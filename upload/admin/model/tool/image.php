@@ -42,6 +42,7 @@ class ModelToolImage extends Model {
 			}
 
 			$path = '';
+			$cache_path_ready = true;
 
 			$directories = explode('/', dirname($image_new));
 
@@ -49,15 +50,23 @@ class ModelToolImage extends Model {
 				$path = $path . '/' . $directory;
 
 				if (!is_dir(DIR_IMAGE . $path)) {
-					@mkdir(DIR_IMAGE . $path, 0777);
+					if (!mkdir(DIR_IMAGE . $path, 0775) && !is_dir(DIR_IMAGE . $path)) {
+						error_log('Error: Could not create image cache directory: ' . DIR_IMAGE . $path);
+						$cache_path_ready = false;
+						break;
+					}
 				}
 			}
 
-			if ($width_orig != $width || $height_orig != $height) {
+			if (!$cache_path_ready) {
+				$image_new = $image_old;
+			}
+
+			if ($cache_path_ready && ($width_orig != $width || $height_orig != $height)) {
 				$image = new Image(DIR_IMAGE . $image_old);
 				$image->resize($width, $height, '', $strategy);
 				$image->save(DIR_IMAGE . $image_new);
-			} else {
+			} elseif ($cache_path_ready) {
 				copy(DIR_IMAGE . $image_old, DIR_IMAGE . $image_new);
 			}
 		}

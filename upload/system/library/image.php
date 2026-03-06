@@ -126,20 +126,37 @@ class Image {
 		$info = pathinfo($file);
 
 		$extension = strtolower($info['extension']);
+		$directory = dirname($file);
+
+		if (!is_dir($directory) && !mkdir($directory, 0775, true) && !is_dir($directory)) {
+			error_log('Error: Could not create image cache directory: ' . $directory);
+			return;
+		}
 
 		if (is_object($this->image) || is_resource($this->image)) {
 			if ($extension == 'jpeg' || $extension == 'jpg') {
-				imagejpeg($this->image, $file, $quality);
+				if (!imagejpeg($this->image, $file, $quality)) {
+					error_log('Error: Failed to write JPEG image: ' . $file);
+				}
 			} elseif ($extension == 'png') {
-				imagepng($this->image, $file);
+				if (!imagepng($this->image, $file)) {
+					error_log('Error: Failed to write PNG image: ' . $file);
+				}
 			} elseif ($extension == 'gif') {
-				imagegif($this->image, $file);
+				if (!imagegif($this->image, $file)) {
+					error_log('Error: Failed to write GIF image: ' . $file);
+				}
 			} elseif ($extension == 'webp') {
 				if (function_exists('imagewebp')) {
-					imagewebp($this->image, $file, $quality);
+					if (!imagewebp($this->image, $file, $quality)) {
+						error_log('Error: Failed to write WebP image: ' . $file);
+					}
 				} else {
 					error_log('Warning: GD WebP support is not available (imagewebp missing), fallback to JPEG: ' . $file);
-					imagejpeg($this->image, preg_replace('/\\.webp$/i', '.jpg', $file), $quality);
+					$fallback_file = preg_replace('/\.webp$/i', '.jpg', $file);
+					if (!imagejpeg($this->image, $fallback_file, $quality)) {
+						error_log('Error: Failed to write fallback JPEG image: ' . $fallback_file);
+					}
 				}
 			}
 
