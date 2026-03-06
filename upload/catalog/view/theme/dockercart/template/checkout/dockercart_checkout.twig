@@ -8,6 +8,9 @@
 <base href="{{ base }}" />
 {% if description %}<meta name="description" content="{{ description }}" />{% endif %}
 {% if keywords %}<meta name="keywords" content="{{ keywords }}" />{% endif %}
+{% for favicon in favicon_links %}
+<link rel="{{ favicon.rel }}" type="{{ favicon.type }}" sizes="{{ favicon.sizes }}" href="{{ favicon.href }}" />
+{% endfor %}
 {% for link in links %}
 {% if link.hreflang is defined %}
 <link href="{{ link.href }}" rel="{{ link.rel }}" hreflang="{{ link.hreflang }}" />

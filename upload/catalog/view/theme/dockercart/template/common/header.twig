@@ -29,6 +29,9 @@
 {% for script in scripts %}
 <script src="{{ script }}" type="text/javascript"></script>
 {% endfor %}
+{% for favicon in favicon_links %}
+<link rel="{{ favicon.rel }}" type="{{ favicon.type }}" sizes="{{ favicon.sizes }}" href="{{ favicon.href }}" />
+{% endfor %}
 {% for link in links %}
 {% if link.hreflang is defined %}
 <link href="{{ link.href }}" rel="{{ link.rel }}" hreflang="{{ link.hreflang }}" />

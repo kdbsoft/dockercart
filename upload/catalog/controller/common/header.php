@@ -20,7 +20,55 @@ class ControllerCommonHeader extends Controller {
 			$server = $this->config->get('config_url');
 		}
 
-		if (is_file(DIR_IMAGE . $this->config->get('config_icon'))) {
+		$data['favicon_links'] = array();
+
+		$favicon_master = (string)$this->config->get('dockercart_theme_favicon_master');
+
+		if ($favicon_master === '') {
+			// Backward compatibility for previously stored value in theme settings.
+			$favicon_master = (string)$this->config->get('theme_dockercart_favicon_master');
+		}
+		$favicon_source = '';
+
+		if ($favicon_master && is_file(DIR_IMAGE . $favicon_master)) {
+			$favicon_source = $favicon_master;
+		} else {
+			$config_icon = (string)$this->config->get('config_icon');
+
+			if ($config_icon && is_file(DIR_IMAGE . $config_icon)) {
+				$favicon_source = $config_icon;
+			}
+		}
+
+		if ($favicon_source) {
+			$this->load->model('tool/image');
+
+			$favicon_sizes = array(16, 32, 48, 64, 96, 128);
+
+			foreach ($favicon_sizes as $size) {
+				$favicon_href = $this->model_tool_image->resize($favicon_source, $size, $size, 'cover');
+
+				if ($favicon_href) {
+					$data['favicon_links'][] = array(
+						'rel' => 'icon',
+						'type' => 'image/png',
+						'sizes' => $size . 'x' . $size,
+						'href' => $favicon_href
+					);
+				}
+			}
+
+			$apple_touch = $this->model_tool_image->resize($favicon_source, 120, 120, 'cover');
+
+			if ($apple_touch) {
+				$data['favicon_links'][] = array(
+					'rel' => 'apple-touch-icon',
+					'type' => 'image/png',
+					'sizes' => '120x120',
+					'href' => $apple_touch
+				);
+			}
+		} elseif (is_file(DIR_IMAGE . $this->config->get('config_icon'))) {
 			$this->document->addLink($server . 'image/' . $this->config->get('config_icon'), 'icon');
 		}
 

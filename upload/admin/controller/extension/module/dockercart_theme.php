@@ -96,6 +96,18 @@ class ControllerExtensionModuleDockerCartTheme extends Controller {
             $data['logo_light_thumb'] = $this->model_tool_image->resize('no_image.png', 200, 80);
         }
 
+        /* ── Favicon master ── */
+        $favicon_master = (string)$this->config->get('dockercart_theme_favicon_master');
+        $data['dockercart_theme_favicon_master'] = $favicon_master;
+
+        if ($favicon_master && is_file(DIR_IMAGE . $favicon_master)) {
+            $data['favicon_master_thumb'] = $this->model_tool_image->resize($favicon_master, 100, 100);
+        } else {
+            $data['favicon_master_thumb'] = $this->model_tool_image->resize('no_image.png', 100, 100);
+        }
+
+        $data['placeholder_favicon'] = $this->model_tool_image->resize('no_image.png', 100, 100);
+
         /* ── Category menu type ── */
         $menu_type = (string)$this->config->get('dockercart_theme_menu_type');
         $data['dockercart_theme_menu_type'] = ($menu_type === 'vertical') ? 'vertical' : 'horizontal';
@@ -164,6 +176,7 @@ class ControllerExtensionModuleDockerCartTheme extends Controller {
             'dockercart_theme_status'     => (int)($p['dockercart_theme_status'] ?? 0),
             'dockercart_theme_logo_dark'  => trim((string)($p['dockercart_theme_logo_dark'] ?? '')),
             'dockercart_theme_logo_light' => trim((string)($p['dockercart_theme_logo_light'] ?? '')),
+            'dockercart_theme_favicon_master' => trim((string)($p['dockercart_theme_favicon_master'] ?? '')),
             'dockercart_theme_menu_type'  => ($p['dockercart_theme_menu_type'] ?? '') === 'vertical' ? 'vertical' : 'horizontal',
         ];
 
@@ -212,6 +225,7 @@ class ControllerExtensionModuleDockerCartTheme extends Controller {
             'dockercart_theme_status'    => 1,
             'dockercart_theme_logo_dark' => '',
             'dockercart_theme_logo_light' => '',
+            'dockercart_theme_favicon_master' => '',
             'dockercart_theme_menu_type' => 'horizontal',
             'dockercart_theme_social_1_image' => '',
             'dockercart_theme_social_1_link'  => '',
