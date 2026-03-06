@@ -217,6 +217,10 @@ set_permissions() {
         # Ensure image cache base directory exists for first-run thumbnail generation.
         mkdir -p /var/www/html/image/cache || true
 
+        # Try to align owner/group for image cache with Apache runtime user.
+        chown -R www-data:www-data /var/www/html/image/cache 2>/dev/null || true
+        chgrp -R www-data /var/www/html/image/cache 2>/dev/null || true
+
         # Don't chown the entire webroot (bind-mount). Only ensure storage ownership.
         chown -R www-data:www-data /var/www/storage || true
 
@@ -229,7 +233,19 @@ set_permissions() {
         # Writable storage dirs
         chmod -R 2775 /var/www/storage/ || true
         chmod -R 775 /var/www/html/image/ || true
-        chmod -R 775 /var/www/html/image/cache/ || true
+
+        # Cache path must always be writable for thumbnail/webp generation.
+        chmod -R 2777 /var/www/html/image/cache/ || true
+
+        # Final safety net for restrictive host FS mappings.
+        find /var/www/html/image/cache -type d -exec chmod 2777 {} \; || true
+        find /var/www/html/image/cache -type f -exec chmod 666 {} \; || true
+
+        # Diagnostic write test helps identify host-side ACL/ownership issues quickly.
+        if ! su -s /bin/sh www-data -c 'touch /var/www/html/image/cache/.perm_test && rm -f /var/www/html/image/cache/.perm_test' 2>/dev/null; then
+            echo "WARNING: /var/www/html/image/cache is still not writable by www-data."
+            echo "WARNING: Check host-side ownership/ACL on bind mount: ./upload/image/cache"
+        fi
     else
         echo "WARNING: not running as root, skipping ownership changes."
         echo "Ensure host ownership/group for bind mounts (upload/storage) allows write by group www-data."
@@ -237,6 +253,14 @@ set_permissions() {
 }
 
 # Основная логика
+# Emit a small diagnostic header so logs show which entrypoint version ran.
+# We print the script modification time (as embedded in the image at build time)
+# and the current UTC timestamp. This helps quickly identify whether the
+# running container uses the updated entrypoint after rebuilds.
+script_mtime="$(stat -c '%y' "$0" 2>/dev/null || echo 'unknown')"
+echo "Entrypoint: $0 (modified: ${script_mtime})"
+echo "Entrypoint started at UTC: $(date -u '+%Y-%m-%d %H:%M:%S')"
+
 echo "Starting DockerCart container..."
 
 # Создаем конфиги приложения, если отсутствуют
