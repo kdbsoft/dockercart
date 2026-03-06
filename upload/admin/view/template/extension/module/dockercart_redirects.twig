@@ -1,0 +1,419 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
+
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="button" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary" onclick="location='{{ add }}';"><i class="fa fa-plus"></i></button>
+        <button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="confirm('{{ text_confirm }}') ? $('#form-redirect').submit() : false;"><i class="fa fa-trash-o"></i></button>
+        <button type="button" data-toggle="tooltip" title="{{ button_export }}" class="btn btn-default" onclick="location='{{ export }}';"><i class="fa fa-download"></i></button>
+        <button type="button" data-toggle="tooltip" title="{{ button_import }}" class="btn btn-default" onclick="$('#import-modal').modal('show');"><i class="fa fa-upload"></i></button>
+        <button type="button" data-toggle="tooltip" title="{{ button_clear_stats }}" class="btn btn-warning" onclick="if(confirm('{{ text_confirm_clear_stats }}')) { location='{{ clear_stats }}'; }"><i class="fa fa-eraser"></i></button>
+        <button type="button" data-toggle="tooltip" title="{{ button_check_duplicates }}" class="btn btn-info" onclick="location='{{ check_duplicates }}';"><i class="fa fa-clone"></i></button>
+        <a href="{{ extensions }}" data-toggle="tooltip" title="{{ button_back }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    {% if warning %}
+    <div class="alert alert-warning alert-dismissible"><i class="fa fa-exclamation-triangle"></i> {{ warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    <ul class="nav nav-tabs dcx-profile-tabs" id="redirect-tabs" role="tablist">
+      <li class="active"><a href="#redirect-tab-general" class="js-redirect-tab" data-tab="redirect-tab-general" data-title="{{ 'General' }}" data-subtitle="{{ text_list }}" data-icon="fa-sliders"><i class="fa fa-sliders"></i> {{ 'General' }}</a></li>
+      <li><a href="#redirect-tab-license" class="js-redirect-tab" data-tab="redirect-tab-license" data-title="{{ text_license|default('License') }}" data-subtitle="{{ text_edit|default('License settings') }}" data-icon="fa-key"><i class="fa fa-key"></i> {{ text_license|default('License') }}</a></li>
+      <li><a href="#redirect-tab-about" class="js-redirect-tab" data-tab="redirect-tab-about" data-title="{{ 'About' }}" data-subtitle="{{ heading_title }}" data-icon="fa-info-circle"><i class="fa fa-info-circle"></i> {{ 'About' }}</a></li>
+    </ul>
+
+    <div class="dcx-shell">
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i id="redirect-tab-icon" class="fa fa-sliders"></i></div>
+          <div>
+            <h3 class="dcx-panel-title" id="redirect-tab-title">General</h3>
+            <div class="dcx-panel-subtitle" id="redirect-tab-subtitle">{{ text_list }}</div>
+          </div>
+        </div>
+
+        <div class="dcx-panel-body">
+          <div id="redirect-tab-general" class="dcx-tab-pane active">
+            <div class="dcx-section">
+              <h4>{{ text_module_settings|default('Module Settings') }}</h4>
+              <form id="form-module-settings" action="{{ action }}" method="post" class="form-horizontal dcx-form">
+                <div class="form-group">
+                  <label class="col-sm-3 control-label" for="input-status">{{ entry_status }}</label>
+                  <div class="col-sm-9">
+                    <select name="module_dockercart_redirects_status" id="input-status" class="form-control">
+                      <option value="1" {% if module_dockercart_redirects_status == '1' or module_dockercart_redirects_status == 1 %}selected="selected"{% endif %}>{{ text_enabled }}</option>
+                      <option value="0" {% if module_dockercart_redirects_status == '0' or module_dockercart_redirects_status == 0 %}selected="selected"{% endif %}>{{ text_disabled }}</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-3 control-label" for="input-debug">{{ entry_debug }}</label>
+                  <div class="col-sm-9">
+                    <select name="module_dockercart_redirects_debug" id="input-debug" class="form-control">
+                      <option value="1" {% if module_dockercart_redirects_debug == '1' or module_dockercart_redirects_debug == 1 %}selected="selected"{% endif %}>{{ text_enabled }}</option>
+                      <option value="0" {% if module_dockercart_redirects_debug == '0' or module_dockercart_redirects_debug == 0 %}selected="selected"{% endif %}>{{ text_disabled }}</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-3 control-label"></label>
+                  <div class="col-sm-9">
+                    <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> {{ button_save }}</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <div class="dcx-section">
+              <h4>{{ text_statistics }}</h4>
+              <div class="row">
+                <div class="col-sm-3">
+                  <div class="well well-sm text-center dcx-stat-card">
+                    <h4>{{ total_redirects }}</h4>
+                    <p>{{ text_total_redirects }}</p>
+                  </div>
+                </div>
+                <div class="col-sm-3">
+                  <div class="well well-sm text-center dcx-stat-card dcx-stat-card--success">
+                    <h4>{{ active_redirects }}</h4>
+                    <p>{{ text_active_redirects }}</p>
+                  </div>
+                </div>
+                <div class="col-sm-3">
+                  <div class="well well-sm text-center dcx-stat-card dcx-stat-card--info">
+                    <h4>{{ regex_redirects }}</h4>
+                    <p>{{ text_regex_redirects }}</p>
+                  </div>
+                </div>
+                <div class="col-sm-3">
+                  <div class="well well-sm text-center dcx-stat-card dcx-stat-card--warning">
+                    <h4>{{ total_hits }}</h4>
+                    <p>{{ text_total_hits }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="dcx-section">
+              <h4>{{ text_filters }}</h4>
+              <div class="row">
+                <div class="col-sm-3">
+                  <div class="form-group">
+                    <label>{{ entry_old_url }}</label>
+                    <input type="text" name="filter_old_url" value="{{ filter_old_url }}" placeholder="{{ entry_old_url }}" class="form-control" />
+                  </div>
+                </div>
+                <div class="col-sm-3">
+                  <div class="form-group">
+                    <label>{{ entry_new_url }}</label>
+                    <input type="text" name="filter_new_url" value="{{ filter_new_url }}" placeholder="{{ entry_new_url }}" class="form-control" />
+                  </div>
+                </div>
+                <div class="col-sm-2">
+                  <div class="form-group">
+                    <label>{{ entry_status }}</label>
+                    <select name="filter_status" class="form-control">
+                      <option value="">{{ text_all }}</option>
+                      <option value="1" {% if filter_status == '1' %}selected="selected"{% endif %}>{{ text_enabled }}</option>
+                      <option value="0" {% if filter_status == '0' %}selected="selected"{% endif %}>{{ text_disabled }}</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-sm-2">
+                  <div class="form-group">
+                    <label>{{ entry_is_regex }}</label>
+                    <select name="filter_is_regex" class="form-control">
+                      <option value="">{{ text_all }}</option>
+                      <option value="1" {% if filter_is_regex == '1' %}selected="selected"{% endif %}>{{ text_yes }}</option>
+                      <option value="0" {% if filter_is_regex == '0' %}selected="selected"{% endif %}>{{ text_no }}</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-sm-2">
+                  <button type="button" id="button-filter" class="btn btn-primary dcx-filter-btn"><i class="fa fa-search"></i> {{ button_filter }}</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="dcx-section">
+              <h4>{{ text_list }}</h4>
+              <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-redirect">
+                <div class="table-responsive">
+                  <table class="table table-bordered table-hover dcx-table">
+                    <thead>
+                      <tr>
+                        <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
+                        <td>{{ column_old_url }}</td>
+                        <td>{{ column_new_url }}</td>
+                        <td class="text-center">{{ column_code }}</td>
+                        <td class="text-center">{{ column_status }}</td>
+                        <td class="text-center">{{ column_is_regex }}</td>
+                        <td class="text-center">{{ column_hits }}</td>
+                        <td class="text-center">{{ column_last_hit }}</td>
+                        <td class="text-center">{{ column_date_added }}</td>
+                        <td class="text-right">{{ column_action }}</td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% if redirects %}
+                      {% for redirect in redirects %}
+                      <tr>
+                        <td class="text-center"><input type="checkbox" name="selected[]" value="{{ redirect.redirect_id }}" /></td>
+                        <td>{{ redirect.old_url }}</td>
+                        <td>{{ redirect.new_url }}</td>
+                        <td class="text-center"><span class="label label-{{ redirect.code == 301 or redirect.code == 308 ? 'success' : 'warning' }}">{{ redirect.code }}</span></td>
+                        <td class="text-center">
+                          {% if redirect.status %}
+                          <span class="label label-success">{{ text_enabled }}</span>
+                          {% else %}
+                          <span class="label label-danger">{{ text_disabled }}</span>
+                          {% endif %}
+                        </td>
+                        <td class="text-center">
+                          {% if redirect.is_regex %}<i class="fa fa-check text-success"></i>{% else %}<i class="fa fa-times text-muted"></i>{% endif %}
+                        </td>
+                        <td class="text-center"><span class="badge">{{ redirect.hits }}</span></td>
+                        <td class="text-center">{{ redirect.last_hit }}</td>
+                        <td class="text-center">{{ redirect.date_added }}</td>
+                        <td class="text-right">
+                          <a href="{{ redirect.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn-xs"><i class="fa fa-pencil"></i></a>
+                          <a href="{{ redirect.delete_single }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn-xs" onclick="return confirm('{{ text_confirm }}');"><i class="fa fa-trash-o"></i></a>
+                        </td>
+                      </tr>
+                      {% endfor %}
+                      {% else %}
+                      <tr><td class="text-center" colspan="10">{{ text_no_results }}</td></tr>
+                      {% endif %}
+                    </tbody>
+                  </table>
+                </div>
+              </form>
+
+              <div class="row">
+                <div class="col-sm-6 text-left">{{ pagination }}</div>
+                <div class="col-sm-6 text-right">{{ results }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div id="redirect-tab-license" class="dcx-tab-pane">
+            <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+              <h4>{{ text_license|default('License') }}</h4>
+              <form id="form-license" action="{{ action }}" method="post" class="form-horizontal dcx-form">
+                <div class="form-group">
+                  <label class="col-sm-3 control-label" for="input-license-key">{{ entry_license_key }}</label>
+                  <div class="col-sm-9">
+                    <input type="text" name="module_dockercart_redirects_license_key" value="{{ module_dockercart_redirects_license_key }}" id="input-license-key" class="form-control" />
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-3 control-label" for="input-public-key">{{ entry_public_key }}</label>
+                  <div class="col-sm-9">
+                    <textarea name="module_dockercart_redirects_public_key" id="input-public-key" rows="8" class="form-control">{{ module_dockercart_redirects_public_key }}</textarea>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-3 control-label"></label>
+                  <div class="col-sm-9">
+                    <button type="button" id="button-verify-license" class="btn btn-info"><i class="fa fa-check-circle"></i> {{ button_verify_license }}</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> {{ button_save }}</button>
+                    <span id="license-verify-result" class="dcx-license-result"></span>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div id="redirect-tab-about" class="dcx-tab-pane">
+            <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+              <h4>About</h4>
+              <table class="table table-bordered dcx-table">
+                <tr>
+                  <td style="width:220px;"><strong>{{ text_module_version|default('Module version') }}</strong></td>
+                  <td>{% if module_version is defined and module_version %}{{ module_version }}{% else %}n/a{% endif %}</td>
+                </tr>
+                <tr>
+                  <td><strong>{{ text_developer|default('Developer') }}</strong></td>
+                  <td>DockerCart Team</td>
+                </tr>
+                <tr>
+                  <td><strong>{{ text_contact|default('Contact') }}</strong></td>
+                  <td><a href="mailto:support@dockercart.net">support@dockercart.net</a></td>
+                </tr>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="import-modal" class="modal fade" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title"><i class="fa fa-upload"></i> {{ heading_import }}</h4>
+      </div>
+      <div class="modal-body">
+        <form id="form-import" enctype="multipart/form-data">
+          <div class="form-group">
+            <label>{{ text_select_file }}</label>
+            <input type="file" name="file" class="form-control" accept=".csv" />
+          </div>
+          <div class="alert alert-info">
+            <strong>{{ text_import_format }}</strong><br/>
+            old_url, new_url, code (301/302/303/307/308), status (0/1), is_regex (0/1), preserve_query (0/1)
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
+        <button type="button" class="btn btn-primary" id="button-import"><i class="fa fa-upload"></i> {{ button_import }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+function updateRedirectPanelHeader(tabLink) {
+  var $tab = $(tabLink);
+  var title = $tab.data('title') || 'General';
+  var subtitle = $tab.data('subtitle') || '{{ text_list }}';
+  var icon = String($tab.data('icon') || 'fa-sliders').replace(/[^a-z0-9\-]/gi, '');
+
+  $('#redirect-tab-title').text(title);
+  $('#redirect-tab-subtitle').text(subtitle);
+  $('#redirect-tab-icon').attr('class', 'fa ' + icon);
+}
+
+$(document).on('click', '.js-redirect-tab', function(e) {
+  e.preventDefault();
+  var tabId = $(this).data('tab');
+  if (!tabId) return;
+
+  $('#redirect-tabs > li').removeClass('active');
+  $(this).closest('li').addClass('active');
+
+  $('#redirect-tab-general, #redirect-tab-license, #redirect-tab-about').removeClass('active');
+  $('#' + tabId).addClass('active');
+
+  updateRedirectPanelHeader(this);
+});
+
+updateRedirectPanelHeader($('#redirect-tabs > li.active a.js-redirect-tab'));
+
+$('#button-filter').on('click', function() {
+  var url = 'index.php?route=extension/module/dockercart_redirects&user_token={{ user_token }}';
+
+  var filter_old_url = $('input[name=\'filter_old_url\']').val();
+  if (filter_old_url) {
+    url += '&filter_old_url=' + encodeURIComponent(filter_old_url);
+  }
+
+  var filter_new_url = $('input[name=\'filter_new_url\']').val();
+  if (filter_new_url) {
+    url += '&filter_new_url=' + encodeURIComponent(filter_new_url);
+  }
+
+  var filter_status = $('select[name=\'filter_status\']').val();
+  if (filter_status !== '') {
+    url += '&filter_status=' + filter_status;
+  }
+
+  var filter_is_regex = $('select[name=\'filter_is_regex\']').val();
+  if (filter_is_regex !== '') {
+    url += '&filter_is_regex=' + filter_is_regex;
+  }
+
+  location = url;
+});
+
+$('#button-import').on('click', function() {
+  var formData = new FormData($('#form-import')[0]);
+
+  $.ajax({
+    url: '{{ import }}',
+    type: 'post',
+    data: formData,
+    dataType: 'json',
+    cache: false,
+    contentType: false,
+    processData: false,
+    beforeSend: function() {
+      $('#button-import').button('loading');
+    },
+    complete: function() {
+      $('#button-import').button('reset');
+    },
+    success: function(json) {
+      $('.alert-dismissible').remove();
+
+      if (json['error']) {
+        $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+      }
+
+      if (json['success']) {
+        $('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+
+        $('#import-modal').modal('hide');
+
+        setTimeout(function() {
+          location.reload();
+        }, 1000);
+      }
+    },
+    error: function(xhr, ajaxOptions, thrownError) {
+      alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+    }
+  });
+});
+
+$('#button-verify-license').on('click', function() {
+  var licenseKey = $('input[name="module_dockercart_redirects_license_key"]').val();
+  var publicKey = $('textarea[name="module_dockercart_redirects_public_key"]').val();
+
+  $('#license-verify-result').html('');
+
+  fetch('index.php?route=extension/module/dockercart_redirects/verifyLicenseAjax&user_token={{ user_token }}', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ license_key: licenseKey, public_key: publicKey })
+  }).then(function(resp) { return resp.json(); }).then(function(json) {
+    if (json.valid) {
+      $('#license-verify-result').html('<span class="text-success"><i class="fa fa-check-circle"></i> License valid</span>');
+    } else {
+      $('#license-verify-result').html('<span class="text-danger"><i class="fa fa-exclamation-circle"></i> ' + (json.error || 'Invalid license') + '</span>');
+    }
+  }).catch(function(err) {
+    $('#license-verify-result').html('<span class="text-danger">Error: ' + err.message + '</span>');
+  });
+});
+</script>
+
+{{ footer }}

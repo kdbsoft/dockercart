@@ -1,0 +1,142 @@
+
+
+<div class="form-group">
+    <label class="col-sm-2 control-label" for="input-license-key">
+        <span data-toggle="tooltip" title="{{ text_license_key_help }}">
+            {{ text_license_key }} <span class="required">*</span>
+        </span>
+    </label>
+    <div class="col-sm-6">
+        <div class="input-group">
+            <input
+                type="text"
+                name="module_dockercart_filter_license_key"
+                value="{{ license_key }}"
+                placeholder="XXXXXXXX-XXXXXXXX-XXXXXXXX"
+                id="input-license-key"
+                class="form-control"
+                required
+                autocomplete="off">
+            <span class="input-group-btn">
+                <button
+                    type="button"
+                    class="btn btn-info"
+                    id="btn-verify-license"
+                    data-loading-text="<i class='fa fa-spinner fa-spin'></i> {{ text_verifying }}">
+                    <i class="fa fa-check-circle"></i> {{ text_verify_license }}
+                </button>
+            </span>
+        </div>
+
+        <div id="license-status-panel" style="margin-top: 10px; display: none;">
+            <div id="license-status" class="alert" style="margin-bottom: 0;">
+                <span id="license-status-icon"></span>
+                <span id="license-status-text"></span>
+            </div>
+        </div>
+
+        <div style="margin-top: 10px; padding: 10px; background-color: #f5f5f5; border-radius: 4px;">
+            <strong>{{ text_domain_binding }}:</strong> <code>{{ current_domain }}</code>
+            <br>
+            <small class="text-muted">{{ text_license_key_help_full }}</small>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var verifyBtn = document.getElementById('btn-verify-license');
+    var licenseInput = document.getElementById('input-license-key');
+    var statusPanel = document.getElementById('license-status-panel');
+    var statusDiv = document.getElementById('license-status');
+    var statusIcon = document.getElementById('license-status-icon');
+    var statusText = document.getElementById('license-status-text');
+
+    if (!verifyBtn) return;
+
+    // Verify on button click
+    verifyBtn.addEventListener('click', function() {
+        var licenseKey = licenseInput.value.trim();
+
+        if (!licenseKey) {
+            alert('{{ text_license_key_required }}');
+            return;
+        }
+
+        verifyBtn.disabled = true;
+        verifyBtn.innerHTML = verifyBtn.getAttribute('data-loading-text');
+
+        fetch('index.php?route=extension/module/dockercart_license/verify', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                license_key: licenseKey
+            })
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            statusPanel.style.display = 'block';
+
+            if (data.valid) {
+                statusDiv.className = 'alert alert-success';
+                statusIcon.innerHTML = '<i class="fa fa-check-circle" style="color: #5cb85c;"></i> ';
+                statusText.innerHTML = '<strong>{{ text_license_valid }}</strong><br>' +
+                    '{{ text_verified_at }}: ' + data.verified_at + '<br>' +
+                    '{{ text_verification_type }}: ' + data.type.toUpperCase();
+            } else {
+                statusDiv.className = 'alert alert-danger';
+                statusIcon.innerHTML = '<i class="fa fa-times-circle" style="color: #d9534f;"></i> ';
+                statusText.innerHTML = '<strong>{{ text_license_invalid }}</strong><br>' +
+                    (data.error || '{{ text_unknown_error }}');
+            }
+
+            verifyBtn.disabled = false;
+            verifyBtn.innerHTML = '<i class="fa fa-check-circle"></i> {{ text_verify_license }}';
+        })
+        .catch(function(error) {
+            statusPanel.style.display = 'block';
+            statusDiv.className = 'alert alert-danger';
+            statusIcon.innerHTML = '<i class="fa fa-exclamation-circle" style="color: #d9534f;"></i> ';
+            statusText.innerHTML = '<strong>{{ text_verification_error }}</strong><br>' + error.message;
+
+            verifyBtn.disabled = false;
+            verifyBtn.innerHTML = '<i class="fa fa-check-circle"></i> {{ text_verify_license }}';
+        });
+    });
+
+    // Also verify when input changes
+    licenseInput.addEventListener('change', function() {
+        statusPanel.style.display = 'none';
+    });
+
+    // Auto-verify on page load if license key exists
+    if (licenseInput.value.trim()) {
+        verifyBtn.click();
+    }
+});
+</script>
+
+<style>
+.required {
+    color: #d9534f;
+}
+
+#license-status-panel {
+    animation: slideDown 0.3s ease-in-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>

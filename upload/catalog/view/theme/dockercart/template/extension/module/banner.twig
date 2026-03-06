@@ -1,0 +1,184 @@
+<style>
+  /* Constrain banner blocks to module-configured dimensions to avoid full-width stretch when small images are used */
+  {% if banner_width %}
+  .banner-slide { max-width: {{ banner_width }}px; }
+  {% endif %}
+  /* Center slides and prevent small images from upscaling; center image inside the slide */
+  :root { --banner-gap: 1rem; }
+  .banner-slides { display: flex; gap: var(--banner-gap); flex-wrap: wrap; justify-content: center; }
+  .banner-slide { position: relative; overflow: hidden; border-radius: 24px; flex: 1 1 auto; min-width: 0; }
+  .banner-slide__media { position: relative; display:flex; align-items:center; justify-content:center; }
+  {% if banner_height %}
+    .banner-slide__media img { width: 100%; height: {{ banner_height }}px; object-fit: cover; }
+  {% else %}
+  .banner-slide__media img { max-width:100%; width:auto; height:auto; }
+  {% endif %}
+  .banner-slide__overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+  .banner-slide__content { pointer-events: auto; color: #fff; text-align: left; padding: 1rem; }
+  .banner-slide__title { font-size: 1.25rem; font-weight: 800; margin: 0 0 .25rem; }
+  .banner-slide__subtitle { margin: 0; opacity: .92; }
+  .banner-slide__badge { display: inline-block; padding: .25rem .5rem; color: #fff; font-weight:700; border-radius: .5rem; margin-bottom: .5rem; background: none; }
+  .banner-slide__btns { margin-top: .5rem; display:flex; gap:.5rem; justify-content: start; flex-wrap:wrap; }
+  .banner-slide__btn { display:inline-flex; align-items:center; justify-content:center; gap:.5px; text-decoration:none; font-weight:700; border-radius: .75rem; padding: .5rem .85rem; font-size: .95rem; transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease; }
+  .banner-slide__btn--primary { background: var(--accent, #2563eb); color: #fff; border: 1px solid var(--accent, #2563eb); box-shadow: 0 6px 18px rgba(2,6,23,0.12); }
+  .banner-slide__btn--primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(2,6,23,0.18); filter: brightness(0.92); }
+  .banner-slide__btn--secondary { background: rgba(255,255,255,0.12); color: #fff; border: 1px solid rgba(255,255,255,0.18); }
+  .banner-slide__btn--secondary:hover { background: rgba(255,255,255,0.18); transform: translateY(-2px); }
+  /* If template inlines accent color on primary, keep text white and add subtle shadow for contrast */
+  .banner-slide__btn[style*="background-color"] { color: #fff; }
+  /* Mobile: make each banner slide take full width for small viewports */
+  @media (max-width: 767px) {
+    /* keep a small page gutter so images don't touch the screen edges */
+    .banner-slider { padding-left: 0.75rem; padding-right: 0.75rem; box-sizing: border-box; }
+    .banner-slides {
+      display: block;
+      gap: 0;
+      justify-content: stretch;
+      padding-top: 0.5rem;
+      padding-bottom: 1.25rem;
+    }
+    .banner-slide {
+      max-width: none !important;
+      width: 100% !important;
+      border-radius: 12px;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
+      position: sticky;
+      top: 0.75rem;
+      z-index: var(--stack-index, 1);
+    }
+    .banner-slide:not(.is-expanded) { cursor: pointer; }
+    /* denser vertical deck: each next card overlaps previous one more */
+    .banner-slide + .banner-slide { margin-top: -26%; }
+    /* Only one card can be fully visible at a time */
+    .banner-slide.is-expanded {
+      position: relative;
+      top: auto;
+      margin-top: 0 !important;
+      z-index: 60;
+    }
+    .banner-slide__media img { width: 100%; height: auto; max-height: none; object-fit: cover; display: block; }
+    .banner-slide__overlay { padding-left: 0.75rem; padding-right: 0.75rem; }
+    .banner-slide__content { text-align: center; }
+    .banner-slide__btns { justify-content: center; }
+    /* Mobile deck mode does not use slider controls */
+    .banner-nav,
+    .banner-dots { display: none !important; }
+  }
+</style>
+
+<div class="banner-slider" id="banner-{{ module }}" data-autoplay="3500">
+  <div class="banner-slides">
+    {% for banner in banners %}
+    <div class="banner-slide{% if loop.first %} active{% endif %}" style="--stack-index: {{ loop.index }};">
+      {% if banner.link %}<a href="{{ banner.link }}" class="banner-slide__link">{% endif %}
+      <div class="banner-slide__media">
+      {% if banner.image %}
+      {# Use portrait variant when available, otherwise fall back to the landscape image for portrait orientation #}
+      {% set portrait_src = banner.image_portrait ? banner.image_portrait : banner.image %}
+      <picture>
+        <source media="(orientation: portrait)" srcset="{{ portrait_src }}" />
+        <source media="(orientation: landscape)" srcset="{{ banner.image }}" />
+        <img src="{{ banner.image }}" alt="{{ banner.title }}" loading="lazy" />
+      </picture>
+      {% endif %}
+      {% if banner.link %}</a>{% endif %}
+
+      {% if banner.title_html or banner.subtitle or banner.accent_text or banner.primary_btn_text or banner.secondary_btn_text %}
+      <div class="banner-slide__overlay">
+        <div class="banner-slide__content">
+          {% if banner.accent_text %}
+          {%- set badge_color = banner.accent_color ? banner.accent_color : '' -%}
+          <span class="banner-slide__badge"{% if badge_color or banner.accent_color or banner.accent_bg %} style="{% if badge_color %}color: {{ badge_color }};{% endif %}{% if banner.accent_color %} --accent: {{ banner.accent_color }};{% endif %}{% if banner.accent_bg %} --accent-bg: {{ banner.accent_bg }};{% endif %}"{% endif %}>{{ banner.accent_text }}</span>
+          {% endif %}
+          {% if banner.title_html %}
+          <h2 class="banner-slide__title">{{ banner.title_html|raw }}</h2>
+          {% endif %}
+          {% if banner.subtitle %}
+          <p class="banner-slide__subtitle">{{ banner.subtitle }}</p>
+          {% endif %}
+          {% if banner.primary_btn_text or banner.secondary_btn_text %}
+          <div class="banner-slide__btns">
+            {% if banner.primary_btn_text %}
+            <a href="{{ banner.primary_btn_link }}" class="banner-slide__btn banner-slide__btn--primary"{% if banner.accent_color or banner.accent_bg or banner.primary_btn_bg_color or banner.primary_btn_text_color %} style="{% if banner.primary_btn_bg_color %}background-color: {{ banner.primary_btn_bg_color }}; border-color: {{ banner.primary_btn_bg_color }};{% elseif banner.accent_color %}--accent: {{ banner.accent_color }};{% endif %}{% if banner.primary_btn_text_color %} color: {{ banner.primary_btn_text_color }};{% endif %}"{% endif %}>{{ banner.primary_btn_text }}</a>
+            {% endif %}
+            {% if banner.secondary_btn_text %}
+            <a href="{{ banner.secondary_btn_link }}" class="banner-slide__btn banner-slide__btn--secondary">{{ banner.secondary_btn_text }}</a>
+            {% endif %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+      </div>
+
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if banners|length > 1 %}
+  <button class="banner-nav banner-prev" aria-label="Previous slide"></button>
+  <button class="banner-nav banner-next" aria-label="Next slide"></button>
+
+  <div class="banner-dots">
+    {% for banner in banners %}
+    <button class="banner-dot{% if loop.first %} active{% endif %}"
+            data-slide="{{ loop.index0 }}"
+            aria-label="Go to slide {{ loop.index }}"></button>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+
+<script>
+  (function () {
+    var root = document.getElementById('banner-{{ module }}');
+    if (!root) return;
+
+    var mobileQuery = window.matchMedia('(max-width: 767px)');
+
+    function getSlides() {
+      return Array.prototype.slice.call(root.querySelectorAll('.banner-slide'));
+    }
+
+    function setExpanded(slide, scrollIntoView) {
+      var slides = getSlides();
+      slides.forEach(function (item) {
+        item.classList.remove('is-expanded');
+      });
+
+      if (!slide) return;
+
+      slide.classList.add('is-expanded');
+
+      if (scrollIntoView) {
+        slide.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    root.addEventListener('click', function (event) {
+      if (!mobileQuery.matches) return;
+
+      var slide = event.target.closest('.banner-slide');
+      if (!slide || !root.contains(slide)) return;
+
+      var link = event.target.closest('a');
+
+      // First tap/click reveals full card; second click on already expanded link follows URL.
+      if (link && !slide.classList.contains('is-expanded')) {
+        event.preventDefault();
+      }
+
+      setExpanded(slide, false);
+    });
+
+    // Keep deck initially collapsed on mobile; no auto-expanded card.
+    
+    // Initialize first card as expanded on mobile
+    if (mobileQuery.matches) {
+      var firstSlide = getSlides()[0];
+      if (firstSlide) {
+        firstSlide.classList.add('is-expanded');
+      }
+    }
+  })();
+</script>

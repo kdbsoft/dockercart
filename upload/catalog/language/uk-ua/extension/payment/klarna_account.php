@@ -1,0 +1,33 @@
+<?php
+
+$_['entry_company'] = 'Реєстраційний номер компанії';
+$_['entry_dob'] = 'Дата народження';
+$_['entry_gender'] = 'Стать';
+$_['entry_house_ext'] = 'Зовнішній вигляд будинку';
+$_['entry_house_no'] = 'Номер будинку';
+$_['entry_phone_no'] = 'Номер телефону';
+$_['entry_pno'] = 'Персональний номер';
+$_['entry_street'] = 'Вулиця';
+$_['error_address_match'] = 'Якщо ви хочете використовувати Klarna Payments, адреса виставлення рахунків та адреса доставки повинні збігатися.';
+$_['error_deu_terms'] = 'Ви повинні погодитися з політикою конфіденційності Klarna (Datenschutz)';
+$_['error_network'] = 'Під час підключення до Klarna сталася помилка. Спробуйте ще раз пізніше.';
+$_['help_company'] = 'Будь ласка, введіть реєстраційний номер вашої компанії';
+$_['help_house_ext'] = 'Будь ласка, надішліть тут розширення вашого будинку. Наприклад, A, B, C, червоний, синій тощо.';
+$_['help_house_no'] = 'Будь ласка, введіть номер вашого будинку.';
+$_['help_phone_no'] = 'Будь ласка, введіть свій номер телефону.';
+$_['help_pno'] = 'Будь ласка, введіть тут свій номер соціального страхування.';
+$_['help_street'] = 'Зверніть увагу, що доставка можлива лише за зареєстрованою адресою при оплаті через Klarna.';
+$_['text_additional'] = 'Обліковий запис Klarna вимагає додаткової інформації, перш ніж вони зможуть обробити ваше замовлення.';
+$_['text_comment'] = 'Ідентифікатор рахунку Klarna: %s %s/%s: %.4f';
+$_['text_day'] = 'День';
+$_['text_female'] = 'Жінка';
+$_['text_information'] = 'Інформація про обліковий запис Klarna';
+$_['text_male'] = 'Чоловік';
+$_['text_month'] = 'Місяць';
+$_['text_monthly_payment'] = '%s – %s на місяць';
+$_['text_payment_option'] = 'Варіанти оплати';
+$_['text_single_payment'] = 'Одноразовий платіж';
+$_['text_terms'] = '<span id="klarna_account_toc"></span><script type="text/javascript">var terms = new Klarna.Terms.Account({el: \'klarna_account_toc\', eid: \'%s\', country: \'%s\'});</script>';
+$_['text_terms_description'] = 'Mit der Übermittlung der für die Abwicklung des Rechnungskaufes und einer Identitäts - und Bonitätsprüfung erforderlichen Daten an Klarna bin ich einverstanden. Meine <a href="https://online.klarna.com/consent_de.yaws" target="_blank">Einwilligung</a> kann ich jederzeit mit Wirkung für die Zukunft widerrufen.';
+$_['text_title'] = 'Рахунок Klarna – Оплата від %s/місяць';
+$_['text_year'] = 'Рік';

@@ -1,0 +1,73 @@
+{{ header }}
+
+<main class="bg-white min-h-screen">
+
+  <section class="relative overflow-hidden">
+    <div class="w-full h-[180px] sm:h-[230px] bg-gradient-to-br from-gray-900 via-blue-950 to-gray-900"></div>
+    <div class="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-black/10"></div>
+    <div class="absolute inset-0 flex items-end sm:items-center pb-6 sm:pb-0">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        {% include 'dockercart/template/common/partials/breadcrumbs.twig' with {
+          breadcrumbs_class: 'flex flex-wrap items-center gap-2 text-xs text-gray-300 mb-3',
+          breadcrumbs_link_class: 'hover:text-white transition',
+          breadcrumbs_last_class: 'text-white font-semibold'
+        } %}
+        <p class="text-xs font-bold uppercase tracking-widest text-blue-400 mb-1">{{ text_browse_by_brand }}</p>
+        <h1 class="text-2xl sm:text-4xl font-extrabold text-white leading-tight">{{ heading_title }}</h1>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+
+      {% if categories %}
+      <div class="bg-white border border-gray-100 rounded-3xl p-4 sm:p-5 mb-6 shadow-sm flex flex-wrap items-center gap-2">
+        {% for key, group in categories %}
+          <a href="javascript:void(0)" onclick="document.querySelector('#letter-{{ key|replace({' ': '-', '/': '-'}) }}').scrollIntoView({behavior:'smooth'});" class="inline-flex items-center justify-center w-9 h-9 rounded-xl border border-gray-200 text-sm font-bold text-gray-700 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition">
+            {{ key }}
+          </a>
+        {% endfor %}
+      </div>
+
+      <div class="space-y-6">
+        {% for key, group in categories %}
+        <div id="letter-{{ key|replace({' ': '-', '/': '-'}) }}" class="scroll-mt-28">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="flex-shrink-0 w-10 h-10 rounded-2xl bg-blue-600 text-white font-extrabold text-lg flex items-center justify-center shadow-md">{{ group.name }}</span>
+            <div class="flex-1 h-px bg-gray-100"></div>
+            <span class="text-xs text-gray-400 font-semibold">{{ group.manufacturer|length }} brand{{ group.manufacturer|length != 1 ? 's' : '' }}</span>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-3">
+            {% for manufacturer in group.manufacturer %}
+            <a href="{{ manufacturer.href }}" class="group flex flex-col items-center justify-center rounded-2xl border border-gray-100 p-4 hover:border-blue-300 hover:bg-blue-50/50 transition shadow-sm h-[150px] relative overflow-hidden">
+              {% if manufacturer.image %}
+                <img src="{{ manufacturer.thumb }}" alt="{{ manufacturer.name }}" class="object-contain h-full w-full mb-2" />
+              {% else %}
+                <i data-lucide="building-2" class="w-8 h-8 text-gray-300 flex-shrink-0 mb-2"></i>
+              {% endif %}
+              <span class="text-xs font-semibold text-gray-800 group-hover:text-blue-700 transition text-center leading-snug line-clamp-2">{{ manufacturer.name }}</span>
+            </a>
+            {% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      {% else %}
+      <div class="flex flex-col items-center justify-center py-24 text-center">
+        <i data-lucide="building-2" class="w-16 h-16 text-gray-200 mb-4"></i>
+        <p class="text-lg font-semibold text-gray-500">{{ text_no_results }}</p>
+        <a href="{{ continue }}" class="mt-6 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl transition">
+          {{ button_continue }}
+        </a>
+      </div>
+      {% endif %}
+
+    </div>
+  </section>
+
+</main>
+
+{{ footer }}

@@ -1,0 +1,1840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NovaMart — Modern Online Store</title>
+
+  <!-- Google Fonts: Manrope (Cyrillic + Latin) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Include Cyrillic subset so Russian text uses Manrope -->
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap&subset=cyrillic" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <style>
+    /* Smooth scroll & base resets */
+    html { scroll-behavior: smooth; }
+    * { box-sizing: border-box; }
+    body, button, input, select, textarea { font-family: 'Manrope', sans-serif; }
+
+    /* Brands marquee */
+    @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    .brands-track { display: flex; width: max-content; animation: marquee 28s linear infinite; }
+    .brands-track:hover { animation-play-state: paused; }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+    /* Hero slider */
+    .hero-slide { transition: opacity 0.8s ease-in-out; }
+
+    /* Product card hover */
+    .product-card:hover .add-to-cart-btn { opacity: 1; transform: translateY(0); }
+    .add-to-cart-btn { opacity: 0; transform: translateY(8px); transition: all 0.25s ease; }
+
+    /* Mobile menu slide */
+    #mobile-menu { transition: transform 0.3s ease, opacity 0.3s ease; }
+    #mobile-menu.hidden-menu { transform: translateX(100%); opacity: 0; pointer-events: none; }
+
+    /* Toast */
+    #toast { transition: all 0.35s ease; }
+
+    /* Cart modal */
+    #cart-modal { transition: opacity 0.25s ease; }
+
+    /* Horizontal scroll categories */
+    .categories-scroll::-webkit-scrollbar { height: 4px; }
+
+    /* Category image cards */
+    .cat-card img { transition: transform 0.45s ease; }
+    .cat-card:hover img { transform: scale(1.08); }
+
+    /* Draggable banners */
+    .banners-drag { cursor: grab; user-select: none; scroll-snap-type: x mandatory; }
+    .banners-drag.is-dragging { cursor: grabbing; scroll-snap-type: none; }
+    .banners-drag::-webkit-scrollbar { height: 4px; }
+    .banners-drag > * { scroll-snap-align: start; }
+
+    /* Quick View modal */
+    #qv-modal { transition: opacity 0.25s ease; }
+    #qv-panel { transition: transform 0.3s ease, opacity 0.3s ease; }
+
+    /* FAQ accordion */
+    .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.38s ease, padding 0.3s ease; }
+    .faq-answer.open { max-height: 400px; }
+    .faq-chevron { transition: transform 0.3s ease; }
+    .faq-item.open .faq-chevron { transform: rotate(180deg); }
+
+    /* Top bar selects */
+    .top-bar-select { color: #d1d5db; background: transparent; border: none; outline: none; cursor: pointer; -webkit-appearance: none; appearance: none; }
+    .top-bar-select option { background: #111827; color: #f9fafb; }
+    .top-bar-select:hover { color: #fff; }
+
+    /* Custom top-bar dropdowns */
+    .topbar-dd-panel { animation: ddFadeIn 0.15s ease; transform-origin: top right; }
+    @keyframes ddFadeIn { from { opacity: 0; transform: scale(0.95) translateY(-4px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+    /* Category nav dropdowns */
+    .cat-nav-item { position: relative; }
+    .cat-dropdown { opacity: 0; pointer-events: none; transform: translateY(6px); transition: opacity 0.2s ease, transform 0.2s ease; }
+    .cat-nav-item:hover .cat-dropdown { opacity: 1; pointer-events: auto; transform: translateY(0); }
+
+    /* Multi-level (level-2) sub-items */
+    .cat-sub-item { position: relative; }
+    .cat-sub-dropdown {
+      opacity: 0; pointer-events: none;
+      transform: translateX(6px);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+      position: absolute; left: 100%; top: -6px;
+      z-index: 110;
+    }
+    .cat-sub-item:hover > .cat-sub-dropdown { opacity: 1; pointer-events: auto; transform: translateX(0); }
+    .cat-sub-item > a .sub-arrow { opacity: 0.4; }
+    .cat-sub-item:hover > a .sub-arrow { opacity: 1; color: #2563eb; }
+
+    /* Quick View slide-up bar on product card */
+    .product-card:hover .quick-view-btn { opacity: 1; transform: translateY(0); }
+    .quick-view-btn { opacity: 0; transform: translateY(100%); transition: opacity 0.25s ease, transform 0.25s ease; }
+  </style>
+</head>
+<body class="bg-white text-gray-900 font-sans antialiased" style="font-family: 'Manrope', sans-serif;">
+
+<!-- ============================================================
+     STICKY NAVBAR (3-tier)
+     ============================================================ -->
+<header id="navbar" class="fixed top-0 left-0 right-0 z-50">
+
+  <!-- ① TOP MICRO BAR: phone, language, currency -->
+  <div class="bg-gray-950">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-9 flex items-center justify-between gap-4">
+      <!-- Phone (more prominent) -->
+      <a href="tel:+18001234567" class="flex items-center gap-2 text-white text-sm font-semibold bg-blue-600/6 hover:bg-blue-600/12 transition px-2 py-0.5 rounded-full flex-shrink-0">
+        <i data-lucide="phone" class="w-4 h-4 text-blue-200"></i>
+        <span class="hidden sm:inline">+1 (800) 123-4567 &nbsp;·&nbsp; Mon–Sat 8am–8pm EST</span>
+        <span class="sm:hidden">+1 (800) 123-4567</span>
+      </a>
+      <!-- Language & Currency -->
+      <div class="flex items-center gap-3 text-xs text-gray-400">
+        <!-- Language -->
+        <div class="flex items-center gap-1">
+          <i data-lucide="globe" class="w-3 h-3"></i>
+          <select class="top-bar-select">
+            <option value="en">ENG</option>
+            <option value="de">DEU</option>
+            <option value="fr">FRA</option>
+            <option value="es">ESP</option>
+            <option value="ru">RUS</option>
+            <option value="zh">CHN</option>
+          </select>
+          <i data-lucide="chevron-down" class="w-2.5 h-2.5 opacity-50"></i>
+        </div>
+        <span class="text-gray-700">|</span>
+        <!-- Currency -->
+        <div class="flex items-center gap-1">
+          <i data-lucide="circle-dollar-sign" class="w-3 h-3"></i>
+          <select id="currency-select" class="top-bar-select" onchange="changeCurrency(this.value)">
+            <option value="USD">USD $</option>
+            <option value="EUR">EUR €</option>
+            <option value="GBP">GBP £</option>
+            <option value="JPY">JPY ¥</option>
+            <option value="CAD">CAD $</option>
+            <option value="AUD">AUD $</option>
+          </select>
+          <i data-lucide="chevron-down" class="w-2.5 h-2.5 opacity-50"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ② MAIN ROW: logo, search, icons -->
+  <div class="bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center h-14 justify-between sm:justify-start">
+
+        <!-- Logo -->
+        <a href="#" class="flex items-center flex-shrink-0">
+          <img src="logo.png" alt="NovaMart" class="w-[225px] h-auto object-contain" />
+        </a>
+
+        <!-- Search bar (desktop) — centered, wider -->
+        <div class="flex-1 hidden sm:flex justify-center px-6 lg:px-10">
+          <div class="w-full max-w-2xl relative">
+            <i data-lucide="search" class="w-4.5 h-4.5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+            <input
+              id="search-input"
+              type="text"
+              placeholder="Search products, brands, categories…"
+              class="w-full pl-11 pr-5 py-2.5 rounded-2xl bg-gray-100 border border-transparent text-sm focus:outline-none focus:border-blue-400 focus:bg-white transition placeholder:text-gray-400"
+            />
+          </div>
+        </div>
+
+        <!-- Right icons -->
+        <div class="flex items-center gap-1 flex-shrink-0">
+          <button class="p-2 rounded-lg hover:bg-gray-100 transition" aria-label="Wishlist">
+            <i data-lucide="heart" class="w-5 h-5 text-gray-600"></i>
+          </button>
+          <button id="cart-btn" class="p-2 rounded-lg hover:bg-gray-100 transition relative" aria-label="Cart">
+            <i data-lucide="shopping-cart" class="w-5 h-5 text-gray-600"></i>
+            <span id="cart-badge" class="hidden absolute -top-1 -right-1 bg-blue-600 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">0</span>
+          </button>
+          <button class="p-2 rounded-lg hover:bg-gray-100 transition" aria-label="Account">
+            <i data-lucide="user" class="w-5 h-5 text-gray-600"></i>
+          </button>
+          <button id="hamburger-btn" class="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition" aria-label="Menu">
+            <i data-lucide="menu" class="w-5 h-5 text-gray-600"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Search bar (mobile) -->
+      <div class="sm:hidden pb-3">
+        <div class="relative">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+          <input
+            id="search-input-mobile"
+            type="text"
+            placeholder="Search products…"
+            class="w-full pl-9 pr-4 py-2 rounded-xl bg-gray-100 border border-transparent text-sm focus:outline-none focus:border-blue-400 focus:bg-white transition placeholder:text-gray-400"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ③ CATEGORY NAV BAR (desktop only) -->
+  <div class="hidden lg:block bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav class="flex items-center">
+
+        <!-- Electronics (multi-level) -->
+        <div class="cat-nav-item">
+          <a href="#" class="flex items-center gap-1 px-3 h-10 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50/70 transition rounded-sm whitespace-nowrap">
+            Electronics
+            <i data-lucide="chevron-down" class="w-3 h-3 opacity-50 ml-0.5"></i>
+          </a>
+          <div class="cat-dropdown absolute bg-white rounded-2xl shadow-2xl border border-gray-100 p-5 z-[100] min-w-[240px]">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Electronics</p>
+            <ul class="space-y-0.5">
+
+              <!-- Laptops — has sub-level -->
+              <li class="cat-sub-item">
+                <a href="#" class="flex items-center justify-between text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">
+                  Laptops &amp; MacBooks
+                  <i data-lucide="chevron-right" class="sub-arrow w-3.5 h-3.5"></i>
+                </a>
+                <div class="cat-sub-dropdown bg-white rounded-2xl shadow-2xl border border-gray-100 p-4 min-w-[190px]">
+                  <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">By Brand</p>
+                  <ul class="space-y-0.5">
+                    <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Apple MacBook</a></li>
+                    <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Dell XPS</a></li>
+                    <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Lenovo ThinkPad</a></li>
+                    <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">ASUS ROG</a></li>
+                    <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Microsoft Surface</a></li>
+                  </ul>
+                </div>
+              </li>
+
+              <!-- Monitors — has sub-level -->
+              <li class="cat-sub-item">
+                <a href="#" class="flex items-center justify-between text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">
+                  Monitors &amp; Displays
+                  <i data-lucide="chevron-right" class="sub-arrow w-3.5 h-3.5"></i>
+                </a>
+                <div class="cat-sub-dropdown bg-white rounded-2xl shadow-2xl border border-gray-100 p-4 min-w-[190px]">
+                  <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">By Type</p>
+                  <ul class="space-y-0.5">
+                    <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">4K &amp; 8K Monitors</a></li>
+                    <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Ultrawide Curved</a></li>
+                    <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Gaming Monitors</a></li>
+                    <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">OLED Displays</a></li>
+                    <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Portable Monitors</a></li>
+                  </ul>
+                </div>
+              </li>
+
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Keyboards &amp; Mice</a></li>
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Storage &amp; Drives</a></li>
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Gaming Gear</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Audio (multi-level) -->
+        <div class="cat-nav-item">
+          <a href="#" class="flex items-center gap-1 px-3 h-10 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50/70 transition rounded-sm whitespace-nowrap">
+            Audio
+            <i data-lucide="chevron-down" class="w-3 h-3 opacity-50 ml-0.5"></i>
+          </a>
+          <div class="cat-dropdown absolute bg-white rounded-2xl shadow-2xl border border-gray-100 p-5 z-[100] min-w-[230px]">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Audio</p>
+            <ul class="space-y-0.5">
+
+              <!-- Headphones — sub-level -->
+              <li class="cat-sub-item">
+                <a href="#" class="flex items-center justify-between text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">
+                  Over-Ear Headphones
+                  <i data-lucide="chevron-right" class="sub-arrow w-3.5 h-3.5"></i>
+                </a>
+                <div class="cat-sub-dropdown bg-white rounded-2xl shadow-2xl border border-gray-100 p-4 min-w-[180px]">
+                  <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">By Brand</p>
+                  <ul class="space-y-0.5">
+                    <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Sony</a></li>
+                    <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Bose</a></li>
+                    <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Sennheiser</a></li>
+                    <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Apple AirPods Max</a></li>
+                  </ul>
+                </div>
+              </li>
+
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Wireless Earbuds</a></li>
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Bluetooth Speakers</a></li>
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Soundbars</a></li>
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">DACs &amp; Amplifiers</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Smartphones -->
+        <div class="cat-nav-item">
+          <a href="#" class="flex items-center gap-1 px-3 h-10 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50/70 transition rounded-sm whitespace-nowrap">
+            Smartphones
+            <i data-lucide="chevron-down" class="w-3 h-3 opacity-50 ml-0.5"></i>
+          </a>
+          <div class="cat-dropdown absolute bg-white rounded-2xl shadow-2xl border border-gray-100 p-5 z-[100] min-w-[200px]">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Smartphones</p>
+            <ul class="space-y-0.5">
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Apple iPhone</a></li>
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Samsung Galaxy</a></li>
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Google Pixel</a></li>
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Tablets &amp; iPads</a></li>
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Cases &amp; Protection</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Kitchen -->
+        <div class="cat-nav-item">
+          <a href="#" class="flex items-center gap-1 px-3 h-10 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50/70 transition rounded-sm whitespace-nowrap">
+            Kitchen
+            <i data-lucide="chevron-down" class="w-3 h-3 opacity-50 ml-0.5"></i>
+          </a>
+          <div class="cat-dropdown absolute bg-white rounded-2xl shadow-2xl border border-gray-100 p-5 z-[100] min-w-[200px]">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Kitchen</p>
+            <ul class="space-y-0.5">
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Coffee Machines</a></li>
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Air Fryers &amp; Ovens</a></li>
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Blenders &amp; Juicers</a></li>
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Cookware Sets</a></li>
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Knives &amp; Boards</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Furniture -->
+        <div class="cat-nav-item">
+          <a href="#" class="flex items-center gap-1 px-3 h-10 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50/70 transition rounded-sm whitespace-nowrap">
+            Furniture
+            <i data-lucide="chevron-down" class="w-3 h-3 opacity-50 ml-0.5"></i>
+          </a>
+          <div class="cat-dropdown absolute bg-white rounded-2xl shadow-2xl border border-gray-100 p-5 z-[100] min-w-[200px]">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Furniture</p>
+            <ul class="space-y-0.5">
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Standing Desks</a></li>
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Ergonomic Chairs</a></li>
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Shelving &amp; Storage</a></li>
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Bedroom Furniture</a></li>
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Outdoor &amp; Garden</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Wearables -->
+        <div class="cat-nav-item">
+          <a href="#" class="flex items-center gap-1 px-3 h-10 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50/70 transition rounded-sm whitespace-nowrap">
+            Wearables
+            <i data-lucide="chevron-down" class="w-3 h-3 opacity-50 ml-0.5"></i>
+          </a>
+          <div class="cat-dropdown absolute bg-white rounded-2xl shadow-2xl border border-gray-100 p-5 z-[100] min-w-[200px]">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Wearables</p>
+            <ul class="space-y-0.5">
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Smartwatches</a></li>
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Fitness Trackers</a></li>
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Smart Glasses</a></li>
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Bands &amp; Straps</a></li>
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Sports Tech</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Smart Home (multi-level) -->
+        <div class="cat-nav-item">
+          <a href="#" class="flex items-center gap-1 px-3 h-10 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50/70 transition rounded-sm whitespace-nowrap">
+            Smart Home
+            <i data-lucide="chevron-down" class="w-3 h-3 opacity-50 ml-0.5"></i>
+          </a>
+          <div class="cat-dropdown absolute bg-white rounded-2xl shadow-2xl border border-gray-100 p-5 z-[100] min-w-[230px]">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Smart Home</p>
+            <ul class="space-y-0.5">
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Smart Speakers</a></li>
+
+              <!-- Security — sub-level -->
+              <li class="cat-sub-item">
+                <a href="#" class="flex items-center justify-between text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">
+                  Security Systems
+                  <i data-lucide="chevron-right" class="sub-arrow w-3.5 h-3.5"></i>
+                </a>
+                <div class="cat-sub-dropdown bg-white rounded-2xl shadow-2xl border border-gray-100 p-4 min-w-[190px]">
+                  <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Security</p>
+                  <ul class="space-y-0.5">
+                    <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Indoor Cameras</a></li>
+                    <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Outdoor Cameras</a></li>
+                    <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Video Doorbells</a></li>
+                    <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Smart Locks</a></li>
+                    <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Alarm Systems</a></li>
+                  </ul>
+                </div>
+              </li>
+
+              <!-- Lighting — sub-level -->
+              <li class="cat-sub-item">
+                <a href="#" class="flex items-center justify-between text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">
+                  Smart Lighting
+                  <i data-lucide="chevron-right" class="sub-arrow w-3.5 h-3.5"></i>
+                </a>
+                <div class="cat-sub-dropdown bg-white rounded-2xl shadow-2xl border border-gray-100 p-4 min-w-[180px]">
+                  <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Lighting</p>
+                  <ul class="space-y-0.5">
+                    <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Smart Bulbs</a></li>
+                    <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Light Strips</a></li>
+                    <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Smart Switches</a></li>
+                    <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Ambient Panels</a></li>
+                  </ul>
+                </div>
+              </li>
+
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Thermostats &amp; Climate</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Photography -->
+        <div class="cat-nav-item">
+          <a href="#" class="flex items-center gap-1 px-3 h-10 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50/70 transition rounded-sm whitespace-nowrap">
+            Photography
+            <i data-lucide="chevron-down" class="w-3 h-3 opacity-50 ml-0.5"></i>
+          </a>
+          <div class="cat-dropdown absolute bg-white rounded-2xl shadow-2xl border border-gray-100 p-5 z-[100] min-w-[210px]">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Photography</p>
+            <ul class="space-y-0.5">
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">DSLR &amp; Mirrorless</a></li>
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Action &amp; Drone Cameras</a></li>
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Lenses &amp; Filters</a></li>
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Tripods &amp; Stabilisers</a></li>
+              <li><a href="#" class="block text-sm text-gray-700 hover:text-blue-600 py-1.5 px-2 rounded-lg hover:bg-blue-50 transition">Bags &amp; Cases</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="w-px h-5 bg-gray-200 mx-1"></div>
+
+        <!-- Info links: Payment, Delivery, Contact -->
+        <a href="#" class="flex items-center gap-1 px-3 h-10 text-sm font-medium text-gray-500 hover:text-blue-600 hover:bg-blue-50/70 transition rounded-sm whitespace-nowrap">
+          <i data-lucide="credit-card" class="w-3.5 h-3.5"></i> Payment
+        </a>
+        <a href="#benefits" class="flex items-center gap-1 px-3 h-10 text-sm font-medium text-gray-500 hover:text-blue-600 hover:bg-blue-50/70 transition rounded-sm whitespace-nowrap">
+          <i data-lucide="truck" class="w-3.5 h-3.5"></i> Delivery
+        </a>
+        <a href="#footer" class="flex items-center gap-1 px-3 h-10 text-sm font-medium text-gray-500 hover:text-blue-600 hover:bg-blue-50/70 transition rounded-sm whitespace-nowrap">
+          <i data-lucide="message-circle" class="w-3.5 h-3.5"></i> Contact
+        </a>
+
+        <!-- Right accent links -->
+        <div class="ml-auto flex items-center">
+          <a href="#new-arrivals" class="flex items-center gap-1 px-3 h-10 text-sm font-semibold text-teal-600 hover:text-teal-700 hover:bg-teal-50 transition whitespace-nowrap rounded-sm">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> New Arrivals
+          </a>
+          <a href="#promo-banner" class="flex items-center gap-1 px-3 h-10 text-sm font-bold text-red-500 hover:text-red-600 hover:bg-red-50 transition whitespace-nowrap rounded-sm">
+            <i data-lucide="tag" class="w-3.5 h-3.5"></i> Sale
+          </a>
+        </div>
+
+      </nav>
+    </div>
+  </div>
+
+</header>
+
+<!-- ============================================================
+     MOBILE SLIDE-IN MENU
+     ============================================================ -->
+<div id="mobile-menu-overlay" class="fixed inset-0 z-40 bg-black/40 hidden" onclick="closeMobileMenu()"></div>
+<div id="mobile-menu" class="fixed top-0 right-0 bottom-0 z-50 w-72 bg-white shadow-2xl p-6 flex flex-col gap-6 hidden-menu">
+  <div class="flex items-center justify-between">
+    <span class="text-lg font-bold">Menu</span>
+    <button onclick="closeMobileMenu()" class="p-1 rounded-lg hover:bg-gray-100">
+      <i data-lucide="x" class="w-5 h-5"></i>
+    </button>
+  </div>
+  <nav class="flex flex-col gap-4 text-gray-700 font-medium">
+    <a href="#categories" onclick="closeMobileMenu()" class="hover:text-blue-600 transition py-1 border-b border-gray-100">Catalog</a>
+    <a href="#new-arrivals" onclick="closeMobileMenu()" class="hover:text-blue-600 transition py-1 border-b border-gray-100">New Arrivals</a>
+    <a href="#promo-banner" onclick="closeMobileMenu()" class="hover:text-blue-600 transition py-1 border-b border-gray-100">Deals</a>
+    <a href="#benefits" onclick="closeMobileMenu()" class="hover:text-blue-600 transition py-1 border-b border-gray-100">Shipping</a>
+    <a href="#footer" onclick="closeMobileMenu()" class="hover:text-blue-600 transition py-1">Contact</a>
+  </nav>
+  <div class="mt-auto flex gap-3">
+    <button class="flex-1 py-2.5 rounded-xl border border-blue-600 text-blue-600 text-sm font-semibold hover:bg-blue-50 transition">Sign In</button>
+    <button class="flex-1 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition">Register</button>
+  </div>
+</div>
+
+<!-- Space below fixed header:
+     Mobile (<640px):  top-bar 36 + main 56 + mobile-search ~52 = 144px
+     SM (640–1024px):  top-bar 36 + main 56 = 92px
+     LG (≥1024px):     + category bar 40 = 132px -->
+<div class="h-[144px] sm:h-[92px] lg:h-[132px]"></div>
+
+<!-- ============================================================
+     HERO SECTION (auto-slider)
+     ============================================================ -->
+<section id="hero" class="relative w-full h-[56vh] min-h-[340px] max-h-[540px] overflow-hidden">
+
+  <!-- Slides -->
+  <div id="hero-slides" class="relative w-full h-full">
+
+    <!-- Slide 1 -->
+    <div class="hero-slide absolute inset-0" data-slide="0">
+      <img src="https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=1600&q=80&auto=format&fit=crop" alt="Hero 1" class="w-full h-full object-cover" />
+      <div class="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent"></div>
+      <div class="absolute inset-0 flex items-center">
+        <div class="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 w-full">
+          <span class="inline-block bg-blue-600 text-white text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3">New 2026 Collection</span>
+          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white leading-tight max-w-xl mb-3">
+            The Future of<br/><span class="text-blue-400">Smart Living</span>
+          </h1>
+          <p class="text-gray-200 text-sm sm:text-base max-w-md mb-5">Discover premium electronics, home gadgets, and lifestyle essentials — curated for modern life.</p>
+          <div class="flex flex-wrap gap-3">
+            <a href="#featured" class="px-7 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-lg transition text-sm">Shop Now</a>
+            <a href="#categories" class="px-7 py-3 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white font-semibold rounded-xl border border-white/30 transition text-sm">Browse Categories</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 2 -->
+    <div class="hero-slide absolute inset-0 opacity-0" data-slide="1">
+      <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1600&q=80&auto=format&fit=crop" alt="Hero 2" class="w-full h-full object-cover" />
+      <div class="absolute inset-0 bg-gradient-to-r from-indigo-900/70 via-indigo-900/30 to-transparent"></div>
+      <div class="absolute inset-0 flex items-center">
+        <div class="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 w-full">
+          <span class="inline-block bg-teal-500 text-white text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3">Limited Deals</span>
+          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white leading-tight max-w-xl mb-3">
+            Up to <span class="text-teal-300">50% Off</span><br/>Top Brands
+          </h1>
+          <p class="text-gray-200 text-sm sm:text-base max-w-md mb-5">Exclusive weekend sale on best-selling gadgets, audio gear, and smart home devices.</p>
+          <div class="flex flex-wrap gap-3">
+            <a href="#promo-banner" class="px-7 py-3 bg-teal-500 hover:bg-teal-600 text-white font-semibold rounded-xl shadow-lg transition text-sm">View Deals</a>
+            <a href="#featured" class="px-7 py-3 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white font-semibold rounded-xl border border-white/30 transition text-sm">All Products</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 3 -->
+    <div class="hero-slide absolute inset-0 opacity-0" data-slide="2">
+      <img src="https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1600&q=80&auto=format&fit=crop" alt="Hero 3" class="w-full h-full object-cover" />
+      <div class="absolute inset-0 bg-gradient-to-r from-black/65 via-black/25 to-transparent"></div>
+      <div class="absolute inset-0 flex items-center">
+        <div class="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 w-full">
+          <span class="inline-block bg-rose-500 text-white text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3">Home & Living</span>
+          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white leading-tight max-w-xl mb-3">
+            Elevate Your<br/><span class="text-rose-300">Home Space</span>
+          </h1>
+          <p class="text-gray-200 text-sm sm:text-base max-w-md mb-5">Minimalist furniture, smart appliances, and decor crafted for comfortable modern living.</p>
+          <div class="flex flex-wrap gap-3">
+            <a href="#new-arrivals" class="px-7 py-3 bg-rose-500 hover:bg-rose-600 text-white font-semibold rounded-xl shadow-lg transition text-sm">Explore Now</a>
+            <a href="#categories" class="px-7 py-3 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white font-semibold rounded-xl border border-white/30 transition text-sm">Categories</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slider dots -->
+  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+    <button class="hero-dot w-8 h-2 rounded-full bg-white transition-all" data-dot="0" onclick="goToSlide(0)"></button>
+    <button class="hero-dot w-2 h-2 rounded-full bg-white/50 transition-all" data-dot="1" onclick="goToSlide(1)"></button>
+    <button class="hero-dot w-2 h-2 rounded-full bg-white/50 transition-all" data-dot="2" onclick="goToSlide(2)"></button>
+  </div>
+
+  <!-- Slider arrows -->
+  <button onclick="prevSlide()" class="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-sm border border-white/30 transition">
+    <i data-lucide="chevron-left" class="w-5 h-5 text-white"></i>
+  </button>
+  <button onclick="nextSlide()" class="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-sm border border-white/30 transition">
+    <i data-lucide="chevron-right" class="w-5 h-5 text-white"></i>
+  </button>
+</section>
+
+<!-- ============================================================
+     POPULAR CATEGORIES
+     ============================================================ -->
+<section id="categories" class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+  <div class="flex items-end justify-between mb-8">
+    <div>
+      <p class="text-blue-600 text-sm font-semibold uppercase tracking-widest mb-1">Browse By</p>
+      <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">Popular Categories</h2>
+    </div>
+    <a href="#" class="text-sm font-medium text-blue-600 hover:underline hidden sm:block">View All →</a>
+  </div>
+
+  <!-- Horizontal scroll on mobile, 4-col grid on sm, 8-col on lg — image-based cards -->
+  <div class="categories-scroll flex gap-3 overflow-x-auto pb-2 sm:grid sm:grid-cols-4 lg:grid-cols-8 sm:overflow-visible">
+
+    <a href="#" class="cat-card flex-shrink-0 sm:flex-shrink-0 group relative rounded-2xl overflow-hidden w-32 h-44 sm:w-auto sm:h-48 block cursor-pointer">
+      <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&q=80&auto=format&fit=crop" alt="Electronics" class="w-full h-full object-cover" />
+      <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+      <span class="absolute bottom-3 left-0 right-0 text-center text-white text-xs font-bold tracking-wide px-1">Electronics</span>
+    </a>
+
+    <a href="#" class="cat-card flex-shrink-0 sm:flex-shrink-0 group relative rounded-2xl overflow-hidden w-32 h-44 sm:w-auto sm:h-48 block cursor-pointer">
+      <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80&auto=format&fit=crop" alt="Audio" class="w-full h-full object-cover" />
+      <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+      <span class="absolute bottom-3 left-0 right-0 text-center text-white text-xs font-bold tracking-wide px-1">Audio</span>
+    </a>
+
+    <a href="#" class="cat-card flex-shrink-0 sm:flex-shrink-0 group relative rounded-2xl overflow-hidden w-32 h-44 sm:w-auto sm:h-48 block cursor-pointer">
+      <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&q=80&auto=format&fit=crop" alt="Smartphones" class="w-full h-full object-cover" />
+      <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+      <span class="absolute bottom-3 left-0 right-0 text-center text-white text-xs font-bold tracking-wide px-1">Smartphones</span>
+    </a>
+
+    <a href="#" class="cat-card flex-shrink-0 sm:flex-shrink-0 group relative rounded-2xl overflow-hidden w-32 h-44 sm:w-auto sm:h-48 block cursor-pointer">
+      <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80&auto=format&fit=crop" alt="Kitchen" class="w-full h-full object-cover" />
+      <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+      <span class="absolute bottom-3 left-0 right-0 text-center text-white text-xs font-bold tracking-wide px-1">Kitchen</span>
+    </a>
+
+    <a href="#" class="cat-card flex-shrink-0 sm:flex-shrink-0 group relative rounded-2xl overflow-hidden w-32 h-44 sm:w-auto sm:h-48 block cursor-pointer">
+      <img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&q=80&auto=format&fit=crop" alt="Furniture" class="w-full h-full object-cover" />
+      <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+      <span class="absolute bottom-3 left-0 right-0 text-center text-white text-xs font-bold tracking-wide px-1">Furniture</span>
+    </a>
+
+    <a href="#" class="cat-card flex-shrink-0 sm:flex-shrink-0 group relative rounded-2xl overflow-hidden w-32 h-44 sm:w-auto sm:h-48 block cursor-pointer">
+      <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80&auto=format&fit=crop" alt="Wearables" class="w-full h-full object-cover" />
+      <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+      <span class="absolute bottom-3 left-0 right-0 text-center text-white text-xs font-bold tracking-wide px-1">Wearables</span>
+    </a>
+
+    <a href="#" class="cat-card flex-shrink-0 sm:flex-shrink-0 group relative rounded-2xl overflow-hidden w-32 h-44 sm:w-auto sm:h-48 block cursor-pointer">
+      <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80&auto=format&fit=crop" alt="Smart Home" class="w-full h-full object-cover" />
+      <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+      <span class="absolute bottom-3 left-0 right-0 text-center text-white text-xs font-bold tracking-wide px-1">Smart Home</span>
+    </a>
+
+    <a href="#" class="cat-card flex-shrink-0 sm:flex-shrink-0 group relative rounded-2xl overflow-hidden w-32 h-44 sm:w-auto sm:h-48 block cursor-pointer">
+      <img src="https://images.unsplash.com/photo-1452780212461-cd59eba3ce93?w=400&q=80&auto=format&fit=crop" alt="Photography" class="w-full h-full object-cover" />
+      <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+      <span class="absolute bottom-3 left-0 right-0 text-center text-white text-xs font-bold tracking-wide px-1">Photography</span>
+    </a>
+
+  </div>
+</section>
+
+<!-- ============================================================
+     BEST SELLERS / FEATURED PRODUCTS
+     ============================================================ -->
+<section id="featured" class="py-16 bg-white px-4 sm:px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto">
+    <div class="flex items-end justify-between mb-8">
+      <div>
+        <p class="text-blue-600 text-sm font-semibold uppercase tracking-widest mb-1">Top Picks</p>
+        <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">Best Sellers</h2>
+      </div>
+      <div class="flex gap-2 items-center">
+        <span id="search-results-count" class="text-sm text-gray-500 hidden"></span>
+        <a href="#" class="text-sm font-medium text-blue-600 hover:underline hidden sm:block">View All →</a>
+      </div>
+    </div>
+
+    <!-- Product grid -->
+    <div id="products-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+      <!-- Filled by JS -->
+    </div>
+
+    <!-- No results -->
+    <div id="no-results" class="hidden text-center py-16 text-gray-400">
+      <i data-lucide="search-x" class="w-12 h-12 mx-auto mb-3 opacity-40"></i>
+      <p class="text-lg font-medium">No products found</p>
+      <p class="text-sm mt-1">Try a different search term</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     PROMOTIONAL BANNER
+     ============================================================ -->
+<section id="promo-banner" class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+  <!-- Draggable / touch-scroll banner row -->
+  <div id="promo-drag" class="banners-drag flex gap-6 overflow-x-auto pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0">
+
+    <!-- Banner 1 -->
+    <div class="relative overflow-hidden rounded-3xl min-h-[220px] flex-shrink-0 w-[82vw] sm:w-[340px] lg:flex-1 bg-gradient-to-br from-blue-600 to-indigo-700 p-7 flex flex-col justify-between">
+      <div>
+        <span class="text-blue-200 text-xs font-bold uppercase tracking-widest">Flash Sale</span>
+        <h3 class="text-white text-2xl font-extrabold mt-1 leading-tight">Up to 50% Off<br/>Electronics</h3>
+        <p class="text-blue-100 text-sm mt-2">Today only — grab the best deals before they're gone.</p>
+      </div>
+      <a href="#featured" class="mt-4 self-start px-5 py-2.5 bg-white text-blue-700 font-bold text-sm rounded-xl hover:bg-blue-50 transition">Shop Now</a>
+      <div class="absolute -bottom-6 -right-6 w-32 h-32 bg-white/10 rounded-full"></div>
+      <div class="absolute -top-4 -right-4 w-20 h-20 bg-white/10 rounded-full"></div>
+    </div>
+
+    <!-- Banner 2 -->
+    <div class="relative overflow-hidden rounded-3xl min-h-[220px] flex-shrink-0 w-[82vw] sm:w-[340px] lg:flex-1 bg-gradient-to-br from-teal-500 to-emerald-600 p-7 flex flex-col justify-between">
+      <div>
+        <span class="text-teal-100 text-xs font-bold uppercase tracking-widest">New Season</span>
+        <h3 class="text-white text-2xl font-extrabold mt-1 leading-tight">Smart Home<br/>Essentials</h3>
+        <p class="text-teal-100 text-sm mt-2">Transform your living space with the latest smart devices.</p>
+      </div>
+      <a href="#new-arrivals" class="mt-4 self-start px-5 py-2.5 bg-white text-teal-700 font-bold text-sm rounded-xl hover:bg-teal-50 transition">Explore</a>
+      <div class="absolute -bottom-6 -right-6 w-32 h-32 bg-white/10 rounded-full"></div>
+      <div class="absolute -top-4 -right-4 w-20 h-20 bg-white/10 rounded-full"></div>
+    </div>
+
+    <!-- Banner 3 -->
+    <div class="relative overflow-hidden rounded-3xl min-h-[220px] flex-shrink-0 w-[82vw] sm:w-[340px] lg:flex-1 bg-gradient-to-br from-rose-500 to-pink-600 p-7 flex flex-col justify-between">
+      <div>
+        <span class="text-rose-100 text-xs font-bold uppercase tracking-widest">Members Only</span>
+        <h3 class="text-white text-2xl font-extrabold mt-1 leading-tight">Free Shipping<br/>on All Orders</h3>
+        <p class="text-rose-100 text-sm mt-2">Sign up today and enjoy free delivery on every purchase.</p>
+      </div>
+      <a href="#newsletter" class="mt-4 self-start px-5 py-2.5 bg-white text-rose-600 font-bold text-sm rounded-xl hover:bg-rose-50 transition">Join Free</a>
+      <div class="absolute -bottom-6 -right-6 w-32 h-32 bg-white/10 rounded-full"></div>
+      <div class="absolute -top-4 -right-4 w-20 h-20 bg-white/10 rounded-full"></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============================================================
+     NEW ARRIVALS
+     ============================================================ -->
+<section id="new-arrivals" class="py-16 bg-white px-4 sm:px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto">
+    <div class="flex items-end justify-between mb-8">
+      <div>
+        <p class="text-teal-500 text-sm font-semibold uppercase tracking-widest mb-1">Just In</p>
+        <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">New Arrivals</h2>
+      </div>
+      <a href="#" class="text-sm font-medium text-blue-600 hover:underline hidden sm:block">View All →</a>
+    </div>
+    <div id="new-arrivals-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6">
+      <!-- Filled by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+  BRANDS SLIDER
+  ============================================================ -->
+<div class="py-10 bg-white overflow-hidden">
+  <div class="max-w-7xl mx-auto px-4 mb-6">
+    <p class="text-xs font-bold uppercase tracking-widest text-gray-400 text-center">Brands we carry</p>
+  </div>
+  <div class="overflow-hidden select-none">
+    <div class="brands-track">
+      <div class="flex items-center">
+        <div class="flex items-center justify-center mx-10 grayscale hover:grayscale-0 opacity-40 hover:opacity-100 transition duration-300 cursor-pointer"><span class="text-2xl font-black tracking-tight text-gray-900">Apple</span></div>
+        <div class="flex items-center justify-center mx-10 grayscale hover:grayscale-0 opacity-40 hover:opacity-100 transition duration-300 cursor-pointer"><span class="text-2xl font-black tracking-tight text-gray-900">Samsung</span></div>
+        <div class="flex items-center justify-center mx-10 grayscale hover:grayscale-0 opacity-40 hover:opacity-100 transition duration-300 cursor-pointer"><span class="text-2xl font-black tracking-tight text-blue-700">Sony</span></div>
+        <div class="flex items-center justify-center mx-10 grayscale hover:grayscale-0 opacity-40 hover:opacity-100 transition duration-300 cursor-pointer"><span class="text-2xl font-black tracking-tight text-gray-900">Bose</span></div>
+        <div class="flex items-center justify-center mx-10 grayscale hover:grayscale-0 opacity-40 hover:opacity-100 transition duration-300 cursor-pointer"><span class="text-xl font-black tracking-widest uppercase text-gray-800">Dyson</span></div>
+        <div class="flex items-center justify-center mx-10 grayscale hover:grayscale-0 opacity-40 hover:opacity-100 transition duration-300 cursor-pointer"><span class="text-2xl font-black tracking-tight text-gray-900 italic">Dell</span></div>
+        <div class="flex items-center justify-center mx-10 grayscale hover:grayscale-0 opacity-40 hover:opacity-100 transition duration-300 cursor-pointer"><span class="text-2xl font-black tracking-tight text-red-600">LG</span></div>
+        <div class="flex items-center justify-center mx-10 grayscale hover:grayscale-0 opacity-40 hover:opacity-100 transition duration-300 cursor-pointer"><span class="text-2xl font-extrabold tracking-tight text-gray-900">Lenovo</span></div>
+        <div class="flex items-center justify-center mx-10 grayscale hover:grayscale-0 opacity-40 hover:opacity-100 transition duration-300 cursor-pointer"><span class="text-2xl font-black tracking-tight text-yellow-500">ASUS</span></div>
+        <div class="flex items-center justify-center mx-10 grayscale hover:grayscale-0 opacity-40 hover:opacity-100 transition duration-300 cursor-pointer"><span class="text-2xl font-black tracking-tight text-gray-900">Google</span></div>
+        <div class="flex items-center justify-center mx-10 grayscale hover:grayscale-0 opacity-40 hover:opacity-100 transition duration-300 cursor-pointer"><span class="text-xl font-black tracking-widest uppercase text-blue-600">Philips</span></div>
+        <div class="flex items-center justify-center mx-10 grayscale hover:grayscale-0 opacity-40 hover:opacity-100 transition duration-300 cursor-pointer"><span class="text-2xl font-black tracking-tight text-gray-900">Bosch</span></div>
+      </div>
+      <div class="flex items-center" aria-hidden="true">
+        <div class="flex items-center justify-center mx-10 opacity-40 hover:opacity-100 transition duration-300 cursor-pointer"><span class="text-2xl font-black tracking-tight text-gray-900">Apple</span></div>
+        <div class="flex items-center justify-center mx-10 opacity-40 hover:opacity-100 transition duration-300 cursor-pointer"><span class="text-2xl font-black tracking-tight text-gray-900">Samsung</span></div>
+        <div class="flex items-center justify-center mx-10 opacity-40 hover:opacity-100 transition duration-300 cursor-pointer"><span class="text-2xl font-black tracking-tight text-blue-700">Sony</span></div>
+        <div class="flex items-center justify-center mx-10 opacity-40 hover:opacity-100 transition duration-300 cursor-pointer"><span class="text-2xl font-black tracking-tight text-gray-900">Bose</span></div>
+        <div class="flex items-center justify-center mx-10 opacity-40 hover:opacity-100 transition duration-300 cursor-pointer"><span class="text-xl font-black tracking-widest uppercase text-gray-800">Dyson</span></div>
+        <div class="flex items-center justify-center mx-10 opacity-40 hover:opacity-100 transition duration-300 cursor-pointer"><span class="text-2xl font-black tracking-tight text-gray-900 italic">Dell</span></div>
+        <div class="flex items-center justify-center mx-10 opacity-40 hover:opacity-100 transition duration-300 cursor-pointer"><span class="text-2xl font-black tracking-tight text-red-600">LG</span></div>
+        <div class="flex items-center justify-center mx-10 opacity-40 hover:opacity-100 transition duration-300 cursor-pointer"><span class="text-2xl font-extrabold tracking-tight text-gray-900">Lenovo</span></div>
+        <div class="flex items-center justify-center mx-10 opacity-40 hover:opacity-100 transition duration-300 cursor-pointer"><span class="text-2xl font-black tracking-tight text-yellow-500">ASUS</span></div>
+        <div class="flex items-center justify-center mx-10 opacity-40 hover:opacity-100 transition duration-300 cursor-pointer"><span class="text-2xl font-black tracking-tight text-gray-900">Google</span></div>
+        <div class="flex items-center justify-center mx-10 opacity-40 hover:opacity-100 transition duration-300 cursor-pointer"><span class="text-xl font-black tracking-widest uppercase text-blue-600">Philips</span></div>
+        <div class="flex items-center justify-center mx-10 opacity-40 hover:opacity-100 transition duration-300 cursor-pointer"><span class="text-2xl font-black tracking-tight text-gray-900">Bosch</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     BLOG / ARTICLES SECTION
+     ============================================================ -->
+<section id="blog" class="py-16 px-4 sm:px-6 lg:px-8 bg-white">
+  <div class="max-w-7xl mx-auto">
+
+    <!-- Header -->
+    <div class="flex items-end justify-between mb-10">
+      <div>
+        <span class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-2 block">From our blog</span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900">Latest Articles</h2>
+      </div>
+      <a href="blog.html" class="text-sm font-medium text-blue-600 hover:underline hidden sm:block">All articles →</a>
+    </div>
+
+    <!-- Cards grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+
+      <!-- Article 1 -->
+      <article class="group bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-lg transition overflow-hidden flex flex-col">
+        <div class="overflow-hidden h-52 flex-shrink-0">
+          <img
+            src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80"
+            alt="Best laptops 2026"
+            class="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+          />
+        </div>
+        <div class="p-6 flex flex-col flex-1">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-[11px] font-semibold uppercase tracking-wider text-white bg-blue-500 px-2.5 py-0.5 rounded-full">Electronics</span>
+            <span class="text-[11px] text-gray-400">Feb 18, 2026</span>
+          </div>
+          <h3 class="font-bold text-gray-900 text-base leading-snug mb-2 group-hover:text-blue-600 transition">
+            Best Laptops of 2026: Our Editor's Top Picks
+          </h3>
+          <p class="text-sm text-gray-500 leading-relaxed flex-1">
+            From ultra-light ultrabooks to powerhouse gaming rigs, we round up the most impressive laptops you can buy right now.
+          </p>
+          <a href="blog-article.html" class="mt-4 flex items-center gap-1 text-sm font-semibold text-blue-600 hover:gap-2 transition-all">
+            Read article <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+          </a>
+        </div>
+      </article>
+
+      <!-- Article 2 -->
+      <article class="group bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-lg transition overflow-hidden flex flex-col">
+        <div class="overflow-hidden h-52 flex-shrink-0">
+          <img
+            src="https://images.unsplash.com/photo-1558002038-1055907df827?w=800&q=80"
+            alt="Smart home guide"
+            class="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+          />
+        </div>
+        <div class="p-6 flex flex-col flex-1">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-[11px] font-semibold uppercase tracking-wider text-white bg-teal-500 px-2.5 py-0.5 rounded-full">Smart Home</span>
+            <span class="text-[11px] text-gray-400">Feb 11, 2026</span>
+          </div>
+          <h3 class="font-bold text-gray-900 text-base leading-snug mb-2 group-hover:text-blue-600 transition">
+            How to Build a Smart Home From Scratch in 2026
+          </h3>
+          <p class="text-sm text-gray-500 leading-relaxed flex-1">
+            A beginner-friendly guide to choosing hubs, smart lights, locks and cameras that all work seamlessly together.
+          </p>
+          <a href="blog-article.html" class="mt-4 flex items-center gap-1 text-sm font-semibold text-blue-600 hover:gap-2 transition-all">
+            Read article <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+          </a>
+        </div>
+      </article>
+
+      <!-- Article 3 -->
+      <article class="group bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-lg transition overflow-hidden flex flex-col">
+        <div class="overflow-hidden h-52 flex-shrink-0">
+          <img
+            src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80"
+            alt="Headphones buyer guide"
+            class="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+          />
+        </div>
+        <div class="p-6 flex flex-col flex-1">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-[11px] font-semibold uppercase tracking-wider text-white bg-indigo-500 px-2.5 py-0.5 rounded-full">Audio</span>
+            <span class="text-[11px] text-gray-400">Feb 4, 2026</span>
+          </div>
+          <h3 class="font-bold text-gray-900 text-base leading-snug mb-2 group-hover:text-blue-600 transition">
+            Noise-Cancelling Headphones: Which Brand Wins in 2026?
+          </h3>
+          <p class="text-sm text-gray-500 leading-relaxed flex-1">
+            Sony, Bose, Apple or Sennheiser? We put the top flagship models head-to-head in real-world listening tests.
+          </p>
+          <a href="blog-article.html" class="mt-4 flex items-center gap-1 text-sm font-semibold text-blue-600 hover:gap-2 transition-all">
+            Read article <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+          </a>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     BENEFITS / TRUST SECTION
+     ============================================================ -->
+<section id="benefits" class="py-16 px-4 sm:px-6 lg:px-8 bg-gray-100">
+  <div class="max-w-7xl mx-auto">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm text-center group hover:shadow-md transition">
+        <div class="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-600 transition">
+          <i data-lucide="truck" class="w-7 h-7 text-blue-600 group-hover:text-white transition"></i>
+        </div>
+        <h3 class="font-bold text-gray-900 mb-1">Free Shipping</h3>
+        <p class="text-gray-500 text-sm">On all orders over $49. Worldwide delivery available.</p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm text-center group hover:shadow-md transition">
+        <div class="w-14 h-14 rounded-2xl bg-teal-100 flex items-center justify-center mx-auto mb-4 group-hover:bg-teal-500 transition">
+          <i data-lucide="shield-check" class="w-7 h-7 text-teal-600 group-hover:text-white transition"></i>
+        </div>
+        <h3 class="font-bold text-gray-900 mb-1">2-Year Warranty</h3>
+        <p class="text-gray-500 text-sm">All products covered. No questions asked repairs.</p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm text-center group hover:shadow-md transition">
+        <div class="w-14 h-14 rounded-2xl bg-rose-100 flex items-center justify-center mx-auto mb-4 group-hover:bg-rose-500 transition">
+          <i data-lucide="refresh-ccw" class="w-7 h-7 text-rose-500 group-hover:text-white transition"></i>
+        </div>
+        <h3 class="font-bold text-gray-900 mb-1">Easy Returns</h3>
+        <p class="text-gray-500 text-sm">30-day hassle-free returns on all items.</p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm text-center group hover:shadow-md transition">
+        <div class="w-14 h-14 rounded-2xl bg-indigo-100 flex items-center justify-center mx-auto mb-4 group-hover:bg-indigo-600 transition">
+          <i data-lucide="headset" class="w-7 h-7 text-indigo-600 group-hover:text-white transition"></i>
+        </div>
+        <h3 class="font-bold text-gray-900 mb-1">24/7 Support</h3>
+        <p class="text-gray-500 text-sm">Live chat, email, and phone support any time.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FAQ SECTION
+     ============================================================ -->
+<section id="faq" class="py-16 px-4 sm:px-6 lg:px-8 bg-white">
+  <div class="max-w-3xl mx-auto">
+    <div class="text-center mb-10">
+      <p class="text-blue-600 text-sm font-semibold uppercase tracking-widest mb-1">Got Questions?</p>
+      <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">Frequently Asked Questions</h2>
+      <p class="text-gray-500 text-sm mt-2 max-w-md mx-auto">Can't find the answer you're looking for? Reach out to our <a href="#" class="text-blue-600 hover:underline">customer support team</a>.</p>
+    </div>
+    <div class="space-y-3" id="faq-list">
+
+      <div class="faq-item bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm">
+        <button class="faq-btn w-full flex items-center justify-between gap-4 p-5 text-left" onclick="toggleFaq(this)">
+          <span class="font-semibold text-gray-900 text-sm sm:text-base">How long does delivery take and what shipping options are available?</span>
+          <i data-lucide="chevron-down" class="faq-chevron w-5 h-5 text-blue-600 flex-shrink-0"></i>
+        </button>
+        <div class="faq-answer">
+          <div class="px-5 pb-5">
+            <p class="text-gray-500 text-sm leading-relaxed">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris. Standard delivery takes 3–5 business days, express shipping delivers within 1–2 business days. Free standard shipping is available on all orders over $49. International orders may take 7–14 business days depending on the destination country.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm">
+        <button class="faq-btn w-full flex items-center justify-between gap-4 p-5 text-left" onclick="toggleFaq(this)">
+          <span class="font-semibold text-gray-900 text-sm sm:text-base">What is your return and refund policy?</span>
+          <i data-lucide="chevron-down" class="faq-chevron w-5 h-5 text-blue-600 flex-shrink-0"></i>
+        </button>
+        <div class="faq-answer">
+          <div class="px-5 pb-5">
+            <p class="text-gray-500 text-sm leading-relaxed">Lorem ipsum dolor sit amet, consectetur adipiscing elit. We offer a 30-day hassle-free return policy on all items. Simply initiate a return request from your account dashboard and ship the item back using the prepaid label we provide. Refunds are processed within 5–7 business days after we receive and inspect the returned product. Items must be in their original condition and packaging.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm">
+        <button class="faq-btn w-full flex items-center justify-between gap-4 p-5 text-left" onclick="toggleFaq(this)">
+          <span class="font-semibold text-gray-900 text-sm sm:text-base">Are all products covered by a warranty?</span>
+          <i data-lucide="chevron-down" class="faq-chevron w-5 h-5 text-blue-600 flex-shrink-0"></i>
+        </button>
+        <div class="faq-answer">
+          <div class="px-5 pb-5">
+            <p class="text-gray-500 text-sm leading-relaxed">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. All electronic products sold at NovaMart come with a minimum 1-year manufacturer warranty. Select premium products include an extended 2-year warranty at no extra cost. You can also purchase additional NovaMart Care coverage for up to 4 years of protection including accidental damage.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm">
+        <button class="faq-btn w-full flex items-center justify-between gap-4 p-5 text-left" onclick="toggleFaq(this)">
+          <span class="font-semibold text-gray-900 text-sm sm:text-base">What payment methods does NovaMart accept?</span>
+          <i data-lucide="chevron-down" class="faq-chevron w-5 h-5 text-blue-600 flex-shrink-0"></i>
+        </button>
+        <div class="faq-answer">
+          <div class="px-5 pb-5">
+            <p class="text-gray-500 text-sm leading-relaxed">Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. We accept all major credit and debit cards (Visa, Mastercard, Amex), PayPal, Apple Pay, Google Pay, and bank transfers. For orders over $500 we also offer buy-now-pay-later options with 0% interest for the first 6 months. All transactions are secured with 256-bit SSL encryption.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm">
+        <button class="faq-btn w-full flex items-center justify-between gap-4 p-5 text-left" onclick="toggleFaq(this)">
+          <span class="font-semibold text-gray-900 text-sm sm:text-base">Can I track my order in real time?</span>
+          <i data-lucide="chevron-down" class="faq-chevron w-5 h-5 text-blue-600 flex-shrink-0"></i>
+        </button>
+        <div class="faq-answer">
+          <div class="px-5 pb-5">
+            <p class="text-gray-500 text-sm leading-relaxed">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt. Yes — once your order ships, you will receive a tracking number via email. You can track your parcel in real time on our Order Tracking page or directly on the carrier's website. SMS notifications are also available if you opt-in during checkout. Estimated delivery windows are updated automatically as your package moves through sorting facilities.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm">
+        <button class="faq-btn w-full flex items-center justify-between gap-4 p-5 text-left" onclick="toggleFaq(this)">
+          <span class="font-semibold text-gray-900 text-sm sm:text-base">How do I contact customer support?</span>
+          <i data-lucide="chevron-down" class="faq-chevron w-5 h-5 text-blue-600 flex-shrink-0"></i>
+        </button>
+        <div class="faq-answer">
+          <div class="px-5 pb-5">
+            <p class="text-gray-500 text-sm leading-relaxed">Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit. Our support team is available 24 hours a day, 7 days a week. You can reach us via live chat on this website, by email at support@novamart.com, or by phone at +1 (800) 123-4567. Average response time for email inquiries is under 2 hours. For urgent matters, live chat is the fastest way to get help.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     NEWSLETTER
+     ============================================================ -->
+<section id="newsletter" class="py-20 px-4 sm:px-6 lg:px-8 bg-gray-100">
+  <div class="max-w-2xl mx-auto text-center">
+    <div class="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center mx-auto mb-5">
+      <i data-lucide="mail" class="w-7 h-7 text-blue-600"></i>
+    </div>
+    <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-3">Stay in the Loop</h2>
+    <p class="text-gray-500 mb-8 text-sm sm:text-base">Get the latest deals, new arrivals, and exclusive offers delivered straight to your inbox. No spam, ever.</p>
+    <form id="newsletter-form" class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto" onsubmit="handleNewsletter(event)">
+      <input
+        type="email"
+        id="newsletter-email"
+        placeholder="Enter your email address"
+        required
+        class="flex-1 px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition"
+      />
+      <button type="submit" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-sm transition shadow-md shadow-blue-200 flex-shrink-0">
+        Subscribe
+      </button>
+    </form>
+    <p class="text-xs text-gray-400 mt-4">By subscribing you agree to our <a href="#" class="underline hover:text-gray-600">Privacy Policy</a>.</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<footer id="footer" class="bg-gray-950 text-gray-400 px-4 sm:px-6 lg:px-8 pt-16 pb-8">
+  <div class="max-w-7xl mx-auto">
+    <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
+
+      <!-- Brand column -->
+      <div class="col-span-2 lg:col-span-2">
+        <div class="mb-5">
+          <img src="logo.png" alt="NovaMart" class="w-[225px] h-auto object-contain brightness-0 invert" />
+        </div>
+        <!-- Contact info -->
+        <ul class="space-y-3 text-sm mb-5">
+          <li class="flex items-start gap-2.5">
+            <i data-lucide="map-pin" class="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0"></i>
+            <span>1234 Innovation Drive, Suite 8<br/>San Francisco, CA 94107, USA</span>
+          </li>
+          <li class="flex items-center gap-2.5">
+            <i data-lucide="phone" class="w-4 h-4 text-blue-400 flex-shrink-0"></i>
+            <a href="tel:+18001234567" class="hover:text-white transition">+1 (800) 123-4567</a>
+          </li>
+          <li class="flex items-center gap-2.5">
+            <i data-lucide="mail" class="w-4 h-4 text-blue-400 flex-shrink-0"></i>
+            <a href="mailto:support@novamart.com" class="hover:text-white transition">support@novamart.com</a>
+          </li>
+        </ul>
+        <!-- Social icons -->
+        <div class="flex gap-3">
+          <a href="#" class="w-9 h-9 rounded-xl bg-gray-800 hover:bg-blue-600 flex items-center justify-center transition" aria-label="Twitter"><i data-lucide="twitter" class="w-4 h-4 text-gray-400 hover:text-white"></i></a>
+          <a href="#" class="w-9 h-9 rounded-xl bg-gray-800 hover:bg-indigo-600 flex items-center justify-center transition" aria-label="Instagram"><i data-lucide="instagram" class="w-4 h-4 text-gray-400"></i></a>
+          <a href="#" class="w-9 h-9 rounded-xl bg-gray-800 hover:bg-blue-700 flex items-center justify-center transition" aria-label="Facebook"><i data-lucide="facebook" class="w-4 h-4 text-gray-400"></i></a>
+          <a href="#" class="w-9 h-9 rounded-xl bg-gray-800 hover:bg-red-600 flex items-center justify-center transition" aria-label="YouTube"><i data-lucide="youtube" class="w-4 h-4 text-gray-400"></i></a>
+        </div>
+      </div>
+
+      <!-- Shop links -->
+      <div>
+        <h4 class="text-white font-semibold text-sm mb-4">Shop</h4>
+        <ul class="space-y-2.5 text-sm">
+          <li><a href="#" class="hover:text-white transition">Electronics</a></li>
+          <li><a href="#" class="hover:text-white transition">Smart Home</a></li>
+          <li><a href="#" class="hover:text-white transition">Audio & Music</a></li>
+          <li><a href="#" class="hover:text-white transition">Wearables</a></li>
+          <li><a href="#" class="hover:text-white transition">Photography</a></li>
+        </ul>
+      </div>
+
+      <!-- Help links -->
+      <div>
+        <h4 class="text-white font-semibold text-sm mb-4">Help</h4>
+        <ul class="space-y-2.5 text-sm">
+          <li><a href="#" class="hover:text-white transition">Track Order</a></li>
+          <li><a href="#" class="hover:text-white transition">Returns & Refunds</a></li>
+          <li><a href="#" class="hover:text-white transition">Shipping Info</a></li>
+          <li><a href="#" class="hover:text-white transition">FAQs</a></li>
+          <li><a href="#" class="hover:text-white transition">Contact Us</a></li>
+        </ul>
+      </div>
+
+      <!-- Company links -->
+      <div>
+        <h4 class="text-white font-semibold text-sm mb-4">Company</h4>
+        <ul class="space-y-2.5 text-sm">
+          <li><a href="#" class="hover:text-white transition">About NovaMart</a></li>
+          <li><a href="#" class="hover:text-white transition">Careers</a></li>
+          <li><a href="#" class="hover:text-white transition">Press</a></li>
+          <li><a href="#" class="hover:text-white transition">Privacy Policy</a></li>
+          <li><a href="#" class="hover:text-white transition">Terms of Service</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="border-t border-gray-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
+      <p>&copy; 2026 NovaMart. All rights reserved.</p>
+      <div class="flex gap-4 items-center">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg" alt="Visa" class="h-5 opacity-50 hover:opacity-80 transition" />
+        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" class="h-5 opacity-50 hover:opacity-80 transition" />
+        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal" class="h-5 opacity-50 hover:opacity-80 transition" />
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ============================================================
+     QUICK VIEW MODAL
+     ============================================================ -->
+<div id="qv-modal" class="fixed inset-0 z-[65] flex items-center justify-center p-4 opacity-0 pointer-events-none">
+  <!-- Overlay -->
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeQuickView()"></div>
+  <!-- Panel -->
+  <div id="qv-panel" class="relative bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden translate-y-6 opacity-0 max-h-[90vh] overflow-y-auto">
+    <!-- Close button -->
+    <button onclick="closeQuickView()" class="absolute top-4 right-4 z-10 w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition">
+      <i data-lucide="x" class="w-4 h-4 text-gray-600"></i>
+    </button>
+    <!-- Content -->
+    <div class="flex flex-col sm:flex-row">
+      <!-- Image -->
+      <div class="sm:w-56 flex-shrink-0 bg-gray-50">
+        <img id="qv-img" src="" alt="" class="w-full h-56 sm:h-full object-cover" />
+      </div>
+      <!-- Details -->
+      <div class="p-6 flex flex-col gap-3 flex-1">
+        <span id="qv-category" class="text-xs text-blue-600 font-bold uppercase tracking-widest"></span>
+        <h2 id="qv-name" class="text-xl font-extrabold text-gray-900 leading-snug"></h2>
+        <!-- Stars -->
+        <div class="flex items-center gap-2">
+          <div id="qv-stars" class="flex text-base"></div>
+          <span id="qv-rating" class="text-sm text-gray-500"></span>
+        </div>
+        <!-- Price -->
+        <div class="flex items-baseline gap-2">
+          <span id="qv-price" class="text-2xl font-extrabold text-gray-900"></span>
+          <span id="qv-old-price" class="text-base text-red-400 line-through"></span>
+          <span id="qv-badge" class="text-xs font-bold bg-red-500 text-white px-2 py-0.5 rounded-lg"></span>
+        </div>
+        <!-- Description -->
+        <p class="text-gray-500 text-sm leading-relaxed">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo.</p>
+        <!-- Features -->
+        <ul class="text-sm text-gray-600 space-y-1.5">
+          <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-teal-500 flex-shrink-0"></i>Free shipping on this item</li>
+          <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-teal-500 flex-shrink-0"></i>2-year manufacturer warranty</li>
+          <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-teal-500 flex-shrink-0"></i>30-day hassle-free returns</li>
+        </ul>
+        <!-- Actions -->
+        <div class="flex gap-3 mt-2">
+          <button id="qv-add-btn" class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition text-sm shadow-md shadow-blue-200">Add to Cart</button>
+          <button class="w-11 h-11 rounded-xl border border-gray-200 hover:border-rose-300 hover:bg-rose-50 flex items-center justify-center transition flex-shrink-0">
+            <i data-lucide="heart" class="w-5 h-5 text-gray-500"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     CART MODAL
+     ============================================================ -->
+<div id="cart-modal" class="fixed inset-0 z-[60] opacity-0 pointer-events-none">
+  <!-- Overlay -->
+  <div id="cart-overlay" class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeCart()"></div>
+  <!-- Drawer -->
+  <div class="absolute top-0 right-0 bottom-0 w-full max-w-sm bg-white shadow-2xl flex flex-col transform translate-x-full transition-transform duration-300" id="cart-drawer">
+    <!-- Header -->
+    <div class="flex items-center justify-between p-5 border-b border-gray-100">
+      <h2 class="text-lg font-bold flex items-center gap-2">
+        <i data-lucide="shopping-cart" class="w-5 h-5 text-blue-600"></i>
+        Your Cart
+        <span id="cart-items-count" class="text-sm font-normal text-gray-500"></span>
+      </h2>
+      <button onclick="closeCart()" class="p-1.5 rounded-lg hover:bg-gray-100 transition">
+        <i data-lucide="x" class="w-5 h-5 text-gray-500"></i>
+      </button>
+    </div>
+
+    <!-- Cart items -->
+    <div id="cart-items" class="flex-1 overflow-y-auto p-5 space-y-4">
+      <!-- Filled by JS -->
+    </div>
+
+    <!-- Empty state -->
+    <div id="cart-empty" class="hidden flex-1 flex flex-col items-center justify-center text-gray-400 p-10">
+      <i data-lucide="shopping-cart" class="w-16 h-16 opacity-20 mb-4"></i>
+      <p class="font-medium text-lg">Your cart is empty</p>
+      <p class="text-sm mt-1">Add something to get started!</p>
+      <button onclick="closeCart()" class="mt-6 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition">Continue Shopping</button>
+    </div>
+
+    <!-- Footer -->
+    <div id="cart-footer" class="p-5 border-t border-gray-100 hidden">
+      <div class="flex justify-between items-center mb-4">
+        <span class="text-gray-600 text-sm">Subtotal</span>
+        <span id="cart-total" class="font-bold text-lg text-gray-900">$0.00</span>
+      </div>
+      <button class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition shadow-md shadow-blue-200 mb-2">Checkout</button>
+      <button onclick="closeCart()" class="w-full py-3 border border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition text-sm">Continue Shopping</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     TOAST NOTIFICATION
+     ============================================================ -->
+<div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[70] flex items-center gap-3 bg-gray-900 text-white px-5 py-3.5 rounded-2xl shadow-xl opacity-0 pointer-events-none translate-y-4 transition-all duration-300 whitespace-nowrap">
+  <i data-lucide="check-circle" class="w-5 h-5 text-teal-400 flex-shrink-0"></i>
+  <span id="toast-text" class="text-sm font-medium">Added to cart!</span>
+</div>
+
+<!-- ============================================================
+     STICKY BOTTOM BAR (mobile, shows on scroll)
+     ============================================================ -->
+<div id="mobile-bar" class="fixed bottom-0 left-0 right-0 z-40 sm:hidden bg-white/90 backdrop-blur-md border-t border-gray-100 px-4 py-2 flex justify-around items-center translate-y-full transition-transform duration-300">
+  <a href="#" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-blue-600 transition text-[10px] font-medium">
+    <i data-lucide="home" class="w-5 h-5"></i>Home
+  </a>
+  <a href="#categories" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-blue-600 transition text-[10px] font-medium">
+    <i data-lucide="grid-2x2" class="w-5 h-5"></i>Categories
+  </a>
+  <a href="#featured" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-blue-600 transition text-[10px] font-medium">
+    <i data-lucide="tag" class="w-5 h-5"></i>Deals
+  </a>
+  <button onclick="document.getElementById('cart-btn').click()" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-blue-600 transition text-[10px] font-medium relative">
+    <i data-lucide="shopping-cart" class="w-5 h-5"></i>Cart
+  </button>
+  <button class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-blue-600 transition text-[10px] font-medium">
+    <i data-lucide="user" class="w-5 h-5"></i>Account
+  </button>
+</div>
+
+<!-- ============================================================
+     TAILWIND CONFIG
+     ============================================================ -->
+<script>
+  tailwind.config = {
+    darkMode: false,
+    theme: {
+      extend: {
+        colors: {
+          primary: '#2563eb',
+          accent: '#4f46e5'
+        }
+      }
+    }
+  };
+</script>
+
+<!-- ============================================================
+     MAIN JAVASCRIPT
+     ============================================================ -->
+<script>
+/* ============================================================
+   PRODUCT DATA
+   ============================================================ */
+const products = [
+  { id: 1,  name: 'Sony WH-1000XM6 Headphones',  price: 349,  oldPrice: 399,  category: 'audio',       rating: 4.9, image: 'https://picsum.photos/seed/novamart-1/600/600'  },
+  { id: 2,  name: 'Apple MacBook Air M3',          price: 1099, oldPrice: 1299, category: 'electronics', rating: 4.8, image: 'https://picsum.photos/seed/novamart-2/600/600'  },
+  { id: 3,  name: 'Samsung Galaxy S25 Ultra',      price: 1199, oldPrice: null, category: 'smartphones', rating: 4.7, image: 'https://picsum.photos/seed/novamart-3/600/600'  },
+  { id: 4,  name: 'iPad Pro 13" M4',               price: 999,  oldPrice: 1099, category: 'electronics', rating: 4.8, image: 'https://picsum.photos/seed/novamart-4/600/600'  },
+  { id: 5,  name: 'Nespresso Vertuo Pop+',         price: 129,  oldPrice: 179,  category: 'kitchen',     rating: 4.6, image: 'https://picsum.photos/seed/novamart-5/600/600'  },
+  { id: 6,  name: 'Dyson V15 Detect Cordless',     price: 699,  oldPrice: 799,  category: 'home',        rating: 4.7, image: 'https://picsum.photos/seed/novamart-6/600/600'  },
+  { id: 7,  name: 'Apple Watch Ultra 3',            price: 799,  oldPrice: null, category: 'wearables',  rating: 4.9, image: 'https://picsum.photos/seed/novamart-7/600/600'  },
+  { id: 8,  name: 'LG 27" 4K OLED Monitor',        price: 849,  oldPrice: 999,  category: 'electronics', rating: 4.8, image: 'https://picsum.photos/seed/novamart-8/600/600'  },
+  { id: 9,  name: 'Logitech MX Master 4',           price: 99,   oldPrice: 119,  category: 'electronics', rating: 4.7, image: 'https://picsum.photos/seed/novamart-9/600/600'  },
+  { id: 10, name: 'Ring Video Doorbell Pro 3',      price: 249,  oldPrice: 299,  category: 'smart-home', rating: 4.5, image: 'https://picsum.photos/seed/novamart-10/600/600' },
+  { id: 11, name: 'Sonos Era 300 Speaker',          price: 449,  oldPrice: 499,  category: 'audio',      rating: 4.8, image: 'https://picsum.photos/seed/novamart-11/600/600' },
+  { id: 12, name: 'DJI Osmo Pocket 4',              price: 399,  oldPrice: 449,  category: 'photography',rating: 4.6, image: 'https://picsum.photos/seed/novamart-12/600/600' },
+];
+
+const newArrivals = [
+  { id: 13, name: 'Meta Quest 4 VR Headset',        price: 499,  oldPrice: null, category: 'electronics', rating: 4.7, image: 'https://picsum.photos/seed/novamart-13/600/600' },
+  { id: 14, name: 'Bose QuietComfort Ultra',         price: 329,  oldPrice: 399,  category: 'audio',       rating: 4.8, image: 'https://picsum.photos/seed/novamart-14/600/600' },
+  { id: 15, name: 'Samsung Neo QLED 8K 55"',         price: 2499, oldPrice: 2999, category: 'electronics', rating: 4.6, image: 'https://picsum.photos/seed/novamart-15/600/600' },
+  { id: 16, name: 'Philips Airfryer XXL Pro',        price: 199,  oldPrice: 249,  category: 'kitchen',     rating: 4.5, image: 'https://picsum.photos/seed/novamart-16/600/600' },
+  { id: 17, name: 'Ergohuman Elite V2 Chair',        price: 1299, oldPrice: null, category: 'furniture',   rating: 4.9, image: 'https://picsum.photos/seed/novamart-17/600/600' },
+  { id: 18, name: 'GoPro Hero 13 Black',             price: 399,  oldPrice: 449,  category: 'photography', rating: 4.7, image: 'https://picsum.photos/seed/novamart-18/600/600' },
+  { id: 19, name: 'Sennheiser Momentum 4',           price: 279,  oldPrice: 329,  category: 'audio',       rating: 4.8, image: 'https://picsum.photos/seed/novamart-19/600/600' },
+  { id: 20, name: 'Xiaomi Smart Band 9 Pro',         price: 59,   oldPrice: 79,   category: 'wearables',   rating: 4.4, image: 'https://picsum.photos/seed/novamart-20/600/600' },
+  { id: 21, name: 'Nanoleaf Lines Squared Kit',      price: 199,  oldPrice: 229,  category: 'smart-home',  rating: 4.5, image: 'https://picsum.photos/seed/novamart-21/600/600' },
+  { id: 22, name: 'IKEA BEKANT Standing Desk',       price: 549,  oldPrice: null, category: 'furniture',   rating: 4.3, image: 'https://picsum.photos/seed/novamart-22/600/600' },
+];
+
+/* ============================================================
+   CART STATE
+   ============================================================ */
+let cart = [];
+
+function getCartTotal() {
+  return cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+}
+
+function getCartCount() {
+  return cart.reduce((sum, item) => sum + item.qty, 0);
+}
+
+/* ============================================================
+   RENDER HELPERS
+   ============================================================ */
+
+/** Render star rating (0–5) */
+function renderStars(rating) {
+  const full = Math.floor(rating);
+  const half = rating % 1 >= 0.5;
+  let html = '';
+  for (let i = 0; i < 5; i++) {
+    if (i < full) {
+      html += '<span class="text-amber-400">★</span>';
+    } else if (i === full && half) {
+      html += '<span class="text-amber-300">★</span>';
+    } else {
+      html += '<span class="text-gray-300">★</span>';
+    }
+  }
+  return html;
+}
+
+/** Build a product card HTML string */
+function buildProductCard(product) {
+  const sym = product._sym || '$';
+  const oldPriceHtml = product.oldPrice
+    ? `<span class="text-xs text-red-400 line-through ml-1">${sym}${product.oldPrice}</span>`
+    : '';
+  const discount = product.oldPrice
+    ? `<span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md">-${Math.round((1 - product.price / product.oldPrice) * 100)}%</span>`
+    : '';
+
+  return `
+    <div class="product-card group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex flex-col"
+         data-name="${product.name.toLowerCase()}" data-id="${product.id}">
+      <div class="relative overflow-hidden aspect-square bg-gray-50">
+        <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+        ${discount}
+        <!-- Wishlist icon (top right, appears on hover) -->
+        <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <button class="w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center hover:bg-rose-50 transition" onclick="event.stopPropagation()" aria-label="Add to wishlist">
+            <i data-lucide="heart" class="w-3.5 h-3.5 text-gray-500"></i>
+          </button>
+        </div>
+        <!-- Quick View — full-width bar slides up from bottom -->
+        <button
+          class="quick-view-btn absolute bottom-0 left-0 right-0 py-2.5 bg-gray-900/85 hover:bg-blue-600 text-white text-[11px] font-bold uppercase tracking-widest backdrop-blur-sm transition-colors duration-200"
+          onclick="openQuickView(${product.id}); event.stopPropagation()"
+        >Quick View</button>
+      </div>
+      <div class="p-3 sm:p-4 flex flex-col flex-1">
+        <p class="text-[10px] sm:text-xs text-gray-400 uppercase tracking-widest mb-1 font-medium">${product.category}</p>
+        <h3 class="text-xs sm:text-sm font-semibold text-gray-900 leading-snug mb-2 flex-1 line-clamp-2">${product.name}</h3>
+        <div class="flex items-center gap-1 mb-3">
+          <div class="flex text-xs">${renderStars(product.rating)}</div>
+          <span class="text-[10px] text-gray-400 ml-1">${product.rating}</span>
+        </div>
+        <div class="flex items-end justify-between gap-2">
+          <div class="flex items-baseline gap-1">
+            <span class="text-base sm:text-lg font-extrabold text-gray-900">${sym}${product.price}</span>
+            ${oldPriceHtml}
+          </div>
+          <!-- ADD TO CART button (revealed on hover) -->
+          <button
+            class="add-to-cart-btn flex-shrink-0 text-[10px] sm:text-xs font-bold px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
+            onclick="addToCart(${product.id}, '${product.name.replace(/'/g, "\\'")}', ${product.price}, '${product.image}')"
+          >+ Cart</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* ============================================================
+   RENDER PRODUCT GRIDS
+   ============================================================ */
+function renderProducts(list, containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = list.map(buildProductCard).join('');
+  lucide.createIcons(); // re-init icons in new cards
+}
+
+/* ============================================================
+   LIVE SEARCH
+   ============================================================ */
+function handleSearch(query) {
+  const q = query.toLowerCase().trim();
+  const allProducts = document.querySelectorAll('#products-grid .product-card');
+  const countEl = document.getElementById('search-results-count');
+  const noResults = document.getElementById('no-results');
+
+  let visible = 0;
+  allProducts.forEach(card => {
+    const name = card.dataset.name || '';
+    const matches = !q || name.includes(q);
+    card.style.display = matches ? '' : 'none';
+    if (matches) visible++;
+  });
+
+  if (q) {
+    countEl.textContent = `${visible} result${visible !== 1 ? 's' : ''} found`;
+    countEl.classList.remove('hidden');
+  } else {
+    countEl.classList.add('hidden');
+  }
+
+  noResults.classList.toggle('hidden', visible > 0 || !q);
+}
+
+/* ============================================================
+   CART FUNCTIONS
+   ============================================================ */
+function addToCart(id, name, price, image) {
+  const existing = cart.find(i => i.id === id);
+  if (existing) {
+    existing.qty++;
+  } else {
+    cart.push({ id, name, price, image, qty: 1 });
+  }
+  updateCartBadge();
+  showToast(`"${name.substring(0, 30)}…" added to cart`);
+}
+
+function removeFromCart(id) {
+  cart = cart.filter(i => i.id !== id);
+  updateCartBadge();
+  renderCartModal();
+}
+
+function changeQty(id, delta) {
+  const item = cart.find(i => i.id === id);
+  if (item) {
+    item.qty += delta;
+    if (item.qty <= 0) removeFromCart(id);
+    else {
+      updateCartBadge();
+      renderCartModal();
+    }
+  }
+}
+
+function updateCartBadge() {
+  const badge = document.getElementById('cart-badge');
+  const count = getCartCount();
+  if (count > 0) {
+    badge.textContent = count > 99 ? '99+' : count;
+    badge.classList.remove('hidden');
+  } else {
+    badge.classList.add('hidden');
+  }
+}
+
+function renderCartModal() {
+  const container = document.getElementById('cart-items');
+  const empty = document.getElementById('cart-empty');
+  const footer = document.getElementById('cart-footer');
+  const countEl = document.getElementById('cart-items-count');
+  const totalEl = document.getElementById('cart-total');
+
+  const count = getCartCount();
+  countEl.textContent = count > 0 ? `(${count} item${count !== 1 ? 's' : ''})` : '';
+
+  if (cart.length === 0) {
+    container.classList.add('hidden');
+    empty.classList.remove('hidden');
+    footer.classList.add('hidden');
+    return;
+  }
+
+  container.classList.remove('hidden');
+  empty.classList.add('hidden');
+  footer.classList.remove('hidden');
+
+  container.innerHTML = cart.map(item => `
+    <div class="flex gap-3 items-start">
+      <img src="${item.image}" alt="${item.name}" class="w-16 h-16 rounded-xl object-cover bg-gray-100 flex-shrink-0" />
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-semibold text-gray-900 leading-tight line-clamp-2">${item.name}</p>
+        <p class="text-blue-600 font-bold text-sm mt-0.5">$${item.price}</p>
+        <div class="flex items-center gap-2 mt-2">
+          <button onclick="changeQty(${item.id}, -1)" class="w-6 h-6 rounded-md bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-sm font-bold transition">−</button>
+          <span class="text-sm font-semibold w-5 text-center">${item.qty}</span>
+          <button onclick="changeQty(${item.id}, 1)" class="w-6 h-6 rounded-md bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-sm font-bold transition">+</button>
+          <button onclick="removeFromCart(${item.id})" class="ml-auto text-gray-400 hover:text-red-500 transition p-1">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  totalEl.textContent = `$${getCartTotal().toFixed(2)}`;
+  lucide.createIcons();
+}
+
+/* ============================================================
+   CART MODAL OPEN / CLOSE
+   ============================================================ */
+function openCart() {
+  renderCartModal();
+  const modal = document.getElementById('cart-modal');
+  const drawer = document.getElementById('cart-drawer');
+  modal.classList.remove('opacity-0', 'pointer-events-none');
+  setTimeout(() => drawer.classList.remove('translate-x-full'), 10);
+}
+
+function closeCart() {
+  const modal = document.getElementById('cart-modal');
+  const drawer = document.getElementById('cart-drawer');
+  drawer.classList.add('translate-x-full');
+  setTimeout(() => modal.classList.add('opacity-0', 'pointer-events-none'), 300);
+}
+
+/* ============================================================
+   TOAST NOTIFICATION
+   ============================================================ */
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  const text = document.getElementById('toast-text');
+  text.textContent = message;
+  toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => {
+    toast.classList.add('opacity-0', 'translate-y-4');
+  }, 2800);
+}
+
+/* ============================================================
+   HERO AUTO-SLIDER
+   ============================================================ */
+let currentSlide = 0;
+const totalSlides = 3;
+let slideInterval;
+
+function goToSlide(index) {
+  const slides = document.querySelectorAll('.hero-slide');
+  const dots = document.querySelectorAll('.hero-dot');
+
+  slides[currentSlide].style.opacity = '0';
+  dots[currentSlide].style.width = '8px';
+  dots[currentSlide].style.opacity = '0.5';
+
+  currentSlide = index;
+
+  slides[currentSlide].style.opacity = '1';
+  dots[currentSlide].style.width = '32px';
+  dots[currentSlide].style.opacity = '1';
+}
+
+function nextSlide() {
+  goToSlide((currentSlide + 1) % totalSlides);
+  resetSlideTimer();
+}
+
+function prevSlide() {
+  goToSlide((currentSlide - 1 + totalSlides) % totalSlides);
+  resetSlideTimer();
+}
+
+function resetSlideTimer() {
+  clearInterval(slideInterval);
+  slideInterval = setInterval(nextSlide, 5000);
+}
+
+/* ============================================================
+   MOBILE MENU
+   ============================================================ */
+function openMobileMenu() {
+  const menu = document.getElementById('mobile-menu');
+  const overlay = document.getElementById('mobile-menu-overlay');
+  menu.classList.remove('hidden-menu');
+  overlay.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeMobileMenu() {
+  const menu = document.getElementById('mobile-menu');
+  const overlay = document.getElementById('mobile-menu-overlay');
+  menu.classList.add('hidden-menu');
+  overlay.classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+/* ============================================================
+   NEWSLETTER FORM
+   ============================================================ */
+function handleNewsletter(event) {
+  event.preventDefault();
+  const email = document.getElementById('newsletter-email').value;
+  showToast(`Subscribed! Welcome, ${email}`);
+  document.getElementById('newsletter-form').reset();
+}
+
+/* ============================================================
+   QUICK VIEW MODAL
+   ============================================================ */
+const allProducts = () => [...products, ...newArrivals];
+
+function openQuickView(id) {
+  const product = allProducts().find(p => p.id === id);
+  if (!product) return;
+
+  // Populate fields
+  document.getElementById('qv-img').src = product.image;
+  document.getElementById('qv-img').alt = product.name;
+  document.getElementById('qv-category').textContent = product.category;
+  document.getElementById('qv-name').textContent = product.name;
+  document.getElementById('qv-stars').innerHTML = renderStars(product.rating);
+  document.getElementById('qv-rating').textContent = product.rating + ' / 5';
+  document.getElementById('qv-price').textContent = '$' + product.price;
+
+  const oldEl = document.getElementById('qv-old-price');
+  const badgeEl = document.getElementById('qv-badge');
+  if (product.oldPrice) {
+    oldEl.textContent = '$' + product.oldPrice;
+    oldEl.style.display = '';
+    const pct = Math.round((1 - product.price / product.oldPrice) * 100);
+    badgeEl.textContent = '-' + pct + '%';
+    badgeEl.style.display = '';
+  } else {
+    oldEl.style.display = 'none';
+    badgeEl.style.display = 'none';
+  }
+
+  // Wire Add to Cart
+  const addBtn = document.getElementById('qv-add-btn');
+  addBtn.onclick = () => { addToCart(product.id, product.name, product.price, product.image); closeQuickView(); };
+
+  // Show modal
+  const modal = document.getElementById('qv-modal');
+  const panel = document.getElementById('qv-panel');
+  modal.classList.remove('opacity-0', 'pointer-events-none');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => {
+    panel.classList.remove('translate-y-6', 'opacity-0');
+  }, 10);
+  lucide.createIcons();
+}
+
+function closeQuickView() {
+  const modal = document.getElementById('qv-modal');
+  const panel = document.getElementById('qv-panel');
+  panel.classList.add('translate-y-6', 'opacity-0');
+  setTimeout(() => {
+    modal.classList.add('opacity-0', 'pointer-events-none');
+    document.body.style.overflow = '';
+  }, 280);
+}
+
+/* ============================================================
+   DRAGGABLE BANNER SCROLL
+   ============================================================ */
+function initBannerDrag() {
+  const el = document.getElementById('promo-drag');
+  if (!el) return;
+  let isDown = false, startX, scrollLeft;
+
+  el.addEventListener('mousedown', e => {
+    isDown = true;
+    el.classList.add('is-dragging');
+    startX = e.pageX - el.offsetLeft;
+    scrollLeft = el.scrollLeft;
+  });
+  document.addEventListener('mouseup', () => {
+    isDown = false;
+    el.classList.remove('is-dragging');
+  });
+  el.addEventListener('mouseleave', () => {
+    isDown = false;
+    el.classList.remove('is-dragging');
+  });
+  el.addEventListener('mousemove', e => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - el.offsetLeft;
+    const walk = (x - startX) * 1.4;
+    el.scrollLeft = scrollLeft - walk;
+  });
+  // Prevent clicking links while dragging
+  el.addEventListener('click', e => {
+    if (el.classList.contains('is-dragging')) e.preventDefault();
+  });
+}
+
+/* ============================================================
+   FAQ ACCORDION
+   ============================================================ */
+function toggleFaq(btn) {
+  const item = btn.closest('.faq-item');
+  const answer = item.querySelector('.faq-answer');
+  const isOpen = item.classList.contains('open');
+
+  // Close all others
+  document.querySelectorAll('.faq-item.open').forEach(other => {
+    if (other !== item) {
+      other.classList.remove('open');
+      other.querySelector('.faq-answer').classList.remove('open');
+    }
+  });
+
+  // Toggle current
+  item.classList.toggle('open', !isOpen);
+  answer.classList.toggle('open', !isOpen);
+}
+
+/* ============================================================
+   CURRENCY SWITCHER
+   ============================================================ */
+const currencyRates = { USD: 1, EUR: 0.92, GBP: 0.79, JPY: 149.5, CAD: 1.36, AUD: 1.53 };
+const currencySymbols = { USD: '$', EUR: '€', GBP: '£', JPY: '¥', CAD: 'CA$', AUD: 'A$' };
+let activeCurrency = 'USD';
+
+/* Custom top-bar dropdowns (language / currency) */
+function toggleTopDd(id) {
+  const panel = document.getElementById(id + '-panel');
+  const isHidden = panel.classList.contains('hidden');
+  // close all
+  document.querySelectorAll('.topbar-dd-panel').forEach(p => p.classList.add('hidden'));
+  if (isHidden) panel.classList.remove('hidden');
+}
+function selectLang(label) {
+  document.getElementById('lang-label').textContent = label;
+  document.getElementById('lang-dd-panel').classList.add('hidden');
+}
+function selectCurr(code, label) {
+  document.getElementById('curr-label').textContent = label;
+  document.getElementById('curr-dd-panel').classList.add('hidden');
+  changeCurrency(code);
+}
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#lang-dd') && !e.target.closest('#curr-dd')) {
+    document.querySelectorAll('.topbar-dd-panel').forEach(p => p.classList.add('hidden'));
+  }
+});
+
+function changeCurrency(code) {
+  activeCurrency = code;
+  const rate = currencyRates[code] || 1;
+  const sym  = currencySymbols[code] || '$';
+  // Re-render both grids with updated prices
+  function convert(p) {
+    return {
+      ...p,
+      price:    Math.round(p._basePrice    * rate),
+      oldPrice: p._baseOldPrice ? Math.round(p._baseOldPrice * rate) : null,
+      _sym: sym
+    };
+  }
+  // Tag base prices on first call
+  [...products, ...newArrivals].forEach(p => {
+    if (!p._basePrice) { p._basePrice = p.price; p._baseOldPrice = p.oldPrice || null; }
+  });
+  renderProducts(products.map(convert),    'products-grid');
+  renderProducts(newArrivals.map(convert), 'new-arrivals-grid');
+  showToast('Currency changed to ' + code);
+}
+
+/* ============================================================
+   STICKY MOBILE BAR
+   ============================================================ */
+function handleScroll() {
+  const bar = document.getElementById('mobile-bar');
+  if (window.scrollY > 200) {
+    bar.classList.remove('translate-y-full');
+  } else {
+    bar.classList.add('translate-y-full');
+  }
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  // Render products
+  renderProducts(products, 'products-grid');
+  renderProducts(newArrivals, 'new-arrivals-grid');
+
+  // Search bindings
+  document.getElementById('search-input').addEventListener('input', e => handleSearch(e.target.value));
+  document.getElementById('search-input-mobile').addEventListener('input', e => {
+    document.getElementById('search-input').value = e.target.value;
+    handleSearch(e.target.value);
+    if (e.target.value.trim()) {
+      document.getElementById('featured').scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+
+  // Cart button
+  document.getElementById('cart-btn').addEventListener('click', openCart);
+
+  // Hamburger
+  document.getElementById('hamburger-btn').addEventListener('click', openMobileMenu);
+
+  // Hero slider auto-play
+  slideInterval = setInterval(nextSlide, 5000);
+
+  // Draggable banners
+  initBannerDrag();
+
+  // Scroll listener
+  window.addEventListener('scroll', handleScroll, { passive: true });
+
+  // Init Lucide icons
+  lucide.createIcons();
+
+  // Close quick view on Escape key
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      closeQuickView();
+      closeCart();
+    }
+  });
+});
+</script>
+
+</body>
+</html>

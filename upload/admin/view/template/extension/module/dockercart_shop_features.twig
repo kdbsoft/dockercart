@@ -1,0 +1,231 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
+
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-module" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_back }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+          <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    {% if error_warning %}
+      <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+      </div>
+    {% endif %}
+
+    {% if success %}
+      <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+      </div>
+    {% endif %}
+
+    <div class="row" style="margin-bottom: 15px;">
+      <div class="col-sm-4">
+        <div class="panel panel-default">
+          <div class="panel-heading"><strong>{{ text_widgets }}</strong></div>
+          <div class="panel-body" style="padding: 0;">
+            {% if widgets %}
+              <div class="list-group" style="margin-bottom: 0;">
+                {% for widget in widgets %}
+                  <a href="{{ widget.href }}" class="list-group-item{% if widget.active %} active{% endif %}">
+                    {{ widget.name }}
+                  </a>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div style="padding: 15px; color: #8c8c8c;">{{ text_no_widgets }}</div>
+            {% endif %}
+          </div>
+          <div class="panel-footer">
+            <a href="{{ new_widget }}" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> {{ text_create_widget }}</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-8">
+        <div class="panel panel-default">
+          <div class="panel-heading"><strong>{{ text_widget_settings }}</strong></div>
+          <div class="panel-body">
+            <form action="{{ action }}" method="post" id="form-module" class="form-horizontal">
+              <div class="form-group required">
+                <label class="col-sm-3 control-label" for="input-name">{{ entry_name }}</label>
+                <div class="col-sm-9">
+                  <input type="text" name="name" value="{{ name }}" placeholder="{{ entry_name }}" id="input-name" class="form-control" />
+                  {% if error_name %}
+                    <div class="text-danger">{{ error_name }}</div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="input-status">{{ entry_status }}</label>
+                <div class="col-sm-9">
+                  <select name="status" id="input-status" class="form-control">
+                    <option value="1" {% if status %}selected="selected"{% endif %}>{{ text_enabled }}</option>
+                    <option value="0" {% if not status %}selected="selected"{% endif %}>{{ text_disabled }}</option>
+                  </select>
+                </div>
+              </div>
+
+              <hr />
+              <h4 style="margin-top: 0;">{{ text_features }}</h4>
+
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="features-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 220px;">{{ entry_icon }}</th>
+                      <th>{{ text_multilingual_settings }}</th>
+                      <th style="width: 120px;">{{ entry_sort_order }}</th>
+                      <th style="width: 80px;">{{ column_action }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% set feature_row = 0 %}
+                    {% for feature in features %}
+                      <tr id="feature-row-{{ feature_row }}">
+                        <td>
+                          <div class="input-group">
+                            <span class="input-group-addon icon-preview"><i data-lucide="{{ feature.icon|default('truck') }}" class="dc-icon-preview" style="width:16px;height:16px;"></i></span>
+                            <select name="features[{{ feature_row }}][icon]" class="form-control dc-icon-select">
+                              {% for icon_option in icon_options %}
+                                <option value="{{ icon_option }}" {% if feature.icon|default('truck') == icon_option %}selected="selected"{% endif %}>{{ icon_option }}</option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                        </td>
+                        <td>
+                          <ul class="nav nav-tabs" role="tablist" style="margin-bottom: 10px;">
+                            {% for language in languages %}
+                              <li{% if loop.first %} class="active"{% endif %}><a href="#feature-{{ feature_row }}-lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>
+                            {% endfor %}
+                          </ul>
+
+                          <div class="tab-content">
+                            {% for language in languages %}
+                              <div class="tab-pane{% if loop.first %} active{% endif %}" id="feature-{{ feature_row }}-lang-{{ language.language_id }}">
+                                <div class="form-group" style="margin-left: 0; margin-right: 0;">
+                                  <label class="control-label">{{ entry_title }}</label>
+                                  <input type="text" name="features[{{ feature_row }}][title][{{ language.language_id }}]" value="{{ feature.title[language.language_id]|default('') }}" class="form-control" />
+                                </div>
+                                <div class="form-group" style="margin-left: 0; margin-right: 0; margin-bottom: 0;">
+                                  <label class="control-label">{{ entry_text }}</label>
+                                  <textarea name="features[{{ feature_row }}][text][{{ language.language_id }}]" rows="3" class="form-control">{{ feature.text[language.language_id]|default('') }}</textarea>
+                                </div>
+                              </div>
+                            {% endfor %}
+                          </div>
+                        </td>
+                        <td>
+                          <input type="number" name="features[{{ feature_row }}][sort_order]" value="{{ feature.sort_order|default(0) }}" class="form-control" />
+                        </td>
+                        <td class="text-center">
+                          <button type="button" onclick="$('#feature-row-{{ feature_row }}').remove();" class="btn btn-danger" title="{{ button_remove }}"><i class="fa fa-trash"></i></button>
+                        </td>
+                      </tr>
+                      {% set feature_row = feature_row + 1 %}
+                    {% endfor %}
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td colspan="4" class="text-right">
+                        <button type="button" id="button-add-feature" class="btn btn-primary"><i class="fa fa-plus"></i> {{ button_add_feature }}</button>
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+var feature_row = {{ feature_row }};
+
+function renderLucideIcons() {
+  if (window.lucide && typeof window.lucide.createIcons === 'function') {
+    window.lucide.createIcons();
+  }
+}
+
+function updateIconPreview(selectEl) {
+  var iconName = (selectEl && selectEl.value) ? selectEl.value : 'truck';
+  var preview = selectEl.closest('.input-group').querySelector('.icon-preview');
+
+  if (preview) {
+    preview.innerHTML = '<i data-lucide="' + iconName.replace(/[^a-z0-9\-]/gi, '') + '" class="dc-icon-preview" style="width:16px;height:16px;"></i>';
+    renderLucideIcons();
+  }
+}
+
+$('#features-table').on('change', '.dc-icon-select', function() {
+  updateIconPreview(this);
+});
+
+$('#button-add-feature').on('click', function() {
+  var html = '';
+  html += '<tr id="feature-row-' + feature_row + '">';
+  html += '  <td>';
+  html += '    <div class="input-group">';
+  html += '      <span class="input-group-addon icon-preview"><i data-lucide="truck" class="dc-icon-preview" style="width:16px;height:16px;"></i></span>';
+  html += '      <select name="features[' + feature_row + '][icon]" class="form-control dc-icon-select">';
+  {% for icon_option in icon_options %}
+  html += '        <option value="{{ icon_option }}"{% if loop.first %} selected="selected"{% endif %}>{{ icon_option }}</option>';
+  {% endfor %}
+  html += '      </select>';
+  html += '    </div>';
+  html += '  </td>';
+
+  html += '  <td>';
+  html += '    <ul class="nav nav-tabs" role="tablist" style="margin-bottom: 10px;">';
+  {% for language in languages %}
+  html += '      <li{% if loop.first %} class="active"{% endif %}><a href="#feature-' + feature_row + '-lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>';
+  {% endfor %}
+  html += '    </ul>';
+
+  html += '    <div class="tab-content">';
+  {% for language in languages %}
+  html += '      <div class="tab-pane{% if loop.first %} active{% endif %}" id="feature-' + feature_row + '-lang-{{ language.language_id }}">';
+  html += '        <div class="form-group" style="margin-left: 0; margin-right: 0;">';
+  html += '          <label class="control-label">{{ entry_title }}</label>';
+  html += '          <input type="text" name="features[' + feature_row + '][title][{{ language.language_id }}]" value="" class="form-control" />';
+  html += '        </div>';
+  html += '        <div class="form-group" style="margin-left: 0; margin-right: 0; margin-bottom: 0;">';
+  html += '          <label class="control-label">{{ entry_text }}</label>';
+  html += '          <textarea name="features[' + feature_row + '][text][{{ language.language_id }}]" rows="3" class="form-control"></textarea>';
+  html += '        </div>';
+  html += '      </div>';
+  {% endfor %}
+  html += '    </div>';
+  html += '  </td>';
+
+  html += '  <td><input type="number" name="features[' + feature_row + '][sort_order]" value="' + feature_row + '" class="form-control" /></td>';
+  html += '  <td class="text-center"><button type="button" onclick="$(\'#feature-row-' + feature_row + '\').remove();" class="btn btn-danger" title="{{ button_remove }}"><i class="fa fa-trash"></i></button></td>';
+  html += '</tr>';
+
+  $('#features-table tbody').append(html);
+  renderLucideIcons();
+  feature_row++;
+});
+
+$(function() {
+  renderLucideIcons();
+});
+</script>
+
+{{ footer }}

@@ -1,0 +1,218 @@
+{{ header }}
+<main class="bg-gray-50 min-h-screen">
+
+  <section class="bg-gradient-to-br from-gray-900 via-gray-800 to-blue-950 py-10 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      {% include 'dockercart/template/common/partials/breadcrumbs.twig' with {
+        breadcrumbs_class: 'flex flex-wrap items-center gap-2 text-xs text-gray-300 mb-3',
+        breadcrumbs_link_class: 'hover:text-white transition',
+        breadcrumbs_last_class: 'text-white font-semibold'
+      } %}
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-white">{{ heading_title }}</h1>
+    </div>
+  </section>
+
+  <section class="py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-2xl mx-auto">
+      {{ content_top }}
+
+      {% if error_warning %}
+      <div class="mb-6 bg-red-50 border border-red-200 text-red-700 rounded-2xl px-5 py-4 text-sm flex items-center gap-3">
+        <i data-lucide="alert-circle" class="w-5 h-5 flex-shrink-0"></i>
+        <span>{{ error_warning }}</span>
+      </div>
+      {% endif %}
+
+      <p class="text-sm text-gray-500 mb-6">{{ text_account_already }}</p>
+
+      <div class="bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-sm">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="account">
+
+          {# Customer Groups #}
+          {% if customer_groups|length > 1 %}
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">{{ entry_customer_group }}</label>
+            <div class="grid grid-cols-2 gap-2">
+              {% for customer_group in customer_groups %}
+              <label class="flex items-center gap-2 cursor-pointer border border-gray-200 rounded-xl p-3 hover:border-blue-300 transition">
+                <input type="radio" name="customer_group_id" value="{{ customer_group.customer_group_id }}"
+                  {% if customer_group.customer_group_id == customer_group_id %}checked{% endif %}
+                  class="w-4 h-4 text-blue-600 border-gray-300" />
+                <span class="text-sm text-gray-700">{{ customer_group.name }}</span>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          {# Your Details #}
+          <p class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-4">{{ text_your_details }}</p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1.5" for="input-firstname">{{ entry_firstname }}</label>
+              <input type="text" name="firstname" value="{{ firstname }}" placeholder="{{ entry_firstname }}" id="input-firstname"
+                class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
+              {% if error_firstname %}<p class="text-sm text-red-500 mt-1">{{ error_firstname }}</p>{% endif %}
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1.5" for="input-lastname">{{ entry_lastname }}</label>
+              <input type="text" name="lastname" value="{{ lastname }}" placeholder="{{ entry_lastname }}" id="input-lastname"
+                class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
+              {% if error_lastname %}<p class="text-sm text-red-500 mt-1">{{ error_lastname }}</p>{% endif %}
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1.5" for="input-email">{{ entry_email }}</label>
+            <input type="email" name="email" value="{{ email }}" placeholder="{{ entry_email }}" id="input-email"
+              class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
+            {% if error_email %}<p class="text-sm text-red-500 mt-1">{{ error_email }}</p>{% endif %}
+          </div>
+
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-1.5" for="input-telephone">{{ entry_telephone }}</label>
+            <input type="tel" name="telephone" value="{{ telephone }}" placeholder="{{ entry_telephone }}" id="input-telephone"
+              class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
+            {% if error_telephone %}<p class="text-sm text-red-500 mt-1">{{ error_telephone }}</p>{% endif %}
+          </div>
+
+          {# Custom Fields #}
+          {% for custom_field in custom_fields %}
+          <div class="mb-4 custom-field" data-sort="{{ custom_field.sort_order }}">
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ custom_field.name }}</label>
+            {% if custom_field.type == 'select' %}
+            <select name="custom_field[{{ custom_field.location }}][{{ custom_field.custom_field_id }}]"
+              class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+              <option value="">{{ text_select }}</option>
+              {% for v in custom_field.custom_field_value %}
+              <option value="{{ v.custom_field_value_id }}" {% if register_custom_field[custom_field.location][custom_field.custom_field_id] and v.custom_field_value_id == register_custom_field[custom_field.custom_field_id] %}selected{% endif %}>{{ v.name }}</option>
+              {% endfor %}
+            </select>
+            {% elseif custom_field.type == 'textarea' %}
+            <textarea name="custom_field[{{ custom_field.location }}][{{ custom_field.custom_field_id }}]" rows="4"
+              class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">{% if register_custom_field[custom_field.custom_field_id] %}{{ register_custom_field[custom_field.custom_field_id] }}{% else %}{{ custom_field.value }}{% endif %}</textarea>
+            {% elseif custom_field.type == 'radio' %}
+            <div class="space-y-2">
+              {% for v in custom_field.custom_field_value %}
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="custom_field[{{ custom_field.location }}][{{ custom_field.custom_field_id }}]" value="{{ v.custom_field_value_id }}"
+                  {% if register_custom_field[custom_field.custom_field_id] and v.custom_field_value_id == register_custom_field[custom_field.custom_field_id] %}checked{% endif %}
+                  class="w-4 h-4 text-blue-600 border-gray-300" />
+                <span class="text-sm text-gray-700">{{ v.name }}</span>
+              </label>
+              {% endfor %}
+            </div>
+            {% elseif custom_field.type == 'checkbox' %}
+            <div class="space-y-2">
+              {% for v in custom_field.custom_field_value %}
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="custom_field[{{ custom_field.location }}][{{ custom_field.custom_field_id }}][]" value="{{ v.custom_field_value_id }}"
+                  {% if register_custom_field[custom_field.custom_field_id] and v.custom_field_value_id in register_custom_field[custom_field.custom_field_id] %}checked{% endif %}
+                  class="w-4 h-4 text-blue-600 border-gray-300 rounded" />
+                <span class="text-sm text-gray-700">{{ v.name }}</span>
+              </label>
+              {% endfor %}
+            </div>
+            {% elseif custom_field.type == 'file' %}
+            <button type="button" id="button-custom-field{{ custom_field.custom_field_id }}"
+              class="border border-gray-200 hover:border-blue-300 text-gray-700 font-medium px-5 py-2.5 rounded-xl transition-colors text-sm flex items-center gap-2">
+              <i data-lucide="upload" class="w-4 h-4"></i>
+              {{ button_upload }}
+            </button>
+            <input type="hidden" name="custom_field[{{ custom_field.location }}][{{ custom_field.custom_field_id }}]"
+              value="{% if register_custom_field[custom_field.custom_field_id] %}{{ register_custom_field[custom_field.custom_field_id] }}{% endif %}" />
+            {% else %}
+            <input type="text" name="custom_field[{{ custom_field.location }}][{{ custom_field.custom_field_id }}]"
+              value="{% if register_custom_field[custom_field.custom_field_id] %}{{ register_custom_field[custom_field.custom_field_id] }}{% else %}{{ custom_field.value }}{% endif %}"
+              placeholder="{{ custom_field.name }}"
+              class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
+            {% endif %}
+            {% if error_custom_field[custom_field.custom_field_id] %}<p class="text-sm text-red-500 mt-1">{{ error_custom_field[custom_field.custom_field_id] }}</p>{% endif %}
+          </div>
+          {% endfor %}
+
+          {# Password #}
+          <p class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-4 mt-6">{{ text_your_password }}</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1.5" for="input-password">{{ entry_password }}</label>
+              <input type="password" name="password" value="{{ password }}" placeholder="{{ entry_password }}" id="input-password"
+                class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
+              {% if error_password %}<p class="text-sm text-red-500 mt-1">{{ error_password }}</p>{% endif %}
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1.5" for="input-confirm">{{ entry_confirm }}</label>
+              <input type="password" name="confirm" value="{{ confirm }}" placeholder="{{ entry_confirm }}" id="input-confirm"
+                class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
+              {% if error_confirm %}<p class="text-sm text-red-500 mt-1">{{ error_confirm }}</p>{% endif %}
+            </div>
+          </div>
+
+          {# Newsletter #}
+          <p class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-4">{{ text_newsletter }}</p>
+          <div class="mb-6 flex items-center gap-6">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="newsletter" value="1" {% if newsletter %}checked{% endif %} class="w-4 h-4 text-blue-600 border-gray-300" />
+              <span class="text-sm text-gray-700">{{ text_yes }}</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="newsletter" value="0" {% if not newsletter %}checked{% endif %} class="w-4 h-4 text-blue-600 border-gray-300" />
+              <span class="text-sm text-gray-700">{{ text_no }}</span>
+            </label>
+          </div>
+
+          {{ captcha }}
+
+          {# Submit #}
+          <div class="flex items-center justify-end gap-4 pt-2">
+            {% if text_agree %}
+            <div class="flex items-center gap-2 text-sm text-gray-600">
+              <span>{{ text_agree }}</span>
+              <input type="checkbox" name="agree" value="1" {% if agree %}checked{% endif %}
+                class="w-4 h-4 text-blue-600 border-gray-300 rounded" />
+            </div>
+            {% endif %}
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm flex items-center gap-2">
+              <i data-lucide="user-check" class="w-4 h-4"></i>
+              {{ button_continue }}
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+      {{ content_bottom }}
+    </div>
+  </section>
+
+</main>
+<script type="text/javascript"><!--
+$('#account .custom-field[data-sort]').detach().each(function() {
+  if ($(this).attr('data-sort') >= 0 && $(this).attr('data-sort') <= $('#account .custom-field').length) {
+    $('#account .custom-field').eq($(this).attr('data-sort')).before(this);
+  }
+  if ($(this).attr('data-sort') > $('#account .custom-field').length) {
+    $('#account .custom-field:last').after(this);
+  }
+  if ($(this).attr('data-sort') < -$('#account .custom-field').length) {
+    $('#account .custom-field:first').before(this);
+  }
+});
+
+$('input[name=\'customer_group_id\']').on('change', function() {
+  $.ajax({
+    url: 'index.php?route=account/register/customfield&customer_group_id=' + this.value,
+    dataType: 'json',
+    success: function(json) {
+      $('.custom-field').hide();
+      for (var i = 0; i < json.length; i++) {
+        var cf = json[i];
+        $('.custom-field[id="custom-field' + cf['custom_field_id'] + '"]').show();
+      }
+    }
+  });
+});
+$('input[name=\'customer_group_id\']:checked').trigger('change');
+//--></script>
+{{ footer }}

@@ -1,0 +1,267 @@
+<!-- ─── Cart Button (with badge) ──────────────────────────── -->
+<button id="cart-btn" onclick="dcOpenCart()" class="p-2 rounded-lg hover:bg-gray-100 transition relative" aria-label="{{ text_cart }}">
+  <i data-lucide="shopping-cart" class="w-5 h-5 text-gray-600"></i>
+  {% set item_count = products|length + (vouchers is defined ? vouchers|length : 0) %}
+  {% if item_count > 0 %}
+  <span id="cart-badge" class="absolute -top-1 -right-1 bg-blue-600 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center leading-none">{{ item_count }}</span>
+  {% else %}
+  <span id="cart-badge" class="hidden absolute -top-1 -right-1 bg-blue-600 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center leading-none"></span>
+  {% endif %}
+</button>
+
+<!-- ─── Cart Drawer (matches html/index.html appearance) ─── -->
+<div id="cart-modal" class="fixed inset-0 z-[10002] opacity-0 pointer-events-none">
+  <!-- Overlay -->
+  <div id="cart-overlay" class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="dcCloseCart()"></div>
+
+  <!-- Drawer -->
+  <div id="cart-drawer" class="absolute top-0 right-0 bottom-0 w-full max-w-sm bg-white shadow-2xl flex flex-col transform translate-x-full transition-transform duration-300">
+    <!-- Header -->
+    <div class="flex items-center justify-between p-5 border-b border-gray-100">
+      <h2 class="text-lg font-bold flex items-center gap-2">
+        <i data-lucide="shopping-cart" class="w-5 h-5 text-blue-600"></i>
+        {{ text_cart_drawer|default('Your Cart') }}
+        <span id="cart-items-count" class="text-sm font-normal text-gray-500">{{ text_items }}</span>
+      </h2>
+      <button onclick="dcCloseCart()" class="p-1.5 rounded-lg hover:bg-gray-100 transition">
+        <i data-lucide="x" class="w-5 h-5 text-gray-500"></i>
+      </button>
+    </div>
+
+    <!-- Items container -->
+    <div id="cart-items" class="flex-1 overflow-y-auto p-5 space-y-4">
+      {% if products is not empty or vouchers is not empty %}
+        {% for product in products %}
+        <div class="flex gap-3 items-start">
+          {% if product.thumb %}
+          <a href="{{ product.href }}" onclick="dcCloseCart()" class="flex-shrink-0">
+            <img src="{{ product.thumb }}" alt="{{ product.name }}" class="w-[60px] h-[60px] rounded-xl object-contain border border-gray-100" />
+          </a>
+          {% endif %}
+          <div class="flex-1 min-w-0">
+            <a href="{{ product.href }}" onclick="dcCloseCart()" class="text-sm font-medium text-gray-900 hover:text-blue-600 transition leading-snug block">{{ product.name }}</a>
+            {% for option in product.option %}
+            <p class="text-xs text-gray-400 mt-0.5">{{ option.name }}: {{ option.value }}</p>
+            {% endfor %}
+            {% if product.recurring %}
+            <p class="text-xs text-gray-400 mt-0.5">{{ product.recurring }}</p>
+            {% endif %}
+            <div class="flex items-center justify-between mt-2">
+              <div class="flex items-center gap-1.5">
+                <button onclick="dcCartUpdate('{{ product.cart_id }}', {{ product.quantity - 1 }})" class="w-6 h-6 rounded-md bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-sm font-bold transition" aria-label="Decrease quantity">−</button>
+                <span class="text-xs font-semibold text-gray-700 min-w-[22px] text-center">{{ product.quantity }}</span>
+                <button onclick="dcCartUpdate('{{ product.cart_id }}', {{ product.quantity + 1 }})" class="w-6 h-6 rounded-md bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-sm font-bold transition" aria-label="Increase quantity">+</button>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-semibold text-gray-900">{{ product.total }}</span>
+                <button onclick="dcCartRemove('{{ product.cart_id }}')" class="p-1 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition" title="Remove">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+
+        {% for voucher in vouchers %}
+        <div class="flex items-center justify-between gap-3 py-2 border-b border-gray-50">
+          <span class="text-sm text-gray-700">{{ voucher.description }}</span>
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-semibold text-gray-900">{{ voucher.amount }}</span>
+            <button onclick="dcVoucherRemove('{{ voucher.key }}')" class="p-1 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <!-- Empty state -->
+        <div id="cart-empty" class="flex flex-col items-center justify-center h-full text-gray-400 py-16">
+          <i data-lucide="shopping-cart" class="w-16 h-16 opacity-20 mb-4"></i>
+          <p class="font-medium text-lg text-gray-500">{{ text_empty }}</p>
+          <p class="text-sm mt-1">Add something to get started!</p>
+          <button onclick="dcCloseCart()" class="mt-6 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition">Continue Shopping</button>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Footer: totals + actions -->
+    {% if products is not empty or vouchers is not empty %}
+    <div id="cart-footer" class="p-5 border-t border-gray-100">
+      {% for total in totals %}
+      <div class="flex justify-between items-center {% if not loop.last %}mb-2 text-sm text-gray-500{% else %}mb-4 text-base font-bold text-gray-900{% endif %}">
+        <span>{{ total.title }}</span>
+        <span>{{ total.text }}</span>
+      </div>
+      {% endfor %}
+      <a href="{{ checkout }}" class="w-full flex items-center justify-center gap-2 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition shadow-md mb-2 text-sm">
+        <i data-lucide="credit-card" class="w-4 h-4"></i>{{ text_checkout }}
+      </a>
+      <a href="{{ cart }}" onclick="dcCloseCart()" class="w-full flex items-center justify-center gap-2 py-3 border border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition text-sm">
+        <i data-lucide="shopping-bag" class="w-4 h-4"></i>{{ text_cart }}
+      </a>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+<script>
+/* ── Cart open / close using classes (matches index.html appearance) ── */
+function dcOpenCart() {
+  var modal  = document.getElementById('cart-modal');
+  var drawer = document.getElementById('cart-drawer');
+  if (!modal || !drawer) return;
+  modal.classList.remove('opacity-0', 'pointer-events-none');
+  setTimeout(function () { drawer.classList.remove('translate-x-full'); }, 10);
+  document.body.style.overflow = 'hidden';
+}
+
+function dcCloseCart() {
+  var modal  = document.getElementById('cart-modal');
+  var drawer = document.getElementById('cart-drawer');
+  if (!modal || !drawer) return;
+  drawer.classList.add('translate-x-full');
+  setTimeout(function () { modal.classList.add('opacity-0', 'pointer-events-none'); }, 300);
+  document.body.style.overflow = '';
+}
+
+/* ── Refresh — replace widget HTML returned by server */
+/* openAfter=true  → animate drawer in (new add); false → restore silently if already open */
+function dcRefreshCart(openAfter) {
+  // common/cart/info calls setOutput(); common/cart index() only returns (used as sub-controller)
+  fetch('index.php?route=common/cart/info', { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+    .then(function (r) { return r.text(); })
+      .then(function (html) {
+        var drawer = document.getElementById('cart-drawer');
+        // drawer is open when translate-x-full has been removed by dcOpenCart
+        var drawerOpen = !openAfter && drawer && !drawer.classList.contains('translate-x-full');
+        var tmp = document.createElement('div'); tmp.innerHTML = html;
+        var newBtn   = tmp.querySelector('#cart-btn');
+        var newModal = tmp.querySelector('#cart-modal');
+
+        // Replace cart button
+        var oldBtn = document.getElementById('cart-btn');
+        if (newBtn && oldBtn) {
+          oldBtn.parentNode.replaceChild(newBtn, oldBtn);
+        }
+
+        // Replace modal safely (it may live on <body> or header)
+        var oldModal = document.getElementById('cart-modal');
+        if (newModal) {
+          if (oldModal && oldModal.parentNode) {
+            oldModal.parentNode.replaceChild(newModal, oldModal);
+          } else {
+            document.body.appendChild(newModal);
+          }
+        }
+
+        if (openAfter) {
+          // Fresh open — use normal animated dcOpenCart()
+          dcOpenCart();
+        } else if (drawerOpen) {
+          // Drawer was already open — restore instantly without flash
+          var nd = document.getElementById('cart-drawer');
+          var nm = document.getElementById('cart-modal');
+          if (nd && nm) {
+            nd.style.transitionDuration  = '0s';
+            nm.style.transitionDuration  = '0s';
+            nd.classList.remove('translate-x-full');
+            nm.classList.remove('opacity-0', 'pointer-events-none');
+            document.body.style.overflow = 'hidden';
+            requestAnimationFrame(function() {
+              requestAnimationFrame(function() {
+                nd.style.transitionDuration = '';
+                nm.style.transitionDuration = '';
+              });
+            });
+          }
+        }
+
+        if (window.lucide) { lucide.createIcons(); }
+      });
+}
+
+/* ── Cart actions (use existing OC routes) */
+function dcCartRemove(cartId) {
+  // controller expects 'key' for removal
+  fetch('index.php?route=checkout/cart/remove', { credentials: 'same-origin', method: 'POST', headers: { 'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest' }, body: 'key=' + encodeURIComponent(cartId) })
+    .then(function() { dcRefreshCart(false); });
+}
+
+function dcCartUpdate(cartId, quantity) {
+  var qty = parseInt(quantity, 10);
+  if (!qty || qty < 1) { dcCartRemove(cartId); return; }
+  // send as quantity[cart_id]=qty so controller can foreach the quantity array
+  var body = 'quantity[' + encodeURIComponent(cartId) + ']=' + encodeURIComponent(qty);
+  fetch('index.php?route=checkout/cart/edit', { credentials: 'same-origin', method: 'POST', headers: { 'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest' }, body: body })
+    .then(function() { dcRefreshCart(false); });
+}
+
+function dcVoucherRemove(voucherKey) {
+  // controller remove() checks $_POST['key'] for both products and vouchers
+  fetch('index.php?route=checkout/cart/remove', { credentials: 'same-origin', method: 'POST', headers: { 'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest' }, body: 'key=' + encodeURIComponent(voucherKey) })
+    .then(function() { dcRefreshCart(false); });
+}
+
+/* ── Toast notification ─────────────────────────────────── */
+function dcShowToast(message) {
+  var ex = document.getElementById('dc-toast');
+  if (ex) { ex.remove(); }
+  var t = document.createElement('div');
+  t.id = 'dc-toast';
+  t.style.cssText = 'position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);z-index:9999;background:#1e293b;color:#fff;padding:.6rem 1.2rem;border-radius:.75rem;font-size:.875rem;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,.2);max-width:90vw;text-align:center;opacity:0;transition:opacity .2s ease;pointer-events:none;';
+  t.innerHTML = message;
+  document.body.appendChild(t);
+  requestAnimationFrame(function() { t.style.opacity = '1'; });
+  setTimeout(function() {
+    t.style.opacity = '0';
+    setTimeout(function() { if (t.parentNode) { t.remove(); } }, 300);
+  }, 3500);
+}
+
+/* ── Wishlist API ───────────────────────────────────────── */
+window.wishlist = window.wishlist || {
+  add: function(productId) {
+    fetch('index.php?route=account/wishlist/add', {
+      credentials: 'same-origin', method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
+      body: 'product_id=' + encodeURIComponent(productId)
+    }).then(function(r) { return r.json(); })
+      .then(function(json) {
+        if (json.success) { dcShowToast(json.success); }
+      });
+  }
+};
+
+/* Expose OpenCart-compatible cart API (keeps existing integration) */
+window.cart = window.cart || {
+  add: function (productId, quantity) {
+    var qty = quantity || 1;
+    fetch('index.php?route=checkout/cart/add', { credentials: 'same-origin', method: 'POST', headers: { 'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest' }, body: 'product_id=' + encodeURIComponent(productId) + '&quantity=' + encodeURIComponent(qty) })
+      .then(function (response) { return response.json(); })
+      .then(function (json) {
+        if (json && json.redirect) {
+          window.location.href = json.redirect;
+          return;
+        }
+
+        dcRefreshCart(true);
+      })
+      .catch(function () {
+        dcRefreshCart(true);
+      });
+  },
+  update: function (cartId, quantity) { var body = 'quantity[' + encodeURIComponent(cartId) + ']=' + encodeURIComponent(quantity); fetch('index.php?route=checkout/cart/edit', { credentials: 'same-origin', method: 'POST', headers: { 'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest' }, body: body }).then(dcRefreshCart); },
+  remove: function (cartId) { dcCartRemove(cartId); }
+};
+
+/* Close on Escape */
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { dcCloseCart(); } });
+
+/* Move modal to <body> */
+document.addEventListener('DOMContentLoaded', function () {
+  var modal = document.getElementById('cart-modal');
+  if (modal && modal.parentNode !== document.body) { document.body.appendChild(modal); }
+});
+</script>

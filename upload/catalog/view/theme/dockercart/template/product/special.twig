@@ -1,0 +1,170 @@
+{{ header }}
+
+<main class="bg-white min-h-screen">
+
+  <section class="relative overflow-hidden">
+    <div class="w-full h-[180px] sm:h-[230px] bg-gradient-to-br from-red-950 via-rose-900 to-gray-900"></div>
+    <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/15"></div>
+    <div class="absolute inset-0 flex items-end sm:items-center pb-6 sm:pb-0">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        {% include 'dockercart/template/common/partials/breadcrumbs.twig' with {
+          breadcrumbs_class: 'flex flex-wrap items-center gap-2 text-xs text-gray-300 mb-3',
+          breadcrumbs_link_class: 'hover:text-white transition',
+          breadcrumbs_last_class: 'text-white font-semibold'
+        } %}
+        <div class="flex items-center gap-3 mb-1">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/90 text-white text-xs font-bold uppercase tracking-widest">
+            <i data-lucide="tag" class="w-3 h-3"></i> {{ text_sale }}
+          </span>
+        </div>
+        <h1 class="text-2xl sm:text-4xl font-extrabold text-white leading-tight">{{ heading_title }}</h1>
+        <p class="text-sm text-rose-200 mt-2">{{ text_special_tagline }}</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="catalog" class="py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      {{ content_top }}
+
+      <div class="{% if column_left and column_right %}grid grid-cols-1 lg:grid-cols-[280px,1fr,280px] gap-6{% elseif column_left or column_right %}grid grid-cols-1 lg:grid-cols-[280px,1fr] gap-6{% endif %}">
+        {% if column_left %}
+        <aside class="hidden lg:block">
+          <div class="bg-white border border-gray-100 rounded-3xl p-5 h-fit shadow-sm">
+            {{ column_left }}
+          </div>
+        </aside>
+        {% endif %}
+
+        <div>
+          {% if products %}
+          <div class="bg-white border border-gray-100 rounded-3xl p-4 sm:p-5 mb-5 shadow-sm">
+            <div class="flex flex-wrap gap-3 items-center justify-between">
+              <div>
+                <p class="text-xs font-bold uppercase tracking-widest text-red-500">{{ text_special }}</p>
+                <h2 class="text-lg sm:text-xl font-extrabold text-gray-900 mt-0.5">{{ heading_title }}</h2>
+              </div>
+              <div class="flex items-center gap-3 flex-wrap">
+                <span class="text-sm text-gray-500">{{ text_products|format(product_total) }}</span>
+                <select onchange="location = this.value;" class="rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-blue-400 bg-white cursor-pointer">
+                  {% for sort_item in sorts %}
+                  <option value="{{ sort_item.href }}" {% if sort_item.value == '%s-%s'|format(sort, order) %}selected{% endif %}>{{ sort_item.text }}</option>
+                  {% endfor %}
+                </select>
+                <select onchange="location = this.value;" class="rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-blue-400 bg-white cursor-pointer">
+                  {% for limit_item in limits %}
+                  <option value="{{ limit_item.href }}" {% if limit_item.value == limit %}selected{% endif %}>{{ limit_item.text }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
+            {% for product in products %}
+            <div class="product-card group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex flex-col" data-id="{{ product.product_id }}" data-description="{{ product.description }}" data-model="{{ product.model }}" data-in-wishlist="{{ product.in_wishlist|default(0) }}" data-rating="{{ product.rating }}">
+              <div class="relative overflow-hidden aspect-square bg-gray-50">
+                <a href="{{ product.href }}">
+                  <img src="{{ product.thumb }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                </a>
+                <span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md">{{ text_sale }}</span>
+                <div class="absolute top-2 right-2">
+                  <button class="wishlist-btn w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center hover:bg-rose-50 transition {% if product.in_wishlist %}bg-rose-50{% endif %}" onclick="dcAddToWishlist('{{ product.product_id }}', this); event.stopPropagation();" aria-label="Add to wishlist">
+                    <i data-lucide="heart" class="w-3.5 h-3.5 {% if product.in_wishlist %}text-rose-500 fill-rose-400{% else %}text-gray-400{% endif %}"></i>
+                  </button>
+                </div>
+                <button class="quick-view-btn absolute bottom-0 left-0 right-0 py-2.5 bg-gray-900/85 hover:bg-red-600 text-white text-[11px] font-bold uppercase tracking-widest backdrop-blur-sm transition-colors duration-200" onclick="openQuickView && openQuickView({{ product.product_id }}); event.stopPropagation();" aria-label="{{ text_quick_view }}">
+                  {{ text_quick_view }}
+                </button>
+              </div>
+              <div class="p-3 sm:p-4 flex flex-col flex-1">
+                {% if product.category %}
+                <p class="text-[10px] sm:text-xs text-gray-400 uppercase tracking-widest mb-1 font-medium">{{ product.category }}</p>
+                {% endif %}
+                <h3 class="text-xs sm:text-sm font-semibold text-gray-900 leading-snug mb-2 flex-1 line-clamp-2">
+                  <a href="{{ product.href }}" class="hover:text-blue-600 transition">{{ product.name }}</a>
+                </h3>
+                {% if product.rating %}
+                <div class="flex items-center gap-0.5 mb-2">
+                  {% for i in 1..5 %}
+                  <span class="text-xs {% if product.rating >= i %}text-amber-400{% else %}text-gray-200{% endif %}">★</span>
+                  {% endfor %}
+                  <span class="text-[10px] text-gray-400 ml-1">{{ product.reviews }} {{ text_reviews }}</span>
+                </div>
+                {% endif %}
+                <div class="flex items-end justify-between gap-2">
+                  <div class="flex items-baseline gap-1 flex-wrap">
+                    {% if product.special %}
+                    <span class="text-base sm:text-lg font-extrabold text-gray-900">{{ product.special }}</span>
+                    <span class="text-xs text-red-400 line-through ml-1">{{ product.price }}</span>
+                    {% elseif product.price %}
+                    <span class="text-base sm:text-lg font-extrabold text-gray-900">{{ product.price }}</span>
+                    {% endif %}
+                  </div>
+                  <button class="add-to-cart-btn flex-shrink-0 text-[10px] sm:text-xs font-bold px-3 py-1.5 rounded-lg bg-red-500 text-white hover:bg-red-600 transition" onclick="cart.add('{{ product.product_id }}', '{{ product.minimum }}');">
+                    + {{ button_cart }}
+                  </button>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+          {% if pagination %}
+          <div class="mt-8 flex items-center justify-center">
+            <div class="dc-pagination">{{ pagination }}</div>
+          </div>
+          {% endif %}
+
+          {% else %}
+          <div class="flex flex-col items-center justify-center py-24 text-center">
+            <i data-lucide="tag-x" class="w-16 h-16 text-gray-200 mb-4"></i>
+            <p class="text-lg font-semibold text-gray-500">{{ text_empty }}</p>
+            <a href="{{ continue }}" class="mt-6 px-6 py-2.5 bg-red-500 hover:bg-red-600 text-white font-semibold text-sm rounded-xl transition">
+              {{ button_continue }}
+            </a>
+          </div>
+          {% endif %}
+        </div>
+
+        {% if column_right %}
+        <aside class="hidden lg:block">
+          <div class="bg-white border border-gray-100 rounded-3xl p-5 h-fit shadow-sm">
+            {{ column_right }}
+          </div>
+        </aside>
+        {% endif %}
+      </div>
+
+      {{ content_bottom }}
+    </div>
+  </section>
+
+</main>
+
+<style>
+  .wishlist-btn { opacity: 0; transform: translateY(-4px) scale(.92); transition: opacity .18s ease, transform .18s ease, box-shadow .18s ease; }
+  .product-card:hover .wishlist-btn { opacity: 1; transform: translateY(0) scale(1); }
+  .wishlist-btn:focus-visible, .wishlist-btn.bg-rose-50 { opacity: 1; transform: translateY(0) scale(1); }
+
+  .product-card:hover .quick-view-btn { opacity: 1 !important; transform: translateY(0) !important; }
+  .quick-view-btn { opacity: 0; transform: translateY(100%); transition: opacity 0.25s ease, transform 0.25s ease; }
+  .product-card:hover .add-to-cart-btn { opacity: 1 !important; transform: translateY(0) !important; }
+  .add-to-cart-btn { opacity: 0; transform: translateY(8px); transition: all 0.25s ease; }
+
+  .dc-pagination ul { display:flex; gap:.5rem; list-style:none; padding:0; margin:0; flex-wrap:wrap; justify-content:center; }
+  .dc-pagination ul li a,
+  .dc-pagination ul li span {
+    display:inline-flex; align-items:center; justify-content:center;
+    width:2.25rem; height:2.25rem; padding:0;
+    border-radius:.75rem; border:1px solid #e5e7eb;
+    font-size:.875rem; font-weight:500; color:#6b7280;
+    background:#fff; text-decoration:none; transition:all .15s ease;
+  }
+  .dc-pagination ul li a:hover { border-color:#fca5a5; color:#dc2626; }
+  .dc-pagination ul li.active span { background:#dc2626; border-color:#dc2626; color:#fff; }
+</style>
+
+{% include 'dockercart/template/common/partials/schema_item_list.twig' %}
+
+{{ footer }}

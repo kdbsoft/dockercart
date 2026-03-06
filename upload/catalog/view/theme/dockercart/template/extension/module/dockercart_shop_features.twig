@@ -1,0 +1,23 @@
+<section id="benefits" class="py-16 px-4 sm:px-6 lg:px-8 bg-gray-100">
+  <div class="max-w-7xl mx-auto">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+      {% for feature in features %}
+        <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm text-center group hover:shadow-md transition">
+          <div class="w-14 h-14 rounded-2xl {{ feature.icon_bg }} flex items-center justify-center mx-auto mb-4 {{ feature.icon_hover_bg }} transition">
+            <i data-lucide="{{ feature.icon }}" class="w-7 h-7 {{ feature.icon_text }} group-hover:text-white transition"></i>
+          </div>
+          <h3 class="font-bold text-gray-900 mb-1">{{ feature.title }}</h3>
+          <p class="text-gray-500 text-sm">{{ feature.text }}</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<script>
+(function() {
+  if (window.lucide && typeof window.lucide.createIcons === 'function') {
+    window.lucide.createIcons();
+  }
+})();
+</script>

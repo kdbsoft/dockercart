@@ -1,0 +1,70 @@
+{{ header }}
+<main class="bg-gray-50 min-h-screen">
+
+  <section class="bg-gradient-to-br from-gray-900 via-gray-800 to-blue-950 py-10 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      {% include 'dockercart/template/common/partials/breadcrumbs.twig' with {
+        breadcrumbs_class: 'flex flex-wrap items-center gap-2 text-xs text-gray-300 mb-3',
+        breadcrumbs_link_class: 'hover:text-white transition',
+        breadcrumbs_last_class: 'text-white font-semibold'
+      } %}
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-white">{{ heading_title }}</h1>
+    </div>
+  </section>
+
+  <section class="py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-3xl mx-auto">
+      {{ content_top }}
+
+      <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 mb-4">
+        <p class="text-sm text-gray-600">{{ text_total }} <strong class="text-gray-900">{{ total }}</strong></p>
+      </div>
+
+      <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden mb-6">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-gray-100 bg-gray-50">
+                <th class="text-left font-semibold text-gray-500 px-4 py-3">{{ column_date_added }}</th>
+                <th class="text-left font-semibold text-gray-500 px-4 py-3">{{ column_description }}</th>
+                <th class="text-right font-semibold text-gray-500 px-4 py-3">{{ column_amount }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if transactions %}
+              {% for transaction in transactions %}
+              <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition">
+                <td class="text-left text-gray-600 px-4 py-3">{{ transaction.date_added }}</td>
+                <td class="text-left text-gray-800 px-4 py-3">{{ transaction.description }}</td>
+                <td class="text-right font-semibold px-4 py-3 {% if transaction.amount starts with '-' %}text-red-600{% else %}text-green-600{% endif %}">
+                  {{ transaction.amount }}
+                </td>
+              </tr>
+              {% endfor %}
+              {% else %}
+              <tr>
+                <td colspan="3" class="text-center text-gray-400 px-4 py-6">{{ text_empty }}</td>
+              </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between text-sm text-gray-500 mb-6">
+        <div>{{ pagination }}</div>
+        <div>{{ results }}</div>
+      </div>
+
+      <div class="flex justify-end">
+        <a href="{{ continue }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm">
+          {{ button_continue }}
+        </a>
+      </div>
+
+      {{ content_bottom }}
+    </div>
+  </section>
+
+</main>
+{{ footer }}

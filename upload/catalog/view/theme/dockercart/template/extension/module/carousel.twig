@@ -1,0 +1,44 @@
+{# Brands marquee styled like html/index.html for dockercart theme #}
+{% if banners|length %}
+  <div class="py-10 bg-white overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 mb-6">
+      <p class="text-xs font-bold uppercase tracking-widest text-gray-400 text-center">{{ text_brands_we_carry }}</p>
+    </div>
+    <div class="overflow-hidden select-none">
+      <style>
+        @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        .brands-track { display: flex; width: max-content; animation: marquee 28s linear infinite; }
+        .brands-track:hover { animation-play-state: paused; }
+        .brands-track > .flex { display:flex; }
+        .brands-item { display:flex; align-items:center; justify-content:center; margin:0 2.5rem; filter:grayscale(100%); opacity:.4; transition: all .3s ease; cursor:pointer }
+        .brands-item:hover { filter:grayscale(0%); opacity:1 }
+      </style>
+
+      <div class="brands-track">
+        <div class="flex items-center">
+          {% for banner in banners %}
+          <div class="brands-item" role="img" aria-label="{{ banner.title }}">
+            {% if banner.image %}
+              <img src="{{ banner.image }}" alt="{{ banner.title }}" class="h-20 object-contain" />
+            {% else %}
+              <span class="text-2xl font-black tracking-tight text-gray-900">{{ banner.title }}</span>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+
+        <div class="flex items-center" aria-hidden="true">
+          {% for banner in banners %}
+          <div class="brands-item">
+            {% if banner.image %}
+              <img src="{{ banner.image }}" alt="" class="h-20 object-contain" />
+            {% else %}
+              <span class="text-2xl font-black tracking-tight text-gray-900">{{ banner.title }}</span>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endif %}

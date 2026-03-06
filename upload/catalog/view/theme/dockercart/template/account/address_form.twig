@@ -1,0 +1,171 @@
+{{ header }}
+<main class="bg-gray-50 min-h-screen">
+
+  <section class="bg-gradient-to-br from-gray-900 via-gray-800 to-blue-950 py-10 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      {% include 'dockercart/template/common/partials/breadcrumbs.twig' with {
+        breadcrumbs_class: 'flex flex-wrap items-center gap-2 text-xs text-gray-300 mb-3',
+        breadcrumbs_link_class: 'hover:text-white transition',
+        breadcrumbs_last_class: 'text-white font-semibold'
+      } %}
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-white">{{ text_address }}</h1>
+    </div>
+  </section>
+
+  <section class="py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-2xl mx-auto">
+      {{ content_top }}
+
+      {% if error_warning %}
+      <div class="mb-6 bg-red-50 border border-red-200 text-red-700 rounded-2xl px-5 py-4 text-sm flex items-center gap-3">
+        <i data-lucide="alert-circle" class="w-5 h-5 flex-shrink-0"></i>
+        <span>{{ error_warning }}</span>
+      </div>
+      {% endif %}
+
+      <div class="bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-sm">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data">
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1.5" for="input-firstname">{{ entry_firstname }}</label>
+              <input type="text" name="firstname" value="{{ firstname }}" placeholder="{{ entry_firstname }}" id="input-firstname"
+                class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
+              {% if error_firstname %}
+              <p class="text-sm text-red-500 mt-1">{{ error_firstname }}</p>
+              {% endif %}
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1.5" for="input-lastname">{{ entry_lastname }}</label>
+              <input type="text" name="lastname" value="{{ lastname }}" placeholder="{{ entry_lastname }}" id="input-lastname"
+                class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
+              {% if error_lastname %}
+              <p class="text-sm text-red-500 mt-1">{{ error_lastname }}</p>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1.5" for="input-company">{{ entry_company }}</label>
+            <input type="text" name="company" value="{{ company }}" placeholder="{{ entry_company }}" id="input-company"
+              class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1.5" for="input-address-1">{{ entry_address_1 }}</label>
+            <input type="text" name="address_1" value="{{ address_1 }}" placeholder="{{ entry_address_1 }}" id="input-address-1"
+              class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
+            {% if error_address_1 %}
+            <p class="text-sm text-red-500 mt-1">{{ error_address_1 }}</p>
+            {% endif %}
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1.5" for="input-address-2">{{ entry_address_2 }}</label>
+            <input type="text" name="address_2" value="{{ address_2 }}" placeholder="{{ entry_address_2 }}" id="input-address-2"
+              class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1.5" for="input-city">{{ entry_city }}</label>
+              <input type="text" name="city" value="{{ city }}" placeholder="{{ entry_city }}" id="input-city"
+                class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
+              {% if error_city %}
+              <p class="text-sm text-red-500 mt-1">{{ error_city }}</p>
+              {% endif %}
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1.5" for="input-postcode">{{ entry_postcode }}</label>
+              <input type="text" name="postcode" value="{{ postcode }}" placeholder="{{ entry_postcode }}" id="input-postcode"
+                class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
+              {% if error_postcode %}
+              <p class="text-sm text-red-500 mt-1">{{ error_postcode }}</p>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1.5" for="input-country">{{ entry_country }}</label>
+            <select name="country_id" id="input-country"
+              class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+              <option value="">{{ text_select }}</option>
+              {% for country in countries %}
+              <option value="{{ country.country_id }}" {% if country.country_id == country_id %}selected{% endif %}>{{ country.name }}</option>
+              {% endfor %}
+            </select>
+            {% if error_country %}
+            <p class="text-sm text-red-500 mt-1">{{ error_country }}</p>
+            {% endif %}
+          </div>
+
+          <div class="mb-6" id="input-zone-group">
+            <label class="block text-sm font-medium text-gray-700 mb-1.5" for="input-zone">{{ entry_zone }}</label>
+            <select name="zone_id" id="input-zone"
+              class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+              <option value="">{{ text_select }}</option>
+              {% for zone in zones %}
+              <option value="{{ zone.zone_id }}" {% if zone.zone_id == zone_id %}selected{% endif %}>{{ zone.name }}</option>
+              {% endfor %}
+            </select>
+            {% if error_zone %}
+            <p class="text-sm text-red-500 mt-1">{{ error_zone }}</p>
+            {% endif %}
+          </div>
+
+          {% if default is defined %}
+          <div class="mb-6 flex items-center gap-3">
+            <input type="checkbox" name="default" value="1" id="input-default" {% if default %}checked{% endif %}
+              class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+            <label for="input-default" class="text-sm font-medium text-gray-700">{{ entry_default }}</label>
+          </div>
+          {% endif %}
+
+          <div class="flex items-center justify-between gap-4">
+            <a href="{{ back }}" class="border border-gray-200 hover:border-gray-300 bg-white text-gray-700 font-medium px-5 py-2.5 rounded-xl transition-colors text-sm">
+              {{ button_back }}
+            </a>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm">
+              {{ button_continue }}
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+      {{ content_bottom }}
+    </div>
+  </section>
+
+</main>
+<script type="text/javascript"><!--
+$('#input-country').on('change', function() {
+  $.ajax({
+    url: 'index.php?route=localisation/country&country_id=' + this.value,
+    dataType: 'json',
+    success: function(json) {
+      if (json['postcode_required'] == '1') {
+        $('#input-postcode').attr('class', 'w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white');
+      } else {
+        $('#input-postcode').attr('class', 'w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white');
+      }
+
+      if (json['zone'].length == 0) {
+        $('#input-zone').html('<option value="0">{{ text_none }}</option>');
+      } else {
+        $('#input-zone').html('');
+        for (var i = 0; i < json['zone'].length; i++) {
+          if (json['zone'][i]['zone_id'] == '{{ zone_id }}') {
+            $('#input-zone').append('<option value="' + json['zone'][i]['zone_id'] + '" selected="selected">' + json['zone'][i]['name'] + '</option>');
+          } else {
+            $('#input-zone').append('<option value="' + json['zone'][i]['zone_id'] + '">' + json['zone'][i]['name'] + '</option>');
+          }
+        }
+      }
+    }
+  });
+});
+
+$('#input-country').trigger('change');
+//--></script>
+{{ footer }}

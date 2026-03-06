@@ -1,0 +1,166 @@
+{# Шаблон для вкладок сущностей (товары, категории, производители, информация) #}
+<div class="entity-generator" data-entity-type="{{ entity_type }}">
+  
+  <ul class="nav nav-tabs">
+    {% for language in languages %}
+    <li{% if loop.first %} class="active"{% endif %}>
+      <a href="#{{ entity_type }}-lang-{{ language.language_id }}" data-toggle="tab">
+        <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+  
+  <div class="tab-content">
+    {% for language in languages %}
+    <div class="tab-pane{% if loop.first %} active{% endif %}" id="{{ entity_type }}-lang-{{ language.language_id }}">
+      {% if entity_type == 'manufacturer' and manufacturer_description_missing %}
+      <div class="alert alert-info">
+        <i class="fa fa-info-circle"></i>
+        {{ text_manufacturer_description_missing|default('Note: manufacturer_description table is missing in this store. Manufacturer meta will not be saved by the generator.') }}
+      </div>
+      {% endif %}
+      
+      <div class="well">
+        <h4>{{ text_template_settings }}</h4>
+        
+        <div class="alert alert-info">
+          <i class="fa fa-info-circle"></i> {{ text_seo_url_auto|default('SEO URL is automatically generated from entity name. Only meta fields use templates below.') }}
+        </div>
+        
+        <div class="form-group">
+          <label class="col-sm-3 control-label">{{ entry_meta_title_template }}</label>
+          <div class="col-sm-9">
+            <textarea name="module_dockercart_seo_generator_{{ entity_type }}_meta_title_{{ language.language_id }}" rows="2" class="form-control template-input" data-field="meta_title">{{ attribute(_context, 'module_dockercart_seo_generator_' ~ entity_type ~ '_meta_title_' ~ language.language_id) }}</textarea>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="col-sm-3 control-label">{{ entry_meta_description_template }}</label>
+          <div class="col-sm-9">
+            <textarea name="module_dockercart_seo_generator_{{ entity_type }}_meta_description_{{ language.language_id }}" rows="3" class="form-control template-input" data-field="meta_description">{{ attribute(_context, 'module_dockercart_seo_generator_' ~ entity_type ~ '_meta_description_' ~ language.language_id) }}</textarea>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="col-sm-3 control-label">{{ entry_meta_keyword_template }}</label>
+          <div class="col-sm-9">
+            <textarea name="module_dockercart_seo_generator_{{ entity_type }}_meta_keyword_{{ language.language_id }}" rows="2" class="form-control template-input" data-field="meta_keyword">{{ attribute(_context, 'module_dockercart_seo_generator_' ~ entity_type ~ '_meta_keyword_' ~ language.language_id) }}</textarea>
+          </div>
+        </div>
+        
+        <div class="alert alert-info" style="margin-top: 15px;">
+          <h5><i class="fa fa-info-circle"></i> {{ text_placeholders }}</h5>
+          <p><strong>{{ text_common_placeholders }}</strong></p>
+          <ul class="list-unstyled">
+            <li><code>{name}</code> - {{ help_placeholder_name }}</li>
+            <li><code>{description}</code> - {{ help_placeholder_description }}</li>
+            <li><code>{store}</code> - {{ help_placeholder_store }}</li>
+            <li><code>{city}</code> - {{ help_placeholder_city }}</li>
+          </ul>
+          
+          {% if entity_type == 'product' %}
+          <p><strong>{{ text_product_placeholders }}</strong></p>
+          <ul class="list-unstyled">
+            <li><code>{category}</code> - {{ help_placeholder_category }}</li>
+            <li><code>{manufacturer}</code> - {{ help_placeholder_manufacturer }}</li>
+            <li><code>{model}</code> - {{ help_placeholder_model }}</li>
+            <li><code>{sku}</code> - {{ help_placeholder_sku }}</li>
+            <li><code>{price}</code> - {{ help_placeholder_price }}</li>
+            <li><code>{stock}</code> - {{ help_placeholder_stock }}</li>
+          </ul>
+          {% endif %}
+        </div>
+      </div>
+      
+      <div class="well">
+        <h4>{{ text_filters }}</h4>
+        
+        <div class="alert alert-warning">
+          <i class="fa fa-warning"></i> {{ text_overwrite_warning|default('Warning! When enabling overwrite options, ALL existing data will be modified. Uncheck to process only empty fields.') }}
+        </div>
+        
+        <div class="form-group">
+          <div class="col-sm-12">
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" class="overwrite-url" data-language="{{ language.language_id }}"> 
+                <strong>{{ text_overwrite_url }}</strong>
+              </label>
+              <p class="help-block">{{ help_overwrite_url }}</p>
+            </div>
+            
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" class="overwrite-meta" data-language="{{ language.language_id }}"> 
+                <strong>{{ text_overwrite_meta }}</strong>
+              </label>
+              <p class="help-block">{{ help_overwrite_meta }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="well">
+        <h4>{{ text_actions }}</h4>
+        
+        <div class="btn-group btn-group-lg" role="group">
+          <button type="button" class="btn btn-info btn-preview" data-entity="{{ entity_type }}" data-language="{{ language.language_id }}">
+            <i class="fa fa-eye"></i> {{ button_preview }}
+          </button>
+          <button type="button" class="btn btn-primary btn-generate-url" data-entity="{{ entity_type }}" data-language="{{ language.language_id }}">
+            <i class="fa fa-link"></i> {{ button_generate_url }}
+          </button>
+          <button type="button" class="btn btn-success btn-generate-meta" data-entity="{{ entity_type }}" data-language="{{ language.language_id }}">
+            <i class="fa fa-tags"></i> {{ button_generate_meta }}
+          </button>
+          <button type="button" class="btn btn-warning btn-generate-all" data-entity="{{ entity_type }}" data-language="{{ language.language_id }}">
+            <i class="fa fa-magic"></i> {{ button_generate_all }}
+          </button>
+        </div>
+      </div>
+      
+      <!-- Прогресс-бар -->
+      <div class="progress-container" id="{{ entity_type }}-progress-{{ language.language_id }}" style="display: none;">
+        <div class="alert alert-info">
+          <strong>{{ text_processing }}</strong>
+          <div class="progress" style="margin-top: 10px;">
+            <div class="progress-bar progress-bar-striped active" role="progressbar" style="width: 0%">
+              <span class="progress-text">0%</span>
+            </div>
+          </div>
+          <p class="progress-info" style="margin-top: 10px;">
+            <span class="processed-count">0</span> / <span class="total-count">0</span> {{ text_items_processed }}
+          </p>
+        </div>
+      </div>
+      
+      <!-- Результат генерации -->
+      <div class="generation-result" id="{{ entity_type }}-result-{{ language.language_id }}" style="display: none;"></div>
+      
+      <!-- Предпросмотр -->
+      <div class="preview-container" id="{{ entity_type }}-preview-{{ language.language_id }}" style="display: none;">
+        <h4>{{ text_preview_title }}</h4>
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>{{ column_name }}</th>
+                <th>{{ column_seo_url }}</th>
+                <th>{{ column_meta_title }}</th>
+                <th>{{ column_meta_description }}</th>
+                <th>{{ column_meta_keyword }}</th>
+              </tr>
+            </thead>
+            <tbody class="preview-body">
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+    </div>
+    {% endfor %}
+  </div>
+  
+</div>

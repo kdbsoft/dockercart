@@ -1,0 +1,146 @@
+{{ header }}
+
+<main class="bg-white min-h-screen">
+  <section class="relative overflow-hidden">
+    <div class="w-full h-[200px] sm:h-[260px] bg-gradient-to-br from-blue-950 via-indigo-900 to-gray-900"></div>
+    <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/15"></div>
+    <div class="absolute inset-0 flex items-end sm:items-center pb-6 sm:pb-0">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        {% include 'dockercart/template/common/partials/breadcrumbs.twig' with {
+          breadcrumbs_class: 'flex flex-wrap items-center gap-2 text-xs text-gray-300 mb-3',
+          breadcrumbs_link_class: 'hover:text-white transition',
+          breadcrumbs_last_class: 'text-white font-semibold'
+        } %}
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/90 text-white text-xs font-bold uppercase tracking-widest mb-2">
+          <i data-lucide="newspaper" class="w-3 h-3"></i> {{ text_blog_post }}
+        </span>
+        <h1 class="text-2xl sm:text-4xl font-extrabold text-white leading-tight">{{ heading_title|default(name) }}</h1>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-5xl mx-auto">
+      <article class="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden">
+        {% if image %}
+        <div class="aspect-[16/8] bg-gray-50">
+          <img src="{{ image }}" alt="{{ heading_title|default(name) }}" class="w-full h-full object-cover" />
+        </div>
+        {% endif %}
+
+        <div class="p-5 sm:p-8">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-gray-500 mb-4">
+            {% if show_author and author %}
+              <a href="{{ author_url }}" class="inline-flex items-center gap-1 hover:text-blue-600 transition"><i data-lucide="user" class="w-4 h-4"></i> {{ author }}</a>
+              {% if show_date or show_views %}<span>•</span>{% endif %}
+            {% endif %}
+            {% if show_date %}
+              <span class="inline-flex items-center gap-1"><i data-lucide="calendar" class="w-4 h-4"></i> {{ date_published }}</span>
+              {% if show_views %}<span>•</span>{% endif %}
+            {% endif %}
+            {% if show_views %}
+              <span class="inline-flex items-center gap-1"><i data-lucide="eye" class="w-4 h-4"></i> {{ views }}</span>
+            {% endif %}
+          </div>
+
+          <div class="prose prose-sm sm:prose lg:prose-lg max-w-none dc-blog-content">
+            {{ content }}
+          </div>
+
+          {% if tags %}
+            <div class="mt-6 pt-6 border-t border-gray-100">
+              <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider mb-2">{{ text_tags }}</h3>
+              <div class="flex flex-wrap gap-2">
+                {% for tag in tags %}
+                  <a href="{{ tag.href }}" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 hover:bg-blue-100 transition">#{{ tag.name }}</a>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+
+          {% if categories %}
+            <div class="mt-4 text-sm text-gray-600">
+              <span class="font-semibold text-gray-800">{{ text_category|default('Categories:') }}</span>
+              {% for category in categories %}
+                <a href="{{ category.href }}" class="text-blue-600 hover:text-blue-700">{{ category.name }}</a>{% if not loop.last %}, {% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      </article>
+
+      {% if allow_comments %}
+      <section class="mt-6 bg-white border border-gray-100 rounded-3xl p-5 sm:p-8 shadow-sm">
+        <h2 class="text-xl font-extrabold text-gray-900 mb-4">{{ text_comments|default('Comments') }}</h2>
+
+        {% if comments %}
+          <div class="space-y-4 mb-6">
+            {% for comment in comments %}
+              <div class="rounded-2xl border border-gray-100 bg-gray-50/70 p-4">
+                <div class="flex items-center justify-between gap-2 mb-1">
+                  <strong class="text-sm text-gray-900">{{ comment.author }}</strong>
+                  <span class="text-xs text-gray-500">{{ comment.date_added }}</span>
+                </div>
+                <p class="text-sm text-gray-700 leading-relaxed">{{ comment.text }}</p>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        {% if comment_form %}
+          <form action="{{ comment_form }}" method="post" id="form-comment" class="space-y-3">
+            <div>
+              <label for="input-name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <input id="input-name" name="name" type="text" class="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-blue-400" />
+            </div>
+            <div>
+              <label for="input-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input id="input-email" name="email" type="email" class="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-blue-400" />
+            </div>
+            <div>
+              <label for="input-comment" class="block text-sm font-medium text-gray-700 mb-1">{{ entry_comment|default('Your Comment') }}</label>
+              <textarea id="input-comment" name="text" rows="5" class="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-blue-400"></textarea>
+            </div>
+            <button type="submit" class="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition">{{ button_comment|default('Post Comment') }}</button>
+          </form>
+        {% endif %}
+      </section>
+      {% endif %}
+
+      {{ content_bottom }}
+    </div>
+  </section>
+</main>
+
+<style>
+  .dc-blog-content img { border-radius: 1rem; }
+</style>
+
+{% if name is defined and name %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "{{ (heading_title|default(name))|striptags|trim|e('js') }}",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ schema_post_url|e('js') }}"
+  },
+  "url": "{{ schema_post_url|e('js') }}"{% if image %},
+  "image": ["{{ image|e('js') }}"]{% endif %}{% if date_published_iso %},
+  "datePublished": "{{ date_published_iso|e('js') }}"{% endif %}{% if date_modified_iso %},
+  "dateModified": "{{ date_modified_iso|e('js') }}"{% endif %},
+  "author": {
+    "@type": "{% if show_author and author %}Person{% else %}Organization{% endif %}",
+    "name": "{{ (show_author and author ? author : name)|striptags|trim|e('js') }}"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "{{ name|striptags|trim|e('js') }}"
+  }{% if description is defined and description %},
+  "description": "{{ description|striptags|trim|e('js') }}"{% endif %}
+}
+</script>
+{% endif %}
+
+{{ footer }}

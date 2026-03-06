@@ -1,0 +1,589 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-import-yml" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    <ul class="nav nav-tabs dcx-profile-tabs" id="yml-tabs" role="tablist">
+      <li class="active"><a href="#yml-tab-general" class="js-yml-tab" data-tab="yml-tab-general" data-title="{{ tab_general }}" data-subtitle="{{ text_tab_general_subtitle }}" data-icon="fa-sliders"><i class="fa fa-sliders"></i> {{ tab_general }}</a></li>
+      <li><a href="#yml-tab-profiles" class="js-yml-tab" data-tab="yml-tab-profiles" data-title="{{ tab_profiles }}" data-subtitle="{{ text_tab_profiles_subtitle }}" data-icon="fa-download"><i class="fa fa-download"></i> {{ tab_profiles }}</a></li>
+      <li><a href="#yml-tab-license" class="js-yml-tab" data-tab="yml-tab-license" data-title="{{ tab_license }}" data-subtitle="{{ text_tab_license_subtitle }}" data-icon="fa-key"><i class="fa fa-key"></i> {{ tab_license }}</a></li>
+      <li><a href="#yml-tab-about" class="js-yml-tab" data-tab="yml-tab-about" data-title="{{ tab_about }}" data-subtitle="{{ text_tab_about_subtitle }}" data-icon="fa-info-circle"><i class="fa fa-info-circle"></i> {{ tab_about }}</a></li>
+    </ul>
+
+    <div class="dcx-shell">
+    <div class="dcx-panel">
+      <div class="dcx-panel-head">
+        <div class="dcx-panel-head__icon"><i id="yml-tab-icon" class="fa fa-sliders"></i></div>
+        <div>
+          <h3 class="dcx-panel-title" id="yml-tab-title">{{ tab_general }}</h3>
+          <div class="dcx-panel-subtitle" id="yml-tab-subtitle">{{ text_tab_general_subtitle }}</div>
+        </div>
+      </div>
+      <div class="dcx-panel-body">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-import-yml" class="form-horizontal dcx-form">
+
+          <div id="yml-tab-general" class="dcx-tab-pane active">
+          <div class="dcx-section">
+            <h4>{{ text_section_module_settings|default('Module Settings') }}</h4>
+            <div class="form-group">
+              <label class="col-sm-3 control-label" for="input-status">{{ entry_status }}</label>
+              <div class="col-sm-9">
+                <select name="module_dockercart_import_yml_status" id="input-status" class="form-control">
+                  {% if module_dockercart_import_yml_status %}
+                  <option value="1" selected="selected">{{ text_enabled }}</option>
+                  <option value="0">{{ text_disabled }}</option>
+                  {% else %}
+                  <option value="1">{{ text_enabled }}</option>
+                  <option value="0" selected="selected">{{ text_disabled }}</option>
+                  {% endif %}
+                </select>
+              </div>
+            </div>
+          </div>
+          </div>
+
+          <div id="yml-tab-license" class="dcx-tab-pane">
+          <div class="dcx-section">
+            <h4>{{ text_section_license_info|default('License Information') }}</h4>
+
+            <div class="form-group">
+              <label class="col-sm-3 control-label" for="input-license-key">{{ entry_license_key }}</label>
+              <div class="col-sm-9">
+                <input type="text" name="module_dockercart_import_yml_license_key" value="{{ module_dockercart_import_yml_license_key }}" id="input-license-key" class="form-control" />
+                <small class="form-text text-muted" style="margin-top: 5px;">
+                  <i class="fa fa-info-circle"></i> License key for signature verification
+                </small>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-3 control-label" for="input-public-key">{{ entry_public_key }}</label>
+              <div class="col-sm-9">
+                <textarea name="module_dockercart_import_yml_public_key" rows="8" id="input-public-key" class="form-control" placeholder="-----BEGIN PUBLIC KEY-----&#10;...&#10;-----END PUBLIC KEY-----">{{ module_dockercart_import_yml_public_key }}</textarea>
+                <small class="form-text text-muted" style="margin-top: 5px;">
+                  <i class="fa fa-shield"></i> RSA Public Key for license verification
+                </small>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-3 control-label"></label>
+              <div class="col-sm-9">
+                <button type="button" class="btn btn-info" onclick="verifyLicense();"><i class="fa fa-check-circle"></i> {{ button_verify_license }}</button>
+                <span id="license-status" style="margin-left: 10px;"></span>
+              </div>
+            </div>
+          </div>
+          </div>
+
+          <div id="yml-tab-profiles" class="dcx-tab-pane">
+          <div class="dcx-section">
+            <h4>{{ text_section_profiles|default('Import Profiles') }}</h4>
+
+            <div id="import-yml-notify"></div>
+            <div id="import-progress" class="alert alert-info" style="display:none;"></div>
+
+            <div class="table-responsive">
+            <table class="table table-bordered table-hover dcx-table">
+              <thead>
+                <tr>
+                  <td>{{ column_profile_name }}</td>
+                  <td>{{ column_feed_url }}</td>
+                  <td>{{ column_store }}</td>
+                  <td>{{ column_mode }}</td>
+                  <td>{{ column_status }}</td>
+                  <td>{{ column_last_run }}</td>
+                  <td>{{ column_cron_command }}</td>
+                  <td class="text-right">{{ column_action }}</td>
+                </tr>
+              </thead>
+              <tbody>
+                {% for profile in profiles %}
+                <tr data-profile-id="{{ profile.profile_id }}">
+                  <td>{{ profile.name }}</td>
+                  <td><a href="{{ profile.feed_url }}" target="_blank">{{ profile.feed_url }}</a></td>
+                  <td>
+                    {% for store in stores %}
+                      {% if store.store_id == profile.store_id %}{{ store.name }}{% endif %}
+                    {% endfor %}
+                  </td>
+                  <td>
+                    {% if profile.import_mode == 'add' %}{{ text_mode_add }}{% endif %}
+                    {% if profile.import_mode == 'update' %}{{ text_mode_update }}{% endif %}
+                    {% if profile.import_mode == 'update_only' %}{{ text_mode_update_only }}{% endif %}
+                    {% if profile.import_mode == 'update_price_qty_only' %}{{ text_mode_update_price_qty_only }}{% endif %}
+                    {% if profile.import_mode == 'replace' %}{{ text_mode_replace }}{% endif %}
+                  </td>
+                  <td>
+                    {% if profile.status %}
+                    <span class="label label-success">{{ text_enabled }}</span>
+                    {% else %}
+                    <span class="label label-danger">{{ text_disabled }}</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if profile.last_run %}
+                      {{ profile.last_run }}
+                    {% else %}
+                      -
+                    {% endif %}
+                  </td>
+                  <td>
+                    <code style="white-space: normal; word-break: break-word;">
+php {{ cron_base_path }} --profile_id={{ profile.profile_id }} --cron_key={{ profile.cron_key }}
+                    </code>
+                  </td>
+                  <td class="text-right">
+                    <button type="button" class="btn btn-primary btn-xs" onclick="runImport({{ profile.profile_id }}, this);" data-toggle="tooltip" title="{{ button_import_now }}"><i class="fa fa-play"></i></button>
+                    <button type="button" class="btn btn-info btn-xs" onclick="editProfile({{ profile.profile_id }});" data-toggle="tooltip" title="{{ text_edit_profile }}"><i class="fa fa-pencil"></i></button>
+                    <button type="button" class="btn btn-danger btn-xs" onclick="deleteProfile({{ profile.profile_id }});" data-toggle="tooltip" title="{{ text_delete_profile }}"><i class="fa fa-trash"></i></button>
+                  </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="8" class="text-center">{{ text_no_profiles }}</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <button type="button" class="btn btn-success" onclick="openProfileModal();"><i class="fa fa-plus"></i> {{ text_add_profile }}</button>
+
+          </div>
+          </div>
+
+          <div id="yml-tab-about" class="dcx-tab-pane">
+          <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+            <h4>{{ tab_about }}</h4>
+            <table class="table table-bordered">
+              <tr>
+                <td style="width:220px;"><strong>{{ text_module_version }}</strong></td>
+                <td>
+                  {% if module_version is defined and module_version %}
+                    {{ module_version }}
+                  {% else %}
+                    n/a
+                  {% endif %}
+                </td>
+              </tr>
+              <tr>
+                <td><strong>{{ text_developer }}</strong></td>
+                <td>{{ text_developer_name }}</td>
+              </tr>
+              <tr>
+                <td><strong>{{ text_contact|default('Contact') }}</strong></td>
+                <td><a href="mailto:support@dockercart.net">support@dockercart.net</a></td>
+              </tr>
+            </table>
+          </div>
+          </div>
+
+          <div id="yml-tab-about" class="dcx-tab-pane">
+            <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+              <h4>{{ tab_about }}</h4>
+              <table class="table table-bordered">
+                <tr>
+                  <td style="width:220px;"><strong>{{ text_module_version }}</strong></td>
+                  <td>
+                    {% if module_version is defined and module_version %}
+                      {{ module_version }}
+                    {% else %}
+                      n/a
+                    {% endif %}
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>{{ text_developer }}</strong></td>
+                  <td>{{ text_developer_name }}</td>
+                </tr>
+                <tr>
+                  <td><strong>{{ text_edit }}</strong></td>
+                  <td>{{ heading_title }}</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+
+        </form>
+      </div>
+    </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+function updateYmlPanelHeader(tabLink) {
+  var $tab = $(tabLink);
+  var title = $tab.data('title') || '{{ tab_general }}';
+  var subtitle = $tab.data('subtitle') || '{{ text_tab_general_subtitle }}';
+  var icon = String($tab.data('icon') || 'fa-sliders').replace(/[^a-z0-9\-]/gi, '');
+
+  $('#yml-tab-title').text(title);
+  $('#yml-tab-subtitle').text(subtitle);
+  $('#yml-tab-icon').attr('class', 'fa ' + icon);
+}
+
+$(document).on('click', '.js-yml-tab', function(e) {
+  e.preventDefault();
+  var tabId = $(this).data('tab');
+  if (!tabId) {
+    return;
+  }
+
+  $('.dcx-tab-pane').removeClass('active');
+  $('#' + tabId).addClass('active');
+
+  $('#yml-tabs > li').removeClass('active');
+  $(this).closest('li').addClass('active');
+
+  updateYmlPanelHeader(this);
+});
+
+updateYmlPanelHeader($('#yml-tabs > li.active a.js-yml-tab'));
+
+function showImportNotice(type, message) {
+    var cls = type === 'success' ? 'alert-success' : 'alert-danger';
+    var html = '<div class="alert ' + cls + ' alert-dismissible"><button type="button" class="close" data-dismiss="alert">&times;</button>' + message + '</div>';
+    $('#import-yml-notify').html(html);
+}
+
+function verifyLicense() {
+    var licenseKey = $('#input-license-key').val();
+    var publicKey = $('#input-public-key').val();
+
+    $('#license-status').html('<i class="fa fa-spinner fa-spin"></i>');
+
+    $.ajax({
+        url: '{{ ajax_verify_license }}',
+        type: 'post',
+        data: JSON.stringify({license_key: licenseKey, public_key: publicKey}),
+        contentType: 'application/json',
+        dataType: 'json',
+        success: function(json) {
+            if (json.valid) {
+                $('#license-status').html('<span class="text-success"><i class="fa fa-check-circle"></i> {{ text_license_valid }}</span>');
+            } else {
+                var err = json.error || '{{ text_license_invalid }}';
+                $('#license-status').html('<span class="text-danger"><i class="fa fa-times-circle"></i> ' + err + '</span>');
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            $('#license-status').html('<span class="text-danger">' + thrownError + '</span>');
+        }
+    });
+}
+
+function runImport(profileId) {
+    if (!confirm('{{ text_confirm_import }}')) {
+        return;
+    }
+
+  $('#import-progress').html('<strong>{{ text_import_file_processing }}</strong>').show();
+  var chunkSize = 40;
+
+  function renderProgress(summary) {
+    if (!summary || !summary.in_progress) {
+      return;
+    }
+
+    if (summary.stage === 'preparing_feed' || parseInt(summary.total_offers || 0, 10) === 0) {
+      $('#import-progress').html('<strong>{{ text_import_file_processing }}</strong>').show();
+      return;
+    }
+
+    var processed = parseInt(summary.processed || 0, 10);
+    var total = parseInt(summary.total_offers || 0, 10);
+    var percent = parseInt(summary.progress_percent || -1, 10);
+    if (isNaN(percent) || percent < 0) {
+      percent = total > 0 ? Math.floor((processed / total) * 100) : 0;
+    }
+    if (percent < 0) {
+      percent = 0;
+    }
+    if (percent > 100) {
+      percent = 100;
+    }
+
+    var html = '';
+    html += '<strong>{{ text_import_running }}</strong><br/>';
+    html += '{{ text_processed }}: ' + processed + ' / ' + total + '<br/>';
+    html += '{{ text_added }}: ' + (summary.added || 0) + ', ';
+    html += '{{ text_updated }}: ' + (summary.updated || 0) + ', ';
+    html += '{{ text_skipped }}: ' + (summary.skipped || 0) + ', ';
+    html += '{{ text_errors }}: ' + (summary.errors || 0) + '<br/>';
+    html += '<div class="progress" style="margin-top:8px;margin-bottom:0;">';
+    html += '  <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="' + percent + '" aria-valuemin="0" aria-valuemax="100" style="width:' + percent + '%;">' + percent + '%</div>';
+    html += '</div>';
+
+    $('#import-progress').html(html).show();
+  }
+
+  function runChunk(offset) {
+    $.ajax({
+        url: '{{ ajax_run_profile }}&profile_id=' + profileId + '&offset=' + (offset || 0) + '&limit=' + chunkSize,
+        type: 'get',
+        dataType: 'json',
+        success: function(json) {
+            if (json.success) {
+            if (json.summary) {
+              renderProgress(json.summary);
+            }
+
+            if (json.summary && json.summary.in_progress) {
+              var nextOffset = parseInt(json.summary.next_offset || 0, 10);
+              if (isNaN(nextOffset) || nextOffset < 0) {
+                nextOffset = (offset || 0) + chunkSize;
+              }
+              runChunk(nextOffset);
+              return;
+            }
+
+            var msg = '<strong>{{ text_import_success }}</strong>';
+            if (json.summary) {
+              msg += '<ul style="margin-top:8px;margin-bottom:0;">';
+              msg += '<li><strong>{{ text_total_offers_label }}:</strong> ' + (json.summary.total_offers || 0) + '</li>';
+              msg += '<li><strong>{{ text_processed_offers_label }}:</strong> ' + (json.summary.processed || json.summary.total_offers || 0) + '</li>';
+              msg += '<li><strong>{{ text_added_label }}:</strong> ' + (json.summary.added || 0) + '</li>';
+              msg += '<li><strong>{{ text_updated_label }}:</strong> ' + (json.summary.updated || 0) + '</li>';
+              msg += '<li><strong>{{ text_skipped_label }}:</strong> ' + (json.summary.skipped || 0) + '</li>';
+              msg += '<li><strong>{{ text_errors_label }}:</strong> ' + (json.summary.errors || 0) + '</li>';
+              msg += '<li><strong>{{ text_categories_in_feed_label }}:</strong> ' + (json.summary.categories_in_feed || 0) + '</li>';
+              msg += '<li><strong>{{ text_categories_mapped_label }}:</strong> ' + (json.summary.categories_mapped || 0) + '</li>';
+              msg += '<li><strong>{{ text_categories_created_label }}:</strong> ' + (json.summary.categories_created || 0) + '</li>';
+              msg += '<li><strong>{{ text_categories_skipped_label }}:</strong> ' + (json.summary.categories_skipped || 0) + '</li>';
+              msg += '</ul>';
+            }
+            showImportNotice('success', msg);
+            $('#import-progress').hide().html('');
+            } else {
+              showImportNotice('danger', (json.error || '{{ error_import_failed }}'));
+              $('#import-progress').hide().html('');
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            showImportNotice('danger', thrownError);
+            $('#import-progress').hide().html('');
+        }
+    });
+  }
+
+  runChunk(0);
+}
+
+function editProfile(profileId) {
+    $.ajax({
+        url: '{{ ajax_get_profile }}&profile_id=' + profileId,
+        type: 'get',
+        dataType: 'json',
+        success: function(json) {
+            if (json.success && json.profile) {
+                openProfileModal(json.profile);
+            } else {
+              showImportNotice('danger', (json.error || '{{ error_load_profile_failed }}'));
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            showImportNotice('danger', thrownError);
+        }
+    });
+}
+
+function openProfileModal(profile) {
+    profile = profile || {};
+    var isEdit = !!profile.profile_id;
+
+    $('#profile-modal').remove();
+
+    var html = '';
+    html += '<div id="profile-modal" class="modal fade" tabindex="-1" role="dialog">';
+    html += '  <div class="modal-dialog modal-lg" role="document">';
+    html += '    <div class="modal-content">';
+    html += '      <div class="modal-header">';
+    html += '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
+    html += '        <h4 class="modal-title">' + (isEdit ? '{{ text_edit_profile }}' : '{{ text_add_profile }}') + '</h4>';
+    html += '      </div>';
+    html += '      <div class="modal-body">';
+    html += '        <form id="form-profile" class="form-horizontal">';
+    html += '          <input type="hidden" name="profile_id" value="' + (profile.profile_id || '') + '" />';
+
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label">{{ entry_profile_name }}</label>';
+    html += '            <div class="col-sm-9"><input type="text" name="name" class="form-control" value="' + (profile.name || '') + '" required /></div>';
+    html += '          </div>';
+
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label">{{ entry_feed_url }}</label>';
+    html += '            <div class="col-sm-9"><input type="text" name="feed_url" class="form-control" value="' + (profile.feed_url || '') + '" required /></div>';
+    html += '          </div>';
+
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label">{{ entry_profile_store }}</label>';
+    html += '            <div class="col-sm-9"><select name="store_id" class="form-control">';
+    {% for store in stores %}
+    html += '              <option value="{{ store.store_id }}"' + (parseInt(profile.store_id || 0, 10) === {{ store.store_id }} ? ' selected' : '') + '>{{ store.name }}</option>';
+    {% endfor %}
+    html += '            </select></div>';
+    html += '          </div>';
+
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label">{{ entry_profile_language }}</label>';
+    html += '            <div class="col-sm-9"><select name="language_id" class="form-control">';
+    {% for language in languages %}
+    html += '              <option value="{{ language.language_id }}"' + (parseInt(profile.language_id || 1, 10) === {{ language.language_id }} ? ' selected' : '') + '>{{ language.name }}</option>';
+    {% endfor %}
+    html += '            </select></div>';
+    html += '          </div>';
+
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label">{{ entry_profile_currency }}</label>';
+    html += '            <div class="col-sm-9"><select name="currency_code" class="form-control">';
+    {% for currency in currencies %}
+    html += '              <option value="{{ currency.code }}"' + (String(profile.currency_code || 'RUB') === '{{ currency.code }}' ? ' selected' : '') + '>{{ currency.title }} ({{ currency.code }})</option>';
+    {% endfor %}
+    html += '            </select></div>';
+    html += '          </div>';
+
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label">{{ entry_default_category }}</label>';
+    html += '            <div class="col-sm-9"><select name="default_category_id" class="form-control">';
+    html += '              <option value="0">-</option>';
+    {% for category in categories %}
+    html += '              <option value="{{ category.category_id }}"' + (parseInt(profile.default_category_id || 0, 10) === {{ category.category_id }} ? ' selected' : '') + '>{{ category.name }}</option>';
+    {% endfor %}
+    html += '            </select></div>';
+    html += '          </div>';
+
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label">{{ entry_load_categories }}</label>';
+    html += '            <div class="col-sm-9">';
+    html += '              <label class="checkbox-inline" style="padding-top: 7px;">';
+    html += '                <input type="checkbox" id="profile-load-categories" name="load_categories" value="1"' + ((parseInt(profile.load_categories || 1, 10) === 1) ? ' checked' : '') + ' /> {{ help_load_categories }}';
+    html += '              </label>';
+    html += '            </div>';
+    html += '          </div>';
+
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label">{{ entry_download_images|default("Download Images") }}</label>';
+    html += '            <div class="col-sm-9">';
+    html += '              <label class="checkbox-inline" style="padding-top: 7px;">';
+    html += '                <input type="checkbox" id="profile-download-images" name="download_images" value="1"' + ((parseInt(profile.download_images || 1, 10) === 1) ? ' checked' : '') + ' /> {{ help_download_images|default("Automatically download product images from YML feed") }}';
+    html += '              </label>';
+    html += '            </div>';
+    html += '          </div>';
+
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label"><span data-toggle="tooltip" title="{{ help_import_mode }}">{{ entry_import_mode }}</span></label>';
+    html += '            <div class="col-sm-9">';
+    html += '              <select name="import_mode" class="form-control">';
+    html += '                <option value="add"' + (String(profile.import_mode || 'update') === 'add' ? ' selected' : '') + '>{{ text_mode_add }}</option>';
+    html += '                <option value="update"' + (String(profile.import_mode || 'update') === 'update' ? ' selected' : '') + '>{{ text_mode_update }}</option>';
+    html += '                <option value="update_only"' + (String(profile.import_mode || 'update') === 'update_only' ? ' selected' : '') + '>{{ text_mode_update_only }}</option>';
+    html += '                <option value="update_price_qty_only"' + (String(profile.import_mode || 'update') === 'update_price_qty_only' ? ' selected' : '') + '>{{ text_mode_update_price_qty_only }}</option>';
+    html += '                <option value="replace"' + (String(profile.import_mode || 'update') === 'replace' ? ' selected' : '') + '>{{ text_mode_replace }}</option>';
+    html += '              </select>';
+    html += '            </div>';
+    html += '          </div>';
+
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label">{{ entry_profile_status }}</label>';
+    html += '            <div class="col-sm-9">';
+    html += '              <select name="status" class="form-control">';
+    html += '                <option value="1"' + ((parseInt(profile.status || 1, 10) === 1) ? ' selected' : '') + '>{{ text_enabled }}</option>';
+    html += '                <option value="0"' + ((parseInt(profile.status || 1, 10) === 0) ? ' selected' : '') + '>{{ text_disabled }}</option>';
+    html += '              </select>';
+    html += '            </div>';
+    html += '          </div>';
+
+    html += '        </form>';
+    html += '      </div>';
+    html += '      <div class="modal-footer">';
+    html += '        <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>';
+    html += '        <button type="button" class="btn btn-primary" onclick="saveProfile();"><i class="fa fa-save"></i> {{ button_save }}</button>';
+    html += '      </div>';
+    html += '    </div>';
+    html += '  </div>';
+    html += '</div>';
+
+    $('body').append(html);
+    $('#profile-modal').modal('show');
+}
+
+function saveProfile() {
+    var payload = {};
+    $('#form-profile').serializeArray().forEach(function(item) {
+        payload[item.name] = item.value;
+    });
+
+  payload.load_categories = $('#profile-load-categories').is(':checked') ? 1 : 0;
+  payload.download_images = $('#profile-download-images').is(':checked') ? 1 : 0;
+
+    $.ajax({
+        url: '{{ ajax_save_profile }}',
+        type: 'post',
+        data: JSON.stringify(payload),
+        contentType: 'application/json',
+        dataType: 'json',
+        success: function(json) {
+            if (json.success) {
+                $('#profile-modal').modal('hide');
+                setTimeout(function(){ location.reload(); }, 400);
+            } else {
+              showImportNotice('danger', (json.error || '{{ error_save_failed }}'));
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            showImportNotice('danger', thrownError);
+        }
+    });
+}
+
+function deleteProfile(profileId) {
+    if (!confirm('{{ text_confirm_delete }}')) {
+        return;
+    }
+
+    $.ajax({
+        url: '{{ ajax_delete_profile }}',
+        type: 'post',
+        data: JSON.stringify({profile_id: profileId}),
+        contentType: 'application/json',
+        dataType: 'json',
+        success: function(json) {
+            if (json.success) {
+                $('tr[data-profile-id="' + profileId + '"]').remove();
+            } else {
+              showImportNotice('danger', (json.error || '{{ error_delete_failed }}'));
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            showImportNotice('danger', thrownError);
+        }
+    });
+}
+</script>
+{{ footer }}

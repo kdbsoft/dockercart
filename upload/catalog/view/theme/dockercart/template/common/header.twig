@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html dir="{{ direction }}" lang="{{ lang }}">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<title>{{ title }}</title>
+<base href="{{ base }}" />
+{% if description %}<meta name="description" content="{{ description }}" />{% endif %}
+{% if keywords %}<meta name="keywords" content="{{ keywords }}" />{% endif %}
+
+<!-- Google Fonts: Manrope -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap&subset=cyrillic" rel="stylesheet" />
+
+<!-- Tailwind CSS (local build) -->
+<link href="catalog/view/theme/dockercart/stylesheet/tailwind.css" rel="stylesheet" />
+
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+<!-- Theme stylesheet -->
+<link href="catalog/view/theme/dockercart/stylesheet/dockercart.css" rel="stylesheet" />
+
+{% for style in styles %}
+<link href="{{ style.href }}" type="text/css" rel="{{ style.rel }}" media="{{ style.media }}" />
+{% endfor %}
+{% for script in scripts %}
+<script src="{{ script }}" type="text/javascript"></script>
+{% endfor %}
+{% for link in links %}
+{% if link.hreflang is defined %}
+<link href="{{ link.href }}" rel="{{ link.rel }}" hreflang="{{ link.hreflang }}" />
+{% else %}
+<link href="{{ link.href }}" rel="{{ link.rel }}" />
+{% endif %}
+{% endfor %}
+{% for analytic in analytics %}
+{{ analytic }}
+{% endfor %}
+
+{% set org_logo = '' %}
+{% if logo %}
+  {% if logo matches '/^https?:\\/\\//i' %}
+    {% set org_logo = logo %}
+  {% else %}
+    {% set org_logo = base ~ logo %}
+  {% endif %}
+{% endif %}
+
+<script type="application/ld+json">
+{{ schema_organization_json|raw }}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "{{ name|striptags|trim|e('js') }}",
+  "url": "{{ schema_website_url|default(home)|e('js') }}",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "{{ schema_search_target|e('js') }}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+</head>
+<body class="bg-white text-gray-900 antialiased" style="font-family:'Manrope',sans-serif;">
+
+<script>
+  window.dcLang = window.dcLang || {};
+  window.dcLang.text_model_prefix = {{ text_model_prefix ? '"' ~ text_model_prefix|e('js') ~ '"' : '"Product Code: "' }};
+  window.dcLang.text_qv_feature_delivery = {{ text_qv_feature_delivery ? '"' ~ text_qv_feature_delivery|e('js') ~ '"' : '"Free shipping on this item"' }};
+  window.dcLang.text_qv_feature_warranty = {{ text_qv_feature_warranty ? '"' ~ text_qv_feature_warranty|e('js') ~ '"' : '"2-year manufacturer warranty"' }};
+  window.dcLang.text_qv_feature_returns = {{ text_qv_feature_returns ? '"' ~ text_qv_feature_returns|e('js') ~ '"' : '"30-day hassle-free returns"' }};
+  window.dcLang.button_cart = {{ button_cart ? '"' ~ button_cart|e('js') ~ '"' : '"Add to Cart"' }};
+  window.dcLang.text_home = {{ text_home ? '"' ~ text_home|e('js') ~ '"' : '' }};
+</script>
+
+<!-- ============================================================
+     STICKY HEADER (3-tier)
+     ============================================================ -->
+<header id="navbar" class="fixed top-0 left-0 right-0 z-[50]">
+
+  <!-- ① TOP MICRO BAR: phone, language, currency -->
+  <div class="bg-gray-950">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-9 flex items-center justify-between gap-4">
+
+      <!-- Phone -->
+      <a href="tel:{{ telephone }}" class="flex items-center gap-2 text-white text-sm font-semibold hover:opacity-80 transition px-2 py-0.5 rounded-full flex-shrink-0">
+        <i data-lucide="phone" class="w-4 h-4 text-blue-300 flex-shrink-0"></i>
+        <span>{{ telephone }}</span>
+        {% if open_hours %}
+        <span class="text-[11px] font-medium text-gray-300">• {{ open_hours|striptags|replace({'\n':' '}) }}</span>
+        {% endif %}
+      </a>
+
+      <!-- Language & Currency -->
+      <div class="flex items-center gap-3 text-xs text-gray-400 dc-topbar-controls">
+        {{ language }}
+        {% if currency %}<span class="text-gray-700">|</span>{{ currency }}{% endif %}
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ② MAIN ROW: logo, search, icons -->
+  <div class="bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center h-14 gap-4">
+
+        <!-- Logo -->
+        <div class="flex items-center gap-3 flex-shrink-0">
+          <a href="{{ home }}" class="flex items-center">
+            {% if logo %}
+              <img src="{{ logo }}" title="{{ name }}" alt="{{ name }}" class="h-9 w-auto object-contain max-w-[180px] sm:max-w-[220px]" />
+            {% else %}
+              <span class="text-xl font-extrabold text-gray-900 tracking-tight">{{ name }}</span>
+            {% endif %}
+          </a>
+
+          {% if menu_type == 'vertical' %}
+          <button id="dc-catalog-btn" type="button" class="hidden lg:inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition">
+            <i data-lucide="layout-grid" class="w-4 h-4"></i>
+            <span>{{ text_catalog }}</span>
+          </button>
+          {% endif %}
+        </div>
+
+        <!-- Search bar (desktop) -->
+        <div class="flex-1 hidden sm:flex justify-center">
+          <div class="w-full max-w-2xl dc-search-wrapper">
+            {{ search }}
+          </div>
+        </div>
+
+        <!-- Right icons -->
+        <div class="flex items-center gap-0.5 flex-shrink-0 ml-auto sm:ml-0">
+
+          <!-- Wishlist -->
+          <a href="{{ wishlist }}" class="p-2 rounded-lg hover:bg-gray-100 transition relative group" title="{{ text_wishlist }}" id="wishlist-total">
+            <i data-lucide="heart" class="w-5 h-5 text-gray-600 group-hover:text-rose-500 transition"></i>
+          </a>
+
+          <!-- Compare -->
+          <a href="{{ compare }}" class="p-2 rounded-lg hover:bg-gray-100 transition relative group" title="{{ text_compare|default('Compare') }}" id="compare-total">
+            <i data-lucide="bar-chart-2" class="w-5 h-5 text-gray-600 group-hover:text-blue-500 transition"></i>            <span class="absolute -top-1 -right-1 bg-blue-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center leading-none">{{ compare_total|default(0) }}</span>          </a>
+
+          <!-- Cart -->
+          {{ cart }}
+
+          <!-- Account -->
+          <div class="relative dc-account-wrapper">
+            <button id="dc-account-btn" class="p-2 rounded-lg hover:bg-gray-100 transition flex items-center gap-1" aria-label="{{ text_account }}">
+              <i data-lucide="user" class="w-5 h-5 text-gray-600"></i>
+            </button>
+            <div id="dc-account-dd" class="dc-account-dd hidden bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 w-48">
+              {% if logged %}
+                <a href="{{ account }}" class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
+                  <i data-lucide="user-circle" class="w-4 h-4"></i>{{ text_account }}
+                </a>
+                <a href="{{ order }}" class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
+                  <i data-lucide="package" class="w-4 h-4"></i>{{ text_order }}
+                </a>
+                <a href="{{ transaction }}" class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
+                  <i data-lucide="receipt" class="w-4 h-4"></i>{{ text_transaction }}
+                </a>
+                <a href="{{ download }}" class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
+                  <i data-lucide="download" class="w-4 h-4"></i>{{ text_download }}
+                </a>
+                <hr class="my-1 border-gray-100" />
+                <a href="{{ logout }}" class="flex items-center gap-2.5 px-4 py-2 text-sm text-rose-500 hover:bg-rose-50 transition">
+                  <i data-lucide="log-out" class="w-4 h-4"></i>{{ text_logout }}
+                </a>
+              {% else %}
+                <a href="{{ login }}" class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
+                  <i data-lucide="log-in" class="w-4 h-4"></i>{{ text_login }}
+                </a>
+                <a href="{{ register }}" class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
+                  <i data-lucide="user-plus" class="w-4 h-4"></i>{{ text_register }}
+                </a>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Hamburger (mobile) -->
+          <button id="dc-hamburger-btn" class="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition" aria-label="Menu">
+            <i data-lucide="menu" class="w-5 h-5 text-gray-600"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Search bar (mobile) -->
+      <div class="sm:hidden pb-3 dc-search-mobile">
+        {{ search }}
+      </div>
+    </div>
+  </div>
+
+  <!-- ③ CATEGORY NAV BAR -->
+  {{ menu }}
+
+</header>
+
+<!-- ============================================================
+  MOBILE SLIDE-IN MENU
+  ============================================================ -->
+<!-- Ensure mobile overlay and menu sit above the sticky header (z-[9999]) -->
+<div id="dc-mobile-overlay" class="fixed inset-0 z-[10000] bg-black/40 hidden" onclick="dcCloseMobileMenu()"></div>
+<div id="dc-mobile-menu" class="fixed top-0 right-0 bottom-0 z-[10001] w-[280px] bg-white shadow-2xl flex flex-col dc-mobile-menu-closed">
+  <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+    {% if logo %}
+      <img src="{{ logo }}" alt="{{ name }}" class="h-7 w-auto object-contain" />
+    {% else %}
+      <span class="font-bold text-gray-900">{{ name }}</span>
+    {% endif %}
+    <button onclick="dcCloseMobileMenu()" class="p-1.5 rounded-lg hover:bg-gray-100 transition">
+      <i data-lucide="x" class="w-5 h-5 text-gray-600"></i>
+    </button>
+  </div>
+
+  <nav class="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-1">
+    <a href="{{ home }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-700 font-medium hover:bg-blue-50 hover:text-blue-600 transition text-sm">
+      <i data-lucide="home" class="w-4 h-4"></i>{{ text_home }}
+    </a>
+    <a href="/product-new_arrivals" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-teal-600 font-semibold hover:bg-teal-50 transition text-sm">
+      <i data-lucide="sparkles" class="w-4 h-4"></i>{{ text_new_arrivals }}
+    </a>
+    <a href="/product-special" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-500 font-semibold hover:bg-red-50 transition text-sm">
+      <i data-lucide="tag" class="w-4 h-4"></i>{{ text_sale }}
+    </a>
+    <a href="{{ contact }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-700 font-medium hover:bg-blue-50 hover:text-blue-600 transition text-sm">
+      <i data-lucide="message-circle" class="w-4 h-4"></i>{{ text_contact|default('Contact') }}
+    </a>
+    <a href="{{ wishlist }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-700 font-medium hover:bg-blue-50 hover:text-blue-600 transition text-sm">
+      <i data-lucide="heart" class="w-4 h-4"></i>{{ text_wishlist }}
+    </a>
+    
+    <!-- Categories (mobile) — accordion -->
+    {% if mobile_categories %}
+    <hr class="my-2 border-t border-gray-100" />
+    <div class="px-0">
+      <p class="text-xs font-bold uppercase tracking-widest text-gray-400 px-3 mb-1">{{ text_catalog }}</p>
+      <div class="space-y-1">
+        {% for category in mobile_categories %}
+        <div class="dc-mobile-cat-item">
+          <button type="button" class="dc-mobile-cat-toggle w-full flex items-center justify-between gap-3 px-3 py-2 rounded-xl text-left text-gray-800 hover:bg-gray-50 transition text-sm font-medium" aria-expanded="false">
+            <span class="flex items-center gap-3"><span>{{ category.name }}</span></span>
+            <span class="flex items-center gap-2">
+              <i data-lucide="plus" class="dc-icon-plus w-4 h-4"></i>
+              <i data-lucide="minus" class="dc-icon-minus w-4 h-4 hidden"></i>
+            </span>
+          </button>
+
+          {% if category.children %}
+          <div class="dc-mobile-cat-children hidden pl-4 mt-1">
+            {% for child in category.children %}
+            <a href="{{ child.href }}" class="block px-3 py-2 rounded-xl text-gray-600 hover:bg-gray-50 transition text-sm">{{ child.name }}</a>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </nav>
+
+  <div class="px-5 py-4 border-t border-gray-100 flex flex-col gap-3">
+    {% if logged %}
+      <a href="{{ account }}" class="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition">
+        <i data-lucide="user-circle" class="w-4 h-4"></i>{{ text_account }}
+      </a>
+      <a href="{{ logout }}" class="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gray-100 text-sm font-semibold text-gray-600 hover:bg-gray-200 transition">
+        {{ text_logout }}
+      </a>
+    {% else %}
+      <a href="{{ login }}" class="flex items-center justify-center py-2.5 rounded-xl border border-blue-600 text-blue-600 text-sm font-semibold hover:bg-blue-50 transition">
+        {{ text_login }}
+      </a>
+      <a href="{{ register }}" class="flex items-center justify-center py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition">
+        {{ text_register }}
+      </a>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Header spacer -->
+<div class="dc-header-spacer"></div>
+
+<script>
+/* ============================================================
+   HEADER JS
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', function () {
+  (function ensureHomeBreadcrumbs() {
+    var breadcrumbLists = document.querySelectorAll('ul');
+
+    breadcrumbLists.forEach(function(list) {
+      if (!list || !list.querySelector('li')) {
+        return;
+      }
+
+      // We only touch breadcrumb-like lists that use dot separators.
+      if (list.textContent.indexOf('•') === -1) {
+        return;
+      }
+
+      var firstAnchor = list.querySelector(':scope > li > a');
+
+      if (!firstAnchor) {
+        return;
+      }
+
+      var firstHref = (firstAnchor.getAttribute('href') || '').trim();
+      var firstText = (firstAnchor.textContent || '').trim().toLowerCase();
+
+      // Normalize absolute URLs to their path component so tests like ^/$ work even when href is absolute
+      var hrefPath = firstHref.replace(/^[a-z]+:\/\/[^\/]+/i, '');
+
+      // Localized home text (e.g. 'Головна') provided by server
+      var localizedHome = (window.dcLang && window.dcLang.text_home) ? (String(window.dcLang.text_home).toLowerCase()) : '';
+
+      var isHomeAlready = firstText === 'home' || (localizedHome && firstText === localizedHome) || /(^\/$|route=common\/home|index\.php$)/i.test(hrefPath);
+
+      if (isHomeAlready) {
+        return;
+      }
+
+      var homeItem = document.createElement('li');
+      var homeLink = document.createElement('a');
+      homeLink.setAttribute('href', '/');
+      homeLink.className = firstAnchor.className || '';
+      // Use localized home text when available; fall back to existing first anchor text if present
+      homeLink.textContent = (window.dcLang && window.dcLang.text_home) ? window.dcLang.text_home : (firstAnchor.textContent || '');
+      homeItem.appendChild(homeLink);
+
+      var separatorItem = document.createElement('li');
+      separatorItem.textContent = '•';
+
+      list.insertBefore(separatorItem, list.firstChild);
+      list.insertBefore(homeItem, separatorItem);
+    });
+  })();
+
+  lucide.createIcons();
+
+  /* Account dropdown (portal) — render in body to avoid header/category stacking conflicts */
+  var accountBtn = document.getElementById('dc-account-btn');
+  var accountDd  = document.getElementById('dc-account-dd');
+  if (accountBtn && accountDd) {
+    if (accountDd.parentNode !== document.body) {
+      document.body.appendChild(accountDd);
+    }
+
+    var accountGap = 8;
+    var accountViewportPadding = 8;
+
+    function positionAccountDropdown() {
+      var rect = accountBtn.getBoundingClientRect();
+      var ddWidth = accountDd.offsetWidth || 192;
+      var left = rect.right - ddWidth;
+      var maxLeft = window.innerWidth - ddWidth - accountViewportPadding;
+
+      if (left < accountViewportPadding) left = accountViewportPadding;
+      if (left > maxLeft) left = maxLeft;
+
+      accountDd.style.top = (rect.bottom + accountGap) + 'px';
+      accountDd.style.left = left + 'px';
+      accountDd.style.right = 'auto';
+    }
+
+    function closeAccountDropdown() {
+      accountDd.classList.add('hidden');
+    }
+
+    accountBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var isHidden = accountDd.classList.contains('hidden');
+
+      if (isHidden) {
+        accountDd.classList.remove('hidden');
+        positionAccountDropdown();
+      } else {
+        closeAccountDropdown();
+      }
+    });
+
+    document.addEventListener('click', closeAccountDropdown);
+    accountDd.addEventListener('click', function (e) { e.stopPropagation(); });
+
+    window.addEventListener('resize', function () {
+      if (!accountDd.classList.contains('hidden')) {
+        positionAccountDropdown();
+      }
+    });
+
+    window.addEventListener('scroll', function () {
+      if (!accountDd.classList.contains('hidden')) {
+        positionAccountDropdown();
+      }
+    }, true);
+  }
+
+  /* Mobile menu */
+  var hamburger = document.getElementById('dc-hamburger-btn');
+  if (hamburger) {
+    hamburger.addEventListener('click', dcOpenMobileMenu);
+  }
+});
+
+/* Close mobile menu on Escape */
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') { dcCloseMobileMenu(); }
+});
+
+/* Top-bar dropdowns (currency / language) */
+function dcToggleTopDd(id) {
+  var panel = document.getElementById(id + '-dd-panel');
+  if (!panel) return;
+  var isHidden = panel.classList.contains('hidden');
+  document.querySelectorAll('.dc-topbar-dd-panel').forEach(function(p) { p.classList.add('hidden'); });
+  if (isHidden) panel.classList.remove('hidden');
+}
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#curr-dd') && !e.target.closest('#lang-dd')) {
+    document.querySelectorAll('.dc-topbar-dd-panel').forEach(function(p) { p.classList.add('hidden'); });
+  }
+});
+
+function dcOpenMobileMenu() {
+  document.getElementById('dc-mobile-menu').classList.remove('dc-mobile-menu-closed');
+  document.getElementById('dc-mobile-overlay').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function dcCloseMobileMenu() {
+  document.getElementById('dc-mobile-menu').classList.add('dc-mobile-menu-closed');
+  document.getElementById('dc-mobile-overlay').classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+function dcToggleCatalogMenu() {
+  var panel = document.getElementById('dc-vertical-menu-panel');
+  if (!panel) return;
+  panel.classList.toggle('hidden');
+}
+
+function dcCloseCatalogMenu() {
+  var panel = document.getElementById('dc-vertical-menu-panel');
+  if (!panel) return;
+  panel.classList.add('hidden');
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  var catalogBtn = document.getElementById('dc-catalog-btn');
+  var catalogPanel = document.getElementById('dc-vertical-menu-panel');
+
+  if (catalogBtn && catalogPanel) {
+    catalogBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      dcToggleCatalogMenu();
+    });
+
+    catalogPanel.addEventListener('click', function (e) {
+      e.stopPropagation();
+    });
+
+    document.addEventListener('click', function () {
+      dcCloseCatalogMenu();
+    });
+  }
+});
+
+/* Mobile categories accordion toggle (inside slide-in menu) */
+document.addEventListener('DOMContentLoaded', function () {
+  var mobileMenu = document.getElementById('dc-mobile-menu');
+  if (!mobileMenu) return;
+
+  // Delegate clicks for toggles
+  mobileMenu.addEventListener('click', function (e) {
+    var toggle = e.target.closest('.dc-mobile-cat-toggle');
+    if (!toggle) return;
+
+    e.preventDefault();
+    var item = toggle.closest('.dc-mobile-cat-item');
+    if (!item) return;
+
+    var children = item.querySelector('.dc-mobile-cat-children');
+    var expanded = toggle.getAttribute('aria-expanded') === 'true';
+    toggle.setAttribute('aria-expanded', (!expanded).toString());
+    item.classList.toggle('is-open');
+
+    if (children) {
+      if (expanded) {
+        children.classList.add('hidden');
+      } else {
+        children.classList.remove('hidden');
+      }
+    }
+
+    // swap icons
+    var plus = toggle.querySelector('.dc-icon-plus');
+    var minus = toggle.querySelector('.dc-icon-minus');
+    if (plus && minus) {
+      plus.classList.toggle('hidden');
+      minus.classList.toggle('hidden');
+      lucide.createIcons();
+    }
+  });
+});
+</script>

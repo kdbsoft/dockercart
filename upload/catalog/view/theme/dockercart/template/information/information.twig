@@ -1,0 +1,35 @@
+{{ header }}
+<main class="bg-gray-50 min-h-screen">
+
+  <section class="bg-gradient-to-br from-gray-900 via-gray-800 to-blue-950 py-10 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      {% include 'dockercart/template/common/partials/breadcrumbs.twig' with {
+        breadcrumbs_class: 'flex flex-wrap items-center gap-2 text-xs text-gray-300 mb-3',
+        breadcrumbs_link_class: 'hover:text-white transition',
+        breadcrumbs_last_class: 'text-white font-semibold'
+      } %}
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-white">{{ heading_title }}</h1>
+    </div>
+  </section>
+
+  <section class="py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
+      {{ content_top }}
+
+      <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 sm:p-10">
+        <div class="prose prose-sm sm:prose max-w-none
+          prose-headings:font-extrabold prose-headings:text-gray-900
+          prose-p:text-gray-600 prose-p:leading-relaxed
+          prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
+          prose-li:text-gray-600
+          prose-img:rounded-2xl prose-img:border prose-img:border-gray-100">
+          {{ description }}
+        </div>
+      </div>
+
+      {{ content_bottom }}
+    </div>
+  </section>
+
+</main>
+{{ footer }}

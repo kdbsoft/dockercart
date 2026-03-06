@@ -1,0 +1,70 @@
+<?php
+// Newsletter module admin strings (defaults)
+$_['text_default_title']               = 'Stay in the Loop';
+$_['text_default_subtitle']            = 'Get the latest deals, new arrivals and exclusive offers straight to your inbox.';
+
+?>
+<?php
+
+$_['button_back'] = 'Назад';
+$_['button_cancel'] = 'Скасувати';
+$_['button_clear'] = 'Скинути';
+$_['button_delete'] = 'Видалити';
+$_['button_export'] = 'Експорт CSV-файлу';
+$_['button_filter'] = 'Фільтр';
+$_['button_import'] = 'Імпорт CSV-файлу';
+$_['button_save'] = 'Зберегти';
+$_['column_action'] = 'Дія';
+$_['column_date_added'] = 'Дата додавання';
+$_['column_email'] = 'Електронна пошта';
+$_['column_source'] = 'Джерело';
+$_['column_status'] = 'Статус';
+$_['column_type'] = 'Тип';
+$_['entry_already_text'] = 'Вже підписаний текст';
+$_['entry_button_text'] = 'Текст кнопки';
+$_['entry_filter_email'] = 'Фільтрувати за електронною поштою';
+$_['entry_name'] = 'Назва модуля';
+$_['entry_placeholder'] = 'Заповнювач для введення електронної пошти';
+$_['entry_privacy_text'] = 'Текст під формою';
+$_['entry_status'] = 'Статус';
+$_['entry_subtitle'] = 'Підзаголовок';
+$_['entry_success_text'] = 'Текст успішної підписки';
+$_['entry_title'] = 'Заголовок блоку';
+$_['error_file_type'] = 'Недійсний тип файлу. Дозволено лише CSV.';
+$_['error_import_empty'] = 'У файлі не знайдено дійсних електронних адрес.';
+$_['error_name'] = 'Назва модуля має містити від 3 до 64 символів!';
+$_['error_permission'] = 'Увага: У вас немає дозволу на зміну цього модуля!';
+$_['error_upload'] = 'Не вдалося завантажити файл.';
+$_['heading_import'] = 'Імпортувати передплатників';
+$_['heading_title'] = 'Розсилка DockerCart';
+$_['text_default_already'] = 'Ви підписані';
+$_['text_default_button'] = 'Підписатися';
+$_['text_default_module_name'] = 'Підписка на розсилку';
+$_['text_default_placeholder'] = 'Введіть свою адресу електронної пошти';
+$_['text_default_privacy'] = 'Підписуючись, ви погоджуєтеся з нашою Політикою конфіденційності.';
+$_['text_default_subtitle'] = 'Отримуйте останні пропозиції, нові надходження та ексклюзивні пропозиції прямо у свою поштову скриньку.';
+$_['text_default_success'] = 'Дякуємо! Ви тепер підписані.';
+$_['text_default_title'] = 'Будьте в курсі';
+$_['text_disabled'] = 'Інвалід';
+$_['text_edit'] = 'Налаштування модуля розсилки';
+$_['text_enabled'] = 'Увімкнено';
+$_['text_extension'] = 'Розширення';
+$_['text_guest_subscriber'] = 'Гість';
+$_['text_home'] = 'Головна';
+$_['text_import_format'] = 'Формат: перший стовпець – електронна пошта. Дозволено рядок заголовка.';
+$_['text_list'] = 'Список підписників';
+$_['text_module_settings'] = 'Налаштування віджета';
+$_['text_multilingual_settings'] = 'Багатомовний контент';
+$_['text_no_results'] = 'Підписників не знайдено.';
+$_['text_pagination'] = 'Показано %d до %d з %d (%d сторінок)';
+$_['text_registered_customer'] = 'Зареєстрований клієнт';
+$_['text_select_file'] = 'Виберіть CSV-файл';
+$_['text_stats_customer'] = 'Клієнти з розсилкою';
+$_['text_stats_guest'] = 'Гість-передплатники';
+$_['text_stats_total'] = 'Загальна кількість підписників';
+$_['text_csv_tools'] = 'Імпорт / Експорт';
+$_['text_subscribers'] = 'Передплатники';
+$_['text_success'] = 'Налаштування модуля розсилки успішно збережено!';
+$_['text_success_delete_subscriber'] = 'Абонента видалено.';
+$_['text_success_import'] = 'Імпорт завершено. Додано: %s, оновлено: %s, вже підписано: %s.';
+$_['text_success_unsubscribe_customer'] = 'Клієнт відписався від розсилки.';

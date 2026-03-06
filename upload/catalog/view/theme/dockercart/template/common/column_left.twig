@@ -1,0 +1,27 @@
+{% if modules %}
+<aside id="column-left" class="hidden lg:block">
+  <div class="flex flex-col gap-4">
+  {% for module in modules %}
+    {# If the module looks like a banner/carousel, render it as-is so it can span or keep its own styles #}
+    {# Render raw module when it likely contains banner/carousel markup (avoid wrapping) #}
+    {% if module is defined and module matches '/(brands-track|carousel|banner)/i' %}
+      {{ module }}
+    {% else %}
+      <div class="bg-white border border-gray-100 rounded-3xl p-5 h-fit shadow-sm">
+        {{ module }}
+      </div>
+    {% endif %}
+  {% endfor %}
+  </div>
+</aside>
+
+<script>
+  // Mark any Dockercart sidebar filters so the mobile widget initializes
+  (function(){
+    try {
+      document.querySelectorAll('#column-left .dockercart-filter-vertical').forEach(function(el){ el.setAttribute('data-position','sidebar'); });
+    } catch(e) { console && console.warn && console.warn('column-left filter marker error', e); }
+  })();
+</script>
+
+{% endif %}

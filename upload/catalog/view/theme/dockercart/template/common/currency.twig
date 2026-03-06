@@ -1,0 +1,29 @@
+{% if currencies|length > 1 %}
+<div class="dc-topbar-dd" id="curr-dd">
+  <button onclick="dcToggleTopDd('curr')" class="flex items-center gap-1 text-xs text-gray-400 hover:text-white transition py-0.5 px-1.5 rounded">
+    <i data-lucide="circle-dollar-sign" class="w-3 h-3 flex-shrink-0"></i>
+    <span id="curr-label">
+      {% for currency in currencies %}{% if currency.code == code %}{% if currency.symbol_left %}{{ currency.symbol_left }}{% else %}{{ currency.symbol_right }}{% endif %} {{ currency.code }}{% endif %}{% endfor %}
+    </span>
+    <i data-lucide="chevron-down" class="w-2.5 h-2.5 opacity-50"></i>
+  </button>
+  <div id="curr-dd-panel" class="dc-topbar-dd-panel hidden absolute right-0 top-full mt-1 w-44 bg-gray-900 border border-gray-700 rounded-xl shadow-2xl py-1.5 z-[300]">
+    <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-currency">
+      {% for currency in currencies %}
+      <button
+        type="button"
+        class="currency-select w-full text-left px-4 py-2 text-xs text-gray-300 hover:bg-gray-800 hover:text-white transition flex items-center gap-2"
+        name="{{ currency.code }}"
+        onclick="this.form.querySelector('input[name=\'code\']').value='{{ currency.code }}'; this.form.submit(); return false;"
+      >
+        <span class="text-gray-500 w-4 text-center">{% if currency.symbol_left %}{{ currency.symbol_left }}{% else %}{{ currency.symbol_right }}{% endif %}</span>
+        {{ currency.title }}
+        {% if currency.code == code %}<i data-lucide="check" class="w-3 h-3 ml-auto text-blue-400"></i>{% endif %}
+      </button>
+      {% endfor %}
+      <input type="hidden" name="code" value="" />
+      <input type="hidden" name="redirect" value="{{ redirect }}" />
+    </form>
+  </div>
+</div>
+{% endif %}

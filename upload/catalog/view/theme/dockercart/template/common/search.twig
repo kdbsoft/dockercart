@@ -1,0 +1,15 @@
+<form action="{{ action }}" method="get" class="dc-search-form w-full" data-search-category-id="{{ search_category_id }}" data-search-category-name="{{ search_category_name }}">
+  <div class="relative w-full">
+    <i data-lucide="search" class="dc-search-icon w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+    <input
+      type="text"
+      name="search"
+      value="{{ search }}"
+      placeholder="{{ text_search }}"
+      autocomplete="off"
+      class="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-gray-100 border border-transparent text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-400 focus:bg-white transition"
+    />
+    <input type="hidden" name="route" value="product/search" />
+    {% if search_category_id %}<input type="hidden" name="category_id" value="{{ search_category_id }}" />{% endif %}
+  </div>
+</form>

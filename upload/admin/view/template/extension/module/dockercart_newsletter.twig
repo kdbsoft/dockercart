@@ -1,0 +1,336 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
+
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-module" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <button type="button" data-toggle="tooltip" title="{{ button_export }}" class="btn btn-default" onclick="location='{{ export }}';"><i class="fa fa-download"></i></button>
+        <button type="button" data-toggle="tooltip" title="{{ button_import }}" class="btn btn-default" onclick="$('#import-modal').modal('show');"><i class="fa fa-upload"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_back }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+          <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    {% if error_warning %}
+      <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+      </div>
+    {% endif %}
+
+    {% if warning %}
+      <div class="alert alert-warning alert-dismissible"><i class="fa fa-exclamation-triangle"></i> {{ warning }}
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+      </div>
+    {% endif %}
+
+    {% if success %}
+      <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+      </div>
+    {% endif %}
+
+    <div class="dc-ix-cards">
+      <div class="dc-ix-card">
+        <div class="dc-ix-card__k">{{ text_stats_total }}</div>
+        <div class="dc-ix-card__v">{{ stats_total }}</div>
+      </div>
+      <div class="dc-ix-card">
+        <div class="dc-ix-card__k">{{ text_stats_guest }}</div>
+        <div class="dc-ix-card__v">{{ stats_guest }}</div>
+      </div>
+      <div class="dc-ix-card">
+        <div class="dc-ix-card__k">{{ text_stats_customer }}</div>
+        <div class="dc-ix-card__v">{{ stats_customer }}</div>
+      </div>
+      <div class="dc-ix-card">
+        <div class="dc-ix-card__k">CSV</div>
+        <div class="dc-ix-card__v">{{ text_csv_tools }}</div>
+      </div>
+    </div>
+
+    <ul class="nav nav-tabs dcx-profile-tabs" id="newsletter-tabs" role="tablist">
+      <li class="active"><a href="#newsletter-settings" class="js-newsletter-tab" data-tab="newsletter-settings" data-title="{{ text_module_settings }}" data-subtitle="{{ text_edit }}" data-icon="fa-sliders"><i class="fa fa-sliders"></i> {{ text_module_settings }}</a></li>
+      <li><a href="#newsletter-subscribers" class="js-newsletter-tab" data-tab="newsletter-subscribers" data-title="{{ text_subscribers }}" data-subtitle="{{ text_list }}" data-icon="fa-users"><i class="fa fa-users"></i> {{ text_subscribers }}</a></li>
+    </ul>
+
+    <div class="dcx-shell">
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i id="newsletter-tab-icon" class="fa fa-sliders"></i></div>
+          <div>
+            <h3 class="dcx-panel-title" id="newsletter-tab-title">{{ text_module_settings }}</h3>
+            <div class="dcx-panel-subtitle" id="newsletter-tab-subtitle">{{ text_edit }}</div>
+          </div>
+        </div>
+
+        <div class="dcx-panel-body">
+          <div id="newsletter-settings" class="dcx-tab-pane active">
+            <form action="{{ action }}" method="post" id="form-module" class="form-horizontal dcx-form">
+              <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+                <h4>{{ text_module_settings }}</h4>
+
+                <div class="form-group required">
+                  <label class="col-sm-2 control-label" for="input-name">{{ entry_name }}</label>
+                  <div class="col-sm-10">
+                    <input type="text" name="name" value="{{ name }}" placeholder="{{ entry_name }}" id="input-name" class="form-control" />
+                    {% if error_name %}
+                      <div class="text-danger">{{ error_name }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
+                  <div class="col-sm-10">
+                    <select name="status" id="input-status" class="form-control">
+                      <option value="1" {% if status %}selected="selected"{% endif %}>{{ text_enabled }}</option>
+                      <option value="0" {% if not status %}selected="selected"{% endif %}>{{ text_disabled }}</option>
+                    </select>
+                  </div>
+                </div>
+
+                <h4>{{ text_multilingual_settings }}</h4>
+
+                <ul class="nav nav-tabs dcx-profile-tabs" id="language-tabs" role="tablist" style="margin-bottom: 15px;">
+                  {% for language in languages %}
+                    <li{% if loop.first %} class="active"{% endif %}><a href="#newsletter-lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>
+                  {% endfor %}
+                </ul>
+
+                <div class="tab-content">
+                  {% for language in languages %}
+                    <div class="tab-pane dcx-tab-pane{% if loop.first %} active{% endif %}" id="newsletter-lang-{{ language.language_id }}">
+                      <div class="form-group">
+                        <label class="col-sm-2 control-label" for="input-title-{{ language.language_id }}">{{ entry_title }}</label>
+                        <div class="col-sm-10">
+                          <input type="text" name="module_settings[{{ language.language_id }}][title]" value="{{ module_settings[language.language_id].title }}" placeholder="{{ entry_title }}" id="input-title-{{ language.language_id }}" class="form-control" />
+                        </div>
+                      </div>
+
+                      <div class="form-group">
+                        <label class="col-sm-2 control-label" for="input-subtitle-{{ language.language_id }}">{{ entry_subtitle }}</label>
+                        <div class="col-sm-10">
+                          <textarea name="module_settings[{{ language.language_id }}][subtitle]" rows="2" placeholder="{{ entry_subtitle }}" id="input-subtitle-{{ language.language_id }}" class="form-control">{{ module_settings[language.language_id].subtitle }}</textarea>
+                        </div>
+                      </div>
+
+                      <div class="form-group">
+                        <label class="col-sm-2 control-label" for="input-placeholder-{{ language.language_id }}">{{ entry_placeholder }}</label>
+                        <div class="col-sm-10">
+                          <input type="text" name="module_settings[{{ language.language_id }}][placeholder]" value="{{ module_settings[language.language_id].placeholder }}" placeholder="{{ entry_placeholder }}" id="input-placeholder-{{ language.language_id }}" class="form-control" />
+                        </div>
+                      </div>
+
+                      <div class="form-group">
+                        <label class="col-sm-2 control-label" for="input-button-text-{{ language.language_id }}">{{ entry_button_text }}</label>
+                        <div class="col-sm-10">
+                          <input type="text" name="module_settings[{{ language.language_id }}][button_text]" value="{{ module_settings[language.language_id].button_text }}" placeholder="{{ entry_button_text }}" id="input-button-text-{{ language.language_id }}" class="form-control" />
+                        </div>
+                      </div>
+
+                      <div class="form-group">
+                        <label class="col-sm-2 control-label" for="input-privacy-text-{{ language.language_id }}">{{ entry_privacy_text }}</label>
+                        <div class="col-sm-10">
+                          <textarea name="module_settings[{{ language.language_id }}][privacy_text]" rows="2" placeholder="{{ entry_privacy_text }}" id="input-privacy-text-{{ language.language_id }}" class="form-control">{{ module_settings[language.language_id].privacy_text }}</textarea>
+                        </div>
+                      </div>
+
+                      <div class="form-group">
+                        <label class="col-sm-2 control-label" for="input-success-text-{{ language.language_id }}">{{ entry_success_text }}</label>
+                        <div class="col-sm-10">
+                          <input type="text" name="module_settings[{{ language.language_id }}][success_text]" value="{{ module_settings[language.language_id].success_text }}" placeholder="{{ entry_success_text }}" id="input-success-text-{{ language.language_id }}" class="form-control" />
+                        </div>
+                      </div>
+
+                      <div class="form-group">
+                        <label class="col-sm-2 control-label" for="input-already-text-{{ language.language_id }}">{{ entry_already_text }}</label>
+                        <div class="col-sm-10">
+                          <input type="text" name="module_settings[{{ language.language_id }}][already_text]" value="{{ module_settings[language.language_id].already_text }}" placeholder="{{ entry_already_text }}" id="input-already-text-{{ language.language_id }}" class="form-control" />
+                        </div>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <div id="newsletter-subscribers" class="dcx-tab-pane">
+            <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+              <h4>{{ text_subscribers }}</h4>
+
+              <form action="{{ filter_action }}" method="get" class="form-inline" style="margin-bottom: 15px; display:flex; gap: 8px; flex-wrap: wrap;">
+                <input type="hidden" name="route" value="extension/module/dockercart_newsletter" />
+                <input type="hidden" name="user_token" value="{{ user_token }}" />
+                <div class="form-group">
+                  <label class="sr-only" for="input-filter-email">{{ entry_filter_email }}</label>
+                  <input type="text" id="input-filter-email" name="filter_email" value="{{ filter_email }}" placeholder="{{ entry_filter_email }}" class="form-control" />
+                </div>
+                <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> {{ button_filter }}</button>
+                <a href="{{ filter_action }}" class="btn btn-default">{{ button_clear }}</a>
+              </form>
+
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover dcx-table">
+                  <thead>
+                    <tr>
+                      <td>{{ column_email }}</td>
+                      <td>{{ column_type }}</td>
+                      <td>{{ column_source }}</td>
+                      <td class="text-center">{{ column_status }}</td>
+                      <td class="text-center">{{ column_date_added }}</td>
+                      <td class="text-right">{{ column_action }}</td>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% if subscribers %}
+                      {% for subscriber in subscribers %}
+                        <tr>
+                          <td>{{ subscriber.email }}</td>
+                          <td>
+                            {% if subscriber.subscriber_type == 'customer' %}
+                              <span class="label label-info">{{ text_registered_customer }}</span>
+                            {% else %}
+                              <span class="label label-default">{{ text_guest_subscriber }}</span>
+                            {% endif %}
+                          </td>
+                          <td>{{ subscriber.source }}</td>
+                          <td class="text-center">
+                            {% if subscriber.status %}
+                              <span class="label label-success">{{ text_enabled }}</span>
+                            {% else %}
+                              <span class="label label-danger">{{ text_disabled }}</span>
+                            {% endif %}
+                          </td>
+                          <td class="text-center">{{ subscriber.date_added }}</td>
+                          <td class="text-right">
+                            <a href="{{ subscriber.delete }}" class="btn btn-danger btn-xs" onclick="return confirm('{{ button_delete }}?');" title="{{ button_delete }}"><i class="fa fa-trash"></i></a>
+                          </td>
+                        </tr>
+                      {% endfor %}
+                    {% else %}
+                      <tr>
+                        <td class="text-center" colspan="6">{{ text_no_results }}</td>
+                      </tr>
+                    {% endif %}
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="row">
+                <div class="col-sm-6 text-left">{{ pagination }}</div>
+                <div class="col-sm-6 text-right">{{ results }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="import-modal" class="modal fade" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title"><i class="fa fa-upload"></i> {{ heading_import }}</h4>
+      </div>
+      <div class="modal-body">
+        <form id="form-import" enctype="multipart/form-data">
+          <div class="form-group">
+            <label>{{ text_select_file }}</label>
+            <input type="file" name="file" class="form-control" accept=".csv" />
+          </div>
+          <div class="alert alert-info">
+            {{ text_import_format }}
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
+        <button type="button" class="btn btn-primary" id="button-import"><i class="fa fa-upload"></i> {{ button_import }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+function updateNewsletterPanelHeader(tabLink) {
+  var $tab = $(tabLink);
+  var title = $tab.data('title') || '{{ text_module_settings }}';
+  var subtitle = $tab.data('subtitle') || '{{ text_edit }}';
+  var icon = String($tab.data('icon') || 'fa-sliders').replace(/[^a-z0-9\-]/gi, '');
+
+  $('#newsletter-tab-title').text(title);
+  $('#newsletter-tab-subtitle').text(subtitle);
+  $('#newsletter-tab-icon').attr('class', 'fa ' + icon);
+}
+
+$(document).on('click', '.js-newsletter-tab', function(e) {
+  e.preventDefault();
+
+  var tabId = $(this).data('tab');
+  if (!tabId) return;
+
+  $('#newsletter-tabs > li').removeClass('active');
+  $(this).closest('li').addClass('active');
+
+  $('#newsletter-settings, #newsletter-subscribers').removeClass('active');
+  $('#' + tabId).addClass('active');
+
+  updateNewsletterPanelHeader(this);
+});
+
+updateNewsletterPanelHeader($('#newsletter-tabs > li.active a.js-newsletter-tab'));
+
+$('#button-import').on('click', function() {
+  var formData = new FormData($('#form-import')[0]);
+
+  $.ajax({
+    url: '{{ import }}',
+    type: 'post',
+    data: formData,
+    dataType: 'json',
+    cache: false,
+    contentType: false,
+    processData: false,
+    beforeSend: function() {
+      $('#button-import').button('loading');
+    },
+    complete: function() {
+      $('#button-import').button('reset');
+    },
+    success: function(json) {
+      $('.alert-dismissible').remove();
+
+      if (json.error) {
+        $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json.error + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+      }
+
+      if (json.success) {
+        $('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> ' + json.success + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+        $('#import-modal').modal('hide');
+
+        setTimeout(function() {
+          location.reload();
+        }, 900);
+      }
+    },
+    error: function(xhr, ajaxOptions, thrownError) {
+      alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+    }
+  });
+});
+</script>
+
+{{ footer }}

@@ -1,0 +1,80 @@
+<?php
+/**
+ * DockerCart Blog - Post Management - Language File (Russian)
+ * 
+ * @package    DockerCart Blog
+ * @version    1.0.0
+ * @language   Russian (ru-ru)
+ */
+
+// Heading
+$_['heading_title']        = 'DockerCart Blog - Записи';
+
+// Text
+$_['text_success']         = 'Успех: Запись успешно сохранена!';
+$_['text_list']            = 'Список записей';
+$_['text_add']             = 'Добавить запись';
+$_['text_edit']            = 'Редактировать запись';
+$_['text_delete']          = 'Удалить';
+$_['text_home']            = 'Главная';
+$_['text_enabled']         = 'Включено';
+$_['text_disabled']        = 'Отключено';
+$_['text_yes']             = 'Да';
+$_['text_no']              = 'Нет';
+$_['text_confirm']         = 'Вы уверены?';
+$_['text_no_results']      = 'Результатов не найдено!';
+$_['text_select']          = '-- Выбрать --';
+$_['text_keyword']         = 'SEO URL для поисковых систем - без пробелов, используйте только дефис "-":';
+
+// Column
+$_['column_title']         = 'Заголовок записи';
+$_['column_category']      = 'Категория';
+$_['column_author']        = 'Автор';
+$_['column_views']         = 'Просмотры';
+$_['column_comments']      = 'Комментарии';
+$_['column_status']        = 'Статус';
+$_['column_date_created']  = 'Дата создания';
+$_['column_featured']      = 'Избранная';
+$_['column_action']        = 'Действие';
+
+// Entry
+$_['entry_title']          = 'Заголовок записи';
+$_['entry_excerpt']        = 'Краткое описание';
+$_['entry_content']        = 'Содержание';
+$_['entry_author']         = 'Автор';
+$_['entry_category']       = 'Категория';
+$_['entry_status']         = 'Статус';
+$_['entry_featured']       = 'Избранная запись';
+$_['entry_image']          = 'Изображение';
+$_['entry_date_published'] = 'Дата публикации';
+$_['entry_allow_comments'] = 'Разрешить комментарии';
+$_['entry_sort_order']     = 'Порядок сортировки';
+$_['entry_meta_title']     = 'Meta заголовок';
+$_['entry_meta_description'] = 'Meta описание';
+$_['entry_meta_keyword']   = 'Meta ключевые слова';
+$_['entry_tags']           = 'Теги';
+$_['entry_store']          = 'Магазин';
+$_['entry_keyword']        = 'Ключевое слово';
+
+// Help
+$_['help_tags']            = 'Разделено запятыми';
+
+// Button
+$_['button_add']           = 'Добавить новую';
+$_['button_edit']          = 'Редактировать';
+$_['button_delete']        = 'Удалить';
+$_['button_cancel']        = 'Отмена';
+$_['button_save']          = 'Сохранить';
+
+// Error
+$_['error_permission']     = 'Внимание: у вас нет прав для изменения записей!';
+$_['error_description']    = 'Внимание: содержание записи обязательно!';
+$_['error_title']          = 'Внимание: заголовок должен быть от 1 до 255 символов!';
+$_['error_content']        = 'Внимание: содержание записи обязательно!';
+$_['error_category']       = 'Внимание: выберите категорию!';
+$_['error_author']         = 'Внимание: выберите автора!';
+
+// Tab
+$_['tab_general']          = 'Общее';
+$_['tab_data']             = 'Данные';
+$_['tab_seo']              = 'SEO';

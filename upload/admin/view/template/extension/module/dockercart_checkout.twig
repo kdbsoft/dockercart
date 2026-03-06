@@ -1,0 +1,2321 @@
+{{ header }}
+
+<link rel="stylesheet" href="view/stylesheet/dockercart_checkout.css" type="text/css" media="all" />
+
+<style>
+:root {
+  --dc-primary: #2563eb;
+  --dc-primary-hover: #1d4ed8;
+  --dc-success: #16a34a;
+  --dc-danger: #ef4444;
+  --dc-bg: #fff;
+  --dc-surface: #f8fafc;
+  --dc-border: #e6edf3;
+  --dc-text: #0f172a;
+  --dc-text-muted: #64748b;
+  --dc-radius: clamp(8px, 2vw, 12px);
+  --dc-shadow: 0 6px 18px rgb(8 15 35 / 6%);
+  --dc-shadow-hover: 0 12px 24px rgb(8 15 35 / 12%);
+  --dc-transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dc-checkout-admin * { box-sizing: border-box; }
+
+.dc-checkout-admin {
+  font-family: system-ui, -apple-system, sans-serif;
+  color: var(--dc-text);
+}
+
+.page-header .container-fluid { padding: clamp(16px, 3vw, 24px); }
+.page-header h1 { font-size: clamp(24px, 4vw, 32px); font-weight: 700; margin: 0; }
+.page-header .breadcrumb { margin: 12px 0 0; padding: 0; background: transparent; }
+
+.dc-modern-panel {
+  border: none;
+  border-radius: var(--dc-radius);
+  box-shadow: var(--dc-shadow);
+  background: var(--dc-bg);
+}
+
+.dc-modern-panel .panel-body { padding: clamp(16px, 4vw, 32px); }
+
+.dc-tabs {
+  border-bottom: 2px solid var(--dc-border);
+  margin-bottom: clamp(16px, 3vw, 32px);
+  gap: 8px;
+}
+
+.dc-tabs > li { margin: 0; flex: 1; }
+
+.dc-tabs > li > a {
+  border: none;
+  border-radius: 8px 8px 0 0;
+  padding: clamp(12px, 2vw, 16px);
+  text-align: center;
+  color: var(--dc-text-muted);
+  background: transparent;
+  transition: var(--dc-transition);
+  font-weight: 500;
+}
+
+.dc-tabs > li > a:hover { background: var(--dc-surface); color: var(--dc-primary); }
+.dc-tabs > li.active > a {
+  background: var(--dc-primary);
+  color: #fff;
+  border-bottom: 3px solid var(--dc-primary);
+}
+
+.dc-tabs i { display: block; font-size: clamp(20px, 3vw, 24px); margin-bottom: 6px; }
+.dc-tab-content, .dc-tab-content .tab-pane { padding: 0; }
+
+.dc-card {
+  border: 1px solid var(--dc-border);
+  border-radius: 8px;
+  margin-bottom: clamp(16px, 3vw, 24px);
+  background: var(--dc-bg);
+  overflow: hidden;
+}
+
+.dc-card-header {
+  padding: clamp(12px, 2vw, 16px) clamp(16px, 3vw, 20px);
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border-bottom: 1px solid var(--dc-border);
+  font-weight: 600;
+  font-size: clamp(14px, 2vw, 15px);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--dc-text);
+}
+
+.dc-card-header i { font-size: 18px; color: var(--dc-primary); }
+.dc-card-body { padding: clamp(16px, 3vw, 24px); }
+
+.form-group {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: flex-start;
+}
+
+.form-group:last-child { margin-bottom: 0; }
+
+.form-group .control-label {
+  padding-top: 10px;
+  font-weight: 600;
+  color: var(--dc-text);
+  font-size: 14px;
+}
+
+.form-group .control-label span {
+  cursor: help;
+  border-bottom: 1px dotted var(--dc-primary);
+}
+
+.form-control {
+  border: 1px solid var(--dc-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: var(--dc-bg);
+  color: var(--dc-text);
+  font-size: 14px;
+  transition: var(--dc-transition);
+  font-family: inherit;
+}
+
+.form-control:focus {
+  border-color: var(--dc-primary);
+  box-shadow: 0 0 0 3px rgb(37 99 235 / 10%);
+  outline: none;
+}
+
+.form-control:is([disabled], [readonly]) {
+  background: var(--dc-surface);
+  color: var(--dc-text-muted);
+  cursor: not-allowed;
+}
+
+textarea.form-control {
+  font-family: ui-monospace, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.dc-switch { display: inline-flex; align-items: center; }
+.dc-switch input { display: none; }
+
+.dc-switch-label {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  gap: 8px;
+}
+
+.dc-switch-inner, .dc-switch-toggle { display: inline-block; }
+
+.dc-switch-inner {
+  width: 48px;
+  height: 28px;
+  background: #d1d5db;
+  border-radius: 14px;
+  position: relative;
+  transition: var(--dc-transition);
+  display: flex;
+  align-items: center;
+  padding: 2px;
+}
+
+.dc-switch-toggle {
+  width: 24px;
+  height: 24px;
+  background: #fff;
+  border-radius: 50%;
+  position: absolute;
+  left: 2px;
+  transition: var(--dc-transition);
+  box-shadow: 0 2px 4px rgb(0 0 0 / 10%);
+}
+
+.dc-switch input:checked ~ .dc-switch-label .dc-switch-inner { background: var(--dc-primary); }
+.dc-switch input:checked ~ .dc-switch-label .dc-switch-toggle { left: 22px; }
+
+.btn {
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: var(--dc-transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgb(0 0 0 / 15%); }
+.btn:active { transform: translateY(0); }
+
+.btn-primary { background: var(--dc-primary); color: #fff; border-color: var(--dc-primary); }
+.btn-primary:hover { background: var(--dc-primary-hover); border-color: var(--dc-primary-hover); }
+
+.btn-success { background: var(--dc-success); color: #fff; border-color: var(--dc-success); }
+.btn-success:hover { background: #15803d; border-color: #15803d; }
+
+.btn-danger { background: var(--dc-danger); color: #fff; border-color: var(--dc-danger); }
+
+.btn-default, .btn-info { background: var(--dc-surface); color: var(--dc-text); border-color: var(--dc-border); }
+.btn-default:hover, .btn-info:hover { background: #e2e8f0; }
+
+.btn-lg { padding: 12px 20px; font-size: 15px; }
+.btn-sm, .btn-block-settings { padding: 8px 12px; font-size: 13px; }
+.btn-block { width: 100%; }
+
+.btn-block-settings {
+  background: var(--dc-primary);
+  color: #fff;
+  border-color: var(--dc-primary);
+  justify-content: center;
+}
+
+.btn i { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; }
+
+.alert {
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  border: 1px solid transparent;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.alert i { flex-shrink: 0; margin-top: 2px; }
+
+.alert-info, .dc-alert-modern {
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  border-color: #bfdbfe;
+  color: #1e40af;
+}
+
+.alert-success {
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+.alert-danger, .alert-error {
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.alert .close {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: var(--dc-transition);
+}
+
+.alert .close:hover { opacity: 1; }
+
+/* ===== BLOCKS CONTAINER ===== */
+.dc-blocks-container {
+  background: var(--dc-bg);
+  border-radius: var(--dc-radius-sm);
+  border: 1px solid var(--dc-border);
+  overflow: hidden;
+}
+
+.dc-blocks-header {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1.5fr;
+  gap: 16px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-bottom: 1px solid var(--dc-border);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--dc-text);
+  text-transform: uppercase;
+}
+
+.dc-blocks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.dc-block-item {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1.5fr;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--dc-border);
+  align-items: center;
+  transition: all 200ms;
+}
+
+.dc-block-item:last-child {
+  border-bottom: none;
+}
+
+.dc-block-item:hover {
+  background: var(--dc-surface);
+}
+
+.dc-block-col-name {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 500;
+  color: var(--dc-text);
+}
+
+.dc-block-col-name i {
+  font-size: 20px;
+  color: var(--dc-primary);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge-info {
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--dc-primary);
+}
+
+/* ===== TOGGLE SWITCH (for blocks list) ===== */
+.dc-toggle {
+  display: inline-flex;
+  cursor: pointer;
+}
+
+.dc-toggle input {
+  display: none;
+}
+
+.dc-toggle-slider {
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  background: #d1d5db;
+  border-radius: 12px;
+  position: relative;
+  transition: background 200ms;
+}
+
+.dc-toggle-slider::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 10px;
+  top: 2px;
+  left: 2px;
+  transition: left 200ms;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.dc-toggle input:checked ~ .dc-toggle-slider {
+  background: var(--dc-success);
+}
+
+.dc-toggle input:checked ~ .dc-toggle-slider::after {
+  left: 22px;
+}
+
+/* ===== MODAL (Block Settings) ===== */
+.dc-modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1050;
+  align-items: center;
+  justify-content: center;
+}
+
+.dc-modal-overlay.active {
+  display: flex;
+}
+
+.dc-modal {
+  background: var(--dc-bg);
+  border-radius: var(--dc-radius);
+  box-shadow: var(--dc-shadow-hover);
+  max-width: 900px;
+  width: 90%;
+  max-height: 85vh;
+  overflow-y: auto;
+  animation: slideIn 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.dc-modal-header {
+  padding: 24px;
+  border-bottom: 1px solid var(--dc-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.dc-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dc-modal-header i {
+  font-size: 24px;
+  color: var(--dc-primary);
+}
+
+.dc-modal-close {
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: var(--dc-text-muted);
+  cursor: pointer;
+  transition: color 200ms;
+  padding: 0;
+}
+
+.dc-modal-close:hover {
+  color: var(--dc-text);
+}
+
+.dc-modal-body {
+  padding: 24px;
+}
+
+.dc-modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--dc-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--dc-surface);
+}
+
+.dc-modal-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--dc-text-muted);
+}
+
+.dc-modal-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+/* ===== ROWS CONFIGURATION ===== */
+.dc-modal-rows-list {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dc-modal-row-item {
+  background: var(--dc-surface);
+  border: 2px solid var(--dc-border);
+  border-radius: var(--dc-radius-sm);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: all 200ms;
+}
+
+.dc-modal-row-item:hover {
+  border-color: var(--dc-primary);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
+}
+
+.dc-modal-row-item.is-dragging {
+  opacity: 0.6;
+  border-color: var(--dc-primary);
+  background: rgba(37, 99, 235, 0.05);
+}
+
+.dc-modal-row-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--dc-border);
+}
+
+.dc-modal-row-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: white;
+  border: 1px solid var(--dc-border);
+  border-radius: 6px;
+  cursor: grab;
+  transition: all 200ms;
+  color: var(--dc-text-muted);
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+  background: var(--dc-primary);
+  color: white;
+  transform: scale(0.95);
+}
+
+.dc-modal-row-header strong {
+  font-size: 14px;
+  color: var(--dc-text);
+  flex: 1;
+}
+
+.dc-modal-row-header select {
+  padding: 6px 10px;
+  border: 1px solid var(--dc-border);
+  border-radius: 6px;
+  background: white;
+  font-size: 13px;
+  cursor: pointer;
+  min-width: 100px;
+}
+
+.dc-modal-row-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.dc-modal-row-controls button {
+  padding: 6px 10px;
+  font-size: 12px;
+  min-width: auto;
+}
+
+.dc-modal-row-fields {
+  min-height: 60px;
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+  border: 2px dashed var(--dc-border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dc-modal-row-fields:empty::after {
+  content: 'Drag fields here or add from list';
+  display: block;
+  text-align: center;
+  color: var(--dc-text-muted);
+  padding: 20px;
+  font-size: 13px;
+}
+
+.dc-modal-field-item {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid var(--dc-border);
+  border-radius: 6px;
+  padding: 12px;
+  cursor: move;
+  transition: all 200ms;
+  gap: 10px;
+}
+
+.dc-modal-field-item:hover {
+  border-color: var(--dc-primary);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+  background: rgba(37, 99, 235, 0.02);
+}
+
+.dc-modal-field-item.is-dragging {
+  opacity: 0.5;
+  transform: scale(0.95);
+}
+
+.dc-modal-field-drag {
+  color: var(--dc-text-muted);
+  font-size: 16px;
+}
+
+.dc-modal-field-name {
+  flex: 1;
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--dc-text);
+}
+
+.dc-modal-field-toggles {
+  display: flex;
+  gap: 12px;
+}
+
+/* ===== INFO CARD ===== */
+.dc-info-card {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border: 1px solid #bfdbfe;
+  border-radius: var(--dc-radius-sm);
+  padding: 24px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.dc-info-card-icon {
+  font-size: 32px;
+  color: var(--dc-primary);
+  flex-shrink: 0;
+}
+
+.dc-info-card-content {
+  font-size: 14px;
+  color: #1e40af;
+  line-height: 1.6;
+}
+
+/* ===== FIELDSET ===== */
+fieldset {
+  border: 1px solid var(--dc-border);
+  border-radius: var(--dc-radius-sm);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+fieldset legend {
+  font-weight: 700;
+  font-size: 15px;
+  padding: 0 12px;
+  margin-left: -12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--dc-text);
+}
+
+fieldset legend i {
+  font-size: 20px;
+  color: var(--dc-primary);
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--dc-border);
+  margin: 24px 0;
+}
+
+/* ===== UTILITY CLASSES ===== */
+.text-success { color: var(--dc-success); }
+.text-danger { color: var(--dc-danger); }
+.text-muted { color: var(--dc-text-muted); }
+.text-info { color: var(--dc-primary); }
+
+.form-text {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+}
+
+.text-muted { color: var(--dc-text-muted); }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .dc-blocks-header,
+  .dc-block-item {
+    grid-template-columns: 1fr;
+  }
+
+  .dc-modal {
+    width: 95%;
+    max-height: 90vh;
+  }
+
+  .form-group {
+    flex-direction: column;
+  }
+
+  .form-group .col-sm-2,
+  .form-group .col-sm-3,
+  .form-group .col-sm-4,
+  .form-group .col-sm-6,
+  .form-group .col-sm-8,
+  .form-group .col-sm-9,
+  .form-group .col-sm-10 {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .page-header .pull-right {
+    float: none;
+    margin-bottom: 16px;
+  }
+
+  .page-header .pull-right .btn {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+}
+
+/* ===== ACCESSIBILITY ===== */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+:focus-visible {
+  outline: 2px solid var(--dc-primary);
+  outline-offset: 2px;
+}
+
+</style>
+
+<!-- Lucide icons (CDN UMD + local fallback) -->
+<script>
+  (function() {
+    // Prefer UMD/Global build from CDN which exposes `lucide` on window
+    var script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/lucide@0.255.0/dist/lucide.min.js';
+    script.async = true;
+    script.onload = function() {
+      try {
+        if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
+          // Render icons present in the DOM
+          lucide.createIcons();
+        }
+      } catch (err) {
+        console.warn('Lucide load error:', err);
+      }
+    };
+    script.onerror = function() {
+      // If CDN fails, load local fallback
+      var fallback = document.createElement('script');
+      fallback.src = 'view/javascript/lucide.min.js';
+      fallback.onload = function() {
+        try { if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') lucide.createIcons(); } catch (e) { console.warn('Lucide fallback error:', e); }
+      };
+      document.head.appendChild(fallback);
+    };
+    document.head.appendChild(script);
+  })();
+</script>
+
+{{ column_left }}
+
+<div id="content"><div class="dc-checkout-admin">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-dockercart-checkout" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary btn-lg" id="button-save">
+          <i data-lucide="save"></i> {{ button_save }}
+        </button>
+
+        <button type="button" data-toggle="tooltip" title="{{ button_apply|default('Apply') }}" class="btn btn-success btn-lg" id="button-apply">
+          <i data-lucide="check"></i> {{ button_apply|default('Apply') }}
+        </button>
+
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default btn-lg">
+          <i data-lucide="x"></i> {{ button_cancel }}
+        </a>
+      </div>
+      <h1>
+        {{ heading_title }}
+        {% if module_version is defined and module_version %}
+          <span class="label label-info" style="margin-left:10px; font-size:0.5em; vertical-align: middle;">v{{ module_version }}</span>
+        {% endif %}
+      </h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i data-lucide="check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    <div class="panel panel-default dc-modern-panel">
+      <div class="panel-body">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-dockercart-checkout" class="form-horizontal">
+
+          <ul class="nav nav-tabs nav-justified dc-tabs" id="checkout-tabs" role="tablist">
+            <li class="active"><a href="#tab-general" data-toggle="tab" role="tab"><i data-lucide="settings"></i><br><span>{{ tab_general }}</span></a></li>
+            <li><a href="#tab-blocks" data-toggle="tab" role="tab"><i data-lucide="list"></i><br><span>{{ tab_blocks }}</span></a></li>
+            <li><a href="#tab-design" data-toggle="tab" role="tab"><i data-lucide="paintbrush"></i><br><span>{{ tab_design }}</span></a></li>
+            <!-- Form Fields tab removed: managed via Blocks -->
+            <li><a href="#tab-method-overrides" data-toggle="tab" role="tab"><i data-lucide="edit-3"></i><br><span>{{ tab_method_overrides }}</span></a></li>
+            <li><a href="#tab-advanced" data-toggle="tab" role="tab"><i data-lucide="sliders"></i><br><span>{{ tab_advanced }}</span></a></li>
+            <li><a href="#tab-license" data-toggle="tab" role="tab"><i data-lucide="key"></i><br><span>{{ tab_license }}</span></a></li>
+          </ul>
+
+          <div class="tab-content dc-tab-content">
+            <script>
+              document.addEventListener('DOMContentLoaded', function() {
+                var applyBtn = document.getElementById('button-apply');
+                var form = document.getElementById('form-dockercart-checkout');
+
+                function createAlert(type, html, cls) {
+                  var container = document.querySelector('.container-fluid');
+                  if (!container) return;
+                  var existing = document.querySelector('.' + (cls || 'dc-apply-alert'));
+                  if (existing) existing.remove();
+                  var div = document.createElement('div');
+                  div.className = 'alert alert-' + type + ' alert-dismissible ' + (cls || 'dc-apply-alert');
+                  div.innerHTML = html + '\n<button type="button" class="close" data-dismiss="alert">&times;</button>';
+                  container.insertBefore(div, container.firstChild);
+                  try { if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') lucide.createIcons(); } catch(e) {}
+                }
+
+                if (applyBtn && form) {
+                  applyBtn.addEventListener('click', function(e) {
+                    applyBtn.disabled = true;
+                    var fd = new FormData(form);
+
+                    fetch(form.action, {
+                      method: 'POST',
+                      body: fd,
+                      credentials: 'same-origin'
+                    }).then(function(response) {
+                      if (!response.ok) throw new Error('Network response was not ok');
+                      return response.text();
+                    }).then(function() {
+                      createAlert('success', '<i data-lucide="check-circle"></i> {{ text_success|default("Settings saved") | e('js') }}');
+                    }).catch(function(err) {
+                      createAlert('danger', '<i data-lucide="alert-circle"></i> ' + (err.message || 'Save failed'), 'dc-apply-alert-error');
+                    }).finally(function() {
+                      applyBtn.disabled = false;
+                    });
+                  });
+                }
+              });
+            </script>
+            <!-- GENERAL TAB -->
+            <div class="tab-pane active" id="tab-general">
+              <div class="row" style="margin-top: 25px;">
+                <div class="col-md-9">
+                  
+                  <div class="dc-card">
+                    <div class="dc-card-header">
+                        <i data-lucide="toggle-right"></i> {{ text_module_status|default('Module Status') }}
+                      </div>
+                    <div class="dc-card-body">
+                      <div class="form-group">
+                        <label class="col-sm-4 control-label" for="input-status">
+                          <span data-toggle="tooltip" title="{{ help_status }}">{{ entry_status }}</span>
+                        </label>
+                        <div class="col-sm-8">
+                          <div class="dc-switch">
+                            <input type="checkbox" name="module_dockercart_checkout_status" value="1" id="input-status" {% if module_dockercart_checkout_status == 1 %}checked{% endif %}>
+                            <label for="input-status" class="dc-switch-label">
+                              <span class="dc-switch-inner"></span>
+                              <span class="dc-switch-toggle"></span>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="dc-card">
+                    <div class="dc-card-header">
+                        <i data-lucide="settings"></i> {{ text_checkout_settings|default('Checkout Settings') }}
+                      </div>
+                    <div class="dc-card-body">
+
+                      <div class="form-group">
+                        <label class="col-sm-4 control-label" for="input-redirect-standard">
+                          <span data-toggle="tooltip" title="{{ help_redirect_standard }}">{{ entry_redirect_standard }}</span>
+                        </label>
+                        <div class="col-sm-8">
+                          <div class="dc-switch">
+                            <input type="checkbox" name="module_dockercart_checkout_redirect_standard" value="1" id="input-redirect-standard" {% if module_dockercart_checkout_redirect_standard == 1 %}checked{% endif %}>
+                            <label for="input-redirect-standard" class="dc-switch-label">
+                              <span class="dc-switch-inner"></span>
+                              <span class="dc-switch-toggle"></span>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="form-group">
+                        <label class="col-sm-4 control-label" for="input-show-progress">
+                          <span data-toggle="tooltip" title="{{ help_show_progress }}">{{ entry_show_progress }}</span>
+                        </label>
+                        <div class="col-sm-8">
+                          <div class="dc-switch">
+                            <input type="checkbox" name="module_dockercart_checkout_show_progress" value="1" id="input-show-progress" {% if module_dockercart_checkout_show_progress == 1 %}checked{% endif %}>
+                            <label for="input-show-progress" class="dc-switch-label">
+                              <span class="dc-switch-inner"></span>
+                              <span class="dc-switch-toggle"></span>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+
+                      {# Geo-detect option removed from admin UI #}
+
+                      <div class="form-group">
+                        <label class="col-sm-4 control-label" for="input-guest-create-account">
+                          <span data-toggle="tooltip" title="{{ help_guest_create_account }}">{{ entry_guest_create_account }}</span>
+                        </label>
+                        <div class="col-sm-8">
+                          <div class="dc-switch">
+                            <input type="checkbox" name="module_dockercart_checkout_guest_create_account" value="1" id="input-guest-create-account" {% if module_dockercart_checkout_guest_create_account == 1 %}checked{% endif %}>
+                            <label for="input-guest-create-account" class="dc-switch-label">
+                              <span class="dc-switch-inner"></span>
+                              <span class="dc-switch-toggle"></span>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+                <div class="col-md-3">
+                  <div class="dc-info-card">
+                    <div class="dc-info-card-icon">
+                      <i data-lucide="info"></i>
+                    </div>
+                    <div class="dc-info-card-content">
+                      {{ text_info|raw }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- BLOCKS TAB -->
+            <div class="tab-pane" id="tab-blocks">
+              <div style="margin-top: 25px;">
+                <div class="alert alert-info dc-alert-modern">
+                  <i data-lucide="bulb" class="pull-left" style="margin-right: 15px;"></i>
+                  <strong>{{ text_blocks_title|default('Manage Checkout Blocks') }}</strong><br>
+                  {{ "Click the Configure button to manage fields in each block." }}
+                </div>
+
+                <div class="dc-blocks-container">
+                  <div class="dc-blocks-header">
+                    <div class="dc-block-col-name">{{ column_block_name|default('Block Name') }}</div>
+                    <div class="dc-block-col-fields">{{ column_block_fields|default('Fields') }}</div>
+                    <div class="dc-block-col-enabled">{{ column_block_enabled|default('Enabled') }}</div>
+                    <div class="dc-block-col-collapsible">{{ column_block_collapsible|default('Collapsible') }}</div>
+                    <div class="dc-block-col-settings">{{ text_settings|default('Settings') }}</div>
+                  </div>
+                  <div id="blocks-sortable" class="dc-blocks-list">
+                    {% for block in blocks %}
+                    <div class="dc-block-item" data-block-id="{{ block.id }}">
+                      <div class="dc-block-col-name">
+                        <i data-lucide="{{ block.id == 'customer_details' ? 'user' : (block.id == 'shipping_address' ? 'map-pin' : (block.id == 'payment_address' ? 'credit-card' : (block.id == 'payment_method' ? 'dollar-sign' : (block.id == 'customer_order' ? 'shopping-cart' : 'code')))) }}"></i>
+                        <span>{{ block.name }}</span>
+                      </div>
+                      <div class="dc-block-col-fields">
+                        {% set enabled_fields = 0 %}
+                        {% set total_fields = 0 %}
+                        {% if block.rows is defined %}
+                          {% for row in block.rows %}
+                            {% for field in row.fields %}
+                              {% set total_fields = total_fields + 1 %}
+                              {% if field.visible == 1 %}
+                                {% set enabled_fields = enabled_fields + 1 %}
+                              {% endif %}
+                            {% endfor %}
+                          {% endfor %}
+                        {% endif %}
+                        <span class="badge badge-info">{{ enabled_fields }}/{{ total_fields }}</span>
+                      </div>
+                      <div class="dc-block-col-enabled">
+                        <label class="dc-toggle">
+                          <input type="checkbox" name="module_dockercart_checkout_blocks[{{ loop.index0 }}][enabled]" value="1" {% if block.enabled == 1 %}checked{% endif %} class="block-enabled-input">
+                          <span class="dc-toggle-slider"></span>
+                        </label>
+                      </div>
+                      <div class="dc-block-col-collapsible">
+                        <label class="dc-toggle">
+                          <input type="checkbox" name="module_dockercart_checkout_blocks[{{ loop.index0 }}][collapsible]" value="1" {% if block.collapsible == 1 %}checked{% endif %} class="block-collapsible-input">
+                          <span class="dc-toggle-slider"></span>
+                        </label>
+                      </div>
+                      <div class="dc-block-col-settings">
+                        <button type="button" class="btn btn-sm btn-primary btn-block-settings" data-block-index="{{ loop.index0 }}" data-block-id="{{ block.id }}">
+                          <i data-lucide="settings"></i> {{ text_configure|default('Configure') }}
+                        </button>
+                      </div>
+                      <!-- Hidden fields data -->
+                      <input type="hidden" name="module_dockercart_checkout_blocks[{{ loop.index0 }}][id]" value="{{ block.id }}" class="block-id-input">
+                      <input type="hidden" name="module_dockercart_checkout_blocks[{{ loop.index0 }}][name]" value="{{ block.name }}" class="block-name-input">
+                      <input type="hidden" name="module_dockercart_checkout_blocks[{{ loop.index0 }}][sort_order]" value="{{ loop.index }}" class="sort-order-input">
+                      <input type="hidden" name="module_dockercart_checkout_blocks[{{ loop.index0 }}][rows]" value="{{ block.rows|json_encode|e('html') }}" class="block-rows-input">
+                    </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- DESIGN TAB -->
+            <div class="tab-pane" id="tab-design">
+              <div style="margin-top: 15px;">
+
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-theme">
+                    <span data-toggle="tooltip" title="{{ help_theme }}">{{ entry_theme }}</span>
+                  </label>
+                  <div class="col-sm-10">
+                    <select name="module_dockercart_checkout_theme" id="input-theme" class="form-control">
+                      {% for key, value in theme_options %}
+                      <option value="{{ key }}" {% if module_dockercart_checkout_theme == key %}selected{% endif %}>{{ value }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+
+                {# Journal 3 Compatibility option removed from admin UI #}
+
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-custom-css">
+                    <span data-toggle="tooltip" title="{{ help_custom_css }}">{{ entry_custom_css }}</span>
+                  </label>
+                  <div class="col-sm-10">
+                    <textarea name="module_dockercart_checkout_custom_css" id="input-custom-css" class="form-control" rows="10" placeholder=".dc-checkout { /* your styles */ }" style="font-family: monospace;">{{ module_dockercart_checkout_custom_css }}</textarea>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-custom-js">
+                    <span data-toggle="tooltip" title="{{ help_custom_js }}">{{ entry_custom_js }}</span>
+                  </label>
+                  <div class="col-sm-10">
+                    <textarea name="module_dockercart_checkout_custom_js" id="input-custom-js" class="form-control" rows="10" placeholder="// Your ES6+ JavaScript" style="font-family: monospace;">{{ module_dockercart_checkout_custom_js }}</textarea>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Form Fields settings moved into Block Settings; tab removed -->
+
+            <!-- METHOD OVERRIDES TAB -->
+            <div class="tab-pane" id="tab-method-overrides">
+              <div style="margin-top: 15px;">
+                
+                <div class="alert alert-info dc-alert-modern">
+                  <i data-lucide="info"></i>
+                  <div>
+                    <strong>{{ text_method_overrides }}</strong><br>
+                    {{ text_method_overrides_help }}
+                  </div>
+                </div>
+
+                <!-- Shipping Methods Section -->
+                <div class="dc-card">
+                  <div class="dc-card-header">
+                    <i data-lucide="truck"></i> {{ text_shipping_methods }}
+                  </div>
+                  <div class="dc-card-body">
+                    <div id="shipping-methods-container">
+                      {% if available_shipping_methods %}
+                        <table class="table table-bordered">
+                          <thead>
+                            <tr>
+                              <th style="width: 25%;">{{ text_method_code }}</th>
+                              <th style="width: 15%;" class="text-center">{{ text_method_enabled }}</th>
+                              <th style="width: 30%;">{{ text_custom_title }}</th>
+                              <th style="width: 30%;">{{ text_custom_description }}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {% for method_code, method_data in available_shipping_methods %}
+                            <tr>
+                              <td>
+                                <strong>{{ method_code }}</strong><br>
+                                <small class="text-muted">{{ text_default_title }}: {{ method_data.default_title }}</small>
+                              </td>
+                              <td class="text-center">
+                                <input type="checkbox" 
+                                       name="module_dockercart_checkout_shipping_override[{{ method_code }}][enabled]" 
+                                       value="1"
+                                       {% if shipping_overrides[method_code].enabled is defined and shipping_overrides[method_code].enabled %}checked{% endif %}
+                                       class="method-override-toggle"
+                                       data-target="shipping-{{ method_code }}">
+                              </td>
+                              <td>
+                                <ul class="nav nav-tabs" style="margin-bottom: 5px; border-bottom: 1px solid #ddd;">
+                                  {% for language in languages %}
+                                  <li{% if loop.first %} class="active"{% endif %}>
+                                    <a href="#shipping-{{ method_code }}-title-{{ language.language_id }}" data-toggle="tab">
+                                      <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" style="width: 16px; height: 11px;"> {{ language.name }}
+                                    </a>
+                                  </li>
+                                  {% endfor %}
+                                </ul>
+                                <div class="tab-content">
+                                  {% for language in languages %}
+                                  <div class="tab-pane{% if loop.first %} active{% endif %}" id="shipping-{{ method_code }}-title-{{ language.language_id }}">
+                                    <input type="text" 
+                                           name="module_dockercart_checkout_shipping_override[{{ method_code }}][title][{{ language.code }}]" 
+                                           value="{{ shipping_overrides[method_code].title[language.code]|default('') }}"
+                                           placeholder="{{ method_data.default_title }}"
+                                           class="form-control method-override-field shipping-{{ method_code }}-field"
+                                           {% if not (shipping_overrides[method_code].enabled is defined and shipping_overrides[method_code].enabled) %}disabled{% endif %}>
+                                  </div>
+                                  {% endfor %}
+                                </div>
+                              </td>
+                              <td>
+                                <ul class="nav nav-tabs" style="margin-bottom: 5px; border-bottom: 1px solid #ddd;">
+                                  {% for language in languages %}
+                                  <li{% if loop.first %} class="active"{% endif %}>
+                                    <a href="#shipping-{{ method_code }}-desc-{{ language.language_id }}" data-toggle="tab">
+                                      <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" style="width: 16px; height: 11px;"> {{ language.name }}
+                                    </a>
+                                  </li>
+                                  {% endfor %}
+                                </ul>
+                                <div class="tab-content">
+                                  {% for language in languages %}
+                                  <div class="tab-pane{% if loop.first %} active{% endif %}" id="shipping-{{ method_code }}-desc-{{ language.language_id }}">
+                                    <input type="text" 
+                                           name="module_dockercart_checkout_shipping_override[{{ method_code }}][description][{{ language.code }}]" 
+                                           value="{{ shipping_overrides[method_code].description[language.code]|default('') }}"
+                                           placeholder="Optional description"
+                                           class="form-control method-override-field shipping-{{ method_code }}-field"
+                                           {% if not (shipping_overrides[method_code].enabled is defined and shipping_overrides[method_code].enabled) %}disabled{% endif %}>
+                                  </div>
+                                  {% endfor %}
+                                </div>
+                              </td>
+                            </tr>
+                            {% endfor %}
+                          </tbody>
+                        </table>
+                      {% else %}
+                        <p class="text-muted">{{ text_no_methods_available }}</p>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Payment Methods Section -->
+                <div class="dc-card" style="margin-top: 20px;">
+                  <div class="dc-card-header">
+                    <i data-lucide="credit-card"></i> {{ text_payment_methods }}
+                  </div>
+                  <div class="dc-card-body">
+                    <div id="payment-methods-container">
+                      {% if available_payment_methods %}
+                        <table class="table table-bordered">
+                          <thead>
+                            <tr>
+                              <th style="width: 25%;">{{ text_method_code }}</th>
+                              <th style="width: 15%;" class="text-center">{{ text_method_enabled }}</th>
+                              <th style="width: 30%;">{{ text_custom_title }}</th>
+                              <th style="width: 30%;">{{ text_custom_description }}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {% for method_code, method_data in available_payment_methods %}
+                            <tr>
+                              <td>
+                                <strong>{{ method_code }}</strong><br>
+                                <small class="text-muted">{{ text_default_title }}: {{ method_data.default_title }}</small>
+                              </td>
+                              <td class="text-center">
+                                <input type="checkbox" 
+                                       name="module_dockercart_checkout_payment_override[{{ method_code }}][enabled]" 
+                                       value="1"
+                                       {% if payment_overrides[method_code].enabled is defined and payment_overrides[method_code].enabled %}checked{% endif %}
+                                       class="method-override-toggle"
+                                       data-target="payment-{{ method_code }}">
+                              </td>
+                              <td>
+                                <ul class="nav nav-tabs" style="margin-bottom: 5px; border-bottom: 1px solid #ddd;">
+                                  {% for language in languages %}
+                                  <li{% if loop.first %} class="active"{% endif %}>
+                                    <a href="#payment-{{ method_code }}-title-{{ language.language_id }}" data-toggle="tab">
+                                      <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" style="width: 16px; height: 11px;"> {{ language.name }}
+                                    </a>
+                                  </li>
+                                  {% endfor %}
+                                </ul>
+                                <div class="tab-content">
+                                  {% for language in languages %}
+                                  <div class="tab-pane{% if loop.first %} active{% endif %}" id="payment-{{ method_code }}-title-{{ language.language_id }}">
+                                    <input type="text" 
+                                           name="module_dockercart_checkout_payment_override[{{ method_code }}][title][{{ language.code }}]" 
+                                           value="{{ payment_overrides[method_code].title[language.code]|default('') }}"
+                                           placeholder="{{ method_data.default_title }}"
+                                           class="form-control method-override-field payment-{{ method_code }}-field"
+                                           {% if not (payment_overrides[method_code].enabled is defined and payment_overrides[method_code].enabled) %}disabled{% endif %}>
+                                  </div>
+                                  {% endfor %}
+                                </div>
+                              </td>
+                              <td>
+                                <ul class="nav nav-tabs" style="margin-bottom: 5px; border-bottom: 1px solid #ddd;">
+                                  {% for language in languages %}
+                                  <li{% if loop.first %} class="active"{% endif %}>
+                                    <a href="#payment-{{ method_code }}-desc-{{ language.language_id }}" data-toggle="tab">
+                                      <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" style="width: 16px; height: 11px;"> {{ language.name }}
+                                    </a>
+                                  </li>
+                                  {% endfor %}
+                                </ul>
+                                <div class="tab-content">
+                                  {% for language in languages %}
+                                  <div class="tab-pane{% if loop.first %} active{% endif %}" id="payment-{{ method_code }}-desc-{{ language.language_id }}">
+                                    <input type="text" 
+                                           name="module_dockercart_checkout_payment_override[{{ method_code }}][description][{{ language.code }}]" 
+                                           value="{{ payment_overrides[method_code].description[language.code]|default('') }}"
+                                           placeholder="Optional description"
+                                           class="form-control method-override-field payment-{{ method_code }}-field"
+                                           {% if not (payment_overrides[method_code].enabled is defined and payment_overrides[method_code].enabled) %}disabled{% endif %}>
+                                  </div>
+                                  {% endfor %}
+                                </div>
+                              </td>
+                            </tr>
+                            {% endfor %}
+                          </tbody>
+                        </table>
+                      {% else %}
+                        <p class="text-muted">{{ text_no_methods_available }}</p>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+
+                <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                  // Enable/disable override fields based on checkbox state
+                  document.querySelectorAll('.method-override-toggle').forEach(function(checkbox) {
+                    checkbox.addEventListener('change', function() {
+                      var target = this.getAttribute('data-target');
+                      
+                      // Find all fields for this method (across all language tabs)
+                      var fields = document.querySelectorAll('.' + target + '-field');
+                      
+                      fields.forEach(function(field) {
+                        if (checkbox.checked) {
+                          field.disabled = false;
+                        } else {
+                          field.disabled = true;
+                        }
+                      });
+                    });
+                  });
+                });
+                </script>
+
+              </div>
+            </div>
+
+            <!-- ADVANCED TAB -->
+            <div class="tab-pane" id="tab-advanced">
+              <div style="margin-top: 15px;">
+
+                <div class="form-group">
+                  <label class="col-sm-3 control-label" for="input-cache-ttl">
+                    <span data-toggle="tooltip" title="{{ help_cache_ttl }}">{{ entry_cache_ttl }}</span>
+                  </label>
+                  <div class="col-sm-9">
+                    <input type="number" name="module_dockercart_checkout_cache_ttl" id="input-cache-ttl" value="{{ module_dockercart_checkout_cache_ttl }}" class="form-control" min="0" max="86400">
+                  </div>
+                </div>
+
+                <hr>
+                <h4><i data-lucide="shield"></i> reCAPTCHA</h4>
+
+                <div class="form-group">
+                  <label class="col-sm-3 control-label" for="input-recaptcha-enabled">
+                    <span data-toggle="tooltip" title="{{ help_recaptcha }}">{{ entry_recaptcha_enabled }}</span>
+                  </label>
+                  <div class="col-sm-9">
+                    <select name="module_dockercart_checkout_recaptcha_enabled" id="input-recaptcha-enabled" class="form-control">
+                      <option value="1" {% if module_dockercart_checkout_recaptcha_enabled == 1 %}selected{% endif %}>{{ text_yes }}</option>
+                      <option value="0" {% if module_dockercart_checkout_recaptcha_enabled == 0 %}selected{% endif %}>{{ text_no }}</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-3 control-label" for="input-recaptcha-site-key">{{ entry_recaptcha_site_key }}</label>
+                  <div class="col-sm-9">
+                    <input type="text" name="module_dockercart_checkout_recaptcha_site_key" id="input-recaptcha-site-key" value="{{ module_dockercart_checkout_recaptcha_site_key }}" class="form-control">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-3 control-label" for="input-recaptcha-secret-key">{{ entry_recaptcha_secret_key }}</label>
+                  <div class="col-sm-9">
+                    <input type="text" name="module_dockercart_checkout_recaptcha_secret_key" id="input-recaptcha-secret-key" value="{{ module_dockercart_checkout_recaptcha_secret_key }}" class="form-control">
+                  </div>
+                </div>
+
+                <hr>
+
+                <div class="form-group">
+                  <label class="col-sm-3 control-label" for="input-debug">
+                    <span data-toggle="tooltip" title="{{ help_debug }}">{{ entry_debug }}</span>
+                  </label>
+                  <div class="col-sm-9">
+                    <select name="module_dockercart_checkout_debug" id="input-debug" class="form-control">
+                      <option value="1" {% if module_dockercart_checkout_debug == 1 %}selected{% endif %}>{{ text_yes }}</option>
+                      <option value="0" {% if module_dockercart_checkout_debug == 0 %}selected{% endif %}>{{ text_no }}</option>
+                    </select>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- LICENSE TAB -->
+            <div class="tab-pane" id="tab-license">
+              <div style="margin-top: 15px;">
+
+                <fieldset>
+                  <legend><i data-lucide="key"></i> {{ text_license }}</legend>
+
+                  <div class="form-group required">
+                    <label class="col-sm-2 control-label" for="input-license-key">
+                      <span data-toggle="tooltip" title="{{ help_license_key }}">{{ entry_license_key }}</span>
+                    </label>
+                    <div class="col-sm-6">
+                      <input type="text" name="module_dockercart_checkout_license_key" value="{{ module_dockercart_checkout_license_key }}" placeholder="DCFL-XXXXXXXXXXXXXXXX-YYYYYYYYYYYY" id="input-license-key" class="form-control">
+                      <small class="form-text text-muted" style="margin-top: 5px;">
+                        <i data-lucide="info" class="dc-license-icon"></i> {{ text_license_domain }}: <strong>{{ license_domain }}</strong>
+                      </small>
+                    </div>
+                    <div class="col-sm-4">
+                      <button type="button" class="btn btn-info" id="btn-verify-license">
+                        <i data-lucide="check-circle"></i> {{ button_verify_license }}
+                      </button>
+                      <span id="license-status" style="margin-left: 10px;">
+                        {% if license_valid %}
+                          <span class="text-success"><i data-lucide="check"></i> {{ text_license_valid }}</span>
+                        {% elseif license_message %}
+                          <span class="text-danger"><i data-lucide="x"></i> {{ license_message }}</span>
+                        {% endif %}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="col-sm-2 control-label" for="input-public-key">
+                      <span data-toggle="tooltip" title="{{ help_public_key }}">{{ entry_public_key }}</span>
+                    </label>
+                    <div class="col-sm-10">
+                      <textarea name="module_dockercart_checkout_public_key" id="input-public-key" rows="8" class="form-control" placeholder="-----BEGIN PUBLIC KEY-----&#10;...&#10;-----END PUBLIC KEY-----">{{ module_dockercart_checkout_public_key }}</textarea>
+                    </div>
+                  </div>
+
+                </fieldset>
+
+              </div>
+            </div>
+
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+  </div>
+</div>
+
+<!-- Block Settings Modal (single copy) -->
+<div id="block-settings-modal" class="dc-modal-overlay">
+  <div class="dc-modal">
+    <div class="dc-modal-header">
+      <h3><i data-lucide="settings"></i> <span id="modal-block-title">{{ text_block_settings|default('Block Settings') }}</span></h3>
+      <button type="button" class="dc-modal-close" onclick="closeBlockSettingsModal()">&times;</button>
+    </div>
+    <div class="dc-modal-body">
+      <div id="modal-block-content">
+        <!-- Dynamic content will be loaded here -->
+      </div>
+    </div>
+      <div class="dc-modal-footer">
+      <div class="dc-modal-info">
+        <i data-lucide="info"></i>
+        <span>{{ text_modal_instructions|default('Drag fields to reorder • Toggle switches to show/hide or set as required') }}</span>
+      </div>
+      <div class="dc-modal-buttons">
+        <button type="button" class="btn btn-default" id="btn-modal-close">
+          <i data-lucide="x"></i> {{ text_cancel|default('Cancel') }}
+        </button>
+        <button type="button" class="btn btn-success" id="btn-modal-save">
+          <i data-lucide="save"></i> {{ text_save|default('Save') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DockercartCheckout = (() => {
+  const CONFIG = {
+    blocksData: [
+      {% for block in blocks %}
+      { id: '{{ block.id }}', rows: {{ block.rows|json_encode|raw }} }{{ not loop.last ? ',' : '' }}
+      {% endfor %}
+    ]
+  };
+
+  const STATE = {
+    blockRowTemplates: {},
+    currentBlockIndex: null,
+    currentBlockId: null,
+    currentBlockRows: [],
+    modalObserver: null,
+    blocksObserver: null,
+    isInitialized: false
+  };
+
+  const initTemplates = () => {
+    CONFIG.blocksData.forEach(({ id, rows }) => {
+      STATE.blockRowTemplates[id] = Array.isArray(rows)
+        ? rows.map(row => ({
+            columns: row.columns || 1,
+            fields: (row.fields || []).map(f => ({
+              id: f.id,
+              label: f.label || f.name || f.id,
+              visible: Boolean(f.visible),
+              required: Boolean(f.required),
+              type: f.type || 'text',
+              placeholder: f.placeholder || ''
+            }))
+          }))
+        : [];
+    });
+  };
+
+  initTemplates();
+  const originalBlockRowTemplates = structuredClone(STATE.blockRowTemplates);
+  // Backwards-compatible alias used in several places in the template
+  const blockRowTemplates = STATE.blockRowTemplates;
+  // Local alias for mutable rows used throughout the modal code
+  let currentBlockRows = STATE.currentBlockRows;
+  // Local aliases for current block identifiers used across modal functions
+  let currentBlockIndex = STATE.currentBlockIndex;
+  let currentBlockId = STATE.currentBlockId;
+  // Local references for observers and init flag (keep STATE in sync)
+  let modalObserver = STATE.modalObserver;
+  let blocksObserver = STATE.blocksObserver;
+  let isInitialized = STATE.isInitialized;
+
+  const lucideRender = () => {
+    try { if (typeof lucide?.createIcons === 'function') lucide.createIcons(); }
+    catch { /* ignore */ }
+  };
+
+  const parseJSON = (value) => {
+    if (!value || typeof value !== 'string') return null;
+
+    // Escape special regex characters in single-char patterns to avoid unterminated
+    const escapeForRegex = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const countChars = (str, char) => (str.match(new RegExp(escapeForRegex(char), 'g')) || []).length;
+    if (countChars(value, '{') !== countChars(value, '}') ||
+        countChars(value, '[') !== countChars(value, ']')) {
+      console.warn('parseJSON: unbalanced braces/brackets');
+      return null;
+    }
+
+    try { return JSON.parse(value); } catch { }
+
+    try {
+      const textarea = document.createElement('textarea');
+      textarea.innerHTML = value;
+      const decoded = textarea.value;
+      if (decoded !== value) return JSON.parse(decoded);
+    } catch { }
+
+    try {
+      const normalized = value
+        .replace(/\r\n?|\n/g, ' ')
+        .replace(/'([^']*)'/g, '"$1"')
+        .replace(/([\{,\s])([A-Za-z0-9_\-]+)\s*:/g, '$1"$2":')
+        .replace(/,\s*([\}\]])/g, '$1');
+      return JSON.parse(normalized);
+    } catch (err) {
+      console.error('parseJSON: all attempts failed', err);
+      return null;
+    }
+  };
+
+  const openBlockSettingsModal = (blockIndex, blockId) => {
+    // update both local aliases and STATE so all code paths see consistent values
+    currentBlockIndex = Number(blockIndex);
+    currentBlockId = blockId;
+    STATE.currentBlockIndex = currentBlockIndex;
+    STATE.currentBlockId = currentBlockId;
+
+    const blockItem = document.querySelector(`[data-block-id="${blockId}"]`);
+    const modalContent = document.getElementById('modal-block-content');
+    const modal = document.getElementById('block-settings-modal');
+
+    if (!blockItem) {
+      console.error('Block item not found:', blockId);
+      modalContent.innerHTML = '<div class="alert alert-info"><i data-lucide="info"></i> {{ text_block_not_found|default("Block not found.") }}</div>';
+      modal.classList.add('active');
+      lucideRender();
+      return;
+    }
+
+    const blockName = blockItem.querySelector('.dc-block-col-name span')?.textContent || blockId;
+    const rowsInput = blockItem.querySelector('.block-rows-input');
+
+    // Initialize local rows array for the modal
+    currentBlockRows = [];
+    if (rowsInput?.value) {
+      const parsed = parseJSON(rowsInput.value);
+      if (Array.isArray(parsed)) currentBlockRows = parsed;
+    }
+
+    // Fallback to template if no rows found
+    if (currentBlockRows.length === 0 && blockRowTemplates[blockId]) {
+      currentBlockRows = JSON.parse(JSON.stringify(blockRowTemplates[blockId]));
+    }
+
+    // Build modal HTML with ROWS
+    document.getElementById('modal-block-title').textContent = `${blockName} - {{ text_configure|default("Configure") }}`;
+
+    let content = `<div style="margin-bottom: 15px;">
+      <button type="button" class="btn btn-sm btn-success" id="btn-add-row">
+        <i data-lucide="plus"></i> {{ button_add_row|default("Add Row") }}
+      </button>
+    </div>`;
+    content += `<h4><i data-lucide="layout"></i> {{ text_rows_configuration|default("Rows Configuration") }}</h4>`;
+    content += `<div class="dc-modal-rows-list" data-block-index="${currentBlockIndex}">`;
+
+    if (currentBlockRows && currentBlockRows.length > 0) {
+      currentBlockRows.forEach((row, rowIdx) => {
+        const columns = row.columns || 1;
+        const fields = row.fields || [];
+        
+        content += `<div class="dc-modal-row-item" data-row-index="${rowIdx}">
+          <div class="dc-modal-row-header">
+            <span class="drag-handle" draggable="true" style="cursor: move; margin-right: 10px; user-select: none;">⋮⋮</span>
+            <strong>{{ text_row|default("Row") }} ${rowIdx + 1}</strong>
+            <span style="margin-left: 15px;">{{ text_columns|default("Columns:") }}</span>
+            <select class="row-columns-select" data-row-index="${rowIdx}" style="margin-left: 5px; padding: 2px 5px;">
+              <option value="1" ${columns === 1 ? 'selected' : ''}>1</option>
+              <option value="2" ${columns === 2 ? 'selected' : ''}>2</option>
+              <option value="3" ${columns === 3 ? 'selected' : ''}>3</option>
+            </select>
+            <button type="button" class="btn btn-xs btn-danger btn-remove-row" data-row-index="${rowIdx}" style="margin-left: 10px;">
+              <i data-lucide="trash-2"></i>
+            </button>
+          </div>
+          <div class="dc-modal-row-fields" data-row-index="${rowIdx}">`;        
+        if (fields.length > 0) {
+          fields.forEach((field, fieldIdx) => {
+            const label = field.label || field.name || field.id;
+            const visibleChecked = field.visible ? 'checked' : '';
+            const requiredChecked = field.required ? 'checked' : '';
+            
+            content += `<div class="dc-modal-field-item" draggable="true" data-field-index="${fieldIdx}" data-field-id="${field.id}">
+              <div class="dc-modal-field-drag"><span class="drag-dots">⋮⋮</span></div>
+              <div class="dc-modal-field-name">${label}</div>
+              <div class="dc-modal-field-toggles">
+                <label class="dc-toggle-sm" title="{{ text_visible|default('Visible') }}">
+                  <input type="checkbox" class="field-visible-check" ${visibleChecked}>
+                  <span class="dc-toggle-slider-sm"></span>
+                  <span class="dc-toggle-label-text">{{ text_visible|default('Visible') }}</span>
+                </label>
+                <label class="dc-toggle-sm" title="{{ text_required|default('Required') }}">
+                  <input type="checkbox" class="field-required-check" ${requiredChecked}>
+                  <span class="dc-toggle-slider-sm"></span>
+                  <span class="dc-toggle-label-text">{{ text_required|default('Required') }}</span>
+                </label>
+              </div>
+            </div>`;
+          });
+        } else {
+          content += `<div style="padding: 10px; text-align: center; color: #999;">{{ text_no_fields_in_row|default("No fields in this row") }}</div>`;
+        }
+        
+        content += `</div></div>`;
+      });
+    } else {
+      content += `<div style="padding: 20px; text-align: center; color: #999;">{{ text_no_rows_configured|default('No rows configured. Click "Add Row" to start.') }}</div>`;
+    }
+
+    content += `</div>`;
+    document.getElementById('modal-block-content').innerHTML = content;
+    lucideRender();
+    document.getElementById('block-settings-modal').classList.add('active');
+
+    // Initialize dragdrop for modal fields
+    initializeModalRowsDragDrop();
+    
+    // Setup event handlers for modal buttons and controls (вызываем один раз)
+    setupModalEventHandlers();
+  };
+
+  const setupModalEventHandlers = () => {
+      // Add Row button
+      const addRowBtn = document.getElementById('btn-add-row');
+      if (addRowBtn) {
+        addRowBtn.onclick = function(e) {
+          e.preventDefault();
+          const newRow = { columns: 1, fields: [] };
+          currentBlockRows.push(newRow);
+          const rowIdx = currentBlockRows.length - 1;
+          
+          const rowsList = document.querySelector('.dc-modal-rows-list');
+          if (rowsList) {
+            const rowHtml = `<div class="dc-modal-row-item" data-row-index="${rowIdx}">
+              <div class="dc-modal-row-header">
+                <span class="drag-handle" draggable="true" style="cursor: move; margin-right: 10px; user-select: none;">⋮⋮</span>
+                <strong>{{ text_row|default("Row") }} ${rowIdx + 1}</strong>
+                <span style="margin-left: 15px;">{{ text_columns|default("Columns:") }}</span>
+                <select class="row-columns-select" data-row-index="${rowIdx}" style="margin-left: 5px; padding: 2px 5px;">
+                  <option value="1" selected>1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                </select>
+                <button type="button" class="btn btn-xs btn-danger btn-remove-row" data-row-index="${rowIdx}" style="margin-left: 10px;">
+                  <i data-lucide="trash-2"></i>
+                </button>
+              </div>
+              <div class="dc-modal-row-fields" data-row-index="${rowIdx}">
+                <div style="padding: 10px; text-align: center; color: #999;">{{ text_no_fields_in_row|default("No fields in this row") }}</div>
+              </div>
+            </div>`;
+            rowsList.insertAdjacentHTML('beforeend', rowHtml);
+            lucideRender();
+            
+            // Rebind handlers for new row
+            setupModalEventHandlers();
+            initializeModalRowsDragDrop();
+            updateHiddenRowsInput();
+          }
+          return false;
+        };
+      }
+
+      // Remove Row buttons
+      document.querySelectorAll('.btn-remove-row').forEach(btn => {
+        btn.onclick = function(e) {
+          e.preventDefault();
+          const rowItem = this.closest('.dc-modal-row-item');
+          if (!rowItem) return false;
+          const rowIndex = parseInt(rowItem.getAttribute('data-row-index'));
+
+          // Check if row is empty
+          const fieldsContainer = rowItem.querySelector('.dc-modal-row-fields');
+          const fieldItems = fieldsContainer ? fieldsContainer.querySelectorAll('.dc-modal-field-item') : [];
+          if (fieldItems.length > 0) {
+            alert("{{ error_remove_non_empty_row|default('Cannot remove a non-empty row. Remove all fields first.') }}");
+            return false;
+          }
+
+          if (!confirm("{{ confirm_are_you_sure|default('Are you sure?') }}")) return false;
+
+          // Remove from state
+          currentBlockRows.splice(rowIndex, 1);
+
+          // Remove from DOM
+          rowItem.remove();
+
+          // Re-index remaining rows
+          const rowsList = document.querySelector('.dc-modal-rows-list');
+          if (rowsList) {
+            const allRows = rowsList.querySelectorAll('.dc-modal-row-item');
+            allRows.forEach((el, idx) => {
+              el.setAttribute('data-row-index', idx);
+              const headerStrong = el.querySelector('.dc-modal-row-header strong');
+              if (headerStrong) headerStrong.textContent = '{{ text_row|default("Row") }}' + ' ' + (idx + 1);
+              el.querySelector('.row-columns-select')?.setAttribute('data-row-index', idx);
+              el.querySelector('.btn-remove-row')?.setAttribute('data-row-index', idx);
+              el.querySelector('.dc-modal-row-fields')?.setAttribute('data-row-index', idx);
+            });
+            
+            updateHiddenRowsInput();
+            updateBadge();
+          }
+          return false;
+        };
+      });
+      
+      // Columns select
+      document.querySelectorAll('.row-columns-select').forEach(select => {
+        select.onchange = function(e) {
+          const rowIndex = parseInt(this.getAttribute('data-row-index'));
+          const newColumns = parseInt(this.value);
+          if (currentBlockRows[rowIndex]) {
+            currentBlockRows[rowIndex].columns = newColumns;
+            updateHiddenRowsInput();
+          }
+        };
+      });
+      
+      // Modal footer buttons
+      const btnClose = document.getElementById('btn-modal-close');
+      if (btnClose) {
+        btnClose.onclick = function(e) {
+          e.preventDefault();
+          console.log('Close button clicked from handler');
+          closeBlockSettingsModal();
+          return false;
+        };
+      }
+      
+      const btnSave = document.getElementById('btn-modal-save');
+      if (btnSave) {
+        btnSave.onclick = function(e) {
+          e.preventDefault();
+          console.log('Save button clicked from handler');
+          saveBlockSettings();
+          return false;
+        };
+      }
+  };
+
+  const closeBlockSettingsModal = () => {
+    document.getElementById('block-settings-modal').classList.remove('active');
+    currentBlockIndex = null;
+    currentBlockId = null;
+    currentBlockRows = [];
+    STATE.currentBlockRows = currentBlockRows;
+    STATE.currentBlockIndex = null;
+    STATE.currentBlockId = null;
+  };
+
+  const updateHiddenRowsInput = () => {
+    const blockItem = document.querySelector(`[data-block-id="${currentBlockId}"]`) || document.querySelectorAll('.dc-block-item')[currentBlockIndex];
+    if (blockItem) {
+      let rowsInput = blockItem.querySelector('.block-rows-input');
+      if (!rowsInput) {
+        rowsInput = document.createElement('input');
+        rowsInput.type = 'hidden';
+        rowsInput.className = 'block-rows-input';
+        const domBlocks = Array.from(document.querySelectorAll('.dc-block-item'));
+        const domIndex = domBlocks.indexOf(blockItem);
+        rowsInput.name = `module_dockercart_checkout_blocks[${domIndex}][rows]`;
+        blockItem.appendChild(rowsInput);
+      }
+      rowsInput.value = JSON.stringify(currentBlockRows);
+    }
+  };
+
+  const updateBadge = () => {
+    const blockItem = document.querySelector(`[data-block-id="${currentBlockId}"]`) || document.querySelectorAll('.dc-block-item')[currentBlockIndex];
+    if (blockItem) {
+      const badge = blockItem.querySelector('.dc-block-col-fields .badge');
+      if (badge) {
+        let enabledCount = 0;
+        let totalCount = 0;
+        currentBlockRows.forEach(r => {
+          if (r.fields) {
+            totalCount += r.fields.length;
+            enabledCount += r.fields.filter(f => f.visible == 1 || f.visible === true).length;
+          }
+        });
+        badge.textContent = `${enabledCount}/${totalCount}`;
+      }
+    }
+  };
+
+  const saveBlockSettings = () => {
+    if (currentBlockIndex === null) return;
+
+    const rowsList = document.querySelector('.dc-modal-rows-list');
+    if (!rowsList) return closeBlockSettingsModal();
+
+    // Rebuild currentBlockRows from DOM order to handle deletions/copies/reorders robustly
+    // Strategy:
+    // 1. Build a map of existing fields by id from currentBlockRows (fallback to empty if none)
+    // 2. For each DOM row in order, create a fresh row object with columns and fields built
+    //    from the DOM order by looking up field metadata in the map. This ensures saved
+    //    state matches exactly what the user sees in the modal regardless of previous indices.
+    const fieldMap = {};
+    if (Array.isArray(currentBlockRows)) {
+      currentBlockRows.forEach(r => {
+        (r.fields || []).forEach(f => {
+          if (f && typeof f.id !== 'undefined') fieldMap[String(f.id)] = f;
+        });
+      });
+    }
+
+    const newBlockRows = [];
+    const rowItems = rowsList.querySelectorAll('.dc-modal-row-item');
+    rowItems.forEach((rowItem) => {
+      const columnsSelect = rowItem.querySelector('.row-columns-select');
+      const columns = columnsSelect ? parseInt(columnsSelect.value) : 1;
+      const row = { columns: columns, fields: [] };
+
+      const fieldsContainer = rowItem.querySelector('.dc-modal-row-fields');
+      const fieldItems = fieldsContainer ? Array.from(fieldsContainer.querySelectorAll('.dc-modal-field-item')) : [];
+      fieldItems.forEach(fieldItem => {
+        const fid = fieldItem.getAttribute('data-field-id');
+        let field = fid ? fieldMap[String(fid)] : null;
+        if (field) {
+          // clone to avoid mutating original map object
+          field = JSON.parse(JSON.stringify(field));
+        } else {
+          // minimal fallback object
+          field = { id: fid, name: fieldItem.querySelector('.dc-modal-field-name')?.textContent || fid };
+        }
+
+        const visibleCheck = fieldItem.querySelector('.field-visible-check');
+        const requiredCheck = fieldItem.querySelector('.field-required-check');
+        field.visible = visibleCheck && visibleCheck.checked ? 1 : 0;
+        field.required = requiredCheck && requiredCheck.checked ? 1 : 0;
+
+        row.fields.push(field);
+      });
+
+      newBlockRows.push(row);
+    });
+
+    // Replace state with reconstructed rows
+    // Defensive merge: ensure we don't accidentally drop known template fields (e.g., address_2)
+    try {
+      const template = Array.isArray(blockRowTemplates[currentBlockId]) ? blockRowTemplates[currentBlockId] : [];
+      // Flatten template field ids
+      const templateFieldIds = new Set();
+      template.forEach(r => (r.fields || []).forEach(f => { if (f && typeof f.id !== 'undefined') templateFieldIds.add(String(f.id)); }));
+
+      // Collect all ids present in newBlockRows
+      const presentIds = new Set();
+      newBlockRows.forEach(r => (r.fields || []).forEach(f => { if (f && typeof f.id !== 'undefined') presentIds.add(String(f.id)); }));
+
+      // Determine missing ids
+      const missing = [];
+      templateFieldIds.forEach(id => { if (!presentIds.has(id)) missing.push(id); });
+
+      if (missing.length > 0) {
+        console.warn('saveBlockSettings: missing fields detected compared to template, reattaching as hidden:', missing);
+        // Attach missing fields as invisible at the end of the first row (or create a row if none)
+        if (newBlockRows.length === 0) newBlockRows.push({ columns: 1, fields: [] });
+        const firstRow = newBlockRows[0];
+        missing.forEach(mid => {
+          // Find metadata in template
+          let meta = null;
+          for (let tr of template) {
+            meta = (tr.fields || []).find(ff => String(ff.id) === String(mid));
+            if (meta) break;
+          }
+          if (!meta) meta = { id: mid, label: mid, visible: false, required: 0 };
+          const cloneMeta = JSON.parse(JSON.stringify(meta));
+          cloneMeta.visible = cloneMeta.visible ? 1 : 0;
+          firstRow.fields.push(cloneMeta);
+        });
+      }
+
+      currentBlockRows = newBlockRows;
+    } catch (e) {
+      console.warn('saveBlockSettings: merge fallback error', e);
+      currentBlockRows = newBlockRows;
+    }
+    updateHiddenRowsInput();
+    updateBadge();
+
+    // Debugging logs: show reconstructed rows and hidden input value
+    try {
+      console.debug('saveBlockSettings: reconstructed currentBlockRows for', currentBlockId, JSON.parse(JSON.stringify(currentBlockRows)));
+      const bi = document.querySelector(`[data-block-id="${currentBlockId}"]`);
+      if (bi) {
+        const hid = bi.querySelector('.block-rows-input');
+        console.debug('saveBlockSettings: hidden input after rebuild', hid ? hid.value : '(no hidden input)');
+      }
+    } catch (e) { console.warn('saveBlockSettings: debug log failed', e); }
+
+    // AJAX save without Apply button
+    const blockItem = document.querySelector(`[data-block-id="${currentBlockId}"]`) || document.querySelectorAll('.dc-block-item')[currentBlockIndex];
+    if (blockItem) {
+      const form = blockItem.closest('form') || document.querySelector('form');
+      if (form) {
+        // Ensure field indices are up-to-date (same as normal form submit)
+        document.querySelectorAll('.dc-fields-list').forEach(list => updateFieldIndices(list));
+
+        // Build FormData and include unchecked checkboxes (as '0') so server receives them
+        const formData = new FormData(form);
+        document.querySelectorAll('.dc-switch input[type="checkbox"], input[type="checkbox"]').forEach(checkbox => {
+          const name = checkbox.getAttribute('name');
+          if (!name) return;
+          if (!checkbox.checked) {
+            // Append unchecked checkbox value as '0' for server-side handling
+            try { formData.append(name, '0'); } catch (e) { /* ignore */ }
+          }
+        });
+
+        fetch(form.getAttribute('action') || '', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(response => response.text())
+        .then(data => {
+          console.debug('saveBlockSettings: AJAX save response', data);
+          // Show success feedback and then close modal
+          const btn = document.querySelector(`.btn-block-settings[data-block-index="${currentBlockIndex}"]`);
+          if (btn) {
+            btn.innerHTML = `<i data-lucide="check"></i> Saved`;
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-success');
+            lucideRender();
+            setTimeout(() => {
+              btn.innerHTML = `<i data-lucide="settings"></i> Configure`;
+              btn.classList.remove('btn-success');
+              btn.classList.add('btn-primary');
+              lucideRender();
+            }, 1500);
+          }
+
+          // Ensure our in-memory template and hidden input reflect the saved state
+          try {
+            if (typeof currentBlockId !== 'undefined' && currentBlockId) {
+              // update template cache used as fallback
+              blockRowTemplates[currentBlockId] = JSON.parse(JSON.stringify(currentBlockRows));
+              // keep STATE in sync with the in-memory rows
+              STATE.currentBlockRows = JSON.parse(JSON.stringify(currentBlockRows));
+              // ensure hidden input on the block item is up-to-date
+              const savedBlockItem = document.querySelector(`[data-block-id="${currentBlockId}"]`);
+              if (savedBlockItem) {
+                const hid = savedBlockItem.querySelector('.block-rows-input');
+                if (hid) hid.value = JSON.stringify(currentBlockRows);
+              }
+            }
+          } catch (e) { console.warn('Post-save sync failed', e); }
+
+          // Close modal after successful save
+          closeBlockSettingsModal();
+        })
+        .catch(error => {
+          console.error('Save error:', error);
+          alert('Error saving settings');
+        });
+      }
+    }
+  };
+
+  const initializeModalRowsDragDrop = () => {
+    const rowsList = document.querySelector('.dc-modal-rows-list');
+    if (!rowsList) return;
+
+    let draggedField = null;
+    let draggedRow = null;
+
+    // Remove old listeners (by cloning and replacing to clear event listeners)
+    const newRowsList = rowsList.cloneNode(true);
+    rowsList.parentNode.replaceChild(newRowsList, rowsList);
+
+    // Reattach listeners to new element
+    const activeRowsList = document.querySelector('.dc-modal-rows-list');
+    if (!activeRowsList) return;
+
+    activeRowsList.addEventListener('dragstart', function (e) {
+      const fieldItem = e.target.closest('.dc-modal-field-item');
+      const rowItem = e.target.closest('.dc-modal-row-item');
+      
+      if (fieldItem && e.target.closest('[draggable]')) {
+        draggedField = fieldItem;
+        draggedField.classList.add('is-dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', fieldItem.innerHTML);
+        e.stopPropagation();
+      } else if (rowItem && e.target.closest('.drag-handle')) {
+        draggedRow = rowItem;
+        draggedRow.classList.add('is-dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', rowItem.innerHTML);
+      }
+    });
+    
+    activeRowsList.addEventListener('dragend', function (e) {
+      if (draggedField) {
+        draggedField.classList.remove('is-dragging');
+      }
+      if (draggedRow) {
+        draggedRow.classList.remove('is-dragging');
+      }
+      draggedField = null;
+      draggedRow = null;
+    });
+    
+    activeRowsList.addEventListener('dragover', function (e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+    });
+    
+    activeRowsList.addEventListener('drop', function (e) {
+      e.preventDefault();
+      
+      // Field drop
+      if (draggedField) {
+        const targetField = e.target.closest('.dc-modal-field-item');
+        const targetRowFields = e.target.closest('.dc-modal-row-fields');
+        
+        if (targetField && draggedField !== targetField) {
+          const rect = targetField.getBoundingClientRect();
+          if (e.clientY < rect.top + rect.height / 2) {
+            targetField.parentNode.insertBefore(draggedField, targetField);
+          } else {
+            targetField.parentNode.insertBefore(draggedField, targetField.nextSibling);
+          }
+        } else if (targetRowFields && !targetField) {
+          targetRowFields.appendChild(draggedField);
+        }
+      }
+      
+      // Row drop
+      if (draggedRow) {
+        const targetRow = e.target.closest('.dc-modal-row-item');
+        if (targetRow && draggedRow !== targetRow) {
+          const rect = targetRow.getBoundingClientRect();
+          const insertBefore = e.clientY < rect.top + rect.height / 2;
+          
+          if (insertBefore) {
+            targetRow.parentNode.insertBefore(draggedRow, targetRow);
+          } else {
+            targetRow.parentNode.insertBefore(draggedRow, targetRow.nextSibling);
+          }
+          
+          // Синхронизируем currentBlockRows с новым порядком DOM
+          const newOrder = [];
+          const allRows = activeRowsList.querySelectorAll('.dc-modal-row-item');
+          allRows.forEach((el, idx) => {
+            const oldIdx = parseInt(el.getAttribute('data-row-index'));
+            if (currentBlockRows[oldIdx]) {
+              newOrder.push(currentBlockRows[oldIdx]);
+            }
+            el.setAttribute('data-row-index', idx);
+            const headerStrong = el.querySelector('.dc-modal-row-header strong');
+            if (headerStrong) headerStrong.textContent = '{{ text_row|default("Row") }}' + ' ' + (idx + 1);
+            el.querySelector('.row-columns-select')?.setAttribute('data-row-index', idx);
+            el.querySelector('.btn-remove-row')?.setAttribute('data-row-index', idx);
+            el.querySelector('.dc-modal-row-fields')?.setAttribute('data-row-index', idx);
+          });
+          currentBlockRows = newOrder;
+          updateHiddenRowsInput();
+        }
+      }
+    });
+
+    // After re-creating the rows list DOM we must rebind modal event handlers
+    // so buttons like .btn-remove-row get their click listeners attached.
+    // This prevents a race where MutationObserver/drag-drop cloning removes
+    // previously attached handlers.
+    try { setupModalEventHandlers(); } catch (err) { console.warn('setupModalEventHandlers rebind failed', err); }
+  };
+
+  // Generic drag for `.dc-fields-list` containers (used by other codepaths)
+  const initFieldsDragDrop = () => {
+    const lists = Array.from(document.querySelectorAll('.dc-fields-list'));
+    lists.forEach(list => {
+      let dragged = null;
+      list.addEventListener('dragstart', e => {
+        const item = e.target.closest('.dc-field-item');
+        if (item) { dragged = item; item.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; }
+      });
+      list.addEventListener('dragend', e => { const item = e.target.closest('.dc-field-item'); if (item) item.classList.remove('dragging'); dragged = null; });
+      list.addEventListener('dragover', e => { e.preventDefault(); });
+      list.addEventListener('drop', e => {
+        e.preventDefault();
+        if (!dragged) return;
+        const target = e.target.closest('.dc-field-item');
+        if (target && target !== dragged && target.parentNode === dragged.parentNode) {
+          const rect = target.getBoundingClientRect();
+          if (e.clientY < rect.top + rect.height / 2) target.parentNode.insertBefore(dragged, target);
+          else target.parentNode.insertBefore(dragged, target.nextSibling);
+        }
+      });
+    });
+  };
+
+  const updateFieldIndices = (container) => {
+    const fields = container.querySelectorAll('.dc-field-item');
+    fields.forEach((field, index) => {
+      const sortInput = field.querySelector('.field-sort-order-input'); if (sortInput) sortInput.value = index + 1;
+      const inputs = field.querySelectorAll('input[name]');
+      inputs.forEach(input => {
+        const name = input.getAttribute('name');
+        if (name && name.includes('module_dockercart_checkout_blocks')) {
+          const newName = name.replace(/\[fields\]\[\d+\]/, `[fields][${index}]`);
+          input.setAttribute('name', newName);
+        }
+      });
+    });
+  };
+
+  const updateBlocksSortOrder = () => {
+    const blocks = document.querySelectorAll('.dc-block-item');
+    blocks.forEach((block, idx) => {
+      const sortInput = block.querySelector('.sort-order-input'); if (sortInput) sortInput.value = idx + 1;
+    });
+  };
+
+  // Row management functions
+  const addNewRow = () => {
+    const newRow = {
+      columns: 1,
+      fields: []
+    };
+    currentBlockRows.push(newRow);
+    
+    // Re-render modal content
+    openBlockSettingsModal(currentBlockIndex, currentBlockId);
+  };
+
+  const removeRow = (rowIndex) => {
+    if (confirm('Are you sure you want to remove this row?')) {
+      currentBlockRows.splice(rowIndex, 1);
+      // Re-render modal content
+      openBlockSettingsModal(currentBlockIndex, currentBlockId);
+    }
+  };
+
+  // Public init
+  const init = () => {
+    if (isInitialized) {
+      console.warn('DockercartCheckout already initialized, skipping');
+      return;
+    }
+    console.info('DockercartCheckout init');
+    isInitialized = true;
+    STATE.isInitialized = true;
+
+    // Use event delegation for buttons (prevents memory leak from multiple listeners)
+    const blocksContainer = document.querySelector('.dc-blocks-list');
+    if (blocksContainer) {
+      blocksContainer.addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-block-settings');
+        if (btn) {
+          e.preventDefault();
+          const blockIndex = btn.getAttribute('data-block-index');
+          const blockId = btn.getAttribute('data-block-id');
+          openBlockSettingsModal(blockIndex, blockId);
+        }
+      });
+    }
+
+    // Modal observer to initialize inner drag/drop (disconnect old observer first)
+    if (modalObserver) {
+      modalObserver.disconnect();
+      modalObserver = null;
+      STATE.modalObserver = null;
+    }
+    const modalOverlay = document.getElementById('block-settings-modal');
+    if (modalOverlay) {
+      modalObserver = new MutationObserver(mutations => {
+        mutations.forEach(m => { 
+          if (m.attributeName === 'class' && modalOverlay.classList.contains('active')) {
+            // Use RAF instead of setTimeout to prevent buildup
+            requestAnimationFrame(() => initializeModalRowsDragDrop());
+          }
+        });
+      });
+      modalObserver.observe(modalOverlay, { attributes: true });
+      STATE.modalObserver = modalObserver;
+    }
+
+    // Close modal on overlay click (single listener)
+    const modalEl = document.getElementById('block-settings-modal');
+    if (modalEl) {
+      const closeHandler = (e) => { if (e.target === modalEl) closeBlockSettingsModal(); };
+      modalEl.addEventListener('click', closeHandler);
+    }
+
+    // Form submit: update field indices and convert unchecked switches to hidden inputs
+    const form = document.getElementById('form-dockercart-checkout');
+    if (form) {
+      form.addEventListener('submit', () => {
+        document.querySelectorAll('.dc-fields-list').forEach(list => updateFieldIndices(list));
+        // Convert dc-switch checkboxes
+        document.querySelectorAll('.dc-switch input[type="checkbox"]').forEach(checkbox => {
+          if (!checkbox.checked) {
+            const hidden = document.createElement('input'); hidden.type = 'hidden'; hidden.name = checkbox.name; hidden.value = '0'; form.appendChild(hidden);
+          }
+        });
+      });
+    }
+
+    // License verification binding
+    const btnVerifyLicense = document.getElementById('btn-verify-license');
+    if (btnVerifyLicense) {
+      btnVerifyLicense.addEventListener('click', () => {
+        const licenseKey = document.getElementById('input-license-key')?.value || '';
+        const publicKey = document.getElementById('input-public-key')?.value || '';
+        const statusEl = document.getElementById('license-status');
+        if (!licenseKey) {
+          statusEl.innerHTML = `<span class="text-danger"><i data-lucide="x"></i> {{ error_license_required }}</span>`; lucideRender(); return;
+        }
+        statusEl.innerHTML = `<span class="text-info"><i data-lucide="loader"></i> {{ text_license_checking }}</span>`; lucideRender();
+        fetch('{{ license_verify_ajax }}', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ license_key: licenseKey, public_key: publicKey }) })
+          .then(res => res.json())
+          .then(data => {
+            if (data.valid) {
+              statusEl.innerHTML = `<span class="text-success"><i data-lucide="check"></i> {{ text_license_valid }}</span>`; lucideRender(); if (data.expires_formatted) statusEl.innerHTML += ` (expires: ${data.expires_formatted})`;
+            } else {
+              const msg = data.error || '{{ text_license_invalid }}';
+              statusEl.innerHTML = `<span class="text-danger"><i data-lucide="x"></i> ${msg}</span>`; lucideRender();
+            }
+          }).catch(err => { statusEl.innerHTML = `<span class="text-danger"><i data-lucide="x"></i> Error: ${err}</span>`; lucideRender(); });
+      });
+    }
+
+    // Blocks sortable observer (updates order if block-level DnD remains elsewhere)
+    if (blocksObserver) {
+      blocksObserver.disconnect();
+      blocksObserver = null;
+    }
+    const blocksList = document.getElementById('blocks-sortable');
+    if (blocksList) {
+        blocksObserver = new MutationObserver(() => updateBlocksSortOrder());
+        blocksObserver.observe(blocksList, { childList: true });
+        STATE.blocksObserver = blocksObserver;
+    }
+  };
+
+  // Cleanup function to prevent memory leaks
+  const cleanup = () => {
+    console.info('DockercartCheckout cleanup');
+    if (modalObserver) {
+      modalObserver.disconnect();
+      modalObserver = null;
+    }
+    if (blocksObserver) {
+      blocksObserver.disconnect();
+      blocksObserver = null;
+    }
+    isInitialized = false;
+    STATE.isInitialized = false;
+    STATE.modalObserver = null;
+    STATE.blocksObserver = null;
+  };
+
+  // Reveal API
+  return {
+    init,
+    cleanup,
+    openBlockSettingsModal,
+    closeBlockSettingsModal,
+    saveBlockSettings,
+    addNewRow,
+    removeRow,
+    initFieldsDragDrop,
+    initializeModalRowsDragDrop,
+    updateFieldIndices,
+    updateBlocksSortOrder,
+    _templates: blockRowTemplates // exposed for debugging
+  };
+})();
+
+// Expose minimal globals for existing inline handlers
+window.openBlockSettingsModal = (idx, id) => DockercartCheckout.openBlockSettingsModal(idx, id);
+window.closeBlockSettingsModal = () => DockercartCheckout.closeBlockSettingsModal();
+window.saveBlockSettings = () => DockercartCheckout.saveBlockSettings();
+// Note: addNewRow and removeRow are now handled via event listeners inside modal
+
+document.addEventListener('DOMContentLoaded', () => {
+  DockercartCheckout.init();
+});
+</script>
+
+{{ footer }}

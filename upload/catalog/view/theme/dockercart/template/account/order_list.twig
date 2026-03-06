@@ -1,0 +1,111 @@
+{{ header }}
+<main class="bg-gray-50 min-h-screen">
+
+  <section class="bg-gradient-to-br from-gray-900 via-gray-800 to-blue-950 py-10 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      {% include 'dockercart/template/common/partials/breadcrumbs.twig' with {
+        breadcrumbs_class: 'flex flex-wrap items-center gap-2 text-xs text-gray-300 mb-3',
+        breadcrumbs_link_class: 'hover:text-white transition',
+        breadcrumbs_last_class: 'text-white font-semibold'
+      } %}
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-white">{{ heading_title }}</h1>
+    </div>
+  </section>
+
+  <section class="py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-5xl mx-auto">
+      {{ content_top }}
+
+      {% if orders %}
+      <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden mb-6">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-gray-100 bg-gray-50">
+                <th class="text-right font-semibold text-gray-500 px-4 py-3">{{ column_order_id }}</th>
+                <th class="text-left font-semibold text-gray-500 px-4 py-3">{{ column_customer }}</th>
+                <th class="text-right font-semibold text-gray-500 px-4 py-3">{{ column_product }}</th>
+                <th class="text-left font-semibold text-gray-500 px-4 py-3">{{ column_status }}</th>
+                <th class="text-right font-semibold text-gray-500 px-4 py-3">{{ column_total }}</th>
+                <th class="text-left font-semibold text-gray-500 px-4 py-3">{{ column_date_added }}</th>
+                <th class="px-4 py-3"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for order in orders %}
+              {# Determine badge colour from status text #}
+              {% set s = order.status|lower %}
+              {% if 'complet' in s or 'deliver' in s or 'shipped' in s %}
+                {% set badge = 'bg-green-100 text-green-700' %}
+              {% elseif 'cancel' in s or 'refund' in s or 'fail' in s or 'denied' in s or 'reversed' in s or 'chargeback' in s or 'void' in s or 'expired' in s %}
+                {% set badge = 'bg-red-100 text-red-700' %}
+              {% elseif 'pending' in s or 'awaiting' in s or 'on hold' in s %}
+                {% set badge = 'bg-amber-100 text-amber-700' %}
+              {% elseif 'process' in s or 'transit' in s or 'dispatch' in s %}
+                {% set badge = 'bg-blue-100 text-blue-700' %}
+              {% else %}
+                {% set badge = 'bg-gray-100 text-gray-600' %}
+              {% endif %}
+              <tr class="border-b border-gray-50 hover:bg-blue-50/30 transition">
+                <td class="text-right text-gray-500 px-4 py-3 font-mono">#{{ order.order_id }}</td>
+                <td class="text-left text-gray-800 px-4 py-3">{{ order.name }}</td>
+                <td class="text-right text-gray-600 px-4 py-3">{{ order.products }}</td>
+                <td class="text-left px-4 py-3">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ badge }}">
+                    {{ order.status }}
+                  </span>
+                </td>
+                <td class="text-right text-gray-800 font-semibold px-4 py-3">{{ order.total }}</td>
+                <td class="text-left text-gray-500 px-4 py-3">{{ order.date_added }}</td>
+                <td class="text-right px-4 py-3">
+                  <a href="{{ order.view }}" class="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium text-xs border border-blue-200 hover:border-blue-300 px-3 py-1.5 rounded-lg transition">
+                    <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                    {{ button_view }}
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {% if pagination %}
+      <div class="mb-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="text-sm text-gray-400">{{ results }}</div>
+        <div class="dc-pagination">{{ pagination }}</div>
+      </div>
+      {% endif %}
+
+      {% else %}
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 text-center text-gray-400 text-sm mb-6">
+        <i data-lucide="shopping-bag" class="w-8 h-8 mx-auto mb-2 opacity-30"></i>
+        <p>{{ text_empty }}</p>
+      </div>
+      {% endif %}
+
+      <div class="mt-6 flex justify-end">
+        <a href="{{ continue }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm">
+          {{ button_continue }}
+        </a>
+      </div>
+
+      {{ content_bottom }}
+    </div>
+  </section>
+
+</main>
+<style>
+  .dc-pagination ul { display:flex; gap:.5rem; list-style:none; padding:0; margin:0; flex-wrap:wrap; justify-content:center; }
+  .dc-pagination ul li a,
+  .dc-pagination ul li span {
+    display:inline-flex; align-items:center; justify-content:center;
+    width:2.25rem; height:2.25rem; padding:0;
+    border-radius:.75rem; border:1px solid #e5e7eb;
+    font-size:.875rem; font-weight:500; color:#6b7280;
+    background:#fff; text-decoration:none; transition:all .15s ease;
+  }
+  .dc-pagination ul li a:hover { border-color:#93c5fd; color:#2563eb; }
+  .dc-pagination ul li.active span { background:#2563eb; border-color:#2563eb; color:#fff; }
+</style>
+{{ footer }}

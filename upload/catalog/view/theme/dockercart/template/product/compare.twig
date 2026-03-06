@@ -1,0 +1,168 @@
+{{ header }}
+
+<main class="bg-white min-h-screen">
+  <section class="relative overflow-hidden">
+    <div class="w-full h-[180px] sm:h-[230px] bg-gradient-to-br from-gray-900 via-gray-800 to-blue-950"></div>
+    <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/15"></div>
+    <div class="absolute inset-0 flex items-end sm:items-center pb-6 sm:pb-0">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        {% include 'dockercart/template/common/partials/breadcrumbs.twig' with {
+          breadcrumbs_class: 'flex flex-wrap items-center gap-2 text-xs text-gray-300 mb-3',
+          breadcrumbs_link_class: 'hover:text-white transition',
+          breadcrumbs_last_class: 'text-white font-semibold'
+        } %}
+        <h1 class="text-2xl sm:text-4xl font-extrabold text-white leading-tight">{{ heading_title }}</h1>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      {% if success %}
+      <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl text-green-800">
+        <i data-lucide="check-circle" class="w-5 h-5 inline mr-2"></i>{{ success }}
+      </div>
+      {% endif %}
+
+      {% if products %}
+      <div class="overflow-x-auto">
+        <table class="w-full border-collapse border border-gray-200 rounded-xl overflow-hidden">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900 border-b border-gray-200">{{ text_product }}</th>
+              {% for product in products %}
+              <th class="px-4 py-3 text-center text-sm font-semibold text-gray-900 border-b border-gray-200 min-w-[200px]">
+                <div class="flex flex-col items-center">
+                  <a href="{{ product.remove }}" class="text-red-500 hover:text-red-700 mb-2" title="{{ button_remove }}">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                  </a>
+                  <a href="{{ product.href }}" class="text-blue-600 hover:text-blue-700 font-medium">{{ product.name }}</a>
+                </div>
+              </th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b border-gray-200">
+              <td class="px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50">{{ text_image }}</td>
+              {% for product in products %}
+              <td class="px-4 py-3 text-center">
+                {% if product.thumb %}
+                <a href="{{ product.href }}">
+                  <img src="{{ product.thumb }}" alt="{{ product.name }}" class="w-24 h-24 object-cover rounded-lg mx-auto" />
+                </a>
+                {% endif %}
+              </td>
+              {% endfor %}
+            </tr>
+            <tr class="border-b border-gray-200">
+              <td class="px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50">{{ text_price }}</td>
+              {% for product in products %}
+              <td class="px-4 py-3 text-center">
+                {% if product.price %}
+                <div class="space-y-1">
+                  {% if product.special %}
+                  <span class="text-lg font-bold text-gray-900">{{ product.special }}</span>
+                  <span class="text-sm text-red-500 line-through">{{ product.price }}</span>
+                  {% else %}
+                  <span class="text-lg font-bold text-gray-900">{{ product.price }}</span>
+                  {% endif %}
+                </div>
+                {% endif %}
+              </td>
+              {% endfor %}
+            </tr>
+            <tr class="border-b border-gray-200">
+              <td class="px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50">{{ text_model }}</td>
+              {% for product in products %}
+              <td class="px-4 py-3 text-center text-sm text-gray-600">{{ product.model }}</td>
+              {% endfor %}
+            </tr>
+            <tr class="border-b border-gray-200">
+              <td class="px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50">{{ text_manufacturer }}</td>
+              {% for product in products %}
+              <td class="px-4 py-3 text-center text-sm text-gray-600">{{ product.manufacturer }}</td>
+              {% endfor %}
+            </tr>
+            <tr class="border-b border-gray-200">
+              <td class="px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50">{{ text_availability }}</td>
+              {% for product in products %}
+              <td class="px-4 py-3 text-center">
+                <span class="px-2 py-1 rounded-full text-xs font-medium {% if product.availability == text_instock %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                  {{ product.availability }}
+                </span>
+              </td>
+              {% endfor %}
+            </tr>
+            <tr class="border-b border-gray-200">
+              <td class="px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50">{{ text_rating }}</td>
+              {% for product in products %}
+              <td class="px-4 py-3 text-center">
+                {% if product.rating %}
+                <div class="flex items-center justify-center gap-1">
+                  <div class="flex text-yellow-400">
+                    {% for i in 1..5 %}
+                    {% if product.rating >= i %}★{% else %}<span class="text-gray-300">★</span>{% endif %}
+                    {% endfor %}
+                  </div>
+                  <span class="text-xs text-gray-500 ml-1">({{ product.reviews }})</span>
+                </div>
+                {% else %}
+                <span class="text-xs text-gray-400">{{ text_no_reviews }}</span>
+                {% endif %}
+              </td>
+              {% endfor %}
+            </tr>
+            <tr class="border-b border-gray-200">
+              <td class="px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50">{{ text_summary }}</td>
+              {% for product in products %}
+              <td class="px-4 py-3 text-sm text-gray-600">{{ product.description|striptags }}</td>
+              {% endfor %}
+            </tr>
+            <tr>
+              <td class="px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50">{{ text_weight }}</td>
+              {% for product in products %}
+              <td class="px-4 py-3 text-center text-sm text-gray-600">{{ product.weight }}</td>
+              {% endfor %}
+            </tr>
+            <tr>
+              <td class="px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50">{{ text_dimension }}</td>
+              {% for product in products %}
+              <td class="px-4 py-3 text-center text-sm text-gray-600">{{ product.length }} x {{ product.width }} x {{ product.height }}</td>
+              {% endfor %}
+            </tr>
+            <tr>
+              <td class="px-4 py-3 bg-gray-50"></td>
+              {% for product in products %}
+              <td class="px-4 py-3 text-center">
+                <button type="button" onclick="cart.add('{{ product.product_id }}');" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition">
+                  {{ button_cart }}
+                </button>
+              </td>
+              {% endfor %}
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="text-center py-12">
+        <i data-lucide="bar-chart-2" class="w-16 h-16 text-gray-300 mx-auto mb-4"></i>
+        <h2 class="text-xl font-semibold text-gray-600 mb-2">{{ text_empty }}</h2>
+        <p class="text-gray-500">{{ text_no_products }}</p>
+        <a href="/" class="inline-flex items-center gap-2 mt-4 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition">
+          {{ button_continue }}
+        </a>
+      </div>
+      {% endif %}
+
+      {{ content_bottom }}
+    </div>
+  </section>
+</main>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script>
+  lucide.createIcons();
+</script>
+
+{{ footer }}

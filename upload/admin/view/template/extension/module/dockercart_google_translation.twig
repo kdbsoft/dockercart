@@ -1,0 +1,223 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-google-translation" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    <ul class="nav nav-tabs dcx-profile-tabs" id="gt-tabs" role="tablist">
+      <li class="active"><a href="#gt-tab-general" class="js-gt-tab" data-tab="gt-tab-general" data-title="{{ text_tab_general }}" data-subtitle="{{ text_tab_general_subtitle }}" data-icon="fa-language"><i class="fa fa-language"></i> {{ text_tab_general }}</a></li>
+      <li><a href="#gt-tab-license" class="js-gt-tab" data-tab="gt-tab-license" data-title="{{ text_tab_license }}" data-subtitle="{{ text_tab_license_subtitle }}" data-icon="fa-key"><i class="fa fa-key"></i> {{ text_tab_license }}</a></li>
+      <li><a href="#gt-tab-about" class="js-gt-tab" data-tab="gt-tab-about" data-title="{{ text_tab_about }}" data-subtitle="{{ text_tab_about_subtitle }}" data-icon="fa-info-circle"><i class="fa fa-info-circle"></i> {{ text_tab_about }}</a></li>
+    </ul>
+
+    <div class="dcx-shell">
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i id="gt-tab-icon" class="fa fa-language"></i></div>
+          <div>
+            <h3 class="dcx-panel-title" id="gt-tab-title">{{ text_tab_general }}</h3>
+            <div class="dcx-panel-subtitle" id="gt-tab-subtitle">{{ text_tab_general_subtitle }}</div>
+          </div>
+        </div>
+        <div class="dcx-panel-body">
+          <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-google-translation" class="form-horizontal dcx-form">
+
+            <div id="gt-tab-general" class="dcx-tab-pane active">
+              <div class="dcx-section">
+                <h4>{{ text_section_module_settings }}</h4>
+
+                <div class="form-group">
+                  <label class="col-sm-3 control-label" for="input-status">{{ entry_status }}</label>
+                  <div class="col-sm-9">
+                    <select name="module_dockercart_google_translation_status" id="input-status" class="form-control">
+                      {% if module_dockercart_google_translation_status %}
+                      <option value="1" selected="selected">{{ text_enabled }}</option>
+                      <option value="0">{{ text_disabled }}</option>
+                      {% else %}
+                      <option value="1">{{ text_enabled }}</option>
+                      <option value="0" selected="selected">{{ text_disabled }}</option>
+                      {% endif %}
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group required">
+                  <label class="col-sm-3 control-label" for="input-api-key">{{ entry_api_key }}</label>
+                  <div class="col-sm-9">
+                    <input type="text" name="module_dockercart_google_translation_api_key" value="{{ module_dockercart_google_translation_api_key }}" id="input-api-key" class="form-control" />
+                    <div class="help-block">{{ help_api_key }}</div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-3 control-label" for="input-match-threshold">{{ entry_match_threshold }}</label>
+                  <div class="col-sm-3">
+                    <input type="number" min="1" max="100" name="module_dockercart_google_translation_match_threshold" value="{{ module_dockercart_google_translation_match_threshold }}" id="input-match-threshold" class="form-control" />
+                    <div class="help-block">{{ help_match_threshold }}</div>
+                  </div>
+
+                  <label class="col-sm-3 control-label" for="input-price">{{ entry_price_per_million }}</label>
+                  <div class="col-sm-3">
+                    <input type="number" min="0" step="0.01" name="module_dockercart_google_translation_price_per_million" value="{{ module_dockercart_google_translation_price_per_million }}" id="input-price" class="form-control" />
+                    <div class="help-block">{{ help_price_per_million }}</div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-3 control-label" for="input-force-overwrite">{{ entry_force_overwrite }}</label>
+                  <div class="col-sm-9">
+                    <label class="checkbox-inline">
+                      <input type="hidden" name="module_dockercart_google_translation_force_overwrite" value="0" />
+                      <input type="checkbox" name="module_dockercart_google_translation_force_overwrite" value="1" id="input-force-overwrite" {% if module_dockercart_google_translation_force_overwrite %}checked="checked"{% endif %} /> {{ text_enabled }}
+                    </label>
+                    <p class="help-block">{{ help_force_overwrite }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="dcx-section">
+                <h4>{{ text_scan_result }}</h4>
+
+                <div class="row" style="margin-bottom:15px;">
+                  <div class="col-sm-3">
+                    <label>{{ entry_source_language }}</label>
+                    <select id="gt-source-language" class="form-control">
+                      {% for language in languages %}
+                      <option value="{{ language.language_id }}" {% if language.language_id == default_language_id %}selected="selected"{% endif %}>{{ language.name }} ({{ language.code }})</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="col-sm-3">
+                    <label>{{ entry_target_language }}</label>
+                    <select id="gt-target-language" class="form-control">
+                      {% for language in languages %}
+                      <option value="{{ language.language_id }}" {% if language.language_id != default_language_id %}selected="selected"{% endif %}>{{ language.name }} ({{ language.code }})</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="col-sm-3">
+                    <label><input type="checkbox" id="gt-include-db" checked="checked" /> {{ text_report_db }}</label><br>
+                    <label><input type="checkbox" id="gt-include-files" checked="checked" /> {{ text_report_files }}</label>
+                  </div>
+                  <div class="col-sm-3 text-right" style="padding-top:24px;">
+                    <button type="button" id="gt-button-scan" class="btn btn-info"><i class="fa fa-search"></i> {{ button_scan }}</button>
+                    <button type="button" id="gt-button-translate" class="btn btn-success"><i class="fa fa-language"></i> {{ button_translate }}</button>
+                  </div>
+                </div>
+
+                <div id="gt-status" class="alert alert-info"><i class="fa fa-info-circle"></i> {{ text_ready }}</div>
+                <div id="gt-result"></div>
+              </div>
+            </div>
+
+            <div id="gt-tab-license" class="dcx-tab-pane">
+              <div class="dcx-section">
+                <h4>{{ text_section_license_info }}</h4>
+
+                <div class="form-group">
+                  <label class="col-sm-3 control-label" for="input-license-key">{{ entry_license_key }}</label>
+                  <div class="col-sm-9">
+                    <input type="text" name="module_dockercart_google_translation_license_key" value="{{ module_dockercart_google_translation_license_key }}" id="input-license-key" class="form-control" placeholder="DCGT-XXXXXXXXXXXXXXXX-YYYYYYYYYYYY" />
+                    <small class="form-text text-muted" style="margin-top: 5px; display: inline-block;">
+                      <i class="fa fa-info-circle"></i> {{ text_license_domain }}: <strong>{{ license_domain }}</strong>
+                    </small>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-3 control-label" for="input-public-key">{{ entry_public_key }}</label>
+                  <div class="col-sm-9">
+                    <textarea name="module_dockercart_google_translation_public_key" id="input-public-key" rows="8" class="form-control" placeholder="-----BEGIN PUBLIC KEY-----&#10;...&#10;-----END PUBLIC KEY-----">{{ module_dockercart_google_translation_public_key }}</textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="gt-tab-about" class="dcx-tab-pane">
+              <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+                <h4>{{ text_tab_about }}</h4>
+                <table class="table table-bordered dcx-table">
+                  <tr>
+                    <td style="width:220px;"><strong>{{ text_module_version }}</strong></td>
+                    <td>{{ module_version }}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>{{ text_developer }}</strong></td>
+                    <td>{{ text_developer_name }}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>{{ text_contact }}</strong></td>
+                    <td><a href="mailto:support@dockercart.net">support@dockercart.net</a></td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="view/javascript/dockercart_google_translation.js"></script>
+<script>
+function updateGoogleTranslationPanelHeader(tabLink) {
+  var $tab = $(tabLink);
+  var title = $tab.data('title') || '{{ text_tab_general }}';
+  var subtitle = $tab.data('subtitle') || '{{ text_tab_general_subtitle }}';
+  var icon = String($tab.data('icon') || 'fa-language').replace(/[^a-z0-9\-]/gi, '');
+
+  $('#gt-tab-title').text(title);
+  $('#gt-tab-subtitle').text(subtitle);
+  $('#gt-tab-icon').attr('class', 'fa ' + icon);
+}
+
+$(document).on('click', '.js-gt-tab', function(e) {
+  e.preventDefault();
+  var tabId = $(this).data('tab');
+  if (!tabId) return;
+
+  $('#gt-tabs > li').removeClass('active');
+  $(this).closest('li').addClass('active');
+
+  $('#gt-tab-general, #gt-tab-license, #gt-tab-about').removeClass('active');
+  $('#' + tabId).addClass('active');
+
+  updateGoogleTranslationPanelHeader(this);
+});
+
+updateGoogleTranslationPanelHeader($('#gt-tabs > li.active a.js-gt-tab'));
+</script>
+<script>
+window.DockercartGoogleTranslation.init({
+  user_token: '{{ user_token }}',
+  match_threshold: parseFloat('{{ module_dockercart_google_translation_match_threshold }}') || 90,
+  force_overwrite: '{{ module_dockercart_google_translation_force_overwrite }}' == '1'
+});
+</script>
+
+{{ footer }}

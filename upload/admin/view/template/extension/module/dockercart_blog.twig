@@ -1,0 +1,258 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-dockercart-blog" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    <ul class="nav nav-tabs dcx-profile-tabs" role="tablist">
+      <li class="active"><a href="#tab-general" data-toggle="tab"><i class="fa fa-sliders"></i> General</a></li>
+      <li><a href="#tab-display" data-toggle="tab"><i class="fa fa-desktop"></i> {{ tab_display }}</a></li>
+      <li><a href="#tab-comments" data-toggle="tab"><i class="fa fa-comments"></i> {{ tab_comments }}</a></li>
+      <li><a href="#tab-seo" data-toggle="tab"><i class="fa fa-sitemap"></i> {{ tab_seo }}</a></li>
+      <li><a href="#tab-about" data-toggle="tab"><i class="fa fa-info-circle"></i> About</a></li>
+    </ul>
+
+    <div class="dcx-shell">
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i class="fa fa-pencil"></i></div>
+          <div>
+            <h3 class="dcx-panel-title">{{ text_edit }}</h3>
+            <div class="dcx-panel-subtitle">Blog module configuration and behavior</div>
+          </div>
+        </div>
+        <div class="dcx-panel-body">
+          <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-dockercart-blog" class="form-horizontal dcx-form">
+            <input type="hidden" name="user_token" value="{{ user_token }}" />
+
+            <div class="alert alert-info">
+              <h4 style="margin-top:0;"><i class="fa fa-link"></i> {{ text_quick_links }}</h4>
+              <p style="margin-bottom:0;">
+                <a href="{{ link_posts }}" class="btn btn-info"><i class="fa fa-file-text"></i> {{ text_manage_posts }}</a>
+                <a href="{{ link_categories }}" class="btn btn-info"><i class="fa fa-folder"></i> {{ text_manage_categories }}</a>
+                <a href="{{ link_authors }}" class="btn btn-info"><i class="fa fa-user"></i> {{ text_manage_authors }}</a>
+                <a href="{{ link_comments }}" class="btn btn-info"><i class="fa fa-comments"></i> {{ text_manage_comments }}</a>
+              </p>
+            </div>
+
+            <div class="tab-content">
+              <div class="tab-pane dcx-tab-pane active" id="tab-general">
+                <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+                  <h4>{{ tab_general }}</h4>
+
+                  <div class="form-group">
+                    <label class="col-sm-3 control-label" for="input-status">{{ entry_status }}</label>
+                    <div class="col-sm-9">
+                      <select name="module_dockercart_blog_status" id="input-status" class="form-control">
+                        {% if module_dockercart_blog_status %}
+                        <option value="1" selected="selected">{{ text_enabled }}</option>
+                        <option value="0">{{ text_disabled }}</option>
+                        {% else %}
+                        <option value="1">{{ text_enabled }}</option>
+                        <option value="0" selected="selected">{{ text_disabled }}</option>
+                        {% endif %}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="col-sm-3 control-label" for="input-posts-per-page">{{ entry_posts_per_page }}</label>
+                    <div class="col-sm-9">
+                      <input type="text" name="module_dockercart_blog_posts_per_page" value="{{ module_dockercart_blog_posts_per_page }}" placeholder="{{ entry_posts_per_page }}" id="input-posts-per-page" class="form-control" />
+                      <span class="help-block">{{ help_posts_per_page }}</span>
+                      {% if error_posts_per_page %}
+                      <div class="text-danger">{{ error_posts_per_page }}</div>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="tab-pane dcx-tab-pane" id="tab-display">
+                <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+                  <h4>{{ tab_display }}</h4>
+
+                  <div class="form-group">
+                    <label class="col-sm-3 control-label" for="input-show-author">{{ entry_show_author }}</label>
+                    <div class="col-sm-9">
+                      <select name="module_dockercart_blog_show_author" id="input-show-author" class="form-control">
+                        {% if module_dockercart_blog_show_author %}
+                        <option value="1" selected="selected">{{ text_yes }}</option>
+                        <option value="0">{{ text_no }}</option>
+                        {% else %}
+                        <option value="1">{{ text_yes }}</option>
+                        <option value="0" selected="selected">{{ text_no }}</option>
+                        {% endif %}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="col-sm-3 control-label" for="input-show-date">{{ entry_show_date }}</label>
+                    <div class="col-sm-9">
+                      <select name="module_dockercart_blog_show_date" id="input-show-date" class="form-control">
+                        {% if module_dockercart_blog_show_date %}
+                        <option value="1" selected="selected">{{ text_yes }}</option>
+                        <option value="0">{{ text_no }}</option>
+                        {% else %}
+                        <option value="1">{{ text_yes }}</option>
+                        <option value="0" selected="selected">{{ text_no }}</option>
+                        {% endif %}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="col-sm-3 control-label" for="input-show-views">{{ entry_show_views }}</label>
+                    <div class="col-sm-9">
+                      <select name="module_dockercart_blog_show_views" id="input-show-views" class="form-control">
+                        {% if module_dockercart_blog_show_views %}
+                        <option value="1" selected="selected">{{ text_yes }}</option>
+                        <option value="0">{{ text_no }}</option>
+                        {% else %}
+                        <option value="1">{{ text_yes }}</option>
+                        <option value="0" selected="selected">{{ text_no }}</option>
+                        {% endif %}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="col-sm-3 control-label" for="input-latest-limit">{{ entry_latest_limit }}</label>
+                    <div class="col-sm-9">
+                      <input type="text" name="module_dockercart_blog_latest_limit" value="{{ module_dockercart_blog_latest_limit }}" placeholder="{{ entry_latest_limit }}" id="input-latest-limit" class="form-control" />
+                      <span class="help-block">{{ help_latest_limit }}</span>
+                      {% if error_latest_limit %}
+                      <div class="text-danger">{{ error_latest_limit }}</div>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="tab-pane dcx-tab-pane" id="tab-comments">
+                <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+                  <h4>{{ tab_comments }}</h4>
+
+                  <div class="form-group">
+                    <label class="col-sm-3 control-label" for="input-allow-comments">{{ entry_allow_comments }}</label>
+                    <div class="col-sm-9">
+                      <select name="module_dockercart_blog_allow_comments" id="input-allow-comments" class="form-control">
+                        {% if module_dockercart_blog_allow_comments %}
+                        <option value="1" selected="selected">{{ text_yes }}</option>
+                        <option value="0">{{ text_no }}</option>
+                        {% else %}
+                        <option value="1">{{ text_yes }}</option>
+                        <option value="0" selected="selected">{{ text_no }}</option>
+                        {% endif %}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="col-sm-3 control-label" for="input-moderate-comments">{{ entry_moderate_comments }}</label>
+                    <div class="col-sm-9">
+                      <select name="module_dockercart_blog_moderate_comments" id="input-moderate-comments" class="form-control">
+                        {% if module_dockercart_blog_moderate_comments %}
+                        <option value="1" selected="selected">{{ text_yes }}</option>
+                        <option value="0">{{ text_no }}</option>
+                        {% else %}
+                        <option value="1">{{ text_yes }}</option>
+                        <option value="0" selected="selected">{{ text_no }}</option>
+                        {% endif %}
+                      </select>
+                      <span class="help-block">{{ help_moderate_comments }}</span>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="col-sm-3 control-label" for="input-captcha">{{ entry_captcha }}</label>
+                    <div class="col-sm-9">
+                      <select name="module_dockercart_blog_captcha" id="input-captcha" class="form-control">
+                        {% if module_dockercart_blog_captcha %}
+                        <option value="1" selected="selected">{{ text_enabled }}</option>
+                        <option value="0">{{ text_disabled }}</option>
+                        {% else %}
+                        <option value="1">{{ text_enabled }}</option>
+                        <option value="0" selected="selected">{{ text_disabled }}</option>
+                        {% endif %}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="tab-pane dcx-tab-pane" id="tab-seo">
+                <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+                  <h4>{{ tab_seo }}</h4>
+
+                  <div class="form-group">
+                    <label class="col-sm-3 control-label" for="input-sitemap">{{ entry_sitemap }}</label>
+                    <div class="col-sm-9">
+                      <select name="module_dockercart_blog_sitemap" id="input-sitemap" class="form-control">
+                        {% if module_dockercart_blog_sitemap %}
+                        <option value="1" selected="selected">{{ text_enabled }}</option>
+                        <option value="0">{{ text_disabled }}</option>
+                        {% else %}
+                        <option value="1">{{ text_enabled }}</option>
+                        <option value="0" selected="selected">{{ text_disabled }}</option>
+                        {% endif %}
+                      </select>
+                      <span class="help-block">{{ help_sitemap }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="tab-pane dcx-tab-pane" id="tab-about">
+                <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+                  <h4>About</h4>
+                  <table class="table table-bordered dcx-table">
+                    <tr>
+                      <td style="width:220px;"><strong>Module</strong></td>
+                      <td>{{ heading_title }}</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Developer</strong></td>
+                      <td>DockerCart Team</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Contact</strong></td>
+                      <td><a href="mailto:support@dockercart.net">support@dockercart.net</a></td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{{ footer }}

@@ -1,0 +1,31 @@
+<?php
+
+$_['entry_accepted_status'] = 'Прийнятий статус';
+$_['entry_geo_zone'] = 'Географічна зона';
+$_['entry_merchant'] = 'Ідентифікатор продавця Klarna';
+$_['entry_pending_status'] = 'Очікування статусу';
+$_['entry_secret'] = 'Секрет Кларни';
+$_['entry_server'] = 'Сервер';
+$_['entry_sort_order'] = 'Порядок сортування';
+$_['entry_status'] = 'Статус';
+$_['entry_total'] = 'Всього';
+$_['error_curl'] = 'Помилка згортання - Код: %d; Повідомлення: %s';
+$_['error_log'] = 'Виникли помилки під час оновлення модуля. Будь ласка, перевірте файл журналу.';
+$_['error_pclass'] = 'Не вдалося отримати pClass для %s. Код помилки: %s; Повідомлення про помилку: %s';
+$_['error_permission'] = 'Увага: У вас немає дозволу на зміну способу оплати. Частковий платіж Klarna!';
+$_['heading_title'] = 'Обліковий запис Klarna';
+$_['help_merchant'] = '(ідентифікатор магазину) для використання в сервісі Klarna (надається Klarna).';
+$_['help_secret'] = 'Спільний секретний ключ для використання з сервісом Klarna (надається Klarna).';
+$_['help_total'] = 'Загальна сума замовлення, яку має досягти, перш ніж цей спосіб оплати стане активним.';
+$_['text_beta'] = 'Бета-версія';
+$_['text_denmark'] = 'Данія';
+$_['text_edit'] = 'Редагувати обліковий запис Klarna';
+$_['text_extension'] = 'Розширення';
+$_['text_finland'] = 'Фінляндія';
+$_['text_germany'] = 'Німеччина';
+$_['text_klarna_account'] = '<a href="https://merchants.klarna.com/signup?locale=en&partner_id=d5c87110cebc383a826364769047042e777da5e8&utm_campaign=Platform&utm_medium=Partners&utm_source=Opencart" target="_blank"><img src="https://cdn.klarna.com/public/images/global/logos/v1/basic/global_basic_logo_std_blue-black.png?width=60&eid=opencart" alt="Klarna Account" title="Обліковий запис Klarna" style="border: 1px solid #EEEEEE;" /></a>';
+$_['text_live'] = 'Живий';
+$_['text_netherlands'] = 'Нідерланди';
+$_['text_norway'] = 'Норвегія';
+$_['text_success'] = 'Успіх: Ви змінили платіжний модуль Klarna!';
+$_['text_sweden'] = 'Швеція';

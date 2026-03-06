@@ -1,0 +1,108 @@
+<section id="hero" class="relative w-full h-[56vh] min-h-[340px] max-h-[540px] overflow-hidden">
+  <div id="hero-slides" class="relative w-full h-full">
+    {% for banner in banners %}
+    <div class="hero-slide absolute inset-0{% if not loop.first %} opacity-0{% endif %}" data-slide="{{ loop.index0 }}">
+      {% if banner.link %}
+      <a href="{{ banner.link }}" class="absolute inset-0 z-0" aria-label="{{ banner.title }}"></a>
+      {% endif %}
+      {% if banner.image_portrait %}
+      <picture>
+        <source media="(orientation: portrait)" srcset="{{ banner.image_portrait }}" />
+        <source media="(orientation: landscape)" srcset="{{ banner.image }}" />
+        <img src="{{ banner.image }}" alt="{{ banner.title }}" class="w-full h-full object-cover" loading="lazy" />
+      </picture>
+      {% else %}
+      <img src="{{ banner.image }}" alt="{{ banner.title }}" class="w-full h-full object-cover" loading="lazy" />
+      {% endif %}
+
+      <div class="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent"></div>
+
+      <div class="absolute inset-0 flex items-center z-10">
+        <div class="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 w-full">
+          {% if banner.badge %}
+          {%- set badge_color = banner.accent_color ? banner.accent_color : '' -%}
+          <span class="banner-slide__badge inline-block text-white text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3"{% if badge_color or banner.accent_color or banner.accent_bg %} style="{% if badge_color %}color: {{ badge_color }};{% endif %}{% if banner.accent_color %} --accent: {{ banner.accent_color }};{% endif %}{% if banner.accent_bg %} --accent-bg: {{ banner.accent_bg }};{% endif %}"{% endif %}>{{ banner.badge }}</span>
+          {% endif %}
+          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white leading-tight max-w-xl mb-3">{{ banner.title_html|raw }}</h1>
+          {% if banner.subtitle %}
+          <p class="text-gray-200 text-sm sm:text-base max-w-md mb-5">{{ banner.subtitle }}</p>
+          {% endif %}
+          <div class="flex flex-wrap gap-3">
+            {% if banner.primary_btn_text %}
+            <a href="{{ banner.primary_btn_link ?: '#' }}" class="banner-slide__btn--primary px-7 py-3 font-semibold rounded-xl shadow-lg transition text-sm"{% if banner.accent_color or banner.accent_bg or banner.primary_btn_bg_color or banner.primary_btn_text_color %} style="{% if banner.primary_btn_bg_color %}background-color: {{ banner.primary_btn_bg_color }}; border-color: {{ banner.primary_btn_bg_color }};{% elseif banner.accent_color %}--accent: {{ banner.accent_color }};{% endif %}{% if banner.primary_btn_text_color %} color: {{ banner.primary_btn_text_color }};{% endif %}"{% endif %}>{{ banner.primary_btn_text }}</a>
+            {% endif %}
+            {% if banner.secondary_btn_text %}
+            <a href="{{ banner.secondary_btn_link ?: '#' }}" class="px-7 py-3 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white font-semibold rounded-xl border border-white/30 transition text-sm">{{ banner.secondary_btn_text }}</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if banners|length > 1 %}
+  <button onclick="prevSlide_{{ module }}()" class="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-sm border border-white/30 transition" aria-label="Previous">
+    <i data-lucide="chevron-left" class="w-5 h-5 text-white"></i>
+  </button>
+  <button onclick="nextSlide_{{ module }}()" class="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-sm border border-white/30 transition" aria-label="Next">
+    <i data-lucide="chevron-right" class="w-5 h-5 text-white"></i>
+  </button>
+
+  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+    {% for banner in banners %}
+    <button class="hero-dot {% if not loop.first %}opacity-50{% endif %}" style="{% if loop.first %}width:32px;{% else %}width:8px;opacity:0.5;{% endif %} height:8px; border-radius:999px; background:#ffffff;" data-dot="{{ loop.index0 }}" onclick="goToSlide_{{ module }}({{ loop.index0 }})" aria-label="Go to slide {{ loop.index }}"></button>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <script>
+    (function(){
+      const moduleId = '{{ module }}';
+      const slides = document.querySelectorAll('#hero .hero-slide');
+      const dots = document.querySelectorAll('#hero .hero-dot');
+      if (!slides.length) return;
+
+      let currentSlide_{{ module }} = 0;
+      const totalSlides_{{ module }} = slides.length;
+      let slideInterval_{{ module }} = null;
+
+      function applyState(idx){
+        slides.forEach((s,i)=>{
+          s.style.opacity = (i===idx)? '1' : '0';
+        });
+        dots.forEach((d,i)=>{
+          if(i===idx){ d.style.width='32px'; d.style.opacity='1'; } else { d.style.width='8px'; d.style.opacity='0.5'; }
+        });
+      }
+
+      window.goToSlide_{{ module }} = function(index){
+        applyState(index);
+        currentSlide_{{ module }} = index;
+        resetSlideTimer_{{ module }}();
+      }
+
+      window.nextSlide_{{ module }} = function(){
+        window.goToSlide_{{ module }}((currentSlide_{{ module }} + 1) % totalSlides_{{ module }});
+      }
+
+      window.prevSlide_{{ module }} = function(){
+        window.goToSlide_{{ module }}((currentSlide_{{ module }} - 1 + totalSlides_{{ module }}) % totalSlides_{{ module }});
+      }
+
+      function resetSlideTimer_{{ module }}(){
+        clearInterval(slideInterval_{{ module }});
+        slideInterval_{{ module }} = setInterval(window.nextSlide_{{ module }}, 5000);
+      }
+
+      // wire dot clicks
+      dots.forEach(d=> d.addEventListener('click', (e)=> window.goToSlide_{{ module }}(parseInt(e.target.dataset.dot))));
+
+      // init
+      applyState(0);
+      resetSlideTimer_{{ module }}();
+      // initialize lucide icons if available
+      if (window.lucide) lucide.createIcons();
+    })();
+  </script>
+</section>

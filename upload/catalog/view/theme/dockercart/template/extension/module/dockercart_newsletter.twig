@@ -1,0 +1,118 @@
+<section id="newsletter" class="py-20 px-4 sm:px-6 lg:px-8 bg-gray-100">
+  <div class="max-w-2xl mx-auto text-center" id="{{ module_id }}">
+    <div class="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center mx-auto mb-5">
+      <i data-lucide="mail" class="w-7 h-7 text-blue-600"></i>
+    </div>
+
+    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold uppercase tracking-widest mb-4">
+      <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+      {{ text_badge }}
+    </span>
+
+    <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-3">{{ title }}</h2>
+    <p class="text-gray-500 mb-8 text-sm sm:text-base">{{ subtitle }}</p>
+
+    <div class="hidden" id="{{ module_id }}-success-box">
+      <div class="inline-flex items-center gap-2 px-4 py-3 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-700 font-semibold text-sm">
+        <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+        <span id="{{ module_id }}-success-text">{{ already_text }}</span>
+      </div>
+    </div>
+
+    <form id="{{ module_id }}-form" class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+      <input
+        type="email"
+        id="{{ module_id }}-email"
+        placeholder="{{ placeholder }}"
+        value="{{ prefill_email }}"
+        required
+        class="flex-1 px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition"
+      />
+      <button type="submit" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-sm transition shadow-md shadow-blue-200 flex-shrink-0">
+        {{ button_text }}
+      </button>
+    </form>
+
+    <div class="mt-5 flex flex-wrap justify-center gap-2 text-xs text-gray-500">
+      <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white border border-gray-200">✓ {{ text_trust_1 }}</span>
+      <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white border border-gray-200">✓ {{ text_trust_2 }}</span>
+      <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white border border-gray-200">✓ {{ text_trust_3 }}</span>
+    </div>
+
+    <p class="text-xs text-gray-400 mt-4">{{ privacy_text }}</p>
+  </div>
+</section>
+
+<script>
+(function() {
+  var rootId = '{{ module_id }}';
+  var root = document.getElementById(rootId);
+  if (!root) return;
+
+  var form = document.getElementById(rootId + '-form');
+  var input = document.getElementById(rootId + '-email');
+  var successBox = document.getElementById(rootId + '-success-box');
+  var successText = document.getElementById(rootId + '-success-text');
+  var localizedSuccessText = '{{ success_text|e('js') }}';
+  var localizedAlreadyText = '{{ already_text|e('js') }}';
+
+  function showSubscribed(message) {
+    if (successText && message) {
+      successText.textContent = message;
+    }
+
+    if (form) {
+      form.classList.add('hidden');
+    }
+
+    if (successBox) {
+      successBox.classList.remove('hidden');
+    }
+
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      window.lucide.createIcons();
+    }
+  }
+
+  {% if is_subscribed %}
+    showSubscribed('{{ already_text|e('js') }}');
+  {% endif %}
+
+  if (!form) return;
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    var email = input ? input.value.trim() : '';
+
+    var formData = new FormData();
+    formData.append('email', email);
+    formData.append('success_text', localizedSuccessText);
+    formData.append('already_text', localizedAlreadyText);
+
+    	var endpoint = '{{ subscribe_url }}';
+
+    	// If SEO-friendly URLs are enabled but the server doesn't have rewrite rules,
+    	// the generated URL may 404 (missing index.php). Fall back to index.php route.
+    	if (endpoint.indexOf('index.php') === -1 && endpoint.indexOf('?route=') === -1) {
+    		endpoint = window.location.origin + '/index.php?route=extension/module/dockercart_newsletter/subscribe';
+    	}
+
+    	fetch(endpoint, {
+      method: 'POST',
+      body: formData,
+      credentials: 'same-origin'
+    })
+      .then(function(response) { return response.json(); })
+      .then(function(json) {
+        if (json && json.success) {
+          var fallbackMessage = json.already ? localizedAlreadyText : localizedSuccessText;
+          showSubscribed(json.message || fallbackMessage);
+        }
+      })
+      .catch(function() {
+        // Soft fail: keep UX calm, do not break page layout.
+      });
+  });
+})();
+</script>
