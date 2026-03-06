@@ -86,6 +86,9 @@ build-extension.sh
 /docs/
 !/docs/modules/
 
+/docker/nginx/cache/
+/docker/nginx/cache/**
+
 /.serena/
 
 *.backup
