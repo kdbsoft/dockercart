@@ -128,7 +128,7 @@ class Image {
 		$extension = strtolower($info['extension']);
 		$directory = dirname($file);
 
-		if (!is_dir($directory) && !mkdir($directory, 0775, true) && !is_dir($directory)) {
+		if (!is_dir($directory) && !@mkdir($directory, 0775, true) && !is_dir($directory)) {
 			error_log('Error: Could not create image cache directory: ' . $directory);
 			return;
 		}
