@@ -1,4 +1,4 @@
-.PHONY: help up standalone ssl letsencrypt down logs logs-follow shell mariadb backup restore clean restart
+.PHONY: help up standalone ssl letsencrypt down logs logs-follow shell mariadb backup restore dump-init clean restart
 
 ### Convenience variables
 COMPOSE := docker compose
@@ -65,6 +65,20 @@ restore: ## Restore from the latest dump in ./backups/
 	echo "Restoring $$LATEST"; \
 	$(COMPOSE) exec -T mariadb mariadb -udockercart -pdockercart_password dockercart < $$LATEST
 	@echo "Restored"
+
+dump-init: ## Regenerate docker/mysql/init.sql from running MariaDB (full dump: data, routines, triggers, events)
+	@mkdir -p docker/mysql
+	@echo "Backing up existing docker/mysql/init.sql to docker/mysql/init.sql.bak.$$(date -u +%Y%m%dT%H%M%SZ)"
+	@cp -a docker/mysql/init.sql docker/mysql/init.sql.bak.$$(date -u +%Y%m%dT%H%M%SZ) || true
+	@TMP_FILE=$$(mktemp docker/mysql/init.sql.tmp.XXXXXX); \
+	echo "Generating new dump (may take some time)..."; \
+	if ! $(COMPOSE) exec -T mariadb sh -c 'mariadb-dump -u"$${MARIADB_USER:-dockercart}" -p"$${MARIADB_PASSWORD:-dockercart_password}" "$${MARIADB_DATABASE:-dockercart}" --single-transaction --quick --hex-blob --routines --triggers --events --default-character-set=utf8mb4' | sed -e 's/DEFINER=[^ ]*//g' > $$TMP_FILE; then \
+		rm -f $$TMP_FILE; \
+		echo "Dump failed"; \
+		exit 1; \
+	fi; \
+	mv $$TMP_FILE docker/mysql/init.sql; \
+	echo "Dump written to docker/mysql/init.sql — review and commit when ready."
 
 clean: down ## DESTRUCTIVE: Stop containers and remove all volumes
 	@echo "WARNING: All database data will be lost."
