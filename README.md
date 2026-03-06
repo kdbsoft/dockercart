@@ -37,7 +37,7 @@ OpenCart is a solid foundation, but running it in production has historically me
 | Database | MySQL 8.0 |
 | Object cache | Memcached 1.6 |
 | Full-text search | Manticore Search |
-| Reverse proxy | Traefik v2 *(optional)* |
+| Reverse proxy | Traefik v3 *(optional)* |
 | SSL | Let's Encrypt / self-signed |
 
 ---
@@ -167,7 +167,7 @@ make restart       # Restart containers
 make logs          # Show last 100 log lines
 make logs-follow   # Follow logs
 make shell         # bash into the app container
-make mysql         # Open MySQL CLI
+make mariadb       # Open MariaDB CLI
 make backup        # Dump DB to ./backups/
 make restore       # Restore from latest dump in ./backups/
 make clean         # Stop + remove all volumes (destructive)
@@ -249,7 +249,7 @@ DOCKERCART_SSL_ENABLED=false
 DOCKERCART_HTTP_PORT=80
 
 # Database
-DB_HOSTNAME=mysql
+DB_HOSTNAME=mariadb
 DB_USERNAME=dockercart
 DB_PASSWORD=dockercart_password
 

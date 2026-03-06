@@ -33,6 +33,135 @@ wait_for_mysql() {
     echo "MariaDB is up and running!"
 }
 
+# Гарантированно создаем config.php файлы (если их нет на хосте/в bind mount)
+ensure_app_configs() {
+    local root_config="/var/www/html/config.php"
+    local admin_config="/var/www/html/admin/config.php"
+
+    if [ ! -f "$root_config" ]; then
+        echo "Creating missing $root_config ..."
+        cat > "$root_config" <<'PHP'
+<?php
+// * Catalog Configuration File
+
+$env = static function (string $key, string $default): string {
+	$value = getenv($key);
+
+	return ($value === false || $value === '') ? $default : $value;
+};
+
+$httpServer = rtrim($env('DOCKERCART_URL', 'http://dockercart.local'), '/') . '/';
+$sslEnabled = filter_var($env('DOCKERCART_SSL_ENABLED', 'false'), FILTER_VALIDATE_BOOLEAN);
+$httpsServer = $sslEnabled
+	? rtrim($env('DOCKERCART_HTTPS_URL', $httpServer), '/') . '/'
+	: $httpServer;
+
+// HTTP
+define('HTTP_SERVER', $httpServer);
+
+// HTTPS
+define('HTTPS_SERVER', $httpsServer);
+
+
+// DIR
+define('DIR_APPLICATION', '/var/www/html/catalog/');
+define('DIR_SYSTEM', '/var/www/html/system/');
+define('DIR_IMAGE', '/var/www/html/image/');
+define('DIR_STORAGE', '/var/www/storage/');
+define('DIR_LANGUAGE', DIR_APPLICATION . 'language/');
+define('DIR_TEMPLATE', DIR_APPLICATION . 'view/theme/');
+define('DIR_CONFIG', DIR_SYSTEM . 'config/');
+define('DIR_CACHE', DIR_STORAGE . 'cache/');
+define('DIR_DOWNLOAD', DIR_STORAGE . 'download/');
+define('DIR_LOGS', DIR_STORAGE . 'logs/');
+define('DIR_MODIFICATION', DIR_STORAGE . 'modification/');
+define('DIR_SESSION', DIR_STORAGE . 'session/');
+define('DIR_UPLOAD', DIR_STORAGE . 'upload/');
+
+// DB
+define('DB_DRIVER', 'mysqli');
+define('DB_HOSTNAME', $env('DB_HOSTNAME', 'mariadb'));
+define('DB_USERNAME', $env('DB_USERNAME', 'dockercart'));
+define('DB_PASSWORD', $env('DB_PASSWORD', 'dockercart_password'));
+define('DB_DATABASE', $env('DB_DATABASE', 'dockercart'));
+define('DB_PORT', $env('DB_PORT', '3306'));
+define('DB_PREFIX', $env('DB_PREFIX', 'oc_'));
+
+// Cache
+define('CACHE_HOSTNAME', $env('CACHE_HOSTNAME', 'memcached'));
+define('CACHE_PORT', $env('CACHE_PORT', '11211'));
+define('CACHE_PREFIX', $env('CACHE_PREFIX', 'oc_'));
+PHP
+    fi
+
+    if [ ! -f "$admin_config" ]; then
+        echo "Creating missing $admin_config ..."
+        mkdir -p /var/www/html/admin
+        cat > "$admin_config" <<'PHP'
+<?php
+// * Admin Configuration File
+
+$env = static function (string $key, string $default): string {
+	$value = getenv($key);
+
+	return ($value === false || $value === '') ? $default : $value;
+};
+
+$catalogHttpServer = rtrim($env('DOCKERCART_URL', 'http://dockercart.local'), '/') . '/';
+$sslEnabled = filter_var($env('DOCKERCART_SSL_ENABLED', 'false'), FILTER_VALIDATE_BOOLEAN);
+$catalogHttpsServer = $sslEnabled
+	? rtrim($env('DOCKERCART_HTTPS_URL', $catalogHttpServer), '/') . '/'
+	: $catalogHttpServer;
+
+// HTTP
+define('HTTP_SERVER', $catalogHttpServer . 'admin/');
+define('HTTP_CATALOG', $catalogHttpServer);
+
+// HTTPS
+define('HTTPS_SERVER', $catalogHttpsServer . 'admin/');
+define('HTTPS_CATALOG', $catalogHttpsServer);
+
+// DIR
+define('DIR_APPLICATION', '/var/www/html/admin/');
+define('DIR_SYSTEM', '/var/www/html/system/');
+define('DIR_IMAGE', '/var/www/html/image/');
+define('DIR_STORAGE', '/var/www/storage/');
+define('DIR_CATALOG', '/var/www/html/catalog/');
+define('DIR_LANGUAGE', DIR_APPLICATION . 'language/');
+define('DIR_TEMPLATE', DIR_APPLICATION . 'view/template/');
+define('DIR_CONFIG', DIR_SYSTEM . 'config/');
+define('DIR_CACHE', DIR_STORAGE . 'cache/');
+define('DIR_DOWNLOAD', DIR_STORAGE . 'download/');
+define('DIR_LOGS', DIR_STORAGE . 'logs/');
+define('DIR_MODIFICATION', DIR_STORAGE . 'modification/');
+define('DIR_SESSION', DIR_STORAGE . 'session/');
+define('DIR_UPLOAD', DIR_STORAGE . 'upload/');
+
+// DB
+define('DB_DRIVER', 'mysqli');
+define('DB_HOSTNAME', $env('DB_HOSTNAME', 'mariadb'));
+define('DB_USERNAME', $env('DB_USERNAME', 'dockercart'));
+define('DB_PASSWORD', $env('DB_PASSWORD', 'dockercart_password'));
+define('DB_DATABASE', $env('DB_DATABASE', 'dockercart'));
+define('DB_PORT', $env('DB_PORT', '3306'));
+define('DB_PREFIX', $env('DB_PREFIX', 'oc_'));
+
+// Cache
+define('CACHE_HOSTNAME', $env('CACHE_HOSTNAME', 'memcached'));
+define('CACHE_PORT', $env('CACHE_PORT', '11211'));
+define('CACHE_PREFIX', $env('CACHE_PREFIX', 'oc_'));
+
+// OpenCart API
+define('OPENCART_SERVER', 'https://www.opencart.com/');
+PHP
+    fi
+
+    if [ "$(id -u)" -eq 0 ]; then
+        chown www-data:www-data "$root_config" "$admin_config" 2>/dev/null || true
+        chmod 664 "$root_config" "$admin_config" 2>/dev/null || true
+    fi
+}
+
 # Миграция storage из upload/system/storage в /var/www/storage
 migrate_storage() {
     SOURCE_STORAGE="/var/www/html/system/storage"
@@ -105,6 +234,9 @@ set_permissions() {
 
 # Основная логика
 echo "Starting DockerCart container..."
+
+# Создаем конфиги приложения, если отсутствуют
+ensure_app_configs
 
 # Ждем MariaDB
 wait_for_mysql

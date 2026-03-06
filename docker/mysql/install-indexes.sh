@@ -2,20 +2,20 @@
 # DockerCart Filter - Auto-create required indexes
 # Usage: bash install-indexes.sh
 
-MYSQL_HOST=${MYSQL_HOST:-"mariadb"}
-MYSQL_USER=${MYSQL_USER:-"dockercart"}
-MYSQL_PASS=${MYSQL_PASS:-"dockercart_password"}
-MYSQL_DB=${MYSQL_DB:-"dockercart"}
-MYSQL_PORT=${MYSQL_PORT:-3306}
+MARIADB_HOST=${MARIADB_HOST:-"mariadb"}
+MARIADB_USER=${MARIADB_USER:-"dockercart"}
+MARIADB_PASSWORD=${MARIADB_PASSWORD:-"dockercart_password"}
+MARIADB_DATABASE=${MARIADB_DATABASE:-"dockercart"}
+MARIADB_PORT=${MARIADB_PORT:-3306}
 DB_PREFIX=${DB_PREFIX:-"oc_"}
 
 echo "🚀 Installing critical indexes for DockerCart Filter..."
-echo "Database: $MYSQL_DB on $MYSQL_HOST:$MYSQL_PORT"
+echo "Database: $MARIADB_DATABASE on $MARIADB_HOST:$MARIADB_PORT"
 echo ""
 
 # Function to execute SQL
 execute_sql() {
-    mysql -h "$MYSQL_HOST" -u "$MYSQL_USER" -p"$MYSQL_PASS" -P "$MYSQL_PORT" "$MYSQL_DB" -e "$1"
+    mysql -h "$MARIADB_HOST" -u "$MARIADB_USER" -p"$MARIADB_PASSWORD" -P "$MARIADB_PORT" "$MARIADB_DATABASE" -e "$1"
 }
 
 # Check connection
@@ -83,7 +83,7 @@ echo ""
 echo "📋 Verifying indexes on critical tables..."
 echo ""
 
-execute_sql "SELECT TABLE_NAME, INDEX_NAME, COLUMN_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = '$MYSQL_DB' AND (TABLE_NAME = '${DB_PREFIX}product' OR TABLE_NAME = '${DB_PREFIX}product_attribute' OR TABLE_NAME = '${DB_PREFIX}product_option_value' OR TABLE_NAME = '${DB_PREFIX}product_to_category') ORDER BY TABLE_NAME, INDEX_NAME;"
+execute_sql "SELECT TABLE_NAME, INDEX_NAME, COLUMN_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = '$MARIADB_DATABASE' AND (TABLE_NAME = '${DB_PREFIX}product' OR TABLE_NAME = '${DB_PREFIX}product_attribute' OR TABLE_NAME = '${DB_PREFIX}product_option_value' OR TABLE_NAME = '${DB_PREFIX}product_to_category') ORDER BY TABLE_NAME, INDEX_NAME;"
 
 echo ""
 echo "═══════════════════════════════════════════════════"
