@@ -65,7 +65,7 @@ class ModelToolImage extends Model {
 				$path = $path . '/' . $directory;
 
 				if (!is_dir(DIR_IMAGE . $path)) {
-					if (!@mkdir(DIR_IMAGE . $path, 0775) && !is_dir(DIR_IMAGE . $path)) {
+					if (!@mkdir(DIR_IMAGE . $path, 0777) && !is_dir(DIR_IMAGE . $path)) {
 						error_log('Error: Could not create image cache directory: ' . DIR_IMAGE . $path);
 						$cache_path_ready = false;
 						break;
