@@ -293,5 +293,5 @@ DockerCart is based on [OpenCart](https://github.com/opencart/opencart), which i
 
 ---
 
-**Official site:** [dockercart.com](https://dockercart.com) · **Demo:** [demo.dockercart.com](https://demo.dockercart.com) · **Support:** `support@dockercart.net`
+**Official site:** [dockercart.net](https://dockercart.net) · **Demo:** [demo.dockercart.net](https://demo.dockercart.net) · **Support:** `support@dockercart.net`
 
