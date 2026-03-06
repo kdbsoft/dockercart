@@ -1,0 +1,821 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
+  <style>
+    .dcx-shell { --dcx-primary:#2f65b9; }
+    .dcx-help { font-size:12px; color:#8b95a8; margin:6px 0 0; }
+    .dcx-map-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px 22px; }
+    .dcx-map-item { display:grid; grid-template-columns:1fr 110px; gap:8px; align-items:center; }
+    .dcx-map-item label { margin:0; font-size:13px; color:#46546f; }
+    .dcx-rules-table td, .dcx-rules-table th { vertical-align:middle !important; }
+    .dcx-rules-actions { width:26px; text-align:right; }
+    .dcx-rules-table { table-layout:fixed; }
+    .dcx-rules-table th:nth-child(1), .dcx-rules-table td:nth-child(1) { width:44%; }
+    .dcx-rules-table th:nth-child(2), .dcx-rules-table td:nth-child(2) { width:44%; }
+    .dcx-rules-table th:nth-child(3), .dcx-rules-table td:nth-child(3) { width:12%; }
+    .dcx-preview-toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px; }
+    .dcx-section > .dcx-panel-title { margin:0 0 14px 0; font-size:14px; }
+    .dcx-preview-state { font-size:12px; color:#7d889d; }
+    .dcx-preview-tabs { margin-bottom:8px; }
+    .dcx-preview-tabs .nav>li>a { padding:6px 10px; font-size:12px; }
+    #preview-wrapper .table { margin-bottom:0; font-size:12px; }
+    @media (max-width: 991px) {
+      .dcx-map-grid { grid-template-columns:1fr; }
+      .dcx-map-item { grid-template-columns:1fr 90px; }
+    }
+  </style>
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-profile" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+      </div>
+      <h1>{{ profile.profile_id ? text_edit_profile : text_add_profile }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    <div id="preview-notice"></div>
+
+    <ul class="nav nav-tabs dcx-profile-tabs" id="profile-tabs" role="tablist">
+      <li class="active"><a href="#tab-general" class="js-profile-tab" data-tab="tab-general" data-title="General" data-icon="fa-sliders" data-subtitle="{{ text_profile_subtitle_general }}" title="General"><i class="fa fa-sliders"></i>General</a></li>
+      <li><a href="#tab-source" class="js-profile-tab" data-tab="tab-source" data-title="Source" data-icon="fa-cloud-download" data-subtitle="{{ text_profile_subtitle_source }}" title="Source"><i class="fa fa-cloud-download"></i>Source</a></li>
+      <li><a href="#tab-import" class="js-profile-tab" data-tab="tab-import" data-title="Import" data-icon="fa-cogs" data-subtitle="{{ text_profile_subtitle_import }}" title="Import"><i class="fa fa-cogs"></i>Import</a></li>
+      <li><a href="#tab-mapping" class="js-profile-tab" data-tab="tab-mapping" data-title="Mapping" data-icon="fa-random" data-subtitle="{{ text_profile_subtitle_mapping }}" title="Mapping"><i class="fa fa-random"></i>Mapping</a></li>
+      <li><a href="#tab-preview" class="js-profile-tab" data-tab="tab-preview" data-title="Preview" data-icon="fa-eye" data-subtitle="{{ text_profile_subtitle_preview }}" title="Preview"><i class="fa fa-eye"></i>Preview</a></li>
+    </ul>
+
+    <div class="dcx-shell">
+    <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i id="panel-tab-icon" class="fa fa-sliders"></i></div>
+          <div>
+            <h3 class="dcx-panel-title" id="panel-tab-title">General</h3>
+            <div class="dcx-panel-subtitle" id="panel-tab-subtitle">{{ text_profile_subtitle_general }}</div>
+          </div>
+        </div>
+      <div class="dcx-panel-body">
+        <form action="{{ action }}" method="post" id="form-profile" class="form-horizontal dcx-form">
+          <input type="hidden" name="profile_id" value="{{ profile.profile_id }}" />
+
+          <div id="tab-general" class="dcx-tab-pane active">
+          <div class="dcx-section" id="sec-general">
+            <h3 class="dcx-panel-title">{{ text_profile_settings }}</h3>
+
+          <div class="form-group required">
+            <label class="col-sm-3 control-label" for="input-name">{{ entry_name }}</label>
+            <div class="col-sm-9">
+              <input type="text" name="name" value="{{ profile.name }}" id="input-name" class="form-control" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for="input-supplier-code">{{ entry_supplier_code }}</label>
+            <div class="col-sm-9">
+              <input type="text" name="supplier_code" value="{{ profile.supplier_code }}" id="input-supplier-code" class="form-control" />
+            </div>
+          </div>
+
+          </div>
+          </div>
+
+          <div id="tab-source" class="dcx-tab-pane">
+          <div class="dcx-section" id="sec-source">
+            <h3 class="dcx-panel-title">Source</h3>
+
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for="input-source-type">{{ entry_source_type }}</label>
+            <div class="col-sm-9">
+              <select name="source_type" id="input-source-type" class="form-control">
+                <option value="url" {% if profile.source_type == 'url' %}selected{% endif %}>{{ text_source_url }}</option>
+                <option value="file" {% if profile.source_type == 'file' %}selected{% endif %}>{{ text_source_file }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group source-url-only">
+            <label class="col-sm-3 control-label" for="input-source-url">{{ entry_source_url }}</label>
+            <div class="col-sm-9">
+              <input type="text" name="source_url" value="{{ profile.source_url }}" id="input-source-url" class="form-control" />
+            </div>
+          </div>
+
+          <div class="form-group source-file-only">
+            <label class="col-sm-3 control-label" for="input-source-file">{{ entry_source_file }}</label>
+            <div class="col-sm-9">
+              <div class="input-group">
+                <input type="text" name="source_file" value="{{ profile.source_file }}" id="input-source-file" class="form-control" />
+                <span class="input-group-btn">
+                  <button type="button" class="btn btn-info" id="btn-upload-source"><i class="fa fa-upload"></i> {{ button_upload_file }}</button>
+                </span>
+              </div>
+              <p class="dcx-help">CSV / XLSX file from supplier feed.</p>
+              <input type="file" id="source-upload" style="display:none;" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for="input-source-format">{{ entry_source_format }}</label>
+            <div class="col-sm-9">
+              <select name="source_format" id="input-source-format" class="form-control">
+                <option value="auto" {% if profile.source_format == 'auto' %}selected{% endif %}>{{ text_format_auto }}</option>
+                <option value="csv" {% if profile.source_format == 'csv' %}selected{% endif %}>{{ text_format_csv }}</option>
+                <option value="xlsx" {% if profile.source_format == 'xlsx' %}selected{% endif %}>{{ text_format_xlsx }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group xlsx-only">
+            <label class="col-sm-3 control-label" for="input-sheet-index">{{ entry_sheet_index }}</label>
+            <div class="col-sm-9">
+              <input type="number" min="0" name="sheet_index" value="{{ profile.sheet_index }}" id="input-sheet-index" class="form-control" />
+            </div>
+          </div>
+
+          <div class="form-group csv-only">
+            <label class="col-sm-3 control-label" for="input-delimiter">{{ entry_delimiter }}</label>
+            <div class="col-sm-9">
+              <input type="text" name="delimiter" value="{{ profile.delimiter }}" id="input-delimiter" class="form-control" />
+            </div>
+          </div>
+
+          </div>
+          </div>
+
+          <div id="tab-import" class="dcx-tab-pane">
+          <div class="dcx-section" id="sec-import">
+            <h3 class="dcx-panel-title">Import Rules</h3>
+
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for="input-has-header">{{ entry_has_header }}</label>
+            <div class="col-sm-9">
+              <select name="has_header" id="input-has-header" class="form-control">
+                <option value="1" {% if profile.has_header %}selected{% endif %}>{{ text_enabled }}</option>
+                <option value="0" {% if not profile.has_header %}selected{% endif %}>{{ text_disabled }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for="input-start-row">{{ entry_start_row }}</label>
+            <div class="col-sm-9">
+              <input type="number" min="1" name="start_row" value="{{ profile.start_row }}" id="input-start-row" class="form-control" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for="input-import-mode">{{ entry_import_mode }}</label>
+            <div class="col-sm-9">
+              <select name="import_mode" id="input-import-mode" class="form-control">
+                <option value="add" {% if profile.import_mode == 'add' %}selected{% endif %}>{{ text_mode_add }}</option>
+                <option value="update" {% if profile.import_mode == 'update' %}selected{% endif %}>{{ text_mode_update }}</option>
+                <option value="update_only" {% if profile.import_mode == 'update_only' %}selected{% endif %}>{{ text_mode_update_only }}</option>
+                <option value="update_price_qty_only" {% if profile.import_mode == 'update_price_qty_only' %}selected{% endif %}>{{ text_mode_update_price_qty_only }}</option>
+                <option value="replace" {% if profile.import_mode == 'replace' %}selected{% endif %}>{{ text_mode_replace }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for="input-store-id">{{ entry_store_id }}</label>
+            <div class="col-sm-9">
+              <select name="store_id" id="input-store-id" class="form-control">
+                {% for store in stores %}
+                <option value="{{ store.store_id }}" {% if profile.store_id == store.store_id %}selected{% endif %}>{{ store.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for="input-language-id">{{ entry_language_id }}</label>
+            <div class="col-sm-9">
+              <select name="language_id" id="input-language-id" class="form-control">
+                {% for language in languages %}
+                <option value="{{ language.language_id }}" {% if profile.language_id == language.language_id %}selected{% endif %}>{{ language.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for="input-currency">{{ entry_currency_code }}</label>
+            <div class="col-sm-9">
+              <select name="currency_code" id="input-currency" class="form-control">
+                {% for currency in currencies %}
+                <option value="{{ currency.code }}" {% if profile.currency_code == currency.code %}selected{% endif %}>{{ currency.title }} ({{ currency.code }})</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for="input-default-category">{{ entry_default_category_id }}</label>
+            <div class="col-sm-9">
+              <select name="default_category_id" id="input-default-category" class="form-control">
+                <option value="0">-</option>
+                {% for category in categories %}
+                <option value="{{ category.category_id }}" {% if profile.default_category_id == category.category_id %}selected{% endif %}>{{ category.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for="input-profile-status">{{ entry_profile_status }}</label>
+            <div class="col-sm-9">
+              <select name="status" id="input-profile-status" class="form-control">
+                <option value="1" {% if profile.status %}selected{% endif %}>{{ text_enabled }}</option>
+                <option value="0" {% if not profile.status %}selected{% endif %}>{{ text_disabled }}</option>
+              </select>
+            </div>
+          </div>
+
+          </div>
+          </div>
+
+          <div id="tab-mapping" class="dcx-tab-pane">
+          <div class="dcx-section" id="sec-map">
+          <h3 class="dcx-panel-title">{{ text_field_mapping }}</h3>
+          <p class="text-muted">{{ text_field_mapping_hint }}</p>
+
+          {% set fm = profile.field_map %}
+          {% macro map_input(label, name, value) %}
+            <div class="dcx-map-item">
+              <label for="{{ name }}">{{ label }}</label>
+              <input type="number" min="0" class="form-control" id="{{ name }}" name="{{ name }}" value="{{ value }}" placeholder="1" />
+            </div>
+          {% endmacro %}
+
+          <div class="dcx-map-grid">
+            {{ _self.map_input(entry_map_external_id, 'map_external_id', fm.external_id) }}
+            {{ _self.map_input(entry_map_sku, 'map_sku', fm.sku) }}
+            {{ _self.map_input(entry_map_model, 'map_model', fm.model) }}
+            {{ _self.map_input(entry_map_name, 'map_name', fm.name) }}
+            {{ _self.map_input(entry_map_description, 'map_description', fm.description) }}
+            {{ _self.map_input(entry_map_price, 'map_price', fm.price) }}
+            {{ _self.map_input(entry_map_quantity, 'map_quantity', fm.quantity) }}
+            {{ _self.map_input(entry_map_manufacturer, 'map_manufacturer', fm.manufacturer) }}
+            {{ _self.map_input(entry_map_category, 'map_category', fm.category) }}
+            {{ _self.map_input(entry_map_image, 'map_image', fm.image) }}
+            <div class="dcx-map-item">
+              <label for="map_images">{{ entry_map_images }}</label>
+              <input type="text" class="form-control" id="map_images" name="map_images" value="{{ fm.images }}" placeholder="11,12,13" />
+            </div>
+          </div>
+          <p class="dcx-help">{{ text_map_images_hint }}</p>
+
+          </div>
+
+          <div class="dcx-section" id="sec-category-map">
+            <h3 class="dcx-panel-title">{{ text_category_mapping }}</h3>
+            <p class="text-muted">{{ text_category_mapping_builder_hint }}</p>
+
+            <input type="hidden" name="category_rules_json" id="input-category-rules-json" />
+            <div class="table-responsive">
+              <table class="table table-bordered table-condensed dcx-rules-table" id="category-rules-table">
+                <thead>
+                  <tr>
+                    <th>{{ entry_supplier_category }}</th>
+                    <th>{{ entry_local_category }}</th>
+                    <th class="dcx-rules-actions">
+                      <button type="button" class="btn btn-primary btn-xs" id="btn-add-category-rule"><i class="fa fa-plus"></i></button>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="dcx-section" id="sec-attribute-map">
+            <h3 class="dcx-panel-title">{{ text_attribute_mapping }}</h3>
+            <p class="text-muted">{{ text_attribute_mapping_hint }}</p>
+
+            <input type="hidden" name="attribute_rules_json" id="input-attribute-rules-json" />
+            <div class="table-responsive">
+              <table class="table table-bordered table-condensed dcx-rules-table" id="attribute-rules-table">
+                <thead>
+                  <tr>
+                    <th>{{ entry_attribute }}</th>
+                    <th>{{ entry_column_number }}</th>
+                    <th class="dcx-rules-actions">
+                      <button type="button" class="btn btn-primary btn-xs" id="btn-add-attribute-rule"><i class="fa fa-plus"></i></button>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="dcx-section" id="sec-option-map">
+            <h3 class="dcx-panel-title">{{ text_option_mapping }}</h3>
+            <p class="text-muted">{{ text_option_mapping_hint }}</p>
+
+            <input type="hidden" name="option_rules_json" id="input-option-rules-json" />
+            <div class="table-responsive">
+              <table class="table table-bordered table-condensed dcx-rules-table" id="option-rules-table">
+                <thead>
+                  <tr>
+                    <th>{{ entry_option }}</th>
+                    <th>{{ entry_column_number }}</th>
+                    <th class="dcx-rules-actions">
+                      <button type="button" class="btn btn-primary btn-xs" id="btn-add-option-rule"><i class="fa fa-plus"></i></button>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+          </div>
+
+        </form>
+
+        <div id="tab-preview" class="dcx-tab-pane">
+        <div class="dcx-section" id="sec-preview">
+        <div class="dcx-preview-toolbar">
+          <h3 class="dcx-panel-title" style="margin:0;">{{ text_preview }}</h3>
+          <button type="button" class="btn btn-default" id="btn-preview"><i class="fa fa-eye"></i> {{ button_preview }}</button>
+        </div>
+        <div class="dcx-preview-state" id="preview-state"></div>
+
+        <div id="preview-wrapper" style="margin-top:15px;display:none;">
+          <ul class="nav nav-tabs dcx-preview-tabs" role="tablist">
+            <li class="active"><a href="#tab-preview-raw" data-toggle="tab">{{ text_preview_raw_rows }}</a></li>
+            <li><a href="#tab-preview-mapped" data-toggle="tab">{{ text_preview_mapped_rows }}</a></li>
+          </ul>
+
+          <div class="tab-content">
+            <div class="tab-pane active" id="tab-preview-raw">
+              <div class="table-responsive">
+                <table class="table table-bordered table-condensed" id="preview-raw-table"></table>
+              </div>
+            </div>
+            <div class="tab-pane" id="tab-preview-mapped">
+              <div class="table-responsive">
+                <table class="table table-bordered table-condensed" id="preview-mapped-table"></table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+(function() {
+  var categoriesRaw = {{ categories|default([])|json_encode|raw }};
+  var attributesRaw = {{ attributes|default([])|json_encode|raw }};
+  var optionListRaw = {{ options|default([])|json_encode|raw }};
+  var categories = toList(categoriesRaw);
+  var attributes = toList(attributesRaw);
+  var optionList = toList(optionListRaw);
+  var categoryRulesInitial = {{ profile.extra_settings.category_rules|default([])|json_encode|raw }};
+  var attributeRulesInitial = {{ profile.extra_settings.attribute_rules|default([])|json_encode|raw }};
+  var optionRulesInitial = {{ profile.extra_settings.option_rules|default([])|json_encode|raw }};
+
+  categoryRulesInitial = toList(categoryRulesInitial);
+  attributeRulesInitial = toList(attributeRulesInitial);
+  optionRulesInitial = toList(optionRulesInitial);
+
+  function toList(value) {
+    if (Array.isArray(value)) {
+      return value;
+    }
+
+    if (value && typeof value === 'object') {
+      return Object.keys(value).map(function(k) { return value[k]; });
+    }
+
+    return [];
+  }
+
+  function showNotice(type, message) {
+    var cls = (type === 'success') ? 'alert-success' : 'alert-danger';
+    $('#preview-notice').html('<div class="alert ' + cls + ' alert-dismissible"><button type="button" class="close" data-dismiss="alert">&times;</button>' + message + '</div>');
+  }
+
+  function updatePanelTitleByTab($tabLink) {
+    var title = $tabLink && $tabLink.length ? ($tabLink.data('title') || '') : '';
+    var icon = $tabLink && $tabLink.length ? ($tabLink.data('icon') || '') : '';
+    var subtitle = $tabLink && $tabLink.length ? ($tabLink.data('subtitle') || '') : '';
+
+    if (!title) {
+      title = 'General';
+    }
+
+    if (!icon) {
+      icon = 'fa-sliders';
+    }
+
+    if (!subtitle) {
+      subtitle = '{{ text_profile_subtitle_general }}';
+    }
+
+    icon = String(icon).replace(/[^a-z0-9\-]/gi, '');
+    $('#panel-tab-title').text(title);
+    $('#panel-tab-icon').attr('class', 'fa ' + icon);
+    $('#panel-tab-subtitle').text(subtitle);
+  }
+
+  function decodeEntities(value) {
+    return $('<textarea/>').html(String(value || '')).text();
+  }
+
+  function normalizeLabel(label) {
+    var text = decodeEntities(label || '');
+    text = text.replace(/\u00a0/g, ' ');
+
+    var leading = (text.match(/^\s+/) || [''])[0].length;
+    var level = Math.min(5, Math.floor(leading / 2));
+    var prefix = '';
+    for (var i = 0; i < level; i++) {
+      prefix += '— ';
+    }
+
+    text = text.trim();
+    return prefix + text;
+  }
+
+  function toggleSourceTypeFields() {
+    var sourceType = $('#input-source-type').val();
+    $('.source-url-only').toggle(sourceType === 'url');
+    $('.source-file-only').toggle(sourceType === 'file');
+  }
+
+  function toggleFormatFields() {
+    var sourceFormat = $('#input-source-format').val();
+    if (sourceFormat === 'xlsx') {
+      $('.csv-only').hide();
+      $('.xlsx-only').show();
+    } else if (sourceFormat === 'csv') {
+      $('.csv-only').show();
+      $('.xlsx-only').hide();
+    } else {
+      $('.csv-only').show();
+      $('.xlsx-only').show();
+    }
+  }
+
+  function uploadFile() {
+    var input = document.getElementById('source-upload');
+    if (!input || !input.files || !input.files[0]) {
+      showNotice('error', 'Select a file first');
+      return;
+    }
+
+    var formData = new FormData();
+    formData.append('source_file', input.files[0]);
+
+    $.ajax({
+      url: '{{ ajax_upload_source }}',
+      type: 'post',
+      data: formData,
+      processData: false,
+      contentType: false,
+      dataType: 'json',
+      success: function(json) {
+        if (json.success) {
+          $('#input-source-type').val('file');
+          $('#input-source-file').val(json.source_file || '');
+          if (json.source_format) {
+            $('#input-source-format').val(json.source_format);
+          }
+          toggleSourceTypeFields();
+          toggleFormatFields();
+          showNotice('success', '{{ text_upload_success }}');
+        } else {
+          showNotice('error', json.error || 'Upload failed');
+        }
+      },
+      error: function(xhr, ajaxOptions, thrownError) {
+        showNotice('error', thrownError);
+      }
+    });
+  }
+
+  function collectFormData() {
+    var result = {};
+    $('#form-profile').serializeArray().forEach(function(item) {
+      result[item.name] = item.value;
+    });
+    return result;
+  }
+
+  function esc(value) {
+    return $('<div>').text(value === null || typeof value === 'undefined' ? '' : String(value)).html();
+  }
+
+  function buildCategoryOptions(selectedId) {
+    var html = '<option value="0">-</option>';
+    categories.forEach(function(c) {
+      var selected = (parseInt(selectedId, 10) === parseInt(c.category_id, 10)) ? ' selected' : '';
+      html += '<option value="' + esc(c.category_id) + '"' + selected + '>' + esc(normalizeLabel(c.name)) + '</option>';
+    });
+    return html;
+  }
+
+  function buildAttributeOptions(selectedId) {
+    if (!attributes.length) {
+      return '<option value="0">-</option>';
+    }
+
+    var groups = {};
+    attributes.forEach(function(a) {
+      var group = decodeEntities(a.attribute_group || a.attribute_group_name || a.group_name || 'Other');
+      if (!groups[group]) {
+        groups[group] = [];
+      }
+      groups[group].push(a);
+    });
+
+    var html = '<option value="0">-</option>';
+    Object.keys(groups).sort().forEach(function(groupName) {
+      html += '<optgroup label="' + esc(groupName) + '">';
+      groups[groupName].forEach(function(a) {
+        var selected = (parseInt(selectedId, 10) === parseInt(a.attribute_id, 10)) ? ' selected' : '';
+        var label = decodeEntities(a.name || a.attribute_name || a.title || ('Attribute #' + (a.attribute_id || '')));
+        html += '<option value="' + esc(a.attribute_id) + '"' + selected + '>' + esc(label) + '</option>';
+      });
+      html += '</optgroup>';
+    });
+
+    return html;
+  }
+
+  function buildOptionOptions(selectedId) {
+    if (!optionList.length) {
+      return '<option value="0">-</option>';
+    }
+
+    var groups = {};
+    optionList.forEach(function(o) {
+      var type = decodeEntities(o.type || 'other');
+      var group = type.toUpperCase();
+      if (!groups[group]) {
+        groups[group] = [];
+      }
+      groups[group].push(o);
+    });
+
+    var html = '<option value="0">-</option>';
+    Object.keys(groups).sort().forEach(function(groupName) {
+      html += '<optgroup label="' + esc(groupName) + '">';
+      groups[groupName].forEach(function(o) {
+        var selected = (parseInt(selectedId, 10) === parseInt(o.option_id, 10)) ? ' selected' : '';
+        var label = decodeEntities(o.name || o.option_name || o.title || ('Option #' + (o.option_id || '')));
+        html += '<option value="' + esc(o.option_id) + '"' + selected + '>' + esc(label) + '</option>';
+      });
+      html += '</optgroup>';
+    });
+
+    return html;
+  }
+
+  function addCategoryRuleRow(rule) {
+    rule = rule || {source:'', category_id:0};
+    var row = ''
+      + '<tr>'
+      + '  <td><input type="text" class="form-control js-cat-source" value="' + esc(rule.source || '') + '" placeholder="Supplier category" /></td>'
+      + '  <td><select class="form-control js-cat-local">' + buildCategoryOptions(rule.category_id || 0) + '</select></td>'
+      + '  <td class="dcx-rules-actions"><button type="button" class="btn btn-danger btn-xs js-remove-rule"><i class="fa fa-trash"></i></button></td>'
+      + '</tr>';
+    $('#category-rules-table tbody').append(row);
+  }
+
+  function addAttributeRuleRow(rule) {
+    rule = rule || {attribute_id:0, column:0};
+    var row = ''
+      + '<tr>'
+      + '  <td><select class="form-control js-attr-id">' + buildAttributeOptions(rule.attribute_id || 0) + '</select></td>'
+      + '  <td><input type="number" min="1" class="form-control js-attr-col" value="' + esc(rule.column || '') + '" placeholder="1" /></td>'
+      + '  <td class="dcx-rules-actions"><button type="button" class="btn btn-danger btn-xs js-remove-rule"><i class="fa fa-trash"></i></button></td>'
+      + '</tr>';
+    $('#attribute-rules-table tbody').append(row);
+  }
+
+  function addOptionRuleRow(rule) {
+    rule = rule || {option_id:0, column:0};
+    var row = ''
+      + '<tr>'
+      + '  <td><select class="form-control js-opt-id">' + buildOptionOptions(rule.option_id || 0) + '</select></td>'
+      + '  <td><input type="number" min="1" class="form-control js-opt-col" value="' + esc(rule.column || '') + '" placeholder="1" /></td>'
+      + '  <td class="dcx-rules-actions"><button type="button" class="btn btn-danger btn-xs js-remove-rule"><i class="fa fa-trash"></i></button></td>'
+      + '</tr>';
+    $('#option-rules-table tbody').append(row);
+  }
+
+  function collectRules() {
+    var categoryRules = [];
+    $('#category-rules-table tbody tr').each(function() {
+      var source = $.trim($(this).find('.js-cat-source').val() || '');
+      var categoryId = parseInt($(this).find('.js-cat-local').val() || '0', 10);
+      if (source && categoryId > 0) {
+        categoryRules.push({source: source, category_id: categoryId});
+      }
+    });
+
+    var attributeRules = [];
+    $('#attribute-rules-table tbody tr').each(function() {
+      var attributeId = parseInt($(this).find('.js-attr-id').val() || '0', 10);
+      var column = parseInt($(this).find('.js-attr-col').val() || '0', 10);
+      if (attributeId > 0 && column > 0) {
+        attributeRules.push({attribute_id: attributeId, column: column});
+      }
+    });
+
+    var optionRules = [];
+    $('#option-rules-table tbody tr').each(function() {
+      var optionId = parseInt($(this).find('.js-opt-id').val() || '0', 10);
+      var column = parseInt($(this).find('.js-opt-col').val() || '0', 10);
+      if (optionId > 0 && column > 0) {
+        optionRules.push({option_id: optionId, column: column});
+      }
+    });
+
+    $('#input-category-rules-json').val(JSON.stringify(categoryRules));
+    $('#input-attribute-rules-json').val(JSON.stringify(attributeRules));
+    $('#input-option-rules-json').val(JSON.stringify(optionRules));
+  }
+
+  function renderRawRows(rows) {
+    var $table = $('#preview-raw-table');
+    $table.empty();
+
+    if (!rows || !rows.length) {
+      $table.html('<tr><td>{{ text_no_preview_rows }}</td></tr>');
+      return;
+    }
+
+    var maxCol = 0;
+    rows.forEach(function(row) {
+      Object.keys(row).forEach(function(key) {
+        var idx = parseInt(key, 10);
+        if (idx > maxCol) maxCol = idx;
+      });
+    });
+
+    var thead = '<thead><tr>';
+    for (var i = 1; i <= maxCol; i++) {
+      thead += '<th>#' + i + '</th>';
+    }
+    thead += '</tr></thead>';
+
+    var tbody = '<tbody>';
+    rows.forEach(function(row) {
+      tbody += '<tr>';
+      for (var i = 1; i <= maxCol; i++) {
+        var value = (typeof row[i] !== 'undefined') ? row[i] : '';
+        tbody += '<td>' + $('<div>').text(value).html() + '</td>';
+      }
+      tbody += '</tr>';
+    });
+    tbody += '</tbody>';
+
+    $table.append(thead + tbody);
+  }
+
+  function renderMappedRows(rows) {
+    var $table = $('#preview-mapped-table');
+    $table.empty();
+
+    var fields = ['external_id','sku','model','name','description','price','quantity','manufacturer','category','image','images'];
+    var thead = '<thead><tr>';
+    fields.forEach(function(field) { thead += '<th>' + field + '</th>'; });
+    thead += '</tr></thead>';
+
+    var tbody = '<tbody>';
+    if (rows && rows.length) {
+      rows.forEach(function(row) {
+        tbody += '<tr>';
+        fields.forEach(function(field) {
+          var value = (typeof row[field] !== 'undefined') ? row[field] : '';
+          tbody += '<td>' + $('<div>').text(value).html() + '</td>';
+        });
+        tbody += '</tr>';
+      });
+    } else {
+      tbody += '<tr><td colspan="11">{{ text_no_preview_rows }}</td></tr>';
+    }
+    tbody += '</tbody>';
+
+    $table.append(thead + tbody);
+  }
+
+  function previewSource() {
+    var payload = collectFormData();
+    var $btn = $('#btn-preview');
+    var originalHtml = $btn.html();
+
+    $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> {{ button_preview }}');
+    $('#preview-state').text('Loading preview...');
+
+    $.ajax({
+      url: '{{ ajax_preview_source }}',
+      type: 'post',
+      data: JSON.stringify(payload),
+      contentType: 'application/json',
+      dataType: 'json',
+      success: function(json) {
+        $btn.prop('disabled', false).html(originalHtml);
+        if (!json.success) {
+          $('#preview-state').text('');
+          showNotice('error', json.error || 'Preview failed');
+          return;
+        }
+
+        $('#preview-wrapper').show();
+        $('#preview-state').text('Preview loaded: ' + (json.rows ? json.rows.length : 0) + ' row(s).');
+        renderRawRows(json.rows || []);
+        renderMappedRows(json.mapped || []);
+      },
+      error: function(xhr, ajaxOptions, thrownError) {
+        $btn.prop('disabled', false).html(originalHtml);
+        $('#preview-state').text('');
+        showNotice('error', thrownError);
+      }
+    });
+  }
+
+  $('#input-source-type').on('change', toggleSourceTypeFields);
+  $('#input-source-format').on('change', toggleFormatFields);
+
+  $('#btn-upload-source').on('click', function() {
+    $('#source-upload').trigger('click');
+  });
+  $('#source-upload').on('change', uploadFile);
+
+  $('#btn-preview').on('click', previewSource);
+
+  $(document).on('click', '#btn-add-category-rule', function(e) { e.preventDefault(); addCategoryRuleRow(); });
+  $(document).on('click', '#btn-add-attribute-rule', function(e) { e.preventDefault(); addAttributeRuleRow(); });
+  $(document).on('click', '#btn-add-option-rule', function(e) { e.preventDefault(); addOptionRuleRow(); });
+
+  $(document).on('click', '.js-remove-rule', function() {
+    $(this).closest('tr').remove();
+  });
+
+  $(document).on('click', '.js-profile-tab', function(e) {
+    e.preventDefault();
+    var tabId = $(this).data('tab');
+    if (!tabId) {
+      return;
+    }
+
+    $('.dcx-tab-pane').removeClass('active');
+    $('#' + tabId).addClass('active');
+
+    $('#profile-tabs > li').removeClass('active');
+    $(this).closest('li').addClass('active');
+
+    updatePanelTitleByTab($(this));
+  });
+
+  $('#form-profile').on('submit', function() {
+    collectRules();
+  });
+
+  if (Array.isArray(categoryRulesInitial) && categoryRulesInitial.length) {
+    categoryRulesInitial.forEach(addCategoryRuleRow);
+  }
+  if (Array.isArray(attributeRulesInitial) && attributeRulesInitial.length) {
+    attributeRulesInitial.forEach(addAttributeRuleRow);
+  }
+  if (Array.isArray(optionRulesInitial) && optionRulesInitial.length) {
+    optionRulesInitial.forEach(addOptionRuleRow);
+  }
+
+  if (!$('#category-rules-table tbody tr').length) { addCategoryRuleRow(); }
+  if (!$('#attribute-rules-table tbody tr').length) { addAttributeRuleRow(); }
+  if (!$('#option-rules-table tbody tr').length) { addOptionRuleRow(); }
+
+  updatePanelTitleByTab($('#profile-tabs > li.active a.js-profile-tab'));
+
+  toggleSourceTypeFields();
+  toggleFormatFields();
+})();
+</script>
+{{ footer }}

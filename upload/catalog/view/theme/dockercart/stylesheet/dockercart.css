@@ -1,0 +1,661 @@
+/* =============================================================
+   DockerCart Theme — dockercart.css
+   ============================================================= */
+
+/* ── Base ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body, button, input, select, textarea { font-family: 'Manrope', sans-serif; }
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+/* ── Header spacer ────────────────────────────────────────── */
+/* top-bar(36) + main(56) + mobile-search(52) = 144 on mobile
+   top-bar(36) + main(56)                     = 92 on sm
+   + category-bar(40)                         = 132 on lg      */
+.dc-header-spacer {
+  height: 144px;
+}
+@media (min-width: 640px)  { .dc-header-spacer { height: 92px; } }
+@media (min-width: 1024px) { .dc-header-spacer { height: 132px; } }
+
+/* ── Category dropdown hover ──────────────────────────────── */
+.dc-cat-item { position: relative; }
+.dc-cat-dropdown {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  transform: translateY(6px);
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0s linear 0.18s;
+}
+.dc-cat-item:hover > .dc-cat-dropdown {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0s linear 0s;
+}
+
+/* ── Category second-level flyout ─────────────────────────── */
+.dc-cat-sub-item { position: relative; }
+.dc-cat-sub-dropdown {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(6px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  position: absolute;
+  left: calc(100% + 8px);
+  top: -6px;
+  z-index: 110;
+}
+.dc-cat-sub-item:hover > .dc-cat-sub-dropdown {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+.dc-sub-arrow { opacity: 0.4; }
+.dc-cat-sub-item:hover > a .dc-sub-arrow {
+  opacity: 1;
+  color: #2563eb;
+}
+
+/* ── Vertical catalog menu (header) ──────────────────────── */
+.dc-vertical-menu-panel {
+  position: fixed;
+  top: 92px;
+  left: 0;
+  right: 0;
+  z-index: 45;
+}
+.dc-vertical-menu-surface {
+  position: relative;
+  width: 320px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 25px 60px rgba(2, 6, 23, 0.14);
+  padding: 12px;
+}
+.dc-vertical-cat-item { position: relative; }
+.dc-vertical-cat-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: #374151;
+  padding: 8px 10px;
+  border-radius: 10px;
+  transition: all .15s ease;
+}
+.dc-vertical-cat-link:hover {
+  background: #eff6ff;
+  color: #2563eb;
+}
+.dc-vertical-cat-link.is-active {
+  background: #eff6ff;
+  color: #2563eb;
+  font-weight: 700;
+}
+.dc-vertical-submenu {
+  position: absolute;
+  left: calc(100% + 10px);
+  top: -2px;
+  min-width: 260px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  box-shadow: 0 20px 45px rgba(2, 6, 23, 0.14);
+  padding: 12px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(4px);
+  transition: opacity .15s ease, transform .15s ease;
+}
+.dc-vertical-cat-item:hover > .dc-vertical-submenu {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
+/* ── Mobile menu slide ────────────────────────────────────── */
+#dc-mobile-menu {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.dc-mobile-menu-closed {
+  transform: translateX(100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ── Search form integration ──────────────────────────────── */
+.dc-search-wrapper #search,
+.dc-search-mobile #search {
+  width: 100%;
+  margin: 0;
+}
+.dc-search-wrapper,
+.dc-search-mobile {
+  position: relative;
+  z-index: 600;
+}
+.dc-search-wrapper .input-group,
+.dc-search-mobile .input-group {
+  display: block;
+  position: relative;
+  width: 100%;
+}
+.dc-search-wrapper .input-group input,
+.dc-search-mobile .input-group input {
+  width: 100%;
+  padding: 0.625rem 1rem 0.625rem 2.5rem;
+  border-radius: 1rem;
+  background: #f3f4f6;
+  border: 1px solid transparent;
+  font-size: 0.875rem;
+  transition: border-color 0.15s, background 0.15s;
+  outline: none;
+  font-family: 'Manrope', sans-serif;
+}
+.dc-search-wrapper .input-group input:focus,
+.dc-search-mobile .input-group input:focus {
+  border-color: #60a5fa;
+  background: white;
+}
+.dc-search-wrapper .input-group-btn,
+.dc-search-mobile .input-group-btn { display: none; }
+
+/* Search icon overlay (Tailwind class used in search.twig) */
+.dc-search-icon {
+  position: absolute;
+  left: 0.875rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.dockercart-search-suggest {
+  z-index: 2147483000 !important;
+  border-radius: 0 0 14px 14px;
+  border-top: 1px solid #e5e7eb !important;
+}
+
+/* ── Top-bar dropdowns (currency / language) ──────────────── */
+.dc-topbar-dd { position: relative; }
+.dc-topbar-dd-panel {
+  animation: dcDdFadeIn 0.14s ease;
+  transform-origin: top right;
+}
+@keyframes dcDdFadeIn {
+  from { opacity: 0; transform: scale(0.96) translateY(-3px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0);    }
+}
+
+/* Ensure topbar controls flex properly */
+.dc-topbar-controls { display: flex; align-items: center; gap: 0.5rem; }
+.dc-topbar-controls > * { display: flex; align-items: center; }
+
+/* Override default Bootstrap styles from currency/language renders */
+.dc-topbar-controls .pull-left,
+.dc-topbar-controls .btn-group { float: none !important; display: flex; }
+.dc-topbar-controls .btn-link {
+  color: #9ca3af !important;
+  padding: 0 !important;
+  font-size: 0.75rem !important;
+  text-decoration: none !important;
+  box-shadow: none !important;
+  font-family: 'Manrope', sans-serif !important;
+}
+.dc-topbar-controls .btn-link:hover { color: #fff !important; }
+.dc-topbar-controls .dropdown-menu {
+  background: #111827 !important;
+  border: 1px solid #374151 !important;
+  border-radius: 0.75rem !important;
+  padding: 0.375rem 0 !important;
+  min-width: 10rem !important;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5) !important;
+}
+.dc-topbar-controls .dropdown-menu > li > a,
+.dc-topbar-controls .dropdown-menu .btn-link {
+  color: #d1d5db !important;
+  font-size: 0.75rem !important;
+  padding: 0.5rem 1rem !important;
+  font-family: 'Manrope', sans-serif !important;
+}
+.dc-topbar-controls .dropdown-menu > li > a:hover,
+.dc-topbar-controls .dropdown-menu .btn-link:hover {
+  background: #1f2937 !important;
+  color: #fff !important;
+}
+
+/* ── Account dropdown ─────────────────────────────────────── */
+.dc-account-wrapper {
+  position: relative;
+  z-index: 120;
+}
+
+.dc-account-dd {
+  animation: dcDdFadeIn 0.14s ease;
+  transform-origin: top right;
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: auto;
+  z-index: 2147483500 !important;
+  pointer-events: auto;
+}
+
+/* ── Footer icon color reset ──────────────────────────────── */
+footer .dc-social a i {
+  color: #9ca3af;
+  transition: color 0.15s;
+}
+footer .dc-social a:hover i { color: white; }
+
+/* ── Suppress leftover Bootstrap global styles ───────────── */
+body { padding-top: 0 !important; }
+
+/* =============================================================
+   DockerCart 1-Click Checkout — theme overrides
+   ============================================================= */
+
+/* ── Button wrapper ───────────────────────────────────────── */
+.dockercart-oneclickcheckout-wrapper {
+  margin: 10px 0 0 !important;
+}
+
+/* ── Base button reset ────────────────────────────────────── */
+.dockercart-oneclickcheckout-button.btn {
+  display: block;
+  width: 100%;
+  padding: 12px 20px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+.dockercart-oneclickcheckout-button.btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0);
+  transition: background 0.15s;
+}
+.dockercart-oneclickcheckout-button.btn:hover::before { background: rgba(255,255,255,0.08); }
+.dockercart-oneclickcheckout-button.btn:active  { transform: translateY(1px) !important; }
+
+/* ── Color themes ─────────────────────────────────────────── */
+.dockercart-oneclickcheckout-button.theme-purple {
+  background: #111827 !important;
+  box-shadow: 0 4px 14px rgba(15,23,42,.22) !important;
+}
+.dockercart-oneclickcheckout-button.theme-blue {
+  background: #111827 !important;
+  box-shadow: 0 4px 14px rgba(15,23,42,.22) !important;
+}
+.dockercart-oneclickcheckout-button.theme-green {
+  background: #111827 !important;
+  box-shadow: 0 4px 14px rgba(15,23,42,.22) !important;
+}
+.dockercart-oneclickcheckout-button.theme-red {
+  background: #111827 !important;
+  box-shadow: 0 4px 14px rgba(15,23,42,.22) !important;
+}
+.dockercart-oneclickcheckout-button.theme-orange {
+  background: #111827 !important;
+  box-shadow: 0 4px 14px rgba(15,23,42,.22) !important;
+}
+.dockercart-oneclickcheckout-button.theme-pink {
+  background: #111827 !important;
+  box-shadow: 0 4px 14px rgba(15,23,42,.22) !important;
+}
+.dockercart-oneclickcheckout-button.theme-teal {
+  background: #111827 !important;
+  box-shadow: 0 4px 14px rgba(15,23,42,.22) !important;
+}
+.dockercart-oneclickcheckout-button.theme-dark {
+  background: #111827 !important;
+  box-shadow: 0 4px 14px rgba(15,23,42,.22) !important;
+}
+
+/* ── Modal backdrop ───────────────────────────────────────── */
+body.modal-open { overflow: hidden; }
+#oneclickcheckout-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 4000;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow-y: auto;
+}
+#oneclickcheckout-modal.in {
+  display: flex;
+}
+#oneclickcheckout-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 3990;
+  background: rgba(15, 23, 42, 0.52);
+  backdrop-filter: blur(4px);
+}
+
+/* ── Modal dialog ─────────────────────────────────────────── */
+#oneclickcheckout-modal .modal-dialog {
+  width: 100%;
+  max-width: 480px;
+  margin: 40px auto;
+  position: relative;
+  z-index: 1;
+}
+@media (max-width: 540px) {
+  #oneclickcheckout-modal {
+    align-items: flex-end;
+    padding: 0;
+  }
+  #oneclickcheckout-modal .modal-dialog { margin: 0; max-width: 100%; }
+  #oneclickcheckout-modal .modal-content { border-radius: 24px 24px 0 0; }
+}
+
+/* ── Modal content card ───────────────────────────────────── */
+#oneclickcheckout-modal .modal-content {
+  border: none !important;
+  border-radius: 24px !important;
+  box-shadow: 0 25px 60px rgba(0,0,0,.18) !important;
+  overflow: hidden;
+  font-family: 'Manrope', sans-serif;
+}
+
+/* ── Modal header ─────────────────────────────────────────── */
+#oneclickcheckout-modal .modal-header {
+  background: #fff;
+  border-bottom: 1px solid #f1f5f9 !important;
+  padding: 20px 24px 16px !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+#oneclickcheckout-modal .modal-title {
+  font-size: 1.1rem !important;
+  font-weight: 800 !important;
+  color: #111827 !important;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+#oneclickcheckout-modal .modal-title::before {
+  content: '';
+}
+#
+/* ── Hero banner badge & primary button styles ───────────────────────── */
+.banner-slide__badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: #fff;
+}
+.banner-slide__badge::after { /* ensure readable text by layering */
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.banner-slide__btn--primary {
+  background: var(--accent, #3b82f6);
+  border: 1px solid var(--accent, #3b82f6);
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+.banner-slide__btn--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(2,6,23,0.18);
+  filter: brightness(0.92);
+}
+
+#oneclickcheckout-modal .close {
+  font-size: 1.5rem !important;
+  line-height: 1 !important;
+  opacity: .4 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  background: none !important;
+  cursor: pointer;
+  color: #374151 !important;
+  transition: opacity .15s !important;
+}
+#oneclickcheckout-modal .close:hover { opacity: .8 !important; }
+
+/* ── Modal body ───────────────────────────────────────────── */
+#oneclickcheckout-modal .modal-body {
+  padding: 20px 24px 24px !important;
+  background: #fff;
+}
+
+/* ── Modal footer ─────────────────────────────────────────── */
+#oneclickcheckout-modal .modal-footer {
+  display: flex;
+  gap: 10px;
+  padding: 0 24px 24px !important;
+  border: none !important;
+  background: #fff;
+}
+#oneclickcheckout-modal .modal-footer .btn {
+  margin: 0 !important;
+  border-radius: 12px !important;
+  font-weight: 700 !important;
+  font-size: 0.875rem !important;
+  padding: 11px 16px !important;
+  transition: all .2s ease !important;
+}
+#oneclickcheckout-modal .btn-cancel {
+  flex: 0 0 auto;
+  min-width: 112px;
+  border: 1px solid #d1d5db !important;
+  color: #374151 !important;
+  background: #fff !important;
+}
+#oneclickcheckout-modal .btn-cancel:hover {
+  border-color: #9ca3af !important;
+  background: #f9fafb !important;
+}
+
+/* ── Form groups ──────────────────────────────────────────── */
+#oneclickcheckout-form .form-group {
+  margin-bottom: 14px !important;
+}
+#oneclickcheckout-form label {
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  color: #374151 !important;
+  margin-bottom: 5px !important;
+  display: block;
+}
+#oneclickcheckout-form label .required { color: #ef4444 !important; }
+
+/* ── Inputs ───────────────────────────────────────────────── */
+#oneclickcheckout-form input[type="text"],
+#oneclickcheckout-form input[type="email"],
+#oneclickcheckout-form input[type="tel"],
+#oneclickcheckout-form textarea,
+#oneclickcheckout-form select {
+  width: 100% !important;
+  padding: 10px 14px !important;
+  border: 1.5px solid #e5e7eb !important;
+  border-radius: 12px !important;
+  font-size: 0.875rem !important;
+  font-family: 'Manrope', sans-serif !important;
+  color: #111827 !important;
+  background: #fff !important;
+  outline: none !important;
+  transition: border-color .15s !important;
+  box-shadow: none !important;
+}
+#oneclickcheckout-form input[readonly],
+#oneclickcheckout-form textarea[readonly],
+#oneclickcheckout-form select[disabled],
+#oneclickcheckout-form input[disabled],
+#oneclickcheckout-form textarea[disabled] {
+  background: #f8fafc !important;
+  border-color: #d1d5db !important;
+  color: #6b7280 !important;
+  cursor: not-allowed !important;
+  opacity: 1 !important;
+}
+#oneclickcheckout-form input:focus,
+#oneclickcheckout-form textarea:focus,
+#oneclickcheckout-form select:focus {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37,99,235,.1) !important;
+}
+#oneclickcheckout-form input.has-error,
+#oneclickcheckout-form select.has-error,
+#oneclickcheckout-form textarea.has-error {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239,68,68,.1) !important;
+}
+
+/* ── Error alert ──────────────────────────────────────────── */
+#oneclickcheckout-error {
+  background: #fef2f2 !important;
+  border: 1px solid #fecaca !important;
+  border-radius: 12px !important;
+  color: #dc2626 !important;
+  font-size: 0.8rem !important;
+  padding: 10px 14px !important;
+  margin-bottom: 14px !important;
+}
+#oneclickcheckout-error ul { margin: 0; padding-left: 16px; }
+
+/* ── Submit button ────────────────────────────────────────── */
+#oneclickcheckout-submit {
+  display: block !important;
+  width: 100% !important;
+  flex: 1 1 auto;
+  padding: 12px 20px !important;
+  background: #2563eb !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  font-size: 0.875rem !important;
+  border: none !important;
+  border-radius: 12px !important;
+  cursor: pointer !important;
+  transition: background .2s !important;
+  font-family: 'Manrope', sans-serif !important;
+  letter-spacing: .02em !important;
+}
+#oneclickcheckout-submit:hover { background: #1d4ed8 !important; }
+#oneclickcheckout-submit:active { background: #1e40af !important; }
+
+/* Theme-based submit button color */
+.theme-purple  #oneclickcheckout-submit { background: #2563eb !important; }
+.theme-green   #oneclickcheckout-submit { background: #2563eb !important; }
+.theme-red     #oneclickcheckout-submit { background: #2563eb !important; }
+.theme-orange  #oneclickcheckout-submit { background: #2563eb !important; }
+.theme-pink    #oneclickcheckout-submit { background: #2563eb !important; }
+.theme-teal    #oneclickcheckout-submit { background: #2563eb !important; }
+.theme-dark    #oneclickcheckout-submit { background: #2563eb !important; }
+
+/* =============================================================
+   DockerCart Success / Logout pages
+   ============================================================= */
+.dc-success-page #content {
+  margin-bottom: 24px;
+}
+
+.dc-success-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  box-shadow: 0 20px 45px rgba(2, 6, 23, 0.08);
+  padding: 24px;
+  text-align: center;
+}
+
+.dc-success-card__icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 14px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: #2563eb;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+
+.dc-success-card__title {
+  margin: 0 0 12px;
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: #111827;
+  line-height: 1.2;
+}
+
+.dc-success-card__message {
+  color: #4b5563;
+  font-size: 1rem;
+  line-height: 1.7;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.dc-success-card__message p:last-child {
+  margin-bottom: 0;
+}
+
+.dc-success-card__actions {
+  margin-top: 20px;
+}
+
+.dc-success-card__actions .btn {
+  min-width: 180px;
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.dc-success-card--logout .dc-success-card__icon {
+  color: #7c3aed;
+  background: #f5f3ff;
+  border-color: #ddd6fe;
+}
+
+@media (max-width: 767px) {
+  .dc-success-card {
+    padding: 18px 16px;
+    border-radius: 14px;
+  }
+
+  .dc-success-card__title {
+    font-size: 1.55rem;
+  }
+
+  .dc-success-card__actions .btn {
+    width: 100%;
+    min-width: 0;
+  }
+}

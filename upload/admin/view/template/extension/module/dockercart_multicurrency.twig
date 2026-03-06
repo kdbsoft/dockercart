@@ -1,0 +1,239 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-module" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    <ul class="nav nav-tabs dcx-profile-tabs" id="mc-tabs" role="tablist">
+      <li class="active"><a href="#mc-tab-general" class="js-mc-tab" data-tab="mc-tab-general" data-title="General" data-subtitle="Core module activation and behavior" data-icon="fa-sliders"><i class="fa fa-sliders"></i> General</a></li>
+      <li><a href="#mc-tab-license" class="js-mc-tab" data-tab="mc-tab-license" data-title="License" data-subtitle="License verification and cryptographic keys" data-icon="fa-key"><i class="fa fa-key"></i> License</a></li>
+      <li><a href="#mc-tab-about" class="js-mc-tab" data-tab="mc-tab-about" data-title="About" data-subtitle="Module information and support contacts" data-icon="fa-info-circle"><i class="fa fa-info-circle"></i> About</a></li>
+    </ul>
+
+    <div class="dcx-shell">
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i id="mc-tab-icon" class="fa fa-sliders"></i></div>
+          <div>
+            <h3 class="dcx-panel-title" id="mc-tab-title">General</h3>
+            <div class="dcx-panel-subtitle" id="mc-tab-subtitle">Core module activation and behavior</div>
+          </div>
+        </div>
+        <div class="dcx-panel-body">
+          <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-module" class="form-horizontal dcx-form">
+
+            <div id="mc-tab-general" class="dcx-tab-pane active">
+              <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+                <h4>Module Settings</h4>
+
+                <div class="form-group">
+                  <label class="col-sm-3 control-label" for="input-status">{{ entry_status }}</label>
+                  <div class="col-sm-9">
+                    <select name="module_dockercart_multicurrency_status" id="input-status" class="form-control">
+                      {% if module_dockercart_multicurrency_status %}
+                      <option value="1" selected="selected">{{ text_enabled }}</option>
+                      <option value="0">{{ text_disabled }}</option>
+                      {% else %}
+                      <option value="1">{{ text_enabled }}</option>
+                      <option value="0" selected="selected">{{ text_disabled }}</option>
+                      {% endif %}
+                    </select>
+                    {% if help_multicurrency is defined and help_multicurrency %}
+                    <span class="help-block">{{ help_multicurrency }}</span>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="mc-tab-license" class="dcx-tab-pane">
+              <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+                <h4>{{ text_license|default('License Information') }}</h4>
+
+                <div class="form-group required">
+                  <label class="col-sm-3 control-label" for="input-license-key">{{ entry_license_key|default('License Key') }}</label>
+                  <div class="col-sm-9">
+                    <input
+                      type="text"
+                      name="module_dockercart_multicurrency_license_key"
+                      value="{{ module_dockercart_multicurrency_license_key }}"
+                      placeholder="DCFL-XXXXXXXXXXXXXXXX-YYYYYYYYYYYY"
+                      id="input-license-key"
+                      class="form-control">
+                    <small class="form-text text-muted" style="margin-top:5px; display:block;">
+                      <i class="fa fa-info-circle"></i> {{ text_license_domain|default('License bound to domain') }}: <strong>{{ license_domain|default('localhost') }}</strong>
+                    </small>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-3 control-label" for="input-public-key">{{ entry_public_key|default('Public Key') }}</label>
+                  <div class="col-sm-9">
+                    <textarea
+                      name="module_dockercart_multicurrency_public_key"
+                      id="input-public-key"
+                      rows="8"
+                      class="form-control"
+                      placeholder="-----BEGIN PUBLIC KEY-----&#10;...&#10;-----END PUBLIC KEY-----">{{ module_dockercart_multicurrency_public_key }}</textarea>
+                    <small class="form-text text-muted" style="margin-top:5px; display:block;">
+                      <i class="fa fa-shield"></i> {{ help_public_key|default('Optional. If not provided, default verification will be used.') }}
+                    </small>
+                  </div>
+                </div>
+
+                <div id="license-info" class="form-group" style="display:none;">
+                  <div class="col-sm-offset-3 col-sm-9">
+                    <div class="alert alert-info" style="margin-bottom:0;">
+                      <h4><i class="fa fa-info-circle"></i> {{ text_license|default('License Information') }}</h4>
+                      <p id="license-details" style="margin-bottom:0;"></p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-3 control-label"></label>
+                  <div class="col-sm-9">
+                    <button type="button" class="btn btn-info" id="button-verify-license">
+                      <i class="fa fa-check-circle"></i> {{ button_verify_license|default('Verify License') }}
+                    </button>
+                    <span id="license-status" style="margin-left:10px;"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="mc-tab-about" class="dcx-tab-pane">
+              <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+                <h4>About</h4>
+                <table class="table table-bordered dcx-table">
+                  <tr>
+                    <td style="width:220px;"><strong>Module Version</strong></td>
+                    <td>{% if module_version is defined and module_version %}{{ module_version }}{% else %}n/a{% endif %}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Developer</strong></td>
+                    <td>DockerCart Team</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Contact</strong></td>
+                    <td><a href="mailto:support@dockercart.net">support@dockercart.net</a></td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+function updateMcPanelHeader(tabLink) {
+    var $tab = $(tabLink);
+    var title = $tab.data('title') || 'General';
+    var subtitle = $tab.data('subtitle') || '';
+    var icon = String($tab.data('icon') || 'fa-sliders').replace(/[^a-z0-9\-]/gi, '');
+
+    $('#mc-tab-title').text(title);
+    $('#mc-tab-subtitle').text(subtitle);
+    $('#mc-tab-icon').attr('class', 'fa ' + icon);
+}
+
+$(document).on('click', '.js-mc-tab', function(e) {
+    e.preventDefault();
+    var tabId = $(this).data('tab');
+    if (!tabId) return;
+
+    $('#mc-tabs > li').removeClass('active');
+    $(this).closest('li').addClass('active');
+
+    $('#mc-tab-general, #mc-tab-license, #mc-tab-about').removeClass('active');
+    $('#' + tabId).addClass('active');
+
+    updateMcPanelHeader(this);
+});
+
+updateMcPanelHeader($('#mc-tabs > li.active a.js-mc-tab'));
+
+// License verification AJAX
+$('#button-verify-license').on('click', function() {
+    var licenseKey = $('#input-license-key').val();
+    var publicKey = $('#input-public-key').val();
+    var $status = $('#license-status');
+    var $info = $('#license-info');
+    var $details = $('#license-details');
+    var $btn = $(this);
+
+    if (!licenseKey) {
+        $status.html('<span class="label label-danger">License key is empty</span>');
+        return;
+    }
+
+    $btn.prop('disabled', true);
+    $status.html('<span class="label label-info"><i class="fa fa-spinner fa-spin"></i> Verifying...</span>');
+    $info.hide();
+
+    $.ajax({
+        url: 'index.php?route=extension/module/dockercart_multicurrency/verifyLicenseAjax&user_token={{ user_token }}',
+        type: 'post',
+        data: JSON.stringify({
+            license_key: licenseKey,
+            public_key: publicKey
+        }),
+        contentType: 'application/json',
+        dataType: 'json',
+        success: function(json) {
+            $btn.prop('disabled', false);
+
+            if (json.valid) {
+                $status.html('<span class="label label-success"><i class="fa fa-check"></i> {{ text_license_valid|default("License is valid") }}</span>');
+
+                var infoHtml = '<strong>Status:</strong> Active<br>';
+                if (json.domain || '{{ license_domain|default('localhost') }}') {
+                    infoHtml += '<strong>Domain:</strong> ' + (json.domain || '{{ license_domain|default('localhost') }}') + '<br>';
+                }
+                if (json.expires_formatted || json.expires) {
+                    infoHtml += '<strong>Expires:</strong> ' + (json.expires_formatted || json.expires) + '<br>';
+                }
+                if (json.license_id) {
+                    infoHtml += '<strong>License ID:</strong> ' + json.license_id;
+                }
+                $details.html(infoHtml);
+                $info.show();
+            } else {
+                var error = json.error || 'Unknown error';
+                $status.html('<span class="label label-danger"><i class="fa fa-times"></i> ' + error + '</span>');
+                $details.html('<strong>Error:</strong> ' + error);
+                $info.show();
+            }
+        },
+        error: function() {
+            $btn.prop('disabled', false);
+            $status.html('<span class="label label-danger"><i class="fa fa-times"></i> Request failed</span>');
+        }
+    });
+});
+</script>
+
+{{ footer }}

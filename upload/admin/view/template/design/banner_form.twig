@@ -1,0 +1,413 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
+  <style>
+    .banner-slide-card { border: 1px solid #e5e7eb; border-radius: 10px; background: #fff; margin-bottom: 18px; overflow: hidden; }
+    .banner-slide-card__head { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
+    .banner-slide-card__num { font-weight: 700; color: #374151; font-size: 13px; }
+    .banner-slide-card__body { padding: 18px; }
+    .banner-slide-card .form-group { margin-bottom: 14px; }
+    .banner-slide-card .form-group label { font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px; display: block; }
+    .banner-slide-card .form-control { font-size: 13px; }
+    .accent-hint { font-size: 11px; color: #9ca3af; margin-top: 3px; }
+    .accent-hint code { background: #f3f4f6; border-radius: 3px; padding: 1px 4px; color: #6366f1; }
+    .slide-images-row { display: flex; gap: 16px; flex-wrap: wrap; }
+    .slide-image-block { text-align: center; }
+    .slide-image-block small { display: block; color: #9ca3af; font-size: 11px; margin-top: 4px; }
+    .btn-row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .no-slides-msg { text-align: center; color: #9ca3af; padding: 28px; font-style: italic; }
+    .add-slide-btn-wrap { padding: 10px 0 4px; text-align: right; }
+    .dcx-divider { border: none; border-top: 1px solid #e5e7eb; margin: 20px 0 18px; }
+  </style>
+
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-banner" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    {# ── Main tabs ──────────────────────────────────────────── #}
+    <ul class="nav nav-tabs dcx-profile-tabs" id="banner-tabs" role="tablist">
+      <li class="active"><a href="#tab-general" data-toggle="tab"><i class="fa fa-image"></i> General</a></li>
+      <li><a href="#tab-slides" data-toggle="tab"><i class="fa fa-list-alt"></i> Slides</a></li>
+    </ul>
+
+    <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-banner">
+
+      <div class="dcx-shell">
+
+        <div class="dcx-panel">
+          <div class="dcx-panel-head">
+            <div class="dcx-panel-head__icon"><i class="fa fa-image"></i></div>
+            <div>
+              <h3 class="dcx-panel-title">{{ text_form }}</h3>
+              <div class="dcx-panel-subtitle">{{ heading_title }}</div>
+            </div>
+          </div>
+          <div class="dcx-panel-body">
+
+            {# ── GENERAL TAB ─────────────────────────────────────── #}
+            <div class="dcx-tab-pane active" id="tab-general">
+              <div class="dcx-section">
+                <h4>General Settings</h4>
+                <div class="form-horizontal dcx-form">
+
+                  <div class="form-group required">
+                    <label class="col-sm-3 control-label" for="input-name">{{ entry_name }}</label>
+                    <div class="col-sm-9">
+                      <input type="text" name="name" value="{{ name }}" placeholder="{{ entry_name }}" id="input-name" class="form-control" />
+                      {% if error_name %}<div class="text-danger">{{ error_name }}</div>{% endif %}
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="col-sm-3 control-label" for="input-status">{{ entry_status }}</label>
+                    <div class="col-sm-9">
+                      <select name="status" id="input-status" class="form-control">
+                        <option value="1" {% if status %}selected="selected"{% endif %}>{{ text_enabled }}</option>
+                        <option value="0" {% if not status %}selected="selected"{% endif %}>{{ text_disabled }}</option>
+                      </select>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            {# ── SLIDES TAB ──────────────────────────────────────── #}
+            <div class="dcx-tab-pane" id="tab-slides">
+              <div class="dcx-section">
+                <h4>Slides by Language</h4>
+
+                <ul class="nav nav-tabs dcx-profile-tabs" id="language">
+              {% for language in languages %}
+              <li {% if loop.first %}class="active"{% endif %}>
+                <a href="#language{{ language.language_id }}" data-toggle="tab">
+                  <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}
+                </a>
+              </li>
+              {% endfor %}
+                </ul>
+
+                <div class="tab-content">
+              {% set image_row = 0 %}
+              {% for language in languages %}
+              <div class="tab-pane {% if loop.first %}active{% endif %}" id="language{{ language.language_id }}">
+
+                <div id="slide-list-{{ language.language_id }}">
+                  {% if banner_images[language.language_id] %}
+                  {% for banner_image in banner_images[language.language_id] %}
+                  <div class="banner-slide-card" id="image-row{{ image_row }}">
+                    <div class="banner-slide-card__head">
+                      <span class="banner-slide-card__num"><i class="fa fa-image" style="margin-right:6px;color:#6366f1;"></i>Slide #{{ loop.index }}</span>
+                      <button type="button" onclick="removeSlide({{ image_row }});" class="btn btn-danger btn-xs"><i class="fa fa-trash-o"></i> {{ button_remove }}</button>
+                    </div>
+                    <div class="banner-slide-card__body">
+
+                      {# Title + subtitle #}
+                      <div class="form-group required">
+                        <label>{{ entry_title }}</label>
+                        <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][title]" value="{{ banner_image.title }}" placeholder="{{ entry_title }}" class="form-control" />
+                        <div class="accent-hint">{{ entry_title_hint }} — e.g.: <code>The Future of [Smart Living]</code></div>
+                        {% if error_banner_image[language.language_id][image_row] %}
+                        <div class="text-danger">{{ error_banner_image[language.language_id][image_row] }}</div>
+                        {% endif %}
+                      </div>
+
+                      <div class="form-group">
+                        <label>{{ entry_subtitle }}</label>
+                        <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][subtitle]" value="{{ banner_image.subtitle }}" placeholder="{{ entry_subtitle }}" class="form-control" />
+                      </div>
+
+                      <hr class="dcx-divider" />
+
+                      {# Accent badge + color #}
+                      <div class="btn-row-2col">
+                        <div class="form-group">
+                          <label>{{ entry_accent_text }}</label>
+                          <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][accent_text]" value="{{ banner_image.accent_text }}" placeholder="e.g. New Collection" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                          <label>{{ entry_accent_color }}</label>
+                          <div style="display:flex;gap:8px;align-items:center;">
+                            <input type="color" name="banner_image[{{ language.language_id }}][{{ image_row }}][accent_color]" value="{{ banner_image.accent_color|default('#6366f1') }}" class="form-control" style="width:52px;padding:2px;height:38px;" />
+                            <input type="text" class="form-control accent-color-text" value="{{ banner_image.accent_color|default('#6366f1') }}" placeholder="#6366f1" style="flex:1;" maxlength="16" />
+                          </div>
+                          <div class="accent-hint">{{ entry_accent_hint }}</div>
+                        </div>
+                      </div>
+
+                      <hr class="dcx-divider" />
+
+                      {# Primary button #}
+                      <div class="btn-row-2col">
+                        <div class="form-group">
+                          <label>{{ entry_primary_btn_text }}</label>
+                          <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][primary_btn_text]" value="{{ banner_image.primary_btn_text }}" placeholder="Shop Now" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                          <label>{{ entry_primary_btn_link }}</label>
+                          <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][primary_btn_link]" value="{{ banner_image.primary_btn_link }}" placeholder="/category/new-arrivals" class="form-control" />
+                        </div>
+                      </div>
+
+                      <div class="btn-row-2col">
+                        <div class="form-group">
+                          <label>{{ entry_primary_btn_text_color }}</label>
+                          <div style="display:flex;gap:8px;align-items:center;">
+                            <input type="color" name="banner_image[{{ language.language_id }}][{{ image_row }}][primary_btn_text_color]" value="{{ banner_image.primary_btn_text_color|default('#ffffff') }}" class="form-control" style="width:52px;padding:2px;height:38px;" />
+                            <input type="text" class="form-control primary-btn-text-color-text" value="{{ banner_image.primary_btn_text_color|default('#ffffff') }}" placeholder="#ffffff" style="flex:1;" maxlength="16" />
+                          </div>
+                        </div>
+                        <div class="form-group">
+                          <label>{{ entry_primary_btn_bg_color }}</label>
+                          <div style="display:flex;gap:8px;align-items:center;">
+                            <input type="color" name="banner_image[{{ language.language_id }}][{{ image_row }}][primary_btn_bg_color]" value="{{ banner_image.primary_btn_bg_color|default('#2563eb') }}" class="form-control" style="width:52px;padding:2px;height:38px;" />
+                            <input type="text" class="form-control primary-btn-bg-color-text" value="{{ banner_image.primary_btn_bg_color|default('#2563eb') }}" placeholder="#2563eb" style="flex:1;" maxlength="16" />
+                          </div>
+                        </div>
+                      </div>
+
+                      {# Secondary button #}
+                      <div class="btn-row-2col">
+                        <div class="form-group">
+                          <label>{{ entry_secondary_btn_text }}</label>
+                          <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][secondary_btn_text]" value="{{ banner_image.secondary_btn_text }}" placeholder="Browse All" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                          <label>{{ entry_secondary_btn_link }}</label>
+                          <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][secondary_btn_link]" value="{{ banner_image.secondary_btn_link }}" placeholder="/collections/all" class="form-control" />
+                        </div>
+                      </div>
+
+                      <hr class="dcx-divider" />
+
+                      {# Slide link & sort order #}
+                      <div class="btn-row-2col">
+                        <div class="form-group">
+                          <label>{{ entry_link }}</label>
+                          <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][link]" value="{{ banner_image.link }}" placeholder="{{ entry_link }}" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                          <label>{{ entry_sort_order }}</label>
+                          <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][sort_order]" value="{{ banner_image.sort_order }}" placeholder="0" class="form-control" style="max-width:100px;" />
+                        </div>
+                      </div>
+
+                      {# Images #}
+                      <div class="form-group">
+                        <label>{{ entry_image }}</label>
+                        <div class="slide-images-row">
+                          <div class="slide-image-block">
+                            <a href="" id="thumb-image{{ image_row }}" data-toggle="image" class="img-thumbnail"><img src="{{ banner_image.thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" style="max-height:90px;" /></a>
+                            <input type="hidden" name="banner_image[{{ language.language_id }}][{{ image_row }}][image]" value="{{ banner_image.image }}" id="input-image{{ image_row }}" />
+                            <small>Landscape</small>
+                          </div>
+                          <div class="slide-image-block">
+                            <a href="" id="thumb-image-portrait{{ image_row }}" data-toggle="image" class="img-thumbnail"><img src="{{ banner_image.thumb_portrait }}" alt="" title="" data-placeholder="{{ placeholder }}" style="max-height:90px;" /></a>
+                            <input type="hidden" name="banner_image[{{ language.language_id }}][{{ image_row }}][image_portrait]" value="{{ banner_image.image_portrait }}" id="input-image-portrait{{ image_row }}" />
+                            <small>Portrait</small>
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+                  {% set image_row = image_row + 1 %}
+                  {% endfor %}
+                  {% else %}
+                  <div class="no-slides-msg" id="no-slides-{{ language.language_id }}"><i class="fa fa-picture-o" style="font-size:22px;margin-bottom:8px;display:block;"></i>No slides yet. Click "+ Add Slide" to create the first one.</div>
+                  {% endif %}
+                </div>
+
+                <div class="add-slide-btn-wrap">
+                  <button type="button" onclick="addSlide({{ language.language_id }});" class="btn btn-primary btn-sm"><i class="fa fa-plus-circle"></i> Add Slide</button>
+                </div>
+
+              </div>
+              {% endfor %}
+                </div>
+
+            </div>
+
+          </div>
+        </div>
+
+      </div>{# /dcx-shell #}
+    </form>
+  </div>
+
+<script type="text/javascript">
+var image_row = {{ image_row }};
+var placeholder = '{{ placeholder }}';
+
+function removeSlide(row) {
+  $('#image-row' + row + ', .tooltip').not('.tooltip:not([id])').remove();
+  $('#image-row' + row).remove();
+}
+
+function syncAccentColorText(container) {
+  var colorPicker = container.find('input[type="color"]');
+  var textInput   = container.find('.accent-color-text');
+  colorPicker.on('input change', function() {
+    textInput.val($(this).val());
+  });
+  textInput.on('input change', function() {
+    var val = $(this).val();
+    if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+      colorPicker.val(val);
+    }
+  });
+}
+
+function syncPrimaryBtnTextColor(container) {
+  var colorPicker = container.find('input[name$="[primary_btn_text_color]"]');
+  var textInput   = container.find('.primary-btn-text-color-text');
+
+  colorPicker.on('input change', function() {
+    textInput.val($(this).val());
+  });
+
+  textInput.on('input change', function() {
+    var val = $(this).val();
+    if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+      colorPicker.val(val);
+    }
+  });
+}
+
+function syncPrimaryBtnBgColor(container) {
+  var colorPicker = container.find('input[name$="[primary_btn_bg_color]"]');
+  var textInput   = container.find('.primary-btn-bg-color-text');
+
+  colorPicker.on('input change', function() {
+    textInput.val($(this).val());
+  });
+
+  textInput.on('input change', function() {
+    var val = $(this).val();
+    if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+      colorPicker.val(val);
+    }
+  });
+}
+
+function addSlide(language_id) {
+  var row = image_row;
+  var pfx = 'banner_image[' + language_id + '][' + row + ']';
+  var html = '<div class="banner-slide-card" id="image-row' + row + '">';
+  html += '<div class="banner-slide-card__head">';
+  html += '<span class="banner-slide-card__num"><i class="fa fa-image" style="margin-right:6px;color:#6366f1;"></i>New Slide</span>';
+  html += '<button type="button" onclick="removeSlide(' + row + ');" class="btn btn-danger btn-xs"><i class="fa fa-trash-o"></i> {{ button_remove }}</button>';
+  html += '</div>';
+  html += '<div class="banner-slide-card__body">';
+
+  html += '<div class="form-group required">';
+  html += '<label>{{ entry_title }}</label>';
+  html += '<input type="text" name="' + pfx + '[title]" value="" placeholder="{{ entry_title }}" class="form-control" />';
+  html += '<div class="accent-hint">{{ entry_title_hint }} — e.g.: <code>The Future of [Smart Living]</code></div>';
+  html += '</div>';
+
+  html += '<div class="form-group">';
+  html += '<label>{{ entry_subtitle }}</label>';
+  html += '<input type="text" name="' + pfx + '[subtitle]" value="" placeholder="{{ entry_subtitle }}" class="form-control" />';
+  html += '</div>';
+
+  html += '<hr class="dcx-divider" />';
+
+  html += '<div class="btn-row-2col">';
+  html += '<div class="form-group">';
+  html += '<label>{{ entry_accent_text }}</label>';
+  html += '<input type="text" name="' + pfx + '[accent_text]" value="" placeholder="e.g. New Collection" class="form-control" />';
+  html += '</div>';
+  html += '<div class="form-group">';
+  html += '<label>{{ entry_accent_color }}</label>';
+  html += '<div style="display:flex;gap:8px;align-items:center;">';
+  html += '<input type="color" name="' + pfx + '[accent_color]" value="#6366f1" class="form-control" style="width:52px;padding:2px;height:38px;" />';
+  html += '<input type="text" class="form-control accent-color-text" value="#6366f1" placeholder="#6366f1" style="flex:1;" maxlength="16" />';
+  html += '</div>';
+  html += '<div class="accent-hint">{{ entry_accent_hint }}</div>';
+  html += '</div>';
+  html += '</div>';
+
+  html += '<hr class="dcx-divider" />';
+
+  html += '<div class="btn-row-2col">';
+  html += '<div class="form-group"><label>{{ entry_primary_btn_text }}</label><input type="text" name="' + pfx + '[primary_btn_text]" value="" placeholder="Shop Now" class="form-control" /></div>';
+  html += '<div class="form-group"><label>{{ entry_primary_btn_link }}</label><input type="text" name="' + pfx + '[primary_btn_link]" value="" placeholder="/category/new-arrivals" class="form-control" /></div>';
+  html += '</div>';
+
+  html += '<div class="btn-row-2col">';
+  html += '<div class="form-group"><label>{{ entry_primary_btn_text_color }}</label>';
+  html += '<div style="display:flex;gap:8px;align-items:center;">';
+  html += '<input type="color" name="' + pfx + '[primary_btn_text_color]" value="#ffffff" class="form-control" style="width:52px;padding:2px;height:38px;" />';
+  html += '<input type="text" class="form-control primary-btn-text-color-text" value="#ffffff" placeholder="#ffffff" style="flex:1;" maxlength="16" />';
+  html += '</div></div>';
+  html += '<div class="form-group"><label>{{ entry_primary_btn_bg_color }}</label>';
+  html += '<div style="display:flex;gap:8px;align-items:center;">';
+  html += '<input type="color" name="' + pfx + '[primary_btn_bg_color]" value="#2563eb" class="form-control" style="width:52px;padding:2px;height:38px;" />';
+  html += '<input type="text" class="form-control primary-btn-bg-color-text" value="#2563eb" placeholder="#2563eb" style="flex:1;" maxlength="16" />';
+  html += '</div></div>';
+  html += '</div>';
+
+  html += '<div class="btn-row-2col">';
+  html += '<div class="form-group"><label>{{ entry_secondary_btn_text }}</label><input type="text" name="' + pfx + '[secondary_btn_text]" value="" placeholder="Browse All" class="form-control" /></div>';
+  html += '<div class="form-group"><label>{{ entry_secondary_btn_link }}</label><input type="text" name="' + pfx + '[secondary_btn_link]" value="" placeholder="/collections/all" class="form-control" /></div>';
+  html += '</div>';
+
+  html += '<hr class="dcx-divider" />';
+
+  html += '<div class="btn-row-2col">';
+  html += '<div class="form-group"><label>{{ entry_link }}</label><input type="text" name="' + pfx + '[link]" value="" placeholder="{{ entry_link }}" class="form-control" /></div>';
+  html += '<div class="form-group"><label>{{ entry_sort_order }}</label><input type="text" name="' + pfx + '[sort_order]" value="" placeholder="0" class="form-control" style="max-width:100px;" /></div>';
+  html += '</div>';
+
+  html += '<div class="form-group">';
+  html += '<label>{{ entry_image }}</label>';
+  html += '<div class="slide-images-row">';
+  html += '<div class="slide-image-block"><a href="" id="thumb-image' + row + '" data-toggle="image" class="img-thumbnail"><img src="' + placeholder + '" alt="" title="" data-placeholder="' + placeholder + '" style="max-height:90px;" /></a><input type="hidden" name="' + pfx + '[image]" value="" id="input-image' + row + '" /><small>Landscape</small></div>';
+  html += '<div class="slide-image-block"><a href="" id="thumb-image-portrait' + row + '" data-toggle="image" class="img-thumbnail"><img src="' + placeholder + '" alt="" title="" data-placeholder="' + placeholder + '" style="max-height:90px;" /></a><input type="hidden" name="' + pfx + '[image_portrait]" value="" id="input-image-portrait' + row + '" /><small>Portrait</small></div>';
+  html += '</div>';
+  html += '</div>';
+
+  html += '</div></div>'; // card body + card
+
+  $('#no-slides-' + language_id).hide();
+  var $card = $(html);
+  $('#slide-list-' + language_id).append($card);
+  syncAccentColorText($card);
+  syncPrimaryBtnTextColor($card);
+  syncPrimaryBtnBgColor($card);
+
+  image_row++;
+}
+
+// Sync existing color pickers on load
+$(document).ready(function() {
+  $('.banner-slide-card').each(function() {
+    syncAccentColorText($(this));
+    syncPrimaryBtnTextColor($(this));
+    syncPrimaryBtnBgColor($(this));
+  });
+  $('#language a:first').tab('show');
+});
+</script>
+
+</div>
+{{ footer }}

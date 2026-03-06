@@ -1,0 +1,88 @@
+# Ignore local build and distribution artifacts
+build
+dist
+
+# Ignore editor files
+.vscode
+node_modules# Git files
+.git
+.gitignore
+.gitattributes
+
+# Docker compose files (not needed in image)
+docker-compose*.yml
+.dockerignore
+
+# Documentation (not needed in image)
+CHANGELOG.md
+INSTALL.md
+LICENSE.md
+UPGRADE.md
+README.md
+DEPLOYMENT.md
+DOCKER-*.md
+DOCKER-*.txt
+
+# Tests (not needed in production)
+tests/
+phpunit.xml
+.phpunit.result.cache
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Build tools
+build.xml
+phpstan.neon
+.php_cs
+.php_cs.cache
+
+# Composer (we'll install inside container)
+vendor/
+composer.phar
+
+# Node modules
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Scripts (not needed in image)
+*.sh
+Makefile
+
+# Environment files
+.env*
+
+# System storage (will be mounted as volume)
+storage/
+upload/system/storage/cache/*
+upload/system/storage/logs/*
+upload/system/storage/download/*
+upload/system/storage/upload/*
+upload/system/storage/modification/*
+upload/system/storage/session/*
+
+# Image cache
+upload/image/cache/*
+
+# Exclude nginx cache directories from build context (they can be created at runtime)
+docker/nginx/cache/
+docker/nginx/cache/**
+
+# Config files (will be generated at runtime)
+upload/config.php
+upload/admin/config.php
+
+# System files
+.DS_Store
+Thumbs.db
+*.log
+
+# Backups directory
+backups/
+
+build-extension.sh

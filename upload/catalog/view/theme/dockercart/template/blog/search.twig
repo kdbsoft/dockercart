@@ -1,0 +1,116 @@
+{{ header }}
+
+<main class="bg-white min-h-screen">
+  <section class="relative overflow-hidden">
+    <div class="w-full h-[180px] sm:h-[230px] bg-gradient-to-br from-blue-950 via-indigo-900 to-gray-900"></div>
+    <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/15"></div>
+    <div class="absolute inset-0 flex items-end sm:items-center pb-6 sm:pb-0">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        {% include 'dockercart/template/common/partials/breadcrumbs.twig' with {
+          breadcrumbs_class: 'flex flex-wrap items-center gap-2 text-xs text-gray-300 mb-3',
+          breadcrumbs_link_class: 'hover:text-white transition',
+          breadcrumbs_last_class: 'text-white font-semibold'
+        } %}
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/90 text-white text-xs font-bold uppercase tracking-widest mb-2">
+          <i data-lucide="search" class="w-3 h-3"></i> {{ text_blog }} {{ text_search }}
+        </span>
+        <h1 class="text-2xl sm:text-4xl font-extrabold text-white leading-tight">{{ heading_title }}</h1>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      {{ content_top }}
+
+      <div class="bg-white border border-gray-100 rounded-3xl p-4 sm:p-5 mb-6 shadow-sm">
+        <form action="{{ action }}" method="get" class="grid grid-cols-1 sm:grid-cols-[1fr,auto] gap-3 items-center">
+          <input type="hidden" name="route" value="blog/search" />
+          <input type="text" name="search" value="{{ search }}" placeholder="{{ text_search_placeholder }}" class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-blue-400" />
+          <button type="submit" class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition">
+            <i data-lucide="search" class="w-4 h-4"></i> Search
+          </button>
+        </form>
+      </div>
+
+      {% if posts %}
+      <div class="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr),300px] gap-6">
+        <div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {% for post in posts %}
+              <article class="group bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition overflow-hidden flex flex-col">
+                <a href="{{ post.href }}" class="block aspect-[16/10] bg-gray-50 overflow-hidden">
+                  <img src="{{ post.image }}" alt="{{ post.name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy" />
+                </a>
+                <div class="p-4 sm:p-5 flex flex-col flex-1">
+                  <div class="flex flex-wrap items-center gap-2 text-xs text-gray-500 mb-2">
+                    {% if post.category %}
+                      <a href="{{ post.category_href }}" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100 transition font-semibold"><i data-lucide="folder" class="w-3 h-3"></i> {{ post.category }}</a>
+                      {% if (show_author and post.author) or show_date or show_views %}<span>•</span>{% endif %}
+                    {% endif %}
+                    {% if show_author and post.author %}
+                      <a href="{{ post.author_url }}" class="inline-flex items-center gap-1 hover:text-blue-600 transition"><i data-lucide="user" class="w-3 h-3"></i> {{ post.author }}</a>
+                      {% if show_date or show_views %}<span>•</span>{% endif %}
+                    {% endif %}
+                    {% if show_date %}
+                      <span class="inline-flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3"></i> {{ post.date_published }}</span>
+                      {% if show_views %}<span>•</span>{% endif %}
+                    {% endif %}
+                    {% if show_views %}
+                      <span class="inline-flex items-center gap-1"><i data-lucide="eye" class="w-3 h-3"></i> {{ post.views }}</span>
+                    {% endif %}
+                  </div>
+                  <h2 class="text-base sm:text-lg font-extrabold text-gray-900 leading-snug mb-2 line-clamp-2"><a href="{{ post.href }}" class="hover:text-blue-600 transition">{{ post.name }}</a></h2>
+                  <p class="text-sm text-gray-600 leading-relaxed line-clamp-3 flex-1">{{ post.description }}</p>
+                  <div class="mt-4"><a href="{{ post.href }}" class="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 hover:text-blue-700 transition">{{ text_read_article }} <i data-lucide="arrow-right" class="w-4 h-4"></i></a></div>
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+
+          <div class="mt-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div class="dc-pagination">{{ pagination }}</div>
+            <div class="text-sm text-gray-500">{{ results }}</div>
+          </div>
+        </div>
+
+        {% if blog_categories %}
+        <aside>
+          <div class="bg-white border border-gray-100 rounded-3xl p-4 sm:p-5 shadow-sm xl:sticky xl:top-28">
+            <h2 class="text-sm font-extrabold text-gray-900 uppercase tracking-widest mb-3">{{ text_categories }}</h2>
+            <div class="flex flex-col gap-2">
+              {% for blog_category in blog_categories %}
+                <a href="{{ blog_category.href }}" class="flex items-center justify-between gap-3 px-3 py-2 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 hover:bg-blue-100">
+                  <span class="truncate">{{ blog_category.name }}</span>
+                  <span class="text-xs opacity-80">{{ blog_category.total }}</span>
+                </a>
+              {% endfor %}
+            </div>
+          </div>
+        </aside>
+        {% endif %}
+      </div>
+      {% else %}
+      <div class="bg-white border border-gray-100 rounded-3xl p-10 text-center shadow-sm">
+        <i data-lucide="search-x" class="w-10 h-10 text-gray-300 mx-auto mb-3"></i>
+        <p class="text-gray-500">{{ text_no_results }}</p>
+      </div>
+      {% endif %}
+
+      {{ content_bottom }}
+    </div>
+  </section>
+</main>
+
+<style>
+  .dc-pagination ul { display:flex; gap:.5rem; list-style:none; padding:0; margin:0; flex-wrap:wrap; }
+  .dc-pagination ul li a, .dc-pagination ul li span {
+    display:inline-flex; align-items:center; justify-content:center; min-width:2.25rem; height:2.25rem; padding:0 .625rem;
+    border-radius:.75rem; border:1px solid #e5e7eb; font-size:.875rem; font-weight:500; color:#6b7280; background:#fff;
+    text-decoration:none; transition:all .15s ease;
+  }
+  .dc-pagination ul li a:hover { border-color:#93c5fd; color:#2563eb; }
+  .dc-pagination ul li.active span { background:#2563eb; border-color:#2563eb; color:#fff; }
+</style>
+
+{{ footer }}

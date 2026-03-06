@@ -1,0 +1,577 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-module" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ add_profile_link }}" data-toggle="tooltip" title="{{ text_add_profile }}" class="btn btn-success"><i class="fa fa-plus"></i></a>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    <div id="module-notice"></div>
+
+    {% set total_profiles = profiles|length %}
+    {% set enabled_profiles = 0 %}
+    {% set url_profiles = 0 %}
+    {% set file_profiles = 0 %}
+    {% for p in profiles %}
+      {% if p.status %}{% set enabled_profiles = enabled_profiles + 1 %}{% endif %}
+      {% if p.source_type == 'url' %}{% set url_profiles = url_profiles + 1 %}{% else %}{% set file_profiles = file_profiles + 1 %}{% endif %}
+    {% endfor %}
+
+    <div class="dc-ix-cards">
+      <div class="dc-ix-card">
+        <div class="dc-ix-card__k">Suppliers</div>
+        <div class="dc-ix-card__v">{{ total_profiles }}</div>
+      </div>
+      <div class="dc-ix-card">
+        <div class="dc-ix-card__k">Enabled</div>
+        <div class="dc-ix-card__v">{{ enabled_profiles }}</div>
+      </div>
+      <div class="dc-ix-card">
+        <div class="dc-ix-card__k">URL Sources</div>
+        <div class="dc-ix-card__v">{{ url_profiles }}</div>
+      </div>
+      <div class="dc-ix-card">
+        <div class="dc-ix-card__k">File Sources</div>
+        <div class="dc-ix-card__v">{{ file_profiles }}</div>
+      </div>
+    </div>
+
+    <ul class="nav nav-tabs dcx-profile-tabs" id="ix-tabs" role="tablist">
+      <li class="active"><a href="#ix-tab-import" class="js-ix-tab" data-tab="ix-tab-import" data-title="{{ text_tab_import }}" data-subtitle="{{ text_tab_import_subtitle }}" data-icon="fa-download"><i class="fa fa-download"></i> {{ text_tab_import }}</a></li>
+      <li><a href="#ix-tab-export" class="js-ix-tab" data-tab="ix-tab-export" data-title="{{ text_tab_export }}" data-subtitle="{{ text_tab_export_subtitle }}" data-icon="fa-file-excel-o"><i class="fa fa-file-excel-o"></i> {{ text_tab_export }}</a></li>
+      <li><a href="#ix-tab-license" class="js-ix-tab" data-tab="ix-tab-license" data-title="{{ text_tab_license }}" data-subtitle="{{ text_tab_license_subtitle }}" data-icon="fa-key"><i class="fa fa-key"></i> {{ text_tab_license }}</a></li>
+      <li><a href="#ix-tab-about" class="js-ix-tab" data-tab="ix-tab-about" data-title="{{ text_tab_about }}" data-subtitle="{{ text_tab_about_subtitle }}" data-icon="fa-info-circle"><i class="fa fa-info-circle"></i> {{ text_tab_about }}</a></li>
+    </ul>
+
+    <div class="dcx-shell">
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i id="ix-tab-icon" class="fa fa-download"></i></div>
+          <div>
+            <h3 class="dcx-panel-title" id="ix-tab-title">{{ text_tab_import }}</h3>
+            <div class="dcx-panel-subtitle" id="ix-tab-subtitle">{{ text_tab_import_subtitle }}</div>
+          </div>
+        </div>
+        <div class="dcx-panel-body">
+          <form action="{{ action }}" method="post" id="form-module" class="form-horizontal dcx-form">
+
+            <div id="ix-tab-import" class="dcx-tab-pane active">
+              <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+                <h4>{{ text_section_import }}</h4>
+
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
+                  <div class="col-sm-10">
+                    <select name="module_dockercart_import_export_excel_status" id="input-status" class="form-control">
+                      {% if module_dockercart_import_export_excel_status %}
+                      <option value="1" selected="selected">{{ text_enabled }}</option>
+                      <option value="0">{{ text_disabled }}</option>
+                      {% else %}
+                      <option value="1">{{ text_enabled }}</option>
+                      <option value="0" selected="selected">{{ text_disabled }}</option>
+                      {% endif %}
+                    </select>
+                  </div>
+                </div>
+
+                <hr />
+
+                <div class="dc-ix-filter">
+                  <div class="input-group">
+                    <span class="input-group-addon"><i class="fa fa-search"></i></span>
+                    <input type="text" id="profile-filter" class="form-control" placeholder="{{ text_filter_profiles }}" />
+                  </div>
+                </div>
+
+                <div class="table-responsive">
+                  <table class="table table-bordered table-hover dcx-table">
+                    <thead>
+                      <tr>
+                        <td>{{ column_name }}</td>
+                        <td>{{ column_supplier }}</td>
+                        <td>{{ column_source }}</td>
+                        <td>{{ column_format }}</td>
+                        <td>{{ column_mode }}</td>
+                        <td>{{ column_status }}</td>
+                        <td>{{ column_last_run }}</td>
+                        <td>{{ column_cron_command }}</td>
+                        <td class="text-right">{{ column_action }}</td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for profile in profiles %}
+                      <tr data-profile-id="{{ profile.profile_id }}">
+                        <td>
+                          <strong>{{ profile.name }}</strong>
+                          <small class="text-muted">#{{ profile.profile_id }}</small>
+                        </td>
+                        <td>{{ profile.supplier_code ?: '-' }}</td>
+                        <td class="dc-ix-source">
+                          {% if profile.source_type == 'file' %}
+                            <span class="dc-ix-chip">{{ text_source_file }}</span>
+                            <small title="{{ profile.source_file }}">{{ profile.source_file }}</small>
+                          {% else %}
+                            <span class="dc-ix-chip">{{ text_source_url }}</span>
+                            <small title="{{ profile.source_url }}">{{ profile.source_url }}</small>
+                          {% endif %}
+                        </td>
+                        <td><span class="label label-default">{{ profile.source_format|upper }}</span></td>
+                        <td>
+                          {% if profile.import_mode == 'add' %}{{ text_mode_add }}{% endif %}
+                          {% if profile.import_mode == 'update' %}{{ text_mode_update }}{% endif %}
+                          {% if profile.import_mode == 'update_only' %}{{ text_mode_update_only }}{% endif %}
+                          {% if profile.import_mode == 'update_price_qty_only' %}{{ text_mode_update_price_qty_only }}{% endif %}
+                          {% if profile.import_mode == 'replace' %}{{ text_mode_replace }}{% endif %}
+                        </td>
+                        <td>
+                          {% if profile.status %}
+                          <span class="dc-ix-chip dc-ix-chip--ok">{{ text_enabled }}</span>
+                          {% else %}
+                          <span class="dc-ix-chip dc-ix-chip--off">{{ text_disabled }}</span>
+                          {% endif %}
+                        </td>
+                        <td>{{ profile.last_run ?: '-' }}</td>
+                        <td>
+                          <code class="dc-ix-code dc-ix-code--multiline">
+php {{ cron_base_path }} --action=import --profile_id={{ profile.profile_id }} --cron_key={{ profile.cron_key }}
+                          </code>
+                        </td>
+                        <td class="text-right">
+                          <div class="dc-ix-actions">
+                            <button type="button" class="btn btn-primary btn-xs" onclick="runImport({{ profile.profile_id }});" title="{{ button_import_now }}"><i class="fa fa-download"></i></button>
+                            <button type="button" class="btn btn-default btn-xs" onclick="copyCron(this);" title="Copy cron command"><i class="fa fa-copy"></i></button>
+                            <a href="{{ profile.edit_link }}" class="btn btn-warning btn-xs" title="{{ text_edit_profile }}"><i class="fa fa-pencil"></i></a>
+                            <button type="button" class="btn btn-danger btn-xs" onclick="deleteProfile({{ profile.profile_id }});" title="{{ text_delete_profile }}"><i class="fa fa-trash"></i></button>
+                          </div>
+                        </td>
+                      </tr>
+                      {% else %}
+                      <tr><td colspan="9" class="text-center">{{ text_no_profiles }}</td></tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div id="ix-tab-export" class="dcx-tab-pane">
+              <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+                <h4>{{ text_section_export }}</h4>
+                <div id="export-tool" class="dcx-form">
+                  <div class="dc-ix-export-grid">
+                    <div class="form-group">
+                      <label class="control-label" for="export-store-id">{{ entry_export_store_id }}</label>
+                      <select id="export-store-id" class="form-control">
+                        {% for store in stores %}
+                        <option value="{{ store.store_id }}" {% if export_filter_defaults.store_id == store.store_id %}selected{% endif %}>{{ store.name }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="control-label" for="export-language-id">{{ entry_export_language_id }}</label>
+                      <select id="export-language-id" class="form-control">
+                        {% for language in languages %}
+                        <option value="{{ language.language_id }}" {% if export_filter_defaults.language_id == language.language_id %}selected{% endif %}>{{ language.name }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="control-label" for="export-status">{{ entry_export_status }}</label>
+                      <select id="export-status" class="form-control">
+                        <option value="">{{ text_all }}</option>
+                        <option value="1">{{ text_enabled }}</option>
+                        <option value="0">{{ text_disabled }}</option>
+                      </select>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="control-label" for="export-format">{{ entry_export_format }}</label>
+                      <select id="export-format" class="form-control">
+                        <option value="xlsx" {% if export_filter_defaults.file_format == 'xlsx' %}selected{% endif %}>{{ text_format_xlsx }}</option>
+                        <option value="csv" {% if export_filter_defaults.file_format == 'csv' %}selected{% endif %}>{{ text_format_csv }}</option>
+                      </select>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="control-label" for="export-manufacturer-id">{{ entry_export_manufacturer_id }}</label>
+                      <select id="export-manufacturer-id" class="form-control">
+                        <option value="0">{{ text_all }}</option>
+                        {% for manufacturer in manufacturers %}
+                        <option value="{{ manufacturer.manufacturer_id }}">{{ manufacturer.name }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="control-label" for="export-category-id">{{ entry_export_category_id }}</label>
+                      <select id="export-category-id" class="form-control">
+                        <option value="0">{{ text_all }}</option>
+                        {% for category in categories %}
+                        <option value="{{ category.category_id }}">{{ category.name }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="control-label" for="export-keyword">{{ entry_export_keyword }}</label>
+                      <input type="text" id="export-keyword" class="form-control" value="" />
+                    </div>
+
+                    <div class="form-group">
+                      <label class="control-label" for="export-quantity-min">{{ entry_export_quantity_min }}</label>
+                      <input type="number" step="1" min="0" id="export-quantity-min" class="form-control" value="" />
+                    </div>
+
+                    <div class="form-group">
+                      <label class="control-label" for="export-quantity-max">{{ entry_export_quantity_max }}</label>
+                      <input type="number" step="1" min="0" id="export-quantity-max" class="form-control" value="" />
+                    </div>
+
+                    <div class="form-group">
+                      <label class="control-label" for="export-price-min">{{ entry_export_price_min }}</label>
+                      <input type="number" step="0.01" min="0" id="export-price-min" class="form-control" value="" />
+                    </div>
+
+                    <div class="form-group">
+                      <label class="control-label" for="export-price-max">{{ entry_export_price_max }}</label>
+                      <input type="number" step="0.01" min="0" id="export-price-max" class="form-control" value="" />
+                    </div>
+                  </div>
+
+                  <div class="dc-ix-export-actions">
+                    <button type="button" class="btn btn-success" id="btn-run-filtered-export"><i class="fa fa-download"></i> {{ button_export_products }}</button>
+                  </div>
+                  <div class="dc-ix-export-help">{{ text_filter_hint_export }}</div>
+                </div>
+              </div>
+            </div>
+
+            <div id="ix-tab-license" class="dcx-tab-pane">
+              <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+                <h4>{{ text_section_license }}</h4>
+
+                <div class="form-group">
+                  <label class="col-sm-3 control-label" for="input-license-key">{{ entry_license_key }}</label>
+                  <div class="col-sm-9">
+                    <input type="text" name="module_dockercart_import_export_excel_license_key" value="{{ module_dockercart_import_export_excel_license_key }}" id="input-license-key" class="form-control" placeholder="DCIE-XXXXXXXXXXXXXXXX-YYYYYYYYYYYY" />
+                    <small class="form-text text-muted dc-ix-license-hint"><i class="fa fa-info-circle"></i> {{ text_license_domain }}: <strong>{{ license_domain }}</strong></small>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-3 control-label" for="input-public-key">{{ entry_public_key }}</label>
+                  <div class="col-sm-9">
+                    <textarea name="module_dockercart_import_export_excel_public_key" id="input-public-key" rows="8" class="form-control" placeholder="-----BEGIN PUBLIC KEY-----&#10;...&#10;-----END PUBLIC KEY-----">{{ module_dockercart_import_export_excel_public_key }}</textarea>
+                  </div>
+                </div>
+
+                <div id="license-info" class="form-group dc-ix-license-info" style="display:none;">
+                  <div class="col-sm-offset-3 col-sm-9">
+                    <div class="alert alert-info">
+                      <h4><i class="fa fa-info-circle"></i> {{ text_license }}</h4>
+                      <p id="license-details"></p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-3 control-label"></label>
+                  <div class="col-sm-9">
+                    <button type="button" class="btn btn-info" id="btn-verify-license"><i class="fa fa-check-circle"></i> {{ button_verify_license }}</button>
+                    <span id="license-status" class="dc-ix-license-status"></span>
+                    {% if license_valid %}
+                    <span class="label label-success dc-ix-license-status">Valid</span>
+                    {% elseif license_message %}
+                    <span class="label label-danger dc-ix-license-status">{{ license_message }}</span>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="ix-tab-about" class="dcx-tab-pane">
+              <div class="dcx-section dc-ix-about-section">
+                <h4>{{ text_section_about }}</h4>
+                <table class="table table-bordered dcx-table">
+                  <tr>
+                    <td class="dc-ix-about-key"><strong>{{ text_module_version }}</strong></td>
+                    <td>{{ module_version ?: 'n/a' }}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>{{ text_developer }}</strong></td>
+                    <td>{{ text_developer_name }}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>{{ text_contact }}</strong></td>
+                    <td><a href="mailto:support@dockercart.net">support@dockercart.net</a></td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+function notice(type, message) {
+  var cls = (type === 'success') ? 'alert-success' : 'alert-danger';
+  $('#module-notice').html('<div class="alert ' + cls + ' alert-dismissible"><button type="button" class="close" data-dismiss="alert">&times;</button>' + message + '</div>');
+}
+
+function updateIxPanelHeader(tabLink) {
+  var $tab = $(tabLink);
+  var title = $tab.data('title') || '{{ text_tab_import }}';
+  var subtitle = $tab.data('subtitle') || '{{ text_tab_import_subtitle }}';
+  var icon = String($tab.data('icon') || 'fa-download').replace(/[^a-z0-9\-]/gi, '');
+
+  $('#ix-tab-title').text(title);
+  $('#ix-tab-subtitle').text(subtitle);
+  $('#ix-tab-icon').attr('class', 'fa ' + icon);
+}
+
+$(document).on('click', '.js-ix-tab', function(e) {
+  e.preventDefault();
+  var tabId = $(this).data('tab');
+  if (!tabId) return;
+
+  $('#ix-tabs > li').removeClass('active');
+  $(this).closest('li').addClass('active');
+
+  $('#ix-tab-import, #ix-tab-export, #ix-tab-license, #ix-tab-about').removeClass('active');
+  $('#' + tabId).addClass('active');
+
+  updateIxPanelHeader(this);
+});
+
+updateIxPanelHeader($('#ix-tabs > li.active a.js-ix-tab'));
+
+function runImport(profileId) {
+  if (!confirm('{{ text_confirm_import }}')) {
+    return;
+  }
+
+  $.ajax({
+    url: '{{ ajax_run_import }}&profile_id=' + profileId,
+    type: 'get',
+    dataType: 'json',
+    success: function(json) {
+      if (json.success) {
+        notice('success', '{{ text_import_success }}');
+        setTimeout(function(){ location.reload(); }, 600);
+      } else {
+        notice('error', json.error || 'Import failed');
+      }
+    },
+    error: function(xhr, ajaxOptions, thrownError) {
+      notice('error', thrownError);
+    }
+  });
+}
+
+function runFilteredExport() {
+  var payload = {
+    store_id: $('#export-store-id').val(),
+    language_id: $('#export-language-id').val(),
+    status: $('#export-status').val(),
+    manufacturer_id: $('#export-manufacturer-id').val(),
+    category_id: $('#export-category-id').val(),
+    keyword: $('#export-keyword').val(),
+    quantity_min: $('#export-quantity-min').val(),
+    quantity_max: $('#export-quantity-max').val(),
+    price_min: $('#export-price-min').val(),
+    price_max: $('#export-price-max').val(),
+    file_format: $('#export-format').val()
+  };
+
+  $.ajax({
+    url: '{{ ajax_run_filtered_export }}',
+    type: 'post',
+    data: payload,
+    dataType: 'json',
+    success: function(json) {
+      if (json.success) {
+        notice('success', '{{ text_export_success }}' + (json.summary && typeof json.summary.rows !== 'undefined' ? ' (' + json.summary.rows + ' rows)' : ''));
+        if (json.download_url) {
+          window.open(json.download_url, '_blank');
+        }
+      } else {
+        notice('error', json.error || 'Export failed');
+      }
+    },
+    error: function(xhr, ajaxOptions, thrownError) {
+      notice('error', thrownError);
+    }
+  });
+}
+
+function saveLicenseKey(licenseKey) {
+  var publicKey = $('#input-public-key').val().trim();
+
+  return fetch('{{ license_save_ajax }}'.replace(/&amp;/g, '&'), {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest'
+    },
+    body: JSON.stringify({ license_key: licenseKey, public_key: publicKey })
+  }).then(function(resp) { return resp.json(); });
+}
+
+function verifyLicense() {
+  var licenseKey = $('#input-license-key').val().trim();
+  var publicKey = $('#input-public-key').val().trim();
+  var $btn = $('#btn-verify-license');
+  var $status = $('#license-status');
+  var $info = $('#license-info');
+  var $details = $('#license-details');
+
+  if (!licenseKey) {
+    $status.html('<span class="label label-danger">Please enter license key</span>');
+    return;
+  }
+
+  if (!publicKey) {
+    $status.html('<span class="label label-danger">Please enter public key</span>');
+    return;
+  }
+
+  var originalHtml = $btn.html();
+  $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Verifying...');
+  $status.html('');
+  $info.hide();
+
+  saveLicenseKey(licenseKey).catch(function(){});
+
+  fetch('{{ license_verify_ajax }}'.replace(/&amp;/g, '&'), {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest'
+    },
+    body: JSON.stringify({ license_key: licenseKey, public_key: publicKey })
+  })
+    .then(function(resp) { return resp.json(); })
+    .then(function(data) {
+      $btn.prop('disabled', false).html(originalHtml);
+
+      if (data.valid) {
+        $status.html('<span class="label label-success"><i class="fa fa-check"></i> Valid</span>');
+        var infoHtml = '<strong>Status:</strong> Active<br>';
+        infoHtml += '<strong>Domain:</strong> ' + (data.domain || '{{ license_domain }}') + '<br>';
+        if (data.expires_formatted) {
+          infoHtml += '<strong>Expires:</strong> ' + data.expires_formatted + '<br>';
+        } else {
+          infoHtml += '<strong>Type:</strong> Lifetime License<br>';
+        }
+        if (data.license_id) infoHtml += '<strong>License ID:</strong> ' + data.license_id;
+        $details.html(infoHtml);
+        $info.show();
+      } else {
+        $status.html('<span class="label label-danger"><i class="fa fa-times"></i> Invalid</span>');
+        $details.html(data.error ? ('<strong>Error:</strong> ' + data.error) : '');
+        $info.show();
+      }
+    })
+    .catch(function(err) {
+      $btn.prop('disabled', false).html(originalHtml);
+      $status.html('<span class="label label-danger">Error: ' + (err.message || err) + '</span>');
+    });
+}
+
+function deleteProfile(profileId) {
+  if (!confirm('{{ text_confirm_delete }}')) {
+    return;
+  }
+
+  $.ajax({
+    url: '{{ ajax_delete_profile }}',
+    type: 'post',
+    data: JSON.stringify({profile_id: profileId}),
+    contentType: 'application/json',
+    dataType: 'json',
+    success: function(json) {
+      if (json.success) {
+        $('tr[data-profile-id="' + profileId + '"]').remove();
+      } else {
+        notice('error', json.error || 'Delete failed');
+      }
+    },
+    error: function(xhr, ajaxOptions, thrownError) {
+      notice('error', thrownError);
+    }
+  });
+}
+
+function copyCron(btn) {
+  var $row = $(btn).closest('tr');
+  var text = $.trim($row.find('.dc-ix-code').text());
+  if (!text) {
+    return;
+  }
+
+  var copyDone = function() { notice('success', '{{ text_cron_copied }}'); };
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(copyDone);
+    return;
+  }
+
+  var $tmp = $('<textarea>').css({position:'fixed', top:'-1000px'}).val(text).appendTo('body');
+  $tmp[0].select();
+  try { document.execCommand('copy'); copyDone(); } catch(e) {}
+  $tmp.remove();
+}
+
+$('#profile-filter').on('input', function() {
+  var q = $(this).val().toLowerCase();
+  $('.dcx-table tbody tr[data-profile-id]').each(function() {
+    var text = $(this).text().toLowerCase();
+    $(this).toggle(text.indexOf(q) !== -1);
+  });
+});
+
+$('#btn-run-filtered-export').on('click', runFilteredExport);
+$('#btn-verify-license').on('click', verifyLicense);
+
+$('#input-license-key, #input-public-key').on('input', function() {
+  $('#license-status').html('');
+  $('#license-info').hide();
+});
+
+if ($('#input-license-key').val().trim()) {
+  setTimeout(function() { verifyLicense(); }, 500);
+}
+</script>
+{{ footer }}

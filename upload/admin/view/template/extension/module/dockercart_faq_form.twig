@@ -1,0 +1,175 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-faq" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+      </div>
+      <h1>{{ faq_id ? text_edit_faq : text_add_faq }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    <div class="dcx-shell">
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i class="fa fa-edit"></i></div>
+          <div>
+            <h3 class="dcx-panel-title">{{ faq_id ? text_edit_faq : text_add_faq }}</h3>
+            <div class="dcx-panel-subtitle">Reusable FAQ block with dynamic placeholders</div>
+          </div>
+        </div>
+        <div class="dcx-panel-body">
+          <form action="{{ action }}" method="post" id="form-faq" class="form-horizontal dcx-form">
+            <input type="hidden" name="faq_id" value="{{ faq.faq_id }}" />
+
+            <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+              <h4>General</h4>
+
+              <div class="form-group required">
+                <label class="col-sm-2 control-label" for="input-code">{{ entry_code }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="code" id="input-code" class="form-control" value="{{ faq.code }}" />
+                  <small class="text-muted">{{ help_code }}</small>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-context-type">{{ entry_context_type }}</label>
+                <div class="col-sm-10">
+                  <select name="context_type" id="input-context-type" class="form-control">
+                    {% for value, label in context_types %}
+                    <option value="{{ value }}" {% if faq.context_type == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                  <small class="text-muted">{{ help_context_type }}</small>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-context-value">{{ entry_context_value }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="context_value" id="input-context-value" class="form-control" value="{{ faq.context_value }}" />
+                  <small class="text-muted">{{ help_context_value }}</small>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-show-widget">{{ entry_show_widget }}</label>
+                <div class="col-sm-10">
+                  <select name="show_widget" id="input-show-widget" class="form-control">
+                    <option value="1" {% if faq.show_widget %}selected{% endif %}>{{ text_enabled }}</option>
+                    <option value="0" {% if not faq.show_widget %}selected{% endif %}>{{ text_disabled }}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-show-json-ld">{{ entry_show_json_ld }}</label>
+                <div class="col-sm-10">
+                  <select name="show_json_ld" id="input-show-json-ld" class="form-control">
+                    <option value="1" {% if faq.show_json_ld %}selected{% endif %}>{{ text_enabled }}</option>
+                    <option value="0" {% if not faq.show_json_ld %}selected{% endif %}>{{ text_disabled }}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-sort-order">{{ entry_sort_order }}</label>
+                <div class="col-sm-4">
+                  <input type="number" name="sort_order" id="input-sort-order" class="form-control" value="{{ faq.sort_order }}" />
+                </div>
+
+                <label class="col-sm-2 control-label" for="input-faq-status">{{ entry_faq_status }}</label>
+                <div class="col-sm-4">
+                  <select name="status" id="input-faq-status" class="form-control">
+                    <option value="1" {% if faq.status %}selected{% endif %}>{{ text_enabled }}</option>
+                    <option value="0" {% if not faq.status %}selected{% endif %}>{{ text_disabled }}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-2 control-label">{{ entry_store }}</label>
+                <div class="col-sm-10">
+                  <div class="well well-sm" style="max-height:180px;overflow:auto;">
+                    {% for store in stores %}
+                    <div class="checkbox">
+                      <label>
+                        <input type="checkbox" name="faq_store[]" value="{{ store.store_id }}" {% if store.store_id in faq_stores %}checked{% endif %} />
+                        {{ store.name }}
+                      </label>
+                    </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="dcx-section">
+              <h4>{{ text_placeholders_title }}</h4>
+              <div class="alert alert-info" style="margin-bottom:12px;">
+                <i class="fa fa-info-circle"></i> {{ text_placeholders_scope }}
+              </div>
+              <p><code>{store_name}</code>, <code>{store_url}</code>, <code>{store_phone}</code>, <code>{store_email}</code></p>
+              <p><code>{category_name}</code>, <code>{category_price_min}</code>, <code>{category_price_max}</code></p>
+              <p><code>{manufacturer_name}</code></p>
+              <p><code>{product_name}</code>, <code>{product_model}</code>, <code>{product_price}</code>, <code>{product_special}</code>, <code>{product_currency}</code></p>
+              <p><code>{information_title}</code>, <code>{route}</code></p>
+            </div>
+
+            <div class="dcx-section">
+              <h4>Question &amp; Answer</h4>
+              <ul class="nav nav-tabs" role="tablist">
+                {% for language in languages %}
+                <li class="{% if loop.first %}active{% endif %}"><a href="#lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" alt="{{ language.name }}" /> {{ language.name }}</a></li>
+                {% endfor %}
+              </ul>
+              <div class="tab-content" style="margin-top:15px;">
+                {% for language in languages %}
+                {% set description = faq_descriptions[language.language_id] is defined ? faq_descriptions[language.language_id] : {'question':'','answer':''} %}
+                <div class="tab-pane {% if loop.first %}active{% endif %}" id="lang-{{ language.language_id }}">
+                  <div class="form-group">
+                    <label class="col-sm-2 control-label">{{ entry_question }}</label>
+                    <div class="col-sm-10">
+                      <input type="text" name="faq_description[{{ language.language_id }}][question]" value="{{ description.question }}" class="form-control" />
+                      <small class="text-muted">{{ help_question_answer_placeholders }}</small>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-sm-2 control-label">{{ entry_answer }}</label>
+                    <div class="col-sm-10">
+                      <textarea name="faq_description[{{ language.language_id }}][answer]" rows="8" class="form-control">{{ description.answer }}</textarea>
+                      <small class="text-muted">{{ help_question_answer_placeholders }}</small>
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{{ footer }}

@@ -1,0 +1,40 @@
+<?php
+// Text
+$_['text_refine']       = 'Refine Search';
+$_['text_product']      = 'Products';
+$_['text_error']        = 'Category not found!';
+$_['text_empty']        = 'There are no products to list in this category.';
+$_['text_quantity']     = 'Qty:';
+$_['text_manufacturer'] = 'Brand:';
+$_['text_model']        = 'Product Code:';
+$_['text_points']       = 'Reward Points:';
+$_['text_price']        = 'Price:';
+$_['text_tax']          = 'Ex Tax:';
+$_['text_compare']      = 'Product Compare (%s)';
+$_['text_sort']         = 'Sort By:';
+$_['text_default']      = 'Default';
+$_['text_name_asc']     = 'Name (A - Z)';
+$_['text_name_desc']    = 'Name (Z - A)';
+$_['text_price_asc']    = 'Price (Low &gt; High)';
+$_['text_price_desc']   = 'Price (High &gt; Low)';
+$_['text_rating_asc']   = 'Rating (Lowest)';
+$_['text_rating_desc']  = 'Rating (Highest)';
+$_['text_model_asc']    = 'Model (A - Z)';
+$_['text_model_desc']   = 'Model (Z - A)';
+$_['text_limit']        = 'Show:';
+$_['text_reviews_word']   = 'reviews';
+// Additional localization for category page UI
+$_['text_subcategories'] = '%s subcategories';
+$_['text_shop_all'] = 'Shop all %s →';
+$_['text_models'] = '%s models';
+$_['text_products'] = '%s products';
+$_['text_quick_view'] = 'Quick View';
+$_['text_category_description'] = 'Category description';
+$_['text_catalog_depth'] = 'Catalog depth';
+$_['text_catalog_depth_desc'] = '%s+ products across %s subcategories';
+$_['text_brand_coverage'] = 'Brand coverage';
+$_['text_brand_coverage_desc'] = 'Global brands and verified suppliers';
+$_['text_support'] = 'Support';
+$_['text_support_desc'] = 'Expert guidance before and after purchase';
+$_['text_new_arrivals'] = 'New Arrivals';
+$_['text_last_90_days'] = 'Last 90 days';

@@ -1,0 +1,60 @@
+http:
+  middlewares:
+    # Security headers
+    secureHeaders:
+      headers:
+        browserXssFilter: true
+        contentTypeNosniff: true
+        frameDeny: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsMaxAge: 31536000
+        stsPreload: true
+        referrerPolicy: "strict-origin-when-cross-origin"
+        customResponseHeaders:
+          X-Custom-Response-Header: ""
+          Server: ""
+
+    # Gzip compression
+    gzip:
+      compression:
+        - gzip
+        - deflate
+        - br
+
+    # Rate limiting
+    rateLimitMiddleware:
+      rateLimit:
+        average: 100
+        period: 60s
+        burst: 200
+
+  routers: {}
+
+  services: {}
+
+  serversTransports:
+    insecureSkipVerify: false
+
+tls:
+  options:
+    default:
+      minVersion: VersionTLS12
+      cipherSuites:
+        - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+        - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+        - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305
+        - TLS_AES_128_GCM_SHA256
+        - TLS_AES_256_GCM_SHA384
+        - TLS_CHACHA20_POLY1305_SHA256
+      curvePreferences:
+        - CurveP521
+        - CurveP384
+        - CurveP256
+      sniStrict: true
+    modern:
+      minVersion: VersionTLS13
+      curvePreferences:
+        - CurveP521
+        - CurveP384
+        - CurveP256

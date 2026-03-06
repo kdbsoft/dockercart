@@ -1,0 +1,41 @@
+<?php
+
+$_['text_benefits'] = 'Переваги:';
+$_['text_compare'] = 'Порівняння товарів (%s)';
+$_['text_default'] = 'За замовчуванням';
+$_['text_empty'] = 'У цій категорії немає товарів для відображення.';
+$_['text_error'] = 'Категорію не знайдено!';
+$_['text_limit'] = 'Показати:';
+$_['text_manufacturer'] = 'Бренд:';
+$_['text_model'] = 'Код товару:';
+$_['text_model_asc'] = 'Модель (А - Я)';
+$_['text_model_desc'] = 'Модель (Z - A)';
+$_['text_name_asc'] = 'Ім\'я (А - Я)';
+$_['text_name_desc'] = 'Ім\'я (Я - А)';
+$_['text_points'] = 'Бонусні бали:';
+$_['text_price'] = 'Ціна:';
+$_['text_price_asc'] = 'Ціна (Низька > Висока)';
+$_['text_price_desc'] = 'Ціна (Висока > Низька)';
+$_['text_product'] = 'Продукти';
+$_['text_quantity'] = 'Кількість:';
+$_['text_rating_asc'] = 'Рейтинг (найнижчий)';
+$_['text_rating_desc'] = 'Рейтинг (найвищий)';
+$_['text_refine'] = 'Уточнити пошук';
+$_['text_reviews_word'] = 'відгуки';
+$_['text_sort'] = 'Сортувати за:';
+$_['text_tax'] = 'Без ПДВ:';
+
+// Додаткові ключі для сторінки категорії
+$_['text_subcategories'] = '%s підкатегорії';
+$_['text_shop_all'] = 'Показати всі %s →';
+$_['text_models'] = '%s моделей';
+$_['text_products'] = '%s товарів';
+$_['text_quick_view'] = 'Швидкий перегляд';
+$_['text_category_description'] = 'Опис категорії';
+$_['text_catalog_depth'] = 'Глибина каталогу';
+$_['text_category'] = 'Категорія';
+$_['text_catalog_depth_desc'] = '%s+ товарів у %s підкатегоріях';
+$_['text_brand_coverage'] = 'Охоплення брендів';
+$_['text_brand_coverage_desc'] = 'Світові бренди та перевірені постачальники';
+$_['text_support'] = 'Підтримка';
+$_['text_support_desc'] = 'Експертна допомога до і після покупки';

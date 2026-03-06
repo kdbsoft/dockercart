@@ -1,0 +1,85 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-comment" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+        <a href="{{ back }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    <div class="dcx-shell">
+      <div class="dcx-panel">
+      <div class="dcx-panel-head">
+        <div class="dcx-panel-head__icon"><i class="fa fa-pencil"></i></div>
+        <div>
+          <h3 class="dcx-panel-title">{{ text_form }}</h3>
+          <div class="dcx-panel-subtitle">Review and edit comment details</div>
+        </div>
+      </div>
+      <div class="dcx-panel-body">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-comment" class="form-horizontal dcx-form">
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for="input-author">{{ entry_author }}</label>
+            <div class="col-sm-9">
+              <input type="text" name="author" value="{{ author }}" placeholder="{{ entry_author }}" id="input-author" class="form-control" />
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for="input-email">{{ entry_email }}</label>
+            <div class="col-sm-9">
+              <input type="email" name="email" value="{{ email }}" placeholder="{{ entry_email }}" id="input-email" class="form-control" />
+            </div>
+          </div>
+          
+          <div class="form-group required">
+            <label class="col-sm-3 control-label" for="input-text">{{ entry_text }}</label>
+            <div class="col-sm-9">
+              <textarea name="text" rows="5" placeholder="{{ entry_text }}" id="input-text" class="form-control">{{ text }}</textarea>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for="input-rating">{{ entry_rating }}</label>
+            <div class="col-sm-9">
+              <select name="rating" id="input-rating" class="form-control">
+                <option value="1" {% if rating == 1 %}selected="selected"{% endif %}>1</option>
+                <option value="2" {% if rating == 2 %}selected="selected"{% endif %}>2</option>
+                <option value="3" {% if rating == 3 %}selected="selected"{% endif %}>3</option>
+                <option value="4" {% if rating == 4 %}selected="selected"{% endif %}>4</option>
+                <option value="5" {% if rating == 5 %}selected="selected"{% endif %}>5</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for="input-status">{{ entry_status }}</label>
+            <div class="col-sm-9">
+              <select name="status" id="input-status" class="form-control">
+                {% if status %}
+                <option value="1" selected="selected">{{ text_enabled }}</option>
+                <option value="0">{{ text_disabled }}</option>
+                {% else %}
+                <option value="1">{{ text_enabled }}</option>
+                <option value="0" selected="selected">{{ text_disabled }}</option>
+                {% endif %}
+              </select>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    </div>
+  </div>
+</div>
+{{ footer }}

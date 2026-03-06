@@ -1,0 +1,601 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-dockercart-filter" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <button type="button" data-toggle="tooltip" title="{{ button_apply|default('Apply') }}" class="btn btn-success" onclick="applySettings();"><i class="fa fa-check"></i></button>
+        <button type="button" data-toggle="tooltip" title="{{ button_clear_cache }}" class="btn btn-warning" onclick="clearCache();"><i class="fa fa-refresh"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+      </div>
+      <h1>
+        {{ heading_title }}
+      </h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    <ul class="nav nav-tabs dcx-profile-tabs" id="filter-tabs" role="tablist">
+      <li class="active"><a href="#filter-tab-general" class="js-filter-tab" data-tab="filter-tab-general" data-title="General" data-subtitle="{{ text_tab_general_subtitle|default('Core filter behavior and display configuration') }}" data-icon="fa-sliders"><i class="fa fa-sliders"></i> General</a></li>
+      <li><a href="#filter-tab-license" class="js-filter-tab" data-tab="filter-tab-license" data-title="{{ text_tab_license|default('License') }}" data-subtitle="{{ text_tab_license_subtitle|default('License key and cryptographic verification') }}" data-icon="fa-key"><i class="fa fa-key"></i> {{ text_tab_license|default('License') }}</a></li>
+      <li><a href="#filter-tab-about" class="js-filter-tab" data-tab="filter-tab-about" data-title="{{ text_tab_about|default('About') }}" data-subtitle="{{ text_tab_about_subtitle|default('Module info, version details, and developer information') }}" data-icon="fa-info-circle"><i class="fa fa-info-circle"></i> {{ text_tab_about|default('About') }}</a></li>
+    </ul>
+
+    <div class="dcx-shell">
+    <div class="dcx-panel">
+      <div class="dcx-panel-head">
+        <div class="dcx-panel-head__icon"><i id="filter-tab-icon" class="fa fa-sliders"></i></div>
+        <div>
+          <h3 class="dcx-panel-title" id="filter-tab-title">General</h3>
+          <div class="dcx-panel-subtitle" id="filter-tab-subtitle">{{ text_tab_general_subtitle|default('Core filter behavior and display configuration') }}</div>
+        </div>
+      </div>
+      <div class="dcx-panel-body">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-dockercart-filter" class="form-horizontal dcx-form">
+
+          <div id="filter-tab-general" class="dcx-tab-pane active">
+
+            <div class="dcx-section">
+              <h4>{{ text_module_settings|default('Module Settings') }}</h4>
+
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="input-status">{{ entry_status }}</label>
+                <div class="col-sm-9">
+                  <select name="module_dockercart_filter_status" id="input-status" class="form-control">
+                    {% if module_dockercart_filter_status %}
+                    <option value="1" selected="selected">{{ text_enabled }}</option>
+                    <option value="0">{{ text_disabled }}</option>
+                    {% else %}
+                    <option value="1">{{ text_enabled }}</option>
+                    <option value="0" selected="selected">{{ text_disabled }}</option>
+                    {% endif %}
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="input-cache-time">{{ entry_cache_time }}</label>
+                <div class="col-sm-9">
+                  <input type="text" name="module_dockercart_filter_cache_time" value="{{ module_dockercart_filter_cache_time }}" placeholder="{{ entry_cache_time }}" id="input-cache-time" class="form-control" />
+                  <span class="help-block">{{ help_cache_time }}</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="input-filter-mode">{{ entry_filter_mode }}</label>
+                <div class="col-sm-9">
+                  <select name="module_dockercart_filter_mode" id="input-filter-mode" class="form-control">
+                    <option value="instant" {% if module_dockercart_filter_mode == 'instant' %}selected="selected"{% endif %}>{{ text_mode_instant }}</option>
+                    <option value="button" {% if module_dockercart_filter_mode == 'button' %}selected="selected"{% endif %}>{{ text_mode_button }}</option>
+                  </select>
+                  <span class="help-block">{{ help_filter_mode|raw }}</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="input-seo-mode">{{ entry_seo_mode }}</label>
+                <div class="col-sm-9">
+                  <select name="module_dockercart_filter_seo_mode" id="input-seo-mode" class="form-control">
+                    <option value="1" {% if module_dockercart_filter_seo_mode == '1' %}selected="selected"{% endif %}>{{ text_enabled }}</option>
+                    <option value="0" {% if module_dockercart_filter_seo_mode == '0' %}selected="selected"{% endif %}>{{ text_disabled }}</option>
+                  </select>
+                  <span class="help-block">{{ help_seo_mode|raw }}</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="input-items-limit">{{ entry_items_limit }}</label>
+                <div class="col-sm-9">
+                  <input type="text" name="module_dockercart_filter_items_limit" value="{{ module_dockercart_filter_items_limit }}" placeholder="{{ entry_items_limit }}" id="input-items-limit" class="form-control" />
+                  <span class="help-block">{{ help_items_limit }}</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="input-attribute-separators">{{ entry_attribute_separators|default('Attribute Value Separators') }}</label>
+                <div class="col-sm-9">
+                  <input type="text" name="module_dockercart_filter_attribute_separators" value="{{ module_dockercart_filter_attribute_separators }}" placeholder=",;|" id="input-attribute-separators" class="form-control" />
+                  <span class="help-block">{{ help_attribute_separators|default('Characters used to split multiple attribute values. Default: ,;| (comma, semicolon, pipe). For example, if attribute value is "Red,Blue;Green|Yellow", it will be split into 4 separate filter values.') }}</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="input-debug">{{ entry_debug|default('Debug Mode') }}</label>
+                <div class="col-sm-9">
+                  <select name="module_dockercart_filter_debug" id="input-debug" class="form-control">
+                    <option value="1" {% if module_dockercart_filter_debug == '1' %}selected="selected"{% endif %}>{{ text_enabled }}</option>
+                    <option value="0" {% if module_dockercart_filter_debug == '0' %}selected="selected"{% endif %}>{{ text_disabled }}</option>
+                  </select>
+                  <span class="help-block">{{ help_debug|default('Enable console.log() in JavaScript and error_log() in PHP for debugging. Disable in production for better performance.') }}</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="input-theme">{{ entry_theme|default('Filter Theme') }}</label>
+                <div class="col-sm-9">
+                  <select name="module_dockercart_filter_theme" id="input-theme" class="form-control">
+                    <option value="light" {% if module_dockercart_filter_theme == 'light' %}selected="selected"{% endif %}>{{ text_theme_light|default('Light') }}</option>
+                    <option value="dark" {% if module_dockercart_filter_theme == 'dark' %}selected="selected"{% endif %}>{{ text_theme_dark|default('Dark') }}</option>
+                  </select>
+                  <span class="help-block">{{ help_theme|default('Select the color theme for the filter widget. Light theme is recommended for light backgrounds, dark theme for dark backgrounds.') }}</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="input-custom-css">{{ entry_custom_css|default('Custom CSS') }}</label>
+                <div class="col-sm-9">
+                  <textarea name="module_dockercart_filter_custom_css" id="input-custom-css" class="form-control" rows="10" placeholder=".dockercart-filter { /* your custom styles */ }" style="font-family: monospace;">{{ module_dockercart_filter_custom_css }}</textarea>
+                  <span class="help-block">{{ help_custom_css|default('Add your custom CSS styles here. These will be applied to the filter widget on the catalog side. Use this to override default styles or add theme-specific customizations.') }}</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="input-primary-color">{{ entry_primary_color|default('Primary Color') }}</label>
+                <div class="col-sm-9">
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <input type="color" name="module_dockercart_filter_primary_color" id="input-primary-color" value="{{ module_dockercart_filter_primary_color }}" class="form-control" style="width:64px;padding:0;height:34px;" />
+                    <input type="text" id="primary-color-hex" class="form-control" value="{{ module_dockercart_filter_primary_color }}" style="width:140px;" />
+                  </div>
+                  <span class="help-block">{{ help_primary_color|default('Choose primary accent color used by the filter (buttons, highlights, sliders).') }}</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="input-mobile-breakpoint">{{ entry_mobile_breakpoint|default('Mobile Breakpoint (px)') }}</label>
+                <div class="col-sm-9">
+                  <input type="number" name="module_dockercart_filter_mobile_breakpoint" value="{{ module_dockercart_filter_mobile_breakpoint }}" placeholder="768" id="input-mobile-breakpoint" class="form-control" min="320" max="1920" />
+                  <span class="help-block">{{ help_mobile_breakpoint|default('Screen width (in pixels) at which the filter switches to mobile/responsive layout. Default: 768px. Common values: 480px (phones), 768px (tablets), 1024px (small laptops).') }}</span>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="dcx-section">
+              <h4>{{ entry_attributes|default('Filterable Attributes') }}</h4>
+              <div class="well" style="max-height: 300px; overflow-y: auto;">
+                {% if attributes %}
+                  {% for attribute in attributes %}
+                  <div class="checkbox">
+                    <label>
+                      <input type="hidden" name="{{ attribute.key }}" value="0" />
+                      <input type="checkbox" name="{{ attribute.key }}" value="1" {% if attribute.enabled %}checked="checked"{% endif %} />
+                      {{ attribute.name }} (ID: {{ attribute.attribute_id }})
+                    </label>
+                  </div>
+                  {% endfor %}
+                {% else %}
+                  <p class="text-muted">{{ text_no_attributes|default('No attributes found') }}</p>
+                {% endif %}
+              </div>
+              <span class="help-block">{{ help_attributes|default('Uncheck attributes that should not appear in the filter') }}</span>
+            </div>
+
+            <div class="dcx-section">
+              <h4>{{ entry_options|default('Filterable Options') }}</h4>
+              <div class="well" style="max-height: 300px; overflow-y: auto;">
+                {% if options %}
+                  {% for option in options %}
+                  <div class="checkbox">
+                    <label>
+                      <input type="hidden" name="{{ option.key }}" value="0" />
+                      <input type="checkbox" name="{{ option.key }}" value="1" {% if option.enabled %}checked="checked"{% endif %} />
+                      {{ option.name }} (ID: {{ option.option_id }})
+                    </label>
+                  </div>
+                  {% endfor %}
+                {% else %}
+                  <p class="text-muted">{{ text_no_options|default('No options found') }}</p>
+                {% endif %}
+              </div>
+              <span class="help-block">{{ help_options|default('Uncheck options that should not appear in the filter') }}</span>
+            </div>
+
+          </div>
+
+          <div id="filter-tab-license" class="dcx-tab-pane">
+
+            <div class="dcx-section">
+              <h4>{{ text_license|default('License Information') }}</h4>
+
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="input-license-key">{{ entry_license_key|default('License Key') }}</label>
+                <div class="col-sm-9">
+                  <input type="text" name="module_dockercart_filter_license_key" value="{{ module_dockercart_filter_license_key }}" placeholder="DCFL-XXXXXXXXXXXXXXXX-YYYYYYYYYYYY" id="input-license-key" class="form-control" />
+                  <small class="form-text text-muted" style="margin-top: 5px;">
+                    <i class="fa fa-info-circle"></i> {{ text_license_domain|default('License bound to domain') }}: <strong>{{ license_domain|default('unknown') }}</strong>
+                  </small>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="input-public-key">{{ entry_public_key|default('Public Key') }}</label>
+                <div class="col-sm-9">
+                  <textarea name="module_dockercart_filter_public_key" id="input-public-key" rows="8" class="form-control" placeholder="-----BEGIN PUBLIC KEY-----&#10;...&#10;-----END PUBLIC KEY-----">{{ module_dockercart_filter_public_key }}</textarea>
+                  <small class="form-text text-muted" style="margin-top: 5px;">
+                    <i class="fa fa-shield"></i> {{ help_public_key|default('This public key is used to verify license signatures. Get it from your vendor.') }}
+                  </small>
+                </div>
+              </div>
+
+              <div id="license-info" class="form-group" style="display: none;">
+                <div class="col-sm-offset-3 col-sm-9">
+                  <div class="alert alert-info">
+                    <h4><i class="fa fa-info-circle"></i> {{ text_license|default('License Information') }}</h4>
+                    <p id="license-details"></p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 control-label"></label>
+                <div class="col-sm-9">
+                  <button type="button" class="btn btn-info" id="btn-verify-license"><i class="fa fa-check-circle"></i> {{ button_verify_license|default('Verify License') }}</button>
+                  <span id="license-status" style="margin-left: 10px;"></span>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+          <div id="filter-tab-about" class="dcx-tab-pane">
+
+            <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+              <h4>{{ text_tab_about|default('About') }}</h4>
+              <table class="table table-bordered">
+                <tr>
+                  <td style="width:220px;"><strong>{{ text_module_version|default('Module version') }}</strong></td>
+                  <td>
+                    {% if module_version is defined and module_version %}
+                      {{ module_version }}
+                    {% else %}
+                      n/a
+                    {% endif %}
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>{{ text_developer|default('Developer') }}</strong></td>
+                  <td>{{ text_developer_name|default('DockerCart Team') }}</td>
+                </tr>
+                <tr>
+                  <td><strong>{{ text_contact|default('Contact') }}</strong></td>
+                  <td><a href="mailto:support@dockercart.net">support@dockercart.net</a></td>
+                </tr>
+              </table>
+            </div>
+
+          </div>
+      </div>
+    </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+// Clear hidden input values before form submission to avoid confusion
+document.getElementById('form-dockercart-filter').addEventListener('submit', function(e) {
+    // Find all hidden inputs and clear them
+    var hiddenInputs = this.querySelectorAll('input[type="hidden"][name^="attr_"], input[type="hidden"][name^="opt_"]');
+    hiddenInputs.forEach(function(input) {
+        input.disabled = true; // Disable so they won't be submitted
+    });
+}, false);
+
+function updateFilterPanelHeader(tabLink) {
+  var $tab = $(tabLink);
+  var title = $tab.data('title') || 'General';
+  var subtitle = $tab.data('subtitle') || '{{ text_tab_general_subtitle|default('Core filter behavior and display configuration') }}';
+  var icon = String($tab.data('icon') || 'fa-sliders').replace(/[^a-z0-9\-]/gi, '');
+
+  $('#filter-tab-title').text(title);
+  $('#filter-tab-subtitle').text(subtitle);
+  $('#filter-tab-icon').attr('class', 'fa ' + icon);
+}
+
+$(document).on('click', '.js-filter-tab', function(e) {
+  e.preventDefault();
+  var tabId = $(this).data('tab');
+  if (!tabId) {
+    return;
+  }
+
+  $('.dcx-tab-pane').removeClass('active');
+  $('#' + tabId).addClass('active');
+
+  $('#filter-tabs > li').removeClass('active');
+  $(this).closest('li').addClass('active');
+
+  updateFilterPanelHeader(this);
+});
+
+updateFilterPanelHeader($('#filter-tabs > li.active a.js-filter-tab'));
+
+function applySettings() {
+    var form = document.getElementById('form-dockercart-filter');
+    var btn = event.currentTarget;
+    var container = document.querySelector('#content > .container-fluid');
+
+    // Show loading state
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+
+    // Remove previous alerts
+    var alerts = container.querySelectorAll('.alert-dismissible');
+    alerts.forEach(function(alert) {
+        alert.remove();
+    });
+
+    // Disable hidden inputs before submission
+    var hiddenInputs = form.querySelectorAll('input[type="hidden"][name^="attr_"], input[type="hidden"][name^="opt_"]');
+    hiddenInputs.forEach(function(input) {
+        input.disabled = true;
+    });
+
+    // Serialize form data
+    var formData = new FormData(form);
+
+    // Re-enable hidden inputs
+    hiddenInputs.forEach(function(input) {
+        input.disabled = false;
+    });
+
+    // Make AJAX request
+    fetch(form.action, {
+        method: 'POST',
+        body: formData
+    })
+    .then(function(response) {
+        return response.text();
+    })
+    .then(function(html) {
+        // Reset button
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa fa-check"></i>';
+
+        // Show success message
+        var successAlert = document.createElement('div');
+        successAlert.className = 'alert alert-success alert-dismissible';
+        successAlert.innerHTML = '<i class="fa fa-check-circle"></i> Settings applied successfully! ' +
+            '<button type="button" class="close" data-dismiss="alert">&times;</button>';
+        container.insertBefore(successAlert, container.firstChild);
+
+        // Auto-hide after 3 seconds
+        setTimeout(function() {
+            successAlert.style.opacity = '0';
+            setTimeout(function() {
+                successAlert.remove();
+            }, 300);
+        }, 3000);
+    })
+    .catch(function(error) {
+        // Reset button
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa fa-check"></i>';
+
+        // Show error message
+        var errorAlert = document.createElement('div');
+        errorAlert.className = 'alert alert-danger alert-dismissible';
+        errorAlert.innerHTML = '<i class="fa fa-exclamation-circle"></i> Error: ' + error.message +
+            ' <button type="button" class="close" data-dismiss="alert">&times;</button>';
+        container.insertBefore(errorAlert, container.firstChild);
+    });
+}
+
+function clearCache() {
+    var btn = document.querySelector('.btn-warning');
+    var container = document.querySelector('#content > .container-fluid');
+
+    // Show loading state
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+
+    // Remove previous alerts
+    var alerts = container.querySelectorAll('.alert-dismissible');
+    alerts.forEach(function(alert) {
+        alert.remove();
+    });
+
+    // Make AJAX request
+    fetch('index.php?route=extension/module/dockercart_filter/clearCache&user_token={{ user_token }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(function(response) {
+        return response.json();
+    })
+    .then(function(json) {
+        // Reset button
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa fa-refresh"></i>';
+
+        if (json.success) {
+            var successAlert = document.createElement('div');
+            successAlert.className = 'alert alert-success alert-dismissible';
+            successAlert.innerHTML = '<i class="fa fa-check-circle"></i> ' + json.success +
+                ' <button type="button" class="close" data-dismiss="alert">&times;</button>';
+            container.insertBefore(successAlert, container.firstChild);
+        }
+    })
+    .catch(function(error) {
+        // Reset button
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa fa-refresh"></i>';
+
+        alert('Error: ' + error.message);
+    });
+}
+
+// License verification
+document.addEventListener('DOMContentLoaded', function() {
+    var btnVerify = document.getElementById('btn-verify-license');
+    var licenseInput = document.getElementById('input-license-key');
+    var licenseStatus = document.getElementById('license-status');
+    var licenseInfo = document.getElementById('license-info');
+    var licenseDetails = document.getElementById('license-details');
+    var publicKeyInput = document.getElementById('input-public-key');
+
+    // Function to save license key via AJAX (without redirect) - returns Promise
+    function saveLicenseKey(licenseKey) {
+        var publicKey = publicKeyInput.value.trim();
+
+        return fetch('index.php?route=extension/module/dockercart_filter/saveLicenseKeyAjax&user_token={{ user_token }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                license_key: licenseKey,
+                public_key: publicKey
+            })
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            if (data.success) {
+                console.log('License key and public key saved successfully');
+            } else {
+                console.error('Failed to save:', data.error);
+            }
+            return data;
+        })
+        .catch(function(error) {
+            console.error('Error saving:', error);
+            throw error;
+        });
+    }
+
+    // Function to verify license (extracted so we can call it from multiple places)
+    function verifyLicense() {
+        var licenseKey = licenseInput.value.trim();
+        var publicKey = publicKeyInput.value.trim();
+
+        if (!licenseKey) {
+            licenseStatus.innerHTML = '<span class="label label-danger">Please enter license key</span>';
+            return;
+        }
+
+        if (!publicKey) {
+            licenseStatus.innerHTML = '<span class="label label-danger">Please enter public key</span>';
+            return;
+        }
+
+        // Show loading
+        btnVerify.disabled = true;
+        var originalText = btnVerify.innerHTML;
+        btnVerify.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Verifying...';
+        licenseStatus.innerHTML = '';
+        licenseInfo.style.display = 'none';
+
+        // Verify license directly with public key (no need to save first)
+        fetch('index.php?route=extension/module/dockercart_filter/verifyLicenseAjax&user_token={{ user_token }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                license_key: licenseKey,
+                public_key: publicKey
+            })
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            // Reset button
+            btnVerify.disabled = false;
+            btnVerify.innerHTML = originalText;
+
+            if (data.valid) {
+                // Show success
+                licenseStatus.innerHTML = '<span class="label label-success"><i class="fa fa-check"></i> Valid</span>';
+
+                // Show license info
+                var infoHtml = '<strong>Status:</strong> Active<br>';
+                infoHtml += '<strong>Domain:</strong> ' + data.domain + '<br>';
+                if (data.expires_formatted) {
+                    infoHtml += '<strong>Expires:</strong> ' + data.expires_formatted + '<br>';
+                } else {
+                    infoHtml += '<strong>Type:</strong> Lifetime License<br>';
+                }
+                if (data.license_id) {
+                    infoHtml += '<strong>License ID:</strong> ' + data.license_id;
+                }
+
+                licenseDetails.innerHTML = infoHtml;
+                licenseInfo.style.display = 'block';
+            } else {
+                // Show error
+                licenseStatus.innerHTML = '<span class="label label-danger"><i class="fa fa-times"></i> Invalid</span>';
+
+                if (data.error) {
+                    var errorHtml = '<strong>Error:</strong> ' + data.error;
+                    licenseDetails.innerHTML = errorHtml;
+                    licenseInfo.style.display = 'block';
+                }
+            }
+        })
+        .catch(function(error) {
+            // Reset button
+            btnVerify.disabled = false;
+            btnVerify.innerHTML = originalText;
+
+            licenseStatus.innerHTML = '<span class="label label-danger">Error: ' + error.message + '</span>';
+        });
+    }
+
+    if (btnVerify) {
+        // Clear status when user changes the input
+        licenseInput.addEventListener('input', function() {
+            licenseStatus.innerHTML = '';
+            licenseInfo.style.display = 'none';
+        });
+
+        btnVerify.addEventListener('click', function() {
+            verifyLicense();
+        });
+
+        // Auto-verify on page load if license exists
+        if (licenseInput.value.trim()) {
+            // Wait a bit for page to fully load before verifying
+            setTimeout(function() {
+                verifyLicense();
+            }, 500);
+        }
+    }
+
+      // Primary color synchronization (picker <-> hex field)
+      var colorInput = document.getElementById('input-primary-color');
+      var colorHex = document.getElementById('primary-color-hex');
+
+      function syncPrimaryColor() {
+        var hex = colorInput.value || '#007bff';
+        colorHex.value = hex;
+      }
+
+      if (colorInput) {
+        colorInput.addEventListener('input', syncPrimaryColor);
+        colorHex.addEventListener('change', function() {
+          var val = colorHex.value.trim();
+          if (/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(val)) {
+            colorInput.value = val;
+            syncPrimaryColor();
+          }
+        });
+      }
+});
+</script>
+{{ footer }}
+

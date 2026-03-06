@@ -1,0 +1,36 @@
+{% if breadcrumbs is defined and breadcrumbs %}
+  {% set bc_class = breadcrumbs_class|default('flex flex-wrap items-center gap-2 text-xs text-gray-500') %}
+  {% set bc_link_class = breadcrumbs_link_class|default('hover:text-gray-900 transition') %}
+  {% set bc_last_class = breadcrumbs_last_class|default('text-gray-700 font-semibold') %}
+  {% set bc_separator = breadcrumbs_separator is defined ? breadcrumbs_separator : '•' %}
+
+  <nav aria-label="Breadcrumb">
+    <ul class="{{ bc_class }}">
+      {% for breadcrumb in breadcrumbs %}
+        {% if not loop.last %}
+          <li><a href="{{ breadcrumb.href }}" class="{{ bc_link_class }}">{{ breadcrumb.text }}</a></li>
+          {% if bc_separator is not same as(false) and bc_separator is not empty %}<li>{{ bc_separator }}</li>{% endif %}
+        {% else %}
+          <li class="{{ bc_last_class }}">{{ breadcrumb.text }}</li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  </nav>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {% for breadcrumb in breadcrumbs %}
+      {
+        "@type": "ListItem",
+        "position": {{ loop.index }},
+        "name": "{{ breadcrumb.text|striptags|trim|e('js') }}"{% if breadcrumb.href %},
+        "item": "{{ breadcrumb.href|e('js') }}"{% endif %}
+      }{% if not loop.last %},{% endif %}
+      {% endfor %}
+    ]
+  }
+  </script>
+{% endif %}

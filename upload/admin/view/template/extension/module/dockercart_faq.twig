@@ -1,0 +1,149 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-module" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ add_faq_link }}" data-toggle="tooltip" title="{{ button_add_faq }}" class="btn btn-success"><i class="fa fa-plus"></i></a>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    {% set total_faq = faqs|length %}
+    {% set enabled_faq = 0 %}
+    {% for item in faqs %}
+      {% if item.status %}{% set enabled_faq = enabled_faq + 1 %}{% endif %}
+    {% endfor %}
+
+    <div class="dc-ix-cards">
+      <div class="dc-ix-card">
+        <div class="dc-ix-card__k">FAQ items</div>
+        <div class="dc-ix-card__v">{{ total_faq }}</div>
+      </div>
+      <div class="dc-ix-card">
+        <div class="dc-ix-card__k">Enabled</div>
+        <div class="dc-ix-card__v">{{ enabled_faq }}</div>
+      </div>
+      <div class="dc-ix-card">
+        <div class="dc-ix-card__k">Placeholders</div>
+        <div class="dc-ix-card__v">{dc_faq:code}</div>
+      </div>
+      <div class="dc-ix-card">
+        <div class="dc-ix-card__k">Auto Context</div>
+        <div class="dc-ix-card__v">{dc_faq:auto}</div>
+      </div>
+    </div>
+
+    <div class="dcx-shell">
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i class="fa fa-question-circle"></i></div>
+          <div>
+            <h3 class="dcx-panel-title">{{ heading_title }}</h3>
+            <div class="dcx-panel-subtitle">Universal FAQ with context placeholders and JSON-LD</div>
+          </div>
+        </div>
+        <div class="dcx-panel-body">
+          <form action="{{ action }}" method="post" id="form-module" class="form-horizontal dcx-form">
+            <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+              <h4>{{ text_edit }}</h4>
+
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
+                <div class="col-sm-10">
+                  <select name="module_dockercart_faq_status" id="input-status" class="form-control">
+                    <option value="1" {% if module_dockercart_faq_status %}selected{% endif %}>{{ text_enabled }}</option>
+                    <option value="0" {% if not module_dockercart_faq_status %}selected{% endif %}>{{ text_disabled }}</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </form>
+
+          <div class="dcx-section">
+            <h4>FAQ entries</h4>
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover dcx-table">
+                <thead>
+                  <tr>
+                    <td>{{ column_question }}</td>
+                    <td>{{ column_code }}</td>
+                    <td>{{ column_context }}</td>
+                    <td>{{ column_status }}</td>
+                    <td>{{ column_sort_order }}</td>
+                    <td class="text-right">{{ column_action }}</td>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for faq in faqs %}
+                  <tr>
+                    <td>{{ faq.question ?: '-' }}</td>
+                    <td><code>{{ faq.code }}</code></td>
+                    <td>
+                      <span class="label label-default">{{ context_type_map[faq.context_type] ?? faq.context_type }}</span>
+                      {% if faq.context_value %}
+                      <small class="text-muted">{{ faq.context_value }}</small>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if faq.status %}
+                      <span class="dc-ix-chip dc-ix-chip--ok">{{ text_enabled }}</span>
+                      {% else %}
+                      <span class="dc-ix-chip dc-ix-chip--off">{{ text_disabled }}</span>
+                      {% endif %}
+                    </td>
+                    <td>{{ faq.sort_order }}</td>
+                    <td class="text-right">
+                      <a href="{{ faq.edit_link }}" class="btn btn-warning btn-xs" title="{{ button_edit }}"><i class="fa fa-pencil"></i></a>
+                      <a href="{{ faq.delete_link }}" class="btn btn-danger btn-xs" onclick="return confirm('Delete this FAQ entry?');" title="{{ button_delete }}"><i class="fa fa-trash"></i></a>
+                    </td>
+                  </tr>
+                  {% else %}
+                  <tr>
+                    <td colspan="6" class="text-center">{{ text_no_results }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="dcx-section">
+            <h4>{{ text_placeholders_title }}</h4>
+            <div class="alert alert-info" style="margin-bottom:12px;">
+              <i class="fa fa-info-circle"></i> {{ text_placeholders_scope }}
+            </div>
+            <p><code>{store_name}</code>, <code>{store_url}</code>, <code>{store_phone}</code>, <code>{store_email}</code></p>
+            <p><code>{category_name}</code>, <code>{category_price_min}</code>, <code>{category_price_max}</code></p>
+            <p><code>{manufacturer_name}</code></p>
+            <p><code>{product_name}</code>, <code>{product_model}</code>, <code>{product_price}</code>, <code>{product_special}</code>, <code>{product_currency}</code></p>
+            <p><code>{information_title}</code>, <code>{route}</code></p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{{ footer }}

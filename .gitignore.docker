@@ -1,0 +1,15 @@
+# Docker files
+.env
+
+# Storage directories (will be created by Docker)
+storage/
+
+# Config files (generated automatically)
+upload/config.php
+upload/admin/config.php
+
+# Backups directory
+backups/
+
+# MySQL data (Docker volume)
+mysql-data/

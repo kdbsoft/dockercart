@@ -1,0 +1,20 @@
+{% if modules %}
+<aside id="column-right" class="hidden lg:block">
+  <div class="flex flex-col gap-4">
+  {% for module in modules %}
+    {{ module }}
+  {% endfor %}
+  </div>
+
+</aside>
+
+<script>
+  // Mark any Dockercart sidebar filters so the mobile widget initializes
+  (function(){
+    try {
+      document.querySelectorAll('#column-right .dockercart-filter-vertical').forEach(function(el){ el.setAttribute('data-position','sidebar'); });
+    } catch(e) { console && console.warn && console.warn('column-right filter marker error', e); }
+  })();
+</script>
+
+{% endif %}

@@ -1,0 +1,92 @@
+{# Special module for dockercart theme — similar style to Featured module #}
+{% if products|length %}
+<section id="special" class="py-16 bg-white px-4 sm:px-6 lg:px-8">
+  <style>
+    /* Minimal styles to match product card appearance without Tailwind */
+    .product-card{background:#fff;border:1px solid #f3f4f6;border-radius:16px;overflow:hidden;transition:transform .25s ease,box-shadow .25s ease;display:flex;flex-direction:column}
+    .product-card:hover{transform:scale(1.02);box-shadow:0 10px 30px rgba(2,6,23,0.08)}
+    .product-card .image img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease}
+    .product-card:hover .image img{transform:scale(1.05)}
+    .add-to-cart-btn{opacity:0;transform:translateY(6px);transition:opacity .18s ease,transform .18s ease}
+    .product-card:hover .add-to-cart-btn{opacity:1;transform:translateY(0)}
+    .wishlist-btn{opacity:0;transform:translateY(-4px) scale(.92);transition:opacity .18s ease,transform .18s ease,box-shadow .18s ease}
+    .product-card:hover .wishlist-btn{opacity:1;transform:translateY(0) scale(1)}
+    .wishlist-btn.in-wishlist{opacity:1;transform:translateY(0) scale(1)}
+    .discount-badge{position:absolute;top:8px;left:8px;background:#ef4444;color:#fff;padding:2px 6px;border-radius:6px;font-size:11px;font-weight:700}
+    .quick-view-btn{position:absolute;bottom:0;left:0;right:0;padding:10px;background:rgba(17,24,39,0.85);color:#fff;font-weight:700;text-transform:uppercase;font-size:11px;opacity:0;transform:translateY(100%);transition:opacity .2s ease,transform .2s ease,background .2s ease}
+    .product-card:hover .quick-view-btn{opacity:1;transform:translateY(0)}
+    .quick-view-btn:hover{background:#2563eb}
+  </style>
+  <div class="max-w-7xl mx-auto">
+    <div class="mb-8">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-red-500 text-sm font-semibold uppercase tracking-widest mb-1">{{ text_special }}</p>
+          <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ heading_title }}</h2>
+        </div>
+        <div class="hidden sm:block">
+          <a href="{{ section_href }}" class="text-sm font-semibold text-blue-600 hover:underline">{{ text_view_all }}</a>
+        </div>
+      </div>
+    </div>
+
+    <div id="special-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+      {% for product in products %}
+      {% set price_val = product.price is defined ? product.price : '' %}
+      {% set special_val = product.special is defined ? product.special : '' %}
+      {% set discount_pct = product.discount is defined ? product.discount : 0 %}
+
+      <div class="product-card group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex flex-col" data-id="{{ product.product_id }}" data-rating="{{ product.rating is defined ? product.rating : 0 }}" data-model="{{ product.model is defined ? product.model : '' }}" data-brand="{{ product.manufacturer is defined ? product.manufacturer : '' }}" data-in-wishlist="{{ product.in_wishlist is defined ? product.in_wishlist : 0 }}">
+        <div class="relative overflow-hidden aspect-square bg-gray-50">
+          <div class="image">
+            <a href="{{ product.href }}">
+              <img src="{{ product.thumb }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+            </a>
+          </div>
+          {% if discount_pct and discount_pct > 0 %}
+          <span class="discount-badge">-{{ discount_pct }}%</span>
+          {% endif %}
+          <div class="absolute top-2 right-2">
+            <button class="wishlist-btn w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center hover:bg-rose-50 transition {% if product.in_wishlist is defined and product.in_wishlist %}bg-rose-50 in-wishlist{% endif %}" onclick="dcAddToWishlist('{{ product.product_id }}', this); event.stopPropagation();" aria-label="Add to wishlist">
+              <i data-lucide="heart" class="w-3.5 h-3.5 {% if product.in_wishlist is defined and product.in_wishlist %}text-rose-500 fill-rose-400{% else %}text-gray-400{% endif %}"></i>
+            </button>
+          </div>
+          <button class="quick-view-btn" onclick="openQuickView({{ product.product_id }}); event.stopPropagation();">{{ text_quick_view }}</button>
+        </div>
+        <div class="p-3 sm:p-4 flex flex-col flex-1">
+          {% if product.category %}
+          <p class="text-[10px] sm:text-xs text-gray-400 uppercase tracking-widest mb-1 font-medium">{{ product.category }}</p>
+          {% endif %}
+          <h3 class="text-xs sm:text-sm font-semibold text-gray-900 leading-snug mb-2 flex-1 line-clamp-2"><a href="{{ product.href }}">{{ product.name }}</a></h3>
+          <div class="flex items-center gap-1 mb-3">
+            <div class="flex text-xs">
+              {% for i in 1..5 %}
+                {% if product.rating is defined and product.rating >= i %}
+                  <span class="text-amber-400">★</span>
+                {% else %}
+                  <span class="text-gray-300">★</span>
+                {% endif %}
+              {% endfor %}
+            </div>
+            {% if product.reviews is defined %}<span class="text-[10px] text-gray-400 ml-1">{{ product.reviews }} {{ text_reviews }}</span>{% endif %}
+          </div>
+          <div class="flex items-end justify-between gap-2">
+            <div class="flex items-baseline gap-1">
+              {% if special_val %}
+                <span class="text-base sm:text-lg font-extrabold text-gray-900">{{ special_val }}</span>
+                <span class="text-xs text-red-400 line-through ml-1">{{ price_val }}</span>
+              {% else %}
+                <span class="text-base sm:text-lg font-extrabold text-gray-900">{{ price_val }}</span>
+              {% endif %}
+            </div>
+            <button class="add-to-cart-btn flex-shrink-0 text-[10px] sm:text-xs font-bold px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0" onclick="cart.add('{{ product.product_id }}');">+ {{ button_cart }}</button>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# Quick View modal is created dynamically by quick-view.js #}

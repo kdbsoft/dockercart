@@ -1,0 +1,103 @@
+{{ header }}
+<main class="bg-gray-50 min-h-screen">
+
+  <section class="bg-gradient-to-br from-gray-900 via-gray-800 to-blue-950 py-10 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      {% include 'dockercart/template/common/partials/breadcrumbs.twig' with {
+        breadcrumbs_class: 'flex flex-wrap items-center gap-2 text-xs text-gray-300 mb-3',
+        breadcrumbs_link_class: 'hover:text-white transition',
+        breadcrumbs_last_class: 'text-white font-semibold'
+      } %}
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-white">{{ heading_title }}</h1>
+    </div>
+  </section>
+
+  <section class="py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-5xl mx-auto">
+      {{ content_top }}
+
+      {% if success %}
+      <div class="mb-6 bg-green-50 border border-green-200 text-green-700 rounded-2xl px-5 py-4 text-sm flex items-center gap-3">
+        <i data-lucide="check-circle" class="w-5 h-5 flex-shrink-0"></i>
+        <span>{{ success }}</span>
+      </div>
+      {% endif %}
+
+      {% if products %}
+      <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden mb-6">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-gray-100 bg-gray-50">
+                <th class="text-center font-semibold text-gray-500 px-4 py-3">{{ column_image }}</th>
+                <th class="text-left font-semibold text-gray-500 px-4 py-3">{{ column_name }}</th>
+                <th class="text-left font-semibold text-gray-500 px-4 py-3">{{ column_model }}</th>
+                <th class="text-right font-semibold text-gray-500 px-4 py-3">{{ column_stock }}</th>
+                <th class="text-right font-semibold text-gray-500 px-4 py-3">{{ column_price }}</th>
+                <th class="text-right font-semibold text-gray-500 px-4 py-3">{{ column_action }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for product in products %}
+              <tr class="border-b border-gray-50 hover:bg-blue-50/30 transition">
+                <td class="text-center px-4 py-3">
+                  {% if product.thumb %}
+                  <a href="{{ product.href }}">
+                    <img src="{{ product.thumb }}" alt="{{ product.name }}" class="w-14 h-14 object-cover rounded-xl mx-auto" />
+                  </a>
+                  {% endif %}
+                </td>
+                <td class="text-left px-4 py-3">
+                  <a href="{{ product.href }}" class="font-medium text-gray-800 hover:text-blue-600 transition">{{ product.name }}</a>
+                </td>
+                <td class="text-left text-gray-500 px-4 py-3">{{ product.model }}</td>
+                <td class="text-right px-4 py-3">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                    {{ product.stock }}
+                  </span>
+                </td>
+                <td class="text-right px-4 py-3">
+                  {% if product.price %}
+                  {% if not product.special %}
+                  <span class="text-gray-800 font-semibold">{{ product.price }}</span>
+                  {% else %}
+                  <span class="font-bold text-blue-600">{{ product.special }}</span>
+                  <s class="text-gray-400 text-xs ml-1">{{ product.price }}</s>
+                  {% endif %}
+                  {% endif %}
+                </td>
+                <td class="text-right px-4 py-3 whitespace-nowrap">
+                  <button type="button" onclick="cart.add('{{ product.product_id }}');"
+                    class="inline-flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-1.5 rounded-lg transition text-xs mr-1">
+                    <i data-lucide="shopping-cart" class="w-3.5 h-3.5"></i>
+                  </button>
+                  <a href="{{ product.remove }}"
+                    class="inline-flex items-center gap-1 border border-red-200 hover:border-red-300 text-red-400 hover:text-red-600 font-medium px-3 py-1.5 rounded-lg transition text-xs">
+                    <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% else %}
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 text-center text-gray-400 text-sm mb-6">
+        <i data-lucide="heart" class="w-8 h-8 mx-auto mb-2 opacity-30"></i>
+        <p>{{ text_empty }}</p>
+      </div>
+      {% endif %}
+
+      <div class="flex justify-end">
+        <a href="{{ continue }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm">
+          {{ button_continue }}
+        </a>
+      </div>
+
+      {{ content_bottom }}
+    </div>
+  </section>
+
+</main>
+{{ footer }}

@@ -1,0 +1,21 @@
+{% if languages|length > 1 %}
+<div class="dc-topbar-dd" id="lang-dd">
+  <button onclick="dcToggleTopDd('lang')" class="flex items-center gap-1 text-xs text-gray-400 hover:text-white transition py-0.5 px-1.5 rounded">
+    <i data-lucide="globe" class="w-3 h-3 flex-shrink-0"></i>
+    <span id="lang-label">
+      {% for language in languages %}{% if language.code == code %}{{ language.name }}{% endif %}{% endfor %}
+    </span>
+    <i data-lucide="chevron-down" class="w-2.5 h-2.5 opacity-50"></i>
+  </button>
+  <div id="lang-dd-panel" class="dc-topbar-dd-panel hidden absolute right-0 top-full mt-1 w-44 bg-gray-900 border border-gray-700 rounded-xl shadow-2xl py-1.5 z-[300]">
+    {% for language in languages %}
+    <a href="{{ language.url }}" rel="nofollow"
+       class="flex items-center gap-2.5 px-4 py-2 text-xs text-gray-300 hover:bg-gray-800 hover:text-white transition">
+      <img src="catalog/language/{{ language.code }}/{{ language.code }}.png" alt="{{ language.name }}" class="w-4 h-4 rounded-sm object-contain" />
+      {{ language.name }}
+      {% if language.code == code %}<i data-lucide="check" class="w-3 h-3 ml-auto text-blue-400"></i>{% endif %}
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}

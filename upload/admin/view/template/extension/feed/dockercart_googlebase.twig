@@ -1,0 +1,1687 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
+  <style>
+    .dc-gb-cards { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin-bottom:12px; }
+    .dc-gb-card { background:#fff; border:1px solid #e6e9ef; border-radius:10px; padding:12px 14px; }
+    .dc-gb-card__k { font-size:11px; text-transform:uppercase; color:#8b96a7; letter-spacing:.04em; }
+    .dc-gb-card__v { font-size:22px; font-weight:600; line-height:1.2; color:#2a3445; }
+    @media (max-width: 1199px) { .dc-gb-cards { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (max-width: 767px) { .dc-gb-cards { grid-template-columns:1fr; } }
+  </style>
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-dockercart-googlebase" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <button type="button" data-toggle="tooltip" title="{{ button_generate|default('Generate Now') }}" class="btn btn-success" id="btn-generate"><i class="fa fa-refresh"></i></button>
+        <button type="button" data-toggle="tooltip" title="{{ button_clear_cache|default('Clear Cache') }}" class="btn btn-warning" id="btn-clear-cache"><i class="fa fa-trash"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    
+    <div id="alert-container"></div>
+
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs dcx-profile-tabs" id="gb-tabs" role="tablist">
+      <li class="active"><a href="#tab-general" class="js-gb-tab" data-tab="tab-general" data-title="General" data-subtitle="Core feed settings, limits and feed overview" data-icon="fa-sliders"><i class="fa fa-sliders"></i> General</a></li>
+      <li><a href="#tab-products" class="js-gb-tab" data-tab="tab-products" data-title="{{ tab_products|default('Product Settings') }}" data-subtitle="Product filters, brand source and exclusions" data-icon="fa-cube"><i class="fa fa-cube"></i> {{ tab_products|default('Product Settings') }}</a></li>
+      <li><a href="#tab-categories" class="js-gb-tab" data-tab="tab-categories" data-title="{{ tab_categories|default('Category Mapping') }}" data-subtitle="DockerCart to Google category mapping" data-icon="fa-sitemap"><i class="fa fa-sitemap"></i> {{ tab_categories|default('Category Mapping') }}</a></li>
+      <li><a href="#tab-shipping" class="js-gb-tab" data-tab="tab-shipping" data-title="{{ tab_shipping|default('Shipping') }}" data-subtitle="Shipping attributes included in feed" data-icon="fa-truck"><i class="fa fa-truck"></i> {{ tab_shipping|default('Shipping') }}</a></li>
+      <li><a href="#tab-custom-labels" class="js-gb-tab" data-tab="tab-custom-labels" data-title="{{ tab_custom_labels|default('Custom Labels') }}" data-subtitle="Merchant Center custom labels" data-icon="fa-tags"><i class="fa fa-tags"></i> {{ tab_custom_labels|default('Custom Labels') }}</a></li>
+      <li><a href="#tab-license" class="js-gb-tab" data-tab="tab-license" data-title="{{ tab_license|default('License') }}" data-subtitle="License verification and activation status" data-icon="fa-key"><i class="fa fa-key"></i> {{ tab_license|default('License') }}</a></li>
+      <li><a href="#tab-about" class="js-gb-tab" data-tab="tab-about" data-title="About" data-subtitle="Module information and support contacts" data-icon="fa-info-circle"><i class="fa fa-info-circle"></i> About</a></li>
+    </ul>
+
+    <div class="dcx-shell">
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i id="gb-tab-icon" class="fa fa-sliders"></i></div>
+          <div>
+            <h3 class="dcx-panel-title" id="gb-tab-title">General</h3>
+            <div class="dcx-panel-subtitle" id="gb-tab-subtitle">Core feed settings, limits and feed overview</div>
+          </div>
+        </div>
+        <div class="dcx-panel-body">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-dockercart-googlebase" class="form-horizontal dcx-form">
+
+          <!-- Tab panes -->
+          <div class="tab-content">
+
+            <!-- GENERAL TAB -->
+            <div class="dcx-tab-pane active" id="tab-general">
+              <div class="dcx-section">
+                <h4>{{ text_statistics|default('Feed Statistics') }}</h4>
+
+                <div class="dc-gb-cards">
+                  <div class="dc-gb-card">
+                    <div class="dc-gb-card__k">{{ text_total_products|default('Total Products') }}</div>
+                    <div class="dc-gb-card__v" id="stat-total">{{ feed_stats.total_products }}</div>
+                  </div>
+                  <div class="dc-gb-card">
+                    <div class="dc-gb-card__k">{{ text_enabled_products|default('Enabled Products') }}</div>
+                    <div class="dc-gb-card__v" id="stat-enabled">{{ feed_stats.enabled_products }}</div>
+                  </div>
+                  <div class="dc-gb-card">
+                    <div class="dc-gb-card__k">{{ text_in_stock_products|default('In Stock Products') }}</div>
+                    <div class="dc-gb-card__v" id="stat-instock">{{ feed_stats.in_stock_products }}</div>
+                  </div>
+                  <div class="dc-gb-card">
+                    <div class="dc-gb-card__k">{{ text_file_size|default('File Size') }}</div>
+                    <div class="dc-gb-card__v" id="stat-size">{% if feed_stats.file_exists %}{{ feed_stats.file_size }}{% else %}-{% endif %}</div>
+                  </div>
+                </div>
+
+                <div class="alert alert-info" style="margin-bottom:0;">
+                  <div>
+                    <strong>{{ text_feed_url|default('Feed URL') }}:</strong>
+                    {% if feed_urls is defined and feed_urls and feed_urls|length > 0 %}
+                      <ul style="margin:4px 0 0; padding-left: 18px;">
+                        {% for url in feed_urls %}
+                          <li><a href="{{ url }}" target="_blank">{{ url }}</a></li>
+                        {% endfor %}
+                      </ul>
+                    {% else %}
+                      <a href="{{ feed_url }}" target="_blank">{{ feed_url }}</a>
+                    {% endif %}
+                  </div>
+                  <div style="margin-top:6px;">
+                    <strong>{{ text_last_generated|default('Last Generated') }}:</strong>
+                    <span id="stat-last-generated">{% if feed_stats.last_generated %}{{ feed_stats.last_generated }}{% else %}{{ text_not_generated|default('Feed not generated yet') }}{% endif %}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="dcx-section">
+                <h4>Module Settings</h4>
+
+              <!-- Status -->
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
+                <div class="col-sm-10">
+                  <select name="module_dockercart_googlebase_status" id="input-status" class="form-control">
+                    {% if module_dockercart_googlebase_status %}
+                    <option value="1" selected="selected">{{ text_enabled }}</option>
+                    <option value="0">{{ text_disabled }}</option>
+                    {% else %}
+                    <option value="1">{{ text_enabled }}</option>
+                    <option value="0" selected="selected">{{ text_disabled }}</option>
+                    {% endif %}
+                  </select>
+                  <span class="help-block">{{ help_status|default('Enable or disable the Google Base feed generation') }}</span>
+                </div>
+              </div>
+
+              <!-- Cache Hours -->
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-cache-hours">{{ entry_cache_hours|default('Cache Duration (hours)') }}</label>
+                <div class="col-sm-10">
+                  <input type="number" name="module_dockercart_googlebase_cache_hours" value="{{ module_dockercart_googlebase_cache_hours }}" id="input-cache-hours" class="form-control" min="1" max="168" />
+                  <span class="help-block">{{ help_cache_hours|default('How long to cache the feed. Default: 24 hours. Range: 1-168 hours') }}</span>
+                </div>
+              </div>
+
+              <!-- Max File Size -->
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-max-file-size">{{ entry_max_file_size|default('Max File Size (MB)') }}</label>
+                <div class="col-sm-10">
+                  <input type="number" name="module_dockercart_googlebase_max_file_size" value="{{ module_dockercart_googlebase_max_file_size }}" id="input-max-file-size" class="form-control" min="1" max="50" />
+                  <span class="help-block">{{ help_max_file_size|default('Maximum file size before splitting into multiple files. Google limit: 50MB') }}</span>
+                </div>
+              </div>
+
+              <!-- Max Products -->
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-max-products">{{ entry_max_products|default('Max Products per File') }}</label>
+                <div class="col-sm-10">
+                  <input type="number" name="module_dockercart_googlebase_max_products" value="{{ module_dockercart_googlebase_max_products }}" id="input-max-products" class="form-control" min="1000" max="1000000" />
+                  <span class="help-block">{{ help_max_products|default('Maximum products per file before splitting. Range: 1,000 - 1,000,000') }}</span>
+                </div>
+              </div>
+
+              <!-- Currency -->
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-currency">{{ entry_currency|default('Price Currency') }}</label>
+                <div class="col-sm-10">
+                  <select name="module_dockercart_googlebase_currency" id="input-currency" class="form-control">
+                    {% for currency in currencies %}
+                    <option value="{{ currency.code }}" {% if module_dockercart_googlebase_currency == currency.code %}selected="selected"{% endif %}>{{ currency.title }} ({{ currency.code }})</option>
+                    {% endfor %}
+                  </select>
+                  <span class="help-block">{{ help_currency|default('Select currency for prices in the feed') }}</span>
+                </div>
+              </div>
+
+              <!-- Image Size -->
+              <div class="form-group">
+                <label class="col-sm-2 control-label">{{ entry_image_width|default('Image Size') }}</label>
+                <div class="col-sm-5">
+                  <input type="number" name="module_dockercart_googlebase_image_width" value="{{ module_dockercart_googlebase_image_width }}" id="input-image-width" class="form-control" min="100" max="2000" placeholder="Width" />
+                  <span class="help-block">{{ help_image_width|default('Width (px)') }}</span>
+                </div>
+                <div class="col-sm-5">
+                  <input type="number" name="module_dockercart_googlebase_image_height" value="{{ module_dockercart_googlebase_image_height }}" id="input-image-height" class="form-control" min="100" max="2000" placeholder="Height" />
+                  <span class="help-block">{{ help_image_height|default('Height (px)') }}</span>
+                </div>
+              </div>
+
+              <!-- Separate Languages -->
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-separate-languages">{{ entry_separate_languages|default('Separate Feeds by Language') }}</label>
+                <div class="col-sm-10">
+                  <select name="module_dockercart_googlebase_separate_languages" id="input-separate-languages" class="form-control">
+                    <option value="0" {% if module_dockercart_googlebase_separate_languages == '0' %}selected="selected"{% endif %}>{{ text_disabled }}</option>
+                    <option value="1" {% if module_dockercart_googlebase_separate_languages == '1' %}selected="selected"{% endif %}>{{ text_enabled }}</option>
+                  </select>
+                  <span class="help-block">{{ help_separate_languages|default('Generate separate feeds for each language') }}</span>
+                </div>
+              </div>
+
+              <!-- Separate Stores -->
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-separate-stores">{{ entry_separate_stores|default('Separate Feeds by Store') }}</label>
+                <div class="col-sm-10">
+                  <select name="module_dockercart_googlebase_separate_stores" id="input-separate-stores" class="form-control">
+                    <option value="0" {% if module_dockercart_googlebase_separate_stores == '0' %}selected="selected"{% endif %}>{{ text_disabled }}</option>
+                    <option value="1" {% if module_dockercart_googlebase_separate_stores == '1' %}selected="selected"{% endif %}>{{ text_enabled }}</option>
+                  </select>
+                  <span class="help-block">{{ help_separate_stores|default('Generate separate feeds for each store') }}</span>
+                </div>
+              </div>
+
+              <!-- Add to Robots removed -->
+
+              <!-- Debug -->
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-debug">{{ entry_debug|default('Debug Mode') }}</label>
+                <div class="col-sm-10">
+                  <select name="module_dockercart_googlebase_debug" id="input-debug" class="form-control">
+                    <option value="0" {% if module_dockercart_googlebase_debug == '0' %}selected="selected"{% endif %}>{{ text_disabled }}</option>
+                    <option value="1" {% if module_dockercart_googlebase_debug == '1' %}selected="selected"{% endif %}>{{ text_enabled }}</option>
+                  </select>
+                  <span class="help-block">{{ help_debug|default('Enable debug logging for troubleshooting') }}</span>
+                </div>
+              </div>
+
+              <!-- Info -->
+              <div class="alert alert-info">
+                <i class="fa fa-info-circle"></i> {{ text_info|raw }}
+              </div>
+
+              </div>
+
+            </div>
+
+            <!-- PRODUCTS TAB -->
+            <div class="dcx-tab-pane" id="tab-products">
+              <h4>{{ tab_products|default('Product Settings') }}</h4>
+
+              <!-- Default Condition -->
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-condition">{{ entry_condition|default('Default Condition') }}</label>
+                <div class="col-sm-10">
+                  <select name="module_dockercart_googlebase_condition" id="input-condition" class="form-control">
+                    <option value="new" {% if module_dockercart_googlebase_condition == 'new' %}selected="selected"{% endif %}>{{ text_condition_new|default('New') }}</option>
+                    <option value="refurbished" {% if module_dockercart_googlebase_condition == 'refurbished' %}selected="selected"{% endif %}>{{ text_condition_refurbished|default('Refurbished') }}</option>
+                    <option value="used" {% if module_dockercart_googlebase_condition == 'used' %}selected="selected"{% endif %}>{{ text_condition_used|default('Used') }}</option>
+                  </select>
+                  <span class="help-block">{{ help_condition|default('Default product condition') }}</span>
+                </div>
+              </div>
+
+              <!-- Include Disabled Products -->
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-include-disabled">{{ entry_include_disabled|default('Include Disabled Products') }}</label>
+                <div class="col-sm-10">
+                  <select name="module_dockercart_googlebase_include_disabled" id="input-include-disabled" class="form-control">
+                    <option value="0" {% if module_dockercart_googlebase_include_disabled == '0' %}selected="selected"{% endif %}>{{ text_disabled }}</option>
+                    <option value="1" {% if module_dockercart_googlebase_include_disabled == '1' %}selected="selected"{% endif %}>{{ text_enabled }}</option>
+                  </select>
+                  <span class="help-block">{{ help_include_disabled|default('Include products with status = 0') }}</span>
+                </div>
+              </div>
+
+              <!-- Include Out of Stock -->
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-include-out-of-stock">{{ entry_include_out_of_stock|default('Include Out of Stock Products') }}</label>
+                <div class="col-sm-10">
+                  <select name="module_dockercart_googlebase_include_out_of_stock" id="input-include-out-of-stock" class="form-control">
+                    <option value="0" {% if module_dockercart_googlebase_include_out_of_stock == '0' %}selected="selected"{% endif %}>{{ text_disabled }}</option>
+                    <option value="1" {% if module_dockercart_googlebase_include_out_of_stock == '1' %}selected="selected"{% endif %}>{{ text_enabled }}</option>
+                  </select>
+                  <span class="help-block">{{ help_include_out_of_stock|default('Include products with quantity = 0') }}</span>
+                </div>
+              </div>
+
+              <!-- Brand Source -->
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-brand-source">{{ entry_brand_source|default('Brand Source') }}</label>
+                <div class="col-sm-10">
+                  <select name="module_dockercart_googlebase_brand_source" id="input-brand-source" class="form-control">
+                    <option value="manufacturer" {% if module_dockercart_googlebase_brand_source == 'manufacturer' %}selected="selected"{% endif %}>{{ text_brand_manufacturer|default('From Manufacturer') }}</option>
+                    <option value="default" {% if module_dockercart_googlebase_brand_source == 'default' %}selected="selected"{% endif %}>{{ text_brand_default|default('Use Default') }}</option>
+                  </select>
+                  <span class="help-block">{{ help_brand_source|default('Get brand from manufacturer or use default value') }}</span>
+                </div>
+              </div>
+
+              <!-- Default Brand -->
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-brand-default">{{ entry_brand_default|default('Default Brand') }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="module_dockercart_googlebase_brand_default" value="{{ module_dockercart_googlebase_brand_default }}" id="input-brand-default" class="form-control" placeholder="" />
+                  <span class="help-block">{{ help_brand_default|default('Default brand name if manufacturer is empty') }}</span>
+                </div>
+              </div>
+
+              <!-- Exclude Products -->
+              <div class="form-group">
+                <label class="col-sm-2 control-label">{{ entry_exclude_products|default('Exclude Products') }}</label>
+                <div class="col-sm-10">
+                  <input type="hidden" name="module_dockercart_googlebase_exclude_products" id="input-exclude-products" value="{{ module_dockercart_googlebase_exclude_products }}" />
+                  
+                  <!-- Search input -->
+                  <div class="input-group" style="margin-bottom: 10px; position: relative;">
+                    <input type="text" id="product-search" class="form-control" placeholder="{{ text_product_search|default('Type to search products...') }}" autocomplete="off" />
+                    <span class="input-group-btn">
+                      <button type="button" class="btn btn-default" id="btn-product-search">
+                        <i class="fa fa-search"></i>
+                      </button>
+                    </span>
+                    <!-- Search results dropdown (positioned relative to input-group) -->
+                    <div id="product-search-results" class="dropdown-menu" style="display: none; position: absolute; top: 100%; left: 0; z-index: 2000; width: 100%; max-height: 300px; overflow-y: auto; background: #fff; border: 1px solid #ddd; box-shadow: 0 6px 12px rgba(0,0,0,.175);"></div>
+                  </div>
+                  
+                  <!-- Selected products list -->
+                  <div id="excluded-products-list" class="well" style="min-height: 50px; max-height: 200px; overflow-y: auto;">
+                    <div class="text-muted" id="no-products-message">{{ text_no_excluded_products|default('No products excluded') }}</div>
+                  </div>
+                  <span class="help-block">{{ help_exclude_products|default('Search and select products to exclude from the feed') }}</span>
+                </div>
+              </div>
+
+              <!-- Exclude Categories -->
+              <div class="form-group">
+                <label class="col-sm-2 control-label">{{ entry_exclude_categories|default('Exclude Categories') }}</label>
+                <div class="col-sm-10">
+                  <input type="hidden" name="module_dockercart_googlebase_exclude_categories" id="input-exclude-categories" value="{{ module_dockercart_googlebase_exclude_categories }}" />
+                  
+                  <!-- Search input -->
+                  <div class="input-group" style="margin-bottom: 10px; position: relative;">
+                    <input type="text" id="category-search" class="form-control" placeholder="{{ text_category_search|default('Type to search categories...') }}" autocomplete="off" />
+                    <span class="input-group-btn">
+                      <button type="button" class="btn btn-default" id="btn-category-search">
+                        <i class="fa fa-search"></i>
+                      </button>
+                    </span>
+                    <!-- Search results dropdown (positioned relative to input-group) -->
+                    <div id="category-search-results" class="dropdown-menu" style="display: none; position: absolute; top: 100%; left: 0; z-index: 2000; width: 100%; max-height: 300px; overflow-y: auto; background: #fff; border: 1px solid #ddd; box-shadow: 0 6px 12px rgba(0,0,0,.175);"></div>
+                  </div>
+                  
+                  <!-- Category tree for easier exclusion -->
+                  <div id="exclude-category-tree" style="max-height:320px; overflow:auto; border:1px solid #f0f0f0; padding:8px; background:#fff; margin-bottom:10px;"></div>
+                  
+                  <!-- Selected categories list -->
+                  <div id="excluded-categories-list" class="well" style="min-height: 50px; max-height: 200px; overflow-y: auto;">
+                    <div class="text-muted" id="no-categories-message">{{ text_no_excluded_categories|default('No categories excluded') }}</div>
+                  </div>
+                  <span class="help-block">{{ help_exclude_categories|default('Search and select categories to exclude from the feed') }}</span>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- CATEGORIES TAB -->
+            <div class="dcx-tab-pane" id="tab-categories">
+              <h4>{{ tab_categories|default('Category Mapping') }}</h4>
+
+              <div class="alert alert-info">
+                <i class="fa fa-info-circle"></i> 
+                {{ help_category_mapping|default('Map DockerCart categories to Google Product Categories. Format: category_id = google_category_id (one per line).')|raw }}
+              </div>
+
+              <!-- Category Mapping -->
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-category-mapping">{{ entry_category_mapping|default('Google Category Mapping') }}</label>
+                <div class="col-sm-10">
+                  <div id="mapping-ui">
+                    <div style="display:flex; gap:10px; margin-bottom:10px; position:relative; align-items:flex-start;">
+                      <div style="flex:1; position:relative; min-width:280px;">
+                        <div class="input-group">
+                          <input type="text" id="mapping-category-search" class="form-control" placeholder="Search DockerCart categories or type ID" />
+                          <span class="input-group-btn"><button id="btn-mapping-category-search" type="button" class="btn btn-default"><i class="fa fa-search"></i></button></span>
+                        </div>
+                        <div id="mapping-category-results" style="display:none; position: absolute; z-index:9999; left:0; right:0; max-height:220px; overflow:auto; border:1px solid #eee; background:#fff;"></div>
+                        <div style="display:flex; gap:10px; margin-top:8px;">
+                          <div id="mapping-category-tree" style="flex:1; max-height:420px; overflow:auto; border:1px solid #f0f0f0; padding:8px; background:#fafafa;"></div>
+                        </div>
+                      </div>
+                      <div style="flex:1; min-width:280px;">
+                        <input type="text" id="mapping-google-input" class="form-control" placeholder="Google category (ID or path)" />
+                        <div style="margin-top:8px;">
+                          <div class="panel panel-default" style="padding:8px;">
+                            <strong>Taxonomy</strong>
+                            <div style="margin-top:8px;">
+                              <div id="mapping-google-results-placeholder" style="position:relative;"></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div style="width:120px; display:flex; flex-direction:column; gap:8px;">
+                        <button type="button" id="btn-add-mapping" class="btn btn-primary" style="width:100%;">Add Mapping</button>
+                        <small class="text-muted">Select a category on the left then enter/select a Google taxonomy on the right.</small>
+                      </div>
+                    </div>
+
+                    <!-- Controls block: Import / Export / Load Taxonomy and status -->
+                    <div class="well" style="margin-bottom:12px; display:flex; align-items:center; gap:12px;">
+                      <div style="display:flex; gap:8px;">
+                        <button type="button" id="btn-import-csv" class="btn btn-default"><i class="fa fa-upload"></i> Import CSV</button>
+                        <button type="button" id="btn-export-csv" class="btn btn-default"><i class="fa fa-download"></i> Export CSV</button>
+                        <button type="button" id="btn-upload-taxonomy" class="btn btn-default"><i class="fa fa-file"></i> Load Taxonomy</button>
+                      </div>
+                      <div style="flex:1;">
+                        <p class="help-block" style="margin:0;">&nbsp;<span id="mapping-taxonomy-status">Upload Google taxonomy (txt) to enable autocomplete. Import/Export mappings via CSV.</span></p>
+                      </div>
+                      <div style="min-width:260px; text-align:right;">
+                        <input type="file" id="mapping-taxonomy-file" accept=".txt,.csv" style="display:none;" />
+                        <input type="file" id="mapping-csv-file" accept=".csv" style="display:none;" />
+                      </div>
+                    </div>
+
+                    <div style="display:block;">
+                      <div id="mapping-list" style="margin-bottom:10px;"></div>
+                      <div id="mapping-no-items" class="text-muted" style="padding:8px; border:1px dashed #ddd;">No mappings defined yet.</div>
+                    </div>
+
+                    <p class="help-block">Use the controls above to map a DockerCart category to a Google Product Category. Existing mappings will be preserved.</p>
+
+                    <!-- Hidden textarea kept for backwards compatibility with settings storage -->
+                    <textarea name="module_dockercart_googlebase_category_mapping" id="input-category-mapping" class="form-control" style="display:none;" rows="5">{{ module_dockercart_googlebase_category_mapping }}</textarea>
+                  </div>
+                </div>
+              </div>
+
+              <div class="well">
+                <strong>Examples:</strong><br>
+                <code>1 = 166</code> - Map category ID 1 to Google taxonomy ID 166<br>
+                <code>5 = Apparel & Accessories > Clothing</code> - Map category ID 5 to Google category path<br>
+                <code>10 = Electronics > Computers > Laptops</code> - Full category path<br><br>
+                <a href="https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt" target="_blank">
+                  <i class="fa fa-external-link"></i> Download Google Product Taxonomy
+                </a>
+              </div>
+
+            </div>
+
+            <!-- SHIPPING TAB -->
+            <div class="dcx-tab-pane" id="tab-shipping">
+              <h4>{{ tab_shipping|default('Shipping') }}</h4>
+
+              <!-- Shipping Enabled -->
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-shipping-enabled">{{ entry_shipping_enabled|default('Include Shipping') }}</label>
+                <div class="col-sm-10">
+                  <select name="module_dockercart_googlebase_shipping_enabled" id="input-shipping-enabled" class="form-control">
+                    <option value="0" {% if module_dockercart_googlebase_shipping_enabled == '0' %}selected="selected"{% endif %}>{{ text_disabled }}</option>
+                    <option value="1" {% if module_dockercart_googlebase_shipping_enabled == '1' %}selected="selected"{% endif %}>{{ text_enabled }}</option>
+                  </select>
+                  <span class="help-block">{{ help_shipping_enabled|default('Include shipping information in the feed') }}</span>
+                </div>
+              </div>
+
+              <!-- Shipping Country -->
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-shipping-country">{{ entry_shipping_country|default('Shipping Country (ISO)') }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="module_dockercart_googlebase_shipping_country" value="{{ module_dockercart_googlebase_shipping_country }}" id="input-shipping-country" class="form-control" placeholder="US" maxlength="2" style="width: 100px;" />
+                  <span class="help-block">{{ help_shipping_country|default('Two-letter country code (e.g., US, DE, RU)') }}</span>
+                </div>
+              </div>
+
+              <!-- Shipping Price -->
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-shipping-price">{{ entry_shipping_price|default('Shipping Price') }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="module_dockercart_googlebase_shipping_price" value="{{ module_dockercart_googlebase_shipping_price }}" id="input-shipping-price" class="form-control" placeholder="10.00 USD" style="width: 200px;" />
+                  <span class="help-block">{{ help_shipping_price|default('Fixed shipping price (with currency, e.g., "10.00 USD")') }}</span>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- CUSTOM LABELS TAB -->
+            <div class="dcx-tab-pane" id="tab-custom-labels">
+              <h4>{{ tab_custom_labels|default('Custom Labels') }}</h4>
+
+              <div class="alert alert-info">
+                <i class="fa fa-info-circle"></i> 
+                {{ help_custom_label|default('Custom labels for Google Merchant Center (used for campaigns, promotions, etc.). Can use placeholders: {manufacturer}, {category}, {sku}, {model}') }}
+              </div>
+
+              <!-- Custom Label 0 -->
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-custom-label-0">{{ entry_custom_label_0|default('Custom Label 0') }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="module_dockercart_googlebase_custom_label_0" value="{{ module_dockercart_googlebase_custom_label_0 }}" id="input-custom-label-0" class="form-control" placeholder="sale" />
+                </div>
+              </div>
+
+              <!-- Custom Label 1 -->
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-custom-label-1">{{ entry_custom_label_1|default('Custom Label 1') }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="module_dockercart_googlebase_custom_label_1" value="{{ module_dockercart_googlebase_custom_label_1 }}" id="input-custom-label-1" class="form-control" placeholder="{manufacturer}" />
+                </div>
+              </div>
+
+              <!-- Custom Label 2 -->
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-custom-label-2">{{ entry_custom_label_2|default('Custom Label 2') }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="module_dockercart_googlebase_custom_label_2" value="{{ module_dockercart_googlebase_custom_label_2 }}" id="input-custom-label-2" class="form-control" placeholder="{category}" />
+                </div>
+              </div>
+
+              <!-- Custom Label 3 -->
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-custom-label-3">{{ entry_custom_label_3|default('Custom Label 3') }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="module_dockercart_googlebase_custom_label_3" value="{{ module_dockercart_googlebase_custom_label_3 }}" id="input-custom-label-3" class="form-control" placeholder="" />
+                </div>
+              </div>
+
+              <!-- Custom Label 4 -->
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-custom-label-4">{{ entry_custom_label_4|default('Custom Label 4') }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="module_dockercart_googlebase_custom_label_4" value="{{ module_dockercart_googlebase_custom_label_4 }}" id="input-custom-label-4" class="form-control" placeholder="" />
+                </div>
+              </div>
+
+            </div>
+
+            <!-- LICENSE TAB -->
+            <div class="dcx-tab-pane" id="tab-license">
+              <div class="dcx-section">
+                <h4>License Information</h4>
+
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="input-license-key">{{ entry_license_key|default('License Key') }}</label>
+                <div class="col-sm-9">
+                  <input
+                    type="text"
+                    name="module_dockercart_googlebase_license_key"
+                    value="{{ module_dockercart_googlebase_license_key }}"
+                    placeholder="DCFL-XXXXXXXXXXXXXXXX-YYYYYYYYYYYY"
+                    id="input-license-key"
+                    class="form-control">
+                  <small class="form-text text-muted" style="margin-top: 5px;">
+                    <i class="fa fa-info-circle"></i> {{ text_license_domain|default('License bound to domain') }}: <strong>{{ license_domain|default('unknown') }}</strong>
+                  </small>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="input-public-key">{{ entry_public_key|default('Public Key') }}</label>
+                <div class="col-sm-9">
+                  <textarea
+                    name="module_dockercart_googlebase_public_key"
+                    id="input-public-key"
+                    rows="8"
+                    class="form-control"
+                    placeholder="-----BEGIN PUBLIC KEY-----&#10;...&#10;-----END PUBLIC KEY-----">{{ module_dockercart_googlebase_public_key }}</textarea>
+                  <small class="form-text text-muted" style="margin-top: 5px;">
+                    <i class="fa fa-shield"></i> {{ help_public_key|default('This public key is used to verify license signatures. Get it from your vendor.') }}
+                  </small>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 control-label"></label>
+                <div class="col-sm-9">
+                  <button type="button" class="btn btn-info" id="btn-verify-license">
+                    <i class="fa fa-check-circle"></i> {{ button_verify_license|default('Verify License') }}
+                  </button>
+                  <span id="license-status" style="margin-left: 10px;"></span>
+                </div>
+              </div>
+
+              <div id="license-info" class="form-group" style="display: none;">
+                <div class="col-sm-offset-3 col-sm-9">
+                  <div class="alert alert-info">
+                    <h4><i class="fa fa-info-circle"></i> {{ text_license_info|default('License Information') }}</h4>
+                    <p id="license-details"></p>
+                  </div>
+                </div>
+              </div>
+
+              </div>
+
+            </div>
+
+            <!-- ABOUT TAB -->
+            <div class="dcx-tab-pane" id="tab-about">
+              <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+                <h4>About</h4>
+                <table class="table table-bordered dcx-table">
+                  <tr>
+                    <td style="width:220px;"><strong>Module Version</strong></td>
+                    <td>{% if module_version is defined and module_version %}{{ module_version }}{% else %}n/a{% endif %}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Developer</strong></td>
+                    <td>DockerCart Team</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Contact</strong></td>
+                    <td><a href="mailto:support@dockercart.net">support@dockercart.net</a></td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+function updateGbPanelHeader(tabLink) {
+    var $tab = $(tabLink);
+    var title = $tab.data('title') || '{{ tab_general|default('General Settings') }}';
+    var subtitle = $tab.data('subtitle') || '';
+    var icon = String($tab.data('icon') || 'fa-cog').replace(/[^a-z0-9\-]/gi, '');
+
+    $('#gb-tab-title').text(title);
+    $('#gb-tab-subtitle').text(subtitle);
+    $('#gb-tab-icon').attr('class', 'fa ' + icon);
+}
+
+$(document).on('click', '.js-gb-tab', function(e) {
+    e.preventDefault();
+    var tabId = $(this).data('tab');
+    if (!tabId) return;
+
+    $('#gb-tabs > li').removeClass('active');
+    $(this).closest('li').addClass('active');
+
+    $('#tab-general, #tab-products, #tab-categories, #tab-shipping, #tab-custom-labels, #tab-license, #tab-about').removeClass('active');
+    $('#' + tabId).addClass('active');
+
+    updateGbPanelHeader(this);
+});
+
+updateGbPanelHeader($('#gb-tabs > li.active a.js-gb-tab'));
+
+// Generate feed
+document.getElementById('btn-generate').addEventListener('click', function() {
+    var btn = this;
+    var originalHtml = btn.innerHTML;
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+    
+    showAlert('info', 'Generating feed... This may take a while for large catalogs.');
+    
+    fetch('index.php?route=extension/feed/dockercart_googlebase/generate&user_token={{ user_token }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(function(response) { return response.json(); })
+    .then(function(json) {
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+        
+        if (json.success) {
+            showAlert('success', json.success);
+            if (json.stats) {
+                updateStats(json.stats);
+            }
+        } else if (json.error) {
+            showAlert('danger', json.error);
+        }
+    })
+    .catch(function(error) {
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+        showAlert('danger', 'Error: ' + error.message);
+    });
+});
+
+// Clear cache
+document.getElementById('btn-clear-cache').addEventListener('click', function() {
+    var btn = this;
+    var originalHtml = btn.innerHTML;
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+    
+    fetch('index.php?route=extension/feed/dockercart_googlebase/clearCache&user_token={{ user_token }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(function(response) { return response.json(); })
+    .then(function(json) {
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+        
+        if (json.success) {
+            showAlert('success', json.success);
+            if (json.stats) {
+                updateStats(json.stats);
+            }
+        } else if (json.error) {
+            showAlert('danger', json.error);
+        }
+    })
+    .catch(function(error) {
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+        showAlert('danger', 'Error: ' + error.message);
+    });
+});
+
+// License verification
+document.getElementById('btn-verify-license').addEventListener('click', function() {
+    var btn = this;
+    var licenseKey = document.getElementById('input-license-key').value.trim();
+    var publicKey = document.getElementById('input-public-key').value.trim();
+    var licenseStatus = document.getElementById('license-status');
+    var licenseInfo = document.getElementById('license-info');
+    var licenseDetails = document.getElementById('license-details');
+    
+    if (!licenseKey) {
+        licenseStatus.innerHTML = '<span class="label label-danger">Please enter license key</span>';
+        return;
+    }
+    
+    if (!publicKey) {
+        licenseStatus.innerHTML = '<span class="label label-danger">Please enter public key</span>';
+        return;
+    }
+    
+    btn.disabled = true;
+    var originalHtml = btn.innerHTML;
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Verifying...';
+    licenseStatus.innerHTML = '';
+    licenseInfo.style.display = 'none';
+
+    // Save keys first (non-blocking)
+    fetch('index.php?route=extension/feed/dockercart_googlebase/saveLicenseKeyAjax&user_token={{ user_token }}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({
+        license_key: licenseKey,
+        public_key: publicKey
+      })
+    }).catch(function(){});
+    
+    fetch('index.php?route=extension/feed/dockercart_googlebase/verifyLicenseAjax&user_token={{ user_token }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            license_key: licenseKey,
+            public_key: publicKey
+        })
+    })
+    .then(function(response) { return response.json(); })
+    .then(function(data) {
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+        
+        if (data.valid) {
+            licenseStatus.innerHTML = '<span class="label label-success"><i class="fa fa-check"></i> Valid</span>';
+            
+            var infoHtml = '<strong>Status:</strong> Active<br>';
+            infoHtml += '<strong>Domain:</strong> ' + data.domain + '<br>';
+            if (data.expires_formatted) {
+                infoHtml += '<strong>Expires:</strong> ' + data.expires_formatted + '<br>';
+            } else {
+                infoHtml += '<strong>Type:</strong> Lifetime License<br>';
+            }
+            if (data.license_id) {
+                infoHtml += '<strong>License ID:</strong> ' + data.license_id;
+            }
+            
+            licenseDetails.innerHTML = infoHtml;
+            licenseInfo.style.display = 'block';
+        } else {
+            licenseStatus.innerHTML = '<span class="label label-danger"><i class="fa fa-times"></i> Invalid</span>';
+            
+            if (data.error) {
+                licenseDetails.innerHTML = '<strong>Error:</strong> ' + data.error;
+                licenseInfo.style.display = 'block';
+            }
+        }
+    })
+    .catch(function(error) {
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+        licenseStatus.innerHTML = '<span class="label label-danger">Error: ' + error.message + '</span>';
+    });
+});
+
+// Helper functions
+function showAlert(type, message) {
+    var alertContainer = document.getElementById('alert-container');
+    var alert = document.createElement('div');
+    alert.className = 'alert alert-' + type + ' alert-dismissible';
+    alert.innerHTML = '<i class="fa fa-' + (type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-circle' : 'info-circle') + '"></i> ' + message + 
+        ' <button type="button" class="close" data-dismiss="alert">&times;</button>';
+    alertContainer.innerHTML = '';
+    alertContainer.appendChild(alert);
+    
+    if (type === 'success') {
+        setTimeout(function() {
+            alert.style.opacity = '0';
+            setTimeout(function() { alert.remove(); }, 300);
+        }, 5000);
+    }
+}
+
+function updateStats(stats) {
+    if (stats.file_size) {
+        document.getElementById('stat-size').textContent = stats.file_size;
+    }
+    if (stats.last_generated) {
+        document.getElementById('stat-last-generated').textContent = stats.last_generated;
+    }
+}
+
+// Auto-verify license on page load
+document.addEventListener('DOMContentLoaded', function() {
+    var licenseKey = document.getElementById('input-license-key').value.trim();
+    var publicKey = document.getElementById('input-public-key').value.trim();
+    
+    if (licenseKey && publicKey) {
+        setTimeout(function() {
+            document.getElementById('btn-verify-license').click();
+        }, 500);
+    }
+});
+
+// ==========================================
+// Exclude Products & Categories Autocomplete
+// ==========================================
+
+(function() {
+    var excludedProducts = [];
+    var excludedCategories = [];
+    var searchTimeout = null;
+    
+    // Parse initial values
+    var initialProducts = document.getElementById('input-exclude-products').value.trim();
+    var initialCategories = document.getElementById('input-exclude-categories').value.trim();
+    
+    if (initialProducts) {
+        excludedProducts = initialProducts.split(',').map(function(id) {
+            return parseInt(id.trim(), 10);
+        }).filter(function(id) { return id > 0; });
+    }
+    
+    if (initialCategories) {
+        excludedCategories = initialCategories.split(',').map(function(id) {
+            return parseInt(id.trim(), 10);
+        }).filter(function(id) { return id > 0; });
+    }
+    
+    // Load existing items info on page load
+    if (excludedProducts.length > 0) {
+        loadProductsInfo(excludedProducts);
+    }
+    
+    if (excludedCategories.length > 0) {
+        loadCategoriesInfo(excludedCategories);
+    }
+
+    // === CATEGORY MAPPING UI ===
+    var mappingEntries = [];
+    var mappingHidden = document.getElementById('input-category-mapping');
+    var mappingList = document.getElementById('mapping-list');
+    var mappingNoItems = document.getElementById('mapping-no-items');
+    var mappingCategorySearch = document.getElementById('mapping-category-search');
+    var mappingCategoryResults = document.getElementById('mapping-category-results');
+    var mappingGoogleInput = document.getElementById('mapping-google-input');
+    var btnMappingCategorySearch = document.getElementById('btn-mapping-category-search');
+    var btnAddMapping = document.getElementById('btn-add-mapping');
+
+    function parseMappingText(text) {
+      var lines = text.split(/\r?\n/);
+      var items = [];
+      lines.forEach(function(line) {
+        line = line.trim();
+        if (!line) return;
+        var parts = line.split('=');
+        if (parts.length >= 2) {
+          var left = parts.shift().trim();
+          var right = parts.join('=').trim();
+          var id = parseInt(left, 10);
+          if (!isNaN(id) && right.length) {
+            items.push({ category_id: id, google: right });
+          }
+        }
+      });
+      return items;
+    }
+
+    function serializeMapping(entries) {
+      return entries.map(function(e) { return e.category_id + ' = ' + e.google; }).join('\n');
+    }
+
+    function renderMappingList() {
+      mappingList.innerHTML = '';
+      if (!mappingEntries.length) {
+        mappingNoItems.style.display = 'block';
+        return;
+      }
+      mappingNoItems.style.display = 'none';
+      mappingEntries.forEach(function(item, idx) {
+        var row = document.createElement('div');
+        row.style.cssText = 'display:flex; align-items:center; padding:6px 8px; margin-bottom:6px; background:#fff; border:1px solid #ddd; border-radius:3px;';
+        var left = document.createElement('div');
+        left.style.flex = '1';
+        left.innerHTML = '<strong>' + escapeHtml(item.path || ('ID: ' + item.category_id)) + '</strong><br><small class="text-muted">DockerCart ID: ' + item.category_id + '</small>';
+        var middle = document.createElement('div');
+        middle.style.flex = '1';
+        middle.innerHTML = '<span>' + escapeHtml(item.google) + '</span>';
+        var removeBtn = document.createElement('button');
+        removeBtn.className = 'btn btn-danger btn-xs';
+        removeBtn.style.marginLeft = '10px';
+        removeBtn.innerHTML = '<i class="fa fa-times"></i>';
+        removeBtn.addEventListener('click', function() {
+          mappingEntries.splice(idx, 1);
+          mappingHidden.value = serializeMapping(mappingEntries);
+          renderMappingList();
+        });
+        row.appendChild(left);
+        row.appendChild(middle);
+        row.appendChild(removeBtn);
+        mappingList.appendChild(row);
+      });
+    }
+
+    // Load existing mappings from hidden textarea
+    if (mappingHidden && mappingHidden.value.trim()) {
+      mappingEntries = parseMappingText(mappingHidden.value.trim());
+      if (mappingEntries.length) {
+        // Try to load category paths for entries
+        var ids = mappingEntries.map(function(e) { return e.category_id; });
+        fetch('index.php?route=extension/feed/dockercart_googlebase/getCategoryInfo&user_token={{ user_token }}&category_ids=' + ids.join(','))
+          .then(function(r){ return r.json(); })
+          .then(function(data){
+            if (data.categories) {
+              data.categories.forEach(function(cat) {
+                mappingEntries.forEach(function(me) {
+                  if (me.category_id == cat.category_id) me.path = cat.path || cat.name;
+                });
+              });
+            }
+            renderMappingList();
+          }).catch(function(){ renderMappingList(); });
+      }
+    }
+
+    function addMappingEntry(category_id, category_path, google) {
+      category_id = parseInt(category_id, 10);
+      if (isNaN(category_id) || !google || !google.trim()) return;
+      // prevent duplicates
+      for (var i=0;i<mappingEntries.length;i++) {
+        if (mappingEntries[i].category_id === category_id) {
+          mappingEntries[i].google = google;
+          mappingEntries[i].path = category_path || mappingEntries[i].path;
+          mappingHidden.value = serializeMapping(mappingEntries);
+          renderMappingList();
+          return;
+        }
+      }
+      mappingEntries.push({ category_id: category_id, path: category_path, google: google.trim() });
+      mappingHidden.value = serializeMapping(mappingEntries);
+      renderMappingList();
+    }
+
+    // Mapping category search
+    var mappingSearchTimeout = null;
+    function mappingSearchCategories(query) {
+      fetch('index.php?route=extension/feed/dockercart_googlebase/searchCategories&user_token={{ user_token }}&filter=' + encodeURIComponent(query))
+        .then(function(response){ return response.json(); })
+        .then(function(data){
+          var html = '';
+          if (data.categories && data.categories.length) {
+            data.categories.forEach(function(category){
+              html += '<a href="#" class="mapping-category-item" data-id="'+category.category_id+'" data-path="'+escapeHtml(category.path||category.name)+''+'" style="display:block;padding:8px 12px;border-bottom:1px solid #eee;color:#333;text-decoration:none;">'+escapeHtml(category.path||category.name)+'<br><small class="text-muted">ID: '+category.category_id+'</small></a>';
+            });
+          } else {
+            html = '<div style="padding:8px 12px;color:#999;">No categories found</div>';
+          }
+          mappingCategoryResults.innerHTML = html;
+          mappingCategoryResults.style.display = 'block';
+          mappingCategoryResults.querySelectorAll('.mapping-category-item').forEach(function(item){
+            item.addEventListener('click', function(e){
+              e.preventDefault();
+              var id = this.getAttribute('data-id');
+              var path = this.getAttribute('data-path');
+              mappingCategorySearch.value = path + ' (ID: ' + id + ')';
+              mappingCategorySearch.dataset.selectedId = id;
+              mappingCategoryResults.style.display = 'none';
+            });
+          });
+        }).catch(function(){ mappingCategoryResults.style.display = 'none'; });
+    }
+
+    mappingCategorySearch.addEventListener('input', function(){
+      clearTimeout(mappingSearchTimeout);
+      var q = this.value.trim();
+      delete this.dataset.selectedId;
+      if (q.length < 2) { mappingCategoryResults.style.display = 'none'; return; }
+      mappingSearchTimeout = setTimeout(function(){ mappingSearchCategories(q); }, 250);
+    });
+
+    btnMappingCategorySearch.addEventListener('click', function(){
+      var q = mappingCategorySearch.value.trim();
+      if (q.length >= 1) mappingSearchCategories(q);
+    });
+
+    btnAddMapping.addEventListener('click', function(){
+      var google = mappingGoogleInput.value.trim();
+      var selId = mappingCategorySearch.dataset.selectedId;
+      var id = selId ? selId : parseInt(mappingCategorySearch.value.trim(),10);
+      if (!id || isNaN(id)) { alert('Please select or enter a valid DockerCart category ID'); return; }
+      // Try to get path via getCategoryInfo
+      fetch('index.php?route=extension/feed/dockercart_googlebase/getCategoryInfo&user_token={{ user_token }}&category_ids='+id)
+        .then(function(r){ return r.json(); })
+        .then(function(data){
+          var path = '';
+          if (data.categories && data.categories.length) path = data.categories[0].path || data.categories[0].name || '';
+          addMappingEntry(id, path, google);
+          mappingCategorySearch.value = '';
+          delete mappingCategorySearch.dataset.selectedId;
+          mappingGoogleInput.value = '';
+        }).catch(function(){ addMappingEntry(id, '', google); mappingCategorySearch.value = ''; mappingGoogleInput.value = ''; });
+    });
+
+    // Ensure hidden textarea is updated on save
+    document.getElementById('form-dockercart-googlebase').addEventListener('submit', function() {
+      mappingHidden.value = serializeMapping(mappingEntries);
+    });
+
+    // --- Category tree + Google taxonomy + CSV import/export ---
+    var mappingCategoryTree = document.getElementById('mapping-category-tree');
+    var mappingTaxonomy = [];
+    var mappingGoogleResults = null;
+    var mappingCsvFileInput = document.getElementById('mapping-csv-file');
+    var mappingTaxonomyFileInput = document.getElementById('mapping-taxonomy-file');
+
+    function loadCategoryTree() {
+      fetch('index.php?route=extension/feed/dockercart_googlebase/getCategoryTree&user_token={{ user_token }}')
+        .then(function(r){ return r.json(); })
+        .then(function(data){
+          if (data.tree) {
+            renderTree(mappingCategoryTree, data.tree);
+            try { var exclTree = document.getElementById('exclude-category-tree'); if (exclTree) renderExcludeTree(exclTree, data.tree); } catch (e) {}
+          }
+        }).catch(function(){ mappingCategoryTree.innerHTML = '<div class="text-muted">Failed to load category tree</div>'; });
+    }
+
+    function renderTree(container, nodes) {
+      container.innerHTML = '';
+      var ul = document.createElement('ul');
+      ul.style.listStyle = 'none';
+      ul.style.paddingLeft = '10px';
+      buildNodes(ul, nodes);
+      container.appendChild(ul);
+    }
+
+    function buildNodes(parentEl, nodes) {
+      nodes.forEach(function(node) {
+        var li = document.createElement('li');
+        li.style.marginBottom = '4px';
+
+        var label = document.createElement('div');
+        label.style.cursor = 'pointer';
+        label.style.padding = '4px 6px';
+        label.style.borderRadius = '3px';
+        label.innerHTML = '<span style="font-weight:600">' + escapeHtml(node.name) + '</span> <small class="text-muted">(ID: ' + node.category_id + ')</small>';
+        label.addEventListener('click', function(e) {
+          e.stopPropagation();
+          // select this category for mapping
+          mappingCategorySearch.value = node.path + ' (ID: ' + node.category_id + ')';
+          mappingCategorySearch.dataset.selectedId = node.category_id;
+        });
+
+        li.appendChild(label);
+
+        if (node.children && node.children.length) {
+          var toggle = document.createElement('span');
+          toggle.innerHTML = ' ▾';
+          toggle.style.marginLeft = '6px';
+          toggle.style.color = '#888';
+          label.appendChild(toggle);
+
+          var childWrap = document.createElement('div');
+          childWrap.style.display = 'none';
+          childWrap.style.paddingLeft = '12px';
+          buildNodes(childWrap, node.children);
+          li.appendChild(childWrap);
+
+          label.addEventListener('click', function() {
+            childWrap.style.display = childWrap.style.display === 'none' ? 'block' : 'none';
+          });
+        }
+
+        parentEl.appendChild(li);
+      });
+    }
+
+      // Render a tree specifically for Exclude Categories with checkboxes
+      function renderExcludeTree(container, nodes) {
+        container.innerHTML = '';
+        var ul = document.createElement('ul');
+        ul.style.listStyle = 'none';
+        ul.style.paddingLeft = '10px';
+        buildNodesForExclude(ul, nodes);
+        container.appendChild(ul);
+      }
+
+      function buildNodesForExclude(parentEl, nodes) {
+        nodes.forEach(function(node) {
+          var li = document.createElement('li');
+          li.style.marginBottom = '4px';
+
+          var row = document.createElement('div');
+          row.style.display = 'flex';
+          row.style.alignItems = 'center';
+
+          var checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.style.marginRight = '8px';
+          checkbox.dataset.id = node.category_id;
+          checkbox.checked = excludedCategories.indexOf(node.category_id) > -1;
+          checkbox.addEventListener('change', function(e) {
+            var id = parseInt(this.dataset.id, 10);
+            if (this.checked) {
+              addExcludedCategory(id, node.name, node.path);
+            } else {
+              removeExcludedCategory(id);
+            }
+          });
+
+          var label = document.createElement('div');
+          label.style.cursor = 'pointer';
+          label.style.padding = '4px 6px';
+          label.style.borderRadius = '3px';
+          label.innerHTML = '<span>' + escapeHtml(node.name) + '</span> <small class="text-muted">(ID: ' + node.category_id + ')</small>';
+
+          row.appendChild(checkbox);
+          row.appendChild(label);
+
+          li.appendChild(row);
+
+          if (node.children && node.children.length) {
+            var toggle = document.createElement('span');
+            toggle.innerHTML = ' ▾';
+            toggle.style.marginLeft = '6px';
+            toggle.style.color = '#888';
+            label.appendChild(toggle);
+
+            var childWrap = document.createElement('div');
+            childWrap.style.display = 'none';
+            childWrap.style.paddingLeft = '12px';
+            buildNodesForExclude(childWrap, node.children);
+            li.appendChild(childWrap);
+
+            label.addEventListener('click', function() {
+              childWrap.style.display = childWrap.style.display === 'none' ? 'block' : 'none';
+            });
+          }
+
+          parentEl.appendChild(li);
+        });
+      }
+
+    // Taxonomy upload: parse Google taxonomy file (format: id\tpath or path lines)
+    mappingTaxonomyFileInput.addEventListener('change', function(e) {
+      var file = this.files[0];
+      if (!file) return;
+
+      // Upload to server for persistence
+      var form = new FormData();
+      form.append('taxonomy', file);
+
+      fetch('index.php?route=extension/feed/dockercart_googlebase/uploadTaxonomy&user_token={{ user_token }}', {
+        method: 'POST',
+        body: form
+      }).then(function(r){ return r.json(); }).then(function(data){
+        var statusEl = document.getElementById('mapping-taxonomy-status');
+        if (data && data.success) {
+          // Load saved taxonomy entries from server
+          fetch('index.php?route=extension/feed/dockercart_googlebase/getSavedTaxonomy&user_token={{ user_token }}')
+            .then(function(r){ return r.json(); })
+            .then(function(d){
+              if (d && d.entries) {
+                mappingTaxonomy = d.entries.map(function(e){ return { id: e.id, label: e.label }; });
+                statusEl.textContent = 'Loaded ' + mappingTaxonomy.length + ' taxonomy entries (saved)';
+              } else {
+                statusEl.textContent = 'Uploaded, but failed to read taxonomy from server';
+              }
+            }).catch(function(){ statusEl.textContent = 'Uploaded, but failed to read taxonomy from server'; });
+        } else {
+          statusEl.textContent = (data && data.error) ? data.error : 'Upload failed';
+        }
+      }).catch(function(){
+        document.getElementById('mapping-taxonomy-status').textContent = 'Upload failed';
+      });
+    });
+
+    function parseTaxonomyText(text) {
+      mappingTaxonomy = [];
+      var lines = text.split(/\r?\n/);
+      lines.forEach(function(line) {
+        line = line.trim();
+        if (!line) return;
+        // Accept tab-separated: id\tpath, or id - path, or just path
+        var parts = line.split('\t');
+        if (parts.length >= 2 && !isNaN(parseInt(parts[0],10))) {
+          mappingTaxonomy.push({ id: parts[0].trim(), label: parts.slice(1).join('\t').trim() });
+        } else {
+          // try split by space after numeric id
+          var m = line.match(/^(\d+)\s+(.+)$/);
+          if (m) {
+            mappingTaxonomy.push({ id: m[1], label: m[2].trim() });
+          } else {
+            // try format: "id - path"
+            var mm = line.match(/^(\d+)\s*-\s*(.+)$/);
+            if (mm) {
+              mappingTaxonomy.push({ id: mm[1], label: mm[2].trim() });
+            } else {
+              // no id, use label only
+              mappingTaxonomy.push({ id: null, label: line });
+            }
+          }
+        }
+      });
+    }
+
+    // Autocomplete for Google taxonomy
+    mappingGoogleResults = document.createElement('div');
+    mappingGoogleResults.id = 'mapping-google-results';
+    mappingGoogleResults.style.display = 'none';
+    mappingGoogleResults.style.position = 'absolute';
+    mappingGoogleResults.style.zIndex = '9999';
+    mappingGoogleResults.style.background = '#fff';
+    mappingGoogleResults.style.border = '1px solid #eee';
+    mappingGoogleResults.style.maxHeight = '220px';
+    mappingGoogleResults.style.overflow = 'auto';
+    // Always append autocomplete dropdown under the Google input (so suggestions appear below the input)
+    mappingGoogleResults.style.position = 'absolute';
+    mappingGoogleResults.style.left = '0';
+    mappingGoogleResults.style.width = '100%';
+    mappingGoogleInput.parentNode.style.position = mappingGoogleInput.parentNode.style.position || 'relative';
+    mappingGoogleInput.parentNode.appendChild(mappingGoogleResults);
+
+    // Render a small taxonomy browser inside the Taxonomy panel placeholder
+    function renderTaxonomyPanel() {
+      var placeholder = document.getElementById('mapping-google-results-placeholder');
+      if (!placeholder) return;
+      placeholder.innerHTML = '';
+
+      var header = document.createElement('div');
+      header.style.marginBottom = '6px';
+      header.innerHTML = '<input type="text" id="mapping-taxonomy-search" class="form-control" placeholder="Filter taxonomy...' + '" style="width:100%;" />';
+      placeholder.appendChild(header);
+
+      var list = document.createElement('div');
+      list.id = 'mapping-taxonomy-list';
+      list.style.maxHeight = '320px';
+      list.style.overflow = 'auto';
+      list.style.border = '1px solid #eee';
+      list.style.background = '#fff';
+      placeholder.appendChild(list);
+
+      var entries = mappingTaxonomy || [];
+      function populate(filter) {
+        list.innerHTML = '';
+        var f = (filter || '').toLowerCase();
+        var count = 0;
+        for (var i = 0; i < entries.length; i++) {
+          var e = entries[i];
+          var label = (e.id ? (e.id + ' - ') : '') + (e.label || '');
+          if (f && label.toLowerCase().indexOf(f) === -1) continue;
+          var a = document.createElement('a');
+          a.href = '#';
+          a.style.display = 'block';
+          a.style.padding = '6px 8px';
+          a.style.borderBottom = '1px solid #f5f5f5';
+          a.style.color = '#333';
+          a.innerHTML = escapeHtml(label);
+          (function(val){
+            a.addEventListener('click', function(e){
+              e.preventDefault();
+              mappingGoogleInput.value = val;
+              mappingGoogleInput.focus();
+              // hide panel suggestions
+              var dd = document.getElementById('mapping-google-results'); if (dd) dd.style.display = 'none';
+            });
+          })(e.label);
+          list.appendChild(a);
+          count++;
+          if (count >= 200) break; // avoid rendering all thousands by default
+        }
+        if (count === 0) list.innerHTML = '<div class="text-muted" style="padding:8px;">No taxonomy entries</div>';
+      }
+
+      // wire filter
+      var filterInput = document.getElementById('mapping-taxonomy-search');
+      filterInput.addEventListener('input', function(){ populate(this.value); });
+
+      // initial populate with top entries
+      populate('');
+    }
+
+    var googleTypTimeout = null;
+    mappingGoogleInput.addEventListener('input', function() {
+      clearTimeout(googleTypTimeout);
+      var q = this.value.trim().toLowerCase();
+      if (!q) { mappingGoogleResults.style.display = 'none'; return; }
+      googleTypTimeout = setTimeout(function() {
+        showGoogleSuggestions(q);
+      }, 150);
+    });
+
+    function showGoogleSuggestions(q) {
+      var matched = [];
+      for (var i=0;i<mappingTaxonomy.length;i++) {
+        var entry = mappingTaxonomy[i];
+        if (entry.label && entry.label.toLowerCase().indexOf(q) !== -1) matched.push(entry);
+        if (matched.length >= 50) break;
+      }
+      var html = '';
+      if (!matched.length) html = '<div style="padding:8px;color:#999;">No suggestions</div>';
+      matched.forEach(function(m) {
+        var display = (m.id ? (m.id + ' - ') : '') + m.label;
+        html += '<a href="#" class="mapping-google-item" data-id="'+(m.id||'')+'" data-label="'+escapeHtml(m.label)+'" style="display:block;padding:8px 12px;border-bottom:1px solid #eee;color:#333;text-decoration:none;">'+escapeHtml(display)+'</a>';
+      });
+      mappingGoogleResults.innerHTML = html;
+      mappingGoogleResults.style.display = 'block';
+      mappingGoogleResults.querySelectorAll('.mapping-google-item').forEach(function(item){
+        item.addEventListener('click', function(e){
+          e.preventDefault();
+          var label = this.getAttribute('data-label');
+          mappingGoogleInput.value = label;
+          mappingGoogleResults.style.display = 'none';
+        });
+      });
+    }
+
+    // CSV import/export
+    document.getElementById('btn-import-csv').addEventListener('click', function() { mappingCsvFileInput.click(); });
+    mappingCsvFileInput.addEventListener('change', function() {
+      var f = this.files[0]; if (!f) return;
+      var r = new FileReader(); r.onload = function() {
+        var text = r.result || '';
+        importCsvMappings(text);
+        mappingCsvFileInput.value = '';
+      }; r.readAsText(f);
+    });
+
+    document.getElementById('btn-upload-taxonomy').addEventListener('click', function() { mappingTaxonomyFileInput.click(); });
+
+    function importCsvMappings(text) {
+      var lines = text.split(/\r?\n/);
+      var added = 0;
+      lines.forEach(function(line) {
+        if (!line.trim()) return;
+        var parts = line.split(',');
+        if (parts.length >= 2) {
+          var cid = parseInt(parts[0].trim(),10);
+          var google = parts.slice(1).join(',').trim();
+          if (!isNaN(cid) && google) {
+            addMappingEntry(cid, '', google);
+            added++;
+          }
+        }
+      });
+      alert('Imported ' + added + ' mappings');
+    }
+
+    document.getElementById('btn-export-csv').addEventListener('click', function() {
+      var lines = mappingEntries.map(function(e){ return e.category_id + ',' + '"' + e.google.replace(/"/g,'""') + '"'; });
+      var csv = lines.join('\n');
+      var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a'); a.href = url; a.download = 'category-mapping.csv'; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 1000);
+    });
+
+    // Load saved taxonomy and category tree on page ready
+    function loadSavedTaxonomyAndTree() {
+      // Load saved taxonomy first
+      fetch('index.php?route=extension/feed/dockercart_googlebase/getSavedTaxonomy&user_token={{ user_token }}')
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          var statusEl = document.getElementById('mapping-taxonomy-status');
+          if (d && d.entries && d.entries.length) {
+            mappingTaxonomy = d.entries.map(function(e){ return { id: e.id, label: e.label }; });
+            statusEl.textContent = 'Loaded ' + mappingTaxonomy.length + ' taxonomy entries (saved)';
+            try { renderTaxonomyPanel(); } catch (e) {}
+          } else {
+            statusEl.textContent = 'Upload Google taxonomy (txt) to enable autocomplete. Import/Export mappings via CSV.';
+          }
+        }).catch(function(){ /* ignore */ }).finally(function(){
+          try { loadCategoryTree(); } catch (e) {}
+        });
+    }
+
+    loadSavedTaxonomyAndTree();
+    
+    // === PRODUCTS ===
+    var productSearch = document.getElementById('product-search');
+    var productResults = document.getElementById('product-search-results');
+    var productsList = document.getElementById('excluded-products-list');
+    
+    productSearch.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        var query = this.value.trim();
+        
+        if (query.length < 2) {
+            productResults.style.display = 'none';
+            return;
+        }
+        
+        searchTimeout = setTimeout(function() {
+            searchProducts(query);
+        }, 300);
+    });
+    
+    productSearch.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            var query = this.value.trim();
+            if (query.length >= 2) {
+                searchProducts(query);
+            }
+        }
+    });
+    
+    document.getElementById('btn-product-search').addEventListener('click', function() {
+        var query = productSearch.value.trim();
+        if (query.length >= 2) {
+            searchProducts(query);
+        }
+    });
+    
+    function searchProducts(query) {
+        fetch('index.php?route=extension/feed/dockercart_googlebase/searchProducts&user_token={{ user_token }}&filter=' + encodeURIComponent(query))
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                if (data.products && data.products.length > 0) {
+                    var html = '';
+                    data.products.forEach(function(product) {
+                        var isExcluded = excludedProducts.indexOf(product.product_id) > -1;
+                        html += '<a href="#" class="product-result-item" data-id="' + product.product_id + '" data-name="' + escapeHtml(product.name) + '" data-model="' + escapeHtml(product.model) + '" style="display: block; padding: 8px 12px; border-bottom: 1px solid #eee; color: #333; text-decoration: none;' + (isExcluded ? 'background: #f5f5f5; color: #999;' : '') + '">';
+                        html += '<strong>' + escapeHtml(product.name) + '</strong>';
+                        html += '<br><small class="text-muted">ID: ' + product.product_id + ' | Model: ' + escapeHtml(product.model) + ' | ' + product.price + '</small>';
+                        if (isExcluded) {
+                            html += '<span class="label label-default pull-right">Already excluded</span>';
+                        }
+                        html += '</a>';
+                    });
+                    productResults.innerHTML = html;
+                    productResults.style.display = 'block';
+                    
+                    // Add click handlers
+                    productResults.querySelectorAll('.product-result-item').forEach(function(item) {
+                        item.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            var id = parseInt(this.dataset.id, 10);
+                            if (excludedProducts.indexOf(id) === -1) {
+                                addExcludedProduct(id, this.dataset.name, this.dataset.model);
+                            }
+                            productResults.style.display = 'none';
+                            productSearch.value = '';
+                        });
+                    });
+                } else {
+                    productResults.innerHTML = '<div style="padding: 8px 12px; color: #999;">No products found</div>';
+                    productResults.style.display = 'block';
+                }
+            });
+    }
+    
+    function loadProductsInfo(ids) {
+        fetch('index.php?route=extension/feed/dockercart_googlebase/getProductInfo&user_token={{ user_token }}&product_ids=' + ids.join(','))
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                if (data.products) {
+                    data.products.forEach(function(product) {
+                        renderProductItem(product.product_id, product.name, product.model);
+                    });
+                    updateNoProductsMessage();
+                }
+            });
+    }
+    
+    function addExcludedProduct(id, name, model) {
+        if (excludedProducts.indexOf(id) === -1) {
+            excludedProducts.push(id);
+            updateProductsInput();
+            renderProductItem(id, name, model);
+            updateNoProductsMessage();
+        }
+    }
+    
+    function removeExcludedProduct(id) {
+        var index = excludedProducts.indexOf(id);
+        if (index > -1) {
+            excludedProducts.splice(index, 1);
+            updateProductsInput();
+            var item = productsList.querySelector('[data-product-id="' + id + '"]');
+            if (item) item.remove();
+            updateNoProductsMessage();
+        }
+    }
+    
+    function renderProductItem(id, name, model) {
+        var existing = productsList.querySelector('[data-product-id="' + id + '"]');
+        if (existing) return;
+        
+        var item = document.createElement('div');
+        item.className = 'excluded-item';
+        item.setAttribute('data-product-id', id);
+        item.style.cssText = 'display: flex; align-items: center; padding: 5px 8px; margin-bottom: 5px; background: #fff; border: 1px solid #ddd; border-radius: 3px;';
+        item.innerHTML = '<span style="flex: 1;"><strong>' + escapeHtml(name) + '</strong> <small class="text-muted">(ID: ' + id + ', Model: ' + escapeHtml(model) + ')</small></span>' +
+            '<button type="button" class="btn btn-danger btn-xs" style="margin-left: 10px;" onclick="removeProduct(' + id + ')"><i class="fa fa-times"></i></button>';
+        productsList.appendChild(item);
+    }
+    
+    function updateProductsInput() {
+        document.getElementById('input-exclude-products').value = excludedProducts.join(',');
+    }
+    
+    function updateNoProductsMessage() {
+        var msg = document.getElementById('no-products-message');
+        if (msg) {
+            msg.style.display = excludedProducts.length > 0 ? 'none' : 'block';
+        }
+    }
+    
+    // Make removeProduct global for onclick
+    window.removeProduct = removeExcludedProduct;
+    
+    // === CATEGORIES ===
+    var categorySearch = document.getElementById('category-search');
+    var categoryResults = document.getElementById('category-search-results');
+    var categoriesList = document.getElementById('excluded-categories-list');
+    
+    categorySearch.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        var query = this.value.trim();
+        
+        if (query.length < 2) {
+            categoryResults.style.display = 'none';
+            return;
+        }
+        
+        searchTimeout = setTimeout(function() {
+            searchCategories(query);
+        }, 300);
+    });
+    
+    categorySearch.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            var query = this.value.trim();
+            if (query.length >= 2) {
+                searchCategories(query);
+            }
+        }
+    });
+    
+    document.getElementById('btn-category-search').addEventListener('click', function() {
+        var query = categorySearch.value.trim();
+        if (query.length >= 2) {
+            searchCategories(query);
+        }
+    });
+    
+    function searchCategories(query) {
+        fetch('index.php?route=extension/feed/dockercart_googlebase/searchCategories&user_token={{ user_token }}&filter=' + encodeURIComponent(query))
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                if (data.categories && data.categories.length > 0) {
+                    var html = '';
+                    data.categories.forEach(function(category) {
+                        var isExcluded = excludedCategories.indexOf(category.category_id) > -1;
+                        html += '<a href="#" class="category-result-item" data-id="' + category.category_id + '" data-name="' + escapeHtml(category.name) + '" data-path="' + escapeHtml(category.path) + '" style="display: block; padding: 8px 12px; border-bottom: 1px solid #eee; color: #333; text-decoration: none;' + (isExcluded ? 'background: #f5f5f5; color: #999;' : '') + '">';
+                        html += '<strong>' + escapeHtml(category.path) + '</strong>';
+                        html += '<br><small class="text-muted">ID: ' + category.category_id + '</small>';
+                        if (isExcluded) {
+                            html += '<span class="label label-default pull-right">Already excluded</span>';
+                        }
+                        html += '</a>';
+                    });
+                    categoryResults.innerHTML = html;
+                    categoryResults.style.display = 'block';
+                    
+                    // Add click handlers
+                    categoryResults.querySelectorAll('.category-result-item').forEach(function(item) {
+                        item.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            var id = parseInt(this.dataset.id, 10);
+                            if (excludedCategories.indexOf(id) === -1) {
+                                addExcludedCategory(id, this.dataset.name, this.dataset.path);
+                            }
+                            categoryResults.style.display = 'none';
+                            categorySearch.value = '';
+                        });
+                    });
+                } else {
+                    categoryResults.innerHTML = '<div style="padding: 8px 12px; color: #999;">No categories found</div>';
+                    categoryResults.style.display = 'block';
+                }
+            });
+    }
+    
+    function loadCategoriesInfo(ids) {
+        fetch('index.php?route=extension/feed/dockercart_googlebase/getCategoryInfo&user_token={{ user_token }}&category_ids=' + ids.join(','))
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                if (data.categories) {
+                    data.categories.forEach(function(category) {
+                        renderCategoryItem(category.category_id, category.name, category.path);
+                    });
+                    updateNoCategoriesMessage();
+                }
+            });
+    }
+    
+    function addExcludedCategory(id, name, path) {
+        if (excludedCategories.indexOf(id) === -1) {
+            excludedCategories.push(id);
+            updateCategoriesInput();
+            renderCategoryItem(id, name, path);
+            updateNoCategoriesMessage();
+            try {
+              var chk = document.querySelector('#exclude-category-tree input[type=checkbox][data-id="' + id + '"]');
+              if (chk) chk.checked = true;
+            } catch (e) {}
+        }
+    }
+    
+    function removeExcludedCategory(id) {
+        var index = excludedCategories.indexOf(id);
+        if (index > -1) {
+            excludedCategories.splice(index, 1);
+            updateCategoriesInput();
+            var item = categoriesList.querySelector('[data-category-id="' + id + '"]');
+            if (item) item.remove();
+            updateNoCategoriesMessage();
+            try {
+              var chk2 = document.querySelector('#exclude-category-tree input[type=checkbox][data-id="' + id + '"]');
+              if (chk2) chk2.checked = false;
+            } catch (e) {}
+        }
+    }
+    
+    function renderCategoryItem(id, name, path) {
+        var existing = categoriesList.querySelector('[data-category-id="' + id + '"]');
+        if (existing) return;
+        
+        var item = document.createElement('div');
+        item.className = 'excluded-item';
+        item.setAttribute('data-category-id', id);
+        item.style.cssText = 'display: flex; align-items: center; padding: 5px 8px; margin-bottom: 5px; background: #fff; border: 1px solid #ddd; border-radius: 3px;';
+        item.innerHTML = '<span style="flex: 1;"><strong>' + escapeHtml(path || name) + '</strong> <small class="text-muted">(ID: ' + id + ')</small></span>' +
+            '<button type="button" class="btn btn-danger btn-xs" style="margin-left: 10px;" onclick="removeCategory(' + id + ')"><i class="fa fa-times"></i></button>';
+        categoriesList.appendChild(item);
+    }
+    
+    function updateCategoriesInput() {
+        document.getElementById('input-exclude-categories').value = excludedCategories.join(',');
+    }
+    
+    function updateNoCategoriesMessage() {
+        var msg = document.getElementById('no-categories-message');
+        if (msg) {
+            msg.style.display = excludedCategories.length > 0 ? 'none' : 'block';
+        }
+    }
+    
+    // Make removeCategory global for onclick
+    window.removeCategory = removeExcludedCategory;
+    
+    // Close dropdowns on outside click
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('#product-search') && !e.target.closest('#product-search-results') && !e.target.closest('#btn-product-search')) {
+            productResults.style.display = 'none';
+        }
+        if (!e.target.closest('#category-search') && !e.target.closest('#category-search-results') && !e.target.closest('#btn-category-search')) {
+            categoryResults.style.display = 'none';
+        }
+    });
+    
+    function escapeHtml(text) {
+        if (!text) return '';
+        var div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+})();
+</script>
+{{ footer }}

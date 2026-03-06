@@ -1,0 +1,33 @@
+<?php
+
+$_['button_more'] = 'читати повністю';
+$_['date_format_short'] = 'd/m/Y';
+$_['heading_title'] = 'Блог';
+$_['text_blog'] = 'Блог';
+$_['text_categories'] = 'Категорії';
+$_['text_date_asc'] = 'Дата (за зростанням)';
+$_['text_date_desc'] = 'Дата (за зменшенням)';
+$_['text_default'] = 'За замовчуванням';
+$_['text_display'] = 'Вигляд:';
+$_['text_empty'] = 'Не знайдено жодних публікацій.';
+$_['text_error'] = 'Категорію не знайдено';
+$_['text_home'] = 'Головна';
+$_['text_limit'] = 'На сторінці:';
+$_['text_name_asc'] = 'Назвою (за зростанням)';
+$_['text_name_desc'] = 'Назвою (за зменшенням)';
+$_['text_pagination'] = 'Показано %d до %d з %d (%d сторінок)';
+$_['text_product'] = 'Статті';
+$_['text_rating_asc'] = 'Рейтингу (за зростанням)';
+$_['text_rating_desc'] = 'Рейтингу (за зменшенням)';
+$_['text_read_more'] = 'Читати далі';
+$_['text_read_article'] = 'Читати статтю';
+$_['text_refine'] = 'Оберіть підкатегорію';
+$_['text_sort'] = 'Сортування:';
+$_['text_sort_by'] = 'Сортувати за:';
+$_['text_sort_date'] = 'датою';
+$_['text_sort_name'] = 'назвою';
+$_['text_sort_rated'] = 'рейтингом';
+$_['text_sort_viewed'] = 'переглядами';
+$_['text_viewed_asc'] = 'Переглядам (за зростанням)';
+$_['text_viewed_desc'] = 'Переглядам (за зменшенням)';
+$_['text_views'] = 'Переглядів:';

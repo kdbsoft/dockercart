@@ -1,0 +1,52 @@
+{% if column_left and column_right %}
+{% set class = 'col-sm-6' %}
+{% elseif column_left or column_right %}
+{% set class = 'col-sm-9' %}
+{% else %}
+{% set class = 'col-sm-12' %}
+{% endif %}
+{{ header }}
+<style type="text/css">
+    .breadcrumb {
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .breadcrumb > li {
+        height: 38px;
+        line-height: 38px;
+    }
+
+    .breadcrumb > li:after {
+        top: 6px;
+    }
+
+    .breadcrumb > li.current {
+        text-decoration: underline;
+    }
+
+    .breadcrumb > li.disabled {
+        cursor: not-allowed;
+        color: #aaa;
+    }
+</style>
+<div class="container">
+    {% if breadcrumbs %}
+        {% include 'dockercart/template/common/partials/breadcrumbs.twig' with {
+            breadcrumbs_class: 'breadcrumb',
+            breadcrumbs_link_class: '',
+            breadcrumbs_last_class: 'active',
+            breadcrumbs_separator: false
+        } %}
+    {% endif %}
+    <div class="row">
+        {{ column_left }}
+        <div id="content" class="{{ class }}">
+            {{ content_top }}
+            {{ content_main }}
+            {{ content_bottom }}
+        </div>
+        {{ column_right }}
+    </div>
+</div>
+{{ footer }}

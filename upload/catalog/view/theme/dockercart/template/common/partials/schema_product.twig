@@ -1,0 +1,43 @@
+{% if heading_title is defined and heading_title %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "{{ heading_title|striptags|trim|e('js') }}"{% if thumb is defined and thumb %},
+  "image": ["{{ thumb|e('js') }}"]{% endif %}{% if model is defined and model %},
+  "sku": "{{ model|e('js') }}"{% endif %}{% if manufacturer is defined and manufacturer %},
+  "brand": {
+    "@type": "Brand",
+    "name": "{{ manufacturer|striptags|trim|e('js') }}"
+  }{% endif %}{% if price is defined and price %},
+  "offers": {
+    "@type": "Offer",
+    "url": "{{ schema_product_url is defined and schema_product_url ? schema_product_url|e('js') : '' }}",
+    "priceCurrency": "{{ currency_code is defined and currency_code ? currency_code|e('js') : 'USD' }}",
+    "price": "{{ dc_base_price_value|default(0)|number_format(2, '.', '') }}",
+    "availability": "https://schema.org/{% if is_in_stock is defined and is_in_stock %}InStock{% else %}OutOfStock{% endif %}",
+    "itemCondition": "https://schema.org/NewCondition"
+  }{% endif %}{% if rating is defined and rating and review_count is defined and review_count > 0 %},
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "{{ rating }}",
+    "reviewCount": "{{ review_count }}"
+  },
+  "review": [
+    {
+      "@type": "Review",
+      "name": "{{ heading_title|striptags|trim|e('js') }} - customer review summary",
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": "{{ rating }}",
+        "bestRating": "5"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "{{ name|default('Customer')|striptags|trim|e('js') }}"
+      }
+    }
+  ]{% endif %}
+}
+</script>
+{% endif %}

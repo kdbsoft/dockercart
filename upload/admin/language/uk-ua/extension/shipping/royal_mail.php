@@ -1,0 +1,37 @@
+<?php
+
+$_['entry_display_insurance'] = 'Страхування дисплеїв';
+$_['entry_display_weight'] = 'Вага доставки';
+$_['entry_geo_zone'] = 'Географічна зона';
+$_['entry_insurance'] = 'Ставки компенсації';
+$_['entry_rate'] = 'Тарифи';
+$_['entry_rate_eu'] = 'Ціни в Європі';
+$_['entry_rate_non_eu'] = 'Тарифи поза Європою';
+$_['entry_rate_zone_1'] = 'Тарифи для світової зони 1';
+$_['entry_rate_zone_2'] = 'Тарифи для світової зони 2';
+$_['entry_sort_order'] = 'Порядок сортування';
+$_['entry_status'] = 'Статус';
+$_['entry_tax_class'] = 'Податковий клас';
+$_['entry_weight_class'] = 'Вагова категорія';
+$_['error_permission'] = 'Увага: Ви не маєте дозволу на зміну налаштувань доставки Royal Mail!';
+$_['heading_title'] = 'Королівська пошта';
+$_['help_display_insurance'] = 'Ви хочете відобразити страховку доставки? (наприклад, застраховано до 500 фунтів стерлінгів)';
+$_['help_display_weight'] = 'Ви хочете відобразити вагу доставки? (наприклад, Вага доставки: 2,7674 кг)';
+$_['help_insurance'] = 'Вводьте значення з точністю до 5,2 знаків після коми. (12345,67) Приклад: 34:0,100:1,250:2,25 - Страхове покриття для кошиків вартістю до 34 коштуватиме додатково 0,00, для вартістю понад 100 та до 250 - додатково 2,25. Не вводьте символи валют.';
+$_['help_international'] = '<p>Ознайомитися з послугами доставки та цінами можна тут:</p><p> <a href="http://www.royalmail.com/international-zones" target="_blank">http://www.royalmail.com/international-zones</a></p><p> <a href="http://www.royalmail.com/sites/default/files/RM_OurPrices_Mar2014a.pdf" target="_blank">http://www.royalmail.com/sites/default/files/RM_OurPrices_Mar2014a.pdf</a></p><p> <a href="http://www.royalmail.com/sites/default/files/RoyalMail_International_TrackedCoverage_Jan2014.pdf" target="_blank">http://www.royalmail.com/sites/default/files/RoyalMail_International_TrackedCoverage_Jan2014.pdf</a></p>';
+$_['help_rate'] = 'Приклад: 5:10.00,7:12.00 Вага:Вартість,Вага:Вартість тощо.';
+$_['tab_1st_class_signed'] = 'Підпис 1-го класу';
+$_['tab_1st_class_standard'] = 'Стандарт 1-го класу';
+$_['tab_2nd_class_signed'] = '2-й клас, підпис';
+$_['tab_2nd_class_standard'] = 'Стандарт 2-го класу';
+$_['tab_international_economy'] = 'Міжнародна економіка';
+$_['tab_international_signed'] = 'Міжнародний підпис';
+$_['tab_international_standard'] = 'Міжнародний стандарт';
+$_['tab_international_tracked'] = 'Міжнародний відстежений';
+$_['tab_international_tracked_signed'] = 'Міжнародне відстеження та підпис';
+$_['tab_special_delivery_1000'] = 'Спеціальна доставка наступного дня (1000 фунтів стерлінгів)';
+$_['tab_special_delivery_2500'] = 'Спеціальна доставка наступного дня (£2500)';
+$_['tab_special_delivery_500'] = 'Спеціальна доставка наступного дня (£500)';
+$_['text_edit'] = 'Редагувати доставку Royal Mail';
+$_['text_extension'] = 'Розширення';
+$_['text_success'] = 'Успіх: Ви змінили доставку Royal Mail!';

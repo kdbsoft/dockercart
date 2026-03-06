@@ -1,0 +1,281 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-dockercart-search" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible">
+      <i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    {% if manticore_connected %}
+    <div class="alert alert-success"><i class="fa fa-check-circle"></i> {{ text_connection_success }}</div>
+    {% else %}
+    <div class="alert alert-danger"><i class="fa fa-times-circle"></i> {{ text_connection_failed }}</div>
+    {% endif %}
+
+    <ul class="nav nav-tabs dcx-profile-tabs" id="search-tabs" role="tablist">
+      <li class="active"><a href="#search-tab-general" class="js-search-tab" data-tab="search-tab-general" data-title="General" data-subtitle="{{ text_tab_general_subtitle }}" data-icon="fa-sliders"><i class="fa fa-sliders"></i> General</a></li>
+      <li><a href="#search-tab-connection" class="js-search-tab" data-tab="search-tab-connection" data-title="{{ tab_connection }}" data-subtitle="{{ text_tab_connection_subtitle }}" data-icon="fa-plug"><i class="fa fa-plug"></i> {{ tab_connection }}</a></li>
+      <li><a href="#search-tab-autocomplete" class="js-search-tab" data-tab="search-tab-autocomplete" data-title="{{ tab_autocomplete }}" data-subtitle="{{ text_tab_autocomplete_subtitle }}" data-icon="fa-bolt"><i class="fa fa-bolt"></i> {{ tab_autocomplete }}</a></li>
+      <li><a href="#search-tab-indexing" class="js-search-tab" data-tab="search-tab-indexing" data-title="{{ tab_indexing }}" data-subtitle="{{ text_tab_indexing_subtitle }}" data-icon="fa-refresh"><i class="fa fa-refresh"></i> {{ tab_indexing }}</a></li>
+      <li><a href="#search-tab-about" class="js-search-tab" data-tab="search-tab-about" data-title="{{ tab_about }}" data-subtitle="{{ text_tab_about_subtitle }}" data-icon="fa-info-circle"><i class="fa fa-info-circle"></i> {{ tab_about }}</a></li>
+    </ul>
+
+    <div class="dcx-shell">
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i id="search-tab-icon" class="fa fa-sliders"></i></div>
+          <div>
+            <h3 class="dcx-panel-title" id="search-tab-title">General</h3>
+            <div class="dcx-panel-subtitle" id="search-tab-subtitle">{{ text_tab_general_subtitle }}</div>
+          </div>
+        </div>
+        <div class="dcx-panel-body">
+          <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-dockercart-search" class="form-horizontal dcx-form">
+
+            <div id="search-tab-general" class="dcx-tab-pane active">
+              <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+                <h4>{{ text_module_settings }}</h4>
+
+                <div class="form-group required">
+                  <label class="col-sm-3 control-label" for="input-status">{{ entry_status }}</label>
+                  <div class="col-sm-9">
+                    <select name="module_dockercart_search_status" id="input-status" class="form-control">
+                      <option value="1" {% if module_dockercart_search_status %}selected{% endif %}>{{ text_enabled }}</option>
+                      <option value="0" {% if not module_dockercart_search_status %}selected{% endif %}>{{ text_disabled }}</option>
+                    </select>
+                    <p class="help-block">{{ help_status }}</p>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-3 control-label" for="input-min-chars">{{ entry_min_chars }}</label>
+                  <div class="col-sm-9">
+                    <input type="number" name="module_dockercart_search_min_chars" value="{{ module_dockercart_search_min_chars }}" id="input-min-chars" class="form-control" />
+                    <p class="help-block">{{ help_min_chars }}</p>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-3 control-label" for="input-results-limit">{{ entry_results_limit }}</label>
+                  <div class="col-sm-9">
+                    <input type="number" name="module_dockercart_search_results_limit" value="{{ module_dockercart_search_results_limit }}" id="input-results-limit" class="form-control" />
+                    <p class="help-block">{{ help_results_limit }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="search-tab-connection" class="dcx-tab-pane">
+              <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+                <h4>{{ tab_connection }}</h4>
+
+                <div class="form-group required">
+                  <label class="col-sm-3 control-label" for="input-host">{{ entry_host }}</label>
+                  <div class="col-sm-9">
+                    <input type="text" name="module_dockercart_search_host" value="{{ module_dockercart_search_host }}" id="input-host" class="form-control" />
+                    <p class="help-block">{{ help_host }}</p>
+                  </div>
+                </div>
+
+                <div class="form-group required">
+                  <label class="col-sm-3 control-label" for="input-port">{{ entry_port }}</label>
+                  <div class="col-sm-9">
+                    <input type="number" name="module_dockercart_search_port" value="{{ module_dockercart_search_port }}" id="input-port" class="form-control" />
+                    <p class="help-block">{{ help_port }}</p>
+                  </div>
+                </div>
+
+                <div class="form-group required">
+                  <label class="col-sm-3 control-label" for="input-http-port">{{ entry_http_port }}</label>
+                  <div class="col-sm-9">
+                    <input type="number" name="module_dockercart_search_http_port" value="{{ module_dockercart_search_http_port }}" id="input-http-port" class="form-control" />
+                    <p class="help-block">{{ help_http_port }}</p>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-3 control-label"></label>
+                  <div class="col-sm-9">
+                    <button type="button" id="button-test" class="btn btn-success" onclick="testConnection();"><i class="fa fa-plug"></i> {{ button_test_connection }}</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="search-tab-autocomplete" class="dcx-tab-pane">
+              <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+                <h4>{{ tab_autocomplete }}</h4>
+
+                <div class="form-group">
+                  <label class="col-sm-3 control-label" for="input-autocomplete">{{ entry_autocomplete }}</label>
+                  <div class="col-sm-9">
+                    <select name="module_dockercart_search_autocomplete" id="input-autocomplete" class="form-control">
+                      <option value="1" {% if module_dockercart_search_autocomplete %}selected{% endif %}>{{ text_enabled }}</option>
+                      <option value="0" {% if not module_dockercart_search_autocomplete %}selected{% endif %}>{{ text_disabled }}</option>
+                    </select>
+                    <p class="help-block">{{ help_autocomplete }}</p>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-3 control-label" for="input-autocomplete-limit">{{ entry_autocomplete_limit }}</label>
+                  <div class="col-sm-9">
+                    <input type="number" name="module_dockercart_search_autocomplete_limit" value="{{ module_dockercart_search_autocomplete_limit }}" id="input-autocomplete-limit" class="form-control" />
+                    <p class="help-block">{{ help_autocomplete_limit }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="search-tab-indexing" class="dcx-tab-pane">
+              <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+                <h4>{{ tab_indexing }}</h4>
+
+                <div class="alert alert-warning"><i class="fa fa-exclamation-triangle"></i> Reindexing may take several minutes for large catalogs (&gt;10,000 products).</div>
+
+                <div class="form-group">
+                  <div class="col-sm-12">
+                    <button type="button" class="btn btn-primary btn-lg btn-block" onclick="reindexAll();">
+                      <i class="fa fa-refresh"></i> {{ button_reindex }}
+                    </button>
+                    <p class="help-block">{{ help_reindex }}</p>
+                  </div>
+                </div>
+
+                <div id="reindex-progress" style="display:none; margin-top:20px;">
+                  <div class="progress">
+                    <div class="progress-bar progress-bar-striped active" role="progressbar" style="width: 100%">Reindexing...</div>
+                  </div>
+                </div>
+
+                <div id="reindex-result" style="margin-top:20px;"></div>
+              </div>
+            </div>
+
+            <div id="search-tab-about" class="dcx-tab-pane">
+              <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+                <h4>{{ tab_about }}</h4>
+                <table class="table table-bordered dcx-table">
+                  <tr>
+                    <td style="width:220px;"><strong>{{ text_module_version }}</strong></td>
+                    <td>{% if module_version is defined and module_version %}{{ module_version }}{% else %}n/a{% endif %}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>{{ text_developer }}</strong></td>
+                    <td>{{ text_developer_name }}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>{{ text_contact }}</strong></td>
+                    <td><a href="mailto:support@dockercart.net">support@dockercart.net</a></td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+function updateSearchPanelHeader(tabLink) {
+  var $tab = $(tabLink);
+  var title = $tab.data('title') || 'General';
+  var subtitle = $tab.data('subtitle') || '{{ text_tab_general_subtitle }}';
+  var icon = String($tab.data('icon') || 'fa-sliders').replace(/[^a-z0-9\-]/gi, '');
+
+  $('#search-tab-title').text(title);
+  $('#search-tab-subtitle').text(subtitle);
+  $('#search-tab-icon').attr('class', 'fa ' + icon);
+}
+
+$(document).on('click', '.js-search-tab', function(e) {
+  e.preventDefault();
+  var tabId = $(this).data('tab');
+  if (!tabId) return;
+
+  $('#search-tabs > li').removeClass('active');
+  $(this).closest('li').addClass('active');
+
+  $('#search-tab-general, #search-tab-connection, #search-tab-autocomplete, #search-tab-indexing, #search-tab-about').removeClass('active');
+  $('#' + tabId).addClass('active');
+
+  updateSearchPanelHeader(this);
+});
+
+updateSearchPanelHeader($('#search-tabs > li.active a.js-search-tab'));
+
+function testConnection() {
+  $.ajax({
+    url: '{{ test_connection_url }}',
+    type: 'post',
+    dataType: 'json',
+    beforeSend: function() {
+      $('#button-test').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> {{ button_test_connection }}');
+    },
+    complete: function() {
+      $('#button-test').prop('disabled', false).html('<i class="fa fa-plug"></i> {{ button_test_connection }}');
+    },
+    success: function(json) {
+      if (json.success) {
+        alert('✅ ' + json.message);
+      } else {
+        alert('❌ ' + json.message);
+      }
+    },
+    error: function(xhr, ajaxOptions, thrownError) {
+      alert('Error: ' + thrownError + "\n" + xhr.statusText + "\n" + xhr.responseText);
+    }
+  });
+}
+
+function reindexAll() {
+  if (!confirm('Are you sure you want to reindex all data? This may take several minutes.')) {
+    return;
+  }
+
+  $('#reindex-progress').show();
+  $('#reindex-result').html('');
+
+  $.ajax({
+    url: '{{ reindex_url }}',
+    type: 'post',
+    dataType: 'json',
+    success: function(json) {
+      $('#reindex-progress').hide();
+
+      if (json.success) {
+        $('#reindex-result').html('<div class="alert alert-success"><i class="fa fa-check-circle"></i> ' + json.message + '</div>');
+      } else {
+        $('#reindex-result').html('<div class="alert alert-danger"><i class="fa fa-times-circle"></i> ' + json.message + '</div>');
+      }
+    },
+    error: function(xhr, ajaxOptions, thrownError) {
+      $('#reindex-progress').hide();
+      $('#reindex-result').html('<div class="alert alert-danger">Error: ' + thrownError + '</div>');
+    }
+  });
+}
+</script>
+
+{{ footer }}

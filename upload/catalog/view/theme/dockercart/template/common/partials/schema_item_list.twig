@@ -1,0 +1,43 @@
+{% if products is defined and products %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "{{ heading_title|default(name)|striptags|trim|e('js') }}",
+  "itemListElement": [
+    {% for product in products %}
+    {
+      "@type": "ListItem",
+      "position": {{ loop.index }},
+      "url": "{{ product.href|e('js') }}",
+      "item": {
+        "@type": "Product",
+        "name": "{{ product.name|striptags|trim|e('js') }}"{% if product.thumb is defined and product.thumb %},
+        "image": "{{ product.thumb|e('js') }}"{% endif %}{% if product.rating is defined and product.rating and product.reviews is defined and product.reviews > 0 %},
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "{{ product.rating }}",
+          "reviewCount": "{{ product.reviews }}"
+        },
+        "review": [
+          {
+            "@type": "Review",
+            "name": "{{ product.name|striptags|trim|e('js') }} - customer review summary",
+            "reviewRating": {
+              "@type": "Rating",
+              "ratingValue": "{{ product.rating }}",
+              "bestRating": "5"
+            },
+            "author": {
+              "@type": "Organization",
+              "name": "{{ name|default('Customer')|striptags|trim|e('js') }}"
+            }
+          }
+        ]{% endif %}
+      }
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+{% endif %}

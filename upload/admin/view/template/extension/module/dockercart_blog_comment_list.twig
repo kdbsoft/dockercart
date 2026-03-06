@@ -1,0 +1,155 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="button" data-toggle="tooltip" title="{{ button_approve }}" class="btn btn-success" onclick="$('#form-comment').attr('action', '{{ approve }}'); $('#form-comment').submit();"><i class="fa fa-check"></i></button>
+        <button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="confirm('{{ text_confirm }}') ? ($('#form-comment').attr('action', '{{ delete }}'), $('#form-comment').submit()) : false;"><i class="fa fa-trash-o"></i></button>
+        <a href="{{ back }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    <div class="dcx-shell">
+      <div class="dcx-panel">
+      <div class="dcx-panel-head">
+        <div class="dcx-panel-head__icon"><i class="fa fa-comments"></i></div>
+        <div>
+          <h3 class="dcx-panel-title">{{ text_list }}</h3>
+          <div class="dcx-panel-subtitle">Moderate blog comments</div>
+        </div>
+      </div>
+      <div class="dcx-panel-body">
+        <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-comment">
+          <div class="well">
+            <div class="row">
+              <div class="col-sm-3">
+                <div class="form-group">
+                  <label class="control-label" for="input-filter-post">{{ entry_post }}</label>
+                  <input type="text" name="filter_post" value="{{ filter_post }}" placeholder="{{ entry_post }}" id="input-filter-post" class="form-control" />
+                </div>
+              </div>
+              <div class="col-sm-3">
+                <div class="form-group">
+                  <label class="control-label" for="input-filter-author">{{ entry_author }}</label>
+                  <input type="text" name="filter_author" value="{{ filter_author }}" placeholder="{{ entry_author }}" id="input-filter-author" class="form-control" />
+                </div>
+              </div>
+              <div class="col-sm-3">
+                <div class="form-group">
+                  <label class="control-label" for="input-filter-email">{{ entry_email }}</label>
+                  <input type="text" name="filter_email" value="{{ filter_email }}" placeholder="{{ entry_email }}" id="input-filter-email" class="form-control" />
+                </div>
+              </div>
+              <div class="col-sm-3">
+                <div class="form-group">
+                  <label class="control-label" for="input-filter-status">{{ entry_status }}</label>
+                  <div style="display:flex;align-items:center;">
+                    <select name="filter_status" id="input-filter-status" class="form-control" style="flex:1;">
+                      <option value="">{{ text_all }}</option>
+                      <option value="1" {% if filter_status == '1' %}selected="selected"{% endif %}>{{ text_enabled }}</option>
+                      <option value="0" {% if filter_status == '0' %}selected="selected"{% endif %}>{{ text_disabled }}</option>
+                    </select>
+                    <button type="button" id="button-filter" class="btn btn-primary" style="margin-left:8px;"> <i class="fa fa-search"></i> {{ button_filter }}</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover dcx-table">
+              <thead>
+                <tr>
+                  <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
+                  <td class="text-left">{{ column_post }}</td>
+                  <td class="text-left">{{ column_author }}</td>
+                  <td class="text-center">{{ column_rating }}</td>
+                  <td class="text-left">{{ column_status }}</td>
+                  <td class="text-left">{{ column_date_added }}</td>
+                  <td class="text-right">{{ column_action }}</td>
+                </tr>
+              </thead>
+              <tbody>
+                {% if comments %}
+                {% for comment in comments %}
+                <tr>
+                  <td class="text-center">
+                    <input type="checkbox" name="selected[]" value="{{ comment.comment_id }}" />
+                  </td>
+                  <td class="text-left">{{ comment.post_name }}</td>
+                  <td class="text-left">{{ comment.author }}</td>
+                  <td class="text-center">{{ comment.rating }}</td>
+                  <td class="text-left">{{ comment.status }}</td>
+                  <td class="text-left">{{ comment.date_added }}</td>
+                  <td class="text-right">
+                    <a href="{{ comment.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a>
+                  </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                  <td class="text-center" colspan="7">{{ text_no_results }}</td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </form>
+        <div class="row">
+          <div class="col-sm-6 text-left">{{ pagination }}</div>
+          <div class="col-sm-6 text-right">{{ results }}</div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+$('#button-filter').on('click', function() {
+  var url = '{{ filter_url }}';
+
+  var filter_post = $('input[name=\'filter_post\']').val();
+  var filter_author = $('input[name=\'filter_author\']').val();
+  var filter_email = $('input[name=\'filter_email\']').val();
+  var filter_status = $('select[name=\'filter_status\']').val();
+  var filter_text = $('input[name=\'filter_text\']').val();
+
+  if (filter_post) {
+    url += '&filter_post=' + encodeURIComponent(filter_post);
+  }
+  if (filter_author) {
+    url += '&filter_author=' + encodeURIComponent(filter_author);
+  }
+  if (filter_email) {
+    url += '&filter_email=' + encodeURIComponent(filter_email);
+  }
+  if (filter_status) {
+    url += '&filter_status=' + encodeURIComponent(filter_status);
+  }
+  if (filter_text) {
+    url += '&filter_text=' + encodeURIComponent(filter_text);
+  }
+
+  location = url;
+});
+</script>
+{{ footer }}

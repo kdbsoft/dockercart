@@ -1,0 +1,76 @@
+{{ header }}
+<main class="bg-gray-50 min-h-screen">
+
+  <section class="bg-gradient-to-br from-gray-900 via-gray-800 to-blue-950 py-10 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      {% include 'dockercart/template/common/partials/breadcrumbs.twig' with {
+        breadcrumbs_class: 'flex flex-wrap items-center gap-2 text-xs text-gray-300 mb-3',
+        breadcrumbs_link_class: 'hover:text-white transition',
+        breadcrumbs_last_class: 'text-white font-semibold'
+      } %}
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-white">{{ heading_title }}</h1>
+    </div>
+  </section>
+
+  <section class="py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
+      {{ content_top }}
+
+      {% if recurrings %}
+      <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden mb-6">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-gray-100 bg-gray-50">
+                <th class="text-right font-semibold text-gray-500 px-4 py-3">{{ column_order_recurring_id }}</th>
+                <th class="text-left font-semibold text-gray-500 px-4 py-3">{{ column_product }}</th>
+                <th class="text-left font-semibold text-gray-500 px-4 py-3">{{ column_status }}</th>
+                <th class="text-left font-semibold text-gray-500 px-4 py-3">{{ column_date_added }}</th>
+                <th class="px-4 py-3"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for recurring in recurrings %}
+              <tr class="border-b border-gray-50 hover:bg-blue-50/30 transition">
+                <td class="text-right text-gray-500 font-mono px-4 py-3">#{{ recurring.order_recurring_id }}</td>
+                <td class="text-left text-gray-800 px-4 py-3">{{ recurring.product }}</td>
+                <td class="text-left px-4 py-3">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                    {{ recurring.status }}
+                  </span>
+                </td>
+                <td class="text-left text-gray-500 px-4 py-3">{{ recurring.date_added }}</td>
+                <td class="text-right px-4 py-3">
+                  <a href="{{ recurring.view }}" class="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium text-xs border border-blue-200 hover:border-blue-300 px-3 py-1.5 rounded-lg transition">
+                    <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                    {{ button_view }}
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="text-right text-sm text-gray-500 mb-6">{{ pagination }}</div>
+
+      {% else %}
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 text-center text-gray-400 text-sm mb-6">
+        <i data-lucide="refresh-cw" class="w-8 h-8 mx-auto mb-2 opacity-30"></i>
+        <p>{{ text_empty }}</p>
+      </div>
+      {% endif %}
+
+      <div class="flex justify-end">
+        <a href="{{ continue }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm">
+          {{ button_continue }}
+        </a>
+      </div>
+
+      {{ content_bottom }}
+    </div>
+  </section>
+
+</main>
+{{ footer }}

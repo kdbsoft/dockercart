@@ -1,0 +1,63 @@
+{# Latest Blog Posts module for dockercart theme — matches index.html blog section exactly #}
+{% if posts|length %}
+<section id="blog" class="py-16 px-4 sm:px-6 lg:px-8 bg-white">
+  <div class="max-w-7xl mx-auto">
+
+    <!-- Header -->
+    <div class="flex items-end justify-between mb-10">
+      <div>
+        <span class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-2 block">{{ text_from_our_blog }}</span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900">{{ heading_title }}</h2>
+      </div>
+      <a href="{{ blog_url }}" class="text-sm font-medium text-blue-600 hover:underline hidden sm:block">{{ text_all_articles }}</a>
+    </div>
+
+    <!-- Cards grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+
+      {% for post in posts %}
+      <!-- Article -->
+      <article class="group bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition overflow-hidden flex flex-col">
+        <a href="{{ post.href }}" class="block aspect-[16/10] bg-gray-50 overflow-hidden">
+          <img
+            src="{{ post.image }}"
+            alt="{{ post.name }}"
+            class="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+            loading="lazy"
+          />
+        </a>
+        <div class="p-4 sm:p-5 flex flex-col flex-1">
+          <div class="flex flex-wrap items-center gap-2 text-xs text-gray-500 mb-2">
+            {% if post.category %}
+              <a href="{{ post.category_href }}" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100 transition font-semibold"><i data-lucide="folder" class="w-3 h-3"></i> {{ post.category }}</a>
+              {% if (show_author and post.author) or show_date or show_views %}<span>•</span>{% endif %}
+            {% endif %}
+            {% if show_author and post.author %}
+              <a href="{{ post.author_url }}" class="inline-flex items-center gap-1 hover:text-blue-600 transition"><i data-lucide="user" class="w-3 h-3"></i> {{ post.author }}</a>
+              {% if show_date or show_views %}<span>•</span>{% endif %}
+            {% endif %}
+            {% if show_date %}
+              <span class="inline-flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3"></i> {{ post.date_published }}</span>
+              {% if show_views %}<span>•</span>{% endif %}
+            {% endif %}
+            {% if show_views %}
+              <span class="inline-flex items-center gap-1"><i data-lucide="eye" class="w-3 h-3"></i> {{ post.views }}</span>
+            {% endif %}
+          </div>
+          <h3 class="font-bold text-gray-900 text-base leading-snug mb-2 group-hover:text-blue-600 transition line-clamp-2">
+            <a href="{{ post.href }}" class="hover:text-blue-600 transition">{{ post.name }}</a>
+          </h3>
+          <p class="text-sm text-gray-500 leading-relaxed line-clamp-3 flex-1">
+            {{ post.description }}
+          </p>
+          <a href="{{ post.href }}" class="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 hover:text-blue-700 transition">
+            {{ text_read_article }} <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </a>
+        </div>
+      </article>
+      {% endfor %}
+
+    </div>
+  </div>
+</section>
+{% endif %}

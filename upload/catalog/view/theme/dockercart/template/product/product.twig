@@ -1,0 +1,1068 @@
+{{ header }}
+
+<!-- GLightbox -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" />
+
+<style>
+  .dc-thumb.active { border-color: #2563eb !important; box-shadow: 0 0 0 2px #dbeafe inset; }
+  .option-btn { transition: border-color .15s, background .15s, color .15s; }
+  .option-btn.active { border-color: #2563eb; background: #eff6ff; color: #1e3a8a; }
+  .tab-btn { color: #6b7280; transition: color .15s, background .15s, border-color .15s; }
+  .tab-btn.active { color: #2563eb; border-color: #2563eb !important; background: #eff6ff; }
+  .zoom-hint { opacity: 0; transform: translateY(6px); transition: all .25s ease; }
+  .zoom-target:hover .zoom-hint { opacity: 1; transform: translateY(0); }
+  .dc-product-card:hover .dc-cart-btn { opacity: 1; transform: translateY(0); }
+  .dc-cart-btn { opacity: 0; transform: translateY(8px); transition: all .25s ease; }
+
+  /* ── Rating stars ─────────────────────────────────────── */
+  .dc-stars-row { display: inline-flex; gap: 3px; cursor: pointer; user-select: none; }
+  .dc-stars-row .dc-star { font-size: 1.75rem; line-height: 1; color: #d1d5db; transition: color .1s, transform .1s; }
+  .dc-stars-row .dc-star.lit { color: #f59e0b; }
+  .dc-stars-row .dc-star:hover { transform: scale(1.2); }
+  /* Review list stars (non-interactive) */
+  .dc-stars { display: inline-flex; gap: 3px; }
+  .dc-stars .dc-star { font-size: 1rem; color: #d1d5db; }
+  .dc-stars .dc-star.active { color: #f59e0b; }
+  .dc-option-required-error { border-color: #fca5a5 !important; box-shadow: 0 0 0 3px rgba(239,68,68,.12) !important; border-radius: 0.75rem; }
+</style>
+
+<main class="py-8 px-4 sm:px-6 lg:px-8 bg-white min-h-screen">
+  <!-- ─── BREADCRUMBS ─── -->
+  <div class="max-w-7xl mx-auto mb-6">
+    {% include 'dockercart/template/common/partials/breadcrumbs.twig' with {
+      breadcrumbs_class: 'flex flex-wrap items-center gap-2 text-xs text-gray-500',
+      breadcrumbs_link_class: 'hover:text-gray-900 transition',
+      breadcrumbs_last_class: 'text-gray-700 font-semibold'
+    } %}
+  </div>
+  <div class="max-w-7xl mx-auto">
+    {{ content_top }}
+
+    <!-- ─── PRODUCT ─── -->
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10">
+
+      <!-- Gallery -->
+      <div class="lg:sticky lg:top-24 lg:z-10 self-start">
+        <div class="rounded-3xl border border-gray-100 bg-gray-50 overflow-hidden">
+          <button id="dc-zoom-btn" type="button" class="zoom-target group relative block w-full text-left" aria-label="{{ heading_title }}">
+            <img id="dc-main-img" src="{{ thumb }}" data-popup="{{ popup }}" alt="{{ heading_title }}" class="w-full aspect-[4/3] object-cover cursor-zoom-in" />
+            <span class="zoom-hint absolute bottom-3 right-3 inline-flex items-center gap-1.5 bg-gray-900/80 text-white text-[11px] font-semibold px-2.5 py-1.5 rounded-lg backdrop-blur-sm">
+              <i data-lucide="zoom-in" class="w-3.5 h-3.5"></i> {{ text_zoom }}
+            </span>
+          </button>
+        </div>
+        {% if images %}
+        <div class="grid grid-cols-4 gap-3 mt-3">
+          <button class="dc-thumb active rounded-2xl border-2 overflow-hidden" data-img="{{ thumb }}" data-popup="{{ popup }}">
+            <img src="{{ thumb }}" alt="{{ heading_title }}" class="w-full h-20 object-cover" />
+          </button>
+          {% for image in images %}
+          <button class="dc-thumb rounded-2xl border-2 border-gray-200 overflow-hidden" data-img="{{ image.thumb }}" data-popup="{{ image.popup }}">
+            <img src="{{ image.thumb }}" alt="{{ heading_title }}" class="w-full h-20 object-cover" />
+          </button>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Info -->
+      <div>
+        <div class="flex items-center gap-2 mb-3">
+          {% if manufacturer %}<span class="text-xs font-bold uppercase tracking-widest text-blue-600">{{ manufacturer }}</span>{% endif %}
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {% if is_in_stock %}bg-emerald-100 text-emerald-700{% else %}bg-red-100 text-red-600{% endif %}">{{ stock }}</span>
+        </div>
+
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 leading-tight">{{ heading_title }}</h1>
+
+        {% if review_status %}
+        <div class="flex flex-wrap items-center gap-3 mt-3">
+          <div class="flex text-sm text-amber-400 gap-0.5">{% for i in 1..5 %}{% if rating >= i %}★{% else %}<span class="text-gray-300">★</span>{% endif %}{% endfor %}</div>
+          <a href="#" onclick="document.querySelector('.tab-btn[data-tab=\'review\']').click();return false;" class="text-sm text-gray-500 hover:text-blue-600 transition">{{ reviews }}</a>
+          <span class="text-sm text-gray-300">|</span>
+          <span class="text-sm text-gray-500">{{ text_model }} {{ model }}</span>
+        </div>
+        {% else %}
+        <p class="text-sm text-gray-500 mt-3">{{ text_model }} {{ model }}</p>
+        {% endif %}
+
+        {% if price %}
+        <div class="flex items-end gap-3 mt-5">
+          {% if not special %}
+            <span id="dc-unit-price" data-base-price="{{ dc_base_price_value|default(0) }}" data-current-price="{{ dc_base_price_value|default(0) }}" class="text-3xl font-extrabold text-gray-900">{{ price }}</span>
+          {% else %}
+            <span id="dc-unit-price" data-base-price="{{ dc_base_price_value|default(0) }}" data-current-price="{{ dc_base_price_value|default(0) }}" class="text-3xl font-extrabold text-gray-900">{{ special }}</span>
+            <span class="text-lg text-red-400 line-through">{{ price }}</span>
+            <span class="text-xs font-bold bg-red-500 text-white px-2 py-0.5 rounded-lg self-start mt-2">{{ text_sale }}</span>
+          {% endif %}
+          {% if tax %}<span class="text-xs text-gray-400 self-center">{{ text_tax }} {{ tax }}</span>{% endif %}
+        </div>
+        {% if points %}<p class="text-xs text-blue-600 mt-1">{{ text_points }} {{ points }}</p>{% endif %}
+        {% if discounts %}
+        <div class="mt-2 space-y-0.5">{% for discount in discounts %}<p class="text-xs text-gray-500">{{ discount.quantity }}{{ text_discount }}{{ discount.price }}</p>{% endfor %}</div>
+        {% endif %}
+        <p id="dc-subtotal" class="hidden text-sm text-blue-700 font-semibold mt-1"></p>
+        {% endif %}
+
+        {% if reward %}<p class="text-xs text-gray-500 mt-2">{{ text_reward }} {{ reward }}</p>{% endif %}
+
+        <!-- Options + Cart form -->
+        <div id="product">
+
+          {% if options %}{% for option in options %}
+          <div class="mt-5">
+            <p class="text-sm font-semibold text-gray-800 mb-2">{{ option.name }}{% if option.required %} <span class="text-red-500">*</span>{% endif %}</p>
+
+            {% if option.type == 'radio' %}
+            <div class="flex flex-wrap gap-2" id="input-option{{ option.product_option_id }}">
+              {% for option_value in option.product_option_value %}
+              <label class="cursor-pointer">
+                <input type="radio" name="option[{{ option.product_option_id }}]" value="{{ option_value.product_option_value_id }}" data-option-price="{{ option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}" class="sr-only dc-option-radio" />
+                <span class="option-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-gray-200 text-sm font-semibold select-none">
+                  {% if option_value.image %}<img src="{{ option_value.image }}" alt="{{ option_value.name }}" class="w-5 h-5 rounded object-cover" />{% endif %}
+                  {{ option_value.name }}{% if option_value.price %} ({{ option_value.price_prefix }}{{ option_value.price }}){% endif %}
+                </span>
+              </label>
+              {% endfor %}
+            </div>
+
+            {% elseif option.type == 'select' %}
+            <select name="option[{{ option.product_option_id }}]" id="input-option{{ option.product_option_id }}" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm bg-white focus:outline-none focus:border-blue-400 transition appearance-none">
+              <option value="">{{ text_select }}</option>
+              {% for option_value in option.product_option_value %}
+              <option value="{{ option_value.product_option_value_id }}" data-option-price="{{ option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}">{{ option_value.name }}{% if option_value.price %} ({{ option_value.price_prefix }}{{ option_value.price }}){% endif %}</option>
+              {% endfor %}
+            </select>
+
+            {% elseif option.type == 'checkbox' %}
+            <div class="flex flex-wrap gap-2" id="input-option{{ option.product_option_id }}">
+              {% for option_value in option.product_option_value %}
+              <label class="cursor-pointer">
+                <input type="checkbox" name="option[{{ option.product_option_id }}][]" value="{{ option_value.product_option_value_id }}" data-option-price="{{ option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}" class="sr-only dc-option-checkbox" />
+                <span class="option-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-gray-200 text-sm font-semibold select-none">
+                  {% if option_value.image %}<img src="{{ option_value.image }}" alt="{{ option_value.name }}" class="w-5 h-5 rounded object-cover" />{% endif %}
+                  {{ option_value.name }}{% if option_value.price %} ({{ option_value.price_prefix }}{{ option_value.price }}){% endif %}
+                </span>
+              </label>
+              {% endfor %}
+            </div>
+
+            {% elseif option.type == 'text' %}
+            <input type="text" name="option[{{ option.product_option_id }}]" value="{{ option.value }}" id="input-option{{ option.product_option_id }}" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-blue-400 transition" />
+
+            {% elseif option.type == 'textarea' %}
+            <textarea name="option[{{ option.product_option_id }}]" rows="4" id="input-option{{ option.product_option_id }}" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-blue-400 transition resize-none">{{ option.value }}</textarea>
+
+            {% elseif option.type == 'file' %}
+            <button type="button" id="button-upload{{ option.product_option_id }}" data-loading-text="{{ text_loading }}" class="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold hover:bg-gray-50 transition">
+              <i data-lucide="upload" class="w-4 h-4"></i> {{ button_upload }}
+            </button>
+            <input type="hidden" name="option[{{ option.product_option_id }}]" id="input-option{{ option.product_option_id }}" />
+
+            {% elseif option.type == 'date' %}
+            <div class="date"><input type="text" name="option[{{ option.product_option_id }}]" value="{{ option.value }}" data-date-format="YYYY-MM-DD" id="input-option{{ option.product_option_id }}" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-blue-400 transition" /></div>
+
+            {% elseif option.type == 'datetime' %}
+            <div class="datetime"><input type="text" name="option[{{ option.product_option_id }}]" value="{{ option.value }}" data-date-format="YYYY-MM-DD HH:mm" id="input-option{{ option.product_option_id }}" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-blue-400 transition" /></div>
+
+            {% elseif option.type == 'time' %}
+            <div class="time"><input type="text" name="option[{{ option.product_option_id }}]" value="{{ option.value }}" data-date-format="HH:mm" id="input-option{{ option.product_option_id }}" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-blue-400 transition" /></div>
+            {% endif %}
+
+          </div>
+          {% endfor %}{% endif %}
+
+          {% if recurrings %}
+          <div class="mt-5">
+            <p class="text-sm font-semibold text-gray-800 mb-2">{{ text_payment_recurring }}</p>
+            <select name="recurring_id" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm bg-white focus:outline-none focus:border-blue-400 transition appearance-none">
+              <option value="">{{ text_select }}</option>
+              {% for recurring in recurrings %}<option value="{{ recurring.recurring_id }}">{{ recurring.name }}</option>{% endfor %}
+            </select>
+            <div class="text-xs text-gray-500 mt-1" id="recurring-description"></div>
+          </div>
+          {% endif %}
+
+          {% if minimum > 1 %}
+          <div class="mt-4 flex items-center gap-2 text-xs text-blue-600 bg-blue-50 rounded-xl px-3 py-2">
+            <i data-lucide="info" class="w-3.5 h-3.5 flex-shrink-0"></i> {{ text_minimum }}
+          </div>
+          {% endif %}
+
+          <input type="hidden" name="product_id" value="{{ product_id }}" />
+
+          <!-- Qty + Cart + Wishlist -->
+          <div class="mt-6 flex items-center gap-3">
+            <div class="flex items-center border border-gray-200 rounded-xl overflow-hidden flex-shrink-0">
+              <button type="button" class="w-10 h-10 text-lg font-bold text-gray-500 hover:bg-gray-50 transition" onclick="dcChangeQty(-1)">−</button>
+              <input type="text" name="quantity" value="{{ minimum }}" id="input-quantity" oninput="dcUpdateSubtotal()" class="w-10 text-center text-sm font-semibold border-0 outline-none py-2 bg-transparent" />
+              <button type="button" class="w-10 h-10 text-lg font-bold text-gray-500 hover:bg-gray-50 transition" onclick="dcChangeQty(1)">+</button>
+            </div>
+
+            <button type="button" id="button-cart" data-loading-text="{{ text_loading }}"
+              class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl transition text-sm shadow-md shadow-blue-200">
+              {{ button_cart }}
+            </button>
+
+            <button type="button" id="dc-wishlist-btn" data-product-id="{{ product_id }}" data-in-wishlist="{{ in_wishlist|default(0) }}" title="{{ button_wishlist }}"
+              class="w-11 h-11 rounded-xl border {% if in_wishlist|default(0) %}border-rose-300 bg-rose-50{% else %}border-gray-200 hover:border-rose-300 hover:bg-rose-50{% endif %} flex items-center justify-center transition flex-shrink-0">
+              <i data-lucide="heart" class="w-5 h-5 pointer-events-none {% if in_wishlist|default(0) %}text-rose-500 fill-rose-400{% else %}text-gray-500{% endif %}"></i>
+            </button>
+
+            <button type="button" onclick="{% if in_compare|default(0) %}compare.remove('{{ product_id }}'){% else %}compare.add('{{ product_id }}'){% endif %};" title="{{ button_compare }}"
+              class="w-11 h-11 rounded-xl border {% if in_compare|default(0) %}border-blue-300 bg-blue-50{% else %}border-gray-200 hover:border-blue-200 hover:bg-blue-50{% endif %} flex items-center justify-center transition flex-shrink-0">
+              <i data-lucide="bar-chart-2" class="w-5 h-5 {% if in_compare|default(0) %}text-blue-500 fill-blue-400{% else %}text-gray-500{% endif %}"></i>
+            </button>
+          </div>
+
+          {# 1-Click Checkout button injected here by PHP event #}
+
+        </div>{# end #product #}
+
+        <!-- Badges row -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6">
+                <div class="rounded-2xl border border-gray-100 p-3 bg-gray-50">
+            <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1 flex items-center gap-1"><i data-lucide="truck" class="w-3.5 h-3.5"></i> {{ text_delivery }}</p>
+            <p class="text-sm font-semibold text-gray-800">{{ text_delivery_desc }}</p>
+          </div>
+          <div class="rounded-2xl border border-gray-100 p-3 bg-gray-50">
+            <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1 flex items-center gap-1"><i data-lucide="shield-check" class="w-3.5 h-3.5"></i> {{ text_warranty }}</p>
+            <p class="text-sm font-semibold text-gray-800">{{ text_warranty_desc }}</p>
+          </div>
+          <div class="rounded-2xl border border-gray-100 p-3 bg-gray-50">
+            <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1 flex items-center gap-1"><i data-lucide="refresh-ccw" class="w-3.5 h-3.5"></i> {{ text_returns }}</p>
+            <p class="text-sm font-semibold text-gray-800">{{ text_returns_desc }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── TABS ─── -->
+    <section class="mt-10">
+      <div class="flex flex-wrap gap-2 border-b border-gray-100 pb-3">
+        <button class="tab-btn active px-4 py-2 rounded-xl border border-transparent text-sm font-semibold" data-tab="description">{{ tab_description }}</button>
+        {% if attribute_groups %}<button class="tab-btn px-4 py-2 rounded-xl border border-transparent text-sm font-semibold" data-tab="attribute">{{ tab_attribute }}</button>{% endif %}
+        {% if review_status %}<button class="tab-btn px-4 py-2 rounded-xl border border-transparent text-sm font-semibold" data-tab="review">{{ tab_review }}</button>{% endif %}
+      </div>
+
+      <div id="dc-tab-description" class="dc-tab-panel mt-5 text-sm text-gray-600 leading-relaxed prose max-w-none">{{ description }}</div>
+
+      {% if attribute_groups %}
+      <div id="dc-tab-attribute" class="dc-tab-panel mt-5 hidden">
+        {% for attribute_group in attribute_groups %}
+        <div class="mb-4">
+          <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">{{ attribute_group.name }}</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            {% for attribute in attribute_group.attribute %}
+            <div class="rounded-xl border border-gray-100 p-3 text-sm">
+              <span class="text-gray-400">{{ attribute.name }}:</span> <span class="font-semibold text-gray-800">{{ attribute.text }}</span>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if review_status %}
+      <div id="dc-tab-review" class="dc-tab-panel mt-5 hidden">
+        <div id="review" class="space-y-3 mb-6"></div>
+        {% if review_guest %}
+        <h3 class="text-base font-bold text-gray-900 mb-4">{{ text_write }}</h3>
+        <form id="form-review" class="space-y-4 max-w-xl">
+          <div>
+            <label class="text-sm font-semibold text-gray-700 block mb-1.5" for="input-name">{{ entry_name }}</label>
+            <input type="text" name="name" value="{{ customer_name }}" id="input-name" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-blue-400 transition" />
+          </div>
+          <div>
+            <label class="text-sm font-semibold text-gray-700 block mb-1.5" for="input-review">{{ entry_review }}</label>
+            <textarea name="text" rows="4" id="input-review" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-blue-400 transition resize-none"></textarea>
+            <p class="text-xs text-gray-400 mt-1">{{ text_note }}</p>
+          </div>
+          <div>
+            <label class="text-sm font-semibold text-gray-700 block mb-2">{{ entry_rating }}</label>
+            <div class="flex items-center gap-3">
+              <span class="text-xs text-gray-400">{{ entry_bad }}</span>
+              <div id="dc-stars-row" class="dc-stars-row" role="group" aria-label="Rating">
+                {% for i in 1..5 %}<span class="dc-star" data-val="{{ i }}" tabindex="0" role="radio" aria-label="{{ i }} stars">★</span>{% endfor %}
+              </div>
+              <span class="text-xs text-gray-400">{{ entry_good }}</span>
+              {% for i in 1..5 %}<input type="radio" name="rating" value="{{ i }}" id="dc-rating-{{ i }}" class="sr-only" />{% endfor %}
+            </div>
+          </div>
+          {{ captcha }}
+          <button type="button" id="button-review" data-loading-text="{{ text_loading }}"
+            class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition">{{ button_continue }}</button>
+        </form>
+        {% else %}
+        <div class="text-sm text-gray-600 p-4 bg-gray-50 rounded-xl">{{ text_login }}</div>
+        {% endif %}
+      </div>
+      {% endif %}
+    </section>
+
+    {% if tags %}
+    <div class="mt-8 flex flex-wrap items-center gap-2">
+      <span class="text-sm font-semibold text-gray-700">{{ text_tags }}</span>
+      {% for tag in tags %}<a href="{{ tag.href }}" class="px-3 py-0.5 rounded-full border border-gray-200 text-xs hover:border-blue-300 hover:text-blue-600 transition">{{ tag.tag }}</a>{% endfor %}
+    </div>
+    {% endif %}
+
+    {{ content_bottom }}
+
+    {% if products %}
+    <section class="mt-12">
+      <div class="flex items-end justify-between mb-6">
+        <div>
+          <p class="text-blue-600 text-sm font-semibold uppercase tracking-widest mb-1">{{ text_you_may_also_like }}</p>
+          <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ text_related }}</h2>
+        </div>
+        {% if products|length > 4 %}
+        <a href="#" id="dc-related-view-all" class="text-sm font-semibold text-blue-600 hover:text-blue-700">{{ text_view_all|default('View All →') }}</a>
+        {% endif %}
+      </div>
+      <div id="dc-related-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        {% for product in products %}
+        {% set discount_pct = product.discount is defined ? product.discount : 0 %}
+        <div class="dc-product-card product-card group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex flex-col {% if loop.index > 4 %}dc-related-extra hidden{% endif %}" data-id="{{ product.product_id }}" data-rating="{{ product.rating is defined ? product.rating : 0 }}" data-model="{{ product.model is defined ? product.model : '' }}" data-brand="{{ product.manufacturer is defined ? product.manufacturer : '' }}" data-description="{{ product.description|striptags|e('html_attr') }}" data-in-wishlist="{{ product.in_wishlist is defined ? product.in_wishlist : 0 }}">
+          <div class="relative overflow-hidden aspect-square bg-gray-50">
+            <a href="{{ product.href }}">
+              <img src="{{ product.thumb }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+            </a>
+            {% if discount_pct and discount_pct > 0 %}
+            <span class="absolute top-2 left-2 bg-red-500 text-white px-2 py-0.5 rounded-lg text-[11px] font-bold">-{{ discount_pct }}%</span>
+            {% endif %}
+            <div class="absolute top-2 right-2">
+              <button class="wishlist-btn w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center hover:bg-rose-50 transition {% if product.in_wishlist is defined and product.in_wishlist %}bg-rose-50 in-wishlist{% endif %}" onclick="dcAddToWishlist('{{ product.product_id }}', this); event.stopPropagation();" aria-label="Add to wishlist">
+                <i data-lucide="heart" class="w-3.5 h-3.5 {% if product.in_wishlist is defined and product.in_wishlist %}text-rose-500 fill-rose-400{% else %}text-gray-400{% endif %}"></i>
+              </button>
+            </div>
+            <button class="quick-view-btn absolute bottom-0 left-0 right-0 py-2.5 bg-gray-900/85 hover:bg-blue-600 text-white text-[11px] font-bold uppercase tracking-wide opacity-0 translate-y-full group-hover:opacity-100 group-hover:translate-y-0 transition" onclick="openQuickView({{ product.product_id }}); event.stopPropagation();" aria-label="{{ text_quick_view }}">{{ text_quick_view }}</button>
+          </div>
+          <div class="p-3 sm:p-4 flex flex-col flex-1">
+            {% if product.category %}
+            <p class="text-[10px] sm:text-xs text-gray-400 uppercase tracking-widest mb-1 font-medium">{{ product.category }}</p>
+            {% endif %}
+            <h3 class="text-xs sm:text-sm font-semibold text-gray-900 leading-snug mb-2 flex-1 line-clamp-2">
+              <a href="{{ product.href }}" class="hover:text-blue-600 transition">{{ product.name }}</a>
+            </h3>
+            {% if product.rating %}
+            <div class="flex items-center gap-1 mb-3">
+              <div class="flex gap-0.5 text-xs text-amber-400">{% for i in 1..5 %}{% if product.rating >= i %}★{% else %}<span class="text-gray-200">★</span>{% endif %}{% endfor %}</div>
+              <span class="text-[10px] text-gray-400 ml-1">{{ product.rating }}{% if product.reviews is defined and product.reviews > 0 %} ({{ product.reviews }}){% endif %}</span>
+            </div>
+            {% endif %}
+            <div class="flex items-end justify-between gap-2">
+              <div class="flex items-baseline gap-1">
+                {% if product.special %}
+                <span class="text-base sm:text-lg font-extrabold text-gray-900">{{ product.special }}</span>
+                <span class="text-xs text-red-400 line-through ml-1">{{ product.price }}</span>
+                {% elseif product.price %}
+                <span class="text-base sm:text-lg font-extrabold text-gray-900">{{ product.price }}</span>
+                {% endif %}
+              </div>
+              <button type="button" onclick="cart.add('{{ product.product_id }}', '{{ product.minimum }}');"
+                class="dc-cart-btn flex-shrink-0 text-[10px] sm:text-xs font-bold px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition">+ {{ button_cart }}</button>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
+
+<script type="text/javascript">
+/* ── Qty stepper ───────────────────────────────────────── */
+function dcChangeQty(delta) {
+  var inp = document.getElementById('input-quantity');
+  inp.value = Math.max(1, (parseInt(inp.value) || 1) + delta);
+  dcUpdateSubtotal();
+}
+
+function dcDetectCurrencySymbol(txt) {
+  return (txt || '').replace(/[\d\s.,]+/g, '').trim();
+}
+
+function dcFormatMoney(value) {
+  var number = (typeof value === 'number' && !isNaN(value)) ? value : 0;
+  var formatted = number.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  // Server-provided symbols (may be empty strings)
+  var left = {{ currency_symbol_left ? '"' ~ currency_symbol_left|e('js') ~ '"' : '""' }};
+  var right = {{ currency_symbol_right ? '"' ~ currency_symbol_right|e('js') ~ '"' : '""' }};
+  var leftSpace = {{ config_symbol_left_space ? 'true' : 'false' }};
+
+  if (left) {
+    return left + (leftSpace ? ' ' : '') + formatted;
+  }
+
+  if (right) {
+    return formatted + ' ' + right;
+  }
+
+  return formatted;
+}
+
+function dcRecalcOptionPrice() {
+  var priceEl = document.getElementById('dc-unit-price');
+  if (!priceEl) return;
+
+  var basePrice = parseFloat(priceEl.dataset.basePrice || '0');
+  if (!basePrice) {
+    dcUpdateSubtotal();
+    return;
+  }
+
+  var adjustment = 0;
+
+  document.querySelectorAll('#product input.dc-option-radio:checked, #product input.dc-option-checkbox:checked').forEach(function(input) {
+    var val = parseFloat(input.dataset.optionPrice || '0');
+    var prefix = (input.dataset.optionPrefix || '+').trim();
+    if (!val) return;
+    adjustment += (prefix === '-') ? -val : val;
+  });
+
+  document.querySelectorAll('#product select[name^="option["]').forEach(function(select) {
+    if (!select.value) return;
+    var selected = select.options[select.selectedIndex];
+    if (!selected) return;
+    var val = parseFloat(selected.dataset.optionPrice || '0');
+    var prefix = (selected.dataset.optionPrefix || '+').trim();
+    if (!val) return;
+    adjustment += (prefix === '-') ? -val : val;
+  });
+
+  var current = Math.max(0, basePrice + adjustment);
+  priceEl.dataset.currentPrice = String(current);
+
+  var symbol = priceEl.dataset.currencySymbol || dcDetectCurrencySymbol(priceEl.textContent);
+  priceEl.dataset.currencySymbol = symbol;
+  priceEl.textContent = dcFormatMoney(current, symbol);
+
+  dcUpdateSubtotal();
+}
+
+/* ── Price × qty subtotal ──────────────────────────────── */
+function dcUpdateSubtotal() {
+  var priceEl = document.getElementById('dc-unit-price');
+  var subEl   = document.getElementById('dc-subtotal');
+  var qtyEl   = document.getElementById('input-quantity');
+  if (!priceEl || !subEl || !qtyEl) return;
+  var qty = parseInt(qtyEl.value) || 1;
+  if (qty <= 1) { subEl.classList.add('hidden'); return; }
+  var unit = parseFloat(priceEl.dataset.currentPrice || priceEl.dataset.basePrice || '0');
+  if (isNaN(unit)) { subEl.classList.add('hidden'); return; }
+  var sym = priceEl.dataset.currencySymbol || dcDetectCurrencySymbol(priceEl.textContent);
+  var total = (unit * qty).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+  subEl.textContent = '{{ text_total }}' + ' ' + (sym || '') + total;
+  subEl.classList.remove('hidden');
+}
+
+/* ── Rating stars with hover fill ─────────────────────── */
+function initRatingStars() {
+  var row = document.getElementById('dc-stars-row');
+  if (!row) return;
+  var stars = Array.from(row.querySelectorAll('.dc-star'));
+  var selected = 0;
+  function light(n) { stars.forEach(function(s) { s.classList.toggle('lit', +s.dataset.val <= n); }); }
+  row.addEventListener('mouseover', function(e) { if (e.target.classList.contains('dc-star')) light(+e.target.dataset.val); });
+  row.addEventListener('mouseleave', function() { light(selected); });
+  row.addEventListener('click', function(e) {
+    if (!e.target.classList.contains('dc-star')) return;
+    selected = +e.target.dataset.val;
+    light(selected);
+    var r = document.getElementById('dc-rating-' + selected);
+    if (r) r.checked = true;
+  });
+  stars.forEach(function(s) {
+    s.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        selected = +s.dataset.val;
+        light(selected);
+        var r = document.getElementById('dc-rating-' + selected);
+        if (r) r.checked = true;
+      }
+    });
+  });
+}
+
+/* ── Option buttons (radio / checkbox) ────────────────── */
+function initOptionButtons() {
+  document.querySelectorAll('.dc-option-radio').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+      document.querySelectorAll('input[name="' + radio.name + '"]').forEach(function(r) {
+        if (r.nextElementSibling) r.nextElementSibling.classList.remove('active');
+      });
+      if (radio.checked && radio.nextElementSibling) radio.nextElementSibling.classList.add('active');
+
+      var radioGroup = document.getElementById('input-option' + radio.name.replace(/[^0-9]/g, ''));
+      if (radioGroup) radioGroup.classList.remove('dc-option-required-error');
+
+      dcRecalcOptionPrice();
+    });
+  });
+  document.querySelectorAll('.dc-option-checkbox').forEach(function(cb) {
+    cb.addEventListener('change', function() {
+      if (cb.nextElementSibling) cb.nextElementSibling.classList.toggle('active', cb.checked);
+
+      var checkGroup = document.getElementById('input-option' + cb.name.replace(/[^0-9]/g, ''));
+      if (checkGroup) checkGroup.classList.remove('dc-option-required-error');
+
+      dcRecalcOptionPrice();
+    });
+  });
+
+  document.querySelectorAll('#product select[name^="option["]').forEach(function(select) {
+    select.addEventListener('change', function() {
+      select.classList.remove('dc-option-required-error');
+      dcRecalcOptionPrice();
+    });
+  });
+}
+
+/* ── Gallery + GLightbox ───────────────────────────────── */
+function initGallery() {
+  var mainImg = document.getElementById('dc-main-img');
+  var thumbs  = Array.from(document.querySelectorAll('.dc-thumb'));
+  var zoomBtn = document.getElementById('dc-zoom-btn');
+  if (!zoomBtn) return;
+  var items = thumbs.length
+    ? thumbs.map(function(b) { return { href: b.dataset.popup || b.dataset.img, type: 'image' }; })
+    : (mainImg ? [{ href: (mainImg.dataset && mainImg.dataset.popup) ? mainImg.dataset.popup : mainImg.src, type: 'image' }] : []);
+  var lb = (items.length && typeof GLightbox === 'function')
+    ? GLightbox({ elements: items, loop: true, touchNavigation: true, zoomable: true, openEffect: 'zoom', closeEffect: 'fade' })
+    : null;
+  var activeIdx = 0;
+  thumbs.forEach(function(btn, idx) {
+    btn.addEventListener('click', function() {
+      thumbs.forEach(function(t) { t.classList.remove('active'); });
+      btn.classList.add('active');
+      if (mainImg) {
+        // Prefer the larger popup image when available, fallback to the thumb
+        var large = btn.dataset.popup || btn.dataset.img;
+        mainImg.src = large;
+        // keep the main image's popup dataset in sync for the lightbox
+        if (btn.dataset.popup) mainImg.dataset.popup = btn.dataset.popup;
+      }
+      activeIdx = idx;
+    });
+  });
+  if (lb) zoomBtn.addEventListener('click', function() { lb.openAt(activeIdx); });
+}
+
+/* ── Tabs ──────────────────────────────────────────────── */
+function initTabs() {
+  var btns   = Array.from(document.querySelectorAll('.tab-btn'));
+  var panels = Array.from(document.querySelectorAll('.dc-tab-panel'));
+  btns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      btns.forEach(function(b) { b.classList.remove('active'); });
+      panels.forEach(function(p) { p.classList.add('hidden'); });
+      btn.classList.add('active');
+      var t = document.getElementById('dc-tab-' + btn.dataset.tab);
+      if (t) t.classList.remove('hidden');
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  initGallery();
+  initOptionButtons();
+  initRatingStars();
+  initTabs();
+  dcUpdateSubtotal();
+
+  var relatedViewAll = document.getElementById('dc-related-view-all');
+  if (relatedViewAll) {
+    relatedViewAll.addEventListener('click', function(e) {
+      e.preventDefault();
+      document.querySelectorAll('.dc-related-extra').forEach(function(item) {
+        item.classList.remove('hidden');
+      });
+      relatedViewAll.style.display = 'none';
+    });
+  }
+
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+});
+</script>
+
+<script type="text/javascript">
+(function() {
+  function clearNodes(selector) {
+    document.querySelectorAll(selector).forEach(function(node) { node.remove(); });
+  }
+
+  window.compare = {
+    add: function(product_id) {
+      fetch('index.php?route=product/compare/add', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: 'product_id=' + product_id
+      })
+      .then(function(response) { return response.json(); })
+      .then(function(json) {
+        if (json.success) {
+          if (typeof dcShowToast === 'function') dcShowToast(json.success);
+
+          var compareTotal = document.querySelector('#compare-total span');
+          if (compareTotal && json.total !== undefined) {
+            compareTotal.textContent = json.total;
+          }
+
+          // Update button style
+          var compareBtn = document.querySelector('button[onclick*="compare.add"]');
+          if (compareBtn) {
+            compareBtn.setAttribute('onclick', "compare.remove('" + product_id + "');");
+            compareBtn.classList.remove('border-gray-200', 'hover:border-blue-200', 'hover:bg-blue-50');
+            compareBtn.classList.add('border-blue-300', 'bg-blue-50');
+            var icon = compareBtn.querySelector('i[data-lucide="bar-chart-2"]');
+            if (icon) {
+              icon.classList.remove('text-gray-500');
+              icon.classList.add('text-blue-500', 'fill-blue-400');
+            }
+          }
+        }
+      })
+      .catch(function(error) {
+        console.error('Compare add error:', error);
+      });
+    },
+    remove: function(product_id) {
+      fetch('index.php?route=product/compare/remove', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: 'product_id=' + product_id
+      })
+      .then(function(response) { return response.json(); })
+      .then(function(json) {
+        if (json.success) {
+          if (typeof dcShowToast === 'function') dcShowToast(json.success);
+
+          var compareTotal = document.querySelector('#compare-total span');
+          if (compareTotal && json.total !== undefined) {
+            compareTotal.textContent = json.total;
+          }
+
+          // Update button style
+          var compareBtn = document.querySelector('button[onclick*="compare.remove"]');
+          if (compareBtn) {
+            compareBtn.setAttribute('onclick', "compare.add('" + product_id + "');");
+            compareBtn.classList.remove('border-blue-300', 'bg-blue-50');
+            compareBtn.classList.add('border-gray-200', 'hover:border-blue-200', 'hover:bg-blue-50');
+            var icon = compareBtn.querySelector('i[data-lucide="bar-chart-2"]');
+            if (icon) {
+              icon.classList.remove('text-blue-500', 'fill-blue-400');
+              icon.classList.add('text-gray-500');
+            }
+          }
+        }
+      })
+      .catch(function(error) {
+        console.error('Compare remove error:', error);
+      });
+    }
+  };
+
+  function clearOptionErrorState() {
+    document.querySelectorAll('#product .dc-option-required-error').forEach(function(el) {
+      el.classList.remove('dc-option-required-error');
+    });
+  }
+
+  function markOptionErrorByKey(key) {
+    if (!key) return null;
+    var normalizedKey = String(key).replace('_', '-');
+    var target = document.getElementById('input-option' + normalizedKey);
+
+    if (!target) {
+      target = document.querySelector('[name="option[' + key + ']"]') || document.querySelector('[name="option[' + key + '][]"]');
+    }
+
+    if (target) {
+      target.classList.add('dc-option-required-error');
+    }
+
+    return target;
+  }
+
+  function serializeProductForm() {
+    var formScope = document.getElementById('product');
+    var fields = formScope ? formScope.querySelectorAll('input[type="text"], input[type="hidden"], input[type="radio"]:checked, input[type="checkbox"]:checked, select, textarea') : [];
+    var params = new URLSearchParams();
+
+    fields.forEach(function(field) {
+      if (!field.name) {
+        return;
+      }
+      params.append(field.name, field.value || '');
+    });
+
+    return params;
+  }
+
+  function setInputNativeType(selector, type) {
+    document.querySelectorAll(selector).forEach(function(input) {
+      input.setAttribute('type', type);
+      if (type === 'date') {
+        input.setAttribute('placeholder', 'YYYY-MM-DD');
+      }
+      if (type === 'datetime-local') {
+        input.setAttribute('placeholder', 'YYYY-MM-DDTHH:mm');
+      }
+      if (type === 'time') {
+        input.setAttribute('placeholder', 'HH:mm');
+      }
+    });
+  }
+
+  function setWishlistButtonState(btn, active) {
+    if (!btn) return;
+
+    var icon = btn.querySelector('[data-lucide="heart"]');
+
+    btn.classList.toggle('bg-rose-50', !!active);
+    btn.classList.toggle('border-rose-300', !!active);
+    btn.classList.toggle('border-gray-200', !active);
+    btn.setAttribute('data-in-wishlist', active ? '1' : '0');
+
+    if (icon) {
+      icon.classList.toggle('text-rose-500', !!active);
+      icon.classList.toggle('fill-rose-400', !!active);
+      icon.classList.toggle('text-gray-500', !active);
+    }
+  }
+
+  if (typeof window.dcAddToWishlist !== 'function') {
+    window.dcAddToWishlist = function(productId, clickedBtn) {
+      var button = clickedBtn || document.getElementById('dc-wishlist-btn');
+      var active = button && button.getAttribute('data-in-wishlist') === '1';
+
+      if (active) {
+        fetch('index.php?route=account/wishlist/remove', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: 'product_id=' + encodeURIComponent(productId)
+        })
+        .then(function() {
+          setWishlistButtonState(button, false);
+          if (typeof dcShowToast === 'function') {
+            dcShowToast('Removed from wishlist');
+          }
+        });
+
+        return;
+      }
+
+      if (window.wishlist && typeof window.wishlist.add === 'function') {
+        window.wishlist.add(productId);
+      }
+
+      setWishlistButtonState(button, true);
+    };
+  }
+
+  function loadReview(url) {
+    var review = document.getElementById('review');
+    if (!review) return;
+
+    review.style.opacity = '0.35';
+
+    fetch(url, { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(function(response) { return response.text(); })
+      .then(function(html) {
+        review.innerHTML = html;
+        review.style.opacity = '1';
+      })
+      .catch(function(error) {
+        review.style.opacity = '1';
+        console.error('Review load error:', error);
+      });
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var recurringSelect = document.querySelector('select[name="recurring_id"]');
+    var quantityInput = document.getElementById('input-quantity');
+    var recurringDescription = document.getElementById('recurring-description');
+    var cartButton = document.getElementById('button-cart');
+    var wishlistButton = document.getElementById('dc-wishlist-btn');
+
+    if (wishlistButton) {
+      wishlistButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        var productId = wishlistButton.getAttribute('data-product-id');
+        if (!productId) return;
+        window.dcAddToWishlist(productId, wishlistButton);
+      });
+    }
+
+    function refreshRecurringDescription() {
+      if (!recurringSelect || !quantityInput || !recurringDescription) return;
+
+      var params = new URLSearchParams();
+      var productIdField = document.querySelector('input[name="product_id"]');
+      params.append('product_id', productIdField ? productIdField.value : '0');
+      params.append('quantity', quantityInput.value || '1');
+      params.append('recurring_id', recurringSelect.value || '');
+
+      fetch('index.php?route=product/product/getRecurringDescription', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: params.toString()
+      })
+      .then(function(response) { return response.json(); })
+      .then(function(json) {
+        recurringDescription.innerHTML = (json && json.success) ? json.success : '';
+      })
+      .catch(function(error) {
+        console.error('Recurring description error:', error);
+      });
+    }
+
+    if (recurringSelect) {
+      recurringSelect.addEventListener('change', refreshRecurringDescription);
+    }
+
+    if (quantityInput) {
+      quantityInput.addEventListener('change', refreshRecurringDescription);
+    }
+
+    if (cartButton) {
+      cartButton.addEventListener('click', function() {
+        var originalText = cartButton.textContent;
+        var loadingText = cartButton.getAttribute('data-loading-text') || '...';
+
+        cartButton.disabled = true;
+        cartButton.textContent = loadingText;
+
+        fetch('index.php?route=checkout/cart/add', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: serializeProductForm().toString()
+        })
+        .then(function(response) { return response.json(); })
+        .then(function(json) {
+          clearNodes('.dc-field-error');
+          clearOptionErrorState();
+
+          if (json.error) {
+            if (json.error.option) {
+              var firstErrorTarget = null;
+
+              Object.keys(json.error.option).forEach(function(key) {
+                var element = markOptionErrorByKey(key);
+                if (!element) return;
+
+                if (!firstErrorTarget) {
+                  firstErrorTarget = element;
+                }
+
+                var errorNode = document.createElement('div');
+                errorNode.className = 'dc-field-error text-xs text-red-500 mt-1';
+                errorNode.textContent = json.error.option[key];
+                element.insertAdjacentElement('afterend', errorNode);
+              });
+
+              if (firstErrorTarget && typeof firstErrorTarget.scrollIntoView === 'function') {
+                firstErrorTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+            }
+
+            if (json.error.recurring && recurringSelect) {
+              var recurringError = document.createElement('div');
+              recurringError.className = 'dc-field-error text-xs text-red-500 mt-1';
+              recurringError.textContent = json.error.recurring;
+              recurringSelect.insertAdjacentElement('afterend', recurringError);
+            }
+          }
+
+          if (json.success) {
+            if (typeof dcRefreshCart === 'function') dcRefreshCart(true);
+            if (typeof dcShowToast === 'function') dcShowToast(json.success);
+          }
+        })
+        .catch(function(error) {
+          console.error('Add to cart error:', error);
+        })
+        .finally(function() {
+          cartButton.disabled = false;
+          cartButton.textContent = originalText;
+        });
+      });
+    }
+
+    document.addEventListener('click', function(e) {
+      var uploadButton = e.target.closest('button[id^="button-upload"]');
+      if (!uploadButton) return;
+
+      e.preventDefault();
+      clearNodes('#form-upload');
+
+      var form = document.createElement('form');
+      form.enctype = 'multipart/form-data';
+      form.id = 'form-upload';
+      form.style.display = 'none';
+
+      var fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.name = 'file';
+
+      form.appendChild(fileInput);
+      document.body.appendChild(form);
+
+      fileInput.addEventListener('change', function() {
+        if (!fileInput.files || !fileInput.files.length) return;
+
+        var originalText = uploadButton.textContent;
+        var loadingText = uploadButton.getAttribute('data-loading-text') || '...';
+
+        uploadButton.disabled = true;
+        uploadButton.textContent = loadingText;
+
+        fetch('index.php?route=tool/upload', {
+          method: 'POST',
+          credentials: 'same-origin',
+          body: new FormData(form)
+        })
+        .then(function(response) { return response.json(); })
+        .then(function(json) {
+          clearNodes('.dc-field-error');
+
+          var targetInput = uploadButton.parentElement ? uploadButton.parentElement.querySelector('input[type="hidden"], input[type="text"]') : null;
+
+          if (json.error && targetInput) {
+            var err = document.createElement('div');
+            err.className = 'dc-field-error text-xs text-red-500 mt-1';
+            err.textContent = json.error;
+            targetInput.insertAdjacentElement('afterend', err);
+          }
+
+          if (json.success) {
+            alert(json.success);
+            if (targetInput && json.code !== undefined) {
+              targetInput.value = json.code;
+            }
+          }
+        })
+        .catch(function(error) {
+          console.error('Upload error:', error);
+        })
+        .finally(function() {
+          uploadButton.disabled = false;
+          uploadButton.textContent = originalText;
+        });
+      }, { once: true });
+
+      fileInput.click();
+    });
+
+    setInputNativeType('.date input', 'date');
+    setInputNativeType('.datetime input', 'datetime-local');
+    setInputNativeType('.time input', 'time');
+    dcRecalcOptionPrice();
+
+    var productBlock = document.getElementById('product');
+    if (productBlock) {
+      productBlock.addEventListener('input', function(e) {
+        if (e.target && e.target.name && e.target.name.indexOf('option[') === 0) {
+          e.target.classList.remove('dc-option-required-error');
+        }
+      });
+
+      productBlock.addEventListener('change', function(e) {
+        if (e.target && e.target.name && e.target.name.indexOf('option[') === 0) {
+          e.target.classList.remove('dc-option-required-error');
+        }
+      });
+    }
+
+{% if review_status %}
+    loadReview('index.php?route=product/product/review&product_id={{ product_id }}');
+
+    document.addEventListener('click', function(e) {
+      var paginationLink = e.target.closest('#review .pagination a');
+      if (!paginationLink) return;
+
+      e.preventDefault();
+      loadReview(paginationLink.getAttribute('href'));
+    });
+
+    var reviewButton = document.getElementById('button-review');
+    var reviewForm = document.getElementById('form-review');
+
+    if (reviewButton && reviewForm) {
+      reviewButton.addEventListener('click', function() {
+        var params = new URLSearchParams(new FormData(reviewForm));
+
+        reviewButton.disabled = true;
+
+        fetch('index.php?route=product/product/write&product_id={{ product_id }}', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: params.toString()
+        })
+        .then(function(response) { return response.json(); })
+        .then(function(json) {
+          clearNodes('.dc-review-alert');
+
+          if (json.error) {
+            reviewForm.insertAdjacentHTML('afterbegin', '<div class="dc-review-alert text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl p-3 mb-3">' + json.error + '</div>');
+          }
+
+          if (json.success) {
+            reviewForm.insertAdjacentHTML('afterbegin', '<div class="dc-review-alert text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl p-3 mb-3">' + json.success + '</div>');
+
+            var inputName = document.getElementById('input-name');
+            var inputReview = document.getElementById('input-review');
+            if (inputName) inputName.value = '';
+            if (inputReview) inputReview.value = '';
+
+            reviewForm.querySelectorAll('input[name="rating"]').forEach(function(r) { r.checked = false; });
+            document.querySelectorAll('#dc-stars-row .dc-star').forEach(function(s) { s.classList.remove('lit'); });
+          }
+        })
+        .catch(function(error) {
+          console.error('Review submit error:', error);
+        })
+        .finally(function() {
+          reviewButton.disabled = false;
+        });
+      });
+    }
+{% endif %}
+  });
+})();
+</script>
+
+{% include 'dockercart/template/common/partials/schema_product.twig' %}
+
+{{ footer }}

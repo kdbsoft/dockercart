@@ -1,0 +1,494 @@
+{{ header }}{{ column_left }}
+<div id="content">
+<link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
+
+<style>
+/* ── DockerCart Theme Settings – module-specific styles ─────────────────── */
+.dc-theme-logo-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 768px) {
+  .dc-theme-logo-pair { grid-template-columns: 1fr; }
+}
+
+.dc-logo-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f2;
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.dc-logo-card__label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #4a5568;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.dc-logo-card__label i { color: #2f65b9; }
+.dc-logo-thumb-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 200px;
+  height: 80px;
+  background: #fff;
+  border: 2px dashed #c8d4e3;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color .2s, box-shadow .2s;
+  overflow: hidden;
+}
+.dc-logo-thumb-link:hover {
+  border-color: #2f65b9;
+  box-shadow: 0 0 0 3px rgba(47,101,185,.1);
+}
+.dc-logo-thumb-link img {
+  max-width: 100%;
+  max-height: 72px;
+  object-fit: contain;
+}
+.dc-logo-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Social & Payment rows ────────────────────────────────────────────── */
+.dc-rows-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.dc-row-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border: 1px solid #e2e8f2;
+  border-radius: 8px;
+  padding: 10px 12px;
+  transition: box-shadow .2s, border-color .2s;
+}
+.dc-row-item:hover {
+  border-color: #b8c8df;
+  box-shadow: 0 2px 8px rgba(26,42,71,.06);
+}
+.dc-row-item__num {
+  min-width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #eaf1ff;
+  color: #2f65b9;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.dc-row-link-input.form-control {
+  flex: 1;
+  min-width: 0;
+  height: 34px;
+  font-size: 13px;
+  border-radius: 6px;
+  padding: 6px 10px;
+}
+.dc-rows-footer {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ── Icon picker button ───────────────────────────────────────────────── */
+/* removed – social icons now use uploaded images */
+
+/* ── Payment / Social thumbnail ──────────────────────────────────────── */
+.dc-payment-thumb-wrap,
+.dc-social-thumb-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+.dc-payment-thumb-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 40px;
+  background: #fff;
+  border: 2px dashed #c8d4e3;
+  border-radius: 6px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.dc-payment-thumb-link img {
+  max-width: 96px;
+  max-height: 36px;
+  object-fit: contain;
+}
+/* Square 40×40 variant for social icons */
+.dc-social-thumb-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: #fff;
+  border: 2px dashed #c8d4e3;
+  border-radius: 6px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.dc-social-thumb-link img {
+  max-width: 36px;
+  max-height: 36px;
+  object-fit: contain;
+}
+.dc-payment-thumb-link:hover,
+.dc-social-thumb-link:hover { border-color: #2f65b9; }
+.dc-payment-clear-btn {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
+}
+.dc-payment-clear-btn:hover { background: #dc2626; }
+</style>
+
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-dockercart-theme" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary">
+          <i class="fa fa-save"></i>
+        </button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default">
+          <i class="fa fa-reply"></i>
+        </a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    <div class="dcx-shell">
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i class="fa fa-paint-brush"></i></div>
+          <div>
+            <h3 class="dcx-panel-title">{{ heading_title }}</h3>
+            <div class="dcx-panel-subtitle">{{ text_edit }}</div>
+          </div>
+        </div>
+        <div class="dcx-panel-body">
+
+          <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-dockercart-theme" class="dcx-form">
+
+            {# ─────────────────────── Section: General ────────────────────────── #}
+            <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+              <h4><i class="fa fa-cog"></i> {{ text_section_general|default('Настройки модуля') }}</h4>
+
+              <div class="form-group form-horizontal" style="margin-bottom:12px;">
+                <label class="col-sm-3 control-label" for="input-status">{{ entry_status }}</label>
+                <div class="col-sm-9">
+                  <select name="dockercart_theme_status" id="input-status" class="form-control" style="max-width:200px;">
+                    <option value="1" {% if dockercart_theme_status == 1 %}selected="selected"{% endif %}>{{ text_enabled }}</option>
+                    <option value="0" {% if dockercart_theme_status == 0 %}selected="selected"{% endif %}>{{ text_disabled }}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group form-horizontal" style="margin-bottom:12px;">
+                <label class="col-sm-3 control-label" for="input-menu-type">{{ entry_menu_type }}</label>
+                <div class="col-sm-9">
+                  <select name="dockercart_theme_menu_type" id="input-menu-type" class="form-control" style="max-width:240px;">
+                    <option value="horizontal" {% if dockercart_theme_menu_type == 'horizontal' %}selected="selected"{% endif %}>{{ text_menu_horizontal }}</option>
+                    <option value="vertical" {% if dockercart_theme_menu_type == 'vertical' %}selected="selected"{% endif %}>{{ text_menu_vertical }}</option>
+                  </select>
+                  <p class="help-block">{{ help_menu_type }}</p>
+                </div>
+              </div>
+            </div>
+
+            {# ─────────────────────── Section: Logos ─────────────────────────── #}
+            <div class="dcx-section">
+              <h4><i class="fa fa-picture-o"></i> {{ text_section_logos|default('Логотипы') }}</h4>
+
+              <div class="dc-theme-logo-pair">
+
+                {# Dark logo #}
+                <div class="dc-logo-card">
+                  <div class="dc-logo-card__label">
+                    <i class="fa fa-moon-o"></i> {{ entry_logo_dark }}
+                  </div>
+                  <div class="dc-logo-card__actions">
+                    <div>
+                      <a href="" id="thumb-logo-dark" data-toggle="image" class="dc-logo-thumb-link">
+                        <img src="{{ logo_dark_thumb }}" data-placeholder="{{ placeholder }}" alt="" />
+                      </a>
+                      <input type="hidden" name="dockercart_theme_logo_dark" id="input-logo-dark" value="{{ dockercart_theme_logo_dark }}" />
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:6px;margin-left:8px;">
+                      <button type="button" class="btn btn-default btn-sm" id="btn-open-dark">
+                        <i class="fa fa-folder-open-o"></i> {{ button_image|default('Выбрать') }}
+                      </button>
+                      <button type="button" class="btn btn-danger btn-sm js-clear-logo" data-input="input-logo-dark" data-thumb="thumb-logo-dark">
+                        <i class="fa fa-times"></i> {{ button_clear|default('Очистить') }}
+                      </button>
+                    </div>
+                  </div>
+                  <p class="help-block" style="font-size:12px;color:#8b96a7;margin:0;">{{ help_logo_dark }}</p>
+                </div>
+
+                {# Light logo #}
+                <div class="dc-logo-card">
+                  <div class="dc-logo-card__label">
+                    <i class="fa fa-sun-o"></i> {{ entry_logo_light }}
+                  </div>
+                  <div class="dc-logo-card__actions">
+                    <div>
+                      <a href="" id="thumb-logo-light" data-toggle="image" class="dc-logo-thumb-link">
+                        <img src="{{ logo_light_thumb }}" data-placeholder="{{ placeholder }}" alt="" />
+                      </a>
+                      <input type="hidden" name="dockercart_theme_logo_light" id="input-logo-light" value="{{ dockercart_theme_logo_light }}" />
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:6px;margin-left:8px;">
+                      <button type="button" class="btn btn-default btn-sm" id="btn-open-light">
+                        <i class="fa fa-folder-open-o"></i> {{ button_image|default('Выбрать') }}
+                      </button>
+                      <button type="button" class="btn btn-danger btn-sm js-clear-logo" data-input="input-logo-light" data-thumb="thumb-logo-light">
+                        <i class="fa fa-times"></i> {{ button_clear|default('Очистить') }}
+                      </button>
+                    </div>
+                  </div>
+                  <p class="help-block" style="font-size:12px;color:#8b96a7;margin:0;">{{ help_logo_light }}</p>
+                </div>
+
+              </div>
+            </div>
+
+            {# ─────────────────────── Section: Social icons ───────────────────── #}
+            <div class="dcx-section">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+                <h4 style="margin:0;"><i class="fa fa-share-alt"></i> {{ entry_social_block }}</h4>
+                <button type="button" id="btn-add-social" class="btn btn-primary btn-sm">
+                  <i class="fa fa-plus"></i> {{ button_add_social|default('Добавить') }}
+                </button>
+              </div>
+
+              <div id="social-rows" class="dc-rows-container">
+                {% for idx, item in social_items %}
+                <div class="dc-row-item dc-social-row" id="social-row-{{ idx }}">
+                  <span class="dc-row-item__num">{{ idx + 1 }}</span>
+                  <div class="dc-social-thumb-wrap">
+                    <a href="" id="thumb-social-row-{{ idx }}" data-toggle="image" class="dc-social-thumb-link">
+                      <img src="{{ item.thumb }}" data-placeholder="{{ placeholder_social }}" alt="" />
+                    </a>
+                    <input type="hidden" name="dockercart_theme_social_image[]" id="input-social-row-{{ idx }}" value="{{ item.image }}" />
+                    <button type="button" class="dc-payment-clear-btn js-clear-social-thumb" data-input="input-social-row-{{ idx }}" data-thumb="thumb-social-row-{{ idx }}" title="{{ button_clear|default('Очистить') }}">
+                      <i class="fa fa-times"></i>
+                    </button>
+                  </div>
+                  <input type="text" name="dockercart_theme_social_link[]" value="{{ item.link }}" placeholder="https://..." class="form-control dc-row-link-input" />
+                  <button type="button" class="btn btn-danger btn-sm js-remove-social-row">
+                    <i class="fa fa-times"></i>
+                  </button>
+                </div>
+                {% endfor %}
+              </div>
+
+              <p class="help-block" style="margin-top:10px;">{{ help_social_block }}</p>
+            </div>
+
+            {# ─────────────────────── Section: Payment icons ──────────────────── #}
+            <div class="dcx-section">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+                <h4 style="margin:0;"><i class="fa fa-credit-card"></i> {{ entry_payment_block }}</h4>
+                <button type="button" id="btn-add-payment" class="btn btn-primary btn-sm">
+                  <i class="fa fa-plus"></i> {{ button_add_payment|default('Добавить') }}
+                </button>
+              </div>
+
+              <div id="payment-rows" class="dc-rows-container">
+                {% for idx, item in payment_items %}
+                <div class="dc-row-item dc-payment-row" id="payment-row-{{ idx }}">
+                  <span class="dc-row-item__num">{{ idx + 1 }}</span>
+                  <div class="dc-payment-thumb-wrap">
+                    <a href="" id="thumb-payment-row-{{ idx }}" data-toggle="image" class="dc-payment-thumb-link">
+                      <img src="{{ item.thumb }}" data-placeholder="{{ placeholder_payment }}" alt="" />
+                    </a>
+                    <input type="hidden" name="dockercart_theme_payment_image[]" id="input-payment-row-{{ idx }}" value="{{ item.image }}" />
+                    <button type="button" class="dc-payment-clear-btn js-clear-payment-thumb" data-input="input-payment-row-{{ idx }}" data-thumb="thumb-payment-row-{{ idx }}" title="{{ button_clear|default('Очистить') }}">
+                      <i class="fa fa-times"></i>
+                    </button>
+                  </div>
+                  <input type="text" name="dockercart_theme_payment_link[]" value="{{ item.link }}" placeholder="https://... ({{ entry_payment_link }})" class="form-control dc-row-link-input" />
+                  <button type="button" class="btn btn-danger btn-sm js-remove-payment-row">
+                    <i class="fa fa-times"></i>
+                  </button>
+                </div>
+                {% endfor %}
+              </div>
+
+              <p class="help-block" style="margin-top:10px;">{{ help_payment_block }}</p>
+            </div>
+
+          </form>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div><!-- /#content -->
+
+{{ footer }}
+
+<script>
+(function($) {
+  'use strict';
+
+  var placeholder        = '{{ placeholder }}';
+  var placeholderPayment = '{{ placeholder_payment }}';
+  var placeholderSocial  = '{{ placeholder_social }}';
+  var userToken          = '{{ user_token }}';
+  var socialRowIndex     = {{ social_items|length }};
+  var paymentRowCounter  = {{ payment_items|length }};
+
+  /* ── Logo clear buttons ───────────────────────────────────────────── */
+  $(document).on('click', '.js-clear-logo', function() {
+    var inputId = $(this).data('input');
+    var thumbId = $(this).data('thumb');
+    $('#' + inputId).val('');
+    $('#' + thumbId + ' img').attr('src', placeholder);
+  });
+
+  /* ── Manual "open" buttons for logos (fallback for older OC builds) ── */
+  $('#btn-open-dark').on('click', function() {
+    var url = 'index.php?route=common/filemanager&user_token=' + userToken + '&target=input-logo-dark&thumb=thumb-logo-dark';
+    window.open(url, 'filemanager', 'width=1200,height=700,scrollbars=yes');
+  });
+  $('#btn-open-light').on('click', function() {
+    var url = 'index.php?route=common/filemanager&user_token=' + userToken + '&target=input-logo-light&thumb=thumb-logo-light';
+    window.open(url, 'filemanager', 'width=1200,height=700,scrollbars=yes');
+  });
+
+  /* ── Social image clear ─────────────────────────────────────────── */
+  $(document).on('click', '.js-clear-social-thumb', function(e) {
+    e.stopPropagation();
+    var inputId = $(this).data('input');
+    var thumbId = $(this).data('thumb');
+    $('#' + inputId).val('');
+    $('#' + thumbId + ' img').attr('src', placeholderSocial);
+  });
+
+  /* ── Payment image clear ─────────────────────────────────────────── */
+  $(document).on('click', '.js-clear-payment-thumb', function(e) {
+    e.stopPropagation();
+    var inputId = $(this).data('input');
+    var thumbId = $(this).data('thumb');
+    $('#' + inputId).val('');
+    $('#' + thumbId + ' img').attr('src', placeholderPayment);
+  });
+
+  /* ── Row counter badges ──────────────────────────────────────────── */
+  function renumberRows(containerSelector, badgeSelector) {
+    $(containerSelector + ' ' + badgeSelector).each(function(i) {
+      $(this).text(i + 1);
+    });
+  }
+
+  /* ── Remove social row ───────────────────────────────────────────── */
+  $(document).on('click', '.js-remove-social-row', function() {
+    $(this).closest('.dc-social-row').remove();
+    renumberRows('#social-rows', '.dc-row-item__num');
+  });
+
+  /* ── Add social row ──────────────────────────────────────────────── */
+  $('#btn-add-social').on('click', function() {
+    var idx = socialRowIndex++;
+    var num = $('#social-rows .dc-row-item').length + 1;
+    var html = '<div class="dc-row-item dc-social-row" id="social-row-' + idx + '">'
+      + '<span class="dc-row-item__num">' + num + '</span>'
+      + '<div class="dc-social-thumb-wrap">'
+      +   '<a href="" id="thumb-social-row-' + idx + '" data-toggle="image" class="dc-social-thumb-link">'
+      +     '<img src="' + placeholderSocial + '" data-placeholder="' + placeholderSocial + '" alt="" />'
+      +   '</a>'
+      +   '<input type="hidden" name="dockercart_theme_social_image[]" id="input-social-row-' + idx + '" value="" />'
+      +   '<button type="button" class="dc-payment-clear-btn js-clear-social-thumb" data-input="input-social-row-' + idx + '" data-thumb="thumb-social-row-' + idx + '" title="Очистить"><i class="fa fa-times"></i></button>'
+      + '</div>'
+      + '<input type="text" name="dockercart_theme_social_link[]" value="" placeholder="https://..." class="form-control dc-row-link-input" />'
+      + '<button type="button" class="btn btn-danger btn-sm js-remove-social-row"><i class="fa fa-times"></i></button>'
+      + '</div>';
+    $('#social-rows').append(html);
+    renumberRows('#social-rows', '.dc-row-item__num');
+  });
+
+  /* ── Remove payment row ──────────────────────────────────────────── */
+  $(document).on('click', '.js-remove-payment-row', function() {
+    $(this).closest('.dc-payment-row').remove();
+    renumberRows('#payment-rows', '.dc-row-item__num');
+  });
+
+  /* ── Add payment row ─────────────────────────────────────────────── */
+  $('#btn-add-payment').on('click', function() {
+    var ctr = paymentRowCounter++;
+    var numLabel = $('#payment-rows .dc-row-item').length + 1;
+    var html = '<div class="dc-row-item dc-payment-row" id="payment-row-' + ctr + '">'
+      + '<span class="dc-row-item__num">' + numLabel + '</span>'
+      + '<div class="dc-payment-thumb-wrap">'
+      +   '<a href="" id="thumb-payment-row-' + ctr + '" data-toggle="image" class="dc-payment-thumb-link">'
+      +     '<img src="' + placeholderPayment + '" data-placeholder="' + placeholderPayment + '" alt="" />'
+      +   '</a>'
+      +   '<input type="hidden" name="dockercart_theme_payment_image[]" id="input-payment-row-' + ctr + '" value="" />'
+      +   '<button type="button" class="dc-payment-clear-btn js-clear-payment-thumb" data-input="input-payment-row-' + ctr + '" data-thumb="thumb-payment-row-' + ctr + '" title="Очистить"><i class="fa fa-times"></i></button>'
+      + '</div>'
+      + '<input type="text" name="dockercart_theme_payment_link[]" value="" placeholder="https://..." class="form-control dc-row-link-input" />'
+      + '<button type="button" class="btn btn-danger btn-sm js-remove-payment-row"><i class="fa fa-times"></i></button>'
+      + '</div>';
+    $('#payment-rows').append(html);
+    renumberRows('#payment-rows', '.dc-row-item__num');
+  });
+
+})(jQuery);
+</script>

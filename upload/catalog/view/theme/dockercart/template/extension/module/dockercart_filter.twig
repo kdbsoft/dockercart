@@ -1,0 +1,279 @@
+<div class="dockercart-filter dockercart-filter-vertical" id="dockercart-filter-{{ module_id|default('main') }}">
+  <!-- Filter Title -->
+  <h2 class="font-extrabold text-gray-900 mb-5">{{ heading_title }}</h2>
+
+  <!-- Active Filters Display -->
+  {% if active_filters %}
+  <div class="active-filters mb-5">
+    <div class="active-filters-header mb-3">
+      <div class="active-filters-title">{{ text_active_filters|default('Active Filters:') }}</div>
+      <button type="button" id="button-reset-filters" class="btn btn-link btn-xs" title="{{ text_reset|default('Reset all filters') }}">
+        <i class="fa fa-times-circle"></i> {{ text_reset|default('Reset') }}
+      </button>
+    </div>
+    <div class="active-filters-list">
+      {% for filter in active_filters %}
+      <a href="{{ filter.remove_url }}" class="filter-badge" title="{{ text_remove_filter|default('Remove filter') }}">
+        {{ filter.label }} <span class="remove-icon">&times;</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <form id="dockercart-filter-form" data-filter-mode="{{ filter_mode|default('button') }}" data-seo-mode="{{ seo_mode|default(0) }}">
+    <!-- Price Filter -->
+    <div class="filter-group" id="filter-price">
+      <button type="button" class="filter-toggle" data-group-id="filter-price">{{ text_price }}</button>
+      <div data-group-content>
+        <div class="price-range-display">
+          {# Render currency symbol on left or right depending on currency configuration #}
+          {% if currency_symbol_left %}
+            <span class="price-range-currency">{{ currency_symbol_left }}</span>
+            <span class="price-range-min-display">{{ filter_price_min|default(price_range.min) }}</span>
+          {% else %}
+            <span class="price-range-min-display">{{ filter_price_min|default(price_range.min) }}</span>
+            <span class="price-range-currency">{{ currency_symbol_right|default('') }}</span>
+          {% endif %}
+
+          <span class="price-range-separator">-</span>
+
+          {% if currency_symbol_left %}
+            <span class="price-range-currency">{{ currency_symbol_left }}</span>
+            <span class="price-range-max-display">{{ filter_price_max|default(price_range.max) }}</span>
+          {% else %}
+            <span class="price-range-max-display">{{ filter_price_max|default(price_range.max) }}</span>
+            <span class="price-range-currency">{{ currency_symbol_right|default('') }}</span>
+          {% endif %}
+        </div>
+        <div class="price-slider-container">
+             <input type="range" class="price-slider price-slider-min" name="price_slider_min"
+               min="{{ price_range.min }}" max="{{ price_range.max }}" step="any"
+               value="{{ filter_price_min|default(price_range.min) }}" />
+             <input type="range" class="price-slider price-slider-max" name="price_slider_max"
+               min="{{ price_range.min }}" max="{{ price_range.max }}" step="any"
+               value="{{ filter_price_max|default(price_range.max) }}" />
+          <div class="price-slider-track"></div>
+          <div class="price-slider-fill"></div>
+        </div>
+        <div class="price-filter-row">
+             <input type="number" name="price_min" value="{{ filter_price_min|default(price_range.min) }}"
+               placeholder="{{ text_from }}" class="form-control price-input"
+               min="{{ price_range.min }}" max="{{ price_range.max }}" step="any" />
+          <span class="price-separator">-</span>
+             <input type="number" name="price_max" value="{{ filter_price_max|default(price_range.max) }}"
+               placeholder="{{ text_to }}" class="form-control price-input"
+               min="{{ price_range.min }}" max="{{ price_range.max }}" step="any" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Manufacturer Filter -->
+    {% if manufacturers %}
+    <div class="filter-group" id="filter-manufacturer">
+      <button type="button" class="filter-toggle" data-group-id="filter-manufacturer">{{ text_manufacturer }}</button>
+      <div data-group-content>
+        <div class="filter-items-container" data-items-limit="{{ items_limit|default(10) }}">
+        {% for manufacturer in manufacturers %}
+        <div class="checkbox filter-item" data-item-index="{{ loop.index0 }}">
+          {% set is_checked = manufacturer.manufacturer_id in filter_manufacturer %}
+          {% if seo_mode %}
+          <label class="has-filter-link">
+            <input type="checkbox" name="manufacturer[]" value="{{ manufacturer.manufacturer_id }}" {% if is_checked %}checked{% endif %} data-filter-url="{{ manufacturer.filter_url|raw|default('#') }}" />
+            <a href="{{ manufacturer.filter_url|raw|default('#') }}" class="filter-link" {% if filter_depth.should_index is not defined or not filter_depth.should_index %}rel="nofollow"{% endif %}>
+              {{ manufacturer.name }} <span class="text-muted">({{ manufacturer.product_count }})</span>
+            </a>
+          </label>
+          {% else %}
+          <label>
+            <input type="checkbox" name="manufacturer[]" value="{{ manufacturer.manufacturer_id }}" {% if is_checked %}checked{% endif %} />
+            <span class="filter-label-text">{{ manufacturer.name }} <span class="text-muted">({{ manufacturer.product_count }})</span></span>
+          </label>
+          {% endif %}
+        </div>
+        {% endfor %}
+        </div>
+        {% if manufacturers|length > items_limit|default(10) %}
+        <a href="#" class="filter-show-more" data-show-text="{{ text_show_more }}" data-hide-text="{{ text_show_less }}">{{ text_show_more }}</a>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Attributes Filter -->
+    {% for attribute in attributes %}
+    <div class="filter-group" id="filter-attribute-{{ attribute.attribute_id }}">
+      <button type="button" class="filter-toggle" data-group-id="filter-attribute-{{ attribute.attribute_id }}">{{ attribute.name }}</button>
+      <div data-group-content>
+        <div class="filter-items-container" data-items-limit="{{ items_limit|default(10) }}">
+        {% for value in attribute.values %}
+        {% if value.text %}
+        <div class="checkbox filter-item" data-item-index="{{ loop.index0 }}" data-attr-id="{{ attribute.attribute_id }}" data-attr-value="{{ value.text }}">
+          {% if seo_mode %}
+          <label class="has-filter-link">
+            <input type="checkbox" name="attribute[{{ attribute.attribute_id }}]" value="{{ value.text }}" data-attr-id="{{ attribute.attribute_id }}" data-attr-value="{{ value.text }}" data-filter-url="{{ value.filter_url|raw|default('#') }}" />
+            <a href="{{ value.filter_url|raw|default('#') }}" class="filter-link" {% if filter_depth.should_index is not defined or not filter_depth.should_index %}rel="nofollow"{% endif %}>
+              {{ value.text }} <span class="text-muted">({{ value.count }})</span>
+            </a>
+          </label>
+          {% else %}
+          <label>
+            <input type="checkbox" name="attribute[{{ attribute.attribute_id }}]" value="{{ value.text }}" data-attr-id="{{ attribute.attribute_id }}" data-attr-value="{{ value.text }}" />
+            <span class="filter-label-text">{{ value.text }} <span class="text-muted">({{ value.count }})</span></span>
+          </label>
+          {% endif %}
+        </div>
+        {% endif %}
+        {% endfor %}
+        </div>
+        {% if attribute.values|length > items_limit|default(10) %}
+        <a href="#" class="filter-show-more" data-show-text="{{ text_show_more }}" data-hide-text="{{ text_show_less }}">{{ text_show_more }}</a>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+
+    <!-- Options Filter -->
+    {% for option in options %}
+    {% if option.values %}
+    <div class="filter-group" id="filter-option-{{ option.option_id }}">
+      <button type="button" class="filter-toggle" data-group-id="filter-option-{{ option.option_id }}">{{ option.name }}</button>
+      <div data-group-content>
+        <div class="filter-items-container" data-items-limit="{{ items_limit|default(10) }}">
+        {% for value in option.values %}
+        {% set is_checked = option.option_id in filter_option and value.option_value_id in filter_option[option.option_id] %}
+        <div class="checkbox filter-item" data-item-index="{{ loop.index0 }}">
+          {% if seo_mode %}
+          <label class="has-filter-link">
+            <input type="checkbox" name="option[{{ option.option_id }}]" value="{{ value.option_value_id }}" {% if is_checked %}checked{% endif %} data-opt-id="{{ option.option_id }}" data-opt-value="{{ value.option_value_id }}" data-filter-url="{{ value.filter_url|raw|default('#') }}" />
+            <a href="{{ value.filter_url|raw|default('#') }}" class="filter-link" {% if filter_depth.should_index is not defined or not filter_depth.should_index %}rel="nofollow"{% endif %}>
+              {{ value.name }} <span class="text-muted">({{ value.count }})</span>
+            </a>
+          </label>
+          {% else %}
+          <label>
+            <input type="checkbox" name="option[{{ option.option_id }}]" value="{{ value.option_value_id }}" {% if is_checked %}checked{% endif %} data-opt-id="{{ option.option_id }}" data-opt-value="{{ value.option_value_id }}" />
+            <span class="filter-label-text">{{ value.name }} <span class="text-muted">({{ value.count }})</span></span>
+          </label>
+          {% endif %}
+        </div>
+        {% endfor %}
+        </div>
+        {% if option.values|length > items_limit|default(10) %}
+        <a href="#" class="filter-show-more" data-show-text="{{ text_show_more }}" data-hide-text="{{ text_show_less }}">{{ text_show_more }}</a>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <!-- Filter Buttons (hidden in instant mode) -->
+    {% if filter_mode|default('button') != 'instant' %}
+    <div class="filter-buttons hidden-xs hidden-sm hidden-md">
+      <button type="button" id="button-reset" class="btn btn-default btn-block btn-sm">{{ text_reset }}</button>
+      <button type="button" id="button-filter" class="btn btn-primary btn-block btn-sm" style="margin-top: 0;">{{ text_filter }}</button>
+    </div>
+    {% endif %}
+  </form>
+</div>
+
+<script>
+// Pass filter settings to JavaScript
+window.dockercartFilterMode = '{{ filter_mode|default('button') }}';
+window.dockercartSeoMode = {{ seo_mode|default(0) }};
+window.dockercartFilterDepth = {{ filter_depth|json_encode|default('{}') }};
+window.dockercartMobileBreakpoint = {{ mobile_breakpoint|default(768) }};
+window.dockercartCurrentCurrency = '{{ current_currency|default('USD') }}';
+window.dockercartBaseCurrency = '{{ base_currency|default('USD') }}';
+
+// Pass language strings to JavaScript
+window.dockercartFilterTexts = {
+  heading_title: '{{ heading_title|default('Filters')|escape('js') }}',
+  text_filter: '{{ text_filter|default('Apply Filter')|escape('js') }}',
+  text_reset: '{{ text_reset|default('Reset')|escape('js') }}',
+  text_apply: '{{ text_apply|default('Apply')|escape('js') }}'
+};
+
+// Pass filter data for dynamic heading
+window.dockercartFilterData = {
+  categoryName: document.querySelector('.product-category h1, h1') ? document.querySelector('.product-category h1, h1').textContent : '',
+  manufacturers: {{ manufacturers|json_encode|raw }},
+  attributes: {{ attributes|json_encode|raw }},
+  options: {{ options|json_encode|raw }},
+  filterAttribute: {{ filter_attribute|json_encode|raw }},
+  filterManufacturer: {{ filter_manufacturer|json_encode|raw }},
+  filterOption: {{ filter_option|json_encode|raw }},
+  currentCurrency: '{{ current_currency|default('USD') }}',
+  baseCurrency: '{{ base_currency|default('USD') }}'
+};
+
+// Initialize Lucide icons for this component
+if (typeof lucide !== 'undefined') {
+  lucide.createIcons();
+}
+
+// Mark checkboxes based on active filters
+document.addEventListener('DOMContentLoaded', () => {
+  const filterData = window.dockercartFilterData;
+
+  const normalizeStr = (v) => {
+    const raw = (v !== undefined && v !== null) ? v : '';
+    const s = (typeof raw.toString === 'function') ? raw.toString().trim() : String(raw).trim();
+    return (typeof s.normalize === 'function') ? s.normalize('NFC') : s;
+  };
+
+  // Mark attribute checkboxes
+  if (filterData.filterAttribute && typeof filterData.filterAttribute === 'object') {
+    for (const attrId of Object.keys(filterData.filterAttribute)) {
+      const values = filterData.filterAttribute[attrId];
+      if (Array.isArray(values)) {
+        for (const value of values) {
+          const inputs = document.querySelectorAll(`input[type="checkbox"][data-attr-id="${attrId}"]`);
+          for (const el of inputs) {
+            const attrVal = el.getAttribute('data-attr-value') || el.value || '';
+            if (normalizeStr(attrVal) === normalizeStr(value)) {
+              el.checked = true;
+              break;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Mark manufacturer checkboxes
+  if (filterData.filterManufacturer && Array.isArray(filterData.filterManufacturer)) {
+    for (const mfrId of filterData.filterManufacturer) {
+      const checkbox = document.querySelector(`input[type="checkbox"][name="manufacturer[]"][value="${mfrId}"]`);
+      if (checkbox) checkbox.checked = true;
+    }
+  }
+
+  // Mark option checkboxes
+  if (filterData.filterOption && typeof filterData.filterOption === 'object') {
+    for (const optId of Object.keys(filterData.filterOption)) {
+      const values = filterData.filterOption[optId];
+      if (Array.isArray(values)) {
+        for (const value of values) {
+          const inputs = document.querySelectorAll(`input[type="checkbox"][data-opt-id="${optId}"]`);
+          for (const el of inputs) {
+            const optVal = el.getAttribute('data-opt-value') || el.value || '';
+            if (normalizeStr(optVal) === normalizeStr(value)) {
+              el.checked = true;
+              break;
+            }
+          }
+        }
+      }
+    }
+  }
+});
+</script>
+
+
+{% if custom_css %}
+<style type="text/css">
+/* Custom CSS from admin settings */
+{{ custom_css|raw }}
+</style>
+{% endif %}

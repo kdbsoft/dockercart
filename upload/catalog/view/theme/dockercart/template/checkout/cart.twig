@@ -1,0 +1,212 @@
+{{ header }}
+<main class="bg-gray-50 min-h-screen">
+
+  <section class="bg-gradient-to-br from-gray-900 via-gray-800 to-blue-950 py-10 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      {% include 'dockercart/template/common/partials/breadcrumbs.twig' with {
+        breadcrumbs_class: 'flex flex-wrap items-center gap-2 text-xs text-gray-300 mb-3',
+        breadcrumbs_link_class: 'hover:text-white transition',
+        breadcrumbs_last_class: 'text-white font-semibold'
+      } %}
+      <div class="flex items-center gap-3">
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-white">{{ heading_title }}</h1>
+        {% if weight %}
+        <span class="bg-white/10 text-white text-xs font-medium px-3 py-1 rounded-full">{{ weight }}</span>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <section class="py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+
+      {% if attention %}
+      <div class="mb-5 bg-blue-50 border border-blue-200 text-blue-700 rounded-2xl px-5 py-4 text-sm flex items-center gap-3">
+        <i data-lucide="info" class="w-5 h-5 flex-shrink-0"></i>
+        <span>{{ attention }}</span>
+      </div>
+      {% endif %}
+      {% if success %}
+      <div class="mb-5 bg-green-50 border border-green-200 text-green-700 rounded-2xl px-5 py-4 text-sm flex items-center gap-3">
+        <i data-lucide="check-circle" class="w-5 h-5 flex-shrink-0"></i>
+        <span>{{ success }}</span>
+      </div>
+      {% endif %}
+      {% if error_warning %}
+      <div class="mb-5 bg-red-50 border border-red-200 text-red-700 rounded-2xl px-5 py-4 text-sm flex items-center gap-3">
+        <i data-lucide="alert-circle" class="w-5 h-5 flex-shrink-0"></i>
+        <span>{{ error_warning }}</span>
+      </div>
+      {% endif %}
+
+      {% if products or vouchers %}
+
+      <div class="flex flex-col lg:flex-row gap-6 items-start">
+
+        {# ── Cart Items ── #}
+        <div class="flex-1 min-w-0">
+
+          <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-cart">
+
+            {# Header row – desktop only #}
+            <div class="hidden sm:grid grid-cols-[2fr_1fr_auto_auto] gap-4 px-4 pb-2 text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">
+              <span>{{ column_name }}</span>
+              <span class="text-right">{{ column_price }}</span>
+              <span class="text-center w-32">{{ column_quantity }}</span>
+              <span class="text-right w-24">{{ column_total }}</span>
+            </div>
+
+            <div class="space-y-3">
+
+              {# Products #}
+              {% for product in products %}
+              <div class="bg-white rounded-2xl border {% if not product.stock %}border-red-200{% else %}border-gray-100{% endif %} shadow-sm p-4 flex flex-col sm:flex-row sm:items-center gap-4">
+
+                {# Thumbnail #}
+                {% if product.thumb %}
+                <a href="{{ product.href }}" class="flex-shrink-0">
+                  <img src="{{ product.thumb }}" alt="{{ product.name }}" class="w-16 h-16 object-cover rounded-xl border border-gray-100" />
+                </a>
+                {% endif %}
+
+                {# Name / Options #}
+                <div class="flex-1 min-w-0">
+                  <a href="{{ product.href }}" class="font-semibold text-gray-900 hover:text-blue-600 transition text-sm leading-snug line-clamp-2">{{ product.name }}</a>
+                  {% if not product.stock %}
+                  <p class="text-xs text-red-500 mt-0.5 flex items-center gap-1"><i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i> {{ text_stock }}</p>
+                  {% endif %}
+                  {% if product.option %}
+                  <ul class="mt-1 space-y-0.5">
+                    {% for option in product.option %}
+                    <li class="text-xs text-gray-400">{{ option.name }}: <span class="text-gray-600">{{ option.value }}</span></li>
+                    {% endfor %}
+                  </ul>
+                  {% endif %}
+                  {% if product.reward %}
+                  <p class="text-xs text-blue-500 mt-0.5">{{ product.reward }}</p>
+                  {% endif %}
+                  {% if product.recurring %}
+                  <p class="text-xs text-indigo-600 mt-0.5 flex items-center gap-1">
+                    <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+                    {{ text_recurring_item }} {{ product.recurring }}
+                  </p>
+                  {% endif %}
+                  {# Unit price – mobile #}
+                  <p class="sm:hidden text-sm font-semibold text-gray-700 mt-1">{{ product.price }}</p>
+                </div>
+
+                {# Unit price – desktop #}
+                <div class="hidden sm:block w-24 text-right">
+                  <span class="text-sm font-semibold text-gray-700">{{ product.price }}</span>
+                </div>
+
+                {# Quantity input #}
+                <div class="flex items-center gap-2 flex-shrink-0">
+                  <input type="number" name="quantity[{{ product.cart_id }}]" value="{{ product.quantity }}" min="1"
+                    class="w-16 text-center rounded-xl border border-gray-200 px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
+                  <button type="submit" title="{{ button_update }}"
+                    class="p-2 rounded-xl border border-gray-200 hover:border-blue-300 hover:text-blue-600 text-gray-400 transition">
+                    <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                  </button>
+                  <button type="button" title="{{ button_remove }}" onclick="cart.remove('{{ product.cart_id }}');"
+                    class="p-2 rounded-xl border border-red-100 hover:border-red-300 hover:text-red-600 text-red-400 transition">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                  </button>
+                </div>
+
+                {# Row total #}
+                <div class="w-24 text-right flex-shrink-0">
+                  <span class="font-bold text-gray-900 text-sm">{{ product.total }}</span>
+                </div>
+
+              </div>
+              {% endfor %}
+
+              {# Gift vouchers #}
+              {% for voucher in vouchers %}
+              <div class="bg-white rounded-2xl border border-indigo-100 shadow-sm p-4 flex flex-col sm:flex-row sm:items-center gap-4">
+                <div class="flex-shrink-0 w-16 h-16 rounded-xl bg-indigo-50 flex items-center justify-center">
+                  <i data-lucide="gift" class="w-7 h-7 text-indigo-400"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="font-semibold text-gray-900 text-sm">{{ voucher.description }}</p>
+                  <p class="text-xs text-indigo-400 mt-0.5">{{ text_gift_certificate }}</p>
+                </div>
+                <div class="hidden sm:block w-24 text-right">
+                  <span class="text-sm font-semibold text-gray-700">{{ voucher.amount }}</span>
+                </div>
+                <div class="flex items-center gap-2 flex-shrink-0">
+                  <div class="w-16 h-9 rounded-xl border border-gray-100 bg-gray-50 flex items-center justify-center text-sm text-gray-400">1</div>
+                  <button type="button" onclick="voucher.remove('{{ voucher.key }}');"
+                    class="p-2 rounded-xl border border-red-100 hover:border-red-300 hover:text-red-600 text-red-400 transition">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                  </button>
+                </div>
+                <div class="w-24 text-right flex-shrink-0">
+                  <span class="font-bold text-gray-900 text-sm">{{ voucher.amount }}</span>
+                </div>
+              </div>
+              {% endfor %}
+
+            </div>
+          </form>
+
+          {# Bottom navigation #}
+          <div class="mt-6 flex items-center justify-between gap-4">
+            <a href="{{ continue }}" class="border border-gray-200 hover:border-gray-300 bg-white text-gray-700 font-medium px-5 py-2.5 rounded-xl transition-colors text-sm flex items-center gap-2">
+              <i data-lucide="arrow-left" class="w-4 h-4"></i>
+              {{ button_shopping }}
+            </a>
+            <a href="{{ checkout }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm flex items-center gap-2 sm:hidden">
+              {{ button_checkout }}
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </a>
+          </div>
+
+        </div>
+
+        {# ── Order Summary ── #}
+        <div class="w-full lg:w-80 xl:w-96 flex-shrink-0">
+          <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 sticky top-4">
+            <p class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-4">{{ text_cart_total }}</p>
+            <div class="space-y-2 divide-y divide-gray-50">
+              {% for total in totals %}
+              <div class="flex items-center justify-between py-2 {% if loop.last %}pt-3{% endif %}">
+                <span class="text-sm {% if loop.last %}font-bold text-gray-900 text-base{% else %}text-gray-500{% endif %}">{{ total.title }}</span>
+                <span class="text-sm {% if loop.last %}font-extrabold text-gray-900 text-base{% else %}font-semibold text-gray-800{% endif %}">{{ total.text }}</span>
+              </div>
+              {% endfor %}
+            </div>
+            <a href="{{ checkout }}" class="mt-6 w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3.5 rounded-2xl transition-colors text-sm">
+              {{ button_checkout }}
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </a>
+            <a href="{{ continue }}" class="mt-3 w-full flex items-center justify-center gap-2 border border-gray-200 hover:border-gray-300 bg-white text-gray-600 font-medium px-6 py-2.5 rounded-xl transition-colors text-sm">
+              <i data-lucide="arrow-left" class="w-4 h-4"></i>
+              {{ button_shopping }}
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+      {% else %}
+
+      {# Empty cart #}
+      <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-12 text-center max-w-lg mx-auto">
+        <i data-lucide="shopping-cart" class="w-14 h-14 text-gray-200 mx-auto mb-4"></i>
+        <p class="text-lg font-semibold text-gray-500 mb-6">{{ text_empty }}</p>
+        <a href="{{ continue }}" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors text-sm">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          {{ button_shopping }}
+        </a>
+      </div>
+
+      {% endif %}
+
+      {{ content_bottom }}
+    </div>
+  </section>
+
+</main>
+{{ footer }}

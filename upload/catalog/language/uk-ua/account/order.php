@@ -1,0 +1,32 @@
+<?php
+
+$_['column_action'] = 'Дія';
+$_['column_comment'] = 'Коментар';
+$_['column_customer'] = 'Клієнт';
+$_['column_date_added'] = 'Дата додавання';
+$_['column_model'] = 'Модель';
+$_['column_name'] = 'Назва продукту';
+$_['column_order_id'] = 'Ідентифікатор замовлення';
+$_['column_price'] = 'Ціна';
+$_['column_product'] = 'Кількість продуктів';
+$_['column_quantity'] = 'Кількість';
+$_['column_status'] = 'Статус';
+$_['column_total'] = 'Всього';
+$_['error_reorder'] = '%s наразі недоступний для повторного замовлення.';
+$_['heading_title'] = 'Історія замовлень';
+$_['text_account'] = 'Обліковий запис';
+$_['text_account_order_id'] = '№ замовлення:';
+$_['text_comment'] = 'Коментарі до замовлення';
+$_['text_date_added'] = 'Дата додавання:';
+$_['text_empty'] = 'Ви не робили жодних попередніх замовлень!';
+$_['text_error'] = 'Замовлення, яке ви запитували, не знайдено!';
+$_['text_history'] = 'Історія замовлень';
+$_['text_invoice_no'] = 'Номер рахунку-фактури:';
+$_['text_order'] = 'Інформація про замовлення';
+$_['text_order_detail'] = 'Деталі замовлення';
+$_['text_order_id'] = 'Ідентифікатор замовлення:';
+$_['text_payment_address'] = 'Адреса для оплати';
+$_['text_payment_method'] = 'Спосіб оплати:';
+$_['text_shipping_address'] = 'Адреса доставки';
+$_['text_shipping_method'] = 'Спосіб доставки:';
+$_['text_success'] = 'Успіх: Ви додали <a href="%s">%s</a> до свого <a href="%s">кошика</a> !';

@@ -1,0 +1,759 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
+  <style>
+    .dc-yml-feed-btn { margin:2px; }
+    .dc-yml-actions { white-space:nowrap; display:flex; gap:4px; justify-content:flex-end; flex-wrap:wrap; }
+    .dc-yml-section-note { font-size:12px; color:#6f7b8f; margin-bottom:10px; }
+  </style>
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-export-yml" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <button type="button" data-toggle="tooltip" title="{{ text_add_profile }}" class="btn btn-success" onclick="addProfile();"><i class="fa fa-plus"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    <ul class="nav nav-tabs dcx-profile-tabs" id="yml-tabs" role="tablist">
+      <li class="active"><a href="#yml-tab-general" class="js-yml-tab" data-tab="yml-tab-general" data-title="{{ tab_general }}" data-subtitle="General module parameters and defaults" data-icon="fa-sliders"><i class="fa fa-sliders"></i> {{ tab_general }}</a></li>
+      <li><a href="#yml-tab-profiles" class="js-yml-tab" data-tab="yml-tab-profiles" data-title="{{ tab_profiles }}" data-subtitle="Manage export profiles, feeds and actions" data-icon="fa-list"><i class="fa fa-list"></i> {{ tab_profiles }}</a></li>
+      <li><a href="#yml-tab-license" class="js-yml-tab" data-tab="yml-tab-license" data-title="{{ tab_license }}" data-subtitle="License key verification and status" data-icon="fa-key"><i class="fa fa-key"></i> {{ tab_license }}</a></li>
+      <li><a href="#yml-tab-about" class="js-yml-tab" data-tab="yml-tab-about" data-title="{{ text_tab_about|default('About') }}" data-subtitle="{{ text_tab_about_subtitle|default('Module information and contacts') }}" data-icon="fa-info-circle"><i class="fa fa-info-circle"></i> {{ text_tab_about|default('About') }}</a></li>
+    </ul>
+
+    <div class="dcx-shell">
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i id="yml-tab-icon" class="fa fa-sliders"></i></div>
+          <div>
+            <h3 class="dcx-panel-title" id="yml-tab-title">{{ tab_general }}</h3>
+            <div class="dcx-panel-subtitle" id="yml-tab-subtitle">General module parameters and defaults</div>
+          </div>
+        </div>
+        <div class="dcx-panel-body">
+          <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-export-yml" class="form-horizontal dcx-form">
+
+          <div id="yml-tab-general" class="dcx-tab-pane active">
+            <div class="dcx-section">
+              <h4>Module Settings</h4>
+              <div class="form-group required">
+                <label class="col-sm-3 control-label" for="input-status">{{ entry_status }}</label>
+                <div class="col-sm-9">
+                  <select name="dockercart_export_yml_status" id="input-status" class="form-control">
+                    {% if dockercart_export_yml_status %}
+                    <option value="1" selected="selected">{{ text_enabled }}</option>
+                    <option value="0">{{ text_disabled }}</option>
+                    {% else %}
+                    <option value="1">{{ text_enabled }}</option>
+                    <option value="0" selected="selected">{{ text_disabled }}</option>
+                    {% endif %}
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="input-shop-name"><span data-toggle="tooltip" title="{{ help_shop_name }}">{{ entry_shop_name }}</span></label>
+                <div class="col-sm-9">
+                  <input type="text" name="dockercart_export_yml_shop_name" value="{{ dockercart_export_yml_shop_name }}" placeholder="{{ entry_shop_name }}" id="input-shop-name" class="form-control" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="input-company"><span data-toggle="tooltip" title="{{ help_company }}">{{ entry_company }}</span></label>
+                <div class="col-sm-9">
+                  <input type="text" name="dockercart_export_yml_company" value="{{ dockercart_export_yml_company }}" placeholder="{{ entry_company }}" id="input-company" class="form-control" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="input-max-products"><span data-toggle="tooltip" title="{{ help_max_products }}">{{ entry_max_products }}</span></label>
+                <div class="col-sm-9">
+                  <input type="number" name="dockercart_export_yml_max_products" value="{{ dockercart_export_yml_max_products }}" placeholder="{{ entry_max_products }}" id="input-max-products" class="form-control" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="input-cache-ttl"><span data-toggle="tooltip" title="{{ help_cache_ttl }}">{{ entry_cache_ttl }}</span></label>
+                <div class="col-sm-9">
+                  <input type="number" name="dockercart_export_yml_cache_ttl" value="{{ dockercart_export_yml_cache_ttl }}" placeholder="{{ entry_cache_ttl }}" id="input-cache-ttl" class="form-control" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="yml-tab-license" class="dcx-tab-pane">
+            <div class="dcx-section">
+              <h4>License Information</h4>
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="input-license-key">{{ entry_license_key|default('License Key') }}</label>
+                <div class="col-sm-9">
+                  <input type="text" name="module_dockercart_export_yml_license_key" value="{{ dockercart_export_yml_license_key }}" placeholder="DCEX-XXXXXXXXXXXXXXXX-YYYYYYYYYYYY" id="input-license-key" class="form-control" />
+                  <small class="form-text text-muted" style="margin-top: 5px;">
+                    <i class="fa fa-info-circle"></i> {{ text_license_domain|default('License bound to domain') }}: <strong>{{ license_domain|default('unknown') }}</strong>
+                  </small>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="input-public-key">{{ entry_public_key|default('Public Key') }}</label>
+                <div class="col-sm-9">
+                  <textarea name="module_dockercart_export_yml_public_key" id="input-public-key" rows="8" class="form-control" placeholder="-----BEGIN PUBLIC KEY-----&#10;...&#10;-----END PUBLIC KEY-----">{{ dockercart_export_yml_public_key }}</textarea>
+                  <small class="form-text text-muted" style="margin-top: 5px;">
+                    <i class="fa fa-shield"></i> {{ help_public_key|default('This public key is used to verify license signatures. Get it from your vendor.') }}
+                  </small>
+                </div>
+              </div>
+
+              <div id="license-info" class="form-group" style="display: none;">
+                <div class="col-sm-offset-3 col-sm-9">
+                  <div class="alert alert-info">
+                    <h4><i class="fa fa-info-circle"></i> {{ text_license|default('License Information') }}</h4>
+                    <p id="license-details"></p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 control-label"></label>
+                <div class="col-sm-9">
+                  <button type="button" class="btn btn-info" id="btn-verify-license"><i class="fa fa-check-circle"></i> {{ button_verify_license|default('Verify License') }}</button>
+                  <span id="license-status" style="margin-left: 10px;"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="yml-tab-about" class="dcx-tab-pane">
+            <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+              <h4>{{ text_tab_about|default('About') }}</h4>
+              <table class="table table-bordered dcx-table">
+                <tr>
+                  <td style="width:220px;"><strong>{{ text_module_version|default('Module Version') }}</strong></td>
+                  <td>{% if module_version is defined and module_version %}{{ module_version }}{% else %}n/a{% endif %}</td>
+                </tr>
+                <tr>
+                  <td><strong>{{ text_developer|default('Developer') }}</strong></td>
+                  <td>DockerCart Team</td>
+                </tr>
+                <tr>
+                  <td><strong>Contact</strong></td>
+                  <td><a href="mailto:support@dockercart.net">support@dockercart.net</a></td>
+                </tr>
+              </table>
+            </div>
+          </div>
+
+          <div id="yml-tab-profiles" class="dcx-tab-pane">
+            <div class="dcx-section">
+              <h4>{{ tab_profiles }}</h4>
+              <div class="dc-yml-section-note">{{ text_no_profiles }}</div>
+              <div id="module-notice"></div>
+              <div id="profiles-panel" class="panel panel-default">
+                <div class="panel-body">
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover dcx-table">
+                  <thead>
+                    <tr>
+                      <td class="text-left">{{ column_profile_name }}</td>
+                      <td class="text-left">{{ column_store }}</td>
+                      <td class="text-left">{{ column_currency }}</td>
+                      <td class="text-left">Feed URLs</td>
+                      <td class="text-center">{{ column_status }}</td>
+                      <td class="text-right">{{ column_action }}</td>
+                    </tr>
+                  </thead>
+                  <tbody id="profile-list">
+                    {% for profile in profiles %}
+                    <tr data-profile-id="{{ profile.profile_id }}">
+                      <td class="text-left">{{ profile.name }}</td>
+                      <td class="text-left">
+                        {% for store in stores %}
+                          {% if store.store_id == profile.store_id %}{{ store.name }}{% endif %}
+                        {% endfor %}
+                      </td>
+                      <td class="text-left">{{ profile.currency_code }}</td>
+                      <td class="text-left">
+                        {% for language in languages %}
+                          <a href="{{ catalog_url }}export-yml-{{ profile.profile_id }}-{{ language.code }}.xml" target="_blank" class="btn btn-xs btn-default dc-yml-feed-btn">
+                            <i class="fa fa-file-code-o"></i> {{ language.name }}
+                          </a>
+                        {% endfor %}
+                      </td>
+                      <td class="text-center">
+                        {% if profile.status %}
+                        <span class="label label-success">{{ text_enabled }}</span>
+                        {% else %}
+                        <span class="label label-danger">{{ text_disabled }}</span>
+                        {% endif %}
+                      </td>
+                      <td class="text-right">
+                        <div class="dc-yml-actions">
+                          <button type="button" class="btn btn-info btn-xs" onclick="editProfile({{ profile.profile_id }});" data-toggle="tooltip" title="Edit"><i class="fa fa-pencil"></i></button>
+                          <button type="button" class="btn btn-primary btn-xs" onclick="generateFeed({{ profile.profile_id }}, this);" data-toggle="tooltip" title="{{ button_generate }}"><i class="fa fa-refresh"></i></button>
+                          <a href="{{ catalog_url }}index.php?route=extension/feed/dockercart_export_yml&profile_id={{ profile.profile_id }}" target="_blank" class="btn btn-success btn-xs" data-toggle="tooltip" title="Download"><i class="fa fa-download"></i></a>
+                          <button type="button" class="btn btn-danger btn-xs" onclick="deleteProfile({{ profile.profile_id }});" data-toggle="tooltip" title="{{ text_delete_profile }}"><i class="fa fa-trash"></i></button>
+                        </div>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              <button type="button" class="btn btn-success" onclick="addProfile();"><i class="fa fa-plus"></i> {{ text_add_profile }}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+function updateYmlPanelHeader(tabLink) {
+    var $tab = $(tabLink);
+    var title = $tab.data('title') || '{{ tab_general }}';
+    var subtitle = $tab.data('subtitle') || '';
+    var icon = String($tab.data('icon') || 'fa-sliders').replace(/[^a-z0-9\-]/gi, '');
+
+    $('#yml-tab-title').text(title);
+    $('#yml-tab-subtitle').text(subtitle);
+    $('#yml-tab-icon').attr('class', 'fa ' + icon);
+}
+
+$(document).on('click', '.js-yml-tab', function(e) {
+    e.preventDefault();
+    var tabId = $(this).data('tab');
+    if (!tabId) return;
+
+    $('#yml-tabs > li').removeClass('active');
+    $(this).closest('li').addClass('active');
+
+    $('#yml-tab-general, #yml-tab-profiles, #yml-tab-license, #yml-tab-about').removeClass('active');
+    $('#' + tabId).addClass('active');
+
+    updateYmlPanelHeader(this);
+});
+
+updateYmlPanelHeader($('#yml-tabs > li.active a.js-yml-tab'));
+
+/* License save + verify (aligned with Dockercart Sitemap behavior) */
+document.addEventListener('DOMContentLoaded', function() {
+  var btnVerify = document.getElementById('btn-verify-license');
+  var licenseInput = document.getElementById('input-license-key');
+  var licenseStatus = document.getElementById('license-status');
+  var licenseInfo = document.getElementById('license-info');
+  var licenseDetails = document.getElementById('license-details');
+  var publicKeyInput = document.getElementById('input-public-key');
+
+  function saveLicenseKey(licenseKey) {
+    var publicKey = publicKeyInput.value.trim();
+
+    return fetch('{{ ajax_save_license }}'.replace(/&amp;/g, '&'), {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({ license_key: licenseKey, public_key: publicKey })
+    }).then(function(resp) { return resp.json(); });
+  }
+
+  function verifyLicense() {
+    var licenseKey = licenseInput.value.trim();
+    var publicKey = publicKeyInput.value.trim();
+
+    if (!licenseKey) {
+      licenseStatus.innerHTML = '<span class="label label-danger">Please enter license key</span>';
+      return;
+    }
+
+    if (!publicKey) {
+      licenseStatus.innerHTML = '<span class="label label-danger">Please enter public key</span>';
+      return;
+    }
+
+    btnVerify.disabled = true;
+    var originalText = btnVerify.innerHTML;
+    btnVerify.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Verifying...';
+    licenseStatus.innerHTML = '';
+    licenseInfo.style.display = 'none';
+
+    // Save keys first to persist (non-blocking if save fails)
+    saveLicenseKey(licenseKey).catch(function(e){ /* ignore save errors here */ });
+
+    fetch('{{ ajax_verify_license }}'.replace(/&amp;/g, '&'), {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({ license_key: licenseKey, public_key: publicKey })
+    })
+    .then(function(resp) { return resp.json(); })
+    .then(function(data) {
+      btnVerify.disabled = false;
+      btnVerify.innerHTML = originalText;
+
+      if (data.valid) {
+        licenseStatus.innerHTML = '<span class="label label-success"><i class="fa fa-check"></i> Valid</span>';
+        var infoHtml = '<strong>Status:</strong> Active<br>';
+        infoHtml += '<strong>Domain:</strong> ' + (data.domain || '{{ license_domain|default('unknown') }}') + '<br>';
+        if (data.expires_formatted) {
+          infoHtml += '<strong>Expires:</strong> ' + data.expires_formatted + '<br>';
+        } else {
+          infoHtml += '<strong>Type:</strong> Lifetime License<br>';
+        }
+        if (data.license_id) infoHtml += '<strong>License ID:</strong> ' + data.license_id;
+        licenseDetails.innerHTML = infoHtml;
+        licenseInfo.style.display = 'block';
+      } else {
+        licenseStatus.innerHTML = '<span class="label label-danger"><i class="fa fa-times"></i> Invalid</span>';
+        licenseDetails.innerHTML = data.error ? ('<strong>Error:</strong> ' + data.error) : '';
+        licenseInfo.style.display = 'block';
+      }
+    })
+    .catch(function(err) {
+      btnVerify.disabled = false;
+      btnVerify.innerHTML = originalText;
+      licenseStatus.innerHTML = '<span class="label label-danger">Error: ' + (err.message || err) + '</span>';
+    });
+  }
+
+  if (btnVerify) {
+    licenseInput.addEventListener('input', function() { licenseStatus.innerHTML = ''; licenseInfo.style.display = 'none'; });
+    btnVerify.addEventListener('click', function() { verifyLicense(); });
+
+    // Auto-verify when page loads if license exists
+    if (licenseInput.value.trim()) {
+      setTimeout(function() { verifyLicense(); }, 500);
+    }
+  }
+});
+
+function addProfile() {
+    showProfileModal();
+}
+
+function editProfile(profileId) {
+    $.ajax({
+        url: '{{ ajax_get_profile }}' + '&profile_id=' + profileId,
+        type: 'get',
+        dataType: 'json',
+        success: function(json) {
+            if (json.success && json.profile) {
+                showProfileModal(json.profile);
+            } else {
+                alert('Error: ' + (json.error || 'Failed to load profile'));
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            alert('Error: ' + thrownError);
+        }
+    });
+}
+
+function showProfileModal(profile) {
+    profile = profile || {};
+    var isEdit = profile.profile_id ? true : false;
+    
+    $('#profile-modal').remove();
+    
+    var html = '<div id="profile-modal" class="modal fade" tabindex="-1" role="dialog">';
+    html += '  <div class="modal-dialog modal-lg" role="document">';
+    html += '    <div class="modal-content">';
+    html += '      <div class="modal-header">';
+    html += '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
+    html += '        <h4 class="modal-title">' + (isEdit ? '{{ text_edit_profile }}' : '{{ text_add_profile }}') + '</h4>';
+    html += '      </div>';
+    html += '      <div class="modal-body">';
+    html += '        <form id="form-profile" class="form-horizontal">';
+    html += '          <input type="hidden" name="profile_id" value="' + (profile.profile_id || '') + '" />';
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label" for="profile-name">{{ entry_profile_name }}</label>';
+    html += '            <div class="col-sm-9">';
+    html += '              <input type="text" name="name" id="profile-name" class="form-control" value="' + (profile.name || '') + '" required />';
+    html += '            </div>';
+    html += '          </div>';
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label" for="profile-store">{{ entry_profile_store }}</label>';
+    html += '            <div class="col-sm-9">';
+    html += '              <select name="store_id" id="profile-store" class="form-control">';
+    {% for store in stores %}
+    html += '                <option value="{{ store.store_id }}"' + ({{ store.store_id }} == (profile.store_id || 0) ? ' selected' : '') + '>{{ store.name|e('js') }}</option>';
+    {% endfor %}
+    html += '              </select>';
+    html += '            </div>';
+    html += '          </div>';
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label" for="profile-currency">{{ entry_profile_currency }}</label>';
+    html += '            <div class="col-sm-9">';
+    html += '              <select name="currency_code" id="profile-currency" class="form-control">';
+    {% for currency in currencies %}
+    html += '                <option value="{{ currency.code }}"' + ('{{ currency.code }}' == (profile.currency_code || 'USD') ? ' selected' : '') + '>{{ currency.title|e('js') }} ({{ currency.code }})</option>';
+    {% endfor %}
+    html += '              </select>';
+    html += '            </div>';
+    html += '          </div>';
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label" for="profile-shop-name">Shop Name</label>';
+    html += '            <div class="col-sm-9">';
+    html += '              <input type="text" name="shop_name" id="profile-shop-name" class="form-control" value="' + (profile.shop_name || '') + '" />';
+    html += '            </div>';
+    html += '          </div>';
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label" for="profile-company-name">Company Name</label>';
+    html += '            <div class="col-sm-9">';
+    html += '              <input type="text" name="company_name" id="profile-company-name" class="form-control" value="' + (profile.company_name || '') + '" />';
+    html += '            </div>';
+    html += '          </div>';
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label" for="profile-categories">{{ entry_profile_categories }}</label>';
+    html += '            <div class="col-sm-9">';
+    html += '              <select name="categories[]" id="profile-categories" class="form-control" multiple size="5">';
+    {% for category in categories %}
+    html += '                <option value="{{ category.category_id }}">{{ category.name|e('js') }}</option>';
+    {% endfor %}
+    html += '              </select>';
+    html += '              <small class="text-muted">{{ help_profile_categories }}</small>';
+    html += '              <br><small class="text-info"><i class="fa fa-info-circle"></i> {{ help_profile_multiselect }}</small>';
+    html += '            </div>';
+    html += '          </div>';
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label" for="profile-manufacturers">{{ entry_profile_manufacturers }}</label>';
+    html += '            <div class="col-sm-9">';
+    html += '              <select name="manufacturers[]" id="profile-manufacturers" class="form-control" multiple size="5">';
+    {% for manufacturer in manufacturers %}
+    html += '                <option value="{{ manufacturer.manufacturer_id }}">{{ manufacturer.name|e('js') }}</option>';
+    {% endfor %}
+    html += '              </select>';
+    html += '              <small class="text-muted">{{ help_profile_manufacturers }}</small>';
+    html += '              <br><small class="text-info"><i class="fa fa-info-circle"></i> {{ help_profile_multiselect }}</small>';
+    html += '            </div>';
+    html += '          </div>';
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label" for="profile-max-products">Max Products</label>';
+    html += '            <div class="col-sm-9">';
+    html += '              <input type="number" name="max_products" id="profile-max-products" class="form-control" value="' + (profile.max_products || 50000) + '" />';
+    html += '            </div>';
+    html += '          </div>';
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label" for="profile-cache-ttl">Cache TTL (seconds)</label>';
+    html += '            <div class="col-sm-9">';
+    html += '              <input type="number" name="cache_ttl" id="profile-cache-ttl" class="form-control" value="' + (profile.cache_ttl || 3600) + '" />';
+    html += '            </div>';
+    html += '          </div>';
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label" for="profile-split-files">{{ entry_split_files }}</label>';
+    html += '            <div class="col-sm-9">';
+    html += '              <input type="checkbox" name="split_files" id="profile-split-files" value="1"' + (profile.split_files ? ' checked' : '') + ' /> ';
+    html += '              <small>{{ help_split_files }}</small>';
+    html += '            </div>';
+    html += '          </div>';
+    html += '          <div class="form-group" id="products-per-file-group" style="display:' + (profile.split_files ? 'block' : 'none') + ';">';
+    html += '            <label class="col-sm-3 control-label" for="profile-products-per-file">{{ entry_products_per_file }}</label>';
+    html += '            <div class="col-sm-9">';
+    html += '              <input type="number" name="products_per_file" id="profile-products-per-file" class="form-control" value="' + (profile.products_per_file || 10000) + '" />';
+    html += '              <small>{{ help_products_per_file }}</small>';
+    html += '            </div>';
+    html += '          </div>';
+    html += '          <hr>';
+    html += '          <h4 class="text-center">Advanced Filters</h4>';
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label" for="profile-min-price">{{ entry_min_price }}</label>';
+    html += '            <div class="col-sm-9">';
+    html += '              <input type="number" step="0.01" name="min_price" id="profile-min-price" class="form-control" placeholder="0.00" />';
+    html += '            </div>';
+    html += '          </div>';
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label" for="profile-max-price">{{ entry_max_price }}</label>';
+    html += '            <div class="col-sm-9">';
+    html += '              <input type="number" step="0.01" name="max_price" id="profile-max-price" class="form-control" placeholder="99999.99" />';
+    html += '            </div>';
+    html += '          </div>';
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label" for="profile-min-quantity">{{ entry_min_quantity }}</label>';
+    html += '            <div class="col-sm-9">';
+    html += '              <input type="number" name="min_quantity" id="profile-min-quantity" class="form-control" placeholder="1" />';
+    html += '            </div>';
+    html += '          </div>';
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label" for="profile-only-special">{{ entry_only_special }}</label>';
+    html += '            <div class="col-sm-9">';
+    html += '              <input type="checkbox" name="only_special" id="profile-only-special" value="1" /> <small>{{ help_only_special }}</small>';
+    html += '            </div>';
+    html += '          </div>';
+    html += '          <hr>';
+    html += '          <h4 class="text-center">Delivery Options</h4>';
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label" for="profile-delivery-cost">{{ entry_delivery_cost }}</label>';
+    html += '            <div class="col-sm-9">';
+    html += '              <input type="number" step="0.01" name="delivery_cost" id="profile-delivery-cost" class="form-control" placeholder="0" />';
+    html += '              <small>{{ help_delivery_cost }}</small>';
+    html += '            </div>';
+    html += '          </div>';
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label" for="profile-delivery-days">{{ entry_delivery_days }}</label>';
+    html += '            <div class="col-sm-9">';
+    html += '              <input type="number" name="delivery_days" id="profile-delivery-days" class="form-control" placeholder="1" />';
+    html += '              <small>{{ help_delivery_days }}</small>';
+    html += '            </div>';
+    html += '          </div>';
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label" for="profile-pickup-enabled">{{ entry_pickup_enabled }}</label>';
+    html += '            <div class="col-sm-9">';
+    html += '              <input type="checkbox" name="pickup_enabled" id="profile-pickup-enabled" value="1" checked />';
+    html += '            </div>';
+    html += '          </div>';
+    html += '          <hr>';
+    html += '          <h4 class="text-center">Additional Options</h4>';
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label" for="profile-sales-notes">{{ entry_sales_notes }}</label>';
+    html += '            <div class="col-sm-9">';
+    html += '              <input type="text" name="sales_notes" id="profile-sales-notes" class="form-control" maxlength="50" />';
+    html += '              <small>{{ help_sales_notes }}</small>';
+    html += '            </div>';
+    html += '          </div>';
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label" for="profile-adult-content">{{ entry_adult_content }}</label>';
+    html += '            <div class="col-sm-9">';
+    html += '              <input type="checkbox" name="adult_content" id="profile-adult-content" value="1" />';
+    html += '              <small>{{ help_adult_content }}</small>';
+    html += '            </div>';
+    html += '          </div>';
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label" for="profile-strip-html">Strip HTML Tags</label>';
+    html += '            <div class="col-sm-9">';
+    html += '              <input type="checkbox" name="strip_html_tags" id="profile-strip-html" value="1" checked />';
+    html += '              <small>Remove all HTML tags from product descriptions (recommended for most YML feeds)</small>';
+    html += '            </div>';
+    html += '          </div>';
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label" for="profile-status">{{ entry_profile_status }}</label>';
+    html += '            <div class="col-sm-9">';
+    html += '              <select name="status" id="profile-status" class="form-control">';
+    html += '                <option value="1" selected>{{ text_enabled }}</option>';
+    html += '                <option value="0">{{ text_disabled }}</option>';
+    html += '              </select>';
+    html += '            </div>';
+    html += '          </div>';
+    html += '        </form>';
+    html += '      </div>';
+    html += '      <div class="modal-footer">';
+    html += '        <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>';
+    html += '        <button type="button" class="btn btn-primary" onclick="saveProfile();"><i class="fa fa-save"></i> {{ button_save }}</button>';
+    html += '      </div>';
+    html += '    </div>';
+    html += '  </div>';
+    html += '</div>';
+    
+    $('body').append(html);
+    $('#profile-modal').modal('show');
+    
+    // Toggle products_per_file field visibility
+    $('#profile-split-files').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('#products-per-file-group').slideDown();
+        } else {
+            $('#products-per-file-group').slideUp();
+        }
+    });
+}
+
+function saveProfile() {
+    var formData = {};
+    var settings = {};
+    var filters = {};
+    
+    // Get profile_id if editing
+    var profileId = $('#form-profile input[name="profile_id"]').val();
+    var isEdit = !!profileId;
+    if (profileId) {
+        formData.profile_id = parseInt(profileId);
+    }
+    
+    $('#form-profile').serializeArray().forEach(function(field) {
+        var fieldName = field.name.replace('[]', '');
+        
+        // Categories and manufacturers go to filters
+        if (fieldName === 'categories' || fieldName === 'manufacturers') {
+            if (!filters[fieldName.replace('s', '')]) filters[fieldName.replace('s', '')] = [];
+            filters[fieldName.replace('s', '')].push(field.value);
+        }
+        // Price, quantity, weight filters
+        else if (['min_price', 'max_price', 'min_quantity', 'min_weight', 'max_weight', 'product_tag'].indexOf(fieldName) > -1) {
+            if (!filters[fieldName]) filters[fieldName] = [];
+            filters[fieldName].push(field.value);
+        }
+        // Delivery and additional settings go to settings object
+        else if (['delivery_cost', 'delivery_days', 'order_before', 'pickup_enabled', 'sales_notes', 'adult_content'].indexOf(fieldName) > -1) {
+            settings[fieldName] = field.value;
+        }
+        // Everything else goes to top level
+        else {
+            formData[fieldName] = field.value;
+        }
+    });
+    
+    // Handle checkboxes separately (they don't appear in serializeArray if unchecked)
+    if ($('#profile-only-special').is(':checked')) {
+        filters['only_special'] = ['1'];
+    }
+    if ($('#profile-pickup-enabled').is(':checked')) {
+        settings['pickup_enabled'] = '1';
+    }
+    if ($('#profile-adult-content').is(':checked')) {
+        settings['adult_content'] = '1';
+    }
+    if ($('#profile-strip-html').is(':checked')) {
+        settings['strip_html_tags'] = '1';
+    }
+    if ($('#profile-split-files').is(':checked')) {
+        formData.split_files = 1;
+        formData.products_per_file = $('#profile-products-per-file').val() || 10000;
+    }
+    
+    // Add settings and filters to formData
+    formData.settings = settings;
+    formData.filters = filters;
+    
+    $.ajax({
+        url: '{{ ajax_save_profile }}',
+        type: 'post',
+        data: JSON.stringify(formData),
+        contentType: 'application/json',
+        dataType: 'json',
+        beforeSend: function() {
+            $('.modal-footer .btn-primary').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Saving...');
+        },
+        success: function(json) {
+            if (json.success) {
+                $('#profile-modal').modal('hide');
+                
+                // Show success message
+                var message = isEdit ? 'Profile updated successfully!' : 'Profile created successfully!';
+                showNotification('success', message);
+                
+                // Reload profiles table after a short delay
+                setTimeout(function() {
+                    location.reload();
+                }, 1000);
+            } else {
+                alert('Error: ' + (json.error || 'Failed to save profile'));
+                $('.modal-footer .btn-primary').prop('disabled', false).html('<i class="fa fa-save"></i> {{ button_save }}');
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            alert('Error: ' + thrownError);
+            $('.modal-footer .btn-primary').prop('disabled', false).html('<i class="fa fa-save"></i> {{ button_save }}');
+        }
+    });
+}
+
+function showNotification(type, message) {
+    var alertClass = 'alert-info';
+    var icon = 'fa-info-circle';
+    
+    if (type === 'success') {
+        alertClass = 'alert-success';
+        icon = 'fa-check-circle';
+    } else if (type === 'danger') {
+        alertClass = 'alert-danger';
+        icon = 'fa-exclamation-circle';
+    }
+    
+    var html = '<div class="alert ' + alertClass + ' alert-dismissible" style="margin-bottom: 20px;">';
+    html += '<button type="button" class="close" data-dismiss="alert">&times;</button>';
+    html += '<i class="fa ' + icon + '"></i> ' + message;
+    html += '</div>';
+    
+    // Add notification to the top of the profiles section
+    $('#module-notice').html(html);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(function() {
+        $('.alert').fadeOut(function() {
+            $(this).remove();
+        });
+    }, 5000);
+}
+
+function generateFeed(profileId, btnEl) {
+    if (!confirm('{{ text_confirm_generate }}')) {
+        return;
+    }
+    
+  var btn = btnEl || null;
+  if (!btn) {
+    return;
+  }
+    var originalHtml = $(btn).html();
+    
+    $(btn).prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Generating...');
+    
+    // Show notification
+    showNotification('info', 'Generating YML feed... (new tab will open)');
+    
+    // Open feed URL in new tab with regenerate flag
+    var feedUrl = '{{ catalog_url }}' + 'index.php?route=extension/feed/dockercart_export_yml&profile_id=' + profileId + '&lang={{ default_language_code }}&regenerate=1';
+    window.open(feedUrl, '_blank');
+    
+    // Reset button after 2 seconds
+    setTimeout(function() {
+        $(btn).prop('disabled', false).html(originalHtml);
+    }, 2000);
+}
+
+function deleteProfile(profileId) {
+    if (!confirm('{{ text_confirm_delete }}')) {
+        return;
+    }
+    
+    $.ajax({
+        url: '{{ ajax_delete_profile }}',
+        type: 'post',
+        data: JSON.stringify({ profile_id: profileId }),
+        contentType: 'application/json',
+        dataType: 'json',
+        success: function(json) {
+            if (json.success) {
+                showNotification('success', '{{ text_delete_success }}');
+                
+                // Remove row from table
+                $('tr[data-profile-id=\"' + profileId + '\"]').fadeOut(function() {
+                    $(this).remove();
+                });
+                
+                // Reload profiles after a short delay
+                setTimeout(function() {
+                    location.reload();
+                }, 1500);
+            } else {
+                alert('Error: ' + (json.error || 'Failed to delete profile'));
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            alert('Error: ' + thrownError);
+        }
+    });
+}
+</script>
+{{ footer }}
