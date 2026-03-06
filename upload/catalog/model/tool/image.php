@@ -57,6 +57,7 @@ class ModelToolImage extends Model {
 			}
 
 			$path = '';
+			$cache_path_ready = true;
 
 			$directories = explode('/', dirname($image_new));
 
@@ -64,14 +65,22 @@ class ModelToolImage extends Model {
 				$path = $path . '/' . $directory;
 
 				if (!is_dir(DIR_IMAGE . $path)) {
-					@mkdir(DIR_IMAGE . $path, 0777);
+					if (!mkdir(DIR_IMAGE . $path, 0775) && !is_dir(DIR_IMAGE . $path)) {
+						error_log('Error: Could not create image cache directory: ' . DIR_IMAGE . $path);
+						$cache_path_ready = false;
+						break;
+					}
 				}
 			}
 
-			if ($image_type == IMAGETYPE_WEBP && !$webp_supported) {
+			if (!$cache_path_ready) {
+				$image_new = $image_old;
+			}
+
+			if ($cache_path_ready && $image_type == IMAGETYPE_WEBP && !$webp_supported) {
 				// Server GD has no WebP decode support: don't crash, return original image URL.
 				$image_new = $image_old;
-			} elseif ($width_orig != $width || $height_orig != $height || $target_extension != $source_extension) {
+			} elseif ($cache_path_ready && ($width_orig != $width || $height_orig != $height || $target_extension != $source_extension)) {
 				$image = new Image(DIR_IMAGE . $image_old);
 
 				if (!$image->getImage()) {
@@ -80,7 +89,7 @@ class ModelToolImage extends Model {
 					$image->resize($width, $height, '', $strategy);
 					$image->save(DIR_IMAGE . $image_new, $webp_quality);
 				}
-			} else {
+			} elseif ($cache_path_ready) {
 				copy(DIR_IMAGE . $image_old, DIR_IMAGE . $image_new);
 			}
 		}

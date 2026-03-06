@@ -214,6 +214,9 @@ set_permissions() {
     # Only perform ownership changes when running as root. For bind-mounted
     # webroot we avoid force-changing owner (host should control ownership).
     if [ "$(id -u)" -eq 0 ]; then
+        # Ensure image cache base directory exists for first-run thumbnail generation.
+        mkdir -p /var/www/html/image/cache || true
+
         # Don't chown the entire webroot (bind-mount). Only ensure storage ownership.
         chown -R www-data:www-data /var/www/storage || true
 
@@ -226,6 +229,7 @@ set_permissions() {
         # Writable storage dirs
         chmod -R 2775 /var/www/storage/ || true
         chmod -R 775 /var/www/html/image/ || true
+        chmod -R 775 /var/www/html/image/cache/ || true
     else
         echo "WARNING: not running as root, skipping ownership changes."
         echo "Ensure host ownership/group for bind mounts (upload/storage) allows write by group www-data."
