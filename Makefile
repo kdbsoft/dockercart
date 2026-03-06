@@ -1,4 +1,4 @@
-.PHONY: help up standalone ssl letsencrypt down logs logs-follow shell mariadb mysql backup restore clean restart
+.PHONY: help up standalone ssl letsencrypt down logs logs-follow shell mariadb backup restore clean restart
 
 ### Convenience variables
 COMPOSE := docker compose
@@ -51,8 +51,6 @@ shell: ## Open bash shell in the app container
 
 mariadb: ## Open MariaDB CLI
 	@$(COMPOSE) exec mariadb mariadb -udockercart -pdockercart_password dockercart
-
-mysql: mariadb ## Backward-compatible alias
 
 backup: ## Dump database to ./backups/
 	@mkdir -p backups

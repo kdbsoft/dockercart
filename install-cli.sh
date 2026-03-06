@@ -31,13 +31,13 @@ if ! docker compose ps | grep -q "mariadb"; then
 fi
 
 echo -e "${YELLOW}⏳ Waiting for MariaDB health...${NC}"
-until docker compose exec -T mariadb mariadb-admin ping -h 127.0.0.1 -u "${MARIADB_USER:-${MYSQL_USER:-dockercart}}" -p"${MARIADB_PASSWORD:-${MYSQL_PASSWORD:-dockercart_password}}" --silent >/dev/null 2>&1; do
+until docker compose exec -T mariadb mariadb-admin ping -h 127.0.0.1 -u "${MARIADB_USER:-dockercart}" -p"${MARIADB_PASSWORD:-dockercart_password}" --silent >/dev/null 2>&1; do
     echo -n "."
     sleep 2
 done
 echo -e " ${GREEN}✓${NC}"
 
-TABLE_COUNT=$(docker compose exec -T mariadb mariadb -N -B -u "${MARIADB_USER:-${MYSQL_USER:-dockercart}}" -p"${MARIADB_PASSWORD:-${MYSQL_PASSWORD:-dockercart_password}}" "${MARIADB_DATABASE:-${MYSQL_DATABASE:-${DB_DATABASE}}}" -e "SHOW TABLES" 2>/dev/null | wc -l | tr -d ' ')
+TABLE_COUNT=$(docker compose exec -T mariadb mariadb -N -B -u "${MARIADB_USER:-dockercart}" -p"${MARIADB_PASSWORD:-dockercart_password}" "${MARIADB_DATABASE:-${DB_DATABASE}}" -e "SHOW TABLES" 2>/dev/null | wc -l | tr -d ' ')
 
 if [ "${TABLE_COUNT}" -gt 0 ]; then
     echo -e "${GREEN}✓ Database '${DB_DATABASE}' looks initialized (${TABLE_COUNT} tables).${NC}"

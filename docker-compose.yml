@@ -72,14 +72,14 @@ services:
 
   mariadb:
     image: mariadb:11.8
-    container_name: ${MARIADB_CONTAINER_NAME:-${MYSQL_CONTAINER_NAME:-dockercart_mariadb}}
+    container_name: ${MARIADB_CONTAINER_NAME:-dockercart_mariadb}
     restart: ${RESTART_POLICY:-unless-stopped}
     # No external port exposure - use override if needed
     environment:
-      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:-${MYSQL_ROOT_PASSWORD:-root_password}}
-      MARIADB_DATABASE: ${MARIADB_DATABASE:-${MYSQL_DATABASE:-dockercart}}
-      MARIADB_USER: ${MARIADB_USER:-${MYSQL_USER:-dockercart}}
-      MARIADB_PASSWORD: ${MARIADB_PASSWORD:-${MYSQL_PASSWORD:-dockercart_password}}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:-root_password}
+      MARIADB_DATABASE: ${MARIADB_DATABASE:-dockercart}
+      MARIADB_USER: ${MARIADB_USER:-dockercart}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD:-dockercart_password}
       DB_PREFIX: ${DB_PREFIX:-oc_}
       ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
@@ -92,7 +92,7 @@ services:
       - ./docker/mysql/init.sql:/opt/dockercart-seed/init.sql:ro
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     healthcheck:
-      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "${MARIADB_USER:-${MYSQL_USER:-dockercart}}", "-p${MARIADB_PASSWORD:-${MYSQL_PASSWORD:-dockercart_password}}"]
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "${MARIADB_USER:-dockercart}", "-p${MARIADB_PASSWORD:-dockercart_password}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -107,7 +107,7 @@ services:
   #     PMA_HOST: ${PMA_HOST:-mariadb}
   #     PMA_PORT: ${PMA_PORT:-3306}
   #     PMA_USER: root
-  #     PMA_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_password}
+  #     PMA_PASSWORD: ${MARIADB_ROOT_PASSWORD:-root_password}
   #   depends_on:
   #     - mariadb
   #   labels:

@@ -44,8 +44,8 @@ Before exposing the store to the internet, update all default passwords in `.env
 
 ```dotenv
 DB_PASSWORD=<strong-random-password>
-MYSQL_ROOT_PASSWORD=<strong-random-password>
-MYSQL_PASSWORD=<strong-random-password>
+MARIADB_ROOT_PASSWORD=<strong-random-password>
+MARIADB_PASSWORD=<strong-random-password>
 ```
 
 Never leave the example credentials (`dockercart_password`, `root_password`) in a
