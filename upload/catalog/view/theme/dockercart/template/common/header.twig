@@ -52,6 +52,19 @@
   {% endif %}
 {% endif %}
 
+{# Open Graph / Twitter cards for messenger previews (Telegram, Viber, etc.) #}
+<meta property="og:title" content="{{ title }}" />
+{% if description %}<meta property="og:description" content="{{ description }}" />{% endif %}
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="{{ name }}" />
+<meta property="og:url" content="{{ schema_website_url|default(home) }}" />
+{% if org_logo %}<meta property="og:image" content="{{ org_logo }}" />{% endif %}
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="{{ title }}" />
+{% if description %}<meta name="twitter:description" content="{{ description }}" />{% endif %}
+{% if org_logo %}<meta name="twitter:image" content="{{ org_logo }}" />{% endif %}
+<link rel="image_src" href="{{ org_logo }}" />
+
 <script type="application/ld+json">
 {{ schema_organization_json|raw }}
 </script>
