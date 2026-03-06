@@ -92,6 +92,7 @@ build-extension.sh
 /.serena/
 
 *.backup
+/docker/mysql/*.bak
 
 # Development session artifacts
 INSTALLATION_UPDATE_SUMMARY.md
