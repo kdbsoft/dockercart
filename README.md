@@ -277,6 +277,8 @@ See [`.env.example`](.env.example) for a complete reference.
 |---|---|
 | [SSL_QUICK_START.md](SSL_QUICK_START.md) | Quick reference for SSL/HTTPS modes (HTTP, self-signed, Let's Encrypt) |
 | [SSL_CONFIGURATION.md](SSL_CONFIGURATION.md) | Detailed SSL/HTTPS configuration guide with troubleshooting |
+| [SSL_QUICK_START.md](SSL_QUICK_START.md) | Quick reference for SSL/HTTPS modes (HTTP, self-signed, Let's Encrypt) |
+| [SSL_CONFIGURATION.md](SSL_CONFIGURATION.md) | Detailed SSL/HTTPS configuration guide with troubleshooting |
 <<<<<<< HEAD
 =======
 | [INSTALL.md](INSTALL.md) | Detailed installation reference |
