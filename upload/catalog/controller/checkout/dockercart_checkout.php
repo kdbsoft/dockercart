@@ -350,14 +350,9 @@ class ControllerCheckoutDockercartCheckout extends Controller {
         $data['error_agree'] = $this->language->get('error_agree');
         $data['text_default_address'] = $this->language->get('text_default_address') ?: 'Default';
         
-        // Logo and store info
+        // Logo and store info (use original image so template can size via CSS)
         $this->load->model('tool/image');
-        
-        if ($this->config->get('config_logo')) {
-            $data['logo'] = $this->model_tool_image->resize($this->config->get('config_logo'), self::IMAGE_LOGO_WIDTH, self::IMAGE_LOGO_HEIGHT);
-        } else {
-            $data['logo'] = '';
-        }
+        $data['logo'] = '';
         
         $data['name'] = $this->config->get('config_name');
         $data['home'] = $this->url->link('common/home');
@@ -365,10 +360,20 @@ class ControllerCheckoutDockercartCheckout extends Controller {
         
 
         if ($this->request->server['HTTPS']) {
-			$server = $this->config->get('config_ssl');
-		} else {
-			$server = $this->config->get('config_url');
-		}
+            $server = $this->config->get('config_ssl');
+        } else {
+            $server = $this->config->get('config_url');
+        }
+
+        // Prefer theme light logo if provided, otherwise fall back to main config logo
+        $logo_light = (string)$this->config->get('dockercart_theme_logo_light');
+        if ($logo_light && is_file(DIR_IMAGE . $logo_light)) {
+            $data['logo'] = $server . 'image/' . $logo_light;
+        } elseif (is_file(DIR_IMAGE . $this->config->get('config_logo'))) {
+            $data['logo'] = $server . 'image/' . $this->config->get('config_logo');
+        } else {
+            $data['logo'] = '';
+        }
 
         $data['favicon_links'] = array();
 
