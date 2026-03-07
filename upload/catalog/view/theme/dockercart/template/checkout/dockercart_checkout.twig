@@ -308,7 +308,7 @@ select[disabled] {
     <div class="flex items-center justify-between">
       <a href="{{ home }}" class="flex items-center">
         {% if logo %}
-        <img src="{{ logo }}" alt="{{ name }}" class="h-8 sm:h-10">
+        <img src="{{ logo }}" alt="{{ name }}" class="max-h-6 sm:max-h-6 object-contain">
         {% else %}
         <span class="text-xl sm:text-2xl font-bold text-primary">{{ name }}</span>
         {% endif %}
