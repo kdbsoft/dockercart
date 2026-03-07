@@ -26,12 +26,26 @@ DockerCart runs in **install-less** mode:
    - `ADMIN_EMAIL`
 
 ### 2) Start in Traefik mode
-
-Uses `docker-compose.yml`.
+Uses `docker-compose.yml` with an external Traefik network. Prefer the helper script or Make targets which select HTTP/HTTPS modes automatically.
 
 ```bash
-docker compose up -d --build
+# HTTP (default)
+make up
+# or
+./start.sh
+
+# HTTPS local testing (self-signed)
+make ssl
+# or
+./start.sh --ssl
+
+# HTTPS production (Let's Encrypt) — requires valid domain and DNS
+make letsencrypt
+# or
+./start.sh --letsencrypt
 ```
+
+Note: Traefik must be available on the external `traefik` network (the compose files expect an external network named `traefik`). The start script will include the appropriate docker-compose override files for SSL vs non-SSL modes.
 
 ### 3) Start in Standalone mode
 
