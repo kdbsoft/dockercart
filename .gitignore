@@ -106,3 +106,13 @@ QUICK_START.md
 
 # Temporary test/debug scripts
 check-multicurrency.sh
+
+# SSL / certificate artifacts (self-signed and Let's Encrypt)
+# Ignore generated self-signed certificates and private keys
+/docker/ssl/
+/docker/ssl/**
+# Ignore Let's Encrypt/ACME storage
+/docker/acme/
+/docker/acme/**
+# Ensure acme.json (contains private keys) is not committed
+/docker/acme/acme.json

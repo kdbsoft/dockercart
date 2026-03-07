@@ -1,0 +1,11 @@
+# Docker Compose override for non-SSL mode (default)
+# Usage: docker compose -f docker-compose.yml -f docker-compose.no-ssl.yml up -d
+# This is the default configuration and is included automatically unless --ssl or --letsencrypt is specified
+
+services:
+  nginx:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.${DOCKERCART_ROUTER_NAME:-dockercart}.rule=Host(`${DOCKERCART_DOMAIN:-dockercart.local}`)"
+      - "traefik.http.routers.${DOCKERCART_ROUTER_NAME:-dockercart}.entrypoints=web"
+      - "traefik.http.services.${DOCKERCART_ROUTER_NAME:-dockercart}.loadbalancer.server.port=80"

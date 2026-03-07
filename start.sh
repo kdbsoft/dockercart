@@ -123,6 +123,26 @@ if [ "$SSL_MODE" = "self-signed" ]; then
 fi
 
 # ============================================================================
+# CONFIGURE DOCKER COMPOSE FILES BASED ON SSL MODE
+# ============================================================================
+
+case "$SSL_MODE" in
+    "none")
+        COMPOSE_FILES+=("-f" "docker-compose.no-ssl.yml")
+        echo -e "${YELLOW}Mode: HTTP (no SSL)${NC}"
+        ;;
+    "self-signed")
+        COMPOSE_FILES+=("-f" "docker-compose.ssl.yml")
+        echo -e "${YELLOW}Mode: HTTPS with self-signed certificate${NC}"
+        ;;
+    "letsencrypt")
+        COMPOSE_FILES+=("-f" "docker-compose.letsencrypt.yml")
+        echo -e "${YELLOW}Mode: HTTPS with Let's Encrypt${NC}"
+        ;;
+esac
+echo ""
+
+# ============================================================================
 # START
 # ============================================================================
 
