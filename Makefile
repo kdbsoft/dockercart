@@ -9,17 +9,24 @@ endif
 
 help: ## Show this help
 	@echo ""
-	@echo "DockerCart"
+	@echo "DockerCart - Docker Compose with Traefik"
 	@echo ""
 	@grep -E '^[a-zA-Z-]+:.*?## .*$$$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$$$1, $$$$2}'
 	@echo ""
-	@echo "  make up          Traefik mode   - http://$${DOCKERCART_DOMAIN:-dockercart.local}"
-	@echo "  make standalone  Standalone     - http://$${DOCKERCART_DOMAIN:-dockercart.local} (port $${DOCKERCART_HTTP_PORT:-80})"
-	@echo "  make ssl         Self-signed SSL - https://$${DOCKERCART_DOMAIN:-dockercart.local} (local testing)"
-	@echo "  make letsencrypt Let's Encrypt  - Production with real domain SSL"
+	@echo "SSL Modes (default: HTTP without SSL):"
+	@echo "  make up          HTTP mode       - http://$${DOCKERCART_DOMAIN:-dockercart.local}"
+	@echo "  make ssl         HTTPS SSL       - https://$${DOCKERCART_DOMAIN:-dockercart.local} (self-signed, local testing)"
+	@echo "  make letsencrypt HTTPS + LE      - Production with real domain SSL (requires SSL_DOMAIN in .env)"
+	@echo ""
+	@echo "Alternative:"
+	@echo "  make standalone  No Traefik      - Standalone Apache + embedded port routing"
+	@echo ""
+	@echo "Documentation:"
+	@echo "  See SSL_QUICK_START.md for SSL/HTTPS quick reference"
+	@echo "  See SSL_CONFIGURATION.md for detailed SSL configuration"
 	@echo ""
 
-up: ## Start in Traefik mode (docker-compose.yml)
+up: ## Start in Traefik mode, HTTP by default (use make ssl or make letsencrypt for HTTPS)
 	@./start.sh
 
 standalone: ## Start without Traefik, store on port ${DOCKERCART_HTTP_PORT:-80}

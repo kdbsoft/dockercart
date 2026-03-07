@@ -14,14 +14,6 @@ services:
       - "traefik.http.routers.${DOCKERCART_ROUTER_NAME:-dockercart}.rule=Host(`${DOCKERCART_DOMAIN:-dockercart.local}`)"
       - "traefik.http.routers.${DOCKERCART_ROUTER_NAME:-dockercart}.entrypoints=web"
       - "traefik.http.services.${DOCKERCART_ROUTER_NAME:-dockercart}.loadbalancer.server.port=80"
-    # SSL Configuration (uncomment to enable)
-    # labels:
-    #   - "traefik.enable=true"
-    #   - "traefik.http.routers.${DOCKERCART_ROUTER_NAME:-dockercart}.rule=Host(`${DOCKERCART_DOMAIN:-dockercart.local}`)"
-    #   - "traefik.http.routers.${DOCKERCART_ROUTER_NAME:-dockercart}.entrypoints=websecure"
-    #   - "traefik.http.routers.${DOCKERCART_ROUTER_NAME:-dockercart}.tls=true"
-    #   - "traefik.http.routers.${DOCKERCART_ROUTER_NAME:-dockercart}.tls.certresolver=letsencrypt"
-    #   - "traefik.http.services.${DOCKERCART_ROUTER_NAME:-dockercart}.loadbalancer.server.port=80"
     depends_on:
       - apache
     networks:
