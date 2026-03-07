@@ -15,6 +15,8 @@ DockerCart is a production-ready e-commerce platform built on top of OpenCart 3,
 
 OpenCart is a solid foundation, but running it in production has historically meant dealing with a long list of known bugs, incompatible extensions, fragile file-based configuration, and manual server setup. DockerCart solves all of that:
 
+Note on frontend stacks: OpenCart's legacy storefront is built on jQuery, Bootstrap and Font Awesome, while DockerCart ships a modern frontend stack using JavaScript (ES6+), Tailwind CSS and the Lucide icon font.
+
 | OpenCart baseline | DockerCart |
 |---|---|
 | Manual server setup | One-command Docker deployment |
@@ -33,12 +35,13 @@ OpenCart is a solid foundation, but running it in production has historically me
 
 | Component | Technology |
 |---|---|
-| Application | PHP 8.5 + Apache + Nginx |
-| Database | MySQL 8.0 |
+| Application | PHP 8.4 + Apache + Nginx |
+| Database | MariaDB 11.8 |
 | Object cache | Memcached 1.6 |
 | Full-text search | Manticore Search |
 | Reverse proxy | Traefik v3 *(optional)* |
 | SSL | Let's Encrypt / self-signed |
+| Frontend | OpenCart (legacy): jQuery, Bootstrap, Font Awesome · DockerCart: JavaScript (ES6+), Tailwind CSS, Lucide icon font |
 
 ---
 
@@ -100,7 +103,7 @@ Set these values in `.env`:
 
 ---
 
-### Mode 2 — Traefik *(local dev / staging)*
+### Mode 2 — Traefik *(production / local dev / staging)*
 
 Use `docker-compose.yml` with an external Traefik network.
 
