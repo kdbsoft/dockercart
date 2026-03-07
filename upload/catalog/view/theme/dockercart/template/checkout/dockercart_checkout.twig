@@ -788,6 +788,7 @@ const CONFIG = {
     coupon: '{{ ajax_coupon }}',
     voucher: '{{ ajax_voucher }}',
     reward: '{{ ajax_reward }}',
+    country: '{{ ajax_country }}',
     confirm: '{{ ajax_confirm }}'
   },
   shippingRequired: {{ shipping_required ? 'true' : 'false' }},
@@ -1055,7 +1056,7 @@ const loadZonesForAddress = (countryId, zoneId, zoneSelect, countrySelect) => {
   }
 
   zoneSelect.innerHTML = '<option value="">Loading...</option>';
-  return ajax(`index.php?route=checkout/checkout/country&country_id=${countryId}`)
+  return ajax(`${CONFIG.urls.country}&country_id=${countryId}`)
     .then(json => {
       let html = `<option value="">${TEXT_SELECT_PLACEHOLDER}</option>`;
       if (json.zone && Array.isArray(json.zone)) {
@@ -1869,7 +1870,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (country_id) {
         zoneSelect.innerHTML = '<option value="">Loading...</option>';
         
-        ajax(`index.php?route=checkout/checkout/country&country_id=${country_id}`)
+        ajax(`${CONFIG.urls.country}&country_id=${country_id}`)
           .then(json => {
             log('Zones loaded', json);
             
@@ -2386,7 +2387,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (country_id) {
         paymentZoneSelect.innerHTML = '<option value="">Loading...</option>';
         
-        ajax(`index.php?route=checkout/checkout/country&country_id=${country_id}`)
+        ajax(`${CONFIG.urls.country}&country_id=${country_id}`)
           .then(json => {
             log('Payment zones loaded', json);
             
