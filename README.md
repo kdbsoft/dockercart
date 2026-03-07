@@ -164,7 +164,9 @@ make letsencrypt
 make help          # List all targets
 
 make standalone    # Start — direct host port (default: 80), no Traefik
-make up            # Start — Traefik mode
+make up            # Start — Traefik mode (HTTP by default)
+make ssl           # Start — Traefik + self-signed HTTPS (local testing)
+make letsencrypt   # Start — Traefik + Let's Encrypt (production)
 make down          # Stop containers
 make restart       # Restart containers
 make logs          # Show last 100 log lines
@@ -275,7 +277,6 @@ See [`.env.example`](.env.example) for a complete reference.
 |---|---|
 | [SSL_QUICK_START.md](SSL_QUICK_START.md) | Quick reference for SSL/HTTPS modes (HTTP, self-signed, Let's Encrypt) |
 | [SSL_CONFIGURATION.md](SSL_CONFIGURATION.md) | Detailed SSL/HTTPS configuration guide with troubleshooting |
-| [INSTALL.md](INSTALL.md) | Detailed installation reference |
 | [DEPLOYMENT.md](DEPLOYMENT.md) | Deployment architecture and CI/CD notes |
 | [SECURITY.md](SECURITY.md) | Security policy and vulnerability reporting |
 
