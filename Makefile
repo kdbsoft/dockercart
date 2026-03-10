@@ -70,11 +70,11 @@ shell: ## Open bash shell in the app container
 	@$(COMPOSE) exec $(SHELL_SERVICE) bash
 
 mariadb: ## Open MariaDB CLI
-	@$(COMPOSE) exec mariadb mariadb -udockercart -pdockercart_password dockercart
+	@$(COMPOSE) exec mariadb mariadb -u$${MARIADB_USER:-dockercart} -p$${MARIADB_PASSWORD:-dockercart_password} $${MARIADB_DATABASE:-dockercart}
 
 backup: ## Dump database to ./backups/
 	@mkdir -p backups
-	@$(COMPOSE) exec mariadb mariadb-dump -udockercart -pdockercart_password dockercart > backups/backup_$$(date +%Y%m%d_%H%M%S).sql
+	@$(COMPOSE) exec mariadb mariadb-dump -u$${MARIADB_USER:-dockercart} -p$${MARIADB_PASSWORD:-dockercart_password} $${MARIADB_DATABASE:-dockercart} > backups/backup_$$(date +%Y%m%d_%H%M%S).sql
 	@echo "Backup created"
 
 restore: ## Restore from the latest dump in ./backups/
