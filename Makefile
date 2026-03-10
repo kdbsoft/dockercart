@@ -26,6 +26,19 @@ help: ## Show this help
 	@echo "  See SSL_CONFIGURATION.md for detailed SSL configuration"
 	@echo ""
 
+migrate: ## Apply SQL migrations from docker/mysql/migrations (uses mariadb container)
+	@echo "Applying SQL migrations from docker/mysql/migrations/..."
+	@set -e; \
+	if [ -z "$(wildcard docker/mysql/migrations/*.sql)" ]; then \
+		echo "No migration files found in docker/mysql/migrations/"; \
+		exit 0; \
+	fi; \
+	for f in docker/mysql/migrations/*.sql; do \
+		echo "-> Applying $$f"; \
+		$(COMPOSE) exec -T mariadb mariadb -udockercart -pdockercart_password dockercart < "$$f" || { echo "Failed applying $$f"; exit 1; }; \
+	done; \
+	echo "Migrations applied."
+
 up: ## Start in Traefik mode, HTTP by default (use make ssl or make letsencrypt for HTTPS)
 	@./start.sh
 
