@@ -33,6 +33,61 @@ wait_for_mysql() {
     echo "MariaDB is up and running!"
 }
 
+# Генерация robots.txt при первом старте (если файл отсутствует в bind mount)
+ensure_robots_txt() {
+    local robots_file="/var/www/html/robots.txt"
+
+    if [ -f "$robots_file" ]; then
+        echo "robots.txt already exists, skipping generation"
+        return
+    fi
+
+    local http_server="$(printf '%s' "${DOCKERCART_URL:-http://dockercart.local}" | sed 's:/*$::')"
+    local ssl_enabled="${DOCKERCART_SSL_ENABLED:-false}"
+    local ssl_enabled_normalized="$(printf '%s' "$ssl_enabled" | tr '[:upper:]' '[:lower:]')"
+    local https_server="$(printf '%s' "${DOCKERCART_HTTPS_URL:-$http_server}" | sed 's:/*$::')"
+    local base_server="$http_server"
+
+    if [ "$ssl_enabled_normalized" = "true" ] || [ "$ssl_enabled_normalized" = "1" ] || [ "$ssl_enabled_normalized" = "yes" ]; then
+        base_server="$https_server"
+    fi
+
+    echo "Generating robots.txt at first start..."
+    cat > "$robots_file" <<EOF
+User-agent: *
+Allow: /catalog/view/javascript/
+Allow: /catalog/view/theme/
+Allow: /image/
+
+# Service and private areas
+Disallow: /admin/
+Disallow: /system/
+Disallow: /storage/
+Disallow: /index.php?route=tool/
+
+# Search, cart, checkout and user actions
+Disallow: /*?*route=product/search
+Disallow: /*?*route=checkout/
+Disallow: /*?*route=account/
+Disallow: /*?*route=affiliate/
+
+# Duplicate pages via query parameters
+Disallow: /*?*sort=
+Disallow: /*?*order=
+Disallow: /*?*limit=
+Disallow: /*?*page=
+Disallow: /*?*tracking=
+Disallow: /*?*utm_
+
+Sitemap: ${base_server}/sitemap.xml
+EOF
+
+    if [ "$(id -u)" -eq 0 ]; then
+        chown www-data:www-data "$robots_file" 2>/dev/null || true
+        chmod 664 "$robots_file" 2>/dev/null || true
+    fi
+}
+
 # Гарантированно создаем config.php файлы (если их нет на хосте/в bind mount)
 ensure_app_configs() {
     local root_config="/var/www/html/config.php"
@@ -265,6 +320,9 @@ echo "Starting DockerCart container..."
 
 # Создаем конфиги приложения, если отсутствуют
 ensure_app_configs
+
+# Генерируем robots.txt, если отсутствует
+ensure_robots_txt
 
 # Ждем MariaDB
 wait_for_mysql
