@@ -1,6 +1,30 @@
 #!/bin/bash
 set -e
 
+# Fix permissions for mounted volumes (они приходят с правами хоста)
+fix_volume_permissions() {
+    echo "Fixing permissions for mounted volumes..."
+    
+    # Переиминяем владельца смонтированных папок на www-data
+    if [ -d "/var/www/html" ]; then
+        chown -R www-data:www-data /var/www/html 2>/dev/null || true
+        chmod -R 755 /var/www/html 2>/dev/null || true
+        find /var/www/html -type d -exec chmod 755 {} \; 2>/dev/null || true
+        find /var/www/html -type f -exec chmod 644 {} \; 2>/dev/null || true
+    fi
+    
+    if [ -d "/var/www/storage" ]; then
+        chown -R www-data:www-data /var/www/storage 2>/dev/null || true
+        chmod -R 777 /var/www/storage 2>/dev/null || true
+    fi
+    
+    # Важные директории для загрузок должны быть writable
+    chmod -R 775 /var/www/html/image/catalog 2>/dev/null || true
+    chmod -R 775 /var/www/html/image/cache 2>/dev/null || true
+    
+    echo "Permissions fixed!"
+}
+
 # Функция для ожидания MariaDB
 wait_for_mysql() {
     echo "Waiting for MariaDB to be ready..."
@@ -317,6 +341,9 @@ echo "Entrypoint: $0 (modified: ${script_mtime})"
 echo "Entrypoint started at UTC: $(date -u '+%Y-%m-%d %H:%M:%S')"
 
 echo "Starting DockerCart container..."
+
+# Исправляем права на смонтированные volume'ы (первое действие!)
+fix_volume_permissions
 
 # Создаем конфиги приложения, если отсутствуют
 ensure_app_configs
