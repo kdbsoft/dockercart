@@ -25,7 +25,7 @@ export-yml-[0-9]*-*.xml
 !/upload/image/no_image.jpg
 
 # Robots.txt
-!/upload/robots.txt
+/upload/robots.txt
 
 # Image Cache Files
 /upload/image/cache/*
