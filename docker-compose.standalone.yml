@@ -24,7 +24,7 @@ services:
     depends_on:
       - apache
     networks:
-      - dockercart-network
+      - ${DOCKERCART_NETWORK:-dockercart-network}
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
       interval: 10s
@@ -66,7 +66,7 @@ services:
       memcached:
         condition: service_started
     networks:
-      - dockercart-network
+      - ${DOCKERCART_NETWORK:-dockercart-network}
 
   mariadb:
     image: mariadb:11.8
@@ -94,7 +94,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - dockercart-network
+      - ${DOCKERCART_NETWORK:-dockercart-network}
 
   manticore:
     image: manticoresearch/manticore:15.1.0
@@ -109,7 +109,7 @@ services:
     entrypoint: /bin/bash
     command: /docker-entrypoint.sh
     networks:
-      - dockercart-network
+      - ${DOCKERCART_NETWORK:-dockercart-network}
     healthcheck:
       test: ["CMD", "mysql", "-h", "127.0.0.1", "-P", "9306", "-e", "SHOW TABLES"]
       interval: 10s
@@ -122,7 +122,7 @@ services:
     restart: ${RESTART_POLICY:-unless-stopped}
     command: ["memcached", "-m", "128", "-p", "11211", "-u", "memcache", "-vv"]
     networks:
-      - dockercart-network
+      - ${DOCKERCART_NETWORK:-dockercart-network}
     healthcheck:
       test: ["CMD-SHELL", "echo stats | nc 127.0.0.1 11211 >/dev/null 2>&1 || exit 1"]
       interval: 10s
@@ -135,4 +135,5 @@ volumes:
 
 networks:
   dockercart-network:
+    name: ${DOCKERCART_NETWORK:-dockercart-network}
     driver: bridge
