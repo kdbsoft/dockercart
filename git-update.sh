@@ -1,13 +1,18 @@
 #!/bin/sh
 
-echo "📥 Fetching updates from GitHub..."
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+echo "Current branch: $BRANCH"
+
 git fetch origin
 
-CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+LOCAL=$(git rev-parse @)
+REMOTE=$(git rev-parse origin/$BRANCH)
 
-echo "🔀 Current branch: $CURRENT_BRANCH"
-
-echo "⬇ Updating branch..."
-git pull --rebase origin $CURRENT_BRANCH
-
-echo "✅ Done."
+if [ "$LOCAL" = "$REMOTE" ]; then
+    echo "✅ Already up to date"
+else
+    echo "⬇ Pulling updates..."
+    git pull --rebase origin $BRANCH
+    echo "🚀 Updated successfully"
+fi
