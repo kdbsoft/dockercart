@@ -1,0 +1,7 @@
+# Docker Compose override for optional MariaDB external port exposure
+# This file is included only when MARIADB_EXTERNAL_PORT is set in .env
+
+services:
+  mariadb:
+    ports:
+      - "${MARIADB_EXTERNAL_PORT}:3306"

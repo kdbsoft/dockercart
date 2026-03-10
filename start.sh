@@ -140,6 +140,13 @@ case "$SSL_MODE" in
         echo -e "${YELLOW}Mode: HTTPS with Let's Encrypt${NC}"
         ;;
 esac
+
+if [ -n "${MARIADB_EXTERNAL_PORT:-}" ]; then
+    COMPOSE_FILES+=("-f" "docker-compose.mariadb-port.yml")
+    echo -e "${YELLOW}MariaDB external port enabled: ${MARIADB_EXTERNAL_PORT}${NC}"
+else
+    echo -e "${YELLOW}MariaDB external port disabled (DB is isolated)${NC}"
+fi
 echo ""
 
 # ============================================================================
