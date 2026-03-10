@@ -1,7 +1,7 @@
 <?php
 class ModelCustomerCustomerGroup extends Model {
 	public function addCustomerGroup($data) {
-		$this->db->query("INSERT INTO " . DB_PREFIX . "customer_group SET approval = '" . (int)$data['approval'] . "', sort_order = '" . (int)$data['sort_order'] . "'");
+		$this->db->query("INSERT INTO " . DB_PREFIX . "customer_group SET approval = '" . (int)$data['approval'] . "', sort_order = '" . (int)$data['sort_order'] . "', discount_percent = '" . (float)$data['discount_percent'] . "'");
 
 		$customer_group_id = $this->db->getLastId();
 
@@ -13,7 +13,7 @@ class ModelCustomerCustomerGroup extends Model {
 	}
 
 	public function editCustomerGroup($customer_group_id, $data) {
-		$this->db->query("UPDATE " . DB_PREFIX . "customer_group SET approval = '" . (int)$data['approval'] . "', sort_order = '" . (int)$data['sort_order'] . "' WHERE customer_group_id = '" . (int)$customer_group_id . "'");
+		$this->db->query("UPDATE " . DB_PREFIX . "customer_group SET approval = '" . (int)$data['approval'] . "', sort_order = '" . (int)$data['sort_order'] . "', discount_percent = '" . (float)$data['discount_percent'] . "' WHERE customer_group_id = '" . (int)$customer_group_id . "'");
 
 		$this->db->query("DELETE FROM " . DB_PREFIX . "customer_group_description WHERE customer_group_id = '" . (int)$customer_group_id . "'");
 
@@ -42,7 +42,8 @@ class ModelCustomerCustomerGroup extends Model {
 
 		$sort_data = array(
 			'cgd.name',
-			'cg.sort_order'
+			'cg.sort_order',
+			'cg.discount_percent'
 		);
 
 		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
