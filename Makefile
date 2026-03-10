@@ -1,3 +1,8 @@
+ifneq (,$(wildcard .env))
+include .env
+export
+endif
+
 .PHONY: help up standalone ssl letsencrypt down logs logs-follow shell mariadb backup restore dump-init clean restart
 
 ### Convenience variables
@@ -35,7 +40,7 @@ migrate: ## Apply SQL migrations from docker/mysql/migrations (uses mariadb cont
 	fi; \
 	for f in docker/mysql/migrations/*.sql; do \
 		echo "-> Applying $$f"; \
-		$(COMPOSE) exec -T mariadb mariadb -udockercart -pdockercart_password dockercart < "$$f" || { echo "Failed applying $$f"; exit 1; }; \
+		$(COMPOSE) exec -T mariadb mariadb -u$${MARIADB_USER:-dockercart} -p$${MARIADB_PASSWORD:-dockercart_password} $${MARIADB_DATABASE:-dockercart} < "$$f" || { echo "Failed applying $$f"; exit 1; }; \
 	done; \
 	echo "Migrations applied."
 
