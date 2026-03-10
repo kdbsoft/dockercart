@@ -131,7 +131,7 @@
         <div class="flex items-center gap-3 flex-shrink-0">
           <a href="{{ home }}" class="flex items-center">
             {% if logo %}
-              <img src="{{ logo }}" title="{{ name }}" alt="{{ name }}" class="h-9 w-auto object-contain max-w-[180px] sm:max-w-[220px]" />
+              <img src="{{ logo }}" title="{{ name }}" alt="{{ name }}" class="object-contain max-w-[180px] sm:max-w-[220px]" />
             {% else %}
               <span class="text-xl font-extrabold text-gray-900 tracking-tight">{{ name }}</span>
             {% endif %}
@@ -228,7 +228,7 @@
 <div id="dc-mobile-menu" class="fixed top-0 right-0 bottom-0 z-[10001] w-[280px] bg-white shadow-2xl flex flex-col dc-mobile-menu-closed">
   <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
     {% if logo %}
-      <img src="{{ logo }}" alt="{{ name }}" class="h-7 w-auto object-contain" />
+      <img src="{{ logo }}" alt="{{ name }}" class="object-contain max-w-[180px] sm:max-w-[220px]" />
     {% else %}
       <span class="font-bold text-gray-900">{{ name }}</span>
     {% endif %}
