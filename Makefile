@@ -27,7 +27,7 @@ help: ## Show this help
 	@echo ""
 
 migrate: ## Apply SQL migrations from docker/mysql/migrations (uses mariadb container)
-	@echo "Applying SQL migrations from docker/mysql/migrations/..."
+	@echo "Applying all SQL migrations from docker/mysql/migrations/..."
 	@set -e; \
 	if [ -z "$(wildcard docker/mysql/migrations/*.sql)" ]; then \
 		echo "No migration files found in docker/mysql/migrations/"; \
