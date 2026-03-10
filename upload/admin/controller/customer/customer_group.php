@@ -175,6 +175,7 @@ class ControllerCustomerCustomerGroup extends Controller {
 			$data['customer_groups'][] = array(
 				'customer_group_id' => $result['customer_group_id'],
 				'name'              => $result['name'] . (($result['customer_group_id'] == $this->config->get('config_customer_group_id')) ? $this->language->get('text_default') : null),
+				'discount_percent'  => (float)$result['discount_percent'],
 				'sort_order'        => $result['sort_order'],
 				'edit'              => $this->url->link('customer/customer_group/edit', 'user_token=' . $this->session->data['user_token'] . '&customer_group_id=' . $result['customer_group_id'] . $url, true)
 			);
@@ -213,6 +214,7 @@ class ControllerCustomerCustomerGroup extends Controller {
 		}
 
 		$data['sort_name'] = $this->url->link('customer/customer_group', 'user_token=' . $this->session->data['user_token'] . '&sort=cgd.name' . $url, true);
+		$data['sort_discount_percent'] = $this->url->link('customer/customer_group', 'user_token=' . $this->session->data['user_token'] . '&sort=cg.discount_percent' . $url, true);
 		$data['sort_sort_order'] = $this->url->link('customer/customer_group', 'user_token=' . $this->session->data['user_token'] . '&sort=cg.sort_order' . $url, true);
 
 		$url = '';
@@ -258,6 +260,12 @@ class ControllerCustomerCustomerGroup extends Controller {
 			$data['error_name'] = $this->error['name'];
 		} else {
 			$data['error_name'] = array();
+		}
+
+		if (isset($this->error['discount_percent'])) {
+			$data['error_discount_percent'] = $this->error['discount_percent'];
+		} else {
+			$data['error_discount_percent'] = '';
 		}
 
 		$url = '';
@@ -326,6 +334,14 @@ class ControllerCustomerCustomerGroup extends Controller {
 			$data['sort_order'] = '';
 		}
 
+		if (isset($this->request->post['discount_percent'])) {
+			$data['discount_percent'] = $this->request->post['discount_percent'];
+		} elseif (!empty($customer_group_info)) {
+			$data['discount_percent'] = $customer_group_info['discount_percent'];
+		} else {
+			$data['discount_percent'] = 0;
+		}
+
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');
@@ -342,6 +358,10 @@ class ControllerCustomerCustomerGroup extends Controller {
 			if ((utf8_strlen($value['name']) < 3) || (utf8_strlen($value['name']) > 32)) {
 				$this->error['name'][$language_id] = $this->language->get('error_name');
 			}
+		}
+
+		if (!is_numeric($this->request->post['discount_percent']) || (float)$this->request->post['discount_percent'] < 0 || (float)$this->request->post['discount_percent'] > 100) {
+			$this->error['discount_percent'] = $this->language->get('error_discount_percent');
 		}
 
 		return !$this->error;

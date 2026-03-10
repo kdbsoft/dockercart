@@ -2133,6 +2133,7 @@ DROP TABLE IF EXISTS `oc_customer_group`;
 CREATE TABLE `oc_customer_group` (
   `customer_group_id` int(11) NOT NULL AUTO_INCREMENT,
   `approval` int(11) NOT NULL,
+  `discount_percent` decimal(5,2) NOT NULL DEFAULT 0.00,
   `sort_order` int(11) NOT NULL,
   PRIMARY KEY (`customer_group_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
@@ -2146,7 +2147,7 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_customer_group` WRITE;
 /*!40000 ALTER TABLE `oc_customer_group` DISABLE KEYS */;
 INSERT INTO `oc_customer_group` VALUES
-(1,0,1);
+(1,0,0.00,1);
 /*!40000 ALTER TABLE `oc_customer_group` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;

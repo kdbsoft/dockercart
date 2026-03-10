@@ -276,6 +276,24 @@ class ControllerStartupStartup extends Controller {
 		} else {
 			$this->config->set('config_customer_group_id', $this->config->get('config_customer_group_id'));
 		}
+
+		$customer_group_discount = 0.0;
+
+		if (isset($this->session->data['customer']) || $this->customer->isLogged()) {
+			$customer_group_query = $this->db->query("SELECT discount_percent FROM " . DB_PREFIX . "customer_group WHERE customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "'");
+
+			if ($customer_group_query->num_rows) {
+				$customer_group_discount = (float)$customer_group_query->row['discount_percent'];
+
+				if ($customer_group_discount < 0) {
+					$customer_group_discount = 0;
+				} elseif ($customer_group_discount > 100) {
+					$customer_group_discount = 100;
+				}
+			}
+		}
+
+		$this->config->set('config_customer_group_discount', $customer_group_discount);
 		
 		// Tracking Code
 		if (isset($this->request->get['tracking'])) {

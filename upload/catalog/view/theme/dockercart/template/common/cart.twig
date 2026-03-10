@@ -79,8 +79,8 @@
         <div id="cart-empty" class="flex flex-col items-center justify-center h-full text-gray-400 py-16">
           <i data-lucide="shopping-cart" class="w-16 h-16 opacity-20 mb-4"></i>
           <p class="font-medium text-lg text-gray-500">{{ text_empty }}</p>
-          <p class="text-sm mt-1">Add something to get started!</p>
-          <button onclick="dcCloseCart()" class="mt-6 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition">Continue Shopping</button>
+          <p class="text-sm mt-1">{{ text_cart_empty_hint }}</p>
+          <button onclick="dcCloseCart()" class="mt-6 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition">{{ button_shopping }}</button>
         </div>
       {% endif %}
     </div>

@@ -1,0 +1,3 @@
+-- Adds B2B discount percent support for customer groups
+ALTER TABLE `oc_customer_group`
+  ADD COLUMN IF NOT EXISTS `discount_percent` DECIMAL(5,2) NOT NULL DEFAULT 0.00 AFTER `approval`;
