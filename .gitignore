@@ -44,6 +44,14 @@ export-yml-[0-9]*-*.xml
 /upload/image/templates/*
 /upload/image/templates/default.jpg
 
+# Ignore all other files under /upload/image (keep currently tracked files).
+# Preserve the demo directory and its contents for tracking.
+/upload/image/catalog/*
+!/upload/image/catalog/demo/
+!/upload/image/catalog/demo/**
+!/upload/image/catalog/social/
+!/upload/image/catalog/social/**
+
 # Download Files
 /upload/system/storage/download/*
 !/upload/system/storage/download/index.html
