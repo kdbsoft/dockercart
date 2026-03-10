@@ -17,7 +17,7 @@ services:
     depends_on:
       - apache
     networks:
-      - ${DOCKERCART_NETWORK:-dockercart-network}
+      - dockercart-network
       - traefik
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
@@ -60,7 +60,7 @@ services:
       memcached:
         condition: service_started
     networks:
-      - ${DOCKERCART_NETWORK:-dockercart-network}
+      - dockercart-network
 
   mariadb:
     image: mariadb:11.8
@@ -89,7 +89,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - ${DOCKERCART_NETWORK:-dockercart-network}
+      - dockercart-network
 
   # phpmyadmin:
   #   image: phpmyadmin:latest
@@ -128,7 +128,7 @@ services:
       - "${MANTICORE_SQL_PORT:-9306}:9306"   # MySQL protocol port
       - "${MANTICORE_HTTP_PORT:-9308}:9308"  # HTTP API port
     networks:
-      - ${DOCKERCART_NETWORK:-dockercart-network}
+      - dockercart-network
     healthcheck:
       test: ["CMD", "mysql", "-h", "127.0.0.1", "-P", "9306", "-e", "SHOW TABLES"]
       interval: 10s
@@ -141,7 +141,7 @@ services:
     restart: ${RESTART_POLICY:-unless-stopped}
     command: ["memcached", "-m", "128", "-p", "11211", "-u", "memcache", "-vv"]
     networks:
-      - ${DOCKERCART_NETWORK:-dockercart-network}
+      - dockercart-network
     healthcheck:
       test: ["CMD-SHELL", "echo stats | nc 127.0.0.1 11211 >/dev/null 2>&1 || exit 1"]
       interval: 10s
