@@ -362,6 +362,24 @@ document.addEventListener('DOMContentLoaded', function () {
   })();
 
   lucide.createIcons();
+  
+  // Remove flag images from language selector in header topbar
+  (function removeLangFlags() {
+    try {
+      var langForm = document.getElementById('form-language');
+      if (langForm) {
+        langForm.querySelectorAll('img').forEach(function (img) { img.remove(); });
+      } else {
+        var topbar = document.querySelector('.dc-topbar-controls');
+        if (topbar) {
+          var first = topbar.firstElementChild;
+          if (first) first.querySelectorAll('img').forEach(function (img) { img.remove(); });
+        }
+      }
+    } catch (e) {
+      // silent
+    }
+  })();
 
   /* Account dropdown (portal) — render in body to avoid header/category stacking conflicts */
   var accountBtn = document.getElementById('dc-account-btn');

@@ -11,8 +11,8 @@
     {% for language in languages %}
     <a href="{{ language.url }}" rel="nofollow"
        class="flex items-center gap-2.5 px-4 py-2 text-xs text-gray-300 hover:bg-gray-800 hover:text-white transition">
-      <img src="catalog/language/{{ language.code }}/{{ language.code }}.png" alt="{{ language.name }}" class="w-4 h-4 rounded-sm object-contain" />
-      {{ language.name }}
+      {# Flags removed - display name only #}
+      <span class="leading-none">{{ language.name }}</span>
       {% if language.code == code %}<i data-lucide="check" class="w-3 h-3 ml-auto text-blue-400"></i>{% endif %}
     </a>
     {% endfor %}
