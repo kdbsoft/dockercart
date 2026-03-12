@@ -144,6 +144,9 @@ class ControllerExtensionModuleDockercartGoogleTranslation extends Controller {
         $this->load->language('extension/module/dockercart_google_translation');
         $this->load->model('extension/module/dockercart_google_translation');
 
+        @set_time_limit(0);
+        @ini_set('max_execution_time', '0');
+
         $json = array();
 
         if (!$this->user->hasPermission('modify', 'extension/module/dockercart_google_translation')) {

@@ -1,0 +1,33 @@
+<?php
+
+$_['entry_description'] = 'Поиск по описанию товара';
+$_['entry_search'] = 'Критерии поиска';
+$_['heading_tag'] = 'Ярлык - ';
+$_['heading_title'] = 'Поиск';
+$_['text_category'] = 'Все категории';
+$_['text_compare'] = 'Сравнение товаров (%s)';
+$_['text_default'] = 'По умолчанию';
+$_['text_empty'] = 'Товар, соответствующий критериям поиска, отсутствует.';
+$_['text_keyword'] = 'Ключевые слова';
+$_['text_limit'] = 'Показывать:';
+$_['text_manufacturer'] = 'Бренд:';
+$_['text_model'] = 'Код товара:';
+$_['text_model_asc'] = 'Модель (от А до Я)';
+$_['text_model_desc'] = 'Модель (Z - A)';
+$_['text_name_asc'] = 'Имя (от А до Я)';
+$_['text_name_desc'] = 'Имя (Z - A)';
+$_['text_points'] = 'Бонусные баллы:';
+$_['text_price'] = 'Цена:';
+$_['text_price_asc'] = 'Цена (низкая > высокая)';
+$_['text_price_desc'] = 'Цена (высокая > низкая)';
+$_['text_products'] = '%s продуктов';
+$_['text_quantity'] = 'Кол-во:';
+$_['text_quick_view'] = 'Быстрый просмотр';
+$_['text_rating_asc'] = 'Рейтинг (самый низкий)';
+$_['text_rating_desc'] = 'Рейтинг (самый высокий)';
+$_['text_reviews'] = 'На основе %s отзывов.';
+$_['text_reviews_word'] = 'отзывы';
+$_['text_search'] = 'Товары, соответствующие критериям поиска';
+$_['text_sort'] = 'Сортировать по:';
+$_['text_sub_category'] = 'Поиск по подкатегориям';
+$_['text_tax'] = 'Без учета налога:';
