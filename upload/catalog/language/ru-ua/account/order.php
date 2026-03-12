@@ -1,0 +1,31 @@
+<?php
+
+$_['column_action'] = 'Действие';
+$_['column_comment'] = 'Комментарий';
+$_['column_customer'] = 'Клиент';
+$_['column_date_added'] = 'Дата добавления';
+$_['column_model'] = 'Модель';
+$_['column_name'] = 'Название продукта';
+$_['column_order_id'] = 'Идентификатор заказа';
+$_['column_price'] = 'Цена';
+$_['column_product'] = 'Количество товаров';
+$_['column_quantity'] = 'Количество';
+$_['column_status'] = 'Статус';
+$_['column_total'] = 'Общий';
+$_['error_reorder'] = 'В настоящее время %s недоступен для повторного заказа.';
+$_['heading_title'] = 'История заказов';
+$_['text_account'] = 'Счет';
+$_['text_comment'] = 'Комментарии к заказу';
+$_['text_date_added'] = 'Дата добавления:';
+$_['text_empty'] = 'Вы ранее не делали заказов!';
+$_['text_error'] = 'Заказ, который вы оформили, не найден!';
+$_['text_history'] = 'История заказов';
+$_['text_invoice_no'] = 'Номер счета-фактуры:';
+$_['text_order'] = 'Информация о заказе';
+$_['text_order_detail'] = 'Детали заказа';
+$_['text_order_id'] = 'Идентификатор заказа:';
+$_['text_payment_address'] = 'Адрес для оплаты';
+$_['text_payment_method'] = 'Способ оплаты:';
+$_['text_shipping_address'] = 'Адрес доставки';
+$_['text_shipping_method'] = 'Способ доставки:';
+$_['text_success'] = 'Успех: Вы добавили <a href="%s">%s</a> в <a href="%s">корзину</a> !';

@@ -1,0 +1,30 @@
+<?php
+
+$_['heading_title'] = 'Найдите свой любимый бренд';
+$_['text_about_brand'] = 'Об этом бренде';
+$_['text_brand'] = 'Бренд';
+$_['text_browse_by_brand'] = 'Поиск по бренду';
+$_['text_compare'] = 'Сравнение товаров (%s)';
+$_['text_default'] = 'По умолчанию';
+$_['text_empty'] = 'Товаров для размещения в списке нет.';
+$_['text_error'] = 'Бренд не найден!';
+$_['text_index'] = 'Индекс брендов:';
+$_['text_limit'] = 'Показывать:';
+$_['text_manufacturer'] = 'Бренд:';
+$_['text_model'] = 'Код товара:';
+$_['text_model_asc'] = 'Модель (от А до Я)';
+$_['text_model_desc'] = 'Модель (Z - A)';
+$_['text_name_asc'] = 'Имя (от А до Я)';
+$_['text_name_desc'] = 'Имя (Z - A)';
+$_['text_no_results'] = 'Нет брендов для перечисления.';
+$_['text_points'] = 'Бонусные баллы:';
+$_['text_price'] = 'Цена:';
+$_['text_price_asc'] = 'Цена (низкая > высокая)';
+$_['text_price_desc'] = 'Цена (высокая > низкая)';
+$_['text_products'] = 'Продукты';
+$_['text_quantity'] = 'Кол-во:';
+$_['text_rating_asc'] = 'Рейтинг (самый низкий)';
+$_['text_rating_desc'] = 'Рейтинг (самый высокий)';
+$_['text_reviews_word'] = 'отзывы';
+$_['text_sort'] = 'Сортировать по:';
+$_['text_tax'] = 'Без учета налога:';

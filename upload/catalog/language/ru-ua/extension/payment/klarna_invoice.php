@@ -1,0 +1,30 @@
+<?php
+
+$_['entry_company'] = 'Регистрационный номер компании';
+$_['entry_dob'] = 'Дата рождения';
+$_['entry_gender'] = 'Пол';
+$_['entry_house_ext'] = 'Внешний вид дома.';
+$_['entry_house_no'] = 'Дом №';
+$_['entry_phone_no'] = 'Номер телефона';
+$_['entry_pno'] = 'Персональный номер';
+$_['entry_street'] = 'Улица';
+$_['error_address_match'] = 'Для использования сервиса Klarna Invoice адреса выставления счетов и доставки должны совпадать.';
+$_['error_deu_terms'] = 'Вы должны согласиться с политикой конфиденциальности Klarna (Datenschutz).';
+$_['error_network'] = 'Произошла ошибка при подключении к Klarna. Пожалуйста, попробуйте позже.';
+$_['help_company'] = 'Пожалуйста, введите регистрационный номер вашей компании.';
+$_['help_house_ext'] = 'Пожалуйста, отправьте информацию о расширении вашего дома сюда. Например, A, B, C, красный, синий и т.д.';
+$_['help_house_no'] = 'Пожалуйста, введите номер вашего дома.';
+$_['help_phone_no'] = 'Пожалуйста, введите свой номер телефона.';
+$_['help_pno'] = 'Пожалуйста, введите здесь свой номер социального страхования.';
+$_['help_street'] = 'Обратите внимание, что доставка осуществляется только по адресу, указанному в документах, при оплате через Klarna.';
+$_['text_additional'] = 'Для обработки вашего заказа Klarna Invoice запрашивает дополнительную информацию.';
+$_['text_comment'] = 'Идентификатор счета Klarna: %s. %s/%s: %.4f';
+$_['text_day'] = 'День';
+$_['text_female'] = 'Женский';
+$_['text_male'] = 'Мужской';
+$_['text_month'] = 'Месяц';
+$_['text_terms_fee'] = '<span id="klarna_invoice_toc"></span>(+%s) <script type="text/javascript">var terms = new Klarna.Terms.Invoice({el: \'klarna_invoice_toc\', eid: \'%s\', country: \'%s\', charge: %s});</script>';
+$_['text_terms_no_fee'] = '<span id="klarna_invoice_toc"></span><script type="text/javascript">var terms = new Klarna.Terms.Invoice({el: \'klarna_invoice_toc\', eid: \'%s\', country: \'%s\'});</script>';
+$_['text_title'] = 'Счет Klarna — оплата в течение 14 дней.';
+$_['text_trems_description'] = 'Mit der Übermittlung der für die Abwicklung des Rechnungskaufes und einer Identitäts - und Bonitätsprüfung erforderlichen Daten an Klarna bin ich einverstanden. Meine <a href="https://online.klarna.com/consent_de.yaws" target="_blank">Einwilligung</a> kann ich jederzeit mit Wirkung für die Zukunft более широкий диапазон.';
+$_['text_year'] = 'Год';

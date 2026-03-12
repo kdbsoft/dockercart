@@ -1,0 +1,34 @@
+<?php
+
+$_['column_comment'] = 'Комментарий';
+$_['column_customer'] = 'Клиент';
+$_['column_date_added'] = 'Дата добавления';
+$_['column_ip'] = 'IP';
+$_['entry_customer'] = 'Клиент';
+$_['entry_date_end'] = 'Дата окончания';
+$_['entry_date_start'] = 'Дата начала';
+$_['entry_ip'] = 'IP';
+$_['entry_sort_order'] = 'Порядок сортировки';
+$_['entry_status'] = 'Статус';
+$_['error_permission'] = 'Внимание: у вас нет разрешения на изменение отчета об активности клиентов!';
+$_['heading_title'] = 'Отчет об активности клиентов';
+$_['text_activity_address_add'] = '<a href="customer_id=%d">%s</a> добавил новый адрес.';
+$_['text_activity_address_delete'] = '<a href="customer_id=%d">%s</a> удалили один из своих адресов.';
+$_['text_activity_address_edit'] = '<a href="customer_id=%d">%s</a> обновили свой адрес.';
+$_['text_activity_affiliate_add'] = '<a href="customer_id=%d">%s</a> зарегистрировал партнерский аккаунт.';
+$_['text_activity_affiliate_edit'] = '<a href="customer_id=%d">Компания %s</a> обновила свои партнерские данные.';
+$_['text_activity_edit'] = '<a href="customer_id=%d">%s</a> обновили данные своей учетной записи.';
+$_['text_activity_forgotten'] = '<a href="customer_id=%d">%s</a> запросил сброс пароля.';
+$_['text_activity_login'] = '<a href="customer_id=%d">%s</a> вошли в систему.';
+$_['text_activity_order_account'] = '<a href="customer_id=%d">%s</a> создал <a href="order_id=%d">новый заказ</a> .';
+$_['text_activity_order_guest'] = '%s создал <a href="order_id=%d">новый заказ</a> .';
+$_['text_activity_password'] = '<a href="customer_id=%d">%s</a> обновили пароль своей учетной записи.';
+$_['text_activity_register'] = '<a href="customer_id=%d">%s</a> зарегистрировал аккаунт.';
+$_['text_activity_reset'] = '<a href="customer_id=%d">%s</a> сбросили пароль своей учетной записи.';
+$_['text_activity_return_account'] = '<a href="customer_id=%d">%s</a> оформил возврат товара.';
+$_['text_activity_return_guest'] = '%s оформил возврат товара.';
+$_['text_activity_transaction'] = '<a href="customer_id=%d">%s</a> получил комиссию от нового <a href="order_id=%d">заказа</a> .';
+$_['text_edit'] = 'Редактировать отчет об активности клиентов';
+$_['text_extension'] = 'Расширения';
+$_['text_filter'] = 'Фильтр';
+$_['text_success'] = 'Успех: Вы успешно отредактировали отчет об активности клиентов!';

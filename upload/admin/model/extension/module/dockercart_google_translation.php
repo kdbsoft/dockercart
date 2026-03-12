@@ -123,29 +123,65 @@ class ModelExtensionModuleDockercartGoogleTranslation extends Model {
 
         if ($translate_db) {
             $db_candidates = $this->collectDbTranslationCandidates($source_language_id, $target_language_id, $match_threshold, $force_overwrite, $selected_tables);
+            $translation_cache = array();
 
             foreach ($db_candidates as $entity_type => $entity_candidates) {
                 $entity_translated = 0;
                 $entity_chars = 0;
 
-                foreach ($entity_candidates as $candidate) {
-                    $source_text = $candidate['source_text'];
+                $batches = $this->buildDbTranslationBatches($entity_candidates, 20, 20000);
 
-                    if ($source_text === '') {
-                        continue;
+                foreach ($batches as $batch) {
+                    $batch_texts = array();
+                    $batch_indexes = array();
+
+                    foreach ($batch as $index => $candidate) {
+                        $source_text = isset($candidate['source_text']) ? (string)$candidate['source_text'] : '';
+
+                        if ($source_text === '') {
+                            continue;
+                        }
+
+                        if (isset($translation_cache[$source_text])) {
+                            $translated_value = (string)$translation_cache[$source_text];
+
+                            if ($translated_value !== '') {
+                                $this->upsertDbField($candidate, $source_language_id, $target_language_id, $translated_value);
+                                $entity_translated++;
+                                $entity_chars += mb_strlen($source_text);
+                            }
+
+                            continue;
+                        }
+
+                        $batch_texts[] = $source_text;
+                        $batch_indexes[] = $index;
                     }
 
-                    $translated = $translator->translateBatch(array($source_text), $source_google, $target_google);
-                    $translated_value = isset($translated[0]) ? $translated[0] : '';
+                    if ($batch_texts) {
+                        $translated_values = $translator->translateBatch($batch_texts, $source_google, $target_google);
 
-                    if ($translated_value === '') {
-                        continue;
+                        foreach ($batch_indexes as $offset => $candidate_index) {
+                            if (!isset($batch[$candidate_index])) {
+                                continue;
+                            }
+
+                            $candidate = $batch[$candidate_index];
+                            $source_text = isset($candidate['source_text']) ? (string)$candidate['source_text'] : '';
+                            $translated_value = isset($translated_values[$offset]) ? (string)$translated_values[$offset] : '';
+
+                            $translation_cache[$source_text] = $translated_value;
+
+                            if ($translated_value === '') {
+                                continue;
+                            }
+
+                            $this->upsertDbField($candidate, $source_language_id, $target_language_id, $translated_value);
+
+                            $entity_translated++;
+                            $entity_chars += mb_strlen($source_text);
+                        }
                     }
-
-                    $this->upsertDbField($candidate, $source_language_id, $target_language_id, $translated_value);
-
-                    $entity_translated++;
-                    $entity_chars += mb_strlen($source_text);
                 }
 
                 $result['db'][$entity_type] = array(
@@ -354,77 +390,118 @@ class ModelExtensionModuleDockercartGoogleTranslation extends Model {
         $source_row = isset($candidate['source_row']) ? $candidate['source_row'] : array();
         $field = $candidate['field'];
 
-        $where_parts = array();
-        foreach ($identity_columns as $column) {
-            if (!array_key_exists($column, $identity_values)) {
-                continue;
-            }
-
-            $where_parts[] = "`" . $this->db->escape($column) . "` = '" . $this->db->escape((string)$identity_values[$column]) . "'";
-        }
-
-        if (!$where_parts) {
+        if ($this->isBannerImageTable($table)) {
+            $this->upsertBannerImageField($table, $source_row, $target_language_id, $field, $translated_value);
             return;
         }
 
-        $where_sql = implode(' AND ', $where_parts);
+        $schema = $this->getDbSchemaName();
+        $auto_increment_columns = $this->getAutoIncrementColumns($schema, $table);
+        $auto_lookup = array_fill_keys($auto_increment_columns, true);
+        $has_language_in_primary = $this->hasLanguageInPrimaryKey($schema, $table);
 
-        $check = $this->db->query("SELECT * FROM `" . $this->db->escape($table) . "`
-            WHERE " . $where_sql . "
-            AND `language_id` = '" . (int)$target_language_id . "'
-            LIMIT 1");
+        // Build WHERE clause using non-auto-increment identity columns for existence check
+        if ($has_language_in_primary) {
+            // For tables like oc_order_status (PRIMARY KEY: order_status_id, language_id)
+            // we must preserve auto-increment id in identity matching across languages.
+            $check_identity_columns = $identity_columns;
+        } else {
+            $check_identity_columns = array_filter($identity_columns, function($col) use ($auto_lookup) {
+                return !isset($auto_lookup[$col]);
+            });
+        }
 
-        if (!$check->num_rows) {
-            if ($source_row) {
-                $clone = $source_row;
-                $clone['language_id'] = (int)$target_language_id;
-                $clone[$field] = (string)$translated_value;
-
-                $schema = $this->getDbSchemaName();
-                $auto_increment_columns = $this->getAutoIncrementColumns($schema, $table);
-                $removed_identity_auto_increment = false;
-
-                foreach ($auto_increment_columns as $auto_column) {
-                    if (array_key_exists($auto_column, $clone)) {
-                        unset($clone[$auto_column]);
-
-                        if (in_array($auto_column, $identity_columns, true)) {
-                            $removed_identity_auto_increment = true;
-                        }
-                    }
+        $where_parts = array();
+        if (!empty($check_identity_columns)) {
+            foreach ($check_identity_columns as $column) {
+                if (!array_key_exists($column, $identity_values)) {
+                    continue;
                 }
 
-                $columns = array();
-                foreach ($clone as $column => $value) {
-                    $columns[] = "`" . $this->db->escape($column) . "` = '" . $this->db->escape((string)$value) . "'";
+                $where_parts[] = "`" . $this->db->escape($column) . "` = '" . $this->db->escape((string)$identity_values[$column]) . "'";
+            }
+        }
+
+        // If no identity found (all auto-increment), use non-text, non-auto-increment columns
+        if (empty($where_parts)) {
+            $text_types = array('char', 'varchar', 'tinytext', 'text', 'mediumtext', 'longtext');
+            
+            $columns_query = $this->db->query("SELECT COLUMN_NAME, DATA_TYPE
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_SCHEMA = '" . $this->db->escape($schema) . "'
+                    AND TABLE_NAME = '" . $this->db->escape($table) . "'
+                ORDER BY ORDINAL_POSITION ASC");
+
+            foreach ($columns_query->rows as $col_row) {
+                $name = (string)$col_row['COLUMN_NAME'];
+                $type = strtolower((string)$col_row['DATA_TYPE']);
+
+                // Skip: language_id, text columns, auto-increment columns
+                if ($name === 'language_id' || in_array($type, $text_types, true) || isset($auto_lookup[$name])) {
+                    continue;
                 }
 
-                if (!$columns) {
-                    return;
-                }
-
-                $this->db->query("INSERT INTO `" . $this->db->escape($table) . "` SET " . implode(', ', $columns));
-
-                // If auto-increment identity was removed, translated value is already set in inserted row.
-                // Updating by old identity can target no rows, so we can stop here safely.
-                if ($removed_identity_auto_increment) {
-                    return;
+                if (isset($source_row[$name])) {
+                    $where_parts[] = "`" . $this->db->escape($name) . "` = '" . $this->db->escape((string)$source_row[$name]) . "'";
                 }
             }
         }
 
-        $this->db->query("UPDATE `" . $this->db->escape($table) . "`
-            SET `" . $field . "` = '" . $this->db->escape($translated_value) . "'
-            WHERE " . $where_sql . "
-            AND `language_id` = '" . (int)$target_language_id . "'");
+        // Try to find existing record
+        if (!empty($where_parts)) {
+            $where_sql = implode(' AND ', $where_parts);
+
+            $check = $this->db->query("SELECT * FROM `" . $this->db->escape($table) . "`
+                WHERE " . $where_sql . "
+                AND `language_id` = '" . (int)$target_language_id . "'
+                LIMIT 1");
+
+            if ($check->num_rows) {
+                // Record exists, update it
+                $this->db->query("UPDATE `" . $this->db->escape($table) . "`
+                    SET `" . $field . "` = '" . $this->db->escape($translated_value) . "'
+                    WHERE " . $where_sql . "
+                    AND `language_id` = '" . (int)$target_language_id . "'");
+                return;
+            }
+        }
+
+        // Record doesn't exist, create it
+        if ($source_row) {
+            $clone = $source_row;
+            $clone['language_id'] = (int)$target_language_id;
+            $clone[$field] = (string)$translated_value;
+
+            // Remove all auto-increment columns to let DB generate new ones
+            foreach ($auto_increment_columns as $auto_column) {
+                if (array_key_exists($auto_column, $clone)) {
+                    unset($clone[$auto_column]);
+                }
+            }
+
+            $columns = array();
+            foreach ($clone as $column => $value) {
+                $columns[] = "`" . $this->db->escape($column) . "` = '" . $this->db->escape((string)$value) . "'";
+            }
+
+            if (!$columns) {
+                return;
+            }
+
+            // Use REPLACE to handle UNIQUE constraint conflicts
+            // REPLACE will delete conflicting row and insert new one
+            $this->db->query("REPLACE INTO `" . $this->db->escape($table) . "` SET " . implode(', ', $columns));
+        }
     }
 
     private function scanLanguageFiles($source_code, $target_code, $match_threshold, $force_overwrite = false) {
         $result = array(
             'total_files' => 0,
+            'missing_files' => 0,
             'untranslated_entries' => 0,
             'characters' => 0,
-            'preview' => array()
+            'preview' => array(),
+            'missing_preview' => array()
         );
 
         $scopes = array(
@@ -448,12 +525,24 @@ class ModelExtensionModuleDockercartGoogleTranslation extends Model {
 
                 $source_entries = $this->parseLanguageFile($source_path);
                 $target_entries = is_file($target_path) ? $this->parseLanguageFile($target_path) : array();
+                $target_missing = !is_file($target_path);
 
                 if (!$source_entries) {
                     continue;
                 }
 
                 $result['total_files']++;
+
+                if ($target_missing) {
+                    $result['missing_files']++;
+
+                    if (count($result['missing_preview']) < 30) {
+                        $result['missing_preview'][] = array(
+                            'scope' => $scope,
+                            'file' => $relative
+                        );
+                    }
+                }
 
                 foreach ($source_entries as $key => $source_value) {
                     $target_value = isset($target_entries[$key]) ? $target_entries[$key] : '';
@@ -550,7 +639,10 @@ class ModelExtensionModuleDockercartGoogleTranslation extends Model {
                 }
 
                 if ($changed) {
-                    $this->writeLanguageFile($target_path, $target_entries);
+                    if (!$this->writeLanguageFile($target_path, $target_entries)) {
+                        throw new Exception('Could not write translated language file: ' . $target_path);
+                    }
+
                     $result['updated_files']++;
                 }
             }
@@ -591,7 +683,10 @@ class ModelExtensionModuleDockercartGoogleTranslation extends Model {
         $dir = dirname($path);
 
         if (!is_dir($dir)) {
-            mkdir($dir, 0775, true);
+            if (!mkdir($dir, 0775, true) && !is_dir($dir)) {
+                $this->logger->error('Failed to create language directory: ' . $dir);
+                return false;
+            }
         }
 
         ksort($entries);
@@ -605,7 +700,14 @@ class ModelExtensionModuleDockercartGoogleTranslation extends Model {
 
         $lines[] = "";
 
-        file_put_contents($path, implode("\n", $lines));
+        $written = @file_put_contents($path, implode("\n", $lines));
+
+        if ($written === false) {
+            $this->logger->error('Failed to write language file: ' . $path);
+            return false;
+        }
+
+        return true;
     }
 
     private function collectLanguagePhpFiles($dir) {
@@ -878,7 +980,7 @@ class ModelExtensionModuleDockercartGoogleTranslation extends Model {
 
         foreach ($query->rows as $row) {
             $column = (string)$row['COLUMN_NAME'];
-            if ($column !== 'language_id' && !isset($auto_lookup[$column])) {
+            if ($column !== 'language_id') {
                 $identity[] = $column;
             }
         }
@@ -911,15 +1013,104 @@ class ModelExtensionModuleDockercartGoogleTranslation extends Model {
         return array();
     }
 
+    private function buildDbTranslationBatches($candidates, $max_items = 20, $max_chars = 20000) {
+        $batches = array();
+        $current_batch = array();
+        $current_chars = 0;
+
+        foreach ($candidates as $candidate) {
+            $source_text = isset($candidate['source_text']) ? (string)$candidate['source_text'] : '';
+
+            if ($source_text === '') {
+                continue;
+            }
+
+            $text_length = mb_strlen($source_text);
+            $would_exceed_items = count($current_batch) >= (int)$max_items;
+            $would_exceed_chars = ($current_chars + $text_length) > (int)$max_chars;
+
+            if ($current_batch && ($would_exceed_items || $would_exceed_chars)) {
+                $batches[] = $current_batch;
+                $current_batch = array();
+                $current_chars = 0;
+            }
+
+            $current_batch[] = $candidate;
+            $current_chars += $text_length;
+        }
+
+        if ($current_batch) {
+            $batches[] = $current_batch;
+        }
+
+        return $batches;
+    }
+
     private function getTargetRowByIdentity($table, $identity_columns, $source_row, $target_language_id) {
+        if ($this->isBannerImageTable($table)) {
+            $banner_where = $this->buildBannerImageNaturalWhere($source_row);
+
+            if (!$banner_where) {
+                return array();
+            }
+
+            $query = $this->db->query("SELECT * FROM `" . $this->db->escape($table) . "`
+                WHERE " . implode(' AND ', $banner_where) . "
+                AND `language_id` = '" . (int)$target_language_id . "'
+                ORDER BY `banner_image_id` ASC
+                LIMIT 1");
+
+            return $query->num_rows ? $query->row : array();
+        }
+
+        $schema = $this->getDbSchemaName();
+        $auto_increment_columns = $this->getAutoIncrementColumns($schema, $table);
+        $auto_lookup = array_fill_keys($auto_increment_columns, true);
+        $has_language_in_primary = $this->hasLanguageInPrimaryKey($schema, $table);
+
+        // Use non-auto-increment identity columns for lookup
+        if ($has_language_in_primary) {
+            // For composite PK with language_id, keep id columns even if auto-increment.
+            $effective_identity_columns = $identity_columns;
+        } else {
+            $effective_identity_columns = array_filter($identity_columns, function($col) use ($auto_lookup) {
+                return !isset($auto_lookup[$col]);
+            });
+        }
+
         $where_parts = array();
 
-        foreach ($identity_columns as $column) {
+        foreach ($effective_identity_columns as $column) {
             if (!isset($source_row[$column])) {
                 continue;
             }
 
             $where_parts[] = "`" . $this->db->escape($column) . "` = '" . $this->db->escape((string)$source_row[$column]) . "'";
+        }
+
+        // If we have no effective identity (all are auto-increment), find by all non-text, non-auto-increment columns
+        if (!$where_parts) {
+            $text_types = array('char', 'varchar', 'tinytext', 'text', 'mediumtext', 'longtext');
+            
+            $columns_query = $this->db->query("SELECT COLUMN_NAME, DATA_TYPE
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_SCHEMA = '" . $this->db->escape($schema) . "'
+                    AND TABLE_NAME = '" . $this->db->escape($table) . "'
+                ORDER BY ORDINAL_POSITION ASC");
+
+            foreach ($columns_query->rows as $col_row) {
+                $name = (string)$col_row['COLUMN_NAME'];
+                $type = strtolower((string)$col_row['DATA_TYPE']);
+
+                // Skip: language_id (will be added separately), text columns, auto-increment columns
+                if ($name === 'language_id' || in_array($type, $text_types, true) || isset($auto_lookup[$name])) {
+                    continue;
+                }
+
+                if (isset($source_row[$name])) {
+                    $where_parts[] = "`" . $this->db->escape($name) . "` = '" . $this->db->escape((string)$source_row[$name]) . "'";
+                }
+            }
         }
 
         if (!$where_parts) {
@@ -932,6 +1123,72 @@ class ModelExtensionModuleDockercartGoogleTranslation extends Model {
             LIMIT 1");
 
         return $query->num_rows ? $query->row : array();
+    }
+
+    private function isBannerImageTable($table) {
+        return strtolower((string)$table) === strtolower((string)DB_PREFIX . 'banner_image');
+    }
+
+    private function buildBannerImageNaturalWhere($row) {
+        if (!isset($row['banner_id']) || !isset($row['sort_order']) || !isset($row['image'])) {
+            return array();
+        }
+
+        return array(
+            "`banner_id` = '" . $this->db->escape((string)$row['banner_id']) . "'",
+            "`sort_order` = '" . $this->db->escape((string)$row['sort_order']) . "'",
+            "`image` = '" . $this->db->escape((string)$row['image']) . "'"
+        );
+    }
+
+    private function upsertBannerImageField($table, $source_row, $target_language_id, $field, $translated_value) {
+        if (!$source_row) {
+            return;
+        }
+
+        $natural_where = $this->buildBannerImageNaturalWhere($source_row);
+
+        if (!$natural_where) {
+            return;
+        }
+
+        $target = $this->db->query("SELECT `banner_image_id` FROM `" . $this->db->escape($table) . "`
+            WHERE " . implode(' AND ', $natural_where) . "
+            AND `language_id` = '" . (int)$target_language_id . "'
+            ORDER BY `banner_image_id` ASC
+            LIMIT 1");
+
+        if ($target->num_rows) {
+            $this->db->query("UPDATE `" . $this->db->escape($table) . "`
+                SET `" . $field . "` = '" . $this->db->escape($translated_value) . "'
+                WHERE `banner_image_id` = '" . (int)$target->row['banner_image_id'] . "'");
+            return;
+        }
+
+        $schema = $this->getDbSchemaName();
+        $auto_increment_columns = $this->getAutoIncrementColumns($schema, $table);
+
+        $clone = $source_row;
+        $clone['language_id'] = (int)$target_language_id;
+        $clone[$field] = (string)$translated_value;
+
+        foreach ($auto_increment_columns as $auto_column) {
+            if (array_key_exists($auto_column, $clone)) {
+                unset($clone[$auto_column]);
+            }
+        }
+
+        $columns = array();
+
+        foreach ($clone as $column => $value) {
+            $columns[] = "`" . $this->db->escape($column) . "` = '" . $this->db->escape((string)$value) . "'";
+        }
+
+        if (!$columns) {
+            return;
+        }
+
+        $this->db->query("INSERT INTO `" . $this->db->escape($table) . "` SET " . implode(', ', $columns));
     }
 
     private function extractIdentityValues($identity_columns, $row) {
@@ -1042,6 +1299,21 @@ class ModelExtensionModuleDockercartGoogleTranslation extends Model {
         }
 
         return $columns;
+    }
+
+    private function hasLanguageInPrimaryKey($schema, $table) {
+        if ($schema === '') {
+            return false;
+        }
+
+        $query = $this->db->query("SELECT COUNT(*) AS total
+            FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+            WHERE TABLE_SCHEMA = '" . $this->db->escape($schema) . "'
+                AND TABLE_NAME = '" . $this->db->escape($table) . "'
+                AND CONSTRAINT_NAME = 'PRIMARY'
+                AND COLUMN_NAME = 'language_id'");
+
+        return !empty($query->row['total']);
     }
 
     private function isExcludedLanguageTable($table_name) {
