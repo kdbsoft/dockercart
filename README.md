@@ -178,7 +178,8 @@ Configure in `.env` if needed:
 - `FTP_ALLOW_WRITEABLE_CHROOT=YES`
 - `FTP_LOCAL_UMASK=000`
 - `FTP_FILE_OPEN_MODE=0777`
-- `FTP_PASV_ADDRESS=your-server-ip-or-domain`
+- `FTP_PASV_ADDRESS=your-server-ip-or-domain` *(must be reachable by FTP client; do not use `127.0.0.1`)*
+- `FTP_PASV_ADDR_RESOLVE=YES`
 - `FTP_PASV_MIN_PORT=21100`
 - `FTP_PASV_MAX_PORT=21110`
 
