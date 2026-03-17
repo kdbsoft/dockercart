@@ -3,7 +3,7 @@ include .env
 export
 endif
 
-.PHONY: help up standalone ssl letsencrypt ftp down logs logs-follow shell mariadb backup restore dump-init clean restart
+.PHONY: help up standalone ssl letsencrypt letsencrypt-ftp ftp down logs logs-follow shell mariadb backup restore dump-init clean restart
 
 ### Convenience variables
 COMPOSE := docker compose
@@ -59,8 +59,15 @@ ssl: ## Start with self-signed SSL certificate
 letsencrypt: ## Production + Let's Encrypt SSL on a real domain
 	@./start.sh --letsencrypt
 
+letsencrypt-ftp: ## Start Let's Encrypt mode and enable FTP profile (images only)
+	@./start.sh --letsencrypt
+	@docker compose -f docker-compose.yml -f docker-compose.letsencrypt.yml --profile ftp up -d ftp
+	@echo ""
+	@echo "Let's Encrypt + FTP enabled"
+	@echo "FTP port: $${FTP_PORT:-21} (passive: $${FTP_PASV_MIN_PORT:-21100}-$${FTP_PASV_MAX_PORT:-21110})"
+
 ftp: ## Start stack with optional FTP server (access only to ./upload/image)
-	@docker compose --profile ftp up -d --build
+	@docker compose --profile ftp up -d ftp
 	@echo ""
 	@echo "FTP enabled on port $${FTP_PORT:-21} (passive: $${FTP_PASV_MIN_PORT:-21100}-$${FTP_PASV_MAX_PORT:-21110})"
 	@echo "User: $${FTP_USER:-images}"
