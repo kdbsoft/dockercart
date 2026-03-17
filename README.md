@@ -161,15 +161,22 @@ FTP is disabled by default and starts only when explicitly requested.
 ```bash
 # via Make (short command)
 make ftp
+
+# with Let's Encrypt (single command)
+make letsencrypt-ftp
 ```
 
-FTP user is chrooted to `./upload/image` only.
+FTP user is chrooted to `./upload/image` only and has extended privileges in this directory: upload, overwrite, delete, and rename image files.
 
 Configure in `.env` if needed:
 
 - `FTP_PORT=21`
 - `FTP_USER=images`
 - `FTP_PASS=change_me_please`
+- `FTP_WRITE_ENABLE=YES`
+- `FTP_ALLOW_WRITEABLE_CHROOT=YES`
+- `FTP_LOCAL_UMASK=000`
+- `FTP_FILE_OPEN_MODE=0777`
 - `FTP_PASV_ADDRESS=your-server-ip-or-domain`
 - `FTP_PASV_MIN_PORT=21100`
 - `FTP_PASV_MAX_PORT=21110`
@@ -190,6 +197,7 @@ make up            # Start — Traefik mode (HTTP by default)
 make ssl           # Start — Traefik + self-signed HTTPS (local testing)
 make letsencrypt   # Start — Traefik + Let's Encrypt (production)
 make ftp           # Start — stack + optional FTP profile (access only to ./upload/image)
+make letsencrypt-ftp # Start — Let's Encrypt + FTP profile together
 make down          # Stop containers
 make restart       # Restart containers
 make logs          # Show last 100 log lines
