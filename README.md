@@ -166,7 +166,8 @@ make ftp
 make letsencrypt-ftp
 ```
 
-FTP user is chrooted to `./upload/image` only and has extended privileges in this directory: upload, overwrite, delete, and rename image files.
+FTP user is chrooted to existing host directory `./upload/image` only and has extended privileges in this directory: upload, overwrite, delete, and rename image files.
+Inside container this directory is mounted as `/home/vsftpd/${FTP_USER}`.
 
 Configure in `.env` if needed:
 

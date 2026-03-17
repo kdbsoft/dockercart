@@ -157,7 +157,7 @@ services:
     environment:
       FTP_USER: ${FTP_USER:-images}
       FTP_PASS: ${FTP_PASS:-change_me_please}
-      FTP_USER_HOME: /home/vsftpd/image
+      FTP_USER_HOME: /home/vsftpd/${FTP_USER:-images}
       WRITE_ENABLE: ${FTP_WRITE_ENABLE:-YES}
       ALLOW_WRITEABLE_CHROOT: ${FTP_ALLOW_WRITEABLE_CHROOT:-YES}
       LOCAL_UMASK: ${FTP_LOCAL_UMASK:-000}
@@ -170,7 +170,7 @@ services:
       - "${FTP_PORT:-21}:21"
       - "${FTP_PASV_MIN_PORT:-21100}-${FTP_PASV_MAX_PORT:-21110}:${FTP_PASV_MIN_PORT:-21100}-${FTP_PASV_MAX_PORT:-21110}"
     volumes:
-      - ./upload/image:/home/vsftpd/image:rw
+      - ./upload/image:/home/vsftpd/${FTP_USER:-images}:rw
     networks:
       - dockercart-network
 
