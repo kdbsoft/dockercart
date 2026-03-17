@@ -148,6 +148,28 @@ services:
       timeout: 5s
       retries: 5
 
+  ftp:
+    image: fauria/vsftpd
+    container_name: ${FTP_CONTAINER_NAME:-dockercart_ftp}
+    profiles:
+      - ftp
+    restart: ${RESTART_POLICY:-unless-stopped}
+    environment:
+      FTP_USER: ${FTP_USER:-images}
+      FTP_PASS: ${FTP_PASS:-change_me_please}
+      FTP_USER_HOME: /home/vsftpd/image
+      PASV_ADDRESS: ${FTP_PASV_ADDRESS:-127.0.0.1}
+      PASV_MIN_PORT: ${FTP_PASV_MIN_PORT:-21100}
+      PASV_MAX_PORT: ${FTP_PASV_MAX_PORT:-21110}
+      LOG_STDOUT: "YES"
+    ports:
+      - "${FTP_PORT:-21}:21"
+      - "${FTP_PASV_MIN_PORT:-21100}-${FTP_PASV_MAX_PORT:-21110}:${FTP_PASV_MIN_PORT:-21100}-${FTP_PASV_MAX_PORT:-21110}"
+    volumes:
+      - ./upload/image:/home/vsftpd/image
+    networks:
+      - dockercart-network
+
 volumes:
   mariadb-data:
   manticore-data:

@@ -154,7 +154,29 @@ make letsencrypt
 
 ---
 
-> **Traefik is optional.** Modes 1, 3, and 4 do not require it.
+### Mode 5 — Optional FTP *(images directory only)*
+
+FTP is disabled by default and starts only when explicitly requested.
+
+```bash
+# via Make (short command)
+make ftp
+```
+
+FTP user is chrooted to `./upload/image` only.
+
+Configure in `.env` if needed:
+
+- `FTP_PORT=21`
+- `FTP_USER=images`
+- `FTP_PASS=change_me_please`
+- `FTP_PASV_ADDRESS=your-server-ip-or-domain`
+- `FTP_PASV_MIN_PORT=21100`
+- `FTP_PASV_MAX_PORT=21110`
+
+---
+
+> **Traefik is optional.** Modes 1, 3, 4, and 5 do not require it.
 
 ---
 
@@ -167,6 +189,7 @@ make standalone    # Start — direct host port (default: 80), no Traefik
 make up            # Start — Traefik mode (HTTP by default)
 make ssl           # Start — Traefik + self-signed HTTPS (local testing)
 make letsencrypt   # Start — Traefik + Let's Encrypt (production)
+make ftp           # Start — stack + optional FTP profile (access only to ./upload/image)
 make down          # Stop containers
 make restart       # Restart containers
 make logs          # Show last 100 log lines
