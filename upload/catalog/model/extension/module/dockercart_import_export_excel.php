@@ -594,10 +594,14 @@ class ModelExtensionModuleDockercartImportExportExcel extends Model {
     }
 
     private function createCategory($name, $language_id, $store_id, $parent_id) {
+        // Root categories (parent_id = 0) must have top = 1
+        $parent_id = (int)$parent_id;
+        $top_value = ($parent_id === 0) ? 1 : 0;
+        
         $this->db->query("INSERT INTO `" . DB_PREFIX . "category`
             SET image = '',
-                parent_id = '" . (int)$parent_id . "',
-                `top` = '0',
+                parent_id = '" . $parent_id . "',
+                `top` = '" . $top_value . "',
                 `column` = '1',
                 sort_order = '0',
                 status = '1',

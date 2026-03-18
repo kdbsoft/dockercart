@@ -479,13 +479,15 @@ function dcCloseMobileMenu() {
 function dcToggleCatalogMenu() {
   var panel = document.getElementById('dc-vertical-menu-panel');
   if (!panel) return;
-  panel.classList.toggle('hidden');
+  var isHidden = panel.classList.toggle('hidden');
+  document.dispatchEvent(new Event(isHidden ? 'dc:catalog-menu-close' : 'dc:catalog-menu-open'));
 }
 
 function dcCloseCatalogMenu() {
   var panel = document.getElementById('dc-vertical-menu-panel');
   if (!panel) return;
   panel.classList.add('hidden');
+  document.dispatchEvent(new Event('dc:catalog-menu-close'));
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -547,79 +549,68 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 
-/* Auto-resize category dropdown columns based on item count */
+/* ── Mega-menu columns + vertical catalog menu ──────────────────── */
 document.addEventListener('DOMContentLoaded', function () {
-  function updateCategoryDropdownColumns() {
-    var dropdowns = document.querySelectorAll('.dc-cat-dropdown');
-    dropdowns.forEach(function(dropdown) {
-      var gridEl = dropdown.querySelector('.dc-cat-auto-columns');
-      if (!gridEl) return;
 
-      var columnCount = gridEl.children.length || 1;
-      columnCount = Math.min(Math.max(columnCount, 1), 4);
-
-      gridEl.style.gridTemplateColumns = 'repeat(' + columnCount + ', minmax(220px, 1fr))';
+  /* Size mega-dropdown grids based on child count */
+  function updateMegaMenuColumns() {
+    document.querySelectorAll('.dc-cat-mega-grid').forEach(function(grid) {
+      var count = grid.children.length;
+      var cols = count <= 2 ? count : (count <= 5 ? 3 : (count <= 8 ? 4 : 5));
+      grid.style.gridTemplateColumns = 'repeat(' + cols + ', minmax(155px, 1fr))';
     });
-
-    // Also update subcategory dropdowns
-    var subGrids = document.querySelectorAll('.dc-cat-sub-grid');
-    subGrids.forEach(function(grid) {
-      var columnCount = grid.children.length || 1;
-      columnCount = Math.min(Math.max(columnCount, 1), 4);
-
-      grid.style.gridTemplateColumns = 'repeat(' + columnCount + ', minmax(260px, 1fr))';
-
-      var subDropdown = grid.closest('.dc-cat-sub-dropdown');
-      if (subDropdown) {
-        var gapPx = 24;
-        var minColPx = 260;
-        var contentWidth = (columnCount * minColPx) + ((columnCount - 1) * gapPx);
-        subDropdown.style.minWidth = Math.max(280, contentWidth) + 'px';
-      }
+    /* Clamp dropdown width so it doesn't overflow viewport */
+    document.querySelectorAll('.dc-cat-dropdown').forEach(function(dd) {
+      var rect = dd.parentElement.getBoundingClientRect();
+      var maxW = window.innerWidth - rect.left - 16;
+      dd.style.maxWidth = Math.min(maxW, 960) + 'px';
     });
-
-    // Vertical catalog submenu columns: 10 items per column, max 4 columns
-    var verticalGrids = document.querySelectorAll('.dc-vertical-auto-columns');
-    verticalGrids.forEach(function(grid) {
-      var itemCount = parseInt(grid.getAttribute('data-item-count') || '0', 10);
-      var columnCount = Math.ceil(itemCount / 10);
-      columnCount = Math.min(Math.max(columnCount, 1), 4);
-
-      grid.style.gridTemplateColumns = 'repeat(' + columnCount + ', minmax(220px, 1fr))';
+    /* Size hamburger right-panel grid */
+    document.querySelectorAll('.dc-vm-panel-grid').forEach(function(grid) {
+      var count = grid.children.length;
+      var cols = count <= 2 ? count : (count <= 5 ? 3 : (count <= 8 ? 4 : 5));
+      grid.style.gridTemplateColumns = 'repeat(' + cols + ', minmax(160px, 1fr))';
     });
   }
 
-  function positionSubDropdown(subItem) {
-    var subDropdown = subItem.querySelector('.dc-cat-sub-dropdown');
-    if (!subDropdown) return;
+  updateMegaMenuColumns();
+  window.addEventListener('resize', updateMegaMenuColumns);
 
-    subDropdown.classList.remove('dc-sub-left', 'dc-sub-right');
-    subDropdown.classList.add('dc-sub-right');
+  /* ── Two-panel vertical catalog menu ────────────────────── */
+  function setupVerticalCatalogMenu() {
+    var panel = document.getElementById('dc-vertical-menu-panel');
+    if (!panel) return;
 
-    var itemRect = subItem.getBoundingClientRect();
-    var dropdownWidth = subDropdown.offsetWidth || 320;
-    var viewportPadding = 12;
-    var availableRight = window.innerWidth - itemRect.right - viewportPadding;
-    var availableLeft = itemRect.left - viewportPadding;
+    var catRows     = Array.prototype.slice.call(panel.querySelectorAll('.dc-vm-cat-row'));
+    var catPanels   = Array.prototype.slice.call(panel.querySelectorAll('.dc-vm-panel'));
+    var activeIndex = -1;
 
-    if (availableRight < dropdownWidth && availableLeft > availableRight) {
-      subDropdown.classList.remove('dc-sub-right');
-      subDropdown.classList.add('dc-sub-left');
+    function activateCat(index) {
+      if (activeIndex === index) return;
+      activeIndex = index;
+      catRows.forEach(function(r)  { r.classList.remove('is-active'); });
+      catPanels.forEach(function(p) { p.classList.remove('is-visible'); });
+      var row   = panel.querySelector('.dc-vm-cat-row[data-vm-cat="'   + index + '"]');
+      var pane  = panel.querySelector('.dc-vm-panel[data-vm-panel="'   + index + '"]');
+      if (row)  row.classList.add('is-active');
+      if (pane) pane.classList.add('is-visible');
     }
+
+    // Activate first category on open
+    activateCat(0);
+
+    catRows.forEach(function(row) {
+      row.addEventListener('mouseenter', function() {
+        activateCat(parseInt(row.getAttribute('data-vm-cat'), 10));
+      });
+    });
+
+    /* Re-run column sizing once visible (dimensions available) */
+    document.addEventListener('dc:catalog-menu-open', function() {
+      updateMegaMenuColumns();
+    });
   }
 
-  updateCategoryDropdownColumns();
-
-  // Auto-position subcategory dropdowns (left vs right) and keep hover stable
-  var subItems = document.querySelectorAll('.dc-cat-sub-item');
-  subItems.forEach(function(subItem) {
-    subItem.addEventListener('mouseenter', function() {
-      positionSubDropdown(subItem);
-    });
-  });
-
-  window.addEventListener('resize', function() {
-    updateCategoryDropdownColumns();
-  });
+  setupVerticalCatalogMenu();
 });
 </script>

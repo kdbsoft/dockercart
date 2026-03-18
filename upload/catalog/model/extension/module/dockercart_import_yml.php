@@ -366,6 +366,22 @@ class ModelExtensionModuleDockercartImportYml extends Model {
         return array('map' => $category_import['map']);
     }
 
+    /**
+     * Ensure category has correct 'top' value based on parent_id
+     * Root categories (parent_id = 0) should always have top = 1
+     */
+    private function ensureCategoryTop($category_id, $parent_id) {
+        $parent_id = (int)$parent_id;
+        $top_value = ($parent_id === 0) ? 1 : 0;
+        
+        $query = $this->db->query("SELECT `top` FROM `" . DB_PREFIX . "category` WHERE category_id = '" . (int)$category_id . "'");
+        
+        if ($query->num_rows && (int)$query->row['top'] !== $top_value) {
+            error_log("DockerCart Import YML: Updating category {$category_id} top value from {$query->row['top']} to {$top_value}");
+            $this->db->query("UPDATE `" . DB_PREFIX . "category` SET `top` = '" . $top_value . "' WHERE category_id = '" . (int)$category_id . "'");
+        }
+    }
+
     private function prepareDescription($raw_description) {
         $description = html_entity_decode((string)$raw_description, ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $description = str_replace(array("\r\n", "\r"), "\n", $description);
@@ -531,6 +547,9 @@ class ModelExtensionModuleDockercartImportYml extends Model {
                 if (!$local_id) {
                     $local_id = $this->createCategory($item['name'], $language_id, $store_id, $parent_local_id);
                     $result['created']++;
+                } else {
+                    // Category already exists - update its 'top' field if it's a root category
+                    $this->ensureCategoryTop($local_id, $parent_local_id);
                 }
 
                 $result['map'][$feed_id] = (int)$local_id;
@@ -550,6 +569,9 @@ class ModelExtensionModuleDockercartImportYml extends Model {
                     if (!$local_id) {
                         $local_id = $this->createCategory($item['name'], $language_id, $store_id, $fallback_parent_id);
                         $result['created']++;
+                    } else {
+                        // Category already exists - update its 'top' field if it's a root category
+                        $this->ensureCategoryTop($local_id, $fallback_parent_id);
                     }
 
                     $result['map'][$feed_id] = (int)$local_id;
@@ -590,12 +612,13 @@ class ModelExtensionModuleDockercartImportYml extends Model {
     }
 
     private function createCategory($name, $language_id, $store_id, $parent_id, $is_top = false) {
-        // Set top = 1 for parent categories (those without a parent), otherwise set based on the parameter
-        $top_value = ((int)$parent_id === 0) ? 1 : (int)$is_top;
+        // Root categories (parent_id = 0 or NULL) must have top = 1
+        $parent_id = (int)$parent_id;
+        $top_value = ($parent_id === 0) ? 1 : ((int)$is_top);
         
         $this->db->query("INSERT INTO `" . DB_PREFIX . "category`
             SET image = '',
-                parent_id = '" . (int)$parent_id . "',
+                parent_id = '" . $parent_id . "',
                 `top` = '" . $top_value . "',
                 `column` = '1',
                 sort_order = '0',
