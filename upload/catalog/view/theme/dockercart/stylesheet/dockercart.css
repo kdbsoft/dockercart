@@ -33,6 +33,7 @@ body, button, input, select, textarea { font-family: 'Manrope', sans-serif; }
   left: 0;
   transform: translateY(6px);
   transition: opacity 0.18s ease, transform 0.18s ease, visibility 0s linear 0.18s;
+  max-width: min(960px, calc(100vw - 32px));
 }
 .dc-cat-item:hover > .dc-cat-dropdown {
   visibility: visible;
@@ -58,7 +59,7 @@ body, button, input, select, textarea { font-family: 'Manrope', sans-serif; }
 }
 .dc-cat-mega-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 200px));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px 20px;
   max-height: 460px;
   overflow-y: auto;
@@ -177,7 +178,9 @@ body, button, input, select, textarea { font-family: 'Manrope', sans-serif; }
 .dc-vm-panel.is-visible { display: block; }
 .dc-vm-panel-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px 20px;
+}
   gap: 14px 20px;
 }
 .dc-vm-subcat-group {}

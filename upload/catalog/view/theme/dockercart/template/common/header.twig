@@ -549,40 +549,15 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 
-/* ── Mega-menu columns + vertical catalog menu ──────────────────── */
+/* ── Vertical catalog menu (two-panel) ──────────────────────────── */
 document.addEventListener('DOMContentLoaded', function () {
 
-  /* Size mega-dropdown grids based on child count */
-  function updateMegaMenuColumns() {
-    document.querySelectorAll('.dc-cat-mega-grid').forEach(function(grid) {
-      var count = grid.children.length;
-      var cols = count <= 2 ? count : (count <= 5 ? 3 : (count <= 8 ? 4 : 5));
-      grid.style.gridTemplateColumns = 'repeat(' + cols + ', minmax(155px, 1fr))';
-    });
-    /* Clamp dropdown width so it doesn't overflow viewport */
-    document.querySelectorAll('.dc-cat-dropdown').forEach(function(dd) {
-      var rect = dd.parentElement.getBoundingClientRect();
-      var maxW = window.innerWidth - rect.left - 16;
-      dd.style.maxWidth = Math.min(maxW, 960) + 'px';
-    });
-    /* Size hamburger right-panel grid */
-    document.querySelectorAll('.dc-vm-panel-grid').forEach(function(grid) {
-      var count = grid.children.length;
-      var cols = count <= 2 ? count : (count <= 5 ? 3 : (count <= 8 ? 4 : 5));
-      grid.style.gridTemplateColumns = 'repeat(' + cols + ', minmax(160px, 1fr))';
-    });
-  }
-
-  updateMegaMenuColumns();
-  window.addEventListener('resize', updateMegaMenuColumns);
-
-  /* ── Two-panel vertical catalog menu ────────────────────── */
   function setupVerticalCatalogMenu() {
     var panel = document.getElementById('dc-vertical-menu-panel');
     if (!panel) return;
 
-    var catRows     = Array.prototype.slice.call(panel.querySelectorAll('.dc-vm-cat-row'));
-    var catPanels   = Array.prototype.slice.call(panel.querySelectorAll('.dc-vm-panel'));
+    var catRows   = Array.prototype.slice.call(panel.querySelectorAll('.dc-vm-cat-row'));
+    var catPanels = Array.prototype.slice.call(panel.querySelectorAll('.dc-vm-panel'));
     var activeIndex = -1;
 
     function activateCat(index) {
@@ -590,24 +565,18 @@ document.addEventListener('DOMContentLoaded', function () {
       activeIndex = index;
       catRows.forEach(function(r)  { r.classList.remove('is-active'); });
       catPanels.forEach(function(p) { p.classList.remove('is-visible'); });
-      var row   = panel.querySelector('.dc-vm-cat-row[data-vm-cat="'   + index + '"]');
-      var pane  = panel.querySelector('.dc-vm-panel[data-vm-panel="'   + index + '"]');
+      var row  = panel.querySelector('.dc-vm-cat-row[data-vm-cat="'   + index + '"]');
+      var pane = panel.querySelector('.dc-vm-panel[data-vm-panel="'   + index + '"]');
       if (row)  row.classList.add('is-active');
       if (pane) pane.classList.add('is-visible');
     }
 
-    // Activate first category on open
     activateCat(0);
 
     catRows.forEach(function(row) {
       row.addEventListener('mouseenter', function() {
         activateCat(parseInt(row.getAttribute('data-vm-cat'), 10));
       });
-    });
-
-    /* Re-run column sizing once visible (dimensions available) */
-    document.addEventListener('dc:catalog-menu-open', function() {
-      updateMegaMenuColumns();
     });
   }
 
