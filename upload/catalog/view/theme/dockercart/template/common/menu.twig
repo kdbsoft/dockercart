@@ -66,10 +66,12 @@
             </div>
             {% endfor %}
           </div>
+          {% endif %}
+
+          {# Always show "See all" footer link even if no children exist #}
           <div class="dc-vm-panel-footer">
             <a href="{{ category.href }}" class="dc-vm-see-all">{{ text_all }} {{ category.name }} →</a>
           </div>
-          {% endif %}
         </div>
         {% endfor %}
       </div>
