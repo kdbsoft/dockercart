@@ -42,22 +42,44 @@ body, button, input, select, textarea { font-family: 'Manrope', sans-serif; }
   transition: opacity 0.18s ease, transform 0.18s ease, visibility 0s linear 0s;
 }
 
+/* ── 4-Column grid layout for categories ──────────────────── */
+.dc-cat-dropdown-grid {
+  display: grid;
+  width: max-content;
+}
+
 /* ── Category second-level flyout ─────────────────────────── */
 .dc-cat-sub-item { position: relative; }
 .dc-cat-sub-dropdown {
+  visibility: hidden;
   opacity: 0;
   pointer-events: none;
-  transform: translateX(6px);
+  width: max-content;
+  min-width: 280px;
+  max-width: calc(100vw - 24px);
   transition: opacity 0.18s ease, transform 0.18s ease;
   position: absolute;
-  left: calc(100% + 8px);
   top: -6px;
   z-index: 110;
 }
-.dc-cat-sub-item:hover > .dc-cat-sub-dropdown {
+.dc-cat-sub-dropdown.dc-sub-right {
+  left: 100%;
+  transform: translateX(4px);
+}
+.dc-cat-sub-dropdown.dc-sub-left {
+  left: auto;
+  right: 100%;
+  transform: translateX(-4px);
+}
+.dc-cat-sub-item:hover > .dc-cat-sub-dropdown,
+.dc-cat-sub-dropdown:hover {
+  visibility: visible;
   opacity: 1;
   pointer-events: auto;
   transform: translateX(0);
+}
+.dc-cat-sub-grid > div {
+  min-width: 260px;
 }
 .dc-sub-arrow { opacity: 0.4; }
 .dc-cat-sub-item:hover > a .dc-sub-arrow {
@@ -108,6 +130,8 @@ body, button, input, select, textarea { font-family: 'Manrope', sans-serif; }
   left: calc(100% + 10px);
   top: -2px;
   min-width: 260px;
+  width: max-content;
+  max-width: calc(100vw - 24px);
   background: #fff;
   border: 1px solid #e5e7eb;
   border-radius: 14px;
@@ -122,6 +146,9 @@ body, button, input, select, textarea { font-family: 'Manrope', sans-serif; }
   opacity: 1;
   pointer-events: auto;
   transform: translateX(0);
+}
+.dc-vertical-submenu-grid > div {
+  min-width: 220px;
 }
 
 /* ── Mobile menu slide ────────────────────────────────────── */
@@ -403,7 +430,7 @@ body.modal-open { overflow: hidden; }
 #oneclickcheckout-modal .modal-title::before {
   content: '';
 }
-#
+
 /* ── Hero banner badge & primary button styles ───────────────────────── */
 .banner-slide__badge {
   position: relative;
