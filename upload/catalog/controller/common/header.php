@@ -108,6 +108,9 @@ class ControllerCommonHeader extends Controller {
 		// UI strings for header mobile menu
 		$data['text_new_arrivals'] = $this->language->get('text_new_arrivals');
 		$data['text_sale'] = $this->language->get('text_sale');
+		// Accent links (language-aware)
+		$data['new_arrivals'] = $this->url->link('product/new_arrivals');
+		$data['special'] = $this->url->link('product/special');
 
 		// Quick view / product UI (global)
 		$data['text_model_prefix'] = $this->language->get('text_model_prefix');

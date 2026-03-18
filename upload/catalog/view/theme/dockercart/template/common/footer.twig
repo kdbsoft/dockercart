@@ -70,9 +70,18 @@
       <div>
         <h4 class="text-white font-semibold text-sm mb-4">{{ text_catalog }}</h4>
         <ul class="space-y-2.5 text-sm">
-          {% for category in categories %}
-          <li><a href="{{ category.href }}" class="hover:text-white transition">{{ category.name }}</a></li>
-          {% endfor %}
+          {# Accent links: New arrivals / Sale #}
+          <li><a href="{{ new_arrivals }}" class="hover:text-white transition">{{ text_new_arrivals }}</a></li>
+          <li><a href="{{ special }}" class="hover:text-white transition">{{ text_sale }}</a></li>
+
+          {% if show_categories_list %}
+            {% for category in categories %}
+              <li><a href="{{ category.href }}" class="hover:text-white transition">{{ category.name }}</a></li>
+            {% endfor %}
+          {% else %}
+            <li><a href="{{ categories_link }}" class="hover:text-white transition">{{ text_catalog }}</a></li>
+            <li><a href="{{ manufacturer }}" class="hover:text-white transition">{{ text_manufacturer }}</a></li>
+          {% endif %}
         </ul>
       </div>
 

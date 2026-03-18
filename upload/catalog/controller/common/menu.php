@@ -19,6 +19,22 @@ class ControllerCommonMenu extends Controller {
 		$data['text_new_arrivals'] = $this->language->get('text_new_arrivals');
 		$data['text_sale']         = $this->language->get('text_sale');
 
+		// Links for accent pages
+		$data['new_arrivals'] = $this->url->link('product/new_arrivals');
+		$data['special'] = $this->url->link('product/special');
+
+		// Information links for bottom placement (used when menu is vertical)
+		$this->load->model('catalog/information');
+		$data['information_links'] = array();
+		foreach ($this->model_catalog_information->getInformations() as $info) {
+			if (!empty($info['bottom'])) {
+				$data['information_links'][] = array(
+					'title' => $info['title'],
+					'href'  => $this->url->link('information/information', 'information_id=' . (int)$info['information_id'])
+				);
+			}
+		}
+
 		// Determine active category
 		// Works for both product/category and product/product (when opened from category)
 		if (!empty($this->request->get['path'])) {
