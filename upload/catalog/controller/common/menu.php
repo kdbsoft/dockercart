@@ -14,7 +14,10 @@ class ControllerCommonMenu extends Controller {
 		if ($data['menu_type'] !== 'vertical') {
 			$data['menu_type'] = 'horizontal';
 		}
-		$data['text_catalog'] = $this->language->get('text_catalog');
+		$data['text_catalog']      = $this->language->get('text_catalog');
+		$data['text_all']          = $this->language->get('text_all');
+		$data['text_new_arrivals'] = $this->language->get('text_new_arrivals');
+		$data['text_sale']         = $this->language->get('text_sale');
 
 		// Determine active category
 		// Works for both product/category and product/product (when opened from category)
