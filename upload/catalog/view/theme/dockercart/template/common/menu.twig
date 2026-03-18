@@ -31,6 +31,15 @@
       </nav>
 
       {# RIGHT: subcategory panel for each top-level category #}
+      {# show right panels only if at least one top-level category has children #}
+      {% set has_vm_children = false %}
+      {% for category in categories %}
+        {% if category.children %}
+          {% set has_vm_children = true %}
+        {% endif %}
+      {% endfor %}
+
+      {% if has_vm_children %}
       <div class="dc-vm-right">
         {% for category in categories %}
         <div class="dc-vm-panel" data-vm-panel="{{ loop.index0 }}">
@@ -56,6 +65,7 @@
         </div>
         {% endfor %}
       </div>
+      {% endif %}
 
     </div>{# /.dc-vm-shell #}
   </div>
