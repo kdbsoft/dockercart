@@ -589,11 +589,14 @@ class ModelExtensionModuleDockercartImportYml extends Model {
         return $query->num_rows ? (int)$query->row['category_id'] : 0;
     }
 
-    private function createCategory($name, $language_id, $store_id, $parent_id) {
+    private function createCategory($name, $language_id, $store_id, $parent_id, $is_top = false) {
+        // Set top = 1 for parent categories (those without a parent), otherwise set based on the parameter
+        $top_value = ((int)$parent_id === 0) ? 1 : (int)$is_top;
+        
         $this->db->query("INSERT INTO `" . DB_PREFIX . "category`
             SET image = '',
                 parent_id = '" . (int)$parent_id . "',
-                `top` = '0',
+                `top` = '" . $top_value . "',
                 `column` = '1',
                 sort_order = '0',
                 status = '1',

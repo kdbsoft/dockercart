@@ -546,4 +546,80 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 });
+
+/* Auto-resize category dropdown columns based on item count */
+document.addEventListener('DOMContentLoaded', function () {
+  function updateCategoryDropdownColumns() {
+    var dropdowns = document.querySelectorAll('.dc-cat-dropdown');
+    dropdowns.forEach(function(dropdown) {
+      var gridEl = dropdown.querySelector('.dc-cat-auto-columns');
+      if (!gridEl) return;
+
+      var columnCount = gridEl.children.length || 1;
+      columnCount = Math.min(Math.max(columnCount, 1), 4);
+
+      gridEl.style.gridTemplateColumns = 'repeat(' + columnCount + ', minmax(220px, 1fr))';
+    });
+
+    // Also update subcategory dropdowns
+    var subGrids = document.querySelectorAll('.dc-cat-sub-grid');
+    subGrids.forEach(function(grid) {
+      var columnCount = grid.children.length || 1;
+      columnCount = Math.min(Math.max(columnCount, 1), 4);
+
+      grid.style.gridTemplateColumns = 'repeat(' + columnCount + ', minmax(260px, 1fr))';
+
+      var subDropdown = grid.closest('.dc-cat-sub-dropdown');
+      if (subDropdown) {
+        var gapPx = 24;
+        var minColPx = 260;
+        var contentWidth = (columnCount * minColPx) + ((columnCount - 1) * gapPx);
+        subDropdown.style.minWidth = Math.max(280, contentWidth) + 'px';
+      }
+    });
+
+    // Vertical catalog submenu columns: 10 items per column, max 4 columns
+    var verticalGrids = document.querySelectorAll('.dc-vertical-auto-columns');
+    verticalGrids.forEach(function(grid) {
+      var itemCount = parseInt(grid.getAttribute('data-item-count') || '0', 10);
+      var columnCount = Math.ceil(itemCount / 10);
+      columnCount = Math.min(Math.max(columnCount, 1), 4);
+
+      grid.style.gridTemplateColumns = 'repeat(' + columnCount + ', minmax(220px, 1fr))';
+    });
+  }
+
+  function positionSubDropdown(subItem) {
+    var subDropdown = subItem.querySelector('.dc-cat-sub-dropdown');
+    if (!subDropdown) return;
+
+    subDropdown.classList.remove('dc-sub-left', 'dc-sub-right');
+    subDropdown.classList.add('dc-sub-right');
+
+    var itemRect = subItem.getBoundingClientRect();
+    var dropdownWidth = subDropdown.offsetWidth || 320;
+    var viewportPadding = 12;
+    var availableRight = window.innerWidth - itemRect.right - viewportPadding;
+    var availableLeft = itemRect.left - viewportPadding;
+
+    if (availableRight < dropdownWidth && availableLeft > availableRight) {
+      subDropdown.classList.remove('dc-sub-right');
+      subDropdown.classList.add('dc-sub-left');
+    }
+  }
+
+  updateCategoryDropdownColumns();
+
+  // Auto-position subcategory dropdowns (left vs right) and keep hover stable
+  var subItems = document.querySelectorAll('.dc-cat-sub-item');
+  subItems.forEach(function(subItem) {
+    subItem.addEventListener('mouseenter', function() {
+      positionSubDropdown(subItem);
+    });
+  });
+
+  window.addEventListener('resize', function() {
+    updateCategoryDropdownColumns();
+  });
+});
 </script>
