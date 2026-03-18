@@ -45,7 +45,7 @@
       <div class="lg:sticky lg:top-24 lg:z-10 self-start">
         <div class="rounded-3xl border border-gray-100 bg-gray-50 overflow-hidden">
           <button id="dc-zoom-btn" type="button" class="zoom-target group relative block w-full text-left" aria-label="{{ heading_title }}">
-            <img id="dc-main-img" src="{{ thumb }}" data-popup="{{ popup }}" alt="{{ heading_title }}" class="w-full aspect-[4/3] object-cover cursor-zoom-in" />
+            <img id="dc-main-img" src="{{ thumb is not empty ? thumb : 'image/no_image.png' }}" data-popup="{{ popup is not empty ? popup : 'image/no_image.png' }}" alt="{{ heading_title }}" class="w-full aspect-[4/3] object-cover cursor-zoom-in" />
             <span class="zoom-hint absolute bottom-3 right-3 inline-flex items-center gap-1.5 bg-gray-900/80 text-white text-[11px] font-semibold px-2.5 py-1.5 rounded-lg backdrop-blur-sm">
               <i data-lucide="zoom-in" class="w-3.5 h-3.5"></i> {{ text_zoom }}
             </span>
@@ -53,12 +53,12 @@
         </div>
         {% if images %}
         <div class="grid grid-cols-4 gap-3 mt-3">
-          <button class="dc-thumb active rounded-2xl border-2 overflow-hidden" data-img="{{ thumb }}" data-popup="{{ popup }}">
-            <img src="{{ thumb }}" alt="{{ heading_title }}" class="w-full h-20 object-cover" />
+          <button class="dc-thumb active rounded-2xl border-2 overflow-hidden" data-img="{{ thumb is not empty ? thumb : 'image/no_image.png' }}" data-popup="{{ popup is not empty ? popup : 'image/no_image.png' }}">
+            <img src="{{ thumb is not empty ? thumb : 'image/no_image.png' }}" alt="{{ heading_title }}" class="w-full h-20 object-cover" />
           </button>
           {% for image in images %}
-          <button class="dc-thumb rounded-2xl border-2 border-gray-200 overflow-hidden" data-img="{{ image.thumb }}" data-popup="{{ image.popup }}">
-            <img src="{{ image.thumb }}" alt="{{ heading_title }}" class="w-full h-20 object-cover" />
+          <button class="dc-thumb rounded-2xl border-2 border-gray-200 overflow-hidden" data-img="{{ image.thumb is not empty ? image.thumb : 'image/no_image.png' }}" data-popup="{{ image.popup is not empty ? image.popup : 'image/no_image.png' }}">
+            <img src="{{ image.thumb is not empty ? image.thumb : 'image/no_image.png' }}" alt="{{ heading_title }}" class="w-full h-20 object-cover" />
           </button>
           {% endfor %}
         </div>
@@ -244,7 +244,8 @@
         {% if review_status %}<button class="tab-btn px-4 py-2 rounded-xl border border-transparent text-sm font-semibold" data-tab="review">{{ tab_review }}</button>{% endif %}
       </div>
 
-      <div id="dc-tab-description" class="dc-tab-panel mt-5 text-sm text-gray-600 leading-relaxed prose max-w-none">{{ description }}</div>
+      {% set _desc_text = description|striptags|trim %}
+      <div id="dc-tab-description" class="dc-tab-panel mt-5 text-sm text-gray-600 leading-relaxed prose max-w-none">{{ _desc_text is not empty ? description : heading_title }}</div>
 
       {% if attribute_groups %}
       <div id="dc-tab-attribute" class="dc-tab-panel mt-5 hidden">
@@ -326,7 +327,7 @@
         <div class="dc-product-card product-card group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex flex-col {% if loop.index > 4 %}dc-related-extra hidden{% endif %}" data-id="{{ product.product_id }}" data-rating="{{ product.rating is defined ? product.rating : 0 }}" data-model="{{ product.model is defined ? product.model : '' }}" data-brand="{{ product.manufacturer is defined ? product.manufacturer : '' }}" data-description="{{ product.description|striptags|e('html_attr') }}" data-in-wishlist="{{ product.in_wishlist is defined ? product.in_wishlist : 0 }}">
           <div class="relative overflow-hidden aspect-square bg-gray-50">
             <a href="{{ product.href }}">
-              <img src="{{ product.thumb }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+              <img src="{{ product.thumb is not empty ? product.thumb : 'image/no_image.png' }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
             </a>
             {% if discount_pct and discount_pct > 0 %}
             <span class="absolute top-2 left-2 bg-red-500 text-white px-2 py-0.5 rounded-lg text-[11px] font-bold">-{{ discount_pct }}%</span>
