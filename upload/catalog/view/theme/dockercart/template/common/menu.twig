@@ -2,14 +2,22 @@
 {% if menu_type == 'vertical' %}
 <div class="hidden lg:block bg-white border-b border-gray-200 h-10">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-10 flex items-center justify-end">
-    <a href="/product-new_arrivals" class="flex items-center gap-1 px-3 h-8 text-sm font-bold text-teal-600 hover:text-teal-700 hover:bg-teal-50 transition whitespace-nowrap rounded-sm">
+    <a href="{{ new_arrivals }}" class="flex items-center gap-1 px-3 h-8 text-sm font-bold text-teal-600 hover:text-teal-700 hover:bg-teal-50 transition whitespace-nowrap rounded-sm">
       <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
       {{ text_new_arrivals }}
     </a>
-    <a href="/product-special" class="flex items-center gap-1 px-3 h-8 text-sm font-bold text-red-500 hover:text-red-600 hover:bg-red-50 transition whitespace-nowrap rounded-sm">
+    <a href="{{ special }}" class="flex items-center gap-1 px-3 h-8 text-sm font-bold text-red-500 hover:text-red-600 hover:bg-red-50 transition whitespace-nowrap rounded-sm">
       <i data-lucide="tag" class="w-3.5 h-3.5"></i>
       {{ text_sale }}
     </a>
+    {# Information links (bottom = 1) — show when configured; placed here to mirror horizontal "right accent" area #}
+    {% if information_links is defined and information_links %}
+      {% for info in information_links %}
+        <a href="{{ info.href }}" class="flex items-center gap-1 px-3 h-8 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition whitespace-nowrap rounded-sm">
+          {{ info.title }}
+        </a>
+      {% endfor %}
+    {% endif %}
   </div>
 </div>
 

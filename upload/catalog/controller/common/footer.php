@@ -67,8 +67,18 @@ class ControllerCommonFooter extends Controller {
 			);
 		}
 
+		// If there are more than 7 top-level categories, we won't render the full list in footer.
+		// Instead the template will show links to the catalog listing and manufacturers.
+		$data['show_categories_list'] = count($data['categories']) <= 7;
+
 		// Catalog column title (for footer)
 		$data['text_catalog'] = $this->language->get('text_catalog');
+
+		// Add new arrivals / sale labels and links (used in footer)
+		$data['text_new_arrivals'] = $this->language->get('text_new_arrivals');
+		$data['text_sale'] = $this->language->get('text_sale');
+		// Use url->link so language prefix / SEO url rules are applied
+		$data['new_arrivals'] = $this->url->link('product/new_arrivals');
 
 		// Footer labels
 		$data['text_manufacturer'] = $this->language->get('text_manufacturer');
