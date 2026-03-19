@@ -183,8 +183,7 @@ body, button, input, select, textarea { font-family: 'Manrope', sans-serif; }
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px 20px;
 }
-  gap: 14px 20px;
-}
+
 .dc-vm-subcat-group {}
 .dc-vm-subcat-parent {
   display: block;
