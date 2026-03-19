@@ -138,7 +138,7 @@
           <i data-lucide="tag" class="w-3.5 h-3.5"></i>
           {{ text_sale }}
         </a>
-        {% if top_informations is defined and top_informations %}
+        {% if menu_type == 'vertical' and top_informations is defined and top_informations %}
           {% for info in top_informations %}
             <a href="{{ info.href }}" class="flex items-center gap-1 px-3 h-10 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50/70 transition whitespace-nowrap rounded-sm">
               {{ info.title }}
