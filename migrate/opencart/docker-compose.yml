@@ -1,0 +1,24 @@
+# Build context is the migrate/opencart/ directory itself.
+# Run:                docker compose run --rm migrate
+# Dry-run:            DRY_RUN=true docker compose run --rm migrate
+# Interactive langs:  docker compose run --rm -it migrate
+
+services:
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: dockercart-migrate-opencart:latest
+    # Connection params are loaded from .env (copy from .env.example)
+    env_file:
+      - .env
+    # Attach to the main DockerCart network so TARGET_HOST=mariadb resolves
+    networks:
+      - dockercart-network
+    # One-shot container — no restart needed
+    restart: "no"
+
+networks:
+  dockercart-network:
+    external: true
+    name: ${DOCKERCART_NETWORK:-dockercart-network}
