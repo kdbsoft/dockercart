@@ -12,14 +12,8 @@
         {% if logo_dark %}
             <a href="{{ home }}" class="inline-flex items-center">
               <img src="{{ logo_dark }}" title="{{ name }}" alt="{{ name }}" class="object-contain max-w-[180px] sm:max-w-[220px]" />
-            </a>
-          {% elseif logo %}
-            <a href="{{ home }}" class="inline-flex items-center">
-              <img src="{{ logo }}" title="{{ name }}" alt="{{ name }}" class="object-contain max-w-[180px] sm:max-w-[220px] brightness-0 invert opacity-80" />
-            </a>
-          {% else %}
-            {# No footer logo set — do not show site name or logo in footer #}
-          {% endif %}
+            </a>         
+        {% endif %}
         </div>
 
         <!-- Contact info -->

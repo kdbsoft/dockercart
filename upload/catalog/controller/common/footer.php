@@ -102,7 +102,7 @@ class ControllerCommonFooter extends Controller {
 		if ($logo_dark_path && is_file(DIR_IMAGE . $logo_dark_path)) {
 			$data['logo_dark'] = $server . 'image/' . $logo_dark_path;
 		} else {
-			$data['logo_dark'] = $data['logo']; // fall back to main logo
+			$data['logo_dark'] = '';
 		}
 
 		$data['social_links'] = array();
