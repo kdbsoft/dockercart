@@ -1,7 +1,7 @@
 {% if categories %}
 {% if menu_type == 'vertical' %}
 <div class="hidden lg:block bg-white border-b border-gray-200 h-10">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-10 flex items-center justify-end">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-10 flex items-center">
     <a href="{{ new_arrivals }}" class="flex items-center gap-1 px-3 h-8 text-sm font-bold text-teal-600 hover:text-teal-700 hover:bg-teal-50 transition whitespace-nowrap rounded-sm">
       <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
       {{ text_new_arrivals }}
@@ -97,28 +97,23 @@
             <i data-lucide="chevron-down" class="w-3 h-3 opacity-50 flex-shrink-0 ml-0.5"></i>
           </a>
 
-          {# Mega-dropdown: L2 as bold group headers, L3 as list below each header #}
-          <div class="dc-cat-dropdown bg-white rounded-2xl shadow-2xl border border-gray-100 absolute top-full left-0 z-[200]">
-            <div class="dc-cat-mega-inner">
-              <p class="dc-cat-mega-heading">{{ category.name }}</p>
-              <div class="dc-cat-mega-grid" data-children="{{ category.children|length }}">
-                {% for child in category.children %}
-                <div class="dc-cat-mega-group">
-                  <a href="{{ child.href }}" class="dc-cat-mega-parent">{{ child.name }}</a>
-                  {% if child.children %}
-                  <ul class="dc-cat-mega-list">
-                    {% for grandchild in child.children %}
-                    <li><a href="{{ grandchild.href }}" class="dc-cat-mega-child">{{ grandchild.name }}</a></li>
-                    {% endfor %}
-                  </ul>
-                  {% endif %}
-                </div>
-                {% endfor %}
-              </div>
-              <div class="dc-cat-mega-footer">
-                <a href="{{ category.href }}" class="dc-cat-mega-seeall">{{ text_all }} {{ category.name }} →</a>
-              </div>
-            </div>
+          {# Mega-dropdown: vertical list style #}
+          <div class="dc-cat-dropdown absolute top-full left-0 bg-white rounded-2xl shadow-2xl border border-gray-100 p-5 z-[100] min-w-[240px]">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">{{ category.name }}</p>
+            <ul class="space-y-0.5">
+              {% for child in category.children %}
+              <li>
+                <a href="{{ child.href }}" class="dc-cat-mega-parent">
+                  {{ child.name }}
+                </a>
+              </li>
+              {% endfor %}
+              <li class="pt-2 border-t border-gray-100 mt-1">
+                <a href="{{ category.href }}" class="dc-cat-mega-seeall dc-cat-mega-seeall-link">
+                  {{ text_all }} {{ category.name }} →
+                </a>
+              </li>
+            </ul>
           </div>
         </div>
 
