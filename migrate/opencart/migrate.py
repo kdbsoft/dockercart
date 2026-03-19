@@ -49,6 +49,7 @@ class TableMeta:
     name: str
     columns: list[str]
     primary_key: list[str]
+    not_null_cols: list[str]  # NOT NULL columns with no default (INSERT would fail if NULL)
 
 
 class Db:
@@ -142,10 +143,23 @@ def get_table_meta(db: Db, table_name: str) -> TableMeta:
         """,
         (db.cfg.database, table_name),
     )
+    required = db.query(
+        """
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_schema = %s AND table_name = %s
+          AND is_nullable = 'NO'
+          AND column_default IS NULL
+          AND extra NOT LIKE '%auto_increment%'
+        ORDER BY ordinal_position
+        """,
+        (db.cfg.database, table_name),
+    )
     return TableMeta(
         name=table_name,
         columns=[c["column_name"] for c in cols],
         primary_key=[k["column_name"] for k in pks],
+        not_null_cols=[c["column_name"] for c in required],
     )
 
 
@@ -276,6 +290,24 @@ def migrate_table_rows(
                 continue
             mutable["language_id"] = lang_map[src_lang]
         rows_to_insert.append(tuple(mutable[c] for c in common_cols))
+
+    if not rows_to_insert:
+        return 0
+
+    # Drop rows that would violate NOT NULL constraints in the target table
+    required_in_common = [c for c in dst_meta.not_null_cols if c in common_cols]
+    if required_in_common:
+        col_idx = {c: i for i, c in enumerate(common_cols)}
+        valid: list[tuple[Any, ...]] = []
+        skipped = 0
+        for row_tuple in rows_to_insert:
+            if all(row_tuple[col_idx[c]] is not None for c in required_in_common):
+                valid.append(row_tuple)
+            else:
+                skipped += 1
+        if skipped:
+            print(f"    Skipped {skipped} row(s) with NULL in required column(s): {required_in_common}")
+        rows_to_insert = valid
 
     if not rows_to_insert:
         return 0
