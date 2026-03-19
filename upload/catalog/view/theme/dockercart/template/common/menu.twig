@@ -10,14 +10,7 @@
       <i data-lucide="tag" class="w-3.5 h-3.5"></i>
       {{ text_sale }}
     </a>
-    {# Information links (bottom = 1) — show when configured; placed here to mirror horizontal "right accent" area #}
-    {% if information_links is defined and information_links %}
-      {% for info in information_links %}
-        <a href="{{ info.href }}" class="flex items-center gap-1 px-3 h-8 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition whitespace-nowrap rounded-sm">
-          {{ info.title }}
-        </a>
-      {% endfor %}
-    {% endif %}
+    {# no top_informations here — they are shown in the dark micro bar in header.twig #}
   </div>
 </div>
 
