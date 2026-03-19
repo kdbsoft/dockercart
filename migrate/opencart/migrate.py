@@ -150,7 +150,7 @@ def get_table_meta(db: Db, table_name: str) -> TableMeta:
         WHERE table_schema = %s AND table_name = %s
           AND is_nullable = 'NO'
           AND column_default IS NULL
-          AND extra NOT LIKE '%auto_increment%'
+          AND extra NOT LIKE '%%auto_increment%%'
         ORDER BY ordinal_position
         """,
         (db.cfg.database, table_name),
