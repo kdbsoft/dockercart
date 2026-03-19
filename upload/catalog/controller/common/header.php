@@ -239,6 +239,18 @@ class ControllerCommonHeader extends Controller {
 		$data['cart'] = $this->load->controller('common/cart');
 		$data['menu'] = $this->load->controller('common/menu');
 
+		// Top information links (shown in header navigation bar)
+		$this->load->model('catalog/information');
+		$data['top_informations'] = array();
+		foreach ($this->model_catalog_information->getInformations() as $result) {
+			if (!empty($result['top'])) {
+				$data['top_informations'][] = array(
+					'title' => $result['title'],
+					'href'  => $this->url->link('information/information', 'information_id=' . $result['information_id'])
+				);
+			}
+		}
+
 		// Mobile categories for slide-in menu (simple two-level tree)
 		$this->load->model('catalog/category');
 		$this->load->model('catalog/product');

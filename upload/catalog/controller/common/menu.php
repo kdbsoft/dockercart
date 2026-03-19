@@ -23,12 +23,12 @@ class ControllerCommonMenu extends Controller {
 		$data['new_arrivals'] = $this->url->link('product/new_arrivals');
 		$data['special'] = $this->url->link('product/special');
 
-		// Information links for bottom placement (used when menu is vertical)
+		// Information links marked as top=1 — shown in header nav (vertical top bar / horizontal micro bar)
 		$this->load->model('catalog/information');
-		$data['information_links'] = array();
+		$data['top_informations'] = array();
 		foreach ($this->model_catalog_information->getInformations() as $info) {
-			if (!empty($info['bottom'])) {
-				$data['information_links'][] = array(
+			if (!empty($info['top'])) {
+				$data['top_informations'][] = array(
 					'title' => $info['title'],
 					'href'  => $this->url->link('information/information', 'information_id=' . (int)$info['information_id'])
 				);

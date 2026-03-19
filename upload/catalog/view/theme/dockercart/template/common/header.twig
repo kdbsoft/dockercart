@@ -102,16 +102,25 @@
 
   <!-- ① TOP MICRO BAR: phone, language, currency -->
   <div class="bg-gray-950">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-9 flex items-center justify-between gap-4">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-9 flex items-center justify-between gap-4 relative">
 
       <!-- Phone -->
       <a href="tel:{{ telephone }}" class="flex items-center gap-2 text-white text-sm font-semibold hover:opacity-80 transition px-2 py-0.5 rounded-full flex-shrink-0">
         <i data-lucide="phone" class="w-4 h-4 text-blue-300 flex-shrink-0"></i>
         <span>{{ telephone }}</span>
         {% if open_hours %}
-        <span class="text-[11px] font-medium text-gray-300">• {{ open_hours|striptags|replace({'\n':' '}) }}</span>
+        <span class="text-[11px] font-medium text-gray-300">&bull; {{ open_hours|striptags|replace({'\n':' '}) }}</span>
         {% endif %}
       </a>
+
+      {% if menu_type == 'horizontal' and top_informations is defined and top_informations %}
+      <!-- Top info links: horizontal menu, centered in dark micro bar -->
+      <nav class="hidden lg:inline-flex absolute left-1/2 -translate-x-1/2 items-center gap-5 pointer-events-auto">
+        {% for info in top_informations %}
+        <a href="{{ info.href }}" class="text-xs font-medium text-gray-300 hover:text-white transition whitespace-nowrap">{{ info.title }}</a>
+        {% endfor %}
+      </nav>
+      {% endif %}
 
       <!-- Language & Currency -->
       <div class="flex items-center gap-3 text-xs text-gray-400 dc-topbar-controls">
@@ -253,6 +262,15 @@
     <a href="{{ wishlist }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-700 font-medium hover:bg-blue-50 hover:text-blue-600 transition text-sm">
       <i data-lucide="heart" class="w-4 h-4"></i>{{ text_wishlist }}
     </a>
+
+    {% if top_informations is defined and top_informations %}
+    <hr class="my-2 border-t border-gray-100" />
+    {% for info in top_informations %}
+    <a href="{{ info.href }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-700 font-medium hover:bg-blue-50 hover:text-blue-600 transition text-sm">
+      <i data-lucide="file-text" class="w-4 h-4"></i>{{ info.title }}
+    </a>
+    {% endfor %}
+    {% endif %}
     
     <!-- Categories (mobile) — accordion -->
     {% if mobile_categories %}
