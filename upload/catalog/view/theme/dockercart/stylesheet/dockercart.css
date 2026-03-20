@@ -766,6 +766,26 @@ body.modal-open { overflow: hidden; }
   border-color: #ddd6fe;
 }
 
+/* =============================================================
+   Article / Information page tweaks
+   Improve paragraph spacing and optional first-line indent for prose
+   (Tailwind Typography handles most of this; keep a couple of small fallbacks)
+   ============================================================= */
+.prose p {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  line-height: 1.75;
+  /* A subtle first-line indent helps readability in some locales */
+  text-indent: 1.05em;
+}
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  margin-top: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+.prose ul, .prose ol {
+  margin-bottom: 1rem;
+}
+
 @media (max-width: 767px) {
   .dc-success-card {
     padding: 18px 16px;
