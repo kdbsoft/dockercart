@@ -786,6 +786,15 @@ body.modal-open { overflow: hidden; }
   margin-bottom: 1rem;
 }
 
+/* Make anchor tags inside rich content render inline-block (prevents full-width blocks)
+   Applied to category/product/article descriptions which use .prose */
+.prose a {
+  display: inline-block;
+}
+.prose a img {
+  display: inline-block;
+}
+
 @media (max-width: 767px) {
   .dc-success-card {
     padding: 18px 16px;
