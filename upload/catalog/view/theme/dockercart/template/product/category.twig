@@ -18,7 +18,11 @@
         } %}
         <h1 class="text-2xl sm:text-4xl font-extrabold text-white leading-tight">{{ heading_title }}</h1>
         {% if description %}
-        <div class="prose prose-sm text-gray-200 mt-2 max-w-xl line-clamp-2 prose-p:text-gray-200 prose-p:leading-relaxed">{{ description|striptags|trim }}</div>
+        {% set _short_desc = description|striptags|trim %}
+        {% if _short_desc|length > 200 %}
+          {% set _short_desc = _short_desc|slice(0, 200) ~ '…' %}
+        {% endif %}
+        <div class="prose prose-sm text-gray-200 mt-2 max-w-xl line-clamp-2 prose-p:text-gray-200 prose-p:leading-relaxed">{{ _short_desc }}</div>
         {% endif %}
       </div>
     </div>
