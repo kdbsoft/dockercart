@@ -115,6 +115,13 @@ body, button, input, select, textarea { font-family: 'Manrope', sans-serif; }
   background-color: transparent !important;
 }
 
+
+/* Ensure line-clamped titles/descriptions use the full width of their container
+   Fixes blog/listing descriptions being clipped horizontally */
+.line-clamp-2, .line-clamp-3 {
+  display: block;
+  width: 100%;
+}
 /* ── Vertical catalog menu — two-panel hamburger ─────────── */
 .dc-vertical-menu-panel {
   position: fixed;
@@ -777,6 +784,8 @@ body.modal-open { overflow: hidden; }
   line-height: 1.75;
   /* A subtle first-line indent helps readability in some locales */
   text-indent: 1.05em;
+  /* Reduce paragraph font-size for better compactness */
+  font-size: 1rem;
 }
 .prose h1, .prose h2, .prose h3, .prose h4 {
   margin-top: 1.25rem;
@@ -800,10 +809,50 @@ body.modal-open { overflow: hidden; }
 /* Make anchor tags inside rich content render inline-block (prevents full-width blocks)
    Applied to category/product/article descriptions which use .prose */
 .prose a {
-  display: inline-block;
+  display: inline-block !important;
 }
 .prose a img {
   display: inline-block;
+}
+
+/* Ensure anchors inside line-clamped headings/descriptions remain inline-block */
+.line-clamp-2 a,
+.line-clamp-3 a,
+.dc-blog-content a {
+  display: inline-block !important;
+}
+
+/* Ensure blog-specific prose uses full width of parent to avoid horizontal clipping */
+.dc-blog-content.prose,
+.dc-blog-content.prose-lg,
+.dc-blog-content.prose-sm {
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  width: 100% !important;
+}
+.dc-blog-content.prose img,
+.dc-blog-content.prose figure {
+  max-width: 100% !important;
+}
+
+/* Override Tailwind Typography root font-size utilities for our prose blocks
+   Some responsive classes like .sm:prose-lg increase root font-size; force smaller size
+   for blog/category/product/article prose blocks. */
+.dc-blog-content.prose,
+.dc-blog-content.prose-sm,
+.dc-blog-content.prose-lg,
+.dc-blog-content.sm\:prose,
+.dc-blog-content.sm\:prose-lg,
+.dc-blog-content.lg\:prose-lg,
+.prose.prose-lg,
+.prose.sm\:prose-lg,
+.prose.lg\:prose-lg,
+.prose-lg,
+.sm\:prose-lg,
+.lg\:prose-lg {
+  font-size: 1rem !important;
+  line-height: 1.75 !important;
 }
 
 @media (max-width: 767px) {
