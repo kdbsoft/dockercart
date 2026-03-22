@@ -18,7 +18,7 @@
         } %}
         <h1 class="text-2xl sm:text-4xl font-extrabold text-white leading-tight">{{ heading_title }}</h1>
         {% if description %}
-        <p class="text-sm sm:text-base text-gray-200 mt-2 max-w-xl line-clamp-2">{{ description|striptags }}</p>
+        <div class="prose prose-sm text-gray-200 mt-2 max-w-xl line-clamp-2 prose-p:text-gray-200 prose-p:leading-relaxed">{{ description|raw }}</div>
         {% endif %}
       </div>
     </div>
@@ -44,7 +44,7 @@
               <span class="text-xs font-bold uppercase tracking-widest text-blue-600 leading-snug">{{ category.name }}</span>
               <i data-lucide="chevron-right" class="w-4 h-4 text-blue-400 group-hover:translate-x-0.5 transition-transform flex-shrink-0"></i>
             </div>
-            <p class="text-sm text-gray-600 leading-relaxed">{{ category.description }}</p>
+            <div class="prose prose-sm max-w-none prose-p:text-gray-600 prose-p:leading-relaxed">{{ category.description }}</div>
             {% if category.total is defined and category.total > 0 %}
             <p class="text-xs font-semibold text-gray-400 mt-3">{{ text_models|format(category.total) }}</p>
             {% endif %}
@@ -153,7 +153,13 @@
           <div class="mt-10 bg-gray-50 border border-gray-100 rounded-3xl p-6 sm:p-8">
             <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">{{ text_category_description }}</p>
             <h2 class="text-xl sm:text-2xl font-extrabold text-gray-900 leading-tight mb-4">{{ heading_title }}</h2>
-            <div class="text-sm sm:text-base text-gray-600 leading-relaxed">{{ description }}</div>
+            <div class="prose prose-lg sm:prose-lg max-w-none
+              prose-headings:font-extrabold prose-headings:text-gray-900
+              prose-p:text-gray-600 prose-p:leading-relaxed
+              prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
+              prose-img:rounded-2xl prose-img:border prose-img:border-gray-100">
+              {{ description }}
+            </div>
 
             <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div class="rounded-2xl border border-gray-200 bg-white p-4">

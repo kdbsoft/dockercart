@@ -25,6 +25,9 @@ class ControllerExtensionModuleLatest extends Controller {
 		$results = $this->model_catalog_product->getLatestProducts($setting['limit']);
 
 		if ($results) {
+			$results = array_filter($results, function($product) {
+				return $product !== false;
+			});
 			foreach ($results as $result) {
 				$product_info = $this->model_catalog_product->getProduct($result['product_id']);
 				if (!$product_info) {
