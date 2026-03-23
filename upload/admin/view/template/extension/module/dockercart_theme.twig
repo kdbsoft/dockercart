@@ -158,6 +158,24 @@
 }
 .dc-payment-thumb-link:hover,
 .dc-social-thumb-link:hover { border-color: #2f65b9; }
+/* Feature icon picker button – matches social icons style */
+.dc-feature-icon-picker-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: #fff;
+  border: 2px dashed #c8d4e3;
+  border-radius: 6px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color .2s;
+  padding: 0;
+  font-size: 18px;
+  color: #333;
+}
+.dc-feature-icon-picker-btn:hover { border-color: #2f65b9; }
 .dc-payment-clear-btn {
   position: absolute;
   top: -6px;
@@ -465,9 +483,9 @@
                 {% for idx, feature in dockercart_theme_product_features %}
                 <div class="dc-row-item dc-feature-row" id="product-feature-row-{{ idx }}">
                   <span class="dc-row-item__num">{{ idx + 1 }}</span>
-                  <div style="display:flex;align-items:center;gap:8px;">
+                  <div style="flex-shrink:0;">
                     <input type="hidden" name="dockercart_theme_product_features[{{ idx }}][icon]" id="product-feature-icon-{{ idx }}" value="{{ feature.icon|default('truck') }}" />
-                    <button type="button" class="btn btn-default dc-icon-picker-button" data-target="#product-feature-icon-{{ idx }}" title="{{ text_search_icons|default('Search icons...') }}">
+                    <button type="button" class="dc-feature-icon-picker-btn dc-icon-picker-button" data-target="#product-feature-icon-{{ idx }}" title="{{ text_search_icons|default('Search icons...') }}">
                       <i data-lucide="{{ feature.icon|default('truck') }}" class="dc-icon-sm"></i>
                     </button>
                   </div>
@@ -484,18 +502,21 @@
                           <label class="control-label dc-feature-label">{{ entry_feature_title }}</label>
                           <input type="text" name="dockercart_theme_product_features[{{ idx }}][title][{{ language.language_id }}]" value="{{ feature.title[language.language_id]|default('') }}" class="form-control" />
                         </div>
-                        <div class="form-group" style="margin-left:0;margin-right:0;margin-bottom:0;">
+                        <div class="form-group" style="margin-left:0;margin-right:0;">
                           <label class="control-label dc-feature-label">{{ entry_feature_text }}</label>
                           <textarea name="dockercart_theme_product_features[{{ idx }}][text][{{ language.language_id }}]" rows="2" class="form-control">{{ feature.text[language.language_id]|default('') }}</textarea>
+                        </div>
+                        <div class="form-group" style="margin-left:0;margin-right:0;margin-bottom:0;">
+                          <label class="control-label dc-feature-label">{{ entry_feature_sort_order }}</label>
+                          <input type="number" name="dockercart_theme_product_features[{{ idx }}][sort_order]" value="{{ feature.sort_order|default(loop.index0) }}" class="form-control" style="width:82px;" />
                         </div>
                       </div>
                       {% endfor %}
                     </div>
                   </div>
-                  <div style="display:flex;flex-direction:column;gap:6px;">
-                    <input type="number" name="dockercart_theme_product_features[{{ idx }}][sort_order]" value="{{ feature.sort_order|default(loop.index0) }}" class="form-control" style="width:82px;" />
-                    <button type="button" class="btn btn-danger js-remove-theme-feature-row" style="margin-top:6px;"><i class="fa fa-trash"></i></button>
-                  </div>
+                  <button type="button" class="btn btn-danger btn-sm js-remove-theme-feature-row" style="flex-shrink:0;">
+                    <i class="fa fa-times"></i>
+                  </button>
                 </div>
                 {% endfor %}
               </div>
@@ -510,9 +531,9 @@
                 {% for idx, feature in dockercart_theme_category_features %}
                 <div class="dc-row-item dc-feature-row" id="category-feature-row-{{ idx }}">
                   <span class="dc-row-item__num">{{ idx + 1 }}</span>
-                  <div style="display:flex;align-items:center;gap:8px;">
+                  <div style="flex-shrink:0;">
                     <input type="hidden" name="dockercart_theme_category_features[{{ idx }}][icon]" id="category-feature-icon-{{ idx }}" value="{{ feature.icon|default('truck') }}" />
-                    <button type="button" class="btn btn-default dc-icon-picker-button" data-target="#category-feature-icon-{{ idx }}" title="{{ text_search_icons|default('Search icons...') }}">
+                    <button type="button" class="dc-feature-icon-picker-btn dc-icon-picker-button" data-target="#category-feature-icon-{{ idx }}" title="{{ text_search_icons|default('Search icons...') }}">
                       <i data-lucide="{{ feature.icon|default('truck') }}" class="dc-icon-sm"></i>
                     </button>
                   </div>
@@ -529,18 +550,21 @@
                           <label class="control-label dc-feature-label">{{ entry_feature_title }}</label>
                           <input type="text" name="dockercart_theme_category_features[{{ idx }}][title][{{ language.language_id }}]" value="{{ feature.title[language.language_id]|default('') }}" class="form-control" />
                         </div>
-                        <div class="form-group" style="margin-left:0;margin-right:0;margin-bottom:0;">
+                        <div class="form-group" style="margin-left:0;margin-right:0;">
                           <label class="control-label dc-feature-label">{{ entry_feature_text }}</label>
                           <textarea name="dockercart_theme_category_features[{{ idx }}][text][{{ language.language_id }}]" rows="2" class="form-control">{{ feature.text[language.language_id]|default('') }}</textarea>
+                        </div>
+                        <div class="form-group" style="margin-left:0;margin-right:0;margin-bottom:0;">
+                          <label class="control-label dc-feature-label">{{ entry_feature_sort_order }}</label>
+                          <input type="number" name="dockercart_theme_category_features[{{ idx }}][sort_order]" value="{{ feature.sort_order|default(loop.index0) }}" class="form-control" style="width:82px;" />
                         </div>
                       </div>
                       {% endfor %}
                     </div>
                   </div>
-                  <div style="display:flex;flex-direction:column;gap:6px;">
-                    <input type="number" name="dockercart_theme_category_features[{{ idx }}][sort_order]" value="{{ feature.sort_order|default(loop.index0) }}" class="form-control" style="width:82px;" />
-                    <button type="button" class="btn btn-danger js-remove-theme-feature-row" style="margin-top:6px;"><i class="fa fa-trash"></i></button>
-                  </div>
+                  <button type="button" class="btn btn-danger btn-sm js-remove-theme-feature-row" style="flex-shrink:0;">
+                    <i class="fa fa-times"></i>
+                  </button>
                 </div>
                 {% endfor %}
               </div>
@@ -556,9 +580,9 @@
                   {% for idx, feature in dockercart_theme_quickview_features %}
                   <div class="dc-row-item dc-feature-row" id="quickview-feature-row-{{ idx }}">
                     <span class="dc-row-item__num">{{ idx + 1 }}</span>
-                    <div style="display:flex;align-items:center;gap:8px;">
+                    <div style="flex-shrink:0;">
                       <input type="hidden" name="dockercart_theme_quickview_features[{{ idx }}][icon]" id="quickview-feature-icon-{{ idx }}" value="{{ feature.icon|default('truck') }}" />
-                      <button type="button" class="btn btn-default dc-icon-picker-button" data-target="#quickview-feature-icon-{{ idx }}" title="{{ text_search_icons|default('Search icons...') }}">
+                      <button type="button" class="dc-feature-icon-picker-btn dc-icon-picker-button" data-target="#quickview-feature-icon-{{ idx }}" title="{{ text_search_icons|default('Search icons...') }}">
                         <i data-lucide="{{ feature.icon|default('truck') }}" class="dc-icon-sm"></i>
                       </button>
                     </div>
@@ -575,18 +599,21 @@
                             <label class="control-label dc-feature-label">{{ entry_feature_title }}</label>
                             <input type="text" name="dockercart_theme_quickview_features[{{ idx }}][title][{{ language.language_id }}]" value="{{ feature.title[language.language_id]|default('') }}" class="form-control" />
                           </div>
-                          <div class="form-group" style="margin-left:0;margin-right:0;margin-bottom:0;">
+                          <div class="form-group" style="margin-left:0;margin-right:0;">
                             <label class="control-label dc-feature-label">{{ entry_feature_text }}</label>
                             <textarea name="dockercart_theme_quickview_features[{{ idx }}][text][{{ language.language_id }}]" rows="2" class="form-control">{{ feature.text[language.language_id]|default('') }}</textarea>
+                          </div>
+                          <div class="form-group" style="margin-left:0;margin-right:0;margin-bottom:0;">
+                            <label class="control-label dc-feature-label">{{ entry_feature_sort_order }}</label>
+                            <input type="number" name="dockercart_theme_quickview_features[{{ idx }}][sort_order]" value="{{ feature.sort_order|default(loop.index0) }}" class="form-control" style="width:82px;" />
                           </div>
                         </div>
                         {% endfor %}
                       </div>
                     </div>
-                    <div style="display:flex;flex-direction:column;gap:6px;">
-                      <input type="number" name="dockercart_theme_quickview_features[{{ idx }}][sort_order]" value="{{ feature.sort_order|default(loop.index0) }}" class="form-control" style="width:82px;" />
-                      <button type="button" class="btn btn-danger js-remove-theme-feature-row" style="margin-top:6px;"><i class="fa fa-trash"></i></button>
-                    </div>
+                    <button type="button" class="btn btn-danger btn-sm js-remove-theme-feature-row" style="flex-shrink:0;">
+                      <i class="fa fa-times"></i>
+                    </button>
                   </div>
                   {% endfor %}
                 </div>
@@ -662,18 +689,19 @@
 
   function buildThemeFeatureRow(fieldName, rowIndex, rowPrefix, sortOrder) {
     var html = '';
+    {% set default_lang = languages[0] %}
     html += '<div class="dc-row-item dc-feature-row" id="' + rowPrefix + '-' + rowIndex + '">';
     html += '<span class="dc-row-item__num">' + (rowIndex + 1) + '</span>';
-    html += '<div style="display:flex;align-items:center;gap:8px;">';
+    html += '<div style="flex-shrink:0;">';
     html += '<input type="hidden" name="' + fieldName + '[' + rowIndex + '][icon]" id="' + rowPrefix + '-icon-' + rowIndex + '" value="truck" />';
-    html += '<button type="button" class="btn btn-default dc-icon-picker-button" data-target="#' + rowPrefix + '-icon-' + rowIndex + '" title="{{ text_search_icons|e('html_attr') }}">';
+    html += '<button type="button" class="dc-feature-icon-picker-btn dc-icon-picker-button" data-target="#' + rowPrefix + '-icon-' + rowIndex + '" title="{{ text_search_icons|e('html_attr') }}">';
     html += '<i data-lucide="truck" class="dc-icon-sm"></i>';
     html += '</button>';
     html += '</div>';
     html += '<div style="flex:1;min-width:0;">';
     html += '<ul class="nav nav-tabs dc-feature-tabs" role="tablist">';
     {% for language in languages %}
-    html += '<li{% if loop.first %} class="active"{% endif %}><a href="#' + rowPrefix + '-' + rowIndex + '-lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name|e('js') }}" /> {{ language.name|e('js') }}</a></li>';
+    html += '<li{% if loop.first %} class="active"{% endif %}><a href="#' + rowPrefix + '-' + rowIndex + '-lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>';
     {% endfor %}
     html += '</ul>';
     html += '<div class="tab-content">';
@@ -683,18 +711,19 @@
     html += '<label class="control-label dc-feature-label">{{ entry_feature_title|e('js') }}</label>';
     html += '<input type="text" name="' + fieldName + '[' + rowIndex + '][title][{{ language.language_id }}]" value="" class="form-control" />';
     html += '</div>';
-    html += '<div class="form-group" style="margin-left:0;margin-right:0;margin-bottom:0;">';
+    html += '<div class="form-group" style="margin-left:0;margin-right:0;">';
     html += '<label class="control-label dc-feature-label">{{ entry_feature_text|e('js') }}</label>';
     html += '<textarea name="' + fieldName + '[' + rowIndex + '][text][{{ language.language_id }}]" rows="2" class="form-control"></textarea>';
+    html += '</div>';
+    html += '<div class="form-group" style="margin-left:0;margin-right:0;margin-bottom:0;">';
+    html += '<label class="control-label dc-feature-label">{{ entry_feature_sort_order|e('js') }}</label>';
+    html += '<input type="number" name="' + fieldName + '[' + rowIndex + '][sort_order]" value="' + escapeHtml(sortOrder) + '" class="form-control" style="width:82px;" />';
     html += '</div>';
     html += '</div>';
     {% endfor %}
     html += '</div>';
     html += '</div>';
-    html += '<div style="display:flex;flex-direction:column;gap:6px;">';
-    html += '<input type="number" name="' + fieldName + '[' + rowIndex + '][sort_order]" value="' + escapeHtml(sortOrder) + '" class="form-control" style="width:82px;" />';
-    html += '<button type="button" class="btn btn-danger js-remove-theme-feature-row" style="margin-top:6px;"><i class="fa fa-trash"></i></button>';
-    html += '</div>';
+    html += '<button type="button" class="btn btn-danger btn-sm js-remove-theme-feature-row" style="flex-shrink:0;"><i class="fa fa-times"></i></button>';
     html += '</div>';
 
     return html;
