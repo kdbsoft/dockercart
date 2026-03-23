@@ -58,7 +58,7 @@
                 {% endif %}
               </div>
               <div class="flex-1 min-w-0">
-                <span class="block text-sm font-semibold text-gray-900 leading-tight truncate">{{ category.name }}</span>
+                <span class="block text-sm font-semibold text-gray-900 leading-tight break-words">{{ category.name }}</span>
                 {% if category.total is defined and category.total > 0 %}
                 <span class="text-xs text-gray-500">{{ text_models|format(category.total) }}</span>
                 {% endif %}
