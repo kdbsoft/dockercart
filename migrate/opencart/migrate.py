@@ -3,7 +3,7 @@
 
 Migrates the following entities:
 - categories
-- products
+- products (including product options and attributes)
 - manufacturers
 - information pages
 - articles (if the table exists)
@@ -394,6 +394,99 @@ def write_seo_rows(
     return target.executemany(sql, prepared)
 
 
+def delete_rows_if_exists(
+    db: Db,
+    table_name: str,
+    where_sql: str = "",
+    where_params: tuple[Any, ...] | None = None,
+) -> int:
+    if not table_exists(db, table_name):
+        return 0
+
+    sql = f"DELETE FROM `{table_name}`"
+    if where_sql:
+        sql += f" WHERE {where_sql}"
+
+    return db.execute(sql, where_params)
+
+
+def clear_seo_for_entity(target: Db, prefix: str, query_pattern: str) -> int:
+    table = f"{prefix}seo_url"
+    if not table_exists(target, table):
+        return 0
+
+    mode = detect_seo_mode(target, table)
+    query_pattern = safe_query_filter(query_pattern)
+
+    if mode == "query":
+        return delete_rows_if_exists(target, table, "`query` LIKE %s", (query_pattern,))
+
+    key_name = query_pattern.split("=", 1)[0]
+    return delete_rows_if_exists(target, table, "`key` = %s", (key_name,))
+
+
+def clear_target_store(target: Db, target_prefix: str) -> None:
+    print("\n[Target cleanup before migration]")
+
+    # Child tables first, then parent tables.
+    tables_to_clear = [
+        f"{target_prefix}product_option_value",
+        f"{target_prefix}product_option",
+        f"{target_prefix}product_attribute",
+        f"{target_prefix}product_related",
+        f"{target_prefix}product_image",
+        f"{target_prefix}product_filter",
+        f"{target_prefix}product_discount",
+        f"{target_prefix}product_special",
+        f"{target_prefix}product_download",
+        f"{target_prefix}product_recurring",
+        f"{target_prefix}product_to_category",
+        f"{target_prefix}product_to_layout",
+        f"{target_prefix}product_to_store",
+        f"{target_prefix}product_description",
+        f"{target_prefix}product",
+        f"{target_prefix}option_value_description",
+        f"{target_prefix}option_value",
+        f"{target_prefix}option_description",
+        f"{target_prefix}option",
+        f"{target_prefix}attribute_description",
+        f"{target_prefix}attribute_to_store",
+        f"{target_prefix}attribute",
+        f"{target_prefix}attribute_group_description",
+        f"{target_prefix}attribute_group",
+        f"{target_prefix}category_path",
+        f"{target_prefix}category_to_layout",
+        f"{target_prefix}category_to_store",
+        f"{target_prefix}category_description",
+        f"{target_prefix}category",
+        f"{target_prefix}manufacturer_to_layout",
+        f"{target_prefix}manufacturer_to_store",
+        f"{target_prefix}manufacturer_description",
+        f"{target_prefix}manufacturer",
+        f"{target_prefix}information_to_layout",
+        f"{target_prefix}information_to_store",
+        f"{target_prefix}information_description",
+        f"{target_prefix}information",
+        f"{target_prefix}article_to_layout",
+        f"{target_prefix}article_to_store",
+        f"{target_prefix}article_description",
+        f"{target_prefix}article",
+    ]
+
+    cleared_rows = 0
+    for table_name in tables_to_clear:
+        cleared_rows += delete_rows_if_exists(target, table_name)
+
+    seo_rows = 0
+    seo_rows += clear_seo_for_entity(target, target_prefix, "category_id=%")
+    seo_rows += clear_seo_for_entity(target, target_prefix, "manufacturer_id=%")
+    seo_rows += clear_seo_for_entity(target, target_prefix, "product_id=%")
+    seo_rows += clear_seo_for_entity(target, target_prefix, "information_id=%")
+    seo_rows += clear_seo_for_entity(target, target_prefix, "article_id=%")
+
+    print(f"  Cleared rows: {cleared_rows}, SEO rows: {seo_rows}")
+
+
 def migrate_seo_for_entity(
     source: Db,
     target: Db,
@@ -446,7 +539,30 @@ def migrate_products(source: Db, target: Db, sp: str, tp: str, lang_map: dict[in
     total += migrate_table_rows(source, target, f"{sp}product_to_store", f"{tp}product_to_store")
     total += migrate_table_rows(source, target, f"{sp}product_to_layout", f"{tp}product_to_layout")
     total += migrate_table_rows(source, target, f"{sp}product_image", f"{tp}product_image")
+    total += migrate_table_rows(source, target, f"{sp}attribute_group", f"{tp}attribute_group")
+    total += migrate_table_rows(
+        source,
+        target,
+        f"{sp}attribute_group_description",
+        f"{tp}attribute_group_description",
+        language_map=lang_map,
+    )
+    total += migrate_table_rows(source, target, f"{sp}attribute", f"{tp}attribute")
+    total += migrate_table_rows(source, target, f"{sp}attribute_description", f"{tp}attribute_description", language_map=lang_map)
+    total += migrate_table_rows(source, target, f"{sp}attribute_to_store", f"{tp}attribute_to_store")
+    total += migrate_table_rows(source, target, f"{sp}option", f"{tp}option")
+    total += migrate_table_rows(source, target, f"{sp}option_description", f"{tp}option_description", language_map=lang_map)
+    total += migrate_table_rows(source, target, f"{sp}option_value", f"{tp}option_value")
+    total += migrate_table_rows(
+        source,
+        target,
+        f"{sp}option_value_description",
+        f"{tp}option_value_description",
+        language_map=lang_map,
+    )
     total += migrate_table_rows(source, target, f"{sp}product_attribute", f"{tp}product_attribute", language_map=lang_map)
+    total += migrate_table_rows(source, target, f"{sp}product_option", f"{tp}product_option")
+    total += migrate_table_rows(source, target, f"{sp}product_option_value", f"{tp}product_option_value")
     total += migrate_table_rows(source, target, f"{sp}product_related", f"{tp}product_related")
     seo = migrate_seo_for_entity(source, target, sp, tp, lang_map, "product_id=%")
     print(f"  Rows migrated: {total}, SEO rows: {seo}")
@@ -554,19 +670,21 @@ def main() -> int:
         entities = {e.strip().lower() for e in args.entities.split(",") if e.strip()}
 
         dst.execute("SET FOREIGN_KEY_CHECKS=0")
+        try:
+            clear_target_store(dst, tp)
 
-        if "categories" in entities:
-            migrate_categories(src, dst, sp, tp, lang_map)
-        if "manufacturers" in entities:
-            migrate_manufacturers(src, dst, sp, tp, lang_map)
-        if "products" in entities:
-            migrate_products(src, dst, sp, tp, lang_map)
-        if "information" in entities:
-            migrate_information(src, dst, sp, tp, lang_map)
-        if "article" in entities:
-            migrate_article(src, dst, sp, tp, lang_map)
-
-        dst.execute("SET FOREIGN_KEY_CHECKS=1")
+            if "categories" in entities:
+                migrate_categories(src, dst, sp, tp, lang_map)
+            if "manufacturers" in entities:
+                migrate_manufacturers(src, dst, sp, tp, lang_map)
+            if "products" in entities:
+                migrate_products(src, dst, sp, tp, lang_map)
+            if "information" in entities:
+                migrate_information(src, dst, sp, tp, lang_map)
+            if "article" in entities:
+                migrate_article(src, dst, sp, tp, lang_map)
+        finally:
+            dst.execute("SET FOREIGN_KEY_CHECKS=1")
 
         if args.dry_run:
             dst.rollback()

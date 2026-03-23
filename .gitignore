@@ -127,3 +127,9 @@ check-multicurrency.sh
 /docker/acme/**
 # Ensure acme.json (contains private keys) is not committed
 /docker/acme/acme.json
+
+
+/__pycache__/
+*.pyc
+*.pyo
+*.pyd
