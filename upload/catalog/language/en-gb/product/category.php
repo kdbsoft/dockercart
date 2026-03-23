@@ -24,7 +24,7 @@ $_['text_model_desc']   = 'Model (Z - A)';
 $_['text_limit']        = 'Show:';
 $_['text_reviews_word']   = 'reviews';
 // Additional localization for category page UI
-$_['text_subcategories'] = '%s subcategories';
+$_['text_subcategories'] = '%s';
 $_['text_shop_all'] = 'Shop all %s →';
 $_['text_models'] = '%s models';
 $_['text_products'] = '%s products';

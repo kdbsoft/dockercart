@@ -203,12 +203,20 @@ class ControllerProductCategory extends Controller {
 
 				$subcategory_ids[$result['category_id']] = $result['name'];
 
-				$data['categories'][] = array(
-					'name' => $result['name'],
-					'total' => $category_total,
-					'description' => utf8_substr(trim(strip_tags(html_entity_decode($result['description'], ENT_QUOTES, 'UTF-8'))), 0, 100) . '...',
-					'href' => $this->url->link('product/category', 'path=' . $this->request->get['path'] . '_' . $result['category_id'] . $url)
-				);
+			// Prepare a resized thumb for subcategory icons (fallback to placeholder)
+			if ($result['image']) {
+				$sub_thumb = $this->model_tool_image->resize($result['image'], 140, 140);
+			} else {
+				$sub_thumb = $this->model_tool_image->resize('placeholder.png', 140, 140);
+			}
+
+			$data['categories'][] = array(
+				'name' => $result['name'],
+				'total' => $category_total,
+				'description' => utf8_substr(trim(strip_tags(html_entity_decode($result['description'], ENT_QUOTES, 'UTF-8'))), 0, 100) . '...',
+				'href' => $this->url->link('product/category', 'path=' . $this->request->get['path'] . '_' . $result['category_id'] . $url),
+				'thumb' => $sub_thumb
+			);
 			}
 
 			$has_subcategories = !empty($subcategory_ids);
