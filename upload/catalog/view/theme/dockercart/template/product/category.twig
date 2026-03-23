@@ -165,20 +165,21 @@
               {{ description }}
             </div>
 
-            <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {% if category_features %}
+            <div class="mt-6 grid grid-cols-1 sm:grid-cols-{{ category_features|length > 1 ? '2' : '1' }} lg:grid-cols-{{ category_features|length > 2 ? '3' : (category_features|length > 1 ? '2' : '1') }} gap-3">
+              {% for feature in category_features %}
               <div class="rounded-2xl border border-gray-200 bg-white p-4">
-                <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1">{{ text_catalog_depth }}</p>
-                <p class="text-sm font-semibold text-gray-900">{{ text_catalog_depth_desc|format(product_total, subcategory_total) }}</p>
+                <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1 flex items-center gap-1.5">
+                  <i data-lucide="{{ feature.icon|default('truck') }}" class="w-3.5 h-3.5"></i>
+                  {{ feature.title }}
+                </p>
+                {% if feature.text %}
+                <p class="text-sm font-semibold text-gray-900">{{ feature.text }}</p>
+                {% endif %}
               </div>
-              <div class="rounded-2xl border border-gray-200 bg-white p-4">
-                <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1">{{ text_brand_coverage }}</p>
-                <p class="text-sm font-semibold text-gray-900">{{ text_brand_coverage_desc }}</p>
-              </div>
-              <div class="rounded-2xl border border-gray-200 bg-white p-4">
-                <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1">{{ text_support }}</p>
-                <p class="text-sm font-semibold text-gray-900">{{ text_support_desc }}</p>
-              </div>
+              {% endfor %}
             </div>
+            {% endif %}
           </div>
           {% endif %}
 

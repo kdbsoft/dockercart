@@ -118,6 +118,29 @@ class ControllerCommonHeader extends Controller {
 		$data['text_qv_feature_warranty'] = $this->language->get('text_qv_feature_warranty');
 		$data['text_qv_feature_returns'] = $this->language->get('text_qv_feature_returns');
 
+		$quickview_feature_defaults = array(
+			array(
+				'icon' => 'truck',
+				'title' => '',
+				'text' => $this->language->get('text_qv_feature_delivery'),
+				'sort_order' => 0
+			),
+			array(
+				'icon' => 'shield-check',
+				'title' => '',
+				'text' => $this->language->get('text_qv_feature_warranty'),
+				'sort_order' => 1
+			),
+			array(
+				'icon' => 'refresh-ccw',
+				'title' => '',
+				'text' => $this->language->get('text_qv_feature_returns'),
+				'sort_order' => 2
+			)
+		);
+		$data['quickview_features'] = $this->resolveThemeFeatures('dockercart_theme_quickview_features', $quickview_feature_defaults);
+		$data['quickview_features_json'] = json_encode($data['quickview_features'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+
 		// Button text for quick view
 		$data['button_cart'] = $this->language->get('button_cart');
 
@@ -279,5 +302,79 @@ class ControllerCommonHeader extends Controller {
 		}
 
 		return $this->load->view('common/header', $data);
+	}
+
+	private function resolveThemeFeatures($setting_key, $defaults = array()) {
+		$raw_value = $this->config->get($setting_key);
+
+		if (!is_string($raw_value) || $raw_value === '') {
+			return $defaults;
+		}
+
+		$decoded = json_decode($raw_value, true);
+		if (!is_array($decoded)) {
+			return $defaults;
+		}
+
+		$language_id = (int)$this->config->get('config_language_id');
+		$features = array();
+
+		foreach ($decoded as $feature) {
+			if (!is_array($feature)) {
+				continue;
+			}
+
+			$icon = isset($feature['icon']) ? (string)$feature['icon'] : 'truck';
+			if (!preg_match('/^[a-z0-9\-]+$/', $icon)) {
+				$icon = 'truck';
+			}
+
+			$title = '';
+			if (isset($feature['title']) && is_array($feature['title'])) {
+				if (isset($feature['title'][$language_id]) && trim((string)$feature['title'][$language_id]) !== '') {
+					$title = trim((string)$feature['title'][$language_id]);
+				} else {
+					foreach ($feature['title'] as $title_candidate) {
+						$title_candidate = trim((string)$title_candidate);
+						if ($title_candidate !== '') {
+							$title = $title_candidate;
+							break;
+						}
+					}
+				}
+			}
+
+			$text = '';
+			if (isset($feature['text']) && is_array($feature['text'])) {
+				if (isset($feature['text'][$language_id]) && trim((string)$feature['text'][$language_id]) !== '') {
+					$text = trim((string)$feature['text'][$language_id]);
+				} else {
+					foreach ($feature['text'] as $text_candidate) {
+						$text_candidate = trim((string)$text_candidate);
+						if ($text_candidate !== '') {
+							$text = $text_candidate;
+							break;
+						}
+					}
+				}
+			}
+
+			if ($title === '' && $text === '') {
+				continue;
+			}
+
+			$features[] = array(
+				'icon' => $icon,
+				'title' => $title,
+				'text' => $text,
+				'sort_order' => isset($feature['sort_order']) ? (int)$feature['sort_order'] : 0
+			);
+		}
+
+		usort($features, function($a, $b) {
+			return (int)$a['sort_order'] <=> (int)$b['sort_order'];
+		});
+
+		return $features ? $features : $defaults;
 	}
 }
