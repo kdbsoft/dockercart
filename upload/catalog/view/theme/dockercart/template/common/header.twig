@@ -91,6 +91,7 @@
   window.dcLang.text_qv_feature_delivery = {{ text_qv_feature_delivery ? '"' ~ text_qv_feature_delivery|e('js') ~ '"' : '"Free shipping on this item"' }};
   window.dcLang.text_qv_feature_warranty = {{ text_qv_feature_warranty ? '"' ~ text_qv_feature_warranty|e('js') ~ '"' : '"2-year manufacturer warranty"' }};
   window.dcLang.text_qv_feature_returns = {{ text_qv_feature_returns ? '"' ~ text_qv_feature_returns|e('js') ~ '"' : '"30-day hassle-free returns"' }};
+  window.dcLang.quickview_features = {{ quickview_features_json ? quickview_features_json|raw : '[]' }};
   window.dcLang.button_cart = {{ button_cart ? '"' ~ button_cart|e('js') ~ '"' : '"Add to Cart"' }};
   window.dcLang.text_home = {{ text_home ? '"' ~ text_home|e('js') ~ '"' : '' }};
 </script>

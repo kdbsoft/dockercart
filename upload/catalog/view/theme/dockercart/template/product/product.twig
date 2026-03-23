@@ -218,21 +218,22 @@
 
         </div>{# end #product #}
 
+        {% if product_features %}
         <!-- Badges row -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6">
-                <div class="rounded-2xl border border-gray-100 p-3 bg-gray-50">
-            <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1 flex items-center gap-1"><i data-lucide="truck" class="w-3.5 h-3.5"></i> {{ text_delivery }}</p>
-            <p class="text-sm font-semibold text-gray-800">{{ text_delivery_desc }}</p>
-          </div>
+        <div class="grid grid-cols-1 sm:grid-cols-{{ product_features|length > 1 ? '2' : '1' }} lg:grid-cols-{{ product_features|length > 2 ? '3' : (product_features|length > 1 ? '2' : '1') }} gap-3 mt-6">
+          {% for feature in product_features %}
           <div class="rounded-2xl border border-gray-100 p-3 bg-gray-50">
-            <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1 flex items-center gap-1"><i data-lucide="shield-check" class="w-3.5 h-3.5"></i> {{ text_warranty }}</p>
-            <p class="text-sm font-semibold text-gray-800">{{ text_warranty_desc }}</p>
+            <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1 flex items-center gap-1">
+              <i data-lucide="{{ feature.icon|default('truck') }}" class="w-3.5 h-3.5"></i>
+              {{ feature.title }}
+            </p>
+            {% if feature.text %}
+            <p class="text-sm font-semibold text-gray-800">{{ feature.text }}</p>
+            {% endif %}
           </div>
-          <div class="rounded-2xl border border-gray-100 p-3 bg-gray-50">
-            <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1 flex items-center gap-1"><i data-lucide="refresh-ccw" class="w-3.5 h-3.5"></i> {{ text_returns }}</p>
-            <p class="text-sm font-semibold text-gray-800">{{ text_returns_desc }}</p>
-          </div>
+          {% endfor %}
         </div>
+        {% endif %}
       </div>
     </section>
 

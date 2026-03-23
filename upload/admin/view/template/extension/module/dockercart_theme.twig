@@ -1,6 +1,7 @@
 {{ header }}{{ column_left }}
 <div id="content">
 <link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 
 <style>
 /* ── DockerCart Theme Settings – module-specific styles ─────────────────── */
@@ -176,6 +177,59 @@
   padding: 0;
 }
 .dc-payment-clear-btn:hover { background: #dc2626; }
+
+/* ── Theme features tables (compact mode) ─────────────────────────────── */
+.dc-theme-features-table th,
+.dc-theme-features-table td {
+  padding: 7px 8px !important;
+  vertical-align: top !important;
+}
+.dc-theme-features-table thead th {
+  font-size: 12px;
+  font-weight: 700;
+  color: #4a5568;
+  background: #f8fafc;
+}
+.dc-theme-features-table .form-control {
+  min-height: 30px;
+  height: 30px;
+  font-size: 12px;
+  padding: 4px 8px;
+}
+.dc-theme-features-table textarea.form-control {
+  min-height: 56px;
+  height: auto;
+  resize: vertical;
+}
+.dc-feature-tabs {
+  margin-bottom: 6px !important;
+}
+.dc-feature-tabs > li > a {
+  padding: 4px 7px;
+  font-size: 11px;
+  line-height: 1.2;
+}
+.dc-feature-tabs img {
+  width: 14px;
+  height: 14px;
+}
+.dc-feature-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #667085;
+  margin-bottom: 4px;
+}
+/* Icon picker modal */
+.dc-icon-picker-modal { display:none; position:fixed; inset:0; z-index:12000; }
+.dc-icon-picker-backdrop { position:absolute; inset:0; background:rgba(0,0,0,0.45); }
+.dc-icon-picker-panel { position:relative; max-width:860px; margin:6vh auto; background:#fff; border-radius:10px; padding:16px; box-shadow:0 10px 40px rgba(2,6,23,0.28); }
+.dc-icon-picker-header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
+.dc-icon-picker-search { width:100%; max-width:480px; }
+.dc-icon-picker-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(56px,1fr)); gap:8px; max-height:56vh; overflow:auto; padding:6px; }
+.dc-icon-option { display:flex; align-items:center; justify-content:center; gap:6px; border:1px solid #e6eef8; background:#f8fbff; padding:8px; border-radius:8px; cursor:pointer; }
+.dc-icon-option:hover { background:#eaf4ff; border-color:#cfe8ff; }
+.dc-icon-option i { width:18px; height:18px; }
+.dc-icon-sm { width:14px; height:14px; display:inline-block; }
 </style>
 
   <div class="page-header">
@@ -397,6 +451,150 @@
               <p class="help-block" style="margin-top:10px;">{{ help_payment_block }}</p>
             </div>
 
+            {# ─────────────────────── Section: Theme features ─────────────────── #}
+            <div class="dcx-section">
+              <h4 style="margin-top:0;"><i class="fa fa-magic"></i> {{ text_section_features }}</h4>
+
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+                <h4 style="margin:0;"><i class="fa fa-magic"></i> {{ entry_features_product }}</h4>
+                <button type="button" class="btn btn-primary btn-sm js-add-theme-feature" data-target="product-features-body" data-field="dockercart_theme_product_features" data-prefix="product-feature-row" data-counter="product">
+                  <i class="fa fa-plus"></i> {{ button_add_feature }}
+                </button>
+              </div>
+              <div id="product-features-body" class="dc-rows-container">
+                {% for idx, feature in dockercart_theme_product_features %}
+                <div class="dc-row-item dc-feature-row" id="product-feature-row-{{ idx }}">
+                  <span class="dc-row-item__num">{{ idx + 1 }}</span>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <input type="hidden" name="dockercart_theme_product_features[{{ idx }}][icon]" id="product-feature-icon-{{ idx }}" value="{{ feature.icon|default('truck') }}" />
+                    <button type="button" class="btn btn-default dc-icon-picker-button" data-target="#product-feature-icon-{{ idx }}" title="{{ text_search_icons|default('Search icons...') }}">
+                      <i data-lucide="{{ feature.icon|default('truck') }}" class="dc-icon-sm"></i>
+                    </button>
+                  </div>
+                  <div style="flex:1;min-width:0;">
+                    <ul class="nav nav-tabs dc-feature-tabs" role="tablist">
+                      {% for language in languages %}
+                      <li{% if loop.first %} class="active"{% endif %}><a href="#product-feature-{{ idx }}-lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>
+                      {% endfor %}
+                    </ul>
+                    <div class="tab-content">
+                      {% for language in languages %}
+                      <div class="tab-pane{% if loop.first %} active{% endif %}" id="product-feature-{{ idx }}-lang-{{ language.language_id }}">
+                        <div class="form-group" style="margin-left:0;margin-right:0;">
+                          <label class="control-label dc-feature-label">{{ entry_feature_title }}</label>
+                          <input type="text" name="dockercart_theme_product_features[{{ idx }}][title][{{ language.language_id }}]" value="{{ feature.title[language.language_id]|default('') }}" class="form-control" />
+                        </div>
+                        <div class="form-group" style="margin-left:0;margin-right:0;margin-bottom:0;">
+                          <label class="control-label dc-feature-label">{{ entry_feature_text }}</label>
+                          <textarea name="dockercart_theme_product_features[{{ idx }}][text][{{ language.language_id }}]" rows="2" class="form-control">{{ feature.text[language.language_id]|default('') }}</textarea>
+                        </div>
+                      </div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:6px;">
+                    <input type="number" name="dockercart_theme_product_features[{{ idx }}][sort_order]" value="{{ feature.sort_order|default(loop.index0) }}" class="form-control" style="width:82px;" />
+                    <button type="button" class="btn btn-danger js-remove-theme-feature-row" style="margin-top:6px;"><i class="fa fa-trash"></i></button>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+                <h4 style="margin:0;"><i class="fa fa-magic"></i> {{ entry_features_category }}</h4>
+                <button type="button" class="btn btn-primary btn-sm js-add-theme-feature" data-target="category-features-body" data-field="dockercart_theme_category_features" data-prefix="category-feature-row" data-counter="category">
+                  <i class="fa fa-plus"></i> {{ button_add_feature }}
+                </button>
+              </div>
+              <div id="category-features-body" class="dc-rows-container">
+                {% for idx, feature in dockercart_theme_category_features %}
+                <div class="dc-row-item dc-feature-row" id="category-feature-row-{{ idx }}">
+                  <span class="dc-row-item__num">{{ idx + 1 }}</span>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <input type="hidden" name="dockercart_theme_category_features[{{ idx }}][icon]" id="category-feature-icon-{{ idx }}" value="{{ feature.icon|default('truck') }}" />
+                    <button type="button" class="btn btn-default dc-icon-picker-button" data-target="#category-feature-icon-{{ idx }}" title="{{ text_search_icons|default('Search icons...') }}">
+                      <i data-lucide="{{ feature.icon|default('truck') }}" class="dc-icon-sm"></i>
+                    </button>
+                  </div>
+                  <div style="flex:1;min-width:0;">
+                    <ul class="nav nav-tabs dc-feature-tabs" role="tablist">
+                      {% for language in languages %}
+                      <li{% if loop.first %} class="active"{% endif %}><a href="#category-feature-{{ idx }}-lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>
+                      {% endfor %}
+                    </ul>
+                    <div class="tab-content">
+                      {% for language in languages %}
+                      <div class="tab-pane{% if loop.first %} active{% endif %}" id="category-feature-{{ idx }}-lang-{{ language.language_id }}">
+                        <div class="form-group" style="margin-left:0;margin-right:0;">
+                          <label class="control-label dc-feature-label">{{ entry_feature_title }}</label>
+                          <input type="text" name="dockercart_theme_category_features[{{ idx }}][title][{{ language.language_id }}]" value="{{ feature.title[language.language_id]|default('') }}" class="form-control" />
+                        </div>
+                        <div class="form-group" style="margin-left:0;margin-right:0;margin-bottom:0;">
+                          <label class="control-label dc-feature-label">{{ entry_feature_text }}</label>
+                          <textarea name="dockercart_theme_category_features[{{ idx }}][text][{{ language.language_id }}]" rows="2" class="form-control">{{ feature.text[language.language_id]|default('') }}</textarea>
+                        </div>
+                      </div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:6px;">
+                    <input type="number" name="dockercart_theme_category_features[{{ idx }}][sort_order]" value="{{ feature.sort_order|default(loop.index0) }}" class="form-control" style="width:82px;" />
+                    <button type="button" class="btn btn-danger js-remove-theme-feature-row" style="margin-top:6px;"><i class="fa fa-trash"></i></button>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+
+              
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+                  <h4 style="margin:0;"><i class="fa fa-magic"></i> {{ entry_features_quickview }}</h4>
+                  <button type="button" class="btn btn-primary btn-sm js-add-theme-feature" data-target="quickview-features-body" data-field="dockercart_theme_quickview_features" data-prefix="quickview-feature-row" data-counter="quickview">
+                    <i class="fa fa-plus"></i> {{ button_add_feature }}
+                  </button>
+                </div>
+                <div id="quickview-features-body" class="dc-rows-container">
+                  {% for idx, feature in dockercart_theme_quickview_features %}
+                  <div class="dc-row-item dc-feature-row" id="quickview-feature-row-{{ idx }}">
+                    <span class="dc-row-item__num">{{ idx + 1 }}</span>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                      <input type="hidden" name="dockercart_theme_quickview_features[{{ idx }}][icon]" id="quickview-feature-icon-{{ idx }}" value="{{ feature.icon|default('truck') }}" />
+                      <button type="button" class="btn btn-default dc-icon-picker-button" data-target="#quickview-feature-icon-{{ idx }}" title="{{ text_search_icons|default('Search icons...') }}">
+                        <i data-lucide="{{ feature.icon|default('truck') }}" class="dc-icon-sm"></i>
+                      </button>
+                    </div>
+                    <div style="flex:1;min-width:0;">
+                      <ul class="nav nav-tabs dc-feature-tabs" role="tablist">
+                        {% for language in languages %}
+                        <li{% if loop.first %} class="active"{% endif %}><a href="#quickview-feature-{{ idx }}-lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>
+                        {% endfor %}
+                      </ul>
+                      <div class="tab-content">
+                        {% for language in languages %}
+                        <div class="tab-pane{% if loop.first %} active{% endif %}" id="quickview-feature-{{ idx }}-lang-{{ language.language_id }}">
+                          <div class="form-group" style="margin-left:0;margin-right:0;">
+                            <label class="control-label dc-feature-label">{{ entry_feature_title }}</label>
+                            <input type="text" name="dockercart_theme_quickview_features[{{ idx }}][title][{{ language.language_id }}]" value="{{ feature.title[language.language_id]|default('') }}" class="form-control" />
+                          </div>
+                          <div class="form-group" style="margin-left:0;margin-right:0;margin-bottom:0;">
+                            <label class="control-label dc-feature-label">{{ entry_feature_text }}</label>
+                            <textarea name="dockercart_theme_quickview_features[{{ idx }}][text][{{ language.language_id }}]" rows="2" class="form-control">{{ feature.text[language.language_id]|default('') }}</textarea>
+                          </div>
+                        </div>
+                        {% endfor %}
+                      </div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:6px;">
+                      <input type="number" name="dockercart_theme_quickview_features[{{ idx }}][sort_order]" value="{{ feature.sort_order|default(loop.index0) }}" class="form-control" style="width:82px;" />
+                      <button type="button" class="btn btn-danger js-remove-theme-feature-row" style="margin-top:6px;"><i class="fa fa-trash"></i></button>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+
+              <p class="help-block" style="margin-top:10px;">{{ help_theme_features }}</p>
+            </div>
+
           </form>
 
         </div>
@@ -408,6 +606,29 @@
 
 {{ footer }}
 
+<!-- Icon picker modal -->
+<div id="dc-icon-picker-modal" class="dc-icon-picker-modal hidden">
+  <div class="dc-icon-picker-backdrop"></div>
+  <div class="dc-icon-picker-panel" role="dialog" aria-modal="true" aria-label="Icon picker">
+    <div class="dc-icon-picker-header">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <strong>Choose icon</strong>
+        <input id="dc-icon-picker-search" class="form-control dc-icon-picker-search" placeholder="{{ text_search_icons|default('Search icons...') }}" />
+      </div>
+      <div>
+        <button id="dc-icon-picker-close" class="btn btn-default">Close</button>
+      </div>
+    </div>
+    <div id="dc-icon-picker-grid" class="dc-icon-picker-grid">
+      {% for icon_option in icon_options %}
+      <button type="button" class="dc-icon-option" data-icon="{{ icon_option }}">
+        <i data-lucide="{{ icon_option }}"></i>
+      </button>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
 <script>
 (function($) {
   'use strict';
@@ -418,6 +639,66 @@
   var userToken          = '{{ user_token }}';
   var socialRowIndex     = {{ social_items|length }};
   var paymentRowCounter  = {{ payment_items|length }};
+  var featureRowCounters = {
+    product: {{ dockercart_theme_product_features|length }},
+    category: {{ dockercart_theme_category_features|length }},
+    quickview: {{ dockercart_theme_quickview_features|length }}
+  };
+
+  function renderLucideIcons() {
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      window.lucide.createIcons();
+    }
+  }
+
+  function escapeHtml(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function buildThemeFeatureRow(fieldName, rowIndex, rowPrefix, sortOrder) {
+    var html = '';
+    html += '<div class="dc-row-item dc-feature-row" id="' + rowPrefix + '-' + rowIndex + '">';
+    html += '<span class="dc-row-item__num">' + (rowIndex + 1) + '</span>';
+    html += '<div style="display:flex;align-items:center;gap:8px;">';
+    html += '<input type="hidden" name="' + fieldName + '[' + rowIndex + '][icon]" id="' + rowPrefix + '-icon-' + rowIndex + '" value="truck" />';
+    html += '<button type="button" class="btn btn-default dc-icon-picker-button" data-target="#' + rowPrefix + '-icon-' + rowIndex + '" title="{{ text_search_icons|e('html_attr') }}">';
+    html += '<i data-lucide="truck" class="dc-icon-sm"></i>';
+    html += '</button>';
+    html += '</div>';
+    html += '<div style="flex:1;min-width:0;">';
+    html += '<ul class="nav nav-tabs dc-feature-tabs" role="tablist">';
+    {% for language in languages %}
+    html += '<li{% if loop.first %} class="active"{% endif %}><a href="#' + rowPrefix + '-' + rowIndex + '-lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name|e('js') }}" /> {{ language.name|e('js') }}</a></li>';
+    {% endfor %}
+    html += '</ul>';
+    html += '<div class="tab-content">';
+    {% for language in languages %}
+    html += '<div class="tab-pane{% if loop.first %} active{% endif %}" id="' + rowPrefix + '-' + rowIndex + '-lang-{{ language.language_id }}">';
+    html += '<div class="form-group" style="margin-left:0;margin-right:0;">';
+    html += '<label class="control-label dc-feature-label">{{ entry_feature_title|e('js') }}</label>';
+    html += '<input type="text" name="' + fieldName + '[' + rowIndex + '][title][{{ language.language_id }}]" value="" class="form-control" />';
+    html += '</div>';
+    html += '<div class="form-group" style="margin-left:0;margin-right:0;margin-bottom:0;">';
+    html += '<label class="control-label dc-feature-label">{{ entry_feature_text|e('js') }}</label>';
+    html += '<textarea name="' + fieldName + '[' + rowIndex + '][text][{{ language.language_id }}]" rows="2" class="form-control"></textarea>';
+    html += '</div>';
+    html += '</div>';
+    {% endfor %}
+    html += '</div>';
+    html += '</div>';
+    html += '<div style="display:flex;flex-direction:column;gap:6px;">';
+    html += '<input type="number" name="' + fieldName + '[' + rowIndex + '][sort_order]" value="' + escapeHtml(sortOrder) + '" class="form-control" style="width:82px;" />';
+    html += '<button type="button" class="btn btn-danger js-remove-theme-feature-row" style="margin-top:6px;"><i class="fa fa-trash"></i></button>';
+    html += '</div>';
+    html += '</div>';
+
+    return html;
+  }
 
   /* ── Logo clear buttons ───────────────────────────────────────────── */
   $(document).on('click', '.js-clear-logo', function() {
@@ -517,6 +798,86 @@
     $('#payment-rows').append(html);
     renumberRows('#payment-rows', '.dc-row-item__num');
   });
+
+  $(document).on('click', '.js-remove-theme-feature-row', function() {
+    var $row = $(this).closest('.dc-feature-row');
+    var $container = $row.parent();
+    $row.remove();
+    if ($container && $container.attr('id')) {
+      renumberRows('#' + $container.attr('id'), '.dc-row-item__num');
+    }
+  });
+
+  // Icon picker modal
+  var __dc_icon_picker_target = null;
+  var __dc_icon_picker_preview = null;
+
+  $(document).on('click', '.dc-icon-picker-button', function(e) {
+    e.preventDefault();
+    var $btn = $(this);
+    var target = $btn.data('target');
+    __dc_icon_picker_target = $(target);
+    __dc_icon_picker_preview = $btn.find('i[data-lucide]');
+    // show modal
+    $('#dc-icon-picker-modal').removeClass('hidden').show();
+    $('#dc-icon-picker-search').val('');
+    $('#dc-icon-picker-grid button').show();
+  });
+
+  // Close modal
+  $(document).on('click', '#dc-icon-picker-close, #dc-icon-picker-modal .dc-icon-picker-backdrop', function() {
+    $('#dc-icon-picker-modal').hide().addClass('hidden');
+  });
+
+  // Icon selection
+  $(document).on('click', '#dc-icon-picker-grid button.dc-icon-option', function(e) {
+    var icon = $(this).data('icon');
+    if (__dc_icon_picker_target && __dc_icon_picker_target.length) {
+      __dc_icon_picker_target.val(icon);
+    }
+    if (__dc_icon_picker_preview && __dc_icon_picker_preview.length) {
+      __dc_icon_picker_preview.attr('data-lucide', icon);
+    }
+    // Also update the small button icon if exists (fallback)
+    if (__dc_icon_picker_target && __dc_icon_picker_target.attr('id')) {
+      var btn = $('[data-target="#' + __dc_icon_picker_target.attr('id') + '"]');
+      if (btn.length) {
+        btn.find('i[data-lucide]').attr('data-lucide', icon);
+      }
+    }
+    renderLucideIcons();
+    $('#dc-icon-picker-modal').hide().addClass('hidden');
+  });
+
+  // Search/filter icons in modal
+  $(document).on('input', '#dc-icon-picker-search', function() {
+    var q = $(this).val().toLowerCase().trim();
+    if (q === '') {
+      $('#dc-icon-picker-grid button').show();
+      return;
+    }
+    $('#dc-icon-picker-grid button').each(function() {
+      var name = $(this).data('icon') || '';
+      if (name.indexOf(q) !== -1) $(this).show(); else $(this).hide();
+    });
+  });
+
+  $(document).on('click', '.js-add-theme-feature', function() {
+    var $btn = $(this);
+    var targetBodyId = $btn.data('target');
+    var fieldName = $btn.data('field');
+    var rowPrefix = $btn.data('prefix');
+    var counterKey = $btn.data('counter');
+    var rowIndex = featureRowCounters[counterKey] || 0;
+    var sortOrder = $('#' + targetBodyId + ' .dc-row-item').length;
+
+    $('#' + targetBodyId).append(buildThemeFeatureRow(fieldName, rowIndex, rowPrefix, sortOrder));
+    featureRowCounters[counterKey] = rowIndex + 1;
+    renderLucideIcons();
+    renumberRows('#' + targetBodyId, '.dc-row-item__num');
+  });
+
+  renderLucideIcons();
 
 })(jQuery);
 </script>

@@ -37,3 +37,36 @@ $_['text_home'] = 'Головна';
 $_['text_menu_horizontal'] = 'Горизонтальний';
 $_['text_menu_vertical'] = 'Вертикальний';
 $_['text_success'] = 'Успіх: Налаштування теми DockerCart оновлено.';
+$_['entry_features_product'] = 'Features у картці товару';
+$_['entry_features_category'] = 'Features у категоріях';
+$_['entry_features_quickview'] = 'Features у швидкому перегляді';
+$_['entry_feature_icon'] = 'Іконка';
+$_['entry_feature_title'] = 'Заголовок';
+$_['entry_feature_text'] = 'Опис';
+$_['entry_feature_sort_order'] = 'Порядок сортування';
+$_['help_theme_features'] = 'Ці блоки features використовуються на сторінці товару, у категоріях і в швидкому перегляді. Можна додавати будь-яку кількість рядків, усі поля мультимовні.';
+$_['button_add_feature'] = 'Додати feature';
+$_['text_section_features'] = 'Features теми';
+$_['text_multilingual_settings'] = 'Мультимовний контент';
+$_['column_action'] = 'Дія';
+
+$_['text_default_product_feature_1_title'] = 'Доставка';
+$_['text_default_product_feature_1_text'] = 'Безкоштовна доставка';
+$_['text_default_product_feature_2_title'] = 'Гарантія';
+$_['text_default_product_feature_2_text'] = 'Офіційна гарантія';
+$_['text_default_product_feature_3_title'] = 'Повернення';
+$_['text_default_product_feature_3_text'] = 'Повернення протягом 30 днів';
+
+$_['text_default_category_feature_1_title'] = 'Глибина каталогу';
+$_['text_default_category_feature_1_text'] = '%s+ товарів у %s підкатегоріях';
+$_['text_default_category_feature_2_title'] = 'Покриття брендів';
+$_['text_default_category_feature_2_text'] = '%s світових брендів і перевірених постачальників';
+$_['text_default_category_feature_3_title'] = 'Підтримка';
+$_['text_default_category_feature_3_text'] = 'Експертна допомога до і після покупки';
+
+$_['text_default_quickview_feature_1_title'] = '';
+$_['text_default_quickview_feature_1_text'] = 'Швидка доставка';
+$_['text_default_quickview_feature_2_title'] = '';
+$_['text_default_quickview_feature_2_text'] = '1-річна гарантія виробника';
+$_['text_default_quickview_feature_3_title'] = '';
+$_['text_default_quickview_feature_3_text'] = 'Повернення протягом 14 днів';

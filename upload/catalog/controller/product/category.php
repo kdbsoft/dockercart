@@ -226,6 +226,7 @@ class ControllerProductCategory extends Controller {
 			$product_total = $this->model_catalog_product->getTotalProducts($filter_data);
 			$data['product_total'] = $product_total;
 			$data['subcategory_total'] = count($data['categories']);
+			$data['brand_total'] = $this->getCategoryBrandCount($category_id);
 
 			// Build wishlist IDs set once before the product loop
 			$wishlist_ids = array();
@@ -496,6 +497,36 @@ class ControllerProductCategory extends Controller {
 			$data['text_support'] = $this->language->get('text_support');
 			$data['text_support_desc'] = $this->language->get('text_support_desc');
 
+			$category_feature_defaults = array(
+				array(
+					'icon' => 'layers-3',
+					'title' => $this->language->get('text_catalog_depth'),
+					'text' => sprintf($this->language->get('text_catalog_depth_desc'), $data['product_total'], $data['subcategory_total']),
+					'sort_order' => 0
+				),
+				array(
+					'icon' => 'badge-check',
+					'title' => $this->language->get('text_brand_coverage'),
+					'text' => sprintf($this->language->get('text_brand_coverage_desc'), $data['brand_total']),
+					'sort_order' => 1
+				),
+				array(
+					'icon' => 'headset',
+					'title' => $this->language->get('text_support'),
+					'text' => $this->language->get('text_support_desc'),
+					'sort_order' => 2
+				)
+			);
+			$data['category_features'] = $this->resolveThemeFeatures('dockercart_theme_category_features', $category_feature_defaults);
+			foreach ($data['category_features'] as &$category_feature) {
+				if (!empty($category_feature['text']) && substr_count($category_feature['text'], '%s') >= 2) {
+					$category_feature['text'] = sprintf($category_feature['text'], $data['product_total'], $data['subcategory_total']);
+				} elseif (!empty($category_feature['text']) && substr_count($category_feature['text'], '%s') === 1) {
+					$category_feature['text'] = sprintf($category_feature['text'], $data['brand_total']);
+				}
+			}
+			unset($category_feature);
+
 			$this->response->setOutput($this->load->view('product/category', $data));
 		} else {
 			$url = '';
@@ -548,5 +579,116 @@ class ControllerProductCategory extends Controller {
 
 			$this->response->setOutput($this->load->view('error/not_found', $data));
 		}
+	}
+
+	private function resolveThemeFeatures($setting_key, $defaults = array()) {
+		$raw_value = $this->config->get($setting_key);
+
+		if (!is_string($raw_value) || $raw_value === '') {
+			return $defaults;
+		}
+
+		$decoded = json_decode($raw_value, true);
+		if (!is_array($decoded)) {
+			return $defaults;
+		}
+
+		$language_id = (int)$this->config->get('config_language_id');
+		$features = array();
+
+		foreach ($decoded as $feature) {
+			if (!is_array($feature)) {
+				continue;
+			}
+
+			$icon = isset($feature['icon']) ? (string)$feature['icon'] : 'truck';
+			if (!preg_match('/^[a-z0-9\-]+$/', $icon)) {
+				$icon = 'truck';
+			}
+
+			$title = '';
+			if (isset($feature['title']) && is_array($feature['title'])) {
+				if (isset($feature['title'][$language_id]) && trim((string)$feature['title'][$language_id]) !== '') {
+					$title = trim((string)$feature['title'][$language_id]);
+				} else {
+					foreach ($feature['title'] as $title_candidate) {
+						$title_candidate = trim((string)$title_candidate);
+						if ($title_candidate !== '') {
+							$title = $title_candidate;
+							break;
+						}
+					}
+				}
+			}
+
+			$text = '';
+			if (isset($feature['text']) && is_array($feature['text'])) {
+				if (isset($feature['text'][$language_id]) && trim((string)$feature['text'][$language_id]) !== '') {
+					$text = trim((string)$feature['text'][$language_id]);
+				} else {
+					foreach ($feature['text'] as $text_candidate) {
+						$text_candidate = trim((string)$text_candidate);
+						if ($text_candidate !== '') {
+							$text = $text_candidate;
+							break;
+						}
+					}
+				}
+			}
+
+			if ($title === '' && $text === '') {
+				continue;
+			}
+
+			$features[] = array(
+				'icon' => $icon,
+				'title' => $title,
+				'text' => $text,
+				'sort_order' => isset($feature['sort_order']) ? (int)$feature['sort_order'] : 0
+			);
+		}
+
+		usort($features, function($a, $b) {
+			return (int)$a['sort_order'] <=> (int)$b['sort_order'];
+		});
+
+		return $features ? $features : $defaults;
+	}
+
+	private function getCategoryBrandCount($category_id) {
+		$category_ids = $this->getCategoryTreeIds((int)$category_id);
+
+		if (!$category_ids) {
+			$category_ids = array((int)$category_id);
+		}
+
+		$category_ids = array_values(array_unique(array_map('intval', $category_ids)));
+		$category_ids_sql = implode(',', $category_ids);
+
+		$query = $this->db->query(
+			"SELECT COUNT(DISTINCT p.manufacturer_id) AS total
+			 FROM `" . DB_PREFIX . "product` p
+			 LEFT JOIN `" . DB_PREFIX . "product_to_category` p2c ON (p.product_id = p2c.product_id)
+			 LEFT JOIN `" . DB_PREFIX . "product_to_store` p2s ON (p.product_id = p2s.product_id)
+			 WHERE p.status = '1'
+			   AND p.date_available <= NOW()
+			   AND p.manufacturer_id > 0
+			   AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "'
+			   AND p2c.category_id IN (" . $category_ids_sql . ")"
+		);
+
+		return isset($query->row['total']) ? (int)$query->row['total'] : 0;
+	}
+
+	private function getCategoryTreeIds($category_id) {
+		$category_id = (int)$category_id;
+		$ids = array($category_id);
+
+		$children = $this->model_catalog_category->getCategories($category_id);
+		foreach ($children as $child) {
+			$ids = array_merge($ids, $this->getCategoryTreeIds((int)$child['category_id']));
+		}
+
+		return $ids;
 	}
 }

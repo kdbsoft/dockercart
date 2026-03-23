@@ -107,16 +107,18 @@
         descEl.textContent = description;
       }
 
-      // Set localized features (inject into span so icons remain)
-      const f1 = document.getElementById('qv-feature-delivery');
-      const f2 = document.getElementById('qv-feature-warranty');
-      const f3 = document.getElementById('qv-feature-returns');
-      const t1 = f1 ? f1.querySelector('.qv-feature-text') : null;
-      const t2 = f2 ? f2.querySelector('.qv-feature-text') : null;
-      const t3 = f3 ? f3.querySelector('.qv-feature-text') : null;
-      if (t1) t1.textContent = (window.dcLang && window.dcLang.text_qv_feature_delivery) ? window.dcLang.text_qv_feature_delivery : 'Free shipping on this item';
-      if (t2) t2.textContent = (window.dcLang && window.dcLang.text_qv_feature_warranty) ? window.dcLang.text_qv_feature_warranty : '2-year manufacturer warranty';
-      if (t3) t3.textContent = (window.dcLang && window.dcLang.text_qv_feature_returns) ? window.dcLang.text_qv_feature_returns : '30-day hassle-free returns';
+      // Set localized features (dynamic list)
+      const featuresList = document.getElementById('qv-features');
+      if (featuresList) {
+        const fallbackFeatures = [
+          { icon: 'truck', title: '', text: (window.dcLang && window.dcLang.text_qv_feature_delivery) ? window.dcLang.text_qv_feature_delivery : 'Free shipping on this item', sort_order: 0 },
+          { icon: 'shield-check', title: '', text: (window.dcLang && window.dcLang.text_qv_feature_warranty) ? window.dcLang.text_qv_feature_warranty : '2-year manufacturer warranty', sort_order: 1 },
+          { icon: 'refresh-ccw', title: '', text: (window.dcLang && window.dcLang.text_qv_feature_returns) ? window.dcLang.text_qv_feature_returns : '30-day hassle-free returns', sort_order: 2 }
+        ];
+
+        const configured = (window.dcLang && Array.isArray(window.dcLang.quickview_features)) ? window.dcLang.quickview_features : fallbackFeatures;
+        featuresList.innerHTML = this._renderFeatures(configured);
+      }
 
       // Wire wishlist button
       const wishBtn = document.getElementById('qv-wishlist-btn');
@@ -265,20 +267,7 @@
       <p id="qv-description" class="text-gray-500 text-sm leading-relaxed"></p>
       
       <!-- Features (icons on the left, text injected by JS) -->
-      <ul class="text-sm text-gray-600 space-y-1.5">
-        <li id="qv-feature-delivery" class="flex items-center gap-3">
-          <i data-lucide="check" class="w-4 h-4 text-teal-500 flex-shrink-0"></i>
-          <span class="qv-feature-text"></span>
-        </li>
-        <li id="qv-feature-warranty" class="flex items-center gap-3">
-          <i data-lucide="check" class="w-4 h-4 text-teal-500 flex-shrink-0"></i>
-          <span class="qv-feature-text"></span>
-        </li>
-        <li id="qv-feature-returns" class="flex items-center gap-3">
-          <i data-lucide="check" class="w-4 h-4 text-teal-500 flex-shrink-0"></i>
-          <span class="qv-feature-text"></span>
-        </li>
-      </ul>
+      <ul id="qv-features" class="text-sm text-gray-600 space-y-1.5"></ul>
       
       <!-- Actions -->
       <div class="flex gap-3 mt-4">
@@ -323,6 +312,49 @@
         }
       }
       return html;
+    },
+
+    _renderFeatures: function(features) {
+      if (!Array.isArray(features)) {
+        return '';
+      }
+
+      const sorted = features.slice().sort(function(a, b) {
+        return (parseInt(a && a.sort_order, 10) || 0) - (parseInt(b && b.sort_order, 10) || 0);
+      });
+
+      const rows = sorted.map((feature) => {
+        if (!feature || typeof feature !== 'object') {
+          return '';
+        }
+
+        const icon = this._safeIconName(feature.icon || 'check');
+        const title = (feature.title || '').toString().trim();
+        const text = (feature.text || '').toString().trim();
+        const content = (title && text) ? (title + ': ' + text) : (text || title);
+
+        if (!content) {
+          return '';
+        }
+
+        return `<li class="flex items-center gap-3"><i data-lucide="${icon}" class="w-4 h-4 text-teal-500 flex-shrink-0"></i><span class="qv-feature-text">${this._escapeHtml(content)}</span></li>`;
+      });
+
+      return rows.join('');
+    },
+
+    _safeIconName: function(iconName) {
+      const normalized = String(iconName || '').toLowerCase();
+      return /^[a-z0-9\-]+$/.test(normalized) ? normalized : 'check';
+    },
+
+    _escapeHtml: function(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
   };
 

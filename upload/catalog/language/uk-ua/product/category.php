@@ -2,7 +2,7 @@
 
 $_['text_benefits'] = 'Переваги:';
 $_['text_brand_coverage'] = 'Охоплення брендів';
-$_['text_brand_coverage_desc'] = 'Світові бренди та перевірені постачальники';
+$_['text_brand_coverage_desc'] = '%s світових брендів і перевірених постачальників';
 $_['text_catalog_depth'] = 'Глибина каталогу';
 $_['text_catalog_depth_desc'] = '%s+ товарів у %s підкатегоріях';
 $_['text_category'] = 'Категорія';

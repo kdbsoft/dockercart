@@ -1,7 +1,7 @@
 <?php
 
 $_['text_brand_coverage'] = 'Охват бренда';
-$_['text_brand_coverage_desc'] = 'Глобальные бренды и проверенные поставщики';
+$_['text_brand_coverage_desc'] = '%s мировых брендов и проверенных поставщиков';
 $_['text_catalog_depth'] = 'Глубина каталога';
 $_['text_catalog_depth_desc'] = '%s+ товаров в %s подкатегориях';
 $_['text_category_description'] = 'Описание категории';

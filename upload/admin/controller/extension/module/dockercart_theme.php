@@ -27,6 +27,10 @@ class ControllerExtensionModuleDockerCartTheme extends Controller {
 
         $this->load->model('setting/setting');
         $this->load->model('tool/image');
+        $this->load->model('localisation/language');
+
+        $data['languages'] = $this->model_localisation_language->getLanguages();
+        $data['icon_options'] = $this->getLucideIconOptions();
 
         if ($this->request->server['REQUEST_METHOD'] === 'POST' && $this->validate()) {
             $this->_saveSettings();
@@ -157,6 +161,25 @@ class ControllerExtensionModuleDockerCartTheme extends Controller {
         }
         $data['payment_items'] = $payment_items;
 
+        /* ── Theme features (multilingual + lucide icon) ── */
+        if (isset($this->request->post['dockercart_theme_product_features'])) {
+            $data['dockercart_theme_product_features'] = $this->normalizeThemeFeatures($this->request->post['dockercart_theme_product_features'], $data['languages'], $this->getDefaultThemeFeatures($data['languages'], 'product'));
+        } else {
+            $data['dockercart_theme_product_features'] = $this->getThemeFeaturesFromConfig('dockercart_theme_product_features', $data['languages'], $this->getDefaultThemeFeatures($data['languages'], 'product'));
+        }
+
+        if (isset($this->request->post['dockercart_theme_category_features'])) {
+            $data['dockercart_theme_category_features'] = $this->normalizeThemeFeatures($this->request->post['dockercart_theme_category_features'], $data['languages'], $this->getDefaultThemeFeatures($data['languages'], 'category'));
+        } else {
+            $data['dockercart_theme_category_features'] = $this->getThemeFeaturesFromConfig('dockercart_theme_category_features', $data['languages'], $this->getDefaultThemeFeatures($data['languages'], 'category'));
+        }
+
+        if (isset($this->request->post['dockercart_theme_quickview_features'])) {
+            $data['dockercart_theme_quickview_features'] = $this->normalizeThemeFeatures($this->request->post['dockercart_theme_quickview_features'], $data['languages'], $this->getDefaultThemeFeatures($data['languages'], 'quickview'));
+        } else {
+            $data['dockercart_theme_quickview_features'] = $this->getThemeFeaturesFromConfig('dockercart_theme_quickview_features', $data['languages'], $this->getDefaultThemeFeatures($data['languages'], 'quickview'));
+        }
+
         /* ── Layout ── */
         $data['header']      = $this->load->controller('common/header');
         $data['column_left'] = $this->load->controller('common/column_left');
@@ -171,6 +194,25 @@ class ControllerExtensionModuleDockerCartTheme extends Controller {
      */
     private function _saveSettings() {
         $p = $this->request->post;
+        $languages = $this->model_localisation_language->getLanguages();
+
+        $product_features = $this->normalizeThemeFeatures(
+            isset($p['dockercart_theme_product_features']) ? $p['dockercart_theme_product_features'] : array(),
+            $languages,
+            $this->getDefaultThemeFeatures($languages, 'product')
+        );
+
+        $category_features = $this->normalizeThemeFeatures(
+            isset($p['dockercart_theme_category_features']) ? $p['dockercart_theme_category_features'] : array(),
+            $languages,
+            $this->getDefaultThemeFeatures($languages, 'category')
+        );
+
+        $quickview_features = $this->normalizeThemeFeatures(
+            isset($p['dockercart_theme_quickview_features']) ? $p['dockercart_theme_quickview_features'] : array(),
+            $languages,
+            $this->getDefaultThemeFeatures($languages, 'quickview')
+        );
 
         $settings = [
             'dockercart_theme_status'     => (int)($p['dockercart_theme_status'] ?? 0),
@@ -178,6 +220,9 @@ class ControllerExtensionModuleDockerCartTheme extends Controller {
             'dockercart_theme_logo_light' => trim((string)($p['dockercart_theme_logo_light'] ?? '')),
             'dockercart_theme_favicon_master' => trim((string)($p['dockercart_theme_favicon_master'] ?? '')),
             'dockercart_theme_menu_type'  => ($p['dockercart_theme_menu_type'] ?? '') === 'vertical' ? 'vertical' : 'horizontal',
+            'dockercart_theme_product_features' => json_encode($product_features, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'dockercart_theme_category_features' => json_encode($category_features, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'dockercart_theme_quickview_features' => json_encode($quickview_features, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
         ];
 
         // Blank out all 10 slots first (ensures removed rows are cleared)
@@ -211,6 +256,156 @@ class ControllerExtensionModuleDockerCartTheme extends Controller {
         $this->model_setting_setting->editSetting('dockercart_theme', $settings);
     }
 
+    private function getThemeFeaturesFromConfig($setting_key, $languages, $defaults) {
+        $raw_value = $this->config->get($setting_key);
+
+        if (!is_string($raw_value) || $raw_value === '') {
+            return $defaults;
+        }
+
+        $decoded = json_decode($raw_value, true);
+
+        if (!is_array($decoded)) {
+            return $defaults;
+        }
+
+        return $this->normalizeThemeFeatures($decoded, $languages, $defaults);
+    }
+
+    private function normalizeThemeFeatures($features, $languages, $fallback = array()) {
+        if (!is_array($features)) {
+            return $fallback;
+        }
+
+        $normalized = array();
+        $icon_options = $this->getLucideIconOptions();
+        $allowed_icons = array_flip($icon_options);
+
+        foreach ($features as $feature) {
+            if (!is_array($feature)) {
+                continue;
+            }
+
+            $icon = isset($feature['icon']) ? trim((string)$feature['icon']) : 'truck';
+            if (!isset($allowed_icons[$icon])) {
+                $icon = 'truck';
+            }
+
+            $item = array(
+                'icon' => $icon,
+                'sort_order' => isset($feature['sort_order']) ? (int)$feature['sort_order'] : 0,
+                'title' => array(),
+                'text' => array()
+            );
+
+            $has_content = false;
+
+            foreach ($languages as $language) {
+                $language_id = (int)$language['language_id'];
+
+                $title = '';
+                if (isset($feature['title']) && is_array($feature['title']) && isset($feature['title'][$language_id])) {
+                    $title = trim((string)$feature['title'][$language_id]);
+                }
+
+                $text = '';
+                if (isset($feature['text']) && is_array($feature['text']) && isset($feature['text'][$language_id])) {
+                    $text = trim((string)$feature['text'][$language_id]);
+                }
+
+                if ($title !== '' || $text !== '') {
+                    $has_content = true;
+                }
+
+                $item['title'][$language_id] = $title;
+                $item['text'][$language_id] = $text;
+            }
+
+            if ($has_content) {
+                $normalized[] = $item;
+            }
+        }
+
+        usort($normalized, function($a, $b) {
+            return (int)$a['sort_order'] <=> (int)$b['sort_order'];
+        });
+
+        if (!$normalized) {
+            return $fallback;
+        }
+
+        return array_values($normalized);
+    }
+
+    private function getDefaultThemeFeatures($languages, $group) {
+        $map = array(
+            'product' => array(
+                array('icon' => 'truck', 'title_key' => 'text_default_product_feature_1_title', 'text_key' => 'text_default_product_feature_1_text'),
+                array('icon' => 'shield-check', 'title_key' => 'text_default_product_feature_2_title', 'text_key' => 'text_default_product_feature_2_text'),
+                array('icon' => 'refresh-ccw', 'title_key' => 'text_default_product_feature_3_title', 'text_key' => 'text_default_product_feature_3_text')
+            ),
+            'category' => array(
+                array('icon' => 'layers-3', 'title_key' => 'text_default_category_feature_1_title', 'text_key' => 'text_default_category_feature_1_text'),
+                array('icon' => 'badge-check', 'title_key' => 'text_default_category_feature_2_title', 'text_key' => 'text_default_category_feature_2_text'),
+                array('icon' => 'headset', 'title_key' => 'text_default_category_feature_3_title', 'text_key' => 'text_default_category_feature_3_text')
+            ),
+            'quickview' => array(
+                array('icon' => 'truck', 'title_key' => 'text_default_quickview_feature_1_title', 'text_key' => 'text_default_quickview_feature_1_text'),
+                array('icon' => 'shield-check', 'title_key' => 'text_default_quickview_feature_2_title', 'text_key' => 'text_default_quickview_feature_2_text'),
+                array('icon' => 'refresh-ccw', 'title_key' => 'text_default_quickview_feature_3_title', 'text_key' => 'text_default_quickview_feature_3_text')
+            )
+        );
+
+        $defaults = array();
+        $group_defaults = isset($map[$group]) ? $map[$group] : array();
+
+        foreach ($group_defaults as $index => $default) {
+            $item = array(
+                'icon' => $default['icon'],
+                'sort_order' => $index,
+                'title' => array(),
+                'text' => array()
+            );
+
+            foreach ($languages as $language) {
+                $language_id = (int)$language['language_id'];
+                $item['title'][$language_id] = $this->language->get($default['title_key']);
+                $item['text'][$language_id] = $this->language->get($default['text_key']);
+            }
+
+            $defaults[] = $item;
+        }
+
+        return $defaults;
+    }
+
+    private function getLucideIconOptions() {
+        return array(
+            'truck',
+            'shield-check',
+            'refresh-ccw',
+            'headset',
+            'layers-3',
+            'badge-check',
+            'gift',
+            'sparkles',
+            'package',
+            'clock-3',
+            'zap',
+            'credit-card',
+            'wallet',
+            'leaf',
+            'award',
+            'thumbs-up',
+            'smile',
+            'check-circle-2',
+            'star',
+            'globe',
+            'lock',
+            'check'
+        );
+    }
+
     protected function validate() {
         if (!$this->user->hasPermission('modify', 'extension/module/dockercart_theme')) {
             $this->error['warning'] = $this->language->get('error_permission');
@@ -221,12 +416,21 @@ class ControllerExtensionModuleDockerCartTheme extends Controller {
     /* Called by marketplace installer */
     public function install() {
         $this->load->model('setting/setting');
+        $this->load->model('localisation/language');
+
+        $languages = $this->model_localisation_language->getLanguages();
+        $product_defaults = $this->getDefaultThemeFeatures($languages, 'product');
+        $category_defaults = $this->getDefaultThemeFeatures($languages, 'category');
+        $quickview_defaults = $this->getDefaultThemeFeatures($languages, 'quickview');
         $this->model_setting_setting->editSetting('dockercart_theme', [
             'dockercart_theme_status'    => 1,
             'dockercart_theme_logo_dark' => '',
             'dockercart_theme_logo_light' => '',
             'dockercart_theme_favicon_master' => '',
             'dockercart_theme_menu_type' => 'horizontal',
+            'dockercart_theme_product_features' => json_encode($product_defaults, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'dockercart_theme_category_features' => json_encode($category_defaults, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'dockercart_theme_quickview_features' => json_encode($quickview_defaults, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             'dockercart_theme_social_1_image' => '',
             'dockercart_theme_social_1_link'  => '',
             'dockercart_theme_social_2_image' => '',
