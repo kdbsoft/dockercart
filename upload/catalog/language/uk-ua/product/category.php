@@ -38,4 +38,5 @@ $_['text_sort'] = 'Сортувати за:';
 $_['text_subcategories'] = '%s';
 $_['text_support'] = 'Підтримка';
 $_['text_support_desc'] = 'Експертна допомога до і після покупки';
-$_['text_tax'] = 'Без ПДВ:';
+$_['text_tax']       = 'Без ПДВ:';
+$_['text_load_more'] = 'Показати ще';

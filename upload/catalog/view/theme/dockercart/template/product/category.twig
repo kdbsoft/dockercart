@@ -108,7 +108,7 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
+          <div id="dc-product-grid" class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
             {% for product in products %}
             <div class="product-card group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex flex-col" data-id="{{ product.product_id }}" data-description="{{ product.description }}" data-model="{{ product.model }}" data-in-wishlist="{{ product.in_wishlist }}" data-rating="{{ product.rating }}">
               <div class="relative overflow-hidden aspect-square bg-gray-50">
@@ -159,6 +159,20 @@
             </div>
             {% endfor %}
           </div>
+
+          {% if has_more %}
+          <div class="dc-load-more-wrap mt-6 flex flex-col items-center gap-2">
+            <button class="dc-load-more-btn inline-flex items-center gap-2 px-7 py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow transition"
+              data-url="{{ load_more_url }}"
+              data-page="{{ page + 1 }}"
+              data-total="{{ product_total }}"
+              data-loaded="{{ products_loaded }}">
+              <i data-lucide="chevron-down" class="w-4 h-4"></i>
+              {{ text_load_more }}
+              <span class="dc-lm-count text-xs font-normal opacity-70">({{ products_loaded }} / {{ product_total }})</span>
+            </button>
+          </div>
+          {% endif %}
 
           {% if pagination %}
           <div class="mt-8 flex items-center justify-center">
@@ -242,7 +256,8 @@
     background:#fff; text-decoration:none; transition:all .15s ease;
   }
   .dc-pagination ul li a:hover { border-color:#93c5fd; color:#2563eb; }
-  .dc-pagination ul li.active span { background:#2563eb; border-color:#2563eb; color:#fff; }
+  .dc-pagination ul li.active span,
+  .dc-pagination ul li.active a { background:#2563eb; border-color:#2563eb; color:#fff; }
 
   /* Subcategory card visuals */
   .subcategory-card { overflow: hidden; }

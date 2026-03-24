@@ -37,4 +37,5 @@ $_['text_oldest_first'] = 'Oldest first';
 $_['text_quick_view'] = 'Quick View';
 $_['text_sale'] = 'SALE';
 $_['text_special_tagline'] = 'Exclusive deals updated regularly — don\'t miss out.';
-$_['text_products'] = '%s products';
+$_['text_products']  = '%s products';
+$_['text_load_more'] = 'Show More';
