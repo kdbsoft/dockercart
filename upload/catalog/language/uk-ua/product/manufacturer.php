@@ -28,4 +28,5 @@ $_['text_rating_asc'] = 'Рейтинг (найнижчий)';
 $_['text_rating_desc'] = 'Рейтинг (найвищий)';
 $_['text_reviews_word'] = 'відгуки';
 $_['text_sort'] = 'Сортувати за:';
-$_['text_tax'] = 'Без ПДВ:';
+$_['text_tax']       = 'Без ПДВ:';
+$_['text_load_more'] = 'Показати ще';

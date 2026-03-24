@@ -336,6 +336,150 @@ class ControllerProductNewArrivals extends Controller {
 		// short word for "reviews" (used in listing templates)
 		$data['text_reviews'] = $this->language->get('text_reviews_word');
 
+		// Load-more AJAX
+		$lm_params = 'sort=' . $sort . '&order=' . $order . '&limit=' . $limit;
+		$data['load_more_url']   = HTTP_SERVER . 'index.php?route=product/new_arrivals/loadmore&' . $lm_params;
+		$data['has_more']        = $product_total > (($page - 1) * $limit + count($data['products']));
+		$data['products_loaded'] = ($page - 1) * $limit + count($data['products']);
+		$data['text_load_more']  = $this->language->get('text_load_more');
+		$data['page']            = $page;
+
 		$this->response->setOutput($this->load->view('product/new_arrivals', $data));
+	}
+
+	/**
+	 * AJAX load-more endpoint.
+	 * Returns JSON: { "html": "<product cards>", "count": N, "total": N }
+	 */
+	public function loadmore() {
+		$this->load->language('product/special');
+		$this->load->model('catalog/product');
+		$this->load->model('catalog/category');
+		$this->load->model('tool/image');
+
+		$this->response->addHeader('Content-Type: application/json');
+
+		$sort  = isset($this->request->get['sort'])  ? $this->request->get['sort']  : 'p.date_added';
+		$order = isset($this->request->get['order']) ? $this->request->get['order'] : 'DESC';
+		$page  = isset($this->request->get['page'])  ? (int)$this->request->get['page'] : 1;
+
+		if ($page < 1) {
+			$page = 1;
+		}
+
+		if (isset($this->request->get['limit']) && (int)$this->request->get['limit'] > 0) {
+			$limit = (int)$this->request->get['limit'];
+		} else {
+			$limit = (int)$this->config->get('theme_' . $this->config->get('config_theme') . '_product_limit');
+		}
+
+		$filter_data = array(
+			'sort'  => $sort,
+			'order' => $order,
+			'start' => ($page - 1) * $limit,
+			'limit' => $limit
+		);
+
+		$product_total = $this->model_catalog_product->getTotalNewArrivalProducts(90);
+		$results       = $this->model_catalog_product->getNewArrivalProducts($filter_data, 90);
+
+		$wishlist_ids = array();
+		if ($this->customer->isLogged()) {
+			$this->load->model('account/wishlist');
+			foreach ($this->model_account_wishlist->getWishlist() as $w) {
+				$wishlist_ids[] = (int)$w['product_id'];
+			}
+		} elseif (isset($this->session->data['wishlist'])) {
+			$wishlist_ids = array_map('intval', $this->session->data['wishlist']);
+		}
+
+		$badge_30 = $this->language->get('text_badge_30');
+		$badge_60 = $this->language->get('text_badge_60');
+		$badge_90 = $this->language->get('text_badge_90');
+
+		$products = array();
+		foreach ($results as $result) {
+			$image = $result['image']
+				? $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_height'))
+				: $this->model_tool_image->resize('placeholder.png', $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_height'));
+
+			if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
+				$price = $this->currency->format($this->tax->calculate($result['price'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+			} else {
+				$price = false;
+			}
+
+			if (!is_null($result['special']) && (float)$result['special'] >= 0) {
+				$special = $this->currency->format($this->tax->calculate($result['special'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+			} else {
+				$special = false;
+			}
+
+			$category_name = '';
+			$product_categories = $this->model_catalog_product->getCategories($result['product_id']);
+			if (!empty($product_categories[0]['category_id'])) {
+				$cat_info = $this->model_catalog_category->getCategory((int)$product_categories[0]['category_id']);
+				if ($cat_info && !empty($cat_info['name'])) {
+					$category_name = $cat_info['name'];
+				}
+			}
+
+			$days_since_added = 90;
+			if (!empty($result['date_added'])) {
+				$days_since_added = (int)floor((time() - strtotime($result['date_added'])) / 86400);
+				if ($days_since_added < 0) {
+					$days_since_added = 0;
+				}
+			}
+
+			if ($days_since_added <= 30) {
+				$badge_text  = $badge_30;
+				$badge_class = 'from-emerald-500 to-green-600';
+			} elseif ($days_since_added <= 60) {
+				$badge_text  = $badge_60;
+				$badge_class = 'from-amber-500 to-orange-600';
+			} else {
+				$badge_text  = $badge_90;
+				$badge_class = 'from-blue-500 to-indigo-600';
+			}
+
+			$products[] = array(
+				'product_id'              => $result['product_id'],
+				'thumb'                   => $image,
+				'name'                    => $result['name'],
+				'model'                   => isset($result['model']) ? $result['model'] : '',
+				'description'             => utf8_substr(trim(strip_tags(html_entity_decode($result['description'], ENT_QUOTES, 'UTF-8'))), 0, $this->config->get('theme_' . $this->config->get('config_theme') . '_product_description_length')) . '..',
+				'category'                => $category_name,
+				'price'                   => $price,
+				'special'                 => $special,
+				'minimum'                 => $result['minimum'] > 0 ? $result['minimum'] : 1,
+				'rating'                  => (int)$result['rating'],
+				'reviews'                 => isset($result['reviews']) ? (int)$result['reviews'] : 0,
+				'in_wishlist'             => in_array((int)$result['product_id'], $wishlist_ids) ? 1 : 0,
+				'new_arrival_badge'       => $badge_text,
+				'new_arrival_badge_class' => $badge_class,
+				'href'                    => $this->url->link('product/product', 'product_id=' . $result['product_id'])
+			);
+		}
+
+		$html = '';
+		foreach ($products as $product) {
+			$html .= $this->load->view('product/product_card_ajax', array(
+				'product'          => $product,
+				'text_quick_view'  => $this->language->get('text_quick_view'),
+				'text_reviews'     => $this->language->get('text_reviews_word'),
+				'text_sale'        => '',
+				'button_cart'      => $this->language->get('button_cart'),
+				'btn_quick_hover'  => 'hover:bg-teal-600',
+				'link_hover'       => 'hover:text-teal-600 transition',
+				'btn_cart_classes' => 'bg-teal-600 text-white hover:bg-teal-700',
+			));
+		}
+
+		$this->response->setOutput(json_encode(array(
+			'html'  => $html,
+			'count' => count($products),
+			'total' => $product_total,
+		)));
 	}
 }

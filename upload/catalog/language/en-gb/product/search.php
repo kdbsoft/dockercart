@@ -29,8 +29,9 @@ $_['text_rating_desc']  = 'Rating (Highest)';
 $_['text_model_asc']    = 'Model (A - Z)';
 $_['text_model_desc']   = 'Model (Z - A)';
 $_['text_limit']        = 'Show:';
-$_['text_products'] = '%s products';
-$_['text_quick_view'] = 'Quick View';
+$_['text_products']   = '%s products';
+$_['text_quick_view']  = 'Quick View';
+$_['text_load_more']   = 'Show More';
 
 // Entry
 $_['entry_search']      = 'Search Criteria';

@@ -486,6 +486,148 @@ class ControllerProductSearch extends Controller {
 		// short word for "reviews" (used in listing templates)
 		$data['text_reviews'] = $this->language->get('text_reviews_word');
 
+		// Load-more AJAX
+		$lm_params = '';
+		if (isset($this->request->get['search']))      { $lm_params .= '&search='      . urlencode(html_entity_decode($this->request->get['search'], ENT_QUOTES, 'UTF-8')); }
+		if (isset($this->request->get['tag']))         { $lm_params .= '&tag='         . urlencode(html_entity_decode(trim($this->request->get['tag']), ENT_QUOTES, 'UTF-8')); }
+		if (isset($this->request->get['description'])) { $lm_params .= '&description=' . $this->request->get['description']; }
+		if (isset($this->request->get['category_id'])) { $lm_params .= '&category_id=' . $this->request->get['category_id']; }
+		if (isset($this->request->get['sub_category'])) { $lm_params .= '&sub_category=' . $this->request->get['sub_category']; }
+		$lm_params .= '&sort=' . $sort . '&order=' . $order . '&limit=' . $limit;
+		$data['load_more_url']   = HTTP_SERVER . 'index.php?route=product/search/loadmore&' . ltrim($lm_params, '&');
+		$data['has_more']        = isset($product_total) && $product_total > (($page - 1) * $limit + count($data['products']));
+		$data['products_loaded'] = ($page - 1) * $limit + count($data['products']);
+		$data['text_load_more']  = $this->language->get('text_load_more');
+		$data['page']            = $page;
+
 		$this->response->setOutput($this->load->view('product/search', $data));
+	}
+
+	/**
+	 * AJAX load-more endpoint — works with Manticore search exactly like index().
+	 * Returns JSON: { "html": "<product cards>", "count": N, "total": N }
+	 */
+	public function loadmore() {
+		$this->load->language('product/search');
+		$this->load->model('catalog/product');
+		$this->load->model('tool/image');
+
+		$this->response->addHeader('Content-Type: application/json');
+
+		$search      = isset($this->request->get['search'])      ? html_entity_decode(html_entity_decode(trim((string)$this->request->get['search']), ENT_QUOTES, 'UTF-8'), ENT_QUOTES, 'UTF-8') : '';
+		$tag         = isset($this->request->get['tag'])         ? html_entity_decode(html_entity_decode(trim((string)$this->request->get['tag']), ENT_QUOTES, 'UTF-8'), ENT_QUOTES, 'UTF-8') : (isset($this->request->get['search']) ? $search : '');
+		$description = isset($this->request->get['description']) ? $this->request->get['description'] : '';
+		$category_id = isset($this->request->get['category_id'])  ? $this->request->get['category_id'] : 0;
+		$sub_category = isset($this->request->get['sub_category']) ? $this->request->get['sub_category'] : '';
+		$sort        = isset($this->request->get['sort'])        ? $this->request->get['sort']  : 'p.sort_order';
+		$order       = isset($this->request->get['order'])       ? $this->request->get['order'] : 'ASC';
+		$page        = isset($this->request->get['page'])        ? (int)$this->request->get['page'] : 1;
+
+		if ($page < 1) {
+			$page = 1;
+		}
+
+		if (isset($this->request->get['limit']) && (int)$this->request->get['limit'] > 0) {
+			$limit = (int)$this->request->get['limit'];
+		} else {
+			$limit = (int)$this->config->get('theme_' . $this->config->get('config_theme') . '_product_limit');
+		}
+
+		if (!isset($this->request->get['search']) && !isset($this->request->get['tag'])) {
+			$this->response->setOutput(json_encode(array('html' => '', 'count' => 0, 'total' => 0)));
+			return;
+		}
+
+		$filter_data = array(
+			'filter_name'         => $search,
+			'filter_tag'          => $tag,
+			'filter_description'  => $description,
+			'filter_category_id'  => $category_id,
+			'filter_sub_category' => $sub_category,
+			'sort'                => $sort,
+			'order'               => $order,
+			'start'               => ($page - 1) * $limit,
+			'limit'               => $limit
+		);
+
+		$product_total = $this->model_catalog_product->getTotalProducts($filter_data);
+
+		$wishlist_ids = array();
+		if ($this->customer->isLogged()) {
+			$this->load->model('account/wishlist');
+			foreach ($this->model_account_wishlist->getWishlist() as $w) {
+				$wishlist_ids[] = (int)$w['product_id'];
+			}
+		} elseif (isset($this->session->data['wishlist'])) {
+			$wishlist_ids = array_map('intval', $this->session->data['wishlist']);
+		}
+
+		$results = $this->model_catalog_product->getProducts($filter_data);
+
+		// Honour Manticore override of total count (set by dockercart_search module)
+		$manticore_total = $this->registry->get('manticore_search_total');
+		if ($manticore_total !== null) {
+			$product_total = (int)$manticore_total;
+		}
+
+		$url = '';
+		if (isset($this->request->get['search'])) {
+			$url .= '&search=' . urlencode(html_entity_decode($this->request->get['search'], ENT_QUOTES, 'UTF-8'));
+		}
+
+		$products = array();
+		foreach ($results as $result) {
+			$image = $result['image']
+				? $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_height'))
+				: $this->model_tool_image->resize('placeholder.png', $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_height'));
+
+			if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
+				$price = $this->currency->format($this->tax->calculate($result['price'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+			} else {
+				$price = false;
+			}
+
+			if (!is_null($result['special']) && (float)$result['special'] >= 0) {
+				$special = $this->currency->format($this->tax->calculate($result['special'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+			} else {
+				$special = false;
+			}
+
+			$products[] = array(
+				'product_id'  => $result['product_id'],
+				'thumb'       => $image,
+				'name'        => $result['name'],
+				'model'       => $result['model'],
+				'description' => utf8_substr(trim(strip_tags(html_entity_decode($result['description'], ENT_QUOTES, 'UTF-8'))), 0, $this->config->get('theme_' . $this->config->get('config_theme') . '_product_description_length')) . '..',
+				'price'       => $price,
+				'special'     => $special,
+				'minimum'     => $result['minimum'] > 0 ? $result['minimum'] : 1,
+				'rating'      => (int)$result['rating'],
+				'reviews'     => isset($result['reviews']) ? (int)$result['reviews'] : 0,
+				'in_wishlist' => in_array((int)$result['product_id'], $wishlist_ids) ? 1 : 0,
+				'category'    => '',
+				'href'        => $this->url->link('product/product', 'product_id=' . $result['product_id'] . $url)
+			);
+		}
+
+		$html = '';
+		foreach ($products as $product) {
+			$html .= $this->load->view('product/product_card_ajax', array(
+				'product'          => $product,
+				'text_quick_view'  => $this->language->get('text_quick_view'),
+				'text_reviews'     => $this->language->get('text_reviews_word'),
+				'text_sale'        => '',
+				'button_cart'      => $this->language->get('button_cart'),
+				'btn_quick_hover'  => 'hover:bg-blue-600',
+				'link_hover'       => 'hover:text-blue-600 transition',
+				'btn_cart_classes' => 'bg-blue-600 text-white hover:bg-blue-700',
+			));
+		}
+
+		$this->response->setOutput(json_encode(array(
+			'html'  => $html,
+			'count' => count($products),
+			'total' => $product_total,
+		)));
 	}
 }

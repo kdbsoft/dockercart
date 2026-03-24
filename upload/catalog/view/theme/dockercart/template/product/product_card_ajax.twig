@@ -1,0 +1,85 @@
+{#
+  product_card_ajax.twig
+  Shared product card partial for AJAX load-more responses.
+
+  Required variables:
+    product          — product data array
+    text_quick_view  — localised "Quick View" string
+    text_reviews     — localised "reviews" word
+    text_sale        — localised "SALE" badge text
+    button_cart      — localised "Add to Cart" text
+
+  Style variables (pass full CSS class strings so compiled Tailwind picks them up
+  from the main templates; these classes already exist in the compiled stylesheet):
+    btn_quick_hover  — e.g. "hover:bg-blue-600"
+    link_hover       — e.g. "hover:text-blue-600 transition"
+    btn_cart_classes — e.g. "bg-blue-600 text-white hover:bg-blue-700"
+#}
+<div class="product-card group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex flex-col"
+     data-id="{{ product.product_id }}"
+     data-description="{{ product.description }}"
+     data-model="{{ product.model|default('') }}"
+     data-in-wishlist="{{ product.in_wishlist|default(0) }}"
+     data-rating="{{ product.rating|default(0) }}">
+
+  <div class="relative overflow-hidden aspect-square bg-gray-50">
+    <a href="{{ product.href }}">
+      <img src="{{ product.thumb }}" alt="{{ product.name }}"
+           class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+           loading="lazy" />
+    </a>
+
+    {% if product.new_arrival_badge is defined and product.new_arrival_badge %}
+      <span class="absolute top-2 left-2 bg-gradient-to-r {{ product.new_arrival_badge_class }} text-white text-[10px] font-bold px-2 py-0.5 rounded-md">{{ product.new_arrival_badge }}</span>
+    {% elseif product.special %}
+      <span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md">{{ text_sale }}</span>
+    {% endif %}
+
+    <div class="absolute top-2 right-2">
+      <button class="wishlist-btn w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center hover:bg-rose-50 transition {% if product.in_wishlist %}bg-rose-50{% endif %}"
+              onclick="dcAddToWishlist('{{ product.product_id }}', this); event.stopPropagation();"
+              aria-label="Add to wishlist">
+        <i data-lucide="heart" class="w-3.5 h-3.5 {% if product.in_wishlist %}text-rose-500 fill-rose-400{% else %}text-gray-400{% endif %}"></i>
+      </button>
+    </div>
+
+    <button class="quick-view-btn absolute bottom-0 left-0 right-0 py-2.5 bg-gray-900/85 {{ btn_quick_hover }} text-white text-[11px] font-bold uppercase tracking-widest backdrop-blur-sm transition-colors duration-200"
+            onclick="openQuickView && openQuickView({{ product.product_id }}); event.stopPropagation();">
+      {{ text_quick_view }}
+    </button>
+  </div>
+
+  <div class="p-3 sm:p-4 flex flex-col flex-1">
+    {% if product.category is defined and product.category %}
+      <p class="text-[10px] sm:text-xs text-gray-400 uppercase tracking-widest mb-1 font-medium">{{ product.category }}</p>
+    {% endif %}
+
+    <h3 class="text-xs sm:text-sm font-semibold text-gray-900 leading-snug mb-2 flex-1 line-clamp-2">
+      <a href="{{ product.href }}" class="{{ link_hover }}">{{ product.name }}</a>
+    </h3>
+
+    {% if product.rating %}
+    <div class="flex items-center gap-0.5 mb-2">
+      {% for i in 1..5 %}
+        <span class="text-xs {% if product.rating >= i %}text-amber-400{% else %}text-gray-200{% endif %}">★</span>
+      {% endfor %}
+      <span class="text-[10px] text-gray-400 ml-1">{{ product.reviews|default(0) }} {{ text_reviews }}</span>
+    </div>
+    {% endif %}
+
+    <div class="flex items-end justify-between gap-2">
+      <div class="flex items-baseline gap-1 flex-wrap">
+        {% if product.special %}
+          <span class="text-base sm:text-lg font-extrabold text-gray-900">{{ product.special }}</span>
+          <span class="text-xs text-red-400 line-through ml-1">{{ product.price }}</span>
+        {% elseif product.price %}
+          <span class="text-base sm:text-lg font-extrabold text-gray-900">{{ product.price }}</span>
+        {% endif %}
+      </div>
+      <button class="add-to-cart-btn flex-shrink-0 text-[10px] sm:text-xs font-bold px-3 py-1.5 rounded-lg {{ btn_cart_classes }} transition"
+              onclick="cart.add('{{ product.product_id }}', '{{ product.minimum }}');">
+        + {{ button_cart }}
+      </button>
+    </div>
+  </div>
+</div>
