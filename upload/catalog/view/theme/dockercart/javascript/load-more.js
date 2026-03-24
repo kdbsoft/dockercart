@@ -6,6 +6,22 @@
     'use strict';
 
     /**
+     * Replace loader icon with chevron-down SVG directly
+     */
+    function showChevronIcon(iconEl) {
+        var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+        iconEl.innerHTML = svg;
+    }
+
+    /**
+     * Show loader icon using lucide
+     */
+    function showLoaderIcon(iconEl) {
+        iconEl.setAttribute('data-lucide', 'loader-2');
+        if (window.lucide) window.lucide.createIcons();
+    }
+
+    /**
      * Move the active highlight in .dc-pagination to the given page number.
      * OpenCart renders active page as <li class="active"><span>N</span></li>
      * and other pages as <li><a href="...&page=N">N</a></li>.
@@ -45,9 +61,8 @@
             var iconEl = btn.querySelector('[data-lucide]');
 
             if (iconEl) {
-                iconEl.setAttribute('data-lucide', 'loader-2');
+                showLoaderIcon(iconEl);
                 iconEl.classList.add('animate-spin');
-                if (window.lucide) lucide.createIcons();
             }
 
             var page = parseInt(btn.dataset.page, 10);
@@ -82,19 +97,16 @@
                         if (wrap) { wrap.remove(); } else { btn.remove(); }
                     } else {
                         if (iconEl) {
-                            iconEl.innerHTML = ''; // Clear old SVG
-                            iconEl.setAttribute('data-lucide', 'chevron-down');
+                            showChevronIcon(iconEl);
                             iconEl.classList.remove('animate-spin');
-                            if (window.lucide) lucide.createIcons();
                         }
                         btn.disabled = false;
                     }
                 })
                 .catch(function () {
                     if (iconEl) {
-                        iconEl.setAttribute('data-lucide', 'chevron-down');
+                        showChevronIcon(iconEl);
                         iconEl.classList.remove('animate-spin');
-                        if (window.lucide) lucide.createIcons();
                     }
                     btn.disabled = false;
                 });
