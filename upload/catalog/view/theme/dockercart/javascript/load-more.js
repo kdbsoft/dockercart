@@ -82,6 +82,7 @@
                         if (wrap) { wrap.remove(); } else { btn.remove(); }
                     } else {
                         if (iconEl) {
+                            iconEl.innerHTML = ''; // Clear old SVG
                             iconEl.setAttribute('data-lucide', 'chevron-down');
                             iconEl.classList.remove('animate-spin');
                             if (window.lucide) lucide.createIcons();
