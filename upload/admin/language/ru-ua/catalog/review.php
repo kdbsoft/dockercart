@@ -3,12 +3,12 @@
 $_['column_action'] = 'Действие';
 $_['column_author'] = 'Автор';
 $_['column_date_added'] = 'Дата добавления';
-$_['column_product'] = 'Продукт';
+$_['column_product'] = 'Товар';
 $_['column_rating'] = 'Рейтинг';
 $_['column_status'] = 'Статус';
 $_['entry_author'] = 'Автор';
 $_['entry_date_added'] = 'Дата добавления';
-$_['entry_product'] = 'Продукт';
+$_['entry_product'] = 'Товар';
 $_['entry_rating'] = 'Рейтинг';
 $_['entry_status'] = 'Статус';
 $_['entry_text'] = 'Текст';

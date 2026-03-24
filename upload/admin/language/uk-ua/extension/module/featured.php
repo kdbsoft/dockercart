@@ -3,7 +3,7 @@
 $_['entry_height'] = 'Висота';
 $_['entry_limit'] = 'Ліміт';
 $_['entry_name'] = 'Назва модуля';
-$_['entry_product'] = 'Продукти';
+$_['entry_product'] = 'Товари';
 $_['entry_status'] = 'Статус';
 $_['entry_width'] = 'Ширина';
 $_['error_height'] = 'Потрібна висота!';

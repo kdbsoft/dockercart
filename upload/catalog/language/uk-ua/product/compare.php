@@ -1,6 +1,6 @@
 <?php
 
-$_['heading_title'] = 'Порівняння продуктів';
+$_['heading_title'] = 'Порівняння товарів';
 $_['text_availability'] = 'Наявність';
 $_['text_compare'] = 'Порівняння товарів (%s)';
 $_['text_dimension'] = 'Розміри (Д х Ш х В)';
@@ -9,9 +9,9 @@ $_['text_image'] = 'Зображення';
 $_['text_instock'] = 'В наявності';
 $_['text_manufacturer'] = 'Бренд';
 $_['text_model'] = 'Модель';
-$_['text_name'] = 'Продукт';
+$_['text_name'] = 'Товар';
 $_['text_price'] = 'Ціна';
-$_['text_product'] = 'Деталі продукту';
+$_['text_product'] = 'Деталі товару';
 $_['text_rating'] = 'Рейтинг';
 $_['text_remove'] = 'Успіх: Ви видалили <a href="%s">%s</a> з <a href="%s">порівняння товарів</a> !';
 $_['text_reviews'] = 'На основі %s відгуків.';

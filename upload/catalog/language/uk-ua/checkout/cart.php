@@ -2,7 +2,7 @@
 
 $_['column_image'] = 'Зображення';
 $_['column_model'] = 'Модель';
-$_['column_name'] = 'Назва продукту';
+$_['column_name'] = 'Назва товару';
 $_['column_price'] = 'Ціна за одиницю';
 $_['column_quantity'] = 'Кількість';
 $_['column_total'] = 'Всього';

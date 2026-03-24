@@ -1,7 +1,7 @@
 <?php
 
 $_['column_model'] = 'Модель';
-$_['column_name'] = 'Название продукта';
+$_['column_name'] = 'Название товара';
 $_['column_percent'] = 'Процент';
 $_['column_viewed'] = 'Просмотрено';
 $_['entry_sort_order'] = 'Порядок сортировки';

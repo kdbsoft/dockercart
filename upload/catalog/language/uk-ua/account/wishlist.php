@@ -3,7 +3,7 @@
 $_['column_action'] = 'Дія';
 $_['column_image'] = 'Зображення';
 $_['column_model'] = 'Модель';
-$_['column_name'] = 'Назва продукту';
+$_['column_name'] = 'Назва товару';
 $_['column_price'] = 'Ціна за одиницю';
 $_['column_stock'] = 'Запас';
 $_['heading_title'] = 'Мій список бажань';

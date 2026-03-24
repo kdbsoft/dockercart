@@ -3,7 +3,7 @@
 $_['column_date_end'] = 'Дата закінчення';
 $_['column_date_start'] = 'Дата початку';
 $_['column_orders'] = 'Кількість замовлень';
-$_['column_products'] = '№ Продукти';
+$_['column_products'] = 'Товари';
 $_['column_tax'] = 'Податок';
 $_['column_total'] = 'Всього';
 $_['entry_date_end'] = 'Дата закінчення';
