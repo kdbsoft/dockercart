@@ -13,6 +13,11 @@ services:
     image: nginx:alpine
     container_name: ${NGINX_CONTAINER_NAME:-dockercart_nginx}
     restart: ${RESTART_POLICY:-unless-stopped}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     ports:
       - "${DOCKERCART_HTTP_PORT:-80}:80"
     volumes:
@@ -37,6 +42,11 @@ services:
       dockerfile: Dockerfile
     container_name: ${APACHE_CONTAINER_NAME:-dockercart_apache}
     restart: ${RESTART_POLICY:-unless-stopped}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     # No ports exposed - Nginx handles external connections
     volumes:
       - ./upload:/var/www/html
@@ -72,6 +82,11 @@ services:
     image: mariadb:11.8
     container_name: ${MARIADB_CONTAINER_NAME:-dockercart_mariadb}
     restart: ${RESTART_POLICY:-unless-stopped}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     environment:
       MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:-root_password}
       MARIADB_DATABASE: ${MARIADB_DATABASE:-dockercart}
@@ -100,6 +115,11 @@ services:
     image: manticoresearch/manticore:15.1.0
     container_name: ${MANTICORE_CONTAINER_NAME:-dockercart_manticore}
     restart: ${RESTART_POLICY:-unless-stopped}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     environment:
       - TZ=${TZ:-UTC}
     volumes:
@@ -120,7 +140,9 @@ services:
     image: memcached:1.6-alpine
     container_name: ${MEMCACHED_CONTAINER_NAME:-dockercart_memcached}
     restart: ${RESTART_POLICY:-unless-stopped}
-    command: ["memcached", "-m", "128", "-p", "11211", "-u", "memcache", "-vv"]
+    command: ["memcached", "-m", "128", "-p", "11211", "-u", "memcache"]
+    logging:
+      driver: "none"
     networks:
       - dockercart-network
     healthcheck:
