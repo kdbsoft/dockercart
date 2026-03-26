@@ -3,6 +3,11 @@ services:
     image: nginx:alpine
     container_name: ${NGINX_CONTAINER_NAME:-dockercart_nginx}
     restart: ${RESTART_POLICY:-unless-stopped}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     volumes:
       - ./upload:/var/www/html:ro
       - ./storage:/var/www/storage:ro
@@ -31,6 +36,11 @@ services:
       dockerfile: Dockerfile
     container_name: ${APACHE_CONTAINER_NAME:-dockercart_apache}
     restart: ${RESTART_POLICY:-unless-stopped}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     # No ports exposed - Nginx handles external connections
     volumes:
       - ./upload:/var/www/html
@@ -66,6 +76,11 @@ services:
     image: mariadb:11.8
     container_name: ${MARIADB_CONTAINER_NAME:-dockercart_mariadb}
     restart: ${RESTART_POLICY:-unless-stopped}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     # No external port exposure - use override if needed
     environment:
       MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:-root_password}
@@ -116,6 +131,11 @@ services:
     image: manticoresearch/manticore:15.1.0
     container_name: ${MANTICORE_CONTAINER_NAME:-dockercart_manticore}
     restart: ${RESTART_POLICY:-unless-stopped}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     environment:
       - TZ=${TZ:-UTC}
     volumes:
@@ -139,7 +159,9 @@ services:
     image: memcached:1.6-alpine
     container_name: ${MEMCACHED_CONTAINER_NAME:-dockercart_memcached}
     restart: ${RESTART_POLICY:-unless-stopped}
-    command: ["memcached", "-m", "128", "-p", "11211", "-u", "memcache", "-vv"]
+    command: ["memcached", "-m", "128", "-p", "11211", "-u", "memcache"]
+    logging:
+      driver: "none"
     networks:
       - dockercart-network
     healthcheck:
@@ -147,34 +169,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
-  ftp:
-    image: fauria/vsftpd
-    container_name: ${FTP_CONTAINER_NAME:-dockercart_ftp}
-    profiles:
-      - ftp
-    restart: ${RESTART_POLICY:-unless-stopped}
-    environment:
-      FTP_USER: ${FTP_USER:-images}
-      FTP_PASS: ${FTP_PASS:-change_me_please}
-      FTP_USER_HOME: /home/vsftpd/${FTP_USER:-images}
-      WRITE_ENABLE: ${FTP_WRITE_ENABLE:-YES}
-      ALLOW_WRITEABLE_CHROOT: ${FTP_ALLOW_WRITEABLE_CHROOT:-YES}
-      LOCAL_UMASK: ${FTP_LOCAL_UMASK:-000}
-      FILE_OPEN_MODE: ${FTP_FILE_OPEN_MODE:-0777}
-      PASV_ADDRESS: ${FTP_PASV_ADDRESS:-dockercart.local}
-      PASV_ADDR_RESOLVE: ${FTP_PASV_ADDR_RESOLVE:-YES}
-      PASV_MIN_PORT: ${FTP_PASV_MIN_PORT:-21100}
-      PASV_MAX_PORT: ${FTP_PASV_MAX_PORT:-21110}
-      REVERSE_LOOKUP_ENABLE: "NO"
-      LOG_STDOUT: "YES"
-    ports:
-      - "${FTP_PORT:-21}:21"
-      - "${FTP_PASV_MIN_PORT:-21100}-${FTP_PASV_MAX_PORT:-21110}:${FTP_PASV_MIN_PORT:-21100}-${FTP_PASV_MAX_PORT:-21110}"
-    volumes:
-      - ./upload/image:/home/vsftpd/${FTP_USER:-images}:rw
-    networks:
-      - dockercart-network
 
 volumes:
   mariadb-data:
