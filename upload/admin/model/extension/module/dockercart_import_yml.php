@@ -25,6 +25,11 @@ class ModelExtensionModuleDockercartImportYml extends Model {
             if (!$column_download_images->num_rows) {
                 $this->db->query("ALTER TABLE `" . DB_PREFIX . "dockercart_import_yml_profile` ADD `download_images` tinyint(1) NOT NULL DEFAULT '1' AFTER `load_categories`");
             }
+
+            $column_allow_zero_price = $this->db->query("SHOW COLUMNS FROM `" . DB_PREFIX . "dockercart_import_yml_profile` LIKE 'allow_zero_price'");
+            if (!$column_allow_zero_price->num_rows) {
+                $this->db->query("ALTER TABLE `" . DB_PREFIX . "dockercart_import_yml_profile` ADD `allow_zero_price` tinyint(1) NOT NULL DEFAULT '0' AFTER `download_images`");
+            }
         }
 
         $this->schema_checked = true;
@@ -67,6 +72,11 @@ class ModelExtensionModuleDockercartImportYml extends Model {
         $column_download_images = $this->db->query("SHOW COLUMNS FROM `" . DB_PREFIX . "dockercart_import_yml_profile` LIKE 'download_images'");
         if (!$column_download_images->num_rows) {
             $this->db->query("ALTER TABLE `" . DB_PREFIX . "dockercart_import_yml_profile` ADD `download_images` tinyint(1) NOT NULL DEFAULT '1' AFTER `load_categories`");
+        }
+
+        $column_allow_zero_price = $this->db->query("SHOW COLUMNS FROM `" . DB_PREFIX . "dockercart_import_yml_profile` LIKE 'allow_zero_price'");
+        if (!$column_allow_zero_price->num_rows) {
+            $this->db->query("ALTER TABLE `" . DB_PREFIX . "dockercart_import_yml_profile` ADD `allow_zero_price` tinyint(1) NOT NULL DEFAULT '0' AFTER `download_images`");
         }
 
         $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "dockercart_import_yml_offer_map` (
@@ -149,6 +159,7 @@ class ModelExtensionModuleDockercartImportYml extends Model {
                 `default_category_id` = '" . (int)(isset($data['default_category_id']) ? $data['default_category_id'] : 0) . "',
                 `load_categories` = '" . (!empty($data['load_categories']) ? 1 : 0) . "',
                 `download_images` = '" . (!empty($data['download_images']) ? 1 : 0) . "',
+                `allow_zero_price` = '" . (!empty($data['allow_zero_price']) ? 1 : 0) . "',
                 `import_mode` = '" . $this->db->escape($this->normalizeImportMode(isset($data['import_mode']) ? $data['import_mode'] : 'update')) . "',
                 `status` = '" . (int)(isset($data['status']) ? $data['status'] : 1) . "',
                 `cron_key` = '" . $this->db->escape($cron_key) . "',
@@ -180,6 +191,7 @@ class ModelExtensionModuleDockercartImportYml extends Model {
                 `default_category_id` = '" . (int)(isset($data['default_category_id']) ? $data['default_category_id'] : 0) . "',
                 `load_categories` = '" . (!empty($data['load_categories']) ? 1 : 0) . "',
                 `download_images` = '" . (!empty($data['download_images']) ? 1 : 0) . "',
+                `allow_zero_price` = '" . (!empty($data['allow_zero_price']) ? 1 : 0) . "',
                 `import_mode` = '" . $this->db->escape($this->normalizeImportMode(isset($data['import_mode']) ? $data['import_mode'] : 'update')) . "',
                 `status` = '" . (int)(isset($data['status']) ? $data['status'] : 1) . "',
                 `cron_key` = '" . $this->db->escape($cron_key) . "',
