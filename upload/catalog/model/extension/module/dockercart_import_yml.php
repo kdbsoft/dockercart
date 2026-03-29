@@ -168,43 +168,21 @@ class ModelExtensionModuleDockercartImportYml extends Model {
                 $category_id = $this->resolveCategoryId($offer, $profile, $feed_category_map);
                 $manufacturer_id = $this->resolveManufacturerId($vendor);
 
-                // Extract image URLs from offer (if enabled in profile)
+                // Extract and download product images (if enabled in profile)
                 $download_images = !isset($profile['download_images']) || (int)$profile['download_images'] === 1;
-
-                // Debug logging
-                error_log("DockerCart Import YML: Offer {$offer_id} - download_images setting: " . ($download_images ? 'enabled' : 'disabled'));
-                error_log("DockerCart Import YML: Offer {$offer_id} - profile download_images value: " . (isset($profile['download_images']) ? $profile['download_images'] : 'not set'));
 
                 $image_urls = $download_images ? $this->extractImageUrls($offer) : array();
                 $main_image = '';
                 $additional_images = array();
 
-                // Debug logging for extracted URLs
-                if ($download_images) {
-                    error_log("DockerCart Import YML: Offer {$offer_id} - extracted " . count($image_urls) . " image URLs: " . implode(', ', $image_urls));
-                }
-
                 if (!empty($image_urls)) {
                     try {
-                        error_log("DockerCart Import YML: Starting image download for offer {$offer_id}");
                         $downloaded = $this->downloadProductImages($image_urls, $offer_id, (int)$profile_id);
                         $main_image = $downloaded['main'];
                         $additional_images = $downloaded['additional'];
-
-                        // Log successful download
-                        if ($main_image !== '') {
-                            error_log("DockerCart Import YML: Successfully downloaded " . count($image_urls) . " images for offer {$offer_id}, main: {$main_image}");
-                        } else {
-                            error_log("DockerCart Import YML: Downloaded images but no main image set for offer {$offer_id}");
-                        }
                     } catch (Exception $e) {
-                        // Log download error and continue without images
                         error_log("DockerCart Import YML: Failed to download images for offer {$offer_id}: " . $e->getMessage());
-                        error_log("DockerCart Import YML: Exception trace: " . $e->getTraceAsString());
                     }
-                } else if ($download_images) {
-                    // Log when no images found in offer
-                    error_log("DockerCart Import YML: No images found in offer {$offer_id}");
                 }
 
                 $product_data = array(
@@ -918,96 +896,61 @@ class ModelExtensionModuleDockercartImportYml extends Model {
     }
 
     /**
-     * Extract image URLs from YML offer
-     * Supports <picture> tags and multiple images
+     * Extract image URLs from YML offer <picture> tags.
+     * Uses foreach which correctly iterates all same-name SimpleXML siblings.
      */
     private function extractImageUrls($offer) {
         $urls = array();
 
-        // Check if picture exists
-        if (!isset($offer->picture)) {
-            error_log("DockerCart Import YML: extractImageUrls - No picture tag found in offer");
-            return $urls;
-        }
-
-        $picture_count = count($offer->picture);
-        error_log("DockerCart Import YML: extractImageUrls - Found {$picture_count} picture tag(s)");
-
-        // Handle multiple <picture> tags (SimpleXML returns array-like object)
-        if ($picture_count > 1) {
-            foreach ($offer->picture as $picture) {
-                $url = trim((string)$picture);
-                error_log("DockerCart Import YML: extractImageUrls - Processing picture: '{$url}'");
-                if ($url !== '' && !in_array($url, $urls)) {
-                    $urls[] = $url;
-                }
-            }
-        } else {
-            // Single <picture> tag
-            $url = trim((string)$offer->picture);
-            error_log("DockerCart Import YML: extractImageUrls - Single picture: '{$url}'");
-            if ($url !== '') {
+        foreach ($offer->picture as $picture) {
+            $url = trim((string)$picture);
+            if ($url !== '' && !in_array($url, $urls)) {
                 $urls[] = $url;
             }
         }
 
-        error_log("DockerCart Import YML: extractImageUrls - Returning " . count($urls) . " URLs");
         return $urls;
     }
 
     /**
-     * Download product images and organize them in subfolders
-     * Returns array with 'main' and 'additional' image paths
+     * Download product images and organize them in subfolders.
+     * Returns array with 'main' and 'additional' image paths.
      */
     private function downloadProductImages($urls, $offer_id, $profile_id = 0) {
-        error_log("DockerCart Import YML: downloadProductImages - Starting for offer {$offer_id} with " . count($urls) . " URLs");
-
         $result = array(
             'main' => '',
             'additional' => array()
         );
 
         if (empty($urls)) {
-            error_log("DockerCart Import YML: downloadProductImages - No URLs provided");
             return $result;
         }
 
-        // Ensure base directory exists
         $base_dir = rtrim(DIR_IMAGE, '/\\') . '/catalog';
-        error_log("DockerCart Import YML: downloadProductImages - Base directory: {$base_dir}");
 
         if (!$this->ensureDirectory($base_dir)) {
-            $error_msg = 'Failed to create or access base image directory: ' . $base_dir;
-            error_log("DockerCart Import YML: downloadProductImages - " . $error_msg);
-            throw new Exception($error_msg);
+            throw new Exception('Failed to create or access base image directory: ' . $base_dir);
         }
 
         foreach ($urls as $index => $url) {
             try {
-                error_log("DockerCart Import YML: downloadProductImages - Processing image {$index}: {$url}");
                 $downloaded_path = $this->downloadImage($url, $base_dir, (int)$profile_id);
 
                 if ($downloaded_path !== '') {
-                    // Relative path for database (without DIR_IMAGE)
                     $relative_path = $this->toRelativeImagePath($downloaded_path);
-                    error_log("DockerCart Import YML: downloadProductImages - Relative path: {$relative_path}");
 
                     if ($index === 0) {
                         $result['main'] = $relative_path;
-                        error_log("DockerCart Import YML: downloadProductImages - Set as main image");
                     } else {
                         $result['additional'][] = $relative_path;
-                        error_log("DockerCart Import YML: downloadProductImages - Added to additional images");
                     }
                 }
             } catch (Exception $e) {
-                // Skip this image on error
-                error_log("DockerCart Import YML: downloadProductImages - Error processing image {$index}: " . $e->getMessage());
+                error_log("DockerCart Import YML: Image download failed ({$url}): " . $e->getMessage());
                 continue;
             }
         }
 
-        error_log("DockerCart Import YML: downloadProductImages - Completed. Main: {$result['main']}, Additional: " . count($result['additional']));
         return $result;
     }
 
@@ -1060,7 +1003,6 @@ class ModelExtensionModuleDockercartImportYml extends Model {
      */
     private function downloadImage($url, $base_dir, $profile_id = 0) {
         $url = trim($url);
-        error_log("DockerCart Import YML: downloadImage - Starting download from: {$url}");
 
         if ($url === '') {
             throw new Exception('Empty URL');
@@ -1080,8 +1022,6 @@ class ModelExtensionModuleDockercartImportYml extends Model {
         }
 
         // Use URL hash as global key to avoid duplicate downloads across offers
-        // Preferred path: image/catalog/dockercart_import_yml/profile_{id}/{a}/{b}/hash.ext
-        // Fallback path (if mkdir permissions are restricted): image/catalog/hash.ext
         $hash = md5($url);
         $profile_segment = 'profile_' . max(0, (int)$profile_id);
         $subfolder = 'dockercart_import_yml/' . $profile_segment . '/' . substr($hash, 0, 1) . '/' . substr($hash, 1, 1);
@@ -1090,7 +1030,6 @@ class ModelExtensionModuleDockercartImportYml extends Model {
 
         $target_dir = $preferred_dir;
         if (!$this->ensureDirectory($preferred_dir)) {
-            error_log("DockerCart Import YML: downloadImage - Cannot create/access preferred dir {$preferred_dir}, fallback to {$fallback_dir}");
             if (!$this->ensureDirectory($fallback_dir)) {
                 throw new Exception('Failed to create or access image directory: ' . $fallback_dir);
             }
@@ -1100,16 +1039,12 @@ class ModelExtensionModuleDockercartImportYml extends Model {
         $filename = $hash . '.' . $extension;
         $target_path = $target_dir . '/' . $filename;
 
-        error_log("DockerCart Import YML: downloadImage - Target path: {$target_path}");
-
         // Skip if file already exists
         if (file_exists($target_path)) {
-            error_log("DockerCart Import YML: downloadImage - File already exists, skipping download");
             return $target_path;
         }
 
         // Download image
-        error_log("DockerCart Import YML: downloadImage - Initiating cURL request");
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
@@ -1122,29 +1057,19 @@ class ModelExtensionModuleDockercartImportYml extends Model {
         $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
-        error_log("DockerCart Import YML: downloadImage - cURL response code: {$code}, errno: {$errno}");
-
         if ($errno || $code >= 400 || $content === false || $content === '') {
-            $error_msg = "Failed to download image from {$url}: HTTP {$code}, cURL error: {$error}";
-            error_log("DockerCart Import YML: downloadImage - " . $error_msg);
-            throw new Exception($error_msg);
+            throw new Exception("Failed to download ({$url}): HTTP {$code}" . ($errno ? ", cURL: {$error}" : ""));
         }
 
-        // Validate that content is an image
-        $content_length = strlen($content);
-        error_log("DockerCart Import YML: downloadImage - Downloaded {$content_length} bytes");
-
-        if ($content_length < 100) {
+        if (strlen($content) < 100) {
             throw new Exception('Downloaded file is too small');
         }
 
         // Save image
         if (file_put_contents($target_path, $content, LOCK_EX) === false) {
-            error_log("DockerCart Import YML: downloadImage - Failed to write file to {$target_path}");
-            throw new Exception('Failed to save image');
+            throw new Exception('Failed to save image to: ' . $target_path);
         }
 
-        error_log("DockerCart Import YML: downloadImage - Successfully saved image to {$target_path}");
         return $target_path;
     }
 
