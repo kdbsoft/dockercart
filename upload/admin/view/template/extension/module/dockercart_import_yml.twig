@@ -497,6 +497,15 @@ function openProfileModal(profile) {
     html += '          </div>';
 
     html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label">{{ entry_allow_zero_price }}</label>';
+    html += '            <div class="col-sm-9">';
+    html += '              <label class="checkbox-inline" style="padding-top: 7px;">';
+    html += '                <input type="checkbox" id="profile-allow-zero-price" name="allow_zero_price" value="1"' + ((parseInt(profile.allow_zero_price || 0, 10) === 1) ? ' checked' : '') + ' /> {{ help_allow_zero_price }}';
+    html += '              </label>';
+    html += '            </div>';
+    html += '          </div>';;
+
+    html += '          <div class="form-group">';
     html += '            <label class="col-sm-3 control-label"><span data-toggle="tooltip" title="{{ help_import_mode }}">{{ entry_import_mode }}</span></label>';
     html += '            <div class="col-sm-9">';
     html += '              <select name="import_mode" class="form-control">';
@@ -541,6 +550,7 @@ function saveProfile() {
 
   payload.load_categories = $('#profile-load-categories').is(':checked') ? 1 : 0;
   payload.download_images = $('#profile-download-images').is(':checked') ? 1 : 0;
+  payload.allow_zero_price = $('#profile-allow-zero-price').is(':checked') ? 1 : 0;
 
     $.ajax({
         url: '{{ ajax_save_profile }}',

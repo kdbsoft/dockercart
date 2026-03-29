@@ -51,6 +51,7 @@ $_['entry_profile_language'] = 'Language';
 $_['entry_profile_currency'] = 'Currency';
 $_['entry_default_category'] = 'Default Category';
 $_['entry_load_categories'] = 'Load categories from feed';
+$_['entry_allow_zero_price'] = 'Import zero-price products';
 $_['entry_import_mode'] = 'Import Mode';
 $_['entry_profile_status'] = 'Status';
 $_['entry_cron_command'] = 'Cron command';
@@ -61,6 +62,7 @@ $_['entry_public_key'] = 'Public key';
 $_['help_feed_url'] = 'Direct URL to YML feed (Yandex Market Language)';
 $_['help_import_mode'] = 'Add only: creates new products; Add + Update: updates existing and creates new; Update only: updates existing products and skips new ones; Update prices and stock only: updates only price and quantity for existing products; Delete all then import: clears all store products before import.';
 $_['help_load_categories'] = 'If enabled, categories from feed will be imported. If Default Category is set, imported feed categories will be created under it as child categories.';
+$_['help_allow_zero_price'] = 'If enabled, products with a price of 0 will be imported. Disabled by default.';
 
 // Buttons
 $_['button_import_now'] = 'Import now';

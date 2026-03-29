@@ -154,6 +154,12 @@ class ModelExtensionModuleDockercartImportYml extends Model {
                     $price = 0;
                 }
 
+                $allow_zero_price = !empty($profile['allow_zero_price']);
+                if ($price == 0 && !$allow_zero_price) {
+                    $summary['skipped']++;
+                    continue;
+                }
+
                 $vendor = $this->xmlText($offer, 'vendor');
                 $vendor_code = $this->xmlText($offer, 'vendorCode');
                 $description = $this->prepareDescription($this->xmlText($offer, 'description'));
