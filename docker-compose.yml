@@ -203,7 +203,7 @@ services:
     # Fix: grant write access for the virtual FTP user (mapped to system 'ftp', uid=14).
     # The bind-mounted directory is owned by www-data (uid=33); without this the
     # 'ftp' user only has 'other' (r-x) permissions and cannot upload files.
-    entrypoint: ["/bin/bash", "-c", "chmod 777 /home/vsftpd/${FTP_USER:-images} && exec /run.sh"]
+    entrypoint: ["/bin/bash", "-c", "chmod 777 /home/vsftpd/${FTP_USER:-images} && exec /usr/sbin/run-vsftpd.sh"]
     networks:
       - dockercart-network
 
