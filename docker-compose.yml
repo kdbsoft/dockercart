@@ -187,8 +187,8 @@ services:
       FTP_USER_HOME: /home/vsftpd/${FTP_USER:-images}
       WRITE_ENABLE: ${FTP_WRITE_ENABLE:-YES}
       ALLOW_WRITEABLE_CHROOT: ${FTP_ALLOW_WRITEABLE_CHROOT:-YES}
-      LOCAL_UMASK: ${FTP_LOCAL_UMASK:-002}
-      FILE_OPEN_MODE: ${FTP_FILE_OPEN_MODE:-0775}
+      LOCAL_UMASK: ${FTP_LOCAL_UMASK:-000}
+      FILE_OPEN_MODE: ${FTP_FILE_OPEN_MODE:-0777}
       PASV_ADDRESS: ${FTP_PASV_ADDRESS:-127.0.0.1}
       PASV_ADDR_RESOLVE: ${FTP_PASV_ADDR_RESOLVE:-YES}
       PASV_MIN_PORT: ${FTP_PASV_MIN_PORT:-21100}
@@ -200,13 +200,10 @@ services:
       - "${FTP_PASV_MIN_PORT:-21100}-${FTP_PASV_MAX_PORT:-21110}:${FTP_PASV_MIN_PORT:-21100}-${FTP_PASV_MAX_PORT:-21110}"
     volumes:
       - ./upload/image:/home/vsftpd/${FTP_USER:-images}:rw
-    # On every start: ensure all directories have setgid so new uploads
-    # inherit the 'staff' group (GID 50), allowing the host debian user
-    # (member of staff) to delete/modify FTP-uploaded files without sudo.
-    entrypoint: ["/bin/bash", "-c",
-      "find /home/vsftpd/${FTP_USER:-images} -type d -exec chmod g+s {} \\; &&
-       chmod 2775 /home/vsftpd/${FTP_USER:-images} &&
-       exec /usr/sbin/run-vsftpd.sh"]
+    # Fix: grant write access for the virtual FTP user (mapped to system 'ftp', uid=14).
+    # The bind-mounted directory is owned by www-data (uid=33); without this the
+    # 'ftp' user only has 'other' (r-x) permissions and cannot upload files.
+    entrypoint: ["/bin/bash", "-c", "chmod 777 /home/vsftpd/${FTP_USER:-images} && exec /run.sh"]
     networks:
       - dockercart-network
 
