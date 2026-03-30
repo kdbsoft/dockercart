@@ -31,10 +31,25 @@ class ControllerProductProduct extends Controller {
 				$category_info = $this->model_catalog_category->getCategory($path_id);
 
 				if ($category_info) {
-					$data['breadcrumbs'][] = array(
-						'text' => $category_info['name'],
-						'href' => $this->url->link('product/category', 'path=' . $path)
-					);
+					$breadcrumb_text = $category_info['name'];
+					$breadcrumb_href = $this->url->link('product/category', 'path=' . $path);
+					
+					// Check if this breadcrumb already exists to avoid duplicates
+					$breadcrumb_exists = false;
+					foreach ($data['breadcrumbs'] as $bc) {
+						if ($bc['text'] === $breadcrumb_text && $bc['href'] === $breadcrumb_href) {
+							$breadcrumb_exists = true;
+							break;
+						}
+					}
+					
+					if (!$breadcrumb_exists) {
+						$data['breadcrumbs'][] = array(
+							'text' => $breadcrumb_text,
+							'href' => $breadcrumb_href
+						);
+					}
+					
 					$data['current_category_id'] = $path_id;
 				}
 			}
@@ -142,6 +157,13 @@ class ControllerProductProduct extends Controller {
 				// Do not clear $product_info (which would cause a 404).
 				// Remove the invalid path so breadcrumbs/url building won't use it.
 				unset($this->request->get['path']);
+				// Reset breadcrumbs to just the home link to avoid duplicates
+				$data['breadcrumbs'] = array(
+					array(
+						'text' => $this->language->get('text_home'),
+						'href' => $this->url->link('common/home')
+					)
+				);
 			}
 		}
 
@@ -194,10 +216,25 @@ class ControllerProductProduct extends Controller {
 							$category_info = $this->model_catalog_category->getCategory($path_id);
 							
 							if ($category_info) {
-								$data['breadcrumbs'][] = array(
-									'text' => $category_info['name'],
-									'href' => $this->url->link('product/category', 'path=' . $path)
-								);
+								// Check if this breadcrumb already exists to avoid duplicates
+								$breadcrumb_text = $category_info['name'];
+								$breadcrumb_href = $this->url->link('product/category', 'path=' . $path);
+								$breadcrumb_exists = false;
+								
+								foreach ($data['breadcrumbs'] as $bc) {
+									if ($bc['text'] === $breadcrumb_text && $bc['href'] === $breadcrumb_href) {
+										$breadcrumb_exists = true;
+										break;
+									}
+								}
+								
+								if (!$breadcrumb_exists) {
+									$data['breadcrumbs'][] = array(
+										'text' => $breadcrumb_text,
+										'href' => $breadcrumb_href
+									);
+								}
+								
 								$data['current_category_id'] = $path_id;
 							}
 						}
@@ -789,15 +826,22 @@ class ControllerProductProduct extends Controller {
 		$this->response->setOutput(json_encode($json));
 	}
 
-	private function getCategoryPath($category_id) {
+	private function getCategoryPath($category_id, $visited = array()) {
 		$path = '';
+		
+		// Prevent infinite loops if there are circular parent relationships
+		if (in_array($category_id, $visited)) {
+			return $path;
+		}
+		
 		$this->load->model('catalog/category');
+		$visited[] = $category_id;
 		
 		$category_info = $this->model_catalog_category->getCategory($category_id);
 		
 		if ($category_info) {
-			if ($category_info['parent_id']) {
-				$parent_path = $this->getCategoryPath($category_info['parent_id']);
+			if ($category_info['parent_id'] && $category_info['parent_id'] != $category_id) {
+				$parent_path = $this->getCategoryPath($category_info['parent_id'], $visited);
 				$path = $parent_path ? $parent_path . '_' . $category_id : $category_id;
 			} else {
 				$path = $category_id;

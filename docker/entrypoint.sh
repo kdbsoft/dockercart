@@ -21,7 +21,13 @@ fix_volume_permissions() {
     # Важные директории для загрузок должны быть writable
     chmod -R 775 /var/www/html/image/catalog 2>/dev/null || true
     chmod -R 775 /var/www/html/image/cache 2>/dev/null || true
-    
+
+    # Restore staff group on image/ so FTP (uid=14:staff) and www-data (member of staff)
+    # can both read/write. chown -R above resets the group to www-data, so we fix it back.
+    chgrp -R staff /var/www/html/image/ 2>/dev/null || true
+    find /var/www/html/image/catalog /var/www/html/image/cache -type d -exec chmod g+ws {} \; 2>/dev/null || true
+    find /var/www/html/image/catalog /var/www/html/image/cache -type f -exec chmod g+w {} \; 2>/dev/null || true
+
     echo "Permissions fixed!"
 }
 
