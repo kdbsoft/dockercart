@@ -203,11 +203,16 @@ class ControllerProductCategory extends Controller {
 
 				$subcategory_ids[$result['category_id']] = $result['name'];
 
-			// Prepare a resized thumb for subcategory icons (fallback to placeholder)
+			// Prepare a resized thumb for subcategory icons (fallback to first product image, then placeholder)
 			if ($result['image']) {
 				$sub_thumb = $this->model_tool_image->resize($result['image'], 140, 140);
 			} else {
-				$sub_thumb = $this->model_tool_image->resize('placeholder.png', 140, 140);
+				$first_product_image = $this->model_catalog_category->getFirstProductImageByCategoryId($result['category_id']);
+				if (!empty($first_product_image)) {
+					$sub_thumb = $this->model_tool_image->resize($first_product_image, 140, 140);
+				} else {
+					$sub_thumb = $this->model_tool_image->resize('placeholder.png', 140, 140);
+				}
 			}
 
 			$data['categories'][] = array(
