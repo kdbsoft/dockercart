@@ -65,7 +65,12 @@ class ControllerExtensionModuleCategory extends Controller {
 			if (!empty($category['image'])) {
 				$image = $this->model_tool_image->resize($category['image'], 480, 640);
 			} else {
-				$image = $this->model_tool_image->resize('placeholder.png', 480, 640);
+				$first_product_image = $this->model_catalog_category->getFirstProductImageByCategoryId($category['category_id']);
+				if (!empty($first_product_image)) {
+					$image = $this->model_tool_image->resize($first_product_image, 480, 640);
+				} else {
+					$image = $this->model_tool_image->resize('placeholder.png', 480, 640);
+				}
 			}
 
 			$data['categories'][] = array(
