@@ -21,7 +21,7 @@ $_['heading_title'] = 'Зарегистрировать аккаунт';
 $_['text_account'] = 'Счет';
 $_['text_account_already'] = 'Если у вас уже есть учетная запись, пожалуйста, войдите на <a href="%s">странице входа</a> .';
 $_['text_agree'] = 'Я прочитал и согласен с <a href="%s" class="agree"><b>%s</b></a>';
-$_['text_newsletter'] = 'Информационный бюллетень';
+$_['text_newsletter'] = 'Подписка';
 $_['text_register'] = 'Регистрация';
 $_['text_your_details'] = 'Ваши персональные данные';
 $_['text_your_password'] = 'Ваш пароль';
