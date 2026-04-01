@@ -53,12 +53,22 @@ class ControllerCheckoutPaymentMethod extends Controller {
 					$method = $this->{'model_extension_payment_' . $result['code']}->getMethod($this->session->data['payment_address'], $total);
 
 					if ($method) {
+						$normalized_methods = $this->normalizePaymentMethods($method, $result['code']);
+
+						if (!$normalized_methods) {
+							continue;
+						}
+
 						if ($recurring) {
 							if (property_exists($this->{'model_extension_payment_' . $result['code']}, 'recurringPayments') && $this->{'model_extension_payment_' . $result['code']}->recurringPayments()) {
-								$method_data[$result['code']] = $method;
+								foreach ($normalized_methods as $code => $method_item) {
+									$method_data[$code] = $method_item;
+								}
 							}
 						} else {
-							$method_data[$result['code']] = $method;
+							foreach ($normalized_methods as $code => $method_item) {
+								$method_data[$code] = $method_item;
+							}
 						}
 					}
 				}
@@ -67,7 +77,7 @@ class ControllerCheckoutPaymentMethod extends Controller {
 			$sort_order = array();
 
 			foreach ($method_data as $key => $value) {
-				$sort_order[$key] = $value['sort_order'];
+				$sort_order[$key] = isset($value['sort_order']) ? (int)$value['sort_order'] : 0;
 			}
 
 			array_multisort($sort_order, SORT_ASC, $method_data);
@@ -122,6 +132,65 @@ class ControllerCheckoutPaymentMethod extends Controller {
 		}
 
 		$this->response->setOutput($this->load->view('checkout/payment_method', $data));
+	}
+
+	/**
+	 * Normalize payment methods to a flat code-indexed list.
+	 *
+	 * Backward compatible with:
+	 * - Legacy format: one method array (code/title/terms/sort_order)
+	 * - Group format: method with quote[] entries (shipping-like)
+	 */
+	protected function normalizePaymentMethods($method, $extension_code) {
+		$normalized = array();
+
+		if (isset($method['quote']) && is_array($method['quote'])) {
+			foreach ($method['quote'] as $quote) {
+				if (!is_array($quote) || empty($quote['code'])) {
+					continue;
+				}
+
+				if (!isset($quote['sort_order'])) {
+					$quote['sort_order'] = isset($method['sort_order']) ? (int)$method['sort_order'] : 0;
+				}
+
+				if (!isset($quote['title']) && isset($method['title'])) {
+					$quote['title'] = $method['title'];
+				}
+
+				if (!array_key_exists('terms', $quote)) {
+					$quote['terms'] = isset($method['terms']) ? $method['terms'] : '';
+				}
+
+					// Ensure compatibility with templates expecting 'description'
+					if (!array_key_exists('description', $quote)) {
+						$quote['description'] = isset($quote['terms']) ? $quote['terms'] : (isset($method['description']) ? $method['description'] : '');
+					}
+
+				$normalized[$quote['code']] = $quote;
+			}
+		} elseif (is_array($method)) {
+			if (empty($method['code'])) {
+				$method['code'] = $extension_code;
+			}
+
+			if (!isset($method['sort_order'])) {
+				$method['sort_order'] = 0;
+			}
+
+			if (!array_key_exists('terms', $method)) {
+				$method['terms'] = '';
+			}
+
+			// Ensure compatibility with templates expecting 'description'
+			if (!array_key_exists('description', $method)) {
+				$method['description'] = isset($method['terms']) ? $method['terms'] : '';
+			}
+
+			$normalized[$method['code']] = $method;
+		}
+
+		return $normalized;
 	}
 
 	public function save() {

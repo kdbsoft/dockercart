@@ -227,6 +227,7 @@ make clean         # Stop + remove all volumes (destructive)
 | **Responsive Banners** | Separate portrait/landscape images via `<picture>` |
 | **Shop Features** | Features icons section |
 | **Universal Shipping** | Flexible, multilingual shipping module with geo-zone, weight- and price-based rules; create unlimited shipping methods. (Free) |
+| **Universal Payment** | Flexible, free payment module that lets you create multiple internal payment methods (geo-zone, order total rules), exposes them as a grouped `quote[]` payment extension and is fully compatible with DockerCart Checkout. (Free) |
 
 ### Premium — require a license key from [dockercart.net](https://dockercart.net)
 

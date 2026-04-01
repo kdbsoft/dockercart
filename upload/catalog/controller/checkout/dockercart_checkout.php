@@ -1643,13 +1643,24 @@ class ControllerCheckoutDockercartCheckout extends Controller {
                 $method = $this->{'model_extension_payment_' . $result['code']}->getMethod(isset($this->session->data['payment_address']) ? $this->session->data['payment_address'] : array(), $recurring ? 0 : $this->cart->getTotal());
 
                 if ($method) {
-                    $this->logger->debug('Payment method ' . $result['code'] . ' AVAILABLE (title=' . ($method['title'] ?? '') . ')');
+                    $normalized_methods = $this->normalizePaymentMethods($method, $result['code']);
+
+                    $this->logger->debug('Payment method ' . $result['code'] . ' AVAILABLE (variants=' . count($normalized_methods) . ')');
+
+                    if (!$normalized_methods) {
+                        continue;
+                    }
+
                     if ($recurring) {
                         if (property_exists($this->{'model_extension_payment_' . $result['code']}, 'recurringPayments') && $this->{'model_extension_payment_' . $result['code']}->recurringPayments()) {
-                            $method_data[$result['code']] = $method;
+                            foreach ($normalized_methods as $code => $method_item) {
+                                $method_data[$code] = $method_item;
+                            }
                         }
                     } else {
-                        $method_data[$result['code']] = $method;
+                        foreach ($normalized_methods as $code => $method_item) {
+                            $method_data[$code] = $method_item;
+                        }
                     }
                 } else {
                     // Add extra diagnostics for common built-in methods
@@ -1677,7 +1688,7 @@ class ControllerCheckoutDockercartCheckout extends Controller {
         $sort_order = array();
 
         foreach ($method_data as $key => $value) {
-            $sort_order[$key] = $value['sort_order'];
+            $sort_order[$key] = isset($value['sort_order']) ? (int)$value['sort_order'] : 0;
         }
 
         array_multisort($sort_order, SORT_ASC, $method_data);
@@ -1688,6 +1699,62 @@ class ControllerCheckoutDockercartCheckout extends Controller {
         $this->session->data['payment_methods'] = $method_data;
 
         return $method_data;
+    }
+
+    /**
+     * Normalize payment methods to a flat list keyed by full method code.
+     *
+     * Supports both legacy one-method format and grouped quote[] format.
+     */
+    private function normalizePaymentMethods($method, $extension_code) {
+        $normalized = array();
+
+        if (isset($method['quote']) && is_array($method['quote'])) {
+            foreach ($method['quote'] as $quote) {
+                if (!is_array($quote) || empty($quote['code'])) {
+                    continue;
+                }
+
+                if (!isset($quote['sort_order'])) {
+                    $quote['sort_order'] = isset($method['sort_order']) ? (int)$method['sort_order'] : 0;
+                }
+
+                if (!isset($quote['title']) && isset($method['title'])) {
+                    $quote['title'] = $method['title'];
+                }
+
+                if (!array_key_exists('terms', $quote)) {
+                    $quote['terms'] = isset($method['terms']) ? $method['terms'] : '';
+                }
+
+                    // Map to 'description' for templates
+                    if (!array_key_exists('description', $quote)) {
+                        $quote['description'] = isset($quote['terms']) ? $quote['terms'] : (isset($method['description']) ? $method['description'] : '');
+                    }
+
+                $normalized[$quote['code']] = $quote;
+            }
+        } elseif (is_array($method)) {
+            if (empty($method['code'])) {
+                $method['code'] = $extension_code;
+            }
+
+            if (!isset($method['sort_order'])) {
+                $method['sort_order'] = 0;
+            }
+
+            if (!array_key_exists('terms', $method)) {
+                $method['terms'] = '';
+            }
+
+            if (!array_key_exists('description', $method)) {
+                $method['description'] = isset($method['terms']) ? $method['terms'] : '';
+            }
+
+            $normalized[$method['code']] = $method;
+        }
+
+        return $normalized;
     }
 
     /**
@@ -2297,9 +2364,16 @@ class ControllerCheckoutDockercartCheckout extends Controller {
         $language_code = isset($this->session->data['language']) ? $this->session->data['language'] : $this->config->get('config_language');
         
         foreach ($methods as $code => &$method) {
+            $override_code = $code;
+
+            if (strpos($code, '.') !== false) {
+                $override_parts = explode('.', $code);
+                $override_code = $override_parts[0];
+            }
+
             // Check if override is enabled for this method
-            if (isset($overrides[$code]) && !empty($overrides[$code]['enabled'])) {
-                $override = $overrides[$code];
+            if (isset($overrides[$override_code]) && !empty($overrides[$override_code]['enabled'])) {
+                $override = $overrides[$override_code];
                 
                 // Apply custom title if set (check language-specific first, then fallback to non-localized)
                 $custom_title = null;
