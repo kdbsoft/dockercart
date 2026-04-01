@@ -226,6 +226,7 @@ make clean         # Stop + remove all volumes (destructive)
 | **FAQ** | Structured FAQ pages with accordion layout |
 | **Responsive Banners** | Separate portrait/landscape images via `<picture>` |
 | **Shop Features** | Features icons section |
+| **Universal Shipping** | Flexible, multilingual shipping module with geo-zone, weight- and price-based rules; create unlimited shipping methods. (Free) |
 
 ### Premium — require a license key from [dockercart.net](https://dockercart.net)
 

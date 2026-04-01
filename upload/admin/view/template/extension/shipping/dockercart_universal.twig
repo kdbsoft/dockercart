@@ -1,0 +1,256 @@
+{{ header }}{{ column_left }}
+<div id="content">
+<link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
+
+<style>
+/* DockerCart Universal Shipping module styles */
+.dc-shipping-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-bottom:16px; }
+.dc-shipping-card { background:#fff; border:1px solid #e6e9ef; border-radius:10px; padding:12px 14px; display:flex; flex-direction:column; gap:6px; }
+.dc-shipping-card__k { font-size:11px; text-transform:uppercase; color:#8b96a7; letter-spacing:.04em; }
+.dc-shipping-card__v { font-size:20px; font-weight:600; line-height:1.2; color:#2a3445; }
+.dc-shipping-table { width:100%; }
+.dc-shipping-table thead th { font-size:11px; color:#6f7b8f; text-transform:uppercase; letter-spacing:.04em; font-weight:600; background:#f8fafc; padding:10px 12px; }
+.dc-shipping-table tbody td { padding:12px; vertical-align:middle; border-bottom:1px solid #f0f3f8; }
+.dc-shipping-table tbody tr:hover { background:#fafbfe; }
+.dc-shipping-name { font-weight:600; color:#2f3f59; }
+.dc-shipping-desc { font-size:12px; color:#8b96a7; margin-top:2px; }
+.dc-shipping-badge { display:inline-block; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:600; }
+.dc-shipping-badge--on { background:#e9f7ef; color:#1e7e34; }
+.dc-shipping-badge--off { background:#fdecee; color:#b02a37; }
+.dc-shipping-actions { display:flex; gap:6px; justify-content:flex-end; }
+.dc-shipping-empty { text-align:center; padding:40px 20px; color:#8b96a7; }
+.dc-shipping-empty i { font-size:48px; display:block; margin-bottom:12px; opacity:0.5; }
+@media (max-width: 767px) {
+  .dc-shipping-grid { grid-template-columns:1fr; }
+}
+</style>
+
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-shipping" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary">
+          <i class="fa fa-save"></i>
+        </button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default">
+          <i class="fa fa-reply"></i>
+        </a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    <div class="dcx-shell">
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i class="fa fa-truck"></i></div>
+          <div>
+            <h3 class="dcx-panel-title">{{ heading_title }}</h3>
+            <div class="dcx-panel-subtitle">{{ text_module_description }}</div>
+          </div>
+        </div>
+        <div class="dcx-panel-body">
+
+          {# ── Tab Navigation ── #}
+          <ul class="nav nav-tabs dcx-profile-tabs" role="tablist">
+            <li class="active"><a href="#tab-methods" data-toggle="tab"><i class="fa fa-list"></i> {{ tab_methods }}</a></li>
+            <li><a href="#tab-settings" data-toggle="tab"><i class="fa fa-cog"></i> {{ tab_settings }}</a></li>
+          </ul>
+
+          <div class="tab-content" style="margin-top:16px;">
+            {# ── Tab: Shipping Methods ── #}
+            <div class="tab-pane active" id="tab-methods">
+
+              {# Stats cards #}
+              <div class="dc-shipping-grid">
+                <div class="dc-shipping-card">
+                  <div class="dc-shipping-card__k">{{ text_total_methods }}</div>
+                  <div class="dc-shipping-card__v">{{ shipping_methods|length }}</div>
+                </div>
+                <div class="dc-shipping-card">
+                  <div class="dc-shipping-card__k">{{ text_active_methods }}</div>
+                  <div class="dc-shipping-card__v">{{ shipping_methods|filter(m => m.status == 1)|length }}</div>
+                </div>
+                <div class="dc-shipping-card">
+                  <div class="dc-shipping-card__k">{{ text_geo_zones }}</div>
+                  <div class="dc-shipping-card__v">{{ geo_zones|length }}</div>
+                </div>
+              </div>
+
+              {# Add button #}
+              <div style="margin-bottom:12px;">
+                <a href="{{ add }}" class="btn btn-primary"><i class="fa fa-plus"></i> {{ button_add_method }}</a>
+              </div>
+
+              {# Methods table #}
+              {% if shipping_methods %}
+              <div class="table-responsive">
+                <table class="table dc-shipping-table">
+                  <thead>
+                    <tr>
+                      <th>{{ column_name }}</th>
+                      <th>{{ column_cost }}</th>
+                      <th>{{ column_geo_zone }}</th>
+                      <th>{{ column_status }}</th>
+                      <th>{{ column_sort_order }}</th>
+                      <th style="text-align:right;">{{ column_action }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for method in shipping_methods %}
+                    <tr id="method-row-{{ method.method_id }}">
+                      <td>
+                        <div class="dc-shipping-name">{{ method.name ? method.name : text_unnamed }}</div>
+                        {% if method.description %}
+                        <div class="dc-shipping-desc">{{ method.description|slice(0, 80) }}{% if method.description|length > 80 %}...{% endif %}</div>
+                        {% endif %}
+                        {% if method.delivery_time %}
+                        <div class="dc-shipping-desc"><i class="fa fa-clock-o"></i> {{ method.delivery_time }}</div>
+                        {% endif %}
+                      </td>
+                      <td>
+                        {% if method.cost_type == 'fixed' %}
+                          {{ method.cost }}
+                        {% elseif method.cost_type == 'weight' %}
+                          <span data-toggle="tooltip" title="{{ text_weight_based }}"><i class="fa fa-balance-scale"></i> {{ text_weight_based }}</span>
+                        {% endif %}
+                        {% if method.free_shipping_threshold > 0 %}
+                        <br><small class="text-success"><i class="fa fa-gift"></i> {{ text_free_from }} {{ method.free_shipping_threshold }}</small>
+                        {% endif %}
+                      </td>
+                      <td>
+                        {% set geo_zone_name = text_all_zones %}
+                        {% for geo_zone in geo_zones %}
+                          {% if geo_zone.geo_zone_id == method.geo_zone_id %}
+                            {% set geo_zone_name = geo_zone.name %}
+                          {% endif %}
+                        {% endfor %}
+                        {{ geo_zone_name }}
+                      </td>
+                      <td>
+                        {% if method.status %}
+                        <span class="dc-shipping-badge dc-shipping-badge--on">{{ text_enabled }}</span>
+                        {% else %}
+                        <span class="dc-shipping-badge dc-shipping-badge--off">{{ text_disabled }}</span>
+                        {% endif %}
+                      </td>
+                      <td>{{ method.sort_order }}</td>
+                      <td class="dc-shipping-actions">
+                        <a href="{{ method.edit }}" class="btn btn-sm btn-primary" data-toggle="tooltip" title="{{ button_edit }}"><i class="fa fa-pencil"></i></a>
+                        <button type="button" class="btn btn-sm btn-danger btn-delete" data-method-id="{{ method.method_id }}" data-toggle="tooltip" title="{{ button_delete }}"><i class="fa fa-trash"></i></button>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              {% else %}
+              <div class="dc-shipping-empty">
+                <i class="fa fa-truck"></i>
+                <p>{{ text_no_methods }}</p>
+                <a href="{{ add }}" class="btn btn-primary"><i class="fa fa-plus"></i> {{ button_add_method }}</a>
+              </div>
+              {% endif %}
+            </div>
+
+            {# ── Tab: Settings ── #}
+            <div class="tab-pane" id="tab-settings">
+              <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-shipping" class="dcx-form form-horizontal">
+
+                <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+                  <h4><i class="fa fa-cog"></i> {{ text_general_settings }}</h4>
+
+                  <div class="form-group">
+                    <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
+                    <div class="col-sm-10">
+                      <select name="shipping_dockercart_universal_status" id="input-status" class="form-control">
+                        {% if shipping_dockercart_universal_status %}
+                        <option value="1" selected>{{ text_enabled }}</option>
+                        <option value="0">{{ text_disabled }}</option>
+                        {% else %}
+                        <option value="1">{{ text_enabled }}</option>
+                        <option value="0" selected>{{ text_disabled }}</option>
+                        {% endif %}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="col-sm-2 control-label" for="input-tax-class">{{ entry_tax_class }}</label>
+                    <div class="col-sm-10">
+                      <select name="shipping_dockercart_universal_tax_class_id" id="input-tax-class" class="form-control">
+                        <option value="0">{{ text_none }}</option>
+                        {% for tax_class in tax_classes %}
+                        <option value="{{ tax_class.tax_class_id }}" {% if tax_class.tax_class_id == shipping_dockercart_universal_tax_class_id %}selected{% endif %}>{{ tax_class.title }}</option>
+                        {% endfor %}
+                      </select>
+                      <div class="help-block">{{ help_tax_class }}</div>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="col-sm-2 control-label" for="input-sort-order">{{ entry_sort_order }}</label>
+                    <div class="col-sm-10">
+                      <input type="text" name="shipping_dockercart_universal_sort_order" value="{{ shipping_dockercart_universal_sort_order }}" id="input-sort-order" class="form-control" style="max-width:100px;" />
+                      <div class="help-block">{{ help_sort_order }}</div>
+                    </div>
+                  </div>
+
+                </div>
+              </form>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+$(function() {
+  // Delete method
+  $('.btn-delete').on('click', function() {
+    var methodId = $(this).data('method-id');
+    
+    if (confirm('{{ text_confirm_delete }}')) {
+      $.ajax({
+        url: 'index.php?route=extension/shipping/dockercart_universal/delete&user_token={{ user_token }}',
+        type: 'POST',
+        dataType: 'json',
+        data: { method_id: methodId },
+        success: function(json) {
+          if (json.success) {
+            $('#method-row-' + methodId).fadeOut(300, function() {
+              $(this).remove();
+            });
+          } else if (json.error) {
+            alert(json.error);
+          }
+        },
+        error: function() {
+          alert('{{ error_ajax }}');
+        }
+      });
+    }
+  });
+});
+</script>
+{{ footer }}
