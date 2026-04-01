@@ -85,7 +85,7 @@ class ModelCatalogCategory extends Model {
 		$cache_key = 'category.first_product_image.' . (int)$category_id . '.' . (int)$this->config->get('config_store_id');
 		$image = $this->cache->get($cache_key);
 
-		if ($image === null) {
+		if ($image === false) {
 			$query = $this->db->query("SELECT p.image FROM " . DB_PREFIX . "product p LEFT JOIN " . DB_PREFIX . "product_to_category p2c ON (p.product_id = p2c.product_id) LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE p2c.category_id = '" . (int)$category_id . "' AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "' AND p.status = '1' AND p.date_available <= NOW() AND p.image != '' ORDER BY p.sort_order ASC, p.product_id ASC LIMIT 1");
 			$image = !empty($query->row['image']) ? $query->row['image'] : '';
 			$this->cache->set($cache_key, $image, 3600);
