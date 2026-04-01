@@ -14,7 +14,8 @@
     {% else %}
     <input type="radio" name="shipping_method" value="{{ quote.code }}" />
     {% endif %}
-    {{ quote.title }} - {{ quote.text }}</label>
+    {{ quote.title }}{% if quote.text %} &mdash; {{ quote.text }}{% endif %}
+    {% if quote.description %}<br><small class="text-muted">{{ quote.description }}</small>{% endif %}</label>
 </div>
 {% endfor %}
 {% else %}

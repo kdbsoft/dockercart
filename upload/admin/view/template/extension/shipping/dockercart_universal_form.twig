@@ -1,0 +1,280 @@
+{{ header }}{{ column_left }}
+<div id="content">
+<link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
+
+<style>
+/* Form-specific styles for universal shipping */
+.dc-lang-tabs { margin-bottom:10px !important; }
+.dc-lang-tabs > li > a { padding:6px 12px; font-size:12px; display:flex; align-items:center; gap:6px; }
+.dc-lang-tabs > li > a img { width:16px; height:12px; object-fit:cover; border-radius:2px; }
+.dc-lang-pane { display:none; }
+.dc-lang-pane.active { display:block; }
+.dc-condition-row { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:16px; }
+.dc-condition-group { background:#f8fafc; border:1px solid #e8edf6; border-radius:8px; padding:14px 16px; }
+.dc-condition-group h5 { margin:0 0 10px 0; font-size:13px; font-weight:600; color:#4a5568; display:flex; align-items:center; gap:6px; }
+.dc-condition-group h5 i { color:#2f65b9; font-size:14px; }
+.dc-weight-rates-hint { font-size:12px; color:#8b96a7; margin-top:4px; }
+.dc-weight-rates-hint code { background:#f0f4f9; padding:2px 6px; border-radius:4px; font-size:11px; }
+.dc-condition-group .form-group { margin-left:0; margin-right:0; }
+.dc-condition-group .col-sm-2 { padding-left:0; padding-right:8px; }
+.dc-condition-group .col-sm-10 { padding-left:15px; padding-right:15px; }
+.dc-condition-group .control-label { margin-bottom:6px; text-align:left; }
+@media (max-width: 991px) {
+  .dc-condition-row { grid-template-columns:1fr; }
+}
+</style>
+
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-method" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary">
+          <i class="fa fa-save"></i>
+        </button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default">
+          <i class="fa fa-reply"></i>
+        </a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    <div class="dcx-shell">
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i class="fa fa-truck"></i></div>
+          <div>
+            <h3 class="dcx-panel-title">{% if method_id %}{{ text_edit_method }}{% else %}{{ text_add_method }}{% endif %}</h3>
+            <div class="dcx-panel-subtitle">{{ text_method_form_description }}</div>
+          </div>
+        </div>
+        <div class="dcx-panel-body">
+
+          <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-method" class="dcx-form form-horizontal">
+
+            {# ── Section: Name & Description (Multilingual) ── #}
+            <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+              <h4><i class="fa fa-language"></i> {{ text_name_description }}</h4>
+
+              {# Language tabs #}
+              <ul class="nav nav-tabs dc-lang-tabs" id="lang-tabs">
+                {% for language in languages %}
+                <li{% if loop.first %} class="active"{% endif %}>
+                  <a href="#lang-{{ language.language_id }}" data-toggle="tab">
+                    <img src="language/{{ language.code }}/{{ language.code }}.png" alt="{{ language.name }}" onerror="this.style.display='none'">
+                    {{ language.name }}
+                  </a>
+                </li>
+                {% endfor %}
+              </ul>
+
+              <div class="tab-content">
+                {% for language in languages %}
+                <div class="tab-pane dc-lang-pane{% if loop.first %} active{% endif %}" id="lang-{{ language.language_id }}">
+                  
+                  <div class="form-group{% if error_name[language.language_id] %} has-error{% endif %}">
+                    <label class="col-sm-2 control-label" for="input-name-{{ language.language_id }}">{{ entry_name }} <span class="text-danger">*</span></label>
+                    <div class="col-sm-10">
+                      <input type="text" name="method_description[{{ language.language_id }}][name]" value="{{ method_description[language.language_id].name }}" placeholder="{{ entry_name }}" id="input-name-{{ language.language_id }}" class="form-control" />
+                      {% if error_name[language.language_id] %}
+                      <div class="text-danger">{{ error_name[language.language_id] }}</div>
+                      {% endif %}
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="col-sm-2 control-label" for="input-description-{{ language.language_id }}">{{ entry_description }}</label>
+                    <div class="col-sm-10">
+                      <textarea name="method_description[{{ language.language_id }}][description]" rows="3" placeholder="{{ entry_description }}" id="input-description-{{ language.language_id }}" class="form-control">{{ method_description[language.language_id].description }}</textarea>
+                      <div class="help-block">{{ help_description }}</div>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="col-sm-2 control-label" for="input-delivery-time-{{ language.language_id }}">{{ entry_delivery_time }}</label>
+                    <div class="col-sm-10">
+                      <input type="text" name="method_description[{{ language.language_id }}][delivery_time]" value="{{ method_description[language.language_id].delivery_time }}" placeholder="{{ entry_delivery_time_placeholder }}" id="input-delivery-time-{{ language.language_id }}" class="form-control" style="max-width:300px;" />
+                      <div class="help-block">{{ help_delivery_time }}</div>
+                    </div>
+                  </div>
+
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+
+            {# ── Section: Pricing ── #}
+            <div class="dcx-section">
+              <h4><i class="fa fa-money"></i> {{ text_pricing }}</h4>
+
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-cost-type">{{ entry_cost_type }}</label>
+                <div class="col-sm-10">
+                  <select name="cost_type" id="input-cost-type" class="form-control" style="max-width:200px;">
+                    <option value="fixed"{% if cost_type == 'fixed' %} selected{% endif %}>{{ text_cost_fixed }}</option>
+                    <option value="weight"{% if cost_type == 'weight' %} selected{% endif %}>{{ text_cost_weight }}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group cost-fixed-group{% if error_cost %} has-error{% endif %}">
+                <label class="col-sm-2 control-label" for="input-cost">{{ entry_cost }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="cost" value="{{ cost }}" placeholder="0.00" id="input-cost" class="form-control" style="max-width:150px;" />
+                  {% if error_cost %}
+                  <div class="text-danger">{{ error_cost }}</div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="form-group cost-weight-group" style="display:none;">
+                <label class="col-sm-2 control-label" for="input-weight-rates">{{ entry_weight_rates }}</label>
+                <div class="col-sm-10">
+                  <textarea name="weight_rates" rows="4" placeholder="{{ entry_weight_rates_placeholder }}" id="input-weight-rates" class="form-control" style="max-width:400px;font-family:monospace;">{{ weight_rates }}</textarea>
+                  <div class="dc-weight-rates-hint">
+                    {{ help_weight_rates }}<br>
+                    {{ text_example }}: <code>1:5.00,5:10.00,10:15.00</code>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-free-shipping">{{ entry_free_shipping_threshold }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="free_shipping_threshold" value="{{ free_shipping_threshold }}" placeholder="0.00" id="input-free-shipping" class="form-control" style="max-width:150px;" />
+                  <div class="help-block">{{ help_free_shipping }}</div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-tax-class">{{ entry_tax_class }}</label>
+                <div class="col-sm-10">
+                  <select name="tax_class_id" id="input-tax-class" class="form-control" style="max-width:250px;">
+                    <option value="0">{{ text_none }}</option>
+                    {% for tax_class in tax_classes %}
+                    <option value="{{ tax_class.tax_class_id }}"{% if tax_class.tax_class_id == tax_class_id %} selected{% endif %}>{{ tax_class.title }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {# ── Section: Conditions ── #}
+            <div class="dcx-section">
+              <h4><i class="fa fa-filter"></i> {{ text_conditions }}</h4>
+
+              <div class="dc-condition-row">
+                {# Geo Zone #}
+                <div class="dc-condition-group">
+                  <h5><i class="fa fa-globe"></i> {{ text_geo_restriction }}</h5>
+                  <div class="form-group" style="margin-bottom:0;">
+                    <label class="control-label">{{ entry_geo_zone }}</label>
+                    <select name="geo_zone_id" class="form-control">
+                      <option value="0">{{ text_all_zones }}</option>
+                      {% for geo_zone in geo_zones %}
+                      <option value="{{ geo_zone.geo_zone_id }}"{% if geo_zone.geo_zone_id == geo_zone_id %} selected{% endif %}>{{ geo_zone.name }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+
+                {# Order Total Range #}
+                <div class="dc-condition-group">
+                  <h5><i class="fa fa-shopping-cart"></i> {{ text_order_total_range }}</h5>
+                  <div class="form-group" style="margin-bottom:8px;">
+                    <label class="control-label">{{ entry_min_total }}</label>
+                    <input type="text" name="min_total" value="{{ min_total }}" placeholder="0.00" class="form-control" />
+                  </div>
+                  <div class="form-group" style="margin-bottom:0;">
+                    <label class="control-label">{{ entry_max_total }}</label>
+                    <input type="text" name="max_total" value="{{ max_total }}" placeholder="{{ text_unlimited }}" class="form-control" />
+                  </div>
+                </div>
+
+                {# Weight Range #}
+                <div class="dc-condition-group">
+                  <h5><i class="fa fa-balance-scale"></i> {{ text_weight_range }}</h5>
+                  <div class="form-group" style="margin-bottom:8px;">
+                    <label class="control-label">{{ entry_min_weight }}</label>
+                    <input type="text" name="min_weight" value="{{ min_weight }}" placeholder="0" class="form-control" />
+                  </div>
+                  <div class="form-group" style="margin-bottom:0;">
+                    <label class="control-label">{{ entry_max_weight }}</label>
+                    <input type="text" name="max_weight" value="{{ max_weight }}" placeholder="{{ text_unlimited }}" class="form-control" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {# ── Section: Status & Sorting ── #}
+            <div class="dcx-section">
+              <h4><i class="fa fa-cog"></i> {{ text_status_sorting }}</h4>
+
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
+                <div class="col-sm-10">
+                  <select name="status" id="input-status" class="form-control" style="max-width:150px;">
+                    {% if status %}
+                    <option value="1" selected>{{ text_enabled }}</option>
+                    <option value="0">{{ text_disabled }}</option>
+                    {% else %}
+                    <option value="1">{{ text_enabled }}</option>
+                    <option value="0" selected>{{ text_disabled }}</option>
+                    {% endif %}
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-sort-order">{{ entry_sort_order }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="0" id="input-sort-order" class="form-control" style="max-width:100px;" />
+                </div>
+              </div>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+$(function() {
+  // Toggle cost type fields
+  function toggleCostType() {
+    var type = $('#input-cost-type').val();
+    if (type === 'fixed') {
+      $('.cost-fixed-group').show();
+      $('.cost-weight-group').hide();
+    } else {
+      $('.cost-fixed-group').hide();
+      $('.cost-weight-group').show();
+    }
+  }
+  
+  $('#input-cost-type').on('change', toggleCostType);
+  toggleCostType();
+  
+  // Language tabs
+  $('#lang-tabs a').click(function(e) {
+    e.preventDefault();
+    $(this).tab('show');
+    $('.dc-lang-pane').removeClass('active');
+    $($(this).attr('href')).addClass('active');
+  });
+});
+</script>
+{{ footer }}
