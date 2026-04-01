@@ -154,19 +154,40 @@ class ControllerStartupSeoUrl extends Controller {
 
 		// Handle product/manufacturer/information (single entity with priority over path)
 		if ($route == 'product/product' && isset($data['product_id'])) {
-			$url = $this->getSeoKeyword('product_id=' . (int)$data['product_id']);
+			$product_id = (int)$data['product_id'];
+			$url = $this->getSeoKeyword('product_id=' . $product_id);
 			if ($url) {
 				unset($data['product_id'], $data['path'], $data['route']);
+			} else {
+				$fallback = $this->buildEntityFallbackKeyword('prod', $product_id, 'product_id=' . $product_id, $route);
+				if ($fallback) {
+					$url = $fallback;
+					unset($data['product_id'], $data['path'], $data['route']);
+				}
 			}
 		} elseif ($route == 'product/manufacturer/info' && isset($data['manufacturer_id'])) {
-			$url = $this->getSeoKeyword('manufacturer_id=' . (int)$data['manufacturer_id']);
+			$manufacturer_id = (int)$data['manufacturer_id'];
+			$url = $this->getSeoKeyword('manufacturer_id=' . $manufacturer_id);
 			if ($url) {
 				unset($data['manufacturer_id'], $data['route']);
+			} else {
+				$fallback = $this->buildEntityFallbackKeyword('man', $manufacturer_id, 'manufacturer_id=' . $manufacturer_id, $route);
+				if ($fallback) {
+					$url = $fallback;
+					unset($data['manufacturer_id'], $data['route']);
+				}
 			}
 		} elseif ($route == 'information/information' && isset($data['information_id'])) {
-			$url = $this->getSeoKeyword('information_id=' . (int)$data['information_id']);
+			$information_id = (int)$data['information_id'];
+			$url = $this->getSeoKeyword('information_id=' . $information_id);
 			if ($url) {
 				unset($data['information_id'], $data['route']);
+			} else {
+				$fallback = $this->buildEntityFallbackKeyword('inf', $information_id, 'information_id=' . $information_id, $route);
+				if ($fallback) {
+					$url = $fallback;
+					unset($data['information_id'], $data['route']);
+				}
 			}
 		} elseif ($route == 'blog/post' && (isset($data['blog_post_id']) || isset($data['post_id']))) {
 			// Blog post SEO URL - support both blog_post_id and post_id
@@ -199,6 +220,8 @@ class ControllerStartupSeoUrl extends Controller {
 			// Handle category path (only if no product/manufacturer/information)
 			$categories = explode('_', $data['path']);
 			$url = '';
+			$last_category_id = (int)end($categories);
+			reset($categories);
 
 			foreach ($categories as $category_id) {
 				$keyword = $this->getSeoKeyword('category_id=' . (int)$category_id);
@@ -216,6 +239,12 @@ class ControllerStartupSeoUrl extends Controller {
 			unset($data['path']);
 			if ($url) {
 				unset($data['route']);
+			} else {
+				$fallback = $this->buildEntityFallbackKeyword('cat', $last_category_id, 'category_id=' . $last_category_id, 'product/category');
+				if ($fallback) {
+					$url = $fallback;
+					unset($data['route']);
+				}
 			}
 		} elseif ($route == 'common/home') {
 			// Home page - just use language prefix
@@ -228,6 +257,23 @@ class ControllerStartupSeoUrl extends Controller {
 			$url = '';
 			// Note: We keep $data['route'] as is, so it will be returned as normal link
 		} elseif ($route) {
+			if ($this->isModuleRoute($route) && isset($data['module_id'])) {
+				$module_id = (int)$data['module_id'];
+				$module_keyword = $this->getSeoKeyword('module_id=' . $module_id);
+
+				if (!$module_keyword) {
+					$module_keyword = $this->buildEntityFallbackKeyword('mod', $module_id, 'module_id=' . $module_id, $route);
+				}
+
+				if ($module_keyword) {
+					$url = $module_keyword;
+					unset($data['module_id'], $data['route']);
+				}
+			}
+
+			if ($url) {
+				// URL already resolved by module_id fallback
+			} else {
 			// Check if this route (controller) has a SEO URL in database
 			// Examples: checkout/cart, information/contact, etc.
 			$keyword = $this->getSeoKeyword($route);
@@ -252,6 +298,7 @@ class ControllerStartupSeoUrl extends Controller {
 						unset($data['route']);
 					}
 				}
+			}
 			}
 		}
 
@@ -345,6 +392,63 @@ class ControllerStartupSeoUrl extends Controller {
 		}
 
 		return ($result->num_rows) ? $result->row['keyword'] : '';
+	}
+
+	/**
+	 * Build deterministic fallback keyword for entity IDs.
+	 * Example: product_id=10 => prod10, category_id=20 => cat20.
+	 *
+	 * Returns empty string when fallback would conflict with existing explicit SEO URL.
+	 */
+	private function buildEntityFallbackKeyword($prefix, $entity_id, $entity_query, $route = null) {
+		$entity_id = (int)$entity_id;
+
+		if ($entity_id <= 0 || $prefix === '') {
+			return '';
+		}
+
+		$candidate = $prefix . $entity_id;
+
+		if ($this->hasConflictingSeoPrefixInDatabase($candidate, $route)) {
+			return '';
+		}
+
+		return $candidate;
+	}
+
+	/**
+	 * Check whether the route points to a storefront module controller.
+	 */
+	private function isModuleRoute($route) {
+		return strpos((string)$route, 'extension/module/') === 0;
+	}
+
+	/**
+	 * Resolve module route by module_id from OpenCart module table.
+	 * module_id=5 with code='featured' => extension/module/featured.
+	 */
+	private function resolveModuleRouteById($module_id) {
+		$module_id = (int)$module_id;
+
+		if ($module_id <= 0) {
+			return '';
+		}
+
+		$module = $this->db->query(
+			"SELECT code FROM " . DB_PREFIX . "module WHERE module_id = '" . $module_id . "' LIMIT 1"
+		);
+
+		if (!$module->num_rows || empty($module->row['code'])) {
+			return '';
+		}
+
+		$code = (string)$module->row['code'];
+
+		if (!preg_match('/^[a-z0-9_]+$/', $code)) {
+			return '';
+		}
+
+		return 'extension/module/' . $code;
 	}
 
 	/**
@@ -503,23 +607,33 @@ class ControllerStartupSeoUrl extends Controller {
 				$this->response->redirect($redirect_url, 301);
 				exit;
 			} elseif ($query_param === $route) {
+				$fallback_keyword = $this->generateFallbackKeywordForRequestRoute($route);
+				if ($fallback_keyword) {
+					$this->performEnforceCleanUrlRedirect($fallback_keyword);
+				}
+
 				// query_param is a route (not an entity ID)
 				// Try to generate SEO URL on the fly and redirect
 				// Examples: product/special, account/login, etc.
-				
+
 				// Only generate if it's a valid route format
 				if ($this->isValidGeneratedRoute($route)) {
 					$generated_keyword = $this->generateSeoUrlFromRoute($route);
-					
+
 					if ($generated_keyword) {
 						// Check for conflicts with existing DB entries
 						$has_conflict = $this->hasConflictingSeoPrefixInDatabase($generated_keyword, $route);
-						
+
 						if (!$has_conflict) {
 							// Safe to redirect to generated URL
 							$this->performEnforceCleanUrlRedirect($generated_keyword);
 						}
 					}
+				}
+			} else {
+				$fallback_keyword = $this->generateFallbackKeywordForRequestRoute($route);
+				if ($fallback_keyword) {
+					$this->performEnforceCleanUrlRedirect($fallback_keyword);
 				}
 			}
 		}
@@ -534,7 +648,7 @@ class ControllerStartupSeoUrl extends Controller {
 	private function performEnforceCleanUrlRedirect($seo_keyword) {
 		
 		// Get remaining query parameters (everything except route and main identifier)
-		$excluded_params = array('route', 'product_id', 'path', 'manufacturer_id', 'information_id', 'blog_post_id', 'post_id', 'blog_category_id', 'category_id', 'blog_author_id', 'author_id');
+		$excluded_params = array('route', 'product_id', 'path', 'manufacturer_id', 'information_id', 'module_id', 'blog_post_id', 'post_id', 'blog_category_id', 'category_id', 'blog_author_id', 'author_id');
 		$remaining_query = $this->buildRemainingQueryString($excluded_params);
 
 		// Build and perform redirect with language prefix
@@ -665,6 +779,11 @@ class ControllerStartupSeoUrl extends Controller {
 				// This is a route query like account/login or checkout/cart
 				$this->request->get['route'] = $query->row['query'];
 			}
+			return;
+		}
+
+		// Not found in DB - check fallback short aliases (cat/prod/inf/man/mod)
+		if ($this->decodeFallbackEntityKeyword($keyword)) {
 			return;
 		}
 
@@ -880,7 +999,7 @@ class ControllerStartupSeoUrl extends Controller {
 		
 		// Check if it's a non-route entity (product_id, category_id, etc)
 		// These have format: "product_id=123" or "category_id=456", etc
-		if (preg_match('/^(product_id|category_id|manufacturer_id|information_id)=/', $query_string)) {
+		if (preg_match('/^(product_id|category_id|manufacturer_id|information_id|module_id)=/', $query_string)) {
 			// This keyword is already assigned to a product/category/manufacturer/information
 			// So it's NOT available for use as a generated route keyword
 			return true;
@@ -926,6 +1045,130 @@ class ControllerStartupSeoUrl extends Controller {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Decode short fallback aliases generated when explicit SEO keyword is missing.
+	 * Supported patterns:
+	 * - cat123  => product/category, path=123
+	 * - prod123 => product/product, product_id=123
+	 * - man123  => product/manufacturer/info, manufacturer_id=123
+	 * - inf123  => information/information, information_id=123
+	 * - mod123  => extension/module/{code}, module_id=123
+	 */
+	private function decodeFallbackEntityKeyword($keyword) {
+		if (preg_match('/^cat(\d+)$/', $keyword, $matches)) {
+			$category_id = (int)$matches[1];
+
+			if ($this->getSeoKeyword('category_id=' . $category_id)) {
+				$this->request->get['route'] = 'error/not_found';
+				return true;
+			}
+
+			$this->handleNestedCategoryRedirect($category_id, $keyword);
+			$this->request->get['path'] = $category_id;
+			$this->request->get['route'] = 'product/category';
+			return true;
+		}
+
+		if (preg_match('/^prod(\d+)$/', $keyword, $matches)) {
+			$product_id = (int)$matches[1];
+
+			if ($this->getSeoKeyword('product_id=' . $product_id)) {
+				$this->request->get['route'] = 'error/not_found';
+				return true;
+			}
+
+			$this->request->get['product_id'] = $product_id;
+			$this->request->get['route'] = 'product/product';
+			return true;
+		}
+
+		if (preg_match('/^man(\d+)$/', $keyword, $matches)) {
+			$manufacturer_id = (int)$matches[1];
+
+			if ($this->getSeoKeyword('manufacturer_id=' . $manufacturer_id)) {
+				$this->request->get['route'] = 'error/not_found';
+				return true;
+			}
+
+			$this->request->get['manufacturer_id'] = $manufacturer_id;
+			$this->request->get['route'] = 'product/manufacturer/info';
+			return true;
+		}
+
+		if (preg_match('/^inf(\d+)$/', $keyword, $matches)) {
+			$information_id = (int)$matches[1];
+
+			if ($this->getSeoKeyword('information_id=' . $information_id)) {
+				$this->request->get['route'] = 'error/not_found';
+				return true;
+			}
+
+			$this->request->get['information_id'] = $information_id;
+			$this->request->get['route'] = 'information/information';
+			return true;
+		}
+
+		if (preg_match('/^mod(\d+)$/', $keyword, $matches)) {
+			$module_id = (int)$matches[1];
+			$module_route = $this->resolveModuleRouteById($module_id);
+
+			if (!$module_route) {
+				return false;
+			}
+
+			if ($this->getSeoKeyword('module_id=' . $module_id) || $this->getSeoKeyword($module_route)) {
+				$this->request->get['route'] = 'error/not_found';
+				return true;
+			}
+
+			$this->request->get['module_id'] = $module_id;
+			$this->request->get['route'] = $module_route;
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Generate fallback keyword for direct index.php?route=... requests when
+	 * explicit SEO keyword is not configured.
+	 */
+	private function generateFallbackKeywordForRequestRoute($route) {
+		if ($route === 'product/product' && isset($this->request->get['product_id'])) {
+			$product_id = (int)$this->request->get['product_id'];
+			return $this->buildEntityFallbackKeyword('prod', $product_id, 'product_id=' . $product_id, $route);
+		}
+
+		if ($route === 'product/category' && isset($this->request->get['path'])) {
+			$parts = explode('_', (string)$this->request->get['path']);
+			$category_id = (int)end($parts);
+			return $this->buildEntityFallbackKeyword('cat', $category_id, 'category_id=' . $category_id, $route);
+		}
+
+		if ($route === 'product/manufacturer/info' && isset($this->request->get['manufacturer_id'])) {
+			$manufacturer_id = (int)$this->request->get['manufacturer_id'];
+			return $this->buildEntityFallbackKeyword('man', $manufacturer_id, 'manufacturer_id=' . $manufacturer_id, $route);
+		}
+
+		if ($route === 'information/information' && isset($this->request->get['information_id'])) {
+			$information_id = (int)$this->request->get['information_id'];
+			return $this->buildEntityFallbackKeyword('inf', $information_id, 'information_id=' . $information_id, $route);
+		}
+
+		if ($this->isModuleRoute($route) && isset($this->request->get['module_id'])) {
+			$module_id = (int)$this->request->get['module_id'];
+			$module_keyword = $this->getSeoKeyword('module_id=' . $module_id);
+
+			if ($module_keyword) {
+				return $module_keyword;
+			}
+
+			return $this->buildEntityFallbackKeyword('mod', $module_id, 'module_id=' . $module_id, $route);
+		}
+
+		return '';
 	}
 
 	/**
