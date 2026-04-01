@@ -13,7 +13,7 @@ $_['text_i_am_returning_customer'] = 'I am a returning customer';
 $_['text_forgotten']               = 'Forgotten Password';
 
 // Entry
-$_['entry_email']                  = 'E-Mail Address';
+$_['entry_email']                  = 'E-Mail Address or Telephone';
 $_['entry_password']               = 'Password';
 
 // Error

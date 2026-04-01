@@ -1,7 +1,7 @@
 <?php
 
 $_['entry_email'] = 'Електронна пошта';
-$_['entry_fax'] = 'Факс';
+$_['entry_fax'] = 'Телефон 2';
 $_['entry_firstname'] = 'Ім\'я';
 $_['entry_lastname'] = 'Прізвище';
 $_['entry_telephone'] = 'Телефон';

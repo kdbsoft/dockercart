@@ -54,6 +54,30 @@ class ModelAccountCustomer extends Model {
 		return $query->row;
 	}
 
+	/**
+	 * Find a customer by telephone number using digits-only comparison.
+	 * This normalizes stored telephone values by stripping non-digits before compare,
+	 * allowing logins when users enter phone numbers with spaces or punctuation.
+	 */
+	public function getCustomerByTelephoneDigits($digits) {
+		$digits = preg_replace('/\D+/', '', (string)$digits);
+		if ($digits === '') {
+			return array();
+		}
+
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "customer WHERE telephone != ''");
+
+		if ($query->num_rows) {
+			foreach ($query->rows as $row) {
+				if (preg_replace('/\D+/', '', $row['telephone']) == $digits) {
+					return $row;
+				}
+			}
+		}
+
+		return array();
+	}
+
 	public function getCustomerByCode($code) {
 		$query = $this->db->query("SELECT customer_id, firstname, lastname, email FROM `" . DB_PREFIX . "customer` WHERE code = '" . $this->db->escape($code) . "' AND code != ''");
 

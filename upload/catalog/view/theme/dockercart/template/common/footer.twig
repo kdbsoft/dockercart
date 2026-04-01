@@ -26,7 +26,12 @@
           {% endif %}
           <li class="flex items-center gap-2.5">
             <i data-lucide="phone" class="w-4 h-4 text-blue-400 flex-shrink-0"></i>
-            <a href="tel:{{ store_telephone }}" class="hover:text-white transition">{{ store_telephone }}</a>
+            <div class="flex flex-col">
+              <a href="tel:{{ store_telephone }}" class="hover:text-white transition">{{ store_telephone }}</a>
+              {% if store_fax %}
+              <a href="tel:{{ store_fax }}" class="hover:text-white transition">{{ store_fax }}</a>
+              {% endif %}
+            </div>
           </li>
           <li class="flex items-center gap-2.5">
             <i data-lucide="mail" class="w-4 h-4 text-blue-400 flex-shrink-0"></i>

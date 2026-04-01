@@ -106,13 +106,19 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-9 flex items-center justify-between gap-4 relative">
 
       <!-- Phone -->
-      <a href="tel:{{ telephone }}" class="flex items-center gap-2 text-white text-sm font-semibold hover:opacity-80 transition px-2 py-0.5 rounded-full flex-shrink-0">
+      <div class="flex items-center gap-2 text-white text-sm font-semibold hover:opacity-80 transition px-2 py-0.5 rounded-full flex-shrink-0">
         <i data-lucide="phone" class="w-4 h-4 text-blue-300 flex-shrink-0"></i>
-        <span>{{ telephone }}</span>
+        <div class="flex items-center gap-3">
+          <a href="tel:{{ telephone }}" class="hover:opacity-80">{{ telephone }}</a>
+          {% if fax %}
+          <span class="text-gray-400">/</span>
+          <a href="tel:{{ fax }}" class="hover:opacity-80">{{ fax }}</a>
+          {% endif %}
+        </div>
         {% if open_hours %}
         <span class="text-[11px] font-medium text-gray-300">&bull; {{ open_hours|striptags|replace({'\n':' '}) }}</span>
         {% endif %}
-      </a>
+      </div>
 
       {% if menu_type == 'horizontal' and top_informations is defined and top_informations %}
       <!-- Top info links: horizontal menu, centered in dark micro bar -->

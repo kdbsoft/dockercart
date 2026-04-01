@@ -45,6 +45,7 @@ class ControllerCommonFooter extends Controller {
 		$data['home']            = '/';
 		$data['store_address']   = $this->config->get('config_address');
 		$data['store_telephone'] = $this->config->get('config_telephone');
+		$data['store_fax']       = $this->config->get('config_fax');
 		$data['store_email']     = $this->config->get('config_email');
 		$data['store_geocode']   = $this->config->get('config_geocode');
 

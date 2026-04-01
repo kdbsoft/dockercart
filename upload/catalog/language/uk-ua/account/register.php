@@ -8,7 +8,7 @@ $_['entry_confirm'] = 'Підтвердження пароля';
 $_['entry_country'] = 'Країна';
 $_['entry_customer_group'] = 'Група клієнтів';
 $_['entry_email'] = 'Електронна пошта';
-$_['entry_fax'] = 'Факс';
+$_['entry_fax'] = 'Телефон 2';
 $_['entry_firstname'] = 'Ім\'я';
 $_['entry_lastname'] = 'Прізвище';
 $_['entry_newsletter'] = 'Підписатися';
@@ -34,7 +34,7 @@ $_['heading_title'] = 'Зареєструвати обліковий запис'
 $_['text_account'] = 'Обліковий запис';
 $_['text_account_already'] = 'Якщо у вас вже є обліковий запис у нас, будь ласка, увійдіть на <a href="%s">сторінці входу</a> .';
 $_['text_agree'] = 'Я прочитав(-ла) та погоджуюся з <a href="%s" class="agree"><b>%s</b></a>';
-$_['text_newsletter'] = 'Інформаційний бюлетень';
+$_['text_newsletter'] = 'Підписатися';
 $_['text_register'] = 'Зареєструватися';
 $_['text_your_address'] = 'Ваша адреса';
 $_['text_your_details'] = 'Ваші особисті дані';

@@ -156,33 +156,64 @@ class ControllerAccountLogin extends Controller {
 	}
 
 	protected function validate() {
-		// Check if email and password are provided
+		// Require identifier (email or phone) and password
 		if (!isset($this->request->post['email']) || !isset($this->request->post['password'])) {
 			$this->error['warning'] = $this->language->get('error_login');
 			return !$this->error;
 		}
 
+		$identifier = trim((string)$this->request->post['email']);
+		$password = $this->request->post['password'];
+
+		// Determine if identifier is email (contains @) or telephone (digits-only after normalization)
+		$is_email = (strpos($identifier, '@') !== false);
+		$telephone_digits = '';
+		if (!$is_email) {
+			$telephone_digits = preg_replace('/\D+/', '', $identifier);
+			if ($telephone_digits === '') {
+				$this->error['warning'] = $this->language->get('error_login');
+				return !$this->error;
+			}
+		}
+
+		// Use a login key for attempt tracking: lowercase email or digits-only telephone
+		$login_key = $is_email ? utf8_strtolower($identifier) : $telephone_digits;
+
 		// Check how many login attempts have been made.
-		$login_info = $this->model_account_customer->getLoginAttempts($this->request->post['email']);
+		$login_info = $this->model_account_customer->getLoginAttempts($login_key);
 
 		if ($login_info && ($login_info['total'] >= $this->config->get('config_login_attempts')) && strtotime('-1 hour') < strtotime($login_info['date_modified'])) {
 			$this->error['warning'] = $this->language->get('error_attempts');
 		}
 
-		// Check if customer has been approved.
-		$customer_info = $this->model_account_customer->getCustomerByEmail($this->request->post['email']);
+		// Resolve customer by email or telephone
+		if ($is_email) {
+			$customer_info = $this->model_account_customer->getCustomerByEmail($identifier);
+		} else {
+			$customer_info = $this->model_account_customer->getCustomerByTelephoneDigits($telephone_digits);
+		}
 
 		if ($customer_info && !$customer_info['status']) {
 			$this->error['warning'] = $this->language->get('error_approved');
 		}
 
 		if (!$this->error) {
-			if (!$this->customer->login($this->request->post['email'], $this->request->post['password'])) {
-				$this->error['warning'] = $this->language->get('error_login');
-
-				$this->model_account_customer->addLoginAttempt($this->request->post['email']);
+			// If logging in by telephone, pass the customer's email to the core login routine
+			if ($is_email) {
+				$login_success = $this->customer->login($identifier, $password);
 			} else {
-				$this->model_account_customer->deleteLoginAttempts($this->request->post['email']);
+				if ($customer_info) {
+					$login_success = $this->customer->login($customer_info['email'], $password);
+				} else {
+					$login_success = false;
+				}
+			}
+
+			if (!$login_success) {
+				$this->error['warning'] = $this->language->get('error_login');
+				$this->model_account_customer->addLoginAttempt($login_key);
+			} else {
+				$this->model_account_customer->deleteLoginAttempts($login_key);
 			}
 		}
 

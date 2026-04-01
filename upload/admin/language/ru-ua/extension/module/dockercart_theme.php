@@ -69,7 +69,7 @@ $_['text_default_product_feature_1_text'] = 'Бесплатная доставк
 $_['text_default_product_feature_2_title'] = 'Гарантия';
 $_['text_default_product_feature_2_text'] = 'Официальная гарантия';
 $_['text_default_product_feature_3_title'] = 'Возврат';
-$_['text_default_product_feature_3_text'] = 'Возврат в течение 30 дней';
+$_['text_default_product_feature_3_text'] = 'Возврат в течение 14 дней';
 
 $_['text_default_category_feature_1_title'] = 'Глубина каталога';
 $_['text_default_category_feature_1_text'] = '%s+ товаров в %s подкатегориях';
