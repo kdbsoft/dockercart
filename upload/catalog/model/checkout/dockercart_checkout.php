@@ -338,12 +338,22 @@ class ModelCheckoutDockerCartCheckout extends Model {
                 $method = $this->{'model_extension_payment_' . $result['code']}->getMethod($address, $total);
                 
                 if ($method) {
+                    $normalized_methods = $this->normalizePaymentMethods($method, $result['code']);
+
+                    if (!$normalized_methods) {
+                        continue;
+                    }
+
                     if ($recurring) {
                         if (property_exists($this->{'model_extension_payment_' . $result['code']}, 'recurringPayments') && $this->{'model_extension_payment_' . $result['code']}->recurringPayments()) {
-                            $method_data[$result['code']] = $method;
+                            foreach ($normalized_methods as $code => $method_item) {
+                                $method_data[$code] = $method_item;
+                            }
                         }
                     } else {
-                        $method_data[$result['code']] = $method;
+                        foreach ($normalized_methods as $code => $method_item) {
+                            $method_data[$code] = $method_item;
+                        }
                     }
                 }
             }
@@ -352,12 +362,68 @@ class ModelCheckoutDockerCartCheckout extends Model {
         $sort_order = array();
         
         foreach ($method_data as $key => $value) {
-            $sort_order[$key] = $value['sort_order'];
+            $sort_order[$key] = isset($value['sort_order']) ? (int)$value['sort_order'] : 0;
         }
         
         array_multisort($sort_order, SORT_ASC, $method_data);
         
         return $method_data;
+    }
+
+    /**
+     * Normalize payment methods to a flat list keyed by full method code.
+     *
+     * Supports both legacy one-method format and grouped quote[] format.
+     */
+    protected function normalizePaymentMethods($method, $extension_code) {
+        $normalized = array();
+
+        if (isset($method['quote']) && is_array($method['quote'])) {
+            foreach ($method['quote'] as $quote) {
+                if (!is_array($quote) || empty($quote['code'])) {
+                    continue;
+                }
+
+                if (!isset($quote['sort_order'])) {
+                    $quote['sort_order'] = isset($method['sort_order']) ? (int)$method['sort_order'] : 0;
+                }
+
+                if (!isset($quote['title']) && isset($method['title'])) {
+                    $quote['title'] = $method['title'];
+                }
+
+                if (!array_key_exists('terms', $quote)) {
+                    $quote['terms'] = isset($method['terms']) ? $method['terms'] : '';
+                }
+
+                    // Map to 'description' for compatibility with frontend
+                    if (!array_key_exists('description', $quote)) {
+                        $quote['description'] = isset($quote['terms']) ? $quote['terms'] : (isset($method['description']) ? $method['description'] : '');
+                    }
+
+                $normalized[$quote['code']] = $quote;
+            }
+        } elseif (is_array($method)) {
+            if (empty($method['code'])) {
+                $method['code'] = $extension_code;
+            }
+
+            if (!isset($method['sort_order'])) {
+                $method['sort_order'] = 0;
+            }
+
+            if (!array_key_exists('terms', $method)) {
+                $method['terms'] = '';
+            }
+
+            if (!array_key_exists('description', $method)) {
+                $method['description'] = isset($method['terms']) ? $method['terms'] : '';
+            }
+
+            $normalized[$method['code']] = $method;
+        }
+
+        return $normalized;
     }
     
     /**

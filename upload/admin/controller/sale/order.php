@@ -1205,19 +1205,22 @@ class ControllerSaleOrder extends Controller {
 
 			// Additional Tabs
 			$data['tabs'] = array();
+			$payment_code = $order_info['payment_code'];
+			$payment_extension = explode('.', $payment_code);
+			$payment_base_code = $payment_extension[0];
 
-			if ($this->user->hasPermission('access', 'extension/payment/' . $order_info['payment_code'])) {
-				if (is_file(DIR_CATALOG . 'controller/extension/payment/' . $order_info['payment_code'] . '.php')) {
-					$content = $this->load->controller('extension/payment/' . $order_info['payment_code'] . '/order');
+			if ($this->user->hasPermission('access', 'extension/payment/' . $payment_base_code)) {
+				if (is_file(DIR_CATALOG . 'controller/extension/payment/' . $payment_base_code . '.php')) {
+					$content = $this->load->controller('extension/payment/' . $payment_base_code . '/order');
 				} else {
 					$content = '';
 				}
 
 				if ($content) {
-					$this->load->language('extension/payment/' . $order_info['payment_code']);
+					$this->load->language('extension/payment/' . $payment_base_code);
 
 					$data['tabs'][] = array(
-						'code'    => $order_info['payment_code'],
+						'code'    => $payment_base_code,
 						'title'   => $this->language->get('heading_title'),
 						'content' => $content
 					);
