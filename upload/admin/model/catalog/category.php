@@ -283,6 +283,74 @@ class ModelCatalogCategory extends Model {
 		return $query->rows;
 	}
 
+	public function getParentCategories($data = array()) {
+		$sql = "SELECT c.category_id, cd.name, c.sort_order FROM " . DB_PREFIX . "category c LEFT JOIN " . DB_PREFIX . "category_description cd ON (c.category_id = cd.category_id) WHERE c.parent_id = '0' AND cd.language_id = '" . (int)$this->config->get('config_language_id') . "'";
+
+		$sort_data = array(
+			'name',
+			'sort_order'
+		);
+
+		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
+			if ($data['sort'] == 'name') {
+				$sql .= " ORDER BY cd.name";
+			} else {
+				$sql .= " ORDER BY c.sort_order";
+			}
+		} else {
+			$sql .= " ORDER BY c.sort_order";
+		}
+
+		if (isset($data['order']) && ($data['order'] == 'DESC')) {
+			$sql .= " DESC";
+		} else {
+			$sql .= " ASC";
+		}
+
+		if (isset($data['start']) || isset($data['limit'])) {
+			if ($data['start'] < 0) {
+				$data['start'] = 0;
+			}
+
+			if ($data['limit'] < 1) {
+				$data['limit'] = 20;
+			}
+
+			$sql .= " LIMIT " . (int)$data['start'] . "," . (int)$data['limit'];
+		}
+
+		$query = $this->db->query($sql);
+
+		return $query->rows;
+	}
+
+	public function getCategoriesByTopParents($parent_ids = array(), $sort = 'name', $order = 'ASC') {
+		if (!$parent_ids) {
+			return array();
+		}
+
+		$parent_ids = array_map('intval', $parent_ids);
+		$parent_ids_sql = implode(',', $parent_ids);
+
+		$sql = "SELECT c.category_id, c.parent_id, c.sort_order, cd.name FROM " . DB_PREFIX . "category c LEFT JOIN " . DB_PREFIX . "category_description cd ON (c.category_id = cd.category_id) LEFT JOIN " . DB_PREFIX . "category_path cp ON (cp.category_id = c.category_id) WHERE cp.path_id IN (" . $parent_ids_sql . ") AND c.category_id NOT IN (" . $parent_ids_sql . ") AND cd.language_id = '" . (int)$this->config->get('config_language_id') . "' GROUP BY c.category_id";
+
+		if ($sort == 'sort_order') {
+			$sql .= " ORDER BY c.parent_id ASC, c.sort_order";
+		} else {
+			$sql .= " ORDER BY c.parent_id ASC, cd.name";
+		}
+
+		if ($order == 'DESC') {
+			$sql .= " DESC";
+		} else {
+			$sql .= " ASC";
+		}
+
+		$query = $this->db->query($sql);
+
+		return $query->rows;
+	}
+
 	public function getCategoryDescriptions($category_id) {
 		$category_description_data = array();
 
@@ -357,6 +425,12 @@ class ModelCatalogCategory extends Model {
 
 	public function getTotalCategories() {
 		$query = $this->db->query("SELECT COUNT(*) AS total FROM " . DB_PREFIX . "category");
+
+		return $query->row['total'];
+	}
+
+	public function getTotalParentCategories() {
+		$query = $this->db->query("SELECT COUNT(*) AS total FROM " . DB_PREFIX . "category WHERE parent_id = '0'");
 
 		return $query->row['total'];
 	}
