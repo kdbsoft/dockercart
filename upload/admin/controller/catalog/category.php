@@ -192,26 +192,53 @@ class ControllerCatalogCategory extends Controller {
 		$data['repair'] = $this->url->link('catalog/category/repair', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
 		$data['categories'] = array();
+		$limit = (int)$this->config->get('config_limit_admin');
+
+		if ($limit < 1) {
+			$limit = 20;
+		}
 
 		$filter_data = array(
 			'sort'  => $sort,
 			'order' => $order,
-			'start' => ($page - 1) * $this->config->get('config_limit_admin'),
-			'limit' => $this->config->get('config_limit_admin')
+			'start' => ($page - 1) * $limit,
+			'limit' => $limit
 		);
 
-		$category_total = $this->model_catalog_category->getTotalCategories();
+		$category_total = $this->model_catalog_category->getTotalParentCategories();
+		$parent_categories = $this->model_catalog_category->getParentCategories($filter_data);
+		$parent_category_ids = array();
 
-		$results = $this->model_catalog_category->getCategories($filter_data);
+		foreach ($parent_categories as $parent_category) {
+			$parent_category_ids[] = (int)$parent_category['category_id'];
+		}
 
-		foreach ($results as $result) {
+		$child_categories = $this->model_catalog_category->getCategoriesByTopParents($parent_category_ids, $sort, $order);
+		$children_map = array();
+
+		foreach ($child_categories as $child_category) {
+			$children_map[(int)$child_category['parent_id']][] = $child_category;
+		}
+
+		foreach ($parent_categories as $parent_category) {
+			$parent_category_id = (int)$parent_category['category_id'];
+			$has_children = !empty($children_map[$parent_category_id]);
+
 			$data['categories'][] = array(
-				'category_id' => $result['category_id'],
-				'name'        => $result['name'],
-				'sort_order'  => $result['sort_order'],
-				'edit'        => $this->url->link('catalog/category/edit', 'user_token=' . $this->session->data['user_token'] . '&category_id=' . $result['category_id'] . $url, true),
-				'delete'      => $this->url->link('catalog/category/delete', 'user_token=' . $this->session->data['user_token'] . '&category_id=' . $result['category_id'] . $url, true)
+				'category_id'  => $parent_category_id,
+				'parent_id'    => 0,
+				'level'        => 0,
+				'indent'       => 0,
+				'has_children' => $has_children,
+				'name'         => $parent_category['name'],
+				'sort_order'   => $parent_category['sort_order'],
+				'edit'         => $this->url->link('catalog/category/edit', 'user_token=' . $this->session->data['user_token'] . '&category_id=' . $parent_category_id . $url, true),
+				'delete'       => $this->url->link('catalog/category/delete', 'user_token=' . $this->session->data['user_token'] . '&category_id=' . $parent_category_id . $url, true)
 			);
+
+			if ($has_children) {
+				$this->appendCategoryChildren($data['categories'], $children_map, $parent_category_id, 1, $url);
+			}
 		}
 
 		if (isset($this->error['warning'])) {
@@ -262,12 +289,12 @@ class ControllerCatalogCategory extends Controller {
 		$pagination = new Pagination();
 		$pagination->total = $category_total;
 		$pagination->page = $page;
-		$pagination->limit = $this->config->get('config_limit_admin');
+		$pagination->limit = $limit;
 		$pagination->url = $this->url->link('catalog/category', 'user_token=' . $this->session->data['user_token'] . $url . '&page={page}', true);
 
 		$data['pagination'] = $pagination->render();
 
-		$data['results'] = sprintf($this->language->get('text_pagination'), ($category_total) ? (($page - 1) * $this->config->get('config_limit_admin')) + 1 : 0, ((($page - 1) * $this->config->get('config_limit_admin')) > ($category_total - $this->config->get('config_limit_admin'))) ? $category_total : ((($page - 1) * $this->config->get('config_limit_admin')) + $this->config->get('config_limit_admin')), $category_total, ceil($category_total / $this->config->get('config_limit_admin')));
+		$data['results'] = sprintf($this->language->get('text_pagination'), ($category_total) ? (($page - 1) * $limit) + 1 : 0, ((($page - 1) * $limit) > ($category_total - $limit)) ? $category_total : ((($page - 1) * $limit) + $limit), $category_total, ceil($category_total / $limit));
 
 		$data['sort'] = $sort;
 		$data['order'] = $order;
@@ -277,6 +304,33 @@ class ControllerCatalogCategory extends Controller {
 		$data['footer'] = $this->load->controller('common/footer');
 
 		$this->response->setOutput($this->load->view('catalog/category_list', $data));
+	}
+
+	protected function appendCategoryChildren(array &$categories, array &$children_map, $parent_id, $level, $url) {
+		if (empty($children_map[(int)$parent_id])) {
+			return;
+		}
+
+		foreach ($children_map[(int)$parent_id] as $child_category) {
+			$category_id = (int)$child_category['category_id'];
+			$has_children = !empty($children_map[$category_id]);
+
+			$categories[] = array(
+				'category_id'  => $category_id,
+				'parent_id'    => (int)$child_category['parent_id'],
+				'level'        => (int)$level,
+				'indent'       => (int)(min((int)$level, 8) * 16),
+				'has_children' => $has_children,
+				'name'         => $child_category['name'],
+				'sort_order'   => $child_category['sort_order'],
+				'edit'         => $this->url->link('catalog/category/edit', 'user_token=' . $this->session->data['user_token'] . '&category_id=' . $category_id . $url, true),
+				'delete'       => $this->url->link('catalog/category/delete', 'user_token=' . $this->session->data['user_token'] . '&category_id=' . $category_id . $url, true)
+			);
+
+			if ($has_children) {
+				$this->appendCategoryChildren($categories, $children_map, $category_id, $level + 1, $url);
+			}
+		}
 	}
 
 	protected function getForm() {
