@@ -219,6 +219,7 @@ make clean         # Stop + remove all volumes (destructive)
 
 | Module | Description |
 |---|---|
+| **Checkout** | One-page checkout flow improvements and UX fixes (GPL, free) |
 | **Theme** | DockerCart theme with customization settings |
 | **Full-text Search** | Manticore Search-powered relevance search across the catalog |
 | **Blog** | Full blog system: categories, authors, comments, SEO-ready posts |
@@ -233,7 +234,6 @@ make clean         # Stop + remove all volumes (destructive)
 
 | Module | Description |
 |---|---|
-| **Checkout** | Checkout flow improvements and UX fixes |
 | **One-Click Checkout** | Streamlined checkout that reduces cart abandonment |
 | **Advanced Filter** | Ajax product filtering by attributes, price, and custom options |
 | **Multicurrency** | Real-time currency switching with automatic rate feeds |

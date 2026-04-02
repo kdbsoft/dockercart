@@ -5,7 +5,7 @@
  * 
  * @package    DockerCart Checkout
  * @author     mathflow-bit
- * @license    Commercial License
+ * @license    GNU General Public License v3.0 (GPL-3.0)
  */
 
 class ControllerExtensionModuleDockerCartCheckout extends Controller {
@@ -21,11 +21,6 @@ class ControllerExtensionModuleDockerCartCheckout extends Controller {
     public function eventRedirectCheckout(&$route, &$args) {
         // Check if module is enabled
         if (!$this->config->get('module_dockercart_checkout_status')) {
-            return;
-        }
-        
-        // Verify license
-        if (!$this->verifyLicense()) {
             return;
         }
         
@@ -54,11 +49,6 @@ class ControllerExtensionModuleDockerCartCheckout extends Controller {
         
         // Check if skip cart is enabled
         if (!$this->config->get('module_dockercart_checkout_skip_cart')) {
-            return;
-        }
-        
-        // Verify license
-        if (!$this->verifyLicense()) {
             return;
         }
         
@@ -142,25 +132,4 @@ class ControllerExtensionModuleDockerCartCheckout extends Controller {
         }
     }
     
-    /**
-     * Verify license
-     * 
-     * @return bool
-     */
-    private function verifyLicense() {
-        $licenseKey = $this->config->get('module_dockercart_checkout_license_key');
-        
-        if (!$licenseKey) {
-            return false;
-        }
-        
-        // Use DockercartLicense library
-        if (class_exists('DockercartLicense')) {
-            $license = new DockercartLicense($this->registry);
-            return $license->verify($licenseKey, 'dockercart_checkout');
-        }
-        
-        // Fallback - simple validation
-        return strlen($licenseKey) > 10;
-    }
 }

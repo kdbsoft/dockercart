@@ -846,7 +846,6 @@ hr {
             <!-- Form Fields tab removed: managed via Blocks -->
             <li><a href="#tab-method-overrides" data-toggle="tab" role="tab"><i data-lucide="edit-3"></i><br><span>{{ tab_method_overrides }}</span></a></li>
             <li><a href="#tab-advanced" data-toggle="tab" role="tab"><i data-lucide="sliders"></i><br><span>{{ tab_advanced }}</span></a></li>
-            <li><a href="#tab-license" data-toggle="tab" role="tab"><i data-lucide="key"></i><br><span>{{ tab_license }}</span></a></li>
           </ul>
 
           <div class="tab-content dc-tab-content">
@@ -1366,51 +1365,6 @@ hr {
                     </select>
                   </div>
                 </div>
-
-              </div>
-            </div>
-
-            <!-- LICENSE TAB -->
-            <div class="tab-pane" id="tab-license">
-              <div style="margin-top: 15px;">
-
-                <fieldset>
-                  <legend><i data-lucide="key"></i> {{ text_license }}</legend>
-
-                  <div class="form-group required">
-                    <label class="col-sm-2 control-label" for="input-license-key">
-                      <span data-toggle="tooltip" title="{{ help_license_key }}">{{ entry_license_key }}</span>
-                    </label>
-                    <div class="col-sm-6">
-                      <input type="text" name="module_dockercart_checkout_license_key" value="{{ module_dockercart_checkout_license_key }}" placeholder="DCFL-XXXXXXXXXXXXXXXX-YYYYYYYYYYYY" id="input-license-key" class="form-control">
-                      <small class="form-text text-muted" style="margin-top: 5px;">
-                        <i data-lucide="info" class="dc-license-icon"></i> {{ text_license_domain }}: <strong>{{ license_domain }}</strong>
-                      </small>
-                    </div>
-                    <div class="col-sm-4">
-                      <button type="button" class="btn btn-info" id="btn-verify-license">
-                        <i data-lucide="check-circle"></i> {{ button_verify_license }}
-                      </button>
-                      <span id="license-status" style="margin-left: 10px;">
-                        {% if license_valid %}
-                          <span class="text-success"><i data-lucide="check"></i> {{ text_license_valid }}</span>
-                        {% elseif license_message %}
-                          <span class="text-danger"><i data-lucide="x"></i> {{ license_message }}</span>
-                        {% endif %}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div class="form-group">
-                    <label class="col-sm-2 control-label" for="input-public-key">
-                      <span data-toggle="tooltip" title="{{ help_public_key }}">{{ entry_public_key }}</span>
-                    </label>
-                    <div class="col-sm-10">
-                      <textarea name="module_dockercart_checkout_public_key" id="input-public-key" rows="8" class="form-control" placeholder="-----BEGIN PUBLIC KEY-----&#10;...&#10;-----END PUBLIC KEY-----">{{ module_dockercart_checkout_public_key }}</textarea>
-                    </div>
-                  </div>
-
-                </fieldset>
 
               </div>
             </div>
@@ -2233,30 +2187,6 @@ const DockercartCheckout = (() => {
             const hidden = document.createElement('input'); hidden.type = 'hidden'; hidden.name = checkbox.name; hidden.value = '0'; form.appendChild(hidden);
           }
         });
-      });
-    }
-
-    // License verification binding
-    const btnVerifyLicense = document.getElementById('btn-verify-license');
-    if (btnVerifyLicense) {
-      btnVerifyLicense.addEventListener('click', () => {
-        const licenseKey = document.getElementById('input-license-key')?.value || '';
-        const publicKey = document.getElementById('input-public-key')?.value || '';
-        const statusEl = document.getElementById('license-status');
-        if (!licenseKey) {
-          statusEl.innerHTML = `<span class="text-danger"><i data-lucide="x"></i> {{ error_license_required }}</span>`; lucideRender(); return;
-        }
-        statusEl.innerHTML = `<span class="text-info"><i data-lucide="loader"></i> {{ text_license_checking }}</span>`; lucideRender();
-        fetch('{{ license_verify_ajax }}', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ license_key: licenseKey, public_key: publicKey }) })
-          .then(res => res.json())
-          .then(data => {
-            if (data.valid) {
-              statusEl.innerHTML = `<span class="text-success"><i data-lucide="check"></i> {{ text_license_valid }}</span>`; lucideRender(); if (data.expires_formatted) statusEl.innerHTML += ` (expires: ${data.expires_formatted})`;
-            } else {
-              const msg = data.error || '{{ text_license_invalid }}';
-              statusEl.innerHTML = `<span class="text-danger"><i data-lucide="x"></i> ${msg}</span>`; lucideRender();
-            }
-          }).catch(err => { statusEl.innerHTML = `<span class="text-danger"><i data-lucide="x"></i> Error: ${err}</span>`; lucideRender(); });
       });
     }
 
