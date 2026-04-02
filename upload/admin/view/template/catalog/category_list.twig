@@ -10,7 +10,7 @@
   }
 
   #category-tree-table td {
-    vertical-align: top;
+    vertical-align: middle;
   }
 
   .category-name-cell {
@@ -28,41 +28,9 @@
     white-space: normal;
     line-height: 1.35;
   }
-
-  .category-toggle {
-    flex: 0 0 auto;
-    width: 22px;
-    height: 22px;
-    padding: 0;
-    line-height: 20px;
-  }
-
-  /* Use CSS pseudo-element for +/- to keep icon light-weight and sharp */
-  .category-toggle {
-    position: relative;
-    font-weight: 400;
-    font-size: 13px;
-    text-align: center;
-    padding: 0;
-  }
-
-  .category-toggle::before {
-    content: '+';
-    display: inline-block;
-    line-height: 20px;
-    font-weight: 400;
-    font-size: 13px;
-    color: #333;
-  }
-
-  .category-toggle[aria-expanded="true"]::before {
-    content: '\2212'; /* minus sign */
-  }
-
-  .category-toggle-placeholder {
-    display: inline-block;
-    width: 22px;
-    height: 22px;
+  .category-sub-prefix {
+    color: #6c757d;
+    font-weight: 600;
   }
 </style>
 {{ column_left }}
@@ -96,16 +64,7 @@
         <h3 class="panel-title"><i class="fa fa-list"></i> {{ text_list }}</h3>
       </div>
       <div class="panel-body">
-        <div class="row" style="margin-bottom: 10px;">
-          <div class="col-sm-12 text-right">
-            <button type="button" class="btn btn-default btn-sm" id="expand-all-categories">
-              <i class="fa fa-plus-square-o"></i>
-            </button>
-            <button type="button" class="btn btn-default btn-sm" id="collapse-all-categories">
-              <i class="fa fa-minus-square-o"></i>
-            </button>
-          </div>
-        </div>
+        <!-- Expand/collapse controls removed — tree is expanded by default and toggle buttons hidden -->
         <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-category">
           <div class="table-responsive">
             <table class="table table-bordered table-hover" id="category-tree-table">
@@ -128,7 +87,7 @@
               <tbody>
                 {% if categories %}
                 {% for category in categories %}
-                <tr class="category-row{% if category.level > 0 %} hidden-row{% endif %}" data-category-id="{{ category.category_id }}" data-parent-id="{{ category.parent_id }}" data-level="{{ category.level }}">
+                <tr class="category-row" data-category-id="{{ category.category_id }}" data-parent-id="{{ category.parent_id }}" data-level="{{ category.level }}">
                   <td class="text-center">{% if category.category_id in selected %}
                     <input type="checkbox" name="selected[]" value="{{ category.category_id }}" checked="checked" />
                     {% else %}
@@ -136,11 +95,8 @@
                     {% endif %}</td>
                   <td class="text-left">
                     <div class="category-name-cell" style="padding-left: {{ category.indent }}px;">
-                      {% if category.has_children %}
-                      <button type="button" class="btn btn-default btn-xs category-toggle" data-category-id="{{ category.category_id }}" aria-expanded="false"></button>
-                      {% else %}
-                      <span class="category-toggle-placeholder"></span>
-                      {% endif %}
+                      {# Subcategory prefix for visual hierarchy #}
+                      {% if category.level > 0 %}<span class="category-sub-prefix">—</span>{% endif %}
                       <span class="category-name-text">{{ category.name }}</span>
                     </div>
                   </td>
@@ -165,78 +121,5 @@
     </div>
   </div>
 </div>
-<script>
-  (function($) {
-    function getChildRows(categoryId) {
-      return $('tr.category-row[data-parent-id="' + categoryId + '"]');
-    }
-
-    function collapseBranch(categoryId) {
-      var $childRows = getChildRows(categoryId);
-
-        $childRows.each(function() {
-        var $row = $(this);
-        var childId = $row.data('category-id');
-        var $toggle = $row.find('.category-toggle').first();
-
-        $row.addClass('hidden-row');
-
-        if ($toggle.length) {
-          $toggle.attr('aria-expanded', 'false');
-        }
-
-        collapseBranch(childId);
-      });
-    }
-
-    function expandChildren(categoryId) {
-      var $childRows = getChildRows(categoryId);
-
-      $childRows.removeClass('hidden-row');
-    }
-
-    function collapseAll() {
-      $('tr.category-row[data-level!="0"]').addClass('hidden-row');
-      $('.category-toggle').attr('aria-expanded', 'false');
-      // CSS pseudo-element will reflect collapsed state via aria-expanded
-    }
-
-    function expandAll() {
-      $('tr.category-row').removeClass('hidden-row');
-      $('.category-toggle').attr('aria-expanded', 'true');
-      // CSS pseudo-element will reflect expanded state via aria-expanded
-    }
-
-    $(document).on('click', '.category-toggle', function() {
-      var $toggle = $(this);
-      var categoryId = $toggle.data('category-id');
-      var expanded = $toggle.attr('aria-expanded') === 'true';
-
-      if (expanded) {
-        $toggle.attr('aria-expanded', 'false');
-        // CSS pseudo-element will show plus when aria-expanded is false
-        collapseBranch(categoryId);
-      } else {
-        $toggle.attr('aria-expanded', 'true');
-        expandChildren(categoryId);
-      }
-    });
-
-    $('#expand-all-categories').on('click', function() { expandAll(); });
-    $('#collapse-all-categories').on('click', function() { collapseAll(); });
-
-    // clicking on the row (name area) toggles the node for convenience
-    $(document).on('click', '.category-name-cell', function(e) {
-      // don't toggle when clicking the actual toggle button, links, or checkboxes
-      if ($(e.target).closest('.category-toggle, a, input').length) return;
-
-      var $row = $(this).closest('tr.category-row');
-      var $toggle = $row.find('.category-toggle').first();
-
-      if ($toggle.length) {
-        $toggle.trigger('click');
-      }
-    });
-  })(jQuery);
-</script>
+        <!-- Collapsing/expanding script removed — categories are expanded by default and no toggles are shown -->
 {{ footer }}
