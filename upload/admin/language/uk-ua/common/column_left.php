@@ -70,7 +70,6 @@ $_['text_openbay_order_import'] = 'Імпорт замовлень';
 $_['text_openbay_orders'] = 'Пакетне оновлення замовлень';
 $_['text_openbay_report_price'] = 'Звіт по прайсам';
 $_['text_openbay_settings'] = 'Налаштування';
-$_['text_opencartforum'] = 'Магазин Opencartforum';
 $_['text_option'] = 'Опції';
 $_['text_order'] = 'Замовлення';
 $_['text_order_recurring'] = 'Повторювані замовлення';
