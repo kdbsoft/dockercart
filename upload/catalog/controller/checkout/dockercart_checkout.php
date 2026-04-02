@@ -2,10 +2,10 @@
 /**
  * DockerCart Checkout — Catalog Controller
  *
- * Premium One-Page Checkout Module for DockerCart 3.0.3.8+
+ * One-Page Checkout Module for DockerCart 3.0.3.8+
  * Main checkout page controller with AJAX handlers
  *
- * License: Commercial — All rights reserved.
+ * License: GNU General Public License v3.0 (GPL-3.0)
  * Copyright (c) mathflow-bit
  */
 
@@ -13,7 +13,6 @@ class ControllerCheckoutDockercartCheckout extends Controller {
     private $logger;
     
     // Configuration constants
-    const LOCALHOST_DOMAINS = array('localhost', '127.0.0.1', '::1');
     const JOURNAL_THEME_KEYWORD = 'journal';
     const JOURNAL3_TEMPLATE_PATH = 'journal3/';
     const IMAGE_THUMB_WIDTH = 64;
@@ -40,12 +39,6 @@ class ControllerCheckoutDockercartCheckout extends Controller {
     public function index() {
         // Check if module is enabled
         if (!$this->config->get('module_dockercart_checkout_status')) {
-            $this->response->redirect($this->url->link('checkout/checkout'));
-            return;
-        }
-
-        // Verify license on production
-        if (!$this->verifyLicense()) {
             $this->response->redirect($this->url->link('checkout/checkout'));
             return;
         }
@@ -299,7 +292,7 @@ class ControllerCheckoutDockercartCheckout extends Controller {
         $data['content_top'] = $this->load->controller('common/content_top');
         $data['text_footer'] = $this->load->controller('common/content_bottom');
         
-        // Premium template: Add all language variables
+        // Checkout template: Add all language variables
         $data['text_checkout_account'] = $this->language->get('text_your_details');
         $data['text_checkout_shipping'] = $this->language->get('text_shipping_address');
         $data['text_checkout_payment'] = $this->language->get('text_payment_method');
@@ -1427,10 +1420,6 @@ class ControllerCheckoutDockercartCheckout extends Controller {
             return;
         }
 
-        if (!$this->verifyLicense()) {
-            return;
-        }
-
         // Redirect to DockerCart Checkout
         $this->response->redirect($this->url->link('checkout/dockercart_checkout'));
     }
@@ -1863,56 +1852,6 @@ class ControllerCheckoutDockercartCheckout extends Controller {
     }
 
     /**
-     * Verify license
-     */
-    private function verifyLicense() {
-        // Allow on localhost
-        if ($this->isLocalhost()) {
-            return true;
-        }
-
-        $license_key = trim((string)$this->config->get('module_dockercart_checkout_license_key'));
-
-        if (empty($license_key)) {
-            $this->logger->debug('License key not configured');
-            return false;
-        }
-
-        if (!file_exists(DIR_SYSTEM . 'library/dockercart_license.php')) {
-            $this->logger->debug('License library not found');
-            return false;
-        }
-
-        require_once(DIR_SYSTEM . 'library/dockercart_license.php');
-
-        if (!class_exists('DockercartLicense')) {
-            $this->logger->debug('DockercartLicense class not found');
-            return false;
-        }
-
-        try {
-            $license = new DockercartLicense($this->registry);
-            $public_key = $this->config->get('module_dockercart_checkout_public_key');
-
-            if (!empty($public_key)) {
-                $result = $license->verifyWithPublicKey($license_key, $public_key, 'dockercart_checkout');
-            } else {
-                $result = $license->verify($license_key, 'dockercart_checkout');
-            }
-
-            if (empty($result) || !$result['valid']) {
-                $this->logger->debug('Invalid license: ' . ($result['error'] ?? 'Unknown error'));
-                return false;
-            }
-
-            return true;
-        } catch (Exception $e) {
-            $this->logger->debug('License verification exception: ' . $e->getMessage());
-            return false;
-        }
-    }
-
-    /**
      * Check if Journal 3 theme is active
      */
     private function isJournal3Theme() {
@@ -2030,21 +1969,6 @@ class ControllerCheckoutDockercartCheckout extends Controller {
         }
     }
 
-    /**
-     * Check if current domain is localhost
-     */
-    private function isLocalhost() {
-        $domain = strtolower($_SERVER['HTTP_HOST'] ?? ($_SERVER['SERVER_NAME'] ?? ''));
-        
-        foreach (self::LOCALHOST_DOMAINS as $localhost) {
-            if (strpos($domain, $localhost) !== false) {
-                return true;
-            }
-        }
-        
-        return false;
-    }
-    
     /**
      * Decode blocks data from JSON string or array
      */

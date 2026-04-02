@@ -2,15 +2,11 @@
 /**
  * DockerCart Checkout — Admin Controller
  *
- * Premium One-Page Checkout Module for OpenCart 3.0.3.8+
+ * One-Page Checkout Module for OpenCart 3.0.3.8+
  * Installation WITHOUT OCMOD - uses OpenCart Event System only
  *
- * License: Commercial — All rights reserved.
+ * License: GNU General Public License v3.0 (GPL-3.0)
  * Copyright (c) mathflow-bit
- *
- * This module is distributed under a commercial/proprietary license.
- * Use, copying, modification, and distribution are permitted only under
- * the terms of a valid commercial license agreement with the copyright owner.
  */
 
 class ControllerExtensionModuleDockercartCheckout extends Controller {
@@ -121,8 +117,6 @@ class ControllerExtensionModuleDockercartCheckout extends Controller {
         // AJAX URLs
         $data['save_blocks_ajax'] = $this->url->link('extension/module/dockercart_checkout/saveBlocksOrder', 'user_token=' . $this->session->data['user_token'], true);
         $data['save_block_fields_ajax'] = $this->url->link('extension/module/dockercart_checkout/saveBlockFieldsAjax', 'user_token=' . $this->session->data['user_token'], true);
-        $data['license_verify_ajax'] = $this->url->link('extension/module/dockercart_checkout/verifyLicenseAjax', 'user_token=' . $this->session->data['user_token'], true);
-        $data['license_save_ajax'] = $this->url->link('extension/module/dockercart_checkout/saveLicenseKeyAjax', 'user_token=' . $this->session->data['user_token'], true);
 
         // Load settings with defaults
         $settings = array(
@@ -141,8 +135,6 @@ class ControllerExtensionModuleDockercartCheckout extends Controller {
             'recaptcha_secret_key' => '',
             'custom_css' => '',
             'custom_js' => '',
-            'license_key' => '',
-            'public_key' => '',
             'require_telephone' => 1,
             'require_address2' => 0,
             'require_postcode' => 1,
@@ -172,34 +164,6 @@ class ControllerExtensionModuleDockercartCheckout extends Controller {
         
         // Remove legacy fields from admin UI
         $data['blocks'] = $this->cleanupBlocksForAdminUI($data['blocks']);
-
-        // License information
-        $data['license_domain'] = $_SERVER['HTTP_HOST'] ?? 'unknown';
-        $data['license_valid'] = false;
-        $data['license_message'] = '';
-
-        try {
-            if (file_exists(DIR_SYSTEM . 'library/dockercart_license.php')) {
-                require_once(DIR_SYSTEM . 'library/dockercart_license.php');
-
-                $license_key = $data['module_dockercart_checkout_license_key'] ?? '';
-                $public_key = $data['module_dockercart_checkout_public_key'] ?? '';
-
-                if (!empty($license_key)) {
-                    $license = new DockercartLicense($this->registry);
-                    if (!empty($public_key)) {
-                        $res = $license->verifyWithPublicKey((string)$license_key, (string)$public_key, 'dockercart_checkout', true);
-                    } else {
-                        $res = $license->verify((string)$license_key, 'dockercart_checkout', true);
-                    }
-                    $data['license_valid'] = !empty($res['valid']);
-                    $data['license_message'] = $res['error'] ?? '';
-                }
-            }
-        } catch (Throwable $e) {
-            $data['license_valid'] = false;
-            $data['license_message'] = 'License check error: ' . $e->getMessage();
-        }
 
         // Theme options
         $data['theme_options'] = array(
@@ -448,106 +412,6 @@ class ControllerExtensionModuleDockercartCheckout extends Controller {
     }
 
     /**
-     * AJAX: Verify License
-     */
-    public function verifyLicenseAjax() {
-        $json = array();
-
-        $input = file_get_contents('php://input');
-        $data = json_decode($input, true);
-
-        $license_key = isset($data['license_key']) ? $data['license_key'] : '';
-        $public_key = isset($data['public_key']) ? $data['public_key'] : '';
-
-        $this->load->language('extension/module/dockercart_checkout');
-
-        if (empty($license_key)) {
-            $json['valid'] = false;
-            $json['error'] = $this->language->get('error_license_key_empty');
-            $this->response->addHeader('Content-Type: application/json');
-            $this->response->setOutput(json_encode($json));
-            return;
-        }
-
-        if (!file_exists(DIR_SYSTEM . 'library/dockercart_license.php')) {
-            $json['valid'] = false;
-            $json['error'] = $this->language->get('error_license_lib_not_found');
-            $this->response->addHeader('Content-Type: application/json');
-            $this->response->setOutput(json_encode($json));
-            return;
-        }
-
-        require_once(DIR_SYSTEM . 'library/dockercart_license.php');
-
-        if (!class_exists('DockercartLicense')) {
-            $json['valid'] = false;
-            $json['error'] = $this->language->get('error_license_class_not_found');
-            $this->response->addHeader('Content-Type: application/json');
-            $this->response->setOutput(json_encode($json));
-            return;
-        }
-
-        try {
-            $license = new DockercartLicense($this->registry);
-
-            if (!empty($public_key)) {
-                $result = $license->verifyWithPublicKey($license_key, $public_key, 'dockercart_checkout', true);
-            } else {
-                $result = $license->verify($license_key, 'dockercart_checkout', true);
-            }
-
-            $json = $result;
-            } catch (Exception $e) {
-            $json['valid'] = false;
-            $json['error'] = sprintf($this->language->get('error_exception'), $e->getMessage());
-        }
-
-        $this->response->addHeader('Content-Type: application/json');
-        $this->response->setOutput(json_encode($json));
-    }
-
-    /**
-     * AJAX: Save License Key
-     */
-    public function saveLicenseKeyAjax() {
-        $json = array();
-
-        $input = file_get_contents('php://input');
-        $data = json_decode($input, true);
-
-        $license_key = isset($data['license_key']) ? $data['license_key'] : '';
-        $public_key = isset($data['public_key']) ? $data['public_key'] : '';
-
-        $this->load->language('extension/module/dockercart_checkout');
-
-        if (!$this->user->hasPermission('modify', 'extension/module/dockercart_checkout')) {
-            $json['success'] = false;
-            $json['error'] = $this->language->get('error_permission');
-            $this->response->addHeader('Content-Type: application/json');
-            $this->response->setOutput(json_encode($json));
-            return;
-        }
-
-        try {
-            $this->load->model('setting/setting');
-
-            $this->model_setting_setting->editSettingValue('module_dockercart_checkout', 'module_dockercart_checkout_license_key', $license_key);
-
-            if (!empty($public_key)) {
-                $this->model_setting_setting->editSettingValue('module_dockercart_checkout', 'module_dockercart_checkout_public_key', $public_key);
-            }
-
-            $json['success'] = true;
-        } catch (Exception $e) {
-            $json['success'] = false;
-            $json['error'] = $e->getMessage();
-        }
-
-        $this->response->addHeader('Content-Type: application/json');
-        $this->response->setOutput(json_encode($json));
-    }
-
-    /**
      * Install module - registers events, creates layout and SEO URL
      */
     public function install() {
@@ -570,9 +434,7 @@ class ControllerExtensionModuleDockercartCheckout extends Controller {
             'module_dockercart_checkout_recaptcha_enabled' => 0,
             'module_dockercart_checkout_journal3_compat' => 1,
             'module_dockercart_checkout_debug' => 0,
-            'module_dockercart_checkout_blocks' => json_encode($this->getDefaultBlocks()),
-            'module_dockercart_checkout_license_key' => '',
-            'module_dockercart_checkout_public_key' => ''
+            'module_dockercart_checkout_blocks' => json_encode($this->getDefaultBlocks())
         );
 
         $this->model_setting_setting->editSetting('module_dockercart_checkout', $defaults);

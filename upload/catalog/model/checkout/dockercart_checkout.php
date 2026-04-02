@@ -5,7 +5,7 @@
  * 
  * @package    DockerCart Checkout
  * @author     mathflow-bit
- * @license    Commercial License
+ * @license    GNU General Public License v3.0 (GPL-3.0)
  */
 
 class ModelCheckoutDockerCartCheckout extends Model {

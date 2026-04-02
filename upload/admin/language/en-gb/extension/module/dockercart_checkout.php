@@ -17,7 +17,7 @@ $_['tab_blocks']            = 'Checkout Blocks';
 $_['tab_design']            = 'Design & Theme';
 $_['tab_fields']            = 'Form Fields';
 $_['tab_advanced']          = 'Advanced';
-$_['tab_license']           = 'License';
+$_['tab_license']           = 'License (GPL-3.0)';
 
 // General Settings
 $_['entry_status']          = 'Module Status';
@@ -139,18 +139,18 @@ $_['entry_debug']             = 'Debug Mode';
 $_['help_debug']              = 'Enable debug logging for troubleshooting';
 
 // License
-$_['text_license']            = 'License Information';
+$_['text_license']            = 'GNU GPL v3 License';
 $_['entry_license_key']       = 'License Key';
-$_['help_license_key']        = 'Enter your license key purchased from the marketplace';
+$_['help_license_key']        = 'License key is not required in the GPL version.';
 $_['entry_public_key']        = 'Public Key';
-$_['help_public_key']         = 'RSA Public Key for license verification (provided by vendor)';
-$_['text_license_domain']     = 'License bound to domain';
+$_['help_public_key']         = 'Public key verification is not used in the GPL version.';
+$_['text_license_domain']     = 'License type';
 $_['button_verify_license']   = 'Verify License';
 $_['button_save_license']     = 'Save License';
 
-$_['text_license_valid']      = 'License is valid';
-$_['text_license_invalid']    = 'License is invalid or expired';
-$_['text_license_checking']   = 'Checking license...';
+$_['text_license_valid']      = 'GPL-3.0 (Free)';
+$_['text_license_invalid']    = 'License key is not required in the GPL version';
+$_['text_license_checking']   = 'License key verification is disabled in the GPL version';
 
 // Buttons
 $_['button_save']             = 'Save';
@@ -158,7 +158,8 @@ $_['button_cancel']           = 'Cancel';
 $_['button_apply']            = 'Apply';
 
 // Info
-$_['text_info']               = '<strong>DockerCart Checkout</strong> is a premium one-page checkout solution for OpenCart 3.x.<br><br>' .
+$_['text_info']               = '<strong>DockerCart Checkout</strong> is a free one-page checkout solution for OpenCart 3.x.<br>' .
+                                '<strong>License:</strong> GNU GPL v3.0<br><br>' .
                                 '<strong>Features:</strong><br>' .
                                 '✓ Modern, fast, single-page checkout<br>' .
                                 '✓ Mobile-first responsive design<br>' .
@@ -175,8 +176,8 @@ $_['text_info']               = '<strong>DockerCart Checkout</strong> is a premi
 // Errors
 $_['error_permission']        = 'Warning: You do not have permission to modify DockerCart Checkout!';
 $_['error_cache_ttl']         = 'Cache TTL must be between 0 and 86400 seconds!';
-$_['error_license_required']  = 'A valid license key is required to use this module on production';
-$_['error_license_invalid']   = 'Invalid or expired license key';
+$_['error_license_required']  = 'License key is not required in the GPL version';
+$_['error_license_invalid']   = 'License key validation is disabled in the GPL version';
 
 // Errors & messages used by AJAX endpoints
 $_['error_invalid_blocks_data'] = 'Invalid blocks data';
