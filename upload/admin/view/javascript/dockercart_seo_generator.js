@@ -164,13 +164,21 @@ const DockercartSeoGenerator = (function () {
         const overwriteUrl = overwriteUrlEl ? overwriteUrlEl.checked : false;
         const overwriteMeta = overwriteMetaEl ? overwriteMetaEl.checked : false;
 
-        const filterEmptyUrl = !overwriteUrl;
-        const filterEmptyMeta = !overwriteMeta;
+        let filterEmptyUrl = !overwriteUrl;
+        let filterEmptyMeta = !overwriteMeta;
+
+        // Keep total counting and generation filters consistent
+        if (generateType === 'url') {
+            filterEmptyMeta = false;
+        } else if (generateType === 'meta') {
+            filterEmptyUrl = false;
+        }
+
         const templates = this.getTemplates(entityType, languageId);
         this.showProgress(entityType, languageId);
 
         try {
-            const params = new URLSearchParams({ entity_type: entityType, language_id: languageId, filter_empty_url: filterEmptyUrl ? 1 : 0, filter_empty_meta: filterEmptyMeta ? 1 : 0, overwrite_url: overwriteUrl ? 1 : 0, overwrite_meta: overwriteMeta ? 1 : 0 });
+            const params = new URLSearchParams({ entity_type: entityType, language_id: languageId, generate_type: generateType, filter_empty_url: filterEmptyUrl ? 1 : 0, filter_empty_meta: filterEmptyMeta ? 1 : 0, overwrite_url: overwriteUrl ? 1 : 0, overwrite_meta: overwriteMeta ? 1 : 0 });
             const resp = await fetch(`index.php?route=extension/module/dockercart_seo_generator/getTotal&user_token=${this.config.user_token}&${params.toString()}`, { method: 'GET' });
             const json = await resp.json();
             const total = json.total || 0;
