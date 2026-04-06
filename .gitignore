@@ -133,3 +133,6 @@ check-multicurrency.sh
 *.pyc
 *.pyo
 *.pyd
+
+# Ignore custom local Dockercart prefixed artifacts
+**/dockercart_custom_*
