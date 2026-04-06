@@ -388,12 +388,17 @@ class ControllerExtensionModuleDockercartSeoGenerator extends Controller {
             $json['processed'] = $result['processed'];
             $json['updated'] = isset($result['updated']) ? $result['updated'] : 0;
             $json['total'] = $result['total'];
-            $json['offset'] = $offset + $result['processed'];
+
+            // For filtered runs we use dynamic datasets (rows leave the set after update).
+            // Progress must advance by actually updated rows, not by fetched chunk size.
+            $progress_increment = ($filter_empty_url || $filter_empty_meta) ? $json['updated'] : $result['processed'];
+            $json['offset'] = $offset + $progress_increment;
 
             if ($filter_empty_url || $filter_empty_meta) {
-                // For dynamic filtered sets continue while we still receive rows.
-                // Also stop if nothing could be updated in this chunk to prevent infinite loops.
-                $json['has_more'] = ($result['processed'] > 0) && ($json['offset'] < $result['total']) && ($json['updated'] > 0);
+                // For dynamic filtered sets total is shrinking on each request,
+                // so relying on offset < total causes premature completion.
+                // Continue while current batch produced at least one update.
+                $json['has_more'] = ($json['updated'] > 0);
             } else {
                 $json['has_more'] = ($json['offset'] < $result['total']);
             }
@@ -415,8 +420,18 @@ class ControllerExtensionModuleDockercartSeoGenerator extends Controller {
         
         $entity_type = isset($this->request->get['entity_type']) ? $this->request->get['entity_type'] : 'product';
         $language_id = isset($this->request->get['language_id']) ? (int)$this->request->get['language_id'] : 0;
+        $generate_type = isset($this->request->get['generate_type']) ? $this->request->get['generate_type'] : 'all';
         $filter_empty_url = isset($this->request->get['filter_empty_url']) ? (bool)$this->request->get['filter_empty_url'] : false;
         $filter_empty_meta = isset($this->request->get['filter_empty_meta']) ? (bool)$this->request->get['filter_empty_meta'] : false;
+
+        // Keep getTotal filter semantics consistent with generate()
+        if ($generate_type === 'url') {
+            $filter_empty_meta = false;
+        }
+
+        if ($generate_type === 'meta') {
+            $filter_empty_url = false;
+        }
         
         $json['total'] = $this->model_extension_module_dockercart_seo_generator->getTotalCount(
             $entity_type,
