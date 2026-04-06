@@ -34,6 +34,12 @@ class ControllerCommonMenu extends Controller {
 				);
 			}
 		}
+		
+		// Add Contacts link after information links
+		$data['top_informations'][] = array(
+			'title' => $this->language->get('text_contact'),
+			'href'  => $this->url->link('information/contact')
+		);
 
 		// Determine active category
 		// Works for both product/category and product/product (when opened from category)
