@@ -18,6 +18,7 @@ $_['text_all']           = 'Show All';
 $_['text_catalog']        = 'Catalog';
 $_['text_new_arrivals'] = 'New Arrivals';
 $_['text_sale'] = 'SALE';
+$_['text_contact']       = 'Contacts';
 // Quick view / product UI (global)
 $_['text_model_prefix'] = 'Product Code: ';
 $_['text_qv_feature_delivery'] = 'Free shipping on this item';

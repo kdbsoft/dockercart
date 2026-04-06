@@ -274,6 +274,12 @@ class ControllerCommonHeader extends Controller {
 				);
 			}
 		}
+		
+		// Add Contacts link after information links
+		$data['top_informations'][] = array(
+			'title' => $this->language->get('text_contact'),
+			'href'  => $this->url->link('information/contact')
+		);
 
 		// Mobile categories for slide-in menu (simple two-level tree)
 		$this->load->model('catalog/category');

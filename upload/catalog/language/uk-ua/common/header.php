@@ -24,3 +24,4 @@ $_['text_search'] = 'Пошук';
 $_['text_shopping_cart'] = 'Кошик для покупок';
 $_['text_transaction'] = 'Транзакції';
 $_['text_wishlist'] = 'Список бажань (%s)';
+$_['text_contact'] = 'Контакти';
