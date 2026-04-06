@@ -169,6 +169,7 @@ class ModelExtensionModuleDockercartSeoGenerator extends Model {
     public function generateSeoData($entity_type, $language_id, $generate_type, $templates, $offset = 0, $limit = 50, $filter_empty_url = false, $filter_empty_meta = false) {
         $result = array(
             'processed' => 0,
+            'updated' => 0,
             'total' => $this->getTotalCount($entity_type, $language_id, $filter_empty_url, $filter_empty_meta)
         );
         $this->logger->info("generateSeoData called: type={$entity_type}, language_id={$language_id}, generate_type={$generate_type}, offset={$offset}, limit={$limit}, filter_empty_url=" . ($filter_empty_url?1:0) . ", filter_empty_meta=" . ($filter_empty_meta?1:0));
@@ -217,17 +218,22 @@ class ModelExtensionModuleDockercartSeoGenerator extends Model {
                     if ($savedMeta) $didSave = true;
                 }
 
-                // Increment processed only if something was actually saved/changed
                 if ($didSave) {
-                    $result['processed']++;
+                    $result['updated']++;
                 }
             }
+
+            // Processed is number of handled entities in this chunk
+            // (independent from whether any value changed)
+            $result['processed']++;
             
             // Логирование
             if ($this->config->get('module_dockercart_seo_generator_logging')) {
                 $this->logGeneration($entity_type, $entity['id'], $language_id, $generated);
             }
         }
+
+        $this->logger->info("generateSeoData finished: processed={$result['processed']}, updated={$result['updated']}, total={$result['total']}");
 
         return $result;
     }
@@ -961,15 +967,28 @@ class ModelExtensionModuleDockercartSeoGenerator extends Model {
                     FROM `" . DB_PREFIX . "product` p";
             
             $where = array();
+            $empty_url_condition = '';
+            $empty_meta_condition = '';
             
             if ($filter_empty_url) {
                 $sql .= " LEFT JOIN `" . DB_PREFIX . "seo_url` su ON (su.query = CONCAT('product_id=', p.product_id))";
-                $where[] = "(su.keyword IS NULL OR su.keyword = '')";
+                $empty_url_condition = "(su.keyword IS NULL OR su.keyword = '')";
             }
             
             if ($filter_empty_meta) {
                 $sql .= " LEFT JOIN `" . DB_PREFIX . "product_description` pd ON (p.product_id = pd.product_id)";
-                $where[] = "(pd.meta_title = '' OR pd.meta_title IS NULL OR pd.meta_description = '' OR pd.meta_description IS NULL)";
+                $empty_meta_condition = "(pd.meta_title = '' OR pd.meta_title IS NULL OR pd.meta_description = '' OR pd.meta_description IS NULL)";
+            }
+
+            if ($filter_empty_url && $filter_empty_meta) {
+                $where[] = '(' . $empty_url_condition . ' OR ' . $empty_meta_condition . ')';
+            } else {
+                if (!empty($empty_url_condition)) {
+                    $where[] = $empty_url_condition;
+                }
+                if (!empty($empty_meta_condition)) {
+                    $where[] = $empty_meta_condition;
+                }
             }
             
             if (!empty($where)) {
@@ -989,6 +1008,8 @@ class ModelExtensionModuleDockercartSeoGenerator extends Model {
                 LEFT JOIN `" . DB_PREFIX . "product_description` pd ON (p.product_id = pd.product_id)";
         
         $where = array();
+        $empty_url_condition = '';
+        $empty_meta_condition = '';
         
         if ($language_id > 0) {
             $where[] = "pd.language_id = '" . (int)$language_id . "'";
@@ -996,11 +1017,23 @@ class ModelExtensionModuleDockercartSeoGenerator extends Model {
         
         if ($filter_empty_url) {
             $sql .= " LEFT JOIN `" . DB_PREFIX . "seo_url` su ON (su.query = CONCAT('product_id=', p.product_id) AND su.language_id = pd.language_id)";
-            $where[] = "(su.keyword IS NULL OR su.keyword = '')";
+            $empty_url_condition = "(su.keyword IS NULL OR su.keyword = '')";
         }
         
         if ($filter_empty_meta) {
-            $where[] = "(pd.meta_title = '' OR pd.meta_title IS NULL OR pd.meta_description = '' OR pd.meta_description IS NULL)";
+            $empty_meta_condition = "(pd.meta_title = '' OR pd.meta_title IS NULL OR pd.meta_description = '' OR pd.meta_description IS NULL)";
+        }
+
+        if ($filter_empty_url && $filter_empty_meta) {
+            $where[] = '(' . $empty_url_condition . ' OR ' . $empty_meta_condition . ')';
+        } else {
+            if (!empty($empty_url_condition)) {
+                $where[] = $empty_url_condition;
+            }
+
+            if (!empty($empty_meta_condition)) {
+                $where[] = $empty_meta_condition;
+            }
         }
         
         if (!empty($where)) {
@@ -1026,15 +1059,29 @@ class ModelExtensionModuleDockercartSeoGenerator extends Model {
                     FROM `" . DB_PREFIX . "category` c";
             
             $where = array();
+            $empty_url_condition = '';
+            $empty_meta_condition = '';
             
             if ($filter_empty_url) {
                 $sql .= " LEFT JOIN `" . DB_PREFIX . "seo_url` su ON (su.query = CONCAT('category_id=', c.category_id))";
-                $where[] = "(su.keyword IS NULL OR su.keyword = '')";
+                $empty_url_condition = "(su.keyword IS NULL OR su.keyword = '')";
             }
             
             if ($filter_empty_meta) {
                 $sql .= " LEFT JOIN `" . DB_PREFIX . "category_description` cd ON (c.category_id = cd.category_id)";
-                $where[] = "(cd.meta_title = '' OR cd.meta_title IS NULL OR cd.meta_description = '' OR cd.meta_description IS NULL)";
+                $empty_meta_condition = "(cd.meta_title = '' OR cd.meta_title IS NULL OR cd.meta_description = '' OR cd.meta_description IS NULL)";
+            }
+
+            if ($filter_empty_url && $filter_empty_meta) {
+                $where[] = '(' . $empty_url_condition . ' OR ' . $empty_meta_condition . ')';
+            } else {
+                if (!empty($empty_url_condition)) {
+                    $where[] = $empty_url_condition;
+                }
+
+                if (!empty($empty_meta_condition)) {
+                    $where[] = $empty_meta_condition;
+                }
             }
             
             if (!empty($where)) {
@@ -1054,6 +1101,8 @@ class ModelExtensionModuleDockercartSeoGenerator extends Model {
                 LEFT JOIN `" . DB_PREFIX . "category_description` cd ON (c.category_id = cd.category_id)";
         
         $where = array();
+        $empty_url_condition = '';
+        $empty_meta_condition = '';
         
         if ($language_id > 0) {
             $where[] = "cd.language_id = '" . (int)$language_id . "'";
@@ -1061,11 +1110,23 @@ class ModelExtensionModuleDockercartSeoGenerator extends Model {
         
         if ($filter_empty_url) {
             $sql .= " LEFT JOIN `" . DB_PREFIX . "seo_url` su ON (su.query = CONCAT('category_id=', c.category_id) AND su.language_id = cd.language_id)";
-            $where[] = "(su.keyword IS NULL OR su.keyword = '')";
+            $empty_url_condition = "(su.keyword IS NULL OR su.keyword = '')";
         }
         
         if ($filter_empty_meta) {
-            $where[] = "(cd.meta_title = '' OR cd.meta_title IS NULL OR cd.meta_description = '' OR cd.meta_description IS NULL)";
+            $empty_meta_condition = "(cd.meta_title = '' OR cd.meta_title IS NULL OR cd.meta_description = '' OR cd.meta_description IS NULL)";
+        }
+
+        if ($filter_empty_url && $filter_empty_meta) {
+            $where[] = '(' . $empty_url_condition . ' OR ' . $empty_meta_condition . ')';
+        } else {
+            if (!empty($empty_url_condition)) {
+                $where[] = $empty_url_condition;
+            }
+
+            if (!empty($empty_meta_condition)) {
+                $where[] = $empty_meta_condition;
+            }
         }
         
         if (!empty($where)) {
@@ -1119,15 +1180,29 @@ class ModelExtensionModuleDockercartSeoGenerator extends Model {
                     FROM `" . DB_PREFIX . "information` i";
             
             $where = array();
+            $empty_url_condition = '';
+            $empty_meta_condition = '';
             
             if ($filter_empty_url) {
                 $sql .= " LEFT JOIN `" . DB_PREFIX . "seo_url` su ON (su.query = CONCAT('information_id=', i.information_id))";
-                $where[] = "(su.keyword IS NULL OR su.keyword = '')";
+                $empty_url_condition = "(su.keyword IS NULL OR su.keyword = '')";
             }
             
             if ($filter_empty_meta) {
                 $sql .= " LEFT JOIN `" . DB_PREFIX . "information_description` id ON (i.information_id = id.information_id)";
-                $where[] = "(id.meta_title = '' OR id.meta_title IS NULL OR id.meta_description = '' OR id.meta_description IS NULL)";
+                $empty_meta_condition = "(id.meta_title = '' OR id.meta_title IS NULL OR id.meta_description = '' OR id.meta_description IS NULL)";
+            }
+
+            if ($filter_empty_url && $filter_empty_meta) {
+                $where[] = '(' . $empty_url_condition . ' OR ' . $empty_meta_condition . ')';
+            } else {
+                if (!empty($empty_url_condition)) {
+                    $where[] = $empty_url_condition;
+                }
+
+                if (!empty($empty_meta_condition)) {
+                    $where[] = $empty_meta_condition;
+                }
             }
             
             if (!empty($where)) {
@@ -1147,18 +1222,32 @@ class ModelExtensionModuleDockercartSeoGenerator extends Model {
                 LEFT JOIN `" . DB_PREFIX . "information_description` id ON (i.information_id = id.information_id AND id.language_id = '" . (int)$language_id . "')";
         
         $where = array();
+        $empty_url_condition = '';
+        $empty_meta_condition = '';
         
         // No need to filter by language_id since it's already in the JOIN condition
         
         if ($filter_empty_url) {
             $sql .= " LEFT JOIN `" . DB_PREFIX . "seo_url` su ON (su.query = CONCAT('information_id=', i.information_id) AND su.language_id = '" . (int)$language_id . "')";
-            $where[] = "(su.keyword IS NULL OR su.keyword = '')";
+            $empty_url_condition = "(su.keyword IS NULL OR su.keyword = '')";
         }
         
         if ($filter_empty_meta) {
             // Only filter if description exists AND meta is empty
             // If no description exists at all (id.information_id IS NULL), we still want to include it
-            $where[] = "(id.information_id IS NULL OR id.meta_title = '' OR id.meta_title IS NULL OR id.meta_description = '' OR id.meta_description IS NULL)";
+            $empty_meta_condition = "(id.information_id IS NULL OR id.meta_title = '' OR id.meta_title IS NULL OR id.meta_description = '' OR id.meta_description IS NULL)";
+        }
+
+        if ($filter_empty_url && $filter_empty_meta) {
+            $where[] = '(' . $empty_url_condition . ' OR ' . $empty_meta_condition . ')';
+        } else {
+            if (!empty($empty_url_condition)) {
+                $where[] = $empty_url_condition;
+            }
+
+            if (!empty($empty_meta_condition)) {
+                $where[] = $empty_meta_condition;
+            }
         }
         
         if (!empty($where)) {
@@ -1182,6 +1271,8 @@ class ModelExtensionModuleDockercartSeoGenerator extends Model {
                 LEFT JOIN `" . DB_PREFIX . "product_description` pd ON (p.product_id = pd.product_id)";
         
         $where = array();
+        $empty_url_condition = '';
+        $empty_meta_condition = '';
         
         if ($language_id > 0) {
             $where[] = "pd.language_id = '" . (int)$language_id . "'";
@@ -1189,11 +1280,23 @@ class ModelExtensionModuleDockercartSeoGenerator extends Model {
         
         if ($filter_empty_url) {
             $sql .= " LEFT JOIN `" . DB_PREFIX . "seo_url` su ON (su.query = CONCAT('product_id=', p.product_id) AND su.language_id = pd.language_id)";
-            $where[] = "(su.keyword IS NULL OR su.keyword = '')";
+            $empty_url_condition = "(su.keyword IS NULL OR su.keyword = '')";
         }
         
         if ($filter_empty_meta) {
-            $where[] = "(pd.meta_title = '' OR pd.meta_title IS NULL OR pd.meta_description = '' OR pd.meta_description IS NULL)";
+            $empty_meta_condition = "(pd.meta_title = '' OR pd.meta_title IS NULL OR pd.meta_description = '' OR pd.meta_description IS NULL)";
+        }
+
+        if ($filter_empty_url && $filter_empty_meta) {
+            $where[] = '(' . $empty_url_condition . ' OR ' . $empty_meta_condition . ')';
+        } else {
+            if (!empty($empty_url_condition)) {
+                $where[] = $empty_url_condition;
+            }
+
+            if (!empty($empty_meta_condition)) {
+                $where[] = $empty_meta_condition;
+            }
         }
         
         if (!empty($where)) {
@@ -1231,6 +1334,8 @@ class ModelExtensionModuleDockercartSeoGenerator extends Model {
                 LEFT JOIN `" . DB_PREFIX . "category_description` cd ON (c.category_id = cd.category_id)";
         
         $where = array();
+        $empty_url_condition = '';
+        $empty_meta_condition = '';
         
         if ($language_id > 0) {
             $where[] = "cd.language_id = '" . (int)$language_id . "'";
@@ -1238,11 +1343,23 @@ class ModelExtensionModuleDockercartSeoGenerator extends Model {
         
         if ($filter_empty_url) {
             $sql .= " LEFT JOIN `" . DB_PREFIX . "seo_url` su ON (su.query = CONCAT('category_id=', c.category_id) AND su.language_id = cd.language_id)";
-            $where[] = "(su.keyword IS NULL OR su.keyword = '')";
+            $empty_url_condition = "(su.keyword IS NULL OR su.keyword = '')";
         }
         
         if ($filter_empty_meta) {
-            $where[] = "(cd.meta_title = '' OR cd.meta_title IS NULL OR cd.meta_description = '' OR cd.meta_description IS NULL)";
+            $empty_meta_condition = "(cd.meta_title = '' OR cd.meta_title IS NULL OR cd.meta_description = '' OR cd.meta_description IS NULL)";
+        }
+
+        if ($filter_empty_url && $filter_empty_meta) {
+            $where[] = '(' . $empty_url_condition . ' OR ' . $empty_meta_condition . ')';
+        } else {
+            if (!empty($empty_url_condition)) {
+                $where[] = $empty_url_condition;
+            }
+
+            if (!empty($empty_meta_condition)) {
+                $where[] = $empty_meta_condition;
+            }
         }
         
         if (!empty($where)) {
@@ -1302,6 +1419,8 @@ class ModelExtensionModuleDockercartSeoGenerator extends Model {
                 LEFT JOIN `" . DB_PREFIX . "information_description` id ON (i.information_id = id.information_id)";
         
         $where = array();
+        $empty_url_condition = '';
+        $empty_meta_condition = '';
         
         if ($language_id > 0) {
             $where[] = "id.language_id = '" . (int)$language_id . "'";
@@ -1309,11 +1428,23 @@ class ModelExtensionModuleDockercartSeoGenerator extends Model {
         
         if ($filter_empty_url) {
             $sql .= " LEFT JOIN `" . DB_PREFIX . "seo_url` su ON (su.query = CONCAT('information_id=', i.information_id) AND su.language_id = id.language_id)";
-            $where[] = "(su.keyword IS NULL OR su.keyword = '')";
+            $empty_url_condition = "(su.keyword IS NULL OR su.keyword = '')";
         }
         
         if ($filter_empty_meta) {
-            $where[] = "(id.meta_title = '' OR id.meta_title IS NULL OR id.meta_description = '' OR id.meta_description IS NULL)";
+            $empty_meta_condition = "(id.meta_title = '' OR id.meta_title IS NULL OR id.meta_description = '' OR id.meta_description IS NULL)";
+        }
+
+        if ($filter_empty_url && $filter_empty_meta) {
+            $where[] = '(' . $empty_url_condition . ' OR ' . $empty_meta_condition . ')';
+        } else {
+            if (!empty($empty_url_condition)) {
+                $where[] = $empty_url_condition;
+            }
+
+            if (!empty($empty_meta_condition)) {
+                $where[] = $empty_meta_condition;
+            }
         }
         
         if (!empty($where)) {

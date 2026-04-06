@@ -367,23 +367,37 @@ class ControllerExtensionModuleDockercartSeoGenerator extends Controller {
             // Генерация
             $this->logger->info('AJAX generate() called with entity_type=' . $entity_type . ', language_id=' . $language_id . ', generate_type=' . $generate_type . ', offset=' . $offset . ', batch_size=' . $batch_size . ', filter_empty_url=' . ($filter_empty_url?1:0) . ', filter_empty_meta=' . ($filter_empty_meta?1:0));
 
+            // When filtering by empty fields, dataset changes during generation.
+            // To avoid skipping entities because of shrinking result sets,
+            // always read from offset 0 and keep offset only as a progress counter.
+            $query_offset = ($filter_empty_url || $filter_empty_meta) ? 0 : $offset;
+
             $result = $this->model_extension_module_dockercart_seo_generator->generateSeoData(
                 $entity_type,
                 $language_id,
                 $generate_type,
                 $templates,
-                $offset,
+                $query_offset,
                 $batch_size,
                 $filter_empty_url,
                 $filter_empty_meta
             );
 
-            $this->logger->info('AJAX generate() result processed=' . $result['processed'] . ', total=' . $result['total']);
+            $this->logger->info('AJAX generate() result processed=' . $result['processed'] . ', updated=' . (isset($result['updated']) ? $result['updated'] : 0) . ', total=' . $result['total']);
             
             $json['processed'] = $result['processed'];
+            $json['updated'] = isset($result['updated']) ? $result['updated'] : 0;
             $json['total'] = $result['total'];
             $json['offset'] = $offset + $result['processed'];
-            $json['has_more'] = ($json['offset'] < $result['total']);
+
+            if ($filter_empty_url || $filter_empty_meta) {
+                // For dynamic filtered sets continue while we still receive rows.
+                // Also stop if nothing could be updated in this chunk to prevent infinite loops.
+                $json['has_more'] = ($result['processed'] > 0) && ($json['offset'] < $result['total']) && ($json['updated'] > 0);
+            } else {
+                $json['has_more'] = ($json['offset'] < $result['total']);
+            }
+
             $json['success'] = true;
         }
         
