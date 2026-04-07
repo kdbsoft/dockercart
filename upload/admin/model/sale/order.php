@@ -476,4 +476,209 @@ class ModelSaleOrder extends Model {
 
 		return $query->row['total'];
 	}
+
+	public function updateOrderQuick($order_id, $data = array()) {
+		$allowed = array(
+			'firstname',
+			'lastname',
+			'email',
+			'telephone',
+			'tax_number',
+			'payment_method',
+			'payment_code',
+			'shipping_method',
+			'shipping_code',
+			'payment_firstname',
+			'payment_lastname',
+			'payment_company',
+			'payment_address_1',
+			'payment_address_2',
+			'payment_city',
+			'payment_postcode',
+			'payment_zone',
+			'payment_zone_id',
+			'payment_country',
+			'payment_country_id',
+			'shipping_firstname',
+			'shipping_lastname',
+			'shipping_company',
+			'shipping_address_1',
+			'shipping_address_2',
+			'shipping_city',
+			'shipping_postcode',
+			'shipping_zone',
+			'shipping_zone_id',
+			'shipping_country',
+			'shipping_country_id',
+			'comment'
+		);
+
+		$set = array();
+
+		foreach ($allowed as $field) {
+			if (array_key_exists($field, $data)) {
+				$set[] = "`" . $field . "` = '" . $this->db->escape($data[$field]) . "'";
+			}
+		}
+
+		if (!$set) {
+			return false;
+		}
+
+		$set[] = "`date_modified` = NOW()";
+
+		$this->db->query("UPDATE `" . DB_PREFIX . "order` SET " . implode(', ', $set) . " WHERE order_id = '" . (int)$order_id . "'");
+
+		return true;
+	}
+
+	public function applyLineDiscounts($order_id, $discounts = array()) {
+		$this->ensureOrderProductDiscountTable();
+
+		$order_products_query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "order_product` WHERE order_id = '" . (int)$order_id . "' ORDER BY order_product_id ASC");
+
+		if (!$order_products_query->num_rows) {
+			$this->db->query("DELETE FROM `" . DB_PREFIX . "order_product_discount` WHERE order_id = '" . (int)$order_id . "'");
+			return;
+		}
+
+		$stored_discounts = $this->getOrderProductDiscounts($order_id);
+
+		$delta_subtotal = 0.0;
+		$delta_tax = 0.0;
+		$processed_order_product_ids = array();
+
+		foreach ($order_products_query->rows as $index => $product) {
+			$order_product_id = (int)$product['order_product_id'];
+			$processed_order_product_ids[] = $order_product_id;
+
+			$old_percent = isset($stored_discounts[$order_product_id]) ? (float)$stored_discounts[$order_product_id] : 0.0;
+			$new_percent = isset($discounts[$index]) ? (float)$discounts[$index] : 0.0;
+
+			if ($new_percent < 0) {
+				$new_percent = 0;
+			}
+
+			if ($new_percent > 100) {
+				$new_percent = 100;
+			}
+
+			if ($old_percent < 0) {
+				$old_percent = 0;
+			}
+
+			if ($old_percent > 100) {
+				$old_percent = 100;
+			}
+
+			$qty = (int)$product['quantity'];
+			$old_price = (float)$product['price'];
+			$old_tax = (float)$product['tax'];
+
+			$base_price = $old_price;
+			$base_tax = $old_tax;
+
+			if ($old_percent > 0 && $old_percent < 100) {
+				$factor = 1 - ($old_percent / 100);
+
+				if ($factor > 0) {
+					$base_price = round($old_price / $factor, 4);
+					$base_tax = round($old_tax / $factor, 4);
+				}
+			}
+
+			$new_price = round($base_price * (1 - ($new_percent / 100)), 4);
+			$new_tax = round($base_tax * (1 - ($new_percent / 100)), 4);
+			$new_total = round($new_price * $qty, 4);
+
+			$delta_subtotal += ($new_price - $old_price) * $qty;
+			$delta_tax += ($new_tax - $old_tax) * $qty;
+
+			$this->db->query("UPDATE `" . DB_PREFIX . "order_product` SET price = '" . (float)$new_price . "', tax = '" . (float)$new_tax . "', total = '" . (float)$new_total . "' WHERE order_product_id = '" . $order_product_id . "'");
+
+			if ($new_percent > 0) {
+				$this->db->query("REPLACE INTO `" . DB_PREFIX . "order_product_discount` SET order_product_id = '" . $order_product_id . "', order_id = '" . (int)$order_id . "', discount_percent = '" . (float)$new_percent . "', date_modified = NOW()");
+			} else {
+				$this->db->query("DELETE FROM `" . DB_PREFIX . "order_product_discount` WHERE order_product_id = '" . $order_product_id . "'");
+			}
+		}
+
+		if ($processed_order_product_ids) {
+			$this->db->query("DELETE FROM `" . DB_PREFIX . "order_product_discount` WHERE order_id = '" . (int)$order_id . "' AND order_product_id NOT IN (" . implode(',', array_map('intval', $processed_order_product_ids)) . ")");
+		} else {
+			$this->db->query("DELETE FROM `" . DB_PREFIX . "order_product_discount` WHERE order_id = '" . (int)$order_id . "'");
+		}
+
+		$delta_subtotal = round($delta_subtotal, 4);
+		$delta_tax = round($delta_tax, 4);
+
+		if (abs($delta_subtotal) < 0.0001 && abs($delta_tax) < 0.0001) {
+			$this->db->query("UPDATE `" . DB_PREFIX . "order` SET date_modified = NOW() WHERE order_id = '" . (int)$order_id . "'");
+			return;
+		}
+
+		$sub_total_query = $this->db->query("SELECT order_total_id, value FROM `" . DB_PREFIX . "order_total` WHERE order_id = '" . (int)$order_id . "' AND code = 'sub_total' ORDER BY sort_order ASC LIMIT 1");
+
+		if ($sub_total_query->num_rows) {
+			$new_subtotal = (float)$sub_total_query->row['value'] + $delta_subtotal;
+
+			if ($new_subtotal < 0) {
+				$new_subtotal = 0;
+			}
+
+			$this->db->query("UPDATE `" . DB_PREFIX . "order_total` SET value = '" . (float)$new_subtotal . "' WHERE order_total_id = '" . (int)$sub_total_query->row['order_total_id'] . "'");
+		}
+
+		$tax_query = $this->db->query("SELECT order_total_id, value FROM `" . DB_PREFIX . "order_total` WHERE order_id = '" . (int)$order_id . "' AND code = 'tax' ORDER BY sort_order ASC LIMIT 1");
+
+		if ($tax_query->num_rows) {
+			$new_tax_total = (float)$tax_query->row['value'] + $delta_tax;
+
+			if ($new_tax_total < 0) {
+				$new_tax_total = 0;
+			}
+
+			$this->db->query("UPDATE `" . DB_PREFIX . "order_total` SET value = '" . (float)$new_tax_total . "' WHERE order_total_id = '" . (int)$tax_query->row['order_total_id'] . "'");
+		}
+
+		$total_query = $this->db->query("SELECT order_total_id, value FROM `" . DB_PREFIX . "order_total` WHERE order_id = '" . (int)$order_id . "' AND code = 'total' ORDER BY sort_order DESC LIMIT 1");
+
+		if ($total_query->num_rows) {
+			$new_order_total = (float)$total_query->row['value'] + $delta_subtotal + $delta_tax;
+
+			if ($new_order_total < 0) {
+				$new_order_total = 0;
+			}
+
+			$this->db->query("UPDATE `" . DB_PREFIX . "order_total` SET value = '" . (float)$new_order_total . "' WHERE order_total_id = '" . (int)$total_query->row['order_total_id'] . "'");
+			$this->db->query("UPDATE `" . DB_PREFIX . "order` SET total = '" . (float)$new_order_total . "', date_modified = NOW() WHERE order_id = '" . (int)$order_id . "'");
+		} else {
+			$this->db->query("UPDATE `" . DB_PREFIX . "order` SET date_modified = NOW() WHERE order_id = '" . (int)$order_id . "'");
+		}
+	}
+
+	public function getOrderProductDiscounts($order_id) {
+		$this->ensureOrderProductDiscountTable();
+
+		$discounts = array();
+
+		$query = $this->db->query("SELECT order_product_id, discount_percent FROM `" . DB_PREFIX . "order_product_discount` WHERE order_id = '" . (int)$order_id . "'");
+
+		foreach ($query->rows as $row) {
+			$discounts[(int)$row['order_product_id']] = (float)$row['discount_percent'];
+		}
+
+		return $discounts;
+	}
+
+	private function ensureOrderProductDiscountTable() {
+		$this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "order_product_discount` (
+			`order_product_id` int(11) NOT NULL,
+			`order_id` int(11) NOT NULL,
+			`discount_percent` decimal(15,4) NOT NULL DEFAULT '0.0000',
+			`date_modified` datetime NOT NULL,
+			PRIMARY KEY (`order_product_id`),
+			KEY `order_id` (`order_id`)
+		) ENGINE=MyISAM DEFAULT CHARSET=utf8");
+	}
 }

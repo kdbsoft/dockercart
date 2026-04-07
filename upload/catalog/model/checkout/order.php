@@ -72,7 +72,7 @@ class ModelCheckoutOrder extends Model {
 
 	public function editOrder($order_id, $data) {
 		// Void the order first
-		$this->addOrderHistory($order_id, 0);
+		$this->addOrderHistory($order_id, 0, '', false, false, false);
 
 		$tax_number = $this->resolveOrderTaxNumber($data, $order_id);
 
@@ -290,7 +290,7 @@ class ModelCheckoutOrder extends Model {
 		return $query->rows;
 	}	
 			
-	public function addOrderHistory($order_id, $order_status_id, $comment = '', $notify = false, $override = false) {
+	public function addOrderHistory($order_id, $order_status_id, $comment = '', $notify = false, $override = false, $record_history = true) {
 		$order_info = $this->getOrder($order_id);
 		
 		if ($order_info) {
@@ -372,7 +372,10 @@ class ModelCheckoutOrder extends Model {
 			// Update the DB with the new statuses
 			$this->db->query("UPDATE `" . DB_PREFIX . "order` SET order_status_id = '" . (int)$order_status_id . "', date_modified = NOW() WHERE order_id = '" . (int)$order_id . "'");
 
-			$this->db->query("INSERT INTO " . DB_PREFIX . "order_history SET order_id = '" . (int)$order_id . "', order_status_id = '" . (int)$order_status_id . "', notify = '" . (int)$notify . "', comment = '" . $this->db->escape($comment) . "', date_added = NOW()");
+
+			if ($record_history) {
+				$this->db->query("INSERT INTO " . DB_PREFIX . "order_history SET order_id = '" . (int)$order_id . "', order_status_id = '" . (int)$order_status_id . "', notify = '" . (int)$notify . "', comment = '" . $this->db->escape($comment) . "', date_added = NOW()");
+			}
 
 			// If old order status is the processing or complete status but new status is not then commence restock, and remove coupon, voucher and reward history
 			if (in_array($order_info['order_status_id'], array_merge($this->config->get('config_processing_status'), $this->config->get('config_complete_status'))) && !in_array($order_status_id, array_merge($this->config->get('config_processing_status'), $this->config->get('config_complete_status')))) {

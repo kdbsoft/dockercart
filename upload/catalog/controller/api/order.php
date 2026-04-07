@@ -680,19 +680,19 @@ class ControllerApiOrder extends Controller {
 
 					$this->model_checkout_order->editOrder($order_id, $order_data);
 
-					// Set the order history
-					if (isset($this->request->post['order_status_id'])) {
-						$order_status_id = $this->request->post['order_status_id'];
-					} else {
-						$order_status_id = $this->config->get('config_order_status_id');
-					}
-					
-					$this->model_checkout_order->addOrderHistory($order_id, $order_status_id);
+					$skip_history = !empty($this->request->post['skip_history']);
 
-					// When order editing is completed, delete added order status for Void the order first.
-					if ($order_status_id) {
-						$this->db->query("DELETE FROM `" . DB_PREFIX . "order_history` WHERE order_id = '" . (int)$order_id . "' AND order_status_id = '0'");
+					// Keep current status by default; status change should come from explicit history action.
+					if (isset($this->request->post['order_status_id']) && $this->request->post['order_status_id'] !== '') {
+						$order_status_id = (int)$this->request->post['order_status_id'];
+					} else {
+						$order_status_id = (int)$order_info['order_status_id'];
 					}
+
+					$this->model_checkout_order->addOrderHistory($order_id, $order_status_id, '', false, false, !$skip_history);
+
+					// Clean up temporary void history rows if they exist.
+					$this->db->query("DELETE FROM `" . DB_PREFIX . "order_history` WHERE order_id = '" . (int)$order_id . "' AND order_status_id = '0'");
 				}
 			} else {
 				$json['error'] = $this->language->get('error_not_found');
