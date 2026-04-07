@@ -1114,6 +1114,7 @@ class ControllerCheckoutDockercartCheckout extends Controller {
         $order_lastname = '';
         $order_email = '';
         $order_telephone = '';
+        $order_tax_number = '';
 
         if ($this->customer->isLogged()) {
             // If a temporary customer override exists (edited in checkout UI), prefer it
@@ -1123,11 +1124,16 @@ class ControllerCheckoutDockercartCheckout extends Controller {
                 $order_lastname = $temp['lastname'] ?? $this->customer->getLastName();
                 $order_email = $temp['email'] ?? $this->customer->getEmail();
                 $order_telephone = $temp['telephone'] ?? $this->customer->getTelephone();
+                $order_tax_number = $temp['tax_number'] ?? '';
             } else {
                 $order_firstname = $this->customer->getFirstName();
                 $order_lastname = $this->customer->getLastName();
                 $order_email = $this->customer->getEmail();
                 $order_telephone = $this->customer->getTelephone();
+
+                $this->load->model('account/customer');
+                $customer_info = $this->model_account_customer->getCustomer($this->customer->getId());
+                $order_tax_number = isset($customer_info['tax_number']) ? $customer_info['tax_number'] : '';
             }
         } else {
             // Check multiple session places where front-end might have saved data.
@@ -1194,6 +1200,7 @@ class ControllerCheckoutDockercartCheckout extends Controller {
             'lastname' => $order_lastname,
             'email' => $order_email,
             'telephone' => $order_telephone,
+            'tax_number' => $order_tax_number,
             'custom_field' => array(),
             
             // Payment address

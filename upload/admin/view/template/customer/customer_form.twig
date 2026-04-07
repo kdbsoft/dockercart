@@ -99,6 +99,14 @@
                             <div class="text-danger">{{ error_telephone }}</div>
                             {% endif %}</div>
                         </div>
+                        <div class="form-group">
+                          <label class="col-sm-2 control-label" for="input-tax-number">{{ entry_tax_number }}</label>
+                          <div class="col-sm-10">
+                            <input type="text" name="tax_number" value="{{ tax_number }}" placeholder="{{ entry_tax_number }}" id="input-tax-number" class="form-control" />
+                            {% if error_tax_number %}
+                            <div class="text-danger">{{ error_tax_number }}</div>
+                            {% endif %}</div>
+                        </div>
                         {% for custom_field in custom_fields %}
                         {% if custom_field.location == 'account' %}
                         {% if custom_field.type == 'select' %}

@@ -51,6 +51,7 @@ class ModelAccountOrder extends Model {
 				'firstname'               => $order_query->row['firstname'],
 				'lastname'                => $order_query->row['lastname'],
 				'telephone'               => $order_query->row['telephone'],
+				'tax_number'              => $order_query->row['tax_number'],
 				'email'                   => $order_query->row['email'],
 				'payment_firstname'       => $order_query->row['payment_firstname'],
 				'payment_lastname'        => $order_query->row['payment_lastname'],

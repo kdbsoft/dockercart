@@ -75,6 +75,12 @@ class ControllerAccountEdit extends Controller {
 			$data['error_telephone'] = '';
 		}
 
+		if (isset($this->error['tax_number'])) {
+			$data['error_tax_number'] = $this->error['tax_number'];
+		} else {
+			$data['error_tax_number'] = '';
+		}
+
 		if (isset($this->error['custom_field'])) {
 			$data['error_custom_field'] = $this->error['custom_field'];
 		} else {
@@ -117,6 +123,14 @@ class ControllerAccountEdit extends Controller {
 			$data['telephone'] = $customer_info['telephone'];
 		} else {
 			$data['telephone'] = '';
+		}
+
+		if (isset($this->request->post['tax_number'])) {
+			$data['tax_number'] = $this->request->post['tax_number'];
+		} elseif (!empty($customer_info)) {
+			$data['tax_number'] = $customer_info['tax_number'];
+		} else {
+			$data['tax_number'] = '';
 		}
 
 		if (isset($this->request->post['custom_field']['account'])) {
@@ -189,6 +203,10 @@ class ControllerAccountEdit extends Controller {
 
 		if ((utf8_strlen($this->request->post['telephone']) < 3) || (utf8_strlen($this->request->post['telephone']) > 32)) {
 			$this->error['telephone'] = $this->language->get('error_telephone');
+		}
+
+		if (utf8_strlen($this->request->post['tax_number']) > 32) {
+			$this->error['tax_number'] = $this->language->get('error_tax_number');
 		}
 
 		// Custom field validation

@@ -52,7 +52,9 @@
         <tr>
           <td>{{ order.shipping_address }}</td>
           <td>{{ order.email }}<br/>
-            {{ order.telephone }}</td>
+            {{ order.telephone }}
+            {% if order.tax_number %}<br/>
+            {{ text_tax_number }} {{ order.tax_number }}{% endif %}</td>
         </tr>
       </tbody>
     </table>

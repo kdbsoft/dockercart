@@ -478,6 +478,7 @@ class ControllerSaleOrder extends Controller {
 			$data['lastname'] = $order_info['lastname'];
 			$data['email'] = $order_info['email'];
 			$data['telephone'] = $order_info['telephone'];
+			$data['tax_number'] = $order_info['tax_number'];
 			$data['account_custom_field'] = $order_info['custom_field'];
 
 			$this->load->model('customer/customer');
@@ -566,6 +567,7 @@ class ControllerSaleOrder extends Controller {
 			$data['lastname'] = '';
 			$data['email'] = '';
 			$data['telephone'] = '';
+			$data['tax_number'] = '';
 			$data['customer_custom_field'] = array();
 
 			$data['addresses'] = array();
@@ -854,6 +856,7 @@ class ControllerSaleOrder extends Controller {
 
 			$data['email'] = $order_info['email'];
 			$data['telephone'] = $order_info['telephone'];
+			$data['tax_number'] = $order_info['tax_number'];
 
 			$data['shipping_method'] = $order_info['shipping_method'];
 			$data['payment_method'] = $order_info['payment_method'];
@@ -1687,6 +1690,7 @@ class ControllerSaleOrder extends Controller {
 					'store_fax'        => $store_fax,
 					'email'            => $order_info['email'],
 					'telephone'        => $order_info['telephone'],
+					'tax_number'       => $order_info['tax_number'],
 					'shipping_address' => $shipping_address,
 					'shipping_method'  => $order_info['shipping_method'],
 					'payment_address'  => $payment_address,
@@ -1862,6 +1866,7 @@ class ControllerSaleOrder extends Controller {
 					'store_telephone'  => $store_telephone,
 					'email'            => $order_info['email'],
 					'telephone'        => $order_info['telephone'],
+					'tax_number'       => $order_info['tax_number'],
 					'shipping_address' => $shipping_address,
 					'shipping_method'  => $order_info['shipping_method'],
 					'product'          => $product_data,

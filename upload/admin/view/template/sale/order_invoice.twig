@@ -38,6 +38,9 @@
             <b>{{ text_invoice_no }}</b> {{ order.invoice_no }}<br/>
             {% endif %}
             <b>{{ text_order_id }}</b> {{ order.order_id }}<br/>
+            {% if order.tax_number %}
+            <b>{{ text_tax_number }}</b> {{ order.tax_number }}<br/>
+            {% endif %}
             <b>{{ text_payment_method }}</b> {{ order.payment_method }}<br/>
             {% if order.shipping_method %}
             <b>{{ text_shipping_method }}</b> {{ order.shipping_method }}<br/>

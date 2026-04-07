@@ -19,6 +19,7 @@ class ControllerApiCustomer extends Controller {
 				'lastname',
 				'email',
 				'telephone',
+				'tax_number',
 			);
 
 			foreach ($keys as $key) {
@@ -84,6 +85,7 @@ class ControllerApiCustomer extends Controller {
 					'lastname'          => $this->request->post['lastname'],
 					'email'             => $this->request->post['email'],
 					'telephone'         => $this->request->post['telephone'],
+					'tax_number'        => $this->request->post['tax_number'],
 					'custom_field'      => isset($this->request->post['custom_field']) ? $this->request->post['custom_field'] : array()
 				);
 

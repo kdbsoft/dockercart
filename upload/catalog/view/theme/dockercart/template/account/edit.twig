@@ -65,6 +65,15 @@
             {% endif %}
           </div>
 
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-1.5" for="input-tax-number">{{ entry_tax_number }}</label>
+            <input type="text" name="tax_number" value="{{ tax_number }}" placeholder="{{ entry_tax_number }}" id="input-tax-number"
+              class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white" />
+            {% if error_tax_number %}
+            <p class="text-sm text-red-500 mt-1">{{ error_tax_number }}</p>
+            {% endif %}
+          </div>
+
           {% for custom_field in custom_fields %}
           <div class="mb-4 custom-field" data-sort="{{ custom_field.sort_order }}">
             <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ custom_field.name }}</label>
