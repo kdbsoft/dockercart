@@ -577,6 +577,12 @@ class ControllerCustomerCustomer extends Controller {
 			$data['error_telephone'] = '';
 		}
 
+		if (isset($this->error['tax_number'])) {
+			$data['error_tax_number'] = $this->error['tax_number'];
+		} else {
+			$data['error_tax_number'] = '';
+		}
+
 		if (isset($this->error['tracking'])) {
 			$data['error_tracking'] = $this->error['tracking'];
 		} else {
@@ -735,6 +741,14 @@ class ControllerCustomerCustomer extends Controller {
 			$data['telephone'] = $customer_info['telephone'];
 		} else {
 			$data['telephone'] = '';
+		}
+
+		if (isset($this->request->post['tax_number'])) {
+			$data['tax_number'] = $this->request->post['tax_number'];
+		} elseif (!empty($customer_info)) {
+			$data['tax_number'] = $customer_info['tax_number'];
+		} else {
+			$data['tax_number'] = '';
 		}
 
 		if (isset($this->request->post['custom_field'])) {
@@ -1023,6 +1037,10 @@ class ControllerCustomerCustomer extends Controller {
 
 		if ((utf8_strlen($this->request->post['telephone']) < 3) || (utf8_strlen($this->request->post['telephone']) > 32)) {
 			$this->error['telephone'] = $this->language->get('error_telephone');
+		}
+
+		if (utf8_strlen($this->request->post['tax_number']) > 32) {
+			$this->error['tax_number'] = $this->language->get('error_tax_number');
 		}
 
 		// Custom field validation
@@ -1481,6 +1499,7 @@ class ControllerCustomerCustomer extends Controller {
 					'lastname'          => $result['lastname'],
 					'email'             => $result['email'],
 					'telephone'         => $result['telephone'],
+					'tax_number'        => $result['tax_number'],
 					'custom_field'      => json_decode($result['custom_field'], true),
 					'address'           => $this->model_customer_customer->getAddresses($result['customer_id'])
 				);

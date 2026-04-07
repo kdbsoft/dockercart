@@ -3,7 +3,7 @@ include .env
 export
 endif
 
-.PHONY: help up standalone ssl letsencrypt letsencrypt-ftp ftp down logs logs-follow shell mariadb backup restore dump-init clean restart
+.PHONY: help migrate up standalone ssl letsencrypt letsencrypt-ftp ftp down logs logs-follow shell mariadb backup restore dump-init clean restart
 
 ### Convenience variables
 COMPOSE := docker compose

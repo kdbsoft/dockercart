@@ -67,6 +67,12 @@
               <td><button data-toggle="tooltip" title="{{ text_telephone }}" class="btn btn-info btn-xs"><i class="fa fa-phone fa-fw"></i></button></td>
               <td>{{ telephone }}</td>
             </tr>
+            {% if tax_number %}
+            <tr>
+              <td><button data-toggle="tooltip" title="{{ text_tax_number }}" class="btn btn-info btn-xs"><i class="fa fa-id-card-o fa-fw"></i></button></td>
+              <td>{{ tax_number }}</td>
+            </tr>
+            {% endif %}
           </table>
         </div>
       </div>
