@@ -79,6 +79,10 @@ function updateCartItem(cartId, quantity) {
 			// Update cart totals if they're present in the response
 			if (json.totals) {
 				updateCartTotals(json.totals);
+				// If a grand total value is provided, also update header/compare totals
+				if (json.total !== undefined) {
+					updateHeaderTotals(json.total);
+				}
 			}
 			
 			// Refresh the cart header/drawer
@@ -86,6 +90,11 @@ function updateCartItem(cartId, quantity) {
 			
 			// Show success notification
 			showNotification('success', 'Товар обновлен');
+
+			// If we're on the cart page (sidebar totals present), reload to ensure row totals render correctly
+			if (document.querySelector('[data-cart-totals]')) {
+				setTimeout(function() { location.reload(); }, 300);
+			}
 		} else if (json.error) {
 			showNotification('error', json.error);
 		}
@@ -132,6 +141,9 @@ function removeCartItem(cartId) {
 						if (json.totals) {
 							updateCartTotals(json.totals);
 						}
+						if (json.total !== undefined) {
+							updateHeaderTotals(json.total);
+						}
 						refreshCartHeader();
 						showNotification('success', 'Товар удален из корзины');
 					}
@@ -176,6 +188,9 @@ function removeVoucher(voucherKey) {
 					if (json.totals) {
 						updateCartTotals(json.totals);
 					}
+					if (json.total !== undefined) {
+						updateHeaderTotals(json.total);
+					}
 					refreshCartHeader();
 					showNotification('success', 'Сертификат удален из корзины');
 				}, 300);
@@ -197,17 +212,51 @@ function updateCartTotals(totalsData) {
 	const totalsContainer = document.querySelector('[data-cart-totals]');
 	if (!totalsContainer) return;
 	
-	const totalRows = totalsContainer.querySelectorAll('[data-total-row]');
-	
+	const totalRows = Array.from(totalsContainer.querySelectorAll('[data-total-row]'));
+
+	// Try to match totals by title text first (safer when extensions change order)
 	totalsData.forEach((total, index) => {
-		if (totalRows[index]) {
-			// Update the text content of the total value
-			const totalValue = totalRows[index].querySelector('[data-total-value]');
-			if (totalValue) {
-				totalValue.textContent = total.text;
+		const title = (total.title || '').trim();
+		let updated = false;
+
+		for (let row of totalRows) {
+			const titleEl = row.querySelector('span');
+			if (!titleEl) continue;
+			if (titleEl.textContent.trim() === title) {
+				const totalValue = row.querySelector('[data-total-value]');
+				if (totalValue) totalValue.textContent = total.text;
+				updated = true;
+				break;
 			}
 		}
+
+		// Fallback to index-based update if no title match
+		if (!updated && totalRows[index]) {
+			const totalValue = totalRows[index].querySelector('[data-total-value]');
+			if (totalValue) totalValue.textContent = total.text;
+		}
 	});
+}
+
+/**
+ * Update header/cart totals (compare icon and cart button) when server returns json.total
+ */
+function updateHeaderTotals(totalText) {
+    // Update compare total (if present)
+    try {
+        const compareEl = document.querySelector('#compare-total span');
+        if (compareEl) compareEl.textContent = totalText;
+
+        // Update cart total button (legacy/OpenCart id)
+        const cartTotalBtn = document.querySelector('#cart > button #cart-total');
+        if (cartTotalBtn) cartTotalBtn.textContent = totalText;
+
+        // Also update any element with id 'cart-total' directly
+        const cartTotalRaw = document.getElementById('cart-total');
+        if (cartTotalRaw) cartTotalRaw.innerHTML = '<i class="fa fa-shopping-cart"></i> ' + totalText;
+    } catch (e) {
+        // silent
+    }
 }
 
 /**
