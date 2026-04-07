@@ -9,10 +9,10 @@ log() {
     printf '%s %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*"
 }
 
-if [ -f "$SCRIPT_DIR/.env" ]; then
+if [ -f ".env" ]; then
     set -a
     # shellcheck disable=SC1091
-    . "$SCRIPT_DIR/.env"
+    . ".env"
     set +a
 fi
 
