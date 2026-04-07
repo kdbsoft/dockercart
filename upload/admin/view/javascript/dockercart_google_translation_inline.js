@@ -11,7 +11,7 @@
     }
 
     const translatableSelector = 'input[type="text"], textarea';
-    const excludedNamePattern = /(image|image_portrait|image_mobile|thumb|icon|logo|link|url|path|file|filename|route|code|token|hash|json|xml|yaml|yml|css|js|date|time|sort_order|model|sku|upc|ean|jan|isbn|mpn)/i;
+    const excludedNamePattern = /(image|image_portrait|image_mobile|thumb|icon|logo|link|url|path|file|filename|route|code|token|hash|json|xml|yaml|yml|css|js|date|time|sort_order|model|sku|upc|ean|jan|isbn|mpn|quantity|discount)/i;
     const knownLanguageIds = new Set();
 
     function collectLanguageIds() {
@@ -126,6 +126,10 @@
 
     function shouldDecorateField(field) {
         if (!field || field.dataset.gtInlineBound === '1') {
+            return false;
+        }
+
+        if (field.classList.contains('gt-no-translate') || field.dataset.gtInlineIgnore === '1') {
             return false;
         }
 

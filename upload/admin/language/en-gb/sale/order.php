@@ -25,6 +25,11 @@ $_['text_invoice']               = 'Invoice';
 $_['text_reward']                = 'Reward Points';
 $_['text_affiliate']             = 'Affiliate';
 $_['text_order']                 = 'Order (#%s)';
+$_['text_order_number']          = 'Order #%s';
+$_['text_panel_order_info']      = 'Order Information';
+$_['text_panel_customer']        = 'Customer';
+$_['text_panel_order_tools']     = 'Order Actions';
+$_['text_panel_order_contents']  = 'Order Contents';
 $_['text_payment_address']       = 'Payment Address';
 $_['text_shipping_address']      = 'Shipping Address';
 $_['text_comment']               = 'Customer Comment';
@@ -61,6 +66,13 @@ $_['text_commission_removed']    = 'Success: Commission removed!';
 $_['text_restock']               = 'Success: Products have been restocked!';
 $_['text_upload']                = 'Your file was successfully uploaded!';
 $_['text_picklist']              = 'Dispatch Note';
+$_['text_onepage_customer']        = 'Customer';
+$_['text_onepage_payment_details'] = 'Payment Details';
+$_['text_onepage_shipping_details']= 'Shipping Details';
+$_['text_onepage_products']        = 'Products';
+$_['text_onepage_order_details']   = 'Order Details';
+$_['text_onepage_totals']          = 'Totals';
+$_['text_onepage_same_shipping_as_payment'] = 'Shipping address is the same as payment address';
 
 // Column
 $_['column_order_id']            = 'Order ID';
@@ -79,6 +91,7 @@ $_['column_location']            = 'Location';
 $_['column_reference']           = 'Reference';
 $_['column_action']              = 'Action';
 $_['column_weight']              = 'Product Weight';
+$_['column_discount_percent']    = 'Discount %';
 
 // Entry
 $_['entry_store']                = 'Store';

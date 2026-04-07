@@ -137,6 +137,19 @@ class ControllerApiCart extends Controller {
 				$json['error']['stock'] = $this->language->get('error_stock');
 			}
 
+			$this->load->model('catalog/product');
+			$this->load->model('tool/image');
+
+			$discounts = array();
+
+			if (isset($this->request->post['discount']) && is_array($this->request->post['discount'])) {
+				$discounts = $this->request->post['discount'];
+			}
+
+			$discount_subtotal = 0.0;
+			$discount_tax = 0.0;
+			$product_index = 0;
+
 			// Products
 			$json['products'] = array();
 
@@ -167,19 +180,58 @@ class ControllerApiCart extends Controller {
 					);
 				}
 
+				$discount_percent = isset($discounts[$product_index]) ? (float)$discounts[$product_index] : 0;
+
+				if ($discount_percent < 0) {
+					$discount_percent = 0;
+				}
+
+				if ($discount_percent > 100) {
+					$discount_percent = 100;
+				}
+
+				$quantity = (int)$product['quantity'];
+				$base_price = (float)$product['price'];
+				$base_tax = (float)$this->tax->getTax($product['price'], $product['tax_class_id']);
+
+				$discounted_price = round($base_price * (1 - ($discount_percent / 100)), 4);
+				$discounted_tax = round($base_tax * (1 - ($discount_percent / 100)), 4);
+
+				$discount_subtotal += ($base_price - $discounted_price) * $quantity;
+				$discount_tax += ($base_tax - $discounted_tax) * $quantity;
+
+				if ($this->config->get('config_tax')) {
+					$display_price = $discounted_price + $discounted_tax;
+				} else {
+					$display_price = $discounted_price;
+				}
+
+				$display_total = $display_price * $quantity;
+
+				$product_info = $this->model_catalog_product->getProduct($product['product_id']);
+
+				if ($product_info && !empty($product_info['image']) && is_file(DIR_IMAGE . $product_info['image'])) {
+					$thumb = $this->model_tool_image->resize($product_info['image'], 40, 40);
+				} else {
+					$thumb = $this->model_tool_image->resize('no_image.png', 40, 40);
+				}
+
 				$json['products'][] = array(
 					'cart_id'    => $product['cart_id'],
 					'product_id' => $product['product_id'],
 					'name'       => $product['name'],
 					'model'      => $product['model'],
+					'thumb'      => $thumb,
 					'option'     => $option_data,
 					'quantity'   => $product['quantity'],
 					'stock'      => $product['stock'] ? true : !(!$this->config->get('config_stock_checkout') || $this->config->get('config_stock_warning')),
 					'shipping'   => $product['shipping'],
-					'price'      => $this->currency->format($this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']),
-					'total'      => $this->currency->format($this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax')) * $product['quantity'], $this->session->data['currency']),
+					'price'      => $this->currency->format($display_price, $this->session->data['currency']),
+					'total'      => $this->currency->format($display_total, $this->session->data['currency']),
 					'reward'     => $product['reward']
 				);
+
+				$product_index++;
 			}
 
 			// Voucher
@@ -245,10 +297,31 @@ class ControllerApiCart extends Controller {
 
 			$json['totals'] = array();
 
+			$discount_subtotal = round($discount_subtotal, 4);
+			$discount_tax = round($discount_tax, 4);
+
 			foreach ($totals as $total) {
+				$value = (float)$total['value'];
+
+				if ($total['code'] == 'sub_total') {
+					$value -= $discount_subtotal;
+				}
+
+				if ($total['code'] == 'tax') {
+					$value -= $discount_tax;
+				}
+
+				if ($total['code'] == 'total') {
+					$value -= ($discount_subtotal + $discount_tax);
+				}
+
+				if ($value < 0) {
+					$value = 0;
+				}
+
 				$json['totals'][] = array(
 					'title' => $total['title'],
-					'text'  => $this->currency->format($total['value'], $this->session->data['currency'])
+					'text'  => $this->currency->format($value, $this->session->data['currency'])
 				);
 			}
 		}
