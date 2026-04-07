@@ -1,4 +1,5 @@
 {{ header }}
+<script src="catalog/view/javascript/cart-auto-update.js"></script>
 <main class="bg-gray-50 min-h-screen">
 
   <section class="bg-gradient-to-br from-gray-900 via-gray-800 to-blue-950 py-10 px-4 sm:px-6 lg:px-8">
@@ -60,7 +61,7 @@
 
               {# Products #}
               {% for product in products %}
-              <div class="bg-white rounded-2xl border {% if not product.stock %}border-red-200{% else %}border-gray-100{% endif %} shadow-sm p-4 flex flex-col sm:flex-row sm:items-center gap-4">
+              <div class="bg-white rounded-2xl border {% if not product.stock %}border-red-200{% else %}border-gray-100{% endif %} shadow-sm p-4 flex flex-col sm:flex-row sm:items-center gap-4" data-cart-id="{{ product.cart_id }}">
 
                 {# Thumbnail #}
                 {% if product.thumb %}
@@ -104,11 +105,7 @@
                 <div class="flex items-center gap-2 flex-shrink-0">
                   <input type="number" name="quantity[{{ product.cart_id }}]" value="{{ product.quantity }}" min="1"
                     class="w-16 text-center rounded-xl border border-gray-200 px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
-                  <button type="submit" title="{{ button_update }}"
-                    class="p-2 rounded-xl border border-gray-200 hover:border-blue-300 hover:text-blue-600 text-gray-400 transition">
-                    <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-                  </button>
-                  <button type="button" title="{{ button_remove }}" onclick="cart.remove('{{ product.cart_id }}');"
+                  <button type="button" title="{{ button_remove }}" onclick="removeCartItem('{{ product.cart_id }}');"
                     class="p-2 rounded-xl border border-red-100 hover:border-red-300 hover:text-red-600 text-red-400 transition">
                     <i data-lucide="x" class="w-4 h-4"></i>
                   </button>
@@ -116,7 +113,7 @@
 
                 {# Row total #}
                 <div class="w-24 text-right flex-shrink-0">
-                  <span class="font-bold text-gray-900 text-sm">{{ product.total }}</span>
+                  <span class="font-bold text-gray-900 text-sm" data-product-total>{{ product.total }}</span>
                 </div>
 
               </div>
@@ -124,7 +121,7 @@
 
               {# Gift vouchers #}
               {% for voucher in vouchers %}
-              <div class="bg-white rounded-2xl border border-indigo-100 shadow-sm p-4 flex flex-col sm:flex-row sm:items-center gap-4">
+              <div class="bg-white rounded-2xl border border-indigo-100 shadow-sm p-4 flex flex-col sm:flex-row sm:items-center gap-4" data-voucher-key="{{ voucher.key }}">
                 <div class="flex-shrink-0 w-16 h-16 rounded-xl bg-indigo-50 flex items-center justify-center">
                   <i data-lucide="gift" class="w-7 h-7 text-indigo-400"></i>
                 </div>
@@ -137,7 +134,7 @@
                 </div>
                 <div class="flex items-center gap-2 flex-shrink-0">
                   <div class="w-16 h-9 rounded-xl border border-gray-100 bg-gray-50 flex items-center justify-center text-sm text-gray-400">1</div>
-                  <button type="button" onclick="voucher.remove('{{ voucher.key }}');"
+                  <button type="button" onclick="removeVoucher('{{ voucher.key }}');"
                     class="p-2 rounded-xl border border-red-100 hover:border-red-300 hover:text-red-600 text-red-400 transition">
                     <i data-lucide="x" class="w-4 h-4"></i>
                   </button>
@@ -169,11 +166,11 @@
         <div class="w-full lg:w-80 xl:w-96 flex-shrink-0">
           <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 sticky top-4">
             <p class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-4">{{ text_cart_total }}</p>
-            <div class="space-y-2 divide-y divide-gray-50">
+            <div class="space-y-2 divide-y divide-gray-50" data-cart-totals>
               {% for total in totals %}
-              <div class="flex items-center justify-between py-2 {% if loop.last %}pt-3{% endif %}">
+              <div class="flex items-center justify-between py-2 {% if loop.last %}pt-3{% endif %}" data-total-row>
                 <span class="text-sm {% if loop.last %}font-bold text-gray-900 text-base{% else %}text-gray-500{% endif %}">{{ total.title }}</span>
-                <span class="text-sm {% if loop.last %}font-extrabold text-gray-900 text-base{% else %}font-semibold text-gray-800{% endif %}">{{ total.text }}</span>
+                <span class="text-sm {% if loop.last %}font-extrabold text-gray-900 text-base{% else %}font-semibold text-gray-800{% endif %}" data-total-value>{{ total.text }}</span>
               </div>
               {% endfor %}
             </div>
