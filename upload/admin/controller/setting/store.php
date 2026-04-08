@@ -392,25 +392,53 @@ class ControllerSettingStore extends Controller {
 			$data['config_fax'] = '';
 		}
 
-		if (isset($this->request->post['config_image'])) {
-			$data['config_image'] = $this->request->post['config_image'];
-		} elseif (isset($store_info['config_image'])) {
-			$data['config_image'] = $store_info['config_image'];
+		if (isset($this->request->post['config_contact_form_status'])) {
+			$data['config_contact_form_status'] = (int)$this->request->post['config_contact_form_status'];
+		} elseif (isset($store_info['config_contact_form_status'])) {
+			$data['config_contact_form_status'] = (int)$store_info['config_contact_form_status'];
 		} else {
-			$data['config_image'] = '';
+			$data['config_contact_form_status'] = 0;
 		}
 
 		$this->load->model('tool/image');
 
-		if (isset($this->request->post['config_image']) && is_file(DIR_IMAGE . $this->request->post['config_image'])) {
-			$data['thumb'] = $this->model_tool_image->resize($this->request->post['config_image'], 100, 100);
-		} elseif (isset($store_info['config_image']) && is_file(DIR_IMAGE . $store_info['config_image'])) {
-			$data['thumb'] = $this->model_tool_image->resize($store_info['config_image'], 100, 100);
+		if (isset($this->request->post['config_images']) && is_array($this->request->post['config_images'])) {
+			$config_images = $this->normalizeConfigImages($this->request->post['config_images']);
+		} elseif (isset($store_info['config_images']) && is_array($store_info['config_images'])) {
+			$config_images = $this->normalizeConfigImages($store_info['config_images']);
 		} else {
-			$data['thumb'] = $this->model_tool_image->resize('no_image.png', 100, 100);
+			$config_images = array();
 		}
 
+		if (!$config_images) {
+			$fallback_image = '';
+
+			if (isset($this->request->post['config_image']) && $this->request->post['config_image']) {
+				$fallback_image = $this->request->post['config_image'];
+			} elseif (isset($store_info['config_image']) && $store_info['config_image']) {
+				$fallback_image = $store_info['config_image'];
+			}
+
+			if ($fallback_image) {
+				$config_images[] = $fallback_image;
+			}
+		}
+
+		$data['config_images'] = array_pad(array_slice($config_images, 0, 5), 5, '');
+		$data['config_image'] = $data['config_images'][0];
+
 		$data['placeholder'] = $this->model_tool_image->resize('no_image.png', 100, 100);
+		$data['config_images_thumb'] = array();
+
+		foreach ($data['config_images'] as $config_image) {
+			if ($config_image && is_file(DIR_IMAGE . $config_image)) {
+				$data['config_images_thumb'][] = $this->model_tool_image->resize($config_image, 100, 100);
+			} else {
+				$data['config_images_thumb'][] = $data['placeholder'];
+			}
+		}
+
+		$data['thumb'] = $data['config_images_thumb'][0];
 
 		if (isset($this->request->post['config_open'])) {
 			$data['config_open'] = $this->request->post['config_open'];
@@ -654,6 +682,12 @@ class ControllerSettingStore extends Controller {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
+		$this->syncConfigImagesInPost();
+
+		if (!isset($this->request->post['config_contact_form_status'])) {
+			$this->request->post['config_contact_form_status'] = 0;
+		}
+
 		if (!$this->request->post['config_url']) {
 			$this->error['url'] = $this->language->get('error_url');
 		}
@@ -691,6 +725,39 @@ class ControllerSettingStore extends Controller {
 		}
 
 		return !$this->error;
+	}
+
+	private function normalizeConfigImages($images) {
+		$result = array();
+
+		foreach ((array)$images as $image) {
+			$image = trim((string)$image);
+
+			if ($image === '' || in_array($image, $result)) {
+				continue;
+			}
+
+			$result[] = $image;
+
+			if (count($result) >= 5) {
+				break;
+			}
+		}
+
+		return $result;
+	}
+
+	private function syncConfigImagesInPost() {
+		$images = array();
+
+		if (isset($this->request->post['config_images']) && is_array($this->request->post['config_images'])) {
+			$images = $this->normalizeConfigImages($this->request->post['config_images']);
+		} elseif (!empty($this->request->post['config_image'])) {
+			$images = $this->normalizeConfigImages(array($this->request->post['config_image']));
+		}
+
+		$this->request->post['config_images'] = $images;
+		$this->request->post['config_image'] = isset($images[0]) ? $images[0] : '';
 	}
 
 	protected function validateDelete() {
