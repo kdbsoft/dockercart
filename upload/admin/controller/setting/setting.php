@@ -974,7 +974,7 @@ class ControllerSettingSetting extends Controller {
 		} elseif ($this->config->get('config_file_max_size')) {
 			$data['config_file_max_size'] = $this->config->get('config_file_max_size');
 		} else {
-			$data['config_file_max_size'] = 300000;
+			$data['config_file_max_size'] = 10485760;
 		}
 
 		if (isset($this->request->post['config_file_ext_allowed'])) {

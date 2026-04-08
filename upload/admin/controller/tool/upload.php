@@ -324,6 +324,12 @@ class ControllerToolUpload extends Controller {
 
 		if (!$json) {
 			if (!empty($this->request->files['file']['name']) && is_file($this->request->files['file']['tmp_name'])) {
+				$max_upload_size = (int)$this->config->get('config_file_max_size');
+
+				if ($max_upload_size < 2097152) {
+					$max_upload_size = 10485760;
+				}
+
 				// Sanitize the filename
 				$filename = html_entity_decode($this->request->files['file']['name'], ENT_QUOTES, 'UTF-8');
 
@@ -366,6 +372,10 @@ class ControllerToolUpload extends Controller {
 
 				if (preg_match('/\<\?php/i', $content)) {
 					$json['error'] = $this->language->get('error_filetype');
+				}
+
+				if ($this->request->files['file']['size'] > $max_upload_size) {
+					$json['error'] = $this->language->get('error_upload_2');
 				}
 
 				// Return any upload error

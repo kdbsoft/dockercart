@@ -56,7 +56,7 @@ $_['button_reward']         = 'Застосувати бонусні бали';
 $_['button_quote']          = 'Запит цін';
 $_['button_list']           = 'Список';
 $_['button_grid']           = 'Сітка';
-$_['button_map']            = 'Переглянути карту';
+$_['button_map']            = 'Переглянути на Google картах';
 
 // Error
 $_['error_exception']       = 'Помилка коду (%s): %s в %s у рядку %s';
