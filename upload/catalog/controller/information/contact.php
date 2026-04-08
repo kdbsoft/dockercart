@@ -7,7 +7,9 @@ class ControllerInformationContact extends Controller {
 
 		$this->document->setTitle($this->language->get('heading_title'));
 
-		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
+		$contact_form_status = (bool)$this->config->get('config_contact_form_status');
+
+		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $contact_form_status && $this->validate()) {
 			$mail = new Mail($this->config->get('config_mail_engine'));
 			$mail->parameter = $this->config->get('config_mail_parameter');
 			$mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
@@ -69,6 +71,25 @@ class ControllerInformationContact extends Controller {
 			$data['image'] = false;
 		}
 
+		$data['store_images'] = array();
+
+		$config_images = $this->normalizeStoreImages($this->config->get('config_images'));
+
+		if (!$config_images && $this->config->get('config_image')) {
+			$config_images = array($this->config->get('config_image'));
+		}
+
+		foreach ($config_images as $config_image) {
+			if (!is_file(DIR_IMAGE . $config_image)) {
+				continue;
+			}
+
+			$data['store_images'][] = array(
+				'preview' => $this->model_tool_image->resize($config_image, 1200, 900),
+				'popup'   => $this->model_tool_image->resize($config_image, 2000, 2000)
+			);
+		}
+
 		$data['store'] = $this->config->get('config_name');
 		$data['address'] = nl2br($this->config->get('config_address'));
 		$data['geocode'] = $this->config->get('config_geocode');
@@ -124,8 +145,10 @@ class ControllerInformationContact extends Controller {
 			$data['enquiry'] = '';
 		}
 
+		$data['contact_form_status'] = $contact_form_status;
+
 		// Captcha
-		if ($this->config->get('captcha_' . $this->config->get('config_captcha') . '_status') && in_array('contact', (array)$this->config->get('config_captcha_page'))) {
+		if ($contact_form_status && $this->config->get('captcha_' . $this->config->get('config_captcha') . '_status') && in_array('contact', (array)$this->config->get('config_captcha_page'))) {
 			$data['captcha'] = $this->load->controller('extension/captcha/' . $this->config->get('config_captcha'), $this->error);
 		} else {
 			$data['captcha'] = '';
@@ -176,6 +199,30 @@ class ControllerInformationContact extends Controller {
 		}
 
 		return !$this->error;
+	}
+
+	private function normalizeStoreImages($images) {
+		$result = array();
+
+		if (!is_array($images)) {
+			$images = array();
+		}
+
+		foreach ($images as $image) {
+			$image = trim((string)$image);
+
+			if ($image === '' || in_array($image, $result)) {
+				continue;
+			}
+
+			$result[] = $image;
+
+			if (count($result) >= 5) {
+				break;
+			}
+		}
+
+		return $result;
 	}
 
 	public function success() {

@@ -310,24 +310,52 @@ class ControllerSettingSetting extends Controller {
 		} else {
 			$data['config_fax'] = $this->config->get('config_fax');
 		}
-		
-		if (isset($this->request->post['config_image'])) {
-			$data['config_image'] = $this->request->post['config_image'];
-		} else {
-			$data['config_image'] = $this->config->get('config_image');
-		}
 
+		if (isset($this->request->post['config_contact_form_status'])) {
+			$data['config_contact_form_status'] = (int)$this->request->post['config_contact_form_status'];
+		} elseif ($this->config->has('config_contact_form_status')) {
+			$data['config_contact_form_status'] = (int)$this->config->get('config_contact_form_status');
+		} else {
+			$data['config_contact_form_status'] = 0;
+		}
+		
 		$this->load->model('tool/image');
 
-		if (isset($this->request->post['config_image']) && is_file(DIR_IMAGE . $this->request->post['config_image'])) {
-			$data['thumb'] = $this->model_tool_image->resize($this->request->post['config_image'], 100, 100);
-		} elseif ($this->config->get('config_image') && is_file(DIR_IMAGE . $this->config->get('config_image'))) {
-			$data['thumb'] = $this->model_tool_image->resize($this->config->get('config_image'), 100, 100);
+		if (isset($this->request->post['config_images']) && is_array($this->request->post['config_images'])) {
+			$config_images = $this->normalizeConfigImages($this->request->post['config_images']);
 		} else {
-			$data['thumb'] = $this->model_tool_image->resize('no_image.png', 100, 100);
+			$config_images = $this->normalizeConfigImages((array)$this->config->get('config_images'));
 		}
 
+		if (!$config_images) {
+			$fallback_image = '';
+
+			if (isset($this->request->post['config_image']) && $this->request->post['config_image']) {
+				$fallback_image = $this->request->post['config_image'];
+			} elseif ($this->config->get('config_image')) {
+				$fallback_image = $this->config->get('config_image');
+			}
+
+			if ($fallback_image) {
+				$config_images[] = $fallback_image;
+			}
+		}
+
+		$data['config_images'] = array_pad(array_slice($config_images, 0, 5), 5, '');
+		$data['config_image'] = $data['config_images'][0];
+
 		$data['placeholder'] = $this->model_tool_image->resize('no_image.png', 100, 100);
+		$data['config_images_thumb'] = array();
+
+		foreach ($data['config_images'] as $config_image) {
+			if ($config_image && is_file(DIR_IMAGE . $config_image)) {
+				$data['config_images_thumb'][] = $this->model_tool_image->resize($config_image, 100, 100);
+			} else {
+				$data['config_images_thumb'][] = $data['placeholder'];
+			}
+		}
+
+		$data['thumb'] = $data['config_images_thumb'][0];
 
 		// Multilingual fields for open and comment
 		if (isset($this->request->post['config_open_i18n'])) {
@@ -1015,6 +1043,12 @@ class ControllerSettingSetting extends Controller {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
+		$this->syncConfigImagesInPost();
+
+		if (!isset($this->request->post['config_contact_form_status'])) {
+			$this->request->post['config_contact_form_status'] = 0;
+		}
+
 		// Validate multilingual fields (_i18n)
 		if (isset($this->request->post['config_meta_title_i18n'])) {
 			foreach ($this->request->post['config_meta_title_i18n'] as $language_id => $value) {
@@ -1149,6 +1183,39 @@ class ControllerSettingSetting extends Controller {
 		}
 
 		return !$this->error;
+	}
+
+	private function normalizeConfigImages($images) {
+		$result = array();
+
+		foreach ((array)$images as $image) {
+			$image = trim((string)$image);
+
+			if ($image === '' || in_array($image, $result)) {
+				continue;
+			}
+
+			$result[] = $image;
+
+			if (count($result) >= 5) {
+				break;
+			}
+		}
+
+		return $result;
+	}
+
+	private function syncConfigImagesInPost() {
+		$images = array();
+
+		if (isset($this->request->post['config_images']) && is_array($this->request->post['config_images'])) {
+			$images = $this->normalizeConfigImages($this->request->post['config_images']);
+		} elseif (!empty($this->request->post['config_image'])) {
+			$images = $this->normalizeConfigImages(array($this->request->post['config_image']));
+		}
+
+		$this->request->post['config_images'] = $images;
+		$this->request->post['config_image'] = isset($images[0]) ? $images[0] : '';
 	}
 	
 	public function theme() {

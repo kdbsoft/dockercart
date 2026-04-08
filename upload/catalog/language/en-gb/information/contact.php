@@ -5,7 +5,9 @@ $_['heading_title']  = 'Contact Us';
 // Text
 $_['text_location']  = 'Our Location';
 $_['text_store']     = 'Our Stores';
+$_['text_store_gallery'] = 'Store Gallery';
 $_['text_contact']   = 'Contact Form';
+$_['text_zoom']       = 'Zoom';
 $_['text_address']   = 'Address';
 $_['text_telephone'] = 'Telephone';
 $_['text_fax']       = 'Fax';
