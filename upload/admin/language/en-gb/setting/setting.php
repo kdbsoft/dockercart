@@ -130,7 +130,7 @@ $_['entry_error_filename']           = 'Error Log Filename';
 $_['entry_status']                   = 'Status';
 
 // Help
-$_['help_geocode']                   = 'Please enter your store location geocode manually.';
+$_['help_geocode']                   = 'Enter coordinates or a map link. Supported examples: 49°58\'11.2"N 36°07\'24.4"E, 49.969778,36.123444, or https://maps.app.goo.gl/...';
 $_['help_open']                      = 'Fill in your store\'s opening times.';
 $_['help_comment']                   = 'This field is for any special notes you would like to tell the customer i.e. Store does not accept cheques.';
 $_['help_images']                    = 'Upload up to 5 images for the Contacts page gallery.';

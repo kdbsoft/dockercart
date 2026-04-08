@@ -59,8 +59,9 @@
   .dc-contact-gallery-media img {
     display: block;
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    height: auto;
+    max-height: 34rem;
+    object-fit: contain;
     transition: transform .7s cubic-bezier(.22, 1, .36, 1);
   }
 
@@ -96,17 +97,17 @@
       <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 sm:p-8 mb-6">
         <p class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-5">{{ text_location }}</p>
         <div class="flex flex-col sm:flex-row gap-6">
-          {% if image %}
           <div class="flex-shrink-0">
-            <img src="{{ image }}" alt="{{ store }}" class="w-24 h-24 object-cover rounded-2xl border border-gray-100" />
+            <span class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 inline-flex items-center justify-center shadow-sm">
+              <i data-lucide="map-pin" class="w-8 h-8 sm:w-10 sm:h-10"></i>
+            </span>
           </div>
-          {% endif %}
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 flex-1 text-sm">
             <div>
               <p class="font-bold text-gray-900 mb-1">{{ store }}</p>
               <address class="not-italic text-gray-500 leading-relaxed">{{ address }}</address>
-              {% if geocode %}
-              <a href="https://maps.google.com/maps?q={{ geocode|url_encode }}&hl={{ geocode_hl }}&t=m&z=15" target="_blank"
+              {% if geocode_url %}
+              <a href="{{ geocode_url }}" target="_blank"
                 class="inline-flex items-center gap-1.5 mt-3 text-blue-600 hover:text-blue-700 text-xs font-medium border border-blue-200 hover:border-blue-300 px-3 py-1.5 rounded-lg transition">
                 <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
                 {{ button_map }}
@@ -139,7 +140,7 @@
         <p class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-5">{{ text_store_gallery }}</p>
         <div class="dc-contact-masonry">
           {% for store_image in store_images %}
-          {% set ratio_class = loop.index0 % 5 == 0 ? 'dc-ratio-portrait' : (loop.index0 % 3 == 0 ? 'dc-ratio-wide' : 'dc-ratio-landscape') %}
+          {% set ratio_class = store_image.ratio_class is defined and store_image.ratio_class ? store_image.ratio_class : 'dc-ratio-landscape' %}
           <button type="button" class="zoom-target dc-contact-gallery-item group relative text-left" data-gallery-index="{{ loop.index0 }}">
             <div class="dc-contact-gallery-media {{ ratio_class }}">
               <img src="{{ store_image.preview }}" data-popup="{{ store_image.popup }}" alt="{{ store }}" class="cursor-zoom-in" />
@@ -175,8 +176,8 @@
                   <div>
                     <p class="font-bold text-gray-900 mb-1">{{ location.name }}</p>
                     <address class="not-italic text-gray-500 leading-relaxed">{{ location.address }}</address>
-                    {% if location.geocode %}
-                    <a href="https://maps.google.com/maps?q={{ location.geocode|url_encode }}&hl={{ geocode_hl }}&t=m&z=15" target="_blank"
+                    {% if location.geocode_url %}
+                    <a href="{{ location.geocode_url }}" target="_blank"
                       class="inline-flex items-center gap-1.5 mt-3 text-blue-600 hover:text-blue-700 text-xs font-medium border border-blue-200 hover:border-blue-300 px-3 py-1.5 rounded-lg transition">
                       <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
                       {{ button_map }}
