@@ -228,6 +228,12 @@ class ControllerCommonFileManager extends Controller {
 
 			foreach ($files as $file) {
 				if (is_file($file['tmp_name'])) {
+					$max_upload_size = (int)$this->config->get('config_file_max_size');
+
+					if ($max_upload_size < 2097152) {
+						$max_upload_size = 10485760;
+					}
+
 					// Sanitize the filename
 					$filename = basename(html_entity_decode($file['name'], ENT_QUOTES, 'UTF-8'));
 
@@ -263,7 +269,7 @@ class ControllerCommonFileManager extends Controller {
 						$json['error'] = $this->language->get('error_filetype');
 					}
 
-					if ($file['size'] > $this->config->get('config_file_max_size')) {
+					if ($file['size'] > $max_upload_size) {
 						$json['error'] = $this->language->get('error_filesize');
 					}
 

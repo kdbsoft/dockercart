@@ -1,80 +1,96 @@
 {{ header }}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" />
 <style>
-  .dc-contact-masonry {
-    columns: 1;
-    column-gap: 1rem;
+  .dc-gal-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
   }
 
-  @media (min-width: 640px) {
-    .dc-contact-masonry {
-      columns: 2;
-    }
+  .dc-gal-row {
+    display: flex;
+    gap: .75rem;
   }
 
-  @media (min-width: 1024px) {
-    .dc-contact-masonry {
-      columns: 3;
-    }
-  }
+  /* Fixed height for multi-photo rows; single photo uses natural height */
+  .dc-gal-row--2 { min-height: 20rem; }
+  .dc-gal-row--3,
+  .dc-gal-row--4 { min-height: 26rem; }
 
-  .dc-contact-gallery-item {
-    display: block;
-    width: 100%;
-    margin: 0 0 1rem;
-    break-inside: avoid;
+  .dc-gal-item {
+    flex: 1;
+    border: 0;
+    background: transparent;
+    padding: 0;
     overflow: hidden;
-    border: 1px solid #f3f4f6;
     border-radius: 1rem;
-    background: #f9fafb;
-    transform: translateY(0);
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
-    transition: transform .28s cubic-bezier(.22, 1, .36, 1), box-shadow .28s cubic-bezier(.22, 1, .36, 1), border-color .28s ease;
-  }
-
-  .dc-contact-gallery-item:hover {
-    transform: translateY(-6px);
-    border-color: #dbeafe;
-    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.16);
-  }
-
-  .dc-contact-gallery-media {
+    cursor: zoom-in;
     position: relative;
-    overflow: hidden;
+    min-height: 14rem;
+    transition: transform .3s cubic-bezier(.22, 1, .36, 1), box-shadow .3s cubic-bezier(.22, 1, .36, 1);
   }
 
-  .dc-contact-gallery-media::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(15, 23, 42, 0.24), rgba(15, 23, 42, 0));
-    opacity: 0;
-    transition: opacity .25s ease;
+  /* Primary slot gets extra flex-weight in split rows */
+  .dc-gal-item--big { flex: 1.3; }
+
+  .dc-gal-item:hover {
+    transform: scale(1.012);
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.13);
+    z-index: 1;
   }
 
-  .dc-contact-gallery-item:hover .dc-contact-gallery-media::after {
-    opacity: 1;
-  }
-
-  .dc-contact-gallery-media img {
+  /* Default: crop-fill for square/portrait images */
+  .dc-gal-item img {
     display: block;
     width: 100%;
-    height: auto;
-    max-height: 34rem;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform .6s cubic-bezier(.22, 1, .36, 1);
+  }
+
+  .dc-gal-item:hover img { transform: scale(1.06); }
+
+  /* Wide/panoramic: show full image without cropping */
+  .dc-gal-item.dc-ratio-wide {
+    background: #f8fafc;
+  }
+  .dc-gal-item.dc-ratio-wide img {
     object-fit: contain;
-    transition: transform .7s cubic-bezier(.22, 1, .36, 1);
   }
 
-  .dc-contact-gallery-item:hover .dc-contact-gallery-media img {
-    transform: scale(1.075);
+  /* Single photo: natural proportions, no forced tall slot */
+  .dc-gal-row--1 .dc-gal-item {
+    min-height: 0;
+  }
+  .dc-gal-row--1 .dc-gal-item img {
+    height: auto;
+    max-height: min(68vh, 34rem);
+    object-fit: contain;
   }
 
-  .dc-ratio-landscape { aspect-ratio: 4 / 3; }
-  .dc-ratio-wide { aspect-ratio: 16 / 9; }
-  .dc-ratio-portrait { aspect-ratio: 3 / 4; }
+  .dc-gal-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+  }
+  .dc-gal-col .dc-gal-item {
+    flex: 1;
+    min-height: 0;
+  }
+
+  @media (max-width: 639px) {
+    .dc-gal-row { flex-direction: column; }
+    .dc-gal-col { flex-direction: column; }
+    .dc-gal-row--2, .dc-gal-row--3, .dc-gal-row--4 { min-height: auto; }
+    .dc-gal-item { min-height: 16rem; }
+    .dc-gal-col .dc-gal-item { min-height: 14rem; }
+    .dc-gal-row--1 .dc-gal-item img { max-height: 22rem; }
+  }
 
   .zoom-hint { opacity: 0; transform: translateY(6px); transition: all .25s ease; }
-  .zoom-target:hover .zoom-hint { opacity: 1; transform: translateY(0); }
+  .dc-gal-item:hover .zoom-hint { opacity: 1; transform: translateY(0); }
 </style>
 <main class="bg-gray-50 min-h-screen">
 
@@ -138,18 +154,108 @@
       {% if store_images %}
       <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 sm:p-8 mb-6">
         <p class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-5">{{ text_store_gallery }}</p>
-        <div class="dc-contact-masonry">
-          {% for store_image in store_images %}
-          {% set ratio_class = store_image.ratio_class is defined and store_image.ratio_class ? store_image.ratio_class : 'dc-ratio-landscape' %}
-          <button type="button" class="zoom-target dc-contact-gallery-item group relative text-left" data-gallery-index="{{ loop.index0 }}">
-            <div class="dc-contact-gallery-media {{ ratio_class }}">
-              <img src="{{ store_image.preview }}" data-popup="{{ store_image.popup }}" alt="{{ store }}" class="cursor-zoom-in" />
+        {% set total = store_images|length %}
+        {% set i0 = store_images[0] is defined ? store_images[0] : null %}
+        {% set i1 = store_images[1] is defined ? store_images[1] : null %}
+        {% set i2 = store_images[2] is defined ? store_images[2] : null %}
+        {% set i3 = store_images[3] is defined ? store_images[3] : null %}
+        {% set i4 = store_images[4] is defined ? store_images[4] : null %}
+        <div class="dc-gal-wrap">
+
+          {% if total == 1 %}
+          {# ── 1 фото: натуральные пропорции ── #}
+          <div class="dc-gal-row dc-gal-row--1">
+            <button type="button" class="dc-gal-item {{ i0.ratio_class }}" data-gallery-index="0">
+              <img src="{{ i0.preview }}" data-popup="{{ i0.popup }}" alt="{{ store }}" />
+              <span class="zoom-hint absolute bottom-2 right-2 z-10 inline-flex items-center gap-1 bg-gray-900/75 text-white text-[11px] font-semibold px-2 py-1 rounded-lg backdrop-blur-sm"><i data-lucide="zoom-in" class="w-3 h-3"></i></span>
+            </button>
+          </div>
+
+          {% elseif total == 2 %}
+          {# ── 2 фото: равные колонки ── #}
+          <div class="dc-gal-row dc-gal-row--2">
+            <button type="button" class="dc-gal-item {{ i0.ratio_class }}" data-gallery-index="0">
+              <img src="{{ i0.preview }}" data-popup="{{ i0.popup }}" alt="{{ store }}" />
+              <span class="zoom-hint absolute bottom-2 right-2 z-10 inline-flex items-center gap-1 bg-gray-900/75 text-white text-[11px] font-semibold px-2 py-1 rounded-lg backdrop-blur-sm"><i data-lucide="zoom-in" class="w-3 h-3"></i></span>
+            </button>
+            <button type="button" class="dc-gal-item {{ i1.ratio_class }}" data-gallery-index="1">
+              <img src="{{ i1.preview }}" data-popup="{{ i1.popup }}" alt="{{ store }}" />
+              <span class="zoom-hint absolute bottom-2 right-2 z-10 inline-flex items-center gap-1 bg-gray-900/75 text-white text-[11px] font-semibold px-2 py-1 rounded-lg backdrop-blur-sm"><i data-lucide="zoom-in" class="w-3 h-3"></i></span>
+            </button>
+          </div>
+
+          {% elseif total == 3 %}
+          {# ── 3 фото: [большое | 2 сложенных] ── #}
+          <div class="dc-gal-row dc-gal-row--3">
+            <button type="button" class="dc-gal-item dc-gal-item--big {{ i0.ratio_class }}" data-gallery-index="0">
+              <img src="{{ i0.preview }}" data-popup="{{ i0.popup }}" alt="{{ store }}" />
+              <span class="zoom-hint absolute bottom-2 right-2 z-10 inline-flex items-center gap-1 bg-gray-900/75 text-white text-[11px] font-semibold px-2 py-1 rounded-lg backdrop-blur-sm"><i data-lucide="zoom-in" class="w-3 h-3"></i></span>
+            </button>
+            <div class="dc-gal-col">
+              <button type="button" class="dc-gal-item {{ i1.ratio_class }}" data-gallery-index="1">
+                <img src="{{ i1.preview }}" data-popup="{{ i1.popup }}" alt="{{ store }}" />
+                <span class="zoom-hint absolute bottom-2 right-2 z-10 inline-flex items-center gap-1 bg-gray-900/75 text-white text-[11px] font-semibold px-2 py-1 rounded-lg backdrop-blur-sm"><i data-lucide="zoom-in" class="w-3 h-3"></i></span>
+              </button>
+              <button type="button" class="dc-gal-item {{ i2.ratio_class }}" data-gallery-index="2">
+                <img src="{{ i2.preview }}" data-popup="{{ i2.popup }}" alt="{{ store }}" />
+                <span class="zoom-hint absolute bottom-2 right-2 z-10 inline-flex items-center gap-1 bg-gray-900/75 text-white text-[11px] font-semibold px-2 py-1 rounded-lg backdrop-blur-sm"><i data-lucide="zoom-in" class="w-3 h-3"></i></span>
+              </button>
             </div>
-            <span class="zoom-hint absolute bottom-3 right-3 z-10 inline-flex items-center gap-1.5 bg-gray-900/80 text-white text-[11px] font-semibold px-2.5 py-1.5 rounded-lg backdrop-blur-sm">
-              <i data-lucide="zoom-in" class="w-3.5 h-3.5"></i> {{ text_zoom }}
-            </span>
-          </button>
-          {% endfor %}
+          </div>
+
+          {% elseif total == 4 %}
+          {# ── 4 фото: ряд1 [большое|маленькое], ряд2 [маленькое|большое] ── #}
+          <div class="dc-gal-row dc-gal-row--4">
+            <button type="button" class="dc-gal-item dc-gal-item--big {{ i0.ratio_class }}" data-gallery-index="0">
+              <img src="{{ i0.preview }}" data-popup="{{ i0.popup }}" alt="{{ store }}" />
+              <span class="zoom-hint absolute bottom-2 right-2 z-10 inline-flex items-center gap-1 bg-gray-900/75 text-white text-[11px] font-semibold px-2 py-1 rounded-lg backdrop-blur-sm"><i data-lucide="zoom-in" class="w-3 h-3"></i></span>
+            </button>
+            <button type="button" class="dc-gal-item {{ i1.ratio_class }}" data-gallery-index="1">
+              <img src="{{ i1.preview }}" data-popup="{{ i1.popup }}" alt="{{ store }}" />
+              <span class="zoom-hint absolute bottom-2 right-2 z-10 inline-flex items-center gap-1 bg-gray-900/75 text-white text-[11px] font-semibold px-2 py-1 rounded-lg backdrop-blur-sm"><i data-lucide="zoom-in" class="w-3 h-3"></i></span>
+            </button>
+          </div>
+          <div class="dc-gal-row dc-gal-row--4">
+            <button type="button" class="dc-gal-item {{ i2.ratio_class }}" data-gallery-index="2">
+              <img src="{{ i2.preview }}" data-popup="{{ i2.popup }}" alt="{{ store }}" />
+              <span class="zoom-hint absolute bottom-2 right-2 z-10 inline-flex items-center gap-1 bg-gray-900/75 text-white text-[11px] font-semibold px-2 py-1 rounded-lg backdrop-blur-sm"><i data-lucide="zoom-in" class="w-3 h-3"></i></span>
+            </button>
+            <button type="button" class="dc-gal-item dc-gal-item--big {{ i3.ratio_class }}" data-gallery-index="3">
+              <img src="{{ i3.preview }}" data-popup="{{ i3.popup }}" alt="{{ store }}" />
+              <span class="zoom-hint absolute bottom-2 right-2 z-10 inline-flex items-center gap-1 bg-gray-900/75 text-white text-[11px] font-semibold px-2 py-1 rounded-lg backdrop-blur-sm"><i data-lucide="zoom-in" class="w-3 h-3"></i></span>
+            </button>
+          </div>
+
+          {% else %}
+          {# ── 5 фото: [большое | 2 сложенных] + [равные | равные] ── #}
+          <div class="dc-gal-row dc-gal-row--3">
+            <button type="button" class="dc-gal-item dc-gal-item--big {{ i0.ratio_class }}" data-gallery-index="0">
+              <img src="{{ i0.preview }}" data-popup="{{ i0.popup }}" alt="{{ store }}" />
+              <span class="zoom-hint absolute bottom-2 right-2 z-10 inline-flex items-center gap-1 bg-gray-900/75 text-white text-[11px] font-semibold px-2 py-1 rounded-lg backdrop-blur-sm"><i data-lucide="zoom-in" class="w-3 h-3"></i></span>
+            </button>
+            <div class="dc-gal-col">
+              <button type="button" class="dc-gal-item {{ i1.ratio_class }}" data-gallery-index="1">
+                <img src="{{ i1.preview }}" data-popup="{{ i1.popup }}" alt="{{ store }}" />
+                <span class="zoom-hint absolute bottom-2 right-2 z-10 inline-flex items-center gap-1 bg-gray-900/75 text-white text-[11px] font-semibold px-2 py-1 rounded-lg backdrop-blur-sm"><i data-lucide="zoom-in" class="w-3 h-3"></i></span>
+              </button>
+              <button type="button" class="dc-gal-item {{ i2.ratio_class }}" data-gallery-index="2">
+                <img src="{{ i2.preview }}" data-popup="{{ i2.popup }}" alt="{{ store }}" />
+                <span class="zoom-hint absolute bottom-2 right-2 z-10 inline-flex items-center gap-1 bg-gray-900/75 text-white text-[11px] font-semibold px-2 py-1 rounded-lg backdrop-blur-sm"><i data-lucide="zoom-in" class="w-3 h-3"></i></span>
+              </button>
+            </div>
+          </div>
+          <div class="dc-gal-row dc-gal-row--2">
+            <button type="button" class="dc-gal-item {{ i3.ratio_class }}" data-gallery-index="3">
+              <img src="{{ i3.preview }}" data-popup="{{ i3.popup }}" alt="{{ store }}" />
+              <span class="zoom-hint absolute bottom-2 right-2 z-10 inline-flex items-center gap-1 bg-gray-900/75 text-white text-[11px] font-semibold px-2 py-1 rounded-lg backdrop-blur-sm"><i data-lucide="zoom-in" class="w-3 h-3"></i></span>
+            </button>
+            <button type="button" class="dc-gal-item {{ i4.ratio_class }}" data-gallery-index="4">
+              <img src="{{ i4.preview }}" data-popup="{{ i4.popup }}" alt="{{ store }}" />
+              <span class="zoom-hint absolute bottom-2 right-2 z-10 inline-flex items-center gap-1 bg-gray-900/75 text-white text-[11px] font-semibold px-2 py-1 rounded-lg backdrop-blur-sm"><i data-lucide="zoom-in" class="w-3 h-3"></i></span>
+            </button>
+          </div>
+          {% endif %}
+
         </div>
       </div>
       {% endif %}
@@ -256,21 +362,17 @@
 <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  var galleryItems = Array.from(document.querySelectorAll('.dc-contact-gallery-item'));
+  var galleryItems = Array.from(document.querySelectorAll('.dc-gal-item[data-gallery-index]'));
 
   if (galleryItems.length && typeof GLightbox === 'function') {
+    galleryItems.sort(function(a, b) {
+      return parseInt(a.dataset.galleryIndex || '0', 10) - parseInt(b.dataset.galleryIndex || '0', 10);
+    });
+
     var elements = galleryItems.map(function(item) {
-      var image = item.querySelector('img');
-
-      if (!image) {
-        return null;
-      }
-
-      return {
-        href: image.dataset.popup || image.src,
-        type: 'image'
-      };
-    }).filter(Boolean);
+      var img = item.querySelector('img');
+      return { href: img ? (img.dataset.popup || img.src) : '', type: 'image' };
+    }).filter(function(e) { return e.href; });
 
     if (elements.length) {
       var lightbox = GLightbox({
@@ -282,9 +384,9 @@ document.addEventListener('DOMContentLoaded', function() {
         closeEffect: 'fade'
       });
 
-      galleryItems.forEach(function(item, index) {
+      galleryItems.forEach(function(item) {
         item.addEventListener('click', function() {
-          lightbox.openAt(index);
+          lightbox.openAt(parseInt(item.dataset.galleryIndex || '0', 10));
         });
       });
     }
