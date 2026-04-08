@@ -65,11 +65,9 @@ class ControllerInformationContact extends Controller {
 
 		$this->load->model('tool/image');
 
-		if ($this->config->get('config_image')) {
-			$data['image'] = $this->model_tool_image->resize($this->config->get('config_image'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_location_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_location_height'));
-		} else {
-			$data['image'] = false;
-		}
+		$server = $this->request->server['HTTPS'] ? HTTPS_SERVER : HTTP_SERVER;
+
+		$data['image'] = false;
 
 		$data['store_images'] = array();
 
@@ -80,13 +78,29 @@ class ControllerInformationContact extends Controller {
 		}
 
 		foreach ($config_images as $config_image) {
-			if (!is_file(DIR_IMAGE . $config_image)) {
+			$image_path = ltrim((string)$config_image, '/');
+
+			if (!is_file(DIR_IMAGE . $image_path)) {
 				continue;
 			}
 
+			$image_size = @getimagesize(DIR_IMAGE . $image_path);
+			$ratio_class = 'dc-ratio-landscape';
+
+			if ($image_size && !empty($image_size[0]) && !empty($image_size[1])) {
+				$ratio = (float)$image_size[0] / (float)$image_size[1];
+
+				if ($ratio <= 0.9) {
+					$ratio_class = 'dc-ratio-portrait';
+				} elseif ($ratio >= 1.6) {
+					$ratio_class = 'dc-ratio-wide';
+				}
+			}
+
 			$data['store_images'][] = array(
-				'preview' => $this->model_tool_image->resize($config_image, 1200, 900),
-				'popup'   => $this->model_tool_image->resize($config_image, 2000, 2000)
+				'preview'     => $server . 'image/' . $image_path,
+				'popup'       => $server . 'image/' . $image_path,
+				'ratio_class' => $ratio_class
 			);
 		}
 
@@ -94,6 +108,7 @@ class ControllerInformationContact extends Controller {
 		$data['address'] = nl2br($this->config->get('config_address'));
 		$data['geocode'] = $this->config->get('config_geocode');
 		$data['geocode_hl'] = $this->config->get('config_language');
+		$data['geocode_url'] = $this->buildMapUrl($data['geocode'], $data['geocode_hl']);
 		$data['telephone'] = $this->config->get('config_telephone');
 		$data['fax'] = $this->config->get('config_fax');
 		$data['open'] = nl2br($this->config->get('config_open'));
@@ -118,6 +133,7 @@ class ControllerInformationContact extends Controller {
 					'name'        => $location_info['name'],
 					'address'     => nl2br($location_info['address']),
 					'geocode'     => $location_info['geocode'],
+					'geocode_url' => $this->buildMapUrl($location_info['geocode'], $data['geocode_hl']),
 					'telephone'   => $location_info['telephone'],
 					'fax'         => $location_info['fax'],
 					'image'       => $image,
@@ -223,6 +239,134 @@ class ControllerInformationContact extends Controller {
 		}
 
 		return $result;
+	}
+
+	private function buildMapUrl($geocode, $language_code = 'en') {
+		$geocode = html_entity_decode((string)$geocode, ENT_QUOTES, 'UTF-8');
+		$geocode = preg_replace('/\x{00A0}/u', ' ', $geocode);
+		$geocode = trim($geocode);
+
+		if ($geocode === '') {
+			return '';
+		}
+
+		$map_base = 'https://www.google.com/maps?q=';
+		$map_suffix = '&hl=' . rawurlencode((string)$language_code) . '&t=m&z=15';
+
+		if (filter_var($geocode, FILTER_VALIDATE_URL)) {
+			$parts = parse_url($geocode);
+			$host = isset($parts['host']) ? strtolower($parts['host']) : '';
+
+			if ($host && $this->isGoogleMapsHost($host)) {
+				return $geocode;
+			}
+
+			return $map_base . rawurlencode($geocode) . $map_suffix;
+		}
+
+		$decimal_pair = $this->parseDecimalCoordinatePair($geocode);
+
+		if ($decimal_pair) {
+			$query = $this->formatCoordinate($decimal_pair['lat']) . ',' . $this->formatCoordinate($decimal_pair['lng']);
+
+			return $map_base . rawurlencode($query) . $map_suffix;
+		}
+
+		$dms_pair = $this->parseDmsCoordinatePair($geocode);
+
+		if ($dms_pair) {
+			$query = $this->formatCoordinate($dms_pair['lat']) . ',' . $this->formatCoordinate($dms_pair['lng']);
+
+			return $map_base . rawurlencode($query) . $map_suffix;
+		}
+
+		return $map_base . rawurlencode($geocode) . $map_suffix;
+	}
+
+	private function isGoogleMapsHost($host) {
+		$google_hosts = array(
+			'maps.app.goo.gl',
+			'goo.gl',
+			'maps.google.com',
+			'google.com',
+			'www.google.com',
+			'm.google.com'
+		);
+
+		if (in_array($host, $google_hosts)) {
+			return true;
+		}
+
+		return (substr($host, -11) === '.google.com');
+	}
+
+	private function parseDecimalCoordinatePair($value) {
+		if (preg_match('/^\s*([+-]?\d{1,2}(?:\.\d+)?)\s*[, ]\s*([+-]?\d{1,3}(?:\.\d+)?)\s*$/u', $value, $matches)) {
+			$lat = (float)$matches[1];
+			$lng = (float)$matches[2];
+
+			if ($lat >= -90 && $lat <= 90 && $lng >= -180 && $lng <= 180) {
+				return array('lat' => $lat, 'lng' => $lng);
+			}
+		}
+
+		return null;
+	}
+
+	private function parseDmsCoordinatePair($value) {
+		if (!preg_match('/^\s*(.+?[NSns])\s*[, ]+\s*(.+?[EWew])\s*$/u', $value, $parts)) {
+			return null;
+		}
+
+		$lat = $this->parseSingleDmsCoordinate($parts[1]);
+		$lng = $this->parseSingleDmsCoordinate($parts[2]);
+
+		if ($lat === null || $lng === null) {
+			return null;
+		}
+
+		if ($lat < -90 || $lat > 90 || $lng < -180 || $lng > 180) {
+			return null;
+		}
+
+		return array('lat' => $lat, 'lng' => $lng);
+	}
+
+	private function parseSingleDmsCoordinate($part) {
+		$normalized = html_entity_decode((string)$part, ENT_QUOTES, 'UTF-8');
+		$normalized = str_replace(array('’', '′', '“', '”', '″', '`'), array("'", "'", '"', '"', '"', "'"), trim($normalized));
+
+		if (!preg_match('/^\s*(\d{1,3})(?:\s*°\s*|\s+)(\d{1,2})\s*[\'\’\′]?\s*(\d{1,2}(?:\.\d+)?)\s*[\"\”\″]?\s*([NSEWnsew])\s*$/u', $normalized, $m)) {
+			if (!preg_match('/^\s*([+-]?\d{1,3}(?:\.\d+)?)\s*([NSEWnsew])\s*$/u', $normalized, $m2)) {
+				return null;
+			}
+
+			$decimal = abs((float)$m2[1]);
+			$direction = strtoupper($m2[2]);
+
+			if ($direction === 'S' || $direction === 'W') {
+				$decimal *= -1;
+			}
+
+			return $decimal;
+		}
+
+		$degrees = (float)$m[1];
+		$minutes = (float)$m[2];
+		$seconds = (float)$m[3];
+		$direction = strtoupper($m[4]);
+
+		$decimal = $degrees + ($minutes / 60) + ($seconds / 3600);
+
+		if ($direction === 'S' || $direction === 'W') {
+			$decimal *= -1;
+		}
+
+		return $decimal;
+	}
+
+	private function formatCoordinate($value) {
+		return rtrim(rtrim(number_format((float)$value, 6, '.', ''), '0'), '.');
 	}
 
 	public function success() {
