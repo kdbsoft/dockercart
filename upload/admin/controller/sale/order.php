@@ -262,6 +262,7 @@ class ControllerSaleOrder extends Controller {
 				'order_id'      => $result['order_id'],
 				'customer'      => $result['customer'],
 				'order_status'  => $result['order_status'] ? $result['order_status'] : $this->language->get('text_missing'),
+				'tracking_number' => $result['tracking_number'],
 				'total'         => $this->currency->format($result['total'], $result['currency_code'], $result['currency_value']),
 				'date_added'    => date($this->language->get('date_format_short'), strtotime($result['date_added'])),
 				'date_modified' => date($this->language->get('date_format_short'), strtotime($result['date_modified'])),
@@ -516,6 +517,7 @@ class ControllerSaleOrder extends Controller {
 			$data['email'] = $order_info['email'];
 			$data['telephone'] = $order_info['telephone'];
 			$data['tax_number'] = $order_info['tax_number'];
+			$data['tracking_number'] = $order_info['tracking_number'];
 			$data['payment_code'] = $order_info['payment_code'];
 			$data['shipping_code'] = $order_info['shipping_code'];
 
@@ -627,6 +629,7 @@ class ControllerSaleOrder extends Controller {
 			$data['email'] = '';
 			$data['telephone'] = '';
 			$data['tax_number'] = '';
+			$data['tracking_number'] = '';
 			$data['customer_custom_field'] = array();
 
 			$data['addresses'] = array();
@@ -922,6 +925,7 @@ class ControllerSaleOrder extends Controller {
 			$data['email'] = $order_info['email'];
 			$data['telephone'] = $order_info['telephone'];
 			$data['tax_number'] = $order_info['tax_number'];
+			$data['tracking_number'] = $order_info['tracking_number'];
 			$data['payment_code'] = $order_info['payment_code'];
 			$data['shipping_code'] = $order_info['shipping_code'];
 
@@ -1458,6 +1462,10 @@ class ControllerSaleOrder extends Controller {
 					$update_data['tax_number'] = isset($this->request->post['value']) ? trim($this->request->post['value']) : '';
 					break;
 
+				case 'tracking_number':
+					$update_data['tracking_number'] = isset($this->request->post['value']) ? trim($this->request->post['value']) : '';
+					break;
+
 				case 'payment_method':
 					$update_data['payment_method'] = isset($this->request->post['title']) ? trim($this->request->post['title']) : '';
 					$update_data['payment_code'] = isset($this->request->post['code']) ? trim($this->request->post['code']) : '';
@@ -1541,6 +1549,7 @@ class ControllerSaleOrder extends Controller {
 				$email = htmlspecialchars($order_info['email'], ENT_QUOTES, 'UTF-8');
 				$telephone = htmlspecialchars($order_info['telephone'], ENT_QUOTES, 'UTF-8');
 				$tax_number = htmlspecialchars($order_info['tax_number'], ENT_QUOTES, 'UTF-8');
+				$tracking_number = htmlspecialchars($order_info['tracking_number'], ENT_QUOTES, 'UTF-8');
 				$payment_method = htmlspecialchars($order_info['payment_method'], ENT_QUOTES, 'UTF-8');
 				$shipping_method = htmlspecialchars($order_info['shipping_method'], ENT_QUOTES, 'UTF-8');
 				$comment = nl2br(htmlspecialchars($order_info['comment'], ENT_QUOTES, 'UTF-8'));
@@ -1568,6 +1577,10 @@ class ControllerSaleOrder extends Controller {
 
 					case 'tax_number':
 						$json['value_html'] = $tax_number;
+						break;
+
+					case 'tracking_number':
+						$json['value_html'] = $tracking_number;
 						break;
 
 					case 'payment_method':

@@ -58,6 +58,7 @@ class ControllerAccountOrder extends Controller {
 				'order_id'   => $result['order_id'],
 				'name'       => $result['firstname'] . ' ' . $result['lastname'],
 				'status'     => $result['status'],
+				'tracking_number' => $result['tracking_number'],
 				'date_added' => date($this->language->get('date_format_short'), strtotime($result['date_added'])),
 				'products'   => ($product_total + $voucher_total),
 				'total'      => $this->currency->format($result['total'], $result['currency_code'], $result['currency_value']),
@@ -161,6 +162,7 @@ class ControllerAccountOrder extends Controller {
 
 			$data['order_id'] = (int)$this->request->get['order_id'];
 			$data['date_added'] = date($this->language->get('date_format_short'), strtotime($order_info['date_added']));
+			$data['tracking_number'] = $order_info['tracking_number'];
 
 			if ($order_info['payment_address_format']) {
 				$format = $order_info['payment_address_format'];

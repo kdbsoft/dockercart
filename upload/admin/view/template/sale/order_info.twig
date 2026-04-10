@@ -42,6 +42,11 @@
                   <td class="text-right"><button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="shipping_method" data-title="{{ text_shipping_method }}" data-value="{{ shipping_method|e('html_attr') }}" data-code="{{ shipping_code|e('html_attr') }}" data-target="#quick-shipping-method"><i class="fa fa-pencil"></i></button></td>
                 </tr>
               {% endif %}
+              <tr>
+                <td><button data-toggle="tooltip" title="{{ text_tracking_number }}" class="btn btn-info btn-xs"><i class="fa fa-map-marker fa-fw"></i></button></td>
+                <td id="quick-tracking-number">{{ tracking_number }}</td>
+                <td class="text-right"><button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="tracking_number" data-title="{{ text_tracking_number }}" data-value="{{ tracking_number|e('html_attr') }}" data-target="#quick-tracking-number"><i class="fa fa-pencil"></i></button></td>
+              </tr>
             </tbody>
 
           </table>
@@ -468,7 +473,8 @@
       lastname: '{{ lastname|e('js') }}',
       email: '{{ email|e('js') }}',
       telephone: '{{ telephone|e('js') }}',
-      tax_number: '{{ tax_number|e('js') }}'
+      tax_number: '{{ tax_number|e('js') }}',
+      tracking_number: '{{ tracking_number|e('js') }}'
     },
     payment: {
       firstname: '{{ payment_firstname|e('js') }}',
@@ -847,6 +853,11 @@
           if (quickEditState.field === 'tax_number') {
             inlineState.customer.tax_number = payload.value;
             $('.btn-quick-edit[data-field="tax_number"]').data('value', payload.value);
+          }
+
+          if (quickEditState.field === 'tracking_number') {
+            inlineState.customer.tracking_number = payload.value;
+            $('.btn-quick-edit[data-field="tracking_number"]').data('value', payload.value);
           }
 
           if (quickEditState.field === 'comment') {
