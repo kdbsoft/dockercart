@@ -38,6 +38,10 @@ class ControllerLocalisationZone extends Controller {
 				$url .= '&page=' . $this->request->get['page'];
 			}
 
+			if (isset($this->request->get['filter_country_id'])) {
+				$url .= '&filter_country_id=' . (int)$this->request->get['filter_country_id'];
+			}
+
 			$this->response->redirect($this->url->link('localisation/zone', 'user_token=' . $this->session->data['user_token'] . $url, true));
 		}
 
@@ -68,6 +72,10 @@ class ControllerLocalisationZone extends Controller {
 
 			if (isset($this->request->get['page'])) {
 				$url .= '&page=' . $this->request->get['page'];
+			}
+
+			if (isset($this->request->get['filter_country_id'])) {
+				$url .= '&filter_country_id=' . (int)$this->request->get['filter_country_id'];
 			}
 
 			$this->response->redirect($this->url->link('localisation/zone', 'user_token=' . $this->session->data['user_token'] . $url, true));
@@ -104,6 +112,10 @@ class ControllerLocalisationZone extends Controller {
 				$url .= '&page=' . $this->request->get['page'];
 			}
 
+			if (isset($this->request->get['filter_country_id'])) {
+				$url .= '&filter_country_id=' . (int)$this->request->get['filter_country_id'];
+			}
+
 			$this->response->redirect($this->url->link('localisation/zone', 'user_token=' . $this->session->data['user_token'] . $url, true));
 		}
 
@@ -129,6 +141,12 @@ class ControllerLocalisationZone extends Controller {
 			$page = 1;
 		}
 
+		if (isset($this->request->get['filter_country_id'])) {
+			$filter_country_id = (int)$this->request->get['filter_country_id'];
+		} else {
+			$filter_country_id = 0;
+		}
+
 		$url = '';
 
 		if (isset($this->request->get['sort'])) {
@@ -141,6 +159,10 @@ class ControllerLocalisationZone extends Controller {
 
 		if (isset($this->request->get['page'])) {
 			$url .= '&page=' . $this->request->get['page'];
+		}
+
+		if (isset($this->request->get['filter_country_id'])) {
+			$url .= '&filter_country_id=' . (int)$this->request->get['filter_country_id'];
 		}
 
 		$data['breadcrumbs'] = array();
@@ -161,13 +183,14 @@ class ControllerLocalisationZone extends Controller {
 		$data['zones'] = array();
 
 		$filter_data = array(
+			'filter_country_id' => $filter_country_id,
 			'sort'  => $sort,
 			'order' => $order,
 			'start' => ($page - 1) * $this->config->get('config_limit_admin'),
 			'limit' => $this->config->get('config_limit_admin')
 		);
 
-		$zone_total = $this->model_localisation_zone->getTotalZones();
+		$zone_total = $this->model_localisation_zone->getTotalZones($filter_data);
 
 		$results = $this->model_localisation_zone->getZones($filter_data);
 
@@ -201,6 +224,11 @@ class ControllerLocalisationZone extends Controller {
 			$data['selected'] = array();
 		}
 
+		$this->load->model('localisation/country');
+		$data['countries'] = $this->model_localisation_country->getCountries();
+		$data['filter_country_id'] = $filter_country_id;
+		$data['user_token'] = $this->session->data['user_token'];
+
 		$url = '';
 
 		if ($order == 'ASC') {
@@ -211,6 +239,10 @@ class ControllerLocalisationZone extends Controller {
 
 		if (isset($this->request->get['page'])) {
 			$url .= '&page=' . $this->request->get['page'];
+		}
+
+		if (isset($this->request->get['filter_country_id'])) {
+			$url .= '&filter_country_id=' . (int)$this->request->get['filter_country_id'];
 		}
 
 		$data['sort_country'] = $this->url->link('localisation/zone', 'user_token=' . $this->session->data['user_token'] . '&sort=c.name' . $url, true);
@@ -225,6 +257,10 @@ class ControllerLocalisationZone extends Controller {
 
 		if (isset($this->request->get['order'])) {
 			$url .= '&order=' . $this->request->get['order'];
+		}
+
+		if (isset($this->request->get['filter_country_id'])) {
+			$url .= '&filter_country_id=' . (int)$this->request->get['filter_country_id'];
 		}
 
 		$pagination = new Pagination();
@@ -274,6 +310,10 @@ class ControllerLocalisationZone extends Controller {
 
 		if (isset($this->request->get['page'])) {
 			$url .= '&page=' . $this->request->get['page'];
+		}
+
+		if (isset($this->request->get['filter_country_id'])) {
+			$url .= '&filter_country_id=' . (int)$this->request->get['filter_country_id'];
 		}
 
 		$data['breadcrumbs'] = array();

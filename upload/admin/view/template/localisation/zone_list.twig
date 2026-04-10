@@ -29,6 +29,23 @@
         <h3 class="panel-title"><i class="fa fa-list"></i> {{ text_list }}</h3>
       </div>
       <div class="panel-body">
+        <div class="well">
+          <div class="row">
+            <div class="col-sm-4">
+              <div class="form-group">
+                <label class="control-label" for="input-filter-country">{{ entry_country }}</label>
+                <select name="filter_country_id" id="input-filter-country" class="form-control">
+                  <option value="0">{{ text_all }}</option>
+                  {% for country in countries %}
+                    <option value="{{ country.country_id }}" {% if country.country_id == filter_country_id %}selected="selected"{% endif %}>{{ country.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <button type="button" id="button-filter" class="btn btn-primary"><i class="fa fa-filter"></i> {{ button_filter }}</button>
+            </div>
+          </div>
+        </div>
+
         <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-zone">
           <div class="table-responsive">
             <table class="table table-bordered table-hover">
@@ -85,4 +102,17 @@
     </div>
   </div>
 </div>
+<script type="text/javascript"><!--
+$('#button-filter').on('click', function() {
+  var url = 'index.php?route=localisation/zone&user_token={{ user_token }}';
+
+  var filter_country_id = $('select[name=\'filter_country_id\']').val();
+
+  if (filter_country_id && filter_country_id != '0') {
+    url += '&filter_country_id=' + encodeURIComponent(filter_country_id);
+  }
+
+  location = url;
+});
+//--></script>
 {{ footer }}

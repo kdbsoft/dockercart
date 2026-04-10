@@ -103,26 +103,33 @@
 
   <!-- ① TOP MICRO BAR: phone, language, currency -->
   <div class="bg-gray-950">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-9 flex items-center justify-between gap-4 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row lg:h-9 lg:items-center lg:justify-between gap-2 lg:gap-4 relative py-2 lg:py-0">
 
-      <!-- Phone -->
-      <div class="flex items-center gap-2 text-white text-sm font-semibold hover:opacity-80 transition px-2 py-0.5 rounded-full flex-shrink-0">
-        <i data-lucide="phone" class="w-4 h-4 text-blue-300 flex-shrink-0"></i>
-        <div class="flex items-center gap-3">
-          <a href="tel:{{ telephone }}" class="hover:opacity-80">{{ telephone }}</a>
-          {% if fax %}
-          <span class="text-gray-400">/</span>
-          <a href="tel:{{ fax }}" class="hover:opacity-80">{{ fax }}</a>
-          {% endif %}
+      <!-- Phone & Hours -->
+      <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+        <!-- Phone row -->
+        <div class="flex items-center gap-2 text-white text-sm font-semibold hover:opacity-80 transition px-2 py-0.5 rounded-full">
+          <i data-lucide="phone" class="w-4 h-4 text-blue-300 flex-shrink-0"></i>
+          <div class="flex items-center gap-3">
+            <a href="tel:{{ telephone }}" class="hover:opacity-80">{{ telephone }}</a>
+            {% if fax %}
+            <span class="text-gray-400">/</span>
+            <a href="tel:{{ fax }}" class="hover:opacity-80">{{ fax }}</a>
+            {% endif %}
+          </div>
         </div>
+        <!-- Hours row (new line on mobile) -->
         {% if open_hours %}
-        <span class="text-[11px] font-medium text-gray-300">&bull; {{ open_hours|striptags|replace({'\n':' '}) }}</span>
+        <div class="flex items-center gap-2 text-[11px] font-medium text-gray-300 px-2 py-0.5">
+          <span class="hidden sm:inline">&bull;</span>
+          <span>{{ open_hours|striptags|replace({'\n':' '}) }}</span>
+        </div>
         {% endif %}
       </div>
 
       {% if menu_type == 'horizontal' and top_informations is defined and top_informations %}
       <!-- Top info links: horizontal menu, centered in dark micro bar -->
-      <nav class="hidden lg:inline-flex absolute left-1/2 -translate-x-1/2 items-center gap-5 pointer-events-auto">
+      <nav class="hidden lg:inline-flex absolute lg:static left-1/2 lg:translate-x-0 -translate-x-1/2 items-center gap-5 pointer-events-auto">
         {% for info in top_informations %}
         <a href="{{ info.href }}" class="text-xs font-medium text-gray-300 hover:text-white transition whitespace-nowrap">{{ info.title }}</a>
         {% endfor %}
@@ -130,7 +137,7 @@
       {% endif %}
 
       <!-- Language & Currency -->
-      <div class="flex items-center gap-3 text-xs text-gray-400 dc-topbar-controls">
+      <div class="flex items-center gap-2 sm:gap-3 text-xs text-gray-400 dc-topbar-controls">
         {{ language }}
         {% if currency %}<span class="text-gray-700">|</span>{{ currency }}{% endif %}
       </div>

@@ -618,6 +618,15 @@ class ControllerCheckoutDockercartCheckout extends Controller {
         $input = file_get_contents('php://input');
         $data = json_decode($input, true);
 
+        // If country/zone fields are hidden in module settings, fall back to store defaults.
+        if (!$this->isFieldVisible('country_id') && empty($data['country_id'])) {
+            $data['country_id'] = (int)$this->config->get('config_country_id');
+        }
+
+        if (!$this->isFieldVisible('zone_id') && empty($data['zone_id'])) {
+            $data['zone_id'] = (int)$this->config->get('config_zone_id');
+        }
+
         // Optional debug logging (centralized)
         $this->logger->debug('shipping_address called with payload: ' . print_r($data, true));
 
@@ -749,6 +758,15 @@ class ControllerCheckoutDockercartCheckout extends Controller {
 
         $input = file_get_contents('php://input');
         $data = json_decode($input, true);
+
+        // If payment country/zone fields are hidden in module settings, use store defaults.
+        if (!$this->isFieldVisible('payment_country_id') && empty($data['country_id'])) {
+            $data['country_id'] = (int)$this->config->get('config_country_id');
+        }
+
+        if (!$this->isFieldVisible('payment_zone_id') && empty($data['zone_id'])) {
+            $data['zone_id'] = (int)$this->config->get('config_zone_id');
+        }
 
         // Same as shipping
         if (!empty($data['same_as_shipping']) && isset($this->session->data['shipping_address'])) {
@@ -1974,6 +1992,46 @@ class ControllerCheckoutDockercartCheckout extends Controller {
             default:
                 return false;
         }
+    }
+
+    /**
+     * Determine if a checkout field is visible in admin blocks config.
+     * If a field is not found in blocks, assume visible for backward compatibility.
+     */
+    private function isFieldVisible($field_id) {
+        $blocks_data = $this->config->get('module_dockercart_checkout_blocks');
+
+        if (!empty($blocks_data)) {
+            if (is_string($blocks_data)) {
+                $blocks = json_decode($blocks_data, true);
+            } else {
+                $blocks = $blocks_data;
+            }
+
+            if (is_array($blocks)) {
+                foreach ($blocks as $block) {
+                    if (!isset($block['rows']) || !is_array($block['rows'])) continue;
+
+                    foreach ($block['rows'] as $row) {
+                        if (!isset($row['fields']) || !is_array($row['fields'])) continue;
+
+                        foreach ($row['fields'] as $field) {
+                            if (!isset($field['id'])) continue;
+
+                            if ($field['id'] === $field_id) {
+                                if (isset($field['visible'])) {
+                                    return ((int)$field['visible'] === 1);
+                                }
+
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return true;
     }
 
     /**

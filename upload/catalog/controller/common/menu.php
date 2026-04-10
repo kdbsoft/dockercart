@@ -53,7 +53,7 @@ class ControllerCommonMenu extends Controller {
 
 		$language_context = $this->resolveLanguageContext();
 
-		$cache_key = 'category.menu.tree.'
+		$cache_key = 'category.menu.tree.v2.'
 			. (int)$this->config->get('config_store_id')
 			. '.' . (int)$language_context['language_id']
 			. '.' . (string)$language_context['language_code']
@@ -92,24 +92,26 @@ class ControllerCommonMenu extends Controller {
 			$grandchildren = $this->model_catalog_category->getCategories((int)$child['category_id']);
 
 			foreach ($grandchildren as $grandchild) {
-				$grandchild_filter_data = array(
-					'filter_category_id'  => (int)$grandchild['category_id'],
-					'filter_sub_category' => true
-				);
+				$grandchild_total = 0;
+
+				if ($this->config->get('config_product_count')) {
+					$grandchild_total = $this->getCategoryProductTotal((int)$grandchild['category_id']);
+				}
 
 				$grandchildren_data[] = array(
-					'name' => $grandchild['name'] . ($this->config->get('config_product_count') ? ' (' . $this->model_catalog_product->getTotalProducts($grandchild_filter_data) . ')' : ''),
+					'name' => $grandchild['name'] . ($this->config->get('config_product_count') ? ' (' . $grandchild_total . ')' : ''),
 					'href' => $this->url->link('product/category', 'path=' . $path . '_' . (int)$child['category_id'] . '_' . (int)$grandchild['category_id'])
 				);
 			}
 
-			$filter_data = array(
-				'filter_category_id'  => (int)$child['category_id'],
-				'filter_sub_category' => true
-			);
+			$child_total = 0;
+
+			if ($this->config->get('config_product_count')) {
+				$child_total = $this->getCategoryProductTotal((int)$child['category_id']);
+			}
 
 			$children_data[] = array(
-				'name'  => $child['name'] . ($this->config->get('config_product_count') ? ' (' . $this->model_catalog_product->getTotalProducts($filter_data) . ')' : ''),
+				'name'  => $child['name'] . ($this->config->get('config_product_count') ? ' (' . $child_total . ')' : ''),
 				'children' => $grandchildren_data,
 				'href'  => $this->url->link('product/category', 'path=' . $path . '_' . (int)$child['category_id'])
 			);
@@ -160,5 +162,38 @@ class ControllerCommonMenu extends Controller {
 			'language_id' => $language_id,
 			'language_code' => $language_code
 		);
+	}
+
+	private function getCategoryProductTotal($category_id) {
+		static $request_cache = array();
+
+		$store_id = (int)$this->config->get('config_store_id');
+		$category_id = (int)$category_id;
+		$cache_key = 'category.menu.count.' . $store_id . '.' . $category_id;
+
+		if (isset($request_cache[$cache_key])) {
+			return $request_cache[$cache_key];
+		}
+
+		$total = $this->cache->get($cache_key);
+
+		if ($total === null || $total === false) {
+			$query = $this->db->query("SELECT COUNT(DISTINCT p.product_id) AS total
+				FROM " . DB_PREFIX . "category_path cp
+				LEFT JOIN " . DB_PREFIX . "product_to_category p2c ON (cp.category_id = p2c.category_id)
+				LEFT JOIN " . DB_PREFIX . "product p ON (p2c.product_id = p.product_id)
+				LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id)
+				WHERE cp.path_id = '" . $category_id . "'
+				AND p.status = '1'
+				AND p.date_available <= NOW()
+				AND p2s.store_id = '" . $store_id . "'");
+
+			$total = isset($query->row['total']) ? (int)$query->row['total'] : 0;
+			$this->cache->set($cache_key, $total, 900);
+		}
+
+		$request_cache[$cache_key] = (int)$total;
+
+		return $request_cache[$cache_key];
 	}
 }
