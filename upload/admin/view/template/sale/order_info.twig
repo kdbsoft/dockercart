@@ -707,7 +707,7 @@
 
     if (field === 'customer_name') {
       html += '<div class="form-group">';
-      html += '  <label class="control-label" for="quick-edit-firstname">{{ entry_firstname }}</label>';
+      html += '  <label class="control-label" for="quick-edit-firstname">{{ entry_firstname|e('js') }}</label>';
       html += '  <input type="text" id="quick-edit-firstname" class="form-control" value="' + (data.firstname || '') + '" />';
       html += '</div>';
       html += '<div class="form-group">';
@@ -728,7 +728,7 @@
       var state = field === 'payment_address' ? inlineState.payment : inlineState.shipping;
 
       html += '<div class="row">';
-      html += '  <div class="col-sm-6"><div class="form-group"><label class="control-label" for="quick-edit-firstname">{{ entry_firstname }}</label><input type="text" id="quick-edit-firstname" class="form-control" value="' + (state.firstname || '') + '" /></div></div>';
+      html += '  <div class="col-sm-6"><div class="form-group"><label class="control-label" for="quick-edit-firstname">{{ entry_firstname|e('js') }}</label><input type="text" id="quick-edit-firstname" class="form-control" value="' + (state.firstname || '') + '" /></div></div>';
       html += '  <div class="col-sm-6"><div class="form-group"><label class="control-label" for="quick-edit-lastname">{{ entry_lastname }}</label><input type="text" id="quick-edit-lastname" class="form-control" value="' + (state.lastname || '') + '" /></div></div>';
       html += '</div>';
       html += '<div class="form-group"><label class="control-label" for="quick-edit-company">{{ entry_company }}</label><input type="text" id="quick-edit-company" class="form-control" value="' + (state.company || '') + '" /></div>';
