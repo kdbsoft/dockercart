@@ -71,6 +71,21 @@ cp .env.example .env
 
 DockerCart does **not** use the legacy OpenCart web installer. On first startup, database bootstrap happens automatically from `docker/mysql/init.sql`, and `config.php` / `admin/config.php` read runtime values from `.env`.
 
+### `robots.txt` on first start (important)
+
+DockerCart ships a **safe first-start policy** for crawlers:
+
+- `upload/robots.txt` is restrictive by default (`Disallow: /`)
+- if `robots.txt` is missing, `docker/entrypoint.sh` generates the same restrictive version on first start
+
+To enable indexing after launch:
+
+1. Copy `upload/robots-dist.txt` to `upload/robots.txt`
+2. Update `Sitemap:` with your real DockerCart domain
+3. Tune rules for your SEO strategy
+
+This step is easy to forget, so please include it in your post-deploy checklist.
+
 Default admin credentials (customize in `.env` before first launch):
 
 - `ADMIN_USERNAME=admin`

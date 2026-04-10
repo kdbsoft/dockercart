@@ -72,44 +72,13 @@ ensure_robots_txt() {
         return
     fi
 
-    local http_server="$(printf '%s' "${DOCKERCART_URL:-http://dockercart.local}" | sed 's:/*$::')"
-    local ssl_enabled="${DOCKERCART_SSL_ENABLED:-false}"
-    local ssl_enabled_normalized="$(printf '%s' "$ssl_enabled" | tr '[:upper:]' '[:lower:]')"
-    local https_server="$(printf '%s' "${DOCKERCART_HTTPS_URL:-$http_server}" | sed 's:/*$::')"
-    local base_server="$http_server"
-
-    if [ "$ssl_enabled_normalized" = "true" ] || [ "$ssl_enabled_normalized" = "1" ] || [ "$ssl_enabled_normalized" = "yes" ]; then
-        base_server="$https_server"
-    fi
-
-    echo "Generating robots.txt at first start..."
+    echo "Generating restrictive robots.txt at first start (Disallow: /)..."
     cat > "$robots_file" <<EOF
+# DockerCart first-start safe default.
+# Keep site closed for indexing until you review SEO settings.
+# To open crawling, replace this file with robots-dist.txt and set your real domain in Sitemap.
 User-agent: *
-Allow: /catalog/view/javascript/
-Allow: /catalog/view/theme/
-Allow: /image/
-
-# Service and private areas
-Disallow: /admin/
-Disallow: /system/
-Disallow: /storage/
-Disallow: /index.php?route=tool/
-
-# Search, cart, checkout and user actions
-Disallow: /*?*route=product/search
-Disallow: /*?*route=checkout/
-Disallow: /*?*route=account/
-Disallow: /*?*route=affiliate/
-
-# Duplicate pages via query parameters
-Disallow: /*?*sort=
-Disallow: /*?*order=
-Disallow: /*?*limit=
-Disallow: /*?*page=
-Disallow: /*?*tracking=
-Disallow: /*?*utm_
-
-Sitemap: ${base_server}/sitemap.xml
+Disallow: /
 EOF
 
     if [ "$(id -u)" -eq 0 ]; then

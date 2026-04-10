@@ -1,0 +1,39 @@
+# DockerCart robots template (production-ready baseline)
+# 1) Copy this file to robots.txt
+# 2) Replace https://your-dockercart-domain with your real HTTPS domain
+# 3) Adjust rules for your SEO strategy
+
+User-agent: *
+Allow: /catalog/view/javascript/
+Allow: /catalog/view/theme/
+Allow: /image/
+
+# Service and private areas
+Disallow: /admin/
+Disallow: /system/
+Disallow: /storage/
+Disallow: /tool-
+Disallow: /*/tool-
+
+# Auto-generated SEO system pages (seo_url startup rewrites route -> route-with-dashes)
+# Examples: /account-login, /checkout-cart, /checkout-dockercart_checkout, /product-search
+Disallow: /account-
+Disallow: /*/account-
+Disallow: /checkout-
+Disallow: /*/checkout-
+Disallow: /affiliate-
+Disallow: /*/affiliate-
+Disallow: /product-search
+Disallow: /*/product-search
+Disallow: /product-compare
+Disallow: /*/product-compare
+
+# Duplicate pages via query parameters
+Disallow: /*?*sort=
+Disallow: /*?*order=
+Disallow: /*?*limit=
+Disallow: /*?*page=
+Disallow: /*?*tracking=
+Disallow: /*?*utm_
+
+Sitemap: https://your-dockercart-domain/sitemap.xml
