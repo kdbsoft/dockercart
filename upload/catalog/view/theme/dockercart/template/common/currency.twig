@@ -7,7 +7,7 @@
     </span>
     <i data-lucide="chevron-down" class="w-2.5 h-2.5 opacity-50"></i>
   </button>
-  <div id="curr-dd-panel" class="dc-topbar-dd-panel hidden absolute right-0 top-full mt-1 w-44 bg-gray-900 border border-gray-700 rounded-xl shadow-2xl py-1.5 z-[300]">
+  <div id="curr-dd-panel" class="dc-topbar-dd-panel hidden absolute left-0 sm:left-auto sm:right-0 top-full mt-1 w-44 bg-gray-900 border border-gray-700 rounded-xl shadow-2xl py-1.5 z-[300]">
     <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-currency">
       {% for currency in currencies %}
       <button
