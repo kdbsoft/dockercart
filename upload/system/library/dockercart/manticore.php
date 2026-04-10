@@ -114,7 +114,7 @@ class ManticoreClient {
         foreach ($data as $field => $value) {
             $fields[] = $this->escapeIdentifier($field);
             
-            if (is_numeric($value)) {
+            if (is_int($value) || is_float($value)) {
                 $values[] = $value;
             } else {
                 $values[] = "'" . $this->escape($value) . "'";
@@ -145,7 +145,7 @@ class ManticoreClient {
         foreach ($data as $field => $value) {
             $fields[] = $this->escapeIdentifier($field);
             
-            if (is_numeric($value)) {
+            if (is_int($value) || is_float($value)) {
                 $values[] = $value;
             } else {
                 $values[] = "'" . $this->escape($value) . "'";
@@ -178,16 +178,33 @@ class ManticoreClient {
      * @return array Search results (flat array of rows)
      */
     public function search($index, $query_text, $options = []) {
-        $escaped = $this->escape($query_text);
-        
         // Build MATCH expression.
-        // When 'wildcard' is enabled we use an OR of the plain query (morphology applies)
-        // and the prefix-wildcard query (finds partial matches without morphology).
-        // This makes autocomplete and full-search results 100% consistent.
+        // Tokenize the user query and, when wildcard is enabled, perform per-token
+        // (token | token*) matching. The previous implementation appended * to
+        // the whole query which produced incorrect results for multi-word queries
+        // (e.g. "red chair" -> "red chair*" didn't match "red wooden chair").
+        $raw = (string)$query_text;
+
+        // Split on whitespace (preserve multi-byte characters)
+        $tokens = preg_split('/\s+/u', trim($raw), -1, PREG_SPLIT_NO_EMPTY);
+
         if (!empty($options['wildcard'])) {
-            $match_expr = "{$escaped} | {$escaped}*";
+            $parts = [];
+            foreach ($tokens as $t) {
+                $t_esc = $this->escape($t);
+                // For each token use (token | token*) so both exact and prefix matches
+                // are found. Join tokens with space so Manticore treats them as AND.
+                $parts[] = "{$t_esc} | {$t_esc}*";
+            }
+
+            if ($parts) {
+                $match_expr = implode(' ', $parts);
+            } else {
+                // Fallback to empty-escaped string
+                $match_expr = $this->escape('');
+            }
         } else {
-            $match_expr = $escaped;
+            $match_expr = $this->escape($raw);
         }
         
         // Build WHERE clause
@@ -199,7 +216,7 @@ class ManticoreClient {
                 if (is_array($value)) {
                     $where[] = $this->escapeIdentifier($field) . ' IN (' . implode(',', array_map('intval', $value)) . ')';
                 } else {
-                    if (is_numeric($value)) {
+                    if (is_int($value) || is_float($value)) {
                         $where[] = $this->escapeIdentifier($field) . ' = ' . $value;
                     } else {
                         $where[] = $this->escapeIdentifier($field) . " = '" . $this->escape($value) . "'";
