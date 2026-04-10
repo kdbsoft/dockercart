@@ -11,6 +11,7 @@ $_['text_order_id']         = 'Order ID:';
 $_['text_date_added']       = 'Date Added:';
 $_['text_shipping_address'] = 'Shipping Address';
 $_['text_shipping_method']  = 'Shipping Method:';
+$_['text_tracking_number']    = 'Tracking Number:';
 $_['text_payment_address']  = 'Payment Address';
 $_['text_payment_method']   = 'Payment Method:';
 $_['text_comment']          = 'Order Comments';
@@ -31,6 +32,7 @@ $_['column_total']          = 'Total';
 $_['column_action']         = 'Action';
 $_['column_date_added']     = 'Date Added';
 $_['column_status']         = 'Status';
+$_['column_tracking_number']  = 'Tracking Number';
 $_['column_comment']        = 'Comment';
 
 // Error

@@ -26,6 +26,7 @@
                 <th class="text-left font-semibold text-gray-500 px-4 py-3">{{ column_customer }}</th>
                 <th class="text-right font-semibold text-gray-500 px-4 py-3">{{ column_product }}</th>
                 <th class="text-left font-semibold text-gray-500 px-4 py-3">{{ column_status }}</th>
+                <th class="text-left font-semibold text-gray-500 px-4 py-3">{{ column_tracking_number }}</th>
                 <th class="text-right font-semibold text-gray-500 px-4 py-3">{{ column_total }}</th>
                 <th class="text-left font-semibold text-gray-500 px-4 py-3">{{ column_date_added }}</th>
                 <th class="px-4 py-3"></th>
@@ -55,6 +56,7 @@
                     {{ order.status }}
                   </span>
                 </td>
+                <td class="text-left text-gray-600 px-4 py-3 font-mono">{{ order.tracking_number ? order.tracking_number : '-' }}</td>
                 <td class="text-right text-gray-800 font-semibold px-4 py-3">{{ order.total }}</td>
                 <td class="text-left text-gray-500 px-4 py-3">{{ order.date_added }}</td>
                 <td class="text-right px-4 py-3">
