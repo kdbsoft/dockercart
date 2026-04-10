@@ -51,7 +51,13 @@ class ControllerCommonMenu extends Controller {
 			}
 		}
 
-		$cache_key = 'category.menu.tree.' . (int)$this->config->get('config_store_id') . '.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_product_count');
+		$language_context = $this->resolveLanguageContext();
+
+		$cache_key = 'category.menu.tree.'
+			. (int)$this->config->get('config_store_id')
+			. '.' . (int)$language_context['language_id']
+			. '.' . (string)$language_context['language_code']
+			. '.' . (int)$this->config->get('config_product_count');
 		$menu_tree = $this->cache->get($cache_key);
 
 		if (!is_array($menu_tree)) {
@@ -115,6 +121,44 @@ class ControllerCommonMenu extends Controller {
 			'children' => $children_data,
 			'column'   => !empty($category['column']) ? $category['column'] : 1,
 			'href'     => $this->url->link('product/category', 'path=' . $path)
+		);
+	}
+
+	private function resolveLanguageContext() {
+		$language_code = '';
+
+		if (!empty($this->session->data['language'])) {
+			$language_code = (string)$this->session->data['language'];
+		} elseif (!empty($this->request->cookie['language'])) {
+			$language_code = (string)$this->request->cookie['language'];
+		} else {
+			$language_code = (string)$this->language->get('code');
+		}
+
+		$language_code = strtolower(preg_replace('/[^a-z0-9\-]/i', '', $language_code));
+		if ($language_code === '') {
+			$language_code = 'default';
+		}
+
+		$language_id = (int)$this->config->get('config_language_id');
+
+		if ($language_code !== 'default') {
+			$this->load->model('localisation/language');
+			$languages = $this->model_localisation_language->getLanguages();
+
+			if (isset($languages[$language_code]) && isset($languages[$language_code]['language_id'])) {
+				$resolved_language_id = (int)$languages[$language_code]['language_id'];
+
+				if ($resolved_language_id > 0 && $resolved_language_id !== $language_id) {
+					$language_id = $resolved_language_id;
+					$this->config->set('config_language_id', $language_id);
+				}
+			}
+		}
+
+		return array(
+			'language_id' => $language_id,
+			'language_code' => $language_code
 		);
 	}
 }
