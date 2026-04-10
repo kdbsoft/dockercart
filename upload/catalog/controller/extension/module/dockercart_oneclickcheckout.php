@@ -160,7 +160,13 @@ class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
         }
         
         $captcha_code = (string)$this->config->get('config_captcha');
-        $html = '<div class="modal fade ' . htmlspecialchars($color_theme, ENT_QUOTES, 'UTF-8') . '" id="oneclickcheckout-modal" tabindex="-1" role="dialog" data-captcha="' . htmlspecialchars($captcha_code, ENT_QUOTES, 'UTF-8') . '">' . "\n";
+        // Determine localized success button text (fallback to text_success)
+        $success_button_text = $this->language->get('text_order_placed');
+        if ($success_button_text === 'text_order_placed' || $success_button_text === '') {
+            $success_button_text = $this->language->get('text_success');
+        }
+
+        $html = '<div class="modal fade ' . htmlspecialchars($color_theme, ENT_QUOTES, 'UTF-8') . '" id="oneclickcheckout-modal" tabindex="-1" role="dialog" data-captcha="' . htmlspecialchars($captcha_code, ENT_QUOTES, 'UTF-8') . '" data-success-text="' . htmlspecialchars($success_button_text, ENT_QUOTES, 'UTF-8') . '">' . "\n";
         $html .= '  <div class="modal-dialog" role="document">' . "\n";
         $html .= '    <div class="modal-content">' . "\n";
         $html .= '      <div class="modal-header">' . "\n";
@@ -348,7 +354,8 @@ class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
                 $order_id = $this->createOrder($product_info);
                 
                 if ($order_id) {
-                    $json['success'] = $this->language->get('text_success');
+                    // Multilingual success message from language files (may contain HTML <br> for line breaks)
+                    $json['success'] = $this->language->get('text_oneclick_success');
                     $json['order_id'] = $order_id;
                 } else {
                     $json['error']['general'] = $this->language->get('error_order_create');
