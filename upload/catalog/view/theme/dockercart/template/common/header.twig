@@ -102,7 +102,7 @@
 <header id="navbar" class="fixed top-0 left-0 right-0 z-[50]">
 
   <!-- ① TOP MICRO BAR: phone, language, currency -->
-  <div class="bg-gray-950">
+  <div id="dc-top-micro-bar" class="bg-gray-950 dc-topbar-mobile-collapsible">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row lg:h-9 lg:items-center lg:justify-between gap-2 lg:gap-4 relative py-2 lg:py-0">
 
       <!-- Phone & Hours -->
@@ -129,7 +129,7 @@
 
       {% if menu_type == 'horizontal' and top_informations is defined and top_informations %}
       <!-- Top info links: horizontal menu, centered in dark micro bar -->
-      <nav class="hidden lg:inline-flex absolute lg:static left-1/2 lg:translate-x-0 -translate-x-1/2 items-center gap-5 pointer-events-auto">
+      <nav class="hidden lg:inline-flex absolute left-1/2 -translate-x-1/2 items-center gap-5 pointer-events-auto dc-topbar-info-links">
         {% for info in top_informations %}
         <a href="{{ info.href }}" class="text-xs font-medium text-gray-300 hover:text-white transition whitespace-nowrap">{{ info.title }}</a>
         {% endfor %}
@@ -137,7 +137,7 @@
       {% endif %}
 
       <!-- Language & Currency -->
-      <div class="flex items-center gap-2 sm:gap-3 text-xs text-gray-400 dc-topbar-controls">
+      <div class="flex items-center gap-2 sm:gap-3 text-xs text-gray-400 dc-topbar-controls dc-topbar-controls-right">
         {{ language }}
         {% if currency %}<span class="text-gray-700">|</span>{{ currency }}{% endif %}
       </div>
@@ -475,6 +475,60 @@ document.addEventListener('DOMContentLoaded', function () {
   if (hamburger) {
     hamburger.addEventListener('click', dcOpenMobileMenu);
   }
+
+  /* Mobile top micro bar: hide on scroll down, show on scroll up */
+  (function setupMobileTopbarScroll() {
+    var topbar = document.getElementById('dc-top-micro-bar');
+    if (!topbar) return;
+
+    var lastY = window.pageYOffset || document.documentElement.scrollTop || 0;
+    var isCollapsed = false;
+    var downThreshold = 8;
+    var upThreshold = 6;
+
+    function isMobileViewport() {
+      return window.matchMedia('(max-width: 1023.98px)').matches;
+    }
+
+    function setCollapsed(next) {
+      if (isCollapsed === next) return;
+      isCollapsed = next;
+      topbar.classList.toggle('is-collapsed', next);
+      document.body.classList.toggle('dc-topbar-hidden', next);
+    }
+
+    window.addEventListener('scroll', function () {
+      var currentY = window.pageYOffset || document.documentElement.scrollTop || 0;
+
+      if (!isMobileViewport()) {
+        setCollapsed(false);
+        lastY = currentY;
+        return;
+      }
+
+      if (currentY <= 0) {
+        setCollapsed(false);
+        lastY = 0;
+        return;
+      }
+
+      var delta = currentY - lastY;
+
+      if (delta > downThreshold) {
+        setCollapsed(true);
+      } else if (delta < -upThreshold) {
+        setCollapsed(false);
+      }
+
+      lastY = currentY;
+    }, { passive: true });
+
+    window.addEventListener('resize', function () {
+      if (!isMobileViewport()) {
+        setCollapsed(false);
+      }
+    });
+  })();
 });
 
 /* Close mobile menu on Escape */
