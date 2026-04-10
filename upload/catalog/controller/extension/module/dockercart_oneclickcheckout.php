@@ -384,15 +384,15 @@ class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
             $order_data['customer_group_id'] = $this->config->get('config_customer_group_id');
         }
         
-        $order_data['firstname'] = $this->request->post['firstname'];
-        $order_data['lastname'] = $this->request->post['lastname'];
-        $order_data['email'] = $this->request->post['email'];
-        $order_data['telephone'] = $this->request->post['telephone'];
+        $order_data['firstname'] = isset($this->request->post['firstname']) ? $this->request->post['firstname'] : '';
+        $order_data['lastname'] = isset($this->request->post['lastname']) ? $this->request->post['lastname'] : '';
+        $order_data['email'] = isset($this->request->post['email']) ? $this->request->post['email'] : '';
+        $order_data['telephone'] = isset($this->request->post['telephone']) ? $this->request->post['telephone'] : '';
         $order_data['custom_field'] = array();
         
         // Payment address
-        $order_data['payment_firstname'] = $this->request->post['firstname'];
-        $order_data['payment_lastname'] = $this->request->post['lastname'];
+        $order_data['payment_firstname'] = isset($this->request->post['firstname']) ? $this->request->post['firstname'] : '';
+        $order_data['payment_lastname'] = isset($this->request->post['lastname']) ? $this->request->post['lastname'] : '';
         $order_data['payment_company'] = '';
         $order_data['payment_address_1'] = isset($this->request->post['address']) ? $this->request->post['address'] : '';
         $order_data['payment_address_2'] = '';
