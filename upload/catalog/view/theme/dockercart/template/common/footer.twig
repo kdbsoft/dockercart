@@ -4,10 +4,10 @@
 <footer id="footer" class="bg-gray-950 text-gray-400 px-4 sm:px-6 lg:px-8 pt-16 pb-8">
   <div class="max-w-7xl mx-auto">
 
-    <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-6 gap-10 mb-12">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8 mb-12">
 
       <!-- Brand column -->
-      <div class="col-span-2 lg:col-span-2">
+      <div class="col-span-1 lg:col-span-2">
         <div class="mb-5">
         {% if logo_dark %}
             <a href="{{ home }}" class="inline-flex items-center">
@@ -56,8 +56,15 @@
       <!-- Information pages -->
       {% if informations %}
       <div>
-        <h4 class="text-white font-semibold text-sm mb-4">{{ text_information }}</h4>
-        <ul class="space-y-2.5 text-sm">
+        <!-- Desktop heading -->
+        <h4 class="text-white font-semibold text-sm mb-4 hidden lg:block">{{ text_information }}</h4>
+        <!-- Mobile accordion toggle -->
+        <button type="button" class="footer-accordion-toggle flex items-center justify-between w-full text-left text-white font-semibold text-sm mb-3 lg:hidden" aria-expanded="false" data-target="accordion-information">
+          <span>{{ text_information }}</span>
+          <i data-lucide="chevron-down" class="w-4 h-4"></i>
+        </button>
+
+        <ul id="accordion-information" class="space-y-2.5 text-sm hidden lg:block">
           {% for information in informations %}
           <li><a href="{{ information.href }}" class="hover:text-white transition">{{ information.title }}</a></li>
           {% endfor %}
@@ -67,8 +74,13 @@
 
       <!-- Catalog (parent categories) -->
       <div>
-        <h4 class="text-white font-semibold text-sm mb-4">{{ text_catalog }}</h4>
-        <ul class="space-y-2.5 text-sm">
+        <h4 class="text-white font-semibold text-sm mb-4 hidden lg:block">{{ text_catalog }}</h4>
+        <button type="button" class="footer-accordion-toggle flex items-center justify-between w-full text-left text-white font-semibold text-sm mb-3 lg:hidden" aria-expanded="false" data-target="accordion-catalog">
+          <span>{{ text_catalog }}</span>
+          <i data-lucide="chevron-down" class="w-4 h-4"></i>
+        </button>
+
+        <ul id="accordion-catalog" class="space-y-2.5 text-sm hidden lg:block">
           {# Accent links: New arrivals / Sale #}
           <li><a href="{{ new_arrivals }}" class="hover:text-white transition">{{ text_new_arrivals }}</a></li>
           <li><a href="{{ special }}" class="hover:text-white transition">{{ text_sale }}</a></li>
@@ -86,8 +98,13 @@
 
       <!-- Service -->
       <div>
-        <h4 class="text-white font-semibold text-sm mb-4">{{ text_service }}</h4>
-        <ul class="space-y-2.5 text-sm">
+        <h4 class="text-white font-semibold text-sm mb-4 hidden lg:block">{{ text_service }}</h4>
+        <button type="button" class="footer-accordion-toggle flex items-center justify-between w-full text-left text-white font-semibold text-sm mb-3 lg:hidden" aria-expanded="false" data-target="accordion-service">
+          <span>{{ text_service }}</span>
+          <i data-lucide="chevron-down" class="w-4 h-4"></i>
+        </button>
+
+        <ul id="accordion-service" class="space-y-2.5 text-sm hidden lg:block">
           <li><a href="{{ contact }}" class="hover:text-white transition">{{ text_contact }}</a></li>
           <li><a href="{{ manufacturer }}" class="hover:text-white transition">{{ text_manufacturer }}</a></li>
           <li><a href="{{ categories_link }}" class="hover:text-white transition">{{ text_catalog }}</a></li>
@@ -98,8 +115,13 @@
 
       <!-- My Account -->
       <div>
-        <h4 class="text-white font-semibold text-sm mb-4">{{ text_account }}</h4>
-        <ul class="space-y-2.5 text-sm">
+        <h4 class="text-white font-semibold text-sm mb-4 hidden lg:block">{{ text_account }}</h4>
+        <button type="button" class="footer-accordion-toggle flex items-center justify-between w-full text-left text-white font-semibold text-sm mb-3 lg:hidden" aria-expanded="false" data-target="accordion-account">
+          <span>{{ text_account }}</span>
+          <i data-lucide="chevron-down" class="w-4 h-4"></i>
+        </button>
+
+        <ul id="accordion-account" class="space-y-2.5 text-sm hidden lg:block">
           <li><a href="{{ account }}" class="hover:text-white transition">{{ text_account }}</a></li>
           <li><a href="{{ order }}" class="hover:text-white transition">{{ text_order }}</a></li>
           <li><a href="{{ wishlist }}" class="hover:text-white transition">{{ text_wishlist }}</a></li>
@@ -148,5 +170,42 @@
 DockerCart is open source software and you are free to remove the powered by DockerCart if you want.
 For support and updates, visit dockercart.net
 //-->
+<script>
+  // Footer accordion (mobile only)
+  document.addEventListener('DOMContentLoaded', function () {
+    try {
+      // Ensure icons are rendered
+      if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+      }
+
+      var toggles = document.querySelectorAll('.footer-accordion-toggle');
+
+      toggles.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var targetId = btn.getAttribute('data-target');
+          if (!targetId) return;
+          var panel = document.getElementById(targetId);
+          if (!panel) return;
+
+          var expanded = btn.getAttribute('aria-expanded') === 'true';
+
+          if (expanded) {
+            btn.setAttribute('aria-expanded', 'false');
+            panel.classList.add('hidden');
+            var icon = btn.querySelector('i'); if (icon) icon.classList.remove('rotate-180');
+          } else {
+            btn.setAttribute('aria-expanded', 'true');
+            panel.classList.remove('hidden');
+            var icon = btn.querySelector('i'); if (icon) icon.classList.add('rotate-180');
+          }
+        });
+      });
+    } catch (e) {
+      // silent
+      console.warn('Footer accordion init failed', e);
+    }
+  });
+</script>
 </body>
 </html>
