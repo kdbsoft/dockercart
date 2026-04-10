@@ -256,58 +256,6 @@ body, button, input, select, textarea { font-family: 'Manrope', sans-serif; }
   pointer-events: none;
 }
 
-/* ── Header top bar hide on scroll (mobile only) ──────────── */
-/* CSS variable for coordinated topbar/header movement */
-#navbar {
-  --topbar-translate: 0px;
-}
-
-/* The topbar is the first child of #navbar (bg-gray-950) */
-#navbar > :first-child {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
-  transform: translateY(var(--topbar-translate, 0px));
-}
-
-/* Main header row and category nav also slide up */
-#navbar > :nth-child(2),
-#navbar > :nth-child(3) {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  transform: translateY(var(--topbar-translate, 0px));
-}
-
-/* On mobile, hide topbar when scrolling down */
-#navbar.dc-topbar-hidden {
-  --topbar-translate: -36px; /* ~py-2 (16px) + text height (20px) */
-}
-
-#navbar.dc-topbar-hidden > :first-child {
-  opacity: 0;
-  visibility: hidden;
-}
-
-/* Automatically adjust header-spacer height when topbar is hidden */
-#navbar.dc-topbar-hidden ~ .dc-header-spacer {
-  height: 92px; /* Without topbar: main(56) + mobile-search(52) = 108, but let's use the sm breakpoint value */
-}
-
-@media (min-width: 640px) {
-  /* On sm and above, disable the topbar hide animation */
-  #navbar {
-    --topbar-translate: 0px !important;
-  }
-  #navbar > :first-child,
-  #navbar > :nth-child(2),
-  #navbar > :nth-child(3) {
-    transform: translateY(0) !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-  }
-  #navbar.dc-topbar-hidden ~ .dc-header-spacer {
-    /* Restore normal height on sm+ */
-    height: 92px;
-  }
-}
-
 /* ── Mobile categories accordion children ────────────────── */
 .dc-mobile-cat-children {
   max-height: 350px;
