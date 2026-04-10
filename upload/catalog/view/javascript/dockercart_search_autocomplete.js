@@ -20,7 +20,7 @@
     }
 
     function init() {
-        var searchInput = document.querySelector('input[name="search"]');
+        var searchInput = getActiveSearchInput();
 
         if (!searchInput) { return; }
         if (typeof dockercart_search_config === 'undefined') {
@@ -75,6 +75,49 @@
 
             window.addEventListener('resize', updatePosition);
             window.addEventListener('scroll', updatePosition, true);
+        }
+
+        function getActiveSearchInput() {
+            var inputs = document.querySelectorAll('input[name="search"]');
+            if (!inputs || !inputs.length) { return null; }
+
+            // Prefer dedicated theme search forms when present.
+            var preferred = [];
+            for (var i = 0; i < inputs.length; i++) {
+                if (inputs[i].closest('.dc-search-form')) {
+                    preferred.push(inputs[i]);
+                }
+            }
+
+            var pool = preferred.length ? preferred : Array.prototype.slice.call(inputs);
+            var isMobileViewport = window.matchMedia && window.matchMedia('(max-width: 639.98px)').matches;
+
+            // On mobile, try to bind to the mobile header search first.
+            if (isMobileViewport) {
+                for (var m = 0; m < pool.length; m++) {
+                    if (isElementVisible(pool[m]) && pool[m].closest('.dc-search-mobile')) {
+                        return pool[m];
+                    }
+                }
+            }
+
+            // Otherwise use the first visible input.
+            for (var v = 0; v < pool.length; v++) {
+                if (isElementVisible(pool[v])) {
+                    return pool[v];
+                }
+            }
+
+            // Fallback for edge cases where visibility can't be determined yet.
+            return pool[0] || null;
+        }
+
+        function isElementVisible(el) {
+            if (!el) { return false; }
+            var style = window.getComputedStyle(el);
+            if (style.display === 'none' || style.visibility === 'hidden') { return false; }
+            if (el.offsetWidth === 0 && el.offsetHeight === 0 && el.getClientRects().length === 0) { return false; }
+            return true;
         }
 
         function updatePosition() {
