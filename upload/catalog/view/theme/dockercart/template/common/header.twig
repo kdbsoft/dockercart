@@ -128,8 +128,8 @@
       </div>
 
       {% if menu_type == 'horizontal' and top_informations is defined and top_informations %}
-      <!-- Top info links: horizontal menu, centered in dark micro bar -->
-      <nav class="hidden lg:inline-flex absolute left-1/2 -translate-x-1/2 items-center gap-5 pointer-events-auto dc-topbar-info-links">
+      <!-- Top info links: horizontal menu, vertically centered and centered in dark micro bar -->
+      <nav class="hidden lg:inline-flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-5 pointer-events-auto dc-topbar-info-links">
         {% for info in top_informations %}
         <a href="{{ info.href }}" class="text-xs font-medium text-gray-300 hover:text-white transition whitespace-nowrap">{{ info.title }}</a>
         {% endfor %}
