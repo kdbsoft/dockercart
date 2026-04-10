@@ -231,10 +231,10 @@ function testConnection() {
     type: 'post',
     dataType: 'json',
     beforeSend: function() {
-      $('#button-test').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> {{ button_test_connection }}');
+      $('#button-test').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> {{ button_test_connection|e('js') }}');
     },
     complete: function() {
-      $('#button-test').prop('disabled', false).html('<i class="fa fa-plug"></i> {{ button_test_connection }}');
+      $('#button-test').prop('disabled', false).html('<i class="fa fa-plug"></i> {{ button_test_connection|e('js') }}');
     },
     success: function(json) {
       if (json.success) {
