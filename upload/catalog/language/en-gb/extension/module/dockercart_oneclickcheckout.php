@@ -15,6 +15,8 @@ $_['heading_oneclickcheckout'] = '1-Click Checkout';
 
 // Text
 $_['text_success']     = 'Thank you for your order! We will contact you shortly.';
+// One-click success (may contain HTML <br> for line breaks)
+$_['text_oneclick_success'] = 'Thank you for your order!<br>We will contact you shortly.';
 
 // Button
 $_['button_oneclickcheckout'] = '1-Click Checkout';

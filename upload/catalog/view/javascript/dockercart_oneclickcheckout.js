@@ -310,34 +310,175 @@ function validateAndNormalizeTelephone(telephone) {
     }
 
     function insertSuccessAlert(message) {
-        var successHtml = '';
-        successHtml += '<div class="alert alert-success alert-dismissible">';
-        successHtml += '<button type="button" class="close" data-dismiss="alert">&times;</button>';
-        successHtml += '<i class="fa fa-check-circle"></i> ' + message;
-        successHtml += '</div>';
-
-        var target = document.querySelector('.breadcrumb');
-        if (target && target.parentNode) {
-            target.insertAdjacentHTML('afterend', successHtml);
-        } else {
-            var content = document.getElementById('content');
-            if (content) {
-                content.insertAdjacentHTML('afterbegin', successHtml);
-            } else {
-                document.body.insertAdjacentHTML('afterbegin', successHtml);
+        try {
+            // Fixed-position top-center alert to avoid affecting body layout
+            var existing = document.getElementById('oneclickcheckout-top-alert');
+            if (existing) {
+                // update text and reset timeout
+                var txt = existing.querySelector('.oneclick-text');
+                if (txt) txt.innerHTML = message || '';
+                // move to front
+                existing.style.opacity = '1';
+                if (existing._timeoutId) clearTimeout(existing._timeoutId);
+                existing._timeoutId = setTimeout(function() {
+                    try { if (existing && existing.parentNode) existing.parentNode.removeChild(existing); } catch(e){}
+                }, 10000);
+                return;
             }
+
+            var alert = document.createElement('div');
+            alert.id = 'oneclickcheckout-top-alert';
+            alert.className = 'alert alert-success alert-dismissible dc-oneclick-success';
+            alert.setAttribute('role', 'alert');
+            // Tailwind-friendly utilities plus inline fixed positioning to avoid layout shift
+            alert.style.position = 'fixed';
+            alert.style.top = '16px';
+            alert.style.left = '50%';
+            alert.style.transform = 'translateX(-50%)';
+            alert.style.zIndex = '1060';
+            alert.style.maxWidth = '720px';
+            alert.style.width = 'auto';
+            alert.style.boxSizing = 'border-box';
+            alert.style.background = '#f0fdf4';
+            alert.style.border = '1px solid #bbf7d0';
+            alert.style.color = '#065f46';
+            alert.style.padding = '12px 16px';
+            alert.style.borderRadius = '8px';
+            alert.style.boxShadow = '0 6px 18px rgba(0,0,0,0.08)';
+
+            var icon = document.createElement('span');
+            icon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:8px"><circle cx="12" cy="12" r="10"></circle><path d="M9 12l2 2 4-4"></path></svg>';
+            icon.style.marginRight = '8px';
+
+            var text = document.createElement('span');
+            text.className = 'oneclick-text';
+            text.innerHTML = message || '';
+
+            var closeBtn = document.createElement('button');
+            closeBtn.type = 'button';
+            closeBtn.className = 'close';
+            closeBtn.setAttribute('aria-label', 'Close');
+            closeBtn.style.marginLeft = '12px';
+            closeBtn.style.background = 'transparent';
+            closeBtn.style.border = 'none';
+            closeBtn.style.cursor = 'pointer';
+            closeBtn.innerHTML = '&times;';
+            closeBtn.addEventListener('click', function() {
+                if (alert && alert.parentNode) alert.parentNode.removeChild(alert);
+            });
+
+            alert.appendChild(icon);
+            alert.appendChild(text);
+            alert.appendChild(closeBtn);
+
+            document.body.appendChild(alert);
+
+            // Auto-remove after 10s
+            alert._timeoutId = setTimeout(function() {
+                try { if (alert && alert.parentNode) alert.parentNode.removeChild(alert); } catch(e){}
+            }, 10000);
+        } catch (e) {
+            console.error('Failed to insert success alert:', e);
         }
+    }
 
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+    function showSuccessPopup(message, buttonLabel) {
+        try {
+            // Remove existing if present
+            var existing = document.getElementById('oneclickcheckout-success-popup');
+            if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
 
-        setTimeout(function() {
-            var alerts = document.querySelectorAll('.alert-success');
-            for (var i = 0; i < alerts.length; i++) {
-                if (alerts[i] && alerts[i].parentNode) {
-                    alerts[i].parentNode.removeChild(alerts[i]);
+            var backdrop = document.createElement('div');
+            backdrop.id = 'oneclickcheckout-success-backdrop';
+            // Tailwind backdrop classes (plus inline fallback styles in case Tailwind isn't available)
+            backdrop.className = 'fixed inset-0 bg-black bg-opacity-50 z-50';
+            backdrop.style.position = 'fixed';
+            backdrop.style.top = '0';
+            backdrop.style.left = '0';
+            backdrop.style.right = '0';
+            backdrop.style.bottom = '0';
+            backdrop.style.backgroundColor = 'rgba(0,0,0,0.5)';
+            backdrop.style.zIndex = '1050';
+
+            var popup = document.createElement('div');
+            popup.id = 'oneclickcheckout-success-popup';
+            // Tailwind modal classes: centered, green background, white text
+            // White background with green border (Tailwind utilities)
+            // Tailwind modal classes plus inline fallback styles
+            popup.className = 'fixed left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md bg-white text-black border-2 border-green-500 rounded-lg shadow-lg p-6 text-center relative';
+            popup.style.position = 'fixed';
+            popup.style.left = '50%';
+            popup.style.top = '50%';
+            popup.style.transform = 'translate(-50%, -50%)';
+            popup.style.zIndex = '1060';
+            popup.style.width = '90%';
+            popup.style.maxWidth = '520px';
+            popup.style.background = '#ffffff';
+            popup.style.color = '#000000';
+            popup.style.border = '2px solid #10b981';
+            popup.style.borderRadius = '8px';
+            popup.style.boxShadow = '0 10px 30px rgba(0,0,0,0.12)';
+            popup.style.padding = '1.25rem';
+            popup.style.textAlign = 'center';
+            popup.setAttribute('role', 'dialog');
+            popup.setAttribute('aria-modal', 'true');
+
+            // Large centered success icon
+            var bigIcon = document.createElement('div');
+            bigIcon.className = 'mx-auto mb-3';
+            bigIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" fill="rgba(16,185,129,0.08)" stroke="#10b981"></circle><path d="M9 12l2 2 4-4" stroke="#10b981"></path></svg>';
+            // Inline fallback to center the icon when Tailwind is not present
+            bigIcon.style.display = 'flex';
+            bigIcon.style.justifyContent = 'center';
+            bigIcon.style.alignItems = 'center';
+
+            var title = document.createElement('div');
+            title.className = 'text-lg font-semibold mb-0';
+            title.innerHTML = (message || 'Success');
+
+            // Close (X) button top-right
+            var closeBtn = document.createElement('button');
+            closeBtn.type = 'button';
+            closeBtn.setAttribute('aria-label', 'Close');
+            closeBtn.className = 'absolute top-2 right-3 text-green-500 leading-none';
+            closeBtn.style.background = 'transparent';
+            closeBtn.style.border = 'none';
+            closeBtn.style.cursor = 'pointer';
+            closeBtn.style.padding = '0';
+            closeBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+
+            function removePopup() {
+                try {
+                    if (popup && popup.parentNode) popup.parentNode.removeChild(popup);
+                    if (backdrop && backdrop.parentNode) backdrop.parentNode.removeChild(backdrop);
+                    document.removeEventListener('keydown', keyHandler);
+                } catch (e) {}
+            }
+
+            closeBtn.addEventListener('click', removePopup);
+            backdrop.addEventListener('click', removePopup);
+
+            // Close on ESC
+            function keyHandler(e) {
+                if (e.key === 'Escape') {
+                    removePopup();
                 }
             }
-        }, 10000);
+
+            document.addEventListener('keydown', keyHandler);
+
+            popup.appendChild(bigIcon);
+            popup.appendChild(title);
+            popup.appendChild(closeBtn);
+
+            document.body.appendChild(backdrop);
+            document.body.appendChild(popup);
+
+            return true;
+        } catch (e) {
+            console.error('Failed to show success popup:', e);
+            return false;
+        }
     }
 
     function formatTelephoneForDisplay(normalized) {
@@ -431,7 +572,7 @@ function validateAndNormalizeTelephone(telephone) {
         var originalLabel = submitButton.getAttribute('data-original-label') || submitButton.textContent;
         submitButton.setAttribute('data-original-label', originalLabel);
         submitButton.disabled = true;
-        submitButton.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Processing...';
+        submitButton.innerHTML = 'Processing...';
 
         var payload = collectFormData(form);
         payload.set('product_id', productId || '0');
@@ -486,8 +627,43 @@ function validateAndNormalizeTelephone(telephone) {
                 }
 
                 if (json.success) {
+                    // Change product one-click button(s) to disabled and localized success text
+                    try {
+                        var modal = getModal();
+                        var successText = (modal && modal.getAttribute('data-success-text')) ? modal.getAttribute('data-success-text') : json.success;
+
+                        // Find all one-click buttons on the page and disable them / change label
+                        var oneClickButtons = document.querySelectorAll('#button-oneclickcheckout');
+                        for (var i = 0; i < oneClickButtons.length; i++) {
+                            try {
+                                oneClickButtons[i].disabled = true;
+                                // Preserve original label
+                                if (!oneClickButtons[i].getAttribute('data-original-label')) {
+                                    oneClickButtons[i].setAttribute('data-original-label', oneClickButtons[i].textContent);
+                                }
+                                oneClickButtons[i].textContent = successText;
+                                oneClickButtons[i].classList.add('disabled');
+                            } catch (errBtn) {
+                                console.error('Failed to update one-click button:', errBtn);
+                            }
+                        }
+                    } catch (err) {
+                        console.error('Error applying success state to one-click button(s):', err);
+                    }
+
                     hideModal();
-                    insertSuccessAlert(json.success);
+                    // Try to show centered success popup (preferred). If popup fails, fall back to top alert.
+                    try {
+                        var modal = getModal();
+                        var okLabel = (modal && modal.getAttribute('data-success-text')) ? modal.getAttribute('data-success-text') : 'OK';
+                        var shown = showSuccessPopup(json.success, okLabel);
+                        if (!shown) {
+                            insertSuccessAlert(json.success);
+                        }
+                    } catch (e) {
+                        console.error('Failed to show fallback success popup:', e);
+                        insertSuccessAlert(json.success);
+                    }
                 }
             })
             .catch(function(error) {
