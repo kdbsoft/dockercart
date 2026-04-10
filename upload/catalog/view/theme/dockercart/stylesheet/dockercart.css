@@ -65,6 +65,22 @@ body, button, input, select, textarea { font-family: 'Manrope', sans-serif; }
   }
 }
 
+/* Mobile: add top padding to main to account for sticky header (approx. 60px) */
+@media (max-width: 639px) {
+  main {
+    padding-top: 60px;
+  }
+  main.py-8 {
+    padding-top: 80px;
+  }
+  section.py-10 {
+    padding-top: 80px;
+  }
+  section#hero {
+    padding-top: 60px;
+  }
+}
+
 /* ── Category dropdown hover ──────────────────────────────── */
 .dc-cat-item { position: relative; }
 .dc-cat-dropdown {
