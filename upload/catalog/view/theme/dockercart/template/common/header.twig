@@ -179,12 +179,12 @@
         <div class="flex items-center gap-0.5 flex-shrink-0 ml-auto sm:ml-0">
 
           <!-- Wishlist -->
-          <a href="{{ wishlist }}" class="p-2 rounded-lg hover:bg-gray-100 transition relative group" title="{{ text_wishlist }}" id="wishlist-total">
+          <a href="{{ wishlist }}" class="p-1 rounded-lg hover:bg-gray-100 transition relative group" title="{{ text_wishlist }}" id="wishlist-total">
             <i data-lucide="heart" class="w-5 h-5 text-gray-600 group-hover:text-rose-500 transition"></i>
           </a>
 
           <!-- Compare -->
-          <a href="{{ compare }}" class="p-2 rounded-lg hover:bg-gray-100 transition relative group" title="{{ text_compare|default('Compare') }}" id="compare-total">
+          <a href="{{ compare }}" class="p-1 rounded-lg hover:bg-gray-100 transition relative group" title="{{ text_compare|default('Compare') }}" id="compare-total">
             <i data-lucide="bar-chart-2" class="w-5 h-5 text-gray-600 group-hover:text-blue-500 transition"></i>            <span class="absolute -top-1 -right-1 bg-blue-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center leading-none">{{ compare_total|default(0) }}</span>          </a>
 
           <!-- Cart -->
@@ -192,7 +192,7 @@
 
           <!-- Account -->
           <div class="relative dc-account-wrapper">
-            <button id="dc-account-btn" class="p-2 rounded-lg hover:bg-gray-100 transition flex items-center gap-1" aria-label="{{ text_account }}">
+            <button id="dc-account-btn" class="p-1 rounded-lg hover:bg-gray-100 transition flex items-center gap-1" aria-label="{{ text_account }}">
               <i data-lucide="user" class="w-5 h-5 text-gray-600"></i>
             </button>
             <div id="dc-account-dd" class="dc-account-dd hidden bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 w-48">
@@ -225,7 +225,7 @@
           </div>
 
           <!-- Hamburger (mobile) -->
-          <button id="dc-hamburger-btn" class="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition" aria-label="Menu">
+          <button id="dc-hamburger-btn" class="lg:hidden p-1 rounded-lg hover:bg-gray-100 transition" aria-label="Menu">
             <i data-lucide="menu" class="w-5 h-5 text-gray-600"></i>
           </button>
         </div>
@@ -614,4 +614,79 @@ document.addEventListener('DOMContentLoaded', function () {
 
   setupVerticalCatalogMenu();
 });
+
+/* ── Header topbar hide on scroll (mobile only) ──────────── */
+(function initHeaderScrollHide() {
+  var navbar = document.getElementById('navbar');
+  if (!navbar) return;
+
+  var lastScrollTop = 0;
+  var isHidden = false;
+  var scrollThreshold = 50; // Minimum pixels scrolled to trigger hide/show
+  var lastActionScroll = 0;
+
+  // Calculate topbar height dynamically
+  function getTopbarHeight() {
+    var topbar = navbar.querySelector('div:first-child');
+    return topbar ? topbar.offsetHeight : 36;
+  }
+
+  function updateTopbarVisibility(currentScrollTop) {
+    // Only apply on mobile (less than 640px)
+    if (window.innerWidth >= 640) {
+      // On larger screens, always show topbar
+      if (isHidden) {
+        navbar.style.setProperty('--topbar-translate', '0px');
+        navbar.classList.remove('dc-topbar-hidden');
+        isHidden = false;
+      }
+      return;
+    }
+
+    // Only update if enough pixels have been scrolled
+    var scrollDiff = Math.abs(currentScrollTop - lastActionScroll);
+    if (scrollDiff < scrollThreshold) return;
+
+    var isScrollingDown = currentScrollTop > lastScrollTop;
+
+    // Hide topbar when scrolling down
+    if (isScrollingDown && !isHidden) {
+      var topbarHeight = getTopbarHeight();
+      navbar.style.setProperty('--topbar-translate', '-' + topbarHeight + 'px');
+      navbar.classList.add('dc-topbar-hidden');
+      isHidden = true;
+      lastActionScroll = currentScrollTop;
+    }
+    // Show topbar when scrolling up
+    else if (!isScrollingDown && isHidden) {
+      navbar.style.setProperty('--topbar-translate', '0px');
+      navbar.classList.remove('dc-topbar-hidden');
+      isHidden = false;
+      lastActionScroll = currentScrollTop;
+    }
+
+    lastScrollTop = currentScrollTop;
+  }
+
+  // Passive scroll listener for better performance
+  var ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      requestAnimationFrame(function() {
+        updateTopbarVisibility(window.pageYOffset || document.documentElement.scrollTop);
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+
+  // Also check on resize in case viewport changes
+  window.addEventListener('resize', function() {
+    if (window.innerWidth >= 640 && isHidden) {
+      navbar.style.setProperty('--topbar-translate', '0px');
+      navbar.classList.remove('dc-topbar-hidden');
+      isHidden = false;
+    }
+  });
+})();
 </script>
