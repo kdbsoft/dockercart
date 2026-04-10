@@ -29,6 +29,16 @@ class ModelLocalisationZone extends Model {
 	public function getZones($data = array()) {
 		$sql = "SELECT *, z.name, c.name AS country FROM " . DB_PREFIX . "zone z LEFT JOIN " . DB_PREFIX . "country c ON (z.country_id = c.country_id)";
 
+		$conditions = array();
+
+		if (!empty($data['filter_country_id'])) {
+			$conditions[] = "z.country_id = '" . (int)$data['filter_country_id'] . "'";
+		}
+
+		if ($conditions) {
+			$sql .= " WHERE " . implode(" AND ", $conditions);
+		}
+
 		$sort_data = array(
 			'c.name',
 			'z.name',
@@ -78,8 +88,14 @@ class ModelLocalisationZone extends Model {
 		return $zone_data;
 	}
 
-	public function getTotalZones() {
-		$query = $this->db->query("SELECT COUNT(*) AS total FROM " . DB_PREFIX . "zone");
+	public function getTotalZones($data = array()) {
+		$sql = "SELECT COUNT(*) AS total FROM " . DB_PREFIX . "zone";
+
+		if (!empty($data['filter_country_id'])) {
+			$sql .= " WHERE country_id = '" . (int)$data['filter_country_id'] . "'";
+		}
+
+		$query = $this->db->query($sql);
 
 		return $query->row['total'];
 	}

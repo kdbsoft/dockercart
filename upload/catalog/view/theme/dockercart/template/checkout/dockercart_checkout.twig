@@ -836,6 +836,27 @@ const log = (msg, data = '') => {
 const $ = selector => document.querySelector(selector);
 const $$ = selector => document.querySelectorAll(selector);
 
+const DEFAULT_SHIPPING_COUNTRY_ID = '{{ country_id|default('')|e('js') }}';
+const DEFAULT_SHIPPING_ZONE_ID = '{{ zone_id|default('')|e('js') }}';
+const DEFAULT_PAYMENT_COUNTRY_ID = '{{ payment_country_id|default(country_id|default(''))|e('js') }}';
+const DEFAULT_PAYMENT_ZONE_ID = '{{ payment_zone_id|default(zone_id|default(''))|e('js') }}';
+
+const getFieldValue = (selector, fallback = '') => {
+  const el = $(selector);
+
+  if (!el) {
+    return fallback || '';
+  }
+
+  const value = (el.value ?? '').toString();
+  return value !== '' ? value : (fallback || '');
+};
+
+const getShippingCountryId = () => getFieldValue('#input-country', DEFAULT_SHIPPING_COUNTRY_ID);
+const getShippingZoneId = () => getFieldValue('#input-zone', DEFAULT_SHIPPING_ZONE_ID);
+const getPaymentCountryId = () => getFieldValue('#input-payment-country', DEFAULT_PAYMENT_COUNTRY_ID);
+const getPaymentZoneId = () => getFieldValue('#input-payment-zone', DEFAULT_PAYMENT_ZONE_ID);
+
 const throttle = (func, delay) => {
   let lastCall = 0;
   return (...args) => {
@@ -1421,8 +1442,8 @@ document.addEventListener('DOMContentLoaded', () => {
       address_2: $('#input-address-2')?.value || '',
       city: $('#input-city')?.value || '',
       postcode: $('#input-postcode')?.value || '',
-      country_id: $('#input-country')?.value || '',
-      zone_id: $('#input-zone')?.value || ''
+      country_id: getShippingCountryId(),
+      zone_id: getShippingZoneId()
     };
 
     log('Loading shipping methods with data:', data);
@@ -2007,14 +2028,42 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Country selector can be hidden while region selector stays visible.
+  // In this case, load regions using default country from backend.
+  if (!countrySelect && zoneSelect && DEFAULT_SHIPPING_COUNTRY_ID) {
+    zoneSelect.innerHTML = '<option value="">Loading...</option>';
+
+    ajax(`${CONFIG.urls.country}&country_id=${DEFAULT_SHIPPING_COUNTRY_ID}`)
+      .then(json => {
+        let html = '<option value="">{{ text_select }}</option>';
+
+        if (json.zone && json.zone.length > 0) {
+          json.zone.forEach(zone => {
+            html += `<option value="${zone.zone_id}">${zone.name}</option>`;
+          });
+        }
+
+        zoneSelect.innerHTML = html;
+
+        const initialZoneId = getShippingZoneId();
+        if (initialZoneId) {
+          zoneSelect.value = String(initialZoneId);
+        }
+      })
+      .catch(error => {
+        log('Zone loading error (hidden country)', error);
+        zoneSelect.innerHTML = '<option value="">{{ text_select }}</option>';
+      });
+  }
+
   // Payment methods will be loaded after user selects a shipping method
 
   // Monitor address fields to auto-save and load shipping
   const checkAddressComplete = () => {
     const address1 = $('#input-address-1')?.value;
     const city = $('#input-city')?.value;
-    const country = $('#input-country')?.value;
-    const zone = $('#input-zone')?.value;
+    const country = getShippingCountryId();
+    const zone = getShippingZoneId();
     const postcodeEl = $('#input-postcode');
     const postcode = postcodeEl?.value;
     const postcodeRequired = postcodeEl ? (postcodeEl.getAttribute('data-required') === '1' || postcodeEl.hasAttribute('required')) : false;
@@ -2108,8 +2157,8 @@ document.addEventListener('DOMContentLoaded', () => {
       address_2: $('#input-address-2')?.value || '',
       city: $('#input-city')?.value || '',
       postcode: $('#input-postcode')?.value || '',
-      country_id: $('#input-country')?.value || '',
-      zone_id: $('#input-zone')?.value || ''
+      country_id: getShippingCountryId(),
+      zone_id: getShippingZoneId()
       // Note: address_id is NOT sent here - when user edits form fields,
       // we treat it as a new address (or update to unsaved version)
       // address_id is only sent when explicitly selecting from dropdown
@@ -2349,8 +2398,8 @@ document.addEventListener('DOMContentLoaded', () => {
       address_2: $('#input-payment-address-2')?.value || '',
       city: $('#input-payment-city')?.value || '',
       postcode: $('#input-payment-postcode')?.value || '',
-      country_id: $('#input-payment-country')?.value || '',
-      zone_id: $('#input-payment-zone')?.value || ''
+      country_id: getPaymentCountryId(),
+      zone_id: getPaymentZoneId()
     };
 
     log('Saving separate payment address', data);
@@ -2426,7 +2475,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Check if all required payment fields are filled and save
         const addr1 = $('#input-payment-address-1')?.value;
         const city = $('#input-payment-city')?.value;
-        const country = $('#input-payment-country')?.value;
+        const country = getPaymentCountryId();
         const postcodeEl = $('#input-payment-postcode');
         const postcode = postcodeEl?.value;
         const postcodeRequired = postcodeEl ? (postcodeEl.getAttribute('data-required') === '1' || postcodeEl.hasAttribute('required')) : false;
@@ -2436,6 +2485,32 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     });
+  }
+
+  if (!paymentCountrySelect && paymentZoneSelect && DEFAULT_PAYMENT_COUNTRY_ID) {
+    paymentZoneSelect.innerHTML = '<option value="">Loading...</option>';
+
+    ajax(`${CONFIG.urls.country}&country_id=${DEFAULT_PAYMENT_COUNTRY_ID}`)
+      .then(json => {
+        let html = '<option value="">{{ text_select }}</option>';
+
+        if (json.zone && json.zone.length > 0) {
+          json.zone.forEach(zone => {
+            html += `<option value="${zone.zone_id}">${zone.name}</option>`;
+          });
+        }
+
+        paymentZoneSelect.innerHTML = html;
+
+        const initialPaymentZoneId = getPaymentZoneId();
+        if (initialPaymentZoneId) {
+          paymentZoneSelect.value = String(initialPaymentZoneId);
+        }
+      })
+      .catch(error => {
+        log('Payment zone loading error (hidden country)', error);
+        paymentZoneSelect.innerHTML = '<option value="">{{ text_select }}</option>';
+      });
   }
 
   // Prefilled (readonly) block edit handling for logged-in users
@@ -2688,8 +2763,8 @@ document.addEventListener('DOMContentLoaded', () => {
           // Check if all required payment fields are filled
           const addr1 = $('#input-payment-address-1')?.value;
           const city = $('#input-payment-city')?.value;
-          const country = $('#input-payment-country')?.value;
-          const zone = $('#input-payment-zone')?.value;
+          const country = getPaymentCountryId();
+          const zone = getPaymentZoneId();
           const postcodeEl = $('#input-payment-postcode');
           const postcode = postcodeEl?.value;
           const postcodeRequired = postcodeEl ? (postcodeEl.getAttribute('data-required') === '1' || postcodeEl.hasAttribute('required')) : false;
@@ -3185,8 +3260,8 @@ document.addEventListener('DOMContentLoaded', () => {
             address_2: $('#input-payment-address-2')?.value || '',
             city: $('#input-payment-city')?.value || '',
             postcode: $('#input-payment-postcode')?.value || '',
-            country_id: $('#input-payment-country')?.value || '',
-            zone_id: $('#input-payment-zone')?.value || ''
+            country_id: getPaymentCountryId(),
+            zone_id: getPaymentZoneId()
           };
 
           log('Saving payment address (separate)', addressData);
