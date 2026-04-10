@@ -7,6 +7,21 @@
 html { scroll-behavior: smooth; }
 body, button, input, select, textarea { font-family: 'Manrope', sans-serif; }
 
+/* ── Header layer order (prevents topbar dropdown clipping under main row) ── */
+#navbar {
+  isolation: isolate;
+}
+
+#dc-top-micro-bar {
+  position: relative;
+  z-index: 30;
+}
+
+.dc-header-main-row {
+  position: relative;
+  z-index: 20;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: #f1f5f9; }
@@ -30,6 +45,11 @@ body, button, input, select, textarea { font-family: 'Manrope', sans-serif; }
     visibility: visible;
     overflow: hidden;
     transition: max-height 0.28s ease, opacity 0.22s ease, visibility 0s linear 0s;
+  }
+
+  /* Mobile dropdowns (language/currency) should not be clipped by topbar collapse container */
+  .dc-topbar-mobile-collapsible:has(.dc-topbar-dd-panel:not(.hidden)) {
+    overflow: visible;
   }
 
   .dc-topbar-mobile-collapsible.is-collapsed {
@@ -343,6 +363,8 @@ body, button, input, select, textarea { font-family: 'Manrope', sans-serif; }
 /* ── Top-bar dropdowns (currency / language) ──────────────── */
 .dc-topbar-dd { position: relative; }
 .dc-topbar-dd-panel {
+  position: absolute;
+  z-index: 40;
   animation: dcDdFadeIn 0.14s ease;
   transform-origin: top right;
 }
