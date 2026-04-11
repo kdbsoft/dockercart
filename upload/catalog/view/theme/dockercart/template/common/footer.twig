@@ -11,7 +11,7 @@
         <div class="mb-5">
         {% if logo_dark %}
             <a href="{{ home }}" class="inline-flex items-center">
-              <img src="{{ logo_dark }}" title="{{ name }}" alt="{{ name }}" class="object-contain max-w-[180px] sm:max-w-[220px]" />
+              <img src="{{ logo_dark }}" title="{{ name }}" alt="{{ name }}" class="object-contain max-w-[160px] sm:max-w-[220px]" />
             </a>         
         {% endif %}
         </div>
@@ -61,7 +61,7 @@
         <!-- Mobile accordion toggle -->
         <button type="button" class="footer-accordion-toggle flex items-center justify-between w-full text-left text-white font-semibold text-sm mb-3 lg:hidden" aria-expanded="false" data-target="accordion-information">
           <span>{{ text_information }}</span>
-          <i data-lucide="chevron-down" class="w-4 h-4"></i>
+          <span class="footer-accordion-arrow inline-flex items-center justify-center"><i data-lucide="chevron-down" class="w-4 h-4"></i></span>
         </button>
 
         <ul id="accordion-information" class="space-y-2.5 text-sm hidden lg:block">
@@ -77,7 +77,7 @@
         <h4 class="text-white font-semibold text-sm mb-4 hidden lg:block">{{ text_catalog }}</h4>
         <button type="button" class="footer-accordion-toggle flex items-center justify-between w-full text-left text-white font-semibold text-sm mb-3 lg:hidden" aria-expanded="false" data-target="accordion-catalog">
           <span>{{ text_catalog }}</span>
-          <i data-lucide="chevron-down" class="w-4 h-4"></i>
+          <span class="footer-accordion-arrow inline-flex items-center justify-center"><i data-lucide="chevron-down" class="w-4 h-4"></i></span>
         </button>
 
         <ul id="accordion-catalog" class="space-y-2.5 text-sm hidden lg:block">
@@ -101,7 +101,7 @@
         <h4 class="text-white font-semibold text-sm mb-4 hidden lg:block">{{ text_service }}</h4>
         <button type="button" class="footer-accordion-toggle flex items-center justify-between w-full text-left text-white font-semibold text-sm mb-3 lg:hidden" aria-expanded="false" data-target="accordion-service">
           <span>{{ text_service }}</span>
-          <i data-lucide="chevron-down" class="w-4 h-4"></i>
+          <span class="footer-accordion-arrow inline-flex items-center justify-center"><i data-lucide="chevron-down" class="w-4 h-4"></i></span>
         </button>
 
         <ul id="accordion-service" class="space-y-2.5 text-sm hidden lg:block">
@@ -118,7 +118,7 @@
         <h4 class="text-white font-semibold text-sm mb-4 hidden lg:block">{{ text_account }}</h4>
         <button type="button" class="footer-accordion-toggle flex items-center justify-between w-full text-left text-white font-semibold text-sm mb-3 lg:hidden" aria-expanded="false" data-target="accordion-account">
           <span>{{ text_account }}</span>
-          <i data-lucide="chevron-down" class="w-4 h-4"></i>
+          <span class="footer-accordion-arrow inline-flex items-center justify-center"><i data-lucide="chevron-down" class="w-4 h-4"></i></span>
         </button>
 
         <ul id="accordion-account" class="space-y-2.5 text-sm hidden lg:block">
@@ -189,15 +189,16 @@ For support and updates, visit dockercart.net
           if (!panel) return;
 
           var expanded = btn.getAttribute('aria-expanded') === 'true';
+          var arrow = btn.querySelector('.footer-accordion-arrow');
 
           if (expanded) {
             btn.setAttribute('aria-expanded', 'false');
             panel.classList.add('hidden');
-            var icon = btn.querySelector('i'); if (icon) icon.classList.remove('rotate-180');
+            if (arrow) arrow.classList.remove('rotate-180');
           } else {
             btn.setAttribute('aria-expanded', 'true');
             panel.classList.remove('hidden');
-            var icon = btn.querySelector('i'); if (icon) icon.classList.add('rotate-180');
+            if (arrow) arrow.classList.add('rotate-180');
           }
         });
       });

@@ -199,7 +199,7 @@
             </div>
 
             <button type="button" id="button-cart" data-loading-text="{{ text_loading }}"
-              class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl transition text-sm shadow-md shadow-blue-200">
+              class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl transition text-sm shadow-md shadow-blue-200 whitespace-nowrap">
               {{ button_cart }}
             </button>
 
@@ -239,10 +239,10 @@
 
     <!-- ─── TABS ─── -->
     <section class="mt-10">
-      <div class="flex flex-wrap gap-2 border-b border-gray-100 pb-3">
-        <button class="tab-btn active px-4 py-2 rounded-xl border border-transparent text-sm font-semibold" data-tab="description">{{ tab_description }}</button>
-        {% if attribute_groups %}<button class="tab-btn px-4 py-2 rounded-xl border border-transparent text-sm font-semibold" data-tab="attribute">{{ tab_attribute }}</button>{% endif %}
-        {% if review_status %}<button class="tab-btn px-4 py-2 rounded-xl border border-transparent text-sm font-semibold" data-tab="review">{{ tab_review }}</button>{% endif %}
+      <div class="flex overflow-x-auto gap-2 border-b border-gray-100 pb-3 whitespace-nowrap">
+        <button class="tab-btn active px-4 py-2 rounded-xl border border-transparent text-sm font-semibold flex-shrink-0" data-tab="description">{{ tab_description }}</button>
+        {% if attribute_groups %}<button class="tab-btn px-4 py-2 rounded-xl border border-transparent text-sm font-semibold flex-shrink-0" data-tab="attribute">{{ tab_attribute }}</button>{% endif %}
+        {% if review_status %}<button class="tab-btn px-4 py-2 rounded-xl border border-transparent text-sm font-semibold flex-shrink-0" data-tab="review">{{ tab_review }}</button>{% endif %}
       </div>
 
       {% set _desc_text = description|striptags|trim %}

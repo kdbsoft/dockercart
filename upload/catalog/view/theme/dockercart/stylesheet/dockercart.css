@@ -944,3 +944,8 @@ body.modal-open { overflow: hidden; }
     min-width: 0;
   }
 }
+
+/* ── Footer accordion arrow rotation ──────────────────────── */
+.footer-accordion-arrow {
+  transition: transform 0.3s ease;
+}
