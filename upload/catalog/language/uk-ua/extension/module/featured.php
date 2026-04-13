@@ -8,3 +8,4 @@ $_['text_tax'] = 'Без ПДВ:';
 $_['text_section_small'] = 'Обрані товари';
 // Quick view button text (module-specific fallback)
 $_['text_quick_view'] = 'Швидкий перегляд';
+$_['text_instock'] = 'В наявності';

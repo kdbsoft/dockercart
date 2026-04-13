@@ -69,6 +69,16 @@ class ControllerExtensionModuleBestSeller extends Controller {
 					$rating = false;
 				}
 
+				$stock_quantity = (int)$product_info['quantity'];
+
+				if ($stock_quantity <= 0) {
+					$stock = $product_info['stock_status'];
+				} elseif ($this->config->get('config_stock_display')) {
+					$stock = $stock_quantity;
+				} else {
+					$stock = $this->language->get('text_instock');
+				}
+
 				$category_name = '';
 				$product_categories = $this->model_catalog_product->getCategories($product_info['product_id']);
 
@@ -92,6 +102,8 @@ class ControllerExtensionModuleBestSeller extends Controller {
 					'special'     => $special,
 					'discount'    => $discount_percent,
 					'tax'         => $tax,
+					'stock'       => $stock,
+					'is_in_stock' => ($stock_quantity > 0),
 					'rating'      => $rating,
 					'reviews'     => $product_info['reviews'],
 					'in_wishlist' => in_array((int)$product_info['product_id'], $wishlist_ids) ? 1 : 0,
@@ -104,6 +116,7 @@ class ControllerExtensionModuleBestSeller extends Controller {
 			$data['section_small'] = $this->language->get('text_section_small');
 			// Quick view button label
 			$data['text_quick_view'] = $this->language->get('text_quick_view');
+			$data['text_instock'] = $this->language->get('text_instock');
 			// Use existing language heading_title for the main title
 			$data['section_title'] = $this->language->get('heading_title');
 

@@ -22,5 +22,6 @@ $_['heading_title'] = 'Страны';
 $_['help_address_format'] = 'Имя = {firstname}<br /> Фамилия = {lastname}<br /> Компания = {компания}<br /> Адрес 1 = {address_1}<br /> Адрес 2 = {address_2}<br /> Город = {city}<br /> Почтовый индекс = {postcode}<br /> Зона = {зона}<br /> Код зоны = {zone_code}<br /> Страна = {страна}';
 $_['text_add'] = 'Добавить страну';
 $_['text_edit'] = 'Изменить страну';
+$_['text_filter'] = 'Фильтр';
 $_['text_list'] = 'Список стран';
 $_['text_success'] = 'Успех: Вы изменили страны!';

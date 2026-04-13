@@ -66,6 +66,16 @@ class ControllerExtensionModuleLatest extends Controller {
 					$rating = false;
 				}
 
+				$stock_quantity = (int)$product_info['quantity'];
+
+				if ($stock_quantity <= 0) {
+					$stock = $product_info['stock_status'];
+				} elseif ($this->config->get('config_stock_display')) {
+					$stock = $stock_quantity;
+				} else {
+					$stock = $this->language->get('text_instock');
+				}
+
 				$discount_percent = 0;
 				if (!is_null($product_info['special']) && $product_info['price'] > 0) {
 					$discount_percent = (int) round((1 - ((float)$product_info['special'] / (float)$product_info['price'])) * 100);
@@ -95,6 +105,8 @@ class ControllerExtensionModuleLatest extends Controller {
 					'special'     => $special,
 					'discount'    => $discount_percent,
 					'tax'         => $tax,
+					'stock'       => $stock,
+					'is_in_stock' => ($stock_quantity > 0),
 					'rating'      => $rating,
 					'reviews'     => $product_info['reviews'],
 					'in_wishlist' => in_array((int)$product_info['product_id'], $wishlist_ids) ? 1 : 0,
@@ -113,6 +125,7 @@ class ControllerExtensionModuleLatest extends Controller {
 			$data['text_view_all'] = $this->language->get('text_view_all');
 			$data['text_quick_view'] = $this->language->get('text_quick_view');
 			$data['text_add_to_wishlist'] = $this->language->get('text_add_to_wishlist');
+			$data['text_instock'] = $this->language->get('text_instock');
 			$data['button_cart'] = $this->language->get('button_cart');
 			return $this->load->view('extension/module/latest', $data);
 		}

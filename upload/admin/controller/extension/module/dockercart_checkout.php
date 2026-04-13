@@ -11,7 +11,7 @@
 
 class ControllerExtensionModuleDockercartCheckout extends Controller {
     private $error = array();
-    private $module_version = '1.0.0';
+    private $module_version = '1.0.1';
     private $logger;
     
     // Configuration constants
@@ -39,7 +39,9 @@ class ControllerExtensionModuleDockercartCheckout extends Controller {
     public function index() {
         $this->load->language('extension/module/dockercart_checkout');
 
-        $this->document->setTitle($this->language->get('heading_title'));
+        $module_heading_title = $this->language->get('heading_title');
+
+        $this->document->setTitle($module_heading_title);
 
         $this->load->model('setting/setting');
 
@@ -164,6 +166,8 @@ class ControllerExtensionModuleDockercartCheckout extends Controller {
         
         // Remove legacy fields from admin UI
         $data['blocks'] = $this->cleanupBlocksForAdminUI($data['blocks']);
+        // Normalize localized labels/placeholders for existing saved blocks (including legacy raw keys like entry_comment)
+        $data['blocks'] = $this->normalizeBlocksForAdminUI($data['blocks']);
 
         // Theme options
         $data['theme_options'] = array(
@@ -178,6 +182,11 @@ class ControllerExtensionModuleDockercartCheckout extends Controller {
         // Load available shipping and payment methods for Method Overrides tab
         $data['available_shipping_methods'] = $this->getAvailableShippingMethods();
         $data['available_payment_methods'] = $this->getAvailablePaymentMethods();
+
+        // getAvailable*Methods() loads languages of shipping/payment extensions and can overwrite common keys
+        // (for example heading_title). Reload module language and lock explicit heading title for template.
+        $this->load->language('extension/module/dockercart_checkout');
+        $data['heading_title'] = $module_heading_title;
         
         // Load saved overrides
         $shipping_overrides_data = $this->getSettingValue('module_dockercart_checkout_shipping_override', array());
@@ -363,12 +372,29 @@ class ControllerExtensionModuleDockercartCheckout extends Controller {
                 )
             ),
             array(
+                'id' => 'comment',
+                'name' => $this->language->get('block_comment') ?: 'Order Comment',
+                'column' => 'left',
+                'width' => 60,
+                'enabled' => 1,
+                'sort_order' => 5,
+                'collapsible' => 0,
+                'rows' => array(
+                    array(
+                        'columns' => 1,
+                        'fields' => array(
+                            array('id' => 'comment', 'label' => $this->language->get('entry_comment') ?: 'Order Comment', 'visible' => 1, 'required' => 0, 'type' => 'textarea', 'placeholder' => $this->language->get('text_comment_placeholder') ?: 'Notes about your order, e.g. special notes for delivery.')
+                        )
+                    )
+                )
+            ),
+            array(
                 'id' => 'terms',
                 'name' => $this->language->get('block_agree') ?: 'Terms & Conditions',
                 'column' => 'left',
                 'width' => 60,
                 'enabled' => 1,
-                'sort_order' => 5,
+                'sort_order' => 6,
                 'collapsible' => 0,
                 'rows' => array()
             )
@@ -768,6 +794,132 @@ class ControllerExtensionModuleDockercartCheckout extends Controller {
             }
         }
         
+        return $blocks;
+    }
+
+    /**
+     * Normalize block/field labels and placeholders for admin UI.
+     * This keeps old saved configs in sync with current localization keys.
+     */
+    private function normalizeBlocksForAdminUI($blocks) {
+        $blockTranslations = array(
+            'customer_details' => 'block_customer_details',
+            'shipping_address' => 'block_shipping_address',
+            'payment_address'  => 'block_payment_address',
+            'shipping_method'  => 'block_shipping_method',
+            'payment_method'   => 'block_payment_method',
+            'coupon'           => 'block_coupon',
+            'comment'          => 'block_comment',
+            'terms'            => 'block_agree',
+            'agree'            => 'block_agree',
+            'cart'             => 'block_cart'
+        );
+
+        $fieldLabelTranslations = array(
+            'firstname'          => 'entry_firstname',
+            'lastname'           => 'entry_lastname',
+            'email'              => 'entry_email',
+            'telephone'          => 'entry_telephone',
+            'fax'                => 'entry_fax',
+            'company'            => 'entry_company',
+            'address_1'          => 'entry_address_1',
+            'address_2'          => 'entry_address_2',
+            'city'               => 'entry_city',
+            'postcode'           => 'entry_postcode',
+            'country_id'         => 'entry_country',
+            'zone_id'            => 'entry_zone',
+            'payment_firstname'  => 'entry_firstname',
+            'payment_lastname'   => 'entry_lastname',
+            'payment_company'    => 'entry_company',
+            'payment_address_1'  => 'entry_address_1',
+            'payment_address_2'  => 'entry_address_2',
+            'payment_city'       => 'entry_city',
+            'payment_postcode'   => 'entry_postcode',
+            'payment_country_id' => 'entry_country',
+            'payment_zone_id'    => 'entry_zone',
+            'comment'            => 'entry_comment',
+            'payment_method'     => 'text_payment_method'
+        );
+
+        $fieldPlaceholderTranslations = array(
+            'firstname'          => 'placeholder_firstname',
+            'lastname'           => 'placeholder_lastname',
+            'email'              => 'placeholder_email',
+            'telephone'          => 'placeholder_telephone',
+            'fax'                => 'placeholder_fax',
+            'company'            => 'placeholder_company',
+            'address_1'          => 'placeholder_address_1',
+            'address_2'          => 'placeholder_address_2',
+            'city'               => 'placeholder_city',
+            'postcode'           => 'placeholder_postcode',
+            'country_id'         => 'placeholder_country',
+            'zone_id'            => 'placeholder_zone',
+            'payment_firstname'  => 'placeholder_payment_firstname',
+            'payment_lastname'   => 'placeholder_payment_lastname',
+            'payment_company'    => 'placeholder_payment_company',
+            'payment_address_1'  => 'placeholder_payment_address_1',
+            'payment_address_2'  => 'placeholder_payment_address_2',
+            'payment_city'       => 'placeholder_payment_city',
+            'payment_postcode'   => 'placeholder_payment_postcode',
+            'payment_country_id' => 'placeholder_country',
+            'payment_zone_id'    => 'placeholder_zone',
+            'comment'            => 'text_comment_placeholder'
+        );
+
+        foreach ($blocks as &$block) {
+            if (isset($block['id']) && isset($blockTranslations[$block['id']])) {
+                $translatedBlockName = $this->language->get($blockTranslations[$block['id']]);
+
+                if ($translatedBlockName && $translatedBlockName !== $blockTranslations[$block['id']]) {
+                    $block['name'] = $translatedBlockName;
+                }
+            }
+
+            if (!isset($block['rows']) || !is_array($block['rows'])) {
+                continue;
+            }
+
+            foreach ($block['rows'] as &$row) {
+                if (!isset($row['fields']) || !is_array($row['fields'])) {
+                    continue;
+                }
+
+                foreach ($row['fields'] as &$field) {
+                    if (empty($field['id'])) {
+                        continue;
+                    }
+
+                    $field_id = (string)$field['id'];
+
+                    if (isset($fieldLabelTranslations[$field_id])) {
+                        $translatedLabel = $this->language->get($fieldLabelTranslations[$field_id]);
+
+                        if ($translatedLabel && $translatedLabel !== $fieldLabelTranslations[$field_id]) {
+                            $field['label'] = $translatedLabel;
+                        }
+                    } elseif (isset($field['label']) && preg_match('/^(entry_|text_)/', (string)$field['label'])) {
+                        $translatedLabel = $this->language->get((string)$field['label']);
+
+                        if ($translatedLabel && $translatedLabel !== (string)$field['label']) {
+                            $field['label'] = $translatedLabel;
+                        }
+                    }
+
+                    if (isset($fieldPlaceholderTranslations[$field_id])) {
+                        $translatedPlaceholder = $this->language->get($fieldPlaceholderTranslations[$field_id]);
+
+                        if ($translatedPlaceholder && $translatedPlaceholder !== $fieldPlaceholderTranslations[$field_id]) {
+                            $currentPlaceholder = isset($field['placeholder']) ? trim((string)$field['placeholder']) : '';
+
+                            if ($currentPlaceholder === '' || preg_match('/^(entry_|text_|placeholder_)/', $currentPlaceholder)) {
+                                $field['placeholder'] = $translatedPlaceholder;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         return $blocks;
     }
     

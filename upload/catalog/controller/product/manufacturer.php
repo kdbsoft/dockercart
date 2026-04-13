@@ -253,6 +253,20 @@ class ControllerProductManufacturer extends Controller {
 					$rating = false;
 				}
 
+				$stock_quantity = (int)($result['quantity'] ?? 0);
+
+				if ($stock_quantity <= 0) {
+					$stock = !empty($result['stock_status']) ? $result['stock_status'] : '';
+				} elseif ($this->config->get('config_stock_display')) {
+					$stock = $stock_quantity;
+				} else {
+					$stock = $this->language->get('text_instock');
+				}
+
+				if ($stock === 'text_instock') {
+					$stock = 'In Stock';
+				}
+
 				$data['products'][] = array(
 					'product_id'  => $result['product_id'],
 					'thumb'       => $image,
@@ -264,6 +278,8 @@ class ControllerProductManufacturer extends Controller {
 					'minimum'     => $result['minimum'] > 0 ? $result['minimum'] : 1,
 					'rating'      => $result['rating'],
 					'reviews'     => isset($result['reviews']) ? $result['reviews'] : 0,
+					'stock'       => $stock,
+					'is_in_stock' => ($stock_quantity > 0),
 					'href'        => $this->url->link('product/product', 'manufacturer_id=' . $result['manufacturer_id'] . '&product_id=' . $result['product_id'] . $url)
 				);
 			}
@@ -541,6 +557,20 @@ class ControllerProductManufacturer extends Controller {
 				$special = false;
 			}
 
+			$stock_quantity = (int)($result['quantity'] ?? 0);
+
+			if ($stock_quantity <= 0) {
+				$stock = !empty($result['stock_status']) ? $result['stock_status'] : '';
+			} elseif ($this->config->get('config_stock_display')) {
+				$stock = $stock_quantity;
+			} else {
+				$stock = $this->language->get('text_instock');
+			}
+
+			if ($stock === 'text_instock') {
+				$stock = 'In Stock';
+			}
+
 			$products[] = array(
 				'product_id'  => $result['product_id'],
 				'thumb'       => $image,
@@ -553,6 +583,8 @@ class ControllerProductManufacturer extends Controller {
 				'minimum'     => $result['minimum'] > 0 ? $result['minimum'] : 1,
 				'rating'      => (int)$result['rating'],
 				'reviews'     => isset($result['reviews']) ? (int)$result['reviews'] : 0,
+				'stock'       => $stock,
+				'is_in_stock' => ($stock_quantity > 0),
 				'in_wishlist' => in_array((int)$result['product_id'], $wishlist_ids) ? 1 : 0,
 				'href'        => $this->url->link('product/product', 'manufacturer_id=' . $result['manufacturer_id'] . '&product_id=' . $result['product_id'])
 			);

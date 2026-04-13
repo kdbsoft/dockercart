@@ -10,6 +10,7 @@ $_['text_category']     = 'All Categories';
 $_['text_sub_category'] = 'Search in subcategories';
 $_['text_empty']        = 'There is no product that matches the search criteria.';
 $_['text_quantity']     = 'Qty:';
+$_['text_instock']      = 'In Stock';
 $_['text_manufacturer'] = 'Brand:';
 $_['text_model']        = 'Product Code:';
 $_['text_points']       = 'Reward Points:';

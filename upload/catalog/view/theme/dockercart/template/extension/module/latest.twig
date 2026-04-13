@@ -16,6 +16,10 @@
     .quick-view-btn{position:absolute;bottom:0;left:0;right:0;padding:10px;background:rgba(17,24,39,0.85);color:#fff;font-weight:700;text-transform:uppercase;font-size:11px;opacity:0;transform:translateY(100%);transition:opacity .2s ease,transform .2s ease,background .2s ease}
     .product-card:hover .quick-view-btn{opacity:1;transform:translateY(0)}
     .quick-view-btn:hover{background:#2563eb}
+    .stock-status{font-size:11px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:4px}
+    .stock-status.in{color:#059669}
+    .stock-status.out{color:#ef4444}
+    .stock-status i{width:14px;height:14px}
   </style>
 
   <div class="max-w-7xl mx-auto">
@@ -37,7 +41,7 @@
       {% set special_val = product.special is defined ? product.special : '' %}
       {% set discount_pct = product.discount is defined ? product.discount : 0 %}
 
-      <div class="product-card group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex flex-col" data-id="{{ product.product_id }}" data-rating="{{ product.rating is defined ? product.rating : 0 }}" data-model="{{ product.model is defined ? product.model : '' }}" data-brand="{{ product.manufacturer is defined ? product.manufacturer : '' }}" data-in-wishlist="{{ product.in_wishlist is defined ? product.in_wishlist : 0 }}">
+      <div class="product-card group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex flex-col" data-id="{{ product.product_id }}" data-rating="{{ product.rating is defined ? product.rating : 0 }}" data-model="{{ product.model is defined ? product.model : '' }}" data-brand="{{ product.manufacturer is defined ? product.manufacturer : '' }}" data-description="{{ product.description|striptags|e('html_attr') }}" data-in-wishlist="{{ product.in_wishlist is defined ? product.in_wishlist : 0 }}" data-stock="{{ (product.stock is defined ? product.stock : '')|e('html_attr') }}" data-is-in-stock="{{ product.is_in_stock ? 1 : 0 }}">
         <div class="relative overflow-hidden aspect-square bg-gray-50">
           <div class="image">
             <a href="{{ product.href }}">
@@ -71,6 +75,12 @@
             </div>
             {% if product.reviews is defined %}<span class="text-[10px] text-gray-400 ml-1">{{ product.reviews }} {{ text_reviews }}</span>{% endif %}
           </div>
+          {% if product.stock is defined and product.stock %}
+          <div class="stock-status {{ product.is_in_stock ? 'in' : 'out' }}">
+            {% if product.is_in_stock %}<i data-lucide="check" class="w-3.5 h-3.5"></i>{% endif %}
+            <span>{{ product.stock }}</span>
+          </div>
+          {% endif %}
           <div class="flex items-end justify-between gap-2">
             <div class="flex items-baseline gap-1">
               {% if special_val %}

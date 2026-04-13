@@ -28,6 +28,7 @@ $_['text_price_desc'] = 'Ціна (Висока > Низька)';
 $_['text_product'] = 'Товари';
 $_['text_products'] = '%s товарів';
 $_['text_quantity'] = 'Кількість:';
+$_['text_instock'] = 'В наявності';
 $_['text_quick_view'] = 'Швидкий перегляд';
 $_['text_rating_asc'] = 'Рейтинг (найнижчий)';
 $_['text_rating_desc'] = 'Рейтинг (найвищий)';

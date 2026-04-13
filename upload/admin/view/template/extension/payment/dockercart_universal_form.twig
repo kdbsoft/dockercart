@@ -11,6 +11,8 @@
 .dc-lang-pane.active { display:block; }
 .dc-condition-row { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-bottom:16px; }
 .dc-condition-group { background:#f8fafc; border:1px solid #e8edf6; border-radius:8px; padding:14px 16px; }
+.dc-condition-group--shipping { grid-column: 1 / -1; }
+.dc-shipping-methods-select { width: 100%; min-height: 260px; font-size: 12px; }
 .dc-condition-group h5 { margin:0 0 10px 0; font-size:13px; font-weight:600; color:#4a5568; display:flex; align-items:center; gap:6px; }
 .dc-condition-group h5 i { color:#2f65b9; font-size:14px; }
 .dc-condition-group .form-group { margin-left:0; margin-right:0; }
@@ -126,6 +128,22 @@
                   <div class="form-group" style="margin-bottom:0;">
                     <label class="control-label">{{ entry_max_total }}</label>
                     <input type="text" name="max_total" value="{{ max_total }}" placeholder="{{ text_unlimited }}" class="form-control" />
+                  </div>
+                </div>
+
+                <div class="dc-condition-group dc-condition-group--shipping">
+                  <h5><i class="fa fa-truck"></i> {{ text_shipping_dependency }}</h5>
+                  <div class="form-group" style="margin-bottom:0;">
+                    <label class="control-label">{{ entry_shipping_methods }}</label>
+                    <select name="shipping_methods[]" class="form-control dc-shipping-methods-select" multiple size="10">
+                      {% for shipping_method in available_shipping_methods %}
+                      <option value="{{ shipping_method.code }}" title="{{ shipping_method.label }}"{% if shipping_method.code in shipping_methods %} selected{% endif %}>{{ shipping_method.label }}</option>
+                      {% endfor %}
+                    </select>
+                    <div class="help-block">{{ help_shipping_methods }}</div>
+                    {% if not available_shipping_methods %}
+                    <div class="help-block text-warning">{{ text_no_shipping_methods_available }}</div>
+                    {% endif %}
                   </div>
                 </div>
               </div>

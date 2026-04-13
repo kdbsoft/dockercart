@@ -23,12 +23,15 @@ $_['text_status_sorting']          = 'Статус і сортування';
 $_['text_general_settings']        = 'Загальні налаштування';
 $_['text_geo_restriction']         = 'Географічне обмеження';
 $_['text_order_total_range']       = 'Діапазон суми замовлення';
+$_['text_shipping_dependency']       = 'Залежність від доставки';
+$_['text_all_methods_of_module']     = 'усі способи модуля';
 $_['text_all_zones']               = 'Усі зони';
 $_['text_unlimited']               = 'Без обмежень';
 $_['text_enabled']                 = 'Увімкнено';
 $_['text_disabled']                = 'Вимкнено';
 $_['text_unnamed']                 = '(Без назви)';
 $_['text_no_methods']              = 'Способи оплати ще не створено.';
+$_['text_no_shipping_methods_available'] = 'Активні способи доставки не знайдено.';
 $_['text_total_methods']           = 'Усього способів';
 $_['text_active_methods']          = 'Активних';
 $_['text_geo_zones']               = 'Геозони';
@@ -51,12 +54,14 @@ $_['entry_description']            = 'Опис';
 $_['entry_geo_zone']               = 'Геозона';
 $_['entry_min_total']              = 'Мін. сума замовлення';
 $_['entry_max_total']              = 'Макс. сума замовлення';
+$_['entry_shipping_methods']         = 'Дозволені способи доставки';
 $_['entry_order_status']           = 'Статус замовлення';
 $_['entry_status']                 = 'Статус';
 $_['entry_sort_order']             = 'Сортування';
 
 // Help
 $_['help_description']             = 'Відображається покупцю під час оформлення як деталі способу оплати (необов\'язково)';
+$_['help_shipping_methods']          = 'Виберіть один або кілька способів доставки, за яких цей спосіб оплати буде доступний. Залиште порожнім, щоб дозволити для всіх способів доставки.';
 $_['help_order_status']            = 'Статус замовлення після підтвердження оформлення покупцем';
 $_['help_sort_order']              = 'Порядок відображення серед інших розширень оплати';
 

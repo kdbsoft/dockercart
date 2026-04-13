@@ -12,6 +12,7 @@ $_['text_browse_by_brand'] = 'Browse By Brand';
 $_['text_about_brand']     = 'About this brand';
 $_['text_products']        = 'Products';
 $_['text_quantity']     = 'Qty:';
+$_['text_instock']      = 'In Stock';
 $_['text_manufacturer'] = 'Brand:';
 $_['text_reviews_word']   = 'reviews';
 $_['text_model']        = 'Product Code:';

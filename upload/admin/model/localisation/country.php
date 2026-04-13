@@ -30,6 +30,10 @@ class ModelLocalisationCountry extends Model {
 		if ($data) {
 			$sql = "SELECT * FROM " . DB_PREFIX . "country";
 
+			if (!empty($data['filter_name'])) {
+				$sql .= " WHERE name LIKE '" . $this->db->escape($data['filter_name']) . "%'";
+			}
+
 			$sort_data = array(
 				'name',
 				'iso_code_2',
@@ -78,8 +82,14 @@ class ModelLocalisationCountry extends Model {
 		}
 	}
 
-	public function getTotalCountries() {
-		$query = $this->db->query("SELECT COUNT(*) AS total FROM " . DB_PREFIX . "country");
+	public function getTotalCountries($data = array()) {
+		$sql = "SELECT COUNT(*) AS total FROM " . DB_PREFIX . "country";
+
+		if (!empty($data['filter_name'])) {
+			$sql .= " WHERE name LIKE '" . $this->db->escape($data['filter_name']) . "%'";
+		}
+
+		$query = $this->db->query($sql);
 
 		return $query->row['total'];
 	}

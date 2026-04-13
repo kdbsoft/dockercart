@@ -55,4 +55,4 @@ $_['text_write'] = 'Написать отзыв';
 $_['text_year'] = 'год';
 $_['text_you_may_also_like'] = 'Вам также может понравиться';
 $_['text_zoom'] = 'Зум';
-$_['button_cart'] = '+ В корзину';
+$_['button_cart'] = 'В корзину';

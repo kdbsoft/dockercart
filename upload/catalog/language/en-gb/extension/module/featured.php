@@ -9,3 +9,4 @@ $_['text_reviews']   = 'reviews';
 $_['text_section_small'] = 'Top Picks';
 // Quick view button text (module-specific fallback)
 $_['text_quick_view'] = 'Quick View';
+$_['text_instock'] = 'In Stock';

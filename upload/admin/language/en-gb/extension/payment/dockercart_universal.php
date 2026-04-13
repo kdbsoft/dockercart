@@ -23,12 +23,15 @@ $_['text_status_sorting']          = 'Status & Sorting';
 $_['text_general_settings']        = 'General Settings';
 $_['text_geo_restriction']         = 'Geographic Restriction';
 $_['text_order_total_range']       = 'Order Total Range';
+$_['text_shipping_dependency']      = 'Shipping Dependency';
+$_['text_all_methods_of_module']    = 'all methods of module';
 $_['text_all_zones']               = 'All Zones';
 $_['text_unlimited']               = 'Unlimited';
 $_['text_enabled']                 = 'Enabled';
 $_['text_disabled']                = 'Disabled';
 $_['text_unnamed']                 = '(Unnamed)';
 $_['text_no_methods']              = 'No payment methods have been created yet.';
+$_['text_no_shipping_methods_available'] = 'No active shipping methods found.';
 $_['text_total_methods']           = 'Total Methods';
 $_['text_active_methods']          = 'Active Methods';
 $_['text_geo_zones']               = 'Geo Zones';
@@ -51,12 +54,14 @@ $_['entry_description']            = 'Description';
 $_['entry_geo_zone']               = 'Geo Zone';
 $_['entry_min_total']              = 'Min Order Total';
 $_['entry_max_total']              = 'Max Order Total';
+$_['entry_shipping_methods']        = 'Allowed Shipping Methods';
 $_['entry_order_status']           = 'Order Status';
 $_['entry_status']                 = 'Status';
 $_['entry_sort_order']             = 'Sort Order';
 
 // Help
 $_['help_description']             = 'Shown to customer during checkout as payment method details (optional)';
+$_['help_shipping_methods']         = 'Select one or more shipping methods for which this payment method is available. Leave empty to allow all shipping methods.';
 $_['help_order_status']            = 'Order status to set after customer confirms checkout';
 $_['help_sort_order']              = 'Display order among other payment extensions';
 

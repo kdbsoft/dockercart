@@ -43,8 +43,8 @@ services:
         max-file: "3"
     # No ports exposed - Nginx handles external connections
     volumes:
-      - ./upload:/var/www/html
-      - ./storage:/var/www/storage
+      - ./upload:/var/www/html:Z
+      - ./storage:/var/www/storage:Z
     environment:
       - DB_HOSTNAME=${DB_HOSTNAME:-mariadb}
       - DB_USERNAME=${DB_USERNAME:-dockercart}
@@ -141,8 +141,8 @@ services:
       - TZ=${TZ:-UTC}
     volumes:
       - manticore-data:/var/lib/manticore
-      - ./docker/manticore/manticore.conf:/etc/manticoresearch/manticore.conf
-      - ./docker/manticore/entrypoint.sh:/docker-entrypoint.sh
+      - ./docker/manticore/manticore.conf:/etc/manticoresearch/manticore.conf:ro
+      - ./docker/manticore/entrypoint.sh:/docker-entrypoint.sh:ro
     entrypoint: /bin/bash
     command: /docker-entrypoint.sh
     ports:

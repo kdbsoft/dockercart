@@ -76,6 +76,16 @@ class ControllerExtensionModuleSpecial extends Controller {
 					$rating = false;
 				}
 
+				$stock_quantity = (int)$product_info['quantity'];
+
+				if ($stock_quantity <= 0) {
+					$stock = $product_info['stock_status'];
+				} elseif ($this->config->get('config_stock_display')) {
+					$stock = $stock_quantity;
+				} else {
+					$stock = $this->language->get('text_instock');
+				}
+
 				$category_name = '';
 				$product_categories = $this->model_catalog_product->getCategories($product_info['product_id']);
 
@@ -99,6 +109,8 @@ class ControllerExtensionModuleSpecial extends Controller {
 					'special'     => $special,
 					'discount'    => $discount_percent,
 					'tax'         => $tax,
+					'stock'       => $stock,
+					'is_in_stock' => ($stock_quantity > 0),
 					'rating'      => $rating,
 					'reviews'     => $product_info['reviews'],
 					'in_wishlist' => in_array((int)$product_info['product_id'], $wishlist_ids) ? 1 : 0,
@@ -124,6 +136,7 @@ class ControllerExtensionModuleSpecial extends Controller {
 			$data['text_view_all'] = $this->language->get('text_view_all');
 			$data['button_cart'] = $this->language->get('button_cart');
 			$data['text_reviews'] = $this->language->get('text_reviews');
+			$data['text_instock'] = $this->language->get('text_instock');
 
 			return $this->load->view('extension/module/special', $data);
 		}

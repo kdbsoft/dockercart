@@ -13,6 +13,7 @@ $_['text_section_title'] = 'Нові надходження';
 $_['text_view_all'] = 'Переглянути всі →';
 $_['text_quick_view'] = 'Швидкий перегляд';
 $_['text_add_to_wishlist'] = 'Додати в обране';
+$_['text_instock'] = 'В наявності';
 
 ?>
 <?php

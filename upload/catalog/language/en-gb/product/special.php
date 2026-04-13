@@ -5,6 +5,7 @@ $_['heading_title']     = 'Special Offers';
 // Text
 $_['text_empty']        = 'There are no special offer products to list.';
 $_['text_quantity']     = 'Qty:';
+$_['text_instock']      = 'In Stock';
 $_['text_manufacturer'] = 'Brand:';
 $_['text_model']        = 'Product Code:';
 $_['text_points']       = 'Reward Points:';
