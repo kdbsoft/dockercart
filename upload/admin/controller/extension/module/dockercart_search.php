@@ -10,13 +10,13 @@
  * @author     DockerCart Team
  * @copyright  2026 DockerCart
  * @license    MIT
- * @version    1.0.0
+ * @version    1.0.2
  */
 
 class ControllerExtensionModuleDockercartSearch extends Controller {
     private $error = [];
     private $logger;
-    private $module_version = '1.0.0';
+    private $module_version = '1.0.2';
     
     /**
      * Constructor - Initialize logger
@@ -42,6 +42,10 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
         
         // Handle form submission
         if ($this->request->server['REQUEST_METHOD'] == 'POST' && $this->validateForm()) {
+            if (isset($this->request->post['module_dockercart_search_query_mappings'])) {
+                $this->request->post['module_dockercart_search_query_mappings'] = $this->normalizeQueryMappingsText($this->request->post['module_dockercart_search_query_mappings']);
+            }
+
             $this->model_setting_setting->editSetting('module_dockercart_search', $this->request->post);
             
             $this->session->data['success'] = $this->language->get('text_success');
@@ -112,6 +116,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
         $data['module_dockercart_search_autocomplete_limit'] = $this->getConfigValue('module_dockercart_search_autocomplete_limit', 10);
         $data['module_dockercart_search_min_chars'] = $this->getConfigValue('module_dockercart_search_min_chars', 3);
         $data['module_dockercart_search_results_limit'] = $this->getConfigValue('module_dockercart_search_results_limit', 20);
+        $data['module_dockercart_search_query_mappings'] = $this->getConfigValue('module_dockercart_search_query_mappings', '');
         
         // Note: Morphology is configured in docker/manticore/manticore.conf
         // Current settings: stem_en, lemmatize_ru
@@ -307,7 +312,8 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
             'module_dockercart_search_autocomplete' => 1,
             'module_dockercart_search_autocomplete_limit' => 10,
             'module_dockercart_search_min_chars' => 3,
-            'module_dockercart_search_results_limit' => 20
+            'module_dockercart_search_results_limit' => 20,
+            'module_dockercart_search_query_mappings' => ''
         ]);
         
         $this->logger->info('Module installed successfully');
@@ -352,6 +358,21 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
         }
         
         return !$this->error;
+    }
+
+    /**
+     * Normalize query mappings text before save.
+     * Keeps one mapping per line and strips empty trailing spaces.
+     */
+    private function normalizeQueryMappingsText($raw_text) {
+        $lines = preg_split('/\R/u', (string)$raw_text);
+        $normalized = [];
+
+        foreach ($lines as $line) {
+            $normalized[] = trim((string)$line);
+        }
+
+        return trim(implode("\n", $normalized));
     }
     
     // Event handlers (will be called by OpenCart event system)

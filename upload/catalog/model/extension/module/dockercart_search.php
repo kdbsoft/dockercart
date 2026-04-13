@@ -9,7 +9,7 @@
  * @author     DockerCart Team
  * @copyright  2026 DockerCart
  * @license    MIT
- * @version    1.0.0
+ * @version    1.0.2
  */
 
 require_once DIR_SYSTEM . 'library/dockercart/manticore.php';
@@ -18,6 +18,7 @@ use Dockercart\ManticoreClient;
 
 class ModelExtensionModuleDockercartSearch extends Model {
     private $manticore;
+    private $query_mappings = null;
     
     /**
      * Get Manticore client instance
@@ -38,6 +39,12 @@ class ModelExtensionModuleDockercartSearch extends Model {
      * Uses wildcard (query | query*) so results are identical to autocomplete.
      */
     public function search($query_text, $options = []) {
+        $query_text = $this->normalizeSearchQuery($query_text);
+
+        if ($query_text === '') {
+            return ['products' => [], 'total' => 0];
+        }
+
         $manticore = $this->getManticore();
         
         if (!$manticore->connect()) {
@@ -148,6 +155,12 @@ class ModelExtensionModuleDockercartSearch extends Model {
      * dropdown shows exactly the same products that will appear on the search page.
      */
     public function suggest($query_text, $options = []) {
+        $query_text = $this->normalizeSearchQuery($query_text);
+
+        if ($query_text === '') {
+            return [];
+        }
+
         $manticore = $this->getManticore();
         
         if (!$manticore->connect()) {
@@ -219,6 +232,12 @@ class ModelExtensionModuleDockercartSearch extends Model {
      * Search in categories
      */
     public function searchCategories($query_text, $options = []) {
+        $query_text = $this->normalizeSearchQuery($query_text);
+
+        if ($query_text === '') {
+            return [];
+        }
+
         $manticore = $this->getManticore();
         
         if (!$manticore->connect()) {
@@ -252,5 +271,97 @@ class ModelExtensionModuleDockercartSearch extends Model {
         }
         
         return $categories;
+    }
+
+    /**
+     * Normalize query with admin-defined mappings.
+     *
+     * Supports one mapping per line in either format:
+     *   source=target
+     *   source=>target
+     */
+    public function normalizeSearchQuery($query_text) {
+        $query_text = trim((string)$query_text);
+
+        if ($query_text === '') {
+            return '';
+        }
+
+        $mappings = $this->getQueryMappings();
+
+        if (empty($mappings)) {
+            return $query_text;
+        }
+
+        $query_text = preg_replace('/\s+/u', ' ', $query_text);
+        $query_lc = mb_strtolower($query_text, 'UTF-8');
+
+        // Exact full-phrase mapping has top priority.
+        if (isset($mappings[$query_lc])) {
+            return $mappings[$query_lc];
+        }
+
+        // Apply boundary-aware replacements, longest source first.
+        $sources = array_keys($mappings);
+        usort($sources, function($a, $b) {
+            return mb_strlen($b, 'UTF-8') <=> mb_strlen($a, 'UTF-8');
+        });
+
+        $result = $query_text;
+
+        foreach ($sources as $source) {
+            $target = $mappings[$source];
+            $pattern = '/(?<![\\p{L}\\p{N}_])' . preg_quote($source, '/') . '(?![\\p{L}\\p{N}_])/ui';
+            $result = preg_replace($pattern, $target, $result);
+        }
+
+        return trim((string)preg_replace('/\s+/u', ' ', (string)$result));
+    }
+
+    /**
+     * Parse query mappings from module settings.
+     *
+     * @return array<string,string> source(lowercase) => target
+     */
+    private function getQueryMappings() {
+        if ($this->query_mappings !== null) {
+            return $this->query_mappings;
+        }
+
+        $this->query_mappings = [];
+
+        $raw = (string)$this->config->get('module_dockercart_search_query_mappings');
+        if (trim($raw) === '') {
+            return $this->query_mappings;
+        }
+
+        $lines = preg_split('/\R/u', $raw);
+
+        foreach ($lines as $line) {
+            $line = trim((string)$line);
+
+            if ($line === '' || strpos($line, '#') === 0 || strpos($line, '//') === 0) {
+                continue;
+            }
+
+            if (strpos($line, '=>') !== false) {
+                $parts = explode('=>', $line, 2);
+            } elseif (strpos($line, '=') !== false) {
+                $parts = explode('=', $line, 2);
+            } else {
+                continue;
+            }
+
+            $source = trim((string)$parts[0]);
+            $target = trim((string)$parts[1]);
+
+            if ($source === '' || $target === '') {
+                continue;
+            }
+
+            $this->query_mappings[mb_strtolower($source, 'UTF-8')] = $target;
+        }
+
+        return $this->query_mappings;
     }
 }
