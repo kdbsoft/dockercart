@@ -541,6 +541,16 @@ class ControllerProductProduct extends Controller {
 					$rating = false;
 				}
 
+				$stock_quantity = (int)($result['quantity'] ?? 0);
+
+				if ($stock_quantity <= 0) {
+					$stock = !empty($result['stock_status']) ? $result['stock_status'] : '';
+				} elseif ($this->config->get('config_stock_display')) {
+					$stock = $stock_quantity;
+				} else {
+					$stock = $this->language->get('text_instock');
+				}
+
 				$discount_percent = 0;
 				if (!is_null($result['special']) && $result['price'] > 0) {
 					$discount_percent = (int)round((1 - ((float)$result['special'] / (float)$result['price'])) * 100);
@@ -571,6 +581,8 @@ class ControllerProductProduct extends Controller {
 					'discount'    => $discount_percent,
 					'tax'         => $tax,
 					'minimum'     => $result['minimum'] > 0 ? $result['minimum'] : 1,
+					'stock'       => $stock,
+					'is_in_stock' => ($stock_quantity > 0),
 					'rating'      => $rating,
 					'reviews'     => isset($result['reviews']) ? (int)$result['reviews'] : 0,
 					'in_wishlist' => in_array((int)$result['product_id'], $wishlist_ids) ? 1 : 0,

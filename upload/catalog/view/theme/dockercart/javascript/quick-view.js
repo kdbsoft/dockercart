@@ -74,19 +74,21 @@
     _populateFromCard: function(productId, card) {
       const imgEl = card.querySelector('img');
       const nameEl = card.querySelector('h3');
-      const priceEl = card.querySelector('[class*="text-base"]');
-      const specialPriceEl = card.querySelector('[class*="text-red"]');
+      const priceEl = card.querySelector('[class*="text-base"], [class*="text-lg"]');
+      const oldPriceCardEl = card.querySelector('.line-through');
       const discountEl = card.querySelector('[class*="bg-red"]');
       
       const image = imgEl ? imgEl.src : '';
       const name = nameEl ? nameEl.innerText.trim() : '';
       const price = priceEl ? priceEl.innerText.trim() : '';
-      const specialPrice = specialPriceEl ? specialPriceEl.innerText.trim() : '';
+      const oldPrice = oldPriceCardEl ? oldPriceCardEl.innerText.trim() : '';
       const discountPct = discountEl ? discountEl.innerText.trim() : '';
       const rating = parseFloat(card.dataset.rating || '0');
       const description = card.dataset.description || '';
       const brand = card.dataset.brand || card.dataset.manufacturer || '';
       const model = card.dataset.model || '';
+      const stock = (card.dataset.stock || '').trim();
+      const isInStock = (String(card.dataset.isInStock || '').toLowerCase() === '1' || String(card.dataset.isInStock || '').toLowerCase() === 'true');
       const inWishlist = card.dataset.inWishlist === '1';
 
       // Set image
@@ -105,6 +107,25 @@
       const descEl = document.getElementById('qv-description');
       if (descEl) {
         descEl.textContent = description;
+      }
+
+      // Set stock status
+      const stockWrapEl = document.getElementById('qv-stock-wrap');
+      const stockTextEl = document.getElementById('qv-stock');
+      const stockIconEl = document.getElementById('qv-stock-icon');
+
+      if (stockWrapEl && stockTextEl) {
+        if (stock) {
+          stockTextEl.textContent = stock;
+          stockWrapEl.classList.remove('hidden', 'text-emerald-600', 'text-red-500');
+          stockWrapEl.classList.add(isInStock ? 'text-emerald-600' : 'text-red-500');
+
+          if (stockIconEl) {
+            stockIconEl.classList.toggle('hidden', !isInStock);
+          }
+        } else {
+          stockWrapEl.classList.add('hidden');
+        }
       }
 
       // Set localized features (dynamic list)
@@ -151,9 +172,9 @@
       const oldPriceEl = document.getElementById('qv-old-price');
       const badgeEl = document.getElementById('qv-badge');
       
-      if (specialPrice && price) {
-        if (oldPriceEl) oldPriceEl.textContent = price;
-        this._setElementContent('qv-price', specialPrice);
+      if (oldPrice && price) {
+        if (oldPriceEl) oldPriceEl.textContent = oldPrice;
+        this._setElementContent('qv-price', price);
         if (badgeEl && discountPct) {
           badgeEl.textContent = discountPct;
           badgeEl.style.display = '';
@@ -261,6 +282,12 @@
         <span id="qv-price" class="text-2xl font-extrabold text-gray-900"></span>
         <span id="qv-old-price" class="text-base text-red-400 line-through" style="display:none;"></span>
         <span id="qv-badge" class="text-xs font-bold bg-red-500 text-white px-2 py-0.5 rounded-lg" style="display:none;"></span>
+      </div>
+
+      <!-- Stock status -->
+      <div id="qv-stock-wrap" class="hidden flex items-center gap-1.5 text-sm font-semibold">
+        <i id="qv-stock-icon" data-lucide="check" class="w-4 h-4"></i>
+        <span id="qv-stock"></span>
       </div>
       
       <!-- Description -->

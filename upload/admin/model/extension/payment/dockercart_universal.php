@@ -10,6 +10,15 @@
  */
 class ModelExtensionPaymentDockercartUniversal extends Model {
     /**
+     * Ensure schema updates for existing installations.
+     */
+    public function __construct($registry) {
+        parent::__construct($registry);
+
+        $this->ensureShippingMethodsColumn();
+    }
+
+    /**
      * Install database tables
      */
     public function install() {
@@ -20,6 +29,7 @@ class ModelExtensionPaymentDockercartUniversal extends Model {
                 `geo_zone_id` INT(11) NOT NULL DEFAULT '0',
                 `min_total` DECIMAL(15,4) DEFAULT NULL,
                 `max_total` DECIMAL(15,4) DEFAULT NULL,
+                `shipping_methods` TEXT DEFAULT NULL,
                 `status` TINYINT(1) NOT NULL DEFAULT '1',
                 `sort_order` INT(3) NOT NULL DEFAULT '0',
                 `date_added` DATETIME NOT NULL,
@@ -56,11 +66,14 @@ class ModelExtensionPaymentDockercartUniversal extends Model {
      * Add a new payment method
      */
     public function addMethod(array $data): int {
+        $shipping_methods = $this->normalizeShippingMethods($data['shipping_methods'] ?? []);
+
         $this->db->query("
             INSERT INTO `" . DB_PREFIX . "dockercart_universal_payment` SET
             `geo_zone_id` = '" . (int)($data['geo_zone_id'] ?? 0) . "',
             `min_total` = " . ($data['min_total'] !== '' ? "'" . (float)$data['min_total'] . "'" : "NULL") . ",
             `max_total` = " . ($data['max_total'] !== '' ? "'" . (float)$data['max_total'] . "'" : "NULL") . ",
+            `shipping_methods` = " . (!empty($shipping_methods) ? "'" . $this->db->escape(json_encode($shipping_methods)) . "'" : "NULL") . ",
             `status` = '" . (int)($data['status'] ?? 1) . "',
             `sort_order` = '" . (int)($data['sort_order'] ?? 0) . "',
             `date_added` = NOW(),
@@ -89,11 +102,14 @@ class ModelExtensionPaymentDockercartUniversal extends Model {
      * Edit existing payment method
      */
     public function editMethod(int $method_id, array $data): void {
+        $shipping_methods = $this->normalizeShippingMethods($data['shipping_methods'] ?? []);
+
         $this->db->query("
             UPDATE `" . DB_PREFIX . "dockercart_universal_payment` SET
             `geo_zone_id` = '" . (int)($data['geo_zone_id'] ?? 0) . "',
             `min_total` = " . ($data['min_total'] !== '' ? "'" . (float)$data['min_total'] . "'" : "NULL") . ",
             `max_total` = " . ($data['max_total'] !== '' ? "'" . (float)$data['max_total'] . "'" : "NULL") . ",
+            `shipping_methods` = " . (!empty($shipping_methods) ? "'" . $this->db->escape(json_encode($shipping_methods)) . "'" : "NULL") . ",
             `status` = '" . (int)($data['status'] ?? 1) . "',
             `sort_order` = '" . (int)($data['sort_order'] ?? 0) . "',
             `date_modified` = NOW()
@@ -194,5 +210,47 @@ class ModelExtensionPaymentDockercartUniversal extends Model {
         $query = $this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "dockercart_universal_payment`");
 
         return (int)$query->row['total'];
+    }
+
+    /**
+     * Ensure shipping_methods column exists for old installations.
+     */
+    protected function ensureShippingMethodsColumn(): void {
+        $table = DB_PREFIX . 'dockercart_universal_payment';
+
+        $check = $this->db->query("SHOW TABLES LIKE '" . $this->db->escape($table) . "'");
+
+        if (!$check->num_rows) {
+            return;
+        }
+
+        $column = $this->db->query("SHOW COLUMNS FROM `" . $this->db->escape($table) . "` LIKE 'shipping_methods'");
+
+        if (!$column->num_rows) {
+            $this->db->query("ALTER TABLE `" . $this->db->escape($table) . "` ADD `shipping_methods` TEXT NULL AFTER `max_total`");
+        }
+    }
+
+    /**
+     * Normalize allowed shipping methods list from form input.
+     */
+    protected function normalizeShippingMethods($shipping_methods): array {
+        if (!is_array($shipping_methods)) {
+            return [];
+        }
+
+        $normalized = [];
+
+        foreach ($shipping_methods as $method_code) {
+            $method_code = trim((string)$method_code);
+
+            if ($method_code === '') {
+                continue;
+            }
+
+            $normalized[$method_code] = $method_code;
+        }
+
+        return array_values($normalized);
     }
 }

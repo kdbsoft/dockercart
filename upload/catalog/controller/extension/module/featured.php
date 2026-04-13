@@ -71,6 +71,16 @@ class ControllerExtensionModuleFeatured extends Controller {
 						$rating = false;
 					}
 
+					$stock_quantity = (int)$product_info['quantity'];
+
+					if ($stock_quantity <= 0) {
+						$stock = $product_info['stock_status'];
+					} elseif ($this->config->get('config_stock_display')) {
+						$stock = $stock_quantity;
+					} else {
+						$stock = $this->language->get('text_instock');
+					}
+
 					$category_name = '';
 					$product_categories = $this->model_catalog_product->getCategories($product_info['product_id']);
 
@@ -94,6 +104,8 @@ class ControllerExtensionModuleFeatured extends Controller {
 						'special'     => $special,
 						'discount'    => $discount_percent,
 						'tax'         => $tax,
+						'stock'       => $stock,
+						'is_in_stock' => ($stock_quantity > 0),
 						'rating'      => $rating,
 						'reviews'     => $product_info['reviews'],
 					'in_wishlist' => in_array((int)$product_info['product_id'], $wishlist_ids) ? 1 : 0,
@@ -108,6 +120,7 @@ class ControllerExtensionModuleFeatured extends Controller {
 			$data['text_reviews'] = $this->language->get('text_reviews');
 			$data['text_section_small'] = $this->language->get('text_section_small');
 			$data['text_quick_view'] = $this->language->get('text_quick_view');
+			$data['text_instock'] = $this->language->get('text_instock');
 			$data['button_cart'] = $this->language->get('button_cart');
 			$data['heading_title'] = $this->language->get('heading_title');
 			return $this->load->view('extension/module/featured', $data);

@@ -24,6 +24,7 @@ $_['text_price'] = 'Ціна:';
 $_['text_price_asc'] = 'Ціна (Низька > Висока)';
 $_['text_price_desc'] = 'Ціна (Висока > Низька)';
 $_['text_quantity'] = 'Кількість:';
+$_['text_instock'] = 'В наявності';
 $_['text_rating_asc'] = 'Рейтинг (найнижчий)';
 $_['text_rating_desc'] = 'Рейтинг (найвищий)';
 $_['text_reviews_word'] = 'відгуки';

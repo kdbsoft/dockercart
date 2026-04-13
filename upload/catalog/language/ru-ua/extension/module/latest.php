@@ -9,3 +9,4 @@ $_['text_section_small'] = 'Только что';
 $_['text_section_title'] = 'Новые поступления';
 $_['text_tax'] = 'Без учета налога:';
 $_['text_view_all'] = 'Посмотреть все →';
+$_['text_instock'] = 'В наличии';

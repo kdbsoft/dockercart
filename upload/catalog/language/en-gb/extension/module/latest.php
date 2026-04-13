@@ -12,3 +12,4 @@ $_['text_section_title'] = 'New Arrivals';
 $_['text_view_all'] = 'View All →';
 $_['text_quick_view'] = 'Quick View';
 $_['text_add_to_wishlist'] = 'Add to wishlist';
+$_['text_instock'] = 'In Stock';

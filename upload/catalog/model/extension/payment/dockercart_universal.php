@@ -29,6 +29,10 @@ class ModelExtensionPaymentDockercartUniversal extends Model {
         $quote_data = [];
 
         foreach ($methods as $method) {
+            if (!$this->checkShippingMethodDependency($method)) {
+                continue;
+            }
+
             if (!$this->checkGeoZone((int)$method['geo_zone_id'], $address)) {
                 continue;
             }
@@ -118,6 +122,56 @@ class ModelExtensionPaymentDockercartUniversal extends Model {
         }
 
         return true;
+    }
+
+    /**
+     * Check dependency on selected shipping method.
+     * Supports exact quote code (e.g. flat.flat) and extension-level code (e.g. flat).
+     */
+    protected function checkShippingMethodDependency(array $method): bool {
+        $allowed_methods = [];
+
+        if (!empty($method['shipping_methods'])) {
+            $decoded = json_decode((string)$method['shipping_methods'], true);
+
+            if (is_array($decoded)) {
+                $allowed_methods = $decoded;
+            }
+        }
+
+        if (!$allowed_methods) {
+            return true;
+        }
+
+        $selected_shipping_code = isset($this->session->data['shipping_method']['code'])
+            ? (string)$this->session->data['shipping_method']['code']
+            : '';
+
+        if ($selected_shipping_code === '') {
+            return !$this->cart->hasShipping();
+        }
+
+        $selected_extension_code = explode('.', $selected_shipping_code)[0];
+
+        foreach ($allowed_methods as $allowed_method) {
+            $allowed_method = trim((string)$allowed_method);
+
+            if ($allowed_method === '') {
+                continue;
+            }
+
+            // Exact quote-level match
+            if ($allowed_method === $selected_shipping_code) {
+                return true;
+            }
+
+            // Extension-level match (all quotes of one shipping module)
+            if (strpos($allowed_method, '.') === false && $allowed_method === $selected_extension_code) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

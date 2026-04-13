@@ -141,6 +141,20 @@ class ControllerProductNewArrivals extends Controller {
 				$rating = false;
 			}
 
+			$stock_quantity = (int)($result['quantity'] ?? 0);
+
+			if ($stock_quantity <= 0) {
+				$stock = !empty($result['stock_status']) ? $result['stock_status'] : '';
+			} elseif ($this->config->get('config_stock_display')) {
+				$stock = $stock_quantity;
+			} else {
+				$stock = $this->language->get('text_instock');
+			}
+
+			if ($stock === 'text_instock') {
+				$stock = 'In Stock';
+			}
+
 				$category_name = '';
 				$product_categories = $this->model_catalog_product->getCategories($result['product_id']);
 
@@ -183,6 +197,8 @@ class ControllerProductNewArrivals extends Controller {
 				'minimum'            => $result['minimum'] > 0 ? $result['minimum'] : 1,
 				'rating'             => $rating,
 				'reviews'            => isset($result['reviews']) ? $result['reviews'] : 0,
+				'stock'              => $stock,
+				'is_in_stock'        => ($stock_quantity > 0),
 				'new_arrival_days'   => $days_since_added,
 				'new_arrival_badge'  => $badge_text,
 				'new_arrival_badge_class' => $badge_class,
@@ -415,6 +431,20 @@ class ControllerProductNewArrivals extends Controller {
 				$special = false;
 			}
 
+			$stock_quantity = (int)($result['quantity'] ?? 0);
+
+			if ($stock_quantity <= 0) {
+				$stock = !empty($result['stock_status']) ? $result['stock_status'] : '';
+			} elseif ($this->config->get('config_stock_display')) {
+				$stock = $stock_quantity;
+			} else {
+				$stock = $this->language->get('text_instock');
+			}
+
+			if ($stock === 'text_instock') {
+				$stock = 'In Stock';
+			}
+
 			$category_name = '';
 			$product_categories = $this->model_catalog_product->getCategories($result['product_id']);
 			if (!empty($product_categories[0]['category_id'])) {
@@ -455,6 +485,8 @@ class ControllerProductNewArrivals extends Controller {
 				'minimum'                 => $result['minimum'] > 0 ? $result['minimum'] : 1,
 				'rating'                  => (int)$result['rating'],
 				'reviews'                 => isset($result['reviews']) ? (int)$result['reviews'] : 0,
+				'stock'                   => $stock,
+				'is_in_stock'             => ($stock_quantity > 0),
 				'in_wishlist'             => in_array((int)$result['product_id'], $wishlist_ids) ? 1 : 0,
 				'new_arrival_badge'       => $badge_text,
 				'new_arrival_badge_class' => $badge_class,

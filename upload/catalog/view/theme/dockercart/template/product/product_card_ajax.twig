@@ -20,7 +20,9 @@
      data-description="{{ product.description }}"
      data-model="{{ product.model|default('') }}"
      data-in-wishlist="{{ product.in_wishlist|default(0) }}"
-     data-rating="{{ product.rating|default(0) }}">
+  data-rating="{{ product.rating|default(0) }}"
+  data-stock="{{ (product.stock is defined ? product.stock : '')|e('html_attr') }}"
+  data-is-in-stock="{{ product.is_in_stock ? 1 : 0 }}">
 
   <div class="relative overflow-hidden aspect-square bg-gray-50">
     <a href="{{ product.href }}">
@@ -64,6 +66,15 @@
         <span class="text-xs {% if product.rating >= i %}text-amber-400{% else %}text-gray-200{% endif %}">★</span>
       {% endfor %}
       <span class="text-[10px] text-gray-400 ml-1">{{ product.reviews|default(0) }} {{ text_reviews }}</span>
+    </div>
+    {% endif %}
+
+    {% if product.stock is defined and product.stock %}
+    <div class="mb-2 text-[11px] font-medium {% if product.is_in_stock %}text-emerald-600{% else %}text-red-500{% endif %} flex items-center gap-1">
+      {% if product.is_in_stock %}
+      <i data-lucide="check" class="w-3.5 h-3.5"></i>
+      {% endif %}
+      <span>{{ product.stock }}</span>
     </div>
     {% endif %}
 

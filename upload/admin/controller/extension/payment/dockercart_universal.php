@@ -127,6 +127,7 @@ class ControllerExtensionPaymentDockercartUniversal extends Controller {
         $this->document->setTitle($this->language->get('heading_title'));
 
         $this->load->model('extension/payment/dockercart_universal');
+        $this->load->model('setting/extension');
         $this->load->model('localisation/language');
         $this->load->model('localisation/geo_zone');
 
@@ -183,6 +184,9 @@ class ControllerExtensionPaymentDockercartUniversal extends Controller {
         // Geo zones
         $data['geo_zones'] = $this->model_localisation_geo_zone->getGeoZones();
 
+        // Available shipping methods for dependency condition
+        $data['available_shipping_methods'] = $this->getAvailableShippingMethodOptions();
+
         // Load existing method data or defaults
         if ($method_id && ($method_info = $this->model_extension_payment_dockercart_universal->getMethod($method_id))) {
             $data['method_id'] = $method_id;
@@ -191,6 +195,7 @@ class ControllerExtensionPaymentDockercartUniversal extends Controller {
             $data['geo_zone_id'] = $method_info['geo_zone_id'];
             $data['min_total'] = $method_info['min_total'];
             $data['max_total'] = $method_info['max_total'];
+            $data['shipping_methods'] = !empty($method_info['shipping_methods']) ? (json_decode($method_info['shipping_methods'], true) ?: []) : [];
             $data['status'] = $method_info['status'];
             $data['sort_order'] = $method_info['sort_order'];
         } else {
@@ -200,8 +205,13 @@ class ControllerExtensionPaymentDockercartUniversal extends Controller {
             $data['geo_zone_id'] = 0;
             $data['min_total'] = '';
             $data['max_total'] = '';
+            $data['shipping_methods'] = [];
             $data['status'] = 1;
             $data['sort_order'] = 0;
+        }
+
+        if (isset($this->request->post['shipping_methods']) && is_array($this->request->post['shipping_methods'])) {
+            $data['shipping_methods'] = $this->request->post['shipping_methods'];
         }
 
         // Layout
@@ -289,5 +299,74 @@ class ControllerExtensionPaymentDockercartUniversal extends Controller {
         }
 
         return !$this->error;
+    }
+
+    /**
+     * Build list of available shipping method codes for dependency selection.
+     * Includes module-level code and known quote-level codes where available.
+     */
+    protected function getAvailableShippingMethodOptions(): array {
+        $options = [];
+
+        $extensions = $this->model_setting_extension->getInstalled('shipping');
+
+        foreach ($extensions as $code) {
+            if (!$this->config->get('shipping_' . $code . '_status')) {
+                continue;
+            }
+
+            $this->load->language('extension/shipping/' . $code);
+
+            $title = $this->language->get('heading_title');
+            if (empty($title) || $title === 'heading_title') {
+                $title = ucfirst(str_replace('_', ' ', $code));
+            }
+
+            // Module-level code means "all methods of this shipping extension"
+            $options[] = [
+                'code'  => $code,
+                'title' => $title,
+                'label' => sprintf('%s — %s', $title, $this->language->get('text_all_methods_of_module'))
+            ];
+
+            // Common single-quote code pattern in OpenCart (e.g. flat.flat, pickup.pickup)
+            $options[] = [
+                'code'  => $code . '.' . $code,
+                'title' => $title,
+                'label' => sprintf('%s — %s.%s', $title, $code, $code)
+            ];
+
+            // DockerCart Universal Shipping has multiple quote-level methods.
+            if ($code === 'dockercart_universal') {
+                $this->load->model('extension/shipping/dockercart_universal');
+                $shipping_methods = $this->model_extension_shipping_dockercart_universal->getMethods();
+
+                foreach ($shipping_methods as $shipping_method) {
+                    $method_code = 'dockercart_universal.dockercart_universal_' . (int)$shipping_method['method_id'];
+                    $method_name = !empty($shipping_method['name']) ? $shipping_method['name'] : $this->language->get('text_unnamed');
+
+                    $options[] = [
+                        'code'  => $method_code,
+                        'title' => $title,
+                        'label' => sprintf('%s — %s', $title, $method_name)
+                    ];
+                }
+            }
+        }
+
+        // Remove accidental duplicates while keeping initial order
+        $unique = [];
+        $seen = [];
+
+        foreach ($options as $option) {
+            if (isset($seen[$option['code']])) {
+                continue;
+            }
+
+            $seen[$option['code']] = true;
+            $unique[] = $option;
+        }
+
+        return $unique;
     }
 }

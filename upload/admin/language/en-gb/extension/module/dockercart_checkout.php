@@ -34,6 +34,7 @@ $_['help_geo_detect']       = 'Automatically detect customer city/region based o
 
 $_['entry_guest_create_account'] = 'Guest Create Account Option';
 $_['help_guest_create_account']  = 'Allow guest customers to optionally create an account during checkout';
+$_['entry_comment']         = 'Order Comment';
 
 // Theme Settings
 $_['entry_theme']           = 'Checkout Theme';
@@ -110,6 +111,7 @@ $_['placeholder_payment_address_1'] = '123 Main Street';
 $_['placeholder_payment_address_2'] = 'Apartment, suite, etc.';
 $_['placeholder_payment_city']      = 'City';
 $_['placeholder_payment_postcode']  = '10001';
+$_['text_comment_placeholder']      = 'Notes about your order, e.g. special notes for delivery.';
 
 // Advanced Settings
 $_['entry_cache_ttl']         = 'Template Cache TTL';

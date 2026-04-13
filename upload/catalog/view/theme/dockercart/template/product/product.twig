@@ -333,7 +333,7 @@
       <div id="dc-related-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
         {% for product in products %}
         {% set discount_pct = product.discount is defined ? product.discount : 0 %}
-        <div class="dc-product-card product-card group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex flex-col {% if loop.index > 4 %}dc-related-extra hidden{% endif %}" data-id="{{ product.product_id }}" data-rating="{{ product.rating is defined ? product.rating : 0 }}" data-model="{{ product.model is defined ? product.model : '' }}" data-brand="{{ product.manufacturer is defined ? product.manufacturer : '' }}" data-description="{{ product.description|striptags|e('html_attr') }}" data-in-wishlist="{{ product.in_wishlist is defined ? product.in_wishlist : 0 }}">
+        <div class="dc-product-card product-card group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex flex-col {% if loop.index > 4 %}dc-related-extra hidden{% endif %}" data-id="{{ product.product_id }}" data-rating="{{ product.rating is defined ? product.rating : 0 }}" data-model="{{ product.model is defined ? product.model : '' }}" data-brand="{{ product.manufacturer is defined ? product.manufacturer : '' }}" data-description="{{ product.description|striptags|e('html_attr') }}" data-in-wishlist="{{ product.in_wishlist is defined ? product.in_wishlist : 0 }}" data-stock="{{ (product.stock is defined ? product.stock : '')|e('html_attr') }}" data-is-in-stock="{{ product.is_in_stock ? 1 : 0 }}">
           <div class="relative overflow-hidden aspect-square bg-gray-50">
             <a href="{{ product.href }}">
               <img src="{{ product.thumb is not empty ? product.thumb : 'image/no_image.png' }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
@@ -359,6 +359,14 @@
             <div class="flex items-center gap-1 mb-3">
               <div class="flex gap-0.5 text-xs text-amber-400">{% for i in 1..5 %}{% if product.rating >= i %}★{% else %}<span class="text-gray-200">★</span>{% endif %}{% endfor %}</div>
               <span class="text-[10px] text-gray-400 ml-1">{{ product.rating }}{% if product.reviews is defined and product.reviews > 0 %} ({{ product.reviews }}){% endif %}</span>
+            </div>
+            {% endif %}
+            {% if product.stock is defined and product.stock %}
+            <div class="mb-2 text-[11px] font-medium {% if product.is_in_stock %}text-emerald-600{% else %}text-red-500{% endif %} flex items-center gap-1">
+              {% if product.is_in_stock %}
+              <i data-lucide="check" class="w-3.5 h-3.5"></i>
+              {% endif %}
+              <span>{{ product.stock }}</span>
             </div>
             {% endif %}
             <div class="flex items-end justify-between gap-2">

@@ -2075,6 +2075,7 @@ class ControllerCheckoutDockercartCheckout extends Controller {
             'lastname' => 'text_field_lastname',
             'email' => 'text_field_email',
             'telephone' => 'text_field_telephone',
+            'comment' => 'entry_comment',
             'fax' => 'text_field_fax',
             'company' => 'text_field_company',
             'address_1' => 'text_field_address_1',

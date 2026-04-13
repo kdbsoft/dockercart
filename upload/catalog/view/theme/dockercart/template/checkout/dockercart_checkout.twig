@@ -3307,7 +3307,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Step 5: Confirm order
         log('Confirming order...');
-        return ajax(ajaxUrls.confirm, { method: 'POST', data: { agree: 1, comment: '' } });
+        const orderComment = $('#input-comment')?.value || '';
+        return ajax(ajaxUrls.confirm, { method: 'POST', data: { agree: 1, comment: orderComment } });
       })
       .then(json => {
         log('Order confirmed', json);

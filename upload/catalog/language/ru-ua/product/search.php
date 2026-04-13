@@ -22,6 +22,7 @@ $_['text_price_asc'] = 'Цена (низкая > высокая)';
 $_['text_price_desc'] = 'Цена (высокая > низкая)';
 $_['text_products'] = '%s товаров';
 $_['text_quantity'] = 'Кол-во:';
+$_['text_instock'] = 'В наличии';
 $_['text_quick_view'] = 'Быстрый просмотр';
 $_['text_rating_asc'] = 'Рейтинг (самый низкий)';
 $_['text_rating_desc'] = 'Рейтинг (самый высокий)';

@@ -62,7 +62,7 @@
 
           <div id="dc-product-grid" class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
             {% for product in products %}
-            <div class="product-card group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex flex-col" data-id="{{ product.product_id }}" data-description="{{ product.description }}" data-model="{{ product.model }}" data-in-wishlist="{{ product.in_wishlist|default(0) }}" data-rating="{{ product.rating }}">
+            <div class="product-card group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex flex-col" data-id="{{ product.product_id }}" data-description="{{ product.description }}" data-model="{{ product.model }}" data-in-wishlist="{{ product.in_wishlist|default(0) }}" data-rating="{{ product.rating }}" data-stock="{{ (product.stock is defined ? product.stock : '')|e('html_attr') }}" data-is-in-stock="{{ product.is_in_stock ? 1 : 0 }}">
               <div class="relative overflow-hidden aspect-square bg-gray-50">
                 <a href="{{ product.href }}">
                   <img src="{{ product.thumb }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
@@ -90,6 +90,14 @@
                   <span class="text-xs {% if product.rating >= i %}text-amber-400{% else %}text-gray-200{% endif %}">★</span>
                   {% endfor %}
                   <span class="text-[10px] text-gray-400 ml-1">{{ product.reviews }} {{ text_reviews }}</span>
+                </div>
+                {% endif %}
+                {% if product.stock is defined and product.stock %}
+                <div class="mb-2 text-[11px] font-medium {% if product.is_in_stock %}text-emerald-600{% else %}text-red-500{% endif %} flex items-center gap-1">
+                  {% if product.is_in_stock %}
+                  <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                  {% endif %}
+                  <span>{{ product.stock }}</span>
                 </div>
                 {% endif %}
                 <div class="flex items-end justify-between gap-2">
