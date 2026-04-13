@@ -9,7 +9,7 @@
  * @author     DockerCart Team
  * @copyright  2026 DockerCart
  * @license    MIT
- * @version    1.0.0
+ * @version    1.0.2
  */
 
 class ControllerExtensionModuleDockercartSearch extends Controller {
@@ -45,6 +45,12 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
 
         $this->load->model('extension/module/dockercart_search');
         $this->load->model('tool/image');
+
+        $normalized_query = $this->model_extension_module_dockercart_search->normalizeSearchQuery($query);
+
+        if ($normalized_query === '') {
+            $normalized_query = $query;
+        }
 
         $limit = $this->config->get('module_dockercart_search_autocomplete_limit') ?: 10;
 
@@ -106,7 +112,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
 
         // ── 3. Manufacturers (MySQL LIKE — no Manticore index required) ───────
         if (!$cat_filter) {
-            $query_safe = $this->db->escape(mb_strtolower(trim($query)));
+            $query_safe = $this->db->escape(mb_strtolower(trim($normalized_query)));
 
             $mfr_result = $this->db->query(
                 "SELECT m.manufacturer_id, m.name
