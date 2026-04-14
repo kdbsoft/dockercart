@@ -60,7 +60,8 @@ class ControllerInformationSitemap extends Controller {
 		$data['password'] = $this->url->link('account/password', '', true);
 		$data['address'] = $this->url->link('account/address', '', true);
 		$data['history'] = $this->url->link('account/order', '', true);
-		$data['download'] = $this->url->link('account/download', '', true);
+		$data['account_download_status'] = (int)$this->config->get('config_account_download_status');
+		$data['download'] = $data['account_download_status'] ? $this->url->link('account/download', '', true) : '';
 		$data['cart'] = $this->url->link('checkout/cart');
 		$data['checkout'] = $this->url->link('checkout/checkout', '', true);
 		$data['search'] = $this->url->link('product/search');

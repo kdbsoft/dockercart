@@ -258,9 +258,13 @@ class ControllerSaleOrder extends Controller {
 		$results = $this->model_sale_order->getOrders($filter_data);
 
 		foreach ($results as $result) {
+			$order_type_badge = $this->getOrderTypeBadge($result);
+
 			$data['orders'][] = array(
 				'order_id'      => $result['order_id'],
 				'customer'      => $result['customer'],
+				'order_type_badge_text'  => $order_type_badge['text'],
+				'order_type_badge_class' => $order_type_badge['class'],
 				'order_status'  => $result['order_status'] ? $result['order_status'] : $this->language->get('text_missing'),
 				'tracking_number' => $result['tracking_number'],
 				'total'         => $this->currency->format($result['total'], $result['currency_code'], $result['currency_value']),
@@ -1703,6 +1707,27 @@ class ControllerSaleOrder extends Controller {
 		);
 
 		return str_replace(array("\r\n", "\r", "\n"), '<br />', preg_replace(array("/\s\s+/", "/\r\r+/", "/\n\n+/"), '<br />', trim(str_replace($find, $replace, $format))));
+	}
+
+	private function getOrderTypeBadge($order) {
+		if (!empty($order['payment_code']) && $order['payment_code'] === 'oneclickcheckout') {
+			return array(
+				'text'  => $this->language->get('text_badge_oneclick_order'),
+				'class' => 'label label-primary'
+			);
+		}
+
+		if (!empty($order['customer_id'])) {
+			return array(
+				'text'  => $this->language->get('text_badge_registered_order'),
+				'class' => 'label label-success'
+			);
+		}
+
+		return array(
+			'text'  => $this->language->get('text_badge_guest_order'),
+			'class' => 'label label-default'
+		);
 	}
 	
 	protected function validate() {

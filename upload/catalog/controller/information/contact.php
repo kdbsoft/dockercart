@@ -114,6 +114,20 @@ class ControllerInformationContact extends Controller {
 		$data['open'] = nl2br($this->config->get('config_open'));
 		$data['comment'] = $this->config->get('config_comment');
 
+		$data['social_links'] = array();
+		for ($i = 1; $i <= 10; $i++) {
+			$image = (string)$this->config->get('dockercart_theme_social_' . $i . '_image');
+			$link  = trim((string)$this->config->get('dockercart_theme_social_' . $i . '_link'));
+			$image_path = ltrim($image, '/');
+
+			if ($image_path !== '') {
+				$data['social_links'][] = array(
+					'image' => $server . 'image/' . $image_path,
+					'link'  => $link,
+				);
+			}
+		}
+
 		$data['locations'] = array();
 
 		$this->load->model('localisation/location');

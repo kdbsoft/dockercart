@@ -103,9 +103,13 @@ class ControllerExtensionDashboardRecent extends Controller {
 		$results = $this->model_sale_order->getOrders($filter_data);
 
 		foreach ($results as $result) {
+			$order_type_badge = $this->getOrderTypeBadge($result);
+
 			$data['orders'][] = array(
 				'order_id'   => $result['order_id'],
 				'customer'   => $result['customer'],
+				'order_type_badge_text'  => $order_type_badge['text'],
+				'order_type_badge_class' => $order_type_badge['class'],
 				'status'     => $result['order_status'],
 				'date_added' => date($this->language->get('date_format_short'), strtotime($result['date_added'])),
 				'total'      => $this->currency->format($result['total'], $result['currency_code'], $result['currency_value']),
@@ -114,5 +118,26 @@ class ControllerExtensionDashboardRecent extends Controller {
 		}
 
 		return $this->load->view('extension/dashboard/recent_info', $data);
+	}
+
+	private function getOrderTypeBadge($order) {
+		if (!empty($order['payment_code']) && $order['payment_code'] === 'oneclickcheckout') {
+			return array(
+				'text'  => $this->language->get('text_badge_oneclick_order'),
+				'class' => 'label label-primary'
+			);
+		}
+
+		if (!empty($order['customer_id'])) {
+			return array(
+				'text'  => $this->language->get('text_badge_registered_order'),
+				'class' => 'label label-success'
+			);
+		}
+
+		return array(
+			'text'  => $this->language->get('text_badge_guest_order'),
+			'class' => 'label label-default'
+		);
 	}
 }

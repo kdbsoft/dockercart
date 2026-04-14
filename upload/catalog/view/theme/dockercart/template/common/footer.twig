@@ -203,5 +203,118 @@ For support and updates, visit dockercart.net
     }
   });
 </script>
+
+{% if social_links and messenger_fab_status %}
+<!-- Messenger FAB Widget -->
+<div id="dc-messenger-fab"
+     class="fixed z-50 flex flex-col items-end gap-2.5"
+     style="right:1.25rem;bottom:calc(1.25rem + env(safe-area-inset-bottom,0px))">
+
+  <!-- Messenger list panel (hidden by default) -->
+  <div id="dc-messenger-fab-panel"
+       role="dialog"
+       aria-label="Messengers"
+       aria-hidden="true"
+       class="flex flex-col items-end gap-2 transition-all duration-200 ease-out opacity-0 translate-y-3 pointer-events-none">
+    {% for social in social_links %}
+      {% if social.image and social.link %}
+      <a href="{{ social.link }}"
+         target="_blank"
+         rel="noopener nofollow"
+         class="flex items-center justify-center w-14 h-14 rounded-full bg-white shadow-lg transition-transform duration-150 hover:scale-110 hover:shadow-xl focus:outline-none"
+         style="border-radius:50%;overflow:hidden;"
+         aria-label="Messenger">
+        <img src="{{ social.image }}" alt="" class="w-10 h-10 object-contain" />
+      </a>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <!-- Toggle button -->
+  <button type="button"
+          id="dc-messenger-fab-toggle"
+          aria-expanded="false"
+          aria-controls="dc-messenger-fab-panel"
+          aria-label="Contact us via messenger"
+          class="relative w-14 h-14 rounded-full text-white flex items-center justify-center transition-transform duration-150 hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
+          style="background:linear-gradient(135deg,#3b82f6 0%,#1d4ed8 100%);box-shadow:0 6px 24px rgba(37,99,235,.5)">
+    <!-- Pulse ring (stops when open) -->
+    <span id="dc-messenger-fab-pulse" class="absolute inset-0 rounded-full bg-blue-400 opacity-0 pointer-events-none" style="animation:dc-fab-ping 2s cubic-bezier(0,0,.2,1) infinite"></span>
+    <span id="dc-messenger-fab-icon-open" aria-hidden="true"><i data-lucide="message-circle" class="w-6 h-6 pointer-events-none"></i></span>
+    <span id="dc-messenger-fab-icon-close" aria-hidden="true" class="hidden"><i data-lucide="x" class="w-6 h-6 pointer-events-none"></i></span>
+  </button>
+</div>
+<style>
+@keyframes dc-fab-ping {
+  0%   { transform:scale(1);   opacity:.35; }
+  70%  { transform:scale(1.5); opacity:0;   }
+  100% { transform:scale(1.5); opacity:0;   }
+}
+</style>
+
+<script>
+(function () {
+  'use strict';
+  document.addEventListener('DOMContentLoaded', function () {
+    var fab      = document.getElementById('dc-messenger-fab');
+    var toggle   = document.getElementById('dc-messenger-fab-toggle');
+    var panel    = document.getElementById('dc-messenger-fab-panel');
+    var iconOpen  = document.getElementById('dc-messenger-fab-icon-open');
+    var iconClose = document.getElementById('dc-messenger-fab-icon-close');
+    var pulse     = document.getElementById('dc-messenger-fab-pulse');
+
+    if (!toggle || !panel) return;
+
+    var isOpen = false;
+
+    function openPanel() {
+      isOpen = true;
+      panel.classList.remove('opacity-0', 'translate-y-3', 'pointer-events-none');
+      panel.classList.add('opacity-100', 'translate-y-0');
+      panel.setAttribute('aria-hidden', 'false');
+      toggle.setAttribute('aria-expanded', 'true');
+      if (iconOpen)  iconOpen.classList.add('hidden');
+      if (iconClose) iconClose.classList.remove('hidden');
+      if (pulse) pulse.style.animation = 'none';
+      var firstLink = panel.querySelector('a');
+      if (firstLink) firstLink.focus();
+    }
+
+    function closePanel() {
+      isOpen = false;
+      panel.classList.add('opacity-0', 'translate-y-3', 'pointer-events-none');
+      panel.classList.remove('opacity-100', 'translate-y-0');
+      panel.setAttribute('aria-hidden', 'true');
+      toggle.setAttribute('aria-expanded', 'false');
+      if (iconOpen)  iconOpen.classList.remove('hidden');
+      if (iconClose) iconClose.classList.add('hidden');
+      if (pulse) pulse.style.animation = 'dc-fab-ping 2s cubic-bezier(0,0,.2,1) infinite';
+    }
+
+    toggle.addEventListener('click', function (e) {
+      e.stopPropagation();
+      isOpen ? closePanel() : openPanel();
+    });
+
+    document.addEventListener('click', function (e) {
+      if (isOpen && fab && !fab.contains(e.target)) {
+        closePanel();
+      }
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (isOpen && (e.key === 'Escape' || e.keyCode === 27)) {
+        closePanel();
+        toggle.focus();
+      }
+    });
+
+    if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
+      lucide.createIcons();
+    }
+  });
+}());
+</script>
+{% endif %}
 </body>
 </html>

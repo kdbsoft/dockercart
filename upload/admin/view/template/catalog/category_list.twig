@@ -4,6 +4,31 @@
     display: none;
   }
 
+  .category-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .category-toolbar-actions {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .category-search-wrap {
+    min-width: 240px;
+    max-width: 360px;
+    width: 100%;
+  }
+
+  .category-search-wrap .form-control {
+    height: 34px;
+  }
+
   #category-tree-table {
     table-layout: fixed;
     width: 100%;
@@ -31,6 +56,49 @@
   .category-sub-prefix {
     color: #6c757d;
     font-weight: 600;
+  }
+
+  .category-toggle {
+    width: 22px;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #d6d8db;
+    border-radius: 3px;
+    background: #fff;
+    color: #5c6670;
+    padding: 0;
+    cursor: pointer;
+    flex: 0 0 auto;
+  }
+
+  .category-toggle .fa {
+    font-size: 10px;
+    transition: transform .15s ease;
+  }
+
+  .category-toggle[aria-expanded="true"] .fa {
+    transform: rotate(90deg);
+  }
+
+  .category-toggle-spacer {
+    width: 22px;
+    height: 22px;
+    display: inline-block;
+    flex: 0 0 auto;
+  }
+
+  .category-depth-badge {
+    display: inline-block;
+    font-size: 10px;
+    line-height: 1;
+    color: #6c757d;
+    background: #f1f3f5;
+    border: 1px solid #e2e5e8;
+    border-radius: 10px;
+    padding: 3px 6px;
+    flex: 0 0 auto;
   }
 </style>
 {{ column_left }}
@@ -64,7 +132,15 @@
         <h3 class="panel-title"><i class="fa fa-list"></i> {{ text_list }}</h3>
       </div>
       <div class="panel-body">
-        <!-- Expand/collapse controls removed — tree is expanded by default and toggle buttons hidden -->
+        <div class="category-toolbar">
+          <div class="category-toolbar-actions">
+            <button type="button" class="btn btn-default btn-sm" id="expand-all-categories"><i class="fa fa-plus-square-o"></i> {{ button_expand_all }}</button>
+            <button type="button" class="btn btn-default btn-sm" id="collapse-all-categories"><i class="fa fa-minus-square-o"></i> {{ button_collapse_all }}</button>
+          </div>
+          <div class="category-search-wrap">
+            <input type="search" id="category-tree-search" class="form-control" placeholder="{{ text_quick_find }}" autocomplete="off" />
+          </div>
+        </div>
         <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-category">
           <div class="table-responsive">
             <table class="table table-bordered table-hover" id="category-tree-table">
@@ -87,7 +163,7 @@
               <tbody>
                 {% if categories %}
                 {% for category in categories %}
-                <tr class="category-row" data-category-id="{{ category.category_id }}" data-parent-id="{{ category.parent_id }}" data-level="{{ category.level }}">
+                <tr class="category-row{% if category.level > 0 %} hidden-row{% endif %}" data-category-id="{{ category.category_id }}" data-parent-id="{{ category.parent_id }}" data-level="{{ category.level }}">
                   <td class="text-center">{% if category.category_id in selected %}
                     <input type="checkbox" name="selected[]" value="{{ category.category_id }}" checked="checked" />
                     {% else %}
@@ -95,8 +171,15 @@
                     {% endif %}</td>
                   <td class="text-left">
                     <div class="category-name-cell" style="padding-left: {{ category.indent }}px;">
-                      {# Subcategory prefix for visual hierarchy #}
+                      {% if category.has_children %}
+                      <button type="button" class="category-toggle" data-category-toggle="{{ category.category_id }}" aria-label="Toggle subcategories" aria-expanded="false">
+                        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                      </button>
+                      {% else %}
+                      <span class="category-toggle-spacer" aria-hidden="true"></span>
+                      {% endif %}
                       {% if category.level > 0 %}<span class="category-sub-prefix">—</span>{% endif %}
+                      {% if category.level > 0 %}<span class="category-depth-badge">L{{ category.level }}</span>{% endif %}
                       <span class="category-name-text">{{ category.name }}</span>
                     </div>
                   </td>
@@ -121,5 +204,279 @@
     </div>
   </div>
 </div>
-        <!-- Collapsing/expanding script removed — categories are expanded by default and no toggles are shown -->
+<script>
+(function() {
+  var rows = Array.prototype.slice.call(document.querySelectorAll('#category-tree-table .category-row'));
+  var storageKey = 'dockercart.admin.category_tree_expanded.v1';
+
+  if (!rows.length) {
+    return;
+  }
+
+  var rowById = {};
+  var childrenByParent = {};
+
+  rows.forEach(function(row) {
+    var id = row.getAttribute('data-category-id');
+    var parentId = row.getAttribute('data-parent-id');
+
+    rowById[id] = row;
+
+    if (!childrenByParent[parentId]) {
+      childrenByParent[parentId] = [];
+    }
+
+    childrenByParent[parentId].push(row);
+  });
+
+  var getDirectChildren = function(categoryId) {
+    return childrenByParent[String(categoryId)] || [];
+  };
+
+  var getToggle = function(categoryId) {
+    return document.querySelector('[data-category-toggle="' + categoryId + '"]');
+  };
+
+  var readExpandedState = function() {
+    try {
+      var raw = window.localStorage.getItem(storageKey);
+
+      if (!raw) {
+        return [];
+      }
+
+      var parsed = JSON.parse(raw);
+
+      return Array.isArray(parsed) ? parsed.map(String) : [];
+    } catch (error) {
+      return [];
+    }
+  };
+
+  var writeExpandedState = function(ids) {
+    try {
+      window.localStorage.setItem(storageKey, JSON.stringify(ids));
+    } catch (error) {
+      // ignore storage quota / privacy mode errors
+    }
+  };
+
+  var collectExpandedIds = function() {
+    return Array.prototype.map.call(document.querySelectorAll('.category-toggle[aria-expanded="true"]'), function(toggle) {
+      return String(toggle.getAttribute('data-category-toggle'));
+    });
+  };
+
+  var persistExpandedState = function() {
+    if (searchInput && searchInput.value && searchInput.value.trim() !== '') {
+      return;
+    }
+
+    writeExpandedState(collectExpandedIds());
+  };
+
+  var setRowVisible = function(row, visible) {
+    row.classList.toggle('hidden-row', !visible);
+  };
+
+  var hideBranch = function(categoryId) {
+    getDirectChildren(categoryId).forEach(function(childRow) {
+      setRowVisible(childRow, false);
+
+      var childId = childRow.getAttribute('data-category-id');
+      var childToggle = getToggle(childId);
+
+      if (childToggle) {
+        childToggle.setAttribute('aria-expanded', 'false');
+      }
+
+      hideBranch(childId);
+    });
+  };
+
+  var showDirectChildren = function(categoryId) {
+    getDirectChildren(categoryId).forEach(function(childRow) {
+      setRowVisible(childRow, true);
+    });
+  };
+
+  var toggleBranch = function(categoryId, forceExpand) {
+    var toggle = getToggle(categoryId);
+
+    if (!toggle) {
+      return;
+    }
+
+    var shouldExpand = (typeof forceExpand === 'boolean') ? forceExpand : (toggle.getAttribute('aria-expanded') !== 'true');
+
+    toggle.setAttribute('aria-expanded', shouldExpand ? 'true' : 'false');
+
+    if (shouldExpand) {
+      showDirectChildren(categoryId);
+    } else {
+      hideBranch(categoryId);
+    }
+
+    persistExpandedState();
+  };
+
+  var expandAll = function(skipPersist) {
+    rows.forEach(function(row) {
+      setRowVisible(row, true);
+    });
+
+    Array.prototype.forEach.call(document.querySelectorAll('.category-toggle'), function(toggle) {
+      toggle.setAttribute('aria-expanded', 'true');
+    });
+
+    if (!skipPersist) {
+      persistExpandedState();
+    }
+  };
+
+  var collapseAll = function(skipPersist) {
+    rows.forEach(function(row) {
+      var level = parseInt(row.getAttribute('data-level') || '0', 10);
+      setRowVisible(row, level === 0);
+    });
+
+    Array.prototype.forEach.call(document.querySelectorAll('.category-toggle'), function(toggle) {
+      toggle.setAttribute('aria-expanded', 'false');
+    });
+
+    if (!skipPersist) {
+      persistExpandedState();
+    }
+  };
+
+  var restoreExpandedState = function() {
+    var expandedIds = readExpandedState();
+
+    collapseAll(true);
+
+    if (!expandedIds.length) {
+      return;
+    }
+
+    expandedIds.sort(function(a, b) {
+      var rowA = rowById[a];
+      var rowB = rowById[b];
+      var levelA = rowA ? parseInt(rowA.getAttribute('data-level') || '0', 10) : 0;
+      var levelB = rowB ? parseInt(rowB.getAttribute('data-level') || '0', 10) : 0;
+
+      return levelA - levelB;
+    });
+
+    expandedIds.forEach(function(categoryId) {
+      var row = rowById[String(categoryId)];
+
+      if (!row) {
+        return;
+      }
+
+      var currentParentId = row.getAttribute('data-parent-id');
+
+      while (currentParentId && currentParentId !== '0') {
+        var parentRow = rowById[currentParentId];
+        var parentToggle = getToggle(currentParentId);
+
+        if (!parentRow || !parentToggle) {
+          break;
+        }
+
+        parentToggle.setAttribute('aria-expanded', 'true');
+        showDirectChildren(currentParentId);
+        setRowVisible(parentRow, true);
+
+        currentParentId = parentRow.getAttribute('data-parent-id');
+      }
+
+      var toggle = getToggle(categoryId);
+
+      if (toggle) {
+        toggle.setAttribute('aria-expanded', 'true');
+        showDirectChildren(categoryId);
+      }
+    });
+  };
+
+  Array.prototype.forEach.call(document.querySelectorAll('.category-toggle'), function(toggle) {
+    toggle.addEventListener('click', function(event) {
+      event.preventDefault();
+      var categoryId = toggle.getAttribute('data-category-toggle');
+      toggleBranch(categoryId);
+    });
+  });
+
+  var expandAllButton = document.getElementById('expand-all-categories');
+  var collapseAllButton = document.getElementById('collapse-all-categories');
+  var searchInput = document.getElementById('category-tree-search');
+
+  if (expandAllButton) {
+    expandAllButton.addEventListener('click', function() {
+      expandAll();
+    });
+  }
+
+  if (collapseAllButton) {
+    collapseAllButton.addEventListener('click', function() {
+      collapseAll();
+      if (searchInput) {
+        searchInput.value = '';
+      }
+    });
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('input', function() {
+      var query = (searchInput.value || '').toLowerCase().trim();
+
+      if (!query) {
+        restoreExpandedState();
+        return;
+      }
+
+      var visibleIds = {};
+
+      rows.forEach(function(row) {
+        var nameCell = row.querySelector('.category-name-text');
+        var nameText = nameCell ? nameCell.textContent.toLowerCase() : '';
+
+        if (nameText.indexOf(query) !== -1) {
+          var current = row;
+
+          while (current) {
+            var currentId = current.getAttribute('data-category-id');
+            var parentId = current.getAttribute('data-parent-id');
+
+            visibleIds[currentId] = true;
+
+            if (!parentId || parentId === '0') {
+              break;
+            }
+
+            current = rowById[parentId] || null;
+          }
+        }
+      });
+
+      rows.forEach(function(row) {
+        var id = row.getAttribute('data-category-id');
+        setRowVisible(row, !!visibleIds[id]);
+      });
+
+      Array.prototype.forEach.call(document.querySelectorAll('.category-toggle'), function(toggle) {
+        var categoryId = toggle.getAttribute('data-category-toggle');
+        var hasVisibleChild = getDirectChildren(categoryId).some(function(childRow) {
+          return !childRow.classList.contains('hidden-row');
+        });
+
+        toggle.setAttribute('aria-expanded', hasVisibleChild ? 'true' : 'false');
+      });
+    });
+  }
+
+  restoreExpandedState();
+})();
+</script>
 {{ footer }}

@@ -23,7 +23,7 @@
       </div>
       {% endif %}
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
         {# My Account #}
         <div class="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
@@ -53,6 +53,35 @@
                 {{ text_wishlist }}
               </a>
             </li>
+            <li>
+              <a href="{{ newsletter }}" class="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition">
+                <i data-lucide="mail" class="w-4 h-4 text-gray-400"></i>
+                {{ text_newsletter }}
+              </a>
+            </li>
+            {% if affiliate_status %}
+              {% if not tracking %}
+              <li>
+                <a href="{{ affiliate }}" class="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition">
+                  <i data-lucide="users" class="w-4 h-4 text-gray-400"></i>
+                  {{ text_affiliate_add }}
+                </a>
+              </li>
+              {% else %}
+              <li>
+                <a href="{{ affiliate }}" class="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition">
+                  <i data-lucide="users" class="w-4 h-4 text-gray-400"></i>
+                  {{ text_affiliate_edit }}
+                </a>
+              </li>
+              <li>
+                <a href="{{ tracking }}" class="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition">
+                  <i data-lucide="link" class="w-4 h-4 text-gray-400"></i>
+                  {{ text_tracking }}
+                </a>
+              </li>
+              {% endif %}
+            {% endif %}
           </ul>
         </div>
 
@@ -66,12 +95,14 @@
                 {{ text_order }}
               </a>
             </li>
+            {% if account_download_status %}
             <li>
               <a href="{{ download }}" class="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition">
                 <i data-lucide="download" class="w-4 h-4 text-gray-400"></i>
                 {{ text_download }}
               </a>
             </li>
+            {% endif %}
             {% if reward %}
             <li>
               <a href="{{ reward }}" class="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition">
@@ -100,44 +131,6 @@
             </li>
           </ul>
         </div>
-
-        {# My Affiliate & Newsletter #}
-        <div class="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
-          <p class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-3">{{ text_my_affiliate }}</p>
-          <ul class="space-y-2 mb-6">
-            {% if not tracking %}
-            <li>
-              <a href="{{ affiliate }}" class="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition">
-                <i data-lucide="users" class="w-4 h-4 text-gray-400"></i>
-                {{ text_affiliate_add }}
-              </a>
-            </li>
-            {% else %}
-            <li>
-              <a href="{{ affiliate }}" class="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition">
-                <i data-lucide="users" class="w-4 h-4 text-gray-400"></i>
-                {{ text_affiliate_edit }}
-              </a>
-            </li>
-            <li>
-              <a href="{{ tracking }}" class="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition">
-                <i data-lucide="link" class="w-4 h-4 text-gray-400"></i>
-                {{ text_tracking }}
-              </a>
-            </li>
-            {% endif %}
-          </ul>
-          <p class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-3">{{ text_my_newsletter }}</p>
-          <ul class="space-y-2">
-            <li>
-              <a href="{{ newsletter }}" class="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition">
-                <i data-lucide="mail" class="w-4 h-4 text-gray-400"></i>
-                {{ text_newsletter }}
-              </a>
-            </li>
-          </ul>
-        </div>
-
       </div>
 
       {% if credit_cards %}

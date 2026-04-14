@@ -14,7 +14,8 @@ class ControllerExtensionModuleAccount extends Controller {
 		$data['address'] = $this->url->link('account/address', '', true);
 		$data['wishlist'] = $this->url->link('account/wishlist');
 		$data['order'] = $this->url->link('account/order', '', true);
-		$data['download'] = $this->url->link('account/download', '', true);
+		$data['account_download_status'] = (int)$this->config->get('config_account_download_status');
+		$data['download'] = $data['account_download_status'] ? $this->url->link('account/download', '', true) : '';
 		$data['reward'] = $this->url->link('account/reward', '', true);
 		$data['return'] = $this->url->link('account/return', '', true);
 		$data['transaction'] = $this->url->link('account/transaction', '', true);

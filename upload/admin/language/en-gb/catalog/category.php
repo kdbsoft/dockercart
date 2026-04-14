@@ -9,6 +9,11 @@ $_['text_add']               = 'Add Category';
 $_['text_edit']              = 'Edit Category';
 $_['text_default']           = 'Default';
 $_['text_keyword']           = 'Do not use spaces, instead replace spaces with - and make sure the SEO URL is globally unique.';
+$_['text_quick_find']         = 'Quick find category...';
+
+// Button
+$_['button_expand_all']       = 'Expand all';
+$_['button_collapse_all']     = 'Collapse all';
 
 // Column
 $_['column_name']            = 'Category Name';

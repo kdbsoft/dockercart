@@ -3,6 +3,10 @@ class ControllerAccountAffiliate extends Controller {
 	private $error = array();
 
 	public function add() {
+		if (!$this->isAffiliateProgramEnabled()) {
+			$this->response->redirect($this->url->link('common/home'));
+		}
+
 		if (!$this->customer->isLogged()) {
 			$this->session->data['redirect'] = $this->url->link('account/affiliate', '', true);
 
@@ -27,6 +31,10 @@ class ControllerAccountAffiliate extends Controller {
 	}
 	
 	public function edit() {
+		if (!$this->isAffiliateProgramEnabled()) {
+			$this->response->redirect($this->url->link('common/home'));
+		}
+
 		if (!$this->customer->isLogged()) {
 			$this->session->data['redirect'] = $this->url->link('account/affiliate', '', true);
 
@@ -51,6 +59,10 @@ class ControllerAccountAffiliate extends Controller {
 	}
 		
 	public function getForm() {
+		if (!$this->isAffiliateProgramEnabled()) {
+			$this->response->redirect($this->url->link('common/home'));
+		}
+
 		$data['breadcrumbs'] = array();
 
 		$data['breadcrumbs'][] = array(
@@ -296,5 +308,9 @@ class ControllerAccountAffiliate extends Controller {
 		}
 
 		return !$this->error;
-	}	
+	}
+
+	private function isAffiliateProgramEnabled() {
+		return (bool)$this->config->get('config_affiliate_status');
+	}
 }

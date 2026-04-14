@@ -1,6 +1,10 @@
 <?php
 class ControllerAccountTracking extends Controller {
 	public function index() {
+		if (!$this->isAffiliateProgramEnabled()) {
+			$this->response->redirect($this->url->link('common/home'));
+		}
+
 		if (!$this->customer->isLogged()) {
 			$this->session->data['redirect'] = $this->url->link('account/tracking', '', true);
 
@@ -55,6 +59,13 @@ class ControllerAccountTracking extends Controller {
 	public function autocomplete() {
 		$json = array();
 
+		if (!$this->isAffiliateProgramEnabled()) {
+			$this->response->addHeader('Content-Type: application/json');
+			$this->response->setOutput(json_encode($json));
+
+			return;
+		}
+
 		if (isset($this->request->get['filter_name'])) {
 			if (isset($this->request->get['tracking'])) {
 				$tracking = $this->request->get['tracking'];
@@ -82,5 +93,9 @@ class ControllerAccountTracking extends Controller {
 
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
+	}
+
+	private function isAffiliateProgramEnabled() {
+		return (bool)$this->config->get('config_affiliate_status');
 	}
 }

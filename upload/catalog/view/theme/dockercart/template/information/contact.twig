@@ -91,6 +91,10 @@
 
   .zoom-hint { opacity: 0; transform: translateY(6px); transition: all .25s ease; }
   .dc-gal-item:hover .zoom-hint { opacity: 1; transform: translateY(0); }
+
+  .dc-messenger-fab-panel {
+    transition: opacity .2s ease, transform .2s ease;
+  }
 </style>
 <main class="bg-gray-50 min-h-screen">
 
@@ -132,9 +136,23 @@
             </div>
             <div>
               <p class="font-semibold text-gray-500 text-xs uppercase tracking-widest mb-1">{{ text_telephone }}</p>
-              <p class="text-gray-800">{{ telephone }}</p>
+              <div class="flex flex-col items-start gap-2">
+                <a href="tel:{{ telephone }}" class="text-gray-800 hover:text-blue-700 transition block">{{ telephone }}</a>
               {% if fax %}
-              <p class="text-gray-800 mt-3">{{ fax }}</p>
+                <a href="tel:{{ fax }}" class="text-gray-800 hover:text-blue-700 transition block">{{ fax }}</a>
+              {% endif %}
+              </div>
+
+              {% if social_links %}
+              <div class="flex flex-wrap items-center gap-2.5 mt-4">
+                {% for social in social_links %}
+                <a href="{{ social.link }}" target="_blank" rel="noopener nofollow"
+                  class="w-9 h-9 inline-flex items-center justify-center rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition"
+                  aria-label="Messenger link {{ loop.index }}">
+                  <img src="{{ social.image }}" alt="" class="w-6 h-6 object-contain" />
+                </a>
+                {% endfor %}
+              </div>
               {% endif %}
             </div>
             <div>
@@ -149,6 +167,7 @@
             </div>
           </div>
         </div>
+
       </div>
 
       {% if store_images %}
@@ -359,6 +378,32 @@
   </section>
 
 </main>
+
+{% if social_links %}
+<div class="fixed right-4 sm:right-6 bottom-4 sm:bottom-6 z-40">
+  <div id="dc-messenger-fab-panel"
+    class="dc-messenger-fab-panel mb-3 flex flex-col items-end gap-2 opacity-0 translate-y-2 pointer-events-none"
+    aria-hidden="true">
+    {% for social in social_links %}
+    <a href="{{ social.link }}" target="_blank" rel="noopener nofollow"
+      class="w-12 h-12 inline-flex items-center justify-center rounded-full border border-gray-200 bg-white hover:bg-blue-50 hover:border-blue-300 shadow-md"
+      aria-label="Messenger link {{ loop.index }}">
+      <img src="{{ social.image }}" alt="" class="w-7 h-7 object-contain" />
+    </a>
+    {% endfor %}
+  </div>
+
+  <button id="dc-messenger-fab-toggle" type="button"
+    class="w-14 h-14 inline-flex items-center justify-center rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+    aria-label="Open messenger links"
+    aria-expanded="false"
+    aria-controls="dc-messenger-fab-panel">
+    <i data-lucide="message-circle" class="w-6 h-6" data-fab-icon="open"></i>
+    <i data-lucide="x" class="w-6 h-6 hidden" data-fab-icon="close"></i>
+  </button>
+</div>
+{% endif %}
+
 <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -390,6 +435,73 @@ document.addEventListener('DOMContentLoaded', function() {
         });
       });
     }
+  }
+
+  var messengerFabToggle = document.getElementById('dc-messenger-fab-toggle');
+  var messengerFabPanel = document.getElementById('dc-messenger-fab-panel');
+
+  if (messengerFabToggle && messengerFabPanel) {
+    var fabOpen = false;
+    var fabOpenIcon = messengerFabToggle.querySelector('[data-fab-icon="open"]');
+    var fabCloseIcon = messengerFabToggle.querySelector('[data-fab-icon="close"]');
+
+    var setFabState = function(nextState) {
+      fabOpen = !!nextState;
+
+      messengerFabToggle.setAttribute('aria-expanded', fabOpen ? 'true' : 'false');
+      messengerFabPanel.setAttribute('aria-hidden', fabOpen ? 'false' : 'true');
+
+      messengerFabPanel.classList.toggle('opacity-0', !fabOpen);
+      messengerFabPanel.classList.toggle('translate-y-2', !fabOpen);
+      messengerFabPanel.classList.toggle('pointer-events-none', !fabOpen);
+
+      messengerFabPanel.classList.toggle('opacity-100', fabOpen);
+      messengerFabPanel.classList.toggle('translate-y-0', fabOpen);
+      messengerFabPanel.classList.toggle('pointer-events-auto', fabOpen);
+
+      if (fabOpenIcon && fabCloseIcon) {
+        fabOpenIcon.classList.toggle('hidden', fabOpen);
+        fabCloseIcon.classList.toggle('hidden', !fabOpen);
+      }
+    };
+
+    messengerFabToggle.addEventListener('click', function(event) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      setFabState(!fabOpen);
+
+      if (fabOpen) {
+        var firstLink = messengerFabPanel.querySelector('a');
+
+        if (firstLink) {
+          firstLink.focus();
+        }
+      }
+    });
+
+    document.addEventListener('click', function(event) {
+      if (!fabOpen) {
+        return;
+      }
+
+      if (!messengerFabPanel.contains(event.target) && !messengerFabToggle.contains(event.target)) {
+        setFabState(false);
+      }
+    });
+
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape' && fabOpen) {
+        setFabState(false);
+        messengerFabToggle.focus();
+      }
+    });
+
+    Array.prototype.forEach.call(messengerFabPanel.querySelectorAll('a'), function(link) {
+      link.addEventListener('click', function() {
+        setFabState(false);
+      });
+    });
   }
 
   if (typeof lucide !== 'undefined') {

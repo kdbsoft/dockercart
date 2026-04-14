@@ -1,6 +1,14 @@
 <?php
 class ControllerAccountDownload extends Controller {
 	public function index() {
+		if (!(int)$this->config->get('config_account_download_status')) {
+			if ($this->customer->isLogged()) {
+				$this->response->redirect($this->url->link('account/account', '', true));
+			} else {
+				$this->response->redirect($this->url->link('common/home'));
+			}
+		}
+
 		if (!$this->customer->isLogged()) {
 			$this->session->data['redirect'] = $this->url->link('account/download', '', true);
 
@@ -100,6 +108,14 @@ class ControllerAccountDownload extends Controller {
 	}
 
 	public function download() {
+		if (!(int)$this->config->get('config_account_download_status')) {
+			if ($this->customer->isLogged()) {
+				$this->response->redirect($this->url->link('account/account', '', true));
+			} else {
+				$this->response->redirect($this->url->link('common/home'));
+			}
+		}
+
 		if (!$this->customer->isLogged()) {
 			$this->session->data['redirect'] = $this->url->link('account/download', '', true);
 

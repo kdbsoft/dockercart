@@ -13,6 +13,7 @@ $_['entry_firstname']    = 'First Name';
 $_['entry_lastname']     = 'Last Name';
 $_['entry_email']        = 'E-Mail';
 $_['entry_telephone']    = 'Telephone';
+$_['entry_company']      = 'Company (optional)';
 $_['entry_tax_number']     = 'Tax Number (optional)';
 
 // Error
@@ -21,5 +22,6 @@ $_['error_firstname']    = 'First Name must be between 1 and 32 characters!';
 $_['error_lastname']     = 'Last Name must be between 1 and 32 characters!';
 $_['error_email']        = 'E-Mail Address does not appear to be valid!';
 $_['error_telephone']    = 'Telephone must be between 3 and 32 characters!';
+$_['error_company']      = 'Company must not exceed 64 characters!';
 $_['error_tax_number']     = 'Tax Number must not exceed 32 characters!';
 $_['error_custom_field'] = '%s required!';
