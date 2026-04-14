@@ -1,7 +1,7 @@
 <?php
 
-$_['entry_address_1'] = 'Адреса 1';
-$_['entry_address_2'] = 'Адреса 2';
+$_['entry_address_1'] = 'Адреса / Відділення';
+$_['entry_address_2'] = 'Продовження адреси';
 $_['entry_bank_account_name'] = 'Ім\'я облікового запису';
 $_['entry_bank_account_number'] = 'Номер рахунку';
 $_['entry_bank_branch_number'] = 'Номер ABA/BSB (номер відділення)';

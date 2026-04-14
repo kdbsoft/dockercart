@@ -3,7 +3,7 @@
 $_['button_all_settings'] = 'Усі налаштування';
 $_['button_cancel_tracker'] = 'Скасувати інформацію про відстеження';
 $_['button_capture_payment'] = 'Захоплення';
-$_['button_cart'] = 'Додати до кошика';
+$_['button_cart'] = 'Купити';
 $_['button_checkout'] = 'Оформлення замовлення';
 $_['button_connect'] = 'Підключитися';
 $_['button_copy_url'] = 'Копіювати URL-адресу в буфер обміну';
