@@ -18,7 +18,7 @@ $_['text_instock'] = 'В наявності';
 ?>
 <?php
 
-$_['button_cart'] = 'Додати до кошика';
+$_['button_cart'] = 'Купити';
 $_['heading_title'] = 'Найновіші';
 $_['text_reviews'] = 'відгуки';
 $_['text_tax'] = 'Без ПДВ:';

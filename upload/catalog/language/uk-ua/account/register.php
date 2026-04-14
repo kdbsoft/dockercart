@@ -1,7 +1,7 @@
 <?php
 
-$_['entry_address_1'] = 'Адреса 1';
-$_['entry_address_2'] = 'Адреса 2';
+$_['entry_address_1'] = 'Адреса / Відділення';
+$_['entry_address_2'] = 'Продовження адреси';
 $_['entry_city'] = 'Місто';
 $_['entry_company'] = 'Компанія';
 $_['entry_confirm'] = 'Підтвердження пароля';
