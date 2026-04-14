@@ -1,6 +1,10 @@
 <?php
 class ControllerAffiliateSuccess extends Controller {
 	public function index() {
+		if (!$this->isAffiliateProgramEnabled()) {
+			$this->response->redirect($this->url->link('common/home'));
+		}
+
 		$this->load->language('affiliate/success');
 
 		$this->document->setTitle($this->language->get('heading_title'));
@@ -44,5 +48,9 @@ class ControllerAffiliateSuccess extends Controller {
 		$data['header'] = $this->load->controller('common/header');
 
 		$this->response->setOutput($this->load->view('common/success', $data));
+	}
+
+	private function isAffiliateProgramEnabled() {
+		return (bool)$this->config->get('config_affiliate_status');
 	}
 }

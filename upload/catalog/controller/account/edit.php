@@ -75,6 +75,12 @@ class ControllerAccountEdit extends Controller {
 			$data['error_telephone'] = '';
 		}
 
+		if (isset($this->error['company'])) {
+			$data['error_company'] = $this->error['company'];
+		} else {
+			$data['error_company'] = '';
+		}
+
 		if (isset($this->error['tax_number'])) {
 			$data['error_tax_number'] = $this->error['tax_number'];
 		} else {
@@ -123,6 +129,14 @@ class ControllerAccountEdit extends Controller {
 			$data['telephone'] = $customer_info['telephone'];
 		} else {
 			$data['telephone'] = '';
+		}
+
+		if (isset($this->request->post['company'])) {
+			$data['company'] = $this->request->post['company'];
+		} elseif (!empty($customer_info)) {
+			$data['company'] = isset($customer_info['company']) ? $customer_info['company'] : '';
+		} else {
+			$data['company'] = '';
 		}
 
 		if (isset($this->request->post['tax_number'])) {
@@ -203,6 +217,10 @@ class ControllerAccountEdit extends Controller {
 
 		if ((utf8_strlen($this->request->post['telephone']) < 3) || (utf8_strlen($this->request->post['telephone']) > 32)) {
 			$this->error['telephone'] = $this->language->get('error_telephone');
+		}
+
+		if (utf8_strlen(isset($this->request->post['company']) ? $this->request->post['company'] : '') > 64) {
+			$this->error['company'] = $this->language->get('error_company');
 		}
 
 		if (utf8_strlen($this->request->post['tax_number']) > 32) {

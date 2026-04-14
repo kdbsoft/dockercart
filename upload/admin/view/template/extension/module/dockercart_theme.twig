@@ -434,6 +434,20 @@
               </div>
 
               <p class="help-block" style="margin-top:10px;">{{ help_social_block }}</p>
+
+              {# Messenger FAB toggle #}
+              <div style="margin-top:16px;padding-top:14px;border-top:1px solid #e8eaec;display:flex;align-items:center;gap:16px;">
+                <label style="font-weight:600;margin:0;white-space:nowrap;">{{ entry_messenger_fab_status }}</label>
+                <div class="btn-group" role="group">
+                  <label class="btn btn-sm {{ dockercart_theme_messenger_fab_status ? 'btn-primary' : 'btn-default' }}" style="margin:0;">
+                    <input type="radio" name="dockercart_theme_messenger_fab_status" value="1" {{ dockercart_theme_messenger_fab_status ? 'checked' : '' }} style="display:none;"> {{ text_enabled }}
+                  </label>
+                  <label class="btn btn-sm {{ not dockercart_theme_messenger_fab_status ? 'btn-danger' : 'btn-default' }}" style="margin:0;">
+                    <input type="radio" name="dockercart_theme_messenger_fab_status" value="0" {{ not dockercart_theme_messenger_fab_status ? 'checked' : '' }} style="display:none;"> {{ text_disabled }}
+                  </label>
+                </div>
+                <span class="help-block" style="margin:0;font-size:12px;color:#8b96a7;">{{ help_messenger_fab_status }}</span>
+              </div>
             </div>
 
             {# ─────────────────────── Section: Payment icons ──────────────────── #}

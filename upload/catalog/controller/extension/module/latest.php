@@ -22,7 +22,14 @@ class ControllerExtensionModuleLatest extends Controller {
 			$wishlist_ids = array_map('intval', $this->session->data['wishlist']);
 		}
 
-		$results = $this->model_catalog_product->getLatestProducts($setting['limit']);
+		$filter_data = array(
+			'sort'  => 'p.date_added',
+			'order' => 'DESC',
+			'start' => 0,
+			'limit' => (int)$setting['limit']
+		);
+
+		$results = $this->model_catalog_product->getNewArrivalProducts($filter_data, 90);
 
 		if ($results) {
 			$results = array_filter($results, function($product) {

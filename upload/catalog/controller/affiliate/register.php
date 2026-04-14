@@ -3,6 +3,10 @@ class ControllerAffiliateRegister extends Controller {
 	private $error = array();
 
 	public function index() {
+		if (!$this->isAffiliateProgramEnabled()) {
+			$this->response->redirect($this->url->link('common/home'));
+		}
+
 		if ($this->customer->isLogged()) {
 			$this->response->redirect($this->url->link('account/account', '', true));
 		}
@@ -409,5 +413,9 @@ class ControllerAffiliateRegister extends Controller {
 		}
 
 		return !$this->error;
+	}
+
+	private function isAffiliateProgramEnabled() {
+		return (bool)$this->config->get('config_affiliate_status');
 	}
 }

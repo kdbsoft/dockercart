@@ -20,6 +20,9 @@
 <!-- Lucide Icons -->
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 
+<!-- jQuery (required by legacy OpenCart datetimepicker/custom-field scripts) -->
+<script src="catalog/view/javascript/jquery/jquery-2.1.1.min.js" type="text/javascript"></script>
+
 <!-- Theme stylesheet -->
 <link href="catalog/view/theme/dockercart/stylesheet/dockercart.css" rel="stylesheet" />
 
@@ -94,6 +97,7 @@
   window.dcLang.quickview_features = {{ quickview_features_json ? quickview_features_json|raw : '[]' }};
   window.dcLang.button_cart = {{ button_cart ? '"' ~ button_cart|e('js') ~ '"' : '"Add to Cart"' }};
   window.dcLang.text_home = {{ text_home ? '"' ~ text_home|e('js') ~ '"' : '' }};
+  window.dcCompareIds = {{ compare_product_ids is defined ? compare_product_ids|json_encode|raw : '[]' }};
 </script>
 
 <!-- ============================================================
@@ -206,9 +210,11 @@
                 <a href="{{ transaction }}" class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
                   <i data-lucide="receipt" class="w-4 h-4"></i>{{ text_transaction }}
                 </a>
+                {% if account_download_status %}
                 <a href="{{ download }}" class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
                   <i data-lucide="download" class="w-4 h-4"></i>{{ text_download }}
                 </a>
+                {% endif %}
                 <hr class="my-1 border-gray-100" />
                 <a href="{{ logout }}" class="flex items-center gap-2.5 px-4 py-2 text-sm text-rose-500 hover:bg-rose-50 transition">
                   <i data-lucide="log-out" class="w-4 h-4"></i>{{ text_logout }}

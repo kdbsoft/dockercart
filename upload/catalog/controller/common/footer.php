@@ -30,7 +30,7 @@ class ControllerCommonFooter extends Controller {
 		$data['tracking'] = $this->url->link('information/tracking');
 		$data['manufacturer'] = $this->url->link('product/manufacturer');
 		$data['voucher'] = $this->url->link('account/voucher', '', true);
-		$data['affiliate'] = $this->url->link('affiliate/login', '', true);
+		$data['affiliate'] = $this->config->get('config_affiliate_status') ? $this->url->link('affiliate/login', '', true) : '';
 		$data['special'] = $this->url->link('product/special');
 		$data['account'] = $this->url->link('account/account', '', true);
 		$data['order'] = $this->url->link('account/order', '', true);
@@ -109,14 +109,19 @@ class ControllerCommonFooter extends Controller {
 		$data['social_links'] = array();
 		for ($i = 1; $i <= 10; $i++) {
 			$image = (string)$this->config->get('dockercart_theme_social_' . $i . '_image');
-			$link  = (string)$this->config->get('dockercart_theme_social_' . $i . '_link');
-			if ($image !== '') {
+			$link  = trim((string)$this->config->get('dockercart_theme_social_' . $i . '_link'));
+			$image_path = ltrim($image, '/');
+
+			if ($image_path !== '') {
 				$data['social_links'][] = array(
-					'image' => $server . 'image/' . $image,
+					'image' => $server . 'image/' . $image_path,
 					'link'  => $link,
 				);
 			}
 		}
+
+		$fab_raw = $this->config->get('dockercart_theme_messenger_fab_status');
+		$data['messenger_fab_status'] = ($fab_raw === null || (int)$fab_raw !== 0);
 
 		$data['payment_icons'] = array();
 		for ($i = 1; $i <= 10; $i++) {

@@ -37,6 +37,8 @@ $_['help_favicon_master'] = 'Single source image for all favicon sizes (16x16 to
 $_['help_favicon_master_hint'] = 'Recommended upload: square 128x128 PNG. The theme will auto-generate favicon sizes and insert them into the site header.';
 $_['help_menu_type']    = 'Choose how categories are shown in the header: classic horizontal bar or vertical dropdown button.';
 $_['help_social_block']   = 'Configure up to 4 social links with selectable icons. Empty link = icon is not displayed in footer.';
+$_['entry_messenger_fab_status'] = 'Messenger FAB widget';
+$_['help_messenger_fab_status']  = 'Show a floating button in the bottom-right corner of every page. Clicking it reveals the messenger list above. Enabled by default.';
 $_['help_payment_block']  = 'Upload payment icons (images). Empty image = item is not displayed in footer.';
 $_['help_theme_features']   = 'These feature blocks are used on product page, category page and quick view. Add as many rows as needed; all texts are multilingual.';
 

@@ -19,7 +19,10 @@
         {% for order in orders %}
         <tr>
           <td class="text-right">{{ order.order_id }}</td>
-          <td>{{ order.customer }}</td>
+          <td>
+            {{ order.customer }}<br />
+            <span class="{{ order.order_type_badge_class }}">{{ order.order_type_badge_text }}</span>
+          </td>
           <td>{{ order.status }}</td>
           <td>{{ order.date_added }}</td>
           <td class="text-right">{{ order.total }}</td>

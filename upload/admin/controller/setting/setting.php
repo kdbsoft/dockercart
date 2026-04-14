@@ -634,6 +634,14 @@ class ControllerSettingSetting extends Controller {
 			$data['config_account_id'] = $this->config->get('config_account_id');
 		}
 
+		if (isset($this->request->post['config_account_download_status'])) {
+			$data['config_account_download_status'] = (int)$this->request->post['config_account_download_status'];
+		} elseif ($this->config->has('config_account_download_status')) {
+			$data['config_account_download_status'] = (int)$this->config->get('config_account_download_status');
+		} else {
+			$data['config_account_download_status'] = 0;
+		}
+
 		$this->load->model('catalog/information');
 
 		$data['informations'] = $this->model_catalog_information->getInformations();
@@ -728,6 +736,14 @@ class ControllerSettingSetting extends Controller {
 			$data['config_affiliate_group_id'] = $this->request->post['config_affiliate_group_id'];
 		} else {
 			$data['config_affiliate_group_id'] = $this->config->get('config_affiliate_group_id');
+		}
+
+		if (isset($this->request->post['config_affiliate_status'])) {
+			$data['config_affiliate_status'] = (int)$this->request->post['config_affiliate_status'];
+		} elseif ($this->config->has('config_affiliate_status')) {
+			$data['config_affiliate_status'] = (int)$this->config->get('config_affiliate_status');
+		} else {
+			$data['config_affiliate_status'] = 0;
 		}
 
 		if (isset($this->request->post['config_affiliate_approval'])) {

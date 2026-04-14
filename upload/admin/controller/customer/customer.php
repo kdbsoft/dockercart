@@ -577,6 +577,12 @@ class ControllerCustomerCustomer extends Controller {
 			$data['error_telephone'] = '';
 		}
 
+		if (isset($this->error['customer_company'])) {
+			$data['error_customer_company'] = $this->error['customer_company'];
+		} else {
+			$data['error_customer_company'] = '';
+		}
+
 		if (isset($this->error['tax_number'])) {
 			$data['error_tax_number'] = $this->error['tax_number'];
 		} else {
@@ -743,6 +749,14 @@ class ControllerCustomerCustomer extends Controller {
 			$data['telephone'] = '';
 		}
 
+		if (isset($this->request->post['customer_company'])) {
+			$data['customer_company'] = $this->request->post['customer_company'];
+		} elseif (!empty($customer_info)) {
+			$data['customer_company'] = isset($customer_info['company']) ? $customer_info['company'] : '';
+		} else {
+			$data['customer_company'] = '';
+		}
+
 		if (isset($this->request->post['tax_number'])) {
 			$data['tax_number'] = $this->request->post['tax_number'];
 		} elseif (!empty($customer_info)) {
@@ -887,12 +901,15 @@ class ControllerCustomerCustomer extends Controller {
 			$data['affiliate'] = '';
 		}
 
-		if (isset($this->request->post['company'])) {
-			$data['company'] = $this->request->post['company'];
+		if (isset($this->request->post['affiliate_company'])) {
+			$data['affiliate_company'] = $this->request->post['affiliate_company'];
+		} elseif (isset($this->request->post['company'])) {
+			// Backward compatibility with older submissions
+			$data['affiliate_company'] = $this->request->post['company'];
 		} elseif (!empty($affiliate_info)) {
-			$data['company'] = $affiliate_info['company'];
+			$data['affiliate_company'] = $affiliate_info['company'];
 		} else {
-			$data['company'] = '';
+			$data['affiliate_company'] = '';
 		}
 
 		if (isset($this->request->post['website'])) {
@@ -1037,6 +1054,10 @@ class ControllerCustomerCustomer extends Controller {
 
 		if ((utf8_strlen($this->request->post['telephone']) < 3) || (utf8_strlen($this->request->post['telephone']) > 32)) {
 			$this->error['telephone'] = $this->language->get('error_telephone');
+		}
+
+		if (utf8_strlen(isset($this->request->post['customer_company']) ? $this->request->post['customer_company'] : '') > 64) {
+			$this->error['customer_company'] = $this->language->get('error_company');
 		}
 
 		if (utf8_strlen($this->request->post['tax_number']) > 32) {

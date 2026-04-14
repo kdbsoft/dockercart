@@ -117,7 +117,10 @@
                     {% endif %}
                     <input type="hidden" name="shipping_code[]" value="{{ order.shipping_code }}" /></td>
                   <td class="text-right">{{ order.order_id }}</td>
-                  <td class="text-left">{{ order.customer }}</td>
+                  <td class="text-left">
+                    {{ order.customer }}<br />
+                    <span class="{{ order.order_type_badge_class }}">{{ order.order_type_badge_text }}</span>
+                  </td>
                   <td class="text-left">{{ order.order_status }}</td>
                   <td class="text-left">{{ order.tracking_number }}</td>
                   <td class="text-right">{{ order.total }}</td>

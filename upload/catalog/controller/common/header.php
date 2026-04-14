@@ -156,6 +156,11 @@ class ControllerCommonHeader extends Controller {
 		// Compare
 		$data['text_compare'] = sprintf($this->language->get('text_compare'), (isset($this->session->data['compare']) ? count($this->session->data['compare']) : 0));
 		$data['compare_total'] = isset($this->session->data['compare']) ? count($this->session->data['compare']) : 0;
+		$data['compare_product_ids'] = array();
+
+		if (isset($this->session->data['compare']) && is_array($this->session->data['compare'])) {
+			$data['compare_product_ids'] = array_values(array_unique(array_map('intval', $this->session->data['compare'])));
+		}
 
 		$data['text_logged'] = sprintf($this->language->get('text_logged'), $this->url->link('account/account', '', true), $this->customer->getFirstName(), $this->url->link('account/logout', '', true));
 		
@@ -170,6 +175,7 @@ class ControllerCommonHeader extends Controller {
 		$data['wishlist'] = $this->url->link('account/wishlist', '', true);
 		$data['compare'] = $this->url->link('product/compare');
 		$data['logged'] = $this->customer->isLogged();
+		$data['account_download_status'] = (int)$this->config->get('config_account_download_status');
 		$data['account'] = $this->url->link('account/account', '', true);
 		$data['register'] = $this->url->link('account/register', '', true);
 		$data['login'] = $this->url->link('account/login', '', true);
