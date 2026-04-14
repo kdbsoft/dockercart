@@ -68,10 +68,8 @@
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1.5" for="input-date-ordered">{{ entry_date_ordered }}</label>
-              <div class="input-group date">
-                <input type="text" name="date_ordered" value="{{ date_ordered }}" placeholder="{{ entry_date_ordered }}" data-date-format="YYYY-MM-DD" id="input-date-ordered"
-                  class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
-              </div>
+              <input type="date" name="date_ordered" value="{{ date_ordered }}" id="input-date-ordered"
+                class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
             </div>
           </div>
 
@@ -153,10 +151,4 @@
   </section>
 
 </main>
-<script type="text/javascript"><!--
-$('.date').datetimepicker({
-  language: '{{ datepicker }}',
-  pickTime: false
-});
-//--></script>
 {{ footer }}
