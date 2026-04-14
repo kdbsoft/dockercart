@@ -9,7 +9,7 @@
  * @author     DockerCart Team
  * @copyright  2026 DockerCart
  * @license    MIT
- * @version    1.0.2
+ * @version    1.0.3
  */
 
 require_once DIR_SYSTEM . 'library/dockercart/manticore.php';

@@ -9,7 +9,7 @@
  * @author     DockerCart Team
  * @copyright  2026 DockerCart
  * @license    MIT
- * @version    1.0.2
+ * @version    1.0.3
  */
 
 class ControllerExtensionModuleDockercartSearch extends Controller {

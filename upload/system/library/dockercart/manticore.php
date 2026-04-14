@@ -206,6 +206,23 @@ class ManticoreClient {
         } else {
             $match_expr = $this->escape($raw);
         }
+
+        // For article-like queries containing spaces/_/- between letters and digits,
+        // add compact variant OR-branch so:
+        //   A 123, A-123, A_123, A123
+        // all can match each other when compact value exists in index.
+        $compact_variant = $this->buildCompactArticleVariant($raw);
+        if ($compact_variant !== '') {
+            $compact_esc = $this->escape($compact_variant);
+
+            if (!empty($options['wildcard'])) {
+                $compact_expr = "{$compact_esc} | {$compact_esc}*";
+            } else {
+                $compact_expr = $compact_esc;
+            }
+
+            $match_expr = "({$match_expr}) | ({$compact_expr})";
+        }
         
         // Build WHERE clause
         $where = ["MATCH('{$match_expr}')"];
@@ -375,6 +392,33 @@ class ManticoreClient {
      */
     private function escapeIdentifier($identifier) {
         return '`' . str_replace('`', '``', $identifier) . '`';
+    }
+
+    /**
+     * Build compact article-like query variant by removing spaces, underscores and hyphens.
+     *
+     * Returns non-empty value only when:
+     *  - query contains at least one separator from [space,_,-], and
+     *  - query contains both letters and digits (article-like pattern).
+     */
+    private function buildCompactArticleVariant($query_text) {
+        $query_text = trim((string)$query_text);
+
+        if ($query_text === '' || !preg_match('/[\s_-]/u', $query_text)) {
+            return '';
+        }
+
+        if (!preg_match('/\p{L}/u', $query_text) || !preg_match('/\d/u', $query_text)) {
+            return '';
+        }
+
+        $compact = preg_replace('/[\s_-]+/u', '', $query_text);
+
+        if ($compact === '' || $compact === $query_text) {
+            return '';
+        }
+
+        return $compact;
     }
     
     /**

@@ -9,7 +9,7 @@
  * @author     DockerCart Team
  * @copyright  2026 DockerCart
  * @license    MIT
- * @version    1.0.2
+ * @version    1.0.3
  */
 
 require_once DIR_SYSTEM . 'library/dockercart/manticore.php';
@@ -216,13 +216,16 @@ class ModelExtensionModuleDockercartSearch extends Model {
             'meta_description' => $product['meta_description'],
             'meta_keywords'    => $product['meta_keyword'],
             'tags'             => $product['tag'],
-            'model'            => $product['model'] ?? '',
-            'sku'              => $product['sku']   ?? '',
-            'upc'              => $product['upc']   ?? '',
-            'ean'              => $product['ean']   ?? '',
-            'jan'              => $product['jan']   ?? '',
-            'isbn'             => $product['isbn']  ?? '',
-            'mpn'              => $product['mpn']   ?? '',
+            // Add compact article variant (without spaces/_/-) into the same indexed field.
+            // Example: "A 123" -> "A 123 A123", "A-123" -> "A-123 A123".
+            // This lets A123 find both "A 123" and "A-123" (and vice versa).
+            'model'            => $this->buildSearchableCode($product['model'] ?? ''),
+            'sku'              => $this->buildSearchableCode($product['sku']   ?? ''),
+            'upc'              => $this->buildSearchableCode($product['upc']   ?? ''),
+            'ean'              => $this->buildSearchableCode($product['ean']   ?? ''),
+            'jan'              => $this->buildSearchableCode($product['jan']   ?? ''),
+            'isbn'             => $this->buildSearchableCode($product['isbn']  ?? ''),
+            'mpn'              => $this->buildSearchableCode($product['mpn']   ?? ''),
             'image'            => $product['image'],
         ];
         
@@ -476,6 +479,32 @@ class ModelExtensionModuleDockercartSearch extends Model {
         }
         
         return true;
+    }
+
+    /**
+     * Build searchable code string for article-like fields.
+     * Adds compact variant without spaces/underscores/hyphens.
+     *
+     * Examples:
+     *  - "A 123"  => "A 123 A123"
+     *  - "A-123"  => "A-123 A123"
+     *  - "A_123"  => "A_123 A123"
+     *  - "A123"   => "A123"
+     */
+    private function buildSearchableCode($value) {
+        $value = trim((string)$value);
+
+        if ($value === '') {
+            return '';
+        }
+
+        $compact = preg_replace('/[\s_-]+/u', '', $value);
+
+        if ($compact === '' || $compact === $value) {
+            return $value;
+        }
+
+        return $value . ' ' . $compact;
     }
     
     /**

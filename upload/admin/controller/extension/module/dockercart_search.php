@@ -10,13 +10,13 @@
  * @author     DockerCart Team
  * @copyright  2026 DockerCart
  * @license    MIT
- * @version    1.0.2
+ * @version    1.0.3
  */
 
 class ControllerExtensionModuleDockercartSearch extends Controller {
     private $error = [];
     private $logger;
-    private $module_version = '1.0.2';
+    private $module_version = '1.0.3';
     
     /**
      * Constructor - Initialize logger

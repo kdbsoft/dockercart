@@ -80,6 +80,20 @@ body, button, input, select, textarea { font-family: 'Manrope', sans-serif; }
     padding-top: 60px;
   }
 }
+@media (max-width: 1023px) {
+  main {
+    padding-top: 40px;
+  }
+  main.py-8 {
+    padding-top: 60px;
+  }
+  section.py-10 {
+    padding-top: 60px;
+  }
+  section#hero {
+    padding-top: 40px;
+  }  
+}
 
 /* ── Category dropdown hover ──────────────────────────────── */
 .dc-cat-item { position: relative; }
