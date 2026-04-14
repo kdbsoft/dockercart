@@ -57,9 +57,13 @@
       {% if informations %}
       <div>
         <!-- Heading -->
-        <h4 class="text-white font-semibold text-sm mb-4">{{ text_information }}</h4>
+        <h4 class="text-white font-semibold text-sm mb-4 hidden lg:block">{{ text_information }}</h4>
+        <button type="button" class="footer-accordion-toggle flex items-center justify-between w-full text-left text-white font-semibold text-sm mb-3 lg:hidden" aria-expanded="true" data-target="accordion-information">
+          <span>{{ text_information }}</span>
+          <span class="footer-accordion-arrow inline-flex items-center justify-center rotate-180"><i data-lucide="chevron-down" class="w-4 h-4"></i></span>
+        </button>
 
-        <ul id="accordion-information" class="space-y-2.5 text-sm">
+        <ul id="accordion-information" class="space-y-2.5 text-sm lg:block">
           {% for information in informations %}
           <li><a href="{{ information.href }}" class="hover:text-white transition">{{ information.title }}</a></li>
           {% endfor %}

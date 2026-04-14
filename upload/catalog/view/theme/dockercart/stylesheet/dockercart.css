@@ -322,9 +322,10 @@ body, button, input, select, textarea { font-family: 'Manrope', sans-serif; }
 /* ── Mobile menu slide ────────────────────────────────────── */
 #dc-mobile-menu {
   transition: transform 0.3s ease, opacity 0.3s ease;
+  transform: translateX(0);
 }
 .dc-mobile-menu-closed {
-  transform: translateX(100%);
+  transform: translateX(-100%);
   opacity: 0;
   pointer-events: none;
 }
