@@ -154,6 +154,11 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center h-14 gap-4">
 
+        <!-- Menu toggle (mobile) -->
+        <button id="dc-mobile-menu-btn" class="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition" aria-label="Menu">
+          <i data-lucide="menu" class="w-5 h-5 text-gray-600"></i>
+        </button>
+
         <!-- Logo -->
         <div class="flex items-center gap-3 flex-shrink-0">
           <a href="{{ home }}" class="flex items-center">
@@ -231,7 +236,7 @@
           </div>
 
           <!-- Hamburger (mobile) -->
-          <button id="dc-hamburger-btn" class="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition" aria-label="Menu">
+          <button id="dc-hamburger-btn" class="hidden p-2 rounded-lg hover:bg-gray-100 transition" aria-label="Menu">
             <i data-lucide="menu" class="w-5 h-5 text-gray-600"></i>
           </button>
         </div>
@@ -254,7 +259,7 @@
   ============================================================ -->
 <!-- Ensure mobile overlay and menu sit above the sticky header (z-[9999]) -->
 <div id="dc-mobile-overlay" class="fixed inset-0 z-[10000] bg-black/40 hidden" onclick="dcCloseMobileMenu()"></div>
-<div id="dc-mobile-menu" class="fixed top-0 right-0 bottom-0 z-[10001] w-[280px] bg-white shadow-2xl flex flex-col dc-mobile-menu-closed">
+<div id="dc-mobile-menu" class="fixed top-0 left-0 bottom-0 z-[10001] w-[280px] bg-white shadow-2xl flex flex-col dc-mobile-menu-closed">
   <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
     {% if logo %}
       <img src="{{ logo }}" alt="{{ name }}" class="object-contain max-w-[180px] sm:max-w-[220px]" />
@@ -480,6 +485,12 @@ document.addEventListener('DOMContentLoaded', function () {
   var hamburger = document.getElementById('dc-hamburger-btn');
   if (hamburger) {
     hamburger.addEventListener('click', dcOpenMobileMenu);
+  }
+
+  /* Mobile menu button (left side) */
+  var mobileMenuBtn = document.getElementById('dc-mobile-menu-btn');
+  if (mobileMenuBtn) {
+    mobileMenuBtn.addEventListener('click', dcOpenMobileMenu);
   }
 
   /* Mobile top micro bar: hide on scroll down, show on scroll up */
