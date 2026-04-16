@@ -1,6 +1,7 @@
 <?php
 class ModelExtensionModuleDockercartImportExportExcel extends Model {
     private $option_type_cache = array();
+    private $customer_group_lookup_cache = array();
 
     public function getProfile($profile_id) {
         $query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "dockercart_import_export_excel_profile` WHERE `profile_id` = '" . (int)$profile_id . "'");
@@ -320,6 +321,8 @@ class ModelExtensionModuleDockercartImportExportExcel extends Model {
 
         $attributes = $this->mapAttributesFromRow($row, $attribute_rules);
         $options = $this->mapOptionsFromRow($row, $option_rules);
+        $specials_defined = $this->hasSpecialMappings($field_map);
+        $specials = $specials_defined ? $this->mapSpecialsFromRow($row, $field_map, (int)$profile['language_id']) : array();
 
         return array(
             'external_id' => $external_id,
@@ -335,6 +338,8 @@ class ModelExtensionModuleDockercartImportExportExcel extends Model {
             'images' => $additional_images,
             'attributes' => $attributes,
             'options' => $options,
+            'specials' => $specials,
+            'specials_defined' => $specials_defined,
             'store_id' => (int)$profile['store_id'],
             'language_id' => (int)$profile['language_id']
         );
@@ -432,6 +437,169 @@ class ModelExtensionModuleDockercartImportExportExcel extends Model {
         }
 
         return $result;
+    }
+
+    private function hasSpecialMappings($field_map) {
+        $group_column = isset($field_map['special_customer_group']) ? (int)$field_map['special_customer_group'] : 0;
+        $price_column = isset($field_map['special_price']) ? (int)$field_map['special_price'] : 0;
+
+        return $group_column > 0 && $price_column > 0;
+    }
+
+    private function mapSpecialsFromRow($row, $field_map, $language_id) {
+        $group_values = $this->splitSpecialColumnValues($this->mappedValue($row, $field_map, 'special_customer_group'));
+        $price_values = $this->splitSpecialColumnValues($this->mappedValue($row, $field_map, 'special_price'));
+        $date_start_values = $this->splitSpecialColumnValues($this->mappedValue($row, $field_map, 'special_date_start'));
+        $date_end_values = $this->splitSpecialColumnValues($this->mappedValue($row, $field_map, 'special_date_end'));
+
+        $max_count = max(count($group_values), count($price_values), count($date_start_values), count($date_end_values));
+        if ($max_count <= 0) {
+            return array();
+        }
+
+        $result = array();
+
+        for ($i = 0; $i < $max_count; $i++) {
+            $group_value = $this->specialValueAt($group_values, $i);
+            $price_value = $this->specialValueAt($price_values, $i);
+            $date_start_value = $this->specialValueAt($date_start_values, $i);
+            $date_end_value = $this->specialValueAt($date_end_values, $i);
+
+            if ($group_value === '' && $price_value === '' && $date_start_value === '' && $date_end_value === '') {
+                continue;
+            }
+
+            $customer_group_id = $this->resolveCustomerGroupId($group_value, $language_id);
+            $price = $this->normalizeSpecialPrice($price_value);
+
+            if ($customer_group_id <= 0 || $price === null) {
+                continue;
+            }
+
+            $result[] = array(
+                'customer_group_id' => $customer_group_id,
+                'priority' => 0,
+                'price' => $price,
+                'date_start' => $this->normalizeSpecialDate($date_start_value),
+                'date_end' => $this->normalizeSpecialDate($date_end_value)
+            );
+        }
+
+        return $result;
+    }
+
+    private function splitSpecialColumnValues($value) {
+        $value = trim((string)$value);
+        if ($value === '') {
+            return array();
+        }
+
+        $parts = explode('|', $value);
+        $result = array();
+
+        foreach ($parts as $part) {
+            $result[] = trim((string)$part);
+        }
+
+        if (count($result) === 1 && $result[0] === '') {
+            return array();
+        }
+
+        return $result;
+    }
+
+    private function specialValueAt($values, $index) {
+        if (!is_array($values) || !$values) {
+            return '';
+        }
+
+        if (isset($values[$index])) {
+            return trim((string)$values[$index]);
+        }
+
+        if (count($values) === 1) {
+            return trim((string)$values[0]);
+        }
+
+        return '';
+    }
+
+    private function resolveCustomerGroupId($value, $language_id) {
+        $value = trim((string)$value);
+        if ($value === '') {
+            return 0;
+        }
+
+        $cache_key = $language_id . ':' . $value;
+        if (isset($this->customer_group_lookup_cache[$cache_key])) {
+            return (int)$this->customer_group_lookup_cache[$cache_key];
+        }
+
+        if (ctype_digit($value)) {
+            $query = $this->db->query("SELECT customer_group_id FROM `" . DB_PREFIX . "customer_group` WHERE customer_group_id = '" . (int)$value . "' LIMIT 1");
+            if ($query->num_rows) {
+                $this->customer_group_lookup_cache[$cache_key] = (int)$query->row['customer_group_id'];
+                return (int)$query->row['customer_group_id'];
+            }
+        }
+
+        $query = $this->db->query("SELECT customer_group_id
+            FROM `" . DB_PREFIX . "customer_group_description`
+            WHERE name = '" . $this->db->escape($value) . "'
+            ORDER BY (language_id = '" . (int)$language_id . "') DESC, language_id ASC
+            LIMIT 1");
+
+        $customer_group_id = $query->num_rows ? (int)$query->row['customer_group_id'] : 0;
+        $this->customer_group_lookup_cache[$cache_key] = $customer_group_id;
+
+        return $customer_group_id;
+    }
+
+    private function normalizeSpecialPrice($value) {
+        $value = trim((string)$value);
+        if ($value === '') {
+            return null;
+        }
+
+        $value = str_replace(' ', '', $value);
+        $value = str_replace(',', '.', $value);
+
+        if (!is_numeric($value)) {
+            return null;
+        }
+
+        $price = (float)$value;
+        if ($price < 0) {
+            $price = 0;
+        }
+
+        return $price;
+    }
+
+    private function normalizeSpecialDate($value) {
+        $value = trim((string)$value);
+
+        if ($value === '' || $value === '0000-00-00') {
+            return '0000-00-00';
+        }
+
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
+            return $value;
+        }
+
+        if (is_numeric($value)) {
+            $serial = (int)$value;
+            if ($serial > 0) {
+                return gmdate('Y-m-d', ($serial - 25569) * 86400);
+            }
+        }
+
+        $timestamp = strtotime($value);
+        if ($timestamp !== false) {
+            return date('Y-m-d', $timestamp);
+        }
+
+        return '0000-00-00';
     }
 
     private function parseImageList($raw) {
@@ -724,6 +892,9 @@ class ModelExtensionModuleDockercartImportExportExcel extends Model {
         $this->upsertProductImages($product_id, isset($data['images']) ? $data['images'] : array());
         $this->upsertProductAttributes($product_id, (int)$data['language_id'], isset($data['attributes']) ? $data['attributes'] : array());
         $this->upsertProductOptions($product_id, isset($data['options']) ? $data['options'] : array());
+        if (!empty($data['specials_defined'])) {
+            $this->upsertProductSpecials($product_id, isset($data['specials']) ? $data['specials'] : array());
+        }
 
         return $product_id;
     }
@@ -751,6 +922,9 @@ class ModelExtensionModuleDockercartImportExportExcel extends Model {
         $this->upsertProductImages($product_id, isset($data['images']) ? $data['images'] : array());
         $this->upsertProductAttributes($product_id, (int)$data['language_id'], isset($data['attributes']) ? $data['attributes'] : array());
         $this->upsertProductOptions($product_id, isset($data['options']) ? $data['options'] : array());
+        if (!empty($data['specials_defined'])) {
+            $this->upsertProductSpecials($product_id, isset($data['specials']) ? $data['specials'] : array());
+        }
     }
 
     private function updateProductPriceQuantity($product_id, $data) {
@@ -759,6 +933,10 @@ class ModelExtensionModuleDockercartImportExportExcel extends Model {
                 price = '" . (float)$data['price'] . "',
                 date_modified = NOW()
             WHERE product_id = '" . (int)$product_id . "'");
+
+        if (!empty($data['specials_defined'])) {
+            $this->upsertProductSpecials($product_id, isset($data['specials']) ? $data['specials'] : array());
+        }
     }
 
     private function upsertProductDescription($product_id, $language_id, $name, $description) {
@@ -879,6 +1057,39 @@ class ModelExtensionModuleDockercartImportExportExcel extends Model {
         }
     }
 
+    private function upsertProductSpecials($product_id, $specials) {
+        $this->db->query("DELETE FROM `" . DB_PREFIX . "product_special` WHERE product_id = '" . (int)$product_id . "'");
+
+        if (!$specials || !is_array($specials)) {
+            return;
+        }
+
+        foreach ($specials as $special) {
+            if (!is_array($special)) {
+                continue;
+            }
+
+            $customer_group_id = isset($special['customer_group_id']) ? (int)$special['customer_group_id'] : 0;
+            $price = isset($special['price']) ? (float)$special['price'] : null;
+
+            if ($customer_group_id <= 0 || $price === null) {
+                continue;
+            }
+
+            $priority = isset($special['priority']) ? (int)$special['priority'] : 0;
+            $date_start = isset($special['date_start']) ? $this->normalizeSpecialDate($special['date_start']) : '0000-00-00';
+            $date_end = isset($special['date_end']) ? $this->normalizeSpecialDate($special['date_end']) : '0000-00-00';
+
+            $this->db->query("INSERT INTO `" . DB_PREFIX . "product_special`
+                SET product_id = '" . (int)$product_id . "',
+                    customer_group_id = '" . $customer_group_id . "',
+                    priority = '" . $priority . "',
+                    price = '" . $price . "',
+                    date_start = '" . $this->db->escape($date_start) . "',
+                    date_end = '" . $this->db->escape($date_end) . "'");
+        }
+    }
+
     private function getOptionType($option_id) {
         $option_id = (int)$option_id;
         if (isset($this->option_type_cache[$option_id])) {
@@ -958,10 +1169,21 @@ class ModelExtensionModuleDockercartImportExportExcel extends Model {
             WHERE p2s.store_id = '" . $store_id . "'
             ORDER BY p.product_id ASC");
 
+        $additional_images_by_product = $this->getProductAdditionalImagesForExport(array_column($query->rows, 'product_id'));
+        $specials_by_product = $this->getProductSpecialsForExport(array_column($query->rows, 'product_id'), $language_id);
+
         $rows = array();
-        $rows[] = array('product_id', 'sku', 'model', 'name', 'description', 'price', 'quantity', 'manufacturer', 'category', 'image', 'status');
+        $rows[] = array('product_id', 'sku', 'model', 'name', 'description', 'price', 'quantity', 'manufacturer', 'category', 'image', 'images', 'status', 'special_customer_group', 'special_price', 'special_date_start', 'special_date_end');
 
         foreach ($query->rows as $row) {
+            $additional_images = isset($additional_images_by_product[(int)$row['product_id']]) ? $additional_images_by_product[(int)$row['product_id']] : '';
+            $special = isset($specials_by_product[(int)$row['product_id']]) ? $specials_by_product[(int)$row['product_id']] : array(
+                'special_customer_group' => '',
+                'special_price' => '',
+                'special_date_start' => '',
+                'special_date_end' => ''
+            );
+
             $rows[] = array(
                 (string)$row['product_id'],
                 (string)$row['sku'],
@@ -973,11 +1195,121 @@ class ModelExtensionModuleDockercartImportExportExcel extends Model {
                 (string)$row['manufacturer'],
                 (string)$row['category_name'],
                 (string)$row['image'],
-                (string)$row['status']
+                (string)$additional_images,
+                (string)$row['status'],
+                (string)$special['special_customer_group'],
+                (string)$special['special_price'],
+                (string)$special['special_date_start'],
+                (string)$special['special_date_end']
             );
         }
 
         return $rows;
+    }
+
+    private function getProductAdditionalImagesForExport($product_ids) {
+        $result = array();
+        if (!$product_ids || !is_array($product_ids)) {
+            return $result;
+        }
+
+        $product_ids = array_values(array_unique(array_map('intval', $product_ids)));
+        $product_ids = array_filter($product_ids);
+
+        if (!$product_ids) {
+            return $result;
+        }
+
+        $query = $this->db->query("SELECT product_id, image FROM `" . DB_PREFIX . "product_image` WHERE product_id IN (" . implode(',', $product_ids) . ") ORDER BY product_id ASC, sort_order ASC, product_image_id ASC");
+
+        foreach ($query->rows as $row) {
+            $product_id = (int)$row['product_id'];
+            if (!isset($result[$product_id])) {
+                $result[$product_id] = array();
+            }
+
+            $image = trim((string)$row['image']);
+            if ($image !== '') {
+                $result[$product_id][] = $image;
+            }
+        }
+
+        foreach ($result as $product_id => $images) {
+            $result[$product_id] = implode(' | ', $images);
+        }
+
+        return $result;
+    }
+
+    private function getProductSpecialsForExport($product_ids, $language_id) {
+        $result = array();
+        if (!$product_ids || !is_array($product_ids)) {
+            return $result;
+        }
+
+        $product_ids = array_values(array_unique(array_map('intval', $product_ids)));
+        $product_ids = array_filter($product_ids);
+
+        if (!$product_ids) {
+            return $result;
+        }
+
+        $query = $this->db->query("SELECT
+                ps.product_id,
+                ps.customer_group_id,
+                ps.price,
+                ps.date_start,
+                ps.date_end,
+                cgd.name AS customer_group_name
+            FROM `" . DB_PREFIX . "product_special` ps
+            LEFT JOIN `" . DB_PREFIX . "customer_group_description` cgd
+                ON (cgd.customer_group_id = ps.customer_group_id AND cgd.language_id = '" . (int)$language_id . "')
+            WHERE ps.product_id IN (" . implode(',', $product_ids) . ")
+            ORDER BY ps.product_id ASC, ps.priority ASC, ps.price ASC, ps.customer_group_id ASC");
+
+        foreach ($query->rows as $row) {
+            $product_id = (int)$row['product_id'];
+
+            if (!isset($result[$product_id])) {
+                $result[$product_id] = array(
+                    'special_customer_group' => array(),
+                    'special_price' => array(),
+                    'special_date_start' => array(),
+                    'special_date_end' => array()
+                );
+            }
+
+            $group_name = trim((string)$row['customer_group_name']);
+            if ($group_name === '') {
+                $group_name = (string)$row['customer_group_id'];
+            }
+
+            $result[$product_id]['special_customer_group'][] = $group_name;
+            $result[$product_id]['special_price'][] = (string)$row['price'];
+            $result[$product_id]['special_date_start'][] = $this->normalizeSpecialDateForExport($row['date_start']);
+            $result[$product_id]['special_date_end'][] = $this->normalizeSpecialDateForExport($row['date_end']);
+        }
+
+        foreach ($result as $product_id => $special) {
+            $result[$product_id] = array(
+                'special_customer_group' => implode(' | ', $special['special_customer_group']),
+                'special_price' => implode(' | ', $special['special_price']),
+                'special_date_start' => implode(' | ', $special['special_date_start']),
+                'special_date_end' => implode(' | ', $special['special_date_end'])
+            );
+        }
+
+        return $result;
+    }
+
+    private function normalizeSpecialDateForExport($value) {
+        $value = trim((string)$value);
+
+        if ($value === '' || $value === '0000-00-00') {
+            return '';
+        }
+
+        return $value;
     }
 
     private function writeCsvFile($filepath, $rows) {

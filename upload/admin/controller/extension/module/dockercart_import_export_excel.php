@@ -248,7 +248,11 @@ class ControllerExtensionModuleDockercartImportExportExcel extends Controller {
                 'manufacturer' => (int)$this->getPostInt('map_manufacturer', 0),
                 'category' => (int)$this->getPostInt('map_category', 0),
                 'image' => (int)$this->getPostInt('map_image', 0),
-                'images' => $this->normalizeColumnList(isset($this->request->post['map_images']) ? (string)$this->request->post['map_images'] : '')
+                'images' => $this->normalizeColumnList(isset($this->request->post['map_images']) ? (string)$this->request->post['map_images'] : ''),
+                'special_customer_group' => (int)$this->getPostInt('map_special_customer_group', 0),
+                'special_price' => (int)$this->getPostInt('map_special_price', 0),
+                'special_date_start' => (int)$this->getPostInt('map_special_date_start', 0),
+                'special_date_end' => (int)$this->getPostInt('map_special_date_end', 0),
             );
 
             $category_rules = $this->decodeJsonArray(isset($this->request->post['category_rules_json']) ? $this->request->post['category_rules_json'] : '[]');
@@ -305,7 +309,11 @@ class ControllerExtensionModuleDockercartImportExportExcel extends Controller {
                 'manufacturer' => max(0, (int)$this->getArrayInt($data, 'map_manufacturer', 0)),
                 'category' => max(0, (int)$this->getArrayInt($data, 'map_category', 0)),
                 'image' => max(0, (int)$this->getArrayInt($data, 'map_image', 0)),
-                'images' => $this->normalizeColumnList(isset($data['map_images']) ? (string)$data['map_images'] : '')
+                'images' => $this->normalizeColumnList(isset($data['map_images']) ? (string)$data['map_images'] : ''),
+                'special_customer_group' => max(0, (int)$this->getArrayInt($data, 'map_special_customer_group', 0)),
+                'special_price' => max(0, (int)$this->getArrayInt($data, 'map_special_price', 0)),
+                'special_date_start' => max(0, (int)$this->getArrayInt($data, 'map_special_date_start', 0)),
+                'special_date_end' => max(0, (int)$this->getArrayInt($data, 'map_special_date_end', 0)),
             );
 
             $this->load->model('extension/module/dockercart_import_export_excel');
@@ -324,7 +332,11 @@ class ControllerExtensionModuleDockercartImportExportExcel extends Controller {
                     'manufacturer' => $this->rowByColumnIndex($row, $field_map['manufacturer']),
                     'category' => $this->rowByColumnIndex($row, $field_map['category']),
                     'image' => $this->rowByColumnIndex($row, $field_map['image']),
-                    'images' => $this->rowByColumnIndexes($row, $field_map['images'])
+                    'images' => $this->rowByColumnIndexes($row, $field_map['images']),
+                    'special_customer_group' => $this->rowByColumnIndex($row, $field_map['special_customer_group']),
+                    'special_price' => $this->rowByColumnIndex($row, $field_map['special_price']),
+                    'special_date_start' => $this->rowByColumnIndex($row, $field_map['special_date_start']),
+                    'special_date_end' => $this->rowByColumnIndex($row, $field_map['special_date_end']),
                 );
             }
 
@@ -822,7 +834,11 @@ class ControllerExtensionModuleDockercartImportExportExcel extends Controller {
                 'manufacturer' => 8,
                 'category' => 9,
                 'image' => 10,
-                'images' => ''
+                'images' => '11',
+                'special_customer_group' => 13,
+                'special_price' => 14,
+                'special_date_start' => 15,
+                'special_date_end' => 16
             )
         );
 
