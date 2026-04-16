@@ -21,6 +21,7 @@ class ModelCatalogProduct extends Model {
 			}
 
 			$customer_group_discount = (float)$this->config->get('config_customer_group_discount');
+			$customer_group_markup = (float)$this->config->get('config_customer_group_markup');
 
 			if ($customer_group_discount > 0) {
 				$discount_multiplier = (100 - $customer_group_discount) / 100;
@@ -28,6 +29,13 @@ class ModelCatalogProduct extends Model {
 
 				if ($special !== null) {
 					$special *= $discount_multiplier;
+				}
+			} elseif ($customer_group_markup > 0) {
+				$markup_multiplier = (100 + $customer_group_markup) / 100;
+				$price *= $markup_multiplier;
+
+				if ($special !== null) {
+					$special *= $markup_multiplier;
 				}
 			}
 

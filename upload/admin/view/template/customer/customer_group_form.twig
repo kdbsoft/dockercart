@@ -89,6 +89,18 @@
               {% endif %}
             </div>
           </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-markup-percent">{{ entry_markup_percent }}</label>
+            <div class="col-sm-10">
+              <div class="input-group">
+                <input type="number" name="markup_percent" value="{{ markup_percent }}" placeholder="{{ entry_markup_percent }}" id="input-markup-percent" class="form-control" min="0" max="100" step="0.01" />
+                <span class="input-group-addon">%</span>
+              </div>
+              {% if error_markup_percent %}
+              <div class="text-danger">{{ error_markup_percent }}</div>
+              {% endif %}
+            </div>
+          </div>
         </form>
       </div>
     </div>
