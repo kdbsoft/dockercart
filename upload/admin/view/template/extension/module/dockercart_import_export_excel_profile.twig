@@ -279,10 +279,7 @@
               <label for="map_images">{{ entry_map_images }}</label>
               <input type="text" class="form-control" id="map_images" name="map_images" value="{{ fm.images }}" placeholder="11,12,13" />
             </div>
-            {{ _self.map_input(entry_map_special_customer_group, 'map_special_customer_group', fm.special_customer_group) }}
-            {{ _self.map_input(entry_map_special_price, 'map_special_price', fm.special_price) }}
-            {{ _self.map_input(entry_map_special_date_start, 'map_special_date_start', fm.special_date_start) }}
-            {{ _self.map_input(entry_map_special_date_end, 'map_special_date_end', fm.special_date_end) }}
+            {{ _self.map_input(entry_map_specials, 'map_specials', fm.specials) }}
           </div>
           <p class="dcx-help">{{ text_map_images_hint }}</p>
           <p class="dcx-help">{{ text_map_specials_hint }}</p>
@@ -707,7 +704,7 @@
     var $table = $('#preview-mapped-table');
     $table.empty();
 
-    var fields = ['external_id','sku','model','name','description','price','quantity','manufacturer','category','image','images','special_customer_group','special_price','special_date_start','special_date_end'];
+    var fields = ['external_id','sku','model','name','description','price','quantity','manufacturer','category','image','images','specials'];
     var thead = '<thead><tr>';
     fields.forEach(function(field) { thead += '<th>' + field + '</th>'; });
     thead += '</tr></thead>';
