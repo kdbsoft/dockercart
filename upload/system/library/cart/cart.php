@@ -66,6 +66,51 @@ class Cart {
 	public function getProducts() {
 		$product_data = array();
 
+		$customer_group_discount = (float)$this->config->get('config_customer_group_discount');
+		$customer_group_markup = (float)$this->config->get('config_customer_group_markup');
+		$customer_group_id = (int)$this->config->get('config_customer_group_id');
+
+		// Fallback: in some request flows startup config may not preload group pricing.
+		// Read values directly from customer_group so cart/checkout prices stay consistent.
+		if ($customer_group_id > 0 && $customer_group_discount <= 0 && $customer_group_markup <= 0) {
+			$has_markup_percent = false;
+			$markup_column_query = $this->db->query("SHOW COLUMNS FROM " . DB_PREFIX . "customer_group LIKE 'markup_percent'");
+
+			if ($markup_column_query->num_rows) {
+				$has_markup_percent = true;
+			}
+
+			if ($has_markup_percent) {
+				$customer_group_query = $this->db->query("SELECT discount_percent, markup_percent FROM " . DB_PREFIX . "customer_group WHERE customer_group_id = '" . $customer_group_id . "'");
+			} else {
+				$customer_group_query = $this->db->query("SELECT discount_percent FROM " . DB_PREFIX . "customer_group WHERE customer_group_id = '" . $customer_group_id . "'");
+			}
+
+			if ($customer_group_query->num_rows) {
+				$customer_group_discount = (float)$customer_group_query->row['discount_percent'];
+
+				if ($customer_group_discount < 0) {
+					$customer_group_discount = 0;
+				} elseif ($customer_group_discount > 100) {
+					$customer_group_discount = 100;
+				}
+
+				if ($has_markup_percent) {
+					$customer_group_markup = (float)$customer_group_query->row['markup_percent'];
+
+					if ($customer_group_markup < 0) {
+						$customer_group_markup = 0;
+					} elseif ($customer_group_markup > 100) {
+						$customer_group_markup = 100;
+					}
+				}
+			}
+		}
+
+		if ($customer_group_discount > 0 && $customer_group_markup > 0) {
+			$customer_group_markup = 0;
+		}
+
 		$cart_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "cart WHERE api_id = '" . (isset($this->session->data['api_id']) ? (int)$this->session->data['api_id'] : 0) . "' AND customer_id = '" . (int)$this->customer->getId() . "' AND session_id = '" . $this->db->escape($this->session->getId()) . "'");
 
 		foreach ($cart_query->rows as $cart) {
@@ -220,10 +265,10 @@ class Cart {
 					$price = (float)$product_special_query->row['price'];
 				}
 
-				$customer_group_discount = (float)$this->config->get('config_customer_group_discount');
-
 				if ($customer_group_discount > 0) {
 					$price *= (100 - $customer_group_discount) / 100;
+				} elseif ($customer_group_markup > 0) {
+					$price *= (100 + $customer_group_markup) / 100;
 				}
 
 				// Reward Points
@@ -274,6 +319,33 @@ class Cart {
 					$recurring = false;
 				}
 
+				// DockerCart Multicurrency: Convert price from product currency to default currency
+				$multicurrency_price = $price;
+				$multicurrency_option_price = $option_price;
+
+				$currency_query = $this->db->query("SELECT currency_id FROM " . DB_PREFIX . "product WHERE product_id = '" . (int)$cart['product_id'] . "'");
+
+				if ($currency_query->num_rows && !empty($currency_query->row['currency_id'])) {
+					$product_currency_id = (int)$currency_query->row['currency_id'];
+					$product_currency_query = $this->db->query("SELECT value FROM " . DB_PREFIX . "currency WHERE currency_id = '" . (int)$product_currency_id . "'");
+
+					if ($product_currency_query->num_rows) {
+						$product_currency_value = (float)$product_currency_query->row['value'];
+						$default_currency = $this->config->get('config_currency');
+						$default_currency_query = $this->db->query("SELECT value FROM " . DB_PREFIX . "currency WHERE code = '" . $this->db->escape($default_currency) . "'");
+
+						if ($default_currency_query->num_rows) {
+							$default_currency_value = (float)$default_currency_query->row['value'];
+
+							if ($product_currency_value > 0) {
+								$conversion_rate = $default_currency_value / $product_currency_value;
+								$multicurrency_price = $price * $conversion_rate;
+								$multicurrency_option_price = $option_price * $conversion_rate;
+							}
+						}
+					}
+				}
+
 				$product_data[] = array(
 					'cart_id'         => $cart['cart_id'],
 					'product_id'      => $product_query->row['product_id'],
@@ -287,8 +359,8 @@ class Cart {
 					'minimum'         => $product_query->row['minimum'],
 					'subtract'        => $product_query->row['subtract'],
 					'stock'           => $stock,
-					'price'           => ($price + $option_price),
-					'total'           => ($price + $option_price) * $cart['quantity'],
+					'price'           => ($multicurrency_price + $multicurrency_option_price),
+					'total'           => ($multicurrency_price + $multicurrency_option_price) * $cart['quantity'],
 					'reward'          => $reward * $cart['quantity'],
 					'points'          => ($product_query->row['points'] ? ($product_query->row['points'] + $option_points) * $cart['quantity'] : 0),
 					'tax_class_id'    => $product_query->row['tax_class_id'],

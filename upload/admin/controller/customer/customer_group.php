@@ -176,6 +176,7 @@ class ControllerCustomerCustomerGroup extends Controller {
 				'customer_group_id' => $result['customer_group_id'],
 				'name'              => $result['name'] . (($result['customer_group_id'] == $this->config->get('config_customer_group_id')) ? $this->language->get('text_default') : null),
 				'discount_percent'  => (float)$result['discount_percent'],
+				'markup_percent'    => (float)$result['markup_percent'],
 				'sort_order'        => $result['sort_order'],
 				'edit'              => $this->url->link('customer/customer_group/edit', 'user_token=' . $this->session->data['user_token'] . '&customer_group_id=' . $result['customer_group_id'] . $url, true)
 			);
@@ -215,6 +216,7 @@ class ControllerCustomerCustomerGroup extends Controller {
 
 		$data['sort_name'] = $this->url->link('customer/customer_group', 'user_token=' . $this->session->data['user_token'] . '&sort=cgd.name' . $url, true);
 		$data['sort_discount_percent'] = $this->url->link('customer/customer_group', 'user_token=' . $this->session->data['user_token'] . '&sort=cg.discount_percent' . $url, true);
+		$data['sort_markup_percent'] = $this->url->link('customer/customer_group', 'user_token=' . $this->session->data['user_token'] . '&sort=cg.markup_percent' . $url, true);
 		$data['sort_sort_order'] = $this->url->link('customer/customer_group', 'user_token=' . $this->session->data['user_token'] . '&sort=cg.sort_order' . $url, true);
 
 		$url = '';
@@ -266,6 +268,12 @@ class ControllerCustomerCustomerGroup extends Controller {
 			$data['error_discount_percent'] = $this->error['discount_percent'];
 		} else {
 			$data['error_discount_percent'] = '';
+		}
+
+		if (isset($this->error['markup_percent'])) {
+			$data['error_markup_percent'] = $this->error['markup_percent'];
+		} else {
+			$data['error_markup_percent'] = '';
 		}
 
 		$url = '';
@@ -342,6 +350,14 @@ class ControllerCustomerCustomerGroup extends Controller {
 			$data['discount_percent'] = 0;
 		}
 
+		if (isset($this->request->post['markup_percent'])) {
+			$data['markup_percent'] = $this->request->post['markup_percent'];
+		} elseif (!empty($customer_group_info) && isset($customer_group_info['markup_percent'])) {
+			$data['markup_percent'] = $customer_group_info['markup_percent'];
+		} else {
+			$data['markup_percent'] = 0;
+		}
+
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');
@@ -360,8 +376,20 @@ class ControllerCustomerCustomerGroup extends Controller {
 			}
 		}
 
-		if (!is_numeric($this->request->post['discount_percent']) || (float)$this->request->post['discount_percent'] < 0 || (float)$this->request->post['discount_percent'] > 100) {
+		$discount_percent = isset($this->request->post['discount_percent']) ? $this->request->post['discount_percent'] : 0;
+		$markup_percent = isset($this->request->post['markup_percent']) ? $this->request->post['markup_percent'] : 0;
+
+		if (!is_numeric($discount_percent) || (float)$discount_percent < 0 || (float)$discount_percent > 100) {
 			$this->error['discount_percent'] = $this->language->get('error_discount_percent');
+		}
+
+		if (!is_numeric($markup_percent) || (float)$markup_percent < 0 || (float)$markup_percent > 100) {
+			$this->error['markup_percent'] = $this->language->get('error_markup_percent');
+		}
+
+		if ((float)$discount_percent > 0 && (float)$markup_percent > 0) {
+			$this->error['discount_percent'] = $this->language->get('error_discount_markup_exclusive');
+			$this->error['markup_percent'] = $this->language->get('error_discount_markup_exclusive');
 		}
 
 		return !$this->error;

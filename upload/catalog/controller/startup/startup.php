@@ -278,9 +278,22 @@ class ControllerStartupStartup extends Controller {
 		}
 
 		$customer_group_discount = 0.0;
+		$customer_group_markup = 0.0;
+		$customer_group_id = (int)$this->config->get('config_customer_group_id');
 
-		if (isset($this->session->data['customer']) || $this->customer->isLogged()) {
-			$customer_group_query = $this->db->query("SELECT discount_percent FROM " . DB_PREFIX . "customer_group WHERE customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "'");
+		if ($customer_group_id > 0) {
+			$has_markup_percent = false;
+			$markup_column_query = $this->db->query("SHOW COLUMNS FROM " . DB_PREFIX . "customer_group LIKE 'markup_percent'");
+
+			if ($markup_column_query->num_rows) {
+				$has_markup_percent = true;
+			}
+
+			if ($has_markup_percent) {
+				$customer_group_query = $this->db->query("SELECT discount_percent, markup_percent FROM " . DB_PREFIX . "customer_group WHERE customer_group_id = '" . $customer_group_id . "'");
+			} else {
+				$customer_group_query = $this->db->query("SELECT discount_percent FROM " . DB_PREFIX . "customer_group WHERE customer_group_id = '" . $customer_group_id . "'");
+			}
 
 			if ($customer_group_query->num_rows) {
 				$customer_group_discount = (float)$customer_group_query->row['discount_percent'];
@@ -290,10 +303,25 @@ class ControllerStartupStartup extends Controller {
 				} elseif ($customer_group_discount > 100) {
 					$customer_group_discount = 100;
 				}
+
+				if ($has_markup_percent) {
+					$customer_group_markup = (float)$customer_group_query->row['markup_percent'];
+
+					if ($customer_group_markup < 0) {
+						$customer_group_markup = 0;
+					} elseif ($customer_group_markup > 100) {
+						$customer_group_markup = 100;
+					}
+				}
+
+				if ($customer_group_discount > 0 && $customer_group_markup > 0) {
+					$customer_group_markup = 0;
+				}
 			}
 		}
 
 		$this->config->set('config_customer_group_discount', $customer_group_discount);
+		$this->config->set('config_customer_group_markup', $customer_group_markup);
 		
 		// Tracking Code
 		if (isset($this->request->get['tracking'])) {

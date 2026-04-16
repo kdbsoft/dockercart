@@ -45,6 +45,11 @@
                     {% else %}
                     <a href="{{ sort_discount_percent }}">{{ column_discount_percent }}</a>
                     {% endif %}</td>
+                  <td class="text-right">{% if sort == 'cg.markup_percent' %}
+                    <a href="{{ sort_markup_percent }}" class="{{ order|lower }}">{{ column_markup_percent }}</a>
+                    {% else %}
+                    <a href="{{ sort_markup_percent }}">{{ column_markup_percent }}</a>
+                    {% endif %}</td>
                   <td class="text-right">{% if sort == 'cg.sort_order' %}
                     <a href="{{ sort_sort_order }}" class="{{ order|lower }}">{{ column_sort_order }}</a>
                     {% else %}
@@ -64,13 +69,14 @@
                     {% endif %}</td>
                   <td class="text-left">{{ customer_group.name }}</td>
                   <td class="text-right">{{ customer_group.discount_percent }}%</td>
+                  <td class="text-right">{{ customer_group.markup_percent }}%</td>
                   <td class="text-right">{{ customer_group.sort_order }}</td>
                   <td class="text-right"><a href="{{ customer_group.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
                 </tr>
                 {% endfor %}
                 {% else %}
                 <tr>
-                  <td class="text-center" colspan="5">{{ text_no_results }}</td>
+                  <td class="text-center" colspan="6">{{ text_no_results }}</td>
                 </tr>
                 {% endif %}
               </tbody>
