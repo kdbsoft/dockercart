@@ -72,18 +72,18 @@ class ControllerCommonHeader extends Controller {
 			$this->document->addLink($server . 'image/' . $this->config->get('config_icon'), 'icon');
 		}
 
-		$data['title'] = $this->document->getTitle();
+		$data['title'] = $this->decodeHtmlEntities($this->document->getTitle());
 
 		$data['base'] = $server;
-		$data['description'] = $this->document->getDescription();
-		$data['keywords'] = $this->document->getKeywords();
+		$data['description'] = $this->decodeHtmlEntities($this->document->getDescription());
+		$data['keywords'] = $this->decodeHtmlEntities($this->document->getKeywords());
 		$data['links'] = $this->document->getLinks();
 		$data['styles'] = $this->document->getStyles();
 		$data['scripts'] = $this->document->getScripts('header');
 		$data['lang'] = $this->language->get('code');
 		$data['direction'] = $this->language->get('direction');
 
-		$data['name'] = $this->config->get('config_name');
+		$data['name'] = $this->decodeHtmlEntities($this->config->get('config_name'));
 
 		$logo_light = (string)$this->config->get('dockercart_theme_logo_light');
 		if ($logo_light && is_file(DIR_IMAGE . $logo_light)) {
@@ -315,6 +315,26 @@ class ControllerCommonHeader extends Controller {
 		}
 
 		return $this->load->view('common/header', $data);
+	}
+
+	private function decodeHtmlEntities($value) {
+		if (!is_scalar($value)) {
+			return '';
+		}
+
+		$decoded = (string)$value;
+
+		for ($i = 0; $i < 2; $i++) {
+			$next = html_entity_decode($decoded, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+			if ($next === $decoded) {
+				break;
+			}
+
+			$decoded = $next;
+		}
+
+		return $decoded;
 	}
 
 	private function resolveThemeFeatures($setting_key, $defaults = array()) {

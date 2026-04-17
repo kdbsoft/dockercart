@@ -4,10 +4,10 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<title>{{ title }}</title>
+<title>{{ title|replace({'&': '&amp;', '<': '&lt;', '>': '&gt;'}) }}</title>
 <base href="{{ base }}" />
-{% if description %}<meta name="description" content="{{ description }}" />{% endif %}
-{% if keywords %}<meta name="keywords" content="{{ keywords }}" />{% endif %}
+{% if description %}<meta name="description" content="{{ description|e('html_attr') }}" />{% endif %}
+{% if keywords %}<meta name="keywords" content="{{ keywords|e('html_attr') }}" />{% endif %}
 
 <!-- Google Fonts: Manrope -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -56,17 +56,17 @@
 {% endif %}
 
 {# Open Graph / Twitter cards for messenger previews (Telegram, Viber, etc.) #}
-<meta property="og:title" content="{{ title }}" />
-{% if description %}<meta property="og:description" content="{{ description }}" />{% endif %}
+<meta property="og:title" content="{{ title|e('html_attr') }}" />
+{% if description %}<meta property="og:description" content="{{ description|e('html_attr') }}" />{% endif %}
 <meta property="og:type" content="website" />
-<meta property="og:site_name" content="{{ name }}" />
-<meta property="og:url" content="{{ schema_website_url|default(home) }}" />
-{% if org_logo %}<meta property="og:image" content="{{ org_logo }}" />{% endif %}
+<meta property="og:site_name" content="{{ name|e('html_attr') }}" />
+<meta property="og:url" content="{{ schema_website_url|default(home)|e('html_attr') }}" />
+{% if org_logo %}<meta property="og:image" content="{{ org_logo|e('html_attr') }}" />{% endif %}
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="{{ title }}" />
-{% if description %}<meta name="twitter:description" content="{{ description }}" />{% endif %}
-{% if org_logo %}<meta name="twitter:image" content="{{ org_logo }}" />{% endif %}
-<link rel="image_src" href="{{ org_logo }}" />
+<meta name="twitter:title" content="{{ title|e('html_attr') }}" />
+{% if description %}<meta name="twitter:description" content="{{ description|e('html_attr') }}" />{% endif %}
+{% if org_logo %}<meta name="twitter:image" content="{{ org_logo|e('html_attr') }}" />{% endif %}
+<link rel="image_src" href="{{ org_logo|e('html_attr') }}" />
 
 <script type="application/ld+json">
 {{ schema_organization_json|raw }}
