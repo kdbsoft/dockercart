@@ -22,7 +22,23 @@ class Memcached {
 	}
 
 	public function delete($key) {
-		$this->memcached->delete(CACHE_PREFIX . $key);
+		$prefix = CACHE_PREFIX . $key;
+
+		if (method_exists($this->memcached, 'getAllKeys')) {
+			$keys = $this->memcached->getAllKeys();
+
+			if (is_array($keys)) {
+				foreach ($keys as $cached_key) {
+					if (strpos($cached_key, $prefix) === 0) {
+						$this->memcached->delete($cached_key);
+					}
+				}
+
+				return;
+			}
+		}
+
+		$this->memcached->delete($prefix);
 	}
 
 	public function flush() {

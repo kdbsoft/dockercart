@@ -295,7 +295,7 @@ class ControllerLocalisationZone extends Controller {
 		if (isset($this->error['name'])) {
 			$data['error_name'] = $this->error['name'];
 		} else {
-			$data['error_name'] = '';
+			$data['error_name'] = array();
 		}
 
 		$url = '';
@@ -340,20 +340,30 @@ class ControllerLocalisationZone extends Controller {
 			$zone_info = $this->model_localisation_zone->getZone($this->request->get['zone_id']);
 		}
 
+		$this->load->model('localisation/language');
+
+		$data['languages'] = $this->model_localisation_language->getLanguages();
+
+		if (isset($this->request->post['zone_description'])) {
+			$data['zone_description'] = $this->request->post['zone_description'];
+		} elseif (isset($this->request->get['zone_id'])) {
+			$data['zone_description'] = $this->model_localisation_zone->getZoneDescriptions($this->request->get['zone_id']);
+
+			if (!$data['zone_description'] && !empty($zone_info)) {
+				$data['zone_description'][(int)$this->config->get('config_language_id')] = array(
+					'name' => $zone_info['name']
+				);
+			}
+		} else {
+			$data['zone_description'] = array();
+		}
+
 		if (isset($this->request->post['status'])) {
 			$data['status'] = $this->request->post['status'];
 		} elseif (!empty($zone_info)) {
 			$data['status'] = $zone_info['status'];
 		} else {
 			$data['status'] = '1';
-		}
-
-		if (isset($this->request->post['name'])) {
-			$data['name'] = $this->request->post['name'];
-		} elseif (!empty($zone_info)) {
-			$data['name'] = $zone_info['name'];
-		} else {
-			$data['name'] = '';
 		}
 
 		if (isset($this->request->post['code'])) {
@@ -388,8 +398,14 @@ class ControllerLocalisationZone extends Controller {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
-		if ((utf8_strlen($this->request->post['name']) < 1) || (utf8_strlen($this->request->post['name']) > 64)) {
-			$this->error['name'] = $this->language->get('error_name');
+		if (isset($this->request->post['zone_description'])) {
+			foreach ($this->request->post['zone_description'] as $language_id => $value) {
+				if ((utf8_strlen($value['name']) < 1) || (utf8_strlen($value['name']) > 64)) {
+					$this->error['name'][$language_id] = $this->language->get('error_name');
+				}
+			}
+		} elseif ((utf8_strlen($this->request->post['name']) < 1) || (utf8_strlen($this->request->post['name']) > 64)) {
+			$this->error['name'][(int)$this->config->get('config_language_id')] = $this->language->get('error_name');
 		}
 
 		return !$this->error;

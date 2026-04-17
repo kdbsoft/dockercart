@@ -28,7 +28,23 @@ class Redis {
 	}
 
 	public function delete($key) {
-		$this->cache->del(CACHE_PREFIX . $key);
+		$prefix = CACHE_PREFIX . $key;
+		$pattern = $prefix . '*';
+
+		$iterator = null;
+		$keys = array();
+
+		while ($scan_keys = $this->cache->scan($iterator, $pattern, 1000)) {
+			foreach ($scan_keys as $scan_key) {
+				$keys[] = $scan_key;
+			}
+		}
+
+		if ($keys) {
+			$this->cache->del($keys);
+		} else {
+			$this->cache->del($prefix);
+		}
 	}
 
 	public function flush() {
