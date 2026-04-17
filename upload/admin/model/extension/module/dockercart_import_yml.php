@@ -30,6 +30,19 @@ class ModelExtensionModuleDockercartImportYml extends Model {
             if (!$column_allow_zero_price->num_rows) {
                 $this->db->query("ALTER TABLE `" . DB_PREFIX . "dockercart_import_yml_profile` ADD `allow_zero_price` tinyint(1) NOT NULL DEFAULT '0' AFTER `download_images`");
             }
+
+            $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "dockercart_import_yml_category_map` (
+                `map_id` int(11) NOT NULL AUTO_INCREMENT,
+                `profile_id` int(11) NOT NULL,
+                `feed_category_id` varchar(255) NOT NULL,
+                `category_id` int(11) NOT NULL,
+                `was_created` tinyint(1) NOT NULL DEFAULT '0',
+                `date_modified` datetime NOT NULL,
+                PRIMARY KEY (`map_id`),
+                UNIQUE KEY `profile_feed_category` (`profile_id`,`feed_category_id`),
+                KEY `profile_created` (`profile_id`,`was_created`),
+                KEY `category_id` (`category_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
         }
 
         $this->schema_checked = true;
@@ -90,6 +103,19 @@ class ModelExtensionModuleDockercartImportYml extends Model {
                 KEY `product_id` (`product_id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
 
+        $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "dockercart_import_yml_category_map` (
+                `map_id` int(11) NOT NULL AUTO_INCREMENT,
+                `profile_id` int(11) NOT NULL,
+                `feed_category_id` varchar(255) NOT NULL,
+                `category_id` int(11) NOT NULL,
+                `was_created` tinyint(1) NOT NULL DEFAULT '0',
+                `date_modified` datetime NOT NULL,
+                PRIMARY KEY (`map_id`),
+                UNIQUE KEY `profile_feed_category` (`profile_id`,`feed_category_id`),
+                KEY `profile_created` (`profile_id`,`was_created`),
+                KEY `category_id` (`category_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+
         $query = $this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "dockercart_import_yml_profile`");
         if ((int)$query->row['total'] === 0) {
             $this->addProfile(array(
@@ -108,6 +134,7 @@ class ModelExtensionModuleDockercartImportYml extends Model {
     }
 
     public function uninstall() {
+        $this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "dockercart_import_yml_category_map`");
         $this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "dockercart_import_yml_offer_map`");
         $this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "dockercart_import_yml_profile`");
         $this->schema_checked = false;
@@ -201,6 +228,7 @@ class ModelExtensionModuleDockercartImportYml extends Model {
 
     public function deleteProfile($profile_id) {
         $this->ensureSchema();
+        $this->db->query("DELETE FROM `" . DB_PREFIX . "dockercart_import_yml_category_map` WHERE `profile_id` = '" . (int)$profile_id . "'");
         $this->db->query("DELETE FROM `" . DB_PREFIX . "dockercart_import_yml_offer_map` WHERE `profile_id` = '" . (int)$profile_id . "'");
         $this->db->query("DELETE FROM `" . DB_PREFIX . "dockercart_import_yml_profile` WHERE `profile_id` = '" . (int)$profile_id . "'");
     }
