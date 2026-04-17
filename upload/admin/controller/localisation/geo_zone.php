@@ -257,13 +257,13 @@ class ControllerLocalisationGeoZone extends Controller {
 		if (isset($this->error['name'])) {
 			$data['error_name'] = $this->error['name'];
 		} else {
-			$data['error_name'] = '';
+			$data['error_name'] = array();
 		}
 
 		if (isset($this->error['description'])) {
 			$data['error_description'] = $this->error['description'];
 		} else {
-			$data['error_description'] = '';
+			$data['error_description'] = array();
 		}
 
 		$url = '';
@@ -306,20 +306,23 @@ class ControllerLocalisationGeoZone extends Controller {
 
 		$data['user_token'] = $this->session->data['user_token'];
 
-		if (isset($this->request->post['name'])) {
-			$data['name'] = $this->request->post['name'];
-		} elseif (!empty($geo_zone_info)) {
-			$data['name'] = $geo_zone_info['name'];
-		} else {
-			$data['name'] = '';
-		}
+		$this->load->model('localisation/language');
 
-		if (isset($this->request->post['description'])) {
-			$data['description'] = $this->request->post['description'];
-		} elseif (!empty($geo_zone_info)) {
-			$data['description'] = $geo_zone_info['description'];
+		$data['languages'] = $this->model_localisation_language->getLanguages();
+
+		if (isset($this->request->post['geo_zone_description'])) {
+			$data['geo_zone_description'] = $this->request->post['geo_zone_description'];
+		} elseif (isset($this->request->get['geo_zone_id'])) {
+			$data['geo_zone_description'] = $this->model_localisation_geo_zone->getGeoZoneDescriptions($this->request->get['geo_zone_id']);
+
+			if (!$data['geo_zone_description'] && !empty($geo_zone_info)) {
+				$data['geo_zone_description'][(int)$this->config->get('config_language_id')] = array(
+					'name'        => $geo_zone_info['name'],
+					'description' => $geo_zone_info['description']
+				);
+			}
 		} else {
-			$data['description'] = '';
+			$data['geo_zone_description'] = array();
 		}
 
 		$this->load->model('localisation/country');
@@ -354,12 +357,24 @@ class ControllerLocalisationGeoZone extends Controller {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
-		if ((utf8_strlen($this->request->post['name']) < 3) || (utf8_strlen($this->request->post['name']) > 32)) {
-			$this->error['name'] = $this->language->get('error_name');
-		}
+		if (isset($this->request->post['geo_zone_description'])) {
+			foreach ($this->request->post['geo_zone_description'] as $language_id => $value) {
+				if ((utf8_strlen($value['name']) < 3) || (utf8_strlen($value['name']) > 32)) {
+					$this->error['name'][$language_id] = $this->language->get('error_name');
+				}
 
-		if ((utf8_strlen($this->request->post['description']) < 3) || (utf8_strlen($this->request->post['description']) > 255)) {
-			$this->error['description'] = $this->language->get('error_description');
+				if ((utf8_strlen($value['description']) < 3) || (utf8_strlen($value['description']) > 255)) {
+					$this->error['description'][$language_id] = $this->language->get('error_description');
+				}
+			}
+		} else {
+			if ((utf8_strlen($this->request->post['name']) < 3) || (utf8_strlen($this->request->post['name']) > 32)) {
+				$this->error['name'][(int)$this->config->get('config_language_id')] = $this->language->get('error_name');
+			}
+
+			if ((utf8_strlen($this->request->post['description']) < 3) || (utf8_strlen($this->request->post['description']) > 255)) {
+				$this->error['description'][(int)$this->config->get('config_language_id')] = $this->language->get('error_description');
+			}
 		}
 
 		return !$this->error;

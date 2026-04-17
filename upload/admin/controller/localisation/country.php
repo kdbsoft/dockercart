@@ -292,7 +292,7 @@ class ControllerLocalisationCountry extends Controller {
 		if (isset($this->error['name'])) {
 			$data['error_name'] = $this->error['name'];
 		} else {
-			$data['error_name'] = '';
+			$data['error_name'] = array();
 		}
 
 		$url = '';
@@ -337,12 +337,23 @@ class ControllerLocalisationCountry extends Controller {
 			$country_info = $this->model_localisation_country->getCountry($this->request->get['country_id']);
 		}
 
-		if (isset($this->request->post['name'])) {
-			$data['name'] = $this->request->post['name'];
-		} elseif (!empty($country_info)) {
-			$data['name'] = $country_info['name'];
+		$this->load->model('localisation/language');
+
+		$data['languages'] = $this->model_localisation_language->getLanguages();
+
+		if (isset($this->request->post['country_description'])) {
+			$data['country_description'] = $this->request->post['country_description'];
+		} elseif (isset($this->request->get['country_id'])) {
+			$data['country_description'] = $this->model_localisation_country->getCountryDescriptions($this->request->get['country_id']);
+
+			if (!$data['country_description'] && !empty($country_info)) {
+				$data['country_description'][(int)$this->config->get('config_language_id')] = array(
+					'name'           => $country_info['name'],
+					'address_format' => $country_info['address_format']
+				);
+			}
 		} else {
-			$data['name'] = '';
+			$data['country_description'] = array();
 		}
 
 		if (isset($this->request->post['iso_code_2'])) {
@@ -359,14 +370,6 @@ class ControllerLocalisationCountry extends Controller {
 			$data['iso_code_3'] = $country_info['iso_code_3'];
 		} else {
 			$data['iso_code_3'] = '';
-		}
-
-		if (isset($this->request->post['address_format'])) {
-			$data['address_format'] = $this->request->post['address_format'];
-		} elseif (!empty($country_info)) {
-			$data['address_format'] = $country_info['address_format'];
-		} else {
-			$data['address_format'] = '';
 		}
 
 		if (isset($this->request->post['postcode_required'])) {
@@ -397,8 +400,14 @@ class ControllerLocalisationCountry extends Controller {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
-		if ((utf8_strlen($this->request->post['name']) < 1) || (utf8_strlen($this->request->post['name']) > 128)) {
-			$this->error['name'] = $this->language->get('error_name');
+		if (isset($this->request->post['country_description'])) {
+			foreach ($this->request->post['country_description'] as $language_id => $value) {
+				if ((utf8_strlen($value['name']) < 1) || (utf8_strlen($value['name']) > 128)) {
+					$this->error['name'][$language_id] = $this->language->get('error_name');
+				}
+			}
+		} elseif ((utf8_strlen($this->request->post['name']) < 1) || (utf8_strlen($this->request->post['name']) > 128)) {
+			$this->error['name'][(int)$this->config->get('config_language_id')] = $this->language->get('error_name');
 		}
 
 		return !$this->error;
