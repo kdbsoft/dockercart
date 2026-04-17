@@ -83,8 +83,8 @@
   }
 
   .category-toggle-spacer {
-    width: 22px;
-    height: 22px;
+    width: 16px;
+    height: 16px;
     display: inline-block;
     flex: 0 0 auto;
   }
@@ -178,7 +178,6 @@
                       {% else %}
                       <span class="category-toggle-spacer" aria-hidden="true"></span>
                       {% endif %}
-                      {% if category.level > 0 %}<span class="category-sub-prefix">—</span>{% endif %}
                       {% if category.level > 0 %}<span class="category-depth-badge">L{{ category.level }}</span>{% endif %}
                       <span class="category-name-text">{{ category.name }}</span>
                     </div>

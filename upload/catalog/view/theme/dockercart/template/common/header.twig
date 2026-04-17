@@ -124,7 +124,7 @@
         </div>
         <!-- Hours row (new line on mobile) -->
         {% if open_hours %}
-        <div class="flex items-center gap-2 text-[11px] font-medium text-gray-300 px-2 py-0.5">
+        <div class="flex items-center gap-2 text-[11px] font-medium text-gray-300 py-0.5">
           <span class="hidden sm:inline">&bull;</span>
           <span>{{ open_hours|striptags|replace({'\n':' '}) }}</span>
         </div>
