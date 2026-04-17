@@ -28,6 +28,14 @@ $_['text_context_search']          = 'Search page';
 
 $_['text_placeholders_title']      = 'Supported placeholders';
 $_['text_placeholders_scope']      = 'Placeholders are supported in both question and answer fields.';
+$_['text_faq_items']                 = 'FAQ items';
+$_['text_auto_context']              = 'Auto Context';
+$_['text_faq_module_subtitle']       = 'Universal FAQ with context placeholders and JSON-LD';
+$_['text_faq_entries']               = 'FAQ entries';
+$_['text_confirm_delete_faq']        = 'Delete this FAQ entry?';
+$_['text_faq_form_subtitle']         = 'Reusable FAQ block with dynamic placeholders';
+$_['text_question_answer']           = 'Question & Answer';
+$_['tab_general']                    = 'General';
 
 // Entry
 $_['entry_status']                 = 'Module status';

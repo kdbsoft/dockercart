@@ -3,7 +3,7 @@
 $_['column_action'] = 'Действие';
 $_['column_customer'] = 'Клиент';
 $_['column_date_added'] = 'Дата добавления';
-$_['column_order_id'] = 'Идентификатор заказа';
+$_['column_order_id'] = 'Номер заказа';
 $_['column_status'] = 'Статус';
 $_['column_total'] = 'Общий';
 $_['entry_sort_order'] = 'Порядок сортировки';

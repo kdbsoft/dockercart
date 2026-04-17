@@ -24,9 +24,9 @@
     {% endif %}
 
     <ul class="nav nav-tabs dcx-profile-tabs" id="mc-tabs" role="tablist">
-      <li class="active"><a href="#mc-tab-general" class="js-mc-tab" data-tab="mc-tab-general" data-title="General" data-subtitle="Core module activation and behavior" data-icon="fa-sliders"><i class="fa fa-sliders"></i> General</a></li>
-      <li><a href="#mc-tab-license" class="js-mc-tab" data-tab="mc-tab-license" data-title="License" data-subtitle="License verification and cryptographic keys" data-icon="fa-key"><i class="fa fa-key"></i> License</a></li>
-      <li><a href="#mc-tab-about" class="js-mc-tab" data-tab="mc-tab-about" data-title="About" data-subtitle="Module information and support contacts" data-icon="fa-info-circle"><i class="fa fa-info-circle"></i> About</a></li>
+      <li class="active"><a href="#mc-tab-general" class="js-mc-tab" data-tab="mc-tab-general" data-title="{{ text_tab_general }}" data-subtitle="{{ text_tab_general_subtitle }}" data-icon="fa-sliders"><i class="fa fa-sliders"></i> {{ text_tab_general }}</a></li>
+      <li><a href="#mc-tab-license" class="js-mc-tab" data-tab="mc-tab-license" data-title="{{ text_tab_license }}" data-subtitle="{{ text_tab_license_subtitle }}" data-icon="fa-key"><i class="fa fa-key"></i> {{ text_tab_license }}</a></li>
+      <li><a href="#mc-tab-about" class="js-mc-tab" data-tab="mc-tab-about" data-title="{{ text_tab_about }}" data-subtitle="{{ text_tab_about_subtitle }}" data-icon="fa-info-circle"><i class="fa fa-info-circle"></i> {{ text_tab_about }}</a></li>
     </ul>
 
     <div class="dcx-shell">
@@ -34,8 +34,8 @@
         <div class="dcx-panel-head">
           <div class="dcx-panel-head__icon"><i id="mc-tab-icon" class="fa fa-sliders"></i></div>
           <div>
-            <h3 class="dcx-panel-title" id="mc-tab-title">General</h3>
-            <div class="dcx-panel-subtitle" id="mc-tab-subtitle">Core module activation and behavior</div>
+            <h3 class="dcx-panel-title" id="mc-tab-title">{{ text_tab_general }}</h3>
+            <div class="dcx-panel-subtitle" id="mc-tab-subtitle">{{ text_tab_general_subtitle }}</div>
           </div>
         </div>
         <div class="dcx-panel-body">
@@ -43,7 +43,7 @@
 
             <div id="mc-tab-general" class="dcx-tab-pane active">
               <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                <h4>Module Settings</h4>
+                <h4>{{ text_module_settings }}</h4>
 
                 <div class="form-group">
                   <label class="col-sm-3 control-label" for="input-status">{{ entry_status }}</label>
@@ -67,10 +67,10 @@
 
             <div id="mc-tab-license" class="dcx-tab-pane">
               <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                <h4>{{ text_license|default('License Information') }}</h4>
+                <h4>{{ text_license }}</h4>
 
                 <div class="form-group required">
-                  <label class="col-sm-3 control-label" for="input-license-key">{{ entry_license_key|default('License Key') }}</label>
+                  <label class="col-sm-3 control-label" for="input-license-key">{{ entry_license_key }}</label>
                   <div class="col-sm-9">
                     <input
                       type="text"
@@ -80,13 +80,13 @@
                       id="input-license-key"
                       class="form-control">
                     <small class="form-text text-muted" style="margin-top:5px; display:block;">
-                      <i class="fa fa-info-circle"></i> {{ text_license_domain|default('License bound to domain') }}: <strong>{{ license_domain|default('localhost') }}</strong>
+                      <i class="fa fa-info-circle"></i> {{ text_license_domain }}: <strong>{{ license_domain|default('localhost') }}</strong>
                     </small>
                   </div>
                 </div>
 
                 <div class="form-group">
-                  <label class="col-sm-3 control-label" for="input-public-key">{{ entry_public_key|default('Public Key') }}</label>
+                  <label class="col-sm-3 control-label" for="input-public-key">{{ entry_public_key }}</label>
                   <div class="col-sm-9">
                     <textarea
                       name="module_dockercart_multicurrency_public_key"
@@ -95,7 +95,7 @@
                       class="form-control"
                       placeholder="-----BEGIN PUBLIC KEY-----&#10;...&#10;-----END PUBLIC KEY-----">{{ module_dockercart_multicurrency_public_key }}</textarea>
                     <small class="form-text text-muted" style="margin-top:5px; display:block;">
-                      <i class="fa fa-shield"></i> {{ help_public_key|default('Optional. If not provided, default verification will be used.') }}
+                      <i class="fa fa-shield"></i> {{ help_public_key }}
                     </small>
                   </div>
                 </div>
@@ -103,7 +103,7 @@
                 <div id="license-info" class="form-group" style="display:none;">
                   <div class="col-sm-offset-3 col-sm-9">
                     <div class="alert alert-info" style="margin-bottom:0;">
-                      <h4><i class="fa fa-info-circle"></i> {{ text_license|default('License Information') }}</h4>
+                      <h4><i class="fa fa-info-circle"></i> {{ text_license }}</h4>
                       <p id="license-details" style="margin-bottom:0;"></p>
                     </div>
                   </div>
@@ -113,7 +113,7 @@
                   <label class="col-sm-3 control-label"></label>
                   <div class="col-sm-9">
                     <button type="button" class="btn btn-info" id="button-verify-license">
-                      <i class="fa fa-check-circle"></i> {{ button_verify_license|default('Verify License') }}
+                      <i class="fa fa-check-circle"></i> {{ button_verify_license }}
                     </button>
                     <span id="license-status" style="margin-left:10px;"></span>
                   </div>
@@ -123,18 +123,18 @@
 
             <div id="mc-tab-about" class="dcx-tab-pane">
               <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                <h4>About</h4>
+                <h4>{{ text_tab_about }}</h4>
                 <table class="table table-bordered dcx-table">
                   <tr>
-                    <td style="width:220px;"><strong>Module Version</strong></td>
+                    <td style="width:220px;"><strong>{{ text_module_version }}</strong></td>
                     <td>{% if module_version is defined and module_version %}{{ module_version }}{% else %}n/a{% endif %}</td>
                   </tr>
                   <tr>
-                    <td><strong>Developer</strong></td>
-                    <td>DockerCart Team</td>
+                    <td><strong>{{ text_developer }}</strong></td>
+                    <td>{{ text_developer_name }}</td>
                   </tr>
                   <tr>
-                    <td><strong>Contact</strong></td>
+                    <td><strong>{{ text_contact }}</strong></td>
                     <td><a href="mailto:support@dockercart.net">support@dockercart.net</a></td>
                   </tr>
                 </table>
@@ -151,7 +151,7 @@
 <script type="text/javascript">
 function updateMcPanelHeader(tabLink) {
     var $tab = $(tabLink);
-    var title = $tab.data('title') || 'General';
+  var title = $tab.data('title') || '{{ text_tab_general|e('js') }}';
     var subtitle = $tab.data('subtitle') || '';
     var icon = String($tab.data('icon') || 'fa-sliders').replace(/[^a-z0-9\-]/gi, '');
 
@@ -186,12 +186,12 @@ $('#button-verify-license').on('click', function() {
     var $btn = $(this);
 
     if (!licenseKey) {
-        $status.html('<span class="label label-danger">License key is empty</span>');
+      $status.html('<span class="label label-danger">{{ text_license_key_empty|e('js') }}</span>');
         return;
     }
 
     $btn.prop('disabled', true);
-    $status.html('<span class="label label-info"><i class="fa fa-spinner fa-spin"></i> Verifying...</span>');
+    $status.html('<span class="label label-info"><i class="fa fa-spinner fa-spin"></i> {{ text_verifying|e('js') }}</span>');
     $info.hide();
 
     $.ajax({
@@ -209,28 +209,28 @@ $('#button-verify-license').on('click', function() {
             if (json.valid) {
                 $status.html('<span class="label label-success"><i class="fa fa-check"></i> {{ text_license_valid|default("License is valid") }}</span>');
 
-                var infoHtml = '<strong>Status:</strong> Active<br>';
+              var infoHtml = '<strong>{{ text_license_status_label|e('js') }}:</strong> {{ text_license_active|e('js') }}<br>';
                 if (json.domain || '{{ license_domain|default('localhost') }}') {
-                    infoHtml += '<strong>Domain:</strong> ' + (json.domain || '{{ license_domain|default('localhost') }}') + '<br>';
+                infoHtml += '<strong>{{ text_license_domain_label|e('js') }}:</strong> ' + (json.domain || '{{ license_domain|default('localhost') }}') + '<br>';
                 }
                 if (json.expires_formatted || json.expires) {
-                    infoHtml += '<strong>Expires:</strong> ' + (json.expires_formatted || json.expires) + '<br>';
+                infoHtml += '<strong>{{ text_license_expires_label|e('js') }}:</strong> ' + (json.expires_formatted || json.expires) + '<br>';
                 }
                 if (json.license_id) {
-                    infoHtml += '<strong>License ID:</strong> ' + json.license_id;
+                infoHtml += '<strong>{{ text_license_id_label|e('js') }}:</strong> ' + json.license_id;
                 }
                 $details.html(infoHtml);
                 $info.show();
             } else {
-                var error = json.error || 'Unknown error';
+              var error = json.error || '{{ text_unknown_error|e('js') }}';
                 $status.html('<span class="label label-danger"><i class="fa fa-times"></i> ' + error + '</span>');
-                $details.html('<strong>Error:</strong> ' + error);
+              $details.html('<strong>{{ text_error_label|e('js') }}:</strong> ' + error);
                 $info.show();
             }
         },
         error: function() {
             $btn.prop('disabled', false);
-            $status.html('<span class="label label-danger"><i class="fa fa-times"></i> Request failed</span>');
+            $status.html('<span class="label label-danger"><i class="fa fa-times"></i> {{ text_request_failed|e('js') }}</span>');
         }
     });
 });

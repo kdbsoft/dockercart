@@ -31,7 +31,7 @@
     {% endif %}
 
     <ul class="nav nav-tabs dcx-profile-tabs" id="search-tabs" role="tablist">
-      <li class="active"><a href="#search-tab-general" class="js-search-tab" data-tab="search-tab-general" data-title="General" data-subtitle="{{ text_tab_general_subtitle }}" data-icon="fa-sliders"><i class="fa fa-sliders"></i> General</a></li>
+      <li class="active"><a href="#search-tab-general" class="js-search-tab" data-tab="search-tab-general" data-title="{{ tab_general }}" data-subtitle="{{ text_tab_general_subtitle }}" data-icon="fa-sliders"><i class="fa fa-sliders"></i> {{ tab_general }}</a></li>
       <li><a href="#search-tab-connection" class="js-search-tab" data-tab="search-tab-connection" data-title="{{ tab_connection }}" data-subtitle="{{ text_tab_connection_subtitle }}" data-icon="fa-plug"><i class="fa fa-plug"></i> {{ tab_connection }}</a></li>
       <li><a href="#search-tab-autocomplete" class="js-search-tab" data-tab="search-tab-autocomplete" data-title="{{ tab_autocomplete }}" data-subtitle="{{ text_tab_autocomplete_subtitle }}" data-icon="fa-bolt"><i class="fa fa-bolt"></i> {{ tab_autocomplete }}</a></li>
       <li><a href="#search-tab-indexing" class="js-search-tab" data-tab="search-tab-indexing" data-title="{{ tab_indexing }}" data-subtitle="{{ text_tab_indexing_subtitle }}" data-icon="fa-refresh"><i class="fa fa-refresh"></i> {{ tab_indexing }}</a></li>
@@ -43,7 +43,7 @@
         <div class="dcx-panel-head">
           <div class="dcx-panel-head__icon"><i id="search-tab-icon" class="fa fa-sliders"></i></div>
           <div>
-            <h3 class="dcx-panel-title" id="search-tab-title">General</h3>
+            <h3 class="dcx-panel-title" id="search-tab-title">{{ tab_general }}</h3>
             <div class="dcx-panel-subtitle" id="search-tab-subtitle">{{ text_tab_general_subtitle }}</div>
           </div>
         </div>
@@ -157,7 +157,7 @@
               <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
                 <h4>{{ tab_indexing }}</h4>
 
-                <div class="alert alert-warning"><i class="fa fa-exclamation-triangle"></i> Reindexing may take several minutes for large catalogs (&gt;10,000 products).</div>
+                <div class="alert alert-warning"><i class="fa fa-exclamation-triangle"></i> {{ text_reindex_warning }}</div>
 
                 <div class="form-group">
                   <div class="col-sm-12">
@@ -170,7 +170,7 @@
 
                 <div id="reindex-progress" style="display:none; margin-top:20px;">
                   <div class="progress">
-                    <div class="progress-bar progress-bar-striped active" role="progressbar" style="width: 100%">Reindexing...</div>
+                    <div class="progress-bar progress-bar-striped active" role="progressbar" style="width: 100%">{{ text_reindexing }}</div>
                   </div>
                 </div>
 
@@ -208,7 +208,7 @@
 <script type="text/javascript">
 function updateSearchPanelHeader(tabLink) {
   var $tab = $(tabLink);
-  var title = $tab.data('title') || 'General';
+  var title = $tab.data('title') || '{{ tab_general|e('js') }}';
   var subtitle = $tab.data('subtitle') || '{{ text_tab_general_subtitle }}';
   var icon = String($tab.data('icon') || 'fa-sliders').replace(/[^a-z0-9\-]/gi, '');
 
@@ -252,13 +252,13 @@ function testConnection() {
       }
     },
     error: function(xhr, ajaxOptions, thrownError) {
-      alert('Error: ' + thrownError + "\n" + xhr.statusText + "\n" + xhr.responseText);
+      alert('{{ text_error_label|e('js') }}: ' + thrownError + "\n" + xhr.statusText + "\n" + xhr.responseText);
     }
   });
 }
 
 function reindexAll() {
-  if (!confirm('Are you sure you want to reindex all data? This may take several minutes.')) {
+  if (!confirm('{{ text_reindex_confirm|e('js') }}')) {
     return;
   }
 
@@ -280,7 +280,7 @@ function reindexAll() {
     },
     error: function(xhr, ajaxOptions, thrownError) {
       $('#reindex-progress').hide();
-      $('#reindex-result').html('<div class="alert alert-danger">Error: ' + thrownError + '</div>');
+      $('#reindex-result').html('<div class="alert alert-danger">{{ text_error_label|e('js') }}: ' + thrownError + '</div>');
     }
   });
 }

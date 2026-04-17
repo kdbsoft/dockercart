@@ -43,19 +43,19 @@
 
     <div class="dc-ix-cards">
       <div class="dc-ix-card">
-        <div class="dc-ix-card__k">Suppliers</div>
+        <div class="dc-ix-card__k">{{ text_stats_suppliers }}</div>
         <div class="dc-ix-card__v">{{ total_profiles }}</div>
       </div>
       <div class="dc-ix-card">
-        <div class="dc-ix-card__k">Enabled</div>
+        <div class="dc-ix-card__k">{{ text_enabled }}</div>
         <div class="dc-ix-card__v">{{ enabled_profiles }}</div>
       </div>
       <div class="dc-ix-card">
-        <div class="dc-ix-card__k">URL Sources</div>
+        <div class="dc-ix-card__k">{{ text_stats_url_sources }}</div>
         <div class="dc-ix-card__v">{{ url_profiles }}</div>
       </div>
       <div class="dc-ix-card">
-        <div class="dc-ix-card__k">File Sources</div>
+        <div class="dc-ix-card__k">{{ text_stats_file_sources }}</div>
         <div class="dc-ix-card__v">{{ file_profiles }}</div>
       </div>
     </div>
@@ -163,7 +163,7 @@ php {{ cron_base_path }} --action=import --profile_id={{ profile.profile_id }} -
                         <td class="text-right">
                           <div class="dc-ix-actions">
                             <button type="button" class="btn btn-primary btn-xs" onclick="runImport({{ profile.profile_id }});" title="{{ button_import_now }}"><i class="fa fa-download"></i></button>
-                            <button type="button" class="btn btn-default btn-xs" onclick="copyCron(this);" title="Copy cron command"><i class="fa fa-copy"></i></button>
+                            <button type="button" class="btn btn-default btn-xs" onclick="copyCron(this);" title="{{ text_copy_cron_command }}"><i class="fa fa-copy"></i></button>
                             <a href="{{ profile.edit_link }}" class="btn btn-warning btn-xs" title="{{ text_edit_profile }}"><i class="fa fa-pencil"></i></a>
                             <button type="button" class="btn btn-danger btn-xs" onclick="deleteProfile({{ profile.profile_id }});" title="{{ text_delete_profile }}"><i class="fa fa-trash"></i></button>
                           </div>
@@ -306,7 +306,7 @@ php {{ cron_base_path }} --action=import --profile_id={{ profile.profile_id }} -
                     <button type="button" class="btn btn-info" id="btn-verify-license"><i class="fa fa-check-circle"></i> {{ button_verify_license }}</button>
                     <span id="license-status" class="dc-ix-license-status"></span>
                     {% if license_valid %}
-                    <span class="label label-success dc-ix-license-status">Valid</span>
+                    <span class="label label-success dc-ix-license-status">{{ text_valid }}</span>
                     {% elseif license_message %}
                     <span class="label label-danger dc-ix-license-status">{{ license_message }}</span>
                     {% endif %}
@@ -457,17 +457,17 @@ function verifyLicense() {
   var $details = $('#license-details');
 
   if (!licenseKey) {
-    $status.html('<span class="label label-danger">Please enter license key</span>');
+    $status.html('<span class="label label-danger">{{ text_license_key_required|e('js') }}</span>');
     return;
   }
 
   if (!publicKey) {
-    $status.html('<span class="label label-danger">Please enter public key</span>');
+    $status.html('<span class="label label-danger">{{ text_public_key_required|e('js') }}</span>');
     return;
   }
 
   var originalHtml = $btn.html();
-  $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Verifying...');
+  $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> {{ text_verifying|e('js') }}');
   $status.html('');
   $info.hide();
 
@@ -487,26 +487,26 @@ function verifyLicense() {
       $btn.prop('disabled', false).html(originalHtml);
 
       if (data.valid) {
-        $status.html('<span class="label label-success"><i class="fa fa-check"></i> Valid</span>');
-        var infoHtml = '<strong>Status:</strong> Active<br>';
-        infoHtml += '<strong>Domain:</strong> ' + (data.domain || '{{ license_domain }}') + '<br>';
+        $status.html('<span class="label label-success"><i class="fa fa-check"></i> {{ text_valid|e('js') }}</span>');
+        var infoHtml = '<strong>{{ text_license_status_label|e('js') }}:</strong> {{ text_license_active|e('js') }}<br>';
+        infoHtml += '<strong>{{ text_license_domain_label|e('js') }}:</strong> ' + (data.domain || '{{ license_domain }}') + '<br>';
         if (data.expires_formatted) {
-          infoHtml += '<strong>Expires:</strong> ' + data.expires_formatted + '<br>';
+          infoHtml += '<strong>{{ text_license_expires_label|e('js') }}:</strong> ' + data.expires_formatted + '<br>';
         } else {
-          infoHtml += '<strong>Type:</strong> Lifetime License<br>';
+          infoHtml += '<strong>{{ text_license_type_label|e('js') }}:</strong> {{ text_license_lifetime|e('js') }}<br>';
         }
-        if (data.license_id) infoHtml += '<strong>License ID:</strong> ' + data.license_id;
+        if (data.license_id) infoHtml += '<strong>{{ text_license_id_label|e('js') }}:</strong> ' + data.license_id;
         $details.html(infoHtml);
         $info.show();
       } else {
-        $status.html('<span class="label label-danger"><i class="fa fa-times"></i> Invalid</span>');
-        $details.html(data.error ? ('<strong>Error:</strong> ' + data.error) : '');
+        $status.html('<span class="label label-danger"><i class="fa fa-times"></i> {{ text_invalid|e('js') }}</span>');
+        $details.html(data.error ? ('<strong>{{ text_error_label|e('js') }}:</strong> ' + data.error) : '');
         $info.show();
       }
     })
     .catch(function(err) {
       $btn.prop('disabled', false).html(originalHtml);
-      $status.html('<span class="label label-danger">Error: ' + (err.message || err) + '</span>');
+      $status.html('<span class="label label-danger">{{ text_error_label|e('js') }}: ' + (err.message || err) + '</span>');
     });
 }
 

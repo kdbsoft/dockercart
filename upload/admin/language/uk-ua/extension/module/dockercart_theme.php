@@ -51,6 +51,9 @@ $_['button_add_feature'] = 'Додати feature';
 $_['text_section_features'] = 'Features теми';
 $_['text_multilingual_settings'] = 'Мультимовний контент';
 $_['column_action'] = 'Дія';
+$_['text_choose_icon'] = 'Оберіть іконку';
+$_['text_close'] = 'Закрити';
+$_['text_icon_picker_aria'] = 'Вибір іконки';
 
 $_['text_default_product_feature_1_title'] = 'Доставка';
 $_['text_default_product_feature_1_text'] = 'Безкоштовна доставка';

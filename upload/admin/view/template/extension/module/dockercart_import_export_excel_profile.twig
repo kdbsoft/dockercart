@@ -55,11 +55,11 @@
     <div id="preview-notice"></div>
 
     <ul class="nav nav-tabs dcx-profile-tabs" id="profile-tabs" role="tablist">
-      <li class="active"><a href="#tab-general" class="js-profile-tab" data-tab="tab-general" data-title="General" data-icon="fa-sliders" data-subtitle="{{ text_profile_subtitle_general }}" title="General"><i class="fa fa-sliders"></i>General</a></li>
-      <li><a href="#tab-source" class="js-profile-tab" data-tab="tab-source" data-title="Source" data-icon="fa-cloud-download" data-subtitle="{{ text_profile_subtitle_source }}" title="Source"><i class="fa fa-cloud-download"></i>Source</a></li>
-      <li><a href="#tab-import" class="js-profile-tab" data-tab="tab-import" data-title="Import" data-icon="fa-cogs" data-subtitle="{{ text_profile_subtitle_import }}" title="Import"><i class="fa fa-cogs"></i>Import</a></li>
-      <li><a href="#tab-mapping" class="js-profile-tab" data-tab="tab-mapping" data-title="Mapping" data-icon="fa-random" data-subtitle="{{ text_profile_subtitle_mapping }}" title="Mapping"><i class="fa fa-random"></i>Mapping</a></li>
-      <li><a href="#tab-preview" class="js-profile-tab" data-tab="tab-preview" data-title="Preview" data-icon="fa-eye" data-subtitle="{{ text_profile_subtitle_preview }}" title="Preview"><i class="fa fa-eye"></i>Preview</a></li>
+      <li class="active"><a href="#tab-general" class="js-profile-tab" data-tab="tab-general" data-title="{{ text_tab_general }}" data-icon="fa-sliders" data-subtitle="{{ text_profile_subtitle_general }}" title="{{ text_tab_general }}"><i class="fa fa-sliders"></i>{{ text_tab_general }}</a></li>
+      <li><a href="#tab-source" class="js-profile-tab" data-tab="tab-source" data-title="{{ text_tab_source }}" data-icon="fa-cloud-download" data-subtitle="{{ text_profile_subtitle_source }}" title="{{ text_tab_source }}"><i class="fa fa-cloud-download"></i>{{ text_tab_source }}</a></li>
+      <li><a href="#tab-import" class="js-profile-tab" data-tab="tab-import" data-title="{{ text_tab_import }}" data-icon="fa-cogs" data-subtitle="{{ text_profile_subtitle_import }}" title="{{ text_tab_import }}"><i class="fa fa-cogs"></i>{{ text_tab_import }}</a></li>
+      <li><a href="#tab-mapping" class="js-profile-tab" data-tab="tab-mapping" data-title="{{ text_tab_mapping }}" data-icon="fa-random" data-subtitle="{{ text_profile_subtitle_mapping }}" title="{{ text_tab_mapping }}"><i class="fa fa-random"></i>{{ text_tab_mapping }}</a></li>
+      <li><a href="#tab-preview" class="js-profile-tab" data-tab="tab-preview" data-title="{{ text_tab_preview }}" data-icon="fa-eye" data-subtitle="{{ text_profile_subtitle_preview }}" title="{{ text_tab_preview }}"><i class="fa fa-eye"></i>{{ text_tab_preview }}</a></li>
     </ul>
 
     <div class="dcx-shell">
@@ -67,7 +67,7 @@
         <div class="dcx-panel-head">
           <div class="dcx-panel-head__icon"><i id="panel-tab-icon" class="fa fa-sliders"></i></div>
           <div>
-            <h3 class="dcx-panel-title" id="panel-tab-title">General</h3>
+            <h3 class="dcx-panel-title" id="panel-tab-title">{{ text_tab_general }}</h3>
             <div class="dcx-panel-subtitle" id="panel-tab-subtitle">{{ text_profile_subtitle_general }}</div>
           </div>
         </div>
@@ -98,7 +98,7 @@
 
           <div id="tab-source" class="dcx-tab-pane">
           <div class="dcx-section" id="sec-source">
-            <h3 class="dcx-panel-title">Source</h3>
+            <h3 class="dcx-panel-title">{{ text_tab_source }}</h3>
 
           <div class="form-group">
             <label class="col-sm-3 control-label" for="input-source-type">{{ entry_source_type }}</label>
@@ -126,7 +126,7 @@
                   <button type="button" class="btn btn-info" id="btn-upload-source"><i class="fa fa-upload"></i> {{ button_upload_file }}</button>
                 </span>
               </div>
-              <p class="dcx-help">CSV / XLSX file from supplier feed.</p>
+              <p class="dcx-help">{{ text_source_file_hint }}</p>
               <input type="file" id="source-upload" style="display:none;" />
             </div>
           </div>
@@ -161,7 +161,7 @@
 
           <div id="tab-import" class="dcx-tab-pane">
           <div class="dcx-section" id="sec-import">
-            <h3 class="dcx-panel-title">Import Rules</h3>
+            <h3 class="dcx-panel-title">{{ text_import_rules }}</h3>
 
           <div class="form-group">
             <label class="col-sm-3 control-label" for="input-has-header">{{ entry_has_header }}</label>
@@ -426,7 +426,7 @@
     var subtitle = $tabLink && $tabLink.length ? ($tabLink.data('subtitle') || '') : '';
 
     if (!title) {
-      title = 'General';
+      title = '{{ text_tab_general|e('js') }}';
     }
 
     if (!icon) {

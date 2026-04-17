@@ -31,10 +31,10 @@
     {% endif %}
 
     <ul class="nav nav-tabs dcx-profile-tabs" id="occ-tabs" role="tablist">
-      <li class="active"><a href="#occ-tab-general" class="js-occ-tab" data-tab="occ-tab-general" data-title="General" data-subtitle="Main behavior, captions and order settings" data-icon="fa-sliders"><i class="fa fa-sliders"></i> General</a></li>
-      <li><a href="#occ-tab-fields" class="js-occ-tab" data-tab="occ-tab-fields" data-title="{{ text_field_settings }}" data-subtitle="Configure visible and required form fields" data-icon="fa-list"><i class="fa fa-list"></i> {{ text_field_settings }}</a></li>
-      <li><a href="#occ-tab-license" class="js-occ-tab" data-tab="occ-tab-license" data-title="License" data-subtitle="License verification and activation status" data-icon="fa-key"><i class="fa fa-key"></i> License</a></li>
-      <li><a href="#occ-tab-about" class="js-occ-tab" data-tab="occ-tab-about" data-title="About" data-subtitle="Module information and support contacts" data-icon="fa-info-circle"><i class="fa fa-info-circle"></i> About</a></li>
+      <li class="active"><a href="#occ-tab-general" class="js-occ-tab" data-tab="occ-tab-general" data-title="{{ text_tab_general }}" data-subtitle="{{ text_tab_general_subtitle }}" data-icon="fa-sliders"><i class="fa fa-sliders"></i> {{ text_tab_general }}</a></li>
+      <li><a href="#occ-tab-fields" class="js-occ-tab" data-tab="occ-tab-fields" data-title="{{ text_field_settings }}" data-subtitle="{{ text_tab_fields_subtitle }}" data-icon="fa-list"><i class="fa fa-list"></i> {{ text_field_settings }}</a></li>
+      <li><a href="#occ-tab-license" class="js-occ-tab" data-tab="occ-tab-license" data-title="{{ text_tab_license }}" data-subtitle="{{ text_tab_license_subtitle }}" data-icon="fa-key"><i class="fa fa-key"></i> {{ text_tab_license }}</a></li>
+      <li><a href="#occ-tab-about" class="js-occ-tab" data-tab="occ-tab-about" data-title="{{ text_tab_about }}" data-subtitle="{{ text_tab_about_subtitle }}" data-icon="fa-info-circle"><i class="fa fa-info-circle"></i> {{ text_tab_about }}</a></li>
     </ul>
 
     <div class="dcx-shell">
@@ -42,8 +42,8 @@
         <div class="dcx-panel-head">
           <div class="dcx-panel-head__icon"><i id="occ-tab-icon" class="fa fa-sliders"></i></div>
           <div>
-            <h3 class="dcx-panel-title" id="occ-tab-title">General</h3>
-            <div class="dcx-panel-subtitle" id="occ-tab-subtitle">Main behavior, captions and order settings</div>
+            <h3 class="dcx-panel-title" id="occ-tab-title">{{ text_tab_general }}</h3>
+            <div class="dcx-panel-subtitle" id="occ-tab-subtitle">{{ text_tab_general_subtitle }}</div>
           </div>
         </div>
         <div class="dcx-panel-body">
@@ -51,7 +51,7 @@
 
             <div id="occ-tab-general" class="dcx-tab-pane active">
               <div class="dcx-section">
-                <h4>Module Settings</h4>
+                <h4>{{ text_module_settings }}</h4>
 
                 <div class="form-group">
                   <label class="col-sm-3 control-label" for="input-status">{{ entry_status }}</label>
@@ -223,7 +223,7 @@
 
             <div id="occ-tab-license" class="dcx-tab-pane">
               <div class="dcx-section">
-                <h4>License Information</h4>
+                <h4>{{ text_license_info }}</h4>
 
                 <div class="form-group">
                   <label class="col-sm-3 control-label" for="input-license-key">{{ entry_license_key }}</label>
@@ -231,7 +231,7 @@
                     <input type="text" name="module_dockercart_oneclickcheckout_license_key" value="{{ module_dockercart_oneclickcheckout_license_key }}" placeholder="{{ entry_license_key }}" id="input-license-key" class="form-control" />
                     <small class="help-block">{{ help_license_key }}</small>
                     <small class="form-text text-muted" style="margin-top: 5px;">
-                      <i class="fa fa-info-circle"></i> License bound to domain: <strong>{{ license_domain|default('localhost') }}</strong>
+                      <i class="fa fa-info-circle"></i> {{ text_license_domain }}: <strong>{{ license_domain|default('localhost') }}</strong>
                     </small>
                     {% if not license_valid and module_dockercart_oneclickcheckout_license_key %}
                     <div class="alert alert-warning" style="margin-top: 10px;">
@@ -254,7 +254,7 @@
                 <div id="license-info" class="form-group" style="display:none;">
                   <div class="col-sm-offset-3 col-sm-9">
                     <div class="alert alert-info">
-                      <h4><i class="fa fa-info-circle"></i> License Information</h4>
+                      <h4><i class="fa fa-info-circle"></i> {{ text_license_info }}</h4>
                       <p id="license-details"></p>
                     </div>
                   </div>
@@ -274,18 +274,18 @@
 
             <div id="occ-tab-about" class="dcx-tab-pane">
               <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                <h4>About</h4>
+                <h4>{{ text_tab_about }}</h4>
                 <table class="table table-bordered dcx-table">
                   <tr>
-                    <td style="width:220px;"><strong>Module Version</strong></td>
+                    <td style="width:220px;"><strong>{{ text_module_version }}</strong></td>
                     <td>{% if module_version is defined and module_version %}{{ module_version }}{% else %}n/a{% endif %}</td>
                   </tr>
                   <tr>
-                    <td><strong>Developer</strong></td>
-                    <td>DockerCart Team</td>
+                    <td><strong>{{ text_developer }}</strong></td>
+                    <td>{{ text_developer_name }}</td>
                   </tr>
                   <tr>
-                    <td><strong>Contact</strong></td>
+                    <td><strong>{{ text_contact }}</strong></td>
                     <td><a href="mailto:support@dockercart.net">support@dockercart.net</a></td>
                   </tr>
                 </table>
@@ -303,7 +303,7 @@
 <script type="text/javascript">
 function updateOccPanelHeader(tabLink) {
     var $tab = $(tabLink);
-  var title = $tab.data('title') || 'General';
+  var title = $tab.data('title') || '{{ text_tab_general|e('js') }}';
     var subtitle = $tab.data('subtitle') || '';
   var icon = String($tab.data('icon') || 'fa-cog').replace(/[^a-z0-9\-]/gi, '');
 
@@ -341,12 +341,12 @@ $('#button-verify-license').on('click', function() {
     }
 
     if (!public_key) {
-        $status.html('<span class="label label-danger">Please enter public key</span>');
+      $status.html('<span class="label label-danger">{{ text_public_key_required|e('js') }}</span>');
         return;
     }
 
     $btn.button('loading');
-    $status.html('<span class="label label-info"><i class="fa fa-spinner fa-spin"></i> Verifying...</span>');
+    $status.html('<span class="label label-info"><i class="fa fa-spinner fa-spin"></i> {{ text_verifying|e('js') }}</span>');
     $('#license-info').hide();
 
     $.ajax({
@@ -365,25 +365,25 @@ $('#button-verify-license').on('click', function() {
                 var message = json.message || '{{ success_license_valid }}';
                 $status.html('<span class="label label-success"><i class="fa fa-check"></i> ' + message + '</span>');
 
-                var infoHtml = '<strong>Status:</strong> Active<br>';
+                var infoHtml = '<strong>{{ text_license_status_label|e('js') }}:</strong> {{ text_license_active|e('js') }}<br>';
                 if (json.domain || '{{ license_domain|default('localhost') }}') {
-                    infoHtml += '<strong>Domain:</strong> ' + (json.domain || '{{ license_domain|default('localhost') }}') + '<br>';
+                  infoHtml += '<strong>{{ text_license_domain_label|e('js') }}:</strong> ' + (json.domain || '{{ license_domain|default('localhost') }}') + '<br>';
                 }
                 if (json.expires_formatted) {
-                    infoHtml += '<strong>Expires:</strong> ' + json.expires_formatted + '<br>';
+                  infoHtml += '<strong>{{ text_license_expires_label|e('js') }}:</strong> ' + json.expires_formatted + '<br>';
                 }
                 if (json.license_id) {
-                    infoHtml += '<strong>License ID:</strong> ' + json.license_id + '<br>';
+                  infoHtml += '<strong>{{ text_license_id_label|e('js') }}:</strong> ' + json.license_id + '<br>';
                 }
                 if (json.message && !json.license_id) {
-                    infoHtml += '<strong>Message:</strong> ' + json.message;
+                  infoHtml += '<strong>{{ text_message_label|e('js') }}:</strong> ' + json.message;
                 }
                 $('#license-details').html(infoHtml);
                 $('#license-info').show();
             } else {
                 var err = json.error || '{{ error_license_invalid }}';
                 $status.html('<span class="label label-danger"><i class="fa fa-times"></i> ' + err + '</span>');
-                $('#license-details').html('<strong>Error:</strong> ' + err);
+                $('#license-details').html('<strong>{{ text_error_label|e('js') }}:</strong> ' + err);
                 $('#license-info').show();
             }
         },

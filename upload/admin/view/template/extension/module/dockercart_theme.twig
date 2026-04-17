@@ -650,14 +650,14 @@
 <!-- Icon picker modal -->
 <div id="dc-icon-picker-modal" class="dc-icon-picker-modal hidden">
   <div class="dc-icon-picker-backdrop"></div>
-  <div class="dc-icon-picker-panel" role="dialog" aria-modal="true" aria-label="Icon picker">
+  <div class="dc-icon-picker-panel" role="dialog" aria-modal="true" aria-label="{{ text_icon_picker_aria }}">
     <div class="dc-icon-picker-header">
       <div style="display:flex;align-items:center;gap:8px;">
-        <strong>Choose icon</strong>
+        <strong>{{ text_choose_icon }}</strong>
         <input id="dc-icon-picker-search" class="form-control dc-icon-picker-search" placeholder="{{ text_search_icons|default('Search icons...') }}" />
       </div>
       <div>
-        <button id="dc-icon-picker-close" class="btn btn-default">Close</button>
+        <button id="dc-icon-picker-close" class="btn btn-default">{{ text_close }}</button>
       </div>
     </div>
     <div id="dc-icon-picker-grid" class="dc-icon-picker-grid">

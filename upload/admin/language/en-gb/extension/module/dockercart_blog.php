@@ -38,6 +38,11 @@ $_['tab_display']      = 'Display';
 $_['tab_comments']     = 'Comments';
 $_['tab_seo']          = 'SEO / Sitemap';
 $_['tab_statistics']   = 'Statistics';
+$_['tab_about']        = 'About';
+
+$_['text_module_label'] = 'Module';
+$_['text_developer_label'] = 'Developer';
+$_['text_contact_label'] = 'Contact';
 
 // Entry
 $_['entry_status']     = 'Status';

@@ -35,7 +35,7 @@
           <div class="dcx-panel-head__icon"><i class="fa fa-edit"></i></div>
           <div>
             <h3 class="dcx-panel-title">{{ faq_id ? text_edit_faq : text_add_faq }}</h3>
-            <div class="dcx-panel-subtitle">Reusable FAQ block with dynamic placeholders</div>
+            <div class="dcx-panel-subtitle">{{ text_faq_form_subtitle }}</div>
           </div>
         </div>
         <div class="dcx-panel-body">
@@ -43,7 +43,7 @@
             <input type="hidden" name="faq_id" value="{{ faq.faq_id }}" />
 
             <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-              <h4>General</h4>
+              <h4>{{ tab_general }}</h4>
 
               <div class="form-group required">
                 <label class="col-sm-2 control-label" for="input-code">{{ entry_code }}</label>
@@ -138,7 +138,7 @@
             </div>
 
             <div class="dcx-section">
-              <h4>Question &amp; Answer</h4>
+              <h4>{{ text_question_answer }}</h4>
               <ul class="nav nav-tabs" role="tablist">
                 {% for language in languages %}
                 <li class="{% if loop.first %}active{% endif %}"><a href="#lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" alt="{{ language.name }}" /> {{ language.name }}</a></li>
