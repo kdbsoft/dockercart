@@ -82,11 +82,7 @@ class ModelExtensionModuleDockercartImportYml extends Model {
         $this->writeProgress($profile_id, $summary, false);
 
         if ($offset === 0 && (string)$profile['import_mode'] === 'replace') {
-            $store_category_ids = $this->getStoreProductCategoryIds((int)$profile['store_id']);
-            $this->deleteAllStoreProducts((int)$profile['store_id']);
-            $this->deleteImportedCategoriesByProfile((int)$profile_id, $store_category_ids, (int)$profile['default_category_id']);
-            $this->db->query("DELETE FROM `" . DB_PREFIX . "dockercart_import_yml_offer_map` WHERE `profile_id` = '" . (int)$profile_id . "'");
-            $this->clearCategoryMap((int)$profile_id);
+            $this->deleteAllCatalogData();
         }
 
         $category_payload = $this->buildFeedCategoryMap($profile, $xml, $offset);
@@ -1148,6 +1144,64 @@ class ModelExtensionModuleDockercartImportYml extends Model {
         $this->deleteByProductIds(DB_PREFIX . 'product_to_layout', $ids);
         $this->deleteByProductIds(DB_PREFIX . 'product_to_store', $ids);
         $this->deleteByProductIds(DB_PREFIX . 'product', $ids);
+    }
+
+    /**
+     * Full wipe for replace mode:
+     * products + categories + manufacturers + importer maps.
+     */
+    private function deleteAllCatalogData() {
+        $tables = array(
+            // Product relations and entities
+            'product_related',
+            'product_option_value',
+            'product_option',
+            'product_attribute',
+            'product_discount',
+            'product_filter',
+            'product_image',
+            'product_reward',
+            'product_special',
+            'product_recurring',
+            'product_to_download',
+            'product_to_layout',
+            'product_to_store',
+            'product_to_category',
+            'product_description',
+            'product',
+
+            // Category entities
+            'category_filter',
+            'category_path',
+            'category_to_layout',
+            'category_to_store',
+            'category_description',
+            'category',
+
+            // Manufacturer entities
+            'manufacturer_to_store',
+            'manufacturer',
+
+            // Importer maps
+            'dockercart_import_yml_offer_map',
+            'dockercart_import_yml_category_map'
+        );
+
+        foreach ($tables as $table) {
+            if ($this->tableExists($table)) {
+                $this->db->query("DELETE FROM `" . DB_PREFIX . $table . "`");
+            }
+        }
+    }
+
+    private function tableExists($table) {
+        $table = trim((string)$table);
+        if ($table === '') {
+            return false;
+        }
+
+        $query = $this->db->query("SHOW TABLES LIKE '" . $this->db->escape(DB_PREFIX . $table) . "'");
+        return (bool)$query->num_rows;
     }
 
     private function deleteByProductIds($table, $ids, $column = 'product_id') {

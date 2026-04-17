@@ -60,7 +60,7 @@ $_['entry_public_key'] = 'Public key';
 
 // Help
 $_['help_feed_url'] = 'Direct URL to YML feed (Yandex Market Language)';
-$_['help_import_mode'] = 'Add only: creates new products; Add + Update: updates existing and creates new; Update only: updates existing products and skips new ones; Update prices and stock only: updates only price and quantity for existing products; Delete all then import: clears store products and previously importer-created categories before import.';
+$_['help_import_mode'] = 'Add only: creates new products; Add + Update: updates existing and creates new; Update only: updates existing products and skips new ones; Update prices and stock only: updates only price and quantity for existing products; Delete all then import: fully clears products, categories, and manufacturers in the database before import.';
 $_['help_load_categories'] = 'If enabled, categories from feed will be imported. If Default Category is set, imported feed categories will be created under it as child categories.';
 $_['help_allow_zero_price'] = 'If enabled, products with a price of 0 will be imported. Disabled by default.';
 
