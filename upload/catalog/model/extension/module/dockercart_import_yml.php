@@ -1,6 +1,8 @@
 <?php
 class ModelExtensionModuleDockercartImportYml extends Model {
 
+    private $category_map_schema_checked = false;
+
     public function getProfile($profile_id) {
         $query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "dockercart_import_yml_profile` WHERE `profile_id` = '" . (int)$profile_id . "'");
 
@@ -79,30 +81,12 @@ class ModelExtensionModuleDockercartImportYml extends Model {
 
         $this->writeProgress($profile_id, $summary, false);
 
-        if ($offset === 0) {
-            $feed_categories = $this->buildFeedCategories($xml);
-            $load_categories = !isset($profile['load_categories']) || (int)$profile['load_categories'] === 1;
-            $default_category_id = (int)$profile['default_category_id'];
-
-            if ($load_categories) {
-                $root_parent_id = $default_category_id > 0 ? $default_category_id : 0;
-                $category_import = $this->importFeedCategories($profile, $feed_categories, $root_parent_id);
-                $category_map = $category_import['map'];
-            } else {
-                $category_import = array(
-                    'total' => count($feed_categories),
-                    'created' => 0,
-                    'mapped' => 0,
-                    'skipped' => count($feed_categories),
-                    'map' => array()
-                );
-                $category_map = array();
-            }
-
-            $summary['categories_in_feed'] = (int)$category_import['total'];
-            $summary['categories_created'] = (int)$category_import['created'];
-            $summary['categories_mapped'] = (int)$category_import['mapped'];
-            $summary['categories_skipped'] = (int)$category_import['skipped'];
+        if ($offset === 0 && (string)$profile['import_mode'] === 'replace') {
+            $store_category_ids = $this->getStoreProductCategoryIds((int)$profile['store_id']);
+            $this->deleteAllStoreProducts((int)$profile['store_id']);
+            $this->deleteImportedCategoriesByProfile((int)$profile_id, $store_category_ids, (int)$profile['default_category_id']);
+            $this->db->query("DELETE FROM `" . DB_PREFIX . "dockercart_import_yml_offer_map` WHERE `profile_id` = '" . (int)$profile_id . "'");
+            $this->clearCategoryMap((int)$profile_id);
         }
 
         $category_payload = $this->buildFeedCategoryMap($profile, $xml, $offset);
@@ -113,11 +97,6 @@ class ModelExtensionModuleDockercartImportYml extends Model {
             $summary['categories_created'] = (int)$category_payload['stats']['created'];
             $summary['categories_mapped'] = (int)$category_payload['stats']['mapped'];
             $summary['categories_skipped'] = (int)$category_payload['stats']['skipped'];
-        }
-
-        if ($offset === 0 && (string)$profile['import_mode'] === 'replace') {
-            $this->deleteAllStoreProducts((int)$profile['store_id']);
-            $this->db->query("DELETE FROM `" . DB_PREFIX . "dockercart_import_yml_offer_map` WHERE `profile_id` = '" . (int)$profile_id . "'");
         }
 
         $chunk_start = $is_chunked ? $offset : 0;
@@ -166,7 +145,8 @@ class ModelExtensionModuleDockercartImportYml extends Model {
 
                 $quantity = $this->extractQuantity($offer);
                 $category_id = $this->resolveCategoryId($offer, $profile, $feed_category_map);
-                $manufacturer_id = $this->resolveManufacturerId($vendor);
+                $manufacturer_name = $this->extractManufacturerName($offer, $vendor);
+                $manufacturer_id = $this->resolveManufacturerId($manufacturer_name, (int)$profile['store_id']);
 
                 // Extract and download product images (if enabled in profile)
                 $download_images = !isset($profile['download_images']) || (int)$profile['download_images'] === 1;
@@ -506,6 +486,9 @@ class ModelExtensionModuleDockercartImportYml extends Model {
 
         $language_id = (int)$profile['language_id'];
         $store_id = (int)$profile['store_id'];
+        $profile_id = isset($profile['profile_id']) ? (int)$profile['profile_id'] : 0;
+
+        $this->ensureCategoryMapTable();
 
         $remaining = $feed_categories;
         $guard = 0;
@@ -527,16 +510,21 @@ class ModelExtensionModuleDockercartImportYml extends Model {
                 }
 
                 $local_id = $this->findCategoryByNameAndParent($item['name'], $language_id, $parent_local_id);
+                $was_created = 0;
 
                 if (!$local_id) {
                     $local_id = $this->createCategory($item['name'], $language_id, $store_id, $parent_local_id);
                     $result['created']++;
+                    $was_created = 1;
                 } else {
                     // Category already exists - update its 'top' field if it's a root category
                     $this->ensureCategoryTop($local_id, $parent_local_id);
                 }
 
                 $result['map'][$feed_id] = (int)$local_id;
+                if ($profile_id > 0) {
+                    $this->upsertCategoryMap($profile_id, (string)$feed_id, (int)$local_id, $was_created);
+                }
                 $result['mapped']++;
                 unset($remaining[$feed_id]);
                 $progress = true;
@@ -550,15 +538,20 @@ class ModelExtensionModuleDockercartImportYml extends Model {
                     }
 
                     $local_id = $this->findCategoryByNameAndParent($item['name'], $language_id, $fallback_parent_id);
+                    $was_created = 0;
                     if (!$local_id) {
                         $local_id = $this->createCategory($item['name'], $language_id, $store_id, $fallback_parent_id);
                         $result['created']++;
+                        $was_created = 1;
                     } else {
                         // Category already exists - update its 'top' field if it's a root category
                         $this->ensureCategoryTop($local_id, $fallback_parent_id);
                     }
 
                     $result['map'][$feed_id] = (int)$local_id;
+                    if ($profile_id > 0) {
+                        $this->upsertCategoryMap($profile_id, (string)$feed_id, (int)$local_id, $was_created);
+                    }
                     $result['mapped']++;
                 }
 
@@ -581,6 +574,59 @@ class ModelExtensionModuleDockercartImportYml extends Model {
         }
 
         return $profile_category;
+    }
+
+    private function extractManufacturerName($offer, $vendor_name = '') {
+        $vendor_name = trim((string)$vendor_name);
+        if ($vendor_name !== '') {
+            return $vendor_name;
+        }
+
+        $brand_param_names = array(
+            'бренд',
+            'brand',
+            'manufacturer',
+            'производитель',
+            'виробник',
+            'торгова марка',
+            'торговая марка'
+        );
+
+        foreach ($offer->param as $param) {
+            $attributes = $param->attributes();
+            if (!isset($attributes['name'])) {
+                continue;
+            }
+
+            $param_name = $this->normalizeParamName((string)$attributes['name']);
+            if ($param_name === '' || !in_array($param_name, $brand_param_names, true)) {
+                continue;
+            }
+
+            $param_value = trim((string)$param);
+            if ($param_value !== '') {
+                return $param_value;
+            }
+        }
+
+        return '';
+    }
+
+    private function normalizeParamName($name) {
+        $name = html_entity_decode(trim((string)$name), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        if ($name === '') {
+            return '';
+        }
+
+        if (function_exists('mb_strtolower')) {
+            $name = mb_strtolower($name, 'UTF-8');
+        } else {
+            $name = strtolower($name);
+        }
+
+        $name = preg_replace('/\s+/u', ' ', $name);
+
+        return trim((string)$name);
     }
 
     private function findCategoryByNameAndParent($name, $language_id, $parent_id) {
@@ -658,22 +704,240 @@ class ModelExtensionModuleDockercartImportYml extends Model {
                 level = '" . (int)$level . "'");
     }
 
-    private function resolveManufacturerId($vendor_name) {
+    private function ensureCategoryMapTable() {
+        if ($this->category_map_schema_checked) {
+            return;
+        }
+
+        $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "dockercart_import_yml_category_map` (
+                `map_id` int(11) NOT NULL AUTO_INCREMENT,
+                `profile_id` int(11) NOT NULL,
+                `feed_category_id` varchar(255) NOT NULL,
+                `category_id` int(11) NOT NULL,
+                `was_created` tinyint(1) NOT NULL DEFAULT '0',
+                `date_modified` datetime NOT NULL,
+                PRIMARY KEY (`map_id`),
+                UNIQUE KEY `profile_feed_category` (`profile_id`,`feed_category_id`),
+                KEY `profile_created` (`profile_id`,`was_created`),
+                KEY `category_id` (`category_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+
+        $this->category_map_schema_checked = true;
+    }
+
+    private function upsertCategoryMap($profile_id, $feed_category_id, $category_id, $was_created = 0) {
+        $profile_id = (int)$profile_id;
+        $category_id = (int)$category_id;
+        $feed_category_id = trim((string)$feed_category_id);
+        $was_created = $was_created ? 1 : 0;
+
+        if ($profile_id <= 0 || $category_id <= 0 || $feed_category_id === '') {
+            return;
+        }
+
+        $this->ensureCategoryMapTable();
+
+        $this->db->query("INSERT INTO `" . DB_PREFIX . "dockercart_import_yml_category_map`
+            SET profile_id = '" . $profile_id . "',
+                feed_category_id = '" . $this->db->escape($feed_category_id) . "',
+                category_id = '" . $category_id . "',
+                was_created = '" . $was_created . "',
+                date_modified = NOW()
+            ON DUPLICATE KEY UPDATE
+                category_id = VALUES(category_id),
+                was_created = VALUES(was_created),
+                date_modified = NOW()");
+    }
+
+    private function clearCategoryMap($profile_id) {
+        $profile_id = (int)$profile_id;
+        if ($profile_id <= 0) {
+            return;
+        }
+
+        $this->ensureCategoryMapTable();
+        $this->db->query("DELETE FROM `" . DB_PREFIX . "dockercart_import_yml_category_map` WHERE profile_id = '" . $profile_id . "'");
+    }
+
+    private function deleteImportedCategoriesByProfile($profile_id, $fallback_category_ids = array(), $default_category_id = 0) {
+        $profile_id = (int)$profile_id;
+        $default_category_id = (int)$default_category_id;
+
+        $fallback_category_ids = array_values(array_unique(array_map('intval', (array)$fallback_category_ids)));
+
+        $this->ensureCategoryMapTable();
+
+        $category_ids_to_delete = array();
+
+        if ($profile_id > 0) {
+            $query = $this->db->query("SELECT DISTINCT category_id
+                FROM `" . DB_PREFIX . "dockercart_import_yml_category_map`
+                WHERE profile_id = '" . $profile_id . "'
+                  AND was_created = '1'");
+
+            foreach ($query->rows as $row) {
+                $category_ids_to_delete[] = (int)$row['category_id'];
+            }
+
+            if ($fallback_category_ids) {
+                $category_ids_to_delete = array_merge($category_ids_to_delete, $fallback_category_ids);
+            }
+        } else {
+            $category_ids_to_delete = $fallback_category_ids;
+        }
+
+        $category_ids_to_delete = array_values(array_unique(array_filter(array_map('intval', $category_ids_to_delete))));
+        if (!$category_ids_to_delete) {
+            return;
+        }
+
+        $ordered_category_ids = $this->sortCategoryIdsByDepthDesc($category_ids_to_delete);
+
+        foreach ($ordered_category_ids as $category_id) {
+            if ($category_id <= 0 || ($default_category_id > 0 && $category_id === $default_category_id)) {
+                continue;
+            }
+
+            if (!$this->canDeleteCategory($category_id)) {
+                continue;
+            }
+
+            $this->deleteCategoryById($category_id);
+        }
+    }
+
+    private function getStoreProductCategoryIds($store_id) {
+        $store_id = (int)$store_id;
+
+        $query = $this->db->query("SELECT DISTINCT ptc.category_id
+            FROM `" . DB_PREFIX . "product_to_store` pts
+            INNER JOIN `" . DB_PREFIX . "product_to_category` ptc ON (ptc.product_id = pts.product_id)
+            WHERE pts.store_id = '" . $store_id . "'");
+
+        $result = array();
+        foreach ($query->rows as $row) {
+            $result[] = (int)$row['category_id'];
+        }
+
+        return array_values(array_unique(array_filter($result)));
+    }
+
+    private function sortCategoryIdsByDepthDesc($category_ids) {
+        $category_ids = array_values(array_unique(array_filter(array_map('intval', (array)$category_ids))));
+        if (!$category_ids) {
+            return array();
+        }
+
+        $in = implode(',', $category_ids);
+        $query = $this->db->query("SELECT cp.category_id, MAX(cp.level) AS depth
+            FROM `" . DB_PREFIX . "category_path` cp
+            WHERE cp.category_id IN (" . $in . ")
+            GROUP BY cp.category_id
+            ORDER BY depth DESC, cp.category_id DESC");
+
+        $ordered = array();
+        foreach ($query->rows as $row) {
+            $ordered[] = (int)$row['category_id'];
+        }
+
+        if (count($ordered) < count($category_ids)) {
+            foreach ($category_ids as $category_id) {
+                if (!in_array($category_id, $ordered, true)) {
+                    $ordered[] = $category_id;
+                }
+            }
+        }
+
+        return $ordered;
+    }
+
+    private function canDeleteCategory($category_id) {
+        $category_id = (int)$category_id;
+        if ($category_id <= 0) {
+            return false;
+        }
+
+        $category = $this->db->query("SELECT category_id, parent_id FROM `" . DB_PREFIX . "category` WHERE category_id = '" . $category_id . "' LIMIT 1");
+        if (!$category->num_rows) {
+            return false;
+        }
+
+        // Never auto-delete root categories here.
+        if ((int)$category->row['parent_id'] === 0) {
+            return false;
+        }
+
+        $has_children = $this->db->query("SELECT category_id FROM `" . DB_PREFIX . "category` WHERE parent_id = '" . $category_id . "' LIMIT 1");
+        if ($has_children->num_rows) {
+            return false;
+        }
+
+        $has_products = $this->db->query("SELECT product_id FROM `" . DB_PREFIX . "product_to_category` WHERE category_id = '" . $category_id . "' LIMIT 1");
+        if ($has_products->num_rows) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private function deleteCategoryById($category_id) {
+        $category_id = (int)$category_id;
+        if ($category_id <= 0) {
+            return;
+        }
+
+        $this->db->query("DELETE FROM `" . DB_PREFIX . "category_path` WHERE category_id = '" . $category_id . "' OR path_id = '" . $category_id . "'");
+        $this->db->query("DELETE FROM `" . DB_PREFIX . "category_description` WHERE category_id = '" . $category_id . "'");
+        $this->db->query("DELETE FROM `" . DB_PREFIX . "category_to_store` WHERE category_id = '" . $category_id . "'");
+        $this->db->query("DELETE FROM `" . DB_PREFIX . "category_to_layout` WHERE category_id = '" . $category_id . "'");
+        $this->db->query("DELETE FROM `" . DB_PREFIX . "category_filter` WHERE category_id = '" . $category_id . "'");
+        $this->db->query("DELETE FROM `" . DB_PREFIX . "category` WHERE category_id = '" . $category_id . "'");
+    }
+
+    private function resolveManufacturerId($vendor_name, $store_id = 0) {
         $vendor_name = trim($vendor_name);
         if ($vendor_name === '') {
             return 0;
         }
 
+        $store_id = (int)$store_id;
+
         $query = $this->db->query("SELECT manufacturer_id FROM `" . DB_PREFIX . "manufacturer` WHERE name = '" . $this->db->escape($vendor_name) . "' LIMIT 1");
         if ($query->num_rows) {
-            return (int)$query->row['manufacturer_id'];
+            $manufacturer_id = (int)$query->row['manufacturer_id'];
+            $this->ensureManufacturerStore($manufacturer_id, 0);
+            if ($store_id > 0) {
+                $this->ensureManufacturerStore($manufacturer_id, $store_id);
+            }
+
+            return $manufacturer_id;
         }
 
         $this->db->query("INSERT INTO `" . DB_PREFIX . "manufacturer` SET name = '" . $this->db->escape($vendor_name) . "', sort_order = 0");
         $manufacturer_id = (int)$this->db->getLastId();
-        $this->db->query("INSERT INTO `" . DB_PREFIX . "manufacturer_to_store` SET manufacturer_id = '" . $manufacturer_id . "', store_id = '0'");
+        $this->ensureManufacturerStore($manufacturer_id, 0);
+        if ($store_id > 0) {
+            $this->ensureManufacturerStore($manufacturer_id, $store_id);
+        }
 
         return $manufacturer_id;
+    }
+
+    private function ensureManufacturerStore($manufacturer_id, $store_id) {
+        $manufacturer_id = (int)$manufacturer_id;
+        $store_id = (int)$store_id;
+
+        if ($manufacturer_id <= 0 || $store_id < 0) {
+            return;
+        }
+
+        $exists = $this->db->query("SELECT manufacturer_id FROM `" . DB_PREFIX . "manufacturer_to_store`
+            WHERE manufacturer_id = '" . $manufacturer_id . "' AND store_id = '" . $store_id . "' LIMIT 1");
+
+        if (!$exists->num_rows) {
+            $this->db->query("INSERT INTO `" . DB_PREFIX . "manufacturer_to_store`
+                SET manufacturer_id = '" . $manufacturer_id . "', store_id = '" . $store_id . "'");
+        }
     }
 
     private function findProductByOffer($profile_id, $offer_id) {
@@ -903,13 +1167,87 @@ class ModelExtensionModuleDockercartImportYml extends Model {
         $urls = array();
 
         foreach ($offer->picture as $picture) {
-            $url = trim((string)$picture);
-            if ($url !== '' && !in_array($url, $urls)) {
+            $url = $this->normalizeImageUrl((string)$picture);
+            if ($url !== '' && !in_array($url, $urls, true)) {
                 $urls[] = $url;
             }
         }
 
         return $urls;
+    }
+
+    /**
+     * Normalize image URL to avoid cURL issues with spaces/Cyrillic and HTML entities.
+     */
+    private function normalizeImageUrl($url) {
+        $url = html_entity_decode(trim((string)$url), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        if ($url === '') {
+            return '';
+        }
+
+        if (strpos($url, '//') === 0) {
+            $url = 'https:' . $url;
+        }
+
+        $parts = @parse_url($url);
+        if (!is_array($parts) || empty($parts['scheme']) || empty($parts['host'])) {
+            return $url;
+        }
+
+        if (!empty($parts['path'])) {
+            $parts['path'] = $this->encodeUrlPath($parts['path']);
+        }
+
+        return $this->buildUrlFromParts($parts);
+    }
+
+    private function encodeUrlPath($path) {
+        $segments = explode('/', (string)$path);
+
+        foreach ($segments as &$segment) {
+            if ($segment === '') {
+                continue;
+            }
+
+            $segment = rawurlencode(rawurldecode($segment));
+        }
+        unset($segment);
+
+        return implode('/', $segments);
+    }
+
+    private function buildUrlFromParts($parts) {
+        $url = '';
+
+        if (!empty($parts['scheme'])) {
+            $url .= $parts['scheme'] . '://';
+        }
+
+        if (!empty($parts['user'])) {
+            $url .= $parts['user'];
+            if (!empty($parts['pass'])) {
+                $url .= ':' . $parts['pass'];
+            }
+            $url .= '@';
+        }
+
+        $url .= $parts['host'];
+
+        if (!empty($parts['port'])) {
+            $url .= ':' . (int)$parts['port'];
+        }
+
+        $url .= isset($parts['path']) ? $parts['path'] : '';
+
+        if (isset($parts['query']) && $parts['query'] !== '') {
+            $url .= '?' . $parts['query'];
+        }
+
+        if (isset($parts['fragment']) && $parts['fragment'] !== '') {
+            $url .= '#' . $parts['fragment'];
+        }
+
+        return $url;
     }
 
     /**
@@ -932,16 +1270,16 @@ class ModelExtensionModuleDockercartImportYml extends Model {
             throw new Exception('Failed to create or access base image directory: ' . $base_dir);
         }
 
-        foreach ($urls as $index => $url) {
+        foreach ($urls as $url) {
             try {
                 $downloaded_path = $this->downloadImage($url, $base_dir, (int)$profile_id);
 
                 if ($downloaded_path !== '') {
                     $relative_path = $this->toRelativeImagePath($downloaded_path);
 
-                    if ($index === 0) {
+                    if ($result['main'] === '') {
                         $result['main'] = $relative_path;
-                    } else {
+                    } elseif (!in_array($relative_path, $result['additional'], true)) {
                         $result['additional'][] = $relative_path;
                     }
                 }
@@ -1002,7 +1340,7 @@ class ModelExtensionModuleDockercartImportYml extends Model {
      * Download single image from URL
      */
     private function downloadImage($url, $base_dir, $profile_id = 0) {
-        $url = trim($url);
+        $url = $this->normalizeImageUrl($url);
 
         if ($url === '') {
             throw new Exception('Empty URL');
@@ -1047,18 +1385,27 @@ class ModelExtensionModuleDockercartImportYml extends Model {
         // Download image
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 60);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_USERAGENT, 'DockerCart-ImportYML/1.1');
+        curl_setopt($ch, CURLOPT_ENCODING, '');
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         $content = curl_exec($ch);
         $errno = curl_errno($ch);
         $error = curl_error($ch);
         $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $content_type = (string)curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
         curl_close($ch);
 
         if ($errno || $code >= 400 || $content === false || $content === '') {
             throw new Exception("Failed to download ({$url}): HTTP {$code}" . ($errno ? ", cURL: {$error}" : ""));
+        }
+
+        if ($content_type !== ''
+            && stripos($content_type, 'image/') !== 0
+            && stripos($content_type, 'application/octet-stream') !== 0) {
+            throw new Exception('Downloaded content is not an image. Content-Type: ' . $content_type);
         }
 
         if (strlen($content) < 100) {
