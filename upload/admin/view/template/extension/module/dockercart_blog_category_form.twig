@@ -53,7 +53,7 @@
                   <div class="form-group required">
                     <label class="col-sm-3 control-label" for="input-name{{ language.language_id }}">{{ entry_name }}</label>
                     <div class="col-sm-9">
-                      <input type="text" name="category_description[{{ language.language_id }}][name]" value="{{ category_description[language.language_id] ? category_description[language.language_id].name }}" placeholder="{{ entry_name }}" id="input-name{{ language.language_id }}" class="form-control" />
+                      <input type="text" name="category_description[{{ language.language_id }}][name]" value="{{ (category_description[language.language_id] ? category_description[language.language_id].name)|e('html_attr') }}" placeholder="{{ entry_name }}" id="input-name{{ language.language_id }}" class="form-control" />
                       {% if error_name[language.language_id] %}
                       <div class="text-danger">{{ error_name[language.language_id] }}</div>
                       {% endif %}
@@ -68,7 +68,7 @@
                   <div class="form-group required">
                     <label class="col-sm-3 control-label" for="input-meta-title{{ language.language_id }}">{{ entry_meta_title }}</label>
                     <div class="col-sm-9">
-                      <input type="text" name="category_description[{{ language.language_id }}][meta_title]" value="{{ category_description[language.language_id] ? category_description[language.language_id].meta_title }}" placeholder="{{ entry_meta_title }}" id="input-meta-title{{ language.language_id }}" class="form-control" />
+                      <input type="text" name="category_description[{{ language.language_id }}][meta_title]" value="{{ (category_description[language.language_id] ? category_description[language.language_id].meta_title)|e('html_attr') }}" placeholder="{{ entry_meta_title }}" id="input-meta-title{{ language.language_id }}" class="form-control" />
                       {% if error_meta_title[language.language_id] %}
                       <div class="text-danger">{{ error_meta_title[language.language_id] }}</div>
                       {% endif %}

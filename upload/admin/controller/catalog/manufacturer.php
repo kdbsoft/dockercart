@@ -324,6 +324,8 @@ class ControllerCatalogManufacturer extends Controller {
 			$data['manufacturer_description'] = array();
 		}
 
+		$data['manufacturer_description'] = $this->decodeDescriptionFields($data['manufacturer_description'], array('name', 'meta_title'));
+
 		if (isset($this->request->post['name'])) {
 			$data['name'] = $this->request->post['name'];
 		} elseif (!empty($manufacturer_info)) {
@@ -403,6 +405,46 @@ class ControllerCatalogManufacturer extends Controller {
 		$data['footer'] = $this->load->controller('common/footer');
 
 		$this->response->setOutput($this->load->view('catalog/manufacturer_form', $data));
+	}
+
+	private function decodeDescriptionFields($descriptions, $fields = array()) {
+		if (!is_array($descriptions)) {
+			return array();
+		}
+
+		foreach ($descriptions as $language_id => $description) {
+			if (!is_array($description)) {
+				continue;
+			}
+
+			foreach ($fields as $field) {
+				if (isset($description[$field])) {
+					$descriptions[$language_id][$field] = $this->decodeHtmlEntitiesForDisplay($description[$field]);
+				}
+			}
+		}
+
+		return $descriptions;
+	}
+
+	private function decodeHtmlEntitiesForDisplay($value) {
+		if (!is_scalar($value)) {
+			return '';
+		}
+
+		$decoded = (string)$value;
+
+		for ($i = 0; $i < 2; $i++) {
+			$next = html_entity_decode($decoded, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+			if ($next === $decoded) {
+				break;
+			}
+
+			$decoded = $next;
+		}
+
+		return $decoded;
 	}
 
 	protected function validateForm() {

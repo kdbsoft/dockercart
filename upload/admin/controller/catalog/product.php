@@ -606,6 +606,8 @@ class ControllerCatalogProduct extends Controller {
 			$data['product_description'] = array();
 		}
 
+		$data['product_description'] = $this->decodeDescriptionFields($data['product_description'], array('name', 'meta_title'));
+
 		if (isset($this->request->post['model'])) {
 			$data['model'] = $this->request->post['model'];
 		} elseif (!empty($product_info)) {
@@ -876,6 +878,8 @@ class ControllerCatalogProduct extends Controller {
 			$data['manufacturer'] = '';
 		}
 
+		$data['manufacturer'] = $this->decodeHtmlEntitiesForDisplay($data['manufacturer']);
+
 		// Categories
 		$this->load->model('catalog/category');
 
@@ -943,7 +947,7 @@ class ControllerCatalogProduct extends Controller {
 			if ($attribute_info) {
 				$data['product_attributes'][] = array(
 					'attribute_id'                  => $product_attribute['attribute_id'],
-					'name'                          => $attribute_info['name'],
+					'name'                          => $this->decodeHtmlEntitiesForDisplay($attribute_info['name']),
 					'product_attribute_description' => $product_attribute['product_attribute_description']
 				);
 			}
@@ -986,7 +990,7 @@ class ControllerCatalogProduct extends Controller {
 				'product_option_id'    => $product_option['product_option_id'],
 				'product_option_value' => $product_option_value_data,
 				'option_id'            => $product_option['option_id'],
-				'name'                 => $product_option['name'],
+				'name'                 => $this->decodeHtmlEntitiesForDisplay($product_option['name']),
 				'type'                 => $product_option['type'],
 				'value'                => isset($product_option['value']) ? $product_option['value'] : '',
 				'required'             => $product_option['required']
@@ -1182,6 +1186,46 @@ class ControllerCatalogProduct extends Controller {
 		$data['footer'] = $this->load->controller('common/footer');
 
 		$this->response->setOutput($this->load->view('catalog/product_form', $data));
+	}
+
+	private function decodeDescriptionFields($descriptions, $fields = array()) {
+		if (!is_array($descriptions)) {
+			return array();
+		}
+
+		foreach ($descriptions as $language_id => $description) {
+			if (!is_array($description)) {
+				continue;
+			}
+
+			foreach ($fields as $field) {
+				if (isset($description[$field])) {
+					$descriptions[$language_id][$field] = $this->decodeHtmlEntitiesForDisplay($description[$field]);
+				}
+			}
+		}
+
+		return $descriptions;
+	}
+
+	private function decodeHtmlEntitiesForDisplay($value) {
+		if (!is_scalar($value)) {
+			return '';
+		}
+
+		$decoded = (string)$value;
+
+		for ($i = 0; $i < 2; $i++) {
+			$next = html_entity_decode($decoded, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+			if ($next === $decoded) {
+				break;
+			}
+
+			$decoded = $next;
+		}
+
+		return $decoded;
 	}
 
 	protected function validateForm() {

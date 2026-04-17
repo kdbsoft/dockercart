@@ -44,7 +44,7 @@
                   <div class="form-group required">
                     <label class="col-sm-2 control-label" for="input-name{{ language.language_id }}">{{ entry_name }}</label>
                     <div class="col-sm-10">
-                      <input type="text" name="category_description[{{ language.language_id }}][name]" value="{{ category_description[language.language_id] ? category_description[language.language_id].name }}" placeholder="{{ entry_name }}" id="input-name{{ language.language_id }}" class="form-control" />
+                      <input type="text" name="category_description[{{ language.language_id }}][name]" value="{{ (category_description[language.language_id] ? category_description[language.language_id].name)|e('html_attr') }}" placeholder="{{ entry_name }}" id="input-name{{ language.language_id }}" class="form-control" />
                       {% if error_name[language.language_id] %}
                       <div class="text-danger">{{ error_name[language.language_id] }}</div>
                       {% endif %}
@@ -59,7 +59,7 @@
                   <div class="form-group required">
                     <label class="col-sm-2 control-label" for="input-meta-title{{ language.language_id }}">{{ entry_meta_title }}</label>
                     <div class="col-sm-10">
-                      <input type="text" name="category_description[{{ language.language_id }}][meta_title]" value="{{ category_description[language.language_id] ? category_description[language.language_id].meta_title }}" placeholder="{{ entry_meta_title }}" id="input-meta-title{{ language.language_id }}" class="form-control" />
+                      <input type="text" name="category_description[{{ language.language_id }}][meta_title]" value="{{ (category_description[language.language_id] ? category_description[language.language_id].meta_title)|e('html_attr') }}" placeholder="{{ entry_meta_title }}" id="input-meta-title{{ language.language_id }}" class="form-control" />
                       {% if error_meta_title[language.language_id] %}
                       <div class="text-danger">{{ error_meta_title[language.language_id] }}</div>
                       {% endif %}
@@ -85,7 +85,7 @@
               <div class="form-group">
                 <label class="col-sm-2 control-label" for="input-parent">{{ entry_parent }}</label>
                 <div class="col-sm-10">
-                  <input type="text" name="path" value="{{ path }}" placeholder="{{ entry_parent }}" id="input-parent" class="form-control" />
+                  <input type="text" name="path" value="{{ path|e('html_attr') }}" placeholder="{{ entry_parent }}" id="input-parent" class="form-control" />
                   <input type="hidden" name="parent_id" value="{{ parent_id }}" />
                   {% if error_parent %}
                   <div class="text-danger">{{ error_parent }}</div>
