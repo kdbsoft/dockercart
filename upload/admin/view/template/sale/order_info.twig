@@ -47,6 +47,11 @@
                 <td id="quick-tracking-number">{{ tracking_number }}</td>
                 <td class="text-right"><button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="tracking_number" data-title="{{ text_tracking_number }}" data-value="{{ tracking_number|e('html_attr') }}" data-target="#quick-tracking-number"><i class="fa fa-pencil"></i></button></td>
               </tr>
+              <tr>
+                <td><button data-toggle="tooltip" title="{{ text_comment }}" class="btn btn-info btn-xs"><i class="fa fa-comment fa-fw"></i></button></td>
+                <td id="quick-comment">{% if comment %}{{ comment|raw }}{% else %}<span class="text-muted">{{ text_none }}</span>{% endif %}</td>
+                <td class="text-right"><button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="comment" data-title="{{ entry_comment }}" data-value="{{ order_comment_raw|e('html_attr') }}" data-target="#quick-comment"><i class="fa fa-pencil"></i></button></td>
+              </tr>
             </tbody>
 
           </table>

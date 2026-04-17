@@ -238,6 +238,8 @@ class ModelExtensionModuleDockercartImportYml extends Model {
                 `date_modified` = NOW()
             WHERE `profile_id` = '" . (int)$profile_id . "'");
 
+        $this->clearAllCache();
+
         return $summary;
     }
 
@@ -1148,7 +1150,7 @@ class ModelExtensionModuleDockercartImportYml extends Model {
 
     /**
      * Full wipe for replace mode:
-     * products + categories + manufacturers + importer maps.
+     * products + categories + manufacturers + importer maps + related seo_url.
      */
     private function deleteAllCatalogData() {
         $tables = array(
@@ -1192,6 +1194,13 @@ class ModelExtensionModuleDockercartImportYml extends Model {
                 $this->db->query("DELETE FROM `" . DB_PREFIX . $table . "`");
             }
         }
+
+        if ($this->tableExists('seo_url')) {
+            $this->db->query("DELETE FROM `" . DB_PREFIX . "seo_url`
+                WHERE `query` LIKE 'product_id=%'
+                   OR `query` LIKE 'category_id=%'
+                   OR `query` LIKE 'manufacturer_id=%'");
+        }
     }
 
     private function tableExists($table) {
@@ -1227,6 +1236,56 @@ class ModelExtensionModuleDockercartImportYml extends Model {
         $sql .= " WHERE `profile_id` = '" . (int)$profile_id . "'";
 
         $this->db->query($sql);
+    }
+
+    /**
+     * Full cache reset after import completion.
+     */
+    private function clearAllCache() {
+        try {
+            if (method_exists($this->cache, 'flush')) {
+                $this->cache->flush();
+            } else {
+                $this->cache->delete('*');
+            }
+        } catch (Exception $e) {
+            error_log('DockerCart Import YML: cache flush failed: ' . $e->getMessage());
+        }
+
+        if (defined('DIR_CACHE') && is_dir(DIR_CACHE)) {
+            $this->clearCacheDirectory(DIR_CACHE, true);
+        }
+
+        if (function_exists('opcache_reset')) {
+            @opcache_reset();
+        }
+    }
+
+    private function clearCacheDirectory($directory, $preserveRootFiles = false) {
+        $directory = rtrim((string)$directory, '/\\');
+        if ($directory === '' || !is_dir($directory)) {
+            return;
+        }
+
+        $items = glob($directory . '/*');
+        if (!$items) {
+            return;
+        }
+
+        foreach ($items as $item) {
+            if (is_dir($item)) {
+                $this->clearCacheDirectory($item, false);
+                @rmdir($item);
+                continue;
+            }
+
+            $basename = basename($item);
+            if ($preserveRootFiles && ($basename === 'index.html' || $basename === '.htaccess')) {
+                continue;
+            }
+
+            @unlink($item);
+        }
     }
 
     /**
