@@ -38,19 +38,19 @@
 
     <div class="dc-ix-cards">
       <div class="dc-ix-card">
-        <div class="dc-ix-card__k">FAQ items</div>
+        <div class="dc-ix-card__k">{{ text_faq_items }}</div>
         <div class="dc-ix-card__v">{{ total_faq }}</div>
       </div>
       <div class="dc-ix-card">
-        <div class="dc-ix-card__k">Enabled</div>
+        <div class="dc-ix-card__k">{{ text_enabled }}</div>
         <div class="dc-ix-card__v">{{ enabled_faq }}</div>
       </div>
       <div class="dc-ix-card">
-        <div class="dc-ix-card__k">Placeholders</div>
+        <div class="dc-ix-card__k">{{ text_placeholders_title }}</div>
         <div class="dc-ix-card__v">{dc_faq:code}</div>
       </div>
       <div class="dc-ix-card">
-        <div class="dc-ix-card__k">Auto Context</div>
+        <div class="dc-ix-card__k">{{ text_auto_context }}</div>
         <div class="dc-ix-card__v">{dc_faq:auto}</div>
       </div>
     </div>
@@ -61,7 +61,7 @@
           <div class="dcx-panel-head__icon"><i class="fa fa-question-circle"></i></div>
           <div>
             <h3 class="dcx-panel-title">{{ heading_title }}</h3>
-            <div class="dcx-panel-subtitle">Universal FAQ with context placeholders and JSON-LD</div>
+            <div class="dcx-panel-subtitle">{{ text_faq_module_subtitle }}</div>
           </div>
         </div>
         <div class="dcx-panel-body">
@@ -82,7 +82,7 @@
           </form>
 
           <div class="dcx-section">
-            <h4>FAQ entries</h4>
+            <h4>{{ text_faq_entries }}</h4>
             <div class="table-responsive">
               <table class="table table-bordered table-hover dcx-table">
                 <thead>
@@ -116,7 +116,7 @@
                     <td>{{ faq.sort_order }}</td>
                     <td class="text-right">
                       <a href="{{ faq.edit_link }}" class="btn btn-warning btn-xs" title="{{ button_edit }}"><i class="fa fa-pencil"></i></a>
-                      <a href="{{ faq.delete_link }}" class="btn btn-danger btn-xs" onclick="return confirm('Delete this FAQ entry?');" title="{{ button_delete }}"><i class="fa fa-trash"></i></a>
+                      <a href="{{ faq.delete_link }}" class="btn btn-danger btn-xs" onclick="return confirm('{{ text_confirm_delete_faq|e('js') }}');" title="{{ button_delete }}"><i class="fa fa-trash"></i></a>
                     </td>
                   </tr>
                   {% else %}

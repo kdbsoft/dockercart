@@ -36,9 +36,9 @@
     {% endif %}
 
     <ul class="nav nav-tabs dcx-profile-tabs" id="redirect-tabs" role="tablist">
-      <li class="active"><a href="#redirect-tab-general" class="js-redirect-tab" data-tab="redirect-tab-general" data-title="{{ 'General' }}" data-subtitle="{{ text_list }}" data-icon="fa-sliders"><i class="fa fa-sliders"></i> {{ 'General' }}</a></li>
-      <li><a href="#redirect-tab-license" class="js-redirect-tab" data-tab="redirect-tab-license" data-title="{{ text_license|default('License') }}" data-subtitle="{{ text_edit|default('License settings') }}" data-icon="fa-key"><i class="fa fa-key"></i> {{ text_license|default('License') }}</a></li>
-      <li><a href="#redirect-tab-about" class="js-redirect-tab" data-tab="redirect-tab-about" data-title="{{ 'About' }}" data-subtitle="{{ heading_title }}" data-icon="fa-info-circle"><i class="fa fa-info-circle"></i> {{ 'About' }}</a></li>
+      <li class="active"><a href="#redirect-tab-general" class="js-redirect-tab" data-tab="redirect-tab-general" data-title="{{ text_tab_general }}" data-subtitle="{{ text_list }}" data-icon="fa-sliders"><i class="fa fa-sliders"></i> {{ text_tab_general }}</a></li>
+      <li><a href="#redirect-tab-license" class="js-redirect-tab" data-tab="redirect-tab-license" data-title="{{ text_tab_license }}" data-subtitle="{{ text_tab_license_subtitle }}" data-icon="fa-key"><i class="fa fa-key"></i> {{ text_tab_license }}</a></li>
+      <li><a href="#redirect-tab-about" class="js-redirect-tab" data-tab="redirect-tab-about" data-title="{{ text_tab_about }}" data-subtitle="{{ text_tab_about_subtitle }}" data-icon="fa-info-circle"><i class="fa fa-info-circle"></i> {{ text_tab_about }}</a></li>
     </ul>
 
     <div class="dcx-shell">
@@ -46,7 +46,7 @@
         <div class="dcx-panel-head">
           <div class="dcx-panel-head__icon"><i id="redirect-tab-icon" class="fa fa-sliders"></i></div>
           <div>
-            <h3 class="dcx-panel-title" id="redirect-tab-title">General</h3>
+            <h3 class="dcx-panel-title" id="redirect-tab-title">{{ text_tab_general }}</h3>
             <div class="dcx-panel-subtitle" id="redirect-tab-subtitle">{{ text_list }}</div>
           </div>
         </div>
@@ -54,7 +54,7 @@
         <div class="dcx-panel-body">
           <div id="redirect-tab-general" class="dcx-tab-pane active">
             <div class="dcx-section">
-              <h4>{{ text_module_settings|default('Module Settings') }}</h4>
+              <h4>{{ text_module_settings }}</h4>
               <form id="form-module-settings" action="{{ action }}" method="post" class="form-horizontal dcx-form">
                 <div class="form-group">
                   <label class="col-sm-3 control-label" for="input-status">{{ entry_status }}</label>
@@ -219,7 +219,7 @@
 
           <div id="redirect-tab-license" class="dcx-tab-pane">
             <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-              <h4>{{ text_license|default('License') }}</h4>
+              <h4>{{ text_tab_license }}</h4>
               <form id="form-license" action="{{ action }}" method="post" class="form-horizontal dcx-form">
                 <div class="form-group">
                   <label class="col-sm-3 control-label" for="input-license-key">{{ entry_license_key }}</label>
@@ -249,18 +249,18 @@
 
           <div id="redirect-tab-about" class="dcx-tab-pane">
             <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-              <h4>About</h4>
+              <h4>{{ text_tab_about }}</h4>
               <table class="table table-bordered dcx-table">
                 <tr>
-                  <td style="width:220px;"><strong>{{ text_module_version|default('Module version') }}</strong></td>
+                  <td style="width:220px;"><strong>{{ text_module_version }}</strong></td>
                   <td>{% if module_version is defined and module_version %}{{ module_version }}{% else %}n/a{% endif %}</td>
                 </tr>
                 <tr>
-                  <td><strong>{{ text_developer|default('Developer') }}</strong></td>
-                  <td>DockerCart Team</td>
+                  <td><strong>{{ text_developer }}</strong></td>
+                  <td>{{ text_developer_name }}</td>
                 </tr>
                 <tr>
-                  <td><strong>{{ text_contact|default('Contact') }}</strong></td>
+                  <td><strong>{{ text_contact }}</strong></td>
                   <td><a href="mailto:support@dockercart.net">support@dockercart.net</a></td>
                 </tr>
               </table>
@@ -303,7 +303,7 @@
 <script type="text/javascript">
 function updateRedirectPanelHeader(tabLink) {
   var $tab = $(tabLink);
-  var title = $tab.data('title') || 'General';
+  var title = $tab.data('title') || '{{ text_tab_general|e('js') }}';
   var subtitle = $tab.data('subtitle') || '{{ text_list }}';
   var icon = String($tab.data('icon') || 'fa-sliders').replace(/[^a-z0-9\-]/gi, '');
 
@@ -406,12 +406,12 @@ $('#button-verify-license').on('click', function() {
     body: JSON.stringify({ license_key: licenseKey, public_key: publicKey })
   }).then(function(resp) { return resp.json(); }).then(function(json) {
     if (json.valid) {
-      $('#license-verify-result').html('<span class="text-success"><i class="fa fa-check-circle"></i> License valid</span>');
+      $('#license-verify-result').html('<span class="text-success"><i class="fa fa-check-circle"></i> {{ text_license_valid|e('js') }}</span>');
     } else {
-      $('#license-verify-result').html('<span class="text-danger"><i class="fa fa-exclamation-circle"></i> ' + (json.error || 'Invalid license') + '</span>');
+      $('#license-verify-result').html('<span class="text-danger"><i class="fa fa-exclamation-circle"></i> ' + (json.error || '{{ text_license_invalid|e('js') }}') + '</span>');
     }
   }).catch(function(err) {
-    $('#license-verify-result').html('<span class="text-danger">Error: ' + err.message + '</span>');
+    $('#license-verify-result').html('<span class="text-danger">{{ text_error_label|e('js') }}: ' + err.message + '</span>');
   });
 });
 </script>

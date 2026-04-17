@@ -27,7 +27,7 @@
     {% endif %}
 
     <ul class="nav nav-tabs dcx-profile-tabs" id="filter-tabs" role="tablist">
-      <li class="active"><a href="#filter-tab-general" class="js-filter-tab" data-tab="filter-tab-general" data-title="General" data-subtitle="{{ text_tab_general_subtitle|default('Core filter behavior and display configuration') }}" data-icon="fa-sliders"><i class="fa fa-sliders"></i> General</a></li>
+      <li class="active"><a href="#filter-tab-general" class="js-filter-tab" data-tab="filter-tab-general" data-title="{{ text_tab_general }}" data-subtitle="{{ text_tab_general_subtitle|default('Core filter behavior and display configuration') }}" data-icon="fa-sliders"><i class="fa fa-sliders"></i> {{ text_tab_general }}</a></li>
       <li><a href="#filter-tab-license" class="js-filter-tab" data-tab="filter-tab-license" data-title="{{ text_tab_license|default('License') }}" data-subtitle="{{ text_tab_license_subtitle|default('License key and cryptographic verification') }}" data-icon="fa-key"><i class="fa fa-key"></i> {{ text_tab_license|default('License') }}</a></li>
       <li><a href="#filter-tab-about" class="js-filter-tab" data-tab="filter-tab-about" data-title="{{ text_tab_about|default('About') }}" data-subtitle="{{ text_tab_about_subtitle|default('Module info, version details, and developer information') }}" data-icon="fa-info-circle"><i class="fa fa-info-circle"></i> {{ text_tab_about|default('About') }}</a></li>
     </ul>
@@ -37,7 +37,7 @@
       <div class="dcx-panel-head">
         <div class="dcx-panel-head__icon"><i id="filter-tab-icon" class="fa fa-sliders"></i></div>
         <div>
-          <h3 class="dcx-panel-title" id="filter-tab-title">General</h3>
+          <h3 class="dcx-panel-title" id="filter-tab-title">{{ text_tab_general }}</h3>
           <div class="dcx-panel-subtitle" id="filter-tab-subtitle">{{ text_tab_general_subtitle|default('Core filter behavior and display configuration') }}</div>
         </div>
       </div>
@@ -293,7 +293,7 @@ document.getElementById('form-dockercart-filter').addEventListener('submit', fun
 
 function updateFilterPanelHeader(tabLink) {
   var $tab = $(tabLink);
-  var title = $tab.data('title') || 'General';
+  var title = $tab.data('title') || '{{ text_tab_general|e('js') }}';
   var subtitle = $tab.data('subtitle') || '{{ text_tab_general_subtitle|default('Core filter behavior and display configuration') }}';
   var icon = String($tab.data('icon') || 'fa-sliders').replace(/[^a-z0-9\-]/gi, '');
 
@@ -483,19 +483,19 @@ document.addEventListener('DOMContentLoaded', function() {
         var publicKey = publicKeyInput.value.trim();
 
         if (!licenseKey) {
-            licenseStatus.innerHTML = '<span class="label label-danger">Please enter license key</span>';
+        licenseStatus.innerHTML = '<span class="label label-danger">{{ text_license_key_required|e('js') }}</span>';
             return;
         }
 
         if (!publicKey) {
-            licenseStatus.innerHTML = '<span class="label label-danger">Please enter public key</span>';
+        licenseStatus.innerHTML = '<span class="label label-danger">{{ text_public_key_required|e('js') }}</span>';
             return;
         }
 
         // Show loading
         btnVerify.disabled = true;
         var originalText = btnVerify.innerHTML;
-        btnVerify.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Verifying...';
+        btnVerify.innerHTML = '<i class="fa fa-spinner fa-spin"></i> {{ text_verifying|e('js') }}';
         licenseStatus.innerHTML = '';
         licenseInfo.style.display = 'none';
 
@@ -520,28 +520,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (data.valid) {
                 // Show success
-                licenseStatus.innerHTML = '<span class="label label-success"><i class="fa fa-check"></i> Valid</span>';
+              licenseStatus.innerHTML = '<span class="label label-success"><i class="fa fa-check"></i> {{ text_valid|e('js') }}</span>';
 
                 // Show license info
-                var infoHtml = '<strong>Status:</strong> Active<br>';
-                infoHtml += '<strong>Domain:</strong> ' + data.domain + '<br>';
+              var infoHtml = '<strong>{{ text_license_status_label|e('js') }}:</strong> {{ text_license_active|e('js') }}<br>';
+              infoHtml += '<strong>{{ text_license_domain_label|e('js') }}:</strong> ' + data.domain + '<br>';
                 if (data.expires_formatted) {
-                    infoHtml += '<strong>Expires:</strong> ' + data.expires_formatted + '<br>';
+                infoHtml += '<strong>{{ text_license_expires_label|e('js') }}:</strong> ' + data.expires_formatted + '<br>';
                 } else {
-                    infoHtml += '<strong>Type:</strong> Lifetime License<br>';
+                infoHtml += '<strong>{{ text_license_type_label|e('js') }}:</strong> {{ text_license_lifetime|e('js') }}<br>';
                 }
                 if (data.license_id) {
-                    infoHtml += '<strong>License ID:</strong> ' + data.license_id;
+                infoHtml += '<strong>{{ text_license_id_label|e('js') }}:</strong> ' + data.license_id;
                 }
 
                 licenseDetails.innerHTML = infoHtml;
                 licenseInfo.style.display = 'block';
             } else {
                 // Show error
-                licenseStatus.innerHTML = '<span class="label label-danger"><i class="fa fa-times"></i> Invalid</span>';
+              licenseStatus.innerHTML = '<span class="label label-danger"><i class="fa fa-times"></i> {{ text_invalid|e('js') }}</span>';
 
                 if (data.error) {
-                    var errorHtml = '<strong>Error:</strong> ' + data.error;
+                var errorHtml = '<strong>{{ text_error_label|e('js') }}:</strong> ' + data.error;
                     licenseDetails.innerHTML = errorHtml;
                     licenseInfo.style.display = 'block';
                 }
@@ -552,7 +552,7 @@ document.addEventListener('DOMContentLoaded', function() {
             btnVerify.disabled = false;
             btnVerify.innerHTML = originalText;
 
-            licenseStatus.innerHTML = '<span class="label label-danger">Error: ' + error.message + '</span>';
+            licenseStatus.innerHTML = '<span class="label label-danger">{{ text_error_label|e('js') }}: ' + error.message + '</span>';
         });
     }
 

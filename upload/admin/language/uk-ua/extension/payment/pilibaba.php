@@ -56,7 +56,7 @@ $_['text_email'] = 'Зареєстрована адреса електронно
 $_['text_extension'] = 'Розширення';
 $_['text_fee'] = 'Плата';
 $_['text_live'] = 'Живий';
-$_['text_order_id'] = 'Ідентифікатор замовлення';
+$_['text_order_id'] = 'Номер замовлення';
 $_['text_other'] = 'Інше';
 $_['text_payment_info'] = 'Інформація про оплату';
 $_['text_pilibaba'] = '<a href="http://www.pilibaba.com" target="_blank"><img src="view/image/payment/pilibaba.png" alt="Pilibaba" title="Пілібаба"></a>';

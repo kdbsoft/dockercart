@@ -30,15 +30,15 @@
     {% endif %}
 
     <ul class="nav nav-tabs dcx-profile-tabs" id="seo-tabs">
-      <li class="active"><a href="#tab-general" class="js-seo-tab" data-toggle="tab" data-title="General" data-subtitle="{{ text_edit }}" data-icon="fa-sliders"><i class="fa fa-sliders"></i> General</a></li>
+      <li class="active"><a href="#tab-general" class="js-seo-tab" data-toggle="tab" data-title="{{ tab_general }}" data-subtitle="{{ text_edit }}" data-icon="fa-sliders"><i class="fa fa-sliders"></i> {{ tab_general }}</a></li>
       <li><a href="#tab-statistics" class="js-seo-tab" data-toggle="tab" data-title="{{ tab_statistics }}" data-subtitle="{{ text_edit }}" data-icon="fa-chart-bar"><i class="fa fa-chart-bar"></i> {{ tab_statistics }}</a></li>
       <li><a href="#tab-products" class="js-seo-tab" data-toggle="tab" data-title="{{ tab_products }}" data-subtitle="{{ text_edit }}" data-icon="fa-cube"><i class="fa fa-cube"></i> {{ tab_products }}</a></li>
       <li><a href="#tab-categories" class="js-seo-tab" data-toggle="tab" data-title="{{ tab_categories }}" data-subtitle="{{ text_edit }}" data-icon="fa-sitemap"><i class="fa fa-sitemap"></i> {{ tab_categories }}</a></li>
       <li><a href="#tab-manufacturers" class="js-seo-tab" data-toggle="tab" data-title="{{ tab_manufacturers }}" data-subtitle="{{ text_edit }}" data-icon="fa-industry"><i class="fa fa-industry"></i> {{ tab_manufacturers }}</a></li>
       <li><a href="#tab-information" class="js-seo-tab" data-toggle="tab" data-title="{{ tab_information }}" data-subtitle="{{ text_edit }}" data-icon="fa-file-text-o"><i class="fa fa-file-text-o"></i> {{ tab_information }}</a></li>
       <li><a href="#tab-controllers" class="js-seo-tab" data-toggle="tab" data-title="{{ tab_controllers }}" data-subtitle="{{ text_edit }}" data-icon="fa-code"><i class="fa fa-code"></i> {{ tab_controllers }}</a></li>
-      <li><a href="#tab-license" class="js-seo-tab" data-toggle="tab" data-title="License" data-subtitle="{{ text_edit }}" data-icon="fa-key"><i class="fa fa-key"></i> License</a></li>
-      <li><a href="#tab-about" class="js-seo-tab" data-toggle="tab" data-title="About" data-subtitle="{{ heading_title }}" data-icon="fa-info-circle"><i class="fa fa-info-circle"></i> About</a></li>
+      <li><a href="#tab-license" class="js-seo-tab" data-toggle="tab" data-title="{{ text_tab_license }}" data-subtitle="{{ text_edit }}" data-icon="fa-key"><i class="fa fa-key"></i> {{ text_tab_license }}</a></li>
+      <li><a href="#tab-about" class="js-seo-tab" data-toggle="tab" data-title="{{ text_tab_about }}" data-subtitle="{{ heading_title }}" data-icon="fa-info-circle"><i class="fa fa-info-circle"></i> {{ text_tab_about }}</a></li>
     </ul>
     
     <div class="dcx-shell">
@@ -46,7 +46,7 @@
         <div class="dcx-panel-head">
           <div class="dcx-panel-head__icon"><i id="seo-tab-icon" class="fa fa-sliders"></i></div>
           <div>
-            <h3 class="dcx-panel-title" id="seo-tab-title">General</h3>
+            <h3 class="dcx-panel-title" id="seo-tab-title">{{ tab_general }}</h3>
             <div class="dcx-panel-subtitle" id="seo-tab-subtitle">{{ text_edit }}</div>
           </div>
         </div>
@@ -58,7 +58,7 @@
             <!-- Общие настройки -->
             <div class="tab-pane active" id="tab-general">
               <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                <h4>Module Settings</h4>
+                <h4>{{ text_module_settings }}</h4>
 
                 <div class="form-group">
                   <label class="col-sm-3 control-label" for="input-status">{{ entry_status }}</label>
@@ -120,7 +120,7 @@
 
             <div class="tab-pane" id="tab-license">
               <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                <h4>License Information</h4>
+                <h4>{{ text_license }}</h4>
 
                 <div class="form-group required">
                   <label class="col-sm-3 control-label" for="input-license-key">
@@ -370,16 +370,15 @@
                 <div id="found-controllers-list" style="margin-top: 20px; display: none;">
                   <h5>{{ text_found_controllers }}</h5>
                   <p class="text-muted">
-                    <i class="fa fa-info-circle"></i> Edit SEO URLs directly in the table and click <i class="fa fa-save"></i> to save. 
-                    Use <i class="fa fa-cog"></i> Generate URLs button to create URLs for all languages (existing URLs will not be overwritten).
+                    <i class="fa fa-info-circle"></i> {{ text_controllers_table_help }}
                   </p>
                   
                   <div class="form-group" style="margin-bottom: 15px;">
                     <button type="button" id="btn-generate-selected" class="btn btn-success" disabled>
-                      <i class="fa fa-cogs"></i> Generate Selected (<span id="selected-count">0</span>)
+                      <i class="fa fa-cogs"></i> {{ button_generate_selected }} (<span id="selected-count">0</span>)
                     </button>
                     <button type="button" id="btn-delete-selected" class="btn btn-danger" disabled>
-                      <i class="fa fa-trash"></i> Delete Selected (<span id="selected-count-delete">0</span>)
+                      <i class="fa fa-trash"></i> {{ button_delete_selected }} (<span id="selected-count-delete">0</span>)
                     </button>
                     <button type="button" id="btn-select-all" class="btn btn-default">
                       <i class="fa fa-check-square-o"></i> Select All
@@ -392,7 +391,7 @@
                       {{ text_overwrite_url }}
                     </label>
                     <span class="help-block" style="margin: 5px 0 0 0;">
-                      <i class="fa fa-info-circle"></i> Select controllers using checkboxes and click "Generate Selected" to create SEO URLs for all languages at once.
+                      <i class="fa fa-info-circle"></i> {{ text_controllers_mass_help }}
                     </span>
                   </div>
                   
@@ -422,13 +421,13 @@
               </div>
               
               <div class="alert alert-info">
-                <h4><i class="fa fa-lightbulb-o"></i> How to use:</h4>
+                <h4><i class="fa fa-lightbulb-o"></i> {{ text_how_to_use }}</h4>
                 <ol>
-                  <li>Click <strong>"{{ button_scan_controllers }}"</strong> to find all controllers with index() method</li>
-                  <li>Edit SEO URLs directly in the table for any language</li>
-                  <li>Click <i class="fa fa-save"></i> button next to each field to save changes</li>
-                  <li>Or use <i class="fa fa-cog"></i> <strong>Generate URLs</strong> button to auto-generate URLs for all languages at once</li>
-                  <li><strong>Note:</strong> Existing URLs will NOT be overwritten when generating</li>
+                  <li>{{ text_how_to_use_1 }}</li>
+                  <li>{{ text_how_to_use_2 }}</li>
+                  <li>{{ text_how_to_use_3 }}</li>
+                  <li>{{ text_how_to_use_4 }}</li>
+                  <li>{{ text_how_to_use_5 }}</li>
                 </ol>
               </div>
             </div>
@@ -436,15 +435,15 @@
             <div class="tab-pane" id="tab-about">
               <table class="table table-bordered dcx-table">
                 <tr>
-                  <td style="width:220px;"><strong>Module version</strong></td>
+                  <td style="width:220px;"><strong>{{ text_module_version }}</strong></td>
                   <td>{% if module_version is defined and module_version %}{{ module_version }}{% else %}n/a{% endif %}</td>
                 </tr>
                 <tr>
-                  <td><strong>Developer</strong></td>
-                  <td>DockerCart Team</td>
+                  <td><strong>{{ text_developer }}</strong></td>
+                  <td>{{ text_developer_name }}</td>
                 </tr>
                 <tr>
-                  <td><strong>Contact</strong></td>
+                  <td><strong>{{ text_contact }}</strong></td>
                   <td><a href="mailto:support@dockercart.net">support@dockercart.net</a></td>
                 </tr>
               </table>

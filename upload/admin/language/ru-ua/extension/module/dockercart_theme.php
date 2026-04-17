@@ -61,6 +61,9 @@ $_['text_section_logos']   = 'Логотипы';
 $_['text_section_features'] = 'Features темы';
 $_['text_search_icons']    = 'Поиск иконки...';
 $_['text_multilingual_settings'] = 'Мультиязычный контент';
+$_['text_choose_icon'] = 'Выберите иконку';
+$_['text_close'] = 'Закрыть';
+$_['text_icon_picker_aria'] = 'Выбор иконки';
 
 // Column
 $_['column_action'] = 'Действие';

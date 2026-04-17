@@ -17,6 +17,8 @@ $_['tab_categories']   = 'Categories';
 $_['tab_manufacturers'] = 'Manufacturers';
 $_['tab_information']  = 'Information Pages';
 $_['tab_controllers']  = 'Controllers';
+$_['text_tab_license'] = 'License';
+$_['text_tab_about'] = 'About';
 
 // Entry
 $_['entry_status']     = 'Auto-generation Status';
@@ -75,10 +77,24 @@ $_['error_controller_exists'] = 'This controller already has SEO URL';
 $_['error_controller_not_found'] = 'Controller file not found';
 $_['text_found_controllers'] = 'Found Controllers:';
 $_['button_generate_selected'] = 'Generate Selected';
+$_['button_delete_selected'] = 'Delete Selected';
 $_['button_select_all'] = 'Select All';
 $_['button_deselect_all'] = 'Deselect All';
 $_['text_selected_count'] = 'Selected';
 $_['help_mass_generation'] = 'Select controllers using checkboxes and click "Generate Selected" to create SEO URLs for all languages at once.';
+$_['text_controllers_table_help'] = 'Edit SEO URLs directly in the table and click save. Use Generate URLs to create URLs for all languages (existing URLs will not be overwritten).';
+$_['text_controllers_mass_help'] = 'Select controllers using checkboxes and click "Generate Selected" to create SEO URLs for all languages at once.';
+$_['text_how_to_use'] = 'How to use:';
+$_['text_how_to_use_1'] = 'Click "Scan Controllers" to find all controllers with index() method';
+$_['text_how_to_use_2'] = 'Edit SEO URLs directly in the table for any language';
+$_['text_how_to_use_3'] = 'Click the save button next to each field to save changes';
+$_['text_how_to_use_4'] = 'Or use the Generate URLs button to auto-generate URLs for all languages at once';
+$_['text_how_to_use_5'] = 'Note: Existing URLs will NOT be overwritten when generating';
+$_['text_module_settings'] = 'Module Settings';
+$_['text_module_version'] = 'Module Version';
+$_['text_developer'] = 'Developer';
+$_['text_developer_name'] = 'DockerCart Team';
+$_['text_contact'] = 'Contact';
 
 // Actions
 $_['text_template_settings'] = 'Template Settings';

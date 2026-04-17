@@ -30,11 +30,11 @@
     {% endif %}
 
     <ul class="nav nav-tabs dcx-profile-tabs" role="tablist">
-      <li class="active"><a href="#tab-general" data-toggle="tab"><i class="fa fa-sliders"></i> General</a></li>
+      <li class="active"><a href="#tab-general" data-toggle="tab"><i class="fa fa-sliders"></i> {{ tab_general }}</a></li>
       <li><a href="#tab-display" data-toggle="tab"><i class="fa fa-desktop"></i> {{ tab_display }}</a></li>
       <li><a href="#tab-comments" data-toggle="tab"><i class="fa fa-comments"></i> {{ tab_comments }}</a></li>
       <li><a href="#tab-seo" data-toggle="tab"><i class="fa fa-sitemap"></i> {{ tab_seo }}</a></li>
-      <li><a href="#tab-about" data-toggle="tab"><i class="fa fa-info-circle"></i> About</a></li>
+      <li><a href="#tab-about" data-toggle="tab"><i class="fa fa-info-circle"></i> {{ tab_about }}</a></li>
     </ul>
 
     <div class="dcx-shell">
@@ -43,7 +43,7 @@
           <div class="dcx-panel-head__icon"><i class="fa fa-pencil"></i></div>
           <div>
             <h3 class="dcx-panel-title">{{ text_edit }}</h3>
-            <div class="dcx-panel-subtitle">Blog module configuration and behavior</div>
+            <div class="dcx-panel-subtitle">{{ text_settings }}</div>
           </div>
         </div>
         <div class="dcx-panel-body">
@@ -231,18 +231,18 @@
 
               <div class="tab-pane dcx-tab-pane" id="tab-about">
                 <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                  <h4>About</h4>
+                  <h4>{{ tab_about }}</h4>
                   <table class="table table-bordered dcx-table">
                     <tr>
-                      <td style="width:220px;"><strong>Module</strong></td>
+                      <td style="width:220px;"><strong>{{ text_module_label }}</strong></td>
                       <td>{{ heading_title }}</td>
                     </tr>
                     <tr>
-                      <td><strong>Developer</strong></td>
+                      <td><strong>{{ text_developer_label }}</strong></td>
                       <td>DockerCart Team</td>
                     </tr>
                     <tr>
-                      <td><strong>Contact</strong></td>
+                      <td><strong>{{ text_contact_label }}</strong></td>
                       <td><a href="mailto:support@dockercart.net">support@dockercart.net</a></td>
                     </tr>
                   </table>

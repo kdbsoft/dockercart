@@ -61,6 +61,9 @@ $_['text_section_logos']   = 'Logos';
 $_['text_section_features'] = 'Theme Features';
 $_['text_search_icons']    = 'Search icons...';
 $_['text_multilingual_settings'] = 'Multilingual content';
+$_['text_choose_icon'] = 'Choose icon';
+$_['text_close'] = 'Close';
+$_['text_icon_picker_aria'] = 'Icon picker';
 
 // Column
 $_['column_action'] = 'Action';

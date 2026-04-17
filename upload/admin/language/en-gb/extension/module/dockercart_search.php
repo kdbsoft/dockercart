@@ -82,3 +82,7 @@ $_['text_connection_success'] = 'Successfully connected to Manticore Search!';
 $_['text_connection_failed'] = 'Failed to connect to Manticore Search!';
 $_['text_reindex_success'] = 'Reindexing completed: %s products, %s categories, %s manufacturers, %s information pages';
 $_['text_reindex_failed'] = 'Reindexing failed!';
+$_['text_reindex_warning'] = 'Reindexing may take several minutes for large catalogs (>10,000 products).';
+$_['text_reindexing'] = 'Reindexing...';
+$_['text_reindex_confirm'] = 'Are you sure you want to reindex all data? This may take several minutes.';
+$_['text_error_label'] = 'Error';
