@@ -791,6 +791,8 @@ class ModelExtensionModuleDockercartImportYml extends Model {
             return;
         }
 
+        $category_ids_to_delete = $this->expandCategoryIdsWithAncestors($category_ids_to_delete);
+
         $ordered_category_ids = $this->sortCategoryIdsByDepthDesc($category_ids_to_delete);
 
         foreach ($ordered_category_ids as $category_id) {
@@ -851,19 +853,33 @@ class ModelExtensionModuleDockercartImportYml extends Model {
         return $ordered;
     }
 
+    private function expandCategoryIdsWithAncestors($category_ids) {
+        $category_ids = array_values(array_unique(array_filter(array_map('intval', (array)$category_ids))));
+        if (!$category_ids) {
+            return array();
+        }
+
+        $in = implode(',', $category_ids);
+        $query = $this->db->query("SELECT DISTINCT cp.path_id AS category_id
+            FROM `" . DB_PREFIX . "category_path` cp
+            WHERE cp.category_id IN (" . $in . ")");
+
+        $expanded = $category_ids;
+        foreach ($query->rows as $row) {
+            $expanded[] = (int)$row['category_id'];
+        }
+
+        return array_values(array_unique(array_filter($expanded)));
+    }
+
     private function canDeleteCategory($category_id) {
         $category_id = (int)$category_id;
         if ($category_id <= 0) {
             return false;
         }
 
-        $category = $this->db->query("SELECT category_id, parent_id FROM `" . DB_PREFIX . "category` WHERE category_id = '" . $category_id . "' LIMIT 1");
+        $category = $this->db->query("SELECT category_id FROM `" . DB_PREFIX . "category` WHERE category_id = '" . $category_id . "' LIMIT 1");
         if (!$category->num_rows) {
-            return false;
-        }
-
-        // Never auto-delete root categories here.
-        if ((int)$category->row['parent_id'] === 0) {
             return false;
         }
 
