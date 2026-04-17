@@ -1113,7 +1113,7 @@ class ControllerSaleOrder extends Controller {
 				);
 			}
 
-			$data['comment'] = nl2br($order_info['comment']);
+			$data['comment'] = nl2br(htmlspecialchars($order_info['comment'], ENT_QUOTES, 'UTF-8'));
 			$data['order_comment_raw'] = $order_info['comment'];
 
 			$this->load->model('customer/customer');
