@@ -3,8 +3,8 @@
 $_['column_action'] = 'Действие';
 $_['column_sort_order'] = 'Порядок сортировки';
 $_['column_title'] = 'Заголовок информации';
-$_['entry_bottom'] = 'Нижний';
-$_['entry_top'] = 'Верхний';
+$_['entry_bottom'] = 'Нижний колонтитул';
+$_['entry_top'] = 'Верхний колонтитул';
 $_['entry_description'] = 'Описание';
 $_['entry_keyword'] = 'Ключевое слово';
 $_['entry_layout'] = 'Переопределение макета';
