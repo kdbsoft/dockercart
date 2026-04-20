@@ -17,6 +17,15 @@
       <div class="brands-track">
         <div class="flex items-center">
           {% for banner in banners %}
+          {% if banner.link %}
+          <a href="{{ banner.link }}" class="brands-item" aria-label="{{ banner.title }}">
+            {% if banner.image %}
+              <img src="{{ banner.image }}" alt="{{ banner.title }}" class="h-20 object-contain" />
+            {% else %}
+              <span class="text-2xl font-black tracking-tight text-gray-900">{{ banner.title }}</span>
+            {% endif %}
+          </a>
+          {% else %}
           <div class="brands-item" role="img" aria-label="{{ banner.title }}">
             {% if banner.image %}
               <img src="{{ banner.image }}" alt="{{ banner.title }}" class="h-20 object-contain" />
@@ -24,11 +33,21 @@
               <span class="text-2xl font-black tracking-tight text-gray-900">{{ banner.title }}</span>
             {% endif %}
           </div>
+          {% endif %}
           {% endfor %}
         </div>
 
         <div class="flex items-center" aria-hidden="true">
           {% for banner in banners %}
+          {% if banner.link %}
+          <a href="{{ banner.link }}" class="brands-item" tabindex="-1" aria-label="{{ banner.title }}">
+            {% if banner.image %}
+              <img src="{{ banner.image }}" alt="" class="h-20 object-contain" />
+            {% else %}
+              <span class="text-2xl font-black tracking-tight text-gray-900">{{ banner.title }}</span>
+            {% endif %}
+          </a>
+          {% else %}
           <div class="brands-item">
             {% if banner.image %}
               <img src="{{ banner.image }}" alt="" class="h-20 object-contain" />
@@ -36,6 +55,7 @@
               <span class="text-2xl font-black tracking-tight text-gray-900">{{ banner.title }}</span>
             {% endif %}
           </div>
+          {% endif %}
           {% endfor %}
         </div>
       </div>
