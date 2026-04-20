@@ -1,6 +1,7 @@
 {{ header }}{{ column_left }}
 <div id="content">
   <link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@melloware/coloris/dist/coloris.min.css" />
   <style>
     .banner-slide-card { border: 1px solid #e5e7eb; border-radius: 10px; background: #fff; margin-bottom: 18px; overflow: hidden; }
     .banner-slide-card__head { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
@@ -146,8 +147,7 @@
                         <div class="form-group">
                           <label>{{ entry_accent_color }}</label>
                           <div style="display:flex;gap:8px;align-items:center;">
-                            <input type="color" name="banner_image[{{ language.language_id }}][{{ image_row }}][accent_color]" value="{{ banner_image.accent_color|default('#6366f1') }}" class="form-control" style="width:52px;padding:2px;height:38px;" />
-                            <input type="text" class="form-control accent-color-text" value="{{ banner_image.accent_color|default('#6366f1') }}" placeholder="#6366f1" style="flex:1;" maxlength="16" />
+                            <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][accent_color]" value="{{ banner_image.accent_color|default('#6366f1') }}" class="form-control dc-color-input accent-color-text" data-default-color="#6366f1" placeholder="#6366f1" style="flex:1;" maxlength="16" />
                           </div>
                           <div class="accent-hint">{{ entry_accent_hint }}</div>
                         </div>
@@ -171,15 +171,13 @@
                         <div class="form-group">
                           <label>{{ entry_primary_btn_text_color }}</label>
                           <div style="display:flex;gap:8px;align-items:center;">
-                            <input type="color" name="banner_image[{{ language.language_id }}][{{ image_row }}][primary_btn_text_color]" value="{{ banner_image.primary_btn_text_color|default('#ffffff') }}" class="form-control" style="width:52px;padding:2px;height:38px;" />
-                            <input type="text" class="form-control primary-btn-text-color-text" value="{{ banner_image.primary_btn_text_color|default('#ffffff') }}" placeholder="#ffffff" style="flex:1;" maxlength="16" />
+                            <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][primary_btn_text_color]" value="{{ banner_image.primary_btn_text_color|default('#ffffff') }}" class="form-control dc-color-input primary-btn-text-color-text" data-default-color="#ffffff" placeholder="#ffffff" style="flex:1;" maxlength="16" />
                           </div>
                         </div>
                         <div class="form-group">
                           <label>{{ entry_primary_btn_bg_color }}</label>
                           <div style="display:flex;gap:8px;align-items:center;">
-                            <input type="color" name="banner_image[{{ language.language_id }}][{{ image_row }}][primary_btn_bg_color]" value="{{ banner_image.primary_btn_bg_color|default('#2563eb') }}" class="form-control" style="width:52px;padding:2px;height:38px;" />
-                            <input type="text" class="form-control primary-btn-bg-color-text" value="{{ banner_image.primary_btn_bg_color|default('#2563eb') }}" placeholder="#2563eb" style="flex:1;" maxlength="16" />
+                            <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][primary_btn_bg_color]" value="{{ banner_image.primary_btn_bg_color|default('#2563eb') }}" class="form-control dc-color-input primary-btn-bg-color-text" data-default-color="#2563eb" placeholder="#2563eb" style="flex:1;" maxlength="16" />
                           </div>
                         </div>
                       </div>
@@ -253,6 +251,7 @@
     </form>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@melloware/coloris/dist/coloris.min.js"></script>
 <script type="text/javascript">
 var image_row = {{ image_row }};
 var placeholder = '{{ placeholder }}';
@@ -262,49 +261,56 @@ function removeSlide(row) {
   $('#image-row' + row).remove();
 }
 
-function syncAccentColorText(container) {
-  var colorPicker = container.find('input[type="color"]');
-  var textInput   = container.find('.accent-color-text');
-  colorPicker.on('input change', function() {
-    textInput.val($(this).val());
-  });
-  textInput.on('input change', function() {
-    var val = $(this).val();
-    if (/^#[0-9a-fA-F]{6}$/.test(val)) {
-      colorPicker.val(val);
-    }
+function normalizeHexColor(value, fallback) {
+  var val = String(value || '').trim();
+  var defaultColor = fallback || '#000000';
+
+  if (/^[0-9a-fA-F]{6}$/.test(val)) {
+    return '#' + val.toLowerCase();
+  }
+
+  if (/^#[0-9a-fA-F]{3}$/.test(val)) {
+    return '#' + val[1] + val[1] + val[2] + val[2] + val[3] + val[3];
+  }
+
+  if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+    return val.toLowerCase();
+  }
+
+  return defaultColor;
+}
+
+function initColorInputs(container) {
+  container.find('.dc-color-input').each(function() {
+    var $input = $(this);
+    var fallback = $input.data('default-color') || '#000000';
+
+    $input.val(normalizeHexColor($input.val(), fallback));
+    $input.off('blur.dcColor').on('blur.dcColor', function() {
+      $input.val(normalizeHexColor($input.val(), fallback));
+    });
   });
 }
 
-function syncPrimaryBtnTextColor(container) {
-  var colorPicker = container.find('input[name$="[primary_btn_text_color]"]');
-  var textInput   = container.find('.primary-btn-text-color-text');
+function initColorisPicker() {
+  if (typeof Coloris === 'undefined') {
+    return;
+  }
 
-  colorPicker.on('input change', function() {
-    textInput.val($(this).val());
-  });
-
-  textInput.on('input change', function() {
-    var val = $(this).val();
-    if (/^#[0-9a-fA-F]{6}$/.test(val)) {
-      colorPicker.val(val);
-    }
-  });
-}
-
-function syncPrimaryBtnBgColor(container) {
-  var colorPicker = container.find('input[name$="[primary_btn_bg_color]"]');
-  var textInput   = container.find('.primary-btn-bg-color-text');
-
-  colorPicker.on('input change', function() {
-    textInput.val($(this).val());
-  });
-
-  textInput.on('input change', function() {
-    var val = $(this).val();
-    if (/^#[0-9a-fA-F]{6}$/.test(val)) {
-      colorPicker.val(val);
-    }
+  Coloris({
+    el: '.dc-color-input',
+    alpha: false,
+    format: 'hex',
+    formatToggle: false,
+    swatches: [
+      '#6366f1',
+      '#2563eb',
+      '#ffffff',
+      '#111827',
+      '#f59e0b',
+      '#10b981',
+      '#ef4444'
+    ]
   });
 }
 
@@ -339,8 +345,7 @@ function addSlide(language_id) {
   html += '<div class="form-group">';
   html += '<label>{{ entry_accent_color }}</label>';
   html += '<div style="display:flex;gap:8px;align-items:center;">';
-  html += '<input type="color" name="' + pfx + '[accent_color]" value="#6366f1" class="form-control" style="width:52px;padding:2px;height:38px;" />';
-  html += '<input type="text" class="form-control accent-color-text" value="#6366f1" placeholder="#6366f1" style="flex:1;" maxlength="16" />';
+  html += '<input type="text" name="' + pfx + '[accent_color]" value="#6366f1" class="form-control dc-color-input accent-color-text" data-default-color="#6366f1" placeholder="#6366f1" style="flex:1;" maxlength="16" />';
   html += '</div>';
   html += '<div class="accent-hint">{{ entry_accent_hint }}</div>';
   html += '</div>';
@@ -356,13 +361,11 @@ function addSlide(language_id) {
   html += '<div class="btn-row-2col">';
   html += '<div class="form-group"><label>{{ entry_primary_btn_text_color }}</label>';
   html += '<div style="display:flex;gap:8px;align-items:center;">';
-  html += '<input type="color" name="' + pfx + '[primary_btn_text_color]" value="#ffffff" class="form-control" style="width:52px;padding:2px;height:38px;" />';
-  html += '<input type="text" class="form-control primary-btn-text-color-text" value="#ffffff" placeholder="#ffffff" style="flex:1;" maxlength="16" />';
+  html += '<input type="text" name="' + pfx + '[primary_btn_text_color]" value="#ffffff" class="form-control dc-color-input primary-btn-text-color-text" data-default-color="#ffffff" placeholder="#ffffff" style="flex:1;" maxlength="16" />';
   html += '</div></div>';
   html += '<div class="form-group"><label>{{ entry_primary_btn_bg_color }}</label>';
   html += '<div style="display:flex;gap:8px;align-items:center;">';
-  html += '<input type="color" name="' + pfx + '[primary_btn_bg_color]" value="#2563eb" class="form-control" style="width:52px;padding:2px;height:38px;" />';
-  html += '<input type="text" class="form-control primary-btn-bg-color-text" value="#2563eb" placeholder="#2563eb" style="flex:1;" maxlength="16" />';
+  html += '<input type="text" name="' + pfx + '[primary_btn_bg_color]" value="#2563eb" class="form-control dc-color-input primary-btn-bg-color-text" data-default-color="#2563eb" placeholder="#2563eb" style="flex:1;" maxlength="16" />';
   html += '</div></div>';
   html += '</div>';
 
@@ -391,20 +394,18 @@ function addSlide(language_id) {
   $('#no-slides-' + language_id).hide();
   var $card = $(html);
   $('#slide-list-' + language_id).append($card);
-  syncAccentColorText($card);
-  syncPrimaryBtnTextColor($card);
-  syncPrimaryBtnBgColor($card);
+  initColorInputs($card);
 
   image_row++;
 }
 
-// Sync existing color pickers on load
 $(document).ready(function() {
+  initColorisPicker();
+
   $('.banner-slide-card').each(function() {
-    syncAccentColorText($(this));
-    syncPrimaryBtnTextColor($(this));
-    syncPrimaryBtnBgColor($(this));
+    initColorInputs($(this));
   });
+
   $('#language a:first').tab('show');
 });
 </script>
