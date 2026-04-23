@@ -101,7 +101,7 @@ restore: ## Restore from the latest dump in ./backups/
 	fi
 	@LATEST=$$(ls -t backups/*.sql | head -1); \
 	echo "Restoring $$LATEST"; \
-	$(COMPOSE) exec -T mariadb mariadb -udockercart -pdockercart_password dockercart < $$LATEST
+	$(COMPOSE) exec -T mariadb mariadb -u$${MARIADB_USER:-dockercart} -p$${MARIADB_PASSWORD:-dockercart_password} $${MARIADB_DATABASE:-dockercart} < $$LATEST
 	@echo "Restored"
 
 dump-init: ## Regenerate docker/mysql/init.sql from running MariaDB (full dump: data, routines, triggers, events)
