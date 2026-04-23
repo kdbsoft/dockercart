@@ -55,6 +55,14 @@ Uses `docker-compose.standalone.yml` (default host port is `80`).
 docker compose -f docker-compose.standalone.yml up -d --build
 ```
 
+Standalone + Let's Encrypt (no Traefik):
+
+```bash
+make standalone-letsencrypt
+# or
+STANDALONE=1 make letsencrypt
+```
+
 ---
 
 ## First database initialization

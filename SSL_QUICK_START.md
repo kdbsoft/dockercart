@@ -8,7 +8,7 @@
 
 ---
 
-## 📝 Three Ways to Run DockerCart
+## 📝 Four Ways to Run DockerCart
 
 ### 1️⃣ HTTP (Default) - Fastest for Local Dev
 
@@ -59,6 +59,35 @@ make letsencrypt
 
 ---
 
+### 4️⃣ Standalone + Let's Encrypt (Production, no Traefik)
+
+**Setup** (edit `.env`):
+```env
+DOCKERCART_DOMAIN=example.com
+DOCKERCART_URL=https://example.com
+DOCKERCART_HTTPS_URL=https://example.com
+DOCKERCART_SSL_ENABLED=true
+SSL_DOMAIN=example.com
+SSL_EMAIL=admin@example.com
+DOCKERCART_HTTP_PORT=80
+DOCKERCART_HTTPS_PORT=443
+```
+
+**Then start**:
+```bash
+make standalone-letsencrypt
+# or compatible alias
+STANDALONE=1 make letsencrypt
+```
+
+**Access**: `https://example.com`
+- No Traefik required
+- Initial certificate is obtained automatically via certbot webroot challenge
+- Renewal loop runs every 12h in `certbot` container
+- Requires public DNS and open ports 80/443
+
+---
+
 ## 🔄 Switching Modes
 
 Just stop and start with a different mode:
@@ -91,6 +120,7 @@ The `start.sh` script automatically includes the correct override file based on 
 make up              # Start HTTP (default)
 make ssl             # Start with self-signed SSL
 make letsencrypt     # Start with Let's Encrypt  
+make standalone-letsencrypt # Start standalone + Let's Encrypt (no Traefik)
 make down            # Stop all containers
 make restart         # Restart without rebuild
 make logs            # View container logs
@@ -113,6 +143,16 @@ For Let's Encrypt mode, set in `.env`:
 DOCKERCART_DOMAIN=example.com     # Your domain for Traefik routing
 SSL_DOMAIN=example.com             # Domain for Let's Encrypt cert
 SSL_EMAIL=admin@example.com        # Email for cert notifications
+```
+
+For standalone + Let's Encrypt mode, also set:
+
+```env
+DOCKERCART_URL=https://example.com
+DOCKERCART_HTTPS_URL=https://example.com
+DOCKERCART_SSL_ENABLED=true
+DOCKERCART_HTTP_PORT=80
+DOCKERCART_HTTPS_PORT=443
 ```
 
 Default (in `.env.example`):
