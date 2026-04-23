@@ -32,6 +32,9 @@ export-yml-[0-9]*-*.xml
 !/upload/image/cache/index.html
 /upload/image/catalog/dockercart_import_yml/*
 
+#Sync Files
+/upload/image/sync/*
+
 # System Cache Files
 /upload/system/storage/cache/*
 !/upload/system/storage/cache/index.html
