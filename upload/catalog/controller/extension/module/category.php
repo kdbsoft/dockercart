@@ -29,59 +29,82 @@ class ControllerExtensionModuleCategory extends Controller {
 
 		$data['categories'] = array();
 		$data['all_categories_href'] = $this->url->link('product/categories');
+		$cache_ttl = 1800;
+		$cache_prefix = 'category.module.' . (int)$this->config->get('config_store_id') . '.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_product_count');
 
 		// Text strings
 		$data['text_browse_by'] = $this->language->get('text_browse_by');
 		$data['text_popular_categories'] = $this->language->get('text_popular_categories');
 		$data['text_view_all'] = $this->language->get('text_view_all');
 
-		$categories = $this->model_catalog_category->getCategories(0);
+		$categories = $this->cache->get($cache_prefix . '.top');
 
-		foreach ($categories as $category) {
-			$children_data = array();
-			$product_total = 0;
+		if (!is_array($categories)) {
+			$categories = array();
+			$top_categories = $this->model_catalog_category->getCategories(0);
 
-			if ($category['category_id'] == $data['category_id']) {
-				$children = $this->model_catalog_category->getCategories($category['category_id']);
+			foreach ($top_categories as $category) {
+				$filter_data = array(
+					'filter_category_id'  => (int)$category['category_id'],
+					'filter_sub_category' => true
+				);
 
-				foreach($children as $child) {
-					$filter_data = array('filter_category_id' => $child['category_id'], 'filter_sub_category' => true);
+				$product_total = (int)$this->model_catalog_product->getTotalProducts($filter_data);
 
-					$children_data[] = array(
-						'category_id' => $child['category_id'],
-						'name' => $child['name'] . ($this->config->get('config_product_count') ? ' (' . $this->model_catalog_product->getTotalProducts($filter_data) . ')' : ''),
-						'href' => $this->url->link('product/category', 'path=' . $category['category_id'] . '_' . $child['category_id'])
+				if (!empty($category['image'])) {
+					$image = $this->model_tool_image->resize($category['image'], 480, 640);
+				} else {
+					$first_product_image = $this->model_catalog_category->getFirstProductImageByCategoryId((int)$category['category_id']);
+					if (!empty($first_product_image)) {
+						$image = $this->model_tool_image->resize($first_product_image, 480, 640);
+					} else {
+						$image = $this->model_tool_image->resize('placeholder.png', 480, 640);
+					}
+				}
+
+				$categories[] = array(
+					'category_id' => (int)$category['category_id'],
+					'name' => $category['name'] . ($this->config->get('config_product_count') ? ' (' . $product_total . ')' : ''),
+					'name_raw' => $category['name'],
+					'image' => $image,
+					'product_total' => $product_total,
+					'href' => $this->url->link('product/category', 'path=' . (int)$category['category_id'])
+				);
+			}
+
+			$this->cache->set($cache_prefix . '.top', $categories, $cache_ttl);
+		}
+
+		$active_children = array();
+
+		if ((int)$data['category_id'] > 0) {
+			$children_cache_key = $cache_prefix . '.children.' . (int)$data['category_id'];
+			$active_children = $this->cache->get($children_cache_key);
+
+			if (!is_array($active_children)) {
+				$active_children = array();
+				$children = $this->model_catalog_category->getCategories((int)$data['category_id']);
+
+				foreach ($children as $child) {
+					$filter_data = array(
+						'filter_category_id' => (int)$child['category_id'],
+						'filter_sub_category' => true
+					);
+
+					$active_children[] = array(
+						'category_id' => (int)$child['category_id'],
+						'name' => $child['name'] . ($this->config->get('config_product_count') ? ' (' . (int)$this->model_catalog_product->getTotalProducts($filter_data) . ')' : ''),
+						'href' => $this->url->link('product/category', 'path=' . (int)$data['category_id'] . '_' . (int)$child['category_id'])
 					);
 				}
+
+				$this->cache->set($children_cache_key, $active_children, $cache_ttl);
 			}
+		}
 
-			$filter_data = array(
-				'filter_category_id'  => $category['category_id'],
-				'filter_sub_category' => true
-			);
-
-			$product_total = (int)$this->model_catalog_product->getTotalProducts($filter_data);
-
-			if (!empty($category['image'])) {
-				$image = $this->model_tool_image->resize($category['image'], 480, 640);
-			} else {
-				$first_product_image = $this->model_catalog_category->getFirstProductImageByCategoryId($category['category_id']);
-				if (!empty($first_product_image)) {
-					$image = $this->model_tool_image->resize($first_product_image, 480, 640);
-				} else {
-					$image = $this->model_tool_image->resize('placeholder.png', 480, 640);
-				}
-			}
-
-			$data['categories'][] = array(
-				'category_id' => $category['category_id'],
-				'name'        => $category['name'] . ($this->config->get('config_product_count') ? ' (' . $product_total . ')' : ''),
-				'name_raw'    => $category['name'],
-				'image'       => $image,
-				'product_total' => $product_total,
-				'children'    => $children_data,
-				'href'        => $this->url->link('product/category', 'path=' . $category['category_id'])
-			);
+		foreach ($categories as $category) {
+			$category['children'] = ((int)$category['category_id'] === (int)$data['category_id']) ? $active_children : array();
+			$data['categories'][] = $category;
 		}
 
 		return $this->load->view('extension/module/category', $data);
