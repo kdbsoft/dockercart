@@ -81,6 +81,8 @@ DB_USER="${DB_USERNAME:-${MARIADB_USER:-dockercart}}"
 DB_PASS="${DB_PASSWORD:-${MARIADB_PASSWORD:-dockercart_password}}"
 DB_NAME="${DB_DATABASE:-${MARIADB_DATABASE:-dockercart}}"
 DB_PREFIX_VALUE="${DB_PREFIX:-oc_}"
+MARIADB_CONTAINER="${MARIADB_CONTAINER_NAME:-dockercart_mariadb}"
+DB_EXEC_METHOD="compose"
 
 case "$DB_PREFIX_VALUE" in
     *[!a-zA-Z0-9_]*)
@@ -91,13 +93,40 @@ esac
 
 MIGRATION_TABLE="${DB_PREFIX_VALUE}schema_migrations"
 
-db_exec() {
+db_exec_compose() {
     compose exec -T mariadb mariadb -u"$DB_USER" -p"$DB_PASS" "$DB_NAME" "$@"
 }
 
+db_exec_docker() {
+    docker exec -i "$MARIADB_CONTAINER" mariadb -u"$DB_USER" -p"$DB_PASS" "$DB_NAME" "$@"
+}
+
+db_exec() {
+    if [ "$DB_EXEC_METHOD" = "docker" ]; then
+        db_exec_docker "$@"
+    else
+        db_exec_compose "$@"
+    fi
+}
+
 log "Checking database connectivity..."
-if ! db_exec -e "SELECT 1;" >/dev/null 2>&1; then
+if db_exec_compose -e "SELECT 1;" >/dev/null 2>&1; then
+    DB_EXEC_METHOD="compose"
+elif db_exec_docker -e "SELECT 1;" >/dev/null 2>&1; then
+    DB_EXEC_METHOD="docker"
+    log "Warning: compose exec failed, using container fallback: $MARIADB_CONTAINER"
+else
+    compose_err=$(db_exec_compose -e "SELECT 1;" 2>&1 || true)
+    docker_err=$(db_exec_docker -e "SELECT 1;" 2>&1 || true)
     log "Error: cannot connect to MariaDB container/database."
+    if [ -n "$compose_err" ]; then
+        log "compose exec error: $compose_err"
+    fi
+    if [ -n "$docker_err" ]; then
+        log "docker exec error: $docker_err"
+    fi
+    log "DB settings used: user=$DB_USER db=$DB_NAME container=$MARIADB_CONTAINER"
+    log "Hint: ensure mariadb is running and DB_* values in .env match existing DB volume credentials."
     exit 1
 fi
 
