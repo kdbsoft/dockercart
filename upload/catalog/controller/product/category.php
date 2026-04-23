@@ -187,41 +187,18 @@ class ControllerProductCategory extends Controller {
 			$data['categories'] = array();
 			$subcategory_ids = array(); // category_id => name map for product labelling
 
-			$results = $this->model_catalog_category->getCategories($category_id);
+			$cached_subcategories = $this->getCachedCategorySubcategories($category_id);
 
-			foreach ($results as $result) {
-				$filter_data = array(
-					'filter_category_id'  => $result['category_id'],
-					'filter_sub_category' => true
+			foreach ($cached_subcategories as $subcategory) {
+				$subcategory_ids[(int)$subcategory['category_id']] = $subcategory['name'];
+
+				$data['categories'][] = array(
+					'name' => $subcategory['name'],
+					'total' => (int)$subcategory['total'],
+					'description' => $subcategory['description'],
+					'href' => $this->url->link('product/category', 'path=' . $this->request->get['path'] . '_' . (int)$subcategory['category_id'] . $url),
+					'thumb' => $subcategory['thumb']
 				);
-
-				$category_total = 0;
-
-				if ($this->config->get('config_product_count')) {
-					$category_total = (int)$this->model_catalog_product->getTotalProducts($filter_data);
-				}
-
-				$subcategory_ids[$result['category_id']] = $result['name'];
-
-			// Prepare a resized thumb for subcategory icons (fallback to first product image, then placeholder)
-			if ($result['image']) {
-				$sub_thumb = $this->model_tool_image->resize($result['image'], 140, 140);
-			} else {
-				$first_product_image = $this->model_catalog_category->getFirstProductImageByCategoryId($result['category_id']);
-				if (!empty($first_product_image)) {
-					$sub_thumb = $this->model_tool_image->resize($first_product_image, 140, 140);
-				} else {
-					$sub_thumb = $this->model_tool_image->resize('placeholder.png', 140, 140);
-				}
-			}
-
-			$data['categories'][] = array(
-				'name' => $result['name'],
-				'total' => $category_total,
-				'description' => utf8_substr(trim(strip_tags(html_entity_decode($result['description'], ENT_QUOTES, 'UTF-8'))), 0, 100) . '...',
-				'href' => $this->url->link('product/category', 'path=' . $this->request->get['path'] . '_' . $result['category_id'] . $url),
-				'thumb' => $sub_thumb
-			);
 			}
 
 			$has_subcategories = !empty($subcategory_ids);
@@ -622,6 +599,56 @@ class ControllerProductCategory extends Controller {
 		}
 	}
 
+	private function getCachedCategorySubcategories($category_id) {
+		$category_id = (int)$category_id;
+		$cache_key = 'category.page.subcategories.' . (int)$this->config->get('config_store_id') . '.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_product_count') . '.' . $category_id;
+		$subcategories = $this->cache->get($cache_key);
+
+		if (is_array($subcategories)) {
+			return $subcategories;
+		}
+
+		$subcategories = array();
+		$results = $this->model_catalog_category->getCategories($category_id);
+
+		foreach ($results as $result) {
+			$filter_data = array(
+				'filter_category_id'  => (int)$result['category_id'],
+				'filter_sub_category' => true
+			);
+
+			$category_total = 0;
+
+			if ($this->config->get('config_product_count')) {
+				$category_total = (int)$this->model_catalog_product->getTotalProducts($filter_data);
+			}
+
+			if ($result['image']) {
+				$sub_thumb = $this->model_tool_image->resize($result['image'], 140, 140);
+			} else {
+				$first_product_image = $this->model_catalog_category->getFirstProductImageByCategoryId((int)$result['category_id']);
+
+				if (!empty($first_product_image)) {
+					$sub_thumb = $this->model_tool_image->resize($first_product_image, 140, 140);
+				} else {
+					$sub_thumb = $this->model_tool_image->resize('placeholder.png', 140, 140);
+				}
+			}
+
+			$subcategories[] = array(
+				'category_id' => (int)$result['category_id'],
+				'name' => $result['name'],
+				'total' => $category_total,
+				'description' => utf8_substr(trim(strip_tags(html_entity_decode($result['description'], ENT_QUOTES, 'UTF-8'))), 0, 100) . '...',
+				'thumb' => $sub_thumb
+			);
+		}
+
+		$this->cache->set($cache_key, $subcategories, 1800);
+
+		return $subcategories;
+	}
+
 	private function resolveThemeFeatures($setting_key, $defaults = array()) {
 		$raw_value = $this->config->get($setting_key);
 
@@ -774,8 +801,7 @@ class ControllerProductCategory extends Controller {
 			return;
 		}
 
-		$subcategories    = $this->model_catalog_category->getCategories($category_id);
-		$has_subcategories = !empty($subcategories);
+		$has_subcategories = !empty($this->getCachedCategorySubcategories($category_id));
 
 		$filter_data = array(
 			'filter_category_id'  => $category_id,
