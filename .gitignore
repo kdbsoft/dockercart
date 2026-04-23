@@ -94,6 +94,7 @@ build-extension.sh
 .bmad/
 .github/
 
+# Local documentation drafts and working notes
 /docs/
 !/docs/modules/
 
