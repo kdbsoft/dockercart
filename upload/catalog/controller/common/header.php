@@ -289,32 +289,138 @@ class ControllerCommonHeader extends Controller {
 
 		// Mobile categories for slide-in menu (simple two-level tree)
 		$this->load->model('catalog/category');
-		$this->load->model('catalog/product');
 		$data['mobile_categories'] = array();
+		$show_product_count = (bool)$this->config->get('config_product_count');
+		$mobile_menu_cache_key = 'category.mobile.tree.v1.'
+			. (int)$this->config->get('config_store_id')
+			. '.' . (int)$this->config->get('config_language_id')
+			. '.' . (int)$show_product_count;
 
-		$top_categories = $this->model_catalog_category->getCategories(0);
-		foreach ($top_categories as $category) {
-			if ($category['top']) {
-				$children_data = array();
+		$mobile_categories = $this->cache->get($mobile_menu_cache_key);
+
+		if (!is_array($mobile_categories)) {
+			$mobile_categories = array();
+			$top_categories = $this->model_catalog_category->getCategories(0);
+
+			$top_with_children = array();
+			$child_category_ids = array();
+
+			foreach ($top_categories as $category) {
+				if (empty($category['top'])) {
+					continue;
+				}
+
 				$children = $this->model_catalog_category->getCategories((int)$category['category_id']);
+
+				$top_with_children[] = array(
+					'category' => $category,
+					'children' => $children
+				);
+
 				foreach ($children as $child) {
-					$filter_data = array('filter_category_id' => (int)$child['category_id'], 'filter_sub_category' => true);
+					$child_category_ids[] = (int)$child['category_id'];
+				}
+			}
+
+			$child_totals = array();
+
+			if ($show_product_count && $child_category_ids) {
+				$child_totals = $this->getCategoryProductTotals($child_category_ids);
+			}
+
+			foreach ($top_with_children as $item) {
+				$category = $item['category'];
+				$children_data = array();
+
+				foreach ($item['children'] as $child) {
+					$child_id = (int)$child['category_id'];
+					$total = isset($child_totals[$child_id]) ? (int)$child_totals[$child_id] : 0;
+
 					$children_data[] = array(
-						'name' => $child['name'] . ($this->config->get('config_product_count') ? ' (' . $this->model_catalog_product->getTotalProducts($filter_data) . ')' : ''),
-						'href' => $this->url->link('product/category', 'path=' . (int)$category['category_id'] . '_' . (int)$child['category_id'])
+						'name' => $child['name'] . ($show_product_count ? ' (' . $total . ')' : ''),
+						'href' => $this->url->link('product/category', 'path=' . (int)$category['category_id'] . '_' . $child_id)
 					);
 				}
 
-				$data['mobile_categories'][] = array(
+				$mobile_categories[] = array(
 					'category_id' => (int)$category['category_id'],
 					'name' => $category['name'],
 					'children' => $children_data,
 					'href' => $this->url->link('product/category', 'path=' . (int)$category['category_id'])
 				);
 			}
+
+			$this->cache->set($mobile_menu_cache_key, $mobile_categories, 900);
 		}
 
+		$data['mobile_categories'] = $mobile_categories;
+
 		return $this->load->view('common/header', $data);
+	}
+
+	private function getCategoryProductTotals(array $category_ids) {
+		static $request_cache = array();
+
+		$store_id = (int)$this->config->get('config_store_id');
+		$totals = array();
+		$missing = array();
+
+		$category_ids = array_values(array_unique(array_map('intval', $category_ids)));
+
+		foreach ($category_ids as $category_id) {
+			if ($category_id <= 0) {
+				continue;
+			}
+
+			$cache_key = 'category.mobile.count.' . $store_id . '.' . $category_id;
+
+			if (isset($request_cache[$cache_key])) {
+				$totals[$category_id] = (int)$request_cache[$cache_key];
+				continue;
+			}
+
+			$cached_total = $this->cache->get($cache_key);
+
+			if ($cached_total !== false && $cached_total !== null) {
+				$request_cache[$cache_key] = (int)$cached_total;
+				$totals[$category_id] = (int)$cached_total;
+			} else {
+				$missing[$category_id] = $cache_key;
+			}
+		}
+
+		if ($missing) {
+			$ids = array_keys($missing);
+			$db_totals = array_fill_keys($ids, 0);
+
+			$query = $this->db->query("SELECT cp.path_id AS category_id, COUNT(DISTINCT p.product_id) AS total
+				FROM " . DB_PREFIX . "category_path cp
+				LEFT JOIN " . DB_PREFIX . "product_to_category p2c ON (cp.category_id = p2c.category_id)
+				LEFT JOIN " . DB_PREFIX . "product p ON (p2c.product_id = p.product_id)
+				LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id)
+				WHERE cp.path_id IN (" . implode(',', array_map('intval', $ids)) . ")
+				AND p.status = '1'
+				AND p.date_available <= NOW()
+				AND p2s.store_id = '" . $store_id . "'
+				GROUP BY cp.path_id");
+
+			foreach ($query->rows as $row) {
+				$category_id = (int)$row['category_id'];
+
+				if (isset($db_totals[$category_id])) {
+					$db_totals[$category_id] = isset($row['total']) ? (int)$row['total'] : 0;
+				}
+			}
+
+			foreach ($db_totals as $category_id => $total) {
+				$cache_key = $missing[$category_id];
+				$this->cache->set($cache_key, (int)$total, 900);
+				$request_cache[$cache_key] = (int)$total;
+				$totals[$category_id] = (int)$total;
+			}
+		}
+
+		return $totals;
 	}
 
 	private function decodeHtmlEntities($value) {
