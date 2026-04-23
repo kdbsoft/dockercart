@@ -72,17 +72,15 @@ standalone-letsencrypt: ## Start standalone mode + Let's Encrypt SSL (no Traefik
 		echo "   Set SSL_EMAIL=admin@your-domain.tld"; \
 		exit 1; \
 	fi; \
-	mkdir -p docker/letsencrypt/live/dockercart docker/letsencrypt/www; \
-	if [ ! -s docker/letsencrypt/live/dockercart/fullchain.pem ] || [ ! -s docker/letsencrypt/live/dockercart/privkey.pem ]; then \
-		echo "Generating temporary self-signed certificate for first boot..."; \
-		openssl req -x509 -nodes -days 1 -newkey rsa:2048 \
-			-keyout docker/letsencrypt/live/dockercart/privkey.pem \
-			-out docker/letsencrypt/live/dockercart/fullchain.pem \
-			-subj "/CN=$${SSL_DOMAIN}" >/dev/null 2>&1 || true; \
+	mkdir -p docker/letsencrypt/www; \
+	if [ -d docker/letsencrypt/live/dockercart ] && [ ! -f docker/letsencrypt/renewal/dockercart.conf ]; then \
+		echo "Removing stale bootstrap lineage docker/letsencrypt/live/dockercart"; \
+		rm -rf docker/letsencrypt/live/dockercart docker/letsencrypt/archive/dockercart; \
 	fi; \
-	docker compose -f docker-compose.standalone.yml -f docker-compose.standalone.letsencrypt.yml up -d --build; \
+	echo "Starting standalone HTTP stack for ACME webroot challenge..."; \
+	docker compose -f docker-compose.standalone.yml up -d --build; \
 	echo "Requesting/renewing Let's Encrypt certificate for $${SSL_DOMAIN}..."; \
-	docker compose -f docker-compose.standalone.yml -f docker-compose.standalone.letsencrypt.yml run --rm certbot certonly \
+	docker compose -f docker-compose.standalone.yml -f docker-compose.standalone.letsencrypt.yml run --rm --no-deps certbot certonly \
 		--webroot -w /var/www/certbot \
 		--email "$${SSL_EMAIL}" \
 		--agree-tos \
@@ -91,6 +89,8 @@ standalone-letsencrypt: ## Start standalone mode + Let's Encrypt SSL (no Traefik
 		--keep-until-expiring \
 		--cert-name dockercart \
 		-d "$${SSL_DOMAIN}"; \
+	echo "Switching stack to standalone HTTPS mode..."; \
+	docker compose -f docker-compose.standalone.yml -f docker-compose.standalone.letsencrypt.yml up -d --build; \
 	docker compose -f docker-compose.standalone.yml -f docker-compose.standalone.letsencrypt.yml exec -T nginx nginx -s reload; \
 	echo ""; \
 	echo "Store: https://$${SSL_DOMAIN}"; \

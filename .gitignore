@@ -132,6 +132,16 @@ check-multicurrency.sh
 # Ensure acme.json (contains private keys) is not committed
 /docker/acme/acme.json
 
+# Ignore Let's Encrypt runtime data (contains private keys and account data)
+/docker/letsencrypt/accounts/
+/docker/letsencrypt/archive/
+/docker/letsencrypt/live/*
+/docker/letsencrypt/renewal/
+/docker/letsencrypt/renewal-hooks/
+/docker/letsencrypt/www/
+/docker/letsencrypt/*.log
+/docker/letsencrypt/*.lock
+
 
 /__pycache__/
 *.pyc
