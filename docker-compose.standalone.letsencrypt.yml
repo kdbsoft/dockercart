@@ -12,7 +12,7 @@ services:
     volumes:
       - ./docker/letsencrypt:/etc/letsencrypt
       - ./docker/letsencrypt/www:/var/www/certbot
-      - ./docker/nginx/conf.d/dockercart.ssl.conf:/etc/nginx/conf.d/dockercart.ssl.conf:ro
+      - ./docker/nginx/ssl/dockercart.ssl.conf:/etc/nginx/conf.d/dockercart.ssl.conf:ro
 
   certbot:
     image: certbot/certbot:latest
