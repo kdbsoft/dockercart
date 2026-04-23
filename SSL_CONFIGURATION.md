@@ -1,14 +1,15 @@
 # SSL/HTTPS Configuration Guide
 
-This guide explains how to switch between HTTP (default) and HTTPS modes in DockerCart using Traefik.
+This guide explains how to switch between HTTP (default) and HTTPS modes in DockerCart using Traefik and standalone mode.
 
 ## Overview
 
-DockerCart supports three SSL/HTTPS modes:
+DockerCart supports four SSL/HTTPS modes:
 
 1. **HTTP (default)** - No SSL, suitable for local development
 2. **Self-signed SSL** - Local testing with HTTPS
 3. **Let's Encrypt SSL** - Production with real domain and auto-renewal
+4. **Standalone + Let's Encrypt** - Production HTTPS without Traefik
 
 You **no longer need to manually edit `docker-compose.yml`** to switch modes. Instead, use the command-line interface or make targets.
 
@@ -146,6 +147,48 @@ If the ACME challenge fails:
 
 ---
 
+## Mode 4: Standalone + Let's Encrypt (Production HTTPS, no Traefik)
+
+Use this mode if you want HTTPS and automatic Let's Encrypt certificates **without Traefik**.
+
+### Prerequisites
+
+1. Own a real domain (for example, `shop.example.com`)
+2. DNS must point to this server
+3. Ports **80 and 443** must be publicly reachable
+4. Configure `.env` values below
+
+### Setup in .env
+
+```env
+DOCKERCART_DOMAIN=shop.example.com
+DOCKERCART_URL=https://shop.example.com
+DOCKERCART_HTTPS_URL=https://shop.example.com
+DOCKERCART_SSL_ENABLED=true
+
+SSL_DOMAIN=shop.example.com
+SSL_EMAIL=admin@example.com
+
+DOCKERCART_HTTP_PORT=80
+DOCKERCART_HTTPS_PORT=443
+```
+
+### Start
+
+```bash
+make standalone-letsencrypt
+# or compatible alias
+STANDALONE=1 make letsencrypt
+```
+
+**Result:**
+- Nginx serves HTTP on 80 (for ACME challenge) and HTTPS on 443
+- certbot requests a real certificate automatically at startup
+- `certbot` container runs a renewal loop every 12h
+- Nginx reload is triggered after renewal via deploy hook
+
+---
+
 ## Switching Between Modes
 
 To switch from one mode to another:
@@ -160,6 +203,8 @@ make up              # HTTP
 make ssl             # Self-signed SSL
 # OR
 make letsencrypt     # Let's Encrypt SSL
+# OR
+make standalone-letsencrypt # Standalone Let's Encrypt SSL (no Traefik)
 ```
 
 The docker-compose override files ensure the correct Traefik labels are applied automatically. **No manual editing of `docker-compose.yml` needed.**
@@ -174,6 +219,7 @@ The system uses **Docker Compose override files**:
 - `docker-compose.no-ssl.yml` - HTTP labels override (default)
 - `docker-compose.ssl.yml` - Self-signed SSL labels override
 - `docker-compose.letsencrypt.yml` - Let's Encrypt SSL labels override
+- `docker-compose.standalone.letsencrypt.yml` - Standalone HTTPS + certbot
 
 The `start.sh` script automatically includes the correct override file based on the chosen mode:
 
@@ -181,6 +227,12 @@ The `start.sh` script automatically includes the correct override file based on 
 ./start.sh              # Includes docker-compose.no-ssl.yml
 ./start.sh --ssl        # Includes docker-compose.ssl.yml
 ./start.sh --letsencrypt # Includes docker-compose.letsencrypt.yml
+```
+
+Standalone Let's Encrypt mode uses:
+
+```bash
+make standalone-letsencrypt
 ```
 
 No comments are needed; no manual file editing required. ✅
@@ -196,6 +248,7 @@ Key variables for SSL mode:
 | `DOCKERCART_DOMAIN` | `dockercart.local` | Domain name for Traefik routing |
 | `SSL_DOMAIN` | `example.com` | Domain for Let's Encrypt certificate |
 | `SSL_EMAIL` | `admin@example.com` | Email for Let's Encrypt notifications |
+| `DOCKERCART_HTTPS_PORT` | `443` | HTTPS host port in standalone Let's Encrypt mode |
 | `DOCKERCART_URL` | `http://dockercart.local` | Store URL (see note below) |
 | `DOCKERCART_HTTPS_URL` | `http://dockercart.local` | Store HTTPS URL (see note below) |
 | `DOCKERCART_SSL_ENABLED` | `false` | PHP app SSL flag (keep as-is) |
@@ -240,6 +293,7 @@ make down
 | Local dev (HTTP) | `make up` | HTTP | ❌ No | `docker-compose.no-ssl.yml` |
 | Local test (HTTPS) | `make ssl` | Self-signed | ✅ Yes | `docker-compose.ssl.yml` |
 | Production | `make letsencrypt` | Real cert | ✅ Yes | `docker-compose.letsencrypt.yml` |
+| Production (no Traefik) | `make standalone-letsencrypt` | Real cert | ✅ Yes | `docker-compose.standalone.letsencrypt.yml` |
 
 ---
 

@@ -3,7 +3,7 @@ include .env
 export
 endif
 
-.PHONY: help migrate up standalone ssl letsencrypt letsencrypt-ftp ftp down logs logs-follow shell mariadb backup restore dump-init clean restart
+.PHONY: help migrate up standalone standalone-letsencrypt ssl letsencrypt letsencrypt-ftp ftp down logs logs-follow shell mariadb backup restore dump-init clean restart
 
 ### Convenience variables
 COMPOSE := docker compose
@@ -25,6 +25,8 @@ help: ## Show this help
 	@echo ""
 	@echo "Alternative:"
 	@echo "  make standalone  No Traefik      - Standalone Apache + embedded port routing"
+	@echo "  make standalone-letsencrypt      - Standalone + HTTPS + Let's Encrypt (no Traefik)"
+	@echo "  STANDALONE=1 make letsencrypt    - Alias for standalone-letsencrypt"
 	@echo ""
 	@echo "Documentation:"
 	@echo "  See SSL_QUICK_START.md for SSL/HTTPS quick reference"
@@ -53,11 +55,58 @@ standalone: ## Start without Traefik, store on port ${DOCKERCART_HTTP_PORT:-80}
 	@echo "Store: $${DOCKERCART_URL:-http://$${DOCKERCART_DOMAIN:-dockercart.local}}"
 	@echo "Admin: $${DOCKERCART_URL:-http://$${DOCKERCART_DOMAIN:-dockercart.local}}/admin"
 
+standalone-letsencrypt: ## Start standalone mode + Let's Encrypt SSL (no Traefik)
+	@if [ ! -f .env ]; then \
+		echo "Creating .env"; \
+		cp .env.example .env; \
+	fi
+	@set -e; \
+	set -o allexport; . ./.env; set +o allexport; \
+	if [ -z "$${SSL_DOMAIN:-}" ] || [ "$${SSL_DOMAIN}" = "example.com" ]; then \
+		echo "❌ SSL_DOMAIN is not configured in .env"; \
+		echo "   Set SSL_DOMAIN=your-real-domain.tld"; \
+		exit 1; \
+	fi; \
+	if [ -z "$${SSL_EMAIL:-}" ] || [ "$${SSL_EMAIL}" = "admin@example.com" ]; then \
+		echo "❌ SSL_EMAIL is not configured in .env"; \
+		echo "   Set SSL_EMAIL=admin@your-domain.tld"; \
+		exit 1; \
+	fi; \
+	mkdir -p docker/letsencrypt/live/dockercart docker/letsencrypt/www; \
+	if [ ! -s docker/letsencrypt/live/dockercart/fullchain.pem ] || [ ! -s docker/letsencrypt/live/dockercart/privkey.pem ]; then \
+		echo "Generating temporary self-signed certificate for first boot..."; \
+		openssl req -x509 -nodes -days 1 -newkey rsa:2048 \
+			-keyout docker/letsencrypt/live/dockercart/privkey.pem \
+			-out docker/letsencrypt/live/dockercart/fullchain.pem \
+			-subj "/CN=$${SSL_DOMAIN}" >/dev/null 2>&1 || true; \
+	fi; \
+	docker compose -f docker-compose.standalone.yml -f docker-compose.standalone.letsencrypt.yml up -d --build; \
+	echo "Requesting/renewing Let's Encrypt certificate for $${SSL_DOMAIN}..."; \
+	docker compose -f docker-compose.standalone.yml -f docker-compose.standalone.letsencrypt.yml run --rm certbot certonly \
+		--webroot -w /var/www/certbot \
+		--email "$${SSL_EMAIL}" \
+		--agree-tos \
+		--no-eff-email \
+		--non-interactive \
+		--keep-until-expiring \
+		--cert-name dockercart \
+		-d "$${SSL_DOMAIN}"; \
+	docker compose -f docker-compose.standalone.yml -f docker-compose.standalone.letsencrypt.yml exec -T nginx nginx -s reload; \
+	echo ""; \
+	echo "Store: https://$${SSL_DOMAIN}"; \
+	echo "Admin: https://$${SSL_DOMAIN}/admin"; \
+	echo "HTTP challenge endpoint: http://$${SSL_DOMAIN}/.well-known/acme-challenge/"; \
+	echo "Auto-renewal: certbot service renews every 12h"
+
 ssl: ## Start with self-signed SSL certificate
 	@./start.sh --ssl
 
 letsencrypt: ## Production + Let's Encrypt SSL on a real domain
-	@./start.sh --letsencrypt
+	@if [ "$(STANDALONE)" = "1" ]; then \
+		$(MAKE) standalone-letsencrypt; \
+	else \
+		./start.sh --letsencrypt; \
+	fi
 
 letsencrypt-ftp: ## Start Let's Encrypt mode and enable FTP profile (images only)
 	@./start.sh --letsencrypt

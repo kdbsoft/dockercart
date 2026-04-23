@@ -1,0 +1,34 @@
+# Docker Compose override for standalone Let's Encrypt SSL mode (no Traefik)
+# Usage:
+#   docker compose -f docker-compose.standalone.yml -f docker-compose.standalone.letsencrypt.yml up -d
+# Requirements:
+#   - SSL_DOMAIN and SSL_EMAIL in .env
+#   - Public inbound ports 80 and 443
+
+services:
+  nginx:
+    ports:
+      - "${DOCKERCART_HTTPS_PORT:-443}:443"
+    volumes:
+      - ./docker/letsencrypt:/etc/letsencrypt
+      - ./docker/letsencrypt/www:/var/www/certbot
+      - ./docker/nginx/conf.d/dockercart.ssl.conf:/etc/nginx/conf.d/dockercart.ssl.conf:ro
+
+  certbot:
+    image: certbot/certbot:latest
+    container_name: ${CERTBOT_CONTAINER_NAME:-dockercart_certbot}
+    restart: ${RESTART_POLICY:-unless-stopped}
+    pid: "service:nginx"
+    depends_on:
+      - nginx
+    volumes:
+      - ./docker/letsencrypt:/etc/letsencrypt
+      - ./docker/letsencrypt/www:/var/www/certbot
+    command: >
+      /bin/sh -c 'trap exit TERM;
+      while :; do
+        certbot renew --webroot -w /var/www/certbot --quiet --deploy-hook "kill -HUP 1";
+        sleep 12h;
+      done'
+    networks:
+      - dockercart-network

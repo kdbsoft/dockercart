@@ -169,7 +169,36 @@ make letsencrypt
 
 ---
 
-### Mode 5 — Optional FTP *(images directory only)*
+### Mode 5 — Standalone + Let's Encrypt *(no Traefik, production SSL)*
+
+Requires a real public domain with ports 80/443 open.
+
+```bash
+# Edit .env first:
+SSL_DOMAIN=shop.example.com
+SSL_EMAIL=admin@example.com
+DOCKERCART_DOMAIN=shop.example.com
+DOCKERCART_URL=https://shop.example.com
+DOCKERCART_HTTPS_URL=https://shop.example.com
+DOCKERCART_SSL_ENABLED=true
+
+# via Make
+make standalone-letsencrypt
+
+# compatible alias
+STANDALONE=1 make letsencrypt
+```
+
+Access: **`https://shop.example.com`**
+
+- Runs without Traefik (standalone compose + Nginx)
+- Obtains certs automatically via certbot (HTTP-01 challenge)
+- Keeps a renewal loop in `certbot` container (checks every 12h)
+- Uses `DOCKERCART_HTTPS_PORT` (default `443`) for HTTPS binding
+
+---
+
+### Mode 6 — Optional FTP *(images directory only)*
 
 FTP is disabled by default and starts only when explicitly requested.
 
@@ -200,7 +229,7 @@ Configure in `.env` if needed:
 
 ---
 
-> **Traefik is optional.** Modes 1, 3, 4, and 5 do not require it.
+> **Traefik is optional.** Modes 1 and 5 do not require it.
 
 ---
 
@@ -210,6 +239,7 @@ Configure in `.env` if needed:
 make help          # List all targets
 
 make standalone    # Start — direct host port (default: 80), no Traefik
+make standalone-letsencrypt # Start — standalone + Let's Encrypt HTTPS (no Traefik)
 make up            # Start — Traefik mode (HTTP by default)
 make ssl           # Start — Traefik + self-signed HTTPS (local testing)
 make letsencrypt   # Start — Traefik + Let's Encrypt (production)
@@ -303,6 +333,9 @@ DOCKERCART_SSL_ENABLED=false
 # Standalone port (used by docker-compose.standalone.yml)
 DOCKERCART_HTTP_PORT=80
 
+# Standalone HTTPS port (used by docker-compose.standalone.letsencrypt.yml)
+DOCKERCART_HTTPS_PORT=443
+
 # Database
 DB_HOSTNAME=mariadb
 DB_USERNAME=dockercart
@@ -325,10 +358,9 @@ See [`.env.example`](.env.example) for a complete reference.
 
 | Document | Description |
 |---|---|
-| [SSL_QUICK_START.md](SSL_QUICK_START.md) | Quick reference for SSL/HTTPS modes (HTTP, self-signed, Let's Encrypt) |
+| [SSL_QUICK_START.md](SSL_QUICK_START.md) | Quick reference for SSL/HTTPS modes (HTTP, self-signed, Let's Encrypt, standalone Let's Encrypt) |
 | [SSL_CONFIGURATION.md](SSL_CONFIGURATION.md) | Detailed SSL/HTTPS configuration guide with troubleshooting |
 | [INSTALL.md](INSTALL.md) | Detailed installation reference |
->>>>>>> 29d373a (update traefik ssl mode for simplest running)
 | [DEPLOYMENT.md](DEPLOYMENT.md) | Deployment architecture and CI/CD notes |
 | [SECURITY.md](SECURITY.md) | Security policy and vulnerability reporting |
 
