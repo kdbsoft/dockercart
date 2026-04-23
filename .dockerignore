@@ -74,6 +74,16 @@ upload/image/cache/*
 docker/nginx/cache/
 docker/nginx/cache/**
 
+# Exclude Let's Encrypt runtime directories from build context
+docker/letsencrypt/accounts/
+docker/letsencrypt/archive/
+docker/letsencrypt/live/
+docker/letsencrypt/renewal/
+docker/letsencrypt/renewal-hooks/
+docker/letsencrypt/www/
+docker/letsencrypt/*.log
+docker/letsencrypt/*.lock
+
 # Config files (will be generated at runtime)
 upload/config.php
 upload/admin/config.php
