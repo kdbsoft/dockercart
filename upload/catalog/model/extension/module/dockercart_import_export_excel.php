@@ -119,6 +119,8 @@ class ModelExtensionModuleDockercartImportExportExcel extends Model {
                 `date_modified` = NOW()
             WHERE `profile_id` = '" . (int)$profile_id . "'");
 
+        $this->clearAllCache();
+
         return $summary;
     }
 
@@ -1688,6 +1690,18 @@ class ModelExtensionModuleDockercartImportExportExcel extends Model {
         }
 
         return 'csv';
+    }
+
+    private function clearAllCache() {
+        try {
+            if (method_exists($this->cache, 'flush')) {
+                $this->cache->flush();
+            } else {
+                $this->cache->delete('*');
+            }
+        } catch (Exception $e) {
+            error_log('DockerCart Import Export Excel: cache flush failed: ' . $e->getMessage());
+        }
     }
 
     private function decodeJson($json) {

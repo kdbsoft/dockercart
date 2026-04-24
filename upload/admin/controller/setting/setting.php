@@ -985,6 +985,14 @@ class ControllerSettingSetting extends Controller {
 			$data['config_seo_url'] = $this->config->get('config_seo_url');
 		}
 
+		if (isset($this->request->post['config_product_cache_status'])) {
+			$data['config_product_cache_status'] = (int)$this->request->post['config_product_cache_status'];
+		} elseif ($this->config->has('config_product_cache_status')) {
+			$data['config_product_cache_status'] = (int)$this->config->get('config_product_cache_status');
+		} else {
+			$data['config_product_cache_status'] = 0;
+		}
+
 		if (isset($this->request->post['config_file_max_size'])) {
 			$data['config_file_max_size'] = $this->request->post['config_file_max_size'];
 		} elseif ($this->config->get('config_file_max_size')) {
