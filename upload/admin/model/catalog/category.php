@@ -39,12 +39,19 @@ class ModelCatalogCategory extends Model {
 		}
 		
 		if (isset($data['category_seo_url'])) {
+			$seo_url_updated = false;
 			foreach ($data['category_seo_url'] as $store_id => $language) {
 				foreach ($language as $language_id => $keyword) {
 					if (!empty($keyword)) {
 						$this->db->query("INSERT INTO " . DB_PREFIX . "seo_url SET store_id = '" . (int)$store_id . "', language_id = '" . (int)$language_id . "', query = 'category_id=" . (int)$category_id . "', keyword = '" . $this->db->escape($keyword) . "'");
+						$seo_url_updated = true;
 					}
 				}
+			}
+
+			if ($seo_url_updated) {
+				$this->load->model('design/seo_url');
+				$this->model_design_seo_url->invalidateSeoUrlCache();
 			}
 		}
 		
@@ -143,6 +150,7 @@ class ModelCatalogCategory extends Model {
 
 		// SEO URL
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "seo_url` WHERE query = 'category_id=" . (int)$category_id . "'");
+		$seo_url_updated = true;
 
 		if (isset($data['category_seo_url'])) {
 			foreach ($data['category_seo_url'] as $store_id => $language) {
@@ -152,6 +160,11 @@ class ModelCatalogCategory extends Model {
 					}
 				}
 			}
+		}
+
+		if ($seo_url_updated) {
+			$this->load->model('design/seo_url');
+			$this->model_design_seo_url->invalidateSeoUrlCache();
 		}
 		
 		$this->db->query("DELETE FROM " . DB_PREFIX . "category_to_layout WHERE category_id = '" . (int)$category_id . "'");
@@ -194,6 +207,9 @@ class ModelCatalogCategory extends Model {
 		$this->db->query("DELETE FROM " . DB_PREFIX . "product_to_category WHERE category_id = '" . (int)$category_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "seo_url WHERE query = 'category_id=" . (int)$category_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "coupon_category WHERE category_id = '" . (int)$category_id . "'");
+
+		$this->load->model('design/seo_url');
+		$this->model_design_seo_url->invalidateSeoUrlCache();
 
 		// Clear all category cache
 		$this->cache->delete('category');

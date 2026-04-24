@@ -9,12 +9,28 @@
  * https://opensource.org/licenses/MIT
  */
 class ControllerStartupSeoUrl extends Controller {
+	private const SEO_URL_CACHE_VERSION_KEY = 'dockercart.seo_url_cache.version';
+	private const SEO_URL_CACHE_KEY = 'dockercart.seo_url_cache.map';
+	private const BLOG_SEO_URL_CACHE_KEY = 'dockercart.blog_seo_url_cache.map';
 	
 	// Request state properties (initialized once per request)
 	private $isGetRequest;
 	private $isXhr;
 	private $storeId;
 	private $languageId;
+
+	// SEO URL maps (loaded from cache/memcached once per request)
+	private $seoUrlCacheLoaded = false;
+	private $blogSeoUrlCacheLoaded = false;
+	private $seoKeywordsByQuery = array();
+	private $seoKeywordsByQueryAny = array();
+	private $seoQueriesByKeyword = array();
+	private $seoQueriesByKeywordAny = array();
+	private $seoKeywordQueryPairs = array();
+	private $blogKeywordsByQuery = array();
+	private $blogKeywordsByQueryAny = array();
+	private $blogQueriesByKeyword = array();
+	private $blogQueriesByKeywordAny = array();
 	
 	// DEBUG: Uncomment for debugging redirects
 	// private function debug_log($message) {
@@ -343,26 +359,17 @@ class ControllerStartupSeoUrl extends Controller {
 	 * @return string SEO keyword or empty string if not found
 	 */
 	private function getSeoKeyword($query) {
-		// First try to find in current language
-		$result = $this->db->query(
-			"SELECT keyword FROM " . DB_PREFIX . "seo_url 
-			WHERE query = '" . $this->db->escape($query) . "' 
-			AND store_id = '" . $this->storeId . "' 
-			AND language_id = '" . $this->languageId . "' 
-			LIMIT 1"
-		);
-		
-		// If not found in current language, try any language
-		if (!$result->num_rows) {
-			$result = $this->db->query(
-				"SELECT keyword FROM " . DB_PREFIX . "seo_url 
-				WHERE query = '" . $this->db->escape($query) . "' 
-				AND store_id = '" . $this->storeId . "' 
-				LIMIT 1"
-			);
+		$this->loadSeoUrlCache();
+
+		if (isset($this->seoKeywordsByQuery[$this->languageId][$query])) {
+			return $this->seoKeywordsByQuery[$this->languageId][$query];
 		}
 
-		return ($result->num_rows) ? $result->row['keyword'] : '';
+		if (isset($this->seoKeywordsByQueryAny[$query])) {
+			return $this->seoKeywordsByQueryAny[$query];
+		}
+
+		return '';
 	}
 
 	/**
@@ -372,26 +379,206 @@ class ControllerStartupSeoUrl extends Controller {
 	 * @return string SEO keyword or empty string if not found
 	 */
 	private function getBlogSeoKeyword($query) {
-		// First try to find in current language
-		$result = $this->db->query(
-			"SELECT keyword FROM " . DB_PREFIX . "blog_seo_url 
-			WHERE query = '" . $this->db->escape($query) . "' 
-			AND store_id = '" . $this->storeId . "' 
-			AND language_id = '" . $this->languageId . "' 
-			LIMIT 1"
-		);
-		
-		// If not found in current language, try any language
-		if (!$result->num_rows) {
-			$result = $this->db->query(
-				"SELECT keyword FROM " . DB_PREFIX . "blog_seo_url 
-				WHERE query = '" . $this->db->escape($query) . "' 
-				AND store_id = '" . $this->storeId . "' 
-				LIMIT 1"
-			);
+		$this->loadBlogSeoUrlCache();
+
+		if (isset($this->blogKeywordsByQuery[$this->languageId][$query])) {
+			return $this->blogKeywordsByQuery[$this->languageId][$query];
 		}
 
-		return ($result->num_rows) ? $result->row['keyword'] : '';
+		if (isset($this->blogKeywordsByQueryAny[$query])) {
+			return $this->blogKeywordsByQueryAny[$query];
+		}
+
+		return '';
+	}
+
+	/**
+	 * Resolve query by SEO keyword from core seo_url table.
+	 */
+	private function getSeoQueryByKeyword($keyword) {
+		$this->loadSeoUrlCache();
+
+		if (isset($this->seoQueriesByKeyword[$this->languageId][$keyword])) {
+			return $this->seoQueriesByKeyword[$this->languageId][$keyword];
+		}
+
+		if (isset($this->seoQueriesByKeywordAny[$keyword])) {
+			return $this->seoQueriesByKeywordAny[$keyword];
+		}
+
+		return '';
+	}
+
+	/**
+	 * Resolve query by SEO keyword from blog_seo_url table.
+	 */
+	private function getBlogSeoQueryByKeyword($keyword) {
+		$this->loadBlogSeoUrlCache();
+
+		if (isset($this->blogQueriesByKeyword[$this->languageId][$keyword])) {
+			return $this->blogQueriesByKeyword[$this->languageId][$keyword];
+		}
+
+		if (isset($this->blogQueriesByKeywordAny[$keyword])) {
+			return $this->blogQueriesByKeywordAny[$keyword];
+		}
+
+		return '';
+	}
+
+	/**
+	 * Returns and initializes SEO cache version used for cache invalidation.
+	 */
+	private function getSeoUrlCacheVersion() {
+		$version = (int)$this->cache->get(self::SEO_URL_CACHE_VERSION_KEY);
+
+		if ($version < 1) {
+			$version = 1;
+			$this->cache->set(self::SEO_URL_CACHE_VERSION_KEY, $version);
+		}
+
+		return $version;
+	}
+
+	/**
+	 * Ensure request context values are initialized before cache map loading.
+	 */
+	private function ensureSeoUrlContext() {
+		if ($this->storeId === null || $this->languageId === null) {
+			$this->initializeRequestState();
+		}
+	}
+
+	/**
+	 * Load and map seo_url table for current store from shared cache.
+	 */
+	private function loadSeoUrlCache() {
+		if ($this->seoUrlCacheLoaded) {
+			return;
+		}
+
+		$this->ensureSeoUrlContext();
+
+		$version = $this->getSeoUrlCacheVersion();
+		$cache_key = self::SEO_URL_CACHE_KEY . '.' . $version . '.store.' . (int)$this->storeId;
+		$payload = $this->cache->get($cache_key);
+
+		if (!is_array($payload)) {
+			$payload = array(
+				'query_to_keyword' => array(),
+				'query_to_keyword_any' => array(),
+				'keyword_to_query' => array(),
+				'keyword_to_query_any' => array(),
+				'keyword_query_pairs' => array()
+			);
+
+			$query = $this->db->query(
+				"SELECT query, keyword, language_id FROM " . DB_PREFIX . "seo_url
+				WHERE store_id = '" . (int)$this->storeId . "'
+				ORDER BY seo_url_id ASC"
+			);
+
+			foreach ($query->rows as $row) {
+				$language_id = (int)$row['language_id'];
+				$query_value = (string)$row['query'];
+				$keyword = (string)$row['keyword'];
+
+				if ($query_value === '' || $keyword === '') {
+					continue;
+				}
+
+				if (!isset($payload['query_to_keyword'][$language_id][$query_value])) {
+					$payload['query_to_keyword'][$language_id][$query_value] = $keyword;
+				}
+
+				if (!isset($payload['query_to_keyword_any'][$query_value])) {
+					$payload['query_to_keyword_any'][$query_value] = $keyword;
+				}
+
+				if (!isset($payload['keyword_to_query'][$language_id][$keyword])) {
+					$payload['keyword_to_query'][$language_id][$keyword] = $query_value;
+				}
+
+				if (!isset($payload['keyword_to_query_any'][$keyword])) {
+					$payload['keyword_to_query_any'][$keyword] = $query_value;
+				}
+
+				$payload['keyword_query_pairs'][$keyword . '||' . $query_value] = true;
+			}
+
+			$this->cache->set($cache_key, $payload);
+		}
+
+		$this->seoKeywordsByQuery = isset($payload['query_to_keyword']) ? $payload['query_to_keyword'] : array();
+		$this->seoKeywordsByQueryAny = isset($payload['query_to_keyword_any']) ? $payload['query_to_keyword_any'] : array();
+		$this->seoQueriesByKeyword = isset($payload['keyword_to_query']) ? $payload['keyword_to_query'] : array();
+		$this->seoQueriesByKeywordAny = isset($payload['keyword_to_query_any']) ? $payload['keyword_to_query_any'] : array();
+		$this->seoKeywordQueryPairs = isset($payload['keyword_query_pairs']) ? $payload['keyword_query_pairs'] : array();
+		$this->seoUrlCacheLoaded = true;
+	}
+
+	/**
+	 * Load and map blog_seo_url table for current store from shared cache.
+	 */
+	private function loadBlogSeoUrlCache() {
+		if ($this->blogSeoUrlCacheLoaded) {
+			return;
+		}
+
+		$this->ensureSeoUrlContext();
+
+		$version = $this->getSeoUrlCacheVersion();
+		$cache_key = self::BLOG_SEO_URL_CACHE_KEY . '.' . $version . '.store.' . (int)$this->storeId;
+		$payload = $this->cache->get($cache_key);
+
+		if (!is_array($payload)) {
+			$payload = array(
+				'query_to_keyword' => array(),
+				'query_to_keyword_any' => array(),
+				'keyword_to_query' => array(),
+				'keyword_to_query_any' => array()
+			);
+
+			$query = $this->db->query(
+				"SELECT query, keyword, language_id FROM " . DB_PREFIX . "blog_seo_url
+				WHERE store_id = '" . (int)$this->storeId . "'
+				ORDER BY language_id ASC, query ASC, keyword ASC"
+			);
+
+			foreach ($query->rows as $row) {
+				$language_id = (int)$row['language_id'];
+				$query_value = (string)$row['query'];
+				$keyword = (string)$row['keyword'];
+
+				if ($query_value === '' || $keyword === '') {
+					continue;
+				}
+
+				if (!isset($payload['query_to_keyword'][$language_id][$query_value])) {
+					$payload['query_to_keyword'][$language_id][$query_value] = $keyword;
+				}
+
+				if (!isset($payload['query_to_keyword_any'][$query_value])) {
+					$payload['query_to_keyword_any'][$query_value] = $keyword;
+				}
+
+				if (!isset($payload['keyword_to_query'][$language_id][$keyword])) {
+					$payload['keyword_to_query'][$language_id][$keyword] = $query_value;
+				}
+				
+				if (!isset($payload['keyword_to_query_any'][$keyword])) {
+					$payload['keyword_to_query_any'][$keyword] = $query_value;
+				}
+			}
+
+			$this->cache->set($cache_key, $payload);
+		}
+
+		$this->blogKeywordsByQuery = isset($payload['query_to_keyword']) ? $payload['query_to_keyword'] : array();
+		$this->blogKeywordsByQueryAny = isset($payload['query_to_keyword_any']) ? $payload['query_to_keyword_any'] : array();
+		$this->blogQueriesByKeyword = isset($payload['keyword_to_query']) ? $payload['keyword_to_query'] : array();
+		$this->blogQueriesByKeywordAny = isset($payload['keyword_to_query_any']) ? $payload['keyword_to_query_any'] : array();
+		$this->blogSeoUrlCacheLoaded = true;
 	}
 
 	/**
@@ -488,26 +675,23 @@ class ControllerStartupSeoUrl extends Controller {
 	 * @return bool True if conflict detected, False if safe to use
 	 */
 	private function hasConflictingSeoPrefixInDatabase($generated_keyword, $route = null) {
-		// Build optimized query checking both exact keyword and shorter version in one query
-		$where_conditions = "keyword = '" . $this->db->escape($generated_keyword) . "'";
-		
-		// If route provided, also check for shorter version of the keyword for the same route
+		$this->loadSeoUrlCache();
+
+		if (isset($this->seoQueriesByKeywordAny[$generated_keyword])) {
+			return true;
+		}
+
 		if ($route) {
 			$parts = explode('-', $generated_keyword);
 			if (count($parts) > 1) {
 				$last_part = end($parts);
-				$where_conditions .= " OR (keyword = '" . $this->db->escape($last_part) . "' AND query = '" . $this->db->escape($route) . "')";
+				if (isset($this->seoKeywordQueryPairs[$last_part . '||' . $route])) {
+					return true;
+				}
 			}
 		}
-		
-		$result = $this->db->query(
-			"SELECT keyword FROM " . DB_PREFIX . "seo_url 
-			WHERE (" . $where_conditions . ") 
-			AND store_id = '" . $this->storeId . "' 
-			LIMIT 1"
-		);
-		
-		return $result->num_rows > 0;
+
+		return false;
 	}
 
 	/**
@@ -724,32 +908,21 @@ class ControllerStartupSeoUrl extends Controller {
 			return;
 		}
 
-		// First try to find in seo_url table
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "seo_url WHERE keyword = '" . $this->db->escape($keyword) . "' AND store_id = '" . $this->storeId . "' AND language_id = '" . $this->languageId . "' LIMIT 1");
-		
-		// If not found in current language, try any language
-		if (!$query->num_rows) {
-			$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "seo_url WHERE keyword = '" . $this->db->escape($keyword) . "' AND store_id = '" . $this->storeId . "' LIMIT 1");
+		$resolved_query = $this->getSeoQueryByKeyword($keyword);
+
+		if ($resolved_query === '') {
+			$resolved_query = $this->getBlogSeoQueryByKeyword($keyword);
 		}
 
-		// If not found in core seo_url, try blog_seo_url table
-		if (!$query->num_rows) {
-			$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "blog_seo_url WHERE keyword = '" . $this->db->escape($keyword) . "' AND store_id = '" . $this->storeId . "' AND language_id = '" . $this->languageId . "' LIMIT 1");
-			
-			// If not found in current language, try any language
-			if (!$query->num_rows) {
-				$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "blog_seo_url WHERE keyword = '" . $this->db->escape($keyword) . "' AND store_id = '" . $this->storeId . "' LIMIT 1");
-			}
-		}
-
-		if ($query->num_rows) {
-			$url = explode('=', $query->row['query']);
+		if ($resolved_query !== '') {
+			$url = explode('=', $resolved_query, 2);
+			$query_value = isset($url[1]) ? $url[1] : '';
 
 			if ($url[0] == 'product_id') {
-				$this->request->get['product_id'] = $url[1];
+				$this->request->get['product_id'] = $query_value;
 				$this->request->get['route'] = 'product/product';
 			} elseif ($url[0] == 'category_id') {
-				$category_id = (int)$url[1];
+				$category_id = (int)$query_value;
 				
 				// Check if this is a nested category (has parent_id)
 				// If so, redirect to canonical URL with full path
@@ -758,26 +931,26 @@ class ControllerStartupSeoUrl extends Controller {
 				$this->request->get['path'] = $category_id;
 				$this->request->get['route'] = 'product/category';
 			} elseif ($url[0] == 'manufacturer_id') {
-				$this->request->get['manufacturer_id'] = $url[1];
+				$this->request->get['manufacturer_id'] = $query_value;
 				$this->request->get['route'] = 'product/manufacturer/info';
 			} elseif ($url[0] == 'information_id') {
-				$this->request->get['information_id'] = $url[1];
+				$this->request->get['information_id'] = $query_value;
 				$this->request->get['route'] = 'information/information';
 			} elseif ($url[0] == 'blog_post_id') {
 				// Blog post
-				$this->request->get['blog_post_id'] = $url[1];
+				$this->request->get['blog_post_id'] = $query_value;
 				$this->request->get['route'] = 'blog/post';
 			} elseif ($url[0] == 'blog_category_id') {
 				// Blog category
-				$this->request->get['blog_category_id'] = $url[1];
+				$this->request->get['blog_category_id'] = $query_value;
 				$this->request->get['route'] = 'blog/category';
 			} elseif ($url[0] == 'blog_author_id') {
 				// Blog author
-				$this->request->get['blog_author_id'] = $url[1];
+				$this->request->get['blog_author_id'] = $query_value;
 				$this->request->get['route'] = 'blog/author';
 			} else {
 				// This is a route query like account/login or checkout/cart
-				$this->request->get['route'] = $query->row['query'];
+				$this->request->get['route'] = $resolved_query;
 			}
 			return;
 		}
@@ -807,14 +980,9 @@ class ControllerStartupSeoUrl extends Controller {
 				
 				// Before generating, check if there's a shorter SEO URL in DB for this route
 				// For example: if checkout-cart maps to checkout/cart, but cart already exists in DB for checkout/cart
-				$shorter_seo = $this->db->query(
-					"SELECT keyword FROM " . DB_PREFIX . "seo_url 
-					WHERE query = '" . $this->db->escape($potential_route) . "' 
-					AND store_id = '" . $this->storeId . "' 
-					LIMIT 1"
-				);
-				
-				if ($shorter_seo->num_rows) {
+				$shorter_seo_keyword = $this->getSeoKeyword($potential_route);
+
+				if ($shorter_seo_keyword) {
 					// There's a shorter version in DB, so this generated long URL should be 404
 					// e.g., /cart exists in DB, so /checkout-cart is wrong and should be 404
 					$this->request->get['route'] = 'error/not_found';
@@ -838,47 +1006,35 @@ class ControllerStartupSeoUrl extends Controller {
 	private function decodeMultiSegmentUrl($parts) {
 		$detected_types = array();
 		$matched = array();
-		$seo_cache = array();
 
 		// Process each segment of the URL
 		foreach ($parts as $part) {
-			// Check cache first
-			if (!isset($seo_cache[$part])) {
-				$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "seo_url WHERE keyword = '" . $this->db->escape($part) . "' AND store_id = '" . $this->storeId . "' AND language_id = '" . $this->languageId . "' LIMIT 1");
-				
-				// If not found in current language, try any language
-				if (!$query->num_rows) {
-					$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "seo_url WHERE keyword = '" . $this->db->escape($part) . "' AND store_id = '" . $this->storeId . "' LIMIT 1");
-				}
-				
-				$seo_cache[$part] = $query;
-			} else {
-				$query = $seo_cache[$part];
-			}
+			$resolved_query = $this->getSeoQueryByKeyword($part);
 
-			if ($query->num_rows) {
-				$matched[] = array('keyword' => $query->row['keyword'], 'query' => $query->row['query']);
-				$url = explode('=', $query->row['query']);
+			if ($resolved_query !== '') {
+				$matched[] = array('keyword' => $part, 'query' => $resolved_query);
+				$url = explode('=', $resolved_query, 2);
+				$query_value = isset($url[1]) ? $url[1] : '';
 
 				if ($url[0] == 'product_id') {
-					$this->request->get['product_id'] = $url[1];
+					$this->request->get['product_id'] = $query_value;
 					$detected_types[] = 'product';
 				} elseif ($url[0] == 'category_id') {
 					if (!isset($this->request->get['path'])) {
-						$this->request->get['path'] = $url[1];
+						$this->request->get['path'] = $query_value;
 					} else {
-						$this->request->get['path'] .= '_' . $url[1];
+						$this->request->get['path'] .= '_' . $query_value;
 					}
 					$detected_types[] = 'category';
 				} elseif ($url[0] == 'manufacturer_id') {
-					$this->request->get['manufacturer_id'] = $url[1];
+					$this->request->get['manufacturer_id'] = $query_value;
 					$detected_types[] = 'manufacturer';
 				} elseif ($url[0] == 'information_id') {
-					$this->request->get['information_id'] = $url[1];
+					$this->request->get['information_id'] = $query_value;
 					$detected_types[] = 'information';
 				} else {
 					// This is a route
-					$this->request->get['route'] = $query->row['query'];
+					$this->request->get['route'] = $resolved_query;
 					$detected_types[] = 'route';
 				}
 			} else {
@@ -982,20 +1138,12 @@ class ControllerStartupSeoUrl extends Controller {
 	 * @return bool True if keyword is used for product/category/etc, False if safe to treat as generated route
 	 */
 	private function isKeywordUsedForNonRouteEntity($keyword) {
-		// Check if this keyword exists in DB
-		$result = $this->db->query(
-			"SELECT query FROM " . DB_PREFIX . "seo_url 
-			WHERE keyword = '" . $this->db->escape($keyword) . "' 
-			AND store_id = '" . $this->storeId . "' 
-			LIMIT 1"
-		);
-		
+		$query_string = $this->getSeoQueryByKeyword($keyword);
+
 		// If no keyword found at all, it's safe
-		if (!$result->num_rows) {
+		if ($query_string === '') {
 			return false;
 		}
-		
-		$query_string = $result->row['query'];
 		
 		// Check if it's a non-route entity (product_id, category_id, etc)
 		// These have format: "product_id=123" or "category_id=456", etc
@@ -1327,30 +1475,13 @@ class ControllerStartupSeoUrl extends Controller {
 
 		// Build path from child to parent
 		while ($current_id > 0) {
-			// Get SEO keyword for this category
-			$seo_query = $this->db->query(
-				"SELECT keyword FROM " . DB_PREFIX . "seo_url 
-				WHERE query = 'category_id=" . (int)$current_id . "' 
-				AND store_id = '" . $this->storeId . "'
-				AND language_id = '" . $this->languageId . "'
-				LIMIT 1"
-			);
+			$category_keyword = $this->getSeoKeyword('category_id=' . (int)$current_id);
 
-			// If not found in current language, try all languages
-			if (!$seo_query->num_rows) {
-				$seo_query = $this->db->query(
-					"SELECT keyword FROM " . DB_PREFIX . "seo_url 
-					WHERE query = 'category_id=" . (int)$current_id . "' 
-					AND store_id = '" . $this->storeId . "'
-					LIMIT 1"
-				);
-			}
-
-			if (!$seo_query->num_rows) {
+			if (!$category_keyword) {
 				return null; // SEO keyword not found
 			}
 
-			array_unshift($breadcrumb, $seo_query->row['keyword']);
+			array_unshift($breadcrumb, $category_keyword);
 
 			// Get parent category ID
 			$parent_query = $this->db->query(

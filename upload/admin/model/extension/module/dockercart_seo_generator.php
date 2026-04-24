@@ -8,6 +8,7 @@
 class ModelExtensionModuleDockercartSeoGenerator extends Model {
     private $logger;
     private $seo_log_schema_checked = false;
+	private $seo_url_cache_dirty = false;
 
     /**
      * Constructor - Initialize logger
@@ -18,6 +19,20 @@ class ModelExtensionModuleDockercartSeoGenerator extends Model {
         // Initialize centralized logger
         require_once DIR_SYSTEM . 'library/dockercart_logger.php';
         $this->logger = new DockercartLogger($this->registry, 'seo_generator');
+    }
+
+    private function markSeoUrlCacheDirty() {
+        $this->seo_url_cache_dirty = true;
+    }
+
+    private function flushSeoUrlCacheInvalidation() {
+        if (!$this->seo_url_cache_dirty) {
+            return;
+        }
+
+        $this->load->model('design/seo_url');
+        $this->model_design_seo_url->invalidateSeoUrlCache();
+        $this->seo_url_cache_dirty = false;
     }
 
     /**
@@ -234,6 +249,7 @@ class ModelExtensionModuleDockercartSeoGenerator extends Model {
         }
 
         $this->logger->info("generateSeoData finished: processed={$result['processed']}, updated={$result['updated']}, total={$result['total']}");
+		$this->flushSeoUrlCacheInvalidation();
 
         return $result;
     }
@@ -593,6 +609,7 @@ class ModelExtensionModuleDockercartSeoGenerator extends Model {
                 WHERE `query` = '" . $this->db->escape($query_value) . "' 
                 AND `language_id` = '" . (int)$language_id . "'
             ");
+			$this->markSeoUrlCacheDirty();
 
             return true;
         } else {
@@ -604,6 +621,7 @@ class ModelExtensionModuleDockercartSeoGenerator extends Model {
                     `language_id` = '" . (int)$language_id . "',
                     `store_id` = '0'
             ");
+			$this->markSeoUrlCacheDirty();
 
             return true;
         }
@@ -764,6 +782,8 @@ class ModelExtensionModuleDockercartSeoGenerator extends Model {
         if ($this->config->get('module_dockercart_seo_generator_debug')) {
             $this->logGeneration($entity_type, $entity_id, $language_id, $generated);
         }
+
+		$this->flushSeoUrlCacheInvalidation();
         
         return true;
     }
@@ -1709,6 +1729,8 @@ class ModelExtensionModuleDockercartSeoGenerator extends Model {
                 $result['processed']++;
             }
         }
+
+		$this->flushSeoUrlCacheInvalidation();
         
         return $result;
     }
@@ -1845,6 +1867,8 @@ class ModelExtensionModuleDockercartSeoGenerator extends Model {
                 `query` = '" . $this->db->escape($query) . "',
                 `keyword` = '" . $this->db->escape($seo_url) . "'
         ");
+
+		$this->markSeoUrlCacheDirty();
     }
     
     /**
@@ -1872,6 +1896,7 @@ class ModelExtensionModuleDockercartSeoGenerator extends Model {
         
         // Сохраняем SEO URL
         $this->saveSeoUrlForController($route, $seo_url, $language_id);
+		$this->flushSeoUrlCacheInvalidation();
         
         return true;
     }
@@ -1889,6 +1914,8 @@ class ModelExtensionModuleDockercartSeoGenerator extends Model {
         }
 
         $this->db->query("DELETE FROM `" . DB_PREFIX . "seo_url` WHERE `query` = '" . $this->db->escape($route) . "' AND `language_id` = '" . (int)$language_id . "'");
+        $this->markSeoUrlCacheDirty();
+        $this->flushSeoUrlCacheInvalidation();
 
         return true;
     }
