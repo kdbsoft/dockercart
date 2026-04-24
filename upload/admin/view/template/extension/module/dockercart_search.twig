@@ -233,9 +233,13 @@ $(document).on('click', '.js-search-tab', function(e) {
 
 updateSearchPanelHeader($('#search-tabs > li.active a.js-search-tab'));
 
+var dcSearchUserToken = '{{ user_token|e('js') }}';
+var dcSearchTestConnectionUrl = 'index.php?route=extension/module/dockercart_search/testConnection&user_token=' + encodeURIComponent(dcSearchUserToken);
+var dcSearchReindexUrl = 'index.php?route=extension/module/dockercart_search/reindex&user_token=' + encodeURIComponent(dcSearchUserToken);
+
 function testConnection() {
   $.ajax({
-    url: '{{ test_connection_url }}',
+    url: dcSearchTestConnectionUrl,
     type: 'post',
     dataType: 'json',
     beforeSend: function() {
@@ -266,7 +270,7 @@ function reindexAll() {
   $('#reindex-result').html('');
 
   $.ajax({
-    url: '{{ reindex_url }}',
+    url: dcSearchReindexUrl,
     type: 'post',
     dataType: 'json',
     success: function(json) {
