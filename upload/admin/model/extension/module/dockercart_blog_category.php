@@ -39,6 +39,7 @@ class ModelExtensionModuleDockercartBlogCategory extends Model {
 
 		// SEO URLs (blog-specific)
 		if (isset($data['category_seo_url'])) {
+			$seo_url_updated = false;
 			foreach ($data['category_seo_url'] as $store_id => $language) {
 				foreach ($language as $language_id => $keyword) {
 					if (trim($keyword)) {
@@ -47,8 +48,14 @@ class ModelExtensionModuleDockercartBlogCategory extends Model {
 							language_id = '" . (int)$language_id . "', 
 							query = 'blog_category_id=" . (int)$category_id . "', 
 							keyword = '" . $this->db->escape($keyword) . "'");
+						$seo_url_updated = true;
 					}
 				}
+			}
+
+			if ($seo_url_updated) {
+				$this->load->model('design/seo_url');
+				$this->model_design_seo_url->invalidateSeoUrlCache();
 			}
 		}
 
@@ -93,6 +100,7 @@ class ModelExtensionModuleDockercartBlogCategory extends Model {
 
 		// Update SEO URLs (blog-specific)
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "blog_seo_url` WHERE query = 'blog_category_id=" . (int)$category_id . "'");
+		$seo_url_updated = true;
 
 		if (isset($data['category_seo_url'])) {
 			foreach ($data['category_seo_url'] as $store_id => $language) {
@@ -108,6 +116,11 @@ class ModelExtensionModuleDockercartBlogCategory extends Model {
 			}
 		}
 
+		if ($seo_url_updated) {
+			$this->load->model('design/seo_url');
+			$this->model_design_seo_url->invalidateSeoUrlCache();
+		}
+
 		$this->cache->delete('blog.category');
 	}
 
@@ -117,6 +130,8 @@ class ModelExtensionModuleDockercartBlogCategory extends Model {
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "blog_category_to_store` WHERE category_id = '" . (int)$category_id . "'");
 		// Remove blog-specific SEO URLs
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "blog_seo_url` WHERE query = 'blog_category_id=" . (int)$category_id . "'");
+		$this->load->model('design/seo_url');
+		$this->model_design_seo_url->invalidateSeoUrlCache();
 		$this->cache->delete('blog.category');
 	}
 

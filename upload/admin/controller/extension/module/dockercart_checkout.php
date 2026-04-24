@@ -523,6 +523,7 @@ class ControllerExtensionModuleDockercartCheckout extends Controller {
         }
 
         // Add SEO URL if SEO URLs are enabled
+        $seo_url_changed = false;
         if ($this->config->get('config_seo_url')) {
             // Check all languages
             $this->load->model('localisation/language');
@@ -541,9 +542,15 @@ class ControllerExtensionModuleDockercartCheckout extends Controller {
                         `language_id` = '" . (int)$language['language_id'] . "',
                         `query` = 'checkout/dockercart_checkout',
                         `keyword` = 'fast-checkout'");
+                    $seo_url_changed = true;
                 }
             }
         }
+
+		if ($seo_url_changed) {
+			$this->load->model('design/seo_url');
+			$this->model_design_seo_url->invalidateSeoUrlCache();
+		}
 
         $this->logger->info('Module installed successfully');
     }
@@ -560,6 +567,8 @@ class ControllerExtensionModuleDockercartCheckout extends Controller {
 
         // Remove SEO URLs
         $this->db->query("DELETE FROM `" . DB_PREFIX . "seo_url` WHERE `query` = 'checkout/dockercart_checkout'");
+		$this->load->model('design/seo_url');
+		$this->model_design_seo_url->invalidateSeoUrlCache();
 
         // Remove layout
         $query = $this->db->query("SELECT layout_id FROM `" . DB_PREFIX . "layout` WHERE `name` = '" . $this->db->escape($layout_name) . "'");

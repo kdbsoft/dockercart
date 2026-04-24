@@ -1,15 +1,30 @@
 <?php
 class ModelDesignSeoUrl extends Model {
+	private const SEO_URL_CACHE_VERSION_KEY = 'dockercart.seo_url_cache.version';
+
 	public function addSeoUrl($data) {
 		$this->db->query("INSERT INTO `" . DB_PREFIX . "seo_url` SET store_id = '" . (int)$data['store_id'] . "', language_id = '" . (int)$data['language_id'] . "', query = '" . $this->db->escape($data['query']) . "', keyword = '" . $this->db->escape($data['keyword']) . "'");
+		$this->invalidateSeoUrlCache();
 	}
 
 	public function editSeoUrl($seo_url_id, $data) {
 		$this->db->query("UPDATE `" . DB_PREFIX . "seo_url` SET store_id = '" . (int)$data['store_id'] . "', language_id = '" . (int)$data['language_id'] . "', query = '" . $this->db->escape($data['query']) . "', keyword = '" . $this->db->escape($data['keyword']) . "' WHERE seo_url_id = '" . (int)$seo_url_id . "'");
+		$this->invalidateSeoUrlCache();
 	}
 
 	public function deleteSeoUrl($seo_url_id) {
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "seo_url` WHERE seo_url_id = '" . (int)$seo_url_id . "'");
+		$this->invalidateSeoUrlCache();
+	}
+
+	public function invalidateSeoUrlCache() {
+		$version = (int)$this->cache->get(self::SEO_URL_CACHE_VERSION_KEY);
+
+		if ($version < 1) {
+			$version = 1;
+		}
+
+		$this->cache->set(self::SEO_URL_CACHE_VERSION_KEY, $version + 1);
 	}
 	
 	public function getSeoUrl($seo_url_id) {

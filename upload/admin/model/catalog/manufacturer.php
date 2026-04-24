@@ -29,12 +29,19 @@ class ModelCatalogManufacturer extends Model {
 				
 		// SEO URL
 		if (isset($data['manufacturer_seo_url'])) {
+			$seo_url_updated = false;
 			foreach ($data['manufacturer_seo_url'] as $store_id => $language) {
 				foreach ($language as $language_id => $keyword) {
 					if (!empty($keyword)) {
 						$this->db->query("INSERT INTO " . DB_PREFIX . "seo_url SET store_id = '" . (int)$store_id . "', language_id = '" . (int)$language_id . "', query = 'manufacturer_id=" . (int)$manufacturer_id . "', keyword = '" . $this->db->escape($keyword) . "'");
+						$seo_url_updated = true;
 					}
 				}
+			}
+
+			if ($seo_url_updated) {
+				$this->load->model('design/seo_url');
+				$this->model_design_seo_url->invalidateSeoUrlCache();
 			}
 		}
 		
@@ -73,6 +80,7 @@ class ModelCatalogManufacturer extends Model {
 		}
 
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "seo_url` WHERE query = 'manufacturer_id=" . (int)$manufacturer_id . "'");
+		$seo_url_updated = true;
 
 		if (isset($data['manufacturer_seo_url'])) {
 			foreach ($data['manufacturer_seo_url'] as $store_id => $language) {
@@ -84,6 +92,11 @@ class ModelCatalogManufacturer extends Model {
 			}
 		}
 
+		if ($seo_url_updated) {
+			$this->load->model('design/seo_url');
+			$this->model_design_seo_url->invalidateSeoUrlCache();
+		}
+
 		$this->cache->delete('manufacturer');
 	}
 
@@ -92,6 +105,9 @@ class ModelCatalogManufacturer extends Model {
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "manufacturer_description` WHERE manufacturer_id = '" . (int)$manufacturer_id . "'");
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "manufacturer_to_store` WHERE manufacturer_id = '" . (int)$manufacturer_id . "'");
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "seo_url` WHERE query = 'manufacturer_id=" . (int)$manufacturer_id . "'");
+
+		$this->load->model('design/seo_url');
+		$this->model_design_seo_url->invalidateSeoUrlCache();
 
 		$this->cache->delete('manufacturer');
 	}

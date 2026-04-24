@@ -17,12 +17,19 @@ class ModelCatalogInformation extends Model {
 
 		// SEO URL
 		if (isset($data['information_seo_url'])) {
+			$seo_url_updated = false;
 			foreach ($data['information_seo_url'] as $store_id => $language) {
 				foreach ($language as $language_id => $keyword) {
 					if (!empty($keyword)) {
 						$this->db->query("INSERT INTO " . DB_PREFIX . "seo_url SET store_id = '" . (int)$store_id . "', language_id = '" . (int)$language_id . "', query = 'information_id=" . (int)$information_id . "', keyword = '" . $this->db->escape($keyword) . "'");
+						$seo_url_updated = true;
 					}
 				}
+			}
+
+			if ($seo_url_updated) {
+				$this->load->model('design/seo_url');
+				$this->model_design_seo_url->invalidateSeoUrlCache();
 			}
 		}
 		
@@ -55,6 +62,7 @@ class ModelCatalogInformation extends Model {
 		}
 
 		$this->db->query("DELETE FROM " . DB_PREFIX . "seo_url WHERE query = 'information_id=" . (int)$information_id . "'");
+		$seo_url_updated = true;
 
 		if (isset($data['information_seo_url'])) {
 			foreach ($data['information_seo_url'] as $store_id => $language) {
@@ -64,6 +72,11 @@ class ModelCatalogInformation extends Model {
 					}
 				}
 			}
+		}
+
+		if ($seo_url_updated) {
+			$this->load->model('design/seo_url');
+			$this->model_design_seo_url->invalidateSeoUrlCache();
 		}
 
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "information_to_layout` WHERE information_id = '" . (int)$information_id . "'");
@@ -83,6 +96,9 @@ class ModelCatalogInformation extends Model {
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "information_to_store` WHERE information_id = '" . (int)$information_id . "'");
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "information_to_layout` WHERE information_id = '" . (int)$information_id . "'");
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "seo_url` WHERE query = 'information_id=" . (int)$information_id . "'");
+
+		$this->load->model('design/seo_url');
+		$this->model_design_seo_url->invalidateSeoUrlCache();
 
 		$this->cache->delete('information');
 	}
