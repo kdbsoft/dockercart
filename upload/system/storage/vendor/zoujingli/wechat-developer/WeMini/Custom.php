@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------
 // | WeChatDeveloper
 // +----------------------------------------------------------------------
-// | 版权所有 2014~2025 ThinkAdmin [ thinkadmin.top ]
+// | 版权所有 2014~2026 ThinkAdmin [ thinkadmin.top ]
 // +----------------------------------------------------------------------
 // | 官方网站: https://thinkadmin.top
 // +----------------------------------------------------------------------
@@ -20,11 +20,23 @@ use WeChat\Contracts\BasicWeChat;
 
 /**
  * 小程序客服服务
- * Class Custom
  * @package WeMini
  */
 class Custom extends BasicWeChat
 {
+
+    /**
+     * 发送小程序客服消息
+     * @param array $data
+     * @return array
+     * @throws \WeChat\Exceptions\InvalidResponseException
+     * @throws \WeChat\Exceptions\LocalCacheException
+     */
+    public function sendCustomMessage($data)
+    {
+        $url = 'https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=ACCESS_TOKEN';
+        return $this->callPostApi($url, $data, true);
+    }
 
     /**
      * 创建商户

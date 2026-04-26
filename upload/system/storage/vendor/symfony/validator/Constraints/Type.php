@@ -11,11 +11,12 @@
 
 namespace Symfony\Component\Validator\Constraints;
 
+use Symfony\Component\Validator\Attribute\HasNamedArguments;
 use Symfony\Component\Validator\Constraint;
+use Symfony\Component\Validator\Exception\MissingOptionsException;
 
 /**
- * @Annotation
- * @Target({"PROPERTY", "METHOD", "ANNOTATION"})
+ * Validates that a value is of a specific data type.
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
@@ -24,44 +25,64 @@ class Type extends Constraint
 {
     public const INVALID_TYPE_ERROR = 'ba785a8c-82cb-4283-967c-3cf342181b40';
 
-    protected static $errorNames = [
+    protected const ERROR_NAMES = [
         self::INVALID_TYPE_ERROR => 'INVALID_TYPE_ERROR',
     ];
 
-    public $message = 'This value should be of type {{ type }}.';
-    public $type;
+    public string $message = 'This value should be of type {{ type }}.';
+    public string|array|null $type = null;
 
     /**
-     * {@inheritdoc}
-     *
-     * @param string|array $type One ore multiple types to validate against or a set of options
+     * @param string|list<string>|null $type   The type(s) to enforce on the value
+     * @param string[]|null            $groups
      */
-    public function __construct($type, ?string $message = null, ?array $groups = null, $payload = null, array $options = [])
+    #[HasNamedArguments]
+    public function __construct(string|array|null $type, ?string $message = null, ?array $groups = null, mixed $payload = null, ?array $options = null)
     {
+        if (null === $type && !isset($options['type'])) {
+            throw new MissingOptionsException(\sprintf('The options "type" must be set for constraint "%s".', self::class), ['type']);
+        }
+
         if (\is_array($type) && \is_string(key($type))) {
-            $options = array_merge($type, $options);
+            trigger_deprecation('symfony/validator', '7.3', 'Passing an array of options to configure the "%s" constraint is deprecated, use named arguments instead.', static::class);
+
+            $options = array_merge($type, $options ?? []);
+            $type = $options['type'] ?? null;
         } elseif (null !== $type) {
-            $options['value'] = $type;
+            if (\is_array($options)) {
+                trigger_deprecation('symfony/validator', '7.3', 'Passing an array of options to configure the "%s" constraint is deprecated, use named arguments instead.', static::class);
+            }
+        } elseif (\is_array($options)) {
+            trigger_deprecation('symfony/validator', '7.3', 'Passing an array of options to configure the "%s" constraint is deprecated, use named arguments instead.', static::class);
         }
 
         parent::__construct($options, $groups, $payload);
 
         $this->message = $message ?? $this->message;
+        $this->type = $type ?? $this->type;
     }
 
     /**
-     * {@inheritdoc}
+     * @deprecated since Symfony 7.4
      */
-    public function getDefaultOption()
+    public function getDefaultOption(): ?string
     {
+        if (0 === \func_num_args() || func_get_arg(0)) {
+            trigger_deprecation('symfony/validator', '7.4', 'The %s() method is deprecated.', __METHOD__);
+        }
+
         return 'type';
     }
 
     /**
-     * {@inheritdoc}
+     * @deprecated since Symfony 7.4
      */
-    public function getRequiredOptions()
+    public function getRequiredOptions(): array
     {
+        if (0 === \func_num_args() || func_get_arg(0)) {
+            trigger_deprecation('symfony/validator', '7.4', 'The %s() method is deprecated.', __METHOD__);
+        }
+
         return ['type'];
     }
 }

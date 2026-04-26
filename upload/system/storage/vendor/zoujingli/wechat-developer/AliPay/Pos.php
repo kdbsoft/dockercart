@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------
 // | WeChatDeveloper
 // +----------------------------------------------------------------------
-// | 版权所有 2014~2025 ThinkAdmin [ thinkadmin.top ]
+// | 版权所有 2014~2026 ThinkAdmin [ thinkadmin.top ]
 // +----------------------------------------------------------------------
 // | 官方网站: https://thinkadmin.top
 // +----------------------------------------------------------------------
@@ -20,14 +20,13 @@ use WeChat\Contracts\BasicAliPay;
 
 /**
  * 支付宝刷卡支付
- * Class Pos
  * @package AliPay
  */
 class Pos extends BasicAliPay
 {
     /**
-     * Pos constructor.
-     * @param array $options
+     * 构造函数
+     * @param array $options 支付宝配置参数
      */
     public function __construct(array $options)
     {
@@ -37,9 +36,9 @@ class Pos extends BasicAliPay
     }
 
     /**
-     * 创建数据操作
-     * @param array $options
-     * @return array|bool
+     * 刷卡支付（条码/声波）下单
+     * @param array $options 订单参数（out_trade_no, auth_code, subject, total_amount 等）
+     * @return array 支付结果
      * @throws \WeChat\Exceptions\InvalidResponseException
      * @throws \WeChat\Exceptions\LocalCacheException
      */

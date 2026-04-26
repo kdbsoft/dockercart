@@ -11,11 +11,13 @@
 
 namespace Symfony\Component\Validator\Constraints;
 
+use Symfony\Component\Validator\Attribute\HasNamedArguments;
 use Symfony\Component\Validator\Constraint;
 
 /**
- * @Annotation
- * @Target({"PROPERTY", "METHOD", "ANNOTATION"})
+ * Validates that a value is a valid bank account number according to the IBAN format.
+ *
+ * @see https://en.wikipedia.org/wiki/International_Bank_Account_Number
  *
  * @author Manuel Reinhard <manu@sprain.ch>
  * @author Michael Schummel
@@ -30,7 +32,7 @@ class Iban extends Constraint
     public const INVALID_FORMAT_ERROR = 'c8d318f1-2ecc-41ba-b983-df70d225cf5a';
     public const NOT_SUPPORTED_COUNTRY_CODE_ERROR = 'e2c259f3-4b46-48e6-b72e-891658158ec8';
 
-    protected static $errorNames = [
+    protected const ERROR_NAMES = [
         self::INVALID_COUNTRY_CODE_ERROR => 'INVALID_COUNTRY_CODE_ERROR',
         self::INVALID_CHARACTERS_ERROR => 'INVALID_CHARACTERS_ERROR',
         self::CHECKSUM_FAILED_ERROR => 'CHECKSUM_FAILED_ERROR',
@@ -38,10 +40,18 @@ class Iban extends Constraint
         self::NOT_SUPPORTED_COUNTRY_CODE_ERROR => 'NOT_SUPPORTED_COUNTRY_CODE_ERROR',
     ];
 
-    public $message = 'This is not a valid International Bank Account Number (IBAN).';
+    public string $message = 'This is not a valid International Bank Account Number (IBAN).';
 
-    public function __construct(?array $options = null, ?string $message = null, ?array $groups = null, $payload = null)
+    /**
+     * @param string[]|null $groups
+     */
+    #[HasNamedArguments]
+    public function __construct(?array $options = null, ?string $message = null, ?array $groups = null, mixed $payload = null)
     {
+        if (\is_array($options)) {
+            trigger_deprecation('symfony/validator', '7.3', 'Passing an array of options to configure the "%s" constraint is deprecated, use named arguments instead.', static::class);
+        }
+
         parent::__construct($options, $groups, $payload);
 
         $this->message = $message ?? $this->message;
