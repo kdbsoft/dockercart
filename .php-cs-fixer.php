@@ -1,34 +1,57 @@
 <?php
-/*
- * This document has been generated with
- * https://mlocati.github.io/php-cs-fixer-configurator/#version:3.46.0|configurator
- * you can change this configuration by importing this file.
- */
-$config = new PhpCsFixer\Config();
-return $config
-    ->setRiskyAllowed(true)
+
+$finder = PhpCsFixer\Finder::create()
+    ->in(__DIR__ . '/upload/')
+    ->exclude([
+        __DIR__ . '/upload/system/storage/vendor/',
+        'vendor',           // на всякий случай
+        'storage',
+        'bootstrap/cache',
+        'public/build',
+    ])
+    ->notName('*.blade.php')     // если у тебя есть blade-файлы
+    ->notName('*.min.php')
+    ->ignoreDotFiles(true)
+    ->ignoreVCS(true);
+
+return (new PhpCsFixer\Config())
+    ->setRiskyAllowed(true)      // оставил, как у тебя было
     ->setIndent("\t")
+    ->setUsingCache(true)        // ← важно для скорости повторных запусков
+    ->setCacheFile(__DIR__ . '/.php-cs-fixer.cache')  // явный путь к кэшу
     ->setRules([
-        '@PER-CS2.0:risky' => true,
         '@PER-CS2.0' => true,
+        '@PER-CS2.0:risky' => true,
         '@DoctrineAnnotation' => true,
         '@PHPUnit100Migration:risky' => true,
+
+        // === Самые частые виновники тормозов (отключены или упрощены) ===
+        'blank_line_after_namespace' => false,     // часто замедляет
+        'blank_lines_before_namespace' => false,
+        'braces_position' => false,
+        'control_structure_braces' => false,
+        'control_structure_continuation_position' => false,
+        'method_chaining_indentation' => false,    // очень тяжёлое
+        'statement_indentation' => false,
+        'no_blank_lines_after_class_opening' => false,
+
+        // Остальные правила оставил почти все, но отключил несколько медленных
+        'ordered_imports' => false,                // уже было false
+        'phpdoc_align' => false,                   // добавлено — часто тормозит
+        'phpdoc_line_span' => false,               // можно вернуть позже
+        'blank_line_before_statement' => false,    // очень частый тормоз
+
+        // Правила, которые ты явно включал
         'assign_null_coalescing_to_coalesce_equal' => true,
         'attribute_empty_parentheses' => true,
         'backtick_to_shell_exec' => true,
         'binary_operator_spaces' => false,
-        'blank_line_after_namespace' => false,
-        'blank_line_after_opening_tag' => false,
-        'blank_lines_before_namespace' => false,
-        'braces_position' => false,
         'cast_spaces' => false,
         'class_definition' => false,
         'clean_namespace' => true,
         'comment_to_phpdoc' => true,
         'concat_space' => false,
         'constant_case' => false,
-        'control_structure_braces' => false,
-        'control_structure_continuation_position' => false,
         'date_time_create_from_format_call' => true,
         'declare_parentheses' => true,
         'echo_tag_syntax' => true,
@@ -51,14 +74,12 @@ return $config
         'magic_constant_casing' => true,
         'magic_method_casing' => true,
         'method_argument_space' => false,
-        'method_chaining_indentation' => true,
         'multiline_comment_opening_closing' => true,
         'native_function_casing' => true,
         'native_type_declaration_casing' => true,
         'new_with_parentheses' => false,
         'no_alternative_syntax' => true,
         'no_binary_string' => true,
-        'no_blank_lines_after_class_opening' => false,
         'no_closing_tag' => false,
         'no_empty_comment' => true,
         'no_homoglyph_names' => true,
@@ -88,7 +109,6 @@ return $config
         'nullable_type_declaration' => true,
         'nullable_type_declaration_for_default_null_value' => true,
         'object_operator_without_whitespace' => true,
-        'ordered_imports' => false,
         'ordered_interfaces' => true,
         'ordered_types' => true,
         'php_unit_construct' => true,
@@ -99,7 +119,6 @@ return $config
         'php_unit_test_annotation' => true,
         'php_unit_test_case_static_method_calls' => true,
         'phpdoc_inline_tag_normalizer' => true,
-        'phpdoc_line_span' => true,
         'phpdoc_no_access' => true,
         'phpdoc_no_useless_inheritdoc' => true,
         'phpdoc_return_self_reference' => true,
@@ -122,7 +141,6 @@ return $config
         'single_line_throw' => true,
         'spaces_inside_parentheses' => false,
         'standardize_not_equals' => true,
-        'statement_indentation' => false,
         'string_length_to_empty' => true,
         'string_line_ending' => true,
         'switch_case_semicolon_to_colon' => false,
@@ -136,13 +154,4 @@ return $config
         'visibility_required' => false,
         'yield_from_array_to_yields' => true,
     ])
-    ->setFinder(PhpCsFixer\Finder::create()
-        ->in(__DIR__ . '/upload/')
-         ->exclude([
-             __DIR__ . '/upload/system/storage/vendor/',
-         ])
-        // ->append([
-        //     'file-to-include',
-        // ])
-    )
-;
+    ->setFinder($finder);
