@@ -1,3 +1,9 @@
+## [1.0.5](https://github.com/mathflow-bit/dockercart/compare/v1.0.4...v1.0.5) (2026-04-26)
+
+### Bug Fixes
+
+* fix certbot autorestart container in standalone mode ([19f5684](https://github.com/mathflow-bit/dockercart/commit/19f5684e01fa6801983de5cf234bdffdeefc5562))
+
 ## [1.0.4](https://github.com/mathflow-bit/dockercart/compare/v1.0.3...v1.0.4) (2026-04-26)
 
 ### Bug Fixes
