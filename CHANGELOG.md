@@ -1,3 +1,9 @@
+## [1.0.15](https://github.com/mathflow-bit/dockercart/compare/v1.0.14...v1.0.15) (2026-04-26)
+
+### Bug Fixes
+
+* update.sh ([fe8c7d4](https://github.com/mathflow-bit/dockercart/commit/fe8c7d4abe32fe2eff2197ae628e78c2ee6aaacd))
+
 ## [1.0.14](https://github.com/mathflow-bit/dockercart/compare/v1.0.13...v1.0.14) (2026-04-26)
 
 ### Bug Fixes
