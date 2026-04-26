@@ -1,3 +1,9 @@
+## [1.0.7](https://github.com/mathflow-bit/dockercart/compare/v1.0.6...v1.0.7) (2026-04-26)
+
+### Bug Fixes
+
+* version volumes ([4863d43](https://github.com/mathflow-bit/dockercart/commit/4863d43f56f214d0927d39ff58ae60a9c3e10d7a))
+
 ## [1.0.6](https://github.com/mathflow-bit/dockercart/compare/v1.0.5...v1.0.6) (2026-04-26)
 
 ### Bug Fixes
