@@ -96,6 +96,10 @@ export-yml-[0-9]*-*.xml
 build-extension.sh
 .bmad/
 .github/
+!/.github/
+/.github/*
+!/.github/workflows/
+!/.github/workflows/**
 
 # Local documentation drafts and working notes
 /docs/
@@ -117,6 +121,7 @@ DOCUMENTATION.md
 PRODUCTION.md
 SSL_SETUP.md
 CHANGELOG.md
+!/CHANGELOG.md
 QUICK_START.md
 
 # Temporary test/debug scripts

@@ -369,9 +369,17 @@ See [`.env.example`](.env.example) for a complete reference.
 ## Contributing
 
 1. Fork the repository and create a feature branch
-2. Write focused commits with clear messages
+2. Write focused commits using Conventional Commits, for example `feat: add cache invalidation` or `fix: handle standalone SSL redirect`
 3. Test your changes with `make standalone`
 4. Submit a pull request describing the change and its motivation
+
+---
+
+## Releases
+
+- Releases are cut automatically from `main` via `semantic-release`
+- The release source of truth is the Git tag (`vX.Y.Z`), with `CHANGELOG.md`, `VERSION`, `package.json`, and `package-lock.json` synchronized during release
+- Preview the next calculated release locally with `npm run release:dry-run`
 
 ---
 
