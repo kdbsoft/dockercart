@@ -79,7 +79,7 @@ standalone-letsencrypt: ## Start standalone mode + Let's Encrypt SSL (no Traefik
 	echo "Starting standalone HTTP stack for ACME webroot challenge..."; \
 	docker compose -f docker-compose.standalone.yml up -d --build; \
 	echo "Requesting/renewing Let's Encrypt certificate for $${SSL_DOMAIN}..."; \
-	docker compose -f docker-compose.standalone.yml -f docker-compose.standalone.letsencrypt.yml run --rm --no-deps certbot certonly \
+	docker compose -f docker-compose.standalone.yml -f docker-compose.standalone.letsencrypt.yml run --rm --no-deps --entrypoint certbot certbot certonly \
 		--webroot -w /var/www/certbot \
 		--email "$${SSL_EMAIL}" \
 		--agree-tos \
