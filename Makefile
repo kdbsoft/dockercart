@@ -71,23 +71,32 @@ standalone-letsencrypt: ## Start standalone mode + Let's Encrypt SSL (no Traefik
 		echo "   Set SSL_EMAIL=admin@your-domain.tld"; \
 		exit 1; \
 	fi; \
-	mkdir -p docker/letsencrypt/www; \
-	if [ -d docker/letsencrypt/live/dockercart ] && [ ! -f docker/letsencrypt/renewal/dockercart.conf ]; then \
-		echo "Removing stale bootstrap lineage docker/letsencrypt/live/dockercart"; \
-		rm -rf docker/letsencrypt/live/dockercart docker/letsencrypt/archive/dockercart; \
+	LE_DATA_DIR="$${LETSENCRYPT_DATA_DIR:-docker/letsencrypt}"; \
+	LE_WEBROOT_DIR="$${LETSENCRYPT_WEBROOT_DIR:-$${LE_DATA_DIR}/www}"; \
+	RENEW_INTERVAL="$${CERTBOT_RENEW_INTERVAL:-24h}"; \
+	mkdir -p "$$LE_DATA_DIR" "$$LE_WEBROOT_DIR"; \
+	if [ -d "$$LE_DATA_DIR/live/dockercart" ] && [ ! -f "$$LE_DATA_DIR/renewal/dockercart.conf" ]; then \
+		echo "Removing stale bootstrap lineage $$LE_DATA_DIR/live/dockercart"; \
+		rm -rf "$$LE_DATA_DIR/live/dockercart" "$$LE_DATA_DIR/archive/dockercart"; \
 	fi; \
 	echo "Starting standalone HTTP stack for ACME webroot challenge..."; \
 	docker compose -f docker-compose.standalone.yml up -d --build; \
-	echo "Requesting/renewing Let's Encrypt certificate for $${SSL_DOMAIN}..."; \
-	docker compose -f docker-compose.standalone.yml -f docker-compose.standalone.letsencrypt.yml run --rm --no-deps --entrypoint certbot certbot certonly \
-		--webroot -w /var/www/certbot \
-		--email "$${SSL_EMAIL}" \
-		--agree-tos \
-		--no-eff-email \
-		--non-interactive \
-		--keep-until-expiring \
-		--cert-name dockercart \
-		-d "$${SSL_DOMAIN}"; \
+	CERT_PATH="$$LE_DATA_DIR/live/dockercart/fullchain.pem"; \
+	RENEWAL_CONF_PATH="$$LE_DATA_DIR/renewal/dockercart.conf"; \
+	if [ -f "$$CERT_PATH" ] && [ -f "$$RENEWAL_CONF_PATH" ] && command -v openssl >/dev/null 2>&1 && openssl x509 -checkend 2592000 -noout -in "$$CERT_PATH" >/dev/null 2>&1; then \
+		echo "Existing certificate is valid for more than 30 days — skipping new issuance."; \
+	else \
+		echo "Requesting/renewing Let's Encrypt certificate for $${SSL_DOMAIN}..."; \
+		docker compose -f docker-compose.standalone.yml -f docker-compose.standalone.letsencrypt.yml run --rm --no-deps --entrypoint certbot certbot certonly \
+			--webroot -w /var/www/certbot \
+			--email "$${SSL_EMAIL}" \
+			--agree-tos \
+			--no-eff-email \
+			--non-interactive \
+			--keep-until-expiring \
+			--cert-name dockercart \
+			-d "$${SSL_DOMAIN}"; \
+	fi; \
 	echo "Switching stack to standalone HTTPS mode..."; \
 	docker compose -f docker-compose.standalone.yml -f docker-compose.standalone.letsencrypt.yml up -d --build; \
 	docker compose -f docker-compose.standalone.yml -f docker-compose.standalone.letsencrypt.yml exec -T nginx nginx -s reload; \
@@ -95,7 +104,7 @@ standalone-letsencrypt: ## Start standalone mode + Let's Encrypt SSL (no Traefik
 	echo "Store: https://$${SSL_DOMAIN}"; \
 	echo "Admin: https://$${SSL_DOMAIN}/admin"; \
 	echo "HTTP challenge endpoint: http://$${SSL_DOMAIN}/.well-known/acme-challenge/"; \
-	echo "Auto-renewal: certbot service renews every 12h"
+	echo "Auto-renewal: certbot service checks every $$RENEW_INTERVAL (renews only near expiry)"
 
 ssl: ## Start with self-signed SSL certificate
 	@./start.sh --ssl
