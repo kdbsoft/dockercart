@@ -10,8 +10,8 @@ services:
     ports:
       - "${DOCKERCART_HTTPS_PORT:-443}:443"
     volumes:
-      - ./docker/letsencrypt:/etc/letsencrypt
-      - ./docker/letsencrypt/www:/var/www/certbot
+      - ${LETSENCRYPT_DATA_DIR:-./docker/letsencrypt}:/etc/letsencrypt
+      - ${LETSENCRYPT_WEBROOT_DIR:-./docker/letsencrypt/www}:/var/www/certbot
       - ./docker/nginx/ssl/dockercart.ssl.conf:/etc/nginx/conf.d/dockercart.ssl.conf:ro
 
   certbot:
@@ -22,14 +22,14 @@ services:
     depends_on:
       - nginx
     volumes:
-      - ./docker/letsencrypt:/etc/letsencrypt
-      - ./docker/letsencrypt/www:/var/www/certbot
+      - ${LETSENCRYPT_DATA_DIR:-./docker/letsencrypt}:/etc/letsencrypt
+      - ${LETSENCRYPT_WEBROOT_DIR:-./docker/letsencrypt/www}:/var/www/certbot
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
         trap exit TERM; while :; do
           certbot renew --webroot -w /var/www/certbot --quiet --deploy-hook "kill -HUP 1";
-          sleep 12h;
+          sleep "${CERTBOT_RENEW_INTERVAL:-24h}";
         done
     networks:
       - dockercart-network

@@ -193,7 +193,8 @@ Access: **`https://shop.example.com`**
 
 - Runs without Traefik (standalone compose + Nginx)
 - Obtains certs automatically via certbot (HTTP-01 challenge)
-- Keeps a renewal loop in `certbot` container (checks every 12h)
+- Keeps a renewal loop in `certbot` container (checks every 24h by default, renews only near expiry)
+- Reuses existing certificate/key from persistent storage to avoid unnecessary re-issuance
 - Uses `DOCKERCART_HTTPS_PORT` (default `443`) for HTTPS binding
 
 ---
@@ -348,6 +349,13 @@ PHP_UPLOAD_MAX_FILESIZE=100M
 # SSL / Let's Encrypt (production)
 SSL_DOMAIN=example.com
 SSL_EMAIL=admin@example.com
+
+# Persist LE state between rebuilds/deploys (important for rate-limit safety)
+LETSENCRYPT_DATA_DIR=./docker/letsencrypt
+LETSENCRYPT_WEBROOT_DIR=./docker/letsencrypt/www
+
+# Standalone certbot renewal check interval
+CERTBOT_RENEW_INTERVAL=24h
 ```
 
 See [`.env.example`](.env.example) for a complete reference.

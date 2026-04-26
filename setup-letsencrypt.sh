@@ -78,7 +78,7 @@ docker-compose -f docker-compose-letsencrypt.yml run --rm certbot certonly \
     --email "$SSL_EMAIL" \
     --agree-tos \
     --no-eff-email \
-    --force-renewal \
+    --keep-until-expiring \
     --non-interactive \
     -d "$SSL_DOMAIN" \
     -d "www.$SSL_DOMAIN" 2>&1 || {
