@@ -11,6 +11,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   syntax:
     name: PHP Syntax
@@ -84,8 +87,6 @@ jobs:
         run: composer require --dev --no-interaction -w friendsofphp/php-cs-fixer v3.95.1
 
       - name: Run PHP-CS-Fixer
-        env:
-          PHP_CS_FIXER_IGNORE_ENV: '1'
         run: |
           ./upload/system/storage/vendor/bin/php-cs-fixer fix --dry-run --diff --format=checkstyle > /tmp/cs-report.xml || true
-          cat /tmp/cs-report.xml | cs2pr
+          cs2pr /tmp/cs-report.xml
