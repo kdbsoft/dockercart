@@ -1,3 +1,9 @@
+## [1.0.14](https://github.com/mathflow-bit/dockercart/compare/v1.0.13...v1.0.14) (2026-04-26)
+
+### Bug Fixes
+
+* bug with version in docker container inodes ([4e8ac3a](https://github.com/mathflow-bit/dockercart/commit/4e8ac3a752026547f1c8f2ecfd0437fc7eb082dc))
+
 ## [1.0.13](https://github.com/mathflow-bit/dockercart/compare/v1.0.12...v1.0.13) (2026-04-26)
 
 ## [1.0.12](https://github.com/mathflow-bit/dockercart/compare/v1.0.11...v1.0.12) (2026-04-26)
