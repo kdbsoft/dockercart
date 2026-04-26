@@ -180,7 +180,7 @@ standalone-letsencrypt: ## Start standalone mode + Let's Encrypt SSL (no Traefik
 		fi; \
 	fi; \
 	echo "Switching stack to standalone HTTPS mode..."; \
-	docker compose -f docker-compose.standalone.yml -f docker-compose.standalone.letsencrypt.yml up -d --build; \
+	docker compose -f docker-compose.standalone.yml -f docker-compose.standalone.letsencrypt.yml up -d; \
 	docker compose -f docker-compose.standalone.yml -f docker-compose.standalone.letsencrypt.yml exec -T nginx nginx -s reload; \
 	echo ""; \
 	echo "Store: https://$${SSL_DOMAIN}"; \
