@@ -561,6 +561,7 @@ class ControllerExtensionModuleDockercartCheckout extends Controller {
     public function uninstall() {
         $this->load->model('setting/setting');
         $this->load->model('setting/event');
+        $layout_name = 'DockerCart Checkout';
 
         // Remove events
         $this->db->query("DELETE FROM `" . DB_PREFIX . "event` WHERE `code` LIKE 'dockercart_checkout_%'");

@@ -66,7 +66,6 @@ class ControllerExtensionModuleBanner extends Controller {
             $data['banners'][] = array(
                 'title'              => html_entity_decode((string)$result['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8'),
                 'title_html'         => $title_html,
-                'subtitle'           => isset($result['subtitle']) ? $result['subtitle'] : '',
                 'subtitle'           => isset($result['subtitle']) ? html_entity_decode((string)$result['subtitle'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : '',
                 'accent_text'        => isset($result['accent_text']) ? $result['accent_text'] : '',
                 'accent_color'       => $accent_color,

@@ -2,6 +2,7 @@
 
 class ControllerExtensionModuleDockercartFilter extends Controller {
     private $logger;
+    private $module_setting = array();
 
     /**
      * Constructor - Initialize logger
@@ -1850,6 +1851,33 @@ class ControllerExtensionModuleDockercartFilter extends Controller {
         $this->logger->debug('buildSeoUrl: Final URL: ' . $url);
 
         return $url;
+    }
+
+    private function normalizeUrlForComparison($url) {
+        $url = html_entity_decode((string)$url, ENT_QUOTES, 'UTF-8');
+
+        $parts = parse_url($url);
+        $path = isset($parts['path']) ? $parts['path'] : '';
+        $path = preg_replace('#/+#', '/', $path);
+        $path = rtrim($path, '/');
+
+        $query = '';
+        if (!empty($parts['query'])) {
+            parse_str($parts['query'], $query_params);
+            if (is_array($query_params)) {
+                ksort($query_params);
+                $query = http_build_query($query_params, '', '&', PHP_QUERY_RFC3986);
+            }
+        }
+
+        return $path . ($query !== '' ? '?' . $query : '');
+    }
+
+    private function encodeAttributeValue($value) {
+        $value = trim((string)$value);
+        $value = mb_strtolower($value, 'UTF-8');
+
+        return substr(md5($value), 0, 8);
     }
 
     public function updateFilters() {

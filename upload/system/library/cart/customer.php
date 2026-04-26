@@ -69,7 +69,7 @@ class Customer {
 					// Rotate token to prevent reuse
 					try {
 						$newToken = bin2hex(random_bytes(32));
-					} catch (Exception $e) {
+					} catch (\Exception $e) {
 						$newToken = bin2hex(openssl_random_pseudo_bytes(32));
 					}
 
@@ -114,7 +114,7 @@ class Customer {
 			// Generate remember token and set cookie for persistent login
 			try {
 				$token = bin2hex(random_bytes(32));
-			} catch (Exception $e) {
+			} catch (\Exception $e) {
 				$token = bin2hex(openssl_random_pseudo_bytes(32));
 			}
 
