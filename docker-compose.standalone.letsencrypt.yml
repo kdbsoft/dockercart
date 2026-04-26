@@ -25,11 +25,11 @@ services:
       - ./docker/letsencrypt:/etc/letsencrypt
       - ./docker/letsencrypt/www:/var/www/certbot
     entrypoint: ["/bin/sh", "-c"]
-    command: |
-      trap exit TERM
-      while :; do
-        certbot renew --webroot -w /var/www/certbot --quiet --deploy-hook "kill -HUP 1"
-        sleep 12h
-      done
+    command:
+      - |
+        trap exit TERM; while :; do
+          certbot renew --webroot -w /var/www/certbot --quiet --deploy-hook "kill -HUP 1";
+          sleep 12h;
+        done
     networks:
       - dockercart-network

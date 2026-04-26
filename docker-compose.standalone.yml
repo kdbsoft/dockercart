@@ -50,8 +50,9 @@ services:
         max-file: "3"
     # No ports exposed - Nginx handles external connections
     volumes:
-      - ./upload:/var/www/html
-      - ./storage:/var/www/storage
+      - ./upload:/var/www/html:Z
+      - ./storage:/var/www/storage:Z
+      - ./VERSION:/var/www/VERSION:ro,Z
     environment:
       - DB_HOSTNAME=${DB_HOSTNAME:-mariadb}
       - DB_USERNAME=${DB_USERNAME:-dockercart}

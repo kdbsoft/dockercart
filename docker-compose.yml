@@ -45,6 +45,7 @@ services:
     volumes:
       - ./upload:/var/www/html:Z
       - ./storage:/var/www/storage:Z
+      - ./VERSION:/var/www/VERSION:ro,Z
     environment:
       - DB_HOSTNAME=${DB_HOSTNAME:-mariadb}
       - DB_USERNAME=${DB_USERNAME:-dockercart}
