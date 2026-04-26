@@ -44,6 +44,7 @@ RUN a2enmod rewrite headers ssl deflate expires
 WORKDIR /var/www/html
 
 COPY upload/ /var/www/html/
+COPY VERSION /var/www/VERSION
 
 RUN mkdir -p /var/www/storage/cache \
     /var/www/storage/logs \
