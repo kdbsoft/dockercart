@@ -15,7 +15,7 @@ use Symfony\Component\Validator\Exception\NoSuchMetadataException;
 use Symfony\Component\Validator\Mapping\MetadataInterface;
 
 /**
- * Returns {@link \Symfony\Component\Validator\Mapping\MetadataInterface} instances for values.
+ * Returns {@link MetadataInterface} instances for values.
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
@@ -24,20 +24,12 @@ interface MetadataFactoryInterface
     /**
      * Returns the metadata for the given value.
      *
-     * @param mixed $value Some value
-     *
-     * @return MetadataInterface
-     *
      * @throws NoSuchMetadataException If no metadata exists for the given value
      */
-    public function getMetadataFor($value);
+    public function getMetadataFor(mixed $value): MetadataInterface;
 
     /**
      * Returns whether the class is able to return metadata for the given value.
-     *
-     * @param mixed $value Some value
-     *
-     * @return bool
      */
-    public function hasMetadataFor($value);
+    public function hasMetadataFor(mixed $value): bool;
 }

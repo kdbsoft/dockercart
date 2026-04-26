@@ -21,20 +21,17 @@ use Symfony\Component\Validator\Exception\UnexpectedValueException;
  */
 class LengthValidator extends ConstraintValidator
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function validate($value, Constraint $constraint)
+    public function validate(mixed $value, Constraint $constraint): void
     {
         if (!$constraint instanceof Length) {
             throw new UnexpectedTypeException($constraint, Length::class);
         }
 
-        if (null === $value || ('' === $value && $constraint->allowEmptyString)) {
+        if (null === $value) {
             return;
         }
 
-        if (!\is_scalar($value) && !(\is_object($value) && method_exists($value, '__toString'))) {
+        if (!\is_scalar($value) && !$value instanceof \Stringable) {
             throw new UnexpectedValueException($value, 'string');
         }
 
@@ -54,7 +51,13 @@ class LengthValidator extends ConstraintValidator
             $invalidCharset = true;
         }
 
-        if ($invalidCharset) {
+        $length = $invalidCharset ? 0 : match ($constraint->countUnit) {
+            Length::COUNT_BYTES => \strlen($stringValue),
+            Length::COUNT_CODEPOINTS => mb_strlen($stringValue, $constraint->charset),
+            Length::COUNT_GRAPHEMES => grapheme_strlen($stringValue),
+        };
+
+        if ($invalidCharset || false === ($length ?? false)) {
             $this->context->buildViolation($constraint->charsetMessage)
                 ->setParameter('{{ value }}', $this->formatValue($stringValue))
                 ->setParameter('{{ charset }}', $constraint->charset)
@@ -65,16 +68,21 @@ class LengthValidator extends ConstraintValidator
             return;
         }
 
-        $length = mb_strlen($stringValue, $constraint->charset);
-
         if (null !== $constraint->max && $length > $constraint->max) {
             $exactlyOptionEnabled = $constraint->min == $constraint->max;
 
-            $this->context->buildViolation($exactlyOptionEnabled ? $constraint->exactMessage : $constraint->maxMessage)
+            $builder = $this->context->buildViolation($exactlyOptionEnabled ? $constraint->exactMessage : $constraint->maxMessage);
+            if (null !== $constraint->min) {
+                $builder->setParameter('{{ min }}', $constraint->min);
+            }
+
+            $builder
                 ->setParameter('{{ value }}', $this->formatValue($stringValue))
                 ->setParameter('{{ limit }}', $constraint->max)
+                ->setParameter('{{ max }}', $constraint->max) // To be consistent with the min error message
+                ->setParameter('{{ value_length }}', $length)
                 ->setInvalidValue($value)
-                ->setPlural((int) $constraint->max)
+                ->setPlural($constraint->max)
                 ->setCode($exactlyOptionEnabled ? Length::NOT_EQUAL_LENGTH_ERROR : Length::TOO_LONG_ERROR)
                 ->addViolation();
 
@@ -84,11 +92,18 @@ class LengthValidator extends ConstraintValidator
         if (null !== $constraint->min && $length < $constraint->min) {
             $exactlyOptionEnabled = $constraint->min == $constraint->max;
 
-            $this->context->buildViolation($exactlyOptionEnabled ? $constraint->exactMessage : $constraint->minMessage)
+            $builder = $this->context->buildViolation($exactlyOptionEnabled ? $constraint->exactMessage : $constraint->minMessage);
+            if (null !== $constraint->max) {
+                $builder->setParameter('{{ max }}', $constraint->max);
+            }
+
+            $builder
                 ->setParameter('{{ value }}', $this->formatValue($stringValue))
                 ->setParameter('{{ limit }}', $constraint->min)
+                ->setParameter('{{ min }}', $constraint->min) // To be consistent with the max error message
+                ->setParameter('{{ value_length }}', $length)
                 ->setInvalidValue($value)
-                ->setPlural((int) $constraint->min)
+                ->setPlural($constraint->min)
                 ->setCode($exactlyOptionEnabled ? Length::NOT_EQUAL_LENGTH_ERROR : Length::TOO_SHORT_ERROR)
                 ->addViolation();
         }
