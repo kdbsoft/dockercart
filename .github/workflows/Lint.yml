@@ -51,7 +51,8 @@ jobs:
 
       - name: PHPStan
         run: |
-          composer require phpstan/phpstan 2.1.17
+          composer require --dev --no-interaction phpstan/phpstan:2.1.17
+          composer dump-autoload
           ./upload/system/storage/vendor/bin/phpstan analyze --no-progress
 
       - name: Code style
