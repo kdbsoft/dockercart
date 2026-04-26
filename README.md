@@ -102,7 +102,7 @@ Use `docker-compose.standalone.yml`. By default it binds host port **80**.
 
 ```bash
 # via Make
-make standalone
+make dev-standalone
 
 # via Docker Compose
 docker compose -f docker-compose.standalone.yml up -d --build
@@ -124,7 +124,7 @@ Use `docker-compose.yml` with an external Traefik network.
 
 ```bash
 # via Make
-make up
+make dev
 
 # via Docker Compose
 docker compose up -d --build
@@ -141,7 +141,7 @@ Store: **`http://your-domain`** (set `DOCKERCART_DOMAIN` in `.env`)
 
 ```bash
 # via Make
-make ssl
+make dev-ssl
 
 # via script
 ./start.sh --ssl
@@ -161,7 +161,7 @@ SSL_DOMAIN=shop.example.com
 SSL_EMAIL=admin@example.com
 
 # via Make
-make letsencrypt
+make prod
 
 # via script
 ./start.sh --letsencrypt
@@ -183,7 +183,7 @@ DOCKERCART_HTTPS_URL=https://shop.example.com
 DOCKERCART_SSL_ENABLED=true
 
 # via Make
-make standalone-letsencrypt
+make prod-standalone
 
 # compatible alias
 STANDALONE=1 make letsencrypt
@@ -239,13 +239,13 @@ Configure in `.env` if needed:
 ```bash
 make help          # List all targets
 
-make standalone    # Start — direct host port (default: 80), no Traefik
-make standalone-letsencrypt # Start — standalone + Let's Encrypt HTTPS (no Traefik)
-make up            # Start — Traefik mode (HTTP by default)
-make ssl           # Start — Traefik + self-signed HTTPS (local testing)
-make letsencrypt   # Start — Traefik + Let's Encrypt (production)
+make dev-standalone    # Start — direct host port (default: 80), no Traefik
+make prod-standalone # Start — standalone + Let's Encrypt HTTPS (no Traefik)
+make dev            # Start — Traefik mode (HTTP by default)
+make dev-ssl           # Start — Traefik + self-signed HTTPS (local testing)
+make prod   # Start — Traefik + Let's Encrypt (production)
 make ftp           # Start — stack + optional FTP profile (access only to ./upload/image)
-make letsencrypt-ftp # Start — Let's Encrypt + FTP profile together
+make prod-ftp # Start — Let's Encrypt + FTP profile together
 make down          # Stop containers
 make restart       # Restart containers
 make logs          # Show last 100 log lines
