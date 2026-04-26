@@ -75,6 +75,10 @@ standalone-letsencrypt: ## Start standalone mode + Let's Encrypt SSL (no Traefik
 	LE_WEBROOT_DIR="$${LETSENCRYPT_WEBROOT_DIR:-$${LE_DATA_DIR}/www}"; \
 	RENEW_INTERVAL="$${CERTBOT_RENEW_INTERVAL:-24h}"; \
 	mkdir -p "$$LE_DATA_DIR" "$$LE_WEBROOT_DIR"; \
+	if [ -f "$$LE_DATA_DIR/renewal/dockercart.conf" ] && [ ! -s "$$LE_DATA_DIR/renewal/dockercart.conf" ]; then \
+		echo "Removing empty renewal config $$LE_DATA_DIR/renewal/dockercart.conf"; \
+		rm -f "$$LE_DATA_DIR/renewal/dockercart.conf"; \
+	fi; \
 	if [ -d "$$LE_DATA_DIR/live/dockercart" ] && [ ! -f "$$LE_DATA_DIR/renewal/dockercart.conf" ] && [ ! -L "$$LE_DATA_DIR/live/dockercart" ]; then \
 		echo "Removing stale bootstrap lineage $$LE_DATA_DIR/live/dockercart"; \
 		rm -rf "$$LE_DATA_DIR/live/dockercart" "$$LE_DATA_DIR/archive/dockercart"; \
@@ -82,24 +86,48 @@ standalone-letsencrypt: ## Start standalone mode + Let's Encrypt SSL (no Traefik
 	echo "Starting standalone HTTP stack for ACME webroot challenge..."; \
 	docker compose -f docker-compose.standalone.yml up -d --build; \
 	ACTIVE_CERT_NAME="dockercart"; \
-	if [ ! -f "$$LE_DATA_DIR/renewal/$$ACTIVE_CERT_NAME.conf" ]; then \
-		for renewal_conf in "$$LE_DATA_DIR"/renewal/*.conf; do \
-			[ -f "$$renewal_conf" ] || continue; \
-			if grep -Fq "$${SSL_DOMAIN}" "$$renewal_conf"; then \
-				ACTIVE_CERT_NAME="$${renewal_conf##*/}"; \
-				ACTIVE_CERT_NAME="$${ACTIVE_CERT_NAME%.conf}"; \
-				break; \
+	VALID_CERT_NAME=""; \
+	USABLE_CERT_NAME=""; \
+	MATCHING_CERT_NAME=""; \
+	for cert_path in "$$LE_DATA_DIR"/live/*/fullchain.pem; do \
+		[ -f "$$cert_path" ] || continue; \
+		cert_name="$${cert_path#$$LE_DATA_DIR/live/}"; \
+		cert_name="$${cert_name%/fullchain.pem}"; \
+		if command -v openssl >/dev/null 2>&1; then \
+			if ! openssl x509 -noout -ext subjectAltName -in "$$cert_path" 2>/dev/null | tr -d ' ' | grep -Fq "DNS:$${SSL_DOMAIN}"; then \
+				continue; \
 			fi; \
-		done; \
+		fi; \
+		MATCHING_CERT_NAME="$$cert_name"; \
+		if [ -z "$$USABLE_CERT_NAME" ] && command -v openssl >/dev/null 2>&1 && openssl x509 -checkend 0 -noout -in "$$cert_path" >/dev/null 2>&1; then \
+			USABLE_CERT_NAME="$$cert_name"; \
+		fi; \
+		if command -v openssl >/dev/null 2>&1 && openssl x509 -checkend 2592000 -noout -in "$$cert_path" >/dev/null 2>&1; then \
+			VALID_CERT_NAME="$$cert_name"; \
+			break; \
+		fi; \
+	done; \
+	if [ -n "$$VALID_CERT_NAME" ]; then \
+		ACTIVE_CERT_NAME="$$VALID_CERT_NAME"; \
+	elif [ -n "$$USABLE_CERT_NAME" ]; then \
+		ACTIVE_CERT_NAME="$$USABLE_CERT_NAME"; \
+	elif [ -n "$$MATCHING_CERT_NAME" ]; then \
+		ACTIVE_CERT_NAME="$$MATCHING_CERT_NAME"; \
 	fi; \
+	echo "Detected certificate lineage for $${SSL_DOMAIN}: $$ACTIVE_CERT_NAME"; \
 	if [ "$$ACTIVE_CERT_NAME" != "dockercart" ] && [ -d "$$LE_DATA_DIR/live/$$ACTIVE_CERT_NAME" ] && [ ! -e "$$LE_DATA_DIR/live/dockercart" ]; then \
 		echo "Linking nginx default cert path to existing lineage: $$ACTIVE_CERT_NAME"; \
 		ln -s "$$ACTIVE_CERT_NAME" "$$LE_DATA_DIR/live/dockercart"; \
+	elif [ "$$ACTIVE_CERT_NAME" != "dockercart" ] && [ -L "$$LE_DATA_DIR/live/dockercart" ]; then \
+		current_target="$$(readlink "$$LE_DATA_DIR/live/dockercart" || true)"; \
+		if [ "$$current_target" != "$$ACTIVE_CERT_NAME" ]; then \
+			echo "Updating nginx cert symlink: dockercart -> $$ACTIVE_CERT_NAME"; \
+			ln -snf "$$ACTIVE_CERT_NAME" "$$LE_DATA_DIR/live/dockercart"; \
+		fi; \
 	fi; \
 	CERT_PATH="$$LE_DATA_DIR/live/$$ACTIVE_CERT_NAME/fullchain.pem"; \
-	RENEWAL_CONF_PATH="$$LE_DATA_DIR/renewal/$$ACTIVE_CERT_NAME.conf"; \
 	HAS_VALID_CERT=false; \
-	if [ -f "$$CERT_PATH" ] && [ -f "$$RENEWAL_CONF_PATH" ] && command -v openssl >/dev/null 2>&1; then \
+	if [ -f "$$CERT_PATH" ] && command -v openssl >/dev/null 2>&1; then \
 		if openssl x509 -checkend 2592000 -noout -in "$$CERT_PATH" >/dev/null 2>&1; then \
 			if openssl x509 -noout -ext subjectAltName -in "$$CERT_PATH" 2>/dev/null | tr -d ' ' | grep -Fq "DNS:$${SSL_DOMAIN}"; then \
 				HAS_VALID_CERT=true; \
@@ -110,6 +138,22 @@ standalone-letsencrypt: ## Start standalone mode + Let's Encrypt SSL (no Traefik
 		echo "Existing certificate ($$ACTIVE_CERT_NAME) is valid for more than 30 days — skipping new issuance."; \
 	else \
 		echo "Requesting/renewing Let's Encrypt certificate for $${SSL_DOMAIN}..."; \
+		CERTBOT_CERT_NAME="$$ACTIVE_CERT_NAME"; \
+		if [ ! -s "$$LE_DATA_DIR/renewal/$$CERTBOT_CERT_NAME.conf" ]; then \
+			CERTBOT_CERT_NAME=""; \
+			for renewal_conf in "$$LE_DATA_DIR"/renewal/*.conf; do \
+				[ -s "$$renewal_conf" ] || continue; \
+				if grep -Fq "$${SSL_DOMAIN}" "$$renewal_conf"; then \
+					CERTBOT_CERT_NAME="$${renewal_conf##*/}"; \
+					CERTBOT_CERT_NAME="$${CERTBOT_CERT_NAME%.conf}"; \
+					break; \
+				fi; \
+			done; \
+		fi; \
+		if [ -z "$$CERTBOT_CERT_NAME" ]; then \
+			CERTBOT_CERT_NAME="dockercart"; \
+		fi; \
+		echo "Using certbot cert-name: $$CERTBOT_CERT_NAME"; \
 		if ! docker compose -f docker-compose.standalone.yml -f docker-compose.standalone.letsencrypt.yml run --rm --no-deps --entrypoint certbot certbot certonly \
 			--webroot -w /var/www/certbot \
 			--email "$${SSL_EMAIL}" \
@@ -117,7 +161,7 @@ standalone-letsencrypt: ## Start standalone mode + Let's Encrypt SSL (no Traefik
 			--no-eff-email \
 			--non-interactive \
 			--keep-until-expiring \
-			--cert-name "$$ACTIVE_CERT_NAME" \
+			--cert-name "$$CERTBOT_CERT_NAME" \
 			-d "$${SSL_DOMAIN}"; then \
 			CAN_USE_EXISTING_CERT=false; \
 			if [ -f "$$CERT_PATH" ] && command -v openssl >/dev/null 2>&1; then \
