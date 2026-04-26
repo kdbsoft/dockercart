@@ -23,7 +23,6 @@ services:
     volumes:
       - ./upload:/var/www/html:ro
       - ./storage:/var/www/storage:ro
-      - ./VERSION:/var/www/VERSION:Z
       - ${LETSENCRYPT_WEBROOT_DIR:-./docker/letsencrypt/www}:/var/www/certbot
       - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
@@ -53,7 +52,7 @@ services:
     volumes:
       - ./upload:/var/www/html:Z
       - ./storage:/var/www/storage:Z
-      - ./VERSION:/var/www/VERSION:Z
+      - ./VERSION:/var/www/VERSION:ro,Z
     environment:
       - DB_HOSTNAME=${DB_HOSTNAME:-mariadb}
       - DB_USERNAME=${DB_USERNAME:-dockercart}

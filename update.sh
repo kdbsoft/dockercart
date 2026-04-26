@@ -57,6 +57,12 @@ elif [ "$LOCAL" = "$BASE" ]; then
     log "Pulling updates (fast-forward only)..."
     git pull --ff-only origin "$BRANCH"
     log "Code updated successfully."
+    # Single-file bind mounts (e.g. VERSION) are bound by inode at container creation time.
+    # git pull replaces files with new inodes, so the running container keeps reading the
+    # old content.  Force-recreate apache to re-bind all single-file mounts to their
+    # current inodes.  --no-deps avoids touching mariadb/memcached unnecessarily.
+    log "Recreating apache container to refresh bind mounts (VERSION and config files)..."
+    compose up --force-recreate --no-deps -d apache
 elif [ "$REMOTE" = "$BASE" ]; then
     log "Local branch is ahead of origin. Skipping pull."
 else
