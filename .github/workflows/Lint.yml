@@ -2,60 +2,92 @@ name: Lint
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
-    types: [opened, synchronize]
+    types: [ opened, synchronize, reopened ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  tests:
+  lint:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # важно для git diff при анализе изменённых файлов
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
           tools: composer:v2, cs2pr
-          extensions: mbstring
+          extensions: mbstring, intl, gd, xml
+          coverage: none
 
-      - name: Lint
-        run: |
-          error=0
-          for file in $(find upload -type f -name "*.php" ! -path 'upload/system/storage/vendor/*'); do
-            php -l -n $file | grep -v "No syntax errors detected" && error=1
-          done
-          if [ $error -eq 1 ]; then
-            echo "Syntax errors were found."
-            exit 1
-          else
-            echo "No syntax errors were detected."
-          fi
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
-      - name: Cache dependencies
-        uses: actions/cache@v3
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
         with:
-          path: |
-            ~/.cache/composer/files
-            ./.cache
-            ./.php-cs-fixer.cache
-          key: OC3.0-PHP8.4-${{ hashFiles('**/composer.lock') }}
-          restore-keys: OC3.0-PHP8.4-
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
 
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist --optimize-autoloader
+
+      # ====================== Syntax check ======================
+      - name: PHP Syntax Check
+        run: |
+          find upload -type f -name "*.php" ! -path "upload/system/storage/vendor/*" \
+            -exec php -l -n {} \; 2>&1 | grep -v "No syntax errors detected" || true
+
+      # ====================== PHPStan ======================
       - name: PHPStan
         run: |
-          composer require --dev --no-interaction phpstan/phpstan:2.1.51
-          composer dump-autoload
-          ./upload/system/storage/vendor/bin/phpstan analyze -a ./upload/system/storage/vendor/autoload.php --no-progress
+          ./vendor/bin/phpstan analyze --no-progress --memory-limit=1G
 
-      - name: Code style
+      # ====================== PHP CS Fixer ======================
+      - name: PHP CS Fixer (only changed files in PR)
+        if: github.event_name == 'pull_request'
         run: |
-          composer require --dev -w friendsofphp/php-cs-fixer v3.95.1
-          ./upload/system/storage/vendor/bin/php-cs-fixer fix --dry-run --diff --ansi || true
-          ./upload/system/storage/vendor/bin/php-cs-fixer fix --dry-run --format=checkstyle | cs2pr
+          git fetch origin main --depth=1
+          CHANGED_FILES=$(git diff --name-only origin/main -- '*.php' | grep -E '^upload/' | grep -v '/vendor/' || true)
+          
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No PHP files changed."
+            exit 0
+          fi
+          
+          echo "$CHANGED_FILES" | xargs ./vendor/bin/php-cs-fixer fix \
+            --config=.php-cs-fixer.php \
+            --using-cache=yes \
+            --cache-file=.php-cs-fixer.cache \
+            --dry-run \
+            --diff \
+            --ansi || true
+          
+          # Для отображения ошибок в PR (Annotations)
+          echo "$CHANGED_FILES" | xargs ./vendor/bin/php-cs-fixer fix \
+            --config=.php-cs-fixer.php \
+            --using-cache=yes \
+            --cache-file=.php-cs-fixer.cache \
+            --dry-run \
+            --format=checkstyle | cs2pr
+
+      - name: PHP CS Fixer (full check on push to main)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          ./vendor/bin/php-cs-fixer fix \
+            --config=.php-cs-fixer.php \
+            --using-cache=yes \
+            --cache-file=.php-cs-fixer.cache \
+            --dry-run \
+            --diff \
+            --ansi | cs2pr
