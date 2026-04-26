@@ -75,27 +75,65 @@ standalone-letsencrypt: ## Start standalone mode + Let's Encrypt SSL (no Traefik
 	LE_WEBROOT_DIR="$${LETSENCRYPT_WEBROOT_DIR:-$${LE_DATA_DIR}/www}"; \
 	RENEW_INTERVAL="$${CERTBOT_RENEW_INTERVAL:-24h}"; \
 	mkdir -p "$$LE_DATA_DIR" "$$LE_WEBROOT_DIR"; \
-	if [ -d "$$LE_DATA_DIR/live/dockercart" ] && [ ! -f "$$LE_DATA_DIR/renewal/dockercart.conf" ]; then \
+	if [ -d "$$LE_DATA_DIR/live/dockercart" ] && [ ! -f "$$LE_DATA_DIR/renewal/dockercart.conf" ] && [ ! -L "$$LE_DATA_DIR/live/dockercart" ]; then \
 		echo "Removing stale bootstrap lineage $$LE_DATA_DIR/live/dockercart"; \
 		rm -rf "$$LE_DATA_DIR/live/dockercart" "$$LE_DATA_DIR/archive/dockercart"; \
 	fi; \
 	echo "Starting standalone HTTP stack for ACME webroot challenge..."; \
 	docker compose -f docker-compose.standalone.yml up -d --build; \
-	CERT_PATH="$$LE_DATA_DIR/live/dockercart/fullchain.pem"; \
-	RENEWAL_CONF_PATH="$$LE_DATA_DIR/renewal/dockercart.conf"; \
-	if [ -f "$$CERT_PATH" ] && [ -f "$$RENEWAL_CONF_PATH" ] && command -v openssl >/dev/null 2>&1 && openssl x509 -checkend 2592000 -noout -in "$$CERT_PATH" >/dev/null 2>&1; then \
-		echo "Existing certificate is valid for more than 30 days — skipping new issuance."; \
+	ACTIVE_CERT_NAME="dockercart"; \
+	if [ ! -f "$$LE_DATA_DIR/renewal/$$ACTIVE_CERT_NAME.conf" ]; then \
+		for renewal_conf in "$$LE_DATA_DIR"/renewal/*.conf; do \
+			[ -f "$$renewal_conf" ] || continue; \
+			if grep -Fq "$${SSL_DOMAIN}" "$$renewal_conf"; then \
+				ACTIVE_CERT_NAME="$${renewal_conf##*/}"; \
+				ACTIVE_CERT_NAME="$${ACTIVE_CERT_NAME%.conf}"; \
+				break; \
+			fi; \
+		done; \
+	fi; \
+	if [ "$$ACTIVE_CERT_NAME" != "dockercart" ] && [ -d "$$LE_DATA_DIR/live/$$ACTIVE_CERT_NAME" ] && [ ! -e "$$LE_DATA_DIR/live/dockercart" ]; then \
+		echo "Linking nginx default cert path to existing lineage: $$ACTIVE_CERT_NAME"; \
+		ln -s "$$ACTIVE_CERT_NAME" "$$LE_DATA_DIR/live/dockercart"; \
+	fi; \
+	CERT_PATH="$$LE_DATA_DIR/live/$$ACTIVE_CERT_NAME/fullchain.pem"; \
+	RENEWAL_CONF_PATH="$$LE_DATA_DIR/renewal/$$ACTIVE_CERT_NAME.conf"; \
+	HAS_VALID_CERT=false; \
+	if [ -f "$$CERT_PATH" ] && [ -f "$$RENEWAL_CONF_PATH" ] && command -v openssl >/dev/null 2>&1; then \
+		if openssl x509 -checkend 2592000 -noout -in "$$CERT_PATH" >/dev/null 2>&1; then \
+			if openssl x509 -noout -ext subjectAltName -in "$$CERT_PATH" 2>/dev/null | tr -d ' ' | grep -Fq "DNS:$${SSL_DOMAIN}"; then \
+				HAS_VALID_CERT=true; \
+			fi; \
+		fi; \
+	fi; \
+	if [ "$$HAS_VALID_CERT" = "true" ]; then \
+		echo "Existing certificate ($$ACTIVE_CERT_NAME) is valid for more than 30 days — skipping new issuance."; \
 	else \
 		echo "Requesting/renewing Let's Encrypt certificate for $${SSL_DOMAIN}..."; \
-		docker compose -f docker-compose.standalone.yml -f docker-compose.standalone.letsencrypt.yml run --rm --no-deps --entrypoint certbot certbot certonly \
+		if ! docker compose -f docker-compose.standalone.yml -f docker-compose.standalone.letsencrypt.yml run --rm --no-deps --entrypoint certbot certbot certonly \
 			--webroot -w /var/www/certbot \
 			--email "$${SSL_EMAIL}" \
 			--agree-tos \
 			--no-eff-email \
 			--non-interactive \
 			--keep-until-expiring \
-			--cert-name dockercart \
-			-d "$${SSL_DOMAIN}"; \
+			--cert-name "$$ACTIVE_CERT_NAME" \
+			-d "$${SSL_DOMAIN}"; then \
+			CAN_USE_EXISTING_CERT=false; \
+			if [ -f "$$CERT_PATH" ] && command -v openssl >/dev/null 2>&1; then \
+				if openssl x509 -checkend 0 -noout -in "$$CERT_PATH" >/dev/null 2>&1; then \
+					if openssl x509 -noout -ext subjectAltName -in "$$CERT_PATH" 2>/dev/null | tr -d ' ' | grep -Fq "DNS:$${SSL_DOMAIN}"; then \
+						CAN_USE_EXISTING_CERT=true; \
+					fi; \
+				fi; \
+			fi; \
+			if [ "$$CAN_USE_EXISTING_CERT" = "true" ]; then \
+				echo "⚠️ Certificate request failed, but a non-expired matching certificate is present. Continuing with existing cert."; \
+			else \
+				echo "❌ Certificate request failed and no usable existing certificate is available (missing/expired/mismatched domain)."; \
+				exit 1; \
+			fi; \
+		fi; \
 	fi; \
 	echo "Switching stack to standalone HTTPS mode..."; \
 	docker compose -f docker-compose.standalone.yml -f docker-compose.standalone.letsencrypt.yml up -d --build; \
