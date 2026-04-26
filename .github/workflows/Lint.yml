@@ -53,7 +53,7 @@ jobs:
         run: |
           composer require --dev --no-interaction phpstan/phpstan:2.1.17
           composer dump-autoload
-          ./upload/system/storage/vendor/bin/phpstan analyze --no-progress
+          ./upload/system/storage/vendor/bin/phpstan analyze -a ./upload/system/storage/vendor/autoload.php --no-progress
 
       - name: Code style
         run: |
