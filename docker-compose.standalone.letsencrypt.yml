@@ -10,8 +10,8 @@ services:
     ports:
       - "${DOCKERCART_HTTPS_PORT:-443}:443"
     volumes:
-      - ${LETSENCRYPT_DATA_DIR:-./docker/letsencrypt}:/etc/letsencrypt
-      - ${LETSENCRYPT_WEBROOT_DIR:-./docker/letsencrypt/www}:/var/www/certbot
+      - ${LETSENCRYPT_DATA_DIR:-./docker/letsencrypt}:/etc/letsencrypt:ro
+      - ${LETSENCRYPT_WEBROOT_DIR:-./docker/letsencrypt/www}:/var/www/certbot:ro
       - ./docker/nginx/ssl/dockercart.ssl.conf:/etc/nginx/conf.d/dockercart.ssl.conf:ro
 
   certbot:
