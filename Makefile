@@ -29,8 +29,7 @@ help: ## Show this help
 	@echo "  STANDALONE=1 make letsencrypt    - Alias for standalone-letsencrypt"
 	@echo ""
 	@echo "Documentation:"
-	@echo "  See SSL_QUICK_START.md for SSL/HTTPS quick reference"
-	@echo "  See SSL_CONFIGURATION.md for detailed SSL configuration"
+	@echo "  See SSL.md for the unified SSL/HTTPS guide and troubleshooting"
 	@echo ""
 
 migrate: ## Apply SQL migrations from docker/mysql/migrations (uses mariadb container)

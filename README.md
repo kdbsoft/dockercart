@@ -357,9 +357,8 @@ See [`.env.example`](.env.example) for a complete reference.
 ## Documentation
 
 | Document | Description |
-|---|---|
-| [SSL_QUICK_START.md](SSL_QUICK_START.md) | Quick reference for SSL/HTTPS modes (HTTP, self-signed, Let's Encrypt, standalone Let's Encrypt) |
-| [SSL_CONFIGURATION.md](SSL_CONFIGURATION.md) | Detailed SSL/HTTPS configuration guide with troubleshooting |
+| --- | --- |
+| [SSL.md](SSL.md) | Unified SSL/HTTPS guide covering HTTP, self-signed SSL, Let's Encrypt, standalone mode, and troubleshooting |
 | [INSTALL.md](INSTALL.md) | Detailed installation reference |
 | [DEPLOYMENT.md](DEPLOYMENT.md) | Deployment architecture and CI/CD notes |
 | [SECURITY.md](SECURITY.md) | Security policy and vulnerability reporting |
