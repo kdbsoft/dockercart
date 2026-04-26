@@ -262,3 +262,11 @@ clean: down ## DESTRUCTIVE: Stop containers and remove all volumes
 	@read -p "Continue? (y/N): " confirm && [ "$$confirm" = "y" ] || exit 1
 	@$(COMPOSE) down -v
 	@echo "Cleaned"
+
+
+prod: letsencrypt ## Alias for production-ready Let's Encrypt mode
+prod-standalone: standalone-letsencrypt ## Alias for production-ready standalone mode with Let's Encrypt (no Traefik)
+prod-ftp: letsencrypt-ftp ## Alias for production-ready Let's Encrypt mode with FTP profile
+dev: up ## Alias for development mode (HTTP, no SSL)
+dev-standalone: standalone ## Alias for development mode without Traefik, HTTP only
+dev-ssl: ssl ## Alias for development mode with self-signed SSL (HTTPS)
