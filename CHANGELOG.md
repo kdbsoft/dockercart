@@ -1,3 +1,9 @@
+## [1.0.4](https://github.com/mathflow-bit/dockercart/compare/v1.0.3...v1.0.4) (2026-04-26)
+
+### Bug Fixes
+
+* add redirect from non-seo url to url with alias ([695f677](https://github.com/mathflow-bit/dockercart/commit/695f677d4cb8758412ab26dfd5ba5e00795f666a))
+
 ## [1.0.3](https://github.com/mathflow-bit/dockercart/compare/v1.0.2...v1.0.3) (2026-04-26)
 
 ## [1.0.2](https://github.com/mathflow-bit/dockercart/compare/v1.0.1...v1.0.2) (2026-04-26)
