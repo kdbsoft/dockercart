@@ -1,3 +1,9 @@
+## [1.0.6](https://github.com/mathflow-bit/dockercart/compare/v1.0.5...v1.0.6) (2026-04-26)
+
+### Bug Fixes
+
+* yml import switch to http 1.1 ([ac4b53c](https://github.com/mathflow-bit/dockercart/commit/ac4b53c90280033682505599de08771c225e9b00))
+
 ## [1.0.5](https://github.com/mathflow-bit/dockercart/compare/v1.0.4...v1.0.5) (2026-04-26)
 
 ### Bug Fixes
