@@ -1,3 +1,9 @@
+## [1.0.1](https://github.com/mathflow-bit/dockercart/compare/v1.0.0...v1.0.1) (2026-04-26)
+
+### Bug Fixes
+
+* Lint.yml php version leave only 8.4 ([e4a0409](https://github.com/mathflow-bit/dockercart/commit/e4a0409bcf4e80ec61d6eba7f86c56576836db65))
+
 ## 1.0.0 (2026-04-26)
 
 ### Bug Fixes
