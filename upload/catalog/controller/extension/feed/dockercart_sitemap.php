@@ -139,9 +139,16 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
                 require_once(DIR_SYSTEM . 'library/dockercart_sitemap_license_helper.php');
                 $license_key = $this->config->get('module_dockercart_sitemap_license_key');
                 $public_key = $this->config->get('module_dockercart_sitemap_public_key');
-                $res = DockercartSitemapLicenseHelper::verify($this->registry, (string)$license_key, (string)$public_key);
-                $license_valid = !empty($res['valid']);
-                $license_message = $res['error'] ?? '';
+                $helper_class = 'DockercartSitemapLicenseHelper';
+
+                if (class_exists($helper_class)) {
+                    $res = $helper_class::verify($this->registry, (string)$license_key, (string)$public_key);
+                    $license_valid = !empty($res['valid']);
+                    $license_message = $res['error'] ?? '';
+                } else {
+                    $license_valid = false;
+                    $license_message = 'License helper class not found';
+                }
             } else {
                 $license_valid = true;
                 $license_message = '';
@@ -430,7 +437,7 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
         }
 
 
-        if (isset($lock_fp) && is_resource($lock_fp)) {
+		if (is_resource($lock_fp)) {
             @flock($lock_fp, LOCK_UN);
             @fclose($lock_fp);
             @unlink(DIR_APPLICATION . '../sitemap.lock');

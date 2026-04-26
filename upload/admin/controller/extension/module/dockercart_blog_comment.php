@@ -4,6 +4,7 @@
  */
 
 class ControllerExtensionModuleDockercartBlogComment extends Controller {
+	private $error = array();
 
 	public function index() {
 		$this->load->language('extension/module/dockercart_blog_comment');

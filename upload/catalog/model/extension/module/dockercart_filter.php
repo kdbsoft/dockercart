@@ -634,9 +634,7 @@ class ModelExtensionModuleDockercartFilter extends Model {
 
         if (!empty($data['manufacturer']) && is_array($data['manufacturer'])) {
             $manufacturer_ids = array_map('intval', $data['manufacturer']);
-            if (!empty($manufacturer_ids)) {
-                $where_conditions[] = "p.manufacturer_id IN (" . implode(',', $manufacturer_ids) . ")";
-            }
+            $where_conditions[] = "p.manufacturer_id IN (" . implode(',', $manufacturer_ids) . ")";
         }
 
         $sql = "SELECT DISTINCT
@@ -739,9 +737,7 @@ class ModelExtensionModuleDockercartFilter extends Model {
 
         if (!empty($data['manufacturer']) && is_array($data['manufacturer'])) {
             $manufacturer_ids = array_map('intval', $data['manufacturer']);
-            if (!empty($manufacturer_ids)) {
-                $where_conditions[] = "p.manufacturer_id IN (" . implode(',', $manufacturer_ids) . ")";
-            }
+            $where_conditions[] = "p.manufacturer_id IN (" . implode(',', $manufacturer_ids) . ")";
         }
 
         $sql .= " WHERE " . implode(' AND ', $where_conditions);
