@@ -24,11 +24,12 @@ services:
     volumes:
       - ./docker/letsencrypt:/etc/letsencrypt
       - ./docker/letsencrypt/www:/var/www/certbot
-    command: >
-      /bin/sh -c 'trap exit TERM;
+    entrypoint: ["/bin/sh", "-c"]
+    command: |
+      trap exit TERM
       while :; do
-        certbot renew --webroot -w /var/www/certbot --quiet --deploy-hook "kill -HUP 1";
-        sleep 12h;
-      done'
+        certbot renew --webroot -w /var/www/certbot --quiet --deploy-hook "kill -HUP 1"
+        sleep 12h
+      done
     networks:
       - dockercart-network
