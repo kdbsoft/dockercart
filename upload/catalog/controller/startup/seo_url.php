@@ -728,6 +728,11 @@ class ControllerStartupSeoUrl extends Controller {
 		$query_param = '';
 		$is_blog_route = false;
 
+		// Ensure blog identifier variables are always defined to satisfy static analysis
+		$post_id = 0;
+		$cat_id = 0;
+		$author_id = 0;
+
 		if ($route === 'product/product' && isset($this->request->get['product_id'])) {
 			$query_param = 'product_id=' . (int)$this->request->get['product_id'];
 		} elseif ($route === 'product/category' && isset($this->request->get['path'])) {
@@ -775,17 +780,17 @@ class ControllerStartupSeoUrl extends Controller {
 			// Redirect if SEO URL exists in database
 			if ($seo_keyword) {
 				$this->performEnforceCleanUrlRedirect($seo_keyword);
-			} elseif ($route === 'blog/post' && isset($post_id) && $post_id) {
+			} elseif ($route === 'blog/post' && $post_id) {
 				// Fallback redirect to generated blog post URL
 				$redirect_url = $this->buildRedirectUrl('/' . $this->calculateLanguagePrefix() . 'blog/post-' . $post_id);
 				$this->response->redirect($redirect_url, 301);
 				exit;
-			} elseif ($route === 'blog/category' && isset($cat_id) && $cat_id) {
+			} elseif ($route === 'blog/category' && $cat_id) {
 				// Fallback redirect to generated blog category URL
 				$redirect_url = $this->buildRedirectUrl('/' . $this->calculateLanguagePrefix() . 'blog/category-' . $cat_id);
 				$this->response->redirect($redirect_url, 301);
 				exit;
-			} elseif ($route === 'blog/author' && isset($author_id) && $author_id) {
+			} elseif ($route === 'blog/author' && $author_id) {
 				// Fallback redirect to generated blog author URL
 				$redirect_url = $this->buildRedirectUrl('/' . $this->calculateLanguagePrefix() . 'blog/author-' . $author_id);
 				$this->response->redirect($redirect_url, 301);
