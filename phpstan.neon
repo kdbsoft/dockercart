@@ -1,6 +1,6 @@
 services:
     -
-        class: \Tools\PHPStan\RegistryPropertyReflectionExtension
+        class: Tools\PHPStan\RegistryPropertyReflectionExtension
         tags:
             - phpstan.broker.propertiesClassReflectionExtension
 parameters:
