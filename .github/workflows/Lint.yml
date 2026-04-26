@@ -51,12 +51,12 @@ jobs:
 
       - name: PHPStan
         run: |
-          composer require --dev --no-interaction phpstan/phpstan:2.1.17
+          composer require --dev --no-interaction phpstan/phpstan:2.1.51
           composer dump-autoload
           ./upload/system/storage/vendor/bin/phpstan analyze -a ./upload/system/storage/vendor/autoload.php --no-progress
 
       - name: Code style
         run: |
-          composer require --dev -w friendsofphp/php-cs-fixer v3.41.1
+          composer require --dev -w friendsofphp/php-cs-fixer v3.95.1
           ./upload/system/storage/vendor/bin/php-cs-fixer fix --dry-run --diff --ansi || true
           ./upload/system/storage/vendor/bin/php-cs-fixer fix --dry-run --format=checkstyle | cs2pr
