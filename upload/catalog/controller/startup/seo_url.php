@@ -1202,6 +1202,7 @@ class ControllerStartupSeoUrl extends Controller {
 
 	/**
 	 * Decode short fallback aliases generated when explicit SEO keyword is missing.
+	 * If explicit SEO keyword exists, redirect fallback alias to canonical SEO URL.
 	 * Supported patterns:
 	 * - cat123  => product/category, path=123
 	 * - prod123 => product/product, product_id=123
@@ -1212,10 +1213,10 @@ class ControllerStartupSeoUrl extends Controller {
 	private function decodeFallbackEntityKeyword($keyword) {
 		if (preg_match('/^cat(\d+)$/', $keyword, $matches)) {
 			$category_id = (int)$matches[1];
+			$seo_keyword = $this->getSeoKeyword('category_id=' . $category_id);
 
-			if ($this->getSeoKeyword('category_id=' . $category_id)) {
-				$this->request->get['route'] = 'error/not_found';
-				return true;
+			if ($seo_keyword) {
+				$this->performCanonicalRedirect($seo_keyword);
 			}
 
 			$this->handleNestedCategoryRedirect($category_id, $keyword);
@@ -1226,10 +1227,10 @@ class ControllerStartupSeoUrl extends Controller {
 
 		if (preg_match('/^prod(\d+)$/', $keyword, $matches)) {
 			$product_id = (int)$matches[1];
+			$seo_keyword = $this->getSeoKeyword('product_id=' . $product_id);
 
-			if ($this->getSeoKeyword('product_id=' . $product_id)) {
-				$this->request->get['route'] = 'error/not_found';
-				return true;
+			if ($seo_keyword) {
+				$this->performCanonicalRedirect($seo_keyword);
 			}
 
 			$this->request->get['product_id'] = $product_id;
@@ -1239,10 +1240,10 @@ class ControllerStartupSeoUrl extends Controller {
 
 		if (preg_match('/^man(\d+)$/', $keyword, $matches)) {
 			$manufacturer_id = (int)$matches[1];
+			$seo_keyword = $this->getSeoKeyword('manufacturer_id=' . $manufacturer_id);
 
-			if ($this->getSeoKeyword('manufacturer_id=' . $manufacturer_id)) {
-				$this->request->get['route'] = 'error/not_found';
-				return true;
+			if ($seo_keyword) {
+				$this->performCanonicalRedirect($seo_keyword);
 			}
 
 			$this->request->get['manufacturer_id'] = $manufacturer_id;
@@ -1252,10 +1253,10 @@ class ControllerStartupSeoUrl extends Controller {
 
 		if (preg_match('/^inf(\d+)$/', $keyword, $matches)) {
 			$information_id = (int)$matches[1];
+			$seo_keyword = $this->getSeoKeyword('information_id=' . $information_id);
 
-			if ($this->getSeoKeyword('information_id=' . $information_id)) {
-				$this->request->get['route'] = 'error/not_found';
-				return true;
+			if ($seo_keyword) {
+				$this->performCanonicalRedirect($seo_keyword);
 			}
 
 			$this->request->get['information_id'] = $information_id;
