@@ -1,3 +1,9 @@
+## [1.1.0](https://github.com/mathflow-bit/dockercart/compare/v1.0.15...v1.1.0) (2026-04-27)
+
+### Features
+
+* add multiple of quantity for the products ([3a7ce89](https://github.com/mathflow-bit/dockercart/commit/3a7ce891494697896f56f79aebe09b5193fe859b))
+
 ## [1.0.15](https://github.com/mathflow-bit/dockercart/compare/v1.0.14...v1.0.15) (2026-04-26)
 
 ### Bug Fixes
