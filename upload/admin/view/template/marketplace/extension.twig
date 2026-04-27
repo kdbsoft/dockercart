@@ -10,137 +10,317 @@
       </ul>
     </div>
   </div>
+
   <div class="container-fluid">
+
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    {% if success %}
+    <div id="ext-alert-success" class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    {# ---- Toolbar ---- #}
     <div class="panel panel-default">
-      <div class="panel-heading">
-        <h3 class="panel-title"><i class="fa fa-puzzle-piece"></i> {{ text_list }}</h3>
-      </div>
-      <div class="panel-body">
-        <fieldset>
-          <legend>{{ text_type }}</legend>
-					<div class="well">
-						<div class="row">
-							<div class="col-sm-12">
-								<div class="btn-group btn-group-sm" role="group" aria-label="Extension types">
-									{% for category in categories %}
-									<a href="{{ category.href }}" class="btn btn-default extension-type-btn {% if type == category.code %}btn-primary active{% endif %}">{{ category.text }}</a>
-									{% endfor %}
-								</div>
-							</div>
-						</div>
-					</div>
-        </fieldset>
-        <div id="extension"></div>
+      <div class="panel-body" style="padding-bottom:8px;">
+        <div class="row">
+          <div class="col-md-4 col-sm-6">
+            <div class="input-group">
+              <span class="input-group-addon"><i class="fa fa-search"></i></span>
+              <input type="text" id="ext-search" class="form-control" placeholder="{{ text_search }}" autocomplete="off">
+            </div>
+          </div>
+          <div class="col-md-8 col-sm-6 text-right" style="margin-top:4px;">
+            <div class="btn-group btn-group-sm" id="ext-type-filter" role="group">
+              <button type="button" class="btn btn-primary active" data-type="all">
+                {{ text_all }}
+              </button>
+              {% for tf in type_filters %}
+              <button type="button" class="btn btn-default" data-type="{{ tf.type }}">
+                <i class="fa {{ tf.icon }}"></i>
+                {{ tf.label }}
+                <span class="badge" style="background:#aaa;margin-left:3px;">{{ tf.count }}</span>
+              </button>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        <div class="row" style="margin-top:8px;">
+          <div class="col-sm-12">
+            <label class="checkbox-inline" style="font-weight:normal;cursor:pointer;">
+              <input type="checkbox" id="ext-filter-installed"> {{ text_installed }}
+            </label>
+            <span id="ext-visible-count" class="text-muted" style="margin-left:16px;font-size:12px;"></span>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-  {% if categories %}
-  <script type="text/javascript"><!--
-$('.extension-type-btn').on('click', function(e) {
-	e.preventDefault();
 
-	var btn = $(this);
+    {# ---- Toast notification (JS-driven) ---- #}
+    <div id="ext-toast" style="display:none;position:fixed;top:70px;right:20px;z-index:9999;min-width:280px;" class="alert alert-success alert-dismissible">
+      <button type="button" class="close" onclick="$('#ext-toast').fadeOut();">&times;</button>
+      <span id="ext-toast-msg"></span>
+    </div>
 
-	$.ajax({
-		url: btn.attr('href'),
-		dataType: 'html',
-		beforeSend: function() {
-			$('.fa-filter').addClass('fa-circle-o-notch fa-spin');
-			$('.fa-filter').removeClass('fa-filter');
-			$('.extension-type-btn').prop('disabled', true);
-		},
-		complete: function() {
-			$('.fa-circle-o-notch').addClass('fa-filter');
-			$('.fa-circle-o-notch').removeClass('fa-circle-o-notch fa-spin');
-			$('.extension-type-btn').prop('disabled', false);
-		},
-		success: function(html) {
-			$('#extension').html(html);
-			// update active button
-			$('.extension-type-btn').removeClass('btn-primary active').addClass('btn-default');
-			btn.removeClass('btn-default').addClass('btn-primary active');
-		},
-		error: function(xhr, ajaxOptions, thrownError) {
-			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
-		}
-	});
-});
+    {# ---- Extension groups ---- #}
+    {% for group in groups %}
+    <div class="ext-group" data-type="{{ group.type }}">
+      <h4 class="ext-group-heading" style="margin:20px 0 10px;padding-bottom:6px;border-bottom:2px solid #eee;">
+        <i class="fa {{ group.icon }}" style="width:18px;text-align:center;"></i>
+        {{ group.label }}
+        <small class="text-muted" style="font-size:12px;margin-left:6px;">{{ group.extensions|length }} {% if group.extensions|length == 1 %}ext.{% else %}ext.{% endif %}</small>
+      </h4>
+      <div class="row ext-cards-row">
+        {% for ext in group.extensions %}
+        <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 ext-card-wrapper"
+             data-type="{{ group.type }}"
+             data-name="{{ ext.name|lower }}"
+             data-installed="{{ ext.installed ? '1' : '0' }}">
+          <div class="panel ext-card {{ ext.installed ? (ext.status_raw ? 'panel-success' : 'panel-default') : 'panel-default ext-card-not-installed' }}"
+               style="margin-bottom:14px;cursor:{{ ext.installed ? 'pointer' : 'default' }};transition:box-shadow .15s;">
+            {# Card header - click to edit if installed #}
+            {% if ext.installed %}
+            <a href="{{ ext.edit }}" class="ext-card-link" style="text-decoration:none;color:inherit;">
+            {% endif %}
+            <div class="panel-heading" style="padding:10px 12px 8px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <i class="fa {{ group.icon }} fa-lg" style="color:{% if ext.installed %}{% if ext.status_raw %}#3c763d{% else %}#777{% endif %}{% else %}#bbb{% endif %};flex-shrink:0;width:20px;text-align:center;"></i>
+                <strong style="flex:1;font-size:13px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ ext.name }}">{{ ext.name }}</strong>
+              </div>
+            </div>
+            {% if ext.installed %}
+            </a>
+            {% endif %}
 
-// Trigger initial load: click active button or first button
-if ($('.extension-type-btn.active').length) {
-	$('.extension-type-btn.active').trigger('click');
-} else {
-	$('.extension-type-btn:first').trigger('click');
+            <div class="panel-body" style="padding:8px 12px;">
+              {# Status + badges #}
+              <div style="margin-bottom:8px;display:flex;align-items:center;flex-wrap:wrap;gap:4px;">
+                {% if ext.installed %}
+                  {% if ext.status_raw %}
+                  <span class="label label-success"><i class="fa fa-check-circle"></i> {{ text_enabled }}</span>
+                  {% else %}
+                  <span class="label label-default"><i class="fa fa-circle-o"></i> {{ text_disabled }}</span>
+                  {% endif %}
+                {% else %}
+                  <span class="label label-warning" style="background:#d9822b;"><i class="fa fa-download"></i> {{ text_not_installed }}</span>
+                {% endif %}
+                {% if ext.sort_order is not empty %}
+                <span class="label label-default" title="Sort order"><i class="fa fa-sort"></i> {{ ext.sort_order }}</span>
+                {% endif %}
+                {% if ext.instance_count > 0 %}
+                <span class="label label-info"><i class="fa fa-clone"></i> {{ ext.instance_count }} {{ text_instances }}</span>
+                {% endif %}
+              </div>
+
+              {% if ext.ext_link %}
+              <div class="ext-payment-link" style="margin-bottom:4px;line-height:1;" onclick="event.stopPropagation();">
+                {{ ext.ext_link|raw }}
+              </div>
+              {% endif %}
+            </div>
+
+            <div class="panel-footer" style="padding:6px 10px;background:#f9f9f9;text-align:right;">
+              {% if ext.installed %}
+                <a href="{{ ext.edit }}" class="btn btn-xs btn-primary" title="{{ button_edit }}" style="margin-right:2px;">
+                  <i class="fa fa-pencil"></i> {% if ext.instance_count > 0 %}{{ button_add }}{% else %}{{ button_edit }}{% endif %}
+                </a>
+                <button type="button"
+                        class="btn btn-xs btn-danger btn-ext-uninstall"
+                        title="{{ button_uninstall }}"
+                        data-url="{{ ext.uninstall_url }}"
+                        data-name="{{ ext.name }}"
+                        data-confirm="{{ text_confirm }}">
+                  <i class="fa fa-minus-circle"></i>
+                </button>
+              {% else %}
+                <button type="button"
+                        class="btn btn-xs btn-success btn-ext-install"
+                        title="{{ button_install }}"
+                        data-url="{{ ext.install_url }}"
+                        data-name="{{ ext.name }}">
+                  <i class="fa fa-plus-circle"></i> {{ button_install }}
+                </button>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>{# end .row #}
+    </div>{# end .ext-group #}
+    {% else %}
+    <div class="text-center text-muted" style="padding:40px 0;">
+      <i class="fa fa-puzzle-piece fa-3x" style="display:block;margin-bottom:10px;"></i>
+      {{ text_no_results }}
+    </div>
+    {% endfor %}
+
+    <div id="ext-empty-state" style="display:none;text-align:center;padding:40px 0;color:#999;">
+      <i class="fa fa-search fa-3x" style="display:block;margin-bottom:10px;"></i>
+      {{ text_no_results }}
+    </div>
+
+  </div>{# end .container-fluid #}
+</div>{# end #content #}
+{{ footer }}
+
+<style>
+.ext-card:hover { box-shadow: 0 3px 12px rgba(0,0,0,.15); }
+.ext-card-not-installed { opacity: .82; }
+.ext-card-not-installed:hover { opacity: 1; box-shadow: 0 2px 8px rgba(0,0,0,.10); }
+.ext-card-link:hover .panel-heading strong { text-decoration: underline; }
+#ext-type-filter .btn { margin-bottom: 2px; }
+@media (max-width: 767px) {
+  #ext-type-filter { display: flex; flex-wrap: wrap; gap: 2px; }
+  #ext-type-filter .btn { flex: 0 0 auto; }
 }
+</style>
 
-$('#extension').on('click', '.btn-success', function(e) {
-	e.preventDefault();
-	
-	var element = this;
+<script type="text/javascript">
+(function() {
+  var $search   = $('#ext-search');
+  var $instOnly = $('#ext-filter-installed');
+  var $typeFilter = $('#ext-type-filter');
+  var $emptyState = $('#ext-empty-state');
+  var activeType  = 'all';
 
-	$.ajax({
-		url: $(element).attr('href'),
-		dataType: 'html',
-		beforeSend: function() {
-			$(element).button('loading');
-		},
-		complete: function() {
-			$(element).button('reset');
-		},
-		success: function(html) {
-			$('#extension').html(html);
-		},
-		error: function(xhr, ajaxOptions, thrownError) {
-			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
-		}
-	});
-});
+  function updateCount() {
+    var visible = $('.ext-card-wrapper:visible').length;
+    $('#ext-visible-count').text(visible + ' extension' + (visible !== 1 ? 's' : '') + ' shown');
+  }
 
-$('#extension').on('click', '.btn-danger, .btn-warning', function(e) {
-	e.preventDefault();
-	
-	if (confirm('{{ text_confirm }}')) {
-		var element = this;
-	
-		$.ajax({
-			url: $(element).attr('href'),
-			dataType: 'html',
-			beforeSend: function() {
-				$(element).button('loading');
-			},
-			complete: function() {
-				$(element).button('reset');
-			},
-			success: function(html) {
-				// refresh menu and extension list
-				$.ajax({
-					url: 'index.php?route=marketplace/extension/refreshMenu&user_token={{ user_token }}',
-					dataType: 'html',
-					success: function(html) {
-						if (html) {
-							$('#column-left').replaceWith(html);
-						}
-					},
-					complete: function() {
-						// refresh extension list by reloading the currently active type
-						if ($('.extension-type-btn.active').length) {
-							$('.extension-type-btn.active').trigger('click');
-						} else {
-							$('.extension-type-btn:first').trigger('click');
-						}
-					},
-					error: function(xhr, ajaxOptions, thrownError) {
-						alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
-					}
-				});
-			},
-			error: function(xhr, ajaxOptions, thrownError) {
-				alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
-			}
-		});
-	}
-});
-//--></script>
-  {% endif %}
-</div>
-{{ footer }} 
+  function applyFilters() {
+    var query     = $search.val().toLowerCase().trim();
+    var instOnly  = $instOnly.is(':checked');
+    var anyVisible = false;
+
+    // Show/hide groups
+    $('.ext-group').each(function() {
+      var groupType = $(this).data('type');
+      var groupShow = (activeType === 'all' || activeType === groupType);
+      var groupHasVisible = false;
+
+      $(this).find('.ext-card-wrapper').each(function() {
+        var $w = $(this);
+        var name      = $w.data('name');
+        var installed = $w.data('installed') === 1 || $w.data('installed') === '1';
+
+        var show = groupShow
+          && (!query || name.indexOf(query) !== -1)
+          && (!instOnly || installed);
+
+        $w.toggle(show);
+        if (show) { groupHasVisible = true; anyVisible = true; }
+      });
+
+      // Hide entire group heading if nothing visible
+      $(this).find('.ext-group-heading').toggle(groupHasVisible);
+      $(this).find('.ext-cards-row').toggle(groupHasVisible);
+    });
+
+    $emptyState.toggle(!anyVisible);
+    updateCount();
+  }
+
+  // Type filter buttons
+  $typeFilter.on('click', 'button', function() {
+    activeType = $(this).data('type');
+    $typeFilter.find('button').removeClass('btn-primary active').addClass('btn-default');
+    $(this).removeClass('btn-default').addClass('btn-primary active');
+    applyFilters();
+  });
+
+  $search.on('input', applyFilters);
+  $instOnly.on('change', applyFilters);
+
+  // Initial count
+  applyFilters();
+
+  // ---- Install / Uninstall via AJAX ----
+  function showToast(msg, type) {
+    var $t = $('#ext-toast');
+    $t.removeClass('alert-success alert-danger').addClass(type === 'error' ? 'alert-danger' : 'alert-success');
+    $('#ext-toast-msg').text(msg);
+    $t.show();
+    clearTimeout($t.data('timer'));
+    $t.data('timer', setTimeout(function() { $t.fadeOut(); }, 4000));
+  }
+
+  function doExtAction(url, $btn, onSuccess) {
+    $btn.prop('disabled', true);
+    var $icon = $btn.find('i');
+    var origClass = $icon.attr('class');
+    $icon.attr('class', 'fa fa-spinner fa-spin');
+
+    $.ajax({
+      url: url,
+      type: 'GET',
+      dataType: 'json',
+      success: function(json) {
+        if (json.success) {
+          showToast(json.success, 'success');
+          onSuccess();
+          // Refresh sidebar menu
+          $.ajax({
+            url: 'index.php?route=marketplace/extension/refreshMenu&user_token={{ user_token }}',
+            dataType: 'html',
+            success: function(html) {
+              if (html) { $('#column-left').replaceWith(html); }
+            }
+          });
+        } else {
+          showToast(json.error || 'Error', 'error');
+          $icon.attr('class', origClass);
+          $btn.prop('disabled', false);
+        }
+      },
+      error: function(xhr) {
+        showToast('Server error: ' + xhr.status, 'error');
+        $icon.attr('class', origClass);
+        $btn.prop('disabled', false);
+      }
+    });
+  }
+
+  // Install button
+  $(document).on('click', '.btn-ext-install', function(e) {
+    e.stopPropagation();
+    var $btn  = $(this);
+    var url   = $btn.data('url');
+    var $card = $btn.closest('.ext-card-wrapper');
+
+    doExtAction(url, $btn, function() {
+      // Update card state: reload the page to get the fresh server-rendered state
+      window.location.reload();
+    });
+  });
+
+  // Uninstall button
+  $(document).on('click', '.btn-ext-uninstall', function(e) {
+    e.stopPropagation();
+    var $btn  = $(this);
+    var name  = $btn.data('name');
+    var confirm_msg = $btn.data('confirm') || '{{ text_confirm }}';
+
+    if (!confirm(confirm_msg + '\n\n' + name)) {
+      return;
+    }
+
+    var url   = $btn.data('url');
+
+    doExtAction(url, $btn, function() {
+      window.location.reload();
+    });
+  });
+
+  // Prevent card click propagation from action buttons
+  $(document).on('click', '.ext-card .panel-footer', function(e) {
+    e.stopPropagation();
+  });
+
+})();
+</script>
+</script>
