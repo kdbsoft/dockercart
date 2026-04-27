@@ -620,6 +620,9 @@ class ControllerProductProduct extends Controller {
 
 			$data['recurrings'] = $this->model_catalog_product->getProfiles($product_id);
 
+			$this->load->model('account/viewed');
+			$this->model_account_viewed->addViewedProduct($product_id);
+
 			$this->model_catalog_product->updateViewed($product_id);
 			
 			$data['column_left'] = $this->load->controller('common/column_left');

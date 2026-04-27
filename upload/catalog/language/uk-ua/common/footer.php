@@ -15,6 +15,7 @@ $_['text_latest'] = 'Новинки';
 $_['text_manufacturer'] = 'Бренди';
 $_['text_mostviewed'] = 'Популярні товари';
 $_['text_newsletter'] = 'Підписатися';
+$_['text_viewed'] = 'Переглянуті товари';
 $_['text_order'] = 'Історія замовлень';
 $_['text_powered'] = 'Працює на <a href="https://dockercart.net">DockerCart</a><br /> %s © %s';
 $_['text_return'] = 'Повернення';

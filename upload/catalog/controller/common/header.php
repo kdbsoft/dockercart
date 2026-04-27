@@ -173,6 +173,7 @@ class ControllerCommonHeader extends Controller {
 		$data['schema_search_target'] = $schema_search_target;
 
 		$data['wishlist'] = $this->url->link('account/wishlist', '', true);
+		$data['viewed'] = $this->url->link('account/viewed', '', true);
 		$data['compare'] = $this->url->link('product/compare');
 		$data['logged'] = $this->customer->isLogged();
 		$data['account_download_status'] = (int)$this->config->get('config_account_download_status');

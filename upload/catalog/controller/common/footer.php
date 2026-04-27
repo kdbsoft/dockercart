@@ -35,6 +35,7 @@ class ControllerCommonFooter extends Controller {
 		$data['account'] = $this->url->link('account/account', '', true);
 		$data['order'] = $this->url->link('account/order', '', true);
 		$data['wishlist'] = $this->url->link('account/wishlist', '', true);
+		$data['viewed'] = $this->url->link('account/viewed', '', true);
 		$data['newsletter'] = $this->url->link('account/newsletter', '', true);
 		$data['compare'] = $this->url->link('product/compare');
 
