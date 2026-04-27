@@ -110,9 +110,6 @@ class ControllerMarketplaceModification extends Controller {
 			// Begin
 			$xml = array();
 
-			// Load the default modification XML
-			$xml[] = file_get_contents(DIR_SYSTEM . 'modification.xml');
-
 			// This is purly for developers so they can run mods directly and have them run without upload after each change.
 			$files = glob(DIR_SYSTEM . '*.ocmod.xml');
 

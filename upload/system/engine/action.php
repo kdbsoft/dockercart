@@ -66,7 +66,7 @@ class Action {
 		
 		// Initialize the class
 		if (is_file($file)) {
-			include_once($file);
+			include_once(modification($file));
 		
 			$controller = new $class($registry);
 		} else {

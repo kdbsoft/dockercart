@@ -9,24 +9,52 @@ class ControllerApiCart extends Controller {
 			$json['error']['warning'] = $this->language->get('error_permission');
 		} else {
 			if (isset($this->request->post['product'])) {
-				$this->cart->clear();
+				$this->load->model('catalog/product');
+
+				$products_to_add = array();
 
 				foreach ($this->request->post['product'] as $product) {
+					$product_id = isset($product['product_id']) ? (int)$product['product_id'] : 0;
+					$product_info = $this->model_catalog_product->getProduct($product_id);
+
+					if (!$product_info) {
+						$json['error']['store'] = $this->language->get('error_store');
+						continue;
+					}
+
+					$quantity = isset($product['quantity'])
+						? $this->normalizeQuantity($product['quantity'], $this->getMinimumQuantity($product_info))
+						: $this->getMinimumQuantity($product_info);
+
 					if (isset($product['option'])) {
 						$option = $product['option'];
 					} else {
 						$option = array();
 					}
 
-					$this->cart->add($product['product_id'], $product['quantity'], $option);
+					$this->validateRequestedQuantity($product_info, $quantity, $json, 'quantity_' . $product_id);
+
+					$products_to_add[] = array(
+						'product_id' => $product_id,
+						'quantity'   => $quantity,
+						'option'     => $option
+					);
 				}
 
-				$json['success'] = $this->language->get('text_success');
+				if (!isset($json['error'])) {
+					$this->cart->clear();
 
-				unset($this->session->data['shipping_method']);
-				unset($this->session->data['shipping_methods']);
-				unset($this->session->data['payment_method']);
-				unset($this->session->data['payment_methods']);
+					foreach ($products_to_add as $product) {
+						$this->cart->add($product['product_id'], $product['quantity'], $product['option']);
+					}
+
+					$json['success'] = $this->language->get('text_success');
+
+					unset($this->session->data['shipping_method']);
+					unset($this->session->data['shipping_methods']);
+					unset($this->session->data['payment_method']);
+					unset($this->session->data['payment_methods']);
+				}
 			} elseif (isset($this->request->post['product_id'])) {
 				$this->load->model('catalog/product');
 
@@ -34,9 +62,9 @@ class ControllerApiCart extends Controller {
 
 				if ($product_info) {
 					if (isset($this->request->post['quantity'])) {
-						$quantity = $this->request->post['quantity'];
+						$quantity = $this->normalizeQuantity($this->request->post['quantity'], $this->getMinimumQuantity($product_info));
 					} else {
-						$quantity = 1;
+						$quantity = $this->getMinimumQuantity($product_info);
 					}
 
 					if (isset($this->request->post['option'])) {
@@ -53,7 +81,9 @@ class ControllerApiCart extends Controller {
 						}
 					}
 
-					if (!isset($json['error']['option'])) {
+					$this->validateRequestedQuantity($product_info, $quantity, $json);
+
+					if (!isset($json['error'])) {
 						$this->cart->add($this->request->post['product_id'], $quantity, $option);
 
 						$json['success'] = $this->language->get('text_success');
@@ -81,15 +111,30 @@ class ControllerApiCart extends Controller {
 		if (!isset($this->session->data['api_id'])) {
 			$json['error'] = $this->language->get('error_permission');
 		} else {
-			$this->cart->update($this->request->post['key'], $this->request->post['quantity']);
+			$cart_products = array();
 
-			$json['success'] = $this->language->get('text_success');
+			foreach ($this->cart->getProducts() as $cart_product) {
+				$cart_products[$cart_product['cart_id']] = $cart_product;
+			}
 
-			unset($this->session->data['shipping_method']);
-			unset($this->session->data['shipping_methods']);
-			unset($this->session->data['payment_method']);
-			unset($this->session->data['payment_methods']);
-			unset($this->session->data['reward']);
+			$cart_id = (int)$this->request->post['key'];
+			$quantity = $this->normalizeQuantity($this->request->post['quantity'], 0);
+
+			if ($quantity > 0 && isset($cart_products[$cart_id])) {
+				$this->validateRequestedQuantity($cart_products[$cart_id], $quantity, $json);
+			}
+
+			if (!isset($json['error'])) {
+				$this->cart->update($cart_id, $quantity);
+
+				$json['success'] = $this->language->get('text_success');
+
+				unset($this->session->data['shipping_method']);
+				unset($this->session->data['shipping_methods']);
+				unset($this->session->data['payment_method']);
+				unset($this->session->data['payment_methods']);
+				unset($this->session->data['reward']);
+			}
 		}
 
 		$this->response->addHeader('Content-Type: application/json');
@@ -190,7 +235,7 @@ class ControllerApiCart extends Controller {
 					$discount_percent = 100;
 				}
 
-				$quantity = (int)$product['quantity'];
+				$quantity = (float)$product['quantity'];
 				$base_price = (float)$product['price'];
 				$base_tax = (float)$this->tax->getTax($product['price'], $product['tax_class_id']);
 
@@ -328,5 +373,70 @@ class ControllerApiCart extends Controller {
 		
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
+	}
+
+	private function normalizeQuantity($value, $default = 1.0) {
+		$normalized = str_replace(',', '.', trim((string)$value));
+
+		if (!is_numeric($normalized)) {
+			return (float)$default;
+		}
+
+		return round((float)$normalized, 2);
+	}
+
+	private function getMinimumQuantity($product_info) {
+		$minimum = isset($product_info['minimum']) ? (float)$product_info['minimum'] : 1.0;
+
+		if ($minimum <= 0) {
+			$minimum = 1.0;
+		}
+
+		return round($minimum, 2);
+	}
+
+	private function getQuantityStep($product_info) {
+		$step = isset($product_info['quantity_step']) ? (float)$product_info['quantity_step'] : 1.0;
+
+		if ($step <= 0) {
+			$step = 1.0;
+		}
+
+		return round($step, 2);
+	}
+
+	private function isQuantityByStep($quantity, $step) {
+		$quantity_cents = (int)round((float)$quantity * 100);
+		$step_cents = (int)round((float)$step * 100);
+
+		if ($step_cents <= 0) {
+			return false;
+		}
+
+		return ($quantity_cents % $step_cents) === 0;
+	}
+
+	private function formatQuantity($quantity) {
+		$formatted = number_format((float)$quantity, 2, '.', '');
+
+		return rtrim(rtrim($formatted, '0'), '.');
+	}
+
+	private function validateRequestedQuantity($product_info, $quantity, &$json, $error_key = 'quantity') {
+		$minimum = $this->getMinimumQuantity($product_info);
+		$step = $this->getQuantityStep($product_info);
+
+		if ($quantity < $minimum || !$this->isQuantityByStep($quantity, $step)) {
+			$json['error'][$error_key] = sprintf(
+				$this->language->get('error_quantity_step'),
+				$product_info['name'],
+				$this->formatQuantity($minimum),
+				$this->formatQuantity($step)
+			);
+
+			return false;
+		}
+
+		return true;
 	}
 }

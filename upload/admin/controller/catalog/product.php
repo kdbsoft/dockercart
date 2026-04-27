@@ -378,7 +378,7 @@ class ControllerCatalogProduct extends Controller {
 				'model'      => $result['model'],
 				'price'      => $this->currency->format($result['price'], $this->config->get('config_currency')),
 				'special'    => $special,
-				'quantity'   => $result['quantity'],
+				'quantity'   => $this->formatQuantityForDisplay($result['quantity']),
 				'status'     => $result['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
 				'edit'       => $this->url->link('catalog/product/edit', 'user_token=' . $this->session->data['user_token'] . '&product_id=' . $result['product_id'] . $url, true)
 			);
@@ -749,7 +749,7 @@ class ControllerCatalogProduct extends Controller {
 		if (isset($this->request->post['quantity'])) {
 			$data['quantity'] = $this->request->post['quantity'];
 		} elseif (!empty($product_info)) {
-			$data['quantity'] = $product_info['quantity'];
+			$data['quantity'] = $this->formatQuantityForDisplay($product_info['quantity']);
 		} else {
 			$data['quantity'] = 1;
 		}
@@ -757,9 +757,17 @@ class ControllerCatalogProduct extends Controller {
 		if (isset($this->request->post['minimum'])) {
 			$data['minimum'] = $this->request->post['minimum'];
 		} elseif (!empty($product_info)) {
-			$data['minimum'] = $product_info['minimum'];
+			$data['minimum'] = $this->formatQuantityForDisplay($product_info['minimum']);
 		} else {
 			$data['minimum'] = 1;
+		}
+
+		if (isset($this->request->post['quantity_step'])) {
+			$data['quantity_step'] = $this->request->post['quantity_step'];
+		} elseif (!empty($product_info) && isset($product_info['quantity_step'])) {
+			$data['quantity_step'] = $this->formatQuantityForDisplay($product_info['quantity_step']);
+		} else {
+			$data['quantity_step'] = 1;
 		}
 
 		if (isset($this->request->post['subtract'])) {
@@ -1228,6 +1236,39 @@ class ControllerCatalogProduct extends Controller {
 		return $decoded;
 	}
 
+	private function isValidDecimalValue($value) {
+		$normalized = str_replace(',', '.', trim((string)$value));
+
+		return preg_match('/^\d+(\.\d{1,2})?$/', $normalized) === 1;
+	}
+
+	private function normalizeDecimal($value, $default = 0.0) {
+		$normalized = str_replace(',', '.', trim((string)$value));
+
+		if (!is_numeric($normalized)) {
+			return (float)$default;
+		}
+
+		return round((float)$normalized, 2);
+	}
+
+	private function formatQuantityForDisplay($value) {
+		$formatted = number_format((float)$value, 2, '.', '');
+
+		return rtrim(rtrim($formatted, '0'), '.');
+	}
+
+	private function isQuantityMultiple($quantity, $step) {
+		$quantity_cents = (int)round((float)$quantity * 100);
+		$step_cents = (int)round((float)$step * 100);
+
+		if ($step_cents <= 0) {
+			return false;
+		}
+
+		return ($quantity_cents % $step_cents) === 0;
+	}
+
 	protected function validateForm() {
 		if (!$this->user->hasPermission('modify', 'catalog/product')) {
 			$this->error['warning'] = $this->language->get('error_permission');
@@ -1245,6 +1286,24 @@ class ControllerCatalogProduct extends Controller {
 
 		if ((utf8_strlen($this->request->post['model']) < 1) || (utf8_strlen($this->request->post['model']) > 64)) {
 			$this->error['model'] = $this->language->get('error_model');
+		}
+
+		$quantity_step_raw = isset($this->request->post['quantity_step']) ? $this->request->post['quantity_step'] : '1';
+		$minimum_raw = isset($this->request->post['minimum']) ? $this->request->post['minimum'] : '1';
+
+		$quantity_step = $this->normalizeDecimal($quantity_step_raw, 1.0);
+		$minimum = $this->normalizeDecimal($minimum_raw, 1.0);
+
+		if (!$this->isValidDecimalValue($quantity_step_raw) || $quantity_step <= 0) {
+			$this->error['quantity_step'] = $this->language->get('error_quantity_step');
+		}
+
+		if (!$this->isValidDecimalValue($minimum_raw) || $minimum <= 0) {
+			$this->error['minimum'] = $this->language->get('error_minimum_value');
+		}
+
+		if (!isset($this->error['quantity_step']) && !isset($this->error['minimum']) && !$this->isQuantityMultiple($minimum, $quantity_step)) {
+			$this->error['minimum_step'] = $this->language->get('error_minimum_step');
 		}
 
 		if ($this->request->post['product_seo_url']) {

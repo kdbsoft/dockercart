@@ -298,7 +298,23 @@ class ControllerProductProduct extends Controller {
 
 			$data['heading_title'] = $product_info['name'];
 
-			$data['text_minimum'] = sprintf($this->language->get('text_minimum'), $product_info['minimum']);
+			$minimum_quantity = isset($product_info['minimum']) ? (float)$product_info['minimum'] : 1;
+
+			if ($minimum_quantity <= 0) {
+				$minimum_quantity = 1;
+			}
+
+			$data['minimum'] = $this->formatQuantityValue($minimum_quantity);
+			$data['text_minimum'] = sprintf($this->language->get('text_minimum'), $data['minimum']);
+
+			$quantity_step = isset($product_info['quantity_step']) ? (float)$product_info['quantity_step'] : 1;
+
+			if ($quantity_step <= 0) {
+				$quantity_step = 1;
+			}
+
+			$data['quantity_step'] = $this->formatQuantityValue($quantity_step);
+			$data['text_quantity_step'] = sprintf($this->language->get('text_quantity_step'), $data['quantity_step']);
 			$data['text_login'] = sprintf($this->language->get('text_login'), $this->url->link('account/login', '', true), $this->url->link('account/register', '', true));
 			// Localized label for the image zoom hint
 			$data['text_zoom'] = $this->language->get('text_zoom');
@@ -433,9 +449,7 @@ class ControllerProductProduct extends Controller {
 				);
 			}
 
-			if ($product_info['minimum']) {
-				$data['minimum'] = $product_info['minimum'];
-			} else {
+			if (!isset($data['minimum'])) {
 				$data['minimum'] = 1;
 			}
 
@@ -580,7 +594,8 @@ class ControllerProductProduct extends Controller {
 					'special'     => $special,
 					'discount'    => $discount_percent,
 					'tax'         => $tax,
-					'minimum'     => $result['minimum'] > 0 ? $result['minimum'] : 1,
+					'minimum'     => $this->formatQuantityValue(($result['minimum'] > 0 ? $result['minimum'] : 1)),
+					'quantity_step' => (isset($result['quantity_step']) && (float)$result['quantity_step'] > 0) ? $result['quantity_step'] : 1,
 					'stock'       => $stock,
 					'is_in_stock' => ($stock_quantity > 0),
 					'rating'      => $rating,
@@ -686,6 +701,12 @@ class ControllerProductProduct extends Controller {
 
 			$this->response->setOutput($this->load->view('error/not_found', $data));
 		}
+	}
+
+	private function formatQuantityValue($value) {
+		$formatted = number_format((float)$value, 2, '.', '');
+
+		return rtrim(rtrim($formatted, '0'), '.');
 	}
 
 	public function review() {

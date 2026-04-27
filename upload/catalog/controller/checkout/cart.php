@@ -67,7 +67,7 @@ class ControllerCheckoutCart extends Controller {
 				}
 
 				if ($product['minimum'] > $product_total) {
-					$data['error_warning'] = sprintf($this->language->get('error_minimum'), $product['name'], $product['minimum']);
+					$data['error_warning'] = sprintf($this->language->get('error_minimum'), $product['name'], $this->formatQuantity($product['minimum']));
 				}
 
 				if ($product['image']) {
@@ -137,7 +137,9 @@ class ControllerCheckoutCart extends Controller {
 					'model'     => $product['model'],
 					'option'    => $option_data,
 					'recurring' => $recurring,
-					'quantity'  => $product['quantity'],
+					'quantity'  => $this->formatQuantity($product['quantity']),
+					'minimum'   => $this->formatQuantity($product['minimum']),
+					'quantity_step' => $this->formatQuantity(isset($product['quantity_step']) ? $product['quantity_step'] : 1),
 					'stock'     => $product['stock'] ? true : !(!$this->config->get('config_stock_checkout') || $this->config->get('config_stock_warning')),
 					'reward'    => ($product['reward'] ? sprintf($this->language->get('text_points'), $product['reward']) : ''),
 					'price'     => $price,
@@ -259,6 +261,71 @@ class ControllerCheckoutCart extends Controller {
 		}
 	}
 
+	private function normalizeQuantity($value, $default = 1.0) {
+		$normalized = str_replace(',', '.', trim((string)$value));
+
+		if (!is_numeric($normalized)) {
+			return (float)$default;
+		}
+
+		return round((float)$normalized, 2);
+	}
+
+	private function getMinimumQuantity($product_info) {
+		$minimum = isset($product_info['minimum']) ? (float)$product_info['minimum'] : 1.0;
+
+		if ($minimum <= 0) {
+			$minimum = 1.0;
+		}
+
+		return round($minimum, 2);
+	}
+
+	private function getQuantityStep($product_info) {
+		$step = isset($product_info['quantity_step']) ? (float)$product_info['quantity_step'] : 1.0;
+
+		if ($step <= 0) {
+			$step = 1.0;
+		}
+
+		return round($step, 2);
+	}
+
+	private function isQuantityByStep($quantity, $step) {
+		$quantity_cents = (int)round((float)$quantity * 100);
+		$step_cents = (int)round((float)$step * 100);
+
+		if ($step_cents <= 0) {
+			return false;
+		}
+
+		return ($quantity_cents % $step_cents) === 0;
+	}
+
+	private function formatQuantity($quantity) {
+		$formatted = number_format((float)$quantity, 2, '.', '');
+
+		return rtrim(rtrim($formatted, '0'), '.');
+	}
+
+	private function validateRequestedQuantity($product_info, $quantity, &$json, $error_key = 'quantity') {
+		$minimum = $this->getMinimumQuantity($product_info);
+		$step = $this->getQuantityStep($product_info);
+
+		if ($quantity < $minimum || !$this->isQuantityByStep($quantity, $step)) {
+			$json['error'][$error_key] = sprintf(
+				$this->language->get('error_quantity_step'),
+				$product_info['name'],
+				$this->formatQuantity($minimum),
+				$this->formatQuantity($step)
+			);
+
+			return false;
+		}
+
+		return true;
+	}
+
 	public function add() {
 		$this->load->language('checkout/cart');
 
@@ -275,10 +342,12 @@ class ControllerCheckoutCart extends Controller {
 		$product_info = $this->model_catalog_product->getProduct($product_id);
 
 		if ($product_info) {
+			$default_quantity = $this->getMinimumQuantity($product_info);
+
 			if (isset($this->request->post['quantity'])) {
-				$quantity = (int)$this->request->post['quantity'];
+				$quantity = $this->normalizeQuantity($this->request->post['quantity'], $default_quantity);
 			} else {
-				$quantity = 1;
+				$quantity = $default_quantity;
 			}
 
 			if (isset($this->request->post['option'])) {
@@ -315,7 +384,7 @@ class ControllerCheckoutCart extends Controller {
 				}
 			}
 
-			if (!$json) {
+			if (!$json && $this->validateRequestedQuantity($product_info, $quantity, $json)) {
 				$this->cart->add($this->request->post['product_id'], $quantity, $option, $recurring_id);
 
 				$json['success'] = sprintf($this->language->get('text_success'), $this->url->link('product/product', 'product_id=' . $this->request->post['product_id']), $product_info['name'], $this->url->link('checkout/cart'));
@@ -372,7 +441,9 @@ class ControllerCheckoutCart extends Controller {
 
 				$json['total'] = sprintf($this->language->get('text_items'), $this->cart->countProducts() + (isset($this->session->data['vouchers']) ? count($this->session->data['vouchers']) : 0), $this->currency->format($total, $this->session->data['currency']));
 			} else {
-				$json['redirect'] = str_replace('&amp;', '&', $this->url->link('product/product', 'product_id=' . $this->request->post['product_id']));
+				if (isset($json['error']['option']) || isset($json['error']['recurring'])) {
+					$json['redirect'] = str_replace('&amp;', '&', $this->url->link('product/product', 'product_id=' . $this->request->post['product_id']));
+				}
 			}
 		}
 
@@ -390,7 +461,7 @@ class ControllerCheckoutCart extends Controller {
 
 		// Support single-key AJAX call: key=<cart_id>&quantity=<qty>
 		if (isset($this->request->post['key']) && isset($this->request->post['quantity'])) {
-			$quantities = array((int)$this->request->post['key'] => (int)$this->request->post['quantity']);
+			$quantities = array((int)$this->request->post['key'] => $this->request->post['quantity']);
 		} elseif (!empty($this->request->post['quantity']) && is_array($this->request->post['quantity'])) {
 			// quantity[cart_id]=qty (array form from AJAX or full-page form)
 			$quantities = $this->request->post['quantity'];
@@ -398,9 +469,45 @@ class ControllerCheckoutCart extends Controller {
 			$quantities = array();
 		}
 
+		$cart_products = array();
+
+		foreach ($this->cart->getProducts() as $cart_product) {
+			$cart_products[$cart_product['cart_id']] = $cart_product;
+		}
+
 		if ($quantities) {
+			$normalized_quantities = array();
+
 			foreach ($quantities as $key => $value) {
-				$this->cart->update($key, (int)$value);
+				$cart_id = (int)$key;
+				$quantity = $this->normalizeQuantity($value, 0);
+
+				if ($quantity <= 0) {
+					$normalized_quantities[$cart_id] = 0;
+					continue;
+				}
+
+				if (isset($cart_products[$cart_id])) {
+					$this->validateRequestedQuantity($cart_products[$cart_id], $quantity, $json, $cart_id);
+				}
+
+				$normalized_quantities[$cart_id] = $quantity;
+			}
+
+			if (isset($json['error'])) {
+				if (!$is_ajax) {
+					$this->session->data['error'] = reset($json['error']);
+					$this->response->redirect($this->url->link('checkout/cart'));
+					return;
+				}
+
+				$this->response->addHeader('Content-Type: application/json');
+				$this->response->setOutput(json_encode($json));
+				return;
+			}
+
+			foreach ($normalized_quantities as $cart_id => $quantity) {
+				$this->cart->update($cart_id, $quantity);
 			}
 
 			unset($this->session->data['shipping_method']);

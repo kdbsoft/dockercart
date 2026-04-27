@@ -465,16 +465,30 @@ class ControllerCheckoutDockercartCheckout extends Controller {
      * AJAX: Update cart item quantity
      */
     public function updateCart() {
+        $this->load->language('checkout/cart');
+
         $data = $this->getJsonInput();
         $json = array();
 
         if (isset($data['cart_id']) && isset($data['quantity'])) {
-            $quantity = (int)$data['quantity'];
+            $cart_id = (int)$data['cart_id'];
+            $quantity = $this->dcNormalizeQuantity($data['quantity'], 0);
+
+            $cart_products = array();
+
+            foreach ($this->cart->getProducts() as $cart_product) {
+                $cart_products[$cart_product['cart_id']] = $cart_product;
+            }
+
+            if ($quantity > 0 && isset($cart_products[$cart_id]) && !$this->dcValidateRequestedQuantity($cart_products[$cart_id], $quantity, $json)) {
+                $this->sendJsonResponse($json);
+                return;
+            }
 
             if ($quantity > 0) {
-                $this->cart->update($data['cart_id'], $quantity);
+                $this->cart->update($cart_id, $quantity);
             } else {
-                $this->cart->remove($data['cart_id']);
+                $this->cart->remove($cart_id);
             }
 
             $json['success'] = true;
@@ -485,6 +499,71 @@ class ControllerCheckoutDockercartCheckout extends Controller {
         }
 
         $this->sendJsonResponse($json);
+    }
+
+    private function dcNormalizeQuantity($value, $default = 1.0) {
+        $normalized = str_replace(',', '.', trim((string)$value));
+
+        if (!is_numeric($normalized)) {
+            return (float)$default;
+        }
+
+        return round((float)$normalized, 2);
+    }
+
+    private function dcGetMinimumQuantity($product_info) {
+        $minimum = isset($product_info['minimum']) ? (float)$product_info['minimum'] : 1.0;
+
+        if ($minimum <= 0) {
+            $minimum = 1.0;
+        }
+
+        return round($minimum, 2);
+    }
+
+    private function dcGetQuantityStep($product_info) {
+        $step = isset($product_info['quantity_step']) ? (float)$product_info['quantity_step'] : 1.0;
+
+        if ($step <= 0) {
+            $step = 1.0;
+        }
+
+        return round($step, 2);
+    }
+
+    private function dcIsQuantityByStep($quantity, $step) {
+        $quantity_cents = (int)round((float)$quantity * 100);
+        $step_cents = (int)round((float)$step * 100);
+
+        if ($step_cents <= 0) {
+            return false;
+        }
+
+        return ($quantity_cents % $step_cents) === 0;
+    }
+
+    private function dcFormatQuantity($quantity) {
+        $formatted = number_format((float)$quantity, 2, '.', '');
+
+        return rtrim(rtrim($formatted, '0'), '.');
+    }
+
+    private function dcValidateRequestedQuantity($product_info, $quantity, &$json) {
+        $minimum = $this->dcGetMinimumQuantity($product_info);
+        $step = $this->dcGetQuantityStep($product_info);
+
+        if ($quantity < $minimum || !$this->dcIsQuantityByStep($quantity, $step)) {
+            $json['error'] = sprintf(
+                $this->language->get('error_quantity_step'),
+                $product_info['name'],
+                $this->dcFormatQuantity($minimum),
+                $this->dcFormatQuantity($step)
+            );
+
+            return false;
+        }
+
+        return true;
     }
 
     /**

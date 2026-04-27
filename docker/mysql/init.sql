@@ -1038,7 +1038,7 @@ CREATE TABLE `oc_cart` (
   `product_id` int(11) NOT NULL,
   `recurring_id` int(11) NOT NULL,
   `option` mediumtext NOT NULL,
-  `quantity` int(11) NOT NULL,
+  `quantity` DECIMAL(15,2) NOT NULL DEFAULT 0.00,
   `date_added` datetime NOT NULL,
   PRIMARY KEY (`cart_id`),
   KEY `cart_id` (`api_id`,`customer_id`,`session_id`,`product_id`,`recurring_id`)
@@ -25052,5 +25052,22 @@ SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
+
+-- DockerCart post-import schema adjustments: fractional quantities
+ALTER TABLE `oc_product`
+  ADD COLUMN IF NOT EXISTS `quantity_step` DECIMAL(15,2) NOT NULL DEFAULT 1.00 AFTER `minimum`;
+
+ALTER TABLE `oc_product`
+  MODIFY COLUMN `quantity` DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+  MODIFY COLUMN `minimum` DECIMAL(15,2) NOT NULL DEFAULT 1.00;
+
+ALTER TABLE `oc_cart`
+  MODIFY COLUMN `quantity` DECIMAL(15,2) NOT NULL;
+
+ALTER TABLE `oc_order_product`
+  MODIFY COLUMN `quantity` DECIMAL(15,2) NOT NULL;
+
+ALTER TABLE `oc_product_option_value`
+  MODIFY COLUMN `quantity` DECIMAL(15,2) NOT NULL;
 
 -- Dump completed on 2026-04-26  8:23:58

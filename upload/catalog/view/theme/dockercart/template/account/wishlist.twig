@@ -67,7 +67,7 @@
                   {% endif %}
                 </td>
                 <td class="text-right px-4 py-3 whitespace-nowrap">
-                  <button type="button" onclick="cart.add('{{ product.product_id }}');"
+                  <button type="button" onclick="cart.add('{{ product.product_id }}', '{{ product.minimum|default(1) }}');"
                     class="inline-flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-1.5 rounded-lg transition text-xs mr-1">
                     <i data-lucide="shopping-cart" class="w-3.5 h-3.5"></i>
                   </button>

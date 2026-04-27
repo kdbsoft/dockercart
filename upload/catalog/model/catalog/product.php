@@ -6,7 +6,14 @@ class ModelCatalogProduct extends Model {
 
 	public function getProduct($product_id) {
 		$cache_enabled = (int)$this->config->get('config_product_cache_status');
-		$cache_key = 'product.get.' . (int)$product_id . '.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_store_id') . '.' . (int)$this->config->get('config_customer_group_id');
+		$version_query = $this->db->query("SELECT date_modified FROM " . DB_PREFIX . "product WHERE product_id = '" . (int)$product_id . "'");
+		$cache_stamp = 0;
+
+		if ($version_query->num_rows && !empty($version_query->row['date_modified'])) {
+			$cache_stamp = (int)strtotime($version_query->row['date_modified']);
+		}
+
+		$cache_key = 'product.get.v3.' . (int)$product_id . '.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_store_id') . '.' . (int)$this->config->get('config_customer_group_id') . '.' . $cache_stamp;
 
 		if ($cache_enabled) {
 			$cached = $this->cache->get($cache_key);
@@ -58,6 +65,12 @@ class ModelCatalogProduct extends Model {
 				$special = null;
 			}
 
+			$quantity_step = isset($query->row['quantity_step']) ? (float)$query->row['quantity_step'] : 1.0;
+
+			if ($quantity_step <= 0) {
+				$quantity_step = 1.0;
+			}
+
 			$product_data = array(
 				'product_id'       => $query->row['product_id'],
 				'name'             => $query->row['name'],
@@ -74,7 +87,7 @@ class ModelCatalogProduct extends Model {
 				'isbn'             => $query->row['isbn'],
 				'mpn'              => $query->row['mpn'],
 				'location'         => $query->row['location'],
-				'quantity'         => $query->row['quantity'],
+				'quantity'         => (float)$query->row['quantity'],
 				'stock_status'     => $query->row['stock_status'],
 				'image'            => $query->row['image'],
 				'manufacturer_id'  => $query->row['manufacturer_id'],
@@ -94,7 +107,8 @@ class ModelCatalogProduct extends Model {
 				'subtract'         => $query->row['subtract'],
 				'rating'           => round(($query->row['rating']===null) ? 0 : $query->row['rating']),
 				'reviews'          => $query->row['reviews'] ? $query->row['reviews'] : 0,
-				'minimum'          => $query->row['minimum'],
+				'minimum'          => (float)$query->row['minimum'],
+				'quantity_step'    => $quantity_step,
 				'sort_order'       => $query->row['sort_order'],
 				'status'           => $query->row['status'],
 				'date_added'       => $query->row['date_added'],

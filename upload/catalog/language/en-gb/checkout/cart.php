@@ -35,6 +35,7 @@ $_['column_total']             = 'Total';
 // Error
 $_['error_stock']              = 'Products marked with *** are not available in the desired quantity or not in stock!';
 $_['error_minimum']            = 'Minimum order amount for %s is %s!';
+$_['error_quantity_step']      = 'Quantity for %s must be at least %s and divisible by step %s.';
 $_['error_required']           = '%s required!';
 $_['error_product']            = 'Warning: There are no products in your cart!';
 $_['error_recurring_required'] = 'Please select a payment recurring!';
