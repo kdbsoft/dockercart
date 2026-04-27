@@ -1,3 +1,9 @@
+## [1.2.0](https://github.com/mathflow-bit/dockercart/compare/v1.1.1...v1.2.0) (2026-04-27)
+
+### Features
+
+* add viewed products module ([71784e2](https://github.com/mathflow-bit/dockercart/commit/71784e2bec13f95f08b470bb14d85cfe2f4c51cb))
+
 ## [1.1.1](https://github.com/mathflow-bit/dockercart/compare/v1.1.0...v1.1.1) (2026-04-27)
 
 ## [1.1.0](https://github.com/mathflow-bit/dockercart/compare/v1.0.15...v1.1.0) (2026-04-27)
