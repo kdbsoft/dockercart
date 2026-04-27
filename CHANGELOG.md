@@ -1,3 +1,5 @@
+## [1.1.1](https://github.com/mathflow-bit/dockercart/compare/v1.1.0...v1.1.1) (2026-04-27)
+
 ## [1.1.0](https://github.com/mathflow-bit/dockercart/compare/v1.0.15...v1.1.0) (2026-04-27)
 
 ### Features
