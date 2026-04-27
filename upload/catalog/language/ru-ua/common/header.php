@@ -14,6 +14,7 @@ $_['text_logout'] = 'Выйти';
 $_['text_model_prefix'] = 'Код товара: ';
 $_['text_new_arrivals'] = 'Новые поступления';
 $_['text_order'] = 'История заказов';
+$_['text_viewed'] = 'Просмотренные товары';
 $_['text_qv_feature_delivery'] = 'Бесплатная доставка этого товара.';
 $_['text_qv_feature_returns'] = 'Возврат без проблем в течение 30 дней.';
 $_['text_qv_feature_warranty'] = '2-летняя гарантия производителя';

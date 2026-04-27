@@ -10,6 +10,7 @@ $_['text_extra'] = 'Дополнительные материалы';
 $_['text_information'] = 'Информация';
 $_['text_manufacturer'] = 'Бренды';
 $_['text_newsletter'] = 'Подписка';
+$_['text_viewed'] = 'Просмотренные товары';
 $_['text_new_arrivals'] = 'Новинки';
 $_['text_sale'] = 'Акции';
 $_['text_order'] = 'История заказов';

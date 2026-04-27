@@ -212,6 +212,9 @@
                 <a href="{{ order }}" class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
                   <i data-lucide="package" class="w-4 h-4"></i>{{ text_order }}
                 </a>
+                <a href="{{ viewed }}" class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
+                  <i data-lucide="history" class="w-4 h-4"></i>{{ text_viewed }}
+                </a>
                 <a href="{{ transaction }}" class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
                   <i data-lucide="receipt" class="w-4 h-4"></i>{{ text_transaction }}
                 </a>
@@ -230,6 +233,9 @@
                 </a>
                 <a href="{{ register }}" class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
                   <i data-lucide="user-plus" class="w-4 h-4"></i>{{ text_register }}
+                </a>
+                <a href="{{ viewed }}" class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
+                  <i data-lucide="history" class="w-4 h-4"></i>{{ text_viewed }}
                 </a>
               {% endif %}
             </div>

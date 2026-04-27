@@ -19,6 +19,7 @@ $_['text_home'] = 'Головна';
 $_['text_login'] = 'Вхід';
 $_['text_logout'] = 'Вийти';
 $_['text_order'] = 'Історія замовлень';
+$_['text_viewed'] = 'Переглянуті товари';
 $_['text_register'] = 'Зареєструватися';
 $_['text_search'] = 'Пошук';
 $_['text_shopping_cart'] = 'Кошик для покупок';

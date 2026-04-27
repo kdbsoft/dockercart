@@ -323,7 +323,6 @@
     </div>
     {% endif %}
 
-    {{ content_bottom }}
 
     {% if products %}
     <section class="mt-12">
@@ -393,6 +392,8 @@
       </div>
     </section>
     {% endif %}
+  {# Move content_bottom to the very end of the page container so it renders at the bottom #}
+  {{ content_bottom }}
 
   </div>
 </main>
