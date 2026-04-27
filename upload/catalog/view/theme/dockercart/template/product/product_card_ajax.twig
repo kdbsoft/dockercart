@@ -22,7 +22,8 @@
      data-in-wishlist="{{ product.in_wishlist|default(0) }}"
   data-rating="{{ product.rating|default(0) }}"
   data-stock="{{ (product.stock is defined ? product.stock : '')|e('html_attr') }}"
-  data-is-in-stock="{{ product.is_in_stock ? 1 : 0 }}">
+  data-is-in-stock="{{ product.is_in_stock ? 1 : 0 }}"
+  data-minimum="{{ product.minimum|default(1) }}">
 
   <div class="relative overflow-hidden aspect-square bg-gray-50">
     <a href="{{ product.href }}">

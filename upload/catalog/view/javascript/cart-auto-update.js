@@ -8,7 +8,11 @@ document.addEventListener('DOMContentLoaded', function() {
 	document.querySelectorAll('input[name^="quantity["]').forEach(function(input) {
 		input.addEventListener('change', function() {
 			const cartId = this.name.match(/\d+/)[0];
-			const quantity = parseInt(this.value) || 0;
+			const minimum = parseQuantity(this.dataset.minimum || this.min || '1', 1);
+			const step = parseQuantity(this.dataset.step || this.step || '1', 1);
+			const quantity = normalizeByStep(this.value, minimum, step);
+
+			this.value = formatQuantity(quantity);
 			
 			if (quantity > 0) {
 				updateCartItem(cartId, quantity);
@@ -20,11 +24,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
 		// Also trigger update on blur for better UX
 		input.addEventListener('blur', function() {
-			const quantity = parseInt(this.value) || 0;
-			if (quantity <= 0) {
-				this.value = 1;
-				this.dispatchEvent(new Event('change'));
-			}
+			const minimum = parseQuantity(this.dataset.minimum || this.min || '1', 1);
+			const step = parseQuantity(this.dataset.step || this.step || '1', 1);
+			const quantity = normalizeByStep(this.value, minimum, step);
+
+			this.value = formatQuantity(quantity);
+			this.dispatchEvent(new Event('change'));
 		});
 	});
 
@@ -59,6 +64,40 @@ document.addEventListener('DOMContentLoaded', function() {
 	});
 });
 
+function parseQuantity(value, fallback = 0) {
+	const normalized = String(value).replace(',', '.').trim();
+	const parsed = parseFloat(normalized);
+
+	if (Number.isNaN(parsed)) {
+		return fallback;
+	}
+
+	return Math.round(parsed * 100) / 100;
+}
+
+function formatQuantity(value) {
+	const fixed = (Math.round(value * 100) / 100).toFixed(2);
+	return fixed.replace(/\.00$/, '').replace(/(\.\d*[1-9])0$/, '$1');
+}
+
+function normalizeByStep(rawValue, minimum, step) {
+	let qty = parseQuantity(rawValue, minimum);
+	const safeStep = step > 0 ? step : 1;
+	const safeMinimum = minimum > 0 ? minimum : 1;
+
+	if (qty < safeMinimum) {
+		qty = safeMinimum;
+	}
+
+	const units = Math.round((qty * 100) / Math.round(safeStep * 100));
+	let snapped = units * safeStep;
+	if (snapped < safeMinimum) {
+		snapped = safeMinimum;
+	}
+
+	return Math.round(snapped * 100) / 100;
+}
+
 /**
  * Update cart item quantity via AJAX
  */
@@ -71,7 +110,7 @@ function updateCartItem(cartId, quantity) {
 			'Content-Type': 'application/x-www-form-urlencoded',
 			'X-Requested-With': 'XMLHttpRequest'
 		},
-		body: `key=${encodeURIComponent(cartId)}&quantity=${encodeURIComponent(quantity)}`
+		body: `key=${encodeURIComponent(cartId)}&quantity=${encodeURIComponent(formatQuantity(quantity))}`
 	})
 	.then(response => response.json())
 	.then(json => {

@@ -100,7 +100,7 @@
         {% if discounts %}
         <div class="mt-2 space-y-0.5">{% for discount in discounts %}<p class="text-xs text-gray-500">{{ discount.quantity }}{{ text_discount }}{{ discount.price }}</p>{% endfor %}</div>
         {% endif %}
-        <p id="dc-subtotal" class="hidden text-sm text-blue-700 font-semibold mt-1"></p>
+        <p id="dc-subtotal" class="{% if minimum is defined and minimum > 1 %}text-sm text-blue-700 font-semibold mt-1{% else %}hidden text-sm text-blue-700 font-semibold mt-1{% endif %}"></p>
         {% endif %}
 
         {% if reward %}<p class="text-xs text-gray-500 mt-2">{{ text_reward }} {{ reward }}</p>{% endif %}
@@ -182,9 +182,15 @@
           </div>
           {% endif %}
 
-          {% if minimum > 1 %}
+          {% if minimum > 1 or (quantity_step is defined and quantity_step != 1) %}
           <div class="mt-4 flex items-center gap-2 text-xs text-blue-600 bg-blue-50 rounded-xl px-3 py-2">
-            <i data-lucide="info" class="w-3.5 h-3.5 flex-shrink-0"></i> {{ text_minimum }}
+            <i data-lucide="info" class="w-3.5 h-3.5 flex-shrink-0"></i>
+            <span>
+              {{ text_minimum }}
+              {% if quantity_step is defined and quantity_step != 1 %}
+              · {{ text_quantity_step }}
+              {% endif %}
+            </span>
           </div>
           {% endif %}
 
@@ -194,7 +200,7 @@
           <div class="mt-6 flex items-center gap-3">
             <div class="flex items-center border border-gray-200 rounded-xl overflow-hidden flex-shrink-0">
               <button type="button" class="w-10 h-10 text-lg font-bold text-gray-500 hover:bg-gray-50 transition" onclick="dcChangeQty(-1)">−</button>
-              <input type="text" name="quantity" value="{{ minimum }}" id="input-quantity" oninput="dcUpdateSubtotal()" class="w-10 text-center text-sm font-semibold border-0 outline-none py-2 bg-transparent" />
+              <input type="number" name="quantity" value="{{ minimum }}" id="input-quantity" min="{{ minimum }}" step="{{ quantity_step|default(1) }}" oninput="dcUpdateSubtotal()" class="w-16 text-center text-sm font-semibold border-0 outline-none py-2 bg-transparent" />
               <button type="button" class="w-10 h-10 text-lg font-bold text-gray-500 hover:bg-gray-50 transition" onclick="dcChangeQty(1)">+</button>
             </div>
 
@@ -333,7 +339,7 @@
       <div id="dc-related-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
         {% for product in products %}
         {% set discount_pct = product.discount is defined ? product.discount : 0 %}
-        <div class="dc-product-card product-card group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex flex-col {% if loop.index > 4 %}dc-related-extra hidden{% endif %}" data-id="{{ product.product_id }}" data-rating="{{ product.rating is defined ? product.rating : 0 }}" data-model="{{ product.model is defined ? product.model : '' }}" data-brand="{{ product.manufacturer is defined ? product.manufacturer : '' }}" data-description="{{ product.description|striptags|e('html_attr') }}" data-in-wishlist="{{ product.in_wishlist is defined ? product.in_wishlist : 0 }}" data-stock="{{ (product.stock is defined ? product.stock : '')|e('html_attr') }}" data-is-in-stock="{{ product.is_in_stock ? 1 : 0 }}">
+        <div class="dc-product-card product-card group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex flex-col {% if loop.index > 4 %}dc-related-extra hidden{% endif %}" data-id="{{ product.product_id }}" data-rating="{{ product.rating is defined ? product.rating : 0 }}" data-model="{{ product.model is defined ? product.model : '' }}" data-brand="{{ product.manufacturer is defined ? product.manufacturer : '' }}" data-description="{{ product.description|striptags|e('html_attr') }}" data-in-wishlist="{{ product.in_wishlist is defined ? product.in_wishlist : 0 }}" data-stock="{{ (product.stock is defined ? product.stock : '')|e('html_attr') }}" data-is-in-stock="{{ product.is_in_stock ? 1 : 0 }}" data-minimum="{{ product.minimum|default(1) }}">
           <div class="relative overflow-hidden aspect-square bg-gray-50">
             <a href="{{ product.href }}">
               <img src="{{ product.thumb is not empty ? product.thumb : 'image/no_image.png' }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
@@ -395,9 +401,51 @@
 
 <script type="text/javascript">
 /* ── Qty stepper ───────────────────────────────────────── */
+var dcMinQty = {{ minimum is defined ? minimum : 1 }};
+var dcStepQty = {{ quantity_step is defined ? quantity_step : 1 }};
+
+if (!dcMinQty || dcMinQty <= 0) dcMinQty = 1;
+if (!dcStepQty || dcStepQty <= 0) dcStepQty = 1;
+
+function dcFormatQty(value) {
+  var fixed = (Math.round(value * 100) / 100).toFixed(2);
+  return fixed.replace(/\.00$/, '').replace(/(\.\d*[1-9])0$/, '$1');
+}
+
+function dcNormalizeQty(rawValue, fallback) {
+  var normalized = String(rawValue).replace(',', '.').trim();
+  var parsed = parseFloat(normalized);
+
+  if (isNaN(parsed)) {
+    parsed = (typeof fallback === 'number') ? fallback : dcMinQty;
+  }
+
+  if (parsed < dcMinQty) {
+    parsed = dcMinQty;
+  }
+
+  var stepUnits = Math.round((parsed * 100) / Math.round(dcStepQty * 100));
+  var snapped = stepUnits * dcStepQty;
+
+  if (snapped < dcMinQty) {
+    snapped = dcMinQty;
+  }
+
+  return Math.round(snapped * 100) / 100;
+}
+
 function dcChangeQty(delta) {
   var inp = document.getElementById('input-quantity');
-  inp.value = Math.max(1, (parseInt(inp.value) || 1) + delta);
+  if (!inp) return;
+
+  var current = dcNormalizeQty(inp.value, dcMinQty);
+  var next = current + ((delta < 0 ? -1 : 1) * dcStepQty);
+
+  if (next < dcMinQty) {
+    next = dcMinQty;
+  }
+
+  inp.value = dcFormatQty(dcNormalizeQty(next, dcMinQty));
   dcUpdateSubtotal();
 }
 
@@ -470,8 +518,11 @@ function dcUpdateSubtotal() {
   var subEl   = document.getElementById('dc-subtotal');
   var qtyEl   = document.getElementById('input-quantity');
   if (!priceEl || !subEl || !qtyEl) return;
-  var qty = parseInt(qtyEl.value) || 1;
-  if (qty <= 1) { subEl.classList.add('hidden'); return; }
+  var qty = dcNormalizeQty(qtyEl.value, dcMinQty);
+  qtyEl.value = dcFormatQty(qty);
+  // If the product minimum is 1, hide subtotal when quantity is at minimum.
+  // If minimum > 1 we want to always show the subtotal (even at the minimum quantity).
+  if (qty <= dcMinQty && dcMinQty == 1) { subEl.classList.add('hidden'); return; }
   var unit = parseFloat(priceEl.dataset.currentPrice || priceEl.dataset.basePrice || '0');
   if (isNaN(unit)) { subEl.classList.add('hidden'); return; }
   var sym = priceEl.dataset.currencySymbol || dcDetectCurrencySymbol(priceEl.textContent);
@@ -719,7 +770,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function serializeProductForm() {
     var formScope = document.getElementById('product');
-    var fields = formScope ? formScope.querySelectorAll('input[type="text"], input[type="hidden"], input[type="radio"]:checked, input[type="checkbox"]:checked, select, textarea') : [];
+    // Include number inputs so quantity is submitted (supports fractional quantities)
+    var fields = formScope ? formScope.querySelectorAll('input[type="text"], input[type="hidden"], input[type="number"], input[type="radio"]:checked, input[type="checkbox"]:checked, select, textarea') : [];
     var params = new URLSearchParams();
 
     fields.forEach(function(field) {
@@ -916,6 +968,12 @@ document.addEventListener('DOMContentLoaded', function() {
               recurringError.className = 'dc-field-error text-xs text-red-500 mt-1';
               recurringError.textContent = json.error.recurring;
               recurringSelect.insertAdjacentElement('afterend', recurringError);
+            }
+
+            if (json.error.quantity && typeof dcShowToast === 'function') {
+              dcShowToast(json.error.quantity);
+            } else if (typeof json.error === 'string' && typeof dcShowToast === 'function') {
+              dcShowToast(json.error);
             }
           }
 

@@ -88,6 +88,7 @@
       const brand = card.dataset.brand || card.dataset.manufacturer || '';
       const model = card.dataset.model || '';
       const stock = (card.dataset.stock || '').trim();
+      const minimum = parseFloat(card.dataset.minimum || '1') || 1;
       const isInStock = (String(card.dataset.isInStock || '').toLowerCase() === '1' || String(card.dataset.isInStock || '').toLowerCase() === 'true');
       const inWishlist = card.dataset.inWishlist === '1';
 
@@ -190,9 +191,9 @@
       if (addBtn) {
         addBtn.onclick = () => {
           if (typeof cart !== 'undefined' && cart.add) {
-            cart.add(productId);
+            cart.add(productId, minimum);
           } else if (window.cart && window.cart.add) {
-            window.cart.add(productId);
+            window.cart.add(productId, minimum);
           }
           this.close();
         };

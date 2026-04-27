@@ -36,7 +36,7 @@
       {% set special_val = product.special is defined ? product.special : '' %}
       {% set discount_pct = product.discount is defined ? product.discount : 0 %}
 
-      <div class="product-card group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex flex-col" data-id="{{ product.product_id }}" data-rating="{{ product.rating is defined ? product.rating : 0 }}" data-model="{{ product.model is defined ? product.model : '' }}" data-brand="{{ product.manufacturer is defined ? product.manufacturer : '' }}" data-description="{{ product.description|striptags|e('html_attr') }}" data-in-wishlist="{{ product.in_wishlist is defined ? product.in_wishlist : 0 }}" data-stock="{{ (product.stock is defined ? product.stock : '')|e('html_attr') }}" data-is-in-stock="{{ product.is_in_stock ? 1 : 0 }}">
+      <div class="product-card group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex flex-col" data-id="{{ product.product_id }}" data-rating="{{ product.rating is defined ? product.rating : 0 }}" data-model="{{ product.model is defined ? product.model : '' }}" data-brand="{{ product.manufacturer is defined ? product.manufacturer : '' }}" data-description="{{ product.description|striptags|e('html_attr') }}" data-in-wishlist="{{ product.in_wishlist is defined ? product.in_wishlist : 0 }}" data-stock="{{ (product.stock is defined ? product.stock : '')|e('html_attr') }}" data-is-in-stock="{{ product.is_in_stock ? 1 : 0 }}" data-minimum="{{ product.minimum|default(1) }}">
         <div class="relative overflow-hidden aspect-square bg-gray-50">
           <div class="image">
             <a href="{{ product.href }}">
@@ -85,7 +85,7 @@
                 <span class="text-base sm:text-lg font-extrabold text-gray-900">{{ price_val }}</span>
               {% endif %}
             </div>
-            <button class="add-to-cart-btn flex-shrink-0 text-[10px] sm:text-xs font-bold px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0" onclick="cart.add('{{ product.product_id }}');">+ {{ button_cart }}</button>
+            <button class="add-to-cart-btn flex-shrink-0 text-[10px] sm:text-xs font-bold px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0" onclick="cart.add('{{ product.product_id }}', '{{ product.minimum|default(1) }}');">+ {{ button_cart }}</button>
           </div>
         </div>
       </div>

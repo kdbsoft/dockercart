@@ -11,7 +11,15 @@ final class Twig {
 		if (!$code) {
 			$file = DIR_TEMPLATE . $filename . '.twig';
 
-			if (is_file($file)) {
+			if (defined('DIR_CATALOG') && is_file(DIR_MODIFICATION . 'admin/view/template/' . $filename . '.twig')) {	
+                $code = file_get_contents(DIR_MODIFICATION . 'admin/view/template/' . $filename . '.twig');
+            } elseif (is_file(DIR_MODIFICATION . 'catalog/view/theme/' . $filename . '.twig')) {
+                $code = file_get_contents(DIR_MODIFICATION . 'catalog/view/theme/' . $filename . '.twig');
+            } elseif (defined('DIR_CATALOG') && is_file(DIR_MODIFICATION . 'admin/view/template/' . $filename . '.twig')) {	
+                $code = file_get_contents(DIR_MODIFICATION . 'admin/view/template/' . $filename . '.twig');
+            } elseif (is_file(DIR_MODIFICATION . 'catalog/view/theme/' . $filename . '.twig')) {
+                $code = file_get_contents(DIR_MODIFICATION . 'catalog/view/theme/' . $filename . '.twig');
+            } elseif (is_file($file)) {
 				$code = file_get_contents($file);
 			} else {
 				$dir = dirname($file);

@@ -104,7 +104,9 @@ class ControllerCommonCart extends Controller {
 				'model'     => $product['model'],
 				'option'    => $option_data,
 				'recurring' => ($product['recurring'] ? $product['recurring']['name'] : ''),
-				'quantity'  => $product['quantity'],
+				'quantity'  => $this->formatQuantityValue($product['quantity']),
+				'minimum'   => $this->formatQuantityValue($product['minimum']),
+				'quantity_step' => $this->formatQuantityValue(isset($product['quantity_step']) ? $product['quantity_step'] : 1),
 				'price'     => $price,
 				'total'     => $total,
 				'href'      => $this->url->link('product/product', 'product_id=' . $product['product_id'])
@@ -137,6 +139,12 @@ class ControllerCommonCart extends Controller {
 		$data['checkout'] = $this->url->link('checkout/checkout', '', true);
 
 		return $this->load->view('common/cart', $data);
+	}
+
+	private function formatQuantityValue($value) {
+		$formatted = number_format((float)$value, 2, '.', '');
+
+		return rtrim(rtrim($formatted, '0'), '.');
 	}
 
 	public function info() {

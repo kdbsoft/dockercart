@@ -63,6 +63,16 @@ class Cart {
 		}
 	}
 
+	private function normalizeQuantity($quantity, $default = 1.0) {
+		$normalized = str_replace(',', '.', trim((string)$quantity));
+
+		if (!is_numeric($normalized)) {
+			return round((float)$default, 2);
+		}
+
+		return round((float)$normalized, 2);
+	}
+
 	public function getProducts() {
 		$product_data = array();
 
@@ -252,7 +262,7 @@ class Cart {
 					}
 				}
 
-				$product_discount_query = $this->db->query("SELECT price FROM " . DB_PREFIX . "product_discount WHERE product_id = '" . (int)$cart['product_id'] . "' AND customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "' AND quantity <= '" . (int)$discount_quantity . "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) ORDER BY quantity DESC, priority ASC, price ASC LIMIT 1");
+				$product_discount_query = $this->db->query("SELECT price FROM " . DB_PREFIX . "product_discount WHERE product_id = '" . (int)$cart['product_id'] . "' AND customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "' AND quantity <= '" . (float)$discount_quantity . "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) ORDER BY quantity DESC, priority ASC, price ASC LIMIT 1");
 
 				if ($product_discount_query->num_rows && (float)$product_discount_query->row['price'] < (float)$price) {
 					$price = (float)$product_discount_query->row['price'];
@@ -346,6 +356,18 @@ class Cart {
 					}
 				}
 
+				$minimum_quantity = (float)$product_query->row['minimum'];
+
+				if ($minimum_quantity <= 0) {
+					$minimum_quantity = 1.0;
+				}
+
+				$quantity_step = isset($product_query->row['quantity_step']) ? (float)$product_query->row['quantity_step'] : 1.0;
+
+				if ($quantity_step <= 0) {
+					$quantity_step = 1.0;
+				}
+
 				$product_data[] = array(
 					'cart_id'         => $cart['cart_id'],
 					'product_id'      => $product_query->row['product_id'],
@@ -355,8 +377,9 @@ class Cart {
 					'image'           => $product_query->row['image'],
 					'option'          => $option_data,
 					'download'        => $download_data,
-					'quantity'        => $cart['quantity'],
-					'minimum'         => $product_query->row['minimum'],
+					'quantity'        => (float)$cart['quantity'],
+					'minimum'         => $minimum_quantity,
+					'quantity_step'   => $quantity_step,
 					'subtract'        => $product_query->row['subtract'],
 					'stock'           => $stock,
 					'price'           => ($multicurrency_price + $multicurrency_option_price),
@@ -381,17 +404,25 @@ class Cart {
 	}
 
 	public function add($product_id, $quantity = 1, $option = array(), $recurring_id = 0) {
+		$quantity = $this->normalizeQuantity($quantity, 1);
+
+		if ($quantity <= 0) {
+			$quantity = 1;
+		}
+
 		$query = $this->db->query("SELECT COUNT(*) AS total FROM " . DB_PREFIX . "cart WHERE api_id = '" . (isset($this->session->data['api_id']) ? (int)$this->session->data['api_id'] : 0) . "' AND customer_id = '" . (int)$this->customer->getId() . "' AND session_id = '" . $this->db->escape($this->session->getId()) . "' AND product_id = '" . (int)$product_id . "' AND recurring_id = '" . (int)$recurring_id . "' AND `option` = '" . $this->db->escape(json_encode($option)) . "'");
 
 		if (!$query->row['total']) {
-			$this->db->query("INSERT INTO " . DB_PREFIX . "cart SET api_id = '" . (isset($this->session->data['api_id']) ? (int)$this->session->data['api_id'] : 0) . "', customer_id = '" . (int)$this->customer->getId() . "', session_id = '" . $this->db->escape($this->session->getId()) . "', product_id = '" . (int)$product_id . "', recurring_id = '" . (int)$recurring_id . "', `option` = '" . $this->db->escape(json_encode($option)) . "', quantity = '" . (int)$quantity . "', date_added = NOW()");
+			$this->db->query("INSERT INTO " . DB_PREFIX . "cart SET api_id = '" . (isset($this->session->data['api_id']) ? (int)$this->session->data['api_id'] : 0) . "', customer_id = '" . (int)$this->customer->getId() . "', session_id = '" . $this->db->escape($this->session->getId()) . "', product_id = '" . (int)$product_id . "', recurring_id = '" . (int)$recurring_id . "', `option` = '" . $this->db->escape(json_encode($option)) . "', quantity = '" . (float)$quantity . "', date_added = NOW()");
 		} else {
-			$this->db->query("UPDATE " . DB_PREFIX . "cart SET quantity = (quantity + " . (int)$quantity . ") WHERE api_id = '" . (isset($this->session->data['api_id']) ? (int)$this->session->data['api_id'] : 0) . "' AND customer_id = '" . (int)$this->customer->getId() . "' AND session_id = '" . $this->db->escape($this->session->getId()) . "' AND product_id = '" . (int)$product_id . "' AND recurring_id = '" . (int)$recurring_id . "' AND `option` = '" . $this->db->escape(json_encode($option)) . "'");
+			$this->db->query("UPDATE " . DB_PREFIX . "cart SET quantity = (quantity + " . (float)$quantity . ") WHERE api_id = '" . (isset($this->session->data['api_id']) ? (int)$this->session->data['api_id'] : 0) . "' AND customer_id = '" . (int)$this->customer->getId() . "' AND session_id = '" . $this->db->escape($this->session->getId()) . "' AND product_id = '" . (int)$product_id . "' AND recurring_id = '" . (int)$recurring_id . "' AND `option` = '" . $this->db->escape(json_encode($option)) . "'");
 		}
 	}
 
 	public function update($cart_id, $quantity) {
-		$this->db->query("UPDATE " . DB_PREFIX . "cart SET quantity = '" . (int)$quantity . "' WHERE cart_id = '" . (int)$cart_id . "' AND api_id = '" . (isset($this->session->data['api_id']) ? (int)$this->session->data['api_id'] : 0) . "' AND customer_id = '" . (int)$this->customer->getId() . "' AND session_id = '" . $this->db->escape($this->session->getId()) . "'");
+		$quantity = $this->normalizeQuantity($quantity, 0);
+
+		$this->db->query("UPDATE " . DB_PREFIX . "cart SET quantity = '" . (float)$quantity . "' WHERE cart_id = '" . (int)$cart_id . "' AND api_id = '" . (isset($this->session->data['api_id']) ? (int)$this->session->data['api_id'] : 0) . "' AND customer_id = '" . (int)$this->customer->getId() . "' AND session_id = '" . $this->db->escape($this->session->getId()) . "'");
 	}
 
 	public function remove($cart_id) {
