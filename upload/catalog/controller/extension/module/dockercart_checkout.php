@@ -2,134 +2,155 @@
 /**
  * DockerCart Checkout - Event Handler Controller
  * Handles event system hooks for catalog side
- * 
+ *
  * @package    DockerCart Checkout
  * @author     mathflow-bit
  * @license    GNU General Public License v3.0 (GPL-3.0)
  */
 
-class ControllerExtensionModuleDockerCartCheckout extends Controller {
-    
+class ControllerExtensionModuleDockerCartCheckout extends Controller
+{
     /**
      * Event: catalog/controller/checkout/checkout/before
      * Redirects standard checkout to DockerCart Checkout
-     * 
+     *
      * @param string $route
      * @param array $args
      * @return void
      */
-    public function eventRedirectCheckout(&$route, &$args) {
+    public function eventRedirectCheckout(&$route, &$args)
+    {
         // Check if module is enabled
-        if (!$this->config->get('module_dockercart_checkout_status')) {
+        if (!$this->config->get("module_dockercart_checkout_status")) {
             return;
         }
-        
+
         // Check if this is already our checkout
-        if (strpos($route, 'dockercart_checkout') !== false) {
+        if (strpos($route, "dockercart_checkout") !== false) {
             return;
         }
-        
+
         // Redirect to DockerCart Checkout
-        $this->response->redirect($this->url->link('checkout/dockercart_checkout', '', true));
+        $this->response->redirect(
+            $this->url->link("checkout/dockercart_checkout", "", true),
+        );
     }
-    
+
     /**
      * Event: catalog/controller/checkout/cart/before
      * Redirects cart to DockerCart Checkout if configured
-     * 
+     *
      * @param string $route
      * @param array $args
      * @return void
      */
-    public function eventRedirectCart(&$route, &$args) {
+    public function eventRedirectCart(&$route, &$args)
+    {
         // Check if module is enabled
-        if (!$this->config->get('module_dockercart_checkout_status')) {
+        if (!$this->config->get("module_dockercart_checkout_status")) {
             return;
         }
-        
+
         // Check if skip cart is enabled
-        if (!$this->config->get('module_dockercart_checkout_skip_cart')) {
+        if (!$this->config->get("module_dockercart_checkout_skip_cart")) {
             return;
         }
-        
+
         // Only redirect if cart has products
-        $this->load->model('checkout/cart');
-        
-        if ($this->cart->hasProducts() || !empty($this->session->data['vouchers'])) {
-            $this->response->redirect($this->url->link('checkout/dockercart_checkout', '', true));
+        $this->load->model("checkout/cart");
+
+        if (
+            $this->cart->hasProducts() ||
+            !empty($this->session->data["vouchers"])
+        ) {
+            $this->response->redirect(
+                $this->url->link("checkout/dockercart_checkout", "", true),
+            );
         }
     }
-    
+
     /**
      * Event: catalog/view/common/header/after
      * Adds DockerCart Checkout CSS to header
-     * 
+     *
      * @param string $route
      * @param array $args
      * @param string $output
      * @return void
      */
-    public function eventHeaderAfter(&$route, &$args, &$output) {
+    public function eventHeaderAfter(&$route, &$args, &$output)
+    {
         // Check if module is enabled
-        if (!$this->config->get('module_dockercart_checkout_status')) {
+        if (!$this->config->get("module_dockercart_checkout_status")) {
             return;
         }
-        
+
         // Only add CSS on checkout page
-        $currentRoute = isset($this->request->get['route']) ? $this->request->get['route'] : '';
-        
-        if (strpos($currentRoute, 'checkout/dockercart_checkout') === false) {
+        $currentRoute = isset($this->request->get["route"])
+            ? $this->request->get["route"]
+            : "";
+
+        if (strpos($currentRoute, "checkout/dockercart_checkout") === false) {
             return;
         }
-        
+
         // Get theme
-        $theme = $this->config->get('module_dockercart_checkout_theme');
+        $theme = $this->config->get("module_dockercart_checkout_theme");
         if (!$theme) {
-            $theme = 'light';
+            $theme = "light";
         }
-        
+
         // Add theme class
-        $themeClass = $theme === 'dark' ? 'dc-theme-dark' : '';
-        
+        $themeClass = $theme === "dark" ? "dc-theme-dark" : "";
+
         // Custom CSS
-        $customCss = $this->config->get('module_dockercart_checkout_custom_css');
-        
+        $customCss = $this->config->get(
+            "module_dockercart_checkout_custom_css",
+        );
+
         // Build CSS to inject
-        $css = '';
-        
+        $css = "";
+
         if ($themeClass) {
-            $css .= '<script>document.body.classList.add("' . $themeClass . '");</script>';
+            $css .=
+                '<script>document.body.classList.add("' .
+                $themeClass .
+                '");</script>';
         }
-        
+
         if ($customCss) {
-            $css .= '<style type="text/css">' . htmlspecialchars_decode($customCss) . '</style>';
+            $css .=
+                '<style type="text/css">' .
+                htmlspecialchars_decode($customCss) .
+                "</style>";
         }
-        
+
         // Inject before </head>
         if ($css) {
-            $output = str_replace('</head>', $css . '</head>', $output);
+            $output = str_replace("</head>", $css . "</head>", $output);
         }
     }
-    
+
     /**
      * Event: catalog/controller/api/cart/add/after
      * Updates checkout page after cart add via AJAX
-     * 
+     *
      * @param string $route
      * @param array $args
      * @param mixed $output
      * @return void
      */
-    public function eventCartAddAfter(&$route, &$args, &$output) {
+    public function eventCartAddAfter(&$route, &$args, &$output)
+    {
         // Check if module is enabled with auto-open cart
-        if (!$this->config->get('module_dockercart_checkout_status')) {
+        if (!$this->config->get("module_dockercart_checkout_status")) {
             return;
         }
-        
+
         // Add flag to response if module is active
         if (is_array($output)) {
-            $output['dockercart_checkout'] = true;
+            $output["dockercart_checkout"] = true;
         }
     }
-    
+
 }
