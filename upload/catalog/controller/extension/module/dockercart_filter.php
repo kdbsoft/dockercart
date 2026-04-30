@@ -1760,13 +1760,20 @@ class ControllerExtensionModuleDockercartFilter extends Controller {
 
                         if ($query->num_rows) {
 
+                            // Use current request's scheme, host and port to support all URL types
+                            $scheme = (!empty($this->request->server['HTTPS']) && $this->request->server['HTTPS'] !== 'off') ? 'https://' : 'http://';
+
+                            $http_host = $this->request->server['HTTP_HOST'] ?? '';
+                            if (strpos($http_host, ':') !== false) {
+                                list($hostname, $port) = explode(':', $http_host, 2);
+                                $port = ':' . $port;
+                            } else {
+                                $hostname = $http_host;
+                                $port = '';
+                            }
 
                             $base_url = $this->url->link('product/category', '');
-
-
                             $parsed = parse_url($base_url);
-                            $scheme = isset($parsed['scheme']) ? $parsed['scheme'] . '://' : '';
-                            $host = isset($parsed['host']) ? $parsed['host'] : '';
                             $base_path = isset($parsed['path']) ? $parsed['path'] : '/';
 
                             // Ensure we don't keep an "index.php" segment when building SEO URLs.
@@ -1796,10 +1803,10 @@ class ControllerExtensionModuleDockercartFilter extends Controller {
 
 
                             if ($langSeg && strpos($base_url, '/' . $langSeg . '/') === false) {
-                                $url = $scheme . $host . '/' . $langSeg . '/' . ltrim($keyword, '/');
+                                $url = $scheme . $hostname . $port . '/' . $langSeg . '/' . ltrim($keyword, '/');
                             } else {
 
-                                $root = $scheme . $host;
+                                $root = $scheme . $hostname . $port;
                                 if (!empty($base_path) && $base_path !== '/') {
                                     $root .= rtrim($base_path, '/') . '/';
                                 } else {
@@ -1857,6 +1864,8 @@ class ControllerExtensionModuleDockercartFilter extends Controller {
         $url = html_entity_decode((string)$url, ENT_QUOTES, 'UTF-8');
 
         $parts = parse_url($url);
+        $host = isset($parts['host']) ? $parts['host'] : '';
+        $port = isset($parts['port']) ? ':' . $parts['port'] : '';
         $path = isset($parts['path']) ? $parts['path'] : '';
         $path = preg_replace('#/+#', '/', $path);
         $path = rtrim($path, '/');
@@ -1870,7 +1879,8 @@ class ControllerExtensionModuleDockercartFilter extends Controller {
             }
         }
 
-        return $path . ($query !== '' ? '?' . $query : '');
+        $normalized = $host . $port . $path . ($query !== '' ? '?' . $query : '');
+        return $normalized;
     }
 
     private function encodeAttributeValue($value) {
