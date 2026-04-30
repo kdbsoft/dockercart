@@ -174,6 +174,16 @@ button { cursor: pointer; }
   outline: none;
 }
 
+/* Required field indicator for shipping-method-dependent fields */
+.field-required label .text-sm {
+  position: relative;
+}
+.field-required label .text-sm::after {
+  content: ' *';
+  color: #EF4444;
+  font-weight: bold;
+}
+
 .btn-hover:hover {
   transform: translateY(-1px);
   box-shadow: 0 8px 24px rgb(99 91 255 / 25%);
@@ -350,13 +360,13 @@ select[disabled] {
 <!-- Main Content -->
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
-    
+
     <!-- Left Column - Checkout Form (60%) -->
     <div class="lg:col-span-7 space-y-6">
-      
+
       {% set step_counter = 1 %}
       {% set total_steps = 3 %}
-      
+
       {% for block in blocks %}
         {% if block.enabled %}
           {% if block.id == 'terms' %}
@@ -378,7 +388,7 @@ select[disabled] {
             </div>
           {% elseif block.rows is defined and block.rows|length > 0 %}
             <!-- Block: {{ block.name }} (with rows) -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8" 
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8"
                  data-block-id="{{ block.id }}"
                  {% if block.id == 'payment_address' %}style="display: none;" id="payment-address-section"{% endif %}>
               <div class="flex items-center justify-between mb-6">
@@ -407,124 +417,133 @@ select[disabled] {
               </div>
             {% endif %}
 
-            <div class="space-y-4">
-              {% if block.rows is defined and block.rows|length > 0 %}
-                {% for row in block.rows %}
-                  {# Row with columns: 1, 2, or 3 #}
-                  {% set columns = row.columns|default(1) %}
-                  {% if row.fields|length > 0 %}
-                  {# DEBUG: block={{ block.id }}, row.columns={{ row.columns|default('UNDEFINED') }}, columns={{ columns }} #}
-                  {% if columns == 2 %}
-                    {% set grid_class = 'grid grid-cols-1 md:grid-cols-2 gap-4' %}
-                  {% elseif columns == 3 %}
-                    {% set grid_class = 'grid grid-cols-1 md:grid-cols-3 gap-4' %}
-                  {% else %}
-                    {% set grid_class = 'grid grid-cols-1 gap-4' %}
-                  {% endif %}
-                  <div class="{{ grid_class }}">
-                  {% for field in row.fields %}
-                {# Generate stable input IDs that match existing JS selectors:
-                   - for fields ending with _id (country_id, zone_id, payment_country_id, payment_zone_id)
-                     remove trailing `_id` so ids become `input-country`, `input-zone`, `input-payment-country`, etc.
-                   - for other fields, replace underscores with hyphens as before
-                #}
-                {% if field.id is defined and field.id|slice(-3) == '_id' %}
-                  {% set base = field.id|slice(0, -3) %}
+            {# Helper macro: render a single row of fields.
+               `ctx` is the parent template context passed via _context.
+               Inside a macro, top-level variables like `logged`, `countries`
+               are NOT visible — we must access them through ctx. #}
+            {% macro renderRow(row, ctx) %}
+              {% set columns = row.columns|default(1) %}
+              {% if row.fields|length > 0 %}
+                {% if columns == 2 %}
+                  {% set grid_class = 'grid grid-cols-1 md:grid-cols-2 gap-4' %}
+                {% elseif columns == 3 %}
+                  {% set grid_class = 'grid grid-cols-1 md:grid-cols-3 gap-4' %}
                 {% else %}
-                  {% set base = field.id %}
+                  {% set grid_class = 'grid grid-cols-1 gap-4' %}
                 {% endif %}
-                {% set field_id = 'input-' ~ (base|replace({'_':'-'})) %}
-                {% set is_required = field.required == 1 %}
-                
-                {% if field.type == 'text' or field.type == 'email' or field.type == 'tel' %}
-                  <div>
-                    <label class="block text-sm font-medium text-text-primary mb-2">
-                      {{ field.label|default(field.name|default(field.id)) }}
-                      {% if not is_required %}<span class="text-gray-400 font-normal">({{ text_optional }})</span>{% endif %}
-                      {% if field.type == 'tel' %}<span class="text-xs text-gray-500">{{ text_telephone_hint }}</span>{% endif %}
-                    </label>
-                    <input 
-                      type="{{ field.type }}" 
-                      id="{{ field_id }}" 
-                      name="{{ field.id }}" 
-                      placeholder="{{ field.placeholder }}"
-                      value="{{ attribute(_context, field.id)|default('') }}"
-                      {% if logged and attribute(_context, field.id) is defined and attribute(_context, field.id) != '' %}readonly data-prefilled="1"{% endif %}
-                      {% if is_required %}required{% endif %}
-                      data-required="{{ is_required ? '1' : '0' }}"
-                      class="w-full h-14 px-4 bg-white border-2 border-gray-300 rounded-xl text-base text-text-primary placeholder-gray-400 input-focus transition">
-                  </div>
-                
-                {% elseif field.type == 'textarea' %}
-                  <div>
-                    <label class="block text-sm font-medium text-text-primary mb-2">
-                      {{ field.label|default(field.name|default(field.id)) }}
-                      {% if not is_required %}<span class="text-gray-400 font-normal">({{ text_optional }})</span>{% endif %}
-                    </label>
-                    <textarea 
-                      id="{{ field_id }}" 
-                      name="{{ field.id }}" 
-                      rows="4"
-                      placeholder="{{ field.placeholder }}"
-                      {% if is_required %}required{% endif %}
-                      data-required="{{ is_required ? '1' : '0' }}"
-                      {% if logged and attribute(_context, field.id) is defined and attribute(_context, field.id) != '' %}readonly data-prefilled="1"{% endif %}
-                      class="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-base text-text-primary placeholder-gray-400 input-focus transition">{{ attribute(_context, field.id)|default('') }}</textarea>
-                  </div>
-                
-                {% elseif field.type == 'select' %}
-                  <div>
-                    <label class="block text-sm font-medium text-text-primary mb-2">
-                      {{ field.label|default(field.name|default(field.id)) }}
-                      {% if not is_required %}<span class="text-gray-400 font-normal">({{ text_optional }})</span>{% endif %}
-                    </label>
-                    <select 
-                      id="{{ field_id }}" 
-                      name="{{ field.id }}"
-                      {% if is_required %}required{% endif %}
-                      data-required="{{ is_required ? '1' : '0' }}"
-                      class="w-full h-14 px-4 bg-white border-2 border-gray-300 rounded-xl text-base text-text-primary input-focus transition appearance-none bg-no-repeat bg-right" 
-                      style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-position: right 1rem center; background-size: 1.5em 1.5em;">
-                      <option value="">{{ field.placeholder }}</option>
-                      {% if field.id == 'country_id' or field.id == 'payment_country_id' %}
-                        {% for country in countries %}
-                              {% set selected_country = attribute(_context, field.id) is defined and attribute(_context, field.id) ? attribute(_context, field.id) : (country_id|default('')) %}
-                              <option value="{{ country.country_id }}" {% if country.country_id == selected_country %}selected{% endif %}>{{ country.name }}</option>
-                        {% endfor %}
-                            {% if logged and attribute(_context, field.id) is defined and attribute(_context, field.id) != '' %}
-                              <input type="hidden" name="{{ field.id }}" value="{{ attribute(_context, field.id)|default('') }}" data-prefilled-hidden>
-                            {% endif %}
-                      {% endif %}
-                    </select>
-                  </div>
-                
-                {% elseif field.type == 'checkbox' %}
-                  <div class="pt-4">
-                    <label class="flex items-center gap-3 cursor-pointer">
-                      <input 
-                        type="checkbox" 
-                        id="{{ field_id }}" 
+                <div class="{{ grid_class }}">
+                {% for field in row.fields %}
+                  {% if field.id is defined and field.id|slice(-3) == '_id' %}
+                    {% set base = field.id|slice(0, -3) %}
+                  {% else %}
+                    {% set base = field.id %}
+                  {% endif %}
+                  {% set field_id = 'input-' ~ (base|replace({'_':'-'})) %}
+                  {% set is_required = field.required == 1 %}
+                  {% set ctx_logged = attribute(ctx, 'logged')|default(false) %}
+                  {% set ctx_countries = attribute(ctx, 'countries')|default([]) %}
+                  {% set ctx_country_id = attribute(ctx, 'country_id')|default('') %}
+
+                  {% if field.type == 'text' or field.type == 'email' or field.type == 'tel' %}
+                    <div{% if field.hidden %} style="display: none;"{% endif %}>
+                      <label class="block text-sm font-medium text-text-primary mb-2">
+                        {{ field.label|default(field.name|default(field.id)) }}
+                        {% if not is_required %}<span class="text-gray-400 font-normal" data-dc-optional="1">({% if attribute(ctx, 'text_optional') is defined %}{{ attribute(ctx, 'text_optional') }}{% else %}Optional{% endif %})</span>{% endif %}
+                        {% if field.type == 'tel' %}<span class="text-xs text-gray-500">{% if attribute(ctx, 'text_telephone_hint') is defined %}{{ attribute(ctx, 'text_telephone_hint') }}{% endif %}</span>{% endif %}
+                      </label>
+                      <input
+                        type="{{ field.type }}"
+                        id="{{ field_id }}"
                         name="{{ field.id }}"
+                        data-dc-field="{{ field.id }}"
+                        placeholder="{{ field.placeholder }}"
+                        value="{{ attribute(ctx, field.id)|default('') }}"
+                        {% if ctx_logged and attribute(ctx, field.id) is defined and attribute(ctx, field.id) != '' %}readonly data-prefilled="1"{% endif %}
                         {% if is_required %}required{% endif %}
                         data-required="{{ is_required ? '1' : '0' }}"
-                        class="w-5 h-5 accent-primary cursor-pointer"
-                        {% if attribute(_context, field.id) %}checked{% endif %}
-                        {% if logged and attribute(_context, field.id) is defined and attribute(_context, field.id) %}disabled data-prefilled="1"{% endif %}>
-                        {% if logged and attribute(_context, field.id) is defined and attribute(_context, field.id) %}
-                          <input type="hidden" name="{{ field.id }}" value="1" data-prefilled-hidden>
+                        class="w-full h-14 px-4 bg-white border-2 border-gray-300 rounded-xl text-base text-text-primary placeholder-gray-400 input-focus transition">
+                    </div>
+
+                  {% elseif field.type == 'textarea' %}
+                    <div{% if field.hidden %} style="display: none;"{% endif %}>
+                      <label class="block text-sm font-medium text-text-primary mb-2">
+                        {{ field.label|default(field.name|default(field.id)) }}
+                        {% if not is_required %}<span class="text-gray-400 font-normal" data-dc-optional="1">({% if attribute(ctx, 'text_optional') is defined %}{{ attribute(ctx, 'text_optional') }}{% else %}Optional{% endif %})</span>{% endif %}
+                      </label>
+                      <textarea
+                        id="{{ field_id }}"
+                        name="{{ field.id }}"
+                        data-dc-field="{{ field.id }}"
+                        rows="4"
+                        placeholder="{{ field.placeholder }}"
+                        {% if is_required %}required{% endif %}
+                        data-required="{{ is_required ? '1' : '0' }}"
+                        {% if ctx_logged and attribute(ctx, field.id) is defined and attribute(ctx, field.id) != '' %}readonly data-prefilled="1"{% endif %}
+                        class="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-base text-text-primary placeholder-gray-400 input-focus transition">{{ attribute(ctx, field.id)|default('') }}</textarea>
+                    </div>
+
+                  {% elseif field.type == 'select' %}
+                    <div{% if field.hidden %} style="display: none;"{% endif %}>
+                      <label class="block text-sm font-medium text-text-primary mb-2">
+                        {{ field.label|default(field.name|default(field.id)) }}
+                        {% if not is_required %}<span class="text-gray-400 font-normal" data-dc-optional="1">({% if attribute(ctx, 'text_optional') is defined %}{{ attribute(ctx, 'text_optional') }}{% else %}Optional{% endif %})</span>{% endif %}
+                      </label>
+                      <select
+                        id="{{ field_id }}"
+                        name="{{ field.id }}"
+                        data-dc-field="{{ field.id }}"
+                        {% if is_required %}required{% endif %}
+                        data-required="{{ is_required ? '1' : '0' }}"
+                        class="w-full h-14 px-4 bg-white border-2 border-gray-300 rounded-xl text-base text-text-primary input-focus transition appearance-none bg-no-repeat bg-right"
+                        style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-position: right 1rem center; background-size: 1.5em 1.5em;">
+                        <option value="">{{ field.placeholder }}</option>
+                        {% if field.id == 'country_id' or field.id == 'payment_country_id' %}
+                          {% for country in ctx_countries %}
+                            {% set selected_country = attribute(ctx, field.id) is defined and attribute(ctx, field.id) ? attribute(ctx, field.id) : (ctx_country_id) %}
+                            <option value="{{ country.country_id }}" {% if country.country_id == selected_country %}selected{% endif %}>{{ country.name }}</option>
+                          {% endfor %}
+                          {% if ctx_logged and attribute(ctx, field.id) is defined and attribute(ctx, field.id) != '' %}
+                            <input type="hidden" name="{{ field.id }}" value="{{ attribute(ctx, field.id)|default('') }}" data-prefilled-hidden>
+                          {% endif %}
                         {% endif %}
-                      <span class="text-sm font-medium text-text-primary">{{ field.label|default(field.name|default(field.id)) }}</span>
-                    </label>
-                  </div>
-                {% endif %}
-              {% endfor %}
-                  </div>{# end grid #}
-                {% endif %}
-              {% endfor %}{# end row loop #}
-              {% else %}
-                <p class="text-text-secondary text-sm">No fields configured for this section.</p>
+                      </select>
+                    </div>
+
+                  {% elseif field.type == 'checkbox' %}
+                    <div class="pt-4"{% if field.hidden %} style="display: none;"{% endif %}>
+                      <label class="flex items-center gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          id="{{ field_id }}"
+                          name="{{ field.id }}"
+                          data-dc-field="{{ field.id }}"
+                          {% if is_required %}required{% endif %}
+                          data-required="{{ is_required ? '1' : '0' }}"
+                          class="w-5 h-5 accent-primary cursor-pointer"
+                          {% if attribute(ctx, field.id) %}checked{% endif %}
+                          {% if ctx_logged and attribute(ctx, field.id) is defined and attribute(ctx, field.id) %}disabled data-prefilled="1"{% endif %}>
+                          {% if ctx_logged and attribute(ctx, field.id) is defined and attribute(ctx, field.id) %}
+                            <input type="hidden" name="{{ field.id }}" value="1" data-prefilled-hidden>
+                          {% endif %}
+                        <span class="text-sm font-medium text-text-primary">{{ field.label|default(field.name|default(field.id)) }}</span>
+                      </label>
+                    </div>
+                  {% endif %}
+                {% endfor %}
+                </div>{# end grid #}
               {% endif %}
-              
+            {% endmacro %}
+
+            <div class="space-y-4" id="shipping-address-fields">
+              {% if block.rows is defined and block.rows|length > 0 %}
+                {# Part 1: Render rows BEFORE shipping methods (country + zone) #}
+                {% for row in block.rows %}
+                  {% if not row.after_shipping is defined or not row.after_shipping %}
+                    {{ _self.renderRow(row, _context) }}
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+
               {# Special handling for shipping/payment methods based on block ID #}
               {% if block.id == 'shipping_address' %}
                 <div class="pt-4">
@@ -535,8 +554,20 @@ select[disabled] {
                       </div>
                   </div>
                 </div>
+
+                {# Part 2: Render rows AFTER shipping methods (company, address, city, postcode) #}
+                {# These fields are hidden initially and revealed when a shipping method is selected #}
+                <div class="after-shipping-fields space-y-4 pt-4" id="after-shipping-fields">
+                {% if block.rows is defined and block.rows|length > 0 %}
+                  {% for row in block.rows %}
+                    {% if row.after_shipping is defined and row.after_shipping %}
+                      {{ _self.renderRow(row, _context) }}
+                    {% endif %}
+                  {% endfor %}
+                {% endif %}
+                </div>
               {% endif %}
-              
+
               {# Payment Address Same as Shipping checkbox #}
               {% if block.id == 'shipping_address' %}
                 <div class="pt-4 border-t border-gray-200 mt-4">
@@ -546,7 +577,7 @@ select[disabled] {
                   </label>
                 </div>
               {% endif %}
-              
+
               {# Guest Create Account - Checkbox and Password fields #}
               {% if block.id == 'customer_details' and guest_create_account and not logged %}
                 <div class="pt-4 border-t border-gray-200 mt-4">
@@ -554,16 +585,16 @@ select[disabled] {
                     <input type="checkbox" id="create-account-checkbox" class="w-5 h-5 accent-primary cursor-pointer">
                     <span class="text-sm font-medium text-text-primary">{{ text_create_account }}</span>
                   </label>
-                  
+
                   <div id="create-account-fields" class="space-y-4" style="display: none;">
                     <div>
                       <label class="block text-sm font-medium text-text-primary mb-2">
                         {{ entry_password }}
                       </label>
-                      <input 
-                        type="password" 
-                        id="input-password" 
-                        name="password" 
+                      <input
+                        type="password"
+                        id="input-password"
+                        name="password"
                         placeholder="{{ placeholder_password|default('Enter password') }}"
                         class="w-full h-14 px-4 bg-white border-2 border-gray-300 rounded-xl text-base text-text-primary placeholder-gray-400 input-focus transition">
                     </div>
@@ -571,10 +602,10 @@ select[disabled] {
                       <label class="block text-sm font-medium text-text-primary mb-2">
                         {{ entry_confirm }}
                       </label>
-                      <input 
-                        type="password" 
-                        id="input-confirm-password" 
-                        name="confirm_password" 
+                      <input
+                        type="password"
+                        id="input-confirm-password"
+                        name="confirm_password"
                         placeholder="{{ placeholder_confirm_password|default('Re-enter password') }}"
                         class="w-full h-14 px-4 bg-white border-2 border-gray-300 rounded-xl text-base text-text-primary placeholder-gray-400 input-focus transition">
                     </div>
@@ -587,7 +618,7 @@ select[disabled] {
                   </div>
                 </div>
               {% endif %}
-              
+
               {% if block.id == 'payment_method' %}
                 <div class="space-y-3" id="payment-methods">
                   <div class="text-sm text-text-secondary py-4">
@@ -630,7 +661,7 @@ select[disabled] {
     <div class="lg:col-span-5">
       <div class="sticky-summary bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8">
         <h2 class="text-xl font-semibold text-text-primary mb-6">{{ text_order_summary }}</h2>
-        
+
         <!-- Order Items -->
         <div class="border-b border-gray-200 pb-4 mb-4">
           <div class="space-y-0" id="cart-items">
@@ -665,7 +696,7 @@ select[disabled] {
         <!-- Promo Code -->
         <div class="mb-4">
           <div class="flex gap-2 items-stretch">
-            <input type="text" id="coupon-code" placeholder="{{ text_coupon }}" 
+            <input type="text" id="coupon-code" placeholder="{{ text_coupon }}"
               class="flex-1 h-12 px-4 bg-gray-50 border border-gray-300 rounded-lg text-sm text-text-primary placeholder-gray-400 focus:border-primary focus:bg-white transition">
             <button type="button" id="apply-coupon" class="px-4 sm:px-6 h-12 bg-gray-100 hover:bg-gray-200 text-text-primary font-medium rounded-lg transition text-sm whitespace-nowrap flex-shrink-0">
               {{ button_coupon }}
@@ -745,7 +776,7 @@ select[disabled] {
       {% endif %}
     </span>
   </div>
-  
+
   <!-- Expandable Order Details -->
   <div id="mobile-order-details" class="mb-3">
     <div class="space-y-2 mb-4 pb-4 border-b border-gray-200">
@@ -769,7 +800,7 @@ select[disabled] {
       {% endif %}
     </div>
   </div>
-  
+
   <button type="button" id="mobile-button-confirm" class="gradient-primary w-full h-14 rounded-xl text-white font-semibold text-base btn-hover btn-active transition-all">
     {{ button_confirm }}
   </button>
@@ -792,7 +823,7 @@ const CONFIG = {
     confirm: '{{ ajax_confirm }}'
   },
   shippingRequired: {{ shipping_required ? 'true' : 'false' }},
-  debug: false
+  debug: {{ debug ? 'true' : 'false' }}
 };
 
 // Saved addresses (for logged-in customers)
@@ -825,12 +856,17 @@ Object.assign(window.dcLang, {
 // Initialize autosave control flag
 window._allowShippingAutosave = true;
 
+// Shipping method field visibility config (populated from server response)
+window._shippingFields = null;
+
 // Compatibility alias for legacy code
 const ajaxUrls = CONFIG.urls;
 
 const log = (msg, data = '') => {
   if (!CONFIG.debug) return;
-  console.log(`[DockerCart] ${msg}`, data);
+  if (typeof console !== 'undefined') {
+    console.log(`[DockerCart] ${msg}`, data);
+  }
 };
 
 const $ = selector => document.querySelector(selector);
@@ -874,16 +910,16 @@ const ajax = (url, options = {}) => {
     headers: { 'Content-Type': 'application/json' },
     ...options
   };
-  
+
   if (config.data) {
     config.body = JSON.stringify(config.data);
     delete config.data;
   }
-  
+
   if (!config.signal && options.abortController) {
     config.signal = options.abortController.signal;
   }
-  
+
   return fetch(url, config)
     .then(response => {
       if (response.ok) {
@@ -915,7 +951,7 @@ const showNotification = (messages, type = 'error', autoHide = true) => {
   const msgs = Array.isArray(messages) ? messages : [String(messages)];
   const colorMap = { success: 'green', warn: 'orange', error: 'red' };
   const color = colorMap[type] || 'red';
-  
+
   let box = $('#validation-errors');
   if (!box) {
     box = document.createElement('div');
@@ -973,22 +1009,25 @@ const FIELD_MAP = {
 const showFieldErrors = (errorObj) => {
   if (!errorObj) return;
   const messages = [];
-  
+
   Object.entries(errorObj).forEach(([key, msg]) => {
     const selector = FIELD_MAP[key];
     let label = key;
-    
+
     if (selector) {
       const el = $(selector);
       if (el) {
         el.classList.add('border-error');
         const labelEl = el.closest('div')?.querySelector('label');
-        if (labelEl?.textContent) label = labelEl.textContent.trim();
+        if (labelEl?.textContent) {
+          label = labelEl.textContent.trim();
+          label = label.replace(/\(Optional\)|\s*\(Optional\)/gi, '').trim();
+        }
       }
     }
     messages.push(`${label}: ${msg}`);
   });
-  
+
   showNotification(messages, 'error');
 };
 
@@ -1125,8 +1164,8 @@ const setupPaymentButtonHandler = (container) => {
     // Replace global alert with friendly notification for legacy payment scripts
     if (!window._dc_alert_overridden) {
       window._dc_old_alert = window.alert;
-      window.alert = function(msg) { 
-        try { showNotification(String(msg), 'error'); } catch (e) { console.error(e); } 
+      window.alert = function(msg) {
+        try { showNotification(String(msg), 'error'); } catch (e) { console.error(e); }
       };
       window._dc_alert_overridden = true;
     }
@@ -1220,7 +1259,7 @@ document.addEventListener('DOMContentLoaded', () => {
     refreshSavedAddressSelect(savedShippingSelect, window._savedAddresses, DEFAULT_ADDRESS_ID);
     savedShippingSelect.addEventListener('change', () => handleSavedShippingSelection(savedShippingSelect));
   }
-  
+
   // Radio card selection - use event delegation on checkout form container instead of entire document
   // This prevents unnecessary event processing for all document clicks
   const checkoutForm = $('.max-w-7xl');
@@ -1258,11 +1297,11 @@ document.addEventListener('DOMContentLoaded', () => {
   if (toggleSummaryBtn) {
     const summary = $('#mobile-summary');
     const orderSummaryContent = summary?.querySelector('#mobile-order-details');
-    
+
     // Track if user manually expanded/collapsed to preserve state during scroll
     let userManuallyToggled = false;
     let isUserExpanded = false;
-    
+
     // Initially collapsed - only show toggle button
     if (orderSummaryContent) {
       orderSummaryContent.style.maxHeight = '0';
@@ -1273,10 +1312,10 @@ document.addEventListener('DOMContentLoaded', () => {
     toggleSummaryBtn.addEventListener('click', () => {
       const arrow = $('#summary-arrow');
       const text = $('#summary-text');
-      
+
       if (orderSummaryContent) {
         const isExpanded = orderSummaryContent.style.maxHeight !== '0px';
-        
+
         if (isExpanded) {
           // Collapse
           orderSummaryContent.style.maxHeight = '0';
@@ -1294,15 +1333,15 @@ document.addEventListener('DOMContentLoaded', () => {
         userManuallyToggled = true;
       }
     });
-    
+
     // Hide mobile summary when user scrolls near bottom of page - THROTTLED to prevent memory leak
     const handleScroll = throttle(() => {
       if (!summary) return;
-      
+
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
       const windowHeight = window.innerHeight;
       const documentHeight = document.documentElement.scrollHeight;
-      
+
       // Only auto-hide if user hasn't manually toggled the summary
       if (!userManuallyToggled) {
         // Hide when within 200px of bottom
@@ -1317,7 +1356,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     }, 100);
-    
+
     // Attach scroll listener only once using flag
     if (!window._scrollHandlerAttached) {
       window.addEventListener('scroll', handleScroll);
@@ -1333,7 +1372,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const el = steps[index];
     if (!el) return;
     const circle = el.querySelector('.step-circle');
-    
+
     log('setStepCompleted: index=', index, 'completed=', completed);
 
     if (completed) {
@@ -1365,7 +1404,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const block = $(blockSelector);
     if (!block) return false;
 
-    const requiredInputs = block.querySelectorAll('input[data-required="1"], select[data-required="1"], textarea[data-required="1"]');
+    // Check both `data-required` and the HTML5 `required` attribute.
+    // `toggleAddressFieldsByShippingMethod` sets both, but we check both
+    // to be robust against any order/timing issues.
+    const requiredInputs = block.querySelectorAll(
+      'input[data-required="1"], select[data-required="1"], textarea[data-required="1"], ' +
+      'input[required]:not([data-required="0"]), select[required]:not([data-required="0"]), textarea[required]:not([data-required="0"])'
+    );
 
     // If there are no required inputs defined for this block, do NOT assume it's complete.
     // Previously we returned true here which caused blocks like payment_method (which
@@ -1376,6 +1421,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     for (const input of requiredInputs) {
+      // Skip hidden fields — they cannot be filled by the user and their
+      // values come from module defaults or are sent via hidden inputs.
+      if (input.type === 'hidden') continue;
+      const container = input.closest('[style*="display: none"]');
+      if (container) continue;
+
       const value = input.type === 'checkbox' ? input.checked : input.value;
       if (!value || (typeof value === 'string' && value.trim() === '')) {
         return false;
@@ -1393,12 +1444,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Step 1: use isStep1Valid() which already respects admin `data-required` flags
     const step1Done = (typeof isStep1Valid === 'function') ? !!isStep1Valid() : isBlockComplete('[data-block-id="customer_details"]');
 
-    // Step 2: shipping block required fields + shipping method selection if shipping is required
+    // Step 2: shipping address block must have ALL its required fields filled.
+    // This includes after-shipping fields (address_1, city, etc.) that become
+    // required dynamically when a shipping method is selected. Simply having a
+    // shipping method checked does NOT mean step 2 is complete — the required
+    // address fields for that method must also be filled.
     const shippingBlockComplete = isBlockComplete('[data-block-id="shipping_address"]');
-    const shippingMethodSelected = !!$('input[name="shipping_method"]:checked');
-    // Consider Step 2 complete if either the shipping address block is complete
-    // or the user has selected a shipping method (covers both flows).
-    const step2Done = shippingBlockComplete || shippingMethodSelected;
+    const step2Done = shippingBlockComplete;
 
     // Step 3: payment block required fields (if admin created one) OR presence of selected payment method
     const paymentBlockComplete = isBlockComplete('[data-block-id="payment_address"]') || isBlockComplete('[data-block-id="payment_method"]');
@@ -1432,9 +1484,9 @@ document.addEventListener('DOMContentLoaded', () => {
     log('Loading shipping methods...');
     const container = $('#shipping-methods');
     if (!container) return;
-    
+
     container.innerHTML = '<div class="text-sm text-text-secondary py-4">{{ text_loading }}</div>';
-    
+
     const data = {
       firstname: $('#input-firstname')?.value || '',
       lastname: $('#input-lastname')?.value || '',
@@ -1447,10 +1499,14 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     log('Loading shipping methods with data:', data);
-    
+
     ajax(ajaxUrls.shipping_address, { method: 'POST', data })
       .then(json => {
         if (json?.shipping_methods) {
+          // Store field visibility config globally
+          if (json.shipping_fields) {
+            window._shippingFields = json.shipping_fields;
+          }
           renderShippingMethods(json.shipping_methods);
         } else if (json?.error) {
           const errHtml = typeof json.error === 'object'
@@ -1466,6 +1522,160 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = '<div class="text-sm text-red-600 py-4">Error loading shipping methods</div>';
       });
   };
+
+  // Toggle address field visibility based on selected shipping method's field config.
+  // Controls visibility of the after-shipping container and individual fields within it.
+  const toggleAddressFieldsByShippingMethod = (methodValue) => {
+    if (!methodValue || !window._shippingFields) {
+      log('toggleAddressFields: skip — no methodValue or _shippingFields');
+      return;
+    }
+
+    // Use full method code (e.g., flat.flat) as primary key in _shippingFields
+    // Fall back to carrier code (module part) for backward compatibility
+    let fields = window._shippingFields[methodValue];
+    if (!fields && methodValue.includes('.')) {
+      const carrierCode = methodValue.split('.')[0];
+      fields = window._shippingFields[carrierCode];
+    }
+    if (!fields) {
+      log('toggleAddressFields: no config for', methodValue);
+      return;
+    }
+
+    log('toggleAddressFields:', methodValue, JSON.stringify(fields));
+
+    // Helper: extract config from a field entry (supports both new and legacy formats)
+    const getFieldConfig = (entry) => {
+      if (typeof entry === 'object' && entry !== null && 'visible' in entry) {
+        // New format: { visible: 0/1, required: 0/1 }
+        return { visible: entry.visible == 1, required: entry.required == 1 };
+      }
+      // Legacy format: scalar 0/1 (visibility only, not required)
+      return { visible: entry == 1, required: false };
+    };
+
+    // Determine if ANY of the after-shipping fields should be visible
+    const afterFields = ['company', 'address_1', 'address_2', 'city', 'postcode'];
+    const hasVisibleField = afterFields.some(f => {
+      if (!(f in fields)) return false;
+      return getFieldConfig(fields[f]).visible;
+    });
+
+    // Show/hide the after-shipping container based on whether any field is visible
+    const afterShippingContainer = $('#after-shipping-fields');
+    if (afterShippingContainer) {
+      if (hasVisibleField) {
+        afterShippingContainer.style.display = '';
+        log('toggleAddressFields: showing after-shipping container');
+      } else {
+        afterShippingContainer.style.display = 'none';
+        log('toggleAddressFields: hiding after-shipping container');
+      }
+    }
+
+    // Search within the shipping_address block only (avoid payment fields)
+    const shippingBlock = document.querySelector('[data-block-id="shipping_address"]');
+    if (!shippingBlock) {
+      log('toggleAddressFields: shipping_address block not found');
+      return;
+    }
+
+    // Toggle individual fields based on the shipping method config.
+    // This affects the display of each field's wrapper div inside the after-shipping container.
+    afterFields.forEach((fieldKey) => {
+      if (!(fieldKey in fields)) return;
+      const config = getFieldConfig(fields[fieldKey]);
+
+      // Find the input/select by data-dc-field attribute within the shipping block
+      const input = shippingBlock.querySelector('[data-dc-field="' + fieldKey + '"]');
+      if (!input) {
+        log('toggleAddressFields: not found in DOM:', fieldKey);
+        return;
+      }
+
+      // Walk up to the wrapper div (input is directly inside a <div>)
+      let fieldContainer = input.parentElement;
+      if (!fieldContainer || fieldContainer.tagName !== 'DIV') {
+        fieldContainer = fieldContainer ? fieldContainer.parentElement : null;
+      }
+      if (!fieldContainer) return;
+
+      // Walk up to the grid row (grid container that wraps field wrappers)
+      const gridRow = fieldContainer.parentElement;
+
+      log('toggleAddressFields:', fieldKey,
+          'visible:', config.visible,
+          'required:', config.required);
+
+      if (config.visible) {
+        fieldContainer.style.display = '';
+        input.required = config.required;
+        input.dataset.required = config.required ? '1' : '0';
+        // Add/remove required visual indicator
+        fieldContainer.classList.toggle('field-required', config.required);
+        // Toggle (Optional) label
+        const optionalSpan = fieldContainer.querySelector('[data-dc-optional]');
+        if (optionalSpan) {
+          optionalSpan.style.display = config.required ? 'none' : '';
+        }
+        // Show the grid row
+        if (gridRow && gridRow.classList.contains('grid')) {
+          gridRow.style.display = '';
+        }
+      } else {
+        fieldContainer.style.display = 'none';
+        input.required = false;
+        fieldContainer.classList.remove('field-required');
+
+        // Hide the grid row if ALL its direct child wrappers are hidden
+        if (gridRow && gridRow.classList.contains('grid')) {
+          const allHidden = Array.from(gridRow.children).every(child => {
+            return child.style.display === 'none';
+          });
+          if (allHidden) {
+            gridRow.style.display = 'none';
+          }
+        }
+      }
+    });
+
+    // Attach auto-save listeners to after-shipping fields when they become visible
+    if (hasVisibleField && afterShippingContainer) {
+      attachAfterShippingListeners();
+    }
+
+    // Trigger address complete check to handle fields that may now need saving
+    setTimeout(checkAddressComplete, 100);
+  };
+
+  // Attach auto-save event listeners to after-shipping address fields
+  const attachAfterShippingListeners = () => {
+    if (window._afterShippingListenersAttached) return;
+
+    const afterFieldSelectors = [
+      '#input-company',
+      '#input-address-1',
+      '#input-address-2',
+      '#input-city',
+      '#input-postcode'
+    ];
+
+    afterFieldSelectors.forEach(selector => {
+      const input = $(selector);
+      if (input) {
+        // Remove any previously attached listeners by cloning
+        if (input.dataset.dcListenerAttached) return;
+        input.addEventListener('blur', scheduleSaveShippingAddress);
+        input.addEventListener('change', scheduleSaveShippingAddress);
+        input.dataset.dcListenerAttached = '1';
+        log('Attached auto-save listener to', selector);
+      }
+    });
+
+    window._afterShippingListenersAttached = true;
+  };
+
 
   // Render shipping methods from server-provided object
   const renderShippingMethods = (shipping_methods) => {
@@ -1499,12 +1709,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const titleWrap = document.createElement('div');
         let titleHtml = `<div class="font-medium text-text-primary">${quote.title}</div>`;
-        
+
         // Add description if available
         if (quote.description) {
           titleHtml += `<div class="text-sm text-text-secondary mt-1">${quote.description}</div>`;
         }
-        
+
         titleWrap.innerHTML = titleHtml;
 
         left.appendChild(input);
@@ -1542,10 +1752,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (input.parentNode) {
           input.parentNode.replaceChild(newInput, input);
         }
-        
+
         newInput.addEventListener('change', (e) => {
           const value = e.target.value;
           log('Shipping method changed', value);
+
+          // Toggle address field visibility based on selected shipping method
+          toggleAddressFieldsByShippingMethod(value);
 
           // Keep the visual selection in sync when change fires (keyboard, programmatic or click)
             try {
@@ -1584,8 +1797,14 @@ document.addEventListener('DOMContentLoaded', () => {
               window._lastSentShippingMethod = value;
 
               updateProgressIntelligent();
-              // After shipping method saved, load payment methods
-              loadPaymentMethods();
+              // After shipping method saved, save payment address (same as shipping),
+              // then load payment methods. This ensures payment_address is in session.
+              const paymentSameCheckbox = $('#payment-same-as-shipping');
+              if (paymentSameCheckbox && paymentSameCheckbox.checked) {
+                savePaymentAddressSameAsShipping();
+              } else {
+                loadPaymentMethods();
+              }
             })
             .catch(error => {
               log('Error saving shipping method', error);
@@ -1598,10 +1817,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Trigger change on the selected input to update totals immediately (if not already sent)
       const selected = $('input[name="shipping_method"]:checked');
-      
+
+      // Auto-trigger field visibility toggle for the initially selected method
+      // This MUST run before updateProgressIntelligent so that after-shipping
+      // fields have their correct data-required attributes set before we check
+      // whether the shipping address block is complete.
+      if (selected) {
+        toggleAddressFieldsByShippingMethod(selected.value);
+      }
+
       // Update progress now that shipping methods are rendered and selected
       updateProgressIntelligent();
-      
+
       if (selected) {
         // Only trigger if we haven't already sent this method
         if (!window._lastSentShippingMethod || window._lastSentShippingMethod !== selected.value) {
@@ -1627,14 +1854,64 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (value === 'new') {
       setShippingFieldsEditable(true);
+
+      // Clear all address fields first
       Object.values(SHIPPING_FIELD_MAP_FULL).forEach(sel => {
         const el = $(sel);
-        if (el) {
-          el.value = '';
-        }
+        if (el) el.value = '';
       });
+
+      // Make firstname/lastname in customer_details editable (they get
+      // cleared because SHIPPING_FIELD_MAP_FULL targets #input-firstname
+      // and #input-lastname, but they remain readonly for logged-in users).
+      const customerBlock = document.querySelector('[data-block-id="customer_details"]');
+      if (customerBlock) {
+        ['#input-firstname', '#input-lastname'].forEach(sel => {
+          const el = customerBlock.querySelector(sel);
+          if (el) {
+            el.removeAttribute('readonly');
+            el.removeAttribute('data-prefilled');
+          }
+        });
+        // Also remove the edit/save controls that initPrefilledBlocks created
+        const controls = customerBlock.querySelector('.flex.items-center.gap-2.justify-end');
+        if (controls) controls.remove();
+      }
+
+      // Fill country and zone from module defaults
+      const countrySelect = $('#input-country');
       const zoneSelect = $('#input-zone');
-      if (zoneSelect) zoneSelect.innerHTML = `<option value="">${TEXT_SELECT_PLACEHOLDER}</option>`;
+
+      if (countrySelect && DEFAULT_SHIPPING_COUNTRY_ID) {
+        countrySelect.value = DEFAULT_SHIPPING_COUNTRY_ID;
+
+        // Load zones for the default country
+        zoneSelect.innerHTML = `<option value="">${TEXT_SELECT_PLACEHOLDER}</option>`;
+
+        ajax(`${CONFIG.urls.country}&country_id=${DEFAULT_SHIPPING_COUNTRY_ID}`)
+          .then(json => {
+            let html = `<option value="">${TEXT_SELECT_PLACEHOLDER}</option>`;
+            if (json.zone && Array.isArray(json.zone)) {
+              json.zone.forEach(z => {
+                html += `<option value="${z.zone_id}">${z.name}</option>`;
+              });
+            }
+            zoneSelect.innerHTML = html;
+
+            if (DEFAULT_SHIPPING_ZONE_ID) {
+              zoneSelect.value = String(DEFAULT_SHIPPING_ZONE_ID);
+            }
+
+            // Trigger address completion check with defaults
+            setTimeout(checkAddressComplete, 50);
+          })
+          .catch(() => {
+            zoneSelect.innerHTML = `<option value="">${TEXT_SELECT_PLACEHOLDER}</option>`;
+          });
+      } else if (zoneSelect) {
+        zoneSelect.innerHTML = `<option value="">${TEXT_SELECT_PLACEHOLDER}</option>`;
+      }
+
       return;
     }
 
@@ -1667,8 +1944,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const addressId = parseInt(value, 10);
         if (!isNaN(addressId)) {
           log('Confirming address selection with backend. Address ID:', addressId);
-          ajax(ajaxUrls.shipping_address, { 
-            method: 'POST', 
+          ajax(ajaxUrls.shipping_address, {
+            method: 'POST',
             data: { address_id: addressId }
           })
           .then(json => {
@@ -1678,28 +1955,32 @@ document.addEventListener('DOMContentLoaded', () => {
               window._allowShippingAutosave = true; // Re-enable autosave on error
               return;
             }
-            
+
             log('Address selection confirmed by backend. Response:', json);
-            
+
             // Update shipping methods if server returned them
             if (json.shipping_methods) {
+              // Store field visibility config globally
+              if (json.shipping_fields) {
+                window._shippingFields = json.shipping_fields;
+              }
               renderShippingMethods(json.shipping_methods);
             }
-            
+
             // Update address dropdown if server returned updated list
             if (json.addresses) {
               ensureSavedAddressesState(json.addresses);
               refreshSavedAddressSelect(selectEl, json.addresses, value);
             }
-            
+
             // Handle payment address if checkbox is checked
             const paymentSameCheckbox = $('#payment-same-as-shipping');
             if (paymentSameCheckbox && paymentSameCheckbox.checked && typeof savePaymentAddressSameAsShipping === 'function') {
               setTimeout(() => savePaymentAddressSameAsShipping(), 300);
             }
-            
+
             updateProgressIntelligent();
-            
+
             // Re-enable autosave after address is confirmed on backend
             window._allowShippingAutosave = true;
           })
@@ -1739,7 +2020,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     window._loadingPaymentMethods = true;
-    
+
     container.innerHTML = '<div class="text-sm text-text-secondary py-4">{{ text_loading }}</div>';
 
     ajax(CONFIG.urls.payment_method, { method: 'GET' })
@@ -1777,12 +2058,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
           const titleWrap = document.createElement('div');
           let titleHtml = `<div class="font-medium text-text-primary">${method.title}</div>`;
-          
+
           // Add description if available
           if (method.description) {
             titleHtml += `<div class="text-sm text-text-secondary mt-1">${method.description}</div>`;
           }
-          
+
           titleWrap.innerHTML = titleHtml;
 
           left.appendChild(input);
@@ -1797,7 +2078,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (fragment.children.length) {
           container.innerHTML = '';
           container.appendChild(fragment);
-          
+
           // Attach change listeners to payment method inputs
           // Clone and replace nodes to remove old listeners from previous renders
           const paymentInputs = Array.from(document.getElementsByName('payment_method'));
@@ -1806,7 +2087,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (input.parentNode) {
               input.parentNode.replaceChild(newInput, input);
             }
-            
+
             newInput.addEventListener('change', (e) => {
               const value = e.target.value;
               log('Payment method changed', value);
@@ -1829,7 +2110,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     else showNotification(json.error, 'error');
                     return;
                   }
-                  
+
                   // Step 2: Load payment extension form/instructions into hidden container
                   log('Loading payment extension...');
                   return ajax(ajaxUrls.payment_extension, { method: 'GET' });
@@ -1842,7 +2123,7 @@ document.addEventListener('DOMContentLoaded', () => {
                       extContainer.innerHTML = json.payment;
                       // Don't show it yet - it stays hidden until confirm is clicked
                       log('Payment extension loaded into hidden container');
-                      
+
                       // Set up click handler for the payment button in the hidden form
                       // This handler will execute when the button is clicked OR triggered programmatically
                       setupPaymentButtonHandler(extContainer);
@@ -1858,7 +2139,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
           // Do NOT auto-trigger change on first payment method to avoid premature progress mark.
           // User will explicitly interact with payment methods when ready.
-          
+
           // However, if the first payment method is already checked (by default),
           // update progress to reflect that Step 3 may already be ready
           const checkedMethod = $('input[name="payment_method"]:checked');
@@ -1882,27 +2163,27 @@ document.addEventListener('DOMContentLoaded', () => {
   // Country change - load zones
   const countrySelect = $('#input-country');
   const zoneSelect = $('#input-zone');
-  
+
   if (countrySelect && zoneSelect) {
     countrySelect.addEventListener('change', () => {
       const country_id = countrySelect.value;
       log('Country changed', country_id);
-      
+
       if (country_id) {
         zoneSelect.innerHTML = '<option value="">Loading...</option>';
-        
+
         ajax(`${CONFIG.urls.country}&country_id=${country_id}`)
           .then(json => {
             log('Zones loaded', json);
-            
+
             let html = '<option value="">{{ text_select }}</option>';
-            
+
             if (json.zone && json.zone.length > 0) {
               json.zone.forEach(zone => {
                 html += `<option value="${zone.zone_id}">${zone.name}</option>`;
               });
             }
-            
+
             zoneSelect.innerHTML = html;
 
             // If the server provided a preselected zone_id (e.g. for logged-in users), select it
@@ -1912,6 +2193,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 zoneSelect.value = initialZoneId;
               }
             } catch (e) { /* ignore template injection errors */ }
+
+            // After zones are loaded and value set, trigger address completion
+            // check so shipping methods load (needed when country/zone are
+            // hidden in admin but have default values).
+            setTimeout(checkAddressComplete, 50);
 
             // Activate step 2 only if Step 1 is valid
             if (isStep1Valid()) {
@@ -1954,7 +2240,7 @@ document.addEventListener('DOMContentLoaded', () => {
       updateProgressIntelligent();
     }
   };
-  
+
   // Trigger initial check on page load
   setTimeout(() => checkStep1(), 500);
 
@@ -1964,24 +2250,24 @@ document.addEventListener('DOMContentLoaded', () => {
     // Get all required fields in customer details block (typically step 1)
     const customerDetailsBlock = $('[data-block-id="customer_details"]');
     if (!customerDetailsBlock) return true; // If no customer details block, consider valid
-    
+
     const requiredInputs = customerDetailsBlock.querySelectorAll('input[data-required="1"], select[data-required="1"], textarea[data-required="1"]');
-    
+
     for (const input of requiredInputs) {
       const value = input.type === 'checkbox' ? input.checked : input.value;
       if (!value || (typeof value === 'string' && value.trim() === '')) {
         return false;
       }
-      
+
       // Special email validation
       if (input.type === 'email' && value && !/\S+@\S+\.\S+/.test(value)) {
         return false;
       }
     }
-    
+
     return true;
   };
-  
+
   // Attach checkStep1 to all inputs in customer_details block (only once via flag to avoid memory leak)
   const attachStep1Listeners = () => {
     if (window._step1ListenersAttached) return;
@@ -2008,7 +2294,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
     observer.observe(document.body, { childList: true, subtree: true });
-    
+
     // Safety cleanup: disconnect observer after 5 seconds if still running
     setTimeout(() => {
       if (observer) {
@@ -2021,7 +2307,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Trigger country change on load if a country is selected (only for guest users or empty zone)
   // For logged-in users with prefilled data, zones are already loaded from server
   if (countrySelect && countrySelect.value) {
-    const hasPrefilledZone = zoneSelect?.hasAttribute('data-prefilled') || 
+    const hasPrefilledZone = zoneSelect?.hasAttribute('data-prefilled') ||
                              (zoneSelect?.options && zoneSelect.options.length > 1);
     if (!hasPrefilledZone) {
       countrySelect.dispatchEvent(new Event('change'));
@@ -2049,6 +2335,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (initialZoneId) {
           zoneSelect.value = String(initialZoneId);
         }
+
+        // Trigger address check to load shipping methods now that
+        // zones are available with default values.
+        setTimeout(checkAddressComplete, 50);
       })
       .catch(error => {
         log('Zone loading error (hidden country)', error);
@@ -2060,28 +2350,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Monitor address fields to auto-save and load shipping
   const checkAddressComplete = () => {
-    const address1 = $('#input-address-1')?.value;
-    const city = $('#input-city')?.value;
     const country = getShippingCountryId();
     const zone = getShippingZoneId();
+
+    // Check if after-shipping fields (address_1, city, postcode) exist in DOM
+    const address1 = $('#input-address-1')?.value;
+    const city = $('#input-city')?.value;
     const postcodeEl = $('#input-postcode');
     const postcode = postcodeEl?.value;
     const postcodeRequired = postcodeEl ? (postcodeEl.getAttribute('data-required') === '1' || postcodeEl.hasAttribute('required')) : false;
 
-    log('checkAddressComplete: address1=', !!address1, 'city=', !!city, 'country=', !!country, 'zone=', !!zone, 'postcodeRequired=', postcodeRequired, 'postcodeFilled=', !!postcode);
+    // Determine if after-shipping fields are visible in the DOM
+    const afterShippingContainer = $('#after-shipping-fields');
+    const afterShippingVisible = afterShippingContainer && afterShippingContainer.style.display !== 'none';
 
-    // Allow address save only when core address fields are present and,
-    // if postcode is marked required by admin, only when postcode is filled.
-    // This prevents premature server-side postcode validation when the user
-    // hasn't reached the postcode field yet.
-    if (address1 && city && country && zone && (!postcodeRequired || (postcodeRequired && postcode && postcode.trim() !== ''))) {
-      log('Address complete, triggering save...');
-      saveShippingAddress();
+    log('checkAddressComplete: afterShippingVisible=', afterShippingVisible, 'address1=', !!address1, 'city=', !!city, 'country=', !!country, 'zone=', !!zone, 'postcodeRequired=', postcodeRequired, 'postcodeFilled=', !!postcode);
+
+    if (!afterShippingVisible) {
+      // After-shipping fields are hidden (no shipping method selected yet).
+      // Save with just country + zone to load available shipping methods.
+      if (country && zone) {
+        log('After-shipping fields hidden but country+zone set, loading shipping methods...');
+        saveShippingAddress();
+      } else {
+        log('Country/zone incomplete, not saving yet');
+      }
     } else {
-      log('Address incomplete, not saving yet');
+      // After-shipping fields are visible (shipping method selected).
+      // Allow address save only when core address fields are present.
+      if (address1 && city && country && zone && (!postcodeRequired || (postcodeRequired && postcode && postcode.trim() !== ''))) {
+        log('Full address complete, triggering save...');
+        saveShippingAddress();
+      } else {
+        log('Full address incomplete, not saving yet');
+      }
     }
   };
-  
+
   // Debounced auto-save scheduler to avoid rapid/concurrent saves
   const scheduleSaveShippingAddress = () => {
     // Don't schedule save if autosave is disabled (e.g., during dropdown selection)
@@ -2097,6 +2402,10 @@ document.addEventListener('DOMContentLoaded', () => {
     window._saveShippingTimer = setTimeout(() => {
       window._saveShippingTimer = null;
       checkAddressComplete();
+      // Always update progress after a blur/change, even if the address
+      // save was skipped (payload unchanged). This ensures the progress
+      // reflects the current state of all required fields.
+      updateProgressIntelligent();
     }, 500);
   };
 
@@ -2131,15 +2440,32 @@ document.addEventListener('DOMContentLoaded', () => {
   // This ensures shipping methods are loaded immediately on page load
   {% if logged %}
   setTimeout(() => {
-    const hasPrefilledAddress = $('#input-address-1')?.hasAttribute('data-prefilled') || 
+    const hasPrefilledAddress = $('#input-address-1')?.hasAttribute('data-prefilled') ||
                                  $('#input-address-1')?.hasAttribute('readonly');
-    
+
     if (hasPrefilledAddress) {
       log('Logged-in user with prefilled address detected, auto-loading shipping methods');
       checkAddressComplete();
     }
   }, 500);
   {% endif %}
+
+  // Auto-load shipping methods when country and zone are pre-filled (e.g., from default config).
+  // This applies to ALL users (guests and logged-in) so shipping methods appear immediately
+  // as soon as country/zone are known, without waiting for the full address.
+  setTimeout(() => {
+    const countryId = getShippingCountryId();
+    const zoneId = getShippingZoneId();
+    log('Auto-load check: countryId=', countryId, 'zoneId=', zoneId);
+    if (countryId && zoneId) {
+      log('Country and zone are pre-filled, auto-loading shipping methods immediately');
+      loadShippingMethods();
+    } else if (countryId && !zoneId) {
+      // Country set but zone not - still try (some shipping methods only need country)
+      log('Country is pre-filled (no zone), attempting to load shipping methods');
+      loadShippingMethods();
+    }
+  }, 300);
 
   // Save shipping address
   const saveShippingAddress = () => {
@@ -2248,7 +2574,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
           // Success: address saved, clear error tracking
           window._lastShippingError = null;
-          
+
           // Remember last saved payload to prevent loops
           window._lastSavedShipping = payloadKey;
 
@@ -2257,6 +2583,10 @@ document.addEventListener('DOMContentLoaded', () => {
           log('Checking for shipping_methods in response. Has shipping_methods:', !!json.shipping_methods);
           if (json.shipping_methods && Object.keys(json.shipping_methods).length > 0) {
             log('Server returned shipping_methods, rendering:', Object.keys(json.shipping_methods));
+            // Store field visibility config globally
+            if (json.shipping_fields) {
+              window._shippingFields = json.shipping_fields;
+            }
             renderShippingMethods(json.shipping_methods);
           } else {
             log('No shipping_methods in response. Response keys:', Object.keys(json));
@@ -2298,7 +2628,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Create Account Checkbox
   const createAccountCheckbox = $('#create-account-checkbox');
   const createAccountFields = $('#create-account-fields');
-  
+
   if (createAccountCheckbox && createAccountFields) {
     createAccountCheckbox.addEventListener('change', () => {
       if (createAccountCheckbox.checked) {
@@ -2317,7 +2647,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Payment Address Same as Shipping Checkbox
   const paymentSameCheckbox = $('#payment-same-as-shipping');
   const paymentAddressSection = $('#payment-address-section');
-  
+
   if (paymentSameCheckbox && paymentAddressSection) {
     // Handle checkbox toggle
     paymentSameCheckbox.addEventListener('change', () => {
@@ -2427,27 +2757,27 @@ document.addEventListener('DOMContentLoaded', () => {
   // Payment country change - load zones
   const paymentCountrySelect = $('#input-payment-country');
   const paymentZoneSelect = $('#input-payment-zone');
-  
+
   if (paymentCountrySelect && paymentZoneSelect) {
     paymentCountrySelect.addEventListener('change', () => {
       const country_id = paymentCountrySelect.value;
       log('Payment country changed', country_id);
-      
+
       if (country_id) {
         paymentZoneSelect.innerHTML = '<option value="">Loading...</option>';
-        
+
         ajax(`${CONFIG.urls.country}&country_id=${country_id}`)
           .then(json => {
             log('Payment zones loaded', json);
-            
+
             let html = '<option value="">{{ text_select }}</option>';
-            
+
             if (json.zone && json.zone.length > 0) {
               json.zone.forEach(zone => {
                 html += `<option value="${zone.zone_id}">${zone.name}</option>`;
               });
             }
-            
+
             paymentZoneSelect.innerHTML = html;
 
             // If server provided a payment_zone_id, attempt to select it
@@ -2790,11 +3120,11 @@ document.addEventListener('DOMContentLoaded', () => {
   if (showTermsBtn && termsModal) {
     showTermsBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      
+
       // Load terms content
       const termsContent = $('#terms-content');
       termsContent.innerHTML = `<div class="text-sm text-text-secondary">${window.dcLang?.text_loading || 'Loading terms...'}</div>`;
-      
+
       // Fetch terms via AJAX with robust fallback
       const termsUrl = '{{ agree_link }}';
       fetch(termsUrl, { credentials: 'same-origin' })
@@ -2856,7 +3186,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (applyCouponBtn) {
     applyCouponBtn.addEventListener('click', () => {
       const code = $('#coupon-code')?.value?.trim();
-      
+
       // Don't send request if coupon code is empty
       if (!code) {
         let errorBox = $('#validation-errors');
@@ -2886,7 +3216,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => errorBox?.remove(), 4000);
         return;
       }
-      
+
       ajax(ajaxUrls.coupon, { method: 'POST', data: { coupon: code } })
         .then(json => {
           let notificationBox = $('#validation-errors');
@@ -2994,16 +3324,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // Confirm order button
   const handleConfirmOrder = (e) => {
     e.preventDefault();
-    
+
     const btn = e.currentTarget;
     log('Confirm button clicked');
-    
+
     // Reset errors
     Array.from($$('input, select, textarea')).forEach(el => el.classList.remove('border-error'));
-    
+
     // Validate dynamically based on data-required attribute from admin config
     const errors = [];
-    
+
     // Check if create-account is checked - if yes, email is required even if not marked as required
     const createAccountChecked = $('#create-account-checkbox')?.checked;
     const emailInput = $('#input-email');
@@ -3037,7 +3367,7 @@ document.addEventListener('DOMContentLoaded', () => {
         errors.push('{{ text_passwords_do_not_match|e('js') }}');
       }
     }
-    
+
     // Check all inputs with data-required="1" or required attribute
     Array.from($$('input[data-required="1"], select[data-required="1"], textarea[data-required="1"], input[required], select[required], textarea[required]')).forEach(input => {
       // Skip payment address fields if "payment same as shipping" is checked
@@ -3045,23 +3375,25 @@ document.addEventListener('DOMContentLoaded', () => {
       if (paymentSameChecked && input.closest('#payment-address-section')) {
         return; // Skip validation for payment address fields
       }
-      
+
       const value = input.type === 'checkbox' ? input.checked : input.value;
       const fieldName = input.name || input.id || 'Field';
-      const label = input.closest('div')?.querySelector('label')?.textContent?.trim() || fieldName;
-      
+      // Get label text without (Optional) suffix for cleaner error messages
+      let label = input.closest('div')?.querySelector('label')?.textContent?.trim() || fieldName;
+      label = label.replace(/\(Optional\)|\s*\(Optional\)/gi, '').trim();
+
       if (!value || (typeof value === 'string' && value.trim() === '')) {
         input.classList.add('border-error');
         // Localized required message with placeholder
         errors.push(`{{ text_required_field|e('js') }}`.replace('%s', label));
       }
-      
+
       // Email validation (skip if already validated above for create-account)
       if (input.type === 'email' && value && !/\S+@\S+\.\S+/.test(value) && input !== emailInput) {
         input.classList.add('border-error');
         errors.push(`{{ text_field_invalid_email|e('js') }}`.replace('%s', label));
       }
-      
+
       // Phone validation (flexible for international formats)
       if (input.type === 'tel' || input.name === 'telephone') {
         const phoneValue = value.toString().replace(/[\s\-\(\)]/g, '');
@@ -3077,23 +3409,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     });
-    
+
     // Check shipping method (only if shipping is required)
     if ({{ shipping_required ? 'true' : 'false' }} && !$('input[name="shipping_method"]:checked')) {
       errors.push(window.dcLang?.error_select_shipping_method || 'Please select a shipping method');
     }
-    
+
     // Check payment method
     if (!$('input[name="payment_method"]:checked')) {
       errors.push(window.dcLang?.error_select_payment_method || 'Please select a payment method');
     }
-    
+
     // Check terms agreement
     const agreeCheckbox = $('#agree');
     if (agreeCheckbox && !agreeCheckbox.checked) {
       errors.push('{{ error_agree|e('js') }}');
     }
-    
+
     if (errors.length > 0) {
       log('Validation errors', errors);
       // Show errors in a notification div instead of alert
@@ -3130,19 +3462,19 @@ document.addEventListener('DOMContentLoaded', () => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return false;
     }
-    
+
     // Disable button
     btn.disabled = true;
     btn.innerHTML = '{{ text_processing }}';
-    
+
     log('Starting order confirmation...');
-    
+
     // Helper to reset button
     const resetButton = () => {
       btn.disabled = false;
       btn.innerHTML = '{{ button_confirm }}';
     };
-    
+
     // Step 1: Save guest customer
     const guestData = {
       firstname: $('#input-firstname')?.value || '',
@@ -3160,7 +3492,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // include confirm if present (server may use it in validation)
       if ($('#input-confirm-password')) guestData.confirm = confirmPwd;
     }
-    
+
     log('Saving guest data', guestData);
 
     const doCustomerSave = () => {
@@ -3197,7 +3529,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (shouldSave) {
         // Check if "Save to account" is checked in customer details block (for logged-in users)
         if (isLogged) {
-          const saveToAccountCheckbox = customerDetailsBlock 
+          const saveToAccountCheckbox = customerDetailsBlock
             ? customerDetailsBlock.querySelector('input[type="checkbox"][id*="save-to-account"]')
             : null;
           if (saveToAccountCheckbox && saveToAccountCheckbox.checked) {
@@ -3276,7 +3608,7 @@ document.addEventListener('DOMContentLoaded', () => {
           resetButton();
           return Promise.reject('Payment address error');
         }
-        
+
         // Step 3: Save shipping method
         const shippingMethod = $('input[name="shipping_method"]:checked')?.value;
         log('Saving shipping method', shippingMethod);
@@ -3290,7 +3622,7 @@ document.addEventListener('DOMContentLoaded', () => {
           resetButton();
           return Promise.reject('Shipping method error');
         }
-        
+
         // Step 4: Save payment method
         const paymentMethod = $('input[name="payment_method"]:checked')?.value;
         log('Saving payment method', paymentMethod);
@@ -3304,7 +3636,7 @@ document.addEventListener('DOMContentLoaded', () => {
           resetButton();
           return Promise.reject('Payment method error');
         }
-        
+
         // Step 5: Confirm order
         log('Confirming order...');
         const orderComment = $('#input-comment')?.value || '';
@@ -3312,7 +3644,7 @@ document.addEventListener('DOMContentLoaded', () => {
       })
       .then(json => {
         log('Order confirmed', json);
-        
+
         if (json.redirect) {
           // Most common case: order created, redirect to success or payment gateway
           // If payment form was loaded, check if it has a button and trigger it
@@ -3327,7 +3659,7 @@ document.addEventListener('DOMContentLoaded', () => {
               return; // Let the payment button handler manage navigation
             }
           }
-          
+
           // No payment form or no button found, redirect directly
           window.location.href = json.redirect;
         } else if (json.error) {
@@ -3346,14 +3678,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         resetButton();
       });
-    
+
     return false;
   };
-  
+
   // Attach confirm handlers
   const confirmBtn = $('#button-confirm');
   const mobileConfirmBtn = $('#mobile-button-confirm');
-  
+
   if (confirmBtn) confirmBtn.addEventListener('click', handleConfirmOrder);
   if (mobileConfirmBtn) mobileConfirmBtn.addEventListener('click', handleConfirmOrder);
 
