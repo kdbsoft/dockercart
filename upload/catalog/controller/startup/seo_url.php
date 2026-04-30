@@ -1860,7 +1860,7 @@ class ControllerStartupSeoUrl extends Controller
             // Build redirect URL with language prefix
             $language_prefix = $this->calculateLanguagePrefix();
             $redirect_path =
-                "/" . trim($language_prefix . "/" . $canonical_path, "/");
+                "/" . trim($language_prefix . $canonical_path, "/");
 
             // Preserve query parameters (excluding _route_)
             $query_string = "";
