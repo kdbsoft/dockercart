@@ -1,4 +1,4 @@
-/*M!999999\- enable the sandbox mode */ 
+/*M!999999\- enable the sandbox mode */
 -- MariaDB dump 10.19-11.8.6-MariaDB, for debian-linux-gnu (x86_64)
 --
 -- Host: localhost    Database: dockercart
@@ -20025,6 +20025,8 @@ INSERT INTO `oc_setting` VALUES
 (15292,0,'module_dockercart_checkout','module_dockercart_checkout_recaptcha_site_key','',0),
 (15293,0,'module_dockercart_checkout','module_dockercart_checkout_recaptcha_secret_key','',0),
 (15294,0,'module_dockercart_checkout','module_dockercart_checkout_debug','1',0),
+(15295,0,'module_dockercart_checkout','module_dockercart_checkout_default_country_id','',0),
+(15296,0,'module_dockercart_checkout','module_dockercart_checkout_default_zone_id','',0),
 (15304,0,'module_dockercart_search','module_dockercart_search_status','1',0),
 (15305,0,'module_dockercart_search','module_dockercart_search_min_chars','3',0),
 (15306,0,'module_dockercart_search','module_dockercart_search_results_limit','20',0),
