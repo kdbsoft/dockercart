@@ -812,9 +812,6 @@ hr {
       </div>
       <h1>
         {{ heading_title }}
-        {% if module_version is defined and module_version %}
-          <span class="label label-info" style="margin-left:10px; font-size:0.5em; vertical-align: middle;">v{{ module_version }}</span>
-        {% endif %}
       </h1>
       <ul class="breadcrumb">
         {% for breadcrumb in breadcrumbs %}
@@ -893,7 +890,7 @@ hr {
             <div class="tab-pane active" id="tab-general">
               <div class="row" style="margin-top: 25px;">
                 <div class="col-md-9">
-                  
+
                   <div class="dc-card">
                     <div class="dc-card-header">
                         <i data-lucide="toggle-right"></i> {{ text_module_status|default('Module Status') }}
@@ -966,6 +963,38 @@ hr {
                               <span class="dc-switch-toggle"></span>
                             </label>
                           </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="dc-card">
+                    <div class="dc-card-header">
+                        <i data-lucide="map-pin"></i> {{ entry_default_country|default('Default Location') }}
+                      </div>
+                    <div class="dc-card-body">
+                      <div class="form-group">
+                        <label class="col-sm-4 control-label" for="input-default-country">
+                          <span data-toggle="tooltip" title="{{ help_default_country|default('Pre-selected country when customer has not chosen one yet.') }}">{{ entry_default_country|default('Default Country') }}</span>
+                        </label>
+                        <div class="col-sm-8">
+                          <select name="module_dockercart_checkout_default_country_id" id="input-default-country" class="form-control">
+                            <option value="">{{ text_select|default('--- None ---') }}</option>
+                            {% for country in admin_countries %}
+                            <option value="{{ country.country_id }}" {% if module_dockercart_checkout_default_country_id == country.country_id %}selected{% endif %}>{{ country.name }}</option>
+                            {% endfor %}
+                          </select>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label class="col-sm-4 control-label" for="input-default-zone">
+                          <span data-toggle="tooltip" title="{{ help_default_zone|default('Pre-selected region/state when customer has not chosen one yet.') }}">{{ entry_default_zone|default('Default Region / State') }}</span>
+                        </label>
+                        <div class="col-sm-8">
+                          <select name="module_dockercart_checkout_default_zone_id" id="input-default-zone" class="form-control">
+                            <option value="">{{ text_select|default('--- None ---') }}</option>
+                          </select>
+                          <small class="text-muted">{{ text_select_country_first|default('Select a country first, then choose a region') }}</small>
                         </div>
                       </div>
                     </div>
@@ -1098,7 +1127,7 @@ hr {
             <!-- METHOD OVERRIDES TAB -->
             <div class="tab-pane" id="tab-method-overrides">
               <div style="margin-top: 15px;">
-                
+
                 <div class="alert alert-info dc-alert-modern">
                   <i data-lucide="info"></i>
                   <div>
@@ -1118,32 +1147,35 @@ hr {
                         <table class="table table-bordered">
                           <thead>
                             <tr>
-                              <th style="width: 25%;">{{ text_method_code }}</th>
-                              <th style="width: 15%;" class="text-center">{{ text_method_enabled }}</th>
-                              <th style="width: 30%;">{{ text_custom_title }}</th>
-                              <th style="width: 30%;">{{ text_custom_description }}</th>
+                              <th style="width: 20%;">{{ text_method_code }}</th>
+                              <th style="width: 10%;" class="text-center">{{ text_method_enabled }}</th>
+                              <th style="width: 25%;">{{ text_custom_title }}</th>
+                              <th style="width: 25%;">{{ text_custom_description }}</th>
+                              <th style="width: 25%;" class="text-center">{{ text_address_fields|default('Address Fields') }}</th>
                             </tr>
                           </thead>
                           <tbody>
                             {% for method_code, method_data in available_shipping_methods %}
+                            {# Sanitize method code for DOM IDs/classes: replace dots with hyphens #}
+                            {% set code_safe = method_code|replace({'.': '-'}) %}
                             <tr>
                               <td>
                                 <strong>{{ method_code }}</strong><br>
-                                <small class="text-muted">{{ text_default_title }}: {{ method_data.default_title }}</small>
+                                <small class="text-muted">{{ text_module }}: {{ method_data.module_title }}</small>
                               </td>
                               <td class="text-center">
-                                <input type="checkbox" 
-                                       name="module_dockercart_checkout_shipping_override[{{ method_code }}][enabled]" 
+                                <input type="checkbox"
+                                       name="module_dockercart_checkout_shipping_override[{{ method_code }}][enabled]"
                                        value="1"
                                        {% if shipping_overrides[method_code].enabled is defined and shipping_overrides[method_code].enabled %}checked{% endif %}
                                        class="method-override-toggle"
-                                       data-target="shipping-{{ method_code }}">
+                                       data-target="shipping-{{ code_safe }}">
                               </td>
                               <td>
                                 <ul class="nav nav-tabs" style="margin-bottom: 5px; border-bottom: 1px solid #ddd;">
                                   {% for language in languages %}
                                   <li{% if loop.first %} class="active"{% endif %}>
-                                    <a href="#shipping-{{ method_code }}-title-{{ language.language_id }}" data-toggle="tab">
+                                    <a href="#shipping-{{ code_safe }}-title-{{ language.language_id }}" data-toggle="tab">
                                       <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" style="width: 16px; height: 11px;"> {{ language.name }}
                                     </a>
                                   </li>
@@ -1151,12 +1183,12 @@ hr {
                                 </ul>
                                 <div class="tab-content">
                                   {% for language in languages %}
-                                  <div class="tab-pane{% if loop.first %} active{% endif %}" id="shipping-{{ method_code }}-title-{{ language.language_id }}">
-                                    <input type="text" 
-                                           name="module_dockercart_checkout_shipping_override[{{ method_code }}][title][{{ language.code }}]" 
+                                  <div class="tab-pane{% if loop.first %} active{% endif %}" id="shipping-{{ code_safe }}-title-{{ language.language_id }}">
+                                    <input type="text"
+                                           name="module_dockercart_checkout_shipping_override[{{ method_code }}][title][{{ language.code }}]"
                                            value="{{ shipping_overrides[method_code].title[language.code]|default('') }}"
                                            placeholder="{{ method_data.default_title }}"
-                                           class="form-control method-override-field shipping-{{ method_code }}-field"
+                                           class="form-control method-override-field shipping-{{ code_safe }}-field"
                                            {% if not (shipping_overrides[method_code].enabled is defined and shipping_overrides[method_code].enabled) %}disabled{% endif %}>
                                   </div>
                                   {% endfor %}
@@ -1166,7 +1198,7 @@ hr {
                                 <ul class="nav nav-tabs" style="margin-bottom: 5px; border-bottom: 1px solid #ddd;">
                                   {% for language in languages %}
                                   <li{% if loop.first %} class="active"{% endif %}>
-                                    <a href="#shipping-{{ method_code }}-desc-{{ language.language_id }}" data-toggle="tab">
+                                    <a href="#shipping-{{ code_safe }}-desc-{{ language.language_id }}" data-toggle="tab">
                                       <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" style="width: 16px; height: 11px;"> {{ language.name }}
                                     </a>
                                   </li>
@@ -1174,16 +1206,52 @@ hr {
                                 </ul>
                                 <div class="tab-content">
                                   {% for language in languages %}
-                                  <div class="tab-pane{% if loop.first %} active{% endif %}" id="shipping-{{ method_code }}-desc-{{ language.language_id }}">
-                                    <input type="text" 
-                                           name="module_dockercart_checkout_shipping_override[{{ method_code }}][description][{{ language.code }}]" 
+                                  <div class="tab-pane{% if loop.first %} active{% endif %}" id="shipping-{{ code_safe }}-desc-{{ language.language_id }}">
+                                    <input type="text"
+                                           name="module_dockercart_checkout_shipping_override[{{ method_code }}][description][{{ language.code }}]"
                                            value="{{ shipping_overrides[method_code].description[language.code]|default('') }}"
                                            placeholder="Optional description"
-                                           class="form-control method-override-field shipping-{{ method_code }}-field"
+                                           class="form-control method-override-field shipping-{{ code_safe }}-field"
                                            {% if not (shipping_overrides[method_code].enabled is defined and shipping_overrides[method_code].enabled) %}disabled{% endif %}>
                                   </div>
                                   {% endfor %}
                                 </div>
+                              </td>
+                              <td class="text-center">
+                                <div style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;" class="shipping-{{ code_safe }}-field">
+                                  {% set addr_fields = [
+                                    {'key': 'company', 'label': text_field_company|default('Company')},
+                                    {'key': 'address_1', 'label': text_field_address_1|default('Address 1')},
+                                    {'key': 'address_2', 'label': text_field_address_2|default('Address 2')},
+                                    {'key': 'city', 'label': text_field_city|default('City')},
+                                    {'key': 'postcode', 'label': text_field_postcode|default('Postcode')}
+                                  ] %}
+                                  {% for f in addr_fields %}
+                                    {% set field_key_visible = 'module_dockercart_checkout_shipping_override[' ~ method_code ~ '][fields][' ~ f.key ~ '][visible]' %}
+                                    {% set field_key_required = 'module_dockercart_checkout_shipping_override[' ~ method_code ~ '][fields][' ~ f.key ~ '][required]' %}
+                                    {% set field_data = shipping_overrides[method_code].fields[f.key]|default(null) %}
+                                    {% if field_data is iterable %}
+                                      {% set is_visible = field_data.visible|default(1) %}
+                                      {% set is_required = field_data.required|default(0) %}
+                                    {% else %}
+                                      {% set is_visible = field_data|default(1) %}
+                                      {% set is_required = 0 %}
+                                    {% endif %}
+                                    <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 3px 6px; border: 1px solid #e5e7eb; border-radius: 4px; {% if not is_visible %}opacity: 0.5;{% endif %}" class="addr-field-group">
+                                      <label style="display: inline-flex; align-items: center; gap: 2px; font-size: 11px; cursor: pointer; white-space: nowrap;">
+                                        <input type="hidden" name="{{ field_key_visible }}" value="0">
+                                        <input type="checkbox" name="{{ field_key_visible }}" value="1" {% if is_visible %}checked{% endif %} style="margin: 0;" class="field-visible-cb" onchange="this.closest('.addr-field-group').style.opacity = this.checked ? '1' : '0.5'">
+                                        <span>{{ f.label }}</span>
+                                      </label>
+                                      <label style="display: inline-flex; align-items: center; gap: 2px; font-size: 10px; cursor: pointer; white-space: nowrap; color: #666;" title="{{ text_required|default('Required') }}">
+                                        <input type="hidden" name="{{ field_key_required }}" value="0">
+                                        <input type="checkbox" name="{{ field_key_required }}" value="1" {% if is_required %}checked{% endif %} style="margin: 0; width: 10px; height: 10px;">
+                                        <span style="font-size: 9px;">{{ text_req_abbr|default('req') }}</span>
+                                      </label>
+                                    </div>
+                                  {% endfor %}
+                                </div>
+                                <small class="text-muted" style="display: block; margin-top: 4px;">{{ help_shipping_fields|default('Show/hide address fields for this shipping method') }}<br>({{ text_country_region_always_visible|default('Country and Region are always visible') }})</small>
                               </td>
                             </tr>
                             {% endfor %}
@@ -1221,8 +1289,8 @@ hr {
                                 <small class="text-muted">{{ text_default_title }}: {{ method_data.default_title }}</small>
                               </td>
                               <td class="text-center">
-                                <input type="checkbox" 
-                                       name="module_dockercart_checkout_payment_override[{{ method_code }}][enabled]" 
+                                <input type="checkbox"
+                                       name="module_dockercart_checkout_payment_override[{{ method_code }}][enabled]"
                                        value="1"
                                        {% if payment_overrides[method_code].enabled is defined and payment_overrides[method_code].enabled %}checked{% endif %}
                                        class="method-override-toggle"
@@ -1241,8 +1309,8 @@ hr {
                                 <div class="tab-content">
                                   {% for language in languages %}
                                   <div class="tab-pane{% if loop.first %} active{% endif %}" id="payment-{{ method_code }}-title-{{ language.language_id }}">
-                                    <input type="text" 
-                                           name="module_dockercart_checkout_payment_override[{{ method_code }}][title][{{ language.code }}]" 
+                                    <input type="text"
+                                           name="module_dockercart_checkout_payment_override[{{ method_code }}][title][{{ language.code }}]"
                                            value="{{ payment_overrides[method_code].title[language.code]|default('') }}"
                                            placeholder="{{ method_data.default_title }}"
                                            class="form-control method-override-field payment-{{ method_code }}-field"
@@ -1264,8 +1332,8 @@ hr {
                                 <div class="tab-content">
                                   {% for language in languages %}
                                   <div class="tab-pane{% if loop.first %} active{% endif %}" id="payment-{{ method_code }}-desc-{{ language.language_id }}">
-                                    <input type="text" 
-                                           name="module_dockercart_checkout_payment_override[{{ method_code }}][description][{{ language.code }}]" 
+                                    <input type="text"
+                                           name="module_dockercart_checkout_payment_override[{{ method_code }}][description][{{ language.code }}]"
                                            value="{{ payment_overrides[method_code].description[language.code]|default('') }}"
                                            placeholder="Optional description"
                                            class="form-control method-override-field payment-{{ method_code }}-field"
@@ -1291,10 +1359,10 @@ hr {
                   document.querySelectorAll('.method-override-toggle').forEach(function(checkbox) {
                     checkbox.addEventListener('change', function() {
                       var target = this.getAttribute('data-target');
-                      
+
                       // Find all fields for this method (across all language tabs)
                       var fields = document.querySelectorAll('.' + target + '-field');
-                      
+
                       fields.forEach(function(field) {
                         if (checkbox.checked) {
                           field.disabled = false;
@@ -1370,6 +1438,56 @@ hr {
             </div>
 
           </div>
+
+<script>
+// Dynamic zone loading for default country dropdown
+document.addEventListener('DOMContentLoaded', function() {
+  var defaultCountrySelect = document.getElementById('input-default-country');
+  var defaultZoneSelect = document.getElementById('input-default-zone');
+
+  if (defaultCountrySelect && defaultZoneSelect) {
+    defaultCountrySelect.addEventListener('change', function() {
+      var countryId = this.value;
+      var zoneSelect = defaultZoneSelect;
+
+      // Clear current options
+      zoneSelect.innerHTML = '<option value="">{{ text_select|default('--- None ---') }}</option>';
+
+      if (!countryId) return;
+
+      // Fetch zones via AJAX
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', 'index.php?route=localisation/country/country&country_id=' + countryId + '&user_token={{ user_token }}', true);
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          try {
+            var data = JSON.parse(xhr.responseText);
+            if (data.zone) {
+              data.zone.forEach(function(zone) {
+                var option = document.createElement('option');
+                option.value = zone.zone_id;
+                option.textContent = zone.name;
+                {% if module_dockercart_checkout_default_zone_id %}
+                if (zone.zone_id == '{{ module_dockercart_checkout_default_zone_id }}') {
+                  option.selected = true;
+                }
+                {% endif %}
+                zoneSelect.appendChild(option);
+              });
+            }
+          } catch(e) {}
+        }
+      };
+      xhr.send();
+    });
+
+    // Trigger if country is pre-selected
+    if (defaultCountrySelect.value) {
+      defaultCountrySelect.dispatchEvent(new Event('change'));
+    }
+  }
+});
+</script>
 
         </form>
       </div>
@@ -1547,7 +1665,7 @@ const DockercartCheckout = (() => {
       currentBlockRows.forEach((row, rowIdx) => {
         const columns = row.columns || 1;
         const fields = row.fields || [];
-        
+
         content += `<div class="dc-modal-row-item" data-row-index="${rowIdx}">
           <div class="dc-modal-row-header">
             <span class="drag-handle" draggable="true" style="cursor: move; margin-right: 10px; user-select: none;">⋮⋮</span>
@@ -1562,13 +1680,13 @@ const DockercartCheckout = (() => {
               <i data-lucide="trash-2"></i>
             </button>
           </div>
-          <div class="dc-modal-row-fields" data-row-index="${rowIdx}">`;        
+          <div class="dc-modal-row-fields" data-row-index="${rowIdx}">`;
         if (fields.length > 0) {
           fields.forEach((field, fieldIdx) => {
             const label = field.label || field.name || field.id;
             const visibleChecked = field.visible ? 'checked' : '';
             const requiredChecked = field.required ? 'checked' : '';
-            
+
             content += `<div class="dc-modal-field-item" draggable="true" data-field-index="${fieldIdx}" data-field-id="${field.id}">
               <div class="dc-modal-field-drag"><span class="drag-dots">⋮⋮</span></div>
               <div class="dc-modal-field-name">${label}</div>
@@ -1589,7 +1707,7 @@ const DockercartCheckout = (() => {
         } else {
           content += `<div style="padding: 10px; text-align: center; color: #999;">{{ text_no_fields_in_row|default("No fields in this row") }}</div>`;
         }
-        
+
         content += `</div></div>`;
       });
     } else {
@@ -1603,7 +1721,7 @@ const DockercartCheckout = (() => {
 
     // Initialize dragdrop for modal fields
     initializeModalRowsDragDrop();
-    
+
     // Setup event handlers for modal buttons and controls (вызываем один раз)
     setupModalEventHandlers();
   };
@@ -1617,7 +1735,7 @@ const DockercartCheckout = (() => {
           const newRow = { columns: 1, fields: [] };
           currentBlockRows.push(newRow);
           const rowIdx = currentBlockRows.length - 1;
-          
+
           const rowsList = document.querySelector('.dc-modal-rows-list');
           if (rowsList) {
             const rowHtml = `<div class="dc-modal-row-item" data-row-index="${rowIdx}">
@@ -1640,7 +1758,7 @@ const DockercartCheckout = (() => {
             </div>`;
             rowsList.insertAdjacentHTML('beforeend', rowHtml);
             lucideRender();
-            
+
             // Rebind handlers for new row
             setupModalEventHandlers();
             initializeModalRowsDragDrop();
@@ -1686,14 +1804,14 @@ const DockercartCheckout = (() => {
               el.querySelector('.btn-remove-row')?.setAttribute('data-row-index', idx);
               el.querySelector('.dc-modal-row-fields')?.setAttribute('data-row-index', idx);
             });
-            
+
             updateHiddenRowsInput();
             updateBadge();
           }
           return false;
         };
       });
-      
+
       // Columns select
       document.querySelectorAll('.row-columns-select').forEach(select => {
         select.onchange = function(e) {
@@ -1705,7 +1823,7 @@ const DockercartCheckout = (() => {
           }
         };
       });
-      
+
       // Modal footer buttons
       const btnClose = document.getElementById('btn-modal-close');
       if (btnClose) {
@@ -1716,7 +1834,7 @@ const DockercartCheckout = (() => {
           return false;
         };
       }
-      
+
       const btnSave = document.getElementById('btn-modal-save');
       if (btnSave) {
         btnSave.onclick = function(e) {
@@ -1967,7 +2085,7 @@ const DockercartCheckout = (() => {
     activeRowsList.addEventListener('dragstart', function (e) {
       const fieldItem = e.target.closest('.dc-modal-field-item');
       const rowItem = e.target.closest('.dc-modal-row-item');
-      
+
       if (fieldItem && e.target.closest('[draggable]')) {
         draggedField = fieldItem;
         draggedField.classList.add('is-dragging');
@@ -1981,7 +2099,7 @@ const DockercartCheckout = (() => {
         e.dataTransfer.setData('text/html', rowItem.innerHTML);
       }
     });
-    
+
     activeRowsList.addEventListener('dragend', function (e) {
       if (draggedField) {
         draggedField.classList.remove('is-dragging');
@@ -1992,20 +2110,20 @@ const DockercartCheckout = (() => {
       draggedField = null;
       draggedRow = null;
     });
-    
+
     activeRowsList.addEventListener('dragover', function (e) {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
     });
-    
+
     activeRowsList.addEventListener('drop', function (e) {
       e.preventDefault();
-      
+
       // Field drop
       if (draggedField) {
         const targetField = e.target.closest('.dc-modal-field-item');
         const targetRowFields = e.target.closest('.dc-modal-row-fields');
-        
+
         if (targetField && draggedField !== targetField) {
           const rect = targetField.getBoundingClientRect();
           if (e.clientY < rect.top + rect.height / 2) {
@@ -2017,20 +2135,20 @@ const DockercartCheckout = (() => {
           targetRowFields.appendChild(draggedField);
         }
       }
-      
+
       // Row drop
       if (draggedRow) {
         const targetRow = e.target.closest('.dc-modal-row-item');
         if (targetRow && draggedRow !== targetRow) {
           const rect = targetRow.getBoundingClientRect();
           const insertBefore = e.clientY < rect.top + rect.height / 2;
-          
+
           if (insertBefore) {
             targetRow.parentNode.insertBefore(draggedRow, targetRow);
           } else {
             targetRow.parentNode.insertBefore(draggedRow, targetRow.nextSibling);
           }
-          
+
           // Синхронизируем currentBlockRows с новым порядком DOM
           const newOrder = [];
           const allRows = activeRowsList.querySelectorAll('.dc-modal-row-item');
@@ -2112,7 +2230,7 @@ const DockercartCheckout = (() => {
       fields: []
     };
     currentBlockRows.push(newRow);
-    
+
     // Re-render modal content
     openBlockSettingsModal(currentBlockIndex, currentBlockId);
   };
@@ -2158,7 +2276,7 @@ const DockercartCheckout = (() => {
     const modalOverlay = document.getElementById('block-settings-modal');
     if (modalOverlay) {
       modalObserver = new MutationObserver(mutations => {
-        mutations.forEach(m => { 
+        mutations.forEach(m => {
           if (m.attributeName === 'class' && modalOverlay.classList.contains('active')) {
             // Use RAF instead of setTimeout to prevent buildup
             requestAnimationFrame(() => initializeModalRowsDragDrop());
