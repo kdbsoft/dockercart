@@ -1601,6 +1601,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (!fieldContainer) return;
 
+      // Walk up to the grid row (grid container that wraps field wrappers)
+      const gridRow = fieldContainer.parentElement;
+
       log('toggleAddressFields:', fieldKey,
           'visible:', config.visible,
           'required:', config.required);
@@ -1616,10 +1619,24 @@ document.addEventListener('DOMContentLoaded', () => {
         if (optionalSpan) {
           optionalSpan.style.display = config.required ? 'none' : '';
         }
+        // Show the grid row
+        if (gridRow && gridRow.classList.contains('grid')) {
+          gridRow.style.display = '';
+        }
       } else {
         fieldContainer.style.display = 'none';
         input.required = false;
         fieldContainer.classList.remove('field-required');
+
+        // Hide the grid row if ALL its direct child wrappers are hidden
+        if (gridRow && gridRow.classList.contains('grid')) {
+          const allHidden = Array.from(gridRow.children).every(child => {
+            return child.style.display === 'none';
+          });
+          if (allHidden) {
+            gridRow.style.display = 'none';
+          }
+        }
       }
     });
 
@@ -1837,14 +1854,64 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (value === 'new') {
       setShippingFieldsEditable(true);
+
+      // Clear all address fields first
       Object.values(SHIPPING_FIELD_MAP_FULL).forEach(sel => {
         const el = $(sel);
-        if (el) {
-          el.value = '';
-        }
+        if (el) el.value = '';
       });
+
+      // Make firstname/lastname in customer_details editable (they get
+      // cleared because SHIPPING_FIELD_MAP_FULL targets #input-firstname
+      // and #input-lastname, but they remain readonly for logged-in users).
+      const customerBlock = document.querySelector('[data-block-id="customer_details"]');
+      if (customerBlock) {
+        ['#input-firstname', '#input-lastname'].forEach(sel => {
+          const el = customerBlock.querySelector(sel);
+          if (el) {
+            el.removeAttribute('readonly');
+            el.removeAttribute('data-prefilled');
+          }
+        });
+        // Also remove the edit/save controls that initPrefilledBlocks created
+        const controls = customerBlock.querySelector('.flex.items-center.gap-2.justify-end');
+        if (controls) controls.remove();
+      }
+
+      // Fill country and zone from module defaults
+      const countrySelect = $('#input-country');
       const zoneSelect = $('#input-zone');
-      if (zoneSelect) zoneSelect.innerHTML = `<option value="">${TEXT_SELECT_PLACEHOLDER}</option>`;
+
+      if (countrySelect && DEFAULT_SHIPPING_COUNTRY_ID) {
+        countrySelect.value = DEFAULT_SHIPPING_COUNTRY_ID;
+
+        // Load zones for the default country
+        zoneSelect.innerHTML = `<option value="">${TEXT_SELECT_PLACEHOLDER}</option>`;
+
+        ajax(`${CONFIG.urls.country}&country_id=${DEFAULT_SHIPPING_COUNTRY_ID}`)
+          .then(json => {
+            let html = `<option value="">${TEXT_SELECT_PLACEHOLDER}</option>`;
+            if (json.zone && Array.isArray(json.zone)) {
+              json.zone.forEach(z => {
+                html += `<option value="${z.zone_id}">${z.name}</option>`;
+              });
+            }
+            zoneSelect.innerHTML = html;
+
+            if (DEFAULT_SHIPPING_ZONE_ID) {
+              zoneSelect.value = String(DEFAULT_SHIPPING_ZONE_ID);
+            }
+
+            // Trigger address completion check with defaults
+            setTimeout(checkAddressComplete, 50);
+          })
+          .catch(() => {
+            zoneSelect.innerHTML = `<option value="">${TEXT_SELECT_PLACEHOLDER}</option>`;
+          });
+      } else if (zoneSelect) {
+        zoneSelect.innerHTML = `<option value="">${TEXT_SELECT_PLACEHOLDER}</option>`;
+      }
+
       return;
     }
 
