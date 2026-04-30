@@ -6,6 +6,8 @@ dist/
 .DS_Store
 /.vscode/
 node_modules/
+/.zed/
+AGENTS.md
 # Config and Htaccess Files
 /upload/.htaccess
 /upload/config.php

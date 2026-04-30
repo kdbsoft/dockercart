@@ -17310,7 +17310,10 @@ CREATE TABLE `oc_seo_url` (
   `keyword` varchar(255) NOT NULL,
   PRIMARY KEY (`seo_url_id`),
   KEY `query` (`query`(250)),
-  KEY `keyword` (`keyword`(250))
+  KEY `keyword` (`keyword`(250)),
+  KEY `idx_store_id` (`store_id`),
+  KEY `idx_store_language_query` (`store_id`, `language_id`, `query`(191)),
+  KEY `idx_store_keyword` (`store_id`, `keyword`(191))
 ) ENGINE=InnoDB AUTO_INCREMENT=5665 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
