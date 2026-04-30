@@ -1334,7 +1334,20 @@ class ControllerStartupSeoUrl extends Controller {
 	private function buildRedirectUrl($path) {
 		$protocol = (!empty($this->request->server['HTTPS']) && $this->request->server['HTTPS'] !== 'off') ? 'https://' : 'http://';
 		$host = isset($this->request->server['HTTP_HOST']) ? $this->request->server['HTTP_HOST'] : $_SERVER['HTTP_HOST'];
-		return $protocol . $host . $path;
+
+		// Append port if using non-standard port and it's not already in HTTP_HOST
+		$port = '';
+		if (isset($this->request->server['SERVER_PORT'])) {
+			$is_https = $protocol === 'https://';
+			$default_port = $is_https ? '443' : '80';
+			$server_port = $this->request->server['SERVER_PORT'];
+
+			if ($server_port !== $default_port && strpos($host, ':' . $server_port) === false) {
+				$port = ':' . $server_port;
+			}
+		}
+
+		return $protocol . $host . $port . $path;
 	}
 
 	/**
