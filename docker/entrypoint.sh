@@ -7,14 +7,12 @@ fix_volume_permissions() {
 
     # Переиминяем владельца смонтированных папок на www-data
     if [ -d "/var/www/html" ]; then
-        chown -R www-data:www-data /var/www/html 2>/dev/null || true
         chmod -R 755 /var/www/html 2>/dev/null || true
         find /var/www/html -type d -exec chmod 755 {} \; 2>/dev/null || true
         find /var/www/html -type f -exec chmod 644 {} \; 2>/dev/null || true
     fi
 
     if [ -d "/var/www/storage" ]; then
-        chown -R www-data:www-data /var/www/storage 2>/dev/null || true
         chmod -R 777 /var/www/storage 2>/dev/null || true
     fi
 
@@ -23,7 +21,7 @@ fix_volume_permissions() {
     chmod -R 775 /var/www/html/image/cache 2>/dev/null || true
 
     # Restore staff group on image/ so FTP (uid=14:staff) and www-data (member of staff)
-    # can both read/write. chown -R above resets the group to www-data, so we fix it back.
+    # can both read/write.
     chgrp -R staff /var/www/html/image/ 2>/dev/null || true
     find /var/www/html/image/catalog /var/www/html/image/cache -type d -exec chmod g+ws {} \; 2>/dev/null || true
     find /var/www/html/image/catalog /var/www/html/image/cache -type f -exec chmod g+w {} \; 2>/dev/null || true
@@ -82,7 +80,6 @@ Disallow: /
 EOF
 
     if [ "$(id -u)" -eq 0 ]; then
-        chown www-data:www-data "$robots_file" 2>/dev/null || true
         chmod 664 "$robots_file" 2>/dev/null || true
     fi
 }
@@ -211,7 +208,6 @@ PHP
     fi
 
     if [ "$(id -u)" -eq 0 ]; then
-        chown www-data:www-data "$root_config" "$admin_config" 2>/dev/null || true
         chmod 664 "$root_config" "$admin_config" 2>/dev/null || true
     fi
 }
@@ -253,7 +249,6 @@ migrate_storage() {
     fi
 
     # Устанавливаем правильные права на все директории storage
-    chown -R www-data:www-data "$TARGET_STORAGE"
     chmod -R 755 "$TARGET_STORAGE"
     chmod -R 777 "$TARGET_STORAGE/cache"
     chmod -R 777 "$TARGET_STORAGE/logs"
@@ -270,13 +265,6 @@ set_permissions() {
     if [ "$(id -u)" -eq 0 ]; then
         # Ensure image cache base directory exists for first-run thumbnail generation.
         mkdir -p /var/www/html/image/cache || true
-
-        # Try to align owner/group for image cache with Apache runtime user.
-        chown -R www-data:www-data /var/www/html/image/cache 2>/dev/null || true
-        chgrp -R www-data /var/www/html/image/cache 2>/dev/null || true
-
-        # Don't chown the entire webroot (bind-mount). Only ensure storage ownership.
-        chown -R www-data:www-data /var/www/storage || true
 
         # Directories in webroot: set SGID so new files inherit group, allow group write
         find /var/www/html -type d -exec chmod 2775 {} \; || true
