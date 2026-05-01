@@ -159,6 +159,8 @@ check-multicurrency.sh
 
 # Ignore custom local Dockercart prefixed artifacts
 **/dockercart_custom_*
+**/dc_custom_*
+**/custom_*
 
 *.lock
 backups/
