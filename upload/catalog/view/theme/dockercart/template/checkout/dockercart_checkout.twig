@@ -1021,7 +1021,7 @@ const showFieldErrors = (errorObj) => {
         const labelEl = el.closest('div')?.querySelector('label');
         if (labelEl?.textContent) {
           label = labelEl.textContent.trim();
-          label = label.replace(/\(Optional\)|\s*\(Optional\)/gi, '').trim();
+          label = label.replace(/\([^)]*\)$|\s*\([^)]*\)$/g, '').trim();
         }
       }
     }
@@ -3380,11 +3380,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const fieldName = input.name || input.id || 'Field';
       // Get label text without (Optional) suffix for cleaner error messages
       let label = input.closest('div')?.querySelector('label')?.textContent?.trim() || fieldName;
-      label = label.replace(/\(Optional\)|\s*\(Optional\)/gi, '').trim();
+      label = label.replace(/\([^)]*\)$|\s*\([^)]*\)$/g, '').trim();
 
       if (!value || (typeof value === 'string' && value.trim() === '')) {
         input.classList.add('border-error');
-        // Localized required message with placeholder
         errors.push(`{{ text_required_field|e('js') }}`.replace('%s', label));
       }
 
