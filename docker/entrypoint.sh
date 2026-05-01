@@ -2,12 +2,12 @@
 set -e
 
 # Fix permissions for mounted volumes (они приходят с правами хоста)
-fix_volume_permissions() {
+# Combines base permissions + SGID/group setup for FTP+www-data access.
+fix_permissions() {
     echo "Fixing permissions for mounted volumes..."
 
-    # Переиминяем владельца смонтированных папок на www-data
+    # ---- Base permissions (files/dirs readable, some writable) ----
     if [ -d "/var/www/html" ]; then
-        chmod -R 755 /var/www/html 2>/dev/null || true
         find /var/www/html -type d -exec chmod 755 {} \; 2>/dev/null || true
         find /var/www/html -type f -exec chmod 644 {} \; 2>/dev/null || true
     fi
@@ -16,15 +16,39 @@ fix_volume_permissions() {
         chmod -R 777 /var/www/storage 2>/dev/null || true
     fi
 
-    # Важные директории для загрузок должны быть writable
+    # Writable dirs for uploads
     chmod -R 775 /var/www/html/image/catalog 2>/dev/null || true
     chmod -R 775 /var/www/html/image/cache 2>/dev/null || true
 
-    # Restore staff group on image/ so FTP (uid=14:staff) and www-data (member of staff)
-    # can both read/write.
+    # ---- SGID + group write for FTP (staff) + www-data shared access ----
     chgrp -R staff /var/www/html/image/ 2>/dev/null || true
     find /var/www/html/image/catalog /var/www/html/image/cache -type d -exec chmod g+ws {} \; 2>/dev/null || true
     find /var/www/html/image/catalog /var/www/html/image/cache -type f -exec chmod g+w {} \; 2>/dev/null || true
+
+    # ---- Extended permissions (run when we are root) ----
+    if [ "$(id -u)" -eq 0 ]; then
+        # SGID on all webroot dirs so new files inherit group
+        find /var/www/html -type d -exec chmod 2775 {} \; || true
+        # Files: group write so www-data and host users can edit
+        find /var/www/html -type f -exec chmod 664 {} \; || true
+
+        # Storage dirs: SGID + group write
+        chmod -R 2775 /var/www/storage/ || true
+        chmod -R 2777 /var/www/html/image/cache/ || true
+
+        # Final safety net for restrictive host FS mappings
+        find /var/www/html/image/cache -type d -exec chmod 2777 {} \; || true
+        find /var/www/html/image/cache -type f -exec chmod 666 {} \; || true
+
+        # Diagnostic write test
+        if ! su -s /bin/sh www-data -c 'touch /var/www/html/image/cache/.perm_test && rm -f /var/www/html/image/cache/.perm_test' 2>/dev/null; then
+            echo "WARNING: /var/www/html/image/cache is still not writable by www-data."
+            echo "WARNING: Check host-side ownership/ACL on bind mount: ./upload/image/cache"
+        fi
+    else
+        echo "WARNING: not running as root, skipping ownership changes."
+        echo "Ensure host ownership/group for bind mounts (upload/storage) allows write by group www-data."
+    fi
 
     echo "Permissions fixed!"
 }
@@ -80,6 +104,7 @@ Disallow: /
 EOF
 
     if [ "$(id -u)" -eq 0 ]; then
+        chown www-data:www-data "$robots_file" 2>/dev/null || true
         chmod 664 "$robots_file" 2>/dev/null || true
     fi
 }
@@ -208,6 +233,7 @@ PHP
     fi
 
     if [ "$(id -u)" -eq 0 ]; then
+        chown www-data:www-data "$root_config" "$admin_config" 2>/dev/null || true
         chmod 664 "$root_config" "$admin_config" 2>/dev/null || true
     fi
 }
@@ -257,42 +283,6 @@ migrate_storage() {
     chmod -R 777 "$TARGET_STORAGE/download"
 }
 
-# Установка прав доступа
-set_permissions() {
-    echo "Setting permissions..."
-    # Only perform ownership changes when running as root. For bind-mounted
-    # webroot we avoid force-changing owner (host should control ownership).
-    if [ "$(id -u)" -eq 0 ]; then
-        # Ensure image cache base directory exists for first-run thumbnail generation.
-        mkdir -p /var/www/html/image/cache || true
-
-        # Directories in webroot: set SGID so new files inherit group, allow group write
-        find /var/www/html -type d -exec chmod 2775 {} \; || true
-
-        # Files: give group write (664) so www-data and users in group can edit
-        find /var/www/html -type f -exec chmod 664 {} \; || true
-
-        # Writable storage dirs
-        chmod -R 2775 /var/www/storage/ || true
-        chmod -R 775 /var/www/html/image/ || true
-
-        # Cache path must always be writable for thumbnail/webp generation.
-        chmod -R 2777 /var/www/html/image/cache/ || true
-
-        # Final safety net for restrictive host FS mappings.
-        find /var/www/html/image/cache -type d -exec chmod 2777 {} \; || true
-        find /var/www/html/image/cache -type f -exec chmod 666 {} \; || true
-
-        # Diagnostic write test helps identify host-side ACL/ownership issues quickly.
-        if ! su -s /bin/sh www-data -c 'touch /var/www/html/image/cache/.perm_test && rm -f /var/www/html/image/cache/.perm_test' 2>/dev/null; then
-            echo "WARNING: /var/www/html/image/cache is still not writable by www-data."
-            echo "WARNING: Check host-side ownership/ACL on bind mount: ./upload/image/cache"
-        fi
-    else
-        echo "WARNING: not running as root, skipping ownership changes."
-        echo "Ensure host ownership/group for bind mounts (upload/storage) allows write by group www-data."
-    fi
-}
 
 # Инициализация БД (fallback — если MariaDB пропустила init скрипты из-за существующего volume)
 initialize_database() {
@@ -380,7 +370,7 @@ echo "Entrypoint started at UTC: $(date -u '+%Y-%m-%d %H:%M:%S')"
 echo "Starting DockerCart container..."
 
 # Исправляем права на смонтированные volume'ы (первое действие!)
-fix_volume_permissions
+fix_permissions
 
 # Создаем конфиги приложения, если отсутствуют
 ensure_app_configs
@@ -396,9 +386,6 @@ initialize_database || echo "WARNING: Database initialization failed — continu
 
 # Миграция storage из upload/system/storage в /var/www/storage
 migrate_storage
-
-# Устанавливаем права
-set_permissions
 
 echo "DockerCart is ready!"
 
