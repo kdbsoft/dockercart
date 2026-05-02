@@ -79,7 +79,8 @@
         <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 ext-card-wrapper"
              data-type="{{ group.type }}"
              data-name="{{ ext.name|lower }}"
-             data-installed="{{ ext.installed ? '1' : '0' }}">
+             data-installed="{{ ext.installed ? '1' : '0' }}"
+             {% if ext.installed %}data-edit="{{ ext.edit }}"{% endif %}>
           <div class="panel ext-card {{ ext.installed ? (ext.status_raw ? 'panel-success' : 'panel-default') : 'panel-default ext-card-not-installed' }}"
                style="margin-bottom:14px;cursor:{{ ext.installed ? 'pointer' : 'default' }};transition:box-shadow .15s;">
             {# Card header - click to edit if installed #}
@@ -319,6 +320,17 @@
   // Prevent card click propagation from action buttons
   $(document).on('click', '.ext-card .panel-footer', function(e) {
     e.stopPropagation();
+  });
+
+  // Make entire card clickable if installed
+  $(document).on('click', '.ext-card', function(e) {
+    if ($(e.target).closest('a, button, input, select, textarea, label').length) {
+      return;
+    }
+    var editUrl = $(this).closest('.ext-card-wrapper').data('edit');
+    if (editUrl) {
+      window.location.href = editUrl;
+    }
   });
 
 })();
