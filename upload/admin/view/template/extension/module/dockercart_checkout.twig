@@ -1219,13 +1219,10 @@ hr {
                               </td>
                               <td class="text-center">
                                 <div style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;" class="shipping-{{ code_safe }}-field">
-                                  {% set addr_fields = [
-                                    {'key': 'company', 'label': text_field_company|default('Company')},
-                                    {'key': 'address_1', 'label': text_field_address_1|default('Address 1')},
-                                    {'key': 'address_2', 'label': text_field_address_2|default('Address 2')},
-                                    {'key': 'city', 'label': text_field_city|default('City')},
-                                    {'key': 'postcode', 'label': text_field_postcode|default('Postcode')}
-                                  ] %}
+                                  {% set addr_fields = [] %}
+                                  {% for key in address_field_order|default(['company','address_1','address_2','city','postcode']) %}
+                                    {% set addr_fields = addr_fields|merge([{'key': key, 'label': attribute(_context, 'text_field_' ~ key)|default(key|replace({'_': ' ', '1': ' 1', '2': ' 2'})|title)}]) %}
+                                  {% endfor %}
                                   {% for f in addr_fields %}
                                     {% set field_key_visible = 'module_dockercart_checkout_shipping_override[' ~ method_code ~ '][fields][' ~ f.key ~ '][visible]' %}
                                     {% set field_key_required = 'module_dockercart_checkout_shipping_override[' ~ method_code ~ '][fields][' ~ f.key ~ '][required]' %}
