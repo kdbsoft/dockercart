@@ -38,6 +38,7 @@ class ControllerMarketplaceExtension extends Controller {
 		);
 
 		$data['user_token'] = $this->session->data['user_token'];
+		$data['filter_type'] = isset($this->request->get['type']) ? (string)$this->request->get['type'] : '';
 
 		if (isset($this->session->data['success'])) {
 			$data['success'] = $this->session->data['success'];

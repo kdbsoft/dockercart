@@ -36,11 +36,11 @@
           </div>
           <div class="col-md-8 col-sm-6 text-right" style="margin-top:4px;">
             <div class="btn-group btn-group-sm" id="ext-type-filter" role="group">
-              <button type="button" class="btn btn-primary active" data-type="all">
+              <button type="button" class="btn {% if filter_type == '' or filter_type == 'all' %}btn-primary active{% else %}btn-default{% endif %}" data-type="all">
                 {{ text_all }}
               </button>
               {% for tf in type_filters %}
-              <button type="button" class="btn btn-default" data-type="{{ tf.type }}">
+              <button type="button" class="btn {% if filter_type == tf.type %}btn-primary active{% else %}btn-default{% endif %}" data-type="{{ tf.type }}">
                 <i class="fa {{ tf.icon }}"></i>
                 {{ tf.label }}
                 <span class="badge" style="background:#aaa;margin-left:3px;">{{ tf.count }}</span>
@@ -186,7 +186,7 @@
   var $instOnly = $('#ext-filter-installed');
   var $typeFilter = $('#ext-type-filter');
   var $emptyState = $('#ext-empty-state');
-  var activeType  = 'all';
+  var activeType  = '{{ filter_type }}' || 'all';
 
   function updateCount() {
     var visible = $('.ext-card-wrapper:visible').length;
@@ -236,6 +236,12 @@
 
   $search.on('input', applyFilters);
   $instOnly.on('change', applyFilters);
+
+  // Set initial active button based on filter_type
+  if (activeType !== 'all') {
+    $typeFilter.find('button').removeClass('btn-primary active').addClass('btn-default');
+    $typeFilter.find('button[data-type="' + activeType + '"]').removeClass('btn-default').addClass('btn-primary active');
+  }
 
   // Initial count
   applyFilters();
