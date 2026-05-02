@@ -2164,10 +2164,107 @@ document.addEventListener('DOMContentLoaded', () => {
   const countrySelect = $('#input-country');
   const zoneSelect = $('#input-zone');
 
+  // Reorder after-shipping fields based on country's address_format
+  const reorderAddressFields = (countryId) => {
+    if (!countryId) return;
+
+    const fieldsContainer = $('#after-shipping-fields');
+    if (!fieldsContainer) return;
+
+    // Get the country's address_format from the country select options
+    const selectedOption = countrySelect.querySelector(`option[value="${countryId}"]`);
+    if (!selectedOption || !selectedOption.dataset.addressFormat) return;
+
+    const format = selectedOption.dataset.addressFormat;
+    if (!format) return;
+
+    // Extract field order from address_format tokens
+    const tokenMap = {
+      'firstname': 'firstname',
+      'lastname': 'lastname',
+      'company': 'input-company',
+      'address_1': 'input-address-1',
+      'address_2': 'input-address-2',
+      'city': 'input-city',
+      'postcode': 'input-postcode',
+    };
+
+    const matches = format.match(/\{(\w+)\}/g) || [];
+    const fieldOrder = [];
+    matches.forEach(token => {
+      const key = token.replace(/[{}]/g, '');
+      if (tokenMap[key]) {
+        fieldOrder.push(tokenMap[key]);
+      }
+    });
+
+    if (fieldOrder.length === 0) return;
+
+    // Collect all rows (each row is a direct child div in the container)
+    const rows = Array.from(fieldsContainer.children);
+    if (rows.length === 0) return;
+
+    // Map each row to its primary field ID
+    const rowFieldMap = [];
+    rows.forEach(row => {
+      // Find the first input/select ID within this row
+      const input = row.querySelector('input[id], select[id]');
+      if (input) {
+        rowFieldMap.push({ row, fieldId: input.id });
+      } else {
+        rowFieldMap.push({ row, fieldId: null });
+      }
+    });
+
+    // Reorder: fields that appear in address_format come first (in format order),
+    // remaining fields keep their relative order at the end
+    const ordered = [];
+    const used = new Set();
+
+    // First, add rows matching the address_format order
+    fieldOrder.forEach(fieldId => {
+      const match = rowFieldMap.find(r => r.fieldId === fieldId && !used.has(r.row));
+      if (match) {
+        ordered.push(match.row);
+        used.add(match.row);
+      }
+    });
+
+    // Then, append any remaining rows not in the format
+    rowFieldMap.forEach(r => {
+      if (!used.has(r.row)) {
+        ordered.push(r.row);
+      }
+    });
+
+    // Re-append rows in the new order
+    ordered.forEach(row => fieldsContainer.appendChild(row));
+  };
+
+  // Store address_format on each country option for frontend reordering
+  const countriesData = {{ countries|json_encode(constant('JSON_UNESCAPED_UNICODE'))|raw }};
+  if (countriesData && countrySelect) {
+    const optionMap = {};
+    countrySelect.querySelectorAll('option').forEach(opt => {
+      if (opt.value) optionMap[opt.value] = opt;
+    });
+    countriesData.forEach(country => {
+      if (optionMap[country.country_id] && country.address_format) {
+        optionMap[country.country_id].dataset.addressFormat = country.address_format;
+      }
+    });
+
+    // Initial reorder based on default country
+    reorderAddressFields(DEFAULT_SHIPPING_COUNTRY_ID);
+  }
+
   if (countrySelect && zoneSelect) {
     countrySelect.addEventListener('change', () => {
       const country_id = countrySelect.value;
       log('Country changed', country_id);
+
+      // Reorder address fields based on new country's format
+      reorderAddressFields(country_id);
 
       if (country_id) {
         zoneSelect.innerHTML = '<option value="">Loading...</option>';

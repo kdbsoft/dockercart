@@ -243,12 +243,21 @@ class ControllerExtensionModuleDockercartCheckout extends Controller
             $default_blocks,
         );
 
-        // Remove legacy fields from admin UI
-        $data["blocks"] = $this->cleanupBlocksForAdminUI($data["blocks"]);
-        // Normalize localized labels/placeholders for existing saved blocks (including legacy raw keys like entry_comment)
-        $data["blocks"] = $this->normalizeBlocksForAdminUI($data["blocks"]);
+	// Remove legacy fields from admin UI
+	$data["blocks"] = $this->cleanupBlocksForAdminUI($data["blocks"]);
+	// Normalize localized labels/placeholders for existing saved blocks (including legacy raw keys like entry_comment)
+	$data["blocks"] = $this->normalizeBlocksForAdminUI($data["blocks"]);
 
-        // Theme options
+	// Load country model early — needed for address format reordering
+	$this->load->model("localisation/country");
+
+	// Reorder address fields based on default country's address_format
+	$data["blocks"] = $this->reorderAddressFieldsByCountryFormat($data["blocks"]);
+
+	// Pass ordered address field keys for Method Overrides tab
+	$data["address_field_order"] = $this->getAddressFieldOrder();
+
+	// Theme options
         $data["theme_options"] = [
             "light" => $this->language->get("text_theme_light"),
             "dark" => $this->language->get("text_theme_dark"),
@@ -318,15 +327,12 @@ class ControllerExtensionModuleDockercartCheckout extends Controller
             }
         }
 
-        // Load available languages for multilingual support
-        $this->load->model("localisation/language");
-        $data["languages"] = $this->model_localisation_language->getLanguages();
+	// Load available languages for multilingual support
+	$this->load->model("localisation/language");
+	$data["languages"] = $this->model_localisation_language->getLanguages();
 
-        // Load countries for default country dropdown
-        $this->load->model("localisation/country");
-        $data[
-            "admin_countries"
-        ] = $this->model_localisation_country->getCountries();
+	// Load countries for default country dropdown (model already loaded above)
+	$data["admin_countries"] = $this->model_localisation_country->getCountries();
 
         $data["user_token"] = $this->session->data["user_token"];
 
@@ -1632,8 +1638,168 @@ class ControllerExtensionModuleDockercartCheckout extends Controller
         return $value !== null ? $value : $default;
     }
 
-    /**
-     * Get available shipping methods from installed extensions
+	/**
+	 * Get ordered address field keys based on default country's address_format
+	 */
+	private function getAddressFieldOrder(): array
+	{
+		$defaultKeys = ["company", "address_1", "address_2", "city", "postcode"];
+
+		$defaultCountryId = $this->config->get(
+			"module_dockercart_checkout_default_country_id",
+		);
+		if (empty($defaultCountryId)) {
+			$defaultCountryId = $this->config->get("config_country_id");
+		}
+		if (empty($defaultCountryId)) {
+			return $defaultKeys;
+		}
+
+		$countryInfo = $this->model_localisation_country->getCountry(
+			(int) $defaultCountryId,
+		);
+		if (empty($countryInfo["address_format"])) {
+			return $defaultKeys;
+		}
+
+		$tokenToField = [
+			"company" => "company",
+			"address_1" => "address_1",
+			"address_2" => "address_2",
+			"city" => "city",
+			"postcode" => "postcode",
+		];
+
+		$format = $countryInfo["address_format"];
+		preg_match_all("/\{(\w+)\}/", $format, $matches);
+		$fieldOrder = [];
+		foreach ($matches[1] as $token) {
+			if (
+				isset($tokenToField[$token]) &&
+				!in_array($tokenToField[$token], $fieldOrder, true)
+			) {
+				$fieldOrder[] = $tokenToField[$token];
+			}
+		}
+
+		// Append any remaining default keys not found in format
+		foreach ($defaultKeys as $key) {
+			if (!in_array($key, $fieldOrder, true)) {
+				$fieldOrder[] = $key;
+			}
+		}
+
+		return $fieldOrder;
+	}
+
+	/**
+	 * Reorder address fields in shipping_address block based on country's address_format
+	 */
+	private function reorderAddressFieldsByCountryFormat(array $blocks): array
+	{
+		$tokenToField = [
+			"firstname" => "firstname",
+			"lastname" => "lastname",
+			"company" => "company",
+			"address_1" => "address_1",
+			"address_2" => "address_2",
+			"city" => "city",
+			"postcode" => "postcode",
+			"zone" => "zone_id",
+			"country" => "country_id",
+		];
+
+		$defaultCountryId = $this->config->get(
+			"module_dockercart_checkout_default_country_id",
+		);
+		if (empty($defaultCountryId)) {
+			$defaultCountryId = $this->config->get("config_country_id");
+		}
+		if (empty($defaultCountryId)) {
+			return $blocks;
+		}
+
+		$this->load->model("localisation/country");
+		$countryInfo = $this->model_localisation_country->getCountry(
+			(int) $defaultCountryId,
+		);
+		if (empty($countryInfo["address_format"])) {
+			return $blocks;
+		}
+
+		// Parse field order from address_format tokens
+		$format = $countryInfo["address_format"];
+		preg_match_all("/\{(\w+)\}/", $format, $matches);
+		$fieldOrder = [];
+		foreach ($matches[1] as $token) {
+			if (isset($tokenToField[$token])) {
+				$fieldOrder[] = $tokenToField[$token];
+			}
+		}
+		if (empty($fieldOrder)) {
+			return $blocks;
+		}
+
+		// Find shipping_address block and reorder after_shipping rows
+		foreach ($blocks as &$block) {
+			if (
+				!isset($block["id"]) ||
+				$block["id"] !== "shipping_address" ||
+				empty($block["rows"])
+			) {
+				continue;
+			}
+
+			$beforeRows = [];
+			$afterRows = [];
+			foreach ($block["rows"] as $row) {
+				if (!empty($row["after_shipping"])) {
+					$afterRows[] = $row;
+				} else {
+					$beforeRows[] = $row;
+				}
+			}
+
+			if (empty($afterRows)) {
+				continue;
+			}
+
+			// Map each after_shipping row to its position in address_format
+			$rowPositions = [];
+			foreach ($afterRows as $idx => $row) {
+				$position = count($fieldOrder);
+				if (
+					isset($row["fields"]) &&
+					is_array($row["fields"]) &&
+					!empty($row["fields"][0]["id"])
+				) {
+					$fieldId = $row["fields"][0]["id"];
+					$pos = array_search($fieldId, $fieldOrder, true);
+					if ($pos !== false) {
+						$position = (int) $pos;
+					}
+				}
+				$rowPositions[$idx] = $position;
+			}
+
+			// Stable sort afterRows by position
+			$indices = array_keys($afterRows);
+			usort($indices, function ($a, $b) use ($rowPositions) {
+				return $rowPositions[$a] <=> $rowPositions[$b];
+			});
+			$sortedAfterRows = [];
+			foreach ($indices as $idx) {
+				$sortedAfterRows[] = $afterRows[$idx];
+			}
+
+			$block["rows"] = array_merge($beforeRows, $sortedAfterRows);
+		}
+
+		return $blocks;
+	}
+
+	/**
+	 * Get available shipping methods from installed extensions
      * @return array Array of shipping methods with their default titles
      */
     private function getAvailableShippingMethods()
