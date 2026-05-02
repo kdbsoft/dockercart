@@ -21,7 +21,6 @@
 class ControllerExtensionFeedDockercartExportYml extends Controller {
     private $logger;
     private $error = array();
-    private $module_version = '1.0.0';
 
     /**
      * Constructor - Initialize logger
@@ -236,23 +235,6 @@ class ControllerExtensionFeedDockercartExportYml extends Controller {
             $data['license_valid'] = false;
             $data['license_message'] = 'License check error: ' . $e->getMessage();
         }
-
-        // Module version
-        $data['module_version'] = defined('DOCKERCART_VERSION') ? DOCKERCART_VERSION : $this->module_version;
-        $data['license_domain'] =
-            (!empty($this->request->server['HTTP_HOST']) ? $this->request->server['HTTP_HOST'] : '')
-            ?: (defined('HTTPS_CATALOG') && HTTPS_CATALOG ? parse_url(HTTPS_CATALOG, PHP_URL_HOST) : '')
-            ?: (defined('HTTP_CATALOG') && HTTP_CATALOG ? parse_url(HTTP_CATALOG, PHP_URL_HOST) : '')
-            ?: (!empty($this->config->get('config_url')) ? parse_url($this->config->get('config_url'), PHP_URL_HOST) : '')
-            ?: 'localhost';
-
-        // Language strings for profiles
-        $data['text_profile'] = $this->language->get('text_profile');
-        $data['text_add_profile'] = $this->language->get('text_add_profile');
-        $data['entry_profile_name'] = $this->language->get('entry_profile_name');
-        $data['entry_profile_categories'] = $this->language->get('entry_profile_categories');
-        $data['entry_profile_currency'] = $this->language->get('entry_profile_currency');
-        $data['entry_profile_store'] = $this->language->get('entry_profile_store');
 
         $data['header'] = $this->load->controller('common/header');
         $data['column_left'] = $this->load->controller('common/column_left');

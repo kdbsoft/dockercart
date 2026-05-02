@@ -38,7 +38,6 @@ $_['text_tab_general_subtitle'] = 'Core module activation and behavior';
 $_['text_tab_license_subtitle'] = 'License verification and cryptographic keys';
 $_['text_tab_about_subtitle'] = 'Module information and support contacts';
 $_['text_module_settings']    = 'Module Settings';
-$_['text_module_version']     = 'Module Version';
 $_['text_developer']          = 'Developer';
 $_['text_developer_name']     = 'DockerCart Team';
 $_['text_contact']            = 'Contact';

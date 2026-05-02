@@ -83,7 +83,6 @@ $_['text_mode_update'] = 'Добавлять + обновлять';
 $_['text_mode_update_only'] = 'Только обновлять (без добавления)';
 $_['text_mode_update_price_qty_only'] = 'Обновлять только цены и остатки';
 $_['text_module_subtitle'] = 'Управление настройками импорта YML, лицензиями и рабочими процессами выполнения профилей.';
-$_['text_module_version'] = 'Версия модуля';
 $_['text_no_profiles'] = 'Профили отсутствуют';
 $_['text_processed'] = 'Обработано';
 $_['text_processed_offers_label'] = 'Обработано товаров';

@@ -1,7 +1,6 @@
 <?php
 class ControllerExtensionModuleDockercartImportExportExcel extends Controller {
     private $error = array();
-    private $module_version = '1.0.1';
 
     public function index() {
         $this->load->language('extension/module/dockercart_import_export_excel');
@@ -136,7 +135,6 @@ class ControllerExtensionModuleDockercartImportExportExcel extends Controller {
             $data['license_message'] = 'License check error: ' . $e->getMessage();
         }
 
-        $data['module_version'] = defined('DOCKERCART_VERSION') ? DOCKERCART_VERSION : $this->module_version;
         $data['cron_base_path'] = '/var/www/html/cron/dockercart_import_export_excel.php';
 
         $data['header'] = $this->load->controller('common/header');

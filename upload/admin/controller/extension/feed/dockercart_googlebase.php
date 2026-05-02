@@ -18,7 +18,6 @@
 class ControllerExtensionFeedDockercartGooglebase extends Controller {
     private $logger;
     private $error = array();
-    private $module_version = '1.0.0';
 
      /**
      * Constructor - Initialize logger
@@ -191,7 +190,6 @@ class ControllerExtensionFeedDockercartGooglebase extends Controller {
         $data['feed_stats'] = $this->getFeedStats();
 
         $data['user_token'] = $this->session->data['user_token'];
-        $data['module_version'] = defined('DOCKERCART_VERSION') ? DOCKERCART_VERSION : $this->module_version;
         $data['license_domain'] =
             (!empty($this->request->server['HTTP_HOST']) ? $this->request->server['HTTP_HOST'] : '')
             ?: (defined('HTTPS_CATALOG') && HTTPS_CATALOG ? parse_url(HTTPS_CATALOG, PHP_URL_HOST) : '')

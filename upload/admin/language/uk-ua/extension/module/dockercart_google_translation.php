@@ -34,7 +34,6 @@ $_['text_extension'] = 'Розширення';
 $_['text_items'] = 'Елементи';
 $_['text_license_domain'] = 'Ліцензія прив\'язана до домену';
 $_['text_module_subtitle'] = 'Перекладайте мовні файли та мовнозалежні поля бази даних за допомогою Google Cloud Translation';
-$_['text_module_version'] = 'Версія модуля';
 $_['text_ready'] = 'Готовий до сканування та перекладу';
 $_['text_report_db'] = 'Таблиці бази даних (language_id)';
 $_['text_report_files'] = 'Мовні файли';

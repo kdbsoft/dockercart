@@ -28,7 +28,6 @@ $_['text_ready'] = 'Ready to scan and translate';
 $_['text_section_module_settings'] = 'Module Settings';
 $_['text_section_license_info'] = 'License Information';
 $_['text_license_domain'] = 'License bound to domain';
-$_['text_module_version'] = 'Module version';
 $_['text_developer'] = 'Developer';
 $_['text_developer_name'] = 'DockerCart Team';
 $_['text_contact'] = 'Contact';

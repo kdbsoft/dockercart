@@ -91,7 +91,6 @@ $_['text_how_to_use_3'] = 'Click the save button next to each field to save chan
 $_['text_how_to_use_4'] = 'Or use the Generate URLs button to auto-generate URLs for all languages at once';
 $_['text_how_to_use_5'] = 'Note: Existing URLs will NOT be overwritten when generating';
 $_['text_module_settings'] = 'Module Settings';
-$_['text_module_version'] = 'Module Version';
 $_['text_developer'] = 'Developer';
 $_['text_developer_name'] = 'DockerCart Team';
 $_['text_contact'] = 'Contact';

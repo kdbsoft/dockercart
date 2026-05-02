@@ -28,7 +28,6 @@ $_['text_tab_general_subtitle'] = 'Базовое поведение и акти
 $_['text_tab_license_subtitle'] = 'Проверка лицензии и криптографические ключи';
 $_['text_tab_about_subtitle'] = 'Информация о модуле и контакты поддержки';
 $_['text_module_settings'] = 'Настройки модуля';
-$_['text_module_version'] = 'Версия модуля';
 $_['text_developer'] = 'Разработчик';
 $_['text_developer_name'] = 'Команда DockerCart';
 $_['text_contact'] = 'Контакт';

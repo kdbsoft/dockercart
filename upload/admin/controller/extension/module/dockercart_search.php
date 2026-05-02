@@ -16,7 +16,6 @@
 class ControllerExtensionModuleDockercartSearch extends Controller {
     private $error = [];
     private $logger;
-    private $module_version = '1.0.3';
     
     /**
      * Constructor - Initialize logger
@@ -122,7 +121,6 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
         // Current settings: stem_en, lemmatize_ru
         
         $data['user_token'] = $this->session->data['user_token'];
-        $data['module_version'] = $this->module_version;
         
         // Check Manticore connection
         $data['manticore_connected'] = $this->model_extension_module_dockercart_search->testConnection();
