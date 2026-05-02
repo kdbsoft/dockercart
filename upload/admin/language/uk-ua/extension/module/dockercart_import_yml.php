@@ -83,7 +83,6 @@ $_['text_mode_update'] = 'Додати + Оновити';
 $_['text_mode_update_only'] = 'Тільки оновлення (без додавання)';
 $_['text_mode_update_price_qty_only'] = 'Оновити лише ціни та наявність на складі';
 $_['text_module_subtitle'] = 'Керування налаштуваннями імпорту YML, ліцензіями та робочими процесами виконання профілів';
-$_['text_module_version'] = 'Версія модуля';
 $_['text_no_profiles'] = 'Немає профілів';
 $_['text_processed'] = 'Оброблено';
 $_['text_processed_offers_label'] = 'Перероблені товари';

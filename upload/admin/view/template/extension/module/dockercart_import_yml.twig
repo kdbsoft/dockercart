@@ -181,18 +181,8 @@ php {{ cron_base_path }} --profile_id={{ profile.profile_id }} --cron_key={{ pro
           <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
             <h4>{{ tab_about }}</h4>
             <table class="table table-bordered">
-              <tr>
-                <td style="width:220px;"><strong>{{ text_module_version }}</strong></td>
-                <td>
-                  {% if module_version is defined and module_version %}
-                    {{ module_version }}
-                  {% else %}
-                    n/a
-                  {% endif %}
-                </td>
-              </tr>
-              <tr>
-                <td><strong>{{ text_developer }}</strong></td>
+               <tr>
+                 <td><strong>{{ text_developer }}</strong></td>
                 <td>{{ text_developer_name }}</td>
               </tr>
               <tr>
@@ -207,18 +197,8 @@ php {{ cron_base_path }} --profile_id={{ profile.profile_id }} --cron_key={{ pro
             <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
               <h4>{{ tab_about }}</h4>
               <table class="table table-bordered">
-                <tr>
-                  <td style="width:220px;"><strong>{{ text_module_version }}</strong></td>
-                  <td>
-                    {% if module_version is defined and module_version %}
-                      {{ module_version }}
-                    {% else %}
-                      n/a
-                    {% endif %}
-                  </td>
-                </tr>
-                <tr>
-                  <td><strong>{{ text_developer }}</strong></td>
+               <tr>
+                 <td><strong>{{ text_developer }}</strong></td>
                   <td>{{ text_developer_name }}</td>
                 </tr>
                 <tr>

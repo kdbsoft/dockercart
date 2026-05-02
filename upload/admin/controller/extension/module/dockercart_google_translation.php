@@ -2,7 +2,6 @@
 
 class ControllerExtensionModuleDockercartGoogleTranslation extends Controller {
     private $error = array();
-    private $module_version = '1.0.0';
 
     public function index() {
         $this->load->language('extension/module/dockercart_google_translation');
@@ -77,7 +76,6 @@ class ControllerExtensionModuleDockercartGoogleTranslation extends Controller {
             }
         }
 
-        $data['module_version'] = defined('DOCKERCART_VERSION') ? DOCKERCART_VERSION : $this->module_version;
         $data['license_domain'] = $_SERVER['HTTP_HOST'] ?? 'unknown';
 
         $data['header'] = $this->load->controller('common/header');

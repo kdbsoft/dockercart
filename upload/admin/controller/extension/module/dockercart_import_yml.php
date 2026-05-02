@@ -84,7 +84,6 @@ class ControllerExtensionModuleDockercartImportYml extends Controller {
 
         $data['profiles'] = $this->model_extension_module_dockercart_import_yml->getProfiles();
         $data['cron_base_path'] = '/var/www/html/cron/dockercart_import_yml.php';
-        $data['module_version'] = '1.0.0';
 
         $data['header'] = $this->load->controller('common/header');
         $data['column_left'] = $this->load->controller('common/column_left');

@@ -45,7 +45,6 @@ $_['text_tab_about'] = 'About';
 $_['text_tab_general_subtitle'] = 'Core filter behavior and display configuration';
 $_['text_tab_license_subtitle'] = 'License key and cryptographic verification';
 $_['text_tab_about_subtitle'] = 'Module info, version details, and developer information';
-$_['text_module_version'] = 'Module version';
 $_['text_developer'] = 'Developer';
 $_['text_developer_name'] = 'DockerCart Team';
 $_['text_contact'] = 'Contact';

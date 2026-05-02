@@ -6,8 +6,6 @@
 class ControllerExtensionModuleDockercartRedirects extends Controller {
     private $error = array();
     private $logger;
-    // Module version — update on release
-    private $module_version = '1.0.0';
     // Request-scoped storage for "before" SEO keywords
     private static $old_seo = array();
 
@@ -177,9 +175,6 @@ class ControllerExtensionModuleDockercartRedirects extends Controller {
             $data['warning'] = '';
         }
 
-        // Expose module version to template. Prefer global DOCKERCART_VERSION if defined.
-        $data['module_version'] = defined('DOCKERCART_VERSION') ? DOCKERCART_VERSION : $this->module_version;
-
         $data['header'] = $this->load->controller('common/header');
         $data['column_left'] = $this->load->controller('common/column_left');
         $data['footer'] = $this->load->controller('common/footer');
@@ -272,9 +267,6 @@ class ControllerExtensionModuleDockercartRedirects extends Controller {
         } else {
             $data['error_new_url'] = '';
         }
-
-        // Expose module version to template for the form view as well.
-        $data['module_version'] = defined('DOCKERCART_VERSION') ? DOCKERCART_VERSION : $this->module_version;
 
         $data['header'] = $this->load->controller('common/header');
         $data['column_left'] = $this->load->controller('common/column_left');

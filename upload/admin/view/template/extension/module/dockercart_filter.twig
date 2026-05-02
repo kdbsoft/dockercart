@@ -254,18 +254,8 @@
             <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
               <h4>{{ text_tab_about|default('About') }}</h4>
               <table class="table table-bordered">
-                <tr>
-                  <td style="width:220px;"><strong>{{ text_module_version|default('Module version') }}</strong></td>
-                  <td>
-                    {% if module_version is defined and module_version %}
-                      {{ module_version }}
-                    {% else %}
-                      n/a
-                    {% endif %}
-                  </td>
-                </tr>
-                <tr>
-                  <td><strong>{{ text_developer|default('Developer') }}</strong></td>
+                 <tr>
+                   <td><strong>{{ text_developer|default('Developer') }}</strong></td>
                   <td>{{ text_developer_name|default('DockerCart Team') }}</td>
                 </tr>
                 <tr>

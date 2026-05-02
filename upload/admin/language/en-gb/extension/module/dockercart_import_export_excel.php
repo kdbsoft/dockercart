@@ -98,7 +98,6 @@ $_['text_license_domain'] = 'License bound to domain';
 $_['text_verify_public_key_required'] = 'Please save the public key first before verifying the license';
 $_['text_all'] = 'All';
 $_['text_filter_hint_export'] = 'Leave filters empty to export all products for selected store/language.';
-$_['text_module_version'] = 'Module version';
 $_['text_developer'] = 'Developer';
 $_['text_developer_name'] = 'DockerCart Team';
 $_['text_contact'] = 'Contact';

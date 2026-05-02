@@ -319,11 +319,7 @@ php {{ cron_base_path }} --action=import --profile_id={{ profile.profile_id }} -
               <div class="dcx-section dc-ix-about-section">
                 <h4>{{ text_section_about }}</h4>
                 <table class="table table-bordered dcx-table">
-                  <tr>
-                    <td class="dc-ix-about-key"><strong>{{ text_module_version }}</strong></td>
-                    <td>{{ module_version ?: 'n/a' }}</td>
-                  </tr>
-                  <tr>
+                   <tr>
                     <td><strong>{{ text_developer }}</strong></td>
                     <td>{{ text_developer_name }}</td>
                   </tr>

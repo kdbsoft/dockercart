@@ -11,7 +11,6 @@
 
 class ControllerExtensionModuleDockercartMulticurrency extends Controller {
     private $error = array();
-    private $module_version = '1.0.0';
     
     /**
      * Main module settings page
@@ -83,14 +82,6 @@ class ControllerExtensionModuleDockercartMulticurrency extends Controller {
         
         // User token for AJAX
         $data['user_token'] = $this->session->data['user_token'];
-        $data['module_version'] = defined('DOCKERCART_VERSION') ? DOCKERCART_VERSION : $this->module_version;
-        $data['license_domain'] =
-            (!empty($this->request->server['HTTP_HOST']) ? $this->request->server['HTTP_HOST'] : '')
-            ?: (defined('HTTPS_CATALOG') && HTTPS_CATALOG ? parse_url(HTTPS_CATALOG, PHP_URL_HOST) : '')
-            ?: (defined('HTTP_CATALOG') && HTTP_CATALOG ? parse_url(HTTP_CATALOG, PHP_URL_HOST) : '')
-            ?: (!empty($this->config->get('config_url')) ? parse_url($this->config->get('config_url'), PHP_URL_HOST) : '')
-            ?: 'localhost';
-        
         $data['header'] = $this->load->controller('common/header');
         $data['column_left'] = $this->load->controller('common/column_left');
         $data['footer'] = $this->load->controller('common/footer');

@@ -17,8 +17,6 @@
 class ControllerExtensionModuleDockerCartFilter extends Controller {
     private $error = array();
     private $logger;
-    // Module version — update this when releasing new versions
-    private $module_version = '2.5.5';
 
     /**
      * Constructor - Initialize logger
@@ -225,9 +223,6 @@ class ControllerExtensionModuleDockerCartFilter extends Controller {
                 'key' => $optId
             );
         }
-
-        // Expose module version to template. Prefer a global DOCKERCART_VERSION constant if defined.
-        $data['module_version'] = defined('DOCKERCART_VERSION') ? DOCKERCART_VERSION : $this->module_version;
 
         $data['header'] = $this->load->controller('common/header');
         $data['column_left'] = $this->load->controller('common/column_left');

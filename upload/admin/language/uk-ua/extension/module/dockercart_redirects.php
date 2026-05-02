@@ -75,7 +75,6 @@ $_['text_tab_about'] = 'Про модуль';
 $_['text_tab_license_subtitle'] = 'Налаштування ліцензії';
 $_['text_tab_about_subtitle'] = 'Інформація про модуль та контакти підтримки';
 $_['text_module_settings'] = 'Налаштування модуля';
-$_['text_module_version'] = 'Версія модуля';
 $_['text_developer'] = 'Розробник';
 $_['text_developer_name'] = 'Команда DockerCart';
 $_['text_contact'] = 'Контакт';

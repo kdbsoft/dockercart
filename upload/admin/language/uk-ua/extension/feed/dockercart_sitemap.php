@@ -57,7 +57,6 @@ $_['text_hourly'] = 'Щогодини';
 $_['text_license'] = 'Інформація про ліцензію';
 $_['text_license_domain'] = 'Ліцензія прив\'язана до домену';
 $_['text_module_subtitle'] = 'Налаштування створення карти сайту, правил контенту та параметрів ліцензії';
-$_['text_module_version'] = 'Версія модуля';
 $_['text_monthly'] = 'Щомісяця';
 $_['text_never'] = 'Ніколи';
 $_['text_section_content_types'] = 'Типи контенту';

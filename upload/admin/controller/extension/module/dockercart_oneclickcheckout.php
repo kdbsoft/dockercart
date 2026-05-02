@@ -13,7 +13,6 @@
 class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
     
     private $error = array();
-    private $module_version = '1.0.0';
     
     /**
      * Module settings page
@@ -159,7 +158,6 @@ class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
         
         // User token for AJAX
         $data['user_token'] = $this->session->data['user_token'];
-        $data['module_version'] = defined('DOCKERCART_VERSION') ? DOCKERCART_VERSION : $this->module_version;
         $data['license_domain'] =
             (!empty($this->request->server['HTTP_HOST']) ? $this->request->server['HTTP_HOST'] : '')
             ?: (defined('HTTPS_CATALOG') && HTTPS_CATALOG ? parse_url(HTTPS_CATALOG, PHP_URL_HOST) : '')

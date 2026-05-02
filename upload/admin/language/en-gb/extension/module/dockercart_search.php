@@ -25,7 +25,6 @@ $_['text_tab_autocomplete_subtitle'] = 'Autocomplete behavior and suggestion lim
 $_['text_tab_indexing_subtitle'] = 'Reindex catalog data into Manticore';
 $_['text_tab_about_subtitle'] = 'Module information and support contacts';
 $_['text_module_settings'] = 'Module Settings';
-$_['text_module_version'] = 'Module Version';
 $_['text_developer'] = 'Developer';
 $_['text_developer_name'] = 'DockerCart Team';
 $_['text_contact'] = 'Contact';

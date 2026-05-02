@@ -15,8 +15,6 @@ class ControllerExtensionModuleDockercartSeoGenerator extends Controller
 {
     private $logger;
     private $error = [];
-    // Module version — update this when releasing new versions
-    private $module_version = "1.0.0";
 
     /**
      * Constructor - Initialize logger
@@ -284,11 +282,6 @@ class ControllerExtensionModuleDockercartSeoGenerator extends Controller
         $data[
             "stats"
         ] = $this->model_extension_module_dockercart_seo_generator->getStatistics();
-
-        // Expose module version to template. Prefer a global DOCKERCART_VERSION constant if defined.
-        $data["module_version"] = defined("DOCKERCART_VERSION")
-            ? DOCKERCART_VERSION
-            : $this->module_version;
 
         // Загружаем шаблон
         $data["header"] = $this->load->controller("common/header");

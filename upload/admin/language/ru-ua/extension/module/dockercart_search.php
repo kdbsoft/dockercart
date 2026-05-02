@@ -56,7 +56,6 @@ $_['text_edit'] = 'Редактирование настроек DockerCart Sear
 $_['text_enabled'] = 'Включено';
 $_['text_extension'] = 'Расширения';
 $_['text_module_settings'] = 'Настройки модуля';
-$_['text_module_version'] = 'Версия модуля';
 $_['text_no'] = 'Нет';
 $_['text_reindex_failed'] = 'Индексация не удалась!';
 $_['text_reindex_success'] = 'Индексация завершена: %s товаров, %s категорий, %s производителей, %s информационных страниц';
