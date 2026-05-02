@@ -35,6 +35,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: dockercart_apache:latest
     container_name: ${APACHE_CONTAINER_NAME:-dockercart_apache}
     restart: ${RESTART_POLICY:-unless-stopped}
     logging:
