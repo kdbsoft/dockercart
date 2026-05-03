@@ -1,3 +1,9 @@
+## [1.3.1](https://github.com/mathflow-bit/dockercart/compare/v1.3.0...v1.3.1) (2026-05-03)
+
+### Bug Fixes
+
+* remove duplicate address fields from checkout form ([7ac0c4d](https://github.com/mathflow-bit/dockercart/commit/7ac0c4da42a12e026c58e92909674443bacc3142))
+
 ## [1.3.0](https://github.com/mathflow-bit/dockercart/compare/v1.2.0...v1.3.0) (2026-05-03)
 
 ### Features
