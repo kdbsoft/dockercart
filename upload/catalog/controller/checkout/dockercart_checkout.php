@@ -1087,13 +1087,13 @@ class ControllerCheckoutDockercartCheckout extends Controller
 
             if (!isset($json["error"])) {
                 $this->session->data["shipping_address"] = [
-                    "firstname" => $data["firstname"],
-                    "lastname" => $data["lastname"],
+                    "firstname" => $data["firstname"] ?? "",
+                    "lastname" => $data["lastname"] ?? "",
                     "company" => $data["company"] ?? "",
-                    "address_1" => $data["address_1"],
+                    "address_1" => $data["address_1"] ?? "",
                     "address_2" => $data["address_2"] ?? "",
                     "postcode" => $data["postcode"] ?? "",
-                    "city" => $data["city"],
+                    "city" => $data["city"] ?? "",
                     "zone_id" => $data["zone_id"],
                     "zone" => "",
                     "zone_code" => "",
@@ -1326,13 +1326,13 @@ class ControllerCheckoutDockercartCheckout extends Controller
 
             if (!isset($json["error"])) {
                 $this->session->data["payment_address"] = [
-                    "firstname" => $data["firstname"],
-                    "lastname" => $data["lastname"],
+                    "firstname" => $data["firstname"] ?? "",
+                    "lastname" => $data["lastname"] ?? "",
                     "company" => $data["company"] ?? "",
-                    "address_1" => $data["address_1"],
+                    "address_1" => $data["address_1"] ?? "",
                     "address_2" => $data["address_2"] ?? "",
                     "postcode" => $data["postcode"] ?? "",
-                    "city" => $data["city"],
+                    "city" => $data["city"] ?? "",
                     "zone_id" => $data["zone_id"],
                     "zone" => "",
                     "zone_code" => "",
@@ -3826,88 +3826,6 @@ class ControllerCheckoutDockercartCheckout extends Controller
                                 "type" => "select",
                                 "placeholder" => $this->language->get(
                                     "text_select",
-                                ),
-                            ],
-                        ],
-                    ],
-                    [
-                        "columns" => 1,
-                        "after_shipping" => 1,
-                        "fields" => [
-                            [
-                                "id" => "company",
-                                "label" => $this->language->get(
-                                    "entry_company",
-                                ),
-                                "visible" => 1,
-                                "required" => 0,
-                                "type" => "text",
-                                "placeholder" => $this->language->get(
-                                    "entry_company",
-                                ),
-                            ],
-                        ],
-                    ],
-                    [
-                        "columns" => 1,
-                        "after_shipping" => 1,
-                        "fields" => [
-                            [
-                                "id" => "address_1",
-                                "label" => $this->language->get(
-                                    "entry_address_1",
-                                ),
-                                "visible" => 1,
-                                "required" => 1,
-                                "type" => "text",
-                                "placeholder" => $this->language->get(
-                                    "entry_address_1",
-                                ),
-                            ],
-                        ],
-                    ],
-                    [
-                        "columns" => 1,
-                        "after_shipping" => 1,
-                        "fields" => [
-                            [
-                                "id" => "address_2",
-                                "label" => $this->language->get(
-                                    "entry_address_2",
-                                ),
-                                "visible" => 1,
-                                "required" => 0,
-                                "type" => "text",
-                                "placeholder" => $this->language->get(
-                                    "entry_address_2",
-                                ),
-                            ],
-                        ],
-                    ],
-                    [
-                        "columns" => 2,
-                        "after_shipping" => 1,
-                        "fields" => [
-                            [
-                                "id" => "city",
-                                "label" => $this->language->get("entry_city"),
-                                "visible" => 1,
-                                "required" => 1,
-                                "type" => "text",
-                                "placeholder" => $this->language->get(
-                                    "entry_city",
-                                ),
-                            ],
-                            [
-                                "id" => "postcode",
-                                "label" => $this->language->get(
-                                    "entry_postcode",
-                                ),
-                                "visible" => 1,
-                                "required" => 1,
-                                "type" => "text",
-                                "placeholder" => $this->language->get(
-                                    "entry_postcode",
                                 ),
                             ],
                         ],
