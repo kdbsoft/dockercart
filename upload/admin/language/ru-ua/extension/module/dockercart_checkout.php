@@ -189,3 +189,19 @@ $_["text_theme_dark"] = "Тёмная";
 $_["text_theme_light"] = "Светлая";
 $_["text_visible"] = "Отображать";
 $_["text_yes"] = "Да";
+
+// Поля формы
+$_["entry_firstname"] = "Имя";
+$_["entry_lastname"] = "Фамилия";
+$_["entry_email"] = "Email";
+$_["entry_telephone"] = "Телефон";
+$_["entry_fax"] = "Факс";
+$_["entry_company"] = "Компания";
+$_["entry_address_1"] = "Адрес (строка 1)";
+$_["entry_address_2"] = "Адрес (строка 2)";
+$_["entry_city"] = "Город";
+$_["entry_postcode"] = "Индекс";
+$_["entry_country"] = "Страна";
+$_["entry_zone"] = "Регион / Область";
+$_["text_step"] = "Шаг";
+$_["text_payment_method"] = "Способ оплаты";

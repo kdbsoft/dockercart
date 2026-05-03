@@ -251,3 +251,19 @@ $_["text_no_rows_configured"] = 'No rows configured. Click "Add Row" to start.';
 $_["error_remove_non_empty_row"] =
     "Cannot remove a non-empty row. Remove all fields first.";
 $_["confirm_are_you_sure"] = "Are you sure?";
+
+// Form labels
+$_["entry_firstname"] = "First Name";
+$_["entry_lastname"] = "Last Name";
+$_["entry_email"] = "Email";
+$_["entry_telephone"] = "Telephone";
+$_["entry_fax"] = "Fax";
+$_["entry_company"] = "Company";
+$_["entry_address_1"] = "Address Line 1";
+$_["entry_address_2"] = "Address Line 2";
+$_["entry_city"] = "City";
+$_["entry_postcode"] = "Postcode";
+$_["entry_country"] = "Country";
+$_["entry_zone"] = "Region / State";
+$_["text_step"] = "Step";
+$_["text_payment_method"] = "Payment Method";
