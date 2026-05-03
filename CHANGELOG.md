@@ -1,3 +1,23 @@
+## [1.3.0](https://github.com/mathflow-bit/dockercart/compare/v1.2.0...v1.3.0) (2026-05-03)
+
+### Features
+
+* Add address field reordering based on country format ([6d60855](https://github.com/mathflow-bit/dockercart/commit/6d6085512152814609c9636d4807da17a5bbdced))
+* add default country and zone settings to checkout module ([5db5493](https://github.com/mathflow-bit/dockercart/commit/5db5493ab6a00dbedb5ed100f418fe1ae91b6b6e))
+* add default country/zone settings to checkout ([472749a](https://github.com/mathflow-bit/dockercart/commit/472749a2b74cbc7587572a90213ebea033049942))
+* add test customer Mykyta to init.sql ([9329e1e](https://github.com/mathflow-bit/dockercart/commit/9329e1e857d2b0c78533e47c866a4137bb9098b4))
+* make extension cards clickable to edit ([679915e](https://github.com/mathflow-bit/dockercart/commit/679915e0b423a295fd5b52174043678e47828224))
+
+### Bug Fixes
+
+* double slash in language-prefixed SEO redirect URLs ([35b0adf](https://github.com/mathflow-bit/dockercart/commit/35b0adfb2e0069fa209117141a84da4ce9d10320))
+* persist extension type filter across page reloads ([fa62318](https://github.com/mathflow-bit/dockercart/commit/fa62318c59cbfece8db32d227aa0f16e73022ffc))
+* preserve non-standard port in SEO URL redirects ([1f79fd4](https://github.com/mathflow-bit/dockercart/commit/1f79fd4f044d39b44a8a68270ba495bdc75c1b92))
+* preserve non-standard port in SEO URL redirects ([5bb73a5](https://github.com/mathflow-bit/dockercart/commit/5bb73a58af2a2c149fa34221c28f5065a531dad8))
+* preserve port in generated URLs ([2358453](https://github.com/mathflow-bit/dockercart/commit/23584539db4a40a2cdd7552192b5e415d29ac73f))
+* selinux resolve problems with rights ([3d7508d](https://github.com/mathflow-bit/dockercart/commit/3d7508d30e7a458a3da7dff80d9854b5189bc64d))
+* toggle grid row visibility and handle new address defaults in ([baf669f](https://github.com/mathflow-bit/dockercart/commit/baf669f30006afa1f69e9011abf3ebb0ca6e519d))
+
 ## [1.2.0](https://github.com/mathflow-bit/dockercart/compare/v1.1.1...v1.2.0) (2026-04-27)
 
 ### Features
