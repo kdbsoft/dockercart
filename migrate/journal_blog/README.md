@@ -47,14 +47,6 @@ selectors:
     views: ".post-views, .view-count"
     content: ".post-content, .journal-post-content, article .content"
 
-target:
-  host: "mariadb"
-  port: 3306
-  user: "opencart"
-  password: "opencart"
-  database: "opencart"
-  prefix: "oc_"
-
 defaults:
   author_id: 1
   store_id: 0
@@ -64,6 +56,19 @@ defaults:
 
 dry_run: false
 ```
+
+### Database credentials
+
+Database credentials are automatically loaded from the project's root `.env` file via the following environment variables:
+- `DB_HOSTNAME`
+- `DB_PORT`
+- `DB_USERNAME`
+- `DB_PASSWORD`
+- `DB_DATABASE`
+- `DB_PREFIX`
+
+These variables are automatically passed to the container when using Docker Compose.
+
 
 ### Key settings
 
