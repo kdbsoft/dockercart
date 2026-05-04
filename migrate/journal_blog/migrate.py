@@ -399,7 +399,18 @@ def insert_seo_url(
 def migrate(config: dict[str, Any]) -> None:
     """Run the full migration."""
     src_cfg = config["source"]
-    tgt_cfg = config["target"]
+    # Target DB config: YAML -> environment variables -> defaults
+    tgt_yaml = config.get("target", {})
+    tgt_cfg = {
+        "host": tgt_yaml.get("host") or os.environ.get("DB_HOSTNAME", "mariadb"),
+        "port": tgt_yaml.get("port") or int(os.environ.get("DB_PORT", "3306")),
+        "user": tgt_yaml.get("user") or os.environ.get("DB_USERNAME", "dockercart"),
+        "password": tgt_yaml.get("password")
+        or os.environ.get("DB_PASSWORD", "dockercart"),
+        "database": tgt_yaml.get("database")
+        or os.environ.get("DB_DATABASE", "dockercart"),
+        "prefix": tgt_yaml.get("prefix") or os.environ.get("DB_PREFIX", "oc_"),
+    }
     defaults = config["defaults"]
     selectors = config["selectors"]
     dry_run = config.get("dry_run", False)
