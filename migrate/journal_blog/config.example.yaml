@@ -1,0 +1,85 @@
+# =============================================================================
+# Journal Blog → DockerCart Migration — Configuration
+# =============================================================================
+# Copy this file to config.yaml and adjust to your environment.
+
+# ── Source site ──────────────────────────────────────────────────────────────
+source:
+  # Base URL of the donor site (no trailing slash)
+  base_url: "https://example.com"
+  # Request timeout in seconds
+  timeout: 30
+  # Delay between requests (seconds) to avoid rate-limiting
+  delay: 0.5
+  # User-Agent header
+  user_agent: "DockerCart-JournalBlog-Migrator/1.0"
+
+# ── Language mappings ────────────────────────────────────────────────────────
+# For each language, specify:
+#   - index_url: path to the blog listing page (relative to base_url)
+#   - language_id: target language_id in DockerCart oc_language table
+#   - code: human-readable label (used for logging)
+languages:
+  - code: "uk"
+    index_url: "/blog"
+    language_id: 2
+  - code: "ru"
+    index_url: "/ru/blog"
+    language_id: 3
+
+# ── HTML selectors (CSS selectors for Journal blog pages) ────────────────────
+# Adjust if the donor site uses a custom theme or different markup.
+selectors:
+  # Listing page (index_url)
+  listing:
+    # Container that wraps all article items on the listing page
+    articles: ".blog-posts .post-item, .main-posts .post-item"
+    # Link to the article page (inside each article item)
+    article_link: "a.post-title, h2 a, .post-title a"
+    # Pagination — "next page" link
+    pagination_next: ".pagination .next a, .pagination a.next, ul.pagination li:last-child a"
+
+  # Article detail page
+  article:
+    # Page title (<title> tag fallback used if meta_title selector yields nothing)
+    title: "h1.title, .post-title h1, .journal-post-title"
+    # Meta description
+    meta_description: "meta[name='description']"
+    # Meta keywords
+    meta_keywords: "meta[name='keywords']"
+    # View count (text content is parsed as integer)
+    views: ".post-views, .post-view, .view-count, .post-stats .views"
+    # Article body HTML
+    content: ".post-content, .post-details .post-detail, .journal-post-content, article .content"
+
+# ── Target database (DockerCart) ─────────────────────────────────────────────
+target:
+  host: "mariadb"
+  port: 3306
+  user: "opencart"
+  password: "opencart"
+  database: "opencart"
+  prefix: "oc_"
+
+# ── Defaults for new posts ───────────────────────────────────────────────────
+defaults:
+  # Author ID in oc_blog_author table
+  author_id: 1
+  # Store ID (0 = default)
+  store_id: 0
+  # Default category ID to assign posts to (0 = uncategorized)
+  category_id: 0
+  # Post status (1 = published)
+  status: 1
+  # Allow comments
+  allow_comments: 0
+  # Sort order starting value
+  sort_order: 0
+  # Image download directory (relative to this config file)
+  image_dir: "./images"
+  # Base path for images in the blog_post table (relative to OpenCart image dir)
+  image_base: "blog/journal"
+
+# ── Dry-run mode ─────────────────────────────────────────────────────────────
+# When true: scrape & parse everything but do NOT write to DB or download images.
+dry_run: false
