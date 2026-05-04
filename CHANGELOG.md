@@ -1,3 +1,9 @@
+## [1.4.0](https://github.com/mathflow-bit/dockercart/compare/v1.3.3...v1.4.0) (2026-05-04)
+
+### Features
+
+* add Journal blog migration tool ([803bbe8](https://github.com/mathflow-bit/dockercart/commit/803bbe8e498a95ba7bc2a929b354b223670ef85e))
+
 ## [1.3.3](https://github.com/mathflow-bit/dockercart/compare/v1.3.2...v1.3.3) (2026-05-04)
 
 ## [1.3.2](https://github.com/mathflow-bit/dockercart/compare/v1.3.1...v1.3.2) (2026-05-03)
