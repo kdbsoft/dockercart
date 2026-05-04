@@ -1,3 +1,9 @@
+## [1.3.2](https://github.com/mathflow-bit/dockercart/compare/v1.3.1...v1.3.2) (2026-05-03)
+
+### Bug Fixes
+
+* increase nginx file descriptor limits ([c4120eb](https://github.com/mathflow-bit/dockercart/commit/c4120eb4f8b6a005d9a657c4fe773e7dcee1a0d7))
+
 ## [1.3.1](https://github.com/mathflow-bit/dockercart/compare/v1.3.0...v1.3.1) (2026-05-03)
 
 ### Bug Fixes
