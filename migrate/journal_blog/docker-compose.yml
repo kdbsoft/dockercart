@@ -15,6 +15,9 @@ services:
       context: .
       dockerfile: Dockerfile
     image: dockercart-migrate-journal-blog:latest
+    # Load DB credentials and network settings from root .env
+    env_file:
+      - ../../.env
     # Mount config + images directory
     volumes:
       - ./config.yaml:/app/config.yaml:ro,z
