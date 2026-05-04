@@ -1,0 +1,30 @@
+# Journal Blog → DockerCart Migration
+#
+# Usage:
+#   docker compose run --rm migrate                  # full migration
+#   docker compose run --rm migrate --dry-run        # dry run
+#   docker compose run --rm migrate --help           # show help
+#
+# Before first run:
+#   1. cp config.example.yaml config.yaml
+#   2. Edit config.yaml with your source URLs and DB credentials
+
+services:
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: dockercart-migrate-journal-blog:latest
+    # Mount config + images directory
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro,z
+      - ./images:/app/images:z
+    # Attach to the main DockerCart network so TARGET_HOST=mariadb resolves
+    networks:
+      - dockercart-network
+    restart: "no"
+
+networks:
+  dockercart-network:
+    external: true
+    name: ${DOCKERCART_NETWORK:-dockercart-network}
