@@ -22,12 +22,11 @@ services:
     volumes:
       - ./config.yaml:/app/config.yaml:ro,z
       - ./images:/app/images:z
-    # Attach to the main DockerCart network so TARGET_HOST=mariadb resolves
     networks:
-      - dockercart-network
+      - default
     restart: "no"
 
 networks:
-  dockercart-network:
+  default:
     external: true
-    name: ${DOCKERCART_NETWORK:-dockercart-network}
+    name: ${DOCKERCART_NETWORK}

@@ -34,6 +34,27 @@ import pymysql
 import yaml
 from bs4 import BeautifulSoup
 
+# Try to load environment variables from .env file if it exists
+try:
+    from dotenv import load_dotenv, find_dotenv
+    load_dotenv(find_dotenv())
+except ImportError:
+    # Fallback: search for .env in current and parent directories
+    def _load_env_fallback():
+        curr = Path.cwd()
+        for _ in range(3):  # Check current, parent, and grandparent
+            env_path = curr / ".env"
+            if env_path.exists():
+                with open(env_path, "r") as f:
+                    for line in f:
+                        line = line.strip()
+                        if line and not line.startswith("#") and "=" in line:
+                            key, value = line.split("=", 1)
+                            os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
+                return
+            curr = curr.parent
+    _load_env_fallback()
+
 # ── Database helpers ──────────────────────────────────────────────────────────
 
 
@@ -399,18 +420,16 @@ def insert_seo_url(
 def migrate(config: dict[str, Any]) -> None:
     """Run the full migration."""
     src_cfg = config["source"]
-    # Target DB config: YAML -> environment variables -> defaults
-    tgt_yaml = config.get("target", {})
+    # Database credentials from environment (root .env via docker-compose)
     tgt_cfg = {
-        "host": tgt_yaml.get("host") or os.environ.get("DB_HOSTNAME", "mariadb"),
-        "port": tgt_yaml.get("port") or int(os.environ.get("DB_PORT", "3306")),
-        "user": tgt_yaml.get("user") or os.environ.get("DB_USERNAME", "dockercart"),
-        "password": tgt_yaml.get("password")
-        or os.environ.get("DB_PASSWORD", "dockercart"),
-        "database": tgt_yaml.get("database")
-        or os.environ.get("DB_DATABASE", "dockercart"),
-        "prefix": tgt_yaml.get("prefix") or os.environ.get("DB_PREFIX", "oc_"),
+        "host": os.environ.get("DB_HOSTNAME") or "mariadb",
+        "port": int(os.environ.get("DB_PORT") or "3306"),
+        "user": os.environ.get("DB_USERNAME") or "dockercart",
+        "password": os.environ.get("DB_PASSWORD") or "dockercart",
+        "database": os.environ.get("DB_DATABASE") or "dockercart",
+        "prefix": os.environ.get("DB_PREFIX") or "oc_",
     }
+
     defaults = config["defaults"]
     selectors = config["selectors"]
     dry_run = config.get("dry_run", False)
