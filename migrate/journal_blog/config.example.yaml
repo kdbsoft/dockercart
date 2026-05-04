@@ -5,7 +5,6 @@
 #
 # NOTE: Database credentials are loaded from the root .env file via environment
 # variables (DB_HOSTNAME, DB_USERNAME, DB_PASSWORD, DB_DATABASE, DB_PORT, DB_PREFIX).
-# The `target` section below is optional — values in YAML override env vars.
 
 # ── Source site ──────────────────────────────────────────────────────────────
 source:
@@ -60,23 +59,6 @@ selectors:
     views: ".post-views, .post-view, .view-count, .post-stats .views, .p-view"
     # Article body HTML
     content: ".post-content, .post-details .post-detail, .journal-post-content, article .content"
-
-# ── Target database (DockerCart) ─────────────────────────────────────────────
-# These values are OPTIONAL. If omitted, they are loaded from environment
-# variables in the root .env file:
-#   host     <- DB_HOSTNAME (default: mariadb)
-#   port     <- DB_PORT (default: 3306)
-#   user     <- DB_USERNAME (default: dockercart)
-#   password <- DB_PASSWORD (default: dockercart)
-#   database <- DB_DATABASE (default: dockercart)
-#   prefix   <- DB_PREFIX (default: oc_)
-target:
-  host: "mariadb"
-  port: 3306
-  user: "dockercart"
-  password: "dockercart"
-  database: "dockercart"
-  prefix: "oc_"
 
 # ── Defaults for new posts ───────────────────────────────────────────────────
 defaults:
