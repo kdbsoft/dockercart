@@ -133,7 +133,7 @@
 
       {% if menu_type == 'horizontal' and top_informations is defined and top_informations %}
       <!-- Top info links: horizontal menu, vertically centered and centered in dark micro bar -->
-      <nav class="hidden lg:inline-flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-5 pointer-events-auto dc-topbar-info-links">
+      <nav class="hidden lg:inline-flex flex-1 justify-center items-center gap-5 pointer-events-auto dc-topbar-info-links">
         {% for info in top_informations %}
         <a href="{{ info.href }}" class="text-xs font-medium text-gray-300 hover:text-white transition whitespace-nowrap">{{ info.title }}</a>
         {% endfor %}
@@ -302,7 +302,7 @@
     </a>
     {% endfor %}
     {% endif %}
-    
+
     <!-- Categories (mobile) — accordion -->
     {% if mobile_categories %}
     <hr class="my-2 border-t border-gray-100" />
@@ -411,7 +411,7 @@ document.addEventListener('DOMContentLoaded', function () {
   })();
 
   lucide.createIcons();
-  
+
   // Remove flag images from language selector in header topbar
   (function removeLangFlags() {
     try {
