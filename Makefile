@@ -3,7 +3,7 @@ include .env
 export
 endif
 
-.PHONY: help migrate up standalone standalone-letsencrypt ssl letsencrypt letsencrypt-ftp ftp down logs logs-follow shell mariadb backup restore dump-init clean restart
+.PHONY: help migrate up update standalone standalone-letsencrypt ssl letsencrypt letsencrypt-ftp ftp down logs logs-follow shell mariadb backup restore dump-init clean restart
 
 ### Convenience variables
 COMPOSE := docker compose
@@ -16,7 +16,7 @@ help: ## Show this help
 	@echo ""
 	@echo "DockerCart - Docker Compose with Traefik"
 	@echo ""
-	@grep -E '^[a-zA-Z-]+:.*?## .*$$$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$$$1, $$$$2}'
+	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
 	@echo ""
 	@echo "SSL Modes (default: HTTP without SSL):"
 	@echo "  make up          HTTP mode       - http://$${DOCKERCART_DOMAIN:-dockercart.local}"
@@ -44,6 +44,9 @@ migrate: ## Apply SQL migrations from docker/mysql/migrations (uses mariadb cont
 		$(COMPOSE) exec -T mariadb mariadb -u$${MARIADB_USER:-dockercart} -p$${MARIADB_PASSWORD:-dockercart_password} $${MARIADB_DATABASE:-dockercart} < "$$f" || { echo "Failed applying $$f"; exit 1; }; \
 	done; \
 	echo "Migrations applied."
+
+update: ## Pull code changes and apply migrations via update.sh
+	@./update.sh
 
 up: ## Start in Traefik mode, HTTP by default (use make ssl or make letsencrypt for HTTPS)
 	@./start.sh
