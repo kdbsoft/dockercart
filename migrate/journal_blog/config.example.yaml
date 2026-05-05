@@ -75,6 +75,10 @@ defaults:
   allow_comments: 0
   # Sort order starting value
   sort_order: 0
+  # Create redirects for old donor URLs → new DockerCart URLs in the redirect
+  # manager module (oc_redirect_manager). Old blog/category paths will 301
+  # redirect to the new SEO URLs. Disable if you don't use the redirect module.
+  create_redirects: true
   # Image download directory (relative to this config file)
   image_dir: "./images"
   # Base path for images in the blog_post table (relative to OpenCart image dir)
