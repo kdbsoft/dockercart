@@ -163,6 +163,14 @@ class ModelExtensionModuleDockercartBlogCategory extends Model {
 		return $query->rows;
 	}
 
+	public function getTotalCategories() {
+		$query = $this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "blog_category` b 
+			LEFT JOIN `" . DB_PREFIX . "blog_category_description` bd ON (b.category_id = bd.category_id) 
+			WHERE bd.language_id = '" . (int)$this->config->get('config_language_id') . "'");
+
+		return $query->row['total'];
+	}
+
 	public function getCategoryDescriptions($category_id) {
 		$category_description_data = array();
 
