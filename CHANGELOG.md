@@ -1,3 +1,9 @@
+## [1.4.7](https://github.com/mathflow-bit/dockercart/compare/v1.4.6...v1.4.7) (2026-05-05)
+
+### Bug Fixes
+
+* group articles by hreflang alternate links ([669e726](https://github.com/mathflow-bit/dockercart/commit/669e726310bdb7a8637e1802727a81bc6e9fc3a4))
+
 ## [1.4.6](https://github.com/mathflow-bit/dockercart/compare/v1.4.5...v1.4.6) (2026-05-05)
 
 ### Bug Fixes
