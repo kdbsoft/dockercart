@@ -45,6 +45,12 @@ migrate: ## Apply SQL migrations from docker/mysql/migrations (uses mariadb cont
 	done; \
 	echo "Migrations applied."
 
+migrate-blog: ## Run Journal Blog migration (scrapes donor site)
+	@cd migrate/journal_blog && $(COMPOSE) run --rm migrate $(ARGS)
+
+migrate-opencart: ## Run OpenCart-to-DockerCart migration
+	@cd migrate/opencart && $(COMPOSE) run --rm migrate $(ARGS)
+
 update: ## Pull code changes and apply migrations via update.sh
 	@./update.sh
 

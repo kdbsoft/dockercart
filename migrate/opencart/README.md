@@ -22,11 +22,9 @@ cd migrate/opencart/
 cp .env.example .env
 ```
 
-Edit `.env` and fill in the source and target database details.
+Edit `.env` and fill in the **source** database details (`SOURCE_*`).
 
-**`SOURCE_*`** — the old OpenCart database server  
-**`TARGET_*`** — the MariaDB container inside your DockerCart stack.  
-When the main stack is running, `TARGET_HOST=mariadb` resolves directly inside `dockercart-network` — no need to expose the MariaDB port externally.
+**`TARGET_*`** (DockerCart database) settings are automatically loaded from your project's root `.env` file when running via the root `Makefile`.
 
 ### 2. Build the image
 
@@ -48,6 +46,20 @@ Changes are **not** committed — the run only prints what would be migrated.
 ```bash
 docker compose run --rm migrate
 ```
+
+## Running
+
+### Root Makefile (Recommended)
+
+From the project root, you can run:
+
+```bash
+make migrate-opencart ARGS="--dry-run"
+```
+
+This automatically uses the `TARGET_*` database credentials and network from your root `.env`. You only need to configure the `SOURCE_*` database in `migrate/opencart/.env`.
+
+### Docker (Manual)
 
 ### Interactive language mapping
 

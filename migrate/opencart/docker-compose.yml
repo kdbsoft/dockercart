@@ -9,9 +9,18 @@ services:
       context: .
       dockerfile: Dockerfile
     image: dockercart-migrate-opencart:latest
-    # Connection params are loaded from .env (copy from .env.example)
+    # SOURCE_* settings are loaded from .env (copy from .env.example)
     env_file:
       - .env
+    # TARGET_* settings are mapped from root .env when running via make
+    environment:
+      - TARGET_HOST=${DB_HOSTNAME:-mariadb}
+      - TARGET_PORT=${DB_PORT:-3306}
+      - TARGET_USER=${DB_USERNAME:-dockercart}
+      - TARGET_PASSWORD=${DB_PASSWORD:-dockercart_password}
+      - TARGET_DATABASE=${DB_DATABASE:-dockercart}
+      - TARGET_PREFIX=${DB_PREFIX:-oc_}
+      - DOCKERCART_NETWORK=${DOCKERCART_NETWORK:-dockercart-network}
     # Attach to the main DockerCart network so TARGET_HOST=mariadb resolves
     networks:
       - dockercart-network
@@ -20,5 +29,5 @@ services:
 
 networks:
   dockercart-network:
-    external: true
     name: ${DOCKERCART_NETWORK:-dockercart-network}
+    external: true
