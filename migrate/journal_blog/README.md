@@ -16,7 +16,14 @@ Scrapes a Journal-themed OpenCart blog from a donor site and imports:
 
 ## Configuration
 
-All settings live in `config.yaml` (copy from `config.example.yaml`):
+All settings live in `config.yaml` (copy from `config.example.yaml`).
+
+### 1. Configure the migration
+
+```bash
+cd migrate/journal_blog/
+cp config.example.yaml config.yaml
+```
 
 ```yaml
 source:
@@ -59,7 +66,7 @@ dry_run: false
 
 ### Database credentials
 
-Database credentials can be set in the `target` section of `config.yaml`. If omitted, the script will try to use environment variables (`DB_HOSTNAME`, `DB_PORT`, etc.), but for Docker Compose, it's recommended to rely on the mounted `config.yaml`.
+Database credentials are automatically loaded from your Docker environment (variables like `DB_HOSTNAME`, `DB_PORT`, etc.) when running via Docker. If you are running the script locally (outside Docker), you can specify them in the `target` section of `config.yaml`.
 
 
 ### Key settings
@@ -73,10 +80,21 @@ Database credentials can be set in the `target` section of `config.yaml`. If omi
 | `selectors` (other) | CSS selectors for article parsing — tune these for non-standard themes |
 | `defaults.author_id` | Author ID in `oc_blog_author` (create one first if needed) |
 | `defaults.category_id` | Fallback category ID if no matching scraped category is found (0 = uncategorized) |
+| `DOCKERCART_NETWORK` | External Docker network name (loads from environment or root `.env`) |
 
 ## Running
 
-### Docker (recommended)
+### Root Makefile (Recommended)
+
+From the project root, you can run:
+
+```bash
+make migrate-blog ARGS="--dry-run"
+```
+
+This automatically uses the database credentials and network from your root `.env`.
+
+### Docker (Manual)
 
 ```bash
 cd migrate/journal_blog/

@@ -7,7 +7,7 @@
 #
 # Before first run:
 #   1. cp config.example.yaml config.yaml
-#   2. Edit config.yaml with your source URLs and DB credentials
+#   2. Edit config.yaml with your source URLs
 
 services:
   migrate:
@@ -20,10 +20,18 @@ services:
       - ./migrate.py:/app/migrate.py:ro,z
       - ./config.yaml:/app/config.yaml:ro,z
       - ./images:/app/images:z
+    environment:
+      - DB_HOSTNAME=${DB_HOSTNAME:-mariadb}
+      - DB_USERNAME=${DB_USERNAME:-dockercart}
+      - DB_PASSWORD=${DB_PASSWORD:-dockercart_password}
+      - DB_DATABASE=${DB_DATABASE:-dockercart}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_PREFIX=${DB_PREFIX:-oc_}
     networks:
       - dockercart-network
     restart: "no"
 
 networks:
   dockercart-network:
+    name: ${DOCKERCART_NETWORK:-dockercart-network}
     external: true
