@@ -32,8 +32,8 @@ class ModelExtensionModuleDockercartBlogComment extends Model {
 
 		$comment_id = $this->db->getLastId();
 
-		$this->cache->delete('blog.comment.');
-		$this->cache->delete('blog.post.');
+		$this->cache->delete('blog.comment');
+		$this->cache->delete('blog.post');
 
 		return $comment_id;
 	}

@@ -112,10 +112,10 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 			}
 		}
 
-		$this->cache->delete('blog.post.');
-		$this->cache->delete('blog.popular.');
-		$this->cache->delete('blog.recent.');
-		$this->cache->delete('blog.archive.');
+		$this->cache->delete('blog.post');
+		$this->cache->delete('blog.popular');
+		$this->cache->delete('blog.recent');
+		$this->cache->delete('blog.archive');
 
 		return $post_id;
 	}
@@ -224,10 +224,10 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 			$this->model_design_seo_url->invalidateSeoUrlCache();
 		}
 
-		$this->cache->delete('blog.post.');
-		$this->cache->delete('blog.popular.');
-		$this->cache->delete('blog.recent.');
-		$this->cache->delete('blog.archive.');
+		$this->cache->delete('blog.post');
+		$this->cache->delete('blog.popular');
+		$this->cache->delete('blog.recent');
+		$this->cache->delete('blog.archive');
 	}
 
 	/**
@@ -247,12 +247,12 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 		$this->load->model('design/seo_url');
 		$this->model_design_seo_url->invalidateSeoUrlCache();
 
-		$this->cache->delete('blog.post.');
-		$this->cache->delete('blog.popular.');
-		$this->cache->delete('blog.recent.');
-		$this->cache->delete('blog.archive.');
-		$this->cache->delete('blog.category.');
-		$this->cache->delete('blog.author.');
+		$this->cache->delete('blog.post');
+		$this->cache->delete('blog.popular');
+		$this->cache->delete('blog.recent');
+		$this->cache->delete('blog.archive');
+		$this->cache->delete('blog.category');
+		$this->cache->delete('blog.author');
 	}
 
 	/**

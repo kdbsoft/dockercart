@@ -16,8 +16,8 @@ class ModelExtensionModuleDockercartBlogAuthor extends Model {
 			date_added = NOW(), 
 			date_modified = NOW()");
 
-		$this->cache->delete('blog.author.');
-		$this->cache->delete('blog.post.');
+		$this->cache->delete('blog.author');
+		$this->cache->delete('blog.post');
 		return $this->db->getLastId();
 	}
 
@@ -32,8 +32,8 @@ class ModelExtensionModuleDockercartBlogAuthor extends Model {
 			date_modified = NOW() 
 			WHERE author_id = '" . (int)$author_id . "'");
 
-		$this->cache->delete('blog.author.');
-		$this->cache->delete('blog.post.');
+		$this->cache->delete('blog.author');
+		$this->cache->delete('blog.post');
 	}
 
 	/**
@@ -56,8 +56,8 @@ class ModelExtensionModuleDockercartBlogAuthor extends Model {
 
 	public function deleteAuthor($author_id) {
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "blog_author` WHERE author_id = '" . (int)$author_id . "'");
-		$this->cache->delete('blog.author.');
-		$this->cache->delete('blog.post.');
+		$this->cache->delete('blog.author');
+		$this->cache->delete('blog.post');
 	}
 
 	public function getAuthor($author_id) {
