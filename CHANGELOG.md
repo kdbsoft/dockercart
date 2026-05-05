@@ -1,3 +1,10 @@
+## [1.4.9](https://github.com/mathflow-bit/dockercart/compare/v1.4.8...v1.4.9) (2026-05-05)
+
+### Bug Fixes
+
+* preserve blog category SEO URLs during migration ([197295c](https://github.com/mathflow-bit/dockercart/commit/197295c5330008aa2f4e3bf434b926fa9d7527c1))
+* remove trailing dots from blog cache keys ([80efd91](https://github.com/mathflow-bit/dockercart/commit/80efd919d14bd03fd1a43a1ca5d70cfb36d0ffd6))
+
 ## [1.4.8](https://github.com/mathflow-bit/dockercart/compare/v1.4.7...v1.4.8) (2026-05-05)
 
 ### Bug Fixes
