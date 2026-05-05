@@ -756,14 +756,31 @@ def migrate(config: dict[str, Any]) -> None:
                 (post_id, store_id),
             )
 
-            # Post-to-category (use primary article's categories)
+            # Post-to-category: add categories from parsed HTML
             assigned_cat_id = 0
-            if primary_article.get("categories"):
-                first_cat = primary_article["categories"][0]
-                cat_name_key = first_cat["name"].lower()
 
-                if cat_name_key not in category_map:
-                    # Create new category
+            # Collect all unique categories with their language versions
+            # cat_key -> {lang_id: cat_data}
+            group_cats: dict[str, dict[int, dict[str, Any]]] = {}
+
+            for url, article, lang_id in articles:
+                actual_lang_id = lang_id
+                for alt in article.get("alternate_links", []):
+                    hreflang = alt.get("hreflang", "")
+                    if hreflang in hreflang_to_lang_id:
+                        actual_lang_id = hreflang_to_lang_id[hreflang]
+                        break
+
+                for cat in article.get("categories", []):
+                    cat_key = cat["name"].lower()
+                    if cat_key not in group_cats:
+                        group_cats[cat_key] = {}
+                    group_cats[cat_key][actual_lang_id] = cat
+
+            # Create categories and add descriptions
+            for cat_key, lang_versions in group_cats.items():
+                # Get category_id (create if new)
+                if cat_key not in category_map:
                     db.execute(
                         f"""
                         INSERT INTO `{prefix}blog_category`
@@ -773,7 +790,8 @@ def migrate(config: dict[str, Any]) -> None:
                         (0, 1, total_categories),
                     )
                     category_id = db.conn.insert_id()
-                    category_map[cat_name_key] = {}
+                    category_map[cat_key] = {}
+                    category_map[cat_key]["_id"] = category_id
 
                     db.execute(
                         f"""
@@ -783,55 +801,54 @@ def migrate(config: dict[str, Any]) -> None:
                         (category_id, store_id),
                     )
                     total_categories += 1
-                    print(f"  + category_id={category_id}: {first_cat['name']}")
-                else:
-                    category_id = next(iter(category_map[cat_name_key].values()))[0]
+                    print(f"  + category_id={category_id}: {list(lang_versions.values())[0]['name']}")
 
-                # Category description for each language in the group
-                for url, article, lang_id in articles:
-                    for cat in article.get("categories", []):
-                        if cat["name"].lower() == cat_name_key:
-                            actual_lang_id = lang_id
-                            for alt in article.get("alternate_links", []):
-                                hreflang = alt.get("hreflang", "")
-                                if hreflang in hreflang_to_lang_id:
-                                    actual_lang_id = hreflang_to_lang_id[hreflang]
-                                    break
+                category_id = category_map[cat_key]["_id"]
 
-                            category_map[cat_name_key][actual_lang_id] = (
-                                category_id,
-                                cat["keyword"],
-                            )
-                            db.execute(
-                                f"""
-                                INSERT INTO `{prefix}blog_category_description`
-                                (category_id, language_id, name, description,
-                                 meta_title, meta_description, meta_keyword)
-                                VALUES (%s, %s, %s, %s, %s, %s, %s)
-                                ON DUPLICATE KEY UPDATE
-                                    name = VALUES(name),
-                                    meta_title = VALUES(meta_title)
-                                """,
-                                (
-                                    category_id,
-                                    actual_lang_id,
-                                    cat["name"],
-                                    "",
-                                    cat["name"],
-                                    "",
-                                    "",
-                                ),
-                            )
-                            if cat["keyword"]:
-                                insert_seo_url(
-                                    db,
-                                    f"blog_category_id={category_id}",
-                                    cat["keyword"],
-                                    store_id,
-                                    actual_lang_id,
-                                )
+                # Add description for each language version
+                for actual_lang_id, cat in lang_versions.items():
+                    if actual_lang_id in category_map[cat_key]:
+                        continue  # Already added
 
-                assigned_cat_id = category_id
+                    category_map[cat_key][actual_lang_id] = (
+                        category_id,
+                        cat["keyword"],
+                    )
+                    db.execute(
+                        f"""
+                        INSERT INTO `{prefix}blog_category_description`
+                        (category_id, language_id, name, description,
+                         meta_title, meta_description, meta_keyword)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                        ON DUPLICATE KEY UPDATE
+                            name = VALUES(name),
+                            meta_title = VALUES(meta_title)
+                        """,
+                        (
+                            category_id,
+                            actual_lang_id,
+                            cat["name"],
+                            "",
+                            cat["name"],
+                            "",
+                            "",
+                        ),
+                    )
+                    if cat["keyword"]:
+                        insert_seo_url(
+                            db,
+                            f"blog_category_id={category_id}",
+                            cat["keyword"],
+                            store_id,
+                            actual_lang_id,
+                        )
+
+            # Map post to first category of primary article
+            if primary_article.get("categories"):
+                first_cat = primary_article["categories"][0]
+                cat_key = first_cat["name"].lower()
+                if cat_key in category_map:
+                    assigned_cat_id = category_map[cat_key]["_id"]
 
             if assigned_cat_id == 0 and defaults.get("category_id", 0) > 0:
                 assigned_cat_id = defaults["category_id"]
