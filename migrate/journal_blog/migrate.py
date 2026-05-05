@@ -510,7 +510,11 @@ def migrate(config: dict[str, Any]) -> None:
                 except Exception:
                     pass
             db.execute(
-                f"DELETE FROM `{prefix}blog_seo_url` WHERE `query` LIKE %s OR `query` LIKE %s",
+                f"""
+                DELETE FROM `{prefix}blog_seo_url`
+                WHERE (`query` LIKE %s OR `query` LIKE %s)
+                AND `query` NOT LIKE 'blog/category/%'
+                """,
                 ("blog_post_id=%", "blog_category_id=%"),
             )
             db.commit()
