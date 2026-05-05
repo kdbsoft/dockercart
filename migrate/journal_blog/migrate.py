@@ -495,6 +495,45 @@ def _build_article_groups(
     return groups
 
 
+def insert_redirect(
+    db: Db,
+    old_url: str,
+    new_url: str,
+    code: int = 301,
+) -> None:
+    """Insert a redirect from old donor URL to new DockerCart URL.
+
+    Deletes any existing redirect for the same old_url first, making
+    this idempotent for re-runs.
+    """
+    if not old_url or not new_url:
+        return
+
+    # Normalise path: strip trailing slash, ensure leading /, lowercase
+    old_path = old_url.lower().rstrip("/")
+    new_path = new_url.lower().rstrip("/")
+
+    if not old_path.startswith("/"):
+        old_path = "/" + old_path
+    if not new_path.startswith("/"):
+        new_path = "/" + new_path
+
+    db.execute(
+        f"DELETE FROM `{db.prefix}redirect_manager` "
+        f"WHERE old_url = %s AND is_regex = 0",
+        (old_path,),
+    )
+    db.execute(
+        f"""
+        INSERT INTO `{db.prefix}redirect_manager`
+        (old_url, new_url, code, status, is_regex, preserve_query,
+         date_added, date_modified)
+        VALUES (%s, %s, %s, 1, 0, 1, NOW(), NOW())
+        """,
+        (old_path, new_path, code),
+    )
+
+
 def insert_seo_url(
     db: Db,
     query: str,
@@ -597,17 +636,21 @@ def migrate(config: dict[str, Any]) -> None:
                 except Exception:
                     pass
             db.execute(
-                f"""
-                DELETE FROM `{prefix}blog_seo_url`
-                WHERE (`query` LIKE %s OR `query` LIKE %s)
-                AND `query` NOT LIKE 'blog/category/%%'
-                """,
+                f"DELETE FROM `{prefix}blog_seo_url` "
+                f"WHERE (`query` LIKE %s OR `query` LIKE %s) "
+                f"AND `query` NOT LIKE 'blog/category/%%'",
                 ("blog_post_id=%", "blog_category_id=%"),
             )
+            # Clean blog-related redirects
+            db.execute(
+                f"DELETE FROM `{prefix}redirect_manager` "
+                f"WHERE old_url LIKE '/blog/%%' "
+                f"OR old_url LIKE '/%%/blog/%%'"
+            )
             db.commit()
-            print("  Blog tables cleaned.")
+            print("  Blog tables and redirects cleaned.")
         elif clean:
-            print("\n[0] [DRY] Would clean blog tables.")
+            print("\n[0] [DRY] Would clean blog tables and redirects.")
 
         # ── Phase 1: Collect all article URLs from all languages ────────
         print("\n[1] Collecting article URLs from all languages...")
@@ -799,7 +842,19 @@ def migrate(config: dict[str, Any]) -> None:
                         actual_lang_id,
                     )
 
-            # Post-to-store
+                # Insert redirect from old donor URL to new DockerCart URL
+                if defaults.get("create_redirects", True):
+                    old_article_path = urlparse_fn(url).path
+                    new_article_path = (
+                        f"/{article['seo_keyword']}" if article["seo_keyword"] else ""
+                    )
+                    if old_article_path and new_article_path:
+                        insert_redirect(db, old_article_path, new_article_path)
+                        print(
+                            f"      redirect: {old_article_path} \u2192 {new_article_path}"
+                        )
+
+                # Post-to-store
             db.execute(
                 f"""
                 INSERT IGNORE INTO `{prefix}blog_post_to_store`
@@ -937,6 +992,17 @@ def migrate(config: dict[str, Any]) -> None:
                             store_id,
                             actual_lang_id,
                         )
+
+                    # Insert redirect for category
+                    if defaults.get("create_redirects", True):
+                        cat_old_url = cat.get("url", "")
+                        if cat_old_url and cat["keyword"]:
+                            old_cat_path = urlparse_fn(cat_old_url).path
+                            new_cat_path = f"/{cat['keyword']}"
+                            insert_redirect(db, old_cat_path, new_cat_path)
+                            print(
+                                f"    + redirect [{actual_lang_id}]: {old_cat_path} \u2192 {new_cat_path}"
+                            )
 
             # Map post to first category of primary article
             if primary_article.get("categories"):
