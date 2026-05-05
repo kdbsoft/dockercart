@@ -1,3 +1,9 @@
+## [1.4.8](https://github.com/mathflow-bit/dockercart/compare/v1.4.7...v1.4.8) (2026-05-05)
+
+### Bug Fixes
+
+* aggregate categories across language versions ([7265307](https://github.com/mathflow-bit/dockercart/commit/72653077727d8337c3c2105d93626d4e1c2f5a56))
+
 ## [1.4.7](https://github.com/mathflow-bit/dockercart/compare/v1.4.6...v1.4.7) (2026-05-05)
 
 ### Bug Fixes
