@@ -1710,15 +1710,15 @@ class ControllerStartupSeoUrl extends Controller
             ? $this->request->server["HTTP_HOST"]
             : $_SERVER["HTTP_HOST"];
 
-        // Append port if using non-standard port and it's not already in HTTP_HOST
+        // Append port only if non-standard (not 80/443) and not already in HTTP_HOST.
+        // This avoids appending internal proxy ports (e.g. SERVER_PORT=80 behind HTTPS proxy).
         $port = "";
         if (isset($this->request->server["SERVER_PORT"])) {
-            $is_https = $protocol === "https://";
-            $default_port = $is_https ? "443" : "80";
             $server_port = $this->request->server["SERVER_PORT"];
 
             if (
-                $server_port !== $default_port &&
+                $server_port !== "80" &&
+                $server_port !== "443" &&
                 strpos($host, ":" . $server_port) === false
             ) {
                 $port = ":" . $server_port;
