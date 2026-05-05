@@ -36,6 +36,7 @@ export-yml-[0-9]*-*.xml
 
 #Sync Files
 /upload/image/sync/*
+/upload/image/blog/journal/*
 
 # System Cache Files
 /upload/system/storage/cache/*
