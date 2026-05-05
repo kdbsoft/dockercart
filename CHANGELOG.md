@@ -1,3 +1,9 @@
+## [1.4.12](https://github.com/mathflow-bit/dockercart/compare/v1.4.11...v1.4.12) (2026-05-05)
+
+### Bug Fixes
+
+* add redirect creation in Journal blog migration ([1561e3b](https://github.com/mathflow-bit/dockercart/commit/1561e3bea1a2fff1b5e734e738545ded1d9ec87a))
+
 ## [1.4.11](https://github.com/mathflow-bit/dockercart/compare/v1.4.10...v1.4.11) (2026-05-05)
 
 ### Bug Fixes
