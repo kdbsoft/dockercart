@@ -18,7 +18,8 @@ class ModelExtensionModuleDockercartBlogComment extends Model {
 			date_added = NOW(), 
 			date_modified = NOW()");
 
-		$this->cache->delete('blog.comment');
+		$this->cache->delete('blog.comment.');
+		$this->cache->delete('blog.post.');
 		return $this->db->getLastId();
 	}
 
@@ -32,12 +33,14 @@ class ModelExtensionModuleDockercartBlogComment extends Model {
 			date_modified = NOW() 
 			WHERE comment_id = '" . (int)$comment_id . "'");
 
-		$this->cache->delete('blog.comment');
+		$this->cache->delete('blog.comment.');
+		$this->cache->delete('blog.post.');
 	}
 
 	public function deleteComment($comment_id) {
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "blog_comment` WHERE comment_id = '" . (int)$comment_id . "'");
-		$this->cache->delete('blog.comment');
+		$this->cache->delete('blog.comment.');
+		$this->cache->delete('blog.post.');
 	}
 
 	public function getComment($comment_id) {
