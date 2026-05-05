@@ -1,3 +1,9 @@
+## [1.4.5](https://github.com/mathflow-bit/dockercart/compare/v1.4.4...v1.4.5) (2026-05-05)
+
+### Bug Fixes
+
+* add pagination and sorting to blog admin lists ([286859a](https://github.com/mathflow-bit/dockercart/commit/286859a49392ef43db1ff933e9d67e1259d4b488))
+
 ## [1.4.4](https://github.com/mathflow-bit/dockercart/compare/v1.4.3...v1.4.4) (2026-05-05)
 
 ## [1.4.3](https://github.com/mathflow-bit/dockercart/compare/v1.4.2...v1.4.3) (2026-05-05)
