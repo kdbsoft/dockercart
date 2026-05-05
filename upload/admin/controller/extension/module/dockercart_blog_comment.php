@@ -179,7 +179,6 @@ class ControllerExtensionModuleDockercartBlogComment extends Controller {
 
 		$data['approve'] = $this->url->link('extension/module/dockercart_blog_comment/approve', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('extension/module/dockercart_blog_comment/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
-		$data['back'] = $this->url->link('extension/module/dockercart_blog', 'user_token=' . $this->session->data['user_token'], true);
 
 		$data['comments'] = array();
 
@@ -268,7 +267,6 @@ class ControllerExtensionModuleDockercartBlogComment extends Controller {
 
 		$data['action'] = $this->url->link('extension/module/dockercart_blog_comment/edit', 'user_token=' . $this->session->data['user_token'] . '&comment_id=' . $this->request->get['comment_id'] . $url, true);
 		$data['cancel'] = $this->url->link('extension/module/dockercart_blog_comment', 'user_token=' . $this->session->data['user_token'] . $url, true);
-		$data['back'] = $this->url->link('extension/module/dockercart_blog', 'user_token=' . $this->session->data['user_token'], true);
 
 		if (isset($this->request->get['comment_id']) && ($this->request->server['REQUEST_METHOD'] != 'POST')) {
 			$comment_info = $this->model_extension_module_dockercart_blog_comment->getComment($this->request->get['comment_id']);
