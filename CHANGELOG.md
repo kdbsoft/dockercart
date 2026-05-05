@@ -1,3 +1,9 @@
+## [1.4.10](https://github.com/mathflow-bit/dockercart/compare/v1.4.9...v1.4.10) (2026-05-05)
+
+### Bug Fixes
+
+* Scope SEO URL checks by language ([6906f1e](https://github.com/mathflow-bit/dockercart/commit/6906f1eec758a51614c28eed049d52b1205656c6))
+
 ## [1.4.9](https://github.com/mathflow-bit/dockercart/compare/v1.4.8...v1.4.9) (2026-05-05)
 
 ### Bug Fixes
