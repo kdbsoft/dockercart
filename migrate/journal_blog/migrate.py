@@ -420,14 +420,19 @@ def insert_seo_url(
 def migrate(config: dict[str, Any]) -> None:
     """Run the full migration."""
     src_cfg = config["source"]
-    # Database credentials from environment (root .env via docker-compose)
+    # Target DB config: YAML -> environment variables -> defaults
+    tgt_yaml = config.get("target", {})
     tgt_cfg = {
-        "host": os.environ.get("DB_HOSTNAME") or "mariadb",
-        "port": int(os.environ.get("DB_PORT") or "3306"),
-        "user": os.environ.get("DB_USERNAME") or "dockercart",
-        "password": os.environ.get("DB_PASSWORD") or "dockercart",
-        "database": os.environ.get("DB_DATABASE") or "dockercart",
-        "prefix": os.environ.get("DB_PREFIX") or "oc_",
+        "host": tgt_yaml.get("host") or os.environ.get("DB_HOSTNAME") or "mariadb",
+        "port": int(tgt_yaml.get("port") or os.environ.get("DB_PORT") or "3306"),
+        "user": tgt_yaml.get("user") or os.environ.get("DB_USERNAME") or "dockercart",
+        "password": tgt_yaml.get("password")
+        or os.environ.get("DB_PASSWORD")
+        or "dockercart",
+        "database": tgt_yaml.get("database")
+        or os.environ.get("DB_DATABASE")
+        or "dockercart",
+        "prefix": tgt_yaml.get("prefix") or os.environ.get("DB_PREFIX") or "oc_",
     }
 
     defaults = config["defaults"]

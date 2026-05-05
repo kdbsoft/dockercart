@@ -59,15 +59,7 @@ dry_run: false
 
 ### Database credentials
 
-Database credentials are automatically loaded from the project's root `.env` file via the following environment variables:
-- `DB_HOSTNAME`
-- `DB_PORT`
-- `DB_USERNAME`
-- `DB_PASSWORD`
-- `DB_DATABASE`
-- `DB_PREFIX`
-
-These variables are automatically passed to the container when using Docker Compose.
+Database credentials can be set in the `target` section of `config.yaml`. If omitted, the script will try to use environment variables (`DB_HOSTNAME`, `DB_PORT`, etc.), but for Docker Compose, it's recommended to rely on the mounted `config.yaml`.
 
 
 ### Key settings
@@ -143,6 +135,11 @@ The script creates **separate `blog_post` rows per language** — each language 
 ## Post-migration steps
 
 1. Copy downloaded images to the DockerCart image directory:
+   ```bash
+   cp -r migrate/journal_blog/images/* upload/image/blog/journal/
+   ```
+2. Clear OpenCart cache: `make shell` then `rm -rf /var/www/storage/cache/*`.
+mage directory:
    ```bash
    cp -r migrate/journal_blog/images/* upload/image/blog/journal/
    ```
