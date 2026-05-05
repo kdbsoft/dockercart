@@ -1,3 +1,9 @@
+## [1.4.3](https://github.com/mathflow-bit/dockercart/compare/v1.4.2...v1.4.3) (2026-05-05)
+
+### Bug Fixes
+
+* prevent appending port 80/443 behind proxy ([2525c15](https://github.com/mathflow-bit/dockercart/commit/2525c1512a3cae293e60f18fb8650a637962c887))
+
 ## [1.4.2](https://github.com/mathflow-bit/dockercart/compare/v1.4.1...v1.4.2) (2026-05-05)
 
 ## [1.4.1](https://github.com/mathflow-bit/dockercart/compare/v1.4.0...v1.4.1) (2026-05-04)
