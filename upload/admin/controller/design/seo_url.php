@@ -514,9 +514,9 @@ class ControllerDesignSeoUrl extends Controller {
 		}
 
 		if(isset($this->request->get['seo_url_id']) && $this->request->get['seo_url_id']) {
-			$seo_urls = $this->model_design_seo_url->getSeoUrlsByQueryId($this->request->get['seo_url_id'], $this->request->post['query']);
+			$seo_urls = $this->model_design_seo_url->getSeoUrlsByQueryId($this->request->get['seo_url_id'], $this->request->post['query'], $this->request->post['language_id']);
 		} else {
-			$seo_urls = $this->model_design_seo_url->getSeoUrlsByQuery($this->request->post['query']);
+			$seo_urls = $this->model_design_seo_url->getSeoUrlsByQuery($this->request->post['query'], $this->request->post['language_id']);
 		}
 		
 		foreach ($seo_urls as $seo_url) {
@@ -531,7 +531,7 @@ class ControllerDesignSeoUrl extends Controller {
 			$this->error['query'] = $this->language->get('error_query');
 		}
 
-		$seo_urls = $this->model_design_seo_url->getSeoUrlsByKeyword($this->request->post['keyword']);
+		$seo_urls = $this->model_design_seo_url->getSeoUrlsByKeyword($this->request->post['keyword'], $this->request->post['language_id']);
 
 		foreach ($seo_urls as $seo_url) {
 			if ($seo_url['store_id'] == $this->request->post['store_id'] && $seo_url['query'] != $this->request->post['query']) {
