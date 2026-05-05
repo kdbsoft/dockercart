@@ -78,13 +78,13 @@ class Db:
 
     def execute(self, sql: str, params: tuple[Any, ...] | None = None) -> int:
         with self.conn.cursor() as cur:
-            return cur.execute(sql, params or ())
+            return cur.execute(sql, params)
 
     def query_one(
         self, sql: str, params: tuple[Any, ...] | None = None
     ) -> dict[str, Any] | None:
         with self.conn.cursor() as cur:
-            cur.execute(sql, params or ())
+            cur.execute(sql, params)
             return cur.fetchone()
 
     def commit(self) -> None:
@@ -482,12 +482,18 @@ def migrate(config: dict[str, Any]) -> None:
             db.execute(f"TRUNCATE TABLE `{prefix}blog_category`")
             db.execute(f"TRUNCATE TABLE `{prefix}blog_category_description`")
             db.execute(f"TRUNCATE TABLE `{prefix}blog_category_to_store`")
+            
+            # Optional category tables (may not exist in all versions)
+            for opt_table in ["blog_category_path", "blog_category_to_layout"]:
+                try:
+                    db.execute(f"TRUNCATE TABLE `{prefix}{opt_table}`")
+                except Exception:
+                    pass
+
             # Clean blog SEO URLs for blog posts and categories
             db.execute(
-                f"""
-                DELETE FROM `{prefix}blog_seo_url`
-                WHERE `query` LIKE 'blog_post_id=%' OR `query` LIKE 'blog_category_id=%'
-                """
+                f"DELETE FROM `{prefix}blog_seo_url` WHERE `query` LIKE %s OR `query` LIKE %s",
+                ("blog_post_id=%", "blog_category_id=%"),
             )
             db.commit()
             print("  Blog tables cleaned.")

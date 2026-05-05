@@ -15,8 +15,9 @@ services:
       context: .
       dockerfile: Dockerfile
     image: dockercart-migrate-journal-blog:latest
-    # Mount config + images directory
+    # Mount config + images directory + script for easier updates
     volumes:
+      - ./migrate.py:/app/migrate.py:ro,z
       - ./config.yaml:/app/config.yaml:ro,z
       - ./images:/app/images:z
     networks:
