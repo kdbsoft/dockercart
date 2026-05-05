@@ -122,7 +122,6 @@ class ControllerExtensionModuleDockercartBlogCategory extends Controller {
 
 		$data['add'] = $this->url->link('extension/module/dockercart_blog_category/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('extension/module/dockercart_blog_category/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
-		$data['back'] = $this->url->link('extension/module/dockercart_blog', 'user_token=' . $this->session->data['user_token'], true);
 
 		$data['categories'] = array();
 
@@ -219,7 +218,6 @@ class ControllerExtensionModuleDockercartBlogCategory extends Controller {
 		}
 
 		$data['cancel'] = $this->url->link('extension/module/dockercart_blog_category', 'user_token=' . $this->session->data['user_token'] . $url, true);
-		$data['back'] = $this->url->link('extension/module/dockercart_blog', 'user_token=' . $this->session->data['user_token'], true);
 
 		if (isset($this->request->get['category_id']) && ($this->request->server['REQUEST_METHOD'] != 'POST')) {
 			$category_info = $this->model_extension_module_dockercart_blog_category->getCategory($this->request->get['category_id']);
