@@ -513,7 +513,7 @@ def migrate(config: dict[str, Any]) -> None:
                 f"""
                 DELETE FROM `{prefix}blog_seo_url`
                 WHERE (`query` LIKE %s OR `query` LIKE %s)
-                AND `query` NOT LIKE 'blog/category/%'
+                AND `query` NOT LIKE 'blog/category/%%'
                 """,
                 ("blog_post_id=%", "blog_category_id=%"),
             )

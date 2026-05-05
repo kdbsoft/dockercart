@@ -124,26 +124,26 @@ class ModelDesignSeoUrl extends Model {
 		return $query->row['total'];
 	}
 	
-	public function getSeoUrlsByKeyword($keyword) {
-		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "seo_url` WHERE keyword = '" . $this->db->escape($keyword) . "'");
+	public function getSeoUrlsByKeyword($keyword, $language_id) {
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "seo_url` WHERE keyword = '" . $this->db->escape($keyword) . "' AND language_id = '" . (int)$language_id . "'");
 
 		return $query->rows;
 	}	
 	
-	public function getSeoUrlsByQuery($query) {
-		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "seo_url` WHERE query = '" . $this->db->escape($query) . "'");
+	public function getSeoUrlsByQuery($query, $language_id) {
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "seo_url` WHERE query = '" . $this->db->escape($query) . "' AND language_id = '" . (int)$language_id . "'");
 
 		return $query->rows;
 	}
 	
-	public function getSeoUrlsByQueryId($seo_url_id, $query) {
-		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "seo_url` WHERE query = '" . $this->db->escape($query) . "' AND seo_url_id != '" . (int)$seo_url_id . "'");
+	public function getSeoUrlsByQueryId($seo_url_id, $query, $language_id) {
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "seo_url` WHERE query = '" . $this->db->escape($query) . "' AND language_id = '" . (int)$language_id . "' AND seo_url_id != '" . (int)$seo_url_id . "'");
 
 		return $query->rows;
 	}	
 
-	public function getSeoUrlsByKeywordId($seo_url_id, $keyword) {
-		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "seo_url` WHERE keyword = '" . $this->db->escape($keyword) . "' AND seo_url_id != '" . (int)$seo_url_id . "'");
+	public function getSeoUrlsByKeywordId($seo_url_id, $keyword, $language_id) {
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "seo_url` WHERE keyword = '" . $this->db->escape($keyword) . "' AND language_id = '" . (int)$language_id . "' AND seo_url_id != '" . (int)$seo_url_id . "'");
 
 		return $query->rows;
 	}	
