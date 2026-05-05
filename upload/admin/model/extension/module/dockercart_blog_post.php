@@ -284,6 +284,7 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 		$sort_data = array(
 			'bpd.name',
 			'bp.date_published',
+			'bp.status',
 			'bp.views',
 			'bp.sort_order'
 		);

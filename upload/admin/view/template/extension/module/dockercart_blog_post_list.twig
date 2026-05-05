@@ -43,13 +43,13 @@
               <thead>
                 <tr>
                   <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
-                  <td class="text-left">{% if sort == 'pd.name' %}<a href="{{ sort_name }}" class="{{ order|lower }}">{{ column_title }}</a>{% else %}<a href="{{ sort_name }}">{{ column_title }}</a>{% endif %}</td>
+                  <td class="text-left">{% if sort == 'bpd.name' %}<a href="{{ sort_name }}" class="{{ order|lower }}">{{ column_title }}</a>{% else %}<a href="{{ sort_name }}">{{ column_title }}</a>{% endif %}</td>
                   <td class="text-left">{{ column_category }}</td>
                   <td class="text-left">{{ column_author }}</td>
                   <td class="text-right">{{ column_views }}</td>
                   <td class="text-right">{{ column_comments }}</td>
-                  <td class="text-left">{% if sort == 'p.status' %}<a href="{{ sort_status }}" class="{{ order|lower }}">{{ column_status }}</a>{% else %}<a href="{{ sort_status }}">{{ column_status }}</a>{% endif %}</td>
-                  <td class="text-right">{% if sort == 'p.date_created' %}<a href="{{ sort_date }}" class="{{ order|lower }}">{{ column_date_created }}</a>{% else %}<a href="{{ sort_date }}">{{ column_date_created }}</a>{% endif %}</td>
+                  <td class="text-left">{% if sort == 'bp.status' %}<a href="{{ sort_status }}" class="{{ order|lower }}">{{ column_status }}</a>{% else %}<a href="{{ sort_status }}">{{ column_status }}</a>{% endif %}</td>
+                  <td class="text-right">{% if sort == 'bp.date_published' %}<a href="{{ sort_date }}" class="{{ order|lower }}">{{ column_date_created }}</a>{% else %}<a href="{{ sort_date }}">{{ column_date_created }}</a>{% endif %}</td>
                   <td class="text-right">{{ column_action }}</td>
                 </tr>
               </thead>

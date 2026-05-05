@@ -131,6 +131,8 @@ class ControllerExtensionModuleDockercartBlogCategory extends Controller {
 			'limit' => $this->config->get('config_limit_admin')
 		);
 
+		$category_total = $this->model_extension_module_dockercart_blog_category->getTotalCategories($filter_data);
+
 		$categories = $this->model_extension_module_dockercart_blog_category->getCategories($filter_data);
 
 		foreach ($categories as $category) {
@@ -138,9 +140,42 @@ class ControllerExtensionModuleDockercartBlogCategory extends Controller {
 				'category_id' => $category['category_id'],
 				'name'        => $category['name'],
 				'status'      => $category['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
+				'sort_order'  => $category['sort_order'],
+				'selected'    => isset($this->request->post['selected']) && in_array($category['category_id'], $this->request->post['selected']),
 				'edit'        => $this->url->link('extension/module/dockercart_blog_category/edit', 'user_token=' . $this->session->data['user_token'] . '&category_id=' . $category['category_id'] . $url, true)
 			);
 		}
+
+		if (isset($this->error['warning'])) {
+			$data['error_warning'] = $this->error['warning'];
+		} else {
+			$data['error_warning'] = '';
+		}
+
+		if (isset($this->session->data['success'])) {
+			$data['success'] = $this->session->data['success'];
+			unset($this->session->data['success']);
+		} else {
+			$data['success'] = '';
+		}
+
+		if (isset($this->request->post['selected'])) {
+			$data['selected'] = (array)$this->request->post['selected'];
+		} else {
+			$data['selected'] = array();
+		}
+
+		$url = '';
+
+		$pagination = new Pagination();
+		$pagination->total = $category_total;
+		$pagination->page = $page;
+		$pagination->limit = $this->config->get('config_limit_admin');
+		$pagination->url = $this->url->link('extension/module/dockercart_blog_category', 'user_token=' . $this->session->data['user_token'] . $url . '&page={page}', true);
+
+		$data['pagination'] = $pagination->render();
+
+		$data['results'] = sprintf($this->language->get('text_pagination'), ($category_total) ? (($page - 1) * $this->config->get('config_limit_admin')) + 1 : 0, ((($page - 1) * $this->config->get('config_limit_admin')) > ($category_total - $this->config->get('config_limit_admin'))) ? $category_total : ((($page - 1) * $this->config->get('config_limit_admin')) + $this->config->get('config_limit_admin')), $category_total, ceil($category_total / $this->config->get('config_limit_admin')));
 
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
