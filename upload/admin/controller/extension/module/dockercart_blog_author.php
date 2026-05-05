@@ -68,6 +68,18 @@ class ControllerExtensionModuleDockercartBlogAuthor extends Controller {
 	}
 
 	protected function getList() {
+		if (isset($this->request->get['page'])) {
+			$page = $this->request->get['page'];
+		} else {
+			$page = 1;
+		}
+
+		$url = '';
+
+		if (isset($this->request->get['page'])) {
+			$url .= '&page=' . $this->request->get['page'];
+		}
+
 		$data['breadcrumbs'] = array();
 		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('text_home'),
@@ -83,16 +95,23 @@ class ControllerExtensionModuleDockercartBlogAuthor extends Controller {
 		$this->load->language('extension/module/dockercart_blog_author');
 		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('extension/module/dockercart_blog_author', 'user_token=' . $this->session->data['user_token'], true)
+			'href' => $this->url->link('extension/module/dockercart_blog_author', 'user_token=' . $this->session->data['user_token'] . $url, true)
 		);
 
-		$data['add'] = $this->url->link('extension/module/dockercart_blog_author/add', 'user_token=' . $this->session->data['user_token'], true);
-		$data['delete'] = $this->url->link('extension/module/dockercart_blog_author/delete', 'user_token=' . $this->session->data['user_token'], true);
+		$data['add'] = $this->url->link('extension/module/dockercart_blog_author/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
+		$data['delete'] = $this->url->link('extension/module/dockercart_blog_author/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['back'] = $this->url->link('extension/module/dockercart_blog', 'user_token=' . $this->session->data['user_token'], true);
 
 		$data['authors'] = array();
 
-		$results = $this->model_extension_module_dockercart_blog_author->getAuthors();
+		$filter_data = array(
+			'start' => ($page - 1) * $this->config->get('config_limit_admin'),
+			'limit' => $this->config->get('config_limit_admin')
+		);
+
+		$author_total = $this->model_extension_module_dockercart_blog_author->getTotalAuthors();
+
+		$results = $this->model_extension_module_dockercart_blog_author->getAuthors($filter_data);
 
 		foreach ($results as $result) {
 			$data['authors'][] = array(
@@ -101,7 +120,8 @@ class ControllerExtensionModuleDockercartBlogAuthor extends Controller {
 				'email'      => $result['email'],
 				'status'     => $result['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
 				'sort_order' => $result['sort_order'],
-				'edit'       => $this->url->link('extension/module/dockercart_blog_author/edit', 'user_token=' . $this->session->data['user_token'] . '&author_id=' . $result['author_id'], true)
+				'selected'   => isset($this->request->post['selected']) && in_array($result['author_id'], $this->request->post['selected']),
+				'edit'       => $this->url->link('extension/module/dockercart_blog_author/edit', 'user_token=' . $this->session->data['user_token'] . '&author_id=' . $result['author_id'] . $url, true)
 			);
 		}
 
@@ -117,6 +137,24 @@ class ControllerExtensionModuleDockercartBlogAuthor extends Controller {
 		} else {
 			$data['success'] = '';
 		}
+
+		if (isset($this->request->post['selected'])) {
+			$data['selected'] = (array)$this->request->post['selected'];
+		} else {
+			$data['selected'] = array();
+		}
+
+		$url = '';
+
+		$pagination = new Pagination();
+		$pagination->total = $author_total;
+		$pagination->page = $page;
+		$pagination->limit = $this->config->get('config_limit_admin');
+		$pagination->url = $this->url->link('extension/module/dockercart_blog_author', 'user_token=' . $this->session->data['user_token'] . $url . '&page={page}', true);
+
+		$data['pagination'] = $pagination->render();
+
+		$data['results'] = sprintf($this->language->get('text_pagination'), ($author_total) ? (($page - 1) * $this->config->get('config_limit_admin')) + 1 : 0, ((($page - 1) * $this->config->get('config_limit_admin')) > ($author_total - $this->config->get('config_limit_admin'))) ? $author_total : ((($page - 1) * $this->config->get('config_limit_admin')) + $this->config->get('config_limit_admin')), $author_total, ceil($author_total / $this->config->get('config_limit_admin')));
 
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');

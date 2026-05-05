@@ -117,6 +117,18 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 	 * Get posts list
 	 */
 	protected function getList() {
+		if (isset($this->request->get['sort'])) {
+			$sort = $this->request->get['sort'];
+		} else {
+			$sort = 'bp.date_published';
+		}
+
+		if (isset($this->request->get['order'])) {
+			$order = $this->request->get['order'];
+		} else {
+			$order = 'DESC';
+		}
+
 		if (isset($this->request->get['page'])) {
 			$page = $this->request->get['page'];
 		} else {
@@ -124,6 +136,14 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 		}
 
 		$url = '';
+
+		if (isset($this->request->get['sort'])) {
+			$url .= '&sort=' . $this->request->get['sort'];
+		}
+
+		if (isset($this->request->get['order'])) {
+			$url .= '&order=' . $this->request->get['order'];
+		}
 
 		if (isset($this->request->get['page'])) {
 			$url .= '&page=' . $this->request->get['page'];
@@ -157,6 +177,8 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 		$data['posts'] = array();
 
 		$filter_data = array(
+			'sort'  => $sort,
+			'order' => $order,
 			'start' => ($page - 1) * $this->config->get('config_limit_admin'),
 			'limit' => $this->config->get('config_limit_admin')
 		);
@@ -187,6 +209,7 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 				'status'       => $result['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
 				'date_created' => isset($result['date_published']) && $result['date_published'] ? date('Y-m-d H:i:s', strtotime($result['date_published'])) : '—',
 				'featured'     => $result['featured'] ? $this->language->get('text_yes') : $this->language->get('text_no'),
+				'selected'     => isset($this->request->post['selected']) && in_array($result['post_id'], $this->request->post['selected']),
 				'edit'         => $this->url->link('extension/module/dockercart_blog_post/edit', 'user_token=' . $this->session->data['user_token'] . '&post_id=' . $result['post_id'] . $url, true)
 			);
 		}
@@ -203,6 +226,51 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 		} else {
 			$data['success'] = '';
 		}
+
+		if (isset($this->request->post['selected'])) {
+			$data['selected'] = (array)$this->request->post['selected'];
+		} else {
+			$data['selected'] = array();
+		}
+
+		$url = '';
+
+		if (isset($this->request->get['sort'])) {
+			$url .= '&sort=' . $this->request->get['sort'];
+		}
+
+		if (isset($this->request->get['order'])) {
+			$url .= '&order=' . $this->request->get['order'];
+		}
+
+		$pagination = new Pagination();
+		$pagination->total = $post_total;
+		$pagination->page = $page;
+		$pagination->limit = $this->config->get('config_limit_admin');
+		$pagination->url = $this->url->link('extension/module/dockercart_blog_post', 'user_token=' . $this->session->data['user_token'] . $url . '&page={page}', true);
+
+		$data['pagination'] = $pagination->render();
+
+		$data['results'] = sprintf($this->language->get('text_pagination'), ($post_total) ? (($page - 1) * $this->config->get('config_limit_admin')) + 1 : 0, ((($page - 1) * $this->config->get('config_limit_admin')) > ($post_total - $this->config->get('config_limit_admin'))) ? $post_total : ((($page - 1) * $this->config->get('config_limit_admin')) + $this->config->get('config_limit_admin')), $post_total, ceil($post_total / $this->config->get('config_limit_admin')));
+
+		$data['sort'] = $sort;
+		$data['order'] = $order;
+
+		$url = '';
+
+		if ($order == 'ASC') {
+			$url .= '&order=DESC';
+		} else {
+			$url .= '&order=ASC';
+		}
+
+		if (isset($this->request->get['page'])) {
+			$url .= '&page=' . $this->request->get['page'];
+		}
+
+		$data['sort_name'] = $this->url->link('extension/module/dockercart_blog_post', 'user_token=' . $this->session->data['user_token'] . '&sort=bpd.name' . $url, true);
+		$data['sort_status'] = $this->url->link('extension/module/dockercart_blog_post', 'user_token=' . $this->session->data['user_token'] . '&sort=bp.status' . $url, true);
+		$data['sort_date'] = $this->url->link('extension/module/dockercart_blog_post', 'user_token=' . $this->session->data['user_token'] . '&sort=bp.date_published' . $url, true);
 
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');

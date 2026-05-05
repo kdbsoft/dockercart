@@ -55,7 +55,11 @@
                 {% for category in categories %}
                 <tr>
                   <td class="text-center">
+                    {% if category.selected %}
+                    <input type="checkbox" name="selected[]" value="{{ category.category_id }}" checked="checked" />
+                    {% else %}
                     <input type="checkbox" name="selected[]" value="{{ category.category_id }}" />
+                    {% endif %}
                   </td>
                   <td class="text-left">{{ category.name }}</td>
                   <td class="text-left">{{ category.status }}</td>
@@ -74,6 +78,10 @@
             </table>
           </div>
         </form>
+        <div class="row">
+          <div class="col-sm-6 text-left">{{ pagination }}</div>
+          <div class="col-sm-6 text-right">{{ results }}</div>
+        </div>
       </div>
     </div>
     </div>
