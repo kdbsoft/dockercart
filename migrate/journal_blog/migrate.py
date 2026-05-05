@@ -564,51 +564,27 @@ def migrate(config: dict[str, Any]) -> None:
 
             time.sleep(src_cfg["delay"])
 
-        # ── Phase 3: Group articles by alternate links ──────────────────
-        print("\n[3] Grouping articles by alternate links...")
+        # ── Phase 3: Group articles by SEO keyword (slug) ─────────────
+        print("\n[3] Grouping articles by SEO keyword (slug)...")
 
-        # Build graph: URLs that reference each other via alternate links are connected
-        # First, build a mapping from URL -> set of all URLs in same group
-        url_to_group_members: dict[str, set[str]] = {}
-
+        # Group by seo_keyword - articles with same slug are same article in different languages
+        keyword_to_urls: dict[str, list[str]] = {}
         for url, (article, _) in scraped.items():
-            alternates = {url}  # Include self
-            for alt in article.get("alternate_links", []):
-                alt_href = alt["href"]
-                if alt_href in scraped:
-                    alternates.add(alt_href)
-            url_to_group_members[url] = alternates
-
-        # Merge groups that share members (transitive closure)
-        # Use union-find approach
-        parent: dict[str, str] = {}
-
-        def find(x: str) -> str:
-            if x not in parent:
-                parent[x] = x
-            if parent[x] != x:
-                parent[x] = find(parent[x])
-            return parent[x]
-
-        def union(x: str, y: str) -> None:
-            px, py = find(x), find(y)
-            if px != py:
-                parent[px] = py
-
-        # Union URLs that share alternate links
-        for url, members in url_to_group_members.items():
-            for member in members:
-                if member in scraped:
-                    union(url, member)
+            keyword = article.get("seo_keyword", "")
+            if keyword:
+                if keyword not in keyword_to_urls:
+                    keyword_to_urls[keyword] = []
+                keyword_to_urls[keyword].append(url)
 
         # Build groups: canonical_url -> [(url, article_data, language_id)]
         groups: dict[str, list[tuple[str, dict[str, Any], int]]] = {}
-        for url in scraped:
-            root = find(url)
-            if root not in groups:
+        for keyword, urls in keyword_to_urls.items():
+            if urls:
+                root = urls[0]  # Use first URL as canonical
                 groups[root] = []
-            article, lang_id = scraped[url]
-            groups[root].append((url, article, lang_id))
+                for url in urls:
+                    article_data, lang_id = scraped[url]
+                    groups[root].append((url, article_data, lang_id))
 
         print(f"  Found {len(groups)} unique articles (across all languages)")
 
@@ -764,18 +740,14 @@ def migrate(config: dict[str, Any]) -> None:
             group_cats: dict[str, dict[int, dict[str, Any]]] = {}
 
             for url, article, lang_id in articles:
-                actual_lang_id = lang_id
-                for alt in article.get("alternate_links", []):
-                    hreflang = alt.get("hreflang", "")
-                    if hreflang in hreflang_to_lang_id:
-                        actual_lang_id = hreflang_to_lang_id[hreflang]
-                        break
-
+                # Use lang_id directly - it's already correct from config
+                if article.get("categories"):
+                    print(f"    [{lang_id}] Categories: {[c['name'] for c in article['categories']]}")
                 for cat in article.get("categories", []):
                     cat_key = cat["name"].lower()
                     if cat_key not in group_cats:
                         group_cats[cat_key] = {}
-                    group_cats[cat_key][actual_lang_id] = cat
+                    group_cats[cat_key][lang_id] = cat
 
             # Create categories and add descriptions
             for cat_key, lang_versions in group_cats.items():
@@ -790,8 +762,8 @@ def migrate(config: dict[str, Any]) -> None:
                         (0, 1, total_categories),
                     )
                     category_id = db.conn.insert_id()
-                    category_map[cat_key] = {}
-                    category_map[cat_key]["_id"] = category_id
+                    # Store: category_id and set of added language_ids
+                    category_map[cat_key] = {"id": category_id, "langs": set()}
 
                     db.execute(
                         f"""
@@ -803,17 +775,15 @@ def migrate(config: dict[str, Any]) -> None:
                     total_categories += 1
                     print(f"  + category_id={category_id}: {list(lang_versions.values())[0]['name']}")
 
-                category_id = category_map[cat_key]["_id"]
+                category_id = category_map[cat_key]["id"]
+                added_langs = category_map[cat_key]["langs"]
 
                 # Add description for each language version
                 for actual_lang_id, cat in lang_versions.items():
-                    if actual_lang_id in category_map[cat_key]:
+                    if actual_lang_id in added_langs:
                         continue  # Already added
 
-                    category_map[cat_key][actual_lang_id] = (
-                        category_id,
-                        cat["keyword"],
-                    )
+                    added_langs.add(actual_lang_id)
                     db.execute(
                         f"""
                         INSERT INTO `{prefix}blog_category_description`
@@ -834,6 +804,7 @@ def migrate(config: dict[str, Any]) -> None:
                             "",
                         ),
                     )
+                    print(f"    + description [{actual_lang_id}]: {cat['name']}")
                     if cat["keyword"]:
                         insert_seo_url(
                             db,
@@ -848,7 +819,7 @@ def migrate(config: dict[str, Any]) -> None:
                 first_cat = primary_article["categories"][0]
                 cat_key = first_cat["name"].lower()
                 if cat_key in category_map:
-                    assigned_cat_id = category_map[cat_key]["_id"]
+                    assigned_cat_id = category_map[cat_key]["id"]
 
             if assigned_cat_id == 0 and defaults.get("category_id", 0) > 0:
                 assigned_cat_id = defaults["category_id"]
