@@ -229,6 +229,17 @@ def parse_views(text: str) -> int:
     return 0
 
 
+def extract_alternate_links(soup: BeautifulSoup) -> list[dict[str, str]]:
+    """Extract alternate language links from the page head."""
+    alternates = []
+    for link in soup.find_all("link", rel="alternate"):
+        hreflang = link.get("hreflang", "")
+        href = link.get("href", "")
+        if hreflang and href:
+            alternates.append({"hreflang": hreflang, "href": href})
+    return alternates
+
+
 # ── Scrapers ──────────────────────────────────────────────────────────────────
 
 
@@ -350,6 +361,9 @@ def scrape_article(
     # Extract SEO keyword from original URL
     seo_keyword = extract_keyword_from_url(article_url)
 
+    # Extract alternate language links
+    alternate_links = extract_alternate_links(soup)
+
     # Extract categories from .p-category elements (Journal microformat)
     categories = []
     cat_elements = soup.select(".p-category")
@@ -387,6 +401,7 @@ def scrape_article(
         "url": article_url,
         "seo_keyword": seo_keyword,
         "categories": categories,
+        "alternate_links": alternate_links,
     }
 
 
@@ -459,13 +474,22 @@ def migrate(config: dict[str, Any]) -> None:
         follow_redirects=True,
     )
 
-    sort_order_base = defaults["sort_order"]
     store_id = defaults["store_id"]
     total_posts = 0
     total_categories = 0
 
+    # Build hreflang -> language_id mapping from config
+    hreflang_to_lang_id: dict[str, int] = {}
+    for lang_cfg in config["languages"]:
+        # Map both the code and common hreflang patterns
+        code = lang_cfg["code"]
+        lang_id = lang_cfg["language_id"]
+        hreflang_to_lang_id[code] = lang_id
+        # Also map without region (e.g., "en" from "en-gb")
+        if "-" in code:
+            hreflang_to_lang_id[code.split("-")[0]] = lang_id
+
     # Track category_id -> keyword mapping for SEO URLs across languages
-    # Key: category name (lowercase), Value: {language_id: (category_id, keyword)}
     category_map: dict[str, dict[int, tuple[int, str]]] = {}
 
     try:
@@ -473,24 +497,18 @@ def migrate(config: dict[str, Any]) -> None:
             assert db is not None
             prefix = db.prefix
             print("\n[0] Cleaning blog tables...")
-            # Clean blog post related tables
             db.execute(f"TRUNCATE TABLE `{prefix}blog_post`")
             db.execute(f"TRUNCATE TABLE `{prefix}blog_post_description`")
             db.execute(f"TRUNCATE TABLE `{prefix}blog_post_to_store`")
             db.execute(f"TRUNCATE TABLE `{prefix}blog_post_to_category`")
-            # Clean blog category related tables
             db.execute(f"TRUNCATE TABLE `{prefix}blog_category`")
             db.execute(f"TRUNCATE TABLE `{prefix}blog_category_description`")
             db.execute(f"TRUNCATE TABLE `{prefix}blog_category_to_store`")
-            
-            # Optional category tables (may not exist in all versions)
             for opt_table in ["blog_category_path", "blog_category_to_layout"]:
                 try:
                     db.execute(f"TRUNCATE TABLE `{prefix}{opt_table}`")
                 except Exception:
                     pass
-
-            # Clean blog SEO URLs for blog posts and categories
             db.execute(
                 f"DELETE FROM `{prefix}blog_seo_url` WHERE `query` LIKE %s OR `query` LIKE %s",
                 ("blog_post_id=%", "blog_category_id=%"),
@@ -500,170 +518,199 @@ def migrate(config: dict[str, Any]) -> None:
         elif clean:
             print("\n[0] [DRY] Would clean blog tables.")
 
+        # ── Phase 1: Collect all article URLs from all languages ────────
+        print("\n[1] Collecting article URLs from all languages...")
+        # url_to_lang: dict[str, int] - URL -> primary language_id (from listing)
+        url_to_lang: dict[str, int] = {}
+        # lang_to_urls: dict[int, list[str]] - language_id -> list of URLs
+        lang_to_urls: dict[int, list[str]] = {}
+
         for lang_cfg in config["languages"]:
             code = lang_cfg["code"]
             index_url = lang_cfg["index_url"]
             language_id = lang_cfg["language_id"]
 
-            print(f"\n{'=' * 60}")
-            print(f"Language: {code} (lang_id={language_id})")
-            print(f"Index:   {base_url}{index_url}")
-            print(f"{'=' * 60}")
+            print(f"\n  Language: {code} (lang_id={language_id})")
+            print(f"  Index:   {base_url}{index_url}")
 
-            # ── 2. Scrape article listing ────────────────────────────────
-            print("\n[2] Scraping article listing...")
             article_urls = scrape_listing(client, base_url, index_url, selectors)
-            print(f"  Total articles: {len(article_urls)}")
+            print(f"  Found {len(article_urls)} articles")
 
-            if not article_urls:
-                print("  No articles found — skipping language.")
+            lang_to_urls[language_id] = article_urls
+            for url in article_urls:
+                if url not in url_to_lang:
+                    url_to_lang[url] = language_id
+
+        # ── Phase 2: Scrape articles and group by alternate links ──────
+        print("\n[2] Scraping articles and grouping by language versions...")
+        # Store scraped article data: url -> (article_data, language_id)
+        scraped: dict[str, tuple[dict[str, Any], int]] = {}
+
+        all_urls = set()
+        for urls in lang_to_urls.values():
+            all_urls.update(urls)
+
+        for idx, url in enumerate(sorted(all_urls), 1):
+            lang_id = url_to_lang.get(url, config["languages"][0]["language_id"])
+            print(f"\n  [{idx}/{len(all_urls)}] {url} (lang_id={lang_id})")
+
+            article = scrape_article(client, url, selectors)
+            if article is None:
                 continue
 
-            # ── 3. Scrape each article ───────────────────────────────────
-            print(f"\n[3] Scraping {len(article_urls)} articles...")
-            for idx, article_url in enumerate(article_urls):
-                sort_order = sort_order_base + idx
-                print(f"\n  [{idx + 1}/{len(article_urls)}] {article_url}")
+            scraped[url] = (article, lang_id)
+            print(f"    Title: {article['title'][:80]}")
+            print(f"    Alternates: {len(article.get('alternate_links', []))}")
 
-                article = scrape_article(client, article_url, selectors)
-                if article is None:
+            time.sleep(src_cfg["delay"])
+
+        # ── Phase 3: Group articles by alternate links ──────────────────
+        print("\n[3] Grouping articles by alternate links...")
+
+        # Build graph: URLs that reference each other via alternate links are connected
+        # First, build a mapping from URL -> set of all URLs in same group
+        url_to_group_members: dict[str, set[str]] = {}
+
+        for url, (article, _) in scraped.items():
+            alternates = {url}  # Include self
+            for alt in article.get("alternate_links", []):
+                alt_href = alt["href"]
+                if alt_href in scraped:
+                    alternates.add(alt_href)
+            url_to_group_members[url] = alternates
+
+        # Merge groups that share members (transitive closure)
+        # Use union-find approach
+        parent: dict[str, str] = {}
+
+        def find(x: str) -> str:
+            if x not in parent:
+                parent[x] = x
+            if parent[x] != x:
+                parent[x] = find(parent[x])
+            return parent[x]
+
+        def union(x: str, y: str) -> None:
+            px, py = find(x), find(y)
+            if px != py:
+                parent[px] = py
+
+        # Union URLs that share alternate links
+        for url, members in url_to_group_members.items():
+            for member in members:
+                if member in scraped:
+                    union(url, member)
+
+        # Build groups: canonical_url -> [(url, article_data, language_id)]
+        groups: dict[str, list[tuple[str, dict[str, Any], int]]] = {}
+        for url in scraped:
+            root = find(url)
+            if root not in groups:
+                groups[root] = []
+            article, lang_id = scraped[url]
+            groups[root].append((url, article, lang_id))
+
+        print(f"  Found {len(groups)} unique articles (across all languages)")
+
+        # ── Phase 4: Insert posts with multi-language descriptions ──────
+        print("\n[4] Inserting posts with multi-language descriptions...")
+
+        if dry_run:
+            for root, articles in groups.items():
+                print(f"\n  Group: {root}")
+                for url, article, lang_id in articles:
+                    print(f"    [{lang_id}] {article['title'][:60]}")
+                print(f"    Would create 1 post with {len(articles)} descriptions")
+            print(f"\n  Total: {len(groups)} posts would be created")
+            return
+
+        assert db is not None
+        prefix = db.prefix
+        sort_order_base = defaults["sort_order"]
+
+        for group_idx, (root, articles) in enumerate(groups.items(), 1):
+            print(f"\n  [{group_idx}/{len(groups)}] Group: {root}")
+            for url, article, lang_id in articles:
+                print(f"    [{lang_id}] {article['title'][:60]}")
+
+            # Use first article's data for main post fields
+            primary_url, primary_article, primary_lang_id = articles[0]
+
+            # Rewrite images in primary content (use for all languages as base)
+            content_soup = BeautifulSoup(primary_article["content"], "html.parser")
+            images = content_soup.find_all("img")
+            main_image: str | None = None
+
+            for img in images:
+                src = img.get("src") or ""
+                if not src:
                     continue
+                img_url = urljoin(primary_url, src)
+                print(f"    Image: {img_url[:100]}...")
+                rel_path = download_image(client, img_url, image_dir, image_base)
+                if rel_path:
+                    img["src"] = f"image/{rel_path}"
+                    if main_image is None:
+                        main_image = rel_path
+                    if img.get("data-src"):
+                        img["data-src"] = f"image/{rel_path}"
 
-                print(f"    Title:    {article['title'][:80]}")
-                print(f"    Views:    {article['views']}")
-                print(f"    Slug:     {article['seo_keyword']}")
-                print(f"    Content:  {len(article['content'])} chars")
+            rewritten_content = (
+                content_soup.decode_contents() if images else primary_article["content"]
+            )
 
-                # ── Create categories from article data ──────────────────
-                if article.get("categories") and not dry_run:
-                    assert db is not None
-                    prefix = db.prefix
-                    for cat in article["categories"]:
-                        cat_name_key = cat["name"].lower()
+            # Insert post (once per group)
+            sort_order = sort_order_base + group_idx
+            db.execute(
+                f"""
+                INSERT INTO `{prefix}blog_post`
+                (author_id, image, status, featured, allow_comments,
+                 sort_order, views, date_published, date_added, date_modified)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, NOW(), NOW(), NOW())
+                """,
+                (
+                    defaults["author_id"],
+                    main_image or "",
+                    defaults["status"],
+                    0,
+                    defaults["allow_comments"],
+                    sort_order,
+                    primary_article["views"],
+                ),
+            )
+            post_id = db.conn.insert_id()
+            print(f"    post_id: {post_id}")
 
-                        if cat_name_key not in category_map:
-                            # Create new category (shared across languages)
-                            db.execute(
-                                f"""
-                                INSERT INTO `{prefix}blog_category`
-                                (parent_id, status, sort_order, date_added, date_modified)
-                                VALUES (%s, %s, %s, NOW(), NOW())
-                                """,
-                                (0, 1, total_categories),
-                            )
-                            category_id = db.conn.insert_id()
-                            category_map[cat_name_key] = {}
+            # Insert description for each language
+            for url, article, lang_id in articles:
+                # Rewrite content for this language (may have different images)
+                lang_content_soup = BeautifulSoup(article["content"], "html.parser")
+                lang_images = lang_content_soup.find_all("img")
+                lang_main_image = main_image
 
-                            # Category-to-store
-                            db.execute(
-                                f"""
-                                INSERT IGNORE INTO `{prefix}blog_category_to_store`
-                                (category_id, store_id) VALUES (%s, %s)
-                                """,
-                                (category_id, store_id),
-                            )
-
-                            total_categories += 1
-                            print(f"  + category_id={category_id}: {cat['name']}")
-                        else:
-                            # Get existing category_id from first language entry
-                            category_id = next(
-                                iter(category_map[cat_name_key].values())
-                            )[0]
-
-                        # Store mapping for this language
-                        category_map[cat_name_key][language_id] = (
-                            category_id,
-                            cat["keyword"],
-                        )
-
-                        # Category description (per language)
-                        db.execute(
-                            f"""
-                            INSERT INTO `{prefix}blog_category_description`
-                            (category_id, language_id, name, description,
-                             meta_title, meta_description, meta_keyword)
-                            VALUES (%s, %s, %s, %s, %s, %s, %s)
-                            ON DUPLICATE KEY UPDATE
-                                name = VALUES(name),
-                                meta_title = VALUES(meta_title)
-                            """,
-                            (
-                                category_id,
-                                language_id,
-                                cat["name"],
-                                "",
-                                cat["name"],
-                                "",
-                                "",
-                            ),
-                        )
-
-                        # Category SEO URL (per language)
-                        if cat["keyword"]:
-                            insert_seo_url(
-                                db,
-                                f"blog_category_id={category_id}",
-                                cat["keyword"],
-                                store_id,
-                                language_id,
-                            )
-
-                    db.commit()
-                elif article.get("categories"):
-                    for cat in article["categories"]:
-                        print(f"  [DRY] Would create category: {cat['name']}")
-
-                if dry_run:
-                    continue
-
-                # Rewrite images in content
-                assert db is not None
-                content_soup = BeautifulSoup(article["content"], "html.parser")
-                images = content_soup.find_all("img")
-                main_image: str | None = None
-
-                for img in images:
+                for img in lang_images:
                     src = img.get("src") or ""
                     if not src:
                         continue
-                    img_url = urljoin(article_url, src)
-                    print(f"    Image:    {img_url[:100]}...")
+                    img_url = urljoin(url, src)
                     rel_path = download_image(client, img_url, image_dir, image_base)
                     if rel_path:
                         img["src"] = f"image/{rel_path}"
-                        if main_image is None:
-                            main_image = rel_path
-                        if img.get("data-src"):
-                            img["data-src"] = f"image/{rel_path}"
+                        if lang_main_image is None:
+                            lang_main_image = rel_path
 
-                rewritten_content = (
-                    content_soup.decode_contents() if images else article["content"]
+                lang_content = (
+                    lang_content_soup.decode_contents() if lang_images else article["content"]
                 )
 
-                # Insert post
-                prefix = db.prefix
-                db.execute(
-                    f"""
-                    INSERT INTO `{prefix}blog_post`
-                    (author_id, image, status, featured, allow_comments,
-                     sort_order, views, date_published, date_added, date_modified)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, NOW(), NOW(), NOW())
-                    """,
-                    (
-                        defaults["author_id"],
-                        main_image or "",
-                        defaults["status"],
-                        0,
-                        defaults["allow_comments"],
-                        sort_order,
-                        article["views"],
-                    ),
-                )
-                post_id = db.conn.insert_id()
-                print(f"    post_id:  {post_id}")
+                # Determine language_id from alternate links if possible
+                actual_lang_id = lang_id
+                for alt in article.get("alternate_links", []):
+                    hreflang = alt.get("hreflang", "")
+                    if hreflang in hreflang_to_lang_id:
+                        actual_lang_id = hreflang_to_lang_id[hreflang]
+                        break
 
-                # Post description
                 db.execute(
                     f"""
                     INSERT INTO `{prefix}blog_post_description`
@@ -680,72 +727,133 @@ def migrate(config: dict[str, Any]) -> None:
                     """,
                     (
                         post_id,
-                        language_id,
+                        actual_lang_id,
                         article["title"],
                         article["description"],
-                        rewritten_content,
+                        lang_content,
                         article["meta_title"],
                         article["meta_description"],
                         article["meta_keyword"],
                     ),
                 )
 
-                # Post-to-store
-                db.execute(
-                    f"""
-                    INSERT IGNORE INTO `{prefix}blog_post_to_store`
-                    (post_id, store_id) VALUES (%s, %s)
-                    """,
-                    (post_id, store_id),
-                )
-
-                # Post-to-category — assign from article's categories
-                assigned_cat_id = 0
-                if article.get("categories"):
-                    # Use first category from the article
-                    first_cat = article["categories"][0]
-                    cat_name_key = first_cat["name"].lower()
-                    if (
-                        cat_name_key in category_map
-                        and language_id in category_map[cat_name_key]
-                    ):
-                        assigned_cat_id = category_map[cat_name_key][language_id][0]
-
-                # Fallback: use default category_id from config
-                if assigned_cat_id == 0 and defaults.get("category_id", 0) > 0:
-                    assigned_cat_id = defaults["category_id"]
-
-                if assigned_cat_id > 0:
-                    db.execute(
-                        f"""
-                        INSERT IGNORE INTO `{prefix}blog_post_to_category`
-                        (post_id, category_id) VALUES (%s, %s)
-                        """,
-                        (post_id, assigned_cat_id),
-                    )
-                    print(f"    category: {assigned_cat_id}")
-
-                # Post SEO URL
+                # SEO URL for this language version
                 if article["seo_keyword"]:
                     insert_seo_url(
                         db,
                         f"blog_post_id={post_id}",
                         article["seo_keyword"],
                         store_id,
-                        language_id,
+                        actual_lang_id,
                     )
 
-                db.commit()
-                total_posts += 1
-                time.sleep(src_cfg["delay"])
+            # Post-to-store
+            db.execute(
+                f"""
+                INSERT IGNORE INTO `{prefix}blog_post_to_store`
+                (post_id, store_id) VALUES (%s, %s)
+                """,
+                (post_id, store_id),
+            )
+
+            # Post-to-category (use primary article's categories)
+            assigned_cat_id = 0
+            if primary_article.get("categories"):
+                first_cat = primary_article["categories"][0]
+                cat_name_key = first_cat["name"].lower()
+
+                if cat_name_key not in category_map:
+                    # Create new category
+                    db.execute(
+                        f"""
+                        INSERT INTO `{prefix}blog_category`
+                        (parent_id, status, sort_order, date_added, date_modified)
+                        VALUES (%s, %s, %s, NOW(), NOW())
+                        """,
+                        (0, 1, total_categories),
+                    )
+                    category_id = db.conn.insert_id()
+                    category_map[cat_name_key] = {}
+
+                    db.execute(
+                        f"""
+                        INSERT IGNORE INTO `{prefix}blog_category_to_store`
+                        (category_id, store_id) VALUES (%s, %s)
+                        """,
+                        (category_id, store_id),
+                    )
+                    total_categories += 1
+                    print(f"  + category_id={category_id}: {first_cat['name']}")
+                else:
+                    category_id = next(iter(category_map[cat_name_key].values()))[0]
+
+                # Category description for each language in the group
+                for url, article, lang_id in articles:
+                    for cat in article.get("categories", []):
+                        if cat["name"].lower() == cat_name_key:
+                            actual_lang_id = lang_id
+                            for alt in article.get("alternate_links", []):
+                                hreflang = alt.get("hreflang", "")
+                                if hreflang in hreflang_to_lang_id:
+                                    actual_lang_id = hreflang_to_lang_id[hreflang]
+                                    break
+
+                            category_map[cat_name_key][actual_lang_id] = (
+                                category_id,
+                                cat["keyword"],
+                            )
+                            db.execute(
+                                f"""
+                                INSERT INTO `{prefix}blog_category_description`
+                                (category_id, language_id, name, description,
+                                 meta_title, meta_description, meta_keyword)
+                                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                                ON DUPLICATE KEY UPDATE
+                                    name = VALUES(name),
+                                    meta_title = VALUES(meta_title)
+                                """,
+                                (
+                                    category_id,
+                                    actual_lang_id,
+                                    cat["name"],
+                                    "",
+                                    cat["name"],
+                                    "",
+                                    "",
+                                ),
+                            )
+                            if cat["keyword"]:
+                                insert_seo_url(
+                                    db,
+                                    f"blog_category_id={category_id}",
+                                    cat["keyword"],
+                                    store_id,
+                                    actual_lang_id,
+                                )
+
+                assigned_cat_id = category_id
+
+            if assigned_cat_id == 0 and defaults.get("category_id", 0) > 0:
+                assigned_cat_id = defaults["category_id"]
+
+            if assigned_cat_id > 0:
+                db.execute(
+                    f"""
+                    INSERT IGNORE INTO `{prefix}blog_post_to_category`
+                    (post_id, category_id) VALUES (%s, %s)
+                    """,
+                    (post_id, assigned_cat_id),
+                )
+                print(f"    category: {assigned_cat_id}")
+
+            db.commit()
+            total_posts += 1
 
         # ── Summary ─────────────────────────────────────────────────────
         print(f"\n{'=' * 60}")
-        print(f"Migration complete.")
+        print("Migration complete.")
         print(f"  Categories: {total_categories}")
         print(f"  Posts:      {total_posts}")
-        if dry_run:
-            print("  DRY RUN — no changes were made.")
         print(f"{'=' * 60}")
 
     except Exception:
