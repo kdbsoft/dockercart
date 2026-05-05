@@ -61,17 +61,6 @@ selectors:
     # Article body HTML
     content: ".post-content, .post-details .post-detail, .journal-post-content, article .content"
 
-# ── Target database (DockerCart) ─────────────────────────────────────────────
-# These values are OPTIONAL. If omitted, they are loaded from environment
-# variables (DB_HOSTNAME, DB_PORT, etc.).
-target:
-  host: "mariadb"
-  port: 3306
-  user: "dockercart"
-  password: "dockercart"
-  database: "dockercart"
-  prefix: "oc_"
-
 # ── Defaults for new posts ───────────────────────────────────────────────────
 defaults:
   # Author ID in oc_blog_author table
