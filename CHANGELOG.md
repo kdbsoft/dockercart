@@ -1,3 +1,9 @@
+## [1.4.11](https://github.com/mathflow-bit/dockercart/compare/v1.4.10...v1.4.11) (2026-05-05)
+
+### Bug Fixes
+
+* group articles by alternate links ([12209a0](https://github.com/mathflow-bit/dockercart/commit/12209a02bb09d86c8399c5aa87e53d13a7197e73))
+
 ## [1.4.10](https://github.com/mathflow-bit/dockercart/compare/v1.4.9...v1.4.10) (2026-05-05)
 
 ### Bug Fixes
