@@ -1,3 +1,9 @@
+## [1.4.6](https://github.com/mathflow-bit/dockercart/compare/v1.4.5...v1.4.6) (2026-05-05)
+
+### Bug Fixes
+
+* cascade blog cache invalidation across entities ([c175cc0](https://github.com/mathflow-bit/dockercart/commit/c175cc08078d1f2d0b357aff80bd300d5ca4cb72))
+
 ## [1.4.5](https://github.com/mathflow-bit/dockercart/compare/v1.4.4...v1.4.5) (2026-05-05)
 
 ### Bug Fixes
