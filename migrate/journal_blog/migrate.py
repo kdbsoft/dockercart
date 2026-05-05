@@ -36,7 +36,8 @@ from bs4 import BeautifulSoup
 
 # Try to load environment variables from .env file if it exists
 try:
-    from dotenv import load_dotenv, find_dotenv
+    from dotenv import find_dotenv, load_dotenv
+
     load_dotenv(find_dotenv())
 except ImportError:
     # Fallback: search for .env in current and parent directories
@@ -50,9 +51,12 @@ except ImportError:
                         line = line.strip()
                         if line and not line.startswith("#") and "=" in line:
                             key, value = line.split("=", 1)
-                            os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
+                            os.environ.setdefault(
+                                key.strip(), value.strip().strip('"').strip("'")
+                            )
                 return
             curr = curr.parent
+
     _load_env_fallback()
 
 # ── Database helpers ──────────────────────────────────────────────────────────
@@ -361,8 +365,18 @@ def scrape_article(
     # Extract SEO keyword from original URL
     seo_keyword = extract_keyword_from_url(article_url)
 
-    # Extract alternate language links
-    alternate_links = extract_alternate_links(soup)
+    # Extract alternate language links and resolve to absolute URLs
+    raw_alternates = extract_alternate_links(soup)
+    alternate_links = []
+    for alt in raw_alternates:
+        href = alt.get("href", "")
+        if href:
+            alternate_links.append(
+                {
+                    "hreflang": alt["hreflang"],
+                    "href": urljoin(article_url, href),
+                }
+            )
 
     # Extract categories from .p-category elements (Journal microformat)
     categories = []
@@ -406,6 +420,79 @@ def scrape_article(
 
 
 # ── DB insert helpers ─────────────────────────────────────────────────────────
+
+
+def _build_article_groups(
+    scraped: dict[str, tuple[dict[str, Any], int]],
+) -> dict[str, list[tuple[str, dict[str, Any], int]]]:
+    """Build article groups using alternate links, with keyword fallback.
+
+    Alternate links form a graph: each article links to its translations.
+    Connected components = one article in N languages.
+    Articles without alternates fall back to seo_keyword (slug) grouping.
+    """
+    # Step 1: Build undirected graph from alternate links
+    graph: dict[str, set[str]] = {}
+
+    for url, (article, _) in scraped.items():
+        if url not in graph:
+            graph[url] = set()
+        for alt in article.get("alternate_links", []):
+            alt_href = alt.get("href", "")
+            if not alt_href or alt_href == url:
+                continue  # skip self-reference
+            graph[url].add(alt_href)
+            if alt_href not in graph:
+                graph[alt_href] = set()
+            graph[alt_href].add(url)
+
+    # Step 2: Find connected components via BFS
+    visited: set[str] = set()
+    groups: dict[str, list[tuple[str, dict[str, Any], int]]] = {}
+
+    for url in list(graph.keys()):
+        if url in visited:
+            continue
+        component: list[tuple[str, dict[str, Any], int]] = []
+        queue = [url]
+        visited.add(url)
+        while queue:
+            current = queue.pop(0)
+            if current in scraped:
+                component.append((current, *scraped[current]))
+            for neighbor in graph.get(current, set()):
+                if neighbor not in visited:
+                    visited.add(neighbor)
+                    queue.append(neighbor)
+
+        if component:
+            root = component[0][0]
+            groups[root] = component
+            langs = [(u, d.get("title", "")[:40]) for u, d, _ in component]
+            print(f"    Alternate-linked group: {len(component)} languages")
+            for u, t in langs:
+                print(f"      - {t}")
+
+    # Step 3: Ungrouped articles — try keyword match, else singleton
+    for url, (article_data, lang_id) in scraped.items():
+        if url in visited:
+            continue
+        keyword = article_data.get("seo_keyword", "")
+        matched = False
+        if keyword:
+            for root, articles in groups.items():
+                for _, a, _ in articles:
+                    if a.get("seo_keyword") and a["seo_keyword"] == keyword:
+                        groups[root].append((url, article_data, lang_id))
+                        matched = True
+                        break
+                if matched:
+                    break
+        visited.add(url)
+        if not matched:
+            groups[url] = [(url, article_data, lang_id)]
+
+    return groups
 
 
 def insert_seo_url(
@@ -568,27 +655,10 @@ def migrate(config: dict[str, Any]) -> None:
 
             time.sleep(src_cfg["delay"])
 
-        # ── Phase 3: Group articles by SEO keyword (slug) ─────────────
-        print("\n[3] Grouping articles by SEO keyword (slug)...")
+        # ── Phase 3: Group articles by alternate links ────────────────
+        print("\n[3] Grouping articles by alternate links...")
 
-        # Group by seo_keyword - articles with same slug are same article in different languages
-        keyword_to_urls: dict[str, list[str]] = {}
-        for url, (article, _) in scraped.items():
-            keyword = article.get("seo_keyword", "")
-            if keyword:
-                if keyword not in keyword_to_urls:
-                    keyword_to_urls[keyword] = []
-                keyword_to_urls[keyword].append(url)
-
-        # Build groups: canonical_url -> [(url, article_data, language_id)]
-        groups: dict[str, list[tuple[str, dict[str, Any], int]]] = {}
-        for keyword, urls in keyword_to_urls.items():
-            if urls:
-                root = urls[0]  # Use first URL as canonical
-                groups[root] = []
-                for url in urls:
-                    article_data, lang_id = scraped[url]
-                    groups[root].append((url, article_data, lang_id))
+        groups = _build_article_groups(scraped)
 
         print(f"  Found {len(groups)} unique articles (across all languages)")
 
@@ -680,7 +750,9 @@ def migrate(config: dict[str, Any]) -> None:
                             lang_main_image = rel_path
 
                 lang_content = (
-                    lang_content_soup.decode_contents() if lang_images else article["content"]
+                    lang_content_soup.decode_contents()
+                    if lang_images
+                    else article["content"]
                 )
 
                 # Determine language_id from alternate links if possible
@@ -739,19 +811,66 @@ def migrate(config: dict[str, Any]) -> None:
             # Post-to-category: add categories from parsed HTML
             assigned_cat_id = 0
 
-            # Collect all unique categories with their language versions
-            # cat_key -> {lang_id: cat_data}
-            group_cats: dict[str, dict[int, dict[str, Any]]] = {}
-
+            # ── Cross-language category linking ────────────────────
+            # Collect categories per language within this article group:
+            lang_cats: dict[int, list[dict[str, Any]]] = {}
             for url, article, lang_id in articles:
-                # Use lang_id directly - it's already correct from config
                 if article.get("categories"):
-                    print(f"    [{lang_id}] Categories: {[c['name'] for c in article['categories']]}")
-                for cat in article.get("categories", []):
-                    cat_key = cat["name"].lower()
-                    if cat_key not in group_cats:
-                        group_cats[cat_key] = {}
-                    group_cats[cat_key][lang_id] = cat
+                    print(
+                        f"    [{lang_id}] Categories: {[c['name'] for c in article['categories']]}"
+                    )
+                lang_cats.setdefault(lang_id, [])
+                lang_cats[lang_id].extend(article.get("categories", []))
+
+            # Build cross-language category mapping using keyword as key.
+            # If URLs share the same keyword across languages, they merge naturally.
+            # If keywords differ, try position-based linking as fallback.
+            cat_translations: dict[str, dict[int, dict[str, Any]]] = {}
+
+            # Step 1: Group by keyword from URL
+            for lang_id, cats in lang_cats.items():
+                for cat in cats:
+                    kw = cat.get("keyword", "") or slugify(cat["name"])
+                    if kw not in cat_translations:
+                        cat_translations[kw] = {}
+                    cat_translations[kw][lang_id] = cat
+
+            # Step 2: Position-based linking for categories with different
+            # keywords across languages but same count per language.
+            lang_ids_with_cats = [lid for lid, cats in lang_cats.items() if cats]
+            if len(lang_ids_with_cats) >= 2:
+                unique_counts = {len(lang_cats[lid]) for lid in lang_ids_with_cats}
+                if len(unique_counts) == 1:
+                    count = unique_counts.pop()
+                    for idx in range(count):
+                        cats_at_idx = [
+                            lang_cats[lid][idx] for lid in lang_ids_with_cats
+                        ]
+                        keywords = {
+                            c.get("keyword", "") or slugify(c["name"])
+                            for c in cats_at_idx
+                        }
+                        # If all keywords differ, merge them into one canonical entry
+                        if len(keywords) == len(cats_at_idx):
+                            first_cat = cats_at_idx[0]
+                            first_kw = first_cat.get("keyword", "") or slugify(
+                                first_cat["name"]
+                            )
+                            for c in cats_at_idx[1:]:
+                                other_kw = c.get("keyword", "") or slugify(c["name"])
+                                if other_kw in cat_translations:
+                                    # Merge other keyword's entries into canonical
+                                    for lid, cat_data in cat_translations[
+                                        other_kw
+                                    ].items():
+                                        cat_translations.setdefault(first_kw, {})[
+                                            lid
+                                        ] = cat_data
+                                    del cat_translations[other_kw]
+
+            # Collect all unique categories with their language versions
+            # canonical_key -> {lang_id: cat_data}
+            group_cats: dict[str, dict[int, dict[str, Any]]] = cat_translations
 
             # Create categories and add descriptions
             for cat_key, lang_versions in group_cats.items():
@@ -777,7 +896,8 @@ def migrate(config: dict[str, Any]) -> None:
                         (category_id, store_id),
                     )
                     total_categories += 1
-                    print(f"  + category_id={category_id}: {list(lang_versions.values())[0]['name']}")
+                    first_name = list(lang_versions.values())[0]["name"]
+                    print(f"  + category_id={category_id}: {first_name}")
 
                 category_id = category_map[cat_key]["id"]
                 added_langs = category_map[cat_key]["langs"]
@@ -821,7 +941,8 @@ def migrate(config: dict[str, Any]) -> None:
             # Map post to first category of primary article
             if primary_article.get("categories"):
                 first_cat = primary_article["categories"][0]
-                cat_key = first_cat["name"].lower()
+                first_kw = first_cat.get("keyword", "") or slugify(first_cat["name"])
+                cat_key = first_kw
                 if cat_key in category_map:
                     assigned_cat_id = category_map[cat_key]["id"]
 
