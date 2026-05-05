@@ -59,11 +59,11 @@ class ModelExtensionModuleDockercartBlogCategory extends Model {
 			}
 		}
 
-		$this->cache->delete('blog.category.');
-		$this->cache->delete('blog.post.');
-		$this->cache->delete('blog.popular.');
-		$this->cache->delete('blog.recent.');
-		$this->cache->delete('blog.archive.');
+		$this->cache->delete('blog.category');
+		$this->cache->delete('blog.post');
+		$this->cache->delete('blog.popular');
+		$this->cache->delete('blog.recent');
+		$this->cache->delete('blog.archive');
 		return $category_id;
 	}
 
@@ -100,11 +100,11 @@ class ModelExtensionModuleDockercartBlogCategory extends Model {
 					store_id = '" . (int)$store_id . "'");
 			}
 		}
-		$this->cache->delete('blog.category.');
-		$this->cache->delete('blog.post.');
-		$this->cache->delete('blog.popular.');
-		$this->cache->delete('blog.recent.');
-		$this->cache->delete('blog.archive.');
+		$this->cache->delete('blog.category');
+		$this->cache->delete('blog.post');
+		$this->cache->delete('blog.popular');
+		$this->cache->delete('blog.recent');
+		$this->cache->delete('blog.archive');
 
 		// Update SEO URLs (blog-specific)
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "blog_seo_url` WHERE query = 'blog_category_id=" . (int)$category_id . "'");
@@ -129,11 +129,11 @@ class ModelExtensionModuleDockercartBlogCategory extends Model {
 			$this->model_design_seo_url->invalidateSeoUrlCache();
 		}
 
-		$this->cache->delete('blog.category.');
-		$this->cache->delete('blog.post.');
-		$this->cache->delete('blog.popular.');
-		$this->cache->delete('blog.recent.');
-		$this->cache->delete('blog.archive.');
+		$this->cache->delete('blog.category');
+		$this->cache->delete('blog.post');
+		$this->cache->delete('blog.popular');
+		$this->cache->delete('blog.recent');
+		$this->cache->delete('blog.archive');
 	}
 
 	public function deleteCategory($category_id) {
@@ -144,11 +144,11 @@ class ModelExtensionModuleDockercartBlogCategory extends Model {
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "blog_seo_url` WHERE query = 'blog_category_id=" . (int)$category_id . "'");
 		$this->load->model('design/seo_url');
 		$this->model_design_seo_url->invalidateSeoUrlCache();
-		$this->cache->delete('blog.category.');
-		$this->cache->delete('blog.post.');
-		$this->cache->delete('blog.popular.');
-		$this->cache->delete('blog.recent.');
-		$this->cache->delete('blog.archive.');
+		$this->cache->delete('blog.category');
+		$this->cache->delete('blog.post');
+		$this->cache->delete('blog.popular');
+		$this->cache->delete('blog.recent');
+		$this->cache->delete('blog.archive');
 	}
 
 	public function getCategory($category_id) {
