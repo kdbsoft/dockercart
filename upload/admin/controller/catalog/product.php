@@ -1060,6 +1060,23 @@ class ControllerCatalogProduct extends Controller {
 			);
 		}
 
+		if (isset($this->request->post['product_customer_group_price'])) {
+			$product_customer_group_prices = $this->request->post['product_customer_group_price'];
+		} elseif (isset($this->request->get['product_id'])) {
+			$product_customer_group_prices = $this->model_catalog_product->getProductCustomerGroupPrices($this->request->get['product_id']);
+		} else {
+			$product_customer_group_prices = array();
+		}
+
+		$data['product_customer_group_prices'] = array();
+
+		foreach ($product_customer_group_prices as $product_customer_group_price) {
+			$data['product_customer_group_prices'][] = array(
+				'customer_group_id' => $product_customer_group_price['customer_group_id'],
+				'price'             => $product_customer_group_price['price']
+			);
+		}
+
 		// Image
 		if (isset($this->request->post['image'])) {
 			$data['image'] = $this->request->post['image'];
