@@ -27,6 +27,7 @@ class ControllerStartupSeoUrl extends Controller
     private $seoKeywordsByQueryAny = [];
     private $seoQueriesByKeyword = [];
     private $seoQueriesByKeywordAny = [];
+    private $seoQueriesByKeywordAll = []; // [language_id][keyword] => [query1, query2, ...]
     private $seoKeywordQueryPairs = [];
     private $blogKeywordsByQuery = [];
     private $blogKeywordsByQueryAny = [];
@@ -515,6 +516,25 @@ class ControllerStartupSeoUrl extends Controller
     }
 
     /**
+     * Resolve ALL queries for a given keyword (handles duplicate keywords).
+     * Returns an array of query strings like ["category_id=5", "category_id=12"]
+     * or an empty array if none found.
+     *
+     * @param string $keyword
+     * @return array
+     */
+    private function getAllSeoQueriesByKeyword($keyword)
+    {
+        $this->loadSeoUrlCache();
+
+        if (isset($this->seoQueriesByKeywordAll[$this->languageId][$keyword])) {
+            return $this->seoQueriesByKeywordAll[$this->languageId][$keyword];
+        }
+
+        return [];
+    }
+
+    /**
      * Resolve query by SEO keyword from blog_seo_url table.
      */
     private function getBlogSeoQueryByKeyword($keyword)
@@ -636,6 +656,18 @@ class ControllerStartupSeoUrl extends Controller
                 $payload["keyword_query_pairs"][
                     $keyword . "||" . $query_value
                 ] = true;
+
+                // Populate all-queries map (allows duplicate keywords for different entities)
+                if (
+                    !isset(
+                        $payload["keyword_to_queries"][$language_id][$keyword],
+                    )
+                ) {
+                    $payload["keyword_to_queries"][$language_id][$keyword] = [];
+                }
+                $payload["keyword_to_queries"][$language_id][
+                    $keyword
+                ][] = $query_value;
             }
 
             $this->cache->set($cache_key, $payload);
@@ -652,6 +684,9 @@ class ControllerStartupSeoUrl extends Controller
             : [];
         $this->seoQueriesByKeywordAny = isset($payload["keyword_to_query_any"])
             ? $payload["keyword_to_query_any"]
+            : [];
+        $this->seoQueriesByKeywordAll = isset($payload["keyword_to_queries"])
+            ? $payload["keyword_to_queries"]
             : [];
         $this->seoKeywordQueryPairs = isset($payload["keyword_query_pairs"])
             ? $payload["keyword_query_pairs"]
@@ -1211,7 +1246,12 @@ class ControllerStartupSeoUrl extends Controller
 
                 // Check if this is a nested category (has parent_id)
                 // If so, redirect to canonical URL with full path
-                $this->handleNestedCategoryRedirect($category_id, $keyword);
+                // Returns the resolved category_id (may be overridden if a top-level
+                // alternative with the same keyword exists)
+                $category_id = $this->handleNestedCategoryRedirect(
+                    $category_id,
+                    $keyword,
+                );
 
                 $this->request->get["path"] = $category_id;
                 $this->request->get["route"] = "product/category";
@@ -1817,9 +1857,14 @@ class ControllerStartupSeoUrl extends Controller
     }
 
     /**
-     * Handle nested category redirect
-     * If a category has a parent, redirect to the canonical URL with full breadcrumb path
-     * Prevents SEO duplicate content issue (e.g., /mac vs /desktops/mac)
+     * Handle nested category redirect logic.
+     * Returns the category_id that should be used for the request.
+     * If a top-level alternative with the same keyword exists, returns that.
+     * Otherwise, returns the original $category_id (and may redirect to full path).
+     *
+     * @param int $category_id
+     * @param string $current_keyword
+     * @return int
      */
     private function handleNestedCategoryRedirect(
         $category_id,
@@ -1827,7 +1872,7 @@ class ControllerStartupSeoUrl extends Controller
     ) {
         // Only for GET requests
         if (!$this->isGetRequest) {
-            return;
+            return $category_id;
         }
 
         // Check if category has a parent
@@ -1842,14 +1887,50 @@ class ControllerStartupSeoUrl extends Controller
         );
 
         if (!$category_query->num_rows) {
-            return; // Category not found
+            return $category_id; // Category not found
         }
 
         $parent_id = (int) $category_query->row["parent_id"];
 
         if ($parent_id === 0) {
             // This is a top-level category, no redirect needed
-            return;
+            return $category_id;
+        }
+
+        // This is a nested category - check if the same keyword also maps to a
+        // top-level category (parent_id=0). If so, prefer the top-level category
+        // instead of redirecting to the full breadcrumb path.
+        // This allows parent and child categories to share the same SEO keyword.
+        $all_queries = $this->getAllSeoQueriesByKeyword($current_keyword);
+
+        if (count($all_queries) > 1) {
+            foreach ($all_queries as $alt_query) {
+                $parts = explode("=", $alt_query, 2);
+                if (
+                    $parts[0] === "category_id" &&
+                    (int) $parts[1] !== $category_id
+                ) {
+                    // Check if this alternative category is top-level
+                    $alt_check = $this->db->query(
+                        "SELECT parent_id FROM " .
+                            DB_PREFIX .
+                            "category
+						WHERE category_id = '" .
+                            (int) $parts[1] .
+                            "'
+						LIMIT 1",
+                    );
+
+                    if (
+                        $alt_check->num_rows &&
+                        (int) $alt_check->row["parent_id"] === 0
+                    ) {
+                        // Found a top-level category with the same keyword -
+                        // use it instead of redirecting to the nested path
+                        return (int) $parts[1];
+                    }
+                }
+            }
         }
 
         // This is a nested category - we need to build its full breadcrumb path
@@ -1880,6 +1961,8 @@ class ControllerStartupSeoUrl extends Controller
             $this->response->redirect($redirect_url, 301);
             exit();
         }
+
+        return $category_id;
     }
 
     /**
