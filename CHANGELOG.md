@@ -1,3 +1,9 @@
+## [1.7.1](https://github.com/mathflow-bit/dockercart/compare/v1.7.0...v1.7.1) (2026-05-07)
+
+### Bug Fixes
+
+* retry YML fetch, fix UA text typo ([1ee80cc](https://github.com/mathflow-bit/dockercart/commit/1ee80cc28483045df1047ac9cee9d831919f95cd))
+
 ## [1.7.0](https://github.com/mathflow-bit/dockercart/compare/v1.6.1...v1.7.0) (2026-05-07)
 
 ### Features
