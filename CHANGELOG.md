@@ -1,3 +1,9 @@
+## [1.6.1](https://github.com/mathflow-bit/dockercart/compare/v1.6.0...v1.6.1) (2026-05-07)
+
+### Bug Fixes
+
+* Add main price tag to YML import profile ([6a5c7e4](https://github.com/mathflow-bit/dockercart/commit/6a5c7e4611600db7420387a56979f797a187541d))
+
 ## [1.6.0](https://github.com/mathflow-bit/dockercart/compare/v1.5.0...v1.6.0) (2026-05-07)
 
 ### Features
