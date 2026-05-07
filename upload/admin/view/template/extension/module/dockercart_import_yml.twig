@@ -453,7 +453,7 @@ function openProfileModal(profile) {
     html += '            <div class="col-sm-9"><select name="default_category_id" class="form-control">';
     html += '              <option value="0">-</option>';
     {% for category in categories %}
-    html += '              <option value="{{ category.category_id }}"' + (parseInt(profile.default_category_id || 0, 10) === {{ category.category_id }} ? ' selected' : '') + '>{{ category.name }}</option>';
+    html += '              <option value="{{ category.category_id }}"' + (parseInt(profile.default_category_id || 0, 10) === {{ category.category_id }} ? ' selected' : '') + '>{{ category.name|e('js') }}</option>';
     {% endfor %}
     html += '            </select></div>';
     html += '          </div>';
@@ -484,6 +484,16 @@ function openProfileModal(profile) {
     html += '              </label>';
     html += '            </div>';
     html += '          </div>';;
+
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label" data-toggle="tooltip" title="{{ help_cg_price_mapping }}">{{ entry_cg_price_mapping }}</label>';
+    html += '            <div class="col-sm-9">';
+    html += '              <div id="cg-mapping-rows">';
+    html += '              </div>';
+    html += '              <button type="button" class="btn btn-default btn-sm" onclick="addCgMappingRow();"><i class="fa fa-plus"></i> {{ button_add_mapping }}</button>';
+    html += '              <input type="hidden" name="customer_group_price_mapping" id="input-customer-group-price-mapping" value="" />';
+    html += '            </div>';
+    html += '          </div>';
 
     html += '          <div class="form-group">';
     html += '            <label class="col-sm-3 control-label"><span data-toggle="tooltip" title="{{ help_import_mode }}">{{ entry_import_mode }}</span></label>';
@@ -520,9 +530,12 @@ function openProfileModal(profile) {
 
     $('body').append(html);
     $('#profile-modal').modal('show');
+    renderCgMapping(profile);
 }
 
 function saveProfile() {
+  updateCgMappingJson();
+
     var payload = {};
     $('#form-profile').serializeArray().forEach(function(item) {
         payload[item.name] = item.value;
@@ -574,6 +587,67 @@ function deleteProfile(profileId) {
             showImportNotice('danger', thrownError);
         }
     });
+}
+
+var cgOptions = '';
+{% for cg in customer_groups %}
+cgOptions += '<option value="{{ cg.customer_group_id }}">{{ cg.name|e('js') }}</option>';
+{% endfor %}
+
+function renderCgMapping(profile) {
+    var container = $('#cg-mapping-rows');
+    container.empty();
+
+    var mapping = {};
+    if (profile && profile.customer_group_price_mapping) {
+        try {
+            mapping = JSON.parse(profile.customer_group_price_mapping);
+        } catch (e) {
+            mapping = {};
+        }
+    }
+
+    if (typeof mapping === 'object' && mapping !== null) {
+        Object.keys(mapping).forEach(function(tag) {
+            addCgMappingRow(tag, mapping[tag]);
+        });
+    }
+
+    updateCgMappingJson();
+}
+
+function addCgMappingRow(tag, groupId) {
+    tag = tag || '';
+    groupId = parseInt(groupId || 0, 10) || 0;
+
+    var rowId = 'cg-row-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+    var html = '<div class="cg-mapping-row" id="' + rowId + '" style="margin-bottom: 5px;">';
+    html += '<input type="text" class="form-control" style="width: 150px; display: inline-block; margin-right: 5px;" placeholder="price2" value="' + tag.replace(/"/g, '&quot;') + '" onchange="updateCgMappingJson();" />';
+    html += '<select class="form-control" style="width: 200px; display: inline-block; margin-right: 5px;" onchange="updateCgMappingJson();">' + cgOptions + '</select>';
+    html += '<button type="button" class="btn btn-danger btn-xs" onclick="removeCgMappingRow(this);"><i class="fa fa-trash"></i></button>';
+    html += '</div>';
+
+    var $row = $(html);
+    $row.find('select').val(groupId);
+    $('#cg-mapping-rows').append($row);
+    updateCgMappingJson();
+}
+
+function removeCgMappingRow(btn) {
+    $(btn).closest('.cg-mapping-row').remove();
+    updateCgMappingJson();
+}
+
+function updateCgMappingJson() {
+    var mapping = {};
+    $('#cg-mapping-rows .cg-mapping-row').each(function() {
+        var tag = $(this).find('input[type="text"]').val().trim();
+        var groupId = parseInt($(this).find('select').val(), 10) || 0;
+        if (tag !== '' && groupId > 0) {
+            mapping[tag] = groupId;
+        }
+    });
+    $('#input-customer-group-price-mapping').val(Object.keys(mapping).length > 0 ? JSON.stringify(mapping) : '');
 }
 </script>
 {{ footer }}
