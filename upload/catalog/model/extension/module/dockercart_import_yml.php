@@ -438,7 +438,7 @@ class ModelExtensionModuleDockercartImportYml extends Model {
             $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
 
-            $retryable = in_array($errno, [CURLE_PARTIAL_FILE, CURLE_HTTP2], true);
+            $retryable = in_array($errno, [CURLE_PARTIAL_FILE, 16], true);
 
             if (!$errno || !$retryable) {
                 break;
