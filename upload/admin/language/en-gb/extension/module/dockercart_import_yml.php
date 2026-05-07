@@ -56,6 +56,7 @@ $_['entry_cg_price_mapping'] = 'Customer Group Price Mapping';
 $_['entry_main_price_tag'] = 'Main Price Tag';
 $_['entry_cg_mapping_tag'] = 'YML Tag';
 $_['entry_cg_mapping_group'] = 'Customer Group';
+$_['entry_cg_mapping_currency_tag'] = 'Currency Tag';
 $_['entry_import_mode'] = 'Import Mode';
 $_['entry_profile_status'] = 'Status';
 $_['entry_cron_command'] = 'Cron command';
@@ -67,7 +68,7 @@ $_['help_feed_url'] = 'Direct URL to YML feed (Yandex Market Language)';
 $_['help_import_mode'] = 'Add only: creates new products; Add + Update: updates existing and creates new; Update only: updates existing products and skips new ones; Update prices and stock only: updates only price and quantity for existing products; Delete all then import: fully clears products, categories, and manufacturers in the database before import.';
 $_['help_load_categories'] = 'If enabled, categories from feed will be imported. If Default Category is set, imported feed categories will be created under it as child categories.';
 $_['help_allow_zero_price'] = 'If enabled, products with a price of 0 will be imported. Disabled by default.';
-$_['help_cg_price_mapping'] = 'Map YML tag names (direct child elements of offer, e.g. "price2", "price_wholesale") to customer group prices. When using this mapping, you must specify which tag to use as the main price in the "Main Price Tag" field above.';
+$_['help_cg_price_mapping'] = 'Map YML tag names (direct child elements of offer, e.g. "price2", "price_wholesale") to customer group prices. Optionally specify a "Currency Tag" — a YML tag name (e.g. "currency1", "curr") that contains the currency code for this price. If the currency differs from the profile currency, the price will be converted using feed rates or store exchange rates. When using this mapping, you must specify which tag to use as the main price in the "Main Price Tag" field above.';
 $_['help_main_price_tag'] = 'YML tag name to use as the base product price. Defaults to "price". Required when customer group price mapping is configured, as some feeds may not have a standard <price> tag but use tags like "price1", "price2" etc.';
 
 // Buttons
