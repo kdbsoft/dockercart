@@ -124,7 +124,7 @@ class ModelExtensionModuleDockercartImportYml extends Model {
                     continue;
                 }
 
-                $price = (float)$this->xmlText($offer, 'price');
+		$price = (float)$this->xmlText($offer, 'price');
                 if ($price < 0) {
                     $price = 0;
                 }
@@ -133,6 +133,24 @@ class ModelExtensionModuleDockercartImportYml extends Model {
                 if ($price == 0 && !$allow_zero_price) {
                     $summary['skipped']++;
                     continue;
+                }
+
+                $customer_group_prices = array();
+                $cg_mapping = !empty($profile['customer_group_price_mapping']) ? $profile['customer_group_price_mapping'] : '';
+                if ($cg_mapping !== '') {
+                    $mapping = json_decode($cg_mapping, true);
+                    if (is_array($mapping)) {
+                        foreach ($mapping as $tag => $group_id) {
+                            $group_id = (int)$group_id;
+                            if ($group_id <= 0) {
+                                continue;
+                            }
+                            $cg_price = $this->xmlText($offer, $tag);
+                            if ($cg_price !== '' && (float)$cg_price >= 0) {
+                                $customer_group_prices[$group_id] = (float)$cg_price;
+                            }
+                        }
+                    }
                 }
 
                 $vendor = $this->xmlText($offer, 'vendor');
@@ -161,7 +179,7 @@ class ModelExtensionModuleDockercartImportYml extends Model {
                     }
                 }
 
-                $product_data = array(
+		$product_data = array(
                     'model' => $vendor_code !== '' ? $vendor_code : ('YML-' . $offer_id),
                     'sku' => $vendor_code !== '' ? $vendor_code : $offer_id,
                     'name' => $name,
@@ -173,7 +191,8 @@ class ModelExtensionModuleDockercartImportYml extends Model {
                     'language_id' => (int)$profile['language_id'],
                     'category_id' => (int)$category_id,
                     'image' => $main_image,
-                    'additional_images' => $additional_images
+                    'additional_images' => $additional_images,
+                    'customer_group_prices' => $customer_group_prices
                 );
 
                 $existing_product_id = $this->findProductByOffer($profile_id, $offer_id);
@@ -1035,7 +1054,7 @@ class ModelExtensionModuleDockercartImportYml extends Model {
 
         $product_id = (int)$this->db->getLastId();
 
-        $this->upsertProductDescription($product_id, $data['language_id'], $data['name'], $data['description']);
+		$this->upsertProductDescription($product_id, $data['language_id'], $data['name'], $data['description']);
         $this->upsertProductStore($product_id, $data['store_id']);
         $this->upsertProductCategory($product_id, $data['category_id']);
 
@@ -1043,6 +1062,8 @@ class ModelExtensionModuleDockercartImportYml extends Model {
         if (!empty($data['additional_images'])) {
             $this->addProductImages($product_id, $data['additional_images']);
         }
+
+        $this->upsertCustomerGroupPrices($product_id, $data['customer_group_prices'] ?? array());
 
         return $product_id;
     }
@@ -1064,18 +1085,22 @@ class ModelExtensionModuleDockercartImportYml extends Model {
         $this->upsertProductStore($product_id, $data['store_id']);
         $this->upsertProductCategory($product_id, $data['category_id']);
 
-        // Update additional images if provided
+		// Update additional images if provided
         if (!empty($data['additional_images'])) {
             $this->updateProductImages($product_id, $data['additional_images']);
         }
+
+        $this->upsertCustomerGroupPrices($product_id, $data['customer_group_prices'] ?? array());
     }
 
-    private function updateProductPriceQuantity($product_id, $data) {
+	private function updateProductPriceQuantity($product_id, $data) {
         $this->db->query("UPDATE `" . DB_PREFIX . "product`
             SET quantity = '" . (int)$data['quantity'] . "',
                 price = '" . (float)$data['price'] . "',
                 date_modified = NOW()
             WHERE product_id = '" . (int)$product_id . "'");
+
+        $this->upsertCustomerGroupPrices($product_id, $data['customer_group_prices'] ?? array());
     }
 
     private function upsertProductDescription($product_id, $language_id, $name, $description) {
@@ -1119,6 +1144,32 @@ class ModelExtensionModuleDockercartImportYml extends Model {
         }
     }
 
+	private function upsertCustomerGroupPrices($product_id, $prices) {
+        $product_id = (int)$product_id;
+        if ($product_id <= 0) {
+            return;
+        }
+
+        $this->db->query("DELETE FROM `" . DB_PREFIX . "dockercart_product_customer_group_price` WHERE `product_id` = '" . $product_id . "'");
+
+        if (!empty($prices) && is_array($prices)) {
+            foreach ($prices as $group_id => $price) {
+                $group_id = (int)$group_id;
+                if ($group_id <= 0) {
+                    continue;
+                }
+                $price = (float)$price;
+                if ($price < 0) {
+                    $price = 0;
+                }
+                $this->db->query("INSERT INTO `" . DB_PREFIX . "dockercart_product_customer_group_price`
+                    SET `product_id` = '" . $product_id . "',
+                        `customer_group_id` = '" . $group_id . "',
+                        `price` = '" . $price . "'");
+            }
+        }
+    }
+
     private function deleteAllStoreProducts($store_id) {
         $store_id = (int)$store_id;
         $query = $this->db->query("SELECT product_id FROM `" . DB_PREFIX . "product_to_store` WHERE store_id = '" . $store_id . "'");
@@ -1133,7 +1184,7 @@ class ModelExtensionModuleDockercartImportYml extends Model {
 
         $this->deleteByProductIds(DB_PREFIX . 'product_attribute', $ids);
         $this->deleteByProductIds(DB_PREFIX . 'product_description', $ids);
-        $this->deleteByProductIds(DB_PREFIX . 'product_discount', $ids);
+		$this->deleteByProductIds(DB_PREFIX . 'product_discount', $ids);
         $this->deleteByProductIds(DB_PREFIX . 'product_filter', $ids);
         $this->deleteByProductIds(DB_PREFIX . 'product_image', $ids);
         $this->deleteByProductIds(DB_PREFIX . 'product_option', $ids);
@@ -1142,6 +1193,7 @@ class ModelExtensionModuleDockercartImportYml extends Model {
         $this->deleteByProductIds(DB_PREFIX . 'product_related', $ids, 'related_id');
         $this->deleteByProductIds(DB_PREFIX . 'product_reward', $ids);
         $this->deleteByProductIds(DB_PREFIX . 'product_special', $ids);
+        $this->deleteByProductIds(DB_PREFIX . 'dockercart_product_customer_group_price', $ids);
         $this->deleteByProductIds(DB_PREFIX . 'product_to_category', $ids);
         $this->deleteByProductIds(DB_PREFIX . 'product_to_download', $ids);
         $this->deleteByProductIds(DB_PREFIX . 'product_to_layout', $ids);
@@ -1154,7 +1206,7 @@ class ModelExtensionModuleDockercartImportYml extends Model {
      * products + categories + manufacturers + importer maps + related seo_url.
      */
     private function deleteAllCatalogData() {
-        $tables = array(
+		$tables = array(
             // Product relations and entities
             'product_related',
             'product_option_value',
@@ -1171,6 +1223,7 @@ class ModelExtensionModuleDockercartImportYml extends Model {
             'product_to_store',
             'product_to_category',
             'product_description',
+            'dockercart_product_customer_group_price',
             'product',
 
             // Category entities
