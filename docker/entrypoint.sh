@@ -387,6 +387,24 @@ initialize_database || echo "WARNING: Database initialization failed — continu
 # Миграция storage из upload/system/storage в /var/www/storage
 migrate_storage
 
+# Применяем PHP настройки из переменных окружения (если заданы)
+apply_php_settings() {
+    local ini_file="/usr/local/etc/php/conf.d/zzz-dockercart-env.ini"
+
+    cat > "$ini_file" <<PHP
+[PHP]
+; DockerCart runtime overrides from environment variables
+memory_limit = ${PHP_MEMORY_LIMIT:-256M}
+max_execution_time = ${PHP_MAX_EXECUTION_TIME:-300}
+upload_max_filesize = ${PHP_UPLOAD_MAX_FILESIZE:-100M}
+post_max_size = ${PHP_POST_MAX_SIZE:-100M}
+PHP
+
+    echo "Applied PHP settings from environment (${ini_file})"
+}
+
+apply_php_settings
+
 echo "DockerCart is ready!"
 
 # Запускаем Apache
