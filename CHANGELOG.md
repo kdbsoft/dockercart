@@ -1,3 +1,9 @@
+## [1.7.3](https://github.com/mathflow-bit/dockercart/compare/v1.7.2...v1.7.3) (2026-05-07)
+
+### Bug Fixes
+
+* add debug ([d4dada2](https://github.com/mathflow-bit/dockercart/commit/d4dada29c62ec7c12ed97bf5663d7b17fd0b28aa))
+
 ## [1.7.2](https://github.com/mathflow-bit/dockercart/compare/v1.7.1...v1.7.2) (2026-05-07)
 
 ### Bug Fixes
