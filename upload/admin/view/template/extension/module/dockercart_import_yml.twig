@@ -486,6 +486,13 @@ function openProfileModal(profile) {
     html += '          </div>';;
 
     html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label" data-toggle="tooltip" title="{{ help_main_price_tag }}">{{ entry_main_price_tag }}</label>';
+    html += '            <div class="col-sm-9">';
+    html += '              <input type="text" name="main_price_tag" id="input-main-price-tag" class="form-control" value="' + (profile.main_price_tag || 'price') + '" placeholder="price" />';
+    html += '            </div>';
+    html += '          </div>';
+
+    html += '          <div class="form-group">';
     html += '            <label class="col-sm-3 control-label" data-toggle="tooltip" title="{{ help_cg_price_mapping }}">{{ entry_cg_price_mapping }}</label>';
     html += '            <div class="col-sm-9">';
     html += '              <div id="cg-mapping-rows">';
