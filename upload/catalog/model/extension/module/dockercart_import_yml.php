@@ -1251,7 +1251,7 @@ class ModelExtensionModuleDockercartImportYml extends Model {
             $from_rate = (float)$feed_currencies[$from_currency];
             $to_rate = (float)$feed_currencies[$to_currency];
             if ($from_rate > 0) {
-                return $price * ($to_rate / $from_rate);
+		return $price * ($from_rate / $to_rate);
             }
         }
 
