@@ -1,3 +1,13 @@
+## [1.5.0](https://github.com/mathflow-bit/dockercart/compare/v1.4.12...v1.5.0) (2026-05-06)
+
+### Features
+
+* handle duplicate SEO keywords for categories ([7064ce9](https://github.com/mathflow-bit/dockercart/commit/7064ce97c50aded200253d7fc71c094dc42a7e3d))
+
+### Bug Fixes
+
+* scope SEO URL duplicate check to current language ([b0e776b](https://github.com/mathflow-bit/dockercart/commit/b0e776bd552313c3ddf7e619ac7d059a59f07ca9))
+
 ## [1.4.12](https://github.com/mathflow-bit/dockercart/compare/v1.4.11...v1.4.12) (2026-05-05)
 
 ### Bug Fixes
