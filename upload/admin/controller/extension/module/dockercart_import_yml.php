@@ -229,6 +229,8 @@ class ControllerExtensionModuleDockercartImportYml extends Controller {
             curl_setopt($ch, CURLOPT_TIMEOUT, 300);
             curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 20);
             curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($ch, CURLOPT_ENCODING, '');
+            curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
             $response = curl_exec($ch);
             $curl_errno = curl_errno($ch);
             $curl_error = curl_error($ch);
@@ -253,12 +255,12 @@ class ControllerExtensionModuleDockercartImportYml extends Controller {
                 }
 
                 if (!is_array($decoded)) {
-                    throw new Exception($this->language->get('error_invalid_response'));
+                    throw new Exception($this->language->get('error_invalid_response') . '. ' . $this->language->get('text_response') . ': ' . mb_substr((string)$response, 0, 2000));
                 }
             }
 
             $json = $decoded;
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             $json['success'] = false;
             $json['error'] = $e->getMessage();
         }
