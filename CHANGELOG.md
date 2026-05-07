@@ -1,3 +1,9 @@
+## [1.7.0](https://github.com/mathflow-bit/dockercart/compare/v1.6.1...v1.7.0) (2026-05-07)
+
+### Features
+
+* add currency tag to CG price mapping ([9050a35](https://github.com/mathflow-bit/dockercart/commit/9050a359763f859b967034574cfa38ca3ac94823))
+
 ## [1.6.1](https://github.com/mathflow-bit/dockercart/compare/v1.6.0...v1.6.1) (2026-05-07)
 
 ### Bug Fixes
