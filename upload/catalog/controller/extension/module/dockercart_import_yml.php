@@ -41,7 +41,7 @@ class ControllerExtensionModuleDockercartImportYml extends Controller {
 
             $json['success'] = true;
             $json['summary'] = $summary;
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             $json['success'] = false;
             $json['error'] = $e->getMessage();
         }
