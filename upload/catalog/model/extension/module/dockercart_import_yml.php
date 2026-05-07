@@ -46,7 +46,7 @@ class ModelExtensionModuleDockercartImportYml extends Model {
         }
 
         $content = $this->fetchFeedContent((string)$profile['feed_url']);
-        $xml = @simplexml_load_string($content, 'SimpleXMLElement', LIBXML_NOCDATA);
+        $xml = @simplexml_load_string($content, 'SimpleXMLElement', LIBXML_NOCDATA | LIBXML_PARSEHUGE);
 
         if (!$xml) {
             throw new Exception('Invalid YML XML');
@@ -429,6 +429,7 @@ class ModelExtensionModuleDockercartImportYml extends Model {
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_TIMEOUT, 600);
             curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
             curl_setopt($ch, CURLOPT_ENCODING, '');
             curl_setopt($ch, CURLOPT_USERAGENT, 'DockerCart-ImportYML/1.1');
             $content = curl_exec($ch);
@@ -437,9 +438,9 @@ class ModelExtensionModuleDockercartImportYml extends Model {
             $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
 
-            $partial_file = ($errno === CURLE_PARTIAL_FILE);
+            $retryable = in_array($errno, [CURLE_PARTIAL_FILE, CURLE_HTTP2], true);
 
-            if (!$errno || !$partial_file) {
+            if (!$errno || !$retryable) {
                 break;
             }
 

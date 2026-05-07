@@ -6,6 +6,9 @@ class ControllerExtensionModuleDockercartImportYml extends Controller {
     }
 
     public function cron() {
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+
         $profile_id = isset($this->request->get['profile_id']) ? (int)$this->request->get['profile_id'] : 0;
         $cron_key = isset($this->request->get['cron_key']) ? (string)$this->request->get['cron_key'] : '';
         $format = isset($this->request->get['format']) ? (string)$this->request->get['format'] : 'json';
