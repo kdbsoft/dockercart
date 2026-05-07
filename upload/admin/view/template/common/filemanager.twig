@@ -20,18 +20,17 @@
         </div>
       </div>
       <hr />
-      {% for image in images|batch(4) %}
-      <div class="row">
-        {% for image in image %}
-        <div class="col-sm-3 col-xs-6 text-center">
+      <div class="filemanager-grid">
+        {% for image in images %}
+        <div class="filemanager-item text-center">
           {% if image.type == 'directory' %}
-          <div class="text-center"><a href="{{ image.href }}" class="directory" style="vertical-align: middle;"><i class="fa fa-folder fa-5x"></i></a></div>
+          <div class="filemanager-thumb"><a href="{{ image.href }}" class="directory"><i class="fa fa-folder fa-5x"></i></a></div>
           <label>
             <input type="checkbox" name="path[]" value="{{ image.path }}" />
             {{ image.name }}</label>
           {% endif %}
           {% if image.type == 'image' %}
-          <a href="{{ image.href }}" class="thumbnail"><img src="{{ image.thumb }}" alt="{{ image.name }}" title="{{ image.name }}" /></a>
+          <div class="filemanager-thumb"><a href="{{ image.href }}" class="thumbnail"><img src="{{ image.thumb }}" alt="{{ image.name }}" title="{{ image.name }}" /></a></div>
           <label>
             <input type="checkbox" name="path[]" value="{{ image.path }}" />
             {{ image.name }}</label>
@@ -39,8 +38,6 @@
         </div>
         {% endfor %}
       </div>
-      <br/>
-      {% endfor %}
     </div>
     <div class="modal-footer">{{ pagination }}</div>
   </div>
@@ -91,7 +88,7 @@ $('input[name=\'search\']').on('keydown', function(e) {
 });
 
 $('#button-search').on('click', function(e) {
-	var url = 'index.php?route=common/filemanager&user_token={{ user_token }}&directory={{ directory }}';
+	var url = 'index.php?route=common/filemanager&user_token={{ user_token }}&directory=' + encodeURIComponent('{{ directory|e('js') }}');
 
 	var filter_name = $('input[name=\'search\']').val();
 
@@ -127,7 +124,7 @@ $('#button-upload').on('click', function() {
 			clearInterval(timer);
 
 			$.ajax({
-				url: 'index.php?route=common/filemanager/upload&user_token={{ user_token }}&directory={{ directory }}',
+				url: 'index.php?route=common/filemanager/upload&user_token={{ user_token }}&directory=' + encodeURIComponent('{{ directory|e('js') }}'),
 				type: 'post',
 				dataType: 'json',
 				data: new FormData($('#form-upload')[0]),
@@ -180,7 +177,7 @@ $('#button-folder').popover({
 $('#button-folder').on('shown.bs.popover', function() {
 	$('#button-create').on('click', function() {
 		$.ajax({
-			url: 'index.php?route=common/filemanager/folder&user_token={{ user_token }}&directory={{ directory }}',
+			url: 'index.php?route=common/filemanager/folder&user_token={{ user_token }}&directory=' + encodeURIComponent('{{ directory|e('js') }}'),
 			type: 'post',
 			dataType: 'json',
 			data: 'folder=' + encodeURIComponent($('input[name=\'folder\']').val()),

@@ -374,6 +374,7 @@ class ControllerCatalogProduct extends Controller {
 			$data['products'][] = array(
 				'product_id' => $result['product_id'],
 				'image'      => $image,
+				'image_path' => $result['image'],
 				'name'       => $result['name'],
 				'model'      => $result['model'],
 				'price'      => $this->currency->format($result['price'], $this->config->get('config_currency')),
@@ -1364,6 +1365,27 @@ class ControllerCatalogProduct extends Controller {
 		}
 
 		return !$this->error;
+	}
+
+	public function updateImage() {
+		$json = array();
+
+		if (!$this->user->hasPermission('modify', 'catalog/product')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		if (!isset($this->request->post['product_id']) || !isset($this->request->post['image'])) {
+			$json['error'] = 'Invalid request';
+		}
+
+		if (!isset($json['error'])) {
+			$this->load->model('catalog/product');
+			$this->model_catalog_product->updateProductImage((int)$this->request->post['product_id'], $this->request->post['image']);
+			$json['success'] = 'Image updated';
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
 	}
 
 	public function autocomplete() {
