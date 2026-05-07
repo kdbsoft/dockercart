@@ -163,7 +163,7 @@
                       {% else %}
                       <input type="checkbox" name="selected[]" value="{{ product.product_id }}" />
                       {% endif %}</td>
-                    <td class="text-center">{% if product.image %} <img src="{{ product.image }}" alt="{{ product.name }}" class="img-thumbnail" /> {% else %} <span class="img-thumbnail list"><i class="fa fa-camera fa-2x"></i></span> {% endif %}</td>
+                    <td class="text-center"><input type="hidden" id="input-image-{{ product.product_id }}" value="{{ product.image_path }}" /><a href="javascript:void(0);" class="product-image-edit" id="thumb-image-{{ product.product_id }}" data-product-id="{{ product.product_id }}">{% if product.image %} <img src="{{ product.image }}" alt="{{ product.name }}" class="img-thumbnail" /> {% else %} <span class="img-thumbnail list"><i class="fa fa-camera fa-2x"></i></span> {% endif %}</a></td>
                     <td class="text-left">{{ product.name }}</td>
                     <td class="text-left">{{ product.model }}</td>
                     <td class="text-right">{% if product.special %} <span style="text-decoration: line-through;">{{ product.price }}</span><br/>
@@ -276,6 +276,49 @@ $('input[name=\'filter_model\']').autocomplete({
 	'select': function(item) {
 		$('input[name=\'filter_model\']').val(item['label']);
 	}
+});
+//--></script>
+<script type="text/javascript"><!--
+$(document).on('click', '.product-image-edit', function(e) {
+	e.preventDefault();
+
+	var $link = $(this);
+	var productId = $link.data('product-id');
+
+	$('#modal-image').remove();
+
+	$.ajax({
+		url: 'index.php?route=common/filemanager&user_token={{ user_token }}',
+		dataType: 'html',
+		success: function(html) {
+			$('body').append('<div id="modal-image" class="modal">' + html + '</div>');
+
+			$('#modal-image').on('click', 'a.thumbnail', function(e) {
+				e.preventDefault();
+
+				var imagePath = $(this).closest('.filemanager-item').find('input[name^=\'path\']').val();
+				var thumbSrc = $(this).find('img').attr('src');
+
+				var $img = $link.find('img');
+				if ($img.length) {
+					$img.attr('src', thumbSrc);
+				} else {
+					$link.html('<img src="' + thumbSrc + '" alt="" class="img-thumbnail" />');
+				}
+
+				$.ajax({
+					url: 'index.php?route=catalog/product/updateImage&user_token={{ user_token }}',
+					type: 'post',
+					dataType: 'json',
+					data: { product_id: productId, image: imagePath }
+				});
+
+				$('#modal-image').modal('hide');
+			});
+
+			$('#modal-image').modal('show');
+		}
+	});
 });
 //--></script></div>
 {{ footer }} 
