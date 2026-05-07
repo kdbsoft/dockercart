@@ -156,7 +156,7 @@ class ModelExtensionModuleDockercartImportYml extends Model {
                                 continue;
                             }
                             $cg_price = $this->xmlText($offer, $tag);
-                            if ($cg_price !== '' && (float)$cg_price >= 0) {
+				if ($cg_price !== '' && (float)$cg_price > 0) {
                                 $cg_price = (float)$cg_price;
                                 if ($currency_tag !== '') {
                                     $currency = strtoupper(trim($this->xmlText($offer, $currency_tag)));
@@ -1277,11 +1277,11 @@ class ModelExtensionModuleDockercartImportYml extends Model {
                 if ($group_id <= 0) {
                     continue;
                 }
-                $price = (float)$price;
-                if ($price < 0) {
-                    $price = 0;
-                }
-                $this->db->query("INSERT INTO `" . DB_PREFIX . "dockercart_product_customer_group_price`
+		$price = (float)$price;
+				if ($price <= 0) {
+					continue;
+				}
+				$this->db->query("INSERT INTO `" . DB_PREFIX . "dockercart_product_customer_group_price`
                     SET `product_id` = '" . $product_id . "',
                         `customer_group_id` = '" . $group_id . "',
                         `price` = '" . $price . "'");
