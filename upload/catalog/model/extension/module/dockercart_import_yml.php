@@ -124,7 +124,8 @@ class ModelExtensionModuleDockercartImportYml extends Model {
                     continue;
                 }
 
-		$price = (float)$this->xmlText($offer, 'price');
+		$main_price_tag = !empty($profile['main_price_tag']) ? trim((string)$profile['main_price_tag']) : 'price';
+		$price = (float)$this->xmlText($offer, $main_price_tag);
                 if ($price < 0) {
                     $price = 0;
                 }
