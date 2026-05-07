@@ -1,3 +1,10 @@
+## [1.6.0](https://github.com/mathflow-bit/dockercart/compare/v1.5.0...v1.6.0) (2026-05-07)
+
+### Features
+
+* add customer group price mapping to YML import ([ac5f56d](https://github.com/mathflow-bit/dockercart/commit/ac5f56d27db857162e19eb61e36faff435d422a2))
+* add per-product customer group prices ([f2a65ac](https://github.com/mathflow-bit/dockercart/commit/f2a65ac748823dcec9c1f0822502c7c85207f93a))
+
 ## [1.5.0](https://github.com/mathflow-bit/dockercart/compare/v1.4.12...v1.5.0) (2026-05-06)
 
 ### Features
