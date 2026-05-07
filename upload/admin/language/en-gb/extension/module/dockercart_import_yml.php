@@ -52,6 +52,9 @@ $_['entry_profile_currency'] = 'Currency';
 $_['entry_default_category'] = 'Default Category';
 $_['entry_load_categories'] = 'Load categories from feed';
 $_['entry_allow_zero_price'] = 'Import zero-price products';
+$_['entry_cg_price_mapping'] = 'Customer Group Price Mapping';
+$_['entry_cg_mapping_tag'] = 'YML Tag';
+$_['entry_cg_mapping_group'] = 'Customer Group';
 $_['entry_import_mode'] = 'Import Mode';
 $_['entry_profile_status'] = 'Status';
 $_['entry_cron_command'] = 'Cron command';
@@ -63,10 +66,12 @@ $_['help_feed_url'] = 'Direct URL to YML feed (Yandex Market Language)';
 $_['help_import_mode'] = 'Add only: creates new products; Add + Update: updates existing and creates new; Update only: updates existing products and skips new ones; Update prices and stock only: updates only price and quantity for existing products; Delete all then import: fully clears products, categories, and manufacturers in the database before import.';
 $_['help_load_categories'] = 'If enabled, categories from feed will be imported. If Default Category is set, imported feed categories will be created under it as child categories.';
 $_['help_allow_zero_price'] = 'If enabled, products with a price of 0 will be imported. Disabled by default.';
+$_['help_cg_price_mapping'] = 'Map YML tag names (direct child elements of offer, e.g. "price2", "price_wholesale") to customer group prices. The base <price> tag is always imported as the main price.';
 
 // Buttons
 $_['button_import_now'] = 'Import now';
 $_['button_save'] = 'Save';
+$_['button_add_mapping'] = 'Add Mapping';
 $_['button_cancel'] = 'Cancel';
 $_['button_verify_license'] = 'Verify license';
 

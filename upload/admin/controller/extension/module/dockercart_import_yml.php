@@ -79,8 +79,11 @@ class ControllerExtensionModuleDockercartImportYml extends Controller {
         $this->load->model('localisation/currency');
         $data['currencies'] = $this->model_localisation_currency->getCurrencies();
 
-        $this->load->model('catalog/category');
+		$this->load->model('catalog/category');
         $data['categories'] = $this->model_catalog_category->getCategories(array());
+
+        $this->load->model('customer/customer_group');
+        $data['customer_groups'] = $this->model_customer_customer_group->getCustomerGroups();
 
         $data['profiles'] = $this->model_extension_module_dockercart_import_yml->getProfiles();
         $data['cron_base_path'] = '/var/www/html/cron/dockercart_import_yml.php';
