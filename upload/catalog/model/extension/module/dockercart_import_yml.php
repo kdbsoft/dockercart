@@ -417,6 +417,15 @@ class ModelExtensionModuleDockercartImportYml extends Model {
             throw new Exception('Feed URL is empty');
         }
 
+        $local_path = $this->resolveLocalPath($url);
+        if ($local_path !== null) {
+            $content = @file_get_contents($local_path);
+            if ($content === false || $content === '') {
+                throw new Exception('Failed to read local file: ' . $local_path);
+            }
+            return $content;
+        }
+
         $max_attempts = 3;
         $attempt = 0;
         $errno = 0;
@@ -457,6 +466,31 @@ class ModelExtensionModuleDockercartImportYml extends Model {
         }
 
         return $content;
+    }
+
+    private function resolveLocalPath($url) {
+        $parts = @parse_url($url);
+        if ($parts === false || !isset($parts['host'])) {
+            return null;
+        }
+
+        $host = strtolower((string)$parts['host']);
+        $is_local = ($host === 'localhost' || $host === '127.0.0.1' || $host === '::1' || $host === 'nginx');
+
+        if (!$is_local) {
+            return null;
+        }
+
+        $path = isset($parts['path']) ? (string)$parts['path'] : '/';
+        $webroot = rtrim(DIR_APPLICATION, '/');
+        $webroot = dirname($webroot);
+        $local = $webroot . $path;
+
+        if (file_exists($local) && is_file($local) && is_readable($local)) {
+            return $local;
+        }
+
+        return null;
     }
 
     private function xmlText($node, $name) {
