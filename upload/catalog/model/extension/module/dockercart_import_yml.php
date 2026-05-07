@@ -469,25 +469,24 @@ class ModelExtensionModuleDockercartImportYml extends Model {
     }
 
     private function resolveLocalPath($url) {
-        $parts = @parse_url($url);
-        if ($parts === false || !isset($parts['host'])) {
+        if (strpos($url, '/') === 0) {
+            if (file_exists($url) && is_file($url) && is_readable($url)) {
+                return $url;
+            }
+            $webroot = dirname(rtrim(DIR_APPLICATION, '/'));
+            $candidate = $webroot . $url;
+            if (file_exists($candidate) && is_file($candidate) && is_readable($candidate)) {
+                return $candidate;
+            }
             return null;
         }
 
-        $host = strtolower((string)$parts['host']);
-        $is_local = ($host === 'localhost' || $host === '127.0.0.1' || $host === '::1' || $host === 'nginx');
-
-        if (!$is_local) {
+        if (strpos($url, 'file://') === 0) {
+            $path = substr($url, 7);
+            if (file_exists($path) && is_file($path) && is_readable($path)) {
+                return $path;
+            }
             return null;
-        }
-
-        $path = isset($parts['path']) ? (string)$parts['path'] : '/';
-        $webroot = rtrim(DIR_APPLICATION, '/');
-        $webroot = dirname($webroot);
-        $local = $webroot . $path;
-
-        if (file_exists($local) && is_file($local) && is_readable($local)) {
-            return $local;
         }
 
         return null;
