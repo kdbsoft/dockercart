@@ -438,9 +438,8 @@ class ModelExtensionModuleDockercartImportYml extends Model {
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_TIMEOUT, 600);
             curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-            curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
             curl_setopt($ch, CURLOPT_ENCODING, '');
-            curl_setopt($ch, CURLOPT_USERAGENT, 'DockerCart-ImportYML/1.1');
+            curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
             $content = curl_exec($ch);
             $errno = curl_errno($ch);
             $error = curl_error($ch);
