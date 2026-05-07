@@ -1,3 +1,9 @@
+## [1.8.0](https://github.com/mathflow-bit/dockercart/compare/v1.7.3...v1.8.0) (2026-05-07)
+
+### Features
+
+* add inline product image editing ([691d41b](https://github.com/mathflow-bit/dockercart/commit/691d41bd015c6c49e139f3c0f8a368658b9e6537))
+
 ## [1.7.3](https://github.com/mathflow-bit/dockercart/compare/v1.7.2...v1.7.3) (2026-05-07)
 
 ### Bug Fixes
