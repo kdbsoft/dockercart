@@ -52,6 +52,9 @@ class ModelExtensionModuleDockercartImportYml extends Model {
             throw new Exception('Invalid YML XML');
         }
 
+        $feed_currencies = $this->extractFeedCurrencies($xml);
+        $profile_currency_code = !empty($profile['currency_code']) ? trim((string)$profile['currency_code']) : '';
+
         $offers = null;
         if (isset($xml->shop->offers->offer)) {
             $offers = $xml->shop->offers->offer;
@@ -141,14 +144,27 @@ class ModelExtensionModuleDockercartImportYml extends Model {
                 if ($cg_mapping !== '') {
                     $mapping = json_decode($cg_mapping, true);
                     if (is_array($mapping)) {
-                        foreach ($mapping as $tag => $group_id) {
-                            $group_id = (int)$group_id;
+                        foreach ($mapping as $tag => $value) {
+                            if (is_array($value)) {
+                                $group_id = isset($value['group_id']) ? (int)$value['group_id'] : 0;
+                                $currency_tag = isset($value['currency_tag']) ? trim((string)$value['currency_tag']) : '';
+                            } else {
+                                $group_id = (int)$value;
+                                $currency_tag = '';
+                            }
                             if ($group_id <= 0) {
                                 continue;
                             }
                             $cg_price = $this->xmlText($offer, $tag);
                             if ($cg_price !== '' && (float)$cg_price >= 0) {
-                                $customer_group_prices[$group_id] = (float)$cg_price;
+                                $cg_price = (float)$cg_price;
+                                if ($currency_tag !== '') {
+                                    $currency = strtoupper(trim($this->xmlText($offer, $currency_tag)));
+                                    if ($currency !== '' && $profile_currency_code !== '' && $currency !== strtoupper($profile_currency_code)) {
+                                        $cg_price = $this->convertPrice($cg_price, $currency, $profile_currency_code, $feed_currencies);
+                                    }
+                                }
+                                $customer_group_prices[$group_id] = $cg_price;
                             }
                         }
                     }
@@ -1143,6 +1159,56 @@ class ModelExtensionModuleDockercartImportYml extends Model {
         if (!$query->num_rows) {
             $this->db->query("INSERT INTO `" . DB_PREFIX . "product_to_category` SET product_id = '" . (int)$product_id . "', category_id = '" . (int)$category_id . "'");
         }
+    }
+
+	private function extractFeedCurrencies($xml) {
+        $currencies = array();
+        $nodes = null;
+        if (isset($xml->shop->currencies->currency)) {
+            $nodes = $xml->shop->currencies->currency;
+        } elseif (isset($xml->currencies->currency)) {
+            $nodes = $xml->currencies->currency;
+        }
+
+        if ($nodes === null) {
+            return $currencies;
+        }
+
+        foreach ($nodes as $currency) {
+            $attrs = $currency->attributes();
+            $code = isset($attrs['id']) ? strtoupper(trim((string)$attrs['id'])) : '';
+            $rate = isset($attrs['rate']) ? trim((string)$attrs['rate']) : '';
+            if ($code !== '' && $rate !== '' && is_numeric($rate)) {
+                $currencies[$code] = (float)$rate;
+            }
+        }
+
+        return $currencies;
+    }
+
+    private function convertPrice($price, $from_currency, $to_currency, $feed_currencies) {
+        $from_currency = strtoupper(trim((string)$from_currency));
+        $to_currency = strtoupper(trim((string)$to_currency));
+
+        if ($from_currency === '' || $to_currency === '' || $from_currency === $to_currency) {
+            return $price;
+        }
+
+        // Try feed exchange rates first
+        if (isset($feed_currencies[$from_currency]) && isset($feed_currencies[$to_currency])) {
+            $from_rate = (float)$feed_currencies[$from_currency];
+            $to_rate = (float)$feed_currencies[$to_currency];
+            if ($from_rate > 0) {
+                return $price * ($to_rate / $from_rate);
+            }
+        }
+
+        // Fall back to OpenCart store exchange rates
+        if (isset($this->currency) && $this->currency->has($from_currency) && $this->currency->has($to_currency)) {
+            return $this->currency->convert($price, $from_currency, $to_currency);
+        }
+
+        return $price;
     }
 
 	private function upsertCustomerGroupPrices($product_id, $prices) {

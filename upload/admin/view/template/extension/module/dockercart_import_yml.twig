@@ -616,21 +616,32 @@ function renderCgMapping(profile) {
 
     if (typeof mapping === 'object' && mapping !== null) {
         Object.keys(mapping).forEach(function(tag) {
-            addCgMappingRow(tag, mapping[tag]);
+            var value = mapping[tag];
+            var groupId = 0;
+            var currencyTag = '';
+            if (typeof value === 'object' && value !== null) {
+                groupId = parseInt(value.group_id || 0, 10) || 0;
+                currencyTag = value.currency_tag || '';
+            } else {
+                groupId = parseInt(value || 0, 10) || 0;
+            }
+            addCgMappingRow(tag, groupId, currencyTag);
         });
     }
 
     updateCgMappingJson();
 }
 
-function addCgMappingRow(tag, groupId) {
+function addCgMappingRow(tag, groupId, currencyTag) {
     tag = tag || '';
     groupId = parseInt(groupId || 0, 10) || 0;
+    currencyTag = currencyTag || '';
 
     var rowId = 'cg-row-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
     var html = '<div class="cg-mapping-row" id="' + rowId + '" style="margin-bottom: 5px;">';
-    html += '<input type="text" class="form-control" style="width: 150px; display: inline-block; margin-right: 5px;" placeholder="price2" value="' + tag.replace(/"/g, '&quot;') + '" onchange="updateCgMappingJson();" />';
-    html += '<select class="form-control" style="width: 200px; display: inline-block; margin-right: 5px;" onchange="updateCgMappingJson();">' + cgOptions + '</select>';
+    html += '<input type="text" class="form-control" style="width: 140px; display: inline-block; margin-right: 5px;" placeholder="price2" value="' + tag.replace(/"/g, '&quot;') + '" onchange="updateCgMappingJson();" />';
+    html += '<select class="form-control" style="width: 190px; display: inline-block; margin-right: 5px;" onchange="updateCgMappingJson();">' + cgOptions + '</select>';
+    html += '<input type="text" class="form-control" style="width: 100px; display: inline-block; margin-right: 5px;" placeholder="currency1" value="' + currencyTag.replace(/"/g, '&quot;') + '" onchange="updateCgMappingJson();" />';
     html += '<button type="button" class="btn btn-danger btn-xs" onclick="removeCgMappingRow(this);"><i class="fa fa-trash"></i></button>';
     html += '</div>';
 
@@ -648,10 +659,15 @@ function removeCgMappingRow(btn) {
 function updateCgMappingJson() {
     var mapping = {};
     $('#cg-mapping-rows .cg-mapping-row').each(function() {
-        var tag = $(this).find('input[type="text"]').val().trim();
+        var tag = $(this).find('input[type="text"]:first').val().trim();
         var groupId = parseInt($(this).find('select').val(), 10) || 0;
+        var currencyTag = $(this).find('input[type="text"]:last').val().trim();
         if (tag !== '' && groupId > 0) {
-            mapping[tag] = groupId;
+            if (currencyTag !== '') {
+                mapping[tag] = {group_id: groupId, currency_tag: currencyTag};
+            } else {
+                mapping[tag] = groupId;
+            }
         }
     });
     $('#input-customer-group-price-mapping').val(Object.keys(mapping).length > 0 ? JSON.stringify(mapping) : '');
