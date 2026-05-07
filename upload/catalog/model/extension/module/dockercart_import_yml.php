@@ -417,17 +417,36 @@ class ModelExtensionModuleDockercartImportYml extends Model {
             throw new Exception('Feed URL is empty');
         }
 
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 300);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-        curl_setopt($ch, CURLOPT_USERAGENT, 'DockerCart-ImportYML/1.1');
-        $content = curl_exec($ch);
-        $errno = curl_errno($ch);
-        $error = curl_error($ch);
-        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
+        $max_attempts = 3;
+        $attempt = 0;
+        $errno = 0;
+        $error = '';
+        $code = 0;
+
+        while ($attempt < $max_attempts) {
+            $attempt++;
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 600);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($ch, CURLOPT_ENCODING, '');
+            curl_setopt($ch, CURLOPT_USERAGENT, 'DockerCart-ImportYML/1.1');
+            $content = curl_exec($ch);
+            $errno = curl_errno($ch);
+            $error = curl_error($ch);
+            $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            $partial_file = ($errno === CURLE_PARTIAL_FILE);
+
+            if (!$errno || !$partial_file) {
+                break;
+            }
+
+            if ($attempt < $max_attempts) {
+                sleep(2);
+            }
+        }
 
         if ($errno) {
             throw new Exception('cURL error: ' . $error);
