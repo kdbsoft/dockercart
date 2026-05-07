@@ -2029,6 +2029,19 @@ class ModelCatalogProduct extends Model
         return $query->row["total"];
     }
 
+    public function updateProductImage($product_id, $image)
+    {
+        $this->db->query(
+            "UPDATE " .
+                DB_PREFIX .
+                "product SET image = '" .
+                $this->db->escape($image) .
+                "' WHERE product_id = '" .
+                (int) $product_id .
+                "'",
+        );
+    }
+
     public function getTotalProductsByLayoutId($layout_id)
     {
         $query = $this->db->query(
