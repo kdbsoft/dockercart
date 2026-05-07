@@ -36,6 +36,11 @@ class ModelExtensionModuleDockercartImportYml extends Model {
                 $this->db->query("ALTER TABLE `" . DB_PREFIX . "dockercart_import_yml_profile` ADD `customer_group_price_mapping` TEXT NULL AFTER `allow_zero_price`");
             }
 
+            $column_main_price_tag = $this->db->query("SHOW COLUMNS FROM `" . DB_PREFIX . "dockercart_import_yml_profile` LIKE 'main_price_tag'");
+            if (!$column_main_price_tag->num_rows) {
+                $this->db->query("ALTER TABLE `" . DB_PREFIX . "dockercart_import_yml_profile` ADD `main_price_tag` VARCHAR(255) NOT NULL DEFAULT 'price' AFTER `customer_group_price_mapping`");
+            }
+
             $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "dockercart_import_yml_category_map` (
                 `map_id` int(11) NOT NULL AUTO_INCREMENT,
                 `profile_id` int(11) NOT NULL,
@@ -67,6 +72,7 @@ class ModelExtensionModuleDockercartImportYml extends Model {
             `download_images` tinyint(1) NOT NULL DEFAULT '1',
             `allow_zero_price` tinyint(1) NOT NULL DEFAULT '0',
             `customer_group_price_mapping` TEXT NULL,
+            `main_price_tag` VARCHAR(255) NOT NULL DEFAULT 'price',
                 `import_mode` enum('add','update','update_only','update_price_qty_only','replace') NOT NULL DEFAULT 'update',
                 `status` tinyint(1) NOT NULL DEFAULT '1',
                 `cron_key` varchar(64) NOT NULL,
@@ -102,6 +108,11 @@ class ModelExtensionModuleDockercartImportYml extends Model {
         $column_cg_mapping = $this->db->query("SHOW COLUMNS FROM `" . DB_PREFIX . "dockercart_import_yml_profile` LIKE 'customer_group_price_mapping'");
         if (!$column_cg_mapping->num_rows) {
             $this->db->query("ALTER TABLE `" . DB_PREFIX . "dockercart_import_yml_profile` ADD `customer_group_price_mapping` TEXT NULL AFTER `allow_zero_price`");
+        }
+
+        $column_main_price_tag = $this->db->query("SHOW COLUMNS FROM `" . DB_PREFIX . "dockercart_import_yml_profile` LIKE 'main_price_tag'");
+        if (!$column_main_price_tag->num_rows) {
+            $this->db->query("ALTER TABLE `" . DB_PREFIX . "dockercart_import_yml_profile` ADD `main_price_tag` VARCHAR(255) NOT NULL DEFAULT 'price' AFTER `customer_group_price_mapping`");
         }
 
         $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "dockercart_import_yml_offer_map` (
@@ -189,6 +200,7 @@ class ModelExtensionModuleDockercartImportYml extends Model {
         $cron_key = $this->generateCronKey();
 
 		$cg_mapping = !empty($data['customer_group_price_mapping']) ? $data['customer_group_price_mapping'] : '';
+		$main_price_tag = !empty($data['main_price_tag']) ? trim((string)$data['main_price_tag']) : 'price';
 
 		$this->db->query("INSERT INTO `" . DB_PREFIX . "dockercart_import_yml_profile`
             SET
@@ -202,6 +214,7 @@ class ModelExtensionModuleDockercartImportYml extends Model {
                 `download_images` = '" . (!empty($data['download_images']) ? 1 : 0) . "',
                 `allow_zero_price` = '" . (!empty($data['allow_zero_price']) ? 1 : 0) . "',
                 `customer_group_price_mapping` = '" . $this->db->escape((string)$cg_mapping) . "',
+                `main_price_tag` = '" . $this->db->escape($main_price_tag) . "',
                 `import_mode` = '" . $this->db->escape($this->normalizeImportMode(isset($data['import_mode']) ? $data['import_mode'] : 'update')) . "',
                 `status` = '" . (int)(isset($data['status']) ? $data['status'] : 1) . "',
                 `cron_key` = '" . $this->db->escape($cron_key) . "',
@@ -224,6 +237,7 @@ class ModelExtensionModuleDockercartImportYml extends Model {
         }
 
 		$cg_mapping = !empty($data['customer_group_price_mapping']) ? $data['customer_group_price_mapping'] : '';
+		$main_price_tag = !empty($data['main_price_tag']) ? trim((string)$data['main_price_tag']) : 'price';
 
 		$this->db->query("UPDATE `" . DB_PREFIX . "dockercart_import_yml_profile`
             SET
@@ -237,6 +251,7 @@ class ModelExtensionModuleDockercartImportYml extends Model {
                 `download_images` = '" . (!empty($data['download_images']) ? 1 : 0) . "',
                 `allow_zero_price` = '" . (!empty($data['allow_zero_price']) ? 1 : 0) . "',
                 `customer_group_price_mapping` = '" . $this->db->escape((string)$cg_mapping) . "',
+                `main_price_tag` = '" . $this->db->escape($main_price_tag) . "',
                 `import_mode` = '" . $this->db->escape($this->normalizeImportMode(isset($data['import_mode']) ? $data['import_mode'] : 'update')) . "',
                 `status` = '" . (int)(isset($data['status']) ? $data['status'] : 1) . "',
                 `cron_key` = '" . $this->db->escape($cron_key) . "',
