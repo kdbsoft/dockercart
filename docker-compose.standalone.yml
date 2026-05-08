@@ -153,6 +153,9 @@ services:
       - /var/lib/manticore:mode=0755,size=256M
     command:
       ["searchd", "-c", "/etc/manticoresearch/manticore.conf", "--nodetach"]
+    depends_on:
+      mariadb:
+        condition: service_healthy
     networks:
       - dockercart-network
     healthcheck:
