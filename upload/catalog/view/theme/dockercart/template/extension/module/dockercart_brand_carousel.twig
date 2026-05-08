@@ -1,0 +1,36 @@
+{# Brand marquee styled like carousel.twig for dockercart theme #}
+{% if brands|length %}
+  <div class="py-10 bg-white overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 mb-6">
+      <p class="text-xs font-bold uppercase tracking-widest text-gray-400 text-center">{{ text_brands_we_carry }}</p>
+    </div>
+    <div class="overflow-hidden select-none">
+      <style>
+        @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        .brands-track { display: flex; width: max-content; animation: marquee 28s linear infinite; }
+        .brands-track:hover { animation-play-state: paused; }
+        .brands-track > .flex { display:flex; }
+        .brands-item { display:flex; align-items:center; justify-content:center; margin:0 2.5rem; filter:grayscale(100%); opacity:.4; transition: all .3s ease; cursor:pointer }
+        .brands-item:hover { filter:grayscale(0%); opacity:1 }
+      </style>
+
+      <div class="brands-track">
+        <div class="flex items-center">
+          {% for brand in brands %}
+          <a href="{{ brand.href }}" class="brands-item" aria-label="{{ brand.name }}">
+            <img src="{{ brand.image }}" alt="{{ brand.name }}" class="h-20 object-contain" />
+          </a>
+          {% endfor %}
+        </div>
+
+        <div class="flex items-center" aria-hidden="true">
+          {% for brand in brands %}
+          <a href="{{ brand.href }}" class="brands-item" tabindex="-1" aria-label="{{ brand.name }}">
+            <img src="{{ brand.image }}" alt="" class="h-20 object-contain" />
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endif %}
