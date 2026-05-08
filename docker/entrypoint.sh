@@ -358,6 +358,48 @@ SQL
     echo "DockerCart bootstrap finished."
 }
 
+# Ожидание Manticore (используется перед фоновой индексацией)
+wait_for_manticore() {
+    echo "Waiting for Manticore to be ready..."
+    local max_attempts=30
+    local attempt=0
+    local manticore_host="${MANTICORE_HOST:-manticore}"
+    local manticore_port="${MANTICORE_PORT:-9306}"
+
+    until mysql -h"${manticore_host}" -P"${manticore_port}" -e "SHOW TABLES" >/dev/null 2>&1; do
+        attempt=$((attempt + 1))
+        if [ $attempt -ge $max_attempts ]; then
+            echo "WARNING: Manticore did not become available in time — skipping background reindex"
+            return 1
+        fi
+        echo "Manticore is unavailable (attempt $attempt/$max_attempts) - sleeping"
+        sleep 3
+    done
+
+    echo "Manticore is up and running!"
+    return 0
+}
+
+# Фоновая инициализация индексов Manticore
+initialize_manticore_index() {
+    local php_script="/var/www/html/admin/cli/dockercart_search_reindex.php"
+
+    if [ ! -f "$php_script" ]; then
+        echo "WARNING: Manticore reindex script not found at $php_script — skipping"
+        return
+    fi
+
+    if ! wait_for_manticore; then
+        return
+    fi
+
+    echo "Starting background Manticore reindex..."
+    # Запускаем в subshell в фоне, чтобы логи шли в stdout/stderr контейнера
+    (
+        php "$php_script" 2>&1
+    ) &
+}
+
 # Основная логика
 # Emit a small diagnostic header so logs show which entrypoint version ran.
 # We print the script modification time (as embedded in the image at build time)
@@ -404,6 +446,9 @@ PHP
 }
 
 apply_php_settings
+
+# Запускаем фоновую индексацию Manticore (не блокирует Apache)
+initialize_manticore_index
 
 echo "DockerCart is ready!"
 
