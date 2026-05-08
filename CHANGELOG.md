@@ -1,3 +1,9 @@
+## [1.9.0](https://github.com/mathflow-bit/dockercart/compare/v1.8.0...v1.9.0) (2026-05-08)
+
+### Features
+
+* Add brand carousel module ([acaf974](https://github.com/mathflow-bit/dockercart/commit/acaf97432dddc47cc921ab3bc295a55e7e36f2a8))
+
 ## [1.8.0](https://github.com/mathflow-bit/dockercart/compare/v1.7.3...v1.8.0) (2026-05-07)
 
 ### Features
