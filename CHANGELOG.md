@@ -1,3 +1,9 @@
+## [1.9.1](https://github.com/mathflow-bit/dockercart/compare/v1.9.0...v1.9.1) (2026-05-08)
+
+### Bug Fixes
+
+* quickfix migration ([9eec479](https://github.com/mathflow-bit/dockercart/commit/9eec479af566526f4363a29511f7e5aee5b48c41))
+
 ## [1.9.0](https://github.com/mathflow-bit/dockercart/compare/v1.8.0...v1.9.0) (2026-05-08)
 
 ### Features
