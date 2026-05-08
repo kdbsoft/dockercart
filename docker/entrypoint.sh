@@ -358,7 +358,6 @@ SQL
     echo "DockerCart bootstrap finished."
 }
 
-# Ожидание Manticore (используется перед фоновой индексацией)
 wait_for_manticore() {
     echo "Waiting for Manticore to be ready..."
     local max_attempts=30
@@ -380,7 +379,6 @@ wait_for_manticore() {
     return 0
 }
 
-# Фоновая инициализация индексов Manticore
 initialize_manticore_index() {
     local php_script="/var/www/html/admin/cli/dockercart_search_reindex.php"
 
@@ -394,7 +392,6 @@ initialize_manticore_index() {
     fi
 
     echo "Starting background Manticore reindex..."
-    # Запускаем в subshell в фоне, чтобы логи шли в stdout/stderr контейнера
     (
         php "$php_script" 2>&1
     ) &
