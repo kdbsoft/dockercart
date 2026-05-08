@@ -170,6 +170,9 @@ services:
     ports:
       - "9306" # MySQL protocol port
       - "9308" # HTTP API port
+    depends_on:
+      mariadb:
+        condition: service_healthy
     networks:
       - dockercart-network
     healthcheck:
