@@ -1,3 +1,13 @@
+## [1.10.0](https://github.com/mathflow-bit/dockercart/compare/v1.9.1...v1.10.0) (2026-05-09)
+
+### Features
+
+* add DockerCart gallery module ([ee91d33](https://github.com/mathflow-bit/dockercart/commit/ee91d335e84b533ac810f9d3b832d3fedf881717))
+
+### Bug Fixes
+
+* use closest() for filemanager input value ([92cfc95](https://github.com/mathflow-bit/dockercart/commit/92cfc95033800e8b7ac73760a7925ee315d05eac))
+
 ## [1.9.1](https://github.com/mathflow-bit/dockercart/compare/v1.9.0...v1.9.1) (2026-05-08)
 
 ### Bug Fixes
