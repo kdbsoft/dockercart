@@ -229,6 +229,41 @@ class ModelCatalogProduct extends Model
                                     ) .
                                     "'",
                             );
+
+                            $product_option_value_id = $this->db->getLastId();
+
+                            if (
+                                isset(
+                                    $product_option_value[
+                                        "customer_group_price"
+                                    ],
+                                )
+                            ) {
+                                foreach (
+                                    $product_option_value[
+                                        "customer_group_price"
+                                    ]
+                                    as $cg_price
+                                ) {
+                                    $this->db->query(
+                                        "INSERT INTO " .
+                                            DB_PREFIX .
+                                            "dockercart_product_option_value_customer_group_price SET product_option_value_id = '" .
+                                            (int) $product_option_value_id .
+                                            "', customer_group_id = '" .
+                                            (int) $cg_price[
+                                                "customer_group_id"
+                                            ] .
+                                            "', price = '" .
+                                            (float) $cg_price["price"] .
+                                            "', price_prefix = '" .
+                                            $this->db->escape(
+                                                $cg_price["price_prefix"],
+                                            ) .
+                                            "'",
+                                    );
+                                }
+                            }
                         }
                     }
                 } else {
@@ -696,14 +731,23 @@ class ModelCatalogProduct extends Model
         $this->db->query(
             "DELETE FROM " .
                 DB_PREFIX .
-                "product_option WHERE product_id = '" .
+                "dockercart_product_option_value_customer_group_price WHERE product_option_value_id IN (SELECT product_option_value_id FROM " .
+                DB_PREFIX .
+                "product_option_value WHERE product_id = '" .
+                (int) $product_id .
+                "')",
+        );
+        $this->db->query(
+            "DELETE FROM " .
+                DB_PREFIX .
+                "product_option_value WHERE product_id = '" .
                 (int) $product_id .
                 "'",
         );
         $this->db->query(
             "DELETE FROM " .
                 DB_PREFIX .
-                "product_option_value WHERE product_id = '" .
+                "product_option WHERE product_id = '" .
                 (int) $product_id .
                 "'",
         );
@@ -778,6 +822,41 @@ class ModelCatalogProduct extends Model
                                     ) .
                                     "'",
                             );
+
+                            if (
+                                isset(
+                                    $product_option_value[
+                                        "customer_group_price"
+                                    ],
+                                )
+                            ) {
+                                foreach (
+                                    $product_option_value[
+                                        "customer_group_price"
+                                    ]
+                                    as $cg_price
+                                ) {
+                                    $this->db->query(
+                                        "INSERT INTO " .
+                                            DB_PREFIX .
+                                            "dockercart_product_option_value_customer_group_price SET product_option_value_id = '" .
+                                            (int) $product_option_value[
+                                                "product_option_value_id"
+                                            ] .
+                                            "', customer_group_id = '" .
+                                            (int) $cg_price[
+                                                "customer_group_id"
+                                            ] .
+                                            "', price = '" .
+                                            (float) $cg_price["price"] .
+                                            "', price_prefix = '" .
+                                            $this->db->escape(
+                                                $cg_price["price_prefix"],
+                                            ) .
+                                            "'",
+                                    );
+                                }
+                            }
                         }
                     }
                 } else {
@@ -1263,6 +1342,15 @@ class ModelCatalogProduct extends Model
         $this->db->query(
             "DELETE FROM " .
                 DB_PREFIX .
+                "dockercart_product_option_value_customer_group_price WHERE product_option_value_id IN (SELECT product_option_value_id FROM " .
+                DB_PREFIX .
+                "product_option_value WHERE product_id = '" .
+                (int) $product_id .
+                "')",
+        );
+        $this->db->query(
+            "DELETE FROM " .
+                DB_PREFIX .
                 "product_option_value WHERE product_id = '" .
                 (int) $product_id .
                 "'",
@@ -1627,6 +1715,27 @@ class ModelCatalogProduct extends Model
                 $product_option_value_query->rows
                 as $product_option_value
             ) {
+                $cg_price_query = $this->db->query(
+                    "SELECT * FROM " .
+                        DB_PREFIX .
+                        "dockercart_product_option_value_customer_group_price WHERE product_option_value_id = '" .
+                        (int) $product_option_value[
+                            "product_option_value_id"
+                        ] .
+                        "'",
+                );
+
+                $customer_group_prices = [];
+
+                foreach ($cg_price_query->rows as $cg_price) {
+                    $customer_group_prices[] = [
+                        "customer_group_id" =>
+                            $cg_price["customer_group_id"],
+                        "price" => $cg_price["price"],
+                        "price_prefix" => $cg_price["price_prefix"],
+                    ];
+                }
+
                 $product_option_value_data[] = [
                     "product_option_value_id" =>
                         $product_option_value["product_option_value_id"],
@@ -1640,6 +1749,7 @@ class ModelCatalogProduct extends Model
                     "points_prefix" => $product_option_value["points_prefix"],
                     "weight" => $product_option_value["weight"],
                     "weight_prefix" => $product_option_value["weight_prefix"],
+                    "customer_group_prices" => $customer_group_prices,
                 ];
             }
 
@@ -1660,13 +1770,17 @@ class ModelCatalogProduct extends Model
     public function getProductOptionValue($product_id, $product_option_value_id)
     {
         $query = $this->db->query(
-            "SELECT pov.option_value_id, ovd.name, pov.quantity, pov.subtract, pov.price, pov.price_prefix, pov.points, pov.points_prefix, pov.weight, pov.weight_prefix FROM " .
+            "SELECT pov.option_value_id, ovd.name, pov.quantity, pov.subtract, COALESCE(cgp.price, pov.price) AS price, COALESCE(cgp.price_prefix, pov.price_prefix) AS price_prefix, pov.points, pov.points_prefix, pov.weight, pov.weight_prefix FROM " .
                 DB_PREFIX .
                 "product_option_value pov LEFT JOIN " .
                 DB_PREFIX .
                 "option_value ov ON (pov.option_value_id = ov.option_value_id) LEFT JOIN " .
                 DB_PREFIX .
-                "option_value_description ovd ON (ov.option_value_id = ovd.option_value_id) WHERE pov.product_id = '" .
+                "option_value_description ovd ON (ov.option_value_id = ovd.option_value_id) LEFT JOIN " .
+                DB_PREFIX .
+                "dockercart_product_option_value_customer_group_price cgp ON (cgp.product_option_value_id = pov.product_option_value_id AND cgp.customer_group_id = '" .
+                (int) $this->config->get("config_customer_group_id") .
+                "') WHERE pov.product_id = '" .
                 (int) $product_id .
                 "' AND pov.product_option_value_id = '" .
                 (int) $product_option_value_id .
