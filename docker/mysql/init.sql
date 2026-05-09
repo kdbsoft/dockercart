@@ -3656,6 +3656,35 @@ COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
+-- Table structure for table `oc_dockercart_product_option_value_customer_group_price`
+--
+
+DROP TABLE IF EXISTS `oc_dockercart_product_option_value_customer_group_price`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_dockercart_product_option_value_customer_group_price` (
+  `product_option_value_id` int(11) NOT NULL,
+  `customer_group_id` int(11) NOT NULL,
+  `price` decimal(15,4) NOT NULL DEFAULT 0.0000,
+  `price_prefix` varchar(1) NOT NULL DEFAULT '+',
+  PRIMARY KEY (`product_option_value_id`,`customer_group_id`),
+  KEY `customer_group_id` (`customer_group_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_dockercart_product_option_value_customer_group_price`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_dockercart_product_option_value_customer_group_price` WRITE;
+/*!40000 ALTER TABLE `oc_dockercart_product_option_value_customer_group_price` DISABLE KEYS */;
+/*!40000 ALTER TABLE `oc_dockercart_product_option_value_customer_group_price` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
 -- Table structure for table `oc_dockercart_seo_log`
 --
 
