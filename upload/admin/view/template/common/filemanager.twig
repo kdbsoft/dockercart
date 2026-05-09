@@ -51,7 +51,7 @@ $('a.thumbnail').on('click', function(e) {
 	$('#{{ thumb|escape('js') }}').find('img').attr('src', $(this).find('img').attr('src'));
 	{% endif %}
 
-	$('#{{ target|escape('js') }}').val($(this).parent().find('input').val());
+	$('#{{ target|escape('js') }}').val($(this).closest('.filemanager-item').find('input').val());
 
 	$('#modal-image').modal('hide');
 });
