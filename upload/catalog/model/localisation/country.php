@@ -8,7 +8,7 @@ class ModelLocalisationCountry extends Model {
 
 		if ($country_data === false) {
 			if ($this->hasCountryDescriptionTable()) {
-				$query = $this->db->query("SELECT c.country_id, COALESCE(cd.name, c.name) AS name, c.iso_code_2, c.iso_code_3, COALESCE(cd.address_format, c.address_format) AS address_format, c.postcode_required, c.status FROM " . DB_PREFIX . "country c LEFT JOIN " . DB_PREFIX . "country_description cd ON (c.country_id = cd.country_id AND cd.language_id = '" . (int)$this->config->get('config_language_id') . "') WHERE c.country_id = '" . (int)$country_id . "' AND c.status = '1'");
+				$query = $this->db->query("SELECT c.country_id, COALESCE(cd.name, c.name) AS name, c.iso_code_2, c.iso_code_3, COALESCE(cd.address_format, c.address_format) AS address_format, c.phone_format, c.postcode_required, c.status FROM " . DB_PREFIX . "country c LEFT JOIN " . DB_PREFIX . "country_description cd ON (c.country_id = cd.country_id AND cd.language_id = '" . (int)$this->config->get('config_language_id') . "') WHERE c.country_id = '" . (int)$country_id . "' AND c.status = '1'");
 			} else {
 				$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "country WHERE country_id = '" . (int)$country_id . "' AND status = '1'");
 			}
@@ -26,7 +26,7 @@ class ModelLocalisationCountry extends Model {
 
 		if ($country_data === false) {
 			if ($this->hasCountryDescriptionTable()) {
-				$query = $this->db->query("SELECT c.country_id, COALESCE(cd.name, c.name) AS name, c.iso_code_2, c.iso_code_3, COALESCE(cd.address_format, c.address_format) AS address_format, c.postcode_required, c.status FROM " . DB_PREFIX . "country c LEFT JOIN " . DB_PREFIX . "country_description cd ON (c.country_id = cd.country_id AND cd.language_id = '" . (int)$this->config->get('config_language_id') . "') WHERE c.status = '1' ORDER BY name ASC");
+				$query = $this->db->query("SELECT c.country_id, COALESCE(cd.name, c.name) AS name, c.iso_code_2, c.iso_code_3, COALESCE(cd.address_format, c.address_format) AS address_format, c.phone_format, c.postcode_required, c.status FROM " . DB_PREFIX . "country c LEFT JOIN " . DB_PREFIX . "country_description cd ON (c.country_id = cd.country_id AND cd.language_id = '" . (int)$this->config->get('config_language_id') . "') WHERE c.status = '1' ORDER BY name ASC");
 			} else {
 				$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "country WHERE status = '1' ORDER BY name ASC");
 			}
