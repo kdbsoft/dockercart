@@ -36,16 +36,32 @@ class ControllerCatalogProduct extends Controller {
 				$url .= '&filter_model=' . urlencode(html_entity_decode($this->request->get['filter_model'], ENT_QUOTES, 'UTF-8'));
 			}
 
+			if (isset($this->request->get['filter_sku'])) {
+				$url .= '&filter_sku=' . urlencode(html_entity_decode($this->request->get['filter_sku'], ENT_QUOTES, 'UTF-8'));
+			}
+
 			if (isset($this->request->get['filter_price'])) {
 				$url .= '&filter_price=' . $this->request->get['filter_price'];
 			}
 
-			if (isset($this->request->get['filter_quantity'])) {
-				$url .= '&filter_quantity=' . $this->request->get['filter_quantity'];
+			if (isset($this->request->get['filter_quantity_min'])) {
+				$url .= '&filter_quantity_min=' . $this->request->get['filter_quantity_min'];
+			}
+
+			if (isset($this->request->get['filter_quantity_max'])) {
+				$url .= '&filter_quantity_max=' . $this->request->get['filter_quantity_max'];
 			}
 
 			if (isset($this->request->get['filter_status'])) {
 				$url .= '&filter_status=' . $this->request->get['filter_status'];
+			}
+
+			if (isset($this->request->get['filter_manufacturer'])) {
+				$url .= '&filter_manufacturer=' . urlencode(html_entity_decode($this->request->get['filter_manufacturer'], ENT_QUOTES, 'UTF-8'));
+			}
+
+			if (isset($this->request->get['filter_category'])) {
+				$url .= '&filter_category=' . urlencode(html_entity_decode($this->request->get['filter_category'], ENT_QUOTES, 'UTF-8'));
 			}
 
 			if (isset($this->request->get['sort'])) {
@@ -95,16 +111,32 @@ class ControllerCatalogProduct extends Controller {
 				$url .= '&filter_model=' . urlencode(html_entity_decode($this->request->get['filter_model'], ENT_QUOTES, 'UTF-8'));
 			}
 
+			if (isset($this->request->get['filter_sku'])) {
+				$url .= '&filter_sku=' . urlencode(html_entity_decode($this->request->get['filter_sku'], ENT_QUOTES, 'UTF-8'));
+			}
+
 			if (isset($this->request->get['filter_price'])) {
 				$url .= '&filter_price=' . $this->request->get['filter_price'];
 			}
 
-			if (isset($this->request->get['filter_quantity'])) {
-				$url .= '&filter_quantity=' . $this->request->get['filter_quantity'];
+			if (isset($this->request->get['filter_quantity_min'])) {
+				$url .= '&filter_quantity_min=' . $this->request->get['filter_quantity_min'];
+			}
+
+			if (isset($this->request->get['filter_quantity_max'])) {
+				$url .= '&filter_quantity_max=' . $this->request->get['filter_quantity_max'];
 			}
 
 			if (isset($this->request->get['filter_status'])) {
 				$url .= '&filter_status=' . $this->request->get['filter_status'];
+			}
+
+			if (isset($this->request->get['filter_manufacturer'])) {
+				$url .= '&filter_manufacturer=' . urlencode(html_entity_decode($this->request->get['filter_manufacturer'], ENT_QUOTES, 'UTF-8'));
+			}
+
+			if (isset($this->request->get['filter_category'])) {
+				$url .= '&filter_category=' . urlencode(html_entity_decode($this->request->get['filter_category'], ENT_QUOTES, 'UTF-8'));
 			}
 
 			if (isset($this->request->get['sort'])) {
@@ -149,16 +181,32 @@ class ControllerCatalogProduct extends Controller {
 				$url .= '&filter_model=' . urlencode(html_entity_decode($this->request->get['filter_model'], ENT_QUOTES, 'UTF-8'));
 			}
 
+			if (isset($this->request->get['filter_sku'])) {
+				$url .= '&filter_sku=' . urlencode(html_entity_decode($this->request->get['filter_sku'], ENT_QUOTES, 'UTF-8'));
+			}
+
 			if (isset($this->request->get['filter_price'])) {
 				$url .= '&filter_price=' . $this->request->get['filter_price'];
 			}
 
-			if (isset($this->request->get['filter_quantity'])) {
-				$url .= '&filter_quantity=' . $this->request->get['filter_quantity'];
+			if (isset($this->request->get['filter_quantity_min'])) {
+				$url .= '&filter_quantity_min=' . $this->request->get['filter_quantity_min'];
+			}
+
+			if (isset($this->request->get['filter_quantity_max'])) {
+				$url .= '&filter_quantity_max=' . $this->request->get['filter_quantity_max'];
 			}
 
 			if (isset($this->request->get['filter_status'])) {
 				$url .= '&filter_status=' . $this->request->get['filter_status'];
+			}
+
+			if (isset($this->request->get['filter_manufacturer'])) {
+				$url .= '&filter_manufacturer=' . urlencode(html_entity_decode($this->request->get['filter_manufacturer'], ENT_QUOTES, 'UTF-8'));
+			}
+
+			if (isset($this->request->get['filter_category'])) {
+				$url .= '&filter_category=' . urlencode(html_entity_decode($this->request->get['filter_category'], ENT_QUOTES, 'UTF-8'));
 			}
 
 			if (isset($this->request->get['sort'])) {
@@ -203,16 +251,32 @@ class ControllerCatalogProduct extends Controller {
 				$url .= '&filter_model=' . urlencode(html_entity_decode($this->request->get['filter_model'], ENT_QUOTES, 'UTF-8'));
 			}
 
+			if (isset($this->request->get['filter_sku'])) {
+				$url .= '&filter_sku=' . urlencode(html_entity_decode($this->request->get['filter_sku'], ENT_QUOTES, 'UTF-8'));
+			}
+
 			if (isset($this->request->get['filter_price'])) {
 				$url .= '&filter_price=' . $this->request->get['filter_price'];
 			}
 
-			if (isset($this->request->get['filter_quantity'])) {
-				$url .= '&filter_quantity=' . $this->request->get['filter_quantity'];
+			if (isset($this->request->get['filter_quantity_min'])) {
+				$url .= '&filter_quantity_min=' . $this->request->get['filter_quantity_min'];
+			}
+
+			if (isset($this->request->get['filter_quantity_max'])) {
+				$url .= '&filter_quantity_max=' . $this->request->get['filter_quantity_max'];
 			}
 
 			if (isset($this->request->get['filter_status'])) {
 				$url .= '&filter_status=' . $this->request->get['filter_status'];
+			}
+
+			if (isset($this->request->get['filter_manufacturer'])) {
+				$url .= '&filter_manufacturer=' . urlencode(html_entity_decode($this->request->get['filter_manufacturer'], ENT_QUOTES, 'UTF-8'));
+			}
+
+			if (isset($this->request->get['filter_category'])) {
+				$url .= '&filter_category=' . urlencode(html_entity_decode($this->request->get['filter_category'], ENT_QUOTES, 'UTF-8'));
 			}
 
 			if (isset($this->request->get['sort'])) {
@@ -252,16 +316,46 @@ class ControllerCatalogProduct extends Controller {
 			$filter_price = '';
 		}
 
-		if (isset($this->request->get['filter_quantity'])) {
-			$filter_quantity = $this->request->get['filter_quantity'];
+		if (isset($this->request->get['filter_quantity_min'])) {
+			$filter_quantity_min = $this->request->get['filter_quantity_min'];
 		} else {
-			$filter_quantity = '';
+			$filter_quantity_min = '';
+		}
+
+		if (isset($this->request->get['filter_quantity_max'])) {
+			$filter_quantity_max = $this->request->get['filter_quantity_max'];
+		} else {
+			$filter_quantity_max = '';
 		}
 
 		if (isset($this->request->get['filter_status'])) {
 			$filter_status = $this->request->get['filter_status'];
 		} else {
 			$filter_status = '';
+		}
+
+		if (isset($this->request->get['filter_sku'])) {
+			$filter_sku = $this->request->get['filter_sku'];
+		} else {
+			$filter_sku = '';
+		}
+
+		if (isset($this->request->get['filter_manufacturer'])) {
+			$filter_manufacturer = $this->request->get['filter_manufacturer'];
+		} else {
+			$filter_manufacturer = '';
+		}
+
+		if (isset($this->request->get['filter_category'])) {
+			$filter_category = $this->request->get['filter_category'];
+		} else {
+			$filter_category = '';
+		}
+
+		if (isset($this->request->get['filter_category_id'])) {
+			$filter_category_id = (int)$this->request->get['filter_category_id'];
+		} else {
+			$filter_category_id = '';
 		}
 
 		if (isset($this->request->get['sort'])) {
@@ -296,12 +390,32 @@ class ControllerCatalogProduct extends Controller {
 			$url .= '&filter_price=' . $this->request->get['filter_price'];
 		}
 
-		if (isset($this->request->get['filter_quantity'])) {
-			$url .= '&filter_quantity=' . $this->request->get['filter_quantity'];
+		if (isset($this->request->get['filter_sku'])) {
+			$url .= '&filter_sku=' . urlencode(html_entity_decode($this->request->get['filter_sku'], ENT_QUOTES, 'UTF-8'));
+		}
+
+		if (isset($this->request->get['filter_quantity_min'])) {
+			$url .= '&filter_quantity_min=' . $this->request->get['filter_quantity_min'];
+		}
+
+		if (isset($this->request->get['filter_quantity_max'])) {
+			$url .= '&filter_quantity_max=' . $this->request->get['filter_quantity_max'];
 		}
 
 		if (isset($this->request->get['filter_status'])) {
 			$url .= '&filter_status=' . $this->request->get['filter_status'];
+		}
+
+		if (isset($this->request->get['filter_manufacturer'])) {
+			$url .= '&filter_manufacturer=' . urlencode(html_entity_decode($this->request->get['filter_manufacturer'], ENT_QUOTES, 'UTF-8'));
+		}
+
+		if (isset($this->request->get['filter_category'])) {
+			$url .= '&filter_category=' . urlencode(html_entity_decode($this->request->get['filter_category'], ENT_QUOTES, 'UTF-8'));
+		}
+
+		if (isset($this->request->get['filter_category_id'])) {
+			$url .= '&filter_category_id=' . $this->request->get['filter_category_id'];
 		}
 
 		if (isset($this->request->get['sort'])) {
@@ -335,15 +449,20 @@ class ControllerCatalogProduct extends Controller {
 		$data['products'] = array();
 
 		$filter_data = array(
-			'filter_name'	  => $filter_name,
-			'filter_model'	  => $filter_model,
-			'filter_price'	  => $filter_price,
-			'filter_quantity' => $filter_quantity,
-			'filter_status'   => $filter_status,
-			'sort'            => $sort,
-			'order'           => $order,
-			'start'           => ($page - 1) * $this->config->get('config_limit_admin'),
-			'limit'           => $this->config->get('config_limit_admin')
+			'filter_name'	      => $filter_name,
+			'filter_model'	      => $filter_model,
+			'filter_sku'	      => $filter_sku,
+			'filter_price'	      => $filter_price,
+			'filter_quantity_min' => $filter_quantity_min,
+			'filter_quantity_max' => $filter_quantity_max,
+			'filter_status'       => $filter_status,
+			'filter_manufacturer' => $filter_manufacturer,
+			'filter_category'     => $filter_category,
+			'filter_category_id'  => $filter_category_id,
+			'sort'                => $sort,
+			'order'               => $order,
+			'start'               => ($page - 1) * $this->config->get('config_limit_admin'),
+			'limit'               => $this->config->get('config_limit_admin')
 		);
 
 		$this->load->model('tool/image');
@@ -421,12 +540,32 @@ class ControllerCatalogProduct extends Controller {
 			$url .= '&filter_price=' . $this->request->get['filter_price'];
 		}
 
-		if (isset($this->request->get['filter_quantity'])) {
-			$url .= '&filter_quantity=' . $this->request->get['filter_quantity'];
+		if (isset($this->request->get['filter_sku'])) {
+			$url .= '&filter_sku=' . urlencode(html_entity_decode($this->request->get['filter_sku'], ENT_QUOTES, 'UTF-8'));
+		}
+
+		if (isset($this->request->get['filter_quantity_min'])) {
+			$url .= '&filter_quantity_min=' . $this->request->get['filter_quantity_min'];
+		}
+
+		if (isset($this->request->get['filter_quantity_max'])) {
+			$url .= '&filter_quantity_max=' . $this->request->get['filter_quantity_max'];
 		}
 
 		if (isset($this->request->get['filter_status'])) {
 			$url .= '&filter_status=' . $this->request->get['filter_status'];
+		}
+
+		if (isset($this->request->get['filter_manufacturer'])) {
+			$url .= '&filter_manufacturer=' . urlencode(html_entity_decode($this->request->get['filter_manufacturer'], ENT_QUOTES, 'UTF-8'));
+		}
+
+		if (isset($this->request->get['filter_category'])) {
+			$url .= '&filter_category=' . urlencode(html_entity_decode($this->request->get['filter_category'], ENT_QUOTES, 'UTF-8'));
+		}
+
+		if (isset($this->request->get['filter_category_id'])) {
+			$url .= '&filter_category_id=' . $this->request->get['filter_category_id'];
 		}
 
 		if ($order == 'ASC') {
@@ -460,12 +599,32 @@ class ControllerCatalogProduct extends Controller {
 			$url .= '&filter_price=' . $this->request->get['filter_price'];
 		}
 
-		if (isset($this->request->get['filter_quantity'])) {
-			$url .= '&filter_quantity=' . $this->request->get['filter_quantity'];
+		if (isset($this->request->get['filter_sku'])) {
+			$url .= '&filter_sku=' . urlencode(html_entity_decode($this->request->get['filter_sku'], ENT_QUOTES, 'UTF-8'));
+		}
+
+		if (isset($this->request->get['filter_quantity_min'])) {
+			$url .= '&filter_quantity_min=' . $this->request->get['filter_quantity_min'];
+		}
+
+		if (isset($this->request->get['filter_quantity_max'])) {
+			$url .= '&filter_quantity_max=' . $this->request->get['filter_quantity_max'];
 		}
 
 		if (isset($this->request->get['filter_status'])) {
 			$url .= '&filter_status=' . $this->request->get['filter_status'];
+		}
+
+		if (isset($this->request->get['filter_manufacturer'])) {
+			$url .= '&filter_manufacturer=' . urlencode(html_entity_decode($this->request->get['filter_manufacturer'], ENT_QUOTES, 'UTF-8'));
+		}
+
+		if (isset($this->request->get['filter_category'])) {
+			$url .= '&filter_category=' . urlencode(html_entity_decode($this->request->get['filter_category'], ENT_QUOTES, 'UTF-8'));
+		}
+
+		if (isset($this->request->get['filter_category_id'])) {
+			$url .= '&filter_category_id=' . $this->request->get['filter_category_id'];
 		}
 
 		if (isset($this->request->get['sort'])) {
@@ -488,12 +647,20 @@ class ControllerCatalogProduct extends Controller {
 
 		$data['filter_name'] = $filter_name;
 		$data['filter_model'] = $filter_model;
+		$data['filter_sku'] = $filter_sku;
 		$data['filter_price'] = $filter_price;
-		$data['filter_quantity'] = $filter_quantity;
+		$data['filter_quantity_min'] = $filter_quantity_min;
+		$data['filter_quantity_max'] = $filter_quantity_max;
 		$data['filter_status'] = $filter_status;
+		$data['filter_manufacturer'] = $filter_manufacturer;
+		$data['filter_category'] = $filter_category;
+		$data['filter_category_id'] = $filter_category_id;
 
 		$data['sort'] = $sort;
 		$data['order'] = $order;
+
+		$data['text_min'] = $this->language->get('text_min');
+		$data['text_max'] = $this->language->get('text_max');
 
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');

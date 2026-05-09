@@ -529,6 +529,23 @@ function validateAndNormalizeTelephone(telephone) {
 
         loadCaptcha();
         showModal();
+
+        // Apply phone mask if country is pre-selected
+        applyPhoneMaskFromCountry();
+    }
+
+    function applyPhoneMaskFromCountry() {
+        var countrySelect = document.getElementById('input-country');
+        var phoneInput = document.getElementById('input-telephone');
+        if (!countrySelect || !phoneInput || typeof DockercartPhoneMask === 'undefined') return;
+
+        var selectedOption = countrySelect.selectedOptions[0];
+        var phoneFormat = selectedOption ? selectedOption.getAttribute('data-phone-format') || '' : '';
+        if (phoneFormat) {
+            DockercartPhoneMask.init(phoneInput, phoneFormat);
+        } else {
+            DockercartPhoneMask.destroy(phoneInput);
+        }
     }
 
     function handleSubmit() {
@@ -555,12 +572,19 @@ function validateAndNormalizeTelephone(telephone) {
 
         var telephoneInput = form.querySelector('input[name="telephone"]');
         if (telephoneInput && telephoneInput.value) {
-            var phoneValidation = validateAndNormalizeTelephone(telephoneInput.value);
-            if (!phoneValidation.valid) {
-                errors.push('Telephone number is invalid! Use format: +7 (XXX) XXX-XX-XX or similar.');
-                telephoneInput.classList.add('has-error');
+            if (telephoneInput._phonemask_format && typeof DockercartPhoneMask !== 'undefined') {
+                if (!DockercartPhoneMask.validate(telephoneInput.value, telephoneInput._phonemask_format)) {
+                    errors.push('Telephone number does not match the required format!');
+                    telephoneInput.classList.add('has-error');
+                }
             } else {
-                telephoneInput.value = phoneValidation.normalized;
+                var phoneValidation = validateAndNormalizeTelephone(telephoneInput.value);
+                if (!phoneValidation.valid) {
+                    errors.push('Telephone number is invalid!');
+                    telephoneInput.classList.add('has-error');
+                } else {
+                    telephoneInput.value = phoneValidation.normalized;
+                }
             }
         }
 
@@ -735,11 +759,28 @@ function validateAndNormalizeTelephone(telephone) {
         if (field && !field.disabled) {
             field.classList.remove('has-error');
         }
+
+        // Apply phone mask on country change
+        if (e.target && e.target.id === 'input-country') {
+            var selectedOption = e.target.selectedOptions[0];
+            var phoneFormat = selectedOption ? selectedOption.getAttribute('data-phone-format') || '' : '';
+            var phoneInput = document.getElementById('input-telephone');
+            if (phoneInput && typeof DockercartPhoneMask !== 'undefined') {
+                if (phoneFormat) {
+                    DockercartPhoneMask.init(phoneInput, phoneFormat);
+                } else {
+                    DockercartPhoneMask.destroy(phoneInput);
+                }
+            }
+        }
     });
 
     document.addEventListener('focusout', function(e) {
         var telephoneField = e.target.closest('#oneclickcheckout-form input[name="telephone"]');
         if (telephoneField && telephoneField.value) {
+            // Skip manual formatting if input has an active phone mask
+            if (telephoneField._phonemask_format) return;
+
             var phoneValidation = validateAndNormalizeTelephone(telephoneField.value);
             if (phoneValidation.valid) {
                 telephoneField.value = formatTelephoneForDisplay(phoneValidation.normalized);

@@ -188,6 +188,17 @@ class ControllerAccountEdit extends Controller {
 
 		$data['back'] = $this->url->link('account/account', '', true);
 
+		// Pass store-default phone format for input mask
+		$data['phone_format'] = '';
+		$this->load->model('localisation/country');
+		$default_country_id = $this->config->get('config_country_id');
+		if ($default_country_id) {
+			$country_info = $this->model_localisation_country->getCountry($default_country_id);
+			$data['phone_format'] = $country_info['phone_format'] ?? '';
+		}
+
+		$this->document->addScript('catalog/view/javascript/common/phone-mask.js');
+
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['column_right'] = $this->load->controller('common/column_right');
 		$data['content_top'] = $this->load->controller('common/content_top');
@@ -215,7 +226,17 @@ class ControllerAccountEdit extends Controller {
 			$this->error['warning'] = $this->language->get('error_exists');
 		}
 
-		if ((utf8_strlen($this->request->post['telephone']) < 3) || (utf8_strlen($this->request->post['telephone']) > 32)) {
+		if (!empty($this->request->post['telephone'])) {
+			$this->load->model('localisation/country');
+			$country_info = $this->model_localisation_country->getCountry($this->config->get('config_country_id'));
+			$phone_format = $country_info ? ($country_info['phone_format'] ?? '') : '';
+
+			$phone_valid = $this->validatePhoneFormat($this->request->post['telephone'], $phone_format);
+
+			if (!$phone_valid) {
+				$this->error['telephone'] = $this->language->get('error_telephone');
+			}
+		} else {
 			$this->error['telephone'] = $this->language->get('error_telephone');
 		}
 
@@ -243,5 +264,20 @@ class ControllerAccountEdit extends Controller {
 		}
 
 		return !$this->error;
+	}
+
+	private function validatePhoneFormat($telephone, $phone_format) {
+		if ($phone_format) {
+			$pattern = '/^';
+			for ($i = 0; $i < strlen($phone_format); $i++) {
+				$ch = $phone_format[$i];
+				$pattern .= $ch === 'X' ? '\d' : preg_quote($ch, '/');
+			}
+			$pattern .= '$/';
+			return (bool)preg_match($pattern, $telephone);
+		}
+
+		$digits = preg_replace('/\D/', '', $telephone);
+		return strlen($digits) >= 3 && strlen($digits) <= 32;
 	}
 }

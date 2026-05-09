@@ -806,6 +806,7 @@ select[disabled] {
   </button>
 </div>
 
+<script src="catalog/view/javascript/common/phone-mask.js"></script>
 <script>
 const CONFIG = {
   urls: {
@@ -876,6 +877,16 @@ const DEFAULT_SHIPPING_COUNTRY_ID = '{{ country_id|default('')|e('js') }}';
 const DEFAULT_SHIPPING_ZONE_ID = '{{ zone_id|default('')|e('js') }}';
 const DEFAULT_PAYMENT_COUNTRY_ID = '{{ payment_country_id|default(country_id|default(''))|e('js') }}';
 const DEFAULT_PAYMENT_ZONE_ID = '{{ payment_zone_id|default(zone_id|default(''))|e('js') }}';
+const DEFAULT_PHONE_FORMAT = '{{ default_phone_format|default('')|e('js') }}';
+const phoneFormatCache = new Map();
+
+const applyPhoneMask = (inputEl, format) => {
+	if (!inputEl || !format) {
+		if (inputEl) DockercartPhoneMask.destroy(inputEl);
+		return;
+	}
+	DockercartPhoneMask.init(inputEl, format);
+};
 
 const getFieldValue = (selector, fallback = '') => {
   const el = $(selector);
@@ -2283,6 +2294,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
             zoneSelect.innerHTML = html;
 
+            // Apply phone format mask if available
+            const phoneFormat = json.phone_format || '';
+            if (phoneFormat) {
+              phoneFormatCache.set(country_id, phoneFormat);
+            }
+            const phoneInput = $('#input-telephone');
+            if (phoneInput) {
+              applyPhoneMask(phoneInput, phoneFormat);
+            }
+
             // If the server provided a preselected zone_id (e.g. for logged-in users), select it
             try {
               const initialZoneId = '{{ zone_id|default('') }}';
@@ -3490,18 +3511,23 @@ document.addEventListener('DOMContentLoaded', () => {
         errors.push(`{{ text_field_invalid_email|e('js') }}`.replace('%s', label));
       }
 
-      // Phone validation (flexible for international formats)
+      // Phone validation
       if (input.type === 'tel' || input.name === 'telephone') {
-        const phoneValue = value.toString().replace(/[\s\-\(\)]/g, '');
-        // Require at least 7 digits (allows +, spaces, dashes, parentheses)
-        if (value && phoneValue.length < 7) {
-          input.classList.add('border-error');
-          errors.push(`${label} must contain at least 7 digits`);
-        }
-        // Check if contains at least some digits
-        if (value && !/\d{7,}/.test(phoneValue)) {
-          input.classList.add('border-error');
-          errors.push(`${label} must be a valid phone number`);
+        const phoneInput = $('#input-telephone');
+        if (phoneInput && phoneInput._phonemask_format && typeof DockercartPhoneMask !== 'undefined') {
+          if (value) {
+            const valid = DockercartPhoneMask.validate(value, phoneInput._phonemask_format);
+            if (!valid) {
+              input.classList.add('border-error');
+              errors.push(`${label} must match the required format`);
+            }
+          }
+        } else if (value) {
+          const digits = value.replace(/\D/g, '');
+          if (digits.length < 3) {
+            input.classList.add('border-error');
+            errors.push(`${label} must contain at least 3 digits`);
+          }
         }
       }
     });
@@ -3804,6 +3830,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 300);
       });
     });
+  }
+
+  // Initialize phone mask on page load
+  const phoneInput = $('#input-telephone');
+  if (phoneInput && DEFAULT_PHONE_FORMAT) {
+    phoneFormatCache.set(DEFAULT_SHIPPING_COUNTRY_ID, DEFAULT_PHONE_FORMAT);
+    applyPhoneMask(phoneInput, DEFAULT_PHONE_FORMAT);
   }
 });
 </script>

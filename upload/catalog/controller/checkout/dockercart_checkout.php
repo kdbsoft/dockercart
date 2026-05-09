@@ -247,9 +247,16 @@ class ControllerCheckoutDockercartCheckout extends Controller
             $data["zone_id"] = $this->config->get(
                 "module_dockercart_checkout_default_zone_id",
             );
-        } else {
-            $data["zone_id"] = $this->config->get("config_zone_id");
-        }
+		} else {
+			$data["zone_id"] = $this->config->get("config_zone_id");
+		}
+
+		// Default phone format (for input mask)
+		$data["default_phone_format"] = "";
+		if (!empty($data["country_id"])) {
+			$country_info = $this->model_localisation_country->getCountry($data["country_id"]);
+			$data["default_phone_format"] = $country_info["phone_format"] ?? "";
+		}
 
         // Default payment country/zone (if previously saved in session)
         if (isset($this->session->data["payment_address"]["country_id"])) {
@@ -832,18 +839,29 @@ class ControllerCheckoutDockercartCheckout extends Controller
             }
         }
 
-        // Telephone validation depends on admin blocks / legacy config
-        if ($this->isFieldRequired("telephone")) {
-            if (
-                empty($data["telephone"]) ||
-                utf8_strlen($data["telephone"]) < 3 ||
-                utf8_strlen($data["telephone"]) > 32
-            ) {
-                $json["error"]["telephone"] = $this->language->get(
-                    "error_telephone",
-                );
-            }
-        }
+		// Telephone validation depends on admin blocks / legacy config
+		if ($this->isFieldRequired("telephone")) {
+			$phone_valid = false;
+
+			if (!empty($data["telephone"])) {
+				$country_id = $data["country_id"] ?? ($this->request->post["country_id"] ?? null);
+				$phone_format = "";
+
+				if ($country_id) {
+					$this->load->model("localisation/country");
+					$country_info = $this->model_localisation_country->getCountry($country_id);
+					$phone_format = $country_info["phone_format"] ?? "";
+				}
+
+				$phone_valid = $this->_validatePhoneWithFormat($data["telephone"], $phone_format);
+			}
+
+			if (!$phone_valid) {
+				$json["error"]["telephone"] = $this->language->get(
+					"error_telephone",
+				);
+			}
+		}
 
         if (!isset($json["error"])) {
             // If customer is logged in, store temporary customer overrides in session
@@ -3098,6 +3116,27 @@ class ControllerCheckoutDockercartCheckout extends Controller
             default:
                 return false;
         }
+    }
+
+    private function _validatePhoneWithFormat($telephone, $phone_format) {
+        if ($phone_format) {
+            $pattern = '/^';
+            $len = strlen($phone_format);
+            for ($i = 0; $i < $len; $i++) {
+                $ch = $phone_format[$i];
+                $pattern .= $ch === 'X' ? '\d' : preg_quote($ch, '/');
+            }
+            $pattern .= '$/';
+
+            if (preg_match($pattern, $telephone)) {
+                return true;
+            }
+
+            return false;
+        }
+
+        $digits = preg_replace('/\D/', '', $telephone);
+        return strlen($digits) >= 3 && strlen($digits) <= 32;
     }
 
     /**

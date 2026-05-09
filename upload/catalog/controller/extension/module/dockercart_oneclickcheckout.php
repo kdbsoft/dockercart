@@ -64,7 +64,8 @@ class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
         if ($active_theme !== 'dockercart') {
             $css_link = '<link rel="stylesheet" type="text/css" href="catalog/view/theme/default/stylesheet/dockercart_oneclickcheckout.css" />' . "\n";
         }
-        $js_link = '<script src="catalog/view/javascript/dockercart_oneclickcheckout.js"></script>' . "\n";
+		$js_link = '<script src="catalog/view/javascript/common/phone-mask.js"></script>' . "\n";
+		$js_link .= '<script src="catalog/view/javascript/dockercart_oneclickcheckout.js"></script>' . "\n";
         
         // Find the "Add to Cart" button and insert our button after it
         $patterns = [
@@ -233,7 +234,8 @@ class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
                     
                     foreach ($countries as $country) {
                         $selected = ($selected_country_id == $country['country_id']) ? ' selected' : '';
-                        $html .= '              <option value="' . $country['country_id'] . '"' . $selected . '>' . htmlspecialchars($country['name'], ENT_QUOTES, 'UTF-8') . '</option>' . "\n";
+                        $phone_format_attr = !empty($country['phone_format']) ? ' data-phone-format="' . htmlspecialchars($country['phone_format'], ENT_QUOTES, 'UTF-8') . '"' : '';
+                        $html .= '              <option value="' . $country['country_id'] . '"' . $selected . $phone_format_attr . '>' . htmlspecialchars($country['name'], ENT_QUOTES, 'UTF-8') . '</option>' . "\n";
                     }
                     
                     $html .= '            </select>' . "\n";

@@ -1472,48 +1472,116 @@ class ModelCatalogProduct extends Model
     public function getProducts($data = [])
     {
         $sql =
-            "SELECT * FROM " .
+            "SELECT p.*, pd.* FROM " .
             DB_PREFIX .
             "product p LEFT JOIN " .
             DB_PREFIX .
-            "product_description pd ON (p.product_id = pd.product_id) WHERE pd.language_id = '" .
+            "product_description pd ON (p.product_id = pd.product_id)";
+
+        $joins = "";
+        $where =
+            " WHERE pd.language_id = '" .
             (int) $this->config->get("config_language_id") .
             "'";
 
         if (!empty($data["filter_name"])) {
-            $sql .=
-                " AND pd.name LIKE '" .
+            $where .=
+                " AND pd.name LIKE '%" .
                 $this->db->escape($data["filter_name"]) .
                 "%'";
         }
 
         if (!empty($data["filter_model"])) {
-            $sql .=
-                " AND p.model LIKE '" .
+            $where .=
+                " AND p.model LIKE '%" .
                 $this->db->escape($data["filter_model"]) .
                 "%'";
         }
 
         if (!empty($data["filter_price"])) {
-            $sql .=
+            $where .=
                 " AND p.price LIKE '" .
                 $this->db->escape($data["filter_price"]) .
                 "%'";
         }
 
         if (
-            isset($data["filter_quantity"]) &&
-            $data["filter_quantity"] !== ""
+            isset($data["filter_quantity_min"]) &&
+            $data["filter_quantity_min"] !== ""
         ) {
-            $sql .=
-                " AND p.quantity = '" . (float) $data["filter_quantity"] . "'";
+            $where .=
+                " AND p.quantity >= '" . (float) $data["filter_quantity_min"] . "'";
+        }
+
+        if (
+            isset($data["filter_quantity_max"]) &&
+            $data["filter_quantity_max"] !== ""
+        ) {
+            $where .=
+                " AND p.quantity <= '" . (float) $data["filter_quantity_max"] . "'";
         }
 
         if (isset($data["filter_status"]) && $data["filter_status"] !== "") {
-            $sql .= " AND p.status = '" . (int) $data["filter_status"] . "'";
+            $where .= " AND p.status = '" . (int) $data["filter_status"] . "'";
         }
 
-        $sql .= " GROUP BY p.product_id";
+        if (!empty($data["filter_sku"])) {
+            $where .=
+                " AND (p.sku LIKE '%" .
+                $this->db->escape($data["filter_sku"]) .
+                "%' OR p.upc LIKE '%" .
+                $this->db->escape($data["filter_sku"]) .
+                "%' OR p.ean LIKE '%" .
+                $this->db->escape($data["filter_sku"]) .
+                "%' OR p.jan LIKE '%" .
+                $this->db->escape($data["filter_sku"]) .
+                "%' OR p.isbn LIKE '%" .
+                $this->db->escape($data["filter_sku"]) .
+                "%' OR p.mpn LIKE '%" .
+                $this->db->escape($data["filter_sku"]) .
+                "%')";
+        }
+
+        if (!empty($data["filter_manufacturer"])) {
+            $joins .=
+                " LEFT JOIN " .
+                DB_PREFIX .
+                "manufacturer m ON (p.manufacturer_id = m.manufacturer_id)";
+            $where .=
+                " AND m.name LIKE '%" .
+                $this->db->escape($data["filter_manufacturer"]) .
+                "%'";
+        }
+
+        if (!empty($data["filter_category_id"])) {
+            $joins .=
+                " LEFT JOIN " .
+                DB_PREFIX .
+                "product_to_category p2c ON (p.product_id = p2c.product_id) LEFT JOIN " .
+                DB_PREFIX .
+                "category_path cp ON (p2c.category_id = cp.category_id)";
+            $where .=
+                " AND cp.path_id = '" . (int) $data["filter_category_id"] . "'";
+        } elseif (!empty($data["filter_category"])) {
+            $category_name = trim(preg_replace('/[>\x{00A0}]+/u', ' ', $data["filter_category"]));
+
+            $joins .=
+                " LEFT JOIN " .
+                DB_PREFIX .
+                "product_to_category p2c ON (p.product_id = p2c.product_id) LEFT JOIN " .
+                DB_PREFIX .
+                "category_path cp ON (p2c.category_id = cp.category_id) LEFT JOIN " .
+                DB_PREFIX .
+                "category_description cd ON (cp.path_id = cd.category_id AND cd.language_id = '" .
+                (int) $this->config->get("config_language_id") .
+                "')";
+            $where .=
+                " AND cd.name LIKE '%" .
+                $this->db->escape($category_name) .
+                "%'";
+        }
+
+        $sql .= $joins . $where . " GROUP BY p.product_id";
 
         $sort_data = [
             "pd.name",
@@ -1983,43 +2051,110 @@ class ModelCatalogProduct extends Model
             DB_PREFIX .
             "product_description pd ON (p.product_id = pd.product_id)";
 
-        $sql .=
+        $joins = "";
+        $where =
             " WHERE pd.language_id = '" .
             (int) $this->config->get("config_language_id") .
             "'";
 
         if (!empty($data["filter_name"])) {
-            $sql .=
-                " AND pd.name LIKE '" .
+            $where .=
+                " AND pd.name LIKE '%" .
                 $this->db->escape($data["filter_name"]) .
                 "%'";
         }
 
         if (!empty($data["filter_model"])) {
-            $sql .=
-                " AND p.model LIKE '" .
+            $where .=
+                " AND p.model LIKE '%" .
                 $this->db->escape($data["filter_model"]) .
                 "%'";
         }
 
         if (isset($data["filter_price"]) && !is_null($data["filter_price"])) {
-            $sql .=
+            $where .=
                 " AND p.price LIKE '" .
                 $this->db->escape($data["filter_price"]) .
                 "%'";
         }
 
         if (
-            isset($data["filter_quantity"]) &&
-            $data["filter_quantity"] !== ""
+            isset($data["filter_quantity_min"]) &&
+            $data["filter_quantity_min"] !== ""
         ) {
-            $sql .=
-                " AND p.quantity = '" . (float) $data["filter_quantity"] . "'";
+            $where .=
+                " AND p.quantity >= '" . (float) $data["filter_quantity_min"] . "'";
+        }
+
+        if (
+            isset($data["filter_quantity_max"]) &&
+            $data["filter_quantity_max"] !== ""
+        ) {
+            $where .=
+                " AND p.quantity <= '" . (float) $data["filter_quantity_max"] . "'";
         }
 
         if (isset($data["filter_status"]) && $data["filter_status"] !== "") {
-            $sql .= " AND p.status = '" . (int) $data["filter_status"] . "'";
+            $where .= " AND p.status = '" . (int) $data["filter_status"] . "'";
         }
+
+        if (!empty($data["filter_sku"])) {
+            $where .=
+                " AND (p.sku LIKE '%" .
+                $this->db->escape($data["filter_sku"]) .
+                "%' OR p.upc LIKE '%" .
+                $this->db->escape($data["filter_sku"]) .
+                "%' OR p.ean LIKE '%" .
+                $this->db->escape($data["filter_sku"]) .
+                "%' OR p.jan LIKE '%" .
+                $this->db->escape($data["filter_sku"]) .
+                "%' OR p.isbn LIKE '%" .
+                $this->db->escape($data["filter_sku"]) .
+                "%' OR p.mpn LIKE '%" .
+                $this->db->escape($data["filter_sku"]) .
+                "%')";
+        }
+
+        if (!empty($data["filter_manufacturer"])) {
+            $joins .=
+                " LEFT JOIN " .
+                DB_PREFIX .
+                "manufacturer m ON (p.manufacturer_id = m.manufacturer_id)";
+            $where .=
+                " AND m.name LIKE '%" .
+                $this->db->escape($data["filter_manufacturer"]) .
+                "%'";
+        }
+
+        if (!empty($data["filter_category_id"])) {
+            $joins .=
+                " LEFT JOIN " .
+                DB_PREFIX .
+                "product_to_category p2c ON (p.product_id = p2c.product_id) LEFT JOIN " .
+                DB_PREFIX .
+                "category_path cp ON (p2c.category_id = cp.category_id)";
+            $where .=
+                " AND cp.path_id = '" . (int) $data["filter_category_id"] . "'";
+        } elseif (!empty($data["filter_category"])) {
+            $category_name = trim(preg_replace('/[>\x{00A0}]+/u', ' ', $data["filter_category"]));
+
+            $joins .=
+                " LEFT JOIN " .
+                DB_PREFIX .
+                "product_to_category p2c ON (p.product_id = p2c.product_id) LEFT JOIN " .
+                DB_PREFIX .
+                "category_path cp ON (p2c.category_id = cp.category_id) LEFT JOIN " .
+                DB_PREFIX .
+                "category_description cd ON (cp.path_id = cd.category_id AND cd.language_id = '" .
+                (int) $this->config->get("config_language_id") .
+                "')";
+            $where .=
+                " AND cd.name LIKE '%" .
+                $this->db->escape($category_name) .
+                "%'";
+        }
+
+        $sql .= $joins . $where;
 
         $query = $this->db->query($sql);
 
