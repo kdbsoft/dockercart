@@ -12,7 +12,7 @@
         {% if logo_dark %}
             <a href="{{ home }}" class="inline-flex items-center">
               <img src="{{ logo_dark }}" title="{{ name }}" alt="{{ name }}" class="object-contain max-w-[160px] sm:max-w-[220px]" />
-            </a>         
+            </a>
         {% endif %}
         </div>
 
@@ -121,7 +121,7 @@
         </button>
 
         <ul id="accordion-account" class="space-y-2.5 text-sm hidden lg:block">
-          <li><a href="{{ account }}" class="hover:text-white transition">{{ text_account }}</a></li>
+          <li><a href="{{ account }}" class="hover:text-white transition">{{ text_login }}</a></li>
           <li><a href="{{ order }}" class="hover:text-white transition">{{ text_order }}</a></li>
           <li><a href="{{ wishlist }}" class="hover:text-white transition">{{ text_wishlist }}</a></li>
           <li><a href="{{ compare }}" class="hover:text-white transition">{{ text_compare|default('Compare') }}</a></li>
