@@ -38,7 +38,7 @@ $_['entry_captcha']    = 'Enter the code in the box below';
 // Error
 $_['error_required']   = '%s is required!';
 $_['error_email']      = 'E-Mail Address does not appear to be valid!';
-$_['error_telephone']  = 'Telephone number is invalid! Use format: +1 (XXX) XXX-XX-XX or similar.';
+$_['error_telephone']  = 'Telephone number is invalid!';
 $_['error_product']    = 'Product not found!';
 $_['error_order_create'] = 'Error creating order. Please try again.';
 $_['error_module_disabled'] = 'Module is disabled.';

@@ -127,8 +127,28 @@ class ControllerCheckoutRegister extends Controller {
 				$json['error']['warning'] = $this->language->get('error_exists');
 			}
 
-			if ((utf8_strlen($this->request->post['telephone']) < 3) || (utf8_strlen($this->request->post['telephone']) > 32)) {
-				$json['error']['telephone'] = $this->language->get('error_telephone');
+			if (!empty($this->request->post['telephone'])) {
+				$this->load->model('localisation/country');
+				$country_id = $this->request->post['country_id'] ?? null;
+				$phone_valid = true;
+
+				if ($country_id) {
+					$country_info = $this->model_localisation_country->getCountry($country_id);
+					$phone_format = $country_info ? ($country_info['phone_format'] ?? '') : '';
+					if ($phone_format) {
+						$phone_valid = $this->validatePhoneFormat($this->request->post['telephone'], $phone_format);
+					} else {
+						$digits = preg_replace('/\D/', '', $this->request->post['telephone']);
+						$phone_valid = strlen($digits) >= 3 && strlen($digits) <= 32;
+					}
+				} else {
+					$digits = preg_replace('/\D/', '', $this->request->post['telephone']);
+					$phone_valid = strlen($digits) >= 3 && strlen($digits) <= 32;
+				}
+
+				if (!$phone_valid) {
+					$json['error']['telephone'] = $this->language->get('error_telephone');
+				}
 			}
 
 			if ((utf8_strlen($this->request->post['address_1']) < 3) || (utf8_strlen($this->request->post['address_1']) > 128)) {
@@ -248,5 +268,20 @@ class ControllerCheckoutRegister extends Controller {
 
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
+	}
+
+	private function validatePhoneFormat($telephone, $phone_format) {
+		if ($phone_format) {
+			$pattern = '/^';
+			for ($i = 0; $i < strlen($phone_format); $i++) {
+				$ch = $phone_format[$i];
+				$pattern .= $ch === 'X' ? '\d' : preg_quote($ch, '/');
+			}
+			$pattern .= '$/';
+			return (bool)preg_match($pattern, $telephone);
+		}
+
+		$digits = preg_replace('/\D/', '', $telephone);
+		return strlen($digits) >= 3 && strlen($digits) <= 32;
 	}
 }

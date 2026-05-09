@@ -1,4 +1,10 @@
 {{ header }}{{ column_left }}
+{% if text_min is not defined %}
+{% set text_min = 'Min' %}
+{% endif %}
+{% if text_max is not defined %}
+{% set text_max = 'Max' %}
+{% endif %}
 <div id="content">
   <div class="page-header">
     <div class="container-fluid">
@@ -42,12 +48,23 @@
               <input type="text" name="filter_model" value="{{ filter_model }}" placeholder="{{ entry_model }}" id="input-model" class="form-control" />
             </div>
             <div class="form-group">
+              <label class="control-label" for="input-sku">{{ entry_sku }}</label>
+              <input type="text" name="filter_sku" value="{{ filter_sku }}" placeholder="{{ entry_sku }}" id="input-sku" class="form-control" />
+            </div>
+            <div class="form-group">
               <label class="control-label" for="input-price">{{ entry_price }}</label>
               <input type="text" name="filter_price" value="{{ filter_price }}" placeholder="{{ entry_price }}" id="input-price" class="form-control" />
             </div>
             <div class="form-group">
-              <label class="control-label" for="input-quantity">{{ entry_quantity }}</label>
-              <input type="text" name="filter_quantity" value="{{ filter_quantity }}" placeholder="{{ entry_quantity }}" id="input-quantity" class="form-control" />
+              <label class="control-label">{{ entry_quantity }}</label>
+              <div class="row">
+                <div class="col-xs-6">
+                  <input type="text" name="filter_quantity_min" value="{{ filter_quantity_min }}" placeholder="{{ text_min }}" id="input-quantity-min" class="form-control" />
+                </div>
+                <div class="col-xs-6">
+                  <input type="text" name="filter_quantity_max" value="{{ filter_quantity_max }}" placeholder="{{ text_max }}" id="input-quantity-max" class="form-control" />
+                </div>
+              </div>
             </div>
             <div class="form-group">
               <label class="control-label" for="input-status">{{ entry_status }}</label>
@@ -125,6 +142,15 @@
               
               
               </select>
+            </div>
+            <div class="form-group">
+              <label class="control-label" for="input-manufacturer">{{ entry_manufacturer }}</label>
+              <input type="text" name="filter_manufacturer" value="{{ filter_manufacturer }}" placeholder="{{ entry_manufacturer }}" id="input-manufacturer" class="form-control" />
+            </div>
+            <div class="form-group">
+              <label class="control-label" for="input-category">{{ entry_category }}</label>
+              <input type="text" name="filter_category" value="{{ filter_category }}" placeholder="{{ entry_category }}" id="input-category" class="form-control" />
+              <input type="hidden" name="filter_category_id" value="{{ filter_category_id }}" id="input-category-id" />
             </div>
             <div class="form-group text-right">
               <button type="button" id="button-filter" class="btn btn-default"><i class="fa fa-filter"></i> {{ button_filter }}</button>
@@ -211,16 +237,28 @@ $('#button-filter').on('click', function() {
 		url += '&filter_model=' + encodeURIComponent(filter_model);
 	}
 
+	var filter_sku = $('input[name=\'filter_sku\']').val();
+
+	if (filter_sku) {
+		url += '&filter_sku=' + encodeURIComponent(filter_sku);
+	}
+
 	var filter_price = $('input[name=\'filter_price\']').val();
 
 	if (filter_price) {
 		url += '&filter_price=' + encodeURIComponent(filter_price);
 	}
 
-	var filter_quantity = $('input[name=\'filter_quantity\']').val();
+	var filter_quantity_min = $('input[name=\'filter_quantity_min\']').val();
 
-	if (filter_quantity) {
-		url += '&filter_quantity=' + encodeURIComponent(filter_quantity);
+	if (filter_quantity_min) {
+		url += '&filter_quantity_min=' + encodeURIComponent(filter_quantity_min);
+	}
+
+	var filter_quantity_max = $('input[name=\'filter_quantity_max\']').val();
+
+	if (filter_quantity_max) {
+		url += '&filter_quantity_max=' + encodeURIComponent(filter_quantity_max);
 	}
 
 	var filter_status = $('select[name=\'filter_status\']').val();
@@ -229,7 +267,32 @@ $('#button-filter').on('click', function() {
 		url += '&filter_status=' + encodeURIComponent(filter_status);
 	}
 
+	var filter_manufacturer = $('input[name=\'filter_manufacturer\']').val();
+
+	if (filter_manufacturer) {
+		url += '&filter_manufacturer=' + encodeURIComponent(filter_manufacturer);
+	}
+
+	var filter_category = $('input[name=\'filter_category\']').val();
+
+	if (filter_category) {
+		url += '&filter_category=' + encodeURIComponent(filter_category);
+	}
+
+	var filter_category_id = $('input[name=\'filter_category_id\']').val();
+
+	if (filter_category_id) {
+		url += '&filter_category_id=' + encodeURIComponent(filter_category_id);
+	}
+
 	location = 'index.php?route=catalog/product&user_token={{ user_token }}' + url;
+});
+//--></script> 
+  <script type="text/javascript"><!--
+$('#filter-product input, #filter-product select').on('keypress', function(e) {
+	if (e.which == 13) {
+		$('#button-filter').trigger('click');
+	}
 });
 //--></script> 
   <script type="text/javascript"><!--
@@ -275,6 +338,47 @@ $('input[name=\'filter_model\']').autocomplete({
 	},
 	'select': function(item) {
 		$('input[name=\'filter_model\']').val(item['label']);
+	}
+});
+
+$('input[name=\'filter_manufacturer\']').autocomplete({
+	'source': function(request, response) {
+		$.ajax({
+			url: 'index.php?route=catalog/manufacturer/autocomplete&user_token={{ user_token }}&filter_name=' +  encodeURIComponent(request),
+			dataType: 'json',
+			success: function(json) {
+				response($.map(json, function(item) {
+					return {
+						label: item['name'],
+						value: item['manufacturer_id']
+					}
+				}));
+			}
+		});
+	},
+	'select': function(item) {
+		$('input[name=\'filter_manufacturer\']').val(item['label']);
+	}
+});
+
+$('input[name=\'filter_category\']').autocomplete({
+	'source': function(request, response) {
+		$.ajax({
+			url: 'index.php?route=catalog/category/autocomplete&user_token={{ user_token }}&filter_name=' +  encodeURIComponent(request),
+			dataType: 'json',
+			success: function(json) {
+				response($.map(json, function(item) {
+					return {
+						label: item['name'],
+						value: item['category_id']
+					}
+				}));
+			}
+		});
+	},
+	'select': function(item) {
+		$('input[name=\'filter_category\']').val(item['label']);
+		$('input[name=\'filter_category_id\']').val(item['value']);
 	}
 });
 //--></script>

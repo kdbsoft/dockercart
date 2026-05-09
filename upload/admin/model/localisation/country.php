@@ -5,7 +5,7 @@ class ModelLocalisationCountry extends Model {
 	public function addCountry($data) {
 		$country_description = $this->prepareCountryDescriptionData($data);
 
-		$this->db->query("INSERT INTO " . DB_PREFIX . "country SET name = '" . $this->db->escape($country_description['name']) . "', iso_code_2 = '" . $this->db->escape($data['iso_code_2']) . "', iso_code_3 = '" . $this->db->escape($data['iso_code_3']) . "', address_format = '" . $this->db->escape($country_description['address_format']) . "', postcode_required = '" . (int)$data['postcode_required'] . "', status = '" . (int)$data['status'] . "'");
+		$this->db->query("INSERT INTO " . DB_PREFIX . "country SET name = '" . $this->db->escape($country_description['name']) . "', iso_code_2 = '" . $this->db->escape($data['iso_code_2']) . "', iso_code_3 = '" . $this->db->escape($data['iso_code_3']) . "', address_format = '" . $this->db->escape($country_description['address_format']) . "', phone_format = '" . $this->db->escape($data['phone_format'] ?? '') . "', postcode_required = '" . (int)$data['postcode_required'] . "', status = '" . (int)$data['status'] . "'");
 
 		$country_id = $this->db->getLastId();
 
@@ -26,7 +26,7 @@ class ModelLocalisationCountry extends Model {
 	public function editCountry($country_id, $data) {
 		$country_description = $this->prepareCountryDescriptionData($data);
 
-		$this->db->query("UPDATE " . DB_PREFIX . "country SET name = '" . $this->db->escape($country_description['name']) . "', iso_code_2 = '" . $this->db->escape($data['iso_code_2']) . "', iso_code_3 = '" . $this->db->escape($data['iso_code_3']) . "', address_format = '" . $this->db->escape($country_description['address_format']) . "', postcode_required = '" . (int)$data['postcode_required'] . "', status = '" . (int)$data['status'] . "' WHERE country_id = '" . (int)$country_id . "'");
+		$this->db->query("UPDATE " . DB_PREFIX . "country SET name = '" . $this->db->escape($country_description['name']) . "', iso_code_2 = '" . $this->db->escape($data['iso_code_2']) . "', iso_code_3 = '" . $this->db->escape($data['iso_code_3']) . "', address_format = '" . $this->db->escape($country_description['address_format']) . "', phone_format = '" . $this->db->escape($data['phone_format'] ?? '') . "', postcode_required = '" . (int)$data['postcode_required'] . "', status = '" . (int)$data['status'] . "' WHERE country_id = '" . (int)$country_id . "'");
 
 		if ($this->hasCountryDescriptionTable()) {
 			$this->db->query("DELETE FROM " . DB_PREFIX . "country_description WHERE country_id = '" . (int)$country_id . "'");

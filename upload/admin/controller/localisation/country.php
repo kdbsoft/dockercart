@@ -380,6 +380,14 @@ class ControllerLocalisationCountry extends Controller {
 			$data['postcode_required'] = 0;
 		}
 
+		if (isset($this->request->post['phone_format'])) {
+			$data['phone_format'] = $this->request->post['phone_format'];
+		} elseif (!empty($country_info)) {
+			$data['phone_format'] = $country_info['phone_format'] ?? '';
+		} else {
+			$data['phone_format'] = '';
+		}
+
 		if (isset($this->request->post['status'])) {
 			$data['status'] = $this->request->post['status'];
 		} elseif (!empty($country_info)) {
@@ -472,6 +480,7 @@ class ControllerLocalisationCountry extends Controller {
 				'iso_code_2'        => $country_info['iso_code_2'],
 				'iso_code_3'        => $country_info['iso_code_3'],
 				'address_format'    => $country_info['address_format'],
+				'phone_format'      => $country_info['phone_format'] ?? '',
 				'postcode_required' => $country_info['postcode_required'],
 				'zone'              => $this->model_localisation_zone->getZonesByCountryId($this->request->get['country_id']),
 				'status'            => $country_info['status']

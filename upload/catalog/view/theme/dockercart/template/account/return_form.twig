@@ -151,4 +151,14 @@
   </section>
 
 </main>
+{% if phone_format %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+	var phoneInput = document.getElementById('input-telephone');
+	if (phoneInput && typeof DockercartPhoneMask !== 'undefined') {
+		DockercartPhoneMask.init(phoneInput, '{{ phone_format|e('js') }}');
+	}
+});
+</script>
+{% endif %}
 {{ footer }}
