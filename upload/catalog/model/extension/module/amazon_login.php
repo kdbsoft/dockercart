@@ -205,16 +205,12 @@ class ModelExtensionModuleAmazonLogin extends Model {
                 'curl_error' => curl_error($ch)
             );
 
-            curl_close($ch);
-
             $this->debugLog("ERROR", $debug);
 
             throw new \RuntimeException($this->language->get('error_login'));
         } else {
             $this->debugLog("SUCCESS", $response);
         }
-
-        curl_close($ch);
 
         return json_decode($response);
     }

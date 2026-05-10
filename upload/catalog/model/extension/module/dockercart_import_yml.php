@@ -444,7 +444,6 @@ class ModelExtensionModuleDockercartImportYml extends Model {
             $errno = curl_errno($ch);
             $error = curl_error($ch);
             $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
 
             $retryable = in_array($errno, [CURLE_PARTIAL_FILE, 16], true);
 
@@ -1698,7 +1697,6 @@ class ModelExtensionModuleDockercartImportYml extends Model {
         $error = curl_error($ch);
         $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $content_type = (string)curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
-        curl_close($ch);
 
         if ($errno || $code >= 400 || $content === false || $content === '') {
             throw new Exception("Failed to download ({$url}): HTTP {$code}" . ($errno ? ", cURL: {$error}" : ""));

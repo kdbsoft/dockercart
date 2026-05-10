@@ -546,8 +546,6 @@ class ControllerExtensionPaymentKlarnaAccount extends Controller {
 						$json['redirect'] = $this->url->link('checkout/success');
 					}
 				}
-
-				curl_close($curl);
 			}
 		}
 

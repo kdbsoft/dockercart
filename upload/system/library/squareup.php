@@ -134,8 +134,6 @@ class Squareup {
         if ($result) {
             $this->debug("SQUAREUP RESULT: " . $result);
 
-            curl_close($ch);
-
             $return = json_decode($result, true);
 
             if (!empty($return['errors'])) {
@@ -145,8 +143,6 @@ class Squareup {
             }
         } else {
             $info = curl_getinfo($ch);
-
-            curl_close($ch);
 
             throw new \Squareup\Exception($this->registry, "CURL error. Info: " . print_r($info, true), true);
         }

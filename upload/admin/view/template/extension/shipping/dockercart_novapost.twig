@@ -1,0 +1,441 @@
+{{ header }}{{ column_left }}
+<div id="content">
+<link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
+
+<style>
+.dc-np-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin-bottom:16px; }
+.dc-np-card { background:#fff; border:1px solid #e6e9ef; border-radius:10px; padding:14px 16px; display:flex; flex-direction:column; gap:4px; }
+.dc-np-card__k { font-size:11px; text-transform:uppercase; color:#8b96a7; letter-spacing:.04em; }
+.dc-np-card__v { font-size:22px; font-weight:600; line-height:1.2; color:#2a3445; }
+.dc-np-card__sub { font-size:12px; color:#8b96a7; }
+.dc-np-table { width:100%; }
+.dc-np-table thead th { font-size:11px; color:#6f7b8f; text-transform:uppercase; letter-spacing:.04em; font-weight:600; background:#f8fafc; padding:10px 12px; }
+.dc-np-table tbody td { padding:10px 12px; vertical-align:middle; border-bottom:1px solid #f0f3f8; }
+.dc-np-table tbody tr:hover { background:#fafbfe; }
+.dc-np-badge { display:inline-block; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:600; }
+.dc-np-badge--success { background:#e9f7ef; color:#1e7e34; }
+.dc-np-badge--failed { background:#fdecee; color:#b02a37; }
+.dc-np-badge--partial { background:#fff3cd; color:#856404; }
+.dc-np-badge--running { background:#cce5ff; color:#004085; }
+.dc-np-badge--on { background:#e9f7ef; color:#1e7e34; }
+.dc-np-badge--off { background:#fdecee; color:#b02a37; }
+.dc-np-empty { text-align:center; padding:40px 20px; color:#8b96a7; }
+.dc-np-empty i { font-size:48px; display:block; margin-bottom:12px; opacity:0.5; }
+.dc-np-country-list { max-height:200px; overflow-y:auto; border:1px solid #ddd; border-radius:4px; padding:8px; }
+.dc-np-country-list label { display:block; padding:3px 0; font-weight:400; }
+.dc-np-cat-list { display:flex; flex-wrap:wrap; gap:12px; }
+.dc-np-cat-list label { font-weight:400; }
+.dc-np-sync-btn { position:relative; }
+.dc-np-sync-btn .fa-spin { display:none; }
+.dc-np-sync-btn.syncing .fa-spin { display:inline; }
+.dc-np-sync-btn.syncing .fa-refresh { display:none; }
+@media (max-width:767px) { .dc-np-grid { grid-template-columns:1fr 1fr; } }
+</style>
+
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-novapost" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary">
+          <i class="fa fa-save"></i>
+        </button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default">
+          <i class="fa fa-reply"></i>
+        </a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    <div id="sync-alert" class="alert alert-success alert-dismissible" style="display:none;">
+      <i class="fa fa-check-circle"></i> <span id="sync-message"></span>
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+
+    <div id="sync-error" class="alert alert-danger alert-dismissible" style="display:none;">
+      <i class="fa fa-exclamation-circle"></i> <span id="sync-error-message"></span>
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+
+    <div class="dcx-shell">
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i class="fa fa-truck"></i></div>
+          <div>
+            <h3 class="dcx-panel-title">{{ heading_title }}</h3>
+            <div class="dcx-panel-subtitle">NovaPost Shipping & Divisions</div>
+          </div>
+        </div>
+        <div class="dcx-panel-body">
+
+          <ul class="nav nav-tabs dcx-profile-tabs" role="tablist">
+            <li class="active"><a href="#tab-dashboard" data-toggle="tab"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+            <li><a href="#tab-settings" data-toggle="tab"><i class="fa fa-cog"></i> {{ tab_general }}</a></li>
+            <li><a href="#tab-divisions" data-toggle="tab"><i class="fa fa-building"></i> {{ tab_divisions }}</a></li>
+            <li><a href="#tab-sync-log" data-toggle="tab"><i class="fa fa-history"></i> {{ tab_sync_log }}</a></li>
+          </ul>
+
+          <div class="tab-content" style="margin-top:16px;">
+
+            {# ── Dashboard Tab ── #}
+            <div class="tab-pane active" id="tab-dashboard">
+              <div class="dc-np-grid">
+                <div class="dc-np-card">
+                  <div class="dc-np-card__k">{{ help_total_divisions }}</div>
+                  <div class="dc-np-card__v">{{ total_divisions }}</div>
+                </div>
+                <div class="dc-np-card">
+                  <div class="dc-np-card__k">{{ help_countries_loaded }}</div>
+                  <div class="dc-np-card__v">{{ divisions_by_country|length }}</div>
+                  {% if divisions_by_country %}
+                  <div class="dc-np-card__sub">
+                    {% for row in divisions_by_country %}
+                      {{ row.country_code }}: {{ row.total }}{% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                  </div>
+                  {% endif %}
+                </div>
+                <div class="dc-np-card">
+                  <div class="dc-np-card__k">By Category</div>
+                  <div class="dc-np-card__v">{{ divisions_by_category|length }}</div>
+                  {% if divisions_by_category %}
+                  <div class="dc-np-card__sub">
+                    {% for row in divisions_by_category %}
+                      {{ row.category }}: {{ row.total }}{% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                  </div>
+                  {% endif %}
+                </div>
+                <div class="dc-np-card">
+                  <div class="dc-np-card__k">{{ help_last_sync }}</div>
+                  {% if last_sync and last_sync.finished_at %}
+                  <div class="dc-np-card__v" style="font-size:14px;">{{ last_sync.finished_at }}</div>
+                  <div class="dc-np-card__sub">{{ last_sync.status }} ({{ last_sync.total_loaded }} loaded)</div>
+                  {% else %}
+                  <div class="dc-np-card__v" style="font-size:14px;">{{ text_no_sync }}</div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div style="margin-top:16px;">
+                <button type="button" id="btn-sync" class="btn btn-primary btn-lg dc-np-sync-btn">
+                  <i class="fa fa-refresh"></i> <i class="fa fa-spinner fa-spin"></i> {{ button_sync }}
+                </button>
+              </div>
+            </div>
+
+            {# ── Settings Tab ── #}
+            <div class="tab-pane" id="tab-settings">
+              <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-novapost" class="dcx-form form-horizontal">
+
+                <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+                  <h4><i class="fa fa-key"></i> API Configuration</h4>
+
+                  <div class="form-group">
+                    <label class="col-sm-2 control-label" for="input-api-key">{{ entry_api_key }}</label>
+                    <div class="col-sm-10">
+                      <input type="text" name="shipping_dockercart_novapost_api_key" value="{{ shipping_dockercart_novapost_api_key }}" id="input-api-key" class="form-control" placeholder="Enter your NovaPost API key" />
+                      <div class="help-block">{{ entry_api_key_help }}</div>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="col-sm-2 control-label">{{ entry_sandbox }}</label>
+                    <div class="col-sm-10">
+                      <label class="radio-inline">
+                        {% if shipping_dockercart_novapost_sandbox %}
+                        <input type="radio" name="shipping_dockercart_novapost_sandbox" value="1" checked /> {{ text_enabled }}
+                        <input type="radio" name="shipping_dockercart_novapost_sandbox" value="0" /> {{ text_disabled }}
+                        {% else %}
+                        <input type="radio" name="shipping_dockercart_novapost_sandbox" value="1" /> {{ text_enabled }}
+                        <input type="radio" name="shipping_dockercart_novapost_sandbox" value="0" checked /> {{ text_disabled }}
+                        {% endif %}
+                      </label>
+                      <div class="help-block">{{ entry_sandbox_help }}</div>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
+                    <div class="col-sm-10">
+                      <select name="shipping_dockercart_novapost_status" id="input-status" class="form-control">
+                        {% if shipping_dockercart_novapost_status %}
+                        <option value="1" selected>{{ text_enabled }}</option>
+                        <option value="0">{{ text_disabled }}</option>
+                        {% else %}
+                        <option value="1">{{ text_enabled }}</option>
+                        <option value="0" selected>{{ text_disabled }}</option>
+                        {% endif %}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="col-sm-2 control-label" for="input-sort-order">{{ entry_sort_order }}</label>
+                    <div class="col-sm-10">
+                      <input type="text" name="shipping_dockercart_novapost_sort_order" value="{{ shipping_dockercart_novapost_sort_order }}" id="input-sort-order" class="form-control" style="max-width:100px;" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="dcx-section">
+                  <h4><i class="fa fa-globe"></i> {{ entry_country_codes }}</h4>
+
+                  <div class="form-group">
+                    <label class="col-sm-2 control-label">{{ entry_country_codes }}</label>
+                    <div class="col-sm-10">
+                      <div class="dc-np-country-list">
+                        {% for code, name in supported_countries %}
+                        <label>
+                          <input type="checkbox" name="shipping_dockercart_novapost_country_codes[]" value="{{ code }}" {% if code in shipping_dockercart_novapost_country_codes %}checked{% endif %} />
+                          {{ name }} ({{ code }})
+                        </label>
+                        {% endfor %}
+                      </div>
+                      <div class="help-block">{{ entry_country_codes_help }}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="dcx-section">
+                  <h4><i class="fa fa-building"></i> {{ entry_division_categories }}</h4>
+
+                  <div class="form-group">
+                    <label class="col-sm-2 control-label">{{ entry_division_categories }}</label>
+                    <div class="col-sm-10">
+                      <div class="dc-np-cat-list">
+                        {% for cat in division_categories %}
+                        <label>
+                          <input type="checkbox" name="shipping_dockercart_novapost_division_categories[]" value="{{ cat }}" {% if cat in shipping_dockercart_novapost_division_categories %}checked{% endif %} />
+                          {% if cat == 'CargoBranch' %}{{ category_cargo_branch }}
+                          {% elseif cat == 'PostBranch' %}{{ category_post_branch }}
+                          {% elseif cat == 'Postomat' %}{{ category_postomat }}
+                          {% elseif cat == 'PUDO' %}{{ category_pudo }}
+                          {% else %}{{ cat }}{% endif %}
+                        </label>
+                        {% endfor %}
+                      </div>
+                      <div class="help-block">{{ entry_division_categories_help }}</div>
+                    </div>
+                  </div>
+                </div>
+
+              </form>
+            </div>
+
+            {# ── Divisions Tab ── #}
+            <div class="tab-pane" id="tab-divisions">
+              <form action="{{ action }}" method="get" class="form-horizontal">
+                <input type="hidden" name="route" value="extension/shipping/dockercart_novapost" />
+                <input type="hidden" name="user_token" value="{{ user_token }}" />
+                <input type="hidden" name="tab" value="divisions" />
+
+                <div class="form-group">
+                  <label class="col-sm-1 control-label">Search</label>
+                  <div class="col-sm-3">
+                    <input type="text" name="filter_search" value="{{ filter_search }}" class="form-control" placeholder="Name, address, city..." />
+                  </div>
+                  <label class="col-sm-1 control-label">Country</label>
+                  <div class="col-sm-2">
+                    <select name="filter_country" class="form-control">
+                      <option value="">All</option>
+                      {% for code, name in supported_countries %}
+                      <option value="{{ code }}" {% if filter_country == code %}selected{% endif %}>{{ name }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <label class="col-sm-1 control-label">Type</label>
+                  <div class="col-sm-2">
+                    <select name="filter_category" class="form-control">
+                      <option value="">All</option>
+                      {% for cat in division_categories %}
+                      <option value="{{ cat }}" {% if filter_category == cat %}selected{% endif %}>{{ cat }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="col-sm-2">
+                    <button type="submit" class="btn btn-primary btn-block"><i class="fa fa-search"></i> Filter</button>
+                  </div>
+                </div>
+              </form>
+
+              {% if divisions %}
+              <div class="table-responsive">
+                <table class="table dc-np-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Type</th>
+                      <th>Country</th>
+                      <th>City</th>
+                      <th>Address</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for div in divisions %}
+                    <tr>
+                      <td><strong>{{ div.name }}</strong><br><small class="text-muted">{{ div.number }}</small></td>
+                      <td><span class="label label-default">{{ div.category }}</span></td>
+                      <td>{{ div.country_code }}</td>
+                      <td>{{ div.city_name }}</td>
+                      <td><small>{{ div.short_address }}</small></td>
+                      <td>
+                        {% if div.enabled %}
+                        <span class="dc-np-badge dc-np-badge--on">{{ text_enabled }}</span>
+                        {% else %}
+                        <span class="dc-np-badge dc-np-badge--off">{{ text_disabled }}</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              <div class="row">
+                <div class="col-sm-6 text-left">{{ pagination_divisions }}</div>
+                <div class="col-sm-6 text-right">{{ results_divisions }}</div>
+              </div>
+              {% else %}
+              <div class="dc-np-empty">
+                <i class="fa fa-building"></i>
+                <p>No divisions loaded. Click "Sync Divisions" to fetch data from NovaPost API.</p>
+              </div>
+              {% endif %}
+            </div>
+
+            {# ── Sync Log Tab ── #}
+            <div class="tab-pane" id="tab-sync-log">
+              {% if sync_logs %}
+              <div class="table-responsive">
+                <table class="table dc-np-table">
+                  <thead>
+                    <tr>
+                      <th>{{ column_status }}</th>
+                      <th>{{ column_loaded }}</th>
+                      <th>{{ column_errors }}</th>
+                      <th>Countries</th>
+                      <th>{{ column_started }}</th>
+                      <th>{{ column_finished }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for log in sync_logs %}
+                    <tr>
+                      <td>
+                        {% if log.status == 'success' %}
+                        <span class="dc-np-badge dc-np-badge--success">{{ status_success }}</span>
+                        {% elseif log.status == 'failed' %}
+                        <span class="dc-np-badge dc-np-badge--failed">{{ status_failed }}</span>
+                        {% elseif log.status == 'partial' %}
+                        <span class="dc-np-badge dc-np-badge--partial">{{ status_partial }}</span>
+                        {% else %}
+                        <span class="dc-np-badge dc-np-badge--running">{{ status_running }}</span>
+                        {% endif %}
+                      </td>
+                      <td>{{ log.total_loaded }}</td>
+                      <td>{{ log.total_errors }}</td>
+                      <td><small>{{ log.countries }}</small></td>
+                      <td>{{ log.started_at }}</td>
+                      <td>{{ log.finished_at ?: '-' }}</td>
+                    </tr>
+                    {% if log.error_message %}
+                    <tr>
+                      <td colspan="6"><small class="text-danger"><i class="fa fa-exclamation-triangle"></i> {{ log.error_message }}</small></td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              <div class="row">
+                <div class="col-sm-6 text-left">{{ pagination_sync }}</div>
+                <div class="col-sm-6 text-right">{{ results_sync }}</div>
+              </div>
+              {% else %}
+              <div class="dc-np-empty">
+                <i class="fa fa-history"></i>
+                <p>No sync history yet.</p>
+              </div>
+              {% endif %}
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function updateTabUrl(tabName) {
+  var url = new URL(window.location.href);
+  if (tabName === 'dashboard') {
+    url.searchParams.delete('tab');
+  } else {
+    url.searchParams.set('tab', tabName);
+  }
+  history.replaceState(null, '', url.toString());
+}
+
+$(function() {
+  var activeTab = '{{ tab }}';
+  if (activeTab && activeTab !== 'dashboard') {
+    $('.nav-tabs a[href="#tab-' + activeTab + '"]').tab('show');
+  }
+
+  $('.nav-tabs a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
+    var tabName = $(e.target).attr('href').replace('#tab-', '');
+    updateTabUrl(tabName);
+  });
+
+  $('#btn-sync').on('click', function() {
+    var btn = $(this);
+    if (btn.hasClass('syncing')) return;
+
+    btn.addClass('syncing').prop('disabled', true);
+    $('#sync-alert, #sync-error').hide();
+
+    $.ajax({
+      url: '{{ sync_url }}',
+      type: 'POST',
+      dataType: 'json',
+      timeout: 300000,
+      success: function(json) {
+        btn.removeClass('syncing').prop('disabled', false);
+        if (json.success) {
+          $('#sync-message').text(json.success);
+          $('#sync-alert').show();
+          setTimeout(function() { location.reload(); }, 1500);
+        } else if (json.error) {
+          $('#sync-error-message').text(json.error);
+          $('#sync-error').show();
+        }
+      },
+      error: function() {
+        btn.removeClass('syncing').prop('disabled', false);
+        $('#sync-error-message').text('AJAX request failed');
+        $('#sync-error').show();
+      }
+    });
+  });
+});
+</script>
+{{ footer }}

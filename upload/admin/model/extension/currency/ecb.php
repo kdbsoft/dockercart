@@ -18,11 +18,9 @@ class ModelExtensionCurrencyEcb extends Model {
 				curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 30);
 				curl_setopt($curl, CURLOPT_TIMEOUT, 30);
 
-				$response = curl_exec($curl);
+			$response = curl_exec($curl);
 
-				curl_close($curl);
-
-				if ($response) {
+			if ($response) {
 					$dom = new \DOMDocument('1.0', 'UTF-8');
 					$dom->loadXml($response);
 

@@ -32,7 +32,8 @@ fix_permissions() {
         # Files: group write so www-data and host users can edit
         find /var/www/html -type f -exec chmod 664 {} \; || true
 
-        # Storage dirs: SGID + group write
+        # Storage dirs: SGID + group write (www-data через staff group)
+        chgrp -R staff /var/www/storage/ || true
         chmod -R 2775 /var/www/storage/ || true
         chmod -R 2777 /var/www/html/image/cache/ || true
 

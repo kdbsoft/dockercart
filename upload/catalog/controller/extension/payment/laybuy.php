@@ -82,7 +82,6 @@ class ControllerExtensionPaymentLaybuy extends Controller {
 				if (curl_errno($ch)) {
 					$this->model_extension_payment_laybuy->log('cURL error: ' . curl_errno($ch));
 				}
-				curl_close($ch);
 
 				$result = json_decode($result, true);
 
@@ -274,7 +273,6 @@ class ControllerExtensionPaymentLaybuy extends Controller {
 							if (curl_errno($ch)) {
 								$this->model_extension_payment_laybuy->log('cURL error: ' . curl_errno($ch));
 							}
-							curl_close($ch);
 
 							$this->model_extension_payment_laybuy->log('Response: ' . $result);
 
@@ -371,7 +369,6 @@ class ControllerExtensionPaymentLaybuy extends Controller {
 				if (curl_errno($ch)) {
 					$this->model_extension_payment_laybuy->log('cURL error: ' . curl_errno($ch));
 				}
-				curl_close($ch);
 
 				$results = json_decode($result, true);
 

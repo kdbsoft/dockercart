@@ -155,7 +155,6 @@ class ModelExtensionPaymentAlipayCross extends Model {
 		if (!$responseText) {
 			$this->log->write('ALIPAY NOTIFY CURL_ERROR: ' . var_export(curl_error($curl), true));
 		}
-		curl_close($curl);
 
 		return $responseText;
 	}

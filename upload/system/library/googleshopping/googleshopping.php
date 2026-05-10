@@ -1881,7 +1881,6 @@ class Googleshopping extends Library {
         curl_setopt_array($ch, $curl_options);
         $result = curl_exec($ch);
         $info = curl_getinfo($ch);
-        curl_close($ch);
 
         $this->debugLog("RESPONSE: " . $result);
 

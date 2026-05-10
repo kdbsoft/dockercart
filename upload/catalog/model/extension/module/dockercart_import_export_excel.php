@@ -1660,7 +1660,6 @@ class ModelExtensionModuleDockercartImportExportExcel extends Model {
         $errno = curl_errno($ch);
         $error = curl_error($ch);
         $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
 
         if ($errno) {
             throw new Exception('cURL error: ' . $error);

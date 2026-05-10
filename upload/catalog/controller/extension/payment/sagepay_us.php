@@ -71,8 +71,6 @@ class ControllerExtensionPaymentSagepayUS extends Controller {
 
 		$response = curl_exec($ch);
 
-		curl_close($ch);
-
 		$json = array();
 
 		if ($response[1] == 'A') {

@@ -622,7 +622,7 @@ class PayPal {
 				}
             }
 			
-            $response_headers = array();
+			$response_headers = array();
             $header_lines = explode("\r\n", $head);
             array_shift($header_lines);
 			
@@ -630,8 +630,6 @@ class PayPal {
                 list($key, $value) = explode(':', $line, 2);
                 $response_headers[$key] = $value;
             }
-			
-			curl_close($ch);
 			
 			if (isset($buffer) && is_resource($buffer)) {
                 fclose($buffer);

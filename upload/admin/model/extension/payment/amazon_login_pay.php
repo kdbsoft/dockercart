@@ -400,7 +400,6 @@ class ModelExtensionPaymentAmazonLoginPay extends Model {
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 
 		$response = curl_exec($curl);
-		curl_close($curl);
 
 		list($other, $responseBody) = explode("\r\n\r\n", $response, 2);
 		$other = preg_split("/\r\n|\n|\r/", $other);

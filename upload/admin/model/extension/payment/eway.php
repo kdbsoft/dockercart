@@ -193,8 +193,6 @@ class ModelExtensionPaymentEway extends Model {
 			}
 		}
 
-		curl_close($ch);
-
 		return $response;
 	}
 
