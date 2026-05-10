@@ -38,13 +38,8 @@ export-yml-[0-9]*-*.xml
 /upload/image/sync/*
 /upload/image/blog/journal/*
 
-# System Cache Files
-/upload/system/storage/cache/*
-!/upload/system/storage/cache/index.html
-
-# Modification Files
-/upload/system/storage/modification/*
-!/upload/system/storage/modification/index.html
+# Legacy storage (migrated to ./storage/)
+/upload/system/storage/
 
 # Templates Files
 /upload/image/templates/*
@@ -58,25 +53,9 @@ export-yml-[0-9]*-*.xml
 !/upload/image/catalog/social/
 !/upload/image/catalog/social/**
 
-# Download Files
-/upload/system/storage/download/*
-!/upload/system/storage/download/index.html
-
-# Session Files
-/upload/system/storage/session/*
-!/upload/system/storage/session/index.html
-
-# Upload Files
-/upload/system/storage/upload/*
-!/upload/system/storage/upload/index.html
-
 # Flags
 # remove sharp char if you want to add flags to gitignore
 # /upload/flags/*
-
-# Log Files
-/upload/system/storage/logs/*
-!/upload/system/storage/logs/index.html
 
 # If you want to ignore backup installer artifacts in development mode:
 # /upload/backup.install/*
