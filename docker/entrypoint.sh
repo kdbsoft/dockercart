@@ -238,52 +238,6 @@ PHP
     fi
 }
 
-# Миграция storage из upload/system/storage в /var/www/storage
-migrate_storage() {
-    SOURCE_STORAGE="/var/www/html/system/storage"
-    TARGET_STORAGE="/var/www/storage"
-
-    if [ -d "$SOURCE_STORAGE" ]; then
-        echo "Migrating storage from $SOURCE_STORAGE to $TARGET_STORAGE..."
-
-        # Создаем целевую директорию если её нет
-        mkdir -p "$TARGET_STORAGE"
-
-        # Копируем содержимое, но НЕ перезаписываем существующие файлы
-        # Это позволяет сохранить логи и кэш из предыдущих запусков
-        if [ -d "$SOURCE_STORAGE/vendor" ] && [ ! -d "$TARGET_STORAGE/vendor" ]; then
-            echo "  → Copying vendor..."
-            cp -a "$SOURCE_STORAGE/vendor" "$TARGET_STORAGE/"
-        fi
-
-        if [ -d "$SOURCE_STORAGE/modification" ] && [ ! -d "$TARGET_STORAGE/modification" ]; then
-            echo "  → Copying modification..."
-            cp -a "$SOURCE_STORAGE/modification" "$TARGET_STORAGE/"
-        fi
-
-        # Создаем необходимые поддиректории если они не существуют
-        for dir in cache logs download session upload; do
-            if [ ! -d "$TARGET_STORAGE/$dir" ]; then
-                echo "  → Creating $dir directory..."
-                mkdir -p "$TARGET_STORAGE/$dir"
-            fi
-        done
-
-        # Убеждаемся что старая директория storage в upload скрыта от web
-        # (это не критично так как DIR_STORAGE теперь указывает на /var/www/storage/)
-        echo "  → Storage migration complete"
-    fi
-
-    # Устанавливаем правильные права на все директории storage
-    chmod -R 755 "$TARGET_STORAGE"
-    chmod -R 777 "$TARGET_STORAGE/cache"
-    chmod -R 777 "$TARGET_STORAGE/logs"
-    chmod -R 777 "$TARGET_STORAGE/session"
-    chmod -R 777 "$TARGET_STORAGE/upload"
-    chmod -R 777 "$TARGET_STORAGE/download"
-}
-
-
 # Инициализация БД (fallback — если MariaDB пропустила init скрипты из-за существующего volume)
 initialize_database() {
     local db_host="${DB_HOSTNAME:-mariadb}"
@@ -422,9 +376,6 @@ wait_for_mysql
 
 # Инициализация БД (если MariaDB пропустила init из-за существующего volume)
 initialize_database || echo "WARNING: Database initialization failed — continuing anyway"
-
-# Миграция storage из upload/system/storage в /var/www/storage
-migrate_storage
 
 # Применяем PHP настройки из переменных окружения (если заданы)
 apply_php_settings() {
