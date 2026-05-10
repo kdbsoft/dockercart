@@ -1,4 +1,4 @@
-FROM php:8.4-apache
+FROM php:8.5-apache
 
 RUN apt-get update && apt-get install -y \
     git \
@@ -27,7 +27,6 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
         mysqli \
         gd \
         zip \
-        opcache \
         intl \
         bcmath \
         xml \

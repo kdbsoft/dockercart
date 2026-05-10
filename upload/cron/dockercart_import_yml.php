@@ -67,7 +67,6 @@ while (true) {
     $errno = curl_errno($ch);
     $error = curl_error($ch);
     $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
 
     if ($errno) {
         fwrite(STDERR, "cURL error: {$error}\n");

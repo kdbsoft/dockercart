@@ -51,11 +51,9 @@ class ModelExtensionFraudMaxMind extends Model {
 			curl_setopt($curl, CURLOPT_POST, 1);
 			curl_setopt($curl, CURLOPT_POSTFIELDS, $request);
 
-			$response = curl_exec($curl);
+		$response = curl_exec($curl);
 
-			curl_close($curl);
-
-			$risk_score = 0;
+		$risk_score = 0;
 
 			if ($response) {
 				$order_id = $order_info['order_id'];

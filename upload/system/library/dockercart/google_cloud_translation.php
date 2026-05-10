@@ -78,12 +78,10 @@ class DockercartGoogleCloudTranslation {
 
         if ($raw_response === false) {
             $error = curl_error($ch);
-            curl_close($ch);
             throw new Exception('Google Translation request failed: ' . $error);
         }
 
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
 
         $decoded = json_decode($raw_response, true);
 

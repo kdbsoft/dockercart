@@ -411,8 +411,6 @@ class ModelExtensionPaymentSagePayServer extends Model {
 
 		$response = curl_exec($curl);
 
-		curl_close($curl);
-
 		$response_info = explode(chr(10), $response);
 
 		foreach ($response_info as $string) {

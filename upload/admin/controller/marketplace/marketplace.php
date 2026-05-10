@@ -160,8 +160,6 @@ class ControllerMarketplaceMarketplace extends Controller {
 
 		$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
-		curl_close($curl);
-
 		$response_info = json_decode($response, true);
 
 		$extension_total = $response_info['extension_total'] ?? 0;
@@ -546,8 +544,6 @@ class ControllerMarketplaceMarketplace extends Controller {
 
 		$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
-		curl_close($curl);
-
 		$response_info = json_decode($response, true);
 
 		if ($response_info) {
@@ -730,8 +726,6 @@ class ControllerMarketplaceMarketplace extends Controller {
 
 			$response = curl_exec($curl);
 
-			curl_close($curl);
-
 			$response_info = json_decode($response, true);
 
 			if (isset($response_info['success'])) {
@@ -858,13 +852,11 @@ class ControllerMarketplaceMarketplace extends Controller {
 			curl_setopt($curl, CURLOPT_FRESH_CONNECT, 1);
 			curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
 
-			$response = curl_exec($curl);
+		$response = curl_exec($curl);
 
-			$response_info = json_decode($response, true);
+		$response_info = json_decode($response, true);
 
-			curl_close($curl);
-
-			if (isset($response_info['download'])) {
+		if (isset($response_info['download'])) {
 				if (substr($response_info['filename'], -10) == '.ocmod.zip') {
 					$this->session->data['install'] = token(10);
 
@@ -957,8 +949,6 @@ class ControllerMarketplaceMarketplace extends Controller {
 
 			$response = curl_exec($curl);
 
-			curl_close($curl);
-
 			$response_info = json_decode($response, true);
 
 			if (isset($response_info['success'])) {
@@ -1001,8 +991,6 @@ class ControllerMarketplaceMarketplace extends Controller {
 		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
 
 		$response = curl_exec($curl);
-
-		curl_close($curl);
 
 		$json = json_decode($response, true);
 

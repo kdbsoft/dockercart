@@ -378,7 +378,6 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
                 $curl_errno = curl_errno($ch);
                 $curl_error = curl_error($ch);
                 $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                curl_close($ch);
 
                 if ($curl_errno || $http_code >= 400) {
                     throw new \RuntimeException('Catalog generation failed: ' . ($curl_error ?: 'HTTP ' . $http_code));
