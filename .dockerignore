@@ -60,12 +60,7 @@ Makefile
 
 # System storage (will be mounted as volume)
 storage/
-upload/system/storage/cache/*
-upload/system/storage/logs/*
-upload/system/storage/download/*
-upload/system/storage/upload/*
-upload/system/storage/modification/*
-upload/system/storage/session/*
+upload/system/storage/
 
 # Image cache
 upload/image/cache/*

@@ -2,10 +2,7 @@
 
 $finder = PhpCsFixer\Finder::create()
     ->in(__DIR__ . '/upload/')
-    ->exclude([
-        'system/storage/vendor',
-        'system/storage',
-    ])
+    ->exclude([])
     ->notName('*.min.php')
     ->ignoreDotFiles(true)
     ->ignoreVCS(true);

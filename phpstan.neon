@@ -8,7 +8,7 @@ parameters:
     paths:
         - ./upload/
     excludePaths:
-        - ./upload/system/storage/vendor/
+        - ./storage/vendor/
     tmpDir: .cache
     ignoreErrors:
         - '#Class Event constructor invoked with 1 parameter, 4-5 required\.#'

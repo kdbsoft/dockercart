@@ -28,7 +28,7 @@ jobs:
 
       - name: Lint
         run: |
-          find upload -type f -name "*.php" ! -path 'upload/system/storage/vendor/*' -print0 \
+          find upload -type f -name "*.php" ! -path 'storage/vendor/*' -print0 \
             | xargs -0 -P4 php -l -n
 
   phpstan:
@@ -59,7 +59,7 @@ jobs:
           composer dump-autoload
 
       - name: Run PHPStan
-        run: ./upload/system/storage/vendor/bin/phpstan analyze -a ./upload/system/storage/vendor/autoload.php --no-progress
+        run: ./storage/vendor/bin/phpstan analyze -a ./storage/vendor/autoload.php --no-progress
 
   cs-fixer:
     name: Code Style
@@ -88,5 +88,5 @@ jobs:
 
       - name: Run PHP-CS-Fixer
         run: |
-          ./upload/system/storage/vendor/bin/php-cs-fixer fix --dry-run --diff --format=checkstyle > /tmp/cs-report.xml || true
+          ./storage/vendor/bin/php-cs-fixer fix --dry-run --diff --format=checkstyle > /tmp/cs-report.xml || true
           cs2pr --graceful-warnings /tmp/cs-report.xml
