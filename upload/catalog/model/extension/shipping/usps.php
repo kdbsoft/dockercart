@@ -328,11 +328,9 @@ class ModelExtensionShippingUsps extends Model {
 				curl_setopt($curl, CURLOPT_HEADER, 0);
 				curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
 
-				$result = curl_exec($curl);
+			$result = curl_exec($curl);
 
-				curl_close($curl);
-
-				// strip reg, trade and ** out, updated 9-11-2013
+			// strip reg, trade and ** out, updated 9-11-2013
 				$result = str_replace('&amp;lt;sup&amp;gt;&amp;#174;&amp;lt;/sup&amp;gt;', '', $result);
 				$result = str_replace('&amp;lt;sup&amp;gt;&amp;#8482;&amp;lt;/sup&amp;gt;', '', $result);
 				$result = str_replace('&amp;lt;sup&amp;gt;&amp;#174;&amp;lt;/sup&amp;gt;', '', $result);

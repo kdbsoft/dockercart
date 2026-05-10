@@ -5,7 +5,7 @@
 DockerCart is a production-ready e-commerce platform built on top of OpenCart 3, shipped as a complete Docker stack. It is not a vanilla OpenCart install — it is an opinionated evolution of OpenCart: hundreds of bug fixes applied, security holes patched, performance tuned, and an ecosystem of first-party modules included. Everything works out of the box.
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE.md)
-[![PHP](https://img.shields.io/badge/PHP-8.4-777BB4?logo=php)](https://www.php.net/)
+[![PHP](https://img.shields.io/badge/PHP-8.5-777BB4?logo=php)](https://www.php.net/)
 [![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql)](https://www.mysql.com/)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker)](https://docs.docker.com/compose/)
 
@@ -35,7 +35,7 @@ Note on frontend stacks: OpenCart's legacy storefront is built on jQuery, Bootst
 
 | Component | Technology |
 |---|---|
-| Application | PHP 8.4 + Apache + Nginx |
+| Application | PHP 8.5 + Apache + Nginx |
 | Database | MariaDB 11.8 |
 | Object cache | Memcached 1.6 |
 | Full-text search | Manticore Search |
@@ -50,7 +50,7 @@ Note on frontend stacks: OpenCart's legacy storefront is built on jQuery, Bootst
 DockerCart is engineered for industrial-grade speed and low latency. It combines modern runtime optimizations and proven infrastructure components to deliver a very fast, production-ready storefront:
 
 - Industrial-grade performance: tuned for low-latency, high-throughput workloads.
-- Modern PHP runtime: built for PHP 8.4 with OPcache and typical production-level PHP optimizations enabled.
+- Modern PHP runtime: built for PHP 8.5 with OPcache and typical production-level PHP optimizations enabled.
 - Caching: Memcached and internal caching layers significantly reduce database load and response times.
 - Fast search: Manticore Search provides high-performance full-text queries and relevance ranking.
 - Database and query optimizations: schema and index improvements are included (see docker/mysql/migrations and sql-optimization scripts).
@@ -399,4 +399,3 @@ DockerCart is based on [OpenCart](https://github.com/opencart/opencart), which i
 ---
 
 **Official site:** [dockercart.net](https://dockercart.net) · **Demo:** [demo.dockercart.net](https://demo.dockercart.net) · **Support:** `support@dockercart.net`
-

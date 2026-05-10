@@ -156,11 +156,9 @@ class ModelExtensionShippingFedex extends Model {
 			curl_setopt($curl, CURLOPT_TIMEOUT, 30);
 			curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
 
-			$response = curl_exec($curl);
+		$response = curl_exec($curl);
 
-			curl_close($curl);
-
-			$dom = new DOMDocument('1.0', 'UTF-8');
+		$dom = new DOMDocument('1.0', 'UTF-8');
 			$dom->loadXml($response);
 
 			if ($dom->getElementsByTagName('faultcode')->length > 0) {

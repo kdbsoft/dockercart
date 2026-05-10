@@ -64,8 +64,6 @@ class ModelExtensionPaymentG2APay extends Model {
 		curl_setopt($curl, CURLOPT_POSTFIELDS, $fields);
 		$response = curl_exec($curl);
 
-		curl_close($curl);
-
 		return json_decode($response);
 	}
 
