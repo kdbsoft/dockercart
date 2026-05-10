@@ -53,11 +53,11 @@ Use `/var/www/storage/` (host: `./storage/`), NOT `/var/www/html/system/storage/
 ## Static Analysis & Lint
 ```bash
 # PHP syntax check (CI: runs on push to main + PRs)
-find upload -type f -name "*.php" ! -path 'upload/system/storage/vendor/*' -print0 | xargs -0 -P4 php -l -n
+find upload -type f -name "*.php" ! -path 'storage/vendor/*' -print0 | xargs -0 -P4 php -l -n
 # PHPStan (level 1, config: phpstan.neon)
-./upload/system/storage/vendor/bin/phpstan analyze -a ./upload/system/storage/vendor/autoload.php --no-progress
+./storage/vendor/bin/phpstan analyze -a ./storage/vendor/autoload.php --no-progress
 # PHP-CS-Fixer (tabs, config: .php-cs-fixer.php)
-./upload/system/storage/vendor/bin/php-cs-fixer fix --dry-run --diff
+./storage/vendor/bin/php-cs-fixer fix --dry-run --diff
 ```
 ---
 ## Docker Compose Modes
