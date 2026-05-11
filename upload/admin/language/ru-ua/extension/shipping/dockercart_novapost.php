@@ -3,7 +3,7 @@
  * DockerCart NovaPost Shipping Module - Admin Language (Russian)
  */
 
-$_['heading_title']          = 'NovaPost';
+$_['heading_title']          = 'NovaPost Beta';
 $_['text_extension']         = 'Расширения';
 $_['text_success']           = 'Настройки успешно сохранены!';
 $_['text_edit']              = 'Редактировать NovaPost доставку';
