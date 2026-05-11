@@ -89,6 +89,8 @@
             <li class="active"><a href="#tab-dashboard" data-toggle="tab"><i class="fa fa-dashboard"></i> {{ tab_dashboard }}</a></li>
             <li><a href="#tab-settings" data-toggle="tab"><i class="fa fa-cog"></i> {{ tab_general }}</a></li>
             <li><a href="#tab-divisions" data-toggle="tab"><i class="fa fa-building"></i> {{ tab_divisions }}</a></li>
+            <li><a href="#tab-tariffs" data-toggle="tab"><i class="fa fa-tags"></i> {{ tab_tariffs }}</a></li>
+            <li><a href="#tab-region-mapping" data-toggle="tab"><i class="fa fa-map-marker"></i> {{ tab_region_mapping }}</a></li>
             <li><a href="#tab-sync-log" data-toggle="tab"><i class="fa fa-history"></i> {{ tab_sync_log }}</a></li>
           </ul>
 
@@ -197,6 +199,20 @@
                     <label class="col-sm-2 control-label" for="input-sort-order">{{ entry_sort_order }}</label>
                     <div class="col-sm-10">
                       <input type="text" name="shipping_dockercart_novapost_sort_order" value="{{ shipping_dockercart_novapost_sort_order }}" id="input-sort-order" class="form-control" style="max-width:100px;" />
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="col-sm-2 control-label">{{ entry_calculation_method }}</label>
+                    <div class="col-sm-10">
+                      {% if shipping_dockercart_novapost_calculation_method == 'api' %}
+                      <label class="radio-inline"><input type="radio" name="shipping_dockercart_novapost_calculation_method" value="tariff" /> {{ text_tariff }}</label>
+                      <label class="radio-inline"><input type="radio" name="shipping_dockercart_novapost_calculation_method" value="api" checked /> {{ text_api }}</label>
+                      {% else %}
+                      <label class="radio-inline"><input type="radio" name="shipping_dockercart_novapost_calculation_method" value="tariff" checked /> {{ text_tariff }}</label>
+                      <label class="radio-inline"><input type="radio" name="shipping_dockercart_novapost_calculation_method" value="api" /> {{ text_api }}</label>
+                      {% endif %}
+                      <div class="help-block">{{ entry_calculation_method_help }}</div>
                     </div>
                   </div>
                 </div>
@@ -327,6 +343,268 @@
               {% endif %}
             </div>
 
+            {# ── Tariffs Tab ── #}
+            <div class="tab-pane" id="tab-tariffs">
+              <form action="{{ action }}" method="get" class="form-horizontal">
+                <input type="hidden" name="route" value="extension/shipping/dockercart_novapost" />
+                <input type="hidden" name="user_token" value="{{ user_token }}" />
+                <input type="hidden" name="tab" value="tariffs" />
+
+                <div class="form-group">
+                  <label class="col-sm-1 control-label">{{ text_country }}</label>
+                  <div class="col-sm-2">
+                    <select name="filter_tariff_country" class="form-control">
+                      <option value="">{{ text_all }}</option>
+                      {% for code, name in supported_countries %}
+                      <option value="{{ code }}" {% if filter_tariff_country == code %}selected{% endif %}>{{ name }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <label class="col-sm-1 control-label">{{ text_type }}</label>
+                  <div class="col-sm-2">
+                    <select name="filter_tariff_delivery_type" class="form-control">
+                      <option value="">{{ text_all }}</option>
+                      {% for type, label in delivery_types %}
+                      <option value="{{ type }}" {% if filter_tariff_delivery_type == type %}selected{% endif %}>{{ label }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="col-sm-2">
+                    <button type="submit" class="btn btn-primary btn-block"><i class="fa fa-search"></i> {{ button_filter }}</button>
+                  </div>
+                  <div class="col-sm-4 text-right">
+                    <button type="button" id="btn-add-tariff" class="btn btn-success"><i class="fa fa-plus"></i> {{ button_add_tariff }}</button>
+                  </div>
+                </div>
+              </form>
+
+              <div id="tariff-form-wrapper" style="display:none; background:#f8fafc; border:1px solid #e6e9ef; border-radius:8px; padding:16px; margin-bottom:16px;">
+                <h4 id="tariff-form-title" style="margin-top:0;">{{ text_add_tariff }}</h4>
+                <input type="hidden" id="tariff-id" value="" />
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label>{{ text_country }}</label>
+                      <select id="tariff-country" class="form-control">
+                        {% for code, name in supported_countries %}
+                        <option value="{{ code }}">{{ name }} ({{ code }})</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label>{{ entry_delivery_type }}</label>
+                      <select id="tariff-delivery-type" class="form-control">
+                        {% for type, label in delivery_types %}
+                        <option value="{{ type }}">{{ label }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-sm-4">
+                    <div class="form-group">
+                      <label>{{ entry_weight_from }}</label>
+                      <input type="number" id="tariff-weight-from" class="form-control" step="0.001" min="0" value="0" />
+                    </div>
+                  </div>
+                  <div class="col-sm-4">
+                    <div class="form-group">
+                      <label>{{ entry_weight_to }}</label>
+                      <input type="number" id="tariff-weight-to" class="form-control" step="0.001" min="0.001" value="1" />
+                    </div>
+                  </div>
+                  <div class="col-sm-4">
+                    <div class="form-group">
+                      <label>{{ entry_cost }}</label>
+                      <input type="number" id="tariff-cost" class="form-control" step="0.01" min="0" value="0" />
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-sm-4">
+                    <div class="form-group">
+                      <label>{{ entry_free_shipping_from }}</label>
+                      <input type="number" id="tariff-free-from" class="form-control" step="0.01" min="0" value="" placeholder="{{ text_free_shipping_off }}" />
+                    </div>
+                  </div>
+                  <div class="col-sm-4">
+                    <div class="form-group">
+                      <label>{{ entry_sort_order }}</label>
+                      <input type="number" id="tariff-sort-order" class="form-control" step="1" min="0" value="0" />
+                    </div>
+                  </div>
+                  <div class="col-sm-4">
+                    <div class="form-group">
+                      <label>{{ entry_status }}</label>
+                      <select id="tariff-status" class="form-control">
+                        <option value="1">{{ text_enabled }}</option>
+                        <option value="0">{{ text_disabled }}</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <button type="button" id="btn-cancel-tariff" class="btn btn-default">{{ button_cancel_tariff }}</button>
+                  <button type="button" id="btn-save-tariff" class="btn btn-primary">{{ button_save }}</button>
+                </div>
+                <div id="tariff-form-error" class="alert alert-danger" style="display:none; margin-top:8px; margin-bottom:0;">&nbsp;</div>
+              </div>
+
+              {% if tariffs %}
+              <div class="table-responsive">
+                <table class="table dc-np-table">
+                  <thead>
+                    <tr>
+                      <th>{{ column_country }}</th>
+                      <th>{{ column_delivery_type }}</th>
+                      <th>{{ text_weight_range }}</th>
+                      <th>{{ column_cost }}</th>
+                      <th>{{ column_free_shipping }}</th>
+                      <th>{{ column_sort_order }}</th>
+                      <th>{{ column_status }}</th>
+                      <th class="text-right">{{ text_action }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for t in tariffs %}
+                    <tr>
+                      <td><strong>{{ t.country_code }}</strong> — {{ supported_countries[t.country_code] ?? t.country_code }}</td>
+                      <td>
+                        {% if t.delivery_type == 'branch' %}{{ delivery_branch }}
+                        {% elseif t.delivery_type == 'locker' %}{{ delivery_locker }}
+                        {% elseif t.delivery_type == 'courier' %}{{ delivery_courier }}
+                        {% else %}{{ t.delivery_type }}{% endif %}
+                      </td>
+                      <td>{{ t.weight_from }} – {{ t.weight_to }} {{ text_kg }}</td>
+                      <td>{{ t.cost }}</td>
+                      <td>
+                        {% if t.free_shipping_from %}
+                        {{ t.free_shipping_from }}
+                        {% else %}
+                        <span class="text-muted">{{ text_free_shipping_off }}</span>
+                        {% endif %}
+                      </td>
+                      <td>{{ t.sort_order }}</td>
+                      <td>
+                        {% if t.status %}
+                        <span class="dc-np-badge dc-np-badge--on">{{ text_enabled }}</span>
+                        {% else %}
+                        <span class="dc-np-badge dc-np-badge--off">{{ text_disabled }}</span>
+                        {% endif %}
+                      </td>
+                      <td class="text-right">
+                        <button type="button" class="btn btn-xs btn-primary btn-edit-tariff"
+                          data-id="{{ t.tariff_id }}"
+                          data-country="{{ t.country_code }}"
+                          data-type="{{ t.delivery_type }}"
+                          data-weight-from="{{ t.weight_from }}"
+                          data-weight-to="{{ t.weight_to }}"
+                          data-cost="{{ t.cost }}"
+                          data-free="{{ t.free_shipping_from }}"
+                          data-sort="{{ t.sort_order }}"
+                          data-status="{{ t.status }}"
+                          title="{{ button_edit_tariff }}"><i class="fa fa-pencil"></i></button>
+                        <button type="button" class="btn btn-xs btn-danger btn-delete-tariff" data-id="{{ t.tariff_id }}" title="{{ button_delete_tariff }}"><i class="fa fa-trash"></i></button>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              <div class="row">
+                <div class="col-sm-6 text-left">{{ pagination_tariffs }}</div>
+                <div class="col-sm-6 text-right">{{ results_tariffs }}</div>
+              </div>
+              {% else %}
+              <div class="dc-np-empty">
+                <i class="fa fa-tags"></i>
+                <p>{{ text_no_tariffs }}</p>
+              </div>
+              {% endif %}
+            </div>
+
+            {# ── Region Mapping Tab ── #}
+            <div class="tab-pane" id="tab-region-mapping">
+              <form action="{{ action }}" method="get" class="form-horizontal">
+                <input type="hidden" name="route" value="extension/shipping/dockercart_novapost" />
+                <input type="hidden" name="user_token" value="{{ user_token }}" />
+                <input type="hidden" name="tab" value="region-mapping" />
+
+                <div class="form-group">
+                  <label class="col-sm-1 control-label">{{ text_country }}</label>
+                  <div class="col-sm-2">
+                    <select name="filter_region_country" class="form-control">
+                      <option value="">{{ text_all }}</option>
+                      {% for code, name in supported_countries %}
+                      <option value="{{ code }}" {% if filter_region_country == code %}selected{% endif %}>{{ name }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <label class="col-sm-2 control-label">{{ entry_region_map_filter_status }}</label>
+                  <div class="col-sm-2">
+                    <select name="filter_region_mapped" class="form-control">
+                      <option value="">{{ text_all_status }}</option>
+                      <option value="1" {% if filter_region_mapped == '1' %}selected{% endif %}>{{ text_mapped }}</option>
+                      <option value="0" {% if filter_region_mapped == '0' %}selected{% endif %}>{{ text_unmapped }}</option>
+                    </select>
+                  </div>
+                  <div class="col-sm-2">
+                    <button type="submit" class="btn btn-primary btn-block"><i class="fa fa-search"></i> {{ button_filter }}</button>
+                  </div>
+                </div>
+              </form>
+
+              {% if region_maps %}
+              <div class="table-responsive">
+                <table class="table dc-np-table">
+                  <thead>
+                    <tr>
+                      <th>{{ column_np_region }}</th>
+                      <th>{{ column_country }}</th>
+                      <th>{{ column_city }}</th>
+                      <th>{{ entry_oc_zone }}</th>
+                      <th class="text-right">{{ text_action }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for rm in region_maps %}
+                    <tr id="region-row-{{ rm.region_map_id }}">
+                      <td><strong>{{ rm.localized_parent_name ?: rm.novapost_region_name }}</strong><br><small class="text-muted">ID: {{ rm.novapost_region_id }}</small></td>
+                      <td>{{ rm.country_name ~ ' (' ~ rm.country_code ~ ')' }}</td>
+                      <td>
+                        <input type="text" class="form-control input-sm" value="{{ rm.city_name }}" placeholder="(все города региона)" style="width:220px;">
+                      </td>
+                      <td>
+                        <select class="form-control zone-select" data-region-id="{{ rm.region_map_id }}" data-country="{{ rm.country_code }}" style="max-width:260px;">
+                          <option value="0">{{ text_unmapped }}</option>
+                          {% if rm.oc_zone_id > 0 %}
+                          <option value="{{ rm.oc_zone_id }}" selected>{{ rm.oc_zone_id }}</option>
+                          {% endif %}
+                        </select>
+                      </td>
+                      <td class="text-right">
+                        <button type="button" class="btn btn-xs btn-primary btn-map-region" data-id="{{ rm.region_map_id }}"><i class="fa fa-save"></i> {{ button_map }}</button>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              <div class="row">
+                <div class="col-sm-6 text-left">{{ pagination_region_maps }}</div>
+                <div class="col-sm-6 text-right">{{ results_region_maps }}</div>
+              </div>
+              {% else %}
+              <div class="dc-np-empty">
+                <i class="fa fa-map-marker"></i>
+                <p>{{ text_no_region_maps }}</p>
+              </div>
+              {% endif %}
+            </div>
+
             {# ── Sync Log Tab ── #}
             <div class="tab-pane" id="tab-sync-log">
               {% if sync_logs %}
@@ -453,5 +731,198 @@ $(function() {
     });
   });
 });
+
+// ── Tariff tab JS ─────────────────────────────────────────────────────
+(function() {
+  var isEditing = false;
+
+  function resetForm() {
+    isEditing = false;
+    $('#tariff-id').val('');
+    $('#tariff-country').val($('#tariff-country option:first').val());
+    $('#tariff-delivery-type').val($('#tariff-delivery-type option:first').val());
+    $('#tariff-weight-from').val('0');
+    $('#tariff-weight-to').val('1');
+    $('#tariff-cost').val('0');
+    $('#tariff-free-from').val('');
+    $('#tariff-sort-order').val('0');
+    $('#tariff-status').val('1');
+    $('#tariff-form-error').hide();
+    $('#tariff-form-title').text('{{ text_add_tariff }}');
+  }
+
+  function setFormData(tariff) {
+    isEditing = true;
+    $('#tariff-id').val(tariff.tariff_id);
+    $('#tariff-country').val(tariff.country_code);
+    $('#tariff-delivery-type').val(tariff.delivery_type);
+    $('#tariff-weight-from').val(tariff.weight_from);
+    $('#tariff-weight-to').val(tariff.weight_to);
+    $('#tariff-cost').val(tariff.cost);
+    $('#tariff-free-from').val(tariff.free_shipping_from || '');
+    $('#tariff-sort-order').val(tariff.sort_order);
+    $('#tariff-status').val(tariff.status);
+    $('#tariff-form-error').hide();
+    $('#tariff-form-title').text('{{ text_edit_tariff }}');
+  }
+
+  function saveTariff() {
+    var tariffId = $('#tariff-id').val();
+    var url = tariffId ? '{{ edit_tariff_url }}' : '{{ add_tariff_url }}';
+
+    var data = {
+      tariff_id: tariffId || 0,
+      country_code: $('#tariff-country').val(),
+      delivery_type: $('#tariff-delivery-type').val(),
+      weight_from: $('#tariff-weight-from').val(),
+      weight_to: $('#tariff-weight-to').val(),
+      cost: $('#tariff-cost').val(),
+      free_shipping_from: $('#tariff-free-from').val(),
+      sort_order: $('#tariff-sort-order').val(),
+      status: $('#tariff-status').val()
+    };
+
+    $.ajax({
+      url: url,
+      type: 'POST',
+      dataType: 'json',
+      data: data,
+      success: function(json) {
+        if (json.success) {
+          location.reload();
+        } else if (json.error) {
+          $('#tariff-form-error').text(json.error).show();
+        }
+      },
+      error: function() {
+        $('#tariff-form-error').text('{{ error_ajax }}').show();
+      }
+    });
+  }
+
+  $('#btn-add-tariff').on('click', function() {
+    resetForm();
+    $('#tariff-form-wrapper').slideDown();
+    $('#tariff-form-wrapper')[0].scrollIntoView({behavior: 'smooth'});
+  });
+
+  $('#btn-cancel-tariff').on('click', function() {
+    $('#tariff-form-wrapper').slideUp();
+    resetForm();
+  });
+
+  $('#btn-save-tariff').on('click', function() {
+    saveTariff();
+  });
+
+  $(document).on('click', '.btn-edit-tariff', function() {
+    var $btn = $(this);
+    var tariff = {
+      tariff_id:     $btn.data('id'),
+      country_code:  $btn.data('country'),
+      delivery_type: $btn.data('type'),
+      weight_from:   $btn.data('weight-from'),
+      weight_to:     $btn.data('weight-to'),
+      cost:          $btn.data('cost'),
+      free_shipping_from: $btn.data('free') || '',
+      sort_order:    $btn.data('sort'),
+      status:        $btn.data('status')
+    };
+    setFormData(tariff);
+    $('#tariff-form-wrapper').slideDown();
+    $('#tariff-form-wrapper')[0].scrollIntoView({behavior: 'smooth'});
+  });
+
+  $(document).on('click', '.btn-delete-tariff', function() {
+    if (!confirm('{{ confirm_delete_tariff }}')) return;
+    var tariffId = $(this).data('id');
+    $.ajax({
+      url: '{{ delete_tariff_url }}',
+      type: 'POST',
+      dataType: 'json',
+      data: { tariff_id: tariffId },
+      success: function(json) {
+        if (json.success) {
+          location.reload();
+        } else if (json.error) {
+          alert(json.error);
+        }
+      }
+    });
+  });
+})();
+
+// ── Region Mapping JS ──────────────────────────────────────────────────
+(function() {
+  var zoneCache = {};
+
+  function loadZones($select, countryCode, selectedZoneId) {
+    if (zoneCache[countryCode]) {
+      populateSelect($select, zoneCache[countryCode], selectedZoneId);
+      return;
+    }
+    $.ajax({
+      url: '{{ get_zones_url }}',
+      type: 'GET',
+      dataType: 'json',
+      data: { country_code: countryCode },
+      success: function(zones) {
+        zoneCache[countryCode] = zones || [];
+        populateSelect($select, zoneCache[countryCode], selectedZoneId);
+      }
+    });
+  }
+
+  function populateSelect($select, zones, selectedZoneId) {
+    $select.empty();
+    $select.append('<option value="0">{{ text_unmapped }}</option>');
+    for (var i = 0; i < zones.length; i++) {
+      var sel = (zones[i].zone_id == selectedZoneId) ? ' selected' : '';
+      $select.append('<option value="' + zones[i].zone_id + '"' + sel + '>' + zones[i].name + ' (' + zones[i].code + ')</option>');
+    }
+  }
+
+  // Populate zone selects on load
+  $('.zone-select').each(function() {
+    var $sel = $(this);
+    var country = $sel.data('country');
+    var currentZoneId = $sel.val() || 0;
+    loadZones($sel, country, currentZoneId);
+  });
+
+  // Save region mapping
+  $(document).on('click', '.btn-map-region', function() {
+    var $btn = $(this);
+    var regionMapId = $btn.data('id');
+    var $row = $('#region-row-' + regionMapId);
+    var $select = $row.find('.zone-select');
+    var $cityInput = $row.find('input[type="text"]');
+    var ocZoneId = $select.val() || 0;
+    var cityName = $cityInput ? $cityInput.val().trim() : '';
+
+    $btn.prop('disabled', true);
+
+    $.ajax({
+      url: '{{ update_region_map_url }}',
+      type: 'POST',
+      dataType: 'json',
+      data: { region_map_id: regionMapId, oc_zone_id: ocZoneId, city_name: cityName },
+      success: function(json) {
+        $btn.prop('disabled', false);
+        if (json.success) {
+          $btn.removeClass('btn-primary').addClass('btn-success').find('i').removeClass('fa-save').addClass('fa-check');
+          setTimeout(function() {
+            $btn.removeClass('btn-success').addClass('btn-primary').find('i').removeClass('fa-check').addClass('fa-save');
+          }, 1500);
+        } else if (json.error) {
+          alert(json.error);
+        }
+      },
+      error: function() {
+        $btn.prop('disabled', false);
+      }
+    });
+  });
+})();
 </script>
 {{ footer }}

@@ -2383,12 +2383,24 @@ class ControllerCheckoutDockercartCheckout extends Controller
         $result_totals = [];
 
         foreach ($totals as $total_item) {
-            $result_totals[] = [
-                "title" => $total_item["title"],
-                "text" => $this->currency->format(
+            $rawValue = (float)$total_item["value"];
+            $customText = isset($total_item["text"]) ? $total_item["text"] : "";
+
+            if (
+                $total_item["code"] === "shipping"
+                && $rawValue == 0
+            ) {
+                $displayText = $customText !== "" ? $customText : "";
+            } else {
+                $displayText = $this->currency->format(
                     $total_item["value"],
                     $this->session->data["currency"],
-                ),
+                );
+            }
+
+            $result_totals[] = [
+                "title" => $total_item["title"],
+                "text" => $displayText,
             ];
         }
 
