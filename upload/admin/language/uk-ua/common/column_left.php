@@ -52,7 +52,6 @@ $_['text_log'] = 'Журнали помилок';
 $_['text_maintenance'] = 'Технічне обслуговування';
 $_['text_manufacturer'] = 'Виробники';
 $_['text_marketing'] = 'Маркетинг';
-$_['text_marketplace'] = 'Маркетплейс';
 $_['text_menu'] = 'Менеджер меню';
 $_['text_modification'] = 'Модифікації';
 $_['text_module'] = 'Модулі';

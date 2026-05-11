@@ -227,9 +227,6 @@ define('DB_PREFIX', $env('DB_PREFIX', 'oc_'));
 define('CACHE_HOSTNAME', $env('CACHE_HOSTNAME', 'memcached'));
 define('CACHE_PORT', $env('CACHE_PORT', '11211'));
 define('CACHE_PREFIX', $env('CACHE_PREFIX', 'oc_'));
-
-// OpenCart API
-define('OPENCART_SERVER', 'https://www.opencart.com/');
 PHP
     fi
 

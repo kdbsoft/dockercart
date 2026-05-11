@@ -36,7 +36,6 @@ $_['text_log'] = 'Журналы ошибок';
 $_['text_maintenance'] = 'Обслуживание';
 $_['text_manufacturer'] = 'Производители';
 $_['text_marketing'] = 'Маркетинг';
-$_['text_marketplace'] = 'Маркетплейс';
 $_['text_menu'] = 'Менеджер меню';
 $_['text_modification'] = 'Модификации';
 $_['text_navigation'] = 'Навигация';
