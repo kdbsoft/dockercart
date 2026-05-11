@@ -39,7 +39,7 @@ class ControllerExtensionModuleDockercartRedirects extends Controller {
         $is_local = false;
         if ($domain !== '') {
             $lower = strtolower($domain);
-            if (strpos($lower, 'localhost') !== false || strpos($lower, '127.0.0.1') !== false || strpos($lower, '::1') !== false) {
+            if (strpos($lower, 'localhost') !== false || strpos($lower, '127.0.0.1') !== false || strpos($lower, '::1') !== false || strpos($lower, '.local') !== false) {
                 $is_local = true;
             }
         }
@@ -107,7 +107,7 @@ class ControllerExtensionModuleDockercartRedirects extends Controller {
         $is_local = false;
         if ($domain !== '') {
             $lower = strtolower($domain);
-            if (strpos($lower, 'localhost') !== false || strpos($lower, '127.0.0.1') !== false || strpos($lower, '::1') !== false) {
+            if (strpos($lower, 'localhost') !== false || strpos($lower, '127.0.0.1') !== false || strpos($lower, '::1') !== false || strpos($lower, '.local') !== false) {
                 $is_local = true;
             }
         }

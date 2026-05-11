@@ -25,6 +25,10 @@ class DockercartLicense {
     }
 
     public function verify($license_key, $module_code, $skip_cache = false) {
+        if ($this->isLocalDomain()) {
+            return $this->localSuccess();
+        }
+
         if (!$this->moduleExists($module_code)) {
             return $this->error('Module not configured: ' . $module_code . '. Please add Public Key in admin panel.');
         }
@@ -90,6 +94,10 @@ class DockercartLicense {
     }
 
     public function verifyWithPublicKey($license_key, $public_key, $module_code, $skip_cache = false) {
+        if ($this->isLocalDomain()) {
+            return $this->localSuccess();
+        }
+
         if (!$this->validateFormat($license_key)) {
             return $this->error('Invalid license key format');
         }
@@ -390,6 +398,42 @@ class DockercartLicense {
         $domain = preg_replace('/:.*$/', '', $domain);
 
         return $domain;
+    }
+
+    private function isLocalDomain() {
+        $domain = $this->domain;
+        $local_patterns = [
+            'localhost',
+            '127.0.0.1',
+            '::1',
+            '.local',
+            '.docker.localhost',
+        ];
+
+        foreach ($local_patterns as $pattern) {
+            if ($pattern[0] === '.') {
+                if (substr($domain, -(strlen($pattern))) === $pattern) {
+                    return true;
+                }
+            } elseif ($domain === $pattern) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function localSuccess() {
+        return array(
+            'valid' => true,
+            'module' => 'local',
+            'domain' => $this->domain,
+            'expires' => 0,
+            'expires_formatted' => 'Lifetime',
+            'license_id' => 'local-development',
+            'version' => '1.0',
+            'verified_at' => time()
+        );
     }
 
     private function getFromCache($license_key, $module_code) {
