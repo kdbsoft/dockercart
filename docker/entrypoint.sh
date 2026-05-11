@@ -47,11 +47,20 @@ fix_permissions() {
             echo "WARNING: Check host-side ownership/ACL on bind mount: ./upload/image/cache"
         fi
     else
-        echo "WARNING: not running as root, skipping ownership changes."
-        echo "Ensure host ownership/group for bind mounts (upload/storage) allows write by group www-data."
-    fi
+		echo "WARNING: not running as root, skipping ownership changes."
+		echo "Ensure host ownership/group for bind mounts (upload/storage) allows write by group www-data."
+	fi
 
-    echo "Permissions fixed!"
+	echo "Permissions fixed!"
+}
+
+# Install Composer dependencies if vendor directory is missing (fresh clone / first start)
+install_composer_deps() {
+	if [ -f /var/www/composer.json ] && [ ! -f /var/www/storage/vendor/autoload.php ]; then
+		echo "Composer dependencies not found — installing..."
+		cd /var/www && composer install --no-dev --optimize-autoloader --no-interaction
+		echo "Composer dependencies installed."
+	fi
 }
 
 # Функция для ожидания MariaDB
@@ -362,6 +371,9 @@ echo "Starting DockerCart container..."
 
 # Исправляем права на смонтированные volume'ы (первое действие!)
 fix_permissions
+
+# Устанавливаем Composer зависимости, если vendor отсутствует (первый запуск / свежий clone)
+install_composer_deps
 
 # Создаем конфиги приложения, если отсутствуют
 ensure_app_configs
