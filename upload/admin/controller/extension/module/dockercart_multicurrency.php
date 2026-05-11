@@ -694,7 +694,8 @@ class ControllerExtensionModuleDockercartMulticurrency extends Controller
         $domain = $_SERVER["HTTP_HOST"] ?? "";
         if (
             strpos($domain, "localhost") !== false ||
-            strpos($domain, "127.0.0.1") !== false
+            strpos($domain, "127.0.0.1") !== false ||
+            strpos($domain, ".local") !== false
         ) {
             return true;
         }
@@ -747,6 +748,7 @@ class ControllerExtensionModuleDockercartMulticurrency extends Controller
         if (
             strpos($domain, "localhost") !== false ||
             strpos($domain, "127.0.0.1") !== false ||
+            strpos($domain, ".local") !== false ||
             strpos($domain, ".docker.localhost") !== false
         ) {
             return true;

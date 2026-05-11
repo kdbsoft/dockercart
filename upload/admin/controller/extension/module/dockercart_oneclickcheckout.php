@@ -205,7 +205,7 @@ class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
             } else {
                 // Check if it's localhost/dev
                 $domain = $_SERVER['HTTP_HOST'] ?? '';
-                if (strpos($domain, 'localhost') !== false || strpos($domain, '127.0.0.1') !== false || strpos($domain, '.docker.localhost') !== false) {
+                if (strpos($domain, 'localhost') !== false || strpos($domain, '127.0.0.1') !== false || strpos($domain, '.local') !== false || strpos($domain, '.docker.localhost') !== false) {
                     $json['valid'] = true;
                     $json['message'] = $this->language->get('success_license_valid') . ' (Development Environment)';
                 } else {
@@ -334,7 +334,7 @@ class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
         $license_key = $this->config->get('module_dockercart_oneclickcheckout_license_key');
 
         $domain = $_SERVER['HTTP_HOST'] ?? '';
-        if (strpos($domain, 'localhost') !== false || strpos($domain, '127.0.0.1') !== false || strpos($domain, '.docker.localhost') !== false) {
+        if (strpos($domain, 'localhost') !== false || strpos($domain, '127.0.0.1') !== false || strpos($domain, '.local') !== false || strpos($domain, '.docker.localhost') !== false) {
             return true;
         }
 
@@ -377,7 +377,7 @@ class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
 
         // Allow localhost/dev environments
         $domain = $_SERVER['HTTP_HOST'] ?? '';
-        if (strpos($domain, 'localhost') !== false || strpos($domain, '127.0.0.1') !== false || strpos($domain, '.docker.localhost') !== false) {
+        if (strpos($domain, 'localhost') !== false || strpos($domain, '127.0.0.1') !== false || strpos($domain, '.local') !== false || strpos($domain, '.docker.localhost') !== false) {
             return true;
         }
 

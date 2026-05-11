@@ -649,7 +649,7 @@ class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
 
         // Allow localhost/dev environments
         $domain = $_SERVER['HTTP_HOST'] ?? '';
-        if (strpos($domain, 'localhost') !== false || strpos($domain, '127.0.0.1') !== false || strpos($domain, '.docker.localhost') !== false) {
+        if (strpos($domain, 'localhost') !== false || strpos($domain, '127.0.0.1') !== false || strpos($domain, '.local') !== false || strpos($domain, '.docker.localhost') !== false) {
             return true;
         }
 
