@@ -53,6 +53,8 @@ services:
       - ./storage:/var/www/storage:z
       - ./VERSION:/var/www/VERSION:ro,z
       - ./docker/mysql/init.sql:/opt/dockercart-seed/init.sql:ro,z
+      - ./composer.json:/var/www/composer.json:ro,z
+      - ./composer.lock:/var/www/composer.lock:ro,z
     environment:
       - DB_HOSTNAME=${DB_HOSTNAME:-mariadb}
       - DB_USERNAME=${DB_USERNAME:-dockercart}
