@@ -2,10 +2,16 @@
 class ModelExtensionTotalShipping extends Model {
 	public function getTotal($total) {
 		if ($this->cart->hasShipping() && isset($this->session->data['shipping_method'])) {
+			$cost = (float)$this->session->data['shipping_method']['cost'];
+			$quoteText = isset($this->session->data['shipping_method']['text'])
+				? $this->session->data['shipping_method']['text']
+				: '';
+
 			$total['totals'][] = array(
 				'code'       => 'shipping',
 				'title'      => $this->session->data['shipping_method']['title'],
-				'value'      => $this->session->data['shipping_method']['cost'],
+				'value'      => $cost,
+				'text'       => $quoteText,
 				'sort_order' => $this->config->get('total_shipping_sort_order')
 			);
 

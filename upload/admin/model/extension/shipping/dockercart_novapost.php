@@ -12,6 +12,7 @@ if (is_file($novapostAutoloader)) {
 class ModelExtensionShippingDockercartNovapost extends Model {
 
 	private $schema_ensured = false;
+	private array $discoveredRegions = [];
 
 	const SUPPORTED_COUNTRIES = [
 		'CZ' => 'Czech Republic',
@@ -37,6 +38,12 @@ class ModelExtensionShippingDockercartNovapost extends Model {
 		'PostBranch',
 		'Postomat',
 		'PUDO',
+	];
+
+	const DELIVERY_TYPES = [
+		'branch'  => 'Branch (В отделение)',
+		'locker'  => 'Locker (В почтомат)',
+		'courier' => 'Courier (Курьером)',
 	];
 
 	private function getLanguageHeader(string $code): string {
@@ -117,9 +124,63 @@ class ModelExtensionShippingDockercartNovapost extends Model {
 				KEY `lang_idx` (`language_id`)
 			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 		");
+
+		$this->db->query("
+			CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "dockercart_novapost_tariff` (
+				`tariff_id` INT(11) NOT NULL AUTO_INCREMENT,
+				`country_code` VARCHAR(2) NOT NULL DEFAULT '',
+				`delivery_type` VARCHAR(32) NOT NULL DEFAULT '',
+				`weight_from` DECIMAL(10,3) NOT NULL DEFAULT '0.000',
+				`weight_to` DECIMAL(10,3) NOT NULL DEFAULT '0.000',
+				`cost` DECIMAL(10,4) NOT NULL DEFAULT '0.0000',
+				`free_shipping_from` DECIMAL(10,4) DEFAULT NULL,
+				`status` TINYINT(1) NOT NULL DEFAULT '1',
+				`sort_order` INT(11) NOT NULL DEFAULT '0',
+				`date_added` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+				`date_modified` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+				PRIMARY KEY (`tariff_id`),
+				KEY `idx_country_delivery` (`country_code`, `delivery_type`),
+				KEY `idx_status` (`status`)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+		");
+
+		// Add parent region columns to division table (idempotent)
+		$this->db->query("ALTER TABLE `" . DB_PREFIX . "dockercart_novapost_division`
+			ADD COLUMN IF NOT EXISTS `parent_region_id` VARCHAR(64) NOT NULL DEFAULT '' AFTER `region_name`,
+			ADD COLUMN IF NOT EXISTS `parent_region_name` VARCHAR(255) NOT NULL DEFAULT '' AFTER `parent_region_id`
+		");
+
+		$this->db->query("
+			CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "dockercart_novapost_region_map` (
+				`region_map_id` INT(11) NOT NULL AUTO_INCREMENT,
+				`novapost_region_id` VARCHAR(64) NOT NULL DEFAULT '',
+				`country_code` VARCHAR(2) NOT NULL DEFAULT '',
+				`novapost_region_name` VARCHAR(255) NOT NULL DEFAULT '',
+				`city_name` VARCHAR(255) NOT NULL DEFAULT '',
+				`oc_zone_id` INT(11) NOT NULL DEFAULT '0',
+				`date_added` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+				`date_modified` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+				PRIMARY KEY (`region_map_id`),
+				UNIQUE KEY `uk_np_region` (`novapost_region_id`, `country_code`, `city_name`)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+		");
+
+		// Add city_name column if upgrading from old schema
+		$this->db->query("ALTER TABLE `" . DB_PREFIX . "dockercart_novapost_region_map`
+			ADD COLUMN IF NOT EXISTS `city_name` VARCHAR(255) NOT NULL DEFAULT '' AFTER `novapost_region_name`,
+			DROP INDEX IF EXISTS `uk_np_region`,
+			ADD UNIQUE KEY `uk_np_region` (`novapost_region_id`, `country_code`, `city_name`)
+		");
+
+		// Add parent_region_name to description table (idempotent)
+		$this->db->query("ALTER TABLE `" . DB_PREFIX . "dockercart_novapost_division_description`
+			ADD COLUMN IF NOT EXISTS `parent_region_name` VARCHAR(255) NOT NULL DEFAULT '' AFTER `region_name`
+		");
 	}
 
 	public function uninstall() {
+		$this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "dockercart_novapost_region_map`");
+		$this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "dockercart_novapost_tariff`");
 		$this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "dockercart_novapost_division_description`");
 		$this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "dockercart_novapost_sync_log`");
 		$this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "dockercart_novapost_division`");
@@ -154,6 +215,10 @@ class ModelExtensionShippingDockercartNovapost extends Model {
 				) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 			");
 		}
+
+		$this->db->query("ALTER TABLE `" . DB_PREFIX . "dockercart_novapost_division_description`
+			ADD COLUMN IF NOT EXISTS `parent_region_name` VARCHAR(255) NOT NULL DEFAULT '' AFTER `region_name`
+		");
 	}
 
 	public function syncDivisions(string $apiKey, bool $sandbox, array $countryCodes, array $categories): array {
@@ -253,8 +318,8 @@ class ModelExtensionShippingDockercartNovapost extends Model {
 										$division['id'] ?? $division['site_key'] ?? 'unknown',
 										$acceptLanguage,
 										$e->getMessage()
-									);
-								}
+		);
+	}
 							}
 
 							if ($page >= $lastPage) {
@@ -274,6 +339,9 @@ class ModelExtensionShippingDockercartNovapost extends Model {
 					}
 				}
 			}
+
+			$this->flushDiscoveredRegions();
+			$this->flushDiscoveredCities();
 
 			$status = $result['total_errors'] > 0 ? 'partial' : 'success';
 			$this->logSyncComplete($logId, $status, $result['total_loaded'], $result['total_errors']);
@@ -301,6 +369,8 @@ class ModelExtensionShippingDockercartNovapost extends Model {
 		$cityName  = $this->db->escape($division['settlement']['name'] ?? $division['cityName'] ?? $division['city_name'] ?? '');
 		$regionRef = $this->db->escape((string)($division['settlement']['region']['id'] ?? $division['regionRef'] ?? $division['region_ref'] ?? ''));
 		$regionNm  = $this->db->escape($division['settlement']['region']['name'] ?? $division['regionName'] ?? $division['region_name'] ?? '');
+		$parentRegionId   = $this->db->escape((string)($division['settlement']['region']['parent']['id'] ?? $division['parentRegionId'] ?? $division['parent_region_id'] ?? ''));
+		$parentRegionName = $this->db->escape($division['settlement']['region']['parent']['name'] ?? $division['parentRegionName'] ?? $division['parent_region_name'] ?? '');
 		$country   = $this->db->escape($division['countryCode'] ?? $division['country_code'] ?? '');
 		$phone     = $this->db->escape(is_array($division['publicPhones'] ?? null) ? ($division['publicPhones'][0] ?? '') : ($division['phone'] ?? ''));
 		$enabled   = ($division['status'] ?? '') === 'Working' ? 1 : (!empty($division['enabled'] ?? '') ? 1 : 0);
@@ -336,6 +406,8 @@ class ModelExtensionShippingDockercartNovapost extends Model {
 				`city_name` = '" . $cityName . "',
 				`region_ref` = '" . $regionRef . "',
 				`region_name` = '" . $regionNm . "',
+				`parent_region_id` = '" . $parentRegionId . "',
+				`parent_region_name` = '" . $parentRegionName . "',
 				`country_code` = '" . $country . "',
 				`latitude` = " . $lat . ",
 				`longitude` = " . $lon . ",
@@ -354,6 +426,8 @@ class ModelExtensionShippingDockercartNovapost extends Model {
 				`city_name` = VALUES(`city_name`),
 				`region_ref` = VALUES(`region_ref`),
 				`region_name` = VALUES(`region_name`),
+				`parent_region_id` = VALUES(`parent_region_id`),
+				`parent_region_name` = VALUES(`parent_region_name`),
 				`country_code` = VALUES(`country_code`),
 				`latitude` = VALUES(`latitude`),
 				`longitude` = VALUES(`longitude`),
@@ -373,6 +447,18 @@ class ModelExtensionShippingDockercartNovapost extends Model {
 				LIMIT 1
 			");
 			$divisionId = (int)$query->row['division_id'];
+		}
+
+		// Track discovered parent regions for region_map
+		if ($parentRegionId !== "''" && $parentRegionId !== '') {
+			$key = $country . '|' . $parentRegionId;
+			if (!isset($this->discoveredRegions[$key])) {
+				$this->discoveredRegions[$key] = [
+					'novapost_region_id'   => $parentRegionId,
+					'country_code'         => $country,
+					'novapost_region_name' => $parentRegionName !== "''" ? $parentRegionName : "''",
+				];
+			}
 		}
 
 		return $divisionId;
@@ -397,6 +483,7 @@ class ModelExtensionShippingDockercartNovapost extends Model {
 		$fullAddr  = $this->db->escape($division['address'] ?? $division['fullAddress'] ?? $division['full_address'] ?? '');
 		$cityName  = $this->db->escape($division['settlement']['name'] ?? $division['cityName'] ?? $division['city_name'] ?? '');
 		$regionNm  = $this->db->escape($division['settlement']['region']['name'] ?? $division['regionName'] ?? $division['region_name'] ?? '');
+		$parentRegionName = $this->db->escape($division['settlement']['region']['parent']['name'] ?? $division['parentRegionName'] ?? $division['parent_region_name'] ?? '');
 
 		$this->db->query("
 			INSERT INTO `" . DB_PREFIX . "dockercart_novapost_division_description` SET
@@ -406,13 +493,15 @@ class ModelExtensionShippingDockercartNovapost extends Model {
 				`short_address` = '" . $shortAddr . "',
 				`full_address` = '" . $fullAddr . "',
 				`city_name` = '" . $cityName . "',
-				`region_name` = '" . $regionNm . "'
+				`region_name` = '" . $regionNm . "',
+				`parent_region_name` = '" . $parentRegionName . "'
 			ON DUPLICATE KEY UPDATE
 				`name` = VALUES(`name`),
 				`short_address` = VALUES(`short_address`),
 				`full_address` = VALUES(`full_address`),
 				`city_name` = VALUES(`city_name`),
-				`region_name` = VALUES(`region_name`)
+				`region_name` = VALUES(`region_name`),
+				`parent_region_name` = VALUES(`parent_region_name`)
 		");
 	}
 
@@ -663,5 +752,244 @@ class ModelExtensionShippingDockercartNovapost extends Model {
 			VALUES (0, 'shipping_dockercart_novapost', 'shipping_dockercart_novapost_sync_date', NOW(), 0)
 			ON DUPLICATE KEY UPDATE `value` = NOW()
 		");
+	}
+
+	private function flushDiscoveredRegions(): void {
+		if (empty($this->discoveredRegions)) {
+			return;
+		}
+
+		$this->ensureRegionMapTable();
+
+		foreach ($this->discoveredRegions as $region) {
+			$this->db->query("INSERT IGNORE INTO `" . DB_PREFIX . "dockercart_novapost_region_map` SET
+				`novapost_region_id` = '" . $region['novapost_region_id'] . "',
+				`country_code` = '" . $region['country_code'] . "',
+				`novapost_region_name` = '" . $region['novapost_region_name'] . "',
+				`city_name` = ''
+			");
+		}
+
+		$this->discoveredRegions = [];
+	}
+
+	private function flushDiscoveredCities(): void {
+		$this->ensureRegionMapTable();
+
+		$languageId = (int)$this->config->get('config_language_id');
+		$result = $this->db->query("
+			INSERT IGNORE INTO `" . DB_PREFIX . "dockercart_novapost_region_map`
+				(`novapost_region_id`, `country_code`, `novapost_region_name`, `city_name`)
+			SELECT DISTINCT '', m.country_code, 'City-level mapping',
+				COALESCE(NULLIF(d.city_name, ''), m.city_name)
+			FROM `" . DB_PREFIX . "dockercart_novapost_division` m
+			LEFT JOIN `" . DB_PREFIX . "dockercart_novapost_division_description` d
+				ON d.division_id = m.division_id AND d.language_id = '" . (int)$languageId . "'
+			WHERE m.parent_region_id = ''
+				AND m.enabled = '1'
+				AND NOT EXISTS (
+					SELECT 1 FROM `" . DB_PREFIX . "dockercart_novapost_region_map` rm
+					WHERE rm.city_name != ''
+					AND rm.city_name = COALESCE(NULLIF(d.city_name, ''), m.city_name)
+					AND rm.country_code = m.country_code
+				)
+		");
+	}
+
+	private function ensureRegionMapTable(): void {
+		$table = DB_PREFIX . 'dockercart_novapost_region_map';
+		$check = $this->db->query("SHOW TABLES LIKE '" . $this->db->escape($table) . "'");
+		if (!$check->num_rows) {
+			$this->db->query("
+				CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "dockercart_novapost_region_map` (
+					`region_map_id` INT(11) NOT NULL AUTO_INCREMENT,
+					`novapost_region_id` VARCHAR(64) NOT NULL DEFAULT '',
+					`country_code` VARCHAR(2) NOT NULL DEFAULT '',
+					`novapost_region_name` VARCHAR(255) NOT NULL DEFAULT '',
+					`city_name` VARCHAR(255) NOT NULL DEFAULT '',
+					`oc_zone_id` INT(11) NOT NULL DEFAULT '0',
+					`date_added` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+					`date_modified` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+					PRIMARY KEY (`region_map_id`),
+					UNIQUE KEY `uk_np_region` (`novapost_region_id`, `country_code`, `city_name`)
+				) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+			");
+		} else {
+			$this->db->query("ALTER TABLE `" . DB_PREFIX . "dockercart_novapost_region_map`
+				ADD COLUMN IF NOT EXISTS `city_name` VARCHAR(255) NOT NULL DEFAULT '' AFTER `novapost_region_name`,
+				DROP INDEX IF EXISTS `uk_np_region`,
+				ADD UNIQUE KEY `uk_np_region` (`novapost_region_id`, `country_code`, `city_name`)
+			");
+		}
+	}
+
+	// ── Tariff CRUD ────────────────────────────────────────────────────────
+
+	public function getTariffs(array $data = []): array {
+		$sql = "SELECT * FROM `" . DB_PREFIX . "dockercart_novapost_tariff` WHERE 1=1";
+
+		if (!empty($data['filter_country'])) {
+			$sql .= " AND country_code = '" . $this->db->escape($data['filter_country']) . "'";
+		}
+		if (!empty($data['filter_delivery_type'])) {
+			$sql .= " AND delivery_type = '" . $this->db->escape($data['filter_delivery_type']) . "'";
+		}
+
+		$sortAllow = ['country_code', 'delivery_type', 'weight_from', 'cost', 'sort_order', 'status', 'date_added'];
+		$sort = !empty($data['sort']) && in_array($data['sort'], $sortAllow) ? $data['sort'] : 'country_code';
+		$order = !empty($data['order']) && in_array(strtoupper($data['order']), ['ASC', 'DESC']) ? $data['order'] : 'ASC';
+
+		$sql .= " ORDER BY `" . $sort . "` " . $order;
+
+		if (isset($data['start']) || isset($data['limit'])) {
+			$start = $data['start'] < 0 ? 0 : (int)$data['start'];
+			$limit = $data['limit'] < 1 ? 20 : (int)$data['limit'];
+			$sql .= " LIMIT " . $start . "," . $limit;
+		}
+
+		$query = $this->db->query($sql);
+		return $query->rows;
+	}
+
+	public function getTotalTariffs(array $data = []): int {
+		$sql = "SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "dockercart_novapost_tariff` WHERE 1=1";
+
+		if (!empty($data['filter_country'])) {
+			$sql .= " AND country_code = '" . $this->db->escape($data['filter_country']) . "'";
+		}
+		if (!empty($data['filter_delivery_type'])) {
+			$sql .= " AND delivery_type = '" . $this->db->escape($data['filter_delivery_type']) . "'";
+		}
+
+		$query = $this->db->query($sql);
+		return (int)$query->row['total'];
+	}
+
+	public function getTariff(int $tariff_id): ?array {
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "dockercart_novapost_tariff` WHERE tariff_id = '" . (int)$tariff_id . "'");
+		return $query->num_rows ? $query->row : null;
+	}
+
+	public function addTariff(array $data): int {
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "dockercart_novapost_tariff` SET
+			`country_code` = '" . $this->db->escape($data['country_code']) . "',
+			`delivery_type` = '" . $this->db->escape($data['delivery_type']) . "',
+			`weight_from` = '" . (float)$data['weight_from'] . "',
+			`weight_to` = '" . (float)$data['weight_to'] . "',
+			`cost` = '" . (float)$data['cost'] . "',
+			`free_shipping_from` = " . ($data['free_shipping_from'] !== '' && $data['free_shipping_from'] !== null ? "'" . (float)$data['free_shipping_from'] . "'" : 'NULL') . ",
+			`status` = '" . (int)($data['status'] ?? 1) . "',
+			`sort_order` = '" . (int)($data['sort_order'] ?? 0) . "',
+			`date_added` = NOW(),
+			`date_modified` = NOW()
+		");
+		return (int)$this->db->getLastId();
+	}
+
+	public function editTariff(int $tariff_id, array $data): void {
+		$this->db->query("UPDATE `" . DB_PREFIX . "dockercart_novapost_tariff` SET
+			`country_code` = '" . $this->db->escape($data['country_code']) . "',
+			`delivery_type` = '" . $this->db->escape($data['delivery_type']) . "',
+			`weight_from` = '" . (float)$data['weight_from'] . "',
+			`weight_to` = '" . (float)$data['weight_to'] . "',
+			`cost` = '" . (float)$data['cost'] . "',
+			`free_shipping_from` = " . ($data['free_shipping_from'] !== '' && $data['free_shipping_from'] !== null ? "'" . (float)$data['free_shipping_from'] . "'" : 'NULL') . ",
+			`status` = '" . (int)($data['status'] ?? 1) . "',
+			`sort_order` = '" . (int)($data['sort_order'] ?? 0) . "',
+			`date_modified` = NOW()
+			WHERE tariff_id = '" . (int)$tariff_id . "'
+		");
+	}
+
+	public function deleteTariff(int $tariff_id): void {
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "dockercart_novapost_tariff` WHERE tariff_id = '" . (int)$tariff_id . "'");
+	}
+
+	// ── Region Map CRUD ────────────────────────────────────────────────────
+
+	public function getRegionMaps(array $data = []): array {
+		$this->ensureRegionMapTable();
+
+		$languageId = (int)$this->config->get('config_language_id');
+
+		$sql = "SELECT rm.*, c.name AS country_name,
+				(SELECT COALESCE(dd.parent_region_name, d.parent_region_name)
+				 FROM `" . DB_PREFIX . "dockercart_novapost_division` d
+				 LEFT JOIN `" . DB_PREFIX . "dockercart_novapost_division_description` dd
+					ON dd.division_id = d.division_id AND dd.language_id = '" . $languageId . "'
+				 WHERE d.country_code = rm.country_code
+					AND d.parent_region_id = rm.novapost_region_id
+					AND d.parent_region_id != ''
+				 LIMIT 1) AS localized_parent_name
+			FROM `" . DB_PREFIX . "dockercart_novapost_region_map` rm
+			LEFT JOIN `" . DB_PREFIX . "country` c ON c.iso_code_2 = rm.country_code COLLATE utf8mb4_general_ci AND c.status = '1'
+			WHERE 1=1";
+
+		if (!empty($data['filter_country'])) {
+			$sql .= " AND rm.country_code = '" . $this->db->escape($data['filter_country']) . "'";
+		}
+		if (isset($data['filter_mapped']) && $data['filter_mapped'] !== '') {
+			if ($data['filter_mapped'] === '1') {
+				$sql .= " AND rm.oc_zone_id > 0";
+			} else {
+				$sql .= " AND rm.oc_zone_id = 0";
+			}
+		}
+
+		$sortAllow = ['country_code', 'novapost_region_name', 'oc_zone_id', 'date_added'];
+		$sort = !empty($data['sort']) && in_array($data['sort'], $sortAllow) ? $data['sort'] : 'country_code';
+		$order = !empty($data['order']) && in_array(strtoupper($data['order']), ['ASC', 'DESC']) ? $data['order'] : 'ASC';
+
+		$sql .= " ORDER BY `" . $sort . "` " . $order;
+
+		if (isset($data['start']) || isset($data['limit'])) {
+			$start = $data['start'] < 0 ? 0 : (int)$data['start'];
+			$limit = $data['limit'] < 1 ? 20 : (int)$data['limit'];
+			$sql .= " LIMIT " . $start . "," . $limit;
+		}
+
+		$query = $this->db->query($sql);
+		return $query->rows;
+	}
+
+	public function getTotalRegionMaps(array $data = []): int {
+		$this->ensureRegionMapTable();
+
+		$sql = "SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "dockercart_novapost_region_map` WHERE 1=1";
+
+		if (!empty($data['filter_country'])) {
+			$sql .= " AND country_code = '" . $this->db->escape($data['filter_country']) . "'";
+		}
+		if (isset($data['filter_mapped']) && $data['filter_mapped'] !== '') {
+			if ($data['filter_mapped'] === '1') {
+				$sql .= " AND oc_zone_id > 0";
+			} else {
+				$sql .= " AND oc_zone_id = 0";
+			}
+		}
+
+		$query = $this->db->query($sql);
+		return (int)$query->row['total'];
+	}
+
+	public function updateRegionMap(int $region_map_id, int $oc_zone_id, string $city_name = ''): void {
+		$this->db->query("UPDATE `" . DB_PREFIX . "dockercart_novapost_region_map` SET
+			`oc_zone_id` = '" . (int)$oc_zone_id . "',
+			`city_name` = '" . $this->db->escape($city_name) . "',
+			`date_modified` = NOW()
+			WHERE region_map_id = '" . (int)$region_map_id . "'
+		");
+	}
+
+	public function getZonesByCountryCode(string $iso_code_2): array {
+		$query = $this->db->query("
+			SELECT z.zone_id, z.name, z.code
+			FROM `" . DB_PREFIX . "zone` z
+			INNER JOIN `" . DB_PREFIX . "country` c ON c.country_id = z.country_id
+			WHERE c.iso_code_2 = '" . $this->db->escape($iso_code_2) . "' COLLATE utf8mb4_general_ci
+			AND z.status = '1'
+			ORDER BY z.name ASC
+		");
+		return $query->rows;
 	}
 }

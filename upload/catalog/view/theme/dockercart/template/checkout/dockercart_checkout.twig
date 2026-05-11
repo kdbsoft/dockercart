@@ -2269,10 +2269,27 @@ document.addEventListener('DOMContentLoaded', () => {
     reorderAddressFields(DEFAULT_SHIPPING_COUNTRY_ID);
   }
 
+  const clearCityAndAddress = () => {
+    const afterFields = [
+      '#input-company', '#input-address-1', '#input-address-2',
+      '#input-city', '#input-postcode'
+    ];
+    afterFields.forEach(function (sel) {
+      var el = $(sel);
+      if (el) {
+        el.value = '';
+        el.classList.remove('np-valid', 'np-invalid', 'border-error');
+      }
+    });
+    const nd = $('#np-division-wrapper');
+    if (nd) nd.style.display = 'none';
+  };
+
   if (countrySelect && zoneSelect) {
     countrySelect.addEventListener('change', () => {
       const country_id = countrySelect.value;
       log('Country changed', country_id);
+      clearCityAndAddress();
 
       // Reorder address fields based on new country's format
       reorderAddressFields(country_id);
@@ -2312,10 +2329,29 @@ document.addEventListener('DOMContentLoaded', () => {
               }
             } catch (e) { /* ignore template injection errors */ }
 
-            // After zones are loaded and value set, trigger address completion
-            // check so shipping methods load (needed when country/zone are
-            // hidden in admin but have default values).
-            setTimeout(checkAddressComplete, 50);
+            // Reset shipping state on country change so stale methods
+            // (e.g. NovaPost for non-UA countries) are cleared.
+            window._lastSavedShipping = null;
+            window._lastSentShippingMethod = null;
+            const smContainer = $('#shipping-methods');
+            if (smContainer) {
+              smContainer.innerHTML = '<div class="text-sm text-text-secondary py-4">{{ text_loading|e('js') }}</div>';
+            }
+            // Clear current payment methods too
+            const pmContainer = $('#payment-methods');
+            if (pmContainer) {
+              pmContainer.innerHTML = '<div class="text-sm text-text-secondary py-4">{{ text_loading|e('js') }}</div>';
+            }
+
+            // After zones are loaded, save address to reload shipping methods
+            // for the new country. We use loadShippingMethods() directly
+            // instead of checkAddressComplete() because city/address fields
+            // may be empty after country change.
+            if (isStep1Valid()) {
+              setTimeout(loadShippingMethods, 100);
+            } else {
+              setTimeout(checkAddressComplete, 50);
+            }
 
             // Activate step 2 only if Step 1 is valid
             if (isStep1Valid()) {
@@ -2339,6 +2375,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add listener to zone change to trigger address save and reload methods
     zoneSelect.addEventListener('change', () => {
       const zone_id = zoneSelect.value;
+      clearCityAndAddress();
       if (zone_id) {
         log('Zone changed, triggering address save to load shipping/payment methods');
         checkAddressComplete();
@@ -3535,6 +3572,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check shipping method (only if shipping is required)
     if ({{ shipping_required ? 'true' : 'false' }} && !$('input[name="shipping_method"]:checked')) {
       errors.push(window.dcLang?.error_select_shipping_method || 'Please select a shipping method');
+    }
+
+    // NovaPost-specific validation (city, division/address)
+    if (typeof window._novapostValidate === 'function') {
+      const npResult = window._novapostValidate();
+      if (!npResult.valid && npResult.errors.length) {
+        npResult.errors.forEach(function (e) { errors.push(e); });
+      }
     }
 
     // Check payment method
