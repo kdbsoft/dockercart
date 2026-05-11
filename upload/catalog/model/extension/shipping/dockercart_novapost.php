@@ -112,28 +112,53 @@ class ModelExtensionShippingDockercartNovapost extends Model {
 		];
 	}
 
-	public function getDivisionsByCity(string $cityName, string $countryCode = ''): array {
-		$table = DB_PREFIX . 'dockercart_novapost_division';
-		$sql = "SELECT * FROM `" . $table . "` WHERE city_name = '" . $this->db->escape($cityName) . "' AND enabled = '1'";
-		if ($countryCode !== '') {
-			$sql .= " AND country_code = '" . $this->db->escape($countryCode) . "'";
+	public function getDivisionsByCity(string $cityName, string $countryCode = '', ?int $languageId = null): array {
+		if ($languageId === null) {
+			$languageId = (int)$this->config->get('config_language_id');
 		}
-		$sql .= " ORDER BY name ASC";
+		$sql = "SELECT m.*,
+			COALESCE(d.`name`, m.`name`) AS `name`,
+			COALESCE(d.`short_address`, m.`short_address`) AS `short_address`,
+			COALESCE(d.`full_address`, m.`full_address`) AS `full_address`,
+			COALESCE(d.`city_name`, m.`city_name`) AS `city_name`,
+			COALESCE(d.`region_name`, m.`region_name`) AS `region_name`
+			FROM `" . DB_PREFIX . "dockercart_novapost_division` m
+			LEFT JOIN `" . DB_PREFIX . "dockercart_novapost_division_description` d
+				ON d.`division_id` = m.`division_id` AND d.`language_id` = '" . (int)$languageId . "'
+			WHERE (m.city_name = '" . $this->db->escape($cityName) . "' OR d.city_name = '" . $this->db->escape($cityName) . "')
+			AND m.enabled = '1'";
+		if ($countryCode !== '') {
+			$sql .= " AND m.country_code = '" . $this->db->escape($countryCode) . "'";
+		}
+		$sql .= " ORDER BY COALESCE(d.`name`, m.`name`) ASC";
 		$query = $this->db->query($sql);
 		return $query->rows;
 	}
 
-	public function searchDivisions(string $query, string $countryCode = '', int $limit = 20): array {
-		$table = DB_PREFIX . 'dockercart_novapost_division';
-		$sql = "SELECT * FROM `" . $table . "`
-			WHERE enabled = '1'
-			AND (name LIKE '%" . $this->db->escape($query) . "%'
-				OR short_address LIKE '%" . $this->db->escape($query) . "%'
-				OR city_name LIKE '%" . $this->db->escape($query) . "%')";
-		if ($countryCode !== '') {
-			$sql .= " AND country_code = '" . $this->db->escape($countryCode) . "'";
+	public function searchDivisions(string $query, string $countryCode = '', int $limit = 20, ?int $languageId = null): array {
+		if ($languageId === null) {
+			$languageId = (int)$this->config->get('config_language_id');
 		}
-		$sql .= " ORDER BY name ASC LIMIT " . (int)$limit;
+		$sql = "SELECT m.*,
+			COALESCE(d.`name`, m.`name`) AS `name`,
+			COALESCE(d.`short_address`, m.`short_address`) AS `short_address`,
+			COALESCE(d.`full_address`, m.`full_address`) AS `full_address`,
+			COALESCE(d.`city_name`, m.`city_name`) AS `city_name`,
+			COALESCE(d.`region_name`, m.`region_name`) AS `region_name`
+			FROM `" . DB_PREFIX . "dockercart_novapost_division` m
+			LEFT JOIN `" . DB_PREFIX . "dockercart_novapost_division_description` d
+				ON d.`division_id` = m.`division_id` AND d.`language_id` = '" . (int)$languageId . "'
+			WHERE m.enabled = '1'
+			AND (m.name LIKE '%" . $this->db->escape($query) . "%'
+				OR d.name LIKE '%" . $this->db->escape($query) . "%'
+				OR m.short_address LIKE '%" . $this->db->escape($query) . "%'
+				OR d.short_address LIKE '%" . $this->db->escape($query) . "%'
+				OR m.city_name LIKE '%" . $this->db->escape($query) . "%'
+				OR d.city_name LIKE '%" . $this->db->escape($query) . "%')";
+		if ($countryCode !== '') {
+			$sql .= " AND m.country_code = '" . $this->db->escape($countryCode) . "'";
+		}
+		$sql .= " ORDER BY COALESCE(d.`name`, m.`name`) ASC LIMIT " . (int)$limit;
 		$result = $this->db->query($sql);
 		return $result->rows;
 	}

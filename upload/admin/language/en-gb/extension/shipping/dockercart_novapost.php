@@ -13,7 +13,17 @@ $_['text_syncing']           = 'Synchronizing...';
 $_['text_sync_complete']     = 'Synchronization completed successfully!';
 $_['text_sync_error']        = 'Synchronization error!';
 $_['text_no_sync']           = 'No synchronization has been performed yet';
+$_['text_subtitle']          = 'NovaPost Shipping & Divisions';
+$_['text_api_config']        = 'API Configuration';
+$_['text_search']            = 'Search';
+$_['text_search_placeholder'] = 'Name, address, city...';
+$_['text_country']           = 'Country';
+$_['text_all']               = 'All';
+$_['text_type']              = 'Type';
+$_['text_no_divisions']      = 'No divisions loaded. Click "Sync Divisions" to fetch data from NovaPost API.';
+$_['text_no_sync_history']   = 'No sync history yet.';
 
+$_['tab_dashboard']          = 'Dashboard';
 $_['tab_general']            = 'General';
 $_['tab_divisions']          = 'Divisions';
 $_['tab_sync_log']           = 'Sync Log';
@@ -29,8 +39,11 @@ $_['entry_division_categories'] = 'Division Types';
 $_['entry_division_categories_help'] = 'Select types of divisions to load';
 $_['entry_sort_order']       = 'Sort Order';
 
+$_['button_save']            = 'Save';
+$_['button_cancel']          = 'Cancel';
 $_['button_sync']            = 'Sync Divisions';
 $_['button_sync_all']        = 'Sync All Countries';
+$_['button_filter']          = 'Filter';
 
 $_['column_country']         = 'Country';
 $_['column_divisions']       = 'Divisions';
@@ -40,14 +53,20 @@ $_['column_loaded']          = 'Loaded';
 $_['column_errors']          = 'Errors';
 $_['column_started']         = 'Started';
 $_['column_finished']        = 'Finished';
+$_['column_name']            = 'Name';
+$_['column_city']            = 'City';
+$_['column_address']         = 'Address';
+$_['column_countries']       = 'Countries';
 
 $_['help_total_divisions']   = 'Total divisions in database';
 $_['help_countries_loaded']  = 'Countries with loaded divisions';
+$_['help_by_category']       = 'By Category';
 $_['help_last_sync']         = 'Last successful synchronization';
 
 $_['error_permission']       = 'Warning: You do not have permission to modify NovaPost shipping!';
 $_['error_api_key']          = 'API Key is required!';
 $_['error_sync']             = 'Synchronization failed: %s';
+$_['error_ajax']             = 'AJAX request failed';
 
 $_['category_cargo_branch']  = 'Cargo Branch';
 $_['category_post_branch']   = 'Post Branch';
