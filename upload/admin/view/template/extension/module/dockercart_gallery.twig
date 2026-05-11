@@ -85,44 +85,30 @@
 
           <div class="dcx-section">
             <h4>{{ text_gallery_entries }}</h4>
-            <div class="table-responsive">
-              <table class="table table-bordered table-hover dcx-table">
-                <thead>
-                  <tr>
-                    <td>{{ column_image }}</td>
-                    <td>{{ column_status }}</td>
-                    <td>{{ column_sort_order }}</td>
-                    <td class="text-right">{{ column_action }}</td>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for image in images %}
-                  <tr>
-                    <td>
-                      <a href="{{ image.edit_link }}">
-                        <img src="{{ image.thumb }}" alt="" class="img-thumbnail" style="max-width:80px;max-height:80px;" />
-                      </a>
-                    </td>
-                    <td>
-                      {% if image.status %}
-                      <span class="dc-ix-chip dc-ix-chip--ok">{{ text_enabled }}</span>
-                      {% else %}
-                      <span class="dc-ix-chip dc-ix-chip--off">{{ text_disabled }}</span>
-                      {% endif %}
-                    </td>
-                    <td>{{ image.sort_order }}</td>
-                    <td class="text-right">
-                      <a href="{{ image.edit_link }}" class="btn btn-warning btn-xs" title="{{ button_edit }}"><i class="fa fa-pencil"></i></a>
-                      <a href="{{ image.delete_link }}" class="btn btn-danger btn-xs" onclick="return confirm('{{ text_confirm_delete_image|e('js') }}');" title="{{ button_delete }}"><i class="fa fa-trash"></i></a>
-                    </td>
-                  </tr>
-                  {% else %}
-                  <tr>
-                    <td colspan="4" class="text-center">{{ text_no_results }}</td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
+            <div class="dcx-gallery-grid">
+              {% for image in images %}
+              <div class="dcx-gallery-card">
+                <a href="{{ image.edit_link }}" class="dcx-gallery-card__thumb">
+                  <img src="{{ image.thumb }}" alt="" loading="lazy" />
+                </a>
+                <div class="dcx-gallery-card__body">
+                  <div class="dcx-gallery-card__meta">
+                    {% if image.status %}
+                    <span class="dc-ix-chip dc-ix-chip--ok">{{ text_enabled }}</span>
+                    {% else %}
+                    <span class="dc-ix-chip dc-ix-chip--off">{{ text_disabled }}</span>
+                    {% endif %}
+                    <span class="dcx-gallery-card__order">{{ column_sort_order }}: {{ image.sort_order }}</span>
+                  </div>
+                  <div class="dcx-gallery-card__actions">
+                    <a href="{{ image.edit_link }}" class="btn btn-warning btn-xs" title="{{ button_edit }}"><i class="fa fa-pencil"></i></a>
+                    <a href="{{ image.delete_link }}" class="btn btn-danger btn-xs" onclick="return confirm('{{ text_confirm_delete_image|e('js') }}');" title="{{ button_delete }}"><i class="fa fa-trash"></i></a>
+                  </div>
+                </div>
+              </div>
+              {% else %}
+              <div class="dcx-gallery-card dcx-gallery-card--empty">{{ text_no_results }}</div>
+              {% endfor %}
             </div>
           </div>
 
