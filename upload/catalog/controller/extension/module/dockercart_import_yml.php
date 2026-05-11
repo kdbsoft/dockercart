@@ -77,7 +77,7 @@ class ControllerExtensionModuleDockercartImportYml extends Controller {
         $license_key = $this->config->get('module_dockercart_import_yml_license_key');
 
         $domain = $_SERVER['HTTP_HOST'] ?? '';
-        if (strpos($domain, 'localhost') !== false || strpos($domain, '127.0.0.1') !== false || strpos($domain, '.docker.localhost') !== false) {
+        if (strpos($domain, 'localhost') !== false || strpos($domain, '127.0.0.1') !== false || strpos($domain, '.local') !== false || strpos($domain, '.docker.localhost') !== false) {
             return true;
         }
 

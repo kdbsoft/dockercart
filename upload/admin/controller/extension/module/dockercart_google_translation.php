@@ -316,7 +316,7 @@ class ControllerExtensionModuleDockercartGoogleTranslation extends Controller {
         $domain = $_SERVER['HTTP_HOST'] ?? '';
         $domain_without_port = preg_replace('/:\\d+$/', '', $domain);
 
-        if (strpos($domain, 'localhost') !== false || strpos($domain, '127.0.0.1') !== false || $domain_without_port === 'localhost' || $domain_without_port === '127.0.0.1') {
+        if (strpos($domain, 'localhost') !== false || strpos($domain, '127.0.0.1') !== false || $domain_without_port === 'localhost' || $domain_without_port === '127.0.0.1' || strpos($domain_without_port, '.local') !== false) {
             return true;
         }
 
