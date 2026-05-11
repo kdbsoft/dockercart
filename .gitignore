@@ -142,7 +142,6 @@ check-multicurrency.sh
 **/dc_custom_*
 **/custom_*
 
-*.lock
 backups/
 sitemap.xml
 
