@@ -39,7 +39,7 @@ class ControllerExtensionModuleDockercartGallery extends Controller {
 		foreach ($data['images'] as &$image) {
 			$image['edit_link'] = $this->url->link('extension/module/dockercart_gallery/form', 'user_token=' . $this->session->data['user_token'] . '&gallery_id=' . (int)$image['gallery_id'], true);
 			$image['delete_link'] = $this->url->link('extension/module/dockercart_gallery/delete', 'user_token=' . $this->session->data['user_token'] . '&gallery_id=' . (int)$image['gallery_id'], true);
-			$image['thumb'] = $this->model_tool_image->resize($image['image'], 80, 80);
+			$image['thumb'] = $this->model_tool_image->resize($image['image'], 200, 200);
 		}
 
 		$this->response->setOutput($this->load->view('extension/module/dockercart_gallery', $data));
