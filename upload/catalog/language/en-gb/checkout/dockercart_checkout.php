@@ -234,3 +234,4 @@ $_["text_enter_coupon_code"] = "Please enter a coupon code";
 $_["text_please_fix_errors"] = "Please fix the following errors:";
 $_["text_order_unclear_response"] =
     "Order placed but response unclear. Please check your account.";
+$_["text_free"] = "Free";
