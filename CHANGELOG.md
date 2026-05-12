@@ -1,3 +1,10 @@
+## [1.11.0](https://github.com/mathflow-bit/dockercart/compare/v1.10.0...v1.11.0) (2026-05-09)
+
+### Features
+
+* add country phone format and enhance product filters ([3cad56b](https://github.com/mathflow-bit/dockercart/commit/3cad56bd75bc061fb07736a0dfa0093ebfd70dca))
+* add customer group pricing to option values ([7dca882](https://github.com/mathflow-bit/dockercart/commit/7dca88270470403007fa5bd59d83a71984305946))
+
 ## [1.10.0](https://github.com/mathflow-bit/dockercart/compare/v1.9.1...v1.10.0) (2026-05-09)
 
 ### Features
