@@ -79,7 +79,7 @@
 
           {# Custom Fields #}
           {% for custom_field in custom_fields %}
-          <div class="mb-4 custom-field" data-sort="{{ custom_field.sort_order }}">
+            <div id="custom-field{{ custom_field.custom_field_id }}" class="mb-4 custom-field" data-sort="{{ custom_field.sort_order }}">
             <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ custom_field.name }}</label>
             {% if custom_field.type == 'select' %}
             <select name="custom_field[{{ custom_field.location }}][{{ custom_field.custom_field_id }}]"
@@ -187,34 +187,47 @@
   </section>
 
 </main>
-<script type="text/javascript"><!--
-$('#account .custom-field[data-sort]').detach().each(function() {
-  if ($(this).attr('data-sort') >= 0 && $(this).attr('data-sort') <= $('#account .custom-field').length) {
-    $('#account .custom-field').eq($(this).attr('data-sort')).before(this);
-  }
-  if ($(this).attr('data-sort') > $('#account .custom-field').length) {
-    $('#account .custom-field:last').after(this);
-  }
-  if ($(this).attr('data-sort') < -$('#account .custom-field').length) {
-    $('#account .custom-field:first').before(this);
-  }
-});
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+	// Sort custom fields by data-sort
+	var container = document.querySelector('#account');
+	var fields = container.querySelectorAll('.custom-field[data-sort]');
 
-$('input[name=\'customer_group_id\']').on('change', function() {
-  $.ajax({
-    url: 'index.php?route=account/register/customfield&customer_group_id=' + this.value,
-    dataType: 'json',
-    success: function(json) {
-      $('.custom-field').hide();
-      for (var i = 0; i < json.length; i++) {
-        var cf = json[i];
-        $('.custom-field[id="custom-field' + cf['custom_field_id'] + '"]').show();
-      }
-    }
-  });
+	Array.from(fields).sort(function(a, b) {
+		return parseInt(a.getAttribute('data-sort'), 10) - parseInt(b.getAttribute('data-sort'), 10);
+	}).forEach(function(field) {
+		container.appendChild(field);
+	});
+
+	// Customer group change -> load custom fields
+	var groupRadios = document.querySelectorAll('input[name="customer_group_id"]');
+
+	groupRadios.forEach(function(radio) {
+		radio.addEventListener('change', function() {
+			fetch('index.php?route=account/register/customfield&customer_group_id=' + this.value)
+				.then(function(r) { return r.json(); })
+				.then(function(json) {
+					document.querySelectorAll('.custom-field').forEach(function(el) {
+						el.style.display = 'none';
+					});
+
+					for (var i = 0; i < json.length; i++) {
+						var cf = json[i];
+						var el = document.querySelector('.custom-field[id="custom-field' + cf['custom_field_id'] + '"]');
+						if (el) el.style.display = '';
+					}
+				})
+				.catch(function(err) {
+					console.error('Failed to load custom fields:', err);
+				});
+		});
+	});
+
+	// Trigger initial load
+	var checked = document.querySelector('input[name="customer_group_id"]:checked');
+	if (checked) checked.dispatchEvent(new Event('change'));
 });
-$('input[name=\'customer_group_id\']:checked').trigger('change');
-//--></script>
+</script>
 {% if phone_format %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {

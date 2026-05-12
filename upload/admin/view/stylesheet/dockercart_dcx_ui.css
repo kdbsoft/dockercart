@@ -84,8 +84,8 @@
     /* keep same weight for all tabs to avoid layout shift when switching/hovering */
     font-weight: 600;
     color: #6d788d;
-    border: none;
-    border-bottom: 3px solid transparent;
+    border: 0 !important;
+    border-bottom: 3px solid transparent !important;
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -96,12 +96,12 @@
 }
 .dcx-profile-tabs > li > a:hover {
     color: #2f65b9;
-    border-bottom-color: #b9c9e6;
+    border-bottom: 3px solid #b9c9e6 !important;
 }
 .dcx-profile-tabs > li.active > a,
 .dcx-profile-tabs > li.active > a:focus {
     color: #1f4e8c;
-    border-bottom-color: #2f65b9;
+    border-bottom: 2px solid #2f65b9 !important;
     /* font-weight kept the same to prevent other tabs from shifting */
     background: transparent;
 }
@@ -434,7 +434,9 @@
     border-radius: 10px;
     overflow: hidden;
     background: #fff;
-    transition: box-shadow 0.25s ease, border-color 0.25s ease;
+    transition:
+        box-shadow 0.25s ease,
+        border-color 0.25s ease;
 }
 .dcx-gallery-card:hover {
     border-color: var(--dcx-blue);
