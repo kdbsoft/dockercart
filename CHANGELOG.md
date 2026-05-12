@@ -1,3 +1,9 @@
+## [1.12.1](https://github.com/mathflow-bit/dockercart/compare/v1.12.0...v1.12.1) (2026-05-12)
+
+### Bug Fixes
+
+* remove WeChat Pay payment extension ([a5e1ed8](https://github.com/mathflow-bit/dockercart/commit/a5e1ed8ab0fa80003728cb4f1b60c87d452031be))
+
 ## [1.12.0](https://github.com/mathflow-bit/dockercart/compare/v1.11.0...v1.12.0) (2026-05-12)
 
 ### Features
