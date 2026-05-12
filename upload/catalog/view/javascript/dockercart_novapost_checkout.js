@@ -39,6 +39,7 @@
     buildDivisionDropdown();
     bindShippingMethodChange();
     bindCountryChange();
+    bindCourierAddressValidation();
     bindZoneCityAutoFill();
   }
 
@@ -242,6 +243,7 @@
 
     clearBtn.addEventListener('click', function () {
       divisionInput.value = '';
+      divisionInput.classList.remove('np-valid', 'np-invalid');
       divisionValid = false;
       if (divisionDropdown) divisionDropdown.style.display = 'none';
       clearBtn.style.display = 'none';
@@ -275,7 +277,7 @@
     divisionInput.addEventListener('focus', function () {
       clearTimeout(divisionBlurTimer);
       if (divisionData.length > 0) {
-        renderDivisionDropdown(divisionInput.value.trim());
+        renderDivisionDropdown('');
       }
     });
 
@@ -339,6 +341,8 @@
     }
     if (divisionInput) {
       divisionInput.value = displayText;
+      divisionInput.classList.add('np-valid');
+      divisionInput.classList.remove('np-invalid');
     }
     var clearBtn = document.getElementById('np-division-clear');
     if (clearBtn) clearBtn.style.display = 'flex';
@@ -426,6 +430,11 @@
         if (addr) {
           addr.classList.add('np-invalid');
           addr.classList.remove('np-valid');
+        }
+      } else {
+        if (addr) {
+          addr.classList.add('np-valid');
+          addr.classList.remove('np-invalid');
         }
       }
     } else if (type !== 'courier') {
@@ -520,6 +529,9 @@
           var lbl = addr.parentElement.querySelector('label');
           if (lbl) lbl.style.display = '';
           addr.placeholder = label('delivery_address', '\u0410\u0434\u0440\u0435\u0441 \u0434\u043E\u0441\u0442\u0430\u0432\u043A\u0438');
+          if (addr.value.trim()) {
+            addr.classList.add('np-valid');
+          }
         }
       } else {
         if (addr) addr.placeholder = label('select_division', '\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043E\u0442\u0434\u0435\u043B\u0435\u043D\u0438\u0435');
@@ -537,6 +549,21 @@
       }
       saveNP({ shipping_method: value });
     }
+  }
+
+  function bindCourierAddressValidation() {
+    var addr = document.getElementById('input-address-1');
+    if (!addr) return;
+    addr.addEventListener('blur', function () {
+      if (!isNP()) return;
+      if (getType() !== 'courier') return;
+      if (addr.value.trim()) {
+        addr.classList.add('np-valid');
+        addr.classList.remove('np-invalid');
+      } else {
+        addr.classList.remove('np-valid', 'np-invalid');
+      }
+    });
   }
 
   function bindZoneCityAutoFill() {

@@ -207,3 +207,4 @@ $_["text_total"] = "Всього";
 $_["text_voucher_applied"] = "Ваучер успішно застосовано!";
 $_["text_voucher_removed"] = "Ваучер видалено";
 $_["text_your_details"] = "Ваші дані";
+$_["text_free"] = "Безкоштовно";

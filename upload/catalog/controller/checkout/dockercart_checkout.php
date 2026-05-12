@@ -2486,6 +2486,18 @@ class ControllerCheckoutDockercartCheckout extends Controller
         // Apply method overrides from admin settings
         $method_data = $this->applyShippingMethodOverrides($method_data);
 
+        // Normalize zero-cost shipping: show "Free" instead of "0₴" / "$0.00"
+        $this->load->language('checkout/dockercart_checkout');
+        $zeroFormatted = $this->currency->format(0, $this->session->data['currency']);
+        foreach ($method_data as &$method) {
+            foreach ($method['quote'] as &$quote) {
+                if (isset($quote['cost']) && (float)$quote['cost'] == 0 && $quote['text'] === $zeroFormatted) {
+                    $quote['text'] = $this->language->get('text_free');
+                }
+            }
+        }
+        unset($method, $quote);
+
         $this->session->data["shipping_methods"] = $method_data;
 
         return $method_data;
