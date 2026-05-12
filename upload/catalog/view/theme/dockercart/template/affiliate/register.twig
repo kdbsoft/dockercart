@@ -567,149 +567,141 @@
       {{ content_bottom }}</div>
     {{ column_right }}</div>
 </div>
-<script type="text/javascript"><!--
-// Sort the custom fields
-$('#account .form-group[data-sort]').detach().each(function() {
-	if ($(this).attr('data-sort') >= 0 && $(this).attr('data-sort') <= $('#account .form-group').length) {
-		$('#account .form-group').eq($(this).attr('data-sort')).before(this);
-	}
-
-	if ($(this).attr('data-sort') > $('#account .form-group').length) {
-		$('#account .form-group:last').after(this);
-	}
-
-	if ($(this).attr('data-sort') == $('#account .form-group').length) {
-		$('#account .form-group:last').after(this);
-	}
-
-	if ($(this).attr('data-sort') < -$('#account .form-group').length) {
-		$('#account .form-group:first').before(this);
-	}
-});
-
-$('#affiliate .form-group[data-sort]').detach().each(function() {
-	if ($(this).attr('data-sort') >= 0 && $(this).attr('data-sort') <= $('#affiliate .form-group').length) {
-		$('#affiliate .form-group').eq($(this).attr('data-sort')).before(this);
-	}
-
-	if ($(this).attr('data-sort') > $('#affiliate .form-group').length) {
-		$('#affiliate .form-group:last').after(this);
-	}
-
-	if ($(this).attr('data-sort') == $('#affiliate .form-group').length) {
-		$('#affiliate .form-group:last').after(this);
-	}
-
-	if ($(this).attr('data-sort') < -$('#affiliate .form-group').length) {
-		$('#affiliate .form-group:first').before(this);
-	}
-});
-
-$('input[name=\'customer_group_id\']').on('change', function() {
-	$.ajax({
-		url: 'index.php?route=account/register/customfield&customer_group_id=' + this.value,
-		dataType: 'json',
-		success: function(json) {
-			$('.custom-field').hide();
-			$('.custom-field').removeClass('required');
-
-			for (i = 0; i < json.length; i++) {
-				custom_field = json[i];
-
-				$('#custom-field' + custom_field['custom_field_id']).show();
-
-				if (custom_field['required']) {
-					$('#custom-field' + custom_field['custom_field_id']).addClass('required');
-				}
-			}
-		},
-		error: function(xhr, ajaxOptions, thrownError) {
-			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
-		}
-	});
-});
-
-$('input[name=\'customer_group_id\']:checked').trigger('change');
-//--></script> 
-<script type="text/javascript"><!--
-$('button[id^=\'button-custom-field\']').on('click', function() {
-	var node = this;
-
-	$('#form-upload').remove();
-
-	$('body').prepend('<form enctype="multipart/form-data" id="form-upload" style="display: none;"><input type="file" name="file" /></form>');
-
-	$('#form-upload input[name=\'file\']').trigger('click');
-
-	if (typeof timer != 'undefined') {
-    	clearInterval(timer);
-	}
-
-	timer = setInterval(function() {
-		if ($('#form-upload input[name=\'file\']').val() != '') {
-			clearInterval(timer);
-
-			$.ajax({
-				url: 'index.php?route=tool/upload',
-				type: 'post',
-				dataType: 'json',
-				data: new FormData($('#form-upload')[0]),
-				cache: false,
-				contentType: false,
-				processData: false,
-				beforeSend: function() {
-					$(node).button('loading');
-				},
-				complete: function() {
-					$(node).button('reset');
-				},
-				success: function(json) {
-					$(node).parent().find('.text-danger').remove();
-
-					if (json['error']) {
-						$(node).parent().find('input').after('<div class="text-danger">' + json['error'] + '</div>');
-					}
-
-					if (json['success']) {
-						alert(json['success']);
-
-						$(node).parent().find('input').val(json['code']);
-					}
-				},
-				error: function(xhr, ajaxOptions, thrownError) {
-					alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
-				}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+	// 1. Sort custom fields by data-sort
+	['#account', '#affiliate'].forEach(function(selector) {
+		var container = document.querySelector(selector);
+		if (!container) return;
+		Array.from(container.querySelectorAll('.form-group[data-sort]'))
+			.sort(function(a, b) {
+				return parseInt(a.getAttribute('data-sort'), 10) - parseInt(b.getAttribute('data-sort'), 10);
+			})
+			.forEach(function(field) {
+				container.appendChild(field);
 			});
-		}
-	}, 500);
-});
-//--></script> 
-<script type="text/javascript"><!--
-$('.date').datetimepicker({
-	language: '{{ datepicker }}',
-	pickTime: false
-});
+	});
 
-$('.time').datetimepicker({
-	language: '{{ datepicker }}',
-	pickDate: false
-});
+	// 2. Customer group change -> load custom fields
+	var groupRadios = document.querySelectorAll('input[name="customer_group_id"]');
 
-$('.datetime').datetimepicker({
-	language: '{{ datepicker }}',
-	pickDate: true,
-	pickTime: true
-});
-//--></script>
-<script type="text/javascript"><!--
-$('input[name=\'payment\']').on('change', function() {
-	$('.payment').hide();
+	groupRadios.forEach(function(radio) {
+		radio.addEventListener('change', function() {
+			fetch('index.php?route=account/register/customfield&customer_group_id=' + this.value)
+				.then(function(r) { return r.json(); })
+				.then(function(json) {
+					document.querySelectorAll('.custom-field').forEach(function(el) {
+						el.style.display = 'none';
+						el.classList.remove('required');
+					});
 
-	$('#payment-' + this.value).show();
-});
+					for (var i = 0; i < json.length; i++) {
+						var cf = json[i];
+						var el = document.querySelector('#custom-field' + cf['custom_field_id']);
+						if (el) {
+							el.style.display = '';
+							if (cf['required']) {
+								el.classList.add('required');
+							}
+						}
+					}
+				})
+				.catch(function(err) {
+					alert('Error: ' + err.message);
+				});
+		});
+	});
 
-$('input[name=\'payment\']:checked').trigger('change');
-//--></script>
+	var checked = document.querySelector('input[name="customer_group_id"]:checked');
+	if (checked) checked.dispatchEvent(new Event('change'));
+
+	// 3. File upload
+	document.querySelectorAll('button[id^="button-custom-field"]').forEach(function(btn) {
+		btn.addEventListener('click', function() {
+			var node = this;
+			var existing = document.getElementById('form-upload');
+			if (existing) existing.remove();
+
+			var form = document.createElement('form');
+			form.id = 'form-upload';
+			form.enctype = 'multipart/form-data';
+			form.style.display = 'none';
+			var fileInput = document.createElement('input');
+			fileInput.type = 'file';
+			fileInput.name = 'file';
+			form.appendChild(fileInput);
+			document.body.insertBefore(form, document.body.firstChild);
+
+			fileInput.click();
+
+			if (typeof timer !== 'undefined') {
+				clearInterval(timer);
+			}
+
+			var originalHtml = node.innerHTML;
+
+			timer = setInterval(function() {
+				if (fileInput.value !== '') {
+					clearInterval(timer);
+
+					node.disabled = true;
+					node.innerHTML = node.getAttribute('data-loading-text') || 'Loading...';
+
+					fetch('index.php?route=tool/upload', {
+						method: 'POST',
+						body: new FormData(form),
+						cache: 'no-cache'
+					})
+					.then(function(r) { return r.json(); })
+					.then(function(json) {
+						node.disabled = false;
+						node.innerHTML = originalHtml;
+
+						var parent = node.parentNode;
+						parent.querySelectorAll('.text-danger').forEach(function(el) { el.remove(); });
+
+						var hiddenInput = parent.querySelector('input');
+
+						if (json.error) {
+							var div = document.createElement('div');
+							div.className = 'text-danger';
+							div.textContent = json.error;
+							if (hiddenInput) {
+								hiddenInput.parentNode.insertBefore(div, hiddenInput.nextSibling);
+							}
+						}
+
+						if (json.success && hiddenInput) {
+							alert(json.success);
+							hiddenInput.value = json.code;
+						}
+					})
+					.catch(function(err) {
+						node.disabled = false;
+						node.innerHTML = originalHtml;
+						alert('Error: ' + err.message);
+					});
+				}
+			}, 500);
+		});
+	});
+
+	// 4. Payment method toggle
+	var paymentRadios = document.querySelectorAll('input[name="payment"]');
+	paymentRadios.forEach(function(radio) {
+		radio.addEventListener('change', function() {
+			document.querySelectorAll('.payment').forEach(function(el) {
+				el.style.display = 'none';
+			});
+			var target = document.getElementById('payment-' + this.value);
+			if (target) target.style.display = '';
+		});
+	});
+
+	var checkedPayment = document.querySelector('input[name="payment"]:checked');
+	if (checkedPayment) checkedPayment.dispatchEvent(new Event('change'));
+});
+</script>
 {% if phone_format %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {

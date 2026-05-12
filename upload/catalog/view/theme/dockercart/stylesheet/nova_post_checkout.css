@@ -1,48 +1,65 @@
 /**
  * DockerCart NovaPost Checkout Fields
  * City autocomplete dropdown + validation indicators.
+ * Styled to match the DockerCart checkout theme (Tailwind-like).
  */
 
 .np-dropdown {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 4px);
   left: 0;
   right: 0;
   z-index: 100;
-  background: #fff;
-  border: 1px solid #d1d5db;
-  border-top: none;
-  border-radius: 0 0 6px 6px;
-  max-height: 200px;
+  background: var(--bg-secondary, #fff);
+  border: 2px solid var(--border-color, #E5E7EB);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  max-height: 280px;
   overflow-y: auto;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 8px 0;
+  transition: opacity 0.15s ease;
 }
 
 .np-dropdown-item {
-  padding: 8px 12px;
+  padding: 10px 16px;
   font-size: 14px;
-  color: #1f2937;
+  color: var(--text-primary, #1f2937);
   cursor: pointer;
-  border-bottom: 1px solid #f3f4f6;
+  transition: background 0.12s ease;
+  line-height: 1.4;
+}
+
+.np-dropdown-item:hover {
+  background: rgba(99, 91, 255, 0.06);
+}
+
+.np-dropdown-item:active {
+  background: rgba(99, 91, 255, 0.12);
 }
 
 .np-dropdown-item:last-child {
   border-bottom: none;
 }
 
-.np-dropdown-item:hover {
-  background: #eef2ff;
-  color: #4338ca;
-}
-
 .np-dropdown-empty {
-  color: #9ca3af;
+  color: var(--text-secondary, #9ca3af);
   cursor: default;
 }
 
 .np-dropdown-empty:hover {
   background: transparent;
-  color: #9ca3af;
+  color: var(--text-secondary, #9ca3af);
+}
+
+/* Division dropdown two-line items */
+.np-division-dropdown-item {
+  border-bottom: 1px solid var(--border-color, #f3f4f6);
+}
+
+/* Readonly and disabled division input after selection */
+.np-division-selected {
+  background-color: var(--bg-secondary, #fff) !important;
+  cursor: default;
 }
 
 /* Validation indicators */
@@ -60,6 +77,29 @@
   background-repeat: no-repeat;
   background-position: right 8px center;
   padding-right: 32px !important;
+}
+
+.np-division-clear {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary, #9ca3af);
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease, background 0.15s ease;
+  z-index: 1;
+}
+
+.np-division-clear:hover {
+  color: var(--text-primary, #111);
+  background: rgba(0, 0, 0, 0.05);
 }
 
 .np-division-wrapper {
