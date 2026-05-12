@@ -90,7 +90,7 @@ docker compose pull
 docker compose up -d
 ```
 
-Regularly pull updated base images (`php:8.4-apache`, `mariadb:11.8`) to receive
+Regularly pull updated base images (`php:8.5-apache`, `mariadb:11.8`) to receive
 upstream security patches.
 
 ### HTTPS
