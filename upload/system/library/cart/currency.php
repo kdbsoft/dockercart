@@ -53,7 +53,9 @@ class Currency {
 			}
 		}
 
-		$string .= number_format($amount, (int)$decimal_place, $this->language->get('decimal_point'), $this->language->get('thousand_point'));
+		$thousand_point = ($currency === 'UAH') ? ' ' : $this->language->get('thousand_point');
+
+		$string .= number_format($amount, (int)$decimal_place, $this->language->get('decimal_point'), $thousand_point);
 
 		if ($symbol_right) {
 			if ($this->symbol_right_space) {
