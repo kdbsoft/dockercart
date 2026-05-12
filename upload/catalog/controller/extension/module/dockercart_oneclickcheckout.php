@@ -167,7 +167,12 @@ class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
             $success_button_text = $this->language->get('text_success');
         }
 
-        $html = '<div class="modal fade ' . htmlspecialchars($color_theme, ENT_QUOTES, 'UTF-8') . '" id="oneclickcheckout-modal" tabindex="-1" role="dialog" data-captcha="' . htmlspecialchars($captcha_code, ENT_QUOTES, 'UTF-8') . '" data-success-text="' . htmlspecialchars($success_button_text, ENT_QUOTES, 'UTF-8') . '">' . "\n";
+        // Load default country phone_format as fallback
+        $this->load->model('localisation/country');
+        $default_country = $this->model_localisation_country->getCountry($this->config->get('config_country_id'));
+        $default_phone_format = !empty($default_country['phone_format']) ? $default_country['phone_format'] : '';
+
+        $html = '<div class="modal fade ' . htmlspecialchars($color_theme, ENT_QUOTES, 'UTF-8') . '" id="oneclickcheckout-modal" tabindex="-1" role="dialog" data-captcha="' . htmlspecialchars($captcha_code, ENT_QUOTES, 'UTF-8') . '" data-success-text="' . htmlspecialchars($success_button_text, ENT_QUOTES, 'UTF-8') . '" data-default-phone-format="' . htmlspecialchars($default_phone_format, ENT_QUOTES, 'UTF-8') . '">' . "\n";
         $html .= '  <div class="modal-dialog" role="document">' . "\n";
         $html .= '    <div class="modal-content">' . "\n";
         $html .= '      <div class="modal-header">' . "\n";
@@ -223,8 +228,6 @@ class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
                 if ($field_info['type'] === 'textarea') {
                     $html .= '            <textarea name="' . $field_name . '" id="input-' . $field_name . '" class="form-control" rows="3"' . $readonly . '>' . $value . '</textarea>' . "\n";
                 } elseif ($field_info['type'] === 'select' && $field_name === 'country') {
-                    // Load countries
-                    $this->load->model('localisation/country');
                     $countries = $this->model_localisation_country->getCountries();
                     
                     $selected_country_id = isset($customer_data['country_id']) ? $customer_data['country_id'] : '';
@@ -319,12 +322,26 @@ class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
         
         // Validate telephone format
         if (!empty($this->request->post['telephone'])) {
-            $phone_validation = $this->validateTelephone($this->request->post['telephone']);
-            if (!$phone_validation['valid']) {
-                $json['error']['telephone'] = $this->language->get('error_telephone');
+            // If a country is selected, try validating against its phone_format
+            if (!empty($this->request->post['country_id'])) {
+                $this->load->model('localisation/country');
+                $country_info = $this->model_localisation_country->getCountry((int)$this->request->post['country_id']);
+                $phone_format = !empty($country_info['phone_format']) ? $country_info['phone_format'] : '';
             } else {
-                // Normalize the phone number for storage
-                $this->request->post['telephone'] = $phone_validation['normalized'];
+                $phone_format = '';
+            }
+
+            if ($phone_format) {
+                if (!$this->validatePhoneFormat($this->request->post['telephone'], $phone_format)) {
+                    $json['error']['telephone'] = $this->language->get('error_telephone');
+                }
+            } else {
+                $phone_validation = $this->validateTelephone($this->request->post['telephone']);
+                if (!$phone_validation['valid']) {
+                    $json['error']['telephone'] = $this->language->get('error_telephone');
+                } else {
+                    $this->request->post['telephone'] = $phone_validation['normalized'];
+                }
             }
         }
         
@@ -639,6 +656,24 @@ class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
         }
         
         return ['valid' => true, 'normalized' => $normalized];
+    }
+
+    /**
+     * Validate phone number against country phone_format pattern
+     */
+    private function validatePhoneFormat($telephone, $phone_format) {
+        if (empty($phone_format)) {
+            return !empty($telephone);
+        }
+
+        $pattern = '/^';
+        for ($i = 0; $i < strlen($phone_format); $i++) {
+            $ch = $phone_format[$i];
+            $pattern .= $ch === 'X' ? '\d' : preg_quote($ch, '/');
+        }
+        $pattern .= '$/';
+
+        return (bool)preg_match($pattern, $telephone);
     }
 
     /**
