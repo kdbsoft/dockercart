@@ -385,11 +385,11 @@ class ControllerProductProduct extends Controller {
 			if (!is_null($product_info['special']) && (float)$product_info['special'] >= 0) {
 				$data['special'] = $this->currency->format($this->tax->calculate($product_info['special'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
 				$tax_price = (float)$product_info['special'];
-				$data['dc_base_price_value'] = (float)$this->tax->calculate($product_info['special'], $product_info['tax_class_id'], $this->config->get('config_tax'));
+				$data['dc_base_price_value'] = (float)$this->currency->format($this->tax->calculate($product_info['special'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency'], '', false);
 			} else {
 				$data['special'] = false;
 				$tax_price = (float)$product_info['price'];
-				$data['dc_base_price_value'] = (float)$this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax'));
+				$data['dc_base_price_value'] = (float)$this->currency->format($this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency'], '', false);
 			}
 
 			if ($data['price'] === false) {
@@ -432,7 +432,7 @@ class ControllerProductProduct extends Controller {
 							'name'                    => $option_value['name'],
 							'image'                   => $this->model_tool_image->resize($option_value['image'], 50, 50),
 							'price'                   => $price,
-							'price_value'             => (float)$this->tax->calculate($option_value['price'], $product_info['tax_class_id'], $this->config->get('config_tax') ? 'P' : false),
+							'price_value'             => (float)$this->currency->format($this->tax->calculate($option_value['price'], $product_info['tax_class_id'], $this->config->get('config_tax') ? 'P' : false), $this->session->data['currency'], '', false),
 							'price_prefix'            => $option_value['price_prefix']
 						);
 					}

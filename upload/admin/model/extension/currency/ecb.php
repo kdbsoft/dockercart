@@ -36,6 +36,33 @@ class ModelExtensionCurrencyEcb extends Model {
 						}
 					}
 
+					if (!isset($currencies['UAH'])) {
+						$curl = curl_init();
+
+						curl_setopt($curl, CURLOPT_URL, 'https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?json');
+						curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+						curl_setopt($curl, CURLOPT_HEADER, false);
+						curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
+						curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 30);
+						curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+
+						$nbu_response = curl_exec($curl);
+
+						if ($nbu_response) {
+							$nbu_rates = json_decode($nbu_response, true);
+
+							if (is_array($nbu_rates)) {
+								foreach ($nbu_rates as $nbu_rate) {
+									if ($nbu_rate['cc'] === 'EUR') {
+										$currencies['UAH'] = (float)$nbu_rate['rate'];
+										break;
+									}
+								}
+							}
+						}
+
+					}
+
 					$default = $this->config->get('config_currency');
 
 					if (isset($currencies[$default])) {
