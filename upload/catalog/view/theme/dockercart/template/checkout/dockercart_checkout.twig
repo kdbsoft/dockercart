@@ -1699,6 +1699,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const fragment = document.createDocumentFragment();
     let first = true;
+    const previousMethod = window._lastSentShippingMethod;
+    let preferPrevious = false;
+
+    // Check if the previously selected method is still available
+    if (previousMethod) {
+      Object.entries(shipping_methods).forEach(([key, method]) => {
+        if (!method.quote) return;
+        Object.entries(method.quote).forEach(([code, quote]) => {
+          if (`${key}.${code}` === previousMethod) preferPrevious = true;
+        });
+      });
+    }
 
     Object.entries(shipping_methods).forEach(([key, method]) => {
       if (!method.quote) {
@@ -1706,8 +1718,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       Object.entries(method.quote).forEach(([code, quote]) => {
+        const methodCode = `${key}.${code}`;
+        const isSelected = preferPrevious ? methodCode === previousMethod : first;
+
         const label = document.createElement('label');
-        label.className = `radio-card flex items-center justify-between ${first ? 'selected' : ''}`;
+        label.className = `radio-card flex items-center justify-between ${isSelected ? 'selected' : ''}`;
 
         const left = document.createElement('div');
         left.className = 'flex items-center gap-3';
@@ -1716,7 +1731,7 @@ document.addEventListener('DOMContentLoaded', () => {
         input.type = 'radio';
         input.name = 'shipping_method';
         input.value = `${key}.${code}`;
-        if (first) input.checked = true;
+        if (isSelected) input.checked = true;
 
         const titleWrap = document.createElement('div');
         let titleHtml = `<div class="font-medium text-text-primary">${quote.title}</div>`;

@@ -14,6 +14,11 @@
   var cityValid = false;
   var divisionValid = false;
   var lastValidCity = '';
+  var divisionData = [];
+  var divisionDropdown = null;
+  var divisionInput = null;
+  var divisionTimer = null;
+  var divisionBlurTimer = null;
 
   function label(key, fallback) {
     if (npConfig && npConfig.labels && npConfig.labels[key]) return npConfig.labels[key];
@@ -31,9 +36,10 @@
     var cityInput = document.getElementById('input-city');
     if (!cityInput) { setTimeout(waitForFields, 300); return; }
     buildCityAutocomplete();
-    buildDivisionSelect();
+    buildDivisionDropdown();
     bindShippingMethodChange();
     bindCountryChange();
+    bindZoneCityAutoFill();
   }
 
   function interceptFetchResponses() {
@@ -46,6 +52,7 @@
             if (json && json.novapost && npConfig) {
               npConfig.country_code = json.novapost.country_code || npConfig.country_code;
               npConfig.zone_id = json.novapost.zone_id || npConfig.zone_id;
+              npConfig.zone_city_map = json.novapost.zone_city_map || npConfig.zone_city_map;
               npConfig.delivery_types = json.novapost.delivery_types || npConfig.delivery_types;
               npConfig.search_url = json.novapost.search_url || npConfig.search_url;
               npConfig.save_url = json.novapost.save_url || npConfig.save_url;
@@ -68,6 +75,7 @@
       var cityInput = document.getElementById('input-city');
       cityValid = false;
       divisionValid = false;
+      divisionData = [];
       if (cityInput) {
         cityInput.classList.remove('np-valid', 'np-invalid');
       }
@@ -76,10 +84,11 @@
         addr.value = '';
         addr.classList.remove('np-valid', 'np-invalid');
       }
-      if (divisionSelect) {
-        divisionSelect.innerHTML = '<option value="">' + label('select_division', '\u2014') + '</option>';
-        divisionSelect.classList.remove('np-valid', 'np-invalid');
+      if (divisionInput) {
+        divisionInput.value = '';
+        divisionInput.classList.remove('np-valid', 'np-invalid');
       }
+      if (divisionDropdown) divisionDropdown.style.display = 'none';
       if (divisionWrapper) divisionWrapper.style.display = 'none';
       clearNPSession();
     });
@@ -132,7 +141,7 @@
     });
 
     input.addEventListener('focus', function () {
-      if (input.value.trim().length >= 2 && isNP()) cityDropdown.style.display = 'block';
+      if (input.value.trim().length >= 2 && isNP() && cityDropdown.children.length > 0) cityDropdown.style.display = 'block';
     });
   }
 
@@ -178,10 +187,14 @@
 
   function resetDivision() {
     divisionValid = false;
-    if (divisionSelect) {
-      divisionSelect.innerHTML = '<option value="">' + label('select_division', '\u2014') + '</option>';
-      divisionSelect.classList.remove('np-valid', 'np-invalid');
+    divisionData = [];
+    if (divisionInput) {
+      divisionInput.value = '';
+      divisionInput.classList.remove('np-valid', 'np-invalid');
     }
+    var clearBtn = document.getElementById('np-division-clear');
+    if (clearBtn) clearBtn.style.display = 'none';
+    if (divisionDropdown) divisionDropdown.style.display = 'none';
     var addr = document.getElementById('input-address-1');
     if (addr) {
       addr.value = '';
@@ -193,10 +206,10 @@
     if (divisionWrapper) divisionWrapper.style.display = 'none';
   }
 
-  // ── Division select ─────────────────────────────────────────────────────
+  // ── Division dropdown (searchable) ──────────────────────────────────────
 
-  function buildDivisionSelect() {
-    if (document.getElementById('np-division-select')) return;
+  function buildDivisionDropdown() {
+    if (document.getElementById('np-division-input')) return;
     var addrInput = document.getElementById('input-address-1');
     if (!addrInput || !addrInput.parentElement) return;
 
@@ -206,32 +219,135 @@
     divisionWrapper.style.display = 'none';
     divisionWrapper.innerHTML =
       '<label class="block text-sm font-medium text-text-primary mb-2">' + label('division', '\u041E\u0442\u0434\u0435\u043B\u0435\u043D\u0438\u0435') + '</label>' +
-      '<select id="np-division-select" class="w-full h-14 px-4 bg-white border-2 border-gray-300 rounded-xl text-base text-text-primary input-focus transition appearance-none bg-no-repeat bg-right" style="background-image: url(\'data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e\'); background-position: right 1rem center; background-size: 1.5em 1.5em;"><option value="">' + label('select_division', '\u2014') + '</option></select>';
+      '<div style="position:relative">' +
+        '<input type="text" id="np-division-input" class="w-full h-14 pl-4 pr-12 bg-white border-2 border-gray-300 rounded-xl text-base text-text-primary placeholder-gray-400 input-focus transition" autocomplete="off" placeholder="' + label('select_division', '\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043E\u0442\u0434\u0435\u043B\u0435\u043D\u0438\u0435') + '">' +
+        '<button type="button" id="np-division-clear" class="np-division-clear" style="display:none" aria-label="Clear">' +
+          '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+        '</button>' +
+        '<div id="np-division-dropdown" class="np-dropdown" style="display:none"></div>' +
+      '</div>';
 
     addrInput.parentElement.insertBefore(divisionWrapper, addrInput.nextSibling);
-    divisionSelect = document.getElementById('np-division-select');
+    divisionInput = document.getElementById('np-division-input');
+    divisionDropdown = document.getElementById('np-division-dropdown');
+    var clearBtn = document.getElementById('np-division-clear');
 
-    divisionSelect.addEventListener('change', function () {
-      var opt = divisionSelect.selectedOptions[0];
-      var addr = document.getElementById('input-address-1');
-      if (opt && opt.value) {
-        divisionValid = true;
-        if (addr) {
-          addr.value = opt.textContent;
-          addr.classList.add('np-valid');
-          addr.classList.remove('np-invalid');
-        }
-        saveNP({
-          novapost_division: opt.value,
-          novapost_division_name: opt.textContent,
-          novapost_city: document.getElementById('input-city').value
-        });
+    function toggleClearBtn() {
+      if (divisionInput.value.trim()) {
+        clearBtn.style.display = 'flex';
       } else {
-        divisionValid = false;
-        if (addr) { addr.value = ''; addr.classList.remove('np-valid', 'np-invalid'); }
+        clearBtn.style.display = 'none';
+      }
+    }
+
+    clearBtn.addEventListener('click', function () {
+      divisionInput.value = '';
+      divisionValid = false;
+      if (divisionDropdown) divisionDropdown.style.display = 'none';
+      clearBtn.style.display = 'none';
+      var addr = document.getElementById('input-address-1');
+      if (addr) {
+        addr.value = '';
+        addr.classList.remove('np-valid', 'np-invalid');
+      }
+      saveNP({
+        novapost_division: '',
+        novapost_division_name: '',
+        novapost_city: document.getElementById('input-city').value
+      });
+      divisionInput.focus();
+    });
+
+    divisionInput.addEventListener('input', function () {
+      divisionValid = false;
+      toggleClearBtn();
+      var addr = document.getElementById('input-address-1');
+      if (addr) {
+        addr.classList.remove('np-valid');
+        addr.value = '';
+      }
+      clearTimeout(divisionTimer);
+      divisionTimer = setTimeout(function () {
+        renderDivisionDropdown(divisionInput.value.trim());
+      }, 200);
+    });
+
+    divisionInput.addEventListener('focus', function () {
+      clearTimeout(divisionBlurTimer);
+      if (divisionData.length > 0) {
+        renderDivisionDropdown(divisionInput.value.trim());
       }
     });
 
+    divisionInput.addEventListener('blur', function () {
+      divisionBlurTimer = setTimeout(function () { divisionDropdown.style.display = 'none'; }, 200);
+    });
+
+    divisionDropdown.addEventListener('mousedown', function (e) {
+      e.preventDefault();
+      var item = e.target.closest('.np-dropdown-item');
+      if (item && item.dataset.index !== undefined) {
+        selectDivision(parseInt(item.dataset.index));
+      }
+    });
+  }
+
+  function renderDivisionDropdown(query) {
+    if (!divisionDropdown) return;
+
+    var filtered = divisionData;
+    if (query) {
+      var q = query.toLowerCase();
+      filtered = divisionData.filter(function (d) {
+        return (d.name || '').toLowerCase().indexOf(q) !== -1 ||
+               (d.short_address || '').toLowerCase().indexOf(q) !== -1;
+      });
+    }
+
+    var limited = filtered.slice(0, 50);
+
+    divisionDropdown.innerHTML = '';
+    if (limited.length === 0) {
+      divisionDropdown.innerHTML = '<div class="np-dropdown-item np-dropdown-empty">' + label('nothing_found', '\u041D\u0438\u0447\u0435\u0433\u043E \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u043E') + '</div>';
+      divisionDropdown.style.display = 'block';
+      return;
+    }
+
+    limited.forEach(function (d) {
+      var item = document.createElement('div');
+      item.className = 'np-dropdown-item np-division-dropdown-item';
+      item.dataset.index = divisionData.indexOf(d);
+      var nameText = document.createElement('div');
+      nameText.textContent = (d.name || '') + ', ' + (d.short_address || '');
+      item.appendChild(nameText);
+      divisionDropdown.appendChild(item);
+    });
+    divisionDropdown.style.display = 'block';
+  }
+
+  function selectDivision(originalIndex) {
+    var d = divisionData[originalIndex];
+    if (!d) return;
+
+    divisionValid = true;
+    var displayText = (d.name || '') + ', ' + (d.short_address || '');
+    var addr = document.getElementById('input-address-1');
+    if (addr) {
+      addr.value = displayText;
+      addr.classList.add('np-valid');
+      addr.classList.remove('np-invalid');
+    }
+    if (divisionInput) {
+      divisionInput.value = displayText;
+    }
+    var clearBtn = document.getElementById('np-division-clear');
+    if (clearBtn) clearBtn.style.display = 'flex';
+    if (divisionDropdown) divisionDropdown.style.display = 'none';
+    saveNP({
+      novapost_division: d.site_key || d.division_id,
+      novapost_division_name: displayText,
+      novapost_city: document.getElementById('input-city').value
+    });
   }
 
   function loadDivisions(cityName) {
@@ -254,14 +370,12 @@
     var url = npConfig.search_url + '&city=' + encodeURIComponent(cityName) + '&country_id=' + encodeURIComponent(countryId) + '&delivery_type=' + encodeURIComponent(type);
 
     fetch(url).then(function (r) { return r.json(); }).then(function (divs) {
-      if (!divisionSelect) return;
-      divisionSelect.innerHTML = '<option value="">' + label('select_division', '\u2014') + '</option>';
-      (divs || []).forEach(function (d) {
-        var opt = document.createElement('option');
-        opt.value = d.site_key || d.division_id;
-        opt.textContent = (d.name || '') + ', ' + (d.short_address || '');
-        divisionSelect.appendChild(opt);
-      });
+      divisionData = divs || [];
+      if (divisionInput) divisionInput.value = '';
+      var clearBtn = document.getElementById('np-division-clear');
+      if (clearBtn) clearBtn.style.display = 'none';
+      renderDivisionDropdown('');
+
       if (divs && divs.length > 0) {
         if (addr) {
           addr.style.display = 'none';
@@ -269,9 +383,14 @@
           if (lbl) lbl.style.display = 'none';
         }
         divisionWrapper.style.display = 'block';
-        divisionSelect.focus();
+        divisionInput.focus();
       } else {
-        divisionSelect.innerHTML = '<option value="">' + label('no_divisions_for_city', '\u2014') + '</option>';
+        if (addr) {
+          addr.style.display = '';
+          var lbl = addr.parentElement.querySelector('label');
+          if (lbl) lbl.style.display = '';
+        }
+        if (divisionWrapper) divisionWrapper.style.display = 'none';
       }
     }).catch(function () {});
   }
@@ -312,9 +431,9 @@
     } else if (type !== 'courier') {
       if (!divisionValid) {
         errors.push(label('division_invalid', 'Select a division from the list'));
-        if (divisionSelect) {
-          divisionSelect.classList.add('np-invalid');
-          divisionSelect.classList.remove('np-valid');
+        if (divisionInput) {
+          divisionInput.classList.add('np-invalid');
+          divisionInput.classList.remove('np-valid');
         }
       }
     }
@@ -368,7 +487,8 @@
     if (cityDropdown) cityDropdown.style.display = 'none';
     if (cityEl) cityEl.classList.remove('np-valid', 'np-invalid');
     if (addr) addr.classList.remove('np-valid', 'np-invalid');
-    if (divisionSelect) divisionSelect.classList.remove('np-valid', 'np-invalid');
+    if (divisionInput) divisionInput.classList.remove('np-valid', 'np-invalid');
+    if (divisionDropdown) divisionDropdown.style.display = 'none';
     if (divisionWrapper) divisionWrapper.style.display = 'none';
     cityValid = false;
     divisionValid = false;
@@ -376,7 +496,17 @@
     if (isNPVal) {
       if (cityEl) {
         cityEl.placeholder = label('search_city', '\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0433\u043E\u0440\u043E\u0434...');
-        if (cityEl.value.trim().length > 0 && cityEl.value.trim() === lastValidCity) {
+
+        // Auto-fill city from zone->city mapping if available
+        if (npConfig && npConfig.zone_city_map) {
+          var zoneId = getDomValue('input-zone');
+          var mappedCity = npConfig.zone_city_map[zoneId];
+          if (mappedCity && cityEl.value.trim() !== mappedCity) {
+            autoFillCityFromZone(mappedCity);
+          }
+        }
+
+        if (!cityValid && cityEl.value.trim().length > 0 && cityEl.value.trim() === lastValidCity) {
           cityEl.classList.add('np-valid');
           cityValid = true;
           saveNP({ novapost_city: cityEl.value.trim() });
@@ -407,6 +537,32 @@
       }
       saveNP({ shipping_method: value });
     }
+  }
+
+  function bindZoneCityAutoFill() {
+    var zoneSelect = document.getElementById('input-zone');
+    if (!zoneSelect) return;
+    zoneSelect.addEventListener('change', function () {
+      if (!isNP() || !npConfig || !npConfig.zone_city_map) return;
+      var mappedCity = npConfig.zone_city_map[zoneSelect.value];
+      if (mappedCity) {
+        setTimeout(function () { autoFillCityFromZone(mappedCity); }, 350);
+      }
+    });
+  }
+
+  function autoFillCityFromZone(cityName) {
+    if (!cityName) return;
+    var input = document.getElementById('input-city');
+    if (!input) return;
+    input.value = cityName;
+    input.classList.add('np-valid');
+    input.classList.remove('np-invalid');
+    cityValid = true;
+    lastValidCity = cityName;
+    saveNP({ novapost_city: cityName });
+    resetDivision();
+    loadDivisions(cityName);
   }
 
   document.addEventListener('DOMContentLoaded', function () { setTimeout(init, 100); });

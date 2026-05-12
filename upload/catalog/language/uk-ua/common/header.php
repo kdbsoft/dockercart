@@ -1,6 +1,6 @@
 <?php
 
-$_["text_account"] = "Особистий кабінет";
+$_["text_account"] = "Обліковий запис";
 $_["text_all"] = "Показати все";
 $_["text_catalog"] = "Каталог";
 $_["text_new_arrivals"] = "Новинки";

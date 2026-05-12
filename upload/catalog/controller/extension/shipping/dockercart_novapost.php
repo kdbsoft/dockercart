@@ -26,9 +26,17 @@ class ControllerExtensionShippingDockercartNovapost extends Controller {
 			$zoneId = $this->session->data['shipping_address']['zone_id'] ?? 0;
 		}
 
+		// Build zone->city map for auto-fill
+		$zoneCityMap = [];
+		$zoneMapQuery = $this->db->query("SELECT oc_zone_id, city_name FROM `" . DB_PREFIX . "dockercart_novapost_region_map` WHERE city_name != '' AND oc_zone_id > 0");
+		foreach ($zoneMapQuery->rows as $zmRow) {
+			$zoneCityMap[(int)$zmRow['oc_zone_id']] = $zmRow['city_name'];
+		}
+
 		$npInit = json_encode([
 			'country_code'  => $countryCode,
 			'zone_id'       => $zoneId,
+			'zone_city_map' => $zoneCityMap,
 			'search_url'    => HTTP_SERVER . 'index.php?route=extension/shipping/dockercart_novapost/searchDivisions',
 			'save_url'      => HTTP_SERVER . 'index.php?route=extension/shipping/dockercart_novapost/saveFields',
 			'labels'        => [
@@ -97,10 +105,18 @@ class ControllerExtensionShippingDockercartNovapost extends Controller {
 		// Load language for frontend labels
 		$this->load->language('extension/shipping/dockercart_novapost');
 
+		// Build zone->city map for auto-fill
+		$zoneCityMap = [];
+		$zoneMapQuery = $this->db->query("SELECT oc_zone_id, city_name FROM `" . DB_PREFIX . "dockercart_novapost_region_map` WHERE city_name != '' AND oc_zone_id > 0");
+		foreach ($zoneMapQuery->rows as $zmRow) {
+			$zoneCityMap[(int)$zmRow['oc_zone_id']] = $zmRow['city_name'];
+		}
+
 		$json['novapost'] = [
 			'enabled'       => true,
 			'country_code'  => $countryCode,
 			'zone_id'       => $address['zone_id'] ?? 0,
+			'zone_city_map' => $zoneCityMap,
 			'delivery_types' => $availableTypes,
 			'search_url'    => HTTP_SERVER . 'index.php?route=extension/shipping/dockercart_novapost/searchDivisions',
 			'save_url'      => HTTP_SERVER . 'index.php?route=extension/shipping/dockercart_novapost/saveFields',

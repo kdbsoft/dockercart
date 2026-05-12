@@ -1,6 +1,6 @@
 <?php
 
-$_["text_account"] = "Особистий кабінет";
+$_["text_account"] = "Обліковий запис";
 $_["text_affiliate"] = "Партнерська програма";
 $_["text_bestseller"] = "Хіти продажу";
 $_["text_blog"] = "Блог";
