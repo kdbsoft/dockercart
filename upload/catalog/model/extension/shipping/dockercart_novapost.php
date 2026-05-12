@@ -11,6 +11,38 @@ if (is_file($novapostAutoloader)) {
 
 class ModelExtensionShippingDockercartNovapost extends Model {
 
+	const SUPPORTED_COUNTRIES = [
+		'CZ' => 'Czech Republic',
+		'DE' => 'Germany',
+		'EE' => 'Estonia',
+		'ES' => 'Spain',
+		'FR' => 'France',
+		'GB' => 'United Kingdom',
+		'HU' => 'Hungary',
+		'IT' => 'Italy',
+		'LT' => 'Lithuania',
+		'LV' => 'Latvia',
+		'MD' => 'Moldova',
+		'NL' => 'Netherlands',
+		'PL' => 'Poland',
+		'RO' => 'Romania',
+		'SK' => 'Slovakia',
+		'UA' => 'Ukraine',
+	];
+
+	const DIVISION_CATEGORIES = [
+		'CargoBranch',
+		'PostBranch',
+		'Postomat',
+		'PUDO',
+	];
+
+	const DELIVERY_TYPES = [
+		'branch'  => 'Branch (В отделение)',
+		'locker'  => 'Locker (В почтомат)',
+		'courier' => 'Courier (Курьером)',
+	];
+
 	public function getQuote(array $address): array {
 		$this->load->language('extension/shipping/dockercart_novapost');
 
