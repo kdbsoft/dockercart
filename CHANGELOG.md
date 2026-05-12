@@ -1,3 +1,22 @@
+## [1.12.0](https://github.com/mathflow-bit/dockercart/compare/v1.11.0...v1.12.0) (2026-05-12)
+
+### Features
+
+* add Beta label to NovaPost heading ([9028cb1](https://github.com/mathflow-bit/dockercart/commit/9028cb1ca6018cdd1e60fc76a8b783e523b6f2f2))
+* add lock files and runtime dependency install ([b4ada96](https://github.com/mathflow-bit/dockercart/commit/b4ada96e93a8403181f97a091d0eb0ba888022b2))
+* add multilingual NovaPost division support ([5423138](https://github.com/mathflow-bit/dockercart/commit/5423138b92348060f7083986b1f9cfa07d8f9a2f))
+* Add NovaPost city autocomplete and delivery types ([d806e36](https://github.com/mathflow-bit/dockercart/commit/d806e362212534e3baa25b6a6ebee58e35e40649))
+* add NovaPost shipping module ([b188106](https://github.com/mathflow-bit/dockercart/commit/b1881060a1e166c6a79273ed621b4acda9f7d501))
+* add UAH rate and adjust price formatting ([13828f8](https://github.com/mathflow-bit/dockercart/commit/13828f8f91652590a92007b379dedebffba3be29))
+* convert gallery list to card grid ([83cfe4b](https://github.com/mathflow-bit/dockercart/commit/83cfe4be78bbbbdd800a2a2a9d86b9258439fccf))
+* detect .local domains as local development environment ([efd74f8](https://github.com/mathflow-bit/dockercart/commit/efd74f81d365d49801662998b473c1f9f6b7ea06))
+* remove OpenCart Marketplace integration ([15c06fc](https://github.com/mathflow-bit/dockercart/commit/15c06fca7065755c11452b1b38c791ef890c9ef5))
+
+### Bug Fixes
+
+* add heading title to product list and form ([b62b2ef](https://github.com/mathflow-bit/dockercart/commit/b62b2ef81944b9a43c0089f91a6fe713e9bfa853))
+* add phone format fallback to one-click ([edc0ee5](https://github.com/mathflow-bit/dockercart/commit/edc0ee5cacf1adce1e8ab3af54b85b552fd36b0e))
+
 ## [1.11.0](https://github.com/mathflow-bit/dockercart/compare/v1.10.0...v1.11.0) (2026-05-09)
 
 ### Features
