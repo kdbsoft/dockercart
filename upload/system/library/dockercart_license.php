@@ -41,14 +41,11 @@ class DockercartLicense {
             $cached = $this->getFromCache($license_key, $module_code);
             if ($cached !== null) {
                 if (is_array($cached)) {
-                    $this->logger->info('License verification: CACHE HIT for ' . $this->maskKey($license_key) . ' [' . $module_code . ']');
                     return $cached;
                 } else {
                     $this->clearCache($license_key, $module_code);
                 }
             }
-        } else {
-            $this->logger->info('License verification: SKIPPING CACHE for ' . $this->maskKey($license_key) . ' [' . $module_code . ']');
         }
 
         $license_data = $this->parse($license_key, $module_code);
@@ -110,14 +107,11 @@ class DockercartLicense {
             $cached = $this->getFromCache($license_key, $module_code);
             if ($cached !== null) {
                 if (is_array($cached)) {
-                    $this->logger->info('License verification (with key): CACHE HIT for ' . $this->maskKey($license_key) . ' [' . $module_code . ']');
                     return $cached;
                 } else {
                     $this->clearCache($license_key, $module_code);
                 }
             }
-        } else {
-            $this->logger->info('License verification (with key): SKIPPING CACHE for ' . $this->maskKey($license_key) . ' [' . $module_code . ']');
         }
 
         $license_data = $this->parseWithPublicKey($license_key, $public_key);
