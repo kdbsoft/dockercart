@@ -34,7 +34,7 @@ class ControllerStartupError extends Controller {
 			echo '<b>' . $error . '</b>: ' . $message . ' in <b>' . $file . '</b> on line <b>' . $line . '</b>';
 		}
 	
-		if ($this->config->get('config_error_log') && !in_array($code, [E_NOTICE, E_USER_NOTICE, E_DEPRECATED, E_USER_DEPRECATED, E_STRICT])) {
+		if ($this->config->get('config_error_log') && in_array($code, [E_WARNING, E_USER_WARNING, E_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR])) {
 			$this->log->write('PHP ' . $error . ':  ' . $message . ' in ' . $file . ' on line ' . $line);
 		}
 	
