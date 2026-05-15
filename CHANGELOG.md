@@ -1,3 +1,9 @@
+## [1.12.2](https://github.com/mathflow-bit/dockercart/compare/v1.12.1...v1.12.2) (2026-05-15)
+
+### Bug Fixes
+
+* suppress low-severity PHP errors from the log ([406b67f](https://github.com/mathflow-bit/dockercart/commit/406b67f42f3404b319df52ef1382c7815cb4fd33))
+
 ## [1.12.1](https://github.com/mathflow-bit/dockercart/compare/v1.12.0...v1.12.1) (2026-05-12)
 
 ### Bug Fixes
