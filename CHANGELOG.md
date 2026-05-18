@@ -1,3 +1,9 @@
+## [1.12.4](https://github.com/mathflow-bit/dockercart/compare/v1.12.3...v1.12.4) (2026-05-18)
+
+### Bug Fixes
+
+* apply accent background to banner badges ([e649339](https://github.com/mathflow-bit/dockercart/commit/e649339588f65d7e0de8e9863d2b1608c2876021))
+
 ## [1.12.3](https://github.com/mathflow-bit/dockercart/compare/v1.12.2...v1.12.3) (2026-05-15)
 
 ### Bug Fixes
