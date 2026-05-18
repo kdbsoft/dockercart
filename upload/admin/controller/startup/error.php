@@ -3,6 +3,7 @@ class ControllerStartupError extends Controller {
 	public function index() {
 		$this->registry->set('log', new Log($this->config->get('config_error_filename') ? $this->config->get('config_error_filename') : $this->config->get('error_filename')));
 		
+		error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
 		set_error_handler(array($this, 'handler'));	
 	}
 	
@@ -21,6 +22,9 @@ class ControllerStartupError extends Controller {
 			case E_USER_WARNING:
 				$error = 'Warning';
 				break;
+			case E_DEPRECATED:
+			case E_USER_DEPRECATED:
+				return false;
 			case E_ERROR:
 			case E_USER_ERROR:
 				$error = 'Fatal Error';
