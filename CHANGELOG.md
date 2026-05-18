@@ -1,3 +1,9 @@
+## [1.13.0](https://github.com/mathflow-bit/dockercart/compare/v1.12.4...v1.13.0) (2026-05-18)
+
+### Features
+
+* auto-contrast badge text from accent color ([ae3454d](https://github.com/mathflow-bit/dockercart/commit/ae3454d07dd0baf14b4432ac8679691d6a71f6ae))
+
 ## [1.12.4](https://github.com/mathflow-bit/dockercart/compare/v1.12.3...v1.12.4) (2026-05-18)
 
 ### Bug Fixes
