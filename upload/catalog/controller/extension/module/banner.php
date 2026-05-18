@@ -34,8 +34,9 @@ class ControllerExtensionModuleBanner extends Controller {
             $accent_color = !empty($result['accent_color']) ? $result['accent_color'] : '';
 
             // Prepare a translucent background variant for badge use (50% alpha)
-            $accent_bg = '';
-            if ($accent_color) {
+			$accent_bg = '';
+			$badge_text_color = $accent_color ? $this->badgeTextColor($accent_color) : '#ffffff';
+			if ($accent_color) {
                 $hex = ltrim($accent_color, '#');
                 // expand 3-digit hex to 6-digit
                 if (preg_match('/^[0-9a-fA-F]{3}$/', $hex)) {
@@ -70,6 +71,7 @@ class ControllerExtensionModuleBanner extends Controller {
                 'accent_text'        => isset($result['accent_text']) ? $result['accent_text'] : '',
                 'accent_color'       => $accent_color,
                 'accent_bg'          => $accent_bg,
+                'badge_text_color'   => $badge_text_color,
                 'primary_btn_text'   => isset($result['primary_btn_text']) ? $result['primary_btn_text'] : '',
                 'primary_btn_link'   => isset($result['primary_btn_link']) ? $result['primary_btn_link'] : '',
                 'primary_btn_text_color' => isset($result['primary_btn_text_color']) ? $result['primary_btn_text_color'] : '',
@@ -85,5 +87,17 @@ class ControllerExtensionModuleBanner extends Controller {
         $data['module'] = $module++;
 
         return $this->load->view('extension/module/banner', $data);
+    }
+
+    private function badgeTextColor($hex) {
+        $hex = ltrim($hex, '#');
+        if (preg_match('/^[0-9a-fA-F]{3}$/', $hex)) {
+            $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+        }
+        if (!preg_match('/^[0-9a-fA-F]{6}$/', $hex)) return '#ffffff';
+        $r = hexdec(substr($hex, 0, 2));
+        $g = hexdec(substr($hex, 2, 2));
+        $b = hexdec(substr($hex, 4, 2));
+        return ((0.299 * $r + 0.587 * $g + 0.114 * $b) / 255) > 0.5 ? '#000000' : '#ffffff';
     }
 }
