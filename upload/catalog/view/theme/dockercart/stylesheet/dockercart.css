@@ -613,15 +613,8 @@ body.modal-open { overflow: hidden; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
+  background-color: var(--accent, #3b82f6);
   color: #fff;
-}
-.banner-slide__badge::after { /* ensure readable text by layering */
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 999px;
-  pointer-events: none;
 }
 
 .banner-slide__btn--primary {
