@@ -21,7 +21,7 @@
         <div class="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 w-full">
           {% if banner.badge %}
           {%- set badge_color = banner.accent_color ? banner.accent_color : '' -%}
-          <span class="banner-slide__badge inline-block text-white text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3"{% if badge_color or banner.accent_color or banner.accent_bg %} style="{% if badge_color %}background-color: {{ badge_color }};{% endif %}{% if banner.accent_color %} --accent: {{ banner.accent_color }};{% endif %}{% if banner.accent_bg %} --accent-bg: {{ banner.accent_bg }};{% endif %}"{% endif %}>{{ banner.badge }}</span>
+          <span class="banner-slide__badge inline-block text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3"{% if badge_color or banner.accent_color or banner.accent_bg %} style="{% if badge_color %}background-color: {{ badge_color }};{% endif %}{% if banner.accent_color %} --accent: {{ banner.accent_color }};{% endif %}{% if banner.accent_bg %} --accent-bg: {{ banner.accent_bg }};{% endif %} color: {{ banner.badge_text_color }};"{% endif %}>{{ banner.badge }}</span>
           {% endif %}
           <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white leading-tight max-w-xl mb-3">{{ banner.title_html|raw }}</h1>
           {% if banner.subtitle %}
