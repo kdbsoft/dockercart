@@ -40,6 +40,7 @@ class ControllerExtensionModuleSlideshow extends Controller {
 			$accent_color = !empty($result['accent_color']) ? $result['accent_color'] : '';
 			// Prepare a translucent background variant (hex alpha) for badge use (50% alpha)
 			$accent_bg = '';
+			$badge_text_color = $accent_color ? $this->badgeTextColor($accent_color) : '#ffffff';
 			if ($accent_color) {
 				$hex = ltrim($accent_color, '#');
 				// expand 3-digit hex to 6-digit
@@ -80,6 +81,7 @@ class ControllerExtensionModuleSlideshow extends Controller {
 				'secondary_btn_link' => isset($result['secondary_btn_link']) ? $result['secondary_btn_link'] : '',
 				'accent_color'       => $accent_color,
 				'accent_bg'          => $accent_bg,
+				'badge_text_color'   => $badge_text_color,
 				'link'               => $result['link'],
 				'image'              => $image_landscape,
 				'image_portrait'     => $image_portrait
@@ -89,5 +91,17 @@ class ControllerExtensionModuleSlideshow extends Controller {
 		$data['module'] = $module++;
 
 		return $this->load->view('extension/module/slideshow', $data);
+	}
+
+	private function badgeTextColor($hex) {
+		$hex = ltrim($hex, '#');
+		if (preg_match('/^[0-9a-fA-F]{3}$/', $hex)) {
+			$hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+		}
+		if (!preg_match('/^[0-9a-fA-F]{6}$/', $hex)) return '#ffffff';
+		$r = hexdec(substr($hex, 0, 2));
+		$g = hexdec(substr($hex, 2, 2));
+		$b = hexdec(substr($hex, 4, 2));
+		return ((0.299 * $r + 0.587 * $g + 0.114 * $b) / 255) > 0.5 ? '#000000' : '#ffffff';
 	}
 }
