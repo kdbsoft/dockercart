@@ -942,3 +942,18 @@ body.modal-open { overflow: hidden; }
 .footer-accordion-arrow {
   transition: transform 0.3s ease;
 }
+
+/* ── Widget "View all" link hover animation ──────────────── */
+.dc-view-all-link {
+  display: inline-block;
+  background: transparent;
+  color: #2563eb;
+  text-decoration: none;
+  padding: 4px 12px;
+  border-radius: 8px;
+  transition: background 0.25s ease;
+}
+.dc-view-all-link:hover {
+  background: #dbeafe;
+  text-decoration: none;
+}
