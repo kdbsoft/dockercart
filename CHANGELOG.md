@@ -1,3 +1,9 @@
+## [1.13.2](https://github.com/mathflow-bit/dockercart/compare/v1.13.1...v1.13.2) (2026-05-19)
+
+### Bug Fixes
+
+* fallback phone mask when country field hidden ([93c1b28](https://github.com/mathflow-bit/dockercart/commit/93c1b28172a327a4bfc19ea5176b3242a2aa4a83))
+
 ## [1.13.1](https://github.com/mathflow-bit/dockercart/compare/v1.13.0...v1.13.1) (2026-05-18)
 
 ### Bug Fixes
