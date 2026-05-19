@@ -362,17 +362,6 @@ See [`.env.example`](.env.example) for a complete reference.
 
 ---
 
-## Documentation
-
-| Document | Description |
-| --- | --- |
-| [SSL.md](SSL.md) | Unified SSL/HTTPS guide covering HTTP, self-signed SSL, Let's Encrypt, standalone mode, and troubleshooting |
-| [INSTALL.md](INSTALL.md) | Detailed installation reference |
-| [DEPLOYMENT.md](DEPLOYMENT.md) | Deployment architecture and CI/CD notes |
-| [SECURITY.md](SECURITY.md) | Security policy and vulnerability reporting |
-
----
-
 ## Contributing
 
 1. Fork the repository and create a feature branch
