@@ -41,7 +41,7 @@ Note on frontend stacks: OpenCart's legacy storefront is built on jQuery, Bootst
 | Full-text search | Manticore Search |
 | Reverse proxy | Traefik v3 *(optional)* |
 | SSL | Let's Encrypt / self-signed |
-| Frontend | OpenCart (legacy): jQuery, Bootstrap, Font Awesome · DockerCart: JavaScript (ES6+), Tailwind CSS, Lucide icon font |
+| Frontend | JavaScript (ES6+), Tailwind CSS, Lucide icon font |
 
 ---
 
