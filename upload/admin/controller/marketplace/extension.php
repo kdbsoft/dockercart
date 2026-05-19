@@ -120,13 +120,25 @@ class ControllerMarketplaceExtension extends Controller {
 						$edit_url = $this->url->link('extension/' . $type . '/' . $code, 'user_token=' . $this->session->data['user_token'], true);
 					}
 
-					// Module instance count
+					// Module instance count + list
 					$instance_count = 0;
+					$instances = array();
 					if ($type === 'module' && $installed) {
-						$instance_count = count($this->model_setting_module->getModulesByCode($code));
-					}
+						$modules = $this->model_setting_module->getModulesByCode($code);
+						$instance_count = count($modules);
+						foreach ($modules as $module) {
+							$setting_info = $module['setting'] ? json_decode($module['setting'], true) : array();
+							$instances[] = array(
+								'module_id' => $module['module_id'],
+								'name'      => $module['name'],
+								'status'    => (isset($setting_info['status']) && $setting_info['status']) ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
+								'edit'      => $this->url->link('extension/module/' . $code, 'user_token=' . $this->session->data['user_token'] . '&module_id=' . $module['module_id'], true),
+								'delete'    => $this->url->link('marketplace/extension/deleteModule', 'user_token=' . $this->session->data['user_token'] . '&module_id=' . $module['module_id'], true)
+							);
+						}
+				}
 
-					// Optional sort_order
+				// Optional sort_order
 					$sort_order = '';
 					if (in_array($type, array('payment', 'shipping', 'total', 'report', 'dashboard', 'menu'))) {
 						$sort_order = (string)$this->config->get($type . '_' . $code . '_sort_order');
@@ -151,6 +163,7 @@ class ControllerMarketplaceExtension extends Controller {
 						'install_url'    => $this->url->link('marketplace/extension/install', 'user_token=' . $this->session->data['user_token'] . '&type=' . $type . '&extension=' . $code, true),
 						'uninstall_url'  => $this->url->link('marketplace/extension/uninstall', 'user_token=' . $this->session->data['user_token'] . '&type=' . $type . '&extension=' . $code, true),
 						'instance_count' => $instance_count,
+						'instances'      => $instances,
 						'sort_order'     => $sort_order,
 						'ext_link'       => $ext_link,
 					);
@@ -187,10 +200,13 @@ class ControllerMarketplaceExtension extends Controller {
 		$data['text_instances']     = $this->language->get('text_instances');
 		$data['text_confirm']       = $this->language->get('text_confirm');
 
+		$data['text_confirm_instance'] = $this->language->get('text_confirm_instance');
+
 		$data['button_install']   = $this->language->get('button_install');
 		$data['button_uninstall'] = $this->language->get('button_uninstall');
 		$data['button_edit']      = $this->language->get('button_edit');
 		$data['button_add']       = $this->language->get('button_add');
+		$data['button_delete']    = $this->language->get('button_delete');
 
 		$data['header']      = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
@@ -281,6 +297,27 @@ class ControllerMarketplaceExtension extends Controller {
 	public function refreshMenu() {
 		$output = $this->load->controller('common/column_left');
 		$this->response->setOutput($output);
+	}
+
+	public function deleteModule() {
+		$this->load->language('marketplace/extension');
+
+		$json = array();
+
+		if (!$this->user->hasPermission('modify', 'marketplace/extension')) {
+			$json['error'] = $this->language->get('error_permission');
+		} elseif (!isset($this->request->get['module_id'])) {
+			$json['error'] = $this->language->get('error_permission');
+		} else {
+			$this->load->model('setting/module');
+
+			$this->model_setting_module->deleteModule((int)$this->request->get['module_id']);
+
+			$json['success'] = $this->language->get('text_success');
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
 	}
 
 	private function getValidTypes() {

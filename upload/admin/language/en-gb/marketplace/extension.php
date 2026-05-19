@@ -11,7 +11,8 @@ $_['text_search']     = 'Search by name...';
 $_['text_no_results']     = 'No extensions found';
 $_['text_not_installed']  = 'Not installed';
 $_['text_instances']  = 'instances';
-$_['text_confirm']    = 'Are you sure you want to uninstall this extension?';
+$_['text_confirm']           = 'Are you sure you want to uninstall this extension?';
+$_['text_confirm_instance']  = 'Are you sure you want to delete this module instance?';
 $_['text_enabled']    = 'Enabled';
 $_['text_disabled']   = 'Disabled';
 $_['text_home']       = 'Home';
@@ -21,6 +22,7 @@ $_['button_install']   = 'Install';
 $_['button_uninstall'] = 'Uninstall';
 $_['button_edit']      = 'Edit';
 $_['button_add']       = 'Add';
+$_['button_delete']    = 'Delete';
 
 // Error
 $_['error_permission'] = 'Warning: You do not have permission to modify extensions!';
