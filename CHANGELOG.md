@@ -1,3 +1,9 @@
+## [1.13.1](https://github.com/mathflow-bit/dockercart/compare/v1.13.0...v1.13.1) (2026-05-18)
+
+### Bug Fixes
+
+* silence deprecation warnings in error handlers ([a4e3759](https://github.com/mathflow-bit/dockercart/commit/a4e375970475cab9222efaccbc81dae6a86fb083))
+
 ## [1.13.0](https://github.com/mathflow-bit/dockercart/compare/v1.12.4...v1.13.0) (2026-05-18)
 
 ### Features
