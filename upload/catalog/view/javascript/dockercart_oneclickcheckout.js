@@ -569,20 +569,19 @@ function validateAndNormalizeTelephone(telephone) {
   }
 
   function applyPhoneMaskFromCountry() {
-    var countrySelect = document.getElementById("input-country");
     var phoneInput = document.getElementById("input-telephone");
-    if (
-      !countrySelect ||
-      !phoneInput ||
-      typeof DockercartPhoneMask === "undefined"
-    )
-      return;
-    var selectedOption = countrySelect.selectedOptions[0];
-    var phoneFormat = selectedOption
-      ? selectedOption.getAttribute("data-phone-format") || ""
-      : "";
+    if (!phoneInput || typeof DockercartPhoneMask === "undefined") return;
 
-    // Fallback to default country format when no country is selected
+    var phoneFormat = "";
+
+    // Try getting format from selected country (country field may be hidden)
+    var countrySelect = document.getElementById("input-country");
+    if (countrySelect && countrySelect.selectedOptions[0]) {
+      phoneFormat =
+        countrySelect.selectedOptions[0].getAttribute("data-phone-format") || "";
+    }
+
+    // Fallback to default country format from modal
     if (!phoneFormat) {
       var modal = getModal();
       if (modal) {
