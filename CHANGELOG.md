@@ -1,3 +1,13 @@
+## [1.14.0](https://github.com/mathflow-bit/dockercart/compare/v1.13.2...v1.14.0) (2026-05-19)
+
+### Features
+
+* manage module instances from extension list ([49c596c](https://github.com/mathflow-bit/dockercart/commit/49c596c7a3249b03057fb37b5e0387a5bb3f254d))
+
+### Bug Fixes
+
+* Add dc-view-all-link CSS class for widgets ([3408ee7](https://github.com/mathflow-bit/dockercart/commit/3408ee7c4a08b0b631a34140c1cf66454d600f5f))
+
 ## [1.13.2](https://github.com/mathflow-bit/dockercart/compare/v1.13.1...v1.13.2) (2026-05-19)
 
 ### Bug Fixes
