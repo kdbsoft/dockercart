@@ -61,7 +61,7 @@ These optimizations make DockerCart suitable for demanding production environmen
 
 ## Quick Start
 
-**Requirements:** Docker 24+ and Docker Compose v2.
+**Requirements:** Docker 24+ and Docker Compose v2 or Podman Compose.
 
 ```bash
 git clone https://github.com/your-org/dockercart.git
