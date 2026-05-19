@@ -2,27 +2,20 @@
 
 <main class="bg-white min-h-screen">
 
-  <section class="relative overflow-hidden">
-    <div class="w-full h-[180px] sm:h-[230px] bg-gradient-to-br from-gray-900 via-gray-800 to-blue-950"></div>
-    <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/15"></div>
-    <div class="absolute inset-0 flex items-end sm:items-center pb-6 sm:pb-0">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        {% include 'dockercart/template/common/partials/breadcrumbs.twig' with {
-          breadcrumbs_class: 'flex flex-wrap items-center gap-2 text-xs text-gray-300 mb-3',
-          breadcrumbs_link_class: 'hover:text-white transition',
-          breadcrumbs_last_class: 'text-white font-semibold'
-        } %}
-        <h1 class="text-2xl sm:text-4xl font-extrabold text-white leading-tight">{{ heading_title }}</h1>
-        {% if description %}
-        {% set _short_desc = description|striptags|trim %}
-        {% if _short_desc|length > 200 %}
-          {% set _short_desc = _short_desc|slice(0, 200) ~ '…' %}
-        {% endif %}
-        <div class="prose prose-sm text-gray-200 mt-2 max-w-xl line-clamp-2 prose-p:text-gray-200 prose-p:leading-relaxed">{{ _short_desc }}</div>
-        {% endif %}
+    <section class="relative overflow-hidden">
+      <div class="w-full h-[180px] sm:h-[230px] bg-gradient-to-br from-gray-900 via-gray-800 to-blue-950"></div>
+      <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/15"></div>
+      <div class="absolute inset-0 flex items-center pb-2 sm:pb-0">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          {% include 'dockercart/template/common/partials/breadcrumbs.twig' with {
+            breadcrumbs_class: 'flex flex-wrap items-center gap-2 text-xs text-gray-300 mb-3',
+            breadcrumbs_link_class: 'hover:text-white transition',
+            breadcrumbs_last_class: 'text-white font-semibold'
+          } %}
+          <h1 class="text-2xl sm:text-4xl font-extrabold text-white leading-tight">{{ heading_title }}</h1>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
   {% if categories and show_refine %}
   <section class="pt-8 pb-2 px-4 sm:px-6 lg:px-8">
