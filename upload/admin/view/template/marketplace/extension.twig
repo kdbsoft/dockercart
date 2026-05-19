@@ -117,6 +117,22 @@
                 {% endif %}
               </div>
 
+              {% if ext.instances is defined and ext.instances|length > 0 %}
+              <div class="ext-instances" style="margin-top:6px;border-top:1px solid #eee;padding-top:6px;">
+                {% for instance in ext.instances %}
+                <div class="ext-instance" style="display:flex;align-items:center;gap:4px;padding:2px 0;font-size:12px;">
+                  <i class="fa fa-folder-open" style="color:#888;flex-shrink:0;"></i>
+                  <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ instance.name }}">{{ instance.name }}</span>
+                  <a href="{{ instance.edit }}" class="btn btn-xs btn-info" title="{{ button_edit }}" style="padding:1px 4px;"><i class="fa fa-pencil"></i></a>
+                  <button type="button" class="btn btn-xs btn-warning btn-instance-delete" title="{{ button_delete }}" data-url="{{ instance.delete }}" data-name="{{ instance.name }}" data-confirm="{{ text_confirm_instance }}" style="padding:1px 4px;"><i class="fa fa-trash-o"></i></button>
+                </div>
+                {% endfor %}
+                <div style="margin-top:4px;">
+                  <a href="{{ ext.edit }}" style="font-size:12px;"><i class="fa fa-plus-circle"></i> {{ button_add }}</a>
+                </div>
+              </div>
+              {% endif %}
+
               {% if ext.ext_link %}
               <div class="ext-payment-link" style="margin-bottom:4px;line-height:1;" onclick="event.stopPropagation();">
                 {{ ext.ext_link|raw }}
@@ -127,7 +143,7 @@
             <div class="panel-footer" style="padding:6px 10px;background:#f9f9f9;text-align:right;">
               {% if ext.installed %}
                 <a href="{{ ext.edit }}" class="btn btn-xs btn-primary" title="{{ button_edit }}" style="margin-right:2px;">
-                  <i class="fa fa-pencil"></i> {% if ext.instance_count > 0 %}{{ button_add }}{% else %}{{ button_edit }}{% endif %}
+                  <i class="fa fa-pencil"></i> {{ button_edit }}
                 </a>
                 <button type="button"
                         class="btn btn-xs btn-danger btn-ext-uninstall"
@@ -320,6 +336,46 @@
 
     doExtAction(url, $btn, function() {
       window.location.reload();
+    });
+  });
+
+  // Instance delete buttons
+  $(document).on('click', '.btn-instance-delete', function(e) {
+    e.stopPropagation();
+    var $btn  = $(this);
+    var name  = $btn.data('name');
+    var confirm_msg = $btn.data('confirm') || '{{ text_confirm_instance }}';
+
+    if (!confirm(confirm_msg + '\n\n' + name)) {
+      return;
+    }
+
+    var url = $btn.data('url');
+
+    $btn.prop('disabled', true);
+    var $icon = $btn.find('i');
+    var origClass = $icon.attr('class');
+    $icon.attr('class', 'fa fa-spinner fa-spin');
+
+    $.ajax({
+      url: url,
+      type: 'GET',
+      dataType: 'json',
+      success: function(json) {
+        if (json.success) {
+          showToast(json.success, 'success');
+          window.location.reload();
+        } else {
+          showToast(json.error || 'Error', 'error');
+          $icon.attr('class', origClass);
+          $btn.prop('disabled', false);
+        }
+      },
+      error: function(xhr) {
+        showToast('Server error: ' + xhr.status, 'error');
+        $icon.attr('class', origClass);
+        $btn.prop('disabled', false);
+      }
     });
   });
 
