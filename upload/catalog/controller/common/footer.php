@@ -164,6 +164,7 @@ class ControllerCommonFooter extends Controller {
 
 		$data['scripts'] = $this->document->getScripts('footer');
 		$data['styles'] = $this->document->getStyles('footer');
+		$data['dockercart_version'] = DOCKERCART_VERSION;
 		
 		return $this->load->view('common/footer', $data);
 	}
