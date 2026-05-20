@@ -1,3 +1,9 @@
+## [1.18.0](https://github.com/mathflow-bit/dockercart/compare/v1.17.2...v1.18.0) (2026-05-20)
+
+### Features
+
+* integrate 1‑click checkout module into cart pages ([f4635d4](https://github.com/mathflow-bit/dockercart/commit/f4635d4749963bab80fb03125ee263325f44d335))
+
 ## [1.17.2](https://github.com/mathflow-bit/dockercart/compare/v1.17.1...v1.17.2) (2026-05-20)
 
 ### Bug Fixes
