@@ -124,6 +124,12 @@ class ControllerProductManufacturer extends Controller {
 			$limit = (int)$this->config->get('theme_' . $this->config->get('config_theme') . '_product_limit');
 		}
 
+		if (isset($this->request->get['view']) && in_array($this->request->get['view'], array('grid', 'list', 'table'))) {
+			$view_mode = $this->request->get['view'];
+		} else {
+			$view_mode = 'grid';
+		}
+
 		$data['breadcrumbs'] = array();
 
 		$data['breadcrumbs'][] = array(
@@ -203,6 +209,10 @@ class ControllerProductManufacturer extends Controller {
 			$data['text_brand'] = $this->language->get('text_brand');
 			$data['text_about_brand'] = $this->language->get('text_about_brand') ?: 'About this brand';
 			$data['text_products'] = $this->language->get('text_products');
+			$data['text_view_grid'] = $this->language->get('text_view_grid');
+			$data['text_view_list'] = $this->language->get('text_view_list');
+			$data['text_view_table'] = $this->language->get('text_view_table');
+			$data['text_quick_view'] = $this->language->get('text_quick_view');
 
 			$data['compare'] = $this->url->link('product/compare');
 
@@ -428,15 +438,18 @@ class ControllerProductManufacturer extends Controller {
 
 			// short word for "reviews" (used in listing templates)
 			$data['text_reviews'] = $this->language->get('text_reviews_word');
+			$data['text_model'] = $this->language->get('text_model');
+			$data['text_quantity'] = $this->language->get('text_quantity');
 
 			// Load-more AJAX
 			$lm_params = 'manufacturer_id=' . $manufacturer_id . '&sort=' . $sort . '&order=' . $order . '&limit=' . $limit;
-			$data['load_more_url']   = HTTP_SERVER . 'index.php?route=product/manufacturer/loadmore&' . $lm_params;
+			$data['load_more_url']   = HTTP_SERVER . 'index.php?route=product/manufacturer/loadmore&' . $lm_params . '&view=' . $view_mode;
 			$data['has_more']        = $product_total > (($page - 1) * $limit + count($data['products']));
 			$data['products_loaded'] = ($page - 1) * $limit + count($data['products']);
 			$data['text_load_more']  = $this->language->get('text_load_more');
 			$data['page']            = $page;
 			$data['text_gift_badge'] = $this->language->get('text_gift_badge');
+			$data['view_mode']       = $view_mode;
 
 				$this->response->setOutput($this->load->view('product/manufacturer_info', $data));
 		} else {
@@ -514,6 +527,8 @@ class ControllerProductManufacturer extends Controller {
 		} else {
 			$limit = (int)$this->config->get('theme_' . $this->config->get('config_theme') . '_product_limit');
 		}
+
+		$view_mode = isset($this->request->get['view']) && in_array($this->request->get['view'], array('grid', 'list', 'table')) ? $this->request->get['view'] : 'grid';
 
 		$manufacturer_info = $this->model_catalog_manufacturer->getManufacturer($manufacturer_id);
 		if (!$manufacturer_info) {
@@ -598,6 +613,7 @@ class ControllerProductManufacturer extends Controller {
 		foreach ($products as $product) {
 			$html .= $this->load->view('product/product_card_ajax', array(
 				'product'          => $product,
+				'view_mode'        => $view_mode,
 				'text_quick_view'  => $this->language->get('text_quick_view'),
 				'text_reviews'     => $this->language->get('text_reviews_word'),
 				'text_sale'        => 'SALE',

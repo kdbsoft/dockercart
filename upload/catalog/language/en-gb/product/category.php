@@ -41,3 +41,6 @@ $_['text_new_arrivals'] = 'New Arrivals';
 $_['text_last_90_days'] = 'Last 90 days';
 $_['text_load_more']    = 'Show More';
 $_['text_gift_badge']  = 'GIFT';
+$_['text_view_grid']   = 'Grid';
+$_['text_view_list']   = 'List';
+$_['text_view_table']  = 'Table';

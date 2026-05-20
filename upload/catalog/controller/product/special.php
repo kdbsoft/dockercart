@@ -32,6 +32,12 @@ class ControllerProductSpecial extends Controller {
 			$limit = $this->config->get('theme_' . $this->config->get('config_theme') . '_product_limit');
 		}
 
+		if (isset($this->request->get['view']) && in_array($this->request->get['view'], array('grid', 'list', 'table'))) {
+			$view_mode = $this->request->get['view'];
+		} else {
+			$view_mode = 'grid';
+		}
+
 		$this->document->setTitle($this->language->get('heading_title'));
 
 		$data['heading_title'] = $this->language->get('heading_title');
@@ -313,14 +319,20 @@ class ControllerProductSpecial extends Controller {
 
 		// short word for "reviews" (used in listing templates)
 		$data['text_reviews'] = $this->language->get('text_reviews_word');
+		$data['text_model'] = $this->language->get('text_model');
+		$data['text_quantity'] = $this->language->get('text_quantity');
+		$data['text_view_grid'] = $this->language->get('text_view_grid');
+		$data['text_view_list'] = $this->language->get('text_view_list');
+		$data['text_view_table'] = $this->language->get('text_view_table');
 
 		// Load-more AJAX
 		$lm_params = 'sort=' . $sort . '&order=' . $order . '&limit=' . $limit;
-		$data['load_more_url']   = HTTP_SERVER . 'index.php?route=product/special/loadmore&' . $lm_params;
+		$data['load_more_url']   = HTTP_SERVER . 'index.php?route=product/special/loadmore&' . $lm_params . '&view=' . $view_mode;
 		$data['has_more']        = $product_total > (($page - 1) * $limit + count($data['products']));
 		$data['products_loaded'] = ($page - 1) * $limit + count($data['products']);
 		$data['text_load_more']  = $this->language->get('text_load_more');
 		$data['page']            = $page;
+		$data['view_mode']       = $view_mode;
 
 		$this->response->setOutput($this->load->view('product/special', $data));
 	}
@@ -350,6 +362,8 @@ class ControllerProductSpecial extends Controller {
 		} else {
 			$limit = (int)$this->config->get('theme_' . $this->config->get('config_theme') . '_product_limit');
 		}
+
+		$view_mode = isset($this->request->get['view']) && in_array($this->request->get['view'], array('grid', 'list', 'table')) ? $this->request->get['view'] : 'grid';
 
 		$filter_data = array(
 			'sort'  => $sort,
@@ -436,6 +450,7 @@ class ControllerProductSpecial extends Controller {
 		foreach ($products as $product) {
 			$html .= $this->load->view('product/product_card_ajax', array(
 				'product'          => $product,
+				'view_mode'        => $view_mode,
 				'text_quick_view'  => $this->language->get('text_quick_view'),
 				'text_reviews'     => $this->language->get('text_reviews_word'),
 				'text_sale'        => $this->language->get('text_sale'),

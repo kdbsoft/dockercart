@@ -65,6 +65,12 @@ class ControllerProductSearch extends Controller {
 			$limit = $this->config->get('theme_' . $this->config->get('config_theme') . '_product_limit');
 		}
 
+		if (isset($this->request->get['view']) && in_array($this->request->get['view'], array('grid', 'list', 'table'))) {
+			$view_mode = $this->request->get['view'];
+		} else {
+			$view_mode = 'grid';
+		}
+
 		if (isset($this->request->get['search'])) {
 			$this->document->setTitle($this->language->get('heading_title') .  ' - ' . $this->request->get['search']);
 		} elseif (isset($this->request->get['tag'])) {
@@ -510,13 +516,19 @@ class ControllerProductSearch extends Controller {
 		if (isset($this->request->get['description'])) { $lm_params .= '&description=' . $this->request->get['description']; }
 		if (isset($this->request->get['category_id'])) { $lm_params .= '&category_id=' . $this->request->get['category_id']; }
 		if (isset($this->request->get['sub_category'])) { $lm_params .= '&sub_category=' . $this->request->get['sub_category']; }
-		$lm_params .= '&sort=' . $sort . '&order=' . $order . '&limit=' . $limit;
+		$lm_params .= '&sort=' . $sort . '&order=' . $order . '&limit=' . $limit . '&view=' . $view_mode;
 		$data['load_more_url']   = HTTP_SERVER . 'index.php?route=product/search/loadmore&' . ltrim($lm_params, '&');
 		$data['has_more']        = isset($product_total) && $product_total > (($page - 1) * $limit + count($data['products']));
 		$data['products_loaded'] = ($page - 1) * $limit + count($data['products']);
 		$data['text_load_more']  = $this->language->get('text_load_more');
 		$data['page']            = $page;
+		$data['view_mode']       = $view_mode;
 		$data['text_gift_badge'] = $this->language->get('text_gift_badge');
+		$data['text_model'] = $this->language->get('text_model');
+		$data['text_quantity'] = $this->language->get('text_quantity');
+		$data['text_view_grid'] = $this->language->get('text_view_grid');
+		$data['text_view_list'] = $this->language->get('text_view_list');
+		$data['text_view_table'] = $this->language->get('text_view_table');
 
 		$this->response->setOutput($this->load->view('product/search', $data));
 	}
@@ -550,6 +562,8 @@ class ControllerProductSearch extends Controller {
 		} else {
 			$limit = (int)$this->config->get('theme_' . $this->config->get('config_theme') . '_product_limit');
 		}
+
+		$view_mode = isset($this->request->get['view']) && in_array($this->request->get['view'], array('grid', 'list', 'table')) ? $this->request->get['view'] : 'grid';
 
 		if (!isset($this->request->get['search']) && !isset($this->request->get['tag'])) {
 			$this->response->setOutput(json_encode(array('html' => '', 'count' => 0, 'total' => 0)));
@@ -649,6 +663,7 @@ class ControllerProductSearch extends Controller {
 		foreach ($products as $product) {
 			$html .= $this->load->view('product/product_card_ajax', array(
 				'product'          => $product,
+				'view_mode'        => $view_mode,
 				'text_quick_view'  => $this->language->get('text_quick_view'),
 				'text_reviews'     => $this->language->get('text_reviews_word'),
 				'text_sale'        => '',

@@ -31,6 +31,12 @@ class ControllerProductNewArrivals extends Controller {
 			$limit = $this->config->get('theme_' . $this->config->get('config_theme') . '_product_limit');
 		}
 
+		if (isset($this->request->get['view']) && in_array($this->request->get['view'], array('grid', 'list', 'table'))) {
+			$view_mode = $this->request->get['view'];
+		} else {
+			$view_mode = 'grid';
+		}
+
 		$data['heading_title'] = $this->language->get('text_new_arrivals');
 		$data['text_empty'] = $this->language->get('text_empty');
 		$data['text_badge_30'] = $this->language->get('text_badge_30');
@@ -43,6 +49,9 @@ class ControllerProductNewArrivals extends Controller {
 		$data['text_products'] = $this->language->get('text_products');
 		// short word for "reviews"
 		$data['text_reviews'] = $this->language->get('text_reviews_word');
+		$data['text_view_grid'] = $this->language->get('text_view_grid');
+		$data['text_view_list'] = $this->language->get('text_view_list');
+		$data['text_view_table'] = $this->language->get('text_view_table');
 
 		$this->document->setTitle($this->language->get('text_new_arrivals'));
 
@@ -352,15 +361,18 @@ class ControllerProductNewArrivals extends Controller {
 
 		// short word for "reviews" (used in listing templates)
 		$data['text_reviews'] = $this->language->get('text_reviews_word');
+		$data['text_model'] = $this->language->get('text_model');
+		$data['text_quantity'] = $this->language->get('text_quantity');
 
 		// Load-more AJAX
 		$lm_params = 'sort=' . $sort . '&order=' . $order . '&limit=' . $limit;
-		$data['load_more_url']   = HTTP_SERVER . 'index.php?route=product/new_arrivals/loadmore&' . $lm_params;
+		$data['load_more_url']   = HTTP_SERVER . 'index.php?route=product/new_arrivals/loadmore&' . $lm_params . '&view=' . $view_mode;
 		$data['has_more']        = $product_total > (($page - 1) * $limit + count($data['products']));
 		$data['products_loaded'] = ($page - 1) * $limit + count($data['products']);
 		$data['text_load_more']  = $this->language->get('text_load_more');
 		$data['page']            = $page;
 		$data['text_gift_badge'] = $this->language->get('text_gift_badge');
+		$data['view_mode']       = $view_mode;
 
 		$this->response->setOutput($this->load->view('product/new_arrivals', $data));
 	}
@@ -390,6 +402,8 @@ class ControllerProductNewArrivals extends Controller {
 		} else {
 			$limit = (int)$this->config->get('theme_' . $this->config->get('config_theme') . '_product_limit');
 		}
+
+		$view_mode = isset($this->request->get['view']) && in_array($this->request->get['view'], array('grid', 'list', 'table')) ? $this->request->get['view'] : 'grid';
 
 		$filter_data = array(
 			'sort'  => $sort,
@@ -501,6 +515,7 @@ class ControllerProductNewArrivals extends Controller {
 		foreach ($products as $product) {
 			$html .= $this->load->view('product/product_card_ajax', array(
 				'product'          => $product,
+				'view_mode'        => $view_mode,
 				'text_quick_view'  => $this->language->get('text_quick_view'),
 				'text_reviews'     => $this->language->get('text_reviews_word'),
 				'text_sale'        => '',

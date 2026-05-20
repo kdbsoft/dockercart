@@ -222,7 +222,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
         }
         
         // Add autocomplete JavaScript before </head>
-        $script = '<script src="catalog/view/javascript/dockercart_search_autocomplete.js"></script>' . "\n";
+        $script = '<script src="catalog/view/javascript/dockercart_search_autocomplete.js?v=' . DOCKERCART_VERSION . '"></script>' . "\n";
         $script .= '<script>' . "\n";
         // Load search labels
         $this->load->language('common/search');

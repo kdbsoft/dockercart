@@ -957,3 +957,113 @@ body.modal-open { overflow: hidden; }
   background: #dbeafe;
   text-decoration: none;
 }
+
+/* =============================================================
+   View Mode Toggle (grid / list / table)
+   ============================================================= */
+.dc-view-toggle .dc-view-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.dc-view-toggle .dc-view-btn:hover {
+  background: #f3f4f6;
+  border-color: #e5e7eb;
+}
+.dc-view-toggle .dc-view-btn.is-active {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+.dc-view-toggle .dc-view-btn.is-active svg {
+  stroke: #2563eb !important;
+}
+
+/* ── List view ──────────────────────────────────────────── */
+.dc-view-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1rem !important;
+}
+.dc-view-list .product-card {
+  flex-direction: row !important;
+  border-radius: 1rem !important;
+}
+.dc-view-list .wishlist-btn {
+  opacity: 1 !important;
+  transform: none !important;
+}
+.dc-view-list .quick-view-btn,
+.dc-view-list .add-to-cart-btn {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* ── Table view ─────────────────────────────────────────── */
+.dc-view-table {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.5rem !important;
+}
+.dc-view-table .product-card {
+  display: grid !important;
+  grid-template-columns: 50px minmax(140px, 1fr) auto auto auto 48px auto;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.625rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid #f3f4f6;
+  background: #fff;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.dc-view-table .product-card:hover {
+  border-color: #e5e7eb;
+  box-shadow: 0 2px 8px rgba(2,6,23,0.06);
+}
+.dc-view-table .product-card .wishlist-btn,
+.dc-view-table .product-card .quick-view-btn,
+.dc-view-table .product-card .add-to-cart-btn {
+  opacity: 1 !important;
+  transform: none !important;
+  position: static !important;
+}
+.dc-view-table .product-card .wishlist-btn {
+  width: 28px;
+  height: 28px;
+}
+.dc-view-table .product-card .wishlist-btn i {
+  width: 12px;
+  height: 12px;
+}
+@media (max-width: 1023px) {
+  .dc-view-table,
+  .dc-view-list {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 1rem !important;
+  }
+  .dc-view-table .product-card {
+    grid-template-columns: 1fr !important;
+    gap: 0;
+    padding: 0;
+    border: 1px solid #e5e7eb;
+    border-radius: 1rem;
+    overflow: hidden;
+  }
+}
+
+/* ── View toggle visibility: desktop only ──────────────── */
+.dc-view-toggle {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .dc-view-toggle {
+    display: inline-flex;
+  }
+}
