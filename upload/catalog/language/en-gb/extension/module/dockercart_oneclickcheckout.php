@@ -2,7 +2,7 @@
 /**
  * DockerCart 1-Click Checkout Module
  * Catalog Language File (English)
- * 
+ *
  * @package    DockerCart
  * @author     DockerCart Team
  * @copyright  2026 DockerCart

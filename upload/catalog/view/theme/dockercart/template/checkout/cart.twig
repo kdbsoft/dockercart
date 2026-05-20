@@ -198,6 +198,11 @@
               {{ button_checkout }}
               <i data-lucide="arrow-right" class="w-4 h-4"></i>
             </a>
+            {% if oneclickcheckout_enabled and products is not empty %}
+            <button type="button" id="button-oneclickcheckout-cart" data-theme="theme-purple" class="mt-3 w-full flex items-center justify-center gap-2 border border-purple-200 text-purple-700 font-bold px-6 py-3 rounded-2xl hover:bg-purple-50 transition-colors text-sm">
+              <i data-lucide="zap" class="w-4 h-4"></i>{{ button_oneclickcheckout }}
+            </button>
+            {% endif %}
             <a href="{{ continue }}" class="mt-3 w-full flex items-center justify-center gap-2 border border-gray-200 hover:border-gray-300 bg-white text-gray-600 font-medium px-6 py-2.5 rounded-xl transition-colors text-sm">
               <i data-lucide="arrow-left" class="w-4 h-4"></i>
               {{ button_shopping }}
@@ -226,4 +231,9 @@
   </section>
 
 </main>
+
+{% if oneclickcheckout_modal %}
+{{ oneclickcheckout_modal }}
+{% endif %}
+
 {{ footer }}
