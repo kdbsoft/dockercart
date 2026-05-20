@@ -1,3 +1,9 @@
+## [1.17.2](https://github.com/mathflow-bit/dockercart/compare/v1.17.1...v1.17.2) (2026-05-20)
+
+### Bug Fixes
+
+* persist product view mode with cookie and sync to localStorage ([eec4603](https://github.com/mathflow-bit/dockercart/commit/eec4603321e0ad5e6838ad35b37ab59fd6e0477b))
+
 ## [1.17.1](https://github.com/mathflow-bit/dockercart/compare/v1.17.0...v1.17.1) (2026-05-20)
 
 ### Bug Fixes
