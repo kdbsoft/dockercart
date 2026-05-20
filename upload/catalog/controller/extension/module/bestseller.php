@@ -107,6 +107,7 @@ class ControllerExtensionModuleBestSeller extends Controller {
 					'rating'      => $rating,
 					'reviews'     => $product_info['reviews'],
 					'in_wishlist' => in_array((int)$product_info['product_id'], $wishlist_ids) ? 1 : 0,
+					'has_gift'    => !empty($product_info['has_gift']),
 					'href'        => $this->url->link('product/product', 'product_id=' . $product_info['product_id'])
 				);
 			}
@@ -121,6 +122,8 @@ class ControllerExtensionModuleBestSeller extends Controller {
 			$data['section_title'] = $this->language->get('heading_title');
 
 			$data['text_reviews'] = $this->language->get('text_reviews');
+			$this->load->language('product/product');
+			$data['text_gift_badge'] = $this->language->get('text_gift_badge');
 			return $this->load->view('extension/module/bestseller', $data);
 		}
 	}
