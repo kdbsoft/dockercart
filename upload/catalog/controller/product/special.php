@@ -41,6 +41,7 @@ class ControllerProductSpecial extends Controller {
 		$data['text_products'] = $this->language->get('text_products');
 		$data['text_quick_view'] = $this->language->get('text_quick_view');
 		$data['text_sale'] = $this->language->get('text_sale');
+		$data['text_gift_badge'] = $this->language->get('text_gift_badge');
 		$data['text_special_tagline'] = $this->language->get('text_special_tagline');
 		// short word for "reviews" (used in listing templates)
 		$data['text_reviews'] = $this->language->get('text_reviews_word');
@@ -165,6 +166,7 @@ class ControllerProductSpecial extends Controller {
 				'reviews'     => isset($result['reviews']) ? $result['reviews'] : 0,
 				'stock'       => $stock,
 				'is_in_stock' => ($stock_quantity > 0),
+				'has_gift'    => !empty($result['has_gift']),
 				'href'        => $this->url->link('product/product', 'product_id=' . $result['product_id'] . $url)
 			);
 		}
@@ -425,6 +427,7 @@ class ControllerProductSpecial extends Controller {
 				'stock'       => $stock,
 				'is_in_stock' => ($stock_quantity > 0),
 				'in_wishlist' => in_array((int)$result['product_id'], $wishlist_ids) ? 1 : 0,
+				'has_gift'    => !empty($result['has_gift']),
 				'href'        => $this->url->link('product/product', 'product_id=' . $result['product_id'])
 			);
 		}
@@ -436,6 +439,7 @@ class ControllerProductSpecial extends Controller {
 				'text_quick_view'  => $this->language->get('text_quick_view'),
 				'text_reviews'     => $this->language->get('text_reviews_word'),
 				'text_sale'        => $this->language->get('text_sale'),
+				'text_gift_badge'  => $this->language->get('text_gift_badge'),
 				'button_cart'      => $this->language->get('button_cart'),
 				'btn_quick_hover'  => 'hover:bg-red-600',
 				'link_hover'       => 'hover:text-blue-600 transition',

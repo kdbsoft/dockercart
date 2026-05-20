@@ -34,6 +34,8 @@
 
     {% if product.new_arrival_badge is defined and product.new_arrival_badge %}
       <span class="absolute top-2 left-2 bg-gradient-to-r {{ product.new_arrival_badge_class }} text-white text-[10px] font-bold px-2 py-0.5 rounded-md">{{ product.new_arrival_badge }}</span>
+    {% elseif product.has_gift is defined and product.has_gift %}
+      <span class="absolute top-2 left-2 bg-amber-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md flex items-center gap-1"><i data-lucide="gift" class="w-3 h-3"></i> {{ text_gift_badge }}</span>
     {% elseif product.special %}
       <span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md">{{ text_sale }}</span>
     {% endif %}
