@@ -856,30 +856,30 @@ class ControllerStartupSeoUrl extends Controller
         return "extension/module/" . $code;
     }
 
-    /**
-     * Generate SEO URL on the fly from route
-     * Examples: account/return/add → account-return-add, checkout/cart → checkout-cart
-     */
-    private function generateSeoUrlFromRoute($route)
-    {
-        // Skip generating URLs for admin, api, install routes
-        if (
-            strpos($route, "admin") === 0 ||
-            strpos($route, "api") === 0 ||
-            strpos($route, "install") === 0
-        ) {
-            return "";
-        }
+	/**
+	 * Generate SEO URL on the fly from route
+	 * Examples: account/return/add → account/return/add, checkout/cart → checkout/cart
+	 */
+	private function generateSeoUrlFromRoute($route)
+	{
+		// Skip generating URLs for admin, api, install routes
+		if (
+			strpos($route, "admin") === 0 ||
+			strpos($route, "api") === 0 ||
+			strpos($route, "install") === 0
+		) {
+			return "";
+		}
 
-        // Skip common/home
-        if ($route === "common/home") {
-            return "";
-        }
+		// Skip common/home
+		if ($route === "common/home") {
+			return "";
+		}
 
-        // Replace slashes with dashes to create clean URL
-        // account/return/add → account-return-add
-        return str_replace("/", "-", $route);
-    }
+		// Use the route path with slashes as the SEO URL
+		// account/return/add → account/return/add
+		return $route;
+	}
 
     /**
      * Check if generated SEO keyword has conflicts with database entries
@@ -907,19 +907,19 @@ class ControllerStartupSeoUrl extends Controller
             return true;
         }
 
-        if ($route) {
-            $parts = explode("-", $generated_keyword);
-            if (count($parts) > 1) {
-                $last_part = end($parts);
-                if (
-                    isset(
-                        $this->seoKeywordQueryPairs[$last_part . "||" . $route],
-                    )
-                ) {
-                    return true;
-                }
-            }
-        }
+		if ($route) {
+			$parts = explode("/", $generated_keyword);
+			if (count($parts) > 1) {
+				$last_part = end($parts);
+				if (
+					isset(
+						$this->seoKeywordQueryPairs[$last_part . "||" . $route],
+					)
+				) {
+					return true;
+				}
+			}
+		}
 
         return false;
     }
@@ -1205,9 +1205,35 @@ class ControllerStartupSeoUrl extends Controller
             }
         }
 
-        // Multi-segment handling for category paths
-        $this->decodeMultiSegmentUrl($parts);
-    }
+		// Check if multi-segment path is a generated route URL (e.g., account/register)
+		// Generated routes use slashes instead of dashes: account/register, checkout/cart
+		$potential_route = implode("/", $parts);
+		if ($this->isValidGeneratedRoute($potential_route)) {
+			// Verify no individual segment exists as a known SEO keyword
+			// (would conflict with category/product/etc entity routes)
+			$has_segment_conflict = false;
+			foreach ($parts as $part) {
+				if ($this->getSeoQueryByKeyword($part) !== "") {
+					$has_segment_conflict = true;
+					break;
+				}
+			}
+
+			if (!$has_segment_conflict) {
+				// Check if a shorter SEO keyword exists for this exact route
+				$shorter_seo_keyword = $this->getSeoKeyword($potential_route);
+
+				if (!$shorter_seo_keyword) {
+					$this->request->get["route"] = $potential_route;
+					return;
+				}
+			}
+		}
+
+		// Multi-segment handling for category paths
+		$this->decodeMultiSegmentUrl($parts);
+	}
+
 
     /**
      * Decode single-segment SEO URLs
@@ -1314,9 +1340,19 @@ class ControllerStartupSeoUrl extends Controller
                     return;
                 }
 
-                // No shorter version found in DB, so this generated URL is valid
-                $this->request->get["route"] = $potential_route;
-                return;
+				// Redirect old dash-based URL to new slash-based URL (GET only)
+				if ($this->isGetRequest && !$this->isXhr) {
+					$remaining_query = $this->buildRemainingQueryString(["_route_", "route"]);
+					$redirect_url = $this->buildRedirectUrl(
+						"/" . $this->calculateLanguagePrefix() . $potential_route . $remaining_query,
+					);
+					$this->response->redirect($redirect_url, 301);
+					exit();
+				}
+
+				// Fallback for POST/AJAX: set route directly (no redirect)
+				$this->request->get["route"] = $potential_route;
+				return;
             }
         }
 
