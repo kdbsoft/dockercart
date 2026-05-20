@@ -104,7 +104,9 @@
                 <a href="{{ product.href }}">
                   <img src="{{ product.thumb }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                 </a>
-                {% if product.special %}
+                {% if product.has_gift %}
+                <span class="absolute top-2 left-2 bg-amber-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md flex items-center gap-1"><i data-lucide="gift" class="w-3 h-3"></i> {{ text_gift_badge|default('GIFT') }}</span>
+                {% elseif product.special %}
                 <span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md">{{ text_sale|default('SALE') }}</span>
                 {% endif %}
                 <div class="absolute top-2 right-2">

@@ -685,6 +685,23 @@ select[disabled] {
                 </div>
               </div>
               {% endfor %}
+              {% if gifts %}
+                {% for gift in gifts %}
+                <div class="order-item border-amber-200 bg-amber-50/40">
+                  <div class="w-12 h-12 bg-amber-100 rounded-lg overflow-hidden flex-shrink-0">
+                    <img src="{{ gift.image }}" alt="{{ gift.name }}" class="w-full h-full object-cover">
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="font-medium text-text-primary text-xs">{{ gift.name }}</p>
+                    <div class="flex items-center gap-1.5 mt-0.5">
+                      <span class="text-[10px] text-red-400 line-through">{{ gift.price }}</span>
+                      <span class="text-[10px] text-emerald-600 font-bold">{{ text_free }}</span>
+                    </div>
+                  </div>
+                  <i data-lucide="gift" class="w-3.5 h-3.5 text-amber-500 flex-shrink-0"></i>
+                </div>
+                {% endfor %}
+              {% endif %}
             {% else %}
               <div class="text-center py-8">
                 <p class="text-text-secondary">{{ text_empty_cart }}</p>
