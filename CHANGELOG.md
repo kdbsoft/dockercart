@@ -1,3 +1,11 @@
+## [1.15.0](https://github.com/mathflow-bit/dockercart/compare/v1.14.1...v1.15.0) (2026-05-20)
+
+### Features
+
+* add fallback canonical URL generation in header ([53cd889](https://github.com/mathflow-bit/dockercart/commit/53cd889381dc5b874f4775a337ce8ad1db9700eb))
+* remove controller SEO management UI and related endpoints ([64c82cb](https://github.com/mathflow-bit/dockercart/commit/64c82cbfd07e94a7a4c3048efc4c5a199c541ab5))
+* use slash SEO URLs and redirect dash URLs ([2352484](https://github.com/mathflow-bit/dockercart/commit/2352484ba605ba82b4b20a0e541d166df68f5edc))
+
 ## [1.14.1](https://github.com/mathflow-bit/dockercart/compare/v1.14.0...v1.14.1) (2026-05-19)
 
 ### Bug Fixes
