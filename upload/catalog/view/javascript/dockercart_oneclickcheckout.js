@@ -184,6 +184,7 @@ function validateAndNormalizeTelephone(telephone) {
     var backdrop = document.createElement("div");
     backdrop.id = BACKDROP_ID;
     backdrop.className = "modal-backdrop fade in";
+    backdrop.style.zIndex = "2147482999";
     document.body.appendChild(backdrop);
     return backdrop;
   }
@@ -345,7 +346,7 @@ function validateAndNormalizeTelephone(telephone) {
       alert.style.top = "16px";
       alert.style.left = "50%";
       alert.style.transform = "translateX(-50%)";
-      alert.style.zIndex = "1060";
+      alert.style.zIndex = "2147483640";
       alert.style.maxWidth = "720px";
       alert.style.width = "auto";
       alert.style.boxSizing = "border-box";
@@ -412,7 +413,7 @@ function validateAndNormalizeTelephone(telephone) {
       backdrop.style.right = "0";
       backdrop.style.bottom = "0";
       backdrop.style.backgroundColor = "rgba(0,0,0,0.5)";
-      backdrop.style.zIndex = "1050";
+      backdrop.style.zIndex = "2147483646";
 
       var popup = document.createElement("div");
       popup.id = "oneclickcheckout-success-popup";
@@ -425,7 +426,7 @@ function validateAndNormalizeTelephone(telephone) {
       popup.style.left = "50%";
       popup.style.top = "50%";
       popup.style.transform = "translate(-50%, -50%)";
-      popup.style.zIndex = "1060";
+      popup.style.zIndex = "2147483647";
       popup.style.width = "90%";
       popup.style.maxWidth = "520px";
       popup.style.background = "#ffffff";
@@ -541,16 +542,25 @@ function validateAndNormalizeTelephone(telephone) {
     return formatted;
   }
 
-  function handleOpenModal(button) {
+  function handleOpenModal(button, isCartMode) {
     var form = getForm();
     var modal = getModal();
 
     if (!form || !modal) return;
 
-    var productId = button.getAttribute("data-product-id");
-    var theme = button.getAttribute("data-theme") || "theme-purple";
+    isCartMode =
+      isCartMode || button.id === "button-oneclickcheckout-cart";
 
-    form.setAttribute("data-product-id", productId || "0");
+    if (isCartMode) {
+      form.setAttribute("data-cart-mode", "1");
+      form.removeAttribute("data-product-id");
+    } else {
+      var productId = button.getAttribute("data-product-id");
+      form.setAttribute("data-product-id", productId || "0");
+      form.removeAttribute("data-cart-mode");
+    }
+
+    var theme = button.getAttribute("data-theme") || "theme-purple";
     applyTheme(modal, theme);
     clearEditableFields(form);
     clearFormErrors(form);
@@ -599,6 +609,7 @@ function validateAndNormalizeTelephone(telephone) {
   function handleSubmit() {
     var submitButton = document.getElementById("oneclickcheckout-submit");
     var form = getForm();
+    var isCartMode = form ? form.getAttribute("data-cart-mode") === "1" : false;
     var productId = form ? form.getAttribute("data-product-id") : "0";
 
     if (!submitButton || !form) return;
@@ -659,16 +670,24 @@ function validateAndNormalizeTelephone(telephone) {
     submitButton.innerHTML = "Processing...";
 
     var payload = collectFormData(form);
-    payload.set("product_id", productId || "0");
+
+    if (isCartMode) {
+      // Cart mode — don't send product_id, server reads from session
+      payload.delete("product_id");
+    } else {
+      payload.set("product_id", productId || "0");
+    }
 
     var captchaInput = document.querySelector('input[name="captcha"]');
     if (captchaInput) {
       payload.set("captcha", captchaInput.value || "");
     }
 
-    fetch(
-      "index.php?route=extension/module/dockercart_oneclickcheckout/submit",
-      {
+    var route = isCartMode
+      ? "index.php?route=extension/module/dockercart_oneclickcheckout/submitCart"
+      : "index.php?route=extension/module/dockercart_oneclickcheckout/submit";
+
+    fetch(route, {
         method: "POST",
         credentials: "same-origin",
         headers: {
@@ -759,6 +778,16 @@ function validateAndNormalizeTelephone(telephone) {
           }
 
           hideModal();
+
+          // Refresh cart drawer if in cart mode
+          if (isCartMode && typeof dcRefreshCart === "function") {
+            try {
+              dcRefreshCart(false);
+            } catch (e) {
+              console.error("Failed to refresh cart:", e);
+            }
+          }
+
           // Try to show centered success popup (preferred). If popup fails, fall back to top alert.
           try {
             var modal = getModal();
@@ -792,6 +821,13 @@ function validateAndNormalizeTelephone(telephone) {
     if (oneClickButton) {
       e.preventDefault();
       handleOpenModal(oneClickButton);
+      return;
+    }
+
+    var cartModeButton = e.target.closest("#button-oneclickcheckout-cart");
+    if (cartModeButton) {
+      e.preventDefault();
+      handleOpenModal(cartModeButton, true);
       return;
     }
 
