@@ -1,6 +1,6 @@
 /**
  * DockerCart View Mode — grid / list / table switcher.
- * Handles click on toggle buttons (navigates to ?view=).
+ * Saves preference to localStorage + cookie, reloads to render correct HTML.
  */
 (function () {
     'use strict';
@@ -8,15 +8,14 @@
     var STORAGE_KEY = 'dc_view_mode';
     var VALID_MODES = ['grid', 'list', 'table'];
 
+    function setCookie(mode) {
+        document.cookie = STORAGE_KEY + '=' + mode + ';path=/;max-age=31536000;SameSite=Lax';
+    }
+
     function navigateToMode(mode) {
         try { localStorage.setItem(STORAGE_KEY, mode); } catch (e) {}
-        var url = new URL(window.location.href);
-        if (mode === 'grid') {
-            url.searchParams.delete('view');
-        } else {
-            url.searchParams.set('view', mode);
-        }
-        window.location.href = url;
+        setCookie(mode);
+        location.reload();
     }
 
     function initViewToggle() {

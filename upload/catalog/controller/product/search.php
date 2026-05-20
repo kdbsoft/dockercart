@@ -65,10 +65,11 @@ class ControllerProductSearch extends Controller {
 			$limit = $this->config->get('theme_' . $this->config->get('config_theme') . '_product_limit');
 		}
 
-		if (isset($this->request->get['view']) && in_array($this->request->get['view'], array('grid', 'list', 'table'))) {
+		$view_mode = 'grid';
+		if (isset($this->request->cookie['dc_view_mode']) && in_array($this->request->cookie['dc_view_mode'], array('grid', 'list', 'table'))) {
+			$view_mode = $this->request->cookie['dc_view_mode'];
+		} elseif (isset($this->request->get['view']) && in_array($this->request->get['view'], array('grid', 'list', 'table'))) {
 			$view_mode = $this->request->get['view'];
-		} else {
-			$view_mode = 'grid';
 		}
 
 		if (isset($this->request->get['search'])) {
@@ -516,7 +517,7 @@ class ControllerProductSearch extends Controller {
 		if (isset($this->request->get['description'])) { $lm_params .= '&description=' . $this->request->get['description']; }
 		if (isset($this->request->get['category_id'])) { $lm_params .= '&category_id=' . $this->request->get['category_id']; }
 		if (isset($this->request->get['sub_category'])) { $lm_params .= '&sub_category=' . $this->request->get['sub_category']; }
-		$lm_params .= '&sort=' . $sort . '&order=' . $order . '&limit=' . $limit . '&view=' . $view_mode;
+		$lm_params .= '&sort=' . $sort . '&order=' . $order . '&limit=' . $limit;
 		$data['load_more_url']   = HTTP_SERVER . 'index.php?route=product/search/loadmore&' . ltrim($lm_params, '&');
 		$data['has_more']        = isset($product_total) && $product_total > (($page - 1) * $limit + count($data['products']));
 		$data['products_loaded'] = ($page - 1) * $limit + count($data['products']);
@@ -563,7 +564,12 @@ class ControllerProductSearch extends Controller {
 			$limit = (int)$this->config->get('theme_' . $this->config->get('config_theme') . '_product_limit');
 		}
 
-		$view_mode = isset($this->request->get['view']) && in_array($this->request->get['view'], array('grid', 'list', 'table')) ? $this->request->get['view'] : 'grid';
+		$view_mode = 'grid';
+		if (isset($this->request->cookie['dc_view_mode']) && in_array($this->request->cookie['dc_view_mode'], array('grid', 'list', 'table'))) {
+			$view_mode = $this->request->cookie['dc_view_mode'];
+		} elseif (isset($this->request->get['view']) && in_array($this->request->get['view'], array('grid', 'list', 'table'))) {
+			$view_mode = $this->request->get['view'];
+		}
 
 		if (!isset($this->request->get['search']) && !isset($this->request->get['tag'])) {
 			$this->response->setOutput(json_encode(array('html' => '', 'count' => 0, 'total' => 0)));
