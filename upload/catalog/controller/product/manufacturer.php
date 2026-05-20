@@ -86,6 +86,7 @@ class ControllerProductManufacturer extends Controller {
 
 	public function info() {
 		$this->load->language('product/manufacturer');
+		$this->load->language('product/product');
 
 		$this->load->model('catalog/manufacturer');
 
@@ -280,6 +281,7 @@ class ControllerProductManufacturer extends Controller {
 					'reviews'     => isset($result['reviews']) ? $result['reviews'] : 0,
 					'stock'       => $stock,
 					'is_in_stock' => ($stock_quantity > 0),
+					'has_gift'    => !empty($result['has_gift']),
 					'href'        => $this->url->link('product/product', 'manufacturer_id=' . $result['manufacturer_id'] . '&product_id=' . $result['product_id'] . $url)
 				);
 			}
@@ -434,6 +436,7 @@ class ControllerProductManufacturer extends Controller {
 			$data['products_loaded'] = ($page - 1) * $limit + count($data['products']);
 			$data['text_load_more']  = $this->language->get('text_load_more');
 			$data['page']            = $page;
+			$data['text_gift_badge'] = $this->language->get('text_gift_badge');
 
 				$this->response->setOutput($this->load->view('product/manufacturer_info', $data));
 		} else {
@@ -586,6 +589,7 @@ class ControllerProductManufacturer extends Controller {
 				'stock'       => $stock,
 				'is_in_stock' => ($stock_quantity > 0),
 				'in_wishlist' => in_array((int)$result['product_id'], $wishlist_ids) ? 1 : 0,
+				'has_gift'    => !empty($result['has_gift']),
 				'href'        => $this->url->link('product/product', 'manufacturer_id=' . $result['manufacturer_id'] . '&product_id=' . $result['product_id'])
 			);
 		}
