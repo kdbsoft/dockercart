@@ -36,7 +36,6 @@
       <li><a href="#tab-categories" class="js-seo-tab" data-toggle="tab" data-title="{{ tab_categories }}" data-subtitle="{{ text_edit }}" data-icon="fa-sitemap"><i class="fa fa-sitemap"></i> {{ tab_categories }}</a></li>
       <li><a href="#tab-manufacturers" class="js-seo-tab" data-toggle="tab" data-title="{{ tab_manufacturers }}" data-subtitle="{{ text_edit }}" data-icon="fa-industry"><i class="fa fa-industry"></i> {{ tab_manufacturers }}</a></li>
       <li><a href="#tab-information" class="js-seo-tab" data-toggle="tab" data-title="{{ tab_information }}" data-subtitle="{{ text_edit }}" data-icon="fa-file-text-o"><i class="fa fa-file-text-o"></i> {{ tab_information }}</a></li>
-      <li><a href="#tab-controllers" class="js-seo-tab" data-toggle="tab" data-title="{{ tab_controllers }}" data-subtitle="{{ text_edit }}" data-icon="fa-code"><i class="fa fa-code"></i> {{ tab_controllers }}</a></li>
       <li><a href="#tab-license" class="js-seo-tab" data-toggle="tab" data-title="{{ text_tab_license }}" data-subtitle="{{ text_edit }}" data-icon="fa-key"><i class="fa fa-key"></i> {{ text_tab_license }}</a></li>
       <li><a href="#tab-about" class="js-seo-tab" data-toggle="tab" data-title="{{ text_tab_about }}" data-subtitle="{{ heading_title }}" data-icon="fa-info-circle"><i class="fa fa-info-circle"></i> {{ text_tab_about }}</a></li>
     </ul>
@@ -346,91 +345,7 @@
             <div class="tab-pane" id="tab-information">
               {{ information_entity_html|raw }}
             </div>
-            
-            <!-- Контроллеры -->
-            <div class="tab-pane" id="tab-controllers">
-              <div class="alert alert-info">
-                <i class="fa fa-info-circle"></i> {{ help_controllers }}
-              </div>
-              
-              <div class="well">
-                <h4>{{ text_select_controllers }}</h4>
-                
-                <div class="form-group">
-                  <div class="col-sm-12">
-                    <button type="button" id="btn-scan-controllers" class="btn btn-primary">
-                      <i class="fa fa-search"></i> {{ button_scan_controllers }}
-                    </button>
-                    <span class="help-block">
-                      <i class="fa fa-info-circle"></i> {{ help_controllers }}
-                    </span>
-                  </div>
-                </div>
-                
-                <div id="found-controllers-list" style="margin-top: 20px; display: none;">
-                  <h5>{{ text_found_controllers }}</h5>
-                  <p class="text-muted">
-                    <i class="fa fa-info-circle"></i> {{ text_controllers_table_help }}
-                  </p>
-                  
-                  <div class="form-group" style="margin-bottom: 15px;">
-                    <button type="button" id="btn-generate-selected" class="btn btn-success" disabled>
-                      <i class="fa fa-cogs"></i> {{ button_generate_selected }} (<span id="selected-count">0</span>)
-                    </button>
-                    <button type="button" id="btn-delete-selected" class="btn btn-danger" disabled>
-                      <i class="fa fa-trash"></i> {{ button_delete_selected }} (<span id="selected-count-delete">0</span>)
-                    </button>
-                    <button type="button" id="btn-select-all" class="btn btn-default">
-                      <i class="fa fa-check-square-o"></i> Select All
-                    </button>
-                    <button type="button" id="btn-deselect-all" class="btn btn-default">
-                      <i class="fa fa-square-o"></i> Deselect All
-                    </button>
-                    <label style="margin-left: 20px; display: inline-block;">
-                      <input type="checkbox" id="checkbox-overwrite-urls" />
-                      {{ text_overwrite_url }}
-                    </label>
-                    <span class="help-block" style="margin: 5px 0 0 0;">
-                      <i class="fa fa-info-circle"></i> {{ text_controllers_mass_help }}
-                    </span>
-                  </div>
-                  
-                  <div class="table-responsive">
-                    <table class="table table-bordered table-hover" id="controllers-table">
-                      <thead>
-                        <tr>
-                          <th width="30" class="text-center">
-                            <input type="checkbox" id="select-all-checkbox" />
-                          </th>
-                          <th width="200">{{ text_controller_route }}</th>
-                          <th width="150">{{ text_controller_title }}</th>
-                          {% for language in languages %}
-                          <th>
-                            <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }} URL
-                          </th>
-                          {% endfor %}
-                          <th width="150">{{ text_actions }}</th>
-                        </tr>
-                      </thead>
-                      <tbody id="controllers-tbody">
-                        <!-- Filled by JS -->
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="alert alert-info">
-                <h4><i class="fa fa-lightbulb-o"></i> {{ text_how_to_use }}</h4>
-                <ol>
-                  <li>{{ text_how_to_use_1 }}</li>
-                  <li>{{ text_how_to_use_2 }}</li>
-                  <li>{{ text_how_to_use_3 }}</li>
-                  <li>{{ text_how_to_use_4 }}</li>
-                  <li>{{ text_how_to_use_5 }}</li>
-                </ol>
-              </div>
-            </div>
+
 
             <div class="tab-pane" id="tab-about">
               <table class="table table-bordered dcx-table">
