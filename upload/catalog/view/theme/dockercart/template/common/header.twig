@@ -9,6 +9,8 @@
 {% if description %}<meta name="description" content="{{ description|e('html_attr') }}" />{% endif %}
 {% if keywords %}<meta name="keywords" content="{{ keywords|e('html_attr') }}" />{% endif %}
 
+<script>(function(){try{var m=localStorage.getItem('dc_view_mode');if(m&&m!=='grid'&&location.href.indexOf('view=')===-1){var q=location.search?'&':'?';location.replace(location.href+q+'view='+m);}}catch(e){}})();</script>
+
 <!-- Google Fonts: Manrope -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
