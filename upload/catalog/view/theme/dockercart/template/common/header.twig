@@ -9,7 +9,7 @@
 {% if description %}<meta name="description" content="{{ description|e('html_attr') }}" />{% endif %}
 {% if keywords %}<meta name="keywords" content="{{ keywords|e('html_attr') }}" />{% endif %}
 
-<script>(function(){try{var m=localStorage.getItem('dc_view_mode');if(m&&m!=='grid'&&location.href.indexOf('view=')===-1){var q=location.search?'&':'?';location.replace(location.href+q+'view='+m);}}catch(e){}})();</script>
+<script>(function(){try{var m=localStorage.getItem('dc_view_mode'),c=(' '+document.cookie).match(/\sdc_view_mode=([^;]*)/);if(m&&m!=='grid'&&(!c||c[1]!==m)){document.cookie='dc_view_mode='+m+';path=/;max-age=31536000;SameSite=Lax';location.reload()}}catch(e){}})();</script>
 
 <!-- Google Fonts: Manrope -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
