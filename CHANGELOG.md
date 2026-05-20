@@ -1,3 +1,9 @@
+## [1.15.1](https://github.com/mathflow-bit/dockercart/compare/v1.15.0...v1.15.1) (2026-05-20)
+
+### Bug Fixes
+
+* sort product option values by price then name ([185f13c](https://github.com/mathflow-bit/dockercart/commit/185f13c6e03d9297802690e1f987a8c4e7ef0878))
+
 ## [1.15.0](https://github.com/mathflow-bit/dockercart/compare/v1.14.1...v1.15.0) (2026-05-20)
 
 ### Features
