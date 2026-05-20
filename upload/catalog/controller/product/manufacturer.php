@@ -86,6 +86,7 @@ class ControllerProductManufacturer extends Controller {
 
 	public function info() {
 		$this->load->language('product/manufacturer');
+		$this->load->language('product/product');
 
 		$this->load->model('catalog/manufacturer');
 
