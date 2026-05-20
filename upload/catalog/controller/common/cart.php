@@ -6,18 +6,17 @@ class ControllerCommonCart extends Controller {
 		// 1-Click Checkout module data
 		$data['oneclickcheckout_enabled'] = false;
 		$data['oneclickcheckout_modal'] = '';
-		$data['button_oneclickcheckout'] = '';
+		$data['button_oneclickcheckout_cart'] = '';
+		$data['dockercart_version'] = defined('DOCKERCART_VERSION') ? DOCKERCART_VERSION : '';
 
 		if ($this->config->get('module_dockercart_oneclickcheckout_status')) {
 			$this->load->language('extension/module/dockercart_oneclickcheckout');
-			$data['button_oneclickcheckout'] = $this->language->get('button_oneclickcheckout');
+			$data['button_oneclickcheckout_cart'] = $this->language->get('button_oneclickcheckout_cart');
 
 			$modal_html = $this->load->controller('extension/module/dockercart_oneclickcheckout/getModalHtml');
 			if ($modal_html) {
 				$data['oneclickcheckout_modal'] = $modal_html;
 				$data['oneclickcheckout_enabled'] = true;
-				$this->document->addScript('catalog/view/javascript/dockercart_oneclickcheckout.js');
-				$this->document->addScript('catalog/view/javascript/common/phone-mask.js');
 			}
 		}
 
