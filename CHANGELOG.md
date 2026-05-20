@@ -1,3 +1,9 @@
+## [1.18.1](https://github.com/mathflow-bit/dockercart/compare/v1.18.0...v1.18.1) (2026-05-20)
+
+### Bug Fixes
+
+* rename one‑click button variable, add versioned asset URLs, and ([df90177](https://github.com/mathflow-bit/dockercart/commit/df901771b9a7fa4065897c1fba0efdad3f97424f))
+
 ## [1.18.0](https://github.com/mathflow-bit/dockercart/compare/v1.17.2...v1.18.0) (2026-05-20)
 
 ### Features
