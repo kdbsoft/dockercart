@@ -1211,9 +1211,11 @@ class ControllerStartupSeoUrl extends Controller
 		if ($this->isValidGeneratedRoute($potential_route)) {
 			// Verify no individual segment exists as a known SEO keyword
 			// (would conflict with category/product/etc entity routes)
+			// Module/extension keywords (query without "=") don't create real ambiguity
 			$has_segment_conflict = false;
 			foreach ($parts as $part) {
-				if ($this->getSeoQueryByKeyword($part) !== "") {
+				$seo_query = $this->getSeoQueryByKeyword($part);
+				if ($seo_query !== "" && strpos($seo_query, "=") !== false) {
 					$has_segment_conflict = true;
 					break;
 				}
