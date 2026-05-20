@@ -1,3 +1,9 @@
+## [1.14.1](https://github.com/mathflow-bit/dockercart/compare/v1.14.0...v1.14.1) (2026-05-19)
+
+### Bug Fixes
+
+* align hero sections and simplify category header layout ([361adb6](https://github.com/mathflow-bit/dockercart/commit/361adb6d0c12a59c72b8f5f8d6ea5b62d10c7747))
+
 ## [1.14.0](https://github.com/mathflow-bit/dockercart/compare/v1.13.2...v1.14.0) (2026-05-19)
 
 ### Features
