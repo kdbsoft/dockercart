@@ -72,6 +72,42 @@ class ControllerCommonHeader extends Controller {
 			$this->document->addLink($server . 'image/' . $this->config->get('config_icon'), 'icon');
 		}
 
+		// Canonical URL fallback: generate automatically if page controller didn't set one
+		$links = $this->document->getLinks();
+		$has_canonical = false;
+		foreach ($links as $link) {
+			if (isset($link['rel']) && $link['rel'] === 'canonical') {
+				$has_canonical = true;
+				break;
+			}
+		}
+
+		if (!$has_canonical && isset($this->request->get['route'])) {
+			$route = $this->request->get['route'];
+			$args = '';
+
+			// Include known entity ID params in canonical URL
+			$entity_keys = [
+				'product_id', 'path', 'manufacturer_id', 'information_id',
+				'blog_post_id', 'blog_category_id', 'blog_author_id', 'module_id'
+			];
+
+			foreach ($entity_keys as $key) {
+				if (isset($this->request->get[$key])) {
+					if ($args) $args .= '&';
+					$args .= $key . '=' . $this->request->get[$key];
+				}
+			}
+
+			// Include page param only if > 1 (page 1 is canonical without it)
+			if (isset($this->request->get['page']) && (int)$this->request->get['page'] > 1) {
+				if ($args) $args .= '&';
+				$args .= 'page=' . (int)$this->request->get['page'];
+			}
+
+			$this->document->addLink($this->url->link($route, $args), 'canonical');
+		}
+
 		$data['title'] = $this->decodeHtmlEntities($this->document->getTitle());
 
 		$data['base'] = $server;
