@@ -32,10 +32,11 @@ class ControllerProductSpecial extends Controller {
 			$limit = $this->config->get('theme_' . $this->config->get('config_theme') . '_product_limit');
 		}
 
-		if (isset($this->request->get['view']) && in_array($this->request->get['view'], array('grid', 'list', 'table'))) {
+		$view_mode = 'grid';
+		if (isset($this->request->cookie['dc_view_mode']) && in_array($this->request->cookie['dc_view_mode'], array('grid', 'list', 'table'))) {
+			$view_mode = $this->request->cookie['dc_view_mode'];
+		} elseif (isset($this->request->get['view']) && in_array($this->request->get['view'], array('grid', 'list', 'table'))) {
 			$view_mode = $this->request->get['view'];
-		} else {
-			$view_mode = 'grid';
 		}
 
 		$this->document->setTitle($this->language->get('heading_title'));
@@ -327,7 +328,7 @@ class ControllerProductSpecial extends Controller {
 
 		// Load-more AJAX
 		$lm_params = 'sort=' . $sort . '&order=' . $order . '&limit=' . $limit;
-		$data['load_more_url']   = HTTP_SERVER . 'index.php?route=product/special/loadmore&' . $lm_params . '&view=' . $view_mode;
+		$data['load_more_url']   = HTTP_SERVER . 'index.php?route=product/special/loadmore&' . $lm_params;
 		$data['has_more']        = $product_total > (($page - 1) * $limit + count($data['products']));
 		$data['products_loaded'] = ($page - 1) * $limit + count($data['products']);
 		$data['text_load_more']  = $this->language->get('text_load_more');
@@ -363,7 +364,12 @@ class ControllerProductSpecial extends Controller {
 			$limit = (int)$this->config->get('theme_' . $this->config->get('config_theme') . '_product_limit');
 		}
 
-		$view_mode = isset($this->request->get['view']) && in_array($this->request->get['view'], array('grid', 'list', 'table')) ? $this->request->get['view'] : 'grid';
+		$view_mode = 'grid';
+		if (isset($this->request->cookie['dc_view_mode']) && in_array($this->request->cookie['dc_view_mode'], array('grid', 'list', 'table'))) {
+			$view_mode = $this->request->cookie['dc_view_mode'];
+		} elseif (isset($this->request->get['view']) && in_array($this->request->get['view'], array('grid', 'list', 'table'))) {
+			$view_mode = $this->request->get['view'];
+		}
 
 		$filter_data = array(
 			'sort'  => $sort,
