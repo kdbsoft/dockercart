@@ -40,3 +40,4 @@ $_['text_sale'] = 'SALE';
 $_['text_special_tagline'] = 'Exclusive deals updated regularly — don\'t miss out.';
 $_['text_products']  = '%s products';
 $_['text_load_more'] = 'Show More';
+$_['text_gift_badge'] = 'GIFT';

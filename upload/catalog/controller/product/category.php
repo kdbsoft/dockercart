@@ -295,6 +295,7 @@ class ControllerProductCategory extends Controller {
 					'stock'       => $stock,
 					'is_in_stock' => ($stock_quantity > 0),
 					'in_wishlist' => in_array((int)$result['product_id'], $wishlist_ids) ? 1 : 0,
+					'has_gift'    => !empty($result['has_gift']),
 					'category'    => '',
 					'href'        => $this->url->link('product/product', 'path=' . $this->request->get['path'] . '&product_id=' . $result['product_id'] . $url)
 				);
@@ -497,6 +498,7 @@ class ControllerProductCategory extends Controller {
 			$data['text_models'] = $this->language->get('text_models');
 			$data['text_products'] = $this->language->get('text_products');
 			$data['text_quick_view'] = $this->language->get('text_quick_view');
+			$data['text_gift_badge'] = $this->language->get('text_gift_badge');
 			$data['text_category_description'] = $this->language->get('text_category_description');
 
 			// Load-more AJAX
@@ -875,6 +877,7 @@ class ControllerProductCategory extends Controller {
 				'stock'       => $stock,
 				'is_in_stock' => ($stock_quantity > 0),
 				'in_wishlist' => in_array((int)$result['product_id'], $wishlist_ids) ? 1 : 0,
+				'has_gift'    => !empty($result['has_gift']),
 				'category'    => '',
 				'href'        => $this->url->link('product/product', 'path=' . (isset($this->request->get['path']) ? $this->request->get['path'] : '') . '&product_id=' . $result['product_id'])
 			);
@@ -887,6 +890,7 @@ class ControllerProductCategory extends Controller {
 				'text_quick_view'  => $this->language->get('text_quick_view'),
 				'text_reviews'     => $this->language->get('text_reviews_word'),
 				'text_sale'        => '',
+				'text_gift_badge'  => $this->language->get('text_gift_badge'),
 				'button_cart'      => $this->language->get('button_cart'),
 				'btn_quick_hover'  => 'hover:bg-blue-600',
 				'link_hover'       => 'hover:text-blue-600 transition',

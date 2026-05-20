@@ -37,3 +37,4 @@ $_['text_load_more']   = 'Show More';
 // Entry
 $_['entry_search']      = 'Search Criteria';
 $_['entry_description'] = 'Search in product descriptions';
+$_['text_gift_badge']  = 'GIFT';
