@@ -30,7 +30,7 @@
 
     <!-- Items container -->
     <div id="cart-items" class="flex-1 overflow-y-auto p-5 space-y-4">
-      {% if products is not empty or vouchers is not empty %}
+      {% if products is not empty or vouchers is not empty or gifts is not empty %}
         {% for product in products %}
         <div class="flex gap-3 items-start">
           {% if product.thumb %}
@@ -74,6 +74,20 @@
           </div>
         </div>
         {% endfor %}
+
+        {% for gift in gifts %}
+        <div class="flex gap-3 items-start py-2 border-b border-amber-100">
+          <img src="{{ gift.image }}" alt="{{ gift.name }}" class="w-[40px] h-[40px] rounded-lg object-contain border border-amber-200 flex-shrink-0"/>
+          <div class="flex-1 min-w-0">
+            <a href="{{ gift.href }}" onclick="dcCloseCart()" class="text-xs font-medium text-gray-800 hover:text-amber-600 transition">{{ gift.name }}</a>
+            <div class="flex items-center gap-1 mt-0.5">
+              <span class="text-[10px] text-red-400 line-through">{{ gift.price }}</span>
+              <span class="text-[10px] text-emerald-600 font-bold">{{ text_free }}</span>
+            </div>
+          </div>
+          <i data-lucide="gift" class="w-3.5 h-3.5 text-amber-500 flex-shrink-0 mt-1"></i>
+        </div>
+        {% endfor %}
       {% else %}
         <!-- Empty state -->
         <div id="cart-empty" class="flex flex-col items-center justify-center h-full text-gray-400 py-16">
@@ -86,7 +100,7 @@
     </div>
 
     <!-- Footer: totals + actions -->
-    {% if products is not empty or vouchers is not empty %}
+    {% if products is not empty or vouchers is not empty or gifts is not empty %}
     <div id="cart-footer" class="p-5 border-t border-gray-100">
       {% for total in totals %}
       <div class="flex justify-between items-center {% if not loop.last %}mb-2 text-sm text-gray-500{% else %}mb-4 text-base font-bold text-gray-900{% endif %}">

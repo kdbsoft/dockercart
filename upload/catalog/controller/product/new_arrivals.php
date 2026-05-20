@@ -202,6 +202,7 @@ class ControllerProductNewArrivals extends Controller {
 				'new_arrival_days'   => $days_since_added,
 				'new_arrival_badge'  => $badge_text,
 				'new_arrival_badge_class' => $badge_class,
+				'has_gift'               => !empty($result['has_gift']),
 				'category'           => $category_name,
 				'href'               => $this->url->link('product/product', 'product_id=' . $result['product_id'] . $url)
 			);
@@ -359,6 +360,7 @@ class ControllerProductNewArrivals extends Controller {
 		$data['products_loaded'] = ($page - 1) * $limit + count($data['products']);
 		$data['text_load_more']  = $this->language->get('text_load_more');
 		$data['page']            = $page;
+		$data['text_gift_badge'] = $this->language->get('text_gift_badge');
 
 		$this->response->setOutput($this->load->view('product/new_arrivals', $data));
 	}
@@ -490,6 +492,7 @@ class ControllerProductNewArrivals extends Controller {
 				'in_wishlist'             => in_array((int)$result['product_id'], $wishlist_ids) ? 1 : 0,
 				'new_arrival_badge'       => $badge_text,
 				'new_arrival_badge_class' => $badge_class,
+				'has_gift'                => !empty($result['has_gift']),
 				'href'                    => $this->url->link('product/product', 'product_id=' . $result['product_id'])
 			);
 		}
@@ -501,6 +504,7 @@ class ControllerProductNewArrivals extends Controller {
 				'text_quick_view'  => $this->language->get('text_quick_view'),
 				'text_reviews'     => $this->language->get('text_reviews_word'),
 				'text_sale'        => '',
+				'text_gift_badge'  => $this->language->get('text_gift_badge'),
 				'button_cart'      => $this->language->get('button_cart'),
 				'btn_quick_hover'  => 'hover:bg-teal-600',
 				'link_hover'       => 'hover:text-teal-600 transition',

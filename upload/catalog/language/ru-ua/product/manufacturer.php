@@ -30,3 +30,4 @@ $_['text_reviews_word'] = 'отзывы';
 $_['text_sort'] = 'Сортировать по:';
 $_['text_tax']       = 'Без учета налога:';
 $_['text_load_more'] = 'Показать ещё';
+$_['text_gift_badge'] = 'ПОДАРОК';

@@ -126,6 +126,36 @@ class ControllerCommonCart extends Controller {
 			}
 		}
 
+		// Product Gifts
+		$this->load->model('catalog/product');
+		$this->load->language('product/product');
+
+		$data['gifts'] = array();
+
+		foreach ($this->cart->getProducts() as $product) {
+			$gifts = $this->model_catalog_product->getProductGifts($product['product_id']);
+
+			foreach ($gifts as $gift) {
+				if ($product['quantity'] >= (int)$gift['minimum_quantity']) {
+					if ($gift['image']) {
+						$gift_image = $this->model_tool_image->resize($gift['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_cart_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_cart_height'));
+					} else {
+						$gift_image = $this->model_tool_image->resize('placeholder.png', $this->config->get('theme_' . $this->config->get('config_theme') . '_image_cart_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_cart_height'));
+					}
+
+					$data['gifts'][] = array(
+						'name'  => $gift['name'],
+						'image' => $gift_image,
+						'price' => $this->currency->format($this->tax->calculate($gift['price'], $product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']),
+						'href'  => $this->url->link('product/product', 'product_id=' . $gift['gift_product_id'])
+					);
+				}
+			}
+		}
+
+		$data['text_gift'] = $this->language->get('text_gift');
+		$data['text_free'] = $this->language->get('text_free');
+
 		$data['totals'] = array();
 
 		foreach ($totals as $total) {

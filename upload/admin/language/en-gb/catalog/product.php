@@ -85,6 +85,7 @@ $_['entry_category']         = 'Categories';
 $_['entry_filter']           = 'Filters';
 $_['entry_download']         = 'Downloads';
 $_['entry_related']          = 'Related Products';
+$_['entry_gift_product']     = 'Gift Product';
 $_['entry_tag']              = 'Product Tags';
 $_['entry_reward']           = 'Reward Points';
 $_['entry_layout']           = 'Layout Override';
@@ -106,6 +107,7 @@ $_['help_category']          = '(Autocomplete)';
 $_['help_filter']            = '(Autocomplete)';
 $_['help_download']          = '(Autocomplete)';
 $_['help_related']           = '(Autocomplete)';
+$_['help_gift_product']      = '(Autocomplete)';
 $_['help_tag']               = 'Comma separated';
 
 // Error
