@@ -438,6 +438,17 @@ class ControllerProductProduct extends Controller {
 					}
 				}
 
+				usort($product_option_value_data, function ($a, $b) {
+					$price_a = $a['price_value'] * ($a['price_prefix'] === '-' ? -1 : 1);
+					$price_b = $b['price_value'] * ($b['price_prefix'] === '-' ? -1 : 1);
+
+					if ($price_a != $price_b) {
+						return ($price_a < $price_b) ? -1 : 1;
+					}
+
+					return strcmp($a['name'], $b['name']);
+				});
+
 				$data['options'][] = array(
 					'product_option_id'    => $option['product_option_id'],
 					'product_option_value' => $product_option_value_data,
