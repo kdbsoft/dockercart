@@ -1,3 +1,9 @@
+## [1.17.0](https://github.com/mathflow-bit/dockercart/compare/v1.16.0...v1.17.0) (2026-05-20)
+
+### Features
+
+* add grid/list/table view toggle with versioned assets and ([031dd15](https://github.com/mathflow-bit/dockercart/commit/031dd1500a938119a145fdb979343a73782ffb29))
+
 ## [1.16.0](https://github.com/mathflow-bit/dockercart/compare/v1.15.1...v1.16.0) (2026-05-20)
 
 ### Features
