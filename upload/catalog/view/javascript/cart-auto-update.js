@@ -281,11 +281,7 @@ function updateCartTotals(totalsData) {
  * Update header/cart totals (compare icon and cart button) when server returns json.total
  */
 function updateHeaderTotals(totalText) {
-    // Update compare total (if present)
     try {
-        const compareEl = document.querySelector('#compare-total span');
-        if (compareEl) compareEl.textContent = totalText;
-
         // Update cart total button (legacy/OpenCart id)
         const cartTotalBtn = document.querySelector('#cart > button #cart-total');
         if (cartTotalBtn) cartTotalBtn.textContent = totalText;
