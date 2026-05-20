@@ -229,8 +229,8 @@
             </div>
 
             <button type="button" id="button-cart" data-loading-text="{{ text_loading }}"
-              class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl transition text-sm shadow-md shadow-blue-200 whitespace-nowrap">
-              {{ button_cart }}
+              class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl transition text-sm shadow-md shadow-blue-200 whitespace-nowrap flex items-center justify-center gap-2">
+              <i data-lucide="shopping-cart" class="w-5 h-5"></i>{{ button_cart }}
             </button>
 
             <button type="button" id="dc-wishlist-btn" data-product-id="{{ product_id }}" data-in-wishlist="{{ in_wishlist|default(0) }}" title="{{ button_wishlist }}"

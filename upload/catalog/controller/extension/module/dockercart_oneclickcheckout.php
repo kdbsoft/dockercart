@@ -50,7 +50,8 @@ class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
         
         // Build button HTML
         $button_html = '<div class="dockercart-oneclickcheckout-wrapper">' . "\n";
-        $button_html .= '  <button type="button" id="button-oneclickcheckout" data-product-id="' . $product_id . '" data-theme="' . htmlspecialchars($color_theme, ENT_QUOTES, 'UTF-8') . '" class="dockercart-oneclickcheckout-button mt-3 w-full py-3 border border-gray-200 text-gray-800 font-semibold rounded-xl hover:bg-gray-50 transition text-sm">';
+        $button_html .= '  <button type="button" id="button-oneclickcheckout" data-product-id="' . $product_id . '" data-theme="' . htmlspecialchars($color_theme, ENT_QUOTES, 'UTF-8') . '" class="dockercart-oneclickcheckout-button mt-3 w-full py-3 border border-gray-200 text-gray-800 font-semibold rounded-xl hover:bg-gray-50 transition text-sm flex items-center justify-center gap-2">';
+        $button_html .= '<i data-lucide="zap" class="w-5 h-5"></i>';
         $button_html .= htmlspecialchars($button_text, ENT_QUOTES, 'UTF-8');
         $button_html .= '</button>' . "\n";
         $button_html .= '</div>' . "\n";
@@ -113,6 +114,27 @@ class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
     }
     
     /**
+     * Public wrapper for buildModalHtml
+     * Can be called from other controllers via $this->load->controller()
+     */
+    public function getModalHtml() {
+        if (!$this->config->get('module_dockercart_oneclickcheckout_status')) {
+            return '';
+        }
+
+        if (!$this->checkLicense()) {
+            return '';
+        }
+
+        $color_theme = $this->config->get('module_dockercart_oneclickcheckout_color_theme');
+        if (empty($color_theme)) {
+            $color_theme = 'theme-purple';
+        }
+
+        return $this->buildModalHtml($color_theme);
+    }
+
+    /**
      * Build modal HTML
      */
     private function buildModalHtml($color_theme = 'theme-purple') {
@@ -172,7 +194,7 @@ class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
         $default_country = $this->model_localisation_country->getCountry($this->config->get('config_country_id'));
         $default_phone_format = !empty($default_country['phone_format']) ? $default_country['phone_format'] : '';
 
-        $html = '<div class="modal fade ' . htmlspecialchars($color_theme, ENT_QUOTES, 'UTF-8') . '" id="oneclickcheckout-modal" tabindex="-1" role="dialog" data-captcha="' . htmlspecialchars($captcha_code, ENT_QUOTES, 'UTF-8') . '" data-success-text="' . htmlspecialchars($success_button_text, ENT_QUOTES, 'UTF-8') . '" data-default-phone-format="' . htmlspecialchars($default_phone_format, ENT_QUOTES, 'UTF-8') . '">' . "\n";
+        $html = '<div class="modal fade ' . htmlspecialchars($color_theme, ENT_QUOTES, 'UTF-8') . '" id="oneclickcheckout-modal" tabindex="-1" role="dialog" style="z-index:2147483000;" data-captcha="' . htmlspecialchars($captcha_code, ENT_QUOTES, 'UTF-8') . '" data-success-text="' . htmlspecialchars($success_button_text, ENT_QUOTES, 'UTF-8') . '" data-default-phone-format="' . htmlspecialchars($default_phone_format, ENT_QUOTES, 'UTF-8') . '">' . "\n";
         $html .= '  <div class="modal-dialog" role="document">' . "\n";
         $html .= '    <div class="modal-content">' . "\n";
         $html .= '      <div class="modal-header">' . "\n";
@@ -552,6 +574,325 @@ class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
         return $order_id;
     }
     
+    /**
+     * AJAX: Process 1-click checkout for entire cart
+     */
+    public function submitCart() {
+        $this->load->language('extension/module/dockercart_oneclickcheckout');
+
+        $json = array();
+
+        // Check if module is enabled
+        if (!$this->config->get('module_dockercart_oneclickcheckout_status')) {
+            $json['error'] = $this->language->get('error_module_disabled');
+            $this->response->addHeader('Content-Type: application/json');
+            $this->response->setOutput(json_encode($json));
+            return;
+        }
+
+        // Check license
+        if (!$this->checkLicense()) {
+            $json['error'] = $this->language->get('error_license_invalid');
+            $this->response->addHeader('Content-Type: application/json');
+            $this->response->setOutput(json_encode($json));
+            return;
+        }
+
+        // Validate cart has products
+        if (!$this->cart->hasProducts()) {
+            $json['error']['cart'] = $this->language->get('error_product');
+            $this->response->addHeader('Content-Type: application/json');
+            $this->response->setOutput(json_encode($json));
+            return;
+        }
+
+        // Validate required fields (same as submit())
+        $fields = ['firstname', 'lastname', 'telephone', 'email', 'comment', 'address', 'city', 'postcode', 'country'];
+
+        foreach ($fields as $field) {
+            $required_key = 'module_dockercart_oneclickcheckout_field_' . $field . '_required';
+
+            if ($field === 'country') {
+                if ($this->config->get($required_key) && empty($this->request->post['country_id'])) {
+                    $json['error']['country_id'] = sprintf($this->language->get('error_required'), $this->language->get('entry_' . $field));
+                }
+            } else {
+                if ($this->config->get($required_key) && empty($this->request->post[$field])) {
+                    $json['error'][$field] = sprintf($this->language->get('error_required'), $this->language->get('entry_' . $field));
+                }
+            }
+        }
+
+        // Validate email format
+        if (!empty($this->request->post['email'])) {
+            if (!$this->validateEmail($this->request->post['email'])) {
+                $json['error']['email'] = $this->language->get('error_email');
+            }
+        }
+
+        // Validate telephone format
+        if (!empty($this->request->post['telephone'])) {
+            if (!empty($this->request->post['country_id'])) {
+                $this->load->model('localisation/country');
+                $country_info = $this->model_localisation_country->getCountry((int)$this->request->post['country_id']);
+                $phone_format = !empty($country_info['phone_format']) ? $country_info['phone_format'] : '';
+            } else {
+                $phone_format = '';
+            }
+
+            if ($phone_format) {
+                if (!$this->validatePhoneFormat($this->request->post['telephone'], $phone_format)) {
+                    $json['error']['telephone'] = $this->language->get('error_telephone');
+                }
+            } else {
+                $phone_validation = $this->validateTelephone($this->request->post['telephone']);
+                if (!$phone_validation['valid']) {
+                    $json['error']['telephone'] = $this->language->get('error_telephone');
+                } else {
+                    $this->request->post['telephone'] = $phone_validation['normalized'];
+                }
+            }
+        }
+
+        // Validate captcha if enabled
+        if ($this->config->get('module_dockercart_oneclickcheckout_use_captcha') && $this->config->get('config_captcha')) {
+            $captcha = $this->load->controller('extension/captcha/' . $this->config->get('config_captcha') . '/validate');
+
+            if ($captcha) {
+                $json['error']['captcha'] = $captcha;
+            }
+        }
+
+        if (!isset($json['error'])) {
+            $order_id = $this->createCartOrder();
+
+            if ($order_id) {
+                $json['success'] = $this->language->get('text_oneclick_success');
+                $json['order_id'] = $order_id;
+            } else {
+                $json['error']['general'] = $this->language->get('error_order_create');
+            }
+        }
+
+        $this->response->addHeader('Content-Type: application/json');
+        $this->response->setOutput(json_encode($json));
+    }
+
+    /**
+     * Create order from all cart products
+     */
+    private function createCartOrder() {
+        $this->load->model('checkout/order');
+
+        // Prepare order data
+        $order_data = array();
+
+        // Store info
+        $order_data['invoice_prefix'] = $this->config->get('config_invoice_prefix');
+        $order_data['store_id'] = $this->config->get('config_store_id');
+        $order_data['store_name'] = $this->config->get('config_name');
+        $order_data['store_url'] = $this->config->get('config_url');
+
+        // Customer info
+        if ($this->customer->isLogged()) {
+            $order_data['customer_id'] = $this->customer->getId();
+            $order_data['customer_group_id'] = $this->customer->getGroupId();
+        } else {
+            $order_data['customer_id'] = 0;
+            $order_data['customer_group_id'] = $this->config->get('config_customer_group_id');
+        }
+
+        $order_data['firstname'] = isset($this->request->post['firstname']) ? $this->request->post['firstname'] : '';
+        $order_data['lastname'] = isset($this->request->post['lastname']) ? $this->request->post['lastname'] : '';
+        $order_data['email'] = isset($this->request->post['email']) ? $this->request->post['email'] : '';
+        $order_data['telephone'] = isset($this->request->post['telephone']) ? $this->request->post['telephone'] : '';
+        $order_data['custom_field'] = array();
+
+        // Payment address
+        $order_data['payment_firstname'] = isset($this->request->post['firstname']) ? $this->request->post['firstname'] : '';
+        $order_data['payment_lastname'] = isset($this->request->post['lastname']) ? $this->request->post['lastname'] : '';
+        $order_data['payment_company'] = '';
+        $order_data['payment_address_1'] = isset($this->request->post['address']) ? $this->request->post['address'] : '';
+        $order_data['payment_address_2'] = '';
+        $order_data['payment_city'] = isset($this->request->post['city']) ? $this->request->post['city'] : '';
+        $order_data['payment_postcode'] = isset($this->request->post['postcode']) ? $this->request->post['postcode'] : '';
+
+        // Get country data if provided
+        if (!empty($this->request->post['country_id'])) {
+            $this->load->model('localisation/country');
+            $country_info = $this->model_localisation_country->getCountry($this->request->post['country_id']);
+
+            if ($country_info) {
+                $order_data['payment_country'] = $country_info['name'];
+                $order_data['payment_country_id'] = $country_info['country_id'];
+                $order_data['payment_address_format'] = $country_info['address_format'];
+            } else {
+                $order_data['payment_country'] = '';
+                $order_data['payment_country_id'] = 0;
+                $order_data['payment_address_format'] = '';
+            }
+        } else {
+            $order_data['payment_country'] = '';
+            $order_data['payment_country_id'] = 0;
+            $order_data['payment_address_format'] = '';
+        }
+
+        $order_data['payment_zone'] = '';
+        $order_data['payment_zone_id'] = 0;
+        $order_data['payment_custom_field'] = array();
+        $order_data['payment_method'] = '1-Click Checkout';
+        $order_data['payment_code'] = 'oneclickcheckout';
+
+        // Shipping address (same as payment)
+        $order_data['shipping_firstname'] = $order_data['payment_firstname'];
+        $order_data['shipping_lastname'] = $order_data['payment_lastname'];
+        $order_data['shipping_company'] = '';
+        $order_data['shipping_address_1'] = $order_data['payment_address_1'];
+        $order_data['shipping_address_2'] = '';
+        $order_data['shipping_city'] = $order_data['payment_city'];
+        $order_data['shipping_postcode'] = $order_data['payment_postcode'];
+        $order_data['shipping_country'] = $order_data['payment_country'];
+        $order_data['shipping_country_id'] = $order_data['payment_country_id'];
+        $order_data['shipping_zone'] = '';
+        $order_data['shipping_zone_id'] = 0;
+        $order_data['shipping_address_format'] = $order_data['payment_address_format'];
+        $order_data['shipping_custom_field'] = array();
+        $order_data['shipping_method'] = '1-Click Checkout';
+        $order_data['shipping_code'] = 'oneclickcheckout';
+
+        // Products from cart
+        $order_data['products'] = array();
+
+        foreach ($this->cart->getProducts() as $product) {
+            $option_data = array();
+
+            foreach ($product['option'] as $option) {
+                $option_data[] = array(
+                    'product_option_id' => $option['product_option_id'],
+                    'product_option_value_id' => $option['product_option_value_id'],
+                    'option_id' => $option['option_id'],
+                    'option_value_id' => $option['option_value_id'],
+                    'name' => $option['name'],
+                    'value' => $option['value'],
+                    'type' => $option['type']
+                );
+            }
+
+            $order_data['products'][] = array(
+                'product_id' => $product['product_id'],
+                'name'       => $product['name'],
+                'model'      => $product['model'],
+                'option'     => $option_data,
+                'download'   => $product['download'],
+                'quantity'   => $product['quantity'],
+                'subtract'   => $product['subtract'],
+                'price'      => $product['price'],
+                'total'      => $product['total'],
+                'tax'        => $this->tax->getTax($product['price'], $product['tax_class_id']),
+                'reward'     => $product['reward']
+            );
+        }
+
+        // Vouchers
+        $order_data['vouchers'] = array();
+
+        if (!empty($this->session->data['vouchers'])) {
+            foreach ($this->session->data['vouchers'] as $voucher) {
+                $order_data['vouchers'][] = $voucher;
+            }
+        }
+
+        // Calculate totals using standard OpenCart method
+        $this->load->model('setting/extension');
+
+        $totals = array();
+        $taxes = $this->cart->getTaxes();
+        $total = 0;
+
+        $total_data = array(
+            'totals' => &$totals,
+            'taxes'  => &$taxes,
+            'total'  => &$total
+        );
+
+        $sort_order = array();
+        $results = $this->model_setting_extension->getExtensions('total');
+
+        foreach ($results as $key => $value) {
+            $sort_order[$key] = $this->config->get('total_' . $value['code'] . '_sort_order');
+        }
+
+        array_multisort($sort_order, SORT_ASC, $results);
+
+        foreach ($results as $result) {
+            if ($this->config->get('total_' . $result['code'] . '_status')) {
+                $this->load->model('extension/total/' . $result['code']);
+                $this->{'model_extension_total_' . $result['code']}->getTotal($total_data);
+            }
+        }
+
+        $sort_order = array();
+
+        foreach ($totals as $key => $value) {
+            $sort_order[$key] = $value['sort_order'];
+        }
+
+        array_multisort($sort_order, SORT_ASC, $totals);
+
+        $order_data['totals'] = $totals;
+        $order_data['total'] = $total;
+
+        // Comment
+        $order_data['comment'] = isset($this->request->post['comment']) ? $this->request->post['comment'] : '';
+
+        // Other info
+        $order_data['affiliate_id'] = 0;
+        $order_data['commission'] = 0;
+        $order_data['marketing_id'] = 0;
+        $order_data['tracking'] = '';
+        $order_data['language_id'] = $this->config->get('config_language_id');
+        $order_data['currency_id'] = $this->currency->getId($this->session->data['currency']);
+        $order_data['currency_code'] = $this->session->data['currency'];
+        $order_data['currency_value'] = $this->currency->getValue($this->session->data['currency']);
+        $order_data['ip'] = $this->request->server['REMOTE_ADDR'];
+
+        if (!empty($this->request->server['HTTP_X_FORWARDED_FOR'])) {
+            $order_data['forwarded_ip'] = $this->request->server['HTTP_X_FORWARDED_FOR'];
+        } elseif (!empty($this->request->server['HTTP_CLIENT_IP'])) {
+            $order_data['forwarded_ip'] = $this->request->server['HTTP_CLIENT_IP'];
+        } else {
+            $order_data['forwarded_ip'] = '';
+        }
+
+        if (isset($this->request->server['HTTP_USER_AGENT'])) {
+            $order_data['user_agent'] = $this->request->server['HTTP_USER_AGENT'];
+        } else {
+            $order_data['user_agent'] = '';
+        }
+
+        if (isset($this->request->server['HTTP_ACCEPT_LANGUAGE'])) {
+            $order_data['accept_language'] = $this->request->server['HTTP_ACCEPT_LANGUAGE'];
+        } else {
+            $order_data['accept_language'] = '';
+        }
+
+        // Add order
+        $order_id = $this->model_checkout_order->addOrder($order_data);
+
+        // Set order status
+        $order_status_id = $this->config->get('module_dockercart_oneclickcheckout_order_status_id');
+        if (!$order_status_id) {
+            $order_status_id = $this->config->get('config_order_status_id');
+        }
+
+        $this->model_checkout_order->addOrderHistory($order_id, $order_status_id, '1-Click Checkout Order (Cart)', true);
+
+        // Clear cart
+        $this->cart->clear();
+
+        return $order_id;
+    }
+
     /**
      * Validate email address
      * 
