@@ -1,3 +1,9 @@
+## [1.17.1](https://github.com/mathflow-bit/dockercart/compare/v1.17.0...v1.17.1) (2026-05-20)
+
+### Bug Fixes
+
+* view mode handling by removing redundant JS redirects and adding ([7dd056b](https://github.com/mathflow-bit/dockercart/commit/7dd056ba109bc973f0ff678a13b1f5ce539c9b57))
+
 ## [1.17.0](https://github.com/mathflow-bit/dockercart/compare/v1.16.0...v1.17.0) (2026-05-20)
 
 ### Features
