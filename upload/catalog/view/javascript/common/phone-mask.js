@@ -97,6 +97,7 @@ const DockercartPhoneMask = (() => {
     const fmt = input._pm_fmt;
     if (!fmt) return;
     if (input._pm_composing) return;
+    if (!e.key) return;
 
     const p = pIdx(fmt);
     const max = digitCount(fmt);
@@ -201,7 +202,7 @@ const DockercartPhoneMask = (() => {
       return;
     }
 
-    if (e.key.length === 1 && /\d/.test(e.key)) {
+    if (e.key && e.key.length === 1 && /\d/.test(e.key)) {
       e.preventDefault();
       if (digits.length >= max) {
         return;
