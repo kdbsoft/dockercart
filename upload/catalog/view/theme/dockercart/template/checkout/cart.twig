@@ -145,6 +145,26 @@
               </div>
               {% endfor %}
 
+              {# Product gifts #}
+              {% for gift in gifts %}
+              <div class="bg-white rounded-2xl border border-amber-200 shadow-sm p-4 flex flex-col sm:flex-row sm:items-center gap-4">
+                <div class="flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden bg-amber-50">
+                  <img src="{{ gift.image }}" alt="{{ gift.name }}" class="w-full h-full object-cover"/>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <a href="{{ gift.href }}" class="font-semibold text-gray-900 text-sm hover:text-amber-600 transition">{{ gift.name }}</a>
+                  <div class="flex items-center gap-1.5 mt-0.5">
+                    <span class="text-xs text-red-400 line-through">{{ gift.price }}</span>
+                    <span class="text-xs text-emerald-600 font-bold">{{ text_free }}</span>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1.5 flex-shrink-0">
+                  <i data-lucide="gift" class="w-4 h-4 text-amber-500"></i>
+                  <span class="text-xs font-bold text-amber-600 uppercase">{{ text_gift }}</span>
+                </div>
+              </div>
+              {% endfor %}
+
             </div>
           </form>
 

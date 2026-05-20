@@ -33,6 +33,15 @@
       <td class="text-right">{{ voucher.amount }}</td>
     </tr>
     {% endfor %}
+    {% for gift in gifts %}
+    <tr>
+      <td class="text-left"><a href="{{ gift.href }}">{{ gift.name }}</a> <br/><small class="text-emerald-600 font-bold">{{ text_free }}</small></td>
+      <td class="text-left">{{ gift.model }}</td>
+      <td class="text-right">1</td>
+      <td class="text-right"><span class="text-red-400 line-through">{{ gift.price }}</span></td>
+      <td class="text-right">{{ text_free }}</td>
+    </tr>
+    {% endfor %}
       </tbody>
     
     <tfoot>

@@ -31,3 +31,4 @@ $_['text_reviews_word'] = 'відгуки';
 $_['text_sort'] = 'Сортувати за:';
 $_['text_tax']       = 'Без ПДВ:';
 $_['text_load_more'] = 'Показати ще';
+$_['text_gift_badge'] = 'ПОДАРУНОК';

@@ -280,6 +280,7 @@ class ControllerProductManufacturer extends Controller {
 					'reviews'     => isset($result['reviews']) ? $result['reviews'] : 0,
 					'stock'       => $stock,
 					'is_in_stock' => ($stock_quantity > 0),
+					'has_gift'    => !empty($result['has_gift']),
 					'href'        => $this->url->link('product/product', 'manufacturer_id=' . $result['manufacturer_id'] . '&product_id=' . $result['product_id'] . $url)
 				);
 			}
@@ -434,6 +435,7 @@ class ControllerProductManufacturer extends Controller {
 			$data['products_loaded'] = ($page - 1) * $limit + count($data['products']);
 			$data['text_load_more']  = $this->language->get('text_load_more');
 			$data['page']            = $page;
+			$data['text_gift_badge'] = $this->language->get('text_gift_badge');
 
 				$this->response->setOutput($this->load->view('product/manufacturer_info', $data));
 		} else {
@@ -586,6 +588,7 @@ class ControllerProductManufacturer extends Controller {
 				'stock'       => $stock,
 				'is_in_stock' => ($stock_quantity > 0),
 				'in_wishlist' => in_array((int)$result['product_id'], $wishlist_ids) ? 1 : 0,
+				'has_gift'    => !empty($result['has_gift']),
 				'href'        => $this->url->link('product/product', 'manufacturer_id=' . $result['manufacturer_id'] . '&product_id=' . $result['product_id'])
 			);
 		}
@@ -597,6 +600,7 @@ class ControllerProductManufacturer extends Controller {
 				'text_quick_view'  => $this->language->get('text_quick_view'),
 				'text_reviews'     => $this->language->get('text_reviews_word'),
 				'text_sale'        => 'SALE',
+				'text_gift_badge'  => $this->language->get('text_gift_badge'),
 				'button_cart'      => $this->language->get('button_cart'),
 				'btn_quick_hover'  => 'hover:bg-blue-600',
 				'link_hover'       => 'hover:text-blue-600 transition',
