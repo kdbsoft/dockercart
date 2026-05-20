@@ -32,3 +32,4 @@ $_['text_model_asc']    = 'Model (A - Z)';
 $_['text_model_desc']   = 'Model (Z - A)';
 $_['text_limit']        = 'Show:';
 $_['text_load_more']    = 'Show More';
+$_['text_gift_badge']  = 'GIFT';

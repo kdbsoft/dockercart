@@ -413,6 +413,30 @@ class ControllerProductProduct extends Controller {
 				);
 			}
 
+			$gifts = $this->model_catalog_product->getProductGifts($product_id);
+
+			$data['gifts'] = array();
+
+			foreach ($gifts as $gift) {
+				if ($gift['image']) {
+					$gift_image = $this->model_tool_image->resize($gift['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_height'));
+				} else {
+					$gift_image = $this->model_tool_image->resize('placeholder.png', $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_height'));
+				}
+
+				$data['gifts'][] = array(
+					'gift_product_id'  => $gift['gift_product_id'],
+					'name'             => $gift['name'],
+					'image'            => $gift_image,
+					'price'            => $this->currency->format($this->tax->calculate($gift['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']),
+					'href'             => $this->url->link('product/product', 'product_id=' . $gift['gift_product_id']),
+					'minimum_quantity' => (int)$gift['minimum_quantity']
+				);
+			}
+
+			$data['text_gift'] = $this->language->get('text_gift');
+			$data['text_gift_minimum'] = $this->language->get('text_gift_minimum');
+
 			$data['options'] = array();
 
 			foreach ($this->model_catalog_product->getProductOptions($product_id) as $option) {

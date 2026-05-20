@@ -401,6 +401,7 @@ class ControllerCheckoutDockercartCheckout extends Controller
         // Get cart contents for initial display
         $data["cart_products"] = $this->getCartProducts();
         $data["totals"] = $this->getCartTotals();
+        $data["gifts"] = $this->getCartGifts();
 
         // Journal 3 detection
         $data["is_journal3"] = $this->isJournal3Theme();
@@ -442,6 +443,8 @@ class ControllerCheckoutDockercartCheckout extends Controller
             $this->language->get("button_apply_coupon") ?: "Apply";
         $data["text_sub_total"] = "Subtotal";
         $data["text_tax"] = "Tax";
+        $data["text_gift"] = $this->language->get("text_gift") ?: "Gift with Purchase";
+        $data["text_free"] = $this->language->get("text_free") ?: "FREE";
         $data["text_show_summary"] = "Show order summary";
         $data["text_hide_summary"] = "Hide order summary";
         // Avoid duplicating the agree error: the confirm() endpoint returns a structured field error.
@@ -2316,6 +2319,41 @@ class ControllerCheckoutDockercartCheckout extends Controller
         }
 
         return $products;
+    }
+
+    /**
+     * Get cart gifts
+     */
+    private function getCartGifts()
+    {
+        $this->load->model("catalog/product");
+        $this->load->model("tool/image");
+        $this->load->language("product/product");
+
+        $gifts = [];
+
+        foreach ($this->cart->getProducts() as $product) {
+            $product_gifts = $this->model_catalog_product->getProductGifts($product["product_id"]);
+
+            foreach ($product_gifts as $gift) {
+                if ($product["quantity"] >= (int)$gift["minimum_quantity"]) {
+                    if ($gift["image"]) {
+                        $image = $this->model_tool_image->resize($gift["image"], 48, 48);
+                    } else {
+                        $image = $this->model_tool_image->resize("placeholder.png", 48, 48);
+                    }
+
+                    $gifts[] = [
+                        "name"  => $gift["name"],
+                        "image" => $image,
+                        "price" => $this->currency->format($this->tax->calculate($gift["price"], $product["tax_class_id"], $this->config->get("config_tax")), $this->session->data["currency"]),
+                        "href"  => $this->url->link("product/product", "product_id=" . $gift["gift_product_id"])
+                    ];
+                }
+            }
+        }
+
+        return $gifts;
     }
 
     /**

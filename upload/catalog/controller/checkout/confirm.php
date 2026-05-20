@@ -240,6 +240,31 @@ class ControllerCheckoutConfirm extends Controller {
 				);
 			}
 
+			// Product Gifts
+			$this->load->model('catalog/product');
+
+			foreach ($this->cart->getProducts() as $cart_product) {
+				$gifts = $this->model_catalog_product->getProductGifts($cart_product['product_id']);
+
+				foreach ($gifts as $gift) {
+					if ($cart_product['quantity'] >= (int)$gift['minimum_quantity']) {
+						$order_data['products'][] = array(
+							'product_id' => $gift['gift_product_id'],
+							'name'       => $gift['name'],
+							'model'      => '',
+							'option'     => array(),
+							'download'   => array(),
+							'quantity'   => 1,
+							'subtract'   => 0,
+							'price'      => 0,
+							'total'      => 0,
+							'tax'        => 0,
+							'reward'     => 0
+						);
+					}
+				}
+			}
+
 			// Gift Voucher
 			$order_data['vouchers'] = array();
 
@@ -397,6 +422,29 @@ class ControllerCheckoutConfirm extends Controller {
 						'description' => $voucher['description'],
 						'amount'      => $this->currency->format($voucher['amount'], $this->session->data['currency'])
 					);
+				}
+			}
+
+			// Product Gifts
+			$this->load->language('product/product');
+
+			$data['text_gift'] = $this->language->get('text_gift');
+			$data['text_free'] = $this->language->get('text_free');
+
+			$data['gifts'] = array();
+
+			foreach ($this->cart->getProducts() as $cart_product) {
+				$gifts = $this->model_catalog_product->getProductGifts($cart_product['product_id']);
+
+				foreach ($gifts as $gift) {
+					if ($cart_product['quantity'] >= (int)$gift['minimum_quantity']) {
+						$data['gifts'][] = array(
+							'name'  => $gift['name'],
+							'model' => '',
+							'price' => $this->currency->format($this->tax->calculate($gift['price'], $cart_product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']),
+							'href'  => $this->url->link('product/product', 'product_id=' . $gift['gift_product_id'])
+						);
+					}
 				}
 			}
 

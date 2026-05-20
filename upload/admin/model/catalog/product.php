@@ -360,6 +360,26 @@ class ModelCatalogProduct extends Model
             }
         }
 
+        if (isset($data["product_gift"])) {
+            foreach ($data["product_gift"] as $product_gift) {
+                $this->db->query(
+                    "INSERT INTO " .
+                        DB_PREFIX .
+                        "product_gift SET product_id = '" .
+                        (int) $product_id .
+                        "', gift_product_id = '" .
+                        (int) $product_gift["gift_product_id"] .
+                        "', minimum_quantity = '" .
+                        (int) $product_gift["minimum_quantity"] .
+                        "', date_start = '" .
+                        $this->db->escape($product_gift["date_start"]) .
+                        "', date_end = '" .
+                        $this->db->escape($product_gift["date_end"]) .
+                        "'",
+                );
+            }
+        }
+
         if (isset($data["product_customer_group_price"])) {
             foreach (
                 $data["product_customer_group_price"]
@@ -982,6 +1002,34 @@ class ModelCatalogProduct extends Model
         $this->db->query(
             "DELETE FROM " .
                 DB_PREFIX .
+                "product_gift WHERE product_id = '" .
+                (int) $product_id .
+                "'",
+        );
+
+        if (isset($data["product_gift"])) {
+            foreach ($data["product_gift"] as $product_gift) {
+                $this->db->query(
+                    "INSERT INTO " .
+                        DB_PREFIX .
+                        "product_gift SET product_id = '" .
+                        (int) $product_id .
+                        "', gift_product_id = '" .
+                        (int) $product_gift["gift_product_id"] .
+                        "', minimum_quantity = '" .
+                        (int) $product_gift["minimum_quantity"] .
+                        "', date_start = '" .
+                        $this->db->escape($product_gift["date_start"]) .
+                        "', date_end = '" .
+                        $this->db->escape($product_gift["date_end"]) .
+                        "'",
+                );
+            }
+        }
+
+        $this->db->query(
+            "DELETE FROM " .
+                DB_PREFIX .
                 "dockercart_product_customer_group_price WHERE product_id = '" .
                 (int) $product_id .
                 "'",
@@ -1276,6 +1324,7 @@ class ModelCatalogProduct extends Model
             $data["product_related"] = $this->getProductRelated($product_id);
             $data["product_reward"] = $this->getProductRewards($product_id);
             $data["product_special"] = $this->getProductSpecials($product_id);
+            $data["product_gift"] = $this->getProductGifts($product_id);
             $data["product_category"] = $this->getProductCategories(
                 $product_id,
             );
@@ -1380,6 +1429,13 @@ class ModelCatalogProduct extends Model
             "DELETE FROM " .
                 DB_PREFIX .
                 "product_special WHERE product_id = '" .
+                (int) $product_id .
+                "'",
+        );
+        $this->db->query(
+            "DELETE FROM " .
+                DB_PREFIX .
+                "product_gift WHERE product_id = '" .
                 (int) $product_id .
                 "'",
         );
@@ -1894,6 +1950,23 @@ class ModelCatalogProduct extends Model
                 "product_special WHERE product_id = '" .
                 (int) $product_id .
                 "' ORDER BY priority, price",
+        );
+
+        return $query->rows;
+    }
+
+    public function getProductGifts($product_id)
+    {
+        $query = $this->db->query(
+            "SELECT g.*, pd.name AS gift_product_name FROM " .
+                DB_PREFIX .
+                "product_gift g LEFT JOIN " .
+                DB_PREFIX .
+                "product_description pd ON (g.gift_product_id = pd.product_id AND pd.language_id = '" .
+                (int) $this->config->get('config_language_id') .
+                "') WHERE g.product_id = '" .
+                (int) $product_id .
+                "' ORDER BY g.minimum_quantity ASC",
         );
 
         return $query->rows;

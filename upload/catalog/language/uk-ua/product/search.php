@@ -36,3 +36,4 @@ $_['text_products']  = '%s товарів';
 $_['text_quick_view'] = 'Швидкий перегляд';
 $_['text_instock'] = 'В наявності';
 $_['text_load_more']  = 'Показати ще';
+$_['text_gift_badge'] = 'ПОДАРУНОК';

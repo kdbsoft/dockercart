@@ -1231,6 +1231,26 @@ class ControllerCatalogProduct extends Controller {
 			);
 		}
 
+		if (isset($this->request->post['product_gift'])) {
+			$product_gifts = $this->request->post['product_gift'];
+		} elseif (isset($this->request->get['product_id'])) {
+			$product_gifts = $this->model_catalog_product->getProductGifts($this->request->get['product_id']);
+		} else {
+			$product_gifts = array();
+		}
+
+		$data['product_gifts'] = array();
+
+		foreach ($product_gifts as $product_gift) {
+			$data['product_gifts'][] = array(
+				'gift_product_id'   => $product_gift['gift_product_id'],
+				'gift_product_name' => $product_gift['gift_product_name'] ?? '',
+				'minimum_quantity'  => $product_gift['minimum_quantity'],
+				'date_start'        => ($product_gift['date_start'] != '0000-00-00') ? $product_gift['date_start'] : '',
+				'date_end'          => ($product_gift['date_end'] != '0000-00-00') ? $product_gift['date_end'] : ''
+			);
+		}
+
 		if (isset($this->request->post['product_customer_group_price'])) {
 			$product_customer_group_prices = $this->request->post['product_customer_group_price'];
 		} elseif (isset($this->request->get['product_id'])) {
