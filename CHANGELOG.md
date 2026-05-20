@@ -1,3 +1,15 @@
+## [1.16.0](https://github.com/mathflow-bit/dockercart/compare/v1.15.1...v1.16.0) (2026-05-20)
+
+### Features
+
+* add gift badge display to product modules ([a6df8a6](https://github.com/mathflow-bit/dockercart/commit/a6df8a60ce65a1ff0301a0e2ae68ee9829832398))
+* add product gift with purchase feature ([15ed532](https://github.com/mathflow-bit/dockercart/commit/15ed532d13510fbcd0f86e8c720c6ee03791a051))
+* add version query to assets cache busting ([d1fd23e](https://github.com/mathflow-bit/dockercart/commit/d1fd23e5900a5787b8e28a110e30565191cc4ad2))
+
+### Bug Fixes
+
+* prevent phone mask error when event key is undefined ([b169ae1](https://github.com/mathflow-bit/dockercart/commit/b169ae15e3b32f5e7946d80711eea116a6f9da4c))
+
 ## [1.15.1](https://github.com/mathflow-bit/dockercart/compare/v1.15.0...v1.15.1) (2026-05-20)
 
 ### Bug Fixes
