@@ -13,7 +13,7 @@
  *   DockercartPhoneMask.stripNonDigits('+7 (999) 123-45-67'); // '389991234567'
  */
 
-const DockercartPhoneMask = (() => {
+window.DockercartPhoneMask = window.DockercartPhoneMask || (() => {
   const X = "X";
 
   function digitCount(fmt) {
