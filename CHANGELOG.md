@@ -1,3 +1,17 @@
+## [1.19.0](https://github.com/mathflow-bit/dockercart/compare/v1.18.1...v1.19.0) (2026-05-21)
+
+### Features
+
+* add product bundle feature with admin UI, DB schema, and cart ([b01b433](https://github.com/mathflow-bit/dockercart/commit/b01b4330356f9768d75deee0534fb15f498cb1aa))
+
+### Bug Fixes
+
+* allow overflow in product form gift tab table responsive div ([ea0dcbb](https://github.com/mathflow-bit/dockercart/commit/ea0dcbb300665094e12111ed243b14d20f808de5))
+* improve one‑click checkout layout and product button flex styling ([577e149](https://github.com/mathflow-bit/dockercart/commit/577e149806a0a67da198ee2ecc8df1c843600c71))
+* initialize bundles array in product controller ([0ed5269](https://github.com/mathflow-bit/dockercart/commit/0ed5269fef15062e987700c8403c02ed88559eff))
+* tidy whitespace and change button margin class to mt-1 ([54085c9](https://github.com/mathflow-bit/dockercart/commit/54085c9da74cbd9181863494c2a3c8fc79290480))
+* Ukrainian one‑click text, global phone mask ([7be8d36](https://github.com/mathflow-bit/dockercart/commit/7be8d369405e153f359e32619715f579016a61e8))
+
 ## [1.18.1](https://github.com/mathflow-bit/dockercart/compare/v1.18.0...v1.18.1) (2026-05-20)
 
 ### Bug Fixes
