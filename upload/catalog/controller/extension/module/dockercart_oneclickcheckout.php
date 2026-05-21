@@ -49,7 +49,7 @@ class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
         $product_id = isset($data['product_id']) ? (int)$data['product_id'] : 0;
         
         // Build button HTML
-        $button_html = '<div class="dockercart-oneclickcheckout-wrapper">' . "\n";
+        $button_html = '<div class="dockercart-oneclickcheckout-wrapper" style="flex:0 0 100%">' . "\n";
         $button_html .= '  <button type="button" id="button-oneclickcheckout" data-product-id="' . $product_id . '" data-theme="' . htmlspecialchars($color_theme, ENT_QUOTES, 'UTF-8') . '" class="dockercart-oneclickcheckout-button mt-3 w-full py-3 border border-gray-200 text-gray-800 font-semibold rounded-xl hover:bg-gray-50 transition text-sm flex items-center justify-center gap-2">';
         $button_html .= '<i data-lucide="zap" class="w-5 h-5"></i>';
         $button_html .= htmlspecialchars($button_text, ENT_QUOTES, 'UTF-8');
