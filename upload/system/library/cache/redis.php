@@ -7,8 +7,11 @@ class Redis {
 	public function __construct($expire) {
 		$this->expire = $expire;
 
+		$hostname = defined('REDIS_HOSTNAME') ? REDIS_HOSTNAME : 'redis';
+		$port = defined('REDIS_PORT') ? (int) REDIS_PORT : 6379;
+
 		$this->cache = new \Redis();
-		$this->cache->pconnect(CACHE_HOSTNAME, CACHE_PORT);
+		$this->cache->pconnect($hostname, $port);
 	}
 
 	public function get($key) {

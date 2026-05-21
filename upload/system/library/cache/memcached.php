@@ -8,9 +8,12 @@ class Memcached {
 
 	public function __construct($expire) {
 		$this->expire = $expire;
-		$this->memcached = new \Memcached();
 
-		$this->memcached->addServer(CACHE_HOSTNAME, CACHE_PORT);
+		$hostname = defined('MEMCACHED_HOSTNAME') ? MEMCACHED_HOSTNAME : (defined('CACHE_HOSTNAME') ? CACHE_HOSTNAME : 'memcached');
+		$port = defined('MEMCACHED_PORT') ? (int) MEMCACHED_PORT : (defined('CACHE_PORT') ? (int) CACHE_PORT : 11211);
+
+		$this->memcached = new \Memcached();
+		$this->memcached->addServer($hostname, $port);
 	}
 
 	public function get($key) {
