@@ -956,7 +956,7 @@ body.modal-open { overflow: hidden; }
   transition: background 0.25s ease;
 }
 .dc-view-all-link:hover {
-  background: #dbeafe;
+  background: rgba(219, 234, 254, 0.52);
   text-decoration: none;
 }
 
