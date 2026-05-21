@@ -665,6 +665,8 @@ class ControllerProductProduct extends Controller {
 			$bundle_lib = new ProductBundle($this->registry);
 			$bundle_results = $bundle_lib->getBundlesByProduct($product_id, (int)$this->config->get('config_store_id'));
 
+			$bundles = array();
+
 			foreach ($bundle_results as $bundle) {
 				$bundle_products = $bundle_lib->getBundleProducts($bundle['bundle_id']);
 
