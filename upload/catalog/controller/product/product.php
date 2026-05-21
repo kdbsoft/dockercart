@@ -655,6 +655,83 @@ class ControllerProductProduct extends Controller {
 
 			$data['recurrings'] = $this->model_catalog_product->getProfiles($product_id);
 
+		$data['bundles'] = array();
+
+		$bundle_file = DIR_SYSTEM . 'library/product_bundle.php';
+
+		if (file_exists($bundle_file)) {
+			require_once $bundle_file;
+
+			$bundle_lib = new ProductBundle($this->registry);
+			$bundle_results = $bundle_lib->getBundlesByProduct($product_id, (int)$this->config->get('config_store_id'));
+
+			foreach ($bundle_results as $bundle) {
+				$bundle_products = $bundle_lib->getBundleProducts($bundle['bundle_id']);
+
+				$products_data = array();
+				$original_total = 0;
+
+				foreach ($bundle_products as $bp) {
+					$bp_info = $this->model_catalog_product->getProduct($bp['product_id']);
+
+					if ($bp_info) {
+						$bp_price = (float)$bp_info['price'];
+
+						if (!is_null($bp_info['special']) && (float)$bp_info['special'] < $bp_price) {
+							$bp_price = (float)$bp_info['special'];
+						}
+
+						$original_total += $bp_price;
+
+						$products_data[] = array(
+							'product_id'  => $bp_info['product_id'],
+							'name'        => $bp_info['name'],
+							'thumb'       => $this->model_tool_image->resize($bp_info['image'], 100, 100),
+							'price'       => $this->currency->format($this->tax->calculate($bp_price, $bp_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']),
+							'price_value' => $bp_price,
+							'href'        => $this->url->link('product/product', 'product_id=' . $bp_info['product_id'])
+						);
+					}
+				}
+
+				if (count($products_data) >= 2) {
+					$discount_value = (float)$bundle['discount_value'];
+					$bundle_total = $original_total;
+
+					if ($bundle['discount_type'] == 'percentage') {
+						$bundle_total = $original_total * (1 - $discount_value / 100);
+					} else {
+						$bundle_total = max(0, $original_total - $discount_value);
+					}
+
+					if ($bundle['discount_type'] == 'percentage') {
+						$discount_text = (int)$discount_value . '%';
+					} else {
+						$discount_text = $this->currency->format($discount_value, $this->session->data['currency']);
+					}
+
+					$bundles[] = array(
+						'bundle_id'                 => $bundle['bundle_id'],
+						'name'                      => $bundle['name'],
+						'products'                  => $products_data,
+						'original_total'            => $original_total,
+						'total'                     => $bundle_total,
+						'original_total_formatted'  => $this->currency->format($original_total, $this->session->data['currency']),
+						'total_formatted'           => $this->currency->format($bundle_total, $this->session->data['currency']),
+						'discount_type'             => $bundle['discount_type'],
+						'discount_value'            => $discount_value,
+						'discount_text'             => $discount_text,
+					);
+				}
+			}
+
+			$data['bundles'] = $bundles;
+		}
+
+		$data['text_bundle_title'] = $this->language->get('text_bundle_title');
+		$data['text_bundle_save'] = $this->language->get('text_bundle_save');
+		$data['button_bundle_add'] = $this->language->get('button_bundle_add');
+
 			$this->load->model('account/viewed');
 			$this->model_account_viewed->addViewedProduct($product_id);
 

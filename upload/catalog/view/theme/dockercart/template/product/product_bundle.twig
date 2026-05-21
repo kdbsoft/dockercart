@@ -1,0 +1,57 @@
+{% if bundles %}
+<section class="mt-10">
+  <div class="max-w-3xl">
+    <div class="flex items-center gap-2 mb-5">
+      <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+        <i data-lucide="layers" class="w-4 h-4 text-emerald-600"></i>
+      </div>
+      <div>
+        <p class="text-emerald-600 text-xs font-semibold uppercase tracking-widest">{{ text_bundle_save }}</p>
+        <h2 class="text-xl sm:text-2xl font-bold text-gray-900">{{ text_bundle_title }}</h2>
+      </div>
+    </div>
+
+    {% for bundle in bundles %}
+    <div class="rounded-xl border border-gray-200 bg-white overflow-hidden {% if not loop.last %}mb-3{% endif %}" data-bundle-id="{{ bundle.bundle_id }}">
+      <div class="p-4">
+        <div class="flex items-center gap-2 mb-3 overflow-x-auto pb-1">
+          {% for product in bundle.products %}
+          <a href="{{ product.href }}" class="group flex items-center gap-2 p-2 rounded-lg bg-gray-50 hover:bg-emerald-50 border border-transparent hover:border-emerald-200 transition flex-shrink-0 min-w-[160px]">
+            <div class="w-10 h-10 rounded-md bg-white overflow-hidden flex-shrink-0 shadow-sm">
+              <img src="{{ product.thumb is not empty ? product.thumb : 'image/no_image.png' }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+            </div>
+            <div class="min-w-0">
+              <span class="text-xs font-medium text-gray-700 truncate block">{{ product.name }}</span>
+              <span class="text-xs font-semibold text-gray-900">{{ product.price }}</span>
+            </div>
+          </a>
+          {% if not loop.last %}
+          <span class="flex-shrink-0 w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 text-xs font-bold">+</span>
+          {% endif %}
+          {% endfor %}
+        </div>
+
+        <div class="flex items-center justify-between gap-3 pt-3 border-t border-gray-100">
+          <div class="flex items-baseline gap-3 flex-wrap">
+            <span class="text-lg font-extrabold text-gray-900">{{ bundle.total_formatted }}</span>
+            <span class="text-sm text-gray-400 line-through">{{ bundle.original_total_formatted }}</span>
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 text-xs font-bold">
+              -{{ bundle.discount_text }}
+            </span>
+          </div>
+
+          <button type="button" onclick="cart.addBundle({{ bundle.bundle_id }})"
+            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold rounded-lg transition text-sm flex items-center gap-2 flex-shrink-0">
+            <i data-lucide="shopping-cart" class="w-4 h-4"></i> {{ button_bundle_add }}
+          </button>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<script>
+lucide.createIcons();
+</script>
+{% endif %}
