@@ -1,3 +1,9 @@
+## [1.21.1](https://github.com/mathflow-bit/dockercart/compare/v1.21.0...v1.21.1) (2026-05-21)
+
+### Bug Fixes
+
+* render FAQ answers with line breaks using nl2br ([dd70e49](https://github.com/mathflow-bit/dockercart/commit/dd70e492acbe4f6a7916b22f79e378347180da8d))
+
 ## [1.21.0](https://github.com/mathflow-bit/dockercart/compare/v1.20.1...v1.21.0) (2026-05-21)
 
 ### Features
