@@ -24,6 +24,7 @@
   .dc-stars .dc-star { font-size: 1rem; color: #d1d5db; }
   .dc-stars .dc-star.active { color: #f59e0b; }
   .dc-option-required-error { border-color: #fca5a5 !important; box-shadow: 0 0 0 3px rgba(239,68,68,.12) !important; border-radius: 0.75rem; }
+
 </style>
 
 <main class="py-4 px-4 sm:px-6 lg:px-8 bg-white">
@@ -221,26 +222,26 @@
           <input type="hidden" name="product_id" value="{{ product_id }}" />
 
           <!-- Qty + Cart + Wishlist -->
-          <div class="mt-6 space-y-3">
-            <div class="inline-flex items-center border border-gray-200 rounded-xl overflow-hidden">
+          <div class="mt-6 flex flex-wrap items-center gap-3">
+            <div class="inline-flex items-center border border-gray-200 rounded-xl overflow-hidden flex-shrink-0">
               <button type="button" class="w-10 h-10 text-lg font-bold text-gray-500 hover:bg-gray-50 transition" onclick="dcChangeQty(-1)">−</button>
               <input type="number" name="quantity" value="{{ minimum }}" id="input-quantity" min="{{ minimum }}" step="{{ quantity_step|default(1) }}" oninput="dcUpdateSubtotal()" class="w-16 text-center text-sm font-semibold border-0 outline-none py-2 bg-transparent" />
               <button type="button" class="w-10 h-10 text-lg font-bold text-gray-500 hover:bg-gray-50 transition" onclick="dcChangeQty(1)">+</button>
             </div>
 
-            <div class="flex items-center gap-3">
-              <button type="button" id="button-cart" data-loading-text="{{ text_loading }}"
-                class="flex-1 min-w-0 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl transition text-sm shadow-md shadow-blue-200 whitespace-nowrap flex items-center justify-center gap-2">
-                <i data-lucide="shopping-cart" class="w-5 h-5"></i>{{ button_cart }}
-              </button>
+            <button type="button" id="button-cart" data-loading-text="{{ text_loading }}"
+              class="flex-1 min-w-0 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl transition text-sm shadow-md shadow-blue-200 whitespace-nowrap flex items-center justify-center gap-2">
+              <i data-lucide="shopping-cart" class="w-5 h-5"></i>{{ button_cart }}
+            </button>
 
+            <div class="flex items-center gap-3 w-full sm:w-auto sm:flex-shrink-0">
               <button type="button" id="dc-wishlist-btn" data-product-id="{{ product_id }}" data-in-wishlist="{{ in_wishlist|default(0) }}" title="{{ button_wishlist }}"
-                class="w-11 h-11 rounded-xl border {% if in_wishlist|default(0) %}border-rose-300 bg-rose-50{% else %}border-gray-200 hover:border-rose-300 hover:bg-rose-50{% endif %} flex items-center justify-center transition flex-shrink-0">
+                class="flex-1 sm:flex-none w-11 h-11 rounded-xl border {% if in_wishlist|default(0) %}border-rose-300 bg-rose-50{% else %}border-gray-200 hover:border-rose-300 hover:bg-rose-50{% endif %} flex items-center justify-center transition flex-shrink-0">
                 <i data-lucide="heart" class="w-5 h-5 pointer-events-none {% if in_wishlist|default(0) %}text-rose-500 fill-rose-400{% else %}text-gray-500{% endif %}"></i>
               </button>
 
               <button type="button" onclick="{% if in_compare|default(0) %}compare.remove('{{ product_id }}'){% else %}compare.add('{{ product_id }}'){% endif %};" title="{{ button_compare }}"
-                class="w-11 h-11 rounded-xl border {% if in_compare|default(0) %}border-blue-300 bg-blue-50{% else %}border-gray-200 hover:border-blue-200 hover:bg-blue-50{% endif %} flex items-center justify-center transition flex-shrink-0">
+                class="flex-1 sm:flex-none w-11 h-11 rounded-xl border {% if in_compare|default(0) %}border-blue-300 bg-blue-50{% else %}border-gray-200 hover:border-blue-200 hover:bg-blue-50{% endif %} flex items-center justify-center transition flex-shrink-0">
                 <i data-lucide="bar-chart-2" class="w-5 h-5 {% if in_compare|default(0) %}text-blue-500 fill-blue-400{% else %}text-gray-500{% endif %}"></i>
               </button>
             </div>

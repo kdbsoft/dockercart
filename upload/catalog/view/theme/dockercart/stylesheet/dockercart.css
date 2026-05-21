@@ -77,7 +77,7 @@ body, button, input, select, textarea { font-family: 'Manrope', sans-serif; }
   }
   section#hero {
     padding-top: 40px;
-  }  
+  }
 }
 
 /* ── Category dropdown hover ──────────────────────────────── */
@@ -122,7 +122,7 @@ body, button, input, select, textarea { font-family: 'Manrope', sans-serif; }
   border-radius: 8px;
   transition: color 0.15s, background-color 0.15s;
 }
-.dc-cat-mega-parent:hover { 
+.dc-cat-mega-parent:hover {
   color: #2563eb;
   background-color: #eff6ff;
   text-decoration: none;
@@ -158,7 +158,7 @@ body, button, input, select, textarea { font-family: 'Manrope', sans-serif; }
   color: #2563eb;
   text-decoration: none;
 }
-.dc-cat-mega-seeall:hover { 
+.dc-cat-mega-seeall:hover {
   color: #1d4ed8;
   text-decoration: underline;
 }
@@ -472,7 +472,9 @@ body { padding-top: 0 !important; }
 
 /* ── Button wrapper ───────────────────────────────────────── */
 .dockercart-oneclickcheckout-wrapper {
-  margin: 10px 0 0 !important;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 /* ── Base button reset ────────────────────────────────────── */
