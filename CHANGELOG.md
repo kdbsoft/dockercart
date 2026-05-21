@@ -1,3 +1,9 @@
+## [1.20.1](https://github.com/mathflow-bit/dockercart/compare/v1.20.0...v1.20.1) (2026-05-21)
+
+### Bug Fixes
+
+* enable media plugin in Tinymce ([57a5b69](https://github.com/mathflow-bit/dockercart/commit/57a5b69fe0e95df089042997bc89f74f86e467df))
+
 ## [1.20.0](https://github.com/mathflow-bit/dockercart/compare/v1.19.0...v1.20.0) (2026-05-21)
 
 ### Features
