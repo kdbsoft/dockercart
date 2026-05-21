@@ -1049,7 +1049,23 @@ class ModelExtensionModuleDockercartImportYml extends Model {
               AND offer_id = '" . $this->db->escape($offer_id) . "'
             LIMIT 1");
 
-        return $query->num_rows ? (int)$query->row['product_id'] : 0;
+        if (!$query->num_rows) {
+            return 0;
+        }
+
+        $product_id = (int)$query->row['product_id'];
+
+        $exists = $this->db->query("SELECT product_id FROM `" . DB_PREFIX . "product`
+            WHERE product_id = '" . $product_id . "' LIMIT 1");
+
+        if (!$exists->num_rows) {
+            $this->db->query("DELETE FROM `" . DB_PREFIX . "dockercart_import_yml_offer_map`
+                WHERE profile_id = '" . (int)$profile_id . "'
+                  AND offer_id = '" . $this->db->escape($offer_id) . "'");
+            return 0;
+        }
+
+        return $product_id;
     }
 
     private function findProductBySkuOrModel($sku, $model) {
