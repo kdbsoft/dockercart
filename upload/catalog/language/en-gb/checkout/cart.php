@@ -4,6 +4,7 @@ $_['heading_title']            = 'Shopping Cart';
 
 // Text
 $_['text_success']             = 'Success: You have added <a href="%s">%s</a> to your <a href="%s">shopping cart</a>!';
+$_['text_success_bundle']      = 'Success: Bundle has been added to your <a href="%s">shopping cart</a>!';
 $_['text_remove']              = 'Success: You have modified your shopping cart!';
 $_['text_login']               = 'Attention: You must <a href="%s">login</a> or <a href="%s">create an account</a> to view prices!';
 $_['text_items']               = '%s item(s) - %s';
@@ -39,3 +40,6 @@ $_['error_quantity_step']      = 'Quantity for %s must be at least %s and divisi
 $_['error_required']           = '%s required!';
 $_['error_product']            = 'Warning: There are no products in your cart!';
 $_['error_recurring_required'] = 'Please select a payment recurring!';
+$_['error_bundle_invalid']     = 'Warning: This bundle is not available!';
+
+$_['text_bundle_discount']     = 'Bundle Discount';

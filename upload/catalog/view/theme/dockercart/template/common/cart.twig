@@ -321,6 +321,27 @@ window.cart = window.cart || {
         dcRefreshCart(true);
       });
   },
+  addBundle: function (bundleId) {
+    fetch('index.php?route=checkout/cart/addBundle', { credentials: 'same-origin', method: 'POST', headers: { 'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest' }, body: 'bundle_id=' + encodeURIComponent(bundleId) })
+      .then(function (response) { return response.json(); })
+      .then(function (json) {
+        if (json && json.error) {
+          if (typeof dcShowToast === 'function') {
+            dcShowToast(json.error);
+          }
+          return;
+        }
+
+        if (json && json.success && typeof dcShowToast === 'function') {
+          dcShowToast(json.success);
+        }
+
+        dcRefreshCart(true);
+      })
+      .catch(function () {
+        dcRefreshCart(true);
+      });
+  },
   update: function (cartId, quantity) { var body = 'quantity[' + encodeURIComponent(cartId) + ']=' + encodeURIComponent(quantity); fetch('index.php?route=checkout/cart/edit', { credentials: 'same-origin', method: 'POST', headers: { 'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest' }, body: body }).then(dcRefreshCart); },
   remove: function (cartId) { dcCartRemove(cartId); }
 };
