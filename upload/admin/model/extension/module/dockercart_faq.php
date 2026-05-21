@@ -63,6 +63,8 @@ class ModelExtensionModuleDockercartFaq extends Model {
         $this->saveDescriptions($faq_id, $data);
         $this->saveStores($faq_id, $data);
 
+        $this->cache->delete('dockercart_faq');
+
         return $faq_id;
     }
 
@@ -87,6 +89,8 @@ class ModelExtensionModuleDockercartFaq extends Model {
 
         $this->saveDescriptions($faq_id, $data);
         $this->saveStores($faq_id, $data);
+
+        $this->cache->delete('dockercart_faq');
     }
 
     public function deleteFaq($faq_id) {
@@ -97,6 +101,8 @@ class ModelExtensionModuleDockercartFaq extends Model {
         $this->db->query("DELETE FROM `" . DB_PREFIX . "dockercart_faq_to_store` WHERE `faq_id` = '" . $faq_id . "'");
         $this->db->query("DELETE FROM `" . DB_PREFIX . "dockercart_faq_description` WHERE `faq_id` = '" . $faq_id . "'");
         $this->db->query("DELETE FROM `" . DB_PREFIX . "dockercart_faq` WHERE `faq_id` = '" . $faq_id . "'");
+
+        $this->cache->delete('dockercart_faq');
     }
 
     public function getFaq($faq_id) {
