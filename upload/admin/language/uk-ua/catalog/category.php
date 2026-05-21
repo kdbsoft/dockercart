@@ -1,5 +1,6 @@
 <?php
 
+$_['column_image'] = 'Зображення';
 $_['column_action'] = 'Дія';
 $_['column_name'] = 'Назва категорії';
 $_['column_noindex'] = 'Індексація';

@@ -1,5 +1,6 @@
 <?php
 
+$_['column_image'] = 'Изображение';
 $_['column_action'] = 'Действие';
 $_['column_name'] = 'Название категории';
 $_['column_sort_order'] = 'Порядок сортировки';

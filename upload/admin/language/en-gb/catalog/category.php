@@ -16,6 +16,7 @@ $_['button_expand_all']       = 'Expand all';
 $_['button_collapse_all']     = 'Collapse all';
 
 // Column
+$_['column_image']           = 'Image';
 $_['column_name']            = 'Category Name';
 $_['column_sort_order']      = 'Sort Order';
 $_['column_action']          = 'Action';
