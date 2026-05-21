@@ -1,3 +1,9 @@
+## [1.21.3](https://github.com/mathflow-bit/dockercart/compare/v1.21.2...v1.21.3) (2026-05-21)
+
+### Bug Fixes
+
+* clean up stale YML import mappings when product missing ([fb681d8](https://github.com/mathflow-bit/dockercart/commit/fb681d8a01405579758cb8902143d65094096b64))
+
 ## [1.21.2](https://github.com/mathflow-bit/dockercart/compare/v1.21.1...v1.21.2) (2026-05-21)
 
 ### Bug Fixes
