@@ -1,3 +1,9 @@
+## [1.21.2](https://github.com/mathflow-bit/dockercart/compare/v1.21.1...v1.21.2) (2026-05-21)
+
+### Bug Fixes
+
+* missing endif in product search template ([0137207](https://github.com/mathflow-bit/dockercart/commit/013720754ed4c9a719ada24ca2c1189aee318b36))
+
 ## [1.21.1](https://github.com/mathflow-bit/dockercart/compare/v1.21.0...v1.21.1) (2026-05-21)
 
 ### Bug Fixes
