@@ -1,3 +1,9 @@
+## [1.21.0](https://github.com/mathflow-bit/dockercart/compare/v1.20.1...v1.21.0) (2026-05-21)
+
+### Features
+
+* add FAQ caching and cache invalidation ([cd67f05](https://github.com/mathflow-bit/dockercart/commit/cd67f05f74506384a2f14d6b7294fd67fafaa3ef))
+
 ## [1.20.1](https://github.com/mathflow-bit/dockercart/compare/v1.20.0...v1.20.1) (2026-05-21)
 
 ### Bug Fixes
