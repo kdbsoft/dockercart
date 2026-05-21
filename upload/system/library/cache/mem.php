@@ -9,8 +9,11 @@ class Mem {
 	public function __construct($expire) {
 		$this->expire = $expire;
 
+		$hostname = defined('MEMCACHED_HOSTNAME') ? MEMCACHED_HOSTNAME : (defined('CACHE_HOSTNAME') ? CACHE_HOSTNAME : 'memcached');
+		$port = defined('MEMCACHED_PORT') ? (int) MEMCACHED_PORT : (defined('CACHE_PORT') ? (int) CACHE_PORT : 11211);
+
 		$this->memcache = new \Memcache();
-		$this->memcache->pconnect(CACHE_HOSTNAME, CACHE_PORT);
+		$this->memcache->pconnect($hostname, $port);
 	}
 
 	public function get($key) {

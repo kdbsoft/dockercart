@@ -70,6 +70,11 @@ services:
       - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
       - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@example.com}
+      - CACHE_ENGINE=${CACHE_ENGINE:-redis}
+      - REDIS_HOSTNAME=${REDIS_HOSTNAME:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - MEMCACHED_HOSTNAME=${MEMCACHED_HOSTNAME:-memcached}
+      - MEMCACHED_PORT=${MEMCACHED_PORT:-11211}
       - CACHE_HOSTNAME=${CACHE_HOSTNAME:-memcached}
       - CACHE_PORT=${CACHE_PORT:-11211}
       - CACHE_PREFIX=${CACHE_PREFIX:-oc_}
@@ -82,6 +87,8 @@ services:
       mariadb:
         condition: service_healthy
       memcached:
+        condition: service_started
+      redis:
         condition: service_started
     networks:
       - dockercart-network
@@ -199,6 +206,21 @@ services:
           "CMD-SHELL",
           "echo stats | nc 127.0.0.1 11211 >/dev/null 2>&1 || exit 1",
         ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: ${REDIS_CONTAINER_NAME:-dockercart_redis}
+    restart: ${RESTART_POLICY:-unless-stopped}
+    command: ["redis-server", "--appendonly", "no", "--save", "", "--maxmemory", "${REDIS_MAXMEMORY:-256mb}", "--maxmemory-policy", "allkeys-lru"]
+    logging:
+      driver: "none"
+    networks:
+      - dockercart-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5

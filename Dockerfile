@@ -32,8 +32,8 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
         xml \
         mbstring \
         curl \
-    && pecl install memcached \
-    && docker-php-ext-enable memcached
+    && pecl install memcached redis \
+    && docker-php-ext-enable memcached redis
 
 # Add www-data to the staff group (GID=50) so it can write to FTP-owned image dirs
 RUN groupadd -f -g 50 staff && usermod -aG staff www-data
