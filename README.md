@@ -6,8 +6,9 @@ DockerCart is a production-ready e-commerce platform built on top of OpenCart 3,
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE.md)
 [![PHP](https://img.shields.io/badge/PHP-8.5-777BB4?logo=php)](https://www.php.net/)
-[![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql)](https://www.mysql.com/)
+[![MariaDB](https://img.shields.io/badge/mariadb-%3E%3D11.4-blue?logo=mariadb)](https://mariadb.org/)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker)](https://docs.docker.com/compose/)
+[![Redis](https://img.shields.io/badge/Redis-7.0-DC3821?logo=redis)](https://redis.io/)
 
 ---
 
