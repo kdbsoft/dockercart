@@ -1,3 +1,9 @@
+## [1.20.0](https://github.com/mathflow-bit/dockercart/compare/v1.19.0...v1.20.0) (2026-05-21)
+
+### Features
+
+* add Redis cache support and configuration ([ce3bf39](https://github.com/mathflow-bit/dockercart/commit/ce3bf395d3668cbc43387e6678d002b7a7bb8e8b))
+
 ## [1.19.0](https://github.com/mathflow-bit/dockercart/compare/v1.18.1...v1.19.0) (2026-05-21)
 
 ### Features
