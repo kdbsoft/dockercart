@@ -1,4 +1,5 @@
 <?php
+/** @property \DB $db */
 class ProductBundle {
 	private $registry;
 
