@@ -26,6 +26,9 @@ $_['text_no_reviews']          = 'There are no reviews for this product.';
 $_['text_note']                = '<span class="text-danger">Note:</span> HTML is not translated!';
 $_['text_success']             = 'Thank you for your review. It has been submitted to the webmaster for approval.';
 $_['text_related']             = 'Related Products';
+$_['text_bundle_title']        = 'Buy Together Cheaper';
+$_['text_bundle_save']         = 'Bundle Deal';
+$_['button_bundle_add']        = 'Add Bundle to Cart';
 $_['text_quick_view'] = 'Quick View';
 // UI additions
 $_['text_delivery'] = 'Delivery';

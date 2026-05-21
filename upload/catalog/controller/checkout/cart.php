@@ -499,6 +499,98 @@ class ControllerCheckoutCart extends Controller {
 		$this->response->setOutput(json_encode($json));
 	}
 
+	public function addBundle() {
+		$this->load->language('checkout/cart');
+
+		$json = array();
+
+		if (isset($this->request->post['bundle_id'])) {
+			$bundle_id = (int)$this->request->post['bundle_id'];
+		} else {
+			$bundle_id = 0;
+		}
+
+		if ($bundle_id) {
+			$bundle_file = DIR_SYSTEM . 'library/product_bundle.php';
+
+			if (file_exists($bundle_file)) {
+				require_once $bundle_file;
+
+				$bundle_lib = new ProductBundle($this->registry);
+				$bundle_products = $bundle_lib->getBundleProducts($bundle_id);
+
+				if (count($bundle_products) >= 2) {
+					$this->load->model('catalog/product');
+
+					foreach ($bundle_products as $bp) {
+						$product_info = $this->model_catalog_product->getProduct($bp['product_id']);
+
+						if ($product_info) {
+							$default_quantity = $this->getMinimumQuantity($product_info);
+							$this->cart->add($bp['product_id'], $default_quantity, array(), 0);
+						}
+					}
+
+					$json['success'] = sprintf($this->language->get('text_success_bundle'), $this->url->link('checkout/cart'));
+
+					unset($this->session->data['shipping_method']);
+					unset($this->session->data['shipping_methods']);
+					unset($this->session->data['payment_method']);
+					unset($this->session->data['payment_methods']);
+
+					$this->load->model('setting/extension');
+
+					$totals = array();
+					$taxes = $this->cart->getTaxes();
+					$total = 0;
+
+					$total_data = array(
+						'totals' => &$totals,
+						'taxes'  => &$taxes,
+						'total'  => &$total
+					);
+
+					if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
+						$sort_order = array();
+
+						$results = $this->model_setting_extension->getExtensions('total');
+
+						foreach ($results as $key => $value) {
+							$sort_order[$key] = $this->config->get('total_' . $value['code'] . '_sort_order');
+						}
+
+						array_multisort($sort_order, SORT_ASC, $results);
+
+						foreach ($results as $result) {
+							if ($this->config->get('total_' . $result['code'] . '_status')) {
+								$this->load->model('extension/total/' . $result['code']);
+
+								$this->{'model_extension_total_' . $result['code']}->getTotal($total_data);
+							}
+						}
+
+						$sort_order = array();
+
+						foreach ($totals as $key => $value) {
+							$sort_order[$key] = $value['sort_order'];
+						}
+
+						array_multisort($sort_order, SORT_ASC, $totals);
+					}
+
+					$json['total'] = sprintf($this->language->get('text_items'), $this->cart->countProducts() + (isset($this->session->data['vouchers']) ? count($this->session->data['vouchers']) : 0), $this->currency->format($total, $this->session->data['currency']));
+				} else {
+					$json['error'] = $this->language->get('error_bundle_invalid');
+				}
+			} else {
+				$json['error'] = $this->language->get('error_bundle_invalid');
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
 	public function edit() {
 		$this->load->language('checkout/cart');
 
