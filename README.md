@@ -23,7 +23,7 @@ Note on frontend stacks: OpenCart's legacy storefront is built on jQuery, Bootst
 | Web installer (`/install`) required | Install-less bootstrap from `.env` + DB seed |
 | Known bugs in core | Hundreds of fixes applied to the base |
 | Configuration in PHP files | Environment variables via `.env` |
-| No built-in caching layer | Memcached + OPcache pre-configured |
+| No built-in caching layer | Redis + OPcache pre-configured (Memcached fallback) |
 | No full-text search | Manticore Search engine included |
 | No containerization | Docker Compose stack, hot-reload dev workflow |
 | Scattered extension ecosystem | First-party modules, tested and integrated |
@@ -37,7 +37,7 @@ Note on frontend stacks: OpenCart's legacy storefront is built on jQuery, Bootst
 |---|---|
 | Application | PHP 8.5 + Apache + Nginx |
 | Database | MariaDB 11.8 |
-| Object cache | Memcached 1.6 |
+| Object cache | Redis 7 (primary), Memcached 1.6 (fallback) |
 | Full-text search | Manticore Search |
 | Reverse proxy | Traefik v3 *(optional)* |
 | SSL | Let's Encrypt / self-signed |
@@ -51,7 +51,7 @@ DockerCart is engineered for industrial-grade speed and low latency. It combines
 
 - Industrial-grade performance: tuned for low-latency, high-throughput workloads.
 - Modern PHP runtime: built for PHP 8.5 with OPcache and typical production-level PHP optimizations enabled.
-- Caching: Memcached and internal caching layers significantly reduce database load and response times.
+- Caching: Redis and internal caching layers significantly reduce database load and response times. Memcached is available as fallback when Redis is unavailable.
 - Fast search: Manticore Search provides high-performance full-text queries and relevance ranking.
 - Database and query optimizations: schema and index improvements are included (see docker/mysql/migrations and sql-optimization scripts).
 - Hot-reload dev workflow: edits to PHP/Twig/JS are applied immediately without container restarts, keeping development fast.

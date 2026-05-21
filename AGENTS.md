@@ -70,7 +70,7 @@ find upload -type f -name "*.php" ! -path 'storage/vendor/*' -print0 | xargs -0 
 | `make prod-standalone` | No Traefik + Let's Encrypt |
 | `make ftp` | Enable FTP (images only) |
 Traefik is optional — standalone modes don't require it.
-Container names: `dockercart_apache`, `dockercart_nginx`, `dockercart_mariadb`, `dockercart_memcached`, `dockercart_manticore`
+Container names: `dockercart_apache`, `dockercart_nginx`, `dockercart_mariadb`, `dockercart_redis`, `dockercart_memcached`, `dockercart_manticore`
 ---
 ## Commit Conventions
 Conventional Commits enforced by commitlint + semantic-release.
