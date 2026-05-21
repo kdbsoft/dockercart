@@ -19,6 +19,9 @@
     .no-slides-msg { text-align: center; color: #9ca3af; padding: 28px; font-style: italic; }
     .add-slide-btn-wrap { padding: 10px 0 4px; text-align: right; }
     .dcx-divider { border: none; border-top: 1px solid #e5e7eb; margin: 20px 0 18px; }
+    .banner-slide-card.collapsed .banner-slide-card__body { display: none; }
+    .banner-slide-card__toggle { cursor: pointer; margin-right: 6px; transition: transform .2s; vertical-align: middle; font-size: 14px; }
+    .banner-slide-card:not(.collapsed) .banner-slide-card__toggle { transform: rotate(90deg); }
   </style>
 
   <div class="page-header">
@@ -114,21 +117,18 @@
                 <div id="slide-list-{{ language.language_id }}">
                   {% if banner_images[language.language_id] %}
                   {% for banner_image in banner_images[language.language_id] %}
-                  <div class="banner-slide-card" id="image-row{{ image_row }}">
-                    <div class="banner-slide-card__head">
-                      <span class="banner-slide-card__num"><i class="fa fa-image" style="margin-right:6px;color:#6366f1;"></i>Slide #{{ loop.index }}</span>
-                      <button type="button" onclick="removeSlide({{ image_row }});" class="btn btn-danger btn-xs"><i class="fa fa-trash-o"></i> {{ button_remove }}</button>
+                  <div class="banner-slide-card collapsed" id="image-row{{ image_row }}">
+                    <div class="banner-slide-card__head" style="cursor:pointer;">
+                      <span><i class="fa fa-chevron-right banner-slide-card__toggle"></i> <span class="banner-slide-card__num"><i class="fa fa-image" style="margin-right:6px;color:#6366f1;"></i>Slide #{{ loop.index }}</span></span>
+                      <button type="button" onclick="removeSlide({{ image_row }}); event.stopPropagation();" class="btn btn-danger btn-xs"><i class="fa fa-trash-o"></i> {{ button_remove }}</button>
                     </div>
                     <div class="banner-slide-card__body">
 
                       {# Title + subtitle #}
-                      <div class="form-group required">
+                      <div class="form-group">
                         <label>{{ entry_title }}</label>
                         <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][title]" value="{{ banner_image.title }}" placeholder="{{ entry_title }}" class="form-control" />
                         <div class="accent-hint">{{ entry_title_hint }} — e.g.: <code>The Future of [Smart Living]</code></div>
-                        {% if error_banner_image[language.language_id][image_row] %}
-                        <div class="text-danger">{{ error_banner_image[language.language_id][image_row] }}</div>
-                        {% endif %}
                       </div>
 
                       <div class="form-group">
@@ -317,14 +317,14 @@ function initColorisPicker() {
 function addSlide(language_id) {
   var row = image_row;
   var pfx = 'banner_image[' + language_id + '][' + row + ']';
-  var html = '<div class="banner-slide-card" id="image-row' + row + '">';
-  html += '<div class="banner-slide-card__head">';
-  html += '<span class="banner-slide-card__num"><i class="fa fa-image" style="margin-right:6px;color:#6366f1;"></i>New Slide</span>';
-  html += '<button type="button" onclick="removeSlide(' + row + ');" class="btn btn-danger btn-xs"><i class="fa fa-trash-o"></i> {{ button_remove }}</button>';
+  var html = '<div class="banner-slide-card collapsed" id="image-row' + row + '">';
+  html += '<div class="banner-slide-card__head" style="cursor:pointer;">';
+  html += '<span><i class="fa fa-chevron-right banner-slide-card__toggle"></i> <span class="banner-slide-card__num"><i class="fa fa-image" style="margin-right:6px;color:#6366f1;"></i>New Slide</span></span>';
+  html += '<button type="button" onclick="removeSlide(' + row + '); event.stopPropagation();" class="btn btn-danger btn-xs"><i class="fa fa-trash-o"></i> {{ button_remove }}</button>';
   html += '</div>';
   html += '<div class="banner-slide-card__body">';
 
-  html += '<div class="form-group required">';
+  html += '<div class="form-group">';
   html += '<label>{{ entry_title }}</label>';
   html += '<input type="text" name="' + pfx + '[title]" value="" placeholder="{{ entry_title }}" class="form-control" />';
   html += '<div class="accent-hint">{{ entry_title_hint }} — e.g.: <code>The Future of [Smart Living]</code></div>';
@@ -401,6 +401,10 @@ function addSlide(language_id) {
 
 $(document).ready(function() {
   initColorisPicker();
+
+  $(document).on('click', '.banner-slide-card__head', function() {
+    $(this).closest('.banner-slide-card').toggleClass('collapsed');
+  });
 
   $('.banner-slide-card').each(function() {
     initColorInputs($(this));
