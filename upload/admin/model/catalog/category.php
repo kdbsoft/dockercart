@@ -300,7 +300,7 @@ class ModelCatalogCategory extends Model {
 	}
 
 	public function getParentCategories($data = array()) {
-		$sql = "SELECT c.category_id, cd.name, c.sort_order FROM " . DB_PREFIX . "category c LEFT JOIN " . DB_PREFIX . "category_description cd ON (c.category_id = cd.category_id) WHERE c.parent_id = '0' AND cd.language_id = '" . (int)$this->config->get('config_language_id') . "'";
+		$sql = "SELECT c.category_id, cd.name, c.sort_order, c.image FROM " . DB_PREFIX . "category c LEFT JOIN " . DB_PREFIX . "category_description cd ON (c.category_id = cd.category_id) WHERE c.parent_id = '0' AND cd.language_id = '" . (int)$this->config->get('config_language_id') . "'";
 
 		$sort_data = array(
 			'name',
@@ -348,7 +348,7 @@ class ModelCatalogCategory extends Model {
 		$parent_ids = array_map('intval', $parent_ids);
 		$parent_ids_sql = implode(',', $parent_ids);
 
-		$sql = "SELECT c.category_id, c.parent_id, c.sort_order, cd.name FROM " . DB_PREFIX . "category c LEFT JOIN " . DB_PREFIX . "category_description cd ON (c.category_id = cd.category_id) LEFT JOIN " . DB_PREFIX . "category_path cp ON (cp.category_id = c.category_id) WHERE cp.path_id IN (" . $parent_ids_sql . ") AND c.category_id NOT IN (" . $parent_ids_sql . ") AND cd.language_id = '" . (int)$this->config->get('config_language_id') . "' GROUP BY c.category_id";
+		$sql = "SELECT c.category_id, c.parent_id, c.sort_order, cd.name, c.image FROM " . DB_PREFIX . "category c LEFT JOIN " . DB_PREFIX . "category_description cd ON (c.category_id = cd.category_id) LEFT JOIN " . DB_PREFIX . "category_path cp ON (cp.category_id = c.category_id) WHERE cp.path_id IN (" . $parent_ids_sql . ") AND c.category_id NOT IN (" . $parent_ids_sql . ") AND cd.language_id = '" . (int)$this->config->get('config_language_id') . "' GROUP BY c.category_id";
 
 		if ($sort == 'sort_order') {
 			$sql .= " ORDER BY c.parent_id ASC, c.sort_order";
@@ -455,5 +455,9 @@ class ModelCatalogCategory extends Model {
 		$query = $this->db->query("SELECT COUNT(*) AS total FROM " . DB_PREFIX . "category_to_layout WHERE layout_id = '" . (int)$layout_id . "'");
 
 		return $query->row['total'];
-	}	
+	}
+
+	public function updateCategoryImage($category_id, $image) {
+		$this->db->query("UPDATE " . DB_PREFIX . "category SET image = '" . $this->db->escape($image) . "' WHERE category_id = '" . (int)$category_id . "'");
+	}
 }

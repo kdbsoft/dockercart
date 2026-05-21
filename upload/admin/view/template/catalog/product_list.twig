@@ -70,77 +70,77 @@
               <label class="control-label" for="input-status">{{ entry_status }}</label>
               <select name="filter_status" id="input-status" class="form-control">
                 <option value=""></option>
-                
-                
-                
-                  
-                
+
+
+
+
+
 
                   {% if filter_status == '1' %}
 
-                
-                
-                  
-                
-                
+
+
+
+
+
                 <option value="1" selected="selected">{{ text_enabled }}</option>
-                
-                
-                
-                  
-                
+
+
+
+
+
 
                   {% else %}
 
-                
-                
-                  
-                
-                
+
+
+
+
+
                 <option value="1">{{ text_enabled }}</option>
-                
-                
-                
-                  
-                
+
+
+
+
+
 
                   {% endif %}
                   {% if filter_status == '0' %}
 
-                
-                
-                  
-                
-                
+
+
+
+
+
                 <option value="0" selected="selected">{{ text_disabled }}</option>
-                
-                
-                
-                  
-                
+
+
+
+
+
 
                   {% else %}
 
-                
-                
-                  
-                
-                
+
+
+
+
+
                 <option value="0">{{ text_disabled }}</option>
-                
-                
-                
-                  
-                
+
+
+
+
+
 
                   {% endif %}
 
 
-              
-              
-                
-              
-              
+
+
+
+
+
               </select>
             </div>
             <div class="form-group">
@@ -180,7 +180,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                  
+
                   {% if products %}
                   {% for product in products %}
                   <tr>
@@ -189,7 +189,7 @@
                       {% else %}
                       <input type="checkbox" name="selected[]" value="{{ product.product_id }}" />
                       {% endif %}</td>
-                    <td class="text-center"><input type="hidden" id="input-image-{{ product.product_id }}" value="{{ product.image_path }}" /><a href="javascript:void(0);" class="product-image-edit" id="thumb-image-{{ product.product_id }}" data-product-id="{{ product.product_id }}">{% if product.image %} <img src="{{ product.image }}" alt="{{ product.name }}" class="img-thumbnail" /> {% else %} <span class="img-thumbnail list"><i class="fa fa-camera fa-2x"></i></span> {% endif %}</a></td>
+                    <td style="width: 80px;" class="text-center"><input type="hidden" id="input-image-{{ product.product_id }}" value="{{ product.image_path }}" /><a href="javascript:void(0);" class="product-image-edit" id="thumb-image-{{ product.product_id }}" data-product-id="{{ product.product_id }}">{% if product.image %} <img src="{{ product.image }}" alt="{{ product.name }}" class="img-thumbnail" /> {% else %} <span class="img-thumbnail list"><i class="fa fa-camera fa-2x"></i></span> {% endif %}</a></td>
                     <td class="text-left">{{ product.name }}</td>
                     <td class="text-left">{{ product.model }}</td>
                     <td class="text-right">{% if product.special %} <span style="text-decoration: line-through;">{{ product.price }}</span><br/>
@@ -208,7 +208,7 @@
                   </tr>
                   {% endif %}
                     </tbody>
-                  
+
                 </table>
               </div>
             </form>
@@ -287,20 +287,20 @@ $('#button-filter').on('click', function() {
 
 	location = 'index.php?route=catalog/product&user_token={{ user_token }}' + url;
 });
-//--></script> 
+//--></script>
   <script type="text/javascript"><!--
 $('#filter-product input, #filter-product select').on('keypress', function(e) {
 	if (e.which == 13) {
 		$('#button-filter').trigger('click');
 	}
 });
-//--></script> 
+//--></script>
   <script type="text/javascript"><!--
 // IE and Edge fix!
 $('button[form=\'form-product\']').on('click', function(e) {
 	$('#form-product').attr('action', $(this).attr('formaction'));
 });
-  
+
 $('input[name=\'filter_name\']').autocomplete({
 	'source': function(request, response) {
 		$.ajax({
@@ -425,4 +425,4 @@ $(document).on('click', '.product-image-edit', function(e) {
 	});
 });
 //--></script></div>
-{{ footer }} 
+{{ footer }}

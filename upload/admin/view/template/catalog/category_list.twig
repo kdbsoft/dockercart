@@ -147,6 +147,7 @@
               <thead>
                 <tr>
                   <td style="width: 32px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
+                  <td style="width: 80px;" class="text-center">{{ column_image }}</td>
                   <td class="text-left">{% if sort == 'name' %}
                     <a href="{{ sort_name }}" class="{{ order|lower }}">{{ column_name }}</a>
                     {% else %}
@@ -169,6 +170,7 @@
                     {% else %}
                     <input type="checkbox" name="selected[]" value="{{ category.category_id }}" />
                     {% endif %}</td>
+                  <td class="text-center"><input type="hidden" id="input-image-{{ category.category_id }}" value="{{ category.image_path }}" /><a href="javascript:void(0);" class="category-image-edit" id="thumb-image-{{ category.category_id }}" data-category-id="{{ category.category_id }}">{% if category.image %} <img src="{{ category.image }}" alt="{{ category.name }}" class="img-thumbnail" /> {% else %} <span class="img-thumbnail list"><i class="fa fa-camera fa-2x"></i></span> {% endif %}</a></td>
                   <td class="text-left">
                     <div class="category-name-cell" style="padding-left: {{ category.indent }}px;">
                       {% if category.has_children %}
@@ -188,7 +190,7 @@
                 {% endfor %}
                 {% else %}
                 <tr>
-                  <td class="text-center" colspan="4">{{ text_no_results }}</td>
+                  <td class="text-center" colspan="5">{{ text_no_results }}</td>
                 </tr>
                 {% endif %}
               </tbody>
@@ -478,4 +480,47 @@
   restoreExpandedState();
 })();
 </script>
+<script type="text/javascript"><!--
+$(document).on('click', '.category-image-edit', function(e) {
+	e.preventDefault();
+
+	var $link = $(this);
+	var categoryId = $link.data('category-id');
+
+	$('#modal-image').remove();
+
+	$.ajax({
+		url: 'index.php?route=common/filemanager&user_token={{ user_token }}',
+		dataType: 'html',
+		success: function(html) {
+			$('body').append('<div id="modal-image" class="modal">' + html + '</div>');
+
+			$('#modal-image').on('click', 'a.thumbnail', function(e) {
+				e.preventDefault();
+
+				var imagePath = $(this).closest('.filemanager-item').find('input[name^=\'path\']').val();
+				var thumbSrc = $(this).find('img').attr('src');
+
+				var $img = $link.find('img');
+				if ($img.length) {
+					$img.attr('src', thumbSrc);
+				} else {
+					$link.html('<img src="' + thumbSrc + '" alt="" class="img-thumbnail" />');
+				}
+
+				$.ajax({
+					url: 'index.php?route=catalog/category/updateImage&user_token={{ user_token }}',
+					type: 'post',
+					dataType: 'json',
+					data: { category_id: categoryId, image: imagePath }
+				});
+
+				$('#modal-image').modal('hide');
+			});
+
+			$('#modal-image').modal('show');
+		}
+	});
+});
+//--></script>
 {{ footer }}

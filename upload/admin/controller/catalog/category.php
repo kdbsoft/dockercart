@@ -192,6 +192,7 @@ class ControllerCatalogCategory extends Controller {
 		$data['repair'] = $this->url->link('catalog/category/repair', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
 		$data['categories'] = array();
+		$this->load->model('tool/image');
 		$limit = (int)$this->config->get('config_limit_admin');
 
 		if ($limit < 1) {
@@ -224,9 +225,17 @@ class ControllerCatalogCategory extends Controller {
 			$parent_category_id = (int)$parent_category['category_id'];
 			$has_children = !empty($children_map[$parent_category_id]);
 
+			if (is_file(DIR_IMAGE . $parent_category['image'])) {
+				$image = $this->model_tool_image->resize($parent_category['image'], 40, 40);
+			} else {
+				$image = $this->model_tool_image->resize('no_image.png', 40, 40);
+			}
+
 			$data['categories'][] = array(
 				'category_id'  => $parent_category_id,
 				'parent_id'    => 0,
+				'image'        => $image,
+				'image_path'   => $parent_category['image'],
 				'level'        => 0,
 				'indent'       => 0,
 				'has_children' => $has_children,
@@ -299,6 +308,8 @@ class ControllerCatalogCategory extends Controller {
 		$data['sort'] = $sort;
 		$data['order'] = $order;
 
+		$data['user_token'] = $this->session->data['user_token'];
+
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');
@@ -315,9 +326,17 @@ class ControllerCatalogCategory extends Controller {
 			$category_id = (int)$child_category['category_id'];
 			$has_children = !empty($children_map[$category_id]);
 
+			if (is_file(DIR_IMAGE . $child_category['image'])) {
+				$image = $this->model_tool_image->resize($child_category['image'], 40, 40);
+			} else {
+				$image = $this->model_tool_image->resize('no_image.png', 40, 40);
+			}
+
 			$categories[] = array(
 				'category_id'  => $category_id,
 				'parent_id'    => (int)$child_category['parent_id'],
+				'image'        => $image,
+				'image_path'   => $child_category['image'],
 				'level'        => (int)$level,
 				'indent'       => (int)(min((int)$level, 8) * 16),
 				'has_children' => $has_children,
@@ -674,6 +693,27 @@ class ControllerCatalogCategory extends Controller {
 		}
 
 		return !$this->error;
+	}
+
+	public function updateImage() {
+		$json = array();
+
+		if (!$this->user->hasPermission('modify', 'catalog/category')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		if (!isset($this->request->post['category_id']) || !isset($this->request->post['image'])) {
+			$json['error'] = 'Invalid request';
+		}
+
+		if (!isset($json['error'])) {
+			$this->load->model('catalog/category');
+			$this->model_catalog_category->updateCategoryImage((int)$this->request->post['category_id'], $this->request->post['image']);
+			$json['success'] = 'Image updated';
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
 	}
 
 	public function autocomplete() {
