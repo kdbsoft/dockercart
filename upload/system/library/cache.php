@@ -38,7 +38,13 @@ class Cache {
      * @return	string
      */
 	public function get($key) {
-		return $this->adaptor->get($key);
+		$data = $this->adaptor->get($key);
+
+		if ($data === null) {
+			return false;
+		}
+
+		return $data;
 	}
 	
     /**
