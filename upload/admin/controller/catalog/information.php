@@ -374,6 +374,14 @@ class ControllerCatalogInformation extends Controller {
 			$data['top'] = 0;
 		}
 
+		if (isset($this->request->post['full_width'])) {
+			$data['full_width'] = $this->request->post['full_width'];
+		} elseif (!empty($information_info)) {
+			$data['full_width'] = $information_info['full_width'];
+		} else {
+			$data['full_width'] = 0;
+		}
+
 		if (isset($this->request->post['status'])) {
 			$data['status'] = $this->request->post['status'];
 		} elseif (!empty($information_info)) {

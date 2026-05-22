@@ -122,6 +122,19 @@
                 </div>
               </div>
               <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-full-width"><span data-toggle="tooltip" title="{{ help_full_width }}">{{ entry_full_width }}</span></label>
+                <div class="col-sm-10">
+                  <div class="checkbox">
+                    <label>{% if full_width %}
+                      <input type="checkbox" name="full_width" value="1" checked="checked" id="input-full-width" />
+                      {% else %}
+                      <input type="checkbox" name="full_width" value="1" id="input-full-width" />
+                      {% endif %}
+                      &nbsp;</label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
                 <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
                 <div class="col-sm-10">
                   <select name="status" id="input-status" class="form-control">
