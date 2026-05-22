@@ -267,7 +267,7 @@
   ============================================================ -->
 <!-- Ensure mobile overlay and menu sit above the sticky header (z-[9999]) -->
 <div id="dc-mobile-overlay" class="fixed inset-0 z-[10000] bg-black/40 hidden" onclick="dcCloseMobileMenu()"></div>
-<div id="dc-mobile-menu" class="fixed top-0 left-0 bottom-0 z-[10001] w-[280px] bg-white shadow-2xl flex flex-col dc-mobile-menu-closed">
+<div id="dc-mobile-menu" class="fixed top-0 left-0 bottom-0 z-[10001] w-[280px] bg-white shadow-2xl flex flex-col overflow-y-auto dc-mobile-menu-closed">
   <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
     {% if logo %}
       <img src="{{ logo }}" alt="{{ name }}" class="object-contain max-w-[180px] sm:max-w-[220px]" />
@@ -279,7 +279,36 @@
     </button>
   </div>
 
-  <nav class="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-1">
+  <!-- Categories -->
+  {% if mobile_categories %}
+  <div class="px-5 py-3 flex-shrink-0">
+    <p class="text-xs font-bold uppercase tracking-widest text-gray-400 px-3 mb-1">{{ text_catalog }}</p>
+    <div class="space-y-1">
+      {% for category in mobile_categories %}
+      <div class="dc-mobile-cat-item">
+        <button type="button" class="dc-mobile-cat-toggle w-full flex items-center justify-between gap-3 px-3 py-2 rounded-xl text-left text-gray-800 hover:bg-gray-50 transition text-sm font-medium" aria-expanded="false">
+          <span class="flex items-center gap-3"><span>{{ category.name }}</span></span>
+          <span class="flex items-center gap-2">
+            <i data-lucide="plus" class="dc-icon-plus w-4 h-4"></i>
+            <i data-lucide="minus" class="dc-icon-minus w-4 h-4 hidden"></i>
+          </span>
+        </button>
+
+        {% if category.children %}
+        <div class="dc-mobile-cat-children hidden pl-4 mt-1">
+          {% for child in category.children %}
+          <a href="{{ child.href }}" class="block px-3 py-2 rounded-xl text-gray-600 hover:bg-gray-50 transition text-sm">{{ child.name }}</a>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Other links -->
+  <nav class="px-5 py-3 flex flex-col gap-1">
     <a href="{{ home }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-700 font-medium hover:bg-blue-50 hover:text-blue-600 transition text-sm">
       <i data-lucide="home" class="w-4 h-4"></i>{{ text_home }}
     </a>
@@ -297,41 +326,11 @@
     </a>
 
     {% if top_informations is defined and top_informations %}
-    <hr class="my-2 border-t border-gray-100" />
     {% for info in top_informations %}
     <a href="{{ info.href }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-700 font-medium hover:bg-blue-50 hover:text-blue-600 transition text-sm">
       <i data-lucide="file-text" class="w-4 h-4"></i>{{ info.title }}
     </a>
     {% endfor %}
-    {% endif %}
-
-    <!-- Categories (mobile) — accordion -->
-    {% if mobile_categories %}
-    <hr class="my-2 border-t border-gray-100" />
-    <div class="px-0">
-      <p class="text-xs font-bold uppercase tracking-widest text-gray-400 px-3 mb-1">{{ text_catalog }}</p>
-      <div class="space-y-1">
-        {% for category in mobile_categories %}
-        <div class="dc-mobile-cat-item">
-          <button type="button" class="dc-mobile-cat-toggle w-full flex items-center justify-between gap-3 px-3 py-2 rounded-xl text-left text-gray-800 hover:bg-gray-50 transition text-sm font-medium" aria-expanded="false">
-            <span class="flex items-center gap-3"><span>{{ category.name }}</span></span>
-            <span class="flex items-center gap-2">
-              <i data-lucide="plus" class="dc-icon-plus w-4 h-4"></i>
-              <i data-lucide="minus" class="dc-icon-minus w-4 h-4 hidden"></i>
-            </span>
-          </button>
-
-          {% if category.children %}
-          <div class="dc-mobile-cat-children hidden pl-4 mt-1">
-            {% for child in category.children %}
-            <a href="{{ child.href }}" class="block px-3 py-2 rounded-xl text-gray-600 hover:bg-gray-50 transition text-sm">{{ child.name }}</a>
-            {% endfor %}
-          </div>
-          {% endif %}
-        </div>
-        {% endfor %}
-      </div>
-    </div>
     {% endif %}
   </nav>
 
