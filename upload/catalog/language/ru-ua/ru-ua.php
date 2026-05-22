@@ -46,9 +46,9 @@ $_['button_cart'] = 'В корзину';
 
 $_['button_cancel'] = 'Отмена';
 
-$_['button_compare'] = 'Сравнить этот товар';
+$_['button_compare'] = 'В сравнение';
 
-$_['button_wishlist'] = 'Добавить в список желаний';
+$_['button_wishlist'] = 'В желания';
 
 $_['button_checkout'] = 'Оформить заказ';
 

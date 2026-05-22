@@ -243,13 +243,15 @@
 
             <div class="flex items-center gap-3 w-full sm:w-auto sm:flex-shrink-0">
               <button type="button" id="dc-wishlist-btn" data-product-id="{{ product_id }}" data-in-wishlist="{{ in_wishlist|default(0) }}" title="{{ button_wishlist }}"
-                class="flex-1 sm:flex-none w-11 h-11 rounded-xl border {% if in_wishlist|default(0) %}border-rose-300 bg-rose-50{% else %}border-gray-200 hover:border-rose-300 hover:bg-rose-50{% endif %} flex items-center justify-center transition flex-shrink-0">
+                class="flex-1 sm:flex-none rounded-xl border {% if in_wishlist|default(0) %}border-rose-300 bg-rose-50{% else %}border-gray-200 hover:border-rose-300 hover:bg-rose-50{% endif %} flex items-center justify-center gap-2 transition flex-shrink-0 px-3 py-2.5">
                 <i data-lucide="heart" class="w-5 h-5 pointer-events-none {% if in_wishlist|default(0) %}text-rose-500 fill-rose-400{% else %}text-gray-500{% endif %}"></i>
+                <span class="inline sm:hidden text-sm font-semibold text-gray-600">{{ button_wishlist }}</span>
               </button>
 
               <button type="button" onclick="{% if in_compare|default(0) %}compare.remove('{{ product_id }}'){% else %}compare.add('{{ product_id }}'){% endif %};" title="{{ button_compare }}"
-                class="flex-1 sm:flex-none w-11 h-11 rounded-xl border {% if in_compare|default(0) %}border-blue-300 bg-blue-50{% else %}border-gray-200 hover:border-blue-200 hover:bg-blue-50{% endif %} flex items-center justify-center transition flex-shrink-0">
+                class="flex-1 sm:flex-none rounded-xl border {% if in_compare|default(0) %}border-blue-300 bg-blue-50{% else %}border-gray-200 hover:border-blue-200 hover:bg-blue-50{% endif %} flex items-center justify-center gap-2 transition flex-shrink-0 px-3 py-2.5">
                 <i data-lucide="bar-chart-2" class="w-5 h-5 {% if in_compare|default(0) %}text-blue-500 fill-blue-400{% else %}text-gray-500{% endif %}"></i>
+                <span class="inline sm:hidden text-sm font-semibold text-gray-600">{{ button_compare }}</span>
               </button>
             </div>
           </div>
