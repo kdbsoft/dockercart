@@ -321,5 +321,78 @@ For support and updates, visit dockercart.net
 }());
 </script>
 {% endif %}
+
+<!-- Scroll-to-top -->
+<div id="dc-scroll-to-top"
+     class="fixed left-0 z-40 hidden sm:flex items-center justify-center cursor-pointer opacity-0 transition-all duration-300 pointer-events-none bg-gray-200 hover:bg-gray-300 hover:opacity-100 w-14"
+     aria-label="Scroll to top">
+  <i data-lucide="arrow-up" class="w-5 h-5 text-gray-400 transition-all duration-300"></i>
+</div>
+<script>
+(function () {
+  'use strict';
+  var btn = document.getElementById('dc-scroll-to-top');
+  if (!btn) return;
+
+  var ticking = false;
+  var returnPos = null;
+  var programmatic = false;
+
+  function update() {
+    var y = window.scrollY;
+
+    if (returnPos !== null) {
+      btn.classList.remove('opacity-0', 'pointer-events-none');
+      btn.classList.add('opacity-60');
+      return;
+    }
+
+    if (y > 300) {
+      btn.classList.remove('opacity-0', 'pointer-events-none');
+      btn.classList.add('opacity-60');
+    } else {
+      btn.classList.remove('opacity-60');
+      btn.classList.add('opacity-0', 'pointer-events-none');
+    }
+  }
+
+  function onScroll() {
+    if (!ticking) {
+      window.requestAnimationFrame(function () {
+        var y = window.scrollY;
+
+        if (!programmatic && returnPos !== null && y > 100) {
+          returnPos = null;
+          btn.classList.remove('is-returning');
+        }
+
+        update();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  btn.addEventListener('click', function () {
+    if (returnPos !== null) {
+      programmatic = true;
+      window.scrollTo({ top: returnPos, behavior: 'smooth' });
+      returnPos = null;
+      btn.classList.remove('is-returning');
+      setTimeout(function () { programmatic = false; }, 600);
+    } else {
+      returnPos = window.scrollY;
+      programmatic = true;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      btn.classList.add('is-returning');
+      setTimeout(function () { programmatic = false; }, 600);
+    }
+  });
+
+  update();
+}());
+</script>
 </body>
 </html>

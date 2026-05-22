@@ -1069,3 +1069,34 @@ body.modal-open { overflow: hidden; }
     display: inline-flex;
   }
 }
+
+/* ── Scroll-to-top ─────────────────────────────────────────── */
+#dc-scroll-to-top {
+  top: 144px;
+  height: calc(100vh - 144px);
+}
+@media (min-width: 640px) {
+  #dc-scroll-to-top {
+    top: 92px;
+    height: calc(100vh - 92px);
+  }
+}
+@media (min-width: 1024px) {
+  #dc-scroll-to-top {
+    top: 132px;
+    height: calc(100vh - 132px);
+  }
+}
+#dc-scroll-to-top svg {
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+#dc-scroll-to-top.is-returning svg {
+  transform: rotate(180deg);
+}
+#dc-scroll-to-top:hover svg {
+  transform: scale(1.15);
+  color: #6b7280;
+}
+#dc-scroll-to-top.is-returning:hover svg {
+  transform: rotate(180deg) scale(1.15);
+}
