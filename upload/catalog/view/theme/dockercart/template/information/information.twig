@@ -13,7 +13,7 @@
   </section>
 
   <section class="py-8 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-4xl mx-auto">
+    <div class="{% if not full_width %}max-w-4xl mx-auto{% endif %}">
       {{ content_top }}
 
       <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 sm:p-10">
