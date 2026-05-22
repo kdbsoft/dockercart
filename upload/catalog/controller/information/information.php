@@ -34,6 +34,8 @@ class ControllerInformationInformation extends Controller {
 
 			$data['description'] = html_entity_decode($information_info['description'], ENT_QUOTES, 'UTF-8');
 
+			$data['full_width'] = $information_info['full_width'] ?? 0;
+
 			$data['continue'] = '/';
 
 			$data['column_left'] = $this->load->controller('common/column_left');
