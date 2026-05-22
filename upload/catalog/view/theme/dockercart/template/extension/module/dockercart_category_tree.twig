@@ -1,0 +1,61 @@
+<style>
+  .dc-ct-card:hover img{transform:scale(1.08)}
+  .dc-ct-arrow{transition:transform .2s ease}
+  .dc-ct-card:hover .dc-ct-arrow{transform:translateX(3px)}
+</style>
+
+{% if categories_tree %}
+<section class="py-16 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-12">
+      <span class="inline-block text-blue-600 text-xs font-semibold uppercase tracking-[0.15em] mb-2 bg-blue-50 px-3 py-1 rounded-full">{{ text_subtitle }}</span>
+      <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">{{ heading_title }}</h2>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6">
+      {% for category in categories_tree %}
+        <div class="dc-ct-card group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col">
+          <a href="{{ category.href }}" class="block relative overflow-hidden aspect-[4/3]">
+            {% if category.thumb %}
+              <img src="{{ category.thumb }}" alt="{{ category.name }}" class="w-full h-full object-cover transition-transform duration-500" loading="lazy" />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+            {% else %}
+              <div class="w-full h-full flex items-center justify-center" style="background:linear-gradient(135deg,hsl({{ category.hue }},70%,55%),hsl({{ (category.hue + 60) % 360 }},70%,45%))">
+                <svg class="w-12 h-12 text-white/30" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
+              </div>
+            {% endif %}
+          </a>
+
+          <div class="p-4 flex flex-col flex-1">
+            <a href="{{ category.href }}" class="text-sm sm:text-base font-bold text-gray-900 hover:text-blue-600 transition leading-tight mb-1">{{ category.name }}</a>
+
+            {% if category.total > 0 %}
+            <p class="text-xs sm:text-sm text-gray-400 flex items-center gap-1.5 mb-2">
+              <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><line x1="3" x2="21" y1="6" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+              {{ category.total }} {{ text_items }}
+            </p>
+            {% endif %}
+
+            {% if category.children %}
+            <div class="flex-1 space-y-0.5 mt-1 border-t border-gray-100 pt-2.5">
+              {% for child in category.children|slice(0, 4) %}
+                <a href="{{ child.href }}" class="flex items-center justify-between gap-2 text-sm text-gray-500 hover:text-blue-600 transition px-2 py-1.5 rounded-lg hover:bg-gray-50">
+                  <span class="truncate">{{ child.name }}</span>
+                  <svg class="w-3.5 h-3.5 flex-shrink-0 dc-ct-arrow text-gray-300" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </a>
+              {% endfor %}
+              {% if category.children|length > 4 %}
+                <a href="{{ category.href }}" class="flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-700 transition px-2 py-1.5 mt-0.5">
+                  {{ text_view_all }}
+                  <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </a>
+              {% endif %}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
