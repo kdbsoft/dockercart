@@ -66,6 +66,9 @@ $_['tab_description']          = 'Description';
 $_['tab_attribute']            = 'Specification';
 $_['tab_review']               = 'Reviews (%s)';
 
+// Messenger
+$_['text_write_in_messenger']  = 'Write in';
+
 // Error
 $_['error_name']               = 'Warning: Review Name must be between 3 and 25 characters!';
 $_['error_text']               = 'Warning: Review Text must be between 25 and 1000 characters!';
