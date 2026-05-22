@@ -554,7 +554,7 @@ class ControllerProductProduct extends Controller {
 				}
 			}
 			$fab_raw = $this->config->get('dockercart_theme_messenger_fab_status');
-			$data['messenger_fab_status'] = ($fab_raw === null || (int)$fab_raw !== 0);
+			$data['messenger_fab_status'] = ($fab_raw !== null && (int)$fab_raw === 1);
 
 			$data['text_write_in_messenger'] = $this->language->get('text_write_in_messenger');
 			$data['text_you_may_also_like'] = $this->language->get('text_you_may_also_like');
