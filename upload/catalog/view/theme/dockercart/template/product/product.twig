@@ -265,6 +265,20 @@
 
         </div>{# end #product #}
 
+        {% if messenger_links and messenger_fab_status %}
+        <div class="mt-6 flex flex-wrap items-center gap-3">
+          {% for messenger in messenger_links %}
+            {% if messenger.link %}
+            <a href="{{ messenger.link }}" target="_blank" rel="noopener nofollow"
+               class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition shadow-sm">
+              <img src="{{ messenger.image }}" alt="" class="w-5 h-5 object-contain" />
+              {{ text_write_in_messenger }} {{ messenger.name }}
+            </a>
+            {% endif %}
+          {% endfor %}
+        </div>
+        {% endif %}
+
         {% if product_features %}
         <!-- Badges row -->
         <div class="grid grid-cols-1 sm:grid-cols-{{ product_features|length > 1 ? '2' : '1' }} lg:grid-cols-{{ product_features|length > 2 ? '3' : (product_features|length > 1 ? '2' : '1') }} gap-3 mt-6">
@@ -278,20 +292,6 @@
             <p class="text-sm font-semibold text-gray-800">{{ feature.text }}</p>
             {% endif %}
           </div>
-          {% endfor %}
-        </div>
-        {% endif %}
-
-        {% if messenger_links and messenger_fab_status %}
-        <div class="mt-5 flex flex-wrap items-center gap-3">
-          {% for messenger in messenger_links %}
-            {% if messenger.link %}
-            <a href="{{ messenger.link }}" target="_blank" rel="noopener nofollow"
-               class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition shadow-sm">
-              <img src="{{ messenger.image }}" alt="" class="w-5 h-5 object-contain" />
-              {{ text_write_in_messenger }} {{ messenger.name }}
-            </a>
-            {% endif %}
           {% endfor %}
         </div>
         {% endif %}

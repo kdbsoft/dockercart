@@ -138,7 +138,7 @@ class ControllerCommonFooter extends Controller {
 		}
 
 		$fab_raw = $this->config->get('dockercart_theme_messenger_fab_status');
-		$data['messenger_fab_status'] = ($fab_raw === null || (int)$fab_raw !== 0);
+		$data['messenger_fab_status'] = ($fab_raw !== null && (int)$fab_raw === 1);
 
 		$data['payment_icons'] = array();
 		for ($i = 1; $i <= 10; $i++) {
