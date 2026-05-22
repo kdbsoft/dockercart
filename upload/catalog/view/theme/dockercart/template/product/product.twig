@@ -87,15 +87,22 @@
         {% endif %}
 
         {% if price %}
-        <div class="flex items-end gap-3 mt-5">
+        <div class="mt-5">
           {% if not special %}
-            <span id="dc-unit-price" data-base-price="{{ dc_base_price_value|default(0) }}" data-current-price="{{ dc_base_price_value|default(0) }}" class="text-3xl font-extrabold text-gray-900">{{ price }}</span>
+            <div class="flex items-baseline gap-3 flex-wrap">
+              <span id="dc-unit-price" data-base-price="{{ dc_base_price_value|default(0) }}" data-current-price="{{ dc_base_price_value|default(0) }}" class="text-2xl sm:text-3xl font-extrabold text-gray-900">{{ price }}</span>
+              {% if tax %}<span class="text-xs text-gray-400">{{ text_tax }} {{ tax }}</span>{% endif %}
+            </div>
           {% else %}
-            <span id="dc-unit-price" data-base-price="{{ dc_base_price_value|default(0) }}" data-current-price="{{ dc_base_price_value|default(0) }}" class="text-3xl font-extrabold text-gray-900">{{ special }}</span>
-            <span class="text-lg text-red-400 line-through">{{ price }}</span>
-            <span class="text-xs font-bold bg-red-500 text-white px-2 py-0.5 rounded-lg self-start mt-2">{{ text_sale }}</span>
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-bold bg-red-500 text-white px-2 py-0.5 rounded-lg self-start">{{ text_sale }}</span>
+              <div class="flex items-baseline gap-2 sm:gap-3 flex-wrap">
+                <span id="dc-unit-price" data-base-price="{{ dc_base_price_value|default(0) }}" data-current-price="{{ dc_base_price_value|default(0) }}" class="text-2xl sm:text-3xl font-extrabold text-gray-900">{{ special }}</span>
+                <span class="text-sm sm:text-lg text-red-400 line-through">{{ price }}</span>
+                {% if tax %}<span class="text-xs text-gray-400">{{ text_tax }} {{ tax }}</span>{% endif %}
+              </div>
+            </div>
           {% endif %}
-          {% if tax %}<span class="text-xs text-gray-400 self-center">{{ text_tax }} {{ tax }}</span>{% endif %}
         </div>
         {% if points %}<p class="text-xs text-blue-600 mt-1">{{ text_points }} {{ points }}</p>{% endif %}
         {% if discounts %}
