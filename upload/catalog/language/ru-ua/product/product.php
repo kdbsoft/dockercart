@@ -65,3 +65,6 @@ $_['text_year'] = 'год';
 $_['text_you_may_also_like'] = 'Вам также может понравиться';
 $_['text_zoom'] = 'Зум';
 $_['button_cart'] = 'В корзину';
+
+// Messenger
+$_['text_write_in_messenger']  = 'Написать в';

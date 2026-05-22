@@ -20,6 +20,8 @@ $_['entry_social_block'] = 'Social Icons & Links';
 $_['entry_social_icon']  = 'Icon';
 $_['entry_social_link']  = 'Link';
 $_['entry_payment_block'] = 'Payment Icons';
+$_['entry_messenger_block'] = 'Messenger Icons & Links';
+$_['entry_messenger_name'] = 'Name';
 $_['entry_payment_image'] = 'Payment Image';
 $_['entry_payment_link']  = 'Payment Link';
 $_['entry_features_product'] = 'Product card features';
@@ -37,9 +39,10 @@ $_['help_favicon_master'] = 'Single source image for all favicon sizes (16x16 to
 $_['help_favicon_master_hint'] = 'Recommended upload: square 128x128 PNG. The theme will auto-generate favicon sizes and insert them into the site header.';
 $_['help_menu_type']    = 'Choose how categories are shown in the header: classic horizontal bar or vertical dropdown button.';
 $_['help_social_block']   = 'Configure up to 4 social links with selectable icons. Empty link = icon is not displayed in footer.';
-$_['entry_messenger_fab_status'] = 'Messenger FAB widget';
-$_['help_messenger_fab_status']  = 'Show a floating button in the bottom-right corner of every page. Clicking it reveals the messenger list above. Enabled by default.';
+$_['entry_messenger_fab_status'] = 'Messenger on product page';
+$_['help_messenger_fab_status']  = 'Show messenger contact buttons on the product page, below the feature blocks. Enabled by default.';
 $_['help_payment_block']  = 'Upload payment icons (images). Empty image = item is not displayed in footer.';
+$_['help_messenger_block'] = 'Configure messenger icons for the FAB widget. Empty image = item is not displayed.';
 $_['help_theme_features']   = 'These feature blocks are used on product page, category page and quick view. Add as many rows as needed; all texts are multilingual.';
 
 // Menu type labels
@@ -53,7 +56,16 @@ $_['button_image']      = 'Select';
 $_['button_clear']      = 'Clear';
 $_['button_add_social'] = 'Add social link';
 $_['button_add_payment']= 'Add payment icon';
+$_['button_add_messenger'] = 'Add messenger';
 $_['button_add_feature'] = 'Add feature';
+
+// Tab titles
+$_['text_tab_general']             = 'General';
+$_['text_tab_general_subtitle']    = 'Module status, menu type, logos and favicon';
+$_['text_tab_social_payments']     = 'Social & Payments';
+$_['text_tab_social_payments_subtitle'] = 'Social links, messenger widget and payment icons';
+$_['text_tab_features']            = 'Features';
+$_['text_tab_features_subtitle']   = 'Product, category and quick view feature blocks';
 
 // Section headings
 $_['text_section_general'] = 'Module Settings';

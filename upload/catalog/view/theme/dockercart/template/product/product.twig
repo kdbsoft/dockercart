@@ -101,9 +101,9 @@
                 <span class="text-sm sm:text-lg text-red-400 line-through">{{ price }}</span>
                 {% if tax %}<span class="text-xs text-gray-400">{{ text_tax }} {{ tax }}</span>{% endif %}
               </div>
-            </div>
-          {% endif %}
         </div>
+        {% endif %}
+      </div>
         {% if points %}<p class="text-xs text-blue-600 mt-1">{{ text_points }} {{ points }}</p>{% endif %}
         {% if discounts %}
         <div class="mt-2 space-y-0.5">{% for discount in discounts %}<p class="text-xs text-gray-500">{{ discount.quantity }}{{ text_discount }}{{ discount.price }}</p>{% endfor %}</div>
@@ -278,6 +278,20 @@
             <p class="text-sm font-semibold text-gray-800">{{ feature.text }}</p>
             {% endif %}
           </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if messenger_links and messenger_fab_status %}
+        <div class="mt-5 flex flex-wrap items-center gap-3">
+          {% for messenger in messenger_links %}
+            {% if messenger.link %}
+            <a href="{{ messenger.link }}" target="_blank" rel="noopener nofollow"
+               class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition shadow-sm">
+              <img src="{{ messenger.image }}" alt="" class="w-5 h-5 object-contain" />
+              {{ text_write_in_messenger }} {{ messenger.name }}
+            </a>
+            {% endif %}
           {% endfor %}
         </div>
         {% endif %}

@@ -283,24 +283,32 @@
     </div>
     {% endif %}
 
+    <ul class="nav nav-tabs dcx-profile-tabs" id="dc-theme-tabs" role="tablist">
+      <li class="active"><a href="#dc-theme-tab-general" class="js-dc-theme-tab" data-tab="dc-theme-tab-general" data-title="{{ text_tab_general }}" data-subtitle="{{ text_tab_general_subtitle }}" data-icon="fa-cog"><i class="fa fa-cog"></i> {{ text_tab_general }}</a></li>
+      <li><a href="#dc-theme-tab-social-payments" class="js-dc-theme-tab" data-tab="dc-theme-tab-social-payments" data-title="{{ text_tab_social_payments }}" data-subtitle="{{ text_tab_social_payments_subtitle }}" data-icon="fa-share-alt"><i class="fa fa-share-alt"></i> {{ text_tab_social_payments }}</a></li>
+      <li><a href="#dc-theme-tab-features" class="js-dc-theme-tab" data-tab="dc-theme-tab-features" data-title="{{ text_tab_features }}" data-subtitle="{{ text_tab_features_subtitle }}" data-icon="fa-magic"><i class="fa fa-magic"></i> {{ text_tab_features }}</a></li>
+    </ul>
+
     <div class="dcx-shell">
       <div class="dcx-panel">
         <div class="dcx-panel-head">
-          <div class="dcx-panel-head__icon"><i class="fa fa-paint-brush"></i></div>
+          <div class="dcx-panel-head__icon"><i id="dc-theme-tab-icon" class="fa fa-cog"></i></div>
           <div>
-            <h3 class="dcx-panel-title">{{ heading_title }}</h3>
-            <div class="dcx-panel-subtitle">{{ text_edit }}</div>
+            <h3 class="dcx-panel-title" id="dc-theme-tab-title">{{ text_tab_general }}</h3>
+            <div class="dcx-panel-subtitle" id="dc-theme-tab-subtitle">{{ text_tab_general_subtitle }}</div>
           </div>
         </div>
         <div class="dcx-panel-body">
 
-          <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-dockercart-theme" class="dcx-form">
+          <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-dockercart-theme" class="form-horizontal dcx-form">
+
+            <div id="dc-theme-tab-general" class="dcx-tab-pane active">
 
             {# ─────────────────────── Section: General ────────────────────────── #}
             <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
               <h4><i class="fa fa-cog"></i> {{ text_section_general|default('Настройки модуля') }}</h4>
 
-              <div class="form-group form-horizontal" style="margin-bottom:12px;">
+              <div class="form-group">
                 <label class="col-sm-3 control-label" for="input-status">{{ entry_status }}</label>
                 <div class="col-sm-9">
                   <select name="dockercart_theme_status" id="input-status" class="form-control" style="max-width:200px;">
@@ -310,7 +318,7 @@
                 </div>
               </div>
 
-              <div class="form-group form-horizontal" style="margin-bottom:12px;">
+              <div class="form-group">
                 <label class="col-sm-3 control-label" for="input-menu-type">{{ entry_menu_type }}</label>
                 <div class="col-sm-9">
                   <select name="dockercart_theme_menu_type" id="input-menu-type" class="form-control" style="max-width:240px;">
@@ -403,6 +411,10 @@
               </div>
             </div>
 
+            </div>{# /dc-theme-tab-general #}
+
+            <div id="dc-theme-tab-social-payments" class="dcx-tab-pane">
+
             {# ─────────────────────── Section: Social icons ───────────────────── #}
             <div class="dcx-section">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
@@ -438,7 +450,7 @@
               {# Messenger FAB toggle #}
               <div style="margin-top:16px;padding-top:14px;border-top:1px solid #e8eaec;display:flex;align-items:center;gap:16px;">
                 <label style="font-weight:600;margin:0;white-space:nowrap;">{{ entry_messenger_fab_status }}</label>
-                <div class="btn-group" role="group">
+                <div class="btn-group" role="group" id="messenger-fab-toggle">
                   <label class="btn btn-sm {{ dockercart_theme_messenger_fab_status ? 'btn-primary' : 'btn-default' }}" style="margin:0;">
                     <input type="radio" name="dockercart_theme_messenger_fab_status" value="1" {{ dockercart_theme_messenger_fab_status ? 'checked' : '' }} style="display:none;"> {{ text_enabled }}
                   </label>
@@ -447,6 +459,40 @@
                   </label>
                 </div>
                 <span class="help-block" style="margin:0;font-size:12px;color:#8b96a7;">{{ help_messenger_fab_status }}</span>
+              </div>
+
+              {# Messenger icons rows #}
+              <div style="margin-top:16px;padding-top:14px;border-top:1px solid #e8eaec;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+                  <h4 style="margin:0;"><i class="fa fa-comments"></i> {{ entry_messenger_block }}</h4>
+                  <button type="button" id="btn-add-messenger" class="btn btn-primary btn-sm">
+                    <i class="fa fa-plus"></i> {{ button_add_messenger|default('Добавить') }}
+                  </button>
+                </div>
+
+                <div id="messenger-rows" class="dc-rows-container">
+                  {% for idx, item in messenger_items %}
+                  <div class="dc-row-item dc-messenger-row" id="messenger-row-{{ idx }}">
+                    <span class="dc-row-item__num">{{ idx + 1 }}</span>
+                    <div class="dc-social-thumb-wrap">
+                      <a href="" id="thumb-messenger-row-{{ idx }}" data-toggle="image" class="dc-social-thumb-link">
+                        <img src="{{ item.thumb }}" data-placeholder="{{ placeholder_social }}" alt="" />
+                      </a>
+                      <input type="hidden" name="dockercart_theme_messenger_image[]" id="input-messenger-row-{{ idx }}" value="{{ item.image }}" />
+                      <button type="button" class="dc-payment-clear-btn js-clear-messenger-thumb" data-input="input-messenger-row-{{ idx }}" data-thumb="thumb-messenger-row-{{ idx }}" title="{{ button_clear|default('Очистить') }}">
+                        <i class="fa fa-times"></i>
+                      </button>
+                    </div>
+                    <input type="text" name="dockercart_theme_messenger_link[]" value="{{ item.link }}" placeholder="https://..." class="form-control dc-row-link-input" />
+                    <input type="text" name="dockercart_theme_messenger_name[]" value="{{ item.name }}" placeholder="{{ entry_messenger_name }}" class="form-control dc-row-link-input" style="max-width:160px;" />
+                    <button type="button" class="btn btn-danger btn-sm js-remove-messenger-row">
+                      <i class="fa fa-times"></i>
+                    </button>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <p class="help-block" style="margin-top:10px;">{{ help_messenger_block }}</p>
               </div>
             </div>
 
@@ -482,6 +528,10 @@
 
               <p class="help-block" style="margin-top:10px;">{{ help_payment_block }}</p>
             </div>
+
+            </div>{# /dc-theme-tab-social-payments #}
+
+            <div id="dc-theme-tab-features" class="dcx-tab-pane">
 
             {# ─────────────────────── Section: Theme features ─────────────────── #}
             <div class="dcx-section">
@@ -631,10 +681,11 @@
                   </div>
                   {% endfor %}
                 </div>
-              </div>
 
               <p class="help-block" style="margin-top:10px;">{{ help_theme_features }}</p>
             </div>
+
+            </div>{# /dc-theme-tab-features #}
 
           </form>
 
@@ -680,6 +731,7 @@
   var userToken          = '{{ user_token }}';
   var socialRowIndex     = {{ social_items|length }};
   var paymentRowCounter  = {{ payment_items|length }};
+  var messengerRowCounter = {{ messenger_items|length }};
   var featureRowCounters = {
     product: {{ dockercart_theme_product_features|length }},
     category: {{ dockercart_theme_category_features|length }},
@@ -842,6 +894,42 @@
     renumberRows('#payment-rows', '.dc-row-item__num');
   });
 
+  /* ── Messenger image clear ──────────────────────────────────────── */
+  $(document).on('click', '.js-clear-messenger-thumb', function(e) {
+    e.stopPropagation();
+    var inputId = $(this).data('input');
+    var thumbId = $(this).data('thumb');
+    $('#' + inputId).val('');
+    $('#' + thumbId + ' img').attr('src', placeholderSocial);
+  });
+
+  /* ── Remove messenger row ───────────────────────────────────────── */
+  $(document).on('click', '.js-remove-messenger-row', function() {
+    $(this).closest('.dc-messenger-row').remove();
+    renumberRows('#messenger-rows', '.dc-row-item__num');
+  });
+
+  /* ── Add messenger row ──────────────────────────────────────────── */
+  $('#btn-add-messenger').on('click', function() {
+    var idx = messengerRowCounter++;
+    var num = $('#messenger-rows .dc-row-item').length + 1;
+    var html = '<div class="dc-row-item dc-messenger-row" id="messenger-row-' + idx + '">'
+      + '<span class="dc-row-item__num">' + num + '</span>'
+      + '<div class="dc-social-thumb-wrap">'
+      +   '<a href="" id="thumb-messenger-row-' + idx + '" data-toggle="image" class="dc-social-thumb-link">'
+      +     '<img src="' + placeholderSocial + '" data-placeholder="' + placeholderSocial + '" alt="" />'
+      +   '</a>'
+      +   '<input type="hidden" name="dockercart_theme_messenger_image[]" id="input-messenger-row-' + idx + '" value="" />'
+      +   '<button type="button" class="dc-payment-clear-btn js-clear-messenger-thumb" data-input="input-messenger-row-' + idx + '" data-thumb="thumb-messenger-row-' + idx + '" title="Очистить"><i class="fa fa-times"></i></button>'
+      + '</div>'
+      + '<input type="text" name="dockercart_theme_messenger_link[]" value="" placeholder="https://..." class="form-control dc-row-link-input" />'
+      + '<input type="text" name="dockercart_theme_messenger_name[]" value="" placeholder="{{ entry_messenger_name|e('js') }}" class="form-control dc-row-link-input" style="max-width:160px;" />'
+      + '<button type="button" class="btn btn-danger btn-sm js-remove-messenger-row"><i class="fa fa-times"></i></button>'
+      + '</div>';
+    $('#messenger-rows').append(html);
+    renumberRows('#messenger-rows', '.dc-row-item__num');
+  });
+
   $(document).on('click', '.js-remove-theme-feature-row', function() {
     var $row = $(this).closest('.dc-feature-row');
     var $container = $row.parent();
@@ -919,6 +1007,48 @@
     renderLucideIcons();
     renumberRows('#' + targetBodyId, '.dc-row-item__num');
   });
+
+  // Messenger FAB toggle — swap btn-primary/btn-danger vs btn-default on click
+  $(document).on('click', '#messenger-fab-toggle label', function() {
+    var $group = $(this).closest('.btn-group');
+    var val = $(this).find('input[type="radio"]').val();
+    var $enabled = $group.find('input[value="1"]').closest('label');
+    var $disabled = $group.find('input[value="0"]').closest('label');
+    if (val === '1') {
+      $enabled.removeClass('btn-default').addClass('btn-primary');
+      $disabled.removeClass('btn-danger').addClass('btn-default');
+    } else {
+      $disabled.removeClass('btn-default').addClass('btn-danger');
+      $enabled.removeClass('btn-primary').addClass('btn-default');
+    }
+  });
+
+  // Tab switching
+  function updateDcThemePanelHeader(tabLink) {
+    var $tab = $(tabLink);
+    var title = $tab.data('title') || '{{ text_tab_general|e('js') }}';
+    var subtitle = $tab.data('subtitle') || '';
+    var icon = String($tab.data('icon') || 'fa-cog').replace(/[^a-z0-9\-]/gi, '');
+    $('#dc-theme-tab-title').text(title);
+    $('#dc-theme-tab-subtitle').text(subtitle);
+    $('#dc-theme-tab-icon').attr('class', 'fa ' + icon);
+  }
+
+  $(document).on('click', '.js-dc-theme-tab', function(e) {
+    e.preventDefault();
+    var tabId = $(this).data('tab');
+    if (!tabId) return;
+
+    $('#dc-theme-tabs > li').removeClass('active');
+    $(this).closest('li').addClass('active');
+
+    $('#dc-theme-tab-general, #dc-theme-tab-social-payments, #dc-theme-tab-features').removeClass('active');
+    $('#' + tabId).addClass('active');
+
+    updateDcThemePanelHeader(this);
+  });
+
+  updateDcThemePanelHeader($('#dc-theme-tabs > li.active a.js-dc-theme-tab'));
 
   renderLucideIcons();
 

@@ -121,6 +121,22 @@ class ControllerCommonFooter extends Controller {
 			}
 		}
 
+		$data['messenger_links'] = array();
+		for ($i = 1; $i <= 10; $i++) {
+			$image = (string)$this->config->get('dockercart_theme_messenger_' . $i . '_image');
+			$link  = trim((string)$this->config->get('dockercart_theme_messenger_' . $i . '_link'));
+			$name  = trim((string)$this->config->get('dockercart_theme_messenger_' . $i . '_name'));
+			$image_path = ltrim($image, '/');
+
+			if ($image_path !== '') {
+				$data['messenger_links'][] = array(
+					'image' => $server . 'image/' . $image_path,
+					'link'  => $link,
+					'name'  => $name,
+				);
+			}
+		}
+
 		$fab_raw = $this->config->get('dockercart_theme_messenger_fab_status');
 		$data['messenger_fab_status'] = ($fab_raw === null || (int)$fab_raw !== 0);
 

@@ -67,3 +67,6 @@ $_['text_week'] = 'тиждень';
 $_['text_write'] = 'Написати відгук';
 $_['text_year'] = 'рік';
 $_['button_cart'] = 'Додати в кошик';
+
+// Messenger
+$_['text_write_in_messenger']  = 'Написати в';
