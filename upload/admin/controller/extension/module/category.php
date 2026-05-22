@@ -8,6 +8,7 @@ class ControllerExtensionModuleCategory extends Controller {
 		$this->document->setTitle($this->language->get('heading_title'));
 
 		$this->load->model('setting/setting');
+		$this->load->model('catalog/category');
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
 			$this->model_setting_setting->editSetting('module_category', $this->request->post);
@@ -48,6 +49,30 @@ class ControllerExtensionModuleCategory extends Controller {
 			$data['module_category_status'] = $this->request->post['module_category_status'];
 		} else {
 			$data['module_category_status'] = $this->config->get('module_category_status');
+		}
+
+		// Selected categories
+		if (isset($this->request->post['module_category_categories'])) {
+			$data['module_category_categories'] = $this->request->post['module_category_categories'];
+		} elseif ($this->config->get('module_category_categories')) {
+			$data['module_category_categories'] = $this->config->get('module_category_categories');
+		} else {
+			$data['module_category_categories'] = array();
+		}
+
+		$data['user_token'] = $this->session->data['user_token'];
+
+		$data['categories'] = array();
+
+		foreach ($data['module_category_categories'] as $category_id) {
+			$category_info = $this->model_catalog_category->getCategory((int)$category_id);
+
+			if ($category_info) {
+				$data['categories'][] = array(
+					'category_id' => (int)$category_info['category_id'],
+					'name'        => $category_info['name']
+				);
+			}
 		}
 
 		$data['header'] = $this->load->controller('common/header');
