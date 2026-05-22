@@ -30,7 +30,15 @@ class ControllerExtensionModuleCategory extends Controller {
 		$data['categories'] = array();
 		$data['all_categories_href'] = $this->url->link('product/categories');
 		$cache_ttl = 1800;
-		$cache_prefix = 'category.module.' . (int)$this->config->get('config_store_id') . '.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_product_count');
+		$selected_category_ids = $this->config->get('module_category_categories');
+
+		if (!empty($selected_category_ids) && is_array($selected_category_ids)) {
+			$cache_selection = '.' . md5(implode(',', $selected_category_ids));
+		} else {
+			$cache_selection = '';
+		}
+
+		$cache_prefix = 'category.module.' . (int)$this->config->get('config_store_id') . '.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_product_count') . $cache_selection;
 
 		// Text strings
 		$data['text_browse_by'] = $this->language->get('text_browse_by');
@@ -41,7 +49,20 @@ class ControllerExtensionModuleCategory extends Controller {
 
 		if (!is_array($categories)) {
 			$categories = array();
-			$top_categories = $this->model_catalog_category->getCategories(0);
+
+			if (!empty($selected_category_ids) && is_array($selected_category_ids)) {
+				$top_categories = array();
+
+				foreach ($selected_category_ids as $cat_id) {
+					$cat_info = $this->model_catalog_category->getCategory((int)$cat_id);
+
+					if ($cat_info) {
+						$top_categories[] = $cat_info;
+					}
+				}
+			} else {
+				$top_categories = $this->model_catalog_category->getCategories(0);
+			}
 
 			foreach ($top_categories as $category) {
 				$filter_data = array(
