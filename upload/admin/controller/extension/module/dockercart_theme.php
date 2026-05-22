@@ -142,6 +142,30 @@ class ControllerExtensionModuleDockerCartTheme extends Controller {
         }
         $data['social_items'] = $social_items;
 
+        /* ── Messenger icons/images (dynamic, up to 10) ── */
+        $messenger_items = [];
+        for ($i = 1; $i <= 10; $i++) {
+            $image = $this->config->get('dockercart_theme_messenger_' . $i . '_image');
+            $link  = $this->config->get('dockercart_theme_messenger_' . $i . '_link');
+            $name  = $this->config->get('dockercart_theme_messenger_' . $i . '_name');
+            if (($image === null || (string)$image === '') && ($link === null || (string)$link === '')) {
+                break;
+            }
+            $image_str = (string)$image;
+            if ($image_str && is_file(DIR_IMAGE . $image_str)) {
+                $thumb = $this->model_tool_image->resize($image_str, 40, 40);
+            } else {
+                $thumb = $this->model_tool_image->resize('no_image.png', 40, 40);
+            }
+            $messenger_items[] = [
+                'image' => $image_str,
+                'link'  => (string)$link,
+                'name'  => (string)$name,
+                'thumb' => $thumb,
+            ];
+        }
+        $data['messenger_items'] = $messenger_items;
+
         /* ── Payment icons/images (dynamic, up to 10) ── */
         $payment_items = [];
         for ($i = 1; $i <= 10; $i++) {
@@ -234,6 +258,9 @@ class ControllerExtensionModuleDockerCartTheme extends Controller {
         for ($n = 1; $n <= 10; $n++) {
             $settings['dockercart_theme_social_' . $n . '_image'] = '';
             $settings['dockercart_theme_social_' . $n . '_link']  = '';
+            $settings['dockercart_theme_messenger_' . $n . '_image'] = '';
+            $settings['dockercart_theme_messenger_' . $n . '_link']  = '';
+            $settings['dockercart_theme_messenger_' . $n . '_name']  = '';
             $settings['dockercart_theme_payment_' . $n . '_image'] = '';
             $settings['dockercart_theme_payment_' . $n . '_link']  = '';
         }
@@ -246,6 +273,18 @@ class ControllerExtensionModuleDockerCartTheme extends Controller {
             if ($n > 10) break;
             $settings['dockercart_theme_social_' . $n . '_image'] = trim((string)$image);
             $settings['dockercart_theme_social_' . $n . '_link']  = trim((string)($social_links[$idx] ?? ''));
+        }
+
+        // Messenger items (array POST fields)
+        $messenger_images = array_values((array)($p['dockercart_theme_messenger_image'] ?? []));
+        $messenger_links  = array_values((array)($p['dockercart_theme_messenger_link']  ?? []));
+        $messenger_names  = array_values((array)($p['dockercart_theme_messenger_name']  ?? []));
+        foreach ($messenger_images as $idx => $image) {
+            $n = $idx + 1;
+            if ($n > 10) break;
+            $settings['dockercart_theme_messenger_' . $n . '_image'] = trim((string)$image);
+            $settings['dockercart_theme_messenger_' . $n . '_link']  = trim((string)($messenger_links[$idx] ?? ''));
+            $settings['dockercart_theme_messenger_' . $n . '_name']  = trim((string)($messenger_names[$idx] ?? ''));
         }
 
         // Payment items (array POST fields)

@@ -209,7 +209,7 @@ For support and updates, visit dockercart.net
   });
 </script>
 
-{% if social_links and messenger_fab_status %}
+{% if messenger_links %}
 <!-- Messenger FAB Widget -->
 <div id="dc-messenger-fab"
      class="fixed z-50 flex flex-col items-end gap-2.5"
@@ -221,15 +221,15 @@ For support and updates, visit dockercart.net
        aria-label="Messengers"
        aria-hidden="true"
        class="flex flex-col items-end gap-2 transition-all duration-200 ease-out opacity-0 translate-y-3 pointer-events-none">
-    {% for social in social_links %}
-      {% if social.image and social.link %}
-      <a href="{{ social.link }}"
+    {% for messenger in messenger_links %}
+      {% if messenger.image and messenger.link %}
+      <a href="{{ messenger.link }}"
          target="_blank"
          rel="noopener nofollow"
          class="flex items-center justify-center w-14 h-14 rounded-full bg-white shadow-lg transition-transform duration-150 hover:scale-110 hover:shadow-xl focus:outline-none"
          style="border-radius:50%;overflow:hidden;"
-         aria-label="Messenger">
-        <img src="{{ social.image }}" alt="" class="w-10 h-10 object-contain" />
+          aria-label="{{ messenger.name|default('Messenger') }}">
+        <img src="{{ messenger.image }}" alt="" class="w-10 h-10 object-contain" />
       </a>
       {% endif %}
     {% endfor %}

@@ -536,6 +536,27 @@ class ControllerProductProduct extends Controller {
 				)
 			);
 			$data['product_features'] = $this->resolveThemeFeatures('dockercart_theme_product_features', $product_feature_defaults);
+
+			// Messenger contact links (for product page under features)
+			$server = ($this->request->server['HTTPS'] ?? '') ? HTTPS_SERVER : HTTP_SERVER;
+			$data['messenger_links'] = array();
+			for ($i = 1; $i <= 10; $i++) {
+				$image = (string)$this->config->get('dockercart_theme_messenger_' . $i . '_image');
+				$link  = trim((string)$this->config->get('dockercart_theme_messenger_' . $i . '_link'));
+				$name  = trim((string)$this->config->get('dockercart_theme_messenger_' . $i . '_name'));
+				$image_path = ltrim($image, '/');
+				if ($image_path !== '') {
+					$data['messenger_links'][] = array(
+						'image' => $server . 'image/' . $image_path,
+						'link'  => $link,
+						'name'  => $name,
+					);
+				}
+			}
+			$fab_raw = $this->config->get('dockercart_theme_messenger_fab_status');
+			$data['messenger_fab_status'] = ($fab_raw === null || (int)$fab_raw !== 0);
+
+			$data['text_write_in_messenger'] = $this->language->get('text_write_in_messenger');
 			$data['text_you_may_also_like'] = $this->language->get('text_you_may_also_like');
 			$data['text_view_all'] = $this->language->get('text_view_all');
 			$data['text_quick_view'] = $this->language->get('text_quick_view');
