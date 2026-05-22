@@ -17,6 +17,7 @@ $_['text_gift']                = 'Gift with Purchase';
 $_['text_gift_minimum']        = 'Minimum quantity to receive the gift';
 $_['text_gift_badge']          = 'GIFT';
 $_['text_free']                = 'FREE';
+$_['text_option_out_of_stock'] = 'Out of stock';
 $_['text_minimum']             = 'This product has a minimum quantity of %s';
 $_['text_quantity_step']       = 'Quantity step: %s';
 $_['text_reviews']             = '%s reviews';

@@ -47,6 +47,7 @@ $_['text_gift'] = 'Подарок к заказу';
 $_['text_gift_minimum'] = 'Минимальное кол-во для получения подарка';
 $_['text_gift_badge'] = 'ПОДАРОК';
 $_['text_free'] = 'БЕСПЛАТНО';
+$_['text_option_out_of_stock'] = 'Нет в наличии';
 $_['text_search'] = 'Поиск';
 $_['text_semi_month'] = 'полмесяца';
 $_['text_stock'] = 'Доступность:';
