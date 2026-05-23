@@ -1,7 +1,7 @@
 <section id="hero" class="relative w-full h-[56vh] min-h-[340px] max-h-[540px] overflow-hidden">
   <div id="hero-slides" class="relative w-full h-full">
     {% for banner in banners %}
-    <div class="hero-slide absolute inset-0{% if not loop.first %} opacity-0{% endif %}" data-slide="{{ loop.index0 }}">
+    <div class="hero-slide absolute inset-0 transition-opacity duration-700 ease-in-out{% if not loop.first %} opacity-0{% endif %}" data-slide="{{ loop.index0 }}">
       {% if banner.link %}
       <a href="{{ banner.link }}" class="absolute inset-0 z-0" aria-label="{{ banner.title }}"></a>
       {% endif %}
@@ -51,7 +51,7 @@
 
   <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-10">
     {% for banner in banners %}
-    <button class="hero-dot {% if not loop.first %}opacity-50{% endif %}" style="{% if loop.first %}width:32px;{% else %}width:8px;opacity:0.5;{% endif %} height:8px; border-radius:999px; background:#ffffff;" data-dot="{{ loop.index0 }}" onclick="goToSlide_{{ module }}({{ loop.index0 }})" aria-label="Go to slide {{ loop.index }}"></button>
+    <button class="hero-dot transition-all duration-500 ease-in-out {% if not loop.first %}opacity-50{% endif %}" style="{% if loop.first %}width:32px;{% else %}width:8px;opacity:0.5;{% endif %} height:8px; border-radius:999px; background:#ffffff;" data-dot="{{ loop.index0 }}" onclick="goToSlide_{{ module }}({{ loop.index0 }})" aria-label="Go to slide {{ loop.index }}"></button>
     {% endfor %}
   </div>
   {% endif %}

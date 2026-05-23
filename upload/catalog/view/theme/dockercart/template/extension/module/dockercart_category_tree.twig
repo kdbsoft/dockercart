@@ -10,6 +10,7 @@
   .dc-item__overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.65),rgba(0,0,0,.1) 50%,transparent);pointer-events:none}
   .dc-item__body{position:absolute;bottom:0;left:0;right:0;z-index:2;padding:.75rem}
   .dc-item__cat{display:flex;align-items:center;gap:.375rem;color:#fff;font-size:.875rem;font-weight:800;line-height:1.2;text-shadow:0 1px 3px rgba(0,0,0,.3);text-decoration:none;transition:color .2s ease}
+  .dc-item__cat:hover{color:#93c5fd}
   .dc-item__cat svg{width:16px;height:16px;flex-shrink:0;transition:transform .2s ease}
   .dc-item__cat:hover svg{transform:translateX(3px)}
   .dc-item__children{max-height:0;opacity:0;overflow:hidden;transition:max-height .35s ease,opacity .3s ease;pointer-events:auto}
@@ -29,9 +30,8 @@
   .dc-section{padding:4rem 1rem}
   .dc-section__inner{max-width:1280px;margin:0 auto}
   .dc-section__header{text-align:center;margin-bottom:3rem}
-  .dc-section__badge{display:inline-flex;align-items:center;gap:.375rem;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.15em;color:#2563eb;background:rgba(37,99,235,.1);padding:.375rem .75rem;border-radius:999px;margin-bottom:.5rem}
-  .dc-section__badge svg{width:14px;height:14px;stroke-width:2.5}
-  .dc-section__title{font-size:1.5rem;font-weight:700;color:#111827}
+  .dc-section__subtitle{font-size:.875rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:#2563eb;margin:0 0 .25rem}
+  .dc-section__title{font-size:1.5rem;font-weight:700;color:#111827;margin:0}
   .dc-section__btn{margin-top:2.5rem;text-align:center}
   .dc-section__btn a{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.5rem;border-radius:12px;background:#111827;color:#fff;font-size:.875rem;font-weight:700;text-decoration:none;box-shadow:0 4px 6px -1px rgba(0,0,0,.1);transition:all .2s ease}
   .dc-section__btn a:hover{background:#1f2937;box-shadow:0 10px 15px -3px rgba(0,0,0,.1);transform:translateY(-2px)}
@@ -45,7 +45,7 @@
 <section class="dc-section">
   <div class="dc-section__inner">
     <div class="dc-section__header">
-      <span class="dc-section__badge"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>{{ text_subtitle }}</span>
+      <p class="dc-section__subtitle">{{ text_subtitle }}</p>
       <h2 class="dc-section__title">{{ heading_title }}</h2>
     </div>
 
