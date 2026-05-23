@@ -325,6 +325,19 @@ class ControllerCommonHeader extends Controller {
 			'href'  => $this->url->link('information/contact')
 		);
 
+		// Custom header links from theme settings (after info pages + contact)
+		for ($i = 1; $i <= 10; $i++) {
+			$title = (string)$this->config->get('dockercart_theme_header_link_' . $i . '_title');
+			$url   = (string)$this->config->get('dockercart_theme_header_link_' . $i . '_url');
+			if ($title === '' || $url === '') {
+				break;
+			}
+			$data['top_informations'][] = array(
+				'title' => $title,
+				'href'  => $url
+			);
+		}
+
 		// Mobile categories for slide-in menu (simple two-level tree)
 		$this->load->model('catalog/category');
 		$data['mobile_categories'] = array();

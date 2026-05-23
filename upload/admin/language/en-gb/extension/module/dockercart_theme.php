@@ -49,6 +49,16 @@ $_['help_theme_features']   = 'These feature blocks are used on product page, ca
 $_['text_menu_horizontal'] = 'Horizontal';
 $_['text_menu_vertical']   = 'Vertical';
 
+// Entry labels (custom links)
+$_['entry_header_links'] = 'Header Links';
+$_['entry_footer_links'] = 'Footer Links';
+$_['entry_link_title']   = 'Link Title';
+$_['entry_link_url']     = 'Link URL';
+
+// Help texts (custom links)
+$_['help_header_links']  = 'Custom links shown in the header navigation after information pages. Empty title or URL = item is not displayed.';
+$_['help_footer_links']  = 'Custom links shown in the footer Information column after information pages. Empty title or URL = item is not displayed.';
+
 // Buttons
 $_['button_save']       = 'Save';
 $_['button_cancel']     = 'Cancel';
@@ -58,6 +68,8 @@ $_['button_add_social'] = 'Add social link';
 $_['button_add_payment']= 'Add payment icon';
 $_['button_add_messenger'] = 'Add messenger';
 $_['button_add_feature'] = 'Add feature';
+$_['button_add_header_link'] = 'Add header link';
+$_['button_add_footer_link'] = 'Add footer link';
 
 // Tab titles
 $_['text_tab_general']             = 'General';
@@ -66,6 +78,8 @@ $_['text_tab_social_payments']     = 'Social & Payments';
 $_['text_tab_social_payments_subtitle'] = 'Social links, messenger widget and payment icons';
 $_['text_tab_features']            = 'Features';
 $_['text_tab_features_subtitle']   = 'Product, category and quick view feature blocks';
+$_['text_tab_links']               = 'Links';
+$_['text_tab_links_subtitle']      = 'Custom navigation links for header and footer';
 
 // Section headings
 $_['text_section_general'] = 'Module Settings';

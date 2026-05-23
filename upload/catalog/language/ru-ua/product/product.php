@@ -67,4 +67,5 @@ $_['text_zoom'] = 'Зум';
 $_['button_cart'] = 'В корзину';
 
 // Messenger
-$_['text_write_in_messenger']  = 'Написать в';
+$_['text_write_in_messenger']    = 'Написать в';
+$_['text_we_are_in_messengers']  = 'Мы в мессенджерах';
