@@ -30,6 +30,11 @@ class ControllerExtensionModuleDockercartCategoryTree extends Controller {
 		}
 
 		$data['heading_title'] = $this->language->get('heading_title');
+		$data['text_subtitle'] = $this->language->get('text_subtitle');
+		$data['text_items'] = $this->language->get('text_items');
+		$data['text_view_all'] = $this->language->get('text_view_all');
+		$data['text_shop_all'] = $this->language->get('text_shop_all');
+		$data['all_categories_href'] = $this->url->link('product/categories');
 
 		return $this->load->view('extension/module/dockercart_category_tree', $data);
 	}

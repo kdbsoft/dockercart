@@ -266,16 +266,18 @@
         </div>{# end #product #}
 
         {% if messenger_links and messenger_fab_status %}
-        <div class="mt-6 flex flex-wrap items-center gap-3">
+        <div class="mt-6">
+          <p class="text-sm font-bold text-gray-900 mb-3">{{ text_we_are_in_messengers }}</p>
+          <div class="flex flex-wrap items-center gap-2">
           {% for messenger in messenger_links %}
             {% if messenger.link %}
-            <a href="{{ messenger.link }}" target="_blank" rel="noopener nofollow"
-               class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition shadow-sm">
-              <img src="{{ messenger.image }}" alt="" class="w-5 h-5 object-contain" />
-              {{ text_write_in_messenger }} {{ messenger.name }}
+            <a href="{{ messenger.link }}" target="_blank" rel="noopener nofollow" title="{{ text_write_in_messenger }} {{ messenger.name }}"
+               class="flex items-center justify-center w-11 h-11 rounded-full border border-gray-200 bg-white text-gray-600 hover:text-white hover:border-transparent transition-all duration-200 shadow-sm hover:shadow-md hover:-translate-y-0.5">
+              <img src="{{ messenger.image }}" alt="{{ messenger.name }}" class="w-6 h-6 object-contain" />
             </a>
             {% endif %}
           {% endfor %}
+          </div>
         </div>
         {% endif %}
 

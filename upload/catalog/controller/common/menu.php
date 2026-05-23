@@ -41,6 +41,19 @@ class ControllerCommonMenu extends Controller {
 			'href'  => $this->url->link('information/contact')
 		);
 
+		// Custom header links from theme settings (after info pages + contact)
+		for ($i = 1; $i <= 10; $i++) {
+			$title = (string)$this->config->get('dockercart_theme_header_link_' . $i . '_title');
+			$url   = (string)$this->config->get('dockercart_theme_header_link_' . $i . '_url');
+			if ($title === '' || $url === '') {
+				break;
+			}
+			$data['top_informations'][] = array(
+				'title' => $title,
+				'href'  => $url
+			);
+		}
+
 		// Determine active category
 		// Works for both product/category and product/product (when opened from category)
 		if (!empty($this->request->get['path'])) {

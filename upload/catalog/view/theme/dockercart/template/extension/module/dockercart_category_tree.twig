@@ -1,53 +1,97 @@
 <style>
-  .dc-ct-card:hover img{transform:scale(1.08)}
-  .dc-ct-arrow{transition:transform .2s ease}
-  .dc-ct-card:hover .dc-ct-arrow{transform:translateX(3px)}
+  .dc-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem;grid-auto-flow:dense}
+  .dc-item{position:relative;border-radius:16px;overflow:hidden}
+  .dc-item,
+  .dc-item img{transition:transform .5s ease}
+  .dc-item:hover img{transform:scale(1.08)}
+  .dc-wide{grid-column:span 2}
+  .dc-item{height:280px}
+  .dc-item img{width:100%;height:100%;object-fit:cover}
+  .dc-item__overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.65),rgba(0,0,0,.1) 50%,transparent);pointer-events:none}
+  .dc-item__body{position:absolute;bottom:0;left:0;right:0;z-index:2;padding:.75rem}
+  .dc-item__cat{display:flex;align-items:center;gap:.375rem;color:#fff;font-size:.875rem;font-weight:800;line-height:1.2;text-shadow:0 1px 3px rgba(0,0,0,.3);text-decoration:none;transition:color .2s ease}
+  .dc-item__cat svg{width:16px;height:16px;flex-shrink:0;transition:transform .2s ease}
+  .dc-item__cat:hover svg{transform:translateX(3px)}
+  .dc-item__children{max-height:0;opacity:0;overflow:hidden;transition:max-height .35s ease,opacity .3s ease;pointer-events:auto}
+  .dc-item:hover .dc-item__children{max-height:300px;opacity:1}
+  .dc-item__child{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.375rem .5rem;margin:0 -.25rem;border-radius:8px;font-size:.8125rem;font-weight:500;color:rgba(255,255,255,.75);transition:all .2s ease;text-decoration:none}
+  .dc-item__child:hover{color:#fff;font-weight:700;background:rgba(255,255,255,.1)}
+  .dc-item__child .arrow{width:14px;height:14px;flex-shrink:0;color:rgba(255,255,255,.35);stroke-width:2;transition:transform .2s ease,color .2s ease,stroke-width .2s ease}
+  .dc-item__child:hover .arrow{color:#fff;stroke-width:3.5;transform:translateX(3px)}
+  .dc-item__view-all{display:flex;align-items:center;gap:.375rem;margin-top:.25rem;padding:.25rem 0;font-size:.8125rem;font-weight:600;color:#93c5fd;transition:color .2s ease;text-decoration:none}
+  .dc-item__view-all:hover{color:#dbeafe}
+  .dc-item__view-all svg{width:14px;height:14px;transition:transform .2s ease}
+  .dc-item__view-all:hover svg{transform:translateX(3px)}
+  .dc-item__badge{position:absolute;top:.75rem;right:.75rem;z-index:3;display:inline-flex;align-items:center;gap:.25rem;padding:.125rem .5rem;border-radius:999px;font-size:.75rem;font-weight:500;background:rgba(255,255,255,.2);color:#fff;backdrop-filter:blur(4px)}
+  .dc-item__badge svg{width:12px;height:12px}
+  .dc-item__fallback{width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#f3f4f6}
+  .dc-item__fallback svg{width:48px;height:48px;color:#9ca3af}
+  .dc-section{padding:4rem 1rem}
+  .dc-section__inner{max-width:1280px;margin:0 auto}
+  .dc-section__header{text-align:center;margin-bottom:3rem}
+  .dc-section__badge{display:inline-flex;align-items:center;gap:.375rem;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.15em;color:#2563eb;background:rgba(37,99,235,.1);padding:.375rem .75rem;border-radius:999px;margin-bottom:.5rem}
+  .dc-section__badge svg{width:14px;height:14px;stroke-width:2.5}
+  .dc-section__title{font-size:1.5rem;font-weight:700;color:#111827}
+  .dc-section__btn{margin-top:2.5rem;text-align:center}
+  .dc-section__btn a{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.5rem;border-radius:12px;background:#111827;color:#fff;font-size:.875rem;font-weight:700;text-decoration:none;box-shadow:0 4px 6px -1px rgba(0,0,0,.1);transition:all .2s ease}
+  .dc-section__btn a:hover{background:#1f2937;box-shadow:0 10px 15px -3px rgba(0,0,0,.1);transform:translateY(-2px)}
+  .dc-section__btn svg{width:16px;height:16px}
+  @media(min-width:640px){.dc-section{padding:4rem 1.5rem}.dc-section__title{font-size:1.875rem}}
+  @media(min-width:768px){.dc-grid{grid-template-columns:repeat(3,1fr);gap:1rem}}
+  @media(min-width:1024px){.dc-grid{grid-template-columns:repeat(4,1fr);gap:1rem}.dc-section__title{font-size:2.25rem}}
 </style>
 
 {% if categories_tree %}
-<section class="py-16 px-4 sm:px-6 lg:px-8">
-  <div class="max-w-7xl mx-auto">
-    <div class="text-center mb-12">
-      <span class="inline-block text-blue-600 text-xs font-semibold uppercase tracking-[0.15em] mb-2 bg-blue-50 px-3 py-1 rounded-full">{{ text_subtitle }}</span>
-      <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">{{ heading_title }}</h2>
+<section class="dc-section">
+  <div class="dc-section__inner">
+    <div class="dc-section__header">
+      <span class="dc-section__badge"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>{{ text_subtitle }}</span>
+      <h2 class="dc-section__title">{{ heading_title }}</h2>
     </div>
 
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6">
+    <div class="dc-grid">
       {% for category in categories_tree %}
-        <div class="dc-ct-card group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col">
-          <a href="{{ category.href }}" class="block relative overflow-hidden aspect-[4/3]">
-            {% if category.thumb %}
-              <img src="{{ category.thumb }}" alt="{{ category.name }}" class="w-full h-full object-cover transition-transform duration-500" loading="lazy" />
-              <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
-            {% else %}
-              <div class="w-full h-full flex items-center justify-center" style="background:linear-gradient(135deg,hsl({{ category.hue }},70%,55%),hsl({{ (category.hue + 60) % 360 }},70%,45%))">
-                <svg class="w-12 h-12 text-white/30" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
-              </div>
-            {% endif %}
-          </a>
+        {% set dc_g = loop.index0 // 3 %}
+        {% set dc_p = loop.index0 % 3 %}
+        {% set dc_w = (dc_g % 2 == 0 and dc_p == 0) or (dc_g % 2 == 1 and dc_p == 2) %}
+        <div class="dc-item{% if dc_w %} dc-wide{% endif %}">
+          {% if category.thumb %}
+            <img src="{{ category.thumb }}" alt="{{ category.name }}" loading="lazy" />
+            <div class="dc-item__overlay"></div>
+          {% else %}
+            <a href="{{ category.href }}" class="dc-item__fallback">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
+            </a>
+          {% endif %}
 
-          <div class="p-4 flex flex-col flex-1">
-            <a href="{{ category.href }}" class="text-sm sm:text-base font-bold text-gray-900 hover:text-blue-600 transition leading-tight mb-1">{{ category.name }}</a>
+          {% if category.thumb %}
+          <a href="{{ category.href }}" class="dc-item__overlay" style="pointer-events:auto;z-index:1"></a>
+          {% endif %}
 
-            {% if category.total > 0 %}
-            <p class="text-xs sm:text-sm text-gray-400 flex items-center gap-1.5 mb-2">
-              <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><line x1="3" x2="21" y1="6" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-              {{ category.total }} {{ text_items }}
-            </p>
-            {% endif %}
+          {% if category.total > 0 %}
+          <span class="dc-item__badge">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><line x1="3" x2="21" y1="6" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            {{ category.total }}
+          </span>
+          {% endif %}
+
+          <div class="dc-item__body">
+            <a href="{{ category.href }}" class="dc-item__cat">{{ category.name }}<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></a>
 
             {% if category.children %}
-            <div class="flex-1 space-y-0.5 mt-1 border-t border-gray-100 pt-2.5">
+            <div class="dc-item__children">
+              <div style="padding-top:.5rem;border-top:1px solid rgba(255,255,255,.15);margin-top:.375rem">
               {% for child in category.children|slice(0, 4) %}
-                <a href="{{ child.href }}" class="flex items-center justify-between gap-2 text-sm text-gray-500 hover:text-blue-600 transition px-2 py-1.5 rounded-lg hover:bg-gray-50">
-                  <span class="truncate">{{ child.name }}</span>
-                  <svg class="w-3.5 h-3.5 flex-shrink-0 dc-ct-arrow text-gray-300" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                <a href="{{ child.href }}" class="dc-item__child">
+                  <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ child.name }}</span>
+                  <svg class="arrow" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
                 </a>
               {% endfor %}
+              </div>
               {% if category.children|length > 4 %}
-                <a href="{{ category.href }}" class="flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-700 transition px-2 py-1.5 mt-0.5">
+                <a href="{{ category.href }}" class="dc-item__view-all">
                   {{ text_view_all }}
-                  <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
                 </a>
               {% endif %}
             </div>
@@ -55,6 +99,13 @@
           </div>
         </div>
       {% endfor %}
+    </div>
+
+    <div class="dc-section__btn">
+      <a href="{{ all_categories_href }}">
+        {{ text_shop_all }}
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </a>
     </div>
   </div>
 </section>

@@ -69,4 +69,5 @@ $_['text_year'] = 'рік';
 $_['button_cart'] = 'Додати в кошик';
 
 // Messenger
-$_['text_write_in_messenger']  = 'Написати в';
+$_['text_write_in_messenger']    = 'Написати в';
+$_['text_we_are_in_messengers']  = 'Ми в месенджерах';
