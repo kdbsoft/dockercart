@@ -16,6 +16,12 @@
  *
  * Social and payment items support up to 10 rows each.
  * POST uses array inputs: dockercart_theme_social_image[], dockercart_theme_payment_image[], etc.
+ *
+ * Custom header/footer links also support up to 10 rows each:
+ *   dockercart_theme_header_link_N_title  str  link title
+ *   dockercart_theme_header_link_N_url    str  link URL
+ *   dockercart_theme_footer_link_N_title  str  link title
+ *   dockercart_theme_footer_link_N_url    str  link URL
  */
 class ControllerExtensionModuleDockerCartTheme extends Controller {
 
@@ -189,6 +195,36 @@ class ControllerExtensionModuleDockerCartTheme extends Controller {
         }
         $data['payment_items'] = $payment_items;
 
+        /* ── Custom header links (dynamic, up to 10) ── */
+        $header_link_items = [];
+        for ($i = 1; $i <= 10; $i++) {
+            $title = $this->config->get('dockercart_theme_header_link_' . $i . '_title');
+            $url   = $this->config->get('dockercart_theme_header_link_' . $i . '_url');
+            if (($title === null || (string)$title === '') && ($url === null || (string)$url === '')) {
+                break;
+            }
+            $header_link_items[] = [
+                'title' => (string)$title,
+                'url'   => (string)$url,
+            ];
+        }
+        $data['header_link_items'] = $header_link_items;
+
+        /* ── Custom footer links (dynamic, up to 10) ── */
+        $footer_link_items = [];
+        for ($i = 1; $i <= 10; $i++) {
+            $title = $this->config->get('dockercart_theme_footer_link_' . $i . '_title');
+            $url   = $this->config->get('dockercart_theme_footer_link_' . $i . '_url');
+            if (($title === null || (string)$title === '') && ($url === null || (string)$url === '')) {
+                break;
+            }
+            $footer_link_items[] = [
+                'title' => (string)$title,
+                'url'   => (string)$url,
+            ];
+        }
+        $data['footer_link_items'] = $footer_link_items;
+
         /* ── Theme features (multilingual + lucide icon) ── */
         if (isset($this->request->post['dockercart_theme_product_features'])) {
             $data['dockercart_theme_product_features'] = $this->normalizeThemeFeatures($this->request->post['dockercart_theme_product_features'], $data['languages'], $this->getDefaultThemeFeatures($data['languages'], 'product'));
@@ -263,6 +299,10 @@ class ControllerExtensionModuleDockerCartTheme extends Controller {
             $settings['dockercart_theme_messenger_' . $n . '_name']  = '';
             $settings['dockercart_theme_payment_' . $n . '_image'] = '';
             $settings['dockercart_theme_payment_' . $n . '_link']  = '';
+            $settings['dockercart_theme_header_link_' . $n . '_title'] = '';
+            $settings['dockercart_theme_header_link_' . $n . '_url']   = '';
+            $settings['dockercart_theme_footer_link_' . $n . '_title'] = '';
+            $settings['dockercart_theme_footer_link_' . $n . '_url']   = '';
         }
 
         // Social items (array POST fields)
@@ -295,6 +335,26 @@ class ControllerExtensionModuleDockerCartTheme extends Controller {
             if ($n > 10) break;
             $settings['dockercart_theme_payment_' . $n . '_image'] = trim((string)$image);
             $settings['dockercart_theme_payment_' . $n . '_link']  = trim((string)($payment_links[$idx] ?? ''));
+        }
+
+        // Custom header links (array POST fields)
+        $header_link_titles = array_values((array)($p['dockercart_theme_header_link_title'] ?? []));
+        $header_link_urls   = array_values((array)($p['dockercart_theme_header_link_url']   ?? []));
+        foreach ($header_link_titles as $idx => $title) {
+            $n = $idx + 1;
+            if ($n > 10) break;
+            $settings['dockercart_theme_header_link_' . $n . '_title'] = trim((string)$title);
+            $settings['dockercart_theme_header_link_' . $n . '_url']   = trim((string)($header_link_urls[$idx] ?? ''));
+        }
+
+        // Custom footer links (array POST fields)
+        $footer_link_titles = array_values((array)($p['dockercart_theme_footer_link_title'] ?? []));
+        $footer_link_urls   = array_values((array)($p['dockercart_theme_footer_link_url']   ?? []));
+        foreach ($footer_link_titles as $idx => $title) {
+            $n = $idx + 1;
+            if ($n > 10) break;
+            $settings['dockercart_theme_footer_link_' . $n . '_title'] = trim((string)$title);
+            $settings['dockercart_theme_footer_link_' . $n . '_url']   = trim((string)($footer_link_urls[$idx] ?? ''));
         }
 
         $this->model_setting_setting->editSetting('dockercart_theme', $settings);
@@ -491,6 +551,18 @@ class ControllerExtensionModuleDockerCartTheme extends Controller {
             'dockercart_theme_payment_3_link' => '',
             'dockercart_theme_payment_4_image' => '',
             'dockercart_theme_payment_4_link' => '',
+            'dockercart_theme_header_link_1_title' => '',
+            'dockercart_theme_header_link_1_url' => '',
+            'dockercart_theme_header_link_2_title' => '',
+            'dockercart_theme_header_link_2_url' => '',
+            'dockercart_theme_header_link_3_title' => '',
+            'dockercart_theme_header_link_3_url' => '',
+            'dockercart_theme_footer_link_1_title' => '',
+            'dockercart_theme_footer_link_1_url' => '',
+            'dockercart_theme_footer_link_2_title' => '',
+            'dockercart_theme_footer_link_2_url' => '',
+            'dockercart_theme_footer_link_3_title' => '',
+            'dockercart_theme_footer_link_3_url' => '',
         ]);
     }
 

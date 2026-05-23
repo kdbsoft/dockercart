@@ -287,6 +287,7 @@
       <li class="active"><a href="#dc-theme-tab-general" class="js-dc-theme-tab" data-tab="dc-theme-tab-general" data-title="{{ text_tab_general }}" data-subtitle="{{ text_tab_general_subtitle }}" data-icon="fa-cog"><i class="fa fa-cog"></i> {{ text_tab_general }}</a></li>
       <li><a href="#dc-theme-tab-social-payments" class="js-dc-theme-tab" data-tab="dc-theme-tab-social-payments" data-title="{{ text_tab_social_payments }}" data-subtitle="{{ text_tab_social_payments_subtitle }}" data-icon="fa-share-alt"><i class="fa fa-share-alt"></i> {{ text_tab_social_payments }}</a></li>
       <li><a href="#dc-theme-tab-features" class="js-dc-theme-tab" data-tab="dc-theme-tab-features" data-title="{{ text_tab_features }}" data-subtitle="{{ text_tab_features_subtitle }}" data-icon="fa-magic"><i class="fa fa-magic"></i> {{ text_tab_features }}</a></li>
+      <li><a href="#dc-theme-tab-links" class="js-dc-theme-tab" data-tab="dc-theme-tab-links" data-title="{{ text_tab_links }}" data-subtitle="{{ text_tab_links_subtitle }}" data-icon="fa-link"><i class="fa fa-link"></i> {{ text_tab_links }}</a></li>
     </ul>
 
     <div class="dcx-shell">
@@ -687,6 +688,60 @@
 
             </div>{# /dc-theme-tab-features #}
 
+            <div id="dc-theme-tab-links" class="dcx-tab-pane">
+
+            {# ─────────────────────── Section: Header Links ─────────────────────── #}
+            <div class="dcx-section">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+                <h4 style="margin:0;"><i class="fa fa-external-link"></i> {{ entry_header_links }}</h4>
+                <button type="button" id="btn-add-header-link" class="btn btn-primary btn-sm">
+                  <i class="fa fa-plus"></i> {{ button_add_header_link|default('Add header link') }}
+                </button>
+              </div>
+
+              <div id="header-link-rows" class="dc-rows-container">
+                {% for idx, item in header_link_items %}
+                <div class="dc-row-item dc-header-link-row" id="header-link-row-{{ idx }}">
+                  <span class="dc-row-item__num">{{ idx + 1 }}</span>
+                  <input type="text" name="dockercart_theme_header_link_title[]" value="{{ item.title }}" placeholder="{{ entry_link_title }}" class="form-control dc-row-link-input" />
+                  <input type="text" name="dockercart_theme_header_link_url[]" value="{{ item.url }}" placeholder="https://... ({{ entry_link_url }})" class="form-control dc-row-link-input" />
+                  <button type="button" class="btn btn-danger btn-sm js-remove-header-link-row">
+                    <i class="fa fa-times"></i>
+                  </button>
+                </div>
+                {% endfor %}
+              </div>
+
+              <p class="help-block" style="margin-top:10px;">{{ help_header_links }}</p>
+            </div>
+
+            {# ─────────────────────── Section: Footer Links ─────────────────────── #}
+            <div class="dcx-section">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+                <h4 style="margin:0;"><i class="fa fa-external-link"></i> {{ entry_footer_links }}</h4>
+                <button type="button" id="btn-add-footer-link" class="btn btn-primary btn-sm">
+                  <i class="fa fa-plus"></i> {{ button_add_footer_link|default('Add footer link') }}
+                </button>
+              </div>
+
+              <div id="footer-link-rows" class="dc-rows-container">
+                {% for idx, item in footer_link_items %}
+                <div class="dc-row-item dc-footer-link-row" id="footer-link-row-{{ idx }}">
+                  <span class="dc-row-item__num">{{ idx + 1 }}</span>
+                  <input type="text" name="dockercart_theme_footer_link_title[]" value="{{ item.title }}" placeholder="{{ entry_link_title }}" class="form-control dc-row-link-input" />
+                  <input type="text" name="dockercart_theme_footer_link_url[]" value="{{ item.url }}" placeholder="https://... ({{ entry_link_url }})" class="form-control dc-row-link-input" />
+                  <button type="button" class="btn btn-danger btn-sm js-remove-footer-link-row">
+                    <i class="fa fa-times"></i>
+                  </button>
+                </div>
+                {% endfor %}
+              </div>
+
+              <p class="help-block" style="margin-top:10px;">{{ help_footer_links }}</p>
+            </div>
+
+            </div>{# /dc-theme-tab-links #}
+
           </form>
 
         </div>
@@ -732,6 +787,8 @@
   var socialRowIndex     = {{ social_items|length }};
   var paymentRowCounter  = {{ payment_items|length }};
   var messengerRowCounter = {{ messenger_items|length }};
+  var headerLinkRowIndex  = {{ header_link_items|length }};
+  var footerLinkRowIndex  = {{ footer_link_items|length }};
   var featureRowCounters = {
     product: {{ dockercart_theme_product_features|length }},
     category: {{ dockercart_theme_category_features|length }},
@@ -930,6 +987,46 @@
     renumberRows('#messenger-rows', '.dc-row-item__num');
   });
 
+  /* ── Remove header link row ──────────────────────────────────── */
+  $(document).on('click', '.js-remove-header-link-row', function() {
+    $(this).closest('.dc-header-link-row').remove();
+    renumberRows('#header-link-rows', '.dc-row-item__num');
+  });
+
+  /* ── Add header link row ─────────────────────────────────────── */
+  $('#btn-add-header-link').on('click', function() {
+    var idx = headerLinkRowIndex++;
+    var num = $('#header-link-rows .dc-row-item').length + 1;
+    var html = '<div class="dc-row-item dc-header-link-row" id="header-link-row-' + idx + '">'
+      + '<span class="dc-row-item__num">' + num + '</span>'
+      + '<input type="text" name="dockercart_theme_header_link_title[]" value="" placeholder="{{ entry_link_title|e('js') }}" class="form-control dc-row-link-input" />'
+      + '<input type="text" name="dockercart_theme_header_link_url[]" value="" placeholder="https://..." class="form-control dc-row-link-input" />'
+      + '<button type="button" class="btn btn-danger btn-sm js-remove-header-link-row"><i class="fa fa-times"></i></button>'
+      + '</div>';
+    $('#header-link-rows').append(html);
+    renumberRows('#header-link-rows', '.dc-row-item__num');
+  });
+
+  /* ── Remove footer link row ──────────────────────────────────── */
+  $(document).on('click', '.js-remove-footer-link-row', function() {
+    $(this).closest('.dc-footer-link-row').remove();
+    renumberRows('#footer-link-rows', '.dc-row-item__num');
+  });
+
+  /* ── Add footer link row ─────────────────────────────────────── */
+  $('#btn-add-footer-link').on('click', function() {
+    var idx = footerLinkRowIndex++;
+    var num = $('#footer-link-rows .dc-row-item').length + 1;
+    var html = '<div class="dc-row-item dc-footer-link-row" id="footer-link-row-' + idx + '">'
+      + '<span class="dc-row-item__num">' + num + '</span>'
+      + '<input type="text" name="dockercart_theme_footer_link_title[]" value="" placeholder="{{ entry_link_title|e('js') }}" class="form-control dc-row-link-input" />'
+      + '<input type="text" name="dockercart_theme_footer_link_url[]" value="" placeholder="https://..." class="form-control dc-row-link-input" />'
+      + '<button type="button" class="btn btn-danger btn-sm js-remove-footer-link-row"><i class="fa fa-times"></i></button>'
+      + '</div>';
+    $('#footer-link-rows').append(html);
+    renumberRows('#footer-link-rows', '.dc-row-item__num');
+  });
+
   $(document).on('click', '.js-remove-theme-feature-row', function() {
     var $row = $(this).closest('.dc-feature-row');
     var $container = $row.parent();
@@ -1042,7 +1139,7 @@
     $('#dc-theme-tabs > li').removeClass('active');
     $(this).closest('li').addClass('active');
 
-    $('#dc-theme-tab-general, #dc-theme-tab-social-payments, #dc-theme-tab-features').removeClass('active');
+    $('#dc-theme-tab-general, #dc-theme-tab-social-payments, #dc-theme-tab-features, #dc-theme-tab-links').removeClass('active');
     $('#' + tabId).addClass('active');
 
     updateDcThemePanelHeader(this);

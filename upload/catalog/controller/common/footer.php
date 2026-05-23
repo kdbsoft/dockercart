@@ -24,6 +24,19 @@ class ControllerCommonFooter extends Controller {
 			'href'  => $this->url->link('blog/category')
 		);
 
+		// Custom footer links from theme settings (after info pages + blog)
+		for ($i = 1; $i <= 10; $i++) {
+			$title = (string)$this->config->get('dockercart_theme_footer_link_' . $i . '_title');
+			$url   = (string)$this->config->get('dockercart_theme_footer_link_' . $i . '_url');
+			if ($title === '' || $url === '') {
+				break;
+			}
+			$data['informations'][] = array(
+				'title' => $title,
+				'href'  => $url
+			);
+		}
+
 		$data['contact'] = $this->url->link('information/contact');
 		$data['return'] = $this->url->link('account/return/add', '', true);
 		$data['sitemap'] = $this->url->link('information/sitemap');

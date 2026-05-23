@@ -557,6 +557,7 @@ class ControllerProductProduct extends Controller {
 			$data['messenger_fab_status'] = ($fab_raw !== null && (int)$fab_raw === 1);
 
 			$data['text_write_in_messenger'] = $this->language->get('text_write_in_messenger');
+			$data['text_we_are_in_messengers'] = $this->language->get('text_we_are_in_messengers');
 			$data['text_you_may_also_like'] = $this->language->get('text_you_may_also_like');
 			$data['text_view_all'] = $this->language->get('text_view_all');
 			$data['text_quick_view'] = $this->language->get('text_quick_view');
