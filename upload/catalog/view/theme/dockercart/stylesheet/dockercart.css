@@ -1100,3 +1100,7 @@ body.modal-open { overflow: hidden; }
 #dc-scroll-to-top.is-returning:hover svg {
   transform: rotate(180deg) scale(1.15);
 }
+
+/* ── Blog: читать статью → анимация стрелки ────────────────── */
+[data-lucide="arrow-right"]{transition:transform .2s ease}
+a:hover [data-lucide="arrow-right"]{transform:translateX(4px)}
