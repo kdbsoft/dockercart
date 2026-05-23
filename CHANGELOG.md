@@ -1,3 +1,13 @@
+## [1.23.0](https://github.com/mathflow-bit/dockercart/compare/v1.22.0...v1.23.0) (2026-05-23)
+
+### Features
+
+* add configurable header/footer links and UI enhancements ([283aad3](https://github.com/mathflow-bit/dockercart/commit/283aad3a5a409703a4500cea7ed2eda9edb96fc3))
+
+### Bug Fixes
+
+* update init.sql seed data and schema adjustments ([e87c0dd](https://github.com/mathflow-bit/dockercart/commit/e87c0ddc305d0e8b75f988540c07715f5fb72c19))
+
 ## [1.22.0](https://github.com/mathflow-bit/dockercart/compare/v1.21.3...v1.22.0) (2026-05-22)
 
 ### Features
