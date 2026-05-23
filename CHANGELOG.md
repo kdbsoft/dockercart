@@ -1,3 +1,24 @@
+## [1.22.0](https://github.com/mathflow-bit/dockercart/compare/v1.21.3...v1.22.0) (2026-05-22)
+
+### Features
+
+* add Category Tree module with admin UI and front‑end display ([fff91ac](https://github.com/mathflow-bit/dockercart/commit/fff91ac5021fa043bf3c0f3b0198312d5bc09ea1))
+* add configurable messenger icons and FAB widget ([49f2d88](https://github.com/mathflow-bit/dockercart/commit/49f2d886250f6e20073928adb76721fc0e15b1f0))
+* add full‑width flag for information pages ([06ddbeb](https://github.com/mathflow-bit/dockercart/commit/06ddbeba4fbf80741bc4390304bd95fc72154719))
+* add scroll-to-top button with animation and responsive styling ([413b621](https://github.com/mathflow-bit/dockercart/commit/413b621d6f99ac67456c4d8fb8ec173415be2e00))
+* add selectable categories to Category module ([3982afd](https://github.com/mathflow-bit/dockercart/commit/3982afd55e12adca5cff835b99776ff424b2e87d))
+
+### Bug Fixes
+
+* add mobile categories accordion and enable scrolling in header menu ([766ae7d](https://github.com/mathflow-bit/dockercart/commit/766ae7d15bd327bf708287d325eec71c830646d6))
+* adjust product page vertical padding ([6d28079](https://github.com/mathflow-bit/dockercart/commit/6d2807940031ed2b633b0a2c95c52fb752910497))
+* cache get to return false when key is missing ([2b5678e](https://github.com/mathflow-bit/dockercart/commit/2b5678e825c8a743f58822f1c4f9dd2fe5abf53d))
+* disable messenger FAB by default and fix status ([2aa51b2](https://github.com/mathflow-bit/dockercart/commit/2aa51b2e69b613afcd46d3eae0dbe50c4f68f8d8))
+* display out‑of‑stock state for product option values ([0b6f6e8](https://github.com/mathflow-bit/dockercart/commit/0b6f6e8d7ab6316f5810f6f126064e2b295f9dbf))
+* improve product price layout and responsiveness in product template ([58c48ad](https://github.com/mathflow-bit/dockercart/commit/58c48adffcba8c83c02d3f203809ff7eb58920ec))
+* shorten wishlist and compare button labels and make product buttons ([1245e28](https://github.com/mathflow-bit/dockercart/commit/1245e2816317919ba92660c345e89a0bb7855ac2))
+* update product bundle template for responsive layout and button ([42a2132](https://github.com/mathflow-bit/dockercart/commit/42a213294d9f2f1c1dd1392f7f91ceac7aa803e7))
+
 ## [1.21.3](https://github.com/mathflow-bit/dockercart/compare/v1.21.2...v1.21.3) (2026-05-21)
 
 ### Bug Fixes
