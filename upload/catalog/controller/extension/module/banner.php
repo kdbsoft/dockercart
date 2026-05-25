@@ -64,6 +64,21 @@ class ControllerExtensionModuleBanner extends Controller {
                 $title_html = preg_replace('/\[(.+?)\]/', '$1', $title_html);
             }
 
+            // Video processing (YouTube takes priority over MP4)
+            $video_type = isset($result['video_type']) ? $result['video_type'] : '';
+            $video = isset($result['video']) ? $result['video'] : '';
+            $video_url = '';
+
+            if ($video_type === 'youtube' && $video) {
+                $video_url = 'https://www.youtube.com/embed/' . urlencode($video) . '?autoplay=1&mute=1&loop=1&playlist=' . urlencode($video) . '&controls=0&showinfo=0&rel=0&enablejsapi=1';
+            } elseif ($video_type === 'mp4' && $video) {
+                if (filter_var($video, FILTER_VALIDATE_URL)) {
+                    $video_url = $video;
+                } elseif (is_file(DIR_IMAGE . $video)) {
+                    $video_url = HTTP_SERVER . 'image/' . ltrim($video, '/');
+                }
+            }
+
             $data['banners'][] = array(
                 'title'              => html_entity_decode((string)$result['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8'),
                 'title_html'         => $title_html,
@@ -80,7 +95,9 @@ class ControllerExtensionModuleBanner extends Controller {
                 'secondary_btn_link' => isset($result['secondary_btn_link']) ? $result['secondary_btn_link'] : '',
                 'link'               => $result['link'],
                 'image'              => $image_landscape,
-                'image_portrait'     => $image_portrait
+                'image_portrait'     => $image_portrait,
+                'video_type'         => $video_type,
+                'video_url'          => $video_url
             );
         }
 
