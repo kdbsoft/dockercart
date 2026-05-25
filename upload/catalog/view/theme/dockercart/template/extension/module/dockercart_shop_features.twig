@@ -1,5 +1,15 @@
 <section id="benefits" class="py-16 px-4 sm:px-6 lg:px-8 bg-gray-100">
   <div class="max-w-7xl mx-auto">
+    {% if section_title or section_subtitle %}
+    <div class="text-center mb-12">
+      {% if section_title %}
+      <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ section_title }}</h2>
+      {% endif %}
+      {% if section_subtitle %}
+      <p class="mt-3 text-gray-500 max-w-2xl mx-auto">{{ section_subtitle }}</p>
+      {% endif %}
+    </div>
+    {% endif %}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {% for feature in features %}
         <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm text-center group hover:shadow-md transition">

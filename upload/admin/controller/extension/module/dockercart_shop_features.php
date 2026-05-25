@@ -63,7 +63,9 @@ class ControllerExtensionModuleDockercartShopFeatures extends Controller {
 
         $defaults = array(
             'name' => $this->language->get('text_default_module_name'),
-            'status' => 1
+            'status' => 1,
+            'section_title' => '',
+            'section_subtitle' => ''
         );
 
         foreach ($defaults as $key => $default) {
