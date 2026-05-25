@@ -104,6 +104,8 @@ $('#button-search').on('click', function(e) {
 	url += '&target=' + '{{ target|escape('js') }}';
 	{% endif %}
 
+	url += '&type={{ type }}';
+
 	$('#modal-image').load(url);
 });
 //--></script>
@@ -124,7 +126,7 @@ $('#button-upload').on('click', function() {
 			clearInterval(timer);
 
 			$.ajax({
-				url: 'index.php?route=common/filemanager/upload&user_token={{ user_token }}&directory=' + encodeURIComponent('{{ directory|e('js') }}'),
+				url: 'index.php?route=common/filemanager/upload&user_token={{ user_token }}&directory=' + encodeURIComponent('{{ directory|e('js') }}') + '&type={{ type }}',
 				type: 'post',
 				dataType: 'json',
 				data: new FormData($('#form-upload')[0]),

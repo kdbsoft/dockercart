@@ -13,8 +13,10 @@
     .accent-hint { font-size: 11px; color: #9ca3af; margin-top: 3px; }
     .accent-hint code { background: #f3f4f6; border-radius: 3px; padding: 1px 4px; color: #6366f1; }
     .slide-images-row { display: flex; gap: 16px; flex-wrap: wrap; }
-    .slide-image-block { text-align: center; }
-    .slide-image-block small { display: block; color: #9ca3af; font-size: 11px; margin-top: 4px; }
+    .slide-image-block,
+    .slide-video-block { text-align: center; }
+    .slide-image-block small,
+    .slide-video-block small { display: block; color: #9ca3af; font-size: 11px; margin-top: 4px; }
     .btn-row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .no-slides-msg { text-align: center; color: #9ca3af; padding: 28px; font-style: italic; }
     .add-slide-btn-wrap { padding: 10px 0 4px; text-align: right; }
@@ -245,7 +247,13 @@
 
                       <div class="form-group dc-video-field" data-type="mp4"{% if banner_image.video_type != 'mp4' %} style="display:none;"{% endif %}>
                         <label>{{ entry_video_mp4 }}</label>
-                        <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][video]" value="{{ banner_image.video }}" placeholder="catalog/video/banner.mp4" class="form-control" />
+                        <div class="slide-video-block">
+                          <a href="" id="thumb-video{{ image_row }}" data-toggle="image" data-type="video" class="img-thumbnail">
+                            <img src="{{ banner_image.video_thumb }}" alt="" title="" data-placeholder="{{ video_placeholder }}" style="max-height:90px;" />
+                          </a>
+                          <input type="hidden" name="banner_image[{{ language.language_id }}][{{ image_row }}][video]" value="{{ banner_image.video }}" id="input-video{{ image_row }}" />
+                          <small>MP4</small>
+                        </div>
                         <div class="accent-hint">{{ help_video_mp4 }}</div>
                       </div>
 
@@ -432,7 +440,13 @@ function addSlide(language_id) {
 
   html += '<div class="form-group dc-video-field" data-type="mp4" style="display:none;">';
   html += '<label>{{ entry_video_mp4 }}</label>';
-  html += '<input type="text" name="' + pfx + '[video]" value="" placeholder="catalog/video/banner.mp4" class="form-control" />';
+  html += '<div class="slide-video-block">';
+  html += '<a href="" id="thumb-video' + row + '" data-toggle="image" data-type="video" class="img-thumbnail">';
+  html += '<img src="' + placeholder + '" alt="" title="" data-placeholder="' + placeholder + '" style="max-height:90px;" />';
+  html += '</a>';
+  html += '<input type="hidden" name="' + pfx + '[video]" value="" id="input-video' + row + '" />';
+  html += '<small>MP4</small>';
+  html += '</div>';
   html += '<div class="accent-hint">{{ help_video_mp4 }}</div>';
   html += '</div>';
 

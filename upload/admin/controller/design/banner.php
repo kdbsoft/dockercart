@@ -357,6 +357,14 @@ class ControllerDesignBanner extends Controller {
 				$thumb_portrait = 'no_image.png';
 			}
 
+			// Process video file
+			$video = isset($banner_image['video']) ? $banner_image['video'] : '';
+			if (!empty($video) && is_file(DIR_IMAGE . $video)) {
+				$video_thumb = $video;
+			} else {
+				$video_thumb = 'no_image.png';
+			}
+
 			$data['banner_images'][$key][] = array(
 				'title'              => $banner_image['title'],
 				'subtitle'           => isset($banner_image['subtitle']) ? $banner_image['subtitle'] : '',
@@ -374,13 +382,15 @@ class ControllerDesignBanner extends Controller {
 				'image_portrait'     => $image_portrait,
 				'thumb_portrait'     => $this->model_tool_image->resize($thumb_portrait, 100, 100),
 				'video_type'         => isset($banner_image['video_type']) ? $banner_image['video_type'] : '',
-				'video'              => isset($banner_image['video']) ? $banner_image['video'] : '',
+				'video'              => $video,
+				'video_thumb'        => $this->model_tool_image->resize($video_thumb, 100, 100),
 				'sort_order'         => $banner_image['sort_order']
 		);
 	}
 }
 
 $data['placeholder'] = $this->model_tool_image->resize('no_image.png', 100, 100);
+$data['video_placeholder'] = $this->model_tool_image->resize('no_image.png', 100, 100);
 
 $data['header'] = $this->load->controller('common/header');
 $data['column_left'] = $this->load->controller('common/column_left');
