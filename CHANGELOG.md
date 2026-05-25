@@ -1,3 +1,10 @@
+## [1.25.0](https://github.com/mathflow-bit/dockercart/compare/v1.24.0...v1.25.0) (2026-05-25)
+
+### Features
+
+* add banner layout option to banner module ([c34c064](https://github.com/mathflow-bit/dockercart/commit/c34c06432d9144fc8e107298c79a3a03cd7e7aa7))
+* add image optimisation on upload and config option ([2a2588e](https://github.com/mathflow-bit/dockercart/commit/2a2588ef2d0e97e8b71f2006e41744d5204efac5))
+
 ## [1.24.0](https://github.com/mathflow-bit/dockercart/compare/v1.23.0...v1.24.0) (2026-05-25)
 
 ### Features
