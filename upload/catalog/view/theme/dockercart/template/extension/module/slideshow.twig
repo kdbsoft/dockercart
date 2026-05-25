@@ -2,10 +2,21 @@
   <div id="hero-slides" class="relative w-full h-full">
     {% for banner in banners %}
     <div class="hero-slide absolute inset-0 transition-opacity duration-700 ease-in-out{% if not loop.first %} opacity-0{% endif %}" data-slide="{{ loop.index0 }}">
-      {% if banner.link %}
+      {% if banner.link and not banner.video_url %}
       <a href="{{ banner.link }}" class="absolute inset-0 z-0" aria-label="{{ banner.title }}"></a>
       {% endif %}
-      {% if banner.image_portrait %}
+      {% if banner.video_type == 'youtube' and banner.video_url %}
+      <iframe src="{{ banner.video_url }}"
+        class="absolute inset-0 w-full h-full"
+        frameborder="0" allow="autoplay; fullscreen" allowfullscreen
+        style="pointer-events:none; object-fit:cover;"></iframe>
+      {% elseif banner.video_type == 'mp4' and banner.video_url %}
+      <video autoplay muted loop playsinline
+        class="absolute inset-0 w-full h-full object-cover"
+        poster="{{ banner.image }}">
+        <source src="{{ banner.video_url }}" type="video/mp4">
+      </video>
+      {% elseif banner.image_portrait %}
       <picture>
         <source media="(orientation: portrait)" srcset="{{ banner.image_portrait }}" />
         <source media="(orientation: landscape)" srcset="{{ banner.image }}" />

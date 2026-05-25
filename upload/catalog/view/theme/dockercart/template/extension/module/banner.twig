@@ -10,8 +10,12 @@
   .banner-slide__media { position: relative; display:flex; align-items:center; justify-content:center; }
   {% if banner_height %}
     .banner-slide__media img { width: 100%; height: {{ banner_height }}px; object-fit: cover; }
+  .banner-slide__media iframe,
+  .banner-slide__media video { width: 100%; height: {{ banner_height }}px; object-fit: cover; }
   {% else %}
   .banner-slide__media img { max-width:100%; width:auto; height:auto; }
+  .banner-slide__media iframe,
+  .banner-slide__media video { max-width:100%; width:auto; height:auto; }
   {% endif %}
   .banner-slide__overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: flex-start; pointer-events: none; background: linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 35%, rgba(0,0,0,0.1) 65%, transparent 100%); }
   .banner-slide__content { pointer-events: auto; color: #fff; text-align: left; padding: 1.75rem 1rem 1rem 2rem; max-width: 65%; }
@@ -68,7 +72,19 @@
     <div class="banner-slide{% if loop.first %} active{% endif %}" style="--stack-index: {{ loop.index }};">
       {% if banner.link %}<a href="{{ banner.link }}" class="banner-slide__link">{% endif %}
       <div class="banner-slide__media">
-      {% if banner.image %}
+      {% if banner.video_type == 'youtube' and banner.video_url %}
+      <iframe src="{{ banner.video_url }}"
+        class="banner-slide__iframe"
+        frameborder="0" allow="autoplay; fullscreen" allowfullscreen
+        style="pointer-events:none; width:100%; height:{{ banner_height ? banner_height ~ 'px' : 'auto' }}; object-fit:cover;"></iframe>
+      {% elseif banner.video_type == 'mp4' and banner.video_url %}
+      <video autoplay muted loop playsinline
+        class="banner-slide__video"
+        poster="{{ banner.image }}"
+        style="width:100%; height:{{ banner_height ? banner_height ~ 'px' : 'auto' }}; object-fit:cover;">
+        <source src="{{ banner.video_url }}" type="video/mp4">
+      </video>
+      {% elseif banner.image %}
       {# Use portrait variant when available, otherwise fall back to the landscape image for portrait orientation #}
       {% set portrait_src = banner.image_portrait ? banner.image_portrait : banner.image %}
       <picture>

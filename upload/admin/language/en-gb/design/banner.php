@@ -33,6 +33,17 @@ $_['entry_image']            = 'Image';
 $_['entry_status']           = 'Status';
 $_['entry_sort_order']       = 'Sort Order';
 
+// Video
+$_['entry_video_type']              = 'Video Background';
+$_['entry_video']                   = 'Video ID / File';
+$_['entry_video_type_none']         = 'None (image only)';
+$_['entry_video_type_youtube']      = 'YouTube';
+$_['entry_video_type_mp4']          = 'MP4 File';
+$_['entry_video_youtube_placeholder'] = 'YouTube video ID (e.g. dQw4w9WgXcQ)';
+$_['entry_video_mp4']               = 'MP4 File';
+$_['help_video_youtube']            = 'Enter the YouTube video ID. The video will autoplay muted with loop as the slide background.';
+$_['help_video_mp4']                = 'Enter the path to an MP4 file relative to the /image/ directory, e.g. catalog/video/banner.mp4.';
+
 // Error
 $_['error_permission'] = 'Warning: You do not have permission to modify banners!';
 $_['error_name']       = 'Banner Name must be between 3 and 64 characters!';

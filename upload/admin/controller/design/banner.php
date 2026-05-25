@@ -373,6 +373,8 @@ class ControllerDesignBanner extends Controller {
 				'thumb'          	 => $this->model_tool_image->resize($thumb, 100, 100),
 				'image_portrait'     => $image_portrait,
 				'thumb_portrait'     => $this->model_tool_image->resize($thumb_portrait, 100, 100),
+				'video_type'         => isset($banner_image['video_type']) ? $banner_image['video_type'] : '',
+				'video'              => isset($banner_image['video']) ? $banner_image['video'] : '',
 				'sort_order'         => $banner_image['sort_order']
 		);
 	}

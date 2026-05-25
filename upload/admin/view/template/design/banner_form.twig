@@ -225,6 +225,30 @@
                         </div>
                       </div>
 
+                      <hr class="dcx-divider" />
+
+                      {# Video background #}
+                      <div class="form-group">
+                        <label>{{ entry_video_type }}</label>
+                        <select name="banner_image[{{ language.language_id }}][{{ image_row }}][video_type]" class="form-control dc-video-type-select" style="max-width:200px;">
+                          <option value="" {% if banner_image.video_type == '' %}selected{% endif %}>{{ entry_video_type_none }}</option>
+                          <option value="youtube" {% if banner_image.video_type == 'youtube' %}selected{% endif %}>{{ entry_video_type_youtube }}</option>
+                          <option value="mp4" {% if banner_image.video_type == 'mp4' %}selected{% endif %}>{{ entry_video_type_mp4 }}</option>
+                        </select>
+                      </div>
+
+                      <div class="form-group dc-video-field" data-type="youtube"{% if banner_image.video_type != 'youtube' %} style="display:none;"{% endif %}>
+                        <label>{{ entry_video }}</label>
+                        <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][video]" value="{{ banner_image.video }}" placeholder="dQw4w9WgXcQ" class="form-control" style="max-width:400px;" />
+                        <div class="accent-hint">{{ help_video_youtube }}</div>
+                      </div>
+
+                      <div class="form-group dc-video-field" data-type="mp4"{% if banner_image.video_type != 'mp4' %} style="display:none;"{% endif %}>
+                        <label>{{ entry_video_mp4 }}</label>
+                        <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][video]" value="{{ banner_image.video }}" placeholder="catalog/video/banner.mp4" class="form-control" />
+                        <div class="accent-hint">{{ help_video_mp4 }}</div>
+                      </div>
+
                     </div>
                   </div>
                   {% set image_row = image_row + 1 %}
@@ -389,14 +413,56 @@ function addSlide(language_id) {
   html += '</div>';
   html += '</div>';
 
+  html += '<hr class="dcx-divider" />';
+
+  html += '<div class="form-group">';
+  html += '<label>{{ entry_video_type }}</label>';
+  html += '<select name="' + pfx + '[video_type]" class="form-control dc-video-type-select" style="max-width:200px;">';
+  html += '<option value="">{{ entry_video_type_none }}</option>';
+  html += '<option value="youtube">{{ entry_video_type_youtube }}</option>';
+  html += '<option value="mp4">{{ entry_video_type_mp4 }}</option>';
+  html += '</select>';
+  html += '</div>';
+
+  html += '<div class="form-group dc-video-field" data-type="youtube" style="display:none;">';
+  html += '<label>{{ entry_video }}</label>';
+  html += '<input type="text" name="' + pfx + '[video]" value="" placeholder="dQw4w9WgXcQ" class="form-control" style="max-width:400px;" />';
+  html += '<div class="accent-hint">{{ help_video_youtube }}</div>';
+  html += '</div>';
+
+  html += '<div class="form-group dc-video-field" data-type="mp4" style="display:none;">';
+  html += '<label>{{ entry_video_mp4 }}</label>';
+  html += '<input type="text" name="' + pfx + '[video]" value="" placeholder="catalog/video/banner.mp4" class="form-control" />';
+  html += '<div class="accent-hint">{{ help_video_mp4 }}</div>';
+  html += '</div>';
+
   html += '</div></div>'; // card body + card
 
   $('#no-slides-' + language_id).hide();
   var $card = $(html);
   $('#slide-list-' + language_id).append($card);
   initColorInputs($card);
+  initVideoFields($card);
 
   image_row++;
+}
+
+function initVideoFields(container) {
+  container.find('.dc-video-type-select').each(function() {
+    toggleVideoField($(this));
+  });
+}
+
+function toggleVideoField($select) {
+  var $card = $select.closest('.banner-slide-card__body, .banner-slide-card');
+  var val = $select.val();
+  $card.find('.dc-video-field').each(function() {
+    if ($(this).data('type') === val) {
+      $(this).show();
+    } else {
+      $(this).hide();
+    }
+  });
 }
 
 $(document).ready(function() {
@@ -406,8 +472,13 @@ $(document).ready(function() {
     $(this).closest('.banner-slide-card').toggleClass('collapsed');
   });
 
+  $(document).on('change', '.dc-video-type-select', function() {
+    toggleVideoField($(this));
+  });
+
   $('.banner-slide-card').each(function() {
     initColorInputs($(this));
+    initVideoFields($(this));
   });
 
   $('#language a:first').tab('show');
