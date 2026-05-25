@@ -18,6 +18,8 @@ class ControllerExtensionModuleDockercartShopFeatures extends Controller {
         );
 
         $data['features'] = array();
+        $data['section_title'] = isset($setting['section_title']) ? $setting['section_title'] : '';
+        $data['section_subtitle'] = isset($setting['section_subtitle']) ? $setting['section_subtitle'] : '';
 
         foreach ($features as $index => $feature) {
             if (!is_array($feature)) {
