@@ -1,3 +1,9 @@
+## [1.25.1](https://github.com/mathflow-bit/dockercart/compare/v1.25.0...v1.25.1) (2026-05-25)
+
+### Bug Fixes
+
+* configure banner height ([70062b7](https://github.com/mathflow-bit/dockercart/commit/70062b7baf5b4443161c1254411f1779e36093e6))
+
 ## [1.25.0](https://github.com/mathflow-bit/dockercart/compare/v1.24.0...v1.25.0) (2026-05-25)
 
 ### Features
