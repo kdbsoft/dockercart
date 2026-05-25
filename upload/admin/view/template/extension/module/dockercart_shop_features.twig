@@ -95,6 +95,19 @@
                 </div>
               </div>
 
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="input-section-title">{{ entry_section_title }}</label>
+                <div class="col-sm-9">
+                  <input type="text" name="section_title" value="{{ section_title }}" placeholder="{{ entry_section_title }}" id="input-section-title" class="form-control" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="input-section-subtitle">{{ entry_section_subtitle }}</label>
+                <div class="col-sm-9">
+                  <textarea name="section_subtitle" rows="2" placeholder="{{ entry_section_subtitle }}" id="input-section-subtitle" class="form-control">{{ section_subtitle }}</textarea>
+                </div>
+              </div>
+
               <hr />
               <h4 style="margin-top: 0;">{{ text_features }}</h4>
 

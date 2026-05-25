@@ -32,6 +32,8 @@ $_['entry_icon']                        = 'Icon';
 $_['entry_title']                       = 'Title';
 $_['entry_text']                        = 'Description';
 $_['entry_sort_order']                  = 'Sort Order';
+$_['entry_section_title']               = 'Section Title';
+$_['entry_section_subtitle']            = 'Section Subtitle';
 
 // Column
 $_['column_widget_name']                = 'Widget Name';

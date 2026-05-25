@@ -32,6 +32,8 @@ $_['entry_icon']                        = 'Іконка';
 $_['entry_title']                       = 'Заголовок';
 $_['entry_text']                        = 'Опис';
 $_['entry_sort_order']                  = 'Порядок сортування';
+$_['entry_section_title']               = 'Заголовок секції';
+$_['entry_section_subtitle']            = 'Підзаголовок секції';
 
 // Column
 $_['column_widget_name']                = 'Назва віджета';
