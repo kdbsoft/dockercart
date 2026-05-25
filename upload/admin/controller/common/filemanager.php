@@ -283,6 +283,13 @@ class ControllerCommonFileManager extends Controller {
 
 				if (!$json) {
 					move_uploaded_file($file['tmp_name'], $directory . '/' . $filename);
+
+				// Optimize uploaded image: resize if oversized + recompress
+				$max_dimension = (int)$this->config->get('config_image_max_dimension');
+				if ($max_dimension <= 0) {
+					$max_dimension = defined('IMAGE_MAX_DIMENSION') ? (int)IMAGE_MAX_DIMENSION : 2560;
+				}
+				Image::optimize($directory . '/' . $filename, $max_dimension);
 				}
 			}
 		}
