@@ -2,13 +2,13 @@
 
 > **OpenCart evolved. A self-hosted e-commerce platform that's ready to deploy in minutes.**
 
-DockerCart is a production-ready e-commerce platform built on top of OpenCart 3, shipped as a complete Docker stack. It is not a vanilla OpenCart install — it is an opinionated evolution of OpenCart: hundreds of bug fixes applied, security holes patched, performance tuned, and an ecosystem of first-party modules included. Everything works out of the box.
-
 <p align="center">
   <a href="https://demo.dockercart.net"><img src="https://img.shields.io/badge/Live%20Demo-demo.dockercart.net-6366f1?style=flat-square&logo=google-chrome&logoColor=white" alt="Live Demo"></a>
   &nbsp;
   <a href="https://dockercart.net"><img src="https://img.shields.io/badge/dockercart.net-6366f1?style=flat-square&logo=globe&logoColor=white" alt="DockerCart"></a>
 </p>
+
+DockerCart is a production-ready e-commerce platform built on top of OpenCart 3, shipped as a complete Docker stack. It is not a vanilla OpenCart install — it is an opinionated evolution of OpenCart: hundreds of bug fixes applied, security holes patched, performance tuned, and an ecosystem of first-party modules included. Everything works out of the box.
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE.md)
 [![PHP](https://img.shields.io/badge/PHP-8.5-777BB4?logo=php)](https://www.php.net/)
