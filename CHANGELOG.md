@@ -1,3 +1,10 @@
+## [1.24.0](https://github.com/mathflow-bit/dockercart/compare/v1.23.0...v1.24.0) (2026-05-25)
+
+### Features
+
+* add video background support to banners ([12522a0](https://github.com/mathflow-bit/dockercart/commit/12522a0e1738a9bae0e81d1c6cfc13d123c1310a))
+* replace header and footer link settings with multilingual JSON ([6ef436e](https://github.com/mathflow-bit/dockercart/commit/6ef436e091b9e8f18597aec1a95779a9b07e4b75))
+
 ## [1.23.0](https://github.com/mathflow-bit/dockercart/compare/v1.22.0...v1.23.0) (2026-05-23)
 
 ### Features
