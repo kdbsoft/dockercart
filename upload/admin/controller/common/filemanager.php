@@ -29,6 +29,8 @@ class ControllerCommonFileManager extends Controller {
 			$page = 1;
 		}
 
+		$file_type = isset($this->request->get['type']) ? $this->request->get['type'] : 'image';
+
 		$directories = array();
 		$files = array();
 
@@ -45,7 +47,11 @@ class ControllerCommonFileManager extends Controller {
 			}
 
 			// Get files
-			$files = glob($directory . '/' . $filter_name . '*.{jpg,jpeg,png,gif,webp,JPG,JPEG,PNG,GIF,WEBP}', GLOB_BRACE);
+			if ($file_type === 'video') {
+				$files = glob($directory . '/' . $filter_name . '*.{mp4,webm,ogv,MP4,WEBM,OGV}', GLOB_BRACE);
+			} else {
+				$files = glob($directory . '/' . $filter_name . '*.{jpg,jpeg,png,gif,webp,JPG,JPEG,PNG,GIF,WEBP}', GLOB_BRACE);
+			}
 
 			if (!$files) {
 				$files = array();
@@ -83,8 +89,14 @@ class ControllerCommonFileManager extends Controller {
 					'href'  => $this->url->link('common/filemanager', 'user_token=' . $this->session->data['user_token'] . '&directory=' . urlencode(utf8_substr($image, utf8_strlen(DIR_IMAGE . 'catalog/'))) . $url, true)
 				);
 			} elseif (is_file($image)) {
+				if ($file_type === 'video') {
+					$thumb = $this->model_tool_image->resize('no_image.png', 100, 100);
+				} else {
+					$thumb = $this->model_tool_image->resize(utf8_substr($image, utf8_strlen(DIR_IMAGE)), 100, 100);
+				}
+
 				$data['images'][] = array(
-					'thumb' => $this->model_tool_image->resize(utf8_substr($image, utf8_strlen(DIR_IMAGE)), 100, 100),
+					'thumb' => $thumb,
 					'name'  => implode(' ', $name),
 					'type'  => 'image',
 					'path'  => utf8_substr($image, utf8_strlen(DIR_IMAGE)),
@@ -94,6 +106,7 @@ class ControllerCommonFileManager extends Controller {
 		}
 
 		$data['user_token'] = $this->session->data['user_token'];
+		$data['type'] = $file_type;
 
 		if (isset($this->request->get['directory'])) {
 			$data['directory'] = $this->request->get['directory'];
@@ -140,6 +153,8 @@ class ControllerCommonFileManager extends Controller {
 			$url .= '&thumb=' . $this->request->get['thumb'];
 		}
 
+		$url .= '&type=' . $file_type;
+
 		$data['parent'] = $this->url->link('common/filemanager', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
 		// Refresh
@@ -156,6 +171,8 @@ class ControllerCommonFileManager extends Controller {
 		if (isset($this->request->get['thumb'])) {
 			$url .= '&thumb=' . $this->request->get['thumb'];
 		}
+
+		$url .= '&type=' . $file_type;
 
 		$data['refresh'] = $this->url->link('common/filemanager', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
@@ -177,6 +194,8 @@ class ControllerCommonFileManager extends Controller {
 			$url .= '&thumb=' . $this->request->get['thumb'];
 		}
 
+		$url .= '&type=' . $file_type;
+
 		$pagination = new Pagination();
 		$pagination->total = $image_total;
 		$pagination->page = $page;
@@ -192,6 +211,8 @@ class ControllerCommonFileManager extends Controller {
 		$this->load->language('common/filemanager');
 
 		$json = array();
+
+		$file_type = isset($this->request->get['type']) ? $this->request->get['type'] : 'image';
 
 		// Check user has permission
 		if (!$this->user->hasPermission('modify', 'common/filemanager')) {
@@ -242,30 +263,21 @@ class ControllerCommonFileManager extends Controller {
 						$json['error'] = $this->language->get('error_filename');
 					}
 
-					// Allowed file extension types
-					$allowed = array(
-						'jpg',
-						'jpeg',
-						'gif',
-						'png',
-						'webp'
-					);
+					if ($file_type === 'video') {
+						// Allowed video extension types
+						$allowed_ext = array('mp4', 'webm', 'ogv');
+						$allowed_mime = array('video/mp4', 'video/webm', 'video/ogg');
+					} else {
+						// Allowed image extension types
+						$allowed_ext = array('jpg', 'jpeg', 'gif', 'png', 'webp');
+						$allowed_mime = array('image/jpeg', 'image/pjpeg', 'image/png', 'image/x-png', 'image/gif', 'image/webp');
+					}
 
-					if (!in_array(utf8_strtolower(utf8_substr(strrchr($filename, '.'), 1)), $allowed)) {
+					if (!in_array(utf8_strtolower(utf8_substr(strrchr($filename, '.'), 1)), $allowed_ext)) {
 						$json['error'] = $this->language->get('error_filetype');
 					}
 
-					// Allowed file mime types
-					$allowed = array(
-						'image/jpeg',
-						'image/pjpeg',
-						'image/png',
-						'image/x-png',
-						'image/gif',
-						'image/webp'
-					);
-
-					if (!in_array($file['type'], $allowed)) {
+					if (!in_array($file['type'], $allowed_mime)) {
 						$json['error'] = $this->language->get('error_filetype');
 					}
 
@@ -284,12 +296,14 @@ class ControllerCommonFileManager extends Controller {
 				if (!$json) {
 					move_uploaded_file($file['tmp_name'], $directory . '/' . $filename);
 
-				// Optimize uploaded image: resize if oversized + recompress
-				$max_dimension = (int)$this->config->get('config_image_max_dimension');
-				if ($max_dimension <= 0) {
-					$max_dimension = defined('IMAGE_MAX_DIMENSION') ? (int)IMAGE_MAX_DIMENSION : 2560;
-				}
-				Image::optimize($directory . '/' . $filename, $max_dimension);
+					// Optimize image (skip for video files)
+					if ($file_type !== 'video') {
+						$max_dimension = (int)$this->config->get('config_image_max_dimension');
+						if ($max_dimension <= 0) {
+							$max_dimension = defined('IMAGE_MAX_DIMENSION') ? (int)IMAGE_MAX_DIMENSION : 2560;
+						}
+						Image::optimize($directory . '/' . $filename, $max_dimension);
+					}
 				}
 			}
 		}

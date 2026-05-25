@@ -42,7 +42,7 @@ $_['entry_video_type_mp4']          = 'MP4 File';
 $_['entry_video_youtube_placeholder'] = 'YouTube video ID (e.g. dQw4w9WgXcQ)';
 $_['entry_video_mp4']               = 'MP4 File';
 $_['help_video_youtube']            = 'Enter the YouTube video ID. The video will autoplay muted with loop as the slide background.';
-$_['help_video_mp4']                = 'Enter the path to an MP4 file relative to the /image/ directory, e.g. catalog/video/banner.mp4.';
+$_['help_video_mp4']                = 'Click the thumbnail to upload or select an MP4 file from the file manager. Videos are stored in the /image/ directory.';
 
 // Error
 $_['error_permission'] = 'Warning: You do not have permission to modify banners!';
