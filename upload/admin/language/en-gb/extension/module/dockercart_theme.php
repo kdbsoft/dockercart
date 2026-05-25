@@ -84,7 +84,6 @@ $_['text_tab_links_subtitle']      = 'Custom navigation links for header and foo
 // Section headings
 $_['text_section_general'] = 'Module Settings';
 $_['text_section_logos']   = 'Logos';
-$_['text_section_features'] = 'Theme Features';
 $_['text_search_icons']    = 'Search icons...';
 $_['text_multilingual_settings'] = 'Multilingual content';
 $_['text_choose_icon'] = 'Choose icon';
