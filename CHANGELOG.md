@@ -1,3 +1,14 @@
+## [1.26.0](https://github.com/mathflow-bit/dockercart/compare/v1.25.1...v1.26.0) (2026-05-25)
+
+### Features
+
+* add video support to file manager and banner ([babd7ab](https://github.com/mathflow-bit/dockercart/commit/babd7ab6762f9568a39dc8584b77a78e0cc4f762))
+* expand Lucide icon picker options, add modal UI, and fix Russian ([70e91bb](https://github.com/mathflow-bit/dockercart/commit/70e91bbe17d8c0e64e1366b23ffe1e409533f451))
+
+### Bug Fixes
+
+* banner form CSS selector for image block ([18c01ff](https://github.com/mathflow-bit/dockercart/commit/18c01ff769f91ff473db136e3feb56c2174ca227))
+
 ## [1.25.1](https://github.com/mathflow-bit/dockercart/compare/v1.25.0...v1.25.1) (2026-05-25)
 
 ### Bug Fixes
