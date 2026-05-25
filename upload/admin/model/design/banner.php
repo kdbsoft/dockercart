@@ -106,6 +106,8 @@ class ModelDesignBanner extends Model {
 				'link'               => $banner_image['link'],
 				'image'              => $banner_image['image'],
 				'image_portrait'     => isset($banner_image['image_portrait']) ? $banner_image['image_portrait'] : '',
+				'video_type'         => isset($banner_image['video_type']) ? $banner_image['video_type'] : '',
+				'video'              => isset($banner_image['video']) ? $banner_image['video'] : '',
 				'sort_order'         => $banner_image['sort_order']
 			);
 		}
@@ -130,6 +132,8 @@ class ModelDesignBanner extends Model {
 		$primary_btn_bg_color   = isset($banner_image['primary_btn_bg_color']) ? $this->db->escape($banner_image['primary_btn_bg_color']) : '';
 		$secondary_btn_text  = isset($banner_image['secondary_btn_text']) ? $this->db->escape($banner_image['secondary_btn_text']) : '';
 		$secondary_btn_link  = isset($banner_image['secondary_btn_link']) ? $this->db->escape($banner_image['secondary_btn_link']) : '';
+		$video_type          = isset($banner_image['video_type']) ? $this->db->escape($banner_image['video_type']) : '';
+		$video               = isset($banner_image['video']) ? $this->db->escape($banner_image['video']) : '';
 
 		$this->db->query("INSERT INTO " . DB_PREFIX . "banner_image SET
 			banner_id = '"           . (int)$banner_id . "',
@@ -147,6 +151,8 @@ class ModelDesignBanner extends Model {
 			link = '"                . $this->db->escape($banner_image['link']) . "',
 			image = '"               . $this->db->escape($banner_image['image']) . "',
 			image_portrait = '"      . $image_portrait . "',
+			video_type = '"          . $video_type . "',
+			video = '"               . $video . "',
 			sort_order = '"          . (int)$banner_image['sort_order'] . "'");
 	}
 
@@ -178,6 +184,10 @@ class ModelDesignBanner extends Model {
 			"ALTER TABLE `" . DB_PREFIX . "banner_image` ADD `secondary_btn_link` varchar(255) NOT NULL DEFAULT '' AFTER `secondary_btn_text`");
 		$this->addColumnIfMissing(DB_PREFIX . 'banner_image', 'image_portrait',
 			"ALTER TABLE `" . DB_PREFIX . "banner_image` ADD `image_portrait` varchar(255) NOT NULL DEFAULT '' AFTER `image`");
+		$this->addColumnIfMissing(DB_PREFIX . 'banner_image', 'video_type',
+			"ALTER TABLE `" . DB_PREFIX . "banner_image` ADD `video_type` varchar(16) NOT NULL DEFAULT '' AFTER `image_portrait`");
+		$this->addColumnIfMissing(DB_PREFIX . 'banner_image', 'video',
+			"ALTER TABLE `" . DB_PREFIX . "banner_image` ADD `video` varchar(255) NOT NULL DEFAULT '' AFTER `video_type`");
 
 		// Expand title column if still varchar(64)
 		$this->db->query("ALTER TABLE `" . DB_PREFIX . "banner_image` MODIFY `title` varchar(255) NOT NULL");
