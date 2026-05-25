@@ -164,6 +164,109 @@ class Image {
 	}
 	
 	/**
+	 * Optimize image at upload time: shrink oversized dimensions and recompress.
+	 *
+	 * If the longest side exceeds $maxDimension, the image is proportionally
+	 * resized down to $maxDimension.  In addition, every supported image is
+	 * re-saved with optimised encoder settings:
+	 *   - JPEG:  quality 95, implicit EXIF strip
+	 *   - PNG:   maximum lossless compression (level 9)
+	 *   - WebP:  quality 95
+	 *   - GIF:   left untouched (preserves animation)
+	 *
+	 * The original file is overwritten in-place.
+	 *
+	 * @param string $file         Absolute path to the image file
+	 * @param int    $maxDimension Longest side limit in pixels; 0 = skip optimisation
+	 * @return bool                True if the file was modified
+	 */
+	public static function optimize(string $file, int $maxDimension): bool {
+		if (!extension_loaded('gd') || !is_file($file) || $maxDimension <= 0) {
+			return false;
+		}
+
+		$info = getimagesize($file);
+
+		if (!$info || empty($info[0]) || empty($info[1])) {
+			return false;
+		}
+
+		$width   = (int)$info[0];
+		$height  = (int)$info[1];
+		$mime    = isset($info['mime']) ? $info['mime'] : '';
+		$ext     = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+
+		$needs_resize  = max($width, $height) > $maxDimension;
+		$needs_reencode = in_array($mime, array('image/jpeg', 'image/png', 'image/webp'), true);
+
+		if (!$needs_resize && !$needs_reencode) {
+			return false;
+		}
+
+		$image = null;
+
+		if ($mime == 'image/gif') {
+			$image = imagecreatefromgif($file);
+		} elseif ($mime == 'image/png') {
+			$image = imagecreatefrompng($file);
+		} elseif ($mime == 'image/jpeg') {
+			$image = imagecreatefromjpeg($file);
+		} elseif ($mime == 'image/webp' && function_exists('imagecreatefromwebp')) {
+			$image = imagecreatefromwebp($file);
+		}
+
+		if (!$image) {
+			error_log('Image::optimize: Could not open image ' . $file);
+			return false;
+		}
+
+		if ($needs_resize) {
+			$scale = $maxDimension / max($width, $height);
+			$new_w = (int)round($width  * $scale);
+			$new_h = (int)round($height * $scale);
+
+			$resized = imagecreatetruecolor($new_w, $new_h);
+
+			if ($mime == 'image/png' || $mime == 'image/webp') {
+				imagealphablending($resized, false);
+				imagesavealpha($resized, true);
+			}
+
+			imagecopyresampled($resized, $image, 0, 0, 0, 0, $new_w, $new_h, $width, $height);
+			imagedestroy($image);
+			$image = $resized;
+		}
+
+		$success = false;
+
+		if ($ext === 'jpeg' || $ext === 'jpg') {
+			$success = imagejpeg($image, $file, 95);
+		} elseif ($ext === 'png') {
+			$success = imagepng($image, $file, 9);
+		} elseif ($ext === 'gif') {
+			$success = imagegif($image, $file);
+		} elseif ($ext === 'webp') {
+			if (function_exists('imagewebp')) {
+				$success = imagewebp($image, $file, 95);
+			} else {
+				$fallback = preg_replace('/\.webp$/i', '.jpg', $file);
+				$success  = imagejpeg($image, $fallback, 95);
+				if ($success) {
+					@unlink($file);
+				}
+			}
+		}
+
+		imagedestroy($image);
+
+		if (!$success) {
+			error_log('Image::optimize: Failed to save ' . $file);
+		}
+
+		return (bool)$success;
+	}
+
+	/**
      * Resize image using the specified strategy.
      *
      * Strategy 'contain' (default): scales the image to fit within the target

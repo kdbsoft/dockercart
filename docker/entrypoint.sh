@@ -186,6 +186,7 @@ define('MEMCACHED_PORT', $env('MEMCACHED_PORT', '11211'));
 define('CACHE_HOSTNAME', $env('CACHE_HOSTNAME', 'memcached'));
 define('CACHE_PORT', $env('CACHE_PORT', '11211'));
 define('CACHE_PREFIX', $env('CACHE_PREFIX', 'oc_'));
+define('IMAGE_MAX_DIMENSION', getenv('IMAGE_MAX_DIMENSION') ?: '2560');
 PHP
     fi
 
@@ -254,6 +255,7 @@ define('MEMCACHED_PORT', $env('MEMCACHED_PORT', '11211'));
 define('CACHE_HOSTNAME', $env('CACHE_HOSTNAME', 'memcached'));
 define('CACHE_PORT', $env('CACHE_PORT', '11211'));
 define('CACHE_PREFIX', $env('CACHE_PREFIX', 'oc_'));
+define('IMAGE_MAX_DIMENSION', getenv('IMAGE_MAX_DIMENSION') ?: '2560');
 PHP
     fi
 
