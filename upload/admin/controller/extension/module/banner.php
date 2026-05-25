@@ -125,6 +125,14 @@ class ControllerExtensionModuleBanner extends Controller {
 			$data['status'] = '';
 		}
 
+		if (isset($this->request->post['layout'])) {
+			$data['layout'] = $this->request->post['layout'];
+		} elseif (!empty($module_info) && isset($module_info['layout'])) {
+			$data['layout'] = $module_info['layout'];
+		} else {
+			$data['layout'] = 'grid';
+		}
+
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');
