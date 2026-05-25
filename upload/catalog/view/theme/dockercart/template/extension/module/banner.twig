@@ -1,7 +1,7 @@
 <style>
-  /* Constrain banner blocks to module-configured dimensions to avoid full-width stretch when small images are used */
+  /* Constrain banner blocks to module-configured dimensions */
   {% if banner_width %}
-  .banner-slide { max-width: {{ banner_width }}px; }
+  .banner-layout--grid .banner-slide { max-width: {{ banner_width }}px; }
   {% endif %}
   /* Center slides and prevent small images from upscaling; center image inside the slide */
   :root { --banner-gap: 1rem; }
@@ -12,6 +12,7 @@
     .banner-slide__media img { width: 100%; height: {{ banner_height }}px; object-fit: cover; }
   .banner-slide__media iframe,
   .banner-slide__media video { width: 100%; height: {{ banner_height }}px; object-fit: cover; }
+
   {% else %}
   .banner-slide__media img { max-width:100%; width:auto; height:auto; }
   .banner-slide__media iframe,
@@ -34,6 +35,10 @@
   .banner--vertical .banner-slide__title { font-size: 1.5rem; }
   .banner--vertical .banner-slide__subtitle { font-size: 1rem; }
   .banner--vertical .banner-slide__content { max-width: 80%; padding-left: 1.5rem; }
+  /* Stack layout: banners in a column, constrained to configured width */
+  .banner-layout--stack { {% if banner_width %} max-width: {{ banner_width }}px; margin-left: auto; margin-right: auto; {% endif %} }
+  .banner-layout--stack .banner-slides { flex-direction: column; flex-wrap: nowrap; }
+  .banner-layout--stack .banner-slide { max-width: none !important; width: 100%; }
   /* Mobile: simple vertical stack of banners */
   @media (max-width: 767px) {
     /* keep a small page gutter so images don't touch the screen edges */
@@ -66,8 +71,8 @@
 </style>
 
 {% set is_vertical = banner_height > banner_width %}
-<div class="banner-slider{% if is_vertical %} banner--vertical{% else %} banner--horizontal{% endif %}" id="banner-{{ module }}" data-autoplay="3500">
-  <div class="banner-slides">
+<div class="banner-slider{% if is_vertical %} banner--vertical{% else %} banner--horizontal{% endif %} banner-layout--{{ banner_layout|default('grid') }}" id="banner-{{ module }}" data-autoplay="3500">
+  <div class="banner-slides{% if banner_layout == 'stack' %} banner-slides--stack{% endif %}">
     {% for banner in banners %}
     <div class="banner-slide{% if loop.first %} active{% endif %}" style="--stack-index: {{ loop.index }};">
       {% if banner.link %}<a href="{{ banner.link }}" class="banner-slide__link">{% endif %}

@@ -13,6 +13,9 @@ $_['entry_banner']     = 'Banner';
 $_['entry_dimension']  = 'Dimension (W x H) and Resize Type';
 $_['entry_width']      = 'Width';
 $_['entry_height']     = 'Height';
+$_['entry_layout']     = 'Banner Layout';
+$_['text_layout_grid'] = 'Grid (row)';
+$_['text_layout_stack'] = 'Stack (column)';
 $_['entry_status']     = 'Status';
 
 // Error
