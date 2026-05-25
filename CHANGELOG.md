@@ -1,3 +1,13 @@
+## [1.27.0](https://github.com/mathflow-bit/dockercart/compare/v1.26.0...v1.27.0) (2026-05-25)
+
+### Features
+
+* add section title and subtitle to shop features module ([af9ebc8](https://github.com/mathflow-bit/dockercart/commit/af9ebc870e3cf0f6e0a4b0397d13e7b0b78d1123))
+
+### Bug Fixes
+
+* enable file manager to show images and videos ([e0a1e17](https://github.com/mathflow-bit/dockercart/commit/e0a1e17d5fe2dceebf8d7cfa4fd0e934dba0c573))
+
 ## [1.26.0](https://github.com/mathflow-bit/dockercart/compare/v1.25.1...v1.26.0) (2026-05-25)
 
 ### Features
