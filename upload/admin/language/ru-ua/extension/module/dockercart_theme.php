@@ -24,13 +24,17 @@ $_['entry_messenger_block'] = 'Иконки мессенджеров';
 $_['entry_messenger_name'] = 'Название';
 $_['entry_payment_image'] = 'Изображение оплаты';
 $_['entry_payment_link']  = 'Ссылка (опционально)';
-$_['entry_features_product'] = 'Features в карточке товара';
-$_['entry_features_category'] = 'Features в категориях';
-$_['entry_features_quickview'] = 'Features в быстром просмотре';
+$_['entry_features_product'] = 'Особенности в карточке товара';
+$_['entry_features_category'] = 'Особенности в категориях';
+$_['entry_features_quickview'] = 'Особенности в быстром просмотре';
 $_['entry_feature_icon'] = 'Иконка';
 $_['entry_feature_title'] = 'Заголовок';
 $_['entry_feature_text'] = 'Описание';
 $_['entry_feature_sort_order'] = 'Порядок сортировки';
+$_['entry_header_links'] = 'Ссылки в шапке';
+$_['entry_footer_links'] = 'Ссылки в подвале';
+$_['entry_link_title']   = 'Название ссылки';
+$_['entry_link_url']     = 'URL ссылки';
 
 // Help texts
 $_['help_logo_dark']    = 'Загрузите версию логотипа для тёмного фона (используется в футере). Рекомендуется: белый или светлый вариант логотипа. Путь указывается относительно директории /image/.';
@@ -43,7 +47,9 @@ $_['entry_messenger_fab_status'] = 'Мессенджеры на странице
 $_['help_messenger_fab_status']  = 'Показывать кнопки контактов мессенджеров на странице товара, под блоком features. Включено по умолчанию.';
 $_['help_payment_block']  = 'Загрузите иконки платёжных систем (картинки). Если изображение не указано — элемент не выводится в футере.';
 $_['help_messenger_block'] = 'Настройте иконки мессенджеров для виджета FAB. Если изображение пустое — не отображается.';
-$_['help_theme_features']   = 'Эти блоки features используются на странице товара, в категориях и в быстром просмотре. Можно добавлять любое количество строк, все поля мультиязычные.';
+$_['help_theme_features']   = 'Эти блоки особенностей используются на странице товара, в категориях и в быстром просмотре. Можно добавлять любое количество строк, все поля мультиязычные.';
+$_['help_header_links']  = 'Пользовательские ссылки в навигации шапки после информационных страниц. Пустое название или URL = ссылка не отображается.';
+$_['help_footer_links']  = 'Пользовательские ссылки в колонке Информация подвала после информационных страниц. Пустое название или URL = ссылка не отображается.';
 
 // Menu type labels
 $_['text_menu_horizontal'] = 'Горизонтальное';
@@ -57,18 +63,22 @@ $_['button_clear']      = 'Очистить';
 $_['button_add_social'] = 'Добавить соцсеть';
 $_['button_add_payment']= 'Добавить иконку оплаты';
 $_['button_add_messenger'] = 'Добавить мессенджер';
-$_['button_add_feature'] = 'Добавить feature';
+$_['button_add_feature'] = 'Добавить особенность';
+$_['button_add_header_link'] = 'Добавить ссылку шапки';
+$_['button_add_footer_link'] = 'Добавить ссылку подвала';
 
 // Section headings
 $_['text_tab_general']             = 'Основные';
 $_['text_tab_general_subtitle']    = 'Статус модуля, тип меню, логотипы и фавикон';
 $_['text_tab_social_payments']     = 'Соцсети и оплата';
 $_['text_tab_social_payments_subtitle'] = 'Ссылки на соцсети, виджет мессенджеров и иконки оплаты';
-$_['text_tab_features']            = 'Features';
-$_['text_tab_features_subtitle']   = 'Блоки features для товара, категорий и быстрого просмотра';
+$_['text_tab_features']            = 'Особенности';
+$_['text_tab_features_subtitle']   = 'Блоки особенностей для товара, категорий и быстрого просмотра';
+$_['text_tab_links']               = 'Ссылки';
+$_['text_tab_links_subtitle']      = 'Пользовательские ссылки навигации для шапки и подвала';
 $_['text_section_general'] = 'Настройки модуля';
 $_['text_section_logos']   = 'Логотипы';
-$_['text_section_features'] = 'Features темы';
+
 $_['text_search_icons']    = 'Поиск иконки...';
 $_['text_multilingual_settings'] = 'Мультиязычный контент';
 $_['text_choose_icon'] = 'Выберите иконку';

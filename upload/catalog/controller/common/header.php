@@ -325,17 +325,39 @@ class ControllerCommonHeader extends Controller {
 			'href'  => $this->url->link('information/contact')
 		);
 
-		// Custom header links from theme settings (after info pages + contact)
-		for ($i = 1; $i <= 10; $i++) {
-			$title = (string)$this->config->get('dockercart_theme_header_link_' . $i . '_title');
-			$url   = (string)$this->config->get('dockercart_theme_header_link_' . $i . '_url');
-			if ($title === '' || $url === '') {
-				break;
+		// Custom header links from theme settings (multilingual, JSON)
+		$header_links_raw = $this->config->get('dockercart_theme_header_links');
+		$header_links = $header_links_raw ? json_decode($header_links_raw, true) : array();
+		if (is_array($header_links)) {
+			$language_id = (int)$this->config->get('config_language_id');
+			foreach ($header_links as $link) {
+				$title = '';
+				if (isset($link['title']) && is_array($link['title']) && isset($link['title'][$language_id])) {
+					$title = trim((string)$link['title'][$language_id]);
+				}
+				$url = '';
+				if (isset($link['url']) && is_array($link['url']) && isset($link['url'][$language_id])) {
+					$url = trim((string)$link['url'][$language_id]);
+				}
+				if ($title === '' || $url === '') {
+					if ($title === '' && isset($link['title']) && is_array($link['title'])) {
+						foreach ($link['title'] as $t) {
+							if ($t) { $title = trim((string)$t); break; }
+						}
+					}
+					if ($url === '' && isset($link['url']) && is_array($link['url'])) {
+						foreach ($link['url'] as $u) {
+							if ($u) { $url = trim((string)$u); break; }
+						}
+					}
+				}
+				if ($title !== '' && $url !== '') {
+					$data['top_informations'][] = array(
+						'title' => $title,
+						'href'  => $url
+					);
+				}
 			}
-			$data['top_informations'][] = array(
-				'title' => $title,
-				'href'  => $url
-			);
 		}
 
 		// Mobile categories for slide-in menu (simple two-level tree)

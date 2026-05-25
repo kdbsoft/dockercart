@@ -534,10 +534,8 @@
 
             <div id="dc-theme-tab-features" class="dcx-tab-pane">
 
-            {# ─────────────────────── Section: Theme features ─────────────────── #}
+            {# ─────────────────────── Product card features ─────────────────── #}
             <div class="dcx-section">
-              <h4 style="margin-top:0;"><i class="fa fa-magic"></i> {{ text_section_features }}</h4>
-
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
                 <h4 style="margin:0;"><i class="fa fa-magic"></i> {{ entry_features_product }}</h4>
                 <button type="button" class="btn btn-primary btn-sm js-add-theme-feature" data-target="product-features-body" data-field="dockercart_theme_product_features" data-prefix="product-feature-row" data-counter="product">
@@ -585,7 +583,10 @@
                 </div>
                 {% endfor %}
               </div>
+            </div>
 
+            {# ─────────────────────── Category features ─────────────────── #}
+            <div class="dcx-section">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
                 <h4 style="margin:0;"><i class="fa fa-magic"></i> {{ entry_features_category }}</h4>
                 <button type="button" class="btn btn-primary btn-sm js-add-theme-feature" data-target="category-features-body" data-field="dockercart_theme_category_features" data-prefix="category-feature-row" data-counter="category">
@@ -633,56 +634,57 @@
                 </div>
                 {% endfor %}
               </div>
+            </div>
 
-              
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-                  <h4 style="margin:0;"><i class="fa fa-magic"></i> {{ entry_features_quickview }}</h4>
-                  <button type="button" class="btn btn-primary btn-sm js-add-theme-feature" data-target="quickview-features-body" data-field="dockercart_theme_quickview_features" data-prefix="quickview-feature-row" data-counter="quickview">
-                    <i class="fa fa-plus"></i> {{ button_add_feature }}
-                  </button>
-                </div>
-                <div id="quickview-features-body" class="dc-rows-container">
-                  {% for idx, feature in dockercart_theme_quickview_features %}
-                  <div class="dc-row-item dc-feature-row" id="quickview-feature-row-{{ idx }}">
-                    <span class="dc-row-item__num">{{ idx + 1 }}</span>
-                    <div style="flex-shrink:0;">
-                      <input type="hidden" name="dockercart_theme_quickview_features[{{ idx }}][icon]" id="quickview-feature-icon-{{ idx }}" value="{{ feature.icon|default('truck') }}" />
-                      <button type="button" class="dc-feature-icon-picker-btn dc-icon-picker-button" data-target="#quickview-feature-icon-{{ idx }}" title="{{ text_search_icons|default('Search icons...') }}">
-                        <i data-lucide="{{ feature.icon|default('truck') }}" class="dc-icon-sm"></i>
-                      </button>
-                    </div>
-                    <div style="flex:1;min-width:0;">
-                      <ul class="nav nav-tabs dc-feature-tabs" role="tablist">
-                        {% for language in languages %}
-                        <li{% if loop.first %} class="active"{% endif %}><a href="#quickview-feature-{{ idx }}-lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>
-                        {% endfor %}
-                      </ul>
-                      <div class="tab-content">
-                        {% for language in languages %}
-                        <div class="tab-pane{% if loop.first %} active{% endif %}" id="quickview-feature-{{ idx }}-lang-{{ language.language_id }}">
-                          <div class="form-group" style="margin-left:0;margin-right:0;">
-                            <label class="control-label dc-feature-label">{{ entry_feature_title }}</label>
-                            <input type="text" name="dockercart_theme_quickview_features[{{ idx }}][title][{{ language.language_id }}]" value="{{ feature.title[language.language_id]|default('') }}" class="form-control" />
-                          </div>
-                          <div class="form-group" style="margin-left:0;margin-right:0;">
-                            <label class="control-label dc-feature-label">{{ entry_feature_text }}</label>
-                            <textarea name="dockercart_theme_quickview_features[{{ idx }}][text][{{ language.language_id }}]" rows="2" class="form-control">{{ feature.text[language.language_id]|default('') }}</textarea>
-                          </div>
-                          <div class="form-group" style="margin-left:0;margin-right:0;margin-bottom:0;">
-                            <label class="control-label dc-feature-label">{{ entry_feature_sort_order }}</label>
-                            <input type="number" name="dockercart_theme_quickview_features[{{ idx }}][sort_order]" value="{{ feature.sort_order|default(loop.index0) }}" class="form-control" style="width:82px;" />
-                          </div>
-                        </div>
-                        {% endfor %}
-                      </div>
-                    </div>
-                    <button type="button" class="btn btn-danger btn-sm js-remove-theme-feature-row" style="flex-shrink:0;">
-                      <i class="fa fa-times"></i>
+            {# ─────────────────────── Quick view features ─────────────────── #}
+            <div class="dcx-section">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+                <h4 style="margin:0;"><i class="fa fa-magic"></i> {{ entry_features_quickview }}</h4>
+                <button type="button" class="btn btn-primary btn-sm js-add-theme-feature" data-target="quickview-features-body" data-field="dockercart_theme_quickview_features" data-prefix="quickview-feature-row" data-counter="quickview">
+                  <i class="fa fa-plus"></i> {{ button_add_feature }}
+                </button>
+              </div>
+              <div id="quickview-features-body" class="dc-rows-container">
+                {% for idx, feature in dockercart_theme_quickview_features %}
+                <div class="dc-row-item dc-feature-row" id="quickview-feature-row-{{ idx }}">
+                  <span class="dc-row-item__num">{{ idx + 1 }}</span>
+                  <div style="flex-shrink:0;">
+                    <input type="hidden" name="dockercart_theme_quickview_features[{{ idx }}][icon]" id="quickview-feature-icon-{{ idx }}" value="{{ feature.icon|default('truck') }}" />
+                    <button type="button" class="dc-feature-icon-picker-btn dc-icon-picker-button" data-target="#quickview-feature-icon-{{ idx }}" title="{{ text_search_icons|default('Search icons...') }}">
+                      <i data-lucide="{{ feature.icon|default('truck') }}" class="dc-icon-sm"></i>
                     </button>
                   </div>
-                  {% endfor %}
+                  <div style="flex:1;min-width:0;">
+                    <ul class="nav nav-tabs dc-feature-tabs" role="tablist">
+                      {% for language in languages %}
+                      <li{% if loop.first %} class="active"{% endif %}><a href="#quickview-feature-{{ idx }}-lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>
+                      {% endfor %}
+                    </ul>
+                    <div class="tab-content">
+                      {% for language in languages %}
+                      <div class="tab-pane{% if loop.first %} active{% endif %}" id="quickview-feature-{{ idx }}-lang-{{ language.language_id }}">
+                        <div class="form-group" style="margin-left:0;margin-right:0;">
+                          <label class="control-label dc-feature-label">{{ entry_feature_title }}</label>
+                          <input type="text" name="dockercart_theme_quickview_features[{{ idx }}][title][{{ language.language_id }}]" value="{{ feature.title[language.language_id]|default('') }}" class="form-control" />
+                        </div>
+                        <div class="form-group" style="margin-left:0;margin-right:0;">
+                          <label class="control-label dc-feature-label">{{ entry_feature_text }}</label>
+                          <textarea name="dockercart_theme_quickview_features[{{ idx }}][text][{{ language.language_id }}]" rows="2" class="form-control">{{ feature.text[language.language_id]|default('') }}</textarea>
+                        </div>
+                        <div class="form-group" style="margin-left:0;margin-right:0;margin-bottom:0;">
+                          <label class="control-label dc-feature-label">{{ entry_feature_sort_order }}</label>
+                          <input type="number" name="dockercart_theme_quickview_features[{{ idx }}][sort_order]" value="{{ feature.sort_order|default(loop.index0) }}" class="form-control" style="width:82px;" />
+                        </div>
+                      </div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                  <button type="button" class="btn btn-danger btn-sm js-remove-theme-feature-row" style="flex-shrink:0;">
+                    <i class="fa fa-times"></i>
+                  </button>
                 </div>
-
+                {% endfor %}
+              </div>
               <p class="help-block" style="margin-top:10px;">{{ help_theme_features }}</p>
             </div>
 
@@ -694,18 +696,37 @@
             <div class="dcx-section">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
                 <h4 style="margin:0;"><i class="fa fa-external-link"></i> {{ entry_header_links }}</h4>
-                <button type="button" id="btn-add-header-link" class="btn btn-primary btn-sm">
-                  <i class="fa fa-plus"></i> {{ button_add_header_link|default('Add header link') }}
+                <button type="button" class="btn btn-primary btn-sm js-add-header-link">
+                  <i class="fa fa-plus"></i> {{ button_add_header_link }}
                 </button>
               </div>
 
               <div id="header-link-rows" class="dc-rows-container">
-                {% for idx, item in header_link_items %}
+                {% for idx, item in dockercart_theme_header_links %}
                 <div class="dc-row-item dc-header-link-row" id="header-link-row-{{ idx }}">
                   <span class="dc-row-item__num">{{ idx + 1 }}</span>
-                  <input type="text" name="dockercart_theme_header_link_title[]" value="{{ item.title }}" placeholder="{{ entry_link_title }}" class="form-control dc-row-link-input" />
-                  <input type="text" name="dockercart_theme_header_link_url[]" value="{{ item.url }}" placeholder="https://... ({{ entry_link_url }})" class="form-control dc-row-link-input" />
-                  <button type="button" class="btn btn-danger btn-sm js-remove-header-link-row">
+                  <div style="flex:1;min-width:0;">
+                    <ul class="nav nav-tabs dc-feature-tabs" role="tablist">
+                      {% for language in languages %}
+                      <li{% if loop.first %} class="active"{% endif %}><a href="#header-link-{{ idx }}-lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>
+                      {% endfor %}
+                    </ul>
+                    <div class="tab-content">
+                      {% for language in languages %}
+                      <div class="tab-pane{% if loop.first %} active{% endif %}" id="header-link-{{ idx }}-lang-{{ language.language_id }}">
+                        <div class="form-group" style="margin-left:0;margin-right:0;">
+                          <label class="control-label dc-feature-label">{{ entry_link_title }}</label>
+                          <input type="text" name="dockercart_theme_header_links[{{ idx }}][title][{{ language.language_id }}]" value="{{ item.title[language.language_id]|default('') }}" class="form-control" />
+                        </div>
+                        <div class="form-group" style="margin-left:0;margin-right:0;margin-bottom:0;">
+                          <label class="control-label dc-feature-label">{{ entry_link_url }}</label>
+                          <input type="text" name="dockercart_theme_header_links[{{ idx }}][url][{{ language.language_id }}]" value="{{ item.url[language.language_id]|default('') }}" class="form-control" placeholder="https://..." />
+                        </div>
+                      </div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                  <button type="button" class="btn btn-danger btn-sm js-remove-header-link-row" style="flex-shrink:0;">
                     <i class="fa fa-times"></i>
                   </button>
                 </div>
@@ -719,18 +740,37 @@
             <div class="dcx-section">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
                 <h4 style="margin:0;"><i class="fa fa-external-link"></i> {{ entry_footer_links }}</h4>
-                <button type="button" id="btn-add-footer-link" class="btn btn-primary btn-sm">
-                  <i class="fa fa-plus"></i> {{ button_add_footer_link|default('Add footer link') }}
+                <button type="button" class="btn btn-primary btn-sm js-add-footer-link">
+                  <i class="fa fa-plus"></i> {{ button_add_footer_link }}
                 </button>
               </div>
 
               <div id="footer-link-rows" class="dc-rows-container">
-                {% for idx, item in footer_link_items %}
+                {% for idx, item in dockercart_theme_footer_links %}
                 <div class="dc-row-item dc-footer-link-row" id="footer-link-row-{{ idx }}">
                   <span class="dc-row-item__num">{{ idx + 1 }}</span>
-                  <input type="text" name="dockercart_theme_footer_link_title[]" value="{{ item.title }}" placeholder="{{ entry_link_title }}" class="form-control dc-row-link-input" />
-                  <input type="text" name="dockercart_theme_footer_link_url[]" value="{{ item.url }}" placeholder="https://... ({{ entry_link_url }})" class="form-control dc-row-link-input" />
-                  <button type="button" class="btn btn-danger btn-sm js-remove-footer-link-row">
+                  <div style="flex:1;min-width:0;">
+                    <ul class="nav nav-tabs dc-feature-tabs" role="tablist">
+                      {% for language in languages %}
+                      <li{% if loop.first %} class="active"{% endif %}><a href="#footer-link-{{ idx }}-lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>
+                      {% endfor %}
+                    </ul>
+                    <div class="tab-content">
+                      {% for language in languages %}
+                      <div class="tab-pane{% if loop.first %} active{% endif %}" id="footer-link-{{ idx }}-lang-{{ language.language_id }}">
+                        <div class="form-group" style="margin-left:0;margin-right:0;">
+                          <label class="control-label dc-feature-label">{{ entry_link_title }}</label>
+                          <input type="text" name="dockercart_theme_footer_links[{{ idx }}][title][{{ language.language_id }}]" value="{{ item.title[language.language_id]|default('') }}" class="form-control" />
+                        </div>
+                        <div class="form-group" style="margin-left:0;margin-right:0;margin-bottom:0;">
+                          <label class="control-label dc-feature-label">{{ entry_link_url }}</label>
+                          <input type="text" name="dockercart_theme_footer_links[{{ idx }}][url][{{ language.language_id }}]" value="{{ item.url[language.language_id]|default('') }}" class="form-control" placeholder="https://..." />
+                        </div>
+                      </div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                  <button type="button" class="btn btn-danger btn-sm js-remove-footer-link-row" style="flex-shrink:0;">
                     <i class="fa fa-times"></i>
                   </button>
                 </div>
@@ -787,8 +827,10 @@
   var socialRowIndex     = {{ social_items|length }};
   var paymentRowCounter  = {{ payment_items|length }};
   var messengerRowCounter = {{ messenger_items|length }};
-  var headerLinkRowIndex  = {{ header_link_items|length }};
-  var footerLinkRowIndex  = {{ footer_link_items|length }};
+  var linkRowCounters = {
+    header: {{ dockercart_theme_header_links|length }},
+    footer: {{ dockercart_theme_footer_links|length }}
+  };
   var featureRowCounters = {
     product: {{ dockercart_theme_product_features|length }},
     category: {{ dockercart_theme_category_features|length }},
@@ -849,6 +891,66 @@
     html += '<button type="button" class="btn btn-danger btn-sm js-remove-theme-feature-row" style="flex-shrink:0;"><i class="fa fa-times"></i></button>';
     html += '</div>';
 
+    return html;
+  }
+
+  function buildHeaderLinkRow(rowIndex, sortOrder) {
+    var html = '';
+    html += '<div class="dc-row-item dc-header-link-row" id="header-link-row-' + rowIndex + '">';
+    html += '<span class="dc-row-item__num">' + (rowIndex + 1) + '</span>';
+    html += '<div style="flex:1;min-width:0;">';
+    html += '<ul class="nav nav-tabs dc-feature-tabs" role="tablist">';
+    {% for language in languages %}
+    html += '<li{% if loop.first %} class="active"{% endif %}><a href="#header-link-' + rowIndex + '-lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>';
+    {% endfor %}
+    html += '</ul>';
+    html += '<div class="tab-content">';
+    {% for language in languages %}
+    html += '<div class="tab-pane{% if loop.first %} active{% endif %}" id="header-link-' + rowIndex + '-lang-{{ language.language_id }}">';
+    html += '<div class="form-group" style="margin-left:0;margin-right:0;">';
+    html += '<label class="control-label dc-feature-label">{{ entry_link_title|e('js') }}</label>';
+    html += '<input type="text" name="dockercart_theme_header_links[' + rowIndex + '][title][{{ language.language_id }}]" value="" class="form-control" />';
+    html += '</div>';
+    html += '<div class="form-group" style="margin-left:0;margin-right:0;margin-bottom:0;">';
+    html += '<label class="control-label dc-feature-label">{{ entry_link_url|e('js') }}</label>';
+    html += '<input type="text" name="dockercart_theme_header_links[' + rowIndex + '][url][{{ language.language_id }}]" value="" class="form-control" placeholder="https://..." />';
+    html += '</div>';
+    html += '</div>';
+    {% endfor %}
+    html += '</div>';
+    html += '</div>';
+    html += '<button type="button" class="btn btn-danger btn-sm js-remove-header-link-row" style="flex-shrink:0;"><i class="fa fa-times"></i></button>';
+    html += '</div>';
+    return html;
+  }
+
+  function buildFooterLinkRow(rowIndex, sortOrder) {
+    var html = '';
+    html += '<div class="dc-row-item dc-footer-link-row" id="footer-link-row-' + rowIndex + '">';
+    html += '<span class="dc-row-item__num">' + (rowIndex + 1) + '</span>';
+    html += '<div style="flex:1;min-width:0;">';
+    html += '<ul class="nav nav-tabs dc-feature-tabs" role="tablist">';
+    {% for language in languages %}
+    html += '<li{% if loop.first %} class="active"{% endif %}><a href="#footer-link-' + rowIndex + '-lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>';
+    {% endfor %}
+    html += '</ul>';
+    html += '<div class="tab-content">';
+    {% for language in languages %}
+    html += '<div class="tab-pane{% if loop.first %} active{% endif %}" id="footer-link-' + rowIndex + '-lang-{{ language.language_id }}">';
+    html += '<div class="form-group" style="margin-left:0;margin-right:0;">';
+    html += '<label class="control-label dc-feature-label">{{ entry_link_title|e('js') }}</label>';
+    html += '<input type="text" name="dockercart_theme_footer_links[' + rowIndex + '][title][{{ language.language_id }}]" value="" class="form-control" />';
+    html += '</div>';
+    html += '<div class="form-group" style="margin-left:0;margin-right:0;margin-bottom:0;">';
+    html += '<label class="control-label dc-feature-label">{{ entry_link_url|e('js') }}</label>';
+    html += '<input type="text" name="dockercart_theme_footer_links[' + rowIndex + '][url][{{ language.language_id }}]" value="" class="form-control" placeholder="https://..." />';
+    html += '</div>';
+    html += '</div>';
+    {% endfor %}
+    html += '</div>';
+    html += '</div>';
+    html += '<button type="button" class="btn btn-danger btn-sm js-remove-footer-link-row" style="flex-shrink:0;"><i class="fa fa-times"></i></button>';
+    html += '</div>';
     return html;
   }
 
@@ -994,16 +1096,10 @@
   });
 
   /* ── Add header link row ─────────────────────────────────────── */
-  $('#btn-add-header-link').on('click', function() {
-    var idx = headerLinkRowIndex++;
-    var num = $('#header-link-rows .dc-row-item').length + 1;
-    var html = '<div class="dc-row-item dc-header-link-row" id="header-link-row-' + idx + '">'
-      + '<span class="dc-row-item__num">' + num + '</span>'
-      + '<input type="text" name="dockercart_theme_header_link_title[]" value="" placeholder="{{ entry_link_title|e('js') }}" class="form-control dc-row-link-input" />'
-      + '<input type="text" name="dockercart_theme_header_link_url[]" value="" placeholder="https://..." class="form-control dc-row-link-input" />'
-      + '<button type="button" class="btn btn-danger btn-sm js-remove-header-link-row"><i class="fa fa-times"></i></button>'
-      + '</div>';
-    $('#header-link-rows').append(html);
+  $(document).on('click', '.js-add-header-link', function() {
+    var idx = linkRowCounters.header++;
+    var sortOrder = $('#header-link-rows .dc-row-item').length;
+    $('#header-link-rows').append(buildHeaderLinkRow(idx, sortOrder));
     renumberRows('#header-link-rows', '.dc-row-item__num');
   });
 
@@ -1014,16 +1110,10 @@
   });
 
   /* ── Add footer link row ─────────────────────────────────────── */
-  $('#btn-add-footer-link').on('click', function() {
-    var idx = footerLinkRowIndex++;
-    var num = $('#footer-link-rows .dc-row-item').length + 1;
-    var html = '<div class="dc-row-item dc-footer-link-row" id="footer-link-row-' + idx + '">'
-      + '<span class="dc-row-item__num">' + num + '</span>'
-      + '<input type="text" name="dockercart_theme_footer_link_title[]" value="" placeholder="{{ entry_link_title|e('js') }}" class="form-control dc-row-link-input" />'
-      + '<input type="text" name="dockercart_theme_footer_link_url[]" value="" placeholder="https://..." class="form-control dc-row-link-input" />'
-      + '<button type="button" class="btn btn-danger btn-sm js-remove-footer-link-row"><i class="fa fa-times"></i></button>'
-      + '</div>';
-    $('#footer-link-rows').append(html);
+  $(document).on('click', '.js-add-footer-link', function() {
+    var idx = linkRowCounters.footer++;
+    var sortOrder = $('#footer-link-rows .dc-row-item').length;
+    $('#footer-link-rows').append(buildFooterLinkRow(idx, sortOrder));
     renumberRows('#footer-link-rows', '.dc-row-item__num');
   });
 
