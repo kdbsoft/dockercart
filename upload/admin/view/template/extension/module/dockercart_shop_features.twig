@@ -1,6 +1,23 @@
 {{ header }}{{ column_left }}
 <div id="content">
   <link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <style>
+  .dc-icon-picker-modal { display:none; position:fixed; inset:0; z-index:12000; }
+  .dc-icon-picker-backdrop { position:absolute; inset:0; background:rgba(0,0,0,0.45); }
+  .dc-icon-picker-panel { position:relative; max-width:860px; margin:6vh auto; background:#fff; border-radius:10px; padding:16px; box-shadow:0 10px 40px rgba(2,6,23,0.28); }
+  .dc-icon-picker-header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
+  .dc-icon-picker-search { width:100%; max-width:480px; }
+  .dc-icon-picker-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(56px,1fr)); gap:8px; max-height:56vh; overflow:auto; padding:6px; }
+  .dc-icon-option { display:flex; align-items:center; justify-content:center; gap:6px; border:1px solid #e6eef8; background:#f8fbff; padding:8px; border-radius:8px; cursor:pointer; }
+  .dc-icon-option:hover { background:#eaf4ff; border-color:#cfe8ff; }
+  .dc-icon-option i { width:18px; height:18px; }
+  .dc-icon-sm { width:14px; height:14px; display:inline-block; }
+  .dc-icon-picker-btn { display:inline-flex; align-items:center; gap:6px; border:1px solid #d0d5dd; background:#fff; padding:6px 12px; border-radius:6px; cursor:pointer; white-space:nowrap; }
+  .dc-icon-picker-btn:hover { background:#f5f7fa; border-color:#98a2b3; }
+  .dc-icon-picker-btn i { width:16px; height:16px; }
+  </style>
 
   <div class="page-header">
     <div class="container-fluid">
@@ -96,14 +113,11 @@
                     {% for feature in features %}
                       <tr id="feature-row-{{ feature_row }}">
                         <td>
-                          <div class="input-group">
-                            <span class="input-group-addon icon-preview"><i data-lucide="{{ feature.icon|default('truck') }}" class="dc-icon-preview" style="width:16px;height:16px;"></i></span>
-                            <select name="features[{{ feature_row }}][icon]" class="form-control dc-icon-select">
-                              {% for icon_option in icon_options %}
-                                <option value="{{ icon_option }}" {% if feature.icon|default('truck') == icon_option %}selected="selected"{% endif %}>{{ icon_option }}</option>
-                              {% endfor %}
-                            </select>
-                          </div>
+                          <input type="hidden" name="features[{{ feature_row }}][icon]" id="feature-icon-{{ feature_row }}" value="{{ feature.icon|default('truck') }}" />
+                          <button type="button" class="dc-icon-picker-btn dc-icon-picker-button" data-target="#feature-icon-{{ feature_row }}" title="{{ feature.icon|default('truck') }}">
+                            <i data-lucide="{{ feature.icon|default('truck') }}" class="dc-icon-sm"></i>
+                            <span class="dc-icon-label">{{ feature.icon|default('truck') }}</span>
+                          </button>
                         </td>
                         <td>
                           <ul class="nav nav-tabs" role="tablist" style="margin-bottom: 10px;">
@@ -154,6 +168,29 @@
   </div>
 </div>
 
+<!-- Icon picker modal -->
+<div id="dc-icon-picker-modal" class="dc-icon-picker-modal hidden">
+  <div class="dc-icon-picker-backdrop"></div>
+  <div class="dc-icon-picker-panel" role="dialog" aria-modal="true">
+    <div class="dc-icon-picker-header">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <strong>{{ entry_icon }}</strong>
+        <input id="dc-icon-picker-search" class="form-control dc-icon-picker-search" placeholder="{{ entry_search_icons|default('Search icons...') }}" />
+      </div>
+      <div>
+        <button id="dc-icon-picker-close" class="btn btn-default">{{ button_close|default('Close') }}</button>
+      </div>
+    </div>
+    <div id="dc-icon-picker-grid" class="dc-icon-picker-grid">
+      {% for icon_option in icon_options %}
+      <button type="button" class="dc-icon-option" data-icon="{{ icon_option }}">
+        <i data-lucide="{{ icon_option }}"></i>
+      </button>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
 <script type="text/javascript">
 var feature_row = {{ feature_row }};
 
@@ -163,32 +200,70 @@ function renderLucideIcons() {
   }
 }
 
-function updateIconPreview(selectEl) {
-  var iconName = (selectEl && selectEl.value) ? selectEl.value : 'truck';
-  var preview = selectEl.closest('.input-group').querySelector('.icon-preview');
+// Icon picker modal
+var __dc_icon_picker_target = null;
+var __dc_icon_picker_preview = null;
+var __dc_icon_picker_label = null;
 
-  if (preview) {
-    preview.innerHTML = '<i data-lucide="' + iconName.replace(/[^a-z0-9\-]/gi, '') + '" class="dc-icon-preview" style="width:16px;height:16px;"></i>';
-    renderLucideIcons();
+$(document).on('click', '.dc-icon-picker-button', function(e) {
+  e.preventDefault();
+  var $btn = $(this);
+  var target = $btn.data('target');
+  __dc_icon_picker_target = $(target);
+  __dc_icon_picker_preview = $btn.find('i[data-lucide]');
+  __dc_icon_picker_label = $btn.find('.dc-icon-label');
+  $('#dc-icon-picker-modal').removeClass('hidden').show();
+  $('#dc-icon-picker-search').val('');
+  $('#dc-icon-picker-grid button').show();
+});
+
+$(document).on('click', '#dc-icon-picker-close, #dc-icon-picker-modal .dc-icon-picker-backdrop', function() {
+  $('#dc-icon-picker-modal').hide().addClass('hidden');
+});
+
+$(document).on('click', '#dc-icon-picker-grid button.dc-icon-option', function(e) {
+  var icon = $(this).data('icon');
+  if (__dc_icon_picker_target && __dc_icon_picker_target.length) {
+    __dc_icon_picker_target.val(icon);
   }
-}
+  if (__dc_icon_picker_preview && __dc_icon_picker_preview.length) {
+    __dc_icon_picker_preview.attr('data-lucide', icon);
+  }
+  if (__dc_icon_picker_label && __dc_icon_picker_label.length) {
+    __dc_icon_picker_label.text(icon);
+  }
+  if (__dc_icon_picker_target && __dc_icon_picker_target.attr('id')) {
+    var btn = $('[data-target="#' + __dc_icon_picker_target.attr('id') + '"]');
+    if (btn.length) {
+      btn.attr('title', icon);
+      btn.find('i[data-lucide]').attr('data-lucide', icon);
+    }
+  }
+  renderLucideIcons();
+  $('#dc-icon-picker-modal').hide().addClass('hidden');
+});
 
-$('#features-table').on('change', '.dc-icon-select', function() {
-  updateIconPreview(this);
+$(document).on('input', '#dc-icon-picker-search', function() {
+  var q = $(this).val().toLowerCase().trim();
+  if (q === '') {
+    $('#dc-icon-picker-grid button').show();
+    return;
+  }
+  $('#dc-icon-picker-grid button').each(function() {
+    var name = $(this).data('icon') || '';
+    if (name.indexOf(q) !== -1) $(this).show(); else $(this).hide();
+  });
 });
 
 $('#button-add-feature').on('click', function() {
   var html = '';
   html += '<tr id="feature-row-' + feature_row + '">';
   html += '  <td>';
-  html += '    <div class="input-group">';
-  html += '      <span class="input-group-addon icon-preview"><i data-lucide="truck" class="dc-icon-preview" style="width:16px;height:16px;"></i></span>';
-  html += '      <select name="features[' + feature_row + '][icon]" class="form-control dc-icon-select">';
-  {% for icon_option in icon_options %}
-  html += '        <option value="{{ icon_option }}"{% if loop.first %} selected="selected"{% endif %}>{{ icon_option }}</option>';
-  {% endfor %}
-  html += '      </select>';
-  html += '    </div>';
+  html += '    <input type="hidden" name="features[' + feature_row + '][icon]" id="feature-icon-' + feature_row + '" value="truck" />';
+  html += '    <button type="button" class="dc-icon-picker-btn dc-icon-picker-button" data-target="#feature-icon-' + feature_row + '" title="truck">';
+  html += '      <i data-lucide="truck" class="dc-icon-sm"></i>';
+  html += '      <span class="dc-icon-label">truck</span>';
+  html += '    </button>';
   html += '  </td>';
 
   html += '  <td>';
