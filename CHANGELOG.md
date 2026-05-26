@@ -1,3 +1,9 @@
+## [1.27.3](https://github.com/mathflow-bit/dockercart/compare/v1.27.2...v1.27.3) (2026-05-26)
+
+### Bug Fixes
+
+* banner width handling in theme ([66a4b98](https://github.com/mathflow-bit/dockercart/commit/66a4b98db25ed02afd4d1769e1ed15a65a2a7967))
+
 ## [1.27.2](https://github.com/mathflow-bit/dockercart/compare/v1.27.1...v1.27.2) (2026-05-26)
 
 ### Bug Fixes
