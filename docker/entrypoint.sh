@@ -32,6 +32,9 @@ fix_permissions() {
         # Files: group write so www-data and host users can edit
         find /var/www/html -type f -exec chmod 664 {} \; || true
 
+        # Ensure webroot group is staff so www-data can write via group permissions
+        chgrp -R staff /var/www/html/ 2>/dev/null || true
+
         # Storage dirs: SGID + group write (www-data через staff group)
         chgrp -R staff /var/www/storage/ || true
         chmod -R 2775 /var/www/storage/ || true
@@ -40,6 +43,14 @@ fix_permissions() {
         # Final safety net for restrictive host FS mappings
         find /var/www/html/image/cache -type d -exec chmod 2777 {} \; || true
         find /var/www/html/image/cache -type f -exec chmod 666 {} \; || true
+
+        # Git exclude file for extension installer (mounted from host .git/info/exclude)
+        if [ -f "/var/www/git-exclude" ]; then
+            chmod 666 /var/www/git-exclude 2>/dev/null || true
+        else
+            touch /var/www/git-exclude 2>/dev/null || true
+            chmod 666 /var/www/git-exclude 2>/dev/null || true
+        fi
 
         # Diagnostic write test
         if ! su -s /bin/sh www-data -c 'touch /var/www/html/image/cache/.perm_test && rm -f /var/www/html/image/cache/.perm_test' 2>/dev/null; then

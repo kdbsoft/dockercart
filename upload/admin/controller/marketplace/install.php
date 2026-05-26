@@ -209,7 +209,7 @@ class ControllerMarketplaceInstall extends Controller {
 							}
 	
 							if (is_dir($file) && !is_dir($path)) {
-								if (mkdir($path, 0777)) {
+								if (mkdir($path, 0777, true)) {
 									$this->model_setting_extension->addExtensionPath($extension_install_id, $destination);
 								}
 							}
@@ -558,11 +558,12 @@ class ControllerMarketplaceInstall extends Controller {
 	}
 
 	private function syncGitExclude(array $paths, string $action): void {
-		if (!defined('GIT_EXCLUDE_FILE') || !GIT_EXCLUDE_FILE || !is_file(GIT_EXCLUDE_FILE)) {
+		$exclude_file = getenv('GIT_EXCLUDE_FILE') ?: (defined('GIT_EXCLUDE_FILE') ? GIT_EXCLUDE_FILE : '');
+
+		if (!$exclude_file || !is_file($exclude_file)) {
 			return;
 		}
 
-		$exclude_file = GIT_EXCLUDE_FILE;
 		$lines = file($exclude_file) ?: array();
 
 		$marker = '# --- DockerCart installer managed entries ---';
