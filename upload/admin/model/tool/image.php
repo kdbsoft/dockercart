@@ -31,6 +31,16 @@ class ModelToolImage extends Model {
 		$image_new = 'cache/' . utf8_substr($filename, 0, utf8_strrpos($filename, '.')) . '-' . $width . 'x' . $height . $suffix . '.' . $extension;
 
 		if (!is_file(DIR_IMAGE . $image_new) || (filemtime(DIR_IMAGE . $image_old) > filemtime(DIR_IMAGE . $image_new))) {
+			$video_exts = array('mp4', 'webm', 'ogv');
+
+			if (in_array(strtolower($extension), $video_exts)) {
+				if ($this->request->server['HTTPS']) {
+					return HTTPS_CATALOG . 'image/' . $image_old;
+				} else {
+					return HTTP_CATALOG . 'image/' . $image_old;
+				}
+			}
+
 			list($width_orig, $height_orig, $image_type) = getimagesize(DIR_IMAGE . $image_old);
 
 			if (!in_array($image_type, array(IMAGETYPE_PNG, IMAGETYPE_JPEG, IMAGETYPE_GIF, IMAGETYPE_WEBP))) {
