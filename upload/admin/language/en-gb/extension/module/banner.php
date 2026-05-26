@@ -16,6 +16,9 @@ $_['entry_height']     = 'Height';
 $_['entry_layout']     = 'Banner Layout';
 $_['text_layout_grid'] = 'Grid (row)';
 $_['text_layout_stack'] = 'Stack (column)';
+$_['entry_full_width'] = 'Full Width';
+$_['text_full_width_disabled'] = 'No';
+$_['text_full_width_enabled']  = 'Yes';
 $_['entry_status']     = 'Status';
 
 // Error

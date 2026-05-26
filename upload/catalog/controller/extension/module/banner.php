@@ -8,13 +8,14 @@ class ControllerExtensionModuleBanner extends Controller {
 
 
 
-        $data['banners'] = array();
+		$data['banners'] = array();
 
-        // Pass configured width/height/layout to the view
-        $banner_layout = isset($setting['layout']) ? $setting['layout'] : 'grid';
-        $data['banner_width'] = (int)($setting['width'] ?? 0);
-        $data['banner_height'] = (int)($setting['height'] ?? 0);
-        $data['banner_layout'] = $banner_layout;
+		// Pass configured width/height/layout/full_width to the view
+		$banner_layout = isset($setting['layout']) ? $setting['layout'] : 'grid';
+		$data['banner_width'] = (int)($setting['width'] ?? 0);
+		$data['banner_height'] = (int)($setting['height'] ?? 0);
+		$data['banner_layout'] = $banner_layout;
+		$data['full_width'] = !empty($setting['full_width']);
 
         $results = $this->model_design_banner->getBanner($setting['banner_id']);
 
