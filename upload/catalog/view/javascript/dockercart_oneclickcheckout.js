@@ -104,6 +104,10 @@ function validateAndNormalizeTelephone(telephone) {
 }
 
 (function () {
+  // Guard against double script load
+  if (window._dockercartOneclickLoaded) return;
+  window._dockercartOneclickLoaded = true;
+
   var BACKDROP_ID = "oneclickcheckout-backdrop";
 
   function getModal() {
@@ -219,6 +223,14 @@ function validateAndNormalizeTelephone(telephone) {
   }
 
   function initModalState() {
+    // Remove duplicate modals (keep the first one)
+    var allModals = document.querySelectorAll("#oneclickcheckout-modal");
+    for (var i = 1; i < allModals.length; i++) {
+      if (allModals[i].parentNode) {
+        allModals[i].parentNode.removeChild(allModals[i]);
+      }
+    }
+
     var modal = getModal();
     if (!modal) return;
 
@@ -613,6 +625,9 @@ function validateAndNormalizeTelephone(telephone) {
     var productId = form ? form.getAttribute("data-product-id") : "0";
 
     if (!submitButton || !form) return;
+
+    // Prevent duplicate submission
+    if (submitButton.disabled) return;
 
     var errors = [];
     clearFormErrors(form);
