@@ -53,6 +53,16 @@ $('#button-developer').on('click', function() {
 		}
 	});	
 });	
-//--></script> 
+//--></script>
+<script type="text/javascript"><!--
+$(document).ready(function() {
+	$.ajax({
+		url: 'index.php?route=common/dashboard/currency&user_token={{ user_token }}',
+		type: 'get',
+		dataType: 'json',
+		cache: false
+	});
+});
+//--></script>
 </div>
 {{ footer }}
