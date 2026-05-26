@@ -12,11 +12,11 @@
     </div>
   </section>
 
-  <section class="py-8 px-4 sm:px-6 lg:px-8">
+  <section class="py-8{% if not full_width %} px-4 sm:px-6 lg:px-8{% endif %}">
     <div class="{% if not full_width %}max-w-4xl mx-auto{% endif %}">
       {{ content_top }}
 
-      <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 sm:p-10">
+      <div class="{% if not full_width %}bg-white rounded-3xl border border-gray-100 shadow-sm p-6 sm:p-10{% endif %}">
         <div class="prose max-w-none
           prose-headings:font-extrabold prose-headings:text-gray-900
           prose-p:text-gray-600 prose-p:leading-relaxed
