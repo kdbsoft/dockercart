@@ -56,18 +56,6 @@ class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
         $button_html .= '</button>' . "\n";
         $button_html .= '</div>' . "\n";
 
-        // Build modal HTML
-        $modal_html = $this->buildModalHtml($color_theme);
-
-        // Add CSS and JS
-        $active_theme = (string)$this->config->get('config_theme');
-        $css_link = '';
-        if ($active_theme !== 'dockercart') {
-            $css_link = '<link rel="stylesheet" type="text/css" href="catalog/view/theme/default/stylesheet/dockercart_oneclickcheckout.css" />' . "\n";
-        }
-		$js_link = '<script src="catalog/view/javascript/common/phone-mask.js"></script>' . "\n";
-		$js_link .= '<script src="catalog/view/javascript/dockercart_oneclickcheckout.js"></script>' . "\n";
-
         // Find the "Add to Cart" button and insert our button after it
         $patterns = [
             // Pattern 1: Look for id="button-cart"
@@ -101,15 +89,6 @@ class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
             if ($pos !== false) {
                 $output = substr($output, 0, $pos) . $button_html . "\n" . substr($output, $pos);
             }
-        }
-
-        // Insert modal, CSS and JS before closing body tag
-        $pos = strpos($output, '</body>');
-        if ($pos !== false) {
-            $output = substr($output, 0, $pos) . $css_link . $js_link . $modal_html . substr($output, $pos);
-        } else {
-            // If no </body> tag, append at the end
-            $output .= $css_link . $js_link . $modal_html;
         }
     }
 
