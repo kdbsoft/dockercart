@@ -96,15 +96,37 @@
               </div>
 
               <div class="form-group">
-                <label class="col-sm-3 control-label" for="input-section-title">{{ entry_section_title }}</label>
+                <label class="col-sm-3 control-label">{{ entry_section_title }}</label>
                 <div class="col-sm-9">
-                  <input type="text" name="section_title" value="{{ section_title }}" placeholder="{{ entry_section_title }}" id="input-section-title" class="form-control" />
+                  <ul class="nav nav-tabs" role="tablist" style="margin-bottom: 10px;">
+                    {% for language in languages %}
+                      <li{% if loop.first %} class="active"{% endif %}><a href="#section-title-lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>
+                    {% endfor %}
+                  </ul>
+                  <div class="tab-content">
+                    {% for language in languages %}
+                      <div class="tab-pane{% if loop.first %} active{% endif %}" id="section-title-lang-{{ language.language_id }}">
+                        <input type="text" name="section_title[{{ language.language_id }}]" value="{{ section_title[language.language_id]|default('') }}" placeholder="{{ entry_section_title }}" class="form-control" />
+                      </div>
+                    {% endfor %}
+                  </div>
                 </div>
               </div>
               <div class="form-group">
-                <label class="col-sm-3 control-label" for="input-section-subtitle">{{ entry_section_subtitle }}</label>
+                <label class="col-sm-3 control-label">{{ entry_section_subtitle }}</label>
                 <div class="col-sm-9">
-                  <textarea name="section_subtitle" rows="2" placeholder="{{ entry_section_subtitle }}" id="input-section-subtitle" class="form-control">{{ section_subtitle }}</textarea>
+                  <ul class="nav nav-tabs" role="tablist" style="margin-bottom: 10px;">
+                    {% for language in languages %}
+                      <li{% if loop.first %} class="active"{% endif %}><a href="#section-subtitle-lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>
+                    {% endfor %}
+                  </ul>
+                  <div class="tab-content">
+                    {% for language in languages %}
+                      <div class="tab-pane{% if loop.first %} active{% endif %}" id="section-subtitle-lang-{{ language.language_id }}">
+                        <textarea name="section_subtitle[{{ language.language_id }}]" rows="2" placeholder="{{ entry_section_subtitle }}" class="form-control">{{ section_subtitle[language.language_id]|default('') }}</textarea>
+                      </div>
+                    {% endfor %}
+                  </div>
                 </div>
               </div>
 

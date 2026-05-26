@@ -61,11 +61,24 @@ class ControllerExtensionModuleDockercartShopFeatures extends Controller {
             $module_info = array();
         }
 
+        // backward compat: convert old flat string section_title/subtitle to multilingual array
+        if (!empty($module_info)) {
+            foreach (['section_title', 'section_subtitle'] as $key) {
+                if (isset($module_info[$key]) && is_string($module_info[$key]) && $module_info[$key] !== '') {
+                    $old = $module_info[$key];
+                    $module_info[$key] = array();
+                    foreach ($data['languages'] as $language) {
+                        $module_info[$key][(int)$language['language_id']] = $old;
+                    }
+                }
+            }
+        }
+
         $defaults = array(
             'name' => $this->language->get('text_default_module_name'),
             'status' => 1,
-            'section_title' => '',
-            'section_subtitle' => ''
+            'section_title' => array(),
+            'section_subtitle' => array()
         );
 
         foreach ($defaults as $key => $default) {

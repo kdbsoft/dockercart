@@ -18,8 +18,44 @@ class ControllerExtensionModuleDockercartShopFeatures extends Controller {
         );
 
         $data['features'] = array();
-        $data['section_title'] = isset($setting['section_title']) ? $setting['section_title'] : '';
-        $data['section_subtitle'] = isset($setting['section_subtitle']) ? $setting['section_subtitle'] : '';
+
+        $section_title = '';
+        if (isset($setting['section_title'])) {
+            if (is_array($setting['section_title'])) {
+                if (isset($setting['section_title'][$language_id]) && $setting['section_title'][$language_id] !== '') {
+                    $section_title = (string)$setting['section_title'][$language_id];
+                } else {
+                    foreach ($setting['section_title'] as $candidate) {
+                        if ($candidate !== '') {
+                            $section_title = (string)$candidate;
+                            break;
+                        }
+                    }
+                }
+            } elseif (is_string($setting['section_title']) && $setting['section_title'] !== '') {
+                $section_title = $setting['section_title'];
+            }
+        }
+        $data['section_title'] = $section_title;
+
+        $section_subtitle = '';
+        if (isset($setting['section_subtitle'])) {
+            if (is_array($setting['section_subtitle'])) {
+                if (isset($setting['section_subtitle'][$language_id]) && $setting['section_subtitle'][$language_id] !== '') {
+                    $section_subtitle = (string)$setting['section_subtitle'][$language_id];
+                } else {
+                    foreach ($setting['section_subtitle'] as $candidate) {
+                        if ($candidate !== '') {
+                            $section_subtitle = (string)$candidate;
+                            break;
+                        }
+                    }
+                }
+            } elseif (is_string($setting['section_subtitle']) && $setting['section_subtitle'] !== '') {
+                $section_subtitle = $setting['section_subtitle'];
+            }
+        }
+        $data['section_subtitle'] = $section_subtitle;
 
         foreach ($features as $index => $feature) {
             if (!is_array($feature)) {
