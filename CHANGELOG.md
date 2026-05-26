@@ -1,3 +1,9 @@
+## [1.27.6](https://github.com/mathflow-bit/dockercart/compare/v1.27.5...v1.27.6) (2026-05-26)
+
+### Bug Fixes
+
+* add multilingual section title and subtitle with backward ([412ac9a](https://github.com/mathflow-bit/dockercart/commit/412ac9ae6db07168d3e6af7fb6b2dc9db2d0711c))
+
 ## [1.27.5](https://github.com/mathflow-bit/dockercart/compare/v1.27.4...v1.27.5) (2026-05-26)
 
 ### Bug Fixes
