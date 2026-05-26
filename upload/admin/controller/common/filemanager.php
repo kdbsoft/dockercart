@@ -230,6 +230,11 @@ class ControllerCommonFileManager extends Controller {
 			$json['error'] = $this->language->get('error_directory');
 		}
 
+		// Check if directory is protected
+		if (!$json && $this->isProtected($directory)) {
+			$json['error'] = $this->language->get('error_directory');
+		}
+
 		if (!$json) {
 			// Check if multiple files are uploaded or just one
 			$files = array();
@@ -335,6 +340,11 @@ class ControllerCommonFileManager extends Controller {
 			$json['error'] = $this->language->get('error_directory');
 		}
 
+		// Check if directory is protected
+		if (!isset($json['error']) && $this->isProtected($directory)) {
+			$json['error'] = $this->language->get('error_directory');
+		}
+
 		if ($this->request->server['REQUEST_METHOD'] == 'POST') {
 			// Sanitize the folder name
 			$folder = basename(html_entity_decode($this->request->post['folder'], ENT_QUOTES, 'UTF-8'));
@@ -381,6 +391,13 @@ class ControllerCommonFileManager extends Controller {
 
 		// Loop through each path to run validations
 		foreach ($paths as $path) {
+			// Check if path is in a protected directory
+			if ($this->isProtected($path)) {
+				$json['error'] = $this->language->get('error_delete');
+
+				break;
+			}
+
 			// Check path exists
 			if ($path == DIR_IMAGE . 'catalog' || substr(str_replace('\\', '/', realpath(DIR_IMAGE . $path)), 0, strlen(DIR_IMAGE . 'catalog')) != str_replace('\\', '/', DIR_IMAGE . 'catalog')) {
 				$json['error'] = $this->language->get('error_delete');
@@ -441,5 +458,24 @@ class ControllerCommonFileManager extends Controller {
 
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
+	}
+
+	private function isProtected(string $path): bool {
+		if (strpos($path, DIR_IMAGE) === 0) {
+			$path = substr($path, strlen(DIR_IMAGE));
+		}
+
+		$normalized = '/' . trim($path, '/');
+		$protected = array('/catalog/demo', '/catalog/social', '/catalog/test');
+
+		foreach ($protected as $prefix) {
+			if (strpos($normalized, $prefix) === 0
+				&& (strlen($normalized) === strlen($prefix) || $normalized[strlen($prefix)] === '/')
+			) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }
