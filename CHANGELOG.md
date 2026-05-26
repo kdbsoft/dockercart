@@ -1,3 +1,10 @@
+## [1.28.0](https://github.com/mathflow-bit/dockercart/compare/v1.27.8...v1.28.0) (2026-05-26)
+
+### Features
+
+* protect demo, social and test directories in file manager ([df3fb20](https://github.com/mathflow-bit/dockercart/commit/df3fb2088f4fe8e80dc05391f7d2000767467c98))
+* sync .git/info/exclude with installed extensions ([03a508c](https://github.com/mathflow-bit/dockercart/commit/03a508c80541360d90da3a7193dc54480e8d72c3))
+
 ## [1.27.8](https://github.com/mathflow-bit/dockercart/compare/v1.27.7...v1.27.8) (2026-05-26)
 
 ### Bug Fixes
