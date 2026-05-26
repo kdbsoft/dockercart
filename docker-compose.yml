@@ -84,6 +84,7 @@ services:
       - PHP_UPLOAD_MAX_FILESIZE=${PHP_UPLOAD_MAX_FILESIZE:-100M}
       - PHP_POST_MAX_SIZE=${PHP_POST_MAX_SIZE:-100M}
       - PHP_MAX_EXECUTION_TIME=${PHP_MAX_EXECUTION_TIME:-300}
+      - GIT_EXCLUDE_FILE=${GIT_EXCLUDE_FILE:-/var/www/git-exclude}
     depends_on:
       mariadb:
         condition: service_healthy
