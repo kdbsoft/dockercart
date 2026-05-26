@@ -1,7 +1,10 @@
 <style>
   /* Constrain banner blocks to module-configured dimensions */
-  {% if banner_width %}
-  .banner-layout--grid .banner-slide { max-width: {{ banner_width }}px; }
+  .banner-layout--grid .banner-slide { {% if banner_width > 0 %}max-width: {{ banner_width }}px;{% endif %} }
+  /* Non-full-width banners: constrain the whole banner container, not just slides */
+  .banner-slider:not(.banner-slider--full-width) { max-width: 100%; }
+  {% if banner_width > 0 %}
+  .banner-slider:not(.banner-slider--full-width).banner-layout--grid { max-width: {{ banner_width }}px; margin-left: auto; margin-right: auto; }
   {% endif %}
   /* Center slides and prevent small images from upscaling; center image inside the slide */
   :root { --banner-gap: 1rem; }
@@ -40,7 +43,7 @@
   .banner-layout--stack .banner-slides { flex-direction: column; flex-wrap: nowrap; }
   .banner-layout--stack .banner-slide { max-width: none !important; width: 100%; }
   /* Full-width mode: breakout of parent container, center content */
-  .banner-slider--full-width { width: 100vw; margin-left: calc(-50vw + 50%); border-radius: 0; }
+  .banner-slider--full-width { width: 100vw; margin-left: calc(-50vw + 50%); border-radius: 0; max-width: none; }
   .banner-slider--full-width .banner-slide { border-radius: 0; }
   .banner-slider--full-width .banner-slide__overlay { justify-content: center; }
   .banner-slider--full-width .banner-slide__content { max-width: 1280px; padding-right: 2rem; }
