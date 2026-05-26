@@ -9,6 +9,14 @@ class ModelExtensionCurrencyEcb extends Model {
 	public function refresh() {
 		if ($this->config->get('currency_ecb_status')) {
 			if ($this->config->get('config_currency_engine')=='ecb') {
+				$default = $this->config->get('config_currency');
+
+				$query = $this->db->query("SELECT `date_modified` FROM `" . DB_PREFIX . "currency` WHERE `code` = '" . $this->db->escape($default) . "'");
+
+				if ($query->num_rows && strtotime($query->row['date_modified']) > strtotime('-1 hour')) {
+					return true;
+				}
+
 				$curl = curl_init();
 
 				curl_setopt($curl, CURLOPT_URL, 'https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml');

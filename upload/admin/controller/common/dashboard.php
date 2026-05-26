@@ -90,14 +90,15 @@ class ControllerCommonDashboard extends Controller {
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');
 
-		// Run currency update
+		$this->response->setOutput($this->load->view('common/dashboard', $data));
+	}
+
+	public function currency() {
 		if ($this->config->get('config_currency_auto')) {
 			$config_currency_engine = $this->config->get('config_currency_engine');
 			if ($config_currency_engine) {
 				$this->load->controller('extension/currency/'.$config_currency_engine.'/currency');
 			}
 		}
-
-		$this->response->setOutput($this->load->view('common/dashboard', $data));
 	}
 }
