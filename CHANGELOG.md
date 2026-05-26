@@ -1,3 +1,9 @@
+## [1.27.2](https://github.com/mathflow-bit/dockercart/compare/v1.27.1...v1.27.2) (2026-05-26)
+
+### Bug Fixes
+
+* add full‑width option to banner module ([859fc8a](https://github.com/mathflow-bit/dockercart/commit/859fc8a8e0031df9aca0a00e59d2abc50f0ea90a))
+
 ## [1.27.1](https://github.com/mathflow-bit/dockercart/compare/v1.27.0...v1.27.1) (2026-05-26)
 
 ### Bug Fixes
