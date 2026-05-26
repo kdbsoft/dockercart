@@ -1,3 +1,9 @@
+## [1.27.7](https://github.com/mathflow-bit/dockercart/compare/v1.27.6...v1.27.7) (2026-05-26)
+
+### Bug Fixes
+
+* add conditional full‑width layout to information page ([9a2b041](https://github.com/mathflow-bit/dockercart/commit/9a2b04190bd631506c19168d49740eb6a0fb7a39))
+
 ## [1.27.6](https://github.com/mathflow-bit/dockercart/compare/v1.27.5...v1.27.6) (2026-05-26)
 
 ### Bug Fixes
