@@ -1,11 +1,6 @@
 <style>
   /* Constrain banner blocks to module-configured dimensions */
   .banner-layout--grid .banner-slide { {% if banner_width > 0 %}max-width: {{ banner_width }}px;{% endif %} }
-  /* Non-full-width banners: constrain the whole banner container, not just slides */
-  .banner-slider:not(.banner-slider--full-width) { max-width: 100%; }
-  {% if banner_width > 0 %}
-  .banner-slider:not(.banner-slider--full-width).banner-layout--grid { max-width: {{ banner_width }}px; margin-left: auto; margin-right: auto; }
-  {% endif %}
   /* Center slides and prevent small images from upscaling; center image inside the slide */
   :root { --banner-gap: 1rem; }
   .banner-slides { display: flex; gap: var(--banner-gap); flex-wrap: wrap; justify-content: center; }
@@ -43,7 +38,7 @@
   .banner-layout--stack .banner-slides { flex-direction: column; flex-wrap: nowrap; }
   .banner-layout--stack .banner-slide { max-width: none !important; width: 100%; }
   /* Full-width mode: breakout of parent container, center content */
-  .banner-slider--full-width { width: 100vw; margin-left: calc(-50vw + 50%); border-radius: 0; max-width: none; }
+  .banner-slider--full-width { width: 100vw; position: relative; left: calc(-50vw + 50%); border-radius: 0; }
   .banner-slider--full-width .banner-slide { border-radius: 0; }
   .banner-slider--full-width .banner-slide__overlay { justify-content: center; }
   .banner-slider--full-width .banner-slide__content { max-width: 1280px; padding-right: 2rem; }
@@ -78,7 +73,7 @@
     /* Mobile: remove outer max-width constraint so banner fills the screen */
     .banner-layout--stack { max-width: none !important; margin-left: 0; margin-right: 0; }
     /* Full-width reset on mobile: stay inside container like everything else */
-    .banner-slider--full-width { width: auto; margin-left: 0; border-radius: 24px; }
+    .banner-slider--full-width { width: auto; position: static; left: auto; border-radius: 24px; }
     .banner-slider--full-width .banner-slide { border-radius: 24px; }
     .banner-slider--full-width .banner-slide__overlay { justify-content: flex-start; }
     .banner-slider--full-width .banner-slide__content { max-width: 100%; padding-right: 1rem; }
