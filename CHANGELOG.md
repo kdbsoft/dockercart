@@ -1,3 +1,9 @@
+## [1.27.4](https://github.com/mathflow-bit/dockercart/compare/v1.27.3...v1.27.4) (2026-05-26)
+
+### Bug Fixes
+
+* banner full-width layout CSS ([2c87942](https://github.com/mathflow-bit/dockercart/commit/2c879429e21457a137835ad64a244429e5ba56e8))
+
 ## [1.27.3](https://github.com/mathflow-bit/dockercart/compare/v1.27.2...v1.27.3) (2026-05-26)
 
 ### Bug Fixes
