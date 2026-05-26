@@ -1,3 +1,11 @@
+## [1.27.8](https://github.com/mathflow-bit/dockercart/compare/v1.27.7...v1.27.8) (2026-05-26)
+
+### Bug Fixes
+
+* add dashboard currency endpoint and cache‑aware refresh logic ([2c3bdd0](https://github.com/mathflow-bit/dockercart/commit/2c3bdd0d8b6dc853af17667590c30140b2708fff))
+* prevent duplicate one‑click checkout scripts and modal injection ([61266ef](https://github.com/mathflow-bit/dockercart/commit/61266efb1cfa7fe2a98e9d3882d1115a7b5ca5f3))
+* quickfix migration ([af55fea](https://github.com/mathflow-bit/dockercart/commit/af55feab74712a46b767f685dbe841379a370bc5))
+
 ## [1.27.7](https://github.com/mathflow-bit/dockercart/compare/v1.27.6...v1.27.7) (2026-05-26)
 
 ### Bug Fixes
