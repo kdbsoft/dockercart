@@ -181,45 +181,48 @@ class ControllerMarketplaceInstall extends Controller {
 						$json['error'] = sprintf($this->language->get('error_allowed'), $destination);
 	
 						break;
+						}
 					}
-				}
 				
-				if (!$json) {
-					$this->load->model('setting/extension');
+					if (!$json) {
+						$this->load->model('setting/extension');
 	
-					foreach ($files as $file) {
-						$destination = str_replace('\\', '/', substr($file, strlen($directory . 'upload/')));
+						foreach ($files as $file) {
+							$destination = str_replace('\\', '/', substr($file, strlen($directory . 'upload/')));
 	
-						$path = '';
+							$path = '';
 	
-						if (substr($destination, 0, 5) == 'admin') {
-							$path = DIR_APPLICATION . substr($destination, 6);
-						}
+							if (substr($destination, 0, 5) == 'admin') {
+								$path = DIR_APPLICATION . substr($destination, 6);
+							}
 	
-						if (substr($destination, 0, 7) == 'catalog') {
-							$path = DIR_CATALOG . substr($destination, 8);
-						}
+							if (substr($destination, 0, 7) == 'catalog') {
+								$path = DIR_CATALOG . substr($destination, 8);
+							}
 	
-						if (substr($destination, 0, 5) == 'image') {
-							$path = DIR_IMAGE . substr($destination, 6);
-						}
+							if (substr($destination, 0, 5) == 'image') {
+								$path = DIR_IMAGE . substr($destination, 6);
+							}
 	
-						if (substr($destination, 0, 6) == 'system') {
-							$path = DIR_SYSTEM . substr($destination, 7);
-						}
+							if (substr($destination, 0, 6) == 'system') {
+								$path = DIR_SYSTEM . substr($destination, 7);
+							}
 	
-						if (is_dir($file) && !is_dir($path)) {
-							if (mkdir($path, 0777)) {
-								$this->model_setting_extension->addExtensionPath($extension_install_id, $destination);
+							if (is_dir($file) && !is_dir($path)) {
+								if (mkdir($path, 0777)) {
+									$this->model_setting_extension->addExtensionPath($extension_install_id, $destination);
+								}
+							}
+	
+							if (is_file($file)) {
+								if (rename($file, $path)) {
+									$this->model_setting_extension->addExtensionPath($extension_install_id, $destination);
+								}
 							}
 						}
-	
-						if (is_file($file)) {
-							if (rename($file, $path)) {
-								$this->model_setting_extension->addExtensionPath($extension_install_id, $destination);
-							}
-						}
-					}
+
+						$paths = $this->model_setting_extension->getExtensionPathsByExtensionInstallId($extension_install_id);
+						$this->syncGitExclude(array_column($paths, 'path'), 'add');
 				}
 			}
 		}
@@ -436,6 +439,8 @@ class ControllerMarketplaceInstall extends Controller {
 
 			rsort($results);
 
+			$this->syncGitExclude(array_column($results, 'path'), 'remove');
+
 			foreach ($results as $result) {
 				$source = '';
 
@@ -530,5 +535,90 @@ class ControllerMarketplaceInstall extends Controller {
 			}
 		}
 		return true;
+	}
+
+	private function getSourcePath(string $path): string {
+		if (substr($path, 0, 5) == 'admin') {
+			return DIR_APPLICATION . substr($path, 6);
+		}
+
+		if (substr($path, 0, 7) == 'catalog') {
+			return DIR_CATALOG . substr($path, 8);
+		}
+
+		if (substr($path, 0, 5) == 'image') {
+			return DIR_IMAGE . substr($path, 6);
+		}
+
+		if (substr($path, 0, 6) == 'system') {
+			return DIR_SYSTEM . substr($path, 7);
+		}
+
+		return '';
+	}
+
+	private function syncGitExclude(array $paths, string $action): void {
+		if (!defined('GIT_EXCLUDE_FILE') || !GIT_EXCLUDE_FILE || !is_file(GIT_EXCLUDE_FILE)) {
+			return;
+		}
+
+		$exclude_file = GIT_EXCLUDE_FILE;
+		$lines = file($exclude_file) ?: array();
+
+		$marker = '# --- DockerCart installer managed entries ---';
+
+		$patterns = array();
+		foreach ($paths as $path) {
+			$source = $this->getSourcePath($path);
+			$pattern = '/upload/' . $path;
+
+			if ($source && is_dir($source)) {
+				$pattern .= '/**';
+			}
+
+			$patterns[] = $pattern;
+		}
+
+		$preamble = array();
+		$managed = array();
+		$past_marker = false;
+
+		foreach ($lines as $line) {
+			$trimmed = rtrim($line, "\r\n");
+
+			if ($trimmed === $marker) {
+				$past_marker = true;
+
+				continue;
+			}
+
+			if ($past_marker) {
+				if ($trimmed !== '') {
+					$managed[] = $trimmed;
+				}
+			} else {
+				$preamble[] = $line;
+			}
+		}
+
+		if ($action === 'add') {
+			$managed = array_values(array_unique(array_merge($managed, $patterns)));
+		} else {
+			$managed = array_values(array_diff($managed, $patterns));
+		}
+
+		$content = rtrim(implode('', $preamble)) . "\n";
+
+		if (!empty($managed)) {
+			$content .= "\n" . $marker . "\n";
+
+			foreach ($managed as $entry) {
+				$content .= $entry . "\n";
+			}
+		} else {
+			$content .= "\n";
+		}
+
+		file_put_contents($exclude_file, $content);
 	}
 }
