@@ -133,6 +133,14 @@ class ControllerExtensionModuleBanner extends Controller {
 			$data['layout'] = 'grid';
 		}
 
+		if (isset($this->request->post['full_width'])) {
+			$data['full_width'] = $this->request->post['full_width'];
+		} elseif (!empty($module_info) && isset($module_info['full_width'])) {
+			$data['full_width'] = $module_info['full_width'];
+		} else {
+			$data['full_width'] = 0;
+		}
+
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');

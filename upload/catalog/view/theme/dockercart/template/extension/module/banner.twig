@@ -39,6 +39,11 @@
   .banner-layout--stack { {% if banner_width %} max-width: {{ banner_width }}px; margin-left: auto; margin-right: auto; {% endif %} }
   .banner-layout--stack .banner-slides { flex-direction: column; flex-wrap: nowrap; }
   .banner-layout--stack .banner-slide { max-width: none !important; width: 100%; }
+  /* Full-width mode: breakout of parent container, center content */
+  .banner-slider--full-width { width: 100vw; margin-left: calc(-50vw + 50%); border-radius: 0; }
+  .banner-slider--full-width .banner-slide { border-radius: 0; }
+  .banner-slider--full-width .banner-slide__overlay { justify-content: center; }
+  .banner-slider--full-width .banner-slide__content { max-width: 1280px; padding-right: 2rem; }
   /* Mobile: simple vertical stack of banners */
   @media (max-width: 767px) {
     /* keep a small page gutter so images don't touch the screen edges */
@@ -69,11 +74,16 @@
     .banner-dots { display: none !important; }
     /* Mobile: remove outer max-width constraint so banner fills the screen */
     .banner-layout--stack { max-width: none !important; margin-left: 0; margin-right: 0; }
+    /* Full-width reset on mobile: stay inside container like everything else */
+    .banner-slider--full-width { width: auto; margin-left: 0; border-radius: 24px; }
+    .banner-slider--full-width .banner-slide { border-radius: 24px; }
+    .banner-slider--full-width .banner-slide__overlay { justify-content: flex-start; }
+    .banner-slider--full-width .banner-slide__content { max-width: 100%; padding-right: 1rem; }
   }
 </style>
 
 {% set is_vertical = banner_height > banner_width %}
-<div class="banner-slider{% if is_vertical %} banner--vertical{% else %} banner--horizontal{% endif %} banner-layout--{{ banner_layout|default('grid') }}" id="banner-{{ module }}" data-autoplay="3500">
+<div class="banner-slider{% if is_vertical %} banner--vertical{% else %} banner--horizontal{% endif %} banner-layout--{{ banner_layout|default('grid') }}{% if full_width %} banner-slider--full-width{% endif %}" id="banner-{{ module }}" data-autoplay="3500">
   <div class="banner-slides{% if banner_layout == 'stack' %} banner-slides--stack{% endif %}">
     {% for banner in banners %}
     <div class="banner-slide{% if loop.first %} active{% endif %}" style="--stack-index: {{ loop.index }};">
