@@ -1,3 +1,9 @@
+## [1.27.5](https://github.com/mathflow-bit/dockercart/compare/v1.27.4...v1.27.5) (2026-05-26)
+
+### Bug Fixes
+
+* scope banner module CSS to instance ID to prevent global style ([758d53a](https://github.com/mathflow-bit/dockercart/commit/758d53abd8cb88e3871c7e32e94ae3c002487ea6))
+
 ## [1.27.4](https://github.com/mathflow-bit/dockercart/compare/v1.27.3...v1.27.4) (2026-05-26)
 
 ### Bug Fixes
