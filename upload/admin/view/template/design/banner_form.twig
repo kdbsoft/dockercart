@@ -23,6 +23,12 @@
     .banner-slide-card.collapsed .banner-slide-card__body { display: none; }
     .banner-slide-card__toggle { cursor: pointer; margin-right: 6px; transition: transform .2s; vertical-align: middle; font-size: 14px; }
     .banner-slide-card:not(.collapsed) .banner-slide-card__toggle { transform: rotate(90deg); }
+    .dc-video-thumb { position: relative; display: inline-flex; align-items: center; justify-content: center; min-width: 100px; min-height: 90px; }
+    .dc-video-thumb__overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #1f2937; border-radius: 5px; gap: 4px; color: #9ca3af; padding: 8px; }
+    .dc-video-thumb__icon { width: 28px; height: 28px; stroke: #6b7280; flex-shrink: 0; }
+    .dc-video-thumb__name { font-size: 10px; color: #9ca3af; word-break: break-all; text-align: center; line-height: 1.2; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+    .dc-youtube-block { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
+    .dc-youtube-thumb img { display: block; border: 1px solid #e5e7eb; border-radius: 4px; max-height: 60px; width: auto; }
   </style>
 
   <div class="page-header">
@@ -240,15 +246,26 @@
 
                       <div class="form-group dc-video-field" data-type="youtube"{% if banner_image.video_type != 'youtube' %} style="display:none;"{% endif %}>
                         <label>{{ entry_video }}</label>
-                        <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][video]" value="{{ banner_image.video }}" placeholder="dQw4w9WgXcQ" class="form-control" style="max-width:400px;" />
+                        <div class="dc-youtube-block">
+                          <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][video]" value="{{ banner_image.video }}" placeholder="dQw4w9WgXcQ" class="form-control dc-youtube-input" style="max-width:400px;" />
+                          {% if banner_image.video_type == 'youtube' and banner_image.video %}
+                          <div class="dc-youtube-thumb">
+                            <img src="https://img.youtube.com/vi/{{ banner_image.video }}/hqdefault.jpg" />
+                          </div>
+                          {% endif %}
+                        </div>
                         <div class="accent-hint">{{ help_video_youtube }}</div>
                       </div>
 
                       <div class="form-group dc-video-field" data-type="mp4"{% if banner_image.video_type != 'mp4' %} style="display:none;"{% endif %}>
                         <label>{{ entry_video_mp4 }}</label>
                         <div class="slide-video-block">
-                          <a href="" id="thumb-video{{ image_row }}" data-toggle="image" data-type="video" class="img-thumbnail">
-                            <img src="{{ banner_image.video_thumb }}" alt="" title="" data-placeholder="{{ video_placeholder }}" style="max-height:90px;" />
+                          <a href="" id="thumb-video{{ image_row }}" data-toggle="image" data-type="video" class="img-thumbnail dc-video-thumb">
+                            <img src="{{ video_placeholder }}" alt="" title="" data-placeholder="{{ video_placeholder }}" class="dc-video-thumb__img" style="max-height:90px;{{ banner_image.video_type == 'mp4' and banner_image.video ? 'display:none;' : '' }}" />
+                            <div class="dc-video-thumb__overlay" style="{{ banner_image.video_type == 'mp4' and banner_image.video ? '' : 'display:none;' }}">
+                              <i data-lucide="film" class="dc-video-thumb__icon"></i>
+                              <span class="dc-video-thumb__name">{{ banner_image.video }}</span>
+                            </div>
                           </a>
                           <input type="hidden" name="banner_image[{{ language.language_id }}][{{ image_row }}][video]" value="{{ banner_image.video }}" id="input-video{{ image_row }}" />
                           <small>MP4</small>
@@ -433,15 +450,22 @@ function addSlide(language_id) {
 
   html += '<div class="form-group dc-video-field" data-type="youtube" style="display:none;">';
   html += '<label>{{ entry_video }}</label>';
-  html += '<input type="text" name="' + pfx + '[video]" value="" placeholder="dQw4w9WgXcQ" class="form-control" style="max-width:400px;" />';
+  html += '<div class="dc-youtube-block">';
+  html += '<input type="text" name="' + pfx + '[video]" value="" placeholder="dQw4w9WgXcQ" class="form-control dc-youtube-input" style="max-width:400px;" />';
+  html += '<div class="dc-youtube-thumb" style="display:none;"><img src="" style="max-height:60px;width:auto;border-radius:4px;margin-top:8px;" /></div>';
+  html += '</div>';
   html += '<div class="accent-hint">{{ help_video_youtube }}</div>';
   html += '</div>';
 
   html += '<div class="form-group dc-video-field" data-type="mp4" style="display:none;">';
   html += '<label>{{ entry_video_mp4 }}</label>';
   html += '<div class="slide-video-block">';
-  html += '<a href="" id="thumb-video' + row + '" data-toggle="image" data-type="video" class="img-thumbnail">';
-  html += '<img src="' + placeholder + '" alt="" title="" data-placeholder="' + placeholder + '" style="max-height:90px;" />';
+  html += '<a href="" id="thumb-video' + row + '" data-toggle="image" data-type="video" class="img-thumbnail dc-video-thumb">';
+  html += '<img src="' + placeholder + '" alt="" title="" data-placeholder="' + placeholder + '" class="dc-video-thumb__img" style="max-height:90px;" />';
+  html += '<div class="dc-video-thumb__overlay" style="display:none;">';
+  html += '  <i data-lucide="film" class="dc-video-thumb__icon"></i>';
+  html += '  <span class="dc-video-thumb__name"></span>';
+  html += '</div>';
   html += '</a>';
   html += '<input type="hidden" name="' + pfx + '[video]" value="" id="input-video' + row + '" />';
   html += '<small>MP4</small>';
@@ -456,6 +480,9 @@ function addSlide(language_id) {
   $('#slide-list-' + language_id).append($card);
   initColorInputs($card);
   initVideoFields($card);
+  if (window.lucide && typeof window.lucide.createIcons === 'function') {
+    window.lucide.createIcons();
+  }
 
   image_row++;
 }
@@ -478,6 +505,47 @@ function toggleVideoField($select) {
   });
 }
 
+function updateMp4Preview($block) {
+  var $a = $block.find('.dc-video-thumb');
+  if (!$a.length) return;
+  var $img = $a.find('.dc-video-thumb__img');
+  var $overlay = $a.find('.dc-video-thumb__overlay');
+  var $input = $block.find('input[type="hidden"]');
+  var $card = $block.closest('.banner-slide-card__body, .banner-slide-card');
+  var videoType = $card.find('.dc-video-type-select').val();
+  var videoVal = $input.val();
+
+  if (videoType === 'mp4' && videoVal) {
+    $img.hide();
+    $overlay.show();
+    $overlay.find('.dc-video-thumb__name').text(videoVal);
+  } else {
+    $img.show();
+    $overlay.hide();
+    $img.attr('src', $img.attr('data-placeholder'));
+  }
+}
+
+function updateYoutubePreview($input) {
+  var val = $input.val().trim();
+  var $thumb = $input.closest('.dc-youtube-block').find('.dc-youtube-thumb');
+  if (val) {
+    $thumb.find('img').attr('src', 'https://img.youtube.com/vi/' + encodeURIComponent(val) + '/hqdefault.jpg');
+    $thumb.show();
+  } else {
+    $thumb.hide();
+  }
+}
+
+function updateAllVideoPreviews() {
+  $('.slide-video-block').each(function() {
+    updateMp4Preview($(this));
+  });
+  $('.dc-youtube-input').each(function() {
+    updateYoutubePreview($(this));
+  });
+}
+
 $(document).ready(function() {
   initColorisPicker();
 
@@ -487,6 +555,27 @@ $(document).ready(function() {
 
   $(document).on('change', '.dc-video-type-select', function() {
     toggleVideoField($(this));
+    var $card = $(this).closest('.banner-slide-card__body, .banner-slide-card');
+    $card.find('.slide-video-block').each(function() {
+      updateMp4Preview($(this));
+    });
+    $card.find('.dc-youtube-input').each(function() {
+      updateYoutubePreview($(this));
+    });
+  });
+
+  $(document).on('input', '.dc-youtube-input', function() {
+    updateYoutubePreview($(this));
+  });
+
+  $(document).on('hidden.bs.modal', '#modal-image', function() {
+    updateAllVideoPreviews();
+  });
+
+  $(document).on('click', '#button-clear', function() {
+    setTimeout(function() {
+      updateAllVideoPreviews();
+    }, 100);
   });
 
   $('.banner-slide-card').each(function() {

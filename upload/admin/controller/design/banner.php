@@ -357,13 +357,8 @@ class ControllerDesignBanner extends Controller {
 				$thumb_portrait = 'no_image.png';
 			}
 
-			// Process video file
 			$video = isset($banner_image['video']) ? $banner_image['video'] : '';
-			if (!empty($video) && is_file(DIR_IMAGE . $video)) {
-				$video_thumb = $video;
-			} else {
-				$video_thumb = 'no_image.png';
-			}
+			$video_thumb = 'no_image.png';
 
 			$data['banner_images'][$key][] = array(
 				'title'              => $banner_image['title'],
