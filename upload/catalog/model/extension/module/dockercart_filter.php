@@ -153,7 +153,7 @@ class ModelExtensionModuleDockercartFilter extends Model {
         $effective_price = $this->getEffectivePriceExpression('p');
 
         $sql = "SELECT
-                    COALESCE(MIN(" . $effective_price . "), 0) as min_price,
+                    COALESCE(MIN(NULLIF(" . $effective_price . ", 0)), 0) as min_price,
                     COALESCE(MAX(" . $effective_price . "), 0) as max_price
                 FROM " . DB_PREFIX . "product p";
 
@@ -650,6 +650,7 @@ class ModelExtensionModuleDockercartFilter extends Model {
             $options[$option_id]['values'][] = [
                 'option_value_id' => (int)$row['option_value_id'],
                 'name' => $row['value_name'],
+                'sort_order' => (int)$row['sort_order'],
                 'count' => (int)$row['product_count']
             ];
         }
