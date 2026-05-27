@@ -449,8 +449,6 @@ class ControllerExtensionModuleDockercartFilter extends Controller
             "CONTROLLER: Parsed filter_option = " . json_encode($filter_option),
         );
 
-        $cache_time = $cache_time ? (int) $cache_time : 3600;
-
         $filter_data = [
             "filter_category_id" => $category_id,
         ];
@@ -509,96 +507,24 @@ class ControllerExtensionModuleDockercartFilter extends Controller
             ? $this->session->data["currency"]
             : $base_currency;
 
-        $base_cache_key =
-            "dockercart_filter." .
-            $category_id .
-            "." .
-            (int) $this->config->get("config_language_id") .
-            "." .
-            (int) $this->config->get("config_store_id");
+        $this->logger->debug(
+            "CONTROLLER: Requesting price_range from model with currency=" .
+                $current_currency,
+        );
+        $data["price_range"] = $this->model_extension_module_dockercart_filter->getPriceRange(
+            $filter_data,
+        );
 
-        $has_active_filters =
-            !empty($filter_manufacturer) ||
-            !empty($filter_attribute) ||
-            !empty($filter_option) ||
-            $filter_price_min !== "" ||
-            $filter_price_max !== "";
-
-        if ($cache_time > 0 && !$has_active_filters) {
-            $this->logger->debug(
-                "CONTROLLER: Requesting price_range from model with currency=" .
-                    $current_currency,
-            );
-            $data[
-                "price_range"
-            ] = $this->model_extension_module_dockercart_filter->getPriceRange(
-                $filter_data,
-            );
-        } else {
-            $data[
-                "price_range"
-            ] = $this->model_extension_module_dockercart_filter->getPriceRange(
-                $filter_data,
-            );
-        }
-
-        $manufacturers_cache_key = $base_cache_key . ".manufacturers";
         $manufacturer_filter_data = $filter_data;
         unset($manufacturer_filter_data["filter_manufacturers"]);
 
-        if ($cache_time > 0 && !$has_active_filters) {
-            $cached_manufacturers = $this->cache->get($manufacturers_cache_key);
-            if (
-                $cached_manufacturers !== null &&
-                $cached_manufacturers !== false
-            ) {
-                $this->logger->debug("CONTROLLER: Using cached manufacturers");
-                $data["manufacturers"] = $cached_manufacturers;
-            } else {
-                $data[
-                    "manufacturers"
-                ] = $this->model_extension_module_dockercart_filter->getManufacturers(
-                    $manufacturer_filter_data,
-                );
-                $this->cache->set(
-                    $manufacturers_cache_key,
-                    $data["manufacturers"],
-                    $cache_time,
-                );
-            }
-        } else {
-            $data[
-                "manufacturers"
-            ] = $this->model_extension_module_dockercart_filter->getManufacturers(
-                $manufacturer_filter_data,
-            );
-        }
+        $data["manufacturers"] = $this->model_extension_module_dockercart_filter->getManufacturers(
+            $manufacturer_filter_data,
+        );
 
-        $attributes_cache_key = $base_cache_key . ".attributes";
-        if ($cache_time > 0 && !$has_active_filters) {
-            $cached_attributes = $this->cache->get($attributes_cache_key);
-            if ($cached_attributes !== null && $cached_attributes !== false) {
-                $this->logger->debug("CONTROLLER: Using cached attributes");
-                $data["attributes"] = $cached_attributes;
-            } else {
-                $data[
-                    "attributes"
-                ] = $this->model_extension_module_dockercart_filter->getAttributes(
-                    $filter_data,
-                );
-                $this->cache->set(
-                    $attributes_cache_key,
-                    $data["attributes"],
-                    $cache_time,
-                );
-            }
-        } else {
-            $data[
-                "attributes"
-            ] = $this->model_extension_module_dockercart_filter->getAttributes(
-                $filter_data,
-            );
-        }
+        $data["attributes"] = $this->model_extension_module_dockercart_filter->getAttributes(
+            $filter_data,
+        );
 
         $disabledAttributesRaw = $this->config->get(
             "module_dockercart_filter_disabled_attributes",
@@ -620,7 +546,6 @@ class ControllerExtensionModuleDockercartFilter extends Controller
             });
         }
 
-        $options_cache_key = $base_cache_key . ".options";
         $option_filter_data = $filter_data;
         if (!empty($filter_option)) {
             $option_filter_data["skip_filter_options"] = array_keys(
@@ -628,30 +553,9 @@ class ControllerExtensionModuleDockercartFilter extends Controller
             );
         }
 
-        if ($cache_time > 0 && !$has_active_filters) {
-            $cached_options = $this->cache->get($options_cache_key);
-            if ($cached_options !== null && $cached_options !== false) {
-                $this->logger->debug("CONTROLLER: Using cached options");
-                $data["options"] = $cached_options;
-            } else {
-                $data[
-                    "options"
-                ] = $this->model_extension_module_dockercart_filter->getOptions(
-                    $option_filter_data,
-                );
-                $this->cache->set(
-                    $options_cache_key,
-                    $data["options"],
-                    $cache_time,
-                );
-            }
-        } else {
-            $data[
-                "options"
-            ] = $this->model_extension_module_dockercart_filter->getOptions(
-                $option_filter_data,
-            );
-        }
+        $data["options"] = $this->model_extension_module_dockercart_filter->getOptions(
+            $option_filter_data,
+        );
 
         $disabledOptionsRaw = $this->config->get(
             "module_dockercart_filter_disabled_options",
