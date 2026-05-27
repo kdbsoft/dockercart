@@ -189,8 +189,8 @@
             <div class="space-y-2 divide-y divide-gray-50" data-cart-totals>
               {% for total in totals %}
               <div class="flex items-center justify-between py-2 {% if loop.last %}pt-3{% endif %}" data-total-row>
-                <span class="text-sm {% if loop.last %}font-bold text-gray-900 text-base{% else %}text-gray-500{% endif %}">{{ total.title }}</span>
-                <span class="text-sm {% if loop.last %}font-extrabold text-gray-900 text-base{% else %}font-semibold text-gray-800{% endif %}" data-total-value>{{ total.text }}</span>
+                <span class="text-sm {% if loop.last %}font-bold text-gray-900 text-lg{% else %}text-gray-500{% endif %}">{{ total.title }}</span>
+                <span class="text-sm {% if loop.last %}font-extrabold text-gray-900 text-lg{% else %}font-semibold text-gray-800{% endif %}" data-total-value>{{ total.text }}</span>
               </div>
               {% endfor %}
             </div>

@@ -103,7 +103,7 @@
     {% if products is not empty or vouchers is not empty or gifts is not empty %}
     <div id="cart-footer" class="p-5 border-t border-gray-100">
       {% for total in totals %}
-      <div class="flex justify-between items-center {% if not loop.last %}mb-2 text-sm text-gray-500{% else %}mb-4 text-base font-bold text-gray-900{% endif %}">
+      <div class="flex justify-between items-center {% if not loop.last %}mb-2 text-sm text-gray-500{% else %}mb-4 text-lg font-bold text-gray-900{% endif %}">
         <span>{{ total.title }}</span>
         <span>{{ total.text }}</span>
       </div>

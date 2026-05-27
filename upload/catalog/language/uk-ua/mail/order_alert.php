@@ -7,4 +7,4 @@ $_['text_order_status'] = 'Статус замовлення:';
 $_['text_product'] = 'Товари';
 $_['text_received'] = 'Ви отримали замовлення.';
 $_['text_subject'] = '%s – Замовлення %s';
-$_['text_total'] = 'Всього';
+$_['text_total'] = 'Сума';
