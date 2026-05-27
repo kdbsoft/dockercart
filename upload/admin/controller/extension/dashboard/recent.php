@@ -111,7 +111,7 @@ class ControllerExtensionDashboardRecent extends Controller {
 				'order_type_badge_text'  => $order_type_badge['text'],
 				'order_type_badge_class' => $order_type_badge['class'],
 				'status'     => $result['order_status'],
-				'date_added' => date($this->language->get('date_format_short'), strtotime($result['date_added'])),
+				'date_added' => date($this->language->get('datetime_format'), strtotime($result['date_added'])),
 				'total'      => $this->currency->format($result['total'], $result['currency_code'], $result['currency_value']),
 				'view'       => $this->url->link('sale/order/info', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $result['order_id'], true),
 			);
