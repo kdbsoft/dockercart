@@ -294,6 +294,7 @@ class ControllerProductCategory extends Controller {
 					'model'       => $result['model'],
 					'description' => utf8_substr(trim(strip_tags(html_entity_decode($result['description'], ENT_QUOTES, 'UTF-8'))), 0, $this->config->get('theme_' . $this->config->get('config_theme') . '_product_description_length')) . '..',
 					'price'       => $price,
+					'price_raw'   => (float)$result['price'],
 					'special'     => $special,
 					'tax'         => $tax,
 					'minimum'     => $result['minimum'] > 0 ? $result['minimum'] : 1,
@@ -303,6 +304,7 @@ class ControllerProductCategory extends Controller {
 					'is_in_stock' => ($stock_quantity > 0),
 					'in_wishlist' => in_array((int)$result['product_id'], $wishlist_ids) ? 1 : 0,
 					'has_gift'    => !empty($result['has_gift']),
+					'call_for_price' => !empty($result['call_for_price']),
 					'category'    => '',
 					'href'        => $this->url->link('product/product', 'path=' . $this->request->get['path'] . '&product_id=' . $result['product_id'] . $url)
 				);
@@ -506,12 +508,17 @@ class ControllerProductCategory extends Controller {
 			$data['text_products'] = $this->language->get('text_products');
 			$data['text_quick_view'] = $this->language->get('text_quick_view');
 			$data['text_gift_badge'] = $this->language->get('text_gift_badge');
+			$data['text_call_for_price'] = $this->language->get('text_call_for_price');
 			$data['text_category_description'] = $this->language->get('text_category_description');
 			$data['text_model'] = $this->language->get('text_model');
 			$data['text_quantity'] = $this->language->get('text_quantity');
 			$data['text_view_grid'] = $this->language->get('text_view_grid');
 			$data['text_view_list'] = $this->language->get('text_view_list');
 			$data['text_view_table'] = $this->language->get('text_view_table');
+
+			// Call for price
+			$data['call_for_price_status'] = (int)$this->config->get('dockercart_theme_call_for_price_status');
+			$data['call_for_price_phone'] = $this->config->get('config_telephone');
 
 			// Load-more AJAX
 			$lm_params = 'path=' . $this->request->get['path'] . '&sort=' . $sort . '&order=' . $order . '&limit=' . $limit;
@@ -890,6 +897,7 @@ class ControllerProductCategory extends Controller {
 				'model'       => $result['model'],
 				'description' => utf8_substr(trim(strip_tags(html_entity_decode($result['description'], ENT_QUOTES, 'UTF-8'))), 0, $this->config->get('theme_' . $this->config->get('config_theme') . '_product_description_length')) . '..',
 				'price'       => $price,
+				'price_raw'   => (float)$result['price'],
 				'special'     => $special,
 				'minimum'     => $result['minimum'] > 0 ? $result['minimum'] : 1,
 				'rating'      => (int)$result['rating'],
@@ -898,6 +906,7 @@ class ControllerProductCategory extends Controller {
 				'is_in_stock' => ($stock_quantity > 0),
 				'in_wishlist' => in_array((int)$result['product_id'], $wishlist_ids) ? 1 : 0,
 				'has_gift'    => !empty($result['has_gift']),
+				'call_for_price' => !empty($result['call_for_price']),
 				'category'    => '',
 				'href'        => $this->url->link('product/product', 'path=' . (isset($this->request->get['path']) ? $this->request->get['path'] : '') . '&product_id=' . $result['product_id'])
 			);
@@ -912,10 +921,13 @@ class ControllerProductCategory extends Controller {
 				'text_reviews'     => $this->language->get('text_reviews_word'),
 				'text_sale'        => '',
 				'text_gift_badge'  => $this->language->get('text_gift_badge'),
+				'text_call_for_price' => $this->language->get('text_call_for_price'),
 				'button_cart'      => $this->language->get('button_cart'),
 				'btn_quick_hover'  => 'hover:bg-blue-600',
 				'link_hover'       => 'hover:text-blue-600 transition',
 				'btn_cart_classes' => 'bg-blue-600 text-white hover:bg-blue-700',
+				'call_for_price_status' => (int)$this->config->get('dockercart_theme_call_for_price_status'),
+				'call_for_price_phone' => $this->config->get('config_telephone'),
 			));
 		}
 

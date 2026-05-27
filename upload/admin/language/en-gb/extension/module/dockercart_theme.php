@@ -12,6 +12,7 @@ $_['text_home']         = 'Home';
 
 // Entry labels
 $_['entry_status']      = 'Status';
+$_['entry_call_for_price_status'] = 'Show "Call for Price" button';
 $_['entry_logo_dark']   = 'Footer Logo (dark background)';
 $_['entry_logo_light']  = 'Header Logo (light background)';
 $_['entry_favicon_master'] = 'Favicon master image';
@@ -38,6 +39,7 @@ $_['help_logo_light']   = 'Upload a logo version optimised for light backgrounds
 $_['help_favicon_master'] = 'Single source image for all favicon sizes (16x16 to 128x128 + Apple touch icon).';
 $_['help_favicon_master_hint'] = 'Recommended upload: square 128x128 PNG. The theme will auto-generate favicon sizes and insert them into the site header.';
 $_['help_menu_type']    = 'Choose how categories are shown in the header: classic horizontal bar or vertical dropdown button.';
+$_['help_call_for_price_status'] = 'When enabled, products with zero price show a "Call us" button instead. Individual products can override this with the per-product setting in the Data tab.';
 $_['help_social_block']   = 'Configure up to 4 social links with selectable icons. Empty link = icon is not displayed in footer.';
 $_['entry_messenger_fab_status'] = 'Messenger on product page';
 $_['help_messenger_fab_status']  = 'Show messenger contact buttons on the product page, below the feature blocks. Enabled by default.';

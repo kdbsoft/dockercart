@@ -215,6 +215,10 @@ class ControllerProductManufacturer extends Controller {
 			$data['text_view_table'] = $this->language->get('text_view_table');
 			$data['text_quick_view'] = $this->language->get('text_quick_view');
 
+			// Call for price
+			$data['call_for_price_status'] = (int)$this->config->get('dockercart_theme_call_for_price_status');
+			$data['call_for_price_phone'] = $this->config->get('config_telephone');
+
 			$data['compare'] = $this->url->link('product/compare');
 
 			$data['products'] = array();
@@ -285,6 +289,7 @@ class ControllerProductManufacturer extends Controller {
 					'name'        => $result['name'],
 					'description' => utf8_substr(trim(strip_tags(html_entity_decode($result['description'], ENT_QUOTES, 'UTF-8'))), 0, $this->config->get('theme_' . $this->config->get('config_theme') . '_product_description_length')) . '..',
 					'price'       => $price,
+					'price_raw'   => (float)$result['price'],
 					'special'     => $special,
 					'tax'         => $tax,
 					'minimum'     => $result['minimum'] > 0 ? $result['minimum'] : 1,
@@ -293,6 +298,7 @@ class ControllerProductManufacturer extends Controller {
 					'stock'       => $stock,
 					'is_in_stock' => ($stock_quantity > 0),
 					'has_gift'    => !empty($result['has_gift']),
+					'call_for_price' => !empty($result['call_for_price']),
 					'href'        => $this->url->link('product/product', 'manufacturer_id=' . $result['manufacturer_id'] . '&product_id=' . $result['product_id'] . $url)
 				);
 			}
@@ -450,6 +456,7 @@ class ControllerProductManufacturer extends Controller {
 			$data['text_load_more']  = $this->language->get('text_load_more');
 			$data['page']            = $page;
 			$data['text_gift_badge'] = $this->language->get('text_gift_badge');
+			$data['text_call_for_price'] = $this->language->get('text_call_for_price');
 			$data['view_mode']       = $view_mode;
 
 				$this->response->setOutput($this->load->view('product/manufacturer_info', $data));
@@ -603,6 +610,7 @@ class ControllerProductManufacturer extends Controller {
 				'description' => utf8_substr(trim(strip_tags(html_entity_decode($result['description'], ENT_QUOTES, 'UTF-8'))), 0, $this->config->get('theme_' . $this->config->get('config_theme') . '_product_description_length')) . '..',
 				'category'    => '',
 				'price'       => $price,
+				'price_raw'   => (float)$result['price'],
 				'special'     => $special,
 				'minimum'     => $result['minimum'] > 0 ? $result['minimum'] : 1,
 				'rating'      => (int)$result['rating'],
@@ -624,10 +632,13 @@ class ControllerProductManufacturer extends Controller {
 				'text_reviews'     => $this->language->get('text_reviews_word'),
 				'text_sale'        => 'SALE',
 				'text_gift_badge'  => $this->language->get('text_gift_badge'),
+				'text_call_for_price' => $this->language->get('text_call_for_price'),
 				'button_cart'      => $this->language->get('button_cart'),
 				'btn_quick_hover'  => 'hover:bg-blue-600',
 				'link_hover'       => 'hover:text-blue-600 transition',
 				'btn_cart_classes' => 'bg-blue-600 text-white hover:bg-blue-700',
+				'call_for_price_status' => (int)$this->config->get('dockercart_theme_call_for_price_status'),
+				'call_for_price_phone' => $this->config->get('config_telephone'),
 			));
 		}
 

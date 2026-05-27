@@ -17,7 +17,7 @@
 #}
 {% if view_mode == 'table' %}
 
-<div class="product-card dc-table-row" data-id="{{ product.product_id }}" data-description="{{ product.description }}" data-model="{{ product.model|default('') }}" data-in-wishlist="{{ product.in_wishlist|default(0) }}" data-rating="{{ product.rating|default(0) }}" data-stock="{{ (product.stock is defined ? product.stock : '')|e('html_attr') }}" data-is-in-stock="{{ product.is_in_stock ? 1 : 0 }}" data-minimum="{{ product.minimum|default(1) }}">
+<div class="product-card dc-table-row" data-id="{{ product.product_id }}" data-description="{{ product.description }}" data-model="{{ product.model|default('') }}" data-in-wishlist="{{ product.in_wishlist|default(0) }}" data-rating="{{ product.rating|default(0) }}" data-stock="{{ (product.stock is defined ? product.stock : '')|e('html_attr') }}" data-is-in-stock="{{ product.is_in_stock ? 1 : 0 }}" data-minimum="{{ product.minimum|default(1) }}" data-call-for-price="{{ (product.call_for_price is defined and product.call_for_price) or (call_for_price_status is defined and call_for_price_status and call_for_price_phone is defined and call_for_price_phone and product.price_raw is defined and product.price_raw <= 0) ? 1 : 0 }}">
   <div class="w-[50px] h-[50px] rounded-lg overflow-hidden bg-gray-50 flex-shrink-0">
     <a href="{{ product.href }}">
       <img src="{{ product.thumb }}" alt="{{ product.name }}" class="w-full h-full object-cover" loading="lazy" />
@@ -35,7 +35,13 @@
     {% endif %}
   </div>
   <div class="flex items-baseline gap-1 whitespace-nowrap">
-    {% if product.special %}
+    {% set cfp = (product.call_for_price is defined and product.call_for_price) or ((call_for_price_status is defined and call_for_price_status) and call_for_price_phone is defined and call_for_price_phone and product.price_raw is defined and product.price_raw <= 0) %}
+    {% if cfp %}
+      <a href="tel:{{ call_for_price_phone }}" class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-600 text-white text-[11px] font-bold rounded-lg hover:bg-blue-700 transition">
+        <i data-lucide="phone" class="w-3 h-3"></i>
+        {{ text_call_for_price|default('Contact for price') }}
+      </a>
+    {% elseif product.special %}
       <span class="text-sm font-extrabold text-gray-900">{{ product.special }}</span>
       <span class="text-[11px] text-red-400 line-through">{{ product.price }}</span>
     {% elseif product.price %}
@@ -55,6 +61,7 @@
     {% endif %}
     <span>{{ product.stock is defined and product.stock ? product.stock : '' }}</span>
   </div>
+  {% if not cfp %}
   <div class="flex items-center gap-1">
     <input type="number" class="dc-qty-input w-12 text-[11px] text-center font-semibold border border-gray-200 rounded-lg py-1.5 px-1 focus:outline-none focus:border-blue-400" value="{{ product.minimum|default(1) }}" min="{{ product.minimum|default(1) }}" step="1" aria-label="{{ text_quantity|default('Qty:') }}" />
   </div>
@@ -63,11 +70,12 @@
       {{ button_cart }}
     </button>
   </div>
+  {% endif %}
 </div>
 
 {% elseif view_mode == 'list' %}
 
-<div class="product-card dc-list-card group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-row" data-id="{{ product.product_id }}" data-description="{{ product.description }}" data-model="{{ product.model|default('') }}" data-in-wishlist="{{ product.in_wishlist|default(0) }}" data-rating="{{ product.rating|default(0) }}" data-stock="{{ (product.stock is defined ? product.stock : '')|e('html_attr') }}" data-is-in-stock="{{ product.is_in_stock ? 1 : 0 }}" data-minimum="{{ product.minimum|default(1) }}">
+<div class="product-card dc-list-card group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-row" data-id="{{ product.product_id }}" data-description="{{ product.description }}" data-model="{{ product.model|default('') }}" data-in-wishlist="{{ product.in_wishlist|default(0) }}" data-rating="{{ product.rating|default(0) }}" data-stock="{{ (product.stock is defined ? product.stock : '')|e('html_attr') }}" data-is-in-stock="{{ product.is_in_stock ? 1 : 0 }}" data-minimum="{{ product.minimum|default(1) }}" data-call-for-price="{{ (product.call_for_price is defined and product.call_for_price) or (call_for_price_status is defined and call_for_price_status and call_for_price_phone is defined and call_for_price_phone and product.price_raw is defined and product.price_raw <= 0) ? 1 : 0 }}">
   <div class="relative w-40 sm:w-48 flex-shrink-0 bg-gray-50 overflow-hidden">
     <a href="{{ product.href }}" class="block w-full h-full">
       <img src="{{ product.thumb }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
@@ -106,15 +114,21 @@
     {% if product.description is defined and product.description %}
       <p class="text-xs sm:text-sm text-gray-500 leading-relaxed mb-3 line-clamp-2">{{ product.description }}</p>
     {% endif %}
-    <div class="mt-auto flex flex-wrap items-end justify-between gap-3">
-      <div class="flex items-baseline gap-1 flex-wrap">
-        {% if product.special %}
-          <span class="text-lg sm:text-xl font-extrabold text-gray-900">{{ product.special }}</span>
-          <span class="text-xs text-red-400 line-through">{{ product.price }}</span>
-        {% elseif product.price %}
-          <span class="text-lg sm:text-xl font-extrabold text-gray-900">{{ product.price }}</span>
-        {% endif %}
-      </div>
+      <div class="mt-auto flex flex-wrap items-end justify-between gap-3">
+        <div class="flex items-baseline gap-1 flex-wrap">
+          {% set cfp = (product.call_for_price is defined and product.call_for_price) or ((call_for_price_status is defined and call_for_price_status) and call_for_price_phone is defined and call_for_price_phone and product.price_raw is defined and product.price_raw <= 0) %}
+          {% if cfp %}
+            <a href="tel:{{ call_for_price_phone }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 transition shadow-sm">
+              <i data-lucide="phone" class="w-4 h-4"></i>
+              {{ text_call_for_price|default('Contact for price') }}
+            </a>
+          {% elseif product.special %}
+            <span class="text-lg sm:text-xl font-extrabold text-gray-900">{{ product.special }}</span>
+            <span class="text-xs text-red-400 line-through">{{ product.price }}</span>
+          {% elseif product.price %}
+            <span class="text-lg sm:text-xl font-extrabold text-gray-900">{{ product.price }}</span>
+          {% endif %}
+        </div>
       <div class="flex items-center gap-2">
         {% if product.stock is defined and product.stock %}
           <div class="text-[11px] font-medium {% if product.is_in_stock %}text-emerald-600{% else %}text-red-500{% endif %} flex items-center gap-1">
@@ -124,9 +138,11 @@
             <span>{{ product.stock }}</span>
           </div>
         {% endif %}
+        {% if not cfp %}
         <button class="text-[11px] sm:text-xs font-bold px-4 py-2 rounded-lg {{ btn_cart_classes|default('bg-blue-600 text-white hover:bg-blue-700') }} transition whitespace-nowrap" onclick="cart.add('{{ product.product_id }}', '{{ product.minimum|default(1) }}');">
           {{ button_cart }}
         </button>
+        {% endif %}
       </div>
     </div>
   </div>
@@ -135,7 +151,7 @@
 {% else %}
 
 {# --- grid view (default) --- #}
-<div class="product-card group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex flex-col" data-id="{{ product.product_id }}" data-description="{{ product.description }}" data-model="{{ product.model|default('') }}" data-in-wishlist="{{ product.in_wishlist|default(0) }}" data-rating="{{ product.rating|default(0) }}" data-stock="{{ (product.stock is defined ? product.stock : '')|e('html_attr') }}" data-is-in-stock="{{ product.is_in_stock ? 1 : 0 }}" data-minimum="{{ product.minimum|default(1) }}">
+<div class="product-card group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex flex-col" data-id="{{ product.product_id }}" data-description="{{ product.description }}" data-model="{{ product.model|default('') }}" data-in-wishlist="{{ product.in_wishlist|default(0) }}" data-rating="{{ product.rating|default(0) }}" data-stock="{{ (product.stock is defined ? product.stock : '')|e('html_attr') }}" data-is-in-stock="{{ product.is_in_stock ? 1 : 0 }}" data-minimum="{{ product.minimum|default(1) }}" data-call-for-price="{{ (product.call_for_price is defined and product.call_for_price) or (call_for_price_status is defined and call_for_price_status and call_for_price_phone is defined and call_for_price_phone and product.price_raw is defined and product.price_raw <= 0) ? 1 : 0 }}">
   <div class="relative overflow-hidden aspect-square bg-gray-50">
     <a href="{{ product.href }}">
       <img src="{{ product.thumb }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
@@ -181,16 +197,24 @@
     {% endif %}
     <div class="flex items-end justify-between gap-2">
       <div class="flex items-baseline gap-1 flex-wrap">
-        {% if product.special %}
+        {% set cfp = (product.call_for_price is defined and product.call_for_price) or ((call_for_price_status is defined and call_for_price_status) and call_for_price_phone is defined and call_for_price_phone and product.price_raw is defined and product.price_raw <= 0) %}
+        {% if cfp %}
+          <a href="tel:{{ call_for_price_phone }}" class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition shadow-sm">
+            <i data-lucide="phone" class="w-3.5 h-3.5"></i>
+            {{ text_call_for_price|default('Contact for price') }}
+          </a>
+        {% elseif product.special %}
           <span class="text-base sm:text-lg font-extrabold text-gray-900">{{ product.special }}</span>
           <span class="text-xs text-red-400 line-through ml-1">{{ product.price }}</span>
         {% elseif product.price %}
           <span class="text-base sm:text-lg font-extrabold text-gray-900">{{ product.price }}</span>
         {% endif %}
       </div>
+      {% if not cfp %}
       <button class="add-to-cart-btn flex-shrink-0 text-[10px] sm:text-xs font-bold px-3 py-1.5 rounded-lg {{ btn_cart_classes|default('bg-blue-600 text-white hover:bg-blue-700') }} transition" onclick="cart.add('{{ product.product_id }}', '{{ product.minimum|default(1) }}');">
         + {{ button_cart }}
       </button>
+      {% endif %}
     </div>
   </div>
 </div>

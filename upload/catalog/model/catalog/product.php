@@ -126,7 +126,8 @@ class ModelCatalogProduct extends Model {
 				'date_added'       => $query->row['date_added'],
 				'date_modified'    => $query->row['date_modified'],
 				'viewed'           => $query->row['viewed'],
-				'has_gift'         => !empty($query->row['has_gift'])
+				'has_gift'         => !empty($query->row['has_gift']),
+				'call_for_price'   => !empty($query->row['call_for_price'])
 			);
 		} else {
 			$product_data = false;

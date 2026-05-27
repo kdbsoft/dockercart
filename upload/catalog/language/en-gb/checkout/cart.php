@@ -40,6 +40,7 @@ $_['error_quantity_step']      = 'Quantity for %s must be at least %s and divisi
 $_['error_required']           = '%s required!';
 $_['error_product']            = 'Warning: There are no products in your cart!';
 $_['error_recurring_required'] = 'Please select a payment recurring!';
+$_['error_call_for_price']     = 'This product cannot be added to the cart. Please contact us for pricing.';
 $_['error_bundle_invalid']     = 'Warning: This bundle is not available!';
 
 $_['text_bundle_discount']     = 'Bundle Discount';

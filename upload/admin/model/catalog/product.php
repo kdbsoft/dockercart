@@ -40,6 +40,8 @@ class ModelCatalogProduct extends Model
                 (int) $data["shipping"] .
                 "', price = '" .
                 (float) $data["price"] .
+                "', call_for_price = '" .
+                (int) ($data["call_for_price"] ?? 0) .
                 "', points = '" .
                 (int) $data["points"] .
                 "', weight = '" .
@@ -617,6 +619,8 @@ class ModelCatalogProduct extends Model
                 (int) $data["shipping"] .
                 "', price = '" .
                 (float) $data["price"] .
+                "', call_for_price = '" .
+                (int) ($data["call_for_price"] ?? 0) .
                 "', points = '" .
                 (int) $data["points"] .
                 "', weight = '" .

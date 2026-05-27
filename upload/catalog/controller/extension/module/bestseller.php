@@ -99,6 +99,7 @@ class ControllerExtensionModuleBestSeller extends Controller {
 					'category'    => $category_name,
 					'description' => utf8_substr(trim(strip_tags(html_entity_decode($product_info['description'], ENT_QUOTES, 'UTF-8'))), 0, $this->config->get('theme_' . $this->config->get('config_theme') . '_product_description_length')) . '..',
 					'price'       => $price,
+					'price_raw'   => (float)$product_info['price'],
 					'special'     => $special,
 					'discount'    => $discount_percent,
 					'tax'         => $tax,
@@ -124,6 +125,12 @@ class ControllerExtensionModuleBestSeller extends Controller {
 			$data['text_reviews'] = $this->language->get('text_reviews');
 			$this->load->language('product/product');
 			$data['text_gift_badge'] = $this->language->get('text_gift_badge');
+			$data['text_call_for_price'] = $this->language->get('text_call_for_price');
+
+			// Call for price
+			$data['call_for_price_status'] = (int)$this->config->get('dockercart_theme_call_for_price_status');
+			$data['call_for_price_phone'] = $this->config->get('config_telephone');
+
 			return $this->load->view('extension/module/bestseller', $data);
 		}
 	}

@@ -99,6 +99,9 @@
   window.dcLang.quickview_features = {{ quickview_features_json ? quickview_features_json|raw : '[]' }};
   window.dcLang.button_cart = {{ button_cart ? '"' ~ button_cart|e('js') ~ '"' : '"Add to Cart"' }};
   window.dcLang.text_you_save = {{ text_you_save ? '"' ~ text_you_save|e('js') ~ '"' : '"You Save"' }};
+  window.dcLang.text_call_for_price = {{ text_call_for_price ? '"' ~ text_call_for_price|e('js') ~ '"' : '"Contact for price"' }};
+  window.dcLang.call_for_price_phone = {{ call_for_price_phone ? '"' ~ call_for_price_phone|e('js') ~ '"' : '""' }};
+  window.dcLang.call_for_price_status = {{ call_for_price_status is defined ? call_for_price_status|json_encode|raw : 0 }};
   window.dcLang.text_home = {{ text_home ? '"' ~ text_home|e('js') ~ '"' : '' }};
   window.dcCompareIds = {{ compare_product_ids is defined ? compare_product_ids|json_encode|raw : '[]' }};
 </script>
