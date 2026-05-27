@@ -186,6 +186,26 @@
         if (badgeEl) badgeEl.style.display = 'none';
       }
 
+      // Set "You Save" monetary savings
+      const savingsEl = document.getElementById('qv-savings');
+      if (savingsEl) {
+        if (oldPrice && price) {
+          var oldPriceNum = this._parsePriceValue(oldPrice);
+          var priceNum = this._parsePriceValue(price);
+          var saved = oldPriceNum - priceNum;
+          if (saved > 0) {
+            var symbol = (oldPrice || '').replace(/[\d.,\s]/g, '') || '';
+            var youSaveText = (window.dcLang && window.dcLang.text_you_save) ? window.dcLang.text_you_save : 'You Save';
+            savingsEl.textContent = youSaveText + ': ' + symbol + '' + saved.toFixed(2);
+            savingsEl.style.display = '';
+          } else {
+            savingsEl.style.display = 'none';
+          }
+        } else {
+          savingsEl.style.display = 'none';
+        }
+      }
+
       // Wire add to cart button
       const addBtn = document.getElementById('qv-add-btn');
       if (addBtn) {
@@ -284,6 +304,7 @@
         <span id="qv-old-price" class="text-base text-red-400 line-through" style="display:none;"></span>
         <span id="qv-badge" class="text-xs font-bold bg-red-500 text-white px-2 py-0.5 rounded-lg" style="display:none;"></span>
       </div>
+      <div id="qv-savings" class="text-sm font-semibold text-green-600 mt-1" style="display:none;"></div>
 
       <!-- Stock status -->
       <div id="qv-stock-wrap" class="hidden flex items-center gap-1.5 text-sm font-semibold">
@@ -383,6 +404,22 @@
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
+    },
+
+    /**
+     * Parse numeric value from formatted price string
+     * Handles both $1,234.56 and 1.234,56 formats
+     * @private
+     */
+    _parsePriceValue: function(str) {
+      if (!str) return 0;
+      var cleaned = str.replace(/[^0-9.,]/g, '');
+      if (cleaned.indexOf(',') > -1 && cleaned.indexOf('.') > -1) {
+        cleaned = cleaned.replace(/,/g, '');
+      } else if (cleaned.indexOf(',') > -1) {
+        cleaned = cleaned.replace(',', '.');
+      }
+      return parseFloat(cleaned) || 0;
     }
   };
 

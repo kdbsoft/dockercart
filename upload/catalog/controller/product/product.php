@@ -382,10 +382,20 @@ class ControllerProductProduct extends Controller {
 				$data['price'] = false;
 			}
 
+			$data['you_save_amount'] = false;
+
 			if (!is_null($product_info['special']) && (float)$product_info['special'] >= 0) {
 				$data['special'] = $this->currency->format($this->tax->calculate($product_info['special'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
 				$tax_price = (float)$product_info['special'];
 				$data['dc_base_price_value'] = (float)$this->currency->format($this->tax->calculate($product_info['special'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency'], '', false);
+
+				if ($data['price'] !== false && (float)$product_info['special'] < (float)$product_info['price']) {
+					$data['you_save_amount'] = $this->currency->format(
+						$this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')) -
+						$this->tax->calculate($product_info['special'], $product_info['tax_class_id'], $this->config->get('config_tax')),
+						$this->session->data['currency']
+					);
+				}
 			} else {
 				$data['special'] = false;
 				$tax_price = (float)$product_info['price'];
@@ -742,6 +752,7 @@ class ControllerProductProduct extends Controller {
 						'total'                     => $bundle_total,
 						'original_total_formatted'  => $this->currency->format($original_total, $this->session->data['currency']),
 						'total_formatted'           => $this->currency->format($bundle_total, $this->session->data['currency']),
+						'you_save_formatted'        => $this->currency->format(max(0, $original_total - $bundle_total), $this->session->data['currency']),
 						'discount_type'             => $bundle['discount_type'],
 						'discount_value'            => $discount_value,
 						'discount_text'             => $discount_text,

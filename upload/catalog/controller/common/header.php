@@ -154,6 +154,7 @@ class ControllerCommonHeader extends Controller {
 		$data['text_qv_feature_delivery'] = $this->language->get('text_qv_feature_delivery');
 		$data['text_qv_feature_warranty'] = $this->language->get('text_qv_feature_warranty');
 		$data['text_qv_feature_returns'] = $this->language->get('text_qv_feature_returns');
+		$data['text_you_save'] = $this->language->get('text_you_save');
 
 		$quickview_feature_defaults = array(
 			array(
