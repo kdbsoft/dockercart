@@ -138,11 +138,17 @@ class ControllerProductNewArrivals extends Controller {
 				);
 				$tax_price = (float)$result['special'];
 			} else {
-				$special = false;
-				$tax_price = (float)$result['price'];
-			}
+					$special = false;
+					$tax_price = (float)$result['price'];
+				}
 
-			if ($this->config->get('config_tax')) {
+				$discount_percent = 0;
+				if (!is_null($result['special']) && (float)$result['price'] > 0) {
+					$discount_percent = (int) round((1 - ((float)$result['special'] / (float)$result['price'])) * 100);
+					if ($discount_percent < 0) { $discount_percent = 0; }
+				}
+
+				if ($this->config->get('config_tax')) {
 				$tax = $this->currency->format($tax_price, $this->session->data['currency']);
 			} else {
 				$tax = false;
@@ -206,6 +212,7 @@ class ControllerProductNewArrivals extends Controller {
 				'description'        => utf8_substr(trim(strip_tags(html_entity_decode($result['description'], ENT_QUOTES, 'UTF-8'))), 0, $this->config->get('theme_' . $this->config->get('config_theme') . '_product_description_length')) . '..',
 				'price'              => $price,
 				'special'            => $special,
+				'discount'           => $discount_percent,
 				'tax'                => $tax,
 				'minimum'            => $result['minimum'] > 0 ? $result['minimum'] : 1,
 				'rating'             => $rating,
@@ -456,6 +463,12 @@ class ControllerProductNewArrivals extends Controller {
 				$special = false;
 			}
 
+			$discount_percent = 0;
+			if (!is_null($result['special']) && (float)$result['price'] > 0) {
+				$discount_percent = (int) round((1 - ((float)$result['special'] / (float)$result['price'])) * 100);
+				if ($discount_percent < 0) { $discount_percent = 0; }
+			}
+
 			$stock_quantity = (int)($result['quantity'] ?? 0);
 
 			if ($stock_quantity <= 0) {
@@ -507,6 +520,7 @@ class ControllerProductNewArrivals extends Controller {
 				'category'                => $category_name,
 				'price'                   => $price,
 				'special'                 => $special,
+				'discount'                => $discount_percent,
 				'minimum'                 => $result['minimum'] > 0 ? $result['minimum'] : 1,
 				'rating'                  => (int)$result['rating'],
 				'reviews'                 => isset($result['reviews']) ? (int)$result['reviews'] : 0,
