@@ -207,6 +207,8 @@ class ControllerProductSearch extends Controller {
 			$product_total = $this->model_catalog_product->getTotalProducts($filter_data);
 			$data['product_total'] = $product_total;
 
+			$this->load->helper('plural');
+
 			// Build wishlist IDs set for in_wishlist flag
 			$wishlist_ids = array();
 			if ($this->customer->isLogged()) {
@@ -226,6 +228,8 @@ class ControllerProductSearch extends Controller {
 				$product_total = (int)$manticore_total;
 				$data['product_total'] = $product_total;
 			}
+
+			$data['text_products'] = product_count_label($data['product_total'], $this->language->get('code'));
 
 			foreach ($results as $result) {
 				if ($result['image']) {

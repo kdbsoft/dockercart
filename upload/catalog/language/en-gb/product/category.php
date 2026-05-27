@@ -27,8 +27,7 @@ $_['text_reviews_word']   = 'reviews';
 // Additional localization for category page UI
 $_['text_subcategories'] = '%s';
 $_['text_shop_all'] = 'Shop all %s →';
-$_['text_models'] = '%s models';
-$_['text_products'] = '%s products';
+$_['text_products'] = 'products';
 $_['text_quick_view'] = 'Quick View';
 $_['text_category_description'] = 'Category description';
 $_['text_catalog_depth'] = 'Catalog depth';

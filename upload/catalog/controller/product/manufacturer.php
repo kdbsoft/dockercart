@@ -234,6 +234,10 @@ class ControllerProductManufacturer extends Controller {
 			$product_total = $this->model_catalog_product->getTotalProducts($filter_data);
 			$data['product_total'] = $product_total;
 
+			$this->load->helper('plural');
+			$lang_code = $this->language->get('code');
+			$data['text_product_count'] = product_count_label($product_total, $lang_code);
+
 			$results = $this->model_catalog_product->getProducts($filter_data);
 
 			foreach ($results as $result) {

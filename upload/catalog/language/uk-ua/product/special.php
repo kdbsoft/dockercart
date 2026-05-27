@@ -38,6 +38,6 @@ $_['text_oldest_first'] = 'Старіші першими';
 $_['text_quick_view'] = 'Швидкий перегляд';
 $_['text_sale'] = 'РОЗПРОДАЖ';
 $_['text_special_tagline'] = 'Ексклюзивні пропозиції — не пропустіть.';
-$_['text_products']  = '%s товарів';
+$_['text_products']  = 'товарів';
 $_['text_load_more'] = 'Показати ще';
 $_['text_gift_badge'] = 'ПОДАРУНОК';

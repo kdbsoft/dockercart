@@ -8,4 +8,3 @@ $_['text_items'] = 'товари';
 $_['text_show'] = 'Дерево категорій';
 
 // Count label (used on image tiles)
-$_['text_items_count'] = '%s товарів';
