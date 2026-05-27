@@ -1176,17 +1176,38 @@ class ControllerExtensionModuleDockercartFilter extends Controller
             $customer_group_discount = (float)$this->config->get('config_customer_group_discount');
             $customer_group_markup = (float)$this->config->get('config_customer_group_markup');
 
+            // Load currency conversion map for multicurrency support
+            $currency_map = [];
+            $currency_query = $this->db->query("SELECT currency_id, value FROM " . DB_PREFIX . "currency");
+            foreach ($currency_query->rows as $row) {
+                $currency_map[(int)$row['currency_id']] = (float)$row['value'];
+            }
+            $default_currency = $this->config->get('config_currency');
+            $default_currency_query = $this->db->query("SELECT value FROM " . DB_PREFIX . "currency WHERE code = '" . $this->db->escape($default_currency) . "'");
+            $default_currency_value = $default_currency_query->num_rows ? (float)$default_currency_query->row['value'] : 1.0;
+
             $products = [];
             foreach ($results as $result) {
-                $effective_price = (float)$result["price"];
-                $has_customer_group_price = isset($result["customer_group_price"]) && $result["customer_group_price"] !== null && $result["customer_group_price"] !== '' && (float)$result["customer_group_price"] > 0;
-
-                if ($has_customer_group_price) {
-                    $effective_price = (float)$result["customer_group_price"];
+                // Convert prices from product currency to base currency
+                $conversion_rate = 1.0;
+                if (!empty($result['currency_id']) && isset($currency_map[(int)$result['currency_id']])) {
+                    $product_currency_value = $currency_map[(int)$result['currency_id']];
+                    if ($product_currency_value > 0) {
+                        $conversion_rate = $default_currency_value / $product_currency_value;
+                    }
                 }
 
-                if (isset($result["discount"]) && $result["discount"] !== null && $result["discount"] !== '' && (float)$result["discount"] < $effective_price) {
-                    $effective_price = (float)$result["discount"];
+                $converted_price = (float)$result["price"] * $conversion_rate;
+                $converted_cg_price = (float)$result["customer_group_price"] * $conversion_rate;
+                $converted_discount = (float)$result["discount"] * $conversion_rate;
+                $converted_special = (float)$result["special"] * $conversion_rate;
+
+                $has_customer_group_price = isset($result["customer_group_price"]) && $result["customer_group_price"] !== null && $result["customer_group_price"] !== '' && $converted_cg_price > 0;
+
+                $effective_price = $has_customer_group_price ? $converted_cg_price : $converted_price;
+
+                if (isset($result["discount"]) && $result["discount"] !== null && $result["discount"] !== '' && $converted_discount < $effective_price) {
+                    $effective_price = $converted_discount;
                 }
 
                 if (!$has_customer_group_price) {
@@ -1199,7 +1220,7 @@ class ControllerExtensionModuleDockercartFilter extends Controller
 
                 $special_price = null;
                 if (isset($result["special"]) && $result["special"] !== null && $result["special"] !== '' && (float)$result["special"] > 0) {
-                    $special_price = (float)$result["special"];
+                    $special_price = $converted_special;
                     if (!$has_customer_group_price) {
                         if ($customer_group_discount > 0) {
                             $special_price *= (100 - $customer_group_discount) / 100;

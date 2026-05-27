@@ -106,12 +106,20 @@ class ModelExtensionModuleDockercartFilter extends Model {
 
         $effective_after_pct = "(CASE WHEN " . $has_cg_price . " THEN " . $effective_before_pct . " ELSE " . $effective_before_pct . " * " . $pct_mult . " END)";
 
-        return "LEAST(" . $effective_after_pct . ", COALESCE(" . $special_sub . ", 999999999))";
+        $expression = "LEAST(" . $effective_after_pct . ", COALESCE(" . $special_sub . ", 999999999))";
+
+        $currency_factor = $this->getMulticurrencyConversionFactor($alias);
+
+        return "(" . $expression . " * " . $currency_factor . ")";
     }
 
     private function getCacheTime() {
         $cache_time = $this->config->get('module_dockercart_filter_cache_time');
         return !empty($cache_time) ? (int)$cache_time : 3600;
+    }
+
+    private function getMulticurrencyConversionFactor($alias = 'p') {
+        return "COALESCE(1.0 / NULLIF((SELECT c.value FROM " . DB_PREFIX . "currency c WHERE c.currency_id = " . $alias . ".currency_id), 0), 1.0)";
     }
 
     public function getPriceRange($data = array()) {
@@ -683,6 +691,7 @@ class ModelExtensionModuleDockercartFilter extends Model {
                     p.image,
                     p.price,
                     p.tax_class_id,
+                    p.currency_id,
                     (SELECT price FROM " . DB_PREFIX . "product_special ps
                      WHERE ps.product_id = p.product_id
                      AND ps.customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "'
