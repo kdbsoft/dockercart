@@ -247,11 +247,17 @@ class ControllerProductSearch extends Controller {
 				if (!is_null($result['special']) && (float)$result['special'] >= 0) {
 					$special = $this->currency->format($this->tax->calculate($result['special'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
 					$tax_price = (float)$result['special'];
-				} else {
+			} else {
 					$special = false;
 					$tax_price = (float)$result['price'];
 				}
-	
+
+				$discount_percent = 0;
+				if (!is_null($result['special']) && (float)$result['price'] > 0) {
+					$discount_percent = (int) round((1 - ((float)$result['special'] / (float)$result['price'])) * 100);
+					if ($discount_percent < 0) { $discount_percent = 0; }
+				}
+
 				if ($this->config->get('config_tax')) {
 					$tax = $this->currency->format($tax_price, $this->session->data['currency']);
 				} else {
@@ -287,6 +293,7 @@ class ControllerProductSearch extends Controller {
 					'price'       => $price,
 					'price_raw'   => (float)$result['price'],
 					'special'     => $special,
+					'discount'    => $discount_percent,
 					'tax'         => $tax,
 					'minimum'     => $result['minimum'] > 0 ? $result['minimum'] : 1,
 					'rating'      => $result['rating'],
@@ -642,6 +649,12 @@ class ControllerProductSearch extends Controller {
 				$special = false;
 			}
 
+			$discount_percent = 0;
+			if (!is_null($result['special']) && (float)$result['price'] > 0) {
+				$discount_percent = (int) round((1 - ((float)$result['special'] / (float)$result['price'])) * 100);
+				if ($discount_percent < 0) { $discount_percent = 0; }
+			}
+
 			$stock_quantity = (int)($result['quantity'] ?? 0);
 
 			if ($stock_quantity <= 0) {
@@ -665,6 +678,7 @@ class ControllerProductSearch extends Controller {
 				'price'       => $price,
 				'price_raw'   => (float)$result['price'],
 				'special'     => $special,
+				'discount'    => $discount_percent,
 				'minimum'     => $result['minimum'] > 0 ? $result['minimum'] : 1,
 				'rating'      => (int)$result['rating'],
 				'reviews'     => isset($result['reviews']) ? (int)$result['reviews'] : 0,
