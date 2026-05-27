@@ -102,6 +102,11 @@
                 {% if tax %}<span class="text-xs text-gray-400">{{ text_tax }} {{ tax }}</span>{% endif %}
               </div>
         </div>
+        {% if you_save_amount %}
+        <div class="mt-1.5">
+          <span class="text-sm font-semibold text-green-600">{{ text_you_save }}: {{ you_save_amount }}</span>
+        </div>
+        {% endif %}
         {% endif %}
       </div>
         {% if points %}<p class="text-xs text-blue-600 mt-1">{{ text_points }} {{ points }}</p>{% endif %}
