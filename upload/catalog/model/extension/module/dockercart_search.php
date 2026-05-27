@@ -62,17 +62,9 @@ class ModelExtensionModuleDockercartSearch extends Model {
         if (!empty($options['category_id'])) {
             $filters['category_id'] = (int)$options['category_id'];
             
-            // Handle sub-categories
+            // Handle sub-categories (recursively — any depth)
             if (!empty($options['sub_category'])) {
-                $this->load->model('catalog/category');
-                $categories = $this->model_catalog_category->getCategories($options['category_id']);
-                
-                $category_ids = [(int)$options['category_id']];
-                foreach ($categories as $category) {
-                    $category_ids[] = (int)$category['category_id'];
-                }
-                
-                $filters['category_id'] = $category_ids;
+                $filters['category_id'] = $this->getAllDescendantCategoryIds((int)$options['category_id']);
             }
         }
         
@@ -176,13 +168,7 @@ class ModelExtensionModuleDockercartSearch extends Model {
         // Apply category filter when searching within a specific category
         if (!empty($options['category_id'])) {
             if (!empty($options['sub_category'])) {
-                $this->load->model('catalog/category');
-                $sub_cats     = $this->model_catalog_category->getCategories((int)$options['category_id']);
-                $category_ids = [(int)$options['category_id']];
-                foreach ($sub_cats as $sub) {
-                    $category_ids[] = (int)$sub['category_id'];
-                }
-                $filters['category_id'] = $category_ids;
+                $filters['category_id'] = $this->getAllDescendantCategoryIds((int)$options['category_id']);
             } else {
                 $filters['category_id'] = (int)$options['category_id'];
             }
@@ -271,6 +257,22 @@ class ModelExtensionModuleDockercartSearch extends Model {
         }
         
         return $categories;
+    }
+
+    /**
+     * Recursively collect all descendant category IDs (any depth).
+     *
+     * @param int $category_id
+     * @return int[]
+     */
+    private function getAllDescendantCategoryIds(int $category_id): array {
+        $this->load->model('catalog/category');
+        $ids = [$category_id];
+        $children = $this->model_catalog_category->getCategories($category_id);
+        foreach ($children as $child) {
+            $ids = array_merge($ids, $this->getAllDescendantCategoryIds((int)$child['category_id']));
+        }
+        return $ids;
     }
 
     /**
