@@ -16,6 +16,7 @@ $_['entry_customer_group_price'] = 'Цены для групп клиентов'
 $_['button_customer_group_price_add'] = 'Добавить цену для группы клиентов';
 $_['entry_date_available'] = 'Дата доступности';
 $_['entry_date_end'] = 'Дата окончания';
+$_['entry_auto_renew'] = 'Автопродление';
 $_['entry_date_start'] = 'Дата начала';
 $_['entry_description'] = 'Описание';
 $_['entry_dimension'] = 'Габариты (Д x Ш x В)';

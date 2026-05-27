@@ -1207,7 +1207,8 @@ class ControllerCatalogProduct extends Controller {
 				'priority'          => $product_discount['priority'],
 				'price'             => $product_discount['price'],
 				'date_start'        => ($product_discount['date_start'] != '0000-00-00') ? $product_discount['date_start'] : '',
-				'date_end'          => ($product_discount['date_end'] != '0000-00-00') ? $product_discount['date_end'] : ''
+				'date_end'          => ($product_discount['date_end'] != '0000-00-00') ? $product_discount['date_end'] : '',
+				'auto_renew'        => !empty($product_discount['auto_renew'])
 			);
 		}
 
@@ -1227,7 +1228,8 @@ class ControllerCatalogProduct extends Controller {
 				'priority'          => $product_special['priority'],
 				'price'             => $product_special['price'],
 				'date_start'        => ($product_special['date_start'] != '0000-00-00') ? $product_special['date_start'] : '',
-				'date_end'          => ($product_special['date_end'] != '0000-00-00') ? $product_special['date_end'] :  ''
+				'date_end'          => ($product_special['date_end'] != '0000-00-00') ? $product_special['date_end'] : '',
+				'auto_renew'        => !empty($product_special['auto_renew'])
 			);
 		}
 
@@ -1247,7 +1249,8 @@ class ControllerCatalogProduct extends Controller {
 				'gift_product_name' => $product_gift['gift_product_name'] ?? '',
 				'minimum_quantity'  => $product_gift['minimum_quantity'],
 				'date_start'        => ($product_gift['date_start'] != '0000-00-00') ? $product_gift['date_start'] : '',
-				'date_end'          => ($product_gift['date_end'] != '0000-00-00') ? $product_gift['date_end'] : ''
+				'date_end'          => ($product_gift['date_end'] != '0000-00-00') ? $product_gift['date_end'] : '',
+				'auto_renew'        => !empty($product_gift['auto_renew'])
 			);
 		}
 

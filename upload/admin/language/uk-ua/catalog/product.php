@@ -19,6 +19,7 @@ $_['entry_customer_group_price'] = 'Ціни для груп клієнтів';
 $_['button_customer_group_price_add'] = 'Додати ціну для групи клієнтів';
 $_['entry_date_available'] = 'Дата доступності';
 $_['entry_date_end'] = 'Дата закінчення';
+$_['entry_auto_renew'] = 'Автопродовження';
 $_['entry_date_start'] = 'Дата початку';
 $_['entry_description'] = 'Опис';
 $_['entry_description_mini'] = 'Стислий опис:';
