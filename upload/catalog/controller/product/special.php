@@ -99,6 +99,9 @@ class ControllerProductSpecial extends Controller {
 		$product_total = $this->model_catalog_product->getTotalProductSpecials();
 		$data['product_total'] = $product_total;
 
+		$this->load->helper('plural');
+		$data['text_products'] = product_count_label($product_total, $this->language->get('code'));
+
 		$results = $this->model_catalog_product->getProductSpecials($filter_data);
 
 		foreach ($results as $result) {

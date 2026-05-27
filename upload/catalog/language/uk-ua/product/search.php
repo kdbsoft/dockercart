@@ -32,7 +32,7 @@ $_['text_sub_category'] = 'Пошук у підкатегоріях';
 $_['text_tax'] = 'Без ПДВ:';
 
 // Additional UI
-$_['text_products']  = '%s товарів';
+$_['text_products']  = 'товарів';
 $_['text_quick_view'] = 'Швидкий перегляд';
 $_['text_instock'] = 'В наявності';
 $_['text_load_more']  = 'Показати ще';

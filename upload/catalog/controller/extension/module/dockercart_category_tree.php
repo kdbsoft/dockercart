@@ -29,6 +29,8 @@ class ControllerExtensionModuleDockercartCategoryTree extends Controller {
 			return '';
 		}
 
+		$this->load->helper('plural');
+
 		$data['heading_title'] = $this->language->get('heading_title');
 		$data['text_subtitle'] = $this->language->get('text_subtitle');
 		$data['text_items'] = $this->language->get('text_items');
@@ -84,6 +86,7 @@ class ControllerExtensionModuleDockercartCategoryTree extends Controller {
 				'hue'         => ($cat_id * 53 + 180) % 360,
 				'href'        => $this->url->link('product/category', 'path=' . $path),
 				'total'       => $total,
+				'product_label' => product_count_label($total, $this->language->get('code')),
 				'children'    => $children
 			);
 		}

@@ -49,7 +49,7 @@
               <div class="flex-1 min-w-0">
                 <span class="block text-sm font-semibold text-gray-900 leading-tight break-words">{{ category.name }}</span>
                 {% if category.total is defined and category.total > 0 %}
-                <span class="text-xs text-gray-500">{{ text_models|format(category.total) }}</span>
+                <span class="text-xs text-gray-500">{{ category.product_label }}</span>
                 {% endif %}
               </div>
               <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
@@ -82,7 +82,7 @@
                 <h2 class="text-lg sm:text-xl font-extrabold text-gray-900 mt-0.5">{{ heading_title }}</h2>
               </div>
                 <div class="flex items-center gap-3 flex-wrap">
-                <span class="text-sm text-gray-500">{{ text_products|format(product_total) }}</span>
+                <span class="text-sm text-gray-500">{{ text_products }}</span>
                 <select onchange="location = this.value;" class="rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-blue-400 bg-white cursor-pointer">
                   {% for sort_item in sorts %}
                   <option value="{{ sort_item.href }}" {% if sort_item.value == '%s-%s'|format(sort, order) %}selected{% endif %}>{{ sort_item.text }}</option>

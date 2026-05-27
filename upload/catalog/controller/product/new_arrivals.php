@@ -102,6 +102,9 @@ class ControllerProductNewArrivals extends Controller {
 		$product_total = $this->model_catalog_product->getTotalNewArrivalProducts(90);
 		$data['product_total'] = $product_total;
 
+		$this->load->helper('plural');
+		$data['text_products'] = product_count_label($product_total, $this->language->get('code'));
+
 		$results = $this->model_catalog_product->getNewArrivalProducts($filter_data, 90);
 
 		foreach ($results as $result) {

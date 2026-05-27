@@ -24,4 +24,4 @@ $_['text_shipping_address'] = 'Адрес доставки';
 $_['text_shipping_method'] = 'Способ доставки:';
 $_['text_subject'] = '%s - Заказ %s';
 $_['text_telephone'] = 'Телефон:';
-$_['text_total'] = 'Сумма';
+$_['text_total'] = 'Итого';

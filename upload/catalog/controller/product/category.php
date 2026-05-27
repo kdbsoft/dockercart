@@ -191,6 +191,9 @@ class ControllerProductCategory extends Controller {
 				$url .= '&dcf=' . $this->request->get['dcf'];
 			}
 
+			$this->load->helper('plural');
+			$lang_code = $this->language->get('code');
+
 			$data['categories'] = array();
 			$subcategory_ids = array(); // category_id => name map for product labelling
 
@@ -199,9 +202,11 @@ class ControllerProductCategory extends Controller {
 			foreach ($cached_subcategories as $subcategory) {
 				$subcategory_ids[(int)$subcategory['category_id']] = $subcategory['name'];
 
+				$total = (int)$subcategory['total'];
 				$data['categories'][] = array(
 					'name' => $subcategory['name'],
-					'total' => (int)$subcategory['total'],
+					'total' => $total,
+					'product_label' => product_count_label($total, $lang_code),
 					'description' => $subcategory['description'],
 					'href' => $this->url->link('product/category', 'path=' . $this->request->get['path'] . '_' . (int)$subcategory['category_id'] . $url),
 					'thumb' => $subcategory['thumb']
@@ -222,6 +227,7 @@ class ControllerProductCategory extends Controller {
 
 			$product_total = $this->model_catalog_product->getTotalProducts($filter_data);
 			$data['product_total'] = $product_total;
+			$data['text_products'] = product_count_label($product_total, $lang_code);
 			$data['subcategory_total'] = count($data['categories']);
 			$data['brand_total'] = $this->getCategoryBrandCount($category_id);
 
@@ -504,8 +510,6 @@ class ControllerProductCategory extends Controller {
 			// Additional localized strings used by the category template
 			$data['text_subcategories'] = $this->language->get('text_subcategories');
 			$data['text_shop_all'] = $this->language->get('text_shop_all');
-			$data['text_models'] = $this->language->get('text_models');
-			$data['text_products'] = $this->language->get('text_products');
 			$data['text_quick_view'] = $this->language->get('text_quick_view');
 			$data['text_gift_badge'] = $this->language->get('text_gift_badge');
 			$data['text_call_for_price'] = $this->language->get('text_call_for_price');
