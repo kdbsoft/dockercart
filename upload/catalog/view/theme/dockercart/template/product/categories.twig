@@ -76,7 +76,7 @@
               <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent"></div>
                 <div class="absolute left-3 right-3 bottom-3">
                 <h3 class="text-white text-sm font-bold leading-tight">{{ category.name }}</h3>
-                <p class="text-white/80 text-xs mt-0.5">{{ text_items_count|format(category.total) }}</p>
+                <p class="text-white/80 text-xs mt-0.5">{{ category.product_label }}</p>
               </div>
             </a>
           {% endfor %}

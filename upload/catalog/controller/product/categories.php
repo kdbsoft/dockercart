@@ -37,6 +37,9 @@ class ControllerProductCategories extends Controller {
 
 		$popular_categories = $this->cache->get($cache_prefix . '.popular');
 		if (!is_array($popular_categories)) {
+			$this->load->helper('plural');
+			$lang_code = $this->language->get('code');
+
 			$popular_categories = array();
 			$top_categories = $this->model_catalog_category->getCategories(0);
 
@@ -64,6 +67,7 @@ class ControllerProductCategories extends Controller {
 					'name' => $category['name'],
 					'image' => $image,
 					'total' => $product_total,
+					'product_label' => product_count_label($product_total, $lang_code),
 					'href' => $this->url->link('product/category', 'path=' . (int)$category['category_id'])
 				);
 			}
@@ -93,6 +97,8 @@ class ControllerProductCategories extends Controller {
 		$tree = array();
 		$categories = $this->model_catalog_category->getCategories((int)$parent_id);
 
+		$lang_code = $this->language->get('code');
+
 		foreach ($categories as $category) {
 			$current_path = $path ? $path . '_' . (int)$category['category_id'] : (string)(int)$category['category_id'];
 
@@ -101,10 +107,13 @@ class ControllerProductCategories extends Controller {
 				'filter_sub_category' => true
 			);
 
+			$total = (int)$this->model_catalog_product->getTotalProducts($filter_data);
+
 			$tree[] = array(
 				'category_id' => (int)$category['category_id'],
 				'name' => $category['name'],
-				'total' => (int)$this->model_catalog_product->getTotalProducts($filter_data),
+				'total' => $total,
+				'product_label' => product_count_label($total, $lang_code),
 				'href' => $this->url->link('product/category', 'path=' . $current_path),
 				'children' => $this->buildTree((int)$category['category_id'], $current_path)
 			);

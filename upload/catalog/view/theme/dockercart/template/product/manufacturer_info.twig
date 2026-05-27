@@ -43,7 +43,7 @@
                 <h2 class="text-lg sm:text-xl font-extrabold text-gray-900 mt-0.5">{{ heading_title }}</h2>
               </div>
               <div class="flex items-center gap-3 flex-wrap">
-                <span class="text-sm text-gray-500">{{ product_total }} products</span>
+                <span class="text-sm text-gray-500">{{ text_product_count }}</span>
                 <select onchange="location = this.value;" class="rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-blue-400 bg-white cursor-pointer">
                   {% for sort_item in sorts %}
                   <option value="{{ sort_item.href }}" {% if sort_item.value == '%s-%s'|format(sort, order) %}selected{% endif %}>{{ sort_item.text }}</option>
@@ -115,7 +115,7 @@
             <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div class="rounded-2xl border border-gray-200 bg-white p-4">
                 <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1">{{ text_products }}</p>
-                <p class="text-sm font-semibold text-gray-900">{{ product_total }}+ items in catalog</p>
+                <p class="text-sm font-semibold text-gray-900">{{ product_total }}+ {{ text_products|lower }}</p>
               </div>
               <div class="rounded-2xl border border-gray-200 bg-white p-4">
                 <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1">Quality</p>
