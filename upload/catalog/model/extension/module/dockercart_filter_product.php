@@ -92,6 +92,10 @@ class ModelExtensionModuleDockercartFilterProduct extends ModelCatalogProduct {
                  ORDER BY ps.priority ASC, ps.price ASC LIMIT 1)";
     }
 
+    private function getMulticurrencyConversionFactor($alias = 'p') {
+        return "COALESCE(1.0 / NULLIF((SELECT c.value FROM " . DB_PREFIX . "currency c WHERE c.currency_id = " . $alias . ".currency_id), 0), 1.0)";
+    }
+
     private function getEffectivePriceExpression($alias = 'p') {
         $group_discount = (float)$this->config->get('config_customer_group_discount');
         $group_markup = (float)$this->config->get('config_customer_group_markup');
@@ -113,7 +117,11 @@ class ModelExtensionModuleDockercartFilterProduct extends ModelCatalogProduct {
 
         $effective_after_pct = "(CASE WHEN " . $has_cg_price . " THEN " . $effective_before_pct . " ELSE " . $effective_before_pct . " * " . $pct_mult . " END)";
 
-        return "LEAST(" . $effective_after_pct . ", COALESCE(" . $special_sub . ", 999999999))";
+        $expression = "LEAST(" . $effective_after_pct . ", COALESCE(" . $special_sub . ", 999999999))";
+
+        $currency_factor = $this->getMulticurrencyConversionFactor($alias);
+
+        return "(" . $expression . " * " . $currency_factor . ")";
     }
 
     public function getProducts($data = array()) {
