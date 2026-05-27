@@ -137,7 +137,7 @@
           </div>
         </div>
         {% endif %}
-        <p id="dc-subtotal" class="{% if minimum is defined and minimum > 1 %}text-sm text-blue-700 font-semibold mt-1{% else %}hidden text-sm text-blue-700 font-semibold mt-1{% endif %}"></p>
+        <p id="dc-subtotal" class="{% if minimum is defined and minimum > 1 %}text-lg text-blue-700 font-bold mt-2{% else %}hidden text-lg text-blue-700 font-bold mt-2{% endif %}"></p>
         {% endif %}
 
         {% if reward %}<p class="text-xs text-gray-500 mt-2">{{ text_reward }} {{ reward }}</p>{% endif %}
@@ -590,9 +590,8 @@ function dcUpdateSubtotal() {
   if (qty <= dcMinQty && dcMinQty == 1) { subEl.classList.add('hidden'); return; }
   var unit = parseFloat(priceEl.dataset.currentPrice || priceEl.dataset.basePrice || '0');
   if (isNaN(unit)) { subEl.classList.add('hidden'); return; }
-  var sym = priceEl.dataset.currencySymbol || dcDetectCurrencySymbol(priceEl.textContent);
-  var total = (unit * qty).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
-  subEl.textContent = '{{ text_total }}' + ' ' + (sym || '') + total;
+  var total = dcFormatMoney(unit * qty);
+  subEl.textContent = '{{ text_total }}' + ' ' + total;
   subEl.classList.remove('hidden');
 }
 

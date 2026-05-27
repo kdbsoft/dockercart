@@ -725,15 +725,15 @@ select[disabled] {
         <div class="space-y-3 border-t border-gray-200 pt-4 mb-6" id="cart-totals">
           {% if totals %}
             {% for total in totals %}
-            <div class="flex justify-between text-sm {% if total.title == 'Total' %}text-base font-semibold border-t border-gray-200 pt-3{% endif %}">
-              <span class="{% if total.title == 'Total' %}text-text-primary{% else %}text-text-secondary{% endif %}">{{ total.title }}</span>
-              <span class="font-medium {% if total.title == 'Total' %}text-xl text-primary{% else %}text-text-primary{% endif %}">{{ total.text }}</span>
+            <div class="flex justify-between text-sm {% if loop.last %}text-base font-semibold border-t border-gray-200 pt-3{% endif %}">
+              <span class="{% if loop.last %}text-text-primary{% else %}text-text-secondary{% endif %}">{{ total.title }}</span>
+              <span class="font-medium {% if loop.last %}text-2xl text-primary{% else %}text-text-primary{% endif %}">{{ total.text }}</span>
             </div>
             {% endfor %}
           {% else %}
             <div class="flex justify-between text-base font-semibold">
               <span class="text-text-primary">{{ text_total }}</span>
-              <span class="text-xl text-primary">$0.00</span>
+              <span class="text-2xl text-primary">$0.00</span>
             </div>
           {% endif %}
         </div>
@@ -786,7 +786,7 @@ select[disabled] {
     <span class="text-lg font-semibold text-text-primary" id="mobile-total">
       {% if totals %}
         {% for total in totals %}
-          {% if total.title == 'Total' %}{{ total.text }}{% endif %}
+          {% if loop.last %}{{ total.text }}{% endif %}
         {% endfor %}
       {% else %}
         $0.00
@@ -809,9 +809,9 @@ select[disabled] {
     <div class="space-y-2">
       {% if totals %}
         {% for total in totals %}
-        <div class="flex justify-between text-sm {% if total.title == 'Total' %}font-semibold text-base pt-2 border-t border-gray-200{% endif %}">
-          <span class="{% if total.title == 'Total' %}text-text-primary{% else %}text-text-secondary{% endif %}">{{ total.title }}</span>
-          <span class="{% if total.title == 'Total' %}text-primary text-lg{% else %}text-text-primary{% endif %}">{{ total.text }}</span>
+        <div class="flex justify-between text-sm {% if loop.last %}font-semibold text-base pt-2 border-t border-gray-200{% endif %}">
+          <span class="{% if loop.last %}text-text-primary{% else %}text-text-secondary{% endif %}">{{ total.title }}</span>
+          <span class="{% if loop.last %}text-primary text-xl{% else %}text-text-primary{% endif %}">{{ total.text }}</span>
         </div>
         {% endfor %}
       {% endif %}
@@ -3483,8 +3483,8 @@ document.addEventListener('DOMContentLoaded', () => {
     cartTotals.innerHTML = '';
     let totalValue = '';
 
-    totals.forEach(total => {
-      const isTotal = total.title === 'Total';
+    totals.forEach((total, index) => {
+      const isTotal = index === totals.length - 1;
 
       const row = document.createElement('div');
       row.className = `flex justify-between text-sm ${isTotal ? 'text-base font-semibold border-t border-gray-200 pt-3' : ''}`;
@@ -3494,7 +3494,7 @@ document.addEventListener('DOMContentLoaded', () => {
       title.textContent = total.title;
 
       const value = document.createElement('span');
-      value.className = `font-medium ${isTotal ? 'text-xl text-primary' : 'text-text-primary'}`;
+      value.className = `font-medium ${isTotal ? 'text-2xl text-primary' : 'text-text-primary'}`;
       value.textContent = total.text;
 
       row.appendChild(title);
