@@ -1,3 +1,10 @@
+## [1.29.2](https://github.com/mathflow-bit/dockercart/compare/v1.29.1...v1.29.2) (2026-05-27)
+
+### Bug Fixes
+
+* add standard SEO rewrite rules to feed .htaccess generation ([41d71f5](https://github.com/mathflow-bit/dockercart/commit/41d71f5d8615f1b44ccf3a7bb1c332f65c87dbaa))
+* convert product prices to default currency in dockercart filter ([e4f1b84](https://github.com/mathflow-bit/dockercart/commit/e4f1b84e94c62a82b7a982c101cd6f214a4ea857))
+
 ## [1.29.1](https://github.com/mathflow-bit/dockercart/compare/v1.29.0...v1.29.1) (2026-05-27)
 
 ### Bug Fixes
