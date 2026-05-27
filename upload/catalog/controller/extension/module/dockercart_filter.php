@@ -1145,6 +1145,16 @@ class ControllerExtensionModuleDockercartFilter extends Controller
                 : [];
             $option = isset($post_data["option"]) ? $post_data["option"] : [];
 
+            $request_currency = !empty($post_data["currency"]) ? $post_data["currency"] : $this->session->data["currency"];
+            $base_currency = $this->config->get("config_currency");
+
+            if ($price_min !== "" && $base_currency !== $request_currency) {
+                $price_min = (float)$this->currency->convert((float)$price_min, $request_currency, $base_currency);
+            }
+            if ($price_max !== "" && $base_currency !== $request_currency) {
+                $price_max = (float)$this->currency->convert((float)$price_max, $request_currency, $base_currency);
+            }
+
             $filter_data = [
                 "category_id" => $category_id,
                 "price_min" => $price_min,
@@ -1163,8 +1173,45 @@ class ControllerExtensionModuleDockercartFilter extends Controller
                 $filter_data,
             );
 
+            $customer_group_discount = (float)$this->config->get('config_customer_group_discount');
+            $customer_group_markup = (float)$this->config->get('config_customer_group_markup');
+
             $products = [];
             foreach ($results as $result) {
+                $effective_price = (float)$result["price"];
+                $has_customer_group_price = isset($result["customer_group_price"]) && $result["customer_group_price"] !== null && $result["customer_group_price"] !== '' && (float)$result["customer_group_price"] > 0;
+
+                if ($has_customer_group_price) {
+                    $effective_price = (float)$result["customer_group_price"];
+                }
+
+                if (isset($result["discount"]) && $result["discount"] !== null && $result["discount"] !== '' && (float)$result["discount"] < $effective_price) {
+                    $effective_price = (float)$result["discount"];
+                }
+
+                if (!$has_customer_group_price) {
+                    if ($customer_group_discount > 0) {
+                        $effective_price *= (100 - $customer_group_discount) / 100;
+                    } elseif ($customer_group_markup > 0) {
+                        $effective_price *= (100 + $customer_group_markup) / 100;
+                    }
+                }
+
+                $special_price = null;
+                if (isset($result["special"]) && $result["special"] !== null && $result["special"] !== '' && (float)$result["special"] > 0) {
+                    $special_price = (float)$result["special"];
+                    if (!$has_customer_group_price) {
+                        if ($customer_group_discount > 0) {
+                            $special_price *= (100 - $customer_group_discount) / 100;
+                        } elseif ($customer_group_markup > 0) {
+                            $special_price *= (100 + $customer_group_markup) / 100;
+                        }
+                    }
+                    if ($special_price >= $effective_price) {
+                        $special_price = null;
+                    }
+                }
+
                 if ($result["image"]) {
                     $image = $this->model_tool_image->resize(
                         $result["image"],
@@ -1201,7 +1248,7 @@ class ControllerExtensionModuleDockercartFilter extends Controller
                 ) {
                     $price = $this->currency->format(
                         $this->tax->calculate(
-                            $result["price"],
+                            $effective_price,
                             $result["tax_class_id"],
                             $this->config->get("config_tax"),
                         ),
@@ -1211,10 +1258,10 @@ class ControllerExtensionModuleDockercartFilter extends Controller
                     $price = false;
                 }
 
-                if ((float) $result["special"]) {
+                if ($special_price !== null) {
                     $special = $this->currency->format(
                         $this->tax->calculate(
-                            $result["special"],
+                            $special_price,
                             $result["tax_class_id"],
                             $this->config->get("config_tax"),
                         ),

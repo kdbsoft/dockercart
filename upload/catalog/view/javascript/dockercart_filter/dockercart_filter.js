@@ -1059,6 +1059,7 @@ console.log('Checking attribute checkbox - attrId:', attrId, 'value:', value);
         category_id: categoryId,
         price_min: data.price_min,
         price_max: data.price_max,
+        currency: window.dockercartCurrentCurrency || '',
         manufacturer: data.manufacturer,
         attribute: data.attribute,
         option: data.option
