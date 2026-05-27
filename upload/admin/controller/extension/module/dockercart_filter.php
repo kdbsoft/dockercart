@@ -511,46 +511,6 @@ class ControllerExtensionModuleDockerCartFilter extends Controller {
     }
 
     private function clearModuleCache() {
-
-        $cache_keys = array(
-            'dockercart_filter',
-            'dockercart_filter.manufacturers',
-            'dockercart_filter.attributes',
-            'dockercart_filter.options',
-            'dockercart_filter.price_range'
-        );
-
-        foreach ($cache_keys as $key) {
-            $this->cache->delete($key);
-        }
-
-        for ($i = 1; $i <= 100; $i++) {
-            $this->cache->delete('dockercart_filter.manufacturers.' . $i);
-            $this->cache->delete('dockercart_filter.attributes.' . $i);
-            $this->cache->delete('dockercart_filter.options.' . $i);
-            $this->cache->delete('dockercart_filter.price_range.' . $i);
-        }
-
-        $cache_dir = defined('DIR_CACHE') ? DIR_CACHE : DIR_STORAGE . 'cache/';
-        $files = glob($cache_dir . 'cache.dockercart_filter.*');
-        if ($files) {
-            foreach ($files as $file) {
-                if (file_exists($file)) {
-                    @unlink($file);
-                }
-            }
-        }
-
-        $storage_cache = DIR_STORAGE . 'cache/';
-        if (is_dir($storage_cache)) {
-            $files = glob($storage_cache . '*');
-            if ($files) {
-                foreach ($files as $file) {
-                    if (is_file($file) && strpos($file, 'dockercart_filter') !== false) {
-                        @unlink($file);
-                    }
-                }
-            }
-        }
+        $this->cache->delete('dockercart_filter');
     }
 }
