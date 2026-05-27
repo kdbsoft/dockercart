@@ -1,7 +1,7 @@
 <?php
 class ModelCatalogProductBundle extends Model {
 	public function addBundle($data) {
-		$this->db->query("INSERT INTO " . DB_PREFIX . "product_bundle SET name = '" . $this->db->escape($data['name']) . "', discount_type = '" . $this->db->escape($data['discount_type']) . "', discount_value = '" . (float)$data['discount_value'] . "', date_start = '" . $this->db->escape($data['date_start']) . "', date_end = '" . $this->db->escape($data['date_end']) . "', status = '" . (int)$data['status'] . "', sort_order = '" . (int)$data['sort_order'] . "'");
+		$this->db->query("INSERT INTO " . DB_PREFIX . "product_bundle SET name = '" . $this->db->escape($data['name']) . "', discount_type = '" . $this->db->escape($data['discount_type']) . "', discount_value = '" . (float)$data['discount_value'] . "', date_start = '" . $this->db->escape($data['date_start']) . "', date_end = '" . $this->db->escape($data['date_end']) . "', status = '" . (int)$data['status'] . "', sort_order = '" . (int)$data['sort_order'] . "', auto_renew = '" . (int)(!empty($data['auto_renew'])) . "'");
 
 		$bundle_id = $this->db->getLastId();
 
@@ -21,7 +21,7 @@ class ModelCatalogProductBundle extends Model {
 	}
 
 	public function editBundle($bundle_id, $data) {
-		$this->db->query("UPDATE " . DB_PREFIX . "product_bundle SET name = '" . $this->db->escape($data['name']) . "', discount_type = '" . $this->db->escape($data['discount_type']) . "', discount_value = '" . (float)$data['discount_value'] . "', date_start = '" . $this->db->escape($data['date_start']) . "', date_end = '" . $this->db->escape($data['date_end']) . "', status = '" . (int)$data['status'] . "', sort_order = '" . (int)$data['sort_order'] . "' WHERE bundle_id = '" . (int)$bundle_id . "'");
+		$this->db->query("UPDATE " . DB_PREFIX . "product_bundle SET name = '" . $this->db->escape($data['name']) . "', discount_type = '" . $this->db->escape($data['discount_type']) . "', discount_value = '" . (float)$data['discount_value'] . "', date_start = '" . $this->db->escape($data['date_start']) . "', date_end = '" . $this->db->escape($data['date_end']) . "', status = '" . (int)$data['status'] . "', sort_order = '" . (int)$data['sort_order'] . "', auto_renew = '" . (int)(!empty($data['auto_renew'])) . "' WHERE bundle_id = '" . (int)$bundle_id . "'");
 
 		$this->db->query("DELETE FROM " . DB_PREFIX . "product_bundle_product WHERE bundle_id = '" . (int)$bundle_id . "'");
 
@@ -53,7 +53,7 @@ class ModelCatalogProductBundle extends Model {
 	}
 
 	public function getBundles($data = array()) {
-		$sql = "SELECT b.bundle_id, b.name, b.discount_type, b.discount_value, b.date_start, b.date_end, b.status, b.sort_order, COUNT(bp.product_id) as product_count FROM " . DB_PREFIX . "product_bundle b LEFT JOIN " . DB_PREFIX . "product_bundle_product bp ON (b.bundle_id = bp.bundle_id)";
+		$sql = "SELECT b.bundle_id, b.name, b.discount_type, b.discount_value, b.date_start, b.date_end, b.status, b.sort_order, b.auto_renew, COUNT(bp.product_id) as product_count FROM " . DB_PREFIX . "product_bundle b LEFT JOIN " . DB_PREFIX . "product_bundle_product bp ON (b.bundle_id = bp.bundle_id)";
 
 		$sql .= " GROUP BY b.bundle_id";
 

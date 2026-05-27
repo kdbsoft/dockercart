@@ -1,6 +1,8 @@
 <?php
 class ModelExtensionTotalCoupon extends Model {
 	public function getCoupon($code) {
+		$this->autoRenewCoupon($code);
+
 		$status = true;
 
 		$coupon_query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "coupon` WHERE code = '" . $this->db->escape($code) . "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) AND status = '1'");
@@ -238,5 +240,44 @@ class ModelExtensionTotalCoupon extends Model {
 		$query = $this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "coupon_history` ch LEFT JOIN `" . DB_PREFIX . "coupon` c ON (ch.coupon_id = c.coupon_id) WHERE c.code = '" . $this->db->escape($coupon) . "' AND ch.customer_id = '" . (int)$customer_id . "'");
 		
 		return $query->row['total'];
+	}
+
+	private function autoRenewCoupon($code) {
+		static $done = array();
+		$today = date('Y-m-d');
+		$key = 'coupon.' . $today;
+
+		if (!empty($done[$key])) {
+			return;
+		}
+
+		$cache_key = 'auto_renew.coupon.' . $key;
+
+		if ($this->cache->get($cache_key)) {
+			$done[$key] = true;
+			return;
+		}
+
+		$this->db->query("
+			INSERT INTO `" . DB_PREFIX . "coupon` (name, code, type, discount, logged, shipping, total, date_start, date_end, uses_total, uses_customer, status, auto_renew, date_added)
+			SELECT c.name, c.code, c.type, c.discount, c.logged, c.shipping, c.total,
+				CURDATE(),
+				DATE_ADD(CURDATE(), INTERVAL DATEDIFF(c.date_end, c.date_start) DAY),
+				c.uses_total, c.uses_customer, '1', '1', NOW()
+			FROM `" . DB_PREFIX . "coupon` c
+			WHERE c.code = '" . $this->db->escape($code) . "'
+				AND c.auto_renew = '1'
+				AND c.date_end < CURDATE()
+				AND c.date_end != '0000-00-00'
+				AND NOT EXISTS (
+					SELECT 1 FROM `" . DB_PREFIX . "coupon` c2
+					WHERE c2.code = c.code
+						AND c2.date_end > CURDATE()
+				)
+			LIMIT 1
+		");
+
+		$this->cache->set($cache_key, true, 86400);
+		$done[$key] = true;
 	}
 }

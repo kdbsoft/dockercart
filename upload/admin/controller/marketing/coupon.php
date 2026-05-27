@@ -466,6 +466,14 @@ class ControllerMarketingCoupon extends Controller {
 			$data['uses_customer'] = 1;
 		}
 
+		if (isset($this->request->post['auto_renew'])) {
+			$data['auto_renew'] = $this->request->post['auto_renew'];
+		} elseif (!empty($coupon_info)) {
+			$data['auto_renew'] = $coupon_info['auto_renew'];
+		} else {
+			$data['auto_renew'] = 0;
+		}
+
 		if (isset($this->request->post['status'])) {
 			$data['status'] = $this->request->post['status'];
 		} elseif (!empty($coupon_info)) {

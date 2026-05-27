@@ -377,6 +377,14 @@ class ControllerCatalogProductBundle extends Controller {
 			$data['sort_order'] = 0;
 		}
 
+		if (isset($this->request->post['auto_renew'])) {
+			$data['auto_renew'] = $this->request->post['auto_renew'];
+		} elseif (!empty($bundle_info)) {
+			$data['auto_renew'] = $bundle_info['auto_renew'];
+		} else {
+			$data['auto_renew'] = 0;
+		}
+
 		$this->load->model('setting/store');
 
 		$data['stores'] = array();

@@ -5,6 +5,8 @@ class ModelCatalogProduct extends Model {
 	}
 
 	public function getProduct($product_id) {
+		$this->autoRenewProductEntities();
+
 		$cache_enabled = (int)$this->config->get('config_product_cache_status');
 		$version_query = $this->db->query("SELECT date_modified FROM " . DB_PREFIX . "product WHERE product_id = '" . (int)$product_id . "'");
 		$cache_stamp = 0;
@@ -738,5 +740,96 @@ class ModelCatalogProduct extends Model {
 		$query = $this->db->query("SELECT g.*, pd.name AS name, p.image, p.price FROM " . DB_PREFIX . "product_gift g LEFT JOIN " . DB_PREFIX . "product p ON (g.gift_product_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_description pd ON (g.gift_product_id = pd.product_id) WHERE g.product_id = '" . (int)$product_id . "' AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "' AND (g.date_start = '0000-00-00' OR g.date_start <= NOW()) AND (g.date_end = '0000-00-00' OR g.date_end >= NOW()) ORDER BY g.minimum_quantity ASC");
 
 		return $query->rows;
+	}
+
+	private function autoRenewProductEntities() {
+		static $done = [];
+
+		$today = date('Y-m-d');
+		$entities = array(
+			'special' => array(
+				'table'  => 'product_special',
+				'insert' => "
+					INSERT INTO " . DB_PREFIX . "product_special (product_id, customer_group_id, priority, price, date_start, date_end, auto_renew)
+					SELECT ps.product_id, ps.customer_group_id, ps.priority, ps.price,
+						CURDATE(),
+						DATE_ADD(CURDATE(), INTERVAL DATEDIFF(ps.date_end, ps.date_start) DAY),
+						1
+					FROM " . DB_PREFIX . "product_special ps
+					WHERE ps.auto_renew = '1'
+						AND ps.date_end < CURDATE()
+						AND ps.date_end != '0000-00-00'
+						AND NOT EXISTS (
+							SELECT 1 FROM " . DB_PREFIX . "product_special ps2
+							WHERE ps2.product_id = ps.product_id
+								AND ps2.customer_group_id = ps.customer_group_id
+								AND ps2.priority = ps.priority
+								AND ps2.price = ps.price
+								AND ps2.date_end > CURDATE()
+						)",
+			),
+			'discount' => array(
+				'table'  => 'product_discount',
+				'insert' => "
+					INSERT INTO " . DB_PREFIX . "product_discount (product_id, customer_group_id, quantity, priority, price, date_start, date_end, auto_renew)
+					SELECT pd.product_id, pd.customer_group_id, pd.quantity, pd.priority, pd.price,
+						CURDATE(),
+						DATE_ADD(CURDATE(), INTERVAL DATEDIFF(pd.date_end, pd.date_start) DAY),
+						1
+					FROM " . DB_PREFIX . "product_discount pd
+					WHERE pd.auto_renew = '1'
+						AND pd.date_end < CURDATE()
+						AND pd.date_end != '0000-00-00'
+						AND NOT EXISTS (
+							SELECT 1 FROM " . DB_PREFIX . "product_discount pd2
+							WHERE pd2.product_id = pd.product_id
+								AND pd2.customer_group_id = pd.customer_group_id
+								AND pd2.quantity = pd.quantity
+								AND pd2.priority = pd.priority
+								AND pd2.price = pd.price
+								AND pd2.date_end > CURDATE()
+						)",
+			),
+			'gift' => array(
+				'table'  => 'product_gift',
+				'insert' => "
+					INSERT INTO " . DB_PREFIX . "product_gift (product_id, gift_product_id, minimum_quantity, date_start, date_end, auto_renew)
+					SELECT pg.product_id, pg.gift_product_id, pg.minimum_quantity,
+						CURDATE(),
+						DATE_ADD(CURDATE(), INTERVAL DATEDIFF(pg.date_end, pg.date_start) DAY),
+						1
+					FROM " . DB_PREFIX . "product_gift pg
+					WHERE pg.auto_renew = '1'
+						AND pg.date_end < CURDATE()
+						AND pg.date_end != '0000-00-00'
+						AND NOT EXISTS (
+							SELECT 1 FROM " . DB_PREFIX . "product_gift pg2
+							WHERE pg2.product_id = pg.product_id
+								AND pg2.gift_product_id = pg.gift_product_id
+								AND pg2.minimum_quantity = pg.minimum_quantity
+								AND pg2.date_end > CURDATE()
+						)",
+			),
+		);
+
+		foreach ($entities as $entity => $config) {
+			$key = $entity . '.' . $today;
+
+			if (!empty($done[$key])) {
+				continue;
+			}
+
+			$cache_key = 'auto_renew.product.' . $key;
+
+			if ($this->cache->get($cache_key)) {
+				$done[$key] = true;
+				continue;
+			}
+
+			$this->db->query($config['insert']);
+
+			$this->cache->set($cache_key, true, 86400);
+			$done[$key] = true;
+		}
 	}
 }

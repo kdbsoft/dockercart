@@ -68,6 +68,7 @@ $_['entry_additional_image'] = 'Additional Images';
 $_['entry_customer_group']   = 'Customer Group';
 $_['entry_date_start']       = 'Date Start';
 $_['entry_date_end']         = 'Date End';
+$_['entry_auto_renew']       = 'Auto-renew';
 $_['entry_customer_group_price']      = 'Customer Group Prices';
 $_['button_customer_group_price_add'] = 'Add Customer Group Price';
 $_["entry_priority"] = "Priority";

@@ -31,6 +31,8 @@ $_['entry_date_start']      = 'Date Start';
 $_['entry_date_end']        = 'Date End';
 $_['entry_status']          = 'Status';
 $_['entry_sort_order']      = 'Sort Order';
+$_['entry_auto_renew']      = 'Auto-renew';
+$_['help_auto_renew']       = 'When the bundle expires, a new one will be created automatically with the same duration.';
 $_['entry_store']           = 'Stores';
 
 $_['help_name']             = '(Optional) Bundle name for identification';
