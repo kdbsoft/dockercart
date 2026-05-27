@@ -98,6 +98,7 @@
   window.dcLang.text_qv_feature_returns = {{ text_qv_feature_returns ? '"' ~ text_qv_feature_returns|e('js') ~ '"' : '"30-day hassle-free returns"' }};
   window.dcLang.quickview_features = {{ quickview_features_json ? quickview_features_json|raw : '[]' }};
   window.dcLang.button_cart = {{ button_cart ? '"' ~ button_cart|e('js') ~ '"' : '"Add to Cart"' }};
+  window.dcLang.text_you_save = {{ text_you_save ? '"' ~ text_you_save|e('js') ~ '"' : '"You Save"' }};
   window.dcLang.text_home = {{ text_home ? '"' ~ text_home|e('js') ~ '"' : '' }};
   window.dcCompareIds = {{ compare_product_ids is defined ? compare_product_ids|json_encode|raw : '[]' }};
 </script>

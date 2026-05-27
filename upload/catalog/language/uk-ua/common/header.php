@@ -5,6 +5,7 @@ $_["text_all"] = "Показати все";
 $_["text_catalog"] = "Каталог";
 $_["text_new_arrivals"] = "Новинки";
 $_["text_sale"] = "Розпродаж";
+$_["text_you_save"] = "Ви заощадите";
 // Quick view / product UI (global)
 $_["text_model_prefix"] = "Код товару: ";
 $_["text_qv_feature_delivery"] = "Швидка доставка";

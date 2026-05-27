@@ -13,6 +13,7 @@ $_['text_total']               = 'Total:';
 $_['text_discount']            = ' or more ';
 $_['text_option']              = 'Available Options';
 $_['text_sale']                = 'Sale';
+$_['text_you_save']            = 'You Save';
 $_['text_gift']                = 'Gift with Purchase';
 $_['text_gift_minimum']        = 'Minimum quantity to receive the gift';
 $_['text_gift_badge']          = 'GIFT';
