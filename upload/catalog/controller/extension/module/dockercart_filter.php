@@ -526,6 +526,10 @@ class ControllerExtensionModuleDockercartFilter extends Controller
             $filter_data,
         );
 
+        usort($data["attributes"], function ($a, $b) {
+            return $a["attribute_id"] - $b["attribute_id"];
+        });
+
         $disabledAttributesRaw = $this->config->get(
             "module_dockercart_filter_disabled_attributes",
         );
@@ -556,6 +560,22 @@ class ControllerExtensionModuleDockercartFilter extends Controller
         $data["options"] = $this->model_extension_module_dockercart_filter->getOptions(
             $option_filter_data,
         );
+
+        usort($data["options"], function ($a, $b) {
+            return $a["option_id"] - $b["option_id"];
+        });
+
+        foreach ($data["options"] as &$option) {
+            usort($option["values"], function ($a, $b) {
+                $a_order = (int)($a["sort_order"] ?? 0);
+                $b_order = (int)($b["sort_order"] ?? 0);
+                if ($a_order !== $b_order) {
+                    return $a_order - $b_order;
+                }
+                return strcmp($a["name"] ?? "", $b["name"] ?? "");
+            });
+        }
+        unset($option);
 
         $disabledOptionsRaw = $this->config->get(
             "module_dockercart_filter_disabled_options",
@@ -1101,6 +1121,9 @@ class ControllerExtensionModuleDockercartFilter extends Controller
 
         $data["current_currency"] = $this->session->data["currency"];
         $data["base_currency"] = $this->config->get("config_currency");
+        $data["currency_decimal_place"] = $this->currency->getDecimalPlace(
+            $display_currency_for_symbol,
+        );
 
         try {
             return $this->load->view(

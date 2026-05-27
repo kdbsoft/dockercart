@@ -27,12 +27,13 @@
       <button type="button" class="filter-toggle" data-group-id="filter-price">{{ text_price }}</button>
       <div data-group-content>
         <div class="price-range-display">
+          {% set dp = currency_decimal_place|default(2) %}
           {# Render currency symbol on left or right depending on currency configuration #}
           {% if currency_symbol_left %}
             <span class="price-range-currency">{{ currency_symbol_left }}</span>
-            <span class="price-range-min-display">{{ filter_price_min|default(price_range.min) }}</span>
+            <span class="price-range-min-display">{{ (filter_price_min|default(price_range.min))|number_format(dp, '.', '') }}</span>
           {% else %}
-            <span class="price-range-min-display">{{ filter_price_min|default(price_range.min) }}</span>
+            <span class="price-range-min-display">{{ (filter_price_min|default(price_range.min))|number_format(dp, '.', '') }}</span>
             <span class="price-range-currency">{{ currency_symbol_right|default('') }}</span>
           {% endif %}
 
@@ -40,9 +41,9 @@
 
           {% if currency_symbol_left %}
             <span class="price-range-currency">{{ currency_symbol_left }}</span>
-            <span class="price-range-max-display">{{ filter_price_max|default(price_range.max) }}</span>
+            <span class="price-range-max-display">{{ (filter_price_max|default(price_range.max))|number_format(dp, '.', '') }}</span>
           {% else %}
-            <span class="price-range-max-display">{{ filter_price_max|default(price_range.max) }}</span>
+            <span class="price-range-max-display">{{ (filter_price_max|default(price_range.max))|number_format(dp, '.', '') }}</span>
             <span class="price-range-currency">{{ currency_symbol_right|default('') }}</span>
           {% endif %}
         </div>
@@ -73,9 +74,10 @@
     <div class="filter-group" id="filter-manufacturer">
       <button type="button" class="filter-toggle" data-group-id="filter-manufacturer">{{ text_manufacturer }}</button>
       <div data-group-content>
-        <div class="filter-items-container" data-items-limit="{{ items_limit|default(10) }}">
+        {% set mfr_has_limit = manufacturers|length > items_limit|default(10) %}
+        <div class="filter-items-container{% if mfr_has_limit %} has-limit{% endif %}" data-items-limit="{{ items_limit|default(10) }}">
         {% for manufacturer in manufacturers %}
-        <div class="checkbox filter-item" data-item-index="{{ loop.index0 }}">
+        <div class="checkbox filter-item{% if not mfr_has_limit or loop.index0 < items_limit|default(10) %} visible{% endif %}" data-item-index="{{ loop.index0 }}">
           {% set is_checked = manufacturer.manufacturer_id in filter_manufacturer %}
           {% if seo_mode %}
           <label class="has-filter-link">
@@ -105,10 +107,11 @@
     <div class="filter-group" id="filter-attribute-{{ attribute.attribute_id }}">
       <button type="button" class="filter-toggle" data-group-id="filter-attribute-{{ attribute.attribute_id }}">{{ attribute.name }}</button>
       <div data-group-content>
-        <div class="filter-items-container" data-items-limit="{{ items_limit|default(10) }}">
+        {% set attr_has_limit = attribute.values|length > items_limit|default(10) %}
+        <div class="filter-items-container{% if attr_has_limit %} has-limit{% endif %}" data-items-limit="{{ items_limit|default(10) }}">
         {% for value in attribute.values %}
         {% if value.text %}
-        <div class="checkbox filter-item" data-item-index="{{ loop.index0 }}" data-attr-id="{{ attribute.attribute_id }}" data-attr-value="{{ value.text }}">
+        <div class="checkbox filter-item{% if not attr_has_limit or loop.index0 < items_limit|default(10) %} visible{% endif %}" data-item-index="{{ loop.index0 }}" data-attr-id="{{ attribute.attribute_id }}" data-attr-value="{{ value.text }}">
           {% if seo_mode %}
           <label class="has-filter-link">
             <input type="checkbox" name="attribute[{{ attribute.attribute_id }}]" value="{{ value.text }}" data-attr-id="{{ attribute.attribute_id }}" data-attr-value="{{ value.text }}" data-filter-url="{{ value.filter_url|raw|default('#') }}" />
@@ -139,10 +142,11 @@
     <div class="filter-group" id="filter-option-{{ option.option_id }}">
       <button type="button" class="filter-toggle" data-group-id="filter-option-{{ option.option_id }}">{{ option.name }}</button>
       <div data-group-content>
-        <div class="filter-items-container" data-items-limit="{{ items_limit|default(10) }}">
+        {% set opt_has_limit = option.values|length > items_limit|default(10) %}
+        <div class="filter-items-container{% if opt_has_limit %} has-limit{% endif %}" data-items-limit="{{ items_limit|default(10) }}">
         {% for value in option.values %}
         {% set is_checked = option.option_id in filter_option and value.option_value_id in filter_option[option.option_id] %}
-        <div class="checkbox filter-item" data-item-index="{{ loop.index0 }}">
+        <div class="checkbox filter-item{% if not opt_has_limit or loop.index0 < items_limit|default(10) %} visible{% endif %}" data-item-index="{{ loop.index0 }}">
           {% if seo_mode %}
           <label class="has-filter-link">
             <input type="checkbox" name="option[{{ option.option_id }}]" value="{{ value.option_value_id }}" {% if is_checked %}checked{% endif %} data-opt-id="{{ option.option_id }}" data-opt-value="{{ value.option_value_id }}" data-filter-url="{{ value.filter_url|raw|default('#') }}" />
@@ -185,6 +189,7 @@ window.dockercartFilterDepth = {{ filter_depth|json_encode|default('{}') }};
 window.dockercartMobileBreakpoint = {{ mobile_breakpoint|default(768) }};
 window.dockercartCurrentCurrency = '{{ current_currency|default('USD') }}';
 window.dockercartBaseCurrency = '{{ base_currency|default('USD') }}';
+window.dockercartCurrencyDecimalPlace = {{ currency_decimal_place|default(2) }};
 
 // Pass language strings to JavaScript
 window.dockercartFilterTexts = {

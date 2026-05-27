@@ -884,8 +884,9 @@ console.log('Checking attribute checkbox - attrId:', attrId, 'value:', value);
 
         const displayMin = document.querySelector('.price-range-min-display');
         const displayMax = document.querySelector('.price-range-max-display');
-        if (displayMin) displayMin.textContent = Math.round(originalMin);
-        if (displayMax) displayMax.textContent = Math.round(originalMax);
+        const dp = typeof window.dockercartCurrencyDecimalPlace !== 'undefined' ? window.dockercartCurrencyDecimalPlace : 2;
+        if (displayMin) displayMin.textContent = Number(originalMin).toFixed(dp);
+        if (displayMax) displayMax.textContent = Number(originalMax).toFixed(dp);
 
         const sliderFill = document.querySelector('.price-slider-fill');
         if (sliderFill) {
@@ -1299,8 +1300,8 @@ console.log('Checking attribute checkbox - attrId:', attrId, 'value:', value);
             sliderFill.style.right = (100 - maxPercent) + '%';
           }
 
-          if (displayMin) displayMin.textContent = Math.round(min);
-          if (displayMax) displayMax.textContent = Math.round(max);
+          if (displayMin) displayMin.textContent = Number(min).toFixed(typeof window.dockercartCurrencyDecimalPlace !== 'undefined' ? window.dockercartCurrencyDecimalPlace : 2);
+          if (displayMax) displayMax.textContent = Number(max).toFixed(typeof window.dockercartCurrencyDecimalPlace !== 'undefined' ? window.dockercartCurrencyDecimalPlace : 2);
 
           // Preserve fractional slider values in the number inputs (do not round)
           minInput.value = min;
@@ -1747,8 +1748,8 @@ console.log('Checking attribute checkbox - attrId:', attrId, 'value:', value);
           sliderFill.style.left = minPercent + '%';
           sliderFill.style.right = (100 - maxPercent) + '%';
 
-          if (displayMin) displayMin.textContent = Math.round(min);
-          if (displayMax) displayMax.textContent = Math.round(max);
+          if (displayMin) displayMin.textContent = Number(min).toFixed(typeof window.dockercartCurrencyDecimalPlace !== 'undefined' ? window.dockercartCurrencyDecimalPlace : 2);
+          if (displayMax) displayMax.textContent = Number(max).toFixed(typeof window.dockercartCurrencyDecimalPlace !== 'undefined' ? window.dockercartCurrencyDecimalPlace : 2);
         };
 
         sliderMin.addEventListener('input', function() {
