@@ -1,3 +1,20 @@
+## [1.29.0](https://github.com/mathflow-bit/dockercart/compare/v1.28.0...v1.29.0) (2026-05-27)
+
+### Features
+
+* add “You Save” display for discounts across UI ([4641879](https://github.com/mathflow-bit/dockercart/commit/46418796a4d57bc1b14da38f45e9a675b383f2b6))
+* add auto_renew flag and auto‑renew logic for promotions ([b034b72](https://github.com/mathflow-bit/dockercart/commit/b034b724321a4b8bce30f5fd3b3f622f973a4665))
+* add call‑for‑price support across admin and storefront ([5c723ba](https://github.com/mathflow-bit/dockercart/commit/5c723baf0215333b489ce9f2ad8c6e15e81ef32b))
+* add currency conversion and customer‑group pricing to filter ([83276cd](https://github.com/mathflow-bit/dockercart/commit/83276cd2a0ca47aca15b51c887f8b6788dc1fc3f))
+* drop popup image settings and add hybrid resize mode with ([a9ac995](https://github.com/mathflow-bit/dockercart/commit/a9ac995f97e86dc9133d0fbba83cbe04b1296d54))
+
+### Bug Fixes
+
+* add plural helper and integrate product count labels across ([71afbd0](https://github.com/mathflow-bit/dockercart/commit/71afbd04d44d97eab52cf3b6c0641d9cd1d29f7e))
+* quickfix ([7382797](https://github.com/mathflow-bit/dockercart/commit/7382797f8cc8f6204ed4f2c37708aed8d2280b3b))
+* translation ([9db86a6](https://github.com/mathflow-bit/dockercart/commit/9db86a667552f27bb5878fb53eeb2f6abadef046))
+* update order date formatting to use datetime format ([dc9cb3f](https://github.com/mathflow-bit/dockercart/commit/dc9cb3f5894d6c55fa105ef55e97261761a29d30))
+
 ## [1.28.0](https://github.com/mathflow-bit/dockercart/compare/v1.27.8...v1.28.0) (2026-05-26)
 
 ### Features
