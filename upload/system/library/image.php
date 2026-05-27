@@ -267,6 +267,106 @@ class Image {
 	}
 
 	/**
+	 * Analyze the source image and decide whether 'cover' or 'contain'
+	 * will produce the best visual result.
+	 *
+	 * Samples all four edges, then calculates the average colour and
+	 * standard deviation (variance) of the non-transparent border
+	 * pixels.  Three criteria must be met for 'contain':
+	 *
+	 *   1. Border is uniform    — stddev < 25  (low colour variation)
+	 *   2. Border is light      — average R/G/B all >= 240
+	 *
+	 * If the border has significant transparency (>= 50 % of samples)
+	 * 'contain' is also returned regardless of colour, because
+	 * transparent padding blends invisibly.
+	 *
+	 * Everything else → 'cover'.
+	 *
+	 * @return string 'cover' | 'contain'
+	 */
+	private function detectStrategy(): string {
+		$w = $this->width;
+		$h = $this->height;
+
+		$sample_step   = (int) max(1, min($w, $h) / 20);
+		$samples_r     = array();
+		$samples_g     = array();
+		$samples_b     = array();
+		$transparent   = 0;
+		$total_samples = 0;
+
+		$collect = function ($x, $y) use (&$samples_r, &$samples_g, &$samples_b, &$transparent, &$total_samples) {
+			$total_samples++;
+			$color_index = imagecolorat($this->image, $x, $y);
+			$rgba        = imagecolorsforindex($this->image, $color_index);
+
+			if (isset($rgba['alpha']) && $rgba['alpha'] >= 96) {
+				$transparent++;
+				return;
+			}
+
+			$samples_r[] = $rgba['red'];
+			$samples_g[] = $rgba['green'];
+			$samples_b[] = $rgba['blue'];
+		};
+
+		// top edge
+		for ($x = 0; $x < $w; $x += $sample_step) {
+			$collect($x, 0);
+		}
+
+		// bottom edge
+		for ($x = 0; $x < $w; $x += $sample_step) {
+			$collect($x, $h - 1);
+		}
+
+		// left edge (skip corners already sampled)
+		for ($y = $sample_step; $y < $h - 1; $y += $sample_step) {
+			$collect(0, $y);
+		}
+
+		// right edge (skip corners already sampled)
+		for ($y = $sample_step; $y < $h - 1; $y += $sample_step) {
+			$collect($w - 1, $y);
+		}
+
+		if ($total_samples === 0) {
+			return 'contain';
+		}
+
+		// Predominantly transparent border → contain
+		if (($transparent / $total_samples) >= 0.50) {
+			return 'contain';
+		}
+
+		$opaque_count = count($samples_r);
+		if ($opaque_count < 8) {
+			return 'cover';
+		}
+
+		// Average colour of non-transparent border samples
+		$avg_r = (int) (array_sum($samples_r) / $opaque_count);
+		$avg_g = (int) (array_sum($samples_g) / $opaque_count);
+		$avg_b = (int) (array_sum($samples_b) / $opaque_count);
+
+		// Standard deviation (how much border colour varies)
+		$var = 0.0;
+		for ($i = 0; $i < $opaque_count; $i++) {
+			$var += ($samples_r[$i] - $avg_r) ** 2
+			      + ($samples_g[$i] - $avg_g) ** 2
+			      + ($samples_b[$i] - $avg_b) ** 2;
+		}
+		$var    /= $opaque_count;
+		$stddev  = sqrt($var);
+
+		$is_uniform = $stddev < 25;
+		$is_white   = $avg_r >= 240 && $avg_g >= 240 && $avg_b >= 240;
+
+		return ($is_uniform && $is_white) ? 'contain' : 'cover';
+	}
+
+	/**
      * Resize image using the specified strategy.
      *
      * Strategy 'contain' (default): scales the image to fit within the target
@@ -275,14 +375,22 @@ class Image {
      * Strategy 'cover': scales the image so it fully fills the target rectangle
      * and crops from the center — no padding, no distortion, minimal quality loss.
      *
+     * Strategy 'hybrid': automatically chooses between 'contain' and 'cover'
+     * per image based on border pixel analysis.
+     *
      * @param	int		$width
 	 * @param	int		$height
 	 * @param	string	$default  'w' | 'h' | '' — axis hint (used by contain only)
-	 * @param	string	$strategy 'contain' | 'cover'
+	 * @param	string	$strategy 'contain' | 'cover' | 'hybrid'
      */
 	public function resize(int $width = 0, int $height = 0, $default = '', string $strategy = 'contain') {
 		if (!$this->width || !$this->height) {
 			return;
+		}
+
+		// ── HYBRID strategy — auto-detect best mode per image ──────────────────
+		if ($strategy === 'hybrid') {
+			$strategy = $this->detectStrategy();
 		}
 
 		$scale_w = $width / $this->width;

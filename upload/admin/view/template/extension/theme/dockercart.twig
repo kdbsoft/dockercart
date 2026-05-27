@@ -87,10 +87,12 @@
                 <select name="theme_dockercart_image_resize_mode" id="input-image-resize-mode" class="form-control">
                   <option value="contain"{% if theme_dockercart_image_resize_mode == 'contain' %} selected="selected"{% endif %}>{{ text_resize_contain }}</option>
                   <option value="cover"{% if theme_dockercart_image_resize_mode == 'cover' %} selected="selected"{% endif %}>{{ text_resize_cover }}</option>
+                  <option value="hybrid"{% if theme_dockercart_image_resize_mode == 'hybrid' %} selected="selected"{% endif %}>{{ text_resize_hybrid }}</option>
                 </select>
                 <p class="help-block" style="margin-top:6px;">
                   <strong>Contain</strong> — вписывает в рамку, добавляет белый/прозрачный фон.<br>
-                  <strong>Cover</strong> — заполняет кадр целиком, обрезает лишнее по центру. Нет белых полос, изображение максимально похоже на оригинал.
+                  <strong>Cover</strong> — заполняет кадр целиком, обрезает лишнее по центру. Нет белых полос, изображение максимально похоже на оригинал.<br>
+                  <strong>Hybrid</strong> — автоматически определяет тип изображения: для товаров на белом/прозрачном фоне — contain, для сюжетных фотографий — cover.
                 </p>
               </div>
             </div>
@@ -147,22 +149,6 @@
                 </div>
                 {% if error_image_thumb %}
                 <div class="text-danger">{{ error_image_thumb }}</div>
-                {% endif %}
-              </div>
-            </div>
-            <div class="form-group required">
-              <label class="col-sm-2 control-label" for="input-image-popup-width">{{ entry_image_popup }}</label>
-              <div class="col-sm-10">
-                <div class="row">
-                  <div class="col-sm-6">
-                    <input type="text" name="theme_dockercart_image_popup_width" value="{{ theme_dockercart_image_popup_width }}" placeholder="{{ entry_width }}" id="input-image-popup-width" class="form-control" />
-                  </div>
-                  <div class="col-sm-6">
-                    <input type="text" name="theme_dockercart_image_popup_height" value="{{ theme_dockercart_image_popup_height }}" placeholder="{{ entry_height }}" class="form-control" />
-                  </div>
-                </div>
-                {% if error_image_popup %}
-                <div class="text-danger">{{ error_image_popup }}</div>
                 {% endif %}
               </div>
             </div>
