@@ -26,4 +26,5 @@ $_['text_model_prefix'] = 'Product Code: ';
 $_['text_qv_feature_delivery'] = 'Free shipping on this item';
 $_['text_qv_feature_warranty'] = '2-year manufacturer warranty';
 $_['text_qv_feature_returns'] = '30-day hassle-free returns';
+$_['text_call_for_price'] = 'Contact for price';
 $_['button_cart'] = 'Add to Cart';

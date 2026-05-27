@@ -206,9 +206,36 @@
         }
       }
 
+      // Call for price handling
+      var isCfp = card.dataset.callForPrice === '1';
+
+      var priceWrap = document.getElementById('qv-price-wrap');
+      var addBtn = document.getElementById('qv-add-btn');
+      var callBtn = document.getElementById('qv-call-btn');
+      var callText = document.getElementById('qv-call-text');
+
+      if (isCfp) {
+        if (priceWrap) priceWrap.style.display = 'none';
+        if (oldPriceEl) oldPriceEl.style.display = 'none';
+        if (badgeEl) badgeEl.style.display = 'none';
+        if (savingsEl) savingsEl.style.display = 'none';
+        if (addBtn) addBtn.classList.add('hidden');
+        if (callBtn) {
+          var phone = (window.dcLang && window.dcLang.call_for_price_phone) || '';
+          callBtn.href = 'tel:' + phone;
+          callBtn.classList.remove('hidden');
+          if (callText) {
+            callText.textContent = (window.dcLang && window.dcLang.text_call_for_price) ? window.dcLang.text_call_for_price : 'Contact for price';
+          }
+        }
+      } else {
+        if (priceWrap) priceWrap.style.display = '';
+        if (addBtn) addBtn.classList.remove('hidden');
+        if (callBtn) callBtn.classList.add('hidden');
+      }
+
       // Wire add to cart button
-      const addBtn = document.getElementById('qv-add-btn');
-      if (addBtn) {
+      if (addBtn && !isCfp) {
         addBtn.onclick = () => {
           if (typeof cart !== 'undefined' && cart.add) {
             cart.add(productId, minimum);
@@ -299,7 +326,7 @@
       </div>
       
       <!-- Price -->
-      <div class="flex items-baseline gap-2">
+      <div id="qv-price-wrap" class="flex items-baseline gap-2">
         <span id="qv-price" class="text-2xl font-extrabold text-gray-900"></span>
         <span id="qv-old-price" class="text-base text-red-400 line-through" style="display:none;"></span>
         <span id="qv-badge" class="text-xs font-bold bg-red-500 text-white px-2 py-0.5 rounded-lg" style="display:none;"></span>
@@ -321,6 +348,10 @@
       <!-- Actions -->
       <div class="flex gap-3 mt-4">
         <button id="qv-add-btn" class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition text-sm shadow-md shadow-blue-200">Add to Cart</button>
+        <a id="qv-call-btn" href="tel:" class="hidden flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition text-sm shadow-md shadow-blue-200 inline-flex items-center justify-center gap-2 whitespace-nowrap">
+          <i data-lucide="phone" class="w-4 h-4"></i>
+          <span id="qv-call-text">Contact for price</span>
+        </a>
         <button id="qv-wishlist-btn" class="w-11 h-11 rounded-xl border border-gray-200 hover:border-rose-300 hover:bg-rose-50 flex items-center justify-center transition flex-shrink-0">
           <i data-lucide="heart" class="w-5 h-5 text-gray-400"></i>
         </button>

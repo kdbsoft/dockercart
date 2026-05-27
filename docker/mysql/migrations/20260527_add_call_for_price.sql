@@ -1,0 +1,1 @@
+ALTER TABLE `oc_product` ADD COLUMN IF NOT EXISTS `call_for_price` TINYINT(1) NOT NULL DEFAULT 0 AFTER `price`;
