@@ -1,3 +1,10 @@
+## [1.29.1](https://github.com/mathflow-bit/dockercart/compare/v1.29.0...v1.29.1) (2026-05-27)
+
+### Bug Fixes
+
+* multicurrency price conversion to filter module ([88ea4f1](https://github.com/mathflow-bit/dockercart/commit/88ea4f100149db8cd615ad6ca40ed90dcf4f0b12))
+* update call‑for‑price translations and show button only for zero or ([d4ee3e0](https://github.com/mathflow-bit/dockercart/commit/d4ee3e0ccb6b626ca8ec6c83833817e26f452642))
+
 ## [1.29.0](https://github.com/mathflow-bit/dockercart/compare/v1.28.0...v1.29.0) (2026-05-27)
 
 ### Features
