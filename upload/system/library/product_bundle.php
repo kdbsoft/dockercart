@@ -1,5 +1,6 @@
 <?php
-/** @property \DB $db */
+/** @property \DB $db
+ * @property \Cache $cache */
 class ProductBundle {
 	private $registry;
 
