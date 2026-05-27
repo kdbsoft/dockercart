@@ -485,6 +485,21 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
             . "</IfModule>\n"
             . $marker_end;
 
+        $standard_rules = "# OpenCart SEO URL Rules - BEGIN\n"
+            . "<IfModule mod_rewrite.c>\n"
+            . "RewriteEngine On\n"
+            . "RewriteBase /\n"
+            . "RewriteRule ^sitemap\\.xml$ index.php?route=extension/feed/google_sitemap [L]\n"
+            . "RewriteRule ^googlebase\\.xml$ index.php?route=extension/feed/google_base [L]\n"
+            . "RewriteRule ^install(/.*)?$ index.php?route=error/not_found [L]\n"
+            . "RewriteRule ^system/storage/(.*) index.php?route=error/not_found [L]\n"
+            . "RewriteCond %{REQUEST_FILENAME} !-f\n"
+            . "RewriteCond %{REQUEST_FILENAME} !-d\n"
+            . "RewriteCond %{REQUEST_URI} !.*\\.(ico|gif|jpg|jpeg|png|js|css)\n"
+            . "RewriteRule ^([^?]*) index.php?_route_=$1 [L,QSA]\n"
+            . "</IfModule>\n"
+            . "# OpenCart SEO URL Rules - END\n";
+
         try {
             if (file_exists($htaccess)) {
                 $content = @file_get_contents($htaccess);
@@ -498,8 +513,8 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
                     }
                 }
             } else {
-
-                @file_put_contents($htaccess, $snippet, LOCK_EX);
+                $content = $snippet . "\n" . $standard_rules;
+                @file_put_contents($htaccess, $content, LOCK_EX);
                 @chmod($htaccess, 0644);
             }
         } catch (\Throwable $e) {
