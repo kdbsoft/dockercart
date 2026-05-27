@@ -22,12 +22,18 @@ class ModelToolImage extends Model {
 		if ($strategy === '') {
 			$strategy = $this->config->get('theme_dockercart_image_resize_mode') ?: 'contain';
 		}
-		$strategy = ($strategy === 'cover') ? 'cover' : 'contain';
+		$strategy = ($strategy === 'cover' || $strategy === 'hybrid') ? $strategy : 'contain';
 
 		$extension = pathinfo($filename, PATHINFO_EXTENSION);
 
 		$image_old = $filename;
-		$suffix    = ($strategy === 'cover') ? '-cover' : '';
+		if ($strategy === 'cover') {
+			$suffix = '-cover';
+		} elseif ($strategy === 'hybrid') {
+			$suffix = '-hybrid';
+		} else {
+			$suffix = '';
+		}
 		$image_new = 'cache/' . utf8_substr($filename, 0, utf8_strrpos($filename, '.')) . '-' . $width . 'x' . $height . $suffix . '.' . $extension;
 
 		if (!is_file(DIR_IMAGE . $image_new) || (filemtime(DIR_IMAGE . $image_old) > filemtime(DIR_IMAGE . $image_new))) {

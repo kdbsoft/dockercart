@@ -24,7 +24,7 @@ class ModelToolImage extends Model {
 		if ($strategy === '') {
 			$strategy = $this->config->get('theme_dockercart_image_resize_mode') ?: 'contain';
 		}
-		$strategy = ($strategy === 'cover') ? 'cover' : 'contain';
+		$strategy = ($strategy === 'cover' || $strategy === 'hybrid') ? $strategy : 'contain';
 
 		$source_extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
 		$webp_enabled = (bool)$this->config->get('theme_dockercart_image_webp_status');
@@ -38,8 +38,14 @@ class ModelToolImage extends Model {
 		$target_extension = ($webp_enabled && $webp_supported) ? 'webp' : $source_extension;
 
 		$image_old = $filename;
-		// Cover images get a distinct cache filename to avoid collisions with contain.
-		$suffix    = ($strategy === 'cover') ? '-cover' : '';
+		// Cover/hybrid images get a distinct cache filename to avoid collisions with contain.
+		if ($strategy === 'cover') {
+			$suffix = '-cover';
+		} elseif ($strategy === 'hybrid') {
+			$suffix = '-hybrid';
+		} else {
+			$suffix = '';
+		}
 		if ($target_extension === 'webp') {
 			$suffix .= '-webp-q' . $webp_quality;
 		}
