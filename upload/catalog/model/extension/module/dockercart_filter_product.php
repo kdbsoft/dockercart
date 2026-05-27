@@ -60,6 +60,62 @@ class ModelExtensionModuleDockercartFilterProduct extends ModelCatalogProduct {
         return "LOWER($field_name) REGEXP '" . $this->db->escape($pattern) . "'";
     }
 
+    private function getDiscountSubquery($alias) {
+        return "(SELECT pd2.price FROM " . DB_PREFIX . "product_discount pd2
+                 WHERE pd2.product_id = " . $alias . ".product_id
+                 AND pd2.customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "'
+                 AND pd2.quantity = '1'
+                 AND ((pd2.date_start = '0000-00-00' OR pd2.date_start < NOW())
+                 AND (pd2.date_end = '0000-00-00' OR pd2.date_end > NOW()))
+                 ORDER BY pd2.priority ASC, pd2.price ASC LIMIT 1)";
+    }
+
+    private function getCGPriceSubquery($alias) {
+        return "(SELECT dcgp.price FROM " . DB_PREFIX . "dockercart_product_customer_group_price dcgp
+                 WHERE dcgp.product_id = " . $alias . ".product_id
+                 AND dcgp.customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "')";
+    }
+
+    private function hasCGPriceSubquery($alias) {
+        return "EXISTS (SELECT 1 FROM " . DB_PREFIX . "dockercart_product_customer_group_price dcgp_chk
+                         WHERE dcgp_chk.product_id = " . $alias . ".product_id
+                         AND dcgp_chk.customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "'
+                         AND dcgp_chk.price > 0)";
+    }
+
+    private function getSpecialSubquery($alias) {
+        return "(SELECT ps.price FROM " . DB_PREFIX . "product_special ps
+                 WHERE ps.product_id = " . $alias . ".product_id
+                 AND ps.customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "'
+                 AND ((ps.date_start = '0000-00-00' OR ps.date_start < NOW())
+                 AND (ps.date_end = '0000-00-00' OR ps.date_end > NOW()))
+                 ORDER BY ps.priority ASC, ps.price ASC LIMIT 1)";
+    }
+
+    private function getEffectivePriceExpression($alias = 'p') {
+        $group_discount = (float)$this->config->get('config_customer_group_discount');
+        $group_markup = (float)$this->config->get('config_customer_group_markup');
+
+        $cg_price_sub = $this->getCGPriceSubquery($alias);
+        $has_cg_price = $this->hasCGPriceSubquery($alias);
+        $discount_sub = $this->getDiscountSubquery($alias);
+        $special_sub = $this->getSpecialSubquery($alias);
+
+        $base_pre_discount = "COALESCE(NULLIF(" . $cg_price_sub . ", 0), " . $alias . ".price)";
+        $effective_before_pct = "LEAST(" . $base_pre_discount . ", COALESCE(" . $discount_sub . ", 999999999))";
+
+        $pct_mult = "1.0";
+        if ($group_discount > 0) {
+            $pct_mult = "((100 - " . $group_discount . ") / 100)";
+        } elseif ($group_markup > 0) {
+            $pct_mult = "((100 + " . $group_markup . ") / 100)";
+        }
+
+        $effective_after_pct = "(CASE WHEN " . $has_cg_price . " THEN " . $effective_before_pct . " ELSE " . $effective_before_pct . " * " . $pct_mult . " END)";
+
+        return "LEAST(" . $effective_after_pct . ", COALESCE(" . $special_sub . ", 999999999))";
+    }
+
     public function getProducts($data = array()) {
 
         $filter_data = $this->registry->get('dockercart_filter_data');
@@ -89,7 +145,9 @@ class ModelExtensionModuleDockercartFilterProduct extends ModelCatalogProduct {
 
         $this->logger->debug('Building custom SQL query');
 
-        $sql = "SELECT p.product_id, (SELECT AVG(rating) AS total FROM " . DB_PREFIX . "review r1 WHERE r1.product_id = p.product_id AND r1.status = '1' GROUP BY r1.product_id) AS rating, (SELECT price FROM " . DB_PREFIX . "product_discount pd2 WHERE pd2.product_id = p.product_id AND pd2.customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "' AND pd2.quantity = '1' AND ((pd2.date_start = '0000-00-00' OR pd2.date_start < NOW()) AND (pd2.date_end = '0000-00-00' OR pd2.date_end > NOW())) ORDER BY pd2.priority ASC, pd2.price ASC LIMIT 1) AS discount, (SELECT price FROM " . DB_PREFIX . "product_special ps WHERE ps.product_id = p.product_id AND ps.customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "' AND ((ps.date_start = '0000-00-00' OR ps.date_start < NOW()) AND (ps.date_end = '0000-00-00' OR ps.date_end > NOW())) ORDER BY ps.priority ASC, ps.price ASC LIMIT 1) AS special";
+        $effective_price = $this->getEffectivePriceExpression('p');
+
+        $sql = "SELECT p.product_id, (SELECT AVG(rating) AS total FROM " . DB_PREFIX . "review r1 WHERE r1.product_id = p.product_id AND r1.status = '1' GROUP BY r1.product_id) AS rating, " . $this->getDiscountSubquery('p') . " AS discount, " . $this->getSpecialSubquery('p') . " AS special, " . $this->getCGPriceSubquery('p') . " AS customer_group_price";
 
         if (!empty($data['filter_category_id'])) {
             if (!empty($data['filter_sub_category'])) {
@@ -152,10 +210,10 @@ class ModelExtensionModuleDockercartFilterProduct extends ModelCatalogProduct {
         }
 
         if (isset($data['filter_price_min']) && $data['filter_price_min'] !== '') {
-            $sql .= " AND p.price >= " . (float)$data['filter_price_min'];
+            $sql .= " AND " . $effective_price . " >= " . (float)$data['filter_price_min'];
         }
         if (isset($data['filter_price_max']) && $data['filter_price_max'] !== '') {
-            $sql .= " AND p.price <= " . (float)$data['filter_price_max'];
+            $sql .= " AND " . $effective_price . " <= " . (float)$data['filter_price_max'];
         }
 
         $sql .= " GROUP BY p.product_id";
@@ -239,6 +297,8 @@ class ModelExtensionModuleDockercartFilterProduct extends ModelCatalogProduct {
             return parent::getTotalProducts($data);
         }
 
+        $effective_price = $this->getEffectivePriceExpression('p');
+
         $sql = "SELECT COUNT(DISTINCT p.product_id) as total FROM " . DB_PREFIX . "product p";
 
         if (!empty($data['filter_category_id'])) {
@@ -297,10 +357,10 @@ class ModelExtensionModuleDockercartFilterProduct extends ModelCatalogProduct {
         }
 
         if (isset($data['filter_price_min']) && $data['filter_price_min'] !== '') {
-            $sql .= " AND p.price >= " . (float)$data['filter_price_min'];
+            $sql .= " AND " . $effective_price . " >= " . (float)$data['filter_price_min'];
         }
         if (isset($data['filter_price_max']) && $data['filter_price_max'] !== '') {
-            $sql .= " AND p.price <= " . (float)$data['filter_price_max'];
+            $sql .= " AND " . $effective_price . " <= " . (float)$data['filter_price_max'];
         }
 
         $query = $this->db->query($sql);

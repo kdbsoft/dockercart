@@ -201,13 +201,17 @@ class ControllerExtensionModuleDockercartFilterEvent extends Controller {
 
 
         if (isset($decoded['price_min']) && $decoded['price_min'] !== '') {
-            $filter_data['filter_price_min'] = (float)$decoded['price_min'];
+            $price_currency = !empty($decoded['currency']) ? $decoded['currency'] : $this->session->data['currency'];
+            $filter_data['filter_price_min'] = (float)$this->currency->convert((float)$decoded['price_min'], $price_currency, $this->config->get('config_currency'));
             $has_filters = true;
+            $this->logger->debug('replaceProductModel: Converted price_min from ' . $price_currency . ' to base: ' . $filter_data['filter_price_min']);
         }
 
         if (isset($decoded['price_max']) && $decoded['price_max'] !== '') {
-            $filter_data['filter_price_max'] = (float)$decoded['price_max'];
+            $price_currency = !empty($decoded['currency']) ? $decoded['currency'] : $this->session->data['currency'];
+            $filter_data['filter_price_max'] = (float)$this->currency->convert((float)$decoded['price_max'], $price_currency, $this->config->get('config_currency'));
             $has_filters = true;
+            $this->logger->debug('replaceProductModel: Converted price_max from ' . $price_currency . ' to base: ' . $filter_data['filter_price_max']);
         }
 
         if ($has_filters) {
@@ -361,11 +365,6 @@ class ControllerExtensionModuleDockercartFilterEvent extends Controller {
             $this->logger->debug('modifyCategoryPageSEO: Updated meta title to: ' . $new_title);
         }
 
-        if (!$this->config->get('module_dockercart_filter_seo_mode')) {
-            return;
-        }
-
-
         $dcf = $this->request->get['dcf'];
         $json = @hex2bin($dcf);
         $decoded = @json_decode($json, true);
@@ -374,11 +373,66 @@ class ControllerExtensionModuleDockercartFilterEvent extends Controller {
             return;
         }
 
+        $filter_price_min = isset($decoded['price_min']) ? $decoded['price_min'] : '';
+        $filter_price_max = isset($decoded['price_max']) ? $decoded['price_max'] : '';
+
+        // Price filter applied — always add noindex + canonical to base category, regardless of SEO mode
+        if ($filter_price_min !== '' || $filter_price_max !== '') {
+            $category_id = 0;
+            if (isset($this->request->get['path'])) {
+                $path = explode('_', $this->request->get['path']);
+                $category_id = (int)end($path);
+            }
+
+            if ($category_id) {
+                $canonical_url = $this->url->link('product/category', 'path=' . $this->request->get['path']);
+            } else {
+                $canonical_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://') .
+                               $_SERVER['HTTP_HOST'] .
+                               strtok($_SERVER['REQUEST_URI'], '?');
+            }
+
+            $canonical_link = '<link href="' . htmlspecialchars($canonical_url, ENT_QUOTES, 'UTF-8') . '" rel="canonical" />';
+
+            $output = preg_replace(
+                '/<link[^>]*rel=["\']canonical["\'][^>]*>/i',
+                $canonical_link,
+                $output
+            );
+
+            if (strpos($output, $canonical_link) === false && preg_match('/<head[^>]*>/i', $output)) {
+                $output = preg_replace(
+                    '/(<head[^>]*>)/i',
+                    '$1' . "\n" . $canonical_link,
+                    $output,
+                    1
+                );
+            }
+
+            if (preg_match('/<head[^>]*>/i', $output)) {
+                if (!preg_match('/<meta\s+name=["\']robots["\'][^>]*content=["\'][^"\']*noindex/i', $output)) {
+                    $output = preg_replace(
+                        '/(<head[^>]*>)/i',
+                        '$1' . "\n" . '<meta name="robots" content="noindex,follow">',
+                        $output,
+                        1
+                    );
+                    $this->logger->debug('modifyCategoryPageSEO: Added noindex + canonical for price filter');
+                }
+            }
+
+            if (!$this->config->get('module_dockercart_filter_seo_mode')) {
+                return;
+            }
+        }
+
+        if (!$this->config->get('module_dockercart_filter_seo_mode')) {
+            return;
+        }
+
         $filter_manufacturer = isset($decoded['manufacturers']) ? $decoded['manufacturers'] : [];
         $filter_attribute = isset($decoded['attributes']) ? $decoded['attributes'] : [];
         $filter_option = isset($decoded['options']) ? $decoded['options'] : [];
-        $filter_price_min = isset($decoded['price_min']) ? $decoded['price_min'] : '';
-        $filter_price_max = isset($decoded['price_max']) ? $decoded['price_max'] : '';
 
         $should_index = true;
         $seo_reason = 'Unknown filter combination';

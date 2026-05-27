@@ -53,6 +53,62 @@ class ModelExtensionModuleDockercartFilter extends Model {
         return "LOWER($field_name) REGEXP '" . $this->db->escape($pattern) . "'";
     }
 
+    private function getDiscountSubquery($alias) {
+        return "(SELECT pd2.price FROM " . DB_PREFIX . "product_discount pd2
+                 WHERE pd2.product_id = " . $alias . ".product_id
+                 AND pd2.customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "'
+                 AND pd2.quantity = '1'
+                 AND ((pd2.date_start = '0000-00-00' OR pd2.date_start < NOW())
+                 AND (pd2.date_end = '0000-00-00' OR pd2.date_end > NOW()))
+                 ORDER BY pd2.priority ASC, pd2.price ASC LIMIT 1)";
+    }
+
+    private function getCGPriceSubquery($alias) {
+        return "(SELECT dcgp.price FROM " . DB_PREFIX . "dockercart_product_customer_group_price dcgp
+                 WHERE dcgp.product_id = " . $alias . ".product_id
+                 AND dcgp.customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "')";
+    }
+
+    private function hasCGPriceSubquery($alias) {
+        return "EXISTS (SELECT 1 FROM " . DB_PREFIX . "dockercart_product_customer_group_price dcgp_chk
+                         WHERE dcgp_chk.product_id = " . $alias . ".product_id
+                         AND dcgp_chk.customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "'
+                         AND dcgp_chk.price > 0)";
+    }
+
+    private function getSpecialSubquery($alias) {
+        return "(SELECT ps.price FROM " . DB_PREFIX . "product_special ps
+                 WHERE ps.product_id = " . $alias . ".product_id
+                 AND ps.customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "'
+                 AND ((ps.date_start = '0000-00-00' OR ps.date_start < NOW())
+                 AND (ps.date_end = '0000-00-00' OR ps.date_end > NOW()))
+                 ORDER BY ps.priority ASC, ps.price ASC LIMIT 1)";
+    }
+
+    private function getEffectivePriceExpression($alias = 'p') {
+        $group_discount = (float)$this->config->get('config_customer_group_discount');
+        $group_markup = (float)$this->config->get('config_customer_group_markup');
+
+        $cg_price_sub = $this->getCGPriceSubquery($alias);
+        $has_cg_price = $this->hasCGPriceSubquery($alias);
+        $discount_sub = $this->getDiscountSubquery($alias);
+        $special_sub = $this->getSpecialSubquery($alias);
+
+        $base_pre_discount = "COALESCE(NULLIF(" . $cg_price_sub . ", 0), " . $alias . ".price)";
+        $effective_before_pct = "LEAST(" . $base_pre_discount . ", COALESCE(" . $discount_sub . ", 999999999))";
+
+        $pct_mult = "1.0";
+        if ($group_discount > 0) {
+            $pct_mult = "((100 - " . $group_discount . ") / 100)";
+        } elseif ($group_markup > 0) {
+            $pct_mult = "((100 + " . $group_markup . ") / 100)";
+        }
+
+        $effective_after_pct = "(CASE WHEN " . $has_cg_price . " THEN " . $effective_before_pct . " ELSE " . $effective_before_pct . " * " . $pct_mult . " END)";
+
+        return "LEAST(" . $effective_after_pct . ", COALESCE(" . $special_sub . ", 999999999))";
+    }
+
     private function getCacheTime() {
         $cache_time = $this->config->get('module_dockercart_filter_cache_time');
         return !empty($cache_time) ? (int)$cache_time : 3600;
@@ -86,9 +142,11 @@ class ModelExtensionModuleDockercartFilter extends Model {
             }
         }
 
+        $effective_price = $this->getEffectivePriceExpression('p');
+
         $sql = "SELECT
-                    COALESCE(MIN(p.price), 0) as min_price,
-                    COALESCE(MAX(p.price), 0) as max_price
+                    COALESCE(MIN(" . $effective_price . "), 0) as min_price,
+                    COALESCE(MAX(" . $effective_price . "), 0) as max_price
                 FROM " . DB_PREFIX . "product p";
 
         if ($category_id) {
@@ -135,45 +193,19 @@ class ModelExtensionModuleDockercartFilter extends Model {
 
         $query = $this->db->query($sql);
 
-        $min_base = (float)$query->row['min_price'];
-        $max_base = (float)$query->row['max_price'];
-
-        $sql_special = "SELECT COALESCE(MIN(ps.price), 0) as min_special
-                        FROM " . DB_PREFIX . "product_special ps
-                        INNER JOIN " . DB_PREFIX . "product p ON ps.product_id = p.product_id";
-
-        if ($category_id) {
-            $sql_special .= " INNER JOIN " . DB_PREFIX . "product_to_category p2c ON p.product_id = p2c.product_id";
-        }
-
-        $sql_special .= " WHERE p.status = 1
-                        AND ps.customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "'
-                        AND ps.date_start <= NOW()
-                        AND (ps.date_end = '0000-00-00 00:00:00' OR ps.date_end > NOW())";
-
-        if ($category_id) {
-            $sql_special .= " AND p2c.category_id = " . (int)$category_id;
-        }
-
-        if (!empty($data['filter_manufacturers'])) {
-            $sql_special .= " AND p.manufacturer_id IN (" . implode(',', array_map('intval', $data['filter_manufacturers'])) . ")";
-        }
-
-        $query_special = $this->db->query($sql_special);
-        $min_special = (float)$query_special->row['min_special'];
-
-        $min_price = ($min_special > 0 && $min_special < $min_base) ? $min_special : $min_base;
+        $min_price = (float)$query->row['min_price'];
+        $max_price = (float)$query->row['max_price'];
 
         $base_currency = $this->config->get('config_currency');
         $current_currency = isset($this->session->data['currency']) ? $this->session->data['currency'] : $base_currency;
 
-        $display_min = (float)$min_price;
-        $display_max = (float)$max_base;
+        $display_min = $min_price;
+        $display_max = $max_price;
 
         if ($base_currency !== $current_currency) {
             $display_min = (float)$this->currency->convert($display_min, $base_currency, $current_currency);
             $display_max = (float)$this->currency->convert($display_max, $base_currency, $current_currency);
-            $this->logger->debug('getPriceRange: Converted from ' . $base_currency . ' to ' . $current_currency . ' | min: ' . $min_price . ' -> ' . $display_min . ' | max: ' . $max_base . ' -> ' . $display_max);
+            $this->logger->debug('getPriceRange: Converted from ' . $base_currency . ' to ' . $current_currency . ' | min: ' . $min_price . ' -> ' . $display_min . ' | max: ' . $max_price . ' -> ' . $display_max);
         }
 
         $result = [
@@ -206,7 +238,7 @@ class ModelExtensionModuleDockercartFilter extends Model {
                       isset($data['filter_price_min']) ||
                       isset($data['filter_price_max']);
 
-        $cache_key = 'dockercart_filter.' . (int)$category_id . '.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_store_id') . '.manufacturers';
+        $cache_key = 'dockercart_filter.' . (int)$category_id . '.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_store_id') . '.' . (int)$this->config->get('config_customer_group_id') . '.manufacturers';
 
         if (!$has_filters) {
             $cached = $this->cache->get($cache_key);
@@ -215,6 +247,8 @@ class ModelExtensionModuleDockercartFilter extends Model {
                 return $cached;
             }
         }
+
+        $effective_price = $this->getEffectivePriceExpression('p');
 
         $sql = "SELECT
                     m.manufacturer_id,
@@ -235,10 +269,10 @@ class ModelExtensionModuleDockercartFilter extends Model {
         }
 
         if (isset($data['filter_price_min']) && $data['filter_price_min'] !== '') {
-            $sql .= " AND p.price >= " . (float)$data['filter_price_min'];
+            $sql .= " AND " . $effective_price . " >= " . (float)$data['filter_price_min'];
         }
         if (isset($data['filter_price_max']) && $data['filter_price_max'] !== '') {
-            $sql .= " AND p.price <= " . (float)$data['filter_price_max'];
+            $sql .= " AND " . $effective_price . " <= " . (float)$data['filter_price_max'];
         }
 
         if (!empty($data['filter_attributes'])) {
@@ -302,7 +336,7 @@ class ModelExtensionModuleDockercartFilter extends Model {
                       isset($data['filter_price_min']) ||
                       isset($data['filter_price_max']);
 
-        $cache_key = 'dockercart_filter.' . (int)$category_id . '.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_store_id') . '.attributes';
+        $cache_key = 'dockercart_filter.' . (int)$category_id . '.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_store_id') . '.' . (int)$this->config->get('config_customer_group_id') . '.attributes';
 
         if (!$has_filters) {
             $cached = $this->cache->get($cache_key);
@@ -379,6 +413,8 @@ class ModelExtensionModuleDockercartFilter extends Model {
 
         $category_id = !empty($data['filter_category_id']) ? (int)$data['filter_category_id'] : 0;
 
+        $effective_price = $this->getEffectivePriceExpression('p');
+
         $sql = "SELECT
                     pa.text as value_text,
                     COUNT(DISTINCT p.product_id) as product_count
@@ -396,10 +432,10 @@ class ModelExtensionModuleDockercartFilter extends Model {
         $sql .= " AND pa.attribute_id = " . (int)$target_attr_id;
 
         if (isset($data['filter_price_min']) && $data['filter_price_min'] !== '') {
-            $sql .= " AND p.price >= " . (float)$data['filter_price_min'];
+            $sql .= " AND " . $effective_price . " >= " . (float)$data['filter_price_min'];
         }
         if (isset($data['filter_price_max']) && $data['filter_price_max'] !== '') {
-            $sql .= " AND p.price <= " . (float)$data['filter_price_max'];
+            $sql .= " AND " . $effective_price . " <= " . (float)$data['filter_price_max'];
         }
 
         if (!empty($data['filter_manufacturers'])) {
@@ -511,7 +547,7 @@ class ModelExtensionModuleDockercartFilter extends Model {
                       isset($data['filter_price_min']) ||
                       isset($data['filter_price_max']);
 
-        $cache_key = 'dockercart_filter.' . (int)$category_id . '.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_store_id') . '.options';
+        $cache_key = 'dockercart_filter.' . (int)$category_id . '.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_store_id') . '.' . (int)$this->config->get('config_customer_group_id') . '.options';
 
         if (!$has_filters) {
             $cached = $this->cache->get($cache_key);
@@ -520,6 +556,8 @@ class ModelExtensionModuleDockercartFilter extends Model {
                 return $cached;
             }
         }
+
+        $effective_price = $this->getEffectivePriceExpression('p');
 
         $sql = "SELECT
                     od.option_id,
@@ -575,10 +613,10 @@ class ModelExtensionModuleDockercartFilter extends Model {
         }
 
         if (isset($data['filter_price_min']) && $data['filter_price_min'] !== '') {
-            $sql .= " AND p.price >= " . (float)$data['filter_price_min'];
+            $sql .= " AND " . $effective_price . " >= " . (float)$data['filter_price_min'];
         }
         if (isset($data['filter_price_max']) && $data['filter_price_max'] !== '') {
-            $sql .= " AND p.price <= " . (float)$data['filter_price_max'];
+            $sql .= " AND " . $effective_price . " <= " . (float)$data['filter_price_max'];
         }
 
         $sql .= " AND p.status = 1
@@ -619,6 +657,8 @@ class ModelExtensionModuleDockercartFilter extends Model {
 
     public function getFilteredProducts($data = []) {
 
+        $effective_price = $this->getEffectivePriceExpression('p');
+
         $where_conditions = ["p.status = 1"];
 
         if (!empty($data['category_id'])) {
@@ -626,10 +666,10 @@ class ModelExtensionModuleDockercartFilter extends Model {
         }
 
         if (isset($data['price_min']) && $data['price_min'] !== '') {
-            $where_conditions[] = "p.price >= " . (float)$data['price_min'];
+            $where_conditions[] = $effective_price . " >= " . (float)$data['price_min'];
         }
         if (isset($data['price_max']) && $data['price_max'] !== '') {
-            $where_conditions[] = "p.price <= " . (float)$data['price_max'];
+            $where_conditions[] = $effective_price . " <= " . (float)$data['price_max'];
         }
 
         if (!empty($data['manufacturer']) && is_array($data['manufacturer'])) {
@@ -649,7 +689,9 @@ class ModelExtensionModuleDockercartFilter extends Model {
                      AND ((ps.date_start = '0000-00-00' OR ps.date_start < NOW())
                      AND (ps.date_end = '0000-00-00' OR ps.date_end > NOW()))
                      ORDER BY ps.priority ASC, ps.price ASC
-                     LIMIT 1) AS special
+                     LIMIT 1) AS special,
+                    " . $this->getDiscountSubquery('p') . " AS discount,
+                    " . $this->getCGPriceSubquery('p') . " AS customer_group_price
                 FROM " . DB_PREFIX . "product p
                 INNER JOIN " . DB_PREFIX . "product_description pd
                     ON p.product_id = pd.product_id
@@ -717,10 +759,12 @@ class ModelExtensionModuleDockercartFilter extends Model {
 
     public function getTotalFilteredProducts($data = []) {
 
+        $effective_price = $this->getEffectivePriceExpression('p');
+
         $sql = "SELECT COUNT(DISTINCT p.product_id) as total
                 FROM " . DB_PREFIX . "product p";
 
-        $where_conditions[] = "p.status = 1";
+        $where_conditions = ["p.status = 1"];
 
         if (!empty($data['category_id'])) {
             $where_conditions[] = "EXISTS (SELECT 1 FROM " . DB_PREFIX . "product_to_category p2c
@@ -729,10 +773,10 @@ class ModelExtensionModuleDockercartFilter extends Model {
         }
 
         if (isset($data['price_min']) && $data['price_min'] !== '') {
-            $where_conditions[] = "p.price >= " . (float)$data['price_min'];
+            $where_conditions[] = $effective_price . " >= " . (float)$data['price_min'];
         }
         if (isset($data['price_max']) && $data['price_max'] !== '') {
-            $where_conditions[] = "p.price <= " . (float)$data['price_max'];
+            $where_conditions[] = $effective_price . " <= " . (float)$data['price_max'];
         }
 
         if (!empty($data['manufacturer']) && is_array($data['manufacturer'])) {
