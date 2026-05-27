@@ -85,7 +85,7 @@
           {% endif %}
           <div class="flex items-end justify-between gap-2">
             <div class="flex items-baseline gap-1">
-              {% set cfp = (product.call_for_price is defined and product.call_for_price) or ((call_for_price_status is defined and call_for_price_status) and call_for_price_phone is defined and call_for_price_phone) %}
+              {% set cfp = (product.call_for_price is defined and product.call_for_price) or ((call_for_price_status is defined and call_for_price_status) and call_for_price_phone is defined and call_for_price_phone and product.price_raw is defined and product.price_raw <= 0) %}
               {% if cfp %}
                 <a href="tel:{{ call_for_price_phone }}" class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition shadow-sm">
                   <i data-lucide="phone" class="w-3.5 h-3.5"></i>
