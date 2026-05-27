@@ -38,9 +38,11 @@ $_['entry_date_start']    = 'Date Start';
 $_['entry_date_end']      = 'Date End';
 $_['entry_uses_total']    = 'Uses Per Coupon';
 $_['entry_uses_customer'] = 'Uses Per Customer';
+$_['entry_auto_renew']    = 'Auto-renew';
 $_['entry_status']        = 'Status';
 
 // Help
+$_['help_auto_renew']     = 'When the coupon expires, a new one will be created automatically with the same duration.';
 $_['help_code']           = 'The code the customer enters to get the discount.';
 $_['help_type']           = 'Percentage or Fixed Amount.';
 $_['help_logged']         = 'Customer must be logged in to use the coupon.';

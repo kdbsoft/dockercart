@@ -333,6 +333,8 @@ class ModelCatalogProduct extends Model
                         $this->db->escape($product_discount["date_start"]) .
                         "', date_end = '" .
                         $this->db->escape($product_discount["date_end"]) .
+                        "', auto_renew = '" .
+                        (int) (!empty($product_discount["auto_renew"])) .
                         "'",
                 );
             }
@@ -355,6 +357,8 @@ class ModelCatalogProduct extends Model
                         $this->db->escape($product_special["date_start"]) .
                         "', date_end = '" .
                         $this->db->escape($product_special["date_end"]) .
+                        "', auto_renew = '" .
+                        (int) (!empty($product_special["auto_renew"])) .
                         "'",
                 );
             }
@@ -375,6 +379,8 @@ class ModelCatalogProduct extends Model
                         $this->db->escape($product_gift["date_start"]) .
                         "', date_end = '" .
                         $this->db->escape($product_gift["date_end"]) .
+                        "', auto_renew = '" .
+                        (int) (!empty($product_gift["auto_renew"])) .
                         "'",
                 );
             }
@@ -964,6 +970,8 @@ class ModelCatalogProduct extends Model
                         $this->db->escape($product_discount["date_start"]) .
                         "', date_end = '" .
                         $this->db->escape($product_discount["date_end"]) .
+                        "', auto_renew = '" .
+                        (int) (!empty($product_discount["auto_renew"])) .
                         "'",
                 );
             }
@@ -994,6 +1002,8 @@ class ModelCatalogProduct extends Model
                         $this->db->escape($product_special["date_start"]) .
                         "', date_end = '" .
                         $this->db->escape($product_special["date_end"]) .
+                        "', auto_renew = '" .
+                        (int) (!empty($product_special["auto_renew"])) .
                         "'",
                 );
             }
@@ -1022,6 +1032,8 @@ class ModelCatalogProduct extends Model
                         $this->db->escape($product_gift["date_start"]) .
                         "', date_end = '" .
                         $this->db->escape($product_gift["date_end"]) .
+                        "', auto_renew = '" .
+                        (int) (!empty($product_gift["auto_renew"])) .
                         "'",
                 );
             }
