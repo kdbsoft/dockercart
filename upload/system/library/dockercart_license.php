@@ -402,6 +402,7 @@ class DockercartLicense {
             '::1',
             '.local',
             '.docker.localhost',
+            '.dockercart.net',
         ];
 
         foreach ($local_patterns as $pattern) {
