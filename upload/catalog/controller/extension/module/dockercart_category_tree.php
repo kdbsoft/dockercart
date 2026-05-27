@@ -6,6 +6,7 @@ class ControllerExtensionModuleDockercartCategoryTree extends Controller {
 		$this->load->model('catalog/category');
 		$this->load->model('catalog/product');
 		$this->load->model('tool/image');
+		$this->load->helper('plural');
 
 		$data['categories_tree'] = array();
 
@@ -28,8 +29,6 @@ class ControllerExtensionModuleDockercartCategoryTree extends Controller {
 		if (!$data['categories_tree']) {
 			return '';
 		}
-
-		$this->load->helper('plural');
 
 		$data['heading_title'] = $this->language->get('heading_title');
 		$data['text_subtitle'] = $this->language->get('text_subtitle');
