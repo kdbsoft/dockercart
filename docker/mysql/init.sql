@@ -20047,8 +20047,6 @@ INSERT INTO `oc_setting` VALUES
 (19118,0,'theme_dockercart','theme_dockercart_image_category_height','640',0),
 (19119,0,'theme_dockercart','theme_dockercart_image_thumb_width','618',0),
 (19120,0,'theme_dockercart','theme_dockercart_image_thumb_height','464',0),
-(19121,0,'theme_dockercart','theme_dockercart_image_popup_width','1236',0),
-(19122,0,'theme_dockercart','theme_dockercart_image_popup_height','928',0),
 (19123,0,'theme_dockercart','theme_dockercart_image_product_width','300',0),
 (19124,0,'theme_dockercart','theme_dockercart_image_product_height','300',0),
 (19125,0,'theme_dockercart','theme_dockercart_image_additional_width','142',0),
