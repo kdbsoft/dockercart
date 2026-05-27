@@ -182,6 +182,11 @@ class ControllerCommonHeader extends Controller {
 		// Button text for quick view
 		$data['button_cart'] = $this->language->get('button_cart');
 
+		// Call for price (for quick view JS)
+		$data['text_call_for_price'] = $this->language->get('text_call_for_price');
+		$data['call_for_price_phone'] = $this->config->get('config_telephone');
+		$data['call_for_price_status'] = (int)$this->config->get('dockercart_theme_call_for_price_status');
+
 		// Wishlist
 		if ($this->customer->isLogged()) {
 			$this->load->model('account/wishlist');

@@ -329,6 +329,17 @@
                   <p class="help-block">{{ help_menu_type }}</p>
                 </div>
               </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="input-call-for-price-status">{{ entry_call_for_price_status }}</label>
+                <div class="col-sm-9">
+                  <select name="dockercart_theme_call_for_price_status" id="input-call-for-price-status" class="form-control" style="max-width:200px;">
+                    <option value="1" {% if dockercart_theme_call_for_price_status == 1 %}selected="selected"{% endif %}>{{ text_enabled }}</option>
+                    <option value="0" {% if dockercart_theme_call_for_price_status == 0 %}selected="selected"{% endif %}>{{ text_disabled }}</option>
+                  </select>
+                  <p class="help-block">{{ help_call_for_price_status }}</p>
+                </div>
+              </div>
             </div>
 
             {# ─────────────────────── Section: Logos ─────────────────────────── #}
