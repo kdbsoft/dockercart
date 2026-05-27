@@ -74,7 +74,7 @@ class ModelExtensionModuleDockercartFilter extends Model {
 
         $base_currency = $this->config->get('config_currency');
         $current_currency = isset($this->session->data['currency']) ? $this->session->data['currency'] : $base_currency;
-        $cache_key = 'dockercart_filter.' . (int)$category_id . '.' . (int)$this->config->get('config_customer_group_id') . '.price_range.' . $current_currency;
+        $cache_key = 'dockercart_filter.' . (int)$category_id . '.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_store_id') . '.' . (int)$this->config->get('config_customer_group_id') . '.price_range.' . $current_currency;
 
         $this->logger->debug('getPriceRange: START - category=' . $category_id . ' | base_currency=' . $base_currency . ' | current_currency=' . $current_currency . ' | cache_key=' . $cache_key);
 
@@ -206,7 +206,7 @@ class ModelExtensionModuleDockercartFilter extends Model {
                       isset($data['filter_price_min']) ||
                       isset($data['filter_price_max']);
 
-        $cache_key = 'dockercart_filter.' . (int)$category_id . '.' . (int)$this->config->get('config_language_id') . '.manufacturers';
+        $cache_key = 'dockercart_filter.' . (int)$category_id . '.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_store_id') . '.manufacturers';
 
         if (!$has_filters) {
             $cached = $this->cache->get($cache_key);
@@ -302,7 +302,7 @@ class ModelExtensionModuleDockercartFilter extends Model {
                       isset($data['filter_price_min']) ||
                       isset($data['filter_price_max']);
 
-        $cache_key = 'dockercart_filter.' . (int)$category_id . '.' . (int)$this->config->get('config_language_id') . '.attributes';
+        $cache_key = 'dockercart_filter.' . (int)$category_id . '.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_store_id') . '.attributes';
 
         if (!$has_filters) {
             $cached = $this->cache->get($cache_key);
@@ -511,7 +511,7 @@ class ModelExtensionModuleDockercartFilter extends Model {
                       isset($data['filter_price_min']) ||
                       isset($data['filter_price_max']);
 
-        $cache_key = 'dockercart_filter.' . (int)$category_id . '.' . (int)$this->config->get('config_language_id') . '.options';
+        $cache_key = 'dockercart_filter.' . (int)$category_id . '.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_store_id') . '.options';
 
         if (!$has_filters) {
             $cached = $this->cache->get($cache_key);
