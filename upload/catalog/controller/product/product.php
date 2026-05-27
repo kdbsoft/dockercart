@@ -333,6 +333,7 @@ class ControllerProductProduct extends Controller {
 			$data['currency_symbol_left'] = $this->currency->getSymbolLeft($display_currency);
 			$data['currency_symbol_right'] = $this->currency->getSymbolRight($display_currency);
 			$data['currency_code'] = $display_currency;
+			$data['currency_decimal_place'] = $this->currency->getDecimalPlace($display_currency);
 			$data['config_symbol_left_space'] = (int)$this->config->get('config_symbol_left_space');
 			$data['manufacturer'] = $product_info['manufacturer'];
 			$data['manufacturers'] = $this->url->link('product/manufacturer/info', 'manufacturer_id=' . $product_info['manufacturer_id']);

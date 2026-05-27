@@ -537,7 +537,8 @@ function dcDetectCurrencySymbol(txt) {
 
 function dcFormatMoney(value) {
   var number = (typeof value === 'number' && !isNaN(value)) ? value : 0;
-  var formatted = number.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  var decimals = {{ currency_decimal_place|default(2) }};
+  var formatted = number.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 
   // Server-provided symbols (may be empty strings)
   var left = {{ currency_symbol_left ? '"' ~ currency_symbol_left|e('js') ~ '"' : '""' }};
