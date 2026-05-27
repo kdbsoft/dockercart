@@ -27,4 +27,4 @@ $_["text_shopping_cart"] = "Кошик для покупок";
 $_["text_transaction"] = "Транзакції";
 $_["text_wishlist"] = "Список бажань (%s)";
 $_["text_contact"] = "Контакти";
-$_["text_call_for_price"] = "Уточнюйте ціну";
+$_["text_call_for_price"] = "Уточнити ціну";
