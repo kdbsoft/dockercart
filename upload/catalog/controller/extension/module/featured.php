@@ -111,6 +111,7 @@ class ControllerExtensionModuleFeatured extends Controller {
 						'reviews'     => $product_info['reviews'],
 					'in_wishlist' => in_array((int)$product_info['product_id'], $wishlist_ids) ? 1 : 0,
 					'has_gift'    => !empty($product_info['has_gift']),
+					'call_for_price' => !empty($product_info['call_for_price']),
 						'href'        => $this->url->link('product/product', 'product_id=' . $product_info['product_id'])
 					);
 				}
