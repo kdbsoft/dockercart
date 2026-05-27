@@ -96,6 +96,67 @@ class ModelExtensionModuleDockercartFilterProduct extends ModelCatalogProduct {
         return "COALESCE(1.0 / NULLIF((SELECT c.value FROM " . DB_PREFIX . "currency c WHERE c.currency_id = " . $alias . ".currency_id), 0), 1.0)";
     }
 
+    private function convertProductPrices(array &$products) {
+        if (empty($products)) {
+            return;
+        }
+
+        $product_ids = array_keys($products);
+
+        $query = $this->db->query("SELECT product_id, currency_id FROM " . DB_PREFIX . "product WHERE product_id IN (" . implode(',', array_map('intval', $product_ids)) . ")");
+
+        $product_currency_map = [];
+        foreach ($query->rows as $row) {
+            if (!empty($row['currency_id'])) {
+                $product_currency_map[(int)$row['product_id']] = (int)$row['currency_id'];
+            }
+        }
+
+        if (empty($product_currency_map)) {
+            return;
+        }
+
+        $currency_values = [];
+        $currency_query = $this->db->query("SELECT currency_id, value FROM " . DB_PREFIX . "currency");
+        foreach ($currency_query->rows as $row) {
+            $currency_values[(int)$row['currency_id']] = (float)$row['value'];
+        }
+
+        $default_currency = $this->config->get('config_currency');
+        $default_query = $this->db->query("SELECT value FROM " . DB_PREFIX . "currency WHERE code = '" . $this->db->escape($default_currency) . "'");
+        $default_value = $default_query->num_rows ? (float)$default_query->row['value'] : 1.0;
+
+        foreach ($products as &$product) {
+            $pid = (int)$product['product_id'];
+            if (!isset($product_currency_map[$pid])) {
+                continue;
+            }
+
+            $currency_id = $product_currency_map[$pid];
+            if (!isset($currency_values[$currency_id]) || $currency_values[$currency_id] <= 0) {
+                continue;
+            }
+
+            $conversion_rate = $default_value / $currency_values[$currency_id];
+
+            if (isset($product['price'])) {
+                $product['price'] = (float)$product['price'] * $conversion_rate;
+            }
+            if (isset($product['special']) && $product['special'] !== null && $product['special'] !== '' && (float)$product['special'] > 0) {
+                $product['special'] = (float)$product['special'] * $conversion_rate;
+            }
+            if (isset($product['discounts']) && is_array($product['discounts'])) {
+                foreach ($product['discounts'] as &$discount) {
+                    if (isset($discount['price'])) {
+                        $discount['price'] = (float)$discount['price'] * $conversion_rate;
+                    }
+                }
+                unset($discount);
+            }
+        }
+        unset($product);
+    }
+
     private function getEffectivePriceExpression($alias = 'p') {
         $group_discount = (float)$this->config->get('config_customer_group_discount');
         $group_markup = (float)$this->config->get('config_customer_group_markup');
@@ -148,7 +209,11 @@ class ModelExtensionModuleDockercartFilterProduct extends ModelCatalogProduct {
         if ($has_tag_search || !$has_custom_filters) {
 
             $this->logger->debug('Using parent getProducts()' . ($has_tag_search ? ' (tag search forced to MySQL)' : ''));
-            return parent::getProducts($data);
+            $product_data = parent::getProducts($data);
+
+            $this->convertProductPrices($product_data);
+
+            return $product_data;
         }
 
         $this->logger->debug('Building custom SQL query');
@@ -280,6 +345,8 @@ class ModelExtensionModuleDockercartFilterProduct extends ModelCatalogProduct {
 
         $this->logger->debug('Product data count = ' . count($product_data));
         $this->logger->debug('Product IDs returned = ' . json_encode(array_keys($product_data)));
+
+        $this->convertProductPrices($product_data);
 
         return $product_data;
     }
