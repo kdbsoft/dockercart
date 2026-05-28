@@ -1,3 +1,13 @@
+## [1.29.3](https://github.com/mathflow-bit/dockercart/compare/v1.29.2...v1.29.3) (2026-05-27)
+
+### Bug Fixes
+
+* add discount percentage badge to product cards ([58090bc](https://github.com/mathflow-bit/dockercart/commit/58090bce8add9aac51d314e1f242c27411c94c04))
+* expose call_for_price flag in module product arrays ([fdc460f](https://github.com/mathflow-bit/dockercart/commit/fdc460f9e46d3ef68f67167125afb02fc187cf93))
+* guard latest module settings and add image fallback ([ae50510](https://github.com/mathflow-bit/dockercart/commit/ae505107f1890cee841b468e1b9bd038d3fc1b4e))
+* include all descendant categories in search filters using recursive ([f3cad99](https://github.com/mathflow-bit/dockercart/commit/f3cad990285f3bdcaf45db48b673f3ce0a5f8750))
+* sort filter attributes/options and respect currency decimal places ([8498543](https://github.com/mathflow-bit/dockercart/commit/849854363ca2409120f5035d1c4be2f8ddfcbc1d))
+
 ## [1.29.2](https://github.com/mathflow-bit/dockercart/compare/v1.29.1...v1.29.2) (2026-05-27)
 
 ### Bug Fixes
