@@ -7,6 +7,14 @@ class ModelExtensionDashboardSale extends Model {
 			$sql .= " AND DATE(date_added) = DATE('" . $this->db->escape($data['filter_date_added']) . "')";
 		}
 
+		if (!empty($data['filter_date_start'])) {
+			$sql .= " AND DATE(date_added) >= DATE('" . $this->db->escape($data['filter_date_start']) . "')";
+		}
+
+		if (!empty($data['filter_date_end'])) {
+			$sql .= " AND DATE(date_added) <= DATE('" . $this->db->escape($data['filter_date_end']) . "')";
+		}
+
 		$query = $this->db->query($sql);
 
 		return isset($query->row['total']) ? $query->row['total'] : 0.00;

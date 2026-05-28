@@ -7,6 +7,11 @@ $_['text_extension']   = 'Extensions';
 $_['text_success']     = 'Success: You have modified dashboard orders!';
 $_['text_edit']        = 'Edit Dashboard Orders';
 $_['text_view']        = 'View more...';
+$_['text_all_time']    = 'All Time';
+$_['text_today']       = 'Today';
+$_['text_week']        = 'Week';
+$_['text_month']       = 'Month';
+$_['text_year']        = 'Year';
 
 // Entry
 $_['entry_status']     = 'Status';

@@ -3,8 +3,8 @@
   <div class="page-header">
     <div class="container-fluid">
       <div class="pull-right">
-        <button type="submit" form="form-custom-field" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
-        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
+        <button type="submit" form="form-custom-field" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i data-lucide="save" class="w-4 h-4"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i data-lucide="reply" class="w-4 h-4"></i></a></div>
       <h1>{{ heading_title }}</h1>
       <ul class="breadcrumb">
         {% for breadcrumb in breadcrumbs %}
@@ -14,13 +14,13 @@
     </div>
   </div>
   <div class="container-fluid"> {% if error_warning %}
-    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+    <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" class="w-4 h-4"></i> {{ error_warning }}
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_form }}</h3>
+        <h3 class="panel-title"><i data-lucide="pencil" class="w-4 h-4"></i> {{ text_form }}</h3>
       </div>
       <div class="panel-body">
         <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-custom-field" class="form-horizontal">
@@ -213,7 +213,7 @@
                     {% endif %}
                     {% endfor %}</td>
                   <td class="text-right"><input type="text" name="custom_field_value[{{ custom_field_value_row }}][sort_order]" value="{{ custom_field_value.sort_order }}" placeholder="{{ entry_sort_order }}" class="form-control" /></td>
-                  <td class="text-left"><button onclick="$('#custom-field-value-row{{ custom_field_value_row }}').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>
+                  <td class="text-left"><button onclick="$('#custom-field-value-row{{ custom_field_value_row }}').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i data-lucide="minus-circle" class="w-4 h-4"></i></button></td>
                 </tr>
                 {% set custom_field_value_row = custom_field_value_row + 1 %}
                 {% endfor %}
@@ -222,7 +222,7 @@
                 <tfoot>
                   <tr>
                     <td colspan="2"></td>
-                    <td class="text-left"><button type="button" onclick="addCustomFieldValue();" data-toggle="tooltip" title="{{ button_custom_field_value_add }}" class="btn btn-primary"><i class="fa fa-plus-circle"></i></button></td>
+                    <td class="text-left"><button type="button" onclick="addCustomFieldValue();" data-toggle="tooltip" title="{{ button_custom_field_value_add }}" class="btn btn-primary"><i data-lucide="plus-circle" class="w-4 h-4"></i></button></td>
                   </tr>
                 </tfoot>
 		
@@ -244,11 +244,11 @@ $('select[name=\'type\']').on('change', function() {
 	}
 
 	if (this.value == 'date') {
-		$('#display-value > div').html('<div class="input-group date"><input type="text" name="value" value="' + $('#input-value').val() + '" placeholder="{{ entry_value }}" data-date-format="YYYY-MM-DD" id="input-value" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button></span></div>');
+		$('#display-value > div').html('<div class="input-group date"><input type="text" name="value" value="' + $('#input-value').val() + '" placeholder="{{ entry_value }}" data-date-format="YYYY-MM-DD" id="input-value" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i data-lucide="calendar" class="w-4 h-4"></i></button></span></div>');
 	} else if (this.value == 'time') {
-		$('#display-value > div').html('<div class="input-group time"><input type="text" name="value" value="' + $('#input-value').val() + '" placeholder="{{ entry_value }}" data-date-format="HH:mm" id="input-value" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button></span></div>');
+		$('#display-value > div').html('<div class="input-group time"><input type="text" name="value" value="' + $('#input-value').val() + '" placeholder="{{ entry_value }}" data-date-format="HH:mm" id="input-value" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i data-lucide="calendar" class="w-4 h-4"></i></button></span></div>');
 	} else if (this.value == 'datetime') {
-		$('#display-value > div').html('<div class="input-group datetime"><input type="text" name="value" value="' + $('#input-value').val() + '" placeholder="{{ entry_value }}" data-date-format="YYYY-MM-DD HH:mm" id="input-value" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button></span></div>');
+		$('#display-value > div').html('<div class="input-group datetime"><input type="text" name="value" value="' + $('#input-value').val() + '" placeholder="{{ entry_value }}" data-date-format="YYYY-MM-DD HH:mm" id="input-value" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i data-lucide="calendar" class="w-4 h-4"></i></button></span></div>');
 	} else if (this.value == 'textarea') {
 		$('#display-value > div').html('<textarea name="value" placeholder="{{ entry_value }}" id="input-value" class="form-control">' + $('#input-value').val() + '</textarea>');
 	} else {
@@ -286,7 +286,7 @@ function addCustomFieldValue() {
 	{% endfor %}
 	html += '  </td>';
 	html += '  <td class="text-right"><input type="text" name="custom_field_value[' + custom_field_value_row + '][sort_order]" value="" placeholder="{{ entry_sort_order }}" class="form-control" /></td>';
-	html += '  <td class="text-left"><button type="button" onclick="$(\'#custom-field-value-row' + custom_field_value_row + '\').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>';
+	html += '  <td class="text-left"><button type="button" onclick="$(\'#custom-field-value-row' + custom_field_value_row + '\').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i data-lucide="minus-circle" class="w-4 h-4"></i></button></td>';
 	html += '</tr>';
 
 	$('#custom-field-value tbody').append(html);

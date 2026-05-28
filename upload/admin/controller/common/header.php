@@ -24,6 +24,7 @@ class ControllerCommonHeader extends Controller {
 		$data['links'] = $this->document->getLinks();
 		$data['styles'] = $this->document->getStyles();
 		$data['scripts'] = $this->document->getScripts();
+		$data['dockercart_version'] = defined('DOCKERCART_VERSION') ? DOCKERCART_VERSION : '';
 		$data['lang'] = $this->language->get('code');
 		$data['direction'] = $this->language->get('direction');
 

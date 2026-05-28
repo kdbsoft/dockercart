@@ -25,6 +25,36 @@ $(document).ready(function() {
 			convert_urls: false,
 			relative_urls: false,
 			remove_script_host: false,
+			file_picker_types: 'image media',
+			file_picker_callback: function(callback, value, meta) {
+				$('#modal-image').remove();
+
+				$.ajax({
+					url: 'index.php?route=common/filemanager&user_token=' + getURLVar('user_token'),
+					dataType: 'html',
+					beforeSend: function() {
+						$('#button-image i').replaceWith('<i class="fa fa-circle-o-notch fa-spin"></i>');
+						$('#button-image').prop('disabled', true);
+					},
+					complete: function() {
+						$('#button-image i').replaceWith('<i class="fa fa-upload"></i>');
+						$('#button-image').prop('disabled', false);
+					},
+					success: function(html) {
+						$('body').append('<div id="modal-image" class="modal" style="z-index: 1500;">' + html + '</div>');
+
+						$('#modal-image').modal('show');
+
+						$('#modal-image').delegate('a.thumbnail', 'click', function(e) {
+							e.preventDefault();
+
+							callback($(this).attr('href'), {alt: ''});
+
+							$('#modal-image').modal('hide');
+						});
+					}
+				});
+			},
 			setup: function(editor) {
 				editor.on('change keyup Undo Redo SetContent', function() {
 					editor.save();
