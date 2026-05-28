@@ -6,6 +6,11 @@ $_['heading_title']    = 'Weight Based Shipping';
 $_['text_extension']   = 'Extensions';
 $_['text_success']     = 'Success: You have modified weight based shipping!';
 $_['text_edit']        = 'Edit Weight Based Shipping';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_rate']       = 'Rates';

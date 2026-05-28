@@ -8,6 +8,11 @@ $_['text_edit']        = 'Edit Marketing Report';
 $_['text_success']     = 'Success: You have modified marketing report!';
 $_['text_filter']      = 'Filter';
 $_['text_all_status']  = 'All Statuses';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Column
 $_['column_campaign']  = 'Campaign Name';

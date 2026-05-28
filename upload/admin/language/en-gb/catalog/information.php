@@ -9,6 +9,15 @@ $_['text_add']               = 'Add Information';
 $_['text_edit']              = 'Edit Information';
 $_['text_default']           = 'Default';
 $_['text_keyword']           = 'Do not use spaces, instead replace spaces with - and make sure the SEO URL is globally unique.';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Manage information pages';
+
+$_['text_add_information_subtitle'] = 'Create a new information page';
+
+$_['text_edit_information_subtitle'] = 'Edit information page content';
+
+
 
 // Column
 $_['column_title']           = 'Information Title';

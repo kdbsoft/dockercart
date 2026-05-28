@@ -20,8 +20,11 @@
     {% endif %}
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h3 class="panel-title"><i data-lucide="pencil" class="w-4 h-4"></i> {{ text_form }}</h3>
-      </div>
+  <div>
+    <h3 class="panel-title">{{ text_form }}</h3>
+    <div class="panel-heading__subtitle">{{ text_form_subtitle }}</div>
+  </div>
+</div>
       <div class="panel-body">
         <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-custom-field" class="form-horizontal">
                       <fieldset>

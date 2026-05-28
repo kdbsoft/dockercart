@@ -21,3 +21,8 @@ $_['text_merchant'] = 'Торговый счет';
 $_['text_nochex'] = '<a href="https://secure.nochex.com/apply/merchant_info.aspx?partner_id=172198798" target="_blank"><img src="view/image/payment/nochex.png" alt="NOCHEX" title="NOCHEX" style="border: 1px solid #EEEEEE;" /></a>';
 $_['text_seller'] = 'Продавец / Личный кабинет';
 $_['text_success'] = 'Успех: Вы изменили данные своей учетной записи NOCHEX!';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Настройте параметры и опции расширения';
+
+

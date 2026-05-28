@@ -15,3 +15,8 @@ $_['help_total'] = 'Сумма заказа, которую необходимо
 $_['text_edit'] = 'Редактировать Sage Payment Solutions (США)';
 $_['text_extension'] = 'Расширения';
 $_['text_success'] = 'Успех: Вы изменили данные своей учетной записи SagePay!';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Настройте параметры и опции расширения';
+
+

@@ -7,6 +7,15 @@ $_['text_success']          = 'Success: You have modified users!';
 $_['text_list']             = 'User List';
 $_['text_add']              = 'Add User';
 $_['text_edit']             = 'Edit User';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Manage admin panel user accounts';
+
+$_['text_add_user_subtitle'] = 'Create a new admin user';
+
+$_['text_edit_user_subtitle'] = 'Edit admin user credentials';
+
+
 
 // Column
 $_['column_username']       = 'Username';

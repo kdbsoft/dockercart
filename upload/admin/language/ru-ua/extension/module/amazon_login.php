@@ -26,3 +26,8 @@ $_['text_module'] = 'Модули';
 $_['text_small_button'] = 'Маленький';
 $_['text_success'] = 'Успех: Вы внесли изменения в модуль «Вход через Amazon!».';
 $_['text_x_large_button'] = 'Очень большой';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Настройте параметры и опции расширения';
+
+

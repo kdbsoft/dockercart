@@ -6,6 +6,11 @@ $_['heading_title']      = 'Free Checkout';
 $_['text_extension']     = 'Extensions';
 $_['text_success']       = 'Success: You have modified Free Checkout payment module!';
 $_['text_edit']          = 'Edit Free Checkout';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_order_status'] = 'Order Status';

@@ -9,6 +9,15 @@ $_['text_add']             = 'Add Tax Rate';
 $_['text_edit']            = 'Edit Tax Rate';
 $_['text_percent']         = 'Percentage';
 $_['text_amount']          = 'Fixed Amount';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Manage tax rates and zones';
+
+$_['text_add_tax_rate_subtitle'] = 'Set a new tax rate';
+
+$_['text_edit_tax_rate_subtitle'] = 'Edit tax rate and zone';
+
+
 
 // Column
 $_['column_name']          = 'Tax Name';

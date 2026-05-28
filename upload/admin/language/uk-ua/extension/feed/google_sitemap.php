@@ -8,3 +8,8 @@ $_['text_edit'] = 'Редагувати карту сайту Google';
 $_['text_extension'] = 'Розширення';
 $_['text_feed'] = 'Канали просування';
 $_['text_success'] = 'Успіх: Ви змінили стрічку Google Sitemap!';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції розширення';
+
+

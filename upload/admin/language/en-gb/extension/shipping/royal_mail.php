@@ -6,6 +6,11 @@ $_['heading_title']                    = 'Royal Mail';
 $_['text_extension']                   = 'Extensions';
 $_['text_success']                     = 'Success: You have modified Royal Mail shipping!';
 $_['text_edit']                        = 'Edit Royal Mail Shipping';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_rate']                       = 'Rates';

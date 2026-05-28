@@ -7,6 +7,15 @@ $_['text_success']     = 'Success: You have modified return reasons!';
 $_['text_list']        = 'Return Reason List';
 $_['text_add']         = 'Add Return Reason';
 $_['text_edit']        = 'Edit Return Reason';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Manage return reason codes';
+
+$_['text_add_return_reason_subtitle'] = 'Create a new return reason';
+
+$_['text_edit_return_reason_subtitle'] = 'Edit return reason label';
+
+
 
 // Column
 $_['column_name']      = 'Return Reason Name';

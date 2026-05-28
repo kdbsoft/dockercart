@@ -6,6 +6,11 @@ $_['heading_title']    = 'Google Hangouts';
 $_['text_extension']   = 'Extensions';
 $_['text_success']     = 'Success: You have modified Google Hangouts module!';
 $_['text_edit']        = 'Edit Google Hangouts Module';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_code']       = 'Google Talk Code';

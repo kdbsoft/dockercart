@@ -112,3 +112,8 @@ $_['text_ship_city_postal_match'] = 'Почтовый матч Shipping City:';
 $_['text_ship_forward'] = 'Доставка в ближайшее время:';
 $_['text_signup'] = 'MaxMind — это сервис обнаружения мошенничества. Если у вас нет лицензионного ключа, вы можете <a href="http://www.maxmind.com/?rId=opencart" target="_blank"><u>зарегистрироваться здесь</u></a> .';
 $_['text_success'] = 'Успех: Вы модернизировали систему защиты от мошенничества MaxMind!';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Настройте параметры и опции расширения';
+
+

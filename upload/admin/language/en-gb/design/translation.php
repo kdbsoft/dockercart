@@ -10,6 +10,15 @@ $_['text_add']         = 'Add Translation';
 $_['text_default']     = 'Default';
 $_['text_store']       = 'Store';
 $_['text_language']    = 'Language';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Manage language translation overrides';
+
+$_['text_add_translation_subtitle'] = 'Add a language translation override';
+
+$_['text_edit_translation_subtitle'] = 'Edit translation string values';
+
+
 
 // Column
 $_['column_store']     = 'Store';

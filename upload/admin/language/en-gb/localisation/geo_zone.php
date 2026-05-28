@@ -8,6 +8,15 @@ $_['text_list']          = 'Geo Zone List';
 $_['text_add']           = 'Add Geo Zone';
 $_['text_edit']          = 'Edit Geo Zone';
 $_['text_geo_zone']      = 'Geo Zones';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Manage geographic tax zones';
+
+$_['text_add_geo_zone_subtitle'] = 'Create a new geographic tax zone';
+
+$_['text_edit_geo_zone_subtitle'] = 'Edit geographic zone settings';
+
+
 
 // Column
 $_['column_name']        = 'Geo Zone Name';

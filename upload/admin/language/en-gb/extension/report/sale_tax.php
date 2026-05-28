@@ -12,6 +12,11 @@ $_['text_month']        = 'Months';
 $_['text_week']         = 'Weeks';
 $_['text_day']          = 'Days';
 $_['text_all_status']   = 'All Statuses';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Column
 $_['column_date_start'] = 'Date Start';

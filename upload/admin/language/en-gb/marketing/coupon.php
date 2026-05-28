@@ -10,6 +10,15 @@ $_['text_edit']           = 'Edit Coupon';
 $_['text_percent']        = 'Percentage';
 $_['text_amount']         = 'Fixed Amount';
 $_['text_coupon']         = 'Coupon History';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Manage discount coupons';
+
+$_['text_add_coupon_subtitle'] = 'Create a new discount coupon';
+
+$_['text_edit_coupon_subtitle'] = 'Edit coupon rules and limits';
+
+
 
 // Column
 $_['column_name']         = 'Coupon Name';

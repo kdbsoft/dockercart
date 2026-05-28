@@ -6,6 +6,11 @@ $_['heading_title']    = 'Google Sitemap';
 $_['text_extension']   = 'Extensions';
 $_['text_success']     = 'Success: You have modified Google Sitemap feed!';
 $_['text_edit']        = 'Edit Google Sitemap';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_status']     = 'Status';

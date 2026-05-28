@@ -7,6 +7,15 @@ $_['text_success']     = 'Success: You have modified order statuses!';
 $_['text_list']        = 'Order Status List';
 $_['text_add']         = 'Add Order Status';
 $_['text_edit']        = 'Edit Order Status';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Manage order status labels';
+
+$_['text_add_order_status_subtitle'] = 'Create a new order status';
+
+$_['text_edit_order_status_subtitle'] = 'Edit order status label';
+
+
 
 // Column
 $_['column_name']      = 'Order Status Name';

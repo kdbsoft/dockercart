@@ -6,6 +6,11 @@ $_['heading_title']      = 'Bank Transfer';
 $_['text_extension']     = 'Extensions';
 $_['text_success']       = 'Success: You have modified bank transfer details!';
 $_['text_edit']          = 'Edit Bank Transfer';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_bank']         = 'Bank Transfer Instructions';

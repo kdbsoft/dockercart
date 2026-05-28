@@ -16,3 +16,8 @@ $_['text_extension'] = 'Розширення';
 $_['text_feed'] = 'Канали просування';
 $_['text_import'] = 'Щоб завантажити найновіший список категорій Google, <a href="https://support.google.com/merchants/answer/160081?hl=en" target="_blank" class="alert-link">натисніть тут</a> і виберіть таксономію з числовими ідентифікаторами у файлі звичайного тексту (.txt). Завантажте за допомогою зеленої кнопки імпорту.';
 $_['text_success'] = 'Успіх: Ви змінили фід Google Base!';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції розширення';
+
+

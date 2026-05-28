@@ -13,6 +13,15 @@ $_['text_no_results']       = 'Нет результатов!';
 $_['text_no_name']          = '(Без названия)';
 $_['text_confirm']          = 'Вы уверены?';
 $_['text_select_product']   = 'Поиск товара по названию...';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Управляйте комплектами товаров';
+
+$_['text_add_product_bundle_subtitle'] = 'Создать новый комплект товаров';
+
+$_['text_edit_product_bundle_subtitle'] = 'Редактировать содержимое комплекта товаров';
+
+
 
 $_['column_name']           = 'Название комплекта';
 $_['column_products']       = 'Товары';

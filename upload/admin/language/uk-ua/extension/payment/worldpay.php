@@ -59,3 +59,8 @@ $_['text_total_released'] = 'Всього випущено';
 $_['text_transactions'] = 'Транзакції';
 $_['text_void_ok'] = 'Скасування успішне, статус замовлення оновлено на анульовано';
 $_['text_worldpay'] = '<a href="https://online.worldpay.com/signup/ee48b6e6-d3e3-42aa-a80e-cbee3f4f8b09" target="_blank"><img src="view/image/payment/worldpay.png" alt="Worldpay" title="Worldpay" style="border: 1px solid #EEEEEE;" /></a>';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції розширення';
+
+

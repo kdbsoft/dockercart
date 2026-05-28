@@ -32,6 +32,11 @@ $_['text_confirm_release']	 = 'Are you sure you want to release the payment?';
 $_['text_confirm_rebate']	 = 'Are you sure you want to rebate the payment?';
 $_['text_payment']           = "Payment";
 $_['text_rebate']            = "Rebate";
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_account_name']	 = 'Account Name';

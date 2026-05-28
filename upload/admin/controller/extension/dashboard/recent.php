@@ -86,6 +86,7 @@ class ControllerExtensionDashboardRecent extends Controller {
 	public function dashboard() {
 		$this->load->language('extension/dashboard/recent');
 
+		$data['text_recent_subtitle'] = $this->language->get('text_recent_subtitle');
 		$data['user_token'] = $this->session->data['user_token'];
 
 		// Last 5 Orders

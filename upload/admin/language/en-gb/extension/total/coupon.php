@@ -6,6 +6,11 @@ $_['heading_title']    = 'Coupon';
 $_['text_extension']   = 'Extensions';
 $_['text_success']     = 'Success: You have modified coupon total!';
 $_['text_edit']        = 'Edit Coupon';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_status']     = 'Status';

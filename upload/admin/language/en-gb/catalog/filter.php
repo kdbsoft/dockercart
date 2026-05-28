@@ -9,6 +9,15 @@ $_['text_add']          = 'Add Filter';
 $_['text_edit']         = 'Edit Filter';
 $_['text_group']        = 'Filter Group';
 $_['text_value']        = 'Filter Values';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Set up catalog filter groups';
+
+$_['text_add_filter_subtitle'] = 'Create a new filter group';
+
+$_['text_edit_filter_subtitle'] = 'Edit filter group settings';
+
+
 
 // Column
 $_['column_group']      = 'Filter Group';

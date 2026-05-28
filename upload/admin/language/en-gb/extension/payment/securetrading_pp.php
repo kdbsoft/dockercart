@@ -82,6 +82,11 @@ $_['text_void_ok']                               = 'Void was successful, order s
 $_['text_confirm_void']                          = 'Are you sure you want to reverse the authorisation?';
 $_['text_confirm_release']                       = 'Are you sure you want to release the payment?';
 $_['text_confirm_rebate']                        = 'Are you sure you want to rebate the payment?';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 $_['button_release']                             = 'Release';
 $_['button_rebate']                              = 'Rebate / refund';

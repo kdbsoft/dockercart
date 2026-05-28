@@ -20,6 +20,15 @@ $_['text_datetime']      = 'Date &amp; Time';
 $_['text_time']          = 'Time';
 $_['text_option']        = 'Option';
 $_['text_value']         = 'Option Values';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Manage product options and values';
+
+$_['text_add_option_subtitle'] = 'Define a new product option';
+
+$_['text_edit_option_subtitle'] = 'Edit option values and settings';
+
+
 
 // Column
 $_['column_name']        = 'Option Name';

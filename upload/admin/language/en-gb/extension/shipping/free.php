@@ -6,6 +6,11 @@ $_['heading_title']    = 'Free Shipping';
 $_['text_extension']   = 'Extensions';
 $_['text_success']     = 'Success: You have modified free shipping!';
 $_['text_edit']        = 'Edit Free Shipping';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_total']      = 'Total';

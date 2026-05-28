@@ -7,6 +7,11 @@ $_['text_extension']		  = 'Extensions';
 $_['text_success']			  = 'Success: You have modified the Skrill details.';
 $_['text_edit']               = 'Edit Skrill';
 $_['text_skrill']	     	  = '<a href="https://content.skrill.com/en/ecommerce-solutions/opencart/" target="_blank"><img src="view/image/payment/skrill.png" alt="Skrill" title="Skrill" style="border: 1px solid #EEEEEE;" /></a>';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_email']			  = 'E-Mail';

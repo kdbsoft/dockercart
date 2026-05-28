@@ -7,6 +7,11 @@ $_['text_extension']        = 'Extensions';
 $_['text_edit']             = 'Edit Customer Reward Points Report';
 $_['text_success']          = 'Success: You have modified customer reward points report!';
 $_['text_filter']           = 'Filter';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Column
 $_['column_customer']       = 'Customer Name';

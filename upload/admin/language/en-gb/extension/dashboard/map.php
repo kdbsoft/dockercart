@@ -8,6 +8,16 @@ $_['text_success']     = 'Success: You have modified dashboard map!';
 $_['text_edit']        = 'Edit Dashboard Map';
 $_['text_order']       = 'Orders';
 $_['text_sale']        = 'Sales';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+// Dashboard Info Subtitle
+
+$_['text_map_subtitle'] = 'Geographic distribution of orders';
+
+
+
+
 
 // Entry
 $_['entry_status']     = 'Status';

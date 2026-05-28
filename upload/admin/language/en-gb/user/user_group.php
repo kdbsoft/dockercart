@@ -7,6 +7,15 @@ $_['text_success']     = 'Success: You have modified user groups!';
 $_['text_list']        = 'User Group';
 $_['text_add']         = 'Add User Group';
 $_['text_edit']        = 'Edit User Group';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Manage user permission groups';
+
+$_['text_add_user_group_subtitle'] = 'Create a new user permission group';
+
+$_['text_edit_user_group_subtitle'] = 'Edit user group permissions';
+
+
 
 // Column
 $_['column_name']      = 'User Group Name';

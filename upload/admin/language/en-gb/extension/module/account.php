@@ -6,6 +6,11 @@ $_['heading_title']    = 'Account';
 $_['text_extension']   = 'Extensions';
 $_['text_success']     = 'Success: You have modified account module!';
 $_['text_edit']        = 'Edit Account Module';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_status']     = 'Status';

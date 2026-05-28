@@ -6,6 +6,11 @@ $_['heading_title']    = 'Pickup From Store';
 $_['text_extension']   = 'Extensions';
 $_['text_success']     = 'Success: You have modified pickup from store!';
 $_['text_edit']        = 'Edit Pickup From Store Shipping';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_geo_zone']   = 'Geo Zone';

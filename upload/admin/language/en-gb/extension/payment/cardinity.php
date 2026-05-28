@@ -16,6 +16,11 @@ $_['text_confirm_refund']	= 'Are you sure you want to refund';
 $_['text_na']				= 'N/A';
 $_['text_success_action']	= 'Success';
 $_['text_error_generic']	= 'Error: There was an error with your request. Please check the logs.';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Column
 $_['column_refund']			= 'Refund';

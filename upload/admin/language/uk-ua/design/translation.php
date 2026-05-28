@@ -22,3 +22,12 @@ $_['text_language'] = 'Мова';
 $_['text_list'] = 'Список перекладів';
 $_['text_store'] = 'Магазин';
 $_['text_success'] = 'Успіх: Ви змінили мовний редактор!';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Керуйте перекладами мови';
+
+$_['text_add_translation_subtitle'] = 'Додати переклад мови';
+
+$_['text_edit_translation_subtitle'] = 'Редагувати значення перекладу';
+
+

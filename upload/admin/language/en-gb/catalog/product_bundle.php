@@ -13,6 +13,15 @@ $_['text_no_results']       = 'No results!';
 $_['text_no_name']          = '(No Name)';
 $_['text_confirm']          = 'Are you sure?';
 $_['text_select_product']   = 'Search product by name...';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Manage product bundles';
+
+$_['text_add_product_bundle_subtitle'] = 'Create a new product bundle';
+
+$_['text_edit_product_bundle_subtitle'] = 'Edit product bundle contents';
+
+
 
 $_['column_name']           = 'Bundle Name';
 $_['column_products']       = 'Products';

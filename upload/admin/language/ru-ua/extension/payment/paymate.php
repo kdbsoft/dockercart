@@ -18,3 +18,8 @@ $_['text_edit'] = 'Редактировать Paymate';
 $_['text_extension'] = 'Расширения';
 $_['text_paymate'] = '<img src="view/image/payment/paymate.png" alt="Paymate" title="Пеймат" style="border: 1px solid #EEEEEE;" />';
 $_['text_success'] = 'Успех: Вы изменили данные своей учетной записи Paymate!';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Настройте параметры и опции расширения';
+
+

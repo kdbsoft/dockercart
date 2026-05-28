@@ -6,6 +6,11 @@ $_['heading_title']           = 'Parcelforce 48';
 $_['text_extension']          = 'Extensions';
 $_['text_success']            = 'Success: You have modified Parcelforce 48 shipping!';
 $_['text_edit']               = 'Edit Parcelforce 48 Shipping';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_rate']              = 'Parcelforce 48 Rates';

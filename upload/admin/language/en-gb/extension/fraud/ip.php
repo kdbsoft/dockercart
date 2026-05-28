@@ -8,6 +8,11 @@ $_['text_success']       = 'Success: You have modified Anti-Fraud IP!';
 $_['text_edit']          = 'Edit Anti-Fraud IP';
 $_['text_ip_add']        = 'Add IP Address';
 $_['text_ip_list']       = 'Fraud IP Address List';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Column
 $_['column_ip']          = 'IP';

@@ -7,6 +7,15 @@ $_['text_success']     = 'Success: You have modified return actions!';
 $_['text_list']        = 'Return Action List';
 $_['text_add']         = 'Add Return Action';
 $_['text_edit']        = 'Edit Return Action';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Manage return action types';
+
+$_['text_add_return_action_subtitle'] = 'Create a new return action type';
+
+$_['text_edit_return_action_subtitle'] = 'Edit return action settings';
+
+
 
 // Column
 $_['column_name']      = 'Return Action Name';

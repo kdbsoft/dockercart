@@ -52,3 +52,8 @@ $_['text_production'] = 'Производство';
 $_['text_sandbox'] = 'Песочница';
 $_['text_success'] = 'Успех: Вы успешно модифицировали платежный модуль Cardinity!';
 $_['text_success_action'] = 'Успех';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Настройте параметры и опции расширения';
+
+

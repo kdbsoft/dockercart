@@ -7,6 +7,15 @@ $_['text_success']      = 'Success: You have modified voucher themes!';
 $_['text_list']         = 'Voucher Theme List';
 $_['text_add']          = 'Add Voucher Theme';
 $_['text_edit']         = 'Edit Voucher Theme';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Manage voucher design templates';
+
+$_['text_add_voucher_theme_subtitle'] = 'Create a new voucher template';
+
+$_['text_edit_voucher_theme_subtitle'] = 'Edit voucher theme design';
+
+
 
 // Column
 $_['column_name']       = 'Voucher Theme Name';
