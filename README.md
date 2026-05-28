@@ -1,6 +1,6 @@
 # DockerCart
 
-> **OpenCart evolved. A self-hosted e-commerce platform that's ready to deploy in minutes.**
+> **A production-ready, self-hosted e-commerce platform that deploys in minutes.**
 
 <p align="center">
   <a href="https://demo.dockercart.net"><img src="https://img.shields.io/badge/Live%20Demo-demo.dockercart.net-6366f1?style=flat-square&logo=google-chrome&logoColor=white" alt="Live Demo"></a>
@@ -8,7 +8,7 @@
   <a href="https://dockercart.net"><img src="https://img.shields.io/badge/dockercart.net-6366f1?style=flat-square&logo=globe&logoColor=white" alt="DockerCart"></a>
 </p>
 
-DockerCart is a production-ready e-commerce platform built on top of OpenCart 3, shipped as a complete Docker stack. It is not a vanilla OpenCart install — it is an opinionated evolution of OpenCart: hundreds of bug fixes applied, security holes patched, performance tuned, and an ecosystem of first-party modules included. Everything works out of the box.
+DockerCart is a production-ready e-commerce platform shipped as a complete Docker stack. Hundreds of bug fixes applied, security holes patched, performance tuned, and an ecosystem of first-party modules included. Everything works out of the box.
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE.md)
 [![PHP](https://img.shields.io/badge/PHP-8.5-777BB4?logo=php)](https://www.php.net/)
@@ -20,21 +20,20 @@ DockerCart is a production-ready e-commerce platform built on top of OpenCart 3,
 
 ## Why DockerCart?
 
-OpenCart is a solid foundation, but running it in production has historically meant dealing with a long list of known bugs, incompatible extensions, fragile file-based configuration, and manual server setup. DockerCart solves all of that:
+DockerCart is a production-ready, self-hosted e-commerce platform that deploys in minutes:
 
-Note on frontend stacks: OpenCart's legacy storefront is built on jQuery, Bootstrap and Font Awesome, while DockerCart ships a modern frontend stack using JavaScript (ES6+), Tailwind CSS and the Lucide icon font.
-
-| OpenCart baseline | DockerCart |
-|---|---|
-| Manual server setup | One-command Docker deployment |
-| Web installer (`/install`) required | Install-less bootstrap from `.env` + DB seed |
-| Known bugs in core | Hundreds of fixes applied to the base |
-| Configuration in PHP files | Environment variables via `.env` |
-| No built-in caching layer | Redis + OPcache pre-configured (Memcached fallback) |
-| No full-text search | Manticore Search engine included |
-| No containerization | Docker Compose stack, hot-reload dev workflow |
-| Scattered extension ecosystem | First-party modules, tested and integrated |
-| No deployment tooling | Makefile, health checks, backup/restore targets |
+- **One-command deployment** — `make dev-standalone` and your store is live. No manual server setup, no web installer.
+- **Complete Docker stack** — PHP 8.5 + Apache + Nginx + MariaDB 11.8 + Redis + Manticore Search, orchestrated via Docker Compose.
+- **Environment-based configuration** — all runtime settings in `.env`, no PHP file editing. Generated `config.php` and `admin/config.php` at container start.
+- **Pre-configured caching** — Redis (primary) + OPcache with Memcached fallback. Industrial-grade performance out of the box.
+- **Full-text search** — Manticore Search engine integrated for fast, relevant product search.
+- **Modern frontend** — JavaScript (ES6+), Tailwind CSS, Lucide icon font. No legacy jQuery/Bootstrap overhead.
+- **First-party modules** — tested and integrated ecosystem: checkout improvements, blog, newsletter, FAQ, search, banners, shipping, payment, and premium modules.
+- **SSL/TLS built-in** — Let's Encrypt with auto-renewal or self-signed certificates, with or without Traefik.
+- **Makefile automation** — health checks, backup/restore, database CLI, shell access, log tailing, and more.
+- **Hot-reload dev workflow** — edits to PHP/Twig/JS apply immediately without container restarts.
+- **Install-less bootstrap** — no `/install` directory. Database seeds and config are generated automatically on first start.
+- **Hundreds of fixes** — bugs patched, security holes sealed, performance tuned at the application layer.
 
 ---
 
@@ -76,7 +75,7 @@ cd dockercart
 cp .env.example .env
 ```
 
-DockerCart does **not** use the legacy OpenCart web installer. On first startup, database bootstrap happens automatically from `docker/mysql/init.sql`, and `config.php` / `admin/config.php` read runtime values from `.env`.
+On first startup, database bootstrap happens automatically from `docker/mysql/init.sql`, and `config.php` / `admin/config.php` read runtime values from `.env`. No web installer needed.
 
 ### `robots.txt` on first start (important)
 
