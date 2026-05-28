@@ -32,6 +32,7 @@ $_['entry_keyword']          = 'Keyword';
 $_['entry_parent']           = 'Parent';
 $_['entry_filter']           = 'Filters';
 $_['entry_image']            = 'Image';
+$_['entry_background_image'] = 'Background Image';
 $_['entry_top']              = 'Top';
 $_['entry_column']           = 'Columns';
 $_['entry_sort_order']       = 'Sort Order';

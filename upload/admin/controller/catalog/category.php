@@ -526,6 +526,22 @@ class ControllerCatalogCategory extends Controller {
 
 		$data['placeholder'] = $this->model_tool_image->resize('no_image.png', 100, 100);
 
+		if (isset($this->request->post['background_image'])) {
+			$data['background_image'] = $this->request->post['background_image'];
+		} elseif (!empty($category_info)) {
+			$data['background_image'] = $category_info['background_image'];
+		} else {
+			$data['background_image'] = '';
+		}
+
+		if (isset($this->request->post['background_image']) && is_file(DIR_IMAGE . $this->request->post['background_image'])) {
+			$data['background_thumb'] = $this->model_tool_image->resize($this->request->post['background_image'], 100, 100);
+		} elseif (!empty($category_info) && is_file(DIR_IMAGE . $category_info['background_image'])) {
+			$data['background_thumb'] = $this->model_tool_image->resize($category_info['background_image'], 100, 100);
+		} else {
+			$data['background_thumb'] = $this->model_tool_image->resize('no_image.png', 100, 100);
+		}
+
 		if (isset($this->request->post['top'])) {
 			$data['top'] = $this->request->post['top'];
 		} elseif (!empty($category_info)) {
