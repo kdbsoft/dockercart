@@ -23,6 +23,8 @@ Strict OpenCart 3 patterns — never deviate.
 - `declare(strict_types=1);` at file top for new files
 - Load models via `$this->load->model()` — never instantiate directly
 - Load language via `$this->language->load()` before `$this->language->get()`
+### Multi-language rule
+- **Always update ALL language files** when adding/changing language strings. Check `upload/admin/language/*/` and `upload/catalog/language/*/` for all variants (en-gb, ru-ua, uk-ua, etc.). Never update only one language.
 ### Database rules
 - Table prefix always `oc_` — DockerCart tables use `oc_dockercart_`
 - DB driver: `mysqli` — access via `$this->db->query()`, never raw `mysqli_*` or PDO
