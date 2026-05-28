@@ -645,14 +645,6 @@ class ControllerCommonColumnLeft extends Controller {
 				);
 			}
 
-			if ($this->user->hasPermission('access', 'report/statistics')) {
-				$report[] = array(
-					'name'	   => $this->language->get('text_statistics'),
-					'href'     => $this->url->link('report/statistics', 'user_token=' . $this->session->data['user_token'], true),
-					'children' => array()
-				);
-			}
-
 			if ($report) {
 				$data['menus'][] = array(
 					'id'       => 'menu-report',
@@ -665,37 +657,52 @@ class ControllerCommonColumnLeft extends Controller {
 
 			// Stats
 			if ($this->user->hasPermission('access', 'report/statistics')) {
-				$this->load->model('sale/order');
+				$cache_key = 'sidebar_stats';
+				$cached = $this->cache->get($cache_key);
 
-				$order_total = (float)$this->model_sale_order->getTotalOrders();
-
-				$this->load->model('report/statistics');
-
-				$complete_total = (float)$this->model_report_statistics->getValue('order_complete');
-
-				if ($complete_total && $order_total) {
-					$data['complete_status'] = round(($complete_total / $order_total) * 100);
+				if ($cached !== false) {
+					$data['complete_status'] = $cached['complete_status'];
+					$data['processing_status'] = $cached['processing_status'];
+					$data['other_status'] = $cached['other_status'];
+					$data['statistics_status'] = true;
 				} else {
-					$data['complete_status'] = 0;
+					$order_total = (float)$this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "order` WHERE order_status_id > '0'")->row['total'];
+
+					$config_complete_status = $this->config->get('config_complete_status');
+					$config_processing_status = $this->config->get('config_processing_status');
+
+					if ($order_total) {
+						$completeimplode = array();
+						foreach ($config_complete_status as $status_id) {
+							$completeimplode[] = "'" . (int)$status_id . "'";
+						}
+						$complete_total = (float)$this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "order` WHERE order_status_id IN(" . implode(',', $completeimplode) . ")")->row['total'];
+
+						$processingimplode = array();
+						foreach ($config_processing_status as $status_id) {
+							$processingimplode[] = "'" . (int)$status_id . "'";
+						}
+						$processing_total = (float)$this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "order` WHERE order_status_id IN(" . implode(',', $processingimplode) . ")")->row['total'];
+
+						$other_total = $order_total - $complete_total - $processing_total;
+
+						$data['complete_status'] = round(($complete_total / $order_total) * 100);
+						$data['processing_status'] = round(($processing_total / $order_total) * 100);
+						$data['other_status'] = max(0, round(($other_total / $order_total) * 100));
+					} else {
+						$data['complete_status'] = 0;
+						$data['processing_status'] = 0;
+						$data['other_status'] = 0;
+					}
+
+					$this->cache->set($cache_key, array(
+						'complete_status' => $data['complete_status'],
+						'processing_status' => $data['processing_status'],
+						'other_status' => $data['other_status']
+					), 300);
+
+					$data['statistics_status'] = true;
 				}
-
-				$processing_total = (float)$this->model_report_statistics->getValue('order_processing');
-
-				if ($processing_total && $order_total) {
-					$data['processing_status'] = round(($processing_total / $order_total) * 100);
-				} else {
-					$data['processing_status'] = 0;
-				}
-
-				$other_total = (float)$this->model_report_statistics->getValue('order_other');
-
-				if ($other_total && $order_total) {
-					$data['other_status'] = round(($other_total / $order_total) * 100);
-				} else {
-					$data['other_status'] = 0;
-				}
-
-				$data['statistics_status'] = true;
 			} else {
 				$data['statistics_status'] = false;
 			}

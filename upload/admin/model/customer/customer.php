@@ -263,6 +263,14 @@ class ModelCustomerCustomer extends Model {
 			$implode[] = "DATE(date_added) = DATE('" . $this->db->escape($data['filter_date_added']) . "')";
 		}
 
+		if (!empty($data['filter_date_start'])) {
+			$implode[] = "DATE(date_added) >= DATE('" . $this->db->escape($data['filter_date_start']) . "')";
+		}
+
+		if (!empty($data['filter_date_end'])) {
+			$implode[] = "DATE(date_added) <= DATE('" . $this->db->escape($data['filter_date_end']) . "')";
+		}
+
 		if ($implode) {
 			$sql .= " WHERE " . implode(" AND ", $implode);
 		}

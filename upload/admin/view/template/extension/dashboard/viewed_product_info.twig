@@ -1,26 +1,27 @@
-<div class="tile tile-primary">
+<div class="tile tile-purple">
   <div class="tile-heading">{{ heading_title }}
-    <select class="tile-period-select" data-widget="order">
+    <select class="tile-period-select" data-widget="viewed_product">
       <option value="all">{{ text_all_time }}</option>
       <option value="year">{{ text_year }}</option>
       <option value="month">{{ text_month }}</option>
       <option value="week">{{ text_week }}</option>
+      <option value="yesterday">{{ text_yesterday }}</option>
       <option value="today">{{ text_today }}</option>
     </select>
   </div>
-  <div class="tile-body"><i class="fa fa-shopping-cart"></i>
+  <div class="tile-body"><i class="fa fa-eye"></i>
     <canvas class="tile-sparkline"></canvas>
     <div class="tile-body-right">
       <h2 class="tile-total">—</h2>
       <span class="tile-pct">—</span>
     </div>
   </div>
-  <div class="tile-footer"><a href="{{ order }}">{{ text_view }}</a></div>
+  <div class="tile-footer"><a href="{{ report }}">{{ text_view }}</a></div>
 </div>
 <script>
 (function() {
-  var key = 'dashboard_order_period';
-  var $sel = $('.tile-period-select[data-widget="order"]');
+  var key = 'dashboard_viewed_product_period';
+  var $sel = $('.tile-period-select[data-widget="viewed_product"]');
   var $tile = $sel.closest('.tile');
   var saved = localStorage.getItem(key) || 'month';
   $sel.val(saved);
@@ -54,12 +55,12 @@
 
   function loadWidget(period) {
     localStorage.setItem(key, period);
-    $.getJSON('index.php?route=extension/dashboard/order/ajax&user_token={{ user_token }}&period=' + period, function(json) {
+    $.getJSON('index.php?route=extension/dashboard/viewed_product/ajax&user_token={{ user_token }}&period=' + period, function(json) {
       $tile.find('.tile-total').text(json.total);
       var icon = json.direction === 'up' ? 'fa-arrow-up' : (json.direction === 'down' ? 'fa-arrow-down' : '');
       $tile.find('.tile-pct').html(icon ? '<i class="fa ' + icon + '"></i> ' + json.percentage + '%' : json.percentage + '%');
     });
-    $.getJSON('index.php?route=extension/dashboard/order/sparkline&user_token={{ user_token }}&period=' + period, function(json) {
+    $.getJSON('index.php?route=extension/dashboard/viewed_product/sparkline&user_token={{ user_token }}&period=' + period, function(json) {
       drawSparkline($tile.find('.tile-sparkline')[0], json.data);
     });
   }

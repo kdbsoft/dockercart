@@ -3,6 +3,7 @@
 $_['column_action'] = 'Дія';
 $_['column_comment'] = 'Коментар';
 $_['column_customer'] = 'Клієнт';
+$_['column_type'] = 'Тип';
 $_['column_date_added'] = 'Дата додавання';
 $_['column_date_modified'] = 'Дата зміни';
 $_['column_location'] = 'Розташування';
@@ -134,7 +135,8 @@ $_['text_voucher'] = 'Додати ваучер(и)';
 $_['text_website'] = 'Веб-сайт:';
 $_['text_badge_guest_order'] = 'Гостьове замовлення';
 $_['text_badge_registered_order'] = 'Зареєстрований клієнт';
-$_['text_badge_oneclick_order'] = 'Замовлення в 1 клік';
+$_['text_badge_oneclick_order']   = 'Замовлення в 1 клік';
+$_['text_confirm_mass_delete']    = 'Ви впевнені, що хочете видалити вибрані замовлення?';
 $_['text_onepage_customer'] = 'Покупець';
 $_['text_onepage_payment_details'] = 'Деталі оплати';
 $_['text_onepage_shipping_details'] = 'Деталі доставки';

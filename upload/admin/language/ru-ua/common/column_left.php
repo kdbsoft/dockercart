@@ -47,6 +47,7 @@ $_['text_order_status'] = 'Статусы заказов';
 $_['text_other_status'] = 'Другие статусы';
 $_['text_processing_status'] = 'Обработка заказов';
 $_['text_product'] = 'Товары';
+$_['text_product_bundle'] = 'Комплекты товаров';
 $_['text_recurring'] = 'Повторяющиеся профили';
 $_['text_reports'] = 'Отчеты';
 $_['text_return'] = 'Возвраты';

@@ -257,15 +257,20 @@ class ControllerSaleOrder extends Controller {
 
 		$results = $this->model_sale_order->getOrders($filter_data);
 
+		$processing_statuses = (array)$this->config->get('config_processing_status');
+		$complete_statuses   = (array)$this->config->get('config_complete_status');
+		$fraud_status        = (int)$this->config->get('config_fraud_status_id');
+
 		foreach ($results as $result) {
-			$order_type_badge = $this->getOrderTypeBadge($result);
+			$order_type = $this->getOrderType($result);
+			$status_badge_class = $this->getOrderStatusBadgeClass((int)$result['order_status_id'], $processing_statuses, $complete_statuses, $fraud_status);
 
 			$data['orders'][] = array(
 				'order_id'      => $result['order_id'],
 				'customer'      => $result['customer'],
-				'order_type_badge_text'  => $order_type_badge['text'],
-				'order_type_badge_class' => $order_type_badge['class'],
+				'order_type'    => $order_type,
 				'order_status'  => $result['order_status'] ? $result['order_status'] : $this->language->get('text_missing'),
+				'order_status_badge_class' => $status_badge_class,
 				'tracking_number' => $result['tracking_number'],
 				'total'         => $this->currency->format($result['total'], $result['currency_code'], $result['currency_value']),
 				'date_added'    => date($this->language->get('datetime_format'), strtotime($result['date_added'])),
@@ -277,6 +282,8 @@ class ControllerSaleOrder extends Controller {
 		}
 
 		$data['user_token'] = $this->session->data['user_token'];
+
+		$data['store_id'] = 0;
 
 		if (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];
@@ -1709,25 +1716,32 @@ class ControllerSaleOrder extends Controller {
 		return str_replace(array("\r\n", "\r", "\n"), '<br />', preg_replace(array("/\s\s+/", "/\r\r+/", "/\n\n+/"), '<br />', trim(str_replace($find, $replace, $format))));
 	}
 
-	private function getOrderTypeBadge($order) {
+	private function getOrderType($order) {
 		if (!empty($order['payment_code']) && $order['payment_code'] === 'oneclickcheckout') {
-			return array(
-				'text'  => $this->language->get('text_badge_oneclick_order'),
-				'class' => 'label label-primary'
-			);
+			return $this->language->get('text_badge_oneclick_order');
 		}
 
 		if (!empty($order['customer_id'])) {
-			return array(
-				'text'  => $this->language->get('text_badge_registered_order'),
-				'class' => 'label label-success'
-			);
+			return $this->language->get('text_badge_registered_order');
 		}
 
-		return array(
-			'text'  => $this->language->get('text_badge_guest_order'),
-			'class' => 'label label-default'
-		);
+		return $this->language->get('text_badge_guest_order');
+	}
+
+	private function getOrderStatusBadgeClass($order_status_id, $processing_statuses, $complete_statuses, $fraud_status) {
+		if ($fraud_status && $order_status_id === $fraud_status) {
+			return 'label label-danger';
+		}
+
+		if (in_array($order_status_id, $processing_statuses)) {
+			return 'label label-warning';
+		}
+
+		if (in_array($order_status_id, $complete_statuses)) {
+			return 'label label-success';
+		}
+
+		return 'label label-default';
 	}
 	
 	protected function validate() {

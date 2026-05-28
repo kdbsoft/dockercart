@@ -245,6 +245,8 @@ class ControllerMarketplaceExtension extends Controller {
 			// Call the extension's own install method if it exists
 			$this->load->controller('extension/' . $type . '/' . $extension . '/install');
 
+			$this->session->data['success'] = $this->language->get('text_success');
+
 			$json['success'] = $this->language->get('text_success');
 		}
 
@@ -286,6 +288,8 @@ class ControllerMarketplaceExtension extends Controller {
 
 			$this->load->model('user/user_group');
 			$this->model_user_user_group->removePermissions('extension/' . $type . '/' . $extension);
+
+			$this->session->data['success'] = $this->language->get('text_success');
 
 			$json['success'] = $this->language->get('text_success');
 		}

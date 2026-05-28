@@ -70,6 +70,7 @@ $_['text_picklist']              = 'Dispatch Note';
 $_['text_badge_guest_order']      = 'Guest order';
 $_['text_badge_registered_order'] = 'Registered customer';
 $_['text_badge_oneclick_order']   = '1-click order';
+$_['text_confirm_mass_delete']    = 'Are you sure you want to delete the selected orders?';
 $_['text_onepage_customer']        = 'Customer';
 $_['text_onepage_payment_details'] = 'Payment Details';
 $_['text_onepage_shipping_details']= 'Shipping Details';
@@ -81,6 +82,7 @@ $_['text_onepage_same_shipping_as_payment'] = 'Shipping address is the same as p
 // Column
 $_['column_order_id']            = 'Order ID';
 $_['column_customer']            = 'Customer';
+$_['column_type']                = 'Type';
 $_['column_status']              = 'Status';
 $_['column_tracking_number']       = 'Tracking Number';
 $_['column_date_added']          = 'Date Added';

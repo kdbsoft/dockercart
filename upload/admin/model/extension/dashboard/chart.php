@@ -210,5 +210,241 @@ class ModelExtensionDashboardChart extends Model {
 		}
 
 		return $customer_data;
-	}	
+	}
+
+	public function getRevenueByDay() {
+		$implode = array();
+
+		foreach ($this->config->get('config_complete_status') as $order_status_id) {
+			$implode[] = "'" . (int)$order_status_id . "'";
+		}
+
+		$revenue_data = array();
+
+		for ($i = 0; $i < 24; $i++) {
+			$revenue_data[$i] = array(
+				'hour'  => $i,
+				'total' => 0
+			);
+		}
+
+		$query = $this->db->query("SELECT SUM(total) AS total, HOUR(date_added) AS hour FROM `" . DB_PREFIX . "order` WHERE order_status_id IN(" . implode(",", $implode) . ") AND DATE(date_added) = DATE(NOW()) GROUP BY HOUR(date_added) ORDER BY date_added ASC");
+
+		foreach ($query->rows as $result) {
+			$revenue_data[$result['hour']] = array(
+				'hour'  => $result['hour'],
+				'total' => (float)$result['total']
+			);
+		}
+
+		return $revenue_data;
+	}
+
+	public function getRevenueByWeek() {
+		$implode = array();
+
+		foreach ($this->config->get('config_complete_status') as $order_status_id) {
+			$implode[] = "'" . (int)$order_status_id . "'";
+		}
+
+		$revenue_data = array();
+
+		$date_start = strtotime('-' . date('w') . ' days');
+
+		for ($i = 0; $i < 7; $i++) {
+			$date = date('Y-m-d', $date_start + ($i * 86400));
+
+			$revenue_data[date('w', strtotime($date))] = array(
+				'day'   => date('D', strtotime($date)),
+				'total' => 0
+			);
+		}
+
+		$query = $this->db->query("SELECT SUM(total) AS total, date_added FROM `" . DB_PREFIX . "order` WHERE order_status_id IN(" . implode(",", $implode) . ") AND DATE(date_added) >= DATE('" . $this->db->escape(date('Y-m-d', $date_start)) . "') GROUP BY DAYNAME(date_added)");
+
+		foreach ($query->rows as $result) {
+			$revenue_data[date('w', strtotime($result['date_added']))] = array(
+				'day'   => date('D', strtotime($result['date_added'])),
+				'total' => (float)$result['total']
+			);
+		}
+
+		return $revenue_data;
+	}
+
+	public function getRevenueByMonth() {
+		$implode = array();
+
+		foreach ($this->config->get('config_complete_status') as $order_status_id) {
+			$implode[] = "'" . (int)$order_status_id . "'";
+		}
+
+		$revenue_data = array();
+
+		for ($i = 1; $i <= date('t'); $i++) {
+			$date = date('Y') . '-' . date('m') . '-' . $i;
+
+			$revenue_data[date('j', strtotime($date))] = array(
+				'day'   => date('d', strtotime($date)),
+				'total' => 0
+			);
+		}
+
+		$query = $this->db->query("SELECT SUM(total) AS total, date_added FROM `" . DB_PREFIX . "order` WHERE order_status_id IN(" . implode(",", $implode) . ") AND DATE(date_added) >= DATE('" . $this->db->escape(date('Y') . '-' . date('m') . '-1') . "') GROUP BY DATE(date_added)");
+
+		foreach ($query->rows as $result) {
+			$revenue_data[date('j', strtotime($result['date_added']))] = array(
+				'day'   => date('d', strtotime($result['date_added'])),
+				'total' => (float)$result['total']
+			);
+		}
+
+		return $revenue_data;
+	}
+
+	public function getRevenueByYear() {
+		$implode = array();
+
+		foreach ($this->config->get('config_complete_status') as $order_status_id) {
+			$implode[] = "'" . (int)$order_status_id . "'";
+		}
+
+		$revenue_data = array();
+
+		for ($i = 1; $i <= 12; $i++) {
+			$revenue_data[$i] = array(
+				'month' => date('M', mktime(0, 0, 0, $i)),
+				'total' => 0
+			);
+		}
+
+		$query = $this->db->query("SELECT SUM(total) AS total, date_added FROM `" . DB_PREFIX . "order` WHERE order_status_id IN(" . implode(",", $implode) . ") AND YEAR(date_added) = YEAR(NOW()) GROUP BY MONTH(date_added)");
+
+		foreach ($query->rows as $result) {
+			$revenue_data[date('n', strtotime($result['date_added']))] = array(
+				'month' => date('M', strtotime($result['date_added'])),
+				'total' => (float)$result['total']
+			);
+		}
+
+		return $revenue_data;
+	}
+
+	public function getPendingOrdersByDay() {
+		$implode = array();
+
+		foreach ($this->config->get('config_complete_status') as $order_status_id) {
+			$implode[] = "'" . (int)$order_status_id . "'";
+		}
+
+		$order_data = array();
+
+		for ($i = 0; $i < 24; $i++) {
+			$order_data[$i] = array(
+				'hour'  => $i,
+				'total' => 0
+			);
+		}
+
+		$query = $this->db->query("SELECT COUNT(*) AS total, HOUR(date_added) AS hour FROM `" . DB_PREFIX . "order` WHERE order_status_id NOT IN(" . implode(",", $implode) . ") AND DATE(date_added) = DATE(NOW()) GROUP BY HOUR(date_added) ORDER BY date_added ASC");
+
+		foreach ($query->rows as $result) {
+			$order_data[$result['hour']] = array(
+				'hour'  => $result['hour'],
+				'total' => $result['total']
+			);
+		}
+
+		return $order_data;
+	}
+
+	public function getPendingOrdersByWeek() {
+		$implode = array();
+
+		foreach ($this->config->get('config_complete_status') as $order_status_id) {
+			$implode[] = "'" . (int)$order_status_id . "'";
+		}
+
+		$order_data = array();
+
+		$date_start = strtotime('-' . date('w') . ' days');
+
+		for ($i = 0; $i < 7; $i++) {
+			$date = date('Y-m-d', $date_start + ($i * 86400));
+
+			$order_data[date('w', strtotime($date))] = array(
+				'day'   => date('D', strtotime($date)),
+				'total' => 0
+			);
+		}
+
+		$query = $this->db->query("SELECT COUNT(*) AS total, date_added FROM `" . DB_PREFIX . "order` WHERE order_status_id NOT IN(" . implode(",", $implode) . ") AND DATE(date_added) >= DATE('" . $this->db->escape(date('Y-m-d', $date_start)) . "') GROUP BY DAYNAME(date_added)");
+
+		foreach ($query->rows as $result) {
+			$order_data[date('w', strtotime($result['date_added']))] = array(
+				'day'   => date('D', strtotime($result['date_added'])),
+				'total' => $result['total']
+			);
+		}
+
+		return $order_data;
+	}
+
+	public function getPendingOrdersByMonth() {
+		$implode = array();
+
+		foreach ($this->config->get('config_complete_status') as $order_status_id) {
+			$implode[] = "'" . (int)$order_status_id . "'";
+		}
+
+		$order_data = array();
+
+		for ($i = 1; $i <= date('t'); $i++) {
+			$date = date('Y') . '-' . date('m') . '-' . $i;
+
+			$order_data[date('j', strtotime($date))] = array(
+				'day'   => date('d', strtotime($date)),
+				'total' => 0
+			);
+		}
+
+		$query = $this->db->query("SELECT COUNT(*) AS total, date_added FROM `" . DB_PREFIX . "order` WHERE order_status_id NOT IN(" . implode(",", $implode) . ") AND DATE(date_added) >= DATE('" . $this->db->escape(date('Y') . '-' . date('m') . '-1') . "') GROUP BY DATE(date_added)");
+
+		foreach ($query->rows as $result) {
+			$order_data[date('j', strtotime($result['date_added']))] = array(
+				'day'   => date('d', strtotime($result['date_added'])),
+				'total' => $result['total']
+			);
+		}
+
+		return $order_data;
+	}
+
+	public function getPendingOrdersByYear() {
+		$implode = array();
+
+		foreach ($this->config->get('config_complete_status') as $order_status_id) {
+			$implode[] = "'" . (int)$order_status_id . "'";
+		}
+
+		$order_data = array();
+
+		for ($i = 1; $i <= 12; $i++) {
+			$order_data[$i] = array(
+				'month' => date('M', mktime(0, 0, 0, $i)),
+				'total' => 0
+			);
+		}
+
+		$query = $this->db->query("SELECT COUNT(*) AS total, date_added FROM `" . DB_PREFIX . "order` WHERE order_status_id NOT IN(" . implode(",", $implode) . ") AND YEAR(date_added) = YEAR(NOW()) GROUP BY MONTH(date_added)");
+
+		foreach ($query->rows as $result) {
+			$order_data[date('n', strtotime($result['date_added']))] = array(
+				'month' => date('M', strtotime($result['date_added'])),
+				'total' => $result['total']
+			);
+		}
+
+		return $order_data;
+	}
 }
