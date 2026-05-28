@@ -1,3 +1,9 @@
+## [1.30.2](https://github.com/mathflow-bit/dockercart/compare/v1.30.1...v1.30.2) (2026-05-28)
+
+### Bug Fixes
+
+* quickfix php error ([5ed89ed](https://github.com/mathflow-bit/dockercart/commit/5ed89eda592fc4d6210a70ac1214bd11c92f5ee5))
+
 ## [1.30.1](https://github.com/mathflow-bit/dockercart/compare/v1.30.0...v1.30.1) (2026-05-28)
 
 ### Bug Fixes
