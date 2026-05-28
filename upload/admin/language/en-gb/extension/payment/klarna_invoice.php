@@ -15,6 +15,11 @@ $_['text_finland']			= 'Finland';
 $_['text_denmark']			= 'Denmark';
 $_['text_germany']			= 'Germany';
 $_['text_netherlands']		= 'The Netherlands';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_merchant']		= 'Klarna Merchant ID';

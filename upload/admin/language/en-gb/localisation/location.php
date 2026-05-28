@@ -10,6 +10,15 @@ $_['text_edit']        = 'Edit Store Location';
 $_['text_default']     = 'Default';
 $_['text_time']        = 'Opening Times';
 $_['text_geocode']     = 'Geocode was not successful for the following reason:';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Manage store physical locations';
+
+$_['text_add_location_subtitle'] = 'Add a new store location';
+
+$_['text_edit_location_subtitle'] = 'Edit store location details';
+
+
 
 // Column
 $_['column_name']      = 'Store Name';

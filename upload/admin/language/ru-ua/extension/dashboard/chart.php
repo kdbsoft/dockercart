@@ -19,3 +19,9 @@ $_['text_all_time'] = 'Всё время';
 $_['text_success'] = 'Успех: Вы успешно изменили диаграмму на панели мониторинга!';
 $_['text_week'] = 'Неделя';
 $_['text_year'] = 'Год';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Настройте параметры и опции расширения';
+// Dashboard Info Subtitle
+
+$_['text_chart_subtitle'] = 'Динамика выручки и заказов по времени';

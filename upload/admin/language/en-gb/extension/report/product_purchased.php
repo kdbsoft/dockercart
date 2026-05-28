@@ -8,6 +8,11 @@ $_['text_edit']         = 'Edit Products Purchased Report';
 $_['text_success']      = 'Success: You have modified products purchased report!';
 $_['text_filter']       = 'Filter';
 $_['text_all_status']   = 'All Statuses';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Column
 $_['column_date_start'] = 'Date Start';

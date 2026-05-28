@@ -19,6 +19,11 @@ $_['text_layout_stack'] = 'Stack (column)';
 $_['entry_full_width'] = 'Full Width';
 $_['text_full_width_disabled'] = 'No';
 $_['text_full_width_enabled']  = 'Yes';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 $_['entry_status']     = 'Status';
 
 // Error

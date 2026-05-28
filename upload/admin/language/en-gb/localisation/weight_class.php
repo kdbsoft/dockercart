@@ -7,6 +7,15 @@ $_['text_success']     = 'Success: You have modified weight classes!';
 $_['text_list']        = 'Weight Class List';
 $_['text_add']         = 'Add Weight Class';
 $_['text_edit']        = 'Edit Weight Class';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Manage weight measurement units';
+
+$_['text_add_weight_class_subtitle'] = 'Add a new weight unit';
+
+$_['text_edit_weight_class_subtitle'] = 'Edit weight class name and ratio';
+
+
 
 // Column
 $_['column_title']     = 'Weight Title';

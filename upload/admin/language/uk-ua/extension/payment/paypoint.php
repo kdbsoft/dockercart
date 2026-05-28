@@ -20,3 +20,8 @@ $_['text_live'] = 'Виробництво';
 $_['text_paypoint'] = '<a href="https://www.paypoint.net/partners/opencart" target="_blank"><img src="view/image/payment/paypoint.png" alt="PayPoint" title="PayPoint" style="border: 1px solid #EEEEEE;" /></a>';
 $_['text_success'] = 'Успіх: Ви змінили дані облікового запису PayPoint!';
 $_['text_successful'] = 'Завжди успішний';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції розширення';
+
+

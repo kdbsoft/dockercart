@@ -7,6 +7,15 @@ $_['text_success']      = 'Success: You have modified customer groups!';
 $_['text_list']         = 'Customer Group List';
 $_['text_add']          = 'Add Customer Group';
 $_['text_edit']         = 'Edit Customer Group';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Manage customer grouping rules';
+
+$_['text_add_customer_group_subtitle'] = 'Create a new customer group';
+
+$_['text_edit_customer_group_subtitle'] = 'Edit customer group settings';
+
+
 
 // Column
 $_['column_name']       = 'Customer Group Name';

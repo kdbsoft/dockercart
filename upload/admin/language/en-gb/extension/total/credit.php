@@ -6,6 +6,11 @@ $_['heading_title']    = 'Store Credit';
 $_['text_extension']   = 'Extensions';
 $_['text_success']     = 'Success: You have modified store credit total!';
 $_['text_edit']        = 'Edit Store Credit Total';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_status']     = 'Status';

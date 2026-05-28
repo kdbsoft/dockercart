@@ -33,3 +33,12 @@ $_['text_text'] = 'Текст';
 $_['text_textarea'] = 'Текстове поле';
 $_['text_time'] = 'Час';
 $_['text_value'] = 'Значення опцій';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Керуйте опціями та значеннями товарів';
+
+$_['text_add_option_subtitle'] = 'Визначити нову опцію товару';
+
+$_['text_edit_option_subtitle'] = 'Редагувати значення та налаштування опції';
+
+

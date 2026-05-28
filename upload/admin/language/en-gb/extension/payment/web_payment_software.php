@@ -11,6 +11,11 @@ $_['text_test']					= 'Test';
 $_['text_live']					= 'Live';
 $_['text_authorization']		= 'Authorization';
 $_['text_capture']				= 'Capture';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_login']				= 'Merchant ID';

@@ -6,3 +6,8 @@ $_['heading_title'] = 'Управління картками Sagepay Direct';
 $_['text_edit'] = 'Редагувати модуль керування картками Sagepay Direct';
 $_['text_extension'] = 'Розширення';
 $_['text_success'] = 'Успіх: Ви змінили модуль керування картками Sagepay Direct!';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції розширення';
+
+

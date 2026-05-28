@@ -16,6 +16,11 @@ $_['text_confirm_instance']  = 'Are you sure you want to delete this module inst
 $_['text_enabled']    = 'Enabled';
 $_['text_disabled']   = 'Disabled';
 $_['text_home']       = 'Home';
+// Subtitle
+
+$_['text_extension_subtitle'] = 'Browse and install extensions';
+
+
 
 // Buttons
 $_['button_install']   = 'Install';

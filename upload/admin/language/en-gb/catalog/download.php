@@ -8,6 +8,15 @@ $_['text_list']         = 'Download List';
 $_['text_add']          = 'Add Download';
 $_['text_edit']         = 'Edit Download';
 $_['text_upload']       = 'Your file was successfully uploaded!';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Manage downloadable file assets';
+
+$_['text_add_download_subtitle'] = 'Upload a new downloadable file';
+
+$_['text_edit_download_subtitle'] = 'Edit downloadable file settings';
+
+
 
 // Column
 $_['column_name']       = 'Download Name';

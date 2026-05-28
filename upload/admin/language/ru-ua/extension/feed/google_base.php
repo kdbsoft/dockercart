@@ -15,3 +15,8 @@ $_['text_edit'] = 'Редактировать базу Google';
 $_['text_extension'] = 'Расширения';
 $_['text_import'] = 'Чтобы загрузить последний список категорий Google, <a href="https://support.google.com/merchants/answer/160081?hl=en" target="_blank" class="alert-link">нажмите здесь</a> и выберите таксономию с числовыми идентификаторами в текстовом файле (.txt). Загрузите файл с помощью зеленой кнопки импорта.';
 $_['text_success'] = 'Успех: Вы изменили ленту Google Base!';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Настройте параметры и опции расширения';
+
+

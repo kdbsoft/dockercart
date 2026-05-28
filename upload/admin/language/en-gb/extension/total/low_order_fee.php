@@ -6,6 +6,11 @@ $_['heading_title']    = 'Low Order Fee';
 $_['text_extension']   = 'Extensions';
 $_['text_success']     = 'Success: You have modified low order fee total!';
 $_['text_edit']        = 'Edit Low Order Fee Total';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_total']      = 'Order Total';

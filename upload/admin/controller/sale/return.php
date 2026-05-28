@@ -525,6 +525,9 @@ class ControllerSaleReturn extends Controller {
 
 	protected function getForm() {
 		$data['text_form'] = !isset($this->request->get['return_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
+		$data['text_form_subtitle'] = !isset($this->request->get['return_id'])
+		    ? $this->language->get('text_add_return_subtitle')
+		    : $this->language->get('text_edit_return_subtitle');
 
 		$data['user_token'] = $this->session->data['user_token'];
 

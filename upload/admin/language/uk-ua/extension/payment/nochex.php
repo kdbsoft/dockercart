@@ -23,3 +23,8 @@ $_["text_nochex"] =
     '<a href="https://secure.nochex.com/apply/merchant_info.aspx?partner_id=172198798" target="_blank"><img src="view/image/payment/nochex.png" alt="NOCHEX" title="НОЧЕКС" style="border: 1px solid #EEEEEE;" /></a>';
 $_["text_seller"] = "Продавець / Обліковий запис";
 $_["text_success"] = "Успіх: Ви змінили дані облікового запису NOCHEX!";
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції розширення';
+
+

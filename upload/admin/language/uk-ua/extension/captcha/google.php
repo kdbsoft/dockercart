@@ -12,3 +12,8 @@ $_['text_edit'] = 'Редагувати Google reCAPTCHA';
 $_['text_extension'] = 'Розширення';
 $_['text_signup'] = 'Перейдіть на <a href="https://www.google.com/recaptcha/intro/index.html" target="_blank"><u>сторінку Google reCAPTCHA</u></a> та зареєструйте свій вебсайт.';
 $_['text_success'] = 'Успіх: Ви змінили Google reCAPTCHA!';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції розширення';
+
+

@@ -10,3 +10,8 @@ $_['text_edit'] = 'Модуль редагування Google Hangouts';
 $_['text_extension'] = 'Розширення';
 $_['text_module'] = 'Модулі';
 $_['text_success'] = 'Успіх: Ви змінили модуль Google Hangouts!';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції розширення';
+
+

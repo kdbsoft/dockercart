@@ -6,6 +6,11 @@ $_['heading_title']		 = 'Payza';
 $_['text_extension']	 = 'Extensions';
 $_['text_success']		 = 'Success: You have modified Payza account details!';
 $_['text_edit']          = 'Edit Payza';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_merchant']	 = 'Merchant ID';

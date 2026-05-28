@@ -43,6 +43,11 @@ $_['text_inquire_success']          = 'Inquire was successful';
 $_['text_capture_success']          = 'Capture request was successful';
 $_['text_refund_success']           = 'Refund request was successful';
 $_['text_void_success']             = 'Void request was successful';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_merchant_id']             = 'Merchant ID';

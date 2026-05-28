@@ -34,6 +34,11 @@ $_['text_confirm_rebate']	 = 'Are you sure you want to rebate the payment?';
 $_['text_void']	    		 = 'Void';
 $_['text_payment']           = 'Payment';
 $_['text_rebate']            = 'Rebate';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_vendor']			 = 'Account ID';

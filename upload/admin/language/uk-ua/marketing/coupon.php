@@ -47,3 +47,12 @@ $_['text_edit'] = 'Редагувати купон';
 $_['text_list'] = 'Список купонів';
 $_['text_percent'] = 'Відсоток';
 $_['text_success'] = 'Успіх: Ви змінили купони!';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Керуйте купонами знижок';
+
+$_['text_add_coupon_subtitle'] = 'Створити новий купон знижки';
+
+$_['text_edit_coupon_subtitle'] = 'Редагувати правила та ліміти купона';
+
+

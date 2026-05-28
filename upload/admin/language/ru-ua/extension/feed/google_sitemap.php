@@ -7,3 +7,8 @@ $_['heading_title'] = 'Карта сайта Google';
 $_['text_edit'] = 'Редактировать карту сайта Google';
 $_['text_extension'] = 'Расширения';
 $_['text_success'] = 'Успех: Вы успешно изменили фид карты сайта Google!';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Настройте параметры и опции расширения';
+
+

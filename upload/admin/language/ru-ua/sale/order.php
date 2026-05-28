@@ -58,7 +58,7 @@ $_['entry_tracking_number'] = 'Номер отслеживания';
 $_['entry_theme'] = 'Тема подарочного сертификата';
 $_['entry_to_email'] = 'Адрес электронной почты получателя';
 $_['entry_to_name'] = 'Имя получателя';
-$_['entry_total'] = 'Общий';
+$_['entry_total'] = 'Сумма';
 $_['entry_voucher'] = 'Ваучер';
 $_['entry_zone'] = 'Регион / Область';
 $_['entry_zone_code'] = 'Региональный/государственный код';
@@ -143,3 +143,24 @@ $_['text_onepage_products'] = 'Товары';
 $_['text_onepage_order_details'] = 'Детали заказа';
 $_['text_onepage_totals'] = 'Итого';
 $_['text_onepage_same_shipping_as_payment'] = 'Адрес доставки совпадает с адресом оплаты';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Просматривайте и обрабатывайте заказы клиентов';
+
+$_['text_filter_subtitle'] = 'Сузить результаты по критериям';
+
+$_['text_add_subtitle'] = 'Создать новый заказ вручную';
+
+$_['text_edit_subtitle'] = 'Редактировать данные заказа';
+
+$_['text_order_info_subtitle'] = 'Основные данные и метаданные заказа';
+
+$_['text_order_customer_subtitle'] = 'Контактная и учётная информация клиента';
+
+$_['text_order_tools_subtitle'] = 'Обновить статус, добавить историю или комментарии';
+
+$_['text_order_contents_subtitle'] = 'Товары и итоги этого заказа';
+
+$_['text_history_subtitle'] = 'Отслеживайте изменения статуса и заметки';
+
+

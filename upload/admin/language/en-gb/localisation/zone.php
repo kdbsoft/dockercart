@@ -8,6 +8,15 @@ $_['text_list']              = 'Zone List';
 $_['text_add']               = 'Add Zone';
 $_['text_edit']              = 'Edit Zone';
 $_['text_filter']             = 'Filter';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Manage geographic zones per country';
+
+$_['text_add_zone_subtitle'] = 'Create a new geographic zone';
+
+$_['text_edit_zone_subtitle'] = 'Edit zone region settings';
+
+
 
 // Column
 $_['column_name']            = 'Zone Name';

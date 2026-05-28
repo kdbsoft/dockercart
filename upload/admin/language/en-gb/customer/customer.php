@@ -27,6 +27,17 @@ $_['text_ip']                   = 'IP';
 $_['text_option']               = 'Options';
 $_['text_login']                = 'Login into Store';
 $_['text_unlock']               = 'Unlock Account';
+// Subtitle
+
+$_['text_list_subtitle'] = 'View and manage customer accounts';
+
+$_['text_filter_subtitle'] = 'Narrow results by specific criteria';
+
+$_['text_add_customer_subtitle'] = 'Register a new customer account';
+
+$_['text_edit_customer_subtitle'] = 'Edit customer account details';
+
+
 
 // Column
 $_['column_name']               = 'Customer Name';

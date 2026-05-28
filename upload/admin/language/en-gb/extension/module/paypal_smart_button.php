@@ -35,6 +35,11 @@ $_['text_text']							= 'Text Message';
 $_['text_flex']							= 'Flexible Banner';
 $_['text_yes']			 	 			= 'Yes';
 $_['text_no']			 	 			= 'No';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_status']     					= 'Status';

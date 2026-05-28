@@ -41,6 +41,11 @@ $_['text_fedex_25kg_box']                      = 'FedEx 25kg Box';
 $_['text_your_packaging']                      = 'Your Packaging';
 $_['text_list_rate']                           = 'List Rate';
 $_['text_account_rate']                        = 'Account Rate';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_key']                                = 'Key';

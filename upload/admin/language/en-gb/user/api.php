@@ -8,6 +8,15 @@ $_['text_list']            = 'API List';
 $_['text_add']             = 'Add API';
 $_['text_edit']            = 'Edit API';
 $_['text_ip']              = 'Below you can create a list of IP\'s allowed to access the API. Your current IP is %s';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Manage API access keys';
+
+$_['text_add_api_subtitle'] = 'Generate a new API key';
+
+$_['text_edit_api_subtitle'] = 'Edit API key settings';
+
+
 
 // Column
 $_['column_username']      = 'API Username';

@@ -18,6 +18,11 @@ $_['text_speed_post']                          = 'SpeedPost (Standard Service)(P
 $_['text_smart_post']                          = 'Smart Post(Package maxiumn weight 2KG)';
 $_['text_local_courier_post']                  = 'Local Courier Post (Counter Collection)(Package maxiumn weight 2KG)';
 $_['text_local_parcel']                        = 'Local Parcel (Package maxiumn weight 20KG)';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_api_key']                            = 'API Key';

@@ -10,6 +10,15 @@ $_['text_edit']              = 'Edit Category';
 $_['text_default']           = 'Default';
 $_['text_keyword']           = 'Do not use spaces, instead replace spaces with - and make sure the SEO URL is globally unique.';
 $_['text_quick_find']         = 'Quick find category...';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Organize products into categories';
+
+$_['text_add_category_subtitle'] = 'Create a new product category';
+
+$_['text_edit_category_subtitle'] = 'Edit category name and settings';
+
+
 
 // Button
 $_['button_expand_all']       = 'Expand all';

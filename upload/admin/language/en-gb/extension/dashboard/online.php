@@ -7,6 +7,16 @@ $_['text_extension']   = 'Extensions';
 $_['text_success']     = 'Success: You have modified dashboard online!';
 $_['text_edit']        = 'Edit Dashboard Online';
 $_['text_view']        = 'View more...';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+// Dashboard Info Subtitle
+
+$_['text_online_subtitle'] = 'Visitors currently browsing the store';
+
+
+
+
 
 // Entry
 $_['entry_status']     = 'Status';

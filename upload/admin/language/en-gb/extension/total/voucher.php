@@ -6,6 +6,11 @@ $_['heading_title']    = 'Gift Voucher';
 $_['text_extension']   = 'Extensions';
 $_['text_success']     = 'Success: You have modified gift voucher total!';
 $_['text_edit']        = 'Edit Gift Voucher Total';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_status']     = 'Status';

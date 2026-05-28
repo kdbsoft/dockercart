@@ -16,3 +16,8 @@ $_['text_netherlands'] = 'Нидерланды';
 $_['text_norway'] = 'Норвегия';
 $_['text_success'] = 'Успех: Вы изменили общую сумму комиссии Klarna!';
 $_['text_sweden'] = 'Швеция';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Настройте параметры и опции расширения';
+
+

@@ -15,3 +15,8 @@ $_['text_extension'] = 'Розширення';
 $_['text_signup'] = 'Fixer.io - це сервіс курсів валют, для його використання <a href="https://fixer.io/" target="_blank" class="alert-link">пройдіть реєстрацію</a>.';
 $_['text_success'] = 'Успіх: Ви змінили конвертер валют Fixer!';
 $_['text_support'] = 'Доповнення потребує щоб валюта Євро (EUR) була додана та активована.';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції розширення';
+
+

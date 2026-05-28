@@ -35,3 +35,8 @@ $_['tab_special_delivery_500'] = 'Спеціальна доставка наст
 $_['text_edit'] = 'Редагувати доставку Royal Mail';
 $_['text_extension'] = 'Розширення';
 $_['text_success'] = 'Успіх: Ви змінили доставку Royal Mail!';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції розширення';
+
+

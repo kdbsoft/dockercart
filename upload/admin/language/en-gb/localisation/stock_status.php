@@ -7,6 +7,15 @@ $_['text_success']     = 'Success: You have modified stock statuses!';
 $_['text_list']        = 'Stock Status List';
 $_['text_add']         = 'Add Stock Status';
 $_['text_edit']        = 'Edit Stock Status';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Manage stock availability labels';
+
+$_['text_add_stock_status_subtitle'] = 'Create a new stock status label';
+
+$_['text_edit_stock_status_subtitle'] = 'Edit stock status name';
+
+
 
 // Column
 $_['column_name']      = 'Stock Status Name';

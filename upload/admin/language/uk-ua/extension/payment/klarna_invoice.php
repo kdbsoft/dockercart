@@ -26,3 +26,8 @@ $_['text_netherlands'] = 'Нідерланди';
 $_['text_norway'] = 'Норвегія';
 $_['text_success'] = 'Успіх: Ви змінили платіжний модуль Klarna!';
 $_['text_sweden'] = 'Швеція';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції розширення';
+
+

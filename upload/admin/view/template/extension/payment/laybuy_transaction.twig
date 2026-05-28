@@ -24,8 +24,12 @@
     {% endif %}
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h3 class="panel-title"><i class="fa fa-info-circle"></i> {{ text_transaction_details }}</h3>
-      </div>
+  <div class="panel-heading__icon"><i class="fa fa-info-circle"></i></div>
+  <div>
+    <h3 class="panel-title">{{ text_transaction_details }}</h3>
+    <div class="panel-heading__subtitle">{{ text_edit_subtitle }}</div>
+  </div>
+</div>
       <div class="panel-body">
       	{% if transaction %}
         <form action="" method="post" enctype="multipart/form-data" id="form-laybuy-transaction" class="form-horizontal">

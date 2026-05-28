@@ -7,6 +7,11 @@ $_['text_extension']		= 'Extensions';
 $_['text_success']			= 'Success: You have modified Authorize.Net (SIM) account details!';
 $_['text_edit']             = 'Edit Authorize.Net (SIM)';
 $_['text_authorizenet_sim']	= '<a href="https://account.authorize.net/signUpNow?resellerID=26357" target="_BLANK"><img src="view/image/payment/authorizenet.png" alt="Authorize.Net" title="Authorize.Net" style="border: 1px solid #EEEEEE;" /></a>';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_merchant']		= 'Merchant ID';

@@ -8,6 +8,15 @@ $_['text_list']               = 'Country List';
 $_['text_add']                = 'Add Country';
 $_['text_edit']               = 'Edit Country';
 $_['text_filter']              = 'Filter';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Manage countries and geolocation';
+
+$_['text_add_country_subtitle'] = 'Add a new country entry';
+
+$_['text_edit_country_subtitle'] = 'Edit country name and code';
+
+
 
 // Column
 $_['column_name']             = 'Country Name';

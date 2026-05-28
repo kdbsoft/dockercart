@@ -86,6 +86,7 @@ class ControllerExtensionDashboardChart extends Controller {
 	public function dashboard() {
 		$this->load->language('extension/dashboard/chart');
 
+		$data['text_chart_subtitle'] = $this->language->get('text_chart_subtitle');
 		$data['user_token'] = $this->session->data['user_token'];
 
 		return $this->load->view('extension/dashboard/chart_info', $data);
