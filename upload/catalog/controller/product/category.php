@@ -166,6 +166,12 @@ class ControllerProductCategory extends Controller {
 				$data['thumb'] = '';
 			}
 
+			if ($category_info['background_image']) {
+				$data['background_image'] = $this->model_tool_image->resize($category_info['background_image'], 1920, 400);
+			} else {
+				$data['background_image'] = '';
+			}
+
 			$data['description'] = html_entity_decode($category_info['description'], ENT_QUOTES, 'UTF-8');
 			$data['compare'] = $this->url->link('product/compare');
 
