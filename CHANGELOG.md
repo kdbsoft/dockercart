@@ -1,3 +1,9 @@
+## [1.30.1](https://github.com/mathflow-bit/dockercart/compare/v1.30.0...v1.30.1) (2026-05-28)
+
+### Bug Fixes
+
+* quickfix ([935f8a3](https://github.com/mathflow-bit/dockercart/commit/935f8a38fef73c18e77637995a3b847e45a31366))
+
 ## [1.30.0](https://github.com/mathflow-bit/dockercart/compare/v1.29.3...v1.30.0) (2026-05-28)
 
 ### Features
