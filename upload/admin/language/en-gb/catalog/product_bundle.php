@@ -48,3 +48,5 @@ $_['error_name']            = 'Bundle Name must be between 0 and 255 characters!
 $_['error_products']        = 'You must select at least 2 products!';
 $_['error_discount_value']  = 'Discount Value must be greater than 0!';
 $_['error_date']            = 'Date End must be after Date Start!';
+$_['error_invalid_sort_order'] = 'Invalid sort order value!';
+$_['error_invalid_date']      = 'Invalid date format!';

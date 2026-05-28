@@ -24,3 +24,4 @@ $_['error_permission']       = 'Warning: You do not have permission to modify at
 $_['error_attribute_group']  = 'Attribute Group Required!';
 $_['error_name']             = 'Attribute Name must be between 1 and 64 characters!';
 $_['error_product']          = 'Warning: This attribute cannot be deleted as it is currently assigned to %s products!';
+$_['error_invalid_sort_order'] = 'Invalid sort order value!';

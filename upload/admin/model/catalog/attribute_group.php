@@ -87,4 +87,27 @@ class ModelCatalogAttributeGroup extends Model {
 
 		return $query->row['total'];
 	}
+
+	public function updateAttributeGroupField($attribute_group_id, $data) {
+		$int_fields = array('sort_order');
+
+		$sets = array();
+		foreach ($int_fields as $field) {
+			if (isset($data[$field])) {
+				$sets[] = "`" . $field . "` = '" . (int)$data[$field] . "'";
+			}
+		}
+
+		if (!empty($sets)) {
+			$this->db->query("UPDATE " . DB_PREFIX . "attribute_group SET " . implode(', ', $sets) . " WHERE attribute_group_id = '" . (int)$attribute_group_id . "'");
+		}
+	}
+
+	public function updateAttributeGroupNames($attribute_group_id, $names) {
+		foreach ($names as $language_id => $name) {
+			$name = trim((string)$name);
+
+			$this->db->query("UPDATE " . DB_PREFIX . "attribute_group_description SET name = '" . $this->db->escape($name) . "' WHERE attribute_group_id = '" . (int)$attribute_group_id . "' AND language_id = '" . (int)$language_id . "'");
+		}
+	}
 }

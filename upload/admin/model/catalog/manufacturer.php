@@ -206,4 +206,32 @@ class ModelCatalogManufacturer extends Model {
 
 		return $query->row['total'];
 	}
+
+	public function updateManufacturerField($manufacturer_id, $data) {
+		$int_fields = array('sort_order');
+
+		$sets = array();
+		foreach ($int_fields as $field) {
+			if (isset($data[$field])) {
+				$sets[] = "`" . $field . "` = '" . (int)$data[$field] . "'";
+			}
+		}
+
+		if (!empty($sets)) {
+			$this->db->query("UPDATE " . DB_PREFIX . "manufacturer SET " . implode(', ', $sets) . " WHERE manufacturer_id = '" . (int)$manufacturer_id . "'");
+		}
+	}
+
+	public function updateManufacturerNames($manufacturer_id, $names, $default_language_id) {
+		foreach ($names as $language_id => $name) {
+			$name = trim((string)$name);
+
+			$this->db->query("UPDATE " . DB_PREFIX . "manufacturer_description SET name = '" . $this->db->escape($name) . "' WHERE manufacturer_id = '" . (int)$manufacturer_id . "' AND language_id = '" . (int)$language_id . "'");
+		}
+
+		if (isset($names[$default_language_id])) {
+			$default_name = trim((string)$names[$default_language_id]);
+			$this->db->query("UPDATE " . DB_PREFIX . "manufacturer SET name = '" . $this->db->escape($default_name) . "' WHERE manufacturer_id = '" . (int)$manufacturer_id . "'");
+		}
+	}
 }

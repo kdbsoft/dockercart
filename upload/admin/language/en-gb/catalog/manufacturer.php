@@ -38,3 +38,4 @@ $_['error_meta_title']  = 'Meta Title must be greater than 1 and less than 255 c
 $_['error_keyword']     = 'SEO URL already in use!';
 $_['error_unique']      = 'SEO URL must be unique!';
 $_['error_product']     = 'Warning: This manufacturer cannot be deleted as it is currently assigned to %s products!';
+$_['error_invalid_sort_order'] = 'Invalid sort order value!';

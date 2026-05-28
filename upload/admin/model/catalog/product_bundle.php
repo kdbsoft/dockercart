@@ -125,4 +125,29 @@ class ModelCatalogProductBundle extends Model {
 
 		return $stores;
 	}
+
+	public function updateBundleField($bundle_id, $data) {
+		$string_fields = array('name', 'date_start', 'date_end');
+		$int_fields = array('status', 'sort_order');
+
+		$sets = array();
+		foreach ($string_fields as $field) {
+			if (isset($data[$field])) {
+				$sets[] = "`" . $field . "` = '" . $this->db->escape($data[$field]) . "'";
+			}
+		}
+		foreach ($int_fields as $field) {
+			if (isset($data[$field])) {
+				$sets[] = "`" . $field . "` = '" . (int)$data[$field] . "'";
+			}
+		}
+
+		if (!empty($sets)) {
+			$this->db->query("UPDATE " . DB_PREFIX . "product_bundle SET " . implode(', ', $sets) . " WHERE bundle_id = '" . (int)$bundle_id . "'");
+		}
+	}
+
+	public function updateBundleDiscount($bundle_id, $value, $type) {
+		$this->db->query("UPDATE " . DB_PREFIX . "product_bundle SET discount_value = '" . (float)$value . "', discount_type = '" . $this->db->escape($type) . "' WHERE bundle_id = '" . (int)$bundle_id . "'");
+	}
 }

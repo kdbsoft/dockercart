@@ -225,4 +225,27 @@ class ModelCatalogInformation extends Model {
 
 		return $query->row['total'];
 	}
+
+	public function updateInformationField($information_id, $data) {
+		$int_fields = array('sort_order');
+
+		$sets = array();
+		foreach ($int_fields as $field) {
+			if (isset($data[$field])) {
+				$sets[] = "`" . $field . "` = '" . (int)$data[$field] . "'";
+			}
+		}
+
+		if (!empty($sets)) {
+			$this->db->query("UPDATE " . DB_PREFIX . "information SET " . implode(', ', $sets) . " WHERE information_id = '" . (int)$information_id . "'");
+		}
+	}
+
+	public function updateInformationNames($information_id, $names) {
+		foreach ($names as $language_id => $title) {
+			$title = trim((string)$title);
+
+			$this->db->query("UPDATE " . DB_PREFIX . "information_description SET title = '" . $this->db->escape($title) . "' WHERE information_id = '" . (int)$information_id . "' AND language_id = '" . (int)$language_id . "'");
+		}
+	}
 }

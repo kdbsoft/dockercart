@@ -2380,6 +2380,47 @@ class ModelCatalogProduct extends Model
         );
     }
 
+    public function updateProductField($product_id, $data)
+    {
+        $float_fields = array('price', 'quantity');
+        $int_fields = array('status');
+        $string_fields = array('model');
+
+        $sets = array();
+        foreach ($float_fields as $field) {
+            if (isset($data[$field])) {
+                $sets[] = "`" . $field . "` = '" . (float)$data[$field] . "'";
+            }
+        }
+        foreach ($int_fields as $field) {
+            if (isset($data[$field])) {
+                $sets[] = "`" . $field . "` = '" . (int)$data[$field] . "'";
+            }
+        }
+        foreach ($string_fields as $field) {
+            if (isset($data[$field])) {
+                $sets[] = "`" . $field . "` = '" . $this->db->escape($data[$field]) . "'";
+            }
+        }
+
+        if (!empty($sets)) {
+            $this->db->query(
+                "UPDATE " . DB_PREFIX . "product SET " . implode(', ', $sets) . ", date_modified = NOW() WHERE product_id = '" . (int)$product_id . "'"
+            );
+        }
+    }
+
+    public function updateProductNames($product_id, $names)
+    {
+        foreach ($names as $language_id => $name) {
+            $name = trim((string)$name);
+
+            $this->db->query(
+                "UPDATE " . DB_PREFIX . "product_description SET name = '" . $this->db->escape($name) . "' WHERE product_id = '" . (int)$product_id . "' AND language_id = '" . (int)$language_id . "'"
+            );
+        }
+    }
+
     public function getTotalProductsByLayoutId($layout_id)
     {
         $query = $this->db->query(
