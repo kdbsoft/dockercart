@@ -91,4 +91,12 @@ class ModelCatalogDownload extends Model {
 
 		return $query->row['total'];
 	}
+
+	public function updateDownloadNames($download_id, $names) {
+		foreach ($names as $language_id => $name) {
+			$name = trim((string)$name);
+
+			$this->db->query("UPDATE " . DB_PREFIX . "download_description SET name = '" . $this->db->escape($name) . "' WHERE download_id = '" . (int)$download_id . "' AND language_id = '" . (int)$language_id . "'");
+		}
+	}
 }

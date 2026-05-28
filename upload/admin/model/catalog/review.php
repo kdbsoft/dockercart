@@ -113,4 +113,25 @@ class ModelCatalogReview extends Model {
 
 		return $query->row['total'];
 	}
+
+	public function updateReviewField($review_id, $data) {
+		$string_fields = array('author', 'date_added');
+		$int_fields = array('rating', 'status');
+
+		$sets = array();
+		foreach ($string_fields as $field) {
+			if (isset($data[$field])) {
+				$sets[] = "`" . $field . "` = '" . $this->db->escape($data[$field]) . "'";
+			}
+		}
+		foreach ($int_fields as $field) {
+			if (isset($data[$field])) {
+				$sets[] = "`" . $field . "` = '" . (int)$data[$field] . "'";
+			}
+		}
+
+		if (!empty($sets)) {
+			$this->db->query("UPDATE " . DB_PREFIX . "review SET " . implode(', ', $sets) . ", date_modified = NOW() WHERE review_id = '" . (int)$review_id . "'");
+		}
+	}
 }

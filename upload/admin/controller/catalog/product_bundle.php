@@ -181,15 +181,22 @@ class ControllerCatalogProductBundle extends Controller {
 			}
 
 			$data['bundles'][] = array(
-				'bundle_id'    => $result['bundle_id'],
-				'name'         => $result['name'] ? $result['name'] : $this->language->get('text_no_name'),
-				'product_count' => $result['product_count'],
-				'discount'     => $discount_text,
-				'status'       => $result['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
-				'date_start'   => ($result['date_start'] != '0000-00-00') ? date($this->language->get('date_format_short'), strtotime($result['date_start'])) : '',
-				'date_end'     => ($result['date_end'] != '0000-00-00') ? date($this->language->get('date_format_short'), strtotime($result['date_end'])) : '',
-				'sort_order'   => $result['sort_order'],
-				'edit'         => $this->url->link('catalog/product_bundle/edit', 'user_token=' . $this->session->data['user_token'] . '&bundle_id=' . $result['bundle_id'] . $url, true)
+				'bundle_id'       => $result['bundle_id'],
+				'name'            => $result['name'] ? $result['name'] : $this->language->get('text_no_name'),
+				'name_raw'        => $result['name'],
+				'product_count'   => $result['product_count'],
+				'discount'        => $discount_text,
+				'discount_raw'    => $result['discount_value'],
+				'discount_type_raw' => $result['discount_type'],
+				'status'          => $result['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
+				'status_raw'      => $result['status'],
+				'date_start'      => ($result['date_start'] != '0000-00-00') ? date($this->language->get('date_format_short'), strtotime($result['date_start'])) : '',
+				'date_start_raw'  => $result['date_start'],
+				'date_end'        => ($result['date_end'] != '0000-00-00') ? date($this->language->get('date_format_short'), strtotime($result['date_end'])) : '',
+				'date_end_raw'    => $result['date_end'],
+				'sort_order'      => $result['sort_order'],
+				'sort_order_raw'  => $result['sort_order'],
+				'edit'            => $this->url->link('catalog/product_bundle/edit', 'user_token=' . $this->session->data['user_token'] . '&bundle_id=' . $result['bundle_id'] . $url, true)
 			);
 		}
 
@@ -254,6 +261,8 @@ class ControllerCatalogProductBundle extends Controller {
 
 		$data['sort'] = $sort;
 		$data['order'] = $order;
+
+		$data['user_token'] = $this->session->data['user_token'];
 
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
@@ -353,13 +362,13 @@ class ControllerCatalogProductBundle extends Controller {
 			$data['discount_value'] = '';
 		}
 
-		if (!empty($bundle_info['date_start'])) {
+		if (!empty($bundle_info['date_start']) && $bundle_info['date_start'] != '0000-00-00') {
 			$data['date_start'] = $bundle_info['date_start'];
 		} else {
 			$data['date_start'] = '';
 		}
 
-		if (!empty($bundle_info['date_end'])) {
+		if (!empty($bundle_info['date_end']) && $bundle_info['date_end'] != '0000-00-00') {
 			$data['date_end'] = $bundle_info['date_end'];
 		} else {
 			$data['date_end'] = '';
@@ -464,6 +473,8 @@ class ControllerCatalogProductBundle extends Controller {
 			$data['sort_order'] = $this->request->post['sort_order'];
 		}
 
+		$data['datepicker'] = $this->language->get('datepicker');
+
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');
@@ -501,6 +512,113 @@ class ControllerCatalogProductBundle extends Controller {
 		}
 
 		return !$this->error;
+	}
+
+	public function updateField() {
+		$json = array();
+
+		if (!$this->user->hasPermission('modify', 'catalog/product_bundle')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		if (!isset($this->request->post['bundle_id']) || !isset($this->request->post['field']) || !isset($this->request->post['value'])) {
+			$json['error'] = 'Invalid request';
+		}
+
+		if (!isset($json['error'])) {
+			$bundle_id = (int)$this->request->post['bundle_id'];
+			$field = $this->request->post['field'];
+			$value = $this->request->post['value'];
+
+			$this->load->model('catalog/product_bundle');
+
+			if ($field === 'name') {
+				$val = trim((string)$value);
+
+				if (utf8_strlen($val) > 255) {
+					$json['error'] = $this->language->get('error_name');
+				} else {
+					$this->model_catalog_product_bundle->updateBundleField($bundle_id, array('name' => $val));
+					$json['success'] = true;
+					$json['value_html'] = htmlspecialchars($val ?: $this->language->get('text_no_name'), ENT_QUOTES, 'UTF-8');
+				}
+			} elseif ($field === 'status') {
+				$val = (int)$value;
+
+				if ($val !== 0 && $val !== 1) {
+					$json['error'] = 'Invalid status value';
+				} else {
+					$this->model_catalog_product_bundle->updateBundleField($bundle_id, array('status' => $val));
+					$json['success'] = true;
+					$json['value_html'] = $val ? $this->language->get('text_enabled') : $this->language->get('text_disabled');
+				}
+			} elseif ($field === 'sort_order') {
+				$val = (int)$value;
+
+				if ($val < 0) {
+					$json['error'] = $this->language->get('error_invalid_sort_order');
+				} else {
+					$this->model_catalog_product_bundle->updateBundleField($bundle_id, array('sort_order' => $val));
+					$json['success'] = true;
+					$json['value_html'] = (string)$val;
+				}
+			} elseif ($field === 'date_start' || $field === 'date_end') {
+				$val = trim((string)$value);
+
+				if ($val !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $val)) {
+					$json['error'] = $this->language->get('error_invalid_date');
+				} else {
+					$db_val = $val ?: '0000-00-00';
+					$this->model_catalog_product_bundle->updateBundleField($bundle_id, array($field => $db_val));
+					$json['success'] = true;
+					$json['value_html'] = ($db_val != '0000-00-00') ? date($this->language->get('date_format_short'), strtotime($db_val)) : '';
+				}
+			} else {
+				$json['error'] = 'Invalid field';
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function updateDiscount() {
+		$json = array();
+
+		if (!$this->user->hasPermission('modify', 'catalog/product_bundle')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		if (!isset($this->request->post['bundle_id']) || !isset($this->request->post['value']) || !isset($this->request->post['type'])) {
+			$json['error'] = 'Invalid request';
+		}
+
+		if (!isset($json['error'])) {
+			$bundle_id = (int)$this->request->post['bundle_id'];
+			$value = (float)$this->request->post['value'];
+			$type = $this->request->post['type'];
+
+			if ($value <= 0) {
+				$json['error'] = $this->language->get('error_discount_value');
+			} elseif ($type !== 'percentage' && $type !== 'fixed') {
+				$json['error'] = 'Invalid discount type';
+			} else {
+				$this->load->model('catalog/product_bundle');
+				$this->model_catalog_product_bundle->updateBundleDiscount($bundle_id, $value, $type);
+
+				if ($type == 'percentage') {
+					$discount_text = '-' . $this->currency->format($value, $this->config->get('config_currency'), 1) . '%';
+				} else {
+					$discount_text = '-' . $this->currency->format($value, $this->session->data['currency']);
+				}
+
+				$json['success'] = true;
+				$json['value_html'] = $discount_text;
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
 	}
 
 	public function autocomplete() {

@@ -175,6 +175,7 @@ class ControllerCatalogDownload extends Controller {
 			$data['downloads'][] = array(
 				'download_id' => $result['download_id'],
 				'name'        => $result['name'],
+				'name_raw'    => $result['name'],
 				'date_added'  => date($this->language->get('date_format_short'), strtotime($result['date_added'])),
 				'edit'        => $this->url->link('catalog/download/edit', 'user_token=' . $this->session->data['user_token'] . '&download_id=' . $result['download_id'] . $url, true)
 			);
@@ -237,6 +238,8 @@ class ControllerCatalogDownload extends Controller {
 
 		$data['sort'] = $sort;
 		$data['order'] = $order;
+
+		$data['user_token'] = $this->session->data['user_token'];
 
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
@@ -395,6 +398,90 @@ class ControllerCatalogDownload extends Controller {
 		}
 
 		return !$this->error;
+	}
+
+	public function getName() {
+		$json = array();
+
+		if (!$this->user->hasPermission('modify', 'catalog/download')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		if (!isset($this->request->get['download_id'])) {
+			$json['error'] = 'Invalid request';
+		}
+
+		if (!isset($json['error'])) {
+			$download_id = (int)$this->request->get['download_id'];
+
+			$this->load->model('catalog/download');
+			$this->load->model('localisation/language');
+
+			$languages = $this->model_localisation_language->getLanguages();
+			$descriptions = $this->model_catalog_download->getDownloadDescriptions($download_id);
+
+			$names = array();
+
+			foreach ($languages as $language) {
+				$lid = $language['language_id'];
+				$names[$lid] = isset($descriptions[$lid]) ? $descriptions[$lid]['name'] : '';
+			}
+
+			$json['success'] = true;
+			$json['languages'] = array_values($languages);
+			$json['names'] = $names;
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function updateNames() {
+		$json = array();
+
+		if (!$this->user->hasPermission('modify', 'catalog/download')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		if (!isset($this->request->post['download_id']) || !isset($this->request->post['names'])) {
+			$json['error'] = 'Invalid request';
+		}
+
+		if (!isset($json['error'])) {
+			$download_id = (int)$this->request->post['download_id'];
+			$names = $this->request->post['names'];
+
+			$this->load->model('catalog/download');
+			$this->load->model('localisation/language');
+
+			$languages = $this->model_localisation_language->getLanguages();
+
+			$error_names = array();
+
+			foreach ($languages as $language) {
+				$lid = $language['language_id'];
+
+				if (isset($names[$lid])) {
+					$name = trim((string)$names[$lid]);
+
+					if (utf8_strlen($name) < 3 || utf8_strlen($name) > 64) {
+						$error_names[$lid] = $this->language->get('error_name');
+					}
+				}
+			}
+
+			if (!empty($error_names)) {
+				$json['error'] = $this->language->get('error_name');
+				$json['error_names'] = $error_names;
+			} else {
+				$this->model_catalog_download->updateDownloadNames($download_id, $names);
+				$json['success'] = true;
+				$json['value_html'] = htmlspecialchars($names[$this->config->get('config_language_id')] ?? '', ENT_QUOTES, 'UTF-8');
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
 	}
 
 	public function upload() {
