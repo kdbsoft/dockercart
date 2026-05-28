@@ -60,7 +60,6 @@ $_['entry_points'] = 'Очки';
 $_['entry_price'] = 'Ціна';
 $_['entry_priority'] = 'Пріоритет';
 $_['entry_quantity'] = 'Кількість';
-$_['entry_recurring'] = 'Повторюваний профіль';
 $_['entry_related'] = 'Супутні товари';
 $_['entry_gift_product'] = 'Товар-подарунок';
 $_['entry_related_article'] = 'Рекомендуємо почитати';

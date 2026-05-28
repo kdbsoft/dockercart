@@ -286,36 +286,6 @@ class ModelCatalogProduct extends Model
             }
         }
 
-        if (isset($data["product_recurring"])) {
-            foreach ($data["product_recurring"] as $recurring) {
-                $query = $this->db->query(
-                    "SELECT `product_id` FROM `" .
-                        DB_PREFIX .
-                        "product_recurring` WHERE `product_id` = '" .
-                        (int) $product_id .
-                        "' AND `customer_group_id` = '" .
-                        (int) $recurring["customer_group_id"] .
-                        "' AND `recurring_id` = '" .
-                        (int) $recurring["recurring_id"] .
-                        "'",
-                );
-
-                if (!$query->num_rows) {
-                    $this->db->query(
-                        "INSERT INTO `" .
-                            DB_PREFIX .
-                            "product_recurring` SET `product_id` = '" .
-                            (int) $product_id .
-                            "', customer_group_id = '" .
-                            (int) $recurring["customer_group_id"] .
-                            "', `recurring_id` = '" .
-                            (int) $recurring["recurring_id"] .
-                            "'",
-                    );
-                }
-            }
-        }
-
         if (isset($data["product_discount"])) {
             foreach ($data["product_discount"] as $product_discount) {
                 $this->db->query(
@@ -910,44 +880,6 @@ class ModelCatalogProduct extends Model
         }
 
         $this->db->query(
-            "DELETE FROM `" .
-                DB_PREFIX .
-                "product_recurring` WHERE product_id = '" .
-                (int) $product_id .
-                "'",
-        );
-
-        if (isset($data["product_recurring"])) {
-            foreach ($data["product_recurring"] as $product_recurring) {
-                $query = $this->db->query(
-                    "SELECT `product_id` FROM `" .
-                        DB_PREFIX .
-                        "product_recurring` WHERE `product_id` = '" .
-                        (int) $product_id .
-                        "' AND `customer_group_id` = '" .
-                        (int) $product_recurring["customer_group_id"] .
-                        "' AND `recurring_id` = '" .
-                        (int) $product_recurring["recurring_id"] .
-                        "'",
-                );
-
-                if (!$query->num_rows) {
-                    $this->db->query(
-                        "INSERT INTO `" .
-                            DB_PREFIX .
-                            "product_recurring` SET `product_id` = '" .
-                            (int) $product_id .
-                            "', `customer_group_id` = '" .
-                            (int) $product_recurring["customer_group_id"] .
-                            "', `recurring_id` = '" .
-                            (int) $product_recurring["recurring_id"] .
-                            "'",
-                    );
-                }
-            }
-        }
-
-        $this->db->query(
             "DELETE FROM " .
                 DB_PREFIX .
                 "product_discount WHERE product_id = '" .
@@ -1347,7 +1279,6 @@ class ModelCatalogProduct extends Model
             $data["product_download"] = $this->getProductDownloads($product_id);
             $data["product_layout"] = $this->getProductLayouts($product_id);
             $data["product_store"] = $this->getProductStores($product_id);
-            $data["product_recurrings"] = $this->getRecurrings($product_id);
 
             $this->addProduct($data);
         }
@@ -1489,12 +1420,6 @@ class ModelCatalogProduct extends Model
                 "product_to_store WHERE product_id = '" .
                 (int) $product_id .
                 "'",
-        );
-        $this->db->query(
-            "DELETE FROM " .
-                DB_PREFIX .
-                "product_recurring WHERE product_id = " .
-                (int) $product_id,
         );
         $this->db->query(
             "DELETE FROM " .
@@ -2118,19 +2043,6 @@ class ModelCatalogProduct extends Model
         return $product_related_data;
     }
 
-    public function getRecurrings($product_id)
-    {
-        $query = $this->db->query(
-            "SELECT * FROM `" .
-                DB_PREFIX .
-                "product_recurring` WHERE product_id = '" .
-                (int) $product_id .
-                "'",
-        );
-
-        return $query->rows;
-    }
-
     public function getTotalProducts($data = [])
     {
         $sql =
@@ -2348,19 +2260,6 @@ class ModelCatalogProduct extends Model
                 DB_PREFIX .
                 "product_option WHERE option_id = '" .
                 (int) $option_id .
-                "'",
-        );
-
-        return $query->row["total"];
-    }
-
-    public function getTotalProductsByProfileId($recurring_id)
-    {
-        $query = $this->db->query(
-            "SELECT COUNT(*) AS total FROM " .
-                DB_PREFIX .
-                "product_recurring WHERE recurring_id = '" .
-                (int) $recurring_id .
                 "'",
         );
 
