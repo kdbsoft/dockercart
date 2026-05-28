@@ -27,4 +27,5 @@ $_['text_qv_feature_delivery'] = 'Free shipping on this item';
 $_['text_qv_feature_warranty'] = '2-year manufacturer warranty';
 $_['text_qv_feature_returns'] = '30-day hassle-free returns';
 $_['text_call_for_price'] = 'Contact for price';
+$_['text_view_full_product'] = 'View Full Product';
 $_['button_cart'] = 'Add to Cart';
