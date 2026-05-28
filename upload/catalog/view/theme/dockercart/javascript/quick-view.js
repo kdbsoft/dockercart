@@ -142,6 +142,17 @@
         featuresList.innerHTML = this._renderFeatures(configured);
       }
 
+      // Set "View full product" link
+      const viewFullEl = document.getElementById('qv-view-full');
+      if (viewFullEl) {
+        const href = card.dataset.href || '#';
+        viewFullEl.href = href;
+        const viewFullText = document.getElementById('qv-view-full-text');
+        if (viewFullText) {
+          viewFullText.textContent = (window.dcLang && window.dcLang.text_view_full_product) ? window.dcLang.text_view_full_product : 'View Full Product';
+        }
+      }
+
       // Wire wishlist button
       const wishBtn = document.getElementById('qv-wishlist-btn');
       if (wishBtn) {
@@ -344,6 +355,12 @@
       
       <!-- Features (icons on the left, text injected by JS) -->
       <ul id="qv-features" class="text-sm text-gray-600 space-y-1.5"></ul>
+
+      <!-- View full product link -->
+      <a id="qv-view-full" href="#" class="text-sm text-blue-600 hover:text-blue-700 font-semibold inline-flex items-center gap-1 transition">
+        <i data-lucide="external-link" class="w-4 h-4"></i>
+        <span id="qv-view-full-text"></span>
+      </a>
       
       <!-- Actions -->
       <div class="flex gap-3 mt-4">

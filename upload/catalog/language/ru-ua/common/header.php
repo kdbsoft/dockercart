@@ -27,3 +27,4 @@ $_['text_transaction'] = 'Транзакции';
 $_['text_contact'] = 'Контакты';
 $_['text_wishlist'] = 'Список желаний (%s)';
 $_['text_call_for_price'] = 'Уточнить цену';
+$_['text_view_full_product'] = 'Перейти к товару';
