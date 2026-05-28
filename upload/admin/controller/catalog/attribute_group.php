@@ -175,7 +175,9 @@ class ControllerCatalogAttributeGroup extends Controller {
 			$data['attribute_groups'][] = array(
 				'attribute_group_id' => $result['attribute_group_id'],
 				'name'               => $result['name'],
+				'name_raw'           => $result['name'],
 				'sort_order'         => $result['sort_order'],
+				'sort_order_raw'     => $result['sort_order'],
 				'edit'               => $this->url->link('catalog/attribute_group/edit', 'user_token=' . $this->session->data['user_token'] . '&attribute_group_id=' . $result['attribute_group_id'] . $url, true)
 			);
 		}
@@ -237,6 +239,8 @@ class ControllerCatalogAttributeGroup extends Controller {
 
 		$data['sort'] = $sort;
 		$data['order'] = $order;
+
+		$data['user_token'] = $this->session->data['user_token'];
 
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
@@ -397,5 +401,126 @@ class ControllerCatalogAttributeGroup extends Controller {
 		}
 
 		return !$this->error;
+	}
+
+	public function updateField() {
+		$json = array();
+
+		if (!$this->user->hasPermission('modify', 'catalog/attribute_group')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		if (!isset($this->request->post['attribute_group_id']) || !isset($this->request->post['field']) || !isset($this->request->post['value'])) {
+			$json['error'] = 'Invalid request';
+		}
+
+		if (!isset($json['error'])) {
+			$attribute_group_id = (int)$this->request->post['attribute_group_id'];
+			$field = $this->request->post['field'];
+			$value = $this->request->post['value'];
+
+			$this->load->model('catalog/attribute_group');
+
+			if ($field === 'sort_order') {
+				$val = (int)$value;
+
+				if ($val < 0) {
+					$json['error'] = $this->language->get('error_invalid_sort_order');
+				} else {
+					$this->model_catalog_attribute_group->updateAttributeGroupField($attribute_group_id, array('sort_order' => $val));
+					$json['success'] = true;
+					$json['value_html'] = (string)$val;
+				}
+			} else {
+				$json['error'] = 'Invalid field';
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function getName() {
+		$json = array();
+
+		if (!$this->user->hasPermission('modify', 'catalog/attribute_group')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		if (!isset($this->request->get['attribute_group_id'])) {
+			$json['error'] = 'Invalid request';
+		}
+
+		if (!isset($json['error'])) {
+			$attribute_group_id = (int)$this->request->get['attribute_group_id'];
+
+			$this->load->model('catalog/attribute_group');
+			$this->load->model('localisation/language');
+
+			$languages = $this->model_localisation_language->getLanguages();
+			$descriptions = $this->model_catalog_attribute_group->getAttributeGroupDescriptions($attribute_group_id);
+
+			$names = array();
+
+			foreach ($languages as $language) {
+				$lid = $language['language_id'];
+				$names[$lid] = isset($descriptions[$lid]) ? $descriptions[$lid]['name'] : '';
+			}
+
+			$json['success'] = true;
+			$json['languages'] = array_values($languages);
+			$json['names'] = $names;
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function updateNames() {
+		$json = array();
+
+		if (!$this->user->hasPermission('modify', 'catalog/attribute_group')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		if (!isset($this->request->post['attribute_group_id']) || !isset($this->request->post['names'])) {
+			$json['error'] = 'Invalid request';
+		}
+
+		if (!isset($json['error'])) {
+			$attribute_group_id = (int)$this->request->post['attribute_group_id'];
+			$names = $this->request->post['names'];
+
+			$this->load->model('catalog/attribute_group');
+			$this->load->model('localisation/language');
+
+			$languages = $this->model_localisation_language->getLanguages();
+
+			$error_names = array();
+
+			foreach ($languages as $language) {
+				$lid = $language['language_id'];
+
+				if (isset($names[$lid])) {
+					$name = trim((string)$names[$lid]);
+
+					if (utf8_strlen($name) < 1 || utf8_strlen($name) > 64) {
+						$error_names[$lid] = $this->language->get('error_name');
+					}
+				}
+			}
+
+			if (!empty($error_names)) {
+				$json['error'] = $this->language->get('error_name');
+				$json['error_names'] = $error_names;
+			} else {
+				$this->model_catalog_attribute_group->updateAttributeGroupNames($attribute_group_id, $names);
+				$json['success'] = true;
+				$json['value_html'] = htmlspecialchars($names[$this->config->get('config_language_id')] ?? '', ENT_QUOTES, 'UTF-8');
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
 	}
 }

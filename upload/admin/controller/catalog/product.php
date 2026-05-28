@@ -492,16 +492,21 @@ class ControllerCatalogProduct extends Controller {
 			}
 
 			$data['products'][] = array(
-				'product_id' => $result['product_id'],
-				'image'      => $image,
-				'image_path' => $result['image'],
-				'name'       => $result['name'],
-				'model'      => $result['model'],
-				'price'      => $this->currency->format($result['price'], $this->config->get('config_currency')),
-				'special'    => $special,
-				'quantity'   => $this->formatQuantityForDisplay($result['quantity']),
-				'status'     => $result['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
-				'edit'       => $this->url->link('catalog/product/edit', 'user_token=' . $this->session->data['user_token'] . '&product_id=' . $result['product_id'] . $url, true)
+				'product_id'  => $result['product_id'],
+				'image'       => $image,
+				'image_path'  => $result['image'],
+				'name'        => $result['name'],
+				'name_raw'    => $result['name'],
+				'model'       => $result['model'],
+				'model_raw'   => $result['model'],
+				'price'       => $this->currency->format($result['price'], $this->config->get('config_currency')),
+				'price_raw'   => $result['price'],
+				'special'     => $special,
+				'quantity'    => $this->formatQuantityForDisplay($result['quantity']),
+				'quantity_raw'=> $result['quantity'],
+				'status'      => $result['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
+				'status_raw'  => $result['status'],
+				'edit'        => $this->url->link('catalog/product/edit', 'user_token=' . $this->session->data['user_token'] . '&product_id=' . $result['product_id'] . $url, true)
 			);
 		}
 
@@ -1583,6 +1588,167 @@ class ControllerCatalogProduct extends Controller {
 			$this->load->model('catalog/product');
 			$this->model_catalog_product->updateProductImage((int)$this->request->post['product_id'], $this->request->post['image']);
 			$json['success'] = 'Image updated';
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function updateField() {
+		$json = array();
+
+		if (!$this->user->hasPermission('modify', 'catalog/product')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		if (!isset($this->request->post['product_id']) || !isset($this->request->post['field']) || !isset($this->request->post['value'])) {
+			$json['error'] = 'Invalid request';
+		}
+
+		if (!isset($json['error'])) {
+			$product_id = (int)$this->request->post['product_id'];
+			$field = $this->request->post['field'];
+			$value = $this->request->post['value'];
+
+			$this->load->model('catalog/product');
+
+			if ($field === 'price') {
+				$normalized = $this->normalizeDecimal($value);
+
+				if (!is_numeric(str_replace(',', '.', trim((string)$value))) || $normalized < 0) {
+					$json['error'] = $this->language->get('error_invalid_price');
+				} else {
+					$this->model_catalog_product->updateProductField($product_id, array('price' => $normalized));
+					$json['success'] = true;
+					$json['value_html'] = $this->currency->format($normalized, $this->config->get('config_currency'));
+				}
+			} elseif ($field === 'model') {
+				$val = trim((string)$value);
+
+				if (utf8_strlen($val) < 1 || utf8_strlen($val) > 64) {
+					$json['error'] = $this->language->get('error_model');
+				} else {
+					$this->model_catalog_product->updateProductField($product_id, array('model' => $val));
+					$json['success'] = true;
+					$json['value_html'] = htmlspecialchars($val, ENT_QUOTES, 'UTF-8');
+				}
+			} elseif ($field === 'status') {
+				$val = (int)$value;
+
+				if ($val !== 0 && $val !== 1) {
+					$json['error'] = 'Invalid status value';
+				} else {
+					$this->model_catalog_product->updateProductField($product_id, array('status' => $val));
+					$json['success'] = true;
+					$json['value_html'] = $val ? $this->language->get('text_enabled') : $this->language->get('text_disabled');
+				}
+			} elseif ($field === 'quantity') {
+				$normalized = $this->normalizeDecimal($value);
+
+				if (!is_numeric(str_replace(',', '.', trim((string)$value))) || $normalized < 0) {
+					$json['error'] = $this->language->get('error_invalid_quantity');
+				} else {
+					$this->model_catalog_product->updateProductField($product_id, array('quantity' => $normalized));
+					$json['success'] = true;
+					$display = $this->formatQuantityForDisplay($normalized);
+
+					if ($normalized <= 0) {
+						$label_class = 'label-warning';
+					} elseif ($normalized <= 5) {
+						$label_class = 'label-danger';
+					} else {
+						$label_class = 'label-success';
+					}
+
+					$json['value_html'] = '<span class="label ' . $label_class . '">' . $display . '</span>';
+				}
+			} else {
+				$json['error'] = 'Invalid field';
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function getName() {
+		$json = array();
+
+		if (!$this->user->hasPermission('modify', 'catalog/product')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		if (!isset($this->request->get['product_id'])) {
+			$json['error'] = 'Invalid request';
+		}
+
+		if (!isset($json['error'])) {
+			$product_id = (int)$this->request->get['product_id'];
+
+			$this->load->model('catalog/product');
+			$this->load->model('localisation/language');
+
+			$languages = $this->model_localisation_language->getLanguages();
+			$descriptions = $this->model_catalog_product->getProductDescriptions($product_id);
+
+			$names = array();
+
+			foreach ($languages as $language) {
+				$lid = $language['language_id'];
+				$names[$lid] = isset($descriptions[$lid]) ? $descriptions[$lid]['name'] : '';
+			}
+
+			$json['success'] = true;
+			$json['languages'] = array_values($languages);
+			$json['names'] = $names;
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function updateNames() {
+		$json = array();
+
+		if (!$this->user->hasPermission('modify', 'catalog/product')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		if (!isset($this->request->post['product_id']) || !isset($this->request->post['names'])) {
+			$json['error'] = 'Invalid request';
+		}
+
+		if (!isset($json['error'])) {
+			$product_id = (int)$this->request->post['product_id'];
+			$names = $this->request->post['names'];
+
+			$this->load->model('catalog/product');
+			$this->load->model('localisation/language');
+
+			$languages = $this->model_localisation_language->getLanguages();
+
+			$error_names = array();
+
+			foreach ($languages as $language) {
+				$lid = $language['language_id'];
+
+				if (isset($names[$lid])) {
+					$name = trim((string)$names[$lid]);
+
+					if (utf8_strlen($name) < 1 || utf8_strlen($name) > 255) {
+						$error_names[$lid] = $this->language->get('error_name');
+					}
+				}
+			}
+
+			if (!empty($error_names)) {
+				$json['error'] = $this->language->get('error_name');
+				$json['error_names'] = $error_names;
+			} else {
+				$this->model_catalog_product->updateProductNames($product_id, $names);
+				$json['success'] = true;
+				$json['value_html'] = htmlspecialchars($names[$this->config->get('config_language_id')] ?? '', ENT_QUOTES, 'UTF-8');
+			}
 		}
 
 		$this->response->addHeader('Content-Type: application/json');

@@ -51,13 +51,29 @@
                 {% for bundle in bundles %}
                 <tr>
                   <td class="text-center"><input type="checkbox" name="selected[]" value="{{ bundle.bundle_id }}" {% if bundle.bundle_id in selected %}checked{% endif %} /></td>
-                  <td class="text-left">{{ bundle.name }}</td>
+                  <td class="text-left">
+                    <span class="inline-edit" data-bundle-id="{{ bundle.bundle_id }}" data-field="name" data-value="{{ bundle.name_raw }}">{{ bundle.name }}<i class="fa fa-pencil-square-o inline-edit-icon"></i></span>
+                  </td>
                   <td class="text-center">{{ bundle.product_count }}</td>
-                  <td class="text-center">{{ bundle.discount }}</td>
-                  <td class="text-center">{{ bundle.status }}</td>
-                  <td class="text-center">{{ bundle.date_start }}</td>
-                  <td class="text-center">{{ bundle.date_end }}</td>
-                  <td class="text-center">{{ bundle.sort_order }}</td>
+                  <td class="text-center">
+                    <span class="inline-edit discount" data-bundle-id="{{ bundle.bundle_id }}" data-field="discount" data-value="{{ bundle.discount_raw }}" data-discount-type="{{ bundle.discount_type_raw }}">{{ bundle.discount }}<i class="fa fa-pencil-square-o inline-edit-icon"></i></span>
+                  </td>
+                  <td class="text-center">
+                    <span class="inline-edit" data-bundle-id="{{ bundle.bundle_id }}" data-field="status" data-value="{{ bundle.status_raw }}">{{ bundle.status }}<i class="fa fa-pencil-square-o inline-edit-icon"></i></span>
+                  </td>
+                  <td class="text-center">
+                    {% if bundle.date_start_raw != '0000-00-00' %}
+                    <span class="inline-edit" data-bundle-id="{{ bundle.bundle_id }}" data-field="date_start" data-value="{{ bundle.date_start_raw }}">{{ bundle.date_start }}<i class="fa fa-pencil-square-o inline-edit-icon"></i></span>
+                    {% endif %}
+                  </td>
+                  <td class="text-center">
+                    {% if bundle.date_end_raw != '0000-00-00' %}
+                    <span class="inline-edit" data-bundle-id="{{ bundle.bundle_id }}" data-field="date_end" data-value="{{ bundle.date_end_raw }}">{{ bundle.date_end }}<i class="fa fa-pencil-square-o inline-edit-icon"></i></span>
+                    {% endif %}
+                  </td>
+                  <td class="text-center">
+                    <span class="inline-edit" data-bundle-id="{{ bundle.bundle_id }}" data-field="sort_order" data-value="{{ bundle.sort_order_raw }}">{{ bundle.sort_order }}<i class="fa fa-pencil-square-o inline-edit-icon"></i></span>
+                  </td>
                   <td class="text-right"><a href="{{ bundle.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
                 </tr>
                 {% endfor %}
@@ -78,4 +94,168 @@
     </div>
   </div>
 </div>
+<style>
+.inline-edit { cursor: default; }
+.inline-edit .inline-edit-icon { margin-left: 4px; font-size: 13px; opacity: 0.3; cursor: pointer; }
+.inline-edit:hover .inline-edit-icon { opacity: 0.8; }
+.inline-edit-input { width: 80px; text-align: right; display: inline-block !important; height: 28px; padding: 3px 8px; }
+.inline-edit-input-left { width: 200px; text-align: left; display: inline-block !important; height: 28px; padding: 3px 8px; }
+.inline-edit-name-input { width: 200px; display: inline-block !important; height: 28px; padding: 3px 8px; }
+.inline-edit-error { margin-left: 4px; font-size: 11px; white-space: nowrap; }
+</style>
+<script type="text/javascript"><!--
+$(document).on('click', '.inline-edit-icon', function(e) {
+	e.stopPropagation();
+
+	var $span = $(this).closest('.inline-edit');
+	if ($span.find('input, select').length) return;
+
+	var field = $span.data('field');
+	var rawValue = $span.data('value');
+	var bundleId = $span.data('bundle-id');
+
+	$span.data('display', $span.html());
+
+	if (field === 'status') {
+		var $select = $('<select class="form-control input-sm" style="width:auto;display:inline-block;">');
+		$select.append('<option value="1"' + (rawValue == 1 ? ' selected' : '') + '>{{ text_enabled }}</option>');
+		$select.append('<option value="0"' + (rawValue == 0 ? ' selected' : '') + '>{{ text_disabled }}</option>');
+		$span.html($select);
+		$select.focus();
+
+		var saved = false;
+
+		$select.on('change', function() {
+			saved = true;
+			var newValue = $(this).val();
+
+			$.ajax({
+				url: 'index.php?route=catalog/product_bundle/updateField&user_token={{ user_token }}',
+				type: 'post',
+				dataType: 'json',
+				data: { bundle_id: bundleId, field: 'status', value: newValue },
+				success: function(json) {
+					if (json['error']) {
+						$span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
+						setTimeout(function() { $span.html($span.data('display')); }, 3000);
+					} else {
+						$span.data('value', newValue);
+						$span.html(json['value_html'] + '<i class="fa fa-pencil-square-o inline-edit-icon"></i>');
+					}
+				},
+				error: function() {
+					$span.html($span.data('display'));
+				}
+			});
+		});
+
+		$select.on('blur', function() {
+			if (!saved) {
+				$span.html($span.data('display'));
+			}
+		});
+	} else if (field === 'discount') {
+		var discountType = $span.data('discount-type');
+
+		var html = '<input type="text" class="form-control input-sm inline-edit-input" value="' + rawValue + '" style="width:70px;">';
+		html += '<select class="form-control input-sm" style="width:auto;display:inline-block;margin-left:4px;">';
+		html += '<option value="percentage"' + (discountType == 'percentage' ? ' selected' : '') + '>%</option>';
+		html += '<option value="fixed"' + (discountType == 'fixed' ? ' selected' : '') + '>{{ text_fixed }}</option>';
+		html += '</select>';
+		html += ' <button type="button" class="btn btn-primary btn-xs inline-edit-discount-save">{{ button_save }}</button>';
+		$span.html(html);
+		$span.find('input').focus().select();
+
+		var reverted = false;
+
+		$span.find('.inline-edit-discount-save').on('click', function() {
+			var newValue = $span.find('input').val();
+			var newType = $span.find('select').val();
+
+			$.ajax({
+				url: 'index.php?route=catalog/product_bundle/updateDiscount&user_token={{ user_token }}',
+				type: 'post',
+				dataType: 'json',
+				data: { bundle_id: bundleId, value: newValue, type: newType },
+				success: function(json) {
+					if (json['error']) {
+						$span.append(' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
+						setTimeout(function() { $span.find('.inline-edit-error').remove(); }, 3000);
+					} else {
+						reverted = true;
+						$span.data('value', newValue);
+						$span.data('discount-type', newType);
+						$span.html(json['value_html'] + '<i class="fa fa-pencil-square-o inline-edit-icon"></i>');
+					}
+				},
+				error: function() {
+					$span.html($span.data('display'));
+				}
+			});
+		});
+
+		$span.find('input').on('keydown', function(e) {
+			if (e.which === 27) {
+				reverted = true;
+				$span.html($span.data('display'));
+			}
+		});
+
+		$span.find('select').on('blur', function() {
+			setTimeout(function() {
+				if (!$span.find('select').is(':focus') && !$span.find('input').is(':focus') && !$span.find('.inline-edit-discount-save').is(':focus') && !reverted) {
+					$span.html($span.data('display'));
+				}
+			}, 200);
+		});
+	} else {
+		var $input;
+
+		if (field === 'name') {
+			$span.html('<input type="text" class="form-control input-sm inline-edit-input-left" value="' + ('' + rawValue).replace(/"/g, '&quot;') + '">');
+			$input = $span.find('input');
+		} else if (field === 'date_start' || field === 'date_end') {
+			$span.html('<input type="date" class="form-control input-sm" value="' + rawValue + '" style="width:auto;display:inline-block;">');
+			$input = $span.find('input');
+		} else {
+			$span.html('<input type="text" class="form-control input-sm inline-edit-input" value="' + rawValue + '">');
+			$input = $span.find('input');
+		}
+		$input.focus().select();
+
+		function revert() {
+			$span.html($span.data('display'));
+		}
+
+		function save() {
+			var newValue = $input.val();
+
+			$.ajax({
+				url: 'index.php?route=catalog/product_bundle/updateField&user_token={{ user_token }}',
+				type: 'post',
+				dataType: 'json',
+				data: { bundle_id: bundleId, field: field, value: newValue },
+				success: function(json) {
+					if (json['error']) {
+						$span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
+						setTimeout(function() { $span.html($span.data('display')); }, 3000);
+					} else {
+						$span.data('value', newValue);
+						$span.html(json['value_html'] + '<i class="fa fa-pencil-square-o inline-edit-icon"></i>');
+					}
+				},
+				error: function() {
+					revert();
+				}
+			});
+		}
+
+		$input.on('blur', save);
+		$input.on('keydown', function(e) {
+			if (e.which === 13) { e.preventDefault(); $input.trigger('blur'); }
+			if (e.which === 27) { revert(); }
+		});
+	}
+});
+//--></script>
 {{ footer }}

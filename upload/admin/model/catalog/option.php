@@ -174,4 +174,27 @@ class ModelCatalogOption extends Model {
 
 		return $query->row['total'];
 	}
+
+	public function updateOptionField($option_id, $data) {
+		$int_fields = array('sort_order');
+
+		$sets = array();
+		foreach ($int_fields as $field) {
+			if (isset($data[$field])) {
+				$sets[] = "`" . $field . "` = '" . (int)$data[$field] . "'";
+			}
+		}
+
+		if (!empty($sets)) {
+			$this->db->query("UPDATE `" . DB_PREFIX . "option` SET " . implode(', ', $sets) . " WHERE option_id = '" . (int)$option_id . "'");
+		}
+	}
+
+	public function updateOptionNames($option_id, $names) {
+		foreach ($names as $language_id => $name) {
+			$name = trim((string)$name);
+
+			$this->db->query("UPDATE " . DB_PREFIX . "option_description SET name = '" . $this->db->escape($name) . "' WHERE option_id = '" . (int)$option_id . "' AND language_id = '" . (int)$language_id . "'");
+		}
+	}
 }

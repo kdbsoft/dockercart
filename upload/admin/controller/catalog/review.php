@@ -265,13 +265,17 @@ class ControllerCatalogReview extends Controller {
 
 		foreach ($results as $result) {
 			$data['reviews'][] = array(
-				'review_id'  => $result['review_id'],
-				'name'       => $result['name'],
-				'author'     => $result['author'],
-				'rating'     => $result['rating'],
-				'status'     => ($result['status']) ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
-				'date_added' => date($this->language->get('date_format_short'), strtotime($result['date_added'])),
-				'edit'       => $this->url->link('catalog/review/edit', 'user_token=' . $this->session->data['user_token'] . '&review_id=' . $result['review_id'] . $url, true)
+				'review_id'       => $result['review_id'],
+				'name'            => $result['name'],
+				'author'          => $result['author'],
+				'author_raw'      => $result['author'],
+				'rating'          => $result['rating'],
+				'rating_raw'      => $result['rating'],
+				'status'          => ($result['status']) ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
+				'status_raw'      => $result['status'],
+				'date_added'      => date($this->language->get('date_format_short'), strtotime($result['date_added'])),
+				'date_added_raw'  => $result['date_added'],
+				'edit'            => $this->url->link('catalog/review/edit', 'user_token=' . $this->session->data['user_token'] . '&review_id=' . $result['review_id'] . $url, true)
 			);
 		}
 
@@ -534,6 +538,73 @@ class ControllerCatalogReview extends Controller {
 		$data['footer'] = $this->load->controller('common/footer');
 
 		$this->response->setOutput($this->load->view('catalog/review_form', $data));
+	}
+
+	public function updateField() {
+		$json = array();
+
+		if (!$this->user->hasPermission('modify', 'catalog/review')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		if (!isset($this->request->post['review_id']) || !isset($this->request->post['field']) || !isset($this->request->post['value'])) {
+			$json['error'] = 'Invalid request';
+		}
+
+		if (!isset($json['error'])) {
+			$review_id = (int)$this->request->post['review_id'];
+			$field = $this->request->post['field'];
+			$value = $this->request->post['value'];
+
+			$this->load->model('catalog/review');
+
+			if ($field === 'author') {
+				$val = trim((string)$value);
+
+				if (utf8_strlen($val) < 3 || utf8_strlen($val) > 64) {
+					$json['error'] = $this->language->get('error_author');
+				} else {
+					$this->model_catalog_review->updateReviewField($review_id, array('author' => $val));
+					$json['success'] = true;
+					$json['value_html'] = htmlspecialchars($val, ENT_QUOTES, 'UTF-8');
+				}
+			} elseif ($field === 'rating') {
+				$val = (int)$value;
+
+				if ($val < 0 || $val > 5) {
+					$json['error'] = $this->language->get('error_rating');
+				} else {
+					$this->model_catalog_review->updateReviewField($review_id, array('rating' => $val));
+					$json['success'] = true;
+					$json['value_html'] = (string)$val;
+				}
+			} elseif ($field === 'status') {
+				$val = (int)$value;
+
+				if ($val !== 0 && $val !== 1) {
+					$json['error'] = 'Invalid status value';
+				} else {
+					$this->model_catalog_review->updateReviewField($review_id, array('status' => $val));
+					$json['success'] = true;
+					$json['value_html'] = $val ? $this->language->get('text_enabled') : $this->language->get('text_disabled');
+				}
+			} elseif ($field === 'date_added') {
+				$val = trim((string)$value);
+
+				if (!preg_match('/^\d{4}-\d{2}-\d{2}( \d{2}:\d{2}:\d{2})?$/', $val)) {
+					$json['error'] = $this->language->get('error_invalid_date');
+				} else {
+					$this->model_catalog_review->updateReviewField($review_id, array('date_added' => $val));
+					$json['success'] = true;
+					$json['value_html'] = date($this->language->get('date_format_short'), strtotime($val));
+				}
+			} else {
+				$json['error'] = 'Invalid field';
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
 	}
 
 	protected function validateForm() {

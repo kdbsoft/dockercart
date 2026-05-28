@@ -190,15 +190,40 @@
                       <input type="checkbox" name="selected[]" value="{{ product.product_id }}" />
                       {% endif %}</td>
                     <td class="text-center"><input type="hidden" id="input-image-{{ product.product_id }}" value="{{ product.image_path }}" /><a href="javascript:void(0);" class="product-image-edit" id="thumb-image-{{ product.product_id }}" data-product-id="{{ product.product_id }}">{% if product.image %} <img src="{{ product.image }}" alt="{{ product.name }}" class="img-thumbnail" /> {% else %} <span class="img-thumbnail list"><i class="fa fa-camera fa-2x"></i></span> {% endif %}</a></td>
-                    <td class="text-left">{{ product.name }}</td>
-                    <td class="text-left">{{ product.model }}</td>
-                    <td class="text-right">{% if product.special %} <span style="text-decoration: line-through;">{{ product.price }}</span><br/>
-                      <div class="text-danger">{{ product.special }}</div>
+                    <td class="text-left">
+                      <span class="inline-edit" data-product-id="{{ product.product_id }}" data-field="name" data-value="{{ product.name_raw }}">
+                        {{ product.name }}
+                        <i class="fa fa-pencil-square-o inline-edit-icon"></i>
+                      </span>
+                    </td>
+                    <td class="text-left">
+                      <span class="inline-edit" data-product-id="{{ product.product_id }}" data-field="model" data-value="{{ product.model_raw }}">
+                        {{ product.model }}
+                        <i class="fa fa-pencil-square-o inline-edit-icon"></i>
+                      </span>
+                    </td>
+                    <td class="text-right">
+                      {% if product.special %}
+                        <span style="text-decoration: line-through;">
+                          <span class="inline-edit" data-product-id="{{ product.product_id }}" data-field="price" data-value="{{ product.price_raw }}">{{ product.price }}<i class="fa fa-pencil-square-o inline-edit-icon"></i></span>
+                        </span><br/>
+                        <div class="text-danger">{{ product.special }}</div>
                       {% else %}
-                      {{ product.price }}
-                      {% endif %}</td>
-                    <td class="text-right">{% if product.quantity <= 0 %} <span class="label label-warning">{{ product.quantity }}</span> {% elseif product.quantity <= 5 %} <span class="label label-danger">{{ product.quantity }}</span> {% else %} <span class="label label-success">{{ product.quantity }}</span> {% endif %}</td>
-                    <td class="text-left">{{ product.status }}</td>
+                        <span class="inline-edit" data-product-id="{{ product.product_id }}" data-field="price" data-value="{{ product.price_raw }}">{{ product.price }}<i class="fa fa-pencil-square-o inline-edit-icon"></i></span>
+                      {% endif %}
+                    </td>
+                    <td class="text-right">
+                      <span class="inline-edit" data-product-id="{{ product.product_id }}" data-field="quantity" data-value="{{ product.quantity_raw }}">
+                        {% if product.quantity <= 0 %} <span class="label label-warning">{{ product.quantity }}</span> {% elseif product.quantity <= 5 %} <span class="label label-danger">{{ product.quantity }}</span> {% else %} <span class="label label-success">{{ product.quantity }}</span> {% endif %}
+                        <i class="fa fa-pencil-square-o inline-edit-icon"></i>
+                      </span>
+                    </td>
+                    <td class="text-left">
+                      <span class="inline-edit" data-product-id="{{ product.product_id }}" data-field="status" data-value="{{ product.status_raw }}">
+                        {{ product.status }}
+                        <i class="fa fa-pencil-square-o inline-edit-icon"></i>
+                      </span>
+                    </td>
                     <td class="text-right"><a href="{{ product.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
                   </tr>
                   {% endfor %}
@@ -382,7 +407,180 @@ $('input[name=\'filter_category\']').autocomplete({
 	}
 });
 //--></script>
+<style>
+.inline-edit { cursor: default; }
+.inline-edit .inline-edit-icon { margin-left: 4px; font-size: 13px; opacity: 0.3; cursor: pointer; }
+.inline-edit:hover .inline-edit-icon { opacity: 0.8; }
+.inline-edit-input { width: 100px; text-align: right; display: inline-block !important; }
+.inline-edit-error { margin-left: 4px; font-size: 11px; white-space: nowrap; }
+</style>
 <script type="text/javascript"><!--
+$(document).on('click', '.inline-edit-icon', function(e) {
+	e.stopPropagation();
+
+	var $span = $(this).closest('.inline-edit');
+	if ($span.find('input').length) return;
+
+	var field = $span.data('field');
+	var rawValue = $span.data('value');
+
+	$span.data('display', $span.html());
+
+	if (field === 'status') {
+		var $select = $('<select class="form-control input-sm" style="width:auto;display:inline-block;">');
+		$select.append('<option value="1"' + (rawValue == 1 ? ' selected' : '') + '>{{ text_enabled }}</option>');
+		$select.append('<option value="0"' + (rawValue == 0 ? ' selected' : '') + '>{{ text_disabled }}</option>');
+		$span.html($select);
+		$select.focus();
+
+		var saved = false;
+
+		$select.on('change', function() {
+			saved = true;
+			var productId = $span.data('product-id');
+			var newValue = $(this).val();
+
+			$.ajax({
+				url: 'index.php?route=catalog/product/updateField&user_token={{ user_token }}',
+				type: 'post',
+				dataType: 'json',
+				data: { product_id: productId, field: 'status', value: newValue },
+				success: function(json) {
+					if (json['error']) {
+						$span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
+						setTimeout(function() { $span.html($span.data('display')); }, 3000);
+					} else {
+						$span.data('value', newValue);
+						$span.html(json['value_html'] + '<i class="fa fa-pencil-square-o inline-edit-icon"></i>');
+					}
+				},
+				error: function() {
+					$span.html($span.data('display'));
+				}
+			});
+		});
+
+		$select.on('blur', function() {
+			if (!saved) {
+				$span.html($span.data('display'));
+			}
+		});
+	} else if (field === 'name') {
+		var productId = $span.data('product-id');
+
+		$.ajax({
+			url: 'index.php?route=catalog/product/getName&user_token={{ user_token }}&product_id=' + productId,
+			dataType: 'json',
+			success: function(json) {
+				if (json['error']) {
+					$span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
+					setTimeout(function() { $span.html($span.data('display')); }, 3000);
+					return;
+				}
+
+				var html = '<div class="inline-edit-names" style="white-space:nowrap;">';
+				$.each(json['languages'], function(i, lang) {
+					var val = json['names'][lang.language_id] || '';
+					html += '<div style="margin-bottom:2px;">';
+					html += '<span style="font-weight:bold;font-size:11px;margin-right:4px;">' + lang.name + ':</span>';
+					html += '<input type="text" class="form-control input-sm inline-edit-name-input" data-lang-id="' + lang.language_id + '" value="' + val.replace(/"/g, '&quot;') + '" style="width:200px;display:inline-block;">';
+					html += '</div>';
+				});
+				html += '<div style="margin-top:4px;"><button type="button" class="btn btn-primary btn-xs inline-edit-name-save">{{ button_save }}</button></div>';
+				html += '</div>';
+
+				$span.html(html);
+				$span.find('input').first().focus();
+
+				var reverted = false;
+
+				$span.on('click', '.inline-edit-name-save', function() {
+					var names = {};
+					$span.find('.inline-edit-name-input').each(function() {
+						names[$(this).data('lang-id')] = $(this).val();
+					});
+
+					$.ajax({
+						url: 'index.php?route=catalog/product/updateNames&user_token={{ user_token }}',
+						type: 'post',
+						dataType: 'json',
+						data: { product_id: productId, names: names },
+						success: function(res) {
+							if (res['error']) {
+								$span.append(' <span class="text-danger inline-edit-error">' + res['error'] + '</span>');
+								setTimeout(function() { $span.find('.inline-edit-error').remove(); }, 3000);
+							} else {
+								reverted = true;
+								$span.data('value', res['value_html']);
+								$span.html(res['value_html'] + '<i class="fa fa-pencil-square-o inline-edit-icon"></i>');
+							}
+						},
+						error: function() {
+							$span.html($span.data('display'));
+						}
+					});
+				});
+
+				$span.find('.inline-edit-name-input').on('keydown', function(e) {
+					if (e.which === 27) {
+						reverted = true;
+						$span.html($span.data('display'));
+					}
+				});
+
+				$(document).one('click', function(e) {
+					if (!$(e.target).closest('.inline-edit-names').length && !reverted) {
+						$span.html($span.data('display'));
+					}
+				});
+			},
+			error: function() {
+				$span.html($span.data('display'));
+			}
+		});
+	} else {
+		var currentDisplay = $span.clone().children('.inline-edit-icon').remove().children('.label').remove().end().text().trim();
+
+		$span.html('<input type="text" class="form-control input-sm inline-edit-input" value="' + rawValue + '">');
+		var $input = $span.find('input');
+		$input.focus().select();
+
+		function revert() {
+			$span.html($span.data('display'));
+		}
+
+		function save() {
+			var newValue = $input.val();
+			var productId = $span.data('product-id');
+
+			$.ajax({
+				url: 'index.php?route=catalog/product/updateField&user_token={{ user_token }}',
+				type: 'post',
+				dataType: 'json',
+				data: { product_id: productId, field: field, value: newValue },
+				success: function(json) {
+					if (json['error']) {
+						$span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
+						setTimeout(function() { $span.html($span.data('display')); }, 3000);
+					} else {
+						$span.data('value', newValue);
+						$span.html(json['value_html'] + '<i class="fa fa-pencil-square-o inline-edit-icon"></i>');
+					}
+				},
+				error: function() {
+					revert();
+				}
+			});
+		}
+
+		$input.on('blur', save);
+		$input.on('keydown', function(e) {
+			if (e.which === 13) { e.preventDefault(); $input.trigger('blur'); }
+			if (e.which === 27) { revert(); }
+		});
+	}
+});
+
 $(document).on('click', '.product-image-edit', function(e) {
 	e.preventDefault();
 

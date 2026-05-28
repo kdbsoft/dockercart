@@ -101,10 +101,18 @@
                       <input type="checkbox" name="selected[]" value="{{ review.review_id }}" />
                       {% endif %}</td>
                     <td class="text-left">{{ review.name }}</td>
-                    <td class="text-left">{{ review.author }}</td>
-                    <td class="text-right">{{ review.rating }}</td>
-                    <td class="text-left">{{ review.status }}</td>
-                    <td class="text-left">{{ review.date_added }}</td>
+                    <td class="text-left">
+                      <span class="inline-edit" data-review-id="{{ review.review_id }}" data-field="author" data-value="{{ review.author_raw }}">{{ review.author }}<i class="fa fa-pencil-square-o inline-edit-icon"></i></span>
+                    </td>
+                    <td class="text-right">
+                      <span class="inline-edit" data-review-id="{{ review.review_id }}" data-field="rating" data-value="{{ review.rating_raw }}">{{ review.rating }}<i class="fa fa-pencil-square-o inline-edit-icon"></i></span>
+                    </td>
+                    <td class="text-left">
+                      <span class="inline-edit" data-review-id="{{ review.review_id }}" data-field="status" data-value="{{ review.status_raw }}">{{ review.status }}<i class="fa fa-pencil-square-o inline-edit-icon"></i></span>
+                    </td>
+                    <td class="text-left">
+                      <span class="inline-edit" data-review-id="{{ review.review_id }}" data-field="date_added" data-value="{{ review.date_added_raw }}">{{ review.date_added }}<i class="fa fa-pencil-square-o inline-edit-icon"></i></span>
+                    </td>
                     <td class="text-right"><a href="{{ review.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
                   </tr>
                   {% endfor %}
@@ -162,6 +170,151 @@ $('#button-filter').on('click', function() {
 $('.date').datetimepicker({
 	language: '{{ datepicker }}',
 	pickTime: false
+});
+//--></script>
+<style>
+.inline-edit { cursor: default; }
+.inline-edit .inline-edit-icon { margin-left: 4px; font-size: 13px; opacity: 0.3; cursor: pointer; }
+.inline-edit:hover .inline-edit-icon { opacity: 0.8; }
+.inline-edit-input { width: 100px; text-align: left; display: inline-block !important; height: 28px; padding: 3px 8px; }
+.inline-edit-error { margin-left: 4px; font-size: 11px; white-space: nowrap; }
+</style>
+<script type="text/javascript"><!--
+$(document).on('click', '.inline-edit-icon', function(e) {
+	e.stopPropagation();
+
+	var $span = $(this).closest('.inline-edit');
+	if ($span.find('input, select').length) return;
+
+	var field = $span.data('field');
+	var rawValue = $span.data('value');
+	var reviewId = $span.data('review-id');
+
+	$span.data('display', $span.html());
+
+	if (field === 'status') {
+		var $select = $('<select class="form-control input-sm" style="width:auto;display:inline-block;">');
+		$select.append('<option value="1"' + (rawValue == 1 ? ' selected' : '') + '>{{ text_enabled }}</option>');
+		$select.append('<option value="0"' + (rawValue == 0 ? ' selected' : '') + '>{{ text_disabled }}</option>');
+		$span.html($select);
+		$select.focus();
+
+		var saved = false;
+
+		$select.on('change', function() {
+			saved = true;
+			var newValue = $(this).val();
+
+			$.ajax({
+				url: 'index.php?route=catalog/review/updateField&user_token={{ user_token }}',
+				type: 'post',
+				dataType: 'json',
+				data: { review_id: reviewId, field: 'status', value: newValue },
+				success: function(json) {
+					if (json['error']) {
+						$span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
+						setTimeout(function() { $span.html($span.data('display')); }, 3000);
+					} else {
+						$span.data('value', newValue);
+						$span.html(json['value_html'] + '<i class="fa fa-pencil-square-o inline-edit-icon"></i>');
+					}
+				},
+				error: function() {
+					$span.html($span.data('display'));
+				}
+			});
+		});
+
+		$select.on('blur', function() {
+			if (!saved) {
+				$span.html($span.data('display'));
+			}
+		});
+	} else if (field === 'rating') {
+		var $select = $('<select class="form-control input-sm" style="width:auto;display:inline-block;">');
+		for (var i = 1; i <= 5; i++) {
+			$select.append('<option value="' + i + '"' + (rawValue == i ? ' selected' : '') + '>' + i + '</option>');
+		}
+		$span.html($select);
+		$select.focus();
+
+		var saved = false;
+
+		$select.on('change', function() {
+			saved = true;
+			var newValue = $(this).val();
+
+			$.ajax({
+				url: 'index.php?route=catalog/review/updateField&user_token={{ user_token }}',
+				type: 'post',
+				dataType: 'json',
+				data: { review_id: reviewId, field: 'rating', value: newValue },
+				success: function(json) {
+					if (json['error']) {
+						$span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
+						setTimeout(function() { $span.html($span.data('display')); }, 3000);
+					} else {
+						$span.data('value', newValue);
+						$span.html(json['value_html'] + '<i class="fa fa-pencil-square-o inline-edit-icon"></i>');
+					}
+				},
+				error: function() {
+					$span.html($span.data('display'));
+				}
+			});
+		});
+
+		$select.on('blur', function() {
+			if (!saved) {
+				$span.html($span.data('display'));
+			}
+		});
+	} else {
+		var $input;
+
+		if (field === 'date_added') {
+			var dateVal = rawValue.substring(0, 10);
+			$span.html('<input type="date" class="form-control input-sm" value="' + dateVal + '" style="width:auto;display:inline-block;">');
+			$input = $span.find('input');
+		} else {
+			$span.html('<input type="text" class="form-control input-sm inline-edit-input" value="' + ('' + rawValue).replace(/"/g, '&quot;') + '">');
+			$input = $span.find('input');
+		}
+		$input.focus().select();
+
+		function revert() {
+			$span.html($span.data('display'));
+		}
+
+		function save() {
+			var newValue = $input.val();
+
+			$.ajax({
+				url: 'index.php?route=catalog/review/updateField&user_token={{ user_token }}',
+				type: 'post',
+				dataType: 'json',
+				data: { review_id: reviewId, field: field, value: newValue },
+				success: function(json) {
+					if (json['error']) {
+						$span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
+						setTimeout(function() { $span.html($span.data('display')); }, 3000);
+					} else {
+						$span.data('value', newValue);
+						$span.html(json['value_html'] + '<i class="fa fa-pencil-square-o inline-edit-icon"></i>');
+					}
+				},
+				error: function() {
+					revert();
+				}
+			});
+		}
+
+		$input.on('blur', save);
+		$input.on('keydown', function(e) {
+			if (e.which === 13) { e.preventDefault(); $input.trigger('blur'); }
+			if (e.which === 27) { revert(); }
+		});
+	}
 });
 //--></script></div>
 {{ footer }}
