@@ -19,6 +19,11 @@ $_['entry_name']             = 'Banner Name';
 $_['entry_title']            = 'Title';
 $_['entry_title_hint']       = 'Wrap accent words with [brackets], e.g.: The Future of [Smart Living]';
 $_['entry_subtitle']         = 'Subtitle';
+$_['entry_content_position']     = 'Content Position';
+$_['text_content_position_left']  = 'Left';
+$_['text_content_position_center'] = 'Center';
+$_['text_content_position_right'] = 'Right';
+
 $_['entry_accent_text']      = 'Top Badge';
 $_['entry_accent_color']     = 'Accent Color';
 $_['entry_accent_hint']      = 'Used for badge background and [bracketed] text in title';

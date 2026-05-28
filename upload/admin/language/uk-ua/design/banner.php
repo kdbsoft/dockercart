@@ -3,6 +3,11 @@
 $_['column_action'] = 'Дія';
 $_['column_name'] = 'Назва банера';
 $_['column_status'] = 'Статус';
+$_['entry_content_position'] = 'Положення контенту';
+$_['text_content_position_left'] = 'Зліва';
+$_['text_content_position_center'] = 'По центру';
+$_['text_content_position_right'] = 'Справа';
+
 $_['entry_accent_color'] = 'Акцентний колір';
 $_['entry_accent_hint'] = 'Використовується для фону значка та тексту [у дужках] у заголовку';
 $_['entry_accent_text'] = 'Акцентний текст';

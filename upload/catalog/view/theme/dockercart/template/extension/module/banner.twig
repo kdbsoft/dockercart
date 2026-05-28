@@ -16,12 +16,20 @@
   #banner-{{ module }} .banner-slide__media iframe,
   #banner-{{ module }} .banner-slide__media video { max-width:100%; width:auto; height:auto; }
   {% endif %}
-  .banner-slide__overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: flex-start; pointer-events: none; background: linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 35%, rgba(0,0,0,0.1) 65%, transparent 100%); }
+  .banner-slide__overlay { position: absolute; inset: 0; display: flex; align-items: center; pointer-events: none; background: linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 35%, rgba(0,0,0,0.1) 65%, transparent 100%); }
+  .banner-slide__overlay--left { justify-content: flex-start; }
+  .banner-slide__overlay--center { justify-content: center; }
+  .banner-slide__overlay--right { justify-content: flex-end; }
   .banner-slide__content { pointer-events: auto; color: #fff; text-align: left; padding: 1.75rem 1rem 1rem 2rem; max-width: 65%; }
+  .banner-slide__overlay--center .banner-slide__content { text-align: center; }
+  .banner-slide__overlay--right .banner-slide__content { text-align: right; }
   .banner-slide__title { font-size: 1.75rem; font-weight: 800; line-height: 1.2; margin: 0 0 .75rem; }
   .banner-slide__subtitle { margin: 0 0 .875rem; font-size: 1.125rem; line-height: 1.5; opacity: .95; }
   .banner-slide__badge { display: inline-block; padding: .25rem .5rem; font-weight:700; border-radius: .5rem; margin-bottom: .75rem; background: var(--accent, #2563eb); }
-  .banner-slide__btns { margin-top: 0; display:flex; gap:.75rem; justify-content: flex-start; flex-wrap:wrap; }
+  .banner-slide__btns { margin-top: 0; display:flex; gap:.75rem; flex-wrap:wrap; }
+  .banner-slide__overlay--left .banner-slide__btns { justify-content: flex-start; }
+  .banner-slide__overlay--center .banner-slide__btns { justify-content: center; }
+  .banner-slide__overlay--right .banner-slide__btns { justify-content: flex-end; }
   .banner-slide__btn { display:inline-flex; align-items:center; justify-content:center; gap:.5px; text-decoration:none; font-weight:700; border-radius: .75rem; padding: .5rem .85rem; font-size: .95rem; transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease; }
   .banner-slide__btn--primary { background: var(--accent, #2563eb); color: #fff; border: 1px solid var(--accent, #2563eb); box-shadow: 0 6px 18px rgba(2,6,23,0.12); }
   .banner-slide__btn--primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(2,6,23,0.18); filter: brightness(0.92); }
@@ -41,7 +49,6 @@
   #banner-{{ module }}.banner-slider--full-width.banner-layout--grid .banner-slide { max-width: none; }
   .banner-slider--full-width { border-radius: 0; }
   .banner-slider--full-width .banner-slide { border-radius: 0; }
-  .banner-slider--full-width .banner-slide__overlay { justify-content: center; }
   .banner-slider--full-width .banner-slide__content { max-width: 1280px; padding-right: 2rem; }
   /* Mobile: simple vertical stack of banners */
   @media (max-width: 767px) {
@@ -74,7 +81,6 @@
     /* Mobile: remove outer max-width constraint so banner fills the screen */
     #banner-{{ module }}.banner-layout--stack { max-width: none !important; margin-left: 0; margin-right: 0; }
     /* Full-width reset on mobile: keep inside container */
-    .banner-slider--full-width .banner-slide__overlay { justify-content: flex-start; }
     .banner-slider--full-width .banner-slide__content { max-width: 100%; padding-right: 1rem; }
   }
 </style>
@@ -110,7 +116,7 @@
       {% if banner.link %}</a>{% endif %}
 
       {% if banner.title_html or banner.subtitle or banner.accent_text or banner.primary_btn_text or banner.secondary_btn_text %}
-      <div class="banner-slide__overlay">
+      <div class="banner-slide__overlay banner-slide__overlay--{{ banner.content_position ?: 'left' }}">
         <div class="banner-slide__content">
           {% if banner.accent_text %}
           {%- set badge_color = banner.accent_color ? banner.accent_color : '' -%}

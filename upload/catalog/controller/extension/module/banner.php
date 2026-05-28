@@ -100,7 +100,8 @@ class ControllerExtensionModuleBanner extends Controller {
                 'image'              => $image_landscape,
                 'image_portrait'     => $image_portrait,
                 'video_type'         => $video_type,
-                'video_url'          => $video_url
+                'video_url'          => $video_url,
+                'content_position'   => isset($result['content_position']) ? $result['content_position'] : 'left'
             );
         }
 

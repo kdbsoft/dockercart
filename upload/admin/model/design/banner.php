@@ -108,6 +108,7 @@ class ModelDesignBanner extends Model {
 				'image_portrait'     => isset($banner_image['image_portrait']) ? $banner_image['image_portrait'] : '',
 				'video_type'         => isset($banner_image['video_type']) ? $banner_image['video_type'] : '',
 				'video'              => isset($banner_image['video']) ? $banner_image['video'] : '',
+				'content_position'   => isset($banner_image['content_position']) ? $banner_image['content_position'] : 'left',
 				'sort_order'         => $banner_image['sort_order']
 			);
 		}
@@ -134,6 +135,7 @@ class ModelDesignBanner extends Model {
 		$secondary_btn_link  = isset($banner_image['secondary_btn_link']) ? $this->db->escape($banner_image['secondary_btn_link']) : '';
 		$video_type          = isset($banner_image['video_type']) ? $this->db->escape($banner_image['video_type']) : '';
 		$video               = isset($banner_image['video']) ? $this->db->escape($banner_image['video']) : '';
+		$content_position    = isset($banner_image['content_position']) ? $this->db->escape($banner_image['content_position']) : 'left';
 
 		$this->db->query("INSERT INTO " . DB_PREFIX . "banner_image SET
 			banner_id = '"           . (int)$banner_id . "',
@@ -153,6 +155,7 @@ class ModelDesignBanner extends Model {
 			image_portrait = '"      . $image_portrait . "',
 			video_type = '"          . $video_type . "',
 			video = '"               . $video . "',
+			content_position = '"   . $content_position . "',
 			sort_order = '"          . (int)$banner_image['sort_order'] . "'");
 	}
 
@@ -188,6 +191,8 @@ class ModelDesignBanner extends Model {
 			"ALTER TABLE `" . DB_PREFIX . "banner_image` ADD `video_type` varchar(16) NOT NULL DEFAULT '' AFTER `image_portrait`");
 		$this->addColumnIfMissing(DB_PREFIX . 'banner_image', 'video',
 			"ALTER TABLE `" . DB_PREFIX . "banner_image` ADD `video` varchar(255) NOT NULL DEFAULT '' AFTER `video_type`");
+		$this->addColumnIfMissing(DB_PREFIX . 'banner_image', 'content_position',
+			"ALTER TABLE `" . DB_PREFIX . "banner_image` ADD `content_position` varchar(16) NOT NULL DEFAULT 'left' AFTER `sort_order`");
 
 		// Expand title column if still varchar(64)
 		$this->db->query("ALTER TABLE `" . DB_PREFIX . "banner_image` MODIFY `title` varchar(255) NOT NULL");

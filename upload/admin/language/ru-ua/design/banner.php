@@ -3,6 +3,11 @@
 $_['column_action'] = 'Действие';
 $_['column_name'] = 'Название баннера';
 $_['column_status'] = 'Статус';
+$_['entry_content_position'] = 'Положение контента';
+$_['text_content_position_left'] = 'Слева';
+$_['text_content_position_center'] = 'По центру';
+$_['text_content_position_right'] = 'Справа';
+
 $_['entry_accent_color'] = 'Акцентный цвет';
 $_['entry_accent_hint'] = 'Используется в качестве фона для значка и текста в скобках в заголовке.';
 $_['entry_accent_text'] = 'Акцентный текст';
