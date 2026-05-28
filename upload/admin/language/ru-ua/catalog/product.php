@@ -50,7 +50,6 @@ $_['entry_price'] = 'Цена';
 $_['entry_priority'] = 'Приоритет';
 $_['entry_quantity'] = 'Количество';
 $_['entry_quantity_step'] = 'Шаг количества';
-$_['entry_recurring'] = 'Повторяющийся профиль';
 $_['entry_related'] = 'Сопутствующие товары';
 $_['entry_gift_product'] = 'Товар-подарок';
 $_['entry_required'] = 'Необходимый';

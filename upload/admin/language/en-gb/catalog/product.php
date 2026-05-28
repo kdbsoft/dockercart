@@ -91,7 +91,6 @@ $_['entry_gift_product']     = 'Gift Product';
 $_['entry_tag']              = 'Product Tags';
 $_['entry_reward']           = 'Reward Points';
 $_['entry_layout']           = 'Layout Override';
-$_['entry_recurring']        = 'Recurring Profile';
 
 // Help
 $_['help_sku']               = 'Stock Keeping Unit';
