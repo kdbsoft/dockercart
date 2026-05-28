@@ -1,51 +1,71 @@
-{{ header }}
-<div id="content">
-  <div class="container-fluid"><br/>
-    <br/>
-    <div class="row">
-      <div class="col-sm-offset-4 col-sm-4">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <h1 class="panel-title"><i class="fa fa-lock"></i> {{ text_login }}</h1>
-          </div>
-          <div class="panel-body">
-            {% if success %}
-            <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
-              <button type="button" class="close" data-dismiss="alert">&times;</button>
-            </div>
-            {% endif %}
-            {% if error_warning %}
-            <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
-              <button type="button" class="close" data-dismiss="alert">&times;</button>
-            </div>
-            {% endif %}
-            <form action="{{ action }}" method="post" enctype="multipart/form-data">
-              <div class="form-group">
-                <label for="input-username">{{ entry_username }}</label>
-                <div class="input-group"><span class="input-group-addon"><i class="fa fa-user"></i></span>
-                  <input type="text" name="username" value="{{ username }}" placeholder="{{ entry_username }}" id="input-username" class="form-control" />
-                </div>
-              </div>
-              <div class="form-group">
-                <label for="input-password">{{ entry_password }}</label>
-                <div class="input-group"><span class="input-group-addon"><i class="fa fa-lock"></i></span>
-                  <input type="password" name="password" value="{{ password }}" placeholder="{{ entry_password }}" id="input-password" class="form-control" />
-                </div>
-                {% if forgotten %}
-                <span class="help-block"><a href="{{ forgotten }}">{{ text_forgotten }}</a></span>
-                {% endif %}
-              </div>
-              <div class="text-right">
-                <button type="submit" class="btn btn-primary"><i class="fa fa-key"></i> {{ button_login }}</button>
-              </div>
-              {% if redirect %}
-              <input type="hidden" name="redirect" value="{{ redirect }}" />
-              {% endif %}
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+<!DOCTYPE html>
+<html dir="{{ direction }}" lang="{{ lang }}">
+<head>
+<meta charset="UTF-8" />
+<title>{{ title }}</title>
+<base href="{{ base }}" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link href="https://fonts.googleapis.com/css?family=Inter:400,500,600,700,800&subset=latin,cyrillic-ext" rel="stylesheet" />
+<link rel="icon" type="image/png" href="../image/catalog/cart.png" />
+<link href="view/stylesheet/dockercart_login.css" type="text/css" rel="stylesheet" />
+<script src="view/javascript/lucide.min.js"></script>
+</head>
+<body>
+<div class="login-wrapper">
+	<div class="login-card">
+		<div class="login-logo">
+			<img src="view/image/logo.png" alt="{{ heading_title }}" />
+		</div>
+		<div class="login-title">{{ heading_title }}</div>
+		<div class="login-subtitle">{{ text_login }}</div>
+
+		{% if success %}
+		<div class="alert alert-success">
+			<i data-lucide="check-circle-2"></i>
+			<span>{{ success }}</span>
+		</div>
+		{% endif %}
+
+		{% if error_warning %}
+		<div class="alert alert-danger">
+			<i data-lucide="alert-circle"></i>
+			<span>{{ error_warning }}</span>
+		</div>
+		{% endif %}
+
+		<form action="{{ action }}" method="post" enctype="multipart/form-data" autocomplete="off">
+			<div class="form-group">
+				<label class="form-label" for="input-username">{{ entry_username }}</label>
+				<div class="input-wrap">
+					<i data-lucide="user" class="input-icon"></i>
+					<input type="text" name="username" value="{{ username }}" placeholder="{{ entry_username }}" id="input-username" class="form-control" autocomplete="username" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="form-label" for="input-password">{{ entry_password }}</label>
+				<div class="input-wrap">
+					<i data-lucide="lock" class="input-icon"></i>
+					<input type="password" name="password" value="{{ password }}" placeholder="{{ entry_password }}" id="input-password" class="form-control" autocomplete="current-password" />
+				</div>
+				{% if forgotten %}
+				<a href="{{ forgotten }}" class="forgotten-link">{{ text_forgotten }}</a>
+				{% endif %}
+			</div>
+			<div class="form-actions">
+				<button type="submit" class="btn-primary">{{ button_login }}</button>
+			</div>
+			{% if redirect %}
+			<input type="hidden" name="redirect" value="{{ redirect }}" />
+			{% endif %}
+		</form>
+	</div>
 </div>
-{{ footer }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+	if (window.lucide) {
+		lucide.createIcons();
+	}
+});
+</script>
+</body>
+</html>

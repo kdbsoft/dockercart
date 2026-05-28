@@ -56,8 +56,16 @@ class ControllerCommonForgotten extends Controller {
 			$data['email'] = '';
 		}
 
-		$data['header'] = $this->load->controller('common/header');
-		$data['footer'] = $this->load->controller('common/footer');
+		$data['title'] = $this->document->getTitle();
+
+		if ($this->request->server['HTTPS']) {
+			$data['base'] = HTTPS_SERVER;
+		} else {
+			$data['base'] = HTTP_SERVER;
+		}
+
+		$data['lang'] = $this->language->get('code');
+		$data['direction'] = $this->language->get('direction');
 
 		$this->response->setOutput($this->load->view('common/forgotten', $data));
 	}

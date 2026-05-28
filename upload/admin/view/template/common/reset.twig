@@ -1,39 +1,61 @@
-{{ header }}
-<div id="content">
-  <div class="container-fluid"><br/>
-    <br/>
-    <div class="row">
-      <div class="col-sm-offset-4 col-sm-4">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <h1 class="panel-title"><i class="fa fa-repeat"></i> {{ heading_title }}</h1>
-          </div>
-          <div class="panel-body">
-            <form action="{{ action }}" method="post" enctype="multipart/form-data">
-              <p>{{ text_password }}</p>
-              <div class="form-group">
-                <label class="control-label" for="input-password">{{ entry_password }}</label>
-                <input type="password" name="password" value="{{ password }}" id="input-password" class="form-control" />
-                {% if error_password %}
-                <div class="text-danger">{{ error_password }}</div>
-                {% endif %}
-              </div>
-              <div class="form-group">
-                <label class="control-label" for="input-confirm">{{ entry_confirm }}</label>
-                <input type="password" name="confirm" value="{{ confirm }}" id="input-confirm" class="form-control" />
-                {% if error_confirm %}
-                <div class="text-danger">{{ error_confirm }}</div>
-                {% endif %}
-              </div>
-              <div class="text-right">
-                <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> {{ button_save }}</button>
-                <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+<!DOCTYPE html>
+<html dir="{{ direction }}" lang="{{ lang }}">
+<head>
+<meta charset="UTF-8" />
+<title>{{ title }}</title>
+<base href="{{ base }}" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link href="https://fonts.googleapis.com/css?family=Inter:400,500,600,700,800&subset=latin,cyrillic-ext" rel="stylesheet" />
+<link rel="icon" type="image/png" href="../image/catalog/cart.png" />
+<link href="view/stylesheet/dockercart_login.css" type="text/css" rel="stylesheet" />
+<script src="view/javascript/lucide.min.js"></script>
+</head>
+<body>
+<div class="login-wrapper">
+	<div class="login-card">
+		<div class="login-logo">
+			<img src="view/image/logo.png" alt="{{ heading_title }}" />
+		</div>
+		<div class="login-title">{{ heading_title }}</div>
+		<div class="instruction-text">{{ text_password }}</div>
+
+		<form action="{{ action }}" method="post" enctype="multipart/form-data" autocomplete="off">
+			<div class="form-group">
+				<label class="form-label" for="input-password">{{ entry_password }}</label>
+				<div class="input-wrap">
+					<i data-lucide="lock" class="input-icon"></i>
+					<input type="password" name="password" value="{{ password }}" placeholder="{{ entry_password }}" id="input-password" class="form-control" autocomplete="new-password" />
+				</div>
+				{% if error_password %}
+				<div class="field-error">{{ error_password }}</div>
+				{% endif %}
+			</div>
+			<div class="form-group">
+				<label class="form-label" for="input-confirm">{{ entry_confirm }}</label>
+				<div class="input-wrap">
+					<i data-lucide="lock" class="input-icon"></i>
+					<input type="password" name="confirm" value="{{ confirm }}" placeholder="{{ entry_confirm }}" id="input-confirm" class="form-control" autocomplete="new-password" />
+				</div>
+				{% if error_confirm %}
+				<div class="field-error">{{ error_confirm }}</div>
+				{% endif %}
+			</div>
+			<div class="form-actions">
+				<button type="submit" class="btn-primary">{{ button_save }}</button>
+				<a href="{{ cancel }}" class="btn-secondary">
+					<i data-lucide="arrow-left"></i>
+					{{ button_cancel }}
+				</a>
+			</div>
+		</form>
+	</div>
 </div>
-{{ footer }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+	if (window.lucide) {
+		lucide.createIcons();
+	}
+});
+</script>
+</body>
+</html>
