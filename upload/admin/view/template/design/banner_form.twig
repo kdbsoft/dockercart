@@ -143,6 +143,16 @@
                         <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][subtitle]" value="{{ banner_image.subtitle }}" placeholder="{{ entry_subtitle }}" class="form-control" />
                       </div>
 
+                      {# Content position #}
+                      <div class="form-group">
+                        <label>{{ entry_content_position }}</label>
+                        <select name="banner_image[{{ language.language_id }}][{{ image_row }}][content_position]" class="form-control" style="max-width:200px;">
+                          <option value="left" {% if banner_image.content_position == 'left' %}selected{% endif %}>{{ text_content_position_left }}</option>
+                          <option value="center" {% if banner_image.content_position == 'center' %}selected{% endif %}>{{ text_content_position_center }}</option>
+                          <option value="right" {% if banner_image.content_position == 'right' %}selected{% endif %}>{{ text_content_position_right }}</option>
+                        </select>
+                      </div>
+
                       <hr class="dcx-divider" />
 
                       {# Accent badge + color #}
@@ -381,6 +391,15 @@ function addSlide(language_id) {
   html += '<div class="form-group">';
   html += '<label>{{ entry_subtitle }}</label>';
   html += '<input type="text" name="' + pfx + '[subtitle]" value="" placeholder="{{ entry_subtitle }}" class="form-control" />';
+  html += '</div>';
+
+  html += '<div class="form-group">';
+  html += '<label>{{ entry_content_position }}</label>';
+  html += '<select name="' + pfx + '[content_position]" class="form-control" style="max-width:200px;">';
+  html += '<option value="left" selected>{{ text_content_position_left }}</option>';
+  html += '<option value="center">{{ text_content_position_center }}</option>';
+  html += '<option value="right">{{ text_content_position_right }}</option>';
+  html += '</select>';
   html += '</div>';
 
   html += '<hr class="dcx-divider" />';
