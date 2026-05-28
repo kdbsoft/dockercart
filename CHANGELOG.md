@@ -1,3 +1,13 @@
+## [1.30.0](https://github.com/mathflow-bit/dockercart/compare/v1.29.3...v1.30.0) (2026-05-28)
+
+### Features
+
+* add background image field for categories ([ac627dd](https://github.com/mathflow-bit/dockercart/commit/ac627dd045df16bef3a66c2d417c13a7fca13343))
+* add banner content position option ([106bc21](https://github.com/mathflow-bit/dockercart/commit/106bc211540b326d7e97804f1013185a26e254a8))
+* add scheduled publication field to blog posts ([63ef59b](https://github.com/mathflow-bit/dockercart/commit/63ef59bb8dda6a21b1042c9d7831f25bde09ee2b))
+* expose raw fields and enable inline editing in catalog lists ([8c9a974](https://github.com/mathflow-bit/dockercart/commit/8c9a97453fd6cc19dc07d004e79fb239e42772ec))
+* redesign admin auth pages with custom layout and stylesheet ([f7e3e29](https://github.com/mathflow-bit/dockercart/commit/f7e3e29ff777784a7ee690b80c053ebf17d0531d))
+
 ## [1.29.3](https://github.com/mathflow-bit/dockercart/compare/v1.29.2...v1.29.3) (2026-05-27)
 
 ### Bug Fixes
