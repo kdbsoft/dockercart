@@ -59,6 +59,7 @@ $_['entry_keyword']        = 'Keyword';
 
 // Help
 $_['help_tags']            = 'Comma separated';
+$_['help_date_published']  = 'Set a future date/time to schedule publication. The post will not appear on the frontend until this date.';
 
 // Button
 $_['button_add']           = 'Add New';
