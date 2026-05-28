@@ -2,10 +2,11 @@
 
 $_['column_action'] = 'Действие';
 $_['column_customer'] = 'Клиент';
+$_['column_type'] = 'Тип';
 $_['column_date_added'] = 'Дата добавления';
 $_['column_order_id'] = 'Номер заказа';
 $_['column_status'] = 'Статус';
-$_['column_total'] = 'Общий';
+$_['column_total'] = 'Сумма';
 $_['entry_sort_order'] = 'Порядок сортировки';
 $_['entry_status'] = 'Статус';
 $_['entry_width'] = 'Ширина';

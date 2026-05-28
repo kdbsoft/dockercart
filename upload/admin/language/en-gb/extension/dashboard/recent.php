@@ -13,6 +13,7 @@ $_['text_badge_oneclick_order']   = '1-click order';
 // Column
 $_['column_order_id']   = 'Order ID';
 $_['column_customer']   = 'Customer';
+$_['column_type']       = 'Type';
 $_['column_status']     = 'Status';
 $_['column_total']      = 'Total';
 $_['column_date_added'] = 'Date Added';

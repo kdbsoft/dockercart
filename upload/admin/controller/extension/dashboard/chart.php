@@ -94,104 +94,94 @@ class ControllerExtensionDashboardChart extends Controller {
 	public function chart() {
 		$this->load->language('extension/dashboard/chart');
 
-		$json = array();
+		$range = isset($this->request->get['range']) ? $this->request->get['range'] : 'month';
+
+		$cache_key = 'dash_chart_' . $range;
+		$cached = $this->cache->get($cache_key);
+		if ($cached !== false) {
+			$this->response->addHeader('Content-Type: application/json');
+			$this->response->setOutput($cached);
+			return;
+		}
 
 		$this->load->model('extension/dashboard/chart');
 
-		$json['order'] = array();
-		$json['customer'] = array();
-		$json['xaxis'] = array();
-
-		$json['order']['label'] = $this->language->get('text_order');
-		$json['customer']['label'] = $this->language->get('text_customer');
-		$json['order']['data'] = array();
-		$json['customer']['data'] = array();
-
-		if (isset($this->request->get['range'])) {
-			$range = $this->request->get['range'];
-		} else {
-			$range = 'day';
-		}
+		$json = array(
+			'labels' => array(),
+			'completed' => array(),
+			'pending' => array(),
+			'total' => array(),
+			'revenue' => array()
+		);
 
 		switch ($range) {
 			default:
 			case 'day':
-				$results = $this->model_extension_dashboard_chart->getTotalOrdersByDay();
-
-				foreach ($results as $key => $value) {
-					$json['order']['data'][] = array($key, $value['total']);
-				}
-
-				$results = $this->model_extension_dashboard_chart->getTotalCustomersByDay();
-
-				foreach ($results as $key => $value) {
-					$json['customer']['data'][] = array($key, $value['total']);
-				}
+				$completed = $this->model_extension_dashboard_chart->getTotalOrdersByDay();
+				$pending = $this->model_extension_dashboard_chart->getPendingOrdersByDay();
+				$revenue = $this->model_extension_dashboard_chart->getRevenueByDay();
 
 				for ($i = 0; $i < 24; $i++) {
-					$json['xaxis'][] = array($i, $i);
+					$json['labels'][] = str_pad($i, 2, '0', STR_PAD_LEFT) . ':00';
+					$json['completed'][] = $completed[$i]['total'];
+					$json['pending'][] = $pending[$i]['total'];
+					$json['total'][] = $completed[$i]['total'] + $pending[$i]['total'];
+					$json['revenue'][] = $revenue[$i]['total'];
 				}
 				break;
 			case 'week':
-				$results = $this->model_extension_dashboard_chart->getTotalOrdersByWeek();
-
-				foreach ($results as $key => $value) {
-					$json['order']['data'][] = array($key, $value['total']);
-				}
-
-				$results = $this->model_extension_dashboard_chart->getTotalCustomersByWeek();
-
-				foreach ($results as $key => $value) {
-					$json['customer']['data'][] = array($key, $value['total']);
-				}
+				$completed = $this->model_extension_dashboard_chart->getTotalOrdersByWeek();
+				$pending = $this->model_extension_dashboard_chart->getPendingOrdersByWeek();
+				$revenue = $this->model_extension_dashboard_chart->getRevenueByWeek();
 
 				$date_start = strtotime('-' . date('w') . ' days');
 
 				for ($i = 0; $i < 7; $i++) {
 					$date = date('Y-m-d', $date_start + ($i * 86400));
+					$w = (int)date('w', strtotime($date));
 
-					$json['xaxis'][] = array(date('w', strtotime($date)), date('D', strtotime($date)));
+					$json['labels'][] = date('D', strtotime($date));
+					$json['completed'][] = $completed[$w]['total'];
+					$json['pending'][] = $pending[$w]['total'];
+					$json['total'][] = $completed[$w]['total'] + $pending[$w]['total'];
+					$json['revenue'][] = $revenue[$w]['total'];
 				}
 				break;
 			case 'month':
-				$results = $this->model_extension_dashboard_chart->getTotalOrdersByMonth();
-
-				foreach ($results as $key => $value) {
-					$json['order']['data'][] = array($key, $value['total']);
-				}
-
-				$results = $this->model_extension_dashboard_chart->getTotalCustomersByMonth();
-
-				foreach ($results as $key => $value) {
-					$json['customer']['data'][] = array($key, $value['total']);
-				}
+				$completed = $this->model_extension_dashboard_chart->getTotalOrdersByMonth();
+				$pending = $this->model_extension_dashboard_chart->getPendingOrdersByMonth();
+				$revenue = $this->model_extension_dashboard_chart->getRevenueByMonth();
 
 				for ($i = 1; $i <= date('t'); $i++) {
 					$date = date('Y') . '-' . date('m') . '-' . $i;
+					$j = (int)date('j', strtotime($date));
 
-					$json['xaxis'][] = array(date('j', strtotime($date)), date('d', strtotime($date)));
+					$json['labels'][] = date('d', strtotime($date));
+					$json['completed'][] = $completed[$j]['total'];
+					$json['pending'][] = $pending[$j]['total'];
+					$json['total'][] = $completed[$j]['total'] + $pending[$j]['total'];
+					$json['revenue'][] = $revenue[$j]['total'];
 				}
 				break;
 			case 'year':
-				$results = $this->model_extension_dashboard_chart->getTotalOrdersByYear();
-
-				foreach ($results as $key => $value) {
-					$json['order']['data'][] = array($key, $value['total']);
-				}
-
-				$results = $this->model_extension_dashboard_chart->getTotalCustomersByYear();
-
-				foreach ($results as $key => $value) {
-					$json['customer']['data'][] = array($key, $value['total']);
-				}
+				$completed = $this->model_extension_dashboard_chart->getTotalOrdersByYear();
+				$pending = $this->model_extension_dashboard_chart->getPendingOrdersByYear();
+				$revenue = $this->model_extension_dashboard_chart->getRevenueByYear();
 
 				for ($i = 1; $i <= 12; $i++) {
-					$json['xaxis'][] = array($i, date('M', mktime(0, 0, 0, $i)));
+					$json['labels'][] = date('M', mktime(0, 0, 0, $i));
+					$json['completed'][] = $completed[$i]['total'];
+					$json['pending'][] = $pending[$i]['total'];
+					$json['total'][] = $completed[$i]['total'] + $pending[$i]['total'];
+					$json['revenue'][] = $revenue[$i]['total'];
 				}
 				break;
 		}
 
+		$output = json_encode($json);
+		$this->cache->set($cache_key, $output, 300);
+
 		$this->response->addHeader('Content-Type: application/json');
-		$this->response->setOutput(json_encode($json));
+		$this->response->setOutput($output);
 	}
 }

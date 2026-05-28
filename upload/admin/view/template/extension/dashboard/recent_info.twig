@@ -8,6 +8,7 @@
         <tr>
           <td class="text-right">{{ column_order_id }}</td>
           <td>{{ column_customer }}</td>
+          <td>{{ column_type }}</td>
           <td>{{ column_status }}</td>
           <td>{{ column_date_added }}</td>
           <td class="text-right">{{ column_total }}</td>
@@ -19,11 +20,9 @@
         {% for order in orders %}
         <tr>
           <td class="text-right">{{ order.order_id }}</td>
-          <td>
-            {{ order.customer }}<br />
-            <span class="{{ order.order_type_badge_class }}">{{ order.order_type_badge_text }}</span>
-          </td>
-          <td>{{ order.status }}</td>
+          <td>{{ order.customer }}</td>
+          <td>{{ order.order_type }}</td>
+          <td><span class="{{ order.order_status_badge_class }}">{{ order.status }}</span></td>
           <td>{{ order.date_added }}</td>
           <td class="text-right">{{ order.total }}</td>
           <td class="text-right"><a href="{{ order.view }}" data-toggle="tooltip" title="{{ button_view }}" class="btn btn-info"><i class="fa fa-eye"></i></a></td>
@@ -31,7 +30,7 @@
         {% endfor %}
         {% else %}
         <tr>
-          <td class="text-center" colspan="6">{{ text_no_results }}</td>
+          <td class="text-center" colspan="7">{{ text_no_results }}</td>
         </tr>
         {% endif %}
       </tbody>

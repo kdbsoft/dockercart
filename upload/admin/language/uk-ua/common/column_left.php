@@ -80,6 +80,7 @@ $_['text_paypal_manage'] = 'PayPal';
 $_['text_paypal_search'] = 'Пошук транзакції';
 $_['text_processing_status'] = 'Обробка замовлень';
 $_['text_product'] = 'Товари';
+$_['text_product_bundle'] = 'Комплекти товарів';
 $_['text_recurring'] = 'Повторювані профілі';
 $_['text_report_affiliate'] = 'Партнерська програма';
 $_['text_report_affiliate_activity'] = 'Активність партнерів';

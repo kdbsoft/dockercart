@@ -1,12 +1,17 @@
 <?php
 // Heading
-$_['heading_title']    = 'Total Customers';
+$_['heading_title']    = 'Registered Customers';
 
 // Text
 $_['text_extension']   = 'Extensions';
 $_['text_success']     = 'Success: You have modified dashboard customer!';
 $_['text_edit']        = 'Edit Dashboard Customer';
 $_['text_view']        = 'View more...';
+$_['text_all_time']    = 'All Time';
+$_['text_today']       = 'Today';
+$_['text_week']        = 'Week';
+$_['text_month']       = 'Month';
+$_['text_year']        = 'Year';
 
 // Entry
 $_['entry_status']     = 'Status';
