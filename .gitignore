@@ -25,6 +25,7 @@ export-yml-[0-9]*-*.xml
 
 # Image File
 !/upload/image/no_image.jpg
+!/upload/image/catalog/cart.png
 
 # Robots.txt
 /upload/robots.txt
