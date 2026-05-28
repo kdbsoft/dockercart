@@ -25,8 +25,12 @@
       <div id="filter-customer" class="col-md-3 col-md-push-9 col-sm-12 hidden-sm hidden-xs">
         <div class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title"><i class="fa fa-filter"></i> {{ text_filter }}</h3>
-          </div>
+  <div class="panel-heading__icon"><i class="fa fa-filter"></i></div>
+  <div>
+    <h3 class="panel-title">{{ text_filter }}</h3>
+    <div class="panel-heading__subtitle">{{ text_filter_subtitle }}</div>
+  </div>
+</div>
           <div class="panel-body">
             <div class="form-group">
               <label class="control-label" for="input-name">{{ entry_name }}</label>
@@ -82,8 +86,12 @@
       <div class="col-md-9 col-md-pull-3 col-sm-12">
         <div class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title"><i class="fa fa-list"></i> {{ text_list }}</h3>
-          </div>
+  <div class="panel-heading__icon"><i class="fa fa-list"></i></div>
+  <div>
+    <h3 class="panel-title">{{ text_list }}</h3>
+    <div class="panel-heading__subtitle">{{ text_list_subtitle }}</div>
+  </div>
+</div>
           <div class="panel-body">
             <div id="customer-approval"></div>
           </div>

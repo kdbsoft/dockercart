@@ -47,3 +47,8 @@ $_['text_refund_status'] = 'Повернення платежу';
 $_['text_success'] = 'Успіх: Ви змінили дані G2APay.';
 $_['text_total_released'] = 'Всього випущено';
 $_['text_transactions'] = 'Транзакції';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції розширення';
+
+

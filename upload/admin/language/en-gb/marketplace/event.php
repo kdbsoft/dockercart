@@ -9,6 +9,11 @@ $_['text_event']        = 'Events are used by extensions to override the default
 $_['text_info']         = 'Event Information';
 $_['text_trigger']      = 'Trigger';
 $_['text_action']       = 'Action';
+// Subtitle
+
+$_['text_event_list_subtitle'] = 'View registered event handlers';
+
+
 
 // Column
 $_['column_code']       = 'Event Code';

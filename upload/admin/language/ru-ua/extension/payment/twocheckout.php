@@ -19,3 +19,8 @@ $_['text_edit'] = 'Редактировать 2Оформить заказ';
 $_['text_extension'] = 'Расширения';
 $_['text_success'] = 'Успех: Вы изменили данные своей учетной записи 2Checkout!';
 $_['text_twocheckout'] = '<a href="https://www.2checkout.com/2co/affiliate?affiliate=1596408" target="_blank"><img src="view/image/payment/2checkout.png" alt="2Checkout" title="2Checkout" style="border: 1px solid #EEEEEE;" /></a>';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Настройте параметры и опции расширения';
+
+

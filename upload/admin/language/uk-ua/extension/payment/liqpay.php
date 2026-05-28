@@ -19,3 +19,8 @@ $_['text_extension'] = 'Розширення';
 $_['text_liqpay'] = '<img src="view/image/payment/liqpay.png" alt="LIQPAY" title="LIQPAY" style="border: 1px solid #EEEEEE;" />';
 $_['text_pay'] = 'LIQPAY';
 $_['text_success'] = 'Успіх: Ви змінили дані облікового запису LIQPAY!';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції розширення';
+
+

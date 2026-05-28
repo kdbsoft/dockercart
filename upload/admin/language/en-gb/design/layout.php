@@ -16,6 +16,15 @@ $_['text_content_bottom'] = 'Content Bottom';
 $_['text_column_left']    = 'Column Left';
 $_['text_column_right']   = 'Column Right';
 $_['text_drag_drop_tip']  = 'Tip: You can drag and drop modules within each column or between columns to change their position and order. Use the drag handle icon (☰) to move modules.';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Manage page layout assignments';
+
+$_['text_add_layout_subtitle'] = 'Create a new page layout';
+
+$_['text_edit_layout_subtitle'] = 'Edit layout assignment rules';
+
+
 
 // Column
 $_['column_name']         = 'Layout Name';

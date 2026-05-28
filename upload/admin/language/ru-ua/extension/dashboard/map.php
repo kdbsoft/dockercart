@@ -10,3 +10,9 @@ $_['text_extension'] = 'Расширения';
 $_['text_order'] = 'Заказы';
 $_['text_sale'] = 'Продажи';
 $_['text_success'] = 'Успех: Вы изменили карту панели управления!';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Настройте параметры и опции расширения';
+// Dashboard Info Subtitle
+
+$_['text_map_subtitle'] = 'Географическое распределение заказов';

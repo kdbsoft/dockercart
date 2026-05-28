@@ -125,6 +125,11 @@ $_['text_view']                                         = 'View More';
 $_['text_void']                                         = 'Void';
 $_['text_na']                                           = 'N/A';
 $_['text_no_reason_provided']                           = 'Reason not provided.';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Statuses
 $_['squareup_status_comment_authorized']                = 'The card transaction has been authorized but not yet captured.';

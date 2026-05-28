@@ -32,3 +32,12 @@ $_['text_add'] = 'Додати мову';
 $_['text_edit'] = 'Редагувати мову';
 $_['text_list'] = 'Список мов';
 $_['text_success'] = 'Успіх: Ви змінили мови!';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Керуйте встановленими мовами';
+
+$_['text_add_language_subtitle'] = 'Додати нову мову';
+
+$_['text_edit_language_subtitle'] = 'Редагувати налаштування мови';
+
+

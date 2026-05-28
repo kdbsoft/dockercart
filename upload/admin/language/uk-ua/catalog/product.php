@@ -138,3 +138,14 @@ $_['text_option_value'] = 'Значення опції';
 $_['text_percent'] = 'Відсоток';
 $_['text_plus'] = '+';
 $_['text_success'] = 'Успіх: Ви змінили товари!';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Перегляд, фільтрування та керування товарами';
+
+$_['text_filter_subtitle'] = 'Звузити результати за критеріями';
+
+$_['text_add_product_subtitle'] = 'Додати новий товар до каталогу';
+
+$_['text_edit_product_subtitle'] = 'Редагувати дані та налаштування товару';
+
+

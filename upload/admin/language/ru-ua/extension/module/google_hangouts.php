@@ -9,3 +9,8 @@ $_['help_code'] = 'Перейдите <a href="https://developers.google.com/+/h
 $_['text_edit'] = 'Редактировать модуль Google Hangouts';
 $_['text_extension'] = 'Расширения';
 $_['text_success'] = 'Успех: Вы успешно модифицировали модуль Google Hangouts!';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Настройте параметры и опции расширения';
+
+

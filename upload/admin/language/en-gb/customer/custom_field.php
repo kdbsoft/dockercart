@@ -24,6 +24,15 @@ $_['text_affiliate']       = 'Affiliate';
 $_['text_regex']           = 'Regex';
 $_['text_custom_field']    = 'Custom Field';
 $_['text_value']           = 'Custom Field Values';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Define custom data fields for accounts';
+
+$_['text_add_custom_field_subtitle'] = 'Define a new custom field';
+
+$_['text_edit_custom_field_subtitle'] = 'Edit custom field settings';
+
+
 
 // Column
 $_['column_name']          = 'Custom Field Name';

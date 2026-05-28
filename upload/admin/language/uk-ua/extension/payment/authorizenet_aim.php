@@ -24,3 +24,8 @@ $_['text_extension'] = 'Розширення';
 $_['text_live'] = 'Живий';
 $_['text_success'] = 'Успіх: Ви змінили дані облікового запису Authorize.Net (AIM)!';
 $_['text_test'] = 'Тест';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції розширення';
+
+

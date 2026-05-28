@@ -120,3 +120,8 @@ $_['text_today'] = 'Сьогодні';
 $_['text_transaction_details'] = 'Деталі транзакції';
 $_['text_type_buynow'] = 'Купити зараз';
 $_['text_type_laybuy'] = 'Купівля-продаж';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції розширення';
+
+

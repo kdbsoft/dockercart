@@ -34,6 +34,11 @@ $_['entry_height']                     = 'Height';
 $_['text_resize_contain']              = 'Contain (fit in box, add background)';
 $_['text_resize_cover']                = 'Cover (fill and crop from center)';
 $_['text_resize_hybrid']               = 'Hybrid (auto-detect: contain or cover per image)';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Help
 $_['help_directory']                   = 'DockerCart should use the "dockercart" directory. Change this only if you are intentionally using a custom theme directory.';

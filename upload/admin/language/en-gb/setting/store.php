@@ -15,6 +15,15 @@ $_['text_checkout']                = 'Checkout';
 $_['text_stock']                   = 'Stock';
 $_['text_shipping']                = 'Shipping Address';
 $_['text_payment']                 = 'Payment Address';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Manage multiple store instances';
+
+$_['text_add_store_subtitle'] = 'Add a new store instance';
+
+$_['text_edit_store_subtitle'] = 'Edit store URL and settings';
+
+
 
 // Column
 $_['column_name']                  = 'Store Name';

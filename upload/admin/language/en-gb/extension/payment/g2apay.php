@@ -19,6 +19,11 @@ $_['text_column_date_added']	 	  = 'Added';
 $_['text_refund_ok']			 	  = 'Refund was successfully requested';
 $_['text_refund_ok_order']		 	  = 'Refund was successfully requested, amount fully refunded';
 $_['text_refund']                     = 'Refund';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_username']			 	  = 'Username';

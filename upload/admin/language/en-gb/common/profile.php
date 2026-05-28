@@ -5,6 +5,11 @@ $_['heading_title']         = 'Profile';
 // Text
 $_['text_success']          = 'Success: You have modified your profile!';
 $_['text_edit']             = 'Edit Your Profile';
+// Subtitle
+
+$_['text_profile_subtitle'] = 'Update your account information';
+
+
 
 // Column
 $_['column_username']       = 'Username';

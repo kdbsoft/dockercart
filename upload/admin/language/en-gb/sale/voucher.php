@@ -7,6 +7,15 @@ $_['text_success']      = 'Success: You have modified vouchers!';
 $_['text_list']         = 'Gift Voucher List';
 $_['text_add']          = 'Add Gift Voucher';
 $_['text_edit']         = 'Edit Gift Voucher';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Manage gift voucher codes';
+
+$_['text_add_voucher_subtitle'] = 'Create a new gift voucher';
+
+$_['text_edit_voucher_subtitle'] = 'Edit gift voucher settings';
+
+
 
 // Column
 $_['column_name']       = 'Voucher Name';

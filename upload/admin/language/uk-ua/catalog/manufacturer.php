@@ -45,3 +45,12 @@ $_['text_keyword'] = 'Не використовуйте пробіли, нато
 $_['text_list'] = 'Список виробників';
 $_['text_percent'] = 'Відсоток';
 $_['text_success'] = 'Успіх: Ви змінили виробників!';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Керуйте виробниками товарів';
+
+$_['text_add_manufacturer_subtitle'] = 'Додати нового виробника товарів';
+
+$_['text_edit_manufacturer_subtitle'] = 'Редагувати дані виробника';
+
+

@@ -13,6 +13,11 @@ $_['text_yesterday']   = 'Вчера';
 $_['text_week']        = 'Неделя';
 $_['text_month']       = 'Месяц';
 $_['text_year']        = 'Год';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Настройте параметры и опции расширения';
+
+
 
 // Entry
 $_['entry_status']     = 'Статус';

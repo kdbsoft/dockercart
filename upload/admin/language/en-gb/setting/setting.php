@@ -32,6 +32,11 @@ $_['text_general']                   = 'General';
 $_['text_security']                  = 'Security';
 $_['text_upload']                    = 'Uploads';
 $_['text_error']                     = 'Error Handling';
+// Subtitle
+
+$_['text_setting_subtitle'] = 'Global store configuration options';
+
+
 
 // Entry
 $_['entry_meta_title']               = 'Meta Title';

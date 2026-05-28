@@ -18,3 +18,8 @@ $_['text_edit'] = 'Редагувати партнера по оплаті';
 $_['text_extension'] = 'Розширення';
 $_['text_paymate'] = '<img src="view/image/payment/paymate.png" alt="Paymate" title="Paymate" style="border: 1px solid #EEEEEE;" />';
 $_['text_success'] = 'Успіх: Ви змінили дані облікового запису Paymate!';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції розширення';
+
+

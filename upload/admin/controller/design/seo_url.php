@@ -390,6 +390,9 @@ class ControllerDesignSeoUrl extends Controller {
 
 	protected function getForm() {
 		$data['text_form'] = !isset($this->request->get['seo_url_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
+		$data['text_form_subtitle'] = !isset($this->request->get['seo_url_id'])
+		    ? $this->language->get('text_add_seo_url_subtitle')
+		    : $this->language->get('text_edit_seo_url_subtitle');
 
 		if (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];

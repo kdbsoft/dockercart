@@ -20,6 +20,11 @@ $_['text_small_button'] = 'Small';
 $_['text_medium_button'] = 'Medium';
 $_['text_large_button'] = 'Large';
 $_['text_x_large_button'] = 'X-Large';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 //Entry
 $_['entry_button_type'] = 'Button Type';

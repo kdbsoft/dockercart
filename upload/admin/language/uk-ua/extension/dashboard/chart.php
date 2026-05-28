@@ -19,3 +19,9 @@ $_['text_all_time'] = 'Весь час';
 $_['text_success'] = 'Успіх: Ви змінили діаграму інформаційної панелі!';
 $_['text_week'] = 'Тиждень';
 $_['text_year'] = 'Рік';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції розширення';
+// Dashboard Info Subtitle
+
+$_['text_chart_subtitle'] = 'Динаміка виручки та замовлень за часом';

@@ -247,6 +247,9 @@ class ControllerLocalisationGeoZone extends Controller {
 
 	protected function getForm() {
 		$data['text_form'] = !isset($this->request->get['geo_zone_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
+		$data['text_form_subtitle'] = !isset($this->request->get['geo_zone_id'])
+		    ? $this->language->get('text_add_geo_zone_subtitle')
+		    : $this->language->get('text_edit_geo_zone_subtitle');
 
 		if (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];

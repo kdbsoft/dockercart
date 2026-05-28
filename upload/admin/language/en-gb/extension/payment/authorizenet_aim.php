@@ -11,6 +11,11 @@ $_['text_live']             = 'Live';
 $_['text_authorization']    = 'Authorization';
 $_['text_capture']          = 'Capture';
 $_['text_authorizenet_aim'] = '<a href="https://account.authorize.net/signUpNow?resellerID=26357" target="_BLANK"><img src="view/image/payment/authorizenet.png" alt="Authorize.Net" title="Authorize.Net" style="border: 1px solid #EEEEEE;" /></a>';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_login']           = 'Login ID';

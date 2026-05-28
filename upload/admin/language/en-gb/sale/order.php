@@ -78,6 +78,27 @@ $_['text_onepage_products']        = 'Products';
 $_['text_onepage_order_details']   = 'Order Details';
 $_['text_onepage_totals']          = 'Totals';
 $_['text_onepage_same_shipping_as_payment'] = 'Shipping address is the same as payment address';
+// Subtitle
+
+$_['text_list_subtitle'] = 'View and process customer orders';
+
+$_['text_filter_subtitle'] = 'Narrow results by specific criteria';
+
+$_['text_add_subtitle'] = 'Create a new order manually';
+
+$_['text_edit_subtitle'] = 'Edit order details';
+
+$_['text_order_info_subtitle'] = 'Core order details and metadata';
+
+$_['text_order_customer_subtitle'] = 'Customer contact and account info';
+
+$_['text_order_tools_subtitle'] = 'Update status, add history or comments';
+
+$_['text_order_contents_subtitle'] = 'Products and totals in this order';
+
+$_['text_history_subtitle'] = 'Track status changes and notes';
+
+
 
 // Column
 $_['column_order_id']            = 'Order ID';

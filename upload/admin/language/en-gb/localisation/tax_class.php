@@ -12,6 +12,15 @@ $_['text_tax_rate']     = 'Tax Rates';
 $_['text_shipping']     = 'Shipping Address';
 $_['text_payment']      = 'Payment Address';
 $_['text_store']        = 'Store Address';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Manage tax classification groups';
+
+$_['text_add_tax_class_subtitle'] = 'Create a new tax class';
+
+$_['text_edit_tax_class_subtitle'] = 'Edit tax class rules';
+
+
 
 // Column
 $_['column_title']      = 'Tax Class Title';

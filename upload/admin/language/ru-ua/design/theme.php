@@ -15,3 +15,8 @@ $_['text_store'] = 'Выберите свой магазин';
 $_['text_success'] = 'Успех: Вы изменили темы!';
 $_['text_template'] = 'Выберите шаблон';
 $_['text_twig'] = 'Редактор тем использует язык шаблонов Twig. Подробнее о <a href="https://twig.symfony.com/doc/" target="_blank" class="alert-link">синтаксисе Twig можно прочитать здесь</a> .';
+// Subtitle
+
+$_['text_theme_subtitle'] = 'Переключайте и редактируйте темы магазина';
+
+

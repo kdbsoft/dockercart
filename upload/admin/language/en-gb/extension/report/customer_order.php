@@ -8,6 +8,11 @@ $_['text_edit']             = 'Edit Customer Orders Report';
 $_['text_success']          = 'Success: You have modified customer orders report!';
 $_['text_filter']           = 'Filter';
 $_['text_all_status']       = 'All Statuses';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Column
 $_['column_customer']       = 'Customer Name';

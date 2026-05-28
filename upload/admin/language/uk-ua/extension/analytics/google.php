@@ -11,3 +11,8 @@ $_['text_edit'] = 'Редагувати Google Analytics';
 $_['text_extension'] = 'Розширення';
 $_['text_signup'] = 'Увійдіть до свого облікового запису <a href="http://www.google.com/analytics/" target="_blank"><u>Google Analytics</u></a> і після створення профілю веб-сайту скопіюйте та вставте код аналітики в це поле.';
 $_['text_success'] = 'Успіх: Ви змінили Google Analytics!';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції розширення';
+
+

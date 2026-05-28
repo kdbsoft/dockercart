@@ -25,3 +25,12 @@ $_['text_edit'] = 'Редагувати URL-адресу SEO';
 $_['text_filter'] = 'Фільтр';
 $_['text_list'] = 'Список URL-адрес SEO';
 $_['text_success'] = 'Успіх: Ви змінили SEO-URL!';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Керуйте SEO-псевдонімами URL';
+
+$_['text_add_seo_url_subtitle'] = 'Створити новий SEO-псевдонім URL';
+
+$_['text_edit_seo_url_subtitle'] = 'Редагувати маппінг SEO URL';
+
+

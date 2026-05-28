@@ -245,6 +245,9 @@ class ControllerDesignLayout extends Controller {
 
 	protected function getForm() {
 		$data['text_form'] = !isset($this->request->get['layout_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
+		$data['text_form_subtitle'] = !isset($this->request->get['layout_id'])
+		    ? $this->language->get('text_add_layout_subtitle')
+		    : $this->language->get('text_edit_layout_subtitle');
 
 		if (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];

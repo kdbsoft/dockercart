@@ -10,6 +10,11 @@ $_['text_template']     = 'Choose a template';
 $_['text_default']      = 'Default';
 $_['text_history']      = 'Theme History';
 $_['text_twig']         = 'The theme editor uses the template language Twig. You can read about <a href="https://twig.symfony.com/doc/" target="_blank" class="alert-link">Twig syntax here</a>.';
+// Subtitle
+
+$_['text_theme_subtitle'] = 'Switch and edit store themes';
+
+
 
 // Column
 $_['column_store']      = 'Store';

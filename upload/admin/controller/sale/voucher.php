@@ -266,6 +266,9 @@ class ControllerSaleVoucher extends Controller {
 
 	protected function getForm() {
 		$data['text_form'] = !isset($this->request->get['voucher_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
+		$data['text_form_subtitle'] = !isset($this->request->get['voucher_id'])
+		    ? $this->language->get('text_add_voucher_subtitle')
+		    : $this->language->get('text_edit_voucher_subtitle');
 
 		if (isset($this->request->get['voucher_id'])) {
 			$data['voucher_id'] = (int)$this->request->get['voucher_id'];

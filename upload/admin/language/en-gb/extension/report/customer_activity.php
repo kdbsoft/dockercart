@@ -23,6 +23,11 @@ $_['text_activity_order_guest']    = '%s created a <a href="order_id=%d">new ord
 $_['text_activity_affiliate_add']  = '<a href="customer_id=%d">%s</a> registered for a affiliate account.';
 $_['text_activity_affiliate_edit'] = '<a href="customer_id=%d">%s</a> updated their affiliate details.';
 $_['text_activity_transaction']    = '<a href="customer_id=%d">%s</a> received commission from an new <a href="order_id=%d">order</a>.';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Column
 $_['column_customer']              = 'Customer';

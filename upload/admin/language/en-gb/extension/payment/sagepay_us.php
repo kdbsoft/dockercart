@@ -6,6 +6,11 @@ $_['heading_title']		 = 'Sage Payment Solutions (US)';
 $_['text_extension']	 = 'Extensions';
 $_['text_success']		 = 'Success: You have modified SagePay account details!';
 $_['text_edit']          = 'Edit Sage Payment Solutions (US)';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_merchant_id']	 = 'Merchant ID';

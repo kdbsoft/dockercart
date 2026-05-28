@@ -6,6 +6,11 @@ $_['heading_title']    = 'Pilibaba Checkout Button';
 $_['text_extension']   = 'Extensions';
 $_['text_success']     = 'Success: You have modified Pilibaba Checkout Button module!';
 $_['text_edit']        = 'Edit Pilibaba Checkout Button Module';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_status']     = 'Status';

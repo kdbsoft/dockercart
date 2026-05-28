@@ -913,21 +913,61 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
     overflow: hidden;
 }
 
+/* dcx-style panel heading */
 .panel .panel-heading {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
     position: relative;
-    border-bottom: 1px solid #f0f0f0;
-    background: #fff;
+    border-bottom: 1px solid var(--dcx-border-soft, #e8edf6);
+    background: linear-gradient(135deg, #fbfcff 0%, #f7f9fe 100%);
+    color: inherit;
+}
+
+.panel .panel-heading::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, #4f84d8, var(--dcx-blue, #2f65b9));
+}
+
+.panel-heading__icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #eaf1ff, #dce6f8);
+    color: var(--dcx-blue, #2f65b9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 2px;
+    font-size: 18px;
+}
+
+.panel-heading h3.panel-title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--dcx-text, #2f3f59);
+    letter-spacing: -0.3px;
+    display: block;
+}
+
+.panel-heading__subtitle {
+    margin-top: 3px;
+    font-size: 12px;
+    color: var(--dcx-muted, #6d7b92);
+    font-weight: 400;
 }
 
 .panel-heading h3 i {
-    margin-right: 5px;
+    margin-right: 0;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-}
-
-.panel-heading h3 {
-    font-weight: 600;
-    font-size: 16px;
-    display: inline-block;
 }
 
 .panel-title {
@@ -944,7 +984,7 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
 .panel-primary .panel-heading {
     color: #1e40af;
     border-color: #e0e7ff;
-    background: #eff6ff;
+    background: linear-gradient(135deg, #fbfcff 0%, #eff6ff 100%);
 }
 
 /* Default Panel */
@@ -955,7 +995,7 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
 .panel-default .panel-heading {
     color: #1f2937;
     border-color: #e5e7eb;
-    background: #f9fafb;
+    background: linear-gradient(135deg, #fbfcff 0%, #f7f9fe 100%);
 }
 
 .img-thumbnail i {

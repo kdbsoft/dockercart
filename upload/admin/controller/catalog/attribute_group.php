@@ -251,6 +251,9 @@ class ControllerCatalogAttributeGroup extends Controller {
 
 	protected function getForm() {
 		$data['text_form'] = !isset($this->request->get['attribute_group_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
+		$data['text_form_subtitle'] = !isset($this->request->get['attribute_group_id'])
+		    ? $this->language->get('text_add_attribute_group_subtitle')
+		    : $this->language->get('text_edit_attribute_group_subtitle');
 
 		if (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];

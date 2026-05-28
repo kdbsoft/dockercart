@@ -6,6 +6,11 @@ $_['heading_title']      = 'Australia Post';
 $_['text_extension']     = 'Extensions';
 $_['text_success']       = 'Success: You have modified Australia Post shipping!';
 $_['text_edit']          = 'Edit Australia Post Shipping';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_api']          = 'API Key';

@@ -25,3 +25,12 @@ $_['text_edit'] = 'Изменить страну';
 $_['text_filter'] = 'Фильтр';
 $_['text_list'] = 'Список стран';
 $_['text_success'] = 'Успех: Вы изменили страны!';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Управляйте странами и геолокацией';
+
+$_['text_add_country_subtitle'] = 'Добавить новую страну';
+
+$_['text_edit_country_subtitle'] = 'Редактировать название и код страны';
+
+

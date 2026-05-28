@@ -55,6 +55,11 @@ $_['help_cron_job_url']		  = 'Set a cron job to call this URL';
 $_['text_void']               = 'Void';
 $_['text_payment']            = "Payment";
 $_['text_rebate']             = 'Rebate';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Button
 $_['button_release']		  = 'Release';

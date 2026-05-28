@@ -6,6 +6,11 @@ $_['heading_title']    = 'Store';
 $_['text_extension']   = 'Extensions';
 $_['text_success']     = 'Success: You have modified store module!';
 $_['text_edit']        = 'Edit Store Module';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_admin']      = 'Admin Users Only';

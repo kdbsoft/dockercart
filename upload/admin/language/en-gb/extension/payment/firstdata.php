@@ -32,6 +32,11 @@ $_['text_column_type']				 = 'Type';
 $_['text_column_date_added']		 = 'Created';
 $_['text_confirm_void']				 = 'Are you sure you want to void the payment?';
 $_['text_confirm_capture']			 = 'Are you sure you want to capture the payment?';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_merchant_id']				 = 'Store ID';

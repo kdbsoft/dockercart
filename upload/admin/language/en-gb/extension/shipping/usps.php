@@ -49,6 +49,11 @@ $_['text_large']            = 'Large';
 $_['text_rectangular']      = 'Rectangular';
 $_['text_non_rectangular']  = 'Non Rectangular';
 $_['text_variable']         = 'Variable';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_user_id']         = 'User ID';

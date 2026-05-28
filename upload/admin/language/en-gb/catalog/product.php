@@ -18,6 +18,17 @@ $_['text_option_value']      = 'Option Value';
 $_['text_percent']           = 'Percentage';
 $_['text_amount']            = 'Fixed Amount';
 $_['text_keyword']           = 'Do not use spaces, instead replace spaces with - and make sure the SEO URL is globally unique.';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Browse, filter and manage your products';
+
+$_['text_filter_subtitle'] = 'Narrow results by specific criteria';
+
+$_['text_add_product_subtitle'] = 'Add a new product to the catalog';
+
+$_['text_edit_product_subtitle'] = 'Edit product details and settings';
+
+
 
 // Column
 $_['column_name']            = 'Product Name';

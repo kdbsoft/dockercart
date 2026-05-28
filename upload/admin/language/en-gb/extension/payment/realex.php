@@ -47,6 +47,11 @@ $_['text_realex']					 = '<a target="_blank" href="http://www.realexpayments.co.
 $_['text_void']                      = 'Void';
 $_['text_payment']                   = "Payment";
 $_['text_rebate']                    = 'Rebate';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_merchant_id']				 = 'Merchant ID';

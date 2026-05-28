@@ -6,6 +6,11 @@ $_['heading_title']      = 'Cheque / Money Order';
 $_['text_extension']     = 'Extensions';
 $_['text_success']       = 'Success: You have modified cheque / money order account details!';
 $_['text_edit']          = 'Edit Cheque / Money Order';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_payable']      = 'Payable To';

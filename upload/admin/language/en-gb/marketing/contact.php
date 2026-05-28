@@ -14,6 +14,11 @@ $_['text_customer']        = 'Customers';
 $_['text_affiliate_all']   = 'All Affiliates';
 $_['text_affiliate']       = 'Affiliates';
 $_['text_product']         = 'Products';
+// Subtitle
+
+$_['text_mail_subtitle'] = 'Send emails to customers';
+
+
 
 // Entry
 $_['entry_store']          = 'From';

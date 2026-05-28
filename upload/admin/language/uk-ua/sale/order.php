@@ -144,3 +144,24 @@ $_['text_onepage_products'] = 'Товари';
 $_['text_onepage_order_details'] = 'Деталі замовлення';
 $_['text_onepage_totals'] = 'Разом';
 $_['text_onepage_same_shipping_as_payment'] = 'Адреса доставки збігається з адресою оплати';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Переглядайте та обробляйте замовлення клієнтів';
+
+$_['text_filter_subtitle'] = 'Звузити результати за критеріями';
+
+$_['text_add_subtitle'] = 'Створити нове замовлення вручну';
+
+$_['text_edit_subtitle'] = 'Редагувати дані замовлення';
+
+$_['text_order_info_subtitle'] = 'Основні дані та метадані замовлення';
+
+$_['text_order_customer_subtitle'] = 'Контактна та облікова інформація клієнта';
+
+$_['text_order_tools_subtitle'] = 'Оновити статус, додати історію або коментарі';
+
+$_['text_order_contents_subtitle'] = 'Товари та підсумки цього замовлення';
+
+$_['text_history_subtitle'] = 'Відстежуйте зміни статусу та нотатки';
+
+

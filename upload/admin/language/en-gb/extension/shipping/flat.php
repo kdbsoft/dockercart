@@ -6,6 +6,11 @@ $_['heading_title']    = 'Flat Rate';
 $_['text_extension']   = 'Extensions';
 $_['text_success']     = 'Success: You have modified flat rate shipping!';
 $_['text_edit']        = 'Edit Flat Rate Shipping';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_cost']       = 'Cost';

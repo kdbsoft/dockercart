@@ -86,6 +86,7 @@ class ControllerExtensionDashboardActivity extends Controller {
 	public function dashboard() {
 		$this->load->language('extension/dashboard/activity');
 
+		$data['text_activity_subtitle'] = $this->language->get('text_activity_subtitle');
 		$data['user_token'] = $this->session->data['user_token'];
 
 		$data['activities'] = array();

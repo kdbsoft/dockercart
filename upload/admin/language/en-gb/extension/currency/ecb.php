@@ -10,6 +10,11 @@ $_['text_edit']       .= '<br><br>';
 $_['text_edit']       .= 'This extension requires the EUR currency to be an available currency.';
 $_['text_edit']       .= '<br><br>';
 $_['text_edit']       .= 'When enabled, it can be chosen as the currency rate engine at <b><a href="%2">System &gt; Settings</b></a> and you can refresh the currency rates via <b><a href="%1">System &gt; Localisation &gt; Currencies</a></b>.';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_ip']         = 'Server IP-address';

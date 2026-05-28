@@ -9,6 +9,15 @@ $_['text_add']          = 'Add Manufacturer';
 $_['text_edit']         = 'Edit Manufacturer';
 $_['text_keyword']      = 'Do not use spaces, instead replace spaces with - and make sure the SEO URL is globally unique.';
 $_['text_default']      = 'Default';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Manage product manufacturers';
+
+$_['text_add_manufacturer_subtitle'] = 'Add a new product manufacturer';
+
+$_['text_edit_manufacturer_subtitle'] = 'Edit manufacturer details';
+
+
 
 // Tab
 $_['tab_general']       = 'General';

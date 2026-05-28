@@ -9,6 +9,11 @@ $_['text_success']      = 'Success: You have modified customer searches report!'
 $_['text_filter']       = 'Filter';
 $_['text_guest']        = 'Guest';
 $_['text_customer']     = '<a href="%s">%s</a>';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Column
 $_['column_keyword']    = 'Keyword';

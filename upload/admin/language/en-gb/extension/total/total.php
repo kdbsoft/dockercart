@@ -6,6 +6,11 @@ $_['heading_title']    = 'Total';
 $_['text_extension']   = 'Extensions';
 $_['text_success']     = 'Success: You have modified total totals!';
 $_['text_edit']        = 'Edit Total Total';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_status']     = 'Status';

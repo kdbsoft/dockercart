@@ -9,6 +9,11 @@ $_['text_edit']          = 'Edit NOCHEX';
 $_['text_nochex']		 = '<a href="https://secure.nochex.com/apply/merchant_info.aspx?partner_id=172198798" target="_blank"><img src="view/image/payment/nochex.png" alt="NOCHEX" title="NOCHEX" style="border: 1px solid #EEEEEE;" /></a>';
 $_['text_seller']		 = 'Seller / Personal Account';
 $_['text_merchant']		 = 'Merchant Account';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_email']		 = 'E-Mail';

@@ -10,6 +10,11 @@ $_['text_edit']       .= '<br><br>';
 $_['text_edit']       .= 'Fixer.io is a currency conversion service. Before using it for the first time you must <b><a href="https://fixer.io/" target="_blank">signup here</a></b> to get an API Access Key.';
 $_['text_edit']       .= '<br><br>';
 $_['text_edit']       .= 'When enabled, it can be chosen as the currency rate engine at <b><a href="%2">System &gt; Settings</b></a> and you can refresh the currency rates via <b><a href="%1">System &gt; Localisation &gt; Currencies</a></b>.';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_api']        = 'API Access Key';

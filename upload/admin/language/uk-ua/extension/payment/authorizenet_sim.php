@@ -21,3 +21,8 @@ $_['text_authorizenet_sim'] = '<a href="https://account.authorize.net/signUpNow?
 $_['text_edit'] = 'Редагувати Authorize.Net (SIM-картка)';
 $_['text_extension'] = 'Розширення';
 $_['text_success'] = 'Успіх: Ви змінили дані облікового запису Authorize.Net (SIM)!';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції розширення';
+
+

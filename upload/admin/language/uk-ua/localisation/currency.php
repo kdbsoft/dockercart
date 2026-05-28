@@ -27,3 +27,12 @@ $_['text_edit'] = 'Редагувати валюту';
 $_['text_iso'] = 'Повний список кодів валют ISO та налаштувань можна знайти <a href="http://www.xe.com/iso4217.php" target="_blank" class="alert-link">тут</a> .';
 $_['text_list'] = 'Список валют';
 $_['text_success'] = 'Успіх: Ви змінили валюти!';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Керуйте валютами та курсами магазину';
+
+$_['text_add_currency_subtitle'] = 'Додати нову валюту магазину';
+
+$_['text_edit_currency_subtitle'] = 'Редагувати курс та налаштування валюти';
+
+

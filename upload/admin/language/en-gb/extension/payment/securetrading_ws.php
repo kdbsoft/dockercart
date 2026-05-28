@@ -47,6 +47,11 @@ $_['text_confirm_rebate']                        = 'Are you sure you want to reb
 $_['text_reversed']                              = 'Reversed';
 $_['text_payment']                               = "Payment";
 $_['text_rebate']                                = 'Rebate';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 $_['entry_site_reference']                       = 'Site reference';
 $_['entry_username']                             = 'Username';

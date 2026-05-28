@@ -13,6 +13,17 @@ $_['text_order']           = 'Order Information';
 $_['text_product']         = 'Product Information &amp; Reason for Return';
 $_['text_history']         = 'History';
 $_['text_history_add']     = 'Add History';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Manage product returns';
+
+$_['text_filter_subtitle'] = 'Narrow results by specific criteria';
+
+$_['text_add_return_subtitle'] = 'Process a new product return';
+
+$_['text_edit_return_subtitle'] = 'Edit product return details';
+
+
 
 // Column
 $_['column_return_id']     = 'Return ID';

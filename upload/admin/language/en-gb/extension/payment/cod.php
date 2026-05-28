@@ -6,6 +6,11 @@ $_['heading_title']      = 'Cash On Delivery';
 $_['text_extension']     = 'Extensions';
 $_['text_success']       = 'Success: You have modified Cash On Delivery payment module!';
 $_['text_edit']          = 'Edit Cash On Delivery';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_total']        = 'Total';

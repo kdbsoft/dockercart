@@ -6,6 +6,11 @@ $_['heading_title']    = 'Taxes';
 $_['text_extension']   = 'Extensions';
 $_['text_success']     = 'Success: You have modified taxes total!';
 $_['text_edit']        = 'Edit Tax Total';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_status']     = 'Status';

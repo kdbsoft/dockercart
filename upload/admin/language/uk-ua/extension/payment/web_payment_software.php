@@ -22,3 +22,8 @@ $_['text_live'] = 'Живий';
 $_['text_success'] = 'Успіх: Ви змінили дані облікового запису програмного забезпечення для веб-платежів!';
 $_['text_test'] = 'Тест';
 $_['text_web_payment_software'] = '<a href="http://www.web-payment-software.com/" target="_blank"><img src="view/image/payment/wps-logo.jpg" alt="Web Payment Software" title="Програмне забезпечення для веб-платежів" style="border: 1px solid #EEEEEE;" /></a>';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції розширення';
+
+

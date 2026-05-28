@@ -7,6 +7,15 @@ $_['text_success']     = 'Success: You have modified return statuses!';
 $_['text_list']        = 'Return Status List';
 $_['text_add']         = 'Add Return Status';
 $_['text_edit']        = 'Edit Return Status';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Manage return status labels';
+
+$_['text_add_return_status_subtitle'] = 'Create a new return status';
+
+$_['text_edit_return_status_subtitle'] = 'Edit return status label';
+
+
 
 // Column
 $_['column_name']      = 'Return Status Name';

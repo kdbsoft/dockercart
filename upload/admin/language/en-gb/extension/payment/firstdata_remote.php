@@ -41,6 +41,11 @@ $_['text_confirm_refund']			 = 'Are you sure you want to refund the payment?';
 $_['text_void']                      = 'Void';
 $_['text_payment']                   = 'Payment';
 $_['text_refund']                    = "Refund";
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_certificate_path']		 = 'Certificate path';

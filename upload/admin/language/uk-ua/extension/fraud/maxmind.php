@@ -112,3 +112,8 @@ $_['text_ship_city_postal_match'] = 'Поштовий індекс міста д
 $_['text_ship_forward'] = 'Доставка вперед:';
 $_['text_signup'] = 'MaxMind – це сервіс виявлення шахрайства. Якщо у вас немає ліцензійного ключа, ви можете <a href="http://www.maxmind.com/?rId=opencart" target="_blank"><u>зареєструватися тут</u></a> .';
 $_['text_success'] = 'Успіх: Ви змінили захист від шахрайства MaxMind!';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції розширення';
+
+

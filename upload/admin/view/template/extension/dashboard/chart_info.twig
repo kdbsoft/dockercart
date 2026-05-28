@@ -1,6 +1,10 @@
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title"><i class="fa fa-line-chart"></i> {{ heading_title }}</h3>
+    <div class="panel-heading__icon"><i class="fa fa-line-chart"></i></div>
+    <div>
+      <h3 class="panel-title">{{ heading_title }}</h3>
+      <div class="panel-heading__subtitle">{{ text_chart_subtitle }}</div>
+    </div>
     <div class="pull-right">
       <select class="tile-period-select" id="chart-range">
         <option value="day">{{ text_day }}</option>

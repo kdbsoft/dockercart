@@ -8,6 +8,15 @@ $_['text_list']            = 'Currency List';
 $_['text_add']             = 'Add Currency';
 $_['text_edit']            = 'Edit Currency';
 $_['text_iso']             = 'You can find a full list of ISO currency codes and settings <a href="http://www.xe.com/iso4217.php" target="_blank" class="alert-link">here</a>.';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Manage store currencies and rates';
+
+$_['text_add_currency_subtitle'] = 'Add a new store currency';
+
+$_['text_edit_currency_subtitle'] = 'Edit currency rate and settings';
+
+
 
 // Column
 $_['column_title']         = 'Currency Title';

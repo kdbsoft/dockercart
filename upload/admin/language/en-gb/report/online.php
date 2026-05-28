@@ -8,6 +8,11 @@ $_['text_success']      = 'Success: You have modified customers online report!';
 $_['text_list']         = 'Online List';
 $_['text_filter']       = 'Filter';
 $_['text_guest']        = 'Guest';
+// Subtitle
+
+$_['text_list_subtitle'] = 'See who is currently online';
+
+
 
 // Column
 $_['column_ip']         = 'IP';

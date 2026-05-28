@@ -66,6 +66,11 @@ $_['text_comment'] 	                = 'Updated by Lay-Buy';
 $_['text_comment_canceled'] 	    = 'Order canceled and recurring PayPal Profile #%s canceled.';
 $_['text_remaining'] 	            = 'Remaining:';
 $_['text_payment'] 	                = 'Payment';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Column
 $_['column_order_id']               = 'Order ID';

@@ -17,6 +17,16 @@ $_['text_day']         = 'Today';
 $_['text_week']        = 'Week';
 $_['text_month']       = 'Month';
 $_['text_year']        = 'Year';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+// Dashboard Info Subtitle
+
+$_['text_chart_subtitle'] = 'Revenue and order trends over time';
+
+
+
+
 
 // Entry
 $_['entry_status']     = 'Status';

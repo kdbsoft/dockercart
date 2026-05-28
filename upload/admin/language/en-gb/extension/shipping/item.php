@@ -6,6 +6,11 @@ $_['heading_title']    = 'Per Item';
 $_['text_extension']   = 'Extensions';
 $_['text_success']     = 'Success: You have modified shipping per item rates!';
 $_['text_edit']        = 'Edit Per Item Shipping';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_cost']       = 'Cost';

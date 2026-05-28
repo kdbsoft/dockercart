@@ -26,3 +26,8 @@ $_['text_pwa_button'] = 'Amazon Pay';
 $_['text_small_button'] = 'Малий';
 $_['text_success'] = 'Успіх: Ви змінили модуль Amazon Pay!';
 $_['text_x_large_button'] = 'Дуже великий';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції розширення';
+
+

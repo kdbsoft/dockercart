@@ -26,3 +26,8 @@ $_['text_module'] = 'Модулі';
 $_['text_small_button'] = 'Малий';
 $_['text_success'] = 'Успіх: Ви змінили модуль Увійти за допомогою Amazon!';
 $_['text_x_large_button'] = 'Дуже великий';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції розширення';
+
+

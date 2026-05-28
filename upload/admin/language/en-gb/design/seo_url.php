@@ -9,6 +9,15 @@ $_['text_add']         = 'Add SEO URL';
 $_['text_edit']        = 'Edit SEO URL';
 $_['text_filter']      = 'Filter';
 $_['text_default']     = 'Default';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Manage SEO-friendly URL aliases';
+
+$_['text_add_seo_url_subtitle'] = 'Create a new SEO URL alias';
+
+$_['text_edit_seo_url_subtitle'] = 'Edit SEO URL mapping';
+
+
 
 // Column
 $_['column_query']     = 'Query';

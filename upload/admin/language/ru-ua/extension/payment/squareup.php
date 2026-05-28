@@ -181,3 +181,8 @@ $_['text_token_revoked'] = 'Срок действия вашего токена 
 $_['text_transaction_statuses'] = 'Статусы транзакций';
 $_['text_view'] = 'Посмотреть больше';
 $_['text_void'] = 'Пустота';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Настройте параметры и опции расширения';
+
+

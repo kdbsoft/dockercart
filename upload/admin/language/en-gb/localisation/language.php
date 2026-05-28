@@ -7,6 +7,15 @@ $_['text_success']      = 'Success: You have modified languages!';
 $_['text_list']         = 'Language List';
 $_['text_add']          = 'Add Language';
 $_['text_edit']         = 'Edit Language';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Manage installed languages';
+
+$_['text_add_language_subtitle'] = 'Add a new language pack';
+
+$_['text_edit_language_subtitle'] = 'Edit language locale settings';
+
+
 
 // Column
 $_['column_name']       = 'Language Name';

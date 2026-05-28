@@ -8,6 +8,15 @@ $_['text_list']         = 'Review List';
 $_['text_add']          = 'Add Review';
 $_['text_edit']         = 'Edit Review';
 $_['text_filter']       = 'Filter';
+// Subtitle
+
+$_['text_list_subtitle'] = 'Moderate customer product reviews';
+
+$_['text_add_review_subtitle'] = 'Moderate a new product review';
+
+$_['text_edit_review_subtitle'] = 'Edit review status and details';
+
+
 
 // Column
 $_['column_product']    = 'Product';

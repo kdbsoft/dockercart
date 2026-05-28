@@ -19,3 +19,8 @@ $_['help_rate'] = 'Вводьте значення з точністю до 5,2 
 $_['text_edit'] = 'Редагувати доставку Parcelforce 48';
 $_['text_extension'] = 'Розширення';
 $_['text_success'] = 'Успіх: Ви змінили доставку Parcelforce 48!';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції розширення';
+
+

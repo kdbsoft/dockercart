@@ -6,6 +6,11 @@ $_['heading_title']    = 'Reward Points';
 $_['text_extension']   = 'Extensions';
 $_['text_success']     = 'Success: You have modified reward points total!';
 $_['text_edit']        = 'Edit Reward Points Total';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_status']     = 'Status';

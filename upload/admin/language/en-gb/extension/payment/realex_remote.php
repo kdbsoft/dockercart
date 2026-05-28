@@ -47,6 +47,11 @@ $_['text_rebate']                    = 'Rebate';
 $_['text_column_amount']			 = 'Amount';
 $_['text_column_type']				 = 'Type';
 $_['text_column_date_added']		 = 'Created';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_merchant_id']				 = 'Merchant ID';

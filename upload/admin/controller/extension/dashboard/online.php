@@ -86,6 +86,7 @@ class ControllerExtensionDashboardOnline extends Controller {
 	public function dashboard() {
 		$this->load->language('extension/dashboard/online');
 
+		$data['text_online_subtitle'] = $this->language->get('text_online_subtitle');
 		$data['user_token'] = $this->session->data['user_token'];
 
 		// Total Orders

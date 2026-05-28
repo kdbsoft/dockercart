@@ -73,6 +73,11 @@ $_['text_column_type']			         = 'Type';
 $_['text_column_date_added']	         = 'Added';
 
 $_['text_confirm_refund']		         = 'Are you sure you want to refund the payment?';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 $_['button_refund']				         = 'Rebate / refund';
 

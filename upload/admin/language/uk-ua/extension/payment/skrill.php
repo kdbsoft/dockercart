@@ -19,3 +19,8 @@ $_['text_edit'] = 'Редагувати Skrill';
 $_['text_extension'] = 'Розширення';
 $_['text_skrill'] = '<a href="https://content.skrill.com/en/ecommerce-solutions/opencart/" target="_blank"><img src="view/image/payment/skrill.png" alt="Skrill" title="Скрилл" style="border: 1px solid #EEEEEE;" /></a>';
 $_['text_success'] = 'Успіх: Ви змінили дані Skrill.';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції розширення';
+
+

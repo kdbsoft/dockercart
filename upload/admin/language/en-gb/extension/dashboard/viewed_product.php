@@ -13,6 +13,11 @@ $_['text_yesterday']   = 'Yesterday';
 $_['text_week']        = 'Week';
 $_['text_month']       = 'Month';
 $_['text_year']        = 'Year';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Configure extension settings and options';
+
+
 
 // Entry
 $_['entry_status']     = 'Status';

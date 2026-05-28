@@ -72,3 +72,8 @@ $_['text_standard_overnight'] = 'Стандартний нічний';
 $_['text_station'] = 'Станція';
 $_['text_success'] = 'Успіх: Ви змінили доставку FedEx!';
 $_['text_your_packaging'] = 'Ваша упаковка';
+// Subtitle
+
+$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції розширення';
+
+
