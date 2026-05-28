@@ -3,7 +3,7 @@
 <main class="bg-white min-h-screen">
 
     <section class="relative overflow-hidden">
-      <div class="w-full h-[180px] sm:h-[230px] bg-gradient-to-br from-gray-900 via-gray-800 to-blue-950"></div>
+      <div class="w-full h-[180px] sm:h-[230px] {% if background_image %}bg-cover bg-center{% else %}bg-gradient-to-br from-gray-900 via-gray-800 to-blue-950{% endif %}"{% if background_image %} style="background-image: url('{{ background_image }}');"{% endif %}></div>
       <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/15"></div>
       <div class="absolute inset-0 flex items-center pb-2 sm:pb-0">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">

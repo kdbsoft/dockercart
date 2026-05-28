@@ -8,6 +8,7 @@ $_['entry_column'] = 'Колонки';
 $_['entry_description'] = 'Описание';
 $_['entry_filter'] = 'Фильтры';
 $_['entry_image'] = 'Изображение';
+$_['entry_background_image'] = 'Фоновое изображение';
 $_['entry_keyword'] = 'Ключевое слово';
 $_['entry_layout'] = 'Переопределение макета';
 $_['entry_meta_description'] = 'Описание метатега';

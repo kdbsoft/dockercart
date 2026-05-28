@@ -10,6 +10,7 @@ $_['entry_description'] = 'Опис';
 $_['entry_description_bottom'] = 'Опис знизу:';
 $_['entry_filter'] = 'Фільтри';
 $_['entry_image'] = 'Зображення';
+$_['entry_background_image'] = 'Фонове зображення';
 $_['entry_keyword'] = 'Ключове слово';
 $_['entry_layout'] = 'Перевизначення макета';
 $_['entry_meta_description'] = 'Опис метатегу';
