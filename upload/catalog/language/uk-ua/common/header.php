@@ -28,3 +28,4 @@ $_["text_transaction"] = "Транзакції";
 $_["text_wishlist"] = "Список бажань (%s)";
 $_["text_contact"] = "Контакти";
 $_["text_call_for_price"] = "Уточнити ціну";
+$_["text_view_full_product"] = "Перейти до товару";

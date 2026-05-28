@@ -182,6 +182,9 @@ class ControllerCommonHeader extends Controller {
 		// Button text for quick view
 		$data['button_cart'] = $this->language->get('button_cart');
 
+		// View full product link text for quick view
+		$data['text_view_full_product'] = $this->language->get('text_view_full_product');
+
 		// Call for price (for quick view JS)
 		$data['text_call_for_price'] = $this->language->get('text_call_for_price');
 		$data['call_for_price_phone'] = $this->config->get('config_telephone');
