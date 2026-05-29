@@ -99,6 +99,7 @@ $_['text_isbn'] = 'ISBN:';
 $_['text_jan'] = 'ЯН:';
 $_['text_list'] = 'Список замовлень';
 $_['text_missing'] = 'Відсутні замовлення';
+$_['text_notify'] = 'Повідомити клієнта';
 $_['text_mpn'] = 'Найкращий артикул:';
 $_['text_option'] = 'Опції';
 $_['text_order'] = 'Замовлення (#%s)';
@@ -136,6 +137,8 @@ $_['text_website'] = 'Веб-сайт:';
 $_['text_badge_guest_order'] = 'Гостьове замовлення';
 $_['text_badge_registered_order'] = 'Зареєстрований клієнт';
 $_['text_badge_oneclick_order']   = 'Замовлення в 1 клік';
+$_['text_badge_guest'] = 'Гість';
+$_['text_badge_registered'] = 'Зареєстрований';
 $_['text_confirm_mass_delete']    = 'Ви впевнені, що хочете видалити вибрані замовлення?';
 $_['text_onepage_customer'] = 'Покупець';
 $_['text_onepage_payment_details'] = 'Деталі оплати';
@@ -158,10 +161,8 @@ $_['text_order_info_subtitle'] = 'Основні дані та метадані 
 
 $_['text_order_customer_subtitle'] = 'Контактна та облікова інформація клієнта';
 
-$_['text_order_tools_subtitle'] = 'Оновити статус, додати історію або коментарі';
+$_['text_order_tools_subtitle'] = 'Рахунок, бонуси та інше';
 
 $_['text_order_contents_subtitle'] = 'Товари та підсумки цього замовлення';
 
 $_['text_history_subtitle'] = 'Відстежуйте зміни статусу та нотатки';
-
-

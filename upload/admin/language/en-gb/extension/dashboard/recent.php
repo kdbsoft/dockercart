@@ -9,12 +9,16 @@ $_['text_edit']         = 'Edit Dashboard Recent Orders';
 $_['text_badge_guest_order']      = 'Guest order';
 $_['text_badge_registered_order'] = 'Registered customer';
 $_['text_badge_oneclick_order']   = '1-click order';
+$_['text_badge_guest']            = 'Guest';
+$_['text_badge_registered']       = 'Registered';
+$_['text_tracking_number']        = 'Tracking Number';
 // Subtitle
 
 $_['text_edit_subtitle'] = 'Configure extension settings and options';
 // Dashboard Info Subtitle
 
 $_['text_recent_subtitle'] = 'Newest customer orders overview';
+$_['text_view_all']        = 'View all orders';
 
 
 

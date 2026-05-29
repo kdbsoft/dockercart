@@ -263,12 +263,21 @@ class ControllerSaleOrder extends Controller {
 
 		foreach ($results as $result) {
 			$order_type = $this->getOrderType($result);
+			$order_type_badge_class = $this->getOrderTypeBadgeClass($result);
+			$customer_type = $this->getCustomerType($result);
+			$customer_type_badge_class = $this->getCustomerTypeBadgeClass($result);
+			$is_oneclick = !empty($result['payment_code']) && $result['payment_code'] === 'oneclickcheckout';
 			$status_badge_class = $this->getOrderStatusBadgeClass((int)$result['order_status_id'], $processing_statuses, $complete_statuses, $fraud_status);
 
 			$data['orders'][] = array(
 				'order_id'      => $result['order_id'],
 				'customer'      => $result['customer'],
+				'customer_type' => $customer_type,
+				'customer_type_badge_class' => $customer_type_badge_class,
+				'is_oneclick'   => $is_oneclick,
 				'order_type'    => $order_type,
+				'order_type_badge_class' => $order_type_badge_class,
+				'order_status_id' => $result['order_status_id'],
 				'order_status'  => $result['order_status'] ? $result['order_status'] : $this->language->get('text_missing'),
 				'order_status_badge_class' => $status_badge_class,
 				'tracking_number' => $result['tracking_number'],
@@ -1157,6 +1166,12 @@ class ControllerSaleOrder extends Controller {
 
 			$data['order_status_id'] = $order_info['order_status_id'];
 
+			$processing_statuses = (array)$this->config->get('config_processing_status');
+			$complete_statuses   = (array)$this->config->get('config_complete_status');
+			$fraud_status        = (int)$this->config->get('config_fraud_status_id');
+
+			$data['status_badge_class'] = $this->getOrderStatusBadgeClass((int)$order_info['order_status_id'], $processing_statuses, $complete_statuses, $fraud_status);
+
 			$this->load->model('localisation/country');
 			$data['countries'] = $this->model_localisation_country->getCountries();
 
@@ -1728,20 +1743,48 @@ class ControllerSaleOrder extends Controller {
 		return $this->language->get('text_badge_guest_order');
 	}
 
-	private function getOrderStatusBadgeClass($order_status_id, $processing_statuses, $complete_statuses, $fraud_status) {
-		if ($fraud_status && $order_status_id === $fraud_status) {
-			return 'label label-danger';
+	private function getOrderTypeBadgeClass($order) {
+		if (!empty($order['payment_code']) && $order['payment_code'] === 'oneclickcheckout') {
+			return 'label label-info';
 		}
 
-		if (in_array($order_status_id, $processing_statuses)) {
-			return 'label label-warning';
-		}
-
-		if (in_array($order_status_id, $complete_statuses)) {
-			return 'label label-success';
+		if (!empty($order['customer_id'])) {
+			return 'label label-primary';
 		}
 
 		return 'label label-default';
+	}
+
+	private function getCustomerType($order) {
+		if (!empty($order['customer_id'])) {
+			return $this->language->get('text_badge_registered');
+		}
+
+		return $this->language->get('text_badge_guest');
+	}
+
+	private function getCustomerTypeBadgeClass($order) {
+		if (!empty($order['customer_id'])) {
+			return 'label label-primary';
+		}
+
+		return 'label label-default';
+	}
+
+	private function getOrderStatusBadgeClass($order_status_id, $processing_statuses, $complete_statuses, $fraud_status) {
+		if ($fraud_status && $order_status_id === $fraud_status) {
+			return 'order-status-badge label label-danger';
+		}
+
+		if (in_array($order_status_id, $processing_statuses)) {
+			return 'order-status-badge label label-warning';
+		}
+
+		if (in_array($order_status_id, $complete_statuses)) {
+			return 'order-status-badge label label-success';
+		}
+
+		return 'order-status-badge label label-default';
 	}
 	
 	protected function validate() {

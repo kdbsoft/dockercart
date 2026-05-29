@@ -3,7 +3,6 @@
   <div class="page-header">
     <div class="container-fluid">
       <div class="pull-right">
-        <button type="button" data-toggle="tooltip" title="{{ button_filter }}" onclick="$('#filter-zone').toggleClass('hidden-sm hidden-xs');" class="btn btn-default hidden-md hidden-lg"><i class="fa fa-filter"></i></button>
         <a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa fa-plus"></i></a>
         <button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="confirm('{{ text_confirm }}') ? $('#form-zone').submit() : false;"><i class="fa fa-trash-o"></i></button>
       </div>
@@ -26,34 +25,26 @@
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
-    <div class="row">
-      <div id="filter-zone" class="col-md-3 col-md-push-9 col-sm-12 hidden-sm hidden-xs">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-  <div class="panel-heading__icon"><i class="fa fa-filter"></i></div>
-  <div>
-    <h3 class="panel-title">{{ text_filter }}</h3>
-    <div class="panel-heading__subtitle">{{ text_filter_subtitle }}</div>
-  </div>
-</div>
-          <div class="panel-body">
-            <div class="form-group">
-              <label class="control-label" for="input-filter-country">{{ entry_country }}</label>
-              <select name="filter_country_id" id="input-filter-country" class="form-control">
-                <option value="0">{{ text_all }}</option>
-                {% for country in countries %}
-                  <option value="{{ country.country_id }}" {% if country.country_id == filter_country_id %}selected="selected"{% endif %}>{{ country.name }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div class="form-group text-right">
-              <button type="button" id="button-filter" class="btn btn-default"><i class="fa fa-filter"></i> {{ button_filter }}</button>
-            </div>
+    <div id="filter-zone" class="filter-bar">
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <div class="filter-field">
+            <label for="input-filter-country">{{ entry_country }}</label>
+            <select name="filter_country_id" id="input-filter-country" class="form-control">
+              <option value="0">{{ text_all }}</option>
+              {% for country in countries %}
+                <option value="{{ country.country_id }}" {% if country.country_id == filter_country_id %}selected="selected"{% endif %}>{{ country.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="filter-actions">
+            <button type="button" id="button-filter" class="btn btn-default"><i class="fa fa-filter"></i> {{ button_filter }}</button>
           </div>
         </div>
       </div>
-
-      <div class="col-md-9 col-md-pull-3 col-sm-12">
+    </div>
+    <div class="row">
+      <div class="col-md-12">
         <div class="panel panel-default">
           <div class="panel-heading">
   <div class="panel-heading__icon"><i class="fa fa-list"></i></div>
