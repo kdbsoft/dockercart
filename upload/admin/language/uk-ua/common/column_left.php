@@ -3,8 +3,8 @@
 $_['text_affiliate'] = 'Партнерська програма';
 $_['text_analytics'] = 'Аналітікс';
 $_['text_api'] = 'API';
-$_['text_attribute'] = 'Атрибути';
-$_['text_attribute_group'] = 'Групи атрибутів';
+$_['text_attribute'] = 'Характеристики';
+$_['text_attribute_group'] = 'Групи характеристик';
 $_['text_backup'] = 'Резервне копіювання / Відновлення';
 $_['text_banner'] = 'Банери';
 $_['text_benefit'] = 'Переваги товару';
