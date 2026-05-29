@@ -1,0 +1,36 @@
+<aside class="space-y-6">
+  <a href="{{ account_href }}" class="flex items-center gap-3 px-3 py-3 rounded-xl bg-gray-50 hover:bg-blue-50 transition-colors group">
+    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-200 transition-colors">
+      <i data-lucide="user" class="w-5 h-5 text-blue-600"></i>
+    </div>
+    <div class="min-w-0">
+      <p class="text-sm font-semibold text-gray-900 truncate">{{ customer_name }}</p>
+      {% if customer_telephone %}
+      <p class="text-xs text-gray-500 truncate">{{ customer_telephone }}</p>
+      {% endif %}
+    </div>
+  </a>
+{% for group in menu_items %}
+  <div>
+    <p class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-2 px-2">{{ group.heading }}</p>
+    <ul class="space-y-0.5">
+      {% for key, item in group.children %}
+        {% if item.status is not defined or item.status %}
+        <li>
+          <a href="{{ item.href }}"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+            {% if current_route == key %}
+              bg-blue-50 text-blue-700
+            {% else %}
+              text-gray-600 hover:text-gray-900 hover:bg-gray-50
+            {% endif %}">
+            <i data-lucide="{{ item.icon }}" class="w-4 h-4 {% if current_route == key %}text-blue-500{% else %}text-gray-400{% endif %}"></i>
+            {{ item.text }}
+          </a>
+        </li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  </div>
+  {% endfor %}
+</aside>

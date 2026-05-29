@@ -11,6 +11,29 @@ class ControllerAccountAccount extends Controller {
 
 		$this->document->setTitle($this->language->get('heading_title'));
 
+		$this->load->model('account/order');
+		$this->load->model('account/wishlist');
+
+		// Dashboard stats
+		$data['total_orders'] = $this->model_account_order->getTotalOrders();
+		$recent_orders = $this->model_account_order->getOrders(0, 3);
+
+		if ($recent_orders) {
+			foreach ($recent_orders as &$order) {
+				$order['view'] = $this->url->link('account/order/info', 'order_id=' . $order['order_id'], true);
+				$order['products'] = $this->model_account_order->getTotalOrderProductsByOrderId($order['order_id']);
+				$order['total'] = $this->currency->format($order['total'], $order['currency_code'], $order['currency_value']);
+			}
+			unset($order);
+		}
+
+		$data['recent_orders'] = $recent_orders;
+		$data['total_wishlist'] = $this->model_account_wishlist->getTotalWishlist();
+
+		$this->load->model('account/customer');
+		$data['total_reward'] = (int)$this->model_account_customer->getRewardTotal($this->customer->getId());
+		$data['total_spent'] = (float)$this->model_account_customer->getTransactionTotal($this->customer->getId());
+
 		$data['breadcrumbs'] = array();
 
 		$data['breadcrumbs'][] = array(
@@ -88,6 +111,8 @@ class ControllerAccountAccount extends Controller {
 			$data['tracking'] = '';
 		}
 		
+		$data['account_menu'] = $this->load->controller('common/account_menu');
+
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['column_right'] = $this->load->controller('common/column_right');
 		$data['content_top'] = $this->load->controller('common/content_top');

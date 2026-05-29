@@ -13,7 +13,7 @@
   </section>
 
   <section class="py-8 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-3xl mx-auto">
+    <div class="max-w-7xl mx-auto">
       {{ content_top }}
 
       {% if success %}
@@ -28,6 +28,12 @@
         <span>{{ error_warning }}</span>
       </div>
       {% endif %}
+
+      <div class="flex flex-col lg:flex-row gap-6 items-start">
+        <aside class="lg:w-60 flex-shrink-0">
+          {{ account_menu }}
+        </aside>
+        <div class="flex-1 min-w-0">
 
       {% if addresses %}
       <div class="space-y-3 mb-6">
@@ -61,6 +67,9 @@
           <i data-lucide="plus" class="w-4 h-4"></i>
           {{ button_new_address }}
         </a>
+      </div>
+
+        </div>
       </div>
 
       {{ content_bottom }}

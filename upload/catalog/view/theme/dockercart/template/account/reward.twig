@@ -13,14 +13,21 @@
   </section>
 
   <section class="py-8 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-3xl mx-auto">
+    <div class="max-w-7xl mx-auto">
       {{ content_top }}
+
+      <div class="flex flex-col lg:flex-row gap-6 items-start">
+        <aside class="lg:w-60 flex-shrink-0">
+          {{ account_menu }}
+        </aside>
+        <div class="flex-1 min-w-0">
 
       <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 mb-4 flex items-center gap-4">
         <i data-lucide="star" class="w-8 h-8 text-blue-500 flex-shrink-0"></i>
         <p class="text-sm text-gray-600">{{ text_total }} <strong class="text-gray-900 text-base">{{ total }}</strong></p>
       </div>
 
+      {% if rewards %}
       <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden mb-6">
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
@@ -32,7 +39,6 @@
               </tr>
             </thead>
             <tbody>
-              {% if rewards %}
               {% for reward in rewards %}
               <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition">
                 <td class="text-left text-gray-600 px-4 py-3">{{ reward.date_added }}</td>
@@ -48,25 +54,30 @@
                 </td>
               </tr>
               {% endfor %}
-              {% else %}
-              <tr>
-                <td colspan="3" class="text-center text-gray-400 px-4 py-6">{{ text_empty }}</td>
-              </tr>
-              {% endif %}
             </tbody>
           </table>
         </div>
       </div>
 
-      <div class="flex items-center justify-between text-sm text-gray-500 mb-6">
+      <div class="mb-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="text-sm text-gray-400">{{ results }}</div>
         <div>{{ pagination }}</div>
-        <div>{{ results }}</div>
       </div>
+
+      {% else %}
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 text-center text-gray-400 text-sm mb-6">
+        <i data-lucide="star" class="w-8 h-8 mx-auto mb-2 opacity-30"></i>
+        <p>{{ text_empty }}</p>
+      </div>
+      {% endif %}
 
       <div class="flex justify-end">
         <a href="{{ continue }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm">
           {{ button_continue }}
         </a>
+      </div>
+
+        </div>
       </div>
 
       {{ content_bottom }}

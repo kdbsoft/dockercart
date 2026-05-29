@@ -138,6 +138,8 @@ class ControllerAccountWishList extends Controller {
 			$data['continue'] = $this->url->link('common/home');
 		}
 
+		$data['account_menu'] = $this->load->controller('common/account_menu');
+
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['column_right'] = $this->load->controller('common/column_right');
 		$data['content_top'] = $this->load->controller('common/content_top');
