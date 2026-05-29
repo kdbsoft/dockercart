@@ -3,7 +3,7 @@
   <div class="page-header">
     <div class="container-fluid">
       <div class="pull-right"><a href="{{ invoice }}" target="_blank" data-toggle="tooltip" title="{{ button_invoice_print }}" class="btn btn-info"><i class="fa fa-print"></i></a> <a href="{{ shipping }}" target="_blank" data-toggle="tooltip" title="{{ button_shipping_print }}" class="btn btn-info"><i class="fa fa-truck"></i></a> <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
-      <h1>{{ heading_title }}</h1>
+      <h1>{{ heading_title }} {% if order_status %}<span class="order-status-badge {{ status_badge_class }}">{{ order_status }}</span>{% endif %}</h1>
       <ul class="breadcrumb">
         {% for breadcrumb in breadcrumbs %}
           <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
@@ -13,295 +13,285 @@
   </div>
   <div class="container-fluid">
     <div class="row">
-      <div class="col-md-4">
+      <div class="col-md-8">
+
+        <div class="order-address-row">
+          <div class="order-address-card">
+            <div class="order-address-card__header">
+              <h4 class="order-address-card__title">{{ text_payment_address }}</h4>
+              <button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="payment_address" data-title="{{ text_payment_address }}" data-target="#quick-payment-address"><i class="fa fa-pencil"></i></button>
+            </div>
+            <div class="order-address-card__body" id="quick-payment-address">{{ payment_address }}</div>
+          </div>
+          {% if shipping_method %}
+          <div class="order-address-card">
+            <div class="order-address-card__header">
+              <h4 class="order-address-card__title">{{ text_shipping_address }}</h4>
+              <button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="shipping_address" data-title="{{ text_shipping_address }}" data-target="#quick-shipping-address"><i class="fa fa-pencil"></i></button>
+            </div>
+            <div class="order-address-card__body" id="quick-shipping-address">{{ shipping_address }}</div>
+          </div>
+          {% endif %}
+        </div>
+
         <div class="panel panel-default">
           <div class="panel-heading">
-
-            <div class="panel-heading__icon"><i class="fa fa-shopping-cart"></i></div>
-
+            <div class="panel-heading__icon"><i class="fa fa-info-circle"></i></div>
             <div>
-
-              <h3 class="panel-title">{{ text_panel_order_info }}</h3>
-
-              <div class="panel-heading__subtitle">{{ text_order_info_subtitle }}</div>
-
+              <h3 class="panel-title">{{ text_panel_order_contents }}</h3>
+              <div class="panel-heading__subtitle">{{ text_order_contents_subtitle }}</div>
             </div>
           </div>
-          <table class="table">
-            <tbody>
-              <tr>
-                <td style="width: 1%;"><button data-toggle="tooltip" title="{{ text_store }}" class="btn btn-info btn-xs"><i class="fa fa-shopping-cart fa-fw"></i></button></td>
-                <td><a href="{{ store_url }}" target="_blank">{{ store_name }}</a></td>
-                <td style="width: 1%;"></td>
-              </tr>
-              <tr>
-                <td><button data-toggle="tooltip" title="{{ text_date_added }}" class="btn btn-info btn-xs"><i class="fa fa-calendar fa-fw"></i></button></td>
-                <td>{{ date_added }}</td>
-                <td></td>
-              </tr>
-              <tr>
-                <td><button data-toggle="tooltip" title="{{ text_payment_method }}" class="btn btn-info btn-xs"><i class="fa fa-credit-card fa-fw"></i></button></td>
-                <td id="quick-payment-method">{{ payment_method }}</td>
-                <td class="text-right"><button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="payment_method" data-title="{{ text_payment_method }}" data-value="{{ payment_method|e('html_attr') }}" data-code="{{ payment_code|e('html_attr') }}" data-target="#quick-payment-method"><i class="fa fa-pencil"></i></button></td>
-              </tr>
-              {% if shipping_method %}
+          <div class="panel-body">
+            <div class="table-responsive">
+            <table class="order-product-table">
+              <thead>
                 <tr>
-                  <td><button data-toggle="tooltip" title="{{ text_shipping_method }}" class="btn btn-info btn-xs"><i class="fa fa-truck fa-fw"></i></button></td>
-                  <td id="quick-shipping-method">{{ shipping_method }}</td>
-                  <td class="text-right"><button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="shipping_method" data-title="{{ text_shipping_method }}" data-value="{{ shipping_method|e('html_attr') }}" data-code="{{ shipping_code|e('html_attr') }}" data-target="#quick-shipping-method"><i class="fa fa-pencil"></i></button></td>
+                  <th class="text-left">{{ column_product }}</th>
+                  <th class="text-left">{{ column_model }}</th>
+                  <th class="text-right">{{ column_quantity }}</th>
+                  <th class="text-right">{{ column_discount_percent }}</th>
+                  <th class="text-right">{{ column_price }}</th>
+                  <th class="text-right">{{ column_total }}</th>
+                  <th class="text-right"></th>
                 </tr>
-              {% endif %}
-              <tr>
-                <td><button data-toggle="tooltip" title="{{ text_tracking_number }}" class="btn btn-info btn-xs"><i class="fa fa-map-marker fa-fw"></i></button></td>
-                <td id="quick-tracking-number">{{ tracking_number }}</td>
-                <td class="text-right"><button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="tracking_number" data-title="{{ text_tracking_number }}" data-value="{{ tracking_number|e('html_attr') }}" data-target="#quick-tracking-number"><i class="fa fa-pencil"></i></button></td>
-              </tr>
-              <tr>
-                <td><button data-toggle="tooltip" title="{{ text_comment }}" class="btn btn-info btn-xs"><i class="fa fa-comment fa-fw"></i></button></td>
-                <td id="quick-comment">{% if comment %}{{ comment|raw }}{% else %}<span class="text-muted">{{ text_none }}</span>{% endif %}</td>
-                <td class="text-right"><button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="comment" data-title="{{ entry_comment }}" data-value="{{ order_comment_raw|e('html_attr') }}" data-target="#quick-comment"><i class="fa fa-pencil"></i></button></td>
-              </tr>
-            </tbody>
-
-          </table>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-
-            <div class="panel-heading__icon"><i class="fa fa-user"></i></div>
-
-            <div>
-
-              <h3 class="panel-title">{{ text_panel_customer }}</h3>
-
-              <div class="panel-heading__subtitle">{{ text_order_customer_subtitle }}</div>
-
-            </div>
-          </div>
-          <table class="table">
-            <tr>
-              <td style="width: 1%;"><button data-toggle="tooltip" title="{{ text_customer }}" class="btn btn-info btn-xs"><i class="fa fa-user fa-fw"></i></button></td>
-              <td id="quick-customer-name">{% if customer %} <a href="{{ customer }}" target="_blank">{{ firstname }} {{ lastname }}</a> {% else %}
-                  {{ firstname }} {{ lastname }}
-                {% endif %}</td>
-              <td class="text-right" style="width: 1%;"><button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="customer_name" data-title="{{ text_customer }}" data-firstname="{{ firstname|e('html_attr') }}" data-lastname="{{ lastname|e('html_attr') }}" data-target="#quick-customer-name"><i class="fa fa-pencil"></i></button></td>
-            </tr>
-            <tr>
-              <td><button data-toggle="tooltip" title="{{ text_customer_group }}" class="btn btn-info btn-xs"><i class="fa fa-group fa-fw"></i></button></td>
-              <td>{{ customer_group }}</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td><button data-toggle="tooltip" title="{{ text_email }}" class="btn btn-info btn-xs"><i class="fa fa-envelope-o fa-fw"></i></button></td>
-              <td id="quick-email"><a href="mailto:{{ email }}">{{ email }}</a></td>
-              <td class="text-right"><button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="email" data-title="{{ text_email }}" data-value="{{ email|e('html_attr') }}" data-target="#quick-email"><i class="fa fa-pencil"></i></button></td>
-            </tr>
-            <tr>
-              <td><button data-toggle="tooltip" title="{{ text_telephone }}" class="btn btn-info btn-xs"><i class="fa fa-phone fa-fw"></i></button></td>
-              <td id="quick-telephone">{{ telephone }}</td>
-              <td class="text-right"><button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="telephone" data-title="{{ text_telephone }}" data-value="{{ telephone|e('html_attr') }}" data-target="#quick-telephone"><i class="fa fa-pencil"></i></button></td>
-            </tr>
-            {% if tax_number %}
-            <tr>
-              <td><button data-toggle="tooltip" title="{{ text_tax_number }}" class="btn btn-info btn-xs"><i class="fa fa-id-card-o fa-fw"></i></button></td>
-              <td id="quick-tax-number">{{ tax_number }}</td>
-              <td class="text-right"><button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="tax_number" data-title="{{ text_tax_number }}" data-value="{{ tax_number|e('html_attr') }}" data-target="#quick-tax-number"><i class="fa fa-pencil"></i></button></td>
-            </tr>
-            {% endif %}
-          </table>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-
-            <div class="panel-heading__icon"><i class="fa fa-cog"></i></div>
-
-            <div>
-
-              <h3 class="panel-title">{{ text_panel_order_tools }}</h3>
-
-              <div class="panel-heading__subtitle">{{ text_order_tools_subtitle }}</div>
-
-            </div>
-          </div>
-          <table class="table">
-            <tbody>
-              <tr>
-                <td>{{ text_invoice }}</td>
-                <td id="invoice" class="text-right">{{ invoice_no }}</td>
-                <td style="width: 1%;" class="text-center">{% if not invoice_no %}
-                    <button id="button-invoice" data-loading-text="{{ text_loading }}" data-toggle="tooltip" title="{{ button_generate }}" class="btn btn-success btn-xs"><i class="fa fa-cog"></i></button>
-                  {% else %}
-                    <button disabled="disabled" class="btn btn-success btn-xs"><i class="fa fa-refresh"></i></button>
-                  {% endif %}</td>
-              </tr>
-              <tr>
-                <td>{{ text_reward }}</td>
-                <td class="text-right">{{ reward }}</td>
-                <td class="text-center">{% if customer and reward %}
-                    {% if not reward_total %}
-                      <button id="button-reward-add" data-loading-text="{{ text_loading }}" data-toggle="tooltip" title="{{ button_reward_add }}" class="btn btn-success btn-xs"><i class="fa fa-plus-circle"></i></button>
-                    {% else %}
-                      <button id="button-reward-remove" data-loading-text="{{ text_loading }}" data-toggle="tooltip" title="{{ button_reward_remove }}" class="btn btn-danger btn-xs"><i class="fa fa-minus-circle"></i></button>
+              </thead>
+              <tbody id="inline-cart">
+                {% set inline_product_row = 0 %}
+                {% for product in products %}
+                <tr>
+                  <td class="text-left order-product-name">
+                    {% if product.thumb %}
+                    <a href="{{ product.href }}" class="order-product-thumb"><img src="{{ product.thumb }}" alt="{{ product.name|e('html_attr') }}" /></a>
                     {% endif %}
-                  {% else %}
-                    <button disabled="disabled" class="btn btn-success btn-xs"><i class="fa fa-plus-circle"></i></button>
-                  {% endif %}</td>
-              </tr>
-              <tr>
-                <td>{{ text_affiliate }}
-                  {% if affiliate %}
-                    (<a href="{{ affiliate }}">{{ affiliate_firstname }} {{ affiliate_lastname }}</a>)
-                  {% endif %}</td>
-                <td class="text-right">{{ commission }}</td>
-                <td class="text-center">{% if affiliate %}
-                    {% if not commission_total %}
-                      <button id="button-commission-add" data-loading-text="{{ text_loading }}" data-toggle="tooltip" title="{{ button_commission_add }}" class="btn btn-success btn-xs"><i class="fa fa-plus-circle"></i></button>
-                    {% else %}
-                      <button id="button-commission-remove" data-loading-text="{{ text_loading }}" data-toggle="tooltip" title="{{ button_commission_remove }}" class="btn btn-danger btn-xs"><i class="fa fa-minus-circle"></i></button>
+                    <a href="{{ product.href }}">{{ product.name }}</a>
+                    <input type="hidden" name="product[{{ inline_product_row }}][product_id]" value="{{ product.product_id }}" />
+                    {% for option in product.option %}
+                    <div class="order-product-option">- {{ option.name }}: {{ option.value }}</div>
+                    {% if option.type == 'select' or option.type == 'radio' or option.type == 'image' %}
+                    <input type="hidden" name="product[{{ inline_product_row }}][option][{{ option.product_option_id }}]" value="{{ option.product_option_value_id }}" />
                     {% endif %}
-                  {% else %}
-                    <button disabled="disabled" class="btn btn-success btn-xs"><i class="fa fa-plus-circle"></i></button>
-                  {% endif %}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    <div class="panel panel-default">
-      <div class="panel-heading">
-
-        <div class="panel-heading__icon"><i class="fa fa-info-circle"></i></div>
-
-        <div>
-
-          <h3 class="panel-title">{{ text_panel_order_contents }}</h3>
-
-          <div class="panel-heading__subtitle">{{ text_order_contents_subtitle }}</div>
-
-        </div>
-      </div>
-      <div class="panel-body">
-        <table class="table table-bordered">
-          <thead>
-            <tr>
-              <td style="width: 50%;" class="text-left">{{ text_payment_address }}</td>
-              <td style="width: 1%;" class="text-right"></td>
-              {% if shipping_method %}
-                <td style="width: 50%;" class="text-left">{{ text_shipping_address }}</td>
-                <td style="width: 1%;" class="text-right"></td>
-              {% endif %} </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="text-left" id="quick-payment-address">{{ payment_address }}</td>
-              <td class="text-right"><button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="payment_address" data-title="{{ text_payment_address }}" data-target="#quick-payment-address"><i class="fa fa-pencil"></i></button></td>
-              {% if shipping_method %}
-                <td class="text-left" id="quick-shipping-address">{{ shipping_address }}</td>
-                <td class="text-right"><button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="shipping_address" data-title="{{ text_shipping_address }}" data-target="#quick-shipping-address"><i class="fa fa-pencil"></i></button></td>
-              {% endif %} </tr>
-          </tbody>
-        </table>
-        <table class="table table-bordered">
-          <thead>
-            <tr>
-              <td class="text-left">{{ column_product }}</td>
-              <td class="text-left">{{ column_model }}</td>
-              <td class="text-right">{{ column_quantity }}</td>
-              <td class="text-right">{{ column_discount_percent }}</td>
-              <td class="text-right">{{ column_price }}</td>
-              <td class="text-right">{{ column_total }}</td>
-              <td class="text-right">{{ column_action }}</td>
-            </tr>
-          </thead>
-          <tbody id="inline-cart">
-            {% set inline_product_row = 0 %}
-            {% for product in products %}
-            <tr>
-              <td class="text-left">{% if product.thumb %}<a href="{{ product.href }}" class="inline-product-thumb"><img src="{{ product.thumb }}" alt="{{ product.name|e('html_attr') }}" class="img-thumbnail" style="width:40px;height:40px;object-fit:cover;margin-right:8px;vertical-align:middle;" /></a>{% endif %}<a href="{{ product.href }}">{{ product.name }}</a>
-                <input type="hidden" name="product[{{ inline_product_row }}][product_id]" value="{{ product.product_id }}" />
-                {% for option in product.option %}
-                <br />
-                <small>- {{ option.name }}: {{ option.value }}</small>
-
-                {% if option.type == 'select' or option.type == 'radio' or option.type == 'image' %}
-                <input type="hidden" name="product[{{ inline_product_row }}][option][{{ option.product_option_id }}]" value="{{ option.product_option_value_id }}" />
-                {% endif %}
-
-                {% if option.type == 'checkbox' %}
-                <input type="hidden" name="product[{{ inline_product_row }}][option][{{ option.product_option_id }}][]" value="{{ option.product_option_value_id }}" />
-                {% endif %}
-
-                {% if option.type == 'text' or option.type == 'textarea' or option.type == 'file' or option.type == 'date' or option.type == 'datetime' or option.type == 'time' %}
-                <input type="hidden" name="product[{{ inline_product_row }}][option][{{ option.product_option_id }}]" value="{{ (option.raw_value is defined ? option.raw_value : option.value)|e('html_attr') }}" />
-                {% endif %}
+                    {% if option.type == 'checkbox' %}
+                    <input type="hidden" name="product[{{ inline_product_row }}][option][{{ option.product_option_id }}][]" value="{{ option.product_option_value_id }}" />
+                    {% endif %}
+                    {% if option.type == 'text' or option.type == 'textarea' or option.type == 'file' or option.type == 'date' or option.type == 'datetime' or option.type == 'time' %}
+                    <input type="hidden" name="product[{{ inline_product_row }}][option][{{ option.product_option_id }}]" value="{{ (option.raw_value is defined ? option.raw_value : option.value)|e('html_attr') }}" />
+                    {% endif %}
+                    {% endfor %}
+                  </td>
+                  <td class="text-left">{{ product.model }}</td>
+                  <td class="text-right"><input type="text" name="product[{{ inline_product_row }}][quantity]" value="{{ product.quantity }}" class="order-product-input gt-no-translate" data-gt-inline-ignore="1" /></td>
+                  <td class="text-right"><input type="text" name="product[{{ inline_product_row }}][discount]" value="{{ product.discount_percent is defined ? product.discount_percent : 0 }}" class="order-product-input gt-no-translate" data-gt-inline-ignore="1" /></td>
+                  <td class="text-right">{{ product.price }}</td>
+                  <td class="text-right">{{ product.total }}</td>
+                  <td class="text-right"><button type="button" class="btn btn-danger btn-xs button-inline-remove-item"><i class="fa fa-trash"></i></button></td>
+                </tr>
+                {% set inline_product_row = inline_product_row + 1 %}
                 {% endfor %}
-              </td>
-              <td class="text-left">{{ product.model }}</td>
-              <td class="text-right" style="max-width: 120px;"><input type="text" name="product[{{ inline_product_row }}][quantity]" value="{{ product.quantity }}" class="form-control text-right gt-no-translate" data-gt-inline-ignore="1" /></td>
-              <td class="text-right" style="max-width: 100px;"><input type="text" name="product[{{ inline_product_row }}][discount]" value="{{ product.discount_percent is defined ? product.discount_percent : 0 }}" class="form-control text-right gt-no-translate" data-gt-inline-ignore="1" /></td>
-              <td class="text-right">{{ product.price }}</td>
-              <td class="text-right">{{ product.total }}</td>
-              <td class="text-right"><button type="button" class="btn btn-danger btn-xs button-inline-remove-item"><i class="fa fa-trash"></i></button></td>
-            </tr>
-            {% set inline_product_row = inline_product_row + 1 %}
-            {% endfor %}
-            {% if not products %}
-            <tr class="inline-cart-empty">
-              <td colspan="7" class="text-center">{{ text_no_results }}</td>
-            </tr>
-            {% endif %}
-          </tbody>
-          <tfoot id="inline-totals">
-            {% for total in totals %}
-            <tr>
-              <td colspan="6" class="text-right">{{ total.title }}</td>
-              <td class="text-right">{{ total.text }}</td>
-            </tr>
-            {% endfor %}
-          </tfoot>
-        </table>
-        <div class="row">
-          <div class="col-md-4">
-            <div class="form-group">
-              <label class="control-label" for="input-inline-product">{{ entry_product }}</label>
-              <input type="text" id="input-inline-product" class="form-control" placeholder="{{ entry_product }}" />
-              <input type="hidden" id="input-inline-product-id" value="" />
+                {% if not products %}
+                <tr class="inline-cart-empty">
+                  <td colspan="7" class="text-center">{{ text_no_results }}</td>
+                </tr>
+                {% endif %}
+              </tbody>
+              <tfoot id="inline-totals">
+                {% for total in totals %}
+                <tr>
+                  <td colspan="5" class="text-right">{{ total.title }}</td>
+                  <td class="text-right">{{ total.text }}</td>
+                  <td></td>
+                </tr>
+                {% endfor %}
+              </tfoot>
+            </table>
+            </div>
+
+            <div class="row">
+              <div class="col-sm-5">
+                <div class="form-group">
+                  <label class="control-label" for="input-inline-product">{{ entry_product }}</label>
+                  <input type="text" id="input-inline-product" class="form-control" placeholder="{{ entry_product }}" />
+                  <input type="hidden" id="input-inline-product-id" value="" />
+                </div>
+              </div>
+              <div class="col-sm-2">
+                <div class="form-group">
+                  <label class="control-label" for="input-inline-quantity">{{ entry_quantity }}</label>
+                  <input type="text" id="input-inline-quantity" value="1" class="form-control text-right gt-no-translate" data-gt-inline-ignore="1" />
+                </div>
+              </div>
+              <div class="col-sm-3">
+                <div class="form-group">
+                  <label class="control-label">&nbsp;</label>
+                  <button type="button" id="button-inline-add-product" class="btn btn-primary btn-block"><i class="fa fa-plus"></i> {{ button_product_add }}</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-sm-6">
+                <div class="form-group">
+                  <label class="control-label" for="input-inline-coupon">{{ entry_coupon }}</label>
+                  <div class="input-group">
+                    <input type="text" id="input-inline-coupon" value="" class="form-control" placeholder="{{ entry_coupon }}" />
+                    <span class="input-group-btn"><button type="button" id="button-inline-apply-coupon" class="btn btn-warning"><i class="fa fa-ticket"></i> {{ button_apply }}</button></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="text-right" style="padding-top:16px;border-top:1px solid #e5e7eb;margin-top:4px">
+              <button type="button" id="button-inline-save-items" data-loading-text="{{ text_loading }}" class="btn btn-success"><i class="fa fa-check-circle"></i> {{ button_save }}</button>
             </div>
           </div>
-          <div class="col-md-2">
-            <div class="form-group">
-              <label class="control-label" for="input-inline-quantity">{{ entry_quantity }}</label>
-              <input type="text" id="input-inline-quantity" value="1" class="form-control text-right gt-no-translate" data-gt-inline-ignore="1" />
+        </div>
+
+      </div>
+      <div class="col-md-4">
+        <div class="order-sidebar">
+
+          <div class="order-sidebar-card">
+            <div class="order-sidebar-card__header">
+              <div class="order-sidebar-card__icon order-sidebar-card__icon--blue"><i class="fa fa-user"></i></div>
+              <h3 class="order-sidebar-card__title">{{ text_panel_customer }}</h3>
+            </div>
+            <div class="order-sidebar-card__body">
+              <div class="order-sidebar-row">
+                <span class="order-sidebar-row__icon"><i class="fa fa-user"></i></span>
+                <span class="order-sidebar-row__label">{{ text_customer }}</span>
+                <span class="order-sidebar-row__value" id="quick-customer-name">{% if customer %}<a href="{{ customer }}" target="_blank">{{ firstname }} {{ lastname }}</a>{% else %}{{ firstname }} {{ lastname }}{% endif %}</span>
+                <span class="order-sidebar-row__actions"><button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="customer_name" data-title="{{ text_customer }}" data-firstname="{{ firstname|e('html_attr') }}" data-lastname="{{ lastname|e('html_attr') }}" data-target="#quick-customer-name"><i class="fa fa-pencil"></i></button></span>
+              </div>
+              <div class="order-sidebar-row">
+                <span class="order-sidebar-row__icon"><i class="fa fa-group"></i></span>
+                <span class="order-sidebar-row__label">{{ text_customer_group }}</span>
+                <span class="order-sidebar-row__value">{{ customer_group }}</span>
+              </div>
+              <div class="order-sidebar-row">
+                <span class="order-sidebar-row__icon"><i class="fa fa-envelope-o"></i></span>
+                <span class="order-sidebar-row__label">{{ text_email }}</span>
+                <span class="order-sidebar-row__value" id="quick-email"><a href="mailto:{{ email }}">{{ email }}</a></span>
+                <span class="order-sidebar-row__actions"><button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="email" data-title="{{ text_email }}" data-value="{{ email|e('html_attr') }}" data-target="#quick-email"><i class="fa fa-pencil"></i></button></span>
+              </div>
+              <div class="order-sidebar-row">
+                <span class="order-sidebar-row__icon"><i class="fa fa-phone"></i></span>
+                <span class="order-sidebar-row__label">{{ text_telephone }}</span>
+                <span class="order-sidebar-row__value" id="quick-telephone">{{ telephone }}</span>
+                <span class="order-sidebar-row__actions"><button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="telephone" data-title="{{ text_telephone }}" data-value="{{ telephone|e('html_attr') }}" data-target="#quick-telephone"><i class="fa fa-pencil"></i></button></span>
+              </div>
+              {% if tax_number %}
+              <div class="order-sidebar-row">
+                <span class="order-sidebar-row__icon"><i class="fa fa-id-card-o"></i></span>
+                <span class="order-sidebar-row__label">{{ text_tax_number }}</span>
+                <span class="order-sidebar-row__value" id="quick-tax-number">{{ tax_number }}</span>
+                <span class="order-sidebar-row__actions"><button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="tax_number" data-title="{{ text_tax_number }}" data-value="{{ tax_number|e('html_attr') }}" data-target="#quick-tax-number"><i class="fa fa-pencil"></i></button></span>
+              </div>
+              {% endif %}
             </div>
           </div>
-          <div class="col-md-2">
-            <div class="form-group">
-              <label class="control-label">&nbsp;</label>
-              <button type="button" id="button-inline-add-product" class="btn btn-primary btn-block"><i class="fa fa-plus"></i> {{ button_product_add }}</button>
+
+          <div class="order-sidebar-card">
+            <div class="order-sidebar-card__header">
+              <div class="order-sidebar-card__icon order-sidebar-card__icon--green"><i class="fa fa-credit-card"></i></div>
+              <h3 class="order-sidebar-card__title">{{ text_panel_order_info }}</h3>
             </div>
-          </div>
-          <div class="col-md-4">
-            <div class="form-group">
-              <label class="control-label" for="input-inline-coupon">{{ entry_coupon }}</label>
-              <div class="input-group">
-                <input type="text" id="input-inline-coupon" value="" class="form-control" placeholder="{{ entry_coupon }}" />
-                <span class="input-group-btn"><button type="button" id="button-inline-apply-coupon" class="btn btn-warning"><i class="fa fa-ticket"></i> {{ button_apply }}</button></span>
+            <div class="order-sidebar-card__body">
+              <div class="order-sidebar-row">
+                <span class="order-sidebar-row__icon"><i class="fa fa-shopping-cart"></i></span>
+                <span class="order-sidebar-row__label">{{ text_store }}</span>
+                <span class="order-sidebar-row__value"><a href="{{ store_url }}" target="_blank">{{ store_name }}</a></span>
+              </div>
+              <div class="order-sidebar-row">
+                <span class="order-sidebar-row__icon"><i class="fa fa-calendar"></i></span>
+                <span class="order-sidebar-row__label">{{ text_date_added }}</span>
+                <span class="order-sidebar-row__value">{{ date_added }}</span>
+              </div>
+              <div class="order-sidebar-row">
+                <span class="order-sidebar-row__icon"><i class="fa fa-credit-card"></i></span>
+                <span class="order-sidebar-row__label">{{ text_payment_method }}</span>
+                <span class="order-sidebar-row__value" id="quick-payment-method">{{ payment_method }}</span>
+                <span class="order-sidebar-row__actions"><button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="payment_method" data-title="{{ text_payment_method }}" data-value="{{ payment_method|e('html_attr') }}" data-code="{{ payment_code|e('html_attr') }}" data-target="#quick-payment-method"><i class="fa fa-pencil"></i></button></span>
+              </div>
+              {% if shipping_method %}
+              <div class="order-sidebar-row">
+                <span class="order-sidebar-row__icon"><i class="fa fa-truck"></i></span>
+                <span class="order-sidebar-row__label">{{ text_shipping_method }}</span>
+                <span class="order-sidebar-row__value" id="quick-shipping-method">{{ shipping_method }}</span>
+                <span class="order-sidebar-row__actions"><button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="shipping_method" data-title="{{ text_shipping_method }}" data-value="{{ shipping_method|e('html_attr') }}" data-code="{{ shipping_code|e('html_attr') }}" data-target="#quick-shipping-method"><i class="fa fa-pencil"></i></button></span>
+              </div>
+              {% endif %}
+              <div class="order-sidebar-row">
+                <span class="order-sidebar-row__icon"><i class="fa fa-map-marker"></i></span>
+                <span class="order-sidebar-row__label">{{ text_tracking_number }}</span>
+                <span class="order-sidebar-row__value" id="quick-tracking-number">{{ tracking_number }}</span>
+                <span class="order-sidebar-row__actions"><button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="tracking_number" data-title="{{ text_tracking_number }}" data-value="{{ tracking_number|e('html_attr') }}" data-target="#quick-tracking-number"><i class="fa fa-pencil"></i></button></span>
+              </div>
+              <div class="order-sidebar-row">
+                <span class="order-sidebar-row__icon"><i class="fa fa-comment"></i></span>
+                <span class="order-sidebar-row__label">{{ text_comment }}</span>
+                <span class="order-sidebar-row__value" id="quick-comment">{% if comment %}{{ comment|raw }}{% else %}<span class="text-muted">{{ text_none }}</span>{% endif %}</span>
+                <span class="order-sidebar-row__actions"><button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="comment" data-title="{{ entry_comment }}" data-value="{{ order_comment_raw|e('html_attr') }}" data-target="#quick-comment"><i class="fa fa-pencil"></i></button></span>
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="text-right">
-          <button type="button" id="button-inline-save-items" data-loading-text="{{ text_loading }}" class="btn btn-success"><i class="fa fa-check-circle"></i> {{ button_save }}</button>
+          <div class="order-sidebar-card">
+            <div class="order-sidebar-card__header">
+              <div class="order-sidebar-card__icon order-sidebar-card__icon--amber"><i class="fa fa-cog"></i></div>
+              <h3 class="order-sidebar-card__title">{{ text_panel_order_tools }}</h3>
+            </div>
+            <div class="order-sidebar-card__body">
+              <div class="order-sidebar-row">
+                <span class="order-sidebar-row__icon"><i class="fa fa-file-text-o"></i></span>
+                <span class="order-sidebar-row__label">{{ text_invoice }}</span>
+                <span class="order-sidebar-row__value" id="invoice">{{ invoice_no }}</span>
+                <span class="order-sidebar-row__actions">
+                  {% if not invoice_no %}
+                  <button id="button-invoice" data-loading-text="{{ text_loading }}" data-toggle="tooltip" title="{{ button_generate }}" class="btn btn-success btn-xs"><i class="fa fa-cog"></i></button>
+                  {% else %}
+                  <button disabled="disabled" class="btn btn-success btn-xs"><i class="fa fa-refresh"></i></button>
+                  {% endif %}
+                </span>
+              </div>
+              <div class="order-sidebar-row">
+                <span class="order-sidebar-row__icon"><i class="fa fa-star"></i></span>
+                <span class="order-sidebar-row__label">{{ text_reward }}</span>
+                <span class="order-sidebar-row__value">{{ reward }}</span>
+                <span class="order-sidebar-row__actions">
+                  {% if customer and reward %}
+                    {% if not reward_total %}
+                    <button id="button-reward-add" data-loading-text="{{ text_loading }}" data-toggle="tooltip" title="{{ button_reward_add }}" class="btn btn-success btn-xs"><i class="fa fa-plus-circle"></i></button>
+                    {% else %}
+                    <button id="button-reward-remove" data-loading-text="{{ text_loading }}" data-toggle="tooltip" title="{{ button_reward_remove }}" class="btn btn-danger btn-xs"><i class="fa fa-minus-circle"></i></button>
+                    {% endif %}
+                  {% else %}
+                  <button disabled="disabled" class="btn btn-success btn-xs"><i class="fa fa-plus-circle"></i></button>
+                  {% endif %}
+                </span>
+              </div>
+              <div class="order-sidebar-row">
+                <span class="order-sidebar-row__icon"><i class="fa fa-users"></i></span>
+                <span class="order-sidebar-row__label">{{ text_affiliate }}</span>
+                <span class="order-sidebar-row__value">{{ commission }}{% if affiliate %} ({{ affiliate_firstname }} {{ affiliate_lastname }}){% endif %}</span>
+                <span class="order-sidebar-row__actions">
+                  {% if affiliate %}
+                    {% if not commission_total %}
+                    <button id="button-commission-add" data-loading-text="{{ text_loading }}" data-toggle="tooltip" title="{{ button_commission_add }}" class="btn btn-success btn-xs"><i class="fa fa-plus-circle"></i></button>
+                    {% else %}
+                    <button id="button-commission-remove" data-loading-text="{{ text_loading }}" data-toggle="tooltip" title="{{ button_commission_remove }}" class="btn btn-danger btn-xs"><i class="fa fa-minus-circle"></i></button>
+                    {% endif %}
+                  {% else %}
+                  <button disabled="disabled" class="btn btn-success btn-xs"><i class="fa fa-plus-circle"></i></button>
+                  {% endif %}
+                </span>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
-    <div class="panel panel-default">
+    <div class="panel panel-default" style="margin-top:20px">
       <div class="panel-heading">
   <div class="panel-heading__icon"><i class="fa fa-comment-o"></i></div>
   <div>
@@ -311,8 +301,8 @@
 </div>
       <div class="panel-body">
         <ul class="nav nav-tabs">
-          <li class="active"><a href="#tab-history" data-toggle="tab">{{ tab_history }}</a></li>
-          <li><a href="#tab-additional" data-toggle="tab">{{ tab_additional }}</a></li>
+          <li class="active"><a href="#tab-history" data-toggle="tab"><i class="fa fa-history"></i> {{ tab_history }}</a></li>
+          <li><a href="#tab-additional" data-toggle="tab"><i class="fa fa-plus-circle"></i> {{ tab_additional }}</a></li>
           {% for tab in tabs %}
             <li><a href="#tab-{{ tab.code }}" data-toggle="tab">{{ tab.title }}</a></li>
           {% endfor %}
@@ -1124,16 +1114,16 @@
         var productThumb = '';
 
         if (product['thumb']) {
-          productThumb = '<a href="' + productHref + '" class="inline-product-thumb"><img src="' + product['thumb'] + '" alt="" class="img-thumbnail" style="width:40px;height:40px;object-fit:cover;margin-right:8px;vertical-align:middle;" /></a>';
+          productThumb = '<a href="' + productHref + '" class="order-product-thumb"><img src="' + product['thumb'] + '" alt="" /></a>';
         }
 
         productsHtml += '<tr>';
-        productsHtml += '  <td class="text-left">' + productThumb + '<a href="' + productHref + '">' + product['name'] + '</a><input type="hidden" name="product[' + i + '][product_id]" value="' + product['product_id'] + '" />';
+        productsHtml += '  <td class="text-left order-product-name">' + productThumb + '<a href="' + productHref + '">' + product['name'] + '</a><input type="hidden" name="product[' + i + '][product_id]" value="' + product['product_id'] + '" />';
 
         if (product['option']) {
           for (var j = 0; j < product['option'].length; j++) {
             var option = product['option'][j];
-            productsHtml += '<br /><small>- ' + option['name'] + ': ' + option['value'] + '</small>';
+            productsHtml += '<div class="order-product-option">- ' + option['name'] + ': ' + option['value'] + '</div>';
 
             if (option['type'] == 'select' || option['type'] == 'radio' || option['type'] == 'image') {
               productsHtml += '<input type="hidden" name="product[' + i + '][option][' + option['product_option_id'] + ']" value="' + option['product_option_value_id'] + '" />';
@@ -1151,8 +1141,8 @@
 
         productsHtml += '  </td>';
         productsHtml += '  <td class="text-left">' + product['model'] + '</td>';
-        productsHtml += '  <td class="text-right" style="max-width: 120px;"><input type="text" name="product[' + i + '][quantity]" value="' + product['quantity'] + '" class="form-control text-right gt-no-translate" data-gt-inline-ignore="1" /></td>';
-        productsHtml += '  <td class="text-right" style="max-width: 100px;"><input type="text" name="product[' + i + '][discount]" value="' + (discounts[i] !== undefined ? discounts[i] : 0) + '" class="form-control text-right gt-no-translate" data-gt-inline-ignore="1" /></td>';
+        productsHtml += '  <td class="text-right"><input type="text" name="product[' + i + '][quantity]" value="' + product['quantity'] + '" class="order-product-input gt-no-translate" data-gt-inline-ignore="1" /></td>';
+        productsHtml += '  <td class="text-right"><input type="text" name="product[' + i + '][discount]" value="' + (discounts[i] !== undefined ? discounts[i] : 0) + '" class="order-product-input gt-no-translate" data-gt-inline-ignore="1" /></td>';
         productsHtml += '  <td class="text-right">' + product['price'] + '</td>';
         productsHtml += '  <td class="text-right">' + product['total'] + '</td>';
         productsHtml += '  <td class="text-right"><button type="button" class="btn btn-danger btn-xs button-inline-remove-item"><i class="fa fa-trash"></i></button></td>';
@@ -1186,7 +1176,7 @@
 
     if (json['totals'] && json['totals'].length) {
       for (var t = 0; t < json['totals'].length; t++) {
-        totalsHtml += '<tr><td colspan="6" class="text-right">' + json['totals'][t]['title'] + '</td><td class="text-right">' + json['totals'][t]['text'] + '</td></tr>';
+        totalsHtml += '<tr><td colspan="5" class="text-right">' + json['totals'][t]['title'] + '</td><td class="text-right">' + json['totals'][t]['text'] + '</td><td></td></tr>';
       }
     }
 

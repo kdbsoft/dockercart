@@ -88,6 +88,7 @@ class ControllerExtensionDashboardRecent extends Controller {
 
 		$data['text_recent_subtitle'] = $this->language->get('text_recent_subtitle');
 		$data['user_token'] = $this->session->data['user_token'];
+		$data['orders_link'] = $this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'], true);
 
 		// Last 5 Orders
 		$data['orders'] = array();
@@ -109,12 +110,20 @@ class ControllerExtensionDashboardRecent extends Controller {
 
 		foreach ($results as $result) {
 			$order_type = $this->getOrderType($result);
+			$order_type_badge_class = $this->getOrderTypeBadgeClass($result);
+			$customer_type = $this->getCustomerType($result);
+			$customer_type_badge_class = $this->getCustomerTypeBadgeClass($result);
+			$is_oneclick = !empty($result['payment_code']) && $result['payment_code'] === 'oneclickcheckout';
 			$status_badge_class = $this->getOrderStatusBadgeClass((int)$result['order_status_id'], $processing_statuses, $complete_statuses, $fraud_status);
 
 			$data['orders'][] = array(
 				'order_id'   => $result['order_id'],
 				'customer'   => $result['customer'],
+				'customer_type' => $customer_type,
+				'customer_type_badge_class' => $customer_type_badge_class,
+				'is_oneclick' => $is_oneclick,
 				'order_type' => $order_type,
+				'order_type_badge_class' => $order_type_badge_class,
 				'status'     => $result['order_status'],
 				'order_status_badge_class' => $status_badge_class,
 				'date_added' => date($this->language->get('datetime_format'), strtotime($result['date_added'])),
@@ -136,6 +145,34 @@ class ControllerExtensionDashboardRecent extends Controller {
 		}
 
 		return $this->language->get('text_badge_guest_order');
+	}
+
+	private function getOrderTypeBadgeClass($order) {
+		if (!empty($order['payment_code']) && $order['payment_code'] === 'oneclickcheckout') {
+			return 'label label-info';
+		}
+
+		if (!empty($order['customer_id'])) {
+			return 'label label-primary';
+		}
+
+		return 'label label-default';
+	}
+
+	private function getCustomerType($order) {
+		if (!empty($order['customer_id'])) {
+			return $this->language->get('text_badge_registered');
+		}
+
+		return $this->language->get('text_badge_guest');
+	}
+
+	private function getCustomerTypeBadgeClass($order) {
+		if (!empty($order['customer_id'])) {
+			return 'label label-primary';
+		}
+
+		return 'label label-default';
 	}
 
 	private function getOrderStatusBadgeClass($order_status_id, $processing_statuses, $complete_statuses, $fraud_status) {

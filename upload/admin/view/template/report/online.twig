@@ -3,7 +3,6 @@
   <div class="page-header">
     <div class="container-fluid">
       <div class="pull-right">
-        <button type="button" data-toggle="tooltip" title="{{ button_filter }}" onclick="$('#filter-online').toggleClass('hidden-sm hidden-xs');" class="btn btn-default hidden-md hidden-lg"><i class="fa fa-filter"></i></button>
         <a href="{{ refresh }}" data-toggle="tooltip" title="{{ button_refresh }}" class="btn btn-default"><i class="fa fa-refresh"></i></a></div>
       <h1>{{ heading_title }}</h1>
       <ul class="breadcrumb">
@@ -14,32 +13,25 @@
     </div>
   </div>
   <div class="container-fluid">
-    <div class="row">
-      <div id="filter-online" class="col-md-3 col-md-push-9 col-sm-12 hidden-sm hidden-xs">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-  <div class="panel-heading__icon"><i class="fa fa-filter"></i></div>
-  <div>
-    <h3 class="panel-title">{{ text_filter }}</h3>
-    <div class="panel-heading__subtitle">{{ text_filter_subtitle }}</div>
-  </div>
-</div>
-          <div class="panel-body">
-            <div class="form-group">
-              <label class="control-label" for="input-ip">{{ entry_ip }}</label>
-              <input type="text" name="filter_ip" value="{{ filter_ip }}" id="input-ip" placeholder="{{ entry_ip }}" i class="form-control" />
-            </div>
-            <div class="form-group">
-              <label class="control-label" for="input-customer">{{ entry_customer }}</label>
-              <input type="text" name="filter_customer" value="{{ filter_customer }}" placeholder="{{ entry_customer }}" id="input-customer" class="form-control" />
-            </div>
-            <div class="form-group text-right">
-              <button type="button" id="button-filter" class="btn btn-default"><i class="fa fa-filter"></i> {{ button_filter }}</button>
-            </div>
+    <div id="filter-online" class="filter-bar">
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <div class="filter-field">
+            <label for="input-ip">{{ entry_ip }}</label>
+            <input type="text" name="filter_ip" value="{{ filter_ip }}" id="input-ip" placeholder="{{ entry_ip }}" class="form-control" />
+          </div>
+          <div class="filter-field">
+            <label for="input-customer">{{ entry_customer }}</label>
+            <input type="text" name="filter_customer" value="{{ filter_customer }}" placeholder="{{ entry_customer }}" id="input-customer" class="form-control" />
+          </div>
+          <div class="filter-actions">
+            <button type="button" id="button-filter" class="btn btn-default"><i class="fa fa-filter"></i> {{ button_filter }}</button>
           </div>
         </div>
       </div>
-      <div class="col-md-9 col-md-pull-3 col-sm-12">
+    </div>
+    <div class="row">
+      <div class="col-md-12">
         <div class="panel panel-default">
           <div class="panel-heading">
   <div class="panel-heading__icon"><i class="fa fa-list"></i></div>
