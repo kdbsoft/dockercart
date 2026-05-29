@@ -22,7 +22,6 @@ $_['text_design'] = 'Дизайн';
 $_['text_download'] = 'Загрузки';
 $_['text_event'] = 'События';
 $_['text_extension'] = 'Расширения';
-$_['text_filter'] = 'Фильтры';
 $_['text_geo_zone'] = 'Геозоны';
 $_['text_information'] = 'Информация';
 $_['text_installer'] = 'Установщик';

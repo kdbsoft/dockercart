@@ -100,19 +100,6 @@
                 </div>
               </div>
               <div class="form-group">
-                <label class="col-sm-2 control-label" for="input-bottom"><span data-toggle="tooltip" title="{{ help_bottom }}">{{ entry_bottom }}</span></label>
-                <div class="col-sm-10">
-                  <div class="checkbox">
-                    <label>{% if bottom %}
-                      <input type="checkbox" name="bottom" value="1" checked="checked" id="input-bottom" />
-                      {% else %}
-                      <input type="checkbox" name="bottom" value="1" id="input-bottom" />
-                      {% endif %}
-                      &nbsp;</label>
-                  </div>
-                </div>
-              </div>
-              <div class="form-group">
                 <label class="col-sm-2 control-label" for="input-top"><span data-toggle="tooltip" title="{{ help_top }}">{{ entry_top }}</span></label>
                 <div class="col-sm-10">
                   <div class="checkbox">
@@ -120,6 +107,19 @@
                       <input type="checkbox" name="top" value="1" checked="checked" id="input-top" />
                       {% else %}
                       <input type="checkbox" name="top" value="1" id="input-top" />
+                      {% endif %}
+                      &nbsp;</label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-bottom"><span data-toggle="tooltip" title="{{ help_bottom }}">{{ entry_bottom }}</span></label>
+                <div class="col-sm-10">
+                  <div class="checkbox">
+                    <label>{% if bottom %}
+                      <input type="checkbox" name="bottom" value="1" checked="checked" id="input-bottom" />
+                      {% else %}
+                      <input type="checkbox" name="bottom" value="1" id="input-bottom" />
                       {% endif %}
                       &nbsp;</label>
                   </div>
@@ -179,7 +179,7 @@
                       </div>
                       {% if error_keyword[store.store_id][language.language_id] %}
                       <div class="text-danger">{{ error_keyword[store.store_id][language.language_id] }}</div>
-                      {% endif %} 
+                      {% endif %}
                       {% endfor %}</td>
                   </tr>
                   {% endfor %}
@@ -197,7 +197,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                  
+
                   {% for store in stores %}
                   <tr>
                     <td class="text-left">{{ store.name }}</td>
@@ -214,7 +214,7 @@
                   </tr>
                   {% endfor %}
                     </tbody>
-                  
+
                 </table>
               </div>
             </div>
@@ -225,14 +225,14 @@
   </div>
   <link href="view/javascript/codemirror/lib/codemirror.css" rel="stylesheet" />
   <link href="view/javascript/codemirror/theme/monokai.css" rel="stylesheet" />
-  <script type="text/javascript" src="view/javascript/codemirror/lib/codemirror.js"></script> 
-  <script type="text/javascript" src="view/javascript/codemirror/lib/xml.js"></script> 
-  <script type="text/javascript" src="view/javascript/codemirror/lib/formatting.js"></script> 
+  <script type="text/javascript" src="view/javascript/codemirror/lib/codemirror.js"></script>
+  <script type="text/javascript" src="view/javascript/codemirror/lib/xml.js"></script>
+  <script type="text/javascript" src="view/javascript/codemirror/lib/formatting.js"></script>
   <script type="text/javascript" src="view/javascript/summernote/summernote.min.js"></script>
   <link href="view/javascript/summernote/summernote.min.css" rel="stylesheet" />
-  <script type="text/javascript" src="view/javascript/summernote/summernote-image-attributes.js"></script> 
-  <script type="text/javascript" src="view/javascript/summernote/opencart.js"></script> 
+  <script type="text/javascript" src="view/javascript/summernote/summernote-image-attributes.js"></script>
+  <script type="text/javascript" src="view/javascript/summernote/opencart.js"></script>
   <script type="text/javascript"><!--
 $('#language a:first').tab('show');
 //--></script></div>
-{{ footer }} 
+{{ footer }}

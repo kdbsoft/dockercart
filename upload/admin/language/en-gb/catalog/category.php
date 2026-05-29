@@ -39,7 +39,6 @@ $_['entry_meta_description'] = 'Meta Tag Description';
 $_['entry_store']            = 'Stores';
 $_['entry_keyword']          = 'Keyword';
 $_['entry_parent']           = 'Parent';
-$_['entry_filter']           = 'Filters';
 $_['entry_image']            = 'Image';
 $_['entry_background_image'] = 'Background Image';
 $_['entry_top']              = 'Top';
@@ -49,7 +48,6 @@ $_['entry_status']           = 'Status';
 $_['entry_layout']           = 'Layout Override';
 
 // Help
-$_['help_filter']            = '(Autocomplete)';
 $_['help_top']               = 'Display in the top menu bar. Only works for the top parent categories.';
 $_['help_column']            = 'Number of columns to use for the bottom 3 categories. Only works for the top parent categories.';
 

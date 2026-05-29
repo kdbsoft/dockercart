@@ -455,17 +455,7 @@
                     {% endfor %}</div>
                 </div>
               </div>
-              <div class="form-group">
-                <label class="col-sm-2 control-label" for="input-filter"><span data-toggle="tooltip" title="{{ help_filter }}">{{ entry_filter }}</span></label>
-                <div class="col-sm-10">
-                  <input type="text" name="filter" value="" placeholder="{{ entry_filter }}" id="input-filter" class="form-control"/>
-                  <div id="product-filter" class="well well-sm" style="height: 150px; overflow: auto;"> {% for product_filter in product_filters %}
-                      <div id="product-filter{{ product_filter.filter_id }}"><i class="fa fa-minus-circle"></i> {{ product_filter.name }}
-                        <input type="hidden" name="product_filter[]" value="{{ product_filter.filter_id }}"/>
-                      </div>
-                    {% endfor %}</div>
-                </div>
-              </div>
+
               <div class="form-group">
                 <label class="col-sm-2 control-label">{{ entry_store }}</label>
                 <div class="col-sm-10">
@@ -1223,35 +1213,6 @@
   });
 
   $('#product-category').delegate('.fa-minus-circle', 'click', function() {
-	  $(this).parent().remove();
-  });
-
-  // Filter
-  $('input[name=\'filter\']').autocomplete({
-	  'source': function(request, response) {
-		  $.ajax({
-			  url: 'index.php?route=catalog/filter/autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
-			  dataType: 'json',
-			  success: function(json) {
-				  response($.map(json, function(item) {
-					  return {
-						  label: item['name'],
-						  value: item['filter_id']
-					  }
-				  }));
-			  }
-		  });
-	  },
-	  'select': function(item) {
-		  $('input[name=\'filter\']').val('');
-
-		  $('#product-filter' + item['value']).remove();
-
-		  $('#product-filter').append('<div id="product-filter' + item['value'] + '"><i class="fa fa-minus-circle"></i> ' + item['label'] + '<input type="hidden" name="product_filter[]" value="' + item['value'] + '" /></div>');
-	  }
-  });
-
-  $('#product-filter').delegate('.fa-minus-circle', 'click', function() {
 	  $(this).parent().remove();
   });
 

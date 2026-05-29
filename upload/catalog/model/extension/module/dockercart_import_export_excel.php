@@ -1175,7 +1175,6 @@ class ModelExtensionModuleDockercartImportExportExcel extends Model {
         $this->deleteByProductIds(DB_PREFIX . 'product_attribute', $ids);
         $this->deleteByProductIds(DB_PREFIX . 'product_description', $ids);
         $this->deleteByProductIds(DB_PREFIX . 'product_discount', $ids);
-        $this->deleteByProductIds(DB_PREFIX . 'product_filter', $ids);
         $this->deleteByProductIds(DB_PREFIX . 'product_image', $ids);
         $this->deleteByProductIds(DB_PREFIX . 'product_option', $ids);
         $this->deleteByProductIds(DB_PREFIX . 'product_option_value', $ids);

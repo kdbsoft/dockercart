@@ -22,7 +22,6 @@ $_['text_download']             = 'Downloads';
 $_['text_log']                  = 'Error Logs';
 $_['text_event']                = 'Events';
 $_['text_extension']            = 'Extensions';
-$_['text_filter']               = 'Filters';
 $_['text_geo_zone']             = 'Geo Zones';
 $_['text_information']          = 'Information';
 $_['text_installer']            = 'Installer';
