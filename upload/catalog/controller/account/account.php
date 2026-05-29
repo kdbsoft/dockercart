@@ -59,15 +59,11 @@ class ControllerAccountAccount extends Controller {
 		$data['download'] = $data['account_download_status'] ? $this->url->link('account/download', '', true) : '';
 		
 		if ($this->config->get('total_reward_status')) {
-			$data['reward'] = $this->url->link('account/reward', '', true);
-		} else {
-			$data['reward'] = '';
-		}		
-		
+		$data['reward'] = $this->url->link('account/reward', '', true);
 		$data['return'] = $this->url->link('account/return', '', true);
 		$data['transaction'] = $this->url->link('account/transaction', '', true);
 		$data['newsletter'] = $this->url->link('account/newsletter', '', true);
-		$data['recurring'] = $this->url->link('account/recurring', '', true);
+		}
 
 		$data['affiliate_status'] = (int)$this->config->get('config_affiliate_status');
 

@@ -32,25 +32,6 @@ class ModelExtensionPaymentSagepayServer extends Model {
 			) ENGINE=MyISAM DEFAULT COLLATE=utf8_general_ci;");
 
 		$this->db->query("
-			CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "sagepay_server_order_recurring` (
-			  `sagepay_server_order_recurring_id` INT(11) NOT NULL AUTO_INCREMENT,
-			  `order_id` INT(11) NOT NULL,
-			  `order_recurring_id` INT(11) NOT NULL,
-			  `VPSTxId` VARCHAR(50),
-			  `VendorTxCode` VARCHAR(50) NOT NULL,
-			  `SecurityKey` CHAR(50) NOT NULL,
-			  `TxAuthNo` INT(50),
-			  `date_added` DATETIME NOT NULL,
-			  `date_modified` DATETIME NOT NULL,
-			  `next_payment` DATETIME NOT NULL,
-			  `trial_end` datetime DEFAULT NULL,
-			  `subscription_end` datetime DEFAULT NULL,
-			  `currency_code` CHAR(3) NOT NULL,
-			  `total` DECIMAL( 10, 2 ) NOT NULL,
-			  PRIMARY KEY (`sagepay_server_order_recurring_id`)
-			) ENGINE=MyISAM DEFAULT COLLATE=utf8_general_ci;");
-
-		$this->db->query("
 			CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "sagepay_server_card` (
 			  `card_id` INT(11) NOT NULL AUTO_INCREMENT,
 			  `customer_id` INT(11) NOT NULL,
@@ -66,7 +47,6 @@ class ModelExtensionPaymentSagepayServer extends Model {
 	public function uninstall() {
 		$this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "sagepay_server_order`;");
 		$this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "sagepay_server_order_transaction`;");
-		$this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "sagepay_server_order_recurring`;");
 		$this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "sagepay_server_card`;");
 	}
 

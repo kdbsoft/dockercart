@@ -2552,8 +2552,6 @@ class ControllerCheckoutDockercartCheckout extends Controller
 
         $results = $this->model_setting_extension->getExtensions("payment");
 
-        $recurring = $this->cart->hasRecurringProducts();
-
         // Debug: log payment address and cart total when debug enabled
         try {
             $addr = isset($this->session->data["payment_address"])
@@ -2590,7 +2588,7 @@ class ControllerCheckoutDockercartCheckout extends Controller
                     isset($this->session->data["payment_address"])
                         ? $this->session->data["payment_address"]
                         : [],
-                    $recurring ? 0 : $this->cart->getTotal(),
+                    $this->cart->getTotal(),
                 );
 
                 if ($method) {
@@ -2611,27 +2609,8 @@ class ControllerCheckoutDockercartCheckout extends Controller
                         continue;
                     }
 
-                    if ($recurring) {
-                        if (
-                            property_exists(
-                                $this->{"model_extension_payment_" .
-                                    $result["code"]},
-                                "recurringPayments",
-                            ) &&
-                            $this->{"model_extension_payment_" .
-                                $result["code"]}->recurringPayments()
-                        ) {
-                            foreach (
-                                $normalized_methods
-                                as $code => $method_item
-                            ) {
-                                $method_data[$code] = $method_item;
-                            }
-                        }
-                    } else {
-                        foreach ($normalized_methods as $code => $method_item) {
-                            $method_data[$code] = $method_item;
-                        }
+                    foreach ($normalized_methods as $code => $method_item) {
+                        $method_data[$code] = $method_item;
                     }
                 } else {
                     // Add extra diagnostics for common built-in methods

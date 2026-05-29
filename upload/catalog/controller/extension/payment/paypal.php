@@ -856,29 +856,9 @@ class ControllerExtensionPaymentPayPal extends Controller {
 						}
 					}
 				
-					if (isset($product['recurring_id'])) {
-						$recurring_id = $product['recurring_id'];
-					} else {
-						$recurring_id = 0;
-					}
-
-					$recurrings = $this->model_catalog_product->getProfiles($product_info['product_id']);
-
-					if ($recurrings) {
-						$recurring_ids = array();
-
-						foreach ($recurrings as $recurring) {
-							$recurring_ids[] = $recurring['recurring_id'];
-						}
-
-						if (!in_array($recurring_id, $recurring_ids)) {
-							$errors[] = $this->language->get('error_recurring_required');
-						}
-					}
-					
 					if (!$errors) {					
-						if (!$this->model_extension_payment_paypal->hasProductInCart($product_id, $option, $recurring_id)) {
-							$this->cart->add($product_id, $quantity, $option, $recurring_id);
+						if (!$this->model_extension_payment_paypal->hasProductInCart($product_id, $option)) {
+							$this->cart->add($product_id, $quantity, $option);
 						}
 																
 						// Unset all shipping and payment methods
@@ -1109,7 +1089,7 @@ class ControllerExtensionPaymentPayPal extends Controller {
 	
 				$paypal_order_info['application_context']['shipping_preference'] = $shipping_preference;
 				
-				if ($setting['general']['vault_status'] && ($this->customer->isLogged() || $this->cart->hasRecurringProducts())) {
+				if ($setting['general']['vault_status'] && ($this->customer->isLogged())) {
 					if ($payment_method == 'paypal') {
 						$paypal_customer_token = array();
 						
@@ -1140,16 +1120,11 @@ class ControllerExtensionPaymentPayPal extends Controller {
 								$paypal_order_info['payment_source'][$payment_method]['stored_credential']['usage'] = 'SUBSEQUENT';
 							}
 						} else {
-							if (!empty($this->request->post['card_save']) || $this->cart->hasRecurringProducts()) {
+							if (!empty($this->request->post['card_save'])) {
 								$paypal_order_info['payment_source'][$payment_method]['attributes']['vault']['store_in_vault'] = 'ON_SUCCESS';								
 								$paypal_order_info['payment_source'][$payment_method]['stored_credential']['payment_initiator'] = 'CUSTOMER';
 								$paypal_order_info['payment_source'][$payment_method]['stored_credential']['usage'] = 'FIRST';
-								
-								if ($this->cart->hasRecurringProducts()) {
-									$paypal_order_info['payment_source'][$payment_method]['stored_credential']['payment_type'] = 'UNSCHEDULED';
-								} else {
-									$paypal_order_info['payment_source'][$payment_method]['stored_credential']['payment_type'] = 'ONE_TIME';
-								}
+								$paypal_order_info['payment_source'][$payment_method]['stored_credential']['payment_type'] = 'ONE_TIME';
 							}
 						}
 					}
@@ -1376,14 +1351,6 @@ class ControllerExtensionPaymentPayPal extends Controller {
 										$this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $order_status_id, $message);
 									}
 								
-									if (($authorization_status == 'CREATED') || ($authorization_status == 'PENDING')) {
-										$recurring_products = $this->cart->getRecurringProducts();
-					
-										foreach ($recurring_products as $recurring_product) {
-											$this->model_extension_payment_paypal->recurringPayment($recurring_product, $order_info, $paypal_order_data);
-										} 
-									}
-													
 									if (($authorization_status == 'CREATED') || ($authorization_status == 'PARTIALLY_CAPTURED') || ($authorization_status == 'PARTIALLY_CREATED') || ($authorization_status == 'PENDING')) {
 										$data['url'] = $this->url->link('checkout/success', '', true);
 									}
@@ -1475,15 +1442,7 @@ class ControllerExtensionPaymentPayPal extends Controller {
 								
 										$this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $order_status_id, $message);
 									}
-								
-									if (($capture_status == 'COMPLETED') || ($capture_status == 'PENDING')) {
-										$recurring_products = $this->cart->getRecurringProducts();
-					
-										foreach ($recurring_products as $recurring_product) {
-											$this->model_extension_payment_paypal->recurringPayment($recurring_product, $order_info, $paypal_order_data);
-										} 
-									}
-						
+
 									if (($capture_status == 'COMPLETED') || ($capture_status == 'PENDING')) {
 										$data['url'] = $this->url->link('checkout/success', '', true);
 									}
@@ -1546,7 +1505,7 @@ class ControllerExtensionPaymentPayPal extends Controller {
 				}
 
 				// if user not logged in check that the guest checkout is allowed
-				if (!$this->customer->isLogged() && (!$this->config->get('config_checkout_guest') || $this->config->get('config_customer_price') || $this->cart->hasDownload() || $this->cart->hasRecurringProducts())) {
+				if (!$this->customer->isLogged() && (!$this->config->get('config_checkout_guest') || $this->config->get('config_customer_price') || $this->cart->hasDownload())) {
 					$data['url'] = $this->url->link('checkout/cart', '', true);
 			
 					$this->response->addHeader('Content-Type: application/json');
@@ -2089,15 +2048,7 @@ class ControllerExtensionPaymentPayPal extends Controller {
 									$this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $order_status_id, $message);
 								}
 								
-								if (($authorization_status == 'CREATED') || ($authorization_status == 'PENDING')) {
-									$recurring_products = $this->cart->getRecurringProducts();
-					
-									foreach ($recurring_products as $recurring_product) {
-										$this->model_extension_payment_paypal->recurringPayment($recurring_product, $order_info, $paypal_order_data);
-									} 
-								}
-													
-								if (($authorization_status == 'CREATED') || ($authorization_status == 'PARTIALLY_CAPTURED') || ($authorization_status == 'PARTIALLY_CREATED') || ($authorization_status == 'PENDING')) {
+									if (($authorization_status == 'CREATED') || ($authorization_status == 'PARTIALLY_CAPTURED') || ($authorization_status == 'PARTIALLY_CREATED') || ($authorization_status == 'PENDING')) {
 									$data['url'] = $this->url->link('checkout/success', '', true);
 								}
 							}
@@ -2215,17 +2166,9 @@ class ControllerExtensionPaymentPayPal extends Controller {
 									$message = sprintf($this->language->get('text_order_message'), $seller_protection_status);
 								
 									$this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $order_status_id, $message);
-								}
-								
-								if (($capture_status == 'COMPLETED') || ($capture_status == 'PENDING')) {
-									$recurring_products = $this->cart->getRecurringProducts();
-					
-									foreach ($recurring_products as $recurring_product) {
-										$this->model_extension_payment_paypal->recurringPayment($recurring_product, $order_info, $paypal_order_data);
-									} 
-								}
-						
-								if (($capture_status == 'COMPLETED') || ($capture_status == 'PENDING')) {
+									}
+
+									if (($capture_status == 'COMPLETED') || ($capture_status == 'PENDING')) {
 									$data['url'] = $this->url->link('checkout/success', '', true);
 								}
 							}
@@ -2394,28 +2337,6 @@ class ControllerExtensionPaymentPayPal extends Controller {
 				$price = false;
 				$total = false;
 			}
-			
-			$recurring = '';
-
-			if ($product['recurring']) {
-				$frequencies = array(
-					'day'        => $this->language->get('text_day'),
-					'week'       => $this->language->get('text_week'),
-					'semi_month' => $this->language->get('text_semi_month'),
-					'month'      => $this->language->get('text_month'),
-					'year'       => $this->language->get('text_year'),
-				);
-
-				if ($product['recurring']['trial']) {
-					$recurring = sprintf($this->language->get('text_trial_description'), $this->currency->format($this->tax->calculate($product['recurring']['trial_price'] * $product['quantity'], $product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']), $product['recurring']['trial_cycle'], $frequencies[$product['recurring']['trial_frequency']], $product['recurring']['trial_duration']) . ' ';
-				}
-
-				if ($product['recurring']['duration']) {
-					$recurring .= sprintf($this->language->get('text_payment_description'), $this->currency->format($this->tax->calculate($product['recurring']['price'] * $product['quantity'], $product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']), $product['recurring']['cycle'], $frequencies[$product['recurring']['frequency']], $product['recurring']['duration']);
-				} else {
-					$recurring .= sprintf($this->language->get('text_payment_cancel'), $this->currency->format($this->tax->calculate($product['recurring']['price'] * $product['quantity'], $product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']), $product['recurring']['cycle'], $frequencies[$product['recurring']['frequency']], $product['recurring']['duration']);
-				}
-			}
 
 			$data['products'][] = array(
 				'cart_id'               => $product['cart_id'],
@@ -2423,7 +2344,6 @@ class ControllerExtensionPaymentPayPal extends Controller {
 				'name'                  => $product['name'],
 				'model'                 => $product['model'],
 				'option'                => $option_data,
-				'recurring' 			=> $recurring,
 				'quantity'              => $product['quantity'],
 				'stock'                 => $product['stock'] ? true : !(!$this->config->get('config_stock_checkout') || $this->config->get('config_stock_warning')),
 				'reward'                => ($product['reward'] ? sprintf($this->language->get('text_points'), $product['reward']) : ''),
@@ -3418,17 +3338,9 @@ class ControllerExtensionPaymentPayPal extends Controller {
 									$message = sprintf($this->language->get('text_order_message'), $seller_protection_status);
 								
 									$this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $order_status_id, $message);
-								}
-								
-								if (($authorization_status == 'CREATED') || ($authorization_status == 'PENDING')) {
-									$recurring_products = $this->cart->getRecurringProducts();
-					
-									foreach ($recurring_products as $recurring_product) {
-										$this->model_extension_payment_paypal->recurringPayment($recurring_product, $order_data, $paypal_order_data);
-									} 
-								}
+									}
 
-								if (($authorization_status == 'CREATED') || ($authorization_status == 'PARTIALLY_CAPTURED') || ($authorization_status == 'PARTIALLY_CREATED') || ($authorization_status == 'PENDING')) {
+									if (($authorization_status == 'CREATED') || ($authorization_status == 'PARTIALLY_CAPTURED') || ($authorization_status == 'PARTIALLY_CREATED') || ($authorization_status == 'PENDING')) {
 									$this->response->redirect($this->url->link('checkout/success', '', true));
 								}
 							}
@@ -3546,17 +3458,9 @@ class ControllerExtensionPaymentPayPal extends Controller {
 									$message = sprintf($this->language->get('text_order_message'), $seller_protection_status);
 								
 									$this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $order_status_id, $message);
-								}
-								
-								if (($capture_status == 'COMPLETED') || ($capture_status == 'PENDING')) {
-									$recurring_products = $this->cart->getRecurringProducts();
-					
-									foreach ($recurring_products as $recurring_product) {
-										$this->model_extension_payment_paypal->recurringPayment($recurring_product, $order_data, $paypal_order_data);
-									} 
-								}
-														
-								if (($capture_status == 'COMPLETED') || ($capture_status == 'PENDING')) {
+									}
+
+									if (($capture_status == 'COMPLETED') || ($capture_status == 'PENDING')) {
 									$this->response->redirect($this->url->link('checkout/success', '', true));
 								}
 							}
@@ -3949,14 +3853,6 @@ class ControllerExtensionPaymentPayPal extends Controller {
 										$this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $order_status_id, $message);
 									}
 								
-									if (($authorization_status == 'CREATED') || ($authorization_status == 'PENDING')) {
-										$recurring_products = $this->cart->getRecurringProducts();
-					
-										foreach ($recurring_products as $recurring_product) {
-											$this->model_extension_payment_paypal->recurringPayment($recurring_product, $order_info, $paypal_order_data);
-										} 
-									}
-													
 									if (($authorization_status == 'CREATED') || ($authorization_status == 'PARTIALLY_CAPTURED') || ($authorization_status == 'PARTIALLY_CREATED') || ($authorization_status == 'PENDING')) {
 										$this->response->redirect($this->url->link('checkout/success', '', true));
 									}
@@ -4059,14 +3955,6 @@ class ControllerExtensionPaymentPayPal extends Controller {
 										$this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $order_status_id, $message);
 									}
 								
-									if (($capture_status == 'COMPLETED') || ($capture_status == 'PENDING')) {
-										$recurring_products = $this->cart->getRecurringProducts();
-					
-										foreach ($recurring_products as $recurring_product) {
-											$this->model_extension_payment_paypal->recurringPayment($recurring_product, $order_info, $paypal_order_data);
-										} 
-									}
-						
 									if (($capture_status == 'COMPLETED') || ($capture_status == 'PENDING')) {
 										$this->response->redirect($this->url->link('checkout/success', '', true));
 									}
@@ -4430,7 +4318,7 @@ class ControllerExtensionPaymentPayPal extends Controller {
 		}
 
 		// if user not logged in check that the guest checkout is allowed
-		if (!$this->customer->isLogged() && (!$this->config->get('config_checkout_guest') || $this->config->get('config_customer_price') || $this->cart->hasDownload() || $this->cart->hasRecurringProducts())) {
+		if (!$this->customer->isLogged() && (!$this->config->get('config_checkout_guest') || $this->config->get('config_customer_price') || $this->cart->hasDownload())) {
 			$data['url'] = $this->url->link('checkout/cart', '', true);
 			
 			$this->response->addHeader('Content-Type: application/json');
@@ -5024,14 +4912,6 @@ class ControllerExtensionPaymentPayPal extends Controller {
 										$this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $order_status_id, $message);
 									}
 								
-									if (($authorization_status == 'CREATED') || ($authorization_status == 'PENDING')) {
-										$recurring_products = $this->cart->getRecurringProducts();
-					
-										foreach ($recurring_products as $recurring_product) {
-											$this->model_extension_payment_paypal->recurringPayment($recurring_product, $order_info, $paypal_order_data);
-										} 
-									}
-													
 									if (($authorization_status == 'CREATED') || ($authorization_status == 'PARTIALLY_CAPTURED') || ($authorization_status == 'PARTIALLY_CREATED') || ($authorization_status == 'PENDING')) {
 										$this->response->redirect($this->url->link('checkout/success', '', true));
 									}
@@ -5124,14 +5004,6 @@ class ControllerExtensionPaymentPayPal extends Controller {
 										$this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $order_status_id, $message);
 									}
 								
-									if (($capture_status == 'COMPLETED') || ($capture_status == 'PENDING')) {
-										$recurring_products = $this->cart->getRecurringProducts();
-					
-										foreach ($recurring_products as $recurring_product) {
-											$this->model_extension_payment_paypal->recurringPayment($recurring_product, $order_info, $paypal_order_data);
-										} 
-									}
-						
 									if (($capture_status == 'COMPLETED') || ($capture_status == 'PENDING')) {
 										$this->response->redirect($this->url->link('checkout/success', '', true));
 									}

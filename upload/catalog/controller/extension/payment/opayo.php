@@ -314,12 +314,6 @@ class ControllerExtensionPaymentOpayo extends Controller {
 			$this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $setting['general']['order_status_id'], $message, false);
 
 			if ($setting['general']['transaction_method'] == 'PAYMENT') {
-				$recurring_products = $this->cart->getRecurringProducts();
-					
-				//loop through any products that are recurring items
-				foreach ($recurring_products as $item) {
-					$this->model_extension_payment_opayo->recurringPayment($item, $payment_data['VendorTxCode']);
-				} 
 			}
 
 			$json['redirect'] = $this->url->link('checkout/success', '', true);
@@ -412,12 +406,7 @@ class ControllerExtensionPaymentOpayo extends Controller {
 				}
 				
 				if ($setting['general']['transaction_method'] == 'PAYMENT') {
-					$recurring_products = $this->cart->getRecurringProducts();
 					
-					//loop through any products that are recurring items
-					foreach ($recurring_products as $item) {
-						$this->model_extension_payment_opayo->recurringPayment($item, $opayo_order_info['VendorTxCode']);
-					}
 				}
 
 				$this->response->redirect($this->url->link('checkout/success', '', true));

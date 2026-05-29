@@ -186,12 +186,6 @@ class ControllerExtensionPaymentSagepayServer extends Controller {
 			$this->model_extension_payment_sagepay_server->addOrder($order_info);
 
 			if ($this->config->get('payment_sagepay_server_transaction') == 'PAYMENT') {
-				$recurring_products = $this->cart->getRecurringProducts();
-
-				//loop through any products that are recurring items
-				foreach ($recurring_products as $item) {
-					$this->model_extension_payment_sagepay_server->addRecurringPayment($item, $payment_data['VendorTxCode']);
-				}
 			}
 		} else {
 			$json['error'] = $response_data['StatusDetail'];
@@ -432,18 +426,11 @@ class ControllerExtensionPaymentSagepayServer extends Controller {
 	public function success() {
 		$this->load->model('checkout/order');
 		$this->load->model('extension/payment/sagepay_server');
-		$this->load->model('checkout/recurring');
 
 		if (isset($this->session->data['order_id'])) {
 			$order_details = $this->model_extension_payment_sagepay_server->getOrder($this->session->data['order_id']);
 
 			if ($this->config->get('payment_sagepay_server_transaction') == 'PAYMENT') {
-				$recurring_products = $this->model_extension_payment_sagepay_server->getRecurringOrders($this->session->data['order_id']);
-
-				//loop through any products that are recurring items
-				foreach ($recurring_products as $item) {
-					$this->model_extension_payment_sagepay_server->updateRecurringPayment($item, $order_details);
-				}
 			}
 
 			$this->response->redirect($this->url->link('checkout/success', '', true));

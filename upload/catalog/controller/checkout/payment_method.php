@@ -38,41 +38,23 @@ class ControllerCheckoutPaymentMethod extends Controller {
 			}
 
 			// Payment Methods
-			$method_data = array();
+		$method_data = array();
 
-			$this->load->model('setting/extension');
+		$this->load->model('setting/extension');
 
-			$results = $this->model_setting_extension->getExtensions('payment');
+		$results = $this->model_setting_extension->getExtensions('payment');
 
-			$recurring = $this->cart->hasRecurringProducts();
+		foreach ($results as $result) {
+			if ($this->config->get('payment_' . $result['code'] . '_status')) {
+				$this->load->model('extension/payment/' . $result['code']);
 
-			foreach ($results as $result) {
-				if ($this->config->get('payment_' . $result['code'] . '_status')) {
-					$this->load->model('extension/payment/' . $result['code']);
+				$method = $this->{'model_extension_payment_' . $result['code']}->getMethod($this->session->data['payment_address'], $total);
 
-					$method = $this->{'model_extension_payment_' . $result['code']}->getMethod($this->session->data['payment_address'], $total);
-
-					if ($method) {
-						$normalized_methods = $this->normalizePaymentMethods($method, $result['code']);
-
-						if (!$normalized_methods) {
-							continue;
-						}
-
-						if ($recurring) {
-							if (property_exists($this->{'model_extension_payment_' . $result['code']}, 'recurringPayments') && $this->{'model_extension_payment_' . $result['code']}->recurringPayments()) {
-								foreach ($normalized_methods as $code => $method_item) {
-									$method_data[$code] = $method_item;
-								}
-							}
-						} else {
-							foreach ($normalized_methods as $code => $method_item) {
-								$method_data[$code] = $method_item;
-							}
-						}
-					}
+				if ($method) {
+					$method_data[$result['code']] = $method;
 				}
 			}
+		}
 
 			$sort_order = array();
 

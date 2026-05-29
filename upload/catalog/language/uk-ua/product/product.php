@@ -28,9 +28,6 @@ $_['text_month'] = 'місяць';
 $_['text_no_reviews'] = 'Немає відгуків про цей товар.';
 $_['text_note'] = '<span class="text-danger">Примітка:</span> HTML не перекладається!';
 $_['text_option'] = 'Доступні опції';
-$_['text_payment_cancel'] = '%s кожні %d %s до скасування';
-$_['text_payment_description'] = '%s кожні %d %s для %d платежу(ів)';
-$_['text_payment_recurring'] = 'Платіжний профіль';
 $_['text_points'] = 'Ціна в бонусних балах:';
 $_['text_related'] = 'Супутні товари';
 $_['text_bundle_title'] = 'Разом дешевше';
@@ -56,7 +53,6 @@ $_['text_success'] = 'Дякуємо за ваш відгук. Його наді
 $_['text_tags'] = 'Теги:';
 $_['text_tax'] = 'Без ПДВ:';
 $_['text_total'] = 'Сума:';
-$_['text_trial_description'] = '%s кожні %d %s для %d платежу(ів), тоді';
 $_['text_sale'] = 'Розпродаж';
 $_['text_call_for_price'] = 'Уточнити ціну';
 $_['text_you_save'] = 'Ви заощадите';

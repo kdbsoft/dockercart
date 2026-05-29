@@ -110,7 +110,6 @@ class Cart
                     $cart["product_id"],
                     $cart["quantity"],
                     json_decode($cart["option"]),
-                    $cart["recurring_id"],
                 );
             }
         }
@@ -663,44 +662,6 @@ class Cart
                     $stock = false;
                 }
 
-                $recurring_query = $this->db->query(
-                    "SELECT * FROM " .
-                        DB_PREFIX .
-                        "recurring r LEFT JOIN " .
-                        DB_PREFIX .
-                        "product_recurring pr ON (r.recurring_id = pr.recurring_id) LEFT JOIN " .
-                        DB_PREFIX .
-                        "recurring_description rd ON (r.recurring_id = rd.recurring_id) WHERE r.recurring_id = '" .
-                        (int) $cart["recurring_id"] .
-                        "' AND pr.product_id = '" .
-                        (int) $cart["product_id"] .
-                        "' AND rd.language_id = " .
-                        (int) $this->config->get("config_language_id") .
-                        " AND r.status = 1 AND pr.customer_group_id = '" .
-                        (int) $this->config->get("config_customer_group_id") .
-                        "'",
-                );
-
-                if ($recurring_query->num_rows) {
-                    $recurring = [
-                        "recurring_id" => $cart["recurring_id"],
-                        "name" => $recurring_query->row["name"],
-                        "frequency" => $recurring_query->row["frequency"],
-                        "price" => $recurring_query->row["price"],
-                        "cycle" => $recurring_query->row["cycle"],
-                        "duration" => $recurring_query->row["duration"],
-                        "trial" => $recurring_query->row["trial_status"],
-                        "trial_frequency" =>
-                            $recurring_query->row["trial_frequency"],
-                        "trial_price" => $recurring_query->row["trial_price"],
-                        "trial_cycle" => $recurring_query->row["trial_cycle"],
-                        "trial_duration" =>
-                            $recurring_query->row["trial_duration"],
-                    ];
-                } else {
-                    $recurring = false;
-                }
-
                 // DockerCart Multicurrency: Convert price from product currency to default currency
                 $multicurrency_price = $price;
                 $multicurrency_option_price = $option_price;
@@ -805,7 +766,6 @@ class Cart
                     "width" => $product_query->row["width"],
                     "height" => $product_query->row["height"],
                     "length_class_id" => $product_query->row["length_class_id"],
-                    "recurring" => $recurring,
                 ];
             } else {
                 $this->remove($cart["cart_id"]);
@@ -819,7 +779,6 @@ class Cart
         $product_id,
         $quantity = 1,
         $option = [],
-        $recurring_id = 0,
     ) {
         $quantity = $this->normalizeQuantity($quantity, 1);
 
@@ -840,8 +799,6 @@ class Cart
                 $this->db->escape($this->session->getId()) .
                 "' AND product_id = '" .
                 (int) $product_id .
-                "' AND recurring_id = '" .
-                (int) $recurring_id .
                 "' AND `option` = '" .
                 $this->db->escape(json_encode($option)) .
                 "'",
@@ -861,8 +818,6 @@ class Cart
                     $this->db->escape($this->session->getId()) .
                     "', product_id = '" .
                     (int) $product_id .
-                    "', recurring_id = '" .
-                    (int) $recurring_id .
                     "', `option` = '" .
                     $this->db->escape(json_encode($option)) .
                     "', quantity = '" .
@@ -885,8 +840,6 @@ class Cart
                     $this->db->escape($this->session->getId()) .
                     "' AND product_id = '" .
                     (int) $product_id .
-                    "' AND recurring_id = '" .
-                    (int) $recurring_id .
                     "' AND `option` = '" .
                     $this->db->escape(json_encode($option)) .
                     "'",
@@ -951,19 +904,6 @@ class Cart
                 $this->db->escape($this->session->getId()) .
                 "'",
         );
-    }
-
-    public function getRecurringProducts()
-    {
-        $product_data = [];
-
-        foreach ($this->getProducts() as $value) {
-            if ($value["recurring"]) {
-                $product_data[] = $value;
-            }
-        }
-
-        return $product_data;
     }
 
     public function getWeight()
@@ -1052,11 +992,6 @@ class Cart
     public function hasProducts()
     {
         return count($this->getProducts());
-    }
-
-    public function hasRecurringProducts()
-    {
-        return count($this->getRecurringProducts());
     }
 
     public function hasStock()

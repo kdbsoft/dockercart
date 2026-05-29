@@ -120,7 +120,6 @@ class ControllerCommonCart extends Controller {
 				'name'      => $product['name'],
 				'model'     => $product['model'],
 				'option'    => $option_data,
-				'recurring' => ($product['recurring'] ? $product['recurring']['name'] : ''),
 				'quantity'  => $this->formatQuantityValue($product['quantity']),
 				'minimum'   => $this->formatQuantityValue($product['minimum']),
 				'quantity_step' => $this->formatQuantityValue(isset($product['quantity_step']) ? $product['quantity_step'] : 1),

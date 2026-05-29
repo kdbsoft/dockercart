@@ -47,6 +47,7 @@ $_['entry_option_value_cg_price']      = 'ЦГ';
 $_['button_option_value_cg_price_add'] = 'Добавить';
 $_['entry_points'] = 'Баллы';
 $_['entry_price'] = 'Цена';
+$_['entry_call_for_price'] = 'Цена по запросу';
 $_['entry_priority'] = 'Приоритет';
 $_['entry_quantity'] = 'Количество';
 $_['entry_quantity_step'] = 'Шаг количества';

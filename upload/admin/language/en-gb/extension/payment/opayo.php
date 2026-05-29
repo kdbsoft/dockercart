@@ -55,8 +55,6 @@ $_['help_cron_url']		  				= 'Set a cron to call this URL.';
 $_['button_release']		  			= 'Release';
 $_['button_rebate']			  			= 'Rebate / refund';
 $_['button_void']			  			= 'Void';
-$_['button_enable_recurring']			= 'Enable Recurring';
-$_['button_disable_recurring']			= 'Disable Recurring';
 
 // Success
 $_['success_save']		 				= 'Success: You have modified Opayo!';
@@ -65,8 +63,6 @@ $_['success_release_ok_order']	  		= 'Success: Release was successful, order sta
 $_['success_rebate_ok']		  			= 'Success: Rebate was successful!';
 $_['success_rebate_ok_order']	  		= 'Success: Rebate was successful, order status updated to rebated!';
 $_['success_void_ok']			  		= 'Success: Void was successful, order status updated to voided!';
-$_['success_enable_recurring']			= 'Success: Recurring payment was enabled!';
-$_['success_disable_recurring']			= 'Success: Recurring payment was disabled!';
 
 // Error
 $_['error_warning']          			= 'Warning: Please check the form carefully for errors!';

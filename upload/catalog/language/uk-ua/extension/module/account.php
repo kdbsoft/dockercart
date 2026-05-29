@@ -11,7 +11,6 @@ $_["text_logout"] = "Вийти";
 $_["text_newsletter"] = "Підписатися";
 $_["text_order"] = "Історія замовлень";
 $_["text_password"] = "Пароль";
-$_["text_recurring"] = "Регулярні платежі";
 $_["text_register"] = "Зареєструватися";
 $_["text_return"] = "Повернення";
 $_["text_reward"] = "Бонусні бали";

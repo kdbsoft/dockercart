@@ -327,7 +327,6 @@ class ModelCheckoutDockerCartCheckout extends Model {
         
         $results = $this->model_setting_extension->getExtensions('payment');
         
-        $recurring = $this->cart->hasRecurringProducts();
         
         $method_data = array();
         

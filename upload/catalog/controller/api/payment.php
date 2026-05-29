@@ -196,8 +196,6 @@ class ControllerApiPayment extends Controller {
 
 				$results = $this->model_setting_extension->getExtensions('payment');
 
-				$recurring = $this->cart->hasRecurringProducts();
-
 				foreach ($results as $result) {
 					if ($this->config->get('payment_' . $result['code'] . '_status')) {
 						$this->load->model('extension/payment/' . $result['code']);
@@ -211,16 +209,8 @@ class ControllerApiPayment extends Controller {
 								continue;
 							}
 
-							if ($recurring) {
-								if (property_exists($this->{'model_extension_payment_' . $result['code']}, 'recurringPayments') && $this->{'model_extension_payment_' . $result['code']}->recurringPayments()) {
-									foreach ($normalized_methods as $code => $method_item) {
-										$json['payment_methods'][$code] = $method_item;
-									}
-								}
-							} else {
-								foreach ($normalized_methods as $code => $method_item) {
-									$json['payment_methods'][$code] = $method_item;
-								}
+							foreach ($normalized_methods as $code => $method_item) {
+								$json['payment_methods'][$code] = $method_item;
 							}
 						}
 					}

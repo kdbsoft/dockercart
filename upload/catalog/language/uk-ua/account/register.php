@@ -39,3 +39,5 @@ $_['text_register'] = 'Зареєструватися';
 $_['text_your_address'] = 'Ваша адреса';
 $_['text_your_details'] = 'Ваші особисті дані';
 $_['text_your_password'] = 'Ваш пароль';
+$_['text_already_have_account'] = 'Вже є акаунт?';
+$_['text_login_link'] = 'Увійти';

@@ -187,8 +187,7 @@
   function updateCount() {
     var visible = $('.ext-card-wrapper:visible').length;
     var countLabel = visible === 1 ? '{{ text_ext_count|escape('js') }}' : '{{ text_ext_count_plural|escape('js') }}';
-    var shownLabel = '{{ text_ext_shown|escape('js') }}';
-    $('#ext-visible-count').text(countLabel.replace('%s', visible) + ', ' + shownLabel.replace('%s', visible));
+    $('#ext-visible-count').text(countLabel.replace('%s', visible));
   }
 
   function applyFilters() {

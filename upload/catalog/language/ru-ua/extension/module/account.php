@@ -11,7 +11,6 @@ $_['text_logout'] = 'Выйти';
 $_['text_newsletter'] = 'Подписка';
 $_['text_order'] = 'История заказов';
 $_['text_password'] = 'Пароль';
-$_['text_recurring'] = 'Регулярные платежи';
 $_['text_register'] = 'Регистрация';
 $_['text_return'] = 'Возвраты';
 $_['text_reward'] = 'Бонусные баллы';

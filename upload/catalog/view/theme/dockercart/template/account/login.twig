@@ -8,12 +8,12 @@
         breadcrumbs_link_class: 'hover:text-white transition',
         breadcrumbs_last_class: 'text-white font-semibold'
       } %}
-      <h1 class="text-2xl sm:text-3xl font-extrabold text-white">{{ text_returning_customer }}</h1>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-white">{{ heading_title }}</h1>
     </div>
   </section>
 
   <section class="py-8 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-5xl mx-auto">
+    <div class="max-w-md mx-auto">
       {{ content_top }}
 
       {% if success %}
@@ -29,47 +29,64 @@
       </div>
       {% endif %}
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-sm">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="login-form">
+          {# Hidden field to hold the actual identifier sent to server #}
+          <input type="hidden" name="email" id="login-identifier" value="{{ email }}" />
 
-        {# New Customer #}
-        <div class="bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-sm flex flex-col">
-          <p class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-1">{{ text_new_customer }}</p>
-          <h2 class="text-xl font-extrabold text-gray-900 mb-3">{{ text_register }}</h2>
-          <p class="text-sm text-gray-500 mb-6 flex-1">{{ text_register_account }}</p>
-          <a href="{{ register }}" class="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors">
-            <i data-lucide="user-plus" class="w-4 h-4"></i>
-            {{ button_continue }}
-          </a>
-        </div>
-
-        {# Returning Customer #}
-        <div class="bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-sm">
-          <p class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-1">{{ text_returning_customer }}</p>
-          <h2 class="text-xl font-extrabold text-gray-900 mb-6">{{ text_i_am_returning_customer }}</h2>
-          <form action="{{ action }}" method="post" enctype="multipart/form-data">
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1.5" for="input-email">{{ entry_email }}</label>
-              <input type="text" name="email" value="{{ email }}" placeholder="{{ entry_email }}" id="input-email"
-                class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white" />
-            </div>
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1.5" for="input-password">{{ entry_password }}</label>
-              <input type="password" name="password" value="{{ password }}" placeholder="{{ entry_password }}" id="input-password"
-                class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white" />
-            </div>
-            <div class="flex items-center justify-between mb-6">
-              <a href="{{ forgotten }}" class="text-sm text-blue-600 hover:underline">{{ text_forgotten }}</a>
-            </div>
-            {% if redirect %}
-            <input type="hidden" name="redirect" value="{{ redirect }}" />
-            {% endif %}
-            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
-              <i data-lucide="log-in" class="w-4 h-4"></i>
-              {{ button_login }}
+          {# Tabs: Email / Phone #}
+          <div class="flex gap-2 border-b border-gray-100 pb-3 mb-5">
+            <button type="button" class="tab-btn active px-4 py-2 rounded-xl border border-transparent text-sm font-semibold flex-shrink-0 flex items-center gap-2" data-tab="email">
+              <i data-lucide="mail" class="w-4 h-4"></i>
+              {{ entry_email_tab }}
             </button>
-          </form>
-        </div>
+            <button type="button" class="tab-btn px-4 py-2 rounded-xl border border-transparent text-sm font-semibold flex-shrink-0 flex items-center gap-2" data-tab="phone">
+              <i data-lucide="phone" class="w-4 h-4"></i>
+              {{ entry_telephone_tab }}
+            </button>
+          </div>
 
+          {# Email panel #}
+          <div id="dc-tab-email" class="dc-tab-panel mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1.5" for="input-email">{{ entry_email_tab }}</label>
+            <input type="email" name="email_display" value="{{ email }}" placeholder="you@example.com" id="input-email"
+              class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white" />
+          </div>
+
+          {# Phone panel #}
+          <div id="dc-tab-phone" class="dc-tab-panel mb-4 hidden">
+            <label class="block text-sm font-medium text-gray-700 mb-1.5" for="input-telephone">{{ entry_telephone_tab }}</label>
+            <input type="tel" name="telephone_display" value="" placeholder="+380 __ ___ __ __" id="input-telephone"
+              class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white" />
+          </div>
+
+          {# Password #}
+          <div class="mb-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1.5" for="input-password">{{ entry_password }}</label>
+            <input type="password" name="password" value="{{ password }}" placeholder="{{ entry_password }}" id="input-password"
+              class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white" />
+          </div>
+
+          <div class="flex items-center justify-end mb-6">
+            <a href="{{ forgotten }}" class="text-sm text-blue-600 hover:underline">{{ text_forgotten }}</a>
+          </div>
+
+          {% if redirect %}
+          <input type="hidden" name="redirect" value="{{ redirect }}" />
+          {% endif %}
+
+          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
+            <i data-lucide="log-in" class="w-4 h-4"></i>
+            {{ button_login }}
+          </button>
+        </form>
+
+        <div class="mt-6 pt-6 border-t border-gray-100 text-center">
+          <p class="text-sm text-gray-500">
+            {{ text_no_account }}
+            <a href="{{ register }}" class="text-blue-600 hover:underline font-semibold">{{ text_register_link }}</a>
+          </p>
+        </div>
       </div>
 
       {{ content_bottom }}
@@ -77,4 +94,51 @@
   </section>
 
 </main>
+
+<style>
+  .tab-btn { color: #6b7280; transition: color .15s, background .15s, border-color .15s; }
+  .tab-btn.active { color: #2563eb; border-color: #2563eb !important; background: #eff6ff; }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var btns   = Array.from(document.querySelectorAll('.tab-btn'));
+  var panels = Array.from(document.querySelectorAll('.dc-tab-panel'));
+  var hiddenInput = document.getElementById('login-identifier');
+  var emailInput  = document.getElementById('input-email');
+  var phoneInput  = document.getElementById('input-telephone');
+
+  function syncIdentifier() {
+    var activeTab = document.querySelector('.tab-btn.active');
+    if (!activeTab) return;
+    var tab = activeTab.dataset.tab;
+    if (tab === 'email') {
+      hiddenInput.value = emailInput.value;
+    } else {
+      hiddenInput.value = phoneInput.value;
+    }
+  }
+
+  btns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      btns.forEach(function(b) { b.classList.remove('active'); });
+      panels.forEach(function(p) { p.classList.add('hidden'); });
+      btn.classList.add('active');
+      var t = document.getElementById('dc-tab-' + btn.dataset.tab);
+      if (t) t.classList.remove('hidden');
+      syncIdentifier();
+    });
+  });
+
+  document.getElementById('login-form').addEventListener('submit', function() {
+    syncIdentifier();
+  });
+
+  {% if phone_format %}
+  if (typeof DockercartPhoneMask !== 'undefined') {
+    DockercartPhoneMask.init(phoneInput, '{{ phone_format|e('js') }}');
+  }
+  {% endif %}
+});
+</script>
 {{ footer }}

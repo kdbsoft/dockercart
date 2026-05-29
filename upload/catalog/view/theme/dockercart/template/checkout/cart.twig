@@ -86,12 +86,6 @@
                   {% if product.reward %}
                   <p class="text-xs text-blue-500 mt-0.5">{{ product.reward }}</p>
                   {% endif %}
-                  {% if product.recurring %}
-                  <p class="text-xs text-indigo-600 mt-0.5 flex items-center gap-1">
-                    <i data-lucide="refresh-cw" class="w-3 h-3"></i>
-                    {{ text_recurring_item }} {{ product.recurring }}
-                  </p>
-                  {% endif %}
                   {# Unit price – mobile #}
                   <p class="sm:hidden text-sm font-semibold text-gray-700 mt-1">{{ product.price }}</p>
                 </div>

@@ -25,3 +25,5 @@ $_['text_newsletter'] = 'Подписка';
 $_['text_register'] = 'Регистрация';
 $_['text_your_details'] = 'Ваши персональные данные';
 $_['text_your_password'] = 'Ваш пароль';
+$_['text_already_have_account'] = 'Уже есть аккаунт?';
+$_['text_login_link'] = 'Войти';

@@ -22,12 +22,6 @@ class ControllerExtensionPaymentWorldpay extends Controller {
 			$data['existing_cards'] = $this->model_extension_payment_worldpay->getCards($this->customer->getId());
 		}
 
-		$recurring_products = $this->cart->getRecurringProducts();
-
-		if (!empty($recurring_products)) {
-			$data['recurring_products'] = true;
-		}
-
 		return $this->load->view('extension/payment/worldpay', $data);
 	}
 
@@ -43,13 +37,8 @@ class ControllerExtensionPaymentWorldpay extends Controller {
 
 		$order_info = $this->model_checkout_order->getOrder($this->session->data['order_id']);
 
-		$recurring_products = $this->cart->getRecurringProducts();
 
-		if (empty($recurring_products)) {
 			$order_type = 'ECOM';
-		} else {
-			$order_type = 'RECURRING';
-		}
 
 		$country_info = $this->model_localisation_country->getCountry($order_info['payment_country_id']);
 
@@ -103,11 +92,6 @@ class ControllerExtensionPaymentWorldpay extends Controller {
 					$card_data['CardType'] = (string)$response->paymentMethod->cardType;
 					$this->model_extension_payment_worldpay->addCard($this->session->data['order_id'], $card_data);
 				}
-			}
-
-			//loop through any products that are recurring items
-			foreach ($recurring_products as $item) {
-				$this->model_extension_payment_worldpay->recurringPayment($item, $this->session->data['order_id'] . rand(), $this->request->post['token']);
 			}
 
 			$this->response->redirect($this->url->link('checkout/success', '', true));

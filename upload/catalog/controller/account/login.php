@@ -145,6 +145,17 @@ class ControllerAccountLogin extends Controller {
 			$data['password'] = '';
 		}
 
+		// Pass store-default phone format for input mask
+		$data['phone_format'] = '';
+		$this->load->model('localisation/country');
+		$default_country_id = $this->config->get('config_country_id');
+		if ($default_country_id) {
+			$country_info = $this->model_localisation_country->getCountry($default_country_id);
+			$data['phone_format'] = $country_info['phone_format'] ?? '';
+		}
+
+		$this->document->addScript('catalog/view/javascript/common/phone-mask.js');
+
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['column_right'] = $this->load->controller('common/column_right');
 		$data['content_top'] = $this->load->controller('common/content_top');
