@@ -25,6 +25,11 @@
     {% endif %}
 
     {# ---- Toolbar ---- #}
+    <style>
+      .ext-toolbar-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+      .ext-toolbar-search { flex: 1 1 260px; min-width: 200px; max-width: 400px; }
+      .ext-toolbar-filters { flex: 0 0 auto; white-space: nowrap; }
+    </style>
     <div class="panel panel-default">
       <div class="panel-body" style="padding-bottom:8px;">
         <div class="ext-toolbar-row">
@@ -62,7 +67,7 @@
       <h4 class="ext-group-heading">
         <i class="fa {{ group.icon }}"></i>
         {{ group.label }}
-        <small>{{ group.extensions|length }} ext.</small>
+        <small>{{ group.extensions|length }} {{ text_ext_short }}</small>
       </h4>
       <div class="row ext-cards-row">
         {% for ext in group.extensions %}
@@ -181,7 +186,9 @@
 
   function updateCount() {
     var visible = $('.ext-card-wrapper:visible').length;
-    $('#ext-visible-count').text(visible + ' extension' + (visible !== 1 ? 's' : '') + ' shown');
+    var countLabel = visible === 1 ? '{{ text_ext_count|escape('js') }}' : '{{ text_ext_count_plural|escape('js') }}';
+    var shownLabel = '{{ text_ext_shown|escape('js') }}';
+    $('#ext-visible-count').text(countLabel.replace('%s', visible) + ', ' + shownLabel.replace('%s', visible));
   }
 
   function applyFilters() {

@@ -54,11 +54,11 @@
 					
 					<ul class="nav nav-tabs">
 						<li class="active">
-							<a data-toggle="tab" href="#store_tab_0">Default Store</a>
+							<a data-toggle="tab" href="#store_tab_0"><i class="fa fa-home"></i> Default Store</a>
 						</li>
 						{% for store in stores %}						
 							<li class="{% if tab_page == store['store_id'] %} active {% endif %}" >
-								<a data-toggle="tab" href="#store_tab_{{store['store_id']}}">{{store['name']}}</a>
+								<a data-toggle="tab" href="#store_tab_{{store['store_id']}}"><i class="fa fa-home"></i> {{store['name']}}</a>
 							</li>							
 						{% endfor %}
 					</ul>

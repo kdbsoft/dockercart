@@ -170,55 +170,76 @@ $(document).ready(function() {
 		return this.each(function() {
 			var $this = $(this);
 			var $dropdown = $('<ul class="dropdown-menu" />');
+			var el = this;
 
-			this.timer = null;
-			this.items = [];
+			el.timer = null;
+			el.items = [];
 
-			$.extend(this, option);
+			$.extend(el, option);
 
 			$this.attr('autocomplete', 'off');
 
+			// Wrap input for clear button
+			var $wrapper = $('<div class="dc-autocomplete-wrap" />');
+			$this.wrap($wrapper);
+			var $wrapperEl = $this.closest('.dc-autocomplete-wrap');
+			$wrapperEl.toggleClass('has-value', !!$this.val());
+			var $clearBtn = $('<button type="button" class="dc-autocomplete-clear" tabindex="-1"><i class="fa fa-times"></i></button>');
+			$this.after($clearBtn);
+
+			$clearBtn.on('mousedown', function(e) {
+				e.preventDefault();
+			});
+
+			$clearBtn.on('click', function() {
+				$this.val('').trigger('change');
+				$wrapperEl.removeClass('has-value');
+				el.hide();
+				$this.focus();
+			});
+
 			// Focus
 			$this.on('focus', function() {
-				this.request();
+				el.request();
 			});
 
 			// Blur
 			$this.on('blur', function() {
-				setTimeout(function(object) {
-					object.hide();
-				}, 200, this);
+				setTimeout(function() {
+					el.hide();
+				}, 200);
 			});
 
 			// Keydown
 			$this.on('keydown', function(event) {
 				switch(event.keyCode) {
 					case 27: // escape
-						this.hide();
+						el.hide();
 						break;
 					default:
-						this.request();
+						el.request();
 						break;
 				}
 			});
 
 			// Click
-			this.click = function(event) {
+			el.click = function(event) {
 				event.preventDefault();
 
 				var value = $(event.target).parent().attr('data-value');
 
-				if (value && this.items[value]) {
-					this.select(this.items[value]);
+				if (value && el.items[value]) {
+					el.select(el.items[value]);
+					$wrapperEl.toggleClass('has-value', !!$this.val());
 				}
 			}
 
 			// Show
-			this.show = function() {
-				var pos = $this.position();
+			el.show = function() {
+				var pos = $wrapperEl.position();
 
 				$dropdown.css({
-					top: pos.top + $this.outerHeight(),
+					top: pos.top + $wrapperEl.outerHeight(),
 					left: pos.left
 				});
 
@@ -226,21 +247,21 @@ $(document).ready(function() {
 			}
 
 			// Hide
-			this.hide = function() {
+			el.hide = function() {
 				$dropdown.hide();
 			}
 
 			// Request
-			this.request = function() {
-				clearTimeout(this.timer);
+			el.request = function() {
+				clearTimeout(el.timer);
 
-				this.timer = setTimeout(function(object) {
-					object.source($(object).val(), $.proxy(object.response, object));
-				}, 200, this);
+				el.timer = setTimeout(function() {
+					el.source($(el).val(), $.proxy(el.response, el));
+				}, 200);
 			}
 
 			// Response
-			this.response = function(json) {
+			el.response = function(json) {
 				var html = '';
 				var category = {};
 				var name;
@@ -248,14 +269,11 @@ $(document).ready(function() {
 
 				if (json.length) {
 					for (i = 0; i < json.length; i++) {
-						// update element items
-						this.items[json[i]['value']] = json[i];
+						el.items[json[i]['value']] = json[i];
 
 						if (!json[i]['category']) {
-							// ungrouped items
 							html += '<li data-value="' + json[i]['value'] + '"><a href="#">' + json[i]['label'] + '</a></li>';
 						} else {
-							// grouped items
 							name = json[i]['category'];
 							if (!category[name]) {
 								category[name] = [];
@@ -275,16 +293,20 @@ $(document).ready(function() {
 				}
 
 				if (html) {
-					this.show();
+					el.show();
 				} else {
-					this.hide();
+					el.hide();
 				}
 
 				$dropdown.html(html);
 			}
 
-			$dropdown.on('click', '> li > a', $.proxy(this.click, this));
-			$this.after($dropdown);
+			$this.on('input change', function() {
+				$wrapperEl.toggleClass('has-value', !!$this.val());
+			});
+
+			$dropdown.on('click', '> li > a', $.proxy(el.click, el));
+			$wrapperEl.after($dropdown);
 		});
 	}
 })(window.jQuery);

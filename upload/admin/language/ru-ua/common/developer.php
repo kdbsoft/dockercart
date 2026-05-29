@@ -1,7 +1,7 @@
 <?php
 
-$_['button_off'] = 'Выключенный';
-$_['button_on'] = 'На';
+$_['button_off'] = 'Выкл.';
+$_['button_on'] = 'Вкл.';
 $_['column_action'] = 'Действие';
 $_['column_component'] = 'Компонент';
 $_['entry_cache'] = 'Кэш';
