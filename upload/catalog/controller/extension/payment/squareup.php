@@ -151,7 +151,6 @@ class ControllerExtensionPaymentSquareup extends Controller {
                 ),
                 'billing_address' => $billing_address,
                 'buyer_email_address' => $order_info['email'],
-                'delay_capture' => !$this->cart->hasRecurringProducts() && $this->config->get('payment_squareup_delay_capture'),
                 'integration_id' => Squareup::SQUARE_INTEGRATION_ID
             );
             
@@ -191,38 +190,6 @@ class ControllerExtensionPaymentSquareup extends Controller {
             $order_status_id = $this->config->get('payment_squareup_status_' . $transaction_status);
 
             if ($order_status_id) {
-                if ($this->cart->hasRecurringProducts() && $transaction_status == 'captured') {
-                    foreach ($this->cart->getRecurringProducts() as $item) {
-                        if ($item['recurring']['trial']) {
-                            $trial_price = $this->tax->calculate($item['recurring']['trial_price'] * $item['quantity'], $item['tax_class_id']);
-                            $trial_amt = $this->currency->format($trial_price, $this->session->data['currency']);
-                            $trial_text =  sprintf($this->language->get('text_trial'), $trial_amt, $item['recurring']['trial_cycle'], $item['recurring']['trial_frequency'], $item['recurring']['trial_duration']);
-
-                            $item['recurring']['trial_price'] = $trial_price;
-                        } else {
-                            $trial_text = '';
-                        }
-
-                        $recurring_price = $this->tax->calculate($item['recurring']['price'] * $item['quantity'], $item['tax_class_id']);
-                        $recurring_amt = $this->currency->format($recurring_price, $this->session->data['currency']);
-                        $recurring_description = $trial_text . sprintf($this->language->get('text_recurring'), $recurring_amt, $item['recurring']['cycle'], $item['recurring']['frequency']);
-
-                        $item['recurring']['price'] = $recurring_price;
-
-                        if ($item['recurring']['duration'] > 0) {
-                            $recurring_description .= sprintf($this->language->get('text_length'), $item['recurring']['duration']);
-                        }
-
-                        if (!$item['recurring']['trial']) {
-                            // We need to override this value for the proper calculation in updateRecurringExpired
-                            $item['recurring']['trial_duration'] = 0;
-                        }
-
-
-                        $this->model_extension_payment_squareup->createRecurring($item, $this->session->data['order_id'], $recurring_description, $transaction['id']);
-                    }
-                }
-
                 $order_status_comment = $this->language->get('squareup_status_comment_' . $transaction_status);
 
                 $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $order_status_id, $order_status_comment, true);

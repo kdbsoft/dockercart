@@ -29,9 +29,6 @@ $_['text_month'] = 'месяц';
 $_['text_no_reviews'] = 'Отзывов на этот товар нет.';
 $_['text_note'] = '<span class="text-danger">Примечание:</span> HTML-код не переводится!';
 $_['text_option'] = 'Доступные варианты';
-$_['text_payment_cancel'] = '%s каждые %d %s(s) до отмены';
-$_['text_payment_description'] = '%s каждые %d %s(s) за %d платежей(ы)';
-$_['text_payment_recurring'] = 'Платежный профиль';
 $_['text_points'] = 'Цена в бонусных баллах:';
 $_['text_quick_view'] = 'Быстрый просмотр';
 $_['text_related'] = 'Сопутствующие товары';
@@ -57,7 +54,6 @@ $_['text_success'] = 'Спасибо за ваш отзыв. Он отправл
 $_['text_tags'] = 'Теги:';
 $_['text_tax'] = 'Без учета налога:';
 $_['text_total'] = 'Итого:';
-$_['text_trial_description'] = '%s каждые %d %s(s) для %d платежей затем';
 $_['text_view_all'] = 'Посмотреть все →';
 $_['text_warranty'] = 'Гарантия';
 $_['text_warranty_desc'] = 'Официальная гарантия';

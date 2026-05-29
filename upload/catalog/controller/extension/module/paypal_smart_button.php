@@ -170,29 +170,9 @@ class ControllerExtensionModulePayPalSmartButton extends Controller {
 					}
 				}
 
-				if (isset($this->request->post['recurring_id'])) {
-					$recurring_id = $this->request->post['recurring_id'];
-				} else {
-					$recurring_id = 0;
-				}
-
-				$recurrings = $this->model_catalog_product->getProfiles($product_info['product_id']);
-
-				if ($recurrings) {
-					$recurring_ids = array();
-
-					foreach ($recurrings as $recurring) {
-						$recurring_ids[] = $recurring['recurring_id'];
-					}
-
-					if (!in_array($recurring_id, $recurring_ids)) {
-						$errors[] = $this->language->get('error_recurring_required');
-					}
-				}
-
 				if (!$errors) {					
-					if (!$this->model_extension_module_paypal_smart_button->hasProductInCart($this->request->post['product_id'], $option, $recurring_id)) {
-						$this->cart->add($this->request->post['product_id'], $quantity, $option, $recurring_id);
+					if (!$this->model_extension_module_paypal_smart_button->hasProductInCart($this->request->post['product_id'], $option)) {
+						$this->cart->add($this->request->post['product_id'], $quantity, $option);
 					}
 					
 					// Unset all shipping and payment methods
@@ -361,7 +341,7 @@ class ControllerExtensionModulePayPalSmartButton extends Controller {
 		}
 
 		// if user not logged in check that the guest checkout is allowed
-		if (!$this->customer->isLogged() && (!$this->config->get('config_checkout_guest') || $this->config->get('config_customer_price') || $this->cart->hasDownload() || $this->cart->hasRecurringProducts())) {
+		if (!$this->customer->isLogged() && (!$this->config->get('config_checkout_guest') || $this->config->get('config_customer_price') || $this->cart->hasDownload())) {
 			$data['url'] = $this->url->link('checkout/cart', '', true);
 			
 			$this->response->addHeader('Content-Type: application/json');
@@ -672,35 +652,12 @@ class ControllerExtensionModulePayPalSmartButton extends Controller {
 				$total = false;
 			}
 
-			$recurring = '';
-
-			if ($product['recurring']) {
-				$frequencies = array(
-					'day'        => $this->language->get('text_day'),
-					'week'       => $this->language->get('text_week'),
-					'semi_month' => $this->language->get('text_semi_month'),
-					'month'      => $this->language->get('text_month'),
-					'year'       => $this->language->get('text_year'),
-				);
-
-				if ($product['recurring']['trial']) {
-					$recurring = sprintf($this->language->get('text_trial_description'), $this->currency->format($this->tax->calculate($product['recurring']['trial_price'] * $product['quantity'], $product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']), $product['recurring']['trial_cycle'], $frequencies[$product['recurring']['trial_frequency']], $product['recurring']['trial_duration']) . ' ';
-				}
-
-				if ($product['recurring']['duration']) {
-					$recurring .= sprintf($this->language->get('text_payment_description'), $this->currency->format($this->tax->calculate($product['recurring']['price'] * $product['quantity'], $product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']), $product['recurring']['cycle'], $frequencies[$product['recurring']['frequency']], $product['recurring']['duration']);
-				} else {
-					$recurring .= sprintf($this->language->get('text_payment_cancel'), $this->currency->format($this->tax->calculate($product['recurring']['price'] * $product['quantity'], $product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']), $product['recurring']['cycle'], $frequencies[$product['recurring']['frequency']], $product['recurring']['duration']);
-				}
-			}
-
 			$data['products'][] = array(
 				'cart_id'               => $product['cart_id'],
 				'thumb'                 => $image,
 				'name'                  => $product['name'],
 				'model'                 => $product['model'],
 				'option'                => $option_data,
-				'recurring' 			=> $recurring,
 				'quantity'              => $product['quantity'],
 				'stock'                 => $product['stock'] ? true : !(!$this->config->get('config_stock_checkout') || $this->config->get('config_stock_warning')),
 				'reward'                => ($product['reward'] ? sprintf($this->language->get('text_points'), $product['reward']) : ''),
