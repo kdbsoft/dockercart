@@ -1,3 +1,9 @@
+## [1.32.0](https://github.com/mathflow-bit/dockercart/compare/v1.31.1...v1.32.0) (2026-05-29)
+
+### Features
+
+* add custom MySQL config to compose files ([ed47f3c](https://github.com/mathflow-bit/dockercart/commit/ed47f3c9d1b92037d336e68251b3fbed1c3a61a6))
+
 ## [1.31.1](https://github.com/mathflow-bit/dockercart/compare/v1.31.0...v1.31.1) (2026-05-29)
 
 ### Bug Fixes
