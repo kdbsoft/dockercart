@@ -97,7 +97,7 @@
               <div class="flex flex-wrap items-center gap-x-1 gap-y-1 text-sm">
                 <span class="text-gray-900 font-semibold mr-2">{{ order.total }}</span>
                 <span class="text-gray-300 mr-2">·</span>
-                <span class="text-gray-500">{{ order.products }} {{ order.products == 1 ? 'товар' : 'товаров' }}</span>
+                <span class="text-gray-500">{{ order.products }} {{ order.products == 1 ? text_product : text_products }}</span>
                 {% if order.tracking_number %}
                 <span class="text-gray-300 mr-2">·</span>
                 <span class="text-gray-400 font-mono text-xs">{{ order.tracking_number }}</span>

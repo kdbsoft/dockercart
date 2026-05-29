@@ -37,3 +37,6 @@ $_['column_comment']        = 'Comment';
 
 // Error
 $_['error_reorder']         = '%s is not currently available to be reordered.';
+
+$_['text_product']  = 'product';
+$_['text_products'] = 'products';

@@ -23,6 +23,7 @@ class ControllerAccountAccount extends Controller {
 				$order['view'] = $this->url->link('account/order/info', 'order_id=' . $order['order_id'], true);
 				$order['products'] = $this->model_account_order->getTotalOrderProductsByOrderId($order['order_id']);
 				$order['total'] = $this->currency->format($order['total'], $order['currency_code'], $order['currency_value']);
+				$order['date_added'] = date($this->language->get('datetime_format'), strtotime($order['date_added']));
 			}
 			unset($order);
 		}
