@@ -13,7 +13,7 @@
   </section>
 
   <section class="py-8 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-5xl mx-auto">
+    <div class="max-w-7xl mx-auto">
       {{ content_top }}
 
       {% if success %}
@@ -23,124 +23,134 @@
       </div>
       {% endif %}
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="flex flex-col lg:flex-row gap-6 items-start">
+        <aside class="lg:w-60 flex-shrink-0">
+          {{ account_menu }}
+        </aside>
+        <div class="flex-1 min-w-0">
 
-        {# My Account #}
-        <div class="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
-          <p class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-3">{{ text_my_account }}</p>
-          <ul class="space-y-2">
-            <li>
-              <a href="{{ edit }}" class="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition">
-                <i data-lucide="user" class="w-4 h-4 text-gray-400"></i>
-                {{ text_edit }}
-              </a>
-            </li>
-            <li>
-              <a href="{{ password }}" class="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition">
-                <i data-lucide="lock" class="w-4 h-4 text-gray-400"></i>
-                {{ text_password }}
-              </a>
-            </li>
-            <li>
-              <a href="{{ address }}" class="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition">
-                <i data-lucide="map-pin" class="w-4 h-4 text-gray-400"></i>
-                {{ text_address }}
-              </a>
-            </li>
-            <li>
-              <a href="{{ wishlist }}" class="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition">
-                <i data-lucide="heart" class="w-4 h-4 text-gray-400"></i>
-                {{ text_wishlist }}
-              </a>
-            </li>
-            <li>
-              <a href="{{ viewed }}" class="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition">
-                <i data-lucide="history" class="w-4 h-4 text-gray-400"></i>
-                {{ text_viewed }}
-              </a>
-            </li>
-            <li>
-              <a href="{{ newsletter }}" class="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition">
-                <i data-lucide="mail" class="w-4 h-4 text-gray-400"></i>
-                {{ text_newsletter }}
-              </a>
-            </li>
-            {% if affiliate_status %}
-              {% if not tracking %}
-              <li>
-                <a href="{{ affiliate }}" class="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition">
-                  <i data-lucide="users" class="w-4 h-4 text-gray-400"></i>
-                  {{ text_affiliate_add }}
-                </a>
-              </li>
-              {% else %}
-              <li>
-                <a href="{{ affiliate }}" class="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition">
-                  <i data-lucide="users" class="w-4 h-4 text-gray-400"></i>
-                  {{ text_affiliate_edit }}
-                </a>
-              </li>
-              <li>
-                <a href="{{ tracking }}" class="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition">
-                  <i data-lucide="link" class="w-4 h-4 text-gray-400"></i>
-                  {{ text_tracking }}
-                </a>
-              </li>
-              {% endif %}
-            {% endif %}
-          </ul>
+      {# ── Stats ── #}
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+        <a href="{{ order }}" class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm hover:shadow-md transition group">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="shopping-bag" class="w-4 h-4 text-blue-500"></i>
+            <span class="text-xs font-medium text-gray-500">{{ text_total_orders }}</span>
+          </div>
+          <p class="text-2xl font-extrabold text-gray-900 group-hover:text-blue-600 transition">{{ total_orders }}</p>
+        </a>
+        <a href="{{ order }}" class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm hover:shadow-md transition group">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="receipt" class="w-4 h-4 text-emerald-500"></i>
+            <span class="text-xs font-medium text-gray-500">{{ text_total_spent }}</span>
+          </div>
+          <p class="text-2xl font-extrabold text-gray-900 group-hover:text-blue-600 transition">{{ total_spent }}</p>
+        </a>
+        <a href="{{ wishlist }}" class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm hover:shadow-md transition group">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="heart" class="w-4 h-4 text-rose-500"></i>
+            <span class="text-xs font-medium text-gray-500">{{ text_total_wishlist }}</span>
+          </div>
+          <p class="text-2xl font-extrabold text-gray-900 group-hover:text-blue-600 transition">{{ total_wishlist }}</p>
+        </a>
+        {% if reward is not empty %}
+        <a href="{{ reward }}" class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm hover:shadow-md transition group">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="star" class="w-4 h-4 text-amber-500"></i>
+            <span class="text-xs font-medium text-gray-500">{{ text_total_reward }}</span>
+          </div>
+          <p class="text-2xl font-extrabold text-gray-900 group-hover:text-blue-600 transition">{{ total_reward }}</p>
+        </a>
+        {% endif %}
+      </div>
+
+      {# ── Recent Orders ── #}
+      <div class="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm mb-6">
+        <div class="flex items-center justify-between mb-4">
+          <p class="text-xs font-bold uppercase tracking-widest text-blue-500">{{ text_recent_orders }}</p>
+          <a href="{{ order }}" class="text-sm text-blue-600 hover:underline font-medium">{{ text_my_orders }}</a>
         </div>
 
-        {# My Orders #}
-        <div class="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
-          <p class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-3">{{ text_my_orders }}</p>
-          <ul class="space-y-2">
-            <li>
-              <a href="{{ order }}" class="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition">
-                <i data-lucide="shopping-bag" class="w-4 h-4 text-gray-400"></i>
-                {{ text_order }}
-              </a>
-            </li>
-            {% if account_download_status %}
-            <li>
-              <a href="{{ download }}" class="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition">
-                <i data-lucide="download" class="w-4 h-4 text-gray-400"></i>
-                {{ text_download }}
-              </a>
-            </li>
-            {% endif %}
-            {% if reward %}
-            <li>
-              <a href="{{ reward }}" class="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition">
-                <i data-lucide="star" class="w-4 h-4 text-gray-400"></i>
-                {{ text_reward }}
-              </a>
-            </li>
-            {% endif %}
-            <li>
-              <a href="{{ return }}" class="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition">
-                <i data-lucide="rotate-ccw" class="w-4 h-4 text-gray-400"></i>
-                {{ text_return }}
-              </a>
-            </li>
-            <li>
-              <a href="{{ transaction }}" class="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition">
-                <i data-lucide="receipt" class="w-4 h-4 text-gray-400"></i>
-                {{ text_transaction }}
-              </a>
-            </li>
-          </ul>
+        {% if recent_orders %}
+        <div class="space-y-2">
+          {% for order in recent_orders %}
+          {% set s = order.status|lower %}
+          {% if 'complet' in s or 'deliver' in s or 'shipped' in s %}
+            {% set badge = 'bg-green-100 text-green-700' %}
+          {% elseif 'cancel' in s or 'refund' in s or 'fail' in s or 'denied' in s or 'reversed' in s or 'chargeback' in s or 'void' in s or 'expired' in s %}
+            {% set badge = 'bg-red-100 text-red-700' %}
+          {% elseif 'pending' in s or 'awaiting' in s or 'on hold' in s %}
+            {% set badge = 'bg-amber-100 text-amber-700' %}
+          {% elseif 'process' in s or 'transit' in s or 'dispatch' in s %}
+            {% set badge = 'bg-blue-100 text-blue-700' %}
+          {% else %}
+            {% set badge = 'bg-gray-100 text-gray-600' %}
+          {% endif %}
+          <a href="{{ order.view }}" class="flex items-center gap-4 bg-white border border-gray-100 hover:border-blue-200 rounded-2xl px-5 py-4 transition-all group shadow-sm hover:shadow-md">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between gap-3 mb-2">
+                <div class="flex items-center gap-2">
+                  <span class="text-base font-bold text-gray-900">#{{ order.order_id }}</span>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ badge }}">{{ order.status }}</span>
+                </div>
+                <span class="text-sm text-gray-400 whitespace-nowrap">{{ order.date_added }}</span>
+              </div>
+              <div class="flex flex-wrap items-center gap-x-1 gap-y-1 text-sm">
+                <span class="text-gray-900 font-semibold mr-2">{{ order.total }}</span>
+                <span class="text-gray-300 mr-2">·</span>
+                <span class="text-gray-500">{{ order.products }} {{ order.products == 1 ? 'товар' : 'товаров' }}</span>
+                {% if order.tracking_number %}
+                <span class="text-gray-300 mr-2">·</span>
+                <span class="text-gray-400 font-mono text-xs">{{ order.tracking_number }}</span>
+                {% endif %}
+              </div>
+            </div>
+            <i data-lucide="chevron-right" class="w-5 h-5 text-gray-300 group-hover:text-blue-500 transition-colors flex-shrink-0"></i>
+          </a>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-8">
+          <i data-lucide="shopping-bag" class="w-10 h-10 text-gray-300 mx-auto mb-3"></i>
+          <p class="text-sm text-gray-500 mb-4">{{ text_no_orders }}</p>
+          <a href="{{ order }}" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2.5 rounded-xl transition-colors text-sm">
+            <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+            {{ text_go_to_catalog }}
+          </a>
+        </div>
+        {% endif %}
+      </div>
+
+      {# ── Quick Actions ── #}
+      <div class="mb-6">
+        <p class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-3">{{ text_quick_actions }}</p>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <a href="{{ edit }}" class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm hover:shadow-md transition flex items-center gap-3 group">
+            <i data-lucide="user" class="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition"></i>
+            <span class="text-sm font-medium text-gray-700 group-hover:text-blue-600 transition">{{ text_edit_profile }}</span>
+          </a>
+          <a href="{{ password }}" class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm hover:shadow-md transition flex items-center gap-3 group">
+            <i data-lucide="lock" class="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition"></i>
+            <span class="text-sm font-medium text-gray-700 group-hover:text-blue-600 transition">{{ text_change_password }}</span>
+          </a>
+          <a href="{{ address }}" class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm hover:shadow-md transition flex items-center gap-3 group">
+            <i data-lucide="map-pin" class="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition"></i>
+            <span class="text-sm font-medium text-gray-700 group-hover:text-blue-600 transition">{{ text_my_addresses }}</span>
+          </a>
+          <a href="{{ newsletter }}" class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm hover:shadow-md transition flex items-center gap-3 group">
+            <i data-lucide="mail" class="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition"></i>
+            <span class="text-sm font-medium text-gray-700 group-hover:text-blue-600 transition">{{ text_newsletter }}</span>
+          </a>
         </div>
       </div>
 
       {% if credit_cards %}
-      <div class="mt-4 bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
+      <div class="mt-4 bg-white rounded-3xl border border-gray-100 p-5 shadow-sm">
         <p class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-3">{{ text_credit_card }}</p>
         <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {% for credit_card in credit_cards %}
           <li>
-            <a href="{{ credit_card.href }}" class="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition">
-              <i data-lucide="credit-card" class="w-4 h-4 text-gray-400"></i>
+            <a href="{{ credit_card.href }}" class="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600 transition py-1">
+              <i data-lucide="credit-card" class="w-3.5 h-3.5 text-gray-400"></i>
               {{ credit_card.name }}
             </a>
           </li>
@@ -148,6 +158,9 @@
         </ul>
       </div>
       {% endif %}
+
+        </div>
+      </div>
 
       {{ content_bottom }}
     </div>

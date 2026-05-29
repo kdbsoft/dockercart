@@ -13,7 +13,7 @@
   </section>
 
   <section class="py-8 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-3xl mx-auto">
+    <div class="max-w-7xl mx-auto">
       {{ content_top }}
 
       {% if error_warning %}
@@ -22,6 +22,12 @@
         <span>{{ error_warning }}</span>
       </div>
       {% endif %}
+
+      <div class="flex flex-col lg:flex-row gap-6 items-start">
+        <aside class="lg:w-60 flex-shrink-0">
+          {{ account_menu }}
+        </aside>
+        <div class="flex-1 min-w-0">
 
       <div class="bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-sm">
         <p class="text-sm text-gray-500 mb-6">{{ text_description }}</p>
@@ -144,6 +150,9 @@
           </div>
 
         </form>
+      </div>
+
+        </div>
       </div>
 
       {{ content_bottom }}

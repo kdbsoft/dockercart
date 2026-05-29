@@ -13,7 +13,7 @@
   </section>
 
   <section class="py-8 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-5xl mx-auto">
+    <div class="max-w-7xl mx-auto">
       {{ content_top }}
 
       {% if success %}
@@ -22,6 +22,12 @@
         <span>{{ success }}</span>
       </div>
       {% endif %}
+
+      <div class="flex flex-col lg:flex-row gap-6 items-start">
+        <aside class="lg:w-60 flex-shrink-0">
+          {{ account_menu }}
+        </aside>
+        <div class="flex-1 min-w-0">
 
       {% if products %}
       <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden mb-6">
@@ -52,7 +58,13 @@
                 </td>
                 <td class="text-left text-gray-500 px-4 py-3">{{ product.model }}</td>
                 <td class="text-right px-4 py-3">
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                  {% set stock_text = product.stock|lower %}
+                  {% if 'out' in stock_text or 'нет' in stock_text or 'нема' in stock_text or '0' in stock_text %}
+                    {% set stock_badge = 'bg-red-100 text-red-700' %}
+                  {% else %}
+                    {% set stock_badge = 'bg-green-100 text-green-700' %}
+                  {% endif %}
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ stock_badge }}">
                     {{ product.stock }}
                   </span>
                 </td>
@@ -93,6 +105,9 @@
         <a href="{{ continue }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm">
           {{ button_continue }}
         </a>
+      </div>
+
+        </div>
       </div>
 
       {{ content_bottom }}

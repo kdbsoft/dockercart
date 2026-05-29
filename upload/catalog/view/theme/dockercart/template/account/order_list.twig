@@ -13,63 +13,74 @@
   </section>
 
   <section class="py-8 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-5xl mx-auto">
+    <div class="max-w-7xl mx-auto">
       {{ content_top }}
+
+      <div class="flex flex-col lg:flex-row gap-6 items-start">
+        <aside class="lg:w-60 flex-shrink-0">
+          {{ account_menu }}
+        </aside>
+        <div class="flex-1 min-w-0">
 
       {% if orders %}
       <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden mb-6">
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm">
-            <thead>
-              <tr class="border-b border-gray-100 bg-gray-50">
-                <th class="text-right font-semibold text-gray-500 px-4 py-3">{{ column_order_id }}</th>
-                <th class="text-left font-semibold text-gray-500 px-4 py-3">{{ column_customer }}</th>
-                <th class="text-right font-semibold text-gray-500 px-4 py-3">{{ column_product }}</th>
-                <th class="text-left font-semibold text-gray-500 px-4 py-3">{{ column_status }}</th>
-                <th class="text-left font-semibold text-gray-500 px-4 py-3">{{ column_tracking_number }}</th>
-                <th class="text-right font-semibold text-gray-500 px-4 py-3">{{ column_total }}</th>
-                <th class="text-left font-semibold text-gray-500 px-4 py-3">{{ column_date_added }}</th>
-                <th class="px-4 py-3"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for order in orders %}
-              {# Determine badge colour from status text #}
-              {% set s = order.status|lower %}
-              {% if 'complet' in s or 'deliver' in s or 'shipped' in s %}
-                {% set badge = 'bg-green-100 text-green-700' %}
-              {% elseif 'cancel' in s or 'refund' in s or 'fail' in s or 'denied' in s or 'reversed' in s or 'chargeback' in s or 'void' in s or 'expired' in s %}
-                {% set badge = 'bg-red-100 text-red-700' %}
-              {% elseif 'pending' in s or 'awaiting' in s or 'on hold' in s %}
-                {% set badge = 'bg-amber-100 text-amber-700' %}
-              {% elseif 'process' in s or 'transit' in s or 'dispatch' in s %}
-                {% set badge = 'bg-blue-100 text-blue-700' %}
-              {% else %}
-                {% set badge = 'bg-gray-100 text-gray-600' %}
-              {% endif %}
-              <tr class="border-b border-gray-50 hover:bg-blue-50/30 transition">
-                <td class="text-right text-gray-500 px-4 py-3 font-mono">#{{ order.order_id }}</td>
-                <td class="text-left text-gray-800 px-4 py-3">{{ order.name }}</td>
-                <td class="text-right text-gray-600 px-4 py-3">{{ order.products }}</td>
-                <td class="text-left px-4 py-3">
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ badge }}">
-                    {{ order.status }}
-                  </span>
-                </td>
-                <td class="text-left text-gray-600 px-4 py-3 font-mono">{{ order.tracking_number ? order.tracking_number : '-' }}</td>
-                <td class="text-right text-gray-800 font-semibold px-4 py-3">{{ order.total }}</td>
-                <td class="text-left text-gray-500 px-4 py-3">{{ order.date_added }}</td>
-                <td class="text-right px-4 py-3">
-                  <a href="{{ order.view }}" class="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium text-xs border border-blue-200 hover:border-blue-300 px-3 py-1.5 rounded-lg transition">
-                    <i data-lucide="eye" class="w-3.5 h-3.5"></i>
-                    {{ button_view }}
-                  </a>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-gray-100 bg-gray-50">
+              <th class="text-right font-semibold text-gray-500 px-4 py-3">#</th>
+              <th class="text-right font-semibold text-gray-500 px-4 py-3 hidden sm:table-cell">{{ column_product }}</th>
+              <th class="text-left font-semibold text-gray-500 px-4 py-3">{{ column_status }}</th>
+              <th class="text-right font-semibold text-gray-500 px-4 py-3 hidden sm:table-cell">{{ column_total }}</th>
+              <th class="text-left font-semibold text-gray-500 px-4 py-3 hidden sm:table-cell">{{ column_date_added }}</th>
+              <th class="px-4 py-3"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in orders %}
+            {% set s = order.status|lower %}
+            {% if 'complet' in s or 'deliver' in s or 'shipped' in s %}
+              {% set badge = 'bg-green-100 text-green-700' %}
+            {% elseif 'cancel' in s or 'refund' in s or 'fail' in s or 'denied' in s or 'reversed' in s or 'chargeback' in s or 'void' in s or 'expired' in s %}
+              {% set badge = 'bg-red-100 text-red-700' %}
+            {% elseif 'pending' in s or 'awaiting' in s or 'on hold' in s %}
+              {% set badge = 'bg-amber-100 text-amber-700' %}
+            {% elseif 'process' in s or 'transit' in s or 'dispatch' in s %}
+              {% set badge = 'bg-blue-100 text-blue-700' %}
+            {% else %}
+              {% set badge = 'bg-gray-100 text-gray-600' %}
+            {% endif %}
+            <tr class="border-b border-gray-50 hover:bg-blue-50/30 transition">
+              <td class="text-right text-gray-500 px-4 py-3 font-mono">#{{ order.order_id }}</td>
+              <td class="text-right text-gray-600 px-4 py-3 hidden sm:table-cell">{{ order.products }}</td>
+              <td class="text-left px-4 py-3">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ badge }}">
+                  {{ order.status }}
+                </span>
+              </td>
+              <td class="text-right text-gray-800 font-semibold px-4 py-3 hidden sm:table-cell">{{ order.total }}</td>
+              <td class="text-left text-gray-500 px-4 py-3 hidden sm:table-cell">{{ order.date_added }}</td>
+              <td class="text-right px-4 py-3 whitespace-nowrap">
+                <a href="{{ order.view }}" class="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium text-xs border border-blue-200 hover:border-blue-300 px-3 py-1.5 rounded-lg transition">
+                  <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                  {{ button_view }}
+                </a>
+              </td>
+            </tr>
+            <tr class="sm:hidden border-b border-gray-50">
+              <td colspan="4" class="px-4 pb-3 pt-0">
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500">
+                  <span>{{ order.products }}</span>
+                  <span class="font-semibold text-gray-800">{{ order.total }}</span>
+                  <span>{{ order.date_added }}</span>
+                  {% if order.tracking_number %}
+                  <span class="font-mono">{{ order.tracking_number }}</span>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
 
       {% if pagination %}
@@ -90,6 +101,9 @@
         <a href="{{ continue }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm">
           {{ button_continue }}
         </a>
+      </div>
+
+        </div>
       </div>
 
       {{ content_bottom }}

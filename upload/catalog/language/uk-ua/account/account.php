@@ -23,3 +23,19 @@ $_["text_tracking"] = "Спеціальний код відстеження па
 $_["text_transaction"] = "Ваші транзакції";
 $_["text_transactions"] = "Транзакції";
 $_["text_wishlist"] = "Змініть свій список бажань";
+
+// Dashboard
+$_['text_welcome'] = "Привіт, %s!";
+$_['text_total_orders'] = "Всього замовлень";
+$_['text_total_spent'] = "Сума покупок";
+$_['text_total_wishlist'] = "У бажаному";
+$_['text_total_reward'] = "Бонусні бали";
+$_['text_recent_orders'] = "Останні замовлення";
+$_['text_no_orders'] = "У вас поки немає замовлень.";
+$_['text_go_to_catalog'] = "Перейти до каталогу";
+$_['text_quick_actions'] = "Швидкі дії";
+$_['text_edit_profile'] = "Редагувати профіль";
+$_['text_change_password'] = "Змінити пароль";
+$_['text_my_addresses'] = "Мої адреси";
+$_['text_order_number'] = "Замовлення №%s";
+$_['text_from'] = "від";
