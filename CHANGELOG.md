@@ -1,3 +1,9 @@
+## [1.31.1](https://github.com/mathflow-bit/dockercart/compare/v1.31.0...v1.31.1) (2026-05-29)
+
+### Bug Fixes
+
+* add DockerCart version query to admin auth CSS assets ([e88fdb6](https://github.com/mathflow-bit/dockercart/commit/e88fdb66b80deb0704da671f8f21c97f65255017))
+
 ## [1.31.0](https://github.com/mathflow-bit/dockercart/compare/v1.30.2...v1.31.0) (2026-05-29)
 
 ### Features
