@@ -55,7 +55,7 @@
                   {% else %}
                     {% set stock_badge = 'bg-green-100 text-green-700' %}
                   {% endif %}
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ stock_badge }}">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap {{ stock_badge }}">
                     {{ product.stock }}
                   </span>
                 </td>

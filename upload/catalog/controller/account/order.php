@@ -59,7 +59,7 @@ class ControllerAccountOrder extends Controller {
 				'name'       => $result['firstname'] . ' ' . $result['lastname'],
 				'status'     => $result['status'],
 				'tracking_number' => $result['tracking_number'],
-				'date_added' => date($this->language->get('date_format_short') . ' ' . $this->language->get('time_format'), strtotime($result['date_added'])),
+				'date_added' => date($this->language->get('datetime_format'), strtotime($result['date_added'])),
 				'products'   => ($product_total + $voucher_total),
 				'total'      => $this->currency->format($result['total'], $result['currency_code'], $result['currency_value']),
 				'view'       => $this->url->link('account/order/info', 'order_id=' . $result['order_id'], true),
