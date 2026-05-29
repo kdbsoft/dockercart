@@ -13,7 +13,7 @@
   </section>
 
   <section class="py-8 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md mx-auto">
+    <div class="max-w-5xl mx-auto">
       {{ content_top }}
 
       {% if success %}
@@ -29,64 +29,74 @@
       </div>
       {% endif %}
 
-      <div class="bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-sm">
-        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="login-form">
-          {# Hidden field to hold the actual identifier sent to server #}
-          <input type="hidden" name="email" id="login-identifier" value="{{ email }}" />
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-          {# Tabs: Email / Phone #}
-          <div class="flex gap-2 border-b border-gray-100 pb-3 mb-5">
-            <button type="button" class="tab-btn active px-4 py-2 rounded-xl border border-transparent text-sm font-semibold flex-shrink-0 flex items-center gap-2" data-tab="email">
-              <i data-lucide="mail" class="w-4 h-4"></i>
-              {{ entry_email_tab }}
+        {# ── Login Form ── #}
+        <div class="bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-sm">
+          <h2 class="text-lg font-extrabold text-gray-900 mb-5">{{ text_login }}</h2>
+          <form action="{{ action }}" method="post" enctype="multipart/form-data" id="login-form">
+            <input type="hidden" name="email" id="login-identifier" value="{{ email }}" />
+
+            {# Tabs: Email / Phone #}
+            <div class="flex gap-2 border-b border-gray-100 pb-3 mb-5">
+              <button type="button" class="tab-btn active px-4 py-2 rounded-xl border border-transparent text-sm font-semibold flex-shrink-0 flex items-center gap-2" data-tab="email">
+                <i data-lucide="mail" class="w-4 h-4"></i>
+                {{ entry_email_tab }}
+              </button>
+              <button type="button" class="tab-btn px-4 py-2 rounded-xl border border-transparent text-sm font-semibold flex-shrink-0 flex items-center gap-2" data-tab="phone">
+                <i data-lucide="phone" class="w-4 h-4"></i>
+                {{ entry_telephone_tab }}
+              </button>
+            </div>
+
+            {# Email panel #}
+            <div id="dc-tab-email" class="dc-tab-panel mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-1.5" for="input-email">{{ entry_email_tab }}</label>
+              <input type="email" name="email_display" value="{{ email }}" placeholder="you@example.com" id="input-email"
+                class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white" />
+            </div>
+
+            {# Phone panel #}
+            <div id="dc-tab-phone" class="dc-tab-panel mb-4 hidden">
+              <label class="block text-sm font-medium text-gray-700 mb-1.5" for="input-telephone">{{ entry_telephone_tab }}</label>
+              <input type="tel" name="telephone_display" value="" placeholder="+380 __ ___ __ __" id="input-telephone"
+                class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white" />
+            </div>
+
+            {# Password #}
+            <div class="mb-2">
+              <label class="block text-sm font-medium text-gray-700 mb-1.5" for="input-password">{{ entry_password }}</label>
+              <input type="password" name="password" value="{{ password }}" placeholder="{{ entry_password }}" id="input-password"
+                class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white" />
+            </div>
+
+            <div class="flex items-center justify-end mb-6">
+              <a href="{{ forgotten }}" class="text-sm text-blue-600 hover:underline">{{ text_forgotten }}</a>
+            </div>
+
+            {% if redirect %}
+            <input type="hidden" name="redirect" value="{{ redirect }}" />
+            {% endif %}
+
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
+              <i data-lucide="log-in" class="w-4 h-4"></i>
+              {{ button_login }}
             </button>
-            <button type="button" class="tab-btn px-4 py-2 rounded-xl border border-transparent text-sm font-semibold flex-shrink-0 flex items-center gap-2" data-tab="phone">
-              <i data-lucide="phone" class="w-4 h-4"></i>
-              {{ entry_telephone_tab }}
-            </button>
-          </div>
-
-          {# Email panel #}
-          <div id="dc-tab-email" class="dc-tab-panel mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1.5" for="input-email">{{ entry_email_tab }}</label>
-            <input type="email" name="email_display" value="{{ email }}" placeholder="you@example.com" id="input-email"
-              class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white" />
-          </div>
-
-          {# Phone panel #}
-          <div id="dc-tab-phone" class="dc-tab-panel mb-4 hidden">
-            <label class="block text-sm font-medium text-gray-700 mb-1.5" for="input-telephone">{{ entry_telephone_tab }}</label>
-            <input type="tel" name="telephone_display" value="" placeholder="+380 __ ___ __ __" id="input-telephone"
-              class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white" />
-          </div>
-
-          {# Password #}
-          <div class="mb-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1.5" for="input-password">{{ entry_password }}</label>
-            <input type="password" name="password" value="{{ password }}" placeholder="{{ entry_password }}" id="input-password"
-              class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white" />
-          </div>
-
-          <div class="flex items-center justify-end mb-6">
-            <a href="{{ forgotten }}" class="text-sm text-blue-600 hover:underline">{{ text_forgotten }}</a>
-          </div>
-
-          {% if redirect %}
-          <input type="hidden" name="redirect" value="{{ redirect }}" />
-          {% endif %}
-
-          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
-            <i data-lucide="log-in" class="w-4 h-4"></i>
-            {{ button_login }}
-          </button>
-        </form>
-
-        <div class="mt-6 pt-6 border-t border-gray-100 text-center">
-          <p class="text-sm text-gray-500">
-            {{ text_no_account }}
-            <a href="{{ register }}" class="text-blue-600 hover:underline font-semibold">{{ text_register_link }}</a>
-          </p>
+          </form>
         </div>
+
+        {# ── Promo: Register ── #}
+        <div class="bg-gradient-to-br from-gray-900 via-gray-800 to-blue-950 rounded-3xl p-6 sm:p-8 flex flex-col items-center justify-center text-center">
+          <div class="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center mb-5">
+            <i data-lucide="user-plus" class="w-7 h-7 text-white"></i>
+          </div>
+          <h2 class="text-xl font-extrabold text-white mb-3">{{ text_no_account }}</h2>
+          <p class="text-sm text-gray-300 mb-6 max-w-xs">{{ text_register_account }}</p>
+          <a href="{{ register }}" class="inline-flex items-center justify-center gap-2 bg-white hover:bg-gray-100 text-gray-900 font-semibold px-6 py-3 rounded-xl transition-colors">
+            {{ text_register_link }}
+          </a>
+        </div>
+
       </div>
 
       {{ content_bottom }}

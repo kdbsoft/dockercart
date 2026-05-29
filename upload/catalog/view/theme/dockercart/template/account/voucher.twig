@@ -13,7 +13,7 @@
   </section>
 
   <section class="py-8 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-2xl mx-auto">
+    <div class="max-w-7xl mx-auto">
       {{ content_top }}
 
       {% if error_warning %}
@@ -22,6 +22,12 @@
         <span>{{ error_warning }}</span>
       </div>
       {% endif %}
+
+      <div class="flex flex-col lg:flex-row gap-6 items-start">
+        <aside class="lg:w-60 flex-shrink-0">
+          {{ account_menu }}
+        </aside>
+        <div class="flex-1 min-w-0">
 
       <div class="bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-sm">
         <p class="text-sm text-gray-500 mb-6">{{ text_description }}</p>
@@ -85,20 +91,28 @@
             {% if error_amount %}<p class="text-sm text-red-500 mt-1">{{ error_amount }}</p>{% endif %}
           </div>
 
-          <div class="flex items-center justify-end gap-4">
+          <div class="border-t border-gray-100 pt-6">
             {% if text_agree %}
-            <div class="flex items-center gap-2 text-sm text-gray-600">
-              <span>{{ text_agree }}</span>
+            <div class="flex items-start gap-2 text-sm text-gray-600 mb-4">
               <input type="checkbox" name="agree" value="1" {% if agree %}checked{% endif %}
-                class="w-4 h-4 text-blue-600 border-gray-300 rounded" />
+                class="w-4 h-4 text-blue-600 border-gray-300 rounded mt-0.5" />
+              <span>{{ text_agree }}</span>
             </div>
             {% endif %}
-            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm">
-              {{ button_continue }}
-            </button>
+            <div class="flex items-center justify-between gap-4">
+              <a href="{{ back }}" class="border border-gray-200 hover:border-gray-300 bg-white text-gray-700 font-medium px-5 py-2.5 rounded-xl transition-colors text-sm">
+                {{ button_back }}
+              </a>
+              <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm">
+                {{ button_continue }}
+              </button>
+            </div>
           </div>
 
         </form>
+      </div>
+
+        </div>
       </div>
 
       {{ content_bottom }}
