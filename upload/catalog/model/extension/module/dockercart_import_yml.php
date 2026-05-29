@@ -992,7 +992,6 @@ class ModelExtensionModuleDockercartImportYml extends Model {
         $this->db->query("DELETE FROM `" . DB_PREFIX . "category_description` WHERE category_id = '" . $category_id . "'");
         $this->db->query("DELETE FROM `" . DB_PREFIX . "category_to_store` WHERE category_id = '" . $category_id . "'");
         $this->db->query("DELETE FROM `" . DB_PREFIX . "category_to_layout` WHERE category_id = '" . $category_id . "'");
-        $this->db->query("DELETE FROM `" . DB_PREFIX . "category_filter` WHERE category_id = '" . $category_id . "'");
         $this->db->query("DELETE FROM `" . DB_PREFIX . "category` WHERE category_id = '" . $category_id . "'");
     }
 
@@ -1319,7 +1318,6 @@ class ModelExtensionModuleDockercartImportYml extends Model {
         $this->deleteByProductIds(DB_PREFIX . 'product_attribute', $ids);
         $this->deleteByProductIds(DB_PREFIX . 'product_description', $ids);
 		$this->deleteByProductIds(DB_PREFIX . 'product_discount', $ids);
-        $this->deleteByProductIds(DB_PREFIX . 'product_filter', $ids);
         $this->deleteByProductIds(DB_PREFIX . 'product_image', $ids);
         $this->deleteByProductIds(DB_PREFIX . 'product_option', $ids);
         $this->deleteByProductIds(DB_PREFIX . 'product_option_value', $ids);
@@ -1347,7 +1345,6 @@ class ModelExtensionModuleDockercartImportYml extends Model {
             'product_option',
             'product_attribute',
             'product_discount',
-            'product_filter',
             'product_image',
             'product_reward',
             'product_special',
@@ -1361,7 +1358,6 @@ class ModelExtensionModuleDockercartImportYml extends Model {
             'product',
 
             // Category entities
-            'category_filter',
             'category_path',
             'category_to_layout',
             'category_to_store',

@@ -35,7 +35,6 @@ $_['text_download'] = 'Завантаження';
 $_['text_event'] = 'Події';
 $_['text_extension'] = 'Розширення';
 $_['text_feed'] = 'Канали просування';
-$_['text_filter'] = 'Фільтри';
 $_['text_fraud'] = 'Протидія шахрайству';
 $_['text_geo_zone'] = 'Географічні зони';
 $_['text_gogettop'] = 'GoGetTop';
