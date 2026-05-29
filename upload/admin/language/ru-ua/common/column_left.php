@@ -1,8 +1,8 @@
 <?php
 
 $_['text_api'] = 'API';
-$_['text_attribute'] = 'Атрибуты';
-$_['text_attribute_group'] = 'Группы атрибутов';
+$_['text_attribute'] = 'Характеристики';
+$_['text_attribute_group'] = 'Группы характеристик';
 $_['text_backup'] = 'Резервное копирование / Восстановление';
 $_['text_banner'] = 'Баннеры';
 $_['text_catalog'] = 'Каталог';
