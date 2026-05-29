@@ -32,3 +32,6 @@ $_['text_shipping_address'] = 'Адреса доставки';
 $_['text_shipping_method'] = 'Спосіб доставки:';
 $_['text_tracking_number'] = 'Номер відстеження:';
 $_['text_success'] = 'Успіх: Ви додали <a href="%s">%s</a> до свого <a href="%s">кошика</a> !';
+
+$_['text_product'] = "товар";
+$_['text_products'] = "товарів";
