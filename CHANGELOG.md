@@ -1,3 +1,16 @@
+## [1.31.0](https://github.com/mathflow-bit/dockercart/compare/v1.30.2...v1.31.0) (2026-05-29)
+
+### Features
+
+* add account dashboard, menu component and related UI updates ([9fdd9cb](https://github.com/mathflow-bit/dockercart/commit/9fdd9cb8a6d410c75454646869a042751e3b2496))
+* add view‑full‑product link and href data attributes ([42f9cab](https://github.com/mathflow-bit/dockercart/commit/42f9cab0144e44958b968db734cc3d316ad675a8))
+* full admin redesign, overhaul dashboard widgets, add DB indexes, ([834d958](https://github.com/mathflow-bit/dockercart/commit/834d95896537a39e02c6282a97bbcf29ff8b8cb4))
+* improve order list UI and add datetime formatting ([4ecbb42](https://github.com/mathflow-bit/dockercart/commit/4ecbb42b3d1970fdc8f419d19cdf2d66a7c96ffd))
+
+### Bug Fixes
+
+* use datetime_format and clean up language strings ([d3ff619](https://github.com/mathflow-bit/dockercart/commit/d3ff6192b472bd55f688955dd5167b5bb84503ab))
+
 ## [1.30.2](https://github.com/mathflow-bit/dockercart/compare/v1.30.1...v1.30.2) (2026-05-28)
 
 ### Bug Fixes
