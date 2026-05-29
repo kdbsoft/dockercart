@@ -2290,3 +2290,30 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
     padding: 2px 8px;
     font-size: 11px;
 }
+
+/* Option value prefix/suffix merged input group */
+.option-value-prefix-group {
+    display: inline-flex;
+    align-items: center;
+    width: auto;
+    flex-wrap: nowrap;
+}
+
+.option-value-prefix-group .option-value-prefix-select {
+    width: 55px;
+    flex-shrink: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    height: 34px;
+    padding: 0 18px 0 6px;
+    text-align: center;
+}
+
+.option-value-prefix-group .option-value-prefix-input {
+    flex: 1;
+    min-width: 60px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    margin-left: -1px;
+    height: 34px;
+}

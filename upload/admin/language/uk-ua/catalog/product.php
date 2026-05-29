@@ -58,6 +58,7 @@ $_['entry_option_value_cg_price']      = 'ЦГ';
 $_['button_option_value_cg_price_add'] = 'Додати';
 $_['entry_points'] = 'Очки';
 $_['entry_price'] = 'Ціна';
+$_['entry_call_for_price'] = 'Ціна за запитом';
 $_['entry_priority'] = 'Пріоритет';
 $_['entry_quantity'] = 'Кількість';
 $_['entry_related'] = 'Супутні товари';

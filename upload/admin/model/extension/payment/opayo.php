@@ -35,26 +35,6 @@ class ModelExtensionPaymentOpayo extends Model {
 			) ENGINE=MyISAM DEFAULT COLLATE=utf8_general_ci;");
 
 		$this->db->query("
-			CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "opayo_order_recurring` (
-			  `opayo_order_recurring_id` INT(11) NOT NULL AUTO_INCREMENT,
-			  `order_id` INT(11) NOT NULL,
-			  `order_recurring_id` INT(11) NOT NULL,
-			  `VPSTxId` VARCHAR(50),
-			  `VendorTxCode` VARCHAR(50) NOT NULL,
-			  `SecurityKey` CHAR(50) NOT NULL,
-			  `TxAuthNo` INT(50),
-			  `date_added` DATETIME NOT NULL,
-			  `date_modified` DATETIME NOT NULL,
-			  `next_payment` DATETIME NOT NULL,
-			  `trial_end` DATETIME DEFAULT NULL,
-			  `subscription_end` DATETIME DEFAULT NULL,
-			  `currency_code` CHAR(3) NOT NULL,
-			  `total` DECIMAL( 10, 2 ) NOT NULL,
-			  PRIMARY KEY (`opayo_order_recurring_id`),
-			  KEY (`order_id`)
-			) ENGINE=MyISAM DEFAULT COLLATE=utf8_general_ci;");
-		
-		$this->db->query("
 			CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "opayo_card` (
 			  `card_id` INT(11) NOT NULL AUTO_INCREMENT,
 			  `customer_id` INT(11) NOT NULL,
@@ -71,7 +51,6 @@ class ModelExtensionPaymentOpayo extends Model {
 	public function uninstall() {
 		$this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "opayo_order`;");
 		$this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "opayo_order_transaction`;");
-		$this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "opayo_order_recurring`;");
 		$this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "opayo_card`;");
 	}
 
@@ -241,10 +220,6 @@ class ModelExtensionPaymentOpayo extends Model {
 		$query = $this->db->query("SELECT SUM(`amount`) AS `total` FROM `" . DB_PREFIX . "opayo_order_transaction` WHERE `opayo_order_id` = '" . (int)$opayo_order_id . "' AND 'rebate'");
 
 		return (float)$query->row['total'];
-	}
-	
-	public function editRecurringStatus($order_recurring_id, $status) {
-		$this->db->query("UPDATE `" . DB_PREFIX . "order_recurring` SET `status` = '" . (int)$status . "' WHERE `order_recurring_id` = '" . (int)$order_recurring_id . "'");
 	}
 
 	public function sendCurl($url, $payment_data) {

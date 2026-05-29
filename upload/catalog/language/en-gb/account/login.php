@@ -14,7 +14,13 @@ $_['text_forgotten']               = 'Forgotten Password';
 
 // Entry
 $_['entry_email']                  = 'E-Mail Address or Telephone';
+$_['entry_email_tab']              = 'E-Mail';
+$_['entry_telephone_tab']          = 'Phone';
 $_['entry_password']               = 'Password';
+
+// Text
+$_['text_no_account']              = 'Don\'t have an account?';
+$_['text_register_link']           = 'Create one';
 
 // Error
 $_['error_login']                  = 'Warning: No match for E-Mail Address and/or Password.';

@@ -8,17 +8,12 @@ $_['heading_title_transaction']                         = 'View Transaction #%s'
 $_['help_total']                                        = 'The checkout total the order must reach before this payment method becomes active.';
 $_['help_local_cron']                                   = 'Insert this command in your web server CRON tab. Set it up to run at least once per day.';
 $_['help_remote_cron']                                  = 'Use this URL to set up a CRON task via a web-based CRON service. Set it up to run at least once per day.';
-$_['help_recurring_status']                             = 'Enable to allow periodic recurring payments.<br />NOTE: You must also setup a daily CRON task.';
 $_['help_cron_email']                                   = 'A summary of the recurring task will be sent to this e-mail after completion.';
 $_['help_cron_email_status']                            = 'Enable to receive a summary after every CRON task.';
-$_['help_notify_recurring_success']                     = 'Notify customers about successful recurring transactions.';
-$_['help_notify_recurring_fail']                        = 'Notify customers about failed recurring transactions.';
-
 // Tab
 $_['tab_setting']                                       = 'Settings';
 $_['tab_transaction']                                   = 'Transactions';
 $_['tab_cron']                                          = 'CRON';
-$_['tab_recurring']                                     = 'Recurring Payments';
 
 // Text
 $_['text_access_token_expires_label']                   = 'Access token expires';
@@ -28,14 +23,14 @@ $_['text_admin_notifications']                          = 'Admin notifications';
 $_['text_authorize_label']                              = 'Authorize';
 $_['text_canceled_success']                             = 'Success: You have succesfully canceled this payment!';
 $_['text_capture']                                      = 'Capture';
-$_['text_client_id_help']                               = 'Get this from the Manage Application page on Square';
-$_['text_client_id_label']                              = 'Square Application ID';
+$_['text_client_id_help']                               = 'Get this from the Manage Application page on Square';$_['text_client_id_label']                              = 'Square Application ID';
 $_['text_client_id_placeholder']                        = 'Square Application ID';
 $_['text_client_secret_help']                           = 'Get this from the Manage Application page on Square';
 $_['text_client_secret_label']                          = 'OAuth Application Secret';
 $_['text_client_secret_placeholder']                    = 'OAuth Application Secret';
 $_['text_confirm_action']                               = 'Are you sure?';
 $_['text_confirm_cancel']                               = 'Are you sure you want to cancel the recurring payments?';
+$_['text_cron_info']                                    = 'Please make sure to set up a daily CRON task using one of the methods below. CRON jobs help you with:<br /><br />&bull; Automatic refresh of your API access token<br />&bull; Processing of subscription transactions';
 $_['text_confirm_capture']                              = 'You are about to capture the following amount: <strong>%s</strong>. Click OK to proceed.';
 $_['text_confirm_refund']                               = 'Please provide a reason for the refund:';
 $_['text_confirm_void']                                 = 'You are about to void the following amount: <strong>%s</strong>. Click OK to proceed.';
@@ -81,15 +76,11 @@ $_['text_no_transactions']                              = 'No transactions have 
 $_['text_not_connected']                                = 'Not connected';
 $_['text_not_connected_info']                           = 'By clicking this button you will connect this module to your Square account and activate the service.';
 $_['text_notification_ssl']                             = 'Make sure you have SSL enabled on your checkout page. Otherwise, the extension will not work.';
-$_['text_notify_recurring_fail']                        = 'Recurring Transaction Failed:';
-$_['text_notify_recurring_success']                     = 'Recurring Transaction Successful:';
 $_['text_ok']                                           = 'OK';
 $_['text_order_history_cancel']                         = 'An administrator has canceled your recurring payments. Your card will no longer be charged.';
 $_['text_payment_method_name_help']                     = 'Checkout payment method name';
 $_['text_payment_method_name_label']                    = 'Payment method name';
 $_['text_payment_method_name_placeholder']              = 'Credit / Debit Card';
-$_['text_recurring_info']                               = 'Please make sure to set up a daily CRON task using one of the methods below. CRON jobs help you with:<br /><br />&bull; Automatic refresh of your API access token<br />&bull; Processing of recurring transactions';
-$_['text_recurring_status']                             = 'Status of recurring payments:';
 $_['text_redirect_uri_help']                            = 'Paste this link into the Redirect URI field under Manage Application/oAuth';
 $_['text_redirect_uri_label']                           = 'Square OAuth Redirect URL';
 $_['text_refresh_access_token_success']                 = 'Successfully refreshed the connection to your Square account.'; 
@@ -165,7 +156,6 @@ $_['entry_setup_confirmation']                          = 'Setup confirmation:';
 
 // Error
 $_['error_permission']                                  = '<strong>Warning:</strong> You do not have permission to modify payment Square!';
-$_['error_permission_recurring']                        = '<strong>Warning:</strong> You do not have permission to modify recurring payments!';
 $_['error_transaction_missing']                         = 'Transaction not found!';
 $_['error_no_ssl']                                      = '<strong>Warning:</strong> SSL is not enabled on your admin panel. Please enable it to finish your configuration.';
 $_['error_user_rejected_connect_attempt']               = 'Connection attempt was canceled by the user.';

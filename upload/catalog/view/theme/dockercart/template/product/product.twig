@@ -220,17 +220,6 @@
           </div>
           {% endfor %}{% endif %}
 
-          {% if recurrings %}
-          <div class="mt-5">
-            <p class="text-sm font-semibold text-gray-800 mb-2">{{ text_payment_recurring }}</p>
-            <select name="recurring_id" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm bg-white focus:outline-none focus:border-blue-400 transition appearance-none">
-              <option value="">{{ text_select }}</option>
-              {% for recurring in recurrings %}<option value="{{ recurring.recurring_id }}">{{ recurring.name }}</option>{% endfor %}
-            </select>
-            <div class="text-xs text-gray-500 mt-1" id="recurring-description"></div>
-          </div>
-          {% endif %}
-
           {% if minimum > 1 or (quantity_step is defined and quantity_step != 1) %}
           <div class="mt-4 flex items-center gap-2 text-xs text-blue-600 bg-blue-50 rounded-xl px-3 py-2">
             <i data-lucide="info" class="w-3.5 h-3.5 flex-shrink-0"></i>
@@ -950,9 +939,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   document.addEventListener('DOMContentLoaded', function() {
-    var recurringSelect = document.querySelector('select[name="recurring_id"]');
     var quantityInput = document.getElementById('input-quantity');
-    var recurringDescription = document.getElementById('recurring-description');
     var cartButton = document.getElementById('button-cart');
     var wishlistButton = document.getElementById('dc-wishlist-btn');
 
@@ -963,41 +950,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!productId) return;
         window.dcAddToWishlist(productId, wishlistButton);
       });
-    }
-
-    function refreshRecurringDescription() {
-      if (!recurringSelect || !quantityInput || !recurringDescription) return;
-
-      var params = new URLSearchParams();
-      var productIdField = document.querySelector('input[name="product_id"]');
-      params.append('product_id', productIdField ? productIdField.value : '0');
-      params.append('quantity', quantityInput.value || '1');
-      params.append('recurring_id', recurringSelect.value || '');
-
-      fetch('index.php?route=product/product/getRecurringDescription', {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-          'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: params.toString()
-      })
-      .then(function(response) { return response.json(); })
-      .then(function(json) {
-        recurringDescription.innerHTML = (json && json.success) ? json.success : '';
-      })
-      .catch(function(error) {
-        console.error('Recurring description error:', error);
-      });
-    }
-
-    if (recurringSelect) {
-      recurringSelect.addEventListener('change', refreshRecurringDescription);
-    }
-
-    if (quantityInput) {
-      quantityInput.addEventListener('change', refreshRecurringDescription);
     }
 
     if (cartButton) {
@@ -1043,13 +995,6 @@ document.addEventListener('DOMContentLoaded', function() {
               if (firstErrorTarget && typeof firstErrorTarget.scrollIntoView === 'function') {
                 firstErrorTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
               }
-            }
-
-            if (json.error.recurring && recurringSelect) {
-              var recurringError = document.createElement('div');
-              recurringError.className = 'dc-field-error text-xs text-red-500 mt-1';
-              recurringError.textContent = json.error.recurring;
-              recurringSelect.insertAdjacentElement('afterend', recurringError);
             }
 
             if (json.error.quantity && typeof dcShowToast === 'function') {
