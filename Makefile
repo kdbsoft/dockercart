@@ -223,8 +223,9 @@ ftp: ## Start stack with optional FTP server (access only to ./upload/image)
 down: ## Stop containers
 	@$(COMPOSE) down || true
 
-restart: ## Restart containers
-	@$(COMPOSE) restart
+restart: ## Restart containers (down + up для совместимости с podman)
+	@$(COMPOSE) down --remove-orphans 2>/dev/null || true
+	@$(COMPOSE) up -d --build
 
 logs: ## Show last 100 log lines
 	@$(COMPOSE) logs --tail=100
