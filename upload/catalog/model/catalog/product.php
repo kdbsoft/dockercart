@@ -153,11 +153,7 @@ class ModelCatalogProduct extends Model {
 				$sql .= " FROM " . DB_PREFIX . "product_to_category p2c";
 			}
 
-			if (!empty($data['filter_filter'])) {
-				$sql .= " LEFT JOIN " . DB_PREFIX . "product_filter pf ON (p2c.product_id = pf.product_id) LEFT JOIN " . DB_PREFIX . "product p ON (pf.product_id = p.product_id)";
-			} else {
-				$sql .= " LEFT JOIN " . DB_PREFIX . "product p ON (p2c.product_id = p.product_id)";
-			}
+			$sql .= " LEFT JOIN " . DB_PREFIX . "product p ON (p2c.product_id = p.product_id)";
 		} else {
 			$sql .= " FROM " . DB_PREFIX . "product p";
 		}
@@ -169,18 +165,6 @@ class ModelCatalogProduct extends Model {
 				$sql .= " AND cp.path_id = '" . (int)$data['filter_category_id'] . "'";
 			} else {
 				$sql .= " AND p2c.category_id = '" . (int)$data['filter_category_id'] . "'";
-			}
-
-			if (!empty($data['filter_filter'])) {
-				$implode = array();
-
-				$filters = explode(',', $data['filter_filter']);
-
-				foreach ($filters as $filter_id) {
-					$implode[] = (int)$filter_id;
-				}
-
-				$sql .= " AND pf.filter_id IN (" . implode(',', $implode) . ")";
 			}
 		}
 
@@ -529,11 +513,7 @@ class ModelCatalogProduct extends Model {
 				$sql .= " FROM " . DB_PREFIX . "product_to_category p2c";
 			}
 
-			if (!empty($data['filter_filter'])) {
-				$sql .= " LEFT JOIN " . DB_PREFIX . "product_filter pf ON (p2c.product_id = pf.product_id) LEFT JOIN " . DB_PREFIX . "product p ON (pf.product_id = p.product_id)";
-			} else {
-				$sql .= " LEFT JOIN " . DB_PREFIX . "product p ON (p2c.product_id = p.product_id)";
-			}
+			$sql .= " LEFT JOIN " . DB_PREFIX . "product p ON (p2c.product_id = p.product_id)";
 		} else {
 			$sql .= " FROM " . DB_PREFIX . "product p";
 		}
@@ -545,18 +525,6 @@ class ModelCatalogProduct extends Model {
 				$sql .= " AND cp.path_id = '" . (int)$data['filter_category_id'] . "'";
 			} else {
 				$sql .= " AND p2c.category_id = '" . (int)$data['filter_category_id'] . "'";
-			}
-
-			if (!empty($data['filter_filter'])) {
-				$implode = array();
-
-				$filters = explode(',', $data['filter_filter']);
-
-				foreach ($filters as $filter_id) {
-					$implode[] = (int)$filter_id;
-				}
-
-				$sql .= " AND pf.filter_id IN (" . implode(',', $implode) . ")";
 			}
 		}
 
