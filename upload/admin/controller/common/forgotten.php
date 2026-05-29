@@ -67,6 +67,8 @@ class ControllerCommonForgotten extends Controller {
 		$data['lang'] = $this->language->get('code');
 		$data['direction'] = $this->language->get('direction');
 
+		$data['dockercart_version'] = defined('DOCKERCART_VERSION') ? DOCKERCART_VERSION : '';
+
 		$this->response->setOutput($this->load->view('common/forgotten', $data));
 	}
 
