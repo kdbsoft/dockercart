@@ -343,7 +343,9 @@ class ControllerProductProduct extends Controller {
 			$data['description'] = html_entity_decode($product_info['description'], ENT_QUOTES, 'UTF-8');
 
 			if ($product_info['quantity'] <= 0) {
-				$data['stock'] = $product_info['stock_status'];
+				$data['stock'] = $product_info['preorder']
+					? $this->language->get('text_preorder')
+					: $this->language->get('text_out_of_stock');
 			} elseif ($this->config->get('config_stock_display')) {
 				$data['stock'] = $product_info['quantity'];
 			} else {
@@ -632,7 +634,9 @@ class ControllerProductProduct extends Controller {
 				$stock_quantity = (int)($result['quantity'] ?? 0);
 
 				if ($stock_quantity <= 0) {
-					$stock = !empty($result['stock_status']) ? $result['stock_status'] : '';
+					$stock = !empty($result['preorder'])
+						? $this->language->get('text_preorder')
+						: $this->language->get('text_out_of_stock');
 				} elseif ($this->config->get('config_stock_display')) {
 					$stock = $stock_quantity;
 				} else {

@@ -6,6 +6,8 @@ $_['heading_title'] = 'Viewed Products';
 $_['text_home']     = 'Home';
 $_['text_account']  = 'Account';
 $_['text_instock']  = 'In Stock';
+$_['text_preorder']  = 'Pre-Order';
+$_['text_out_of_stock']  = 'Out Of Stock';
 $_['text_empty']    = 'You have not viewed any products yet.';
 
 // Column

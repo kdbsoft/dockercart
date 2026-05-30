@@ -917,18 +917,13 @@ class ModelExtensionModuleDockercartImportExportExcel extends Model {
     }
 
     private function addProduct($data) {
-        $stock_status_id = (int)$this->config->get('config_stock_status_id');
-        if ($stock_status_id <= 0) {
-            $stock_status_id = 5;
-        }
-
         $this->db->query("INSERT INTO `" . DB_PREFIX . "product`
             SET model = '" . $this->db->escape($data['model']) . "',
                 sku = '" . $this->db->escape($data['sku']) . "',
                 upc = '', ean = '', jan = '', isbn = '', mpn = '',
                 location = '',
                 quantity = '" . (int)$data['quantity'] . "',
-                stock_status_id = '" . $stock_status_id . "',
+                preorder = '0',
                 image = '" . $this->db->escape((string)$data['image']) . "',
                 manufacturer_id = '" . (int)$data['manufacturer_id'] . "',
                 shipping = '1',

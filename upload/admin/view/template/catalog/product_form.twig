@@ -278,29 +278,14 @@
                 </div>
               </div>
               <div class="form-group">
-                <label class="col-sm-2 control-label" for="input-stock-status"><span data-toggle="tooltip" title="{{ help_stock_status }}">{{ entry_stock_status }}</span></label>
+                <label class="col-sm-2 control-label" for="input-preorder"><span data-toggle="tooltip" title="{{ help_preorder }}">{{ entry_preorder }}</span></label>
                 <div class="col-sm-10">
-                  <select name="stock_status_id" id="input-stock-status" class="form-control">
-
-
-                    {% for stock_status in stock_statuses %}
-                      {% if stock_status.stock_status_id == stock_status_id %}
-
-
-                        <option value="{{ stock_status.stock_status_id }}" selected="selected">{{ stock_status.name }}</option>
-
-
-                      {% else %}
-
-
-                        <option value="{{ stock_status.stock_status_id }}">{{ stock_status.name }}</option>
-
-
-                      {% endif %}
-                    {% endfor %}
-
-
-                  </select>
+                  <div class="checkbox">
+                    <label>
+                      <input type="checkbox" name="preorder" value="1" id="input-preorder"{% if preorder %} checked{% endif %} />
+                      {{ entry_preorder }}
+                    </label>
+                  </div>
                 </div>
               </div>
               <div class="form-group">

@@ -74,7 +74,9 @@ class ControllerProductCompare extends Controller {
 				}
 
 				if ($product_info['quantity'] <= 0) {
-					$availability = $product_info['stock_status'];
+					$availability = $product_info['preorder']
+						? $this->language->get('text_preorder')
+						: $this->language->get('text_out_of_stock');
 				} elseif ($this->config->get('config_stock_display')) {
 					$availability = $product_info['quantity'];
 				} else {

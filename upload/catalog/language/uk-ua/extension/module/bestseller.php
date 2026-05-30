@@ -10,3 +10,5 @@ $_['text_section_small'] = 'Хіти продажу';
 // Quick view button text (module-specific fallback)
 $_['text_quick_view'] = 'Швидкий перегляд';
 $_['text_instock'] = 'В наявності';
+$_['text_preorder'] = 'Передзамовлення';
+$_['text_out_of_stock'] = 'Немає в наявності';
