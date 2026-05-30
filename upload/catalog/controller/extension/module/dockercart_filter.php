@@ -2511,6 +2511,9 @@ class ControllerExtensionModuleDockercartFilter extends Controller
                             AND store_id = '" .
                                 (int) $this->config->get("config_store_id") .
                                 "'
+                            AND language_id = '" .
+                                (int) $this->config->get("config_language_id") .
+                                "'
                             LIMIT 1
                         ",
                         );
@@ -2530,6 +2533,11 @@ class ControllerExtensionModuleDockercartFilter extends Controller
                                      AND store_id = '" .
                                         (int) $this->config->get(
                                             "config_store_id",
+                                        ) .
+                                        "'
+                                     AND language_id = '" .
+                                        (int) $this->config->get(
+                                            "config_language_id",
                                         ) .
                                         "'
                                      LIMIT 1",
