@@ -219,6 +219,7 @@ class Cart
 
         foreach ($cart_query->rows as $cart) {
             $stock = true;
+            $cart["quantity"] = (float) $cart["quantity"];
 
             $product_query = $this->db->query(
                 "SELECT * FROM " .
@@ -333,11 +334,13 @@ class Cart
                                         $option_value_query->row["weight"];
                                 }
 
+                                $option_value_quantity = (float) $option_value_query->row["quantity"];
+
                                 if (
                                     $option_value_query->row["subtract"] &&
-                                    (!$option_value_query->row["quantity"] ||
-                                        $option_value_query->row["quantity"] <
-                                            $cart["quantity"])
+                                    !(int)$product_query->row['preorder'] &&
+                                    ($option_value_quantity <= 0 ||
+                                        $option_value_quantity < $cart["quantity"])
                                 ) {
                                     $stock = false;
                                 }
@@ -452,14 +455,13 @@ class Cart
                                             $option_value_query->row["weight"];
                                     }
 
+                                    $option_value_quantity = (float) $option_value_query->row["quantity"];
+
                                     if (
                                         $option_value_query->row["subtract"] &&
-                                        (!$option_value_query->row[
-                                            "quantity"
-                                        ] ||
-                                            $option_value_query->row[
-                                                "quantity"
-                                            ] < $cart["quantity"])
+                                        !(int)$product_query->row['preorder'] &&
+                                        ($option_value_quantity <= 0 ||
+                                            $option_value_quantity < $cart["quantity"])
                                     ) {
                                         $stock = false;
                                     }
@@ -653,11 +655,11 @@ class Cart
                         "mask" => $download["mask"],
                     ];
                 }
-
+                $product_quantity = (float) $product_query->row["quantity"];
                 // Stock
                 if (
-                    !$product_query->row["quantity"] ||
-                    $product_query->row["quantity"] < $cart["quantity"]
+                    ($product_quantity <= 0 && !(int)$product_query->row['preorder']) ||
+                    ($product_quantity > 0 && $product_quantity < $cart["quantity"])
                 ) {
                     $stock = false;
                 }
@@ -747,6 +749,7 @@ class Cart
                     "quantity_step" => $quantity_step,
                     "subtract" => $product_query->row["subtract"],
                     "stock" => $stock,
+                    "preorder" => !empty($product_query->row['preorder']),
                     "price" =>
                         $multicurrency_price + $multicurrency_option_price,
                     "total" =>

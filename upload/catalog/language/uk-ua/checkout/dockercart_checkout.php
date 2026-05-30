@@ -178,6 +178,7 @@ $_["text_price"] = "Ціна";
 $_["text_processing"] = "Обробка...";
 $_["text_product"] = "Товар";
 $_["text_quantity"] = "Кількість";
+$_["text_preorder"] = "Передзамовлення";
 $_["text_register"] = "Зареєструвати обліковий запис";
 $_["text_required_field"] = "Потрібно %s";
 $_["text_return"] = "Повернення протягом 14 днів";

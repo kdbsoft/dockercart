@@ -2295,6 +2295,7 @@ class ControllerCheckoutDockercartCheckout extends Controller
                 ),
                 "option" => $option_data,
                 "quantity" => $product["quantity"],
+                "preorder" => !empty($product["preorder"]),
                 "price" => $this->currency->format(
                     $this->tax->calculate(
                         $product["price"],
