@@ -1,3 +1,9 @@
+## [1.34.1](https://github.com/mathflow-bit/dockercart/compare/v1.34.0...v1.34.1) (2026-05-30)
+
+### Bug Fixes
+
+* filter active languages and skip hreflang when only one language ([1ab0fa9](https://github.com/mathflow-bit/dockercart/commit/1ab0fa9eaa7d91730e0d7f1f34ddc6853772360e))
+
 ## [1.34.0](https://github.com/mathflow-bit/dockercart/compare/v1.33.0...v1.34.0) (2026-05-30)
 
 ### Features
