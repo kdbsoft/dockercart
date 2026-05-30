@@ -1,3 +1,15 @@
+## [1.33.0](https://github.com/mathflow-bit/dockercart/compare/v1.32.0...v1.33.0) (2026-05-30)
+
+### Features
+
+* add preorder handling and rename localisation labels ([7b88568](https://github.com/mathflow-bit/dockercart/commit/7b88568d22138701e1609ce663bdb6a5808d2d57))
+* add preorder support for products and update related UI and logic ([18eadca](https://github.com/mathflow-bit/dockercart/commit/18eadca90a5c555cff521af255dfcf958d3daa86))
+* enhance dashboard periods, add month range and conditional change ([7254707](https://github.com/mathflow-bit/dockercart/commit/7254707581a1da4e7f9213bcd958deeec3927838))
+
+### Bug Fixes
+
+* remove default config_encryption value from DB dump ([12a6db8](https://github.com/mathflow-bit/dockercart/commit/12a6db8f39baf43807774c822dd9665ea8704d20))
+
 ## [1.32.0](https://github.com/mathflow-bit/dockercart/compare/v1.31.1...v1.32.0) (2026-05-29)
 
 ### Features
