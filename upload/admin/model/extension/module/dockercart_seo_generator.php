@@ -482,7 +482,17 @@ class ModelExtensionModuleDockercartSeoGenerator extends Model {
         
         return $url;
     }
-    
+
+    /**
+     * Public wrapper — generates SEO URL string from a raw name/title.
+     * Used by the inline per-field generator in admin forms.
+     */
+    public function generateSeoUrlFromName($name)
+    {
+        $name = $this->cleanHtml($name);
+        return $this->sanitizeSeoUrl($name);
+    }
+
     /**
      * Транслитерация текста (multi-language support)
      * Supports: ru-ru, uk-ua, de-de, fr-fr, es-es, pt-pt, ar-ar, zh-cn, ja-jp, id-id

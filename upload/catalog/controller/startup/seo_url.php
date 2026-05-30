@@ -182,6 +182,14 @@ class ControllerStartupSeoUrl extends Controller
     {
         $url_info = parse_url(str_replace("&amp;", "&", $link));
 
+        // Sync languageId — session may have changed since request start
+        // (e.g., by multilanguage or language switcher modules)
+        // This must happen before any getSeoKeyword/getBlogSeoKeyword calls
+        $current_lang_id = (int) $this->config->get("config_language_id");
+        if ($current_lang_id > 0 && $current_lang_id !== $this->languageId) {
+            $this->languageId = $current_lang_id;
+        }
+
         $url = "";
         $data = [];
 
@@ -200,7 +208,7 @@ class ControllerStartupSeoUrl extends Controller
                 unset($data["product_id"], $data["path"], $data["route"]);
             } else {
                 $fallback = $this->buildEntityFallbackKeyword(
-                    "prod",
+                    "product",
                     $product_id,
                     "product_id=" . $product_id,
                     $route,
@@ -220,7 +228,7 @@ class ControllerStartupSeoUrl extends Controller
                 unset($data["manufacturer_id"], $data["route"]);
             } else {
                 $fallback = $this->buildEntityFallbackKeyword(
-                    "man",
+                    "brand",
                     $manufacturer_id,
                     "manufacturer_id=" . $manufacturer_id,
                     $route,
@@ -240,7 +248,7 @@ class ControllerStartupSeoUrl extends Controller
                 unset($data["information_id"], $data["route"]);
             } else {
                 $fallback = $this->buildEntityFallbackKeyword(
-                    "inf",
+                    "page",
                     $information_id,
                     "information_id=" . $information_id,
                     $route,
@@ -323,7 +331,7 @@ class ControllerStartupSeoUrl extends Controller
                 unset($data["route"]);
             } else {
                 $fallback = $this->buildEntityFallbackKeyword(
-                    "cat",
+                    "category",
                     $last_category_id,
                     "category_id=" . $last_category_id,
                     "product/category",
@@ -352,7 +360,7 @@ class ControllerStartupSeoUrl extends Controller
 
                 if (!$module_keyword) {
                     $module_keyword = $this->buildEntityFallbackKeyword(
-                        "mod",
+                        "module",
                         $module_id,
                         "module_id=" . $module_id,
                         $route,
@@ -469,10 +477,6 @@ class ControllerStartupSeoUrl extends Controller
             return $this->seoKeywordsByQuery[$this->languageId][$query];
         }
 
-        if (isset($this->seoKeywordsByQueryAny[$query])) {
-            return $this->seoKeywordsByQueryAny[$query];
-        }
-
         return "";
     }
 
@@ -490,10 +494,6 @@ class ControllerStartupSeoUrl extends Controller
             return $this->blogKeywordsByQuery[$this->languageId][$query];
         }
 
-        if (isset($this->blogKeywordsByQueryAny[$query])) {
-            return $this->blogKeywordsByQueryAny[$query];
-        }
-
         return "";
     }
 
@@ -506,10 +506,6 @@ class ControllerStartupSeoUrl extends Controller
 
         if (isset($this->seoQueriesByKeyword[$this->languageId][$keyword])) {
             return $this->seoQueriesByKeyword[$this->languageId][$keyword];
-        }
-
-        if (isset($this->seoQueriesByKeywordAny[$keyword])) {
-            return $this->seoQueriesByKeywordAny[$keyword];
         }
 
         return "";
@@ -543,10 +539,6 @@ class ControllerStartupSeoUrl extends Controller
 
         if (isset($this->blogQueriesByKeyword[$this->languageId][$keyword])) {
             return $this->blogQueriesByKeyword[$this->languageId][$keyword];
-        }
-
-        if (isset($this->blogQueriesByKeywordAny[$keyword])) {
-            return $this->blogQueriesByKeywordAny[$keyword];
         }
 
         return "";
@@ -806,7 +798,7 @@ class ControllerStartupSeoUrl extends Controller
             return "";
         }
 
-        $candidate = $prefix . $entity_id;
+        $candidate = $prefix . '-' . $entity_id;
 
         if ($this->hasConflictingSeoPrefixInDatabase($candidate, $route)) {
             return "";
@@ -1313,6 +1305,13 @@ class ControllerStartupSeoUrl extends Controller
             return;
         }
 
+        // Not found in DB for current language — check if keyword exists in ANY language
+        // If yes, it's a cross-language keyword — 404, not a generated route
+        if (isset($this->seoQueriesByKeywordAny[$keyword]) || isset($this->blogQueriesByKeywordAny[$keyword])) {
+            $this->request->get["route"] = "error/not_found";
+            return;
+        }
+
         // Not found in DB - check if it's a generated SEO URL (format: account-return-add)
         // These are auto-generated from routes that contain dashes
         if (strpos($keyword, "-") !== false) {
@@ -1601,15 +1600,15 @@ class ControllerStartupSeoUrl extends Controller
      * Decode short fallback aliases generated when explicit SEO keyword is missing.
      * If explicit SEO keyword exists, redirect fallback alias to canonical SEO URL.
      * Supported patterns:
-     * - cat123  => product/category, path=123
-     * - prod123 => product/product, product_id=123
-     * - man123  => product/manufacturer/info, manufacturer_id=123
-     * - inf123  => information/information, information_id=123
-     * - mod123  => extension/module/{code}, module_id=123
+     * - category-123  => product/category, path=123
+     * - product-123   => product/product, product_id=123
+     * - brand-123     => product/manufacturer/info, manufacturer_id=123
+     * - page-123      => information/information, information_id=123
+     * - module-123    => extension/module/{code}, module_id=123
      */
     private function decodeFallbackEntityKeyword($keyword)
     {
-        if (preg_match('/^cat(\d+)$/', $keyword, $matches)) {
+        if (preg_match('/^category-(\d+)$/', $keyword, $matches)) {
             $category_id = (int) $matches[1];
             $seo_keyword = $this->getSeoKeyword("category_id=" . $category_id);
 
@@ -1623,7 +1622,7 @@ class ControllerStartupSeoUrl extends Controller
             return true;
         }
 
-        if (preg_match('/^prod(\d+)$/', $keyword, $matches)) {
+        if (preg_match('/^product-(\d+)$/', $keyword, $matches)) {
             $product_id = (int) $matches[1];
             $seo_keyword = $this->getSeoKeyword("product_id=" . $product_id);
 
@@ -1636,7 +1635,7 @@ class ControllerStartupSeoUrl extends Controller
             return true;
         }
 
-        if (preg_match('/^man(\d+)$/', $keyword, $matches)) {
+        if (preg_match('/^brand-(\d+)$/', $keyword, $matches)) {
             $manufacturer_id = (int) $matches[1];
             $seo_keyword = $this->getSeoKeyword(
                 "manufacturer_id=" . $manufacturer_id,
@@ -1651,7 +1650,7 @@ class ControllerStartupSeoUrl extends Controller
             return true;
         }
 
-        if (preg_match('/^inf(\d+)$/', $keyword, $matches)) {
+        if (preg_match('/^page-(\d+)$/', $keyword, $matches)) {
             $information_id = (int) $matches[1];
             $seo_keyword = $this->getSeoKeyword(
                 "information_id=" . $information_id,
@@ -1666,7 +1665,7 @@ class ControllerStartupSeoUrl extends Controller
             return true;
         }
 
-        if (preg_match('/^mod(\d+)$/', $keyword, $matches)) {
+        if (preg_match('/^module-(\d+)$/', $keyword, $matches)) {
             $module_id = (int) $matches[1];
             $module_route = $this->resolveModuleRouteById($module_id);
 
@@ -1702,7 +1701,7 @@ class ControllerStartupSeoUrl extends Controller
         ) {
             $product_id = (int) $this->request->get["product_id"];
             return $this->buildEntityFallbackKeyword(
-                "prod",
+                "product",
                 $product_id,
                 "product_id=" . $product_id,
                 $route,
@@ -1716,7 +1715,7 @@ class ControllerStartupSeoUrl extends Controller
             $parts = explode("_", (string) $this->request->get["path"]);
             $category_id = (int) end($parts);
             return $this->buildEntityFallbackKeyword(
-                "cat",
+                "category",
                 $category_id,
                 "category_id=" . $category_id,
                 $route,
@@ -1729,7 +1728,7 @@ class ControllerStartupSeoUrl extends Controller
         ) {
             $manufacturer_id = (int) $this->request->get["manufacturer_id"];
             return $this->buildEntityFallbackKeyword(
-                "man",
+                "brand",
                 $manufacturer_id,
                 "manufacturer_id=" . $manufacturer_id,
                 $route,
@@ -1742,7 +1741,7 @@ class ControllerStartupSeoUrl extends Controller
         ) {
             $information_id = (int) $this->request->get["information_id"];
             return $this->buildEntityFallbackKeyword(
-                "inf",
+                "page",
                 $information_id,
                 "information_id=" . $information_id,
                 $route,
@@ -1761,7 +1760,7 @@ class ControllerStartupSeoUrl extends Controller
             }
 
             return $this->buildEntityFallbackKeyword(
-                "mod",
+                "module",
                 $module_id,
                 "module_id=" . $module_id,
                 $route,

@@ -1418,5 +1418,35 @@ class ControllerExtensionModuleDockercartSeoGenerator extends Controller
 
         $this->response->addHeader("Content-Type: application/json");
         $this->response->setOutput(json_encode($json));
-	}
+    }
+
+    /**
+     * Inline AJAX — generates SEO URL from a name/title string on the fly.
+     * Called by the per-field ✨ button in entity forms.
+     * No license check, no module-status check — universal single entry point.
+     */
+    public function generateSeoUrlAjax()
+    {
+        $json = [];
+
+        if (!$this->user->hasPermission("modify", "extension/module/dockercart_seo_generator")) {
+            $json["error"] = $this->language->get("error_permission");
+        } else {
+            $this->load->model("extension/module/dockercart_seo_generator");
+
+            $name = isset($this->request->post["name"]) ? $this->request->post["name"] : "";
+
+            if (empty($name)) {
+                $json["error"] = "Name is empty";
+            } else {
+                $keyword = $this->model_extension_module_dockercart_seo_generator->generateSeoUrlFromName($name);
+                $json["success"] = true;
+                $json["keyword"] = $keyword;
+            }
+        }
+
+        $this->response->addHeader("Content-Type: application/json");
+        $this->response->setOutput(json_encode($json));
+    }
+
 }
