@@ -1,3 +1,13 @@
+## [1.34.0](https://github.com/mathflow-bit/dockercart/compare/v1.33.0...v1.34.0) (2026-05-30)
+
+### Features
+
+* add inline SEO URL generator and refine SEO URL handling ([b747d39](https://github.com/mathflow-bit/dockercart/commit/b747d39cddf4f0200778d69fcad80bcd719f06a1))
+
+### Bug Fixes
+
+* display inline translation errors as admin UI alerts ([2c2168a](https://github.com/mathflow-bit/dockercart/commit/2c2168aec0b631565f9c314e17eb1e621e67f6b4))
+
 ## [1.33.0](https://github.com/mathflow-bit/dockercart/compare/v1.32.0...v1.33.0) (2026-05-30)
 
 ### Features
