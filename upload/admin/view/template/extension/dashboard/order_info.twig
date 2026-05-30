@@ -12,7 +12,7 @@
     <canvas class="tile-sparkline"></canvas>
     <div class="tile-body-right">
       <h2 class="tile-total">—</h2>
-      <span class="tile-pct">—</span>
+      <span class="tile-pct"></span>
     </div>
   </div>
   <div class="tile-footer"><a href="{{ order }}">{{ text_view }}</a></div>
@@ -56,8 +56,12 @@
     localStorage.setItem(key, period);
     $.getJSON('index.php?route=extension/dashboard/order/ajax&user_token={{ user_token }}&period=' + period, function(json) {
       $tile.find('.tile-total').text(json.total);
-      var icon = json.direction === 'up' ? 'fa-arrow-up' : (json.direction === 'down' ? 'fa-arrow-down' : '');
-      $tile.find('.tile-pct').html(icon ? '<i class="fa ' + icon + '"></i> ' + json.percentage + '%' : json.percentage + '%');
+      if (json.show_change) {
+        var icon = json.direction === 'up' ? 'fa-arrow-up' : 'fa-arrow-down';
+        $tile.find('.tile-pct').html('<i class="fa ' + icon + '"></i> ' + json.percentage + '%');
+      } else {
+        $tile.find('.tile-pct').empty();
+      }
     });
     $.getJSON('index.php?route=extension/dashboard/order/sparkline&user_token={{ user_token }}&period=' + period, function(json) {
       drawSparkline($tile.find('.tile-sparkline')[0], json.data);
