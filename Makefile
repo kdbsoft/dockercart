@@ -259,7 +259,7 @@ dump-init: ## Regenerate docker/mysql/init.sql from running MariaDB (full dump: 
 	@cp -a docker/mysql/init.sql docker/mysql/init.sql.bak.$$(date -u +%Y%m%dT%H%M%SZ) || true
 	@TMP_FILE=$$(mktemp docker/mysql/init.sql.tmp.XXXXXX); \
 	echo "Generating new dump (may take some time)..."; \
-	if ! $(COMPOSE) exec -T mariadb sh -c 'mariadb-dump -u"$${MARIADB_USER:-dockercart}" -p"$${MARIADB_PASSWORD:-dockercart_password}" "$${MARIADB_DATABASE:-dockercart}" --single-transaction --quick --hex-blob --routines --triggers --events --default-character-set=utf8mb4' | sed -e 's/DEFINER=[^ ]*//g' > $$TMP_FILE; then \
+	if ! $(COMPOSE) exec -T mariadb sh -c 'mariadb-dump -u"$${MARIADB_USER:-dockercart}" -p"$${MARIADB_PASSWORD:-dockercart_password}" "$${MARIADB_DATABASE:-dockercart}" --single-transaction --quick --hex-blob --routines --triggers --events --default-character-set=utf8mb4' | sed -e 's/DEFINER=[^ ]*//g' | sed "s/,'config_encryption','[^']*'/,'config_encryption',''/g" > $$TMP_FILE; then \
 		rm -f $$TMP_FILE; \
 		echo "Dump failed"; \
 		exit 1; \
