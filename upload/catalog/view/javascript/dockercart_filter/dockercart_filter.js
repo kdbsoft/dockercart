@@ -128,6 +128,12 @@
             return;
           }
 
+          if (target.id === 'button-reset-mobile') {
+            e.preventDefault();
+            self.resetFilter();
+            return;
+          }
+
           if (target.id === 'button-reset-filters') {
             e.preventDefault();
             self.resetFilter();
@@ -1035,8 +1041,10 @@ console.log('Checking attribute checkbox - attrId:', attrId, 'value:', value);
 
       if (Object.keys(filterData).length > 0) {
         const jsonString = JSON.stringify(filterData);
-        const hexString = Array.from(jsonString)
-          .map(char => char.charCodeAt(0).toString(16).padStart(2, '0'))
+        const encoder = new TextEncoder();
+        const bytes = encoder.encode(jsonString);
+        const hexString = Array.from(bytes)
+          .map(b => b.toString(16).padStart(2, '0'))
           .join('');
         clean.set('dcf', hexString);
       }
