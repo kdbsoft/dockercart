@@ -1,3 +1,5 @@
+## [1.34.2](https://github.com/mathflow-bit/dockercart/compare/v1.34.1...v1.34.2) (2026-05-30)
+
 ## [1.34.1](https://github.com/mathflow-bit/dockercart/compare/v1.34.0...v1.34.1) (2026-05-30)
 
 ### Bug Fixes
