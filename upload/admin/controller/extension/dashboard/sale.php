@@ -93,23 +93,23 @@ class ControllerExtensionDashboardSale extends Controller {
 				$dates['prev_start'] = date('Y-m-d', strtotime('-1 day'));
 				$dates['prev_end'] = date('Y-m-d', strtotime('-1 day'));
 				break;
-			case 'yesterday':
-				$dates['start'] = date('Y-m-d', strtotime('-1 day'));
-				$dates['end'] = date('Y-m-d', strtotime('-1 day'));
-				$dates['prev_start'] = date('Y-m-d', strtotime('-2 day'));
-				$dates['prev_end'] = date('Y-m-d', strtotime('-2 day'));
-				break;
 			case 'week':
-				$dates['start'] = date('Y-m-d', strtotime('-6 days'));
-				$dates['end'] = date('Y-m-d');
-				$dates['prev_start'] = date('Y-m-d', strtotime('-13 days'));
-				$dates['prev_end'] = date('Y-m-d', strtotime('-7 days'));
+				$dates['start'] = date('Y-m-d', strtotime('monday this week'));
+				$dates['end'] = date('Y-m-d', strtotime('sunday this week'));
+				$dates['prev_start'] = date('Y-m-d', strtotime('monday this week -1 week'));
+				$dates['prev_end'] = date('Y-m-d', strtotime('sunday this week -1 week'));
+				break;
+			case 'month':
+				$dates['start'] = date('Y-m-01');
+				$dates['end'] = date('Y-m-t');
+				$dates['prev_start'] = date('Y-m-01', strtotime('first day of last month'));
+				$dates['prev_end'] = date('Y-m-t', strtotime('last day of last month'));
 				break;
 			case 'year':
-				$dates['start'] = date('Y-m-d', strtotime('-364 days'));
-				$dates['end'] = date('Y-m-d');
-				$dates['prev_start'] = date('Y-m-d', strtotime('-729 days'));
-				$dates['prev_end'] = date('Y-m-d', strtotime('-365 days'));
+				$dates['start'] = date('Y-01-01');
+				$dates['end'] = date('Y-12-31');
+				$dates['prev_start'] = date('Y-01-01', strtotime('-1 year'));
+				$dates['prev_end'] = date('Y-12-31', strtotime('-1 year'));
 				break;
 			case 'all':
 			default:
@@ -169,24 +169,31 @@ class ControllerExtensionDashboardSale extends Controller {
 		if ($dates['start']) {
 			$current = $this->model_extension_dashboard_sale->getTotalSales(array('filter_date_start' => $dates['start'], 'filter_date_end' => $dates['end']));
 			$previous = $this->model_extension_dashboard_sale->getTotalSales(array('filter_date_start' => $dates['prev_start'], 'filter_date_end' => $dates['prev_end']));
+
+			if ($previous > 0) {
+				$difference = $current - $previous;
+				$percentage = round(($difference / $previous) * 100);
+
+				$json = array(
+					'total' => $this->formatTotal($current),
+					'show_change' => true,
+					'percentage' => abs($percentage),
+					'direction' => $difference >= 0 ? 'up' : 'down',
+				);
+			} else {
+				$json = array(
+					'total' => $this->formatTotal($current),
+					'show_change' => false,
+				);
+			}
 		} else {
 			$current = $this->model_extension_dashboard_sale->getTotalSales();
-			$previous = 0;
+
+			$json = array(
+				'total' => $this->formatTotal($current),
+				'show_change' => false,
+			);
 		}
-
-		$difference = $current - $previous;
-
-		if ($difference && (int)$current) {
-			$percentage = round(($difference / $current) * 100);
-		} else {
-			$percentage = 0;
-		}
-
-		$json = array(
-			'total' => $this->formatTotal($current),
-			'percentage' => $percentage,
-			'direction' => $difference >= 0 ? 'up' : 'down'
-		);
 
 		$output = json_encode($json);
 		$this->cache->set($cache_key, $output, 300);
@@ -221,43 +228,58 @@ class ControllerExtensionDashboardSale extends Controller {
 				}
 				break;
 			case 'week':
-				$sql = "SELECT DATE(date_added) AS bucket, SUM(total) AS val FROM `" . DB_PREFIX . "order` WHERE order_status_id > '0' AND DATE(date_added) >= DATE(CURDATE() - INTERVAL 6 DAY) GROUP BY DATE(date_added) ORDER BY DATE(date_added) ASC";
+				$week_start = date('Y-m-d', strtotime('monday this week'));
+				$week_end = date('Y-m-d', strtotime('sunday this week'));
+				$sql = "SELECT DATE(date_added) AS bucket, SUM(total) AS val FROM `" . DB_PREFIX . "order` WHERE order_status_id > '0' AND DATE(date_added) >= '" . $week_start . "' AND DATE(date_added) <= '" . $week_end . "' GROUP BY DATE(date_added) ORDER BY DATE(date_added) ASC";
 				$result = $this->db->query($sql);
 				$raw = array();
 				foreach ($result->rows as $row) {
 					$raw[$row['bucket']] = (float)$row['val'];
 				}
 				$data = array();
-				for ($i = 6; $i >= 0; $i--) {
-					$date = date('Y-m-d', strtotime("-{$i} days"));
+				for ($i = 0; $i < 7; $i++) {
+					$date = date('Y-m-d', strtotime($week_start . " +{$i} days"));
+					$data[] = isset($raw[$date]) ? $raw[$date] : 0;
+				}
+				break;
+			case 'month':
+				$month_start = date('Y-m-01');
+				$month_end = date('Y-m-t');
+				$days_in_month = (int)date('t');
+				$sql = "SELECT DATE(date_added) AS bucket, SUM(total) AS val FROM `" . DB_PREFIX . "order` WHERE order_status_id > '0' AND DATE(date_added) >= '" . $month_start . "' AND DATE(date_added) <= '" . $month_end . "' GROUP BY DATE(date_added) ORDER BY DATE(date_added) ASC";
+				$result = $this->db->query($sql);
+				$raw = array();
+				foreach ($result->rows as $row) {
+					$raw[$row['bucket']] = (float)$row['val'];
+				}
+				$data = array();
+				for ($i = 0; $i < $days_in_month; $i++) {
+					$date = date('Y-m-d', strtotime($month_start . " +{$i} days"));
 					$data[] = isset($raw[$date]) ? $raw[$date] : 0;
 				}
 				break;
 			case 'year':
-				$sql = "SELECT DATE_FORMAT(date_added, '%Y-%m') AS bucket, SUM(total) AS val FROM `" . DB_PREFIX . "order` WHERE order_status_id > '0' AND date_added >= DATE(CURDATE() - INTERVAL 11 MONTH) GROUP BY DATE_FORMAT(date_added, '%Y-%m') ORDER BY DATE_FORMAT(date_added, '%Y-%m') ASC";
+				$year_start = date('Y-01-01');
+				$year_end = date('Y-12-31');
+				$sql = "SELECT DATE_FORMAT(date_added, '%Y-%m') AS bucket, SUM(total) AS val FROM `" . DB_PREFIX . "order` WHERE order_status_id > '0' AND DATE(date_added) >= '" . $year_start . "' AND DATE(date_added) <= '" . $year_end . "' GROUP BY DATE_FORMAT(date_added, '%Y-%m') ORDER BY DATE_FORMAT(date_added, '%Y-%m') ASC";
 				$result = $this->db->query($sql);
 				$raw = array();
 				foreach ($result->rows as $row) {
 					$raw[$row['bucket']] = (float)$row['val'];
 				}
 				$data = array();
-				for ($i = 11; $i >= 0; $i--) {
-					$key = date('Y-m', strtotime("-{$i} months"));
+				for ($i = 0; $i < 12; $i++) {
+					$key = date('Y-m', strtotime("first day of january +{$i} months"));
 					$data[] = isset($raw[$key]) ? $raw[$key] : 0;
 				}
 				break;
-			case 'month':
+			case 'all':
 			default:
-				$sql = "SELECT DATE(date_added) AS bucket, SUM(total) AS val FROM `" . DB_PREFIX . "order` WHERE order_status_id > '0' AND DATE(date_added) >= DATE(CURDATE() - INTERVAL " . (date('t') - 1) . " DAY) GROUP BY DATE(date_added) ORDER BY DATE(date_added) ASC";
+				$sql = "SELECT DATE_FORMAT(date_added, '%Y') AS bucket, SUM(total) AS val FROM `" . DB_PREFIX . "order` WHERE order_status_id > '0' GROUP BY DATE_FORMAT(date_added, '%Y') ORDER BY DATE_FORMAT(date_added, '%Y') ASC";
 				$result = $this->db->query($sql);
-				$raw = array();
-				foreach ($result->rows as $row) {
-					$raw[$row['bucket']] = (float)$row['val'];
-				}
 				$data = array();
-				for ($i = date('t') - 1; $i >= 0; $i--) {
-					$date = date('Y-m-d', strtotime("-{$i} days"));
-					$data[] = isset($raw[$date]) ? $raw[$date] : 0;
+				foreach ($result->rows as $row) {
+					$data[] = (float)$row['val'];
 				}
 				break;
 		}
