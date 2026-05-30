@@ -1,3 +1,9 @@
+## [1.34.4](https://github.com/mathflow-bit/dockercart/compare/v1.34.3...v1.34.4) (2026-05-30)
+
+### Bug Fixes
+
+* add mobile filter button bar for responsive UI ([be68be1](https://github.com/mathflow-bit/dockercart/commit/be68be1d04ffeca659c3e14c5a3fb210646bc40b))
+
 ## [1.34.3](https://github.com/mathflow-bit/dockercart/compare/v1.34.2...v1.34.3) (2026-05-30)
 
 ### Bug Fixes
