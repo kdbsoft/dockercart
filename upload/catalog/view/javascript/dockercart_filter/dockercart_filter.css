@@ -3,8 +3,7 @@
     display: none !important;
 }
 
-.dockercart-filter {
-    /* CSS variables: `--dc-primary` can be overridden on the widget container. */
+:root {
     --dc-primary: #007bff;
 }
 
@@ -751,6 +750,54 @@
     margin-top: 15px;
 }
 
+.filter-buttons-mobile {
+    display: none;
+}
+
+@media (max-width: 991px) {
+    .filter-buttons-mobile {
+        display: flex;
+        gap: 10px;
+        padding: 12px 16px;
+        background: #fff;
+        border-top: 1px solid #dee2e6;
+        box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        bottom: 0;
+        z-index: 100;
+        margin-top: 16px;
+    }
+
+    .filter-buttons-mobile .btn {
+        flex: 1;
+        padding: 12px 20px;
+        font-size: 15px;
+        font-weight: 600;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        text-align: center;
+    }
+
+    .filter-buttons-mobile .btn-primary {
+        background: var(--dc-primary, #007bff);
+        color: #fff;
+    }
+
+    .filter-buttons-mobile .btn-default {
+        background: #6c757d;
+        color: #fff;
+    }
+
+    .filter-buttons-mobile .btn-default:hover {
+        background: #5a6268;
+    }
+
+    .filter-buttons-mobile .btn-primary:hover {
+        background: #0056b3;
+    }
+}
+
 .btn-block {
     width: 100%;
 }
@@ -1014,6 +1061,10 @@
 
 .mobile-filter-apply:active {
     transform: scale(0.98);
+}
+
+.mobile-filter-panel .filter-buttons-mobile {
+    display: none !important;
 }
 
 @media (max-width: 991px) {
