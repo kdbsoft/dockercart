@@ -672,7 +672,7 @@ select[disabled] {
                   <img src="{{ product.thumb }}" alt="{{ product.name }}" class="w-full h-full object-cover">
                 </div>
                 <div class="flex-1 min-w-0">
-                  <h4 class="font-medium text-text-primary text-sm mb-1 truncate">{{ product.name }}</h4>
+                  <h4 class="font-medium text-text-primary text-sm mb-1 truncate">{{ product.name }}{% if product.preorder %} <span class="text-amber-500 text-xs font-semibold">({{ text_preorder }})</span>{% endif %}</h4>
                   <p class="text-sm text-text-secondary">{{ text_quantity }}: {{ product.quantity }}</p>
                   {% if product.option %}
                     {% for option in product.option %}

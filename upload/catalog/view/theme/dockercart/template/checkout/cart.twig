@@ -74,7 +74,9 @@
                 <div class="flex-1 min-w-0">
                   <a href="{{ product.href }}" class="font-semibold text-gray-900 hover:text-blue-600 transition text-sm leading-snug line-clamp-2">{{ product.name }}</a>
                   {% if not product.stock %}
-                  <p class="text-xs text-red-500 mt-0.5 flex items-center gap-1"><i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i> {{ text_stock }}</p>
+                  <p class="text-xs text-red-500 mt-0.5 flex items-center gap-1"><i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i> {{ text_out_of_stock }}</p>
+                  {% elseif product.preorder %}
+                  <p class="text-xs text-amber-500 mt-0.5 flex items-center gap-1"><i data-lucide="clock" class="w-3.5 h-3.5"></i> {{ text_preorder }}</p>
                   {% endif %}
                   {% if product.option %}
                   <ul class="mt-1 space-y-0.5">

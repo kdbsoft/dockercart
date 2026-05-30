@@ -384,6 +384,7 @@ class ControllerCheckoutConfirm extends Controller {
 					'option'     => $option_data,
 					'quantity'   => $product['quantity'],
 					'subtract'   => $product['subtract'],
+					'preorder'   => !empty($product['preorder']),
 					'price'      => $this->currency->format($this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']),
 					'total'      => $this->currency->format($this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax')) * $product['quantity'], $this->session->data['currency']),
 					'href'       => $this->url->link('product/product', 'product_id=' . $product['product_id'])

@@ -147,7 +147,7 @@
                     </td>
                     <td class="text-right">
                       <span class="inline-edit" data-product-id="{{ product.product_id }}" data-field="quantity" data-value="{{ product.quantity_raw }}">
-                        {% if product.quantity <= 0 %} <span class="label label-warning">{{ product.quantity }}</span> {% elseif product.quantity <= 5 %} <span class="label label-danger">{{ product.quantity }}</span> {% else %} <span class="label label-success">{{ product.quantity }}</span> {% endif %}
+                        {% if product.quantity <= 0 %} <span class="label label-danger">{{ product.quantity }}</span> {% elseif product.quantity <= 5 %} <span class="label label-warning">{{ product.quantity }}</span> {% else %} <span class="label label-success">{{ product.quantity }}</span> {% endif %}
                         <i class="fa fa-pencil-square-o inline-edit-icon"></i>
                       </span>
                     </td>

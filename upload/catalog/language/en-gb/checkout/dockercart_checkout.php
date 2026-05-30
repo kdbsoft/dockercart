@@ -38,6 +38,7 @@ $_["text_custom_fields"] = "Additional Information";
 // Cart
 $_["text_product"] = "Product";
 $_["text_quantity"] = "Qty";
+$_["text_preorder"] = "Pre-Order";
 $_["text_price"] = "Price";
 $_["text_total"] = "Total";
 $_["text_empty_cart"] = "Your shopping cart is empty!";
