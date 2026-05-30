@@ -100,7 +100,7 @@
                 <div class="col-sm-9">
                   <ul class="nav nav-tabs" role="tablist" style="margin-bottom: 10px;">
                     {% for language in languages %}
-                      <li{% if loop.first %} class="active"{% endif %}><a href="#section-title-lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>
+                      <li{% if loop.first %} class="active"{% endif %}><a href="#section-title-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
                     {% endfor %}
                   </ul>
                   <div class="tab-content">
@@ -117,7 +117,7 @@
                 <div class="col-sm-9">
                   <ul class="nav nav-tabs" role="tablist" style="margin-bottom: 10px;">
                     {% for language in languages %}
-                      <li{% if loop.first %} class="active"{% endif %}><a href="#section-subtitle-lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>
+                      <li{% if loop.first %} class="active"{% endif %}><a href="#section-subtitle-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
                     {% endfor %}
                   </ul>
                   <div class="tab-content">
@@ -157,7 +157,7 @@
                         <td>
                           <ul class="nav nav-tabs" role="tablist" style="margin-bottom: 10px;">
                             {% for language in languages %}
-                              <li{% if loop.first %} class="active"{% endif %}><a href="#feature-{{ feature_row }}-lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>
+                              <li{% if loop.first %} class="active"{% endif %}><a href="#feature-{{ feature_row }}-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
                             {% endfor %}
                           </ul>
 
@@ -304,7 +304,7 @@ $('#button-add-feature').on('click', function() {
   html += '  <td>';
   html += '    <ul class="nav nav-tabs" role="tablist" style="margin-bottom: 10px;">';
   {% for language in languages %}
-  html += '      <li{% if loop.first %} class="active"{% endif %}><a href="#feature-' + feature_row + '-lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>';
+  html += '      <li{% if loop.first %} class="active"{% endif %}><a href="#feature-' + feature_row + '-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>';
   {% endfor %}
   html += '    </ul>';
 

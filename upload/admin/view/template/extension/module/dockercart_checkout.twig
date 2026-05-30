@@ -1176,7 +1176,7 @@ hr {
                                   {% for language in languages %}
                                   <li{% if loop.first %} class="active"{% endif %}>
                                     <a href="#shipping-{{ code_safe }}-title-{{ language.language_id }}" data-toggle="tab">
-                                      <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" style="width: 16px; height: 11px;"> {{ language.name }}
+                                      <span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}
                                     </a>
                                   </li>
                                   {% endfor %}
@@ -1199,7 +1199,7 @@ hr {
                                   {% for language in languages %}
                                   <li{% if loop.first %} class="active"{% endif %}>
                                     <a href="#shipping-{{ code_safe }}-desc-{{ language.language_id }}" data-toggle="tab">
-                                      <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" style="width: 16px; height: 11px;"> {{ language.name }}
+                                      <span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}
                                     </a>
                                   </li>
                                   {% endfor %}
@@ -1298,7 +1298,7 @@ hr {
                                   {% for language in languages %}
                                   <li{% if loop.first %} class="active"{% endif %}>
                                     <a href="#payment-{{ method_code }}-title-{{ language.language_id }}" data-toggle="tab">
-                                      <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" style="width: 16px; height: 11px;"> {{ language.name }}
+                                      <span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}
                                     </a>
                                   </li>
                                   {% endfor %}
@@ -1321,7 +1321,7 @@ hr {
                                   {% for language in languages %}
                                   <li{% if loop.first %} class="active"{% endif %}>
                                     <a href="#payment-{{ method_code }}-desc-{{ language.language_id }}" data-toggle="tab">
-                                      <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" style="width: 16px; height: 11px;"> {{ language.name }}
+                                      <span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}
                                     </a>
                                   </li>
                                   {% endfor %}

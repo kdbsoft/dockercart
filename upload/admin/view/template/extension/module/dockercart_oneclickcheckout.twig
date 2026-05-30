@@ -73,7 +73,7 @@
                   <div class="col-sm-9">
                     <ul class="nav nav-tabs dc-occ-lang-tabs" id="language-button">
                       {% for language in languages %}
-                      <li{% if loop.first %} class="active"{% endif %}><a href="#language-button{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>
+                      <li{% if loop.first %} class="active"{% endif %}><a href="#language-button{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
                       {% endfor %}
                     </ul>
                     <div class="tab-content">
@@ -92,7 +92,7 @@
                   <div class="col-sm-9">
                     <ul class="nav nav-tabs dc-occ-lang-tabs" id="language-modal">
                       {% for language in languages %}
-                      <li{% if loop.first %} class="active"{% endif %}><a href="#language-modal{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>
+                      <li{% if loop.first %} class="active"{% endif %}><a href="#language-modal{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
                       {% endfor %}
                     </ul>
                     <div class="tab-content">
