@@ -240,7 +240,7 @@ class ControllerExtensionPaymentSquareup extends Controller {
             $data['languages'][] = array(
                 'language_id' => $language['language_id'],
                 'name' => $language['name'] . ($language['code'] == $this->config->get('config_language') ? $this->language->get('text_default') : ''),
-                'image' => 'language/' . $language['code'] . '/'. $language['code'] . '.png'
+                'code' => $language['code']
             );
         }
 

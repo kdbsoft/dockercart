@@ -110,7 +110,7 @@
               {% for language in languages %}
               <li {% if loop.first %}class="active"{% endif %}>
                 <a href="#language{{ language.language_id }}" data-toggle="tab">
-                  <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}
+                  <span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}
                 </a>
               </li>
               {% endfor %}

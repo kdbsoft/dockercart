@@ -141,7 +141,7 @@
               <h4>{{ text_question_answer }}</h4>
               <ul class="nav nav-tabs" role="tablist">
                 {% for language in languages %}
-                <li class="{% if loop.first %}active{% endif %}"><a href="#lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" alt="{{ language.name }}" /> {{ language.name }}</a></li>
+                <li class="{% if loop.first %}active{% endif %}"><a href="#lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
                 {% endfor %}
               </ul>
               <div class="tab-content" style="margin-top:15px;">

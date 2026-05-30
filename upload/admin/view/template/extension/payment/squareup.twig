@@ -83,7 +83,7 @@
                                     <div class="col-sm-10">
                                         {% for language in languages %}
                                             <div class="input-group">
-                                                <span class="input-group-addon"><img src="{{ language.image }}" alt="{{ language.name }}" /></span>
+                                                <span class="input-group-addon"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span></span>
                                                 <input type="text" name="payment_squareup_display_name[{{ language.language_id }}]" value="{{ payment_squareup_display_name[language.language_id] ?? text_payment_method_name_placeholder }}" placeholder="{{ text_payment_method_name_placeholder }}" class="form-control"/>
                                             </div>
                                         {% endfor %}
