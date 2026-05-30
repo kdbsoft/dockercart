@@ -7093,7 +7093,7 @@ CREATE TABLE `oc_product` (
   `mpn` varchar(64) NOT NULL,
   `location` varchar(128) NOT NULL,
   `quantity` decimal(15,2) NOT NULL DEFAULT 0.00,
-  `stock_status_id` int(11) NOT NULL,
+  `preorder` tinyint(1) NOT NULL DEFAULT 0,
   `image` varchar(255) DEFAULT NULL,
   `manufacturer_id` int(11) NOT NULL,
   `shipping` tinyint(1) NOT NULL DEFAULT 1,

@@ -10,3 +10,5 @@ $_['text_section_title'] = 'Новые поступления';
 $_['text_tax'] = 'Без учета налога:';
 $_['text_view_all'] = 'Посмотреть все →';
 $_['text_instock'] = 'В наличии';
+$_['text_preorder'] = 'Предзаказ';
+$_['text_out_of_stock'] = 'Нет в наличии';

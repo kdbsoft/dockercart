@@ -14,6 +14,8 @@ $_['text_view_all'] = 'Переглянути всі →';
 $_['text_quick_view'] = 'Швидкий перегляд';
 $_['text_add_to_wishlist'] = 'Додати в обране';
 $_['text_instock'] = 'В наявності';
+$_['text_preorder'] = 'Передзамовлення';
+$_['text_out_of_stock'] = 'Немає в наявності';
 
 ?>
 <?php

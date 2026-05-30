@@ -1832,13 +1832,13 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
     display: flex;
     align-items: flex-end;
     flex-wrap: wrap;
-    row-gap: 10px;
+    row-gap: 15px;
 }
 
 .filter-field {
     flex: 1 1 auto;
     min-width: 130px;
-    margin-right: 10px;
+    margin-right: 15px;
 }
 
 .filter-field label {
