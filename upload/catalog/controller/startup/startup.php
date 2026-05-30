@@ -140,6 +140,16 @@ class ControllerStartupStartup extends Controller {
 						ORDER BY (language_id = '" . $default_language_id . "') DESC
 						LIMIT 1"
 					);
+
+					if (!$seo_query->num_rows) {
+						$seo_query = $this->db->query(
+							"SELECT language_id FROM " . DB_PREFIX . "blog_seo_url 
+							WHERE keyword = '" . $this->db->escape($seo_keyword) . "' 
+							AND store_id = '" . $store_id . "' 
+							ORDER BY (language_id = '" . $default_language_id . "') DESC
+							LIMIT 1"
+						);
+					}
 					
 					if ($seo_query->num_rows) {
 						// Found SEO URL - get its language
@@ -168,23 +178,23 @@ class ControllerStartupStartup extends Controller {
 		
 		// Language detection priority:
 		// 1. URL prefix (highest - explicit in URL)
-		// 2. Session (user's selected language via switch_lang)
-		// 3. Cookie (persistent user preference)
-		// 4. SEO URL language (inferred from DB)
+		// 2. SEO URL language (inferred from DB — the keyword IS the content language)
+		// 3. Session (user's selected language via switch_lang)
+		// 4. Cookie (persistent user preference)
 		// 5. Default (config)
 		
 		if ($has_language_prefix) {
 			// URL has explicit language prefix - use it
 			// Code is already set from URL prefix detection above
+		} else if ($seo_url_language) {
+			// SEO URL found - infer language from DB
+			$code = $seo_url_language;
 		} else if (isset($this->session->data['language']) && array_key_exists($this->session->data['language'], $languages)) {
-			// User has selected language via switch_lang - highest priority after URL prefix
+			// User has selected language via switch_lang
 			$code = $this->session->data['language'];
 		} else if (isset($this->request->cookie['language']) && array_key_exists($this->request->cookie['language'], $languages)) {
 			// User has persistent cookie - use it
 			$code = $this->request->cookie['language'];
-		} else if ($seo_url_language) {
-			// SEO URL found - infer language from DB
-			$code = $seo_url_language;
 		} else {
 			// No language detected - use default
 			$code = $this->config->get('config_language');
