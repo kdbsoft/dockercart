@@ -11,3 +11,5 @@ $_['text_section_small'] = 'Top Sellers';
 // Quick view button text (module-specific fallback)
 $_['text_quick_view'] = 'Quick View';
 $_['text_instock'] = 'In Stock';
+$_['text_preorder'] = 'Pre-Order';
+$_['text_out_of_stock'] = 'Out Of Stock';

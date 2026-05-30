@@ -334,15 +334,6 @@ class ControllerLocalisationStockStatus extends Controller {
 		}
 
 		$this->load->model('setting/store');
-		$this->load->model('catalog/product');
-
-		foreach ($this->request->post['selected'] as $stock_status_id) {
-			$product_total = $this->model_catalog_product->getTotalProductsByStockStatusId($stock_status_id);
-
-			if ($product_total) {
-				$this->error['warning'] = sprintf($this->language->get('error_product'), $product_total);
-			}
-		}
 
 		return !$this->error;
 	}

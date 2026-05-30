@@ -7,3 +7,5 @@ $_['text_reviews'] = 'отзывы';
 $_['text_section_small'] = 'Самые продаваемые товары';
 $_['text_tax'] = 'Без учета налога:';
 $_['text_instock'] = 'В наличии';
+$_['text_preorder'] = 'Предзаказ';
+$_['text_out_of_stock'] = 'Нет в наличии';

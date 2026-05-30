@@ -13,3 +13,5 @@ $_['text_view_all'] = 'View All →';
 $_['text_quick_view'] = 'Quick View';
 $_['text_add_to_wishlist'] = 'Add to wishlist';
 $_['text_instock'] = 'In Stock';
+$_['text_preorder'] = 'Pre-Order';
+$_['text_out_of_stock'] = 'Out Of Stock';

@@ -377,9 +377,10 @@ class ControllerExtensionFeedDockercartGooglebase extends Controller {
         // Availability
         if ($product['quantity'] > 0) {
             $writer->writeElement('g:availability', 'in_stock');
+        } elseif (!empty($product['preorder'])) {
+            $writer->writeElement('g:availability', 'preorder');
         } else {
-            $stock_status = $this->getStockStatus($product['stock_status_id']);
-            $writer->writeElement('g:availability', $stock_status);
+            $writer->writeElement('g:availability', 'out_of_stock');
         }
 
         // Price
@@ -749,22 +750,6 @@ class ControllerExtensionFeedDockercartGooglebase extends Controller {
         }
         
         return '';
-    }
-
-    /**
-     * Get stock status availability
-     */
-    protected function getStockStatus($stock_status_id) {
-        // Map DockerCart stock status to Google availability
-        // Common mappings - can be extended
-        $status_map = array(
-            5 => 'out_of_stock',  // Out of Stock
-            6 => 'preorder',      // Pre-Order
-            7 => 'out_of_stock',  // 2-3 Days
-            8 => 'backorder',     // Backorder
-        );
-        
-        return isset($status_map[$stock_status_id]) ? $status_map[$stock_status_id] : 'out_of_stock';
     }
 
     /**

@@ -87,7 +87,9 @@ class ControllerAccountWishList extends Controller {
 				}
 
 				if ($product_info['quantity'] <= 0) {
-					$stock = $product_info['stock_status'];
+					$stock = $product_info['preorder']
+						? $this->language->get('text_preorder')
+						: $this->language->get('text_out_of_stock');
 				} elseif ($this->config->get('config_stock_display')) {
 					$stock = $product_info['quantity'];
 				} else {

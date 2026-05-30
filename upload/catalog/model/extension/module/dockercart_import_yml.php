@@ -1096,11 +1096,6 @@ class ModelExtensionModuleDockercartImportYml extends Model {
     }
 
     private function addProduct($data) {
-        $stock_status_id = (int)$this->config->get('config_stock_status_id');
-        if ($stock_status_id <= 0) {
-            $stock_status_id = 5;
-        }
-
         $image = isset($data['image']) ? $this->db->escape($data['image']) : '';
 
         $this->db->query("INSERT INTO `" . DB_PREFIX . "product`
@@ -1113,7 +1108,7 @@ class ModelExtensionModuleDockercartImportYml extends Model {
                 mpn = '',
                 location = '',
                 quantity = '" . (int)$data['quantity'] . "',
-                stock_status_id = '" . $stock_status_id . "',
+                preorder = '0',
                 image = '" . $image . "',
                 manufacturer_id = '" . (int)$data['manufacturer_id'] . "',
                 shipping = '1',

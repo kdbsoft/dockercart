@@ -960,16 +960,12 @@ class ControllerCatalogProduct extends Controller {
 			$data['sort_order'] = 1;
 		}
 
-		$this->load->model('localisation/stock_status');
-
-		$data['stock_statuses'] = $this->model_localisation_stock_status->getStockStatuses();
-
-		if (isset($this->request->post['stock_status_id'])) {
-			$data['stock_status_id'] = $this->request->post['stock_status_id'];
+		if (isset($this->request->post['preorder'])) {
+			$data['preorder'] = (int)$this->request->post['preorder'];
 		} elseif (!empty($product_info)) {
-			$data['stock_status_id'] = $product_info['stock_status_id'];
+			$data['preorder'] = (int)$product_info['preorder'];
 		} else {
-			$data['stock_status_id'] = 0;
+			$data['preorder'] = 0;
 		}
 
 		if (isset($this->request->post['status'])) {

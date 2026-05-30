@@ -72,7 +72,9 @@ class ControllerExtensionModuleBestSeller extends Controller {
 				$stock_quantity = (int)$product_info['quantity'];
 
 				if ($stock_quantity <= 0) {
-					$stock = $product_info['stock_status'];
+					$stock = $product_info['preorder']
+						? $this->language->get('text_preorder')
+						: $this->language->get('text_out_of_stock');
 				} elseif ($this->config->get('config_stock_display')) {
 					$stock = $stock_quantity;
 				} else {

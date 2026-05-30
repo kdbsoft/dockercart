@@ -79,7 +79,7 @@ class ModelExtensionFeedDockercartGooglebase extends Model {
                 p.mpn,
                 p.image,
                 p.quantity,
-                p.stock_status_id,
+                p.preorder,
                 p.weight,
                 p.weight_class_id,
                 p.price,
