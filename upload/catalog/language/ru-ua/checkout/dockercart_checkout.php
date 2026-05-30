@@ -167,6 +167,7 @@ $_["text_price"] = "Цена";
 $_["text_processing"] = "Обработка...";
 $_["text_product"] = "Товар";
 $_["text_quantity"] = "Кол-во";
+$_["text_preorder"] = "Предзаказ";
 $_["text_register"] = "Создать аккаунт";
 $_["text_required_field"] = "Поле %s является обязательным!";
 $_["text_return"] = "Возврат в течение 14 дней";

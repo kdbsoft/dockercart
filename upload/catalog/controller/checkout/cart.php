@@ -135,6 +135,7 @@ class ControllerCheckoutCart extends Controller {
 					'minimum'   => $this->formatQuantity($product['minimum']),
 					'quantity_step' => $this->formatQuantity(isset($product['quantity_step']) ? $product['quantity_step'] : 1),
 					'stock'     => $product['stock'] ? true : !(!$this->config->get('config_stock_checkout') || $this->config->get('config_stock_warning')),
+					'preorder'  => !empty($product['preorder']),
 					'reward'    => ($product['reward'] ? sprintf($this->language->get('text_points'), $product['reward']) : ''),
 					'price'     => $price,
 					'total'     => $total,
