@@ -99,7 +99,7 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
 
 
 
-        $query = $this->db->query("SELECT language_id, code FROM " . DB_PREFIX . "language ORDER BY language_id");
+        $query = $this->db->query("SELECT language_id, code FROM " . DB_PREFIX . "language WHERE status = 1 ORDER BY language_id");
         $languages = $query->rows;
 
         if (empty($languages)) {
@@ -257,13 +257,15 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
             $w->writeElement('changefreq', $changefreq);
             $w->writeElement('priority', number_format((float)$priority, 1, '.', ''));
 
-            foreach ($urls as $url_entry) {
-                $w->startElementNS('xhtml', 'link', null);
-                $w->writeAttribute('rel', 'alternate');
-                $w->writeAttribute('hreflang', $url_entry['hreflang']);
-                $href_value = html_entity_decode($url_entry['loc'], ENT_QUOTES | ENT_XML1, 'UTF-8');
-                $w->writeAttribute('href', $href_value);
-                $w->endElement();
+            if (count($urls) > 1) {
+                foreach ($urls as $url_entry) {
+                    $w->startElementNS('xhtml', 'link', null);
+                    $w->writeAttribute('rel', 'alternate');
+                    $w->writeAttribute('hreflang', $url_entry['hreflang']);
+                    $href_value = html_entity_decode($url_entry['loc'], ENT_QUOTES | ENT_XML1, 'UTF-8');
+                    $w->writeAttribute('href', $href_value);
+                    $w->endElement();
+                }
             }
 
             $w->endElement();
@@ -458,12 +460,14 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
         $writer->writeElement('priority', number_format((float)$priority, 1, '.', ''));
 
 
-        foreach ($urls as $url_entry) {
-            $writer->startElementNS('xhtml', 'link', null);
-            $writer->writeAttribute('rel', 'alternate');
-            $writer->writeAttribute('hreflang', $url_entry['hreflang']);
-            $writer->writeAttribute('href', $url_entry['loc']);
-            $writer->endElement();
+        if (count($urls) > 1) {
+            foreach ($urls as $url_entry) {
+                $writer->startElementNS('xhtml', 'link', null);
+                $writer->writeAttribute('rel', 'alternate');
+                $writer->writeAttribute('hreflang', $url_entry['hreflang']);
+                $writer->writeAttribute('href', $url_entry['loc']);
+                $writer->endElement();
+            }
         }
 
         $writer->endElement();
@@ -473,25 +477,31 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
 
     private function buildAlternateUrls($route, $args = '', $languages = array(), $secure = false) {
         $old_config_language_id = $this->config->get('config_language_id');
+        $old_language = isset($this->session->data['language']) ? $this->session->data['language'] : null;
 
         $urls = array();
         foreach ($languages as $l) {
-            // Устанавливаем только config_language_id, не трогаем config_language
             $this->config->set('config_language_id', (int)$l['language_id']);
+            $this->session->data['language'] = $l['code'];
 
             $url = $this->url->link($route, $args !== '' ? $args : '', $secure);
 
             $urls[] = array(
-            'loc' => $url,
-            'hreflang' => $l['code']
+                'loc' => $url,
+                'hreflang' => $l['code']
             );
         }
 
-        // Восстанавливаем прежний config_language_id
+        // Restore original state
         if ($old_config_language_id !== null) {
             $this->config->set('config_language_id', $old_config_language_id);
         } else {
             $this->config->set('config_language_id', null);
+        }
+        if ($old_language !== null) {
+            $this->session->data['language'] = $old_language;
+        } else {
+            unset($this->session->data['language']);
         }
 
         return $urls;

@@ -71,6 +71,11 @@ class ControllerStartupMultilanguage extends Controller {
 		$this->load->model('localisation/language');
 		$languages = $this->model_localisation_language->getLanguages();
 
+		// No hreflang needed when only one language is available
+		if (count($languages) <= 1) {
+			return;
+		}
+
 		$default_language = $this->config->get('config_language');
 		$current_language = isset($this->session->data['language']) ? $this->session->data['language'] : $default_language;
 
