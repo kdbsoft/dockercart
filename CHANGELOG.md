@@ -1,3 +1,9 @@
+## [1.34.3](https://github.com/mathflow-bit/dockercart/compare/v1.34.2...v1.34.3) (2026-05-30)
+
+### Bug Fixes
+
+* filter dockercart queries by current language ([8292aa1](https://github.com/mathflow-bit/dockercart/commit/8292aa11eb7be19aa0924fcefca5876718d8c4b0))
+
 ## [1.34.2](https://github.com/mathflow-bit/dockercart/compare/v1.34.1...v1.34.2) (2026-05-30)
 
 ## [1.34.1](https://github.com/mathflow-bit/dockercart/compare/v1.34.0...v1.34.1) (2026-05-30)
