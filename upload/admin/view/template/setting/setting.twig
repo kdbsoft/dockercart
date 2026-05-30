@@ -46,7 +46,7 @@
             <div class="tab-pane active" id="tab-general">
               <ul class="nav nav-tabs" id="language">
                 {% for language in languages %}
-                <li><a href="#language-general{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>
+                <li><a href="#language-general{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
                 {% endfor %}
               </ul>
               <div class="tab-content">
@@ -109,7 +109,7 @@
             <div class="tab-pane" id="tab-store">
               <ul class="nav nav-tabs" id="language-store">
                 {% for language in languages %}
-                <li><a href="#language-store{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>
+                <li><a href="#language-store{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
                 {% endfor %}
               </ul>
               <div class="tab-content">

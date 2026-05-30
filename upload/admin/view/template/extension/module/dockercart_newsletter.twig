@@ -102,7 +102,7 @@
 
                 <ul class="nav nav-tabs dcx-profile-tabs" id="language-tabs" role="tablist" style="margin-bottom: 15px;">
                   {% for language in languages %}
-                    <li{% if loop.first %} class="active"{% endif %}><a href="#newsletter-lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>
+                    <li{% if loop.first %} class="active"{% endif %}><a href="#newsletter-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
                   {% endfor %}
                 </ul>
 

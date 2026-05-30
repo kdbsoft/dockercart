@@ -1248,6 +1248,9 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
     padding: 8px 14px;
     border-bottom: 1px solid #334155;
 }
+#stats li:last-child {
+    border-bottom: none;
+}
 
 #stats div:first-child {
     margin-bottom: 4px;
@@ -1261,7 +1264,7 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
 /* Progress bars */
 .progress {
     height: 8px;
-    background: #1e293b;
+    background: #d1d5db;
     border-radius: 999px;
     overflow: hidden;
     box-shadow: none;
@@ -1773,6 +1776,17 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
     border-radius: 8px;
     box-shadow: none;
     padding: 16px;
+}
+
+.dropdown-menu + .well.well-sm {
+    margin-top: 5px;
+}
+
+.lang-code {
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    color: #1f2937;
 }
 
 .well.filter {

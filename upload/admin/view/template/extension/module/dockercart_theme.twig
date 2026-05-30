@@ -566,7 +566,7 @@
                   <div style="flex:1;min-width:0;">
                     <ul class="nav nav-tabs dc-feature-tabs" role="tablist">
                       {% for language in languages %}
-                      <li{% if loop.first %} class="active"{% endif %}><a href="#product-feature-{{ idx }}-lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>
+                      <li{% if loop.first %} class="active"{% endif %}><a href="#product-feature-{{ idx }}-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
                       {% endfor %}
                     </ul>
                     <div class="tab-content">
@@ -617,7 +617,7 @@
                   <div style="flex:1;min-width:0;">
                     <ul class="nav nav-tabs dc-feature-tabs" role="tablist">
                       {% for language in languages %}
-                      <li{% if loop.first %} class="active"{% endif %}><a href="#category-feature-{{ idx }}-lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>
+                      <li{% if loop.first %} class="active"{% endif %}><a href="#category-feature-{{ idx }}-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
                       {% endfor %}
                     </ul>
                     <div class="tab-content">
@@ -668,7 +668,7 @@
                   <div style="flex:1;min-width:0;">
                     <ul class="nav nav-tabs dc-feature-tabs" role="tablist">
                       {% for language in languages %}
-                      <li{% if loop.first %} class="active"{% endif %}><a href="#quickview-feature-{{ idx }}-lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>
+                      <li{% if loop.first %} class="active"{% endif %}><a href="#quickview-feature-{{ idx }}-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
                       {% endfor %}
                     </ul>
                     <div class="tab-content">
@@ -719,7 +719,7 @@
                   <div style="flex:1;min-width:0;">
                     <ul class="nav nav-tabs dc-feature-tabs" role="tablist">
                       {% for language in languages %}
-                      <li{% if loop.first %} class="active"{% endif %}><a href="#header-link-{{ idx }}-lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>
+                      <li{% if loop.first %} class="active"{% endif %}><a href="#header-link-{{ idx }}-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
                       {% endfor %}
                     </ul>
                     <div class="tab-content">
@@ -763,7 +763,7 @@
                   <div style="flex:1;min-width:0;">
                     <ul class="nav nav-tabs dc-feature-tabs" role="tablist">
                       {% for language in languages %}
-                      <li{% if loop.first %} class="active"{% endif %}><a href="#footer-link-{{ idx }}-lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>
+                      <li{% if loop.first %} class="active"{% endif %}><a href="#footer-link-{{ idx }}-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
                       {% endfor %}
                     </ul>
                     <div class="tab-content">
@@ -877,7 +877,7 @@
     html += '<div style="flex:1;min-width:0;">';
     html += '<ul class="nav nav-tabs dc-feature-tabs" role="tablist">';
     {% for language in languages %}
-    html += '<li{% if loop.first %} class="active"{% endif %}><a href="#' + rowPrefix + '-' + rowIndex + '-lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>';
+    html += '<li{% if loop.first %} class="active"{% endif %}><a href="#' + rowPrefix + '-' + rowIndex + '-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>';
     {% endfor %}
     html += '</ul>';
     html += '<div class="tab-content">';
@@ -912,7 +912,7 @@
     html += '<div style="flex:1;min-width:0;">';
     html += '<ul class="nav nav-tabs dc-feature-tabs" role="tablist">';
     {% for language in languages %}
-    html += '<li{% if loop.first %} class="active"{% endif %}><a href="#header-link-' + rowIndex + '-lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>';
+    html += '<li{% if loop.first %} class="active"{% endif %}><a href="#header-link-' + rowIndex + '-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>';
     {% endfor %}
     html += '</ul>';
     html += '<div class="tab-content">';
@@ -942,7 +942,7 @@
     html += '<div style="flex:1;min-width:0;">';
     html += '<ul class="nav nav-tabs dc-feature-tabs" role="tablist">';
     {% for language in languages %}
-    html += '<li{% if loop.first %} class="active"{% endif %}><a href="#footer-link-' + rowIndex + '-lang-{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>';
+    html += '<li{% if loop.first %} class="active"{% endif %}><a href="#footer-link-' + rowIndex + '-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>';
     {% endfor %}
     html += '</ul>';
     html += '<div class="tab-content">';

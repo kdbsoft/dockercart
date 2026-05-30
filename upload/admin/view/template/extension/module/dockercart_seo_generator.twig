@@ -207,7 +207,7 @@
                       <table class="table table-condensed">
                         {% for lang_id, lang_stats in stats.products.by_language %}
                         <tr>
-                          <td><img src="language/{{ lang_stats.code }}/{{ lang_stats.code }}.png" /> {{ lang_stats.name }}</td>
+                          <td><span class="lang-code">{{ lang_stats.code|split('-')|first|upper }}</span> {{ lang_stats.name }}</td>
                           <td class="text-right">
                             <span class="label label-danger">URL: {{ lang_stats.empty_url }}</span>
                             <span class="label label-warning">Meta: {{ lang_stats.empty_meta }}</span>
@@ -243,7 +243,7 @@
                       <table class="table table-condensed">
                         {% for lang_id, lang_stats in stats.categories.by_language %}
                         <tr>
-                          <td><img src="language/{{ lang_stats.code }}/{{ lang_stats.code }}.png" /> {{ lang_stats.name }}</td>
+                          <td><span class="lang-code">{{ lang_stats.code|split('-')|first|upper }}</span> {{ lang_stats.name }}</td>
                           <td class="text-right">
                             <span class="label label-danger">URL: {{ lang_stats.empty_url }}</span>
                             <span class="label label-warning">Meta: {{ lang_stats.empty_meta }}</span>
@@ -277,7 +277,7 @@
                       <table class="table table-condensed">
                         {% for lang_id, lang_stats in stats.manufacturers.by_language %}
                         <tr>
-                          <td><img src="language/{{ lang_stats.code }}/{{ lang_stats.code }}.png" /> {{ lang_stats.name }}</td>
+                          <td><span class="lang-code">{{ lang_stats.code|split('-')|first|upper }}</span> {{ lang_stats.name }}</td>
                           <td class="text-right">
                             <span class="label label-danger">URL: {{ lang_stats.empty_url }}</span>
                           </td>
@@ -312,7 +312,7 @@
                       <table class="table table-condensed">
                         {% for lang_id, lang_stats in stats.information.by_language %}
                         <tr>
-                          <td><img src="language/{{ lang_stats.code }}/{{ lang_stats.code }}.png" /> {{ lang_stats.name }}</td>
+                          <td><span class="lang-code">{{ lang_stats.code|split('-')|first|upper }}</span> {{ lang_stats.name }}</td>
                           <td class="text-right">
                             <span class="label label-danger">URL: {{ lang_stats.empty_url }}</span>
                             <span class="label label-warning">Meta: {{ lang_stats.empty_meta }}</span>
