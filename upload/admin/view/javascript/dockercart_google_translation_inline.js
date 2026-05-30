@@ -245,9 +245,15 @@
                     btn.classList.remove('btn-danger');
                     btn.classList.add('btn-default');
                 }, 1500);
-                // keep silent in UI; leave diagnostics in console
-                // eslint-disable-next-line no-console
-                console.error('Inline translation error:', e);
+
+                if (typeof jQuery !== 'undefined') {
+                    jQuery('#content > .container-fluid').prepend(
+                        '<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' +
+                        e.message +
+                        ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>'
+                    );
+                    window.scrollTo(0, 0);
+                }
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = originalHtml;
