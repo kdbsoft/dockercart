@@ -1,3 +1,9 @@
+## [1.34.5](https://github.com/mathflow-bit/dockercart/compare/v1.34.4...v1.34.5) (2026-05-30)
+
+### Bug Fixes
+
+* improve mobile layout of admin login ([d0cd777](https://github.com/mathflow-bit/dockercart/commit/d0cd7770a61ee855116bd9c3750613a8d5ceba97))
+
 ## [1.34.4](https://github.com/mathflow-bit/dockercart/compare/v1.34.3...v1.34.4) (2026-05-30)
 
 ### Bug Fixes
