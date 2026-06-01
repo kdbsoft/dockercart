@@ -4,6 +4,7 @@
     <div class="container-fluid">
       <div class="pull-right">
         <a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa fa-plus"></i></a>
+        <button type="submit" form="form-review" formaction="{{ copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default"><i class="fa fa-copy"></i></button>
         <button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="confirm('{{ text_confirm }}') ? $('#form-review').submit() : false;"><i class="fa fa-trash-o"></i></button>
       </div>
       <h1>{{ heading_title }}</h1>
@@ -112,7 +113,7 @@
                     <td class="text-left">
                       <span class="inline-edit" data-review-id="{{ review.review_id }}" data-field="date_added" data-value="{{ review.date_added_raw }}">{{ review.date_added }}<i class="fa fa-pencil-square-o inline-edit-icon"></i></span>
                     </td>
-                    <td class="text-right"><a href="{{ review.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
+                    <td class="text-right"><a href="{{ review.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a> <a href="{{ review.copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default"><i class="fa fa-copy"></i></a> <a href="{{ review.delete }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="return confirm('{{ text_confirm }}');"><i class="fa fa-trash-o"></i></a></td>
                   </tr>
                   {% endfor %}
                   {% else %}
@@ -178,6 +179,12 @@ $('.date').datetimepicker({
 .inline-edit-input { width: 100px; text-align: left; display: inline-block !important; height: 28px; padding: 3px 8px; }
 .inline-edit-error { margin-left: 4px; font-size: 11px; white-space: nowrap; }
 </style>
+<script type="text/javascript"><!--
+// IE and Edge fix!
+$('button[form=\'form-review\']').on('click', function(e) {
+	$('#form-review').attr('action', $(this).attr('formaction'));
+});
+//--></script>
 <script type="text/javascript"><!--
 $(document).on('click', '.inline-edit-icon', function(e) {
 	e.stopPropagation();

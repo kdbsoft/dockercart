@@ -42,7 +42,6 @@ class ControllerExtensionModuleCarousel extends Controller {
 
 			$data['banners'][] = array(
 				'title'          => $result['title'],
-				'link'           => $result['link'],
 				'image'          => $image_landscape,
 				'image_portrait' => $image_portrait
 			);

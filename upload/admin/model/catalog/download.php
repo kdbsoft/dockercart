@@ -27,6 +27,76 @@ class ModelCatalogDownload extends Model {
 		$this->db->query("DELETE FROM " . DB_PREFIX . "download_description WHERE download_id = '" . (int)$download_id . "'");
 	}
 
+	public function copyDownload($download_id)
+	{
+		$query = $this->db->query(
+			"SELECT * FROM " .
+				DB_PREFIX .
+				"download WHERE download_id = '" .
+				(int) $download_id .
+				"'",
+		);
+
+		if (!$query->num_rows) {
+			return false;
+		}
+
+		$download = $query->row;
+
+		$data = [];
+
+		$data["filename"] = $download["filename"];
+		$data["mask"] = $download["mask"];
+		$data["download_description"] = $this->getDownloadDescriptions(
+			$download_id,
+		);
+
+		$default_language_id = (int) $this->config->get("config_language_id");
+
+		if (
+			isset(
+				$data["download_description"][$default_language_id]["name"],
+			)
+		) {
+			$data["download_description"][$default_language_id]["name"] = $this->getUniqueCopyName(
+				$data["download_description"][$default_language_id]["name"],
+				DB_PREFIX . "download_description",
+				"name",
+			);
+		}
+
+		return $this->addDownload($data);
+	}
+
+	private function getUniqueCopyName($original, $table, $column)
+	{
+		$base = $original;
+
+		if (preg_match('/^(.+)-copy(\d*)$/', $original, $matches)) {
+			$base = $matches[1];
+		}
+
+		$counter = 0;
+
+		do {
+			$counter++;
+			$suffix = $counter > 1 ? (string) $counter : "";
+			$candidate = $base . "-copy" . $suffix;
+
+			$query = $this->db->query(
+				"SELECT COUNT(*) AS total FROM " .
+					$table .
+					" WHERE " .
+					$column .
+					" = '" .
+					$this->db->escape($candidate) .
+					"'",
+			);
+		} while ($query->row["total"] > 0);
+
+		return $candidate;
+	}
+
 	public function getDownload($download_id) {
 		$query = $this->db->query("SELECT DISTINCT * FROM " . DB_PREFIX . "download d LEFT JOIN " . DB_PREFIX . "download_description dd ON (d.download_id = dd.download_id) WHERE d.download_id = '" . (int)$download_id . "' AND dd.language_id = '" . (int)$this->config->get('config_language_id') . "'");
 

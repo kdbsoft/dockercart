@@ -96,7 +96,6 @@ class ControllerExtensionModuleBanner extends Controller {
                 'primary_btn_bg_color' => isset($result['primary_btn_bg_color']) ? $result['primary_btn_bg_color'] : '',
                 'secondary_btn_text' => isset($result['secondary_btn_text']) ? $result['secondary_btn_text'] : '',
                 'secondary_btn_link' => isset($result['secondary_btn_link']) ? $result['secondary_btn_link'] : '',
-                'link'               => $result['link'],
                 'image'              => $image_landscape,
                 'image_portrait'     => $image_portrait,
                 'video_type'         => $video_type,

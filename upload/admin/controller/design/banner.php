@@ -248,6 +248,23 @@ class ControllerDesignBanner extends Controller {
 	protected function getForm() {
 		$data['text_form'] = !isset($this->request->get['banner_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
 
+		// Localization keys for banner_form.twig
+		$data['text_tab_general']        = $this->language->get('text_tab_general');
+		$data['text_tab_slides']         = $this->language->get('text_tab_slides');
+		$data['text_general_settings']   = $this->language->get('text_general_settings');
+		$data['text_slides_by_language'] = $this->language->get('text_slides_by_language');
+		$data['text_slide']              = $this->language->get('text_slide');
+		$data['text_new_slide']          = $this->language->get('text_new_slide');
+		$data['text_no_slides']          = $this->language->get('text_no_slides');
+		$data['button_add_slide']        = $this->language->get('button_add_slide');
+		$data['text_landscape']          = $this->language->get('text_landscape');
+		$data['text_portrait']           = $this->language->get('text_portrait');
+		$data['text_mp4']                = $this->language->get('text_mp4');
+		$data['placeholder_accent_text']    = $this->language->get('placeholder_accent_text');
+		$data['placeholder_primary_btn']    = $this->language->get('placeholder_primary_btn');
+		$data['placeholder_secondary_btn']  = $this->language->get('placeholder_secondary_btn');
+		$data['button_duplicate_slide']    = $this->language->get('button_duplicate_slide');
+
 		if (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];
 		} else {
@@ -370,8 +387,6 @@ class ControllerDesignBanner extends Controller {
 				'primary_btn_text_color' => isset($banner_image['primary_btn_text_color']) ? $banner_image['primary_btn_text_color'] : '',
 				'primary_btn_bg_color'   => isset($banner_image['primary_btn_bg_color']) ? $banner_image['primary_btn_bg_color'] : '',
 				'secondary_btn_text' => isset($banner_image['secondary_btn_text']) ? $banner_image['secondary_btn_text'] : '',
-				'secondary_btn_link' => isset($banner_image['secondary_btn_link']) ? $banner_image['secondary_btn_link'] : '',
-				'link'               => $banner_image['link'],
 				'image'              => $image,
 				'thumb'          	 => $this->model_tool_image->resize($thumb, 100, 100),
 				'image_portrait'     => $image_portrait,

@@ -76,6 +76,50 @@ class ControllerCatalogInformation extends Controller {
 		$this->getForm();
 	}
 
+	public function copy() {
+		$this->load->language('catalog/information');
+
+		$this->document->setTitle($this->language->get('heading_title'));
+
+		$this->load->model('catalog/information');
+
+		$information_ids = [];
+
+		if (isset($this->request->post['selected'])) {
+			$information_ids = $this->request->post['selected'];
+		} elseif (isset($this->request->get['information_id'])) {
+			$information_ids = [(int) $this->request->get['information_id']];
+		}
+
+		if ($information_ids && $this->validateCopy()) {
+			foreach ($information_ids as $information_id) {
+				$this->model_catalog_information->copyInformation(
+					(int) $information_id,
+				);
+			}
+
+			$this->session->data['success'] = $this->language->get('text_success');
+
+			$url = '';
+
+			if (isset($this->request->get['sort'])) {
+				$url .= '&sort=' . $this->request->get['sort'];
+			}
+
+			if (isset($this->request->get['order'])) {
+				$url .= '&order=' . $this->request->get['order'];
+			}
+
+			if (isset($this->request->get['page'])) {
+				$url .= '&page=' . $this->request->get['page'];
+			}
+
+			$this->response->redirect($this->url->link('catalog/information', 'user_token=' . $this->session->data['user_token'] . $url, true));
+		}
+
+		$this->getList();
+	}
+
 	public function delete() {
 		$this->load->language('catalog/information');
 
@@ -83,9 +127,19 @@ class ControllerCatalogInformation extends Controller {
 
 		$this->load->model('catalog/information');
 
-		if (isset($this->request->post['selected']) && $this->validateDelete()) {
-			foreach ($this->request->post['selected'] as $information_id) {
-				$this->model_catalog_information->deleteInformation($information_id);
+		$information_ids = [];
+
+		if (isset($this->request->post['selected'])) {
+			$information_ids = $this->request->post['selected'];
+		} elseif (isset($this->request->get['information_id'])) {
+			$information_ids = [(int) $this->request->get['information_id']];
+		}
+
+		if ($information_ids && $this->validateDelete()) {
+			foreach ($information_ids as $information_id) {
+				$this->model_catalog_information->deleteInformation(
+					(int) $information_id,
+				);
 			}
 
 			$this->session->data['success'] = $this->language->get('text_success');
@@ -156,6 +210,7 @@ class ControllerCatalogInformation extends Controller {
 		);
 
 		$data['add'] = $this->url->link('catalog/information/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
+		$data['copy'] = $this->url->link('catalog/information/copy', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('catalog/information/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
 		$data['informations'] = array();
@@ -178,7 +233,9 @@ class ControllerCatalogInformation extends Controller {
 				'title_raw'      => $result['title'],
 				'sort_order'     => $result['sort_order'],
 				'sort_order_raw' => $result['sort_order'],
-				'edit'           => $this->url->link('catalog/information/edit', 'user_token=' . $this->session->data['user_token'] . '&information_id=' . $result['information_id'] . $url, true)
+				'edit'           => $this->url->link('catalog/information/edit', 'user_token=' . $this->session->data['user_token'] . '&information_id=' . $result['information_id'] . $url, true),
+				'copy'           => $this->url->link('catalog/information/copy', 'user_token=' . $this->session->data['user_token'] . '&information_id=' . $result['information_id'] . $url, true),
+				'delete'         => $this->url->link('catalog/information/delete', 'user_token=' . $this->session->data['user_token'] . '&information_id=' . $result['information_id'] . $url, true)
 			);
 		}
 
@@ -637,14 +694,30 @@ class ControllerCatalogInformation extends Controller {
 		$this->response->setOutput(json_encode($json));
 	}
 
+	protected function validateCopy() {
+		if (!$this->user->hasPermission('modify', 'catalog/information')) {
+			$this->error['warning'] = $this->language->get('error_permission');
+		}
+
+		return !$this->error;
+	}
+
 	protected function validateDelete() {
 		if (!$this->user->hasPermission('modify', 'catalog/information')) {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
+		$information_ids = [];
+
+		if (isset($this->request->post['selected'])) {
+			$information_ids = $this->request->post['selected'];
+		} elseif (isset($this->request->get['information_id'])) {
+			$information_ids = [(int) $this->request->get['information_id']];
+		}
+
 		$this->load->model('setting/store');
 
-		foreach ($this->request->post['selected'] as $information_id) {
+		foreach ($information_ids as $information_id) {
 			if ($this->config->get('config_account_id') == $information_id) {
 				$this->error['warning'] = $this->language->get('error_account');
 			}

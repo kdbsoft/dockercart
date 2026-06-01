@@ -46,6 +46,71 @@ class ModelCatalogProductBundle extends Model {
 		$this->db->query("DELETE FROM " . DB_PREFIX . "product_bundle_store WHERE bundle_id = '" . (int)$bundle_id . "'");
 	}
 
+	public function copyBundle($bundle_id)
+	{
+		$query = $this->db->query(
+			"SELECT * FROM " .
+				DB_PREFIX .
+				"product_bundle WHERE bundle_id = '" .
+				(int) $bundle_id .
+				"'",
+		);
+
+		if (!$query->num_rows) {
+			return false;
+		}
+
+		$bundle = $query->row;
+
+		$data = [];
+
+		$data["name"] = $this->getUniqueCopyName(
+			$bundle["name"],
+			DB_PREFIX . "product_bundle",
+			"name",
+		);
+		$data["discount_type"] = $bundle["discount_type"];
+		$data["discount_value"] = $bundle["discount_value"];
+		$data["date_start"] = $bundle["date_start"];
+		$data["date_end"] = $bundle["date_end"];
+		$data["status"] = $bundle["status"];
+		$data["sort_order"] = $bundle["sort_order"];
+		$data["auto_renew"] = $bundle["auto_renew"];
+		$data["bundle_product"] = $this->getBundleProducts($bundle_id);
+		$data["bundle_store"] = $this->getBundleStores($bundle_id);
+
+		return $this->addBundle($data);
+	}
+
+	private function getUniqueCopyName($original, $table, $column)
+	{
+		$base = $original;
+
+		if (preg_match('/^(.+)-copy(\d*)$/', $original, $matches)) {
+			$base = $matches[1];
+		}
+
+		$counter = 0;
+
+		do {
+			$counter++;
+			$suffix = $counter > 1 ? (string) $counter : "";
+			$candidate = $base . "-copy" . $suffix;
+
+			$query = $this->db->query(
+				"SELECT COUNT(*) AS total FROM " .
+					$table .
+					" WHERE " .
+					$column .
+					" = '" .
+					$this->db->escape($candidate) .
+					"'",
+			);
+		} while ($query->row["total"] > 0);
+
+		return $candidate;
+	}
+
 	public function getBundle($bundle_id) {
 		$query = $this->db->query("SELECT DISTINCT * FROM " . DB_PREFIX . "product_bundle WHERE bundle_id = '" . (int)$bundle_id . "'");
 

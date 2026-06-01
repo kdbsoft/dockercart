@@ -76,6 +76,72 @@ class ControllerCatalogProductBundle extends Controller {
 		$this->getForm();
 	}
 
+	public function copy() {
+		$this->load->language('catalog/product_bundle');
+
+		$this->document->setTitle($this->language->get('heading_title'));
+
+		$this->load->model('catalog/product_bundle');
+
+		$bundle_ids = [];
+
+		if (isset($this->request->post['selected'])) {
+			$bundle_ids = $this->request->post['selected'];
+		} elseif (isset($this->request->get['bundle_id'])) {
+			$bundle_ids = [(int) $this->request->get['bundle_id']];
+		}
+
+		if ($bundle_ids && $this->validateCopy()) {
+			// Check all bundles have a name
+			$has_no_name = false;
+
+			foreach ($bundle_ids as $bundle_id) {
+				$bundle_info = $this->model_catalog_product_bundle->getBundle(
+					(int) $bundle_id,
+				);
+
+				if (!$bundle_info || empty($bundle_info['name'])) {
+					$has_no_name = true;
+					break;
+				}
+			}
+
+			if ($has_no_name) {
+				$this->error['warning'] = $this->language->get(
+					'error_copy_no_name',
+				);
+			} else {
+				foreach ($bundle_ids as $bundle_id) {
+					$this->model_catalog_product_bundle->copyBundle(
+						(int) $bundle_id,
+					);
+				}
+
+				$this->session->data['success'] = $this->language->get(
+					'text_success',
+				);
+
+				$url = '';
+
+				if (isset($this->request->get['sort'])) {
+					$url .= '&sort=' . $this->request->get['sort'];
+				}
+
+				if (isset($this->request->get['order'])) {
+					$url .= '&order=' . $this->request->get['order'];
+				}
+
+				if (isset($this->request->get['page'])) {
+					$url .= '&page=' . $this->request->get['page'];
+				}
+
+				$this->response->redirect($this->url->link('catalog/product_bundle', 'user_token=' . $this->session->data['user_token'] . $url, true));
+			}
+		}
+
+		$this->getList();
+	}
+
 	public function delete() {
 		$this->load->language('catalog/product_bundle');
 
@@ -83,9 +149,19 @@ class ControllerCatalogProductBundle extends Controller {
 
 		$this->load->model('catalog/product_bundle');
 
-		if (isset($this->request->post['selected']) && $this->validateDelete()) {
-			foreach ($this->request->post['selected'] as $bundle_id) {
-				$this->model_catalog_product_bundle->deleteBundle($bundle_id);
+		$bundle_ids = [];
+
+		if (isset($this->request->post['selected'])) {
+			$bundle_ids = $this->request->post['selected'];
+		} elseif (isset($this->request->get['bundle_id'])) {
+			$bundle_ids = [(int) $this->request->get['bundle_id']];
+		}
+
+		if ($bundle_ids && $this->validateDelete()) {
+			foreach ($bundle_ids as $bundle_id) {
+				$this->model_catalog_product_bundle->deleteBundle(
+					(int) $bundle_id,
+				);
 			}
 
 			$this->session->data['success'] = $this->language->get('text_success');
@@ -156,6 +232,7 @@ class ControllerCatalogProductBundle extends Controller {
 		);
 
 		$data['add'] = $this->url->link('catalog/product_bundle/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
+		$data['copy'] = $this->url->link('catalog/product_bundle/copy', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('catalog/product_bundle/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
 		$data['bundles'] = array();
@@ -196,7 +273,9 @@ class ControllerCatalogProductBundle extends Controller {
 				'date_end_raw'    => $result['date_end'],
 				'sort_order'      => $result['sort_order'],
 				'sort_order_raw'  => $result['sort_order'],
-				'edit'            => $this->url->link('catalog/product_bundle/edit', 'user_token=' . $this->session->data['user_token'] . '&bundle_id=' . $result['bundle_id'] . $url, true)
+				'edit'            => $this->url->link('catalog/product_bundle/edit', 'user_token=' . $this->session->data['user_token'] . '&bundle_id=' . $result['bundle_id'] . $url, true),
+				'copy'            => $this->url->link('catalog/product_bundle/copy', 'user_token=' . $this->session->data['user_token'] . '&bundle_id=' . $result['bundle_id'] . $url, true),
+				'delete'          => $this->url->link('catalog/product_bundle/delete', 'user_token=' . $this->session->data['user_token'] . '&bundle_id=' . $result['bundle_id'] . $url, true)
 			);
 		}
 
@@ -504,6 +583,14 @@ class ControllerCatalogProductBundle extends Controller {
 
 		if ($this->request->post['date_start'] != '0000-00-00' && $this->request->post['date_end'] != '0000-00-00' && $this->request->post['date_start'] > $this->request->post['date_end']) {
 			$this->error['date_end'] = $this->language->get('error_date');
+		}
+
+		return !$this->error;
+	}
+
+	protected function validateCopy() {
+		if (!$this->user->hasPermission('modify', 'catalog/product_bundle')) {
+			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
 		return !$this->error;
