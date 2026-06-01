@@ -3,6 +3,7 @@
   <div class="page-header">
     <div class="container-fluid">
       <div class="pull-right"><a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa fa-plus"></i></a>
+        <button type="submit" form="form-attribute-group" formaction="{{ copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default"><i class="fa fa-copy"></i></button>
         <button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="confirm('{{ text_confirm }}') ? $('#form-attribute-group').submit() : false;"><i class="fa fa-trash-o"></i></button>
       </div>
       <h1>{{ heading_title }}</h1>
@@ -67,7 +68,7 @@
                   <td class="text-right">
                     <span class="inline-edit" data-attribute-group-id="{{ attribute_group.attribute_group_id }}" data-field="sort_order" data-value="{{ attribute_group.sort_order_raw }}">{{ attribute_group.sort_order }}<i class="fa fa-pencil-square-o inline-edit-icon"></i></span>
                   </td>
-                  <td class="text-right"><a href="{{ attribute_group.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
+                  <td class="text-right"><a href="{{ attribute_group.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a> <a href="{{ attribute_group.copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default"><i class="fa fa-copy"></i></a> <a href="{{ attribute_group.delete }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="return confirm('{{ text_confirm }}');"><i class="fa fa-trash-o"></i></a></td>
                 </tr>
                 {% endfor %}
                 {% else %}
@@ -96,6 +97,12 @@
 .inline-edit-name-input { width: 200px; display: inline-block !important; height: 28px; padding: 3px 8px; }
 .inline-edit-error { margin-left: 4px; font-size: 11px; white-space: nowrap; }
 </style>
+<script type="text/javascript"><!--
+// IE and Edge fix!
+$('button[form=\'form-attribute-group\']').on('click', function(e) {
+	$('#form-attribute-group').attr('action', $(this).attr('formaction'));
+});
+//--></script>
 <script type="text/javascript"><!--
 $(document).on('click', '.inline-edit-icon', function(e) {
 	e.stopPropagation();

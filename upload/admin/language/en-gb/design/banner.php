@@ -19,10 +19,6 @@ $_['entry_name']             = 'Banner Name';
 $_['entry_title']            = 'Title';
 $_['entry_title_hint']       = 'Wrap accent words with [brackets], e.g.: The Future of [Smart Living]';
 $_['entry_subtitle']         = 'Subtitle';
-$_['entry_content_position']     = 'Content Position';
-$_['text_content_position_left']  = 'Left';
-$_['text_content_position_center'] = 'Center';
-$_['text_content_position_right'] = 'Right';
 
 $_['entry_accent_text']      = 'Top Badge';
 $_['entry_accent_color']     = 'Accent Color';
@@ -33,7 +29,6 @@ $_['entry_primary_btn_text_color'] = 'Primary Button Text Color';
 $_['entry_primary_btn_bg_color']   = 'Primary Button Background Color';
 $_['entry_secondary_btn_text'] = 'Secondary Button Text';
 $_['entry_secondary_btn_link'] = 'Secondary Button Link';
-$_['entry_link']             = 'Link (slide wrapper)';
 $_['entry_image']            = 'Image';
 $_['entry_status']           = 'Status';
 $_['entry_sort_order']       = 'Sort Order';
@@ -48,6 +43,33 @@ $_['entry_video_youtube_placeholder'] = 'YouTube video ID (e.g. dQw4w9WgXcQ)';
 $_['entry_video_mp4']               = 'MP4 File';
 $_['help_video_youtube']            = 'Enter the YouTube video ID. The video will autoplay muted with loop as the slide background.';
 $_['help_video_mp4']                = 'Click the thumbnail to upload or select an MP4 file from the file manager. Videos are stored in the /image/ directory.';
+
+// Tabs
+$_['text_tab_general']        = 'General';
+$_['text_tab_slides']         = 'Slides';
+
+// Sections
+$_['text_general_settings']   = 'General Settings';
+$_['text_slides_by_language'] = 'Slides by Language';
+
+// Slides
+$_['text_slide']              = 'Slide';
+$_['text_new_slide']          = 'New Slide';
+$_['text_no_slides']          = 'No slides yet. Click "+ Add Slide" to create the first one.';
+$_['button_add_slide']        = 'Add Slide';
+
+// Image orientation
+$_['text_landscape']          = 'Landscape';
+$_['text_portrait']           = 'Portrait';
+$_['text_mp4']                = 'MP4';
+
+// Placeholders
+$_['placeholder_accent_text']    = 'e.g. New Collection';
+$_['placeholder_primary_btn']    = 'Shop Now';
+$_['placeholder_secondary_btn']  = 'Browse All';
+
+// Actions
+$_['button_duplicate_slide']    = 'Duplicate';
 
 // Error
 $_['error_permission'] = 'Warning: You do not have permission to modify banners!';

@@ -76,6 +76,52 @@ class ControllerCatalogAttribute extends Controller {
 		$this->getForm();
 	}
 
+	public function copy() {
+		$this->load->language('catalog/attribute');
+
+		$this->document->setTitle($this->language->get('heading_title'));
+
+		$this->load->model('catalog/attribute');
+
+		$attribute_ids = [];
+
+		if (isset($this->request->post['selected'])) {
+			$attribute_ids = $this->request->post['selected'];
+		} elseif (isset($this->request->get['attribute_id'])) {
+			$attribute_ids = [(int) $this->request->get['attribute_id']];
+		}
+
+		if ($attribute_ids && $this->validateCopy()) {
+			foreach ($attribute_ids as $attribute_id) {
+				$this->model_catalog_attribute->copyAttribute(
+					(int) $attribute_id,
+				);
+			}
+
+			$this->session->data['success'] = $this->language->get(
+				'text_success',
+			);
+
+			$url = '';
+
+			if (isset($this->request->get['sort'])) {
+				$url .= '&sort=' . $this->request->get['sort'];
+			}
+
+			if (isset($this->request->get['order'])) {
+				$url .= '&order=' . $this->request->get['order'];
+			}
+
+			if (isset($this->request->get['page'])) {
+				$url .= '&page=' . $this->request->get['page'];
+			}
+
+			$this->response->redirect($this->url->link('catalog/attribute', 'user_token=' . $this->session->data['user_token'] . $url, true));
+		}
+
+		$this->getList();
+	}
+
 	public function delete() {
 		$this->load->language('catalog/attribute');
 
@@ -83,9 +129,19 @@ class ControllerCatalogAttribute extends Controller {
 
 		$this->load->model('catalog/attribute');
 
-		if (isset($this->request->post['selected']) && $this->validateDelete()) {
-			foreach ($this->request->post['selected'] as $attribute_id) {
-				$this->model_catalog_attribute->deleteAttribute($attribute_id);
+		$attribute_ids = [];
+
+		if (isset($this->request->post['selected'])) {
+			$attribute_ids = $this->request->post['selected'];
+		} elseif (isset($this->request->get['attribute_id'])) {
+			$attribute_ids = [(int) $this->request->get['attribute_id']];
+		}
+
+		if ($attribute_ids && $this->validateDelete()) {
+			foreach ($attribute_ids as $attribute_id) {
+				$this->model_catalog_attribute->deleteAttribute(
+					(int) $attribute_id,
+				);
 			}
 
 			$this->session->data['success'] = $this->language->get('text_success');
@@ -156,6 +212,7 @@ class ControllerCatalogAttribute extends Controller {
 		);
 
 		$data['add'] = $this->url->link('catalog/attribute/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
+		$data['copy'] = $this->url->link('catalog/attribute/copy', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('catalog/attribute/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
 		$data['attributes'] = array();
@@ -180,7 +237,9 @@ class ControllerCatalogAttribute extends Controller {
 				'attribute_group_id_raw'=> $result['attribute_group_id'],
 				'sort_order'            => $result['sort_order'],
 				'sort_order_raw'        => $result['sort_order'],
-				'edit'                  => $this->url->link('catalog/attribute/edit', 'user_token=' . $this->session->data['user_token'] . '&attribute_id=' . $result['attribute_id'] . $url, true)
+				'edit'                  => $this->url->link('catalog/attribute/edit', 'user_token=' . $this->session->data['user_token'] . '&attribute_id=' . $result['attribute_id'] . $url, true),
+				'copy'                  => $this->url->link('catalog/attribute/copy', 'user_token=' . $this->session->data['user_token'] . '&attribute_id=' . $result['attribute_id'] . $url, true),
+				'delete'                => $this->url->link('catalog/attribute/delete', 'user_token=' . $this->session->data['user_token'] . '&attribute_id=' . $result['attribute_id'] . $url, true)
 			);
 		}
 
@@ -417,14 +476,30 @@ class ControllerCatalogAttribute extends Controller {
 		return !$this->error;
 	}
 
+	protected function validateCopy() {
+		if (!$this->user->hasPermission('modify', 'catalog/attribute')) {
+			$this->error['warning'] = $this->language->get('error_permission');
+		}
+
+		return !$this->error;
+	}
+
 	protected function validateDelete() {
 		if (!$this->user->hasPermission('modify', 'catalog/attribute')) {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
+		$attribute_ids = [];
+
+		if (isset($this->request->post['selected'])) {
+			$attribute_ids = $this->request->post['selected'];
+		} elseif (isset($this->request->get['attribute_id'])) {
+			$attribute_ids = [(int) $this->request->get['attribute_id']];
+		}
+
 		$this->load->model('catalog/product');
 
-		foreach ($this->request->post['selected'] as $attribute_id) {
+		foreach ($attribute_ids as $attribute_id) {
 			$product_total = $this->model_catalog_product->getTotalProductsByAttributeId($attribute_id);
 
 			if ($product_total) {

@@ -76,6 +76,52 @@ class ControllerCatalogDownload extends Controller {
 		$this->getForm();
 	}
 
+	public function copy() {
+		$this->load->language('catalog/download');
+
+		$this->document->setTitle($this->language->get('heading_title'));
+
+		$this->load->model('catalog/download');
+
+		$download_ids = [];
+
+		if (isset($this->request->post['selected'])) {
+			$download_ids = $this->request->post['selected'];
+		} elseif (isset($this->request->get['download_id'])) {
+			$download_ids = [(int) $this->request->get['download_id']];
+		}
+
+		if ($download_ids && $this->validateCopy()) {
+			foreach ($download_ids as $download_id) {
+				$this->model_catalog_download->copyDownload(
+					(int) $download_id,
+				);
+			}
+
+			$this->session->data['success'] = $this->language->get(
+				'text_success',
+			);
+
+			$url = '';
+
+			if (isset($this->request->get['sort'])) {
+				$url .= '&sort=' . $this->request->get['sort'];
+			}
+
+			if (isset($this->request->get['order'])) {
+				$url .= '&order=' . $this->request->get['order'];
+			}
+
+			if (isset($this->request->get['page'])) {
+				$url .= '&page=' . $this->request->get['page'];
+			}
+
+			$this->response->redirect($this->url->link('catalog/download', 'user_token=' . $this->session->data['user_token'] . $url, true));
+		}
+
+		$this->getList();
+	}
+
 	public function delete() {
 		$this->load->language('catalog/download');
 
@@ -83,9 +129,19 @@ class ControllerCatalogDownload extends Controller {
 
 		$this->load->model('catalog/download');
 
-		if (isset($this->request->post['selected']) && $this->validateDelete()) {
-			foreach ($this->request->post['selected'] as $download_id) {
-				$this->model_catalog_download->deleteDownload($download_id);
+		$download_ids = [];
+
+		if (isset($this->request->post['selected'])) {
+			$download_ids = $this->request->post['selected'];
+		} elseif (isset($this->request->get['download_id'])) {
+			$download_ids = [(int) $this->request->get['download_id']];
+		}
+
+		if ($download_ids && $this->validateDelete()) {
+			foreach ($download_ids as $download_id) {
+				$this->model_catalog_download->deleteDownload(
+					(int) $download_id,
+				);
 			}
 
 			$this->session->data['success'] = $this->language->get('text_success');
@@ -156,6 +212,7 @@ class ControllerCatalogDownload extends Controller {
 		);
 
 		$data['add'] = $this->url->link('catalog/download/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
+		$data['copy'] = $this->url->link('catalog/download/copy', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('catalog/download/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
 		$data['downloads'] = array();
@@ -177,7 +234,9 @@ class ControllerCatalogDownload extends Controller {
 				'name'        => $result['name'],
 				'name_raw'    => $result['name'],
 				'date_added'  => date($this->language->get('date_format_short'), strtotime($result['date_added'])),
-				'edit'        => $this->url->link('catalog/download/edit', 'user_token=' . $this->session->data['user_token'] . '&download_id=' . $result['download_id'] . $url, true)
+				'edit'        => $this->url->link('catalog/download/edit', 'user_token=' . $this->session->data['user_token'] . '&download_id=' . $result['download_id'] . $url, true),
+				'copy'        => $this->url->link('catalog/download/copy', 'user_token=' . $this->session->data['user_token'] . '&download_id=' . $result['download_id'] . $url, true),
+				'delete'      => $this->url->link('catalog/download/delete', 'user_token=' . $this->session->data['user_token'] . '&download_id=' . $result['download_id'] . $url, true)
 			);
 		}
 
@@ -385,14 +444,30 @@ class ControllerCatalogDownload extends Controller {
 		return !$this->error;
 	}
 
+	protected function validateCopy() {
+		if (!$this->user->hasPermission('modify', 'catalog/download')) {
+			$this->error['warning'] = $this->language->get('error_permission');
+		}
+
+		return !$this->error;
+	}
+
 	protected function validateDelete() {
 		if (!$this->user->hasPermission('modify', 'catalog/download')) {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
+		$download_ids = [];
+
+		if (isset($this->request->post['selected'])) {
+			$download_ids = $this->request->post['selected'];
+		} elseif (isset($this->request->get['download_id'])) {
+			$download_ids = [(int) $this->request->get['download_id']];
+		}
+
 		$this->load->model('catalog/product');
 
-		foreach ($this->request->post['selected'] as $download_id) {
+		foreach ($download_ids as $download_id) {
 			$product_total = $this->model_catalog_product->getTotalProductsByDownloadId($download_id);
 
 			if ($product_total) {

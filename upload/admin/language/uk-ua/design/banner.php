@@ -12,7 +12,6 @@ $_['entry_accent_color'] = 'Акцентний колір';
 $_['entry_accent_hint'] = 'Використовується для фону значка та тексту [у дужках] у заголовку';
 $_['entry_accent_text'] = 'Акцентний текст';
 $_['entry_image'] = 'Зображення';
-$_['entry_link'] = 'Посилання (обгортка слайда)';
 $_['entry_name'] = 'Назва банера';
 $_['entry_primary_btn_link'] = 'Посилання на основну кнопку';
 $_['entry_primary_btn_text_color'] = 'Колір тексту основної кнопки';
@@ -42,3 +41,30 @@ $_['text_default'] = 'За замовчуванням';
 $_['text_edit'] = 'Редагувати банер';
 $_['text_list'] = 'Список банерів';
 $_['text_success'] = 'Успіх: Ви змінили банери!';
+
+// Tabs
+$_['text_tab_general']        = 'Загальне';
+$_['text_tab_slides']         = 'Слайди';
+
+// Sections
+$_['text_general_settings']   = 'Загальні налаштування';
+$_['text_slides_by_language'] = 'Слайди за мовами';
+
+// Slides
+$_['text_slide']              = 'Слайд';
+$_['text_new_slide']          = 'Новий слайд';
+$_['text_no_slides']          = 'Слайдів поки що немає. Натисніть «+ Додати слайд», щоб створити перший.';
+$_['button_add_slide']        = 'Додати слайд';
+
+// Image orientation
+$_['text_landscape']          = 'Альбомна';
+$_['text_portrait']           = 'Книжкова';
+$_['text_mp4']                = 'MP4';
+
+// Placeholders
+$_['placeholder_accent_text']    = 'напр. Нова колекція';
+$_['placeholder_primary_btn']    = 'Купити зараз';
+$_['placeholder_secondary_btn']  = 'Переглянути все';
+
+// Actions
+$_['button_duplicate_slide']    = 'Дублювати';

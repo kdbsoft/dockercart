@@ -49,15 +49,49 @@ class ControllerExtensionModuleDockercartBlogAuthor extends Controller {
 		$this->getForm();
 	}
 
+	public function copy() {
+		$this->load->language('extension/module/dockercart_blog_author');
+		$this->load->model('extension/module/dockercart_blog_author');
+
+		$this->document->setTitle($this->language->get('heading_title'));
+
+		$author_ids = [];
+
+		if (isset($this->request->post['selected'])) {
+			$author_ids = $this->request->post['selected'];
+		} elseif (isset($this->request->get['author_id'])) {
+			$author_ids = [(int) $this->request->get['author_id']];
+		}
+
+		if ($author_ids && $this->validateCopy()) {
+			foreach ($author_ids as $author_id) {
+				$this->model_extension_module_dockercart_blog_author->copyAuthor((int) $author_id);
+			}
+
+			$this->session->data['success'] = $this->language->get('text_success');
+			$this->response->redirect($this->url->link('extension/module/dockercart_blog_author', 'user_token=' . $this->session->data['user_token'], true));
+		}
+
+		$this->getList();
+	}
+
 	public function delete() {
 		$this->load->language('extension/module/dockercart_blog_author');
 		$this->load->model('extension/module/dockercart_blog_author');
 
 		$this->document->setTitle($this->language->get('heading_title'));
 
-		if (isset($this->request->post['selected']) && $this->validateDelete()) {
-			foreach ($this->request->post['selected'] as $author_id) {
-				$this->model_extension_module_dockercart_blog_author->deleteAuthor($author_id);
+		$author_ids = [];
+
+		if (isset($this->request->post['selected'])) {
+			$author_ids = $this->request->post['selected'];
+		} elseif (isset($this->request->get['author_id'])) {
+			$author_ids = [(int) $this->request->get['author_id']];
+		}
+
+		if ($author_ids && $this->validateDelete()) {
+			foreach ($author_ids as $author_id) {
+				$this->model_extension_module_dockercart_blog_author->deleteAuthor((int) $author_id);
 			}
 
 			$this->session->data['success'] = $this->language->get('text_success');
@@ -99,6 +133,7 @@ class ControllerExtensionModuleDockercartBlogAuthor extends Controller {
 		);
 
 		$data['add'] = $this->url->link('extension/module/dockercart_blog_author/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
+		$data['copy'] = $this->url->link('extension/module/dockercart_blog_author/copy', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('extension/module/dockercart_blog_author/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
 		$data['authors'] = array();
@@ -120,7 +155,9 @@ class ControllerExtensionModuleDockercartBlogAuthor extends Controller {
 				'status'     => $result['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
 				'sort_order' => $result['sort_order'],
 				'selected'   => isset($this->request->post['selected']) && in_array($result['author_id'], $this->request->post['selected']),
-				'edit'       => $this->url->link('extension/module/dockercart_blog_author/edit', 'user_token=' . $this->session->data['user_token'] . '&author_id=' . $result['author_id'] . $url, true)
+				'edit'       => $this->url->link('extension/module/dockercart_blog_author/edit', 'user_token=' . $this->session->data['user_token'] . '&author_id=' . $result['author_id'] . $url, true),
+				'copy'       => $this->url->link('extension/module/dockercart_blog_author/copy', 'user_token=' . $this->session->data['user_token'] . '&author_id=' . $result['author_id'] . $url, true),
+				'delete'     => $this->url->link('extension/module/dockercart_blog_author/delete', 'user_token=' . $this->session->data['user_token'] . '&author_id=' . $result['author_id'] . $url, true)
 			);
 		}
 
@@ -301,6 +338,14 @@ class ControllerExtensionModuleDockercartBlogAuthor extends Controller {
 			if (!isset($this->request->get['author_id']) || ((int)$existing['author_id'] !== (int)$this->request->get['author_id'])) {
 				$this->error['warning'] = $this->language->get('error_duplicate');
 			}
+		}
+
+		return !$this->error;
+	}
+
+	protected function validateCopy() {
+		if (!$this->user->hasPermission('modify', 'extension/module/dockercart_blog_author')) {
+			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
 		return !$this->error;

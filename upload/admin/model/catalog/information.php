@@ -103,6 +103,104 @@ class ModelCatalogInformation extends Model {
 		$this->cache->delete('information');
 	}
 
+	public function copyInformation($information_id)
+	{
+		$query = $this->db->query(
+			"SELECT * FROM " .
+				DB_PREFIX .
+				"information WHERE information_id = '" .
+				(int) $information_id .
+				"'",
+		);
+
+		if (!$query->num_rows) {
+			return false;
+		}
+
+		$information = $query->row;
+
+		$data = [];
+
+		$data["bottom"] = $information["bottom"];
+		$data["top"] = $information["top"];
+		$data["full_width"] = $information["full_width"];
+		$data["sort_order"] = $information["sort_order"];
+		$data["status"] = $information["status"];
+		$data["information_description"] = $this->getInformationDescriptions(
+			$information_id,
+		);
+		$data["information_store"] = $this->getInformationStores(
+			$information_id,
+		);
+
+		// Make title unique for default language
+		$default_language_id = (int) $this->config->get("config_language_id");
+
+		if (
+			isset(
+				$data["information_description"][$default_language_id]["title"],
+			)
+		) {
+			$data["information_description"][$default_language_id][
+				"title"
+			] = $this->getUniqueCopyName(
+				$data["information_description"][$default_language_id]["title"],
+				DB_PREFIX . "information_description",
+				"title",
+			);
+		}
+
+		// Make SEO URL keywords unique
+		$seo_urls = $this->getInformationSeoUrls($information_id);
+
+		foreach ($seo_urls as $store_id => &$languages) {
+			foreach ($languages as $language_id => &$keyword) {
+				$keyword = $this->getUniqueCopyName(
+					$keyword,
+					DB_PREFIX . "seo_url",
+					"keyword",
+				);
+			}
+		}
+		unset($languages, $keyword);
+
+		$data["information_seo_url"] = $seo_urls;
+		$data["information_layout"] = $this->getInformationLayouts(
+			$information_id,
+		);
+
+		return $this->addInformation($data);
+	}
+
+	private function getUniqueCopyName($original, $table, $column)
+	{
+		$base = $original;
+
+		if (preg_match('/^(.+)-copy(\d*)$/', $original, $matches)) {
+			$base = $matches[1];
+		}
+
+		$counter = 0;
+
+		do {
+			$counter++;
+			$suffix = $counter > 1 ? (string) $counter : "";
+			$candidate = $base . "-copy" . $suffix;
+
+			$query = $this->db->query(
+				"SELECT COUNT(*) AS total FROM " .
+					$table .
+					" WHERE " .
+					$column .
+					" = '" .
+					$this->db->escape($candidate) .
+					"'",
+			);
+		} while ($query->row["total"] > 0);
+
+		return $candidate;
+	}
+
 	public function getInformation($information_id) {
 		$query = $this->db->query("SELECT DISTINCT * FROM " . DB_PREFIX . "information WHERE information_id = '" . (int)$information_id . "'");
 

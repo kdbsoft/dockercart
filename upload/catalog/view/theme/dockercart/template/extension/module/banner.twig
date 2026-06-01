@@ -50,38 +50,38 @@
   .banner-slider--full-width { border-radius: 0; }
   .banner-slider--full-width .banner-slide { border-radius: 0; }
   .banner-slider--full-width .banner-slide__content { max-width: 1280px; padding-right: 2rem; }
-  /* Mobile: simple vertical stack of banners */
+  /* Mobile: horizontal carousel with swipe */
   @media (max-width: 767px) {
-    /* keep a small page gutter so images don't touch the screen edges */
-    .banner-slider { padding-left: 0.75rem; padding-right: 0.75rem; box-sizing: border-box; }
+    .banner-slider { padding: 0; overflow: hidden; }
     .banner-slides {
       display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      padding-top: 0.5rem;
-      padding-bottom: 1.25rem;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      gap: 0;
     }
+    .banner-slides::-webkit-scrollbar { display: none; }
     .banner-slide {
-      max-width: none !important;
-      width: 100% !important;
-      border-radius: 12px;
-      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
+      min-width: 100%;
+      max-width: 100%;
+      flex-shrink: 0;
+      scroll-snap-align: start;
+      border-radius: 0;
+      box-shadow: none;
     }
-    #banner-{{ module }} .banner-slide__media img { width: 100%; {% if banner_height %}height: {{ banner_height }}px; max-height: {{ banner_height }}px;{% else %}height: auto; max-height: none;{% endif %} object-fit: cover; display: block; }
-    .banner-slide__overlay { background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 50%, transparent 100%); padding-left: 0.75rem; padding-right: 0.75rem; }
-    .banner-slide__content { max-width: 100%; padding: 1.25rem 0.75rem; }
+    .banner-slide__media img,
+    .banner-slide__media iframe,
+    .banner-slide__media video { width: 100%; height: auto; object-fit: cover; }
+    .banner-slide__overlay { background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 50%, transparent 100%); }
+    .banner-slide__content { max-width: 100%; padding: 1.25rem 1rem; }
     .banner-slide__title { font-size: 1.375rem; }
     .banner-slide__subtitle { font-size: 1rem; }
-    /* Vertical banners on mobile: even tighter */
     .banner--vertical .banner-slide__title { font-size: 1.25rem; }
     .banner--vertical .banner-slide__subtitle { font-size: .9375rem; }
-    /* Mobile does not use slider controls */
-    .banner-nav,
-    .banner-dots { display: none !important; }
-    /* Mobile: remove outer max-width constraint so banner fills the screen */
-    #banner-{{ module }}.banner-layout--stack { max-width: none !important; margin-left: 0; margin-right: 0; }
-    /* Full-width reset on mobile: keep inside container */
-    .banner-slider--full-width .banner-slide__content { max-width: 100%; padding-right: 1rem; }
+    .banner-dots { display: flex !important; position: relative; z-index: 2; }
+    .banner-nav { display: none !important; }
+    #banner-{{ module }}.banner-layout--stack { max-width: none !important; margin: 0; }
   }
 </style>
 
@@ -89,8 +89,7 @@
 <div class="banner-slider{% if is_vertical %} banner--vertical{% else %} banner--horizontal{% endif %} banner-layout--{{ banner_layout|default('grid') }}{% if full_width %} banner-slider--full-width{% endif %}" id="banner-{{ module }}" data-autoplay="3500">
   <div class="banner-slides{% if banner_layout == 'stack' %} banner-slides--stack{% endif %}">
     {% for banner in banners %}
-    <div class="banner-slide{% if loop.first %} active{% endif %}" style="--stack-index: {{ loop.index }};">
-      {% if banner.link %}<a href="{{ banner.link }}" class="banner-slide__link">{% endif %}
+      <div class="banner-slide{% if loop.first %} active{% endif %}" style="--stack-index: {{ loop.index }};">
       <div class="banner-slide__media">
       {% if banner.video_type == 'youtube' and banner.video_url %}
       <iframe src="{{ banner.video_url }}"
@@ -113,7 +112,6 @@
         <img src="{{ banner.image }}" alt="{{ banner.title }}" loading="lazy" />
       </picture>
       {% endif %}
-      {% if banner.link %}</a>{% endif %}
 
       {% if banner.title_html or banner.subtitle or banner.accent_text or banner.primary_btn_text or banner.secondary_btn_text %}
       <div class="banner-slide__overlay banner-slide__overlay--{{ banner.content_position ?: 'left' }}">
@@ -162,17 +160,75 @@
 </div>
 
 <script>
-  (function () {
-    var root = document.getElementById('banner-{{ module }}');
+  (() => {
+    const root = document.getElementById('banner-{{ module }}');
     if (!root) return;
 
-    // On mobile, banners are displayed as a simple vertical stack.
-    // On desktop, banners are shown in a responsive flex row.
-    var mobileQuery = window.matchMedia('(max-width: 767px)');
+    const slides = root.querySelector('.banner-slides');
+    const items = [...root.querySelectorAll('.banner-slide')];
+    const dots = [...root.querySelectorAll('.banner-dot')];
+    const prevBtn = root.querySelector('.banner-prev');
+    const nextBtn = root.querySelector('.banner-next');
+    const total = items.length;
+    const autoplayMs = parseInt(root.dataset.autoplay) || 0;
 
-    // No special interactions needed on mobile with the simplified stack layout
-    if (mobileQuery.matches) {
-      return;
-    }
+    let current = 0;
+    let timer = null;
+
+    const goTo = (index) => {
+      current = (index + total) % total;
+      slides.scrollTo({ left: items[current].offsetLeft, behavior: 'smooth' });
+      dots.forEach((d, i) => d.classList.toggle('active', i === current));
+    };
+
+    const startAutoplay = () => {
+      if (autoplayMs > 0 && total > 1) {
+        timer = setInterval(() => goTo(current + 1), autoplayMs);
+      }
+    };
+
+    const resetAutoplay = () => {
+      clearInterval(timer);
+      startAutoplay();
+    };
+
+    let startX = 0;
+    let startY = 0;
+    let swiping = false;
+
+    slides.addEventListener('touchstart', (e) => {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      swiping = true;
+    }, { passive: true });
+
+    slides.addEventListener('touchend', (e) => {
+      if (!swiping) return;
+      swiping = false;
+      const dx = e.changedTouches[0].clientX - startX;
+      const dy = e.changedTouches[0].clientY - startY;
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+        goTo(dx < 0 ? current + 1 : current - 1);
+        resetAutoplay();
+      }
+    }, { passive: true });
+
+    dots.forEach((dot) => {
+      dot.addEventListener('click', () => {
+        goTo(Number(dot.dataset.slide));
+        resetAutoplay();
+      });
+    });
+
+    prevBtn?.addEventListener('click', () => { goTo(current - 1); resetAutoplay(); });
+    nextBtn?.addEventListener('click', () => { goTo(current + 1); resetAutoplay(); });
+
+    root.setAttribute('tabindex', '0');
+    root.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') { goTo(current - 1); resetAutoplay(); }
+      if (e.key === 'ArrowRight') { goTo(current + 1); resetAutoplay(); }
+    });
+
+    startAutoplay();
   })();
 </script>
