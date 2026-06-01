@@ -1,3 +1,9 @@
+## [1.36.0](https://github.com/mathflow-bit/dockercart/compare/v1.35.0...v1.36.0) (2026-06-01)
+
+### Features
+
+* add language selector to admin login and support session language ([7998098](https://github.com/mathflow-bit/dockercart/commit/7998098276ba763e4c6420f330fd63581da996bc))
+
 ## [1.35.0](https://github.com/mathflow-bit/dockercart/compare/v1.34.5...v1.35.0) (2026-06-01)
 
 ### Features
