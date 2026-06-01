@@ -1,3 +1,14 @@
+## [1.35.0](https://github.com/mathflow-bit/dockercart/compare/v1.34.5...v1.35.0) (2026-06-01)
+
+### Features
+
+* add copy actions for catalog and blog entities ([206918e](https://github.com/mathflow-bit/dockercart/commit/206918e70a46e51934f088d3ffa5ad36a4ed97f2))
+
+### Bug Fixes
+
+* add multicurrency price fix events for catalog product queries ([3b0aace](https://github.com/mathflow-bit/dockercart/commit/3b0aace5c057e71111aea836ae2ab11385e86da6))
+* product copy uniqueness and option handling ([29a93d5](https://github.com/mathflow-bit/dockercart/commit/29a93d560092c78344547872c0f481f8c301fa20))
+
 ## [1.34.5](https://github.com/mathflow-bit/dockercart/compare/v1.34.4...v1.34.5) (2026-05-30)
 
 ### Bug Fixes
