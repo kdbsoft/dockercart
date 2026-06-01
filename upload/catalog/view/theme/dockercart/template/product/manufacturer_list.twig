@@ -2,11 +2,10 @@
 
 <main class="bg-white min-h-screen">
 
-  <section class="relative overflow-hidden">
-    <div class="w-full h-[180px] sm:h-[230px] bg-gradient-to-br from-gray-900 via-blue-950 to-gray-900"></div>
+  <section class="bg-gradient-to-br from-gray-900 via-blue-950 to-gray-900 relative">
     <div class="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-black/10"></div>
-    <div class="absolute inset-0 flex items-end sm:items-center pb-6 sm:pb-0">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+    <div class="relative z-10 py-10 sm:py-14 px-4 sm:px-6 lg:px-8 flex items-center">
+      <div class="max-w-7xl mx-auto w-full">
         {% include 'dockercart/template/common/partials/breadcrumbs.twig' with {
           breadcrumbs_class: 'flex flex-wrap items-center gap-2 text-xs text-gray-300 mb-3',
           breadcrumbs_link_class: 'hover:text-white transition',
