@@ -61,6 +61,89 @@ class ModelCatalogOption extends Model {
 		$this->db->query("DELETE FROM " . DB_PREFIX . "option_value_description WHERE option_id = '" . (int)$option_id . "'");
 	}
 
+	public function copyOption($option_id)
+	{
+		$query = $this->db->query(
+			"SELECT * FROM `" .
+				DB_PREFIX .
+				"option` WHERE option_id = '" .
+				(int) $option_id .
+				"'",
+		);
+
+		if (!$query->num_rows) {
+			return false;
+		}
+
+		$option = $query->row;
+
+		$data = [];
+
+		$data["type"] = $option["type"];
+		$data["sort_order"] = $option["sort_order"];
+		$data["option_description"] = $this->getOptionDescriptions(
+			$option_id,
+		);
+
+		$default_language_id = (int) $this->config->get("config_language_id");
+
+		if (isset($data["option_description"][$default_language_id]["name"])) {
+			$data["option_description"][$default_language_id]["name"] = $this->getUniqueCopyName(
+				$data["option_description"][$default_language_id]["name"],
+				DB_PREFIX . "option_description",
+				"name",
+			);
+		}
+
+		$option_values = $this->getOptionValueDescriptions($option_id);
+
+		if ($option_values) {
+			$data["option_value"] = [];
+
+			foreach ($option_values as $option_value) {
+				$data["option_value"][] = [
+					"option_value_id" => "",
+					"image" => $option_value["image"],
+					"sort_order" => $option_value["sort_order"],
+					"option_value_description" => $option_value[
+						"option_value_description"
+					],
+				];
+			}
+		}
+
+		return $this->addOption($data);
+	}
+
+	private function getUniqueCopyName($original, $table, $column)
+	{
+		$base = $original;
+
+		if (preg_match('/^(.+)-copy(\d*)$/', $original, $matches)) {
+			$base = $matches[1];
+		}
+
+		$counter = 0;
+
+		do {
+			$counter++;
+			$suffix = $counter > 1 ? (string) $counter : "";
+			$candidate = $base . "-copy" . $suffix;
+
+			$query = $this->db->query(
+				"SELECT COUNT(*) AS total FROM " .
+					$table .
+					" WHERE " .
+					$column .
+					" = '" .
+					$this->db->escape($candidate) .
+					"'",
+			);
+		} while ($query->row["total"] > 0);
+
+		return $candidate;
+	}
+
 	public function getOption($option_id) {
 		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "option` o LEFT JOIN " . DB_PREFIX . "option_description od ON (o.option_id = od.option_id) WHERE o.option_id = '" . (int)$option_id . "' AND od.language_id = '" . (int)$this->config->get('config_language_id') . "'");
 

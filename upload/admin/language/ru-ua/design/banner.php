@@ -12,7 +12,6 @@ $_['entry_accent_color'] = 'Акцентный цвет';
 $_['entry_accent_hint'] = 'Используется в качестве фона для значка и текста в скобках в заголовке.';
 $_['entry_accent_text'] = 'Акцентный текст';
 $_['entry_image'] = 'Изображение';
-$_['entry_link'] = 'Ссылка (оболочка слайда)';
 $_['entry_name'] = 'Название баннера';
 $_['entry_primary_btn_bg_color'] = 'Основной цвет фона кнопки';
 $_['entry_primary_btn_link'] = 'Основная кнопка';
@@ -42,3 +41,30 @@ $_['text_default'] = 'По умолчанию';
 $_['text_edit'] = 'Редактировать баннер';
 $_['text_list'] = 'Список баннеров';
 $_['text_success'] = 'Успех: Вы успешно изменили баннеры!';
+
+// Tabs
+$_['text_tab_general']        = 'Основное';
+$_['text_tab_slides']         = 'Слайды';
+
+// Sections
+$_['text_general_settings']   = 'Основные настройки';
+$_['text_slides_by_language'] = 'Слайды по языкам';
+
+// Slides
+$_['text_slide']              = 'Слайд';
+$_['text_new_slide']          = 'Новый слайд';
+$_['text_no_slides']          = 'Слайдов пока нет. Нажмите «+ Добавить слайд», чтобы создать первый.';
+$_['button_add_slide']        = 'Добавить слайд';
+
+// Image orientation
+$_['text_landscape']          = 'Альбомная';
+$_['text_portrait']           = 'Книжная';
+$_['text_mp4']                = 'MP4';
+
+// Placeholders
+$_['placeholder_accent_text']    = 'напр. Новая коллекция';
+$_['placeholder_primary_btn']    = 'Купить сейчас';
+$_['placeholder_secondary_btn']  = 'Смотреть все';
+
+// Actions
+$_['button_duplicate_slide']    = 'Дублировати';

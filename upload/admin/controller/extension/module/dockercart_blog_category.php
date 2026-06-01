@@ -62,15 +62,56 @@ class ControllerExtensionModuleDockercartBlogCategory extends Controller {
 		$this->getForm();
 	}
 
+	public function copy() {
+		$this->load->language('extension/module/dockercart_blog_category');
+		$this->document->setTitle($this->language->get('heading_title'));
+
+		$this->load->model('extension/module/dockercart_blog_category');
+
+		$category_ids = [];
+
+		if (isset($this->request->post['selected'])) {
+			$category_ids = $this->request->post['selected'];
+		} elseif (isset($this->request->get['category_id'])) {
+			$category_ids = [(int) $this->request->get['category_id']];
+		}
+
+		if ($category_ids && $this->validateCopy()) {
+			foreach ($category_ids as $category_id) {
+				$this->model_extension_module_dockercart_blog_category->copyCategory((int) $category_id);
+			}
+
+			$this->session->data['success'] = $this->language->get('text_success');
+
+			$url = '';
+
+			if (isset($this->request->get['page'])) {
+				$url .= '&page=' . $this->request->get['page'];
+			}
+
+			$this->response->redirect($this->url->link('extension/module/dockercart_blog_category', 'user_token=' . $this->session->data['user_token'] . $url, true));
+		}
+
+		$this->getList();
+	}
+
 	public function delete() {
 		$this->load->language('extension/module/dockercart_blog_category');
 		$this->document->setTitle($this->language->get('heading_title'));
 
 		$this->load->model('extension/module/dockercart_blog_category');
 
-		if (isset($this->request->post['selected']) && $this->validateDelete()) {
-			foreach ($this->request->post['selected'] as $category_id) {
-				$this->model_extension_module_dockercart_blog_category->deleteCategory($category_id);
+		$category_ids = [];
+
+		if (isset($this->request->post['selected'])) {
+			$category_ids = $this->request->post['selected'];
+		} elseif (isset($this->request->get['category_id'])) {
+			$category_ids = [(int) $this->request->get['category_id']];
+		}
+
+		if ($category_ids && $this->validateDelete()) {
+			foreach ($category_ids as $category_id) {
+				$this->model_extension_module_dockercart_blog_category->deleteCategory((int) $category_id);
 			}
 
 			$this->session->data['success'] = $this->language->get('text_success');
@@ -121,6 +162,7 @@ class ControllerExtensionModuleDockercartBlogCategory extends Controller {
 		);
 
 		$data['add'] = $this->url->link('extension/module/dockercart_blog_category/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
+		$data['copy'] = $this->url->link('extension/module/dockercart_blog_category/copy', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('extension/module/dockercart_blog_category/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
 		$data['categories'] = array();
@@ -141,7 +183,9 @@ class ControllerExtensionModuleDockercartBlogCategory extends Controller {
 				'status'      => $category['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
 				'sort_order'  => $category['sort_order'],
 				'selected'    => isset($this->request->post['selected']) && in_array($category['category_id'], $this->request->post['selected']),
-				'edit'        => $this->url->link('extension/module/dockercart_blog_category/edit', 'user_token=' . $this->session->data['user_token'] . '&category_id=' . $category['category_id'] . $url, true)
+				'edit'        => $this->url->link('extension/module/dockercart_blog_category/edit', 'user_token=' . $this->session->data['user_token'] . '&category_id=' . $category['category_id'] . $url, true),
+				'copy'        => $this->url->link('extension/module/dockercart_blog_category/copy', 'user_token=' . $this->session->data['user_token'] . '&category_id=' . $category['category_id'] . $url, true),
+				'delete'      => $this->url->link('extension/module/dockercart_blog_category/delete', 'user_token=' . $this->session->data['user_token'] . '&category_id=' . $category['category_id'] . $url, true)
 			);
 		}
 
@@ -399,6 +443,14 @@ class ControllerExtensionModuleDockercartBlogCategory extends Controller {
 					$this->error['meta_title'][$language_id] = $this->language->get('error_meta_title');
 				}
 			}
+		}
+
+		return !$this->error;
+	}
+
+	protected function validateCopy() {
+		if (!$this->user->hasPermission('modify', 'extension/module/dockercart_blog_category')) {
+			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
 		return !$this->error;

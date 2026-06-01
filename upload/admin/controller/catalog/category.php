@@ -76,6 +76,48 @@ class ControllerCatalogCategory extends Controller {
 		$this->getForm();
 	}
 
+	public function copy() {
+		$this->load->language('catalog/category');
+
+		$this->document->setTitle($this->language->get('heading_title'));
+
+		$this->load->model('catalog/category');
+
+		$category_ids = [];
+
+		if (isset($this->request->post['selected'])) {
+			$category_ids = $this->request->post['selected'];
+		} elseif (isset($this->request->get['category_id'])) {
+			$category_ids = [(int) $this->request->get['category_id']];
+		}
+
+		if ($category_ids && $this->validateCopy()) {
+			foreach ($category_ids as $category_id) {
+				$this->model_catalog_category->copyCategory((int) $category_id);
+			}
+
+			$this->session->data['success'] = $this->language->get('text_success');
+
+			$url = '';
+
+			if (isset($this->request->get['sort'])) {
+				$url .= '&sort=' . $this->request->get['sort'];
+			}
+
+			if (isset($this->request->get['order'])) {
+				$url .= '&order=' . $this->request->get['order'];
+			}
+
+			if (isset($this->request->get['page'])) {
+				$url .= '&page=' . $this->request->get['page'];
+			}
+
+			$this->response->redirect($this->url->link('catalog/category', 'user_token=' . $this->session->data['user_token'] . $url, true));
+		}
+
+		$this->getList();
+	}
+
 	public function delete() {
 		$this->load->language('catalog/category');
 
@@ -83,9 +125,17 @@ class ControllerCatalogCategory extends Controller {
 
 		$this->load->model('catalog/category');
 
-		if (isset($this->request->post['selected']) && $this->validateDelete()) {
-			foreach ($this->request->post['selected'] as $category_id) {
-				$this->model_catalog_category->deleteCategory($category_id);
+		$category_ids = [];
+
+		if (isset($this->request->post['selected'])) {
+			$category_ids = $this->request->post['selected'];
+		} elseif (isset($this->request->get['category_id'])) {
+			$category_ids = [(int) $this->request->get['category_id']];
+		}
+
+		if ($category_ids && $this->validateDelete()) {
+			foreach ($category_ids as $category_id) {
+				$this->model_catalog_category->deleteCategory((int) $category_id);
 			}
 
 			$this->session->data['success'] = $this->language->get('text_success');
@@ -188,6 +238,7 @@ class ControllerCatalogCategory extends Controller {
 		);
 
 		$data['add'] = $this->url->link('catalog/category/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
+		$data['copy'] = $this->url->link('catalog/category/copy', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('catalog/category/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['repair'] = $this->url->link('catalog/category/repair', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
@@ -244,6 +295,7 @@ class ControllerCatalogCategory extends Controller {
 				'sort_order'    => $parent_category['sort_order'],
 				'sort_order_raw'=> $parent_category['sort_order'],
 				'edit'          => $this->url->link('catalog/category/edit', 'user_token=' . $this->session->data['user_token'] . '&category_id=' . $parent_category_id . $url, true),
+				'copy'          => $this->url->link('catalog/category/copy', 'user_token=' . $this->session->data['user_token'] . '&category_id=' . $parent_category_id . $url, true),
 				'delete'        => $this->url->link('catalog/category/delete', 'user_token=' . $this->session->data['user_token'] . '&category_id=' . $parent_category_id . $url, true)
 			);
 
@@ -347,6 +399,7 @@ class ControllerCatalogCategory extends Controller {
 				'sort_order'    => $child_category['sort_order'],
 				'sort_order_raw'=> $child_category['sort_order'],
 				'edit'          => $this->url->link('catalog/category/edit', 'user_token=' . $this->session->data['user_token'] . '&category_id=' . $category_id . $url, true),
+				'copy'          => $this->url->link('catalog/category/copy', 'user_token=' . $this->session->data['user_token'] . '&category_id=' . $category_id . $url, true),
 				'delete'        => $this->url->link('catalog/category/delete', 'user_token=' . $this->session->data['user_token'] . '&category_id=' . $category_id . $url, true)
 			);
 
@@ -674,6 +727,14 @@ class ControllerCatalogCategory extends Controller {
 
 		if ($this->error && !isset($this->error['warning'])) {
 			$this->error['warning'] = $this->language->get('error_warning');
+		}
+
+		return !$this->error;
+	}
+
+	protected function validateCopy() {
+		if (!$this->user->hasPermission('modify', 'catalog/category')) {
+			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
 		return !$this->error;

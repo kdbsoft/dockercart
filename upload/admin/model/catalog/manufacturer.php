@@ -112,6 +112,98 @@ class ModelCatalogManufacturer extends Model {
 		$this->cache->delete('manufacturer');
 	}
 
+	public function copyManufacturer($manufacturer_id)
+	{
+		$query = $this->db->query(
+			"SELECT * FROM " .
+				DB_PREFIX .
+				"manufacturer WHERE manufacturer_id = '" .
+				(int) $manufacturer_id .
+				"'",
+		);
+
+		if (!$query->num_rows) {
+			return false;
+		}
+
+		$manufacturer = $query->row;
+
+		$data = [];
+
+		$data["image"] = $manufacturer["image"];
+		$data["sort_order"] = $manufacturer["sort_order"];
+		$data["manufacturer_description"] = $this->getManufacturerDescriptions(
+			$manufacturer_id,
+		);
+		$data["manufacturer_store"] = $this->getManufacturerStores(
+			$manufacturer_id,
+		);
+
+		// Make name unique for default language
+		$default_language_id = (int) $this->config->get("config_language_id");
+
+		if (
+			isset(
+				$data["manufacturer_description"][$default_language_id]["name"],
+			)
+		) {
+			$data["manufacturer_description"][$default_language_id][
+				"name"
+			] = $this->getUniqueCopyName(
+				$data["manufacturer_description"][$default_language_id]["name"],
+				DB_PREFIX . "manufacturer_description",
+				"name",
+			);
+		}
+
+		// Make SEO URL keywords unique
+		$seo_urls = $this->getManufacturerSeoUrls($manufacturer_id);
+
+		foreach ($seo_urls as $store_id => &$languages) {
+			foreach ($languages as $language_id => &$keyword) {
+				$keyword = $this->getUniqueCopyName(
+					$keyword,
+					DB_PREFIX . "seo_url",
+					"keyword",
+				);
+			}
+		}
+		unset($languages, $keyword);
+
+		$data["manufacturer_seo_url"] = $seo_urls;
+
+		return $this->addManufacturer($data);
+	}
+
+	private function getUniqueCopyName($original, $table, $column)
+	{
+		$base = $original;
+
+		if (preg_match('/^(.+)-copy(\d*)$/', $original, $matches)) {
+			$base = $matches[1];
+		}
+
+		$counter = 0;
+
+		do {
+			$counter++;
+			$suffix = $counter > 1 ? (string) $counter : "";
+			$candidate = $base . "-copy" . $suffix;
+
+			$query = $this->db->query(
+				"SELECT COUNT(*) AS total FROM " .
+					$table .
+					" WHERE " .
+					$column .
+					" = '" .
+					$this->db->escape($candidate) .
+					"'",
+			);
+		} while ($query->row["total"] > 0);
+
+		return $candidate;
+	}
+
 	public function getManufacturer($manufacturer_id) {
 		$query = $this->db->query("SELECT DISTINCT * FROM " . DB_PREFIX . "manufacturer WHERE manufacturer_id = '" . (int)$manufacturer_id . "'");
 
@@ -119,10 +211,12 @@ class ModelCatalogManufacturer extends Model {
 	}
 
 	public function getManufacturers($data = array()) {
-		$sql = "SELECT * FROM " . DB_PREFIX . "manufacturer";
+		$language_id = (int) $this->config->get('config_language_id');
+
+		$sql = "SELECT m.*, COALESCE(md.name, m.name) AS name FROM " . DB_PREFIX . "manufacturer m LEFT JOIN " . DB_PREFIX . "manufacturer_description md ON (m.manufacturer_id = md.manufacturer_id AND md.language_id = '" . $language_id . "')";
 
 		if (!empty($data['filter_name'])) {
-			$sql .= " WHERE name LIKE '" . $this->db->escape($data['filter_name']) . "%'";
+			$sql .= " WHERE COALESCE(md.name, m.name) LIKE '" . $this->db->escape($data['filter_name']) . "%'";
 		}
 
 		$sort_data = array(

@@ -108,6 +108,64 @@ class ControllerCatalogReview extends Controller {
 		$this->getForm();
 	}
 
+	public function copy() {
+		$this->load->language('catalog/review');
+
+		$this->document->setTitle($this->language->get('heading_title'));
+
+		$this->load->model('catalog/review');
+
+		$review_ids = [];
+
+		if (isset($this->request->post['selected'])) {
+			$review_ids = $this->request->post['selected'];
+		} elseif (isset($this->request->get['review_id'])) {
+			$review_ids = [(int) $this->request->get['review_id']];
+		}
+
+		if ($review_ids && $this->validateCopy()) {
+			foreach ($review_ids as $review_id) {
+				$this->model_catalog_review->copyReview((int) $review_id);
+			}
+
+			$this->session->data['success'] = $this->language->get('text_success');
+
+			$url = '';
+
+			if (isset($this->request->get['filter_product'])) {
+				$url .= '&filter_product=' . urlencode(html_entity_decode($this->request->get['filter_product'], ENT_QUOTES, 'UTF-8'));
+			}
+
+			if (isset($this->request->get['filter_author'])) {
+				$url .= '&filter_author=' . urlencode(html_entity_decode($this->request->get['filter_author'], ENT_QUOTES, 'UTF-8'));
+			}
+
+			if (isset($this->request->get['filter_status'])) {
+				$url .= '&filter_status=' . $this->request->get['filter_status'];
+			}
+
+			if (isset($this->request->get['filter_date_added'])) {
+				$url .= '&filter_date_added=' . $this->request->get['filter_date_added'];
+			}
+
+			if (isset($this->request->get['sort'])) {
+				$url .= '&sort=' . $this->request->get['sort'];
+			}
+
+			if (isset($this->request->get['order'])) {
+				$url .= '&order=' . $this->request->get['order'];
+			}
+
+			if (isset($this->request->get['page'])) {
+				$url .= '&page=' . $this->request->get['page'];
+			}
+
+			$this->response->redirect($this->url->link('catalog/review', 'user_token=' . $this->session->data['user_token'] . $url, true));
+		}
+
+		$this->getList();
+	}
+
 	public function delete() {
 		$this->load->language('catalog/review');
 
@@ -115,9 +173,17 @@ class ControllerCatalogReview extends Controller {
 
 		$this->load->model('catalog/review');
 
-		if (isset($this->request->post['selected']) && $this->validateDelete()) {
-			foreach ($this->request->post['selected'] as $review_id) {
-				$this->model_catalog_review->deleteReview($review_id);
+		$review_ids = [];
+
+		if (isset($this->request->post['selected'])) {
+			$review_ids = $this->request->post['selected'];
+		} elseif (isset($this->request->get['review_id'])) {
+			$review_ids = [(int) $this->request->get['review_id']];
+		}
+
+		if ($review_ids && $this->validateDelete()) {
+			foreach ($review_ids as $review_id) {
+				$this->model_catalog_review->deleteReview((int) $review_id);
 			}
 
 			$this->session->data['success'] = $this->language->get('text_success');
@@ -244,6 +310,7 @@ class ControllerCatalogReview extends Controller {
 		);
 
 		$data['add'] = $this->url->link('catalog/review/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
+		$data['copy'] = $this->url->link('catalog/review/copy', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('catalog/review/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
 		$data['reviews'] = array();
@@ -275,7 +342,9 @@ class ControllerCatalogReview extends Controller {
 				'status_raw'      => $result['status'],
 				'date_added'      => date($this->language->get('date_format_short'), strtotime($result['date_added'])),
 				'date_added_raw'  => $result['date_added'],
-				'edit'            => $this->url->link('catalog/review/edit', 'user_token=' . $this->session->data['user_token'] . '&review_id=' . $result['review_id'] . $url, true)
+				'edit'            => $this->url->link('catalog/review/edit', 'user_token=' . $this->session->data['user_token'] . '&review_id=' . $result['review_id'] . $url, true),
+				'copy'            => $this->url->link('catalog/review/copy', 'user_token=' . $this->session->data['user_token'] . '&review_id=' . $result['review_id'] . $url, true),
+				'delete'          => $this->url->link('catalog/review/delete', 'user_token=' . $this->session->data['user_token'] . '&review_id=' . $result['review_id'] . $url, true)
 			);
 		}
 
@@ -629,6 +698,14 @@ class ControllerCatalogReview extends Controller {
 
 		if (!isset($this->request->post['rating']) || $this->request->post['rating'] < 0 || $this->request->post['rating'] > 5) {
 			$this->error['rating'] = $this->language->get('error_rating');
+		}
+
+		return !$this->error;
+	}
+
+	protected function validateCopy() {
+		if (!$this->user->hasPermission('modify', 'catalog/review')) {
+			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
 		return !$this->error;

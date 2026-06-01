@@ -97,7 +97,6 @@ class ControllerExtensionModuleSlideshow extends Controller {
 				'accent_color'       => $accent_color,
 				'accent_bg'          => $accent_bg,
 				'badge_text_color'   => $badge_text_color,
-				'link'               => $result['link'],
 				'image'              => $image_landscape,
 				'image_portrait'     => $image_portrait,
 				'video_type'         => $video_type,

@@ -76,6 +76,50 @@ class ControllerCatalogOption extends Controller {
 		$this->getForm();
 	}
 
+	public function copy() {
+		$this->load->language('catalog/option');
+
+		$this->document->setTitle($this->language->get('heading_title'));
+
+		$this->load->model('catalog/option');
+
+		$option_ids = [];
+
+		if (isset($this->request->post['selected'])) {
+			$option_ids = $this->request->post['selected'];
+		} elseif (isset($this->request->get['option_id'])) {
+			$option_ids = [(int) $this->request->get['option_id']];
+		}
+
+		if ($option_ids && $this->validateCopy()) {
+			foreach ($option_ids as $option_id) {
+				$this->model_catalog_option->copyOption((int) $option_id);
+			}
+
+			$this->session->data['success'] = $this->language->get(
+				'text_success',
+			);
+
+			$url = '';
+
+			if (isset($this->request->get['sort'])) {
+				$url .= '&sort=' . $this->request->get['sort'];
+			}
+
+			if (isset($this->request->get['order'])) {
+				$url .= '&order=' . $this->request->get['order'];
+			}
+
+			if (isset($this->request->get['page'])) {
+				$url .= '&page=' . $this->request->get['page'];
+			}
+
+			$this->response->redirect($this->url->link('catalog/option', 'user_token=' . $this->session->data['user_token'] . $url, true));
+		}
+
+		$this->getList();
+	}
+
 	public function delete() {
 		$this->load->language('catalog/option');
 
@@ -83,9 +127,17 @@ class ControllerCatalogOption extends Controller {
 
 		$this->load->model('catalog/option');
 
-		if (isset($this->request->post['selected']) && $this->validateDelete()) {
-			foreach ($this->request->post['selected'] as $option_id) {
-				$this->model_catalog_option->deleteOption($option_id);
+		$option_ids = [];
+
+		if (isset($this->request->post['selected'])) {
+			$option_ids = $this->request->post['selected'];
+		} elseif (isset($this->request->get['option_id'])) {
+			$option_ids = [(int) $this->request->get['option_id']];
+		}
+
+		if ($option_ids && $this->validateDelete()) {
+			foreach ($option_ids as $option_id) {
+				$this->model_catalog_option->deleteOption((int) $option_id);
 			}
 
 			$this->session->data['success'] = $this->language->get('text_success');
@@ -156,6 +208,7 @@ class ControllerCatalogOption extends Controller {
 		);
 
 		$data['add'] = $this->url->link('catalog/option/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
+		$data['copy'] = $this->url->link('catalog/option/copy', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('catalog/option/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
 		$data['options'] = array();
@@ -178,7 +231,9 @@ class ControllerCatalogOption extends Controller {
 				'name_raw'       => $result['name'],
 				'sort_order'     => $result['sort_order'],
 				'sort_order_raw' => $result['sort_order'],
-				'edit'           => $this->url->link('catalog/option/edit', 'user_token=' . $this->session->data['user_token'] . '&option_id=' . $result['option_id'] . $url, true)
+				'edit'           => $this->url->link('catalog/option/edit', 'user_token=' . $this->session->data['user_token'] . '&option_id=' . $result['option_id'] . $url, true),
+				'copy'           => $this->url->link('catalog/option/copy', 'user_token=' . $this->session->data['user_token'] . '&option_id=' . $result['option_id'] . $url, true),
+				'delete'         => $this->url->link('catalog/option/delete', 'user_token=' . $this->session->data['user_token'] . '&option_id=' . $result['option_id'] . $url, true)
 			);
 		}
 
@@ -452,14 +507,30 @@ class ControllerCatalogOption extends Controller {
 		return !$this->error;
 	}
 
+	protected function validateCopy() {
+		if (!$this->user->hasPermission('modify', 'catalog/option')) {
+			$this->error['warning'] = $this->language->get('error_permission');
+		}
+
+		return !$this->error;
+	}
+
 	protected function validateDelete() {
 		if (!$this->user->hasPermission('modify', 'catalog/option')) {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
+		$option_ids = [];
+
+		if (isset($this->request->post['selected'])) {
+			$option_ids = $this->request->post['selected'];
+		} elseif (isset($this->request->get['option_id'])) {
+			$option_ids = [(int) $this->request->get['option_id']];
+		}
+
 		$this->load->model('catalog/product');
 
-		foreach ($this->request->post['selected'] as $option_id) {
+		foreach ($option_ids as $option_id) {
 			$product_total = $this->model_catalog_product->getTotalProductsByOptionId($option_id);
 
 			if ($product_total) {

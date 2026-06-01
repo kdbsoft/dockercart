@@ -255,6 +255,98 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 		$this->cache->delete('blog.author');
 	}
 
+	public function copyPost($post_id)
+	{
+		$query = $this->db->query(
+			"SELECT * FROM `" .
+				DB_PREFIX .
+				"blog_post` WHERE post_id = '" .
+				(int) $post_id .
+				"'",
+		);
+
+		if (!$query->num_rows) {
+			return false;
+		}
+
+		$post = $query->row;
+
+		$data = [];
+
+		$data["author_id"] = $post["author_id"];
+		$data["image"] = $post["image"];
+		$data["status"] = $post["status"];
+		$data["featured"] = $post["featured"];
+		$data["allow_comments"] = $post["allow_comments"];
+		$data["sort_order"] = $post["sort_order"];
+		$data["date_published"] = $post["date_published"];
+		$data["post_description"] = $this->getPostDescriptions($post_id);
+		$data["post_store"] = $this->getPostStores($post_id);
+		$data["post_category"] = $this->getPostCategories($post_id);
+
+		// Make title unique for default language
+		$default_language_id = (int) $this->config->get("config_language_id");
+
+		if (
+			isset(
+				$data["post_description"][$default_language_id]["title"],
+			)
+		) {
+			$data["post_description"][$default_language_id]["title"] = $this->getUniqueCopyName(
+				$data["post_description"][$default_language_id]["title"],
+				DB_PREFIX . "blog_post_description",
+				"name",
+			);
+		}
+
+		// Make SEO URL keywords unique
+		$seo_urls = $this->getPostSeoUrls($post_id);
+
+		foreach ($seo_urls as $store_id => &$languages) {
+			foreach ($languages as $language_id => &$keyword) {
+				$keyword = $this->getUniqueCopyName(
+					$keyword,
+					DB_PREFIX . "blog_seo_url",
+					"keyword",
+				);
+			}
+		}
+		unset($languages, $keyword);
+
+		$data["post_seo_url"] = $seo_urls;
+
+		return $this->addPost($data);
+	}
+
+	private function getUniqueCopyName($original, $table, $column)
+	{
+		$base = $original;
+
+		if (preg_match('/^(.+)-copy(\d*)$/', $original, $matches)) {
+			$base = $matches[1];
+		}
+
+		$counter = 0;
+
+		do {
+			$counter++;
+			$suffix = $counter > 1 ? (string) $counter : "";
+			$candidate = $base . "-copy" . $suffix;
+
+			$query = $this->db->query(
+				"SELECT COUNT(*) AS total FROM " .
+					$table .
+					" WHERE " .
+					$column .
+					" = '" .
+					$this->db->escape($candidate) .
+					"'",
+			);
+		} while ($query->row["total"] > 0);
+
+		return $candidate;
+	}
+
 	/**
 	 * Get single post
 	 * 

@@ -76,6 +76,54 @@ class ControllerCatalogAttributeGroup extends Controller {
 		$this->getForm();
 	}
 
+	public function copy() {
+		$this->load->language('catalog/attribute_group');
+
+		$this->document->setTitle($this->language->get('heading_title'));
+
+		$this->load->model('catalog/attribute_group');
+
+		$attribute_group_ids = [];
+
+		if (isset($this->request->post['selected'])) {
+			$attribute_group_ids = $this->request->post['selected'];
+		} elseif (isset($this->request->get['attribute_group_id'])) {
+			$attribute_group_ids = [
+				(int) $this->request->get['attribute_group_id'],
+			];
+		}
+
+		if ($attribute_group_ids && $this->validateCopy()) {
+			foreach ($attribute_group_ids as $attribute_group_id) {
+				$this->model_catalog_attribute_group->copyAttributeGroup(
+					(int) $attribute_group_id,
+				);
+			}
+
+			$this->session->data['success'] = $this->language->get(
+				'text_success',
+			);
+
+			$url = '';
+
+			if (isset($this->request->get['sort'])) {
+				$url .= '&sort=' . $this->request->get['sort'];
+			}
+
+			if (isset($this->request->get['order'])) {
+				$url .= '&order=' . $this->request->get['order'];
+			}
+
+			if (isset($this->request->get['page'])) {
+				$url .= '&page=' . $this->request->get['page'];
+			}
+
+			$this->response->redirect($this->url->link('catalog/attribute_group', 'user_token=' . $this->session->data['user_token'] . $url, true));
+		}
+
+		$this->getList();
+	}
+
 	public function delete() {
 		$this->load->language('catalog/attribute_group');
 
@@ -83,9 +131,21 @@ class ControllerCatalogAttributeGroup extends Controller {
 
 		$this->load->model('catalog/attribute_group');
 
-		if (isset($this->request->post['selected']) && $this->validateDelete()) {
-			foreach ($this->request->post['selected'] as $attribute_group_id) {
-				$this->model_catalog_attribute_group->deleteAttributeGroup($attribute_group_id);
+		$attribute_group_ids = [];
+
+		if (isset($this->request->post['selected'])) {
+			$attribute_group_ids = $this->request->post['selected'];
+		} elseif (isset($this->request->get['attribute_group_id'])) {
+			$attribute_group_ids = [
+				(int) $this->request->get['attribute_group_id'],
+			];
+		}
+
+		if ($attribute_group_ids && $this->validateDelete()) {
+			foreach ($attribute_group_ids as $attribute_group_id) {
+				$this->model_catalog_attribute_group->deleteAttributeGroup(
+					(int) $attribute_group_id,
+				);
 			}
 
 			$this->session->data['success'] = $this->language->get('text_success');
@@ -156,6 +216,7 @@ class ControllerCatalogAttributeGroup extends Controller {
 		);
 
 		$data['add'] = $this->url->link('catalog/attribute_group/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
+		$data['copy'] = $this->url->link('catalog/attribute_group/copy', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('catalog/attribute_group/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
 		$data['attribute_groups'] = array();
@@ -178,7 +239,9 @@ class ControllerCatalogAttributeGroup extends Controller {
 				'name_raw'           => $result['name'],
 				'sort_order'         => $result['sort_order'],
 				'sort_order_raw'     => $result['sort_order'],
-				'edit'               => $this->url->link('catalog/attribute_group/edit', 'user_token=' . $this->session->data['user_token'] . '&attribute_group_id=' . $result['attribute_group_id'] . $url, true)
+				'edit'               => $this->url->link('catalog/attribute_group/edit', 'user_token=' . $this->session->data['user_token'] . '&attribute_group_id=' . $result['attribute_group_id'] . $url, true),
+				'copy'               => $this->url->link('catalog/attribute_group/copy', 'user_token=' . $this->session->data['user_token'] . '&attribute_group_id=' . $result['attribute_group_id'] . $url, true),
+				'delete'             => $this->url->link('catalog/attribute_group/delete', 'user_token=' . $this->session->data['user_token'] . '&attribute_group_id=' . $result['attribute_group_id'] . $url, true)
 			);
 		}
 
@@ -388,14 +451,30 @@ class ControllerCatalogAttributeGroup extends Controller {
 		return !$this->error;
 	}
 
+	protected function validateCopy() {
+		if (!$this->user->hasPermission('modify', 'catalog/attribute_group')) {
+			$this->error['warning'] = $this->language->get('error_permission');
+		}
+
+		return !$this->error;
+	}
+
 	protected function validateDelete() {
 		if (!$this->user->hasPermission('modify', 'catalog/attribute_group')) {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
+		$attribute_group_ids = [];
+
+		if (isset($this->request->post['selected'])) {
+			$attribute_group_ids = $this->request->post['selected'];
+		} elseif (isset($this->request->get['attribute_group_id'])) {
+			$attribute_group_ids = [(int) $this->request->get['attribute_group_id']];
+		}
+
 		$this->load->model('catalog/attribute');
 
-		foreach ($this->request->post['selected'] as $attribute_group_id) {
+		foreach ($attribute_group_ids as $attribute_group_id) {
 			$attribute_total = $this->model_catalog_attribute->getTotalAttributesByAttributeGroupId($attribute_group_id);
 
 			if ($attribute_total) {

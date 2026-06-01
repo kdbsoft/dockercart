@@ -95,15 +95,49 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 	/**
 	 * Delete post(s)
 	 */
+	public function copy() {
+		$this->load->language('extension/module/dockercart_blog_post');
+		$this->load->model('extension/module/dockercart_blog_post');
+
+		$this->document->setTitle($this->language->get('heading_title'));
+
+		$post_ids = [];
+
+		if (isset($this->request->post['selected'])) {
+			$post_ids = $this->request->post['selected'];
+		} elseif (isset($this->request->get['post_id'])) {
+			$post_ids = [(int) $this->request->get['post_id']];
+		}
+
+		if ($post_ids && $this->validateCopy()) {
+			foreach ($post_ids as $post_id) {
+				$this->model_extension_module_dockercart_blog_post->copyPost((int) $post_id);
+			}
+
+			$this->session->data['success'] = $this->language->get('text_success');
+			$this->response->redirect($this->url->link('extension/module/dockercart_blog_post', 'user_token=' . $this->session->data['user_token'], true));
+		}
+
+		$this->getList();
+	}
+
 	public function delete() {
 		$this->load->language('extension/module/dockercart_blog_post');
 		$this->load->model('extension/module/dockercart_blog_post');
 
 		$this->document->setTitle($this->language->get('heading_title'));
 
-		if (isset($this->request->post['selected']) && $this->validateDelete()) {
-			foreach ($this->request->post['selected'] as $post_id) {
-				$this->model_extension_module_dockercart_blog_post->deletePost($post_id);
+		$post_ids = [];
+
+		if (isset($this->request->post['selected'])) {
+			$post_ids = $this->request->post['selected'];
+		} elseif (isset($this->request->get['post_id'])) {
+			$post_ids = [(int) $this->request->get['post_id']];
+		}
+
+		if ($post_ids && $this->validateDelete()) {
+			foreach ($post_ids as $post_id) {
+				$this->model_extension_module_dockercart_blog_post->deletePost((int) $post_id);
 			}
 
 			$this->session->data['success'] = $this->language->get('text_success');
@@ -171,6 +205,7 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 		);
 
 		$data['add'] = $this->url->link('extension/module/dockercart_blog_post/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
+		$data['copy'] = $this->url->link('extension/module/dockercart_blog_post/copy', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('extension/module/dockercart_blog_post/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
 		$data['posts'] = array();
@@ -209,7 +244,9 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 				'date_created' => isset($result['date_published']) && $result['date_published'] ? date('Y-m-d H:i:s', strtotime($result['date_published'])) : '—',
 				'featured'     => $result['featured'] ? $this->language->get('text_yes') : $this->language->get('text_no'),
 				'selected'     => isset($this->request->post['selected']) && in_array($result['post_id'], $this->request->post['selected']),
-				'edit'         => $this->url->link('extension/module/dockercart_blog_post/edit', 'user_token=' . $this->session->data['user_token'] . '&post_id=' . $result['post_id'] . $url, true)
+				'edit'         => $this->url->link('extension/module/dockercart_blog_post/edit', 'user_token=' . $this->session->data['user_token'] . '&post_id=' . $result['post_id'] . $url, true),
+				'copy'         => $this->url->link('extension/module/dockercart_blog_post/copy', 'user_token=' . $this->session->data['user_token'] . '&post_id=' . $result['post_id'] . $url, true),
+				'delete'       => $this->url->link('extension/module/dockercart_blog_post/delete', 'user_token=' . $this->session->data['user_token'] . '&post_id=' . $result['post_id'] . $url, true)
 			);
 		}
 
@@ -598,6 +635,14 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 	 * 
 	 * @return bool
 	 */
+	protected function validateCopy() {
+		if (!$this->user->hasPermission('modify', 'extension/module/dockercart_blog_post')) {
+			$this->error['warning'] = $this->language->get('error_permission');
+		}
+
+		return !$this->error;
+	}
+
 	protected function validateDelete() {
 		if (!$this->user->hasPermission('modify', 'extension/module/dockercart_blog_post')) {
 			$this->error['warning'] = $this->language->get('error_permission');

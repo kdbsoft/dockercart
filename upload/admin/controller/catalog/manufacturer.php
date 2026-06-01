@@ -76,6 +76,54 @@ class ControllerCatalogManufacturer extends Controller {
 		$this->getForm();
 	}
 
+	public function copy() {
+		$this->load->language('catalog/manufacturer');
+
+		$this->document->setTitle($this->language->get('heading_title'));
+
+		$this->load->model('catalog/manufacturer');
+
+		$manufacturer_ids = [];
+
+		if (isset($this->request->post['selected'])) {
+			$manufacturer_ids = $this->request->post['selected'];
+		} elseif (isset($this->request->get['manufacturer_id'])) {
+			$manufacturer_ids = [
+				(int) $this->request->get['manufacturer_id'],
+			];
+		}
+
+		if ($manufacturer_ids && $this->validateCopy()) {
+			foreach ($manufacturer_ids as $manufacturer_id) {
+				$this->model_catalog_manufacturer->copyManufacturer(
+					(int) $manufacturer_id,
+				);
+			}
+
+			$this->session->data['success'] = $this->language->get(
+				'text_success',
+			);
+
+			$url = '';
+
+			if (isset($this->request->get['sort'])) {
+				$url .= '&sort=' . $this->request->get['sort'];
+			}
+
+			if (isset($this->request->get['order'])) {
+				$url .= '&order=' . $this->request->get['order'];
+			}
+
+			if (isset($this->request->get['page'])) {
+				$url .= '&page=' . $this->request->get['page'];
+			}
+
+			$this->response->redirect($this->url->link('catalog/manufacturer', 'user_token=' . $this->session->data['user_token'] . $url, true));
+		}
+
+		$this->getList();
+	}
+
 	public function delete() {
 		$this->load->language('catalog/manufacturer');
 
@@ -83,9 +131,21 @@ class ControllerCatalogManufacturer extends Controller {
 
 		$this->load->model('catalog/manufacturer');
 
-		if (isset($this->request->post['selected']) && $this->validateDelete()) {
-			foreach ($this->request->post['selected'] as $manufacturer_id) {
-				$this->model_catalog_manufacturer->deleteManufacturer($manufacturer_id);
+		$manufacturer_ids = [];
+
+		if (isset($this->request->post['selected'])) {
+			$manufacturer_ids = $this->request->post['selected'];
+		} elseif (isset($this->request->get['manufacturer_id'])) {
+			$manufacturer_ids = [
+				(int) $this->request->get['manufacturer_id'],
+			];
+		}
+
+		if ($manufacturer_ids && $this->validateDelete()) {
+			foreach ($manufacturer_ids as $manufacturer_id) {
+				$this->model_catalog_manufacturer->deleteManufacturer(
+					(int) $manufacturer_id,
+				);
 			}
 
 			$this->session->data['success'] = $this->language->get('text_success');
@@ -156,6 +216,7 @@ class ControllerCatalogManufacturer extends Controller {
 		);
 
 		$data['add'] = $this->url->link('catalog/manufacturer/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
+		$data['copy'] = $this->url->link('catalog/manufacturer/copy', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('catalog/manufacturer/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
 		$data['manufacturers'] = array();
@@ -178,7 +239,9 @@ class ControllerCatalogManufacturer extends Controller {
 				'name_raw'        => $result['name'],
 				'sort_order'      => $result['sort_order'],
 				'sort_order_raw'  => $result['sort_order'],
-				'edit'            => $this->url->link('catalog/manufacturer/edit', 'user_token=' . $this->session->data['user_token'] . '&manufacturer_id=' . $result['manufacturer_id'] . $url, true)
+				'edit'            => $this->url->link('catalog/manufacturer/edit', 'user_token=' . $this->session->data['user_token'] . '&manufacturer_id=' . $result['manufacturer_id'] . $url, true),
+				'copy'            => $this->url->link('catalog/manufacturer/copy', 'user_token=' . $this->session->data['user_token'] . '&manufacturer_id=' . $result['manufacturer_id'] . $url, true),
+				'delete'          => $this->url->link('catalog/manufacturer/delete', 'user_token=' . $this->session->data['user_token'] . '&manufacturer_id=' . $result['manufacturer_id'] . $url, true)
 			);
 		}
 
@@ -493,14 +556,30 @@ class ControllerCatalogManufacturer extends Controller {
 		return !$this->error;
 	}
 
+	protected function validateCopy() {
+		if (!$this->user->hasPermission('modify', 'catalog/manufacturer')) {
+			$this->error['warning'] = $this->language->get('error_permission');
+		}
+
+		return !$this->error;
+	}
+
 	protected function validateDelete() {
 		if (!$this->user->hasPermission('modify', 'catalog/manufacturer')) {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
+		$manufacturer_ids = [];
+
+		if (isset($this->request->post['selected'])) {
+			$manufacturer_ids = $this->request->post['selected'];
+		} elseif (isset($this->request->get['manufacturer_id'])) {
+			$manufacturer_ids = [(int) $this->request->get['manufacturer_id']];
+		}
+
 		$this->load->model('catalog/product');
 
-		foreach ($this->request->post['selected'] as $manufacturer_id) {
+		foreach ($manufacturer_ids as $manufacturer_id) {
 			$product_total = $this->model_catalog_product->getTotalProductsByManufacturerId($manufacturer_id);
 
 			if ($product_total) {

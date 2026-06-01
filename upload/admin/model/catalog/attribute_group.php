@@ -27,6 +27,81 @@ class ModelCatalogAttributeGroup extends Model {
 		$this->db->query("DELETE FROM " . DB_PREFIX . "attribute_group_description WHERE attribute_group_id = '" . (int)$attribute_group_id . "'");
 	}
 
+	public function copyAttributeGroup($attribute_group_id)
+	{
+		$query = $this->db->query(
+			"SELECT * FROM " .
+				DB_PREFIX .
+				"attribute_group WHERE attribute_group_id = '" .
+				(int) $attribute_group_id .
+				"'",
+		);
+
+		if (!$query->num_rows) {
+			return false;
+		}
+
+		$group = $query->row;
+
+		$data = [];
+
+		$data["sort_order"] = $group["sort_order"];
+		$data["attribute_group_description"] = $this->getAttributeGroupDescriptions(
+			$attribute_group_id,
+		);
+
+		$default_language_id = (int) $this->config->get("config_language_id");
+
+		if (
+			isset(
+				$data["attribute_group_description"][$default_language_id][
+					"name"
+				],
+			)
+		) {
+			$data["attribute_group_description"][$default_language_id][
+				"name"
+			] = $this->getUniqueCopyName(
+				$data["attribute_group_description"][$default_language_id][
+					"name"
+				],
+				DB_PREFIX . "attribute_group_description",
+				"name",
+			);
+		}
+
+		return $this->addAttributeGroup($data);
+	}
+
+	private function getUniqueCopyName($original, $table, $column)
+	{
+		$base = $original;
+
+		if (preg_match('/^(.+)-copy(\d*)$/', $original, $matches)) {
+			$base = $matches[1];
+		}
+
+		$counter = 0;
+
+		do {
+			$counter++;
+			$suffix = $counter > 1 ? (string) $counter : "";
+			$candidate = $base . "-copy" . $suffix;
+
+			$query = $this->db->query(
+				"SELECT COUNT(*) AS total FROM " .
+					$table .
+					" WHERE " .
+					$column .
+					" = '" .
+					$this->db->escape($candidate) .
+					"'",
+			);
+		} while ($query->row["total"] > 0);
+
+		return $candidate;
+	}
+
 	public function getAttributeGroup($attribute_group_id) {
 		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "attribute_group WHERE attribute_group_id = '" . (int)$attribute_group_id . "'");
 

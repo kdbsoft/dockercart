@@ -20,6 +20,20 @@
     .no-slides-msg { text-align: center; color: #9ca3af; padding: 28px; font-style: italic; }
     .add-slide-btn-wrap { padding: 10px 0 4px; text-align: right; }
     .dcx-divider { border: none; border-top: 1px solid #e5e7eb; margin: 20px 0 18px; }
+    .slide-section { margin-bottom: 18px; }
+    .slide-section__title { font-size: 11px; font-weight: 700; color: #6366f1; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid #f3f4f6; }
+    .position-radio-group { display: flex; gap: 0; max-width: 280px; }
+    .position-radio-group label { display: inline-flex; align-items: center; gap: 5px; padding: 7px 14px; font-size: 12px; font-weight: 500; border: 1px solid #e5e7eb; cursor: pointer; background: #fff; color: #6b7280; transition: all .15s; }
+    .position-radio-group label:first-child { border-radius: 6px 0 0 6px; }
+    .position-radio-group label:last-child { border-radius: 0 6px 6px 0; }
+    .position-radio-group label:has(input:checked) { background: #eef2ff; border-color: #6366f1; color: #4f46e5; }
+    .position-radio-group input[type="radio"] { display: none; }
+    .slide-advanced-toggle { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: #9ca3af; cursor: pointer; margin-top: 10px; border: none; background: none; padding: 0; }
+    .slide-advanced-toggle:hover { color: #6366f1; }
+    .slide-advanced-toggle .fa { transition: transform .2s; font-size: 10px; }
+    .slide-advanced-toggle.open .fa { transform: rotate(90deg); }
+    .slide-advanced-body { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid #f3f4f6; }
+    .slide-advanced-body.open { display: block; }
     .banner-slide-card.collapsed .banner-slide-card__body { display: none; }
     .banner-slide-card__toggle { cursor: pointer; margin-right: 6px; transition: transform .2s; vertical-align: middle; font-size: 14px; }
     .banner-slide-card:not(.collapsed) .banner-slide-card__toggle { transform: rotate(90deg); }
@@ -29,6 +43,13 @@
     .dc-video-thumb__name { font-size: 10px; color: #9ca3af; word-break: break-all; text-align: center; line-height: 1.2; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
     .dc-youtube-block { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
     .dc-youtube-thumb img { display: block; border: 1px solid #e5e7eb; border-radius: 4px; max-height: 60px; width: auto; }
+    .slide-drag-handle { cursor: grab; color: #9ca3af; margin-right: 6px; font-size: 13px; vertical-align: middle; }
+    .slide-drag-handle:active { cursor: grabbing; }
+    .banner-slide-card.drag-over { border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99,102,241,.25); }
+    .banner-slide-card.dragging { opacity: .4; }
+    #language li.drag-over-tab > a { background: #eef2ff; border-color: #6366f1; color: #4f46e5; }
+    .btn-duplicate { color: #6366f1; margin-left: 4px; }
+    .btn-duplicate:hover { color: #4f46e5; background: #eef2ff; }
   </style>
 
   <div class="page-header">
@@ -55,8 +76,8 @@
 
     {# ── Main tabs ──────────────────────────────────────────── #}
     <ul class="nav nav-tabs dcx-profile-tabs" id="banner-tabs" role="tablist">
-      <li class="active"><a href="#tab-general" data-toggle="tab"><i class="fa fa-image"></i> General</a></li>
-      <li><a href="#tab-slides" data-toggle="tab"><i class="fa fa-list-alt"></i> Slides</a></li>
+      <li class="active"><a href="#tab-general" data-toggle="tab"><i class="fa fa-image"></i> {{ text_tab_general }}</a></li>
+      <li><a href="#tab-slides" data-toggle="tab"><i class="fa fa-list-alt"></i> {{ text_tab_slides }}</a></li>
     </ul>
 
     <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-banner">
@@ -76,7 +97,7 @@
             {# ── GENERAL TAB ─────────────────────────────────────── #}
             <div class="dcx-tab-pane active" id="tab-general">
               <div class="dcx-section">
-                <h4>General Settings</h4>
+                <h4>{{ text_general_settings }}</h4>
                 <div class="form-horizontal dcx-form">
 
                   <div class="form-group required">
@@ -104,7 +125,7 @@
             {# ── SLIDES TAB ──────────────────────────────────────── #}
             <div class="dcx-tab-pane" id="tab-slides">
               <div class="dcx-section">
-                <h4>Slides by Language</h4>
+                <h4>{{ text_slides_by_language }}</h4>
 
                 <ul class="nav nav-tabs dcx-profile-tabs" id="language">
               {% for language in languages %}
@@ -124,163 +145,154 @@
                 <div id="slide-list-{{ language.language_id }}">
                   {% if banner_images[language.language_id] %}
                   {% for banner_image in banner_images[language.language_id] %}
-                  <div class="banner-slide-card collapsed" id="image-row{{ image_row }}">
+                  <div class="banner-slide-card collapsed" draggable="true" id="image-row{{ image_row }}">
                     <div class="banner-slide-card__head" style="cursor:pointer;">
-                      <span><i class="fa fa-chevron-right banner-slide-card__toggle"></i> <span class="banner-slide-card__num"><i class="fa fa-image" style="margin-right:6px;color:#6366f1;"></i>Slide #{{ loop.index }}</span></span>
-                      <button type="button" onclick="removeSlide({{ image_row }}); event.stopPropagation();" class="btn btn-danger btn-xs"><i class="fa fa-trash-o"></i> {{ button_remove }}</button>
+                      <span>
+                        <i class="fa fa-arrows slide-drag-handle"></i>
+                        <i class="fa fa-chevron-right banner-slide-card__toggle"></i>
+                        <span class="banner-slide-card__num"><i class="fa fa-image" style="margin-right:6px;color:#6366f1;"></i><span class="slide-label">{% if banner_image.title %}{{ banner_image.title }}{% else %}{{ text_slide }} #{{ loop.index }}{% endif %}</span></span>
+                      </span>
+                      <span>
+                        <button type="button" onclick="duplicateSlide({{ image_row }}, {{ language.language_id }}); event.stopPropagation();" class="btn btn-default btn-xs btn-duplicate"><i class="fa fa-clone"></i></button>
+                        <button type="button" onclick="removeSlide({{ image_row }}); event.stopPropagation();" class="btn btn-danger btn-xs"><i class="fa fa-trash-o"></i> {{ button_remove }}</button>
+                      </span>
                     </div>
                     <div class="banner-slide-card__body">
 
-                      {# Title + subtitle #}
-                      <div class="form-group">
-                        <label>{{ entry_title }}</label>
-                        <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][title]" value="{{ banner_image.title }}" placeholder="{{ entry_title }}" class="form-control" />
-                        <div class="accent-hint">{{ entry_title_hint }} — e.g.: <code>The Future of [Smart Living]</code></div>
-                      </div>
-
-                      <div class="form-group">
-                        <label>{{ entry_subtitle }}</label>
-                        <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][subtitle]" value="{{ banner_image.subtitle }}" placeholder="{{ entry_subtitle }}" class="form-control" />
-                      </div>
-
-                      {# Content position #}
-                      <div class="form-group">
-                        <label>{{ entry_content_position }}</label>
-                        <select name="banner_image[{{ language.language_id }}][{{ image_row }}][content_position]" class="form-control" style="max-width:200px;">
-                          <option value="left" {% if banner_image.content_position == 'left' %}selected{% endif %}>{{ text_content_position_left }}</option>
-                          <option value="center" {% if banner_image.content_position == 'center' %}selected{% endif %}>{{ text_content_position_center }}</option>
-                          <option value="right" {% if banner_image.content_position == 'right' %}selected{% endif %}>{{ text_content_position_right }}</option>
-                        </select>
-                      </div>
-
-                      <hr class="dcx-divider" />
-
-                      {# Accent badge + color #}
-                      <div class="btn-row-2col">
+                      {# ── Content ── #}
+                      <div class="slide-section">
+                        <div class="slide-section__title"><i class="fa fa-pencil" style="margin-right:4px;"></i>{{ text_tab_general }}</div>
                         <div class="form-group">
-                          <label>{{ entry_accent_text }}</label>
-                          <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][accent_text]" value="{{ banner_image.accent_text }}" placeholder="e.g. New Collection" class="form-control" />
+                          <label>{{ entry_title }}</label>
+                          <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][title]" value="{{ banner_image.title }}" placeholder="{{ entry_title }}" class="form-control slide-title-input" />
+                          <div class="accent-hint">{{ entry_title_hint }}</div>
                         </div>
                         <div class="form-group">
-                          <label>{{ entry_accent_color }}</label>
-                          <div style="display:flex;gap:8px;align-items:center;">
-                            <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][accent_color]" value="{{ banner_image.accent_color|default('#6366f1') }}" class="form-control dc-color-input accent-color-text" data-default-color="#6366f1" placeholder="#6366f1" style="flex:1;" maxlength="16" />
-                          </div>
-                          <div class="accent-hint">{{ entry_accent_hint }}</div>
-                        </div>
-                      </div>
-
-                      <hr class="dcx-divider" />
-
-                      {# Primary button #}
-                      <div class="btn-row-2col">
-                        <div class="form-group">
-                          <label>{{ entry_primary_btn_text }}</label>
-                          <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][primary_btn_text]" value="{{ banner_image.primary_btn_text }}" placeholder="Shop Now" class="form-control" />
+                          <label>{{ entry_subtitle }}</label>
+                          <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][subtitle]" value="{{ banner_image.subtitle }}" placeholder="{{ entry_subtitle }}" class="form-control" />
                         </div>
                         <div class="form-group">
-                          <label>{{ entry_primary_btn_link }}</label>
-                          <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][primary_btn_link]" value="{{ banner_image.primary_btn_link }}" placeholder="/category/new-arrivals" class="form-control" />
-                        </div>
-                      </div>
-
-                      <div class="btn-row-2col">
-                        <div class="form-group">
-                          <label>{{ entry_primary_btn_text_color }}</label>
-                          <div style="display:flex;gap:8px;align-items:center;">
-                            <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][primary_btn_text_color]" value="{{ banner_image.primary_btn_text_color|default('#ffffff') }}" class="form-control dc-color-input primary-btn-text-color-text" data-default-color="#ffffff" placeholder="#ffffff" style="flex:1;" maxlength="16" />
-                          </div>
-                        </div>
-                        <div class="form-group">
-                          <label>{{ entry_primary_btn_bg_color }}</label>
-                          <div style="display:flex;gap:8px;align-items:center;">
-                            <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][primary_btn_bg_color]" value="{{ banner_image.primary_btn_bg_color|default('#2563eb') }}" class="form-control dc-color-input primary-btn-bg-color-text" data-default-color="#2563eb" placeholder="#2563eb" style="flex:1;" maxlength="16" />
+                          <label>{{ entry_content_position }}</label>
+                          <div class="position-radio-group">
+                            <label><input type="radio" name="banner_image[{{ language.language_id }}][{{ image_row }}][content_position]" value="left" {% if banner_image.content_position == 'left' %}checked{% endif %} /><i class="fa fa-align-left"></i> {{ text_content_position_left }}</label>
+                            <label><input type="radio" name="banner_image[{{ language.language_id }}][{{ image_row }}][content_position]" value="center" {% if banner_image.content_position == 'center' %}checked{% endif %} /><i class="fa fa-align-center"></i> {{ text_content_position_center }}</label>
+                            <label><input type="radio" name="banner_image[{{ language.language_id }}][{{ image_row }}][content_position]" value="right" {% if banner_image.content_position == 'right' %}checked{% endif %} /><i class="fa fa-align-right"></i> {{ text_content_position_right }}</label>
                           </div>
                         </div>
                       </div>
 
-                      {# Secondary button #}
-                      <div class="btn-row-2col">
+                      {# ── Media ── #}
+                      <div class="slide-section">
+                        <div class="slide-section__title"><i class="fa fa-image" style="margin-right:4px;"></i>{{ entry_image }}</div>
                         <div class="form-group">
-                          <label>{{ entry_secondary_btn_text }}</label>
-                          <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][secondary_btn_text]" value="{{ banner_image.secondary_btn_text }}" placeholder="Browse All" class="form-control" />
-                        </div>
-                        <div class="form-group">
-                          <label>{{ entry_secondary_btn_link }}</label>
-                          <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][secondary_btn_link]" value="{{ banner_image.secondary_btn_link }}" placeholder="/collections/all" class="form-control" />
-                        </div>
-                      </div>
-
-                      <hr class="dcx-divider" />
-
-                      {# Slide link & sort order #}
-                      <div class="btn-row-2col">
-                        <div class="form-group">
-                          <label>{{ entry_link }}</label>
-                          <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][link]" value="{{ banner_image.link }}" placeholder="{{ entry_link }}" class="form-control" />
-                        </div>
-                        <div class="form-group">
-                          <label>{{ entry_sort_order }}</label>
-                          <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][sort_order]" value="{{ banner_image.sort_order }}" placeholder="0" class="form-control" style="max-width:100px;" />
-                        </div>
-                      </div>
-
-                      {# Images #}
-                      <div class="form-group">
-                        <label>{{ entry_image }}</label>
-                        <div class="slide-images-row">
-                          <div class="slide-image-block">
-                            <a href="" id="thumb-image{{ image_row }}" data-toggle="image" class="img-thumbnail"><img src="{{ banner_image.thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" style="max-height:90px;" /></a>
-                            <input type="hidden" name="banner_image[{{ language.language_id }}][{{ image_row }}][image]" value="{{ banner_image.image }}" id="input-image{{ image_row }}" />
-                            <small>Landscape</small>
-                          </div>
-                          <div class="slide-image-block">
-                            <a href="" id="thumb-image-portrait{{ image_row }}" data-toggle="image" class="img-thumbnail"><img src="{{ banner_image.thumb_portrait }}" alt="" title="" data-placeholder="{{ placeholder }}" style="max-height:90px;" /></a>
-                            <input type="hidden" name="banner_image[{{ language.language_id }}][{{ image_row }}][image_portrait]" value="{{ banner_image.image_portrait }}" id="input-image-portrait{{ image_row }}" />
-                            <small>Portrait</small>
-                          </div>
-                        </div>
-                      </div>
-
-                      <hr class="dcx-divider" />
-
-                      {# Video background #}
-                      <div class="form-group">
-                        <label>{{ entry_video_type }}</label>
-                        <select name="banner_image[{{ language.language_id }}][{{ image_row }}][video_type]" class="form-control dc-video-type-select" style="max-width:200px;">
-                          <option value="" {% if banner_image.video_type == '' %}selected{% endif %}>{{ entry_video_type_none }}</option>
-                          <option value="youtube" {% if banner_image.video_type == 'youtube' %}selected{% endif %}>{{ entry_video_type_youtube }}</option>
-                          <option value="mp4" {% if banner_image.video_type == 'mp4' %}selected{% endif %}>{{ entry_video_type_mp4 }}</option>
-                        </select>
-                      </div>
-
-                      <div class="form-group dc-video-field" data-type="youtube"{% if banner_image.video_type != 'youtube' %} style="display:none;"{% endif %}>
-                        <label>{{ entry_video }}</label>
-                        <div class="dc-youtube-block">
-                          <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][video]" value="{{ banner_image.video }}" placeholder="dQw4w9WgXcQ" class="form-control dc-youtube-input" style="max-width:400px;" />
-                          {% if banner_image.video_type == 'youtube' and banner_image.video %}
-                          <div class="dc-youtube-thumb">
-                            <img src="https://img.youtube.com/vi/{{ banner_image.video }}/hqdefault.jpg" />
-                          </div>
-                          {% endif %}
-                        </div>
-                        <div class="accent-hint">{{ help_video_youtube }}</div>
-                      </div>
-
-                      <div class="form-group dc-video-field" data-type="mp4"{% if banner_image.video_type != 'mp4' %} style="display:none;"{% endif %}>
-                        <label>{{ entry_video_mp4 }}</label>
-                        <div class="slide-video-block">
-                          <a href="" id="thumb-video{{ image_row }}" data-toggle="image" data-type="video" class="img-thumbnail dc-video-thumb">
-                            <img src="{{ video_placeholder }}" alt="" title="" data-placeholder="{{ video_placeholder }}" class="dc-video-thumb__img" style="max-height:90px;{{ banner_image.video_type == 'mp4' and banner_image.video ? 'display:none;' : '' }}" />
-                            <div class="dc-video-thumb__overlay" style="{{ banner_image.video_type == 'mp4' and banner_image.video ? '' : 'display:none;' }}">
-                              <i data-lucide="film" class="dc-video-thumb__icon"></i>
-                              <span class="dc-video-thumb__name">{{ banner_image.video }}</span>
+                          <div class="slide-images-row">
+                            <div class="slide-image-block">
+                              <a href="" id="thumb-image{{ image_row }}" data-toggle="image" class="img-thumbnail"><img src="{{ banner_image.thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" style="max-height:90px;" /></a>
+                              <input type="hidden" name="banner_image[{{ language.language_id }}][{{ image_row }}][image]" value="{{ banner_image.image }}" id="input-image{{ image_row }}" />
+                              <small>{{ text_landscape }}</small>
                             </div>
-                          </a>
-                          <input type="hidden" name="banner_image[{{ language.language_id }}][{{ image_row }}][video]" value="{{ banner_image.video }}" id="input-video{{ image_row }}" />
-                          <small>MP4</small>
+                            <div class="slide-image-block">
+                              <a href="" id="thumb-image-portrait{{ image_row }}" data-toggle="image" class="img-thumbnail"><img src="{{ banner_image.thumb_portrait }}" alt="" title="" data-placeholder="{{ placeholder }}" style="max-height:90px;" /></a>
+                              <input type="hidden" name="banner_image[{{ language.language_id }}][{{ image_row }}][image_portrait]" value="{{ banner_image.image_portrait }}" id="input-image-portrait{{ image_row }}" />
+                              <small>{{ text_portrait }}</small>
+                            </div>
+                          </div>
                         </div>
-                        <div class="accent-hint">{{ help_video_mp4 }}</div>
+                        <div class="form-group">
+                          <label>{{ entry_video_type }}</label>
+                          <select name="banner_image[{{ language.language_id }}][{{ image_row }}][video_type]" class="form-control dc-video-type-select" style="max-width:200px;">
+                            <option value="" {% if banner_image.video_type == '' %}selected{% endif %}>{{ entry_video_type_none }}</option>
+                            <option value="youtube" {% if banner_image.video_type == 'youtube' %}selected{% endif %}>{{ entry_video_type_youtube }}</option>
+                            <option value="mp4" {% if banner_image.video_type == 'mp4' %}selected{% endif %}>{{ entry_video_type_mp4 }}</option>
+                          </select>
+                        </div>
+                        <div class="form-group dc-video-field" data-type="youtube"{% if banner_image.video_type != 'youtube' %} style="display:none;"{% endif %}>
+                          <label>{{ entry_video }}</label>
+                          <div class="dc-youtube-block">
+                            <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][video]" value="{{ banner_image.video }}" placeholder="dQw4w9WgXcQ" class="form-control dc-youtube-input" style="max-width:400px;" />
+                            {% if banner_image.video_type == 'youtube' and banner_image.video %}
+                            <div class="dc-youtube-thumb">
+                              <img src="https://img.youtube.com/vi/{{ banner_image.video }}/hqdefault.jpg" />
+                            </div>
+                            {% endif %}
+                          </div>
+                          <div class="accent-hint">{{ help_video_youtube }}</div>
+                        </div>
+                        <div class="form-group dc-video-field" data-type="mp4"{% if banner_image.video_type != 'mp4' %} style="display:none;"{% endif %}>
+                          <label>{{ entry_video_mp4 }}</label>
+                          <div class="slide-video-block">
+                            <a href="" id="thumb-video{{ image_row }}" data-toggle="image" data-type="video" class="img-thumbnail dc-video-thumb">
+                              <img src="{{ video_placeholder }}" alt="" title="" data-placeholder="{{ video_placeholder }}" class="dc-video-thumb__img" style="max-height:90px;{{ banner_image.video_type == 'mp4' and banner_image.video ? 'display:none;' : '' }}" />
+                              <div class="dc-video-thumb__overlay" style="{{ banner_image.video_type == 'mp4' and banner_image.video ? '' : 'display:none;' }}">
+                                <i data-lucide="film" class="dc-video-thumb__icon"></i>
+                                <span class="dc-video-thumb__name">{{ banner_image.video }}</span>
+                              </div>
+                            </a>
+                            <input type="hidden" name="banner_image[{{ language.language_id }}][{{ image_row }}][video]" value="{{ banner_image.video }}" id="input-video{{ image_row }}" />
+                            <small>{{ text_mp4 }}</small>
+                          </div>
+                          <div class="accent-hint">{{ help_video_mp4 }}</div>
+                        </div>
+                      </div>
+
+                      {# ── Buttons ── #}
+                      <div class="slide-section">
+                        <div class="slide-section__title"><i class="fa fa-hand-pointer-o" style="margin-right:4px;"></i>{{ text_tab_slides }}</div>
+                        <div class="btn-row-2col">
+                          <div class="form-group">
+                            <label>{{ entry_primary_btn_text }}</label>
+                            <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][primary_btn_text]" value="{{ banner_image.primary_btn_text }}" placeholder="{{ placeholder_primary_btn }}" class="form-control" />
+                          </div>
+                          <div class="form-group">
+                            <label>{{ entry_primary_btn_link }}</label>
+                            <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][primary_btn_link]" value="{{ banner_image.primary_btn_link }}" placeholder="/category/new-arrivals" class="form-control" />
+                          </div>
+                        </div>
+                        <div class="btn-row-2col">
+                          <div class="form-group">
+                            <label>{{ entry_secondary_btn_text }}</label>
+                            <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][secondary_btn_text]" value="{{ banner_image.secondary_btn_text }}" placeholder="{{ placeholder_secondary_btn }}" class="form-control" />
+                          </div>
+                          <div class="form-group">
+                            <label>{{ entry_secondary_btn_link }}</label>
+                            <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][secondary_btn_link]" value="{{ banner_image.secondary_btn_link }}" placeholder="/collections/all" class="form-control" />
+                          </div>
+                        </div>
+                        <button type="button" class="slide-advanced-toggle" onclick="$(this).toggleClass('open'); $(this).next('.slide-advanced-body').toggleClass('open');"><i class="fa fa-chevron-right"></i> {{ text_tab_general }}</button>
+                        <div class="slide-advanced-body">
+                          <div class="btn-row-2col">
+                            <div class="form-group">
+                              <label>{{ entry_primary_btn_text_color }}</label>
+                              <div style="display:flex;gap:8px;align-items:center;">
+                                <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][primary_btn_text_color]" value="{{ banner_image.primary_btn_text_color|default('#ffffff') }}" class="form-control dc-color-input primary-btn-text-color-text" data-default-color="#ffffff" placeholder="#ffffff" style="flex:1;" maxlength="16" />
+                              </div>
+                            </div>
+                            <div class="form-group">
+                              <label>{{ entry_primary_btn_bg_color }}</label>
+                              <div style="display:flex;gap:8px;align-items:center;">
+                                <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][primary_btn_bg_color]" value="{{ banner_image.primary_btn_bg_color|default('#2563eb') }}" class="form-control dc-color-input primary-btn-bg-color-text" data-default-color="#2563eb" placeholder="#2563eb" style="flex:1;" maxlength="16" />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {# ── Badge ── #}
+                      <div class="slide-section">
+                        <div class="slide-section__title"><i class="fa fa-tag" style="margin-right:4px;"></i>{{ entry_accent_text }}</div>
+                        <div class="btn-row-2col">
+                          <div class="form-group">
+                            <label>{{ entry_accent_text }}</label>
+                            <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][accent_text]" value="{{ banner_image.accent_text }}" placeholder="{{ placeholder_accent_text }}" class="form-control" />
+                          </div>
+                          <div class="form-group">
+                            <label>{{ entry_accent_color }}</label>
+                            <div style="display:flex;gap:8px;align-items:center;">
+                              <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][accent_color]" value="{{ banner_image.accent_color|default('#6366f1') }}" class="form-control dc-color-input accent-color-text" data-default-color="#6366f1" placeholder="#6366f1" style="flex:1;" maxlength="16" />
+                            </div>
+                            <div class="accent-hint">{{ entry_accent_hint }}</div>
+                          </div>
+                        </div>
                       </div>
 
                     </div>
@@ -288,12 +300,12 @@
                   {% set image_row = image_row + 1 %}
                   {% endfor %}
                   {% else %}
-                  <div class="no-slides-msg" id="no-slides-{{ language.language_id }}"><i class="fa fa-picture-o" style="font-size:22px;margin-bottom:8px;display:block;"></i>No slides yet. Click "+ Add Slide" to create the first one.</div>
+                  <div class="no-slides-msg" id="no-slides-{{ language.language_id }}"><i class="fa fa-picture-o" style="font-size:22px;margin-bottom:8px;display:block;"></i>{{ text_no_slides }}</div>
                   {% endif %}
                 </div>
 
                 <div class="add-slide-btn-wrap">
-                  <button type="button" onclick="addSlide({{ language.language_id }});" class="btn btn-primary btn-sm"><i class="fa fa-plus-circle"></i> Add Slide</button>
+                  <button type="button" onclick="addSlide({{ language.language_id }});" class="btn btn-primary btn-sm"><i class="fa fa-plus-circle"></i> {{ button_add_slide }}</button>
                 </div>
 
               </div>
@@ -313,10 +325,134 @@
 <script type="text/javascript">
 var image_row = {{ image_row }};
 var placeholder = '{{ placeholder }}';
+var _dragCard = null;
+var _dragSrcLangId = null;
 
 function removeSlide(row) {
   $('#image-row' + row + ', .tooltip').not('.tooltip:not([id])').remove();
   $('#image-row' + row).remove();
+}
+
+function duplicateSlide(row, language_id) {
+  var $original = $('#image-row' + row);
+  if (!$original.length) return;
+
+  var newRow = image_row;
+  var $clone = $original.clone(true);
+
+  $clone.attr('id', 'image-row' + newRow);
+
+  $clone.find('[name]').each(function() {
+    var name = $(this).attr('name');
+    if (name) {
+      $(this).attr('name', name.replace(/\[(\d+)\](?=\[[^\]]+\]$)/, '[' + newRow + ']'));
+    }
+  });
+
+  $clone.find('[id]').each(function() {
+    var id = $(this).attr('id');
+    if (id) {
+      $(this).attr('id', id.replace(/(\d+)(?!.*\d)/, newRow));
+    }
+  });
+
+  $clone.find('[onclick]').each(function() {
+    var onclick = $(this).attr('onclick');
+    if (onclick) {
+      $(this).attr('onclick', onclick.replace(/removeSlide\(\d+\)/g, 'removeSlide(' + newRow + ')').replace(/duplicateSlide\(\d+,(\d+)\)/g, 'duplicateSlide(' + newRow + ',$1)'));
+    }
+  });
+
+  $clone.find('.dc-video-thumb__img').each(function() {
+    var src = $(this).attr('src');
+    var placeholder = $(this).attr('data-placeholder') || window.placeholder || '';
+    if (src && src !== placeholder) {
+      $(this).attr('src', src);
+    }
+  });
+
+  $clone.attr('draggable', 'true');
+  $clone.removeClass('collapsed');
+  $clone.insertAfter($original);
+
+  initColorInputs($clone);
+  initVideoFields($clone);
+  if (window.lucide && typeof window.lucide.createIcons === 'function') {
+    window.lucide.createIcons();
+  }
+
+  image_row++;
+  renumberSlides(language_id);
+}
+
+function renumberSlides(language_id) {
+  var $list = $('#slide-list-' + language_id);
+  var $cards = $list.children('.banner-slide-card');
+
+  $cards.each(function(i) {
+    var $card = $(this);
+    var oldId = $card.attr('id');
+    var oldRow = oldId ? oldId.replace('image-row', '') : '0';
+
+    $card.attr('id', 'image-row' + i);
+
+    $card.find('[name]').each(function() {
+      var name = $(this).attr('name');
+      if (name) {
+        $(this).attr('name', name.replace(/\[\d+\](?=\[[^\]]+\]$)/, '[' + i + ']'));
+      }
+    });
+
+    $card.find('[id]').each(function() {
+      var id = $(this).attr('id');
+      if (id) {
+        $(this).attr('id', id.replace(/\d+(?!.*\d)/, i));
+      }
+    });
+
+    $card.find('[onclick]').each(function() {
+      var onclick = $(this).attr('onclick');
+      if (onclick) {
+        $(this).attr('onclick', onclick.replace(/removeSlide\(\d+\)/g, 'removeSlide(' + i + ')').replace(/duplicateSlide\(\d+,(\d+)\)/g, 'duplicateSlide(' + i + ',$1)'));
+      }
+    });
+
+    var $title = $card.find('.slide-title-input');
+    var title = $title.length ? $title.val().trim() : '';
+    var fallback = '{{ text_slide }} #' + (i + 1);
+    $card.find('.slide-label').text(title || fallback);
+
+    var $sortInput = $card.find('[name$="[sort_order]"]');
+    if ($sortInput.length) {
+      $sortInput.val(i);
+    }
+  });
+}
+
+function updateSlideLabel($input) {
+  var $card = $input.closest('.banner-slide-card');
+  var title = $input.val().trim();
+  var idx = $card.index() + 1;
+  var fallback = '{{ text_slide }} #' + idx;
+  $card.find('.slide-label').text(title || fallback);
+}
+
+function changeSlideLanguage($card, newLangId) {
+  $card.find('[name]').each(function() {
+    var name = $(this).attr('name');
+    if (name) {
+      $(this).attr('name', name.replace(/banner_image\[\d+\]/, 'banner_image[' + newLangId + ']'));
+    }
+  });
+  $card.find('[onclick]').each(function() {
+    var onclick = $(this).attr('onclick');
+    if (onclick) {
+      $(this).attr('onclick', onclick.replace(
+        /duplicateSlide\(\d+,\s*\d+\)/g,
+        'duplicateSlide($1,' + newLangId + ')'
+      ));
+    }
+  });
 }
 
 function normalizeHexColor(value, fallback) {
@@ -375,124 +511,48 @@ function initColorisPicker() {
 function addSlide(language_id) {
   var row = image_row;
   var pfx = 'banner_image[' + language_id + '][' + row + ']';
-  var html = '<div class="banner-slide-card collapsed" id="image-row' + row + '">';
+  var html = '<div class="banner-slide-card collapsed" draggable="true" id="image-row' + row + '">';
   html += '<div class="banner-slide-card__head" style="cursor:pointer;">';
-  html += '<span><i class="fa fa-chevron-right banner-slide-card__toggle"></i> <span class="banner-slide-card__num"><i class="fa fa-image" style="margin-right:6px;color:#6366f1;"></i>New Slide</span></span>';
+  html += '<span>';
+  html += '<i class="fa fa-arrows slide-drag-handle"></i> ';
+  html += '<i class="fa fa-chevron-right banner-slide-card__toggle"></i> ';
+  html += '<span class="banner-slide-card__num"><i class="fa fa-image" style="margin-right:6px;color:#6366f1;"></i><span class="slide-label">{{ text_slide }} #' + row + '</span></span></span>';
+  html += '<span>';
+  html += '<button type="button" onclick="duplicateSlide(' + row + ',' + language_id + '); event.stopPropagation();" class="btn btn-default btn-xs btn-duplicate"><i class="fa fa-clone"></i></button> ';
   html += '<button type="button" onclick="removeSlide(' + row + '); event.stopPropagation();" class="btn btn-danger btn-xs"><i class="fa fa-trash-o"></i> {{ button_remove }}</button>';
+  html += '</span>';
   html += '</div>';
   html += '<div class="banner-slide-card__body">';
 
-  html += '<div class="form-group">';
-  html += '<label>{{ entry_title }}</label>';
-  html += '<input type="text" name="' + pfx + '[title]" value="" placeholder="{{ entry_title }}" class="form-control" />';
-  html += '<div class="accent-hint">{{ entry_title_hint }} — e.g.: <code>The Future of [Smart Living]</code></div>';
-  html += '</div>';
-
-  html += '<div class="form-group">';
-  html += '<label>{{ entry_subtitle }}</label>';
-  html += '<input type="text" name="' + pfx + '[subtitle]" value="" placeholder="{{ entry_subtitle }}" class="form-control" />';
-  html += '</div>';
-
-  html += '<div class="form-group">';
-  html += '<label>{{ entry_content_position }}</label>';
-  html += '<select name="' + pfx + '[content_position]" class="form-control" style="max-width:200px;">';
-  html += '<option value="left" selected>{{ text_content_position_left }}</option>';
-  html += '<option value="center">{{ text_content_position_center }}</option>';
-  html += '<option value="right">{{ text_content_position_right }}</option>';
-  html += '</select>';
-  html += '</div>';
-
-  html += '<hr class="dcx-divider" />';
-
-  html += '<div class="btn-row-2col">';
-  html += '<div class="form-group">';
-  html += '<label>{{ entry_accent_text }}</label>';
-  html += '<input type="text" name="' + pfx + '[accent_text]" value="" placeholder="e.g. New Collection" class="form-control" />';
-  html += '</div>';
-  html += '<div class="form-group">';
-  html += '<label>{{ entry_accent_color }}</label>';
-  html += '<div style="display:flex;gap:8px;align-items:center;">';
-  html += '<input type="text" name="' + pfx + '[accent_color]" value="#6366f1" class="form-control dc-color-input accent-color-text" data-default-color="#6366f1" placeholder="#6366f1" style="flex:1;" maxlength="16" />';
-  html += '</div>';
-  html += '<div class="accent-hint">{{ entry_accent_hint }}</div>';
-  html += '</div>';
-  html += '</div>';
-
-  html += '<hr class="dcx-divider" />';
-
-  html += '<div class="btn-row-2col">';
-  html += '<div class="form-group"><label>{{ entry_primary_btn_text }}</label><input type="text" name="' + pfx + '[primary_btn_text]" value="" placeholder="Shop Now" class="form-control" /></div>';
-  html += '<div class="form-group"><label>{{ entry_primary_btn_link }}</label><input type="text" name="' + pfx + '[primary_btn_link]" value="" placeholder="/category/new-arrivals" class="form-control" /></div>';
-  html += '</div>';
-
-  html += '<div class="btn-row-2col">';
-  html += '<div class="form-group"><label>{{ entry_primary_btn_text_color }}</label>';
-  html += '<div style="display:flex;gap:8px;align-items:center;">';
-  html += '<input type="text" name="' + pfx + '[primary_btn_text_color]" value="#ffffff" class="form-control dc-color-input primary-btn-text-color-text" data-default-color="#ffffff" placeholder="#ffffff" style="flex:1;" maxlength="16" />';
-  html += '</div></div>';
-  html += '<div class="form-group"><label>{{ entry_primary_btn_bg_color }}</label>';
-  html += '<div style="display:flex;gap:8px;align-items:center;">';
-  html += '<input type="text" name="' + pfx + '[primary_btn_bg_color]" value="#2563eb" class="form-control dc-color-input primary-btn-bg-color-text" data-default-color="#2563eb" placeholder="#2563eb" style="flex:1;" maxlength="16" />';
+  // Content
+  html += '<div class="slide-section">';
+  html += '<div class="slide-section__title"><i class="fa fa-pencil" style="margin-right:4px;"></i>{{ text_tab_general }}</div>';
+  html += '<div class="form-group"><label>{{ entry_title }}</label><input type="text" name="' + pfx + '[title]" value="" placeholder="{{ entry_title }}" class="form-control slide-title-input" /><div class="accent-hint">{{ entry_title_hint }}</div></div>';
+  html += '<div class="form-group"><label>{{ entry_subtitle }}</label><input type="text" name="' + pfx + '[subtitle]" value="" placeholder="{{ entry_subtitle }}" class="form-control" /></div>';
+  html += '<div class="form-group"><label>{{ entry_content_position }}</label>';
+  html += '<div class="position-radio-group">';
+  html += '<label><input type="radio" name="' + pfx + '[content_position]" value="left" checked /><i class="fa fa-align-left"></i> {{ text_content_position_left }}</label>';
+  html += '<label><input type="radio" name="' + pfx + '[content_position]" value="center" /><i class="fa fa-align-center"></i> {{ text_content_position_center }}</label>';
+  html += '<label><input type="radio" name="' + pfx + '[content_position]" value="right" /><i class="fa fa-align-right"></i> {{ text_content_position_right }}</label>';
   html += '</div></div>';
   html += '</div>';
 
+  // Badge
+  html += '<div class="slide-section">';
+  html += '<div class="slide-section__title"><i class="fa fa-tag" style="margin-right:4px;"></i>{{ entry_accent_text }}</div>';
   html += '<div class="btn-row-2col">';
-  html += '<div class="form-group"><label>{{ entry_secondary_btn_text }}</label><input type="text" name="' + pfx + '[secondary_btn_text]" value="" placeholder="Browse All" class="form-control" /></div>';
-  html += '<div class="form-group"><label>{{ entry_secondary_btn_link }}</label><input type="text" name="' + pfx + '[secondary_btn_link]" value="" placeholder="/collections/all" class="form-control" /></div>';
-  html += '</div>';
-
-  html += '<hr class="dcx-divider" />';
-
-  html += '<div class="btn-row-2col">';
-  html += '<div class="form-group"><label>{{ entry_link }}</label><input type="text" name="' + pfx + '[link]" value="" placeholder="{{ entry_link }}" class="form-control" /></div>';
-  html += '<div class="form-group"><label>{{ entry_sort_order }}</label><input type="text" name="' + pfx + '[sort_order]" value="" placeholder="0" class="form-control" style="max-width:100px;" /></div>';
-  html += '</div>';
-
-  html += '<div class="form-group">';
-  html += '<label>{{ entry_image }}</label>';
-  html += '<div class="slide-images-row">';
-  html += '<div class="slide-image-block"><a href="" id="thumb-image' + row + '" data-toggle="image" class="img-thumbnail"><img src="' + placeholder + '" alt="" title="" data-placeholder="' + placeholder + '" style="max-height:90px;" /></a><input type="hidden" name="' + pfx + '[image]" value="" id="input-image' + row + '" /><small>Landscape</small></div>';
-  html += '<div class="slide-image-block"><a href="" id="thumb-image-portrait' + row + '" data-toggle="image" class="img-thumbnail"><img src="' + placeholder + '" alt="" title="" data-placeholder="' + placeholder + '" style="max-height:90px;" /></a><input type="hidden" name="' + pfx + '[image_portrait]" value="" id="input-image-portrait' + row + '" /><small>Portrait</small></div>';
+  html += '<div class="form-group"><label>{{ entry_accent_text }}</label><input type="text" name="' + pfx + '[accent_text]" value="" placeholder="{{ placeholder_accent_text }}" class="form-control" /></div>';
+  html += '<div class="form-group"><label>{{ entry_accent_color }}</label><div style="display:flex;gap:8px;align-items:center;"><input type="text" name="' + pfx + '[accent_color]" value="#6366f1" class="form-control dc-color-input accent-color-text" data-default-color="#6366f1" placeholder="#6366f1" style="flex:1;" maxlength="16" /></div><div class="accent-hint">{{ entry_accent_hint }}</div></div>';
   html += '</div>';
   html += '</div>';
 
-  html += '<hr class="dcx-divider" />';
-
-  html += '<div class="form-group">';
-  html += '<label>{{ entry_video_type }}</label>';
-  html += '<select name="' + pfx + '[video_type]" class="form-control dc-video-type-select" style="max-width:200px;">';
-  html += '<option value="">{{ entry_video_type_none }}</option>';
-  html += '<option value="youtube">{{ entry_video_type_youtube }}</option>';
-  html += '<option value="mp4">{{ entry_video_type_mp4 }}</option>';
-  html += '</select>';
+  // Link
+  html += '<div class="slide-section">';
+  html += '<div class="slide-section__title"><i class="fa fa-link" style="margin-right:4px;"></i>{{ entry_link }}</div>';
+  html += '<div class="form-group"><input type="text" name="' + pfx + '[link]" value="" placeholder="{{ entry_link }}" class="form-control" /></div>';
   html += '</div>';
 
-  html += '<div class="form-group dc-video-field" data-type="youtube" style="display:none;">';
-  html += '<label>{{ entry_video }}</label>';
-  html += '<div class="dc-youtube-block">';
-  html += '<input type="text" name="' + pfx + '[video]" value="" placeholder="dQw4w9WgXcQ" class="form-control dc-youtube-input" style="max-width:400px;" />';
-  html += '<div class="dc-youtube-thumb" style="display:none;"><img src="" style="max-height:60px;width:auto;border-radius:4px;margin-top:8px;" /></div>';
-  html += '</div>';
-  html += '<div class="accent-hint">{{ help_video_youtube }}</div>';
-  html += '</div>';
-
-  html += '<div class="form-group dc-video-field" data-type="mp4" style="display:none;">';
-  html += '<label>{{ entry_video_mp4 }}</label>';
-  html += '<div class="slide-video-block">';
-  html += '<a href="" id="thumb-video' + row + '" data-toggle="image" data-type="video" class="img-thumbnail dc-video-thumb">';
-  html += '<img src="' + placeholder + '" alt="" title="" data-placeholder="' + placeholder + '" class="dc-video-thumb__img" style="max-height:90px;" />';
-  html += '<div class="dc-video-thumb__overlay" style="display:none;">';
-  html += '  <i data-lucide="film" class="dc-video-thumb__icon"></i>';
-  html += '  <span class="dc-video-thumb__name"></span>';
-  html += '</div>';
-  html += '</a>';
-  html += '<input type="hidden" name="' + pfx + '[video]" value="" id="input-video' + row + '" />';
-  html += '<small>MP4</small>';
-  html += '</div>';
-  html += '<div class="accent-hint">{{ help_video_mp4 }}</div>';
-  html += '</div>';
-
-  html += '</div></div>'; // card body + card
+  html += '</div></div>';
 
   $('#no-slides-' + language_id).hide();
   var $card = $(html);
@@ -600,6 +660,120 @@ $(document).ready(function() {
   $('.banner-slide-card').each(function() {
     initColorInputs($(this));
     initVideoFields($(this));
+  });
+
+  $(document).on('dragstart', '.banner-slide-card', function(e) {
+    if (!$(e.target).closest('.slide-drag-handle').length && e.target !== this) {
+      e.preventDefault();
+      return;
+    }
+    var $card = $(this);
+    var $list = $card.closest('[id^="slide-list-"]');
+    $card.addClass('dragging');
+    _dragCard = $card;
+    _dragSrcLangId = $list.attr('id').replace('slide-list-', '');
+    e.originalEvent.dataTransfer.effectAllowed = 'move';
+    e.originalEvent.dataTransfer.setData('text/plain', '');
+  });
+
+  $(document).on('dragover', '.banner-slide-card', function(e) {
+    e.preventDefault();
+    e.originalEvent.dataTransfer.dropEffect = 'move';
+    var $target = $(this);
+    var $list = $target.closest('[id^="slide-list-"]');
+    $list.find('.banner-slide-card').not('.dragging').removeClass('drag-over');
+    if (!$target.hasClass('dragging')) {
+      $target.addClass('drag-over');
+    }
+  });
+
+  $(document).on('drop', '.banner-slide-card', function(e) {
+    e.preventDefault();
+    var $target = $(this);
+    var $list = $target.closest('[id^="slide-list-"]');
+    if (!_dragCard || _dragCard.is($target)) return;
+    if ($list.attr('id') !== 'slide-list-' + _dragSrcLangId) return;
+
+    var targetIndex = $target.index();
+    var draggedIndex = _dragCard.index();
+
+    if (targetIndex < draggedIndex) {
+      _dragCard.insertBefore($target);
+    } else {
+      _dragCard.insertAfter($target);
+    }
+
+    renumberSlides(_dragSrcLangId);
+    _dragCard = null;
+    _dragSrcLangId = null;
+  });
+
+  $(document).on('dragend', '.banner-slide-card', function() {
+    $(this).removeClass('dragging');
+    $('[id^="slide-list-"]').find('.banner-slide-card').removeClass('drag-over');
+    $('#language li').removeClass('drag-over-tab');
+    _dragCard = null;
+    _dragSrcLangId = null;
+  });
+
+  $(document).on('dragover', '#language li', function(e) {
+    if (!_dragCard) return;
+    e.preventDefault();
+    var targetLangId = $(this).find('a').attr('href').replace('#language', '');
+    if (targetLangId !== _dragSrcLangId) {
+      $(this).addClass('drag-over-tab');
+    }
+  });
+
+  $(document).on('dragleave', '#language li', function() {
+    $(this).removeClass('drag-over-tab');
+  });
+
+  $(document).on('drop', '#language li a', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    $(this).closest('li').removeClass('drag-over-tab');
+
+    var targetLangId = $(this).attr('href').replace('#language', '');
+    if (!_dragCard || targetLangId === _dragSrcLangId) return;
+
+    var $targetList = $('#slide-list-' + targetLangId);
+    $('#no-slides-' + targetLangId).hide();
+    $targetList.append(_dragCard);
+
+    changeSlideLanguage(_dragCard, targetLangId);
+
+    $(this).tab('show');
+
+    renumberSlides(_dragSrcLangId);
+    renumberSlides(targetLangId);
+
+    _dragCard = null;
+    _dragSrcLangId = null;
+  });
+
+  $(document).on('input', '.slide-title-input', function() {
+    updateSlideLabel($(this));
+  });
+
+  $('#form-banner').on('submit', function() {
+    $('[id^="slide-list-"]').each(function() {
+      $(this).children('.banner-slide-card').each(function(i) {
+        var $card = $(this);
+        var $sortInput = $card.find('[name$="[sort_order]"]');
+        if (!$sortInput.length) {
+          var $firstInput = $card.find('[name^="banner_image["]');
+          if ($firstInput.length) {
+            var baseName = $firstInput.attr('name').replace(/\[[^\]]+\]$/, '');
+            $sortInput = $('<input type="hidden">').attr('name', baseName + '[sort_order]');
+            $card.append($sortInput);
+          }
+        }
+        if ($sortInput.length) {
+          $sortInput.val(i);
+        }
+      });
+    });
   });
 
   $('#language a:first').tab('show');

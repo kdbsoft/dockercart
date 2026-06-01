@@ -3,6 +3,7 @@
   <div class="page-header">
     <div class="container-fluid">
       <div class="pull-right"><a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa fa-plus"></i></a>
+        <button type="submit" form="form-attribute" formaction="{{ copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default"><i class="fa fa-copy"></i></button>
         <button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="confirm('{{ text_confirm }}') ? $('#form-attribute').submit() : false;"><i class="fa fa-trash-o"></i></button>
       </div>
       <h1>{{ heading_title }}</h1>
@@ -75,7 +76,7 @@
                   <td class="text-right">
                     <span class="inline-edit" data-attribute-id="{{ attribute.attribute_id }}" data-field="sort_order" data-value="{{ attribute.sort_order_raw }}">{{ attribute.sort_order }}<i class="fa fa-pencil-square-o inline-edit-icon"></i></span>
                   </td>
-                  <td class="text-right"><a href="{{ attribute.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
+                  <td class="text-right"><a href="{{ attribute.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a> <a href="{{ attribute.copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default"><i class="fa fa-copy"></i></a> <a href="{{ attribute.delete }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="return confirm('{{ text_confirm }}');"><i class="fa fa-trash-o"></i></a></td>
                 </tr>
                 {% endfor %}
                 {% else %}
@@ -104,6 +105,12 @@
 .inline-edit-name-input { width: 200px; display: inline-block !important; height: 28px; padding: 3px 8px; }
 .inline-edit-error { margin-left: 4px; font-size: 11px; white-space: nowrap; }
 </style>
+<script type="text/javascript"><!--
+// IE and Edge fix!
+$('button[form=\'form-attribute\']').on('click', function(e) {
+	$('#form-attribute').attr('action', $(this).attr('formaction'));
+});
+//--></script>
 <script type="text/javascript"><!--
 var attributeGroups = {{ attribute_groups_json|raw }};
 

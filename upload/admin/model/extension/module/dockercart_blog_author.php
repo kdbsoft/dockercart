@@ -60,6 +60,53 @@ class ModelExtensionModuleDockercartBlogAuthor extends Model {
 		$this->cache->delete('blog.post');
 	}
 
+	public function copyAuthor($author_id)
+	{
+		$query = $this->db->query(
+			"SELECT * FROM `" .
+				DB_PREFIX .
+				"blog_author` WHERE author_id = '" .
+				(int) $author_id .
+				"'",
+		);
+
+		if (!$query->num_rows) {
+			return false;
+		}
+
+		$author = $query->row;
+
+		$data = [];
+
+		$data["name"] = $author["name"];
+		$data["email"] = $author["email"];
+		$data["image"] = $author["image"];
+		$data["bio"] = $author["bio"];
+		$data["status"] = $author["status"];
+		$data["sort_order"] = $author["sort_order"];
+
+		// Make name unique
+		$counter = 0;
+
+		do {
+			$counter++;
+			$suffix = $counter > 1 ? (string) $counter : "";
+			$candidate = $author["name"] . "-copy" . $suffix;
+
+			$query = $this->db->query(
+				"SELECT COUNT(*) AS total FROM `" .
+					DB_PREFIX .
+					"blog_author` WHERE LCASE(TRIM(name)) = '" .
+					$this->db->escape(utf8_strtolower(trim($candidate))) .
+					"'",
+			);
+		} while ($query->row["total"] > 0);
+
+		$data["name"] = $candidate;
+
+		return $this->addAuthor($data);
+	}
+
 	public function getAuthor($author_id) {
 		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "blog_author` WHERE author_id = '" . (int)$author_id . "'");
 		return $query->row;

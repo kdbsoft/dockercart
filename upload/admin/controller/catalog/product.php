@@ -164,9 +164,17 @@ class ControllerCatalogProduct extends Controller {
 
 		$this->load->model('catalog/product');
 
-		if (isset($this->request->post['selected']) && $this->validateDelete()) {
-			foreach ($this->request->post['selected'] as $product_id) {
-				$this->model_catalog_product->deleteProduct($product_id);
+		$product_ids = [];
+
+		if (isset($this->request->post['selected'])) {
+			$product_ids = $this->request->post['selected'];
+		} elseif (isset($this->request->get['product_id'])) {
+			$product_ids = [(int) $this->request->get['product_id']];
+		}
+
+		if ($product_ids && $this->validateDelete()) {
+			foreach ($product_ids as $product_id) {
+				$this->model_catalog_product->deleteProduct((int) $product_id);
 			}
 
 			$this->session->data['success'] = $this->language->get('text_success');
@@ -234,9 +242,17 @@ class ControllerCatalogProduct extends Controller {
 
 		$this->load->model('catalog/product');
 
-		if (isset($this->request->post['selected']) && $this->validateCopy()) {
-			foreach ($this->request->post['selected'] as $product_id) {
-				$this->model_catalog_product->copyProduct($product_id);
+		$product_ids = [];
+
+		if (isset($this->request->post['selected'])) {
+			$product_ids = $this->request->post['selected'];
+		} elseif (isset($this->request->get['product_id'])) {
+			$product_ids = [(int) $this->request->get['product_id']];
+		}
+
+		if ($product_ids && $this->validateCopy()) {
+			foreach ($product_ids as $product_id) {
+				$this->model_catalog_product->copyProduct((int) $product_id);
 			}
 
 			$this->session->data['success'] = $this->language->get('text_success');
@@ -506,7 +522,9 @@ class ControllerCatalogProduct extends Controller {
 				'quantity_raw'=> $result['quantity'],
 				'status'      => $result['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
 				'status_raw'  => $result['status'],
-				'edit'        => $this->url->link('catalog/product/edit', 'user_token=' . $this->session->data['user_token'] . '&product_id=' . $result['product_id'] . $url, true)
+				'edit'        => $this->url->link('catalog/product/edit', 'user_token=' . $this->session->data['user_token'] . '&product_id=' . $result['product_id'] . $url, true),
+				'copy'        => $this->url->link('catalog/product/copy', 'user_token=' . $this->session->data['user_token'] . '&product_id=' . $result['product_id'] . $url, true),
+				'delete'      => $this->url->link('catalog/product/delete', 'user_token=' . $this->session->data['user_token'] . '&product_id=' . $result['product_id'] . $url, true)
 			);
 		}
 

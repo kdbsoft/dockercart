@@ -18,8 +18,35 @@ class ModelCatalogReview extends Model {
 
 	public function deleteReview($review_id) {
 		$this->db->query("DELETE FROM " . DB_PREFIX . "review WHERE review_id = '" . (int)$review_id . "'");
-
 		$this->cache->delete('product');
+	}
+
+	public function copyReview($review_id)
+	{
+		$query = $this->db->query(
+			"SELECT * FROM " .
+				DB_PREFIX .
+				"review WHERE review_id = '" .
+				(int) $review_id .
+				"'",
+		);
+
+		if (!$query->num_rows) {
+			return false;
+		}
+
+		$review = $query->row;
+
+		$data = [];
+
+		$data["product_id"] = $review["product_id"];
+		$data["author"] = $review["author"];
+		$data["text"] = $review["text"];
+		$data["rating"] = $review["rating"];
+		$data["status"] = $review["status"];
+		$data["date_added"] = $review["date_added"];
+
+		return $this->addReview($data);
 	}
 
 	public function getReview($review_id) {

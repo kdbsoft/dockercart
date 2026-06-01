@@ -5,6 +5,7 @@
     <div class="container-fluid">
       <div class="pull-right">
         <a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa fa-plus"></i></a>
+        <button type="submit" form="form-category" formaction="{{ copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default"><i class="fa fa-copy"></i></button>
         <button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="confirm('{{ text_confirm }}') ? $('#form-category').submit() : false;"><i class="fa fa-trash-o"></i></button>
       </div>
       <h1>{{ heading_title }}</h1>
@@ -64,7 +65,7 @@
                   <td class="text-left">{{ category.status }}</td>
                   <td class="text-center">{{ category.sort_order }}</td>
                   <td class="text-right">
-                    <a href="{{ category.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a>
+                    <a href="{{ category.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a> <a href="{{ category.copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default"><i class="fa fa-copy"></i></a> <a href="{{ category.delete }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="return confirm('{{ text_confirm }}');"><i class="fa fa-trash-o"></i></a>
                   </td>
                 </tr>
                 {% endfor %}
@@ -86,4 +87,10 @@
     </div>
   </div>
 </div>
+<script type="text/javascript"><!--
+// IE and Edge fix!
+$('button[form=\'form-category\']').on('click', function(e) {
+	$('#form-category').attr('action', $(this).attr('formaction'));
+});
+//--></script>
 {{ footer }}
