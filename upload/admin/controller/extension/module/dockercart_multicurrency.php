@@ -251,6 +251,54 @@ class ControllerExtensionModuleDockercartMulticurrency extends Controller
                     "extension/module/dockercart_multicurrency/eventModelProductsAfter",
                 "sort_order" => 999,
             ],
+            // Catalog: Fix prices after getProductRelated
+            [
+                "code" => "dockercart_multicurrency_model_product_related_after",
+                "trigger" => "catalog/model/catalog/product/getProductRelated/after",
+                "action" =>
+                    "extension/module/dockercart_multicurrency/eventModelProductsAfter",
+                "sort_order" => 999,
+            ],
+            // Catalog: Fix prices after getProductSpecials
+            [
+                "code" => "dockercart_multicurrency_model_product_specials_after",
+                "trigger" => "catalog/model/catalog/product/getProductSpecials/after",
+                "action" =>
+                    "extension/module/dockercart_multicurrency/eventModelProductsAfter",
+                "sort_order" => 999,
+            ],
+            // Catalog: Fix prices after getNewArrivalProducts
+            [
+                "code" => "dockercart_multicurrency_model_new_arrivals_after",
+                "trigger" => "catalog/model/catalog/product/getNewArrivalProducts/after",
+                "action" =>
+                    "extension/module/dockercart_multicurrency/eventModelProductsAfter",
+                "sort_order" => 999,
+            ],
+            // Catalog: Fix prices after getBestSellerProducts
+            [
+                "code" => "dockercart_multicurrency_model_bestseller_after",
+                "trigger" => "catalog/model/catalog/product/getBestSellerProducts/after",
+                "action" =>
+                    "extension/module/dockercart_multicurrency/eventModelProductsAfter",
+                "sort_order" => 999,
+            ],
+            // Catalog: Fix prices after getLatestProducts
+            [
+                "code" => "dockercart_multicurrency_model_latest_after",
+                "trigger" => "catalog/model/catalog/product/getLatestProducts/after",
+                "action" =>
+                    "extension/module/dockercart_multicurrency/eventModelProductsAfter",
+                "sort_order" => 999,
+            ],
+            // Catalog: Fix prices after getPopularProducts
+            [
+                "code" => "dockercart_multicurrency_model_popular_after",
+                "trigger" => "catalog/model/catalog/product/getPopularProducts/after",
+                "action" =>
+                    "extension/module/dockercart_multicurrency/eventModelProductsAfter",
+                "sort_order" => 999,
+            ],
         ];
 
         foreach ($events as $event) {
