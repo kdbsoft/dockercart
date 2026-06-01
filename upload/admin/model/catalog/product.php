@@ -237,13 +237,13 @@ class ModelCatalogProduct extends Model
                             if (
                                 isset(
                                     $product_option_value[
-                                        "customer_group_price"
+                                        "customer_group_prices"
                                     ],
                                 )
                             ) {
                                 foreach (
                                     $product_option_value[
-                                        "customer_group_price"
+                                        "customer_group_prices"
                                     ]
                                     as $cg_price
                                 ) {
@@ -423,20 +423,6 @@ class ModelCatalogProduct extends Model
             }
         }
 
-        if (isset($data["product_store"])) {
-            foreach ($data["product_store"] as $store_id) {
-                $this->db->query(
-                    "INSERT INTO " .
-                        DB_PREFIX .
-                        "product_to_store SET product_id = '" .
-                        (int) $product_id .
-                        "', store_id = '" .
-                        (int) $store_id .
-                        "'",
-                );
-            }
-        }
-
         $this->db->query(
             "DELETE FROM " .
                 DB_PREFIX .
@@ -463,6 +449,18 @@ class ModelCatalogProduct extends Model
                         $product_attribute["product_attribute_description"]
                         as $language_id => $product_attribute_description
                     ) {
+                        $this->db->query(
+                            "DELETE FROM " .
+                                DB_PREFIX .
+                                "product_attribute WHERE product_id = '" .
+                                (int) $product_id .
+                                "' AND attribute_id = '" .
+                                (int) $product_attribute["attribute_id"] .
+                                "' AND language_id = '" .
+                                (int) $language_id .
+                                "'",
+                        );
+
                         $this->db->query(
                             "INSERT INTO " .
                                 DB_PREFIX .
@@ -519,9 +517,7 @@ class ModelCatalogProduct extends Model
                         $this->db->query(
                             "INSERT INTO " .
                                 DB_PREFIX .
-                                "product_option SET product_option_id = '" .
-                                (int) $product_option["product_option_id"] .
-                                "', product_id = '" .
+                                "product_option SET product_id = '" .
                                 (int) $product_id .
                                 "', option_id = '" .
                                 (int) $product_option["option_id"] .
@@ -539,11 +535,7 @@ class ModelCatalogProduct extends Model
                             $this->db->query(
                                 "INSERT INTO " .
                                     DB_PREFIX .
-                                    "product_option_value SET product_option_value_id = '" .
-                                    (int) $product_option_value[
-                                        "product_option_value_id"
-                                    ] .
-                                    "', product_option_id = '" .
+                                    "product_option_value SET product_option_id = '" .
                                     (int) $product_option_id .
                                     "', product_id = '" .
                                     (int) $product_id .
@@ -578,16 +570,18 @@ class ModelCatalogProduct extends Model
                                     "'",
                             );
 
+                            $product_option_value_id = $this->db->getLastId();
+
                             if (
                                 isset(
                                     $product_option_value[
-                                        "customer_group_price"
+                                        "customer_group_prices"
                                     ],
                                 )
                             ) {
                                 foreach (
                                     $product_option_value[
-                                        "customer_group_price"
+                                        "customer_group_prices"
                                     ]
                                     as $cg_price
                                 ) {
@@ -595,9 +589,7 @@ class ModelCatalogProduct extends Model
                                         "INSERT INTO " .
                                             DB_PREFIX .
                                             "dockercart_product_option_value_customer_group_price SET product_option_value_id = '" .
-                                            (int) $product_option_value[
-                                                "product_option_value_id"
-                                            ] .
+                                            (int) $product_option_value_id .
                                             "', customer_group_id = '" .
                                             (int) $cg_price[
                                                 "customer_group_id"
@@ -618,9 +610,7 @@ class ModelCatalogProduct extends Model
                     $this->db->query(
                         "INSERT INTO " .
                             DB_PREFIX .
-                            "product_option SET product_option_id = '" .
-                            (int) $product_option["product_option_id"] .
-                            "', product_id = '" .
+                            "product_option SET product_id = '" .
                             (int) $product_id .
                             "', option_id = '" .
                             (int) $product_option["option_id"] .
@@ -1248,13 +1238,13 @@ class ModelCatalogProduct extends Model
                             if (
                                 isset(
                                     $product_option_value[
-                                        "customer_group_price"
+                                        "customer_group_prices"
                                     ],
                                 )
                             ) {
                                 foreach (
                                     $product_option_value[
-                                        "customer_group_price"
+                                        "customer_group_prices"
                                     ]
                                     as $cg_price
                                 ) {
@@ -1659,6 +1649,13 @@ class ModelCatalogProduct extends Model
             $data["keyword"] = "";
             $data["status"] = "0";
 
+            // Make model unique
+            $data["model"] = $this->getUniqueCopyName(
+                $data["model"],
+                DB_PREFIX . "product",
+                "model",
+            );
+
             $data["product_attribute"] = $this->getProductAttributes(
                 $product_id,
             );
@@ -1678,9 +1675,57 @@ class ModelCatalogProduct extends Model
             $data["product_download"] = $this->getProductDownloads($product_id);
             $data["product_layout"] = $this->getProductLayouts($product_id);
             $data["product_store"] = $this->getProductStores($product_id);
+            $data["product_customer_group_price"] = $this->getProductCustomerGroupPrices(
+                $product_id,
+            );
+
+            // Make SEO URL keywords unique
+            $seo_urls = $this->getProductSeoUrls($product_id);
+
+            foreach ($seo_urls as $store_id => &$languages) {
+                foreach ($languages as $language_id => &$keyword) {
+                    $keyword = $this->getUniqueCopyName(
+                        $keyword,
+                        DB_PREFIX . "seo_url",
+                        "keyword",
+                    );
+                }
+            }
+            unset($languages, $keyword);
+
+            $data["product_seo_url"] = $seo_urls;
 
             $this->addProduct($data);
         }
+    }
+
+    private function getUniqueCopyName($original, $table, $column)
+    {
+        $base = $original;
+
+        if (preg_match('/^(.+)-copy(\d*)$/', $original, $matches)) {
+            $base = $matches[1];
+        }
+
+        $counter = 0;
+
+        do {
+            $counter++;
+            $suffix = $counter > 1 ? (string) $counter : "";
+            $candidate = $base . "-copy" . $suffix;
+
+            $query = $this->db->query(
+                "SELECT COUNT(*) AS total FROM " .
+                    $table .
+                    " WHERE " .
+                    $column .
+                    " = '" .
+                    $this->db->escape($candidate) .
+                    "'",
+            );
+        } while ($query->row["total"] > 0);
+
+        return $candidate;
     }
 
     public function deleteProduct($product_id)
