@@ -78,6 +78,29 @@ class ControllerCommonLogin extends Controller {
 			$data['forgotten'] = '';
 		}
 
+		// Languages
+		$this->load->model('localisation/language');
+
+		$all_languages = $this->model_localisation_language->getLanguages();
+		$current_language_code = isset($this->session->data['language']) ? $this->session->data['language'] : $this->config->get('config_admin_language');
+
+		$languages = array();
+
+		foreach ($all_languages as $code => $lang) {
+			if (!$lang['status']) {
+				continue;
+			}
+
+			$languages[] = array(
+				'name' => $lang['name'],
+				'code' => $lang['code'],
+				'href' => $this->url->link('common/login', 'language=' . $lang['code'], true)
+			);
+		}
+
+		$data['languages'] = $languages;
+		$data['language_code'] = $current_language_code;
+
 		$data['title'] = $this->document->getTitle();
 
 		if ($this->request->server['HTTPS']) {
