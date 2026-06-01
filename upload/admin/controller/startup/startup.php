@@ -23,16 +23,31 @@ class ControllerStartupStartup extends Controller {
 		// Theme
 		$this->config->set('template_cache', $this->config->get('developer_theme'));
 				
-		// Language
-		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "language` WHERE code = '" . $this->db->escape($this->config->get('config_admin_language')) . "'");
-		
+		// Language — with per-session override via GET param or session
+		$admin_language = $this->config->get('config_admin_language');
+
+		if (!isset($this->session->data['user_id']) && isset($this->request->get['language'])) {
+			$this->session->data['language'] = $this->request->get['language'];
+			$admin_language = $this->request->get['language'];
+		} elseif (isset($this->session->data['language'])) {
+			$admin_language = $this->session->data['language'];
+		}
+
+		// Validate the resolved language (exists and enabled)
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "language` WHERE code = '" . $this->db->escape($admin_language) . "' AND status = '1'");
+
+		if (!$query->num_rows) {
+			// Fall back to configured default
+			$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "language` WHERE code = '" . $this->db->escape($this->config->get('config_admin_language')) . "' AND status = '1'");
+		}
+
 		if ($query->num_rows) {
 			$this->config->set('config_language_id', $query->row['language_id']);
+			$admin_language = $query->row['code'];
 		}
-		
-		// Language
-		$language = new Language($this->config->get('config_admin_language'));
-		$language->load($this->config->get('config_admin_language'));
+
+		$language = new Language($admin_language);
+		$language->load($admin_language);
 		$this->registry->set('language', $language);
 		
 		// Customer

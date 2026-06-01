@@ -10,6 +10,7 @@ $_['text_forgotten'] = 'Forgotten Password';
 // Entry
 $_['entry_username'] = 'Username';
 $_['entry_password'] = 'Password';
+$_['entry_language'] = 'Language';
 
 // Button
 $_['button_login']   = 'Login';

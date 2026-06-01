@@ -33,6 +33,18 @@
 		</div>
 		{% endif %}
 
+		<div class="language-selector">
+			<label class="form-label" for="input-language">{{ entry_language }}</label>
+			<div class="input-wrap">
+				<select name="language" id="input-language" class="form-control form-select" onchange="window.location.href = this.value;">
+					{% for language in languages %}
+					<option value="{{ language.href }}" {% if language.code == language_code %}selected{% endif %}>{{ language.name }}</option>
+					{% endfor %}
+				</select>
+				<i data-lucide="globe-2" class="input-icon"></i>
+			</div>
+		</div>
+
 		<form action="{{ action }}" method="post" enctype="multipart/form-data" autocomplete="off">
 			<div class="form-group">
 				<label class="form-label" for="input-username">{{ entry_username }}</label>
