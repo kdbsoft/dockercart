@@ -13,9 +13,10 @@ class ModelToolImage extends Model {
 	 * @param  int    $width
 	 * @param  int    $height
 	 * @param  string $strategy  Override strategy; empty = read from config.
+	 * @param  bool   $skip_webp  Skip WebP conversion for this image.
 	 * @return string|null
 	 */
-	public function resize($filename, $width, $height, $strategy = '') {
+	public function resize($filename, $width, $height, $strategy = '', $skip_webp = false) {
 		if (!is_file(DIR_IMAGE . $filename) || substr(str_replace('\\', '/', realpath(DIR_IMAGE . $filename)), 0, strlen(DIR_IMAGE)) != str_replace('\\', '/', DIR_IMAGE)) {
 			return;
 		}
@@ -35,7 +36,7 @@ class ModelToolImage extends Model {
 		}
 
 		$webp_supported = function_exists('imagewebp') && function_exists('imagecreatefromwebp');
-		$target_extension = ($webp_enabled && $webp_supported) ? 'webp' : $source_extension;
+		$target_extension = ($webp_enabled && $webp_supported && !$skip_webp) ? 'webp' : $source_extension;
 
 		$image_old = $filename;
 		// Cover/hybrid images get a distinct cache filename to avoid collisions with contain.
