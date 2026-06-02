@@ -61,8 +61,12 @@ elif [ "$LOCAL" = "$BASE" ]; then
     # git pull replaces files with new inodes, so the running container keeps reading the
     # old content.  Force-recreate apache to re-bind all single-file mounts to their
     # current inodes.  --no-deps avoids touching mariadb/memcached unnecessarily.
-    log "Recreating apache container to refresh bind mounts (VERSION and config files)..."
-    docker compose up --force-recreate --no-deps -d apache
+	log "Recreating apache container to refresh bind mounts (VERSION and config files)..."
+	docker compose up --force-recreate --no-deps -d apache
+
+	# Refresh OCMOD modifications to match new code
+	log "Refreshing OCMOD modifications..."
+	docker compose exec -T apache php /var/www/html/admin/cli/dockercart_modification_refresh.php
 elif [ "$REMOTE" = "$BASE" ]; then
     log "Local branch is ahead of origin. Skipping pull."
 else
