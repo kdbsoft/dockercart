@@ -130,6 +130,10 @@ class ControllerExtensionModuleDockerCartTheme extends Controller {
         $fab_raw = $this->config->get('dockercart_theme_messenger_fab_status');
         $data['dockercart_theme_messenger_fab_status'] = ($fab_raw === null) ? 0 : (int)$fab_raw;
 
+        /* ── Custom CSS/JS ── */
+        $data['dockercart_theme_custom_css'] = (string)$this->config->get('dockercart_theme_custom_css');
+        $data['dockercart_theme_custom_js'] = (string)$this->config->get('dockercart_theme_custom_js');
+
         /* ── Social icons/images (dynamic, up to 10) ── */
         $social_items = [];
         for ($i = 1; $i <= 10; $i++) {
@@ -276,6 +280,8 @@ class ControllerExtensionModuleDockerCartTheme extends Controller {
             'dockercart_theme_product_features' => json_encode($product_features, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             'dockercart_theme_category_features' => json_encode($category_features, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             'dockercart_theme_quickview_features' => json_encode($quickview_features, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'dockercart_theme_custom_css' => trim((string)($p['dockercart_theme_custom_css'] ?? '')),
+            'dockercart_theme_custom_js'  => trim((string)($p['dockercart_theme_custom_js'] ?? '')),
         ];
 
         // Blank out all 10 slots first (ensures removed rows are cleared)

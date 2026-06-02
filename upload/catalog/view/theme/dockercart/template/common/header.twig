@@ -87,6 +87,10 @@
   }
 }
 </script>
+
+{% if custom_css %}
+<style>{{ custom_css|raw }}</style>
+{% endif %}
 </head>
 <body class="bg-white text-gray-900 antialiased" style="font-family:'Manrope',sans-serif;">
 

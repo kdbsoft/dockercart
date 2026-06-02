@@ -437,6 +437,8 @@ class ControllerCommonHeader extends Controller {
 
 		$data['mobile_categories'] = $mobile_categories;
 
+		$data['custom_css'] = (string)$this->config->get('dockercart_theme_custom_css');
+
 		return $this->load->view('common/header', $data);
 	}
 

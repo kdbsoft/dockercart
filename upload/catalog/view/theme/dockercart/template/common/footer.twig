@@ -394,5 +394,9 @@ For support and updates, visit dockercart.net
   update();
 }());
 </script>
+
+{% if custom_js %}
+<script>{{ custom_js|raw }}</script>
+{% endif %}
 </body>
 </html>
