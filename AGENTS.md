@@ -18,6 +18,10 @@ Strict OpenCart 3 patterns — never deviate.
 | Model | `upload/catalog/model/{section}/{name}.php` | `upload/admin/model/extension/module/{name}.php` |
 | View (Twig) | `upload/catalog/view/theme/dockercart/template/{section}/{name}.twig` | `upload/admin/view/template/extension/module/{name}.twig` |
 | Language | `upload/catalog/language/en-gb/{section}/{name}.php` | `upload/admin/language/en-gb/extension/module/{name}.php` |
+### JavaScript
+- ES6+ syntax
+- Tailwind CSS 3 + Lucide icons for all frontend components
+- Vanilla JS for all interactive features
 ### Code style (PHP)
 - **Indentation: tabs** (not spaces) — enforced by `.php-cs-fixer.php`
 - `declare(strict_types=1);` at file top for new files
