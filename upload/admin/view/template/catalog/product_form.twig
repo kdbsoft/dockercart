@@ -430,9 +430,9 @@
                 </div>
               </div>
               <div class="form-group">
-                <label class="col-sm-2 control-label" for="input-category"><span data-toggle="tooltip" title="{{ help_category }}">{{ entry_category }}</span></label>
+                <label class="col-sm-2 control-label"><span data-toggle="tooltip" title="{{ help_category }}">{{ entry_category }}</span></label>
                 <div class="col-sm-10">
-                  <input type="text" name="category" value="" placeholder="{{ entry_category }}" id="input-category" class="form-control"/>
+                  <button type="button" id="category-tree-btn" class="btn btn-default" style="margin-bottom:5px"><i class="fa fa-folder-open"></i> {{ button_select_category }}</button>
                   <div id="product-category" class="well well-sm" style="height: 150px; overflow: auto;"> {% for product_category in product_categories %}
                       <div id="product-category{{ product_category.category_id }}"><i class="fa fa-minus-circle"></i> {{ product_category.name }}
                         <input type="hidden" name="product_category[]" value="{{ product_category.category_id }}"/>
@@ -1172,33 +1172,171 @@
 	  }
   });
 
-  // Category
-  $('input[name=\'category\']').autocomplete({
-	  'source': function(request, response) {
-		  $.ajax({
-			  url: 'index.php?route=catalog/category/autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
-			  dataType: 'json',
-			  success: function(json) {
-				  response($.map(json, function(item) {
-					  return {
-						  label: item['name'],
-						  value: item['category_id']
-					  }
-				  }));
-			  }
-		  });
-	  },
-	  'select': function(item) {
-		  $('input[name=\'category\']').val('');
+  // Category Tree Modal
+  var selectedCategories = [];
+  var categoryTreeLoaded = false;
 
-		  $('#product-category' + item['value']).remove();
+  function syncSelectedCategoriesFromWell() {
+    selectedCategories = [];
+    $('#product-category > div').each(function() {
+      var $div = $(this);
+      var id = $div.find('input[name="product_category[]"]').val();
+      var name = $div.clone().children().remove().end().text().trim();
+      if (id) {
+        selectedCategories.push({category_id: id, name: name});
+      }
+    });
+  }
 
-		  $('#product-category').append('<div id="product-category' + item['value'] + '"><i class="fa fa-minus-circle"></i> ' + item['label'] + '<input type="hidden" name="product_category[]" value="' + item['value'] + '" /></div>');
-	  }
+  syncSelectedCategoriesFromWell();
+
+  $(document).on('click', '#category-tree-btn', function() {
+    syncSelectedCategoriesFromWell();
+    if (!categoryTreeLoaded) {
+      loadCategoryTree();
+    }
+    $('#category-tree-modal').modal('show');
+  });
+
+  function loadCategoryTree() {
+    $.ajax({
+      url: 'index.php?route=catalog/category/tree&user_token={{ user_token }}',
+      dataType: 'json',
+      success: function(data) {
+        renderCategoryTree(data);
+      },
+      error: function() {
+        $('#category-tree-container').html('<div class="text-center text-danger">{{ text_no_results }}</div>');
+      }
+    });
+  }
+
+  function renderCategoryTree(data) {
+    var $container = $('#category-tree-container');
+    var $ul = $('<ul class="category-tree list-unstyled" style="margin:0"></ul>');
+
+    if (!data.length) {
+      $container.html('<div class="text-center text-muted">{{ text_no_results }}</div>');
+      return;
+    }
+
+    data.forEach(function(cat) {
+      if (cat.level === 0) {
+        $ul.append(createCategoryNode(cat, data));
+      }
+    });
+
+    $container.html($ul);
+    categoryTreeLoaded = true;
+
+    selectedCategories.forEach(function(sel) {
+      var $cb = $container.find('.category-check[value="' + sel.category_id + '"]');
+      if ($cb.length) {
+        $cb.prop('checked', true);
+        $cb.parents('ul.category-children').show().prev('.category-node').find('.category-toggle i.fa')
+          .removeClass('fa-plus-square-o').addClass('fa-minus-square-o');
+      }
+    });
+  }
+
+  function createCategoryNode(cat, allData) {
+    var $li = $('<li></li>');
+    var $div = $('<div class="category-node" style="white-space:nowrap;padding:2px 0"></div>');
+    var indent = cat.level * 20;
+    $div.css('padding-left', indent + 'px');
+
+    if (cat.has_children) {
+      var $toggle = $('<span class="category-toggle" style="cursor:pointer;display:inline-block;width:16px;text-align:center"><i class="fa fa-plus-square-o"></i></span>');
+      $toggle.data('id', cat.category_id);
+      $div.append($toggle);
+    } else {
+      $div.append($('<span style="display:inline-block;width:16px"></span>'));
+    }
+
+    var escName = $('<span>').text(cat.name).html();
+    var escPath = $('<span>').text(cat.path || cat.name).html();
+
+    var $label = $('<label style="font-weight:normal;margin:0 0 0 4px;cursor:pointer"></label>');
+    var $checkbox = $('<input type="checkbox" class="category-check" value="' + cat.category_id + '" data-name="' + escName + '" data-path="' + escPath + '">');
+    $label.append($checkbox).append(' ' + cat.name);
+    $div.append($label);
+    $li.append($div);
+
+    if (cat.has_children) {
+      var $children = $('<ul class="category-children list-unstyled" style="display:none;margin:0"></ul>');
+      allData.forEach(function(child) {
+        if (child.parent_id === cat.category_id) {
+          $children.append(createCategoryNode(child, allData));
+        }
+      });
+      $li.append($children);
+    }
+
+    return $li;
+  }
+
+  $(document).on('click', '.category-toggle', function(e) {
+    e.stopPropagation();
+    var $children = $(this).closest('li').find('> ul.category-children');
+    var $icon = $(this).find('i.fa');
+    if ($children.is(':visible')) {
+      $children.slideUp(150);
+      $icon.removeClass('fa-minus-square-o').addClass('fa-plus-square-o');
+    } else {
+      $children.slideDown(150);
+      $icon.removeClass('fa-plus-square-o').addClass('fa-minus-square-o');
+    }
+  });
+
+  $('#category-tree-search').on('input', function() {
+    var query = $(this).val().toLowerCase().trim();
+    var $container = $('#category-tree-container');
+
+    if (!query) {
+      $container.find('li').show();
+      $container.find('ul.category-children').hide();
+      $container.find('.category-toggle i.fa')
+        .removeClass('fa-minus-square-o').addClass('fa-plus-square-o');
+      return;
+    }
+
+    $container.find('li').each(function() {
+      var name = $(this).find('.category-node label').text().toLowerCase();
+      if (name.indexOf(query) !== -1) {
+        $(this).show();
+        $(this).parents('ul.category-children').show();
+        $(this).parents('li').find('> .category-node > .category-toggle i.fa')
+          .removeClass('fa-plus-square-o').addClass('fa-minus-square-o');
+      } else {
+        $(this).hide();
+      }
+    });
+  });
+
+  $(document).on('click', '#category-tree-confirm', function() {
+    var $well = $('#product-category');
+    $well.empty();
+
+    selectedCategories = [];
+
+    $('#category-tree-container .category-check:checked').each(function() {
+      var id = $(this).val();
+      var path = $(this).data('path');
+
+      var $div = $('<div id="product-category' + id + '"></div>');
+      $div.append('<i class="fa fa-minus-circle"></i> ');
+      $div.append(document.createTextNode(path));
+      $div.append('<input type="hidden" name="product_category[]" value="' + id + '" />');
+      $well.append($div);
+
+      selectedCategories.push({category_id: id, name: path});
+    });
+
+    $('#category-tree-modal').modal('hide');
   });
 
   $('#product-category').delegate('.fa-minus-circle', 'click', function() {
-	  $(this).parent().remove();
+    $(this).parent().remove();
   });
 
   // Downloads
@@ -1706,5 +1844,31 @@
   $('#language a:first').tab('show');
   $('#option a:first').tab('show');
   //--></script>
+
+<!-- Category Tree Modal -->
+<div id="category-tree-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">{{ entry_category }}</h4>
+      </div>
+      <div class="modal-body">
+        <div class="form-group" style="margin-bottom:10px">
+          <input type="text" id="category-tree-search" class="form-control" placeholder="{{ text_filter }}" />
+        </div>
+        <div id="category-tree-container" style="max-height:400px;overflow-y:auto;border:1px solid #ddd;border-radius:3px;padding:8px">
+          <div class="text-center text-muted">{{ text_loading }}</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
+        <button type="button" class="btn btn-primary" id="category-tree-confirm">{{ button_continue }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /Category Tree Modal -->
+
 </div>
 {{ footer }}
