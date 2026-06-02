@@ -1,3 +1,9 @@
+## [1.38.0](https://github.com/mathflow-bit/dockercart/compare/v1.37.4...v1.38.0) (2026-06-02)
+
+### Features
+
+* add category tree selector for products ([2a5c8f8](https://github.com/mathflow-bit/dockercart/commit/2a5c8f82ce7775f3c9abc0c03e3011e666d18f57))
+
 ## [1.37.4](https://github.com/mathflow-bit/dockercart/compare/v1.37.3...v1.37.4) (2026-06-02)
 
 ### Bug Fixes
