@@ -82,6 +82,14 @@ $_['text_tab_features']            = 'Features';
 $_['text_tab_features_subtitle']   = 'Product, category and quick view feature blocks';
 $_['text_tab_links']               = 'Links';
 $_['text_tab_links_subtitle']      = 'Custom navigation links for header and footer';
+$_['text_tab_custom_code']         = 'Custom Code';
+$_['text_tab_custom_code_subtitle'] = 'Custom CSS and JavaScript';
+
+// Custom code (CSS/JS)
+$_['entry_custom_css'] = 'Custom CSS';
+$_['entry_custom_js'] = 'Custom JavaScript';
+$_['help_custom_css'] = 'Custom CSS code inserted into the <head> section of every page.';
+$_['help_custom_js'] = 'Custom JavaScript code inserted before the closing </body> tag.';
 
 // Section headings
 $_['text_section_general'] = 'Module Settings';

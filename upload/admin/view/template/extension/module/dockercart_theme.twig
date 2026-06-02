@@ -288,6 +288,7 @@
       <li><a href="#dc-theme-tab-social-payments" class="js-dc-theme-tab" data-tab="dc-theme-tab-social-payments" data-title="{{ text_tab_social_payments }}" data-subtitle="{{ text_tab_social_payments_subtitle }}" data-icon="fa-share-alt"><i class="fa fa-share-alt"></i> {{ text_tab_social_payments }}</a></li>
       <li><a href="#dc-theme-tab-features" class="js-dc-theme-tab" data-tab="dc-theme-tab-features" data-title="{{ text_tab_features }}" data-subtitle="{{ text_tab_features_subtitle }}" data-icon="fa-magic"><i class="fa fa-magic"></i> {{ text_tab_features }}</a></li>
       <li><a href="#dc-theme-tab-links" class="js-dc-theme-tab" data-tab="dc-theme-tab-links" data-title="{{ text_tab_links }}" data-subtitle="{{ text_tab_links_subtitle }}" data-icon="fa-link"><i class="fa fa-link"></i> {{ text_tab_links }}</a></li>
+      <li><a href="#dc-theme-tab-custom-code" class="js-dc-theme-tab" data-tab="dc-theme-tab-custom-code" data-title="{{ text_tab_custom_code }}" data-subtitle="{{ text_tab_custom_code_subtitle }}" data-icon="fa-code"><i class="fa fa-code"></i> {{ text_tab_custom_code }}</a></li>
     </ul>
 
     <div class="dcx-shell">
@@ -793,6 +794,34 @@
 
             </div>{# /dc-theme-tab-links #}
 
+            <div id="dc-theme-tab-custom-code" class="dcx-tab-pane">
+
+            {# ─────────────────────── Section: Custom CSS ───────────────────── #}
+            <div class="dcx-section">
+              <h4><i class="fa fa-css3"></i> {{ entry_custom_css }}</h4>
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="input-custom-css">{{ entry_custom_css }}</label>
+                <div class="col-sm-9">
+                  <textarea name="dockercart_theme_custom_css" id="input-custom-css" class="form-control" style="font-family:monospace;min-height:140px;white-space:pre;tab-size:2;">{{ dockercart_theme_custom_css }}</textarea>
+                  <p class="help-block">{{ help_custom_css }}</p>
+                </div>
+              </div>
+            </div>
+
+            {# ─────────────────────── Section: Custom JS ─────────────────────── #}
+            <div class="dcx-section">
+              <h4><i class="fa fa-code"></i> {{ entry_custom_js }}</h4>
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="input-custom-js">{{ entry_custom_js }}</label>
+                <div class="col-sm-9">
+                  <textarea name="dockercart_theme_custom_js" id="input-custom-js" class="form-control" style="font-family:monospace;min-height:140px;white-space:pre;tab-size:2;">{{ dockercart_theme_custom_js }}</textarea>
+                  <p class="help-block">{{ help_custom_js }}</p>
+                </div>
+              </div>
+            </div>
+
+            </div>{# /dc-theme-tab-custom-code #}
+
           </form>
 
         </div>
@@ -1240,7 +1269,7 @@
     $('#dc-theme-tabs > li').removeClass('active');
     $(this).closest('li').addClass('active');
 
-    $('#dc-theme-tab-general, #dc-theme-tab-social-payments, #dc-theme-tab-features, #dc-theme-tab-links').removeClass('active');
+    $('#dc-theme-tab-general, #dc-theme-tab-social-payments, #dc-theme-tab-features, #dc-theme-tab-links, #dc-theme-tab-custom-code').removeClass('active');
     $('#' + tabId).addClass('active');
 
     updateDcThemePanelHeader(this);
