@@ -98,6 +98,17 @@ $_['text_order_customer_subtitle'] = 'Customer contact and account info';
 $_['text_order_tools_subtitle'] = 'Update status, add history or comments';
 
 $_['text_order_contents_subtitle'] = 'Products and totals in this order';
+$_['text_product_info']          = 'Product Information';
+$_['text_stock_quantity']        = 'Stock';
+$_['text_manufacturer']          = 'Manufacturer';
+$_['text_weight']                = 'Weight';
+$_['text_dimensions']            = 'Dimensions (L×W×H)';
+$_['text_special']               = 'Special Price';
+$_['text_discounts']             = 'Volume Discounts';
+$_['text_quantity_short']        = 'Qty';
+$_['text_price_short']           = 'Price';
+$_['text_enabled']               = 'Enabled';
+$_['text_disabled']              = 'Disabled';
 
 $_['text_history_subtitle'] = 'Track status changes and notes';
 
