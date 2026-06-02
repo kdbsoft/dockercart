@@ -1045,6 +1045,7 @@ class ControllerSaleOrder extends Controller {
 			// Uploaded files
 			$this->load->model('tool/upload');
 			$this->load->model('catalog/product');
+			$this->load->model('catalog/manufacturer');
 			$this->load->model('tool/image');
 
 			$data['products'] = array();
@@ -1091,6 +1092,63 @@ class ControllerSaleOrder extends Controller {
 					}
 				}
 
+				if ($product_info && !empty($product_info['image']) && is_file(DIR_IMAGE . $product_info['image'])) {
+					$thumb_large = $this->model_tool_image->resize($product_info['image'], 200, 200);
+				} else {
+					$thumb_large = $this->model_tool_image->resize('no_image.png', 200, 200);
+				}
+
+				$description = '';
+				if ($product_info && !empty($product_info['description'])) {
+					$description = trim(strip_tags(html_entity_decode($product_info['description'], ENT_QUOTES, 'UTF-8')));
+					if (mb_strlen($description) > 500) {
+						$description = mb_substr($description, 0, 497) . '...';
+					}
+				}
+
+				$special = '';
+				$specials = $this->model_catalog_product->getProductSpecials($product['product_id']);
+				if (!empty($specials)) {
+					foreach ($specials as $special_info) {
+						if ((!$special_info['date_start'] || strtotime($special_info['date_start']) <= time()) && (!$special_info['date_end'] || strtotime($special_info['date_end']) >= time())) {
+							$special = $this->currency->format($special_info['price'], $order_info['currency_code'], $order_info['currency_value']);
+							break;
+						}
+					}
+				}
+
+				$discounts = array();
+				$product_discounts = $this->model_catalog_product->getProductDiscounts($product['product_id']);
+				if (!empty($product_discounts)) {
+					foreach ($product_discounts as $discount_info) {
+						$discounts[] = array(
+							'quantity' => $discount_info['quantity'],
+							'price'    => $this->currency->format($discount_info['price'], $order_info['currency_code'], $order_info['currency_value'])
+						);
+					}
+				}
+
+				$manufacturer = '';
+				if ($product_info && !empty($product_info['manufacturer_id'])) {
+					$manufacturer_info = $this->model_catalog_manufacturer->getManufacturer($product_info['manufacturer_id']);
+					if ($manufacturer_info) {
+						$manufacturer = $manufacturer_info['name'];
+					}
+				}
+
+				$images = array();
+				$additional_images = $this->model_catalog_product->getProductImages($product['product_id']);
+				if (!empty($additional_images)) {
+					foreach ($additional_images as $img) {
+						if (is_file(DIR_IMAGE . $img['image'])) {
+							$images[] = array(
+								'thumb' => $this->model_tool_image->resize($img['image'], 200, 200),
+								'popup' => $this->model_tool_image->resize($img['image'], 600, 600)
+							);
+						}
+					}
+				}
+
 				$data['products'][] = array(
 					'order_product_id' => $product['order_product_id'],
 					'product_id'       => $product['product_id'],
@@ -1102,7 +1160,27 @@ class ControllerSaleOrder extends Controller {
 					'price'    		   => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value']),
 					'total'    		   => $this->currency->format($product['total'] + ($this->config->get('config_tax') ? ($product['tax'] * $product['quantity']) : 0), $order_info['currency_code'], $order_info['currency_value']),
 					'thumb'             => $thumb,
-					'href'     		   => $this->url->link('catalog/product/edit', 'user_token=' . $this->session->data['user_token'] . '&product_id=' . $product['product_id'], true)
+					'href'     		   => $this->url->link('catalog/product/edit', 'user_token=' . $this->session->data['user_token'] . '&product_id=' . $product['product_id'], true),
+					'thumb_large'       => $thumb_large,
+					'description'       => $description,
+					'sku'               => $product_info ? ($product_info['sku'] ?? '') : '',
+					'upc'               => $product_info ? ($product_info['upc'] ?? '') : '',
+					'ean'               => $product_info ? ($product_info['ean'] ?? '') : '',
+					'jan'               => $product_info ? ($product_info['jan'] ?? '') : '',
+					'isbn'              => $product_info ? ($product_info['isbn'] ?? '') : '',
+					'mpn'               => $product_info ? ($product_info['mpn'] ?? '') : '',
+					'price_raw'         => $product['price'],
+					'special'           => $special,
+					'discounts'         => $discounts,
+					'stock_quantity'    => $product_info ? (float)$product_info['quantity'] : 0,
+					'status'            => $product_info ? (int)$product_info['status'] : 0,
+					'manufacturer'      => $manufacturer,
+					'weight'            => $product_info ? (float)$product_info['weight'] : 0,
+					'weight_class_id'   => $product_info ? (int)$product_info['weight_class_id'] : 0,
+					'length'            => $product_info ? (float)$product_info['length'] : 0,
+					'width'             => $product_info ? (float)$product_info['width'] : 0,
+					'height'            => $product_info ? (float)$product_info['height'] : 0,
+					'images'            => $images
 				);
 			}
 

@@ -2269,11 +2269,11 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
 }
 
 .order-product-input {
-    width: 72px;
+    width: 60px;
     height: 32px;
     padding: 4px 8px;
     font-size: 12px;
-    text-align: right;
+    text-align: left;
     border: 1px solid #d1d5db;
     border-radius: 6px;
     background: #fff;
@@ -2330,4 +2330,112 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
     border-bottom-left-radius: 0;
     margin-left: -1px;
     height: 34px;
+}
+
+/* Product info modal */
+.modal-product-info-body {
+    display: flex;
+    gap: 24px;
+}
+
+.modal-product-info-image {
+    flex: 0 0 200px;
+}
+
+.modal-product-info-main-image img {
+    width: 200px;
+    height: 200px;
+    object-fit: contain;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+}
+
+.modal-product-info-thumbs {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+
+.modal-product-info-thumbs img {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+    border: 2px solid #e5e7eb;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+}
+
+.modal-product-info-thumbs img:hover,
+.modal-product-info-thumbs img.active {
+    border-color: #3b82f6;
+}
+
+.modal-product-info-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.modal-product-info-details h4 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.modal-product-info-description {
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 16px;
+    line-height: 1.5;
+}
+
+.modal-product-info-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 6px 16px;
+    font-size: 13px;
+}
+
+.modal-product-info-grid .label {
+    color: #6b7280;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.modal-product-info-grid .value {
+    color: #1f2937;
+}
+
+.modal-product-info-grid .value.enabled {
+    color: #059669;
+}
+
+.modal-product-info-grid .value.disabled {
+    color: #dc2626;
+}
+
+.modal-product-info-discounts {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.modal-product-info-discounts table {
+    width: 100%;
+    font-size: 13px;
+    border-collapse: collapse;
+}
+
+.modal-product-info-discounts th,
+.modal-product-info-discounts td {
+    padding: 4px 8px;
+    text-align: left;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.modal-product-info-discounts th {
+    font-weight: 500;
+    color: #6b7280;
 }

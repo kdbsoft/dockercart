@@ -62,9 +62,9 @@
                 <tr>
                   <td class="text-left order-product-name">
                     {% if product.thumb %}
-                    <a href="{{ product.href }}" class="order-product-thumb"><img src="{{ product.thumb }}" alt="{{ product.name|e('html_attr') }}" /></a>
+                    <a href="#" class="order-product-thumb btn-product-info" data-product-id="{{ product.product_id }}"><img src="{{ product.thumb }}" alt="{{ product.name|e('html_attr') }}" /></a>
                     {% endif %}
-                    <a href="{{ product.href }}">{{ product.name }}</a>
+                    <a href="#" class="btn-product-info" data-product-id="{{ product.product_id }}">{{ product.name }}</a>
                     <input type="hidden" name="product[{{ inline_product_row }}][product_id]" value="{{ product.product_id }}" />
                     {% for option in product.option %}
                     <div class="order-product-option">- {{ option.name }}: {{ option.value }}</div>
@@ -117,7 +117,7 @@
               <div class="col-sm-2">
                 <div class="form-group">
                   <label class="control-label" for="input-inline-quantity">{{ entry_quantity }}</label>
-                  <input type="text" id="input-inline-quantity" value="1" class="form-control text-right gt-no-translate" data-gt-inline-ignore="1" />
+                  <input type="text" id="input-inline-quantity" value="1" class="form-control order-product-input gt-no-translate" data-gt-inline-ignore="1" />
                 </div>
               </div>
               <div class="col-sm-3">
@@ -497,6 +497,34 @@
     </div>
   </div>
 
+  <div id="modal-product-info" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="modal-product-info-title">{{ text_product_info }}</h4>
+        </div>
+        <div class="modal-body">
+          <div class="modal-product-info-body">
+            <div class="modal-product-info-image">
+              <div class="modal-product-info-main-image" id="modal-product-info-main-image"></div>
+              <div class="modal-product-info-thumbs" id="modal-product-info-thumbs"></div>
+            </div>
+            <div class="modal-product-info-details">
+              <h4 id="modal-product-info-name"></h4>
+              <div class="modal-product-info-description" id="modal-product-info-description"></div>
+              <div class="modal-product-info-grid" id="modal-product-info-grid"></div>
+              <div class="modal-product-info-discounts" id="modal-product-info-discounts" style="display:none"></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script type="text/javascript"><!--
   var quickCountries = {{ countries|json_encode|raw }};
 
@@ -544,6 +572,33 @@
   var quickEditState = {
     field: '',
     target: ''
+  };
+
+  var productInfoData = {
+    {% for product in products %}
+    {{ product.product_id }}: {
+      name: '{{ product.name|e('js') }}',
+      model: '{{ product.model|e('js') }}',
+      thumb_large: '{{ product.thumb_large|e('js') }}',
+      description: '{{ product.description|e('js') }}',
+      sku: '{{ product.sku|e('js') }}',
+      upc: '{{ product.upc|e('js') }}',
+      ean: '{{ product.ean|e('js') }}',
+      jan: '{{ product.jan|e('js') }}',
+      isbn: '{{ product.isbn|e('js') }}',
+      mpn: '{{ product.mpn|e('js') }}',
+      price: '{{ product.price|e('js') }}',
+      special: '{{ product.special|e('js') }}',
+      stock_quantity: '{{ product.stock_quantity|e('js') }}',
+      status: {{ product.status }},
+      manufacturer: '{{ product.manufacturer|e('js') }}',
+      weight: '{{ product.weight|e('js') }}',
+      weight_class_id: '{{ product.weight_class_id|e('js') }}',
+      dimensions: '{% if product.length > 0 or product.width > 0 or product.height > 0 %}{{ product.length|e('js') }} × {{ product.width|e('js') }} × {{ product.height|e('js') }}{% endif %}',
+      discounts: {{ product.discounts|json_encode|raw }},
+      images: {{ product.images|json_encode|raw }}
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
   };
 
   var inlineRecalcTimer = null;
@@ -963,6 +1018,100 @@
     });
   }
 
+  function inlineBuildProductInfoModal(productId) {
+    var data = productInfoData[productId];
+
+    if (!data) {
+      $('#modal-product-info').modal('show');
+      return;
+    }
+
+    $('#modal-product-info-name').text(data.name);
+
+    var mainImageHtml = '';
+    if (data.thumb_large) {
+      mainImageHtml = '<img src="' + data.thumb_large + '" alt="' + data.name.replace(/'/g, '&#39;') + '" />';
+    }
+    $('#modal-product-info-main-image').html(mainImageHtml);
+
+    var thumbsHtml = '';
+    if (data.thumb_large) {
+      thumbsHtml += '<img src="' + data.thumb_large + '" class="active" data-img="' + data.thumb_large + '" alt="" />';
+    }
+    if (data.images && data.images.length) {
+      for (var g = 0; g < data.images.length; g++) {
+        thumbsHtml += '<img src="' + data.images[g].thumb + '" data-img="' + data.images[g].thumb + '" alt="" />';
+      }
+    }
+    $('#modal-product-info-thumbs').html(thumbsHtml);
+
+    $('#modal-product-info-description').text(data.description || '');
+
+    var gridHtml = '';
+    gridHtml += '<span class="label">{{ text_sku|e('js') }}</span><span class="value">' + (data.sku || '—') + '</span>';
+    gridHtml += '<span class="label">{{ column_model|e('js') }}</span><span class="value">' + (data.model || '—') + '</span>';
+
+    if (data.upc) gridHtml += '<span class="label">{{ text_upc|e('js') }}</span><span class="value">' + data.upc + '</span>';
+    if (data.ean) gridHtml += '<span class="label">{{ text_ean|e('js') }}</span><span class="value">' + data.ean + '</span>';
+    if (data.jan) gridHtml += '<span class="label">{{ text_jan|e('js') }}</span><span class="value">' + data.jan + '</span>';
+    if (data.isbn) gridHtml += '<span class="label">{{ text_isbn|e('js') }}</span><span class="value">' + data.isbn + '</span>';
+    if (data.mpn) gridHtml += '<span class="label">{{ text_mpn|e('js') }}</span><span class="value">' + data.mpn + '</span>';
+
+    gridHtml += '<span class="label">{{ column_price|e('js') }}</span><span class="value">' + (data.price || '—') + '</span>';
+
+    if (data.special) {
+      gridHtml += '<span class="label">{{ text_special|e('js') }}</span><span class="value">' + data.special + '</span>';
+    }
+
+    if (data.manufacturer) {
+      gridHtml += '<span class="label">{{ text_manufacturer|e('js') }}</span><span class="value">' + data.manufacturer + '</span>';
+    }
+
+    gridHtml += '<span class="label">{{ text_stock_quantity|e('js') }}</span><span class="value">' + (data.stock_quantity !== '' ? data.stock_quantity : '—') + '</span>';
+
+    gridHtml += '<span class="label">{{ column_status|e('js') }}</span><span class="value ' + (data.status ? 'enabled' : 'disabled') + '">' + (data.status ? '{{ text_enabled|e('js') }}' : '{{ text_disabled|e('js') }}') + '</span>';
+
+    if (data.weight) {
+      gridHtml += '<span class="label">{{ text_weight|e('js') }}</span><span class="value">' + data.weight + '</span>';
+    }
+
+    if (data.dimensions) {
+      gridHtml += '<span class="label">{{ text_dimensions|e('js') }}</span><span class="value">' + data.dimensions + '</span>';
+    }
+
+    $('#modal-product-info-grid').html(gridHtml);
+
+    if (data.discounts && data.discounts.length) {
+      var discountsHtml = '<table><thead><tr><th>{{ text_quantity_short|e('js') }}</th><th>{{ text_price_short|e('js') }}</th></tr></thead><tbody>';
+      for (var d = 0; d < data.discounts.length; d++) {
+        discountsHtml += '<tr><td>' + data.discounts[d].quantity + '+</td><td>' + data.discounts[d].price + '</td></tr>';
+      }
+      discountsHtml += '</tbody></table>';
+      $('#modal-product-info-discounts').html(discountsHtml).show();
+    } else {
+      $('#modal-product-info-discounts').hide();
+    }
+
+    $('#modal-product-info').modal('show');
+  }
+
+  $(document).on('click', '.btn-product-info', function(e) {
+    e.preventDefault();
+    var productId = $(this).data('product-id');
+    inlineBuildProductInfoModal(productId);
+  });
+
+  $(document).on('click', '.modal-product-info-thumbs img', function() {
+    var $thumb = $(this);
+    var imgSrc = $thumb.data('img');
+
+    if (imgSrc) {
+      $('#modal-product-info-main-image img').attr('src', imgSrc);
+      $thumb.closest('.modal-product-info-thumbs').find('img').removeClass('active');
+      $thumb.addClass('active');
+    }
+  });
+
   function inlineBuildProductOptionFields(options) {
     var html = '';
 
@@ -1110,15 +1259,40 @@
     if (json['products'] && json['products'].length) {
       for (var i = 0; i < json['products'].length; i++) {
         var product = json['products'][i];
-        var productHref = 'index.php?route=catalog/product/edit&user_token={{ user_token }}&product_id=' + product['product_id'];
+        var productId = product['product_id'];
         var productThumb = '';
 
+        if (productId && !productInfoData[productId]) {
+          productInfoData[productId] = {
+            name: product['name'] || '',
+            model: product['model'] || '',
+            thumb_large: product['thumb'] || '',
+            description: '',
+            sku: '',
+            upc: '',
+            ean: '',
+            jan: '',
+            isbn: '',
+            mpn: '',
+            price: product['price'] || '',
+            special: '',
+            stock_quantity: '',
+            status: 1,
+            manufacturer: '',
+            weight: '',
+            weight_class_id: 0,
+            dimensions: '',
+            discounts: [],
+            images: []
+          };
+        }
+
         if (product['thumb']) {
-          productThumb = '<a href="' + productHref + '" class="order-product-thumb"><img src="' + product['thumb'] + '" alt="" /></a>';
+          productThumb = '<a href="#" class="order-product-thumb btn-product-info" data-product-id="' + productId + '"><img src="' + product['thumb'] + '" alt="" /></a>';
         }
 
         productsHtml += '<tr>';
-        productsHtml += '  <td class="text-left order-product-name">' + productThumb + '<a href="' + productHref + '">' + product['name'] + '</a><input type="hidden" name="product[' + i + '][product_id]" value="' + product['product_id'] + '" />';
+        productsHtml += '  <td class="text-left order-product-name">' + productThumb + '<a href="#" class="btn-product-info" data-product-id="' + productId + '">' + product['name'] + '</a><input type="hidden" name="product[' + i + '][product_id]" value="' + productId + '" />';
 
         if (product['option']) {
           for (var j = 0; j < product['option'].length; j++) {
