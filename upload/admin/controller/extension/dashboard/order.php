@@ -200,8 +200,18 @@ class ControllerExtensionDashboardOrder extends Controller {
 		$this->response->setOutput($output);
 	}
 
+	protected function getCompleteStatusCondition() {
+		$implode = array();
+
+		foreach ((array)$this->config->get('config_complete_status') as $order_status_id) {
+			$implode[] = "'" . (int)$order_status_id . "'";
+		}
+
+		return $implode ? "order_status_id IN(" . implode(",", $implode) . ")" : "1=0";
+	}
+
 	protected function countOrders($date_start = '', $date_end = '') {
-		$sql = "SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "order` WHERE order_status_id > '0'";
+		$sql = "SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "order` WHERE " . $this->getCompleteStatusCondition();
 
 		if ($date_start) {
 			$sql .= " AND DATE(date_added) >= DATE('" . $this->db->escape($date_start) . "')";
@@ -229,7 +239,8 @@ class ControllerExtensionDashboardOrder extends Controller {
 
 		switch ($period) {
 			case 'today':
-				$sql = "SELECT HOUR(date_added) AS bucket, COUNT(*) AS val FROM `" . DB_PREFIX . "order` WHERE order_status_id > '0' AND DATE(date_added) = CURDATE() GROUP BY HOUR(date_added) ORDER BY HOUR(date_added) ASC";
+				$cond = $this->getCompleteStatusCondition();
+			$sql = "SELECT HOUR(date_added) AS bucket, COUNT(*) AS val FROM `" . DB_PREFIX . "order` WHERE " . $cond . " AND DATE(date_added) = CURDATE() GROUP BY HOUR(date_added) ORDER BY HOUR(date_added) ASC";
 				$result = $this->db->query($sql);
 				$raw = array();
 				foreach ($result->rows as $row) {
@@ -244,7 +255,7 @@ class ControllerExtensionDashboardOrder extends Controller {
 			case 'week':
 				$week_start = date('Y-m-d', strtotime('monday this week'));
 				$week_end = date('Y-m-d', strtotime('sunday this week'));
-				$sql = "SELECT DATE(date_added) AS bucket, COUNT(*) AS val FROM `" . DB_PREFIX . "order` WHERE order_status_id > '0' AND DATE(date_added) >= '" . $week_start . "' AND DATE(date_added) <= '" . $week_end . "' GROUP BY DATE(date_added) ORDER BY DATE(date_added) ASC";
+				$sql = "SELECT DATE(date_added) AS bucket, COUNT(*) AS val FROM `" . DB_PREFIX . "order` WHERE " . $cond . " AND DATE(date_added) >= '" . $week_start . "' AND DATE(date_added) <= '" . $week_end . "' GROUP BY DATE(date_added) ORDER BY DATE(date_added) ASC";
 				$result = $this->db->query($sql);
 				$raw = array();
 				foreach ($result->rows as $row) {
@@ -260,7 +271,7 @@ class ControllerExtensionDashboardOrder extends Controller {
 				$month_start = date('Y-m-01');
 				$month_end = date('Y-m-t');
 				$days_in_month = (int)date('t');
-				$sql = "SELECT DATE(date_added) AS bucket, COUNT(*) AS val FROM `" . DB_PREFIX . "order` WHERE order_status_id > '0' AND DATE(date_added) >= '" . $month_start . "' AND DATE(date_added) <= '" . $month_end . "' GROUP BY DATE(date_added) ORDER BY DATE(date_added) ASC";
+				$sql = "SELECT DATE(date_added) AS bucket, COUNT(*) AS val FROM `" . DB_PREFIX . "order` WHERE " . $cond . " AND DATE(date_added) >= '" . $month_start . "' AND DATE(date_added) <= '" . $month_end . "' GROUP BY DATE(date_added) ORDER BY DATE(date_added) ASC";
 				$result = $this->db->query($sql);
 				$raw = array();
 				foreach ($result->rows as $row) {
@@ -275,7 +286,7 @@ class ControllerExtensionDashboardOrder extends Controller {
 			case 'year':
 				$year_start = date('Y-01-01');
 				$year_end = date('Y-12-31');
-				$sql = "SELECT DATE_FORMAT(date_added, '%Y-%m') AS bucket, COUNT(*) AS val FROM `" . DB_PREFIX . "order` WHERE order_status_id > '0' AND DATE(date_added) >= '" . $year_start . "' AND DATE(date_added) <= '" . $year_end . "' GROUP BY DATE_FORMAT(date_added, '%Y-%m') ORDER BY DATE_FORMAT(date_added, '%Y-%m') ASC";
+				$sql = "SELECT DATE_FORMAT(date_added, '%Y-%m') AS bucket, COUNT(*) AS val FROM `" . DB_PREFIX . "order` WHERE " . $cond . " AND DATE(date_added) >= '" . $year_start . "' AND DATE(date_added) <= '" . $year_end . "' GROUP BY DATE_FORMAT(date_added, '%Y-%m') ORDER BY DATE_FORMAT(date_added, '%Y-%m') ASC";
 				$result = $this->db->query($sql);
 				$raw = array();
 				foreach ($result->rows as $row) {
@@ -289,7 +300,7 @@ class ControllerExtensionDashboardOrder extends Controller {
 				break;
 			case 'all':
 			default:
-				$sql = "SELECT DATE_FORMAT(date_added, '%Y') AS bucket, COUNT(*) AS val FROM `" . DB_PREFIX . "order` WHERE order_status_id > '0' GROUP BY DATE_FORMAT(date_added, '%Y') ORDER BY DATE_FORMAT(date_added, '%Y') ASC";
+				$sql = "SELECT DATE_FORMAT(date_added, '%Y') AS bucket, COUNT(*) AS val FROM `" . DB_PREFIX . "order` WHERE " . $cond . " GROUP BY DATE_FORMAT(date_added, '%Y') ORDER BY DATE_FORMAT(date_added, '%Y') ASC";
 				$result = $this->db->query($sql);
 				$data = array();
 				foreach ($result->rows as $row) {

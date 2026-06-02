@@ -1,6 +1,6 @@
 <?php
 // Heading
-$_['heading_title']    = 'Registered Customers';
+$_['heading_title']    = 'Registrations';
 
 // Text
 $_['text_extension']   = 'Extensions';
