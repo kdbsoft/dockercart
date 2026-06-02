@@ -1,3 +1,9 @@
+## [1.37.3](https://github.com/mathflow-bit/dockercart/compare/v1.37.2...v1.37.3) (2026-06-02)
+
+### Bug Fixes
+
+* remove raw filter from custom CSS and JS fields ([531a229](https://github.com/mathflow-bit/dockercart/commit/531a2293141e52086a4f654e34407eede6b25744))
+
 ## [1.37.2](https://github.com/mathflow-bit/dockercart/compare/v1.37.1...v1.37.2) (2026-06-02)
 
 ### Bug Fixes
