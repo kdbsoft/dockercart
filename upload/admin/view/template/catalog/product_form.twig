@@ -1288,6 +1288,18 @@
     }
   });
 
+  // Checkbox cascade
+  $(document).on('change', '.category-check', function() {
+    var $cb = $(this);
+    var $li = $cb.closest('li');
+
+    if ($cb.is(':checked')) {
+      $li.parents('li').find('> .category-node > label > .category-check').prop('checked', true);
+    } else {
+      $li.find('.category-check').prop('checked', false);
+    }
+  });
+
   $('#category-tree-search').on('input', function() {
     var query = $(this).val().toLowerCase().trim();
     var $container = $('#category-tree-container');
