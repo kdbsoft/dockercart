@@ -1,3 +1,9 @@
+## [1.37.1](https://github.com/mathflow-bit/dockercart/compare/v1.37.0...v1.37.1) (2026-06-02)
+
+### Bug Fixes
+
+* preserve PNG and WebP transparency when saving and cropping images ([ab9aaa7](https://github.com/mathflow-bit/dockercart/commit/ab9aaa708eeea3527781ff2c65100a0f62bec3cd))
+
 ## [1.37.0](https://github.com/mathflow-bit/dockercart/compare/v1.36.0...v1.37.0) (2026-06-02)
 
 ### Features
