@@ -1,3 +1,13 @@
+## [1.37.0](https://github.com/mathflow-bit/dockercart/compare/v1.36.0...v1.37.0) (2026-06-02)
+
+### Features
+
+* add custom CSS and JavaScript fields to DockerCart theme ([c457841](https://github.com/mathflow-bit/dockercart/commit/c4578412fd05be1d7b5e7eb697a6a5865c9ed4a4))
+
+### Bug Fixes
+
+* add skip_webp option to image resize and enable it in favicon ([2b8b7f6](https://github.com/mathflow-bit/dockercart/commit/2b8b7f69acdb4a4aa0d7cdedc7848692c982668f))
+
 ## [1.36.0](https://github.com/mathflow-bit/dockercart/compare/v1.35.0...v1.36.0) (2026-06-01)
 
 ### Features
