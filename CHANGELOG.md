@@ -1,3 +1,9 @@
+## [1.38.1](https://github.com/mathflow-bit/dockercart/compare/v1.38.0...v1.38.1) (2026-06-02)
+
+### Bug Fixes
+
+* add cascade checking for category checkboxes in product form ([4be6d68](https://github.com/mathflow-bit/dockercart/commit/4be6d6874e680254421b4b5ee06dd7b66ce4d85a))
+
 ## [1.38.0](https://github.com/mathflow-bit/dockercart/compare/v1.37.4...v1.38.0) (2026-06-02)
 
 ### Features
