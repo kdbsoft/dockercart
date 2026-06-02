@@ -933,4 +933,13 @@ class ControllerCatalogCategory extends Controller {
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
 	}
+
+	public function tree() {
+		$this->load->model('catalog/category');
+
+		$results = $this->model_catalog_category->getTreeCategories();
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($results));
+	}
 }
