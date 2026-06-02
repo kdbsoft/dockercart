@@ -73,7 +73,7 @@
         {% for ext in group.extensions %}
         <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 ext-card-wrapper"
              data-type="{{ group.type }}"
-             data-name="{{ ext.name|lower }}"
+             data-name="{{ ext.name|striptags|lower }}"
              data-installed="{{ ext.installed ? '1' : '0' }}"
              {% if ext.installed %}data-edit="{{ ext.edit }}"{% endif %}>
           <div class="panel ext-card {{ ext.installed ? (ext.status_raw ? 'panel-success' : 'panel-default') : 'panel-default ext-card-not-installed' }}">
@@ -83,7 +83,7 @@
             {% endif %}
             <div class="panel-heading">
               <i class="fa {{ group.icon }} fa-lg" style="color:{% if ext.installed %}{% if ext.status_raw %}#166534{% else %}#6b7280{% endif %}{% else %}#9ca3af{% endif %};"></i>
-              <strong title="{{ ext.name }}">{{ ext.name }}</strong>
+              <strong title="{{ ext.name|striptags }}">{{ ext.name|raw }}</strong>
             </div>
             {% if ext.installed %}
             </a>
@@ -141,7 +141,7 @@
                         class="btn btn-xs btn-danger btn-ext-uninstall"
                         title="{{ button_uninstall }}"
                         data-url="{{ ext.uninstall_url }}"
-                        data-name="{{ ext.name }}"
+                        data-name="{{ ext.name|striptags }}"
                         data-confirm="{{ text_confirm }}">
                   <i class="fa fa-minus-circle"></i>
                 </button>
@@ -150,7 +150,7 @@
                         class="btn btn-xs btn-success btn-ext-install"
                         title="{{ button_install }}"
                         data-url="{{ ext.install_url }}"
-                        data-name="{{ ext.name }}">
+                        data-name="{{ ext.name|striptags }}">
                   <i class="fa fa-plus-circle"></i> {{ button_install }}
                 </button>
               {% endif %}
