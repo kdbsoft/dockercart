@@ -1,3 +1,9 @@
+## [1.37.4](https://github.com/mathflow-bit/dockercart/compare/v1.37.3...v1.37.4) (2026-06-02)
+
+### Bug Fixes
+
+* sanitize extension names in extensions list view ([ff77e21](https://github.com/mathflow-bit/dockercart/commit/ff77e218f157158e582bfb912071d6ca301dbef7))
+
 ## [1.37.3](https://github.com/mathflow-bit/dockercart/compare/v1.37.2...v1.37.3) (2026-06-02)
 
 ### Bug Fixes
