@@ -437,6 +437,10 @@ PHP
 
 apply_php_settings
 
+# Перестраиваем OCMOD модификации (читает XML из БД и файлов, пересоздаёт кэш)
+echo "Refreshing OCMOD modifications..."
+php /var/www/html/admin/cli/dockercart_modification_refresh.php || echo "WARNING: OCMOD modification refresh failed (non-fatal)"
+
 # Запускаем фоновую индексацию Manticore (не блокирует Apache)
 initialize_manticore_index
 
