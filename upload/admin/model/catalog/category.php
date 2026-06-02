@@ -582,6 +582,61 @@ class ModelCatalogCategory extends Model {
 		return $category_layout_data;
 	}
 
+	public function getTreeCategories() {
+		$language_id = (int)$this->config->get('config_language_id');
+
+		$query = $this->db->query(
+			"SELECT c.category_id, c.parent_id, c.sort_order, cd.name
+			FROM " . DB_PREFIX . "category c
+			LEFT JOIN " . DB_PREFIX . "category_description cd
+				ON (c.category_id = cd.category_id AND cd.language_id = '" . $language_id . "')
+			ORDER BY c.sort_order ASC, cd.name ASC"
+		);
+
+		$rows = $query->rows;
+
+		$children_map = array();
+		$by_id = array();
+
+		foreach ($rows as $row) {
+			$id = (int)$row['category_id'];
+			$pid = (int)$row['parent_id'];
+			$by_id[$id] = $row;
+			$children_map[$pid][] = $row;
+		}
+
+		$result = array();
+
+		foreach ($rows as $row) {
+			if ((int)$row['parent_id'] === 0) {
+				$this->walkTree($result, $children_map, $by_id, (int)$row['category_id'], 0, '');
+			}
+		}
+
+		return $result;
+	}
+
+	private function walkTree(array &$result, array &$children_map, array &$by_id, $category_id, $level, $parent_path) {
+		$cat = $by_id[$category_id];
+		$path = $parent_path ? $parent_path . ' > ' . $cat['name'] : $cat['name'];
+
+		$result[] = array(
+			'category_id'  => $category_id,
+			'parent_id'    => (int)$cat['parent_id'],
+			'name'         => $cat['name'],
+			'path'         => $path,
+			'level'        => $level,
+			'has_children' => !empty($children_map[$category_id]),
+			'sort_order'   => $cat['sort_order'],
+		);
+
+		if (!empty($children_map[$category_id])) {
+			foreach ($children_map[$category_id] as $child) {
+				$this->walkTree($result, $children_map, $by_id, (int)$child['category_id'], $level + 1, $path);
+			}
+		}
+	}
+
 	public function getTotalCategories() {
 		$query = $this->db->query("SELECT COUNT(*) AS total FROM " . DB_PREFIX . "category");
 

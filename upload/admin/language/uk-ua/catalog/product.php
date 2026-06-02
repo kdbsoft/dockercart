@@ -14,6 +14,7 @@ $_['entry_additional_image'] = 'Додаткові зображення';
 $_['entry_attribute'] = 'Характеристика';
 $_['entry_attribute_group'] = 'Група характеристик';
 $_['entry_category'] = 'Категорії';
+$_['button_select_category'] = 'Вибрати категорії';
 $_['entry_customer_group'] = 'Група клієнтів';
 $_['entry_customer_group_price'] = 'Ціни для груп клієнтів';
 $_['button_customer_group_price_add'] = 'Додати ціну для групи клієнтів';
