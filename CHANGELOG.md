@@ -1,3 +1,9 @@
+## [1.37.2](https://github.com/mathflow-bit/dockercart/compare/v1.37.1...v1.37.2) (2026-06-02)
+
+### Bug Fixes
+
+* render raw custom CSS and JS in theme settings ([9da6987](https://github.com/mathflow-bit/dockercart/commit/9da69874a00e024e3bf6e3e46578e82c0b8ec0ac))
+
 ## [1.37.1](https://github.com/mathflow-bit/dockercart/compare/v1.37.0...v1.37.1) (2026-06-02)
 
 ### Bug Fixes
