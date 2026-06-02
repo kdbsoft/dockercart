@@ -565,6 +565,7 @@ class ControllerCheckoutDockercartCheckout extends Controller
                     $size,
                     $size,
                     "cover",
+                    true,
                 );
 
                 if ($favicon_href) {
@@ -582,6 +583,7 @@ class ControllerCheckoutDockercartCheckout extends Controller
                 120,
                 120,
                 "cover",
+                true,
             );
 
             if ($apple_touch) {

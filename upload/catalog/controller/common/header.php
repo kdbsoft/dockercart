@@ -46,7 +46,7 @@ class ControllerCommonHeader extends Controller {
 			$favicon_sizes = array(16, 32, 48, 64, 96, 128);
 
 			foreach ($favicon_sizes as $size) {
-				$favicon_href = $this->model_tool_image->resize($favicon_source, $size, $size, 'cover');
+				$favicon_href = $this->model_tool_image->resize($favicon_source, $size, $size, 'cover', true);
 
 				if ($favicon_href) {
 					$data['favicon_links'][] = array(
@@ -58,7 +58,7 @@ class ControllerCommonHeader extends Controller {
 				}
 			}
 
-			$apple_touch = $this->model_tool_image->resize($favicon_source, 120, 120, 'cover');
+			$apple_touch = $this->model_tool_image->resize($favicon_source, 120, 120, 'cover', true);
 
 			if ($apple_touch) {
 				$data['favicon_links'][] = array(
