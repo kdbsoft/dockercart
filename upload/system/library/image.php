@@ -139,6 +139,8 @@ class Image {
 					error_log('Error: Failed to write JPEG image: ' . $file);
 				}
 			} elseif ($extension == 'png') {
+				imagealphablending($this->image, false);
+				imagesavealpha($this->image, true);
 				if (!imagepng($this->image, $file)) {
 					error_log('Error: Failed to write PNG image: ' . $file);
 				}
@@ -242,6 +244,8 @@ class Image {
 		if ($ext === 'jpeg' || $ext === 'jpg') {
 			$success = imagejpeg($image, $file, 95);
 		} elseif ($ext === 'png') {
+			imagealphablending($image, false);
+			imagesavealpha($image, true);
 			$success = imagepng($image, $file, 9);
 		} elseif ($ext === 'gif') {
 			$success = imagegif($image, $file);
@@ -533,6 +537,11 @@ class Image {
 	public function crop($top_x, $top_y, $bottom_x, $bottom_y) {
 		$image_old = $this->image;
 		$this->image = imagecreatetruecolor($bottom_x - $top_x, $bottom_y - $top_y);
+
+		if ($this->mime == 'image/png' || $this->mime == 'image/webp') {
+			imagealphablending($this->image, false);
+			imagesavealpha($this->image, true);
+		}
 
 		imagecopy($this->image, $image_old, 0, 0, $top_x, $top_y, $this->width, $this->height);
 
