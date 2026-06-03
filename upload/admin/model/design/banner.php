@@ -5,9 +5,17 @@ class ModelDesignBanner extends Model {
 	public function addBanner($data) {
 		$this->ensureSchema();
 
-		$this->db->query("INSERT INTO " . DB_PREFIX . "banner SET name = '" . $this->db->escape($data['name']) . "', status = '" . (int)$data['status'] . "'");
+		$name = '';
+		if (!empty($data['banner_description'])) {
+			$desc = reset($data['banner_description']);
+			$name = isset($desc['name']) ? $desc['name'] : '';
+		}
+
+		$this->db->query("INSERT INTO " . DB_PREFIX . "banner SET name = '" . $this->db->escape($name) . "', status = '" . (int)$data['status'] . "'");
 
 		$banner_id = $this->db->getLastId();
+
+		$this->saveBannerDescriptions($banner_id, $data);
 
 		if (isset($data['banner_image'])) {
 			foreach ($data['banner_image'] as $language_id => $value) {
@@ -23,7 +31,15 @@ class ModelDesignBanner extends Model {
 	public function editBanner($banner_id, $data) {
 		$this->ensureSchema();
 
-		$this->db->query("UPDATE " . DB_PREFIX . "banner SET name = '" . $this->db->escape($data['name']) . "', status = '" . (int)$data['status'] . "' WHERE banner_id = '" . (int)$banner_id . "'");
+		$name = '';
+		if (!empty($data['banner_description'])) {
+			$desc = reset($data['banner_description']);
+			$name = isset($desc['name']) ? $desc['name'] : '';
+		}
+
+		$this->db->query("UPDATE " . DB_PREFIX . "banner SET name = '" . $this->db->escape($name) . "', status = '" . (int)$data['status'] . "' WHERE banner_id = '" . (int)$banner_id . "'");
+
+		$this->saveBannerDescriptions($banner_id, $data);
 
 		$this->db->query("DELETE FROM " . DB_PREFIX . "banner_image WHERE banner_id = '" . (int)$banner_id . "'");
 
@@ -38,7 +54,31 @@ class ModelDesignBanner extends Model {
 
 	public function deleteBanner($banner_id) {
 		$this->db->query("DELETE FROM " . DB_PREFIX . "banner WHERE banner_id = '" . (int)$banner_id . "'");
+		$this->db->query("DELETE FROM " . DB_PREFIX . "banner_description WHERE banner_id = '" . (int)$banner_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "banner_image WHERE banner_id = '" . (int)$banner_id . "'");
+	}
+
+	public function getBannerDescriptions($banner_id) {
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "banner_description WHERE banner_id = '" . (int)$banner_id . "'");
+
+		$descriptions = array();
+		foreach ($query->rows as $row) {
+			$descriptions[$row['language_id']] = $row;
+		}
+
+		return $descriptions;
+	}
+
+	private function saveBannerDescriptions($banner_id, $data) {
+		$this->db->query("DELETE FROM " . DB_PREFIX . "banner_description WHERE banner_id = '" . (int)$banner_id . "'");
+
+		if (isset($data['banner_description'])) {
+			foreach ($data['banner_description'] as $language_id => $value) {
+				if (!empty($value['name'])) {
+					$this->db->query("INSERT INTO " . DB_PREFIX . "banner_description SET banner_id = '" . (int)$banner_id . "', language_id = '" . (int)$language_id . "', name = '" . $this->db->escape($value['name']) . "'");
+				}
+			}
+		}
 	}
 
 	public function getBanner($banner_id) {
@@ -48,7 +88,9 @@ class ModelDesignBanner extends Model {
 	}
 
 	public function getBanners($data = array()) {
-		$sql = "SELECT * FROM " . DB_PREFIX . "banner";
+		$language_id = (int)$this->config->get('config_language_id');
+
+		$sql = "SELECT b.*, bd.name FROM " . DB_PREFIX . "banner b LEFT JOIN " . DB_PREFIX . "banner_description bd ON (b.banner_id = bd.banner_id AND bd.language_id = '" . $language_id . "')";
 
 		$sort_data = array(
 			'name',
@@ -56,9 +98,13 @@ class ModelDesignBanner extends Model {
 		);
 
 		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
-			$sql .= " ORDER BY " . $data['sort'];
+			if ($data['sort'] == 'name') {
+				$sql .= " ORDER BY bd.name";
+			} else {
+				$sql .= " ORDER BY " . $data['sort'];
+			}
 		} else {
-			$sql .= " ORDER BY name";
+			$sql .= " ORDER BY bd.name";
 		}
 
 		if (isset($data['order']) && ($data['order'] == 'DESC')) {

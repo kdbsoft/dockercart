@@ -258,7 +258,7 @@ class ControllerDesignLayout extends Controller {
 		if (isset($this->error['name'])) {
 			$data['error_name'] = $this->error['name'];
 		} else {
-			$data['error_name'] = '';
+			$data['error_name'] = array();
 		}
 
 		$url = '';
@@ -301,12 +301,16 @@ class ControllerDesignLayout extends Controller {
 			$layout_info = $this->model_design_layout->getLayout($this->request->get['layout_id']);
 		}
 
-		if (isset($this->request->post['name'])) {
-			$data['name'] = $this->request->post['name'];
+		$this->load->model('localisation/language');
+
+		$data['languages'] = $this->model_localisation_language->getLanguages();
+
+		if (isset($this->request->post['layout_description'])) {
+			$data['layout_descriptions'] = $this->request->post['layout_description'];
 		} elseif (!empty($layout_info)) {
-			$data['name'] = $layout_info['name'];
+			$data['layout_descriptions'] = $this->model_design_layout->getLayoutDescriptions($this->request->get['layout_id']);
 		} else {
-			$data['name'] = '';
+			$data['layout_descriptions'] = array();
 		}
 
 		$this->load->model('setting/store');
@@ -402,8 +406,12 @@ class ControllerDesignLayout extends Controller {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
-		if ((utf8_strlen($this->request->post['name']) < 3) || (utf8_strlen($this->request->post['name']) > 64)) {
-			$this->error['name'] = $this->language->get('error_name');
+		if (isset($this->request->post['layout_description'])) {
+			foreach ($this->request->post['layout_description'] as $language_id => $value) {
+				if ((utf8_strlen($value['name']) < 3) || (utf8_strlen($value['name']) > 64)) {
+					$this->error['name'][$language_id] = $this->language->get('error_name');
+				}
+			}
 		}
 
 		return !$this->error;
