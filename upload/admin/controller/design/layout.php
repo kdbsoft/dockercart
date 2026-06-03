@@ -169,6 +169,11 @@ class ControllerDesignLayout extends Controller {
 		$first_route = !empty($data['layout_routes']) ? $data['layout_routes'][0]['route'] : 'common/home';
 		$data['preview_url'] = HTTP_CATALOG . 'index.php?route=' . $first_route;
 
+		// Route-based layout config for template position filtering
+		$route_config = $this->getRouteLayoutConfig($first_route);
+		$data['active_positions'] = $route_config['positions'];
+		$data['responsive_map'] = $route_config['responsive'];
+
 		// Get installed extensions for the module palette
 		$this->load->model('setting/extension');
 		$this->load->model('setting/module');
@@ -211,6 +216,12 @@ class ControllerDesignLayout extends Controller {
 		);
 
 		$idx = 0;
+		// Build extension name lookup for display names
+		$extension_names = array();
+		foreach ($data['extensions'] as $ext) {
+			$extension_names[$ext['code']] = $ext['name'];
+		}
+
 		foreach ($layout_modules as $layout_module) {
 			$part = explode('.', $layout_module['code']);
 
@@ -223,17 +234,23 @@ class ControllerDesignLayout extends Controller {
 				$module_name = $this->language->get('extension')->get('heading_title');
 			}
 
+			$display_name = $module_name;
+			if (isset($part[1], $extension_names[$part[0]])) {
+				$display_name = $extension_names[$part[0]] . ' → ' . $module_name;
+			}
+
 			$edit_url = !isset($part[1])
 				? $this->url->link('extension/module/' . $part[0], 'user_token=' . $this->session->data['user_token'], true)
 				: $this->url->link('extension/module/' . $part[0], 'user_token=' . $this->session->data['user_token'] . '&module_id=' . $part[1], true);
 
 			$module_entry = array(
-				'idx'        => $idx,
-				'code'       => $layout_module['code'],
-				'name'       => strip_tags($module_name),
-				'edit'       => $edit_url,
-				'position'   => $layout_module['position'],
-				'sort_order' => $layout_module['sort_order']
+				'idx'          => $idx,
+				'code'         => $layout_module['code'],
+				'name'         => strip_tags($module_name),
+				'display_name' => strip_tags($display_name),
+				'edit'         => $edit_url,
+				'position'     => $layout_module['position'],
+				'sort_order'   => $layout_module['sort_order']
 			);
 
 			$data['layout_modules'][] = $module_entry;
@@ -606,5 +623,128 @@ class ControllerDesignLayout extends Controller {
 		}
 
 		return !$this->error;
+	}
+
+	private function getRouteLayoutConfig($route) {
+		$configs = array(
+			// Pattern A — Modern Tailwind Grid (columns: hidden lg:block)
+			'product/category' => array(
+				'positions' => array('content_top', 'column_left', 'column_right', 'content_bottom'),
+				'responsive' => array('column_left' => 'lg_only', 'column_right' => 'lg_only')
+			),
+			'product/special' => array(
+				'positions' => array('content_top', 'column_left', 'column_right', 'content_bottom'),
+				'responsive' => array('column_left' => 'lg_only', 'column_right' => 'lg_only')
+			),
+			'product/search' => array(
+				'positions' => array('content_top', 'column_left', 'column_right', 'content_bottom'),
+				'responsive' => array('column_left' => 'lg_only', 'column_right' => 'lg_only')
+			),
+			'product/manufacturer/info' => array(
+				'positions' => array('content_top', 'column_left', 'column_right', 'content_bottom'),
+				'responsive' => array('column_left' => 'lg_only', 'column_right' => 'lg_only')
+			),
+			'product/manufacturer' => array(
+				'positions' => array('content_top', 'column_left', 'column_right', 'content_bottom'),
+				'responsive' => array('column_left' => 'lg_only', 'column_right' => 'lg_only')
+			),
+			'product/new_arrivals' => array(
+				'positions' => array('content_top', 'column_left', 'column_right', 'content_bottom'),
+				'responsive' => array('column_left' => 'lg_only', 'column_right' => 'lg_only')
+			),
+			'blog/category' => array(
+				'positions' => array('content_top', 'column_left', 'column_right', 'content_bottom'),
+				'responsive' => array('column_left' => 'lg_only', 'column_right' => 'lg_only')
+			),
+			// Pattern B — Legacy Bootstrap (columns visible on all breakpoints)
+			'common/home' => array(
+				'positions' => array('content_top', 'column_left', 'column_right', 'content_bottom'),
+				'responsive' => array('column_left' => 'always', 'column_right' => 'always')
+			),
+			'checkout/checkout' => array(
+				'positions' => array('content_top', 'column_left', 'column_right', 'content_bottom'),
+				'responsive' => array('column_left' => 'always', 'column_right' => 'always')
+			),
+			'affiliate/login' => array(
+				'positions' => array('content_top', 'column_left', 'column_right', 'content_bottom'),
+				'responsive' => array('column_left' => 'always', 'column_right' => 'always')
+			),
+			'affiliate/register' => array(
+				'positions' => array('content_top', 'column_left', 'column_right', 'content_bottom'),
+				'responsive' => array('column_left' => 'always', 'column_right' => 'always')
+			),
+			// Pattern C — No sidebars, various
+			'common/success' => array(
+				'positions' => array('content_top', 'content_bottom'),
+				'responsive' => array()
+			),
+			'information/information' => array(
+				'positions' => array('content_top', 'content_bottom'),
+				'responsive' => array()
+			),
+			'information/contact' => array(
+				'positions' => array('content_top', 'content_bottom'),
+				'responsive' => array()
+			),
+			'information/sitemap' => array(
+				'positions' => array('content_top', 'content_bottom'),
+				'responsive' => array()
+			),
+			'checkout/success' => array(
+				'positions' => array('content_top', 'content_bottom'),
+				'responsive' => array()
+			),
+			'error/not_found' => array(
+				'positions' => array('content_top', 'content_bottom'),
+				'responsive' => array()
+			),
+			'product/product' => array(
+				'positions' => array('content_top', 'content_bottom'),
+				'responsive' => array()
+			),
+			'product/compare' => array(
+				'positions' => array('content_bottom'),
+				'responsive' => array()
+			),
+			'checkout/cart' => array(
+				'positions' => array('content_bottom'),
+				'responsive' => array()
+			),
+			'blog/post' => array(
+				'positions' => array('content_bottom'),
+				'responsive' => array()
+			),
+			'blog/author' => array(
+				'positions' => array('content_bottom'),
+				'responsive' => array()
+			),
+			'blog/archive' => array(
+				'positions' => array('content_bottom'),
+				'responsive' => array()
+			),
+			'blog/search' => array(
+				'positions' => array('content_top', 'content_bottom'),
+				'responsive' => array()
+			),
+		);
+
+		// Exact match
+		if (isset($configs[$route])) {
+			return $configs[$route];
+		}
+
+		// Wildcard match for account/* and affiliate/* (excluding login/register already matched above)
+		if (strpos($route, 'account/') === 0 || (strpos($route, 'affiliate/') === 0 && !isset($configs[$route]))) {
+			return array(
+				'positions' => array('content_top', 'content_bottom'),
+				'responsive' => array()
+			);
+		}
+
+		// Default for unknown routes: all 4 positions, lg_only columns
+		return array(
+			'positions' => array('content_top', 'column_left', 'column_right', 'content_bottom'),
+			'responsive' => array('column_left' => 'lg_only', 'column_right' => 'lg_only')
+		);
 	}
 }
