@@ -23,13 +23,9 @@ $_['entry_subtitle']         = 'Subtitle';
 $_['entry_accent_text']      = 'Top Badge';
 $_['entry_accent_color']     = 'Accent Color';
 $_['entry_accent_hint']      = 'Used for badge background and [bracketed] text in title';
-$_['entry_primary_btn_text'] = 'Primary Button Text';
-$_['entry_primary_btn_link'] = 'Primary Button Link';
-$_['entry_primary_btn_text_color'] = 'Primary Button Text Color';
-$_['entry_primary_btn_bg_color']   = 'Primary Button Background Color';
-$_['entry_secondary_btn_text'] = 'Secondary Button Text';
-$_['entry_secondary_btn_link'] = 'Secondary Button Link';
+$_['entry_primary_btn_text'] = 'Button Text';
 $_['entry_image']            = 'Image';
+$_['entry_link']             = 'Link';
 $_['entry_status']           = 'Status';
 $_['entry_sort_order']       = 'Sort Order';
 
@@ -65,8 +61,6 @@ $_['text_mp4']                = 'MP4';
 
 // Placeholders
 $_['placeholder_accent_text']    = 'e.g. New Collection';
-$_['placeholder_primary_btn']    = 'Shop Now';
-$_['placeholder_secondary_btn']  = 'Browse All';
 
 // Actions
 $_['button_duplicate_slide']    = 'Duplicate';

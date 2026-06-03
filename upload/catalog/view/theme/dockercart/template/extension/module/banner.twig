@@ -16,6 +16,7 @@
   #banner-{{ module }} .banner-slide__media iframe,
   #banner-{{ module }} .banner-slide__media video { max-width:100%; width:auto; height:auto; }
   {% endif %}
+  .banner-slide__link { display: block; text-decoration: none; color: inherit; }
   .banner-slide__overlay { position: absolute; inset: 0; display: flex; align-items: center; pointer-events: none; background: linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 35%, rgba(0,0,0,0.1) 65%, transparent 100%); }
   .banner-slide__overlay--left { justify-content: flex-start; }
   .banner-slide__overlay--center { justify-content: center; }
@@ -92,18 +93,23 @@
       <div class="banner-slide{% if loop.first %} active{% endif %}" style="--stack-index: {{ loop.index }};">
       <div class="banner-slide__media">
       {% if banner.video_type == 'youtube' and banner.video_url %}
+      {% if banner.link %}<a href="{{ banner.link }}" class="banner-slide__link">{% endif %}
       <iframe src="{{ banner.video_url }}"
         class="banner-slide__iframe"
         frameborder="0" allow="autoplay; fullscreen" allowfullscreen
         style="pointer-events:none; width:100%; height:{{ banner_height ? banner_height ~ 'px' : 'auto' }}; object-fit:cover;"></iframe>
+      {% if banner.link %}</a>{% endif %}
       {% elseif banner.video_type == 'mp4' and banner.video_url %}
+      {% if banner.link %}<a href="{{ banner.link }}" class="banner-slide__link">{% endif %}
       <video autoplay muted loop playsinline
         class="banner-slide__video"
         poster="{{ banner.image }}"
         style="width:100%; height:{{ banner_height ? banner_height ~ 'px' : 'auto' }}; object-fit:cover;">
         <source src="{{ banner.video_url }}" type="video/mp4">
       </video>
+      {% if banner.link %}</a>{% endif %}
       {% elseif banner.image %}
+      {% if banner.link %}<a href="{{ banner.link }}" class="banner-slide__link">{% endif %}
       {# Use portrait variant when available, otherwise fall back to the landscape image for portrait orientation #}
       {% set portrait_src = banner.image_portrait ? banner.image_portrait : banner.image %}
       <picture>
@@ -111,9 +117,10 @@
         <source media="(orientation: landscape)" srcset="{{ banner.image }}" />
         <img src="{{ banner.image }}" alt="{{ banner.title }}" loading="lazy" />
       </picture>
+      {% if banner.link %}</a>{% endif %}
       {% endif %}
 
-      {% if banner.title_html or banner.subtitle or banner.accent_text or banner.primary_btn_text or banner.secondary_btn_text %}
+      {% if banner.title_html or banner.subtitle or banner.accent_text or banner.primary_btn_text %}
       <div class="banner-slide__overlay banner-slide__overlay--{{ banner.content_position ?: 'left' }}">
         <div class="banner-slide__content">
           {% if banner.accent_text %}
@@ -126,14 +133,9 @@
           {% if banner.subtitle %}
           <p class="banner-slide__subtitle">{{ banner.subtitle }}</p>
           {% endif %}
-          {% if banner.primary_btn_text or banner.secondary_btn_text %}
+          {% if banner.primary_btn_text %}
           <div class="banner-slide__btns">
-            {% if banner.primary_btn_text %}
-            <a href="{{ banner.primary_btn_link }}" class="banner-slide__btn banner-slide__btn--primary"{% if banner.accent_color or banner.accent_bg or banner.primary_btn_bg_color or banner.primary_btn_text_color %} style="{% if banner.primary_btn_bg_color %}background-color: {{ banner.primary_btn_bg_color }}; border-color: {{ banner.primary_btn_bg_color }};{% elseif banner.accent_color %}--accent: {{ banner.accent_color }};{% endif %}{% if banner.primary_btn_text_color %} color: {{ banner.primary_btn_text_color }};{% endif %}"{% endif %}>{{ banner.primary_btn_text }}</a>
-            {% endif %}
-            {% if banner.secondary_btn_text %}
-            <a href="{{ banner.secondary_btn_link }}" class="banner-slide__btn banner-slide__btn--secondary">{{ banner.secondary_btn_text }}</a>
-            {% endif %}
+            <span class="banner-slide__btn banner-slide__btn--primary"{% if banner.accent_color %} style="--accent: {{ banner.accent_color }}; color: {{ banner.badge_text_color }};"{% endif %}>{{ banner.primary_btn_text }}</span>
           </div>
           {% endif %}
         </div>

@@ -177,14 +177,16 @@
                       {# ── Content ── #}
                       <div class="slide-section">
                         <div class="slide-section__title"><i class="fa fa-pencil" style="margin-right:4px;"></i>{{ text_tab_general }}</div>
-                        <div class="form-group">
-                          <label>{{ entry_title }}</label>
-                          <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][title]" value="{{ banner_image.title }}" placeholder="{{ entry_title }}" class="form-control slide-title-input" />
-                          <div class="accent-hint">{{ entry_title_hint }}</div>
-                        </div>
-                        <div class="form-group">
-                          <label>{{ entry_subtitle }}</label>
-                          <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][subtitle]" value="{{ banner_image.subtitle }}" placeholder="{{ entry_subtitle }}" class="form-control" />
+                        <div class="btn-row-2col">
+                          <div class="form-group">
+                            <label>{{ entry_title }}</label>
+                            <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][title]" value="{{ banner_image.title }}" placeholder="{{ entry_title }}" class="form-control slide-title-input" />
+                            <div class="accent-hint">{{ entry_title_hint }}</div>
+                          </div>
+                          <div class="form-group">
+                            <label>{{ entry_subtitle }}</label>
+                            <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][subtitle]" value="{{ banner_image.subtitle }}" placeholder="{{ entry_subtitle }}" class="form-control" />
+                          </div>
                         </div>
                         <div class="form-group">
                           <label>{{ entry_content_position }}</label>
@@ -213,8 +215,12 @@
                             </div>
                           </div>
                         </div>
+                      </div>
+
+                      {# ── Video ── #}
+                      <div class="slide-section">
+                        <div class="slide-section__title"><i class="fa fa-video-camera" style="margin-right:4px;"></i>{{ entry_video_type }}</div>
                         <div class="form-group">
-                          <label>{{ entry_video_type }}</label>
                           <select name="banner_image[{{ language.language_id }}][{{ image_row }}][video_type]" class="form-control dc-video-type-select" style="max-width:200px;">
                             <option value="" {% if banner_image.video_type == '' %}selected{% endif %}>{{ entry_video_type_none }}</option>
                             <option value="youtube" {% if banner_image.video_type == 'youtube' %}selected{% endif %}>{{ entry_video_type_youtube }}</option>
@@ -250,45 +256,11 @@
                         </div>
                       </div>
 
-                      {# ── Buttons ── #}
+                      {# ── Link ── #}
                       <div class="slide-section">
-                        <div class="slide-section__title"><i class="fa fa-hand-pointer-o" style="margin-right:4px;"></i>{{ text_tab_slides }}</div>
-                        <div class="btn-row-2col">
-                          <div class="form-group">
-                            <label>{{ entry_primary_btn_text }}</label>
-                            <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][primary_btn_text]" value="{{ banner_image.primary_btn_text }}" placeholder="{{ placeholder_primary_btn }}" class="form-control" />
-                          </div>
-                          <div class="form-group">
-                            <label>{{ entry_primary_btn_link }}</label>
-                            <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][primary_btn_link]" value="{{ banner_image.primary_btn_link }}" placeholder="/category/new-arrivals" class="form-control" />
-                          </div>
-                        </div>
-                        <div class="btn-row-2col">
-                          <div class="form-group">
-                            <label>{{ entry_secondary_btn_text }}</label>
-                            <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][secondary_btn_text]" value="{{ banner_image.secondary_btn_text }}" placeholder="{{ placeholder_secondary_btn }}" class="form-control" />
-                          </div>
-                          <div class="form-group">
-                            <label>{{ entry_secondary_btn_link }}</label>
-                            <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][secondary_btn_link]" value="{{ banner_image.secondary_btn_link }}" placeholder="/collections/all" class="form-control" />
-                          </div>
-                        </div>
-                        <button type="button" class="slide-advanced-toggle" onclick="$(this).toggleClass('open'); $(this).next('.slide-advanced-body').toggleClass('open');"><i class="fa fa-chevron-right"></i> {{ text_tab_general }}</button>
-                        <div class="slide-advanced-body">
-                          <div class="btn-row-2col">
-                            <div class="form-group">
-                              <label>{{ entry_primary_btn_text_color }}</label>
-                              <div style="display:flex;gap:8px;align-items:center;">
-                                <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][primary_btn_text_color]" value="{{ banner_image.primary_btn_text_color|default('#ffffff') }}" class="form-control dc-color-input primary-btn-text-color-text" data-default-color="#ffffff" placeholder="#ffffff" style="flex:1;" maxlength="16" />
-                              </div>
-                            </div>
-                            <div class="form-group">
-                              <label>{{ entry_primary_btn_bg_color }}</label>
-                              <div style="display:flex;gap:8px;align-items:center;">
-                                <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][primary_btn_bg_color]" value="{{ banner_image.primary_btn_bg_color|default('#2563eb') }}" class="form-control dc-color-input primary-btn-bg-color-text" data-default-color="#2563eb" placeholder="#2563eb" style="flex:1;" maxlength="16" />
-                              </div>
-                            </div>
-                          </div>
+                        <div class="slide-section__title"><i class="fa fa-link" style="margin-right:4px;"></i>{{ entry_link }}</div>
+                        <div class="form-group">
+                          <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][link]" value="{{ banner_image.link }}" placeholder="{{ entry_link }}" class="form-control" />
                         </div>
                       </div>
 
@@ -307,6 +279,14 @@
                             </div>
                             <div class="accent-hint">{{ entry_accent_hint }}</div>
                           </div>
+                        </div>
+                      </div>
+
+                      {# ── Button ── #}
+                      <div class="slide-section">
+                        <div class="slide-section__title"><i class="fa fa-hand-pointer-o" style="margin-right:4px;"></i>{{ entry_primary_btn_text }}</div>
+                        <div class="form-group">
+                          <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][primary_btn_text]" value="{{ banner_image.primary_btn_text }}" class="form-control" />
                         </div>
                       </div>
 
@@ -542,14 +522,22 @@ function addSlide(language_id) {
   // Content
   html += '<div class="slide-section">';
   html += '<div class="slide-section__title"><i class="fa fa-pencil" style="margin-right:4px;"></i>{{ text_tab_general }}</div>';
+  html += '<div class="btn-row-2col">';
   html += '<div class="form-group"><label>{{ entry_title }}</label><input type="text" name="' + pfx + '[title]" value="" placeholder="{{ entry_title }}" class="form-control slide-title-input" /><div class="accent-hint">{{ entry_title_hint }}</div></div>';
   html += '<div class="form-group"><label>{{ entry_subtitle }}</label><input type="text" name="' + pfx + '[subtitle]" value="" placeholder="{{ entry_subtitle }}" class="form-control" /></div>';
+  html += '</div>';
   html += '<div class="form-group"><label>{{ entry_content_position }}</label>';
   html += '<div class="position-radio-group">';
   html += '<label><input type="radio" name="' + pfx + '[content_position]" value="left" checked /><i class="fa fa-align-left"></i> {{ text_content_position_left }}</label>';
   html += '<label><input type="radio" name="' + pfx + '[content_position]" value="center" /><i class="fa fa-align-center"></i> {{ text_content_position_center }}</label>';
   html += '<label><input type="radio" name="' + pfx + '[content_position]" value="right" /><i class="fa fa-align-right"></i> {{ text_content_position_right }}</label>';
   html += '</div></div>';
+  html += '</div>';
+
+  // Link
+  html += '<div class="slide-section">';
+  html += '<div class="slide-section__title"><i class="fa fa-link" style="margin-right:4px;"></i>{{ entry_link }}</div>';
+  html += '<div class="form-group"><input type="text" name="' + pfx + '[link]" value="" placeholder="{{ entry_link }}" class="form-control" /></div>';
   html += '</div>';
 
   // Badge
@@ -561,10 +549,10 @@ function addSlide(language_id) {
   html += '</div>';
   html += '</div>';
 
-  // Link
+  // Button
   html += '<div class="slide-section">';
-  html += '<div class="slide-section__title"><i class="fa fa-link" style="margin-right:4px;"></i>{{ entry_link }}</div>';
-  html += '<div class="form-group"><input type="text" name="' + pfx + '[link]" value="" placeholder="{{ entry_link }}" class="form-control" /></div>';
+  html += '<div class="slide-section__title"><i class="fa fa-hand-pointer-o" style="margin-right:4px;"></i>{{ entry_primary_btn_text }}</div>';
+  html += '<div class="form-group"><input type="text" name="' + pfx + '[primary_btn_text]" value="" class="form-control" /></div>';
   html += '</div>';
 
   html += '</div></div>';
