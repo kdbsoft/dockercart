@@ -721,15 +721,17 @@ function initLinkAutocomplete($input) {
   });
 }
 
-function toggleLinkField($select) {
+function toggleLinkField($select, isInit) {
   var $card = $select.closest('.banner-slide-card');
   var val = $select.val();
   $card.find('.dc-link-custom').toggle(val === 'custom');
   $card.find('.dc-link-entity').toggle(val !== 'custom');
-  if (val === 'custom') {
-    $card.find('.dc-link-hidden').val($card.find('.dc-link-custom-input').val());
-  } else {
-    $card.find('.dc-link-hidden').val('');
+  if (!isInit) {
+    if (val === 'custom') {
+      $card.find('.dc-link-hidden').val($card.find('.dc-link-custom-input').val());
+    } else {
+      $card.find('.dc-link-hidden').val('');
+    }
   }
 }
 
@@ -747,7 +749,7 @@ function initLinkFields(container) {
     initLinkAutocomplete($(this));
   });
   container.find('.dc-link-type').each(function() {
-    toggleLinkField($(this));
+    toggleLinkField($(this), true);
   });
 }
 
