@@ -1,3 +1,9 @@
+## [1.39.0](https://github.com/mathflow-bit/dockercart/compare/v1.38.1...v1.39.0) (2026-06-02)
+
+### Features
+
+* add product info modal with extended details to order view ([6c4543f](https://github.com/mathflow-bit/dockercart/commit/6c4543f11a61d5390fd47d40e7146ddfc6ebb8b2))
+
 ## [1.38.1](https://github.com/mathflow-bit/dockercart/compare/v1.38.0...v1.38.1) (2026-06-02)
 
 ### Bug Fixes
