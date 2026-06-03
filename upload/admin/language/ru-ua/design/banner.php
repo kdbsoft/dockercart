@@ -12,13 +12,9 @@ $_['entry_accent_color'] = 'Акцентный цвет';
 $_['entry_accent_hint'] = 'Используется в качестве фона для значка и текста в скобках в заголовке.';
 $_['entry_accent_text'] = 'Акцентный текст';
 $_['entry_image'] = 'Изображение';
+$_['entry_link'] = 'Ссылка';
 $_['entry_name'] = 'Название баннера';
-$_['entry_primary_btn_bg_color'] = 'Основной цвет фона кнопки';
-$_['entry_primary_btn_link'] = 'Основная кнопка';
-$_['entry_primary_btn_text'] = 'Основной текст кнопки';
-$_['entry_primary_btn_text_color'] = 'Основной цвет текста кнопки';
-$_['entry_secondary_btn_link'] = 'Дополнительная кнопка';
-$_['entry_secondary_btn_text'] = 'Текст дополнительной кнопки';
+$_['entry_primary_btn_text'] = 'Текст кнопки';
 $_['entry_sort_order'] = 'Порядок сортировки';
 $_['entry_status'] = 'Статус';
 $_['entry_subtitle'] = 'Текст под заголовком';
@@ -63,8 +59,6 @@ $_['text_mp4']                = 'MP4';
 
 // Placeholders
 $_['placeholder_accent_text']    = 'напр. Новая коллекция';
-$_['placeholder_primary_btn']    = 'Купить сейчас';
-$_['placeholder_secondary_btn']  = 'Смотреть все';
 
 // Actions
 $_['button_duplicate_slide']    = 'Дублировати';

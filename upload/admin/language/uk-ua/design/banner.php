@@ -12,13 +12,9 @@ $_['entry_accent_color'] = 'Акцентний колір';
 $_['entry_accent_hint'] = 'Використовується для фону значка та тексту [у дужках] у заголовку';
 $_['entry_accent_text'] = 'Акцентний текст';
 $_['entry_image'] = 'Зображення';
+$_['entry_link'] = 'Посилання';
 $_['entry_name'] = 'Назва банера';
-$_['entry_primary_btn_link'] = 'Посилання на основну кнопку';
-$_['entry_primary_btn_text_color'] = 'Колір тексту основної кнопки';
-$_['entry_primary_btn_bg_color'] = 'Колір фону основної кнопки';
-$_['entry_primary_btn_text'] = 'Текст основної кнопки';
-$_['entry_secondary_btn_link'] = 'Посилання на додаткову кнопку';
-$_['entry_secondary_btn_text'] = 'Текст додаткової кнопки';
+$_['entry_primary_btn_text'] = 'Текст кнопки';
 $_['entry_sort_order'] = 'Порядок сортування';
 $_['entry_status'] = 'Статус';
 $_['entry_subtitle'] = 'Текст під заголовком';
@@ -63,8 +59,6 @@ $_['text_mp4']                = 'MP4';
 
 // Placeholders
 $_['placeholder_accent_text']    = 'напр. Нова колекція';
-$_['placeholder_primary_btn']    = 'Купити зараз';
-$_['placeholder_secondary_btn']  = 'Переглянути все';
 
 // Actions
 $_['button_duplicate_slide']    = 'Дублювати';
