@@ -778,10 +778,28 @@ class ControllerProductProduct extends Controller {
 		$data['text_bundle_save'] = $this->language->get('text_bundle_save');
 		$data['button_bundle_add'] = $this->language->get('button_bundle_add');
 
-			$this->load->model('account/viewed');
-			$this->model_account_viewed->addViewedProduct($product_id);
+			// Skip view tracking for known bots/crawlers
+			$is_bot = false;
+			$user_agent = $this->request->server['HTTP_USER_AGENT'] ?? '';
 
-			$this->model_catalog_product->updateViewed($product_id);
+			if ($user_agent !== '') {
+				$robots = explode("\n", str_replace(["\r\n", "\r"], "\n", trim((string)$this->config->get('config_robots'))));
+
+				foreach ($robots as $robot) {
+					$robot = trim($robot);
+
+					if ($robot !== '' && mb_stripos($user_agent, $robot) !== false) {
+						$is_bot = true;
+						break;
+					}
+				}
+			}
+
+			if (!$is_bot) {
+				$this->load->model('account/viewed');
+				$this->model_account_viewed->addViewedProduct($product_id);
+				$this->model_catalog_product->updateViewed($product_id);
+			}
 			
 			$data['column_left'] = $this->load->controller('common/column_left');
 			$data['column_right'] = $this->load->controller('common/column_right');
