@@ -1,3 +1,20 @@
+## [1.40.0](https://github.com/mathflow-bit/dockercart/compare/v1.39.0...v1.40.0) (2026-06-03)
+
+### Features
+
+* add layout builder for visual module management ([18abe05](https://github.com/mathflow-bit/dockercart/commit/18abe054309555d4f2bb6ff9188131551070f361))
+* add structured link types to banner slides ([67baa76](https://github.com/mathflow-bit/dockercart/commit/67baa76757ec8bb1eacf79ce711e8cb8d9ac5ca7))
+* banner & layour localisation id admin ([09741f6](https://github.com/mathflow-bit/dockercart/commit/09741f6f9cb66cbd8db5aacb5662c314291416f0))
+* builder improvements ([caafc58](https://github.com/mathflow-bit/dockercart/commit/caafc584597827a8bf39cc7482e7561b97109479))
+* display permission titles in user group form ([a27f22b](https://github.com/mathflow-bit/dockercart/commit/a27f22bf3b771371bbdd0ac518a747d84d514a14))
+* simplify banner links to one per slide ([87c255c](https://github.com/mathflow-bit/dockercart/commit/87c255c1cf5497899c153ae272ba703780e607bb))
+* skip product view tracking for known bots ([d511b5e](https://github.com/mathflow-bit/dockercart/commit/d511b5ea824ad11675cf8cc07ddaafe2879f9bc5))
+
+### Bug Fixes
+
+* add missing input-group wrapper in layout module form ([abf6ceb](https://github.com/mathflow-bit/dockercart/commit/abf6cebb26a71f9b6c7e88f680d5f5769a7ebed3))
+* disable collapsed banners drag&drop in admin ([07cdc08](https://github.com/mathflow-bit/dockercart/commit/07cdc088cf13c4f91f7238270b7e91ce894a1a03))
+
 ## [1.39.0](https://github.com/mathflow-bit/dockercart/compare/v1.38.1...v1.39.0) (2026-06-02)
 
 ### Features
