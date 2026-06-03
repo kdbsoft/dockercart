@@ -13,6 +13,7 @@ $_['entry_accent_hint'] = 'Используется в качестве фона
 $_['entry_accent_text'] = 'Акцентный текст';
 $_['entry_image'] = 'Изображение';
 $_['entry_link'] = 'Ссылка';
+$_['entry_link_search'] = 'Поиск по названию...';
 $_['entry_name'] = 'Название баннера';
 $_['entry_primary_btn_text'] = 'Текст кнопки';
 $_['entry_sort_order'] = 'Порядок сортировки';
@@ -62,3 +63,12 @@ $_['placeholder_accent_text']    = 'напр. Новая коллекция';
 
 // Actions
 $_['button_duplicate_slide']    = 'Дублировати';
+
+// Link types
+$_['text_link_custom']       = 'Произвольная ссылка';
+$_['text_link_product']      = 'Товар';
+$_['text_link_category']     = 'Категория';
+$_['text_link_manufacturer'] = 'Производитель';
+$_['text_link_information']  = 'Информационная страница';
+$_['text_link_blog']         = 'Запись блога';
+$_['help_link_type']         = 'Выберите тип ссылки';

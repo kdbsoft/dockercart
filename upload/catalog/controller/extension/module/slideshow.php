@@ -89,7 +89,7 @@ class ControllerExtensionModuleSlideshow extends Controller {
 				'subtitle'           => isset($result['subtitle']) ? html_entity_decode((string)$result['subtitle'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : '',
 				'badge'              => isset($result['badge']) ? html_entity_decode((string)$result['badge'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : (isset($result['accent_text']) ? html_entity_decode((string)$result['accent_text'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : ''),
 				'primary_btn_text'   => isset($result['primary_btn_text']) ? $result['primary_btn_text'] : '',
-				'link'               => isset($result['link']) ? $result['link'] : '',
+                'link'               => $this->resolveLink(isset($result['link']) ? $result['link'] : ''),
 				'accent_color'       => $accent_color,
 				'accent_bg'          => $accent_bg,
 				'badge_text_color'   => $badge_text_color,
@@ -105,7 +105,14 @@ class ControllerExtensionModuleSlideshow extends Controller {
 		return $this->load->view('extension/module/slideshow', $data);
 	}
 
-	private function badgeTextColor($hex) {
+    private function resolveLink($link) {
+        if (preg_match('/^route=([^&]+)&(.+)$/', $link, $m)) {
+            return $this->url->link($m[1], $m[2], true);
+        }
+        return $link;
+    }
+
+    private function badgeTextColor($hex) {
 		$hex = ltrim($hex, '#');
 		if (preg_match('/^[0-9a-fA-F]{3}$/', $hex)) {
 			$hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
