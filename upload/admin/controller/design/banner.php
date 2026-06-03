@@ -377,13 +377,19 @@ class ControllerDesignBanner extends Controller {
 			$video = isset($banner_image['video']) ? $banner_image['video'] : '';
 			$video_thumb = 'no_image.png';
 
+			$link = isset($banner_image['link']) ? $banner_image['link'] : '';
+			$link_data = $this->parseSlideLink($link);
+
 			$data['banner_images'][$key][] = array(
 				'title'              => $banner_image['title'],
 				'subtitle'           => isset($banner_image['subtitle']) ? $banner_image['subtitle'] : '',
 				'accent_text'        => isset($banner_image['accent_text']) ? $banner_image['accent_text'] : '',
 				'accent_color'       => isset($banner_image['accent_color']) ? $banner_image['accent_color'] : '',
 				'primary_btn_text'   => isset($banner_image['primary_btn_text']) ? $banner_image['primary_btn_text'] : '',
-				'link'               => isset($banner_image['link']) ? $banner_image['link'] : '',
+				'link'               => $link,
+				'link_type'          => $link_data['type'],
+				'link_value'         => $link_data['value'],
+				'link_entity_name'   => $link_data['entity_name'],
 				'image'              => $image,
 				'thumb'          	 => $this->model_tool_image->resize($thumb, 100, 100),
 				'image_portrait'     => $image_portrait,
@@ -405,6 +411,78 @@ $data['footer'] = $this->load->controller('common/footer');
 
 $this->response->setOutput($this->load->view('design/banner_form', $data));
 }
+
+	private function parseSlideLink($link) {
+		$result = array(
+			'type' => 'custom',
+			'value' => $link,
+			'entity_name' => ''
+		);
+
+		if (preg_match('/^route=([^&]+)&(.+)$/', $link, $m)) {
+			$route = $m[1];
+			$params = array();
+			parse_str($m[2], $params);
+
+			$map = array(
+				'product/product' => array('type' => 'product', 'id_key' => 'product_id'),
+				'product/category' => array('type' => 'category', 'id_key' => 'path'),
+				'product/manufacturer/info' => array('type' => 'manufacturer', 'id_key' => 'manufacturer_id'),
+				'information/information' => array('type' => 'information', 'id_key' => 'information_id'),
+				'blog/post' => array('type' => 'blog', 'id_key' => 'blog_post_id'),
+			);
+
+			if (isset($map[$route]) && isset($params[$map[$route]['id_key']])) {
+				$result['type'] = $map[$route]['type'];
+				$result['value'] = $params[$map[$route]['id_key']];
+				$result['entity_name'] = $this->getLinkEntityName($result['type'], $result['value']);
+			}
+		}
+
+		return $result;
+	}
+
+	private function getLinkEntityName($type, $value) {
+		switch ($type) {
+			case 'product':
+				$this->load->model('catalog/product');
+				$info = $this->model_catalog_product->getProduct((int)$value);
+				return $info ? $info['name'] : '';
+
+			case 'category':
+				$this->load->model('catalog/category');
+				$info = $this->model_catalog_category->getCategory((int)$value);
+				return $info ? strip_tags(html_entity_decode($info['name'], ENT_QUOTES, 'UTF-8')) : '';
+
+			case 'manufacturer':
+				$this->load->model('catalog/manufacturer');
+				$info = $this->model_catalog_manufacturer->getManufacturer((int)$value);
+				return $info ? $info['name'] : '';
+
+			case 'information':
+				$this->load->model('catalog/information');
+				$descriptions = $this->model_catalog_information->getInformationDescriptions((int)$value);
+				if ($descriptions) {
+					$first = reset($descriptions);
+					return isset($first['title']) ? $first['title'] : '';
+				}
+				return '';
+
+			case 'blog':
+				$this->load->model('extension/module/dockercart_blog_post');
+				$info = $this->model_extension_module_dockercart_blog_post->getPost((int)$value);
+				if ($info) {
+					$descriptions = $this->model_extension_module_dockercart_blog_post->getPostDescriptions((int)$value);
+					if ($descriptions) {
+						$first = reset($descriptions);
+						return isset($first['title']) ? $first['title'] : '';
+					}
+				}
+				return '';
+		}
+
+		return '';
+	}
 
 	protected function validateForm() {
 		if (!$this->user->hasPermission('modify', 'design/banner')) {

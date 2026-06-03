@@ -13,6 +13,7 @@ $_['entry_accent_hint'] = 'Використовується для фону зн
 $_['entry_accent_text'] = 'Акцентний текст';
 $_['entry_image'] = 'Зображення';
 $_['entry_link'] = 'Посилання';
+$_['entry_link_search'] = 'Пошук за назвою...';
 $_['entry_name'] = 'Назва банера';
 $_['entry_primary_btn_text'] = 'Текст кнопки';
 $_['entry_sort_order'] = 'Порядок сортування';
@@ -62,3 +63,12 @@ $_['placeholder_accent_text']    = 'напр. Нова колекція';
 
 // Actions
 $_['button_duplicate_slide']    = 'Дублювати';
+
+// Link types
+$_['text_link_custom']       = 'Довільне посилання';
+$_['text_link_product']      = 'Товар';
+$_['text_link_category']     = 'Категорія';
+$_['text_link_manufacturer'] = 'Виробник';
+$_['text_link_information']  = 'Інформаційна сторінка';
+$_['text_link_blog']         = 'Запис блогу';
+$_['help_link_type']         = 'Виберіть тип посилання';

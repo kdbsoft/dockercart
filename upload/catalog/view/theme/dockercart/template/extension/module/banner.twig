@@ -16,7 +16,7 @@
   #banner-{{ module }} .banner-slide__media iframe,
   #banner-{{ module }} .banner-slide__media video { max-width:100%; width:auto; height:auto; }
   {% endif %}
-  .banner-slide__link { display: block; text-decoration: none; color: inherit; }
+  .banner-slide__link { display: block; text-decoration: none; color: inherit; cursor: pointer; }
   .banner-slide__overlay { position: absolute; inset: 0; display: flex; align-items: center; pointer-events: none; background: linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 35%, rgba(0,0,0,0.1) 65%, transparent 100%); }
   .banner-slide__overlay--left { justify-content: flex-start; }
   .banner-slide__overlay--center { justify-content: center; }
@@ -92,24 +92,20 @@
     {% for banner in banners %}
       <div class="banner-slide{% if loop.first %} active{% endif %}" style="--stack-index: {{ loop.index }};">
       <div class="banner-slide__media">
-      {% if banner.video_type == 'youtube' and banner.video_url %}
       {% if banner.link %}<a href="{{ banner.link }}" class="banner-slide__link">{% endif %}
+      {% if banner.video_type == 'youtube' and banner.video_url %}
       <iframe src="{{ banner.video_url }}"
         class="banner-slide__iframe"
         frameborder="0" allow="autoplay; fullscreen" allowfullscreen
         style="pointer-events:none; width:100%; height:{{ banner_height ? banner_height ~ 'px' : 'auto' }}; object-fit:cover;"></iframe>
-      {% if banner.link %}</a>{% endif %}
       {% elseif banner.video_type == 'mp4' and banner.video_url %}
-      {% if banner.link %}<a href="{{ banner.link }}" class="banner-slide__link">{% endif %}
       <video autoplay muted loop playsinline
         class="banner-slide__video"
         poster="{{ banner.image }}"
         style="width:100%; height:{{ banner_height ? banner_height ~ 'px' : 'auto' }}; object-fit:cover;">
         <source src="{{ banner.video_url }}" type="video/mp4">
       </video>
-      {% if banner.link %}</a>{% endif %}
       {% elseif banner.image %}
-      {% if banner.link %}<a href="{{ banner.link }}" class="banner-slide__link">{% endif %}
       {# Use portrait variant when available, otherwise fall back to the landscape image for portrait orientation #}
       {% set portrait_src = banner.image_portrait ? banner.image_portrait : banner.image %}
       <picture>
@@ -117,7 +113,6 @@
         <source media="(orientation: landscape)" srcset="{{ banner.image }}" />
         <img src="{{ banner.image }}" alt="{{ banner.title }}" loading="lazy" />
       </picture>
-      {% if banner.link %}</a>{% endif %}
       {% endif %}
 
       {% if banner.title_html or banner.subtitle or banner.accent_text or banner.primary_btn_text %}
@@ -141,6 +136,7 @@
         </div>
       </div>
       {% endif %}
+      {% if banner.link %}</a>{% endif %}
       </div>
 
     </div>

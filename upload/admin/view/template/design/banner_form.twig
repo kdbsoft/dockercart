@@ -260,7 +260,21 @@
                       <div class="slide-section">
                         <div class="slide-section__title"><i class="fa fa-link" style="margin-right:4px;"></i>{{ entry_link }}</div>
                         <div class="form-group">
-                          <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][link]" value="{{ banner_image.link }}" placeholder="{{ entry_link }}" class="form-control" />
+                          <select class="form-control dc-link-type" style="max-width:200px;margin-bottom:8px;">
+                            <option value="custom" {{ banner_image.link_type == 'custom' or not banner_image.link_type ? 'selected' : '' }}>{{ text_link_custom }}</option>
+                            <option value="product" {{ banner_image.link_type == 'product' ? 'selected' : '' }}>{{ text_link_product }}</option>
+                            <option value="category" {{ banner_image.link_type == 'category' ? 'selected' : '' }}>{{ text_link_category }}</option>
+                            <option value="manufacturer" {{ banner_image.link_type == 'manufacturer' ? 'selected' : '' }}>{{ text_link_manufacturer }}</option>
+                            <option value="information" {{ banner_image.link_type == 'information' ? 'selected' : '' }}>{{ text_link_information }}</option>
+                            <option value="blog" {{ banner_image.link_type == 'blog' ? 'selected' : '' }}>{{ text_link_blog }}</option>
+                          </select>
+                          <div class="dc-link-custom"{{ banner_image.link_type is not empty and banner_image.link_type != 'custom' ? ' style="display:none;"' : '' }}>
+                            <input type="text" class="form-control dc-link-custom-input" value="{{ banner_image.link }}" placeholder="{{ entry_link }}" />
+                          </div>
+                          <div class="dc-link-entity"{{ not banner_image.link_type or banner_image.link_type == 'custom' ? ' style="display:none;"' : '' }}>
+                            <input type="text" class="form-control dc-link-autocomplete" value="{{ banner_image.link_entity_name }}" placeholder="{{ entry_link_search }}" data-type="{{ banner_image.link_type }}" data-value="{{ banner_image.link_value }}" />
+                          </div>
+                          <input type="hidden" name="banner_image[{{ language.language_id }}][{{ image_row }}][link]" value="{{ banner_image.link }}" class="dc-link-hidden" />
                         </div>
                       </div>
 
@@ -372,6 +386,7 @@ function duplicateSlide(row, language_id) {
 
   initColorInputs($clone);
   initVideoFields($clone);
+  initLinkFields($clone);
   if (window.lucide && typeof window.lucide.createIcons === 'function') {
     window.lucide.createIcons();
   }
@@ -537,7 +552,19 @@ function addSlide(language_id) {
   // Link
   html += '<div class="slide-section">';
   html += '<div class="slide-section__title"><i class="fa fa-link" style="margin-right:4px;"></i>{{ entry_link }}</div>';
-  html += '<div class="form-group"><input type="text" name="' + pfx + '[link]" value="" placeholder="{{ entry_link }}" class="form-control" /></div>';
+  html += '<div class="form-group">';
+  html += '<select class="form-control dc-link-type" style="max-width:200px;margin-bottom:8px;">';
+  html += '<option value="custom">{{ text_link_custom }}</option>';
+  html += '<option value="product">{{ text_link_product }}</option>';
+  html += '<option value="category">{{ text_link_category }}</option>';
+  html += '<option value="manufacturer">{{ text_link_manufacturer }}</option>';
+  html += '<option value="information">{{ text_link_information }}</option>';
+  html += '<option value="blog">{{ text_link_blog }}</option>';
+  html += '</select>';
+  html += '<div class="dc-link-custom"><input type="text" class="form-control dc-link-custom-input" value="" placeholder="{{ entry_link }}" /></div>';
+  html += '<div class="dc-link-entity" style="display:none;"><input type="text" class="form-control dc-link-autocomplete" value="" placeholder="{{ entry_link_search }}" data-type="" data-value="" /></div>';
+  html += '<input type="hidden" name="' + pfx + '[link]" value="" class="dc-link-hidden" />';
+  html += '</div>';
   html += '</div>';
 
   // Badge
@@ -562,6 +589,7 @@ function addSlide(language_id) {
   $('#slide-list-' + language_id).append($card);
   initColorInputs($card);
   initVideoFields($card);
+  initLinkFields($card);
   if (window.lucide && typeof window.lucide.createIcons === 'function') {
     window.lucide.createIcons();
   }
@@ -628,6 +656,101 @@ function updateAllVideoPreviews() {
   });
 }
 
+function getAutocompleteRoute(type) {
+  var map = {
+    'product': 'catalog/product/autocomplete',
+    'category': 'catalog/category/autocomplete',
+    'manufacturer': 'catalog/manufacturer/autocomplete',
+    'information': 'catalog/information/autocomplete',
+    'blog': 'extension/module/dockercart_blog_post/autocomplete'
+  };
+  return map[type] || '';
+}
+
+function getAutocompleteIdKey(type) {
+  var map = {
+    'product': 'product_id',
+    'category': 'category_id',
+    'manufacturer': 'manufacturer_id',
+    'information': 'information_id',
+    'blog': 'blog_post_id'
+  };
+  return map[type] || '';
+}
+
+function getEntityRoute(type) {
+  var map = {
+    'product': 'route=product/product&product_id=',
+    'category': 'route=product/category&path=',
+    'manufacturer': 'route=product/manufacturer/info&manufacturer_id=',
+    'information': 'route=information/information&information_id=',
+    'blog': 'route=blog/post&blog_post_id='
+  };
+  return map[type] || '';
+}
+
+function initLinkAutocomplete($input) {
+  $input.autocomplete({
+    'source': function(request, response) {
+      var $card = $input.closest('.banner-slide-card');
+      var type = $card.find('.dc-link-type').val();
+      var route = getAutocompleteRoute(type);
+      if (!route || type === 'custom') {
+        response([]);
+        return;
+      }
+      $.ajax({
+        url: 'index.php?route=' + route + '&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+        dataType: 'json',
+        success: function(json) {
+          response($.map(json, function(item) {
+            return {
+              label: item['name'],
+              value: item[getAutocompleteIdKey(type)]
+            }
+          }));
+        }
+      });
+    },
+    'select': function(item) {
+      var $card = $input.closest('.banner-slide-card');
+      var type = $card.find('.dc-link-type').val();
+      $card.find('.dc-link-hidden').val(getEntityRoute(type) + item.value);
+      $input.val(item['label']);
+    }
+  });
+}
+
+function toggleLinkField($select) {
+  var $card = $select.closest('.banner-slide-card');
+  var val = $select.val();
+  $card.find('.dc-link-custom').toggle(val === 'custom');
+  $card.find('.dc-link-entity').toggle(val !== 'custom');
+  if (val === 'custom') {
+    $card.find('.dc-link-hidden').val($card.find('.dc-link-custom-input').val());
+  } else {
+    $card.find('.dc-link-hidden').val('');
+  }
+}
+
+function initLinkFields(container) {
+  container.find('.dc-link-type').off('change.dcLink').on('change.dcLink', function() {
+    toggleLinkField($(this));
+  });
+  container.find('.dc-link-custom-input').off('input.dcLink').on('input.dcLink', function() {
+    var $card = $(this).closest('.banner-slide-card');
+    if ($card.find('.dc-link-type').val() === 'custom') {
+      $card.find('.dc-link-hidden').val($(this).val());
+    }
+  });
+  container.find('.dc-link-autocomplete').each(function() {
+    initLinkAutocomplete($(this));
+  });
+  container.find('.dc-link-type').each(function() {
+    toggleLinkField($(this));
+  });
+}
+
 $(document).ready(function() {
   initColorisPicker();
 
@@ -663,6 +786,7 @@ $(document).ready(function() {
   $('.banner-slide-card').each(function() {
     initColorInputs($(this));
     initVideoFields($(this));
+    initLinkFields($(this));
   });
 
   $(document).on('dragstart', '.banner-slide-card', function(e) {

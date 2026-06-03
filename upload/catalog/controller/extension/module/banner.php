@@ -91,7 +91,7 @@ class ControllerExtensionModuleBanner extends Controller {
                 'accent_bg'          => $accent_bg,
                 'badge_text_color'   => $badge_text_color,
                 'primary_btn_text'   => isset($result['primary_btn_text']) ? $result['primary_btn_text'] : '',
-                'link'               => isset($result['link']) ? $result['link'] : '',
+                'link'               => $this->resolveLink(isset($result['link']) ? $result['link'] : ''),
                 'image'              => $image_landscape,
                 'image_portrait'     => $image_portrait,
                 'video_type'         => $video_type,
@@ -103,6 +103,13 @@ class ControllerExtensionModuleBanner extends Controller {
         $data['module'] = $module++;
 
         return $this->load->view('extension/module/banner', $data);
+    }
+
+    private function resolveLink($link) {
+        if (preg_match('/^route=([^&]+)&(.+)$/', $link, $m)) {
+            return $this->url->link($m[1], $m[2], true);
+        }
+        return $link;
     }
 
     private function badgeTextColor($hex) {
