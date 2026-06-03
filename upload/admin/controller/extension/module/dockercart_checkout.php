@@ -863,15 +863,12 @@ class ControllerExtensionModuleDockercartCheckout extends Controller
 
         // Create layout for DockerCart Checkout
         $this->load->language("extension/module/dockercart_checkout");
+        $this->load->model("design/layout");
 
         $layout_name =
             $this->language->get("text_layout_name") ?: "DockerCart Checkout";
 
-        $layout_data = [
-            "name" => $layout_name,
-        ];
-
-        // Check if layout exists
+        // Check if layout exists (by name in oc_layout.name fallback column)
         $query = $this->db->query(
             "SELECT layout_id FROM `" .
                 DB_PREFIX .
@@ -880,28 +877,33 @@ class ControllerExtensionModuleDockercartCheckout extends Controller
                 "'",
         );
 
-        if (!$query->num_rows) {
-            $this->db->query(
-                "INSERT INTO `" .
-                    DB_PREFIX .
-                    "layout` SET `name` = '" .
-                    $this->db->escape($layout_name) .
-                    "'",
-            );
-            $layout_id = $this->db->getLastId();
-
-            // Add layout route
-            $this->db->query(
-                "INSERT INTO `" .
-                    DB_PREFIX .
-                    "layout_route` SET
-                `layout_id` = '" .
-                    (int) $layout_id .
-                    "',
-                `store_id` = '0',
-                `route` = 'checkout/dockercart_checkout'",
-            );
+        if ($query->num_rows) {
+            $layout_id = $query->row["layout_id"];
+        } else {
+            $layout_data = [
+                "name" => $layout_name,
+                "layout_route" => [
+                    [
+                        "store_id" => 0,
+                        "route" => "checkout/dockercart_checkout",
+                    ],
+                ],
+            ];
+            $layout_id = $this->model_design_layout->addLayout($layout_data);
         }
+
+        // Save layout_id to settings for clean uninstall
+        $this->load->model("setting/setting");
+        $existing_settings =
+            $this->model_setting_setting->getSetting(
+                "module_dockercart_checkout",
+            );
+        $existing_settings["module_dockercart_checkout_layout_id"] =
+            $layout_id;
+        $this->model_setting_setting->editSetting(
+            "module_dockercart_checkout",
+            $existing_settings,
+        );
 
         // Add SEO URL if SEO URLs are enabled
         $seo_url_changed = false;
@@ -955,7 +957,6 @@ class ControllerExtensionModuleDockercartCheckout extends Controller
     {
         $this->load->model("setting/setting");
         $this->load->model("setting/event");
-        $layout_name = "DockerCart Checkout";
 
         // Remove events
         $this->db->query(
@@ -974,29 +975,16 @@ class ControllerExtensionModuleDockercartCheckout extends Controller
         $this->model_design_seo_url->invalidateSeoUrlCache();
 
         // Remove layout
-        $query = $this->db->query(
-            "SELECT layout_id FROM `" .
-                DB_PREFIX .
-                "layout` WHERE `name` = '" .
-                $this->db->escape($layout_name) .
-                "'",
+        $settings = $this->model_setting_setting->getSetting(
+            "module_dockercart_checkout",
         );
-        if ($query->num_rows) {
-            $layout_id = $query->row["layout_id"];
-            $this->db->query(
-                "DELETE FROM `" .
-                    DB_PREFIX .
-                    "layout_route` WHERE `layout_id` = '" .
-                    (int) $layout_id .
-                    "'",
-            );
-            $this->db->query(
-                "DELETE FROM `" .
-                    DB_PREFIX .
-                    "layout` WHERE `layout_id` = '" .
-                    (int) $layout_id .
-                    "'",
-            );
+        $layout_id = isset($settings["module_dockercart_checkout_layout_id"])
+            ? (int) $settings["module_dockercart_checkout_layout_id"]
+            : 0;
+
+        if ($layout_id) {
+            $this->load->model("design/layout");
+            $this->model_design_layout->deleteLayout($layout_id);
         }
 
         // Remove settings

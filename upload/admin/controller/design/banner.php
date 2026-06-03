@@ -274,7 +274,7 @@ class ControllerDesignBanner extends Controller {
 		if (isset($this->error['name'])) {
 			$data['error_name'] = $this->error['name'];
 		} else {
-			$data['error_name'] = '';
+			$data['error_name'] = array();
 		}
 
 		if (isset($this->error['banner_image'])) {
@@ -323,12 +323,12 @@ class ControllerDesignBanner extends Controller {
 
 		$data['user_token'] = $this->session->data['user_token'];
 
-		if (isset($this->request->post['name'])) {
-			$data['name'] = $this->request->post['name'];
+		if (isset($this->request->post['banner_description'])) {
+			$data['banner_descriptions'] = $this->request->post['banner_description'];
 		} elseif (!empty($banner_info)) {
-			$data['name'] = $banner_info['name'];
+			$data['banner_descriptions'] = $this->model_design_banner->getBannerDescriptions($this->request->get['banner_id']);
 		} else {
-			$data['name'] = '';
+			$data['banner_descriptions'] = array();
 		}
 
 		if (isset($this->request->post['status'])) {
@@ -409,13 +409,17 @@ $data['footer'] = $this->load->controller('common/footer');
 $this->response->setOutput($this->load->view('design/banner_form', $data));
 }
 
-protected function validateForm() {
+	protected function validateForm() {
 		if (!$this->user->hasPermission('modify', 'design/banner')) {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
-		if ((utf8_strlen($this->request->post['name']) < 3) || (utf8_strlen($this->request->post['name']) > 64)) {
-			$this->error['name'] = $this->language->get('error_name');
+		if (isset($this->request->post['banner_description'])) {
+			foreach ($this->request->post['banner_description'] as $language_id => $value) {
+				if ((utf8_strlen($value['name']) < 3) || (utf8_strlen($value['name']) > 64)) {
+					$this->error['name'][$language_id] = $this->language->get('error_name');
+				}
+			}
 		}
 
 		if (isset($this->request->post['banner_image'])) {

@@ -101,10 +101,25 @@
                 <div class="form-horizontal dcx-form">
 
                   <div class="form-group required">
-                    <label class="col-sm-3 control-label" for="input-name">{{ entry_name }}</label>
+                    <label class="col-sm-3 control-label">{{ entry_name }}</label>
                     <div class="col-sm-9">
-                      <input type="text" name="name" value="{{ name }}" placeholder="{{ entry_name }}" id="input-name" class="form-control" />
-                      {% if error_name %}<div class="text-danger">{{ error_name }}</div>{% endif %}
+                      <ul class="nav nav-tabs dcx-profile-tabs" id="banner-name-language" style="margin-bottom:8px;">
+                        {% for language in languages %}
+                        <li {% if loop.first %}class="active"{% endif %}>
+                          <a href="#banner-name-{{ language.language_id }}" data-toggle="tab">
+                            <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                          </a>
+                        </li>
+                        {% endfor %}
+                      </ul>
+                      <div class="tab-content">
+                        {% for language in languages %}
+                        <div class="tab-pane {% if loop.first %}active{% endif %}" id="banner-name-{{ language.language_id }}">
+                          <input type="text" name="banner_description[{{ language.language_id }}][name]" value="{{ banner_descriptions[language.language_id].name ?? '' }}" placeholder="{{ entry_name }}" class="form-control" />
+                          {% if error_name[language.language_id] is defined %}<div class="text-danger">{{ error_name[language.language_id] }}</div>{% endif %}
+                        </div>
+                        {% endfor %}
+                      </div>
                     </div>
                   </div>
 
