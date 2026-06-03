@@ -46,7 +46,7 @@ $_['error_category']      = 'Warning: This layout cannot be deleted as it is cur
 $_['error_information']   = 'Warning: This layout cannot be deleted as it is currently assigned to %s information pages!';
 
 // Builder
-$_['text_switch_to_builder']  = 'Switch to Modern Builder';
+$_['text_switch_to_builder']  = 'Switch to Builder';
 $_['text_switch_to_classic']  = 'Switch to Classic View';
 $_['heading_title_builder']   = 'Layout Builder';
 $_['text_modules_palette']    = 'Modules';

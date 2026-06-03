@@ -27,9 +27,8 @@
 				group: { name: 'modules', pull: 'clone', put: false },
 				sort: false,
 				animation: 150,
-				handle: '.palette-item',
-				filter: '.palette-group div:first-child',
-				preventOnFilter: false
+				filter: '.palette-group-header',
+				preventOnFilter: true
 			});
 			sortables.push(paletteSortable);
 		}
@@ -56,26 +55,27 @@
 	function handleDrop(evt) {
 		var item = evt.item;
 		var paletteCode = item.getAttribute('data-palette-code');
-		var paletteName = item.getAttribute('data-palette-name');
 
 		if (paletteCode) {
 			var zoneEl = evt.to.closest('.zone-drop-area') || evt.to;
-			var zoneZone = zoneEl.getAttribute('data-zone');
 			var editUrl = buildEditUrl(paletteCode);
-			var newCard = createModuleCard(paletteCode, paletteName, editUrl);
-			item.replaceWith(newCard);
+			var paletteName = item.getAttribute('data-palette-name');
+			var paletteDisplay = item.getAttribute('data-palette-display') || paletteName;
 
 			setTimeout(function() {
-				lucide.createIcons({ attrs: { class: ['module-card'].join(' ') } });
-			}, 10);
+				var newCard = createModuleCard(paletteCode, paletteName, editUrl, paletteDisplay);
+				item.replaceWith(newCard);
+				lucide.createIcons();
+				updateEmptyStates();
+			}, 0);
+		} else {
+			updateEmptyStates();
 		}
-
-		updateEmptyStates();
 	}
 
 	// ==================== MODULE CARD ====================
 
-	function createModuleCard(code, name, editUrl) {
+	function createModuleCard(code, name, editUrl, displayName) {
 		var idx = nextModuleIdx;
 		nextModuleIdx++;
 
@@ -92,7 +92,7 @@
 
 		var nameSpan = document.createElement('span');
 		nameSpan.className = 'flex-1 truncate text-xs font-medium';
-		nameSpan.textContent = name;
+		nameSpan.textContent = displayName || name;
 
 		var editBtn = document.createElement('button');
 		editBtn.type = 'button';
@@ -250,7 +250,13 @@
 	}
 
 	function initPropertiesPanel() {
-		document.getElementById('prop-position').addEventListener('change', function() {
+		// Filter position options based on active positions
+		var propPosition = document.getElementById('prop-position');
+		Array.from(propPosition.options).forEach(function(opt) {
+			opt.style.display = config.activePositions.indexOf(opt.value) !== -1 ? '' : 'none';
+		});
+
+		propPosition.addEventListener('change', function() {
 			if (!selectedCardEl) return;
 			var newZone = this.value;
 			var targetZone = document.querySelector('.zone-drop-area[data-zone="' + newZone + '"]');
@@ -453,21 +459,31 @@
 
 		searchInput.addEventListener('input', function() {
 			var query = this.value.toLowerCase();
-			var groups = document.querySelectorAll('.palette-group');
-			groups.forEach(function(group) {
-				var items = group.querySelectorAll('.palette-item');
+			var headers = document.querySelectorAll('.palette-group-header');
+
+			headers.forEach(function(header) {
+				var groupName = (header.getAttribute('data-group-name') || '').toLowerCase();
+				var el = header.nextElementSibling;
+				var items = [];
+				while (el && !el.classList.contains('palette-group-header')) {
+					if (el.classList.contains('palette-item')) {
+						items.push(el);
+					}
+					el = el.nextElementSibling;
+				}
+
 				var hasVisible = false;
+				var headerMatch = !query || groupName.indexOf(query) !== -1;
+
 				items.forEach(function(item) {
 					var code = (item.getAttribute('data-palette-code') || '').toLowerCase();
 					var name = (item.getAttribute('data-palette-name') || '').toLowerCase();
-					if (!query || code.indexOf(query) !== -1 || name.indexOf(query) !== -1) {
-						item.style.display = '';
-						hasVisible = true;
-					} else {
-						item.style.display = 'none';
-					}
+					var match = !query || code.indexOf(query) !== -1 || name.indexOf(query) !== -1;
+					item.style.display = match ? '' : 'none';
+					if (match) hasVisible = true;
 				});
-				group.style.display = hasVisible || !query ? '' : 'none';
+
+				header.style.display = (headerMatch || hasVisible) ? '' : 'none';
 			});
 		});
 	}
