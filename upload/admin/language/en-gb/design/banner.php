@@ -26,8 +26,17 @@ $_['entry_accent_hint']      = 'Used for badge background and [bracketed] text i
 $_['entry_primary_btn_text'] = 'Button Text';
 $_['entry_image']            = 'Image';
 $_['entry_link']             = 'Link';
+$_['entry_link_search']      = 'Search by name...';
 $_['entry_status']           = 'Status';
 $_['entry_sort_order']       = 'Sort Order';
+
+$_['text_link_custom']       = 'Custom URL';
+$_['text_link_product']      = 'Product';
+$_['text_link_category']     = 'Category';
+$_['text_link_manufacturer'] = 'Manufacturer';
+$_['text_link_information']  = 'Information Page';
+$_['text_link_blog']         = 'Blog Post';
+$_['help_link_type']         = 'Select link type';
 
 // Video
 $_['entry_video_type']              = 'Video Background';
