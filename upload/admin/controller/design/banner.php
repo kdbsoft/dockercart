@@ -419,8 +419,24 @@ $this->response->setOutput($this->load->view('design/banner_form', $data));
 			'entity_name' => ''
 		);
 
-		if (preg_match('/^route=([^&]+)&(.+)$/', $link, $m)) {
-			$route = $m[1];
+		if (empty($link)) {
+			return $result;
+		}
+
+		// Normalize: decode HTML entities and URL-encode
+		$clean = html_entity_decode($link, ENT_QUOTES, 'UTF-8');
+
+		// Strip full URL or path prefix, leave only query string
+		if (preg_match('/^https?:\/\/[^\/]+\/?(?:index\.php)?\?(.*)$/', $clean, $urlMatch)) {
+			$clean = $urlMatch[1];
+		} elseif (preg_match('/^\/?(?:index\.php)?\?(.*)$/', $clean, $pathMatch)) {
+			$clean = $pathMatch[1];
+		} elseif (strpos($clean, '?') === 0) {
+			$clean = substr($clean, 1);
+		}
+
+		if (preg_match('/^route=([^&]+)&(.+)$/', $clean, $m)) {
+			$route = urldecode($m[1]);
 			$params = array();
 			parse_str($m[2], $params);
 

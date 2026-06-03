@@ -42,7 +42,7 @@ class ControllerExtensionModuleCarousel extends Controller {
 
 			$data['banners'][] = array(
 				'title'          => $result['title'],
-				'link'           => isset($result['link']) ? $result['link'] : '',
+				'link'           => $this->resolveLink(isset($result['link']) ? $result['link'] : ''),
 				'image'          => $image_landscape,
 				'image_portrait' => $image_portrait
 			);
@@ -51,5 +51,12 @@ class ControllerExtensionModuleCarousel extends Controller {
 		$data['module'] = $module++;
 
 		return $this->load->view('extension/module/carousel', $data);
+	}
+
+	private function resolveLink($link) {
+		if (preg_match('/^route=([^&]+)&(.+)$/', $link, $m)) {
+			return $this->url->link($m[1], $m[2], true);
+		}
+		return $link;
 	}
 }
