@@ -350,7 +350,26 @@ class ControllerUserUserPermission extends Controller {
 			$permission = substr($controller, 0, strrpos($controller, '.'));
 
 			if (!in_array($permission, $ignore)) {
-				$data['permissions'][] = $permission;
+				$parts = explode('/', $permission);
+				$parts = array_map(function($p) {
+					return implode(' ', array_map('ucfirst', explode('_', $p)));
+				}, $parts);
+
+				$name = implode('/', $parts);
+
+				$title = '';
+
+				$this->load->language($permission, 'perm_' . str_replace('/', '_', $permission));
+
+				if (isset($this->language->data['perm_' . str_replace('/', '_', $permission)]->data['heading_title'])) {
+					$title = $this->language->data['perm_' . str_replace('/', '_', $permission)]->data['heading_title'];
+				}
+
+				$data['permissions'][] = array(
+					'route' => $permission,
+					'name'  => $name,
+					'title' => $title
+				);
 			}
 		}
 
