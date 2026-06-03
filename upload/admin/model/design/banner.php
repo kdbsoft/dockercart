@@ -144,13 +144,9 @@ class ModelDesignBanner extends Model {
 				'accent_text'        => isset($banner_image['accent_text']) ? $banner_image['accent_text'] : '',
 				'accent_color'       => isset($banner_image['accent_color']) ? $banner_image['accent_color'] : '',
 				'primary_btn_text'   => isset($banner_image['primary_btn_text']) ? $banner_image['primary_btn_text'] : '',
-				'primary_btn_link'   => isset($banner_image['primary_btn_link']) ? $banner_image['primary_btn_link'] : '',
-				'primary_btn_text_color' => isset($banner_image['primary_btn_text_color']) ? $banner_image['primary_btn_text_color'] : '',
-				'primary_btn_bg_color'   => isset($banner_image['primary_btn_bg_color']) ? $banner_image['primary_btn_bg_color'] : '',
-				'secondary_btn_text' => isset($banner_image['secondary_btn_text']) ? $banner_image['secondary_btn_text'] : '',
-				'secondary_btn_link' => isset($banner_image['secondary_btn_link']) ? $banner_image['secondary_btn_link'] : '',
 				'image'              => $banner_image['image'],
 				'image_portrait'     => isset($banner_image['image_portrait']) ? $banner_image['image_portrait'] : '',
+				'link'               => isset($banner_image['link']) ? $banner_image['link'] : '',
 				'video_type'         => isset($banner_image['video_type']) ? $banner_image['video_type'] : '',
 				'video'              => isset($banner_image['video']) ? $banner_image['video'] : '',
 				'content_position'   => isset($banner_image['content_position']) ? $banner_image['content_position'] : 'left',
@@ -169,15 +165,11 @@ class ModelDesignBanner extends Model {
 
 	private function insertBannerImage($banner_id, $language_id, $banner_image) {
 		$image_portrait      = isset($banner_image['image_portrait']) ? $this->db->escape($banner_image['image_portrait']) : '';
+		$link                = isset($banner_image['link']) ? $this->db->escape($banner_image['link']) : '';
 		$subtitle            = isset($banner_image['subtitle']) ? $this->db->escape($banner_image['subtitle']) : '';
 		$accent_text         = isset($banner_image['accent_text']) ? $this->db->escape($banner_image['accent_text']) : '';
 		$accent_color        = isset($banner_image['accent_color']) ? $this->db->escape($banner_image['accent_color']) : '';
 		$primary_btn_text    = isset($banner_image['primary_btn_text']) ? $this->db->escape($banner_image['primary_btn_text']) : '';
-		$primary_btn_link    = isset($banner_image['primary_btn_link']) ? $this->db->escape($banner_image['primary_btn_link']) : '';
-		$primary_btn_text_color = isset($banner_image['primary_btn_text_color']) ? $this->db->escape($banner_image['primary_btn_text_color']) : '';
-		$primary_btn_bg_color   = isset($banner_image['primary_btn_bg_color']) ? $this->db->escape($banner_image['primary_btn_bg_color']) : '';
-		$secondary_btn_text  = isset($banner_image['secondary_btn_text']) ? $this->db->escape($banner_image['secondary_btn_text']) : '';
-		$secondary_btn_link  = isset($banner_image['secondary_btn_link']) ? $this->db->escape($banner_image['secondary_btn_link']) : '';
 		$video_type          = isset($banner_image['video_type']) ? $this->db->escape($banner_image['video_type']) : '';
 		$video               = isset($banner_image['video']) ? $this->db->escape($banner_image['video']) : '';
 		$content_position    = isset($banner_image['content_position']) ? $this->db->escape($banner_image['content_position']) : 'left';
@@ -190,13 +182,9 @@ class ModelDesignBanner extends Model {
 			accent_text = '"         . $accent_text . "',
 			accent_color = '"        . $accent_color . "',
 			primary_btn_text = '"    . $primary_btn_text . "',
-			primary_btn_link = '"    . $primary_btn_link . "',
-			primary_btn_text_color = '" . $primary_btn_text_color . "',
-			primary_btn_bg_color = '" . $primary_btn_bg_color . "',
-			secondary_btn_text = '"  . $secondary_btn_text . "',
-			secondary_btn_link = '"  . $secondary_btn_link . "',
 			image = '"               . $this->db->escape($banner_image['image']) . "',
 			image_portrait = '"      . $image_portrait . "',
+			link = '"                . $link . "',
 			video_type = '"          . $video_type . "',
 			video = '"               . $video . "',
 			content_position = '"   . $content_position . "',
@@ -219,16 +207,6 @@ class ModelDesignBanner extends Model {
 			"ALTER TABLE `" . DB_PREFIX . "banner_image` ADD `accent_color` varchar(16) NOT NULL DEFAULT '' AFTER `accent_text`");
 		$this->addColumnIfMissing(DB_PREFIX . 'banner_image', 'primary_btn_text',
 			"ALTER TABLE `" . DB_PREFIX . "banner_image` ADD `primary_btn_text` varchar(64) NOT NULL DEFAULT '' AFTER `accent_color`");
-		$this->addColumnIfMissing(DB_PREFIX . 'banner_image', 'primary_btn_link',
-			"ALTER TABLE `" . DB_PREFIX . "banner_image` ADD `primary_btn_link` varchar(255) NOT NULL DEFAULT '' AFTER `primary_btn_text`");
-		$this->addColumnIfMissing(DB_PREFIX . 'banner_image', 'primary_btn_text_color',
-			"ALTER TABLE `" . DB_PREFIX . "banner_image` ADD `primary_btn_text_color` varchar(16) NOT NULL DEFAULT '' AFTER `primary_btn_link`");
-		$this->addColumnIfMissing(DB_PREFIX . 'banner_image', 'primary_btn_bg_color',
-			"ALTER TABLE `" . DB_PREFIX . "banner_image` ADD `primary_btn_bg_color` varchar(16) NOT NULL DEFAULT '' AFTER `primary_btn_text_color`");
-		$this->addColumnIfMissing(DB_PREFIX . 'banner_image', 'secondary_btn_text',
-			"ALTER TABLE `" . DB_PREFIX . "banner_image` ADD `secondary_btn_text` varchar(64) NOT NULL DEFAULT '' AFTER `primary_btn_bg_color`");
-		$this->addColumnIfMissing(DB_PREFIX . 'banner_image', 'secondary_btn_link',
-			"ALTER TABLE `" . DB_PREFIX . "banner_image` ADD `secondary_btn_link` varchar(255) NOT NULL DEFAULT '' AFTER `secondary_btn_text`");
 		$this->addColumnIfMissing(DB_PREFIX . 'banner_image', 'image_portrait',
 			"ALTER TABLE `" . DB_PREFIX . "banner_image` ADD `image_portrait` varchar(255) NOT NULL DEFAULT '' AFTER `image`");
 		$this->addColumnIfMissing(DB_PREFIX . 'banner_image', 'video_type',
@@ -237,6 +215,8 @@ class ModelDesignBanner extends Model {
 			"ALTER TABLE `" . DB_PREFIX . "banner_image` ADD `video` varchar(255) NOT NULL DEFAULT '' AFTER `video_type`");
 		$this->addColumnIfMissing(DB_PREFIX . 'banner_image', 'content_position',
 			"ALTER TABLE `" . DB_PREFIX . "banner_image` ADD `content_position` varchar(16) NOT NULL DEFAULT 'left' AFTER `sort_order`");
+		$this->addColumnIfMissing(DB_PREFIX . 'banner_image', 'link',
+			"ALTER TABLE `" . DB_PREFIX . "banner_image` ADD `link` varchar(255) NOT NULL DEFAULT '' AFTER `image_portrait`");
 
 		// Expand title column if still varchar(64)
 		$this->db->query("ALTER TABLE `" . DB_PREFIX . "banner_image` MODIFY `title` varchar(255) NOT NULL");

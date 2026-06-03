@@ -1,4 +1,8 @@
 <section id="hero" class="relative w-full h-[56vh] min-h-[340px] max-h-[540px] overflow-hidden">
+  <style>
+    .hero-slide .banner-slide__btn--primary { pointer-events:auto; cursor:pointer; }
+    .hero-slide .banner-slide__btn--primary:hover { filter: brightness(0.85); transform: translateY(-2px); }
+  </style>
   <div id="hero-slides" class="relative w-full h-full">
     {% for banner in banners %}
     <div class="hero-slide absolute inset-0 transition-opacity duration-700 ease-in-out{% if not loop.first %} opacity-0{% endif %}" data-slide="{{ loop.index0 }}">
@@ -23,9 +27,10 @@
       <img src="{{ banner.image }}" alt="{{ banner.title }}" class="w-full h-full object-cover" loading="lazy" />
       {% endif %}
 
-      <div class="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent"></div>
+      <div class="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" style="pointer-events:none"></div>
+      {% if banner.link %}<a href="{{ banner.link }}" class="absolute inset-0 z-10" aria-label="{{ banner.title }}"></a>{% endif %}
 
-      <div class="absolute inset-0 flex items-center z-10">
+      <div class="absolute inset-0 flex items-center z-20" style="pointer-events:none">
         <div class="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 w-full">
           {% if banner.badge %}
           {%- set badge_color = banner.accent_color ? banner.accent_color : '' -%}
@@ -35,14 +40,11 @@
           {% if banner.subtitle %}
           <p class="text-gray-200 text-sm sm:text-base max-w-md mb-5">{{ banner.subtitle }}</p>
           {% endif %}
+          {% if banner.primary_btn_text %}
           <div class="flex flex-wrap gap-3">
-            {% if banner.primary_btn_text %}
-            <a href="{{ banner.primary_btn_link ?: '#' }}" class="banner-slide__btn--primary px-7 py-3 font-semibold rounded-xl shadow-lg transition text-sm"{% if banner.accent_color or banner.accent_bg or banner.primary_btn_bg_color or banner.primary_btn_text_color %} style="{% if banner.primary_btn_bg_color %}background-color: {{ banner.primary_btn_bg_color }}; border-color: {{ banner.primary_btn_bg_color }};{% elseif banner.accent_color %}--accent: {{ banner.accent_color }};{% endif %}{% if banner.primary_btn_text_color %} color: {{ banner.primary_btn_text_color }};{% endif %}"{% endif %}>{{ banner.primary_btn_text }}</a>
-            {% endif %}
-            {% if banner.secondary_btn_text %}
-            <a href="{{ banner.secondary_btn_link ?: '#' }}" class="px-7 py-3 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white font-semibold rounded-xl border border-white/30 transition text-sm">{{ banner.secondary_btn_text }}</a>
-            {% endif %}
+            <span class="banner-slide__btn--primary px-7 py-3 font-semibold rounded-xl shadow-lg transition text-sm" style="{% if banner.accent_color %}--accent: {{ banner.accent_color }}; color: {{ banner.badge_text_color }};{% endif %}">{{ banner.primary_btn_text }}</span>
           </div>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -50,14 +52,14 @@
   </div>
 
   {% if banners|length > 1 %}
-  <button onclick="prevSlide_{{ module }}()" class="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-sm border border-white/30 transition" aria-label="Previous">
+  <button onclick="prevSlide_{{ module }}()" class="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-2 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-sm border border-white/30 transition" aria-label="Previous">
     <i data-lucide="chevron-left" class="w-5 h-5 text-white"></i>
   </button>
-  <button onclick="nextSlide_{{ module }}()" class="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-sm border border-white/30 transition" aria-label="Next">
+  <button onclick="nextSlide_{{ module }}()" class="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-2 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-sm border border-white/30 transition" aria-label="Next">
     <i data-lucide="chevron-right" class="w-5 h-5 text-white"></i>
   </button>
 
-  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-30">
     {% for banner in banners %}
     <button class="hero-dot transition-all duration-500 ease-in-out {% if not loop.first %}opacity-50{% endif %}" style="{% if loop.first %}width:32px;{% else %}width:8px;opacity:0.5;{% endif %} height:8px; border-radius:999px; background:#ffffff;" data-dot="{{ loop.index0 }}" onclick="goToSlide_{{ module }}({{ loop.index0 }})" aria-label="Go to slide {{ loop.index }}"></button>
     {% endfor %}
@@ -105,6 +107,16 @@
 
       // wire dot clicks
       dots.forEach(d=> d.addEventListener('click', (e)=> window.goToSlide_{{ module }}(parseInt(e.target.dataset.dot))));
+
+      // decorative button click → navigate via slide link
+      document.getElementById('hero').addEventListener('click', function(e) {
+        var btn = e.target.closest('.banner-slide__btn--primary');
+        if (btn) {
+          var slide = btn.closest('.hero-slide');
+          var link = slide && slide.querySelector('a.z-10');
+          if (link) location.href = link.href;
+        }
+      });
 
       // init
       applyState(0);
