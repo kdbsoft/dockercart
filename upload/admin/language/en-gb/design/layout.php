@@ -44,3 +44,22 @@ $_['error_store']         = 'Warning: This layout cannot be deleted as it is cur
 $_['error_product']       = 'Warning: This layout cannot be deleted as it is currently assigned to %s products!';
 $_['error_category']      = 'Warning: This layout cannot be deleted as it is currently assigned to %s categories!';
 $_['error_information']   = 'Warning: This layout cannot be deleted as it is currently assigned to %s information pages!';
+
+// Builder
+$_['text_switch_to_builder']  = 'Switch to Modern Builder';
+$_['text_switch_to_classic']  = 'Switch to Classic View';
+$_['heading_title_builder']   = 'Layout Builder';
+$_['text_modules_palette']    = 'Modules';
+$_['text_drop_zone']          = 'Drop module here';
+$_['text_no_modules']         = 'No modules assigned';
+$_['text_add_module']         = 'Add Module';
+$_['text_preview_page']       = 'Preview Page';
+$_['text_properties']         = 'Properties';
+$_['text_select_module']      = 'Select a module to edit';
+$_['text_edit_module']        = 'Edit Module Settings';
+$_['text_remove_module']      = 'Remove Module';
+$_['text_position']           = 'Position';
+$_['text_sort_order']         = 'Sort Order';
+$_['button_builder_save']     = 'Save Layout';
+$_['text_back_to_layouts']    = 'Back to Layouts';
+$_['text_back_to_classic']    = 'Back to Classic Editor';
