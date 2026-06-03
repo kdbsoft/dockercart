@@ -323,6 +323,7 @@
                     {% if layout_module.position == 'column_right' %}
                     <tr id="module-row{{ module_row }}" class="module-drag-item">
                       <td class="text-center drag-handle" style="cursor: grab; padding: 8px 4px;"><i class="fa fa-bars"></i></td>
+                          <td class="text-left"><div class="input-group">
                           <select name="layout_module[{{ module_row }}][code]" class="form-control input-sm">
                             {% for extension in extensions %}
                             <optgroup label="{{ extension.name }}">
