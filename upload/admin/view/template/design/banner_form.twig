@@ -663,11 +663,15 @@ $(document).ready(function() {
   });
 
   $(document).on('dragstart', '.banner-slide-card', function(e) {
+    var $card = $(this);
+    if (!$card.hasClass('collapsed')) {
+      e.preventDefault();
+      return;
+    }
     if (!$(e.target).closest('.slide-drag-handle').length && e.target !== this) {
       e.preventDefault();
       return;
     }
-    var $card = $(this);
     var $list = $card.closest('[id^="slide-list-"]');
     $card.addClass('dragging');
     _dragCard = $card;
