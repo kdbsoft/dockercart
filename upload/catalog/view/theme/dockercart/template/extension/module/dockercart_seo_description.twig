@@ -1,0 +1,79 @@
+<section id="seo-description" class="py-10 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto">
+    <div class="dc-seo-desc__content">
+      {{ description }}
+    </div>
+    <div class="dc-seo-desc__actions">
+      <a href="#" class="dc-seo-desc__toggle" data-text-expand="{{ text_read_all }}" data-text-collapse="{{ text_collapse }}">{{ text_read_all }}</a>
+    </div>
+  </div>
+</section>
+
+<style>
+.dc-seo-desc__content {
+  max-height: 5.6em;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: #6b7280;
+}
+.dc-seo-desc__content.expanded {
+  max-height: 2000px;
+}
+.dc-seo-desc__content h1 { font-size: 1.25rem; }
+.dc-seo-desc__content h2 { font-size: 1.125rem; }
+.dc-seo-desc__content h3 { font-size: 1rem; }
+.dc-seo-desc__content h4 { font-size: 0.9375rem; }
+.dc-seo-desc__content h5 { font-size: 0.875rem; }
+.dc-seo-desc__content h6 { font-size: 0.8125rem; }
+.dc-seo-desc__content h1,
+.dc-seo-desc__content h2,
+.dc-seo-desc__content h3,
+.dc-seo-desc__content h4,
+.dc-seo-desc__content h5,
+.dc-seo-desc__content h6 {
+  line-height: 1.6;
+  font-weight: 600;
+  color: #374151;
+  margin: 0.5rem 0 0.25rem;
+}
+.dc-seo-desc__content p {
+  margin: 0 0 0.5rem;
+}
+.dc-seo-desc__content a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+.dc-seo-desc__actions {
+  text-align: center;
+  margin-top: 0.5rem;
+}
+.dc-seo-desc__toggle {
+  font-size: 0.75rem;
+  color: #2563eb;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+.dc-seo-desc__toggle:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.dc-seo-desc__toggle').forEach(function (link) {
+    link.addEventListener('click', function (e) {
+      e.preventDefault();
+      var section = this.closest('section');
+      var content = section.querySelector('.dc-seo-desc__content');
+      var isExpanded = content.classList.contains('expanded');
+
+      content.classList.toggle('expanded', !isExpanded);
+      this.textContent = isExpanded ? this.dataset.textExpand : this.dataset.textCollapse;
+    });
+  });
+});
+</script>
