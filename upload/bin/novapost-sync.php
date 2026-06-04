@@ -230,6 +230,7 @@ try {
 
 	// Flush discovered parent regions into region_map
 	flushDiscoveredRegions($pdo, $dbPrefix);
+	flushDiscoveredCities($pdo, $dbPrefix);
 
 	$status = $totalErrors > 0 ? 'partial' : 'success';
 
@@ -454,4 +455,24 @@ function flushDiscoveredRegions(PDO $pdo, string $prefix): void {
 	}
 
 	echo "Flushed " . count($discoveredRegions) . " unique parent regions to region_map.\n";
+}
+
+function flushDiscoveredCities(PDO $pdo, string $prefix): void {
+	$stmt = $pdo->prepare("
+		INSERT IGNORE INTO `{$prefix}dockercart_novapost_region_map`
+			(`novapost_region_id`, `country_code`, `novapost_region_name`, `city_name`)
+		SELECT DISTINCT m.city_ref, m.country_code, 'City-level mapping', m.city_name
+		FROM `{$prefix}dockercart_novapost_division` m
+		WHERE m.parent_region_id = ''
+			AND m.enabled = '1'
+			AND m.city_ref != ''
+			AND NOT EXISTS (
+				SELECT 1 FROM `{$prefix}dockercart_novapost_region_map` rm
+				WHERE rm.city_name != ''
+				AND rm.novapost_region_id = m.city_ref
+				AND rm.country_code = m.country_code
+			)
+	");
+	$stmt->execute();
+	echo "Flushed discovered cities to region_map.\n";
 }
