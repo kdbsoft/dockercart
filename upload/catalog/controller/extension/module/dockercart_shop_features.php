@@ -14,7 +14,11 @@ class ControllerExtensionModuleDockercartShopFeatures extends Controller {
             array('icon_bg' => 'bg-blue-100', 'icon_hover_bg' => 'group-hover:bg-blue-600', 'icon_text' => 'text-blue-600'),
             array('icon_bg' => 'bg-teal-100', 'icon_hover_bg' => 'group-hover:bg-teal-500', 'icon_text' => 'text-teal-600'),
             array('icon_bg' => 'bg-rose-100', 'icon_hover_bg' => 'group-hover:bg-rose-500', 'icon_text' => 'text-rose-500'),
-            array('icon_bg' => 'bg-indigo-100', 'icon_hover_bg' => 'group-hover:bg-indigo-600', 'icon_text' => 'text-indigo-600')
+            array('icon_bg' => 'bg-indigo-100', 'icon_hover_bg' => 'group-hover:bg-indigo-600', 'icon_text' => 'text-indigo-600'),
+            array('icon_bg' => 'bg-purple-100', 'icon_hover_bg' => 'group-hover:bg-purple-600', 'icon_text' => 'text-purple-600'),
+            array('icon_bg' => 'bg-green-100', 'icon_hover_bg' => 'group-hover:bg-green-600', 'icon_text' => 'text-green-600'),
+            array('icon_bg' => 'bg-orange-100', 'icon_hover_bg' => 'group-hover:bg-orange-600', 'icon_text' => 'text-orange-600'),
+            array('icon_bg' => 'bg-red-100', 'icon_hover_bg' => 'group-hover:bg-red-600', 'icon_text' => 'text-red-600'),
         );
 
         $data['features'] = array();
