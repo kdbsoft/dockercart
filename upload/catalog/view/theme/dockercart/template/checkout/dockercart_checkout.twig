@@ -2844,17 +2844,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Hide payment address fields
         paymentAddressSection.style.display = 'none';
 
-        // Only auto-save payment address as same as shipping if shipping address
-        // has been saved at least once to avoid loading payment methods prematurely.
-        if (window._lastSavedShipping) {
-          savePaymentAddressSameAsShipping();
-        } else {
-          // Provide user guidance in the payment methods area
-          const pmContainer = $('#payment-methods');
-          if (pmContainer) {
-            pmContainer.innerHTML = `<div class="text-sm text-text-secondary py-4">${window.dcLang?.fill_and_save_shipping_to_enable_payment || 'Please fill in and save your shipping address to enable payment methods.'}</div>`;
-          }
-        }
+        savePaymentAddressSameAsShipping();
       } else {
         // Show payment address fields
         paymentAddressSection.style.display = 'block';
@@ -2896,7 +2886,10 @@ document.addEventListener('DOMContentLoaded', () => {
             errHtml = String(json.error);
           }
           log('Error saving payment address:', errHtml);
-          // Don't alert, just log — payment methods will show error if needed
+          const pmContainer = $('#payment-methods');
+          if (pmContainer) {
+            pmContainer.innerHTML = `<div class="text-sm text-text-secondary py-4">${window.dcLang?.fill_and_save_shipping_to_enable_payment || 'Please fill in and save your shipping address to enable payment methods.'}</div>`;
+          }
         } else {
           // Payment address saved successfully, now load payment methods
           loadPaymentMethods();
