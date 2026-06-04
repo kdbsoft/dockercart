@@ -1,3 +1,9 @@
+## [1.40.1](https://github.com/mathflow-bit/dockercart/compare/v1.40.0...v1.40.1) (2026-06-03)
+
+### Bug Fixes
+
+* correct banner link parsing and resolution ([dd8433f](https://github.com/mathflow-bit/dockercart/commit/dd8433fd987c3f12da55b94228af4a06a5a72759))
+
 ## [1.40.0](https://github.com/mathflow-bit/dockercart/compare/v1.39.0...v1.40.0) (2026-06-03)
 
 ### Features
