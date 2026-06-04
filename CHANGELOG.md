@@ -1,3 +1,10 @@
+## [1.42.1](https://github.com/mathflow-bit/dockercart/compare/v1.42.0...v1.42.1) (2026-06-04)
+
+### Bug Fixes
+
+* add cache-busting to Nova Post assets ([dc3437c](https://github.com/mathflow-bit/dockercart/commit/dc3437c7843257367312d6a4cc180998107f7833))
+* use product currency for special and edit ([0351c4b](https://github.com/mathflow-bit/dockercart/commit/0351c4bda5f7d709fa7ecb290da0bdbd227d30c7))
+
 ## [1.42.0](https://github.com/mathflow-bit/dockercart/compare/v1.41.0...v1.42.0) (2026-06-04)
 
 ### Features
