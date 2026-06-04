@@ -2313,6 +2313,8 @@ document.addEventListener('DOMContentLoaded', () => {
         el.classList.remove('np-valid', 'np-invalid', 'border-error');
       }
     });
+    const ccb = $('#np-city-clear');
+    if (ccb) ccb.style.display = 'none';
     const nd = $('#np-division-wrapper');
     if (nd) nd.style.display = 'none';
   };

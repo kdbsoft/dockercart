@@ -79,6 +79,8 @@
       divisionData = [];
       if (cityInput) {
         cityInput.classList.remove('np-valid', 'np-invalid');
+        var cc = document.getElementById('np-city-clear');
+        if (cc) cc.style.display = 'none';
       }
       var addr = document.getElementById('input-address-1');
       if (addr) {
@@ -123,10 +125,41 @@
     if (wrapper) { wrapper.style.position = 'relative'; wrapper.appendChild(cityDropdown); }
     input.setAttribute('autocomplete', 'off');
 
+    var cityClearBtn = document.createElement('button');
+    cityClearBtn.type = 'button';
+    cityClearBtn.id = 'np-city-clear';
+    cityClearBtn.className = 'np-city-clear';
+    cityClearBtn.style.display = 'none';
+    cityClearBtn.setAttribute('aria-label', 'Clear');
+    cityClearBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+    if (wrapper) wrapper.appendChild(cityClearBtn);
+
+    function positionCityClearBtn() {
+      var wrapperRect = wrapper.getBoundingClientRect();
+      var inputRect = input.getBoundingClientRect();
+      var btnOffsetTop = inputRect.top - wrapperRect.top + (inputRect.height - 28) / 2;
+      cityClearBtn.style.top = btnOffsetTop + 'px';
+    }
+
+    cityClearBtn._position = positionCityClearBtn;
+
+    cityClearBtn.addEventListener('click', function () {
+      input.value = '';
+      input.classList.remove('np-valid', 'np-invalid');
+      cityValid = false;
+      cityClearBtn.style.display = 'none';
+      if (cityDropdown) cityDropdown.style.display = 'none';
+      resetDivision();
+      saveNP({ novapost_city: '' });
+      input.focus();
+    });
+
     input.addEventListener('input', function () {
       clearTimeout(cityTimer);
       cityValid = false;
       input.classList.remove('np-valid', 'np-invalid');
+      cityClearBtn.style.display = input.value.trim() ? 'flex' : 'none';
+      if (input.value.trim() && cityClearBtn._position) cityClearBtn._position();
       resetDivision();
 
       var val = input.value.trim();
@@ -182,6 +215,8 @@
     cityValid = true;
     lastValidCity = name;
     cityDropdown.style.display = 'none';
+    var cc = document.getElementById('np-city-clear');
+    if (cc) { cc.style.display = 'flex'; if (cc._position) cc._position(); }
     saveNP({ novapost_city: name });
     loadDivisions(name);
   }
@@ -495,6 +530,8 @@
     // Always clear all NovaPost validation state regardless of method
     if (cityDropdown) cityDropdown.style.display = 'none';
     if (cityEl) cityEl.classList.remove('np-valid', 'np-invalid');
+    var cc = document.getElementById('np-city-clear');
+    if (cc) cc.style.display = 'none';
     if (addr) addr.classList.remove('np-valid', 'np-invalid');
     if (divisionInput) divisionInput.classList.remove('np-valid', 'np-invalid');
     if (divisionDropdown) divisionDropdown.style.display = 'none';
@@ -587,6 +624,8 @@
     input.classList.remove('np-invalid');
     cityValid = true;
     lastValidCity = cityName;
+    var cc = document.getElementById('np-city-clear');
+    if (cc) { cc.style.display = 'flex'; if (cc._position) cc._position(); }
     saveNP({ novapost_city: cityName });
     resetDivision();
     loadDivisions(cityName);
