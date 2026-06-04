@@ -342,6 +342,7 @@ class ModelExtensionShippingDockercartNovapost extends Model {
 
 			$this->flushDiscoveredRegions();
 			$this->flushDiscoveredCities();
+			$this->applyDefaultMappings();
 
 			$status = $result['total_errors'] > 0 ? 'partial' : 'success';
 			$this->logSyncComplete($logId, $status, $result['total_loaded'], $result['total_errors']);
@@ -780,7 +781,7 @@ class ModelExtensionShippingDockercartNovapost extends Model {
 		$result = $this->db->query("
 			INSERT IGNORE INTO `" . DB_PREFIX . "dockercart_novapost_region_map`
 				(`novapost_region_id`, `country_code`, `novapost_region_name`, `city_name`)
-			SELECT DISTINCT '', m.country_code, 'City-level mapping',
+			SELECT DISTINCT m.city_ref, m.country_code, 'City-level mapping',
 				COALESCE(NULLIF(d.city_name, ''), m.city_name)
 			FROM `" . DB_PREFIX . "dockercart_novapost_division` m
 			LEFT JOIN `" . DB_PREFIX . "dockercart_novapost_division_description` d
@@ -790,8 +791,79 @@ class ModelExtensionShippingDockercartNovapost extends Model {
 				AND NOT EXISTS (
 					SELECT 1 FROM `" . DB_PREFIX . "dockercart_novapost_region_map` rm
 					WHERE rm.city_name != ''
-					AND rm.city_name = COALESCE(NULLIF(d.city_name, ''), m.city_name)
+					AND rm.novapost_region_id = m.city_ref
 					AND rm.country_code = m.country_code
+				)
+		");
+	}
+
+	private function applyDefaultMappings(): void {
+		$this->db->query("
+			INSERT INTO `" . DB_PREFIX . "dockercart_novapost_region_map`
+				(`novapost_region_id`, `country_code`, `novapost_region_name`, `city_name`, `oc_zone_id`)
+			VALUES
+				('398', 'UA', 'Vinnytska oblast', '', '3501'),
+				('399', 'UA', 'Volynska oblast', '', '3502'),
+				('400', 'UA', 'Dnipropetrovska oblast', '', '3484'),
+				('401', 'UA', 'Donetska oblast', '', '3485'),
+				('402', 'UA', 'Zhytomyrska oblast', '', '3505'),
+				('403', 'UA', 'Zakarpatska oblast', '', '3503'),
+				('404', 'UA', 'Zaporizka oblast', '', '3504'),
+				('405', 'UA', 'Ivano-Frankivska oblast', '', '3486'),
+				('406', 'UA', 'Kyivska oblast', '', '3491'),
+				('407', 'UA', 'Kirovohradska oblast', '', '3489'),
+				('409', 'UA', 'Lvivska oblast', '', '3493'),
+				('410', 'UA', 'Mykolaivska oblast', '', '3494'),
+				('411', 'UA', 'Odeska oblast', '', '3495'),
+				('412', 'UA', 'Poltavska oblast', '', '3496'),
+				('413', 'UA', 'Rivnenska oblast', '', '3497'),
+				('414', 'UA', 'Sumska oblast', '', '3499'),
+				('415', 'UA', 'Ternopilska oblast', '', '3500'),
+				('416', 'UA', 'Kharkivska oblast', '', '4224'),
+				('417', 'UA', 'Khersonska oblast', '', '3487'),
+				('418', 'UA', 'Khmelnytska oblast', '', '3488'),
+				('419', 'UA', 'Cherkaska oblast', '', '3480'),
+				('420', 'UA', 'Chernivetska oblast', '', '3482'),
+				('421', 'UA', 'Chernihivska oblast', '', '3481')
+			ON DUPLICATE KEY UPDATE `oc_zone_id` = VALUES(`oc_zone_id`)
+		");
+
+		$this->db->query("
+			UPDATE `" . DB_PREFIX . "dockercart_novapost_region_map`
+			SET `oc_zone_id` = CASE `novapost_region_id`
+				WHEN '110024' THEN '3491'
+				WHEN '112225' THEN '3501'
+				WHEN '114833' THEN '3484'
+				WHEN '115640' THEN '3505'
+				WHEN '116260' THEN '3504'
+				WHEN '117153' THEN '3486'
+				WHEN '118064' THEN '3490'
+				WHEN '119794' THEN '3489'
+				WHEN '121270' THEN '3502'
+				WHEN '121300' THEN '3493'
+				WHEN '122635' THEN '3494'
+				WHEN '125394' THEN '3495'
+				WHEN '127808' THEN '3496'
+				WHEN '128845' THEN '3497'
+				WHEN '131868' THEN '3499'
+				WHEN '132363' THEN '3500'
+				WHEN '133058' THEN '3503'
+				WHEN '133451' THEN '4224'
+				WHEN '133502' THEN '3487'
+				WHEN '133581' THEN '3488'
+				WHEN '134271' THEN '3480'
+				WHEN '134333' THEN '3482'
+				WHEN '134335' THEN '3481'
+			END
+			WHERE `country_code` = 'UA'
+				AND `city_name` != ''
+				AND `oc_zone_id` = '0'
+				AND `novapost_region_id` IN (
+					'110024', '112225', '114833', '115640', '116260',
+					'117153', '118064', '119794', '121270', '121300',
+					'122635', '125394', '127808', '128845', '131868',
+					'132363', '133058', '133451', '133502', '133581',
+					'134271', '134333', '134335'
 				)
 		");
 	}

@@ -315,11 +315,8 @@ class ModelExtensionShippingDockercartNovapost extends Model {
 				OR m.parent_region_id IN (
 					SELECT novapost_region_id FROM `" . DB_PREFIX . "dockercart_novapost_region_map` WHERE oc_zone_id = '" . $zoneId . "' AND city_name = ''
 				)
-				OR m.city_name IN (
-					SELECT city_name FROM `" . DB_PREFIX . "dockercart_novapost_region_map` WHERE oc_zone_id = '" . $zoneId . "' AND city_name != ''
-				)
-				OR d.city_name IN (
-					SELECT city_name FROM `" . DB_PREFIX . "dockercart_novapost_region_map` WHERE oc_zone_id = '" . $zoneId . "' AND city_name != ''
+				OR m.city_ref IN (
+					SELECT novapost_region_id FROM `" . DB_PREFIX . "dockercart_novapost_region_map` WHERE oc_zone_id = '" . $zoneId . "' AND city_name != ''
 				)
 			)";
 		}

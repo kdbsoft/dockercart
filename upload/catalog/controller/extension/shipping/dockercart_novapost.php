@@ -26,9 +26,23 @@ class ControllerExtensionShippingDockercartNovapost extends Controller {
 			$zoneId = $this->session->data['shipping_address']['zone_id'] ?? 0;
 		}
 
-		// Build zone->city map for auto-fill
+		// Build zone->city map for auto-fill (resolve localized city name)
+		$languageId = (int)$this->config->get('config_language_id');
 		$zoneCityMap = [];
-		$zoneMapQuery = $this->db->query("SELECT oc_zone_id, city_name FROM `" . DB_PREFIX . "dockercart_novapost_region_map` WHERE city_name != '' AND oc_zone_id > 0");
+		$zoneMapQuery = $this->db->query("
+			SELECT rm.oc_zone_id,
+				COALESCE(
+					(SELECT COALESCE(NULLIF(d.city_name, ''), m.city_name)
+					 FROM `" . DB_PREFIX . "dockercart_novapost_division` m
+					 LEFT JOIN `" . DB_PREFIX . "dockercart_novapost_division_description` d
+						ON d.division_id = m.division_id AND d.language_id = '" . (int)$languageId . "'
+					 WHERE m.city_ref = rm.novapost_region_id
+					 LIMIT 1),
+					rm.city_name
+				) AS city_name
+			FROM `" . DB_PREFIX . "dockercart_novapost_region_map` rm
+			WHERE rm.city_name != '' AND rm.oc_zone_id > 0
+		");
 		foreach ($zoneMapQuery->rows as $zmRow) {
 			$zoneCityMap[(int)$zmRow['oc_zone_id']] = $zmRow['city_name'];
 		}
@@ -105,9 +119,23 @@ class ControllerExtensionShippingDockercartNovapost extends Controller {
 		// Load language for frontend labels
 		$this->load->language('extension/shipping/dockercart_novapost');
 
-		// Build zone->city map for auto-fill
+		// Build zone->city map for auto-fill (resolve localized city name)
+		$languageId = (int)$this->config->get('config_language_id');
 		$zoneCityMap = [];
-		$zoneMapQuery = $this->db->query("SELECT oc_zone_id, city_name FROM `" . DB_PREFIX . "dockercart_novapost_region_map` WHERE city_name != '' AND oc_zone_id > 0");
+		$zoneMapQuery = $this->db->query("
+			SELECT rm.oc_zone_id,
+				COALESCE(
+					(SELECT COALESCE(NULLIF(d.city_name, ''), m.city_name)
+					 FROM `" . DB_PREFIX . "dockercart_novapost_division` m
+					 LEFT JOIN `" . DB_PREFIX . "dockercart_novapost_division_description` d
+						ON d.division_id = m.division_id AND d.language_id = '" . (int)$languageId . "'
+					 WHERE m.city_ref = rm.novapost_region_id
+					 LIMIT 1),
+					rm.city_name
+				) AS city_name
+			FROM `" . DB_PREFIX . "dockercart_novapost_region_map` rm
+			WHERE rm.city_name != '' AND rm.oc_zone_id > 0
+		");
 		foreach ($zoneMapQuery->rows as $zmRow) {
 			$zoneCityMap[(int)$zmRow['oc_zone_id']] = $zmRow['city_name'];
 		}
