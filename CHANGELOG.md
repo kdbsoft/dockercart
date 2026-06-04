@@ -1,3 +1,9 @@
+## [1.42.2](https://github.com/mathflow-bit/dockercart/compare/v1.42.1...v1.42.2) (2026-06-04)
+
+### Bug Fixes
+
+* **tailwind:** safelist dynamic shop feature palette ([17f877c](https://github.com/mathflow-bit/dockercart/commit/17f877c2b32dee81938369f7bb532adffd739a0c))
+
 ## [1.42.1](https://github.com/mathflow-bit/dockercart/compare/v1.42.0...v1.42.1) (2026-06-04)
 
 ### Bug Fixes
