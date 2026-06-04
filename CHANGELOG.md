@@ -1,3 +1,15 @@
+## [1.42.0](https://github.com/mathflow-bit/dockercart/compare/v1.41.0...v1.42.0) (2026-06-04)
+
+### Features
+
+* add SEO Description module ([d5ca1ea](https://github.com/mathflow-bit/dockercart/commit/d5ca1eac0fbf3d6c6773246c5429b5d6c5ff2056))
+
+### Bug Fixes
+
+* add name filter for admin information ([1ada604](https://github.com/mathflow-bit/dockercart/commit/1ada60420aaa425bec85aec2357dd5d55db79523))
+* always sync payment address for same-as-shipping ([fb4cde0](https://github.com/mathflow-bit/dockercart/commit/fb4cde06f1db95c91a62571cc724d7f36367c95c))
+* expand NP to Nova Poshta in Ukrainian strings ([fae5dcf](https://github.com/mathflow-bit/dockercart/commit/fae5dcffbf39588b9ace39e86c5fdad70a00b9c4))
+
 ## [1.41.0](https://github.com/mathflow-bit/dockercart/compare/v1.40.3...v1.41.0) (2026-06-04)
 
 ### Features
