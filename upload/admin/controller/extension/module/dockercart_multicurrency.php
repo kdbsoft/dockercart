@@ -716,12 +716,29 @@ class ControllerExtensionModuleDockercartMulticurrency extends Controller
                     );
 
                     if ($currency && $currency["code"] != $default_currency) {
-                        // Add currency code to price display if different from default
+                        // Re-format price with product's own currency
                         $product["price"] =
-                            $product["price"] .
+                            $this->currency->format(
+                                $product["price_raw"],
+                                $currency["code"],
+                                $currency["value"],
+                            ) .
                             ' <span class="label label-info">' .
                             $currency["code"] .
                             "</span>";
+
+                        // Re-format special price if exists
+                        if (!empty($product["special"]) && !empty($product["special_raw"])) {
+                            $product["special"] =
+                                $this->currency->format(
+                                    $product["special_raw"],
+                                    $currency["code"],
+                                    $currency["value"],
+                                ) .
+                                ' <span class="label label-info">' .
+                                $currency["code"] .
+                                "</span>";
+                        }
                     }
                 } else {
                     // No specific currency set, uses default
