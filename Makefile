@@ -3,7 +3,7 @@ include .env
 export
 endif
 
-.PHONY: help migrate up update standalone standalone-letsencrypt ssl letsencrypt letsencrypt-ftp ftp down logs logs-follow shell mariadb backup restore dump-init clean restart
+.PHONY: help migrate deps up update standalone standalone-letsencrypt ssl letsencrypt letsencrypt-ftp ftp down logs logs-follow shell mariadb backup restore dump-init clean restart
 
 ### Convenience variables
 COMPOSE := docker compose
@@ -44,6 +44,9 @@ migrate: ## Apply SQL migrations from docker/mysql/migrations (uses mariadb cont
 		$(COMPOSE) exec -T mariadb mariadb -u$${MARIADB_USER:-dockercart} -p$${MARIADB_PASSWORD:-dockercart_password} $${MARIADB_DATABASE:-dockercart} < "$$f" || { echo "Failed applying $$f"; exit 1; }; \
 	done; \
 	echo "Migrations applied."
+
+deps: ## Install/update Composer dependencies
+	@composer install --no-dev --optimize-autoloader
 
 migrate-blog: ## Run Journal Blog migration (scrapes donor site)
 	@cd migrate/journal_blog && $(COMPOSE) run --rm migrate $(ARGS)
