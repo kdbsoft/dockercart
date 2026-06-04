@@ -54,7 +54,7 @@ class ModelExtensionShippingDockercartNovapost extends Model {
 		$cartTotal = $this->cart->getSubTotal();
 
 		if ($cartWeight <= 0) {
-			return [];
+			$cartWeight = 1;
 		}
 
 		$countryCode = $this->getCountryCode($address['country_id'] ?? 0);
