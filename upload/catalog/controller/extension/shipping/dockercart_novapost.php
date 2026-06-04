@@ -68,9 +68,9 @@ class ControllerExtensionShippingDockercartNovapost extends Controller {
 			],
 		]);
 
-		$inject = '<link rel="stylesheet" href="catalog/view/theme/dockercart/stylesheet/nova_post_checkout.css" />' . "\n";
+		$inject = '<link rel="stylesheet" href="catalog/view/theme/dockercart/stylesheet/nova_post_checkout.css?v=' . DOCKERCART_VERSION . '" />' . "\n";
 		$inject .= '<script>window._novapost = ' . $npInit . ';</script>' . "\n";
-		$inject .= '<script src="catalog/view/javascript/dockercart_novapost_checkout.js" defer></script>' . "\n";
+		$inject .= '<script src="catalog/view/javascript/dockercart_novapost_checkout.js?v=' . DOCKERCART_VERSION . '" defer></script>' . "\n";
 		$output = str_replace('</head>', $inject . '</head>', $output);
 	}
 
