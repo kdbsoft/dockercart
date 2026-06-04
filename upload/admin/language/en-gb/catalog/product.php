@@ -24,6 +24,8 @@ $_['text_list_subtitle'] = 'Browse, filter and manage your products';
 
 $_['text_filter_subtitle'] = 'Narrow results by specific criteria';
 
+$_['text_filter_hint']    = 'You can enter part of the name or model to search';
+
 $_['text_add_product_subtitle'] = 'Add a new product to the catalog';
 
 $_['text_edit_product_subtitle'] = 'Edit product details and settings';
