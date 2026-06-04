@@ -1,3 +1,9 @@
+## [1.41.0](https://github.com/mathflow-bit/dockercart/compare/v1.40.3...v1.41.0) (2026-06-04)
+
+### Features
+
+* add default region mappings and improve city detection to NovaPost ([ec02568](https://github.com/mathflow-bit/dockercart/commit/ec0256898e024ab84d7c680507fcadfb34d1b4b7))
+
 ## [1.40.3](https://github.com/mathflow-bit/dockercart/compare/v1.40.2...v1.40.3) (2026-06-04)
 
 ### Bug Fixes
