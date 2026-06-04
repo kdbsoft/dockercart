@@ -1,3 +1,9 @@
+## [1.40.2](https://github.com/mathflow-bit/dockercart/compare/v1.40.1...v1.40.2) (2026-06-04)
+
+### Bug Fixes
+
+* add deps target and composer.lock hash check ([9a8c2ec](https://github.com/mathflow-bit/dockercart/commit/9a8c2ec7e5cf0da3f07a06bc17a0fc6b6e2d7e6d))
+
 ## [1.40.1](https://github.com/mathflow-bit/dockercart/compare/v1.40.0...v1.40.1) (2026-06-03)
 
 ### Bug Fixes
