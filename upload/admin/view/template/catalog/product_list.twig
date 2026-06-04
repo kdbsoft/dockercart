@@ -85,6 +85,11 @@
           <div class="filter-actions">
             <button type="button" id="button-filter" class="btn btn-default"><i class="fa fa-filter"></i> {{ button_filter }}</button>
           </div>
+          {% if text_filter_hint %}
+          <div class="filter-field" style="width:100%;flex-basis:100%;">
+            <small class="text-muted"><i class="fa fa-info-circle"></i> {{ text_filter_hint }}</small>
+          </div>
+          {% endif %}
         </div>
       </div>
     </div>
