@@ -1,3 +1,9 @@
+## [1.40.3](https://github.com/mathflow-bit/dockercart/compare/v1.40.2...v1.40.3) (2026-06-04)
+
+### Bug Fixes
+
+* handle zero cart weight in novapost shipping ([6ed5d2a](https://github.com/mathflow-bit/dockercart/commit/6ed5d2a4a7b07f9a9bdf3b8a3dff22ac76d67313))
+
 ## [1.40.2](https://github.com/mathflow-bit/dockercart/compare/v1.40.1...v1.40.2) (2026-06-04)
 
 ### Bug Fixes
