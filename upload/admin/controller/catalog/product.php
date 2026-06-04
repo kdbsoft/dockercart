@@ -496,12 +496,14 @@ class ControllerCatalogProduct extends Controller {
 			}
 
 			$special = false;
+			$special_raw = 0;
 
 			$product_specials = $this->model_catalog_product->getProductSpecials($result['product_id']);
 
 			foreach ($product_specials  as $product_special) {
 				if (($product_special['date_start'] == '0000-00-00' || strtotime($product_special['date_start']) < time()) && ($product_special['date_end'] == '0000-00-00' || strtotime($product_special['date_end']) > time())) {
 					$special = $this->currency->format($product_special['price'], $this->config->get('config_currency'));
+					$special_raw = $product_special['price'];
 
 					break;
 				}
@@ -518,6 +520,7 @@ class ControllerCatalogProduct extends Controller {
 				'price'       => $this->currency->format($result['price'], $this->config->get('config_currency')),
 				'price_raw'   => $result['price'],
 				'special'     => $special,
+				'special_raw' => $special_raw,
 				'quantity'    => $this->formatQuantityForDisplay($result['quantity']),
 				'quantity_raw'=> $result['quantity'],
 				'status'      => $result['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
@@ -1601,7 +1604,21 @@ class ControllerCatalogProduct extends Controller {
 				} else {
 					$this->model_catalog_product->updateProductField($product_id, array('price' => $normalized));
 					$json['success'] = true;
-					$json['value_html'] = $this->currency->format($normalized, $this->config->get('config_currency'));
+
+					$this->load->model('localisation/currency');
+					$product_query = $this->db->query("SELECT currency_id FROM " . DB_PREFIX . "product WHERE product_id = '" . (int)$product_id . "'");
+
+					if ($product_query->num_rows && $product_query->row['currency_id']) {
+						$product_currency = $this->model_localisation_currency->getCurrency($product_query->row['currency_id']);
+
+						if ($product_currency && $product_currency['code'] !== $this->config->get('config_currency')) {
+							$json['value_html'] = $this->currency->format($normalized, $product_currency['code'], $product_currency['value']) . ' <span class="label label-info">' . $product_currency['code'] . '</span>';
+						} else {
+							$json['value_html'] = $this->currency->format($normalized, $this->config->get('config_currency'));
+						}
+					} else {
+						$json['value_html'] = $this->currency->format($normalized, $this->config->get('config_currency'));
+					}
 				}
 			} elseif ($field === 'model') {
 				$val = trim((string)$value);
