@@ -57,11 +57,6 @@ elif [ "$LOCAL" = "$BASE" ]; then
 	log "Pulling updates (fast-forward only)..."
 	git pull --ff-only origin "$BRANCH"
 	log "Code updated successfully."
-
-	# Install/update Composer dependencies before recreating container,
-	# so the entrypoint skips it (hash matches) and startup is fast.
-	composer install --no-dev --optimize-autoloader
-
 	# Single-file bind mounts (e.g. VERSION) are bound by inode at container creation time.
 	# git pull replaces files with new inodes, so the running container keeps reading the
 	# old content.  Force-recreate apache to re-bind all single-file mounts to their
