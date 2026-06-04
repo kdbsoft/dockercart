@@ -65,12 +65,31 @@ fix_permissions() {
 	echo "Permissions fixed!"
 }
 
-# Install Composer dependencies if vendor directory is missing (fresh clone / first start)
+# Install Composer dependencies when composer.lock changes
 install_composer_deps() {
-	if [ -f /var/www/composer.json ] && [ ! -f /var/www/storage/vendor/autoload.php ]; then
-		echo "Composer dependencies not found — installing..."
-		cd /var/www && composer install --no-dev --optimize-autoloader --no-interaction
+	if [ ! -f /var/www/composer.lock ]; then
+		return
+	fi
+
+	LOCK_HASH=$(md5sum /var/www/composer.lock | cut -d' ' -f1)
+	STORED_HASH=""
+	HASH_FILE="/var/www/storage/vendor/.lock_hash"
+
+	if [ -f "$HASH_FILE" ]; then
+		STORED_HASH=$(cat "$HASH_FILE")
+	fi
+
+	if [ "$LOCK_HASH" != "$STORED_HASH" ]; then
+		echo "composer.lock changed — installing dependencies..."
+		cd /var/www && composer install --no-dev --optimize-autoloader --no-interaction || {
+			echo "ERROR: Composer install failed!"
+			exit 1
+		}
+		echo "$LOCK_HASH" > "$HASH_FILE"
+		chmod 664 "$HASH_FILE" 2>/dev/null || true
 		echo "Composer dependencies installed."
+	else
+		echo "Composer dependencies up to date."
 	fi
 }
 
