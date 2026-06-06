@@ -147,7 +147,7 @@ Disallow: /
 EOF
 
     if [ "$(id -u)" -eq 0 ]; then
-        chown www-data:www-data "$robots_file" 2>/dev/null || true
+        chown www-data:staff "$robots_file" 2>/dev/null || true
         chmod 664 "$robots_file" 2>/dev/null || true
     fi
 }
@@ -294,7 +294,7 @@ PHP
     fi
 
     if [ "$(id -u)" -eq 0 ]; then
-        chown www-data:www-data "$root_config" "$admin_config" 2>/dev/null || true
+        chown www-data:staff "$root_config" "$admin_config" 2>/dev/null || true
         chmod 664 "$root_config" "$admin_config" 2>/dev/null || true
     fi
 }
