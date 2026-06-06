@@ -1,3 +1,9 @@
+## [1.42.3](https://github.com/mathflow-bit/dockercart/compare/v1.42.2...v1.42.3) (2026-06-04)
+
+### Bug Fixes
+
+* ensure banner link spans full width ([6f41ee1](https://github.com/mathflow-bit/dockercart/commit/6f41ee1497565ecbe3f70ad89c61c735588cf9f5))
+
 ## [1.42.2](https://github.com/mathflow-bit/dockercart/compare/v1.42.1...v1.42.2) (2026-06-04)
 
 ### Bug Fixes
