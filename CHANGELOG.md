@@ -1,3 +1,10 @@
+## [1.42.5](https://github.com/mathflow-bit/dockercart/compare/v1.42.4...v1.42.5) (2026-06-06)
+
+### Bug Fixes
+
+* avoid duplicate address in NovaPost division ([c23e961](https://github.com/mathflow-bit/dockercart/commit/c23e96133fb3cff2becbf87b63883811bf5d5c2b))
+* update healthcheck URL to /health ([25f26a0](https://github.com/mathflow-bit/dockercart/commit/25f26a0ea6aad797b03b7bb49f66acbb3586aa58))
+
 ## [1.42.4](https://github.com/mathflow-bit/dockercart/compare/v1.42.3...v1.42.4) (2026-06-06)
 
 ## [1.42.3](https://github.com/mathflow-bit/dockercart/compare/v1.42.2...v1.42.3) (2026-06-04)
