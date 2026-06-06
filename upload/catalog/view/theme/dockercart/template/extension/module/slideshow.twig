@@ -1,11 +1,7 @@
 <section id="hero" class="relative w-full h-[56vh] min-h-[340px] max-h-[540px] overflow-hidden">
-  <style>
-    .hero-slide .banner-slide__btn--primary { cursor:pointer; }
-    .hero-slide .banner-slide__btn--primary:hover { filter: brightness(0.85); transform: translateY(-2px); }
-  </style>
   <div id="hero-slides" class="relative w-full h-full">
     {% for banner in banners %}
-    <div class="hero-slide absolute inset-0 transition-opacity duration-700 ease-in-out{% if not loop.first %} opacity-0{% endif %}" data-slide="{{ loop.index0 }}">
+    <div class="hero-slide absolute inset-0 transition-opacity duration-700 ease-in-out{% if not loop.first %} opacity-0{% endif %}{% if banner.link %} cursor-pointer{% endif %}" data-slide="{{ loop.index0 }}"{% if banner.link %} data-slide-link="{{ banner.link }}"{% endif %}>
       {% if banner.video_type == 'youtube' and banner.video_url %}
       <iframe src="{{ banner.video_url }}"
         class="absolute inset-0 w-full h-full"
@@ -28,9 +24,8 @@
       {% endif %}
 
       <div class="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" style="pointer-events:none"></div>
-      {% if banner.link %}<a href="{{ banner.link }}" class="absolute inset-0 z-10" aria-label="{{ banner.title }}"></a>{% endif %}
 
-      <div class="absolute inset-0 flex items-center z-20" style="pointer-events:none">
+      <div class="absolute inset-0 flex items-center z-20">
         <div class="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 w-full">
           {% if banner.badge %}
           {%- set badge_color = banner.accent_color ? banner.accent_color : '' -%}
@@ -40,9 +35,9 @@
           {% if banner.subtitle %}
           <p class="text-gray-200 text-sm sm:text-base max-w-md mb-5">{{ banner.subtitle }}</p>
           {% endif %}
-          {% if banner.primary_btn_text %}
+          {% if banner.primary_btn_text and banner.link %}
           <div class="flex flex-wrap gap-3">
-            <span class="banner-slide__btn--primary px-7 py-3 font-semibold rounded-xl shadow-lg transition text-sm" style="{% if banner.accent_color %}--accent: {{ banner.accent_color }}; color: {{ banner.badge_text_color }};{% endif %}">{{ banner.primary_btn_text }}</span>
+            <a href="{{ banner.link }}" class="banner-slide__btn--primary px-7 py-3 font-semibold rounded-xl shadow-lg transition text-sm inline-block" style="{% if banner.accent_color %}--accent: {{ banner.accent_color }}; color: {{ banner.badge_text_color }};{% endif %}">{{ banner.primary_btn_text }}</a>
           </div>
           {% endif %}
         </div>
@@ -108,14 +103,11 @@
       // wire dot clicks
       dots.forEach(d=> d.addEventListener('click', (e)=> window.goToSlide_{{ module }}(parseInt(e.target.dataset.dot))));
 
-      // decorative button click → navigate via slide link
+      // slide click → navigate (skip if target is a link or button)
       document.getElementById('hero').addEventListener('click', function(e) {
-        var btn = e.target.closest('.banner-slide__btn--primary');
-        if (btn) {
-          var slide = btn.closest('.hero-slide');
-          var link = slide && slide.querySelector('a.z-10');
-          if (link) location.href = link.href;
-        }
+        if (e.target.closest('a, button')) return;
+        var slide = e.target.closest('.hero-slide');
+        if (slide && slide.dataset.slideLink) location.href = slide.dataset.slideLink;
       });
 
       // init
