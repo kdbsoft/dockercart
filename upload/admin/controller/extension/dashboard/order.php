@@ -237,9 +237,10 @@ class ControllerExtensionDashboardOrder extends Controller {
 			return;
 		}
 
+		$cond = $this->getCompleteStatusCondition();
+
 		switch ($period) {
 			case 'today':
-				$cond = $this->getCompleteStatusCondition();
 			$sql = "SELECT HOUR(date_added) AS bucket, COUNT(*) AS val FROM `" . DB_PREFIX . "order` WHERE " . $cond . " AND DATE(date_added) = CURDATE() GROUP BY HOUR(date_added) ORDER BY HOUR(date_added) ASC";
 				$result = $this->db->query($sql);
 				$raw = array();
