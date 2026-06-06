@@ -4,9 +4,9 @@
 
 | Version | Supported |
 |---|---|
-| 1.0.x (current) | ✅ Yes |
+| 1.x.x (current) | ✅ Yes |
 
-Only the latest `1.0.x` release line receives security fixes.
+Only the latest `1.x.x` release line receives security fixes.
 
 ---
 
