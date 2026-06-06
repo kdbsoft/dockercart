@@ -153,20 +153,21 @@ class ControllerMarketplaceExtension extends Controller {
 						}
 					}
 
-					$extensions[] = array(
-						'code'           => $code,
-						'name'           => $name,
-						'installed'      => $installed,
-						'status_raw'     => $status_raw,
-						'status'         => $status_text,
-						'edit'           => $edit_url,
-						'install_url'    => $this->url->link('marketplace/extension/install', 'user_token=' . $this->session->data['user_token'] . '&type=' . $type . '&extension=' . $code, true),
-						'uninstall_url'  => $this->url->link('marketplace/extension/uninstall', 'user_token=' . $this->session->data['user_token'] . '&type=' . $type . '&extension=' . $code, true),
-						'instance_count' => $instance_count,
-						'instances'      => $instances,
-						'sort_order'     => $sort_order,
-						'ext_link'       => $ext_link,
-					);
+				$extensions[] = array(
+					'code'           => $code,
+					'name'           => $name,
+					'installed'      => $installed,
+					'status_raw'     => $status_raw,
+					'status'         => $status_text,
+					'edit'           => $edit_url,
+					'install_url'    => $this->url->link('marketplace/extension/install', 'user_token=' . $this->session->data['user_token'] . '&type=' . $type . '&extension=' . $code, true),
+					'uninstall_url'  => $this->url->link('marketplace/extension/uninstall', 'user_token=' . $this->session->data['user_token'] . '&type=' . $type . '&extension=' . $code, true),
+					'instance_count' => $instance_count,
+					'instances'      => $instances,
+					'sort_order'     => $sort_order,
+					'ext_link'       => $ext_link,
+					'is_official'    => (strpos($code, 'dockercart_') === 0),
+				);
 				}
 
 				// Sort by name

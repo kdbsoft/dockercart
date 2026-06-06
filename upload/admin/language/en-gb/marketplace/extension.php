@@ -19,6 +19,7 @@ $_['text_confirm']           = 'Are you sure you want to uninstall this extensio
 $_['text_confirm_instance']  = 'Are you sure you want to delete this module instance?';
 $_['text_enabled']    = 'Enabled';
 $_['text_disabled']   = 'Disabled';
+$_['text_official']   = 'Official';
 $_['text_home']       = 'Home';
 // Subtitle
 
