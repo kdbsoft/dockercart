@@ -107,12 +107,17 @@ class ControllerExtensionDashboardChart extends Controller {
 
 		$this->load->model('extension/dashboard/chart');
 
+		$currency_code = $this->config->get('config_currency');
+		$currency_query = $this->db->query("SELECT symbol_left, symbol_right FROM `" . DB_PREFIX . "currency` WHERE code = '" . $this->db->escape($currency_code) . "'");
+
 		$json = array(
 			'labels' => array(),
 			'completed' => array(),
 			'pending' => array(),
 			'total' => array(),
-			'revenue' => array()
+			'revenue' => array(),
+			'currency_symbol_left' => $currency_query->num_rows ? $currency_query->row['symbol_left'] : '$',
+			'currency_symbol_right' => $currency_query->num_rows ? $currency_query->row['symbol_right'] : ''
 		);
 
 		switch ($range) {
