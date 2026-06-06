@@ -6,6 +6,7 @@ $_['heading_title']    = 'DockerCart Blog - Последние статьи';
 $_['text_extension']   = 'Расширения';
 $_['text_success']     = 'Настройки модуля "Последние статьи блога" успешно обновлены!';
 $_['text_edit']        = 'Редактирование модуля "Последние статьи блога"';
+$_['text_default_module_name'] = 'DockerCart Blog - Последние статьи';
 $_['text_enabled']     = 'Включено';
 $_['text_disabled']    = 'Отключено';
 $_['text_all_categories'] = 'Все категории';

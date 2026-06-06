@@ -32,6 +32,11 @@ class ControllerExtensionModuleDockercartNewsletter extends Controller {
         if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
             $module_data = $this->request->post;
 
+            $language_id = (int)$this->config->get('config_language_id');
+            if (isset($module_data['name_translation'][$language_id])) {
+                $module_data['name'] = $module_data['name_translation'][$language_id];
+            }
+
             if (isset($module_data['module_settings']) && is_array($module_data['module_settings'])) {
                 foreach ($multilingual_fields as $field) {
                     $module_data[$field] = array();
@@ -113,8 +118,34 @@ class ControllerExtensionModuleDockercartNewsletter extends Controller {
             $module_info = array();
         }
 
+        if (isset($this->request->post['name_translation'])) {
+            $data['name_translation'] = $this->request->post['name_translation'];
+        } elseif (!empty($module_info) && isset($module_info['name_translation']) && is_array($module_info['name_translation'])) {
+            $data['name_translation'] = $module_info['name_translation'];
+        } else {
+            $data['name_translation'] = array();
+        }
+
+        $language_id = (int)$this->config->get('config_language_id');
+
+        if (isset($this->request->post['name'])) {
+            $data['name'] = $this->request->post['name'];
+        } elseif (!empty($module_info)) {
+            $data['name'] = isset($data['name_translation'][$language_id]) && $data['name_translation'][$language_id] !== ''
+                ? $data['name_translation'][$language_id]
+                : (isset($module_info['name']) ? $module_info['name'] : $this->language->get('text_default_module_name'));
+        } else {
+            $data['name'] = $this->language->get('text_default_module_name');
+        }
+
+        foreach ($data['languages'] as $lang) {
+            $lid = (int)$lang['language_id'];
+            if (!isset($data['name_translation'][$lid])) {
+                $data['name_translation'][$lid] = !empty($module_info) && isset($module_info['name']) ? $module_info['name'] : $this->language->get('text_default_module_name');
+            }
+        }
+
         $defaults = array(
-            'name' => $this->language->get('text_default_module_name'),
             'status' => 1
         );
 
@@ -410,7 +441,9 @@ class ControllerExtensionModuleDockercartNewsletter extends Controller {
             $this->error['warning'] = $this->language->get('error_permission');
         }
 
-        if ((utf8_strlen($this->request->post['name']) < 3) || (utf8_strlen($this->request->post['name']) > 64)) {
+        $language_id = (int)$this->config->get('config_language_id');
+        $name_value = isset($this->request->post['name_translation'][$language_id]) ? $this->request->post['name_translation'][$language_id] : '';
+        if ((utf8_strlen($name_value) < 3) || (utf8_strlen($name_value) > 64)) {
             $this->error['name'] = $this->language->get('error_name');
         }
 

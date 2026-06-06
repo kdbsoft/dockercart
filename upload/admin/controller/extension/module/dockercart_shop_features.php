@@ -19,6 +19,11 @@ class ControllerExtensionModuleDockercartShopFeatures extends Controller {
             $module_data = $this->request->post;
             $module_data['features'] = $this->normalizeFeatures(isset($module_data['features']) ? $module_data['features'] : array(), $data['languages']);
 
+            $language_id = (int)$this->config->get('config_language_id');
+            if (isset($module_data['name_translation'][$language_id])) {
+                $module_data['name'] = $module_data['name_translation'][$language_id];
+            }
+
             if ($selected_module_id > 0) {
                 $this->model_setting_module->editModule($selected_module_id, $module_data);
                 $saved_module_id = $selected_module_id;
@@ -74,8 +79,34 @@ class ControllerExtensionModuleDockercartShopFeatures extends Controller {
             }
         }
 
+        if (isset($this->request->post['name_translation'])) {
+            $data['name_translation'] = $this->request->post['name_translation'];
+        } elseif (!empty($module_info) && isset($module_info['name_translation']) && is_array($module_info['name_translation'])) {
+            $data['name_translation'] = $module_info['name_translation'];
+        } else {
+            $data['name_translation'] = array();
+        }
+
+        $language_id = (int)$this->config->get('config_language_id');
+
+        if (isset($this->request->post['name'])) {
+            $data['name'] = $this->request->post['name'];
+        } elseif (!empty($module_info)) {
+            $data['name'] = isset($data['name_translation'][$language_id]) && $data['name_translation'][$language_id] !== ''
+                ? $data['name_translation'][$language_id]
+                : (isset($module_info['name']) ? $module_info['name'] : $this->language->get('text_default_module_name'));
+        } else {
+            $data['name'] = $this->language->get('text_default_module_name');
+        }
+
+        foreach ($data['languages'] as $lang) {
+            $lid = (int)$lang['language_id'];
+            if (!isset($data['name_translation'][$lid])) {
+                $data['name_translation'][$lid] = !empty($module_info) && isset($module_info['name']) ? $module_info['name'] : $this->language->get('text_default_module_name');
+            }
+        }
+
         $defaults = array(
-            'name' => $this->language->get('text_default_module_name'),
             'status' => 1,
             'section_title' => array(),
             'section_subtitle' => array()
@@ -104,10 +135,16 @@ class ControllerExtensionModuleDockercartShopFeatures extends Controller {
 
         foreach ($modules as $module) {
             $module_id = isset($module['module_id']) ? (int)$module['module_id'] : 0;
+            $setting_info = $module['setting'] ? json_decode($module['setting'], true) : array();
+            $widget_name = !empty($module['name']) ? $module['name'] : $this->language->get('text_default_module_name') . ' #' . $module_id;
+
+            if (isset($setting_info['name_translation'][$language_id]) && $setting_info['name_translation'][$language_id] !== '') {
+                $widget_name = $setting_info['name_translation'][$language_id];
+            }
 
             $data['widgets'][] = array(
                 'module_id' => $module_id,
-                'name' => !empty($module['name']) ? $module['name'] : $this->language->get('text_default_module_name') . ' #' . $module_id,
+                'name' => $widget_name,
                 'href' => $this->url->link('extension/module/dockercart_shop_features', 'user_token=' . $this->session->data['user_token'] . '&module_id=' . $module_id, true),
                 'active' => ($selected_module_id === $module_id)
             );
@@ -142,7 +179,9 @@ class ControllerExtensionModuleDockercartShopFeatures extends Controller {
             $this->error['warning'] = $this->language->get('error_permission');
         }
 
-        if ((utf8_strlen($this->request->post['name']) < 3) || (utf8_strlen($this->request->post['name']) > 64)) {
+        $language_id = (int)$this->config->get('config_language_id');
+        $name_value = isset($this->request->post['name_translation'][$language_id]) ? $this->request->post['name_translation'][$language_id] : '';
+        if ((utf8_strlen($name_value) < 3) || (utf8_strlen($name_value) > 64)) {
             $this->error['name'] = $this->language->get('error_name');
         }
 
