@@ -67,6 +67,7 @@ elif [ "$LOCAL" = "$BASE" ]; then
 	# Refresh OCMOD modifications to match new code
 	log "Refreshing OCMOD modifications..."
 	docker compose exec -T apache php /var/www/html/admin/cli/dockercart_modification_refresh.php
+	docker compose exec -T apache chown -R www-data:staff /var/www/storage/modification/
 elif [ "$REMOTE" = "$BASE" ]; then
     log "Local branch is ahead of origin. Skipping pull."
 else
