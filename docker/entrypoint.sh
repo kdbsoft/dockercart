@@ -40,6 +40,9 @@ fix_permissions() {
         chmod -R 2775 /var/www/storage/ || true
         chmod -R 2777 /var/www/html/image/cache/ || true
 
+        # Ensure modification cache is owned by www-data (refresh runs as root)
+        chown -R www-data:staff /var/www/storage/modification/ || true
+
         # Final safety net for restrictive host FS mappings
         find /var/www/html/image/cache -type d -exec chmod 2777 {} \; || true
         find /var/www/html/image/cache -type f -exec chmod 666 {} \; || true
@@ -459,6 +462,7 @@ apply_php_settings
 # Перестраиваем OCMOD модификации (читает XML из БД и файлов, пересоздаёт кэш)
 echo "Refreshing OCMOD modifications..."
 php /var/www/html/admin/cli/dockercart_modification_refresh.php || echo "WARNING: OCMOD modification refresh failed (non-fatal)"
+chown -R www-data:staff /var/www/storage/modification/ || true
 
 # Запускаем фоновую индексацию Manticore (не блокирует Apache)
 initialize_manticore_index
