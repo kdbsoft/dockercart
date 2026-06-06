@@ -143,21 +143,27 @@ class ControllerExtensionExtensionModule extends Controller {
 
 				$modules = $this->model_setting_module->getModulesByCode($extension);
 
-				foreach ($modules as $module) {
-					if ($module['setting']) {
-						$setting_info = json_decode($module['setting'], true);
-					} else {
-						$setting_info = array();
-					}
-					
-					$module_data[] = array(
-						'module_id' => $module['module_id'],
-						'name'      => $module['name'],
-						'status'    => (isset($setting_info['status']) && $setting_info['status']) ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
-						'edit'      => $this->url->link('extension/module/' . $extension, 'user_token=' . $this->session->data['user_token'] . '&module_id=' . $module['module_id'], true),
-						'delete'    => $this->url->link('extension/extension/module/delete', 'user_token=' . $this->session->data['user_token'] . '&module_id=' . $module['module_id'], true)
-					);
+			foreach ($modules as $module) {
+				if ($module['setting']) {
+					$setting_info = json_decode($module['setting'], true);
+				} else {
+					$setting_info = array();
 				}
+
+				$module_name = $module['name'];
+				$language_id = (int)$this->config->get('config_language_id');
+				if (isset($setting_info['name_translation'][$language_id]) && $setting_info['name_translation'][$language_id] !== '') {
+					$module_name = $setting_info['name_translation'][$language_id];
+				}
+				
+				$module_data[] = array(
+					'module_id' => $module['module_id'],
+					'name'      => $module_name,
+					'status'    => (isset($setting_info['status']) && $setting_info['status']) ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
+					'edit'      => $this->url->link('extension/module/' . $extension, 'user_token=' . $this->session->data['user_token'] . '&module_id=' . $module['module_id'], true),
+					'delete'    => $this->url->link('extension/extension/module/delete', 'user_token=' . $this->session->data['user_token'] . '&module_id=' . $module['module_id'], true)
+				);
+			}
 
 				$data['extensions'][] = array(
 					'name'      => $this->language->get('extension')->get('heading_title'),

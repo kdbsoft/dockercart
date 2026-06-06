@@ -6,6 +6,7 @@ $_['heading_title']    = 'Latest';
 $_['text_extension']   = 'Extensions';
 $_['text_success']     = 'Success: You have modified latest module!';
 $_['text_edit']        = 'Edit Latest Module';
+$_['text_default_module_name'] = 'Latest';
 // Subtitle
 
 $_['text_edit_subtitle'] = 'Configure extension settings and options';

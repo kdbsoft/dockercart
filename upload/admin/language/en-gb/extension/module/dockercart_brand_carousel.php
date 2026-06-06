@@ -6,6 +6,7 @@ $_['heading_title']       = 'DockerCart Brand Carousel';
 $_['text_extension']      = 'Extensions';
 $_['text_success']        = 'Success: You have modified brand carousel module!';
 $_['text_edit']           = 'Edit Brand Carousel Module';
+$_['text_default_module_name'] = 'DockerCart Brand Carousel';
 $_['text_enabled']        = 'Enabled';
 $_['text_disabled']       = 'Disabled';
 $_['text_home']           = 'Home';

@@ -20,9 +20,17 @@ class ControllerExtensionModuleDockercartBlogLatest extends Controller {
 
 		$this->load->model('setting/setting');
 		$this->load->model('setting/module');
+		$this->load->model('localisation/language');
+
+		$data['languages'] = $this->model_localisation_language->getLanguages();
 
 		// Save settings
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
+			$language_id = (int)$this->config->get('config_language_id');
+			if (isset($this->request->post['name_translation'][$language_id])) {
+				$this->request->post['name'] = $this->request->post['name_translation'][$language_id];
+			}
+
 			if (!isset($this->request->get['module_id'])) {
 				$this->model_setting_module->addModule('dockercart_blog_latest', $this->request->post);
 			} else {
@@ -34,7 +42,6 @@ class ControllerExtensionModuleDockercartBlogLatest extends Controller {
 		}
 
 		// Prepare data for view
-		$data = array();
 
 		// Language strings
 		$data['heading_title'] = $this->language->get('heading_title');
@@ -91,12 +98,31 @@ class ControllerExtensionModuleDockercartBlogLatest extends Controller {
 			$module_info = $this->model_setting_module->getModule($this->request->get['module_id']);
 		}
 
+		if (isset($this->request->post['name_translation'])) {
+			$data['name_translation'] = $this->request->post['name_translation'];
+		} elseif (!empty($module_info) && isset($module_info['name_translation']) && is_array($module_info['name_translation'])) {
+			$data['name_translation'] = $module_info['name_translation'];
+		} else {
+			$data['name_translation'] = array();
+		}
+
+		$language_id = (int)$this->config->get('config_language_id');
+
 		if (isset($this->request->post['name'])) {
 			$data['name'] = $this->request->post['name'];
 		} elseif (!empty($module_info)) {
-			$data['name'] = $module_info['name'];
+			$data['name'] = isset($data['name_translation'][$language_id]) && $data['name_translation'][$language_id] !== ''
+				? $data['name_translation'][$language_id]
+				: $module_info['name'];
 		} else {
-			$data['name'] = '';
+			$data['name'] = $this->language->get('heading_title');
+		}
+
+		foreach ($data['languages'] as $lang) {
+			$lid = (int)$lang['language_id'];
+			if (!isset($data['name_translation'][$lid])) {
+				$data['name_translation'][$lid] = !empty($module_info) ? $module_info['name'] : $this->language->get('heading_title');
+			}
 		}
 
 		if (isset($this->request->post['limit'])) {
@@ -140,7 +166,9 @@ class ControllerExtensionModuleDockercartBlogLatest extends Controller {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
-		if ((utf8_strlen($this->request->post['name']) < 3) || (utf8_strlen($this->request->post['name']) > 64)) {
+		$language_id = (int)$this->config->get('config_language_id');
+		$name_value = isset($this->request->post['name_translation'][$language_id]) ? $this->request->post['name_translation'][$language_id] : '';
+		if ((utf8_strlen($name_value) < 3) || (utf8_strlen($name_value) > 64)) {
 			$this->error['name'] = $this->language->get('error_name');
 		}
 

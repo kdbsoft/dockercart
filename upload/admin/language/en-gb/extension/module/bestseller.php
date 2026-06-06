@@ -6,6 +6,7 @@ $_['heading_title']    = 'Bestsellers';
 $_['text_extension']   = 'Extensions';
 $_['text_success']     = 'Success: You have modified bestsellers module!';
 $_['text_edit']        = 'Edit Bestsellers Module';
+$_['text_default_module_name'] = 'Bestsellers';
 // Subtitle
 
 $_['text_edit_subtitle'] = 'Configure extension settings and options';
