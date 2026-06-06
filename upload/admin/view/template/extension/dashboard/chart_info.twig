@@ -35,12 +35,18 @@
   var saved = localStorage.getItem(key) || 'month';
   $sel.val(saved);
 
+  var currencySymbolLeft = '$';
+  var currencySymbolRight = '';
+
   function loadChart(range) {
     localStorage.setItem(key, range);
     $.getJSON('index.php?route=extension/dashboard/chart/chart&user_token={{ user_token }}&range=' + range, function(json) {
       if (chart) {
         chart.destroy();
       }
+
+      currencySymbolLeft = json.currency_symbol_left || '$';
+      currencySymbolRight = json.currency_symbol_right || '';
 
       var revenueGradient = ctx.createLinearGradient(0, 0, 0, 280);
       revenueGradient.addColorStop(0, 'rgba(59, 130, 246, 0.15)');
@@ -135,7 +141,7 @@
                   var label = context.dataset.label || '';
                   var value = context.parsed.y;
                   if (label === labels.revenue) {
-                    return label + ': $' + value.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0});
+                    return label + ': ' + currencySymbolLeft + value.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0}) + currencySymbolRight;
                   }
                   return label + ': ' + value;
                 }
@@ -180,7 +186,7 @@
               position: 'right',
               title: {
                 display: true,
-                text: labels.revenue + ' ($)',
+                text: labels.revenue,
                 font: { size: 11, family: 'Inter', weight: '500' },
                 color: '#3b82f6'
               },
@@ -191,9 +197,9 @@
                 font: { size: 11, family: 'Inter' },
                 color: '#9ca3af',
                 callback: function(value) {
-                  if (value >= 1000000) return '$' + (value / 1000000).toFixed(1) + 'M';
-                  if (value >= 1000) return '$' + (value / 1000).toFixed(1) + 'K';
-                  return '$' + value;
+                  if (value >= 1000000) return currencySymbolLeft + (value / 1000000).toFixed(1) + 'M' + currencySymbolRight;
+                  if (value >= 1000) return currencySymbolLeft + (value / 1000).toFixed(1) + 'K' + currencySymbolRight;
+                  return currencySymbolLeft + value + currencySymbolRight;
                 }
               }
             }
