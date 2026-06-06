@@ -2231,10 +2231,8 @@ class ControllerExtensionPaymentPayPal extends Controller {
 		
 		$this->document->setTitle($text_title);
 		
-		$this->document->addScript('catalog/view/javascript/jquery/datetimepicker/moment/moment.min.js');
-		$this->document->addScript('catalog/view/javascript/jquery/datetimepicker/moment/moment-with-locales.min.js');
-		$this->document->addScript('catalog/view/javascript/jquery/datetimepicker/bootstrap-datetimepicker.min.js');
-		$this->document->addStyle('catalog/view/javascript/jquery/datetimepicker/bootstrap-datetimepicker.min.css');
+		$this->document->addScript('catalog/view/javascript/flatpickr/flatpickr.min.js');
+		$this->document->addStyle('catalog/view/javascript/flatpickr/flatpickr.min.css');
 		
 		$theme = $this->config->get('theme_' . $this->config->get('config_theme') . '_directory');
 				
@@ -5386,7 +5384,9 @@ class ControllerExtensionPaymentPayPal extends Controller {
 					}
 				}
 			
-				$this->document->addScript('catalog/view/javascript/paypal/paypal.js?' . http_build_query($params));
+				$this->document->addScript('catalog/view/javascript/jquery/jquery-3.7.1.min.js');
+			$this->document->addScript('catalog/view/javascript/bootstrap/js/bootstrap.min.js');
+			$this->document->addScript('catalog/view/javascript/paypal/paypal.js?' . http_build_query($params));
 			}
 		}			
 	}
