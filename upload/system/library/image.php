@@ -271,6 +271,140 @@ class Image {
 	}
 
 	/**
+	 * Check whether a PNG file has any transparent pixels.
+	 *
+	 * For palette-based PNGs we check imagecolortransparent().
+	 * For truecolor PNGs we sample a regular grid of pixels across
+	 * the entire image and look for any alpha < 127 (fully opaque).
+	 *
+	 * @param  string $file  Absolute path to the PNG file.
+	 * @return bool          True if the image contains transparency.
+	 */
+	public static function hasTransparency(string $file): bool {
+		if (!is_file($file)) {
+			return false;
+		}
+
+		$info = @getimagesize($file);
+
+		if (!$info || $info['mime'] !== 'image/png') {
+			return false;
+		}
+
+		$image = @imagecreatefrompng($file);
+
+		if (!$image) {
+			return false;
+		}
+
+		$w = (int)$info[0];
+		$h = (int)$info[1];
+
+		// Palette-based PNGs — check the transparent colour index
+		if (!imageistruecolor($image)) {
+			$transparent = imagecolortransparent($image);
+			imagedestroy($image);
+			return $transparent >= 0;
+		}
+
+		// Truecolor PNG — sample a roughly 10 × 10 grid
+		$step_x = max(1, (int)($w / 10));
+		$step_y = max(1, (int)($h / 10));
+
+		for ($x = 0; $x < $w; $x += $step_x) {
+			for ($y = 0; $y < $h; $y += $step_y) {
+				$color_index = imagecolorat($image, $x, $y);
+				$rgba        = imagecolorsforindex($image, $color_index);
+
+				if (isset($rgba['alpha']) && $rgba['alpha'] > 0) {
+					imagedestroy($image);
+					return true;
+				}
+			}
+		}
+
+		imagedestroy($image);
+		return false;
+	}
+
+	/**
+	 * Convert an image to a different format without resizing.
+	 *
+	 * Supported source MIME types: JPEG, PNG, GIF, WebP.
+	 * Supported target formats: WebP (and JPEG as fallback).
+	 *
+	 * Alpha channel is preserved when the source is a PNG with transparency.
+	 *
+	 * @param  string $sourceFile  Absolute path to the source image.
+	 * @param  string $targetFile  Absolute path for the output file.
+	 * @param  int    $quality     WebP quality (1–100, default 90).
+	 * @return bool                True on success.
+	 */
+	public static function convertToFormat(string $sourceFile, string $targetFile, int $quality = 90): bool {
+		if (!is_file($sourceFile)) {
+			return false;
+		}
+
+		$info = @getimagesize($sourceFile);
+
+		if (!$info || empty($info[0]) || empty($info[1])) {
+			return false;
+		}
+
+		$mime  = $info['mime'] ?? '';
+		$image = null;
+
+		if ($mime === 'image/gif') {
+			$image = @imagecreatefromgif($sourceFile);
+		} elseif ($mime === 'image/png') {
+			$image = @imagecreatefrompng($sourceFile);
+		} elseif ($mime === 'image/jpeg') {
+			$image = @imagecreatefromjpeg($sourceFile);
+		} elseif ($mime === 'image/webp' && function_exists('imagecreatefromwebp')) {
+			$image = @imagecreatefromwebp($sourceFile);
+		}
+
+		if (!$image) {
+			return false;
+		}
+
+		$targetDir = dirname($targetFile);
+
+		if (!is_dir($targetDir) && !@mkdir($targetDir, 0777, true) && !is_dir($targetDir)) {
+			imagedestroy($image);
+			return false;
+		}
+
+		$ext     = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
+		$success = false;
+
+		if ($ext === 'webp' && function_exists('imagewebp')) {
+			if ($mime === 'image/png') {
+				imagealphablending($image, false);
+				imagesavealpha($image, true);
+			} elseif ($mime === 'image/webp') {
+				imagealphablending($image, false);
+				imagesavealpha($image, true);
+			}
+
+			if (!imagewebp($image, $targetFile, $quality)) {
+				error_log('Image::convertToFormat: Failed to write WebP: ' . $targetFile);
+			} else {
+				$success = true;
+			}
+		} elseif ($ext === 'jpeg' || $ext === 'jpg') {
+			if (!imagejpeg($image, $targetFile, $quality)) {
+				error_log('Image::convertToFormat: Failed to write JPEG: ' . $targetFile);
+			} else {
+				$success = true;
+			}
+		}
+
+		imagedestroy($image);
+		return $success;
+	}
+
+	/**
 	 * Analyze the source image and decide whether 'cover' or 'contain'
 	 * will produce the best visual result.
 	 *

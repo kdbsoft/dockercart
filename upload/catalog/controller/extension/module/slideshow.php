@@ -13,12 +13,12 @@ class ControllerExtensionModuleSlideshow extends Controller {
 		$results = $this->model_design_banner->getBanner($setting['banner_id']);
 
 		foreach ($results as $result) {
-			// Support external image URLs or local images. Use original image URL (no resize).
+			// Support external image URLs or local images.
 			if (filter_var($result['image'], FILTER_VALIDATE_URL)) {
 				$image_landscape = $result['image'];
 			} elseif (is_file(DIR_IMAGE . $result['image'])) {
-				// Serve original image file via web path (no resizing/compression)
-				$image_landscape = HTTP_SERVER . 'image/' . ltrim($result['image'], '/');
+				// Convert to WebP at original dimensions when enabled
+				$image_landscape = $this->model_tool_image->convert($result['image']);
 			} else {
 				$image_landscape = '';
 			}
@@ -28,7 +28,7 @@ class ControllerExtensionModuleSlideshow extends Controller {
 				if (filter_var($result['image_portrait'], FILTER_VALIDATE_URL)) {
 					$image_portrait = $result['image_portrait'];
 				} elseif (is_file(DIR_IMAGE . $result['image_portrait'])) {
-					$image_portrait = HTTP_SERVER . 'image/' . ltrim($result['image_portrait'], '/');
+					$image_portrait = $this->model_tool_image->convert($result['image_portrait']);
 				} else {
 					$image_portrait = '';
 				}
