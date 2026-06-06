@@ -37,7 +37,7 @@ services:
       - dockercart-network
     healthcheck:
       test:
-        ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+        ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
       interval: 10s
       timeout: 5s
       retries: 3
