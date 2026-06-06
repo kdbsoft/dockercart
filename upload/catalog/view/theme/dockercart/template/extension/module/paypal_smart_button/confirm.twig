@@ -216,6 +216,14 @@
 </div>
 <script type="text/javascript">
 
+{% if datepicker != 'en' %}
+document.addEventListener('DOMContentLoaded', function() {
+	var s = document.createElement('script');
+	s.src = 'catalog/view/javascript/flatpickr/l10n/{{ datepicker }}.js';
+	document.head.appendChild(s);
+});
+{% endif %}
+
 $('input[name=\'shipping_method\']').change(function() {
 	$('#shipping_form').submit();
 });
@@ -325,21 +333,11 @@ function onLoadPaymentAddress() {
 
 	$('#payment_address select[name=\'country_id\']').trigger('change');
 	
-	$('.date').datetimepicker({
-		language: '{{ datepicker }}',
-		pickTime: false
-	});
+	flatpickr('.date', { dateFormat: 'Y-m-d', locale: '{{ datepicker }}' });
 
-	$('.time').datetimepicker({
-		language: '{{ datepicker }}',
-		pickDate: false
-	});
+	flatpickr('.time', { enableTime: true, noCalendar: true, dateFormat: 'H:i', locale: '{{ datepicker }}' });
 
-	$('.datetime').datetimepicker({
-		language: '{{ datepicker }}',
-		pickDate: true,
-		pickTime: true
-	});
+	flatpickr('.datetime', { enableTime: true, dateFormat: 'Y-m-d H:i', locale: '{{ datepicker }}' });
 	
 	$('#payment_address button[id^=\'button_payment_custom_field\']').on('click', function() {
 		var node = this;
@@ -491,21 +489,11 @@ function onLoadShippingAddress() {
 
 	$('#shipping_address select[name=\'country_id\']').trigger('change');
 	
-	$('.date').datetimepicker({
-		language: '{{ datepicker }}',
-		pickTime: false
-	});
+	flatpickr('.date', { dateFormat: 'Y-m-d', locale: '{{ datepicker }}' });
 
-	$('.time').datetimepicker({
-		language: '{{ datepicker }}',
-		pickDate: false
-	});
+	flatpickr('.time', { enableTime: true, noCalendar: true, dateFormat: 'H:i', locale: '{{ datepicker }}' });
 
-	$('.datetime').datetimepicker({
-		language: '{{ datepicker }}',
-		pickDate: true,
-		pickTime: true
-	});
+	flatpickr('.datetime', { enableTime: true, dateFormat: 'Y-m-d H:i', locale: '{{ datepicker }}' });
 	
 	$('#shipping_address button[id^=\'button_shipping_custom_field\']').on('click', function() {
 		var node = this;
