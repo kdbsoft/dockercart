@@ -84,6 +84,9 @@
             <div class="panel-heading">
               <i class="fa {{ group.icon }} fa-lg" style="color:{% if ext.installed %}{% if ext.status_raw %}#166534{% else %}#6b7280{% endif %}{% else %}#9ca3af{% endif %};"></i>
               <strong title="{{ ext.name|striptags }}">{{ ext.name|raw }}</strong>
+              {% if ext.is_official %}
+              <span style="font-size:11px;color:#2563eb;vertical-align:middle;margin-left:4px;"><i class="fa fa-check-circle"></i> {{ text_official }}</span>
+              {% endif %}
             </div>
             {% if ext.installed %}
             </a>
