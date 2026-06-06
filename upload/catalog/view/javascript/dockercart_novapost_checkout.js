@@ -355,7 +355,11 @@
       item.className = 'np-dropdown-item np-division-dropdown-item';
       item.dataset.index = divisionData.indexOf(d);
       var nameText = document.createElement('div');
-      nameText.textContent = (d.name || '') + ', ' + (d.short_address || '');
+      var displayName = d.name || '';
+      if (d.short_address && d.short_address !== d.name) {
+        displayName += ', ' + d.short_address;
+      }
+      nameText.textContent = displayName;
       item.appendChild(nameText);
       divisionDropdown.appendChild(item);
     });
@@ -367,7 +371,10 @@
     if (!d) return;
 
     divisionValid = true;
-    var displayText = (d.name || '') + ', ' + (d.short_address || '');
+    var displayText = d.name || '';
+    if (d.short_address && d.short_address !== d.name) {
+      displayText += ', ' + d.short_address;
+    }
     var addr = document.getElementById('input-address-1');
     if (addr) {
       addr.value = displayText;
