@@ -10,6 +10,7 @@ $_['heading_title'] = 'HTML-контент';
 $_['text_edit'] = 'Редактировать модуль HTML-контента';
 $_['text_extension'] = 'Расширения';
 $_['text_success'] = 'Успех: Вы успешно модифицировали модуль HTML-контента!';
+$_['text_default_module_name'] = 'HTML-контент';
 // Subtitle
 
 $_['text_edit_subtitle'] = 'Настройте параметры и опции расширения';

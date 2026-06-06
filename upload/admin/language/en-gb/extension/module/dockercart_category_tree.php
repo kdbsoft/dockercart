@@ -6,6 +6,7 @@ $_['heading_title']    = 'Category Tree';
 $_['text_extension']   = 'Extensions';
 $_['text_success']     = 'Success: You have modified category tree module!';
 $_['text_edit']        = 'Edit Category Tree Module';
+$_['text_default_module_name'] = 'Category Tree';
 
 // Entry
 $_['entry_name']       = 'Module Name';

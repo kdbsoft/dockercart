@@ -18,6 +18,7 @@ $_['text_edit'] = 'Модуль редагування банера';
 $_['text_extension'] = 'Розширення';
 $_['text_module'] = 'Модулі';
 $_['text_success'] = 'Успіх: Ви змінили модуль банера!';
+$_['text_default_module_name'] = 'Банер';
 // Subtitle
 
 $_['text_edit_subtitle'] = 'Налаштуйте параметри та опції розширення';

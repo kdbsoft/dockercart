@@ -12,6 +12,7 @@ $_['heading_title'] = 'Блог DockerCart - Останні публікації
 $_['text_all_categories'] = 'Усі категорії';
 $_['text_disabled'] = 'Вимкнено';
 $_['text_edit'] = 'Модуль редагування останніх публікацій блогу DockerCart';
+$_['text_default_module_name'] = 'Блог DockerCart - Останні публікації';
 $_['text_enabled'] = 'Увімкнено';
 $_['text_extension'] = 'Розширення';
 $_['text_success'] = 'Успіх: Ви змінили модуль «Останні публікації блогу DockerCart»!';

@@ -6,6 +6,7 @@ $_['heading_title']    = 'DockerCart Blog - Latest Posts';
 $_['text_extension']   = 'Extensions';
 $_['text_success']     = 'Success: You have modified DockerCart Blog Latest Posts module!';
 $_['text_edit']        = 'Edit DockerCart Blog Latest Posts Module';
+$_['text_default_module_name'] = 'DockerCart Blog - Latest Posts';
 $_['text_enabled']     = 'Enabled';
 $_['text_disabled']    = 'Disabled';
 $_['text_all_categories'] = 'All Categories';

@@ -3,6 +3,7 @@ $_['heading_title']     = 'SEO-описание';
 $_['text_extension']    = 'Расширения';
 $_['text_success']      = 'Успех: Вы успешно модифицировали модуль SEO-описания!';
 $_['text_edit']         = 'Редактировать модуль SEO-описания';
+$_['text_default_module_name'] = 'SEO-описание';
 $_['text_edit_subtitle'] = 'Настройте SEO-описание для вашего магазина';
 $_['entry_name']        = 'Название модуля';
 $_['entry_description'] = 'SEO-описание';

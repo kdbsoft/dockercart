@@ -14,6 +14,7 @@ $_['text_edit'] = 'Модуль каруселі редагування';
 $_['text_extension'] = 'Розширення';
 $_['text_module'] = 'Модулі';
 $_['text_success'] = 'Успіх: Ви змінили модуль каруселі!';
+$_['text_default_module_name'] = 'Карусель';
 // Subtitle
 
 $_['text_edit_subtitle'] = 'Налаштуйте параметри та опції розширення';

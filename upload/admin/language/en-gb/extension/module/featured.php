@@ -6,6 +6,7 @@ $_['heading_title']    = 'Featured';
 $_['text_extension']   = 'Extensions';
 $_['text_success']     = 'Success: You have modified featured module!';
 $_['text_edit']        = 'Edit Featured Module';
+$_['text_default_module_name'] = 'Featured';
 // Subtitle
 
 $_['text_edit_subtitle'] = 'Configure extension settings and options';
