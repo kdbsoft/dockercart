@@ -3,7 +3,7 @@
 $_['heading_title']          = 'Products';
 
 // Text
-$_['text_success']           = 'Success: You have modified products!';
+$_['text_success']           = 'Success: You have modified the product!';
 $_['text_list']              = 'Product List';
 $_['text_min']               = 'Min';
 $_['text_max']               = 'Max';
@@ -93,6 +93,9 @@ $_['entry_option']           = 'Option';
 $_['entry_option_value']     = 'Option Value';
 $_['entry_option_value_cg_price']      = 'CG';
 $_['button_option_value_cg_price_add'] = 'Add';
+$_['button_add_all_values']    = 'Add all values';
+$_['text_qty_short']           = 'pcs';
+$_['entry_hit']                = 'Hit';
 $_['entry_required']         = 'Required';
 $_['entry_status']           = 'Status';
 $_['entry_sort_order']       = 'Sort Order';
