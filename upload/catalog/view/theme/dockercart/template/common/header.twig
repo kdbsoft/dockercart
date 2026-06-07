@@ -303,7 +303,7 @@
         {% if category.children %}
         <div class="dc-mobile-cat-children hidden pl-4 mt-1">
           {% for child in category.children %}
-          <a href="{{ child.href }}" class="block px-3 py-2 rounded-xl text-gray-600 hover:bg-gray-50 transition text-sm">{{ child.name }}</a>
+          <a href="{{ child.href }}" class="flex items-center gap-2 px-3 py-2 rounded-xl text-gray-600 hover:bg-gray-50 transition text-sm">{% if child.icon %}<img src="{{ child.icon }}" alt="" class="w-5 h-5 flex-shrink-0 object-contain" />{% endif %}{{ child.name }}</a>
           {% endfor %}
         </div>
         {% endif %}
