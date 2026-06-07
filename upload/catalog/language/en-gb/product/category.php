@@ -40,6 +40,7 @@ $_['text_support'] = 'Support';
 $_['text_support_desc'] = 'Expert guidance before and after purchase';
 $_['text_new_arrivals'] = 'New Arrivals';
 $_['text_last_90_days'] = 'Last 90 days';
+$_['text_back_to']      = 'Back to %s';
 $_['text_load_more']    = 'Show More';
 $_['text_gift_badge']  = 'GIFT';
 $_['text_view_grid']   = 'Grid';

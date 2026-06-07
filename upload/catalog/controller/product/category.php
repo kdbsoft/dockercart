@@ -53,6 +53,9 @@ class ControllerProductCategory extends Controller {
 			'href' => $this->url->link('common/home')
 		);
 
+		$parent_path = '';
+		$parent_category_name = '';
+
 		if (isset($this->request->get['path'])) {
 			$url = '';
 
@@ -88,6 +91,15 @@ class ControllerProductCategory extends Controller {
 						'text' => $category_info['name'],
 						'href' => $this->url->link('product/category', 'path=' . $path . $url)
 					);
+				}
+			}
+
+			if ($path) {
+				$parent_path = $path;
+				$parent_id = (int)end($parts);
+				$parent_cat_info = $this->model_catalog_category->getCategory($parent_id);
+				if ($parent_cat_info) {
+					$parent_category_name = $parent_cat_info['name'];
 				}
 			}
 		} else {
@@ -153,6 +165,9 @@ class ControllerProductCategory extends Controller {
 			$data['current_href'] = $this->url->link('product/category', 'path=' . $this->request->get['path'] . $current_url);
 			$base_href = $this->url->link('product/category', 'path=' . $this->request->get['path']);
 			$data['show_shop_all'] = $data['current_href'] !== $base_href;
+
+			$data['parent_href'] = $parent_path ? $this->url->link('product/category', 'path=' . $parent_path) : '';
+			$data['parent_category_name'] = $parent_category_name;
 
 			// Set the last category breadcrumb
 			$data['breadcrumbs'][] = array(
@@ -525,6 +540,7 @@ class ControllerProductCategory extends Controller {
 			// Additional localized strings used by the category template
 			$data['text_subcategories'] = $this->language->get('text_subcategories');
 			$data['text_shop_all'] = $this->language->get('text_shop_all');
+			$data['text_back_to'] = $this->language->get('text_back_to');
 			$data['text_quick_view'] = $this->language->get('text_quick_view');
 			$data['text_gift_badge'] = $this->language->get('text_gift_badge');
 			$data['text_call_for_price'] = $this->language->get('text_call_for_price');
