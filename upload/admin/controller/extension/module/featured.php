@@ -173,6 +173,14 @@ class ControllerExtensionModuleFeatured extends Controller {
 			$data['status'] = '';
 		}
 
+		if (isset($this->request->post['category_filter'])) {
+			$data['category_filter'] = $this->request->post['category_filter'];
+		} elseif (!empty($module_info) && isset($module_info['category_filter'])) {
+			$data['category_filter'] = $module_info['category_filter'];
+		} else {
+			$data['category_filter'] = '0';
+		}
+
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');

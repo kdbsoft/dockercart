@@ -21,7 +21,15 @@ class ControllerExtensionModuleBestSeller extends Controller {
 			$wishlist_ids = array_map('intval', $this->session->data['wishlist']);
 		}
 
-		$results = $this->model_catalog_product->getBestSellerProducts($setting['limit']);
+		if (!empty($setting['product'])) {
+			$product_ids = array_slice($setting['product'], 0, (int)($setting['limit'] ?? 4));
+			$results = array();
+			foreach ($product_ids as $pid) {
+				$results[] = array('product_id' => (int)$pid);
+			}
+		} else {
+			$results = $this->model_catalog_product->getBestSellerProducts($setting['limit']);
+		}
 
 		if ($results) {
 			foreach ($results as $result) {
@@ -82,10 +90,12 @@ class ControllerExtensionModuleBestSeller extends Controller {
 				}
 
 				$category_name = '';
+				$category_id = 0;
 				$product_categories = $this->model_catalog_product->getCategories($product_info['product_id']);
 
 				if (!empty($product_categories[0]['category_id'])) {
-					$category_info = $this->model_catalog_category->getCategory((int)$product_categories[0]['category_id']);
+					$category_id = (int)$product_categories[0]['category_id'];
+					$category_info = $this->model_catalog_category->getCategory($category_id);
 
 					if ($category_info && !empty($category_info['name'])) {
 						$category_name = $category_info['name'];
@@ -99,6 +109,7 @@ class ControllerExtensionModuleBestSeller extends Controller {
 					'model'       => $product_info['model'],
 					'manufacturer'=> isset($product_info['manufacturer']) ? $product_info['manufacturer'] : '',
 					'category'    => $category_name,
+					'category_id' => $category_id,
 					'description' => utf8_substr(trim(strip_tags(html_entity_decode($product_info['description'], ENT_QUOTES, 'UTF-8'))), 0, $this->config->get('theme_' . $this->config->get('config_theme') . '_product_description_length')) . '..',
 					'price'       => $price,
 					'price_raw'   => (float)$product_info['price'],
@@ -115,6 +126,20 @@ class ControllerExtensionModuleBestSeller extends Controller {
 					'href'        => $this->url->link('product/product', 'product_id=' . $product_info['product_id'])
 				);
 			}
+
+			$categories_map = array();
+			foreach ($data['products'] as $p) {
+				if ($p['category_id'] > 0 && $p['category'] !== '') {
+					$categories_map[$p['category_id']] = $p['category'];
+				}
+			}
+			$categories = array();
+			foreach ($categories_map as $cid => $cname) {
+				$categories[] = array('category_id' => $cid, 'name' => $cname);
+			}
+			$data['categories'] = $categories;
+			$data['category_filter'] = !empty($setting['category_filter']) ? (int)$setting['category_filter'] : 0;
+			$data['text_other'] = $this->language->get('text_other');
 
 			// Section header customization similar to featured/latest but without "View All"
 			// Use language entry so the small section label is translatable

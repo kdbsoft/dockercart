@@ -20,9 +20,11 @@ $_['entry_limit']      = 'Limit';
 $_['entry_width']      = 'Width';
 $_['entry_height']     = 'Height';
 $_['entry_status']     = 'Status';
+$_['entry_category_filter'] = 'Category Filter';
 
 // Help
 $_['help_product']     = '(Autocomplete)';
+$_['help_category_filter'] = 'Show category buttons above products for filtering. Click a category to show only products from that category. Click again to show all products.';
 
 // Error
 $_['error_permission'] = 'Warning: You do not have permission to modify featured module!';
