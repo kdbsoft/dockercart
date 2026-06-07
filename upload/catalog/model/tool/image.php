@@ -59,6 +59,14 @@ class ModelToolImage extends Model {
 		$image_new = 'cache/' . utf8_substr($filename, 0, utf8_strrpos($filename, '.')) . '-' . (int)$width . 'x' . (int)$height . $suffix . '.' . $target_extension;
 
 		if (!is_file(DIR_IMAGE . $image_new) || (filemtime(DIR_IMAGE . $image_old) > filemtime(DIR_IMAGE . $image_new))) {
+			if ($source_extension === 'svg') {
+				if ($this->request->server['HTTPS']) {
+					return $this->config->get('config_ssl') . 'image/' . $image_old;
+				} else {
+					return $this->config->get('config_url') . 'image/' . $image_old;
+				}
+			}
+
 			$image_info = getimagesize(DIR_IMAGE . $image_old);
 			if ($image_info === false) {
 				if ($this->request->server['HTTPS']) {
