@@ -103,7 +103,7 @@
               {% for child in category.children %}
               <li>
                 <a href="{{ child.href }}" class="dc-cat-mega-parent">
-                  {{ child.name }}
+                  {% if child.icon %}<img src="{{ child.icon }}" alt="" class="w-4 h-4 inline-block mr-1 align-text-bottom" />{% endif %}{{ child.name }}
                 </a>
               </li>
               {% endfor %}

@@ -373,7 +373,7 @@ class ControllerCommonHeader extends Controller {
 		$this->load->model('catalog/category');
 		$data['mobile_categories'] = array();
 		$show_product_count = (bool)$this->config->get('config_product_count');
-		$mobile_menu_cache_key = 'category.mobile.tree.v2.'
+		$mobile_menu_cache_key = 'category.mobile.tree.v3.'
 			. (int)$this->config->get('config_store_id')
 			. '.' . (int)$this->config->get('config_language_id')
 			. '.' . (int)$show_product_count;
@@ -418,8 +418,15 @@ class ControllerCommonHeader extends Controller {
 					$child_id = (int)$child['category_id'];
 					$total = isset($child_totals[$child_id]) ? (int)$child_totals[$child_id] : 0;
 
+					$child_icon = '';
+					if (!empty($child['icon'])) {
+						$this->load->model('tool/image');
+						$child_icon = $this->model_tool_image->resize($child['icon'], 20, 20);
+					}
+
 					$children_data[] = array(
 						'name' => $child['name'] . ($show_product_count ? ' (' . $total . ')' : ''),
+						'icon' => $child_icon,
 						'href' => $this->url->link('product/category', 'path=' . (int)$category['category_id'] . '_' . $child_id)
 					);
 				}
