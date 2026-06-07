@@ -80,3 +80,9 @@ $_['error_author']         = 'Warning: Please select an author!';
 $_['tab_general']          = 'General';
 $_['tab_data']             = 'Data';
 $_['tab_seo']              = 'SEO';
+$_['tab_recommended']       = 'Recommended';
+
+// Entry - Recommended
+$_['entry_related_product']     = 'Products';
+$_['entry_related_category']    = 'Product Categories';
+$_['entry_related_manufacturer']= 'Manufacturers';

@@ -117,6 +117,8 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 		$this->cache->delete('blog.recent');
 		$this->cache->delete('blog.archive');
 
+		$this->deleteRecommendationCache($post_id);
+
 		return $post_id;
 	}
 
@@ -202,6 +204,36 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 			}
 		}
 
+		// Update recommended products
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "blog_post_to_product` WHERE post_id = '" . (int)$post_id . "'");
+		if (isset($data['post_product'])) {
+			foreach ($data['post_product'] as $product_id) {
+				$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_post_to_product` SET 
+					post_id = '" . (int)$post_id . "', 
+					product_id = '" . (int)$product_id . "'");
+			}
+		}
+
+		// Update recommended product categories
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "blog_post_to_product_category` WHERE post_id = '" . (int)$post_id . "'");
+		if (isset($data['post_product_category'])) {
+			foreach ($data['post_product_category'] as $category_id) {
+				$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_post_to_product_category` SET 
+					post_id = '" . (int)$post_id . "', 
+					category_id = '" . (int)$category_id . "'");
+			}
+		}
+
+		// Update recommended manufacturers
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "blog_post_to_manufacturer` WHERE post_id = '" . (int)$post_id . "'");
+		if (isset($data['post_manufacturer'])) {
+			foreach ($data['post_manufacturer'] as $manufacturer_id) {
+				$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_post_to_manufacturer` SET 
+					post_id = '" . (int)$post_id . "', 
+					manufacturer_id = '" . (int)$manufacturer_id . "'");
+			}
+		}
+
 		// Update SEO URLs
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "blog_seo_url` WHERE query = 'blog_post_id=" . (int)$post_id . "'");
 		$seo_url_updated = true;
@@ -228,6 +260,8 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 		$this->cache->delete('blog.popular');
 		$this->cache->delete('blog.recent');
 		$this->cache->delete('blog.archive');
+
+		$this->deleteRecommendationCache($post_id);
 	}
 
 	/**
@@ -240,6 +274,9 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "blog_post_description` WHERE post_id = '" . (int)$post_id . "'");
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "blog_post_to_store` WHERE post_id = '" . (int)$post_id . "'");
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "blog_post_to_category` WHERE post_id = '" . (int)$post_id . "'");
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "blog_post_to_product` WHERE post_id = '" . (int)$post_id . "'");
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "blog_post_to_product_category` WHERE post_id = '" . (int)$post_id . "'");
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "blog_post_to_manufacturer` WHERE post_id = '" . (int)$post_id . "'");
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "blog_post_tag` WHERE post_id = '" . (int)$post_id . "'");
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "blog_comment` WHERE post_id = '" . (int)$post_id . "'");
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "blog_seo_url` WHERE query = 'blog_post_id=" . (int)$post_id . "'");
@@ -253,6 +290,8 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 		$this->cache->delete('blog.archive');
 		$this->cache->delete('blog.category');
 		$this->cache->delete('blog.author');
+
+		$this->deleteRecommendationCache($post_id);
 	}
 
 	public function copyPost($post_id)
@@ -283,6 +322,9 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 		$data["post_description"] = $this->getPostDescriptions($post_id);
 		$data["post_store"] = $this->getPostStores($post_id);
 		$data["post_category"] = $this->getPostCategories($post_id);
+		$data["post_product"] = $this->getPostProducts($post_id);
+		$data["post_product_category"] = $this->getPostProductCategories($post_id);
+		$data["post_manufacturer"] = $this->getPostManufacturers($post_id);
 
 		// Make title unique for default language
 		$default_language_id = (int) $this->config->get("config_language_id");
@@ -576,5 +618,62 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 		}
 
 		return $post_seo_url_data;
+	}
+
+	public function getPostProducts($post_id) {
+		$post_product_data = array();
+
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "blog_post_to_product` WHERE post_id = '" . (int)$post_id . "'");
+
+		foreach ($query->rows as $result) {
+			$post_product_data[] = $result['product_id'];
+		}
+
+		return $post_product_data;
+	}
+
+	public function getPostProductCategories($post_id) {
+		$post_product_category_data = array();
+
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "blog_post_to_product_category` WHERE post_id = '" . (int)$post_id . "'");
+
+		foreach ($query->rows as $result) {
+			$post_product_category_data[] = $result['category_id'];
+		}
+
+		return $post_product_category_data;
+	}
+
+	public function getPostManufacturers($post_id) {
+		$post_manufacturer_data = array();
+
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "blog_post_to_manufacturer` WHERE post_id = '" . (int)$post_id . "'");
+
+		foreach ($query->rows as $result) {
+			$post_manufacturer_data[] = $result['manufacturer_id'];
+		}
+
+		return $post_manufacturer_data;
+	}
+
+	private function deleteRecommendationCache($post_id) {
+		$this->load->model('localisation/language');
+		$this->load->model('setting/store');
+
+		$languages = $this->model_localisation_language->getLanguages();
+		$stores = $this->model_setting_store->getStores();
+
+		$store_ids = array(0);
+		foreach ($stores as $store) {
+			$store_ids[] = (int)$store['store_id'];
+		}
+
+		foreach ($languages as $language) {
+			foreach ($store_ids as $store_id) {
+				$this->cache->delete('blog.recommendations.products.' . (int)$post_id . '.' . (int)$language['language_id'] . '.' . (int)$store_id);
+				$this->cache->delete('blog.recommendations.categories.' . (int)$post_id . '.' . (int)$language['language_id'] . '.' . (int)$store_id);
+				$this->cache->delete('blog.recommendations.manufacturers.' . (int)$post_id . '.' . (int)$store_id);
+			}
+		}
 	}
 }

@@ -531,6 +531,80 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 			$data['post_seo_url'] = array();
 		}
 
+		// Recommended products
+		$this->load->model('catalog/product');
+
+		if (isset($this->request->post['post_product'])) {
+			$data['post_product'] = $this->request->post['post_product'];
+		} elseif (!empty($post_info)) {
+			$data['post_product'] = $this->model_extension_module_dockercart_blog_post->getPostProducts($post_info['post_id']);
+		} else {
+			$data['post_product'] = array();
+		}
+
+		$data['product_recommendations'] = array();
+
+		foreach ($data['post_product'] as $product_id) {
+			$product_info = $this->model_catalog_product->getProduct($product_id);
+
+			if ($product_info) {
+				$data['product_recommendations'][] = array(
+					'product_id' => $product_info['product_id'],
+					'name'       => strip_tags(html_entity_decode($product_info['name'], ENT_QUOTES, 'UTF-8'))
+				);
+			}
+		}
+
+		// Recommended product categories
+		$this->load->model('catalog/category');
+
+		if (isset($this->request->post['post_product_category'])) {
+			$data['post_product_category'] = $this->request->post['post_product_category'];
+		} elseif (!empty($post_info)) {
+			$data['post_product_category'] = $this->model_extension_module_dockercart_blog_post->getPostProductCategories($post_info['post_id']);
+		} else {
+			$data['post_product_category'] = array();
+		}
+
+		$data['product_category_recommendations'] = array();
+
+		foreach ($data['post_product_category'] as $category_id) {
+			$category_info = $this->model_catalog_category->getCategory($category_id);
+
+			if ($category_info) {
+				$data['product_category_recommendations'][] = array(
+					'category_id' => $category_info['category_id'],
+					'name'        => strip_tags(html_entity_decode($category_info['name'], ENT_QUOTES, 'UTF-8'))
+				);
+			}
+		}
+
+		// Recommended manufacturers
+		$this->load->model('catalog/manufacturer');
+
+		if (isset($this->request->post['post_manufacturer'])) {
+			$data['post_manufacturer'] = $this->request->post['post_manufacturer'];
+		} elseif (!empty($post_info)) {
+			$data['post_manufacturer'] = $this->model_extension_module_dockercart_blog_post->getPostManufacturers($post_info['post_id']);
+		} else {
+			$data['post_manufacturer'] = array();
+		}
+
+		$data['manufacturer_recommendations'] = array();
+
+		foreach ($data['post_manufacturer'] as $manufacturer_id) {
+			$manufacturer_info = $this->model_catalog_manufacturer->getManufacturer($manufacturer_id);
+
+			if ($manufacturer_info) {
+				$data['manufacturer_recommendations'][] = array(
+					'manufacturer_id' => $manufacturer_info['manufacturer_id'],
+					'name'            => strip_tags(html_entity_decode($manufacturer_info['name'], ENT_QUOTES, 'UTF-8'))
+				);
+			}
+		}
+
+		$data['user_token'] = $this->session->data['user_token'];
+
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');

@@ -36,6 +36,7 @@
             <li class="active"><a href="#tab-general" data-toggle="tab"><i class="fa fa-pencil-square-o"></i> {{ tab_general }}</a></li>
             <li><a href="#tab-data" data-toggle="tab"><i class="fa fa-database"></i> {{ tab_data }}</a></li>
             <li><a href="#tab-seo" data-toggle="tab"><i class="fa fa-sitemap"></i> {{ tab_seo }}</a></li>
+            <li><a href="#tab-recommended" data-toggle="tab"><i class="fa fa-thumbs-up"></i> {{ tab_recommended }}</a></li>
           </ul>
           <div class="tab-content">
             <div class="tab-pane dcx-tab-pane active" id="tab-general">
@@ -265,6 +266,53 @@
                 </div>
               </div>
             </div>
+            <div class="tab-pane dcx-tab-pane" id="tab-recommended">
+              <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+                <h4>{{ tab_recommended }}</h4>
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="input-product">{{ entry_related_product }}</label>
+                <div class="col-sm-9">
+                  <input type="text" name="product" value="" placeholder="{{ entry_related_product }}" id="input-product" class="form-control" />
+                  <div id="product-related" class="well well-sm" style="height: 150px; overflow: auto;">
+                    {% for product_recommendation in product_recommendations %}
+                    <div id="product-related{{ product_recommendation.product_id }}">
+                      <i class="fa fa-minus-circle"></i> {{ product_recommendation.name }}
+                      <input type="hidden" name="post_product[]" value="{{ product_recommendation.product_id }}" />
+                    </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="input-product-category">{{ entry_related_category }}</label>
+                <div class="col-sm-9">
+                  <input type="text" name="product_category" value="" placeholder="{{ entry_related_category }}" id="input-product-category" class="form-control" />
+                  <div id="product-category-related" class="well well-sm" style="height: 150px; overflow: auto;">
+                    {% for product_category_recommendation in product_category_recommendations %}
+                    <div id="product-category-related{{ product_category_recommendation.category_id }}">
+                      <i class="fa fa-minus-circle"></i> {{ product_category_recommendation.name }}
+                      <input type="hidden" name="post_product_category[]" value="{{ product_category_recommendation.category_id }}" />
+                    </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="input-manufacturer">{{ entry_related_manufacturer }}</label>
+                <div class="col-sm-9">
+                  <input type="text" name="manufacturer" value="" placeholder="{{ entry_related_manufacturer }}" id="input-manufacturer" class="form-control" />
+                  <div id="manufacturer-related" class="well well-sm" style="height: 150px; overflow: auto;">
+                    {% for manufacturer_recommendation in manufacturer_recommendations %}
+                    <div id="manufacturer-related{{ manufacturer_recommendation.manufacturer_id }}">
+                      <i class="fa fa-minus-circle"></i> {{ manufacturer_recommendation.name }}
+                      <input type="hidden" name="post_manufacturer[]" value="{{ manufacturer_recommendation.manufacturer_id }}" />
+                    </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+              </div>
+            </div>
           </div>
         </form>
       </div>
@@ -284,6 +332,77 @@ $('.datetime').datetimepicker({
 	language: '{{ datepicker }}',
 	pickDate: true,
 	pickTime: true
+});
+//--></script>
+<script type="text/javascript"><!--
+$('input[name=\'product\']').autocomplete({
+	'source': function(request, response) {
+		$.ajax({
+			url: 'index.php?route=catalog/product/autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+			dataType: 'json',
+			success: function(json) {
+				response($.map(json, function(item) {
+					return {
+						label: item['name'],
+						value: item['product_id']
+					}
+				}));
+			}
+		});
+	},
+	'select': function(item) {
+		$('input[name=\'product\']').val('');
+		$('#product-related' + item['value']).remove();
+		$('#product-related').append('<div id="product-related' + item['value'] + '"><i class="fa fa-minus-circle"></i> ' + item['label'] + '<input type="hidden" name="post_product[]" value="' + item['value'] + '" /></div>');
+	}
+});
+
+$('input[name=\'product_category\']').autocomplete({
+	'source': function(request, response) {
+		$.ajax({
+			url: 'index.php?route=catalog/category/autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+			dataType: 'json',
+			success: function(json) {
+				response($.map(json, function(item) {
+					return {
+						label: item['name'],
+						value: item['category_id']
+					}
+				}));
+			}
+		});
+	},
+	'select': function(item) {
+		$('input[name=\'product_category\']').val('');
+		$('#product-category-related' + item['value']).remove();
+		$('#product-category-related').append('<div id="product-category-related' + item['value'] + '"><i class="fa fa-minus-circle"></i> ' + item['label'] + '<input type="hidden" name="post_product_category[]" value="' + item['value'] + '" /></div>');
+	}
+});
+
+$('input[name=\'manufacturer\']').autocomplete({
+	'source': function(request, response) {
+		$.ajax({
+			url: 'index.php?route=catalog/manufacturer/autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+			dataType: 'json',
+			success: function(json) {
+				response($.map(json, function(item) {
+					return {
+						label: item['name'],
+						value: item['manufacturer_id']
+					}
+				}));
+			}
+		});
+	},
+	'select': function(item) {
+		$('input[name=\'manufacturer\']').val('');
+		$('#manufacturer-related' + item['value']).remove();
+		$('#manufacturer-related').append('<div id="manufacturer-related' + item['value'] + '"><i class="fa fa-minus-circle"></i> ' + item['label'] + '<input type="hidden" name="post_manufacturer[]" value="' + item['value'] + '" /></div>');
+	}
+});
+
+$('#product-related, #product-category-related, #manufacturer-related').delegate('.fa-minus-circle', 'click', function() {
+	$(this).parent().remove();
 });
 //--></script>
 {{ footer }}

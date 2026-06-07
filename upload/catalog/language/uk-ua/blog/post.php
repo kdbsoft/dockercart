@@ -14,3 +14,6 @@ $_['text_write_comment'] = 'Написати коментар';
 $_['text_read_article'] = 'Читати статтю';
 $_['text_tags'] = 'Теги';
 $_['text_blog_post'] = 'Стаття';
+$_['text_recommended_products'] = 'Рекомендовані товари';
+$_['text_recommended_categories'] = 'Рекомендовані категорії';
+$_['text_recommended_manufacturers'] = 'Рекомендовані виробники';

@@ -12,6 +12,9 @@ $_['text_category']         = 'Categories:';
 $_['text_related_posts']    = 'Related Posts';
 $_['text_tags']               = 'Tags';
 $_['text_blog_post']          = 'Blog Post';
+$_['text_recommended_products'] = 'Recommended Products';
+$_['text_recommended_categories'] = 'Recommended Categories';
+$_['text_recommended_manufacturers'] = 'Recommended Manufacturers';
 
 // Entry
 $_['entry_comment']         = 'Your Comment';

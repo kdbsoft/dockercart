@@ -264,4 +264,80 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 
 		return $query->rows;
 	}
+
+	public function getPostProducts($post_id) {
+		$cache_key = 'blog.recommendations.products.' . (int)$post_id . '.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_store_id');
+
+		$data = $this->cache->get($cache_key);
+
+		if ($data !== false) {
+			return $data;
+		}
+
+		$query = $this->db->query("SELECT p.product_id, pd.name, pd.description, p.image, p.price,
+					(SELECT price FROM `" . DB_PREFIX . "product_special` ps WHERE ps.product_id = p.product_id AND ps.customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "' AND ((ps.date_start = '0000-00-00' OR ps.date_start < NOW()) AND (ps.date_end = '0000-00-00' OR ps.date_end > NOW())) ORDER BY ps.priority ASC, ps.price ASC LIMIT 1) AS special,
+					(SELECT AVG(rating) AS total FROM `" . DB_PREFIX . "review` r1 WHERE r1.product_id = p.product_id AND r1.status = '1' GROUP BY r1.product_id) AS rating,
+					p.manufacturer_id, m.name as manufacturer
+				FROM `" . DB_PREFIX . "blog_post_to_product` bptp
+				LEFT JOIN `" . DB_PREFIX . "product` p ON (bptp.product_id = p.product_id)
+				LEFT JOIN `" . DB_PREFIX . "product_description` pd ON (p.product_id = pd.product_id)
+				LEFT JOIN `" . DB_PREFIX . "product_to_store` p2s ON (p.product_id = p2s.product_id)
+				LEFT JOIN `" . DB_PREFIX . "manufacturer` m ON (p.manufacturer_id = m.manufacturer_id)
+				WHERE bptp.post_id = '" . (int)$post_id . "'
+				AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "'
+				AND p.status = '1'
+				AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "'
+				ORDER BY p.sort_order, pd.name");
+
+		$this->cache->set($cache_key, $query->rows, 3600);
+
+		return $query->rows;
+	}
+
+	public function getPostProductCategories($post_id) {
+		$cache_key = 'blog.recommendations.categories.' . (int)$post_id . '.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_store_id');
+
+		$data = $this->cache->get($cache_key);
+
+		if ($data !== false) {
+			return $data;
+		}
+
+		$query = $this->db->query("SELECT c.category_id, cd.name, c.image, cd.description
+				FROM `" . DB_PREFIX . "blog_post_to_product_category` bptpc
+				LEFT JOIN `" . DB_PREFIX . "category` c ON (bptpc.category_id = c.category_id)
+				LEFT JOIN `" . DB_PREFIX . "category_description` cd ON (c.category_id = cd.category_id)
+				LEFT JOIN `" . DB_PREFIX . "category_to_store` c2s ON (c.category_id = c2s.category_id)
+				WHERE bptpc.post_id = '" . (int)$post_id . "'
+				AND cd.language_id = '" . (int)$this->config->get('config_language_id') . "'
+				AND c.status = '1'
+				AND c2s.store_id = '" . (int)$this->config->get('config_store_id') . "'
+				ORDER BY c.sort_order, cd.name");
+
+		$this->cache->set($cache_key, $query->rows, 3600);
+
+		return $query->rows;
+	}
+
+	public function getPostManufacturers($post_id) {
+		$cache_key = 'blog.recommendations.manufacturers.' . (int)$post_id . '.' . (int)$this->config->get('config_store_id');
+
+		$data = $this->cache->get($cache_key);
+
+		if ($data !== false) {
+			return $data;
+		}
+
+		$query = $this->db->query("SELECT m.manufacturer_id, m.name, m.image, m.sort_order
+				FROM `" . DB_PREFIX . "blog_post_to_manufacturer` bptm
+				LEFT JOIN `" . DB_PREFIX . "manufacturer` m ON (bptm.manufacturer_id = m.manufacturer_id)
+				LEFT JOIN `" . DB_PREFIX . "manufacturer_to_store` m2s ON (m.manufacturer_id = m2s.manufacturer_id)
+				WHERE bptm.post_id = '" . (int)$post_id . "'
+				AND m2s.store_id = '" . (int)$this->config->get('config_store_id') . "'
+				ORDER BY m.sort_order, m.name");
+
+		$this->cache->set($cache_key, $query->rows, 3600);
+
+		return $query->rows;
+	}
 }
