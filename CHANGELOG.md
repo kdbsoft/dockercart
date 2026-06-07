@@ -1,3 +1,9 @@
+## [1.42.6](https://github.com/mathflow-bit/dockercart/compare/v1.42.5...v1.42.6) (2026-06-06)
+
+### Bug Fixes
+
+* update modification cache owner after refresh ([d294b7f](https://github.com/mathflow-bit/dockercart/commit/d294b7fae9ee463e41c1f28225d7731c0729b683))
+
 ## [1.42.5](https://github.com/mathflow-bit/dockercart/compare/v1.42.4...v1.42.5) (2026-06-06)
 
 ### Bug Fixes
