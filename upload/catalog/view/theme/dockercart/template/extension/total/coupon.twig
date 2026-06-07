@@ -1,0 +1,31 @@
+<div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-4">
+  <h3 class="text-sm font-bold uppercase tracking-widest text-gray-500 mb-3">{{ heading_title }}</h3>
+  <div class="flex gap-2 items-stretch">
+    <input type="text" name="coupon" value="{{ coupon }}" placeholder="{{ entry_coupon }}" id="input-coupon"
+      class="flex-1 h-11 px-4 bg-gray-50 border border-gray-300 rounded-lg text-sm text-text-primary placeholder-gray-400 focus:border-primary focus:bg-white transition">
+    <button type="button" id="button-coupon" class="px-5 h-11 bg-gray-100 hover:bg-gray-200 text-text-primary font-medium rounded-lg transition text-sm whitespace-nowrap flex-shrink-0">
+      <i data-lucide="tag" class="w-4 h-4 inline-block -ml-1 mr-1"></i>{{ button_coupon|default('Apply') }}
+    </button>
+  </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var btn = document.getElementById('button-coupon');
+  if (!btn) return;
+  btn.addEventListener('click', function() {
+    var input = document.getElementById('input-coupon');
+    var code = input ? input.value.trim() : '';
+    if (!code) return;
+    fetch('index.php?route=extension/total/coupon/coupon', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'coupon=' + encodeURIComponent(code)
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(json) {
+      if (json.error) alert(json.error);
+      if (json.redirect) window.location.href = json.redirect;
+    });
+  });
+});
+</script>
