@@ -145,7 +145,9 @@ class ManticoreClient {
         foreach ($data as $field => $value) {
             $fields[] = $this->escapeIdentifier($field);
             
-            if (is_int($value) || is_float($value)) {
+            if (is_array($value)) {
+                $values[] = '(' . implode(',', array_map('intval', $value)) . ')';
+            } elseif (is_int($value) || is_float($value)) {
                 $values[] = $value;
             } else {
                 $values[] = "'" . $this->escape($value) . "'";

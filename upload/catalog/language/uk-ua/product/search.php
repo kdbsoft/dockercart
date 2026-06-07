@@ -38,4 +38,7 @@ $_['text_instock'] = 'В наявності';
 $_['text_preorder'] = 'Передзамовлення';
 $_['text_out_of_stock'] = 'Немає в наявності';
 $_['text_load_more']  = 'Показати ще';
+$_['text_refine'] = 'Уточнити пошук';
+$_['text_refine_categories'] = 'Категорії';
+$_['text_all_categories'] = 'Усі категорії';
 $_['text_gift_badge'] = 'ПОДАРУНОК';

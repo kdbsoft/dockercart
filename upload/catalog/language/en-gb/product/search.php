@@ -38,6 +38,9 @@ $_['text_limit']        = 'Show:';
 $_['text_products']   = 'products';
 $_['text_quick_view']  = 'Quick View';
 $_['text_load_more']   = 'Show More';
+$_['text_refine']      = 'Refine Search';
+$_['text_refine_categories'] = 'Categories';
+$_['text_all_categories'] = 'All Categories';
 
 // Entry
 $_['entry_search']      = 'Search Criteria';

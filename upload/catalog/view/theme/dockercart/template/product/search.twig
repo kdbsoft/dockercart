@@ -30,23 +30,6 @@
               class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-blue-400 bg-white"
               placeholder="{{ text_keyword }}" />
           </div>
-
-          <div class="min-w-[180px]">
-            <label class="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-1.5">{{ text_category }}</label>
-            <select name="category_id" class="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-blue-400 bg-white cursor-pointer">
-              <option value="0">{{ text_category }}</option>
-              {% for cat in categories %}
-                <option value="{{ cat.category_id }}" {% if cat.category_id == category_id %}selected{% endif %}>{{ cat.name }}</option>
-                {% for cat2 in cat.children %}
-                  <option value="{{ cat2.category_id }}" {% if cat2.category_id == category_id %}selected{% endif %}>&nbsp;&nbsp;{{ cat2.name }}</option>
-                  {% for cat3 in cat2.children %}
-                    <option value="{{ cat3.category_id }}" {% if cat3.category_id == category_id %}selected{% endif %}>&nbsp;&nbsp;&nbsp;&nbsp;{{ cat3.name }}</option>
-                  {% endfor %}
-                {% endfor %}
-              {% endfor %}
-            </select>
-          </div>
-
           <button type="submit" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition whitespace-nowrap">
             <i data-lucide="search" class="w-4 h-4 inline-block mr-1.5 align-text-bottom"></i>{{ button_search|default('Search') }}
           </button>
@@ -54,6 +37,55 @@
       </div>
     </div>
   </section>
+
+  {% if refine_categories %}
+  <section class="pt-4 pb-2 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      <div class="bg-white border border-gray-100 rounded-3xl p-5 sm:p-6 shadow-sm">
+        <div class="flex flex-wrap items-end justify-between gap-3 mb-5">
+          <div>
+            <p class="text-xs font-bold uppercase tracking-widest text-blue-500">{{ text_refine }}</p>
+            <h2 class="text-xl sm:text-2xl font-extrabold text-gray-900 mt-1">
+              {% if refine_category_name %}
+                {{ refine_category_name }}
+              {% else %}
+                {{ text_refine_categories }}
+              {% endif %}
+            </h2>
+          </div>
+        </div>
+
+        {% set palette_bg = [ 'rgba(59,130,246,0.07)', 'rgba(99,102,241,0.07)', 'rgba(16,185,129,0.07)', 'rgba(236,72,153,0.07)', 'rgba(249,115,22,0.07)', 'rgba(234,179,8,0.07)' ] %}
+        {% set palette_accent = [ 'rgba(59,130,246,0.18)', 'rgba(99,102,241,0.18)', 'rgba(16,185,129,0.18)', 'rgba(236,72,153,0.18)', 'rgba(249,115,22,0.18)', 'rgba(234,179,8,0.18)' ] %}
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          {% for category in refine_categories %}
+          {% set bg = palette_bg[loop.index0 % palette_bg|length] %}
+          {% set accent = palette_accent[loop.index0 % palette_accent|length] %}
+          <a href="{{ category.href }}" class="group subcategory-card rounded-2xl p-4 transition-transform hover:scale-[1.02]" style="background: {{ bg }}; border: 1px solid rgba(15,23,42,0.04);">
+            <div class="flex items-center gap-3">
+              <div class="w-14 h-14 rounded-lg flex items-center justify-center flex-shrink-0" style="background: {{ accent }}; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);">
+                {% if category.thumb %}
+                <img src="{{ category.thumb }}" alt="{{ category.name }}" class="w-10 h-10 object-cover rounded-md shadow-sm" loading="lazy" />
+                {% else %}
+                <i data-lucide="layers" class="w-6 h-6 text-gray-700"></i>
+                {% endif %}
+              </div>
+              <div class="flex-1 min-w-0">
+                <span class="block text-sm font-semibold text-gray-900 leading-tight break-words">{{ category.name }}</span>
+                {% if category.total is defined and category.total > 0 %}
+                <span class="text-xs text-gray-500">{{ category.product_label }}</span>
+                {% endif %}
+              </div>
+              <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </section>
+  {% endif %}
 
   <section id="catalog" class="py-8 px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto">

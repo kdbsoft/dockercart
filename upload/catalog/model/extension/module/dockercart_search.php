@@ -1,9 +1,9 @@
 <?php
 /**
  * DockerCart Search Module - Catalog Model
- * 
+ *
  * Handles search queries on frontend using Manticore
- * 
+ *
  * @package    DockerCart
  * @subpackage Module
  * @author     DockerCart Team
@@ -19,7 +19,7 @@ use Dockercart\ManticoreClient;
 class ModelExtensionModuleDockercartSearch extends Model {
     private $manticore;
     private $query_mappings = null;
-    
+
     /**
      * Get Manticore client instance
      */
@@ -27,13 +27,13 @@ class ModelExtensionModuleDockercartSearch extends Model {
         if (!$this->manticore) {
             $host = $this->config->get('module_dockercart_search_host') ?: 'manticore';
             $port = $this->config->get('module_dockercart_search_port') ?: 9306;
-            
+
             $this->manticore = new ManticoreClient($host, $port);
         }
-        
+
         return $this->manticore;
     }
-    
+
     /**
      * Search products using Manticore.
      * Uses wildcard (query | query*) so results are identical to autocomplete.
@@ -46,28 +46,27 @@ class ModelExtensionModuleDockercartSearch extends Model {
         }
 
         $manticore = $this->getManticore();
-        
+
         if (!$manticore->connect()) {
             return ['products' => [], 'total' => 0];
         }
-        
+
         // Prepare filters
         $filters = [
             'store_id'    => (int)$this->config->get('config_store_id'),
             'language_id' => (int)$this->config->get('config_language_id'),
             'status'      => 1
         ];
-        
+
         // Add category filter
         if (!empty($options['category_id'])) {
-            $filters['category_id'] = (int)$options['category_id'];
-            
-            // Handle sub-categories (recursively — any depth)
             if (!empty($options['sub_category'])) {
-                $filters['category_id'] = $this->getAllDescendantCategoryIds((int)$options['category_id']);
+                $filters['category_ids'] = $this->getAllDescendantCategoryIds((int)$options['category_id']);
+            } else {
+                $filters['category_id'] = (int)$options['category_id'];
             }
         }
-        
+
         // Build search options.
         // wildcard=true makes the engine use (query | query*) so results are 100% consistent
         // between the autocomplete dropdown and the search results page.
@@ -78,7 +77,7 @@ class ModelExtensionModuleDockercartSearch extends Model {
             'ranker'   => 'proximity_bm25',
             'wildcard' => true,
         ];
-        
+
         // Add sorting
         if (!empty($options['sort'])) {
             switch ($options['sort']) {
@@ -107,12 +106,12 @@ class ModelExtensionModuleDockercartSearch extends Model {
                     break;
             }
         }
-        
+
         // Perform search and get real total_found for pagination
         $result_data = $manticore->searchWithMeta('products', $query_text, $search_options);
         $raw_results = $result_data['results'];
         $total       = $result_data['total'];
-        
+
         // Extract product IDs (composite ID = product_id * 100 + language_id)
         $product_ids = [];
         foreach ($raw_results as $result) {
@@ -121,12 +120,12 @@ class ModelExtensionModuleDockercartSearch extends Model {
                 $product_ids[] = $product_id;
             }
         }
-        
+
         // Get full product data from DockerCart
         $products = [];
         if (!empty($product_ids)) {
             $this->load->model('catalog/product');
-            
+
             foreach ($product_ids as $product_id) {
                 $product = $this->model_catalog_product->getProduct($product_id);
                 if ($product) {
@@ -134,13 +133,66 @@ class ModelExtensionModuleDockercartSearch extends Model {
                 }
             }
         }
-        
+
         return [
             'products' => $products,
             'total'    => $total,
         ];
     }
-    
+
+    /**
+     * Get all product IDs from Manticore search (without LIMIT).
+     * Used for refine search category counts.
+     */
+    public function getAllProductIds($query_text, $options = []) {
+        $query_text = $this->normalizeSearchQuery($query_text);
+
+        if ($query_text === '') {
+            return [];
+        }
+
+        $manticore = $this->getManticore();
+
+        if (!$manticore->connect()) {
+            return [];
+        }
+
+        $filters = [
+            'store_id'    => (int)$this->config->get('config_store_id'),
+            'language_id' => (int)$this->config->get('config_language_id'),
+            'status'      => 1
+        ];
+
+        if (!empty($options['category_id'])) {
+            if (!empty($options['sub_category'])) {
+                $filters['category_ids'] = $this->getAllDescendantCategoryIds((int)$options['category_id']);
+            } else {
+                $filters['category_id'] = (int)$options['category_id'];
+            }
+        }
+
+        $search_options = [
+            'filters'  => $filters,
+            'limit'    => 1000,
+            'offset'   => 0,
+            'ranker'   => 'proximity_bm25',
+            'wildcard' => true,
+        ];
+
+        $result_data = $manticore->searchWithMeta('products', $query_text, $search_options);
+        $raw_results = $result_data['results'];
+
+        $product_ids = [];
+        foreach ($raw_results as $result) {
+            $product_id = (int)floor($result['id'] / 100);
+            if ($product_id > 0) {
+                $product_ids[] = $product_id;
+            }
+        }
+
+        return $product_ids;
+    }
+
     /**
      * Get autocomplete suggestions.
      * Uses the same Manticore query as search() (wildcard=true) so the autocomplete
@@ -154,11 +206,11 @@ class ModelExtensionModuleDockercartSearch extends Model {
         }
 
         $manticore = $this->getManticore();
-        
+
         if (!$manticore->connect()) {
             return [];
         }
-        
+
         $filters = [
             'store_id'    => (int)$this->config->get('config_store_id'),
             'language_id' => (int)$this->config->get('config_language_id'),
@@ -168,12 +220,12 @@ class ModelExtensionModuleDockercartSearch extends Model {
         // Apply category filter when searching within a specific category
         if (!empty($options['category_id'])) {
             if (!empty($options['sub_category'])) {
-                $filters['category_id'] = $this->getAllDescendantCategoryIds((int)$options['category_id']);
+                $filters['category_ids'] = $this->getAllDescendantCategoryIds((int)$options['category_id']);
             } else {
                 $filters['category_id'] = (int)$options['category_id'];
             }
         }
-        
+
         // Use search() with wildcard — identical query engine to the search page
         $search_options = [
             'filters'  => $filters,
@@ -181,23 +233,23 @@ class ModelExtensionModuleDockercartSearch extends Model {
             'offset'   => 0,
             'wildcard' => true,
         ];
-        
+
         $result_data = $manticore->searchWithMeta('products', $query_text, $search_options);
         $raw_results = $result_data['results'];
-        
+
         // Get full product data
         $products = [];
-        
+
         $this->load->model('catalog/product');
-        
+
         foreach ($raw_results as $result) {
             $product_id = (int)floor($result['id'] / 100);
             if ($product_id <= 0) {
                 continue;
             }
-            
+
             $product = $this->model_catalog_product->getProduct($product_id);
-            
+
             if ($product) {
                 $products[] = [
                     'product_id'  => $product['product_id'],
@@ -210,10 +262,10 @@ class ModelExtensionModuleDockercartSearch extends Model {
                 ];
             }
         }
-        
+
         return $products;
     }
-    
+
     /**
      * Search in categories
      */
@@ -225,37 +277,37 @@ class ModelExtensionModuleDockercartSearch extends Model {
         }
 
         $manticore = $this->getManticore();
-        
+
         if (!$manticore->connect()) {
             return [];
         }
-        
+
         $filters = [
             'store_id' => (int)$this->config->get('config_store_id'),
             'language_id' => (int)$this->config->get('config_language_id'),
             'status' => 1
         ];
-        
+
         $search_options = [
             'filters' => $filters,
             'limit' => $options['limit'] ?? 10
         ];
-        
+
         // Use suggest() to get prefix wildcard matching (noteboo* → notebook)
         $results = $manticore->suggest('categories', $query_text, $search_options);
-        
+
         $categories = [];
         foreach ($results as $result) {
             $category_id = floor($result['id'] / 100);
-            
+
             $this->load->model('catalog/category');
             $category = $this->model_catalog_category->getCategory($category_id);
-            
+
             if ($category) {
                 $categories[] = $category;
             }
         }
-        
+
         return $categories;
     }
 
