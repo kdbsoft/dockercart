@@ -152,6 +152,80 @@ class ControllerBlogPost extends Controller {
 			$data['text_tags'] = $this->language->get('text_tags');
 			$data['text_blog'] = $this->language->get('text_blog');
 			$data['text_categories'] = $this->language->get('text_categories');
+			$data['text_recommended_products'] = $this->language->get('text_recommended_products');
+			$data['text_recommended_categories'] = $this->language->get('text_recommended_categories');
+			$data['text_recommended_manufacturers'] = $this->language->get('text_recommended_manufacturers');
+
+			// Recommended items
+			$data['recommended_products'] = array();
+			$recommended_products = $this->model_extension_module_dockercart_blog_post->getPostProducts($post_id);
+
+			foreach ($recommended_products as $product) {
+				if ($product['image']) {
+					$image = $this->model_tool_image->resize($product['image'], 200, 200);
+				} else {
+					$image = $this->model_tool_image->resize('placeholder.png', 200, 200);
+				}
+
+				if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
+					$price = $this->currency->format($this->tax->calculate($product['price'], $this->config->get('config_tax_class_id'), $this->config->get('config_tax')), $this->config->get('config_currency'));
+				} else {
+					$price = false;
+				}
+
+				if ((float)$product['special']) {
+					$special = $this->currency->format($this->tax->calculate($product['special'], $this->config->get('config_tax_class_id'), $this->config->get('config_tax')), $this->config->get('config_currency'));
+				} else {
+					$special = false;
+				}
+
+				$data['recommended_products'][] = array(
+					'product_id' => $product['product_id'],
+					'thumb'      => $image,
+					'name'       => $product['name'],
+					'description'=> utf8_substr(strip_tags(html_entity_decode($product['description'], ENT_QUOTES, 'UTF-8')), 0, 100) . '..',
+					'price'      => $price,
+					'special'    => $special,
+					'rating'     => $product['rating'],
+					'href'       => $this->url->link('product/product', 'product_id=' . $product['product_id'])
+				);
+			}
+
+			$data['recommended_categories'] = array();
+			$recommended_categories = $this->model_extension_module_dockercart_blog_post->getPostProductCategories($post_id);
+
+			foreach ($recommended_categories as $category) {
+				if ($category['image']) {
+					$image = $this->model_tool_image->resize($category['image'], 200, 200);
+				} else {
+					$image = $this->model_tool_image->resize('placeholder.png', 200, 200);
+				}
+
+				$data['recommended_categories'][] = array(
+					'category_id' => $category['category_id'],
+					'thumb'       => $image,
+					'name'        => $category['name'],
+					'href'        => $this->url->link('product/category', 'path_id=' . $category['category_id'])
+				);
+			}
+
+			$data['recommended_manufacturers'] = array();
+			$recommended_manufacturers = $this->model_extension_module_dockercart_blog_post->getPostManufacturers($post_id);
+
+			foreach ($recommended_manufacturers as $manufacturer) {
+				if ($manufacturer['image']) {
+					$image = $this->model_tool_image->resize($manufacturer['image'], 200, 200);
+				} else {
+					$image = $this->model_tool_image->resize('placeholder.png', 200, 200);
+				}
+
+				$data['recommended_manufacturers'][] = array(
+					'manufacturer_id' => $manufacturer['manufacturer_id'],
+					'thumb'           => $image,
+					'name'            => $manufacturer['name'],
+					'href'            => $this->url->link('product/manufacturer/info', 'manufacturer_id=' . $manufacturer['manufacturer_id'])
+				);
+			}
 
 			$this->response->setOutput($this->load->view('blog/post', $data));
 		} else {
