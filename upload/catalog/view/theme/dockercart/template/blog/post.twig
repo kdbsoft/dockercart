@@ -68,6 +68,74 @@
         </div>
       </article>
 
+      {% if recommended_products or recommended_categories or recommended_manufacturers %}
+      <section class="mt-6 bg-white border border-gray-100 rounded-3xl p-5 sm:p-8 shadow-sm">
+        {% if recommended_products %}
+        <div class="mb-6">
+          <h3 class="text-lg font-extrabold text-gray-900 mb-4">{{ text_recommended_products }}</h3>
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {% for product in recommended_products %}
+            <div class="group relative bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-lg transition">
+              <a href="{{ product.href }}" class="block aspect-square bg-gray-50">
+                <img src="{{ product.thumb }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-105 transition" />
+              </a>
+              <div class="p-3">
+                <a href="{{ product.href }}" class="block text-sm font-semibold text-gray-900 hover:text-blue-600 line-clamp-2">{{ product.name }}</a>
+                {% if product.price %}
+                <div class="mt-2">
+                  {% if product.special %}
+                    <span class="text-sm font-bold text-red-600">{{ product.special }}</span>
+                    <span class="text-xs text-gray-400 line-through ml-1">{{ product.price }}</span>
+                  {% else %}
+                    <span class="text-sm font-bold text-gray-900">{{ product.price }}</span>
+                  {% endif %}
+                </div>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        {% if recommended_categories %}
+        <div class="mb-6">
+          <h3 class="text-lg font-extrabold text-gray-900 mb-4">{{ text_recommended_categories }}</h3>
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {% for category in recommended_categories %}
+            <a href="{{ category.href }}" class="group block bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-lg transition">
+              <div class="aspect-square bg-gray-50">
+                <img src="{{ category.thumb }}" alt="{{ category.name }}" class="w-full h-full object-cover group-hover:scale-105 transition" />
+              </div>
+              <div class="p-3 text-center">
+                <span class="text-sm font-semibold text-gray-900 group-hover:text-blue-600">{{ category.name }}</span>
+              </div>
+            </a>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        {% if recommended_manufacturers %}
+        <div>
+          <h3 class="text-lg font-extrabold text-gray-900 mb-4">{{ text_recommended_manufacturers }}</h3>
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {% for manufacturer in recommended_manufacturers %}
+            <a href="{{ manufacturer.href }}" class="group block bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-lg transition">
+              <div class="aspect-square bg-gray-50">
+                <img src="{{ manufacturer.thumb }}" alt="{{ manufacturer.name }}" class="w-full h-full object-cover group-hover:scale-105 transition" />
+              </div>
+              <div class="p-3 text-center">
+                <span class="text-sm font-semibold text-gray-900 group-hover:text-blue-600">{{ manufacturer.name }}</span>
+              </div>
+            </a>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+      </section>
+      {% endif %}
+
       {% if allow_comments %}
       <section class="mt-6 bg-white border border-gray-100 rounded-3xl p-5 sm:p-8 shadow-sm">
         <h2 class="text-xl font-extrabold text-gray-900 mb-4">{{ text_comments|default('Comments') }}</h2>
