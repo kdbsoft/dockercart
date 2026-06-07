@@ -20,6 +20,68 @@
     </div>
   </section>
 
+  {% if refine_categories %}
+  <section class="pt-8 pb-2 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      <div class="bg-white border border-gray-100 rounded-3xl p-5 sm:p-6 shadow-sm">
+        <div class="flex flex-wrap items-end justify-between gap-3 mb-5">
+          <div>
+            <p class="text-xs font-bold uppercase tracking-widest text-blue-500">{{ text_refine }}</p>
+            <h2 class="text-xl sm:text-2xl font-extrabold text-gray-900 mt-1">
+              {% if refine_category_name %}
+                {{ refine_category_name }}
+              {% else %}
+                {{ text_refine_categories }}
+              {% endif %}
+            </h2>
+            {% if refine_parent_href %}
+            <a href="{{ refine_parent_href }}" class="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline mt-1">
+              <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> {{ text_back_to|format(refine_parent_name) }}
+            </a>
+            {% endif %}
+          </div>
+        </div>
+
+        {% set palette_bg = [ 'rgba(59,130,246,0.07)', 'rgba(99,102,241,0.07)', 'rgba(16,185,129,0.07)', 'rgba(236,72,153,0.07)', 'rgba(249,115,22,0.07)', 'rgba(234,179,8,0.07)' ] %}
+        {% set palette_accent = [ 'rgba(59,130,246,0.18)', 'rgba(99,102,241,0.18)', 'rgba(16,185,129,0.18)', 'rgba(236,72,153,0.18)', 'rgba(249,115,22,0.18)', 'rgba(234,179,8,0.18)' ] %}
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          {% for category in refine_categories %}
+          {% set bg = palette_bg[loop.index0 % palette_bg|length] %}
+          {% set accent = palette_accent[loop.index0 % palette_accent|length] %}
+          <a href="{{ category.href }}" class="group subcategory-card rounded-2xl p-4 transition-transform hover:scale-[1.02]" style="background: {{ bg }}; border: 1px solid rgba(15,23,42,0.04);">
+            <div class="flex items-center gap-3">
+              <div class="w-14 h-14 rounded-lg flex items-center justify-center flex-shrink-0" style="background: {{ accent }}; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);">
+                {% if category.thumb %}
+                <img src="{{ category.thumb }}" alt="{{ category.name }}" class="w-10 h-10 object-cover rounded-md shadow-sm" loading="lazy" />
+                {% else %}
+                <i data-lucide="layers" class="w-6 h-6 text-gray-700"></i>
+                {% endif %}
+              </div>
+              <div class="flex-1 min-w-0">
+                <span class="block text-sm font-semibold text-gray-900 leading-tight break-words">{{ category.name }}</span>
+                {% if category.total is defined and category.total > 0 %}
+                <span class="text-xs text-gray-500">{{ category.product_label }}</span>
+                {% endif %}
+              </div>
+              <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </section>
+  {% elseif refine_parent_href %}
+  <div class="px-4 sm:px-6 lg:px-8 pt-8 pb-2">
+    <div class="max-w-7xl mx-auto">
+      <a href="{{ refine_parent_href }}" class="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-800 font-medium">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i> {{ text_back_to|format(refine_parent_name) }}
+      </a>
+    </div>
+  </div>
+  {% endif %}
+
   <section id="catalog" class="py-8 px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto">
       {{ content_top }}

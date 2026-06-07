@@ -92,12 +92,19 @@ class ControllerProductManufacturer extends Controller {
 
 		$this->load->model('catalog/product');
 
+		$this->load->model('catalog/category');
+
 		$this->load->model('tool/image');
 
 		if (isset($this->request->get['manufacturer_id'])) {
 			$manufacturer_id = (int)$this->request->get['manufacturer_id'];
 		} else {
 			$manufacturer_id = 0;
+		}
+
+		$category_id = 0;
+		if (isset($this->request->get['category_id'])) {
+			$category_id = (int)$this->request->get['category_id'];
 		}
 
 		if (isset($this->request->get['sort'])) {
@@ -199,6 +206,10 @@ class ControllerProductManufacturer extends Controller {
 				$url .= '&limit=' . $this->request->get['limit'];
 			}
 
+			if ($category_id) {
+				$url .= '&category_id=' . $category_id;
+			}
+
 			$data['breadcrumbs'][] = array(
 				'text' => $manufacturer_info['name'],
 				'href' => $this->url->link('product/manufacturer/info', 'manufacturer_id=' . $this->request->get['manufacturer_id'] . $url)
@@ -231,12 +242,129 @@ class ControllerProductManufacturer extends Controller {
 				'limit'                  => $limit
 			);
 
+			if ($category_id) {
+				$filter_data['filter_category_id'] = $category_id;
+				$filter_data['filter_sub_category'] = true;
+			}
+
 			$product_total = $this->model_catalog_product->getTotalProducts($filter_data);
 			$data['product_total'] = $product_total;
 
 			$this->load->helper('plural');
 			$lang_code = $this->language->get('code');
 			$data['text_product_count'] = product_count_label($product_total, $lang_code);
+
+			// Refine Search: build category cards for this manufacturer
+			$data['refine_categories'] = array();
+			$data['refine_category_name'] = '';
+			$data['refine_parent_href'] = '';
+			$data['refine_parent_name'] = '';
+			$data['category_id'] = $category_id;
+
+			$all_manufacturer_product_ids = $this->getCachedManufacturerProductIds($manufacturer_id);
+
+			if (!empty($all_manufacturer_product_ids)) {
+				$category_counts = $this->model_catalog_category->getCategoryProductCounts($all_manufacturer_product_ids);
+
+				if (!empty($category_counts)) {
+					$category_ids = array_keys($category_counts);
+					$categories_info = $this->model_catalog_category->getCategoriesByIds($category_ids);
+
+					$top_level_ids = array();
+					foreach ($categories_info as $cat) {
+						if ((int)$cat['parent_id'] === 0) {
+							$top_level_ids[] = (int)$cat['category_id'];
+						}
+					}
+
+					$refine_ids = array();
+					if ($category_id === 0) {
+						$refine_ids = $top_level_ids;
+					} else {
+						foreach ($categories_info as $cat) {
+							if ((int)$cat['parent_id'] === $category_id) {
+								$refine_ids[] = (int)$cat['category_id'];
+							}
+						}
+					}
+
+					if ($category_id > 0) {
+						if (isset($categories_info[$category_id])) {
+							$data['refine_category_name'] = $categories_info[$category_id]['name'];
+						} else {
+							$cat_info = $this->model_catalog_category->getCategory($category_id);
+							if ($cat_info) {
+								$data['refine_category_name'] = $cat_info['name'];
+							}
+						}
+
+						$back_url = 'manufacturer_id=' . $manufacturer_id;
+						if (isset($this->request->get['sort'])) {
+							$back_url .= '&sort=' . $this->request->get['sort'];
+						}
+						if (isset($this->request->get['order'])) {
+							$back_url .= '&order=' . $this->request->get['order'];
+						}
+						if (isset($this->request->get['limit'])) {
+							$back_url .= '&limit=' . $this->request->get['limit'];
+						}
+						$data['refine_parent_href'] = $this->url->link('product/manufacturer/info', $back_url);
+						$data['refine_parent_name'] = $manufacturer_info['name'];
+					}
+
+					$refine_data = array();
+					foreach ($refine_ids as $cat_id) {
+						if (!isset($categories_info[$cat_id])) {
+							continue;
+						}
+
+						$cat = $categories_info[$cat_id];
+						$total = isset($category_counts[$cat_id]) ? (int)$category_counts[$cat_id] : 0;
+
+						if ($cat['image']) {
+							$thumb = $this->model_tool_image->resize($cat['image'], 140, 140);
+						} else {
+							$first_image = $this->model_catalog_category->getFirstProductImageByCategoryId($cat_id);
+							if (!empty($first_image)) {
+								$thumb = $this->model_tool_image->resize($first_image, 140, 140);
+							} else {
+								$thumb = '';
+							}
+						}
+
+						$refine_url = 'manufacturer_id=' . $manufacturer_id . '&category_id=' . $cat_id;
+						if (isset($this->request->get['sort'])) {
+							$refine_url .= '&sort=' . $this->request->get['sort'];
+						}
+						if (isset($this->request->get['order'])) {
+							$refine_url .= '&order=' . $this->request->get['order'];
+						}
+						if (isset($this->request->get['limit'])) {
+							$refine_url .= '&limit=' . $this->request->get['limit'];
+						}
+
+						$refine_data[] = array(
+							'category_id'   => $cat_id,
+							'name'          => $cat['name'],
+							'total'         => $total,
+							'product_label' => product_count_label($total, $lang_code),
+							'thumb'         => $thumb,
+							'href'          => $this->url->link('product/manufacturer/info', $refine_url)
+						);
+					}
+
+					usort($refine_data, function($a, $b) {
+						return $b['total'] - $a['total'];
+					});
+
+					$data['refine_categories'] = $refine_data;
+				}
+			}
+
+			$data['text_refine'] = $this->language->get('text_refine');
+			$data['text_refine_categories'] = $this->language->get('text_refine_categories');
+			$data['text_back_to'] = $this->language->get('text_back_to');
+			$data['text_all_brands'] = $this->language->get('text_all_brands');
 
 			$results = $this->model_catalog_product->getProducts($filter_data);
 
@@ -667,5 +795,26 @@ class ControllerProductManufacturer extends Controller {
 			'count' => count($products),
 			'total' => $product_total,
 		)));
+	}
+
+	private function getCachedManufacturerProductIds($manufacturer_id) {
+		$manufacturer_id = (int)$manufacturer_id;
+		$cache_key = 'manufacturer.product_ids.' . (int)$this->config->get('config_store_id') . '.' . (int)$this->config->get('config_language_id') . '.' . $manufacturer_id;
+		$product_ids = $this->cache->get($cache_key);
+
+		if (is_array($product_ids)) {
+			return $product_ids;
+		}
+
+		$query = $this->db->query("SELECT p.product_id FROM " . DB_PREFIX . "product p LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE p.manufacturer_id = '" . $manufacturer_id . "' AND p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "'");
+
+		$product_ids = array();
+		foreach ($query->rows as $row) {
+			$product_ids[] = (int)$row['product_id'];
+		}
+
+		$this->cache->set($cache_key, $product_ids, 1800);
+
+		return $product_ids;
 	}
 }
