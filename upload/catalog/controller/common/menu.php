@@ -68,7 +68,7 @@ class ControllerCommonMenu extends Controller {
 
 		$language_context = $this->resolveLanguageContext();
 
-		$cache_key = 'category.menu.tree.v3.'
+		$cache_key = 'category.menu.tree.v4.'
 			. (int)$this->config->get('config_store_id')
 			. '.' . (int)$language_context['language_id']
 			. '.' . (string)$language_context['language_code']
@@ -113,8 +113,14 @@ class ControllerCommonMenu extends Controller {
 					$grandchild_total = $this->getCategoryProductTotal((int)$grandchild['category_id']);
 				}
 
+				$grandchild_icon = '';
+				if (!empty($grandchild['icon'])) {
+					$grandchild_icon = $this->model_tool_image->resize($grandchild['icon'], 20, 20);
+				}
+
 				$grandchildren_data[] = array(
 					'name' => $grandchild['name'] . ($this->config->get('config_product_count') ? ' (' . $grandchild_total . ')' : ''),
+					'icon' => $grandchild_icon,
 					'href' => $this->url->link('product/category', 'path=' . $path . '_' . (int)$child['category_id'] . '_' . (int)$grandchild['category_id'])
 				);
 			}
@@ -125,8 +131,14 @@ class ControllerCommonMenu extends Controller {
 				$child_total = $this->getCategoryProductTotal((int)$child['category_id']);
 			}
 
+			$child_icon = '';
+			if (!empty($child['icon'])) {
+				$child_icon = $this->model_tool_image->resize($child['icon'], 20, 20);
+			}
+
 			$children_data[] = array(
 				'name'  => $child['name'] . ($this->config->get('config_product_count') ? ' (' . $child_total . ')' : ''),
+				'icon'  => $child_icon,
 				'children' => $grandchildren_data,
 				'href'  => $this->url->link('product/category', 'path=' . $path . '_' . (int)$child['category_id'])
 			);
