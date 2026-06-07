@@ -181,7 +181,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
         }
         
         // Add sub-category filter
-        if (isset($filter_data['filter_sub_category'])) {
+        if (!empty($filter_data['filter_sub_category'])) {
             $search_options['sub_category'] = true;
         }
         

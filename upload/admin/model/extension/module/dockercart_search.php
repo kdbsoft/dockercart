@@ -132,6 +132,9 @@ class ModelExtensionModuleDockercartSearch extends Model {
             // Intentionally ignore errors (column may already exist)
             $manticore->query("ALTER TABLE `products` ADD COLUMN `{$col}` text");
         }
+        
+        // Add MVA attribute for all category IDs (if not exists)
+        $manticore->query("ALTER TABLE `products` ADD COLUMN `category_ids` multi");
     }
 
     /**
@@ -188,21 +191,29 @@ class ModelExtensionModuleDockercartSearch extends Model {
         
         $product = $query->row;
         
-        // Get category (first one)
+        // Get all category IDs for this product
         $category_query = $this->db->query("
             SELECT category_id FROM " . DB_PREFIX . "product_to_category
             WHERE product_id = '" . (int)$product_id . "'
-            LIMIT 1
         ");
         
-        $category_id = $category_query->num_rows ? $category_query->row['category_id'] : 0;
+        $category_ids = [];
+        $first_category_id = 0;
+        foreach ($category_query->rows as $row) {
+            $cid = (int)$row['category_id'];
+            $category_ids[] = $cid;
+            if ($first_category_id === 0) {
+                $first_category_id = $cid;
+            }
+        }
         
         // Prepare document for Manticore
         $doc = [
             'id'               => (int)$product_id * 100 + (int)$language_id, // Composite ID
             'store_id'         => (int)$this->config->get('config_store_id'),
             'language_id'      => (int)$language_id,
-            'category_id'      => (int)$category_id,
+            'category_id'      => $first_category_id,
+            'category_ids'     => $category_ids,
             'manufacturer_id'  => (int)$product['manufacturer_id'],
             'status'           => (int)$product['status'],
             'quantity'         => (int)$product['quantity'],

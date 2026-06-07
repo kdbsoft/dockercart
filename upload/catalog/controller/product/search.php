@@ -37,6 +37,8 @@ class ControllerProductSearch extends Controller {
 
 		if (isset($this->request->get['sub_category'])) {
 			$sub_category = $this->request->get['sub_category'];
+		} elseif ($category_id > 0) {
+			$sub_category = '1';
 		} else {
 			$sub_category = '';
 		}
@@ -152,42 +154,6 @@ class ControllerProductSearch extends Controller {
 		$data['call_for_price_status'] = (int)$this->config->get('dockercart_theme_call_for_price_status');
 		$data['call_for_price_phone'] = $this->config->get('config_telephone');
 
-		// 3 Level Category Search
-		$data['categories'] = array();
-
-		$categories_1 = $this->model_catalog_category->getCategories(0);
-
-		foreach ($categories_1 as $category_1) {
-			$level_2_data = array();
-
-			$categories_2 = $this->model_catalog_category->getCategories($category_1['category_id']);
-
-			foreach ($categories_2 as $category_2) {
-				$level_3_data = array();
-
-				$categories_3 = $this->model_catalog_category->getCategories($category_2['category_id']);
-
-				foreach ($categories_3 as $category_3) {
-					$level_3_data[] = array(
-						'category_id' => $category_3['category_id'],
-						'name'        => $category_3['name'],
-					);
-				}
-
-				$level_2_data[] = array(
-					'category_id' => $category_2['category_id'],
-					'name'        => $category_2['name'],
-					'children'    => $level_3_data
-				);
-			}
-
-			$data['categories'][] = array(
-				'category_id' => $category_1['category_id'],
-				'name'        => $category_1['name'],
-				'children'    => $level_2_data
-			);
-		}
-
 		$data['products'] = array();
 		$data['product_total'] = 0;
 
@@ -230,6 +196,137 @@ class ControllerProductSearch extends Controller {
 			}
 
 			$data['text_products'] = product_count_label($data['product_total'], $this->language->get('code'));
+
+			// Refine Search: get all product IDs and build category list
+			$data['refine_categories'] = array();
+
+			$search_key = md5($search . '|' . $category_id . '|' . $sub_category . '|' . $description);
+			$session_key = 'search_product_ids_' . $search_key;
+
+			if (isset($this->session->data[$session_key]) && is_array($this->session->data[$session_key])) {
+				$all_product_ids = $this->session->data[$session_key];
+			} else {
+				$all_product_ids = array();
+
+				if ($manticore_total !== null) {
+					$this->load->model('extension/module/dockercart_search');
+					$all_product_ids = $this->model_extension_module_dockercart_search->getAllProductIds($search, array(
+						'category_id'  => $category_id,
+						'sub_category' => $sub_category,
+						'description'  => $description
+					));
+				} else {
+					foreach ($results as $r) {
+						$all_product_ids[] = (int)$r['product_id'];
+					}
+				}
+
+				$this->session->data[$session_key] = $all_product_ids;
+			}
+
+			if (!empty($all_product_ids)) {
+				$this->load->helper('plural');
+				$lang_code = $this->language->get('code');
+
+				$category_counts = $this->model_catalog_category->getCategoryProductCounts($all_product_ids);
+
+				if (!empty($category_counts)) {
+					$category_ids = array_keys($category_counts);
+					$categories_info = $this->model_catalog_category->getCategoriesByIds($category_ids);
+
+					$top_level_ids = array();
+					foreach ($categories_info as $cat) {
+						if ((int)$cat['parent_id'] === 0) {
+							$top_level_ids[] = (int)$cat['category_id'];
+						}
+					}
+
+					$refine_ids = array();
+					if ((int)$category_id === 0) {
+						$refine_ids = $top_level_ids;
+					} else {
+						foreach ($categories_info as $cat) {
+							if ((int)$cat['parent_id'] === (int)$category_id) {
+								$refine_ids[] = (int)$cat['category_id'];
+							}
+						}
+					}
+
+					$refine_category_name = '';
+					$refine_parent_href = '';
+
+					if ((int)$category_id > 0 && isset($categories_info[(int)$category_id])) {
+						$refine_category_name = $categories_info[(int)$category_id]['name'];
+
+						$parent_url = '';
+						if (isset($this->request->get['search'])) {
+							$parent_url .= '&search=' . urlencode(html_entity_decode($this->request->get['search'], ENT_QUOTES, 'UTF-8'));
+						}
+						if (isset($this->request->get['tag'])) {
+							$parent_url .= '&tag=' . urlencode(html_entity_decode(trim($this->request->get['tag']), ENT_QUOTES, 'UTF-8'));
+						}
+						if (isset($this->request->get['description'])) {
+							$parent_url .= '&description=' . $this->request->get['description'];
+						}
+						$parent_url .= '&category_id=0&sub_category=1';
+						$refine_parent_href = $this->url->link('product/search', ltrim($parent_url, '&'));
+					}
+
+					$refine_data = array();
+					foreach ($refine_ids as $cat_id) {
+						if (!isset($categories_info[$cat_id])) {
+							continue;
+						}
+
+						$cat = $categories_info[$cat_id];
+						$total = isset($category_counts[$cat_id]) ? (int)$category_counts[$cat_id] : 0;
+
+						if ($cat['image']) {
+							$thumb = $this->model_tool_image->resize($cat['image'], 140, 140);
+						} else {
+							$first_image = $this->model_catalog_category->getFirstProductImageByCategoryId($cat_id);
+							if (!empty($first_image)) {
+								$thumb = $this->model_tool_image->resize($first_image, 140, 140);
+							} else {
+								$thumb = '';
+							}
+						}
+
+						$refine_url = '';
+						if (isset($this->request->get['search'])) {
+							$refine_url .= '&search=' . urlencode(html_entity_decode($this->request->get['search'], ENT_QUOTES, 'UTF-8'));
+						}
+						if (isset($this->request->get['tag'])) {
+							$refine_url .= '&tag=' . urlencode(html_entity_decode(trim($this->request->get['tag']), ENT_QUOTES, 'UTF-8'));
+						}
+						if (isset($this->request->get['description'])) {
+							$refine_url .= '&description=' . $this->request->get['description'];
+						}
+						$refine_url .= '&category_id=' . $cat_id . '&sub_category=1';
+
+						$refine_data[] = array(
+							'category_id'   => $cat_id,
+							'name'          => $cat['name'],
+							'total'         => $total,
+							'product_label' => product_count_label($total, $lang_code),
+							'thumb'         => $thumb,
+							'href'          => $this->url->link('product/search', ltrim($refine_url, '&'))
+						);
+					}
+
+					usort($refine_data, function($a, $b) {
+						return $b['total'] - $a['total'];
+					});
+
+					$data['refine_categories'] = $refine_data;
+					$data['refine_category_name'] = $refine_category_name;
+					$data['refine_parent_href'] = $refine_parent_href;
+				}
+			}
+
+			$data['text_refine'] = $this->language->get('text_refine');
+			$data['text_refine_categories'] = $this->language->get('text_refine_categories');
+			$data['text_all_categories'] = $this->language->get('text_all_categories');
 
 			foreach ($results as $result) {
 				if ($result['image']) {
@@ -567,7 +664,7 @@ class ControllerProductSearch extends Controller {
 		$tag         = isset($this->request->get['tag'])         ? html_entity_decode(html_entity_decode(trim((string)$this->request->get['tag']), ENT_QUOTES, 'UTF-8'), ENT_QUOTES, 'UTF-8') : (isset($this->request->get['search']) ? $search : '');
 		$description = isset($this->request->get['description']) ? $this->request->get['description'] : '';
 		$category_id = isset($this->request->get['category_id'])  ? $this->request->get['category_id'] : 0;
-		$sub_category = isset($this->request->get['sub_category']) ? $this->request->get['sub_category'] : '';
+		$sub_category = isset($this->request->get['sub_category']) ? $this->request->get['sub_category'] : ($category_id > 0 ? '1' : '');
 		$sort        = isset($this->request->get['sort'])        ? $this->request->get['sort']  : 'p.sort_order';
 		$order       = isset($this->request->get['order'])       ? $this->request->get['order'] : 'ASC';
 		$page        = isset($this->request->get['page'])        ? (int)$this->request->get['page'] : 1;
