@@ -40,6 +40,7 @@ $_['entry_store']            = 'Stores';
 $_['entry_keyword']          = 'Keyword';
 $_['entry_parent']           = 'Parent';
 $_['entry_image']            = 'Image';
+$_['entry_icon']             = 'Icon';
 $_['entry_background_image'] = 'Background Image';
 $_['entry_top']              = 'Top';
 $_['entry_column']           = 'Columns';
@@ -49,6 +50,7 @@ $_['entry_layout']           = 'Layout Override';
 
 // Help
 $_['help_top']               = 'Display in the top menu bar. Only works for the top parent categories.';
+$_['help_icon']              = 'Small icon displayed next to the category name in the header navigation. Recommended: SVG or PNG, 24×24 px.';
 $_['help_column']            = 'Number of columns to use for the bottom 3 categories. Only works for the top parent categories.';
 
 // Error

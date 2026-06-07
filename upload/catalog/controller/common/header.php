@@ -373,7 +373,7 @@ class ControllerCommonHeader extends Controller {
 		$this->load->model('catalog/category');
 		$data['mobile_categories'] = array();
 		$show_product_count = (bool)$this->config->get('config_product_count');
-		$mobile_menu_cache_key = 'category.mobile.tree.v1.'
+		$mobile_menu_cache_key = 'category.mobile.tree.v2.'
 			. (int)$this->config->get('config_store_id')
 			. '.' . (int)$this->config->get('config_language_id')
 			. '.' . (int)$show_product_count;
@@ -424,9 +424,16 @@ class ControllerCommonHeader extends Controller {
 					);
 				}
 
+				$icon = '';
+				if (!empty($category['icon'])) {
+					$this->load->model('tool/image');
+					$icon = $this->model_tool_image->resize($category['icon'], 24, 24);
+				}
+
 				$mobile_categories[] = array(
 					'category_id' => (int)$category['category_id'],
 					'name' => $category['name'],
+					'icon' => $icon,
 					'children' => $children_data,
 					'href' => $this->url->link('product/category', 'path=' . (int)$category['category_id'])
 				);

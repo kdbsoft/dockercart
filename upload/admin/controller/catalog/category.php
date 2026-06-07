@@ -563,6 +563,22 @@ class ControllerCatalogCategory extends Controller {
 
 		$data['placeholder'] = $this->model_tool_image->resize('no_image.png', 100, 100);
 
+		if (isset($this->request->post['icon'])) {
+			$data['icon'] = $this->request->post['icon'];
+		} elseif (!empty($category_info)) {
+			$data['icon'] = $category_info['icon'];
+		} else {
+			$data['icon'] = '';
+		}
+
+		if (isset($this->request->post['icon']) && is_file(DIR_IMAGE . $this->request->post['icon'])) {
+			$data['icon_thumb'] = $this->model_tool_image->resize($this->request->post['icon'], 100, 100);
+		} elseif (!empty($category_info) && is_file(DIR_IMAGE . $category_info['icon'])) {
+			$data['icon_thumb'] = $this->model_tool_image->resize($category_info['icon'], 100, 100);
+		} else {
+			$data['icon_thumb'] = $this->model_tool_image->resize('no_image.png', 100, 100);
+		}
+
 		if (isset($this->request->post['background_image'])) {
 			$data['background_image'] = $this->request->post['background_image'];
 		} elseif (!empty($category_info)) {
@@ -771,6 +787,27 @@ class ControllerCatalogCategory extends Controller {
 			$this->load->model('catalog/category');
 			$this->model_catalog_category->updateCategoryImage((int)$this->request->post['category_id'], $this->request->post['image']);
 			$json['success'] = 'Image updated';
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function updateIcon() {
+		$json = array();
+
+		if (!$this->user->hasPermission('modify', 'catalog/category')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		if (!isset($this->request->post['category_id']) || !isset($this->request->post['icon'])) {
+			$json['error'] = 'Invalid request';
+		}
+
+		if (!isset($json['error'])) {
+			$this->load->model('catalog/category');
+			$this->model_catalog_category->updateCategoryIcon((int)$this->request->post['category_id'], $this->request->post['icon']);
+			$json['success'] = 'Icon updated';
 		}
 
 		$this->response->addHeader('Content-Type: application/json');

@@ -9,6 +9,10 @@ class ModelCatalogCategory extends Model {
 			$this->db->query("UPDATE " . DB_PREFIX . "category SET image = '" . $this->db->escape($data['image']) . "' WHERE category_id = '" . (int)$category_id . "'");
 		}
 
+		if (isset($data['icon'])) {
+			$this->db->query("UPDATE " . DB_PREFIX . "category SET icon = '" . $this->db->escape($data['icon']) . "' WHERE category_id = '" . (int)$category_id . "'");
+		}
+
 		if (isset($data['background_image'])) {
 			$this->db->query("UPDATE " . DB_PREFIX . "category SET background_image = '" . $this->db->escape($data['background_image']) . "' WHERE category_id = '" . (int)$category_id . "'");
 		}
@@ -71,6 +75,10 @@ class ModelCatalogCategory extends Model {
 
 		if (isset($data['image'])) {
 			$this->db->query("UPDATE " . DB_PREFIX . "category SET image = '" . $this->db->escape($data['image']) . "' WHERE category_id = '" . (int)$category_id . "'");
+		}
+
+		if (isset($data['icon'])) {
+			$this->db->query("UPDATE " . DB_PREFIX . "category SET icon = '" . $this->db->escape($data['icon']) . "' WHERE category_id = '" . (int)$category_id . "'");
 		}
 
 		if (isset($data['background_image'])) {
@@ -657,6 +665,10 @@ class ModelCatalogCategory extends Model {
 
 	public function updateCategoryImage($category_id, $image) {
 		$this->db->query("UPDATE " . DB_PREFIX . "category SET image = '" . $this->db->escape($image) . "' WHERE category_id = '" . (int)$category_id . "'");
+	}
+
+	public function updateCategoryIcon($category_id, $icon) {
+		$this->db->query("UPDATE " . DB_PREFIX . "category SET icon = '" . $this->db->escape($icon) . "' WHERE category_id = '" . (int)$category_id . "'");
 	}
 
 	public function updateCategoryField($category_id, $data) {

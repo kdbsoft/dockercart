@@ -293,7 +293,7 @@
       {% for category in mobile_categories %}
       <div class="dc-mobile-cat-item">
         <button type="button" class="dc-mobile-cat-toggle w-full flex items-center justify-between gap-3 px-3 py-2 rounded-xl text-left text-gray-800 hover:bg-gray-50 transition text-sm font-medium" aria-expanded="false">
-          <span class="flex items-center gap-3"><span>{{ category.name }}</span></span>
+          <span class="flex items-center gap-3">{% if category.icon %}<img src="{{ category.icon }}" alt="" class="w-6 h-6 flex-shrink-0 object-contain" />{% endif %}<span>{{ category.name }}</span></span>
           <span class="flex items-center gap-2">
             <i data-lucide="plus" class="dc-icon-plus w-4 h-4"></i>
             <i data-lucide="minus" class="dc-icon-minus w-4 h-4 hidden"></i>
