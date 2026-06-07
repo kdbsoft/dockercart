@@ -305,7 +305,7 @@ class ControllerExtensionPaymentPayPal extends Controller {
 						
 					foreach ($product_options as $product_option) {
 						if (isset($option[$product_option['product_option_id']])) {
-							if (($product_option['type'] == 'select') || ($product_option['type'] == 'radio')) {
+							if (($product_option['type'] == 'select') || ($product_option['type'] == 'radio') || ($product_option['type'] == 'color')) {
 								foreach ($product_option['product_option_value'] as $product_option_value) {
 									if (!$product_option_value['subtract'] || ($product_option_value['quantity'] > 0)) {
 										if ((float)$product_option_value['price']) {

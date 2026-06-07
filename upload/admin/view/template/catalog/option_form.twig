@@ -61,6 +61,11 @@
                 {% else %}
                   <option value="checkbox">{{ text_checkbox }}</option>
                 {% endif %}
+                {% if type == 'color' %}
+                  <option value="color" selected="selected">{{ text_color }}</option>
+                {% else %}
+                  <option value="color">{{ text_color }}</option>
+                {% endif %}
                 </optgroup>
                   <optgroup label="{{ text_input }}">
                 {% if type == 'text' %}
@@ -115,6 +120,7 @@
                 <tr>
                   <td class="text-left required">{{ entry_option_value }}</td>
                   <td class="text-center">{{ entry_image }}</td>
+                  <td class="text-center dc-color-col">{{ entry_color }}</td>
                   <td class="text-right">{{ entry_sort_order }}</td>
                   <td></td>
                 </tr>
@@ -135,6 +141,7 @@
                   {% endfor %}</td>
                 <td class="text-left"><a href="" id="thumb-image{{ option_value_row }}" data-toggle="image" class="img-thumbnail"><img src="{{ option_value.thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
                   <input type="hidden" name="option_value[{{ option_value_row }}][image]" value="{{ option_value.image }}" id="input-image{{ option_value_row }}" /></td>
+                <td class="text-center dc-color-col"><input type="color" name="option_value[{{ option_value_row }}][color_code]" value="{{ option_value.color_code }}" class="form-control" style="width:50px;height:34px;padding:2px;margin:0 auto;cursor:pointer;" /></td>
                 <td class="text-right"><input type="text" name="option_value[{{ option_value_row }}][sort_order]" value="{{ option_value.sort_order }}" class="form-control" /></td>
                 <td class="text-right"><button type="button" onclick="$('#option-value-row{{ option_value_row }}').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>
               </tr>
@@ -144,7 +151,7 @@
               
               <tfoot>
                 <tr>
-                  <td colspan="3"></td>
+                  <td colspan="4"></td>
                   <td class="text-right"><button type="button" onclick="addOptionValue();" data-toggle="tooltip" title="{{ button_option_value_add }}" class="btn btn-primary"><i class="fa fa-plus-circle"></i></button></td>
                 </tr>
               </tfoot>
@@ -156,11 +163,13 @@
   </div>
   <script type="text/javascript"><!--
 $('select[name=\'type\']').on('change', function() {
-	if (this.value == 'select' || this.value == 'radio' || this.value == 'checkbox' || this.value == 'image') {
-		$('#option-value').parent().show();
-	} else {
-		$('#option-value').parent().hide();
-	}
+	var showValues = this.value == 'select' || this.value == 'radio' || this.value == 'checkbox' || this.value == 'image' || this.value == 'color';
+	var showColor = this.value == 'color';
+
+	$('#option-value').parent().toggle(showValues);
+
+	$('.dc-color-col').toggle(showColor);
+	$('#option-value tfoot tr td:first').attr('colspan', showColor ? 4 : 3);
 });
 
 $('select[name=\'type\']').trigger('change');
@@ -168,6 +177,7 @@ $('select[name=\'type\']').trigger('change');
 var option_value_row = {{ option_value_row }};
 
 function addOptionValue() {
+	var currentType = $('select[name="type"]').val();
 	html  = '<tr id="option-value-row' + option_value_row + '">';
     html += '  <td class="text-left"><input type="hidden" name="option_value[' + option_value_row + '][option_value_id]" value="" />';
 	{% for language in languages %}
@@ -177,6 +187,9 @@ function addOptionValue() {
 	{% endfor %}
 	html += '  </td>';
     html += '  <td class="text-center"><a href="" id="thumb-image' + option_value_row + '" data-toggle="image" class="img-thumbnail"><img src="{{ placeholder }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a><input type="hidden" name="option_value[' + option_value_row + '][image]" value="" id="input-image' + option_value_row + '" /></td>';
+	if (currentType === 'color') {
+		html += '  <td class="text-center dc-color-col"><input type="color" name="option_value[' + option_value_row + '][color_code]" value="" class="form-control" style="width:50px;height:34px;padding:2px;margin:0 auto;cursor:pointer;" /></td>';
+	}
 	html += '  <td class="text-right"><input type="text" name="option_value[' + option_value_row + '][sort_order]" value="" placeholder="{{ entry_sort_order }}" class="form-control" /></td>';
 	html += '  <td class="text-right"><button type="button" onclick="$(\'#option-value-row' + option_value_row + '\').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>';
 	html += '</tr>';

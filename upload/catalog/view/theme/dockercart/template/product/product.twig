@@ -23,6 +23,10 @@
   .dc-stars .dc-star { font-size: 1rem; color: #d1d5db; }
   .dc-stars .dc-star.active { color: #f59e0b; }
   .dc-option-required-error { border-color: #fca5a5 !important; box-shadow: 0 0 0 3px rgba(239,68,68,.12) !important; border-radius: 0.75rem; }
+  .dc-color-swatch { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #e5e7eb; flex-shrink: 0; }
+  .dc-color-option { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 12px; border-radius: 12px; border: 1px solid #e5e7eb; cursor: pointer; transition: border-color .15s, background .15s; }
+  .dc-color-option.active { border-color: #2563eb; background: #eff6ff; }
+  .dc-color-option.oos { cursor: not-allowed; border-color: #f3f4f6; opacity: 0.5; }
 
 </style>
 
@@ -155,7 +159,23 @@
           <div class="mt-5">
             <p class="text-sm font-semibold text-gray-800 mb-2">{{ option.name }}{% if option.required %} <span class="text-red-500">*</span>{% endif %}</p>
 
-            {% if option.type == 'radio' %}
+            {% if option.type == 'color' %}
+            <div class="flex flex-wrap gap-2" id="input-option{{ option.product_option_id }}">
+              {% for option_value in option.product_option_value %}
+              {% set option_oos = option_value.subtract and option_value.quantity <= 0 %}
+              <label class="{% if option_oos %}cursor-not-allowed{% else %}cursor-pointer{% endif %}">
+                <input type="radio" name="option[{{ option.product_option_id }}]" value="{{ option_value.product_option_value_id }}" data-option-price="{{ option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}" class="sr-only dc-option-radio"{% if option_oos %} disabled{% endif %} />
+                <span class="dc-color-option{% if option_oos %} oos{% endif %}">
+                  <span class="dc-color-swatch" style="background-color: {{ option_value.color_code }}{% if option_oos %}; opacity: 0.4{% endif %}"></span>
+                  <span class="text-xs font-semibold{% if option_oos %} text-gray-300{% endif %}">{{ option_value.name }}</span>
+                  {% if option_value.price %}<span class="text-[10px] text-gray-500">({{ option_value.price_prefix }}{{ option_value.price }})</span>{% endif %}
+                  {% if option_oos %}<span class="text-[10px] text-gray-400 font-medium">({{ text_option_out_of_stock }})</span>{% endif %}
+                </span>
+              </label>
+              {% endfor %}
+            </div>
+
+            {% elseif option.type == 'radio' %}
             <div class="flex flex-wrap gap-2" id="input-option{{ option.product_option_id }}">
               {% for option_value in option.product_option_value %}
               {% set option_oos = option_value.subtract and option_value.quantity <= 0 %}

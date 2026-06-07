@@ -267,7 +267,8 @@ class Cart
                     if ($option_query->num_rows) {
                         if (
                             $option_query->row["type"] == "select" ||
-                            $option_query->row["type"] == "radio"
+                            $option_query->row["type"] == "radio" ||
+                            $option_query->row["type"] == "color"
                         ) {
                             $option_value_query = $this->db->query(
                                 "SELECT pov.option_value_id, ovd.name, pov.quantity, pov.subtract, COALESCE(cgp.price, pov.price) AS price, COALESCE(cgp.price_prefix, pov.price_prefix) AS price_prefix, pov.points, pov.points_prefix, pov.weight, pov.weight_prefix FROM " .

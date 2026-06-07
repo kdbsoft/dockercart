@@ -426,6 +426,7 @@ class ControllerCatalogOption extends Controller {
 				'option_value_description' => $option_value['option_value_description'],
 				'image'                    => $image,
 				'thumb'                    => $this->model_tool_image->resize($thumb, 100, 100),
+				'color_code'               => $option_value['color_code'] ?? '',
 				'sort_order'               => $option_value['sort_order']
 			);
 		}
@@ -490,7 +491,7 @@ class ControllerCatalogOption extends Controller {
 			}
 		}
 
-		if (($this->request->post['type'] == 'select' || $this->request->post['type'] == 'radio' || $this->request->post['type'] == 'checkbox') && !isset($this->request->post['option_value'])) {
+		if (($this->request->post['type'] == 'select' || $this->request->post['type'] == 'radio' || $this->request->post['type'] == 'checkbox' || $this->request->post['type'] == 'color') && !isset($this->request->post['option_value'])) {
 			$this->error['warning'] = $this->language->get('error_type');
 		}
 
@@ -683,7 +684,7 @@ class ControllerCatalogOption extends Controller {
 			foreach ($options as $option) {
 				$option_value_data = array();
 
-				if ($option['type'] == 'select' || $option['type'] == 'radio' || $option['type'] == 'checkbox' || $option['type'] == 'image') {
+				if ($option['type'] == 'select' || $option['type'] == 'radio' || $option['type'] == 'checkbox' || $option['type'] == 'image' || $option['type'] == 'color') {
 					$option_values = $this->model_catalog_option->getOptionValues($option['option_id']);
 
 					foreach ($option_values as $option_value) {
@@ -711,7 +712,7 @@ class ControllerCatalogOption extends Controller {
 
 				$type = '';
 
-				if ($option['type'] == 'select' || $option['type'] == 'radio' || $option['type'] == 'checkbox') {
+				if ($option['type'] == 'select' || $option['type'] == 'radio' || $option['type'] == 'checkbox' || $option['type'] == 'color') {
 					$type = $this->language->get('text_choose');
 				}
 
