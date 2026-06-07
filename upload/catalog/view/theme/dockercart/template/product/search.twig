@@ -90,6 +90,14 @@
       </div>
     </div>
   </section>
+  {% elseif refine_parent_href %}
+  <div class="px-4 sm:px-6 lg:px-8 pt-4 pb-2">
+    <div class="max-w-7xl mx-auto">
+      <a href="{{ refine_parent_href }}" class="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-800 font-medium">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i> {{ text_back_to|format(refine_parent_name) }}
+      </a>
+    </div>
+  </div>
   {% endif %}
 
   <section id="catalog" class="py-8 px-4 sm:px-6 lg:px-8">

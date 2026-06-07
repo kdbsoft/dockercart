@@ -34,3 +34,7 @@ $_['text_sort'] = 'Сортувати за:';
 $_['text_tax']       = 'Без ПДВ:';
 $_['text_load_more'] = 'Показати ще';
 $_['text_gift_badge'] = 'ПОДАРУНОК';
+$_['text_refine'] = 'Уточніть пошук';
+$_['text_refine_categories'] = 'Категорії';
+$_['text_back_to'] = 'Назад до %s';
+$_['text_all_brands'] = 'Всі товари %s';
