@@ -15,11 +15,17 @@ $_['text_edit_subtitle'] = 'Configure extension settings and options';
 
 // Entry
 $_['entry_name']       = 'Module Name';
+$_['entry_product']    = 'Products';
 $_['entry_limit']      = 'Limit';
 $_['entry_image']      = 'Image (W x H) and Resize Type';
 $_['entry_width']      = 'Width';
 $_['entry_height']     = 'Height';
 $_['entry_status']     = 'Status';
+$_['entry_category_filter'] = 'Category Filter';
+
+// Help
+$_['help_product']     = 'Manually select products to display. If at least one product is added, only manual products will be shown. If empty, products are shown automatically.';
+$_['help_category_filter'] = 'Show category buttons above products for filtering. Click a category to show only products from that category. Click again to show all products.';
 
 // Error
 $_['error_permission'] = 'Warning: You do not have permission to modify bestsellers module!';
