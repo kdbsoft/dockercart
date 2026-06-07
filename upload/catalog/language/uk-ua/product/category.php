@@ -41,5 +41,6 @@ $_['text_subcategories'] = '%s';
 $_['text_support'] = 'Підтримка';
 $_['text_support_desc'] = 'Експертна допомога до і після покупки';
 $_['text_tax']       = 'Без ПДВ:';
+$_['text_back_to']   = 'Назад до %s';
 $_['text_load_more'] = 'Показати ще';
 $_['text_gift_badge'] = 'ПОДАРУНОК';

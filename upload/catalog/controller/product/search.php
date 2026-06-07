@@ -254,9 +254,21 @@ class ControllerProductSearch extends Controller {
 
 					$refine_category_name = '';
 					$refine_parent_href = '';
+					$refine_parent_name = '';
 
-					if ((int)$category_id > 0 && isset($categories_info[(int)$category_id])) {
-						$refine_category_name = $categories_info[(int)$category_id]['name'];
+					if ((int)$category_id > 0) {
+						$parent_id = 0;
+
+						if (isset($categories_info[(int)$category_id])) {
+							$refine_category_name = $categories_info[(int)$category_id]['name'];
+							$parent_id = (int)$categories_info[(int)$category_id]['parent_id'];
+						} else {
+							$cat_info = $this->model_catalog_category->getCategory($category_id);
+							if ($cat_info) {
+								$refine_category_name = $cat_info['name'];
+								$parent_id = (int)$cat_info['parent_id'];
+							}
+						}
 
 						$parent_url = '';
 						if (isset($this->request->get['search'])) {
@@ -268,8 +280,21 @@ class ControllerProductSearch extends Controller {
 						if (isset($this->request->get['description'])) {
 							$parent_url .= '&description=' . $this->request->get['description'];
 						}
-						$parent_url .= '&category_id=0&sub_category=1';
+						$parent_url .= '&category_id=' . $parent_id . '&sub_category=1';
 						$refine_parent_href = $this->url->link('product/search', ltrim($parent_url, '&'));
+
+						if ($parent_id > 0) {
+							if (isset($categories_info[$parent_id])) {
+								$refine_parent_name = $categories_info[$parent_id]['name'];
+							} else {
+								$parent_cat = $this->model_catalog_category->getCategory($parent_id);
+								if ($parent_cat) {
+									$refine_parent_name = $parent_cat['name'];
+								}
+							}
+						} else {
+							$refine_parent_name = $this->language->get('text_all_categories');
+						}
 					}
 
 					$refine_data = array();
@@ -321,12 +346,14 @@ class ControllerProductSearch extends Controller {
 					$data['refine_categories'] = $refine_data;
 					$data['refine_category_name'] = $refine_category_name;
 					$data['refine_parent_href'] = $refine_parent_href;
+					$data['refine_parent_name'] = $refine_parent_name;
 				}
 			}
 
 			$data['text_refine'] = $this->language->get('text_refine');
 			$data['text_refine_categories'] = $this->language->get('text_refine_categories');
 			$data['text_all_categories'] = $this->language->get('text_all_categories');
+			$data['text_back_to'] = $this->language->get('text_back_to');
 
 			foreach ($results as $result) {
 				if ($result['image']) {

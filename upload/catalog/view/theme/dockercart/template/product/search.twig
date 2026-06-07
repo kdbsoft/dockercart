@@ -52,6 +52,11 @@
                 {{ text_refine_categories }}
               {% endif %}
             </h2>
+            {% if refine_parent_href %}
+            <a href="{{ refine_parent_href }}" class="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline mt-1">
+              <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> {{ text_back_to|format(refine_parent_name) }}
+            </a>
+            {% endif %}
           </div>
         </div>
 

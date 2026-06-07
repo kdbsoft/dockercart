@@ -26,6 +26,11 @@
           <div>
             <p class="text-xs font-bold uppercase tracking-widest text-blue-500">{{ text_refine }}</p>
             <h2 class="text-xl sm:text-2xl font-extrabold text-gray-900 mt-1">{{ text_subcategories|format(original_category_name) }}</h2>
+            {% if parent_href %}
+            <a href="{{ parent_href }}" class="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline mt-1">
+              <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> {{ text_back_to|format(parent_category_name) }}
+            </a>
+            {% endif %}
           </div>
           {% if show_shop_all %}<a href="{{ shop_all_href }}" class="text-sm font-semibold text-blue-600 hover:underline">{{ text_shop_all|format(original_category_name) }}</a>{% endif %}
         </div>

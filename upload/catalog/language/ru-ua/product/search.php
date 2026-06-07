@@ -35,6 +35,7 @@ $_['text_sort'] = 'Сортировать по:';
 $_['text_sub_category'] = 'Поиск по подкатегориям';
 $_['text_tax']       = 'Без учета налога:';
 $_['text_load_more'] = 'Показать ещё';
+$_['text_back_to']   = 'Назад к %s';
 $_['text_refine'] = 'Уточнить поиск';
 $_['text_refine_categories'] = 'Категории';
 $_['text_all_categories'] = 'Все категории';
