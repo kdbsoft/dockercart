@@ -618,7 +618,7 @@
                             </div>
                           </div>
                         {% endif %}
-                        {% if product_option.type == 'select' or product_option.type == 'radio' or product_option.type == 'checkbox' or product_option.type == 'image' %}
+                        {% if product_option.type == 'select' or product_option.type == 'radio' or product_option.type == 'checkbox' or product_option.type == 'image' or product_option.type == 'color' %}
                           <div class="table-responsive">
                             <table id="option-value{{ option_row }}" class="table table-striped table-bordered table-hover">
                               <thead>
@@ -1536,7 +1536,7 @@
 			  html += '	</div>';
 		  }
 
-		  if (item['type'] == 'select' || item['type'] == 'radio' || item['type'] == 'checkbox' || item['type'] == 'image') {
+		  if (item['type'] == 'select' || item['type'] == 'radio' || item['type'] == 'checkbox' || item['type'] == 'image' || item['type'] == 'color') {
 			  html += '<div class="table-responsive">';
 			  html += '  <table id="option-value' + option_row + '" class="table table-striped table-bordered table-hover">';
 			  html += '  	 <thead>';
