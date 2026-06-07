@@ -47,6 +47,14 @@ class ModelToolImage extends Model {
 				}
 			}
 
+			if (strtolower($extension) === 'svg') {
+				if ($this->request->server['HTTPS']) {
+					return HTTPS_CATALOG . 'image/' . $image_old;
+				} else {
+					return HTTP_CATALOG . 'image/' . $image_old;
+				}
+			}
+
 			list($width_orig, $height_orig, $image_type) = getimagesize(DIR_IMAGE . $image_old);
 
 			if (!in_array($image_type, array(IMAGETYPE_PNG, IMAGETYPE_JPEG, IMAGETYPE_GIF, IMAGETYPE_WEBP))) {
