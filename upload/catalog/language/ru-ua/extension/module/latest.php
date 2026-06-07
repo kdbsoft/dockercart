@@ -12,3 +12,4 @@ $_['text_view_all'] = 'Посмотреть все →';
 $_['text_instock'] = 'В наличии';
 $_['text_preorder'] = 'Предзаказ';
 $_['text_out_of_stock'] = 'Нет в наличии';
+$_['text_other'] = 'Другие';

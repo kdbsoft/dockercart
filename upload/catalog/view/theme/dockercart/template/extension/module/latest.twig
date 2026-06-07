@@ -1,27 +1,6 @@
-{# Latest module for dockercart theme — similar style to Featured module #}
+{# Latest module for dockercart theme #}
 {% if products|length %}
 <section id="latest" class="py-16 bg-white px-4 sm:px-6 lg:px-8">
-  <style>
-    /* Minimal styles to match product card appearance without Tailwind */
-    .product-card{background:#fff;border:1px solid #f3f4f6;border-radius:16px;overflow:hidden;transition:transform .25s ease,box-shadow .25s ease;display:flex;flex-direction:column}
-    .product-card:hover{transform:scale(1.02);box-shadow:0 10px 30px rgba(2,6,23,0.08)}
-    .product-card .image img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease}
-    .product-card:hover .image img{transform:scale(1.05)}
-    .add-to-cart-btn{opacity:0;transform:translateY(6px);transition:opacity .18s ease,transform .18s ease}
-    .product-card:hover .add-to-cart-btn{opacity:1;transform:translateY(0)}
-    .wishlist-btn{opacity:0;transform:translateY(-4px) scale(.92);transition:opacity .18s ease,transform .18s ease,box-shadow .18s ease}
-    .product-card:hover .wishlist-btn{opacity:1;transform:translateY(0) scale(1)}
-    .wishlist-btn.in-wishlist{opacity:1;transform:translateY(0) scale(1)}
-    .discount-badge{position:absolute;top:8px;left:8px;background:#ef4444;color:#fff;padding:2px 6px;border-radius:6px;font-size:11px;font-weight:700}
-    .quick-view-btn{position:absolute;bottom:0;left:0;right:0;padding:10px;background:rgba(17,24,39,0.85);color:#fff;font-weight:700;text-transform:uppercase;font-size:11px;opacity:0;transform:translateY(100%);transition:opacity .2s ease,transform .2s ease,background .2s ease}
-    .product-card:hover .quick-view-btn{opacity:1;transform:translateY(0)}
-    .quick-view-btn:hover{background:#2563eb}
-    .stock-status{font-size:11px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:4px}
-    .stock-status.in{color:#059669}
-    .stock-status.out{color:#ef4444}
-    .stock-status i{width:14px;height:14px}
-  </style>
-
   <div class="max-w-7xl mx-auto">
     <div class="mb-8">
       <div class="flex items-center justify-between">
@@ -35,79 +14,95 @@
       </div>
     </div>
 
+    {% if category_filter and categories|length > 0 %}
+    <div class="dc-category-filter mb-6 flex flex-wrap gap-2" data-module="latest">
+      {% set has_other = false %}
+      {% for product in products %}
+        {% if product.category_id == 0 %}
+          {% set has_other = true %}
+        {% endif %}
+      {% endfor %}
+      {% for cat in categories %}
+      <button type="button" class="dc-cat-btn px-4 py-2 text-sm font-medium rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-teal-500 transition-all duration-200" data-category-id="{{ cat.category_id }}">
+        {{ cat.name }}
+      </button>
+      {% endfor %}
+      {% if has_other %}
+      <button type="button" class="dc-cat-btn px-4 py-2 text-sm font-medium rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-teal-500 transition-all duration-200" data-category-id="0">
+        {{ text_other }}
+      </button>
+      {% endif %}
+    </div>
+    {% endif %}
+
     <div id="latest-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
       {% for product in products %}
-      {% set price_val = product.price is defined ? product.price : '' %}
-      {% set special_val = product.special is defined ? product.special : '' %}
-      {% set discount_pct = product.discount is defined ? product.discount : 0 %}
-
-      <div class="product-card group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex flex-col" data-id="{{ product.product_id }}" data-href="{{ product.href }}" data-rating="{{ product.rating is defined ? product.rating : 0 }}" data-model="{{ product.model is defined ? product.model : '' }}" data-brand="{{ product.manufacturer is defined ? product.manufacturer : '' }}" data-description="{{ product.description|striptags|e('html_attr') }}" data-in-wishlist="{{ product.in_wishlist is defined ? product.in_wishlist : 0 }}" data-stock="{{ (product.stock is defined ? product.stock : '')|e('html_attr') }}" data-is-in-stock="{{ product.is_in_stock ? 1 : 0 }}" data-minimum="{{ product.minimum|default(1) }}">
-        <div class="relative overflow-hidden aspect-square bg-gray-50">
-          <div class="image">
-            <a href="{{ product.href }}">
-              <img src="{{ product.thumb }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-            </a>
-          </div>
-          {% if product.has_gift is defined and product.has_gift %}
-          <span class="absolute top-2 left-2 bg-amber-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md flex items-center gap-1"><i data-lucide="gift" class="w-3 h-3"></i> {{ text_gift_badge|default('GIFT') }}</span>
-          {% elseif discount_pct and discount_pct > 0 %}
-          <span class="discount-badge">-{{ discount_pct }}%</span>
-          {% endif %}
-          <div class="absolute top-2 right-2">
-            <button class="wishlist-btn w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center hover:bg-rose-50 transition {% if product.in_wishlist is defined and product.in_wishlist %}bg-rose-50 in-wishlist{% endif %}" onclick="dcAddToWishlist('{{ product.product_id }}', this); event.stopPropagation();" aria-label="{{ text_add_to_wishlist }}">
-              <i data-lucide="heart" class="w-3.5 h-3.5 {% if product.in_wishlist is defined and product.in_wishlist %}text-rose-500 fill-rose-400{% else %}text-gray-400{% endif %}"></i>
-            </button>
-          </div>
-          <button class="quick-view-btn" onclick="openQuickView({{ product.product_id }}); event.stopPropagation();">{{ text_quick_view }}</button>
-        </div>
-        <div class="p-3 sm:p-4 flex flex-col flex-1">
-          {% if product.category %}
-          <p class="text-[10px] sm:text-xs text-gray-400 uppercase tracking-widest mb-1 font-medium">{{ product.category }}</p>
-          {% endif %}
-          <h3 class="text-xs sm:text-sm font-semibold text-gray-900 leading-snug mb-2 flex-1 line-clamp-2"><a href="{{ product.href }}" class="hover:text-teal-600 transition">{{ product.name }}</a></h3>
-          <div class="flex items-center gap-1 mb-3">
-            <div class="flex text-xs">
-              {% for i in 1..5 %}
-                {% if product.rating is defined and product.rating >= i %}
-                  <span class="text-amber-400">★</span>
-                {% else %}
-                  <span class="text-gray-300">★</span>
-                {% endif %}
-              {% endfor %}
-            </div>
-            {% if product.reviews is defined %}<span class="text-[10px] text-gray-400 ml-1">{{ product.reviews }} {{ text_reviews }}</span>{% endif %}
-          </div>
-          {% if product.stock is defined and product.stock %}
-          <div class="stock-status {{ product.is_in_stock ? 'in' : 'out' }}">
-            {% if product.is_in_stock %}<i data-lucide="check" class="w-3.5 h-3.5"></i>{% endif %}
-            <span>{{ product.stock }}</span>
-          </div>
-          {% endif %}
-          <div class="flex items-end justify-between gap-2">
-            <div class="flex items-baseline gap-1">
-              {% set cfp = (product.call_for_price is defined and product.call_for_price) or ((call_for_price_status is defined and call_for_price_status) and call_for_price_phone is defined and call_for_price_phone and product.price_raw is defined and product.price_raw <= 0) %}
-              {% if cfp %}
-                <a href="tel:{{ call_for_price_phone }}" class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition shadow-sm">
-                  <i data-lucide="phone" class="w-3.5 h-3.5"></i>
-                  {{ text_call_for_price|default('Contact for price') }}
-                </a>
-              {% elseif special_val %}
-                <span class="text-base sm:text-lg font-extrabold text-gray-900">{{ special_val }}</span>
-                <span class="text-xs text-red-400 line-through ml-1">{{ price_val }}</span>
-              {% else %}
-                <span class="text-base sm:text-lg font-extrabold text-gray-900">{{ price_val }}</span>
-              {% endif %}
-            </div>
-            {% if not cfp %}
-            <button class="add-to-cart-btn flex-shrink-0 text-[10px] sm:text-xs font-bold px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0" onclick="cart.add('{{ product.product_id }}', '{{ product.minimum|default(1) }}');">+ {{ button_cart }}</button>
-            {% endif %}
-          </div>
-        </div>
+      <div class="dc-product-item" data-category-id="{{ product.category_id }}">
+        {% include 'dockercart/template/product/product_card_widget.twig' with {
+          product: product,
+          accent_color: 'teal-600',
+          btn_cart_classes: 'bg-teal-600 text-white hover:bg-teal-700',
+          btn_quick_hover: 'hover:bg-teal-600',
+          show_new_arrival: true
+        } %}
       </div>
       {% endfor %}
     </div>
   </div>
 </section>
+{% endif %}
+
+{% if category_filter and categories|length > 0 %}
+<style>
+.dc-cat-btn.bg-teal-600 {
+  border-color: rgb(13 148 136);
+}
+.dc-cat-btn.bg-teal-600:hover {
+  background-color: rgb(15 118 110);
+  border-color: rgb(15 118 110);
+}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const filterContainer = document.querySelector('.dc-category-filter[data-module="latest"]');
+  if (!filterContainer) return;
+  
+  const buttons = filterContainer.querySelectorAll('.dc-cat-btn');
+  const productItems = document.querySelectorAll('#latest .dc-product-item');
+  let activeBtn = null;
+  
+  buttons.forEach(btn => {
+    btn.addEventListener('click', function() {
+      const catId = this.dataset.categoryId;
+      
+      if (activeBtn === this) {
+        this.classList.remove('bg-teal-600', 'text-white', 'border-teal-600');
+        this.classList.add('border-gray-300', 'text-gray-700', 'hover:bg-gray-50');
+        activeBtn = null;
+        productItems.forEach(item => item.style.display = '');
+        return;
+      }
+      
+      buttons.forEach(b => {
+        b.classList.remove('bg-teal-600', 'text-white', 'border-teal-600');
+        b.classList.add('border-gray-300', 'text-gray-700', 'hover:bg-gray-50');
+      });
+      
+      this.classList.remove('border-gray-300', 'text-gray-700', 'hover:bg-gray-50');
+      this.classList.add('bg-teal-600', 'text-white', 'border-teal-600');
+      activeBtn = this;
+      
+      productItems.forEach(item => {
+        if (item.dataset.categoryId === catId) {
+          item.style.display = '';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    });
+  });
+});
+</script>
 {% endif %}
 
 {# Quick View modal is created dynamically by quick-view.js #}
