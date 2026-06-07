@@ -8,6 +8,8 @@ class ControllerCommonMenu extends Controller {
 
 		$this->load->model('catalog/product');
 
+		$this->load->model('tool/image');
+
 		$data['categories'] = array();
 		$data['active_category_id'] = 0;
 		$data['menu_type'] = (string)$this->config->get('dockercart_theme_menu_type');
@@ -66,7 +68,7 @@ class ControllerCommonMenu extends Controller {
 
 		$language_context = $this->resolveLanguageContext();
 
-		$cache_key = 'category.menu.tree.v2.'
+		$cache_key = 'category.menu.tree.v3.'
 			. (int)$this->config->get('config_store_id')
 			. '.' . (int)$language_context['language_id']
 			. '.' . (string)$language_context['language_code']
@@ -130,9 +132,15 @@ class ControllerCommonMenu extends Controller {
 			);
 		}
 
+		$icon = '';
+		if (!empty($category['icon'])) {
+			$icon = $this->model_tool_image->resize($category['icon'], 20, 20);
+		}
+
 		return array(
 			'category_id' => (int)$category['category_id'],
 			'name'     => $category['name'],
+			'icon'     => $icon,
 			'children' => $children_data,
 			'column'   => !empty($category['column']) ? $category['column'] : 1,
 			'href'     => $this->url->link('product/category', 'path=' . $path)
