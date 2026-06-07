@@ -472,7 +472,8 @@ class ControllerProductProduct extends Controller {
 						'price_value'             => (float)$this->currency->format($this->tax->calculate($option_value['price'], $product_info['tax_class_id'], $this->config->get('config_tax') ? 'P' : false), $this->session->data['currency'], '', false),
 						'price_prefix'            => $option_value['price_prefix'],
 						'quantity'                => $option_value['quantity'],
-						'subtract'                => $option_value['subtract']
+						'subtract'                => $option_value['subtract'],
+						'is_hit'                  => !empty($option_value['is_hit']),
 					);
 				}
 
