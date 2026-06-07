@@ -92,7 +92,6 @@ Preview release: `npm run release:dry-run`
 - Do NOT edit `upload/config.php` or `upload/admin/config.php` — generated at startup
 - Do NOT store state in `/var/www/html/system/storage/` — use `/var/www/storage/`
 - Do NOT write inline SQL schema in PHP — always use a migration
-- Do NOT modify `upload/system/` core files — extend via controllers/models/events
 - Do NOT generate/modify `robots.txt` in code — managed by `entrypoint.sh`
 - Do NOT commit `.env` files
 ---
