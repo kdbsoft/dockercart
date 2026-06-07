@@ -39,5 +39,6 @@ $_['text_subcategories'] = '%s';
 $_['text_support'] = 'Поддерживать';
 $_['text_support_desc'] = 'Консультации экспертов до и после покупки.';
 $_['text_tax']       = 'Без учета налога:';
+$_['text_back_to']   = 'Назад к %s';
 $_['text_load_more'] = 'Показать ещё';
 $_['text_gift_badge'] = 'ПОДАРОК';
