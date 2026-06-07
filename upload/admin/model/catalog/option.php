@@ -11,7 +11,7 @@ class ModelCatalogOption extends Model {
 
 		if (isset($data['option_value'])) {
 			foreach ($data['option_value'] as $option_value) {
-				$this->db->query("INSERT INTO " . DB_PREFIX . "option_value SET option_id = '" . (int)$option_id . "', image = '" . $this->db->escape(html_entity_decode($option_value['image'], ENT_QUOTES, 'UTF-8')) . "', sort_order = '" . (int)$option_value['sort_order'] . "'");
+				$this->db->query("INSERT INTO " . DB_PREFIX . "option_value SET option_id = '" . (int)$option_id . "', image = '" . $this->db->escape(html_entity_decode($option_value['image'], ENT_QUOTES, 'UTF-8')) . "', color_code = '" . $this->db->escape($option_value['color_code'] ?? '') . "', sort_order = '" . (int)$option_value['sort_order'] . "'");
 
 				$option_value_id = $this->db->getLastId();
 
@@ -39,9 +39,9 @@ class ModelCatalogOption extends Model {
 		if (isset($data['option_value'])) {
 			foreach ($data['option_value'] as $option_value) {
 				if ($option_value['option_value_id']) {
-					$this->db->query("INSERT INTO " . DB_PREFIX . "option_value SET option_value_id = '" . (int)$option_value['option_value_id'] . "', option_id = '" . (int)$option_id . "', image = '" . $this->db->escape(html_entity_decode($option_value['image'], ENT_QUOTES, 'UTF-8')) . "', sort_order = '" . (int)$option_value['sort_order'] . "'");
+					$this->db->query("INSERT INTO " . DB_PREFIX . "option_value SET option_value_id = '" . (int)$option_value['option_value_id'] . "', option_id = '" . (int)$option_id . "', image = '" . $this->db->escape(html_entity_decode($option_value['image'], ENT_QUOTES, 'UTF-8')) . "', color_code = '" . $this->db->escape($option_value['color_code'] ?? '') . "', sort_order = '" . (int)$option_value['sort_order'] . "'");
 				} else {
-					$this->db->query("INSERT INTO " . DB_PREFIX . "option_value SET option_id = '" . (int)$option_id . "', image = '" . $this->db->escape(html_entity_decode($option_value['image'], ENT_QUOTES, 'UTF-8')) . "', sort_order = '" . (int)$option_value['sort_order'] . "'");
+					$this->db->query("INSERT INTO " . DB_PREFIX . "option_value SET option_id = '" . (int)$option_id . "', image = '" . $this->db->escape(html_entity_decode($option_value['image'], ENT_QUOTES, 'UTF-8')) . "', color_code = '" . $this->db->escape($option_value['color_code'] ?? '') . "', sort_order = '" . (int)$option_value['sort_order'] . "'");
 				}
 
 				$option_value_id = $this->db->getLastId();
@@ -104,6 +104,7 @@ class ModelCatalogOption extends Model {
 				$data["option_value"][] = [
 					"option_value_id" => "",
 					"image" => $option_value["image"],
+					"color_code" => $option_value["color_code"],
 					"sort_order" => $option_value["sort_order"],
 					"option_value_description" => $option_value[
 						"option_value_description"
@@ -220,6 +221,7 @@ class ModelCatalogOption extends Model {
 				'option_value_id' => $option_value['option_value_id'],
 				'name'            => $option_value['name'],
 				'image'           => $option_value['image'],
+				'color_code'      => $option_value['color_code'],
 				'sort_order'      => $option_value['sort_order']
 			);
 		}
@@ -245,6 +247,7 @@ class ModelCatalogOption extends Model {
 				'option_value_id'          => $option_value['option_value_id'],
 				'option_value_description' => $option_value_description_data,
 				'image'                    => $option_value['image'],
+				'color_code'               => $option_value['color_code'],
 				'sort_order'               => $option_value['sort_order']
 			);
 		}

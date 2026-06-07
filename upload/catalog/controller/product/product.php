@@ -467,6 +467,7 @@ class ControllerProductProduct extends Controller {
 						'option_value_id'         => $option_value['option_value_id'],
 						'name'                    => $option_value['name'],
 						'image'                   => $this->model_tool_image->resize($option_value['image'], 50, 50),
+						'color_code'              => $option_value['color_code'],
 						'price'                   => $price,
 						'price_value'             => (float)$this->currency->format($this->tax->calculate($option_value['price'], $product_info['tax_class_id'], $this->config->get('config_tax') ? 'P' : false), $this->session->data['currency'], '', false),
 						'price_prefix'            => $option_value['price_prefix'],
