@@ -2320,7 +2320,14 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
     border-bottom-right-radius: 0;
     height: 34px;
     padding: 0 18px 0 6px;
-    text-align: center;
+    line-height: 32px;
+    text-align: left;
+}
+
+.option-value-prefix-group .option-value-prefix-select option {
+    font-size: 16px;
+    font-weight: 700;
+    padding: 4px 8px;
 }
 
 .option-value-prefix-group .option-value-prefix-input {
@@ -2330,6 +2337,8 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
     border-bottom-left-radius: 0;
     margin-left: -1px;
     height: 34px;
+    padding: 0 8px;
+    line-height: 32px;
 }
 
 /* Product info modal */
@@ -2438,4 +2447,354 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
 .modal-product-info-discounts th {
     font-weight: 500;
     color: #6b7280;
+}
+
+/* ── Option Manager ── */
+.dc-opt-sidebar {
+    position: sticky;
+    top: 15px;
+    max-height: calc(100vh - 120px);
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #fff;
+}
+
+.dc-opt-sidebar__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto;
+    flex: 1;
+    max-height: 400px;
+}
+
+.dc-opt-sidebar__item {
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+}
+
+.dc-opt-sidebar__item:last-child {
+    border-bottom: none;
+}
+
+.dc-opt-sidebar__item a {
+    display: block;
+    padding: 8px 10px;
+    color: #333;
+    text-decoration: none;
+    font-size: 13px;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: background 0.15s;
+}
+
+.dc-opt-sidebar__item a:hover {
+    background: #f5f5f5;
+}
+
+.dc-opt-sidebar__required {
+    color: #e53e3e;
+    font-weight: 700;
+    font-size: 14px;
+    margin-left: 2px;
+}
+
+.dc-opt-sidebar__remove {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    color: #ccc;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0 8px;
+    cursor: pointer;
+    transition: color 0.15s;
+}
+
+.dc-opt-sidebar__remove:hover {
+    color: #e53e3e;
+}
+
+.dc-opt-sidebar__item a:hover {
+    background: #f5f5f5;
+}
+
+.dc-opt-sidebar__item a i {
+    font-size: 6px;
+    vertical-align: middle;
+    margin-right: 6px;
+    color: #999;
+}
+
+.dc-opt-sidebar__add {
+    padding: 8px;
+    border-top: 1px solid #ddd;
+    background: #f9f9f9;
+    border-radius: 0 0 4px 4px;
+}
+
+.dc-opt-sidebar__add input {
+    height: 30px;
+    padding: 0 8px;
+    line-height: 28px;
+    font-size: 12px;
+}
+
+.dc-opt-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.dc-opt-card {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #fff;
+    transition: box-shadow 0.15s;
+    position: relative;
+}
+
+.dc-opt-card:hover {
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.dc-opt-card__header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    user-select: none;
+}
+
+.dc-opt-card__title {
+    flex: 1;
+    font-weight: 600;
+    font-size: 13px;
+    color: #333;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dc-opt-card__badges {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+    align-items: center;
+}
+
+.dc-opt-badge {
+    display: inline-block;
+    padding: 1px 7px;
+    font-size: 11px;
+    border-radius: 10px;
+    font-weight: 500;
+    line-height: 18px;
+}
+
+.dc-opt-badge--qty-ok {
+    background: #e6f4ea;
+    color: #1e7e34;
+}
+
+.dc-opt-badge--qty-zero {
+    background: #fce8e6;
+    color: #c62828;
+}
+
+.dc-opt-badge--price {
+    background: #e8f0fe;
+    color: #1a56db;
+}
+
+.dc-opt-badge--hit {
+    background: #fff3e0;
+    color: #e65100;
+}
+
+.dc-opt-card__hit {
+    margin-top: 6px;
+}
+
+.dc-opt-card__hit-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: #e65100;
+    cursor: pointer;
+    margin: 0;
+}
+
+.dc-opt-card__hit-label i {
+    color: #f9a825;
+}
+
+.dc-opt-card__body {
+    padding: 8px 10px 10px;
+    border-top: 1px solid #eee;
+}
+
+.dc-opt-card__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 8px;
+}
+
+.dc-opt-card__field label {
+    display: block;
+    font-size: 11px;
+    color: #777;
+    margin-bottom: 2px;
+    font-weight: 500;
+}
+
+.dc-opt-card__field input,
+.dc-opt-card__field select {
+    height: 30px;
+    padding: 0 8px;
+    line-height: 28px;
+    font-size: 12px;
+}
+
+.dc-opt-card__field .option-value-prefix-group {
+    width: 100%;
+}
+
+.dc-opt-card__field .option-value-prefix-select {
+    height: 30px;
+    padding: 0 8px;
+    line-height: 28px;
+    text-align: left;
+    font-size: 18px;
+}
+
+.dc-opt-card__field .option-value-prefix-select option {
+    font-size: 14px;
+    font-weight: 700;
+    padding: 3px 6px;
+}
+
+.dc-opt-card__field .option-value-prefix-input {
+    height: 30px;
+    padding: 0 8px;
+    line-height: 28px;
+}
+
+.dc-opt-card__cg {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed #e0e0e0;
+}
+
+.dc-opt-card__cg-toggle {
+    font-size: 11px;
+    padding: 2px 8px;
+}
+
+.dc-opt-card__cg-body {
+    margin-top: 6px;
+}
+
+.dc-opt-card__cg-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.dc-opt-card__cg-row select,
+.dc-opt-card__cg-row input {
+    height: 28px;
+    padding: 0 6px;
+    line-height: 26px;
+    font-size: 12px;
+}
+
+.dc-opt-card__cg-row .option-value-prefix-group {
+    flex: 1;
+}
+
+.dc-opt-card__remove {
+    flex-shrink: 0;
+}
+
+.dc-opt-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+/* Option section layout */
+.dc-options-add-row {
+    margin-bottom: 16px;
+}
+
+.dc-option-section {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #fff;
+    margin-bottom: 16px;
+}
+
+.dc-option-section__header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: #f5f5f5;
+    border-bottom: 1px solid #ddd;
+    border-radius: 4px 4px 0 0;
+    flex-wrap: wrap;
+}
+
+.dc-option-section__title {
+    font-weight: 600;
+    font-size: 14px;
+    color: #333;
+}
+
+.dc-option-section__type {
+    font-size: 12px;
+    color: #888;
+}
+
+.dc-option-section__controls {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dc-option-section__required {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #555;
+    margin: 0;
+}
+
+.dc-option-section__required select {
+    width: 70px;
+    height: 28px;
+    padding: 0 4px;
+    line-height: 26px;
+    font-size: 12px;
+}
+
+.dc-option-section__body {
+    padding: 14px;
+}
+
+.dc-option-section__body > .form-group {
+    margin-bottom: 10px;
 }

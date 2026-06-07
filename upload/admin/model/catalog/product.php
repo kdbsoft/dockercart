@@ -173,7 +173,8 @@ class ModelCatalogProduct extends Model
                     $product_option["type"] == "select" ||
                     $product_option["type"] == "radio" ||
                     $product_option["type"] == "checkbox" ||
-                    $product_option["type"] == "image"
+                    $product_option["type"] == "image" ||
+                    $product_option["type"] == "color"
                 ) {
                     if (isset($product_option["product_option_value"])) {
                         $this->db->query(
@@ -229,6 +230,8 @@ class ModelCatalogProduct extends Model
                                     $this->db->escape(
                                         $product_option_value["weight_prefix"],
                                     ) .
+                                    "', is_hit = '" .
+                                    (int) ($product_option_value["is_hit"] ?? 0) .
                                     "'",
                             );
 
@@ -511,7 +514,8 @@ class ModelCatalogProduct extends Model
                     $product_option["type"] == "select" ||
                     $product_option["type"] == "radio" ||
                     $product_option["type"] == "checkbox" ||
-                    $product_option["type"] == "image"
+                    $product_option["type"] == "image" ||
+                    $product_option["type"] == "color"
                 ) {
                     if (isset($product_option["product_option_value"])) {
                         $this->db->query(
@@ -567,6 +571,8 @@ class ModelCatalogProduct extends Model
                                     $this->db->escape(
                                         $product_option_value["weight_prefix"],
                                     ) .
+                                    "', is_hit = '" .
+                                    (int) ($product_option_value["is_hit"] ?? 0) .
                                     "'",
                             );
 
@@ -1170,7 +1176,8 @@ class ModelCatalogProduct extends Model
                     $product_option["type"] == "select" ||
                     $product_option["type"] == "radio" ||
                     $product_option["type"] == "checkbox" ||
-                    $product_option["type"] == "image"
+                    $product_option["type"] == "image" ||
+                    $product_option["type"] == "color"
                 ) {
                     if (isset($product_option["product_option_value"])) {
                         $this->db->query(
@@ -1232,6 +1239,8 @@ class ModelCatalogProduct extends Model
                                     $this->db->escape(
                                         $product_option_value["weight_prefix"],
                                     ) .
+                                    "', is_hit = '" .
+                                    (int) ($product_option_value["is_hit"] ?? 0) .
                                     "'",
                             );
 
@@ -2232,6 +2241,7 @@ class ModelCatalogProduct extends Model
                     "points_prefix" => $product_option_value["points_prefix"],
                     "weight" => $product_option_value["weight"],
                     "weight_prefix" => $product_option_value["weight_prefix"],
+                    "is_hit" => $product_option_value["is_hit"],
                     "customer_group_prices" => $customer_group_prices,
                 ];
             }
