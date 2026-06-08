@@ -56,7 +56,12 @@ class ModelToolImage extends Model {
 		if ($target_extension === 'webp') {
 			$suffix .= '-webp-q' . $webp_quality;
 		}
-		$image_new = 'cache/' . utf8_substr($filename, 0, utf8_strrpos($filename, '.')) . '-' . (int)$width . 'x' . (int)$height . $suffix . '.' . $target_extension;
+
+		// Content hash for CDN cache-busting: URL changes when source changes.
+		$hash = Image::getCacheHash(DIR_IMAGE . $image_old);
+
+		$cache_base = 'cache/' . utf8_substr($filename, 0, utf8_strrpos($filename, '.')) . '-' . (int)$width . 'x' . (int)$height . $suffix;
+		$image_new = $cache_base . '-' . $hash . '.' . $target_extension;
 
 		if (!is_file(DIR_IMAGE . $image_new) || (filemtime(DIR_IMAGE . $image_old) > filemtime(DIR_IMAGE . $image_new))) {
 			if ($source_extension === 'svg') {
@@ -121,6 +126,20 @@ class ModelToolImage extends Model {
 			} elseif ($cache_path_ready) {
 				copy(DIR_IMAGE . $image_old, DIR_IMAGE . $image_new);
 			}
+
+			// Cleanup: remove stale cache files for this dimension (old hash + legacy no-hash)
+			if ($image_new !== $image_old) {
+				$cleanup_base = DIR_IMAGE . $cache_base;
+				$legacy = $cleanup_base . '.' . $target_extension;
+				if (is_file($legacy)) {
+					@unlink($legacy);
+				}
+				foreach (glob($cleanup_base . '-*.' . $target_extension) as $old_path) {
+					if (is_file($old_path) && $old_path !== DIR_IMAGE . $image_new) {
+						@unlink($old_path);
+					}
+				}
+			}
 		}
 
 		$image_new = str_replace(' ', '%20', $image_new);  // fix bug when attach image on email (gmail.com). it is automatic changing space " " to +
@@ -178,8 +197,10 @@ class ModelToolImage extends Model {
 			return $this->config->get('config_url') . 'image/' . $filename;
 		}
 
-		// Build target cache path
-		$target_file = 'cache/' . utf8_substr($filename, 0, utf8_strrpos($filename, '.')) . '-webp-q' . $webp_quality . '.webp';
+		// Build target cache path (with content hash for cache-busting)
+		$cache_base = 'cache/' . utf8_substr($filename, 0, utf8_strrpos($filename, '.')) . '-webp-q' . $webp_quality;
+		$hash = Image::getCacheHash(DIR_IMAGE . $filename);
+		$target_file = $cache_base . '-' . $hash . '.webp';
 
 		// Regenerate if source is newer than cached version
 		if (!is_file(DIR_IMAGE . $target_file) || filemtime(DIR_IMAGE . $filename) > filemtime(DIR_IMAGE . $target_file)) {
@@ -196,6 +217,18 @@ class ModelToolImage extends Model {
 			}
 
 			Image::convertToFormat(DIR_IMAGE . $filename, DIR_IMAGE . $target_file, $webp_quality);
+
+			// Cleanup: remove stale cache files for this dimension
+			$cleanup_base = DIR_IMAGE . $cache_base;
+			$legacy = $cleanup_base . '.webp';
+			if (is_file($legacy)) {
+				@unlink($legacy);
+			}
+			foreach (glob($cleanup_base . '-*.webp') as $old_path) {
+				if (is_file($old_path) && $old_path !== DIR_IMAGE . $target_file) {
+					@unlink($old_path);
+				}
+			}
 		}
 
 		// If the cache file exists, serve it; otherwise fall back to original
