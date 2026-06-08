@@ -1,3 +1,32 @@
+## [1.43.0](https://github.com/mathflow-bit/dockercart/compare/v1.42.6...v1.43.0) (2026-06-08)
+
+### Features
+
+* add back-to-parent link in category & search ([ea799ca](https://github.com/mathflow-bit/dockercart/commit/ea799ca8e0bcdc69642bbfe3c2717a55f1baa5f0))
+* add blog post recommendations ([6a2dbb0](https://github.com/mathflow-bit/dockercart/commit/6a2dbb0dde7595d16151871af3d5cb8ab360d172))
+* add category icons to navigation menus ([13cf041](https://github.com/mathflow-bit/dockercart/commit/13cf041cb98ad877bc6b4a55d63a7d9e5d7fc299))
+* add color option type ([eaa976a](https://github.com/mathflow-bit/dockercart/commit/eaa976ad5030c2a6f91fbcfa7b5da720fd0855f7))
+* add content hash to image cache filenames ([41cb6c6](https://github.com/mathflow-bit/dockercart/commit/41cb6c64632fe22ec9989912fd93fb78729883cf))
+* add error summary and fix checkbox escape ([12afc1f](https://github.com/mathflow-bit/dockercart/commit/12afc1f15d8e083f81325c50cf12439fabbbf515))
+* add icon field to categories ([f5ecf53](https://github.com/mathflow-bit/dockercart/commit/f5ecf53f9a4a5acd24d928f817a7e77b5c621ba7))
+* Add is_hit flag to product option values ([dcf7990](https://github.com/mathflow-bit/dockercart/commit/dcf79900d9505a8e2ca130ed570f307acd665fa2))
+* add manual product selection and category filter ([126acf7](https://github.com/mathflow-bit/dockercart/commit/126acf7b01a1d27dfb551b9c815263a985e13f4a))
+* add multi-language support for module names ([8c3f30f](https://github.com/mathflow-bit/dockercart/commit/8c3f30f82f676184b9080801822a348c62a67990))
+* add refine categories to manufacturer page ([ae0ac72](https://github.com/mathflow-bit/dockercart/commit/ae0ac726ed444ec7beab81a2e9e6fbc2aec2c678))
+* add SVG support to filemanager and image tools ([5aed217](https://github.com/mathflow-bit/dockercart/commit/5aed217b596f6364977702a2206b022470f81eee))
+* replace category dropdown with refine widget ([3ce6690](https://github.com/mathflow-bit/dockercart/commit/3ce6690144c42b74a5812ae9d26a63a723b5b994))
+
+### Bug Fixes
+
+* add coupon, reward, shipping, voucher total templates ([6c06c2d](https://github.com/mathflow-bit/dockercart/commit/6c06c2dc452d4c693cd2db41c85ad15b8280d219))
+* correct group ownership from www-data to staff in entrypoint ([56364fb](https://github.com/mathflow-bit/dockercart/commit/56364fb8c0e81a512754628f5928c38ee16e86a5))
+* correct RU/UA translations for latest module ([7f62bcd](https://github.com/mathflow-bit/dockercart/commit/7f62bcdd2d40ffd9e7c7be39cbadf2957d8b4ec1))
+* **migrations:** add IF NOT EXISTS and remove obsolete ([f3c344a](https://github.com/mathflow-bit/dockercart/commit/f3c344aecc19f2825b2aa923fac0e530870da080))
+* remove sticky summary scroll constraints ([7076526](https://github.com/mathflow-bit/dockercart/commit/7076526a0fb772fedfd51fcd1a553018d27efcbc))
+* stop toggling maintenance mode on mod refresh ([b0ec8d7](https://github.com/mathflow-bit/dockercart/commit/b0ec8d7d39444b0bd281bf0c8edbd44579eb7956))
+* use config_complete_status in sale dashboard ([5e8435f](https://github.com/mathflow-bit/dockercart/commit/5e8435fcd17d3326f1aded6f7403638c599e9229))
+* use store base currency in dashboard chart ([55947d3](https://github.com/mathflow-bit/dockercart/commit/55947d3a39c372665c316f0a9ff146fbe865565f))
+
 ## [1.42.6](https://github.com/mathflow-bit/dockercart/compare/v1.42.5...v1.42.6) (2026-06-06)
 
 ### Bug Fixes
