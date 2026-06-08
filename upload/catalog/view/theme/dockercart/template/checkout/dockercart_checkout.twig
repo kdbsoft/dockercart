@@ -1557,7 +1557,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Use full method code (e.g., flat.flat) as primary key in _shippingFields
+    // Use full method code as primary key in _shippingFields
     // Fall back to carrier code (module part) for backward compatibility
     let fields = window._shippingFields[methodValue];
     if (!fields && methodValue.includes('.')) {
