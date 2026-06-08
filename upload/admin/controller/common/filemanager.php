@@ -308,6 +308,15 @@ class ControllerCommonFileManager extends Controller {
 							$max_dimension = defined('IMAGE_MAX_DIMENSION') ? (int)IMAGE_MAX_DIMENSION : 2560;
 						}
 						Image::optimize($directory . '/' . $filename, $max_dimension);
+
+						// Proactive cleanup: remove all cached variants of this image
+						$relative_dir = substr($directory, strlen(DIR_IMAGE));
+						$cache_base = DIR_IMAGE . 'cache/' . trim($relative_dir, '/') . '/' . pathinfo($filename, PATHINFO_FILENAME);
+						foreach (glob($cache_base . '-*.*') as $cache_file) {
+							if (is_file($cache_file)) {
+								@unlink($cache_file);
+							}
+						}
 					}
 				}
 			}
