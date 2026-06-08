@@ -329,7 +329,7 @@ class ControllerExtensionPaymentDockercartUniversal extends Controller {
                 'label' => sprintf('%s — %s', $title, $this->language->get('text_all_methods_of_module'))
             ];
 
-            // Common single-quote code pattern in OpenCart (e.g. flat.flat, pickup.pickup)
+            // Common single-quote code pattern in OpenCart
             $options[] = [
                 'code'  => $code . '.' . $code,
                 'title' => $title,
