@@ -1199,7 +1199,7 @@ class ControllerCheckoutDockercartCheckout extends Controller
                         continue;
                     }
                     foreach ($method["quote"] as $quote_key => $quote_data) {
-                        // Full sub-method code: module.quote_key (e.g., flat.flat)
+                        // Full sub-method code: module.quote_key
                         $full_code = $module_code . "." . $quote_key;
 
                         $fields_config = [];
@@ -4093,7 +4093,7 @@ class ControllerCheckoutDockercartCheckout extends Controller
 
     /**
      * Apply shipping method overrides from admin settings at the sub-method (quote) level.
-     * Override keys are full sub-method codes (e.g., flat.flat, pickup.1).
+     * Override keys are full sub-method codes.
      * @param array $methods Shipping methods array
      * @return array Modified methods array with custom titles/descriptions
      */
@@ -4125,7 +4125,7 @@ class ControllerCheckoutDockercartCheckout extends Controller
             }
 
             foreach ($method["quote"] as $quote_key => &$quote) {
-                // Full sub-method code: module.quote_key (e.g., flat.flat)
+                // Full sub-method code: module.quote_key
                 $full_code = $module_code . "." . $quote_key;
 
                 // Check if override is enabled for this sub-method

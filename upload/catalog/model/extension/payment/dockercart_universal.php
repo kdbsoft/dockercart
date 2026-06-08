@@ -126,7 +126,7 @@ class ModelExtensionPaymentDockercartUniversal extends Model {
 
     /**
      * Check dependency on selected shipping method.
-     * Supports exact quote code (e.g. flat.flat) and extension-level code (e.g. flat).
+     * Supports exact quote code and extension-level code.
      */
     protected function checkShippingMethodDependency(array $method): bool {
         $allowed_methods = [];
