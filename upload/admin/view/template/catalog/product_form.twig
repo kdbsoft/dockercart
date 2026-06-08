@@ -1662,7 +1662,7 @@
 	  if (optionType === 'color') {
 		  html += '    <div class="dc-opt-card__hit">';
 		  html += '      <label class="dc-opt-card__hit-label">';
-		  html += '        <input type="checkbox" name="product_option[' + option_row + '][product_option_value][' + ovRow + '][is_hit]" value="1" onchange="$(this).closest(\'.dc-opt-card\').find(\'input[name$=\\\\\\'[is_hit\\\\\\']\').val(this.checked ? 1 : 0);dcUpdateHitBadge(this)" />';
+		  html += '        <input type="checkbox" name="product_option[' + option_row + '][product_option_value][' + ovRow + '][is_hit]" value="1" onchange="$(this).closest(\'.dc-opt-card\').find(\'input[name$=\\\'[is_hit\\\']\').val(this.checked ? 1 : 0);dcUpdateHitBadge(this)" />';
 		  html += '        <i class="fa fa-star"></i> {{ entry_hit|e('js') }}';
 		  html += '      </label>';
 		  html += '    </div>';
