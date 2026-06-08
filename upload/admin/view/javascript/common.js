@@ -37,6 +37,79 @@ $(document).ready(function() {
 		}
 	});
 
+	// Error summary at the top of the form
+	var $errors = $('#content .text-danger').filter(function() {
+		var text = $.trim($(this).text());
+		if (!text.length) return false;
+		if (text === '*') return false;
+		if ($(this).closest('.modal').length) return false;
+		if (!$(this).closest('.form-group').length) return false;
+		return true;
+	});
+
+	if ($errors.length) {
+		var seen = {};
+		var list = '';
+
+		$errors.each(function() {
+			var msg = $.trim($(this).text());
+			if (seen[msg]) return;
+			seen[msg] = true;
+
+			var $field = $(this).siblings('input, textarea, select').first();
+			if (!$field.length) {
+				$field = $(this).closest('.form-group').find('input, textarea, select').first();
+			}
+
+			if ($field.length && $field.attr('id')) {
+				list += '<li style="padding:3px 0;"><a href="javascript:void(0);" data-error-target="' + $field.attr('id') + '" style="color:#a94442;font-weight:500;text-decoration:underline;cursor:pointer;">' + msg + '</a></li>';
+			} else {
+				list += '<li style="padding:3px 0;">' + msg + '</li>';
+			}
+		});
+
+		if (list) {
+			var count = Object.keys(seen).length;
+			var label = count === 1
+				? 'Please correct the error below:'
+				: 'Please correct the ' + count + ' errors below:';
+
+			var html = '<div id="dcx-error-summary" class="alert alert-danger alert-dismissible">'
+				+ '<button type="button" class="close" data-dismiss="alert">&times;</button>'
+				+ '<p style="margin:0 0 6px;"><i class="fa fa-exclamation-circle"></i> <strong>' + label + '</strong></p>'
+				+ '<ul style="margin:0;padding-left:20px;">' + list + '</ul>'
+				+ '</div>';
+
+			var $target = $('#content > .container-fluid').first();
+			if ($target.length) {
+				$target.children('.alert').first().length
+					? $target.children('.alert').first().after(html)
+					: $target.prepend(html);
+			}
+		}
+	}
+
+	// Error summary: activate tabs and scroll to field
+	$(document).on('click', '#dcx-error-summary a[data-error-target]', function(e) {
+		e.preventDefault();
+		var targetId = $(this).data('error-target');
+		var $field = $('#' + targetId);
+		if (!$field.length) return;
+
+		var $panes = $field.parents('.tab-pane');
+		$($panes.get().reverse()).each(function() {
+			var paneId = $(this).attr('id');
+			if (paneId) {
+				var $tabLink = $('.nav-tabs a[href="#' + paneId + '"]');
+				if ($tabLink.length) {
+					$tabLink.tab('show');
+				}
+			}
+		});
+
+		$('html, body').animate({scrollTop: $field.offset().top - 50}, 300);
+	});
+
 	// tooltips on hover
 	$('[data-toggle=\'tooltip\']').tooltip({container: 'body', html: true});
 
