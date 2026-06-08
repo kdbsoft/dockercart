@@ -34,7 +34,12 @@ class ModelToolImage extends Model {
 		} else {
 			$suffix = '';
 		}
-		$image_new = 'cache/' . utf8_substr($filename, 0, utf8_strrpos($filename, '.')) . '-' . $width . 'x' . $height . $suffix . '.' . $extension;
+
+		// Content hash for CDN cache-busting
+		$hash = Image::getCacheHash(DIR_IMAGE . $image_old);
+
+		$cache_base = 'cache/' . utf8_substr($filename, 0, utf8_strrpos($filename, '.')) . '-' . $width . 'x' . $height . $suffix;
+		$image_new = $cache_base . '-' . $hash . '.' . $extension;
 
 		if (!is_file(DIR_IMAGE . $image_new) || (filemtime(DIR_IMAGE . $image_old) > filemtime(DIR_IMAGE . $image_new))) {
 			$video_exts = array('mp4', 'webm', 'ogv');
@@ -92,6 +97,20 @@ class ModelToolImage extends Model {
 				$image->save(DIR_IMAGE . $image_new);
 			} elseif ($cache_path_ready) {
 				copy(DIR_IMAGE . $image_old, DIR_IMAGE . $image_new);
+			}
+
+			// Cleanup: remove stale cache files for this dimension (old hash + legacy no-hash)
+			if ($image_new !== $image_old) {
+				$cleanup_base = DIR_IMAGE . $cache_base;
+				$legacy = $cleanup_base . '.' . $extension;
+				if (is_file($legacy)) {
+					@unlink($legacy);
+				}
+				foreach (glob($cleanup_base . '-*.' . $extension) as $old_path) {
+					if (is_file($old_path) && $old_path !== DIR_IMAGE . $image_new) {
+						@unlink($old_path);
+					}
+				}
 			}
 		}
 

@@ -1007,7 +1007,11 @@ class Googleshopping extends Library {
         $extension = pathinfo($filename, PATHINFO_EXTENSION);
 
         $image_old = $filename;
-        $image_new = 'cache/' . utf8_substr($filename, 0, utf8_strrpos($filename, '.')) . '-' . (int)$width . 'x' . (int)$height . '.' . $extension;
+
+        // Content hash for CDN cache-busting
+        $hash = \Image::getCacheHash(DIR_IMAGE . $image_old);
+        $cache_base = 'cache/' . utf8_substr($filename, 0, utf8_strrpos($filename, '.')) . '-' . (int)$width . 'x' . (int)$height;
+        $image_new = $cache_base . '-' . $hash . '.' . $extension;
 
         if (!is_file(DIR_IMAGE . $image_new) || (filemtime(DIR_IMAGE . $image_old) > filemtime(DIR_IMAGE . $image_new))) {
             list($width_orig, $height_orig, $image_type) = getimagesize(DIR_IMAGE . $image_old);
@@ -1038,6 +1042,18 @@ class Googleshopping extends Library {
                 $image->save(DIR_IMAGE . $image_new);
             } else {
                 copy(DIR_IMAGE . $image_old, DIR_IMAGE . $image_new);
+            }
+
+            // Cleanup: remove stale cache files for this dimension
+            $cleanup_base = DIR_IMAGE . $cache_base;
+            $legacy = $cleanup_base . '.' . $extension;
+            if (is_file($legacy)) {
+                @unlink($legacy);
+            }
+            foreach (glob($cleanup_base . '-*.' . $extension) as $old_path) {
+                if (is_file($old_path) && $old_path !== DIR_IMAGE . $image_new) {
+                    @unlink($old_path);
+                }
             }
         }
         

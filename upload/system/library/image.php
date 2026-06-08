@@ -405,6 +405,20 @@ class Image {
 	}
 
 	/**
+	 * Return a short content-based hash for cache-busting.
+	 *
+	 * @param  string $file  Absolute path to the source image.
+	 * @return string        8-character hex hash.
+	 */
+	public static function getCacheHash(string $file): string {
+		if (!is_file($file)) {
+			return '00000000';
+		}
+
+		return substr(md5_file($file), 0, 8);
+	}
+
+	/**
 	 * Analyze the source image and decide whether 'cover' or 'contain'
 	 * will produce the best visual result.
 	 *
