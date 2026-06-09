@@ -1,3 +1,9 @@
+## [1.44.3](https://github.com/mathflow-bit/dockercart/compare/v1.44.2...v1.44.3) (2026-06-09)
+
+### Bug Fixes
+
+* skip unchanged meta updates and correct batch termination ([7e5b4fc](https://github.com/mathflow-bit/dockercart/commit/7e5b4fcabef445796ab0fa93394b75728a75ceba))
+
 ## [1.44.2](https://github.com/mathflow-bit/dockercart/compare/v1.44.1...v1.44.2) (2026-06-09)
 
 ### Bug Fixes
