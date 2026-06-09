@@ -377,14 +377,14 @@ class ControllerProductProduct extends Controller {
 					$data['image_orientation'] = 'landscape';
 				}
 
-				$display_w = 600;
-				$display_h = 450;
+				$display_w = 640;
+				$display_h = 480;
 				if ($data['image_orientation'] === 'portrait') {
-					$display_w = 450;
-					$display_h = 600;
+					$display_w = 480;
+					$display_h = 640;
 				} elseif ($data['image_orientation'] === 'square') {
-					$display_w = 600;
-					$display_h = 600;
+					$display_w = 640;
+					$display_h = 640;
 				}
 
 				$data['display'] = $this->model_tool_image->resize($product_info['image'], $display_w, $display_h);
