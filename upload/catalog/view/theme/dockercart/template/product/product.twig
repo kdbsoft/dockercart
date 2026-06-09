@@ -51,7 +51,7 @@
       <div class="lg:sticky lg:top-24 lg:z-10 self-start">
         <div class="rounded-3xl border border-gray-100 bg-gray-50 overflow-hidden">
           <button id="dc-zoom-btn" type="button" class="zoom-target group relative block w-full text-left" aria-label="{{ heading_title }}">
-            <img id="dc-main-img" src="{{ thumb is not empty ? thumb : 'image/no_image.png' }}" data-popup="{{ popup is not empty ? popup : 'image/no_image.png' }}" alt="{{ heading_title }}" class="w-full aspect-[4/3] object-cover cursor-zoom-in" />
+            <img id="dc-main-img" src="{{ thumb is not empty ? thumb : 'image/no_image.png' }}" data-popup="{{ popup is not empty ? popup : 'image/no_image.png' }}" alt="{{ heading_title }}" class="w-full {{ image_orientation == 'portrait' ? 'aspect-[3/4]' : (image_orientation == 'square' ? 'aspect-square' : 'aspect-[4/3]') }} object-cover cursor-zoom-in" />
             <span class="zoom-hint absolute bottom-3 right-3 inline-flex items-center gap-1.5 bg-gray-900/80 text-white text-[11px] font-semibold px-2.5 py-1.5 rounded-lg backdrop-blur-sm">
               <i data-lucide="zoom-in" class="w-3.5 h-3.5"></i> {{ text_zoom }}
             </span>
@@ -59,11 +59,11 @@
         </div>
         {% if images %}
         <div class="grid grid-cols-4 gap-3 mt-3">
-          <button class="dc-thumb active rounded-2xl border-2 overflow-hidden" data-img="{{ thumb is not empty ? thumb : 'image/no_image.png' }}" data-popup="{{ popup is not empty ? popup : 'image/no_image.png' }}">
+          <button class="dc-thumb active rounded-2xl border-2 overflow-hidden" data-img="{{ thumb is not empty ? thumb : 'image/no_image.png' }}" data-popup="{{ popup is not empty ? popup : 'image/no_image.png' }}" data-orientation="{{ image_orientation }}">
             <img src="{{ thumb is not empty ? thumb : 'image/no_image.png' }}" alt="{{ heading_title }}" class="w-full h-20 object-cover" />
           </button>
           {% for image in images %}
-          <button class="dc-thumb rounded-2xl border-2 border-gray-200 overflow-hidden" data-img="{{ image.thumb is not empty ? image.thumb : 'image/no_image.png' }}" data-popup="{{ image.popup is not empty ? image.popup : 'image/no_image.png' }}">
+          <button class="dc-thumb rounded-2xl border-2 border-gray-200 overflow-hidden" data-img="{{ image.thumb is not empty ? image.thumb : 'image/no_image.png' }}" data-popup="{{ image.popup is not empty ? image.popup : 'image/no_image.png' }}" data-orientation="{{ image.orientation }}">
             <img src="{{ image.thumb is not empty ? image.thumb : 'image/no_image.png' }}" alt="{{ heading_title }}" class="w-full h-20 object-cover" />
           </button>
           {% endfor %}
@@ -637,34 +637,46 @@ function initOptionButtons() {
 }
 
 /* ── Gallery + GLightbox ───────────────────────────────── */
-function initGallery() {
-  var mainImg = document.getElementById('dc-main-img');
-  var thumbs  = Array.from(document.querySelectorAll('.dc-thumb'));
-  var zoomBtn = document.getElementById('dc-zoom-btn');
+const initGallery = () => {
+  const mainImg = document.getElementById('dc-main-img');
+  const thumbs  = [...document.querySelectorAll('.dc-thumb')];
+  const zoomBtn = document.getElementById('dc-zoom-btn');
   if (!zoomBtn) return;
-  var items = thumbs.length
-    ? thumbs.map(function(b) { return { href: b.dataset.popup || b.dataset.img, type: 'image' }; })
-    : (mainImg ? [{ href: (mainImg.dataset && mainImg.dataset.popup) ? mainImg.dataset.popup : mainImg.src, type: 'image' }] : []);
-  var lb = (items.length && typeof GLightbox === 'function')
+
+  const aspectMap = {
+    portrait:  'aspect-[3/4]',
+    square:    'aspect-square',
+    landscape: 'aspect-[4/3]'
+  };
+
+  const items = thumbs.length
+    ? thumbs.map(b => ({ href: b.dataset.popup || b.dataset.img, type: 'image' }))
+    : (mainImg ? [{ href: mainImg.dataset?.popup || mainImg.src, type: 'image' }] : []);
+
+  const lb = (items.length && typeof GLightbox === 'function')
     ? GLightbox({ elements: items, loop: true, touchNavigation: true, zoomable: true, openEffect: 'zoom', closeEffect: 'fade' })
     : null;
-  var activeIdx = 0;
-  thumbs.forEach(function(btn, idx) {
-    btn.addEventListener('click', function() {
-      thumbs.forEach(function(t) { t.classList.remove('active'); });
+
+  let activeIdx = 0;
+
+  thumbs.forEach((btn, idx) => {
+    btn.addEventListener('click', () => {
+      thumbs.forEach(t => t.classList.remove('active'));
       btn.classList.add('active');
       if (mainImg) {
-        // Prefer the larger popup image when available, fallback to the thumb
-        var large = btn.dataset.popup || btn.dataset.img;
-        mainImg.src = large;
-        // keep the main image's popup dataset in sync for the lightbox
+        const newOrient = btn.dataset.orientation || 'landscape';
+        Object.values(aspectMap).forEach(cls => mainImg.classList.remove(cls));
+        mainImg.classList.add(aspectMap[newOrient]);
+
+        mainImg.src = btn.dataset.popup || btn.dataset.img;
         if (btn.dataset.popup) mainImg.dataset.popup = btn.dataset.popup;
       }
       activeIdx = idx;
     });
   });
-  if (lb) zoomBtn.addEventListener('click', function() { lb.openAt(activeIdx); });
-}
+
+  if (lb) zoomBtn.addEventListener('click', () => lb.openAt(activeIdx));
+};
 
 /* ── Tabs ──────────────────────────────────────────────── */
 function initTabs() {

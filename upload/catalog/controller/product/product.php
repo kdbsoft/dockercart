@@ -364,8 +364,23 @@ class ControllerProductProduct extends Controller {
 
 			if ($product_info['image']) {
 				$data['thumb'] = $this->model_tool_image->resize($product_info['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_height'));
+
+				$image_size = @getimagesize(DIR_IMAGE . $product_info['image']);
+				if ($image_size && $image_size[0] > 0 && $image_size[1] > 0) {
+					$ratio = $image_size[1] / $image_size[0];
+					if ($ratio > 1.15) {
+						$data['image_orientation'] = 'portrait';
+					} elseif ($ratio < 0.85) {
+						$data['image_orientation'] = 'landscape';
+					} else {
+						$data['image_orientation'] = 'square';
+					}
+				} else {
+					$data['image_orientation'] = 'landscape';
+				}
 			} else {
 				$data['thumb'] = '';
+				$data['image_orientation'] = 'landscape';
 			}
 
 			$data['images'] = array();
@@ -373,9 +388,23 @@ class ControllerProductProduct extends Controller {
 			$results = $this->model_catalog_product->getProductImages($product_id);
 
 			foreach ($results as $result) {
+				$orientation = 'landscape';
+				$image_size = @getimagesize(DIR_IMAGE . $result['image']);
+				if ($image_size && $image_size[0] > 0 && $image_size[1] > 0) {
+					$ratio = $image_size[1] / $image_size[0];
+					if ($ratio > 1.15) {
+						$orientation = 'portrait';
+					} elseif ($ratio < 0.85) {
+						$orientation = 'landscape';
+					} else {
+						$orientation = 'square';
+					}
+				}
+
 				$data['images'][] = array(
 					'popup' => ($this->request->server['HTTPS'] ? $this->config->get('config_ssl') : $this->config->get('config_url')) . 'image/' . $result['image'],
-					'thumb' => $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_height'))
+					'thumb' => $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_height')),
+					'orientation' => $orientation
 				);
 			}
 
