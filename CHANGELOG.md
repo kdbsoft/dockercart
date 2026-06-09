@@ -1,3 +1,9 @@
+## [1.44.4](https://github.com/mathflow-bit/dockercart/compare/v1.44.3...v1.44.4) (2026-06-09)
+
+### Bug Fixes
+
+* return actual affected rows count ([d43ef50](https://github.com/mathflow-bit/dockercart/commit/d43ef507189e1dbd21b2df4a3a72505b38865ed7))
+
 ## [1.44.3](https://github.com/mathflow-bit/dockercart/compare/v1.44.2...v1.44.3) (2026-06-09)
 
 ### Bug Fixes
