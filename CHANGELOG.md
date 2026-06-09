@@ -1,3 +1,9 @@
+## [1.44.5](https://github.com/mathflow-bit/dockercart/compare/v1.44.4...v1.44.5) (2026-06-09)
+
+### Bug Fixes
+
+* add Let's Encrypt compose file to standalone update script ([81386b0](https://github.com/mathflow-bit/dockercart/commit/81386b03c6afc5267baa0afbbf5b39b263cd007f))
+
 ## [1.44.4](https://github.com/mathflow-bit/dockercart/compare/v1.44.3...v1.44.4) (2026-06-09)
 
 ### Bug Fixes
