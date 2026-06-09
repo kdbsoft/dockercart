@@ -1185,6 +1185,61 @@ const setShippingFieldsEditable = (editable = true) => {
  * This handler parses inline scripts from legacy payment extensions and
  * executes their AJAX calls when the button is clicked or triggered programmatically.
  */
+const _cleanSingleSelector = (sel) => {
+  // Convert common jQuery pseudo-selectors to CSS equivalents
+  // NOTE: :input expands to multiple tag names; caller must split before calling this
+  return sel
+    .replace(/:input\b/gi, '*')
+    .replace(/:text\b/gi, 'input[type="text"]')
+    .replace(/:checked\b/gi, ':checked')
+    .replace(/:enabled\b/gi, ':enabled')
+    .replace(/:disabled\b/gi, ':disabled')
+    .replace(/:file\b/gi, 'input[type="file"]')
+    .replace(/:radio\b/gi, 'input[type="radio"]')
+    .replace(/:checkbox\b/gi, 'input[type="checkbox"]');
+};
+
+const _collectFormData = (container, selector) => {
+  const data = {};
+  try {
+    // Split by comma first, then clean each part
+    const parts = selector.split(',').map(s => s.trim()).filter(Boolean);
+    parts.forEach(part => {
+      // For :input which expands to multiple selectors, we need special handling
+      const hasInput = /:input\b/i.test(part);
+      const clean = _cleanSingleSelector(part);
+      if (hasInput) {
+        // :input becomes * but we need to filter to form elements
+        const elements = container.querySelectorAll(clean);
+        elements.forEach(el => {
+          const tag = el.tagName.toLowerCase();
+          if (!el.name || el.disabled) return;
+          if (['input', 'select', 'textarea', 'button'].includes(tag)) {
+            if (el.type === 'checkbox' || el.type === 'radio') {
+              if (el.checked) data[el.name] = el.value;
+            } else {
+              data[el.name] = el.value;
+            }
+          }
+        });
+      } else {
+        const elements = container.querySelectorAll(clean);
+        elements.forEach(el => {
+          if (!el.name || el.disabled) return;
+          if (el.type === 'checkbox' || el.type === 'radio') {
+            if (el.checked) data[el.name] = el.value;
+          } else {
+            data[el.name] = el.value;
+          }
+        });
+      }
+    });
+  } catch (e) {
+    log('Error collecting form data', e);
+  }
+  return data;
+};
+
 const setupPaymentButtonHandler = (container) => {
   try {
     // Replace global alert with friendly notification for legacy payment scripts
@@ -1202,20 +1257,52 @@ const setupPaymentButtonHandler = (container) => {
 
     scripts.forEach(s => {
       const code = s.innerText || s.textContent || s.innerHTML || '';
-      // Remove script tag from DOM to avoid duplicate execution
+      // Remove script tag from DOM — not executed anyway via innerHTML
       try { s.parentNode && s.parentNode.removeChild(s); } catch (e) {}
       if (!code.trim()) return;
 
-      // Look for $.ajax({ url: '...', type: 'GET'|'POST', dataType: 'json' }) pattern
-      const urlMatch = code.match(/url\s*:\s*['"]([^'"]+)['"]/i);
-      const typeMatch = code.match(/type\s*:\s*['"]([^'"]+)['"]/i);
-      const dataMatch = code.match(/data\s*:\s*(\{[\s\S]*?\})/i);
+      // Look for $.ajax({ url: '...', type: 'GET'|'POST', data: ... }) pattern
+      const urlMatch = code.match(/url\s*:\s*(['"])((?:[^\\'"]|\\.)*?)\1/i);
+      const typeMatch = code.match(/type\s*:\s*(['"])((?:[^\\'"]|\\.)*?)\1/i);
+      const dataStrMatch = code.match(/data\s*:\s*(\{[\s\S]*?\})/i);
+      const dataSelMatch = code.match(/data\s*:\s*\$\(\s*(['"])((?:[^\\'"]|\\.)*?)\1\s*\)/i);
 
       if (urlMatch) {
-        const url = urlMatch[1];
-        const method = typeMatch ? typeMatch[1].toUpperCase() : (dataMatch ? 'POST' : 'GET');
-        parsedCalls.push({ url, method, raw: code });
-        log('Parsed payment extension AJAX call', { url, method });
+        const url = urlMatch[2];
+        const method = typeMatch ? typeMatch[2].toUpperCase() : (dataStrMatch || dataSelMatch ? 'POST' : 'GET');
+        const dataSelector = dataSelMatch ? dataSelMatch[2].replace(/\\(.)/g, '$1') : null;
+
+        // Parse success callback patterns
+        let formSubmitSel = null;
+        let successRedirect = null;
+        let isAcsUrl = false;
+
+        // Form submission: $(selector).submit()
+        const formSubmitMatch = code.match(
+          /success\s*:\s*function\s*\([^)]*\)\s*\{[^}]*\$\(\s*(['"])((?:[^\\'"]|\\.)*?)\1\s*\)\.submit\(\)/i
+        );
+        if (formSubmitMatch) formSubmitSel = formSubmitMatch[2].replace(/\\(.)/g, '$1');
+
+        // Redirect: location = 'url' or location.href = 'url'
+        const redirectMatch = code.match(
+          /success\s*:\s*function\s*\([^)]*\)\s*\{[^}]*(?:location|window\.location)(?:\.href)?\s*=\s*['"]([^'"]+)['"]/i
+        );
+        if (redirectMatch) successRedirect = redirectMatch[1];
+
+        // ACSURL / 3D Secure detection
+        if (/ACSURL/i.test(code)) isAcsUrl = true;
+
+        parsedCalls.push({
+          url,
+          method,
+          dataSelector,
+          formSubmitSel,
+          successRedirect,
+          isAcsUrl,
+          raw: code
+        });
+
+        log('Parsed payment extension AJAX call', { url, method, formSubmitSel, successRedirect, isAcsUrl });
       }
     });
 
@@ -1236,16 +1323,86 @@ const setupPaymentButtonHandler = (container) => {
           }
           btn.disabled = true;
 
+          // Collect form data if a jQuery selector was specified
+          let requestOpts = { method: call.method };
+          if (call.dataSelector) {
+            const formData = _collectFormData(container, call.dataSelector);
+            if (Object.keys(formData).length) {
+              requestOpts.data = formData;
+            }
+          }
+
           // Perform the request using our ajax helper
-          ajax(call.url, { method: call.method })
+          ajax(call.url, requestOpts)
             .then(json => {
               try {
+                // Handle 3D Secure / ACSURL (SagePay, etc.)
+                if (call.isAcsUrl && json && json.ACSURL) {
+                  const form = document.createElement('form');
+                  form.action = json.ACSURL;
+                  form.method = 'POST';
+                  form.id = '3dauth-payment';
+                  form.style.display = 'none';
+                  ['MD', 'PaReq', 'TermUrl'].forEach(f => {
+                    if (json[f]) {
+                      const input = document.createElement('input');
+                      input.type = 'hidden';
+                      input.name = f;
+                      input.value = json[f];
+                      form.appendChild(input);
+                    }
+                  });
+                  document.body.appendChild(form);
+                  window._dc_payment_redirected = true;
+                  form.submit();
+                  return;
+                }
+
+                // Handle form submission from success callback (WayForPay, etc.)
+                if (call.formSubmitSel && json && json.success !== false) {
+                  let targetForm = container.querySelector(`#${CSS.escape(call.formSubmitSel.replace(/^#/, ''))}`)
+                    || container.querySelector(`form[id="${CSS.escape(call.formSubmitSel.replace(/^#/, ''))}"]`)
+                    || container.querySelector(`form[name="${CSS.escape(call.formSubmitSel.replace(/^#/, ''))}"]`)
+                    || container.querySelector(call.formSubmitSel);
+                  if (targetForm) {
+                    log(`Submitting form matching "${call.formSubmitSel}" after payment processing`);
+                    // Move form to body for reliable submission (redirect navigation)
+                    const formClone = targetForm.cloneNode(true);
+                    document.body.appendChild(formClone);
+                    window._dc_payment_redirected = true;
+                    formClone.submit();
+                    return;
+                  }
+                  log(`Form matching "${call.formSubmitSel}" not found in container`);
+                }
+
+                // Handle redirect from success callback
+                if (call.successRedirect) {
+                  window._dc_payment_redirected = true;
+                  window.location = call.successRedirect;
+                  return;
+                }
+
+                // Standard JSON redirect
                 if (json && json.redirect) {
+                  window._dc_payment_redirected = true;
                   window.location = json.redirect;
                   return;
                 }
+
+                // Error response from payment
+                if (json && json.error) {
+                  let msg = json.error;
+                  if (typeof msg === 'object') msg = Object.values(msg).join(', ');
+                  showNotification(msg, 'error');
+                  return;
+                }
+
+                // Generic success without redirect — go to success page
                 if (json && json.success) {
-                  if (json.redirect) window.location = json.redirect;
+                  window._dc_payment_redirected = true;
+                  window.location = 'index.php?route=checkout/success';
+                  return;
                 }
               } catch (err) {
                 console.error('Payment handler success error', err);
@@ -3847,7 +4004,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const paymentBtn = extContainer.querySelector('#button-confirm');
             if (paymentBtn) {
               log('Triggering hidden payment button programmatically');
+              // Store fallback redirect URL and reset nav flag
+              window._dc_payment_fallback_redirect = json.redirect;
+              window._dc_payment_redirected = false;
               paymentBtn.click();
+              // Safety net: if the payment button handler doesn't navigate
+              // within 10s (no handler, error, etc.), redirect to fallback
+              setTimeout(() => {
+                if (!window._dc_payment_redirected) {
+                  log('Payment handler did not redirect, using fallback');
+                  window.location.href = window._dc_payment_fallback_redirect || json.redirect;
+                }
+              }, 10000);
               return; // Let the payment button handler manage navigation
             }
           }
