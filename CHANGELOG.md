@@ -1,3 +1,9 @@
+## [1.44.1](https://github.com/mathflow-bit/dockercart/compare/v1.44.0...v1.44.1) (2026-06-09)
+
+### Bug Fixes
+
+* replace thumb size with orientation-based display ([dc4e236](https://github.com/mathflow-bit/dockercart/commit/dc4e23602fa6acf13a99bd33602521fda77f7ea5))
+
 ## [1.44.0](https://github.com/mathflow-bit/dockercart/compare/v1.43.0...v1.44.0) (2026-06-09)
 
 ### Features
