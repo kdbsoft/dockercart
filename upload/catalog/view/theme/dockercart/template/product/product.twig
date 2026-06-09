@@ -51,7 +51,7 @@
       <div class="lg:sticky lg:top-24 lg:z-10 self-start">
         <div class="rounded-3xl border border-gray-100 bg-gray-50 overflow-hidden">
           <button id="dc-zoom-btn" type="button" class="zoom-target group relative block w-full text-left" aria-label="{{ heading_title }}">
-            <img id="dc-main-img" src="{{ thumb is not empty ? thumb : 'image/no_image.png' }}" data-popup="{{ popup is not empty ? popup : 'image/no_image.png' }}" alt="{{ heading_title }}" class="w-full {{ image_orientation == 'portrait' ? 'aspect-[3/4]' : (image_orientation == 'square' ? 'aspect-square' : 'aspect-[4/3]') }} object-cover cursor-zoom-in" />
+            <img id="dc-main-img" src="{{ display is not empty ? display : 'image/no_image.png' }}" data-popup="{{ popup is not empty ? popup : 'image/no_image.png' }}" alt="{{ heading_title }}" class="w-full {{ image_orientation == 'portrait' ? 'aspect-[3/4]' : (image_orientation == 'square' ? 'aspect-square' : 'aspect-[4/3]') }} object-cover cursor-zoom-in" />
             <span class="zoom-hint absolute bottom-3 right-3 inline-flex items-center gap-1.5 bg-gray-900/80 text-white text-[11px] font-semibold px-2.5 py-1.5 rounded-lg backdrop-blur-sm">
               <i data-lucide="zoom-in" class="w-3.5 h-3.5"></i> {{ text_zoom }}
             </span>
@@ -59,11 +59,11 @@
         </div>
         {% if images %}
         <div class="grid grid-cols-4 gap-3 mt-3">
-          <button class="dc-thumb active rounded-2xl border-2 overflow-hidden" data-img="{{ thumb is not empty ? thumb : 'image/no_image.png' }}" data-popup="{{ popup is not empty ? popup : 'image/no_image.png' }}" data-orientation="{{ image_orientation }}">
+          <button class="dc-thumb active rounded-2xl border-2 overflow-hidden" data-img="{{ display is not empty ? display : 'image/no_image.png' }}" data-display="{{ display is not empty ? display : 'image/no_image.png' }}" data-popup="{{ popup is not empty ? popup : 'image/no_image.png' }}" data-orientation="{{ image_orientation }}">
             <img src="{{ thumb is not empty ? thumb : 'image/no_image.png' }}" alt="{{ heading_title }}" class="w-full h-20 object-cover" />
           </button>
           {% for image in images %}
-          <button class="dc-thumb rounded-2xl border-2 border-gray-200 overflow-hidden" data-img="{{ image.thumb is not empty ? image.thumb : 'image/no_image.png' }}" data-popup="{{ image.popup is not empty ? image.popup : 'image/no_image.png' }}" data-orientation="{{ image.orientation }}">
+          <button class="dc-thumb rounded-2xl border-2 border-gray-200 overflow-hidden" data-img="{{ image.display is not empty ? image.display : 'image/no_image.png' }}" data-display="{{ image.display is not empty ? image.display : 'image/no_image.png' }}" data-popup="{{ image.popup is not empty ? image.popup : 'image/no_image.png' }}" data-orientation="{{ image.orientation }}">
             <img src="{{ image.thumb is not empty ? image.thumb : 'image/no_image.png' }}" alt="{{ heading_title }}" class="w-full h-20 object-cover" />
           </button>
           {% endfor %}
@@ -668,7 +668,7 @@ const initGallery = () => {
         Object.values(aspectMap).forEach(cls => mainImg.classList.remove(cls));
         mainImg.classList.add(aspectMap[newOrient]);
 
-        mainImg.src = btn.dataset.popup || btn.dataset.img;
+        mainImg.src = btn.dataset.display || btn.dataset.popup;
         if (btn.dataset.popup) mainImg.dataset.popup = btn.dataset.popup;
       }
       activeIdx = idx;
