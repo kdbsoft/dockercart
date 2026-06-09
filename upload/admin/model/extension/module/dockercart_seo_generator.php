@@ -723,7 +723,7 @@ class ModelExtensionModuleDockercartSeoGenerator extends Model {
                 AND `language_id` = '" . (int)$language_id . "'
             ");
 
-            return true;
+            return $this->db->countAffected() > 0;
         }
 
         return false;
