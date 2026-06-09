@@ -1,3 +1,13 @@
+## [1.44.0](https://github.com/mathflow-bit/dockercart/compare/v1.43.0...v1.44.0) (2026-06-09)
+
+### Features
+
+* add image orientation detection for product gallery ([bae32a7](https://github.com/mathflow-bit/dockercart/commit/bae32a7bb2478c87d5167b416bf8cd40c2c8ec1d))
+
+### Bug Fixes
+
+* extend payment button handler with 3DS and fallback ([e0cfe57](https://github.com/mathflow-bit/dockercart/commit/e0cfe570d968c8e2315db9ac51766eb1659c3a89))
+
 ## [1.43.0](https://github.com/mathflow-bit/dockercart/compare/v1.42.6...v1.43.0) (2026-06-08)
 
 ### Features
