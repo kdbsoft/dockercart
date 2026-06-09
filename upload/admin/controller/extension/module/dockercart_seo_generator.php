@@ -682,8 +682,9 @@ class ControllerExtensionModuleDockercartSeoGenerator extends Controller
             if ($filter_empty_url || $filter_empty_meta) {
                 // For dynamic filtered sets total is shrinking on each request,
                 // so relying on offset < total causes premature completion.
-                // Continue while current batch produced at least one update.
-                $json["has_more"] = $json["updated"] > 0;
+                // Continue while current batch produced at least one update
+                // AND entities were actually fetched (processed > 0).
+                $json["has_more"] = $json["processed"] > 0 && $json["updated"] > 0;
             } else {
                 $json["has_more"] = $json["offset"] < $result["total"];
             }

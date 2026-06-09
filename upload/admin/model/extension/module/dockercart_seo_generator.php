@@ -687,25 +687,32 @@ class ModelExtensionModuleDockercartSeoGenerator extends Model {
             $this->logger->debug('[META] current row not found (will INSERT if update_fields present)');
         }
 
-        // Обновляем мета-теги
+        // Обновляем мета-теги — сравниваем со старыми значениями, обновляем только при реальном изменении
         $update_fields = array();
+
+        $current_meta_title = isset($current->row['meta_title']) ? $current->row['meta_title'] : '';
+        $current_meta_description = isset($current->row['meta_description']) ? $current->row['meta_description'] : '';
+        $current_meta_keyword = isset($current->row['meta_keyword']) ? $current->row['meta_keyword'] : '';
         
         if (!empty($meta_tags['meta_title'])) {
-            // Clean HTML and encode quotes to avoid breaking admin attribute rendering
             $meta_tags['meta_title'] = $this->escapeQuotes($this->cleanHtml($meta_tags['meta_title']));
-            $update_fields[] = "`meta_title` = '" . $this->db->escape($meta_tags['meta_title']) . "'";
+            if ($meta_tags['meta_title'] !== $current_meta_title) {
+                $update_fields[] = "`meta_title` = '" . $this->db->escape($meta_tags['meta_title']) . "'";
+            }
         }
 
         if (!empty($meta_tags['meta_description'])) {
-            // Clean HTML and encode quotes
             $meta_tags['meta_description'] = $this->escapeQuotes($this->cleanHtml($meta_tags['meta_description']));
-            $update_fields[] = "`meta_description` = '" . $this->db->escape($meta_tags['meta_description']) . "'";
+            if ($meta_tags['meta_description'] !== $current_meta_description) {
+                $update_fields[] = "`meta_description` = '" . $this->db->escape($meta_tags['meta_description']) . "'";
+            }
         }
 
         if (!empty($meta_tags['meta_keyword'])) {
-            // Keywords shouldn't contain HTML; clean and encode
             $meta_tags['meta_keyword'] = $this->escapeQuotes($this->cleanHtml($meta_tags['meta_keyword']));
-            $update_fields[] = "`meta_keyword` = '" . $this->db->escape($meta_tags['meta_keyword']) . "'";
+            if ($meta_tags['meta_keyword'] !== $current_meta_keyword) {
+                $update_fields[] = "`meta_keyword` = '" . $this->db->escape($meta_tags['meta_keyword']) . "'";
+            }
         }
         
         if (!empty($update_fields)) {
