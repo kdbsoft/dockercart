@@ -62,12 +62,12 @@ elif [ "$LOCAL" = "$BASE" ]; then
 	# old content.  Force-recreate apache to re-bind all single-file mounts to their
 	# current inodes.  --no-deps avoids touching mariadb/memcached unnecessarily.
 	log "Recreating apache container to refresh bind mounts (VERSION and config files)..."
-	docker compose up --force-recreate --no-deps -d apache
+	compose up --force-recreate --no-deps -d apache
 
 	# Refresh OCMOD modifications to match new code
 	log "Refreshing OCMOD modifications..."
-	docker compose exec -T apache php /var/www/html/admin/cli/dockercart_modification_refresh.php
-	docker compose exec -T apache chown -R www-data:staff /var/www/storage/modification/
+	compose exec -T apache php /var/www/html/admin/cli/dockercart_modification_refresh.php
+	compose exec -T apache chown -R www-data:staff /var/www/storage/modification/
 elif [ "$REMOTE" = "$BASE" ]; then
     log "Local branch is ahead of origin. Skipping pull."
 else
@@ -82,7 +82,11 @@ fi
 
 compose() {
     if [ "${STANDALONE:-0}" = "1" ]; then
-        docker compose -f docker-compose.standalone.yml "$@"
+        FILES="-f docker-compose.standalone.yml"
+        if docker ps -a --format '{{.Names}}' 2>/dev/null | grep -qFx "${CERTBOT_CONTAINER_NAME:-dockercart_certbot}"; then
+            FILES="$FILES -f docker-compose.standalone.letsencrypt.yml"
+        fi
+        docker compose $FILES "$@"
     else
         docker compose "$@"
     fi
