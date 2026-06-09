@@ -1,3 +1,10 @@
+## [1.44.2](https://github.com/mathflow-bit/dockercart/compare/v1.44.1...v1.44.2) (2026-06-09)
+
+### Bug Fixes
+
+* add color swatch columns to option value ([2ba7b53](https://github.com/mathflow-bit/dockercart/commit/2ba7b53805381050f5c8463ecb07d7d8bcb53deb))
+* increase product image display dimensions ([e4de77a](https://github.com/mathflow-bit/dockercart/commit/e4de77a824d4bb67495c4a56984a084305aec34f))
+
 ## [1.44.1](https://github.com/mathflow-bit/dockercart/compare/v1.44.0...v1.44.1) (2026-06-09)
 
 ### Bug Fixes
