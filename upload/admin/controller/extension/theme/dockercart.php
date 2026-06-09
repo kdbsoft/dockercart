@@ -32,8 +32,6 @@ class ControllerExtensionThemeDockercart extends Controller {
 				'theme_dockercart_image_webp_quality'         => 90,
 				'theme_dockercart_image_category_width'       => 80,
 				'theme_dockercart_image_category_height'      => 80,
-				'theme_dockercart_image_thumb_width'          => 228,
-				'theme_dockercart_image_thumb_height'         => 228,
 				'theme_dockercart_image_product_width'        => 228,
 				'theme_dockercart_image_product_height'       => 228,
 				'theme_dockercart_image_additional_width'     => 74,
@@ -94,12 +92,6 @@ class ControllerExtensionThemeDockercart extends Controller {
 			$data['error_image_category'] = $this->error['image_category'];
 		} else {
 			$data['error_image_category'] = '';
-		}
-
-		if (isset($this->error['image_thumb'])) {
-			$data['error_image_thumb'] = $this->error['image_thumb'];
-		} else {
-			$data['error_image_thumb'] = '';
 		}
 
 		if (isset($this->error['image_product'])) {
@@ -249,22 +241,6 @@ class ControllerExtensionThemeDockercart extends Controller {
 			$data['theme_dockercart_image_category_height'] = 80;
 		}
 
-		if (isset($this->request->post['theme_dockercart_image_thumb_width'])) {
-			$data['theme_dockercart_image_thumb_width'] = $this->request->post['theme_dockercart_image_thumb_width'];
-		} elseif (isset($setting_info['theme_dockercart_image_thumb_width'])) {
-			$data['theme_dockercart_image_thumb_width'] = $setting_info['theme_dockercart_image_thumb_width'];
-		} else {
-			$data['theme_dockercart_image_thumb_width'] = 228;
-		}
-
-		if (isset($this->request->post['theme_dockercart_image_thumb_height'])) {
-			$data['theme_dockercart_image_thumb_height'] = $this->request->post['theme_dockercart_image_thumb_height'];
-		} elseif (isset($setting_info['theme_dockercart_image_thumb_height'])) {
-			$data['theme_dockercart_image_thumb_height'] = $setting_info['theme_dockercart_image_thumb_height'];
-		} else {
-			$data['theme_dockercart_image_thumb_height'] = 228;
-		}
-
 		if (isset($this->request->post['theme_dockercart_image_product_width'])) {
 			$data['theme_dockercart_image_product_width'] = $this->request->post['theme_dockercart_image_product_width'];
 		} elseif (isset($setting_info['theme_dockercart_image_product_width'])) {
@@ -399,10 +375,6 @@ class ControllerExtensionThemeDockercart extends Controller {
 
 		if (!$this->request->post['theme_dockercart_image_category_width'] || !$this->request->post['theme_dockercart_image_category_height']) {
 			$this->error['image_category'] = $this->language->get('error_image_category');
-		}
-
-		if (!$this->request->post['theme_dockercart_image_thumb_width'] || !$this->request->post['theme_dockercart_image_thumb_height']) {
-			$this->error['image_thumb'] = $this->language->get('error_image_thumb');
 		}
 
 		if (!$this->request->post['theme_dockercart_image_product_width'] || !$this->request->post['theme_dockercart_image_product_height']) {

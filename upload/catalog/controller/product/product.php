@@ -33,7 +33,7 @@ class ControllerProductProduct extends Controller {
 				if ($category_info) {
 					$breadcrumb_text = $category_info['name'];
 					$breadcrumb_href = $this->url->link('product/category', 'path=' . $path);
-					
+
 					// Check if this breadcrumb already exists to avoid duplicates
 					$breadcrumb_exists = false;
 					foreach ($data['breadcrumbs'] as $bc) {
@@ -42,14 +42,14 @@ class ControllerProductProduct extends Controller {
 							break;
 						}
 					}
-					
+
 					if (!$breadcrumb_exists) {
 						$data['breadcrumbs'][] = array(
 							'text' => $breadcrumb_text,
 							'href' => $breadcrumb_href
 						);
 					}
-					
+
 					$data['current_category_id'] = $path_id;
 				}
 			}
@@ -192,49 +192,49 @@ class ControllerProductProduct extends Controller {
 			} else {
 				// If no path provided, try to get from product's first category
 				$product_categories = $this->model_catalog_product->getCategories($product_id);
-				
+
 				if (!empty($product_categories)) {
 					// Get the path for the first category
 					$first_category_id = $product_categories[0]['category_id'];
 					$category_path = $this->getCategoryPath($first_category_id);
-					
+
 					if ($category_path) {
 						$this->request->get['path'] = $category_path;
 						$url .= '&path=' . $category_path;
-						
+
 						// Rebuild breadcrumbs with category path
 						$path = '';
 						$path_parts = explode('_', $category_path);
-						
+
 						foreach ($path_parts as $path_id) {
 							if (!$path) {
 								$path = $path_id;
 							} else {
 								$path .= '_' . $path_id;
 							}
-							
+
 							$category_info = $this->model_catalog_category->getCategory($path_id);
-							
+
 							if ($category_info) {
 								// Check if this breadcrumb already exists to avoid duplicates
 								$breadcrumb_text = $category_info['name'];
 								$breadcrumb_href = $this->url->link('product/category', 'path=' . $path);
 								$breadcrumb_exists = false;
-								
+
 								foreach ($data['breadcrumbs'] as $bc) {
 									if ($bc['text'] === $breadcrumb_text && $bc['href'] === $breadcrumb_href) {
 										$breadcrumb_exists = true;
 										break;
 									}
 								}
-								
+
 								if (!$breadcrumb_exists) {
 									$data['breadcrumbs'][] = array(
 										'text' => $breadcrumb_text,
 										'href' => $breadcrumb_href
 									);
 								}
-								
+
 								$data['current_category_id'] = $path_id;
 							}
 						}
@@ -363,8 +363,6 @@ class ControllerProductProduct extends Controller {
 			}
 
 			if ($product_info['image']) {
-				$data['thumb'] = $this->model_tool_image->resize($product_info['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_height'));
-
 				$image_size = @getimagesize(DIR_IMAGE . $product_info['image']);
 				if ($image_size && $image_size[0] > 0 && $image_size[1] > 0) {
 					$ratio = $image_size[1] / $image_size[0];
@@ -378,7 +376,21 @@ class ControllerProductProduct extends Controller {
 				} else {
 					$data['image_orientation'] = 'landscape';
 				}
+
+				$display_w = 600;
+				$display_h = 450;
+				if ($data['image_orientation'] === 'portrait') {
+					$display_w = 450;
+					$display_h = 600;
+				} elseif ($data['image_orientation'] === 'square') {
+					$display_w = 600;
+					$display_h = 600;
+				}
+
+				$data['display'] = $this->model_tool_image->resize($product_info['image'], $display_w, $display_h);
+				$data['thumb'] = $this->model_tool_image->resize($product_info['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_height'));
 			} else {
+				$data['display'] = '';
 				$data['thumb'] = '';
 				$data['image_orientation'] = 'landscape';
 			}
@@ -401,8 +413,19 @@ class ControllerProductProduct extends Controller {
 					}
 				}
 
+				$display_w = 600;
+				$display_h = 450;
+				if ($orientation === 'portrait') {
+					$display_w = 450;
+					$display_h = 600;
+				} elseif ($orientation === 'square') {
+					$display_w = 600;
+					$display_h = 600;
+				}
+
 				$data['images'][] = array(
 					'popup' => ($this->request->server['HTTPS'] ? $this->config->get('config_ssl') : $this->config->get('config_url')) . 'image/' . $result['image'],
+					'display' => $this->model_tool_image->resize($result['image'], $display_w, $display_h),
 					'thumb' => $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_height')),
 					'orientation' => $orientation
 				);
@@ -649,7 +672,7 @@ class ControllerProductProduct extends Controller {
 					$special = false;
 					$tax_price = (float)$result['price'];
 				}
-	
+
 				if ($this->config->get('config_tax')) {
 					$tax = $this->currency->format($tax_price, $this->session->data['currency']);
 				} else {
@@ -831,7 +854,7 @@ class ControllerProductProduct extends Controller {
 				$this->model_account_viewed->addViewedProduct($product_id);
 				$this->model_catalog_product->updateViewed($product_id);
 			}
-			
+
 			$data['column_left'] = $this->load->controller('common/column_left');
 			$data['column_right'] = $this->load->controller('common/column_right');
 			$data['content_top'] = $this->load->controller('common/content_top');
@@ -978,7 +1001,7 @@ class ControllerProductProduct extends Controller {
 				if ((utf8_strlen($this->request->post['text']) < 25) || (utf8_strlen($this->request->post['text']) > 1000)) {
 					$json['error'] = $this->language->get('error_text');
 				}
-			
+
 				if (empty($this->request->post['rating']) || $this->request->post['rating'] < 0 || $this->request->post['rating'] > 5) {
 					$json['error'] = $this->language->get('error_rating');
 				}
@@ -1002,7 +1025,7 @@ class ControllerProductProduct extends Controller {
 			}
 		} else {
 			$json['error'] = $this->language->get('error_product');
-		} 
+		}
 
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
@@ -1010,17 +1033,17 @@ class ControllerProductProduct extends Controller {
 
 	private function getCategoryPath($category_id, $visited = array()) {
 		$path = '';
-		
+
 		// Prevent infinite loops if there are circular parent relationships
 		if (in_array($category_id, $visited)) {
 			return $path;
 		}
-		
+
 		$this->load->model('catalog/category');
 		$visited[] = $category_id;
-		
+
 		$category_info = $this->model_catalog_category->getCategory($category_id);
-		
+
 		if ($category_info) {
 			if ($category_info['parent_id'] && $category_info['parent_id'] != $category_id) {
 				$parent_path = $this->getCategoryPath($category_info['parent_id'], $visited);
@@ -1029,7 +1052,7 @@ class ControllerProductProduct extends Controller {
 				$path = $category_id;
 			}
 		}
-		
+
 		return $path;
 	}
 

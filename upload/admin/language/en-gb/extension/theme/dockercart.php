@@ -16,7 +16,6 @@ $_['entry_status']                     = 'Status';
 $_['entry_product_limit']              = 'Default Items Per Page';
 $_['entry_product_description_length'] = 'List Description Limit';
 $_['entry_image_category']             = 'Category Image Size (W x H)';
-$_['entry_image_thumb']                = 'Product Image Thumb Size (W x H)';
 $_['entry_image_product']              = 'Product Image List Size (W x H)';
 $_['entry_image_additional']           = 'Additional Product Image Size (W x H)';
 $_['entry_image_related']              = 'Related Product Image Size (W x H)';
@@ -51,7 +50,6 @@ $_['help_image_webp_quality']           = 'Compression quality for generated Web
 // Error
 $_['error_permission']                 = 'Warning: You do not have permission to modify DockerCart store theme!';
 $_['error_limit']                      = 'Product Limit required!';
-$_['error_image_thumb']                = 'Product Image Thumb Size dimensions required!';
 $_['error_image_product']              = 'Product List Size dimensions required!';
 $_['error_image_category']             = 'Category List Size dimensions required!';
 $_['error_image_additional']           = 'Additional Product Image Size dimensions required!';
