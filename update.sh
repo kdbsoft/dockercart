@@ -27,6 +27,18 @@ else
     log "Warning: flock is not installed. Lock protection is disabled."
 fi
 
+compose() {
+    if [ "${STANDALONE:-0}" = "1" ]; then
+        FILES="-f docker-compose.standalone.yml"
+        if docker ps -a --format '{{.Names}}' 2>/dev/null | grep -qFx "${CERTBOT_CONTAINER_NAME:-dockercart_certbot}"; then
+            FILES="$FILES -f docker-compose.standalone.letsencrypt.yml"
+        fi
+        docker compose $FILES "$@"
+    else
+        docker compose "$@"
+    fi
+}
+
 if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     log "Error: $SCRIPT_DIR is not a git repository."
     exit 1
