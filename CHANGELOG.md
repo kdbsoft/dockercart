@@ -1,3 +1,9 @@
+## [1.45.1](https://github.com/mathflow-bit/dockercart/compare/v1.45.0...v1.45.1) (2026-06-17)
+
+### Bug Fixes
+
+* add compose function for standalone mode ([95ae424](https://github.com/mathflow-bit/dockercart/commit/95ae4241ceb83ce3ff53baeb7071c88464415549))
+
 ## [1.45.0](https://github.com/mathflow-bit/dockercart/compare/v1.44.5...v1.45.0) (2026-06-17)
 
 ### Features
