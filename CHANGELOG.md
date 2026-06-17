@@ -1,3 +1,9 @@
+## [1.45.0](https://github.com/mathflow-bit/dockercart/compare/v1.44.5...v1.45.0) (2026-06-17)
+
+### Features
+
+* add Redis session support and harden security ([3e98d81](https://github.com/mathflow-bit/dockercart/commit/3e98d814a95efb6678568918746e50c7f138b736))
+
 ## [1.44.5](https://github.com/mathflow-bit/dockercart/compare/v1.44.4...v1.44.5) (2026-06-09)
 
 ### Bug Fixes
