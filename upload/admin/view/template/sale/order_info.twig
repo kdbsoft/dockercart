@@ -106,25 +106,19 @@
             </table>
             </div>
 
-            <div class="row">
-              <div class="col-sm-5">
-                <div class="form-group">
-                  <label class="control-label" for="input-inline-product">{{ entry_product }}</label>
-                  <input type="text" id="input-inline-product" class="form-control" placeholder="{{ entry_product }}" />
-                  <input type="hidden" id="input-inline-product-id" value="" />
-                </div>
+            <div class="order-product-add-row">
+              <div class="order-product-add-field order-product-add-field--product">
+                <label class="control-label" for="input-inline-product">{{ entry_product }}</label>
+                <input type="text" id="input-inline-product" class="form-control" placeholder="{{ entry_product }}" />
+                <input type="hidden" id="input-inline-product-id" value="" />
               </div>
-              <div class="col-sm-2">
-                <div class="form-group">
-                  <label class="control-label" for="input-inline-quantity">{{ entry_quantity }}</label>
-                  <input type="text" id="input-inline-quantity" value="1" class="form-control order-product-input gt-no-translate" data-gt-inline-ignore="1" />
-                </div>
+              <div class="order-product-add-field order-product-add-field--quantity">
+                <label class="control-label" for="input-inline-quantity">{{ entry_quantity }}</label>
+                <input type="text" id="input-inline-quantity" value="1" class="form-control order-product-input gt-no-translate" data-gt-inline-ignore="1" />
               </div>
-              <div class="col-sm-3">
-                <div class="form-group">
-                  <label class="control-label">&nbsp;</label>
-                  <button type="button" id="button-inline-add-product" class="btn btn-primary btn-block"><i class="fa fa-plus"></i> {{ button_product_add }}</button>
-                </div>
+              <div class="order-product-add-field order-product-add-field--action">
+                <label class="control-label">&nbsp;</label>
+                <button type="button" id="button-inline-add-product" class="btn btn-primary"><i class="fa fa-plus"></i> {{ button_product_add }}</button>
               </div>
             </div>
 
