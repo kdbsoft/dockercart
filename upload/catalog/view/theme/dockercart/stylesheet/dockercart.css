@@ -1101,6 +1101,9 @@ body.modal-open { overflow: hidden; }
   transform: rotate(180deg) scale(1.15);
 }
 
+/* ── Add-to-cart icon: always visible ────────────────────── */
+.add-to-cart-btn { opacity: 1 !important; transform: none !important; }
+
 /* ── Blog: читать статью → анимация стрелки ────────────────── */
 [data-lucide="arrow-right"]{transition:transform .2s ease}
 a:hover [data-lucide="arrow-right"]{transform:translateX(4px)}
