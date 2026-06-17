@@ -62,7 +62,9 @@
         {% endif %}
       </div>
       {% if not cfp %}
-      <button class="add-to-cart-btn flex-shrink-0 text-[10px] sm:text-xs font-bold px-3 py-1.5 rounded-lg {{ btn_cart_classes|default('bg-blue-600 text-white hover:bg-blue-700') }} transition opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0" onclick="cart.add('{{ product.product_id }}', '{{ product.minimum|default(1) }}');">+ {{ button_cart }}</button>
+      <button class="add-to-cart-btn flex-shrink-0 text-blue-600 hover:bg-blue-50 hover:text-blue-700 p-1.5 rounded-lg transition" onclick="cart.add('{{ product.product_id }}', '{{ product.minimum|default(1) }}');" aria-label="{{ button_cart }}">
+        <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+      </button>
       {% endif %}
     </div>
   </div>
