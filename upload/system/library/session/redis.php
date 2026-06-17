@@ -4,7 +4,7 @@ class Redis {
 	private $redis;
 	private $ttl = 86400;
 
-	public function __construct($registry = '') {
+	public function __construct() {
 		$this->redis = new \Redis();
 		$hostname = defined('REDIS_HOSTNAME') ? REDIS_HOSTNAME : 'redis';
 		$port = defined('REDIS_PORT') ? (int) REDIS_PORT : 6379;
