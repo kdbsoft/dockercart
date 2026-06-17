@@ -92,18 +92,6 @@ if [ "${SKIP_MIGRATIONS:-0}" = "1" ]; then
     exit 0
 fi
 
-compose() {
-    if [ "${STANDALONE:-0}" = "1" ]; then
-        FILES="-f docker-compose.standalone.yml"
-        if docker ps -a --format '{{.Names}}' 2>/dev/null | grep -qFx "${CERTBOT_CONTAINER_NAME:-dockercart_certbot}"; then
-            FILES="$FILES -f docker-compose.standalone.letsencrypt.yml"
-        fi
-        docker compose $FILES "$@"
-    else
-        docker compose "$@"
-    fi
-}
-
 DB_USER="${DB_USERNAME:-${MARIADB_USER:-dockercart}}"
 DB_PASS="${DB_PASSWORD:-${MARIADB_PASSWORD:-dockercart_password}}"
 DB_NAME="${DB_DATABASE:-${MARIADB_DATABASE:-dockercart}}"
