@@ -2270,7 +2270,7 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
 
 .order-product-input {
     width: 60px;
-    height: 32px;
+    height: 36px;
     padding: 4px 8px;
     font-size: 12px;
     text-align: left;
@@ -2298,6 +2298,46 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
     border-bottom: none;
     font-size: 15px;
     color: #3b82f6;
+}
+
+/* Product add row (Choose Product + Quantity + Button) */
+.order-product-add-row {
+    display: inline-flex;
+    gap: 16px;
+    align-items: stretch;
+    flex-wrap: wrap;
+}
+
+.order-product-add-field {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.order-product-add-field--product {
+    width: 280px;
+}
+
+.order-product-add-field--quantity {
+    width: 80px;
+}
+
+.order-product-add-field--quantity .order-product-input {
+    width: 100%;
+}
+
+.order-product-add-field--action {
+    flex: 0 0 auto;
+}
+
+.order-product-add-field .control-label {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.order-product-add-field--action .btn {
+    white-space: nowrap;
+    height: 36px;
 }
 
 .order-address-card__header .btn {
