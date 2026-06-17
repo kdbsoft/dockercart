@@ -10,18 +10,24 @@ DOCKERCART_URL=${DOCKERCART_URL:-http://${DOCKERCART_DOMAIN}}
 PHPMYADMIN_PORT=${PHPMYADMIN_PORT:-8081}
 PMA_URL=${PMA_URL:-http://pma.${DOCKERCART_DOMAIN}}
 HEALTHCHECK_HOST=${HEALTHCHECK_HOST:-127.0.0.1}
+MARIADB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD:-root_password}
+MARIADB_PASSWORD=${MARIADB_PASSWORD:-dockercart_password}
 if [ -f .env ]; then
     env_dockercart_http_port=$(grep "^DOCKERCART_HTTP_PORT=" .env | cut -d'=' -f2 || true)
     env_dockercart_domain=$(grep "^DOCKERCART_DOMAIN=" .env | cut -d'=' -f2 || true)
     env_dockercart_url=$(grep "^DOCKERCART_URL=" .env | cut -d'=' -f2 || true)
     env_phpmyadmin_port=$(grep "^PHPMYADMIN_PORT=" .env | cut -d'=' -f2 || true)
     env_pma_url=$(grep "^PMA_URL=" .env | cut -d'=' -f2 || true)
+    env_mariadb_root_password=$(grep "^MARIADB_ROOT_PASSWORD=" .env | cut -d'=' -f2 || true)
+    env_mariadb_password=$(grep "^MARIADB_PASSWORD=" .env | cut -d'=' -f2 || true)
 
     [ -n "${env_dockercart_http_port:-}" ] && DOCKERCART_HTTP_PORT="${env_dockercart_http_port}"
     [ -n "${env_dockercart_domain:-}" ] && DOCKERCART_DOMAIN="${env_dockercart_domain}"
     [ -n "${env_dockercart_url:-}" ] && DOCKERCART_URL="${env_dockercart_url}"
     [ -n "${env_phpmyadmin_port:-}" ] && PHPMYADMIN_PORT="${env_phpmyadmin_port}"
     [ -n "${env_pma_url:-}" ] && PMA_URL="${env_pma_url}"
+    [ -n "${env_mariadb_root_password:-}" ] && MARIADB_ROOT_PASSWORD="${env_mariadb_root_password}"
+    [ -n "${env_mariadb_password:-}" ] && MARIADB_PASSWORD="${env_mariadb_password}"
 fi
 
 DOCKERCART_HTTP_PORT=${DOCKERCART_HTTP_PORT:-80}
@@ -84,8 +90,8 @@ echo ""
 
 # Check MariaDB
 echo -e "${YELLOW}💾 MariaDB Check${NC}"
-check "MariaDB responding" "docker compose exec -T mariadb mariadb-admin ping -h 127.0.0.1 -u root -proot_password --silent"
-check "Database dockercart exists" "docker compose exec -T mariadb mariadb -u dockercart -pdockerart_password -e 'USE dockercart'"
+check "MariaDB responding" "MYSQL_PWD=$MARIADB_ROOT_PASSWORD docker compose exec -T -e MYSQL_PWD mariadb mariadb-admin ping -h 127.0.0.1 -u root --silent"
+check "Database dockercart exists" "MYSQL_PWD=$MARIADB_PASSWORD docker compose exec -T -e MYSQL_PWD mariadb mariadb -u dockercart -e 'USE dockercart'"
 echo ""
 
 # Check PHP

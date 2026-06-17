@@ -13,7 +13,7 @@ fix_permissions() {
     fi
 
     if [ -d "/var/www/storage" ]; then
-        chmod -R 777 /var/www/storage 2>/dev/null || true
+        chmod -R 775 /var/www/storage 2>/dev/null || true
     fi
 
     # Writable dirs for uploads
@@ -103,7 +103,7 @@ wait_for_mysql() {
     local attempt=0
 
     # Используем mysqladmin ping для проверки доступности MariaDB (без SSL)
-    until mysqladmin ping -h"${DB_HOSTNAME:-mariadb}" -u"${DB_USERNAME:-dockercart}" -p"${DB_PASSWORD:-dockercart_password}" --skip-ssl 2>/dev/null; do
+    until MYSQL_PWD="${DB_PASSWORD:-dockercart_password}" mysqladmin ping -h"${DB_HOSTNAME:-mariadb}" -u"${DB_USERNAME:-dockercart}" --skip-ssl 2>/dev/null; do
         attempt=$((attempt + 1))
         if [ $attempt -ge $max_attempts ]; then
             echo "ERROR: MariaDB did not become available in time!"
@@ -115,7 +115,7 @@ wait_for_mysql() {
 
     # Дополнительная проверка что MariaDB действительно готова принимать запросы
     echo "MariaDB is responding, checking database readiness..."
-    until mysql -h"${DB_HOSTNAME:-mariadb}" -u"${DB_USERNAME:-dockercart}" -p"${DB_PASSWORD:-dockercart_password}" --skip-ssl -e "SELECT 1" >/dev/null 2>&1; do
+    until MYSQL_PWD="${DB_PASSWORD:-dockercart_password}" mysql -h"${DB_HOSTNAME:-mariadb}" -u"${DB_USERNAME:-dockercart}" --skip-ssl -e "SELECT 1" >/dev/null 2>&1; do
         attempt=$((attempt + 1))
         if [ $attempt -ge $max_attempts ]; then
             echo "ERROR: MariaDB database is not ready!"
@@ -157,9 +157,8 @@ ensure_app_configs() {
     local root_config="/var/www/html/config.php"
     local admin_config="/var/www/html/admin/config.php"
 
-    if [ ! -f "$root_config" ]; then
-        echo "Creating missing $root_config ..."
-        cat > "$root_config" <<'PHP'
+    echo "Regenerating $root_config ..."
+    cat > "$root_config" <<'PHP'
 <?php
 // * Catalog Configuration File
 
@@ -214,19 +213,21 @@ if ($cache_engine === 'redis' && !class_exists('Redis', false)) {
 define('CACHE_ENGINE', $cache_engine);
 define('REDIS_HOSTNAME', $env('REDIS_HOSTNAME', 'redis'));
 define('REDIS_PORT', $env('REDIS_PORT', '6379'));
+define('REDIS_PASSWORD', $env('REDIS_PASSWORD', 'dockercart_redis_pass'));
 define('MEMCACHED_HOSTNAME', $env('MEMCACHED_HOSTNAME', 'memcached'));
 define('MEMCACHED_PORT', $env('MEMCACHED_PORT', '11211'));
 define('CACHE_HOSTNAME', $env('CACHE_HOSTNAME', 'memcached'));
 define('CACHE_PORT', $env('CACHE_PORT', '11211'));
 define('CACHE_PREFIX', $env('CACHE_PREFIX', 'oc_'));
 define('IMAGE_MAX_DIMENSION', getenv('IMAGE_MAX_DIMENSION') ?: '2560');
-PHP
-    fi
 
-    if [ ! -f "$admin_config" ]; then
-        echo "Creating missing $admin_config ..."
-        mkdir -p /var/www/html/admin
-        cat > "$admin_config" <<'PHP'
+// Session
+define('SESSION_ENGINE', $env('SESSION_ENGINE', 'redis'));
+PHP
+
+    echo "Regenerating $admin_config ..."
+    mkdir -p /var/www/html/admin
+    cat > "$admin_config" <<'PHP'
 <?php
 // * Admin Configuration File
 
@@ -284,14 +285,17 @@ if ($cache_engine === 'redis' && !class_exists('Redis', false)) {
 define('CACHE_ENGINE', $cache_engine);
 define('REDIS_HOSTNAME', $env('REDIS_HOSTNAME', 'redis'));
 define('REDIS_PORT', $env('REDIS_PORT', '6379'));
+define('REDIS_PASSWORD', $env('REDIS_PASSWORD', 'dockercart_redis_pass'));
 define('MEMCACHED_HOSTNAME', $env('MEMCACHED_HOSTNAME', 'memcached'));
 define('MEMCACHED_PORT', $env('MEMCACHED_PORT', '11211'));
 define('CACHE_HOSTNAME', $env('CACHE_HOSTNAME', 'memcached'));
 define('CACHE_PORT', $env('CACHE_PORT', '11211'));
 define('CACHE_PREFIX', $env('CACHE_PREFIX', 'oc_'));
 define('IMAGE_MAX_DIMENSION', getenv('IMAGE_MAX_DIMENSION') ?: '2560');
+
+// Session
+define('SESSION_ENGINE', $env('SESSION_ENGINE', 'redis'));
 PHP
-    fi
 
     if [ "$(id -u)" -eq 0 ]; then
         chown www-data:staff "$root_config" "$admin_config" 2>/dev/null || true
@@ -314,7 +318,7 @@ initialize_database() {
 
     # Проверяем, есть ли таблицы в БД
     local table_count
-    table_count=$(mysql -h"${db_host}" -u"${db_user}" -p"${db_pass}" --skip-ssl \
+    table_count=$(MYSQL_PWD="${db_pass}" mysql -h"${db_host}" -u"${db_user}" --skip-ssl \
         -N -B -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '${db_name}'" \
         2>/dev/null || echo "0")
     table_count="$(echo "${table_count}" | tr -d '[:space:]')"
@@ -334,7 +338,7 @@ initialize_database() {
     fi
 
     echo "Importing seed SQL into database '${db_name}'..."
-    if ! mysql -h"${db_host}" -u"${db_user}" -p"${db_pass}" --skip-ssl "${db_name}" < "${seed_sql}"; then
+    if ! MYSQL_PWD="${db_pass}" mysql -h"${db_host}" -u"${db_user}" --skip-ssl "${db_name}" < "${seed_sql}"; then
         echo "ERROR: Failed to import seed SQL" >&2
         return 1
     fi
@@ -345,15 +349,18 @@ initialize_database() {
     url="${url%/}/"
 
     echo "Applying DockerCart bootstrap settings..."
-    mysql -h"${db_host}" -u"${db_user}" -p"${db_pass}" --skip-ssl "${db_name}" <<SQL
+    local admin_hash
+    admin_hash=$(php -r "echo password_hash('${admin_pass}', PASSWORD_ARGON2ID);")
+
+    MYSQL_PWD="${db_pass}" mysql -h"${db_host}" -u"${db_user}" --skip-ssl "${db_name}" <<SQL
 SET NAMES utf8mb4;
 
 DELETE FROM \`${db_prefix}user\` WHERE user_id = 1;
 INSERT INTO \`${db_prefix}user\` \
   (user_id, user_group_id, username, salt, password, firstname, lastname, email, image, code, ip, status, date_added) \
 VALUES \
-  (1, 1, '${admin_user}', 'dockercart', \
-   SHA1(CONCAT('dockercart', SHA1(CONCAT('dockercart', SHA1('${admin_pass}'))))), \
+  (1, 1, '${admin_user}', '', \
+   '${admin_hash}', \
    'DockerCart', 'Admin', '${admin_email}', '', '', '', 1, NOW());
 
 DELETE FROM \`${db_prefix}setting\` WHERE \`key\` IN ('config_email', 'config_url', 'config_ssl', 'config_encryption', 'config_api_id');
@@ -453,6 +460,10 @@ max_execution_time = ${PHP_MAX_EXECUTION_TIME:-300}
 upload_max_filesize = ${PHP_UPLOAD_MAX_FILESIZE:-100M}
 post_max_size = ${PHP_POST_MAX_SIZE:-100M}
 PHP
+
+    if [ "${DOCKERCART_SSL_ENABLED:-false}" = "true" ] || [ "${DOCKERCART_FORCE_SSL:-0}" -eq 1 ]; then
+        echo "session.cookie_secure = On" >> "$ini_file"
+    fi
 
     echo "Applied PHP settings from environment (${ini_file})"
 }

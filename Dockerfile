@@ -56,11 +56,11 @@ RUN mkdir -p /var/www/storage/cache \
 
 RUN chown -R www-data:www-data /var/www/html /var/www/storage \
     && chmod -R 755 /var/www/html \
-    && chmod -R 777 /var/www/storage \
+    && chmod -R 755 /var/www/storage \
     && find /var/www/html -type d -exec chmod 755 {} \; \
     && find /var/www/html -type f -exec chmod 644 {} \;
 
-COPY docker/php.ini /usr/local/etc/php/conf.d/dockercart.ini
+COPY docker/php.prod.ini /usr/local/etc/php/conf.d/dockercart.ini
 
 COPY docker/apache.conf /etc/apache2/sites-available/000-default.conf
 

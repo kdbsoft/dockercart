@@ -325,10 +325,13 @@ class ControllerUserApi extends Controller {
 		if (isset($this->request->post['key'])) {
 			$data['key'] = $this->request->post['key'];
 		} elseif (!empty($api_info)) {
-			$data['key'] = $api_info['key'];
+			$data['key'] = '';
 		} else {
 			$data['key'] = '';
 		}
+
+		$data['api_id'] = isset($this->request->get['api_id']) ? $this->request->get['api_id'] : 0;
+		$data['help_key'] = $this->language->get('help_key_edit');
 
 		if (isset($this->request->post['status'])) {
 			$data['status'] = $this->request->post['status'];
@@ -380,7 +383,7 @@ class ControllerUserApi extends Controller {
 			$this->error['username'] = $this->language->get('error_username');
 		}
 
-		if ((utf8_strlen($this->request->post['key']) < 64) || (utf8_strlen($this->request->post['key']) > 256)) {
+		if (!isset($this->request->get['api_id']) && ((utf8_strlen($this->request->post['key']) < 64) || (utf8_strlen($this->request->post['key']) > 256))) {
 			$this->error['key'] = $this->language->get('error_key');
 		}
 		

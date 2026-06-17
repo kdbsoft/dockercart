@@ -15,7 +15,7 @@ echo ""
 
 # Function to execute SQL
 execute_sql() {
-    mysql -h "$MARIADB_HOST" -u "$MARIADB_USER" -p"$MARIADB_PASSWORD" -P "$MARIADB_PORT" "$MARIADB_DATABASE" -e "$1"
+    MYSQL_PWD="$MARIADB_PASSWORD" mysql -h "$MARIADB_HOST" -u "$MARIADB_USER" -P "$MARIADB_PORT" "$MARIADB_DATABASE" -e "$1"
 }
 
 # Check connection

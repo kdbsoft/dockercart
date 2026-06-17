@@ -1134,7 +1134,7 @@ class ControllerExtensionModuleDockercartSeoGenerator extends Controller
             $lang_file =
                 DIR_APPLICATION .
                 "language/" .
-                $language_code .
+                basename($language_code) .
                 "/extension/module/dockercart_seo_generator.php";
 
             if (is_file($lang_file)) {

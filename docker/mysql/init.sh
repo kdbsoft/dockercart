@@ -31,15 +31,15 @@ fi
 
 echo "[dockercart-init] Importing seed SQL into '${DB_NAME}' with prefix '${DB_PREFIX}'..."
 if [ "${DB_PREFIX}" = "oc_" ]; then
-  mariadb -u"${DB_USER}" -p"${DB_PASSWORD}" "${DB_NAME}" < "${SEED_SQL}"
+  MYSQL_PWD="${DB_PASSWORD}" mariadb -u"${DB_USER}" "${DB_NAME}" < "${SEED_SQL}"
 else
-  sed "s/\`oc_/\`${DB_PREFIX}/g" "${SEED_SQL}" | mariadb -u"${DB_USER}" -p"${DB_PASSWORD}" "${DB_NAME}"
+  MYSQL_PWD="${DB_PASSWORD}" sed "s/\`oc_/\`${DB_PREFIX}/g" "${SEED_SQL}" | mariadb -u"${DB_USER}" "${DB_NAME}"
 fi
 
-USER_TABLE_EXISTS="$(mariadb -N -B -u"${DB_USER}" -p"${DB_PASSWORD}" "${DB_NAME}" -e "SHOW TABLES LIKE '${DB_PREFIX}user';" 2>/dev/null || true)"
-SETTING_TABLE_EXISTS="$(mariadb -N -B -u"${DB_USER}" -p"${DB_PASSWORD}" "${DB_NAME}" -e "SHOW TABLES LIKE '${DB_PREFIX}setting';" 2>/dev/null || true)"
-API_TABLE_EXISTS="$(mariadb -N -B -u"${DB_USER}" -p"${DB_PASSWORD}" "${DB_NAME}" -e "SHOW TABLES LIKE '${DB_PREFIX}api';" 2>/dev/null || true)"
-PRODUCT_TABLE_EXISTS="$(mariadb -N -B -u"${DB_USER}" -p"${DB_PASSWORD}" "${DB_NAME}" -e "SHOW TABLES LIKE '${DB_PREFIX}product';" 2>/dev/null || true)"
+USER_TABLE_EXISTS="$(MYSQL_PWD="${DB_PASSWORD}" mariadb -N -B -u"${DB_USER}" "${DB_NAME}" -e "SHOW TABLES LIKE '${DB_PREFIX}user';" 2>/dev/null || true)"
+SETTING_TABLE_EXISTS="$(MYSQL_PWD="${DB_PASSWORD}" mariadb -N -B -u"${DB_USER}" "${DB_NAME}" -e "SHOW TABLES LIKE '${DB_PREFIX}setting';" 2>/dev/null || true)"
+API_TABLE_EXISTS="$(MYSQL_PWD="${DB_PASSWORD}" mariadb -N -B -u"${DB_USER}" "${DB_NAME}" -e "SHOW TABLES LIKE '${DB_PREFIX}api';" 2>/dev/null || true)"
+PRODUCT_TABLE_EXISTS="$(MYSQL_PWD="${DB_PASSWORD}" mariadb -N -B -u"${DB_USER}" "${DB_NAME}" -e "SHOW TABLES LIKE '${DB_PREFIX}product';" 2>/dev/null || true)"
 
 if [ -z "${USER_TABLE_EXISTS}" ] || [ -z "${SETTING_TABLE_EXISTS}" ] || [ -z "${API_TABLE_EXISTS}" ]; then
   echo "[dockercart-init] WARNING: Required OpenCart tables are missing after seed import."
@@ -48,9 +48,9 @@ if [ -z "${USER_TABLE_EXISTS}" ] || [ -z "${SETTING_TABLE_EXISTS}" ] || [ -z "${
 fi
 
 echo "[dockercart-init] Applying DockerCart bootstrap settings and admin account..."
-mariadb -u"${DB_USER}" -p"${DB_PASSWORD}" "${DB_NAME}" <<SQL
+SALT=$(head -c 16 /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' | head -c 16)
+MYSQL_PWD="${DB_PASSWORD}" mariadb -u"${DB_USER}" "${DB_NAME}" <<SQL
 SET NAMES utf8mb4;
-SET @salt = 'dockercart';
 
 DELETE FROM \`${DB_PREFIX}user\`
 WHERE user_id = 1;
@@ -62,8 +62,8 @@ VALUES
     1,
     1,
     '${ADMIN_USERNAME_ESCAPED}',
-    @salt,
-    SHA1(CONCAT(@salt, SHA1(CONCAT(@salt, SHA1('${ADMIN_PASSWORD_ESCAPED}'))))),
+    '${SALT}',
+    SHA1(CONCAT('${SALT}', SHA1(CONCAT('${SALT}', SHA1('${ADMIN_PASSWORD_ESCAPED}'))))),
     'DockerCart',
     'Admin',
     '${ADMIN_EMAIL_ESCAPED}',
@@ -93,7 +93,7 @@ VALUES (0, 'config', 'config_api_id', @api_id, 0);
 SQL
 
 if [ -n "${PRODUCT_TABLE_EXISTS}" ]; then
-  mariadb -u"${DB_USER}" -p"${DB_PASSWORD}" "${DB_NAME}" -e "UPDATE \`${DB_PREFIX}product\` SET viewed = 0;" || true
+  MYSQL_PWD="${DB_PASSWORD}" mariadb -u"${DB_USER}" "${DB_NAME}" -e "UPDATE \`${DB_PREFIX}product\` SET viewed = 0;" || true
 fi
 
 echo "[dockercart-init] Bootstrap finished."

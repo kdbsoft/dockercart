@@ -31,6 +31,7 @@ $_['column_action']        = 'Action';
 // Entry
 $_['entry_username']       = 'API Username';
 $_['entry_key']            = 'API Key';
+$_['help_key_edit']        = 'Leave blank to keep the current key. The key is stored hashed and cannot be displayed.';
 $_['entry_status']         = 'Status';
 $_['entry_ip']             = 'IP';
 
