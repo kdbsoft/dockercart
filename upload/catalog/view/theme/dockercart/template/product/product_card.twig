@@ -66,8 +66,8 @@
     <input type="number" class="dc-qty-input w-12 text-[11px] text-center font-semibold border border-gray-200 rounded-lg py-1.5 px-1 focus:outline-none focus:border-blue-400" value="{{ product.minimum|default(1) }}" min="{{ product.minimum|default(1) }}" step="1" aria-label="{{ text_quantity|default('Qty:') }}" />
   </div>
   <div>
-    <button class="text-[11px] font-bold px-3 py-1.5 rounded-lg {{ btn_cart_classes|default('bg-blue-600 text-white hover:bg-blue-700') }} transition whitespace-nowrap" onclick="cart.add('{{ product.product_id }}', this.closest('.dc-table-row').querySelector('.dc-qty-input').value || '{{ product.minimum|default(1) }}');">
-      {{ button_cart }}
+    <button class="text-blue-600 hover:bg-blue-50 hover:text-blue-700 p-1.5 rounded-lg transition" onclick="cart.add('{{ product.product_id }}', this.closest('.dc-table-row').querySelector('.dc-qty-input').value || '{{ product.minimum|default(1) }}');" aria-label="{{ button_cart }}">
+      <i data-lucide="shopping-cart" class="w-5 h-5"></i>
     </button>
   </div>
   {% endif %}
@@ -144,8 +144,8 @@
           </div>
         {% endif %}
         {% if not cfp %}
-        <button class="text-[11px] sm:text-xs font-bold px-4 py-2 rounded-lg {{ btn_cart_classes|default('bg-blue-600 text-white hover:bg-blue-700') }} transition whitespace-nowrap" onclick="cart.add('{{ product.product_id }}', '{{ product.minimum|default(1) }}');">
-          {{ button_cart }}
+        <button class="text-blue-600 hover:bg-blue-50 hover:text-blue-700 p-1.5 rounded-lg transition flex-shrink-0" onclick="cart.add('{{ product.product_id }}', '{{ product.minimum|default(1) }}');" aria-label="{{ button_cart }}">
+          <i data-lucide="shopping-cart" class="w-5 h-5"></i>
         </button>
         {% endif %}
       </div>
@@ -221,8 +221,8 @@
         {% endif %}
       </div>
       {% if not cfp %}
-      <button class="add-to-cart-btn flex-shrink-0 text-[10px] sm:text-xs font-bold px-3 py-1.5 rounded-lg {{ btn_cart_classes|default('bg-blue-600 text-white hover:bg-blue-700') }} transition" onclick="cart.add('{{ product.product_id }}', '{{ product.minimum|default(1) }}');">
-        + {{ button_cart }}
+      <button class="add-to-cart-btn flex-shrink-0 text-blue-600 hover:bg-blue-50 hover:text-blue-700 p-1.5 rounded-lg transition" onclick="cart.add('{{ product.product_id }}', '{{ product.minimum|default(1) }}');" aria-label="{{ button_cart }}">
+        <i data-lucide="shopping-cart" class="w-5 h-5"></i>
       </button>
       {% endif %}
     </div>
