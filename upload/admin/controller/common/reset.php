@@ -91,16 +91,12 @@ class ControllerCommonReset extends Controller {
 
 			$this->response->setOutput($this->load->view('common/reset', $data));
 		} else {
-			$this->load->model('setting/setting');
-
-			$this->model_setting_setting->editSettingValue('config', 'config_password', '0');
-
-			return new Action('common/login');
+			$this->response->redirect($this->url->link('common/login', '', true));
 		}
 	}
 
 	protected function validate() {
-		if ((utf8_strlen(html_entity_decode($this->request->post['password'], ENT_QUOTES, 'UTF-8')) < 4) || (utf8_strlen(html_entity_decode($this->request->post['password'], ENT_QUOTES, 'UTF-8')) > 40)) {
+		if ((utf8_strlen(html_entity_decode($this->request->post['password'], ENT_QUOTES, 'UTF-8')) < 8) || (utf8_strlen(html_entity_decode($this->request->post['password'], ENT_QUOTES, 'UTF-8')) > 40)) {
 			$this->error['password'] = $this->language->get('error_password');
 		}
 

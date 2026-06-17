@@ -41,7 +41,7 @@ migrate: ## Apply SQL migrations from docker/mysql/migrations (uses mariadb cont
 	fi; \
 	for f in docker/mysql/migrations/*.sql; do \
 		echo "-> Applying $$f"; \
-		$(COMPOSE) exec -T mariadb mariadb -u$${MARIADB_USER:-dockercart} -p$${MARIADB_PASSWORD:-dockercart_password} $${MARIADB_DATABASE:-dockercart} < "$$f" || { echo "Failed applying $$f"; exit 1; }; \
+		$(COMPOSE) exec -T -e MYSQL_PWD=$${MARIADB_PASSWORD:-dockercart_password} mariadb mariadb -u$${MARIADB_USER:-dockercart} $${MARIADB_DATABASE:-dockercart} < "$$f" || { echo "Failed applying $$f"; exit 1; }; \
 	done; \
 	echo "Migrations applied."
 
@@ -237,11 +237,11 @@ shell: ## Open bash shell in the app container
 	@$(COMPOSE) exec $(SHELL_SERVICE) bash
 
 mariadb: ## Open MariaDB CLI
-	@$(COMPOSE) exec mariadb mariadb -u$${MARIADB_USER:-dockercart} -p$${MARIADB_PASSWORD:-dockercart_password} $${MARIADB_DATABASE:-dockercart}
+	@$(COMPOSE) exec -e MYSQL_PWD=$${MARIADB_PASSWORD:-dockercart_password} mariadb mariadb -u$${MARIADB_USER:-dockercart} $${MARIADB_DATABASE:-dockercart}
 
 backup: ## Dump database to ./backups/
 	@mkdir -p backups
-	@$(COMPOSE) exec mariadb mariadb-dump -u$${MARIADB_USER:-dockercart} -p$${MARIADB_PASSWORD:-dockercart_password} $${MARIADB_DATABASE:-dockercart} > backups/backup_$$(date +%Y%m%d_%H%M%S).sql
+	@$(COMPOSE) exec -e MYSQL_PWD=$${MARIADB_PASSWORD:-dockercart_password} mariadb mariadb-dump -u$${MARIADB_USER:-dockercart} $${MARIADB_DATABASE:-dockercart} > backups/backup_$$(date +%Y%m%d_%H%M%S).sql
 	@echo "Backup created"
 
 restore: ## Restore from the latest dump in ./backups/
@@ -250,7 +250,7 @@ restore: ## Restore from the latest dump in ./backups/
 	fi
 	@LATEST=$$(ls -t backups/*.sql | head -1); \
 	echo "Restoring $$LATEST"; \
-	$(COMPOSE) exec -T mariadb mariadb -u$${MARIADB_USER:-dockercart} -p$${MARIADB_PASSWORD:-dockercart_password} $${MARIADB_DATABASE:-dockercart} < $$LATEST
+	$(COMPOSE) exec -T -e MYSQL_PWD=$${MARIADB_PASSWORD:-dockercart_password} mariadb mariadb -u$${MARIADB_USER:-dockercart} $${MARIADB_DATABASE:-dockercart} < $$LATEST
 	@echo "Restored"
 
 dump-init: ## Regenerate docker/mysql/init.sql from running MariaDB (full dump: data, routines, triggers, events)
@@ -259,7 +259,7 @@ dump-init: ## Regenerate docker/mysql/init.sql from running MariaDB (full dump: 
 	@cp -a docker/mysql/init.sql docker/mysql/init.sql.bak.$$(date -u +%Y%m%dT%H%M%SZ) || true
 	@TMP_FILE=$$(mktemp docker/mysql/init.sql.tmp.XXXXXX); \
 	echo "Generating new dump (may take some time)..."; \
-	if ! $(COMPOSE) exec -T mariadb sh -c 'mariadb-dump -u"$${MARIADB_USER:-dockercart}" -p"$${MARIADB_PASSWORD:-dockercart_password}" "$${MARIADB_DATABASE:-dockercart}" --single-transaction --quick --hex-blob --routines --triggers --events --default-character-set=utf8mb4' | sed -e 's/DEFINER=[^ ]*//g' | sed "s/,'config_encryption','[^']*'/,'config_encryption',''/g" > $$TMP_FILE; then \
+	if ! $(COMPOSE) exec -T -e MYSQL_PWD=$${MARIADB_PASSWORD:-dockercart_password} mariadb sh -c 'mariadb-dump -u"$${MARIADB_USER:-dockercart}" "$${MARIADB_DATABASE:-dockercart}" --single-transaction --quick --hex-blob --routines --triggers --events --default-character-set=utf8mb4' | sed -e 's/DEFINER=[^ ]*//g' | sed "s/,'config_encryption','[^']*'/,'config_encryption',''/g" > $$TMP_FILE; then \
 		rm -f $$TMP_FILE; \
 		echo "Dump failed"; \
 		exit 1; \
