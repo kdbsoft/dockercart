@@ -40,28 +40,45 @@ class User {
 	}
 
 	public function login($username, $password) {
-		$user_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "user WHERE username = '" . $this->db->escape($username) . "' AND (password = SHA1(CONCAT(salt, SHA1(CONCAT(salt, SHA1('" . $this->db->escape($password) . "'))))) OR password = '" . $this->db->escape(md5($password)) . "') AND status = '1'");
+		$user_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "user WHERE username = '" . $this->db->escape($username) . "' AND status = '1'");
 
 		if ($user_query->num_rows) {
-			$this->session->data['user_id'] = $user_query->row['user_id'];
+			$hash = $user_query->row['password'];
 
-			$this->user_id = $user_query->row['user_id'];
-			$this->username = $user_query->row['username'];
-			$this->user_group_id = $user_query->row['user_group_id'];
-
-			$user_group_query = $this->db->query("SELECT permission FROM " . DB_PREFIX . "user_group WHERE user_group_id = '" . (int)$user_query->row['user_group_id'] . "'");
-
-			$permissions = json_decode($user_group_query->row['permission'], true);
-
-			if (is_array($permissions)) {
-				foreach ($permissions as $key => $value) {
-					$this->permission[$key] = $value;
-				}
+			if (password_verify($password, $hash)) {
+				$this->persistLogin($user_query);
+				return true;
 			}
 
-			return true;
-		} else {
-			return false;
+			if (!empty($user_query->row['salt']) && $hash === sha1($user_query->row['salt'] . sha1($user_query->row['salt'] . sha1($password)))) {
+				$this->db->query("UPDATE " . DB_PREFIX . "user SET password = '" . $this->db->escape(password_hash($password, PASSWORD_ARGON2ID)) . "' WHERE user_id = '" . (int)$user_query->row['user_id'] . "'");
+				$this->persistLogin($user_query);
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private function persistLogin($user_query) {
+		$this->session->data['user_id'] = $user_query->row['user_id'];
+
+		$this->user_id = $user_query->row['user_id'];
+		$this->username = $user_query->row['username'];
+		$this->user_group_id = $user_query->row['user_group_id'];
+
+		$user_group_query = $this->db->query("SELECT permission FROM " . DB_PREFIX . "user_group WHERE user_group_id = '" . (int)$user_query->row['user_group_id'] . "'");
+
+		$permissions = json_decode($user_group_query->row['permission'], true);
+
+		if (is_array($permissions)) {
+			foreach ($permissions as $key => $value) {
+				$this->permission[$key] = $value;
+			}
+		}
+
+		if (session_id() && function_exists('session_regenerate_id')) {
+			session_regenerate_id(true);
 		}
 	}
 

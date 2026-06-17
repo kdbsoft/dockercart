@@ -40,7 +40,7 @@ $_['cache_engine']         = defined('CACHE_ENGINE') ? CACHE_ENGINE : 'memcached
 $_['cache_expire']         = 3600;
 
 // Session
-$_['session_engine']       = 'db';
+$_['session_engine']       = defined('SESSION_ENGINE') ? SESSION_ENGINE : 'db';
 $_['session_autostart']    = true;
 $_['session_name']         = 'OCSESSID';
 

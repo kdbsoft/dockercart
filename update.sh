@@ -109,11 +109,11 @@ esac
 MIGRATION_TABLE="${DB_PREFIX_VALUE}schema_migrations"
 
 db_exec_compose() {
-    compose exec -T mariadb mariadb -u"$DB_USER" -p"$DB_PASS" "$DB_NAME" "$@"
+    compose exec -T -e MYSQL_PWD mariadb mariadb -u"$DB_USER" "$DB_NAME" "$@"
 }
 
 db_exec_docker() {
-    docker exec -i "$MARIADB_CONTAINER" mariadb -u"$DB_USER" -p"$DB_PASS" "$DB_NAME" "$@"
+    docker exec -i -e MYSQL_PWD="$DB_PASS" "$MARIADB_CONTAINER" mariadb -u"$DB_USER" "$DB_NAME" "$@"
 }
 
 db_exec() {

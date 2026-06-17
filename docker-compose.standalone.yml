@@ -13,6 +13,14 @@ services:
     image: nginx:alpine
     container_name: ${NGINX_CONTAINER_NAME:-dockercart_nginx}
     restart: ${RESTART_POLICY:-unless-stopped}
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+      - SETGID
+      - SETUID
     logging:
       driver: "json-file"
       options:
@@ -49,6 +57,17 @@ services:
     image: dockercart_apache:latest
     container_name: ${APACHE_CONTAINER_NAME:-dockercart_apache}
     restart: ${RESTART_POLICY:-unless-stopped}
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+      - CHOWN
+      - SETGID
+      - SETUID
+      - FOWNER
+      - DAC_OVERRIDE
     logging:
       driver: "json-file"
       options:
@@ -80,6 +99,7 @@ services:
       - CACHE_ENGINE=${CACHE_ENGINE:-redis}
       - REDIS_HOSTNAME=${REDIS_HOSTNAME:-redis}
       - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-dockercart_redis_pass}
       - MEMCACHED_HOSTNAME=${MEMCACHED_HOSTNAME:-memcached}
       - MEMCACHED_PORT=${MEMCACHED_PORT:-11211}
       - CACHE_HOSTNAME=${CACHE_HOSTNAME:-memcached}
@@ -105,6 +125,8 @@ services:
     image: mariadb:11.8
     container_name: ${MARIADB_CONTAINER_NAME:-dockercart_mariadb}
     restart: ${RESTART_POLICY:-unless-stopped}
+    security_opt:
+      - no-new-privileges:true
     logging:
       driver: "json-file"
       options:
@@ -130,14 +152,8 @@ services:
     healthcheck:
       test:
         [
-          "CMD",
-          "mariadb-admin",
-          "ping",
-          "-h",
-          "localhost",
-          "-u",
-          "${MARIADB_USER:-dockercart}",
-          "-p${MARIADB_PASSWORD:-dockercart_password}",
+          "CMD-SHELL",
+          "MYSQL_PWD=${MARIADB_PASSWORD:-dockercart_password} mariadb-admin ping -h localhost -u ${MARIADB_USER:-dockercart} 2>/dev/null || exit 1",
         ]
       interval: 10s
       timeout: 5s
@@ -149,6 +165,8 @@ services:
     image: manticoresearch/manticore:15.1.0
     container_name: ${MANTICORE_CONTAINER_NAME:-dockercart_manticore}
     restart: ${RESTART_POLICY:-unless-stopped}
+    security_opt:
+      - no-new-privileges:true
     logging:
       driver: "json-file"
       options:
@@ -158,7 +176,7 @@ services:
       - TZ=${TZ:-UTC}
     volumes:
       - ./docker/manticore/manticore.conf:/etc/manticoresearch/manticore.conf:ro,z
-      - ./docker/manticore/entrypoint.sh:/usr/local/bin/docker-entrypoint.sh:z
+      - ./docker/manticore/entrypoint.sh:/usr/local/bin/docker-entrypoint.sh:ro,z
     tmpfs:
       - /var/lib/manticore:mode=0755,size=256M
     command:
@@ -179,6 +197,8 @@ services:
     image: memcached:1.6-alpine
     container_name: ${MEMCACHED_CONTAINER_NAME:-dockercart_memcached}
     restart: ${RESTART_POLICY:-unless-stopped}
+    security_opt:
+      - no-new-privileges:true
     command: ["memcached", "-m", "128", "-p", "11211", "-u", "memcache"]
     logging:
       driver: "none"
@@ -198,7 +218,9 @@ services:
     image: redis:7-alpine
     container_name: ${REDIS_CONTAINER_NAME:-dockercart_redis}
     restart: ${RESTART_POLICY:-unless-stopped}
-    command: ["redis-server", "--appendonly", "no", "--save", "", "--maxmemory", "${REDIS_MAXMEMORY:-256mb}", "--maxmemory-policy", "allkeys-lru"]
+    security_opt:
+      - no-new-privileges:true
+    command: ["redis-server", "--appendonly", "no", "--save", "", "--maxmemory", "${REDIS_MAXMEMORY:-256mb}", "--maxmemory-policy", "allkeys-lru", "--requirepass", "${REDIS_PASSWORD:-dockercart_redis_pass}"]
     logging:
       driver: "none"
     networks:

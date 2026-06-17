@@ -94,10 +94,22 @@ class Customer {
 		if ($override) {
 			$customer_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "customer WHERE LOWER(email) = '" . $this->db->escape(utf8_strtolower($email)) . "' AND status = '1'");
 		} else {
-			$customer_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "customer WHERE LOWER(email) = '" . $this->db->escape(utf8_strtolower($email)) . "' AND (password = SHA1(CONCAT(salt, SHA1(CONCAT(salt, SHA1('" . $this->db->escape($password) . "'))))) OR password = '" . $this->db->escape(md5($password)) . "') AND status = '1'");
+			$customer_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "customer WHERE LOWER(email) = '" . $this->db->escape(utf8_strtolower($email)) . "' AND status = '1'");
 		}
 
 		if ($customer_query->num_rows) {
+			if (!$override) {
+				$hash = $customer_query->row['password'];
+
+				if (!password_verify($password, $hash)) {
+					if (empty($customer_query->row['salt']) || $hash !== sha1($customer_query->row['salt'] . sha1($customer_query->row['salt'] . sha1($password)))) {
+						return false;
+					}
+
+					$this->db->query("UPDATE " . DB_PREFIX . "customer SET password = '" . $this->db->escape(password_hash($password, PASSWORD_ARGON2ID)) . "' WHERE customer_id = '" . (int)$customer_query->row['customer_id'] . "'");
+				}
+			}
+
 			$this->session->data['customer_id'] = $customer_query->row['customer_id'];
 
 			$this->customer_id = $customer_query->row['customer_id'];
@@ -110,6 +122,10 @@ class Customer {
 			$this->address_id = $customer_query->row['address_id'];
 		
 			$this->db->query("UPDATE " . DB_PREFIX . "customer SET language_id = '" . (int)$this->config->get('config_language_id') . "', ip = '" . $this->db->escape($this->request->server['REMOTE_ADDR']) . "' WHERE customer_id = '" . (int)$this->customer_id . "'");
+
+			if (session_id() && function_exists('session_regenerate_id')) {
+				session_regenerate_id(true);
+			}
 
 			// Generate remember token and set cookie for persistent login
 			try {

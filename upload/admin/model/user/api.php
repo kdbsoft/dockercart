@@ -1,7 +1,7 @@
 <?php
 class ModelUserApi extends Model {
 	public function addApi($data) {
-		$this->db->query("INSERT INTO `" . DB_PREFIX . "api` SET username = '" . $this->db->escape($data['username']) . "', `key` = '" . $this->db->escape($data['key']) . "', status = '" . (int)$data['status'] . "', date_added = NOW(), date_modified = NOW()");
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "api` SET username = '" . $this->db->escape($data['username']) . "', `key` = '" . $this->db->escape(password_hash($data['key'], PASSWORD_ARGON2ID)) . "', status = '" . (int)$data['status'] . "', date_added = NOW(), date_modified = NOW()");
 
 		$api_id = $this->db->getLastId();
 
@@ -17,7 +17,14 @@ class ModelUserApi extends Model {
 	}
 
 	public function editApi($api_id, $data) {
-		$this->db->query("UPDATE `" . DB_PREFIX . "api` SET username = '" . $this->db->escape($data['username']) . "', `key` = '" . $this->db->escape($data['key']) . "', status = '" . (int)$data['status'] . "', date_modified = NOW() WHERE api_id = '" . (int)$api_id . "'");
+		$sql = "UPDATE `" . DB_PREFIX . "api` SET username = '" . $this->db->escape($data['username']) . "', status = '" . (int)$data['status'] . "', date_modified = NOW()";
+
+		if (!empty($data['key'])) {
+			$sql .= ", `key` = '" . $this->db->escape(password_hash($data['key'], PASSWORD_ARGON2ID)) . "'";
+		}
+
+		$sql .= " WHERE api_id = '" . (int)$api_id . "'";
+		$this->db->query($sql);
 
 		$this->db->query("DELETE FROM " . DB_PREFIX . "api_ip WHERE api_id = '" . (int)$api_id . "'");
 
