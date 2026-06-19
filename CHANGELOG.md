@@ -1,3 +1,9 @@
+## [1.45.8](https://github.com/mathflow-bit/dockercart/compare/v1.45.7...v1.45.8) (2026-06-19)
+
+### Bug Fixes
+
+* ensure images are rebuilt in standalone modes ([0356aae](https://github.com/mathflow-bit/dockercart/commit/0356aae43a59422e773bd5bf54af962b6b04eddb))
+
 ## [1.45.7](https://github.com/mathflow-bit/dockercart/compare/v1.45.6...v1.45.7) (2026-06-19)
 
 ### Bug Fixes
