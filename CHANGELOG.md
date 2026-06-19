@@ -1,3 +1,9 @@
+## [1.45.4](https://github.com/mathflow-bit/dockercart/compare/v1.45.3...v1.45.4) (2026-06-19)
+
+### Bug Fixes
+
+* clean up standalone Makefile targets ([c581607](https://github.com/mathflow-bit/dockercart/commit/c58160779b1ca0427ef1a909f62c76815e5774fe))
+
 ## [1.45.3](https://github.com/mathflow-bit/dockercart/compare/v1.45.2...v1.45.3) (2026-06-19)
 
 ### Bug Fixes
