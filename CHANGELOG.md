@@ -1,3 +1,9 @@
+## [1.45.2](https://github.com/mathflow-bit/dockercart/compare/v1.45.1...v1.45.2) (2026-06-17)
+
+### Bug Fixes
+
+* show category description when empty ([34b1ae1](https://github.com/mathflow-bit/dockercart/commit/34b1ae11af639686de262812e976a55154f181cf))
+
 ## [1.45.1](https://github.com/mathflow-bit/dockercart/compare/v1.45.0...v1.45.1) (2026-06-17)
 
 ### Bug Fixes
