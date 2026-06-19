@@ -124,14 +124,14 @@ class ControllerExtensionDashboardCustomer extends Controller {
 	}
 
 	protected function formatTotal($value) {
-		if ($value > 1000000000000) {
-			return round($value / 1000000000000, 1) . 'T';
-		} elseif ($value > 1000000000) {
-			return round($value / 1000000000, 1) . 'B';
-		} elseif ($value > 1000000) {
-			return round($value / 1000000, 1) . 'M';
-		} elseif ($value > 1000) {
-			return round($value / 1000, 1) . 'K';
+		if ($value >= 1000000000000) {
+			return (int)($value / 1000000000000) . 'T';
+		} elseif ($value >= 1000000000) {
+			return (int)($value / 1000000000) . 'B';
+		} elseif ($value >= 1000000) {
+			return (int)($value / 1000000) . 'M';
+		} elseif ($value >= 1000) {
+			return (int)($value / 1000) . 'K';
 		} else {
 			return $value;
 		}

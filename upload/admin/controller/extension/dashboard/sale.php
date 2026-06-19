@@ -123,6 +123,20 @@ class ControllerExtensionDashboardSale extends Controller {
 		return $dates;
 	}
 
+	protected function formatTotal($value) {
+		if ($value >= 1000000000000) {
+			return (int)($value / 1000000000000) . 'T';
+		} elseif ($value >= 1000000000) {
+			return (int)($value / 1000000000) . 'B';
+		} elseif ($value >= 1000000) {
+			return (int)($value / 1000000) . 'M';
+		} elseif ($value >= 1000) {
+			return (int)($value / 1000) . 'K';
+		} else {
+			return $value;
+		}
+	}
+
 	public function dashboard() {
 		$this->load->language('extension/dashboard/sale');
 
@@ -161,14 +175,14 @@ class ControllerExtensionDashboardSale extends Controller {
 				$percentage = round(($difference / $previous) * 100);
 
 				$json = array(
-					'total' => $this->currency->format($current, $this->config->get('config_currency')),
+					'total' => $this->formatTotal($current),
 					'show_change' => true,
 					'percentage' => abs($percentage),
 					'direction' => $difference >= 0 ? 'up' : 'down',
 				);
 			} else {
 				$json = array(
-					'total' => $this->currency->format($current, $this->config->get('config_currency')),
+					'total' => $this->formatTotal($current),
 					'show_change' => false,
 				);
 			}
@@ -176,7 +190,7 @@ class ControllerExtensionDashboardSale extends Controller {
 			$current = $this->model_extension_dashboard_sale->getTotalSales();
 
 			$json = array(
-				'total' => $this->currency->format($current, $this->config->get('config_currency')),
+				'total' => $this->formatTotal($current),
 				'show_change' => false,
 			);
 		}
