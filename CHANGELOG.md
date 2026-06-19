@@ -1,3 +1,9 @@
+## [1.45.7](https://github.com/mathflow-bit/dockercart/compare/v1.45.6...v1.45.7) (2026-06-19)
+
+### Bug Fixes
+
+* add CHOWN capability to service containers ([da0de80](https://github.com/mathflow-bit/dockercart/commit/da0de8066c2ef05410499ab726cd1dd39401c1c5))
+
 ## [1.45.6](https://github.com/mathflow-bit/dockercart/compare/v1.45.5...v1.45.6) (2026-06-19)
 
 ### Bug Fixes
