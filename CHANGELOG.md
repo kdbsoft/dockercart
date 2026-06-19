@@ -1,3 +1,9 @@
+## [1.45.9](https://github.com/mathflow-bit/dockercart/compare/v1.45.8...v1.45.9) (2026-06-19)
+
+### Bug Fixes
+
+* standardize dashboard totalValue output formats ([ba944c7](https://github.com/mathflow-bit/dockercart/commit/ba944c760dae8860d428b906839fccbe1ed04691))
+
 ## [1.45.8](https://github.com/mathflow-bit/dockercart/compare/v1.45.7...v1.45.8) (2026-06-19)
 
 ### Bug Fixes
