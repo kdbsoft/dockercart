@@ -1,3 +1,9 @@
+## [1.45.3](https://github.com/mathflow-bit/dockercart/compare/v1.45.2...v1.45.3) (2026-06-19)
+
+### Bug Fixes
+
+* use nginx -s reload for cert renewal ([98ea90c](https://github.com/mathflow-bit/dockercart/commit/98ea90c2727e0fae63126226345fe70b2313d0d5))
+
 ## [1.45.2](https://github.com/mathflow-bit/dockercart/compare/v1.45.1...v1.45.2) (2026-06-17)
 
 ### Bug Fixes
