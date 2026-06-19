@@ -1,3 +1,9 @@
+## [1.45.6](https://github.com/mathflow-bit/dockercart/compare/v1.45.5...v1.45.6) (2026-06-19)
+
+### Bug Fixes
+
+* use integer abbreviation for dashboard totals ([0e86504](https://github.com/mathflow-bit/dockercart/commit/0e865048c61a63c1cb2c4af7ef265020098ee67c))
+
 ## [1.45.5](https://github.com/mathflow-bit/dockercart/compare/v1.45.4...v1.45.5) (2026-06-19)
 
 ### Bug Fixes
