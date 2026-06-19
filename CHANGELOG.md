@@ -1,3 +1,9 @@
+## [1.45.5](https://github.com/mathflow-bit/dockercart/compare/v1.45.4...v1.45.5) (2026-06-19)
+
+### Bug Fixes
+
+* add DAC_OVERRIDE capability ([3a83823](https://github.com/mathflow-bit/dockercart/commit/3a838230dcd3eed53a8ce01bc812a07b5595ddd0))
+
 ## [1.45.4](https://github.com/mathflow-bit/dockercart/compare/v1.45.3...v1.45.4) (2026-06-19)
 
 ### Bug Fixes
