@@ -58,7 +58,7 @@ up: ## Start in Traefik mode, HTTP by default (use make ssl or make letsencrypt 
 	@./start.sh
 
 standalone: ## Start without Traefik, store on port ${DOCKERCART_HTTP_PORT:-80}
-	@docker compose -f docker-compose.standalone.yml up -d --build
+	@docker compose -f docker-compose.standalone.yml up -d
 	@echo ""
 	@echo "Store: $${DOCKERCART_URL:-http://$${DOCKERCART_DOMAIN:-dockercart.local}}"
 	@echo "Admin: $${DOCKERCART_URL:-http://$${DOCKERCART_DOMAIN:-dockercart.local}}/admin"
@@ -93,7 +93,7 @@ standalone-letsencrypt: ## Start standalone mode + Let's Encrypt SSL (no Traefik
 		rm -rf "$$LE_DATA_DIR/live/dockercart" "$$LE_DATA_DIR/archive/dockercart"; \
 	fi; \
 	echo "Starting standalone HTTP stack for ACME webroot challenge..."; \
-	docker compose -f docker-compose.standalone.yml up -d --build; \
+	docker compose -f docker-compose.standalone.yml up -d; \
 	ACTIVE_CERT_NAME="dockercart"; \
 	VALID_CERT_NAME=""; \
 	USABLE_CERT_NAME=""; \
@@ -190,7 +190,6 @@ standalone-letsencrypt: ## Start standalone mode + Let's Encrypt SSL (no Traefik
 	fi; \
 	echo "Switching stack to standalone HTTPS mode..."; \
 	docker compose -f docker-compose.standalone.yml -f docker-compose.standalone.letsencrypt.yml up -d; \
-	docker compose -f docker-compose.standalone.yml -f docker-compose.standalone.letsencrypt.yml exec -T nginx nginx -s reload; \
 	echo ""; \
 	echo "Store: https://$${SSL_DOMAIN}"; \
 	echo "Admin: https://$${SSL_DOMAIN}/admin"; \
