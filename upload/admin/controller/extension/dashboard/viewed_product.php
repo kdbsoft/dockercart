@@ -139,7 +139,7 @@ class ControllerExtensionDashboardViewedProduct extends Controller {
 		} elseif ($value > 1000) {
 			return round($value / 1000, 1) . 'K';
 		} else {
-			return round($value);
+			return (int)$value;
 		}
 	}
 
