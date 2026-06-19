@@ -18,7 +18,6 @@ services:
     image: certbot/certbot:latest
     container_name: ${CERTBOT_CONTAINER_NAME:-dockercart_certbot}
     restart: ${RESTART_POLICY:-unless-stopped}
-    pid: "service:nginx"
     depends_on:
       - nginx
     volumes:
@@ -28,7 +27,7 @@ services:
     command:
       - |
         trap exit TERM; while :; do
-          certbot renew --webroot -w /var/www/certbot --quiet --deploy-hook "kill -HUP 1";
+          certbot renew --webroot -w /var/www/certbot --quiet --deploy-hook "nginx -s reload";
           sleep "${CERTBOT_RENEW_INTERVAL:-24h}";
         done
     networks:
