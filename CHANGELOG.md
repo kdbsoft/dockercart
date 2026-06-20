@@ -1,3 +1,12 @@
+## [1.45.10](https://github.com/mathflow-bit/dockercart/compare/v1.45.9...v1.45.10) (2026-06-20)
+
+### Bug Fixes
+
+* add pending order status to admin dashboard ([6b5b08d](https://github.com/mathflow-bit/dockercart/commit/6b5b08d38d4fe280d7a7224a461e0beb159ac448))
+* correct bot detection logic and indentation ([6289f66](https://github.com/mathflow-bit/dockercart/commit/6289f66803aa9307e2f509b08fda514b55f10d31))
+* correct stats sidebar permission check ([61e5ea2](https://github.com/mathflow-bit/dockercart/commit/61e5ea280b71c521593cf7e32de255b8fdcd2ac8))
+* restrict API IP check to API ID ([722028e](https://github.com/mathflow-bit/dockercart/commit/722028ed37aea2cd57bce56c3f54ab4b35b15d8c))
+
 ## [1.45.9](https://github.com/mathflow-bit/dockercart/compare/v1.45.8...v1.45.9) (2026-06-19)
 
 ### Bug Fixes
