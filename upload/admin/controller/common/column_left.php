@@ -640,41 +640,57 @@ class ControllerCommonColumnLeft extends Controller {
 				if ($cached !== false) {
 					$data['complete_status'] = $cached['complete_status'];
 					$data['processing_status'] = $cached['processing_status'];
+					$data['pending_status'] = $cached['pending_status'] ?? 0;
 					$data['other_status'] = $cached['other_status'];
 					$data['statistics_status'] = true;
 				} else {
 					$order_total = (float)$this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "order` WHERE order_status_id > '0'")->row['total'];
 
-					$config_complete_status = $this->config->get('config_complete_status');
-					$config_processing_status = $this->config->get('config_processing_status');
+					$config_complete_status = (array)$this->config->get('config_complete_status');
+					$config_processing_status = (array)$this->config->get('config_processing_status');
+					$config_pending_status = (int)$this->config->get('config_order_status_id');
 
 					if ($order_total) {
-						$completeimplode = array();
-						foreach ($config_complete_status as $status_id) {
-							$completeimplode[] = "'" . (int)$status_id . "'";
+						$complete_total = 0;
+						if ($config_complete_status) {
+							$completeimplode = array();
+							foreach ($config_complete_status as $status_id) {
+								$completeimplode[] = "'" . (int)$status_id . "'";
+							}
+							$complete_total = (float)$this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "order` WHERE order_status_id IN(" . implode(',', $completeimplode) . ")")->row['total'];
 						}
-						$complete_total = (float)$this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "order` WHERE order_status_id IN(" . implode(',', $completeimplode) . ")")->row['total'];
 
-						$processingimplode = array();
-						foreach ($config_processing_status as $status_id) {
-							$processingimplode[] = "'" . (int)$status_id . "'";
+						$processing_total = 0;
+						if ($config_processing_status) {
+							$processingimplode = array();
+							foreach ($config_processing_status as $status_id) {
+								$processingimplode[] = "'" . (int)$status_id . "'";
+							}
+							$processing_total = (float)$this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "order` WHERE order_status_id IN(" . implode(',', $processingimplode) . ")")->row['total'];
 						}
-						$processing_total = (float)$this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "order` WHERE order_status_id IN(" . implode(',', $processingimplode) . ")")->row['total'];
 
-						$other_total = $order_total - $complete_total - $processing_total;
+						$pending_total = 0;
+						if ($config_pending_status) {
+							$pending_total = (float)$this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "order` WHERE order_status_id = '" . $config_pending_status . "'")->row['total'];
+						}
+
+						$other_total = $order_total - $complete_total - $processing_total - $pending_total;
 
 						$data['complete_status'] = round(($complete_total / $order_total) * 100);
 						$data['processing_status'] = round(($processing_total / $order_total) * 100);
+						$data['pending_status'] = round(($pending_total / $order_total) * 100);
 						$data['other_status'] = max(0, round(($other_total / $order_total) * 100));
 					} else {
 						$data['complete_status'] = 0;
 						$data['processing_status'] = 0;
+						$data['pending_status'] = 0;
 						$data['other_status'] = 0;
 					}
 
 					$this->cache->set($cache_key, array(
 						'complete_status' => $data['complete_status'],
 						'processing_status' => $data['processing_status'],
+						'pending_status' => $data['pending_status'],
 						'other_status' => $data['other_status']
 					), 300);
 

@@ -71,4 +71,5 @@ $_['text_length_class']         = 'Length Classes';
 $_['text_zone']                 = 'Zones';
 $_['text_complete_status']      = 'Orders Completed';
 $_['text_processing_status']    = 'Orders Processing';
+$_['text_pending_status']       = 'Orders Pending';
 $_['text_other_status']         = 'Other Statuses';

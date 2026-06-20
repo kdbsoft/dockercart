@@ -72,6 +72,7 @@ $_['text_option'] = 'Опції';
 $_['text_order'] = 'Замовлення';
 $_['text_order_status'] = 'Статуси замовлень';
 $_['text_other_status'] = 'Інші статуси';
+$_['text_pending_status'] = 'Замовлення в очікуванні';
 $_['text_payment'] = 'Оплата';
 $_['text_paypal'] = 'PayPal';
 $_['text_paypal_manage'] = 'PayPal';
