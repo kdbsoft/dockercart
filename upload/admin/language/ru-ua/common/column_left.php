@@ -43,6 +43,7 @@ $_['text_option'] = 'Опции';
 $_['text_order'] = 'Заказы';
 $_['text_order_status'] = 'Статусы заказов';
 $_['text_other_status'] = 'Другие статусы';
+$_['text_pending_status'] = 'Заказы в ожидании';
 $_['text_processing_status'] = 'Обработка заказов';
 $_['text_product'] = 'Товары';
 $_['text_product_bundle'] = 'Комплекты товаров';

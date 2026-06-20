@@ -58,6 +58,12 @@
         </div>
       </li>
       <li>
+        <div>{{ text_pending_status }} <span class="pull-right">{{ pending_status }}%</span></div>
+        <div class="progress">
+          <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="{{ pending_status }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ pending_status }}%"> <span class="sr-only">{{ pending_status }}%</span></div>
+        </div>
+      </li>
+      <li>
         <div>{{ text_other_status }} <span class="pull-right">{{ other_status }}%</span></div>
         <div class="progress">
           <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="{{ other_status }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ other_status }}%"> <span class="sr-only">{{ other_status }}%</span></div>
