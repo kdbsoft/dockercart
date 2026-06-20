@@ -1,3 +1,9 @@
+## [1.45.12](https://github.com/mathflow-bit/dockercart/compare/v1.45.11...v1.45.12) (2026-06-20)
+
+### Bug Fixes
+
+* return formatted price for default currency ([8aa289b](https://github.com/mathflow-bit/dockercart/commit/8aa289b55aff0fbe4b988e70aa8b465371154099))
+
 ## [1.45.11](https://github.com/mathflow-bit/dockercart/compare/v1.45.10...v1.45.11) (2026-06-20)
 
 ### Bug Fixes
