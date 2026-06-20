@@ -721,7 +721,7 @@ class ControllerExtensionModuleDockercartMulticurrency extends Controller
                             $this->currency->format(
                                 $product["price_raw"],
                                 $currency["code"],
-                                $currency["value"],
+                                1.0,
                             ) .
                             ' <span class="label label-info">' .
                             $currency["code"] .
