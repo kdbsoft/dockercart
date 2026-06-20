@@ -76,5 +76,9 @@ class ModelSettingModification extends Model {
 		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "modification` WHERE `code` = '" . $this->db->escape($code) . "'");
 
 		return $query->row;
-	}	
+	}
+
+	public function editModification($modification_id, $data) {
+		$this->db->query("UPDATE `" . DB_PREFIX . "modification` SET `name` = '" . $this->db->escape($data['name']) . "', `code` = '" . $this->db->escape($data['code']) . "', `author` = '" . $this->db->escape($data['author']) . "', `version` = '" . $this->db->escape($data['version']) . "', `link` = '" . $this->db->escape($data['link']) . "', `xml` = '" . $this->db->escape($data['xml']) . "', `status` = '" . (int)$data['status'] . "' WHERE `modification_id` = '" . (int)$modification_id . "'");
+	}
 }
