@@ -103,8 +103,8 @@ class ModelUserApi extends Model {
 	}
 
 	public function addApiSession($api_id, $session_id, $ip) {
-		$api_ip_query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "api_ip` WHERE ip = '" . $this->db->escape($ip) . "'");
-		
+		$api_ip_query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "api_ip` WHERE api_id = '" . (int)$api_id . "' AND ip = '" . $this->db->escape($ip) . "'");
+
 		if (!$api_ip_query->num_rows) {
 			$this->db->query("INSERT INTO `" . DB_PREFIX . "api_ip` SET api_id = '" . (int)$api_id . "', ip = '" . $this->db->escape($ip) . "'");
 		}

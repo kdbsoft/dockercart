@@ -26,7 +26,8 @@ class ControllerStartupSession extends Controller {
 				
 				if ($ip_allowed) {
 					$this->session->start($this->request->get['api_token']);
-					
+					$this->session->data['api_id'] = $api_id;
+
 					// keep the session alive
 					$this->db->query("UPDATE `" . DB_PREFIX . "api_session` SET `date_modified` = NOW() WHERE `api_session_id` = '" . (int)$api_query->row['api_session_id'] . "'");
 				}
