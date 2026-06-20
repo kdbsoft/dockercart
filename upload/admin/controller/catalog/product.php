@@ -488,6 +488,13 @@ class ControllerCatalogProduct extends Controller {
 
 		$results = $this->model_catalog_product->getProducts($filter_data);
 
+		$this->load->model('localisation/currency');
+		$currency_map = [];
+
+		foreach ($this->model_localisation_currency->getCurrencies() as $currency) {
+			$currency_map[(int)$currency['currency_id']] = $currency['code'];
+		}
+
 		foreach ($results as $result) {
 			if (is_file(DIR_IMAGE . $result['image'])) {
 				$image = $this->model_tool_image->resize($result['image'], 40, 40);
@@ -495,6 +502,7 @@ class ControllerCatalogProduct extends Controller {
 				$image = $this->model_tool_image->resize('no_image.png', 40, 40);
 			}
 
+			$price_info = $this->getPriceDisplayInfo($result['price'], (int)$result['currency_id'], $currency_map);
 			$special = false;
 			$special_raw = 0;
 
@@ -502,7 +510,8 @@ class ControllerCatalogProduct extends Controller {
 
 			foreach ($product_specials  as $product_special) {
 				if (($product_special['date_start'] == '0000-00-00' || strtotime($product_special['date_start']) < time()) && ($product_special['date_end'] == '0000-00-00' || strtotime($product_special['date_end']) > time())) {
-					$special = $this->currency->format($product_special['price'], $this->config->get('config_currency'));
+					$special_price_info = $this->getPriceDisplayInfo($product_special['price'], (int)$result['currency_id'], $currency_map);
+					$special = $special_price_info['formatted'];
 					$special_raw = $product_special['price'];
 
 					break;
@@ -517,8 +526,9 @@ class ControllerCatalogProduct extends Controller {
 				'name_raw'    => $result['name'],
 				'model'       => $result['model'],
 				'model_raw'   => $result['model'],
-				'price'       => $this->currency->format($result['price'], $this->config->get('config_currency')),
+				'price'       => $price_info['formatted'],
 				'price_raw'   => $result['price'],
+				'price_currency_code' => $price_info['code'],
 				'special'     => $special,
 				'special_raw' => $special_raw,
 				'quantity'    => $this->formatQuantityForDisplay($result['quantity']),
@@ -1613,7 +1623,7 @@ class ControllerCatalogProduct extends Controller {
 						$product_currency = $this->model_localisation_currency->getCurrency($product_query->row['currency_id']);
 
 						if ($product_currency && $product_currency['code'] !== $this->config->get('config_currency')) {
-							$json['value_html'] = $this->currency->format($normalized, $product_currency['code'], $product_currency['value']) . ' <span class="label label-info">' . $product_currency['code'] . '</span>';
+							$json['value_html'] = $this->currency->format($normalized, $product_currency['code'], 1.0) . ' <span class="label label-info">' . $product_currency['code'] . '</span>';
 						} else {
 							$json['value_html'] = $this->currency->format($normalized, $this->config->get('config_currency'));
 						}
@@ -1837,5 +1847,25 @@ class ControllerCatalogProduct extends Controller {
 
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
+	}
+
+	private function getPriceDisplayInfo($amount, $currency_id, array $currency_map): array {
+		$currency_id = (int)$currency_id;
+
+		if ($currency_id && isset($currency_map[$currency_id])) {
+			$code = $currency_map[$currency_id];
+
+			if ($code !== $this->config->get('config_currency')) {
+				return [
+					'formatted' => $this->currency->format($amount, $code, 1.0),
+					'code'      => $code,
+				];
+			}
+		}
+
+		return [
+			'formatted' => $this->currency->format($amount, $this->config->get('config_currency')),
+			'code'      => '',
+		];
 	}
 }
