@@ -832,35 +832,37 @@ class ControllerProductProduct extends Controller {
 		$data['text_bundle_save'] = $this->language->get('text_bundle_save');
 		$data['button_bundle_add'] = $this->language->get('button_bundle_add');
 
-			// Skip view tracking for known bots/crawlers
-			$is_bot = false;
-			$user_agent = $this->request->server['HTTP_USER_AGENT'] ?? '';
+		// Skip view tracking for known bots/crawlers
+		$is_bot = false;
+		$user_agent = $this->request->server['HTTP_USER_AGENT'] ?? '';
 
-			if ($user_agent !== '') {
-				$robots = explode("\n", str_replace(["\r\n", "\r"], "\n", trim((string)$this->config->get('config_robots'))));
+		if ($user_agent === '') {
+			$is_bot = true;
+		} else {
+			$robots = explode("\n", str_replace(["\r\n", "\r"], "\n", trim((string)$this->config->get('config_robots'))));
 
-				foreach ($robots as $robot) {
-					$robot = trim($robot);
+			foreach ($robots as $robot) {
+				$robot = trim($robot);
 
-					if ($robot !== '' && mb_stripos($user_agent, $robot) !== false) {
-						$is_bot = true;
-						break;
-					}
+				if ($robot !== '' && mb_stripos($user_agent, $robot) !== false) {
+					$is_bot = true;
+					break;
 				}
 			}
+		}
 
-			if (!$is_bot) {
-				$this->load->model('account/viewed');
-				$this->model_account_viewed->addViewedProduct($product_id);
-				$this->model_catalog_product->updateViewed($product_id);
-			}
+		if (!$is_bot) {
+			$this->load->model('account/viewed');
+			$this->model_account_viewed->addViewedProduct($product_id);
+			$this->model_catalog_product->updateViewed($product_id);
+		}
 
-			$data['column_left'] = $this->load->controller('common/column_left');
-			$data['column_right'] = $this->load->controller('common/column_right');
-			$data['content_top'] = $this->load->controller('common/content_top');
-			$data['content_bottom'] = $this->load->controller('common/content_bottom');
-			$data['footer'] = $this->load->controller('common/footer');
-			$data['header'] = $this->load->controller('common/header');
+		$data['column_left'] = $this->load->controller('common/column_left');
+		$data['column_right'] = $this->load->controller('common/column_right');
+		$data['content_top'] = $this->load->controller('common/content_top');
+		$data['content_bottom'] = $this->load->controller('common/content_bottom');
+		$data['footer'] = $this->load->controller('common/footer');
+		$data['header'] = $this->load->controller('common/header');
 
 			$this->response->setOutput($this->load->view('product/product', $data));
 		} else {
