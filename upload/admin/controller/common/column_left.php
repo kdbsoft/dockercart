@@ -633,7 +633,7 @@ class ControllerCommonColumnLeft extends Controller {
 			}
 
 			// Stats
-			if ($this->user->hasPermission('access', 'report/statistics')) {
+			if ($this->user->hasPermission('access', 'report/report')) {
 				$cache_key = 'sidebar_stats';
 				$cached = $this->cache->get($cache_key);
 
