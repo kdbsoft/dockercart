@@ -1,3 +1,9 @@
+## [1.45.11](https://github.com/mathflow-bit/dockercart/compare/v1.45.10...v1.45.11) (2026-06-20)
+
+### Bug Fixes
+
+* Use stored currency for price display ([9c8c056](https://github.com/mathflow-bit/dockercart/commit/9c8c056ace4aa839ed1f63d7f029b5244c658aa5))
+
 ## [1.45.10](https://github.com/mathflow-bit/dockercart/compare/v1.45.9...v1.45.10) (2026-06-20)
 
 ### Bug Fixes
