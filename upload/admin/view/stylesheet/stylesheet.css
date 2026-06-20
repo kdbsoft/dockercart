@@ -396,6 +396,36 @@ a:hover, a:focus {
     margin-right: 5px;
 }
 
+/* Navs / Pills (vertical sidebar tabs) */
+.nav-pills > li > a {
+    color: #6b7280;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-weight: 500;
+    font-size: 13px;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+
+.nav-pills > li > a:hover {
+    color: #1f2937;
+    background: #f3f4f6;
+}
+
+.nav-pills > li.active > a,
+.nav-pills > li.active > a:hover,
+.nav-pills > li.active > a:focus {
+    font-weight: 600;
+    color: #3b82f6;
+    background: rgba(59, 130, 246, 0.08);
+    border-left: 3px solid #3b82f6;
+    margin-left: -3px;
+}
+
+.nav-pills > li > a > .fa {
+    margin-right: 5px;
+}
+
 .form-control {
     border: 1px solid #d1d5db;
     border-radius: 6px;
