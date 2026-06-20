@@ -1622,8 +1622,11 @@ class ControllerCatalogProduct extends Controller {
 					if ($product_query->num_rows && $product_query->row['currency_id']) {
 						$product_currency = $this->model_localisation_currency->getCurrency($product_query->row['currency_id']);
 
-						if ($product_currency && $product_currency['code'] !== $this->config->get('config_currency')) {
-							$json['value_html'] = $this->currency->format($normalized, $product_currency['code'], 1.0) . ' <span class="label label-info">' . $product_currency['code'] . '</span>';
+						if ($product_currency) {
+							$badge = ($product_currency['code'] !== $this->config->get('config_currency'))
+								? ' <span class="label label-info">' . $product_currency['code'] . '</span>'
+								: '';
+							$json['value_html'] = $this->currency->format($normalized, $product_currency['code'], 1.0) . $badge;
 						} else {
 							$json['value_html'] = $this->currency->format($normalized, $this->config->get('config_currency'));
 						}
@@ -1855,12 +1858,10 @@ class ControllerCatalogProduct extends Controller {
 		if ($currency_id && isset($currency_map[$currency_id])) {
 			$code = $currency_map[$currency_id];
 
-			if ($code !== $this->config->get('config_currency')) {
-				return [
-					'formatted' => $this->currency->format($amount, $code, 1.0),
-					'code'      => $code,
-				];
-			}
+			return [
+				'formatted' => $this->currency->format($amount, $code, 1.0),
+				'code'      => ($code !== $this->config->get('config_currency')) ? $code : '',
+			];
 		}
 
 		return [
