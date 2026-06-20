@@ -1,0 +1,86 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-flask"></i> {{ text_test }} &mdash; {{ source_name|e('html') }}</h3>
+      </div>
+      <div class="panel-body">
+        {% if test_results.status == 'success' %}
+        <div class="alert alert-success"><i class="fa fa-check-circle"></i> {{ text_test_success }}</div>
+        {% elseif test_results.status == 'warning' %}
+        <div class="alert alert-warning"><i class="fa fa-exclamation-triangle"></i> {{ text_test_warning }}</div>
+        {% else %}
+        <div class="alert alert-danger"><i class="fa fa-times-circle"></i> {{ text_test_error }}</div>
+        {% endif %}
+
+        {% if test_results.messages %}
+        <div class="well well-sm" style="font-family: monospace; font-size: 12px; max-height: 400px; overflow-y: auto;">
+          {% for msg in test_results.messages %}
+           <div class="test-msg-{{ msg.type }}">{{ msg.text|e('html') }}</div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if test_results.files %}
+        <table class="table table-bordered table-hover">
+          <thead>
+            <tr>
+              <td>{{ column_file }}</td>
+              <td>{{ column_status }}</td>
+              <td>{{ column_operations }}</td>
+            </tr>
+          </thead>
+          <tbody>
+          {% for file in test_results.files %}
+            <tr>
+              <td style="font-family: monospace; font-size: 12px;">{{ file.key|e('html') }}</td>
+              <td>
+                {% if file.modified %}
+                <span class="label label-success">{{ text_modified }}</span>
+                {% else %}
+                <span class="label label-default">{{ text_unmodified }}</span>
+                {% endif %}
+              </td>
+              <td>
+                {% for op in file.operations %}
+                <div style="font-family: monospace; font-size: 11px; margin-bottom: 4px;">
+                  {% if op.status == 'ok' %}
+                  <span class="label label-success">{{ text_ok }}</span>
+                  {% elseif op.status == 'skip' %}
+                  <span class="label label-warning">{{ text_skipped }}</span>
+                  {% elseif op.status == 'break' %}
+                  <span class="label label-warning">{{ text_break }}</span>
+                  {% elseif op.status == 'abort' %}
+                  <span class="label label-danger">{{ text_abort }}</span>
+                  {% elseif op.status == 'error' %}
+                  <span class="label label-danger">{{ text_error }}</span>
+                  {% endif %}
+                  <span class="text-muted">&nbsp;{{ op.search|default('')|e('html') }}</span>
+                  {% if op.text %}<br/><span class="text-danger">{{ op.text|e('html') }}</span>{% endif %}
+                </div>
+                {% endfor %}
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{{ footer }}
