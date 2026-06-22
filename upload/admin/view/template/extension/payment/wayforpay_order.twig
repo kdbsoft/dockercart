@@ -1,0 +1,21 @@
+<h2>{{ text_order_info }}</h2>
+<table class="table table-striped table-bordered">
+  {% if wayforpay_order %}
+  <tr>
+    <td>{{ text_payment_status }}</td>
+    <td>{{ wayforpay_order.payment_status }}</td>
+  </tr>
+  <tr>
+    <td>{{ text_date_added }}</td>
+    <td>{{ wayforpay_order.date_added }}</td>
+  </tr>
+  <tr>
+    <td>{{ text_date_modified }}</td>
+    <td>{{ wayforpay_order.date_modified }}</td>
+  </tr>
+  {% else %}
+  <tr>
+    <td colspan="2">{{ text_no_payment }}</td>
+  </tr>
+  {% endif %}
+</table>

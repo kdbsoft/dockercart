@@ -1,0 +1,33 @@
+<form action="{{ action }}" method="post" accept-charset="utf-8" id="wayforpay-form">
+  <input type="hidden" name="merchantAccount" value="{{ merchantAccount }}">
+  <input type="hidden" name="merchantDomainName" value="{{ merchantDomainName }}">
+  <input type="hidden" name="merchantSignature" value="{{ merchantSignature }}">
+  <input type="hidden" name="merchantAuthType" value="SimpleSignature">
+  <input type="hidden" name="merchantTransactionSecureType" value="AUTO">
+  <input type="hidden" name="apiVersion" value="2">
+  <input type="hidden" name="language" value="{{ language }}">
+  <input type="hidden" name="orderReference" value="{{ orderReference }}">
+  <input type="hidden" name="orderDate" value="{{ orderDate }}">
+  <input type="hidden" name="amount" value="{{ amount }}">
+  <input type="hidden" name="currency" value="{{ currency }}">
+  <input type="hidden" name="serviceUrl" value="{{ serviceUrl }}">
+  <input type="hidden" name="returnUrl" value="{{ returnUrl }}">
+  <input type="hidden" name="clientFirstName" value="{{ clientFirstName }}">
+  <input type="hidden" name="clientLastName" value="{{ clientLastName }}">
+  <input type="hidden" name="clientEmail" value="{{ clientEmail }}">
+  <input type="hidden" name="clientPhone" value="{{ clientPhone }}">
+  <input type="hidden" name="clientCity" value="{{ clientCity }}">
+  <input type="hidden" name="clientAddress" value="{{ clientAddress }}">
+  {% for productName in productNames %}
+  <input type="hidden" name="productName[]" value="{{ productName }}">
+  {% endfor %}
+  {% for productPrice in productPrices %}
+  <input type="hidden" name="productPrice[]" value="{{ productPrice }}">
+  {% endfor %}
+  {% for productCount in productCounts %}
+  <input type="hidden" name="productCount[]" value="{{ productCount }}">
+  {% endfor %}
+</form>
+<script>
+  document.getElementById('wayforpay-form').submit();
+</script>
