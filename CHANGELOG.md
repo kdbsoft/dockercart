@@ -1,3 +1,10 @@
+## [1.47.2](https://github.com/mathflow-bit/dockercart/compare/v1.47.1...v1.47.2) (2026-06-22)
+
+### Bug Fixes
+
+* quickfix ([6ca2b1c](https://github.com/mathflow-bit/dockercart/commit/6ca2b1c3cc91722f537165f721f95df8790d2229))
+* use number_format for WayForPay amounts ([2bc6ee6](https://github.com/mathflow-bit/dockercart/commit/2bc6ee6b807a14b79637f4ea13f8357a308e373e))
+
 ## [1.47.1](https://github.com/mathflow-bit/dockercart/compare/v1.47.0...v1.47.1) (2026-06-22)
 
 ### Bug Fixes
