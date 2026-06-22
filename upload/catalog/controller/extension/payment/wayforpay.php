@@ -57,13 +57,13 @@ class ControllerExtensionPaymentWayforpay extends Controller {
 
 		foreach ($order_products as $product) {
 			$productNames[] = $product['name'];
-			$productPrices[] = $this->currency->format($product['price'], $order_info['currency_code'], $order_info['currency_value'], false);
-			$productCounts[] = $product['quantity'];
+			$productPrices[] = number_format((float)$product['price'], 2, '.', '');
+			$productCounts[] = (int)$product['quantity'];
 		}
 
 		if (empty($productNames)) {
 			$productNames[] = 'Order #' . $order_id;
-			$productPrices[] = $this->currency->format($order_info['total'], $order_info['currency_code'], $order_info['currency_value'], false);
+			$productPrices[] = number_format((float)$order_info['total'], 2, '.', '');
 			$productCounts[] = 1;
 		}
 
@@ -74,7 +74,7 @@ class ControllerExtensionPaymentWayforpay extends Controller {
 		$merchantDomainName = parse_url($this->config->get('config_url'), PHP_URL_HOST);
 		$orderReference = (string)$order_id;
 		$orderDate = strtotime($order_info['date_added']);
-		$amount = $this->currency->format($order_info['total'], $order_info['currency_code'], $order_info['currency_value'], false);
+		$amount = number_format((float)$order_info['total'], 2, '.', '');
 		$currency = $order_info['currency_code'];
 
 		$signatureString = $merchantAccount . ';' . $merchantDomainName . ';' . $orderReference . ';' . $orderDate . ';' . $amount . ';' . $currency . ';';
