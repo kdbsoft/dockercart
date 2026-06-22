@@ -81,6 +81,23 @@ class ControllerExtensionPaymentWayforpay extends Controller {
 		$signatureString .= implode(';', $productNames) . ';' . implode(';', $productCounts) . ';' . implode(';', $productPrices);
 		$merchantSignature = hash_hmac('md5', $signatureString, $secretKey);
 
+		if ($this->config->get('payment_wayforpay_debug')) {
+			$log = new \Log('wayforpay.log');
+			$log->write('--- PAY SIGNATURE DEBUG ---');
+			$log->write('merchantAccount: ' . $merchantAccount);
+			$log->write('merchantDomainName: ' . $merchantDomainName);
+			$log->write('orderReference: ' . $orderReference);
+			$log->write('orderDate: ' . $orderDate);
+			$log->write('amount: ' . $amount);
+			$log->write('currency: ' . $currency);
+			$log->write('productNames: ' . print_r($productNames, true));
+			$log->write('productCounts: ' . print_r($productCounts, true));
+			$log->write('productPrices: ' . print_r($productPrices, true));
+			$log->write('signatureString: ' . $signatureString);
+			$log->write('merchantSignature: ' . $merchantSignature);
+			$log->write('--- END ---');
+		}
+
 		$data['action'] = 'https://secure.wayforpay.com/pay';
 		$data['merchantAccount'] = $merchantAccount;
 		$data['merchantDomainName'] = $merchantDomainName;
