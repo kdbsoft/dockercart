@@ -179,6 +179,14 @@ class ControllerExtensionPaymentWayforpay extends Controller {
 
 	public function callback() {
 		$json = file_get_contents('php://input');
+
+		if ($this->config->get('payment_wayforpay_debug')) {
+			$log = new \Log('wayforpay.log');
+			$log->write('--- CALLBACK RECEIVED ---');
+			$log->write('Method: ' . ($_SERVER['REQUEST_METHOD'] ?? 'N/A'));
+			$log->write('Raw input: ' . $json);
+		}
+
 		$data = json_decode($json, true);
 
 		if (!$data || !isset($data['merchantAccount']) || !isset($data['orderReference']) || !isset($data['merchantSignature'])) {
@@ -201,6 +209,12 @@ class ControllerExtensionPaymentWayforpay extends Controller {
 		$calculatedSignature = hash_hmac('md5', $signatureString, $secretKey);
 
 		if (!hash_equals($calculatedSignature, $data['merchantSignature'])) {
+			if ($this->config->get('payment_wayforpay_debug')) {
+				$log = new \Log('wayforpay.log');
+				$log->write('CALLBACK SIGNATURE MISMATCH');
+				$log->write('calculated: ' . $calculatedSignature);
+				$log->write('received: ' . $data['merchantSignature']);
+			}
 			$this->response->addHeader('HTTP/1.1 400 Bad Request');
 
 			return;
@@ -244,6 +258,11 @@ class ControllerExtensionPaymentWayforpay extends Controller {
 			'payment_status' => $new_status,
 			'callback_data'  => $json
 		));
+
+		if ($this->config->get('payment_wayforpay_debug')) {
+			$log = new \Log('wayforpay.log');
+			$log->write('CALLBACK PROCESSED: order_id=' . $order_id . ' status=' . $transactionStatus . ' new_status=' . $new_status);
+		}
 
 		$time = time();
 		$status = 'accept';
