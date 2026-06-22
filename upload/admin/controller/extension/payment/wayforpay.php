@@ -120,6 +120,12 @@ class ControllerExtensionPaymentWayforpay extends Controller {
 			$data['payment_wayforpay_awaiting_status_id'] = $this->config->get('payment_wayforpay_awaiting_status_id');
 		}
 
+		if (isset($this->request->post['payment_wayforpay_debug'])) {
+			$data['payment_wayforpay_debug'] = $this->request->post['payment_wayforpay_debug'];
+		} else {
+			$data['payment_wayforpay_debug'] = $this->config->get('payment_wayforpay_debug');
+		}
+
 		$this->load->model('localisation/order_status');
 
 		$data['order_statuses'] = $this->model_localisation_order_status->getOrderStatuses();

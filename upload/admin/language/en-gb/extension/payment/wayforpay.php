@@ -17,6 +17,7 @@ $_['entry_refunded_status']      = 'Refunded Status';
 $_['entry_geo_zone']             = 'Geo Zone';
 $_['entry_status']               = 'Status';
 $_['entry_awaiting_status']      = 'Awaiting Payment Status';
+$_['entry_debug']                = 'Debug Logging';
 $_['entry_sort_order']           = 'Sort Order';
 
 $_['help_total']                 = 'The checkout total the order must reach before this payment method becomes active.';
