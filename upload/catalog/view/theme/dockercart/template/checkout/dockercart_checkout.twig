@@ -2344,6 +2344,23 @@ document.addEventListener('DOMContentLoaded', () => {
           if (checkedMethod) {
             log('Payment method pre-selected, updating progress');
             updateProgressIntelligent();
+
+            // Auto-load payment extension for pre-selected method on initial load
+            ajax(ajaxUrls.payment_method, { method: 'POST', data: { payment_method: checkedMethod.value } })
+              .then(json => ajax(ajaxUrls.payment_extension, { method: 'GET' }))
+              .then(json => {
+                if (json && json.payment) {
+                  const extContainer = $('#payment-extension-container');
+                  if (extContainer) {
+                    extContainer.innerHTML = json.payment;
+                    setupPaymentButtonHandler(extContainer);
+                    log('Payment extension auto-loaded for pre-selected method');
+                  }
+                }
+              })
+              .catch(error => {
+                log('Error auto-loading payment extension', error);
+              });
           }
         } else {
           container.innerHTML = '<div class="text-sm text-text-secondary py-4">No payment methods available</div>';
