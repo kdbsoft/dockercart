@@ -1,3 +1,13 @@
+## [1.47.0](https://github.com/mathflow-bit/dockercart/compare/v1.46.0...v1.47.0) (2026-06-22)
+
+### Features
+
+* Add WayForPay payment module ([9de409c](https://github.com/mathflow-bit/dockercart/commit/9de409c9a53f6d46cf39b2a5a9df04bf509f9c69))
+
+### Bug Fixes
+
+* suppress mail() warnings ([238cc9f](https://github.com/mathflow-bit/dockercart/commit/238cc9f7d9d6a949c30d857a3b8339d655ba73b0))
+
 ## [1.46.0](https://github.com/mathflow-bit/dockercart/compare/v1.45.12...v1.46.0) (2026-06-20)
 
 ### Features
