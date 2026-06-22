@@ -58,7 +58,7 @@ class ControllerExtensionPaymentWayforpay extends Controller {
 		foreach ($order_products as $product) {
 			$productNames[] = $product['name'];
 			$productPrices[] = number_format((float)$product['price'], 2, '.', '');
-			$productCounts[] = (int)$product['quantity'];
+			$productCounts[] = (float)$product['quantity'];
 		}
 
 		if (empty($productNames)) {
