@@ -1,3 +1,14 @@
+## [1.46.0](https://github.com/mathflow-bit/dockercart/compare/v1.45.12...v1.46.0) (2026-06-20)
+
+### Features
+
+* add modification add/edit form and test ([aa1bfb4](https://github.com/mathflow-bit/dockercart/commit/aa1bfb4d60c8cad3084ee420bd0b381b0b7464a7))
+
+### Bug Fixes
+
+* prevent double conversion in multicurrency ([f242036](https://github.com/mathflow-bit/dockercart/commit/f242036af1781f0e0ee5d1d59a94074eb79d2aac))
+* skip currency conversion when formatting special price ([7a199fc](https://github.com/mathflow-bit/dockercart/commit/7a199fccb2f98977a38a0558e7c62a9fc4d268a4))
+
 ## [1.45.12](https://github.com/mathflow-bit/dockercart/compare/v1.45.11...v1.45.12) (2026-06-20)
 
 ### Bug Fixes
