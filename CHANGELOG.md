@@ -1,3 +1,9 @@
+## [1.47.1](https://github.com/mathflow-bit/dockercart/compare/v1.47.0...v1.47.1) (2026-06-22)
+
+### Bug Fixes
+
+* Load payment extension for pre-selected ([2f65516](https://github.com/mathflow-bit/dockercart/commit/2f65516590a66e458c7a6b5bbb8ef39941a86135))
+
 ## [1.47.0](https://github.com/mathflow-bit/dockercart/compare/v1.46.0...v1.47.0) (2026-06-22)
 
 ### Features
