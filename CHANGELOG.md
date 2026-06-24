@@ -1,3 +1,9 @@
+## [1.47.5](https://github.com/mathflow-bit/dockercart/compare/v1.47.4...v1.47.5) (2026-06-24)
+
+### Bug Fixes
+
+* add preorder label for zero-stock products ([f3a6572](https://github.com/mathflow-bit/dockercart/commit/f3a6572e61b88b0a6477c9e5e7864d58430e33c8))
+
 ## [1.47.4](https://github.com/mathflow-bit/dockercart/compare/v1.47.3...v1.47.4) (2026-06-24)
 
 ### Bug Fixes
