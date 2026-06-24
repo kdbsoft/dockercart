@@ -352,7 +352,8 @@ class ControllerProductProduct extends Controller {
 				$data['stock'] = $this->language->get('text_instock');
 			}
 
-			$data['is_in_stock'] = ((int)$product_info['quantity'] > 0);
+			$data['is_in_stock'] = ((int)$product_info['quantity'] > 0) || !empty($product_info['preorder']);
+			$data['is_preorder'] = empty($product_info['quantity']) && !empty($product_info['preorder']);
 
 			$this->load->model('tool/image');
 
@@ -730,7 +731,8 @@ class ControllerProductProduct extends Controller {
 					'minimum'     => $this->formatQuantityValue(($result['minimum'] > 0 ? $result['minimum'] : 1)),
 					'quantity_step' => (isset($result['quantity_step']) && (float)$result['quantity_step'] > 0) ? $result['quantity_step'] : 1,
 					'stock'       => $stock,
-					'is_in_stock' => ($stock_quantity > 0),
+					'is_in_stock' => ($stock_quantity > 0) || !empty($result['preorder']),
+					'is_preorder' => empty($stock_quantity) && !empty($result['preorder']),
 					'rating'      => $rating,
 					'reviews'     => isset($result['reviews']) ? (int)$result['reviews'] : 0,
 					'in_wishlist' => in_array((int)$result['product_id'], $wishlist_ids) ? 1 : 0,

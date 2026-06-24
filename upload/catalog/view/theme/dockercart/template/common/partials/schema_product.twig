@@ -15,7 +15,7 @@
     "url": "{{ schema_product_url is defined and schema_product_url ? schema_product_url|e('js') : '' }}",
     "priceCurrency": "{{ currency_code is defined and currency_code ? currency_code|e('js') : 'USD' }}",
     "price": "{{ dc_base_price_value|default(0)|number_format(2, '.', '') }}",
-    "availability": "https://schema.org/{% if is_in_stock is defined and is_in_stock %}InStock{% else %}OutOfStock{% endif %}",
+    "availability": "https://schema.org/{% if is_preorder is defined and is_preorder %}PreOrder{% elseif is_in_stock is defined and is_in_stock %}InStock{% else %}OutOfStock{% endif %}",
     "itemCondition": "https://schema.org/NewCondition"
   }{% endif %}{% if rating is defined and rating and review_count is defined and review_count > 0 %},
   "aggregateRating": {
