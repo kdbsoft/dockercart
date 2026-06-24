@@ -1,3 +1,10 @@
+## [1.47.4](https://github.com/mathflow-bit/dockercart/compare/v1.47.3...v1.47.4) (2026-06-24)
+
+### Bug Fixes
+
+* block out-of-stock product additions ([25c4aff](https://github.com/mathflow-bit/dockercart/commit/25c4affbf066bec3482306e93746c99754965f35))
+* **filemanager:** refine upload error handling ([956ef75](https://github.com/mathflow-bit/dockercart/commit/956ef75d85ce3e33e6d0332c7cc652d7a5a1732c))
+
 ## [1.47.3](https://github.com/mathflow-bit/dockercart/compare/v1.47.2...v1.47.3) (2026-06-22)
 
 ### Bug Fixes
