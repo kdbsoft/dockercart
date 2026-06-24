@@ -41,7 +41,7 @@
     </div>
     {% endif %}
     {% if product.stock is defined and product.stock %}
-    <div class="mb-2 text-[11px] font-medium {% if product.is_in_stock %}text-emerald-600{% else %}text-red-500{% endif %} flex items-center gap-1">
+    <div class="mb-2 text-[11px] font-medium {% if product.is_preorder is defined and product.is_preorder %}text-amber-600{% elseif product.is_in_stock %}text-emerald-600{% else %}text-red-500{% endif %} flex items-center gap-1">
       {% if product.is_in_stock %}<i data-lucide="check" class="w-3.5 h-3.5"></i>{% endif %}
       <span>{{ product.stock }}</span>
     </div>
