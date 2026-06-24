@@ -437,7 +437,8 @@ class ControllerProductManufacturer extends Controller {
 					'rating'      => $result['rating'],
 					'reviews'     => isset($result['reviews']) ? $result['reviews'] : 0,
 					'stock'       => $stock,
-					'is_in_stock' => ($stock_quantity > 0),
+					'is_in_stock' => ($stock_quantity > 0) || !empty($result['preorder']),
+					'is_preorder' => empty($stock_quantity) && !empty($result['preorder']),
 					'has_gift'    => !empty($result['has_gift']),
 					'call_for_price' => !empty($result['call_for_price']),
 					'href'        => $this->url->link('product/product', 'manufacturer_id=' . $result['manufacturer_id'] . '&product_id=' . $result['product_id'] . $url)
@@ -766,7 +767,8 @@ class ControllerProductManufacturer extends Controller {
 				'rating'      => (int)$result['rating'],
 				'reviews'     => isset($result['reviews']) ? (int)$result['reviews'] : 0,
 				'stock'       => $stock,
-				'is_in_stock' => ($stock_quantity > 0),
+				'is_in_stock' => ($stock_quantity > 0) || !empty($result['preorder']),
+				'is_preorder' => empty($stock_quantity) && !empty($result['preorder']),
 				'in_wishlist' => in_array((int)$result['product_id'], $wishlist_ids) ? 1 : 0,
 				'has_gift'    => !empty($result['has_gift']),
 				'href'        => $this->url->link('product/product', 'manufacturer_id=' . $result['manufacturer_id'] . '&product_id=' . $result['product_id'])
