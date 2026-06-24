@@ -1,3 +1,9 @@
+## [1.47.6](https://github.com/mathflow-bit/dockercart/compare/v1.47.5...v1.47.6) (2026-06-24)
+
+### Bug Fixes
+
+* add preorder support to product listings and schema ([31901bf](https://github.com/mathflow-bit/dockercart/commit/31901bf0e1c244120efb3d5d764d3f8d6bcb33e1))
+
 ## [1.47.5](https://github.com/mathflow-bit/dockercart/compare/v1.47.4...v1.47.5) (2026-06-24)
 
 ### Bug Fixes
