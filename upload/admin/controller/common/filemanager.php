@@ -211,6 +211,7 @@ class ControllerCommonFileManager extends Controller {
 
 	public function upload() {
 		$this->load->language('common/filemanager');
+		$this->load->language('default');
 
 		$json = array();
 
@@ -298,8 +299,12 @@ class ControllerCommonFileManager extends Controller {
 				}
 
 				if (!$json) {
-					move_uploaded_file($file['tmp_name'], $directory . '/' . $filename);
+					if (!move_uploaded_file($file['tmp_name'], $directory . '/' . $filename)) {
+						$json['error'] = $this->language->get('error_upload');
+					}
+				}
 
+				if (!$json) {
 					// Optimize image if it's an image file (skip video)
 					$ext = utf8_strtolower(utf8_substr(strrchr($filename, '.'), 1));
 					if (in_array($ext, array('jpg', 'jpeg', 'gif', 'png', 'webp'))) {
@@ -307,7 +312,7 @@ class ControllerCommonFileManager extends Controller {
 						if ($max_dimension <= 0) {
 							$max_dimension = defined('IMAGE_MAX_DIMENSION') ? (int)IMAGE_MAX_DIMENSION : 2560;
 						}
-						Image::optimize($directory . '/' . $filename, $max_dimension);
+						@Image::optimize($directory . '/' . $filename, $max_dimension);
 
 						// Proactive cleanup: remove all cached variants of this image
 						$relative_dir = substr($directory, strlen(DIR_IMAGE));
