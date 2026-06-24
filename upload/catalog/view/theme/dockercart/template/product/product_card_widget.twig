@@ -61,7 +61,7 @@
           <span class="text-base sm:text-lg font-extrabold text-gray-900">{{ product.price }}</span>
         {% endif %}
       </div>
-      {% if not cfp %}
+      {% if not cfp and product.is_in_stock %}
       <button class="add-to-cart-btn flex-shrink-0 text-blue-600 hover:bg-blue-50 hover:text-blue-700 p-1.5 rounded-lg transition" onclick="cart.add('{{ product.product_id }}', '{{ product.minimum|default(1) }}');" aria-label="{{ button_cart }}">
         <i data-lucide="shopping-cart" class="w-5 h-5"></i>
       </button>

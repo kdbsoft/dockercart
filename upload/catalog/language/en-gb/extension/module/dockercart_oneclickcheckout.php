@@ -40,6 +40,7 @@ $_['error_required']   = '%s is required!';
 $_['error_email']      = 'E-Mail Address does not appear to be valid!';
 $_['error_telephone']  = 'Telephone number is invalid!';
 $_['error_product']    = 'Product not found!';
+$_['error_stock']      = 'Products marked with *** are not available in the desired quantity or not in stock!';
 $_['error_order_create'] = 'Error creating order. Please try again.';
 $_['error_module_disabled'] = 'Module is disabled.';
 $_['error_license_invalid'] = 'Module is not activated. Please contact administrator.';

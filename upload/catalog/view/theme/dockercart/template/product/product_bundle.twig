@@ -45,10 +45,16 @@
           {% endif %}
           </div>
 
+          {% if bundle.all_in_stock %}
           <button type="button" onclick="cart.addBundle({{ bundle.bundle_id }})"
             class="w-full sm:w-auto px-4 py-2.5 sm:py-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold rounded-lg transition text-sm flex items-center justify-center gap-2 flex-shrink-0">
             <i data-lucide="shopping-cart" class="w-4 h-4"></i> {{ button_bundle_add }}
           </button>
+          {% else %}
+          <span class="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-100 text-gray-500 font-semibold rounded-lg text-sm">
+            <i data-lucide="x-circle" class="w-4 h-4"></i>{{ text_out_of_stock|default('Out of Stock') }}
+          </span>
+          {% endif %}
         </div>
       </div>
     </div>
