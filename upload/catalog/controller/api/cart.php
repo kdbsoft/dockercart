@@ -17,10 +17,15 @@ class ControllerApiCart extends Controller {
 					$product_id = isset($product['product_id']) ? (int)$product['product_id'] : 0;
 					$product_info = $this->model_catalog_product->getProduct($product_id);
 
-					if (!$product_info) {
-						$json['error']['store'] = $this->language->get('error_store');
-						continue;
-					}
+				if (!$product_info) {
+					$json['error']['store'] = $this->language->get('error_store');
+					continue;
+				}
+
+				if ((float)$product_info['quantity'] <= 0 && empty($product_info['preorder']) && !$this->config->get('config_stock_checkout')) {
+					$json['error']['stock'] = $this->language->get('error_stock');
+					continue;
+				}
 
 					$quantity = isset($product['quantity'])
 						? $this->normalizeQuantity($product['quantity'], $this->getMinimumQuantity($product_info))
@@ -61,6 +66,10 @@ class ControllerApiCart extends Controller {
 				$product_info = $this->model_catalog_product->getProduct($this->request->post['product_id']);
 
 				if ($product_info) {
+					if ((float)$product_info['quantity'] <= 0 && empty($product_info['preorder']) && !$this->config->get('config_stock_checkout')) {
+						$json['error']['stock'] = $this->language->get('error_stock');
+					} else {
+
 					if (isset($this->request->post['quantity'])) {
 						$quantity = $this->normalizeQuantity($this->request->post['quantity'], $this->getMinimumQuantity($product_info));
 					} else {
@@ -92,6 +101,7 @@ class ControllerApiCart extends Controller {
 						unset($this->session->data['shipping_methods']);
 						unset($this->session->data['payment_method']);
 						unset($this->session->data['payment_methods']);
+					}
 					}
 				} else {
 					$json['error']['store'] = $this->language->get('error_store');

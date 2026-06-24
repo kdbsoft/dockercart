@@ -809,6 +809,15 @@ class ControllerProductProduct extends Controller {
 						$discount_text = $this->currency->format($discount_value, $this->session->data['currency']);
 					}
 
+					$all_in_stock = true;
+					foreach ($bundle_products as $bp) {
+						$bp_stock_info = $this->model_catalog_product->getProduct($bp['product_id']);
+						if ($bp_stock_info && (float)$bp_stock_info['quantity'] <= 0 && empty($bp_stock_info['preorder'])) {
+							$all_in_stock = false;
+							break;
+						}
+					}
+
 					$bundles[] = array(
 						'bundle_id'                 => $bundle['bundle_id'],
 						'name'                      => $bundle['name'],
@@ -821,6 +830,7 @@ class ControllerProductProduct extends Controller {
 						'discount_type'             => $bundle['discount_type'],
 						'discount_value'            => $discount_value,
 						'discount_text'             => $discount_text,
+						'all_in_stock'              => $all_in_stock,
 					);
 				}
 			}

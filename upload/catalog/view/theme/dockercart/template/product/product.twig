@@ -260,6 +260,7 @@
           <!-- Qty + Cart + Wishlist -->
           <div class="mt-6 flex flex-wrap items-center gap-3">
             {% if not show_call_for_price %}
+            {% if is_in_stock %}
             <div class="inline-flex items-center border border-gray-200 rounded-xl overflow-hidden flex-shrink-0">
               <button type="button" class="w-10 h-10 text-lg font-bold text-gray-500 hover:bg-gray-50 transition" onclick="dcChangeQty(-1)">−</button>
               <input type="number" name="quantity" value="{{ minimum }}" id="input-quantity" min="{{ minimum }}" step="{{ quantity_step|default(1) }}" oninput="dcUpdateSubtotal()" class="w-16 text-center text-sm font-semibold border-0 outline-none py-2 bg-transparent" />
@@ -270,6 +271,11 @@
               class="flex-1 min-w-0 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl transition text-sm shadow-md shadow-blue-200 whitespace-nowrap flex items-center justify-center gap-2">
               <i data-lucide="shopping-cart" class="w-5 h-5"></i>{{ button_cart }}
             </button>
+            {% else %}
+            <span class="inline-flex items-center gap-2 px-4 py-3 bg-gray-100 text-gray-500 font-semibold rounded-xl text-sm">
+              <i data-lucide="x-circle" class="w-5 h-5"></i>{{ text_out_of_stock }}
+            </span>
+            {% endif %}
             {% endif %}
 
             <div class="flex items-center gap-3 w-full sm:w-auto sm:flex-shrink-0">

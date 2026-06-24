@@ -134,9 +134,13 @@
               <td class="px-4 py-3 bg-gray-50"></td>
               {% for product in products %}
               <td class="px-4 py-3 text-center">
+                {% if product.is_in_stock %}
                 <button type="button" onclick="cart.add('{{ product.product_id }}', '{{ product.minimum|default(1) }}');" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition">
                   {{ button_cart }}
                 </button>
+                {% else %}
+                <span class="text-xs text-gray-400">{{ text_out_of_stock|default('Out of Stock') }}</span>
+                {% endif %}
               </td>
               {% endfor %}
             </tr>

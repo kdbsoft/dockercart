@@ -2098,11 +2098,8 @@ class ControllerCheckoutDockercartCheckout extends Controller
         $data = $this->getJsonInput();
         $json = [];
 
-        // Validate cart
-        if (
-            !$this->cart->hasProducts() &&
-            empty($this->session->data["vouchers"])
-        ) {
+        // Validate cart has products and has stock.
+        if ((!$this->cart->hasProducts() && empty($this->session->data["vouchers"])) || (!$this->cart->hasStock() && !$this->config->get("config_stock_checkout"))) {
             $json["redirect"] = $this->url->link("checkout/cart");
         }
 
