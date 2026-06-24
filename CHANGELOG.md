@@ -1,3 +1,9 @@
+## [1.47.3](https://github.com/mathflow-bit/dockercart/compare/v1.47.2...v1.47.3) (2026-06-22)
+
+### Bug Fixes
+
+* add debug logging to WayforPay callback handler ([6d129e7](https://github.com/mathflow-bit/dockercart/commit/6d129e78b4ecdc9c929bdaab04f34459d50c79ef))
+
 ## [1.47.2](https://github.com/mathflow-bit/dockercart/compare/v1.47.1...v1.47.2) (2026-06-22)
 
 ### Bug Fixes
