@@ -158,6 +158,7 @@ $_["error_customer"] = "Please enter your details first!";
 $_["error_shipping_address"] = "Please enter your shipping address!";
 $_["error_payment_address"] = "Please enter your billing address!";
 $_["error_general"] = "An error occurred. Please try again.";
+$_["error_stock"] = "Products marked with *** are not available in the desired quantity or not in stock!";
 
 // Success
 $_["text_order_success"] = "Your order has been successfully processed!";

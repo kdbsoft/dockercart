@@ -372,6 +372,10 @@ class ControllerCheckoutCart extends Controller {
 				$json['error']['call_for_price'] = $this->language->get('error_call_for_price');
 			}
 
+			if ((float)$product_info['quantity'] <= 0 && empty($product_info['preorder']) && !$this->config->get('config_stock_checkout')) {
+				$json['error']['stock'] = $this->language->get('error_stock');
+			}
+
 			$default_quantity = $this->getMinimumQuantity($product_info);
 
 			if (isset($this->request->post['quantity'])) {
@@ -487,14 +491,19 @@ class ControllerCheckoutCart extends Controller {
 					foreach ($bundle_products as $bp) {
 						$product_info = $this->model_catalog_product->getProduct($bp['product_id']);
 
-						if ($product_info) {
-							if (!empty($product_info['call_for_price'])) {
-								$json['error'] = $this->language->get('error_call_for_price');
-								break;
-							}
+					if ($product_info) {
+						if (!empty($product_info['call_for_price'])) {
+							$json['error'] = $this->language->get('error_call_for_price');
+							break;
+						}
 
-							$default_quantity = $this->getMinimumQuantity($product_info);
-							$this->cart->add($bp['product_id'], $default_quantity, array(), 0);
+						if ((float)$product_info['quantity'] <= 0 && empty($product_info['preorder']) && !$this->config->get('config_stock_checkout')) {
+							$json['error'] = $this->language->get('error_stock');
+							break;
+						}
+
+						$default_quantity = $this->getMinimumQuantity($product_info);
+						$this->cart->add($bp['product_id'], $default_quantity, array(), 0);
 						}
 					}
 

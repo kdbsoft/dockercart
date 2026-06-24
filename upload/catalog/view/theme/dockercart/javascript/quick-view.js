@@ -241,12 +241,18 @@
         }
       } else {
         if (priceWrap) priceWrap.style.display = '';
-        if (addBtn) addBtn.classList.remove('hidden');
+        if (addBtn) {
+          if (isInStock) {
+            addBtn.classList.remove('hidden');
+          } else {
+            addBtn.classList.add('hidden');
+          }
+        }
         if (callBtn) callBtn.classList.add('hidden');
       }
 
       // Wire add to cart button
-      if (addBtn && !isCfp) {
+      if (addBtn && !isCfp && isInStock) {
         addBtn.onclick = () => {
           if (typeof cart !== 'undefined' && cart.add) {
             cart.add(productId, minimum);

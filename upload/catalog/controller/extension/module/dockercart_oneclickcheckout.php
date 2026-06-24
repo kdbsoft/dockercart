@@ -369,6 +369,8 @@ class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
 
             if (!$product_info) {
                 $json['error']['product'] = $this->language->get('error_product');
+            } elseif ((float)$product_info['quantity'] <= 0 && empty($product_info['preorder']) && !$this->config->get('config_stock_checkout')) {
+                $json['error']['product'] = $this->language->get('error_stock');
             } else {
                 // Create order
                 $order_id = $this->createOrder($product_info);
@@ -640,6 +642,11 @@ class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
             if ($captcha) {
                 $json['error']['captcha'] = $captcha;
             }
+        }
+
+        // Validate cart has stock
+        if (!isset($json['error']) && !$this->cart->hasStock() && !$this->config->get('config_stock_checkout')) {
+            $json['error']['cart'] = $this->language->get('error_stock');
         }
 
         if (!isset($json['error'])) {
