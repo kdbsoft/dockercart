@@ -394,24 +394,26 @@ class ControllerProductSearch extends Controller {
 					$rating = false;
 				}
 
-				$stock_quantity = (int)($result['quantity'] ?? 0);
+			$stock_quantity = (int)($result['quantity'] ?? 0);
 
-				if ($stock_quantity <= 0) {
-					$stock = !empty($result['stock_status']) ? $result['stock_status'] : '';
-				} elseif ($this->config->get('config_stock_display')) {
-					$stock = $stock_quantity;
-				} else {
-					$stock = $this->language->get('text_instock');
-				}
+			if ($stock_quantity <= 0) {
+				$stock = !empty($result['preorder'])
+					? $this->language->get('text_preorder')
+					: $this->language->get('text_out_of_stock');
+			} elseif ($this->config->get('config_stock_display')) {
+				$stock = $stock_quantity;
+			} else {
+				$stock = $this->language->get('text_instock');
+			}
 
-				if ($stock === 'text_instock') {
-					$stock = 'In Stock';
-				}
+			if ($stock === 'text_instock') {
+				$stock = 'In Stock';
+			}
 
-				$data['products'][] = array(
-					'product_id'  => $result['product_id'],
-					'thumb'       => $image,
-					'name'        => $result['name'],
+			$data['products'][] = array(
+				'product_id'  => $result['product_id'],
+				'thumb'       => $image,
+				'name'        => $result['name'],
 					'model'       => $result['model'],
 					'description' => utf8_substr(trim(strip_tags(html_entity_decode($result['description'], ENT_QUOTES, 'UTF-8'))), 0, $this->config->get('theme_' . $this->config->get('config_theme') . '_product_description_length')) . '..',
 					'price'       => $price,
