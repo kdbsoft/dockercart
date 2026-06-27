@@ -23,7 +23,7 @@ if [ ! -f .env ]; then
 fi
 
 # Load environment variables
-export $(cat .env | grep -E "SSL_DOMAIN|SSL_EMAIL" | xargs)
+set -a; . ./.env; set +a
 
 if [ -z "$SSL_DOMAIN" ] || [ -z "$SSL_EMAIL" ]; then
     echo "❌ Error: SSL_DOMAIN or SSL_EMAIL not set in .env"
@@ -41,6 +41,7 @@ echo ""
 
 # Create necessary directories
 mkdir -p docker/letsencrypt/{certs,keys,www}
+chmod 700 docker/letsencrypt/keys
 echo "✅ Created directories"
 
 # Check if certificate already exists
@@ -106,7 +107,7 @@ if [ -d "$CERT_DIR" ]; then
     cp "$CERT_DIR/fullchain.pem" docker/letsencrypt/certs/cert.pem
     cp "$CERT_DIR/privkey.pem" docker/letsencrypt/keys/key.pem
     chmod 644 docker/letsencrypt/certs/cert.pem
-    chmod 644 docker/letsencrypt/keys/key.pem
+    chmod 600 docker/letsencrypt/keys/key.pem
     echo "✅ Certificates configured"
 else
     echo "❌ Certificate directory not found: $CERT_DIR"
