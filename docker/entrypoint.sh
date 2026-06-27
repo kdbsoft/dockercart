@@ -298,8 +298,8 @@ define('SESSION_ENGINE', $env('SESSION_ENGINE', 'redis'));
 PHP
 
     if [ "$(id -u)" -eq 0 ]; then
-        chown www-data:staff "$root_config" "$admin_config" 2>/dev/null || true
-        chmod 664 "$root_config" "$admin_config" 2>/dev/null || true
+        chown www-data:www-data "$root_config" "$admin_config" 2>/dev/null || true
+        chmod 640 "$root_config" "$admin_config" 2>/dev/null || true
     fi
 }
 
