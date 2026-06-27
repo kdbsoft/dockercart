@@ -122,6 +122,10 @@ check-multicurrency.sh
 # Ensure acme.json (contains private keys) is not committed
 /docker/acme/acme.json
 
+# Ignore generated Let's Encrypt certificates and keys
+/docker/letsencrypt/certs/
+/docker/letsencrypt/keys/
+
 # Ignore Let's Encrypt runtime data (contains private keys and account data)
 /docker/letsencrypt/accounts/
 /docker/letsencrypt/archive/
