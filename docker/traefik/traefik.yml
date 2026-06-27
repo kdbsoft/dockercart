@@ -1,5 +1,5 @@
 api:
-  insecure: true
+  insecure: false
   dashboard: true
   debug: false
 
@@ -20,6 +20,9 @@ entryPoints:
       sanitizePath: false
       tls:
         options: default
+
+  traefik:
+    address: ":8080"
 
 providers:
   docker:
