@@ -1,3 +1,10 @@
+## [1.47.7](https://github.com/mathflow-bit/dockercart/compare/v1.47.6...v1.47.7) (2026-06-27)
+
+### Bug Fixes
+
+* tighten config file ownership and permissions ([e989dbd](https://github.com/mathflow-bit/dockercart/commit/e989dbd3eef1fd61fbe69e54d83cd2c02034ff1a))
+* tighten Let's Encrypt private key permissions ([f1b46e0](https://github.com/mathflow-bit/dockercart/commit/f1b46e008dea82d9737e0c00f5f723cd5d942e60))
+
 ## [1.47.6](https://github.com/mathflow-bit/dockercart/compare/v1.47.5...v1.47.6) (2026-06-24)
 
 ### Bug Fixes
