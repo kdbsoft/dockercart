@@ -151,3 +151,4 @@ backups/
 sitemap.xml
 
 /.cache/
+.omo/
