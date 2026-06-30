@@ -578,12 +578,6 @@ class ControllerSettingSetting extends Controller {
 			$data['config_tax_customer'] = $this->config->get('config_tax_customer');
 		}
 
-		if (isset($this->request->post['config_customer_online'])) {
-			$data['config_customer_online'] = $this->request->post['config_customer_online'];
-		} else {
-			$data['config_customer_online'] = $this->config->get('config_customer_online');
-		}
-
 		if (isset($this->request->post['config_customer_activity'])) {
 			$data['config_customer_activity'] = $this->request->post['config_customer_activity'];
 		} else {

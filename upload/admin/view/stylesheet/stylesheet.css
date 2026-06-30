@@ -1325,10 +1325,6 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
     background: #3b82f6;
 }
 
-.jqvmap-label {
-    z-index: 999;
-}
-
 .alert {
     overflow: auto;
     border: none;
