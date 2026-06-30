@@ -509,7 +509,7 @@ class ControllerProductProduct extends Controller {
 				$product_option_value_data = array();
 
 				foreach ($option['product_option_value'] as $option_value) {
-					if ((($this->config->get('config_customer_price') && $this->customer->isLogged()) || !$this->config->get('config_customer_price')) && (float)$option_value['price']) {
+					if (($this->config->get('config_customer_price') && $this->customer->isLogged()) || !$this->config->get('config_customer_price')) {
 						$price = $this->currency->format($this->tax->calculate($option_value['price'], $product_info['tax_class_id'], $this->config->get('config_tax') ? 'P' : false), $this->session->data['currency']);
 					} else {
 						$price = false;
