@@ -1,4 +1,4 @@
-<form action="{{ action }}" method="post" accept-charset="utf-8" id="wayforpay-form">
+<form action="{{ action }}" method="post" accept-charset="utf-8" id="dockercart_wayforpay-form">
   <input type="hidden" name="merchantAccount" value="{{ merchantAccount }}">
   <input type="hidden" name="merchantDomainName" value="{{ merchantDomainName }}">
   <input type="hidden" name="merchantSignature" value="{{ merchantSignature }}">
@@ -29,5 +29,5 @@
   {% endfor %}
 </form>
 <script>
-  document.getElementById('wayforpay-form').submit();
+  document.getElementById('dockercart_wayforpay-form').submit();
 </script>

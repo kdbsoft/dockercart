@@ -203,6 +203,7 @@ class ControllerMarketplaceExtension extends Controller {
 		$data['text_no_results']    = $this->language->get('text_no_results');
 		$data['text_instances']     = $this->language->get('text_instances');
 		$data['text_confirm']       = $this->language->get('text_confirm');
+		$data['text_official']      = $this->language->get('text_official');
 
 		$data['text_confirm_instance'] = $this->language->get('text_confirm_instance');
 

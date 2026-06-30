@@ -1,32 +1,32 @@
 <?php
-class ControllerExtensionPaymentWayforpay extends Controller {
+class ControllerExtensionPaymentDockercartWayforpay extends Controller {
 	public function index() {
-		$this->load->language('extension/payment/wayforpay');
+		$this->load->language('extension/payment/dockercart_wayforpay');
 
 		$data['button_confirm'] = $this->language->get('button_confirm');
 		$data['text_loading'] = $this->language->get('text_loading');
 
-		return $this->load->view('extension/payment/wayforpay', $data);
+		return $this->load->view('extension/payment/dockercart_wayforpay', $data);
 	}
 
 	public function confirm() {
 		$json = array();
 
-		if (isset($this->session->data['payment_method']['code']) && $this->session->data['payment_method']['code'] == 'wayforpay') {
+		if (isset($this->session->data['payment_method']['code']) && $this->session->data['payment_method']['code'] == 'dockercart_wayforpay') {
 			$order_id = $this->session->data['order_id'];
 
-			$awaiting_status_id = $this->config->get('payment_wayforpay_awaiting_status_id');
+			$awaiting_status_id = $this->config->get('payment_dockercart_wayforpay_awaiting_status_id');
 			if ($awaiting_status_id) {
 				$this->load->model('checkout/order');
 				$this->model_checkout_order->addOrderHistory($order_id, (int)$awaiting_status_id);
 			}
 
-			$this->load->model('extension/payment/wayforpay');
-			$this->model_extension_payment_wayforpay->addOrder($order_id);
+			$this->load->model('extension/payment/dockercart_wayforpay');
+			$this->model_extension_payment_dockercart_wayforpay->addOrder($order_id);
 
 			$base = $this->config->get('config_url');
 			$lang = $this->config->get('config_language');
-			$json['redirect'] = $base . 'index.php?route=extension/payment/wayforpay/pay&language=' . $lang;
+			$json['redirect'] = $base . 'index.php?route=extension/payment/dockercart_wayforpay/pay&language=' . $lang;
 		}
 
 		$this->response->addHeader('Content-Type: application/json');
@@ -69,8 +69,8 @@ class ControllerExtensionPaymentWayforpay extends Controller {
 
 		$base = $this->config->get('config_url');
 		$lang = $this->config->get('config_language');
-		$merchantAccount = $this->config->get('payment_wayforpay_merchant');
-		$secretKey = $this->config->get('payment_wayforpay_secretkey');
+		$merchantAccount = $this->config->get('payment_dockercart_wayforpay_merchant');
+		$secretKey = $this->config->get('payment_dockercart_wayforpay_secretkey');
 		$merchantDomainName = parse_url($this->config->get('config_url'), PHP_URL_HOST);
 		$orderReference = (string)$order_id;
 		$orderDate = strtotime($order_info['date_added']);
@@ -81,8 +81,8 @@ class ControllerExtensionPaymentWayforpay extends Controller {
 		$signatureString .= implode(';', $productNames) . ';' . implode(';', $productCounts) . ';' . implode(';', $productPrices);
 		$merchantSignature = hash_hmac('md5', $signatureString, $secretKey);
 
-		if ($this->config->get('payment_wayforpay_debug')) {
-			$log = new \Log('wayforpay.log');
+		if ($this->config->get('payment_dockercart_wayforpay_debug')) {
+			$log = new \Log('dockercart_wayforpay.log');
 			$log->write('--- PAY SIGNATURE DEBUG ---');
 			$log->write('merchantAccount: ' . $merchantAccount);
 			$log->write('merchantDomainName: ' . $merchantDomainName);
@@ -109,8 +109,8 @@ class ControllerExtensionPaymentWayforpay extends Controller {
 		$data['productNames'] = $productNames;
 		$data['productPrices'] = $productPrices;
 		$data['productCounts'] = $productCounts;
-		$data['serviceUrl'] = $base . 'index.php?route=extension/payment/wayforpay/callback&language=' . $lang;
-		$data['returnUrl'] = $base . 'index.php?route=extension/payment/wayforpay/success&order_id=' . $order_id . '&language=' . $lang;
+		$data['serviceUrl'] = $base . 'index.php?route=extension/payment/dockercart_wayforpay/callback&language=' . $lang;
+		$data['returnUrl'] = $base . 'index.php?route=extension/payment/dockercart_wayforpay/success&order_id=' . $order_id . '&language=' . $lang;
 
 		$data['clientFirstName'] = $order_info['payment_firstname'];
 		$data['clientLastName'] = $order_info['payment_lastname'];
@@ -131,11 +131,11 @@ class ControllerExtensionPaymentWayforpay extends Controller {
 		}
 		$data['language'] = $language;
 
-		$this->response->setOutput($this->load->view('extension/payment/wayforpay_pay', $data));
+		$this->response->setOutput($this->load->view('extension/payment/dockercart_wayforpay_pay', $data));
 	}
 
 	public function success() {
-		$this->load->language('extension/payment/wayforpay');
+		$this->load->language('extension/payment/dockercart_wayforpay');
 		$this->load->language('common/home');
 
 		$this->document->setTitle($this->language->get('text_success_title'));
@@ -151,8 +151,8 @@ class ControllerExtensionPaymentWayforpay extends Controller {
 		);
 
 		if (isset($this->request->get['order_id'])) {
-			$this->load->model('extension/payment/wayforpay');
-			$wf_order = $this->model_extension_payment_wayforpay->getOrder((int)$this->request->get['order_id']);
+			$this->load->model('extension/payment/dockercart_wayforpay');
+			$wf_order = $this->model_extension_payment_dockercart_wayforpay->getOrder((int)$this->request->get['order_id']);
 
 			if ($wf_order) {
 				$data['payment_status'] = $wf_order['payment_status'];
@@ -174,14 +174,14 @@ class ControllerExtensionPaymentWayforpay extends Controller {
 		$data['footer'] = $this->load->controller('common/footer');
 		$data['header'] = $this->load->controller('common/header');
 
-		$this->response->setOutput($this->load->view('extension/payment/wayforpay_success', $data));
+		$this->response->setOutput($this->load->view('extension/payment/dockercart_wayforpay_success', $data));
 	}
 
 	public function callback() {
 		$json = file_get_contents('php://input');
 
-		if ($this->config->get('payment_wayforpay_debug')) {
-			$log = new \Log('wayforpay.log');
+		if ($this->config->get('payment_dockercart_wayforpay_debug')) {
+			$log = new \Log('dockercart_wayforpay.log');
 			$log->write('--- CALLBACK RECEIVED ---');
 			$log->write('Method: ' . ($_SERVER['REQUEST_METHOD'] ?? 'N/A'));
 			$log->write('Raw input: ' . $json);
@@ -195,7 +195,7 @@ class ControllerExtensionPaymentWayforpay extends Controller {
 			return;
 		}
 
-		$merchantAccount = $this->config->get('payment_wayforpay_merchant');
+		$merchantAccount = $this->config->get('payment_dockercart_wayforpay_merchant');
 
 		if ($data['merchantAccount'] !== $merchantAccount) {
 			$this->response->addHeader('HTTP/1.1 400 Bad Request');
@@ -203,14 +203,14 @@ class ControllerExtensionPaymentWayforpay extends Controller {
 			return;
 		}
 
-		$secretKey = $this->config->get('payment_wayforpay_secretkey');
+		$secretKey = $this->config->get('payment_dockercart_wayforpay_secretkey');
 
 		$signatureString = $data['merchantAccount'] . ';' . $data['orderReference'] . ';' . $data['amount'] . ';' . $data['currency'] . ';' . ($data['authCode'] ?? '') . ';' . ($data['cardPan'] ?? '') . ';' . $data['transactionStatus'] . ';' . $data['reasonCode'];
 		$calculatedSignature = hash_hmac('md5', $signatureString, $secretKey);
 
 		if (!hash_equals($calculatedSignature, $data['merchantSignature'])) {
-			if ($this->config->get('payment_wayforpay_debug')) {
-				$log = new \Log('wayforpay.log');
+			if ($this->config->get('payment_dockercart_wayforpay_debug')) {
+				$log = new \Log('dockercart_wayforpay.log');
 				$log->write('CALLBACK SIGNATURE MISMATCH');
 				$log->write('calculated: ' . $calculatedSignature);
 				$log->write('received: ' . $data['merchantSignature']);
@@ -231,36 +231,36 @@ class ControllerExtensionPaymentWayforpay extends Controller {
 			return;
 		}
 
-		$this->load->model('extension/payment/wayforpay');
+		$this->load->model('extension/payment/dockercart_wayforpay');
 
 		$transactionStatus = $data['transactionStatus'];
 
 		switch ($transactionStatus) {
 			case 'Approved':
 				$new_status = 'approved';
-				$order_status_id = $this->config->get('payment_wayforpay_completed_status_id');
+				$order_status_id = $this->config->get('payment_dockercart_wayforpay_completed_status_id');
 				break;
 			case 'Refunded':
 			case 'Reversed':
 				$new_status = 'refunded';
-				$order_status_id = $this->config->get('payment_wayforpay_refunded_status_id');
+				$order_status_id = $this->config->get('payment_dockercart_wayforpay_refunded_status_id');
 				break;
 			default:
 				$new_status = 'failed';
-				$order_status_id = $this->config->get('payment_wayforpay_failed_status_id');
+				$order_status_id = $this->config->get('payment_dockercart_wayforpay_failed_status_id');
 		}
 
 		if ($order_status_id) {
 			$this->model_checkout_order->addOrderHistory($order_id, $order_status_id);
 		}
 
-		$this->model_extension_payment_wayforpay->updateOrder($order_id, array(
+		$this->model_extension_payment_dockercart_wayforpay->updateOrder($order_id, array(
 			'payment_status' => $new_status,
 			'callback_data'  => $json
 		));
 
-		if ($this->config->get('payment_wayforpay_debug')) {
-			$log = new \Log('wayforpay.log');
+		if ($this->config->get('payment_dockercart_wayforpay_debug')) {
+			$log = new \Log('dockercart_wayforpay.log');
 			$log->write('CALLBACK PROCESSED: order_id=' . $order_id . ' status=' . $transactionStatus . ' new_status=' . $new_status);
 		}
 
