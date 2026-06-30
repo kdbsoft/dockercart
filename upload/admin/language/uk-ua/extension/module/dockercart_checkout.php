@@ -40,9 +40,6 @@ $_["help_default_zone"] =
 $_["entry_journal3_compat"] = "Сумісність журналу 3";
 $_["entry_license_key"] = "Ліцензійний ключ";
 $_["entry_public_key"] = "Відкритий ключ";
-$_["entry_recaptcha_enabled"] = "Увімкнути reCAPTCHA";
-$_["entry_recaptcha_secret_key"] = "Секретний ключ reCAPTCHA";
-$_["entry_recaptcha_site_key"] = "Ключ сайту reCAPTCHA";
 $_["entry_redirect_standard"] =
     "Перенаправлення стандартного оформлення замовлення";
 $_["entry_require_address2"] = 'Обов\'язковий рядок адреси 2';
@@ -89,7 +86,6 @@ $_["help_method_overrides"] =
     "Увімкніть перевизначення для певного методу та введіть власну назву/опис. Якщо перевизначення не ввімкнено, буде використано оригінальну назву та опис методу.";
 $_["help_public_key"] =
     "У GPL-версії перевірка за відкритим ключем не використовується";
-$_["help_recaptcha"] = "Увімкніть Google reCAPTCHA v3 для захисту від спаму";
 $_["help_redirect_standard"] =
     "Автоматично перенаправляти користувачів зі стандартної каси OpenCart (checkout/checkout) до каси DockerCart";
 $_["help_required_fields"] =
