@@ -32,6 +32,7 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
         xml \
         mbstring \
         curl \
+        pcntl \
     && pecl install memcached redis \
     && docker-php-ext-enable memcached redis
 

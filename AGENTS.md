@@ -48,6 +48,24 @@ Use `/var/www/storage/` (host: `./storage/`), NOT `/var/www/html/system/storage/
 - Run via: `make migrate` (applies to running MariaDB container)
 - Base schema: `docker/mysql/init.sql` — regenerate with `make dump-init`
 ---
+## Scheduler Registration
+The scheduler daemon (`upload/bin/dockercart_scheduler.php`) is a **generic** cron dispatcher.
+It reads **only** `oc_dockercart_scheduler_task` — there is no hardcoded handler list.
+Every module that needs cron must call `registerTask()` / `unregisterTask()` in its install/uninstall handlers via `upload/system/library/dockercart/scheduler.php`.
+
+**Registration API** (load via `$this->load->library('dockercart/scheduler')` if Registry is available, or `new DockercartScheduler($registry)`):
+| Method | Use case |
+|---|---|
+| `registerTask($type, $name, $workerCommand, $schedule, $enabled)` | Singleton tasks (e.g. novapost_sync, currency_refresh) |
+| `unregisterTask($type)` | Remove all rows for a type |
+| `registerProfileTask($type, $sourceId, $name, $workerCommand, $schedule, $enabled)` | Per-profile tasks (e.g. import_yml profile #5) |
+| `unregisterProfileTask($type, $sourceId)` | Remove a specific profile's row |
+
+**workerCommand** is the CLI invocation string. Use `%d` as placeholder for `source_id` — the daemon substitutes it at runtime.
+Example: `registerTask('novapost_sync', 'NovaPost Sync', 'php /var/www/html/bin/novapost-sync.php', '0 2 * * *')`.
+
+**Never** hardcode handler classes, task_type literals, or worker commands in `bin/dockercart_scheduler.php`.
+---
 ## Frontend (DockerCart Theme)
 - **Tailwind CSS 3** + **Lucide icons** (not Font Awesome) + **ES6+** vanilla JS
 - Build: `npm run build:css` — compiles to `upload/catalog/view/theme/dockercart/stylesheet/tailwind.css`

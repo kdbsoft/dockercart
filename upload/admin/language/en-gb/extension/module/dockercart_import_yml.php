@@ -122,3 +122,14 @@ $_['error_import_failed'] = 'Import failed';
 $_['error_load_profile_failed'] = 'Failed to load profile';
 $_['error_save_failed'] = 'Save failed';
 $_['error_delete_failed'] = 'Delete failed';
+
+// Schedule
+$_['entry_cron_schedule'] = 'Schedule';
+$_['text_cron_disabled']  = 'Disabled';
+$_['text_every_15m']      = 'Every 15 min';
+$_['text_every_30m']      = 'Every 30 min';
+$_['text_hourly']         = 'Hourly';
+$_['text_every_6h']       = 'Every 6 hours';
+$_['text_every_12h']      = 'Every 12 hours';
+$_['text_daily']          = 'Daily';
+$_['text_custom']         = 'Custom cron...';

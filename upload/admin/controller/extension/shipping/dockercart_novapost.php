@@ -284,6 +284,14 @@ class ControllerExtensionShippingDockercartNovapost extends Controller {
 		$groupId = (int)$this->user->getGroupId();
 		$this->model_user_user_group->addPermission($groupId, 'access', 'extension/shipping/dockercart_novapost');
 		$this->model_user_user_group->addPermission($groupId, 'modify', 'extension/shipping/dockercart_novapost');
+
+		// Register with universal scheduler
+		$this->dockercart_scheduler->registerTask(
+			'novapost_sync',
+			'NovaPost Sync',
+			'php /var/www/html/bin/novapost-sync.php',
+			'0 2 * * *'
+		);
 	}
 
 	public function uninstall() {
@@ -296,6 +304,9 @@ class ControllerExtensionShippingDockercartNovapost extends Controller {
 
 		$this->model_setting_event->deleteEventByCode('dockercart_novapost_header');
 		$this->model_setting_event->deleteEventByCode('dockercart_novapost_shipping_address');
+
+		// Remove from universal scheduler
+		$this->dockercart_scheduler->unregisterTask('novapost_sync');
 	}
 
 	protected function validate() {

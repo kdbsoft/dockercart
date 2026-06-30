@@ -189,3 +189,14 @@ $_['error_invalid_response'] = 'Invalid response from endpoint';
 $_['error_file_required'] = 'Please choose a file';
 $_['error_upload_failed'] = 'Failed to upload file';
 $_['error_invalid_file_format'] = 'Only CSV and XLSX files are supported';
+
+// Schedule
+$_['entry_cron_schedule'] = 'Schedule';
+$_['text_cron_disabled'] = 'Disabled';
+$_['text_every_15m'] = 'Every 15 minutes';
+$_['text_every_30m'] = 'Every 30 minutes';
+$_['text_hourly'] = 'Hourly';
+$_['text_every_6h'] = 'Every 6 hours';
+$_['text_every_12h'] = 'Every 12 hours';
+$_['text_daily'] = 'Daily';
+$_['text_custom'] = 'Custom';

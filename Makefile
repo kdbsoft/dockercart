@@ -235,6 +235,22 @@ logs-follow: ## Follow logs in real time
 shell: ## Open bash shell in the app container
 	@$(COMPOSE) exec $(SHELL_SERVICE) bash
 
+scheduler-logs: ## Show scheduler container logs
+	@$(COMPOSE) logs -f scheduler
+
+scheduler-restart: ## Restart scheduler container
+	@$(COMPOSE) restart scheduler
+
+scheduler-reload: ## Reload scheduler code without restart (SIGHUP)
+	@echo "Sending SIGHUP to scheduler (code reload)..."
+	@$(COMPOSE) kill -s HUP scheduler
+
+scheduler-shell: ## Open bash in scheduler container
+	@$(COMPOSE) exec scheduler bash
+
+scheduler-status: ## Check scheduler health
+	@$(COMPOSE) exec scheduler pgrep -f dockercart_scheduler.php && echo "Scheduler: RUNNING" || echo "Scheduler: NOT RUNNING"
+
 mariadb: ## Open MariaDB CLI
 	@$(COMPOSE) exec -e MYSQL_PWD=$${MARIADB_PASSWORD:-dockercart_password} mariadb mariadb -u$${MARIADB_USER:-dockercart} $${MARIADB_DATABASE:-dockercart}
 

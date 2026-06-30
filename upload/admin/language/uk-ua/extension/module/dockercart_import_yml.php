@@ -120,3 +120,14 @@ $_["text_tab_profiles_subtitle"] =
 $_["text_total_offers_label"] = "Товари у стрічці";
 $_["text_updated"] = "Оновлено";
 $_["text_updated_label"] = "Оновлено";
+
+// Schedule
+$_["entry_cron_schedule"] = "Розклад";
+$_["text_cron_disabled"]  = "Вимкнено";
+$_["text_every_15m"]      = "Кожні 15 хв";
+$_["text_every_30m"]      = "Кожні 30 хв";
+$_["text_hourly"]         = "Щогодини";
+$_["text_every_6h"]       = "Кожні 6 годин";
+$_["text_every_12h"]      = "Кожні 12 годин";
+$_["text_daily"]          = "Щоденно";
+$_["text_custom"]         = "Свій cron...";

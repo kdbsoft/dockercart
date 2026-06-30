@@ -108,3 +108,14 @@ $_['text_tab_profiles_subtitle'] = 'Управление профилями им
 $_['text_total_offers_label'] = 'Товары в фиде';
 $_['text_updated'] = 'Обновлено';
 $_['text_updated_label'] = 'Обновлено';
+
+// Schedule
+$_['entry_cron_schedule'] = 'Расписание';
+$_['text_cron_disabled']  = 'Отключено';
+$_['text_every_15m']      = 'Каждые 15 мин';
+$_['text_every_30m']      = 'Каждые 30 мин';
+$_['text_hourly']         = 'Каждый час';
+$_['text_every_6h']       = 'Каждые 6 часов';
+$_['text_every_12h']      = 'Каждые 12 часов';
+$_['text_daily']          = 'Ежедневно';
+$_['text_custom']         = 'Своё cron...';
