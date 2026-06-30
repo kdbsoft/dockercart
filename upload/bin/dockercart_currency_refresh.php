@@ -3,8 +3,7 @@
 /**
  * DockerCart Currency Refresh — CLI Worker
  *
- * Bootstraps OpenCart admin and refreshes currency exchange rates via the
- * active currency engine (ECB or Fixer.io).
+ * Bootstraps OpenCart admin and refreshes currency exchange rates via ECB.
  *
  * Usage:
  *   php /var/www/html/bin/dockercart_currency_refresh.php
@@ -82,30 +81,15 @@ try {
 	$config->set('config_store_id',    0);
 	$config->set('config_language_id', 1);
 
-	// Determine active currency engine from DB
-	$query = $db->query("SELECT `value` FROM `" . DB_PREFIX . "setting` WHERE `store_id` = 0 AND `code` = 'config' AND `key` = 'config_currency_engine'");
+	// Load model and refresh
+	$loader->model('extension/currency/ecb');
+	$model = $registry->get('model_extension_currency_ecb');
 
-	$engine = '';
-	if ($query->num_rows) {
-		$engine = trim((string)$query->row['value']);
-	}
-
-	// Load model and refresh — fallback to ECB if no engine configured
-	if ($engine === 'fixer') {
-		$loader->model('extension/currency/fixer');
-		$model = $registry->get('model_extension_currency_fixer');
-		$engine_label = 'Fixer.io';
-	} else {
-		$loader->model('extension/currency/ecb');
-		$model = $registry->get('model_extension_currency_ecb');
-		$engine_label = 'ECB';
-	}
-
-	echo "[dockercart-currency] Refreshing rates via {$engine_label}...\n";
+	echo "[dockercart-currency] Refreshing rates via ECB...\n";
 
 	$model->refresh();
 
-	echo "[dockercart-currency] {$engine_label} rates refreshed successfully.\n";
+	echo "[dockercart-currency] ECB rates refreshed successfully.\n";
 	exit(0);
 } catch (\Throwable $e) {
 	fwrite(STDERR, "[dockercart-currency] ERROR: " . $e->getMessage() . "\n");
