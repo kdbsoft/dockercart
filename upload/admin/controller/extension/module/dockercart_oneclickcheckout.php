@@ -299,7 +299,7 @@ class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
             'module_dockercart_oneclickcheckout_field_country_show' => 0,
             'module_dockercart_oneclickcheckout_field_zone_required' => 0,
             'module_dockercart_oneclickcheckout_field_zone_show' => 0,
-            'module_dockercart_oneclickcheckout_use_captcha' => 1,
+            'module_dockercart_oneclickcheckout_use_captcha' => 0,
             'module_dockercart_oneclickcheckout_order_status_id' => 1,
         );
         

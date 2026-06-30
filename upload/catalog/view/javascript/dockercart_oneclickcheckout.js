@@ -265,6 +265,19 @@ function validateAndNormalizeTelephone(telephone) {
       })
       .then(function (html) {
         captchaContainer.innerHTML = html;
+
+        // Execute script tags (innerHTML does not execute them)
+        var scripts = captchaContainer.querySelectorAll("script");
+        for (var i = 0; i < scripts.length; i++) {
+          var oldScript = scripts[i];
+          var newScript = document.createElement("script");
+          if (oldScript.src) {
+            newScript.src = oldScript.src;
+          } else {
+            newScript.textContent = oldScript.textContent;
+          }
+          oldScript.parentNode.replaceChild(newScript, oldScript);
+        }
       })
       .catch(function (error) {
         console.error("Captcha load error:", error);
@@ -693,7 +706,7 @@ function validateAndNormalizeTelephone(telephone) {
       payload.set("product_id", productId || "0");
     }
 
-    var captchaInput = document.querySelector('input[name="captcha"]');
+    var captchaInput = document.querySelector('#oneclickcheckout-form input[name="captcha"]');
     if (captchaInput) {
       payload.set("captcha", captchaInput.value || "");
     }

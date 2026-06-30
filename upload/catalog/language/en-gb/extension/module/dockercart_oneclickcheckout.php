@@ -33,7 +33,7 @@ $_['entry_address']    = 'Address';
 $_['entry_city']       = 'City';
 $_['entry_postcode']   = 'Postcode';
 $_['entry_country']    = 'Country';
-$_['entry_captcha']    = 'Enter the code in the box below';
+$_['entry_captcha']    = 'Drag the slider to the correct answer';
 
 // Error
 $_['error_required']   = '%s is required!';

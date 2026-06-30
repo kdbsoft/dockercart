@@ -736,6 +736,8 @@ select[disabled] {
           {% endif %}
         </div>
 
+        {{ captcha }}
+
         <!-- Place Order Button -->
         <button type="button" id="button-confirm" class="gradient-primary w-full h-14 rounded-xl text-white font-semibold text-base btn-hover btn-active transition-all">
           {{ button_confirm }}
@@ -4006,7 +4008,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Step 5: Confirm order
         log('Confirming order...');
         const orderComment = $('#input-comment')?.value || '';
-        return ajax(ajaxUrls.confirm, { method: 'POST', data: { agree: 1, comment: orderComment } });
+        const captchaValue = document.querySelector('input[name="captcha"]')?.value || '';
+        return ajax(ajaxUrls.confirm, { method: 'POST', data: { agree: 1, comment: orderComment, captcha: captchaValue } });
       })
       .then(json => {
         log('Order confirmed', json);
@@ -4043,6 +4046,27 @@ document.addEventListener('DOMContentLoaded', () => {
           if (typeof json.error === 'object') showFieldErrors(json.error);
           else showNotification(json.error, 'error');
           resetButton();
+
+          // Refresh captcha with a new question after failed validation
+          if (json.captcha_html) {
+            var captchaEl = document.querySelector('.dockercart-captcha');
+            if (captchaEl) {
+              var fieldset = captchaEl.closest('fieldset');
+              if (fieldset) {
+                fieldset.innerHTML = json.captcha_html;
+                var scripts = fieldset.querySelectorAll('script');
+                for (var si = 0; si < scripts.length; si++) {
+                  var newScript = document.createElement('script');
+                  if (scripts[si].src) {
+                    newScript.src = scripts[si].src;
+                  } else {
+                    newScript.textContent = scripts[si].textContent;
+                  }
+                  scripts[si].parentNode.replaceChild(newScript, scripts[si]);
+                }
+              }
+            }
+          }
         } else {
           log('Unknown response', json);
           showNotification(window.dcLang?.order_unclear_response || 'Order placed but response unclear. Please check your account.', 'warn');
