@@ -318,14 +318,6 @@ class ControllerExtensionModuleDockercartMulticurrency extends Controller
                 $event["action"],
             );
         }
-
-		// Register with universal scheduler
-		$this->dockercart_scheduler->registerTask(
-			'currency_refresh',
-			'Currency Refresh',
-			'php /var/www/html/bin/dockercart_currency_refresh.php',
-			'0 * * * *'
-		);
     }
 
     /**
@@ -344,9 +336,6 @@ class ControllerExtensionModuleDockercartMulticurrency extends Controller
 
         // Uninstall OCMOD
         $this->uninstallOCMOD();
-
-		// Remove from universal scheduler
-		$this->dockercart_scheduler->unregisterTask('currency_refresh');
 
         // Note: We intentionally do NOT drop the currency_id column to preserve data
         // If you want to completely remove it, run manually:

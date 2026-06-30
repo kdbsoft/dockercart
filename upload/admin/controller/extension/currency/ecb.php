@@ -53,14 +53,6 @@ class ControllerExtensionCurrencyEcb extends Controller {
 		$data['text_edit'] = str_replace('%1',$this->url->link('localisation/currency', 'user_token=' . $this->session->data['user_token'], true), $data['text_edit']);
 		$data['text_edit'] = str_replace('%2',$this->url->link('setting/store', 'user_token=' . $this->session->data['user_token'], true), $data['text_edit']);
 
-		$data['currency_ecb_cron'] = 'curl -s &quot;' . HTTPS_CATALOG . 'index.php?route=extension/currency/ecb/refresh&quot;';
-
-		if (isset($this->request->post['currency_ecb_ip'])) {
-			$data['currency_ecb_ip'] = $this->request->post['currency_ecb_ip'];
-		} else {
-			$data['currency_ecb_ip'] = (string)$this->config->get('currency_ecb_ip');
-		}
-
 		if (isset($this->request->post['currency_ecb_status'])) {
 			$data['currency_ecb_status'] = $this->request->post['currency_ecb_status'];
 		} else {
@@ -86,17 +78,19 @@ class ControllerExtensionCurrencyEcb extends Controller {
 					$this->error['warning'] = $this->language->get('error_euro');
 				}
 			}
-			if (!empty($this->request->post['currency_ecb_ip'])) {
-				if (!filter_var($this->request->post['currency_ecb_ip'],FILTER_VALIDATE_IP)) {
-					$this->error['ip'] = $this->language->get('error_ip');
-				}
-			}
 		}
 		return !$this->error;
 	}
 
 
 	public function install() {
+		$this->dockercart_scheduler->registerTask(
+			'currency_refresh',
+			'Currency Refresh',
+			'php /var/www/html/bin/dockercart_currency_refresh.php',
+			'every_15m',
+			true
+		);
 	}
 
 
