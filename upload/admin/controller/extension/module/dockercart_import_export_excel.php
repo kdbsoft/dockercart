@@ -137,6 +137,17 @@ class ControllerExtensionModuleDockercartImportExportExcel extends Controller {
 
         $data['cron_base_path'] = '/var/www/html/cron/dockercart_import_export_excel.php';
 
+        $data['schedule_options'] = array(
+            ''             => $this->language->get('text_cron_disabled'),
+            'every_15m'    => $this->language->get('text_every_15m'),
+            'every_30m'    => $this->language->get('text_every_30m'),
+            'hourly'       => $this->language->get('text_hourly'),
+            'every_6h'     => $this->language->get('text_every_6h'),
+            'every_12h'    => $this->language->get('text_every_12h'),
+            'daily'        => $this->language->get('text_daily'),
+            'custom'       => $this->language->get('text_custom'),
+        );
+
         $data['header'] = $this->load->controller('common/header');
         $data['column_left'] = $this->load->controller('common/column_left');
         $data['footer'] = $this->load->controller('common/footer');
@@ -765,18 +776,27 @@ class ControllerExtensionModuleDockercartImportExportExcel extends Controller {
         return $response;
     }
 
-    public function install() {
-        $this->load->model('extension/module/dockercart_import_export_excel');
-        $this->load->model('setting/setting');
+	public function install() {
+		$this->load->model('extension/module/dockercart_import_export_excel');
+		$this->load->model('setting/setting');
 
-        $this->model_extension_module_dockercart_import_export_excel->install();
-        $this->model_setting_setting->editSettingValue('module_dockercart_import_export_excel', 'module_dockercart_import_export_excel_status', 0);
-    }
+		$this->model_extension_module_dockercart_import_export_excel->install();
 
-    public function uninstall() {
-        $this->load->model('extension/module/dockercart_import_export_excel');
-        $this->model_extension_module_dockercart_import_export_excel->uninstall();
-    }
+		$this->dockercart_scheduler->registerTask(
+			'import_excel',
+			'Import/Export Excel',
+			'php /var/www/html/bin/dockercart_import_export_excel_run.php --profile_id=%d --action=import'
+		);
+
+		$this->model_setting_setting->editSettingValue('module_dockercart_import_export_excel', 'module_dockercart_import_export_excel_status', 0);
+	}
+
+	public function uninstall() {
+		$this->load->model('extension/module/dockercart_import_export_excel');
+		$this->model_extension_module_dockercart_import_export_excel->uninstall();
+
+		$this->dockercart_scheduler->unregisterTask('import_excel');
+	}
 
     protected function validate() {
         if (!$this->user->hasPermission('modify', 'extension/module/dockercart_import_export_excel')) {

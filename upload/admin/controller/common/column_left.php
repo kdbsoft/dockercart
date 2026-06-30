@@ -594,6 +594,15 @@ class ControllerCommonColumnLeft extends Controller {
 				);
 			}
 
+			// Scheduler
+			$system[] = array(
+				'id'       => 'menu-scheduler',
+				'icon'	   => 'fa-clock-o',
+				'name'	   => 'Scheduler',
+				'href'     => $this->url->link('tool/dockercart_scheduler', 'user_token=' . $this->session->data['user_token'], true),
+				'children' => array()
+			);
+
 			if ($system) {
 				$data['menus'][] = array(
 					'id'       => 'menu-system',

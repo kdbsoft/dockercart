@@ -58,25 +58,24 @@ class ModelExtensionModuleDockercartImportYml extends Model {
         $this->schema_checked = true;
     }
 
-    public function install() {
-        $this->schema_checked = false;
-        $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "dockercart_import_yml_profile` (
-                `profile_id` int(11) NOT NULL AUTO_INCREMENT,
-                `name` varchar(255) NOT NULL,
-                `feed_url` text NOT NULL,
-                `store_id` int(11) NOT NULL DEFAULT '0',
-                `language_id` int(11) NOT NULL DEFAULT '1',
-                `currency_code` varchar(3) NOT NULL DEFAULT 'RUB',
-                `default_category_id` int(11) NOT NULL DEFAULT '0',
-            `load_categories` tinyint(1) NOT NULL DEFAULT '1',
-            `download_images` tinyint(1) NOT NULL DEFAULT '1',
-            `allow_zero_price` tinyint(1) NOT NULL DEFAULT '0',
-            `customer_group_price_mapping` TEXT NULL,
-            `main_price_tag` VARCHAR(255) NOT NULL DEFAULT 'price',
-                `import_mode` enum('add','update','update_only','update_price_qty_only','replace') NOT NULL DEFAULT 'update',
-                `status` tinyint(1) NOT NULL DEFAULT '1',
-                `cron_key` varchar(64) NOT NULL,
-                `last_run` datetime DEFAULT NULL,
+	public function install() {
+		$this->schema_checked = false;
+		$this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "dockercart_import_yml_profile` (
+				`profile_id` int(11) NOT NULL AUTO_INCREMENT,
+				`name` varchar(255) NOT NULL,
+				`feed_url` text NOT NULL,
+				`store_id` int(11) NOT NULL DEFAULT '0',
+				`language_id` int(11) NOT NULL DEFAULT '1',
+				`currency_code` varchar(3) NOT NULL DEFAULT 'RUB',
+				`default_category_id` int(11) NOT NULL DEFAULT '0',
+			`load_categories` tinyint(1) NOT NULL DEFAULT '1',
+			`download_images` tinyint(1) NOT NULL DEFAULT '1',
+			`allow_zero_price` tinyint(1) NOT NULL DEFAULT '0',
+			`customer_group_price_mapping` TEXT NULL,
+			`main_price_tag` VARCHAR(255) NOT NULL DEFAULT 'price',
+				`import_mode` enum('add','update','update_only','update_price_qty_only','replace') NOT NULL DEFAULT 'update',
+				`status` tinyint(1) NOT NULL DEFAULT '1',
+		`cron_key` varchar(64) NOT NULL,
                 `last_result` text,
                 `date_added` datetime NOT NULL,
                 `date_modified` datetime NOT NULL,
@@ -221,7 +220,18 @@ class ModelExtensionModuleDockercartImportYml extends Model {
                 `date_added` = NOW(),
                 `date_modified` = NOW()");
 
-        return (int)$this->db->getLastId();
+		$profile_id = (int)$this->db->getLastId();
+
+		$this->dockercart_scheduler->registerProfileTask(
+			'import_yml',
+			$profile_id,
+			$data['name'],
+			'php /var/www/html/bin/dockercart_import_yml_run.php --profile_id=%d',
+			isset($data['cron_schedule']) ? (string)$data['cron_schedule'] : '',
+			!empty($data['cron_enabled'])
+		);
+
+        return $profile_id;
     }
 
     public function updateProfile($profile_id, $data) {
@@ -257,13 +267,24 @@ class ModelExtensionModuleDockercartImportYml extends Model {
                 `cron_key` = '" . $this->db->escape($cron_key) . "',
                 `date_modified` = NOW()
             WHERE `profile_id` = '" . (int)$profile_id . "'");
+
+		$this->dockercart_scheduler->registerProfileTask(
+			'import_yml',
+			(int)$profile_id,
+			$data['name'],
+			'php /var/www/html/bin/dockercart_import_yml_run.php --profile_id=%d',
+			isset($data['cron_schedule']) ? (string)$data['cron_schedule'] : '',
+			!empty($data['cron_enabled'])
+		);
     }
 
     public function deleteProfile($profile_id) {
         $this->ensureSchema();
         $this->db->query("DELETE FROM `" . DB_PREFIX . "dockercart_import_yml_category_map` WHERE `profile_id` = '" . (int)$profile_id . "'");
         $this->db->query("DELETE FROM `" . DB_PREFIX . "dockercart_import_yml_offer_map` WHERE `profile_id` = '" . (int)$profile_id . "'");
-        $this->db->query("DELETE FROM `" . DB_PREFIX . "dockercart_import_yml_profile` WHERE `profile_id` = '" . (int)$profile_id . "'");
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "dockercart_import_yml_profile` WHERE `profile_id` = '" . (int)$profile_id . "'");
+
+		$this->dockercart_scheduler->unregisterProfileTask('import_yml', (int)$profile_id);
     }
 
     private function normalizeImportMode($mode) {

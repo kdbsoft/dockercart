@@ -118,6 +118,7 @@
                         <td>{{ column_mode }}</td>
                         <td>{{ column_status }}</td>
                         <td>{{ column_last_run }}</td>
+                        <td>{{ entry_cron_schedule }}</td>
                         <td>{{ column_cron_command }}</td>
                         <td class="text-right">{{ column_action }}</td>
                       </tr>
@@ -156,6 +157,15 @@
                         </td>
                         <td>{{ profile.last_run ?: '-' }}</td>
                         <td>
+                          {% if profile.cron_schedule is not empty and profile.cron_enabled %}
+                            {% for key, label in schedule_options %}
+                              {% if key == profile.cron_schedule %}{{ label }}{% endif %}
+                            {% endfor %}
+                          {% else %}
+                            <span class="text-muted">{{ text_cron_disabled }}</span>
+                          {% endif %}
+                        </td>
+                        <td>
                           <code class="dc-ix-code dc-ix-code--multiline">
 php {{ cron_base_path }} --action=import --profile_id={{ profile.profile_id }} --cron_key={{ profile.cron_key }}
                           </code>
@@ -170,7 +180,7 @@ php {{ cron_base_path }} --action=import --profile_id={{ profile.profile_id }} -
                         </td>
                       </tr>
                       {% else %}
-                      <tr><td colspan="9" class="text-center">{{ text_no_profiles }}</td></tr>
+                      <tr><td colspan="10" class="text-center">{{ text_no_profiles }}</td></tr>
                       {% endfor %}
                     </tbody>
                   </table>

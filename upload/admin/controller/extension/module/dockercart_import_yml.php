@@ -88,6 +88,18 @@ class ControllerExtensionModuleDockercartImportYml extends Controller {
         $data['profiles'] = $this->model_extension_module_dockercart_import_yml->getProfiles();
         $data['cron_base_path'] = '/var/www/html/cron/dockercart_import_yml.php';
 
+        $data['entry_cron_schedule'] = $this->language->get('entry_cron_schedule');
+        $data['schedule_options'] = array(
+            ''             => $this->language->get('text_cron_disabled'),
+            'every_15m'    => $this->language->get('text_every_15m'),
+            'every_30m'    => $this->language->get('text_every_30m'),
+            'hourly'       => $this->language->get('text_hourly'),
+            'every_6h'     => $this->language->get('text_every_6h'),
+            'every_12h'    => $this->language->get('text_every_12h'),
+            'daily'        => $this->language->get('text_daily'),
+            'custom'       => $this->language->get('text_custom'),
+        );
+
         $data['header'] = $this->load->controller('common/header');
         $data['column_left'] = $this->load->controller('common/column_left');
         $data['footer'] = $this->load->controller('common/footer');
@@ -323,18 +335,27 @@ class ControllerExtensionModuleDockercartImportYml extends Controller {
         $this->response->setOutput(json_encode($json));
     }
 
-    public function install() {
-        $this->load->model('extension/module/dockercart_import_yml');
-        $this->load->model('setting/setting');
+	public function install() {
+		$this->load->model('extension/module/dockercart_import_yml');
+		$this->load->model('setting/setting');
 
-        $this->model_extension_module_dockercart_import_yml->install();
-        $this->model_setting_setting->editSettingValue('module_dockercart_import_yml', 'module_dockercart_import_yml_status', 0);
-    }
+		$this->model_extension_module_dockercart_import_yml->install();
 
-    public function uninstall() {
-        $this->load->model('extension/module/dockercart_import_yml');
-        $this->model_extension_module_dockercart_import_yml->uninstall();
-    }
+		$this->dockercart_scheduler->registerTask(
+			'import_yml',
+			'Import YML',
+			'php /var/www/html/bin/dockercart_import_yml_run.php --profile_id=%d'
+		);
+
+		$this->model_setting_setting->editSettingValue('module_dockercart_import_yml', 'module_dockercart_import_yml_status', 0);
+	}
+
+	public function uninstall() {
+		$this->load->model('extension/module/dockercart_import_yml');
+		$this->model_extension_module_dockercart_import_yml->uninstall();
+
+		$this->dockercart_scheduler->unregisterTask('import_yml');
+	}
 
     protected function validate() {
         if (!$this->user->hasPermission('modify', 'extension/module/dockercart_import_yml')) {
