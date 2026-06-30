@@ -160,14 +160,6 @@ class ControllerCheckoutDockercartCheckout extends Controller
             "module_dockercart_checkout_journal3_compat",
         );
 
-        // reCAPTCHA
-        $data["recaptcha_enabled"] = $this->config->get(
-            "module_dockercart_checkout_recaptcha_enabled",
-        );
-        $data["recaptcha_site_key"] = $this->config->get(
-            "module_dockercart_checkout_recaptcha_site_key",
-        );
-
         // Load and process checkout blocks
         $blocksData = $this->config->get("module_dockercart_checkout_blocks");
         $data["blocks"] = $this->processBlocksForDisplay(
