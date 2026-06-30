@@ -1796,17 +1796,6 @@ class ControllerExtensionModuleDockercartCheckout extends Controller
             }
         }
 
-        // For other modules that support multiple methods:
-        // - royal_mail: Generates methods based on weight (1st_class, 2nd_class, etc.)
-        // - auspost: Returns available services from API
-        // - fedex: Returns available services from API
-        // - ec_ship: Returns available services from API
-        // These typically generate methods dynamically based on API responses or
-        // calculated rates, so we can't enumerate them without a sample address.
-        // For now, these modules will use module-level configuration.
-        // Future enhancement: Add database tables to store method configurations
-        // for these modules, similar to dockercart_universal.
-
         return $methods;
     }
 
