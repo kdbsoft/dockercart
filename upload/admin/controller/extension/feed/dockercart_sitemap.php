@@ -484,38 +484,7 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
             '0 3 * * *'
         );
 
-
-
-        // Write a minimal .htaccess only if one does not already exist.
-        // sitemap.xml is a static file — Apache serves it directly when present.
-        $webroot = DIR_APPLICATION . '../';
-        $htaccess = $webroot . '.htaccess';
-
-        if (!file_exists($htaccess)) {
-            try {
-                $rules = "# OpenCart SEO URL Rules - BEGIN\n"
-                    . "<IfModule mod_rewrite.c>\n"
-                    . "RewriteEngine On\n"
-                    . "RewriteBase /\n"
-                    . "RewriteCond %{REQUEST_FILENAME} !-f\n"
-                    . "RewriteRule ^googlebase\\.xml$ index.php?route=extension/feed/google_base [L]\n"
-                    . "RewriteRule ^install(/.*)?$ index.php?route=error/not_found [L]\n"
-                    . "RewriteRule ^system/storage/(.*) index.php?route=error/not_found [L]\n"
-                    . "RewriteCond %{REQUEST_FILENAME} !-f\n"
-                    . "RewriteCond %{REQUEST_FILENAME} !-d\n"
-                    . "RewriteCond %{REQUEST_URI} !.*\\.(ico|gif|jpg|jpeg|png|js|css)\n"
-                    . "RewriteRule ^([^?]*) index.php?_route_=$1 [L,QSA]\n"
-                    . "</IfModule>\n"
-                    . "# OpenCart SEO URL Rules - END\n";
-
-                @file_put_contents($htaccess, $rules, LOCK_EX);
-                @chmod($htaccess, 0644);
-            } catch (\Throwable $e) {
-                $this->logger->info('DockerCart Sitemap: failed to create .htaccess: ' . $e->getMessage());
-            }
-        }
     }
-
 
 
     public function uninstall() {
