@@ -40,9 +40,6 @@ $_["help_default_zone"] =
 $_["entry_journal3_compat"] = "Совместимость с Journal 3";
 $_["entry_license_key"] = "Лицензионный ключ";
 $_["entry_public_key"] = "Публичный ключ";
-$_["entry_recaptcha_enabled"] = "Включить reCAPTCHA";
-$_["entry_recaptcha_secret_key"] = "Secret Key reCAPTCHA";
-$_["entry_recaptcha_site_key"] = "Site Key reCAPTCHA";
 $_["entry_redirect_standard"] = "Перенаправлять стандартный чекаут";
 $_["entry_require_address2"] = "Обязательный адрес (строка 2)";
 $_["entry_require_company"] = "Обязательная компания";
@@ -87,7 +84,6 @@ $_["help_method_overrides"] =
     "Включите переопределение для конкретного метода и введите пользовательское название/описание. Если переопределение не включено, будут использоваться оригинальные название и описание метода.";
 $_["help_public_key"] =
     "В GPL-версии проверка по публичному ключу не используется";
-$_["help_recaptcha"] = "Включить Google reCAPTCHA v3 для защиты от спама";
 $_["help_redirect_standard"] =
     "Автоматически перенаправлять пользователей со стандартного чекаута OpenCart (checkout/checkout) на DockerCart Checkout";
 $_["help_required_fields"] =

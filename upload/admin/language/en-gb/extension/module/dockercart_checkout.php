@@ -135,12 +135,6 @@ $_["entry_cache_ttl"] = "Template Cache TTL";
 $_["help_cache_ttl"] =
     "Cache lifetime in seconds (0 = no cache, useful for development). Max: 86400";
 
-$_["entry_recaptcha_enabled"] = "Enable reCAPTCHA";
-$_["help_recaptcha"] = "Enable Google reCAPTCHA v3 for spam protection";
-
-$_["entry_recaptcha_site_key"] = "reCAPTCHA Site Key";
-$_["entry_recaptcha_secret_key"] = "reCAPTCHA Secret Key";
-
 // Method Overrides
 $_["tab_method_overrides"] = "Method Overrides";
 $_["text_method_overrides"] =
