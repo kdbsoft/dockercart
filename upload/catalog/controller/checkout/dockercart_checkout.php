@@ -617,16 +617,23 @@ class ControllerCheckoutDockercartCheckout extends Controller
         $data["google_analytics"] =
             $ga !== null ? html_entity_decode($ga, ENT_QUOTES, "UTF-8") : "";
 
-        $data["base"] = $server;
-        $data["description"] = $this->document->getDescription();
-        $data["keywords"] = $this->document->getKeywords();
-        $data["links"] = $this->document->getLinks();
-        $data["styles"] = $this->document->getStyles();
-        $data["scripts"] = $this->document->getScripts("dockercart_checkout");
-        $data["lang"] = $this->language->get("code");
-        $data["direction"] = $this->language->get("direction");
+		$data["base"] = $server;
+		$data["description"] = $this->document->getDescription();
+		$data["keywords"] = $this->document->getKeywords();
+		$data["links"] = $this->document->getLinks();
+		$data["styles"] = $this->document->getStyles();
+		$data["scripts"] = $this->document->getScripts("dockercart_checkout");
+		$data["lang"] = $this->language->get("code");
+		$data["direction"] = $this->language->get("direction");
 
-        $this->response->setOutput(
+		// Captcha
+		if ($this->config->get('captcha_' . $this->config->get('config_captcha') . '_status') && in_array('guest', (array)$this->config->get('config_captcha_page'))) {
+			$data['captcha'] = $this->load->controller('extension/captcha/' . $this->config->get('config_captcha'));
+		} else {
+			$data['captcha'] = '';
+		}
+
+		$this->response->setOutput(
             $this->load->view("checkout/dockercart_checkout", $data),
         );
     }
@@ -2095,22 +2102,34 @@ class ControllerCheckoutDockercartCheckout extends Controller
             $json["redirect"] = $this->url->link("checkout/cart");
         }
 
-        // Validate terms agreement
-        if (
-            !empty($this->config->get("config_checkout_id")) &&
-            empty($data["agree"])
-        ) {
-            // Return a structured field error so the frontend highlights the
-            // specific 'agree' field instead of showing a duplicate generic
-            // notification. Frontend showFieldErrors() will display this properly.
-            $json["error"] =
-                isset($json["error"]) && is_array($json["error"])
-                    ? $json["error"]
-                    : [];
-            $json["error"]["agree"] = $this->language->get("error_agree");
-        }
+		// Validate terms agreement
+		if (
+			!empty($this->config->get("config_checkout_id")) &&
+			empty($data["agree"])
+		) {
+			// Return a structured field error so the frontend highlights the
+			// specific 'agree' field instead of showing a duplicate generic
+			// notification. Frontend showFieldErrors() will display this properly.
+			$json["error"] =
+				isset($json["error"]) && is_array($json["error"])
+					? $json["error"]
+					: [];
+			$json["error"]["agree"] = $this->language->get("error_agree");
+		}
 
-        // Validate customer/guest
+		// Validate captcha if enabled for checkout page
+		if ($this->config->get('captcha_' . $this->config->get('config_captcha') . '_status') && in_array('guest', (array)$this->config->get('config_captcha_page'))) {
+			$this->request->post['captcha'] = isset($data['captcha']) ? $data['captcha'] : '';
+			$captcha = $this->load->controller('extension/captcha/' . $this->config->get('config_captcha') . '/validate');
+
+			if ($captcha) {
+				$json['error']['captcha'] = $captcha;
+				// Return fresh captcha HTML so the frontend can re-render it
+				$json['captcha_html'] = $this->load->controller('extension/captcha/' . $this->config->get('config_captcha'));
+			}
+		}
+
+		// Validate customer/guest
         if (
             !$this->customer->isLogged() &&
             !$this->config->get("config_checkout_guest")
