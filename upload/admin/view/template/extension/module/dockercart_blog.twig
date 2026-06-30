@@ -33,7 +33,6 @@
       <li class="active"><a href="#tab-general" data-toggle="tab"><i class="fa fa-sliders"></i> {{ tab_general }}</a></li>
       <li><a href="#tab-display" data-toggle="tab"><i class="fa fa-desktop"></i> {{ tab_display }}</a></li>
       <li><a href="#tab-comments" data-toggle="tab"><i class="fa fa-comments"></i> {{ tab_comments }}</a></li>
-      <li><a href="#tab-seo" data-toggle="tab"><i class="fa fa-sitemap"></i> {{ tab_seo }}</a></li>
       <li><a href="#tab-about" data-toggle="tab"><i class="fa fa-info-circle"></i> {{ tab_about }}</a></li>
     </ul>
 
@@ -202,28 +201,6 @@
                         <option value="0" selected="selected">{{ text_disabled }}</option>
                         {% endif %}
                       </select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="tab-pane dcx-tab-pane" id="tab-seo">
-                <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                  <h4>{{ tab_seo }}</h4>
-
-                  <div class="form-group">
-                    <label class="col-sm-3 control-label" for="input-sitemap">{{ entry_sitemap }}</label>
-                    <div class="col-sm-9">
-                      <select name="module_dockercart_blog_sitemap" id="input-sitemap" class="form-control">
-                        {% if module_dockercart_blog_sitemap %}
-                        <option value="1" selected="selected">{{ text_enabled }}</option>
-                        <option value="0">{{ text_disabled }}</option>
-                        {% else %}
-                        <option value="1">{{ text_enabled }}</option>
-                        <option value="0" selected="selected">{{ text_disabled }}</option>
-                        {% endif %}
-                      </select>
-                      <span class="help-block">{{ help_sitemap }}</span>
                     </div>
                   </div>
                 </div>

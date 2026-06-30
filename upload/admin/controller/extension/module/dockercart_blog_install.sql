@@ -210,8 +210,7 @@ INSERT INTO `oc_blog_setting` (`store_id`, `code`, `key`, `value`, `serialized`)
 (0, 'module_dockercart_blog', 'module_dockercart_blog_show_author', '1', 0),
 (0, 'module_dockercart_blog', 'module_dockercart_blog_show_date', '1', 0),
 (0, 'module_dockercart_blog', 'module_dockercart_blog_show_views', '1', 0),
-(0, 'module_dockercart_blog', 'module_dockercart_blog_latest_limit', '5', 0),
-(0, 'module_dockercart_blog', 'module_dockercart_blog_sitemap', '1', 0);
+(0, 'module_dockercart_blog', 'module_dockercart_blog_latest_limit', '5', 0);
 
 -- Sample Author
 INSERT INTO `oc_blog_author` (`name`, `email`, `bio`, `status`, `sort_order`, `date_added`, `date_modified`) VALUES
