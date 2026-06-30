@@ -89,3 +89,9 @@ $_['error_priority']        = 'Priority must be between 0.0 and 1.0';
 $_['error_max_urls']        = 'Max URLs must be between 1000 and 1000000';
 $_['error_max_file_size_mb'] = 'Max file size must be between 1 and 1024 MB';
 $_['error_cache_seconds']    = 'Cache duration must be between 60 and 31536000 seconds';
+
+$_['entry_scheduler_schedule'] = 'Cron Schedule';
+$_['text_scheduler_prefix']   = 'Automatic regeneration runs';
+$_['text_scheduler_active']   = 'Active';
+$_['text_scheduler_inactive'] = 'Inactive';
+$_['text_scheduler_hint']     = 'Managed by DockerCart Scheduler. Schedule can be changed in the Scheduler panel.';
