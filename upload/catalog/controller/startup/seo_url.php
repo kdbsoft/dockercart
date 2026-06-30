@@ -140,7 +140,7 @@ class ControllerStartupSeoUrl extends Controller
      * Initialize request state properties
      * Called once at the beginning of index() to avoid repeated calculations
      */
-    private function initializeRequestState()
+    public function initializeRequestState()
     {
         $method = isset($this->request->server["REQUEST_METHOD"])
             ? strtoupper($this->request->server["REQUEST_METHOD"])
