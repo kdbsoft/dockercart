@@ -74,3 +74,9 @@ $_['text_tab_license_subtitle'] = 'Настройки лицензионного
 $_['text_verify_public_key_required'] = 'Сначала сохраните публичный ключ перед проверкой лицензии';
 $_['text_weekly'] = 'Еженедельно';
 $_['text_yearly'] = 'Ежегодно';
+
+$_['entry_scheduler_schedule'] = 'Расписание Cron';
+$_['text_scheduler_prefix']   = 'Автоматическая генерация выполняется';
+$_['text_scheduler_active']   = 'Активно';
+$_['text_scheduler_inactive'] = 'Неактивно';
+$_['text_scheduler_hint']     = 'Управляется планировщиком DockerCart. Расписание можно изменить в панели планировщика.';

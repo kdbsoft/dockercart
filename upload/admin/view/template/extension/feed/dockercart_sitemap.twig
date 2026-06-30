@@ -82,6 +82,24 @@
                   </div>
                 </div>
               </div>
+
+              {% if scheduler_schedule %}
+              <div class="form-group">
+                <label class="col-sm-3 control-label">{{ entry_scheduler_schedule }}</label>
+                <div class="col-sm-9">
+                  <div class="alert alert-info" style="margin-bottom:0;">
+                    <i class="fa fa-clock-o"></i>
+                    {{ text_scheduler_prefix }} <code>{{ scheduler_schedule }}</code>
+                    {% if scheduler_enabled %}
+                    <span class="label label-success">{{ text_scheduler_active }}</span>
+                    {% else %}
+                    <span class="label label-default">{{ text_scheduler_inactive }}</span>
+                    {% endif %}
+                    <div class="dcx-sitemap-url">{{ text_scheduler_hint }}</div>
+                  </div>
+                </div>
+              </div>
+              {% endif %}
             </div>
 
             <div class="dcx-section">
