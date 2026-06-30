@@ -119,7 +119,7 @@
                   <td>{{ column_mode }}</td>
                   <td>{{ column_status }}</td>
                   <td>{{ column_last_run }}</td>
-                  <td>{{ column_cron_command }}</td>
+                  <td>{{ entry_cron_schedule }}</td>
                   <td class="text-right">{{ column_action }}</td>
                 </tr>
               </thead>
@@ -155,9 +155,11 @@
                     {% endif %}
                   </td>
                   <td>
-                    <code style="white-space: normal; word-break: break-word;">
-php {{ cron_base_path }} --profile_id={{ profile.profile_id }} --cron_key={{ profile.cron_key }}
-                    </code>
+                    <select name="cron_schedule[{{ profile.profile_id }}]" class="form-control" style="min-width:140px" onchange="changeSchedule({{ profile.profile_id }}, this.value);">
+                      {% for value, label in schedule_options %}
+                      <option value="{{ value }}"{% if profile.cron_schedule == value %} selected{% endif %}>{{ label }}</option>
+                      {% endfor %}
+                    </select>
                   </td>
                   <td class="text-right">
                     <button type="button" class="btn btn-primary btn-xs" onclick="runImport({{ profile.profile_id }}, this);" data-toggle="tooltip" title="{{ button_import_now }}"><i class="fa fa-play"></i></button>
@@ -525,6 +527,17 @@ function openProfileModal(profile) {
     html += '            </div>';
     html += '          </div>';
 
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label">{{ entry_cron_schedule }}</label>';
+    html += '            <div class="col-sm-9">';
+    html += '              <select name="cron_schedule" class="form-control">';
+    {% for value, label in schedule_options %}
+    html += '                <option value="{{ value }}"' + (String(profile.cron_schedule || '') === '{{ value }}' ? ' selected' : '') + '>{{ label|e('js') }}</option>';
+    {% endfor %}
+    html += '              </select>';
+    html += '            </div>';
+    html += '          </div>';
+
     html += '        </form>';
     html += '      </div>';
     html += '      <div class="modal-footer">';
@@ -592,6 +605,36 @@ function deleteProfile(profileId) {
         },
         error: function(xhr, ajaxOptions, thrownError) {
             showImportNotice('danger', thrownError);
+        }
+    });
+}
+
+function changeSchedule(profileId, schedule) {
+    $.ajax({
+        url: '{{ ajax_get_profile }}&profile_id=' + profileId,
+        type: 'get',
+        dataType: 'json',
+        success: function(json) {
+            if (json.success && json.profile) {
+                var payload = json.profile;
+                payload.cron_schedule = schedule;
+                payload.cron_enabled = schedule ? 1 : 0;
+                $.ajax({
+                    url: '{{ ajax_save_profile }}',
+                    type: 'post',
+                    data: JSON.stringify(payload),
+                    contentType: 'application/json',
+                    dataType: 'json',
+                    success: function(saveJson) {
+                        if (!saveJson.success) {
+                            showImportNotice('danger', (saveJson.error || '{{ error_save_failed }}'));
+                        }
+                    },
+                    error: function(xhr, ajaxOptions, thrownError) {
+                        showImportNotice('danger', thrownError);
+                    }
+                });
+            }
         }
     });
 }

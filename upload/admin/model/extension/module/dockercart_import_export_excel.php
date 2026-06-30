@@ -23,7 +23,6 @@ class ModelExtensionModuleDockercartImportExportExcel extends Model {
             `extra_settings_json` longtext,
             `status` tinyint(1) NOT NULL DEFAULT '1',
             `cron_key` varchar(64) NOT NULL,
-            `last_run` datetime DEFAULT NULL,
             `last_result` longtext,
             `date_added` datetime NOT NULL,
             `date_modified` datetime NOT NULL,
@@ -104,7 +103,18 @@ class ModelExtensionModuleDockercartImportExportExcel extends Model {
                 `date_modified` = NOW()"
         );
 
-        return (int)$this->db->getLastId();
+		$profile_id = (int)$this->db->getLastId();
+
+		$this->dockercart_scheduler->registerProfileTask(
+			'import_excel',
+			$profile_id,
+			(string)$data['name'],
+			'php /var/www/html/bin/dockercart_import_export_excel_run.php --profile_id=%d --action=import',
+			(string)$this->getData($data, 'cron_schedule', ''),
+			(bool)$this->getData($data, 'cron_enabled', 0)
+		);
+
+        return $profile_id;
     }
 
     public function updateProfile($profile_id, $data) {
@@ -141,11 +151,22 @@ class ModelExtensionModuleDockercartImportExportExcel extends Model {
                 `date_modified` = NOW()
             WHERE `profile_id` = '" . (int)$profile_id . "'"
         );
+
+		$this->dockercart_scheduler->registerProfileTask(
+			'import_excel',
+			(int)$profile_id,
+			(string)$data['name'],
+			'php /var/www/html/bin/dockercart_import_export_excel_run.php --profile_id=%d --action=import',
+			(string)$this->getData($data, 'cron_schedule', ''),
+			(bool)$this->getData($data, 'cron_enabled', 0)
+		);
     }
 
     public function deleteProfile($profile_id) {
         $this->db->query("DELETE FROM `" . DB_PREFIX . "dockercart_import_export_excel_row_map` WHERE `profile_id` = '" . (int)$profile_id . "'");
         $this->db->query("DELETE FROM `" . DB_PREFIX . "dockercart_import_export_excel_profile` WHERE `profile_id` = '" . (int)$profile_id . "'");
+
+		$this->dockercart_scheduler->unregisterProfileTask('import_excel', (int)$profile_id);
     }
 
     public function previewSourceRows($profile, $limit = 10) {

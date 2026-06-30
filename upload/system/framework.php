@@ -92,6 +92,12 @@ if ($config->get('db_autostart')) {
 
 	// Sync PHP and DB time zones
 	$db->query("SET time_zone = '" . $db->escape(date('P')) . "'");
+
+	// DockerCart Scheduler (admin only) — register in registry for universal access
+	if ($application_config === 'admin') {
+		require_once DIR_SYSTEM . 'library/dockercart/scheduler.php';
+		$registry->set('dockercart_scheduler', new DockercartScheduler($registry));
+	}
 }
 
 // Session

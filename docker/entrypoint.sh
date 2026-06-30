@@ -419,35 +419,6 @@ initialize_manticore_index() {
     ) &
 }
 
-# Основная логика
-# Emit a small diagnostic header so logs show which entrypoint version ran.
-# We print the script modification time (as embedded in the image at build time)
-# and the current UTC timestamp. This helps quickly identify whether the
-# running container uses the updated entrypoint after rebuilds.
-script_mtime="$(stat -c '%y' "$0" 2>/dev/null || echo 'unknown')"
-echo "Entrypoint: $0 (modified: ${script_mtime})"
-echo "Entrypoint started at UTC: $(date -u '+%Y-%m-%d %H:%M:%S')"
-
-echo "Starting DockerCart container..."
-
-# Исправляем права на смонтированные volume'ы (первое действие!)
-fix_permissions
-
-# Устанавливаем Composer зависимости, если vendor отсутствует (первый запуск / свежий clone)
-install_composer_deps
-
-# Создаем конфиги приложения, если отсутствуют
-ensure_app_configs
-
-# Генерируем robots.txt, если отсутствует
-ensure_robots_txt
-
-# Ждем MariaDB
-wait_for_mysql
-
-# Инициализация БД (если MariaDB пропустила init из-за существующего volume)
-initialize_database || echo "WARNING: Database initialization failed — continuing anyway"
-
 # Применяем PHP настройки из переменных окружения (если заданы)
 apply_php_settings() {
     local ini_file="/usr/local/etc/php/conf.d/zzz-dockercart-env.ini"
@@ -467,6 +438,45 @@ PHP
 
     echo "Applied PHP settings from environment (${ini_file})"
 }
+
+# Основная логика
+# Emit a small diagnostic header so logs show which entrypoint version ran.
+# We print the script modification time (as embedded in the image at build time)
+# and the current UTC timestamp. This helps quickly identify whether the
+# running container uses the updated entrypoint after rebuilds.
+script_mtime="$(stat -c '%y' "$0" 2>/dev/null || echo 'unknown')"
+echo "Entrypoint: $0 (modified: ${script_mtime})"
+echo "Entrypoint started at UTC: $(date -u '+%Y-%m-%d %H:%M:%S')"
+
+echo "Starting DockerCart container..."
+
+# Исправляем права на смонтированные volume'ы (первое действие!)
+fix_permissions
+
+# Устанавливаем Composer зависимости, если vendor отсутствует (первый запуск / свежий clone)
+install_composer_deps
+
+# Scheduler role: lightweight startup, no Apache/OCMOD/Manticore
+if [ "$DOCKERCART_ROLE" = "scheduler" ]; then
+    ensure_app_configs
+    wait_for_mysql
+    apply_php_settings
+    mkdir -p /var/www/storage/logs/scheduler
+    echo "Starting DockerCart scheduler..."
+    exec php /var/www/html/bin/dockercart_scheduler.php
+fi
+
+# Создаем конфиги приложения, если отсутствуют
+ensure_app_configs
+
+# Генерируем robots.txt, если отсутствует
+ensure_robots_txt
+
+# Ждем MariaDB
+wait_for_mysql
+
+# Инициализация БД (если MariaDB пропустила init из-за существующего volume)
+initialize_database || echo "WARNING: Database initialization failed — continuing anyway"
 
 apply_php_settings
 

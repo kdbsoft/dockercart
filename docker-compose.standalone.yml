@@ -123,6 +123,77 @@ services:
     networks:
       - dockercart-network
 
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: dockercart_apache:latest
+    container_name: ${SCHEDULER_CONTAINER_NAME:-dockercart_scheduler}
+    restart: ${RESTART_POLICY:-unless-stopped}
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+      - FOWNER
+      - DAC_OVERRIDE
+    mem_limit: ${SCHEDULER_MEM_LIMIT:-512M}
+    cpus: ${SCHEDULER_CPUS:-1.0}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    volumes:
+      - ./upload:/var/www/html:z
+      - ./storage:/var/www/storage:z
+      - ./VERSION:/var/www/VERSION:ro,z
+      - ./docker/mysql/init.sql:/opt/dockercart-seed/init.sql:ro,z
+      - ./composer.json:/var/www/composer.json:ro,z
+      - ./composer.lock:/var/www/composer.lock:ro,z
+    environment:
+      - DOCKERCART_ROLE=scheduler
+      - DB_HOSTNAME=${DB_HOSTNAME:-mariadb}
+      - DB_USERNAME=${DB_USERNAME:-dockercart}
+      - DB_PASSWORD=${DB_PASSWORD:-dockercart_password}
+      - DB_DATABASE=${DB_DATABASE:-dockercart}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_PREFIX=${DB_PREFIX:-oc_}
+      - DOCKERCART_URL=${DOCKERCART_URL:-http://dockercart.local}
+      - DOCKERCART_HTTPS_URL=${DOCKERCART_HTTPS_URL:-http://dockercart.local}
+      - DOCKERCART_SSL_ENABLED=${DOCKERCART_SSL_ENABLED:-false}
+      - CACHE_ENGINE=${CACHE_ENGINE:-redis}
+      - REDIS_HOSTNAME=${REDIS_HOSTNAME:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-dockercart_redis_pass}
+      - MEMCACHED_HOSTNAME=${MEMCACHED_HOSTNAME:-memcached}
+      - MEMCACHED_PORT=${MEMCACHED_PORT:-11211}
+      - CACHE_HOSTNAME=${CACHE_HOSTNAME:-memcached}
+      - CACHE_PORT=${CACHE_PORT:-11211}
+      - CACHE_PREFIX=${CACHE_PREFIX:-oc_}
+      - TZ=${TZ:-UTC}
+      - PHP_MEMORY_LIMIT=${PHP_MEMORY_LIMIT:-256M}
+      - PHP_UPLOAD_MAX_FILESIZE=${PHP_UPLOAD_MAX_FILESIZE:-100M}
+      - PHP_POST_MAX_SIZE=${PHP_POST_MAX_SIZE:-100M}
+      - PHP_MAX_EXECUTION_TIME=${PHP_MAX_EXECUTION_TIME:-300}
+      - SCHEDULER_ENABLED=${SCHEDULER_ENABLED:-true}
+      - SCHEDULER_POLL_INTERVAL=${SCHEDULER_POLL_INTERVAL:-60}
+      - SCHEDULER_WORKER_TIMEOUT=${SCHEDULER_WORKER_TIMEOUT:-3600}
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    networks:
+      - dockercart-network
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f dockercart_scheduler.php || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
   mariadb:
     image: mariadb:11.8
     container_name: ${MARIADB_CONTAINER_NAME:-dockercart_mariadb}

@@ -179,3 +179,14 @@ $_['text_license_type_label'] = 'Тип';
 $_['text_license_lifetime'] = 'Бессрочная лицензия';
 $_['text_license_id_label'] = 'ID лицензии';
 $_['text_error_label'] = 'Ошибка';
+
+// Schedule
+$_['entry_cron_schedule'] = 'Расписание';
+$_['text_cron_disabled'] = 'Отключено';
+$_['text_every_15m'] = 'Каждые 15 минут';
+$_['text_every_30m'] = 'Каждые 30 минут';
+$_['text_hourly'] = 'Ежечасно';
+$_['text_every_6h'] = 'Каждые 6 часов';
+$_['text_every_12h'] = 'Каждые 12 часов';
+$_['text_daily'] = 'Ежедневно';
+$_['text_custom'] = 'Настраиваемое';
