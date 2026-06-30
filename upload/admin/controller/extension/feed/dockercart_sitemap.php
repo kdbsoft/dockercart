@@ -175,6 +175,12 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
 
         $data['generate_ajax'] = $this->url->link('extension/feed/dockercart_sitemap/ajaxGenerate', 'user_token=' . $this->session->data['user_token'], true);
 
+        // Scheduler info
+        $tasks = $this->dockercart_scheduler->getTasksByType('dockercart_sitemap_generate');
+        $task = !empty($tasks) ? $tasks[0] : null;
+        $data['scheduler_schedule'] = $task ? ($task['schedule'] ?? '') : '';
+        $data['scheduler_enabled']  = $task ? (int)($task['enabled'] ?? 0) : 0;
+
 
 
         $module_settings = $this->model_setting_setting->getSetting('module_dockercart_sitemap');
@@ -470,56 +476,44 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
         $this->model_setting_setting->editSetting('module_dockercart_sitemap', $defaults);
         $this->model_setting_setting->editSettingValue('feed_dockercart_sitemap', 'feed_dockercart_sitemap_status', 0);
 
+        // Register scheduled sitemap generation task
+        $this->dockercart_scheduler->registerTask(
+            'dockercart_sitemap_generate',
+            'Sitemap Generate',
+            'php /var/www/html/bin/dockercart_sitemap_generate.php',
+            '0 3 * * *'
+        );
 
 
+
+        // Write a minimal .htaccess only if one does not already exist.
+        // sitemap.xml is a static file — Apache serves it directly when present.
         $webroot = DIR_APPLICATION . '../';
         $htaccess = $webroot . '.htaccess';
 
-        $marker_start = "# DockerCart Sitemap - BEGIN\n";
-        $marker_end = "# DockerCart Sitemap - END\n";
+        if (!file_exists($htaccess)) {
+            try {
+                $rules = "# OpenCart SEO URL Rules - BEGIN\n"
+                    . "<IfModule mod_rewrite.c>\n"
+                    . "RewriteEngine On\n"
+                    . "RewriteBase /\n"
+                    . "RewriteCond %{REQUEST_FILENAME} !-f\n"
+                    . "RewriteRule ^sitemap\\.xml$ index.php?route=extension/feed/google_sitemap [L]\n"
+                    . "RewriteRule ^googlebase\\.xml$ index.php?route=extension/feed/google_base [L]\n"
+                    . "RewriteRule ^install(/.*)?$ index.php?route=error/not_found [L]\n"
+                    . "RewriteRule ^system/storage/(.*) index.php?route=error/not_found [L]\n"
+                    . "RewriteCond %{REQUEST_FILENAME} !-f\n"
+                    . "RewriteCond %{REQUEST_FILENAME} !-d\n"
+                    . "RewriteCond %{REQUEST_URI} !.*\\.(ico|gif|jpg|jpeg|png|js|css)\n"
+                    . "RewriteRule ^([^?]*) index.php?_route_=$1 [L,QSA]\n"
+                    . "</IfModule>\n"
+                    . "# OpenCart SEO URL Rules - END\n";
 
-        $snippet = $marker_start
-            . "<IfModule mod_rewrite.c>\n"
-            . "RewriteEngine On\n"
-            . "RewriteRule ^sitemap\\.xml$ index.php?route=extension/feed/dockercart_sitemap [L,QSA]\n"
-            . "</IfModule>\n"
-            . $marker_end;
-
-        $standard_rules = "# OpenCart SEO URL Rules - BEGIN\n"
-            . "<IfModule mod_rewrite.c>\n"
-            . "RewriteEngine On\n"
-            . "RewriteBase /\n"
-            . "RewriteRule ^sitemap\\.xml$ index.php?route=extension/feed/google_sitemap [L]\n"
-            . "RewriteRule ^googlebase\\.xml$ index.php?route=extension/feed/google_base [L]\n"
-            . "RewriteRule ^install(/.*)?$ index.php?route=error/not_found [L]\n"
-            . "RewriteRule ^system/storage/(.*) index.php?route=error/not_found [L]\n"
-            . "RewriteCond %{REQUEST_FILENAME} !-f\n"
-            . "RewriteCond %{REQUEST_FILENAME} !-d\n"
-            . "RewriteCond %{REQUEST_URI} !.*\\.(ico|gif|jpg|jpeg|png|js|css)\n"
-            . "RewriteRule ^([^?]*) index.php?_route_=$1 [L,QSA]\n"
-            . "</IfModule>\n"
-            . "# OpenCart SEO URL Rules - END\n";
-
-        try {
-            if (file_exists($htaccess)) {
-                $content = @file_get_contents($htaccess);
-                if ($content !== false) {
-
-                    if (strpos($content, 'DockerCart Sitemap - BEGIN') === false) {
-                        @copy($htaccess, $htaccess . '.bak.' . time());
-
-                        $content = $snippet . "\n" . $content;
-                        @file_put_contents($htaccess, $content, LOCK_EX);
-                    }
-                }
-            } else {
-                $content = $snippet . "\n" . $standard_rules;
-                @file_put_contents($htaccess, $content, LOCK_EX);
+                @file_put_contents($htaccess, $rules, LOCK_EX);
                 @chmod($htaccess, 0644);
+            } catch (\Throwable $e) {
+                $this->logger->info('DockerCart Sitemap: failed to create .htaccess: ' . $e->getMessage());
             }
-        } catch (\Throwable $e) {
-
-            $this->logger->info('DockerCart Sitemap: failed to update .htaccess: ' . $e->getMessage());
         }
     }
 
@@ -529,26 +523,15 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
         $this->load->model('setting/setting');
         $this->model_setting_setting->deleteSetting('dockercart_sitemap');
 
+        // Unregister scheduled sitemap generation task
+        $this->dockercart_scheduler->unregisterTask('dockercart_sitemap_generate');
+
 
         $files = glob(DIR_APPLICATION . '../sitemap*.xml');
         if ($files) {
             foreach ($files as $file) {
                 if (is_file($file)) {
                     @unlink($file);
-                }
-            }
-        }
-
-
-        $webroot = DIR_APPLICATION . '../';
-        $htaccess = $webroot . '.htaccess';
-        if (file_exists($htaccess)) {
-            $content = @file_get_contents($htaccess);
-            if ($content !== false) {
-
-                $new = preg_replace('/# DockerCart Sitemap - BEGIN[\s\S]*?# DockerCart Sitemap - END\n?/i', '', $content);
-                if ($new !== null && $new !== $content) {
-                    @file_put_contents($htaccess, $new, LOCK_EX);
                 }
             }
         }
