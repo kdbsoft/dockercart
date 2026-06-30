@@ -1,6 +1,7 @@
 <?php
 $_['heading_title']              = 'WayForPay';
 
+$_['text_wayforpay']             = '<a href="https://wayforpay.com/" target="_blank"><img src="view/image/payment/wayforpay.png" alt="WayForPay" title="WayForPay" style="border: 1px solid #EEEEEE;" width="150" /></a>';
 $_['text_extension']             = 'Расширения';
 $_['text_success']               = 'Успех: Вы изменили данные WayForPay!';
 $_['text_edit']                  = 'Редактировать WayForPay';
