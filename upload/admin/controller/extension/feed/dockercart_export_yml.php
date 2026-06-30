@@ -493,8 +493,14 @@ class ControllerExtensionFeedDockercartExportYml extends Controller {
         // Ensure feed list has a dedicated status key
         $this->model_setting_setting->editSettingValue('feed_dockercart_export_yml', 'feed_dockercart_export_yml_status', 0);
 
-        $this->installHtaccessRewrite();
-        
+        // Register scheduled feed generation task
+        $this->dockercart_scheduler->registerTask(
+            'dockercart_export_yml_generate',
+            'Export YML Generate',
+            'php /var/www/html/bin/dockercart_export_yml_generate.php',
+            '0 4 * * *'
+        );
+
         $this->logger->info('DockerCart Export YML installed');
     }
 
@@ -504,7 +510,10 @@ class ControllerExtensionFeedDockercartExportYml extends Controller {
     public function uninstall() {
         $this->load->model('extension/feed/dockercart_export_yml');
         $this->model_extension_feed_dockercart_export_yml->uninstall();
-        
+
+        // Unregister scheduled feed generation task
+        $this->dockercart_scheduler->unregisterTask('dockercart_export_yml_generate');
+
         // Remove all generated files
         $webroot = DIR_APPLICATION . '../';
         $files = glob($webroot . 'export-yml-*.xml');
@@ -516,63 +525,9 @@ class ControllerExtensionFeedDockercartExportYml extends Controller {
             @unlink($file);
         }
 
-        $this->removeHtaccessRewrite();
-        
         $this->logger->info('DockerCart Export YML uninstalled');
     }
 
-    /**
-     * Install .htaccess rewrite snippet for export-yml XML links.
-     */
-    private function installHtaccessRewrite() {
-        $webroot = DIR_APPLICATION . '../';
-        $htaccess = $webroot . '.htaccess';
-
-        $marker_start = "# DockerCart Export YML - BEGIN\n";
-        $marker_end = "# DockerCart Export YML - END\n";
-
-        $snippet = $marker_start
-            . "<IfModule mod_rewrite.c>\n"
-            . "RewriteEngine On\n"
-            . "RewriteRule ^export-yml-([0-9]+)(-[a-z]{2}-[a-z]{2})?(-part-[0-9]+)?\\.xml$ index.php?route=extension/feed/dockercart_export_yml&file=$0 [L,QSA]\n"
-            . "</IfModule>\n"
-            . $marker_end;
-
-        try {
-            if (file_exists($htaccess)) {
-                $content = @file_get_contents($htaccess);
-                if ($content !== false && strpos($content, 'DockerCart Export YML - BEGIN') === false) {
-                    @copy($htaccess, $htaccess . '.bak.' . time());
-                    $content = $snippet . "\n" . $content;
-                    @file_put_contents($htaccess, $content, LOCK_EX);
-                }
-            }
-        } catch (\Throwable $e) {
-            $this->logger->warning('DockerCart Export YML: failed to update .htaccess: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Remove .htaccess rewrite snippet for export-yml XML links.
-     */
-    private function removeHtaccessRewrite() {
-        $webroot = DIR_APPLICATION . '../';
-        $htaccess = $webroot . '.htaccess';
-
-        if (!file_exists($htaccess)) {
-            return;
-        }
-
-        $content = @file_get_contents($htaccess);
-        if ($content === false) {
-            return;
-        }
-
-        $new = preg_replace('/# DockerCart Export YML - BEGIN[\s\S]*?# DockerCart Export YML - END\n?/i', '', $content);
-        if ($new !== null && $new !== $content) {
-            @file_put_contents($htaccess, $new, LOCK_EX);
-        }
-    }
 
     /**
      * Validate form submission
