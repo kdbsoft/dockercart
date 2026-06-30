@@ -146,7 +146,6 @@ $_['tab_transaction'] = 'Операции';
 $_['tab_voucher'] = 'Подарочные сертификаты';
 $_['tab_sale'] = 'Продажи';
 $_['tab_marketing'] = 'Маркетинг';
-$_['tab_online'] = 'Покупатели онлайн';
 $_['tab_activity'] = 'Последняя активность';
 $_['tab_action'] = 'Действие';
 $_['tab_google'] = 'Google';

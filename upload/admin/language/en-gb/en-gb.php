@@ -138,7 +138,6 @@ $_['tab_transaction']               = 'Transactions';
 $_['tab_voucher']                   = 'Vouchers';
 $_['tab_sale']                      = 'Sales';
 $_['tab_marketing']                 = 'Marketing';
-$_['tab_online']                    = 'People Online';
 $_['tab_activity']                  = 'Recent Activity';
 $_['tab_action']                    = 'Action';
 $_['tab_google']                    = 'Google';
