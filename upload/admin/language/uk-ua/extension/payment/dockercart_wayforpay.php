@@ -1,7 +1,7 @@
 <?php
 $_['heading_title']              = 'WayForPay';
 
-$_['text_wayforpay']             = '<a href="https://wayforpay.com/" target="_blank"><img src="view/image/payment/wayforpay.png" alt="WayForPay" title="WayForPay" style="border: 1px solid #EEEEEE;" width="150" /></a>';
+$_['text_dockercart_wayforpay']  = '<a href="https://wayforpay.com/" target="_blank"><img src="view/image/payment/dockercart_wayforpay.png" alt="WayForPay" title="WayForPay" style="border: 1px solid #EEEEEE;" width="150" /></a>';
 $_['text_extension']             = 'Розширення';
 $_['text_success']               = 'Успіх: Ви змінили дані WayForPay!';
 $_['text_edit']                  = 'Редагувати WayForPay';
