@@ -49,6 +49,15 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
             }
             $this->model_setting_setting->editSetting('module_dockercart_sitemap', $module_data);
 
+            // Update scheduler task
+            $tasks = $this->dockercart_scheduler->getTasksByType('dockercart_sitemap_generate');
+            $task = !empty($tasks) ? $tasks[0] : null;
+            if ($task) {
+                $schedule = $this->request->post['dockercart_sitemap_schedule'] ?? $task['cron_schedule'];
+                $this->dockercart_scheduler->setSchedule((int)$task['task_id'], $schedule);
+                $this->dockercart_scheduler->setEnabled((int)$task['task_id'], !empty($schedule));
+            }
+
             $this->session->data['success'] = $this->language->get('text_success');
 
             $this->response->redirect($this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=feed', true));
@@ -108,7 +117,6 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
             'dockercart_sitemap_information_changefreq',
             'dockercart_sitemap_max_urls',
             'dockercart_sitemap_max_file_size_mb'
-            ,'dockercart_sitemap_cache_seconds'
             ,'dockercart_sitemap_create_gzip'
         );
 
@@ -150,9 +158,6 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
         if (!isset($data['dockercart_sitemap_max_file_size_mb'])) {
             $data['dockercart_sitemap_max_file_size_mb'] = '50';
         }
-        if (!isset($data['dockercart_sitemap_cache_seconds'])) {
-            $data['dockercart_sitemap_cache_seconds'] = '86400';
-        }
         if (!isset($data['dockercart_sitemap_create_gzip'])) {
             $data['dockercart_sitemap_create_gzip'] = 0;
         }
@@ -170,16 +175,44 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
 
         $data['sitemap_url'] = HTTP_CATALOG . 'sitemap.xml';
 
-        $data['last_generated'] = $this->config->get('dockercart_sitemap_last_generated');
-        $data['sitemap_file_count'] = (int)$this->config->get('dockercart_sitemap_file_count');
+        $sitemap_files = glob(DIR_APPLICATION . '../sitemap*.xml');
+        $sitemap_gzfiles = glob(DIR_APPLICATION . '../sitemap*.xml.gz');
+        $sitemap_all = array_merge($sitemap_files ?: [], $sitemap_gzfiles ?: []);
+        if (!empty($sitemap_all)) {
+            $latest_mtime = 0;
+            foreach ($sitemap_all as $sf) {
+                $mt = filemtime($sf);
+                if ($mt > $latest_mtime) {
+                    $latest_mtime = $mt;
+                }
+            }
+            $data['last_generated'] = date('c', $latest_mtime);
+        } else {
+            $data['last_generated'] = '';
+        }
+        $data['sitemap_file_count'] = count(array_unique($sitemap_all));
 
         $data['generate_ajax'] = $this->url->link('extension/feed/dockercart_sitemap/ajaxGenerate', 'user_token=' . $this->session->data['user_token'], true);
 
         // Scheduler info
         $tasks = $this->dockercart_scheduler->getTasksByType('dockercart_sitemap_generate');
         $task = !empty($tasks) ? $tasks[0] : null;
-        $data['scheduler_schedule'] = $task ? ($task['schedule'] ?? '') : '';
-        $data['scheduler_enabled']  = $task ? (int)($task['enabled'] ?? 0) : 0;
+
+        $data['schedule_options'] = array(
+            ''          => $this->language->get('text_cron_disabled'),
+            'every_15m' => $this->language->get('text_every_15m'),
+            'every_30m' => $this->language->get('text_every_30m'),
+            'hourly'    => $this->language->get('text_hourly'),
+            'every_6h'  => $this->language->get('text_every_6h'),
+            'every_12h' => $this->language->get('text_every_12h'),
+            'daily'     => $this->language->get('text_daily'),
+        );
+
+        if (isset($this->request->post['dockercart_sitemap_schedule'])) {
+            $data['dockercart_sitemap_schedule'] = $this->request->post['dockercart_sitemap_schedule'];
+        } else {
+            $data['dockercart_sitemap_schedule'] = $task ? ($task['cron_schedule'] ?? 'daily') : 'daily';
+        }
 
 
 
@@ -236,8 +269,6 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
     $data['help_max_urls'] = $this->language->get('help_max_urls');
     $data['entry_max_file_size_mb'] = $this->language->get('entry_max_file_size_mb');
     $data['help_max_file_size_mb'] = $this->language->get('help_max_file_size_mb');
-    $data['entry_cache_seconds'] = $this->language->get('entry_cache_seconds');
-    $data['help_cache_seconds'] = $this->language->get('help_cache_seconds');
 
     // Simple inline labels (no lang file required for backward compatibility)
     $data['entry_create_gzip'] = 'Create gzipped sitemap files';
@@ -363,38 +394,14 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
             });
 
 
+            $cli_script = DIR_APPLICATION . '../bin/dockercart_sitemap_generate.php';
+            $cmd = sprintf('php %s 2>&1', escapeshellarg($cli_script));
+            $output = [];
+            $return_code = 0;
+            exec($cmd, $output, $return_code);
 
-            $catalog_url = (defined('HTTP_CATALOG') ? rtrim(HTTP_CATALOG, '/') : rtrim($this->config->get('config_url'), '/')) . '/index.php?route=extension/feed/dockercart_sitemap';
-
-            $catalog_url .= '&regenerate=1&admin_request=1';
-
-
-            @array_map('unlink', glob(DIR_APPLICATION . '../sitemap*.xml'));
-
-
-            if (function_exists('curl_init')) {
-                $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, $catalog_url);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-                curl_setopt($ch, CURLOPT_TIMEOUT, 120);
-
-                curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-                $response = curl_exec($ch);
-                $curl_errno = curl_errno($ch);
-                $curl_error = curl_error($ch);
-                $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-                if ($curl_errno || $http_code >= 400) {
-                    throw new \RuntimeException('Catalog generation failed: ' . ($curl_error ?: 'HTTP ' . $http_code));
-                }
-            } else {
-
-                $context = stream_context_create(array('http' => array('timeout' => 120)));
-                $response = @file_get_contents($catalog_url, false, $context);
-                if ($response === false) {
-                    throw new \RuntimeException('Catalog generation failed: file_get_contents error');
-                }
+            if ($return_code !== 0) {
+                throw new \RuntimeException('Catalog generation failed: ' . implode("\n", $output));
             }
 
 
@@ -405,23 +412,22 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
             $gzfiles = glob(DIR_APPLICATION . '../sitemap*.xml.gz');
             $files = $files ?: array();
             $gzfiles = $gzfiles ?: array();
-            // Merge and keep unique
             $files = array_values(array_unique(array_merge($files, $gzfiles)));
 
-
-            $this->load->model('setting/setting');
-            $last_generated = date('c');
+            if (!empty($files)) {
+                $latest_mtime = 0;
+                foreach ($files as $sf) {
+                    $mt = filemtime($sf);
+                    if ($mt > $latest_mtime) {
+                        $latest_mtime = $mt;
+                    }
+                }
+                $last_generated = date('c', $latest_mtime);
+            } else {
+                $last_generated = '';
+            }
             $file_count = count($files);
 
-
-            $current_settings = $this->model_setting_setting->getSetting('dockercart_sitemap');
-
-
-            $current_settings['dockercart_sitemap_last_generated'] = $last_generated;
-            $current_settings['dockercart_sitemap_file_count'] = $file_count;
-
-
-            $this->model_setting_setting->editSetting('dockercart_sitemap', $current_settings);
 
             $json['success'] = $this->language->get('text_generated');
             $json['files'] = array();
@@ -466,8 +472,9 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
             'dockercart_sitemap_information_changefreq' => 'monthly',
             'dockercart_sitemap_max_urls' => '50000',
             'dockercart_sitemap_max_file_size_mb' => '50',
-            'dockercart_sitemap_cache_seconds' => '86400',
             'dockercart_sitemap_create_gzip' => 0,
+            'dockercart_sitemap_schedule' => 'daily',
+            'dockercart_sitemap_autogenerate' => 0,
             'module_dockercart_sitemap_license_key' => '',
             'module_dockercart_sitemap_public_key' => ''
         );
@@ -545,13 +552,6 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
             $max_mb = $this->request->post['dockercart_sitemap_max_file_size_mb'];
             if (!ctype_digit((string)$max_mb) || (int)$max_mb < 1 || (int)$max_mb > 1024) {
                 $this->error['warning'] = $this->language->get('error_max_file_size_mb');
-            }
-        }
-
-        if (isset($this->request->post['dockercart_sitemap_cache_seconds'])) {
-            $cache = $this->request->post['dockercart_sitemap_cache_seconds'];
-            if (!ctype_digit((string)$cache) || (int)$cache < 60 || (int)$cache > 31536000) {
-                $this->error['warning'] = $this->language->get('error_cache_seconds');
             }
         }
 

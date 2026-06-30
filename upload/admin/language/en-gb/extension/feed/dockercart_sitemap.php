@@ -68,11 +68,9 @@ $_['help_changefreq']   = 'How often the page content changes';
 $_['entry_limits_heading'] = 'Sitemap Limits';
 $_['entry_max_urls']    = 'Maximum URLs per File';
 $_['entry_max_file_size_mb'] = 'Maximum File Size (MB)';
-$_['entry_cache_seconds'] = 'Cache Duration (seconds)';
 
 $_['help_max_urls']     = 'Maximum number of URLs in one XML file. Default: 50000';
 $_['help_max_file_size_mb'] = 'Maximum file size in megabytes. Default: 50';
-$_['help_cache_seconds'] = 'How long to cache sitemap data in seconds. Default: 86400 (24 hours)';
 
 $_['text_always']      = 'Always';
 $_['text_hourly']      = 'Hourly';
@@ -88,10 +86,18 @@ $_['error_license_invalid']  = 'Invalid or expired license key';
 $_['error_priority']        = 'Priority must be between 0.0 and 1.0';
 $_['error_max_urls']        = 'Max URLs must be between 1000 and 1000000';
 $_['error_max_file_size_mb'] = 'Max file size must be between 1 and 1024 MB';
-$_['error_cache_seconds']    = 'Cache duration must be between 60 and 31536000 seconds';
 
 $_['entry_scheduler_schedule'] = 'Cron Schedule';
 $_['text_scheduler_prefix']   = 'Automatic regeneration runs';
 $_['text_scheduler_active']   = 'Active';
 $_['text_scheduler_inactive'] = 'Inactive';
 $_['text_scheduler_hint']     = 'Managed by DockerCart Scheduler. Schedule can be changed in the Scheduler panel.';
+$_['entry_autogenerate']      = 'Auto-generate';
+$_['entry_schedule']          = 'Schedule';
+$_['help_schedule']           = 'Automatic sitemap regeneration schedule';
+$_['text_cron_disabled']      = 'Disabled';
+$_['text_every_15m']          = 'Every 15 min';
+$_['text_every_30m']          = 'Every 30 min';
+$_['text_hourly']             = 'Hourly';
+$_['text_every_6h']           = 'Every 6 hours';
+$_['text_every_12h']          = 'Every 12 hours';
