@@ -83,23 +83,17 @@
                 </div>
               </div>
 
-              {% if scheduler_schedule %}
               <div class="form-group">
-                <label class="col-sm-3 control-label">{{ entry_scheduler_schedule }}</label>
+                <label class="col-sm-3 control-label" for="input-schedule">{{ entry_schedule }}</label>
                 <div class="col-sm-9">
-                  <div class="alert alert-info" style="margin-bottom:0;">
-                    <i class="fa fa-clock-o"></i>
-                    {{ text_scheduler_prefix }} <code>{{ scheduler_schedule }}</code>
-                    {% if scheduler_enabled %}
-                    <span class="label label-success">{{ text_scheduler_active }}</span>
-                    {% else %}
-                    <span class="label label-default">{{ text_scheduler_inactive }}</span>
-                    {% endif %}
-                    <div class="dcx-sitemap-url">{{ text_scheduler_hint }}</div>
-                  </div>
+                  <select name="dockercart_sitemap_schedule" id="input-schedule" class="form-control">
+                    {% for value, label in schedule_options %}
+                      <option value="{{ value }}" {% if value == dockercart_sitemap_schedule %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                  <p class="help-block">{{ help_schedule }}</p>
                 </div>
               </div>
-              {% endif %}
             </div>
 
             <div class="dcx-section">
@@ -335,16 +329,6 @@
             <div class="col-sm-9">
               <input type="text" name="dockercart_sitemap_max_file_size_mb" value="{{ dockercart_sitemap_max_file_size_mb }}" placeholder="50" class="form-control" />
               <p class="help-block">{{ help_max_file_size_mb }}</p>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="col-sm-3 control-label">
-              <span data-toggle="tooltip" title="{{ help_cache_seconds }}">{{ entry_cache_seconds }}</span>
-            </label>
-            <div class="col-sm-9">
-              <input type="text" name="dockercart_sitemap_cache_seconds" value="{{ dockercart_sitemap_cache_seconds }}" placeholder="86400" class="form-control" />
-              <p class="help-block">{{ help_cache_seconds }}</p>
             </div>
           </div>
 
