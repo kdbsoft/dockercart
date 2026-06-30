@@ -19062,7 +19062,7 @@ INSERT INTO `oc_setting` VALUES
 (23136,0,'config','config_images','[]',1),
 (23137,0,'config','config_country_id','220',0),
 (23138,0,'config','config_zone_id','3490',0),
-(23139,0,'config','config_timezone','Europe/Kyiv',0),
+(23139,0,'config','config_timezone','UTC',0),
 (23140,0,'config','config_language','en-gb',0),
 (23141,0,'config','config_admin_language','en-gb',0),
 (23142,0,'config','config_currency','UAH',0),

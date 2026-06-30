@@ -27,6 +27,8 @@ services:
       nofile:
         soft: 4096
         hard: 4096
+    environment:
+      - TZ=${TZ:-UTC}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.${DOCKERCART_ROUTER_NAME:-dockercart}.rule=Host(`${DOCKERCART_DOMAIN:-dockercart.local}`)"
@@ -289,6 +291,8 @@ services:
     security_opt:
       - no-new-privileges:true
     command: ["memcached", "-m", "128", "-p", "11211", "-u", "memcache"]
+    environment:
+      - TZ=${TZ:-UTC}
     logging:
       driver: "none"
     networks:
@@ -310,6 +314,8 @@ services:
     security_opt:
       - no-new-privileges:true
     command: ["redis-server", "--appendonly", "no", "--save", "", "--maxmemory", "${REDIS_MAXMEMORY:-256mb}", "--maxmemory-policy", "allkeys-lru", "--requirepass", "${REDIS_PASSWORD:-dockercart_redis_pass}"]
+    environment:
+      - TZ=${TZ:-UTC}
     logging:
       driver: "none"
     networks:
@@ -332,6 +338,7 @@ services:
         max-size: "10m"
         max-file: "3"
     environment:
+      TZ: ${TZ:-UTC}
       FTP_USER: ${FTP_USER:-images}
       FTP_PASS: ${FTP_PASS:-change_me_please}
       FTP_USER_HOME: /home/vsftpd/${FTP_USER:-images}

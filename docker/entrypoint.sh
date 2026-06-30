@@ -430,6 +430,7 @@ memory_limit = ${PHP_MEMORY_LIMIT:-256M}
 max_execution_time = ${PHP_MAX_EXECUTION_TIME:-300}
 upload_max_filesize = ${PHP_UPLOAD_MAX_FILESIZE:-100M}
 post_max_size = ${PHP_POST_MAX_SIZE:-100M}
+date.timezone = ${TZ:-UTC}
 PHP
 
     if [ "${DOCKERCART_SSL_ENABLED:-false}" = "true" ] || [ "${DOCKERCART_FORCE_SSL:-0}" -eq 1 ]; then

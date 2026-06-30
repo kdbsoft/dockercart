@@ -30,6 +30,8 @@ services:
         max-file: "3"
     ports:
       - "${DOCKERCART_HTTP_PORT:-80}:80"
+    environment:
+      - TZ=${TZ:-UTC}
     volumes:
       - ./upload:/var/www/html:ro
       - ./storage:/var/www/storage:ro
@@ -273,6 +275,8 @@ services:
     security_opt:
       - no-new-privileges:true
     command: ["memcached", "-m", "128", "-p", "11211", "-u", "memcache"]
+    environment:
+      - TZ=${TZ:-UTC}
     logging:
       driver: "none"
     networks:
@@ -294,6 +298,8 @@ services:
     security_opt:
       - no-new-privileges:true
     command: ["redis-server", "--appendonly", "no", "--save", "", "--maxmemory", "${REDIS_MAXMEMORY:-256mb}", "--maxmemory-policy", "allkeys-lru", "--requirepass", "${REDIS_PASSWORD:-dockercart_redis_pass}"]
+    environment:
+      - TZ=${TZ:-UTC}
     logging:
       driver: "none"
     networks:
