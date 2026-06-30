@@ -149,13 +149,11 @@ class ControllerMarketplaceExtension extends Controller {
 						$sort_order = (string)$this->config->get($type . '_' . $code . '_sort_order');
 					}
 
-					// Payment external link
+					// External link / logo
 					$ext_link = '';
-					if ($type === 'payment') {
-						$text_link = $this->language->get('ext_lang')->get('text_' . $code);
-						if ($text_link !== 'text_' . $code) {
-							$ext_link = $text_link;
-						}
+					$text_link = $this->language->get('ext_lang')->get('text_' . $code);
+					if ($text_link !== 'text_' . $code) {
+						$ext_link = $text_link;
 					}
 
 				$extensions[] = array(
