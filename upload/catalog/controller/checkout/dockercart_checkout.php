@@ -2605,54 +2605,6 @@ class ControllerCheckoutDockercartCheckout extends Controller
                         $method_data[$code] = $method_item;
                     }
                 } else {
-                    // Add extra diagnostics for common built-in methods
-                    if ($result["code"] === "cod") {
-                        try {
-                            $cod_geo = (int) $this->config->get(
-                                "payment_cod_geo_zone_id",
-                            );
-                            $cod_total_threshold = (float) $this->config->get(
-                                "payment_cod_total",
-                            );
-                            $hasShipping = $this->cart->hasShipping()
-                                ? "1"
-                                : "0";
-                            $query = $this->db->query(
-                                "SELECT COUNT(*) AS cnt FROM " .
-                                    DB_PREFIX .
-                                    "zone_to_geo_zone WHERE geo_zone_id = '" .
-                                    $cod_geo .
-                                    "' AND country_id = '" .
-                                    (int) $this->session->data[
-                                        "payment_address"
-                                    ]["country_id"] .
-                                    "' AND (zone_id = '" .
-                                    (int) $this->session->data[
-                                        "payment_address"
-                                    ]["zone_id"] .
-                                    "' OR zone_id = '0')",
-                            );
-                            $this->logger->debug(
-                                "COD diagnostics: geo_zone_id=" .
-                                    $cod_geo .
-                                    ", threshold=" .
-                                    $cod_total_threshold .
-                                    ", hasShipping=" .
-                                    $hasShipping .
-                                    ", geo_match_count=" .
-                                    ($query->row["cnt"] ?? 0),
-                            );
-                        } catch (Exception $e) {
-                        }
-                    }
-
-                    if ($result["code"] === "free_checkout") {
-                        $this->logger->debug(
-                            "Free checkout diagnostics: cart_total=" .
-                                (float) $this->cart->getTotal(),
-                        );
-                    }
-
                     $this->logger->debug(
                         "Payment method " .
                             $result["code"] .
