@@ -54,14 +54,14 @@ $_['entry_show_author'] = 'Show Author';
 $_['entry_show_date']  = 'Show Date';
 $_['entry_show_views'] = 'Show Views';
 $_['entry_latest_limit'] = 'Latest Posts Limit';
-$_['entry_sitemap']    = 'Add to Sitemap';
+
 
 // Help
 $_['help_posts_per_page'] = 'Number of posts per page in listing (recommended 10-20)';
 $_['help_moderate_comments'] = 'Comments require approval before publishing';
 $_['help_captcha']     = 'Spam protection when adding comments';
 $_['help_latest_limit'] = 'Number of posts in "Latest Posts" widget (1-20)';
-$_['help_sitemap']     = 'Automatically add blog posts to XML sitemap';
+
 
 // Error
 $_['error_permission'] = 'Warning: You do not have permission to modify this module!';

@@ -1061,9 +1061,14 @@ class ControllerExtensionFeedDockercartGooglebase extends Controller {
 
         $this->model_setting_setting->editSetting('module_dockercart_googlebase', $defaults);
         $this->model_setting_setting->editSettingValue('feed_dockercart_googlebase', 'feed_dockercart_googlebase_status', 0);
-        
-        // Add rewrite rules to .htaccess
-        $this->updateHtaccess(true);
+
+        // Register scheduled feed generation task
+        $this->dockercart_scheduler->registerTask(
+            'dockercart_googlebase_generate',
+            'Google Base Generate',
+            'php /var/www/html/bin/dockercart_googlebase_generate.php',
+            '0 4 * * *'
+        );
     }
 
     /**
@@ -1074,6 +1079,9 @@ class ControllerExtensionFeedDockercartGooglebase extends Controller {
         $this->load->model('setting/setting');
         $this->model_setting_setting->deleteSetting('module_dockercart_googlebase');
 
+        // Unregister scheduled feed generation task
+        $this->dockercart_scheduler->unregisterTask('dockercart_googlebase_generate');
+
         // Remove feed files (use DIR_CATALOG for correct path)
         $files = glob(DIR_CATALOG . '../google-base*.xml');
         if ($files) {
@@ -1081,81 +1089,7 @@ class ControllerExtensionFeedDockercartGooglebase extends Controller {
                 @unlink($file);
             }
         }
-        
-        // Remove .htaccess rules
-        $this->updateHtaccess(false);
     }
     
-    /**
-     * Update .htaccess with Google Base rewrite rules
-     * 
-     * @param bool $install True to add rules, false to remove
-     */
-    protected function updateHtaccess($install = true) {
-        $webroot = DIR_CATALOG . '../';
-        $htaccess = $webroot . '.htaccess';
-        
-        $marker_start = "# DockerCart Google Base - BEGIN\n";
-        $marker_end = "# DockerCart Google Base - END\n";
-        
-        $snippet = $marker_start
-            . "<IfModule mod_rewrite.c>\n"
-            . "RewriteEngine On\n"
-            . "RewriteRule ^google-base(-[a-z-]+)?(-\\d+)?\\.xml$ index.php?route=extension/feed/dockercart_googlebase&file=$0 [L,QSA]\n"
-            . "</IfModule>\n"
-            . $marker_end;
-
-        $standard_rules = "# OpenCart SEO URL Rules - BEGIN\n"
-            . "<IfModule mod_rewrite.c>\n"
-            . "RewriteEngine On\n"
-            . "RewriteBase /\n"
-            . "RewriteRule ^sitemap\\.xml$ index.php?route=extension/feed/google_sitemap [L]\n"
-            . "RewriteRule ^googlebase\\.xml$ index.php?route=extension/feed/google_base [L]\n"
-            . "RewriteRule ^install(/.*)?$ index.php?route=error/not_found [L]\n"
-            . "RewriteRule ^system/storage/(.*) index.php?route=error/not_found [L]\n"
-            . "RewriteCond %{REQUEST_FILENAME} !-f\n"
-            . "RewriteCond %{REQUEST_FILENAME} !-d\n"
-            . "RewriteCond %{REQUEST_URI} !.*\\.(ico|gif|jpg|jpeg|png|js|css)\n"
-            . "RewriteRule ^([^?]*) index.php?_route_=$1 [L,QSA]\n"
-            . "</IfModule>\n"
-            . "# OpenCart SEO URL Rules - END\n";
-
-        try {
-            if ($install) {
-                // Add rules
-                if (file_exists($htaccess)) {
-                    $content = @file_get_contents($htaccess);
-                    if ($content !== false) {
-                        // Check if already exists
-                        if (strpos($content, 'DockerCart Google Base - BEGIN') === false) {
-                            // Backup original
-                            @copy($htaccess, $htaccess . '.bak.' . time());
-
-                            // Add at the beginning
-                            $content = $snippet . "\n" . $content;
-                            @file_put_contents($htaccess, $content, LOCK_EX);
-                        }
-                    }
-                } else {
-                    // Create new .htaccess
-                    $content = $snippet . "\n" . $standard_rules;
-                    @file_put_contents($htaccess, $content, LOCK_EX);
-                    @chmod($htaccess, 0644);
-                }
-            } else {
-                // Remove rules
-                if (file_exists($htaccess)) {
-                    $content = @file_get_contents($htaccess);
-                    if ($content !== false) {
-                        $new = preg_replace('/# DockerCart Google Base - BEGIN[\s\S]*?# DockerCart Google Base - END\n?/i', '', $content);
-                        if ($new !== null && $new !== $content) {
-                            @file_put_contents($htaccess, $new, LOCK_EX);
-                        }
-                    }
-                }
-            }
-        } catch (\Throwable $e) {
-            $this->logger->info('DockerCart Google Base: failed to update .htaccess: ' . $e->getMessage());
-        }
-    }
 }
+

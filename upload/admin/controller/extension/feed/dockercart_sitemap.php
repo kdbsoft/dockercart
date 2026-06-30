@@ -498,7 +498,6 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
                     . "RewriteEngine On\n"
                     . "RewriteBase /\n"
                     . "RewriteCond %{REQUEST_FILENAME} !-f\n"
-                    . "RewriteRule ^sitemap\\.xml$ index.php?route=extension/feed/google_sitemap [L]\n"
                     . "RewriteRule ^googlebase\\.xml$ index.php?route=extension/feed/google_base [L]\n"
                     . "RewriteRule ^install(/.*)?$ index.php?route=error/not_found [L]\n"
                     . "RewriteRule ^system/storage/(.*) index.php?route=error/not_found [L]\n"

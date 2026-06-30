@@ -9,7 +9,6 @@
  * Description: Core library for blog functionality including:
  *              - Event handlers
  *              - SEO helpers
- *              - Sitemap generation (streaming)
  *              - URL rewriting
  *              - Utility functions
  */
@@ -73,73 +72,6 @@ class DockercartBlog {
 			AND language_id = '" . (int)$language_id . "'");
 		
 		return $result->num_rows ? $result->row['keyword'] : '';
-	}
-	
-	/**
-	 * Generate sitemap XML for blog posts (streaming)
-	 * 
-	 * @param resource $handle File handle for output
-	 * @param int $store_id Store ID
-	 * @param int $language_id Language ID
-	 */
-	public function generateSitemap($handle, $store_id = 0, $language_id = 1) {
-		// Get all published posts
-		$query = $this->db->query("SELECT bp.post_id, bp.date_modified, bpd.name 
-			FROM `" . DB_PREFIX . "blog_post` bp
-			LEFT JOIN `" . DB_PREFIX . "blog_post_description` bpd ON (bp.post_id = bpd.post_id)
-			LEFT JOIN `" . DB_PREFIX . "blog_post_to_store` bps ON (bp.post_id = bps.post_id)
-			WHERE bp.status = '1' 
-			AND bp.date_published <= NOW()
-			AND bpd.language_id = '" . (int)$language_id . "'
-			AND bps.store_id = '" . (int)$store_id . "'
-			ORDER BY bp.date_modified DESC");
-		
-		foreach ($query->rows as $post) {
-			$keyword = $this->getSeoUrl('post', $post['post_id'], $language_id);
-			
-			if ($keyword) {
-				$url = $this->getStoreUrl($store_id) . $keyword;
-			} else {
-				$url = $this->getStoreUrl($store_id) . 'index.php?route=blog/post&blog_post_id=' . $post['post_id'];
-			}
-			
-			// Write directly to handle (streaming)
-			fwrite($handle, "\t<url>\n");
-			fwrite($handle, "\t\t<loc>" . htmlspecialchars($url, ENT_XML1) . "</loc>\n");
-			fwrite($handle, "\t\t<lastmod>" . date('Y-m-d', strtotime($post['date_modified'])) . "</lastmod>\n");
-			fwrite($handle, "\t\t<changefreq>weekly</changefreq>\n");
-			fwrite($handle, "\t\t<priority>0.6</priority>\n");
-			fwrite($handle, "\t</url>\n");
-			
-			// Free memory
-			unset($post);
-		}
-		
-		// Categories
-		$query = $this->db->query("SELECT bc.category_id, bc.date_modified 
-			FROM `" . DB_PREFIX . "blog_category` bc
-			LEFT JOIN `" . DB_PREFIX . "blog_category_to_store` bcs ON (bc.category_id = bcs.category_id)
-			WHERE bc.status = '1' 
-			AND bcs.store_id = '" . (int)$store_id . "'");
-		
-		foreach ($query->rows as $category) {
-			$keyword = $this->getSeoUrl('category', $category['category_id'], $language_id);
-			
-			if ($keyword) {
-				$url = $this->getStoreUrl($store_id) . $keyword;
-			} else {
-				$url = $this->getStoreUrl($store_id) . 'index.php?route=blog/category&blog_category_id=' . $category['category_id'];
-			}
-			
-			fwrite($handle, "\t<url>\n");
-			fwrite($handle, "\t\t<loc>" . htmlspecialchars($url, ENT_XML1) . "</loc>\n");
-			fwrite($handle, "\t\t<lastmod>" . date('Y-m-d', strtotime($category['date_modified'])) . "</lastmod>\n");
-			fwrite($handle, "\t\t<changefreq>weekly</changefreq>\n");
-			fwrite($handle, "\t\t<priority>0.7</priority>\n");
-			fwrite($handle, "\t</url>\n");
-			
-			unset($category);
-		}
 	}
 	
 	/**
