@@ -24,7 +24,6 @@
  * @property Document                      $document
  * @property Encryption                    $encryption
  * @property Event                         $event
- * @property googleshopping\Googleshopping $googleshopping
  * @property Language                      $language
  * @property Loader                        $load
  * @property Log                           $log
