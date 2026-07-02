@@ -88,13 +88,14 @@ class ControllerExtensionCurrencyEcb extends Controller {
 			'currency_refresh',
 			'Currency Refresh',
 			'php /var/www/html/bin/dockercart_currency_refresh.php',
-			'every_15m',
+			'daily',
 			true
 		);
 	}
 
 
 	public function uninstall() {
+		$this->dockercart_scheduler->unregisterTask('currency_refresh');
 	}
 
 
