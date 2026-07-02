@@ -6,28 +6,15 @@ $_['text_home']        = 'Home';
 $_['text_extension']   = 'Extensions';
 $_['text_success']     = 'Success: You have modified Sitemap module!';
 $_['text_edit']        = 'Edit Sitemap Module';
-$_['text_module_subtitle'] = 'Configure sitemap generation, content rules, and license settings';
+$_['text_module_subtitle'] = 'Configure sitemap generation and content rules';
 $_['text_enabled']     = 'Enabled';
 $_['text_disabled']    = 'Disabled';
 $_['text_tab_general']   = 'General';
-$_['text_tab_license']   = 'License';
 $_['text_tab_about']     = 'About';
 $_['text_tab_general_subtitle'] = 'Sitemap status, URL, content types and generation limits';
-$_['text_tab_license_subtitle'] = 'License key and signature verification settings';
 $_['text_tab_about_subtitle'] = 'Module information and support contacts';
 
-$_['text_license']     = 'License Information';
-$_['text_license_domain'] = 'License bound to domain';
-$_['text_verify_public_key_required'] = 'Please save the public key first before verifying the license';
-
 $_['entry_status']     = 'Status';
-$_['entry_license_key'] = 'License Key';
-$_['entry_public_key']  = 'Public Key';
-
-$_['help_license_key']  = 'Enter your license key purchased from marketplace';
-$_['help_public_key']   = 'RSA Public Key for license verification. Provided by vendor.';
-
-$_['button_verify_license'] = 'Verify License';
 $_['button_save']       = 'Save';
 $_['button_cancel']     = 'Cancel';
 $_['button_generate']   = 'Generate Sitemap';
@@ -36,7 +23,6 @@ $_['text_sitemap_url']  = 'Sitemap URL';
 $_['text_generated']    = 'Sitemap generated successfully!';
 $_['text_section_module_settings'] = 'Module Settings';
 $_['text_section_content_types'] = 'Content Types';
-$_['text_section_license_info'] = 'License Information';
 $_['text_section_limits'] = 'Sitemap Limits';
 $_['text_developer'] = 'Developer';
 $_['text_developer_name'] = 'DockerCart Team';
@@ -81,8 +67,6 @@ $_['text_yearly']      = 'Yearly';
 $_['text_never']       = 'Never';
 
 $_['error_permission']      = 'Warning: You do not have permission to modify Sitemap module!';
-$_['error_license_required'] = 'License key is required to use this module';
-$_['error_license_invalid']  = 'Invalid or expired license key';
 $_['error_priority']        = 'Priority must be between 0.0 and 1.0';
 $_['error_max_urls']        = 'Max URLs must be between 1000 and 1000000';
 $_['error_max_file_size_mb'] = 'Max file size must be between 1 and 1024 MB';
