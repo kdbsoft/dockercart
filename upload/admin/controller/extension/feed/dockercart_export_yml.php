@@ -209,6 +209,19 @@ class ControllerExtensionFeedDockercartExportYml extends Controller {
         $this->load->model('catalog/manufacturer');
         $data['manufacturers'] = $this->model_catalog_manufacturer->getManufacturers(array());
 
+        // Schedule options for per-profile cron
+        $data['entry_cron_schedule'] = $this->language->get('entry_cron_schedule');
+        $data['column_schedule'] = $this->language->get('column_schedule');
+        $data['schedule_options'] = array(
+            ''          => $this->language->get('text_cron_disabled'),
+            'every_15m' => $this->language->get('text_every_15m'),
+            'every_30m' => $this->language->get('text_every_30m'),
+            'hourly'    => $this->language->get('text_hourly'),
+            'every_6h'  => $this->language->get('text_every_6h'),
+            'every_12h' => $this->language->get('text_every_12h'),
+            'daily'     => $this->language->get('text_daily'),
+        );
+
         // License verification
         $data['license_valid'] = false;
         $data['license_message'] = '';
@@ -375,7 +388,7 @@ class ControllerExtensionFeedDockercartExportYml extends Controller {
 
             $json['success'] = true;
             $json['message'] = 'YML feed generated successfully';
-            $json['url'] = HTTP_CATALOG . 'export-yml-' . $profile_id . '-' . (string)$this->config->get('config_language') . '.xml';
+            $json['url'] = HTTP_CATALOG . 'index.php?route=extension/feed/dockercart_export_yml&profile_id=' . $profile_id;
         } catch (Exception $e) {
             $json['success'] = false;
             $json['error'] = $e->getMessage();
@@ -493,12 +506,11 @@ class ControllerExtensionFeedDockercartExportYml extends Controller {
         // Ensure feed list has a dedicated status key
         $this->model_setting_setting->editSettingValue('feed_dockercart_export_yml', 'feed_dockercart_export_yml_status', 0);
 
-        // Register scheduled feed generation task
+        // Register scheduled feed generation task type (per-profile tasks created on profile save)
         $this->dockercart_scheduler->registerTask(
-            'dockercart_export_yml_generate',
-            'Export YML Generate',
-            'php /var/www/html/bin/dockercart_export_yml_generate.php',
-            '0 4 * * *'
+            'export_yml',
+            'Export YML',
+            'php /var/www/html/bin/dockercart_export_yml_generate.php --profile_id=%d'
         );
 
         $this->logger->info('DockerCart Export YML installed');
@@ -511,8 +523,8 @@ class ControllerExtensionFeedDockercartExportYml extends Controller {
         $this->load->model('extension/feed/dockercart_export_yml');
         $this->model_extension_feed_dockercart_export_yml->uninstall();
 
-        // Unregister scheduled feed generation task
-        $this->dockercart_scheduler->unregisterTask('dockercart_export_yml_generate');
+        // Unregister scheduled feed generation task type (removes all per-profile tasks)
+        $this->dockercart_scheduler->unregisterTask('export_yml');
 
         // Remove all generated files
         $webroot = DIR_APPLICATION . '../';

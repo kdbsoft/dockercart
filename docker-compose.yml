@@ -291,8 +291,6 @@ services:
     security_opt:
       - no-new-privileges:true
     command: ["memcached", "-m", "128", "-p", "11211", "-u", "memcache"]
-    environment:
-      - TZ=${TZ:-UTC}
     logging:
       driver: "none"
     networks:

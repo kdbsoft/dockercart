@@ -124,12 +124,16 @@
                 </div>
               </div>
 
-              <!-- Cache Hours -->
+              <!-- Schedule -->
               <div class="form-group">
-                <label class="col-sm-2 control-label" for="input-cache-hours">{{ entry_cache_hours|default('Cache Duration (hours)') }}</label>
+                <label class="col-sm-2 control-label" for="input-schedule">{{ entry_schedule|default('Auto generate') }}</label>
                 <div class="col-sm-10">
-                  <input type="number" name="module_dockercart_googlebase_cache_hours" value="{{ module_dockercart_googlebase_cache_hours }}" id="input-cache-hours" class="form-control" min="1" max="168" />
-                  <span class="help-block">{{ help_cache_hours|default('How long to cache the feed. Default: 24 hours. Range: 1-168 hours') }}</span>
+                  <select name="module_dockercart_googlebase_schedule" id="input-schedule" class="form-control">
+                    {% for value, label in schedule_options %}
+                      <option value="{{ value }}" {% if value == module_dockercart_googlebase_schedule %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                  <span class="help-block">{{ help_schedule|default('Automatic feed regeneration schedule') }}</span>
                 </div>
               </div>
 
@@ -634,7 +638,7 @@ document.getElementById('btn-generate').addEventListener('click', function() {
     
     showAlert('info', 'Generating feed... This may take a while for large catalogs.');
     
-    fetch('index.php?route=extension/feed/dockercart_googlebase/generate&user_token={{ user_token }}', {
+    fetch('index.php?route=extension/feed/dockercart_googlebase/ajaxGenerate&user_token={{ user_token }}', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
     })

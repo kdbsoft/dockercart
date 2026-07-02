@@ -115,3 +115,14 @@ $_['entry_split_files'] = 'Split Large Files';
 $_['entry_products_per_file'] = 'Products Per File';
 $_['help_split_files'] = 'Split large catalogs into multiple files with index';
 $_['help_products_per_file'] = 'Maximum products per file (recommended: 10,000-50,000)';
+
+// Schedule
+$_['entry_cron_schedule'] = 'Schedule';
+$_['column_schedule'] = 'Schedule';
+$_['text_cron_disabled'] = 'Disabled';
+$_['text_every_15m'] = 'Every 15 min';
+$_['text_every_30m'] = 'Every 30 min';
+$_['text_hourly'] = 'Hourly';
+$_['text_every_6h'] = 'Every 6 hours';
+$_['text_every_12h'] = 'Every 12 hours';
+$_['text_daily'] = 'Daily';
