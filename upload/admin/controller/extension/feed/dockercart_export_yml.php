@@ -134,7 +134,6 @@ class ControllerExtensionFeedDockercartExportYml extends Controller {
             'dockercart_export_yml_shop_name',
             'dockercart_export_yml_company',
             'dockercart_export_yml_max_products',
-            'dockercart_export_yml_cache_ttl',
             'dockercart_export_yml_split_files',
             'dockercart_export_yml_products_per_file',
         );
@@ -170,9 +169,6 @@ class ControllerExtensionFeedDockercartExportYml extends Controller {
         // Defaults
         if (empty($data['dockercart_export_yml_max_products'])) {
             $data['dockercart_export_yml_max_products'] = 50000;
-        }
-        if (empty($data['dockercart_export_yml_cache_ttl'])) {
-            $data['dockercart_export_yml_cache_ttl'] = 3600;
         }
         if (empty($data['dockercart_export_yml_products_per_file'])) {
             $data['dockercart_export_yml_products_per_file'] = 10000;
