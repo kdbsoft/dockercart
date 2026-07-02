@@ -151,7 +151,7 @@ class ControllerExtensionFeedDockercartExportYml extends Controller {
         // Settings
         $split_files = !empty($profile['split_files']);
         $products_per_file = (int)($profile['products_per_file'] ?: 10000);
-        $cache_ttl = (int)$profile['cache_ttl'];
+        $cache_ttl = 3600;
         $regenerate = isset($this->request->get['regenerate']) && $this->request->get['regenerate'] == '1';
         $lock_timeout = 1800; // 30 minutes
         $lock_warning = 600;  // Warn at 10 minutes
@@ -343,7 +343,7 @@ class ControllerExtensionFeedDockercartExportYml extends Controller {
             if ($currency['status']) {
                 $xml->startElement('currency');
                 $xml->writeAttribute('id', $currency['code']);
-                $xml->writeAttribute('rate', $currency['code'] == $main_currency ? '1' : $currency['value']);
+                $xml->writeAttribute('rate', $currency['code'] == $main_currency ? '1' : number_format($this->currency->convert(1, $currency['code'], $main_currency), 8, '.', ''));
                 $xml->endElement();
             }
         }
