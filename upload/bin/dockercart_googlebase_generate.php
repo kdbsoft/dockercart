@@ -101,6 +101,24 @@ try {
 	$session->data = ['language' => $config->get('config_language') ?: 'en-gb'];
 	$registry->set('session', $session);
 
+	// Request — required by model_tool_image->resize() for HTTPS detection
+	$registry->set('request', new Request());
+
+	// Language — required by Cart\Currency
+	$language = new Language($config->get('language_directory'));
+	$registry->set('language', $language);
+
+	// Currency — required by catalog controller's formatPrice()
+	$registry->set('currency', new \Cart\Currency($registry));
+
+	// Register SEO URL rewriter so $url->link() returns clean SEO URLs
+	if ($config->get('config_seo_url')) {
+		require_once DIR_APPLICATION . 'controller/startup/seo_url.php';
+		$seoUrl = new ControllerStartupSeoUrl($registry);
+		$seoUrl->initializeRequestState();
+		$url->addRewrite($seoUrl);
+	}
+
 	// ── Load and run the googlebase controller ───────────────────────
 	$controller_file = DIR_APPLICATION . 'controller/extension/feed/dockercart_googlebase.php';
 	if (!is_file($controller_file)) {

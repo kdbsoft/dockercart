@@ -168,6 +168,7 @@
                       <td class="text-left">{{ column_store }}</td>
                       <td class="text-left">{{ column_currency }}</td>
                       <td class="text-left">Feed URLs</td>
+                      <td class="text-left">{{ column_schedule }}</td>
                       <td class="text-center">{{ column_status }}</td>
                       <td class="text-right">{{ column_action }}</td>
                     </tr>
@@ -188,6 +189,13 @@
                             <i class="fa fa-file-code-o"></i> {{ language.name }}
                           </a>
                         {% endfor %}
+                      </td>
+                      <td class="text-left">
+                        <select name="cron_schedule[{{ profile.profile_id }}]" class="form-control" style="min-width:140px" onchange="changeSchedule({{ profile.profile_id }}, this.value);">
+                          {% for value, label in schedule_options %}
+                          <option value="{{ value }}"{% if profile.cron_schedule == value %} selected{% endif %}>{{ label }}</option>
+                          {% endfor %}
+                        </select>
                       </td>
                       <td class="text-center">
                         {% if profile.status %}
@@ -347,6 +355,36 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function addProfile() {
     showProfileModal();
+}
+
+function changeSchedule(profileId, schedule) {
+    $.ajax({
+        url: '{{ ajax_get_profile }}&profile_id=' + profileId,
+        type: 'get',
+        dataType: 'json',
+        success: function(json) {
+            if (json.success && json.profile) {
+                var payload = json.profile;
+                payload.cron_schedule = schedule;
+                payload.cron_enabled = schedule ? 1 : 0;
+                $.ajax({
+                    url: '{{ ajax_save_profile }}',
+                    type: 'post',
+                    data: JSON.stringify(payload),
+                    contentType: 'application/json',
+                    dataType: 'json',
+                    success: function(saveJson) {
+                        if (!saveJson.success) {
+                            showNotification('danger', saveJson.error || 'Failed to save schedule');
+                        }
+                    },
+                    error: function(xhr, ajaxOptions, thrownError) {
+                        showNotification('danger', thrownError);
+                    }
+                });
+            }
+        }
+    });
 }
 
 function editProfile(profileId) {
@@ -551,6 +589,16 @@ function showProfileModal(profile) {
     html += '              </select>';
     html += '            </div>';
     html += '          </div>';
+    html += '          <div class="form-group">';
+    html += '            <label class="col-sm-3 control-label">{{ entry_cron_schedule }}</label>';
+    html += '            <div class="col-sm-9">';
+    html += '              <select name="cron_schedule" class="form-control">';
+    {% for value, label in schedule_options %}
+    html += '                <option value="{{ value }}"' + (String(profile.cron_schedule || '') === '{{ value }}' ? ' selected' : '') + '>{{ label|e('js') }}</option>';
+    {% endfor %}
+    html += '              </select>';
+    html += '            </div>';
+    html += '          </div>';
     html += '        </form>';
     html += '      </div>';
     html += '      <div class="modal-footer">';
@@ -709,7 +757,7 @@ function generateFeed(profileId, btnEl) {
     showNotification('info', 'Generating YML feed... (new tab will open)');
     
     // Open feed URL in new tab with regenerate flag
-    var feedUrl = '{{ catalog_url }}' + 'index.php?route=extension/feed/dockercart_export_yml&profile_id=' + profileId + '&lang={{ default_language_code }}&regenerate=1';
+    var feedUrl = '{{ catalog_url }}' + 'index.php?route=extension/feed/dockercart_export_yml&profile_id=' + profileId + '&regenerate=1';
     window.open(feedUrl, '_blank');
     
     // Reset button after 2 seconds
