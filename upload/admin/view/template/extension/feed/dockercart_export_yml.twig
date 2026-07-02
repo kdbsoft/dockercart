@@ -5,6 +5,7 @@
     .dc-yml-feed-btn { margin:2px; }
     .dc-yml-actions { white-space:nowrap; display:flex; gap:4px; justify-content:flex-end; flex-wrap:wrap; }
     .dc-yml-section-note { font-size:12px; color:#6f7b8f; margin-bottom:10px; }
+    select.form-control[multiple] { height: auto; min-height: 36px; }
   </style>
   <div class="page-header">
     <div class="container-fluid">
@@ -87,12 +88,7 @@
                   <input type="number" name="dockercart_export_yml_max_products" value="{{ dockercart_export_yml_max_products }}" placeholder="{{ entry_max_products }}" id="input-max-products" class="form-control" />
                 </div>
               </div>
-              <div class="form-group">
-                <label class="col-sm-3 control-label" for="input-cache-ttl"><span data-toggle="tooltip" title="{{ help_cache_ttl }}">{{ entry_cache_ttl }}</span></label>
-                <div class="col-sm-9">
-                  <input type="number" name="dockercart_export_yml_cache_ttl" value="{{ dockercart_export_yml_cache_ttl }}" placeholder="{{ entry_cache_ttl }}" id="input-cache-ttl" class="form-control" />
-                </div>
-              </div>
+
             </div>
           </div>
 
@@ -467,6 +463,7 @@ function showProfileModal(profile) {
     html += '                <option value="{{ category.category_id }}">{{ category.name|e('js') }}</option>';
     {% endfor %}
     html += '              </select>';
+    html += '              <a href="javascript:void(0)" onclick="$(\'#profile-categories\').val(null);" class="text-danger" style="font-size:12px"><i class="fa fa-times-circle"></i> {{ button_clear_selection }}</a> ';
     html += '              <small class="text-muted">{{ help_profile_categories }}</small>';
     html += '              <br><small class="text-info"><i class="fa fa-info-circle"></i> {{ help_profile_multiselect }}</small>';
     html += '            </div>';
@@ -479,6 +476,7 @@ function showProfileModal(profile) {
     html += '                <option value="{{ manufacturer.manufacturer_id }}">{{ manufacturer.name|e('js') }}</option>';
     {% endfor %}
     html += '              </select>';
+    html += '              <a href="javascript:void(0)" onclick="$(\'#profile-manufacturers\').val(null);" class="text-danger" style="font-size:12px"><i class="fa fa-times-circle"></i> {{ button_clear_selection }}</a> ';
     html += '              <small class="text-muted">{{ help_profile_manufacturers }}</small>';
     html += '              <br><small class="text-info"><i class="fa fa-info-circle"></i> {{ help_profile_multiselect }}</small>';
     html += '            </div>';
@@ -487,12 +485,6 @@ function showProfileModal(profile) {
     html += '            <label class="col-sm-3 control-label" for="profile-max-products">Max Products</label>';
     html += '            <div class="col-sm-9">';
     html += '              <input type="number" name="max_products" id="profile-max-products" class="form-control" value="' + (profile.max_products || 50000) + '" />';
-    html += '            </div>';
-    html += '          </div>';
-    html += '          <div class="form-group">';
-    html += '            <label class="col-sm-3 control-label" for="profile-cache-ttl">Cache TTL (seconds)</label>';
-    html += '            <div class="col-sm-9">';
-    html += '              <input type="number" name="cache_ttl" id="profile-cache-ttl" class="form-control" value="' + (profile.cache_ttl || 3600) + '" />';
     html += '            </div>';
     html += '          </div>';
     html += '          <div class="form-group">';
@@ -610,6 +602,19 @@ function showProfileModal(profile) {
     html += '</div>';
     
     $('body').append(html);
+
+    // Pre-select categories and manufacturers from saved filters
+    if (profile.filters && profile.filters.category) {
+        profile.filters.category.forEach(function(id) {
+            $('#profile-categories option[value="' + id + '"]').prop('selected', true);
+        });
+    }
+    if (profile.filters && profile.filters.manufacturer) {
+        profile.filters.manufacturer.forEach(function(id) {
+            $('#profile-manufacturers option[value="' + id + '"]').prop('selected', true);
+        });
+    }
+
     $('#profile-modal').modal('show');
     
     // Toggle products_per_file field visibility
@@ -639,8 +644,9 @@ function saveProfile() {
         
         // Categories and manufacturers go to filters
         if (fieldName === 'categories' || fieldName === 'manufacturers') {
-            if (!filters[fieldName.replace('s', '')]) filters[fieldName.replace('s', '')] = [];
-            filters[fieldName.replace('s', '')].push(field.value);
+            var filterKey = fieldName === 'categories' ? 'category' : 'manufacturer';
+            if (!filters[filterKey]) filters[filterKey] = [];
+            filters[filterKey].push(field.value);
         }
         // Price, quantity, weight filters
         else if (['min_price', 'max_price', 'min_quantity', 'min_weight', 'max_weight', 'product_tag'].indexOf(fieldName) > -1) {

@@ -23,7 +23,6 @@ $_['entry_status'] = 'Status';
 $_['entry_shop_name'] = 'Shop Name';
 $_['entry_company'] = 'Company Name';
 $_['entry_max_products'] = 'Max Products per Feed';
-$_['entry_cache_ttl'] = 'Cache TTL (seconds)';
 $_['entry_split_files'] = 'Split Files';
 $_['entry_products_per_file'] = 'Products per File';
 
@@ -54,6 +53,7 @@ $_['help_profile_name'] = 'Unique name for this export profile';
 $_['help_profile_categories'] = 'Leave empty to export all categories';
 $_['help_profile_manufacturers'] = 'Leave empty to export all manufacturers';
 $_['help_profile_multiselect'] = 'To select multiple values, hold Ctrl (Windows/Linux) or Cmd (Mac) while clicking.';
+$_['button_clear_selection'] = 'Clear selection';
 
 // Buttons
 $_['button_generate'] = 'Generate Feed';
@@ -64,7 +64,6 @@ $_['button_cancel'] = 'Cancel';
 $_['help_shop_name'] = 'Shop name for YML feed';
 $_['help_company'] = 'Company name for YML feed';
 $_['help_max_products'] = 'Maximum number of products to export (default: 50000)';
-$_['help_cache_ttl'] = 'How long to cache generated feed before regenerating (default: 3600)';
 $_['help_split_files'] = 'Split large feeds into multiple files';
 $_['help_products_per_file'] = 'Number of products per file when splitting (default: 10000)';
 

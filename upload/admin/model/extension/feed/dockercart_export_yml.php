@@ -27,7 +27,6 @@ class ModelExtensionFeedDockercartExportYml extends Model {
                 `company_name` varchar(255) NOT NULL DEFAULT '',
                 `status` tinyint(1) NOT NULL DEFAULT '1',
                 `max_products` int(11) NOT NULL DEFAULT '50000',
-                `cache_ttl` int(11) NOT NULL DEFAULT '3600',
                 `split_files` tinyint(1) NOT NULL DEFAULT '0',
                 `products_per_file` int(11) NOT NULL DEFAULT '10000',
                 `settings` text,
@@ -52,9 +51,9 @@ class ModelExtensionFeedDockercartExportYml extends Model {
         // Create default profile
         $this->db->query("
             INSERT INTO `" . DB_PREFIX . "dockercart_export_yml_profile` 
-            (`name`, `store_id`, `currency_code`, `language_id`, `shop_name`, `company_name`, `status`, `max_products`, `cache_ttl`, `date_added`, `date_modified`)
+            (`name`, `store_id`, `currency_code`, `language_id`, `shop_name`, `company_name`, `status`, `max_products`, `date_added`, `date_modified`)
             VALUES 
-            ('Default YML Export', 0, 'USD', 1, 'My Shop', 'My Company', 1, 50000, 3600, NOW(), NOW())
+            ('Default YML Export', 0, 'USD', 1, 'My Shop', 'My Company', 1, 50000, NOW(), NOW())
         ");
     }
 
@@ -173,7 +172,6 @@ class ModelExtensionFeedDockercartExportYml extends Model {
                 `company_name` = '" . $this->db->escape(isset($data['company_name']) ? $data['company_name'] : '') . "',
                 `status` = '" . (int)(isset($data['status']) ? $data['status'] : 1) . "',
                 `max_products` = '" . (int)(isset($data['max_products']) ? $data['max_products'] : 50000) . "',
-                `cache_ttl` = '" . (int)(isset($data['cache_ttl']) ? $data['cache_ttl'] : 3600) . "',
                 `split_files` = '" . (int)(isset($data['split_files']) ? $data['split_files'] : 0) . "',
                 `products_per_file` = '" . (int)(isset($data['products_per_file']) ? $data['products_per_file'] : 10000) . "',
                 `settings` = '" . $this->db->escape(json_encode($settings)) . "',
@@ -224,7 +222,6 @@ class ModelExtensionFeedDockercartExportYml extends Model {
                 `company_name` = '" . $this->db->escape(isset($data['company_name']) ? $data['company_name'] : '') . "',
                 `status` = '" . (int)(isset($data['status']) ? $data['status'] : 1) . "',
                 `max_products` = '" . (int)(isset($data['max_products']) ? $data['max_products'] : 50000) . "',
-                `cache_ttl` = '" . (int)(isset($data['cache_ttl']) ? $data['cache_ttl'] : 3600) . "',
                 `split_files` = '" . (int)(isset($data['split_files']) ? $data['split_files'] : 0) . "',
                 `products_per_file` = '" . (int)(isset($data['products_per_file']) ? $data['products_per_file'] : 10000) . "',
                 `settings` = '" . $this->db->escape(json_encode($settings)) . "',
