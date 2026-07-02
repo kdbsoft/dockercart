@@ -3870,22 +3870,6 @@ CREATE TABLE `oc_dockercart_scheduler_task` (
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Dumping data for table `oc_dockercart_scheduler_task`
---
-
-SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
-LOCK TABLES `oc_dockercart_scheduler_task` WRITE;
-/*!40000 ALTER TABLE `oc_dockercart_scheduler_task` DISABLE KEYS */;
-INSERT INTO `oc_dockercart_scheduler_task` VALUES
-(1,'novapost_sync','NovaPost Sync',0,'0 2 * * *',NULL,NULL,'2026-06-29 13:55:23','2026-06-29 13:55:23',NULL,0,'php /var/www/html/bin/novapost-sync.php',1),
-(2,'currency_refresh','Currency Refresh',1,'every_15m','2026-06-30 05:34:35',NULL,'2026-06-29 13:55:23','2026-06-30 05:34:35',NULL,0,'php /var/www/html/bin/dockercart_currency_refresh.php',1),
-(3,'dockercart_googlebase_generate','Google Base Generate',0,'0 4 * * *',NULL,NULL,'2026-06-30 07:31:07','2026-06-30 07:31:07',NULL,0,'php /var/www/html/bin/dockercart_googlebase_generate.php',1),
-(4,'dockercart_export_yml_generate','Export YML Generate',0,'0 4 * * *',NULL,NULL,'2026-06-30 07:31:59','2026-06-30 07:31:59',NULL,0,'php /var/www/html/bin/dockercart_export_yml_generate.php',1);
-/*!40000 ALTER TABLE `oc_dockercart_scheduler_task` ENABLE KEYS */;
-UNLOCK TABLES;
-COMMIT;
-SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `oc_dockercart_seo_log`
