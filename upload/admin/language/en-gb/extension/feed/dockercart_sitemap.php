@@ -1,11 +1,11 @@
 <?php
 
-$_['heading_title']    = 'DockerCart Sitemap';
+$_['heading_title']    = 'Sitemap';
 
 $_['text_home']        = 'Home';
 $_['text_extension']   = 'Extensions';
-$_['text_success']     = 'Success: You have modified DockerCart Sitemap module!';
-$_['text_edit']        = 'Edit DockerCart Sitemap Module';
+$_['text_success']     = 'Success: You have modified Sitemap module!';
+$_['text_edit']        = 'Edit Sitemap Module';
 $_['text_module_subtitle'] = 'Configure sitemap generation, content rules, and license settings';
 $_['text_enabled']     = 'Enabled';
 $_['text_disabled']    = 'Disabled';
@@ -80,7 +80,7 @@ $_['text_monthly']     = 'Monthly';
 $_['text_yearly']      = 'Yearly';
 $_['text_never']       = 'Never';
 
-$_['error_permission']      = 'Warning: You do not have permission to modify DockerCart Sitemap module!';
+$_['error_permission']      = 'Warning: You do not have permission to modify Sitemap module!';
 $_['error_license_required'] = 'License key is required to use this module';
 $_['error_license_invalid']  = 'Invalid or expired license key';
 $_['error_priority']        = 'Priority must be between 0.0 and 1.0';

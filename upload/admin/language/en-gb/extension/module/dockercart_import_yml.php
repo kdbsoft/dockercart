@@ -1,11 +1,11 @@
 <?php
 // Heading
-$_['heading_title'] = 'DockerCart Import YML';
+$_['heading_title'] = 'Import YML';
 
 // Text
 $_['text_extension'] = 'Extensions';
-$_['text_success'] = 'Success: You have modified DockerCart Import YML module!';
-$_['text_edit'] = 'Edit DockerCart Import YML';
+$_['text_success'] = 'Success: You have modified Import YML module!';
+$_['text_edit'] = 'Edit Import YML';
 $_['text_module_subtitle'] = 'Manage YML import settings, license, and profile execution workflows';
 $_['text_enabled'] = 'Enabled';
 $_['text_disabled'] = 'Disabled';
@@ -105,7 +105,7 @@ $_['column_cron_command'] = 'Cron Command';
 $_['column_action'] = 'Action';
 
 // Error
-$_['error_permission'] = 'Warning: You do not have permission to modify DockerCart Import YML module!';
+$_['error_permission'] = 'Warning: You do not have permission to modify Import YML module!';
 $_['error_license_invalid'] = 'License is invalid';
 $_['error_profile_name_required'] = 'Profile name is required';
 $_['error_feed_url_required'] = 'Feed URL is required';

@@ -11,12 +11,12 @@
  */
 
 // Heading
-$_['heading_title']    = 'DockerCart 1-Click Checkout';
+$_['heading_title']    = '1-Click Checkout';
 
 // Text
 $_['text_extension']   = 'Extensions';
-$_['text_success']     = 'Success: You have modified DockerCart 1-Click Checkout module!';
-$_['text_edit']        = 'Edit DockerCart 1-Click Checkout Module';
+$_['text_success']     = 'Success: You have modified 1-Click Checkout module!';
+$_['text_edit']        = 'Edit 1-Click Checkout Module';
 $_['text_enabled']     = 'Enabled';
 $_['text_disabled']    = 'Disabled';
 $_['text_yes']         = 'Yes';
@@ -84,7 +84,7 @@ $_['button_cancel']    = 'Cancel';
 $_['button_verify_license'] = 'Verify License';
 
 // Error
-$_['error_permission'] = 'Warning: You do not have permission to modify DockerCart 1-Click Checkout module!';
+$_['error_permission'] = 'Warning: You do not have permission to modify 1-Click Checkout module!';
 $_['error_license_invalid'] = 'Invalid license key';
 $_['error_license_required'] = 'A valid license is required for the module to work';
 

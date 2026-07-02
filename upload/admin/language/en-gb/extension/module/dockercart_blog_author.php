@@ -8,7 +8,7 @@
  */
 
 // Heading
-$_['heading_title']     = 'DockerCart Blog - Authors';
+$_['heading_title']     = 'Blog - Authors';
 
 // Text
 $_['text_success']      = 'Success: You have modified blog authors!';

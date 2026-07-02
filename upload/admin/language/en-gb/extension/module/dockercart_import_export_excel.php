@@ -1,11 +1,11 @@
 <?php
 // Heading
-$_['heading_title'] = 'DockerCart Import/Export Excel';
+$_['heading_title'] = 'Import/Export Excel';
 
 // Text
 $_['text_extension'] = 'Extensions';
-$_['text_success'] = 'Success: You have modified DockerCart Import/Export Excel module!';
-$_['text_edit'] = 'Edit DockerCart Import/Export Excel';
+$_['text_success'] = 'Success: You have modified Import/Export Excel module!';
+$_['text_edit'] = 'Edit Import/Export Excel';
 $_['text_module_subtitle'] = 'Manage suppliers, run import/export jobs, and monitor integration status';
 $_['text_tab_import'] = 'Import';
 $_['text_tab_export'] = 'Export';

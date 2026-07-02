@@ -1,6 +1,6 @@
 <?php
 
-$_['heading_title'] = 'DockerCart — Лицензия';
+$_['heading_title'] = 'Лицензия';
 $_['text_license'] = 'Лицензия';
 $_['text_license_key'] = 'Лицензионный ключ';
 $_['text_license_key_help'] = 'Введите ваш лицензионный ключ';

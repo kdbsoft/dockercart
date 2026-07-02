@@ -1,11 +1,11 @@
 <?php
 // Heading
-$_['heading_title'] = 'DockerCart Export YML';
+$_['heading_title'] = 'Export YML';
 
 // Text
 $_['text_extension'] = 'Extensions';
-$_['text_success'] = 'Success: You have modified DockerCart Export YML feed!';
-$_['text_edit'] = 'Edit DockerCart Export YML';
+$_['text_success'] = 'Success: You have modified Export YML feed!';
+$_['text_edit'] = 'Edit Export YML';
 $_['text_enabled'] = 'Enabled';
 $_['text_disabled'] = 'Disabled';
 $_['text_add_profile'] = 'Add Profile';
@@ -68,7 +68,7 @@ $_['help_split_files'] = 'Split large feeds into multiple files';
 $_['help_products_per_file'] = 'Number of products per file when splitting (default: 10000)';
 
 // Error
-$_['error_permission'] = 'Warning: You do not have permission to modify DockerCart Export YML feed!';
+$_['error_permission'] = 'Warning: You do not have permission to modify Export YML feed!';
 $_['error_shop_name'] = 'Shop name is required!';
 $_['error_company'] = 'Company name is required!';
 
