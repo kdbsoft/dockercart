@@ -1,13 +1,13 @@
 <?php
 // Heading
-$_['heading_title']                = 'DockerCart FAQ';
+$_['heading_title']                = 'FAQ';
 $_['heading_title_menu']           = 'FAQ';
 
 // Text
 $_['text_home']                    = 'Home';
 $_['text_extension']               = 'Extensions';
-$_['text_success']                 = 'Success: You have modified DockerCart FAQ settings!';
-$_['text_edit']                    = 'Edit DockerCart FAQ';
+$_['text_success']                 = 'Success: You have modified FAQ settings!';
+$_['text_edit']                    = 'Edit FAQ';
 $_['text_default']                 = 'Default';
 $_['text_enabled']                 = 'Enabled';
 $_['text_disabled']                = 'Disabled';
@@ -73,7 +73,7 @@ $_['button_delete']                = 'Delete';
 $_['button_add_faq']               = 'Add FAQ';
 
 // Error
-$_['error_permission']             = 'Warning: You do not have permission to modify DockerCart FAQ!';
+$_['error_permission']             = 'Warning: You do not have permission to modify FAQ!';
 $_['error_form']                   = 'Warning: Please check the form carefully.';
 $_['error_faq_not_found']          = 'Warning: FAQ entry not found.';
 $_['error_code_required']          = 'FAQ code is required.';

@@ -4,7 +4,7 @@
  */
 
 // Heading
-$_['heading_title']                = 'DockerCart Универсальная доставка';
+$_['heading_title']                = 'Универсальная доставка';
 
 // Text
 $_['text_extension']               = 'Расширения';

@@ -1,11 +1,11 @@
 <?php
 // Heading
-$_['heading_title']     = 'DockerCart Search (Manticore)';
+$_['heading_title']     = 'Search (Manticore)';
 
 // Text
 $_['text_extension']    = 'Extensions';
 $_['text_success']      = 'Success: Module settings have been saved!';
-$_['text_edit']         = 'Edit DockerCart Search Settings';
+$_['text_edit']         = 'Edit Search Settings';
 $_['text_enabled']      = 'Enabled';
 $_['text_disabled']     = 'Disabled';
 $_['text_yes']          = 'Yes';

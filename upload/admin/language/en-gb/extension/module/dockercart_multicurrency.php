@@ -1,12 +1,12 @@
 <?php
 // Heading
-$_["heading_title"] = "DockerCart Multicurrency";
+$_["heading_title"] = "Multicurrency";
 
 // Text
 $_["text_extension"] = "Extensions";
 $_["text_success"] =
-    "Success: You have modified DockerCart Multicurrency module!";
-$_["text_edit"] = "Edit DockerCart Multicurrency Module";
+    "Success: You have modified Multicurrency module!";
+$_["text_edit"] = "Edit Multicurrency Module";
 $_["text_enabled"] = "Enabled";
 $_["text_disabled"] = "Disabled";
 
@@ -15,7 +15,7 @@ $_["entry_status"] = "Status";
 
 // Error
 $_["error_permission"] =
-    "Warning: You do not have permission to modify DockerCart Multicurrency module!";
+    "Warning: You do not have permission to modify Multicurrency module!";
 
 // Help
 $_["help_multicurrency"] =
