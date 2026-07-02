@@ -77,10 +77,21 @@ class ModelExtensionFeedDockercartExportYml extends Model {
             ORDER BY `name` ASC
         ");
 
+        $scheduler_table = DB_PREFIX . 'dockercart_scheduler_task';
+
         $profiles = array();
         foreach ($query->rows as $row) {
             $row['settings'] = !empty($row['settings']) ? json_decode($row['settings'], true) : array();
             $row['filters'] = $this->getProfileFilters($row['profile_id']);
+
+            $task = $this->db->query(
+                "SELECT cron_schedule, cron_enabled, last_run FROM `" . $scheduler_table . "`
+                 WHERE task_type = 'export_yml' AND source_id = " . (int)$row['profile_id']
+            );
+            $row['cron_schedule'] = $task->num_rows ? $task->row['cron_schedule'] : '';
+            $row['cron_enabled'] = $task->num_rows ? (int)$task->row['cron_enabled'] : 0;
+            $row['last_run'] = $task->num_rows ? $task->row['last_run'] : null;
+
             $profiles[] = $row;
         }
 
@@ -103,6 +114,16 @@ class ModelExtensionFeedDockercartExportYml extends Model {
             $profile = $query->row;
             $profile['settings'] = !empty($profile['settings']) ? json_decode($profile['settings'], true) : array();
             $profile['filters'] = $this->getProfileFilters($profile_id);
+
+            $scheduler_table = DB_PREFIX . 'dockercart_scheduler_task';
+            $task = $this->db->query(
+                "SELECT cron_schedule, cron_enabled, last_run FROM `" . $scheduler_table . "`
+                 WHERE task_type = 'export_yml' AND source_id = " . (int)$profile_id
+            );
+            $profile['cron_schedule'] = $task->num_rows ? $task->row['cron_schedule'] : '';
+            $profile['cron_enabled'] = $task->num_rows ? (int)$task->row['cron_enabled'] : 0;
+            $profile['last_run'] = $task->num_rows ? $task->row['last_run'] : null;
+
             return $profile;
         }
 
@@ -162,6 +183,16 @@ class ModelExtensionFeedDockercartExportYml extends Model {
 
         $profile_id = $this->db->getLastId();
 
+        // Register scheduler task for this profile
+        $this->dockercart_scheduler->registerProfileTask(
+            'export_yml',
+            (int)$profile_id,
+            $data['name'],
+            'php /var/www/html/bin/dockercart_export_yml_generate.php --profile_id=%d',
+            isset($data['cron_schedule']) ? (string)$data['cron_schedule'] : '',
+            !empty($data['cron_enabled'])
+        );
+
         // Add filters
         if (isset($data['filters']) && is_array($data['filters'])) {
             $this->setProfileFilters($profile_id, $data['filters']);
@@ -205,6 +236,16 @@ class ModelExtensionFeedDockercartExportYml extends Model {
         if (isset($data['filters']) && is_array($data['filters'])) {
             $this->setProfileFilters($profile_id, $data['filters']);
         }
+
+        // Upsert scheduler task for this profile
+        $this->dockercart_scheduler->registerProfileTask(
+            'export_yml',
+            (int)$profile_id,
+            $data['name'],
+            'php /var/www/html/bin/dockercart_export_yml_generate.php --profile_id=%d',
+            isset($data['cron_schedule']) ? (string)$data['cron_schedule'] : '',
+            !empty($data['cron_enabled'])
+        );
     }
 
     /**
@@ -215,6 +256,9 @@ class ModelExtensionFeedDockercartExportYml extends Model {
     public function deleteProfile($profile_id) {
         $this->db->query("DELETE FROM `" . DB_PREFIX . "dockercart_export_yml_profile` WHERE `profile_id` = '" . (int)$profile_id . "'");
         $this->db->query("DELETE FROM `" . DB_PREFIX . "dockercart_export_yml_profile_filter` WHERE `profile_id` = '" . (int)$profile_id . "'");
+
+        // Unregister scheduler task for this profile
+        $this->dockercart_scheduler->unregisterProfileTask('export_yml', (int)$profile_id);
     }
 
     /**

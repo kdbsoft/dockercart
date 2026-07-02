@@ -3,11 +3,12 @@
 /**
  * DockerCart Export YML Generate — CLI Worker
  *
- * Regenerates YML feed files for all active profiles by calling the
+ * Regenerates YML feed files for active profiles by calling the
  * catalog controller via internal HTTP request (same bridge as admin AJAX).
  *
  * Usage:
  *   php /var/www/html/bin/dockercart_export_yml_generate.php
+ *   php /var/www/html/bin/dockercart_export_yml_generate.php --profile_id=5
  *
  * Exit codes:
  *   0 — success
@@ -24,6 +25,14 @@ if (php_sapi_name() !== 'cli') {
 $_SERVER['HTTP_HOST']      = 'localhost';
 $_SERVER['REQUEST_METHOD'] = 'GET';
 $_SERVER['REQUEST_URI']    = '/';
+
+// Parse --profile_id argument
+$profile_id = 0;
+foreach ($argv as $arg) {
+	if (strpos($arg, '--profile_id=') === 0) {
+		$profile_id = (int)substr($arg, 13);
+	}
+}
 
 $config_path = __DIR__ . '/../config.php';
 
@@ -94,12 +103,22 @@ try {
 	}
 
 	// ── Load active profiles ──────────────────────────────────────────
-	$profile_query = $db->query(
-		"SELECT profile_id, name FROM `" . DB_PREFIX . "dockercart_export_yml_profile` WHERE status = 1 ORDER BY profile_id"
-	);
+	if ($profile_id > 0) {
+		$profile_query = $db->query(
+			"SELECT profile_id, name FROM `" . DB_PREFIX . "dockercart_export_yml_profile` WHERE profile_id = " . $profile_id . " AND status = 1"
+		);
+	} else {
+		$profile_query = $db->query(
+			"SELECT profile_id, name FROM `" . DB_PREFIX . "dockercart_export_yml_profile` WHERE status = 1 ORDER BY profile_id"
+		);
+	}
 
 	if (!$profile_query->num_rows) {
-		echo "[dockercart-export-yml] No active profiles found.\n";
+		if ($profile_id > 0) {
+			fwrite(STDERR, "[dockercart-export-yml] Profile #{$profile_id} not found or disabled.\n");
+		} else {
+			echo "[dockercart-export-yml] No active profiles found.\n";
+		}
 		exit(0);
 	}
 

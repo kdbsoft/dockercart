@@ -149,6 +149,8 @@ check-multicurrency.sh
 
 backups/
 sitemap.xml
+google-base*.xml
+
 
 /.cache/
 .omo/

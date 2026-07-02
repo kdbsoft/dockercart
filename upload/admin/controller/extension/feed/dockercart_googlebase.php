@@ -62,6 +62,15 @@ class ControllerExtensionFeedDockercartGooglebase extends Controller {
 
             $this->model_setting_setting->editSetting('module_dockercart_googlebase', $this->request->post);
 
+            // Update scheduler task
+            $tasks = $this->dockercart_scheduler->getTasksByType('dockercart_googlebase_generate');
+            $task = !empty($tasks) ? $tasks[0] : null;
+            if ($task) {
+                $schedule = $this->request->post['module_dockercart_googlebase_schedule'] ?? $task['cron_schedule'];
+                $this->dockercart_scheduler->setSchedule((int)$task['task_id'], $schedule);
+                $this->dockercart_scheduler->setEnabled((int)$task['task_id'], !empty($schedule));
+            }
+
             // Keep native feed status in sync so Extensions > Feeds shows the correct state
             if (isset($this->request->post['feed_dockercart_googlebase_status'])) {
                 $feed_status = (int)$this->request->post['feed_dockercart_googlebase_status'];
@@ -108,7 +117,6 @@ class ControllerExtensionFeedDockercartGooglebase extends Controller {
         // Load settings with defaults
         $settings = array(
             'module_dockercart_googlebase_status' => 0,
-            'module_dockercart_googlebase_cache_hours' => 24,
             'module_dockercart_googlebase_max_file_size' => 50,
             'module_dockercart_googlebase_max_products' => 100000,
             'module_dockercart_googlebase_currency' => 'USD',
@@ -144,6 +152,26 @@ class ControllerExtensionFeedDockercartGooglebase extends Controller {
                 $value = $this->config->get($key);
                 $data[$key] = ($value !== null) ? $value : $default;
             }
+        }
+
+        // Scheduler info
+        $tasks = $this->dockercart_scheduler->getTasksByType('dockercart_googlebase_generate');
+        $task = !empty($tasks) ? $tasks[0] : null;
+
+        $data['schedule_options'] = array(
+            ''          => $this->language->get('text_cron_disabled'),
+            'every_15m' => $this->language->get('text_every_15m'),
+            'every_30m' => $this->language->get('text_every_30m'),
+            'hourly'    => $this->language->get('text_hourly'),
+            'every_6h'  => $this->language->get('text_every_6h'),
+            'every_12h' => $this->language->get('text_every_12h'),
+            'daily'     => $this->language->get('text_daily'),
+        );
+
+        if (isset($this->request->post['module_dockercart_googlebase_schedule'])) {
+            $data['module_dockercart_googlebase_schedule'] = $this->request->post['module_dockercart_googlebase_schedule'];
+        } else {
+            $data['module_dockercart_googlebase_schedule'] = $task ? ($task['cron_schedule'] ?? '0 4 * * *') : '0 4 * * *';
         }
 
         // Get languages
@@ -210,14 +238,6 @@ class ControllerExtensionFeedDockercartGooglebase extends Controller {
     protected function validate() {
         if (!$this->user->hasPermission('modify', 'extension/feed/dockercart_googlebase')) {
             $this->error['warning'] = $this->language->get('error_permission');
-        }
-
-        // Validate cache hours
-        if (isset($this->request->post['module_dockercart_googlebase_cache_hours'])) {
-            $cache_hours = (int)$this->request->post['module_dockercart_googlebase_cache_hours'];
-            if ($cache_hours < 1 || $cache_hours > 168) {
-                $this->error['warning'] = $this->language->get('error_cache_hours');
-            }
         }
 
         // Validate max file size
@@ -308,9 +328,9 @@ class ControllerExtensionFeedDockercartGooglebase extends Controller {
     }
 
     /**
-     * Generate feed now (AJAX)
+     * Generate feed now (AJAX) — delegates to CLI worker via exec()
      */
-    public function generate() {
+    public function ajaxGenerate() {
         $this->load->language('extension/feed/dockercart_googlebase');
 
         $json = array();
@@ -327,72 +347,21 @@ class ControllerExtensionFeedDockercartGooglebase extends Controller {
                 throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
             });
 
-            // Build catalog URL for feed generation. Prefer HTTPS_CATALOG when available.
-            if (defined('HTTPS_CATALOG') && HTTPS_CATALOG) {
-                $base = rtrim(HTTPS_CATALOG, '/');
-            } elseif (defined('HTTP_CATALOG') && HTTP_CATALOG) {
-                $base = rtrim(HTTP_CATALOG, '/');
-            } else {
-                $base = rtrim($this->config->get('config_url'), '/');
-            }
+            $cli_script = DIR_APPLICATION . '../bin/dockercart_googlebase_generate.php';
+            $cmd = sprintf('php %s 2>&1', escapeshellarg($cli_script));
+            $output = [];
+            $return_code = 0;
+            exec($cmd, $output, $return_code);
 
-            $catalog_url = $base . '/index.php?route=extension/feed/dockercart_googlebase&regenerate=1&admin_request=1';
-
-            // Clean up old files before regeneration
-            @array_map('unlink', glob(DIR_CATALOG . '../google-base*.xml'));
-            @array_map('unlink', glob(DIR_CATALOG . '../google-base*.xml.tmp'));
-
-            // Make HTTP request to catalog to generate the feed
-            if (function_exists('curl_init')) {
-                $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, $catalog_url);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
-                curl_setopt($ch, CURLOPT_TIMEOUT, 300); // 5 minutes for large catalogs
-                curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-                
-                $response = curl_exec($ch);
-                $curl_errno = curl_errno($ch);
-                $curl_error = curl_error($ch);
-                $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-                if ($curl_errno) {
-                    // Include response if any for debugging
-                    $msg = 'cURL error: ' . $curl_error;
-                    if (!empty($response)) $msg .= ' | response: ' . substr($response, 0, 1000);
-                    throw new \RuntimeException($msg);
-                }
-
-                if ($http_code >= 400) {
-                    $msg = 'HTTP error: ' . $http_code;
-                    if (!empty($response)) $msg .= ' | response: ' . substr($response, 0, 1000);
-                    throw new \RuntimeException($msg);
-                }
-            } else {
-                // Fallback to file_get_contents
-                $context = stream_context_create(array(
-                    'http' => array(
-                        'timeout' => 300,
-                        'ignore_errors' => true
-                    ),
-                    'ssl' => array(
-                        'verify_peer' => false,
-                        'verify_peer_name' => false
-                    )
-                ));
-                $response = @file_get_contents($catalog_url, false, $context);
-                if ($response === false) {
-                    throw new \RuntimeException('file_get_contents failed');
-                }
+            if ($return_code !== 0) {
+                throw new \RuntimeException('Feed generation failed: ' . implode("\n", $output));
             }
 
             restore_error_handler();
 
             // Check if files were generated
-            $files = glob(DIR_CATALOG . '../google-base*.xml');
-            
+            $files = glob(DIR_APPLICATION . '../google-base*.xml');
+
             if (empty($files)) {
                 throw new \RuntimeException('Feed file was not created');
             }
@@ -400,7 +369,7 @@ class ControllerExtensionFeedDockercartGooglebase extends Controller {
             $json['success'] = $this->language->get('text_feed_generated');
             $json['stats'] = $this->getFeedStats();
             $json['files'] = array();
-            
+
             foreach ($files as $f) {
                 $json['files'][] = array(
                     'name' => basename($f),
@@ -1043,7 +1012,6 @@ class ControllerExtensionFeedDockercartGooglebase extends Controller {
 
         $defaults = array(
             'module_dockercart_googlebase_status' => 0,
-            'module_dockercart_googlebase_cache_hours' => 24,
             'module_dockercart_googlebase_max_file_size' => 50,
             'module_dockercart_googlebase_max_products' => 100000,
             'module_dockercart_googlebase_currency' => 'USD',

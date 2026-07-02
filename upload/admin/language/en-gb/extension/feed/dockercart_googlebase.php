@@ -26,7 +26,7 @@ $_['tab_license']      = 'License';
 
 // Entry - General
 $_['entry_status']     = 'Module Status';
-$_['entry_cache_hours'] = 'Cache Duration (Hours)';
+$_['entry_schedule']   = 'Auto generate';
 $_['entry_max_file_size'] = 'Max File Size (MB)';
 $_['entry_max_products'] = 'Max Products per File';
 $_['entry_currency']   = 'Price Currency';
@@ -72,7 +72,14 @@ $_['entry_public_key'] = 'Public Key';
 
 // Help
 $_['help_status']      = 'Enable or disable Google Base feed generation';
-$_['help_cache_hours'] = 'How long to cache the feed. Default: 24 hours.';
+$_['help_schedule']    = 'Automatic feed regeneration schedule';
+$_['text_cron_disabled'] = 'Disabled';
+$_['text_every_15m']   = 'Every 15 min';
+$_['text_every_30m']   = 'Every 30 min';
+$_['text_hourly']      = 'Hourly';
+$_['text_every_6h']    = 'Every 6 hours';
+$_['text_every_12h']   = 'Every 12 hours';
+$_['text_daily']       = 'Daily';
 $_['help_max_file_size'] = 'Maximum file size before splitting. Google limit: 50MB';
 $_['help_max_products'] = 'Maximum products per file before splitting.';
 $_['help_currency']    = 'Select currency for prices in the feed';
@@ -127,7 +134,6 @@ $_['text_info']        = '<strong>DockerCart Google Base</strong> generates Goog
 
 // Errors
 $_['error_permission'] = 'Warning: You do not have permission to modify DockerCart Google Base!';
-$_['error_cache_hours'] = 'Cache duration must be between 1 and 168 hours!';
 $_['error_max_file_size'] = 'Max file size must be between 1 and 50 MB!';
 $_['error_max_products'] = 'Max products must be between 1,000 and 1,000,000!';
 $_['error_generation'] = 'Error generating feed';
