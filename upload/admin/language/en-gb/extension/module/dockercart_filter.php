@@ -1,10 +1,10 @@
 <?php
 
-$_['heading_title']    = 'DockerCart Filter';
+$_['heading_title']    = 'Filter';
 
 $_['text_extension']   = 'Extensions';
-$_['text_success']     = 'Success: You have modified DockerCart Filter module!';
-$_['text_edit']        = 'Edit DockerCart Filter Module';
+$_['text_success']     = 'Success: You have modified Filter module!';
+$_['text_edit']        = 'Edit Filter Module';
 $_['text_module_subtitle'] = 'Configure filtering behavior, license, and catalog display settings';
 $_['text_enabled']     = 'Enabled';
 $_['text_disabled']    = 'Disabled';
@@ -80,7 +80,7 @@ $_['help_debug']         = 'Enable console.log() in JavaScript and error_log() i
 $_['text_no_attributes'] = 'No attributes found';
 $_['text_no_options']    = 'No options found';
 
-$_['error_permission']   = 'Warning: You do not have permission to modify DockerCart Filter module!';
+$_['error_permission']   = 'Warning: You do not have permission to modify Filter module!';
 $_['error_license_required'] = 'License key is required to use this module';
 $_['error_license_invalid']  = 'Invalid or expired license key';
 $_['error_license_format']   = 'Invalid license key format';

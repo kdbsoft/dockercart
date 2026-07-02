@@ -4,12 +4,12 @@
  */
 
 // Heading
-$_['heading_title']    = 'DockerCart Google Base';
+$_['heading_title']    = 'Google Base';
 
 // Text
 $_['text_extension']   = 'Extensions';
-$_['text_success']     = 'Success: You have modified DockerCart Google Base module settings!';
-$_['text_edit']        = 'Edit DockerCart Google Base';
+$_['text_success']     = 'Success: You have modified Google Base module settings!';
+$_['text_edit']        = 'Edit Google Base';
 $_['text_enabled']     = 'Enabled';
 $_['text_disabled']    = 'Disabled';
 $_['text_default']     = '(Default)';
@@ -133,7 +133,7 @@ $_['button_save_license'] = 'Save License';
 $_['text_info']        = '<strong>DockerCart Google Base</strong> generates Google Merchant Center compatible XML feed using streaming XML (XMLWriter) for minimal memory consumption.';
 
 // Errors
-$_['error_permission'] = 'Warning: You do not have permission to modify DockerCart Google Base!';
+$_['error_permission'] = 'Warning: You do not have permission to modify Google Base!';
 $_['error_max_file_size'] = 'Max file size must be between 1 and 50 MB!';
 $_['error_max_products'] = 'Max products must be between 1,000 and 1,000,000!';
 $_['error_generation'] = 'Error generating feed';

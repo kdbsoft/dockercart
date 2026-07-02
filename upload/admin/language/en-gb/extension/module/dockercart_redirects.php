@@ -1,6 +1,6 @@
 <?php
 // Heading
-$_['heading_title']     = 'DockerCart Redirect Manager';
+$_['heading_title']     = 'Redirect Manager';
 $_['heading_import']    = 'Import Redirects';
 
 // Text

@@ -1,9 +1,9 @@
 <?php
 
-$_['heading_title'] = 'DockerCart Google Cloud Translation';
+$_['heading_title'] = 'Google Cloud Translation';
 
 $_['text_extension'] = 'Extensions';
-$_['text_success'] = 'Success: You have modified DockerCart Google Cloud Translation module!';
+$_['text_success'] = 'Success: You have modified Google Cloud Translation module!';
 $_['text_edit'] = 'Google Cloud Translation Settings';
 $_['text_module_subtitle'] = 'Translate language files and language-dependent database fields via Google Cloud Translation';
 $_['text_enabled'] = 'Enabled';

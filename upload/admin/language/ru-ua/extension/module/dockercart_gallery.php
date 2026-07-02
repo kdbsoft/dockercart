@@ -1,13 +1,13 @@
 <?php
 // Heading
-$_['heading_title']                = 'DockerCart Галерея';
+$_['heading_title']                = 'Галерея';
 $_['heading_title_menu']           = 'Галерея';
 
 // Text
 $_['text_home']                    = 'Главная';
 $_['text_extension']               = 'Расширения';
-$_['text_success']                 = 'Настройки DockerCart Галереи успешно изменены!';
-$_['text_edit']                    = 'Редактировать DockerCart Галерею';
+$_['text_success']                 = 'Настройки Галереи успешно изменены!';
+$_['text_edit']                    = 'Редактировать Галерею';
 $_['text_default']                 = 'По умолчанию';
 $_['text_enabled']                 = 'Включено';
 $_['text_disabled']                = 'Отключено';
@@ -45,7 +45,7 @@ $_['button_delete']                = 'Удалить';
 $_['button_add_image']             = 'Добавить изображение';
 
 // Error
-$_['error_permission']             = 'У вас нет прав для изменения DockerCart Галереи!';
+$_['error_permission']             = 'У вас нет прав для изменения Галереи!';
 $_['error_form']                   = 'Пожалуйста, проверьте форму.';
 $_['error_image_not_found']        = 'Изображение не найдено.';
 $_['error_image_required']         = 'Изображение обязательно.';

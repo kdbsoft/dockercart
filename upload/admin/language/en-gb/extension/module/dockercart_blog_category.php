@@ -1,6 +1,6 @@
 <?php
 // Heading
-$_['heading_title']     = 'DockerCart Blog - Categories';
+$_['heading_title']     = 'Blog - Categories';
 
 // Text
 $_['text_success']      = 'Success: You have modified blog categories!';

@@ -1,6 +1,6 @@
 <?php
 // Heading
-$_['heading_title']                     = 'DockerCart Shop Features';
+$_['heading_title']                     = 'Shop Features';
 
 // Text
 $_['text_extension']                    = 'Extensions';

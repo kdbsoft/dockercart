@@ -1,10 +1,10 @@
 <?php
 // Heading
-$_['heading_title']    = 'DockerCart SEO Generator';
+$_['heading_title']    = 'SEO Generator';
 
 // Text
 $_['text_extension']   = 'Extensions';
-$_['text_success']     = 'Success: You have modified DockerCart SEO Generator module!';
+$_['text_success']     = 'Success: You have modified SEO Generator module!';
 $_['text_edit']        = 'Edit Module';
 $_['text_enabled']     = 'Enabled';
 $_['text_disabled']    = 'Disabled';
@@ -99,7 +99,7 @@ $_['column_meta_description'] = 'Meta Description';
 $_['column_meta_keyword'] = 'Meta Keywords';
 
 // Errors
-$_['error_permission'] = 'Warning: You do not have permission to modify DockerCart SEO Generator module!';
+$_['error_permission'] = 'Warning: You do not have permission to modify SEO Generator module!';
 $_['error_warning']    = 'Warning: Please check the form carefully for errors!';
 $_['error_license_invalid'] = 'License verification failed';
 $_['error_license_required'] = 'License key is required to use generation feature. Please enter and verify your license key in General Settings tab.';

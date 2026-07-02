@@ -1,11 +1,11 @@
 <?php
 // Heading
-$_['heading_title']                    = 'DockerCart Store Theme';
+$_['heading_title']                    = 'Store Theme';
 
 // Text
 $_['text_extension']                   = 'Extensions';
-$_['text_success']                     = 'Success: You have modified DockerCart store theme settings!';
-$_['text_edit']                        = 'Edit DockerCart Store Theme';
+$_['text_success']                     = 'Success: You have modified store theme settings!';
+$_['text_edit']                        = 'Edit Store Theme';
 $_['text_general']                     = 'General';
 $_['text_product']                     = 'Products';
 $_['text_image']                       = 'Images';
@@ -48,7 +48,7 @@ $_['help_image_webp_status']            = 'When enabled, resized files in image/
 $_['help_image_webp_quality']           = 'Compression quality for generated WebP cache files. Default: 90%.';
 
 // Error
-$_['error_permission']                 = 'Warning: You do not have permission to modify DockerCart store theme!';
+$_['error_permission']                 = 'Warning: You do not have permission to modify store theme!';
 $_['error_limit']                      = 'Product Limit required!';
 $_['error_image_product']              = 'Product List Size dimensions required!';
 $_['error_image_category']             = 'Category List Size dimensions required!';
