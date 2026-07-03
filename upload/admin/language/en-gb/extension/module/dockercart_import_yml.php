@@ -1,6 +1,7 @@
 <?php
 // Heading
 $_['heading_title'] = 'Import YML';
+$_['heading_title_menu'] = 'Import YML';
 
 // Text
 $_['text_extension'] = 'Extensions';

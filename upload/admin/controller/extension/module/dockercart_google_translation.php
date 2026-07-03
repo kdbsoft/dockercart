@@ -90,10 +90,12 @@ class ControllerExtensionModuleDockercartGoogleTranslation extends Controller {
         $this->model_extension_module_dockercart_google_translation->install();
 
         $this->registerCacheFlushEvents();
+        $this->registerMenuEvent();
     }
 
     public function uninstall() {
         $this->unregisterCacheFlushEvents();
+        $this->unregisterMenuEvent();
     }
 
     public function scan() {
@@ -300,6 +302,55 @@ class ControllerExtensionModuleDockercartGoogleTranslation extends Controller {
 
     private function unregisterCacheFlushEvents() {
         $this->db->query("DELETE FROM " . DB_PREFIX . "event WHERE code LIKE 'dockercart_google_translation_%'");
+    }
+
+    private function registerMenuEvent() {
+        $this->load->model('setting/event');
+        $this->db->query("DELETE FROM `" . DB_PREFIX . "event` WHERE `code` = 'dockercart_google_translation_admin_menu'");
+        $this->model_setting_event->addEvent(
+            'dockercart_google_translation_admin_menu',
+            'admin/view/common/column_left/before',
+            'extension/module/dockercart_google_translation/eventAdminMenu',
+            1,
+            0
+        );
+    }
+
+    private function unregisterMenuEvent() {
+        $this->db->query("DELETE FROM `" . DB_PREFIX . "event` WHERE `code` = 'dockercart_google_translation_admin_menu'");
+    }
+
+    public function eventAdminMenu(&$route, &$data, &$output) {
+        $this->load->language('extension/module/dockercart_google_translation');
+
+        if (!$this->user->hasPermission('access', 'extension/module/dockercart_google_translation')) {
+            return;
+        }
+
+        $menu = array(
+            'name' => $this->language->get('heading_title_menu'),
+            'href' => $this->url->link('extension/module/dockercart_google_translation', 'user_token=' . $this->session->data['user_token'], true),
+            'children' => array()
+        );
+
+        if (!isset($data['menus']) || !is_array($data['menus'])) {
+            return;
+        }
+
+        foreach ($data['menus'] as &$item) {
+            if (isset($item['id']) && $item['id'] === 'menu-extension' && isset($item['children']) && is_array($item['children'])) {
+                $item['children'][] = $menu;
+                return;
+            }
+        }
+
+        $data['menus'][] = array(
+            'id' => 'menu-dockercart-google-translation',
+            'icon' => 'fa-language',
+            'name' => $this->language->get('heading_title_menu'),
+            'href' => $this->url->link('extension/module/dockercart_google_translation', 'user_token=' . $this->session->data['user_token'], true),
+            'children' => array()
+        );
     }
 
     private function flushSystemCacheSafe() {

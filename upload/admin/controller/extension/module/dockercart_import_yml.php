@@ -338,6 +338,8 @@ class ControllerExtensionModuleDockercartImportYml extends Controller {
 	public function install() {
 		$this->load->model('extension/module/dockercart_import_yml');
 		$this->load->model('setting/setting');
+		$this->load->model('setting/event');
+		$this->load->model('user/user_group');
 
 		$this->model_extension_module_dockercart_import_yml->install();
 
@@ -347,14 +349,82 @@ class ControllerExtensionModuleDockercartImportYml extends Controller {
 			'php /var/www/html/bin/dockercart_import_yml_run.php --profile_id=%d'
 		);
 
+		$this->registerEvents();
+
 		$this->model_setting_setting->editSettingValue('module_dockercart_import_yml', 'module_dockercart_import_yml_status', 0);
+
+		$group_id = (int)$this->user->getGroupId();
+		$this->model_user_user_group->addPermission($group_id, 'access', 'extension/module/dockercart_import_yml');
+		$this->model_user_user_group->addPermission($group_id, 'modify', 'extension/module/dockercart_import_yml');
 	}
 
 	public function uninstall() {
 		$this->load->model('extension/module/dockercart_import_yml');
 		$this->model_extension_module_dockercart_import_yml->uninstall();
 
+		$this->unregisterEvents();
+
 		$this->dockercart_scheduler->unregisterTask('import_yml');
+	}
+
+	private function registerEvents() {
+		$this->load->model('setting/event');
+
+		$this->model_setting_event->deleteEventByCode('dockercart_import_yml_admin_menu');
+
+		$this->model_setting_event->addEvent(
+			'dockercart_import_yml_admin_menu',
+			'admin/view/common/column_left/before',
+			'extension/module/dockercart_import_yml/eventAdminMenu',
+			1,
+			0
+		);
+	}
+
+	private function unregisterEvents() {
+		$this->load->model('setting/event');
+		$this->model_setting_event->deleteEventByCode('dockercart_import_yml_admin_menu');
+	}
+
+	public function eventAdminMenu(&$route, &$data, &$output) {
+		$this->load->language('extension/module/dockercart_import_yml');
+
+		if (!$this->user->hasPermission('access', 'extension/module/dockercart_import_yml')) {
+			return;
+		}
+
+		if (!isset($data['menus']) || !is_array($data['menus'])) {
+			return;
+		}
+
+		$menu_item = array(
+			'name' => $this->language->get('heading_title_menu'),
+			'href' => $this->url->link('extension/module/dockercart_import_yml', 'user_token=' . $this->session->data['user_token'], true),
+			'children' => array()
+		);
+
+		foreach ($data['menus'] as &$item) {
+			if (isset($item['id']) && $item['id'] === 'menu-catalog' && isset($item['children']) && is_array($item['children'])) {
+				$import_found = false;
+				foreach ($item['children'] as &$child) {
+					if (isset($child['name']) && $child['name'] === 'Import' && empty($child['href'])) {
+						$child['children'][] = $menu_item;
+						$import_found = true;
+						break;
+					}
+				}
+				unset($child);
+				if (!$import_found) {
+					$item['children'][] = array(
+						'name' => 'Import',
+						'href' => '',
+						'children' => array($menu_item)
+					);
+				}
+				return;
+			}
+		}
+		unset($item);
 	}
 
     protected function validate() {
