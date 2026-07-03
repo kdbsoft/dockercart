@@ -29,18 +29,26 @@ class ControllerMailRegister extends Controller {
 		$data['store'] = html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8');
 
 		$mail = new Mail($this->config->get('config_mail_engine'));
-		$mail->parameter = $this->config->get('config_mail_parameter');
 		$mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
 		$mail->smtp_username = $this->config->get('config_mail_smtp_username');
 		$mail->smtp_password = html_entity_decode($this->config->get('config_mail_smtp_password'), ENT_QUOTES, 'UTF-8');
 		$mail->smtp_port = $this->config->get('config_mail_smtp_port');
 		$mail->smtp_timeout = $this->config->get('config_mail_smtp_timeout');
+		$mail->smtp_auth_method = $this->config->get('config_mail_smtp_auth_method');
+		$mail->smtp_oauth_token = $this->config->get('config_mail_smtp_oauth_token');
+		$mail->smtp_oauth_refresh_token = $this->config->get('config_mail_smtp_oauth_refresh_token');
+		$mail->smtp_oauth_client_id = $this->config->get('config_mail_smtp_oauth_client_id');
+		$mail->smtp_oauth_client_secret = $this->config->get('config_mail_smtp_oauth_client_secret');
 
 		$mail->setTo($args[0]['email']);
 		$mail->setFrom($this->config->get('config_email'));
 		$mail->setSender(html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8'));
 		$mail->setSubject(sprintf($this->language->get('text_subject'), html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8')));
 		$mail->setText($this->load->view('mail/register', $data));
+		$mail->on_token_refresh = function ($token) {
+			$this->db->query("UPDATE " . DB_PREFIX . "setting SET `value` = '" . $this->db->escape($token) . "' WHERE `key` = 'config_mail_smtp_oauth_token' AND `store_id` = '" . (int)$this->config->get('config_store_id') . "'");
+		};
+
 		$mail->send(); 
 	}
 	
@@ -79,18 +87,26 @@ class ControllerMailRegister extends Controller {
 			$data['telephone'] = $args[0]['telephone'];
 
 			$mail = new Mail($this->config->get('config_mail_engine'));
-			$mail->parameter = $this->config->get('config_mail_parameter');
 			$mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
 			$mail->smtp_username = $this->config->get('config_mail_smtp_username');
 			$mail->smtp_password = html_entity_decode($this->config->get('config_mail_smtp_password'), ENT_QUOTES, 'UTF-8');
 			$mail->smtp_port = $this->config->get('config_mail_smtp_port');
 			$mail->smtp_timeout = $this->config->get('config_mail_smtp_timeout');
+			$mail->smtp_auth_method = $this->config->get('config_mail_smtp_auth_method');
+			$mail->smtp_oauth_token = $this->config->get('config_mail_smtp_oauth_token');
+			$mail->smtp_oauth_refresh_token = $this->config->get('config_mail_smtp_oauth_refresh_token');
+			$mail->smtp_oauth_client_id = $this->config->get('config_mail_smtp_oauth_client_id');
+			$mail->smtp_oauth_client_secret = $this->config->get('config_mail_smtp_oauth_client_secret');
 
 			$mail->setTo($this->config->get('config_email'));
 			$mail->setFrom($this->config->get('config_email'));
 			$mail->setSender(html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8'));
 			$mail->setSubject(html_entity_decode($this->language->get('text_new_customer'), ENT_QUOTES, 'UTF-8'));
 			$mail->setText($this->load->view('mail/register_alert', $data));
+			$mail->on_token_refresh = function ($token) {
+				$this->db->query("UPDATE " . DB_PREFIX . "setting SET `value` = '" . $this->db->escape($token) . "' WHERE `key` = 'config_mail_smtp_oauth_token' AND `store_id` = '" . (int)$this->config->get('config_store_id') . "'");
+			};
+
 			$mail->send();
 
 			// Send to additional alert emails if new account email is enabled
@@ -99,6 +115,10 @@ class ControllerMailRegister extends Controller {
 			foreach ($emails as $email) {
 				if (utf8_strlen($email) > 0 && filter_var($email, FILTER_VALIDATE_EMAIL)) {
 					$mail->setTo($email);
+					$mail->on_token_refresh = function ($token) {
+						$this->db->query("UPDATE " . DB_PREFIX . "setting SET `value` = '" . $this->db->escape($token) . "' WHERE `key` = 'config_mail_smtp_oauth_token' AND `store_id` = '" . (int)$this->config->get('config_store_id') . "'");
+					};
+
 					$mail->send();
 				}
 			}

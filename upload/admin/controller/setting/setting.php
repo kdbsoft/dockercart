@@ -873,17 +873,7 @@ class ControllerSettingSetting extends Controller {
 			$data['icon'] = $this->model_tool_image->resize('no_image.png', 100, 100);
 		}
 
-		if (isset($this->request->post['config_mail_engine'])) {
-			$data['config_mail_engine'] = $this->request->post['config_mail_engine'];
-		} else {
-			$data['config_mail_engine'] = $this->config->get('config_mail_engine');
-		}
-
-		if (isset($this->request->post['config_mail_parameter'])) {
-			$data['config_mail_parameter'] = $this->request->post['config_mail_parameter'];
-		} else {
-			$data['config_mail_parameter'] = $this->config->get('config_mail_parameter');
-		}
+		$data['config_mail_engine'] = 'smtp';
 
 		if (isset($this->request->post['config_mail_smtp_hostname'])) {
 			$data['config_mail_smtp_hostname'] = $this->request->post['config_mail_smtp_hostname'];
@@ -917,6 +907,36 @@ class ControllerSettingSetting extends Controller {
 			$data['config_mail_smtp_timeout'] = $this->config->get('config_mail_smtp_timeout');
 		} else {
 			$data['config_mail_smtp_timeout'] = 5;
+		}
+
+		if (isset($this->request->post['config_mail_smtp_auth_method'])) {
+			$data['config_mail_smtp_auth_method'] = $this->request->post['config_mail_smtp_auth_method'];
+		} else {
+			$data['config_mail_smtp_auth_method'] = $this->config->get('config_mail_smtp_auth_method');
+		}
+
+		if (isset($this->request->post['config_mail_smtp_oauth_token'])) {
+			$data['config_mail_smtp_oauth_token'] = $this->request->post['config_mail_smtp_oauth_token'];
+		} else {
+			$data['config_mail_smtp_oauth_token'] = $this->config->get('config_mail_smtp_oauth_token');
+		}
+
+		if (isset($this->request->post['config_mail_smtp_oauth_refresh_token'])) {
+			$data['config_mail_smtp_oauth_refresh_token'] = $this->request->post['config_mail_smtp_oauth_refresh_token'];
+		} else {
+			$data['config_mail_smtp_oauth_refresh_token'] = $this->config->get('config_mail_smtp_oauth_refresh_token');
+		}
+
+		if (isset($this->request->post['config_mail_smtp_oauth_client_id'])) {
+			$data['config_mail_smtp_oauth_client_id'] = $this->request->post['config_mail_smtp_oauth_client_id'];
+		} else {
+			$data['config_mail_smtp_oauth_client_id'] = $this->config->get('config_mail_smtp_oauth_client_id');
+		}
+
+		if (isset($this->request->post['config_mail_smtp_oauth_client_secret'])) {
+			$data['config_mail_smtp_oauth_client_secret'] = $this->request->post['config_mail_smtp_oauth_client_secret'];
+		} else {
+			$data['config_mail_smtp_oauth_client_secret'] = $this->config->get('config_mail_smtp_oauth_client_secret');
 		}
 
 		if (isset($this->request->post['config_mail_alert'])) {

@@ -265,18 +265,26 @@ class ControllerMailOrder extends Controller {
 		}
 
 		$mail = new Mail($this->config->get('config_mail_engine'));
-		$mail->parameter = $this->config->get('config_mail_parameter');
 		$mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
 		$mail->smtp_username = $this->config->get('config_mail_smtp_username');
 		$mail->smtp_password = html_entity_decode($this->config->get('config_mail_smtp_password'), ENT_QUOTES, 'UTF-8');
 		$mail->smtp_port = $this->config->get('config_mail_smtp_port');
 		$mail->smtp_timeout = $this->config->get('config_mail_smtp_timeout');
+		$mail->smtp_auth_method = $this->config->get('config_mail_smtp_auth_method');
+		$mail->smtp_oauth_token = $this->config->get('config_mail_smtp_oauth_token');
+		$mail->smtp_oauth_refresh_token = $this->config->get('config_mail_smtp_oauth_refresh_token');
+		$mail->smtp_oauth_client_id = $this->config->get('config_mail_smtp_oauth_client_id');
+		$mail->smtp_oauth_client_secret = $this->config->get('config_mail_smtp_oauth_client_secret');
 
 		$mail->setTo($order_info['email']);
 		$mail->setFrom($from);
 		$mail->setSender(html_entity_decode($order_info['store_name'], ENT_QUOTES, 'UTF-8'));
 		$mail->setSubject(html_entity_decode(sprintf($language->get('text_subject'), $order_info['store_name'], $order_info['order_id']), ENT_QUOTES, 'UTF-8'));
 		$mail->setHtml($this->load->view('mail/order_add', $data));
+		$mail->on_token_refresh = function ($token) {
+			$this->db->query("UPDATE " . DB_PREFIX . "setting SET `value` = '" . $this->db->escape($token) . "' WHERE `key` = 'config_mail_smtp_oauth_token' AND `store_id` = '" . (int)$this->config->get('config_store_id') . "'");
+		};
+
 		$mail->send();
 	}
 	
@@ -320,18 +328,26 @@ class ControllerMailOrder extends Controller {
 		}
 		
 		$mail = new Mail($this->config->get('config_mail_engine'));
-		$mail->parameter = $this->config->get('config_mail_parameter');
 		$mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
 		$mail->smtp_username = $this->config->get('config_mail_smtp_username');
 		$mail->smtp_password = html_entity_decode($this->config->get('config_mail_smtp_password'), ENT_QUOTES, 'UTF-8');
 		$mail->smtp_port = $this->config->get('config_mail_smtp_port');
 		$mail->smtp_timeout = $this->config->get('config_mail_smtp_timeout');
+		$mail->smtp_auth_method = $this->config->get('config_mail_smtp_auth_method');
+		$mail->smtp_oauth_token = $this->config->get('config_mail_smtp_oauth_token');
+		$mail->smtp_oauth_refresh_token = $this->config->get('config_mail_smtp_oauth_refresh_token');
+		$mail->smtp_oauth_client_id = $this->config->get('config_mail_smtp_oauth_client_id');
+		$mail->smtp_oauth_client_secret = $this->config->get('config_mail_smtp_oauth_client_secret');
 
 		$mail->setTo($order_info['email']);
 		$mail->setFrom($from);
 		$mail->setSender(html_entity_decode($order_info['store_name'], ENT_QUOTES, 'UTF-8'));
 		$mail->setSubject(html_entity_decode(sprintf($language->get('text_subject'), $order_info['store_name'], $order_info['order_id']), ENT_QUOTES, 'UTF-8'));
 		$mail->setText($this->load->view('mail/order_edit', $data));
+		$mail->on_token_refresh = function ($token) {
+			$this->db->query("UPDATE " . DB_PREFIX . "setting SET `value` = '" . $this->db->escape($token) . "' WHERE `key` = 'config_mail_smtp_oauth_token' AND `store_id` = '" . (int)$this->config->get('config_store_id') . "'");
+		};
+
 		$mail->send();
 	}
 	
@@ -450,18 +466,26 @@ class ControllerMailOrder extends Controller {
 			$data['comment'] = strip_tags($order_info['comment']);
 
 			$mail = new Mail($this->config->get('config_mail_engine'));
-			$mail->parameter = $this->config->get('config_mail_parameter');
 			$mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
 			$mail->smtp_username = $this->config->get('config_mail_smtp_username');
 			$mail->smtp_password = html_entity_decode($this->config->get('config_mail_smtp_password'), ENT_QUOTES, 'UTF-8');
 			$mail->smtp_port = $this->config->get('config_mail_smtp_port');
 			$mail->smtp_timeout = $this->config->get('config_mail_smtp_timeout');
+			$mail->smtp_auth_method = $this->config->get('config_mail_smtp_auth_method');
+			$mail->smtp_oauth_token = $this->config->get('config_mail_smtp_oauth_token');
+			$mail->smtp_oauth_refresh_token = $this->config->get('config_mail_smtp_oauth_refresh_token');
+			$mail->smtp_oauth_client_id = $this->config->get('config_mail_smtp_oauth_client_id');
+			$mail->smtp_oauth_client_secret = $this->config->get('config_mail_smtp_oauth_client_secret');
 
 			$mail->setTo($this->config->get('config_email'));
 			$mail->setFrom($this->config->get('config_email'));
 			$mail->setSender(html_entity_decode($order_info['store_name'], ENT_QUOTES, 'UTF-8'));
 			$mail->setSubject(html_entity_decode(sprintf($this->language->get('text_subject'), $this->config->get('config_name'), $order_info['order_id']), ENT_QUOTES, 'UTF-8'));
 			$mail->setText($this->load->view('mail/order_alert', $data));
+			$mail->on_token_refresh = function ($token) {
+				$this->db->query("UPDATE " . DB_PREFIX . "setting SET `value` = '" . $this->db->escape($token) . "' WHERE `key` = 'config_mail_smtp_oauth_token' AND `store_id` = '" . (int)$this->config->get('config_store_id') . "'");
+			};
+
 			$mail->send();
 
 			// Send to additional alert emails
@@ -471,6 +495,10 @@ class ControllerMailOrder extends Controller {
 				$email = trim($email);
 				if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) {
 					$mail->setTo($email);
+					$mail->on_token_refresh = function ($token) {
+						$this->db->query("UPDATE " . DB_PREFIX . "setting SET `value` = '" . $this->db->escape($token) . "' WHERE `key` = 'config_mail_smtp_oauth_token' AND `store_id` = '" . (int)$this->config->get('config_store_id') . "'");
+					};
+
 					$mail->send();
 				}
 			}

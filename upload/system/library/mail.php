@@ -19,15 +19,19 @@ class Mail extends \stdClass {
 	protected $text;
 	protected $html;
 	protected $attachments = array();
-	public $parameter;
+
+	/**
+	 * @var callable|null
+	 */
+	public $on_token_refresh;
 
 	/**
 	 * Constructor
 	 *
 	 * @param	string	$adaptor
 	 *
- 	*/
-	public function __construct($adaptor = 'mail') {
+  	*/
+	public function __construct($adaptor = 'smtp') {
 		$class = 'Mail\\' . $adaptor;
 		
 		if (class_exists($class)) {
@@ -140,5 +144,10 @@ class Mail extends \stdClass {
 		}
 		
 		$this->adaptor->send();
+
+		// Check if OAuth token was refreshed by the adaptor
+		if (isset($this->adaptor->smtp_oauth_token, $this->smtp_oauth_token) && $this->adaptor->smtp_oauth_token !== $this->smtp_oauth_token && is_callable($this->on_token_refresh)) {
+			call_user_func($this->on_token_refresh, $this->adaptor->smtp_oauth_token);
+		}
 	}
 }
