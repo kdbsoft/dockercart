@@ -29,7 +29,6 @@ $_['text_source_file_hint'] = 'CSV / XLSX file from supplier feed.';
 $_['text_stats_suppliers'] = 'Suppliers';
 $_['text_stats_url_sources'] = 'URL Sources';
 $_['text_stats_file_sources'] = 'File Sources';
-$_['text_copy_cron_command'] = 'Copy cron command';
 $_['text_valid'] = 'Valid';
 $_['text_invalid'] = 'Invalid';
 $_['text_license_key_required'] = 'Please enter license key';
@@ -74,7 +73,6 @@ $_['text_no_rules'] = 'No rules yet';
 $_['text_map_images_hint'] = 'You can specify multiple column numbers separated by commas, for example: 11,12,13';
 $_['text_map_specials_hint'] = 'Use one column for specials in format: Group::Price::DateStart::DateEnd. Separate multiple specials by " | ". Example: Default::99.00::2026-04-01::2026-04-30 | Wholesale::89.00::2026-04-01::2026-04-30';
 $_['text_filter_profiles'] = 'Filter suppliers by name/code/source...';
-$_['text_cron_copied'] = 'Cron command copied';
 $_['text_delete_profile'] = 'Delete Supplier';
 $_['text_confirm_delete'] = 'Are you sure you want to delete this supplier profile?';
 $_['text_confirm_import'] = 'Run import for this supplier now?';
@@ -165,7 +163,6 @@ $_['column_format'] = 'Format';
 $_['column_mode'] = 'Mode';
 $_['column_status'] = 'Status';
 $_['column_last_run'] = 'Last Run';
-$_['column_cron_command'] = 'Cron Command';
 $_['column_action'] = 'Action';
 
 // Button
@@ -190,6 +187,8 @@ $_['error_invalid_response'] = 'Invalid response from endpoint';
 $_['error_file_required'] = 'Please choose a file';
 $_['error_upload_failed'] = 'Failed to upload file';
 $_['error_invalid_file_format'] = 'Only CSV and XLSX files are supported';
+$_['error_exec_failed'] = 'Worker execution failed';
+$_['error_unknown'] = 'Unknown error';
 
 // Schedule
 $_['entry_cron_schedule'] = 'Schedule';

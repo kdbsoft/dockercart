@@ -22,7 +22,6 @@ class ModelExtensionModuleDockercartImportExportExcel extends Model {
             `field_map_json` longtext,
             `extra_settings_json` longtext,
             `status` tinyint(1) NOT NULL DEFAULT '1',
-            `cron_key` varchar(64) NOT NULL,
             `last_result` longtext,
             `date_added` datetime NOT NULL,
             `date_modified` datetime NOT NULL,
@@ -77,8 +76,6 @@ class ModelExtensionModuleDockercartImportExportExcel extends Model {
     }
 
     public function addProfile($data) {
-        $cron_key = $this->generateCronKey();
-
         $this->db->query("INSERT INTO `" . DB_PREFIX . "dockercart_import_export_excel_profile`
             SET `name` = '" . $this->db->escape((string)$data['name']) . "',
                 `supplier_code` = '" . $this->db->escape((string)$this->getData($data, 'supplier_code', '')) . "',
@@ -98,7 +95,6 @@ class ModelExtensionModuleDockercartImportExportExcel extends Model {
                 `field_map_json` = '" . $this->db->escape(json_encode($this->normalizeFieldMap($this->getData($data, 'field_map', array())), JSON_UNESCAPED_UNICODE)) . "',
                 `extra_settings_json` = '" . $this->db->escape(json_encode($this->getData($data, 'extra_settings', array()), JSON_UNESCAPED_UNICODE)) . "',
                 `status` = '" . ((int)$this->getData($data, 'status', 1) ? 1 : 0) . "',
-                `cron_key` = '" . $this->db->escape($cron_key) . "',
                 `date_added` = NOW(),
                 `date_modified` = NOW()"
         );
@@ -123,11 +119,6 @@ class ModelExtensionModuleDockercartImportExportExcel extends Model {
             return;
         }
 
-        $cron_key = !empty($existing['cron_key']) ? $existing['cron_key'] : $this->generateCronKey();
-        if (!empty($data['regenerate_cron_key'])) {
-            $cron_key = $this->generateCronKey();
-        }
-
         $this->db->query("UPDATE `" . DB_PREFIX . "dockercart_import_export_excel_profile`
             SET `name` = '" . $this->db->escape((string)$data['name']) . "',
                 `supplier_code` = '" . $this->db->escape((string)$this->getData($data, 'supplier_code', '')) . "',
@@ -147,7 +138,6 @@ class ModelExtensionModuleDockercartImportExportExcel extends Model {
                 `field_map_json` = '" . $this->db->escape(json_encode($this->normalizeFieldMap($this->getData($data, 'field_map', array())), JSON_UNESCAPED_UNICODE)) . "',
                 `extra_settings_json` = '" . $this->db->escape(json_encode($this->getData($data, 'extra_settings', array()), JSON_UNESCAPED_UNICODE)) . "',
                 `status` = '" . ((int)$this->getData($data, 'status', 1) ? 1 : 0) . "',
-                `cron_key` = '" . $this->db->escape($cron_key) . "',
                 `date_modified` = NOW()
             WHERE `profile_id` = '" . (int)$profile_id . "'"
         );
@@ -1071,13 +1061,5 @@ class ModelExtensionModuleDockercartImportExportExcel extends Model {
 
     private function getData($data, $key, $default = null) {
         return isset($data[$key]) ? $data[$key] : $default;
-    }
-
-    private function generateCronKey() {
-        try {
-            return bin2hex(random_bytes(20));
-        } catch (Exception $e) {
-            return sha1(uniqid('dockercart_import_export_excel_', true));
-        }
     }
 }

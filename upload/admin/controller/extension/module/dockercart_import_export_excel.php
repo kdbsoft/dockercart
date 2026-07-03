@@ -135,8 +135,6 @@ class ControllerExtensionModuleDockercartImportExportExcel extends Controller {
             $data['license_message'] = 'License check error: ' . $e->getMessage();
         }
 
-        $data['cron_base_path'] = '/var/www/html/cron/dockercart_import_export_excel.php';
-
         $data['schedule_options'] = array(
             ''             => $this->language->get('text_cron_disabled'),
             'every_15m'    => $this->language->get('text_every_15m'),
@@ -676,7 +674,7 @@ class ControllerExtensionModuleDockercartImportExportExcel extends Controller {
     }
 
     private function runRemoteAction($action) {
-        $json = array();
+        $json = array('success' => false);
         $this->load->language('extension/module/dockercart_import_export_excel');
 
         try {
@@ -685,61 +683,43 @@ class ControllerExtensionModuleDockercartImportExportExcel extends Controller {
                 throw new Exception($this->language->get('error_profile_id_invalid'));
             }
 
-            $this->load->model('extension/module/dockercart_import_export_excel');
-            $profile = $this->model_extension_module_dockercart_import_export_excel->getProfile($profile_id);
-            if (!$profile) {
-                throw new Exception($this->language->get('error_profile_not_found'));
-            }
-
             $file_format = isset($this->request->get['file_format']) ? (string)$this->request->get['file_format'] : 'xlsx';
             if (!in_array($file_format, array('xlsx', 'csv'))) {
                 $file_format = 'xlsx';
             }
 
-            $url = HTTP_CATALOG . 'index.php?route=extension/module/dockercart_import_export_excel/cron'
-                . '&profile_id=' . $profile_id
-                . '&cron_key=' . urlencode($profile['cron_key'])
-                . '&action=' . urlencode($action)
-                . '&file_format=' . urlencode($file_format)
-                . '&format=json';
+            $command = sprintf(
+                'php /var/www/html/bin/dockercart_import_export_excel_run.php --profile_id=%d --action=%s',
+                $profile_id,
+                $action
+            );
 
-            $ch = curl_init($url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 1800);
-            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 20);
-            $response = curl_exec($ch);
-            $curl_errno = curl_errno($ch);
-            $curl_error = curl_error($ch);
-            $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-            if ($curl_errno) {
-                throw new Exception($this->language->get('error_curl') . ': [' . (int)$curl_errno . '] ' . $curl_error . '. URL: ' . $url);
+            if ($action === 'export') {
+                $command .= ' --file_format=' . escapeshellarg($file_format);
             }
 
-            if ((int)$http_code !== 200) {
-                $body_preview = $this->buildResponsePreview($response);
-                throw new Exception($this->language->get('error_http') . ': ' . $http_code . '. URL: ' . $url . ($body_preview !== '' ? '. Response preview: ' . $body_preview : ''));
+            $command .= ' 2>&1';
+            exec($command, $output_lines, $exit_code);
+
+            if ($exit_code !== 0) {
+                $error_msg = !empty($output_lines) ? implode("\n", $output_lines) : $this->language->get('error_unknown');
+                throw new Exception($this->language->get('error_exec_failed') . ': ' . $error_msg);
             }
 
-            $decoded = json_decode((string)$response, true);
-            if (!is_array($decoded)) {
-                $json_error = function_exists('json_last_error_msg') ? json_last_error_msg() : 'json decode error';
-                $body_preview = $this->buildResponsePreview($response);
-                throw new Exception($this->language->get('error_invalid_response') . '. JSON decode error: ' . $json_error . '. URL: ' . $url . ($body_preview !== '' ? '. Response preview: ' . $body_preview : ''));
+            $this->load->model('extension/module/dockercart_import_export_excel');
+            $profile = $this->model_extension_module_dockercart_import_export_excel->getProfile($profile_id);
+            $last_result = $profile && is_array($profile['last_result']) ? $profile['last_result'] : array();
+
+            $json['success'] = true;
+            $json['summary'] = $last_result;
+
+            if ($action === 'export' && !empty($last_result['filename'])) {
+                $json['download_url'] = $this->url->link(
+                    'extension/module/dockercart_import_export_excel/downloadExportAjax',
+                    'user_token=' . $this->session->data['user_token'] . '&file=' . urlencode((string)$last_result['filename']),
+                    true
+                );
             }
-
-            if (isset($decoded['success']) && !$decoded['success']) {
-                $remote_error = isset($decoded['error']) ? trim((string)$decoded['error']) : '';
-                if ($remote_error === '') {
-                    $body_preview = $this->buildResponsePreview($response);
-                    $remote_error = $this->language->get('error_invalid_response') . ($body_preview !== '' ? '. Response preview: ' . $body_preview : '');
-                }
-
-                throw new Exception('Endpoint error: ' . $remote_error . '. URL: ' . $url);
-            }
-
-            $json = $decoded;
         } catch (Exception $e) {
             $json['success'] = false;
             $json['error'] = $e->getMessage();
@@ -747,33 +727,6 @@ class ControllerExtensionModuleDockercartImportExportExcel extends Controller {
 
         $this->response->addHeader('Content-Type: application/json');
         $this->response->setOutput(json_encode($json));
-    }
-
-    private function buildResponsePreview($response, $max_length = 500) {
-        $response = trim((string)$response);
-        if ($response === '') {
-            return '';
-        }
-
-        $response = preg_replace('/\s+/', ' ', $response);
-        if (!is_string($response)) {
-            return '';
-        }
-
-        $max_length = max(50, (int)$max_length);
-        if (function_exists('mb_substr') && function_exists('mb_strlen')) {
-            if (mb_strlen($response, 'UTF-8') > $max_length) {
-                return mb_substr($response, 0, $max_length, 'UTF-8') . '...';
-            }
-
-            return $response;
-        }
-
-        if (strlen($response) > $max_length) {
-            return substr($response, 0, $max_length) . '...';
-        }
-
-        return $response;
     }
 
 	public function install() {
