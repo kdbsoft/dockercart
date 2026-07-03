@@ -3,9 +3,8 @@
 declare(strict_types=1);
 
 class DockercartExtensionStore {
-	const YML_DEV_ENDPOINT = 'http://licensing.docker.localhost:8080/api/v1/yml/';
-	const YML_PROD_ENDPOINT = 'https://licensing.dockercart.com/api/v1/yml/';
-	const STORE_DOMAIN = 'https://dockercart.com/extensions';
+	const YML_ENDPOINT = 'http://licensing.docker.localhost:8080/api/v1/yml/';
+	const STORE_DOMAIN = 'https://dockercart.net/extensions';
 	const CACHE_TTL = 1800;
 
 	private $registry;
@@ -14,16 +13,6 @@ class DockercartExtensionStore {
 	public function __construct($registry) {
 		$this->registry = $registry;
 		$this->cache_dir = DIR_STORAGE . 'dockercart/extension_store/';
-	}
-
-	private function getEndpoint(): string {
-		$host = $_SERVER['HTTP_HOST'] ?? '';
-
-		if (strpos($host, 'localhost') !== false || strpos($host, '127.0.0.1') !== false || strpos($host, '.local') !== false) {
-			return self::YML_DEV_ENDPOINT;
-		}
-
-		return self::YML_PROD_ENDPOINT;
 	}
 
 	public function resolveLanguage(): string {
@@ -53,7 +42,7 @@ class DockercartExtensionStore {
 			}
 		}
 
-		$url = $this->getEndpoint() . $lang;
+		$url = self::YML_ENDPOINT . $lang;
 
 		$ch = curl_init($url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -61,6 +50,15 @@ class DockercartExtensionStore {
 		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 		curl_setopt($ch, CURLOPT_ENCODING, '');
+
+		$parsed = parse_url($url);
+		$gateway_ip = @gethostbyname('host.docker.internal');
+
+		if ($gateway_ip !== 'host.docker.internal') {
+			curl_setopt($ch, CURLOPT_RESOLVE, array(
+				$parsed['host'] . ':' . ($parsed['port'] ?? 80) . ':' . $gateway_ip
+			));
+		}
 
 		$response = curl_exec($ch);
 		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -170,8 +168,6 @@ class DockercartExtensionStore {
 	}
 
 	public function getOffers(SimpleXMLElement $yml, ?array $category_ids = null): array {
-		$namespace_yml = $yml->getNamespaces(true);
-
 		$offers = array();
 
 		foreach ($yml->shop->offers->offer as $offer) {

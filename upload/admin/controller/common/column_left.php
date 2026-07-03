@@ -155,6 +155,14 @@ class ControllerCommonColumnLeft extends Controller {
 			// Extension
 			$marketplace = array();
 
+			if ($this->user->hasPermission('access', 'extension/store')) {
+				$marketplace[] = array(
+					'name'	   => $this->language->get('text_extensions_store'),
+					'href'     => $this->url->link('extension/store', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
 			if ($this->user->hasPermission('access', 'marketplace/installer')) {
 				$marketplace[] = array(
 					'name'	   => $this->language->get('text_installer'),

@@ -33,6 +33,7 @@ $_['text_design'] = 'Дизайн';
 $_['text_download'] = 'Завантаження';
 $_['text_event'] = 'Події';
 $_['text_extension'] = 'Розширення';
+$_['text_extensions_store'] = 'Магазин розширень';
 $_['text_feed'] = 'Канали просування';
 $_['text_fraud'] = 'Протидія шахрайству';
 $_['text_geo_zone'] = 'Географічні зони';
