@@ -82,7 +82,6 @@ docker/letsencrypt/*.lock
 # Config files (will be generated at runtime)
 upload/config.php
 upload/admin/config.php
-upload/robots-dist.txt
 
 # System files
 .DS_Store

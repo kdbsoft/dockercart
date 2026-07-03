@@ -128,28 +128,56 @@ wait_for_mysql() {
     echo "MariaDB is up and running!"
 }
 
-# Генерация robots.txt при первом старте (если файл отсутствует в bind mount)
+# Генерация robots.txt при каждом старте (как config.php)
 ensure_robots_txt() {
     local robots_file="/var/www/html/robots.txt"
 
-    if [ -f "$robots_file" ]; then
-        echo "robots.txt already exists, skipping generation"
-        return
+    echo "Regenerating $robots_file ..."
+
+    local url="${DOCKERCART_URL:-http://dockercart.local}"
+    url="${url%/}"
+
+    if [ "${DOCKERCART_SSL_ENABLED:-false}" = "true" ] && [ -n "${DOCKERCART_HTTPS_URL:-}" ]; then
+        url="${DOCKERCART_HTTPS_URL%/}"
     fi
 
-    echo "Generating restrictive robots.txt at first start (Disallow: /)..."
-    cat > "$robots_file" <<EOF
-# DockerCart first-start safe default.
-# Keep site closed for indexing until you review SEO settings.
-# To open crawling, replace this file with robots-dist.txt and set your real domain in Sitemap.
-User-agent: *
-Disallow: /
-EOF
+    cat > "$robots_file" <<-EOF
+	User-agent: *
+	Allow: /catalog/view/javascript/
+	Allow: /catalog/view/theme/
+	Allow: /image/
+
+	Disallow: /admin/
+	Disallow: /system/
+	Disallow: /storage/
+	Disallow: /tool-
+	Disallow: /*/tool-
+	Disallow: /account-
+	Disallow: /*/account-
+	Disallow: /checkout-
+	Disallow: /*/checkout-
+	Disallow: /affiliate-
+	Disallow: /*/affiliate-
+	Disallow: /product-search
+	Disallow: /*/product-search
+	Disallow: /product-compare
+	Disallow: /*/product-compare
+	Disallow: /*?*sort=
+	Disallow: /*?*order=
+	Disallow: /*?*limit=
+	Disallow: /*?*page=
+	Disallow: /*?*tracking=
+	Disallow: /*?*utm_
+
+	Sitemap: ${url}/sitemap.xml
+	EOF
 
     if [ "$(id -u)" -eq 0 ]; then
         chown www-data:staff "$robots_file" 2>/dev/null || true
         chmod 664 "$robots_file" 2>/dev/null || true
     fi
+
+    echo "$robots_file regenerated (sitemap: ${url}/sitemap.xml)"
 }
 
 # Гарантированно создаем config.php файлы (если их нет на хосте/в bind mount)
@@ -462,7 +490,7 @@ fi
 # Создаем конфиги приложения, если отсутствуют
 ensure_app_configs
 
-# Генерируем robots.txt, если отсутствует
+# Генерируем robots.txt при каждом старте
 ensure_robots_txt
 
 # Ждем MariaDB

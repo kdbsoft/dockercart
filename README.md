@@ -324,13 +324,11 @@ The release tag (`vX.Y.Z`) is the source of truth — `CHANGELOG.md`, `VERSION`,
 
 ---
 
-## robots.txt on First Start
+## robots.txt
 
-DockerCart ships a restrictive `robots.txt` (`Disallow: /`) to prevent premature indexing. To open the site to crawlers after launch:
+`robots.txt` is auto-generated on every container start — like `config.php`. The sitemap URL is populated from your `DOCKERCART_URL` (or `DOCKERCART_HTTPS_URL` when SSL is enabled).
 
-1. Copy `upload/robots-dist.txt` to `upload/robots.txt`
-2. Update `Sitemap:` with your real domain
-3. Tune rules for your SEO strategy
+Crawling rules are defined in `docker/entrypoint.sh` (`ensure_robots_txt`). To customize, edit the heredoc there and restart the container.
 
 ---
 
