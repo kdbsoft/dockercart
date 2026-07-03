@@ -1,6 +1,6 @@
-# Docker Compose override for non-SSL mode (default)
-# Usage: docker compose -f docker-compose.yml -f docker-compose.no-ssl.yml up -d
-# This is the default configuration and is included automatically unless --ssl or --letsencrypt is specified
+# Docker Compose override for Traefik non-SSL mode (HTTP)
+# Usage: docker compose -f docker-compose.traefik.yml -f docker-compose.traefik.no-ssl.yml up -d
+# Included automatically unless --ssl or --le is specified
 
 services:
   nginx:

@@ -86,13 +86,14 @@ find upload -type f -name "*.php" ! -path 'storage/vendor/*' -print0 | xargs -0 
 ## Docker Compose Modes
 | Make target | Use case |
 |---|---|
-| `make dev` / `make up` | Local dev with Traefik (HTTP) |
-| `make dev-standalone` | No Traefik, port 80 |
-| `make dev-ssl` | Traefik + self-signed HTTPS |
-| `make prod` | Traefik + Let's Encrypt |
-| `make prod-standalone` | No Traefik + Let's Encrypt |
+| `make dev` / `make up` | Standalone HTTP (port 80) — default |
+| `make dev-ssl` / `make ssl` | Standalone + self-signed HTTPS |
+| `make prod` / `make le` | Standalone + Let's Encrypt HTTPS |
+| `make traefik` | Traefik + external reverse proxy |
+| `make traefik-ssl` | Traefik + self-signed HTTPS |
+| `make traefik-le` | Traefik + Let's Encrypt HTTPS |
 | `make ftp` | Enable FTP (images only) |
-Traefik is optional — standalone modes don't require it.
+Traefik is optional — standalone is the default.
 Container names: `dockercart_apache`, `dockercart_nginx`, `dockercart_mariadb`, `dockercart_redis`, `dockercart_memcached`, `dockercart_manticore`
 ---
 ## Commit Conventions
