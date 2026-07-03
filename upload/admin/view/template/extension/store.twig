@@ -97,6 +97,9 @@
 												<strong class="text-success">{{ text_free }}</strong>
 												{% endif %}
 											</span>
+											<a href="{{ offer.buy_url }}" class="btn btn-sm btn-primary store-card-buy-btn" target="_blank" rel="noopener">
+												<i class="fa fa-shopping-cart"></i> {{ text_buy }}
+											</a>
 										</div>
 									</div>
 								</div>
@@ -136,6 +139,7 @@
 				</div>
 				<div class="store-modal-description" id="store-modal-description"></div>
 				<div class="store-modal-params" id="store-modal-params"></div>
+				<div class="store-modal-changelog" id="store-modal-changelog"></div>
 			</div>
 			<div class="modal-footer store-modal-footer">
 				<a href="#" id="store-modal-buy" class="btn btn-primary btn-lg btn-buy" target="_blank" rel="noopener">
@@ -158,6 +162,7 @@ $(document).ready(function() {
 	var $modalParams = $('#store-modal-params');
 	var $modalBuy = $('#store-modal-buy');
 	var $modalBuyText = $('#store-modal-buy-text');
+	var $modalChangelog = $('#store-modal-changelog');
 
 	$('.store-grid').on('click', '.store-card', function() {
 		var offerId = $(this).data('offer-id');
@@ -168,6 +173,7 @@ $(document).ready(function() {
 		$modalParams.html('').hide();
 		$modalBuy.attr('href', '#').hide();
 		$modalBuyText.text('{{ text_buy }}');
+		$modalChangelog.html('').hide();
 		$modalIndicators.empty();
 		$modalCarouselInner.empty();
 
@@ -225,6 +231,16 @@ $(document).ready(function() {
 				});
 
 				$modalParams.html(paramsHtml).show();
+			} else {
+				$modalParams.html('').hide();
+			}
+
+			if (data.changelog) {
+				var changelogHtml = '<div class="store-changelog-title">' + '{{ text_changelog }}' + '</div>';
+				changelogHtml += '<div class="store-changelog-content">' + data.changelog + '</div>';
+				$modalChangelog.html(changelogHtml).show();
+			} else {
+				$modalChangelog.html('').hide();
 			}
 
 			$modal.modal('show');
@@ -233,6 +249,10 @@ $(document).ready(function() {
 			$modalDescription.html('<div class="alert alert-danger store-modal-alert">{{ text_error_detail }}</div>').show();
 			$modal.modal('show');
 		});
+	});
+
+	$('.store-grid').on('click', '.store-card-buy-btn', function(e) {
+		e.stopPropagation();
 	});
 
 	lucide.createIcons();

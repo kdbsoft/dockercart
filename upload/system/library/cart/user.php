@@ -84,6 +84,7 @@ class User {
 
 	public function logout() {
 		unset($this->session->data['user_id']);
+		unset($this->session->data['user_token']);
 
 		$this->user_id = '';
 		$this->username = '';

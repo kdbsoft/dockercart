@@ -23,6 +23,7 @@ $_['text_cache_cleared'] = 'Store cache has been cleared.';
 $_['text_no_description'] = 'No description available.';
 $_['text_error_detail'] = 'Failed to load extension details. Please try again.';
 $_['text_installed'] = 'Installed';
+$_['text_changelog'] = 'Changelog';
 
 $_['error_permission'] = 'Warning: You do not have permission to modify extensions store!';
 $_['error_fetch'] = 'Failed to load extensions catalog from server. Please try again later.';
