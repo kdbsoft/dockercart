@@ -135,3 +135,14 @@ $_['column_city']            = 'City';
 $_['entry_oc_zone']          = 'OpenCart Zone';
 $_['button_map']             = 'Map';
 $_['entry_region_map_filter_status'] = 'Status';
+
+// Scheduler
+$_['entry_sync_schedule']    = 'Auto Sync Schedule';
+$_['help_sync_schedule']     = 'Schedule automatic division synchronization via CLI';
+$_['text_cron_disabled']     = 'Disabled';
+$_['text_every_15m']         = 'Every 15 min';
+$_['text_every_30m']         = 'Every 30 min';
+$_['text_hourly']            = 'Hourly';
+$_['text_every_6h']          = 'Every 6 hours';
+$_['text_every_12h']         = 'Every 12 hours';
+$_['text_daily']             = 'Daily';

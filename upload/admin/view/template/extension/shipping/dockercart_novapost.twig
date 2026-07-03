@@ -260,6 +260,22 @@
                 </div>
 
               </form>
+
+              <div class="dcx-section">
+                <h4><i class="fa fa-clock-o"></i> {{ entry_sync_schedule }}</h4>
+
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-sync-schedule">{{ entry_sync_schedule }}</label>
+                  <div class="col-sm-10">
+                    <select name="sync_schedule" id="input-sync-schedule" class="form-control">
+                      {% for value, label in schedule_options %}
+                      <option value="{{ value }}" {% if value == sync_schedule %}selected{% endif %}>{{ label }}</option>
+                      {% endfor %}
+                    </select>
+                    <div class="help-block">{{ help_sync_schedule }}</div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {# ── Divisions Tab ── #}
@@ -726,6 +742,20 @@ $(function() {
         } else {
           $('#sync-error-message').text('{{ error_ajax }} (' + textStatus + ')');
           $('#sync-error').show();
+        }
+      }
+    });
+  });
+
+  $('#input-sync-schedule').on('change', function() {
+    $.ajax({
+      url: '{{ set_schedule_url }}',
+      type: 'POST',
+      dataType: 'json',
+      data: { schedule: $(this).val() },
+      success: function(json) {
+        if (!json.success && json.error) {
+          alert(json.error);
         }
       }
     });

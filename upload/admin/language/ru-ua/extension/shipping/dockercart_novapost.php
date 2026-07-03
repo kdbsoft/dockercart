@@ -134,3 +134,14 @@ $_['column_oc_zone']         = 'Зона OC';
 $_['entry_oc_zone']          = 'Зона OpenCart';
 $_['button_map']             = 'Сопоставить';
 $_['entry_region_map_filter_status'] = 'Статус';
+
+// Scheduler
+$_['entry_sync_schedule']    = 'Расписание автосинхронизации';
+$_['help_sync_schedule']     = 'Расписание автоматической синхронизации отделений через CLI';
+$_['text_cron_disabled']     = 'Отключено';
+$_['text_every_15m']         = 'Каждые 15 мин';
+$_['text_every_30m']         = 'Каждые 30 мин';
+$_['text_hourly']            = 'Каждый час';
+$_['text_every_6h']          = 'Каждые 6 часов';
+$_['text_every_12h']         = 'Каждые 12 часов';
+$_['text_daily']             = 'Ежедневно';
