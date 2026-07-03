@@ -13,6 +13,7 @@
  * Options:
  *   --profile_id=N   Profile ID to run (required, must be > 0)
  *   --action=TYPE    import|export (default: import)
+ *   --file_format=T  xlsx|csv (default: xlsx, export only)
  *
  * Exit codes:
  *   0 — success
@@ -33,15 +34,22 @@ $_SERVER['REQUEST_METHOD'] = 'GET';
 $_SERVER['REQUEST_URI']    = '/';
 
 // ── Parse CLI arguments ──────────────────────────────────────────────
-$profile_id = 0;
-$action     = 'import';
+$profile_id  = 0;
+$action      = 'import';
+$file_format = 'xlsx';
 
 foreach ($argv as $arg) {
 	if (strpos($arg, '--profile_id=') === 0) {
 		$profile_id = (int)substr($arg, 13);
 	} elseif (strpos($arg, '--action=') === 0) {
 		$action = strtolower(substr($arg, 9));
+	} elseif (strpos($arg, '--file_format=') === 0) {
+		$file_format = strtolower(substr($arg, 14));
 	}
+}
+
+if (!in_array($file_format, ['xlsx', 'csv'], true)) {
+	$file_format = 'xlsx';
 }
 
 if ($profile_id <= 0) {
@@ -127,8 +135,8 @@ try {
 			fwrite(STDERR, "[dockercart-import-export-excel] ERROR: runExport() method not found\n");
 			exit(1);
 		}
-		$model->runExport($profile_id, 'xlsx');
-		echo "[dockercart-import-export-excel] Export complete: profile_id={$profile_id}\n";
+		$summary = $model->runExport($profile_id, $file_format);
+		echo "[dockercart-import-export-excel] Export complete: profile_id={$profile_id}, filename={$summary['filename']}\n";
 	}
 } catch (\Throwable $e) {
 	fwrite(STDERR, "[dockercart-import-export-excel] FAILED: " . $e->getMessage() . "\n");

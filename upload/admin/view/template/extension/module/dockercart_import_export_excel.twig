@@ -119,7 +119,6 @@
                         <td>{{ column_status }}</td>
                         <td>{{ column_last_run }}</td>
                         <td>{{ entry_cron_schedule }}</td>
-                        <td>{{ column_cron_command }}</td>
                         <td class="text-right">{{ column_action }}</td>
                       </tr>
                     </thead>
@@ -165,22 +164,16 @@
                             <span class="text-muted">{{ text_cron_disabled }}</span>
                           {% endif %}
                         </td>
-                        <td>
-                          <code class="dc-ix-code dc-ix-code--multiline">
-php {{ cron_base_path }} --action=import --profile_id={{ profile.profile_id }} --cron_key={{ profile.cron_key }}
-                          </code>
-                        </td>
                         <td class="text-right">
                           <div class="dc-ix-actions">
                             <button type="button" class="btn btn-primary btn-xs" onclick="runImport({{ profile.profile_id }});" title="{{ button_import_now }}"><i class="fa fa-download"></i></button>
-                            <button type="button" class="btn btn-default btn-xs" onclick="copyCron(this);" title="{{ text_copy_cron_command }}"><i class="fa fa-copy"></i></button>
                             <a href="{{ profile.edit_link }}" class="btn btn-warning btn-xs" title="{{ text_edit_profile }}"><i class="fa fa-pencil"></i></a>
                             <button type="button" class="btn btn-danger btn-xs" onclick="deleteProfile({{ profile.profile_id }});" title="{{ text_delete_profile }}"><i class="fa fa-trash"></i></button>
                           </div>
                         </td>
                       </tr>
                       {% else %}
-                      <tr><td colspan="10" class="text-center">{{ text_no_profiles }}</td></tr>
+                      <tr><td colspan="9" class="text-center">{{ text_no_profiles }}</td></tr>
                       {% endfor %}
                     </tbody>
                   </table>
@@ -538,26 +531,6 @@ function deleteProfile(profileId) {
       notice('error', thrownError);
     }
   });
-}
-
-function copyCron(btn) {
-  var $row = $(btn).closest('tr');
-  var text = $.trim($row.find('.dc-ix-code').text());
-  if (!text) {
-    return;
-  }
-
-  var copyDone = function() { notice('success', '{{ text_cron_copied }}'); };
-
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(copyDone);
-    return;
-  }
-
-  var $tmp = $('<textarea>').css({position:'fixed', top:'-1000px'}).val(text).appendTo('body');
-  $tmp[0].select();
-  try { document.execCommand('copy'); copyDone(); } catch(e) {}
-  $tmp.remove();
 }
 
 $('#profile-filter').on('input', function() {
