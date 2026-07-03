@@ -1,5 +1,5 @@
-# Docker Compose override for Let's Encrypt SSL configuration
-# Usage: docker compose -f docker-compose.yml -f docker-compose.letsencrypt.yml up -d
+# Docker Compose override for Traefik LE (Let's Encrypt) SSL mode
+# Usage: docker compose -f docker-compose.traefik.yml -f docker-compose.traefik.le.yml up -d
 # Requires SSL_DOMAIN and SSL_EMAIL environment variables to be set in .env
 
 services:
@@ -9,5 +9,5 @@ services:
       - "traefik.http.routers.${DOCKERCART_ROUTER_NAME:-dockercart}.rule=Host(`${DOCKERCART_DOMAIN:-dockercart.local}`)"
       - "traefik.http.routers.${DOCKERCART_ROUTER_NAME:-dockercart}.entrypoints=websecure"
       - "traefik.http.routers.${DOCKERCART_ROUTER_NAME:-dockercart}.tls=true"
-      - "traefik.http.routers.${DOCKERCART_ROUTER_NAME:-dockercart}.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.${DOCKERCART_ROUTER_NAME:-dockercart}.tls.certresolver=le"
       - "traefik.http.services.${DOCKERCART_ROUTER_NAME:-dockercart}.loadbalancer.server.port=80"

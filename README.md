@@ -22,7 +22,7 @@ DockerCart is a production-ready e-commerce platform shipped as a complete Docke
 
 DockerCart is a production-ready, self-hosted e-commerce platform that deploys in minutes:
 
-- **One-command deployment** — `make dev-standalone` and your store is live. No manual server setup, no web installer.
+- **One-command deployment** — `make up` and your store is live. No manual server setup, no web installer.
 - **Complete Docker stack** — PHP 8.5 + Apache + Nginx + MariaDB 11.8 + Redis + Manticore Search, orchestrated via Docker Compose.
 - **Environment-based configuration** — all runtime settings in `.env`, no PHP file editing. Generated `config.php` and `admin/config.php` at container start.
 - **Pre-configured caching** — Redis (primary) + OPcache with Memcached fallback. Industrial-grade performance out of the box.
@@ -102,16 +102,14 @@ Then choose a deployment mode:
 
 ---
 
-### Mode 1 — Standalone *(no Traefik, simplest)*
+### Standalone — HTTP *(default, simplest)*
 
-Use `docker-compose.standalone.yml`. By default it binds host port **80**.
+Uses `docker-compose.yml`. By default it binds host port **80**.
 
 ```bash
-# via Make
-make dev-standalone
-
-# via Docker Compose
-docker compose -f docker-compose.standalone.yml up -d --build
+make up
+# or
+./start.sh
 ```
 
 Store: **`http://your-domain`** · Admin: **`http://your-domain/admin`**
@@ -124,32 +122,13 @@ Set these values in `.env`:
 
 ---
 
-### Mode 2 — Traefik *(production / local dev / staging)*
+### Standalone — HTTPS with self-signed cert *(local testing)*
 
-Use `docker-compose.yml` with an external Traefik network.
-
-```bash
-# via Make
-make dev
-
-# via Docker Compose
-docker compose up -d --build
-
-# via script
-./start.sh
-```
-
-Store: **`http://your-domain`** (set `DOCKERCART_DOMAIN` in `.env`)
-
----
-
-### Mode 3 — Self-signed SSL *(HTTPS testing)*
+Generates a self-signed certificate and serves HTTPS on port 443.
 
 ```bash
-# via Make
-make dev-ssl
-
-# via script
+make ssl
+# or
 ./start.sh --ssl
 ```
 
@@ -157,7 +136,7 @@ Access: **`https://your-domain`** (browser warning is expected for self-signed c
 
 ---
 
-### Mode 4 — Let's Encrypt *(production SSL with automatic renewal)*
+### Standalone — HTTPS with Let's Encrypt *(production)*
 
 Requires a real public domain with ports 80/443 open.
 
@@ -166,55 +145,53 @@ Requires a real public domain with ports 80/443 open.
 SSL_DOMAIN=shop.example.com
 SSL_EMAIL=admin@example.com
 
-# via Make
-make prod
-
-# via script
-./start.sh --letsencrypt
+make le
+# or
+./start.sh --le
 ```
 
----
-
-### Mode 5 — Standalone + Let's Encrypt *(no Traefik, production SSL)*
-
-Requires a real public domain with ports 80/443 open.
-
-```bash
-# Edit .env first:
-SSL_DOMAIN=shop.example.com
-SSL_EMAIL=admin@example.com
-DOCKERCART_DOMAIN=shop.example.com
-DOCKERCART_URL=https://shop.example.com
-DOCKERCART_HTTPS_URL=https://shop.example.com
-DOCKERCART_SSL_ENABLED=true
-
-# via Make
-make prod-standalone
-
-# compatible alias
-STANDALONE=1 make letsencrypt
-```
-
-Access: **`https://shop.example.com`**
-
-- Runs without Traefik (standalone compose + Nginx)
+- Runs without Traefik (standalone Nginx)
 - Obtains certs automatically via certbot (HTTP-01 challenge)
 - Keeps a renewal loop in `certbot` container (checks every 24h by default, renews only near expiry)
 - Reuses existing certificate/key from persistent storage to avoid unnecessary re-issuance
-- Uses `DOCKERCART_HTTPS_PORT` (default `443`) for HTTPS binding
+
+Access: **`https://shop.example.com`** · Admin: **`https://shop.example.com/admin`**
 
 ---
 
-### Mode 6 — Optional FTP *(images directory only)*
+### Traefik mode *(external reverse proxy)*
+
+Use when you already have Traefik running on the host. Requires an external `traefik` Docker network.
+
+```bash
+# HTTP
+make traefik
+# or
+./start.sh --traefik
+
+# HTTPS with self-signed cert
+make traefik-ssl
+
+# HTTPS with Let's Encrypt
+make traefik-le
+# or
+./start.sh --traefik --le
+```
+
+Store: **`http://your-domain`** (set `DOCKERCART_DOMAIN` in `.env`)
+
+---
+
+### Optional FTP *(images directory only)*
 
 FTP is disabled by default and starts only when explicitly requested.
 
 ```bash
-# via Make (short command)
+# Attach FTP to any running mode
 make ftp
 
-# with Let's Encrypt (single command)
-make letsencrypt-ftp
+# With standalone Let's Encrypt (single command)
+make le-ftp
 ```
 
 FTP user is chrooted to existing host directory `./upload/image` only and has extended privileges in this directory: upload, overwrite, delete, and rename image files.
@@ -236,7 +213,7 @@ Configure in `.env` if needed:
 
 ---
 
-> **Traefik is optional.** Modes 1 and 5 do not require it.
+> **Traefik is optional.** The default mode runs standalone without Traefik.
 
 ---
 
@@ -245,13 +222,19 @@ Configure in `.env` if needed:
 ```bash
 make help          # List all targets
 
-make dev-standalone    # Start — direct host port (default: 80), no Traefik
-make prod-standalone # Start — standalone + Let's Encrypt HTTPS (no Traefik)
-make dev            # Start — Traefik mode (HTTP by default)
-make dev-ssl           # Start — Traefik + self-signed HTTPS (local testing)
-make prod   # Start — Traefik + Let's Encrypt (production)
-make ftp           # Start — stack + optional FTP profile (access only to ./upload/image)
-make prod-ftp # Start — Let's Encrypt + FTP profile together
+# Standalone mode (default)
+make up            # Start — direct host port (default: 80)
+make ssl           # Start — standalone + self-signed HTTPS
+make le            # Start — standalone + Let's Encrypt HTTPS (production)
+make le-ftp        # Start — standalone LE + FTP
+
+# Traefik mode (alternative)
+make traefik       # Start — Traefik, HTTP
+make traefik-ssl   # Start — Traefik + self-signed HTTPS
+make traefik-le    # Start — Traefik + Let's Encrypt HTTPS
+
+# Utilities
+make ftp           # Start — FTP profile (access only to ./upload/image)
 make down          # Stop containers
 make restart       # Restart containers
 make logs          # Show last 100 log lines
@@ -261,6 +244,12 @@ make mariadb       # Open MariaDB CLI
 make backup        # Dump DB to ./backups/
 make restore       # Restore from latest dump in ./backups/
 make clean         # Stop + remove all volumes (destructive)
+
+# Aliases
+make dev           # Same as make up
+make dev-ssl       # Same as make ssl
+make prod          # Same as make le
+make prod-ftp      # Same as make le-ftp
 ```
 
 ---
@@ -318,8 +307,10 @@ dockercart/
 │   ├── admin/                  Admin panel
 │   └── catalog/                Storefront
 ├── .env.example                Environment variable template
-├── docker-compose.yml          Default stack (Traefik or standalone via override)
-├── docker-compose.standalone.yml  Standalone mode (no Traefik) stack
+├── docker-compose.yml          Default stack (standalone, no Traefik)
+├── docker-compose.traefik.yml  Traefik mode stack
+├── docker-compose.ssl.yml      Standalone self-signed SSL override
+├── docker-compose.le.yml       Standalone Let's Encrypt override
 ├── Dockerfile                  Application image
 └── Makefile                    Shortcut commands
 ```
@@ -331,16 +322,16 @@ dockercart/
 All runtime settings live in `.env`. Copy from `.env.example` and edit:
 
 ```dotenv
-# Domain (used by Traefik mode)
+# Domain
 DOCKERCART_DOMAIN=dockercart.local
 DOCKERCART_URL=http://dockercart.local
 DOCKERCART_HTTPS_URL=http://dockercart.local
 DOCKERCART_SSL_ENABLED=false
 
-# Standalone port (used by docker-compose.standalone.yml)
+# Standalone HTTP port (docker-compose.yml)
 DOCKERCART_HTTP_PORT=80
 
-# Standalone HTTPS port (used by docker-compose.standalone.letsencrypt.yml)
+# Standalone HTTPS port (docker-compose.ssl.yml / docker-compose.le.yml)
 DOCKERCART_HTTPS_PORT=443
 
 # Database
@@ -372,7 +363,7 @@ See [`.env.example`](.env.example) for a complete reference.
 
 1. Fork the repository and create a feature branch
 2. Write focused commits using Conventional Commits, for example `feat: add cache invalidation` or `fix: handle standalone SSL redirect`
-3. Test your changes with `make standalone`
+3. Test your changes with `make up`
 4. Submit a pull request describing the change and its motivation
 
 ---
@@ -392,5 +383,4 @@ DockerCart is released under the **GNU General Public License v3.0 (GPLv3)**.
 DockerCart is based on [OpenCart](https://github.com/opencart/opencart), which is also GPL-licensed. All original attributions are preserved. See [LICENSE.md](LICENSE.md) for the full license text.
 
 ---
-
 

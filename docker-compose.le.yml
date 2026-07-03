@@ -1,6 +1,6 @@
-# Docker Compose override for standalone Let's Encrypt SSL mode (no Traefik)
+# Docker Compose override for standalone LE (Let's Encrypt) SSL mode
 # Usage:
-#   docker compose -f docker-compose.standalone.yml -f docker-compose.standalone.letsencrypt.yml up -d
+#   docker compose -f docker-compose.yml -f docker-compose.le.yml up -d
 # Requirements:
 #   - SSL_DOMAIN and SSL_EMAIL in .env
 #   - Public inbound ports 80 and 443
