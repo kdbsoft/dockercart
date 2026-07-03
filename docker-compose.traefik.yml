@@ -97,10 +97,6 @@ services:
       - REDIS_HOSTNAME=${REDIS_HOSTNAME:-redis}
       - REDIS_PORT=${REDIS_PORT:-6379}
       - REDIS_PASSWORD=${REDIS_PASSWORD:-dockercart_redis_pass}
-      - MEMCACHED_HOSTNAME=${MEMCACHED_HOSTNAME:-memcached}
-      - MEMCACHED_PORT=${MEMCACHED_PORT:-11211}
-      - CACHE_HOSTNAME=${CACHE_HOSTNAME:-memcached}
-      - CACHE_PORT=${CACHE_PORT:-11211}
       - CACHE_PREFIX=${CACHE_PREFIX:-oc_}
       - TZ=${TZ:-UTC}
       - PHP_MEMORY_LIMIT=${PHP_MEMORY_LIMIT:-256M}
@@ -111,8 +107,6 @@ services:
     depends_on:
       mariadb:
         condition: service_healthy
-      memcached:
-        condition: service_started
       redis:
         condition: service_started
     networks:
@@ -164,10 +158,6 @@ services:
       - REDIS_HOSTNAME=${REDIS_HOSTNAME:-redis}
       - REDIS_PORT=${REDIS_PORT:-6379}
       - REDIS_PASSWORD=${REDIS_PASSWORD:-dockercart_redis_pass}
-      - MEMCACHED_HOSTNAME=${MEMCACHED_HOSTNAME:-memcached}
-      - MEMCACHED_PORT=${MEMCACHED_PORT:-11211}
-      - CACHE_HOSTNAME=${CACHE_HOSTNAME:-memcached}
-      - CACHE_PORT=${CACHE_PORT:-11211}
       - CACHE_PREFIX=${CACHE_PREFIX:-oc_}
       - TZ=${TZ:-UTC}
       - PHP_MEMORY_LIMIT=${PHP_MEMORY_LIMIT:-256M}
@@ -280,27 +270,6 @@ services:
     healthcheck:
       test:
         ["CMD", "mysql", "-h", "127.0.0.1", "-P", "9306", "-e", "SHOW TABLES"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  memcached:
-    image: memcached:1.6-alpine
-    container_name: ${MEMCACHED_CONTAINER_NAME:-dockercart_memcached}
-    restart: ${RESTART_POLICY:-unless-stopped}
-    security_opt:
-      - no-new-privileges:true
-    command: ["memcached", "-m", "128", "-p", "11211", "-u", "memcache"]
-    logging:
-      driver: "none"
-    networks:
-      - dockercart-network
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "echo stats | nc 127.0.0.1 11211 >/dev/null 2>&1 || exit 1",
-        ]
       interval: 10s
       timeout: 5s
       retries: 5
