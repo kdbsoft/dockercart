@@ -153,11 +153,19 @@ class ControllerExtensionStore extends Controller {
 					}
 
 					$params = array();
+					$changelog = '';
 
 					foreach ($offer->param as $param) {
+						$code = (string) $param['code'];
+
+						if ($code === 'changelog') {
+							$changelog = (string) $param;
+							continue;
+						}
+
 						$params[] = array(
 							'name' => (string) $param['name'],
-							'code' => (string) $param['code'],
+							'code' => $code,
 							'value' => (string) $param,
 						);
 					}
@@ -201,6 +209,7 @@ class ControllerExtensionStore extends Controller {
 					$json['currency'] = (string) $offer->currencyId;
 					$json['pictures'] = $pictures;
 					$json['params'] = $params;
+					$json['changelog'] = $changelog;
 					$json['buy_url'] = $buy_url;
 					$json['available'] = ((string) $offer['available']) === 'true';
 
