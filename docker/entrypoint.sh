@@ -208,16 +208,12 @@ define('DB_PREFIX', $env('DB_PREFIX', 'oc_'));
 // Cache
 $cache_engine = $env('CACHE_ENGINE', 'redis');
 if ($cache_engine === 'redis' && !class_exists('Redis', false)) {
-	$cache_engine = class_exists('Memcached', false) ? 'memcached' : 'file';
+	$cache_engine = 'file';
 }
 define('CACHE_ENGINE', $cache_engine);
 define('REDIS_HOSTNAME', $env('REDIS_HOSTNAME', 'redis'));
 define('REDIS_PORT', $env('REDIS_PORT', '6379'));
 define('REDIS_PASSWORD', $env('REDIS_PASSWORD', 'dockercart_redis_pass'));
-define('MEMCACHED_HOSTNAME', $env('MEMCACHED_HOSTNAME', 'memcached'));
-define('MEMCACHED_PORT', $env('MEMCACHED_PORT', '11211'));
-define('CACHE_HOSTNAME', $env('CACHE_HOSTNAME', 'memcached'));
-define('CACHE_PORT', $env('CACHE_PORT', '11211'));
 define('CACHE_PREFIX', $env('CACHE_PREFIX', 'oc_'));
 define('IMAGE_MAX_DIMENSION', getenv('IMAGE_MAX_DIMENSION') ?: '2560');
 
@@ -280,16 +276,12 @@ define('DB_PREFIX', $env('DB_PREFIX', 'oc_'));
 // Cache
 $cache_engine = $env('CACHE_ENGINE', 'redis');
 if ($cache_engine === 'redis' && !class_exists('Redis', false)) {
-	$cache_engine = class_exists('Memcached', false) ? 'memcached' : 'file';
+	$cache_engine = 'file';
 }
 define('CACHE_ENGINE', $cache_engine);
 define('REDIS_HOSTNAME', $env('REDIS_HOSTNAME', 'redis'));
 define('REDIS_PORT', $env('REDIS_PORT', '6379'));
 define('REDIS_PASSWORD', $env('REDIS_PASSWORD', 'dockercart_redis_pass'));
-define('MEMCACHED_HOSTNAME', $env('MEMCACHED_HOSTNAME', 'memcached'));
-define('MEMCACHED_PORT', $env('MEMCACHED_PORT', '11211'));
-define('CACHE_HOSTNAME', $env('CACHE_HOSTNAME', 'memcached'));
-define('CACHE_PORT', $env('CACHE_PORT', '11211'));
 define('CACHE_PREFIX', $env('CACHE_PREFIX', 'oc_'));
 define('IMAGE_MAX_DIMENSION', getenv('IMAGE_MAX_DIMENSION') ?: '2560');
 

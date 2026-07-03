@@ -13,7 +13,6 @@ RUN apt-get update && apt-get install -y \
     libmcrypt-dev \
     libicu-dev \
     libcurl4-openssl-dev \
-    libmemcached-dev \
     libsasl2-dev \
     zlib1g-dev \
     unzip \
@@ -33,8 +32,8 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
         mbstring \
         curl \
         pcntl \
-    && pecl install memcached redis \
-    && docker-php-ext-enable memcached redis
+    && pecl install redis \
+    && docker-php-ext-enable redis
 
 # Add www-data to the staff group (GID=50) so it can write to FTP-owned image dirs
 RUN groupadd -f -g 50 staff && usermod -aG staff www-data

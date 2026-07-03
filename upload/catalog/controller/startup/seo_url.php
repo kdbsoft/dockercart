@@ -22,7 +22,7 @@ class ControllerStartupSeoUrl extends Controller
     private $hasLanguagePrefixInUrl = false;
     private $languagesCache = null;
 
-    // SEO URL maps (loaded from cache/memcached once per request)
+    // SEO URL maps (loaded from cache once per request)
     private $seoUrlCacheLoaded = false;
     private $blogSeoUrlCacheLoaded = false;
     private $seoKeywordsByQuery = [];
