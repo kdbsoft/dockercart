@@ -26,6 +26,11 @@
     "commitlint": "commitlint --from HEAD~1 --to HEAD --verbose"
   },
   "dependencies": {
-    "lucide": "^0.577.0"
+    "@melloware/coloris": "^0.25.0",
+    "@tailwindcss/browser": "^4.3.2",
+    "chart.js": "^4.5.1",
+    "glightbox": "^3.3.1",
+    "lucide": "^0.577.0",
+    "sortablejs": "^1.15.7"
   }
 }

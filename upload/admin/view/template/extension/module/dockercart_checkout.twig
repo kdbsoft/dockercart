@@ -762,35 +762,8 @@ hr {
 
 </style>
 
-<!-- Lucide icons (CDN UMD + local fallback) -->
-<script>
-  (function() {
-    // Prefer UMD/Global build from CDN which exposes `lucide` on window
-    var script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/lucide@0.255.0/dist/lucide.min.js';
-    script.async = true;
-    script.onload = function() {
-      try {
-        if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
-          // Render icons present in the DOM
-          lucide.createIcons();
-        }
-      } catch (err) {
-        console.warn('Lucide load error:', err);
-      }
-    };
-    script.onerror = function() {
-      // If CDN fails, load local fallback
-      var fallback = document.createElement('script');
-      fallback.src = 'view/javascript/lucide.min.js';
-      fallback.onload = function() {
-        try { if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') lucide.createIcons(); } catch (e) { console.warn('Lucide fallback error:', e); }
-      };
-      document.head.appendChild(fallback);
-    };
-    document.head.appendChild(script);
-  })();
-</script>
+<!-- Lucide icons (local) -->
+<script src="view/javascript/lucide.min.js"></script>
 
 {{ column_left }}
 
