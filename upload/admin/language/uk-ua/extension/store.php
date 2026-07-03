@@ -1,24 +1,28 @@
 <?php
-// *	@copyright		Pavel Kravchenko; https://opencartforum.com/profile/711752-paulkravchenko/
 
-// Heading
-$_['heading_title']    = 'Магазин розширень';
+$_['heading_title'] = 'Магазин розширень';
 
-// Text
-$_['text_success']     = 'Налаштування змінені';
-$_['text_list']        = 'Список розширень';
-$_['text_license']     = 'Ліцензія';
-$_['text_free']        = 'Безкоштовні';
-$_['text_commercial']  = 'Платні';
-$_['text_category']    = 'Всі категорії';
-$_['text_theme']       = 'Шаблони';
-$_['text_payment']     = 'Методи оплати';
-$_['text_shipping']    = 'Методи доставки';
-$_['text_module']      = 'Модулі';
-$_['text_total']       = 'Історія замовлень';
-$_['text_feed']        = 'Канали просування';
-$_['text_report']      = 'Звіти';
-$_['text_other']       = 'Інше';
+$_['text_extension'] = 'Розширення';
+$_['text_success'] = 'Успіх: Ви змінили магазин розширень!';
+$_['text_edit'] = 'Редагувати модуль магазину розширень';
+$_['text_extensions_store'] = 'Магазин розширень';
+$_['text_all_categories'] = 'Усі категорії';
+$_['text_categories'] = 'Категорії';
+$_['text_free'] = 'Безкоштовно';
+$_['text_buy'] = 'Купити';
+$_['text_close'] = 'Закрити';
+$_['text_loading'] = 'Завантаження...';
+$_['text_error'] = 'Помилка';
+$_['text_parameter'] = 'Параметр';
+$_['text_value'] = 'Значення';
+$_['text_refresh'] = 'Оновити';
+$_['text_home'] = 'Головна';
+$_['text_no_extensions'] = 'Розширення не знайдено в цій категорії.';
+$_['text_extensions_found'] = 'розширень знайдено';
+$_['text_cache_cleared'] = 'Кеш магазину очищено.';
+$_['text_no_description'] = 'Опис відсутній.';
+$_['text_error_detail'] = 'Не вдалося завантажити деталі розширення. Будь ласка, спробуйте ще раз.';
+$_['text_installed'] = 'Встановлено';
 
-// Error
-$_['error_permission'] = 'У вас недостатньо прав для внесення змін';
+$_['error_permission'] = 'Попередження: У вас немає прав для зміни магазину розширень!';
+$_['error_fetch'] = 'Не вдалося завантажити каталог розширень із сервера. Спробуйте пізніше.';
