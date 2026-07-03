@@ -47,6 +47,21 @@ class ControllerExtensionShippingDockercartNovapost extends Controller {
 		$data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=shipping', true);
 		$data['user_token'] = $this->session->data['user_token'];
 		$data['sync_url'] = $this->url->link('extension/shipping/dockercart_novapost/sync', 'user_token=' . $this->session->data['user_token'], true);
+		$data['set_schedule_url'] = $this->url->link('extension/shipping/dockercart_novapost/setSchedule', 'user_token=' . $this->session->data['user_token'], true);
+
+		// Scheduler task
+		$tasks = $this->dockercart_scheduler->getTasksByType('novapost_sync');
+		$schedulerTask = !empty($tasks) ? $tasks[0] : null;
+		$data['sync_schedule'] = $schedulerTask ? ($schedulerTask['cron_schedule'] ?? '') : '';
+		$data['schedule_options'] = [
+			''          => $this->language->get('text_cron_disabled'),
+			'every_15m' => $this->language->get('text_every_15m'),
+			'every_30m' => $this->language->get('text_every_30m'),
+			'hourly'    => $this->language->get('text_hourly'),
+			'every_6h'  => $this->language->get('text_every_6h'),
+			'every_12h' => $this->language->get('text_every_12h'),
+			'daily'     => $this->language->get('text_daily'),
+		];
 
 		// Statistics
 		$data['total_divisions'] = $this->model_extension_shipping_dockercart_novapost->getTotalDivisions();
@@ -260,6 +275,28 @@ class ControllerExtensionShippingDockercartNovapost extends Controller {
 		$this->response->setOutput(json_encode($json));
 	}
 
+	public function setSchedule() {
+		$json = [];
+
+		if (!$this->user->hasPermission('modify', 'extension/shipping/dockercart_novapost')) {
+			$json['error'] = $this->language->get('error_permission');
+		} else {
+			$schedule = $this->request->post['schedule'] ?? '';
+
+			$tasks = $this->dockercart_scheduler->getTasksByType('novapost_sync');
+			if (!empty($tasks)) {
+				$task = $tasks[0];
+				$this->dockercart_scheduler->setSchedule((int)$task['task_id'], $schedule);
+				$json['success'] = true;
+			} else {
+				$json['error'] = 'Scheduler task not found';
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
 	public function install() {
 		$this->load->model('extension/shipping/dockercart_novapost');
 		$this->load->model('setting/setting');
@@ -290,7 +327,8 @@ class ControllerExtensionShippingDockercartNovapost extends Controller {
 			'novapost_sync',
 			'NovaPost Sync',
 			'php /var/www/html/bin/novapost-sync.php',
-			'0 2 * * *'
+			'daily',
+			true
 		);
 	}
 
