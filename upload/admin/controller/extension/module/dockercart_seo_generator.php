@@ -753,6 +753,9 @@ class ControllerExtensionModuleDockercartSeoGenerator extends Controller
 
         // Регистрируем события для автогенерации
         $this->registerEvents();
+
+        // Регистрируем событие для меню
+        $this->registerMenuEvent();
     }
 
     /**
@@ -1101,6 +1104,53 @@ class ControllerExtensionModuleDockercartSeoGenerator extends Controller
         }
 
         return !$this->error;
+    }
+
+    private function registerMenuEvent()
+    {
+        $this->load->model("setting/event");
+        $this->db->query("DELETE FROM `" . DB_PREFIX . "event` WHERE `code` = 'dockercart_seo_generator_admin_menu'");
+        $this->model_setting_event->addEvent(
+            'dockercart_seo_generator_admin_menu',
+            'admin/view/common/column_left/before',
+            'extension/module/dockercart_seo_generator/eventAdminMenu',
+            1,
+            0
+        );
+    }
+
+    public function eventAdminMenu(&$route, &$data, &$output)
+    {
+        $this->load->language('extension/module/dockercart_seo_generator');
+
+        if (!$this->user->hasPermission('access', 'extension/module/dockercart_seo_generator')) {
+            return;
+        }
+
+        $menu = array(
+            'name' => $this->language->get('heading_title_menu'),
+            'href' => $this->url->link('extension/module/dockercart_seo_generator', 'user_token=' . $this->session->data['user_token'], true),
+            'children' => array()
+        );
+
+        if (!isset($data['menus']) || !is_array($data['menus'])) {
+            return;
+        }
+
+        foreach ($data['menus'] as &$item) {
+            if (isset($item['id']) && $item['id'] === 'menu-catalog' && isset($item['children']) && is_array($item['children'])) {
+                $item['children'][] = $menu;
+                return;
+            }
+        }
+
+        $data['menus'][] = array(
+            'id' => 'menu-dockercart-seo-generator',
+            'icon' => 'fa-magic',
+            'name' => $this->language->get('heading_title_menu'),
+            'href' => $this->url->link('extension/module/dockercart_seo_generator', 'user_token=' . $this->session->data['user_token'], true),
+            'children' => array()
+        );
     }
 
     /**

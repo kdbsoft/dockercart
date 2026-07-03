@@ -215,7 +215,7 @@ class ControllerExtensionModuleDockercartGallery extends Controller {
 		}
 
 		foreach ($data['menus'] as &$item) {
-			if (isset($item['id']) && $item['id'] === 'menu-extension' && isset($item['children']) && is_array($item['children'])) {
+            if (isset($item['id']) && $item['id'] === 'menu-catalog' && isset($item['children']) && is_array($item['children'])) {
 				$faq_index = -1;
 				foreach ($item['children'] as $idx => $child) {
 					if (isset($child['href']) && strpos($child['href'], 'dockercart_faq') !== false) {

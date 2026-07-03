@@ -1,6 +1,7 @@
 <?php
 // Heading
 $_['heading_title'] = 'Import/Export Excel';
+$_['heading_title_menu'] = 'Import/Export Excel';
 
 // Text
 $_['text_extension'] = 'Extensions';
