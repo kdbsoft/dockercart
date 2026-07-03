@@ -1,6 +1,6 @@
 # DockerCart
 
-> **A production-ready, self-hosted e-commerce platform that deploys in minutes.**
+> A production-hardened e-commerce platform — deploy anywhere with Docker Compose.
 
 <p align="center">
   <a href="https://demo.dockercart.net"><img src="https://img.shields.io/badge/Live%20Demo-demo.dockercart.net-6366f1?style=flat-square&logo=google-chrome&logoColor=white" alt="Live Demo"></a>
@@ -8,32 +8,71 @@
   <a href="https://dockercart.net"><img src="https://img.shields.io/badge/dockercart.net-6366f1?style=flat-square&logo=globe&logoColor=white" alt="DockerCart"></a>
 </p>
 
-DockerCart is a production-ready e-commerce platform shipped as a complete Docker stack. Hundreds of bug fixes applied, security holes patched, performance tuned, and an ecosystem of first-party modules included. Everything works out of the box.
-
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE.md)
 [![PHP](https://img.shields.io/badge/PHP-8.5-777BB4?logo=php)](https://www.php.net/)
-[![MariaDB](https://img.shields.io/badge/mariadb-%3E%3D11.4-blue?logo=mariadb)](https://mariadb.org/)
-[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker)](https://docs.docker.com/compose/)
+[![MariaDB](https://img.shields.io/badge/MariaDB-11.4-003545?logo=mariadb)](https://mariadb.org/)
 [![Redis](https://img.shields.io/badge/Redis-7.0-DC3821?logo=redis)](https://redis.io/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker)](https://docs.docker.com/compose/)
 
 ---
 
-## Why DockerCart?
+## Quick Start
 
-DockerCart is a production-ready, self-hosted e-commerce platform that deploys in minutes:
+```bash
+git clone https://github.com/your-org/dockercart.git
+cd dockercart
+cp .env.example .env
+make up
+```
 
-- **One-command deployment** — `make up` and your store is live. No manual server setup, no web installer.
-- **Complete Docker stack** — PHP 8.5 + Apache + Nginx + MariaDB 11.8 + Redis + Manticore Search, orchestrated via Docker Compose.
-- **Environment-based configuration** — all runtime settings in `.env`, no PHP file editing. Generated `config.php` and `admin/config.php` at container start.
-- **Pre-configured caching** — Redis (primary) + OPcache with Memcached fallback. Industrial-grade performance out of the box.
-- **Full-text search** — Manticore Search engine integrated for fast, relevant product search.
-- **Modern frontend** — JavaScript (ES6+), Tailwind CSS, Lucide icon font. No legacy jQuery/Bootstrap overhead.
-- **First-party modules** — tested and integrated ecosystem: checkout improvements, blog, newsletter, FAQ, search, banners, shipping, payment, and premium modules.
-- **SSL/TLS built-in** — Let's Encrypt with auto-renewal or self-signed certificates, with or without Traefik.
-- **Makefile automation** — health checks, backup/restore, database CLI, shell access, log tailing, and more.
-- **Hot-reload dev workflow** — edits to PHP/Twig/JS apply immediately without container restarts.
-- **Install-less bootstrap** — no `/install` directory. Database seeds and config are generated automatically on first start.
-- **Hundreds of fixes** — bugs patched, security holes sealed, performance tuned at the application layer.
+First boot auto-generates `config.php`, seeds the database, applies migrations, and indexes the search — no web installer, no manual steps.
+
+Admin panel: `http://dockercart.local/admin`  
+Default credentials (set in `.env` before first run): `admin` / `admin123`
+
+---
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         nginx:alpine                            │
+│  Reverse proxy — TLS termination, static assets, gzip, cache   │
+└──────────────┬──────────────────────────────────────┬───────────┘
+               │                                      │
+    ┌──────────▼──────────┐              ┌────────────▼──────────┐
+    │  apache (PHP 8.5)    │              │    scheduler          │
+    │  Application server  │              │  daemon — cron tasks  │
+    │  ┌─────────────────┐ │              │  php cron_dispatcher  │
+    │  │  entrypoint.sh   │ │              └────────────┬──────────┘
+    │  │  • config gen    │ │                           │
+    │  │  • DB seed       │ │                           │
+    │  │  • OCMOD refresh │ │                           │
+    │  │  • permissions   │ │                           │
+    │  └─────────────────┘ │                           │
+    └──────────┬──────────┘                            │
+               │                                       │
+    ┌──────────▼──────────┐              ┌────────────▼──────────┐
+    │       mariadb:11.8   │              │     manticore:15      │
+    │  Primary database    │◄─────────────┤  Full-text search     │
+    │  init.sql + auto-    │    reads     │  Reindex on boot      │
+    │  migrations          │    via SQL   └───────────────────────┘
+    └──────────────────────┘
+
+    ┌──────────────────────┐
+    │   redis:7-alpine     │
+    │  Primary cache +     │
+    │  session store       │
+    └──────────────────────┘
+
+    ┌──────────────────────┐
+    │   ftp (optional)     │
+    │  vsftpd — chrooted   │
+    │  to ./upload/image   │
+    └──────────────────────┘
+```
+
+All containers communicate over a shared bridge network (`dockercart-network`). Nginx is the only entry point — Apache has no exposed ports.
 
 ---
 
@@ -41,255 +80,106 @@ DockerCart is a production-ready, self-hosted e-commerce platform that deploys i
 
 | Component | Technology |
 |---|---|
-| Application | PHP 8.5 + Apache + Nginx |
+| Application | PHP 8.5 + Apache 2.4 |
+| Reverse proxy | Nginx (alpine) |
 | Database | MariaDB 11.8 |
-| Object cache | Redis 7 (primary), Memcached 1.6 (fallback) |
-| Full-text search | Manticore Search |
-| Reverse proxy | Traefik v3 *(optional)* |
-| SSL | Let's Encrypt / self-signed |
-| Frontend | JavaScript (ES6+), Tailwind CSS, Lucide icon font |
+| Cache & sessions | Redis 7 |
+| Full-text search | Manticore Search 15 |
+| Reverse proxy (alt) | Traefik v3 *(optional)* |
+| SSL | Let's Encrypt (certbot) or self-signed |
+| Frontend | ES6+ JavaScript, Tailwind CSS 3, Lucide icons |
 
 ---
 
-## Performance
+## Features
 
-DockerCart is engineered for industrial-grade speed and low latency. It combines modern runtime optimizations and proven infrastructure components to deliver a very fast, production-ready storefront:
+### Storefront
 
-- Industrial-grade performance: tuned for low-latency, high-throughput workloads.
-- Modern PHP runtime: built for PHP 8.5 with OPcache and typical production-level PHP optimizations enabled.
-- Caching: Redis and internal caching layers significantly reduce database load and response times. Memcached is available as fallback when Redis is unavailable.
-- Fast search: Manticore Search provides high-performance full-text queries and relevance ranking.
-- Database and query optimizations: schema and index improvements are included (see docker/mysql/migrations and sql-optimization scripts).
-- Hot-reload dev workflow: edits to PHP/Twig/JS are applied immediately without container restarts, keeping development fast.
+- **One-page checkout** — streamlined flow with shipping, payment, and order review on a single page
+- **Modern responsive theme** — Tailwind CSS 3 + Lucide icons, zero jQuery, vanilla ES6+
+- **AJAX product filtering** — filter by attributes, price range, and custom options without page reload
+- **Real-time multicurrency** — automatic rate feeds with seamless currency switching
+- **SEO generator** — auto-generated SEO URLs, meta titles, and descriptions for all products
+- **One-click checkout** — reduced-friction checkout to minimize cart abandonment
 
-These optimizations make DockerCart suitable for demanding production environments where speed and scalability matter.
+### Content
 
+- **Blog** — full system with categories, authors, comments, and SEO-ready posts
+- **Newsletter** — subscription form with mailing list management
+- **FAQ** — structured accordion pages, easily manageable from admin
+- **Responsive banners** — separate portrait and landscape images via `<picture>` art direction
 
-## Quick Start
+### Search
 
-**Requirements:** Docker 24+ and Docker Compose v2 or Podman Compose.
+- **Manticore-powered full-text search** — indexes product names, descriptions, SKUs, and attributes for fast, relevant results. Index built automatically on first boot; incremental updates via admin or scheduler.
 
-```bash
-git clone https://github.com/your-org/dockercart.git
-cd dockercart
-cp .env.example .env
-```
+### Shipping & Payment
 
-On first startup, database bootstrap happens automatically from `docker/mysql/init.sql`, and `config.php` / `admin/config.php` read runtime values from `.env`. No web installer needed.
+- **Universal Shipping** — create unlimited shipping methods with geo-zone, weight, and price rules. Multi-language support.
+- **Universal Payment** — define multiple internal payment methods using geo-zone and order total rules; exposed as a grouped `quote[]` extension
+- **One-click checkout** — express checkout option with reduced friction
 
-### `robots.txt` on first start (important)
+### Catalog Management
 
-DockerCart ships a **safe first-start policy** for crawlers:
+- **Bulk import/export** — manage products and categories via `.xlsx` files
+- **YML import/export** — full Yandex Market Language support for catalog exchange
+- **Google Merchant Center feed** — auto-generated product feed
+- **XML sitemap** — auto-generated sitemap for search crawlers
+- **Image auto-optimization** — uploaded images exceeding `IMAGE_MAX_DIMENSION` are proportionally resized and optimally recompressed (JPEG 95, PNG level 9, WebP 95)
 
-- `upload/robots.txt` is restrictive by default (`Disallow: /`)
-- if `robots.txt` is missing, `docker/entrypoint.sh` generates the same restrictive version on first start
+### Admin
 
-To enable indexing after launch:
+- **Redirect manager** — create and manage 301/302 redirects, import via CSV
+- **Google Translation** — connect Google Translate for multi-language storefronts
+- **Plugin architecture** — extend via OCMOD system, event hooks, and the full module lifecycle
 
-1. Copy `upload/robots-dist.txt` to `upload/robots.txt`
-2. Update `Sitemap:` with your real DockerCart domain
-3. Tune rules for your SEO strategy
+### Caching & Performance
 
-This step is easy to forget, so please include it in your post-deploy checklist.
-
-Default admin credentials (customize in `.env` before first launch):
-
-- `ADMIN_USERNAME=admin`
-- `ADMIN_PASSWORD=admin123`
-- `ADMIN_EMAIL=admin@example.com`
-
-Then choose a deployment mode:
-
----
-
-### Standalone — HTTP *(default, simplest)*
-
-Uses `docker-compose.yml`. By default it binds host port **80**.
-
-```bash
-make up
-# or
-./start.sh
-```
-
-Store: **`http://your-domain`** · Admin: **`http://your-domain/admin`**
-
-Set these values in `.env`:
-
-- `DOCKERCART_DOMAIN=your-domain`
-- `DOCKERCART_URL=http://your-domain`
-- `DOCKERCART_HTTP_PORT=80`
+- **Redis** — primary object cache and session store with configurable maxmemory and LRU eviction
+- **OPcache** — enabled with production-typical PHP settings
+- **Nginx** — static asset caching, gzip compression, FastCGI cache layer
+- **MariaDB** — three InnoDB profiles (s/m/l) selectable via `MARIADB_CONFIG_SIZE`
 
 ---
 
-### Standalone — HTTPS with self-signed cert *(local testing)*
+## Deployment
 
-Generates a self-signed certificate and serves HTTPS on port 443.
+All modes are invoked via `make` or `./start.sh`. Container names are prefixed `dockercart_`.
 
-```bash
-make ssl
-# or
-./start.sh --ssl
-```
+### Standalone (default, no Traefik)
 
-Access: **`https://your-domain`** (browser warning is expected for self-signed certs)
+| Mode | Command | Access |
+|---|---|---|
+| HTTP | `make up` / `make dev` | `http://your-domain` |
+| HTTPS (self-signed) | `make ssl` / `make dev-ssl` | `https://your-domain` |
+| HTTPS (Let's Encrypt) | `make le` / `make prod` | `https://shop.example.com` |
+| LE + FTP | `make le-ftp` / `make prod-ftp` | HTTPS + FTP on port 21 |
 
----
+### Traefik (external reverse proxy)
 
-### Standalone — HTTPS with Let's Encrypt *(production)*
+| Mode | Command |
+|---|---|
+| HTTP | `make traefik` |
+| HTTPS (self-signed) | `make traefik-ssl` |
+| HTTPS (Let's Encrypt) | `make traefik-le` |
 
-Requires a real public domain with ports 80/443 open.
+Requires an external `traefik` Docker network.
 
-```bash
-# Edit .env first:
-SSL_DOMAIN=shop.example.com
-SSL_EMAIL=admin@example.com
+### FTP (optional)
 
-make le
-# or
-./start.sh --le
-```
-
-- Runs without Traefik (standalone Nginx)
-- Obtains certs automatically via certbot (HTTP-01 challenge)
-- Keeps a renewal loop in `certbot` container (checks every 24h by default, renews only near expiry)
-- Reuses existing certificate/key from persistent storage to avoid unnecessary re-issuance
-
-Access: **`https://shop.example.com`** · Admin: **`https://shop.example.com/admin`**
-
----
-
-### Traefik mode *(external reverse proxy)*
-
-Use when you already have Traefik running on the host. Requires an external `traefik` Docker network.
+Attach FTP to any running mode:
 
 ```bash
-# HTTP
-make traefik
-# or
-./start.sh --traefik
-
-# HTTPS with self-signed cert
-make traefik-ssl
-
-# HTTPS with Let's Encrypt
-make traefik-le
-# or
-./start.sh --traefik --le
-```
-
-Store: **`http://your-domain`** (set `DOCKERCART_DOMAIN` in `.env`)
-
----
-
-### Optional FTP *(images directory only)*
-
-FTP is disabled by default and starts only when explicitly requested.
-
-```bash
-# Attach FTP to any running mode
 make ftp
-
-# With standalone Let's Encrypt (single command)
-make le-ftp
 ```
 
-FTP user is chrooted to existing host directory `./upload/image` only and has extended privileges in this directory: upload, overwrite, delete, and rename image files.
-Inside container this directory is mounted as `/home/vsftpd/${FTP_USER}`.
-
-Configure in `.env` if needed:
-
-- `FTP_PORT=21`
-- `FTP_USER=images`
-- `FTP_PASS=change_me_please`
-- `FTP_WRITE_ENABLE=YES`
-- `FTP_ALLOW_WRITEABLE_CHROOT=YES`
-- `FTP_LOCAL_UMASK=000`
-- `FTP_FILE_OPEN_MODE=0777`
-- `FTP_PASV_ADDRESS=your-server-ip-or-domain` *(must be reachable by FTP client; do not use `127.0.0.1`)*
-- `FTP_PASV_ADDR_RESOLVE=YES`
-- `FTP_PASV_MIN_PORT=21100`
-- `FTP_PASV_MAX_PORT=21110`
+FTP user is chrooted to `./upload/image` with extended privileges. Configure in `.env`.
 
 ---
 
-> **Traefik is optional.** The default mode runs standalone without Traefik.
+## Developer Guide
 
----
-
-## Makefile Reference
-
-```bash
-make help          # List all targets
-
-# Standalone mode (default)
-make up            # Start — direct host port (default: 80)
-make ssl           # Start — standalone + self-signed HTTPS
-make le            # Start — standalone + Let's Encrypt HTTPS (production)
-make le-ftp        # Start — standalone LE + FTP
-
-# Traefik mode (alternative)
-make traefik       # Start — Traefik, HTTP
-make traefik-ssl   # Start — Traefik + self-signed HTTPS
-make traefik-le    # Start — Traefik + Let's Encrypt HTTPS
-
-# Utilities
-make ftp           # Start — FTP profile (access only to ./upload/image)
-make down          # Stop containers
-make restart       # Restart containers
-make logs          # Show last 100 log lines
-make logs-follow   # Follow logs
-make shell         # bash into the app container
-make mariadb       # Open MariaDB CLI
-make backup        # Dump DB to ./backups/
-make restore       # Restore from latest dump in ./backups/
-make clean         # Stop + remove all volumes (destructive)
-
-# Aliases
-make dev           # Same as make up
-make dev-ssl       # Same as make ssl
-make prod          # Same as make le
-make prod-ftp      # Same as make le-ftp
-```
-
----
-
-## Modules
-
-### Free — included, no license key required
-
-| Module | Description |
-|---|---|
-| **Checkout** | One-page checkout flow improvements and UX fixes (GPL, free) |
-| **Theme** | DockerCart theme with customization settings |
-| **Full-text Search** | Manticore Search-powered relevance search across the catalog |
-| **Blog** | Full blog system: categories, authors, comments, SEO-ready posts |
-| **Newsletter** | Subscription form + mailing list management |
-| **FAQ** | Structured FAQ pages with accordion layout |
-| **Responsive Banners** | Separate portrait/landscape images via `<picture>` |
-| **Shop Features** | Features icons section |
-| **Universal Shipping** | Flexible, multilingual shipping module with geo-zone, weight- and price-based rules; create unlimited shipping methods. (Free) |
-| **Universal Payment** | Flexible, free payment module that lets you create multiple internal payment methods (geo-zone, order total rules), exposes them as a grouped `quote[]` payment extension and is fully compatible with DockerCart Checkout. (Free) |
-
-### Premium — require a license key from [dockercart.net](https://dockercart.net)
-
-| Module | Description |
-|---|---|
-| **One-Click Checkout** | Streamlined checkout that reduces cart abandonment |
-| **Advanced Filter** | Ajax product filtering by attributes, price, and custom options |
-| **Multicurrency** | Real-time currency switching with automatic rate feeds |
-| **SEO Generator** | Automatic SEO URLs and meta tags for all products |
-| **Import/Export Excel** | Bulk product management via `.xlsx` files |
-| **Import YML** | Import catalogs in Yandex Market Language (YML) format |
-| **Google Translation** | Integration with Google Translate for multilingual storefronts |
-| **Redirects** | 301/302 redirect management with CSV import |
-| **Export YML** | Export catalog in Yandex Market Language format |
-| **Google Base** | Product feed for Google Merchant Center |
-| **Sitemap** | Auto-generated XML sitemap for crawlers |
-
----
-
-## Directory Structure
+### Directory Layout
 
 ```
 dockercart/
@@ -299,88 +189,162 @@ dockercart/
 │   ├── entrypoint.sh           Container startup script
 │   ├── mysql/
 │   │   ├── init.sql            Schema + seed data
-│   │   └── migrations/         Incremental DB migration scripts
-│   └── manticore/              Manticore Search config
-├── storage/                    Runtime files — outside webroot
-│   └── logs/                   Application error logs
+│   │   └── migrations/         Incremental SQL migrations
+│   ├── manticore/              Manticore Search config
+│   └── nginx/                  Nginx configs
+├── storage/                    Runtime files (outside webroot)
+│   ├── logs/                   Application error logs
+│   ├── cache/                  Cache files
+│   └── ...                     Session, download, modification, upload
 ├── upload/                     Application source (mounted as /var/www/html)
-│   ├── admin/                  Admin panel
-│   └── catalog/                Storefront
-├── .env.example                Environment variable template
-├── docker-compose.yml          Default stack (standalone, no Traefik)
-├── docker-compose.traefik.yml  Traefik mode stack
-├── docker-compose.ssl.yml      Standalone self-signed SSL override
-├── docker-compose.le.yml       Standalone Let's Encrypt override
-├── Dockerfile                  Application image
-└── Makefile                    Shortcut commands
+│   ├── admin/                  Admin panel (MVC)
+│   ├── catalog/                Storefront (MVC)
+│   ├── bin/                    CLI scripts
+│   ├── system/                 Framework libraries
+│   └── ...
+├── .env.example                Environment template
+├── docker-compose.yml          Default stack (standalone)
+├── docker-compose.*.yml        SSL, LE, Traefik overrides
+├── Dockerfile                  PHP 8.5 + Apache image
+└── Makefile                    All commands
 ```
+
+### Makefile Reference
+
+```bash
+make up/down/restart      # Container lifecycle
+make logs/logs-follow     # View logs
+make shell                # Bash into app container
+make mariadb              # MariaDB CLI
+make backup/restore       # Database dumps
+make clean                # Destructive: remove all volumes
+make migrate              # Apply SQL migrations
+```
+
+### Configuration
+
+All runtime settings are in `.env` (copy from `.env.example`). `config.php` and `admin/config.php` are **generated at container start** by `entrypoint.sh` — never edit them directly.
+
+Key variables:
+
+```dotenv
+DOCKERCART_URL=http://dockercart.local    # Store URL
+DB_PASSWORD=...                           # Database password
+ADMIN_USERNAME=admin                      # Admin credentials
+ADMIN_PASSWORD=admin123
+CACHE_ENGINE=redis                        # redis (primary) or file
+REDIS_MAXMEMORY=256mb
+PHP_MEMORY_LIMIT=256M
+```
+
+For Let's Encrypt production:
+
+```dotenv
+SSL_DOMAIN=shop.example.com
+SSL_EMAIL=admin@example.com
+LETSENCRYPT_ENABLED=true
+LETSENCRYPT_DATA_DIR=./docker/letsencrypt
+```
+
+### Database Migrations
+
+- Location: `docker/mysql/migrations/`
+- Naming: `YYYYMMDD_short_description.sql`
+- Always idempotent (`CREATE TABLE IF NOT EXISTS`, `ADD COLUMN IF NOT EXISTS`)
+- Apply: `make migrate` (runs against running MariaDB container)
+- Regenerate base schema: `make dump-init` (dumps current DB state)
+
+### Scheduler (Cron)
+
+The scheduler daemon (`upload/bin/dockercart_scheduler.php`) polls the `oc_dockercart_scheduler_task` table and dispatches workers on schedule. There are no hardcoded handler classes — modules register tasks at install time via `DockercartScheduler`:
+
+```php
+$this->load->library('dockercart/scheduler');
+$this->dockercart_scheduler->registerTask(
+    'novapost_sync',
+    'NovaPost Sync',
+    'php /var/www/html/bin/novapost-sync.php',
+    '0 2 * * *',
+    true
+);
+```
+
+Scheduler targets in the Makefile:
+
+```bash
+make scheduler-logs       # Follow scheduler logs
+make scheduler-restart    # Restart scheduler container
+make scheduler-reload     # SIGHUP — reload code without restart
+make scheduler-status     # Check if running
+```
+
+### Static Analysis & Lint
+
+```bash
+# PHP syntax check
+find upload -type f -name "*.php" ! -path 'storage/vendor/*' -print0 | xargs -0 -P4 php -l -n
+
+# PHPStan (level 1)
+./storage/vendor/bin/phpstan analyze -a ./storage/vendor/autoload.php --no-progress
+
+# PHP-CS-Fixer (indentation: tabs)
+./storage/vendor/bin/php-cs-fixer fix --dry-run --diff
+```
+
+### MVC Conventions
+
+The codebase follows MVC patterns inherited from OpenCart 3:
+
+| Layer | Catalog (frontend) | Admin |
+|---|---|---|
+| Controller | `catalog/controller/{section}/{name}.php` | `admin/controller/extension/module/{name}.php` |
+| Model | `catalog/model/{section}/{name}.php` | `admin/model/extension/module/{name}.php` |
+| View | `catalog/view/theme/dockercart/template/{section}/{name}.twig` | `admin/view/template/extension/module/{name}.twig` |
+| Language | `catalog/language/en-gb/{section}/{name}.php` | `admin/language/en-gb/extension/module/{name}.php` |
+
+Language files must be kept in sync across all locales (`en-gb`, `ru-ua`, `uk-ua`, etc.).
+
+### Release Workflow
+
+Releases are automated from `main` via `semantic-release`. Commit messages follow Conventional Commits:
+
+```
+feat: add product label field
+fix: resolve cache invalidation on price update
+feat!: breaking API change
+```
+
+Preview next version:
+
+```bash
+npm run release:dry-run
+```
+
+The release tag (`vX.Y.Z`) is the source of truth — `CHANGELOG.md`, `VERSION`, and `package.json` are synced during release.
 
 ---
 
-## Configuration
+## robots.txt on First Start
 
-All runtime settings live in `.env`. Copy from `.env.example` and edit:
+DockerCart ships a restrictive `robots.txt` (`Disallow: /`) to prevent premature indexing. To open the site to crawlers after launch:
 
-```dotenv
-# Domain
-DOCKERCART_DOMAIN=dockercart.local
-DOCKERCART_URL=http://dockercart.local
-DOCKERCART_HTTPS_URL=http://dockercart.local
-DOCKERCART_SSL_ENABLED=false
-
-# Standalone HTTP port (docker-compose.yml)
-DOCKERCART_HTTP_PORT=80
-
-# Standalone HTTPS port (docker-compose.ssl.yml / docker-compose.le.yml)
-DOCKERCART_HTTPS_PORT=443
-
-# Database
-DB_HOSTNAME=mariadb
-DB_USERNAME=dockercart
-DB_PASSWORD=dockercart_password
-
-# PHP
-PHP_MEMORY_LIMIT=256M
-PHP_UPLOAD_MAX_FILESIZE=100M
-
-# SSL / Let's Encrypt (production)
-SSL_DOMAIN=example.com
-SSL_EMAIL=admin@example.com
-
-# Persist LE state between rebuilds/deploys (important for rate-limit safety)
-LETSENCRYPT_DATA_DIR=./docker/letsencrypt
-LETSENCRYPT_WEBROOT_DIR=./docker/letsencrypt/www
-
-# Standalone certbot renewal check interval
-CERTBOT_RENEW_INTERVAL=24h
-```
-
-See [`.env.example`](.env.example) for a complete reference.
+1. Copy `upload/robots-dist.txt` to `upload/robots.txt`
+2. Update `Sitemap:` with your real domain
+3. Tune rules for your SEO strategy
 
 ---
 
 ## Contributing
 
 1. Fork the repository and create a feature branch
-2. Write focused commits using Conventional Commits, for example `feat: add cache invalidation` or `fix: handle standalone SSL redirect`
-3. Test your changes with `make up`
-4. Submit a pull request describing the change and its motivation
-
----
-
-## Releases
-
-- Releases are cut automatically from `main` via `semantic-release`
-- The release source of truth is the Git tag (`vX.Y.Z`), with `CHANGELOG.md`, `VERSION`, `package.json`, and `package-lock.json` synchronized during release
-- Preview the next calculated release locally with `npm run release:dry-run`
+2. Write focused commits following [Conventional Commits](https://www.conventionalcommits.org/)
+3. Test with `make up`
+4. Submit a pull request
 
 ---
 
 ## License
 
-DockerCart is released under the **GNU General Public License v3.0 (GPLv3)**.
+DockerCart is released under **GNU General Public License v3.0 (GPLv3)**.
 
-DockerCart is based on [OpenCart](https://github.com/opencart/opencart), which is also GPL-licensed. All original attributions are preserved. See [LICENSE.md](LICENSE.md) for the full license text.
-
----
-
+The project originated from a fork of [OpenCart](https://github.com/opencart/opencart) (also GPL-licensed) but has since evolved into an independent platform with its own architecture, module ecosystem, and compatibility boundary. All original attributions are preserved. See [LICENSE.md](LICENSE.md).
