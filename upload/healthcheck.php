@@ -63,7 +63,7 @@ if (defined('DIR_STORAGE')) {
 }
 
 // Optional cache check
-$cache_engine = defined('CACHE_ENGINE') ? CACHE_ENGINE : 'memcached';
+$cache_engine = defined('CACHE_ENGINE') ? CACHE_ENGINE : 'redis';
 
 if ($cache_engine === 'redis' && defined('REDIS_HOSTNAME') && defined('REDIS_PORT') && class_exists('Redis')) {
 	try {
@@ -78,48 +78,6 @@ if ($cache_engine === 'redis' && defined('REDIS_HOSTNAME') && defined('REDIS_POR
 	} catch (Throwable $e) {
 		$ok = false;
 		$result['cache'] = ['engine' => 'redis', 'ok' => false, 'error' => $e->getMessage()];
-	}
-} elseif (defined('MEMCACHED_HOSTNAME') && defined('MEMCACHED_PORT') && class_exists('Memcached')) {
-	$hostname = defined('MEMCACHED_HOSTNAME') ? MEMCACHED_HOSTNAME : (defined('CACHE_HOSTNAME') ? CACHE_HOSTNAME : 'memcached');
-	$port = defined('MEMCACHED_PORT') ? (int) MEMCACHED_PORT : (defined('CACHE_PORT') ? (int) CACHE_PORT : 11211);
-	try {
-		$mc = new Memcached();
-		$mc->addServer($hostname, $port);
-		$stats = $mc->getVersion();
-		$cache_ok = !empty($stats);
-		$result['cache'] = ['engine' => 'memcached', 'ok' => (bool) $cache_ok];
-		if (!$cache_ok) {
-			$ok = false;
-		}
-	} catch (Throwable $e) {
-		$ok = false;
-		$result['cache'] = ['engine' => 'memcached', 'ok' => false, 'error' => $e->getMessage()];
-	}
-} elseif (defined('CACHE_HOSTNAME') && defined('CACHE_PORT') && class_exists('Memcached')) {
-	try {
-		$mc = new Memcached();
-		$mc->addServer(CACHE_HOSTNAME, (int) CACHE_PORT);
-		$stats = $mc->getVersion();
-		$cache_ok = !empty($stats);
-		$result['cache'] = ['engine' => 'memcached', 'ok' => (bool) $cache_ok];
-		if (!$cache_ok) {
-			$ok = false;
-		}
-	} catch (Throwable $e) {
-		$ok = false;
-		$result['cache'] = ['engine' => 'memcached', 'ok' => false, 'error' => $e->getMessage()];
-	}
-} elseif (defined('CACHE_HOSTNAME') && defined('CACHE_PORT') && function_exists('memcache_connect')) {
-	try {
-		$conn = @memcache_connect(CACHE_HOSTNAME, (int) CACHE_PORT);
-		$cache_ok = (bool) $conn;
-		$result['cache'] = ['engine' => 'memcache', 'ok' => (bool) $cache_ok];
-		if (!$cache_ok) {
-			$ok = false;
-		}
-	} catch (Throwable $e) {
-		$ok = false;
-		$result['cache'] = ['engine' => 'memcache', 'ok' => false, 'error' => $e->getMessage()];
 	}
 } else {
 	$result['cache'] = ['ok' => null, 'note' => 'no cache engine available or not configured'];
