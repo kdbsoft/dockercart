@@ -28,14 +28,15 @@ else
 fi
 
 compose() {
-    if [ "${STANDALONE:-0}" = "1" ]; then
-        FILES="-f docker-compose.standalone.yml"
-        if docker ps -a --format '{{.Names}}' 2>/dev/null | grep -qFx "${CERTBOT_CONTAINER_NAME:-dockercart_certbot}"; then
-            FILES="$FILES -f docker-compose.standalone.letsencrypt.yml"
-        fi
+    if [ "${TRAEFIK:-0}" = "1" ]; then
+        FILES="-f docker-compose.traefik.yml"
         docker compose $FILES "$@"
     else
-        docker compose "$@"
+        FILES="-f docker-compose.yml"
+        if docker ps -a --format '{{.Names}}' 2>/dev/null | grep -qFx "${CERTBOT_CONTAINER_NAME:-dockercart_certbot}"; then
+            FILES="$FILES -f docker-compose.le.yml"
+        fi
+        docker compose $FILES "$@"
     fi
 }
 
