@@ -301,6 +301,9 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
             );
         }
         
+        // Register admin menu event
+        $this->registerMenuEvent();
+        
         // Set default settings
         $this->model_setting_setting->editSetting('module_dockercart_search', [
             'module_dockercart_search_status' => 0,
@@ -337,7 +340,8 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
             'dockercart_search_information_add',
             'dockercart_search_information_edit',
             'dockercart_search_information_delete',
-            'dockercart_search_override'
+            'dockercart_search_override',
+            'dockercart_search_admin_menu'
         ];
         
         foreach ($events as $event_code) {
@@ -517,5 +521,50 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
 
             $this->logger->info("Information page {$args[0]} deleted from index");
         }
+    }
+
+    private function registerMenuEvent() {
+        $this->load->model('setting/event');
+        $this->db->query("DELETE FROM `" . DB_PREFIX . "event` WHERE `code` = 'dockercart_search_admin_menu'");
+        $this->model_setting_event->addEvent(
+            'dockercart_search_admin_menu',
+            'admin/view/common/column_left/before',
+            'extension/module/dockercart_search/eventAdminMenu',
+            1,
+            0
+        );
+    }
+
+    public function eventAdminMenu(&$route, &$data, &$output) {
+        $this->load->language('extension/module/dockercart_search');
+
+        if (!$this->user->hasPermission('access', 'extension/module/dockercart_search')) {
+            return;
+        }
+
+        $menu = array(
+            'name' => $this->language->get('heading_title_menu'),
+            'href' => $this->url->link('extension/module/dockercart_search', 'user_token=' . $this->session->data['user_token'], true),
+            'children' => array()
+        );
+
+        if (!isset($data['menus']) || !is_array($data['menus'])) {
+            return;
+        }
+
+        foreach ($data['menus'] as &$item) {
+            if (isset($item['id']) && $item['id'] === 'menu-catalog' && isset($item['children']) && is_array($item['children'])) {
+                $item['children'][] = $menu;
+                return;
+            }
+        }
+
+        $data['menus'][] = array(
+            'id' => 'menu-dockercart-search',
+            'icon' => 'fa-search',
+            'name' => $this->language->get('heading_title_menu'),
+            'href' => $this->url->link('extension/module/dockercart_search', 'user_token=' . $this->session->data['user_token'], true),
+            'children' => array()
+        );
     }
 }

@@ -779,6 +779,7 @@ class ControllerExtensionModuleDockercartImportExportExcel extends Controller {
 	public function install() {
 		$this->load->model('extension/module/dockercart_import_export_excel');
 		$this->load->model('setting/setting');
+		$this->load->model('setting/event');
 
 		$this->model_extension_module_dockercart_import_export_excel->install();
 
@@ -788,14 +789,76 @@ class ControllerExtensionModuleDockercartImportExportExcel extends Controller {
 			'php /var/www/html/bin/dockercart_import_export_excel_run.php --profile_id=%d --action=import'
 		);
 
+		$this->registerMenuEvent();
+
 		$this->model_setting_setting->editSettingValue('module_dockercart_import_export_excel', 'module_dockercart_import_export_excel_status', 0);
 	}
 
 	public function uninstall() {
 		$this->load->model('extension/module/dockercart_import_export_excel');
+		$this->load->model('setting/event');
 		$this->model_extension_module_dockercart_import_export_excel->uninstall();
 
+		$this->unregisterMenuEvent();
+
 		$this->dockercart_scheduler->unregisterTask('import_excel');
+	}
+
+	private function registerMenuEvent() {
+		$this->load->model('setting/event');
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "event` WHERE `code` = 'dockercart_import_export_excel_admin_menu'");
+		$this->model_setting_event->addEvent(
+			'dockercart_import_export_excel_admin_menu',
+			'admin/view/common/column_left/before',
+			'extension/module/dockercart_import_export_excel/eventAdminMenu',
+			1,
+			0
+		);
+	}
+
+	private function unregisterMenuEvent() {
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "event` WHERE `code` = 'dockercart_import_export_excel_admin_menu'");
+	}
+
+	public function eventAdminMenu(&$route, &$data, &$output) {
+		$this->load->language('extension/module/dockercart_import_export_excel');
+
+		if (!$this->user->hasPermission('access', 'extension/module/dockercart_import_export_excel')) {
+			return;
+		}
+
+		if (!isset($data['menus']) || !is_array($data['menus'])) {
+			return;
+		}
+
+		$menu_item = array(
+			'name' => $this->language->get('heading_title_menu'),
+			'href' => $this->url->link('extension/module/dockercart_import_export_excel', 'user_token=' . $this->session->data['user_token'], true),
+			'children' => array()
+		);
+
+		foreach ($data['menus'] as &$item) {
+			if (isset($item['id']) && $item['id'] === 'menu-catalog' && isset($item['children']) && is_array($item['children'])) {
+				$import_found = false;
+				foreach ($item['children'] as &$child) {
+					if (isset($child['name']) && $child['name'] === 'Import' && empty($child['href'])) {
+						$child['children'][] = $menu_item;
+						$import_found = true;
+						break;
+					}
+				}
+				unset($child);
+				if (!$import_found) {
+					$item['children'][] = array(
+						'name' => 'Import',
+						'href' => '',
+						'children' => array($menu_item)
+					);
+				}
+				return;
+			}
+		}
+		unset($item);
 	}
 
     protected function validate() {

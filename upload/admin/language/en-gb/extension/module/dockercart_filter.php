@@ -1,6 +1,7 @@
 <?php
 
 $_['heading_title']    = 'Filter';
+$_['heading_title_menu'] = 'Filter';
 
 $_['text_extension']   = 'Extensions';
 $_['text_success']     = 'Success: You have modified Filter module!';

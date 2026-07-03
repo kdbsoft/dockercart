@@ -213,7 +213,7 @@ class ControllerExtensionModuleDockercartFaq extends Controller {
         }
 
         foreach ($data['menus'] as &$item) {
-            if (isset($item['id']) && $item['id'] === 'menu-extension' && isset($item['children']) && is_array($item['children'])) {
+            if (isset($item['id']) && $item['id'] === 'menu-catalog' && isset($item['children']) && is_array($item['children'])) {
                 $item['children'][] = $menu;
                 return;
             }

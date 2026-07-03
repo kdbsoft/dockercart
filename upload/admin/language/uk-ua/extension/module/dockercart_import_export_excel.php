@@ -81,6 +81,7 @@ $_['error_profile_name_required'] = 'Потрібне ім\'я профілю';
 $_['error_profile_not_found'] = 'Профіль не знайдено';
 $_['error_upload_failed'] = 'Не вдалося завантажити файл';
 $_['heading_title'] = 'Імпорт/експорт Excel';
+$_['heading_title_menu'] = 'Імпорт/експорт Excel';
 $_['text_add_profile'] = 'Додати постачальника';
 $_['text_all'] = 'Усі';
 $_['text_attribute_mapping'] = 'Зіставлення характеристик';

@@ -1,6 +1,7 @@
 <?php
 // Heading
 $_['heading_title']    = 'SEO Generator';
+$_['heading_title_menu'] = 'SEO Generator';
 
 // Text
 $_['text_extension']   = 'Extensions';

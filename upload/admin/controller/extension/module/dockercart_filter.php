@@ -489,12 +489,16 @@ class ControllerExtensionModuleDockerCartFilter extends Controller {
 
     public function install() {
         $this->load->model('extension/module/dockercart_filter');
+        $this->load->model('setting/event');
         $this->model_extension_module_dockercart_filter->install();
+        $this->registerMenuEvent();
     }
 
     public function uninstall() {
         $this->load->model('extension/module/dockercart_filter');
+        $this->load->model('setting/event');
         $this->model_extension_module_dockercart_filter->uninstall();
+        $this->unregisterMenuEvent();
     }
 
     public function clearCache() {
@@ -512,5 +516,54 @@ class ControllerExtensionModuleDockerCartFilter extends Controller {
 
     private function clearModuleCache() {
         $this->cache->delete('dockercart_filter');
+    }
+
+    private function registerMenuEvent() {
+        $this->load->model('setting/event');
+        $this->db->query("DELETE FROM `" . DB_PREFIX . "event` WHERE `code` = 'dockercart_filter_admin_menu'");
+        $this->model_setting_event->addEvent(
+            'dockercart_filter_admin_menu',
+            'admin/view/common/column_left/before',
+            'extension/module/dockercart_filter/eventAdminMenu',
+            1,
+            0
+        );
+    }
+
+    private function unregisterMenuEvent() {
+        $this->db->query("DELETE FROM `" . DB_PREFIX . "event` WHERE `code` = 'dockercart_filter_admin_menu'");
+    }
+
+    public function eventAdminMenu(&$route, &$data, &$output) {
+        $this->load->language('extension/module/dockercart_filter');
+
+        if (!$this->user->hasPermission('access', 'extension/module/dockercart_filter')) {
+            return;
+        }
+
+        $menu = array(
+            'name' => $this->language->get('heading_title_menu'),
+            'href' => $this->url->link('extension/module/dockercart_filter', 'user_token=' . $this->session->data['user_token'], true),
+            'children' => array()
+        );
+
+        if (!isset($data['menus']) || !is_array($data['menus'])) {
+            return;
+        }
+
+        foreach ($data['menus'] as &$item) {
+            if (isset($item['id']) && $item['id'] === 'menu-catalog' && isset($item['children']) && is_array($item['children'])) {
+                $item['children'][] = $menu;
+                return;
+            }
+        }
+
+        $data['menus'][] = array(
+            'id' => 'menu-dockercart-filter',
+            'icon' => 'fa-filter',
+            'name' => $this->language->get('heading_title_menu'),
+            'href' => $this->url->link('extension/module/dockercart_filter', 'user_token=' . $this->session->data['user_token'], true),
+            'children' => array()
+        );
     }
 }

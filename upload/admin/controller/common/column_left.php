@@ -111,6 +111,37 @@ class ControllerCommonColumnLeft extends Controller {
 				);
 			}
 
+			// Import (populated by events)
+			$catalog[] = array(
+				'name'     => 'Import',
+				'href'     => '',
+				'children' => array()
+			);
+
+			// Feeds
+			$feeds = array();
+			$this->load->model('setting/extension');
+			$feed_extensions = $this->model_setting_extension->getInstalled('feed');
+
+			foreach ($feed_extensions as $extension) {
+				if ($this->user->hasPermission('access', 'extension/feed/' . $extension)) {
+					$this->load->language('extension/feed/' . $extension, 'extension');
+					$feeds[] = array(
+						'name'     => $this->language->get('extension')->get('heading_title'),
+						'href'     => $this->url->link('extension/feed/' . $extension, 'user_token=' . $this->session->data['user_token'], true),
+						'children' => array()
+					);
+				}
+			}
+
+			if ($feeds) {
+				$catalog[] = array(
+					'name'     => 'Feeds',
+					'href'     => '',
+					'children' => $feeds
+				);
+			}
+
 			if ($catalog) {
 				$data['menus'][] = array(
 					'id'       => 'menu-catalog',
