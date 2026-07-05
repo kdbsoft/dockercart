@@ -6,13 +6,18 @@ class DockercartExtensionStore {
 	const YML_ENDPOINT = 'http://licensing.docker.localhost:8080/api/v1/yml/';
 	const STORE_DOMAIN = 'https://dockercart.net/extensions';
 	const CACHE_TTL = 1800;
+	const LICENSING_CACHE_TTL = 1800;
 
 	private $registry;
 	private $cache_dir;
+	private $api_url;
 
 	public function __construct($registry) {
 		$this->registry = $registry;
 		$this->cache_dir = DIR_STORAGE . 'dockercart/extension_store/';
+		$this->api_url = defined('LICENSING_API_URL')
+			? LICENSING_API_URL
+			: 'http://licensing.docker.localhost:8080';
 	}
 
 	public function resolveLanguage(): string {
@@ -226,6 +231,7 @@ class DockercartExtensionStore {
 
 			$offers[] = array(
 				'id' => (string) $offer['id'],
+				'sku' => (string) $offer['id'],
 				'name' => $name,
 				'description' => $description,
 				'price' => (float) $offer->price,
@@ -241,5 +247,315 @@ class DockercartExtensionStore {
 		}
 
 		return $offers;
+	}
+
+	/**
+	 * Merge YML catalog offers with licensed-module data from the licensing server.
+	 * Returns offers enriched with state, license_key, and version/status info.
+	 */
+	public function getMergedOffers(SimpleXMLElement $yml, ?array $category_ids = null): array {
+		$offers = $this->getOffers($yml, $category_ids);
+		$licensed_modules = $this->getLicensedModules();
+		$licensed_map = array();
+
+		foreach ($licensed_modules as $mod) {
+			if (!empty($mod['sku'])) {
+				$licensed_map[$mod['sku']] = $mod;
+			}
+		}
+
+		foreach ($offers as &$offer) {
+			$offer['state'] = 'buy';
+			$offer['license_key'] = null;
+			$offer['license_status'] = null;
+			$offer['is_licensed'] = false;
+			$offer['installed_version'] = null;
+			$offer['update_available'] = false;
+
+			$sku = $offer['sku'];
+
+			if (isset($licensed_map[$sku])) {
+				$offer['is_licensed'] = true;
+				$offer['license_key'] = $licensed_map[$sku]['licenseKey'] ?? null;
+				$offer['license_status'] = $licensed_map[$sku]['licenseStatus'] ?? null;
+			}
+
+			$meta = $this->getInstalledMeta($sku);
+			if ($meta) {
+				$offer['installed_version'] = $meta['installed_version'];
+			}
+
+			if ($offer['installed_version'] && $offer['version']) {
+				if (version_compare($offer['version'], $offer['installed_version'], '>')) {
+					$offer['update_available'] = true;
+				}
+			}
+
+			$offer['state'] = $this->resolveState($offer);
+
+			if (!$offer['is_licensed'] && $offer['installed_version'] === null) {
+				$offer['state'] = 'buy';
+			}
+		}
+		unset($offer);
+
+		return $offers;
+	}
+
+	public function resolveState(array $offer): string {
+		$installed = $offer['installed_version'] !== null;
+		$licensed = !empty($offer['is_licensed']);
+		$update_available = !empty($offer['update_available']);
+		$license_status = $offer['license_status'] ?? null;
+
+		if (in_array($license_status, ['REVOKED', 'EXPIRED'], true)) {
+			return strtolower($license_status);
+		}
+
+		if ($licensed && !$installed) {
+			return 'install';
+		}
+
+		if ($installed && $update_available && $licensed) {
+			return 'update';
+		}
+
+		if ($installed) {
+			return 'up_to_date';
+		}
+
+		return 'buy';
+	}
+
+	public function getDomain(): string {
+		if (defined('LICENSING_DOMAIN') && LICENSING_DOMAIN !== '') {
+			return LICENSING_DOMAIN;
+		}
+
+		$domain = $_SERVER['HTTP_HOST'] ?? 'localhost';
+		$domain = strtolower($domain);
+		$domain = preg_replace('/^www\./', '', $domain);
+		$domain = preg_replace('/:.*$/', '', $domain);
+
+		return $domain;
+	}
+
+	public function getLicensedModules(): array {
+		$domain = $this->getDomain();
+		$cache_file = $this->cache_dir . 'licensed_' . md5($domain) . '.json';
+
+		if (is_file($cache_file) && (time() - filemtime($cache_file)) < self::LICENSING_CACHE_TTL) {
+			$cached = json_decode(file_get_contents($cache_file), true);
+
+			if (is_array($cached)) {
+				return $cached;
+			}
+		}
+
+		$url = $this->api_url . '/api/v1/modules/by-domain?domain=' . urlencode($domain);
+
+		$ch = curl_init($url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, ['Accept: application/json']);
+
+		$parsed = parse_url($url);
+		$gateway_ip = @gethostbyname('host.docker.internal');
+
+		if ($gateway_ip !== 'host.docker.internal') {
+			curl_setopt($ch, CURLOPT_RESOLVE, array(
+				$parsed['host'] . ':' . ($parsed['port'] ?? 80) . ':' . $gateway_ip
+			));
+		}
+
+		$response = curl_exec($ch);
+		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		curl_close($ch);
+
+		if ($http_code !== 200 || $response === false) {
+			return array();
+		}
+
+		$body = json_decode($response, true);
+
+		if (!is_array($body) || empty($body['success']) || !isset($body['data'])) {
+			return array();
+		}
+
+		if (!is_dir($this->cache_dir)) {
+			mkdir($this->cache_dir, 0755, true);
+		}
+
+		file_put_contents($cache_file, json_encode($body['data']));
+
+		return $body['data'];
+	}
+
+	public function getModuleVersions(string $sku): array {
+		$url = $this->api_url . '/api/v1/modules/' . urlencode($sku);
+
+		$ch = curl_init($url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, ['Accept: application/json']);
+
+		$parsed = parse_url($url);
+		$gateway_ip = @gethostbyname('host.docker.internal');
+
+		if ($gateway_ip !== 'host.docker.internal') {
+			curl_setopt($ch, CURLOPT_RESOLVE, array(
+				$parsed['host'] . ':' . ($parsed['port'] ?? 80) . ':' . $gateway_ip
+			));
+		}
+
+		$response = curl_exec($ch);
+		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		curl_close($ch);
+
+		if ($http_code !== 200 || $response === false) {
+			return array();
+		}
+
+		$body = json_decode($response, true);
+
+		if (!is_array($body) || empty($body['success']) || !isset($body['data'])) {
+			return array();
+		}
+
+		return $body['data']['versions'] ?? array();
+	}
+
+	public function getDownloadUrl(string $sku, string $version_id, string $license_key): ?array {
+		$domain = $this->getDomain();
+
+		$url = $this->api_url . '/api/v1/modules/' . urlencode($sku)
+			. '/versions/' . urlencode($version_id)
+			. '/download?domain=' . urlencode($domain)
+			. '&key=' . urlencode($license_key);
+
+		$ch = curl_init($url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, ['Accept: application/json']);
+
+		$parsed = parse_url($url);
+		$gateway_ip = @gethostbyname('host.docker.internal');
+
+		if ($gateway_ip !== 'host.docker.internal') {
+			curl_setopt($ch, CURLOPT_RESOLVE, array(
+				$parsed['host'] . ':' . ($parsed['port'] ?? 80) . ':' . $gateway_ip
+			));
+		}
+
+		$response = curl_exec($ch);
+		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		curl_close($ch);
+
+		if ($http_code !== 200 || $response === false) {
+			return null;
+		}
+
+		$body = json_decode($response, true);
+
+		if (!is_array($body) || empty($body['success']) || !isset($body['data']['downloadUrl'])) {
+			return null;
+		}
+
+		return $body['data'];
+	}
+
+	public function getInstalledMeta(string $sku): ?array {
+		$db = $this->registry->get('db');
+
+		$result = $db->query(
+			"SELECT * FROM `" . DB_PREFIX . "dockercart_extension_meta`
+			 WHERE `sku` = '" . $db->escape($sku) . "'"
+		);
+
+		return $result->num_rows ? $result->row : null;
+	}
+
+	public function getInstalledMetaByCode(string $code): ?array {
+		$db = $this->registry->get('db');
+
+		$result = $db->query(
+			"SELECT * FROM `" . DB_PREFIX . "dockercart_extension_meta`
+			 WHERE `code` = '" . $db->escape($code) . "'"
+		);
+
+		return $result->num_rows ? $result->row : null;
+	}
+
+	public function setInstalledMeta(string $code, string $sku, string $version, string $source = 'store', ?int $extension_install_id = null): void {
+		$db = $this->registry->get('db');
+
+		$db->query(
+			"INSERT INTO `" . DB_PREFIX . "dockercart_extension_meta`
+			 SET `code` = '" . $db->escape($code) . "',
+			     `sku` = '" . $db->escape($sku) . "',
+			     `installed_version` = '" . $db->escape($version) . "',
+			     `source` = '" . $db->escape($source) . "',
+			     `extension_type` = 'module',
+			     `extension_install_id` = " . ($extension_install_id !== null ? (int)$extension_install_id : 'NULL') . ",
+			     `date_added` = NOW(),
+			     `date_modified` = NOW()
+			 ON DUPLICATE KEY UPDATE
+			     `installed_version` = VALUES(`installed_version`),
+			     `sku` = VALUES(`sku`),
+			     `extension_install_id` = VALUES(`extension_install_id`),
+			     `date_modified` = NOW()"
+		);
+	}
+
+	public function updateInstalledMetaVersion(string $code, string $version): void {
+		$db = $this->registry->get('db');
+
+		$db->query(
+			"UPDATE `" . DB_PREFIX . "dockercart_extension_meta`
+			 SET `installed_version` = '" . $db->escape($version) . "',
+			     `date_modified` = NOW()
+			 WHERE `code` = '" . $db->escape($code) . "'"
+		);
+	}
+
+	public function removeInstalledMeta(string $code): void {
+		$db = $this->registry->get('db');
+
+		$db->query(
+			"DELETE FROM `" . DB_PREFIX . "dockercart_extension_meta`
+			 WHERE `code` = '" . $db->escape($code) . "'"
+		);
+	}
+
+	public function getChangelogHtml(array $versions, string $from_version): string {
+		$html = '';
+		$from_found = $from_version === '' || $from_version === '0.0.0';
+
+		foreach ($versions as $ver) {
+			$v = $ver['version'] ?? '';
+
+			if (!$from_found) {
+				if (version_compare($v, $from_version, '<=')) {
+					$from_found = true;
+				}
+
+				continue;
+			}
+
+			if ($v === $from_version) {
+				continue;
+			}
+
+			$changelog = $ver['changelog'] ?? '';
+
+			if ($changelog !== '') {
+				$html .= '<div class="store-changelog-version">';
+				$html .= '<strong>v' . htmlspecialchars($v, ENT_QUOTES, 'UTF-8') . '</strong>';
+				$html .= '<div class="store-changelog-content">' . $changelog . '</div>';
+				$html .= '</div>';
+			}
+		}
+
+		return $html;
 	}
 }

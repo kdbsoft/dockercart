@@ -8,7 +8,7 @@ $_['heading_title'] = 'Аналитика продаж';
 $_['text_customer'] = 'Покупатели';
 $_['text_day'] = 'Сегодня';
 $_['text_edit'] = 'Редактировать диаграмму панели мониторинга';
-$_['text_extension'] = 'Расширения';
+$_['text_extension'] = 'Дополнения';
 $_['text_month'] = 'Месяц';
 $_['text_order'] = 'Заказы';
 $_['text_completed'] = 'Завершённые';
@@ -21,7 +21,7 @@ $_['text_week'] = 'Неделя';
 $_['text_year'] = 'Год';
 // Subtitle
 
-$_['text_edit_subtitle'] = 'Настройте параметры и опции расширения';
+$_['text_edit_subtitle'] = 'Настройте параметры и опции дополнения';
 // Dashboard Info Subtitle
 
 $_['text_chart_subtitle'] = 'Динамика выручки и заказов по времени';

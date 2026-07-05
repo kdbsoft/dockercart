@@ -8,12 +8,12 @@ $_['error_name'] = 'Назва модуля має містити від 3 до 
 $_['error_permission'] = 'Увага: У вас немає дозволу на зміну модуля HTML-контенту!';
 $_['heading_title'] = 'HTML-контент';
 $_['text_edit'] = 'Модуль редагування HTML-контенту';
-$_['text_extension'] = 'Розширення';
+$_['text_extension'] = 'Доповнення';
 $_['text_module'] = 'Модулі';
 $_['text_success'] = 'Успіх: Ви змінили модуль HTML-контенту!';
 $_['text_default_module_name'] = 'HTML-контент';
 // Subtitle
 
-$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції розширення';
+$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції доповнення';
 
 

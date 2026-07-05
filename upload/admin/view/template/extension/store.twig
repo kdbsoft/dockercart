@@ -69,7 +69,7 @@
 							<div class="row store-grid">
 								{% for offer in offers %}
 								<div class="col-sm-6 col-md-4 col-lg-3">
-									<div class="store-card" data-offer-id="{{ offer.id }}">
+									<div class="store-card" data-sku="{{ offer.sku }}">
 										<div class="store-card-image">
 											{% if offer.pictures %}
 											<img src="{{ offer.pictures[0] }}" alt="{{ offer.name }}" loading="lazy" />
@@ -81,25 +81,46 @@
 											{% if offer.price_type %}
 											<span class="store-card-badge store-badge-{{ offer.price_type|lower }}">{{ offer.price_type }}</span>
 											{% endif %}
+											{% if offer.state %}
+											<span class="store-card-badge store-state-badge store-state-{{ offer.state }}">{{ attribute(_context, 'text_state_' ~ offer.state) is defined ? attribute(_context, 'text_state_' ~ offer.state) : offer.state }}</span>
+											{% endif %}
 										</div>
 										<div class="store-card-body">
 											<h4 class="store-card-title">{{ offer.name }}</h4>
-											{% if offer.version %}<small class="text-muted">v{{ offer.version }}</small>{% endif %}
+											{% if offer.installed_version %}
+											<small class="text-muted">{{ text_installed }}: v{{ offer.installed_version }}</small>
+											{% endif %}
+											{% if offer.version and offer.state == 'update' %}
+											<small class="text-success">→ v{{ offer.version }}</small>
+											{% elseif offer.version and not offer.installed_version %}
+											<small class="text-muted">v{{ offer.version }}</small>
+											{% endif %}
 										</div>
 										<div class="store-card-footer">
 											<span class="store-card-price">
 												{% if offer.price > 0 %}
 												${{ offer.price|number_format(0, '.', ',') }}
-												{% if offer.price_type %}
-												<small class="store-price-type">/ {{ offer.price_type }}</small>
-												{% endif %}
 												{% else %}
 												<strong class="text-success">{{ text_free }}</strong>
 												{% endif %}
 											</span>
-											<a href="{{ offer.buy_url }}" class="btn btn-sm btn-primary store-card-buy-btn" target="_blank" rel="noopener">
+											{% if offer.state == 'buy' %}
+											<a href="{{ offer.buy_url }}" class="btn btn-sm btn-primary store-card-btn" target="_blank" rel="noopener">
 												<i class="fa fa-shopping-cart"></i> {{ text_buy }}
 											</a>
+											{% elseif offer.state == 'install' %}
+											<button class="btn btn-sm btn-success store-card-btn store-install-btn" data-sku="{{ offer.sku }}">
+												<i class="fa fa-download"></i> {{ text_install }}
+											</button>
+											{% elseif offer.state == 'update' %}
+											<button class="btn btn-sm btn-warning store-card-btn store-update-btn" data-sku="{{ offer.sku }}">
+												<i class="fa fa-arrow-up"></i> {{ text_update }}
+											</button>
+											{% elseif offer.state == 'up_to_date' %}
+											<span class="label label-success store-card-btn-label">{{ text_up_to_date }}</span>
+											{% elseif offer.state in ['revoked', 'expired'] %}
+											<span class="label label-danger store-card-btn-label">{{ attribute(_context, 'text_state_' ~ offer.state) }}</span>
+											{% endif %}
 										</div>
 									</div>
 								</div>
@@ -115,6 +136,59 @@
 					</div>
 				</div>
 			</div>
+
+			{% if licenses %}
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h3 class="panel-title"><i class="fa fa-key"></i> {{ text_license_management }}</h3>
+				</div>
+				<div class="panel-body">
+					<div class="table-responsive">
+						<table class="table table-bordered table-hover">
+							<thead>
+								<tr>
+									<th>{{ text_extension }}</th>
+									<th>{{ text_license_key }}</th>
+									<th>{{ text_status }}</th>
+									<th>{{ text_expires }}</th>
+									<th>{{ text_last_verified }}</th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for license in licenses %}
+								<tr>
+									<td>{{ license.module_code }}</td>
+									<td style="font-family: monospace; font-size: 11px;">{{ license.license_key[:24] }}{% if license.license_key|length > 24 %}...{% endif %}</td>
+									<td>
+										{% if license.status == 'active' %}
+										<span class="label label-success">Active</span>
+										{% elseif license.status == 'grace' %}
+										<span class="label label-warning">Grace</span>
+										{% elseif license.status == 'revoked' %}
+										<span class="label label-danger">Revoked</span>
+										{% elseif license.status == 'expired' %}
+										<span class="label label-danger">Expired</span>
+										{% elseif license.status == 'invalid' %}
+										<span class="label label-danger">Invalid</span>
+										{% else %}
+										<span class="label label-default">{{ license.status }}</span>
+										{% endif %}
+										{% if license.is_test %}<small class="text-muted"> (test)</small>{% endif %}
+									</td>
+									<td>{{ license.expires_at ?? '—' }}</td>
+									<td>{{ license.last_verified ?? text_no_license }}</td>
+									<td>
+										<button class="btn btn-xs btn-default store-set-key-btn" data-module-code="{{ license.module_code }}" title="{{ text_set_key }}"><i class="fa fa-key"></i></button>
+									</td>
+								</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+			{% endif %}
 		{% endif %}
 	</div>
 </div>
@@ -140,11 +214,47 @@
 				<div class="store-modal-description" id="store-modal-description"></div>
 				<div class="store-modal-params" id="store-modal-params"></div>
 				<div class="store-modal-changelog" id="store-modal-changelog"></div>
+				<div class="store-modal-update-changelog" id="store-modal-update-changelog" style="display:none;"></div>
+				<div class="store-modal-license" id="store-modal-license" style="display:none;">
+					<div class="form-group">
+						<label for="store-modal-license-key-input">{{ text_license_key }}</label>
+						<input type="text" id="store-modal-license-key-input" class="form-control" placeholder="DCL-..." />
+						<button type="button" class="btn btn-sm btn-primary store-activate-btn" id="store-modal-activate-btn">{{ text_activate_key }}</button>
+					</div>
+				</div>
 			</div>
 			<div class="modal-footer store-modal-footer">
 				<a href="#" id="store-modal-buy" class="btn btn-primary btn-lg btn-buy" target="_blank" rel="noopener">
 					<i class="fa fa-shopping-cart"></i> <span id="store-modal-buy-text">{{ text_buy }}</span>
 				</a>
+				<button type="button" class="btn btn-success btn-lg" id="store-modal-install-btn" style="display:none;">
+					<i class="fa fa-download"></i> <span>{{ text_install }}</span>
+				</button>
+				<button type="button" class="btn btn-warning btn-lg" id="store-modal-update-btn" style="display:none;">
+					<i class="fa fa-arrow-up"></i> <span>{{ text_update }}</span>
+				</button>
+				<button type="button" class="btn btn-default" data-dismiss="modal">{{ text_close }}</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="store-key-modal" tabindex="-1" role="dialog">
+	<div class="modal-dialog modal-sm" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+				<h4 class="modal-title">{{ text_set_key }}</h4>
+			</div>
+			<div class="modal-body">
+				<div class="form-group">
+					<label for="key-modal-key-input">{{ text_license_key }}</label>
+					<input type="text" id="key-modal-key-input" class="form-control" placeholder="DCL-..." />
+					<input type="hidden" id="key-modal-module-code" />
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-primary" id="key-modal-save-btn">{{ text_set_key }}</button>
 				<button type="button" class="btn btn-default" data-dismiss="modal">{{ text_close }}</button>
 			</div>
 		</div>
@@ -163,21 +273,30 @@ $(document).ready(function() {
 	var $modalBuy = $('#store-modal-buy');
 	var $modalBuyText = $('#store-modal-buy-text');
 	var $modalChangelog = $('#store-modal-changelog');
+	var $modalUpdateChangelog = $('#store-modal-update-changelog');
+	var $modalLicense = $('#store-modal-license');
+	var $modalInstallBtn = $('#store-modal-install-btn');
+	var $modalUpdateBtn = $('#store-modal-update-btn');
+	var $modalLicenseInput = $('#store-modal-license-key-input');
 
-	$('.store-grid').on('click', '.store-card', function() {
-		var offerId = $(this).data('offer-id');
+	var currentDetail = null;
 
+	function showModal(sku) {
 		$modalTitle.text('{{ text_loading }}');
 		$modalCarousel.hide();
 		$modalDescription.html('').hide();
 		$modalParams.html('').hide();
-		$modalBuy.attr('href', '#').hide();
-		$modalBuyText.text('{{ text_buy }}');
+		$modalBuy.hide();
+		$modalInstallBtn.hide();
+		$modalUpdateBtn.hide();
 		$modalChangelog.html('').hide();
+		$modalUpdateChangelog.html('').hide();
+		$modalLicense.hide();
+		$modalBuyText.text('{{ text_buy }}');
 		$modalIndicators.empty();
 		$modalCarouselInner.empty();
 
-		$.getJSON('{{ detail_url }}&offer_id=' + encodeURIComponent(offerId), function(data) {
+		$.getJSON('{{ detail_url }}&sku=' + encodeURIComponent(sku), function(data) {
 			if (data.error) {
 				$modalTitle.text('{{ text_error }}');
 				$modalDescription.html('<div class="alert alert-danger store-modal-alert">' + data.error + '</div>').show();
@@ -185,20 +304,9 @@ $(document).ready(function() {
 				return;
 			}
 
+			currentDetail = data;
+
 			$modalTitle.text(data.name);
-
-			if (data.buy_url) {
-				var priceText = '{{ text_buy }}';
-
-				if (data.price > 0) {
-					priceText += ' — $' + data.price.toLocaleString('en-US', {minimumFractionDigits: 0});
-				}
-
-				$modalBuyText.text(priceText);
-				$modalBuy.attr('href', data.buy_url).show();
-			} else {
-				$modalBuy.hide();
-			}
 
 			if (data.pictures && data.pictures.length > 0) {
 				$modalCarousel.show();
@@ -212,8 +320,6 @@ $(document).ready(function() {
 						'</div>'
 					);
 				});
-			} else {
-				$modalCarousel.hide();
 			}
 
 			if (data.description) {
@@ -222,25 +328,52 @@ $(document).ready(function() {
 
 			if (data.params && data.params.length > 0) {
 				var paramsHtml = '';
-
 				$.each(data.params, function(i, param) {
 					paramsHtml += '<div class="store-param-badge">';
 					paramsHtml += '<span class="store-param-label">' + param.name + '</span>';
 					paramsHtml += '<span class="store-param-value">' + param.value + '</span>';
 					paramsHtml += '</div>';
 				});
-
 				$modalParams.html(paramsHtml).show();
-			} else {
-				$modalParams.html('').hide();
 			}
 
 			if (data.changelog) {
-				var changelogHtml = '<div class="store-changelog-title">' + '{{ text_changelog }}' + '</div>';
+				var changelogHtml = '<div class="store-changelog-title">{{ text_changelog }}</div>';
 				changelogHtml += '<div class="store-changelog-content">' + data.changelog + '</div>';
 				$modalChangelog.html(changelogHtml).show();
+			}
+
+			if (data.update_changelog) {
+				var updateHtml = '<div class="store-changelog-title">{{ text_whats_new }}</div>';
+				updateHtml += data.update_changelog;
+				$modalUpdateChangelog.html(updateHtml).show();
+			}
+
+			var state = data.state || 'buy';
+
+			if (state === 'buy') {
+				if (data.buy_url) {
+					var priceText = '{{ text_buy }}';
+					if (data.price > 0) {
+						priceText += ' — $' + data.price.toLocaleString('en-US', {minimumFractionDigits: 0});
+					}
+					$modalBuyText.text(priceText);
+					$modalBuy.attr('href', data.buy_url).show();
+				}
+				$modalLicense.show();
+				$modalLicenseInput.val(data.license_key || '');
+			} else if (state === 'install') {
+				$modalInstallBtn.show();
+				if (data.license_key) {
+					$modalLicenseInput.val(data.license_key);
+				}
+				$modalLicense.show();
+			} else if (state === 'update') {
+				$modalUpdateBtn.show();
 			} else {
-				$modalChangelog.html('').hide();
+				$modalBuy.hide();
+				$modalInstallBtn.hide();
+				$modalUpdateBtn.hide();
 			}
 
 			$modal.modal('show');
@@ -249,10 +382,126 @@ $(document).ready(function() {
 			$modalDescription.html('<div class="alert alert-danger store-modal-alert">{{ text_error_detail }}</div>').show();
 			$modal.modal('show');
 		});
+	}
+
+	$('.store-grid').on('click', '.store-card', function() {
+		var sku = $(this).data('sku');
+		showModal(sku);
 	});
 
-	$('.store-grid').on('click', '.store-card-buy-btn', function(e) {
+	$('.store-grid').on('click', '.store-card-btn', function(e) {
 		e.stopPropagation();
+	});
+
+	$('.store-grid').on('click', '.store-install-btn', function(e) {
+		e.stopPropagation();
+		var sku = $(this).data('sku');
+		showModal(sku);
+	});
+
+	$('.store-grid').on('click', '.store-update-btn', function(e) {
+		e.stopPropagation();
+		var sku = $(this).data('sku');
+		showModal(sku);
+	});
+
+	$modalInstallBtn.on('click', function() {
+		if (!currentDetail) return;
+
+		var licenseKey = $modalLicenseInput.val().trim();
+		var sku = currentDetail.sku;
+
+		if (!licenseKey) {
+			alert('{{ error_license_required }}');
+			return;
+		}
+
+		if (!confirm('{{ text_confirm_install }}')) return;
+
+		$.post('{{ install_url }}', { sku: sku, license_key: licenseKey }, function(resp) {
+			if (resp.error) {
+				alert(resp.error);
+			} else {
+				alert(resp.message);
+				location.reload();
+			}
+		}, 'json').fail(function() {
+			alert('{{ text_error }}');
+		});
+	});
+
+	$modalUpdateBtn.on('click', function() {
+		if (!currentDetail) return;
+
+		if (!confirm('{{ text_confirm_update }}')) return;
+
+		var licenseKey = $modalLicenseInput.val().trim();
+
+		$.post('{{ update_url }}', { sku: currentDetail.sku, license_key: licenseKey }, function(resp) {
+			if (resp.error) {
+				alert(resp.error);
+			} else {
+				alert(resp.message);
+				location.reload();
+			}
+		}, 'json').fail(function() {
+			alert('{{ text_error }}');
+		});
+	});
+
+	$('#store-modal-activate-btn').on('click', function() {
+		if (!currentDetail) return;
+
+		var licenseKey = $modalLicenseInput.val().trim();
+
+		if (!licenseKey) {
+			alert('{{ error_license_required }}');
+			return;
+		}
+
+		$.post('{{ activate_key_url }}', { sku: currentDetail.sku, license_key: licenseKey }, function(resp) {
+			if (resp.error) {
+				alert(resp.error);
+			} else {
+				alert(resp.message);
+				$modal.modal('hide');
+				location.reload();
+			}
+		}, 'json').fail(function() {
+			alert('{{ text_error }}');
+		});
+	});
+
+	var $keyModal = $('#store-key-modal');
+	var $keyModalInput = $('#key-modal-key-input');
+	var $keyModalModuleCode = $('#key-modal-module-code');
+
+	$('.store-set-key-btn').on('click', function() {
+		var moduleCode = $(this).data('module-code');
+		$keyModalModuleCode.val(moduleCode);
+		$keyModalInput.val('');
+		$keyModal.modal('show');
+	});
+
+	$('#key-modal-save-btn').on('click', function() {
+		var moduleCode = $keyModalModuleCode.val();
+		var key = $keyModalInput.val().trim();
+
+		if (!key) {
+			alert('{{ error_license_required }}');
+			return;
+		}
+
+		$.post('{{ set_license_key_url }}', { module_code: moduleCode, license_key: key }, function(resp) {
+			if (resp.error) {
+				alert(resp.error);
+			} else {
+				alert(resp.message);
+				location.reload();
+			}
+		}, 'json').fail(function() {
+			alert('{{ text_error }}');
+		});
 	});
 
 	lucide.createIcons();

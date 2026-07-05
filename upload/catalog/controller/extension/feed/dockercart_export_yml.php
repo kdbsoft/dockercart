@@ -63,25 +63,16 @@ class ControllerExtensionFeedDockercartExportYml extends Controller {
         $license_from_admin = isset($this->request->get['admin_request']) && $this->request->get['admin_request'] == '1';
 
         if (!$license_from_admin) {
-            $license_key = $this->config->get('module_dockercart_export_yml_license_key');
-            if (!empty($license_key)) {
-                if (!file_exists(DIR_SYSTEM . 'library/dockercart_license.php')) {
-                    $this->sendErrorXML('License library not found');
-                    return;
-                }
+            if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
+                $this->sendErrorXML('Licensing library not found');
+                return;
+            }
 
-                require_once(DIR_SYSTEM . 'library/dockercart_license.php');
-                if (class_exists('DockercartLicense')) {
-                    $license = new DockercartLicense($this->registry);
-                    $result = $license->verify($license_key, 'dockercart_export_yml');
+            require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
+            $licensing = new DockercartLicensing($this->registry);
 
-                    if (!$result['valid']) {
-                        $this->sendErrorXML('Invalid license: ' . ($result['error'] ?? ''));
-                        return;
-                    }
-                }
-            } else {
-                $this->sendErrorXML('License key not configured');
+            if (!$licensing->check('dockercart_export_yml')) {
+                $this->sendErrorXML('License check failed');
                 return;
             }
         }

@@ -564,37 +564,18 @@ class ControllerExtensionFeedDockercartGooglebase extends Controller {
      * Verify license
      */
     protected function verifyLicense() {
-        $license_key = $this->config->get('module_dockercart_googlebase_license_key');
-        
-        if (empty($license_key)) {
-            $this->log('License key not configured');
+        if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
+            $this->log('Licensing library not found');
             return false;
         }
 
-        if (!file_exists(DIR_SYSTEM . 'library/dockercart_license.php')) {
-            $this->log('License library not found');
-            return false;
-        }
-
-        require_once(DIR_SYSTEM . 'library/dockercart_license.php');
-        
-        if (!class_exists('DockercartLicense')) {
-            $this->log('DockercartLicense class not found');
-            return false;
-        }
+        require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
 
         try {
-            $license = new DockercartLicense($this->registry);
-            $public_key = $this->config->get('module_dockercart_googlebase_public_key');
-            
-            if (!empty($public_key)) {
-                $result = $license->verifyWithPublicKey($license_key, $public_key, 'dockercart_googlebase');
-            } else {
-                $result = $license->verify($license_key, 'dockercart_googlebase');
-            }
+            $licensing = new DockercartLicensing($this->registry);
 
-            if (!$result['valid']) {
-                $this->log('License verification failed: ' . ($result['error'] ?? 'Unknown error'));
+            if (!$licensing->check('dockercart_googlebase')) {
+                $this->log('License check failed');
                 return false;
             }
 

@@ -3,7 +3,7 @@
 $_['heading_title']    = 'Captcha';
 
 // Text
-$_['text_extension']   = 'Розширення';
+$_['text_extension']   = 'Доповнення';
 $_['text_success']     = 'Успіх: Ви змінили Captcha!';
 $_['text_edit']        = 'Редагувати Captcha';
 $_['text_edit_subtitle'] = 'Налаштуйте параметри математичної капчі-слайдера';
