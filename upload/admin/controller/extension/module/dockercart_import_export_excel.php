@@ -41,8 +41,6 @@ class ControllerExtensionModuleDockercartImportExportExcel extends Controller {
         $data['ajax_run_import'] = $this->url->link('extension/module/dockercart_import_export_excel/runImportAjax', 'user_token=' . $this->session->data['user_token'], true);
         $data['ajax_run_export'] = $this->url->link('extension/module/dockercart_import_export_excel/runExportAjax', 'user_token=' . $this->session->data['user_token'], true);
         $data['ajax_run_filtered_export'] = $this->url->link('extension/module/dockercart_import_export_excel/runFilteredExportAjax', 'user_token=' . $this->session->data['user_token'], true);
-        $data['license_verify_ajax'] = $this->url->link('extension/module/dockercart_import_export_excel/verifyLicenseAjax', 'user_token=' . $this->session->data['user_token'], true);
-        $data['license_save_ajax'] = $this->url->link('extension/module/dockercart_import_export_excel/saveLicenseKeyAjax', 'user_token=' . $this->session->data['user_token'], true);
         $data['add_profile_link'] = $this->url->link('extension/module/dockercart_import_export_excel/profile', 'user_token=' . $this->session->data['user_token'], true);
 
         if (isset($this->request->post['module_dockercart_import_export_excel_status'])) {
@@ -95,37 +93,6 @@ class ControllerExtensionModuleDockercartImportExportExcel extends Controller {
             'file_format' => 'xlsx'
         );
 
-        if (isset($this->request->post['module_dockercart_import_export_excel_license_key'])) {
-            $data['module_dockercart_import_export_excel_license_key'] = $this->request->post['module_dockercart_import_export_excel_license_key'];
-        } else {
-            $data['module_dockercart_import_export_excel_license_key'] = (string)$this->config->get('module_dockercart_import_export_excel_license_key');
-        }
-
-        if (isset($this->request->post['module_dockercart_import_export_excel_public_key'])) {
-            $data['module_dockercart_import_export_excel_public_key'] = $this->request->post['module_dockercart_import_export_excel_public_key'];
-        } else {
-            $data['module_dockercart_import_export_excel_public_key'] = (string)$this->config->get('module_dockercart_import_export_excel_public_key');
-        }
-
-        $data['license_domain'] = isset($_SERVER['HTTP_HOST']) ? (string)$_SERVER['HTTP_HOST'] : 'unknown';
-        $data['license_valid'] = false;
-        $data['license_message'] = '';
-
-        try {
-            if (is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
-                require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
-
-                $licensing = new DockercartLicensing($this->registry);
-                $valid = $licensing->check('dockercart_import_export_excel');
-
-                $data['license_valid'] = $valid;
-                $data['license_message'] = $valid ? '' : 'License is not valid';
-            }
-        } catch (Exception $e) {
-            $data['license_valid'] = false;
-            $data['license_message'] = 'License check error: ' . $e->getMessage();
-        }
-
         $data['schedule_options'] = array(
             ''             => $this->language->get('text_cron_disabled'),
             'every_15m'    => $this->language->get('text_every_15m'),
@@ -137,11 +104,32 @@ class ControllerExtensionModuleDockercartImportExportExcel extends Controller {
             'custom'       => $this->language->get('text_custom'),
         );
 
-        $data['header'] = $this->load->controller('common/header');
-        $data['column_left'] = $this->load->controller('common/column_left');
-        $data['footer'] = $this->load->controller('common/footer');
+		$data['text_tab_license'] = $this->language->get('text_tab_license');
+		$data['text_tab_license_subtitle'] = $this->language->get('text_tab_license_subtitle');
+		$data['text_section_license'] = $this->language->get('text_section_license');
+		$data['text_license'] = $this->language->get('text_license');
+		$data['text_license_domain'] = $this->language->get('text_license_domain');
+		$data['text_valid'] = $this->language->get('text_valid');
+		$data['entry_license_key'] = $this->language->get('entry_license_key');
+		$data['button_verify_license'] = $this->language->get('button_verify_license');
 
-        $this->response->setOutput($this->load->view('extension/module/dockercart_import_export_excel', $data));
+		$data['license_valid'] = null;
+		$data['license_message'] = '';
+		$data['license_domain'] = $_SERVER['HTTP_HOST'] ?? 'localhost';
+		$data['license_save_ajax'] = '';
+		$data['license_verify_ajax'] = '';
+
+		if (isset($this->request->post['module_dockercart_import_export_excel_license_key'])) {
+			$data['module_dockercart_import_export_excel_license_key'] = $this->request->post['module_dockercart_import_export_excel_license_key'];
+		} else {
+			$data['module_dockercart_import_export_excel_license_key'] = $this->config->get('module_dockercart_import_export_excel_license_key');
+		}
+
+		$data['header'] = $this->load->controller('common/header');
+		$data['column_left'] = $this->load->controller('common/column_left');
+		$data['footer'] = $this->load->controller('common/footer');
+
+		$this->response->setOutput($this->load->view('extension/module/dockercart_import_export_excel', $data));
     }
 
     public function profile() {
@@ -541,68 +529,6 @@ class ControllerExtensionModuleDockercartImportExportExcel extends Controller {
                 'user_token=' . $this->session->data['user_token'] . '&file=' . urlencode((string)$summary['filename']),
                 true
             );
-        } catch (Exception $e) {
-            $json['success'] = false;
-            $json['error'] = $e->getMessage();
-        }
-
-        $this->response->addHeader('Content-Type: application/json');
-        $this->response->setOutput(json_encode($json));
-    }
-
-    public function verifyLicenseAjax() {
-        $json = array();
-
-        if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
-            $json['valid'] = false;
-            $json['error'] = 'License library not found';
-            $this->response->addHeader('Content-Type: application/json');
-            $this->response->setOutput(json_encode($json));
-            return;
-        }
-
-        require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
-
-        try {
-            $licensing = new DockercartLicensing($this->registry);
-            $valid = $licensing->check('dockercart_import_export_excel');
-
-            $json['valid'] = $valid;
-            if (!$valid) {
-                $json['error'] = 'License is not valid';
-            }
-        } catch (Exception $e) {
-            $json['valid'] = false;
-            $json['error'] = 'Error: ' . $e->getMessage();
-        }
-
-        $this->response->addHeader('Content-Type: application/json');
-        $this->response->setOutput(json_encode($json));
-    }
-
-    public function saveLicenseKeyAjax() {
-        $json = array();
-
-        if (!$this->user->hasPermission('modify', 'extension/module/dockercart_import_export_excel')) {
-            $json['success'] = false;
-            $json['error'] = 'No permission';
-            $this->response->addHeader('Content-Type: application/json');
-            $this->response->setOutput(json_encode($json));
-            return;
-        }
-
-        $input = file_get_contents('php://input');
-        $data = json_decode($input, true);
-
-        $license_key = isset($data['license_key']) ? (string)$data['license_key'] : '';
-        $public_key = isset($data['public_key']) ? (string)$data['public_key'] : '';
-
-        try {
-            $this->load->model('setting/setting');
-            $this->model_setting_setting->editSettingValue('module_dockercart_import_export_excel', 'module_dockercart_import_export_excel_license_key', $license_key);
-            $this->model_setting_setting->editSettingValue('module_dockercart_import_export_excel', 'module_dockercart_import_export_excel_public_key', $public_key);
-
-            $json['success'] = true;
         } catch (Exception $e) {
             $json['success'] = false;
             $json['error'] = $e->getMessage();

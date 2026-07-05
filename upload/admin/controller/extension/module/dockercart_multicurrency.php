@@ -22,9 +22,6 @@ class ControllerExtensionModuleDockercartMulticurrency extends Controller
 
         $this->document->setTitle($this->language->get("heading_title"));
 
-        // Проверка лицензии
-        $this->validateLicense();
-
         $this->load->model("setting/setting");
 
         if (
@@ -152,6 +149,11 @@ class ControllerExtensionModuleDockercartMulticurrency extends Controller
                 "module_dockercart_multicurrency_public_key",
             );
         }
+
+        $data['entry_license_key'] = $this->language->get('entry_license_key');
+        $data['entry_public_key'] = $this->language->get('entry_public_key');
+        $data['help_public_key'] = $this->language->get('help_public_key');
+        $data['button_verify_license'] = $this->language->get('button_verify_license');
 
         // User token for AJAX
         $data["user_token"] = $this->session->data["user_token"];
@@ -747,105 +749,6 @@ class ControllerExtensionModuleDockercartMulticurrency extends Controller
         }
     }
 
-    /**
-     * Проверка лицензии (для UI warnings, не блокирует работу админки)
-     */
-    private function validateLicense()
-    {
-        $domain = $_SERVER["HTTP_HOST"] ?? "";
-        if (
-            strpos($domain, "localhost") !== false ||
-            strpos($domain, "127.0.0.1") !== false ||
-            strpos($domain, ".local") !== false
-        ) {
-            return true;
-        }
-
-        if (!is_file(DIR_SYSTEM . "library/dockercart/licensing.php")) {
-            return true;
-        }
-
-        require_once DIR_SYSTEM . "library/dockercart/licensing.php";
-
-        try {
-            $licensing = new DockercartLicensing($this->registry);
-            if (!$licensing->check("dockercart_multicurrency")) {
-                $error_msg = $this->language->get("error_license_invalid");
-            }
-        } catch (Exception $e) {
-            // Silent fail in admin
-        }
-
-        return true;
-    }
-
-    /**
-     * Проверка лицензии для работы модуля (блокирует работу если нет лицензии)
-     */
-    private function checkLicenseForOperation()
-    {
-        // Allow localhost/dev environments
-        $domain = $_SERVER["HTTP_HOST"] ?? "";
-        if (
-            strpos($domain, "localhost") !== false ||
-            strpos($domain, "127.0.0.1") !== false ||
-            strpos($domain, ".local") !== false ||
-            strpos($domain, ".docker.localhost") !== false
-        ) {
-            return true;
-        }
-
-        if (!is_file(DIR_SYSTEM . "library/dockercart/licensing.php")) {
-            return false;
-        }
-
-        require_once DIR_SYSTEM . "library/dockercart/licensing.php";
-
-        try {
-            $licensing = new DockercartLicensing($this->registry);
-            return $licensing->check("dockercart_multicurrency");
-        } catch (Exception $e) {
-            return false;
-        }
-    }
-
-    /**
-     * AJAX проверка лицензии
-     */
-    public function verifyLicenseAjax()
-    {
-        $json = [];
-
-        if (!is_file(DIR_SYSTEM . "library/dockercart/licensing.php")) {
-            $json["valid"] = false;
-            $json["error"] = "License library not found";
-            $this->response->addHeader("Content-Type: application/json");
-            $this->response->setOutput(json_encode($json));
-            return;
-        }
-
-        require_once DIR_SYSTEM . "library/dockercart/licensing.php";
-
-        try {
-            $licensing = new DockercartLicensing($this->registry);
-            $valid = $licensing->check("dockercart_multicurrency");
-
-            $json["valid"] = $valid;
-            if (!$valid) {
-                $json["error"] = "License is not valid";
-            }
-        } catch (Exception $e) {
-            $json["valid"] = false;
-            $json["error"] = "Error: " . $e->getMessage();
-        }
-
-        $this->response->addHeader("Content-Type: application/json");
-        $this->response->setOutput(json_encode($json));
-    }
-
-    /**
-     * Validate form
-     */
     protected function validate()
     {
         if (

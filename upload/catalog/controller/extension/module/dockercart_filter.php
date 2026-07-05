@@ -349,22 +349,6 @@ class ControllerExtensionModuleDockercartFilter extends Controller
             return "";
         }
 
-        if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
-            $this->logger->debug('ERROR: Licensing library not found');
-            return '';
-        }
-
-        require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
-
-        $licensing = new DockercartLicensing($this->registry);
-
-        if (!$licensing->check('dockercart_filter')) {
-            $this->logger->debug('ERROR: License check failed for dockercart_filter');
-            return '';
-        }
-
-        $this->logger->debug('LICENSE: Valid license verified for dockercart_filter');
-
         $this->load->language("extension/module/dockercart_filter");
         $this->load->model("extension/module/dockercart_filter");
 

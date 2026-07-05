@@ -338,13 +338,13 @@ $(document).ready(function() {
 			}
 
 			if (data.changelog) {
-				var changelogHtml = '<div class="store-changelog-title">{{ text_changelog }}</div>';
+				var changelogHtml = '<div class="store-changelog-title">{{ text_changelog|escape('js') }}</div>';
 				changelogHtml += '<div class="store-changelog-content">' + data.changelog + '</div>';
 				$modalChangelog.html(changelogHtml).show();
 			}
 
 			if (data.update_changelog) {
-				var updateHtml = '<div class="store-changelog-title">{{ text_whats_new }}</div>';
+				var updateHtml = '<div class="store-changelog-title">{{ text_whats_new|escape('js') }}</div>';
 				updateHtml += data.update_changelog;
 				$modalUpdateChangelog.html(updateHtml).show();
 			}

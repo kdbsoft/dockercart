@@ -42,26 +42,48 @@ $populated = $licensing->autoPopulate();
 echo '[' . date('Y-m-d H:i:s') . '] Auto-populated ' . $populated . ' new license(s)' . "\n";
 
 $licenses = $db->query(
-	"SELECT `module_code`, `license_key`, `sku`, `status`, `domain`
+	"SELECT `module_code`, `license_key`, `sku`, `status`, `domain`, `frontend_blocked`
 	 FROM `" . DB_PREFIX . "dockercart_license`"
 );
 
 $count = 0;
 $errors = 0;
+$blocked = 0;
+$restored = 0;
 
 foreach ($licenses->rows as $row) {
 	$result = $licensing->validate($row['module_code'], true);
 
 	if (!empty($result['valid'])) {
 		$licensing->heartbeat($row['module_code']);
+
+		if (!empty($row['frontend_blocked'])) {
+			$licensing->enableExtension($row['module_code']);
+			$restored++;
+			echo '[' . date('Y-m-d H:i:s') . '] RESTORED: ' . $row['module_code'] . ' (license valid)' . "\n";
+		}
+
 		$count++;
 	} else {
 		$reason = $result['reason'] ?? 'unknown';
 		echo '[' . date('Y-m-d H:i:s') . '] INVALID: ' . $row['module_code'] . ' reason=' . $reason . "\n";
+
+		$blockable_statuses = ['revoked', 'expired', 'invalid'];
+		$row_status = $db->query(
+			"SELECT `status` FROM `" . DB_PREFIX . "dockercart_license`
+			 WHERE `module_code` = '" . $db->escape($row['module_code']) . "'"
+		);
+
+		if ($row_status->num_rows && in_array($row_status->row['status'], $blockable_statuses, true)) {
+			$licensing->disableExtension($row['module_code']);
+			$blocked++;
+			echo '[' . date('Y-m-d H:i:s') . '] BLOCKED: ' . $row['module_code'] . ' (frontend disabled)' . "\n";
+		}
+
 		$errors++;
 	}
 }
 
-echo '[' . date('Y-m-d H:i:s') . '] Verification complete. ' . $count . ' valid, ' . $errors . ' invalid.' . "\n";
+echo '[' . date('Y-m-d H:i:s') . '] Verification complete. ' . $count . ' valid, ' . $errors . ' invalid, ' . $blocked . ' blocked, ' . $restored . ' restored.' . "\n";
 
-exit($errors > 0 ? 0 : 0);
+exit(0);
