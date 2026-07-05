@@ -362,8 +362,6 @@ class ControllerExtensionModuleDockercartGoogleTranslation extends Controller {
     }
 
     private function checkLicenseForTranslation() {
-        $license_key = (string)$this->config->get('module_dockercart_google_translation_license_key');
-
         $domain = $_SERVER['HTTP_HOST'] ?? '';
         $domain_without_port = preg_replace('/:\\d+$/', '', $domain);
 
@@ -371,31 +369,15 @@ class ControllerExtensionModuleDockercartGoogleTranslation extends Controller {
             return true;
         }
 
-        if ($license_key === '') {
-            return false;
-        }
-
-        if (!file_exists(DIR_SYSTEM . 'library/dockercart_license.php')) {
+        if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
             return true;
         }
 
-        require_once DIR_SYSTEM . 'library/dockercart_license.php';
-
-        if (!class_exists('DockercartLicense')) {
-            return true;
-        }
+        require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
 
         try {
-            $license = new DockercartLicense($this->registry);
-            $public_key = (string)$this->config->get('module_dockercart_google_translation_public_key');
-
-            if ($public_key !== '') {
-                $result = $license->verifyWithPublicKey($license_key, $public_key, 'dockercart_google_translation', true);
-            } else {
-                $result = $license->verify($license_key, 'dockercart_google_translation', true);
-            }
-
-            return !empty($result['valid']);
+            $licensing = new DockercartLicensing($this->registry);
+            return $licensing->check('dockercart_google_translation');
         } catch (Exception $e) {
             return false;
         }

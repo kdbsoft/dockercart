@@ -2,10 +2,10 @@
 $_['heading_title']              = 'WayForPay';
 
 $_['text_dockercart_wayforpay']  = '<a href="https://wayforpay.com/" target="_blank"><img src="view/image/payment/dockercart_wayforpay.png" alt="WayForPay" title="WayForPay" style="border: 1px solid #EEEEEE;" width="150" /></a>';
-$_['text_extension']             = 'Розширення';
+$_['text_extension']             = 'Доповнення';
 $_['text_success']               = 'Успіх: Ви змінили дані WayForPay!';
 $_['text_edit']                  = 'Редагувати WayForPay';
-$_['text_edit_subtitle']         = 'Налаштуйте параметри та опції розширення';
+$_['text_edit_subtitle']         = 'Налаштуйте параметри та опції доповнення';
 $_['text_callback_info']         = 'Вкажіть цей URL у панелі продавця WayForPay як service URL для сповіщень про оплату:';
 $_['text_order_info']            = 'Платіж WayForPay';
 

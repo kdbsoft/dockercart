@@ -908,38 +908,21 @@ class ControllerExtensionModuleDockercartRedirects extends Controller {
      * Validate license in admin context (non-blocking; logs warnings)
      */
     private function validateLicense() {
-        $license_key = $this->config->get('module_dockercart_redirects_license_key');
-
         $domain = $_SERVER['HTTP_HOST'] ?? '';
         if (strpos($domain, 'localhost') !== false || strpos($domain, '127.0.0.1') !== false || strpos($domain, '.local') !== false) {
             return true;
         }
 
-        if (empty($license_key)) {
+        if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
             return true;
         }
 
-        if (!file_exists(DIR_SYSTEM . 'library/dockercart_license.php')) {
-            return true;
-        }
-
-        require_once(DIR_SYSTEM . 'library/dockercart_license.php');
-
-        if (!class_exists('DockercartLicense')) {
-            return true;
-        }
+        require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
 
         try {
-            $license = new DockercartLicense($this->registry);
-            $result = $license->verify($license_key, 'dockercart_redirects');
-
-            if (!$result['valid']) {
-                $error_msg = $this->language->get('error_license_invalid');
-                if (isset($result['error'])) {
-                    $error_msg .= ': ' . $result['error'];
-                }
-
-                $this->logger->info('WARNING: License validation failed in admin: ' . $error_msg);
+            $licensing = new DockercartLicensing($this->registry);
+            if (!$licensing->check('dockercart_redirects')) {
+                $this->logger->info('WARNING: License validation failed in admin');
             }
         } catch (Exception $e) {
             $this->logger->info('ERROR: License verification exception: ' . $e->getMessage());
@@ -954,23 +937,9 @@ class ControllerExtensionModuleDockercartRedirects extends Controller {
     public function verifyLicenseAjax() {
         $json = array();
 
-        $input = file_get_contents('php://input');
-        $data = json_decode($input, true);
+        $this->logger->info('AJAX: verifyLicenseAjax() called');
 
-        $license_key = isset($data['license_key']) ? $data['license_key'] : '';
-        $public_key = isset($data['public_key']) ? $data['public_key'] : '';
-
-        $this->logger->info('AJAX: verifyLicenseAjax() called with key: ' . substr($license_key, 0, 20) . '...');
-
-        if (empty($license_key)) {
-            $json['valid'] = false;
-            $json['error'] = 'License key is empty';
-            $this->response->addHeader('Content-Type: application/json');
-            $this->response->setOutput(json_encode($json));
-            return;
-        }
-
-        if (!file_exists(DIR_SYSTEM . 'library/dockercart_license.php')) {
+        if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
             $json['valid'] = false;
             $json['error'] = 'License library not found';
             $this->logger->info('AJAX: License library not found');
@@ -979,36 +948,23 @@ class ControllerExtensionModuleDockercartRedirects extends Controller {
             return;
         }
 
-        require_once(DIR_SYSTEM . 'library/dockercart_license.php');
-
-        if (!class_exists('DockercartLicense')) {
-            $json['valid'] = false;
-            $json['error'] = 'DockercartLicense class not found';
-            $this->logger->info('AJAX: DockercartLicense class not found');
-            $this->response->addHeader('Content-Type: application/json');
-            $this->response->setOutput(json_encode($json));
-            return;
-        }
+        require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
 
         try {
-            $license = new DockercartLicense($this->registry);
+            $licensing = new DockercartLicensing($this->registry);
+            $valid = $licensing->check('dockercart_redirects');
 
-            if (!empty($public_key)) {
-                $this->logger->info('AJAX: Using provided public key for verification');
-                $result = $license->verifyWithPublicKey($license_key, $public_key, 'dockercart_redirects', true);
-            } else {
-                $this->logger->info('AJAX: Using saved public key from database');
-                $result = $license->verify($license_key, 'dockercart_redirects', true);
+            $json['valid'] = $valid;
+            if (!$valid) {
+                $json['error'] = 'License is not valid';
             }
 
-            $this->logger->info('AJAX: Verification result: ' . json_encode($result));
+            $this->logger->info('AJAX: Verification result: ' . json_encode($json));
 
-            $json = $result;
-
-            if ($result['valid']) {
+            if ($valid) {
                 $this->logger->info('AJAX: License verified successfully');
             } else {
-                $this->logger->info('AJAX: License verification failed - ' . (isset($result['error']) ? $result['error'] : 'Unknown error'));
+                $this->logger->info('AJAX: License verification failed');
             }
         } catch (Exception $e) {
             $json['valid'] = false;

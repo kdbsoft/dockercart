@@ -41,11 +41,11 @@ $_['text_customer_reset'] = '<a href="customer_id=%d">%s</a> - скинутий 
 $_['text_customer_return_account'] = '<a href="customer_id=%d">%s</a> - запит повернення товару.';
 $_['text_customer_return_guest'] = '%s - запит повернення товару.';
 $_['text_edit'] = 'Редагувати останню активність на інформаційній панелі';
-$_['text_extension'] = 'Розширення';
+$_['text_extension'] = 'Доповнення';
 $_['text_success'] = 'Успіх: Ви змінили активність панелі інструментів!';
 // Subtitle
 
-$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції розширення';
+$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції доповнення';
 // Dashboard Info Subtitle
 
 $_['text_activity_subtitle'] = 'Нещодавні події магазину та дії користувачів';

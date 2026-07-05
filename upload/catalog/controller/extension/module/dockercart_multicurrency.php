@@ -141,33 +141,16 @@ class ControllerExtensionModuleDockercartMulticurrency extends Controller {
      * Проверка лицензии (блокирует работу модуля если нет валидной лицензии)
      */
     private function checkLicense() {
-        $license_key = $this->config->get('module_dockercart_multicurrency_license_key');
-
-        // Allow localhost/dev environments
-        $domain = $_SERVER['HTTP_HOST'] ?? '';
-        if (strpos($domain, 'localhost') !== false || strpos($domain, '127.0.0.1') !== false || strpos($domain, '.local') !== false || strpos($domain, '.docker.localhost') !== false) {
-            return true;
-        }
-
-        if (empty($license_key)) {
+        if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
             return false;
         }
 
-        if (!file_exists(DIR_SYSTEM . 'library/dockercart_license.php')) {
-            return false;
-        }
-
-        require_once(DIR_SYSTEM . 'library/dockercart_license.php');
-
-        if (!class_exists('DockercartLicense')) {
-            return false;
-        }
+        require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
 
         try {
-            $license = new DockercartLicense($this->registry);
-            $result = $license->verify($license_key, 'dockercart_multicurrency');
+            $licensing = new DockercartLicensing($this->registry);
 
-            return $result['valid'];
+            return $licensing->check('dockercart_multicurrency');
         } catch (Exception $e) {
             return false;
         }

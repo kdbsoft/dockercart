@@ -22,11 +22,11 @@ $_['text_activity_return_account'] = '<a href="customer_id=%d">%s</a> отпра
 $_['text_activity_return_guest'] = '%s отправил запрос <a href="return_id=%d">на возврат</a> товара.';
 $_['text_activity_transaction'] = '<a href="customer_id=%d">%s</a> получил комиссию от нового <a href="order_id=%d">заказа</a> .';
 $_['text_edit'] = 'Редактировать панель управления Последние действия';
-$_['text_extension'] = 'Расширения';
+$_['text_extension'] = 'Дополнения';
 $_['text_success'] = 'Успех: Вы изменили активность на панели мониторинга!';
 // Subtitle
 
-$_['text_edit_subtitle'] = 'Настройте параметры и опции расширения';
+$_['text_edit_subtitle'] = 'Настройте параметры и опции дополнения';
 // Dashboard Info Subtitle
 
 $_['text_activity_subtitle'] = 'Последние события магазина и действия пользователей';

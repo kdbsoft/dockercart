@@ -36,6 +36,22 @@ class ControllerExtensionModuleDockercartGallery extends Controller {
 		$data['add_image_link'] = $this->url->link('extension/module/dockercart_gallery/form', 'user_token=' . $this->session->data['user_token'], true);
 		$data['images'] = $this->model_extension_module_dockercart_gallery->getImages(array('sort' => 'sort_order', 'order' => 'ASC'));
 
+		$data['license'] = null;
+
+		if (is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
+			require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
+			$licensing = new DockercartLicensing($this->registry);
+
+			$data['license'] = $licensing->getLicense('dockercart_gallery');
+
+			if ($data['license'] && !empty($data['license']['license_key'])) {
+				$licensing->validate('dockercart_gallery');
+				$data['license'] = $licensing->getLicense('dockercart_gallery');
+			}
+		}
+
+		$data['activate_key_url'] = $this->url->link('extension/store/activateKey', 'user_token=' . $this->session->data['user_token'], true);
+
 		foreach ($data['images'] as &$image) {
 			$image['edit_link'] = $this->url->link('extension/module/dockercart_gallery/form', 'user_token=' . $this->session->data['user_token'] . '&gallery_id=' . (int)$image['gallery_id'], true);
 			$image['delete_link'] = $this->url->link('extension/module/dockercart_gallery/delete', 'user_token=' . $this->session->data['user_token'] . '&gallery_id=' . (int)$image['gallery_id'], true);
@@ -156,6 +172,18 @@ class ControllerExtensionModuleDockercartGallery extends Controller {
 		$this->model_extension_module_dockercart_gallery->uninstallSeoUrls();
 		$this->model_extension_module_dockercart_gallery->uninstall();
 		$this->model_setting_setting->deleteSetting('module_dockercart_gallery');
+
+		if (is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
+			require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
+			$licensing = new DockercartLicensing($this->registry);
+			$licensing->removeLicense('dockercart_gallery');
+		}
+
+		if (is_file(DIR_SYSTEM . 'library/dockercart/extension_store.php')) {
+			require_once DIR_SYSTEM . 'library/dockercart/extension_store.php';
+			$store = new DockercartExtensionStore($this->registry);
+			$store->removeInstalledMeta('dockercart_gallery');
+		}
 	}
 
 	private function registerEvents() {
@@ -265,6 +293,19 @@ class ControllerExtensionModuleDockercartGallery extends Controller {
 		$data['text_gallery_entries'] = $this->language->get('text_gallery_entries');
 		$data['text_confirm_delete_image'] = $this->language->get('text_confirm_delete_image');
 		$data['text_show_header'] = $this->language->get('text_show_header');
+		$data['tab_about'] = $this->language->get('tab_about');
+		$data['tab_about_subtitle'] = $this->language->get('tab_about_subtitle');
+		$data['text_developer'] = $this->language->get('text_developer');
+		$data['text_developer_name'] = $this->language->get('text_developer_name');
+		$data['text_contact'] = $this->language->get('text_contact');
+		$data['text_license_status'] = $this->language->get('text_license_status');
+		$data['text_license_key_label'] = $this->language->get('text_license_key_label');
+		$data['text_license_domain'] = $this->language->get('text_license_domain');
+		$data['text_license_expires'] = $this->language->get('text_license_expires');
+		$data['text_license_last_verified'] = $this->language->get('text_license_last_verified');
+		$data['text_license_activate'] = $this->language->get('text_license_activate');
+		$data['text_license_no_license'] = $this->language->get('text_license_no_license');
+		$data['text_license_change_key'] = $this->language->get('text_license_change_key');
 
 		$data['entry_status'] = $this->language->get('entry_status');
 		$data['entry_show_header'] = $this->language->get('entry_show_header');

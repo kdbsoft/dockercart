@@ -11,6 +11,7 @@ $_['text_edit']                    = 'Edit Gallery';
 $_['text_default']                 = 'Default';
 $_['text_enabled']                 = 'Enabled';
 $_['text_disabled']                = 'Disabled';
+$_['text_status']                  = 'Status';
 $_['text_no_results']              = 'No images found.';
 $_['text_add_image']               = 'Add Image';
 $_['text_edit_image']              = 'Edit Image';
@@ -22,6 +23,19 @@ $_['text_gallery_module_subtitle'] = 'Photo gallery with masonry layout and lazy
 $_['text_gallery_form_subtitle']   = 'Add or edit a gallery image';
 $_['tab_general']                  = 'General';
 $_['text_show_header']             = 'Show link in header';
+$_['tab_about']                    = 'About';
+$_['tab_about_subtitle']           = 'Version and license information';
+$_['text_developer']               = 'Developer';
+$_['text_developer_name']          = 'DockerCart';
+$_['text_contact']                 = 'Contact';
+$_['text_license_status']          = 'License Status';
+$_['text_license_key_label']       = 'License Key';
+$_['text_license_domain']          = 'Domain';
+$_['text_license_expires']         = 'Expires';
+$_['text_license_last_verified']   = 'Last Verified';
+$_['text_license_activate']        = 'Activate';
+$_['text_license_no_license']      = 'No license activated. Enter your key below.';
+$_['text_license_change_key']      = 'Change Key';
 
 // Entry
 $_['entry_status']                 = 'Module status';

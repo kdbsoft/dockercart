@@ -752,10 +752,6 @@ class ControllerExtensionModuleDockercartMulticurrency extends Controller
      */
     private function validateLicense()
     {
-        $license_key = $this->config->get(
-            "module_dockercart_multicurrency_license_key",
-        );
-
         $domain = $_SERVER["HTTP_HOST"] ?? "";
         if (
             strpos($domain, "localhost") !== false ||
@@ -765,32 +761,16 @@ class ControllerExtensionModuleDockercartMulticurrency extends Controller
             return true;
         }
 
-        if (empty($license_key)) {
+        if (!is_file(DIR_SYSTEM . "library/dockercart/licensing.php")) {
             return true;
         }
 
-        if (!file_exists(DIR_SYSTEM . "library/dockercart_license.php")) {
-            return true;
-        }
-
-        require_once DIR_SYSTEM . "library/dockercart_license.php";
-
-        if (!class_exists("DockercartLicense")) {
-            return true;
-        }
+        require_once DIR_SYSTEM . "library/dockercart/licensing.php";
 
         try {
-            $license = new DockercartLicense($this->registry);
-            $result = $license->verify(
-                $license_key,
-                "dockercart_multicurrency",
-            );
-
-            if (!$result["valid"]) {
+            $licensing = new DockercartLicensing($this->registry);
+            if (!$licensing->check("dockercart_multicurrency")) {
                 $error_msg = $this->language->get("error_license_invalid");
-                if (isset($result["error"])) {
-                    $error_msg .= ": " . $result["error"];
-                }
             }
         } catch (Exception $e) {
             // Silent fail in admin
@@ -804,10 +784,6 @@ class ControllerExtensionModuleDockercartMulticurrency extends Controller
      */
     private function checkLicenseForOperation()
     {
-        $license_key = $this->config->get(
-            "module_dockercart_multicurrency_license_key",
-        );
-
         // Allow localhost/dev environments
         $domain = $_SERVER["HTTP_HOST"] ?? "";
         if (
@@ -819,28 +795,15 @@ class ControllerExtensionModuleDockercartMulticurrency extends Controller
             return true;
         }
 
-        if (empty($license_key)) {
+        if (!is_file(DIR_SYSTEM . "library/dockercart/licensing.php")) {
             return false;
         }
 
-        if (!file_exists(DIR_SYSTEM . "library/dockercart_license.php")) {
-            return false;
-        }
-
-        require_once DIR_SYSTEM . "library/dockercart_license.php";
-
-        if (!class_exists("DockercartLicense")) {
-            return false;
-        }
+        require_once DIR_SYSTEM . "library/dockercart/licensing.php";
 
         try {
-            $license = new DockercartLicense($this->registry);
-            $result = $license->verify(
-                $license_key,
-                "dockercart_multicurrency",
-            );
-
-            return $result["valid"];
+            $licensing = new DockercartLicensing($this->registry);
+            return $licensing->check("dockercart_multicurrency");
         } catch (Exception $e) {
             return false;
         }
@@ -853,21 +816,7 @@ class ControllerExtensionModuleDockercartMulticurrency extends Controller
     {
         $json = [];
 
-        $input = file_get_contents("php://input");
-        $data = json_decode($input, true);
-
-        $license_key = isset($data["license_key"]) ? $data["license_key"] : "";
-        $public_key = isset($data["public_key"]) ? $data["public_key"] : "";
-
-        if (empty($license_key)) {
-            $json["valid"] = false;
-            $json["error"] = "License key is empty";
-            $this->response->addHeader("Content-Type: application/json");
-            $this->response->setOutput(json_encode($json));
-            return;
-        }
-
-        if (!file_exists(DIR_SYSTEM . "library/dockercart_license.php")) {
+        if (!is_file(DIR_SYSTEM . "library/dockercart/licensing.php")) {
             $json["valid"] = false;
             $json["error"] = "License library not found";
             $this->response->addHeader("Content-Type: application/json");
@@ -875,35 +824,16 @@ class ControllerExtensionModuleDockercartMulticurrency extends Controller
             return;
         }
 
-        require_once DIR_SYSTEM . "library/dockercart_license.php";
-
-        if (!class_exists("DockercartLicense")) {
-            $json["valid"] = false;
-            $json["error"] = "DockercartLicense class not found";
-            $this->response->addHeader("Content-Type: application/json");
-            $this->response->setOutput(json_encode($json));
-            return;
-        }
+        require_once DIR_SYSTEM . "library/dockercart/licensing.php";
 
         try {
-            $license = new DockercartLicense($this->registry);
+            $licensing = new DockercartLicensing($this->registry);
+            $valid = $licensing->check("dockercart_multicurrency");
 
-            if (!empty($public_key)) {
-                $result = $license->verifyWithPublicKey(
-                    $license_key,
-                    $public_key,
-                    "dockercart_multicurrency",
-                    true,
-                );
-            } else {
-                $result = $license->verify(
-                    $license_key,
-                    "dockercart_multicurrency",
-                    true,
-                );
+            $json["valid"] = $valid;
+            if (!$valid) {
+                $json["error"] = "License is not valid";
             }
-
-            $json = $result;
         } catch (Exception $e) {
             $json["valid"] = false;
             $json["error"] = "Error: " . $e->getMessage();

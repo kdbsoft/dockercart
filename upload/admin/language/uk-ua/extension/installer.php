@@ -21,7 +21,7 @@ $_['entry_overwrite']      = 'Файли, які будуть перезапис
 $_['entry_progress']       = 'Процес';
 
 // Help
-$_['help_upload']          = 'Розширення модифікатора або модуля має бути .ocmod.zip або .ocmod.xml';
+$_['help_upload']          = 'Доповнення модифікатора або модуля має бути .ocmod.zip або .ocmod.xml';
 
 // Error
 $_['error_permission']     = 'У вас недостатньо прав для внесення змін';

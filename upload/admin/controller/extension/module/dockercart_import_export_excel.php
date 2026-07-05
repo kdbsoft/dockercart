@@ -112,23 +112,14 @@ class ControllerExtensionModuleDockercartImportExportExcel extends Controller {
         $data['license_message'] = '';
 
         try {
-            if (file_exists(DIR_SYSTEM . 'library/dockercart_license.php')) {
-                require_once(DIR_SYSTEM . 'library/dockercart_license.php');
+            if (is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
+                require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
 
-                $license_key = (string)$data['module_dockercart_import_export_excel_license_key'];
-                $public_key = (string)$data['module_dockercart_import_export_excel_public_key'];
+                $licensing = new DockercartLicensing($this->registry);
+                $valid = $licensing->check('dockercart_import_export_excel');
 
-                if ($license_key !== '' && class_exists('DockercartLicense')) {
-                    $license = new DockercartLicense($this->registry);
-                    if ($public_key !== '') {
-                        $res = $license->verifyWithPublicKey($license_key, $public_key, 'dockercart_import_export_excel', true);
-                    } else {
-                        $res = $license->verify($license_key, 'dockercart_import_export_excel', true);
-                    }
-
-                    $data['license_valid'] = !empty($res['valid']);
-                    $data['license_message'] = isset($res['error']) ? (string)$res['error'] : '';
-                }
+                $data['license_valid'] = $valid;
+                $data['license_message'] = $valid ? '' : 'License is not valid';
             }
         } catch (Exception $e) {
             $data['license_valid'] = false;
@@ -562,21 +553,7 @@ class ControllerExtensionModuleDockercartImportExportExcel extends Controller {
     public function verifyLicenseAjax() {
         $json = array();
 
-        $input = file_get_contents('php://input');
-        $data = json_decode($input, true);
-
-        $license_key = isset($data['license_key']) ? (string)$data['license_key'] : '';
-        $public_key = isset($data['public_key']) ? (string)$data['public_key'] : '';
-
-        if ($license_key === '') {
-            $json['valid'] = false;
-            $json['error'] = 'License key is empty';
-            $this->response->addHeader('Content-Type: application/json');
-            $this->response->setOutput(json_encode($json));
-            return;
-        }
-
-        if (!file_exists(DIR_SYSTEM . 'library/dockercart_license.php')) {
+        if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
             $json['valid'] = false;
             $json['error'] = 'License library not found';
             $this->response->addHeader('Content-Type: application/json');
@@ -584,25 +561,16 @@ class ControllerExtensionModuleDockercartImportExportExcel extends Controller {
             return;
         }
 
-        require_once(DIR_SYSTEM . 'library/dockercart_license.php');
-
-        if (!class_exists('DockercartLicense')) {
-            $json['valid'] = false;
-            $json['error'] = 'DockercartLicense class not found';
-            $this->response->addHeader('Content-Type: application/json');
-            $this->response->setOutput(json_encode($json));
-            return;
-        }
+        require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
 
         try {
-            $license = new DockercartLicense($this->registry);
-            if ($public_key !== '') {
-                $result = $license->verifyWithPublicKey($license_key, $public_key, 'dockercart_import_export_excel', true);
-            } else {
-                $result = $license->verify($license_key, 'dockercart_import_export_excel', true);
-            }
+            $licensing = new DockercartLicensing($this->registry);
+            $valid = $licensing->check('dockercart_import_export_excel');
 
-            $json = $result;
+            $json['valid'] = $valid;
+            if (!$valid) {
+                $json['error'] = 'License is not valid';
+            }
         } catch (Exception $e) {
             $json['valid'] = false;
             $json['error'] = 'Error: ' . $e->getMessage();

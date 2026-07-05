@@ -284,21 +284,7 @@ class ControllerExtensionModuleDockercartImportYml extends Controller {
         $json = array();
         $this->load->language('extension/module/dockercart_import_yml');
 
-        $input = file_get_contents('php://input');
-        $data = json_decode($input, true);
-
-        $license_key = isset($data['license_key']) ? $data['license_key'] : '';
-        $public_key = isset($data['public_key']) ? $data['public_key'] : '';
-
-        if (empty($license_key)) {
-            $json['valid'] = false;
-            $json['error'] = $this->language->get('error_license_key_empty');
-            $this->response->addHeader('Content-Type: application/json');
-            $this->response->setOutput(json_encode($json));
-            return;
-        }
-
-        if (!file_exists(DIR_SYSTEM . 'library/dockercart_license.php')) {
+        if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
             $json['valid'] = false;
             $json['error'] = $this->language->get('error_license_library_not_found');
             $this->response->addHeader('Content-Type: application/json');
@@ -306,26 +292,16 @@ class ControllerExtensionModuleDockercartImportYml extends Controller {
             return;
         }
 
-        require_once(DIR_SYSTEM . 'library/dockercart_license.php');
-
-        if (!class_exists('DockercartLicense')) {
-            $json['valid'] = false;
-            $json['error'] = $this->language->get('error_license_class_not_found');
-            $this->response->addHeader('Content-Type: application/json');
-            $this->response->setOutput(json_encode($json));
-            return;
-        }
+        require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
 
         try {
-            $license = new DockercartLicense($this->registry);
+            $licensing = new DockercartLicensing($this->registry);
+            $valid = $licensing->check('dockercart_import_yml');
 
-            if (!empty($public_key)) {
-                $result = $license->verifyWithPublicKey($license_key, $public_key, 'dockercart_import_yml', true);
-            } else {
-                $result = $license->verify($license_key, 'dockercart_import_yml', true);
+            $json['valid'] = $valid;
+            if (!$valid) {
+                $json['error'] = $this->language->get('error_license_class_not_found');
             }
-
-            $json = $result;
         } catch (Exception $e) {
             $json['valid'] = false;
             $json['error'] = $this->language->get('error_prefix') . ': ' . $e->getMessage();
@@ -436,30 +412,20 @@ class ControllerExtensionModuleDockercartImportYml extends Controller {
     }
 
     private function validateLicense() {
-        $license_key = $this->config->get('module_dockercart_import_yml_license_key');
-
         $domain = $_SERVER['HTTP_HOST'] ?? '';
         if (strpos($domain, 'localhost') !== false || strpos($domain, '127.0.0.1') !== false || strpos($domain, '.local') !== false || strpos($domain, '.docker.localhost') !== false) {
             return true;
         }
 
-        if (empty($license_key)) {
+        if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
             return true;
         }
 
-        if (!file_exists(DIR_SYSTEM . 'library/dockercart_license.php')) {
-            return true;
-        }
-
-        require_once(DIR_SYSTEM . 'library/dockercart_license.php');
-
-        if (!class_exists('DockercartLicense')) {
-            return true;
-        }
+        require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
 
         try {
-            $license = new DockercartLicense($this->registry);
-            $license->verify($license_key, 'dockercart_import_yml');
+            $licensing = new DockercartLicensing($this->registry);
+            $licensing->check('dockercart_import_yml');
         } catch (Exception $e) {
             // silent fail in admin
         }

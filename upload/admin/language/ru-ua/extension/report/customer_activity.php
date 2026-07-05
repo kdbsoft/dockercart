@@ -29,11 +29,11 @@ $_['text_activity_return_account'] = '<a href="customer_id=%d">%s</a> оформ
 $_['text_activity_return_guest'] = '%s оформил возврат товара.';
 $_['text_activity_transaction'] = '<a href="customer_id=%d">%s</a> получил комиссию от нового <a href="order_id=%d">заказа</a> .';
 $_['text_edit'] = 'Редактировать отчет об активности клиентов';
-$_['text_extension'] = 'Расширения';
+$_['text_extension'] = 'Дополнения';
 $_['text_filter'] = 'Фильтр';
 $_['text_success'] = 'Успех: Вы успешно отредактировали отчет об активности клиентов!';
 // Subtitle
 
-$_['text_edit_subtitle'] = 'Настройте параметры и опции расширения';
+$_['text_edit_subtitle'] = 'Настройте параметры и опции дополнения';
 
 

@@ -36,85 +36,238 @@
       {% if item.status %}{% set enabled_images = enabled_images + 1 %}{% endif %}
     {% endfor %}
 
-    <div class="dc-ix-cards">
-      <div class="dc-ix-card">
-        <div class="dc-ix-card__k">{{ text_gallery_entries }}</div>
-        <div class="dc-ix-card__v">{{ total_images }}</div>
-      </div>
-      <div class="dc-ix-card">
-        <div class="dc-ix-card__k">{{ text_enabled }}</div>
-        <div class="dc-ix-card__v">{{ enabled_images }}</div>
-      </div>
-    </div>
+    <ul class="nav nav-tabs dcx-profile-tabs" id="gallery-tabs" role="tablist">
+      <li class="active"><a href="#gallery-tab-general" class="js-gallery-tab"
+          data-tab="gallery-tab-general"
+          data-title="{{ tab_general }}"
+          data-subtitle="{{ text_gallery_module_subtitle }}"
+          data-icon="fa-image">
+        <i class="fa fa-image"></i> {{ tab_general }}
+      </a></li>
+      <li><a href="#gallery-tab-about" class="js-gallery-tab"
+          data-tab="gallery-tab-about"
+          data-title="{{ tab_about }}"
+          data-subtitle="{{ tab_about_subtitle }}"
+          data-icon="fa-info-circle">
+        <i class="fa fa-info-circle"></i> {{ tab_about }}
+      </a></li>
+    </ul>
 
     <div class="dcx-shell">
       <div class="dcx-panel">
         <div class="dcx-panel-head">
-          <div class="dcx-panel-head__icon"><i class="fa fa-image"></i></div>
+          <div class="dcx-panel-head__icon">
+            <i id="gallery-tab-icon" class="fa fa-image"></i>
+          </div>
           <div>
-            <h3 class="dcx-panel-title">{{ heading_title }}</h3>
-            <div class="dcx-panel-subtitle">{{ text_gallery_module_subtitle }}</div>
+            <h3 class="dcx-panel-title" id="gallery-tab-title">{{ tab_general }}</h3>
+            <div class="dcx-panel-subtitle" id="gallery-tab-subtitle">{{ text_gallery_module_subtitle }}</div>
           </div>
         </div>
         <div class="dcx-panel-body">
           <form action="{{ action }}" method="post" id="form-module" class="form-horizontal dcx-form">
-            <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-              <h4>{{ text_edit }}</h4>
 
-              <div class="form-group">
-                <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
-                <div class="col-sm-10">
-                  <select name="module_dockercart_gallery_status" id="input-status" class="form-control">
-                    <option value="1" {% if module_dockercart_gallery_status %}selected{% endif %}>{{ text_enabled }}</option>
-                    <option value="0" {% if not module_dockercart_gallery_status %}selected{% endif %}>{{ text_disabled }}</option>
-                  </select>
+            <div id="gallery-tab-general" class="dcx-tab-pane active">
+
+              <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+                <h4>{{ text_edit }}</h4>
+
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
+                  <div class="col-sm-10">
+                    <select name="module_dockercart_gallery_status" id="input-status" class="form-control">
+                      <option value="1" {% if module_dockercart_gallery_status %}selected{% endif %}>{{ text_enabled }}</option>
+                      <option value="0" {% if not module_dockercart_gallery_status %}selected{% endif %}>{{ text_disabled }}</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-show-header">{{ entry_show_header }}</label>
+                  <div class="col-sm-10">
+                    <select name="module_dockercart_gallery_show_header" id="input-show-header" class="form-control">
+                      <option value="1" {% if module_dockercart_gallery_show_header %}selected{% endif %}>{{ text_enabled }}</option>
+                      <option value="0" {% if not module_dockercart_gallery_show_header %}selected{% endif %}>{{ text_disabled }}</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
-              <div class="form-group">
-                <label class="col-sm-2 control-label" for="input-show-header">{{ entry_show_header }}</label>
-                <div class="col-sm-10">
-                  <select name="module_dockercart_gallery_show_header" id="input-show-header" class="form-control">
-                    <option value="1" {% if module_dockercart_gallery_show_header %}selected{% endif %}>{{ text_enabled }}</option>
-                    <option value="0" {% if not module_dockercart_gallery_show_header %}selected{% endif %}>{{ text_disabled }}</option>
-                  </select>
+              <div class="dcx-section">
+                <div class="dc-ix-cards" style="margin-bottom:16px;">
+                  <div class="dc-ix-card">
+                    <div class="dc-ix-card__k">{{ text_gallery_entries }}</div>
+                    <div class="dc-ix-card__v">{{ total_images }}</div>
+                  </div>
+                  <div class="dc-ix-card">
+                    <div class="dc-ix-card__k">{{ text_enabled }}</div>
+                    <div class="dc-ix-card__v">{{ enabled_images }}</div>
+                  </div>
                 </div>
+
+                <div class="dcx-gallery-grid">
+                  {% for image in images %}
+                  <div class="dcx-gallery-card">
+                    <a href="{{ image.edit_link }}" class="dcx-gallery-card__thumb">
+                      <img src="{{ image.thumb }}" alt="" loading="lazy" />
+                    </a>
+                    <div class="dcx-gallery-card__body">
+                      <div class="dcx-gallery-card__meta">
+                        {% if image.status %}
+                        <span class="dc-ix-chip dc-ix-chip--ok">{{ text_enabled }}</span>
+                        {% else %}
+                        <span class="dc-ix-chip dc-ix-chip--off">{{ text_disabled }}</span>
+                        {% endif %}
+                        <span class="dcx-gallery-card__order">{{ column_sort_order }}: {{ image.sort_order }}</span>
+                      </div>
+                      <div class="dcx-gallery-card__actions">
+                        <a href="{{ image.edit_link }}" class="btn btn-warning btn-xs" title="{{ button_edit }}"><i class="fa fa-pencil"></i></a>
+                        <a href="{{ image.delete_link }}" class="btn btn-danger btn-xs" onclick="return confirm('{{ text_confirm_delete_image|e('js') }}');" title="{{ button_delete }}"><i class="fa fa-trash"></i></a>
+                      </div>
+                    </div>
+                  </div>
+                  {% else %}
+                  <div class="dcx-gallery-card dcx-gallery-card--empty">{{ text_no_results }}</div>
+                  {% endfor %}
+                </div>
+              </div>
+
+            </div>
+
+            <div id="gallery-tab-about" class="dcx-tab-pane">
+              <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+                <h4>{{ tab_about }}</h4>
+                <table class="table table-bordered dcx-table">
+                  <tr>
+                    <td style="width:200px;"><strong>{{ text_developer }}</strong></td>
+                    <td>{{ text_developer_name }}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>{{ text_contact }}</strong></td>
+                    <td><a href="mailto:support@dockercart.net">support@dockercart.net</a></td>
+                  </tr>
+                </table>
+              </div>
+
+              <div class="dcx-section">
+                <h4>{{ text_license_status }}</h4>
+                {% if license and license.license_key %}
+                <table class="table table-bordered dcx-table">
+                  <tr>
+                    <td style="width:200px;"><strong>{{ text_license_key_label }}</strong></td>
+                    <td><code>{{ license.license_key[:30] }}{% if license.license_key|length > 30 %}...{% endif %}</code></td>
+                  </tr>
+                  <tr>
+                    <td><strong>{{ text_status }}</strong></td>
+                    <td>
+                      {% if license.status == 'active' %}
+                      <span class="label label-success">Active</span>
+                      {% elseif license.status == 'grace' %}
+                      <span class="label label-warning">Grace</span>
+                      {% elseif license.status == 'revoked' %}
+                      <span class="label label-danger">Revoked</span>
+                      {% elseif license.status == 'expired' %}
+                      <span class="label label-danger">Expired</span>
+                      {% elseif license.status == 'invalid' %}
+                      <span class="label label-danger">Invalid</span>
+                      {% else %}
+                      <span class="label label-default">{{ license.status }}</span>
+                      {% endif %}
+                      {% if license.is_test %}<small class="text-muted"> (test)</small>{% endif %}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><strong>{{ text_license_domain }}</strong></td>
+                    <td>{{ license.domain }}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>{{ text_license_expires }}</strong></td>
+                    <td>{{ license.expires_at ? license.expires_at : 'Lifetime' }}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>{{ text_license_last_verified }}</strong></td>
+                    <td>{{ license.last_verified ? license.last_verified : '&mdash;' }}</td>
+                  </tr>
+                </table>
+
+                <div class="form-group">
+                  <label class="col-sm-2 control-label">{{ text_license_change_key }}</label>
+                  <div class="col-sm-6">
+                    <input type="text" id="license-key-input" class="form-control" placeholder="DCL-..." />
+                  </div>
+                  <div class="col-sm-2">
+                    <button type="button" id="activate-key-btn" class="btn btn-primary">{{ text_license_activate }}</button>
+                  </div>
+                </div>
+                {% else %}
+                <p class="text-muted" style="padding: 0 0 12px 0;">{{ text_license_no_license }}</p>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label">{{ text_license_key_label }}</label>
+                  <div class="col-sm-6">
+                    <input type="text" id="license-key-input" class="form-control" placeholder="DCL-..." />
+                  </div>
+                  <div class="col-sm-2">
+                    <button type="button" id="activate-key-btn" class="btn btn-success">{{ text_license_activate }}</button>
+                  </div>
+                </div>
+                {% endif %}
               </div>
             </div>
+
           </form>
-
-          <div class="dcx-section">
-            <h4>{{ text_gallery_entries }}</h4>
-            <div class="dcx-gallery-grid">
-              {% for image in images %}
-              <div class="dcx-gallery-card">
-                <a href="{{ image.edit_link }}" class="dcx-gallery-card__thumb">
-                  <img src="{{ image.thumb }}" alt="" loading="lazy" />
-                </a>
-                <div class="dcx-gallery-card__body">
-                  <div class="dcx-gallery-card__meta">
-                    {% if image.status %}
-                    <span class="dc-ix-chip dc-ix-chip--ok">{{ text_enabled }}</span>
-                    {% else %}
-                    <span class="dc-ix-chip dc-ix-chip--off">{{ text_disabled }}</span>
-                    {% endif %}
-                    <span class="dcx-gallery-card__order">{{ column_sort_order }}: {{ image.sort_order }}</span>
-                  </div>
-                  <div class="dcx-gallery-card__actions">
-                    <a href="{{ image.edit_link }}" class="btn btn-warning btn-xs" title="{{ button_edit }}"><i class="fa fa-pencil"></i></a>
-                    <a href="{{ image.delete_link }}" class="btn btn-danger btn-xs" onclick="return confirm('{{ text_confirm_delete_image|e('js') }}');" title="{{ button_delete }}"><i class="fa fa-trash"></i></a>
-                  </div>
-                </div>
-              </div>
-              {% else %}
-              <div class="dcx-gallery-card dcx-gallery-card--empty">{{ text_no_results }}</div>
-              {% endfor %}
-            </div>
-          </div>
-
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<script type="text/javascript"><!--
+function updateGalleryPanelHeader(tabLink) {
+  var $tab = $(tabLink);
+  var title = $tab.data('title') || '{{ tab_general|e("js") }}';
+  var subtitle = $tab.data('subtitle') || '';
+  var icon = String($tab.data('icon') || 'fa-image').replace(/[^a-z0-9\-]/gi, '');
+
+  $('#gallery-tab-title').text(title);
+  $('#gallery-tab-subtitle').text(subtitle);
+  $('#gallery-tab-icon').attr('class', 'fa ' + icon);
+}
+
+$(document).on('click', '.js-gallery-tab', function(e) {
+  e.preventDefault();
+  var tabId = $(this).data('tab');
+  if (!tabId) return;
+
+  $('#gallery-tabs > li').removeClass('active');
+  $(this).closest('li').addClass('active');
+
+  $('.dcx-tab-pane').removeClass('active');
+  $('#' + tabId).addClass('active');
+
+  updateGalleryPanelHeader(this);
+});
+
+updateGalleryPanelHeader($('#gallery-tabs > li.active a.js-gallery-tab'));
+
+$('#activate-key-btn').on('click', function() {
+  var key = $('#license-key-input').val().trim();
+
+  if (!key) {
+    alert('{{ text_license_key_label }} required');
+    return;
+  }
+
+  var $btn = $(this).prop('disabled', true);
+
+  $.post('{{ activate_key_url }}', { sku: 'dockercart_gallery', license_key: key }, function(resp) {
+    $btn.prop('disabled', false);
+    alert(resp.error || resp.message);
+    if (resp.success) location.reload();
+  }, 'json').fail(function() {
+    $btn.prop('disabled', false);
+    alert('Failed to activate');
+  });
+});
+//--></script>
+
 {{ footer }}
