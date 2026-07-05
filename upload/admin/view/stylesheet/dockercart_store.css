@@ -289,6 +289,20 @@
 	color: #333;
 }
 
+.store-modal-license {
+	margin-top: 16px;
+}
+
+.store-license-input-group {
+	display: flex;
+	gap: 8px;
+}
+
+.store-license-input-group .form-control,
+.store-license-input-group .btn {
+	height: 34px;
+}
+
 .store-modal-footer {
 	text-align: right;
 	padding: 16px 20px;

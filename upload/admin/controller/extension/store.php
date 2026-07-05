@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once DIR_SYSTEM . 'library/dockercart/install_helper.php';
+
 class ControllerExtensionStore extends Controller {
 	private function loadStore(): DockercartExtensionStore {
 		require_once DIR_SYSTEM . 'library/dockercart/extension_store.php';
@@ -13,6 +15,12 @@ class ControllerExtensionStore extends Controller {
 		$this->load->language('extension/store');
 		$this->document->setTitle($this->language->get('heading_title'));
 		$this->document->addStyle('view/stylesheet/dockercart_store.css');
+
+		if (!$this->user->hasPermission('access', 'extension/store')) {
+			$this->response->redirect($this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true));
+
+			return;
+		}
 
 		$data['user_token'] = $this->session->data['user_token'];
 		$data['breadcrumbs'] = array();
@@ -73,7 +81,7 @@ class ControllerExtensionStore extends Controller {
 		$data['categories_tree'] = $categories_tree;
 		$data['offers'] = $offers;
 		$data['selected_category'] = $selected_category;
-		$data['licenses'] = $this->getLicensesData();
+		$data['licenses'] = $this->getLicensesData($yml);
 
 		$data['detail_url'] = $this->url->link('extension/store/detail', 'user_token=' . $this->session->data['user_token'], true);
 		$data['refresh_url'] = $this->url->link('extension/store/refresh', 'user_token=' . $this->session->data['user_token'], true);
@@ -81,6 +89,7 @@ class ControllerExtensionStore extends Controller {
 		$data['update_url'] = $this->url->link('extension/store/update', 'user_token=' . $this->session->data['user_token'], true);
 		$data['activate_key_url'] = $this->url->link('extension/store/activateKey', 'user_token=' . $this->session->data['user_token'], true);
 		$data['set_license_key_url'] = $this->url->link('extension/store/setLicenseKey', 'user_token=' . $this->session->data['user_token'], true);
+		$data['uninstall_url'] = $this->url->link('extension/store/uninstall', 'user_token=' . $this->session->data['user_token'], true);
 		$data['base_url'] = $this->url->link('extension/store', 'user_token=' . $this->session->data['user_token'], true);
 
 		$data['total_offers'] = count($offers);
@@ -124,6 +133,13 @@ class ControllerExtensionStore extends Controller {
 			return;
 		}
 
+		if (!$this->user->hasPermission('access', 'extension/store')) {
+			$json['error'] = $this->language->get('error_permission');
+			$this->response->setOutput(json_encode($json));
+
+			return;
+		}
+
 		$sku = $this->request->get['sku'] ?? '';
 
 		if (empty($sku)) {
@@ -159,7 +175,7 @@ class ControllerExtensionStore extends Controller {
 						$code = (string) $param['code'];
 
 						if ($code === 'changelog') {
-							$yml_changelog = (string) $param;
+							$yml_changelog = strip_tags((string) $param, '<p><br><strong><em><b><i><u><ul><ol><li><a><code><pre><blockquote><h1><h2><h3><h4>');
 							continue;
 						}
 
@@ -180,11 +196,11 @@ class ControllerExtensionStore extends Controller {
 						$name = 'Extension #' . $sku;
 					}
 
-					$description = '';
+				$description = '';
 
-					if (isset($offer->description)) {
-						$description = (string) $offer->description;
-					}
+				if (isset($offer->description)) {
+					$description = strip_tags((string) $offer->description, '<p><br><strong><em><b><i><u><ul><ol><li><a><code><pre><blockquote><h1><h2><h3><h4><h5><h6><hr><table><thead><tbody><tr><th><td><span><div><img><figure><figcaption>');
+				}
 
 					$buy_url = '';
 
@@ -288,7 +304,8 @@ class ControllerExtensionStore extends Controller {
 				$json['error'] = 'Extension not found';
 			}
 		} catch (Exception $e) {
-			$json['error'] = $e->getMessage();
+			$this->log->write('Extension Store detail error: ' . $e->getMessage());
+			$json['error'] = $this->language->get('text_error_detail');
 		}
 
 		$this->response->setOutput(json_encode($json));
@@ -300,6 +317,13 @@ class ControllerExtensionStore extends Controller {
 
 		$json = array();
 
+		if ($this->request->server['REQUEST_METHOD'] !== 'POST') {
+			$json['error'] = 'Invalid request method';
+			$this->response->setOutput(json_encode($json));
+
+			return;
+		}
+
 		if (!$this->user->hasPermission('modify', 'extension/store')) {
 			$json['error'] = $this->language->get('error_permission');
 			$this->response->setOutput(json_encode($json));
@@ -307,7 +331,7 @@ class ControllerExtensionStore extends Controller {
 			return;
 		}
 
-		$sku = $this->request->post['sku'] ?? $this->request->get['sku'] ?? '';
+		$sku = $this->request->post['sku'] ?? '';
 
 		if (empty($sku)) {
 			$json['error'] = 'Missing SKU';
@@ -389,6 +413,10 @@ class ControllerExtensionStore extends Controller {
 
 			$code = 'dockercart_' . preg_replace('/^dockercart_/', '', $sku);
 
+			if (!preg_match('/^[a-zA-Z0-9_]+$/', $code)) {
+				throw new \Exception('Invalid extension code');
+			}
+
 			$token = token(10);
 			$tmp_file = DIR_UPLOAD . $token . '.tmp';
 
@@ -400,10 +428,27 @@ class ControllerExtensionStore extends Controller {
 
 			$extension_install_id = $this->model_setting_extension->addExtensionInstall($sku . '_' . $current_version['version'] . '.ocmod.zip');
 
-			$install_result = $this->runOcmodInstall($token, $extension_install_id);
+			try {
+				$install_result = $this->runOcmodInstall($token, $extension_install_id);
 
-			if (!empty($install_result['error'])) {
-				$json['error'] = $install_result['error'];
+				if (!empty($install_result['error'])) {
+					$this->model_setting_extension->deleteExtensionInstall($extension_install_id);
+					$json['error'] = $install_result['error'];
+					$this->response->setOutput(json_encode($json));
+
+					return;
+				}
+			} catch (\Throwable $e) {
+				$this->model_setting_extension->deleteExtensionInstall($extension_install_id);
+				throw $e;
+			}
+
+			$this->load->controller('marketplace/modification/refresh');
+
+			// Re-check installation status (TOCTOU guard)
+			if ($store->getInstalledMeta($sku)) {
+				$this->model_setting_extension->deleteExtensionInstall($extension_install_id);
+				$json['error'] = $this->language->get('error_already_installed');
 				$this->response->setOutput(json_encode($json));
 
 				return;
@@ -433,10 +478,14 @@ class ControllerExtensionStore extends Controller {
 			$licensing->setLicenseKey($code, $sku, $license_key);
 			$licensing->activate($code, $license_key);
 
+			$this->db->query("COMMIT");
+
 			$json['success'] = true;
 			$json['message'] = sprintf($this->language->get('text_install_success'), $current_version['version']);
 		} catch (Exception $e) {
-			$json['error'] = $e->getMessage();
+			$this->db->query("ROLLBACK");
+			$this->log->write('Extension Store install error: ' . $e->getMessage());
+			$json['error'] = $this->language->get('error_download_failed');
 		}
 
 		$this->response->setOutput(json_encode($json));
@@ -448,6 +497,13 @@ class ControllerExtensionStore extends Controller {
 
 		$json = array();
 
+		if ($this->request->server['REQUEST_METHOD'] !== 'POST') {
+			$json['error'] = 'Invalid request method';
+			$this->response->setOutput(json_encode($json));
+
+			return;
+		}
+
 		if (!$this->user->hasPermission('modify', 'extension/store')) {
 			$json['error'] = $this->language->get('error_permission');
 			$this->response->setOutput(json_encode($json));
@@ -455,7 +511,7 @@ class ControllerExtensionStore extends Controller {
 			return;
 		}
 
-		$sku = $this->request->post['sku'] ?? $this->request->get['sku'] ?? '';
+		$sku = $this->request->post['sku'] ?? '';
 
 		if (empty($sku)) {
 			$json['error'] = 'Missing SKU';
@@ -467,11 +523,14 @@ class ControllerExtensionStore extends Controller {
 		$license_key = $this->request->post['license_key'] ?? '';
 
 		try {
+			$this->db->query("START TRANSACTION");
+
 			$store = $this->loadStore();
 
 			$meta = $store->getInstalledMeta($sku);
 
 			if (!$meta) {
+				$this->db->query("ROLLBACK");
 				$json['error'] = $this->language->get('error_not_installed');
 				$this->response->setOutput(json_encode($json));
 
@@ -522,6 +581,16 @@ class ControllerExtensionStore extends Controller {
 				$licensing = new DockercartLicensing($this->registry);
 				$license = $licensing->getLicense($meta['code']);
 				$license_key = $license['license_key'] ?? '';
+
+				if (!empty($license_key)) {
+					$validation = $licensing->validate($meta['code']);
+					if (empty($validation['valid'])) {
+						$json['error'] = $this->language->get('error_license_expired');
+						$this->response->setOutput(json_encode($json));
+
+						return;
+					}
+				}
 			}
 
 			if (empty($license_key)) {
@@ -558,14 +627,22 @@ class ControllerExtensionStore extends Controller {
 
 			$extension_install_id = $this->model_setting_extension->addExtensionInstall($sku . '_' . $current_version['version'] . '_update.ocmod.zip');
 
-			$install_result = $this->runOcmodInstall($token, $extension_install_id);
+			try {
+				$install_result = $this->runOcmodInstall($token, $extension_install_id);
 
-			if (!empty($install_result['error'])) {
-				$json['error'] = $install_result['error'];
-				$this->response->setOutput(json_encode($json));
+				if (!empty($install_result['error'])) {
+					$this->model_setting_extension->deleteExtensionInstall($extension_install_id);
+					$json['error'] = $install_result['error'];
+					$this->response->setOutput(json_encode($json));
 
-				return;
+					return;
+				}
+			} catch (\Throwable $e) {
+				$this->model_setting_extension->deleteExtensionInstall($extension_install_id);
+				throw $e;
 			}
+
+			$this->load->controller('marketplace/modification/refresh');
 
 			$code = $meta['code'];
 			$from_version = $meta['installed_version'];
@@ -578,11 +655,179 @@ class ControllerExtensionStore extends Controller {
 
 			$store->updateInstalledMetaVersion($code, $current_version['version']);
 
+			$this->db->query("COMMIT");
+
 			$json['success'] = true;
 			$json['message'] = sprintf($this->language->get('text_update_success'), $from_version, $current_version['version']);
 			$json['new_version'] = $current_version['version'];
 		} catch (Exception $e) {
-			$json['error'] = $e->getMessage();
+			$this->db->query("ROLLBACK");
+			$this->log->write('Extension Store update error: ' . $e->getMessage());
+			$json['error'] = $this->language->get('error_download_failed');
+		}
+
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function uninstall() {
+		$this->load->language('extension/store');
+		$this->response->addHeader('Content-Type: application/json');
+
+		$json = array();
+
+		if ($this->request->server['REQUEST_METHOD'] !== 'POST') {
+			$json['error'] = 'Invalid request method';
+			$this->response->setOutput(json_encode($json));
+
+			return;
+		}
+
+		if (!$this->user->hasPermission('modify', 'extension/store')) {
+			$json['error'] = $this->language->get('error_permission');
+			$this->response->setOutput(json_encode($json));
+
+			return;
+		}
+
+		$sku = $this->request->post['sku'] ?? '';
+
+		if (empty($sku)) {
+			$json['error'] = 'Missing SKU';
+			$this->response->setOutput(json_encode($json));
+
+			return;
+		}
+
+		try {
+			$this->db->query("START TRANSACTION");
+
+			$store = $this->loadStore();
+
+			$meta = $store->getInstalledMeta($sku);
+
+			if (!$meta) {
+				$json['error'] = $this->language->get('error_not_installed');
+				$this->response->setOutput(json_encode($json));
+
+				return;
+			}
+
+			$code = $meta['code'];
+
+			$this->load->model('setting/extension');
+			$this->load->model('setting/module');
+
+			$extension_install_id = $meta['extension_install_id'];
+
+			// Call module uninstall script
+			$this->load->controller('extension/module/' . $code . '/uninstall');
+
+			// Remove files
+			if ($extension_install_id) {
+				$paths = $this->model_setting_extension->getExtensionPathsByExtensionInstallId($extension_install_id);
+
+				DockercartInstallHelper::syncGitExclude(array_column($paths, 'path'), 'remove');
+
+				rsort($paths);
+
+				foreach ($paths as $result) {
+					$source = '';
+
+					if (substr($result['path'], 0, 5) == 'admin') {
+						$source = DIR_APPLICATION . substr($result['path'], 6);
+					} elseif (substr($result['path'], 0, 7) == 'catalog') {
+						$source = DIR_CATALOG . substr($result['path'], 8);
+					} elseif (substr($result['path'], 0, 5) == 'image') {
+						$source = DIR_IMAGE . substr($result['path'], 6);
+					} elseif (substr($result['path'], 0, 6) == 'system') {
+						$source = DIR_SYSTEM . substr($result['path'], 7);
+					}
+
+					if ($source) {
+						if (is_file($source)) {
+							if (!unlink($source)) {
+								$this->log->write('Extension Store uninstall: failed to unlink ' . $source);
+							}
+						} elseif (is_dir($source)) {
+							$files = array();
+							$path = array($source);
+
+							while (count($path) != 0) {
+								$next = array_shift($path);
+
+								foreach (array_diff(scandir($next), array('.', '..')) as $file) {
+									$file = $next . '/' . $file;
+
+									if (is_dir($file)) {
+										$path[] = $file;
+									}
+
+									$files[] = $file;
+								}
+							}
+
+							rsort($files);
+
+							foreach ($files as $file) {
+								if (is_file($file)) {
+									if (!unlink($file)) {
+										$this->log->write('Extension Store uninstall: failed to unlink ' . $file);
+									}
+								} elseif (is_dir($file) && DockercartInstallHelper::isDirEmpty($file)) {
+									if (!rmdir($file)) {
+										$this->log->write('Extension Store uninstall: failed to rmdir ' . $file);
+									}
+								}
+							}
+
+							if (DockercartInstallHelper::isDirEmpty($source)) {
+								if (!rmdir($source)) {
+									$this->log->write('Extension Store uninstall: failed to rmdir ' . $source);
+								}
+							}
+						}
+					}
+
+					$this->model_setting_extension->deleteExtensionPath($result['extension_path_id']);
+				}
+
+				// Remove modification
+				$this->load->model('setting/modification');
+				$this->model_setting_modification->deleteModificationsByExtensionInstallId($extension_install_id);
+
+				// Remove install record
+				$this->model_setting_extension->deleteExtensionInstall($extension_install_id);
+			}
+
+			// Uninstall extension
+			$this->model_setting_extension->uninstall('module', $code);
+			$this->model_setting_module->deleteModulesByCode($code);
+
+			// Remove permissions
+			$this->load->model('user/user_group');
+			$this->model_user_user_group->removePermissions('extension/module/' . $code);
+
+			// Remove meta
+			$store->removeInstalledMeta($code);
+
+			// Remove license
+			if (is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
+				require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
+				$licensing = new DockercartLicensing($this->registry);
+				$licensing->removeLicense($code);
+			}
+
+			// Refresh modifications
+			$this->load->controller('marketplace/modification/refresh');
+
+			$this->db->query("COMMIT");
+
+			$json['success'] = true;
+			$json['message'] = $this->language->get('text_uninstall_success');
+		} catch (Exception $e) {
+			$this->db->query("ROLLBACK");
+			$this->log->write('Extension Store uninstall error: ' . $e->getMessage());
+			$json['error'] = $this->language->get('text_error');
 		}
 
 		$this->response->setOutput(json_encode($json));
@@ -593,6 +838,13 @@ class ControllerExtensionStore extends Controller {
 		$this->response->addHeader('Content-Type: application/json');
 
 		$json = array();
+
+		if ($this->request->server['REQUEST_METHOD'] !== 'POST') {
+			$json['error'] = 'Invalid request method';
+			$this->response->setOutput(json_encode($json));
+
+			return;
+		}
 
 		if (!$this->user->hasPermission('modify', 'extension/store')) {
 			$json['error'] = $this->language->get('error_permission');
@@ -611,6 +863,20 @@ class ControllerExtensionStore extends Controller {
 			return;
 		}
 
+		if (!preg_match('/^[a-zA-Z0-9_\-]+$/', $sku)) {
+			$json['error'] = 'Invalid SKU format';
+			$this->response->setOutput(json_encode($json));
+
+			return;
+		}
+
+		if (strlen($license_key) < 10 || strlen($license_key) > 255) {
+			$json['error'] = 'Invalid license key format';
+			$this->response->setOutput(json_encode($json));
+
+			return;
+		}
+
 		if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
 			$json['error'] = 'Licensing library not found';
 			$this->response->setOutput(json_encode($json));
@@ -621,6 +887,17 @@ class ControllerExtensionStore extends Controller {
 		require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
 
 		$code = 'dockercart_' . preg_replace('/^dockercart_/', '', $sku);
+
+		// Check if this key is already used by another module
+		$licensing = new DockercartLicensing($this->registry);
+		$existing_key = $licensing->getLicenseByKey($license_key);
+
+		if ($existing_key && $existing_key['module_code'] !== $code) {
+			$json['error'] = 'This license key is already assigned to another module';
+			$this->response->setOutput(json_encode($json));
+
+			return;
+		}
 		$licensing = new DockercartLicensing($this->registry);
 		$licensing->setLicenseKey($code, $sku, $license_key);
 
@@ -645,6 +922,13 @@ class ControllerExtensionStore extends Controller {
 
 		$json = array();
 
+		if ($this->request->server['REQUEST_METHOD'] !== 'POST') {
+			$json['error'] = 'Invalid request method';
+			$this->response->setOutput(json_encode($json));
+
+			return;
+		}
+
 		if (!$this->user->hasPermission('modify', 'extension/store')) {
 			$json['error'] = $this->language->get('error_permission');
 			$this->response->setOutput(json_encode($json));
@@ -657,6 +941,20 @@ class ControllerExtensionStore extends Controller {
 
 		if (empty($module_code) || empty($license_key)) {
 			$json['error'] = 'Module code and license key are required';
+			$this->response->setOutput(json_encode($json));
+
+			return;
+		}
+
+		if (!preg_match('/^[a-zA-Z0-9_]+$/', $module_code)) {
+			$json['error'] = 'Invalid module code format';
+			$this->response->setOutput(json_encode($json));
+
+			return;
+		}
+
+		if (strlen($license_key) < 10 || strlen($license_key) > 255) {
+			$json['error'] = 'Invalid license key format';
 			$this->response->setOutput(json_encode($json));
 
 			return;
@@ -708,7 +1006,7 @@ class ControllerExtensionStore extends Controller {
 		$this->response->redirect($this->url->link('extension/store', 'user_token=' . $this->session->data['user_token'], true));
 	}
 
-	private function getLicensesData(): array {
+	private function getLicensesData($yml = null): array {
 		if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
 			return array();
 		}
@@ -716,7 +1014,87 @@ class ControllerExtensionStore extends Controller {
 		require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
 		$licensing = new DockercartLicensing($this->registry);
 
-		return $licensing->getAllLicenses();
+		$licenses = $licensing->getAllLicenses();
+
+		$name_map = array();
+		$version_map = array();
+
+		if ($yml !== null) {
+			foreach ($yml->shop->offers->offer as $offer) {
+				$sku = (string)$offer['id'];
+				$name = (string)$offer->name;
+
+				if (empty($name)) {
+					$name = (string)$offer->model;
+				}
+
+				if (!empty($sku) && !empty($name)) {
+					$name_map[$sku] = $name;
+				}
+
+				if (!empty($sku)) {
+					$yml_version = '';
+					foreach ($offer->param as $param) {
+						if ((string)$param['code'] === 'version') {
+							$yml_version = (string)$param;
+							break;
+						}
+					}
+					if ($yml_version !== '') {
+						$version_map[$sku] = $yml_version;
+					}
+				}
+			}
+		}
+
+		foreach ($licenses as &$license) {
+			$license['is_installed'] = false;
+			$license['installed_version'] = null;
+			$license['latest_version'] = null;
+			$license['update_available'] = false;
+
+			if (!empty($license['sku']) && isset($name_map[$license['sku']])) {
+				$license['ext_name'] = $name_map[$license['sku']];
+				$license['ext_sku'] = $license['sku'];
+			}
+
+			if (!empty($license['sku'])) {
+				$meta = $this->db->query(
+					"SELECT `name`, `sku`, `installed_version` FROM `" . DB_PREFIX . "dockercart_extension_meta`
+					 WHERE `sku` = '" . $this->db->escape($license['sku']) . "'
+					 LIMIT 1"
+				);
+				if ($meta->num_rows) {
+					$license['is_installed'] = true;
+					$license['installed_version'] = $meta->row['installed_version'];
+
+					if (empty($license['ext_name'])) {
+						$license['ext_name'] = $meta->row['name'];
+						$license['ext_sku'] = $meta->row['sku'];
+					}
+				}
+
+				if (isset($version_map[$license['sku']])) {
+					$license['latest_version'] = $version_map[$license['sku']];
+				}
+			}
+
+			if ($license['installed_version'] && $license['latest_version']) {
+				if (version_compare($license['latest_version'], $license['installed_version'], '>')) {
+					$license['update_available'] = true;
+				}
+			}
+
+			if (empty($license['ext_name'])) {
+				$license['ext_name'] = $license['module_code'];
+			}
+			if (empty($license['ext_sku'])) {
+				$license['ext_sku'] = $license['sku'] ?: $license['module_code'];
+			}
+		}
+		unset($license);
+
+		return $licenses;
 	}
 
 	private function downloadFile(string $url) {
@@ -725,14 +1103,20 @@ class ControllerExtensionStore extends Controller {
 		curl_setopt($ch, CURLOPT_TIMEOUT, 300);
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 		curl_setopt($ch, CURLOPT_ENCODING, '');
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
 
 		$parsed = parse_url($url);
-		$gateway_ip = @gethostbyname('host.docker.internal');
+		$expected_host = parse_url(DockercartExtensionStore::STORE_DOMAIN, PHP_URL_HOST);
 
-		if ($gateway_ip !== 'host.docker.internal') {
-			curl_setopt($ch, CURLOPT_RESOLVE, array(
-				$parsed['host'] . ':' . ($parsed['port'] ?? 443) . ':' . $gateway_ip
-			));
+		if ($parsed['host'] === $expected_host) {
+			$gateway_ip = @gethostbyname('host.docker.internal');
+
+			if ($gateway_ip !== 'host.docker.internal') {
+				curl_setopt($ch, CURLOPT_RESOLVE, array(
+					$parsed['host'] . ':' . ($parsed['port'] ?? 443) . ':' . $gateway_ip
+				));
+			}
 		}
 
 		$response = curl_exec($ch);
@@ -770,6 +1154,10 @@ class ControllerExtensionStore extends Controller {
 
 		if (is_dir($upload_dir)) {
 			$this->moveFiles($upload_dir, $extension_install_id);
+
+			$this->load->model('setting/extension');
+			$paths = $this->model_setting_extension->getExtensionPathsByExtensionInstallId($extension_install_id);
+			DockercartInstallHelper::syncGitExclude(array_column($paths, 'path'), 'add');
 		}
 
 		$install_xml = $tmp_dir . '/install.xml';
@@ -819,21 +1207,29 @@ class ControllerExtensionStore extends Controller {
 				mkdir($dest_dir, 0755, true);
 			}
 
-			rename($item->getPathname(), $dest);
+			if (!copy($item->getPathname(), $dest)) {
+				continue;
+			}
 
-			$this->model_setting_extension->addExtensionPath($extension_install_id, $dest);
+			unlink($item->getPathname());
+
+			$this->model_setting_extension->addExtensionPath($extension_install_id, $prefix . '/' . $sub_path);
 		}
 	}
 
 	private function resolveDestination(string $prefix, string $sub_path): ?string {
 		$allowed = [
-			'admin' => '/var/www/html/admin/',
-			'catalog' => '/var/www/html/catalog/',
-			'image' => '/var/www/html/image/',
-			'system' => '/var/www/html/system/',
+			'admin' => DIR_APPLICATION,
+			'catalog' => DIR_CATALOG,
+			'image' => DIR_IMAGE,
+			'system' => DIR_SYSTEM,
 		];
 
 		if (!isset($allowed[$prefix])) {
+			return null;
+		}
+
+		if (preg_match('#(?:^|/)\.\.(?:/|$)#', $sub_path)) {
 			return null;
 		}
 
@@ -844,7 +1240,9 @@ class ControllerExtensionStore extends Controller {
 		$this->load->model('setting/modification');
 
 		$xml = new \DOMDocument();
-		$xml->load($xml_path);
+		$old = libxml_disable_entity_loader(true);
+		$xml->load($xml_path, LIBXML_NONET);
+		libxml_disable_entity_loader($old);
 
 		$code = '';
 		$name = '';
@@ -912,4 +1310,5 @@ class ControllerExtensionStore extends Controller {
 
 		rmdir($dir);
 	}
+
 }

@@ -79,17 +79,17 @@ class DockercartExtensionStore {
 			throw new RuntimeException('Failed to fetch YML catalog. HTTP ' . $http_code);
 		}
 
-		if (!is_dir($this->cache_dir)) {
-			mkdir($this->cache_dir, 0755, true);
-		}
-
-		file_put_contents($cache_file, $response);
-
 		$xml = simplexml_load_string($response);
 
 		if ($xml === false) {
 			throw new RuntimeException('Failed to parse YML catalog XML');
 		}
+
+		if (!is_dir($this->cache_dir)) {
+			mkdir($this->cache_dir, 0750, true);
+		}
+
+		file_put_contents($cache_file, $response);
 
 		return $xml;
 	}
@@ -99,7 +99,7 @@ class DockercartExtensionStore {
 			return;
 		}
 
-		$files = glob($this->cache_dir . 'yml_*.xml');
+		$files = glob($this->cache_dir . '{yml_*.xml,licensed_*.json}', GLOB_BRACE);
 
 		if ($files === false) {
 			return;
@@ -359,6 +359,7 @@ class DockercartExtensionStore {
 		$ch = curl_init($url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, ['Accept: application/json']);
 
 		$parsed = parse_url($url);
@@ -403,6 +404,7 @@ class DockercartExtensionStore {
 		$ch = curl_init($url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json'));
 
 		$parsed = parse_url($url);
@@ -450,6 +452,7 @@ class DockercartExtensionStore {
 		$ch = curl_init($url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, ['Accept: application/json']);
 
 		$parsed = parse_url($url);
@@ -602,7 +605,7 @@ class DockercartExtensionStore {
 			if ($changelog !== '') {
 				$html .= '<div class="store-changelog-version">';
 				$html .= '<strong>v' . htmlspecialchars($v, ENT_QUOTES, 'UTF-8') . '</strong>';
-				$html .= '<div class="store-changelog-content">' . $changelog . '</div>';
+				$html .= '<div class="store-changelog-content">' . htmlspecialchars($changelog, ENT_QUOTES, 'UTF-8') . '</div>';
 				$html .= '</div>';
 			}
 		}
