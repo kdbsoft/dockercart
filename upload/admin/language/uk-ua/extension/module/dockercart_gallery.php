@@ -23,19 +23,6 @@ $_['text_gallery_module_subtitle'] = 'Фотогалерея з розкладк
 $_['text_gallery_form_subtitle']   = 'Додати або змінити зображення галереї';
 $_['tab_general']                  = 'Основне';
 $_['text_show_header']             = 'Показувати посилання у шапці';
-$_['tab_about']                    = 'Про модуль';
-$_['tab_about_subtitle']           = 'Версія та інформація про ліцензію';
-$_['text_developer']               = 'Розробник';
-$_['text_developer_name']          = 'DockerCart';
-$_['text_contact']                 = 'Контакти';
-$_['text_license_status']          = 'Статус ліцензії';
-$_['text_license_key_label']       = 'Ліцензійний ключ';
-$_['text_license_domain']          = 'Домен';
-$_['text_license_expires']         = 'Закінчується';
-$_['text_license_last_verified']   = 'Остання перевірка';
-$_['text_license_activate']        = 'Активувати';
-$_['text_license_no_license']      = 'Ліцензію не активовано. Введіть ключ нижче.';
-$_['text_license_change_key']      = 'Змінити ключ';
 
 // Entry
 $_['entry_status']                 = 'Статус модуля';

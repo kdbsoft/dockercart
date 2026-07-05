@@ -417,7 +417,16 @@ class ControllerExtensionStore extends Controller {
 
 			$this->load->controller('extension/module/' . $code . '/install');
 
-			$store->setInstalledMeta($code, $sku, $current_version['version'], 'store', $extension_install_id);
+			$module_info = $store->getModuleInfo($sku);
+
+			$store->setInstalledMeta(
+				$code, $sku, $current_version['version'], 'store', $extension_install_id,
+				name:        $module_info['name'] ?? null,
+				author:      $module_info['author'] ?? null,
+				author_email: $module_info['authorEmail'] ?? null,
+				license_type: $module_info['licenseType'] ?? null,
+				link:        $module_info['link'] ?? null
+			);
 
 			$this->load->library('dockercart/licensing');
 			$licensing = new DockercartLicensing($this->registry);

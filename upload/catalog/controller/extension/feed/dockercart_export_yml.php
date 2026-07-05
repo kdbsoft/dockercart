@@ -59,25 +59,7 @@ class ControllerExtensionFeedDockercartExportYml extends Controller {
             $this->config->set('module_dockercart_export_yml_public_key', $module_settings['module_dockercart_export_yml_public_key']);
         }
 
-        // License check (skip if admin request)
-        $license_from_admin = isset($this->request->get['admin_request']) && $this->request->get['admin_request'] == '1';
-
-        if (!$license_from_admin) {
-            if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
-                $this->sendErrorXML('Licensing library not found');
-                return;
-            }
-
-            require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
-            $licensing = new DockercartLicensing($this->registry);
-
-            if (!$licensing->check('dockercart_export_yml')) {
-                $this->sendErrorXML('License check failed');
-                return;
-            }
-        }
-
-        // Get profile
+		// Get profile
         $profile = $this->model_extension_feed_dockercart_export_yml->getProfile($profile_id);
         if (!$profile || !$profile['status']) {
             $this->sendErrorXML('Profile not found or disabled');

@@ -29,12 +29,7 @@ class ControllerExtensionModuleDockercartMulticurrency extends Controller {
             return;
         }
         
-        // Проверка лицензии - модуль не работает без валидной лицензии
-        if (!$this->checkLicense()) {
-            return;
-        }
-        
-        if (!empty($output) && isset($output['product_id'])) {
+		if (!empty($output) && isset($output['product_id'])) {
             $this->convertProductPrice($output);
         }
     }
@@ -47,12 +42,7 @@ class ControllerExtensionModuleDockercartMulticurrency extends Controller {
             return;
         }
         
-        // Проверка лицензии - модуль не работает без валидной лицензии
-        if (!$this->checkLicense()) {
-            return;
-        }
-        
-        if (!empty($output) && is_array($output)) {
+		if (!empty($output) && is_array($output)) {
             foreach ($output as &$product) {
                 if (isset($product['product_id'])) {
                     $this->convertProductPrice($product);
@@ -137,22 +127,4 @@ class ControllerExtensionModuleDockercartMulticurrency extends Controller {
         }
     }
     
-    /**
-     * Проверка лицензии (блокирует работу модуля если нет валидной лицензии)
-     */
-    private function checkLicense() {
-        if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
-            return false;
-        }
-
-        require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
-
-        try {
-            $licensing = new DockercartLicensing($this->registry);
-
-            return $licensing->check('dockercart_multicurrency');
-        } catch (Exception $e) {
-            return false;
-        }
-    }
 }

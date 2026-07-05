@@ -6,8 +6,6 @@ class ControllerExtensionModuleDockercartImportYml extends Controller {
         $this->load->language('extension/module/dockercart_import_yml');
         $this->document->setTitle($this->language->get('heading_title'));
 
-        $this->validateLicense();
-
         $this->load->model('setting/setting');
         $this->load->model('extension/module/dockercart_import_yml');
 
@@ -43,7 +41,6 @@ class ControllerExtensionModuleDockercartImportYml extends Controller {
         $data['ajax_get_profile'] = $this->url->link('extension/module/dockercart_import_yml/getProfileAjax', 'user_token=' . $this->session->data['user_token'], true);
         $data['ajax_delete_profile'] = $this->url->link('extension/module/dockercart_import_yml/deleteProfileAjax', 'user_token=' . $this->session->data['user_token'], true);
         $data['ajax_run_profile'] = $this->url->link('extension/module/dockercart_import_yml/runProfileAjax', 'user_token=' . $this->session->data['user_token'], true);
-        $data['ajax_verify_license'] = $this->url->link('extension/module/dockercart_import_yml/verifyLicenseAjax', 'user_token=' . $this->session->data['user_token'], true);
 
         if (isset($this->request->post['module_dockercart_import_yml_status'])) {
             $data['module_dockercart_import_yml_status'] = (int)$this->request->post['module_dockercart_import_yml_status'];
@@ -99,6 +96,9 @@ class ControllerExtensionModuleDockercartImportYml extends Controller {
             'daily'        => $this->language->get('text_daily'),
             'custom'       => $this->language->get('text_custom'),
         );
+
+        $data['ajax_verify_license'] = '';
+        $data['button_verify_license'] = $this->language->get('button_verify_license');
 
         $data['header'] = $this->load->controller('common/header');
         $data['column_left'] = $this->load->controller('common/column_left');
@@ -280,37 +280,6 @@ class ControllerExtensionModuleDockercartImportYml extends Controller {
         $this->response->setOutput(json_encode($json));
     }
 
-    public function verifyLicenseAjax() {
-        $json = array();
-        $this->load->language('extension/module/dockercart_import_yml');
-
-        if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
-            $json['valid'] = false;
-            $json['error'] = $this->language->get('error_license_library_not_found');
-            $this->response->addHeader('Content-Type: application/json');
-            $this->response->setOutput(json_encode($json));
-            return;
-        }
-
-        require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
-
-        try {
-            $licensing = new DockercartLicensing($this->registry);
-            $valid = $licensing->check('dockercart_import_yml');
-
-            $json['valid'] = $valid;
-            if (!$valid) {
-                $json['error'] = $this->language->get('error_license_class_not_found');
-            }
-        } catch (Exception $e) {
-            $json['valid'] = false;
-            $json['error'] = $this->language->get('error_prefix') . ': ' . $e->getMessage();
-        }
-
-        $this->response->addHeader('Content-Type: application/json');
-        $this->response->setOutput(json_encode($json));
-    }
-
 	public function install() {
 		$this->load->model('extension/module/dockercart_import_yml');
 		$this->load->model('setting/setting');
@@ -409,27 +378,5 @@ class ControllerExtensionModuleDockercartImportYml extends Controller {
         }
 
         return !$this->error;
-    }
-
-    private function validateLicense() {
-        $domain = $_SERVER['HTTP_HOST'] ?? '';
-        if (strpos($domain, 'localhost') !== false || strpos($domain, '127.0.0.1') !== false || strpos($domain, '.local') !== false || strpos($domain, '.docker.localhost') !== false) {
-            return true;
-        }
-
-        if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
-            return true;
-        }
-
-        require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
-
-        try {
-            $licensing = new DockercartLicensing($this->registry);
-            $licensing->check('dockercart_import_yml');
-        } catch (Exception $e) {
-            // silent fail in admin
-        }
-
-        return true;
     }
 }

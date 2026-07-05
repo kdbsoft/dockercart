@@ -141,8 +141,7 @@ class ControllerExtensionFeedDockercartGooglebase extends Controller {
             'module_dockercart_googlebase_separate_languages' => 0,
             'module_dockercart_googlebase_separate_stores' => 0,
             'module_dockercart_googlebase_debug' => 0,
-            'module_dockercart_googlebase_license_key' => '',
-            'module_dockercart_googlebase_public_key' => ''
+
         );
 
         foreach ($settings as $key => $default) {
@@ -218,13 +217,6 @@ class ControllerExtensionFeedDockercartGooglebase extends Controller {
         $data['feed_stats'] = $this->getFeedStats();
 
         $data['user_token'] = $this->session->data['user_token'];
-        $data['license_domain'] =
-            (!empty($this->request->server['HTTP_HOST']) ? $this->request->server['HTTP_HOST'] : '')
-            ?: (defined('HTTPS_CATALOG') && HTTPS_CATALOG ? parse_url(HTTPS_CATALOG, PHP_URL_HOST) : '')
-            ?: (defined('HTTP_CATALOG') && HTTP_CATALOG ? parse_url(HTTP_CATALOG, PHP_URL_HOST) : '')
-            ?: (!empty($this->config->get('config_url')) ? parse_url($this->config->get('config_url'), PHP_URL_HOST) : '')
-            ?: 'localhost';
-
         $data['header'] = $this->load->controller('common/header');
         $data['column_left'] = $this->load->controller('common/column_left');
         $data['footer'] = $this->load->controller('common/footer');
@@ -477,78 +469,6 @@ class ControllerExtensionFeedDockercartGooglebase extends Controller {
             }
 
             $json['products'] = $preview_items;
-        }
-
-        $this->response->addHeader('Content-Type: application/json');
-        $this->response->setOutput(json_encode($json));
-    }
-
-    /**
-     * Verify license (AJAX)
-     */
-    public function verifyLicenseAjax() {
-        $json = array();
-
-        if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
-            $json['valid'] = false;
-            $json['error'] = 'License library not found';
-            $this->response->addHeader('Content-Type: application/json');
-            $this->response->setOutput(json_encode($json));
-            return;
-        }
-
-        require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
-
-        try {
-            $licensing = new DockercartLicensing($this->registry);
-            $valid = $licensing->check('dockercart_googlebase');
-
-            $json['valid'] = $valid;
-            if (!$valid) {
-                $json['error'] = 'License is not valid';
-            }
-        } catch (Exception $e) {
-            $json['valid'] = false;
-            $json['error'] = 'Error: ' . $e->getMessage();
-        }
-
-        $this->response->addHeader('Content-Type: application/json');
-        $this->response->setOutput(json_encode($json));
-    }
-
-    /**
-     * Save license key (AJAX)
-     */
-    public function saveLicenseKeyAjax() {
-        $json = array();
-
-        $input = file_get_contents('php://input');
-        $data = json_decode($input, true);
-
-        $license_key = isset($data['license_key']) ? $data['license_key'] : '';
-        $public_key = isset($data['public_key']) ? $data['public_key'] : '';
-
-        if (!$this->user->hasPermission('modify', 'extension/feed/dockercart_googlebase')) {
-            $json['success'] = false;
-            $json['error'] = 'No permission';
-            $this->response->addHeader('Content-Type: application/json');
-            $this->response->setOutput(json_encode($json));
-            return;
-        }
-
-        try {
-            $this->load->model('setting/setting');
-
-            $this->model_setting_setting->editSettingValue('module_dockercart_googlebase', 'module_dockercart_googlebase_license_key', $license_key);
-
-            if (!empty($public_key)) {
-                $this->model_setting_setting->editSettingValue('module_dockercart_googlebase', 'module_dockercart_googlebase_public_key', $public_key);
-            }
-
-            $json['success'] = true;
-        } catch (Exception $e) {
-            $json['success'] = false;
-            $json['error'] = $e->getMessage();
         }
 
         $this->response->addHeader('Content-Type: application/json');

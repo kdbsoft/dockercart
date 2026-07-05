@@ -25,9 +25,6 @@ class ControllerExtensionModuleDockercartRedirects extends Controller {
         $this->load->model('extension/module/dockercart_redirects');
         $this->load->model('setting/setting');
 
-        // Non-blocking admin license validation (logs warnings)
-        $this->validateLicense();
-
         // Save module settings (status/debug)
         if ($this->request->server['REQUEST_METHOD'] == 'POST') {
                 if (!$this->user->hasPermission('modify', 'extension/module/dockercart_redirects')) {
@@ -174,6 +171,8 @@ class ControllerExtensionModuleDockercartRedirects extends Controller {
         } else {
             $data['warning'] = '';
         }
+
+        $data['button_verify_license'] = $this->language->get('button_verify_license');
 
         $data['header'] = $this->load->controller('common/header');
         $data['column_left'] = $this->load->controller('common/column_left');
@@ -901,78 +900,4 @@ class ControllerExtensionModuleDockercartRedirects extends Controller {
         }
     }
 
-    /**
-     * Write to log file
-     */
-    /**
-     * Validate license in admin context (non-blocking; logs warnings)
-     */
-    private function validateLicense() {
-        $domain = $_SERVER['HTTP_HOST'] ?? '';
-        if (strpos($domain, 'localhost') !== false || strpos($domain, '127.0.0.1') !== false || strpos($domain, '.local') !== false) {
-            return true;
-        }
-
-        if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
-            return true;
-        }
-
-        require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
-
-        try {
-            $licensing = new DockercartLicensing($this->registry);
-            if (!$licensing->check('dockercart_redirects')) {
-                $this->logger->info('WARNING: License validation failed in admin');
-            }
-        } catch (Exception $e) {
-            $this->logger->info('ERROR: License verification exception: ' . $e->getMessage());
-        }
-
-        return true;
-    }
-
-    /**
-     * AJAX license verification endpoint
-     */
-    public function verifyLicenseAjax() {
-        $json = array();
-
-        $this->logger->info('AJAX: verifyLicenseAjax() called');
-
-        if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
-            $json['valid'] = false;
-            $json['error'] = 'License library not found';
-            $this->logger->info('AJAX: License library not found');
-            $this->response->addHeader('Content-Type: application/json');
-            $this->response->setOutput(json_encode($json));
-            return;
-        }
-
-        require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
-
-        try {
-            $licensing = new DockercartLicensing($this->registry);
-            $valid = $licensing->check('dockercart_redirects');
-
-            $json['valid'] = $valid;
-            if (!$valid) {
-                $json['error'] = 'License is not valid';
-            }
-
-            $this->logger->info('AJAX: Verification result: ' . json_encode($json));
-
-            if ($valid) {
-                $this->logger->info('AJAX: License verified successfully');
-            } else {
-                $this->logger->info('AJAX: License verification failed');
-            }
-        } catch (Exception $e) {
-            $json['valid'] = false;
-            $json['error'] = 'Error: ' . $e->getMessage();
-            $this->logger->info('AJAX: Exception during verification - ' . $e->getMessage());
-        }
-
-        $this->response->addHeader('Content-Type: application/json');
-        $this->response->setOutput(json_encode($json));
-    }
 }

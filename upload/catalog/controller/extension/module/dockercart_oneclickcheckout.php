@@ -21,13 +21,8 @@ class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
             return;
         }
 
-        // Check license
-        if (!$this->checkLicense()) {
-            return;
-        }
-
-        // Load language
-        $this->load->language('extension/module/dockercart_oneclickcheckout');
+		// Load language
+		$this->load->language('extension/module/dockercart_oneclickcheckout');
 
         // Get button text from settings or use default
         $button_text_array = $this->config->get('module_dockercart_oneclickcheckout_button_text');
@@ -98,10 +93,6 @@ class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
      */
     public function getModalHtml() {
         if (!$this->config->get('module_dockercart_oneclickcheckout_status')) {
-            return '';
-        }
-
-        if (!$this->checkLicense()) {
             return '';
         }
 
@@ -288,16 +279,8 @@ class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
             return;
         }
 
-        // Check license
-        if (!$this->checkLicense()) {
-            $json['error'] = $this->language->get('error_license_invalid');
-            $this->response->addHeader('Content-Type: application/json');
-            $this->response->setOutput(json_encode($json));
-            return;
-        }
-
-        // Validate required fields
-        $fields = ['firstname', 'lastname', 'telephone', 'email', 'comment', 'address', 'city', 'postcode', 'country'];
+		// Validate required fields
+		$fields = ['firstname', 'lastname', 'telephone', 'email', 'comment', 'address', 'city', 'postcode', 'country'];
 
         foreach ($fields as $field) {
             $required_key = 'module_dockercart_oneclickcheckout_field_' . $field . '_required';
@@ -571,16 +554,8 @@ class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
             return;
         }
 
-        // Check license
-        if (!$this->checkLicense()) {
-            $json['error'] = $this->language->get('error_license_invalid');
-            $this->response->addHeader('Content-Type: application/json');
-            $this->response->setOutput(json_encode($json));
-            return;
-        }
-
-        // Validate cart has products
-        if (!$this->cart->hasProducts()) {
+		// Validate cart has products
+		if (!$this->cart->hasProducts()) {
             $json['error']['cart'] = $this->language->get('error_product');
             $this->response->addHeader('Content-Type: application/json');
             $this->response->setOutput(json_encode($json));
@@ -1003,22 +978,4 @@ class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
         return (bool)preg_match($pattern, $telephone);
     }
 
-    /**
-     * Проверка лицензии (блокирует работу модуля если нет валидной лицензии)
-     */
-    private function checkLicense() {
-        if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
-            return false;
-        }
-
-        require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
-
-        try {
-            $licensing = new DockercartLicensing($this->registry);
-
-            return $licensing->check('dockercart_oneclickcheckout');
-        } catch (Exception $e) {
-            return false;
-        }
-    }
 }

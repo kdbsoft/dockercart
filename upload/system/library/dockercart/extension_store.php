@@ -12,6 +12,8 @@ class DockercartExtensionStore {
 	private $cache_dir;
 	private $api_url;
 
+	private $module_info_cache = array();
+
 	public function __construct($registry) {
 		$this->registry = $registry;
 		$this->cache_dir = DIR_STORAGE . 'dockercart/extension_store/';
@@ -391,20 +393,24 @@ class DockercartExtensionStore {
 		return $body['data'];
 	}
 
-	public function getModuleVersions(string $sku): array {
+	public function getModuleInfo(string $sku): ?array {
+		if (isset($this->module_info_cache[$sku])) {
+			return $this->module_info_cache[$sku];
+		}
+
 		$url = $this->api_url . '/api/v1/modules/' . urlencode($sku);
 
 		$ch = curl_init($url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_TIMEOUT, 15);
-		curl_setopt($ch, CURLOPT_HTTPHEADER, ['Accept: application/json']);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json'));
 
 		$parsed = parse_url($url);
 		$gateway_ip = @gethostbyname('host.docker.internal');
 
 		if ($gateway_ip !== 'host.docker.internal') {
 			curl_setopt($ch, CURLOPT_RESOLVE, array(
-				$parsed['host'] . ':' . ($parsed['port'] ?? 80) . ':' . $gateway_ip
+				$parsed['host'] . ':' . ($parsed['port'] ?? 80) . ':' . $gateway_ip,
 			));
 		}
 
@@ -413,16 +419,24 @@ class DockercartExtensionStore {
 		curl_close($ch);
 
 		if ($http_code !== 200 || $response === false) {
-			return array();
+			return null;
 		}
 
 		$body = json_decode($response, true);
 
 		if (!is_array($body) || empty($body['success']) || !isset($body['data'])) {
-			return array();
+			return null;
 		}
 
-		return $body['data']['versions'] ?? array();
+		$this->module_info_cache[$sku] = $body['data'];
+
+		return $body['data'];
+	}
+
+	public function getModuleVersions(string $sku): array {
+		$data = $this->getModuleInfo($sku);
+
+		return $data['versions'] ?? array();
 	}
 
 	public function getDownloadUrl(string $sku, string $version_id, string $license_key): ?array {
@@ -486,8 +500,43 @@ class DockercartExtensionStore {
 		return $result->num_rows ? $result->row : null;
 	}
 
-	public function setInstalledMeta(string $code, string $sku, string $version, string $source = 'store', ?int $extension_install_id = null): void {
+	public function setInstalledMeta(
+		string $code,
+		string $sku,
+		string $version,
+		string $source = 'store',
+		?int $extension_install_id = null,
+		?string $name = null,
+		?string $author = null,
+		?string $author_email = null,
+		?string $license_type = null,
+		?string $link = null
+	): void {
 		$db = $this->registry->get('db');
+
+		$column_sql = '';
+		$update_sql = '';
+
+		if ($name !== null) {
+			$column_sql .= "`name` = '" . $db->escape($name) . "', ";
+			$update_sql .= "`name` = VALUES(`name`), ";
+		}
+		if ($author !== null) {
+			$column_sql .= "`author` = '" . $db->escape($author) . "', ";
+			$update_sql .= "`author` = VALUES(`author`), ";
+		}
+		if ($author_email !== null) {
+			$column_sql .= "`author_email` = '" . $db->escape($author_email) . "', ";
+			$update_sql .= "`author_email` = VALUES(`author_email`), ";
+		}
+		if ($license_type !== null) {
+			$column_sql .= "`license_type` = '" . $db->escape($license_type) . "', ";
+			$update_sql .= "`license_type` = VALUES(`license_type`), ";
+		}
+		if ($link !== null) {
+			$column_sql .= "`link` = '" . $db->escape($link) . "', ";
+			$update_sql .= "`link` = VALUES(`link`), ";
+		}
 
 		$db->query(
 			"INSERT INTO `" . DB_PREFIX . "dockercart_extension_meta`
@@ -497,12 +546,14 @@ class DockercartExtensionStore {
 			     `source` = '" . $db->escape($source) . "',
 			     `extension_type` = 'module',
 			     `extension_install_id` = " . ($extension_install_id !== null ? (int)$extension_install_id : 'NULL') . ",
+			     " . $column_sql . "
 			     `date_added` = NOW(),
 			     `date_modified` = NOW()
 			 ON DUPLICATE KEY UPDATE
 			     `installed_version` = VALUES(`installed_version`),
 			     `sku` = VALUES(`sku`),
 			     `extension_install_id` = VALUES(`extension_install_id`),
+			     " . $update_sql . "
 			     `date_modified` = NOW()"
 		);
 	}
