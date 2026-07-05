@@ -102,6 +102,7 @@ const PRESET_INTERVALS = [
 	'hourly'    => 60,
 	'every_6h'  => 360,
 	'every_12h' => 720,
+	'every_3d'  => 4320,
 ];
 
 /**

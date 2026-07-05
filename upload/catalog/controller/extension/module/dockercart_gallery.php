@@ -7,6 +7,17 @@ class ControllerExtensionModuleDockercartGallery extends Controller {
 			$this->response->redirect($this->url->link('common/home'));
 		}
 
+		if (is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
+			require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
+			$licensing = new DockercartLicensing($this->registry);
+
+			if (!$licensing->check('dockercart_gallery')) {
+				$this->response->redirect($this->url->link('common/home'));
+
+				return;
+			}
+		}
+
 		$this->load->language('extension/module/dockercart_gallery');
 		$this->load->model('extension/module/dockercart_gallery');
 		$this->load->model('tool/image');
@@ -70,11 +81,22 @@ class ControllerExtensionModuleDockercartGallery extends Controller {
 	}
 
 	public function loadmore() {
+		$this->response->addHeader('Content-Type: application/json');
+
+		if (is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
+			require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
+			$licensing = new DockercartLicensing($this->registry);
+
+			if (!$licensing->check('dockercart_gallery')) {
+				$this->response->setOutput(json_encode(array('html' => '', 'count' => 0, 'total' => 0)));
+
+				return;
+			}
+		}
+
 		$this->load->language('extension/module/dockercart_gallery');
 		$this->load->model('extension/module/dockercart_gallery');
 		$this->load->model('tool/image');
-
-		$this->response->addHeader('Content-Type: application/json');
 
 		$page = isset($this->request->get['page']) ? (int)$this->request->get['page'] : 2;
 		if ($page < 2) {
@@ -113,6 +135,15 @@ class ControllerExtensionModuleDockercartGallery extends Controller {
 			return;
 		}
 
+		if (is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
+			require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
+			$licensing = new DockercartLicensing($this->registry);
+
+			if (!$licensing->check('dockercart_gallery')) {
+				return;
+			}
+		}
+
 		$this->load->language('extension/module/dockercart_gallery');
 
 		if (!isset($data['informations']) || !is_array($data['informations'])) {
@@ -132,6 +163,15 @@ class ControllerExtensionModuleDockercartGallery extends Controller {
 
 		if (!(int)$this->config->get('module_dockercart_gallery_show_header')) {
 			return;
+		}
+
+		if (is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
+			require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
+			$licensing = new DockercartLicensing($this->registry);
+
+			if (!$licensing->check('dockercart_gallery')) {
+				return;
+			}
 		}
 
 		$this->load->language('extension/module/dockercart_gallery');

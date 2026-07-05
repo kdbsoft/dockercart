@@ -74,31 +74,16 @@ class ControllerExtensionModuleDockercartImportYml extends Controller {
     }
 
     private function checkLicense() {
-        $license_key = $this->config->get('module_dockercart_import_yml_license_key');
-
-        $domain = $_SERVER['HTTP_HOST'] ?? '';
-        if (strpos($domain, 'localhost') !== false || strpos($domain, '127.0.0.1') !== false || strpos($domain, '.local') !== false || strpos($domain, '.docker.localhost') !== false) {
-            return true;
-        }
-
-        if (empty($license_key)) {
+        if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
             return false;
         }
 
-        if (!file_exists(DIR_SYSTEM . 'library/dockercart_license.php')) {
-            return false;
-        }
-
-        require_once(DIR_SYSTEM . 'library/dockercart_license.php');
-
-        if (!class_exists('DockercartLicense')) {
-            return false;
-        }
+        require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
 
         try {
-            $license = new DockercartLicense($this->registry);
-            $result = $license->verify($license_key, 'dockercart_import_yml');
-            return !empty($result['valid']);
+            $licensing = new DockercartLicensing($this->registry);
+
+            return $licensing->check('dockercart_import_yml');
         } catch (Exception $e) {
             return false;
         }

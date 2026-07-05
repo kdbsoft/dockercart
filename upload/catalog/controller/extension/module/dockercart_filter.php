@@ -349,39 +349,21 @@ class ControllerExtensionModuleDockercartFilter extends Controller
             return "";
         }
 
-        $license_key = $this->config->get(
-            "module_dockercart_filter_license_key",
-        );
-        if (!empty($license_key)) {
-            if (!file_exists(DIR_SYSTEM . "library/dockercart_license.php")) {
-                $this->logger->debug(
-                    "ERROR: License library not found at " .
-                        DIR_SYSTEM .
-                        "library/dockercart_license.php",
-                );
-                return "";
-            }
-
-            require_once DIR_SYSTEM . "library/dockercart_license.php";
-            if (class_exists("DockercartLicense")) {
-                $license = new DockercartLicense($this->registry);
-                $result = $license->verify($license_key, "dockercart_filter");
-
-                if (!$result["valid"]) {
-                    $this->logger->debug(
-                        "ERROR: Invalid license - " .
-                            (isset($result["error"])
-                                ? $result["error"]
-                                : "Unknown error"),
-                    );
-                    return "";
-                }
-
-                $this->logger->debug(
-                    "LICENSE: Valid license verified for dockercart_filter",
-                );
-            }
+        if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
+            $this->logger->debug('ERROR: Licensing library not found');
+            return '';
         }
+
+        require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
+
+        $licensing = new DockercartLicensing($this->registry);
+
+        if (!$licensing->check('dockercart_filter')) {
+            $this->logger->debug('ERROR: License check failed for dockercart_filter');
+            return '';
+        }
+
+        $this->logger->debug('LICENSE: Valid license verified for dockercart_filter');
 
         $this->load->language("extension/module/dockercart_filter");
         $this->load->model("extension/module/dockercart_filter");

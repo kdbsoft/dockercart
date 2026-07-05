@@ -13,7 +13,7 @@ class ModelToolDockercartScheduler extends Model {
 			"SELECT `task_id`, `task_type`, `task_name`, `source_id`,
 			        `cron_enabled`, `cron_schedule`, `last_run`, `status`
 			 FROM `" . DB_PREFIX . "dockercart_scheduler_task`
-			 WHERE `status` = 1
+			 WHERE `status` = 1 AND `is_system` = 0
 			 ORDER BY `task_type` ASC, `task_name` ASC"
 		);
 

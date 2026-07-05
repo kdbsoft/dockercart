@@ -30,53 +30,26 @@ class ControllerExtensionModuleDockercartRedirects extends Controller {
             return;
         }
 
-        // Runtime license enforcement:
-        // - On local development (localhost/127.0.0.1/::1) redirects are allowed without a license.
-        // - On any other host, a license key must be configured and validated. If missing or invalid,
-        //   redirects are disabled to prevent unlicensed use on production systems.
-        $license_key = trim((string)$this->config->get('module_dockercart_redirects_license_key'));
-        $domain = $_SERVER['HTTP_HOST'] ?? ($_SERVER['SERVER_NAME'] ?? '');
-        $is_local = false;
-        if ($domain !== '') {
-            $lower = strtolower($domain);
-            if (strpos($lower, 'localhost') !== false || strpos($lower, '127.0.0.1') !== false || strpos($lower, '::1') !== false || strpos($lower, '.local') !== false) {
-                $is_local = true;
-            }
+        // Runtime license enforcement via licensing server
+        if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
+            $this->logger->info('ERROR: Licensing library not found');
+            return;
         }
 
-        if (!$is_local) {
-            // On non-local hosts require a license key to be present
-            if (empty($license_key)) {
-                $this->logger->info('ERROR: License key not configured; redirects disabled on production host (' . $domain . ')');
+        require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
+
+        try {
+            $licensing = new DockercartLicensing($this->registry);
+
+            if (!$licensing->check('dockercart_redirects')) {
+                $this->logger->info('ERROR: License check failed for dockercart_redirects');
                 return;
             }
 
-            if (!file_exists(DIR_SYSTEM . 'library/dockercart_license.php')) {
-                $this->logger->info('ERROR: License library not found at ' . DIR_SYSTEM . 'library/dockercart_license.php');
-                return;
-            }
-
-            require_once(DIR_SYSTEM . 'library/dockercart_license.php');
-
-            if (class_exists('DockercartLicense')) {
-                try {
-                    $license = new DockercartLicense($this->registry);
-                    $result = $license->verify($license_key, 'dockercart_redirects');
-
-                    if (empty($result) || !$result['valid']) {
-                        $this->logger->info('ERROR: Invalid or missing license - ' . (isset($result['error']) ? $result['error'] : 'No verification result'));
-                        return;
-                    }
-
-                    $this->logger->info('LICENSE: Valid license verified for dockercart_redirects');
-                } catch (Exception $e) {
-                    $this->logger->info('ERROR: Exception during license verification - ' . $e->getMessage());
-                    return;
-                }
-            } else {
-                $this->logger->info('ERROR: DockercartLicense class not found after including license library');
-                return;
-            }
+            $this->logger->info('LICENSE: Valid license verified for dockercart_redirects');
+        } catch (Exception $e) {
+            $this->logger->info('ERROR: Exception during license verification - ' . $e->getMessage());
+            return;
         }
 
         if ($this->registry->get('dockercart_redirects_checked')) {
@@ -101,47 +74,23 @@ class ControllerExtensionModuleDockercartRedirects extends Controller {
     }
 
     public function handle404() {
-        // Enforce license for 404 handling as well (same rules as checkRedirect)
-        $license_key = trim((string)$this->config->get('module_dockercart_redirects_license_key'));
-        $domain = $_SERVER['HTTP_HOST'] ?? ($_SERVER['SERVER_NAME'] ?? '');
-        $is_local = false;
-        if ($domain !== '') {
-            $lower = strtolower($domain);
-            if (strpos($lower, 'localhost') !== false || strpos($lower, '127.0.0.1') !== false || strpos($lower, '::1') !== false || strpos($lower, '.local') !== false) {
-                $is_local = true;
-            }
+        if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
+            $this->logger->info('ERROR: Licensing library not found (404 handler)');
+            return;
         }
 
-        if (!$is_local) {
-            if (empty($license_key)) {
-                $this->logger->info('ERROR: License key not configured; 404 redirect handling disabled on production host (' . $domain . ')');
+        require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
+
+        try {
+            $licensing = new DockercartLicensing($this->registry);
+
+            if (!$licensing->check('dockercart_redirects')) {
+                $this->logger->info('ERROR: License check failed during 404 handling');
                 return;
             }
-
-            if (!file_exists(DIR_SYSTEM . 'library/dockercart_license.php')) {
-                $this->logger->info('ERROR: License library not found at ' . DIR_SYSTEM . 'library/dockercart_license.php');
-                return;
-            }
-
-            require_once(DIR_SYSTEM . 'library/dockercart_license.php');
-
-            if (class_exists('DockercartLicense')) {
-                try {
-                    $license = new DockercartLicense($this->registry);
-                    $result = $license->verify($license_key, 'dockercart_redirects');
-
-                    if (empty($result) || !$result['valid']) {
-                        $this->logger->info('ERROR: Invalid or missing license during 404 handling - ' . (isset($result['error']) ? $result['error'] : 'No verification result'));
-                        return;
-                    }
-                } catch (Exception $e) {
-                    $this->logger->info('ERROR: Exception during license verification (404 handler) - ' . $e->getMessage());
-                    return;
-                }
-            } else {
-                $this->logger->info('ERROR: DockercartLicense class not found after including license library (404 handler)');
-                return;
-            }
+        } catch (Exception $e) {
+            $this->logger->info('ERROR: Exception during license verification (404 handler) - ' . $e->getMessage());
+            return;
         }
 
         $this->load->model('extension/module/dockercart_redirects');

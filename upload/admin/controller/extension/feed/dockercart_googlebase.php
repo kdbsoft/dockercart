@@ -489,21 +489,7 @@ class ControllerExtensionFeedDockercartGooglebase extends Controller {
     public function verifyLicenseAjax() {
         $json = array();
 
-        $input = file_get_contents('php://input');
-        $data = json_decode($input, true);
-
-        $license_key = isset($data['license_key']) ? $data['license_key'] : '';
-        $public_key = isset($data['public_key']) ? $data['public_key'] : '';
-
-        if (empty($license_key)) {
-            $json['valid'] = false;
-            $json['error'] = 'License key is empty';
-            $this->response->addHeader('Content-Type: application/json');
-            $this->response->setOutput(json_encode($json));
-            return;
-        }
-
-        if (!file_exists(DIR_SYSTEM . 'library/dockercart_license.php')) {
+        if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
             $json['valid'] = false;
             $json['error'] = 'License library not found';
             $this->response->addHeader('Content-Type: application/json');
@@ -511,26 +497,16 @@ class ControllerExtensionFeedDockercartGooglebase extends Controller {
             return;
         }
 
-        require_once(DIR_SYSTEM . 'library/dockercart_license.php');
-
-        if (!class_exists('DockercartLicense')) {
-            $json['valid'] = false;
-            $json['error'] = 'DockercartLicense class not found';
-            $this->response->addHeader('Content-Type: application/json');
-            $this->response->setOutput(json_encode($json));
-            return;
-        }
+        require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
 
         try {
-            $license = new DockercartLicense($this->registry);
+            $licensing = new DockercartLicensing($this->registry);
+            $valid = $licensing->check('dockercart_googlebase');
 
-            if (!empty($public_key)) {
-                $result = $license->verifyWithPublicKey($license_key, $public_key, 'dockercart_googlebase', true);
-            } else {
-                $result = $license->verify($license_key, 'dockercart_googlebase', true);
+            $json['valid'] = $valid;
+            if (!$valid) {
+                $json['error'] = 'License is not valid';
             }
-
-            $json = $result;
         } catch (Exception $e) {
             $json['valid'] = false;
             $json['error'] = 'Error: ' . $e->getMessage();

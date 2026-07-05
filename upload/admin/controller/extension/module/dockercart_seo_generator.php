@@ -1244,10 +1244,6 @@ class ControllerExtensionModuleDockercartSeoGenerator extends Controller
      */
     private function checkLicenseForGeneration()
     {
-        $license_key = $this->config->get(
-            "module_dockercart_seo_generator_license_key",
-        );
-
         // Allow localhost/127.0.0.1 (including with port) without license
         $domain = $_SERVER["HTTP_HOST"] ?? "";
         // Strip port from domain for checking
@@ -1262,42 +1258,23 @@ class ControllerExtensionModuleDockercartSeoGenerator extends Controller
             return true;
         }
 
-        // Block if license is empty
-        if (empty($license_key)) {
-            $this->logger->info("Generation blocked: License key is empty");
-            return false;
-        }
-
         // If license library doesn't exist, allow (backwards compatibility)
-        if (!file_exists(DIR_SYSTEM . "library/dockercart_license.php")) {
+        if (!is_file(DIR_SYSTEM . "library/dockercart/licensing.php")) {
             $this->logger->info(
                 "Generation allowed: License library not found (backwards compatibility)",
             );
             return true;
         }
 
-        require_once DIR_SYSTEM . "library/dockercart_license.php";
-
-        if (!class_exists("DockercartLicense")) {
-            $this->logger->info(
-                "Generation allowed: DockercartLicense class not found",
-            );
-            return true;
-        }
+        require_once DIR_SYSTEM . "library/dockercart/licensing.php";
 
         try {
-            $license = new DockercartLicense($this->registry);
-            $result = $license->verify(
-                $license_key,
-                "dockercart_seo_generator",
-            );
+            $licensing = new DockercartLicensing($this->registry);
+            $valid = $licensing->check("dockercart_seo_generator");
 
-            if (!$result["valid"]) {
+            if (!$valid) {
                 $this->logger->info(
-                    "Generation blocked: License validation failed - " .
-                        (isset($result["error"])
-                            ? $result["error"]
-                            : "Unknown error"),
+                    "Generation blocked: License validation failed",
                 );
                 return false;
             }
@@ -1320,10 +1297,6 @@ class ControllerExtensionModuleDockercartSeoGenerator extends Controller
      */
     private function validateLicense()
     {
-        $license_key = $this->config->get(
-            "module_dockercart_seo_generator_license_key",
-        );
-
         $domain = $_SERVER["HTTP_HOST"] ?? "";
         if (
             strpos($domain, "localhost") !== false ||
@@ -1332,35 +1305,17 @@ class ControllerExtensionModuleDockercartSeoGenerator extends Controller
             return true;
         }
 
-        if (empty($license_key)) {
+        if (!is_file(DIR_SYSTEM . "library/dockercart/licensing.php")) {
             return true;
         }
 
-        if (!file_exists(DIR_SYSTEM . "library/dockercart_license.php")) {
-            return true;
-        }
-
-        require_once DIR_SYSTEM . "library/dockercart_license.php";
-
-        if (!class_exists("DockercartLicense")) {
-            return true;
-        }
+        require_once DIR_SYSTEM . "library/dockercart/licensing.php";
 
         try {
-            $license = new DockercartLicense($this->registry);
-            $result = $license->verify(
-                $license_key,
-                "dockercart_seo_generator",
-            );
-
-            if (!$result["valid"]) {
-                $error_msg = $this->language->get("error_license_invalid");
-                if (isset($result["error"])) {
-                    $error_msg .= ": " . $result["error"];
-                }
+            $licensing = new DockercartLicensing($this->registry);
+            if (!$licensing->check("dockercart_seo_generator")) {
                 $this->logger->info(
-                    "WARNING: License validation failed in admin: " .
-                        $error_msg,
+                    "WARNING: License validation failed in admin",
                 );
             }
         } catch (Exception $e) {
@@ -1379,27 +1334,11 @@ class ControllerExtensionModuleDockercartSeoGenerator extends Controller
     {
         $json = [];
 
-        $input = file_get_contents("php://input");
-        $data = json_decode($input, true);
-
-        $license_key = isset($data["license_key"]) ? $data["license_key"] : "";
-        $public_key = isset($data["public_key"]) ? $data["public_key"] : "";
-
         $this->logger->info(
-            "AJAX: verifyLicenseAjax() called with key: " .
-                substr($license_key, 0, 20) .
-                "...",
+            "AJAX: verifyLicenseAjax() called",
         );
 
-        if (empty($license_key)) {
-            $json["valid"] = false;
-            $json["error"] = "License key is empty";
-            $this->response->addHeader("Content-Type: application/json");
-            $this->response->setOutput(json_encode($json));
-            return;
-        }
-
-        if (!file_exists(DIR_SYSTEM . "library/dockercart_license.php")) {
+        if (!is_file(DIR_SYSTEM . "library/dockercart/licensing.php")) {
             $json["valid"] = false;
             $json["error"] = "License library not found";
             $this->logger->info("AJAX: License library not found");
@@ -1408,55 +1347,26 @@ class ControllerExtensionModuleDockercartSeoGenerator extends Controller
             return;
         }
 
-        require_once DIR_SYSTEM . "library/dockercart_license.php";
-
-        if (!class_exists("DockercartLicense")) {
-            $json["valid"] = false;
-            $json["error"] = "DockercartLicense class not found";
-            $this->logger->info("AJAX: DockercartLicense class not found");
-            $this->response->addHeader("Content-Type: application/json");
-            $this->response->setOutput(json_encode($json));
-            return;
-        }
+        require_once DIR_SYSTEM . "library/dockercart/licensing.php";
 
         try {
-            $license = new DockercartLicense($this->registry);
+            $licensing = new DockercartLicensing($this->registry);
+            $valid = $licensing->check("dockercart_seo_generator");
 
-            if (!empty($public_key)) {
-                $this->logger->info(
-                    "AJAX: Using provided public key for verification",
-                );
-                $result = $license->verifyWithPublicKey(
-                    $license_key,
-                    $public_key,
-                    "dockercart_seo_generator",
-                    true,
-                );
-            } else {
-                $this->logger->info(
-                    "AJAX: Using saved public key from database",
-                );
-                $result = $license->verify(
-                    $license_key,
-                    "dockercart_seo_generator",
-                    true,
-                );
+            $json["valid"] = $valid;
+            if (!$valid) {
+                $json["error"] = "License is not valid";
             }
 
             $this->logger->info(
-                "AJAX: Verification result: " . json_encode($result),
+                "AJAX: Verification result: " . json_encode($json),
             );
 
-            $json = $result;
-
-            if ($result["valid"]) {
+            if ($valid) {
                 $this->logger->info("AJAX: License verified successfully");
             } else {
                 $this->logger->info(
-                    "AJAX: License verification failed - " .
-                        (isset($result["error"])
-                            ? $result["error"]
-                            : "Unknown error"),
+                    "AJAX: License verification failed",
                 );
             }
         } catch (Exception $e) {

@@ -187,62 +187,42 @@ class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
      */
     public function verifyLicense() {
         $this->load->language('extension/module/dockercart_oneclickcheckout');
-        
+
         $json = array();
-        
+
         if (!$this->user->hasPermission('modify', 'extension/module/dockercart_oneclickcheckout')) {
             $json['error'] = $this->language->get('error_permission');
         } else {
-            $input = file_get_contents('php://input');
-            $data = json_decode($input, true);
-            
-            $license_key = isset($data['license_key']) ? $data['license_key'] : '';
-            $public_key = isset($data['public_key']) ? $data['public_key'] : '';
-            
-            if (empty($license_key)) {
-                $json['valid'] = false;
-                $json['error'] = $this->language->get('error_license_invalid');
+            // Check if it's localhost/dev
+            $domain = $_SERVER['HTTP_HOST'] ?? '';
+            if (strpos($domain, 'localhost') !== false || strpos($domain, '127.0.0.1') !== false || strpos($domain, '.local') !== false || strpos($domain, '.docker.localhost') !== false) {
+                $json['valid'] = true;
+                $json['message'] = $this->language->get('success_license_valid') . ' (Development Environment)';
             } else {
-                // Check if it's localhost/dev
-                $domain = $_SERVER['HTTP_HOST'] ?? '';
-                if (strpos($domain, 'localhost') !== false || strpos($domain, '127.0.0.1') !== false || strpos($domain, '.local') !== false || strpos($domain, '.docker.localhost') !== false) {
-                    $json['valid'] = true;
-                    $json['message'] = $this->language->get('success_license_valid') . ' (Development Environment)';
+                if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
+                    $json['valid'] = false;
+                    $json['error'] = 'License library not found';
                 } else {
-                    if (!file_exists(DIR_SYSTEM . 'library/dockercart_license.php')) {
-                        $json['valid'] = false;
-                        $json['error'] = 'License library not found';
-                    } else {
-                        require_once(DIR_SYSTEM . 'library/dockercart_license.php');
-                        
-                        if (!class_exists('DockercartLicense')) {
-                            $json['valid'] = false;
-                            $json['error'] = 'License class not found';
+                    require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
+
+                    try {
+                        $licensing = new DockercartLicensing($this->registry);
+                        $valid = $licensing->check('dockercart_oneclickcheckout');
+
+                        $json['valid'] = $valid;
+                        if ($valid) {
+                            $json['message'] = $this->language->get('success_license_valid');
                         } else {
-                            try {
-                                $license = new DockercartLicense($this->registry);
-                                
-                                if (!empty($public_key)) {
-                                    $result = $license->verifyWithPublicKey($license_key, $public_key, 'dockercart_oneclickcheckout', true);
-                                } else {
-                                    $result = $license->verify($license_key, 'dockercart_oneclickcheckout', true);
-                                }
-                                
-                                $json = $result;
-                                
-                                if ($result['valid']) {
-                                    $json['message'] = $this->language->get('success_license_valid');
-                                }
-                            } catch (Exception $e) {
-                                $json['valid'] = false;
-                                $json['error'] = 'Error: ' . $e->getMessage();
-                            }
+                            $json['error'] = $this->language->get('error_license_invalid');
                         }
+                    } catch (Exception $e) {
+                        $json['valid'] = false;
+                        $json['error'] = 'Error: ' . $e->getMessage();
                     }
                 }
             }
         }
-        
+
         $this->response->addHeader('Content-Type: application/json');
         $this->response->setOutput(json_encode($json));
     }
@@ -331,37 +311,20 @@ class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
      * Проверка лицензии (для UI warnings, не блокирует работу админки)
      */
     private function validateLicense() {
-        $license_key = $this->config->get('module_dockercart_oneclickcheckout_license_key');
-
         $domain = $_SERVER['HTTP_HOST'] ?? '';
         if (strpos($domain, 'localhost') !== false || strpos($domain, '127.0.0.1') !== false || strpos($domain, '.local') !== false || strpos($domain, '.docker.localhost') !== false) {
             return true;
         }
 
-        if (empty($license_key)) {
+        if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
             return true;
         }
 
-        if (!file_exists(DIR_SYSTEM . 'library/dockercart_license.php')) {
-            return true;
-        }
-
-        require_once(DIR_SYSTEM . 'library/dockercart_license.php');
-
-        if (!class_exists('DockercartLicense')) {
-            return true;
-        }
+        require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
 
         try {
-            $license = new DockercartLicense($this->registry);
-            $result = $license->verify($license_key, 'dockercart_oneclickcheckout');
-
-            if (!$result['valid']) {
-                $error_msg = $this->language->get('error_license_invalid');
-                if (isset($result['error'])) {
-                    $error_msg .= ': ' . $result['error'];
-                }
-            }
+            $licensing = new DockercartLicensing($this->registry);
+            $licensing->check('dockercart_oneclickcheckout');
         } catch (Exception $e) {
             // Silent fail in admin
         }
@@ -373,33 +336,21 @@ class ControllerExtensionModuleDockercartOneclickcheckout extends Controller {
      * Проверка лицензии для работы модуля (блокирует работу если нет лицензии)
      */
     private function checkLicenseForOperation() {
-        $license_key = $this->config->get('module_dockercart_oneclickcheckout_license_key');
-
         // Allow localhost/dev environments
         $domain = $_SERVER['HTTP_HOST'] ?? '';
         if (strpos($domain, 'localhost') !== false || strpos($domain, '127.0.0.1') !== false || strpos($domain, '.local') !== false || strpos($domain, '.docker.localhost') !== false) {
             return true;
         }
 
-        if (empty($license_key)) {
+        if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
             return false;
         }
 
-        if (!file_exists(DIR_SYSTEM . 'library/dockercart_license.php')) {
-            return false;
-        }
-
-        require_once(DIR_SYSTEM . 'library/dockercart_license.php');
-
-        if (!class_exists('DockercartLicense')) {
-            return false;
-        }
+        require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
 
         try {
-            $license = new DockercartLicense($this->registry);
-            $result = $license->verify($license_key, 'dockercart_oneclickcheckout');
-
-            return $result['valid'];
+            $licensing = new DockercartLicensing($this->registry);
+            return $licensing->check('dockercart_oneclickcheckout');
         } catch (Exception $e) {
             return false;
         }
