@@ -8,6 +8,7 @@ class DockercartLicensing {
 	private $config;
 	private $logger;
 
+	const LICENSING_API = 'http://licensing.docker.localhost:8080';
 	const GRACE_DAYS = 7;
 	const VALIDATE_TTL = 604800;
 
@@ -21,14 +22,14 @@ class DockercartLicensing {
 	}
 
 	public function getApiUrl(): string {
-		return defined('LICENSING_API_URL') ? LICENSING_API_URL : 'http://licensing.docker.localhost:8080';
+		if (defined('LICENSING_API_URL') && LICENSING_API_URL !== '') {
+			return LICENSING_API_URL;
+		}
+
+		return self::LICENSING_API;
 	}
 
 	public function getDomain(): string {
-		if (defined('LICENSING_DOMAIN') && LICENSING_DOMAIN !== '') {
-			return LICENSING_DOMAIN;
-		}
-
 		$domain = $_SERVER['HTTP_HOST'] ?? 'localhost';
 		$domain = strtolower($domain);
 		$domain = preg_replace('/^www\./', '', $domain);
@@ -48,7 +49,7 @@ class DockercartLicensing {
 	}
 
 	public function getGraceDays(): int {
-		return defined('LICENSING_GRACE_DAYS') ? (int)LICENSING_GRACE_DAYS : self::GRACE_DAYS;
+		return self::GRACE_DAYS;
 	}
 
 	public function getLicense(string $module_code): ?array {
@@ -428,6 +429,72 @@ class DockercartLicensing {
 		);
 
 		return $result->rows;
+	}
+
+	public function disableExtension(string $module_code): void {
+		$license = $this->getLicense($module_code);
+
+		if ($license && !empty($license['frontend_blocked'])) {
+			return;
+		}
+
+		$result = $this->db->query(
+			"SELECT `value` FROM `" . DB_PREFIX . "setting`
+			 WHERE `code` = '" . $this->db->escape('module_' . $module_code) . "'
+			 AND `key` = '" . $this->db->escape('module_' . $module_code . '_status') . "'
+			 AND `store_id` = 0"
+		);
+
+		$original_value = null;
+
+		if ($result->num_rows) {
+			$original_value = $result->row['value'];
+
+			$this->db->query(
+				"UPDATE `" . DB_PREFIX . "setting`
+				 SET `value` = '0'
+				 WHERE `code` = '" . $this->db->escape('module_' . $module_code) . "'
+				 AND `key` = '" . $this->db->escape('module_' . $module_code . '_status') . "'"
+			);
+		}
+
+		$this->db->query(
+			"UPDATE `" . DB_PREFIX . "dockercart_license`
+			 SET `frontend_blocked` = 1,
+			     `original_status_value` = " . ($original_value !== null ? "'" . $this->db->escape($original_value) . "'" : 'NULL') . ",
+			     `date_modified` = NOW()
+			 WHERE `module_code` = '" . $this->db->escape($module_code) . "'"
+		);
+
+		$this->logger->info('DisableExtension: blocked ' . $module_code . ' on frontend (original=' . ($original_value ?? 'none') . ')');
+	}
+
+	public function enableExtension(string $module_code): void {
+		$license = $this->getLicense($module_code);
+
+		if (!$license || empty($license['frontend_blocked'])) {
+			return;
+		}
+
+		if ($license['original_status_value'] !== null && $license['original_status_value'] !== '') {
+			$this->db->query(
+				"UPDATE `" . DB_PREFIX . "setting`
+				 SET `value` = '" . $this->db->escape($license['original_status_value']) . "'
+				 WHERE `code` = '" . $this->db->escape('module_' . $module_code) . "'
+				 AND `key` = '" . $this->db->escape('module_' . $module_code . '_status') . "'
+				 AND `store_id` = 0"
+			);
+		}
+
+		$this->db->query(
+			"UPDATE `" . DB_PREFIX . "dockercart_license`
+			 SET `frontend_blocked` = 0,
+			     `original_status_value` = NULL,
+			     `date_modified` = NOW()
+			 WHERE `module_code` = '" . $this->db->escape($module_code) . "'"
+		);
+
+		$this->logger->info('EnableExtension: restored ' . $module_code . ' (value=' . ($license['original_status_value'] ?? 'default') . ')');
 	}
 
 	public function removeLicense(string $module_code): void {

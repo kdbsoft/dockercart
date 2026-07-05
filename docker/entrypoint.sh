@@ -245,15 +245,6 @@ define('REDIS_PASSWORD', $env('REDIS_PASSWORD', 'dockercart_redis_pass'));
 define('CACHE_PREFIX', $env('CACHE_PREFIX', 'oc_'));
 define('IMAGE_MAX_DIMENSION', getenv('IMAGE_MAX_DIMENSION') ?: '2560');
 
-// Licensing
-define('LICENSING_API_URL', $env('LICENSING_API_URL', 'http://licensing.docker.localhost:8080'));
-
-$licensingDomain = getenv('LICENSING_DOMAIN');
-if ($licensingDomain !== false && $licensingDomain !== '') {
-	define('LICENSING_DOMAIN', $licensingDomain);
-}
-define('LICENSING_GRACE_DAYS', getenv('LICENSING_GRACE_DAYS') ?: '7');
-
 // Session
 define('SESSION_ENGINE', $env('SESSION_ENGINE', 'redis'));
 PHP
@@ -321,15 +312,6 @@ define('REDIS_PORT', $env('REDIS_PORT', '6379'));
 define('REDIS_PASSWORD', $env('REDIS_PASSWORD', 'dockercart_redis_pass'));
 define('CACHE_PREFIX', $env('CACHE_PREFIX', 'oc_'));
 define('IMAGE_MAX_DIMENSION', getenv('IMAGE_MAX_DIMENSION') ?: '2560');
-
-// Licensing
-define('LICENSING_API_URL', $env('LICENSING_API_URL', 'http://licensing.docker.localhost:8080'));
-
-$licensingDomain = getenv('LICENSING_DOMAIN');
-if ($licensingDomain !== false && $licensingDomain !== '') {
-	define('LICENSING_DOMAIN', $licensingDomain);
-}
-define('LICENSING_GRACE_DAYS', getenv('LICENSING_GRACE_DAYS') ?: '7');
 
 // Session
 define('SESSION_ENGINE', $env('SESSION_ENGINE', 'redis'));

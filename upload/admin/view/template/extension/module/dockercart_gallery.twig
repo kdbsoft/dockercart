@@ -44,13 +44,6 @@
           data-icon="fa-image">
         <i class="fa fa-image"></i> {{ tab_general }}
       </a></li>
-      <li><a href="#gallery-tab-about" class="js-gallery-tab"
-          data-tab="gallery-tab-about"
-          data-title="{{ tab_about }}"
-          data-subtitle="{{ tab_about_subtitle }}"
-          data-icon="fa-info-circle">
-        <i class="fa fa-info-circle"></i> {{ tab_about }}
-      </a></li>
     </ul>
 
     <div class="dcx-shell">
@@ -134,85 +127,6 @@
 
             </div>
 
-            <div id="gallery-tab-about" class="dcx-tab-pane">
-              <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                <h4>{{ tab_about }}</h4>
-                <table class="table table-bordered dcx-table">
-                  <tr>
-                    <td style="width:200px;"><strong>{{ text_developer }}</strong></td>
-                    <td>{{ text_developer_name }}</td>
-                  </tr>
-                  <tr>
-                    <td><strong>{{ text_contact }}</strong></td>
-                    <td><a href="mailto:support@dockercart.net">support@dockercart.net</a></td>
-                  </tr>
-                </table>
-              </div>
-
-              <div class="dcx-section">
-                <h4>{{ text_license_status }}</h4>
-                {% if license and license.license_key %}
-                <table class="table table-bordered dcx-table">
-                  <tr>
-                    <td style="width:200px;"><strong>{{ text_license_key_label }}</strong></td>
-                    <td><code>{{ license.license_key[:30] }}{% if license.license_key|length > 30 %}...{% endif %}</code></td>
-                  </tr>
-                  <tr>
-                    <td><strong>{{ text_status }}</strong></td>
-                    <td>
-                      {% if license.status == 'active' %}
-                      <span class="label label-success">Active</span>
-                      {% elseif license.status == 'grace' %}
-                      <span class="label label-warning">Grace</span>
-                      {% elseif license.status == 'revoked' %}
-                      <span class="label label-danger">Revoked</span>
-                      {% elseif license.status == 'expired' %}
-                      <span class="label label-danger">Expired</span>
-                      {% elseif license.status == 'invalid' %}
-                      <span class="label label-danger">Invalid</span>
-                      {% else %}
-                      <span class="label label-default">{{ license.status }}</span>
-                      {% endif %}
-                      {% if license.is_test %}<small class="text-muted"> (test)</small>{% endif %}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td><strong>{{ text_license_domain }}</strong></td>
-                    <td>{{ license.domain }}</td>
-                  </tr>
-                  <tr>
-                    <td><strong>{{ text_license_expires }}</strong></td>
-                    <td>{{ license.expires_at ? license.expires_at : 'Lifetime' }}</td>
-                  </tr>
-                  <tr>
-                    <td><strong>{{ text_license_last_verified }}</strong></td>
-                    <td>{{ license.last_verified ? license.last_verified : '&mdash;' }}</td>
-                  </tr>
-                </table>
-
-                <div class="form-group">
-                  <label class="col-sm-2 control-label">{{ text_license_change_key }}</label>
-                  <div class="col-sm-6">
-                    <input type="text" id="license-key-input" class="form-control" placeholder="DCL-..." />
-                  </div>
-                  <div class="col-sm-2">
-                    <button type="button" id="activate-key-btn" class="btn btn-primary">{{ text_license_activate }}</button>
-                  </div>
-                </div>
-                {% else %}
-                <p class="text-muted" style="padding: 0 0 12px 0;">{{ text_license_no_license }}</p>
-                <div class="form-group">
-                  <label class="col-sm-2 control-label">{{ text_license_key_label }}</label>
-                  <div class="col-sm-6">
-                    <input type="text" id="license-key-input" class="form-control" placeholder="DCL-..." />
-                  </div>
-                  <div class="col-sm-2">
-                    <button type="button" id="activate-key-btn" class="btn btn-success">{{ text_license_activate }}</button>
-                  </div>
-                </div>
-                {% endif %}
-              </div>
-            </div>
 
           </form>
         </div>
@@ -248,26 +162,6 @@ $(document).on('click', '.js-gallery-tab', function(e) {
 });
 
 updateGalleryPanelHeader($('#gallery-tabs > li.active a.js-gallery-tab'));
-
-$('#activate-key-btn').on('click', function() {
-  var key = $('#license-key-input').val().trim();
-
-  if (!key) {
-    alert('{{ text_license_key_label }} required');
-    return;
-  }
-
-  var $btn = $(this).prop('disabled', true);
-
-  $.post('{{ activate_key_url }}', { sku: 'dockercart_gallery', license_key: key }, function(resp) {
-    $btn.prop('disabled', false);
-    alert(resp.error || resp.message);
-    if (resp.success) location.reload();
-  }, 'json').fail(function() {
-    $btn.prop('disabled', false);
-    alert('Failed to activate');
-  });
-});
 //--></script>
 
 {{ footer }}

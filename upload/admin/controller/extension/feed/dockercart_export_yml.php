@@ -113,8 +113,6 @@ class ControllerExtensionFeedDockercartExportYml extends Controller {
 
         // AJAX endpoints
         $data['ajax_generate'] = $this->url->link('extension/feed/dockercart_export_yml/ajaxGenerate', 'user_token=' . $this->session->data['user_token'], true);
-        $data['ajax_verify_license'] = $this->url->link('extension/feed/dockercart_export_yml/verifyLicenseAjax', 'user_token=' . $this->session->data['user_token'], true);
-        $data['ajax_save_license'] = $this->url->link('extension/feed/dockercart_export_yml/saveLicenseKeyAjax', 'user_token=' . $this->session->data['user_token'], true);
         $data['ajax_save_profile'] = $this->url->link('extension/feed/dockercart_export_yml/saveProfileAjax', 'user_token=' . $this->session->data['user_token'], true);
         $data['ajax_delete_profile'] = $this->url->link('extension/feed/dockercart_export_yml/deleteProfileAjax', 'user_token=' . $this->session->data['user_token'], true);
         $data['ajax_get_profile'] = $this->url->link('extension/feed/dockercart_export_yml/getProfileAjax', 'user_token=' . $this->session->data['user_token'], true);
@@ -123,14 +121,10 @@ class ControllerExtensionFeedDockercartExportYml extends Controller {
         $data['catalog_url'] = HTTP_CATALOG;
         $data['default_language_code'] = (string)$this->config->get('config_language');
 
-        // Load module settings (license keys are stored in module_* namespace)
-        $module_settings = $this->model_setting_setting->getSetting('module_dockercart_export_yml');
-
         // Load settings
         $settings = array(
             'dockercart_export_yml_status',
-            'dockercart_export_yml_license_key',
-            'dockercart_export_yml_public_key',
+
             'dockercart_export_yml_shop_name',
             'dockercart_export_yml_company',
             'dockercart_export_yml_max_products',
@@ -148,23 +142,6 @@ class ControllerExtensionFeedDockercartExportYml extends Controller {
                 $data[$setting] = '';
             }
         }
-
-        // License fields: keep visible after activation/save
-        if (isset($this->request->post['module_dockercart_export_yml_license_key'])) {
-            $data['dockercart_export_yml_license_key'] = $this->request->post['module_dockercart_export_yml_license_key'];
-        } else {
-            $data['dockercart_export_yml_license_key'] = isset($module_settings['module_dockercart_export_yml_license_key']) ? $module_settings['module_dockercart_export_yml_license_key'] : '';
-        }
-
-        if (isset($this->request->post['module_dockercart_export_yml_public_key'])) {
-            $data['dockercart_export_yml_public_key'] = $this->request->post['module_dockercart_export_yml_public_key'];
-        } else {
-            $data['dockercart_export_yml_public_key'] = isset($module_settings['module_dockercart_export_yml_public_key']) ? $module_settings['module_dockercart_export_yml_public_key'] : '';
-        }
-
-        // Optional aliases used by some templates/scripts
-        $data['module_dockercart_export_yml_license_key'] = $data['dockercart_export_yml_license_key'];
-        $data['module_dockercart_export_yml_public_key'] = $data['dockercart_export_yml_public_key'];
 
         // Defaults
         if (empty($data['dockercart_export_yml_max_products'])) {
@@ -218,102 +195,14 @@ class ControllerExtensionFeedDockercartExportYml extends Controller {
             'daily'     => $this->language->get('text_daily'),
         );
 
-        // License verification
-        $data['license_valid'] = false;
-        $data['license_message'] = '';
-        
-        try {
-            if (is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
-                require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
-
-                $licensing = new DockercartLicensing($this->registry);
-                $valid = $licensing->check('dockercart_export_yml');
-                $data['license_valid'] = $valid;
-                $data['license_message'] = $valid ? '' : 'License is not valid';
-            }
-        } catch (Throwable $e) {
-            $data['license_valid'] = false;
-            $data['license_message'] = 'License check error: ' . $e->getMessage();
-        }
+        $data['ajax_verify_license'] = '';
+        $data['ajax_save_license'] = '';
 
         $data['header'] = $this->load->controller('common/header');
         $data['column_left'] = $this->load->controller('common/column_left');
         $data['footer'] = $this->load->controller('common/footer');
 
         $this->response->setOutput($this->load->view('extension/feed/dockercart_export_yml', $data));
-    }
-
-    /**
-     * AJAX: Verify license
-     */
-    public function verifyLicenseAjax() {
-        $json = array();
-
-        if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
-            $json['valid'] = false;
-            $json['error'] = 'License library not found';
-            $this->response->addHeader('Content-Type: application/json');
-            $this->response->setOutput(json_encode($json));
-            return;
-        }
-
-        require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
-
-        try {
-            $licensing = new DockercartLicensing($this->registry);
-            $valid = $licensing->check('dockercart_export_yml');
-
-            $json['valid'] = $valid;
-            if (!$valid) {
-                $json['error'] = 'License is not valid';
-            }
-        } catch (Exception $e) {
-            $json['valid'] = false;
-            $json['error'] = 'Error: ' . $e->getMessage();
-        }
-
-        $this->response->addHeader('Content-Type: application/json');
-        $this->response->setOutput(json_encode($json));
-    }
-
-    /**
-     * AJAX: Save license key
-     */
-    public function saveLicenseKeyAjax() {
-        $json = array();
-
-        $input = file_get_contents('php://input');
-        $data = json_decode($input, true);
-
-        $license_key = isset($data['license_key']) ? $data['license_key'] : '';
-        $public_key = isset($data['public_key']) ? $data['public_key'] : '';
-
-        if (empty($license_key)) {
-            $json['success'] = false;
-            $json['error'] = 'License key is empty';
-            $this->response->addHeader('Content-Type: application/json');
-            $this->response->setOutput(json_encode($json));
-            return;
-        }
-
-        try {
-            $this->load->model('setting/setting');
-            
-            $settings = array(
-                'module_dockercart_export_yml_license_key' => $license_key,
-                'module_dockercart_export_yml_public_key' => $public_key
-            );
-            
-            $this->model_setting_setting->editSetting('module_dockercart_export_yml', $settings);
-            
-            $json['success'] = true;
-        } catch (Exception $e) {
-            $json['success'] = false;
-            $json['error'] = 'Error: ' . $e->getMessage();
-        }
-
-        $this->response->addHeader('Content-Type: application/json');
-        $this->response->setOutput(json_encode($json));
     }
 
     /**

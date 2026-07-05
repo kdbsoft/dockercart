@@ -77,6 +77,8 @@ class ControllerExtensionModuleDockercartGoogleTranslation extends Controller {
         }
 
         $data['license_domain'] = $_SERVER['HTTP_HOST'] ?? 'unknown';
+        $data['entry_license_key'] = $this->language->get('entry_license_key');
+        $data['entry_public_key'] = $this->language->get('entry_public_key');
 
         $data['header'] = $this->load->controller('common/header');
         $data['column_left'] = $this->load->controller('common/column_left');
@@ -106,33 +108,41 @@ class ControllerExtensionModuleDockercartGoogleTranslation extends Controller {
 
         if (!$this->user->hasPermission('modify', 'extension/module/dockercart_google_translation')) {
             $json['error'] = $this->language->get('error_permission');
-        } elseif (!$this->checkLicenseForTranslation()) {
-            $json['error'] = $this->language->get('error_license_required');
         } else {
-            try {
-                $input = $this->getJsonBody();
+            if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
+                $json['error'] = $this->language->get('error_license_required');
+            } else {
+                require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
+                $licensing = new DockercartLicensing($this->registry);
+                if (!$licensing->check('dockercart_google_translation')) {
+                    $json['error'] = $this->language->get('error_license_required');
+                } else {
+                    try {
+                        $input = $this->getJsonBody();
 
-                $source_language_id = isset($input['source_language_id']) ? (int)$input['source_language_id'] : 0;
-                $target_language_id = isset($input['target_language_id']) ? (int)$input['target_language_id'] : 0;
-                $include_db = !empty($input['include_db']);
-                $include_files = !empty($input['include_files']);
+                        $source_language_id = isset($input['source_language_id']) ? (int)$input['source_language_id'] : 0;
+                        $target_language_id = isset($input['target_language_id']) ? (int)$input['target_language_id'] : 0;
+                        $include_db = !empty($input['include_db']);
+                        $include_files = !empty($input['include_files']);
 
-                $match_threshold = isset($input['match_threshold']) ? (float)$input['match_threshold'] : (float)$this->config->get('module_dockercart_google_translation_match_threshold');
+                        $match_threshold = isset($input['match_threshold']) ? (float)$input['match_threshold'] : (float)$this->config->get('module_dockercart_google_translation_match_threshold');
 
-                if ($source_language_id <= 0 || $target_language_id <= 0 || $source_language_id === $target_language_id) {
-                    throw new Exception($this->language->get('error_language_pair'));
+                        if ($source_language_id <= 0 || $target_language_id <= 0 || $source_language_id === $target_language_id) {
+                            throw new Exception($this->language->get('error_language_pair'));
+                        }
+
+                        $json['report'] = $this->model_extension_module_dockercart_google_translation->buildScanReport(
+                            $source_language_id,
+                            $target_language_id,
+                            $match_threshold,
+                            $include_db,
+                            $include_files
+                        );
+                        $json['success'] = true;
+                    } catch (Exception $e) {
+                        $json['error'] = $e->getMessage();
+                    }
                 }
-
-                $json['report'] = $this->model_extension_module_dockercart_google_translation->buildScanReport(
-                    $source_language_id,
-                    $target_language_id,
-                    $match_threshold,
-                    $include_db,
-                    $include_files
-                );
-                $json['success'] = true;
-            } catch (Exception $e) {
-                $json['error'] = $e->getMessage();
             }
         }
 
@@ -151,37 +161,45 @@ class ControllerExtensionModuleDockercartGoogleTranslation extends Controller {
 
         if (!$this->user->hasPermission('modify', 'extension/module/dockercart_google_translation')) {
             $json['error'] = $this->language->get('error_permission');
-        } elseif (!$this->checkLicenseForTranslation()) {
-            $json['error'] = $this->language->get('error_license_required');
         } else {
-            try {
-                $input = $this->getJsonBody();
+            if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
+                $json['error'] = $this->language->get('error_license_required');
+            } else {
+                require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
+                $licensing = new DockercartLicensing($this->registry);
+                if (!$licensing->check('dockercart_google_translation')) {
+                    $json['error'] = $this->language->get('error_license_required');
+                } else {
+                    try {
+                        $input = $this->getJsonBody();
 
-                $source_language_id = isset($input['source_language_id']) ? (int)$input['source_language_id'] : 0;
-                $target_language_id = isset($input['target_language_id']) ? (int)$input['target_language_id'] : 0;
-                $translate_db = !empty($input['translate_db']);
-                $translate_files = !empty($input['translate_files']);
-                $selected_tables = isset($input['selected_tables']) && is_array($input['selected_tables']) ? $input['selected_tables'] : array();
-                $force_overwrite = !empty($input['force_overwrite']);
+                        $source_language_id = isset($input['source_language_id']) ? (int)$input['source_language_id'] : 0;
+                        $target_language_id = isset($input['target_language_id']) ? (int)$input['target_language_id'] : 0;
+                        $translate_db = !empty($input['translate_db']);
+                        $translate_files = !empty($input['translate_files']);
+                        $selected_tables = isset($input['selected_tables']) && is_array($input['selected_tables']) ? $input['selected_tables'] : array();
+                        $force_overwrite = !empty($input['force_overwrite']);
 
-                $match_threshold = isset($input['match_threshold']) ? (float)$input['match_threshold'] : (float)$this->config->get('module_dockercart_google_translation_match_threshold');
+                        $match_threshold = isset($input['match_threshold']) ? (float)$input['match_threshold'] : (float)$this->config->get('module_dockercart_google_translation_match_threshold');
 
-                if ($source_language_id <= 0 || $target_language_id <= 0 || $source_language_id === $target_language_id) {
-                    throw new Exception($this->language->get('error_language_pair'));
+                        if ($source_language_id <= 0 || $target_language_id <= 0 || $source_language_id === $target_language_id) {
+                            throw new Exception($this->language->get('error_language_pair'));
+                        }
+
+                        $json['result'] = $this->model_extension_module_dockercart_google_translation->executeTranslation(
+                            $source_language_id,
+                            $target_language_id,
+                            $match_threshold,
+                            $force_overwrite,
+                            $translate_db,
+                            $translate_files,
+                            $selected_tables
+                        );
+                        $json['success'] = true;
+                    } catch (Exception $e) {
+                        $json['error'] = $e->getMessage();
+                    }
                 }
-
-                $json['result'] = $this->model_extension_module_dockercart_google_translation->executeTranslation(
-                    $source_language_id,
-                    $target_language_id,
-                    $match_threshold,
-                    $force_overwrite,
-                    $translate_db,
-                    $translate_files,
-                    $selected_tables
-                );
-                $json['success'] = true;
-            } catch (Exception $e) {
-                $json['error'] = $e->getMessage();
             }
         }
 
@@ -197,29 +215,37 @@ class ControllerExtensionModuleDockercartGoogleTranslation extends Controller {
 
         if (!$this->user->hasPermission('access', 'extension/module/dockercart_google_translation')) {
             $json['error'] = $this->language->get('error_permission');
-        } elseif (!$this->checkLicenseForTranslation()) {
-            $json['error'] = $this->language->get('error_license_required');
         } else {
-            try {
-                $input = $this->getJsonBody();
+            if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
+                $json['error'] = $this->language->get('error_license_required');
+            } else {
+                require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
+                $licensing = new DockercartLicensing($this->registry);
+                if (!$licensing->check('dockercart_google_translation')) {
+                    $json['error'] = $this->language->get('error_license_required');
+                } else {
+                    try {
+                        $input = $this->getJsonBody();
 
-                $source_language_id = isset($input['source_language_id']) ? (int)$input['source_language_id'] : 0;
-                $target_language_id = isset($input['target_language_id']) ? (int)$input['target_language_id'] : 0;
-                $text = isset($input['text']) ? (string)$input['text'] : '';
+                        $source_language_id = isset($input['source_language_id']) ? (int)$input['source_language_id'] : 0;
+                        $target_language_id = isset($input['target_language_id']) ? (int)$input['target_language_id'] : 0;
+                        $text = isset($input['text']) ? (string)$input['text'] : '';
 
-                if ($source_language_id <= 0 || $target_language_id <= 0 || $source_language_id === $target_language_id) {
-                    throw new Exception($this->language->get('error_language_pair'));
+                        if ($source_language_id <= 0 || $target_language_id <= 0 || $source_language_id === $target_language_id) {
+                            throw new Exception($this->language->get('error_language_pair'));
+                        }
+
+                        $json['translated_text'] = $this->model_extension_module_dockercart_google_translation->translateSingleText(
+                            $text,
+                            $source_language_id,
+                            $target_language_id
+                        );
+
+                        $json['success'] = true;
+                    } catch (Exception $e) {
+                        $json['error'] = $e->getMessage();
+                    }
                 }
-
-                $json['translated_text'] = $this->model_extension_module_dockercart_google_translation->translateSingleText(
-                    $text,
-                    $source_language_id,
-                    $target_language_id
-                );
-
-                $json['success'] = true;
-            } catch (Exception $e) {
-                $json['error'] = $e->getMessage();
             }
         }
 
@@ -358,28 +384,6 @@ class ControllerExtensionModuleDockercartGoogleTranslation extends Controller {
             $this->cache->flush();
         } catch (Throwable $e) {
             // Avoid interrupting save/delete flows due to cache backend issues.
-        }
-    }
-
-    private function checkLicenseForTranslation() {
-        $domain = $_SERVER['HTTP_HOST'] ?? '';
-        $domain_without_port = preg_replace('/:\\d+$/', '', $domain);
-
-        if (strpos($domain, 'localhost') !== false || strpos($domain, '127.0.0.1') !== false || $domain_without_port === 'localhost' || $domain_without_port === '127.0.0.1' || strpos($domain_without_port, '.local') !== false) {
-            return true;
-        }
-
-        if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
-            return true;
-        }
-
-        require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
-
-        try {
-            $licensing = new DockercartLicensing($this->registry);
-            return $licensing->check('dockercart_google_translation');
-        } catch (Exception $e) {
-            return false;
         }
     }
 }

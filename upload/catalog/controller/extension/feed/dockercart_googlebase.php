@@ -38,24 +38,7 @@ class ControllerExtensionFeedDockercartGooglebase extends Controller {
             return new Action('error/not_found');
         }
 
-        // Check license (skip for admin preview)
-        $admin_request = isset($this->request->get['admin_request']) && $this->request->get['admin_request'] == '1';
-        
-        if (!$admin_request) {
-            if (!$this->verifyLicense()) {
-                http_response_code(403);
-                header('Content-Type: application/xml; charset=UTF-8');
-                echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
-                echo '<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">' . "\n";
-                echo '  <channel>' . "\n";
-                echo '    <!-- DockerCart Google Base: License not verified -->' . "\n";
-                echo '  </channel>' . "\n";
-                echo '</rss>' . "\n";
-                exit;
-            }
-        }
-
-        // Determine which file to serve
+		// Determine which file to serve
         $feed_file = $this->getFeedFilePath();
         $cache_duration = (int)($this->config->get('module_dockercart_googlebase_cache_hours') ?: 24) * 3600;
 
@@ -560,33 +543,7 @@ class ControllerExtensionFeedDockercartGooglebase extends Controller {
         @chmod($index_file, 0644);
     }
 
-    /**
-     * Verify license
-     */
-    protected function verifyLicense() {
-        if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
-            $this->log('Licensing library not found');
-            return false;
-        }
-
-        require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
-
-        try {
-            $licensing = new DockercartLicensing($this->registry);
-
-            if (!$licensing->check('dockercart_googlebase')) {
-                $this->log('License check failed');
-                return false;
-            }
-
-            return true;
-        } catch (Exception $e) {
-            $this->log('License verification exception: ' . $e->getMessage());
-            return false;
-        }
-    }
-
-    /**
+	/**
      * Get settings array
      */
     protected function getSettings() {

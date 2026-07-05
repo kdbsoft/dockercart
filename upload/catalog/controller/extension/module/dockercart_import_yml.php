@@ -22,10 +22,6 @@ class ControllerExtensionModuleDockercartImportYml extends Controller {
                 throw new Exception('Invalid profile_id');
             }
 
-            if (!$this->checkLicense()) {
-                throw new Exception('License is invalid');
-            }
-
             $this->load->model('extension/module/dockercart_import_yml');
             $profile = $this->model_extension_module_dockercart_import_yml->getProfile($profile_id);
 
@@ -73,19 +69,4 @@ class ControllerExtensionModuleDockercartImportYml extends Controller {
         $this->response->setOutput(json_encode($json));
     }
 
-    private function checkLicense() {
-        if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
-            return false;
-        }
-
-        require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
-
-        try {
-            $licensing = new DockercartLicensing($this->registry);
-
-            return $licensing->check('dockercart_import_yml');
-        } catch (Exception $e) {
-            return false;
-        }
-    }
 }

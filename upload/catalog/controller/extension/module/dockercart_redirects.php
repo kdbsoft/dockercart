@@ -30,28 +30,6 @@ class ControllerExtensionModuleDockercartRedirects extends Controller {
             return;
         }
 
-        // Runtime license enforcement via licensing server
-        if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
-            $this->logger->info('ERROR: Licensing library not found');
-            return;
-        }
-
-        require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
-
-        try {
-            $licensing = new DockercartLicensing($this->registry);
-
-            if (!$licensing->check('dockercart_redirects')) {
-                $this->logger->info('ERROR: License check failed for dockercart_redirects');
-                return;
-            }
-
-            $this->logger->info('LICENSE: Valid license verified for dockercart_redirects');
-        } catch (Exception $e) {
-            $this->logger->info('ERROR: Exception during license verification - ' . $e->getMessage());
-            return;
-        }
-
         if ($this->registry->get('dockercart_redirects_checked')) {
             return;
         }
@@ -74,25 +52,6 @@ class ControllerExtensionModuleDockercartRedirects extends Controller {
     }
 
     public function handle404() {
-        if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
-            $this->logger->info('ERROR: Licensing library not found (404 handler)');
-            return;
-        }
-
-        require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
-
-        try {
-            $licensing = new DockercartLicensing($this->registry);
-
-            if (!$licensing->check('dockercart_redirects')) {
-                $this->logger->info('ERROR: License check failed during 404 handling');
-                return;
-            }
-        } catch (Exception $e) {
-            $this->logger->info('ERROR: Exception during license verification (404 handler) - ' . $e->getMessage());
-            return;
-        }
-
         $this->load->model('extension/module/dockercart_redirects');
 
         $current_url = $this->getCurrentUrl();
