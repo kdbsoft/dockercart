@@ -17,8 +17,14 @@ class DockercartLicensing {
 		$this->db = $registry->get('db');
 		$this->config = $registry->get('config');
 
-		require_once DIR_SYSTEM . 'library/dockercart_logger.php';
-		$this->logger = new DockercartLogger($this->registry, 'licensing');
+		if (is_file(DIR_SYSTEM . 'library/dockercart_logger.php')) {
+			require_once DIR_SYSTEM . 'library/dockercart_logger.php';
+			$this->logger = new DockercartLogger($this->registry, 'licensing');
+		} else {
+			$this->logger = new class {
+				public function __call($name, $args) {}
+			};
+		}
 	}
 
 	public function getApiUrl(): string {
@@ -56,6 +62,16 @@ class DockercartLicensing {
 		$result = $this->db->query(
 			"SELECT * FROM `" . DB_PREFIX . "dockercart_license`
 			 WHERE `module_code` = '" . $this->db->escape($module_code) . "'"
+		);
+
+		return $result->num_rows ? $result->row : null;
+	}
+
+	public function getLicenseByKey(string $license_key): ?array {
+		$result = $this->db->query(
+			"SELECT * FROM `" . DB_PREFIX . "dockercart_license`
+			 WHERE `license_key` = '" . $this->db->escape($license_key) . "'
+			 LIMIT 1"
 		);
 
 		return $result->num_rows ? $result->row : null;
@@ -109,6 +125,7 @@ class DockercartLicensing {
 		$ch = curl_init($url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
 		curl_setopt($ch, CURLOPT_POST, true);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
@@ -123,12 +140,11 @@ class DockercartLicensing {
 
 			if (is_array($body) && isset($body['activation'])) {
 				$license = $this->getLicense($module_code);
-				$new_status = (isset($body['isNew']) && $body['isNew']) ? 'active' : 'active';
 
 				if ($license) {
 					$this->db->query(
 						"UPDATE `" . DB_PREFIX . "dockercart_license`
-						 SET `status` = '" . $this->db->escape($new_status) . "',
+						 SET `status` = 'active',
 						     `fingerprint` = '" . $this->db->escape($fingerprint) . "',
 						     `last_verified` = NOW(),
 						     `last_valid` = NOW(),
@@ -189,6 +205,7 @@ class DockercartLicensing {
 		$ch = curl_init($api_url . '/api/v1/license/validate');
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
 		curl_setopt($ch, CURLOPT_POST, true);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
@@ -313,6 +330,7 @@ class DockercartLicensing {
 		$ch = curl_init($api_url . '/api/v1/license/heartbeat');
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
 		curl_setopt($ch, CURLOPT_POST, true);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
@@ -322,7 +340,13 @@ class DockercartLicensing {
 		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 		curl_close($ch);
 
-		return $http_code >= 200 && $http_code < 300;
+		if ($http_code < 200 || $http_code >= 300) {
+			$this->logger->info('Heartbeat: FAILED for ' . $module_code . ' HTTP=' . $http_code);
+
+			return false;
+		}
+
+		return true;
 	}
 
 	public function check(string $module_code): bool {
@@ -340,10 +364,12 @@ class DockercartLicensing {
 	public function autoPopulate(): int {
 		$api_url = $this->getApiUrl();
 		$domain = $this->getDomain();
+		$fingerprint = $this->getFingerprint();
 
 		$ch = curl_init($api_url . '/api/v1/modules/by-domain?domain=' . urlencode($domain));
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, ['Accept: application/json']);
 		$this->applyResolve($ch, $api_url . '/api/v1/modules/by-domain?domain=' . urlencode($domain));
 
@@ -357,67 +383,114 @@ class DockercartLicensing {
 			return 0;
 		}
 
+		if (strlen($response) > 5_000_000) {
+			$this->logger->info('AutoPopulate: response too large for domain=' . $domain);
+
+			return 0;
+		}
+
 		$body = json_decode($response, true);
 
 		if (!is_array($body) || empty($body['success']) || !isset($body['data'])) {
 			return 0;
 		}
 
-		$count = 0;
+		$items = $body['data'];
 
-		foreach ($body['data'] as $item) {
-			if (empty($item['sku']) || empty($item['licenseKey'])) {
-				continue;
-			}
-
-			$sku = $item['sku'];
-			$key = $item['licenseKey'];
-			$module_code = $sku;
-
-			$existing = $this->getLicense($module_code);
-
-			if ($existing) {
-				if ($existing['license_key'] !== $key) {
-					$this->db->query(
-						"UPDATE `" . DB_PREFIX . "dockercart_license`
-						 SET `license_key` = '" . $this->db->escape($key) . "',
-						     `sku` = '" . $this->db->escape($sku) . "',
-						     `status` = 'unknown',
-						     `last_verified` = NULL,
-						     `last_valid` = NULL,
-						     `consecutive_failures` = 0,
-						     `is_test` = " . (!empty($item['isTest']) ? '1' : '0') . ",
-						     `expires_at` = " . (isset($item['expiresAt']) && $item['expiresAt'] !== null ? "'" . $this->db->escape($item['expiresAt']) . "'" : 'NULL') . ",
-						     `date_modified` = NOW()
-						 WHERE `module_code` = '" . $this->db->escape($module_code) . "'"
-					);
-				}
-
-				continue;
-			}
-
-			$expires_at = (isset($item['expiresAt']) && $item['expiresAt'] !== null)
-				? $item['expiresAt']
-				: null;
-
-			$this->db->query(
-				"INSERT INTO `" . DB_PREFIX . "dockercart_license`
-				 SET `module_code` = '" . $this->db->escape($module_code) . "',
-				     `sku` = '" . $this->db->escape($sku) . "',
-				     `license_key` = '" . $this->db->escape($key) . "',
-				     `domain` = '" . $this->db->escape($domain) . "',
-				     `fingerprint` = '" . $this->db->escape($this->getFingerprint()) . "',
-				     `status` = 'unknown',
-				     `is_test` = " . (!empty($item['isTest']) ? '1' : '0') . ",
-				     `expires_at` = " . ($expires_at !== null ? "'" . $this->db->escape($expires_at) . "'" : 'NULL') . ",
-				     `date_added` = NOW(),
-				     `date_modified` = NOW()"
-			);
-
-			$count++;
+		if (empty($items)) {
+			return 0;
 		}
 
-		$this->logger->info('AutoPopulate: populated ' . $count . ' licenses for domain=' . $domain);
+		$count = 0;
+		$fingerprint_escaped = $this->db->escape($fingerprint);
+		$domain_escaped = $this->db->escape($domain);
+
+		$this->db->query("START TRANSACTION");
+
+		try {
+			// Fetch existing licenses in one query
+			$skus = array();
+
+			foreach ($items as $item) {
+				if (!empty($item['sku'])) {
+					$skus[] = $this->db->escape($item['sku']);
+				}
+			}
+
+			if (empty($skus)) {
+				$this->db->query("ROLLBACK");
+
+				return 0;
+			}
+
+			$existing_result = $this->db->query(
+				"SELECT `module_code`, `license_key` FROM `" . DB_PREFIX . "dockercart_license`
+				 WHERE `module_code` IN ('" . implode("','", $skus) . "')"
+			);
+
+			$existing_map = array();
+
+			foreach ($existing_result->rows as $row) {
+				$existing_map[$row['module_code']] = $row['license_key'];
+			}
+
+			foreach ($items as $item) {
+				if (empty($item['sku']) || empty($item['licenseKey'])) {
+					continue;
+				}
+
+				$sku = $item['sku'];
+				$key = $item['licenseKey'];
+				$module_code = $sku;
+				$is_test = !empty($item['isTest']) ? '1' : '0';
+				$expires_at = (isset($item['expiresAt']) && $item['expiresAt'] !== null)
+					? "'" . $this->db->escape($item['expiresAt']) . "'"
+					: 'NULL';
+
+				if (isset($existing_map[$module_code])) {
+					if ($existing_map[$module_code] !== $key) {
+						$this->db->query(
+							"UPDATE `" . DB_PREFIX . "dockercart_license`
+							 SET `license_key` = '" . $this->db->escape($key) . "',
+							     `sku` = '" . $this->db->escape($sku) . "',
+							     `status` = 'unknown',
+							     `last_verified` = NULL,
+							     `last_valid` = NULL,
+							     `consecutive_failures` = 0,
+							     `is_test` = " . $is_test . ",
+							     `expires_at` = " . $expires_at . ",
+							     `date_modified` = NOW()
+							 WHERE `module_code` = '" . $this->db->escape($module_code) . "'"
+						);
+					}
+				} else {
+					$this->db->query(
+						"INSERT INTO `" . DB_PREFIX . "dockercart_license`
+						 SET `module_code` = '" . $this->db->escape($module_code) . "',
+						     `sku` = '" . $this->db->escape($sku) . "',
+						     `license_key` = '" . $this->db->escape($key) . "',
+						     `domain` = '" . $domain_escaped . "',
+						     `fingerprint` = '" . $fingerprint_escaped . "',
+						     `status` = 'unknown',
+						     `is_test` = " . $is_test . ",
+						     `expires_at` = " . $expires_at . ",
+						     `date_added` = NOW(),
+						     `date_modified` = NOW()"
+					);
+
+					$count++;
+				}
+			}
+
+			$this->db->query("COMMIT");
+		} catch (\Exception $e) {
+			$this->db->query("ROLLBACK");
+			$this->logger->info('AutoPopulate: transaction failed for domain=' . $domain . ' error=' . $e->getMessage());
+
+			return 0;
+		}
+
+		$this->logger->info('AutoPopulate: populated ' . $count . ' new licenses for domain=' . $domain);
 
 		return $count;
 	}
@@ -498,10 +571,14 @@ class DockercartLicensing {
 	}
 
 	public function removeLicense(string $module_code): void {
+		$this->enableExtension($module_code);
+
 		$this->db->query(
 			"DELETE FROM `" . DB_PREFIX . "dockercart_license`
 			 WHERE `module_code` = '" . $this->db->escape($module_code) . "'"
 		);
+
+		$this->logger->info('RemoveLicense: removed ' . $module_code);
 	}
 
 	private function applyResolve($ch, string $url): void {
@@ -524,35 +601,7 @@ class DockercartLicensing {
 			 WHERE `module_code` = '" . $this->db->escape($module_code) . "'"
 		);
 
-		$grace_days = $this->getGraceDays();
-
-		$result = $this->db->query(
-			"SELECT `consecutive_failures`, `last_valid`
-			 FROM `" . DB_PREFIX . "dockercart_license`
-			 WHERE `module_code` = '" . $this->db->escape($module_code) . "'"
-		);
-
-		if ($result->num_rows && $result->row['last_valid']) {
-			$last_valid = strtotime($result->row['last_valid']);
-			$grace_seconds = $grace_days * 86400;
-
-			if ((time() - $last_valid) >= $grace_seconds) {
-				$this->db->query(
-					"UPDATE `" . DB_PREFIX . "dockercart_license`
-					 SET `status` = 'invalid'
-					 WHERE `module_code` = '" . $this->db->escape($module_code) . "'"
-				);
-
-				$this->logger->info('Validate: GRACE EXPIRED for ' . $module_code);
-			}
-		}
+		$this->logger->info('Validate: RECORD FAILURE for ' . $module_code);
 	}
 
-	private function maskKey(string $key): string {
-		if (strlen($key) < 20) {
-			return substr($key, 0, 8) . '...';
-		}
-
-		return substr($key, 0, 12) . '...' . substr($key, -8);
-	}
 }
