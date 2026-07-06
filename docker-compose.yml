@@ -114,6 +114,17 @@ services:
       - PHP_POST_MAX_SIZE=${PHP_POST_MAX_SIZE:-100M}
       - PHP_MAX_EXECUTION_TIME=${PHP_MAX_EXECUTION_TIME:-300}
       - GIT_EXCLUDE_FILE=${GIT_EXCLUDE_FILE:-/var/www/git-exclude}
+      # Backup to S3 (optional; worker reads these to dump+tar+upload)
+      - BACKUP_S3_ENABLED=${BACKUP_S3_ENABLED:-false}
+      - BACKUP_S3_PROVIDER=${BACKUP_S3_PROVIDER:-}
+      - BACKUP_S3_ENDPOINT=${BACKUP_S3_ENDPOINT:-}
+      - BACKUP_S3_REGION=${BACKUP_S3_REGION:-}
+      - BACKUP_S3_BUCKET=${BACKUP_S3_BUCKET:-}
+      - BACKUP_S3_ACCESS_KEY_ID=${BACKUP_S3_ACCESS_KEY_ID:-}
+      - BACKUP_S3_SECRET_ACCESS_KEY=${BACKUP_S3_SECRET_ACCESS_KEY:-}
+      - BACKUP_S3_PATH=${BACKUP_S3_PATH:-dockercart/backups}
+      - BACKUP_S3_RETENTION_DAYS=${BACKUP_S3_RETENTION_DAYS:-7}
+      - BACKUP_S3_INSECURE=${BACKUP_S3_INSECURE:-false}
     depends_on:
       mariadb:
         condition: service_healthy
@@ -177,6 +188,17 @@ services:
       - SCHEDULER_ENABLED=${SCHEDULER_ENABLED:-true}
       - SCHEDULER_POLL_INTERVAL=${SCHEDULER_POLL_INTERVAL:-60}
       - SCHEDULER_WORKER_TIMEOUT=${SCHEDULER_WORKER_TIMEOUT:-3600}
+      # Backup to S3 (optional; worker reads these to dump+tar+upload)
+      - BACKUP_S3_ENABLED=${BACKUP_S3_ENABLED:-false}
+      - BACKUP_S3_PROVIDER=${BACKUP_S3_PROVIDER:-}
+      - BACKUP_S3_ENDPOINT=${BACKUP_S3_ENDPOINT:-}
+      - BACKUP_S3_REGION=${BACKUP_S3_REGION:-}
+      - BACKUP_S3_BUCKET=${BACKUP_S3_BUCKET:-}
+      - BACKUP_S3_ACCESS_KEY_ID=${BACKUP_S3_ACCESS_KEY_ID:-}
+      - BACKUP_S3_SECRET_ACCESS_KEY=${BACKUP_S3_SECRET_ACCESS_KEY:-}
+      - BACKUP_S3_PATH=${BACKUP_S3_PATH:-dockercart/backups}
+      - BACKUP_S3_RETENTION_DAYS=${BACKUP_S3_RETENTION_DAYS:-7}
+      - BACKUP_S3_INSECURE=${BACKUP_S3_INSECURE:-false}
     depends_on:
       mariadb:
         condition: service_healthy

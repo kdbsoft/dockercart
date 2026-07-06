@@ -460,6 +460,40 @@ PHP
     echo "Applied PHP settings from environment (${ini_file})"
 }
 
+# Generate rclone config for S3 backups from BACKUP_S3_* env vars.
+# Writes /var/www/storage/.rclone.conf (chmod 600) and exports RCLONE_CONFIG.
+# No-op when BACKUP_S3_ENABLED != true or required creds are missing.
+ensure_rclone_config() {
+    local rc_conf="/var/www/storage/.rclone.conf"
+
+    if [ "${BACKUP_S3_ENABLED:-false}" != "true" ]; then
+        return 0
+    fi
+
+    if [ -z "${BACKUP_S3_BUCKET:-}" ] || [ -z "${BACKUP_S3_ACCESS_KEY_ID:-}" ] || [ -z "${BACKUP_S3_SECRET_ACCESS_KEY:-}" ]; then
+        echo "WARNING: BACKUP_S3_ENABLED=true but BACKUP_S3_BUCKET/ACCESS_KEY_ID/SECRET_ACCESS_KEY not set — skipping rclone config."
+        return 0
+    fi
+
+    echo "Generating rclone config at ${rc_conf}..."
+    cat > "$rc_conf" <<EOF
+[s3]
+type = s3
+provider = ${BACKUP_S3_PROVIDER:-Other}
+endpoint = ${BACKUP_S3_ENDPOINT:-}
+region = ${BACKUP_S3_REGION:-}
+access_key_id = ${BACKUP_S3_ACCESS_KEY_ID}
+secret_access_key = ${BACKUP_S3_SECRET_ACCESS_KEY}
+no_check_certificate = ${BACKUP_S3_INSECURE:-false}
+EOF
+    chmod 600 "$rc_conf" 2>/dev/null || true
+    if [ "$(id -u)" -eq 0 ]; then
+        chown www-data:staff "$rc_conf" 2>/dev/null || true
+    fi
+    export RCLONE_CONFIG="$rc_conf"
+    echo "rclone config generated (RCLONE_CONFIG=${rc_conf})."
+}
+
 # Основная логика
 # Emit a small diagnostic header so logs show which entrypoint version ran.
 # We print the script modification time (as embedded in the image at build time)
@@ -483,6 +517,8 @@ if [ "$DOCKERCART_ROLE" = "scheduler" ]; then
     wait_for_mysql
     apply_php_settings
     mkdir -p /var/www/storage/logs/scheduler
+    mkdir -p /var/www/storage/backup
+    ensure_rclone_config
     echo "Starting DockerCart scheduler..."
     exec php /var/www/html/bin/dockercart_scheduler.php
 fi
@@ -500,6 +536,11 @@ wait_for_mysql
 initialize_database || echo "WARNING: Database initialization failed — continuing anyway"
 
 apply_php_settings
+
+# rclone config for S3 backup worker (also lets `make shell` users run the
+# worker manually; no-op when BACKUP_S3_ENABLED != true).
+mkdir -p /var/www/storage/backup
+ensure_rclone_config
 
 # Перестраиваем OCMOD модификации (читает XML из БД и файлов, пересоздаёт кэш)
 echo "Refreshing OCMOD modifications..."
