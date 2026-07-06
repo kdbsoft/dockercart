@@ -410,24 +410,6 @@ class ModelSaleOrder extends Model {
 		return $query->row['total'];
 	}
 	
-	public function createInvoiceNo($order_id) {
-		$order_info = $this->getOrder($order_id);
-
-		if ($order_info && !$order_info['invoice_no']) {
-			$query = $this->db->query("SELECT MAX(invoice_no) AS invoice_no FROM `" . DB_PREFIX . "order` WHERE invoice_prefix = '" . $this->db->escape($order_info['invoice_prefix']) . "'");
-
-			if ($query->row['invoice_no']) {
-				$invoice_no = $query->row['invoice_no'] + 1;
-			} else {
-				$invoice_no = 1;
-			}
-
-			$this->db->query("UPDATE `" . DB_PREFIX . "order` SET invoice_no = '" . (int)$invoice_no . "', invoice_prefix = '" . $this->db->escape($order_info['invoice_prefix']) . "' WHERE order_id = '" . (int)$order_id . "'");
-
-			return $order_info['invoice_prefix'] . $invoice_no;
-		}
-	}
-
 	public function getOrderHistories($order_id, $start = 0, $limit = 10) {
 		if ($start < 0) {
 			$start = 0;
