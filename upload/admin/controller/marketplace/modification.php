@@ -1409,7 +1409,7 @@ class ControllerMarketplaceModification extends Controller {
 				'author'          => $result['author'],
 				'version'         => $result['version'],
 				'status'          => $result['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
-				'date_added'      => date($this->language->get('date_format_short'), strtotime($result['date_added'])),
+				'date_added'      => date('d/m/Y H:i', strtotime($result['date_added'])),
 				'link'            => $result['link'],
 				'enable'          => $this->url->link('marketplace/modification/enable', 'user_token=' . $this->session->data['user_token'] . '&modification_id=' . $result['modification_id'], true),
 				'disable'         => $this->url->link('marketplace/modification/disable', 'user_token=' . $this->session->data['user_token'] . '&modification_id=' . $result['modification_id'], true),
