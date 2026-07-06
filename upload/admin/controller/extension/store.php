@@ -342,13 +342,6 @@ class ControllerExtensionStore extends Controller {
 
 		$license_key = $this->request->post['license_key'] ?? '';
 
-		if (empty($license_key)) {
-			$json['error'] = $this->language->get('error_license_required');
-			$this->response->setOutput(json_encode($json));
-
-			return;
-		}
-
 		try {
 			$store = $this->loadStore();
 
@@ -402,6 +395,10 @@ class ControllerExtensionStore extends Controller {
 				return;
 			}
 
+			if (!empty($download_data['licenseKey'])) {
+				$license_key = $download_data['licenseKey'];
+			}
+
 			$zip_content = $this->downloadFile($download_data['downloadUrl']);
 
 			if ($zip_content === false) {
@@ -443,7 +440,7 @@ class ControllerExtensionStore extends Controller {
 				throw $e;
 			}
 
-			$this->load->controller('marketplace/modification/refresh');
+			$this->clearModificationCache();
 
 			// Re-check installation status (TOCTOU guard)
 			if ($store->getInstalledMeta($sku)) {
@@ -475,16 +472,19 @@ class ControllerExtensionStore extends Controller {
 
 			$this->load->library('dockercart/licensing');
 			$licensing = new DockercartLicensing($this->registry);
-			$licensing->setLicenseKey($code, $sku, $license_key);
-			$licensing->activate($code, $license_key);
+
+			if (!empty($license_key)) {
+				$licensing->setLicenseKey($code, $sku, $license_key);
+				$licensing->activate($code, $license_key);
+			}
 
 			$this->db->query("COMMIT");
 
 			$json['success'] = true;
 			$json['message'] = sprintf($this->language->get('text_install_success'), $current_version['version']);
-		} catch (Exception $e) {
+		} catch (\Throwable $e) {
 			$this->db->query("ROLLBACK");
-			$this->log->write('Extension Store install error: ' . $e->getMessage());
+			$this->log->write('Extension Store install EXCEPTION: ' . get_class($e) . ' ' . $e->getMessage() . ' file=' . $e->getFile() . ' line=' . $e->getLine());
 			$json['error'] = $this->language->get('error_download_failed');
 		}
 
@@ -593,13 +593,6 @@ class ControllerExtensionStore extends Controller {
 				}
 			}
 
-			if (empty($license_key)) {
-				$json['error'] = $this->language->get('error_license_required');
-				$this->response->setOutput(json_encode($json));
-
-				return;
-			}
-
 			$download_data = $store->getDownloadUrl($sku, $version_id, $license_key);
 
 			if ($download_data === null || empty($download_data['downloadUrl'])) {
@@ -642,7 +635,7 @@ class ControllerExtensionStore extends Controller {
 				throw $e;
 			}
 
-			$this->load->controller('marketplace/modification/refresh');
+			$this->clearModificationCache();
 
 			$code = $meta['code'];
 			$from_version = $meta['installed_version'];
@@ -817,8 +810,7 @@ class ControllerExtensionStore extends Controller {
 				$licensing->removeLicense($code);
 			}
 
-			// Refresh modifications
-			$this->load->controller('marketplace/modification/refresh');
+			$this->clearModificationCache();
 
 			$this->db->query("COMMIT");
 
@@ -1106,21 +1098,19 @@ class ControllerExtensionStore extends Controller {
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
 
-		$parsed = parse_url($url);
-		$expected_host = parse_url(DockercartExtensionStore::STORE_DOMAIN, PHP_URL_HOST);
+		$gateway_ip = @gethostbyname('host.docker.internal');
 
-		if ($parsed['host'] === $expected_host) {
-			$gateway_ip = @gethostbyname('host.docker.internal');
-
-			if ($gateway_ip !== 'host.docker.internal') {
-				curl_setopt($ch, CURLOPT_RESOLVE, array(
-					$parsed['host'] . ':' . ($parsed['port'] ?? 443) . ':' . $gateway_ip
-				));
-			}
+		if ($gateway_ip !== 'host.docker.internal') {
+			$parsed = parse_url($url);
+			$port = $parsed['port'] ?? (strtolower($parsed['scheme'] ?? 'http') === 'https' ? 443 : 80);
+			curl_setopt($ch, CURLOPT_RESOLVE, array(
+				$parsed['host'] . ':' . $port . ':' . $gateway_ip
+			));
 		}
 
 		$response = curl_exec($ch);
 		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		$curl_error = curl_error($ch);
 		curl_close($ch);
 
 		if ($http_code !== 200 || $response === false) {
@@ -1246,10 +1236,14 @@ class ControllerExtensionStore extends Controller {
 	private function processInstallXml(string $xml_path, int $extension_install_id): void {
 		$this->load->model('setting/modification');
 
+		$xml_content = file_get_contents($xml_path);
+
+		if ($xml_content === false || $xml_content === '') {
+			return;
+		}
+
 		$xml = new \DOMDocument();
-		$old = libxml_disable_entity_loader(true);
-		$xml->load($xml_path, LIBXML_NONET);
-		libxml_disable_entity_loader($old);
+		$xml->loadXML($xml_content, LIBXML_NONET);
 
 		$code = '';
 		$name = '';
@@ -1318,4 +1312,13 @@ class ControllerExtensionStore extends Controller {
 		rmdir($dir);
 	}
 
+	private function clearModificationCache(): void {
+		$files = glob(DIR_MODIFICATION . '*');
+
+		foreach ($files as $file) {
+			if (is_file($file) && basename($file) !== 'index.html') {
+				unlink($file);
+			}
+		}
+	}
 }
