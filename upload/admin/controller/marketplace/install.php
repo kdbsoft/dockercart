@@ -225,38 +225,7 @@ class ControllerMarketplaceInstall extends Controller {
 				}
 
 				if (!$json) {
-					// Check writability of existing destination files
-					$not_writable = array();
-
-					foreach ($files as $file) {
-						if (!is_file($file)) {
-							continue;
-						}
-
-						$destination = str_replace('\\', '/', substr($file, strlen($directory . 'upload/')));
-
-						$path = '';
-
-						if (substr($destination, 0, 5) == 'admin') {
-							$path = DIR_APPLICATION . substr($destination, 6);
-						}
-
-						if (substr($destination, 0, 7) == 'catalog') {
-							$path = DIR_CATALOG . substr($destination, 8);
-						}
-
-						if (substr($destination, 0, 5) == 'image') {
-							$path = DIR_IMAGE . substr($destination, 6);
-						}
-
-						if (substr($destination, 0, 6) == 'system') {
-							$path = DIR_SYSTEM . substr($destination, 7);
-						}
-
-						if ($path !== '' && is_file($path) && !is_writable($path)) {
-							$not_writable[] = $destination;
-						}
-					}
+					$not_writable = DockercartInstallHelper::checkWritable($directory . 'upload/');
 
 					if (!empty($not_writable)) {
 						$json['error'] = sprintf($this->language->get('error_writable'), implode('<br>', $not_writable));

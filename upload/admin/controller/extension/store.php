@@ -1153,6 +1153,13 @@ class ControllerExtensionStore extends Controller {
 		$upload_dir = $tmp_dir . '/upload';
 
 		if (is_dir($upload_dir)) {
+			$not_writable = DockercartInstallHelper::checkWritable($upload_dir);
+
+			if (!empty($not_writable)) {
+				$this->cleanupTemp($tmp_dir);
+				return array('error' => sprintf($this->language->get('error_writable'), implode('<br>', $not_writable)));
+			}
+
 			$this->moveFiles($upload_dir, $extension_install_id);
 
 			$this->load->model('setting/extension');

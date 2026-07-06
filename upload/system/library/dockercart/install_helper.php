@@ -119,4 +119,38 @@ class DockercartInstallHelper {
 		flock($fh, LOCK_UN);
 		fclose($fh);
 	}
+
+	public static function checkWritable(string $source): array {
+		$not_writable = array();
+
+		if (!is_dir($source)) {
+			return $not_writable;
+		}
+
+		$iterator = new RecursiveIteratorIterator(
+			new RecursiveDirectoryIterator($source, RecursiveDirectoryIterator::SKIP_DOTS),
+			RecursiveIteratorIterator::SELF_FIRST
+		);
+
+		foreach ($iterator as $item) {
+			if ($item->isDir()) {
+				continue;
+			}
+
+			$relative = substr($item->getPathname(), strlen($source) + 1);
+			$parts = explode('/', $relative, 2);
+
+			if (count($parts) < 2) {
+				continue;
+			}
+
+			$dest = self::getSourcePath($parts[0] . '/' . $parts[1]);
+
+			if ($dest !== '' && is_file($dest) && !is_writable($dest)) {
+				$not_writable[] = $parts[0] . '/' . $parts[1];
+			}
+		}
+
+		return $not_writable;
+	}
 }
