@@ -31,7 +31,7 @@
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
-    
+
     <div id="alert-container"></div>
 
     <!-- Nav tabs -->
@@ -295,7 +295,7 @@
                 <label class="col-sm-2 control-label">{{ entry_exclude_products|default('Exclude Products') }}</label>
                 <div class="col-sm-10">
                   <input type="hidden" name="module_dockercart_googlebase_exclude_products" id="input-exclude-products" value="{{ module_dockercart_googlebase_exclude_products }}" />
-                  
+
                   <!-- Search input -->
                   <div class="input-group" style="margin-bottom: 10px; position: relative;">
                     <input type="text" id="product-search" class="form-control" placeholder="{{ text_product_search|default('Type to search products...') }}" autocomplete="off" />
@@ -307,7 +307,7 @@
                     <!-- Search results dropdown (positioned relative to input-group) -->
                     <div id="product-search-results" class="dropdown-menu" style="display: none; position: absolute; top: 100%; left: 0; z-index: 2000; width: 100%; max-height: 300px; overflow-y: auto; background: #fff; border: 1px solid #ddd; box-shadow: 0 6px 12px rgba(0,0,0,.175);"></div>
                   </div>
-                  
+
                   <!-- Selected products list -->
                   <div id="excluded-products-list" class="well" style="min-height: 50px; max-height: 200px; overflow-y: auto;">
                     <div class="text-muted" id="no-products-message">{{ text_no_excluded_products|default('No products excluded') }}</div>
@@ -321,7 +321,7 @@
                 <label class="col-sm-2 control-label">{{ entry_exclude_categories|default('Exclude Categories') }}</label>
                 <div class="col-sm-10">
                   <input type="hidden" name="module_dockercart_googlebase_exclude_categories" id="input-exclude-categories" value="{{ module_dockercart_googlebase_exclude_categories }}" />
-                  
+
                   <!-- Search input -->
                   <div class="input-group" style="margin-bottom: 10px; position: relative;">
                     <input type="text" id="category-search" class="form-control" placeholder="{{ text_category_search|default('Type to search categories...') }}" autocomplete="off" />
@@ -333,10 +333,10 @@
                     <!-- Search results dropdown (positioned relative to input-group) -->
                     <div id="category-search-results" class="dropdown-menu" style="display: none; position: absolute; top: 100%; left: 0; z-index: 2000; width: 100%; max-height: 300px; overflow-y: auto; background: #fff; border: 1px solid #ddd; box-shadow: 0 6px 12px rgba(0,0,0,.175);"></div>
                   </div>
-                  
+
                   <!-- Category tree for easier exclusion -->
                   <div id="exclude-category-tree" style="max-height:320px; overflow:auto; border:1px solid #f0f0f0; padding:8px; background:#fff; margin-bottom:10px;"></div>
-                  
+
                   <!-- Selected categories list -->
                   <div id="excluded-categories-list" class="well" style="min-height: 50px; max-height: 200px; overflow-y: auto;">
                     <div class="text-muted" id="no-categories-message">{{ text_no_excluded_categories|default('No categories excluded') }}</div>
@@ -352,7 +352,7 @@
               <h4>{{ tab_categories|default('Category Mapping') }}</h4>
 
               <div class="alert alert-info">
-                <i class="fa fa-info-circle"></i> 
+                <i class="fa fa-info-circle"></i>
                 {{ help_category_mapping|default('Map DockerCart categories to Google Product Categories. Format: category_id = google_category_id (one per line).')|raw }}
               </div>
 
@@ -471,7 +471,7 @@
               <h4>{{ tab_custom_labels|default('Custom Labels') }}</h4>
 
               <div class="alert alert-info">
-                <i class="fa fa-info-circle"></i> 
+                <i class="fa fa-info-circle"></i>
                 {{ help_custom_label|default('Custom labels for Google Merchant Center (used for campaigns, promotions, etc.). Can use placeholders: {manufacturer}, {category}, {sku}, {model}') }}
               </div>
 
@@ -583,7 +583,7 @@
                 <table class="table table-bordered dcx-table">
                    <tr>
                      <td><strong>Developer</strong></td>
-                    <td>DockerCart Team</td>
+                    <td>DockerCart Official</td>
                   </tr>
                   <tr>
                     <td><strong>Contact</strong></td>
@@ -632,12 +632,12 @@ updateGbPanelHeader($('#gb-tabs > li.active a.js-gb-tab'));
 document.getElementById('btn-generate').addEventListener('click', function() {
     var btn = this;
     var originalHtml = btn.innerHTML;
-    
+
     btn.disabled = true;
     btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
-    
+
     showAlert('info', 'Generating feed... This may take a while for large catalogs.');
-    
+
     fetch('index.php?route=extension/feed/dockercart_googlebase/ajaxGenerate&user_token={{ user_token }}', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
@@ -646,7 +646,7 @@ document.getElementById('btn-generate').addEventListener('click', function() {
     .then(function(json) {
         btn.disabled = false;
         btn.innerHTML = originalHtml;
-        
+
         if (json.success) {
             showAlert('success', json.success);
             if (json.stats) {
@@ -667,10 +667,10 @@ document.getElementById('btn-generate').addEventListener('click', function() {
 document.getElementById('btn-clear-cache').addEventListener('click', function() {
     var btn = this;
     var originalHtml = btn.innerHTML;
-    
+
     btn.disabled = true;
     btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
-    
+
     fetch('index.php?route=extension/feed/dockercart_googlebase/clearCache&user_token={{ user_token }}', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
@@ -679,7 +679,7 @@ document.getElementById('btn-clear-cache').addEventListener('click', function() 
     .then(function(json) {
         btn.disabled = false;
         btn.innerHTML = originalHtml;
-        
+
         if (json.success) {
             showAlert('success', json.success);
             if (json.stats) {
@@ -704,17 +704,17 @@ document.getElementById('btn-verify-license').addEventListener('click', function
     var licenseStatus = document.getElementById('license-status');
     var licenseInfo = document.getElementById('license-info');
     var licenseDetails = document.getElementById('license-details');
-    
+
     if (!licenseKey) {
         licenseStatus.innerHTML = '<span class="label label-danger">Please enter license key</span>';
         return;
     }
-    
+
     if (!publicKey) {
         licenseStatus.innerHTML = '<span class="label label-danger">Please enter public key</span>';
         return;
     }
-    
+
     btn.disabled = true;
     var originalHtml = btn.innerHTML;
     btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Verifying...';
@@ -733,7 +733,7 @@ document.getElementById('btn-verify-license').addEventListener('click', function
         public_key: publicKey
       })
     }).catch(function(){});
-    
+
     fetch('index.php?route=extension/feed/dockercart_googlebase/verifyLicenseAjax&user_token={{ user_token }}', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -746,10 +746,10 @@ document.getElementById('btn-verify-license').addEventListener('click', function
     .then(function(data) {
         btn.disabled = false;
         btn.innerHTML = originalHtml;
-        
+
         if (data.valid) {
             licenseStatus.innerHTML = '<span class="label label-success"><i class="fa fa-check"></i> Valid</span>';
-            
+
             var infoHtml = '<strong>Status:</strong> Active<br>';
             infoHtml += '<strong>Domain:</strong> ' + data.domain + '<br>';
             if (data.expires_formatted) {
@@ -760,12 +760,12 @@ document.getElementById('btn-verify-license').addEventListener('click', function
             if (data.license_id) {
                 infoHtml += '<strong>License ID:</strong> ' + data.license_id;
             }
-            
+
             licenseDetails.innerHTML = infoHtml;
             licenseInfo.style.display = 'block';
         } else {
             licenseStatus.innerHTML = '<span class="label label-danger"><i class="fa fa-times"></i> Invalid</span>';
-            
+
             if (data.error) {
                 licenseDetails.innerHTML = '<strong>Error:</strong> ' + data.error;
                 licenseInfo.style.display = 'block';
@@ -784,11 +784,11 @@ function showAlert(type, message) {
     var alertContainer = document.getElementById('alert-container');
     var alert = document.createElement('div');
     alert.className = 'alert alert-' + type + ' alert-dismissible';
-    alert.innerHTML = '<i class="fa fa-' + (type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-circle' : 'info-circle') + '"></i> ' + message + 
+    alert.innerHTML = '<i class="fa fa-' + (type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-circle' : 'info-circle') + '"></i> ' + message +
         ' <button type="button" class="close" data-dismiss="alert">&times;</button>';
     alertContainer.innerHTML = '';
     alertContainer.appendChild(alert);
-    
+
     if (type === 'success') {
         setTimeout(function() {
             alert.style.opacity = '0';
@@ -810,7 +810,7 @@ function updateStats(stats) {
 document.addEventListener('DOMContentLoaded', function() {
     var licenseKey = document.getElementById('input-license-key').value.trim();
     var publicKey = document.getElementById('input-public-key').value.trim();
-    
+
     if (licenseKey && publicKey) {
         setTimeout(function() {
             document.getElementById('btn-verify-license').click();
@@ -826,28 +826,28 @@ document.addEventListener('DOMContentLoaded', function() {
     var excludedProducts = [];
     var excludedCategories = [];
     var searchTimeout = null;
-    
+
     // Parse initial values
     var initialProducts = document.getElementById('input-exclude-products').value.trim();
     var initialCategories = document.getElementById('input-exclude-categories').value.trim();
-    
+
     if (initialProducts) {
         excludedProducts = initialProducts.split(',').map(function(id) {
             return parseInt(id.trim(), 10);
         }).filter(function(id) { return id > 0; });
     }
-    
+
     if (initialCategories) {
         excludedCategories = initialCategories.split(',').map(function(id) {
             return parseInt(id.trim(), 10);
         }).filter(function(id) { return id > 0; });
     }
-    
+
     // Load existing items info on page load
     if (excludedProducts.length > 0) {
         loadProductsInfo(excludedProducts);
     }
-    
+
     if (excludedCategories.length > 0) {
         loadCategoriesInfo(excludedCategories);
     }
@@ -1389,26 +1389,26 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     loadSavedTaxonomyAndTree();
-    
+
     // === PRODUCTS ===
     var productSearch = document.getElementById('product-search');
     var productResults = document.getElementById('product-search-results');
     var productsList = document.getElementById('excluded-products-list');
-    
+
     productSearch.addEventListener('input', function() {
         clearTimeout(searchTimeout);
         var query = this.value.trim();
-        
+
         if (query.length < 2) {
             productResults.style.display = 'none';
             return;
         }
-        
+
         searchTimeout = setTimeout(function() {
             searchProducts(query);
         }, 300);
     });
-    
+
     productSearch.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -1418,14 +1418,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
-    
+
     document.getElementById('btn-product-search').addEventListener('click', function() {
         var query = productSearch.value.trim();
         if (query.length >= 2) {
             searchProducts(query);
         }
     });
-    
+
     function searchProducts(query) {
         fetch('index.php?route=extension/feed/dockercart_googlebase/searchProducts&user_token={{ user_token }}&filter=' + encodeURIComponent(query))
             .then(function(response) { return response.json(); })
@@ -1444,7 +1444,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                     productResults.innerHTML = html;
                     productResults.style.display = 'block';
-                    
+
                     // Add click handlers
                     productResults.querySelectorAll('.product-result-item').forEach(function(item) {
                         item.addEventListener('click', function(e) {
@@ -1463,7 +1463,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
     }
-    
+
     function loadProductsInfo(ids) {
         fetch('index.php?route=extension/feed/dockercart_googlebase/getProductInfo&user_token={{ user_token }}&product_ids=' + ids.join(','))
             .then(function(response) { return response.json(); })
@@ -1476,7 +1476,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
     }
-    
+
     function addExcludedProduct(id, name, model) {
         if (excludedProducts.indexOf(id) === -1) {
             excludedProducts.push(id);
@@ -1485,7 +1485,7 @@ document.addEventListener('DOMContentLoaded', function() {
             updateNoProductsMessage();
         }
     }
-    
+
     function removeExcludedProduct(id) {
         var index = excludedProducts.indexOf(id);
         if (index > -1) {
@@ -1496,11 +1496,11 @@ document.addEventListener('DOMContentLoaded', function() {
             updateNoProductsMessage();
         }
     }
-    
+
     function renderProductItem(id, name, model) {
         var existing = productsList.querySelector('[data-product-id="' + id + '"]');
         if (existing) return;
-        
+
         var item = document.createElement('div');
         item.className = 'excluded-item';
         item.setAttribute('data-product-id', id);
@@ -1509,40 +1509,40 @@ document.addEventListener('DOMContentLoaded', function() {
             '<button type="button" class="btn btn-danger btn-xs" style="margin-left: 10px;" onclick="removeProduct(' + id + ')"><i class="fa fa-times"></i></button>';
         productsList.appendChild(item);
     }
-    
+
     function updateProductsInput() {
         document.getElementById('input-exclude-products').value = excludedProducts.join(',');
     }
-    
+
     function updateNoProductsMessage() {
         var msg = document.getElementById('no-products-message');
         if (msg) {
             msg.style.display = excludedProducts.length > 0 ? 'none' : 'block';
         }
     }
-    
+
     // Make removeProduct global for onclick
     window.removeProduct = removeExcludedProduct;
-    
+
     // === CATEGORIES ===
     var categorySearch = document.getElementById('category-search');
     var categoryResults = document.getElementById('category-search-results');
     var categoriesList = document.getElementById('excluded-categories-list');
-    
+
     categorySearch.addEventListener('input', function() {
         clearTimeout(searchTimeout);
         var query = this.value.trim();
-        
+
         if (query.length < 2) {
             categoryResults.style.display = 'none';
             return;
         }
-        
+
         searchTimeout = setTimeout(function() {
             searchCategories(query);
         }, 300);
     });
-    
+
     categorySearch.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -1552,14 +1552,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
-    
+
     document.getElementById('btn-category-search').addEventListener('click', function() {
         var query = categorySearch.value.trim();
         if (query.length >= 2) {
             searchCategories(query);
         }
     });
-    
+
     function searchCategories(query) {
         fetch('index.php?route=extension/feed/dockercart_googlebase/searchCategories&user_token={{ user_token }}&filter=' + encodeURIComponent(query))
             .then(function(response) { return response.json(); })
@@ -1578,7 +1578,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                     categoryResults.innerHTML = html;
                     categoryResults.style.display = 'block';
-                    
+
                     // Add click handlers
                     categoryResults.querySelectorAll('.category-result-item').forEach(function(item) {
                         item.addEventListener('click', function(e) {
@@ -1597,7 +1597,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
     }
-    
+
     function loadCategoriesInfo(ids) {
         fetch('index.php?route=extension/feed/dockercart_googlebase/getCategoryInfo&user_token={{ user_token }}&category_ids=' + ids.join(','))
             .then(function(response) { return response.json(); })
@@ -1610,7 +1610,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
     }
-    
+
     function addExcludedCategory(id, name, path) {
         if (excludedCategories.indexOf(id) === -1) {
             excludedCategories.push(id);
@@ -1623,7 +1623,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } catch (e) {}
         }
     }
-    
+
     function removeExcludedCategory(id) {
         var index = excludedCategories.indexOf(id);
         if (index > -1) {
@@ -1638,11 +1638,11 @@ document.addEventListener('DOMContentLoaded', function() {
             } catch (e) {}
         }
     }
-    
+
     function renderCategoryItem(id, name, path) {
         var existing = categoriesList.querySelector('[data-category-id="' + id + '"]');
         if (existing) return;
-        
+
         var item = document.createElement('div');
         item.className = 'excluded-item';
         item.setAttribute('data-category-id', id);
@@ -1651,21 +1651,21 @@ document.addEventListener('DOMContentLoaded', function() {
             '<button type="button" class="btn btn-danger btn-xs" style="margin-left: 10px;" onclick="removeCategory(' + id + ')"><i class="fa fa-times"></i></button>';
         categoriesList.appendChild(item);
     }
-    
+
     function updateCategoriesInput() {
         document.getElementById('input-exclude-categories').value = excludedCategories.join(',');
     }
-    
+
     function updateNoCategoriesMessage() {
         var msg = document.getElementById('no-categories-message');
         if (msg) {
             msg.style.display = excludedCategories.length > 0 ? 'none' : 'block';
         }
     }
-    
+
     // Make removeCategory global for onclick
     window.removeCategory = removeExcludedCategory;
-    
+
     // Close dropdowns on outside click
     document.addEventListener('click', function(e) {
         if (!e.target.closest('#product-search') && !e.target.closest('#product-search-results') && !e.target.closest('#btn-product-search')) {
@@ -1675,7 +1675,7 @@ document.addEventListener('DOMContentLoaded', function() {
             categoryResults.style.display = 'none';
         }
     });
-    
+
     function escapeHtml(text) {
         if (!text) return '';
         var div = document.createElement('div');

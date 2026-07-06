@@ -2,7 +2,7 @@
 -- DockerCart Blog - Database Schema
 -- Version: 1.0.0
 -- Compatible: OpenCart 3.0.0 - 3.0.3.8+
--- Author: DockerCart Team
+-- Author: DockerCart Official
 -- Description: Complete blog system for OpenCart with posts, categories,
 --              authors, comments, tags, and SEO support
 -- ============================================================================

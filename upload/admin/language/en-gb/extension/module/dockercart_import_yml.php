@@ -92,7 +92,7 @@ $_['text_section_module_settings'] = 'Module Settings';
 $_['text_section_profiles'] = 'Import Profiles';
 $_['text_section_license_info'] = 'License Information';
 $_['text_developer'] = 'Developer';
-$_['text_developer_name'] = 'DockerCart Team';
+$_['text_developer_name'] = 'DockerCart Official';
 $_['text_contact'] = 'Contact';
 
 // Column

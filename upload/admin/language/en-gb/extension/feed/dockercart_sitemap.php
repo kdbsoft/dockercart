@@ -25,7 +25,7 @@ $_['text_section_module_settings'] = 'Module Settings';
 $_['text_section_content_types'] = 'Content Types';
 $_['text_section_limits'] = 'Sitemap Limits';
 $_['text_developer'] = 'Developer';
-$_['text_developer_name'] = 'DockerCart Team';
+$_['text_developer_name'] = 'DockerCart Official';
 $_['text_contact'] = 'Contact';
 
 $_['entry_products']    = 'Include Products';

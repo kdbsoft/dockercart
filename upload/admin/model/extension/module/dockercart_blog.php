@@ -1,11 +1,11 @@
 <?php
 /**
  * DockerCart Blog - Admin Model
- * 
+ *
  * @package    DockerCart Blog
  * @version    1.0.0
- * @author     DockerCart Team
- * 
+ * @author     DockerCart Official
+ *
  * Description: Main model for database schema management and core blog operations.
  *              Handles installation, uninstallation, and provides utility methods.
  */
@@ -19,16 +19,16 @@ class ModelExtensionModuleDockercartBlog extends Model {
 	public function install() {
 		// SQL file location - in admin/controller/extension/module/
 		$sql_file = DIR_APPLICATION . 'controller/extension/module/dockercart_blog_install.sql';
-		
+
 		if (!file_exists($sql_file)) {
 			throw new Exception('Installation SQL file not found: ' . $sql_file);
 		}
 
 		$sql = file_get_contents($sql_file);
-		
+
 		// Properly parse SQL file
 		$sql = $this->parseSql($sql);
-		
+
 		// Execute each statement
 		foreach ($sql as $statement) {
 			if (!empty($statement)) {
@@ -37,7 +37,7 @@ class ModelExtensionModuleDockercartBlog extends Model {
 				} catch (Exception $e) {
 					// Allow table already exists errors to be skipped
 					$error_msg = $e->getMessage();
-					if (strpos($error_msg, 'already exists') === false && 
+					if (strpos($error_msg, 'already exists') === false &&
 					    strpos($error_msg, 'Duplicate') === false &&
 					    strpos($error_msg, 'already in use') === false) {
 						throw $e;
@@ -61,7 +61,7 @@ class ModelExtensionModuleDockercartBlog extends Model {
 	/**
 	 * Parse SQL file into individual statements
 	 * Handles comments and multi-line statements properly
-	 * 
+	 *
 	 * @param string $sql Raw SQL content
 	 * @return array Array of SQL statements
 	 */
@@ -69,18 +69,18 @@ class ModelExtensionModuleDockercartBlog extends Model {
 		// Remove SQL comments
 		$sql = preg_replace('/^--.*?$/m', '', $sql); // Remove line comments
 		$sql = preg_replace('/\/\*[\s\S]*?\*\//m', '', $sql); // Remove block comments
-		
+
 		// Split on semicolons that aren't inside quotes
 		$statements = array();
 		$current = '';
 		$in_quote = false;
 		$quote_char = '';
 		$length = strlen($sql);
-		
+
 		for ($i = 0; $i < $length; $i++) {
 			$char = $sql[$i];
 			$next_char = ($i + 1 < $length) ? $sql[$i + 1] : '';
-			
+
 			// Handle quotes
 			if (($char === "'" || $char === '"') && ($i === 0 || $sql[$i - 1] !== '\\')) {
 				if (!$in_quote) {
@@ -91,7 +91,7 @@ class ModelExtensionModuleDockercartBlog extends Model {
 					$quote_char = '';
 				}
 			}
-			
+
 			// Handle semicolon - statement separator
 			if ($char === ';' && !$in_quote) {
 				$current .= $char;
@@ -102,16 +102,16 @@ class ModelExtensionModuleDockercartBlog extends Model {
 				$current = '';
 				continue;
 			}
-			
+
 			$current .= $char;
 		}
-		
+
 		// Add last statement if exists
 		$stmt = trim($current);
 		if (!empty($stmt) && $stmt !== ';') {
 			$statements[] = $stmt;
 		}
-		
+
 		return $statements;
 	}
 
@@ -143,7 +143,7 @@ class ModelExtensionModuleDockercartBlog extends Model {
 
 	/**
 	 * Get module statistics
-	 * 
+	 *
 	 * @return array
 	 */
 	public function getStatistics() {

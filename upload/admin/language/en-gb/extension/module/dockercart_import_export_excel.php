@@ -98,7 +98,7 @@ $_['text_verify_public_key_required'] = 'Please save the public key first before
 $_['text_all'] = 'All';
 $_['text_filter_hint_export'] = 'Leave filters empty to export all products for selected store/language.';
 $_['text_developer'] = 'Developer';
-$_['text_developer_name'] = 'DockerCart Team';
+$_['text_developer_name'] = 'DockerCart Official';
 $_['text_contact'] = 'Contact';
 
 // Entry

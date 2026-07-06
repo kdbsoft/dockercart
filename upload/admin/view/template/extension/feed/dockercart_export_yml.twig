@@ -139,7 +139,7 @@
               <table class="table table-bordered dcx-table">
                  <tr>
                   <td><strong>{{ text_developer|default('Developer') }}</strong></td>
-                  <td>DockerCart Team</td>
+                  <td>DockerCart Official</td>
                 </tr>
                 <tr>
                   <td><strong>Contact</strong></td>
@@ -404,9 +404,9 @@ function editProfile(profileId) {
 function showProfileModal(profile) {
     profile = profile || {};
     var isEdit = profile.profile_id ? true : false;
-    
+
     $('#profile-modal').remove();
-    
+
     var html = '<div id="profile-modal" class="modal fade" tabindex="-1" role="dialog">';
     html += '  <div class="modal-dialog modal-lg" role="document">';
     html += '    <div class="modal-content">';
@@ -600,7 +600,7 @@ function showProfileModal(profile) {
     html += '    </div>';
     html += '  </div>';
     html += '</div>';
-    
+
     $('body').append(html);
 
     // Pre-select categories and manufacturers from saved filters
@@ -616,7 +616,7 @@ function showProfileModal(profile) {
     }
 
     $('#profile-modal').modal('show');
-    
+
     // Toggle products_per_file field visibility
     $('#profile-split-files').on('change', function() {
         if ($(this).is(':checked')) {
@@ -631,17 +631,17 @@ function saveProfile() {
     var formData = {};
     var settings = {};
     var filters = {};
-    
+
     // Get profile_id if editing
     var profileId = $('#form-profile input[name="profile_id"]').val();
     var isEdit = !!profileId;
     if (profileId) {
         formData.profile_id = parseInt(profileId);
     }
-    
+
     $('#form-profile').serializeArray().forEach(function(field) {
         var fieldName = field.name.replace('[]', '');
-        
+
         // Categories and manufacturers go to filters
         if (fieldName === 'categories' || fieldName === 'manufacturers') {
             var filterKey = fieldName === 'categories' ? 'category' : 'manufacturer';
@@ -662,7 +662,7 @@ function saveProfile() {
             formData[fieldName] = field.value;
         }
     });
-    
+
     // Handle checkboxes separately (they don't appear in serializeArray if unchecked)
     if ($('#profile-only-special').is(':checked')) {
         filters['only_special'] = ['1'];
@@ -680,11 +680,11 @@ function saveProfile() {
         formData.split_files = 1;
         formData.products_per_file = $('#profile-products-per-file').val() || 10000;
     }
-    
+
     // Add settings and filters to formData
     formData.settings = settings;
     formData.filters = filters;
-    
+
     $.ajax({
         url: '{{ ajax_save_profile }}',
         type: 'post',
@@ -697,11 +697,11 @@ function saveProfile() {
         success: function(json) {
             if (json.success) {
                 $('#profile-modal').modal('hide');
-                
+
                 // Show success message
                 var message = isEdit ? 'Profile updated successfully!' : 'Profile created successfully!';
                 showNotification('success', message);
-                
+
                 // Reload profiles table after a short delay
                 setTimeout(function() {
                     location.reload();
@@ -721,7 +721,7 @@ function saveProfile() {
 function showNotification(type, message) {
     var alertClass = 'alert-info';
     var icon = 'fa-info-circle';
-    
+
     if (type === 'success') {
         alertClass = 'alert-success';
         icon = 'fa-check-circle';
@@ -729,15 +729,15 @@ function showNotification(type, message) {
         alertClass = 'alert-danger';
         icon = 'fa-exclamation-circle';
     }
-    
+
     var html = '<div class="alert ' + alertClass + ' alert-dismissible" style="margin-bottom: 20px;">';
     html += '<button type="button" class="close" data-dismiss="alert">&times;</button>';
     html += '<i class="fa ' + icon + '"></i> ' + message;
     html += '</div>';
-    
+
     // Add notification to the top of the profiles section
     $('#module-notice').html(html);
-    
+
     // Auto-dismiss after 5 seconds
     setTimeout(function() {
         $('.alert').fadeOut(function() {
@@ -750,22 +750,22 @@ function generateFeed(profileId, btnEl) {
     if (!confirm('{{ text_confirm_generate }}')) {
         return;
     }
-    
+
   var btn = btnEl || null;
   if (!btn) {
     return;
   }
     var originalHtml = $(btn).html();
-    
+
     $(btn).prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Generating...');
-    
+
     // Show notification
     showNotification('info', 'Generating YML feed... (new tab will open)');
-    
+
     // Open feed URL in new tab with regenerate flag
     var feedUrl = '{{ catalog_url }}' + 'index.php?route=extension/feed/dockercart_export_yml&profile_id=' + profileId + '&regenerate=1';
     window.open(feedUrl, '_blank');
-    
+
     // Reset button after 2 seconds
     setTimeout(function() {
         $(btn).prop('disabled', false).html(originalHtml);
@@ -776,7 +776,7 @@ function deleteProfile(profileId) {
     if (!confirm('{{ text_confirm_delete }}')) {
         return;
     }
-    
+
     $.ajax({
         url: '{{ ajax_delete_profile }}',
         type: 'post',
@@ -786,12 +786,12 @@ function deleteProfile(profileId) {
         success: function(json) {
             if (json.success) {
                 showNotification('success', '{{ text_delete_success }}');
-                
+
                 // Remove row from table
                 $('tr[data-profile-id=\"' + profileId + '\"]').fadeOut(function() {
                     $(this).remove();
                 });
-                
+
                 // Reload profiles after a short delay
                 setTimeout(function() {
                     location.reload();
