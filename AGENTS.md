@@ -66,6 +66,19 @@ Example: `registerTask('novapost_sync', 'NovaPost Sync', 'php /var/www/html/bin/
 
 **Never** hardcode handler classes, task_type literals, or worker commands in `bin/dockercart_scheduler.php`.
 ---
+## Backup to S3 (optional)
+Scheduled `tar.gz` backup of **DB + `./upload/image` + `./storage/download` + `./storage/modification`** to S3 / S3-compatible storage. Off by default.
+
+- **Worker**: `upload/bin/dockercart_backup_s3.php` — registered as singleton scheduler task `backup_s3` via migration `20260706_register_backup_s3_task.sql`. Disabled by default; user toggles schedule in admin **System → Scheduler**.
+- **S3 client**: `rclone` (installed in Dockerfile). Config `/var/www/storage/.rclone.conf` is generated at container start by `ensure_rclone_config()` in `docker/entrypoint.sh` from `BACKUP_S3_*` env vars. `RCLONE_CONFIG` env is exported so the worker (spawned by the scheduler daemon) inherits it.
+- **Credentials stay in `.env`** — never written to the database. Worker reads them via `getenv()`.
+- **Staging dir**: `/var/www/storage/backup/` (host `./storage/backup/`). Local tar.gz is deleted immediately after successful upload (kept only on upload failure, for manual recovery).
+- **Retention**: worker deletes S3 objects older than `BACKUP_S3_RETENTION_DAYS` (default 7) under `BACKUP_S3_PATH`. Only `dockercart_*.tar.gz` files are deleted — other objects in the prefix are left alone.
+- **Status**: worker writes JSON to `oc_dockercart_scheduler_task.last_result` (status, size, s3_key, retention_deleted). Worker log: `/var/www/storage/logs/scheduler/worker_backup_s3_<taskId>.log`.
+- **To enable**: set `BACKUP_S3_ENABLED=true` + credentials in `.env` → `make scheduler-restart` (and `make up` for apache) → enable the "Backup to S3" task in admin UI.
+
+**Required env vars** (see `.env.example`): `BACKUP_S3_ENABLED`, `BACKUP_S3_PROVIDER`, `BACKUP_S3_ENDPOINT`, `BACKUP_S3_REGION`, `BACKUP_S3_BUCKET`, `BACKUP_S3_ACCESS_KEY_ID`, `BACKUP_S3_SECRET_ACCESS_KEY`, `BACKUP_S3_PATH`, `BACKUP_S3_RETENTION_DAYS`, `BACKUP_S3_INSECURE`.
+---
 ## Frontend (DockerCart Theme)
 - **Tailwind CSS 3** + **Lucide icons** (not Font Awesome) + **ES6+** vanilla JS
 - Build: `npm run build:css` — compiles to `upload/catalog/view/theme/dockercart/stylesheet/tailwind.css`

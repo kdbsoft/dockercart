@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y \
     zlib1g-dev \
     unzip \
     default-mysql-client \
+    rclone \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
