@@ -525,72 +525,99 @@ class ControllerMarketplaceInstall extends Controller {
 		if (!$json) {
 			$this->load->model('setting/extension');
 
-			$results = $this->model_setting_extension->getExtensionPathsByExtensionInstallId($extension_install_id);
+			// Check if module is still active in Extensions > Modules
+			$code = '';
 
-			rsort($results);
+			$query = $this->db->query("SELECT `code` FROM `" . DB_PREFIX . "modification` WHERE `extension_install_id` = '" . (int)$extension_install_id . "' LIMIT 1");
 
-			DockercartInstallHelper::syncGitExclude(array_column($results, 'path'), 'remove');
-
-			foreach ($results as $result) {
-				$source = DockercartInstallHelper::getSourcePath($result['path']);
-
-				if (is_file($source)) {
-					unlink($source);
-				}
-
-				if (is_dir($source)) {
-					$files = array();
-
-					$path = array($source);
-
-					while (count($path) != 0) {
-						$next = array_shift($path);
-
-						foreach (array_diff(scandir($next), array('.', '..')) as $file) {
-							$file = $next . '/' . $file;
-
-							if (is_dir($file)) {
-								$path[] = $file;
-							}
-
-							$files[] = $file;
-						}
-					}
-
-					rsort($files);
-
-					foreach ($files as $file) {
-						if (is_dir($file)) {
-							if (DockercartInstallHelper::isDirEmpty($file)) {
-								rmdir($file);
-							}
-						}
-					}
-
-					if (is_file($source)) {
-						unlink($source);
-					}
-
-					if (is_dir($source)) {
-						if (DockercartInstallHelper::isDirEmpty($source)) {
-							rmdir($source);
-						}
-					}
-				}
-
-				$this->model_setting_extension->deleteExtensionPath($result['extension_path_id']);
+			if ($query->row) {
+				$code = $query->row['code'];
 			}
 
-			// Remove the install
-			$this->model_setting_extension->deleteExtensionInstall($extension_install_id);
+			if (empty($code)) {
+				$query = $this->db->query("SELECT `code` FROM `" . DB_PREFIX . "dockercart_extension_meta` WHERE `extension_install_id` = '" . (int)$extension_install_id . "' LIMIT 1");
 
-			// Remove any xml modifications
-			$this->load->model('setting/modification');
+				if ($query->row) {
+					$code = $query->row['code'];
+				}
+			}
 
-			$this->model_setting_modification->deleteModificationsByExtensionInstallId($extension_install_id);
+			if (!empty($code)) {
+				$extension_query = $this->db->query("SELECT `extension_id` FROM `" . DB_PREFIX . "extension` WHERE `type` = 'module' AND `code` = '" . $this->db->escape($code) . "' LIMIT 1");
 
-			$json['success'] = $this->language->get('text_success');
-		}
+				if ($extension_query->row) {
+					$json['error'] = sprintf($this->language->get('error_module_active'), $code);
+				}
+			}
+
+			if (!$json) {
+					$results = $this->model_setting_extension->getExtensionPathsByExtensionInstallId($extension_install_id);
+
+					rsort($results);
+
+					DockercartInstallHelper::syncGitExclude(array_column($results, 'path'), 'remove');
+
+					foreach ($results as $result) {
+						$source = DockercartInstallHelper::getSourcePath($result['path']);
+
+						if (is_file($source)) {
+							unlink($source);
+						}
+
+						if (is_dir($source)) {
+							$files = array();
+
+							$path = array($source);
+
+							while (count($path) != 0) {
+								$next = array_shift($path);
+
+								foreach (array_diff(scandir($next), array('.', '..')) as $file) {
+									$file = $next . '/' . $file;
+
+									if (is_dir($file)) {
+										$path[] = $file;
+									}
+
+									$files[] = $file;
+								}
+							}
+
+							rsort($files);
+
+							foreach ($files as $file) {
+								if (is_dir($file)) {
+									if (DockercartInstallHelper::isDirEmpty($file)) {
+										rmdir($file);
+									}
+								}
+							}
+
+							if (is_file($source)) {
+								unlink($source);
+							}
+
+							if (is_dir($source)) {
+								if (DockercartInstallHelper::isDirEmpty($source)) {
+									rmdir($source);
+								}
+							}
+						}
+
+						$this->model_setting_extension->deleteExtensionPath($result['extension_path_id']);
+					}
+
+					// Remove the install
+					$this->model_setting_extension->deleteExtensionInstall($extension_install_id);
+
+					// Remove any xml modifications
+					$this->load->model('setting/modification');
+
+					$this->model_setting_modification->deleteModificationsByExtensionInstallId($extension_install_id);
+
+					$json['success'] = $this->language->get('text_success');
+				}
+			}
 
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
