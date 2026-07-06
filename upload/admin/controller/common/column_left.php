@@ -642,6 +642,15 @@ class ControllerCommonColumnLeft extends Controller {
 				'children' => array()
 			);
 
+			// Reports
+			if ($this->user->hasPermission('access', 'report/report')) {
+				$system[] = array(
+					'name'	   => $this->language->get('text_reports'),
+					'href'     => $this->url->link('report/report', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
 			if ($system) {
 				$data['menus'][] = array(
 					'id'       => 'menu-system',
@@ -649,28 +658,6 @@ class ControllerCommonColumnLeft extends Controller {
 					'name'	   => $this->language->get('text_system'),
 					'href'     => '',
 					'children' => $system
-				);
-			}
-
-			$report = array();
-
-			if ($this->user->hasPermission('access', 'report/report')) {
-				$report[] = array(
-					'name'	   => $this->language->get('text_reports'),
-					'href'     => $this->url->link('report/report', 'user_token=' . $this->session->data['user_token'], true),
-					'children' => array()
-				);
-			}
-
-
-
-			if ($report) {
-				$data['menus'][] = array(
-					'id'       => 'menu-report',
-					'icon'	   => 'fa-bar-chart',
-					'name'	   => $this->language->get('text_reports'),
-					'href'     => '',
-					'children' => $report
 				);
 			}
 
