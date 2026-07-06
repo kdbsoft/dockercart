@@ -1,0 +1,41 @@
+<div class="table-responsive">
+  <table class="table table-bordered table-hover dcx-table">
+    <thead>
+      <tr>
+        <td>{{ column_customer }}</td>
+        <td>{{ column_consent_type }}</td>
+        <td class="text-center">{{ column_value }}</td>
+        <td>{{ column_ip }}</td>
+        <td class="text-center">{{ column_date_added }}</td>
+      </tr>
+    </thead>
+    <tbody>
+      {% if consents %}
+        {% for consent in consents %}
+          <tr>
+            <td>{{ consent.customer }}</td>
+            <td>{{ consent.consent_type }}</td>
+            <td class="text-center">
+              {% if consent.consent_value == text_allowed %}
+                <span class="label label-success">{{ text_allowed }}</span>
+              {% else %}
+                <span class="label label-danger">{{ text_denied }}</span>
+              {% endif %}
+            </td>
+            <td>{{ consent.ip }}</td>
+            <td class="text-center">{{ consent.date_added }}</td>
+          </tr>
+        {% endfor %}
+      {% else %}
+        <tr>
+          <td class="text-center" colspan="5">{{ text_no_results }}</td>
+        </tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+
+<div class="row">
+  <div class="col-sm-6 text-left">{{ pagination }}</div>
+  <div class="col-sm-6 text-right">{{ results }}</div>
+</div>

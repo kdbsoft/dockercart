@@ -1,0 +1,189 @@
+{{ header }}
+<div id="account-gdpr" class="container">
+  <ul class="breadcrumb">
+    {% for breadcrumb in breadcrumbs %}
+      <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+    {% endfor %}
+  </ul>
+
+  <div class="row">
+    {{ column_left }}
+    <div id="content" class="col-sm-9">
+      <h1>{{ text_account_title }}</h1>
+
+      {% if framework in ['eu', 'both'] %}
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title"><i data-lucide="cookie" class="w-4 h-4"></i> {{ text_cookie_preferences }}</h3>
+        </div>
+        <div class="panel-body">
+          <p>{{ text_cookie_preferences_intro }}</p>
+
+          <form id="form-cookie-preferences">
+            <div class="table-responsive">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <td>{{ column_name }}</td>
+                    <td>{{ column_description }}</td>
+                    <td class="text-center">{{ column_status }}</td>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for group in cookie_groups %}
+                    <tr>
+                      <td>{{ group.name }}</td>
+                      <td>{{ group.description }}</td>
+                      <td class="text-center">
+                        {% if group.is_required %}
+                          <span class="label label-info">{{ text_required }}</span>
+                        {% else %}
+                          <label class="switch">
+                            <input type="checkbox" name="preferences[]" value="group_{{ group.cookie_group_id }}"
+                              {% if consents['group_' ~ group.cookie_group_id] %}checked{% endif %} />
+                            <span class="switch-slider"></span>
+                          </label>
+                        {% endif %}
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <button type="submit" class="btn btn-primary">{{ button_save_preferences }}</button>
+          </form>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if do_not_sell_enabled and framework in ['us', 'both'] %}
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title"><i data-lucide="shield" class="w-4 h-4"></i> {{ text_do_not_sell_heading }}</h3>
+        </div>
+        <div class="panel-body">
+          <p>{{ text_do_not_sell_intro }}</p>
+          <label class="switch">
+            <input type="checkbox" id="input-do-not-sell" {% if do_not_sell_opted_out %}checked{% endif %} />
+            <span class="switch-slider"></span>
+          </label>
+          <span class="do-not-sell-label">{{ text_do_not_sell_toggle }}</span>
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title"><i data-lucide="download" class="w-4 h-4"></i> {{ text_data_export }}</h3>
+        </div>
+        <div class="panel-body">
+          <p>{{ text_data_export_intro }}</p>
+          <button type="button" id="button-request-export" class="btn btn-info" {% if has_pending_export %}disabled{% endif %}>
+            {{ has_pending_export ? text_pending_export : button_request_export }}
+          </button>
+        </div>
+      </div>
+
+      <div class="panel panel-danger">
+        <div class="panel-heading">
+          <h3 class="panel-title"><i data-lucide="trash-2" class="w-4 h-4"></i> {{ text_data_delete }}</h3>
+        </div>
+        <div class="panel-body">
+          <p>{{ text_data_delete_intro }}</p>
+          <button type="button" id="button-request-delete" class="btn btn-danger" {% if has_pending_delete %}disabled{% endif %}>
+            {{ has_pending_delete ? text_pending_delete : button_request_delete }}
+          </button>
+        </div>
+      </div>
+
+      <div class="buttons clearfix">
+        <div class="pull-left"><a href="{{ continue }}" class="btn btn-default">{{ button_continue }}</a></div>
+      </div>
+    </div>
+    {{ column_right }}
+  </div>
+</div>
+
+<script>
+(function() {
+  var saveUrl = '{{ save_url }}';
+  var exportUrl = '{{ export_url }}';
+  var deleteUrl = '{{ delete_url }}';
+  var doNotSellUrl = '{{ do_not_sell_url }}';
+
+  var form = document.getElementById('form-cookie-preferences');
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      var formData = new FormData(form);
+      fetch(saveUrl, {
+        method: 'POST',
+        body: formData,
+        credentials: 'same-origin'
+      }).then(function(r) { return r.json(); }).then(function(json) {
+        if (json.success) {
+          alert('{{ text_preferences_saved }}');
+        }
+      });
+    });
+  }
+
+  var exportBtn = document.getElementById('button-request-export');
+  if (exportBtn) {
+    exportBtn.addEventListener('click', function() {
+      fetch(exportUrl, {
+        method: 'POST',
+        credentials: 'same-origin'
+      }).then(function(r) { return r.json(); }).then(function(json) {
+        if (json.success) {
+          alert('{{ text_export_requested }}');
+          exportBtn.disabled = true;
+          exportBtn.textContent = '{{ text_pending_export }}';
+        }
+      });
+    });
+  }
+
+  var deleteBtn = document.getElementById('button-request-delete');
+  if (deleteBtn) {
+    deleteBtn.addEventListener('click', function() {
+      if (!confirm('{{ text_confirm_delete_data }}')) return;
+      fetch(deleteUrl, {
+        method: 'POST',
+        credentials: 'same-origin'
+      }).then(function(r) { return r.json(); }).then(function(json) {
+        if (json.success) {
+          alert('{{ text_delete_requested }}');
+          deleteBtn.disabled = true;
+          deleteBtn.textContent = '{{ text_pending_delete }}';
+        }
+      });
+    });
+  }
+
+  var dnsCheckbox = document.getElementById('input-do-not-sell');
+  if (dnsCheckbox) {
+    dnsCheckbox.addEventListener('change', function() {
+      var formData = new FormData();
+      formData.append('opt_out', dnsCheckbox.checked ? '1' : '0');
+      fetch(doNotSellUrl, {
+        method: 'POST',
+        body: formData,
+        credentials: 'same-origin'
+      });
+    });
+  }
+})();
+</script>
+
+<style>
+.switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.switch-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .3s; border-radius: 28px; }
+.switch-slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .3s; border-radius: 50%; }
+.switch input:checked + .switch-slider { background-color: #2196F3; }
+.switch input:checked + .switch-slider:before { transform: translateX(22px); }
+.do-not-sell-label { margin-left: 10px; vertical-align: middle; }
+</style>
+
+{{ footer }}

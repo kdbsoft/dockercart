@@ -1,0 +1,61 @@
+<div class="table-responsive">
+  <table class="table table-bordered table-hover dcx-table">
+    <thead>
+      <tr>
+        <td>{{ column_customer }}</td>
+        <td class="text-center">{{ column_type }}</td>
+        <td class="text-center">{{ column_status }}</td>
+        <td class="text-center">{{ column_date_added }}</td>
+        <td class="text-center">{{ column_date_processed }}</td>
+        <td class="text-right">{{ column_action }}</td>
+      </tr>
+    </thead>
+    <tbody>
+      {% if requests %}
+        {% for request in requests %}
+          <tr>
+            <td>{{ request.customer }}</td>
+            <td class="text-center">
+              {% if request.type == 'export' %}
+                <span class="label label-info">{{ text_export }}</span>
+              {% else %}
+                <span class="label label-danger">{{ text_delete }}</span>
+              {% endif %}
+            </td>
+            <td class="text-center">
+              {% if request.status == 'pending' %}
+                <span class="label label-warning">{{ text_pending }}</span>
+              {% elseif request.status == 'approved' %}
+                <span class="label label-info">{{ text_approved }}</span>
+              {% elseif request.status == 'completed' %}
+                <span class="label label-success">{{ text_completed }}</span>
+              {% else %}
+                <span class="label label-danger">{{ text_denied }}</span>
+              {% endif %}
+            </td>
+            <td class="text-center">{{ request.date_added }}</td>
+            <td class="text-center">{{ request.date_processed ? request.date_processed : '-' }}</td>
+            <td class="text-right">
+              {% if request.status == 'pending' %}
+                <a href="{{ request.approve }}" class="btn btn-success btn-xs" title="{{ button_approve }}"><i class="fa fa-check"></i></a>
+                <a href="{{ request.deny }}" class="btn btn-danger btn-xs" title="{{ button_deny }}"><i class="fa fa-times"></i></a>
+              {% endif %}
+              {% if request.download %}
+                <a href="{{ request.download }}" class="btn btn-info btn-xs" title="{{ button_download }}"><i class="fa fa-download"></i></a>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      {% else %}
+        <tr>
+          <td class="text-center" colspan="6">{{ text_no_results }}</td>
+        </tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+
+<div class="row">
+  <div class="col-sm-6 text-left">{{ pagination }}</div>
+  <div class="col-sm-6 text-right">{{ results }}</div>
+</div>
