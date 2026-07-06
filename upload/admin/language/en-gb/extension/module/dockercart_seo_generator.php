@@ -64,7 +64,7 @@ $_['text_by_languages'] = 'By Languages:';
 
 $_['text_module_settings'] = 'Module Settings';
 $_['text_developer'] = 'Developer';
-$_['text_developer_name'] = 'DockerCart Team';
+$_['text_developer_name'] = 'DockerCart Official';
 $_['text_contact'] = 'Contact';
 
 // Actions

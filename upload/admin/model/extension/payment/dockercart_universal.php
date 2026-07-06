@@ -4,7 +4,7 @@
  * Handles CRUD operations for payment methods with database storage.
  *
  * @package    DockerCart
- * @author     DockerCart Team
+ * @author     DockerCart Official
  * @copyright  2024-2026 DockerCart
  * @license    MIT
  */

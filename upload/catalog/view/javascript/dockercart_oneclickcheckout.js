@@ -3,7 +3,7 @@
  * Frontend JavaScript
  *
  * @package    DockerCart
- * @author     DockerCart Team
+ * @author     DockerCart Official
  * @copyright  2026 DockerCart
  * @license    Commercial
  * @version    1.0.0

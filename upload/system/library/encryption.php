@@ -1,7 +1,7 @@
 <?php
 /**
  * @package		DockerCart
- * @author		DockerCart Team
+ * @author		DockerCart Official
  * @license		https://opensource.org/licenses/GPL-3.0
  * @link		https://dockercart.net
  */

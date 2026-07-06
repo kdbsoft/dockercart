@@ -3,7 +3,7 @@
  * DockerCart SEO Generator Module
  *
  * @package    DockerCart
- * @author     DockerCart Team
+ * @author     DockerCart Official
  * @copyright  2025 DockerCart
  * @license    MIT
  * @version    1.0.0

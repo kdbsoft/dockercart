@@ -107,5 +107,5 @@ $_['text_total'] = 'Всього';
 $_['text_verify_public_key_required'] = 'Будь ласка, збережіть відкритий ключ, перш ніж перевіряти ліцензію';
 $_['text_module_settings'] = 'Налаштування модуля';
 $_['text_developer'] = 'Розробник';
-$_['text_developer_name'] = 'Команда DockerCart';
+$_['text_developer_name'] = 'DockerCart Official';
 $_['text_contact'] = 'Контакт';

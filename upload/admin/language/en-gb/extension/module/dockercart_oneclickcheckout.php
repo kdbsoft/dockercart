@@ -2,9 +2,9 @@
 /**
  * DockerCart 1-Click Checkout Module
  * Admin Language File (English)
- * 
+ *
  * @package    DockerCart
- * @author     DockerCart Team
+ * @author     DockerCart Official
  * @copyright  2026 DockerCart
  * @license    Commercial
  * @version    1.0.0
@@ -33,7 +33,7 @@ $_['text_module_settings'] = 'Module Settings';
 $_['text_license_info'] = 'License Information';
 $_['text_license_domain'] = 'License bound to domain';
 $_['text_developer'] = 'Developer';
-$_['text_developer_name'] = 'DockerCart Team';
+$_['text_developer_name'] = 'DockerCart Official';
 $_['text_contact'] = 'Contact';
 $_['text_public_key_required'] = 'Please enter public key';
 $_['text_verifying'] = 'Verifying...';

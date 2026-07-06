@@ -1,17 +1,17 @@
 <?php
 /**
  * DockerCart Blog - Post Admin Controller
- * 
+ *
  * @package    DockerCart Blog
  * @version    1.0.0
- * @author     DockerCart Team
- * 
+ * @author     DockerCart Official
+ *
  * Description: Admin controller for blog post management.
  *              Handles CRUD operations, validation, filtering, and pagination.
  */
 
 class ControllerExtensionModuleDockercartBlogPost extends Controller {
-	
+
 	private $error = array();
 
 	/**
@@ -38,7 +38,7 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
 			// Prepare data for model
 			$post_data = $this->request->post;
-			
+
 			// Convert single category_id to post_category array
 			if (isset($post_data['category_id']) && $post_data['category_id']) {
 				$post_data['post_category'] = array($post_data['category_id']);
@@ -50,7 +50,7 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 			if (empty($post_data['post_store'])) {
 				$post_data['post_store'] = $this->getAllStoreIds();
 			}
-			
+
 			$this->model_extension_module_dockercart_blog_post->addPost($post_data);
 			$this->session->data['success'] = $this->language->get('text_success');
 			$this->response->redirect($this->url->link('extension/module/dockercart_blog_post', 'user_token=' . $this->session->data['user_token'], true));
@@ -71,7 +71,7 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
 			// Prepare data for model
 			$post_data = $this->request->post;
-			
+
 			// Convert single category_id to post_category array
 			if (isset($post_data['category_id']) && $post_data['category_id']) {
 				$post_data['post_category'] = array($post_data['category_id']);
@@ -83,7 +83,7 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 			if (empty($post_data['post_store'])) {
 				$post_data['post_store'] = $this->getAllStoreIds();
 			}
-			
+
 			$this->model_extension_module_dockercart_blog_post->editPost($this->request->get['post_id'], $post_data);
 			$this->session->data['success'] = $this->language->get('text_success');
 			$this->response->redirect($this->url->link('extension/module/dockercart_blog_post', 'user_token=' . $this->session->data['user_token'], true));
@@ -230,7 +230,7 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 				LEFT JOIN `" . DB_PREFIX . "blog_category` bc ON (bpc.category_id = bc.category_id)
 				LEFT JOIN `" . DB_PREFIX . "blog_category_description` bcd ON (bc.category_id = bcd.category_id)
 				WHERE bpc.post_id = '" . (int)$result['post_id'] . "' AND bcd.language_id = '" . (int)$this->config->get('config_language_id') . "'")->row;
-			
+
 			$category_text = !empty($post_categories['categories']) ? $post_categories['categories'] : '—';
 
 			$data['posts'][] = array(
@@ -691,7 +691,7 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 
 	/**
 	 * Validate form data
-	 * 
+	 *
 	 * @return bool
 	 */
 	protected function validateForm() {
@@ -743,7 +743,7 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 
 	/**
 	 * Validate delete operation
-	 * 
+	 *
 	 * @return bool
 	 */
 	protected function validateCopy() {
