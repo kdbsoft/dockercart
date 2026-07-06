@@ -4,7 +4,7 @@
  *
  * @package    DockerCart
  * @subpackage Module
- * @author     DockerCart Team
+ * @author     DockerCart Official
  * @copyright  2026 DockerCart
  * @license    MIT
  * @version    2.0.0

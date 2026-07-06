@@ -1,13 +1,13 @@
 <?php
 /**
  * DockerCart Logger
- * 
+ *
  * Централизованное логирование для всех модулей DockerCart
- * 
+ *
  * @package    DockerCart
  * @subpackage Logger
  * @version    1.0.0
- * @author     DockerCart Team
+ * @author     DockerCart Official
  * @license    Commercial
  */
 
@@ -16,27 +16,27 @@ class DockercartLogger {
      * @var object OpenCart registry instance
      */
     private $registry;
-    
+
     /**
      * @var string Module name (e.g., 'checkout', 'redirects', 'filter')
      */
     private $module_name;
-    
+
     /**
      * @var string Log file name
      */
     private $log_file;
-    
+
     /**
      * @var string Config key for debug setting
      */
     private $debug_config_key;
-    
+
     /**
      * @var string Prefix for log messages
      */
     private $log_prefix;
-    
+
     /**
      * @var bool Cache for debug setting to avoid repeated checks
      */
@@ -44,7 +44,7 @@ class DockercartLogger {
 
     /**
      * Constructor
-     * 
+     *
      * @param object $registry OpenCart registry instance
      * @param string $module_name Module name (e.g., 'checkout', 'redirects', 'filter')
      * @param string $log_file Optional custom log file name (default: dockercart_{module}.log)
@@ -52,7 +52,7 @@ class DockercartLogger {
     public function __construct($registry, $module_name, $log_file = null) {
         $this->registry = $registry;
         $this->module_name = $module_name;
-        $this->log_file = $log_file ? $log_file : 'dockercart_' . $module_name . '.log';       
+        $this->log_file = $log_file ? $log_file : 'dockercart_' . $module_name . '.log';
         $this->debug_config_key = 'module_dockercart_' . $module_name . '_debug';
          if ($module_name === 'license') {
             $this->debug_config_key = 'config_error_log';
@@ -62,7 +62,7 @@ class DockercartLogger {
 
     /**
      * Write a log message
-     * 
+     *
      * @param string $message Log message
      * @param string $level Log level (INFO, WARNING, ERROR, DEBUG)
      * @return void
@@ -77,7 +77,7 @@ class DockercartLogger {
 
     /**
      * Write INFO level log
-     * 
+     *
      * @param string $message Log message
      * @return void
      */
@@ -87,7 +87,7 @@ class DockercartLogger {
 
     /**
      * Write WARNING level log
-     * 
+     *
      * @param string $message Log message
      * @return void
      */
@@ -97,7 +97,7 @@ class DockercartLogger {
 
     /**
      * Write ERROR level log
-     * 
+     *
      * @param string $message Log message
      * @return void
      */
@@ -107,7 +107,7 @@ class DockercartLogger {
 
     /**
      * Write DEBUG level log
-     * 
+     *
      * @param string $message Log message
      * @return void
      */
@@ -117,7 +117,7 @@ class DockercartLogger {
 
     /**
      * Write log with exception details
-     * 
+     *
      * @param Exception $e Exception object
      * @param string $context Additional context message
      * @return void
@@ -125,9 +125,9 @@ class DockercartLogger {
     public function exception($e, $context = '') {
         $message = ($context ? $context . ': ' : '') . $e->getMessage();
         $message .= ' in ' . $e->getFile() . ':' . $e->getLine();
-        
+
         $this->error($message);
-        
+
         // Log stack trace in debug mode
         if ($this->isDebugEnabled()) {
             $this->debug('Stack trace: ' . $e->getTraceAsString());
@@ -137,7 +137,7 @@ class DockercartLogger {
     /**
      * Check if debug logging is enabled
      * Uses cache to avoid repeated config/DB checks
-     * 
+     *
      * @return bool
      */
     private function isDebugEnabled() {
@@ -147,7 +147,7 @@ class DockercartLogger {
         }
 
         $debug = false;
-        
+
         // Try to get from config first
         if ($this->registry->has('config') && method_exists($this->registry->get('config'), 'get')) {
             $config = $this->registry->get('config');
@@ -162,7 +162,7 @@ class DockercartLogger {
                 "WHERE `key` = '" . $db->escape($this->debug_config_key) . "' " .
                 "AND `store_id` = '0' LIMIT 1"
             );
-            
+
             if ($query->num_rows) {
                 $val = $query->row['value'];
                 $debug = ((string)$val === '1' || (string)$val === 'true' || $val === true);
@@ -171,13 +171,13 @@ class DockercartLogger {
 
         // Cache the result
         $this->debug_enabled = $debug;
-        
+
         return $debug;
     }
 
     /**
      * Force refresh debug setting cache (useful after settings update)
-     * 
+     *
      * @return void
      */
     public function refreshDebugSetting() {
@@ -186,7 +186,7 @@ class DockercartLogger {
 
     /**
      * Get current log file name
-     * 
+     *
      * @return string
      */
     public function getLogFile() {
@@ -195,7 +195,7 @@ class DockercartLogger {
 
     /**
      * Get module name
-     * 
+     *
      * @return string
      */
     public function getModuleName() {
@@ -204,7 +204,7 @@ class DockercartLogger {
 
     /**
      * Set custom log prefix
-     * 
+     *
      * @param string $prefix Custom prefix
      * @return void
      */
@@ -214,7 +214,7 @@ class DockercartLogger {
 
     /**
      * Get current log prefix
-     * 
+     *
      * @return string
      */
     public function getLogPrefix() {

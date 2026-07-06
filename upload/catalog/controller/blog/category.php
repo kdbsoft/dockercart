@@ -1,11 +1,11 @@
 <?php
 /**
  * DockerCart Blog - Category Catalog Controller
- * 
+ *
  * @package    DockerCart Blog
  * @version    1.0.0
- * @author     DockerCart Team
- * 
+ * @author     DockerCart Official
+ *
  * Description: Frontend controller for displaying blog categories and post listings.
  */
 
@@ -26,7 +26,7 @@ class ControllerBlogCategory extends Controller {
 
 		// Get category ID
 		$category_id = 0;
-		
+
 		if (isset($this->request->get['blog_category_id'])) {
 			$category_id = (int)$this->request->get['blog_category_id'];
 		} elseif (isset($this->request->get['category_id'])) {

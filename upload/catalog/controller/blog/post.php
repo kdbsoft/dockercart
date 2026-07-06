@@ -1,11 +1,11 @@
 <?php
 /**
  * DockerCart Blog - Post Catalog Controller
- * 
+ *
  * @package    DockerCart Blog
  * @version    1.0.0
- * @author     DockerCart Team
- * 
+ * @author     DockerCart Official
+ *
  * Description: Frontend controller for displaying individual blog posts.
  *              Handles post viewing, comment submission, view counting, SEO.
  */
@@ -27,7 +27,7 @@ class ControllerBlogPost extends Controller {
 
 		// Get post ID from request
 		$post_id = 0;
-		
+
 		if (isset($this->request->get['blog_post_id'])) {
 			$post_id = (int)$this->request->get['blog_post_id'];
 		} elseif (isset($this->request->get['post_id'])) {
@@ -40,7 +40,7 @@ class ControllerBlogPost extends Controller {
 		if ($post_info && $post_info['status']) {
 			// Increment view counter
 			$this->model_extension_module_dockercart_blog_post->incrementViews($post_id);
-			
+
 			// Update views in current data (for display)
 			$post_info['views']++;
 
@@ -119,12 +119,12 @@ class ControllerBlogPost extends Controller {
 
 			// Comments
 			$data['allow_comments'] = $post_info['allow_comments'] && $this->config->get('module_dockercart_blog_allow_comments');
-			
+
 			if ($data['allow_comments']) {
 				$data['comments'] = array();
-				
+
 				$results = $this->model_extension_module_dockercart_blog_comment->getCommentsByPostId($post_id);
-				
+
 				foreach ($results as $result) {
 					$data['comments'][] = array(
 						'author'     => $result['author'],

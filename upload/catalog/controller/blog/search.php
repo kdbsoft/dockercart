@@ -1,11 +1,11 @@
 <?php
 /**
  * DockerCart Blog - Search Catalog Controller
- * 
+ *
  * @package    DockerCart Blog
  * @version    1.0.0
- * @author     DockerCart Team
- * 
+ * @author     DockerCart Official
+ *
  * Description: Frontend controller for blog search functionality.
  *              Handles search by tags and keywords.
  */
@@ -28,11 +28,11 @@ class ControllerBlogSearch extends Controller {
 		// Get search parameters
 		$tag = '';
 		$search = '';
-		
+
 		if (isset($this->request->get['tag'])) {
 			$tag = trim($this->request->get['tag']);
 		}
-		
+
 		if (isset($this->request->get['search'])) {
 			$search = trim($this->request->get['search']);
 		}
@@ -127,11 +127,11 @@ class ControllerBlogSearch extends Controller {
 
 		// Pagination
 		$url = '';
-		
+
 		if ($tag) {
 			$url .= '&tag=' . urlencode($tag);
 		}
-		
+
 		if ($search) {
 			$url .= '&search=' . urlencode($search);
 		}
@@ -161,7 +161,7 @@ class ControllerBlogSearch extends Controller {
 		$data['tag'] = $tag;
 		$data['search'] = $search;
 		$data['action'] = $this->url->link('blog/search');
-		
+
 		// Language variables
 		$data['button_continue'] = $this->language->get('button_continue');
 		$data['text_no_results'] = $this->language->get('text_no_results');
