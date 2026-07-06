@@ -35,7 +35,7 @@
   var saved = localStorage.getItem(key) || 'month';
   $sel.val(saved);
 
-  var currencySymbolLeft = '$';
+  var currencySymbolLeft = '';
   var currencySymbolRight = '';
 
   function loadChart(range) {
@@ -45,8 +45,8 @@
         chart.destroy();
       }
 
-      currencySymbolLeft = json.currency_symbol_left || '$';
-      currencySymbolRight = json.currency_symbol_right || '';
+      currencySymbolLeft = json.currency_symbol_left != null ? json.currency_symbol_left : '$';
+      currencySymbolRight = json.currency_symbol_right != null ? json.currency_symbol_right : '';
 
       var revenueGradient = ctx.createLinearGradient(0, 0, 0, 280);
       revenueGradient.addColorStop(0, 'rgba(59, 130, 246, 0.15)');
