@@ -65,3 +65,4 @@ $_['error_not_installed'] = 'This extension is not installed.';
 $_['error_up_to_date'] = 'This extension is already up to date.';
 $_['error_download_failed'] = 'Failed to download the extension package.';
 $_['error_license_expired'] = 'License has expired or is invalid. Please renew your license.';
+$_['error_writable'] = 'Warning: The following files are not writable and cannot be overwritten:<br>%s';
