@@ -146,8 +146,20 @@ class DockercartInstallHelper {
 
 			$dest = self::getSourcePath($parts[0] . '/' . $parts[1]);
 
-			if ($dest !== '' && is_file($dest) && !is_writable($dest)) {
-				$not_writable[] = $parts[0] . '/' . $parts[1];
+			if ($dest === '') {
+				continue;
+			}
+
+			if (is_file($dest)) {
+				if (!is_writable($dest)) {
+					$not_writable[] = $parts[0] . '/' . $parts[1];
+				}
+			} else {
+				$parent = dirname($dest);
+
+				if (!is_dir($parent) || !is_writable($parent)) {
+					$not_writable[] = $parts[0] . '/' . $parts[1];
+				}
 			}
 		}
 

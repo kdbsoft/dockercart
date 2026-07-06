@@ -266,8 +266,14 @@ class ControllerMarketplaceInstall extends Controller {
 									mkdir(dirname($path), 0755, true);
 								}
 
-								if (rename($file, $path)) {
+								if (@copy($file, $path)) {
+									unlink($file);
+
 									$this->model_setting_extension->addExtensionPath($extension_install_id, $destination);
+								} else {
+									$json['error'] = sprintf($this->language->get('error_copy_failed'), $destination);
+
+									break;
 								}
 							}
 						}
