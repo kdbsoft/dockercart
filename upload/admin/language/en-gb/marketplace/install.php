@@ -16,3 +16,4 @@ $_['error_code']       = 'Unique code is required for modification XML!';
 $_['error_xml']        = 'Modification %s is already being used!';
 $_['error_exists']     = 'The file %s already exists!';
 $_['error_allowed']    = 'The directory %s is not allowed to be written to!';
+$_['error_writable']   = 'Warning: The following files are not writable and cannot be overwritten:<br>%s';

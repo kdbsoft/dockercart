@@ -225,9 +225,14 @@ class ControllerMarketplaceInstall extends Controller {
 				}
 
 				if (!$json) {
-					$this->load->model('setting/extension');
+					// Check writability of existing destination files
+					$not_writable = array();
 
 					foreach ($files as $file) {
+						if (!is_file($file)) {
+							continue;
+						}
+
 						$destination = str_replace('\\', '/', substr($file, strlen($directory . 'upload/')));
 
 						$path = '';
@@ -248,25 +253,59 @@ class ControllerMarketplaceInstall extends Controller {
 							$path = DIR_SYSTEM . substr($destination, 7);
 						}
 
-						if (is_dir($file) && !is_dir($path)) {
-							if (mkdir($path, 0755, true)) {
-								$this->model_setting_extension->addExtensionPath($extension_install_id, $destination);
-							}
-						}
-
-						if (is_file($file)) {
-							if (!is_dir(dirname($path))) {
-								mkdir(dirname($path), 0755, true);
-							}
-
-							if (rename($file, $path)) {
-								$this->model_setting_extension->addExtensionPath($extension_install_id, $destination);
-							}
+						if ($path !== '' && is_file($path) && !is_writable($path)) {
+							$not_writable[] = $destination;
 						}
 					}
 
-					$paths = $this->model_setting_extension->getExtensionPathsByExtensionInstallId($extension_install_id);
-					DockercartInstallHelper::syncGitExclude(array_column($paths, 'path'), 'add');
+					if (!empty($not_writable)) {
+						$json['error'] = sprintf($this->language->get('error_writable'), implode('<br>', $not_writable));
+					}
+
+					if (!$json) {
+						$this->load->model('setting/extension');
+
+						foreach ($files as $file) {
+							$destination = str_replace('\\', '/', substr($file, strlen($directory . 'upload/')));
+
+							$path = '';
+
+							if (substr($destination, 0, 5) == 'admin') {
+								$path = DIR_APPLICATION . substr($destination, 6);
+							}
+
+							if (substr($destination, 0, 7) == 'catalog') {
+								$path = DIR_CATALOG . substr($destination, 8);
+							}
+
+							if (substr($destination, 0, 5) == 'image') {
+								$path = DIR_IMAGE . substr($destination, 6);
+							}
+
+							if (substr($destination, 0, 6) == 'system') {
+								$path = DIR_SYSTEM . substr($destination, 7);
+							}
+
+							if (is_dir($file) && !is_dir($path)) {
+								if (mkdir($path, 0755, true)) {
+									$this->model_setting_extension->addExtensionPath($extension_install_id, $destination);
+								}
+							}
+
+							if (is_file($file)) {
+								if (!is_dir(dirname($path))) {
+									mkdir(dirname($path), 0755, true);
+								}
+
+								if (rename($file, $path)) {
+									$this->model_setting_extension->addExtensionPath($extension_install_id, $destination);
+								}
+							}
+						}
+
+						$paths = $this->model_setting_extension->getExtensionPathsByExtensionInstallId($extension_install_id);
+						DockercartInstallHelper::syncGitExclude(array_column($paths, 'path'), 'add');
+					}
 				}
 			}
 		}
