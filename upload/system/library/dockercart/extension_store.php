@@ -295,7 +295,7 @@ class DockercartExtensionStore {
 
 			$offer['state'] = $this->resolveState($offer);
 
-			if (!$offer['is_licensed'] && $offer['installed_version'] === null) {
+			if (!$offer['is_licensed'] && $offer['installed_version'] === null && (float)$offer['price'] > 0) {
 				$offer['state'] = 'buy';
 			}
 		}
@@ -306,7 +306,7 @@ class DockercartExtensionStore {
 
 	public function resolveState(array $offer): string {
 		$installed = $offer['installed_version'] !== null;
-		$licensed = !empty($offer['is_licensed']);
+		$licensed = !empty($offer['is_licensed']) || (float)($offer['price'] ?? 0) == 0;
 		$update_available = !empty($offer['update_available']);
 		$license_status = $offer['license_status'] ?? null;
 
@@ -446,8 +446,11 @@ class DockercartExtensionStore {
 
 		$url = $this->api_url . '/api/v1/modules/' . urlencode($sku)
 			. '/versions/' . urlencode($version_id)
-			. '/download?domain=' . urlencode($domain)
-			. '&key=' . urlencode($license_key);
+			. '/download?domain=' . urlencode($domain);
+
+		if (!empty($license_key)) {
+			$url .= '&key=' . urlencode($license_key);
+		}
 
 		$ch = curl_init($url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -466,6 +469,7 @@ class DockercartExtensionStore {
 
 		$response = curl_exec($ch);
 		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		$curl_error = curl_error($ch);
 		curl_close($ch);
 
 		if ($http_code !== 200 || $response === false) {
