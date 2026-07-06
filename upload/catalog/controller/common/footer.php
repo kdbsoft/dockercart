@@ -193,7 +193,18 @@ class ControllerCommonFooter extends Controller {
 		$data['dockercart_version'] = DOCKERCART_VERSION;
 
 		$data['custom_js'] = (string)$this->config->get('dockercart_theme_custom_js');
-		
+
+		// GDPR / Cookie Consent Banner
+		$data['gdpr_banner'] = '';
+		if ($this->config->get('module_dockercart_gdpr_status')) {
+			$this->load->model('setting/setting');
+			$gdpr_settings = $this->model_setting_setting->getSetting('module_dockercart_gdpr');
+			if (!is_array($gdpr_settings) || empty($gdpr_settings)) {
+				$gdpr_settings = array('module_dockercart_gdpr_status' => 1, 'module_dockercart_gdpr_framework' => 'eu');
+			}
+			$data['gdpr_banner'] = $this->load->controller('extension/module/dockercart_gdpr', $gdpr_settings);
+		}
+
 		return $this->load->view('common/footer', $data);
 	}
 }

@@ -42,14 +42,19 @@ class ControllerCommonAccountMenu extends Controller {
 						'href' => $this->url->link('account/viewed', '', true),
 						'icon' => 'history',
 					),
-					'account/newsletter' => array(
-						'text' => $this->language->get('text_newsletter'),
-						'href' => $this->url->link('account/newsletter', '', true),
-						'icon' => 'mail',
-					),
+				'account/newsletter' => array(
+					'text' => $this->language->get('text_newsletter'),
+					'href' => $this->url->link('account/newsletter', '', true),
+					'icon' => 'mail',
+				),
+				'extension/module/dockercart_gdpr/account' => array(
+					'text' => 'Privacy Settings',
+					'href' => $this->url->link('extension/module/dockercart_gdpr/account', '', true),
+					'icon' => 'shield',
 				),
 			),
-			array(
+		),
+		array(
 				'heading' => $this->language->get('text_my_orders'),
 				'children' => array(
 					'account/order' => array(
