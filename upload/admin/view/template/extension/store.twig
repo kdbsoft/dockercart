@@ -233,13 +233,7 @@
 				<div class="store-modal-params" id="store-modal-params"></div>
 				<div class="store-modal-changelog" id="store-modal-changelog"></div>
 				<div class="store-modal-update-changelog" id="store-modal-update-changelog" style="display:none;"></div>
-				<div class="store-modal-license" id="store-modal-license" style="display:none;">
-					<label for="store-modal-license-key-input">{{ text_license_key }}</label>
-					<div class="store-license-input-group">
-						<input type="text" id="store-modal-license-key-input" class="form-control" placeholder="DCL-..." />
-						<button type="button" class="btn btn-primary store-activate-btn" id="store-modal-activate-btn"><i class="fa fa-key"></i> {{ text_activate_key }}</button>
-					</div>
-				</div>
+	
 			</div>
 			<div class="modal-footer store-modal-footer">
 				<a href="#" id="store-modal-buy" class="btn btn-primary btn-lg btn-buy" target="_blank" rel="noopener">
@@ -292,10 +286,8 @@ $(document).ready(function() {
 	var $modalBuyText = $('#store-modal-buy-text');
 	var $modalChangelog = $('#store-modal-changelog');
 	var $modalUpdateChangelog = $('#store-modal-update-changelog');
-	var $modalLicense = $('#store-modal-license');
 	var $modalInstallBtn = $('#store-modal-install-btn');
 	var $modalUpdateBtn = $('#store-modal-update-btn');
-	var $modalLicenseInput = $('#store-modal-license-key-input');
 
 	var currentDetail = null;
 
@@ -309,7 +301,6 @@ $(document).ready(function() {
 		$modalUpdateBtn.hide();
 		$modalChangelog.html('').hide();
 		$modalUpdateChangelog.html('').hide();
-		$modalLicense.hide();
 		$modalBuyText.text('{{ text_buy }}');
 		$modalIndicators.empty();
 		$modalCarouselInner.empty();
@@ -383,14 +374,8 @@ $(document).ready(function() {
 					$modalBuyText.text(priceText);
 					$modalBuy.attr('href', data.buy_url).show();
 				}
-				$modalLicense.show();
-				$modalLicenseInput.val(data.license_key || '');
 			} else if (state === 'install') {
 				$modalInstallBtn.show();
-				if (data.license_key) {
-					$modalLicenseInput.val(data.license_key);
-				}
-				$modalLicense.show();
 			} else if (state === 'update') {
 				$modalUpdateBtn.show();
 			} else {
@@ -422,7 +407,7 @@ $(document).ready(function() {
 		showModal(sku);
 	});
 
-	$(document).on('click', '.store-update-btn', function(e) {
+	$('.store-grid').on('click', '.store-update-btn', function(e) {
 		e.stopPropagation();
 		var sku = $(this).data('sku');
 		showModal(sku);
@@ -432,18 +417,11 @@ $(document).ready(function() {
 		if (!currentDetail) return;
 
 		var $btn = $(this).prop('disabled', true);
-		var licenseKey = $modalLicenseInput.val().trim();
-		var sku = currentDetail.sku;
-
-		if (!licenseKey) {
-			$btn.prop('disabled', false);
-			alert('{{ error_license_required }}');
-			return;
-		}
+		var licenseKey = currentDetail.license_key || '';
 
 		if (!confirm('{{ text_confirm_install }}')) { $btn.prop('disabled', false); return; }
 
-		$.post('{{ install_url }}', { sku: sku, license_key: licenseKey }, function(resp) {
+		$.post('{{ install_url }}', { sku: currentDetail.sku, license_key: licenseKey }, function(resp) {
 			if (resp.error) {
 				$btn.prop('disabled', false);
 				alert(resp.error);
@@ -461,7 +439,7 @@ $(document).ready(function() {
 		if (!currentDetail) return;
 
 		var $btn = $(this).prop('disabled', true);
-		var licenseKey = $modalLicenseInput.val().trim();
+		var licenseKey = currentDetail.license_key || '';
 
 		if (!confirm('{{ text_confirm_update }}')) { $btn.prop('disabled', false); return; }
 
@@ -479,31 +457,11 @@ $(document).ready(function() {
 		});
 	});
 
-	$('#store-modal-activate-btn').on('click', function() {
-		if (!currentDetail) return;
-
-		var $btn = $(this).prop('disabled', true);
-		var licenseKey = $modalLicenseInput.val().trim();
-
-		if (!licenseKey) {
-			$btn.prop('disabled', false);
-			alert('{{ error_license_required }}');
-			return;
-		}
-
-		$.post('{{ activate_key_url }}', { sku: currentDetail.sku, license_key: licenseKey }, function(resp) {
-			if (resp.error) {
-				$btn.prop('disabled', false);
-				alert(resp.error);
-			} else {
-				alert(resp.message);
-				$modal.modal('hide');
-				location.reload();
-			}
-		}, 'json').fail(function() {
-			$btn.prop('disabled', false);
-			alert('{{ text_error }}');
-		});
+	$(document).on('click', '.store-update-btn', function(e) {
+		if ($(this).closest('.store-grid').length) return;
+		e.stopPropagation();
+		var sku = $(this).data('sku');
+		showModal(sku);
 	});
 
 	var $keyModal = $('#store-key-modal');

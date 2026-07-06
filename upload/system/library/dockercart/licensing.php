@@ -603,5 +603,6 @@ class DockercartLicensing {
 
 		$this->logger->info('Validate: RECORD FAILURE for ' . $module_code);
 	}
-
 }
+
+class_alias('DockercartLicensing', 'dockercart\\licensing');
