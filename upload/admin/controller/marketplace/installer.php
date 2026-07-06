@@ -45,7 +45,7 @@ class ControllerMarketplaceInstaller extends Controller {
 			$data['histories'][] = array(
 				'extension_install_id' => $result['extension_install_id'],
 				'filename'             => $result['filename'],
-				'date_added'           => date($this->language->get('date_format_short'), strtotime($result['date_added']))
+				'date_added'           => date('d/m/Y H:i', strtotime($result['date_added']))
 			);
 		}
 		
