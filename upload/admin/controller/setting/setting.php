@@ -658,14 +658,6 @@ class ControllerSettingSetting extends Controller {
 			$data['config_checkout_id'] = $this->config->get('config_checkout_id');
 		}
 
-		if (isset($this->request->post['config_invoice_prefix'])) {
-			$data['config_invoice_prefix'] = $this->request->post['config_invoice_prefix'];
-		} elseif ($this->config->get('config_invoice_prefix')) {
-			$data['config_invoice_prefix'] = $this->config->get('config_invoice_prefix');
-		} else {
-			$data['config_invoice_prefix'] = 'INV-' . date('Y') . '-00';
-		}
-
 		if (isset($this->request->post['config_order_status_id'])) {
 			$data['config_order_status_id'] = $this->request->post['config_order_status_id'];
 		} else {

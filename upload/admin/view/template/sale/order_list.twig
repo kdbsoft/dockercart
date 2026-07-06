@@ -3,8 +3,6 @@
 <div class="page-header">
   <div class="container-fluid">
     <div class="pull-right">
-      <button type="submit" id="button-shipping" form="form-order" formaction="{{ shipping }}" formtarget="_blank" data-toggle="tooltip" title="{{ button_shipping_print }}" class="btn btn-info"><i class="fa fa-truck"></i></button>
-      <button type="submit" id="button-invoice" form="form-order" formaction="{{ invoice }}" formtarget="_blank" data-toggle="tooltip" title="{{ button_invoice_print }}" class="btn btn-info"><i class="fa fa-print"></i></button>
       <button type="button" id="button-delete" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger"><i class="fa fa-trash-o"></i></button></div>
     <h1>{{ heading_title }}</h1>
     <ul class="breadcrumb">
@@ -220,32 +218,18 @@ $('input[name=\'filter_customer\']').autocomplete({
 //--></script> 
   <script type="text/javascript"><!--
 $('input[name^=\'selected\']').on('change', function() {
-	$('#button-shipping, #button-invoice, #button-delete').prop('disabled', true);
+	$('#button-delete').prop('disabled', true);
 
 	var selected = $('input[name^=\'selected\']:checked');
 
 	if (selected.length) {
-		$('#button-invoice').prop('disabled', false);
 		$('#button-delete').prop('disabled', false);
 	}
-
-	for (i = 0; i < selected.length; i++) {
-		if ($(selected[i]).parent().find('input[name^=\'shipping_code\']').val()) {
-			$('#button-shipping').prop('disabled', false);
-
-			break;
-		}
-	}
 });
 
-$('#button-shipping, #button-invoice, #button-delete').prop('disabled', true);
+$('#button-delete').prop('disabled', true);
 
 $('input[name^=\'selected\']:first').trigger('change');
-
-// IE and Edge fix!
-$('#button-shipping, #button-invoice').on('click', function(e) {
-	$('#form-order').attr('action', this.getAttribute('formAction'));
-});
 
 $('.button-order-delete').on('click', function(e) {
 	e.preventDefault();
