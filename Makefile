@@ -3,7 +3,7 @@ include .env
 export
 endif
 
-.PHONY: help migrate up update ssl le le-ftp ftp down logs logs-follow shell mariadb backup restore dump-init clean restart traefik traefik-ssl traefik-le scheduler-logs scheduler-restart scheduler-reload scheduler-shell scheduler-status prod prod-ftp dev dev-ssl
+.PHONY: help migrate up update ssl le le-ftp ftp down logs logs-follow shell mariadb backup restore backup-s3 dump-init clean restart traefik traefik-ssl traefik-le scheduler-logs scheduler-restart scheduler-reload scheduler-shell scheduler-status prod prod-ftp dev dev-ssl
 
 ### Convenience variables
 COMPOSE := docker compose -f docker-compose.yml
@@ -15,7 +15,7 @@ help: ## Show this help
 	@echo ""
 	@echo "DockerCart - Docker Compose Stack"
 	@echo ""
-	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	@grep -hE '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
 	@echo ""
 	@echo "Modes (default: standalone, no Traefik needed):"
 	@echo "  make up          HTTP mode       - http://$${DOCKERCART_DOMAIN:-dockercart.local}"
@@ -137,6 +137,9 @@ restore: ## Restore from the latest dump in ./backups/
 	echo "Restoring $$LATEST"; \
 	$(COMPOSE) exec -T -e MYSQL_PWD=$${MARIADB_PASSWORD:-dockercart_password} mariadb mariadb -u$${MARIADB_USER:-dockercart} $${MARIADB_DATABASE:-dockercart} < $$LATEST
 	@echo "Restored"
+
+backup-s3: ## Run S3 backup worker manually (one-shot; needs BACKUP_S3_* in .env)
+	@COMPOSE_PROFILES=backup $(COMPOSE) run --rm --no-deps backup-worker
 
 dump-init: ## Regenerate docker/mysql/init.sql from running MariaDB
 	@mkdir -p docker/mysql
