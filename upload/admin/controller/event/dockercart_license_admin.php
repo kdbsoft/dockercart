@@ -65,10 +65,12 @@ class ControllerEventDockercartLicenseAdmin extends Controller {
 	}
 
 	private function extractModuleCode(string $route): ?string {
-		if (preg_match('/^extension\/(module|feed|payment|shipping|total)\/([a-z0-9_]+)/', $route, $matches)) {
-			return $matches[2];
+		if (strpos($route, 'extension/') !== 0) {
+			return null;
 		}
 
-		return null;
+		$parts = explode('/', $route);
+
+		return $parts[2] ?? null;
 	}
 }

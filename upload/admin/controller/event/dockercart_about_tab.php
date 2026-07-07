@@ -32,15 +32,13 @@ class ControllerEventDockercartAboutTab extends Controller {
 	}
 
 	private function extractModuleCode(string $route): ?string {
-		if (preg_match('/^extension\/(?:module|feed|payment|shipping|total)\/[^\/]+\/([a-z0-9_]+)/', $route, $matches)) {
-			return $matches[1];
+		if (strpos($route, 'extension/') !== 0) {
+			return null;
 		}
 
-		if (preg_match('/^extension\/(?:module|feed|payment|shipping|total)\/([a-z0-9_]+)/', $route, $matches)) {
-			return $matches[1];
-		}
+		$parts = explode('/', $route);
 
-		return null;
+		return $parts[2] ?? null;
 	}
 
 	private function getMeta(string $module_code): ?array {
