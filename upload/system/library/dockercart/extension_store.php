@@ -59,7 +59,7 @@ class DockercartExtensionStore {
 		$parsed = parse_url($url);
 		$gateway_ip = @gethostbyname('host.docker.internal');
 
-		if ($gateway_ip !== 'host.docker.internal') {
+		if ($gateway_ip !== 'host.docker.internal' && str_contains($parsed['host'] ?? '', 'developer.dockercart.net')) {
 			curl_setopt($ch, CURLOPT_RESOLVE, array(
 				$parsed['host'] . ':' . ($parsed['port'] ?? 80) . ':' . $gateway_ip
 			));
@@ -363,7 +363,7 @@ class DockercartExtensionStore {
 		$parsed = parse_url($url);
 		$gateway_ip = @gethostbyname('host.docker.internal');
 
-		if ($gateway_ip !== 'host.docker.internal') {
+		if ($gateway_ip !== 'host.docker.internal' && str_contains($parsed['host'] ?? '', 'developer.dockercart.net')) {
 			curl_setopt($ch, CURLOPT_RESOLVE, array(
 				$parsed['host'] . ':' . ($parsed['port'] ?? 80) . ':' . $gateway_ip
 			));
@@ -408,7 +408,7 @@ class DockercartExtensionStore {
 		$parsed = parse_url($url);
 		$gateway_ip = @gethostbyname('host.docker.internal');
 
-		if ($gateway_ip !== 'host.docker.internal') {
+		if ($gateway_ip !== 'host.docker.internal' && str_contains($parsed['host'] ?? '', 'developer.dockercart.net')) {
 			curl_setopt($ch, CURLOPT_RESOLVE, array(
 				$parsed['host'] . ':' . ($parsed['port'] ?? 80) . ':' . $gateway_ip,
 			));
@@ -459,7 +459,7 @@ class DockercartExtensionStore {
 		$parsed = parse_url($url);
 		$gateway_ip = @gethostbyname('host.docker.internal');
 
-		if ($gateway_ip !== 'host.docker.internal') {
+		if ($gateway_ip !== 'host.docker.internal' && str_contains($parsed['host'] ?? '', 'developer.dockercart.net')) {
 			curl_setopt($ch, CURLOPT_RESOLVE, array(
 				$parsed['host'] . ':' . ($parsed['port'] ?? 80) . ':' . $gateway_ip
 			));
@@ -467,7 +467,6 @@ class DockercartExtensionStore {
 
 		$response = curl_exec($ch);
 		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-		$curl_error = curl_error($ch);
 		curl_close($ch);
 
 		if ($http_code !== 200 || $response === false) {
