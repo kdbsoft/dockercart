@@ -28,6 +28,7 @@ $_['text_edit_subtitle'] = 'Configure extension settings and options';
 // Dashboard Info Subtitle
 
 $_['text_activity_subtitle'] = 'Latest store events and user actions';
+$_['text_view_all']           = 'View all activity';
 
 
 
