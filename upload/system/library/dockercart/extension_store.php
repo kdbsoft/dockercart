@@ -576,6 +576,17 @@ class DockercartExtensionStore {
 		);
 	}
 
+	public function updateInstalledMetaExtensionInstallId(string $code, int $extension_install_id): void {
+		$db = $this->registry->get('db');
+
+		$db->query(
+			"UPDATE `" . DB_PREFIX . "dockercart_extension_meta`
+			 SET `extension_install_id` = '" . (int)$extension_install_id . "',
+			     `date_modified` = NOW()
+			 WHERE `code` = '" . $db->escape($code) . "'"
+		);
+	}
+
 	public function removeInstalledMeta(string $code): void {
 		$db = $this->registry->get('db');
 

@@ -530,8 +530,9 @@ class ControllerMarketplaceInstall extends Controller {
 
 		if (!$json) {
 			$this->load->model('setting/extension');
+			$this->load->model('setting/modification');
 
-			// Check if module is still active in Extensions > Modules
+			// Resolve the module code (try modification, then dockercart meta)
 			$code = '';
 
 			$query = $this->db->query("SELECT `code` FROM `" . DB_PREFIX . "modification` WHERE `extension_install_id` = '" . (int)$extension_install_id . "' LIMIT 1");
@@ -548,17 +549,36 @@ class ControllerMarketplaceInstall extends Controller {
 				}
 			}
 
-			if (!empty($code)) {
-				$extension_query = $this->db->query("SELECT `extension_id` FROM `" . DB_PREFIX . "extension` WHERE `type` = 'module' AND `code` = '" . $this->db->escape($code) . "' LIMIT 1");
+			// Collect every extension_install_id tied to this code (handles legacy duplicates
+			// left over from install+update before consolidation was introduced).
+			$all_install_ids = array($extension_install_id);
 
-				if ($extension_query->row) {
-					$json['error'] = sprintf($this->language->get('error_module_active'), $code);
+			if ($code !== '') {
+				$dup_query = $this->db->query("SELECT DISTINCT `extension_install_id` FROM `" . DB_PREFIX . "modification` WHERE `code` = '" . $this->db->escape($code) . "' AND `extension_install_id` <> 0");
+
+				foreach ($dup_query->rows as $row) {
+					$all_install_ids[] = (int)$row['extension_install_id'];
+				}
+
+				$meta_query = $this->db->query("SELECT `extension_install_id` FROM `" . DB_PREFIX . "dockercart_extension_meta` WHERE `code` = '" . $this->db->escape($code) . "' LIMIT 1");
+
+				if ($meta_query->row && !empty($meta_query->row['extension_install_id'])) {
+					$all_install_ids[] = (int)$meta_query->row['extension_install_id'];
 				}
 			}
 
-			if (!$json) {
-					$results = $this->model_setting_extension->getExtensionPathsByExtensionInstallId($extension_install_id);
+			$all_install_ids = array_values(array_unique(array_filter($all_install_ids)));
 
+			// Call the module's own uninstall hook first (drops module tables, unregisters tasks)
+			if ($code !== '') {
+				$this->load->controller('extension/module/' . $code . '/uninstall');
+			}
+
+			// Remove files + extension_path/extension_install/modification rows for every install id
+			foreach ($all_install_ids as $install_id) {
+				$results = $this->model_setting_extension->getExtensionPathsByExtensionInstallId($install_id);
+
+				if (!empty($results)) {
 					rsort($results);
 
 					DockercartInstallHelper::syncGitExclude(array_column($results, 'path'), 'remove');
@@ -609,21 +629,42 @@ class ControllerMarketplaceInstall extends Controller {
 								}
 							}
 						}
-
-						$this->model_setting_extension->deleteExtensionPath($result['extension_path_id']);
 					}
+				}
 
-					// Remove the install
-					$this->model_setting_extension->deleteExtensionInstall($extension_install_id);
+				$this->model_setting_extension->deleteExtensionPathsByExtensionInstallId($install_id);
+				$this->model_setting_extension->deleteExtensionInstall($install_id);
+				$this->model_setting_modification->deleteModificationsByExtensionInstallId($install_id);
+			}
 
-					// Remove any xml modifications
-					$this->load->model('setting/modification');
+			// Fully uninstall from Extensions > Modules + settings + module instances
+			if ($code !== '') {
+				$this->model_setting_extension->uninstall('module', $code);
 
-					$this->model_setting_modification->deleteModificationsByExtensionInstallId($extension_install_id);
+				$this->load->model('setting/module');
+				$this->model_setting_module->deleteModulesByCode($code);
 
-					$json['success'] = $this->language->get('text_success');
+				$this->load->model('user/user_group');
+				$this->model_user_user_group->removePermissions('extension/module/' . $code);
+
+				// Remove DockerCart metadata + license
+				if (is_file(DIR_SYSTEM . 'library/dockercart/extension_store.php')) {
+					require_once DIR_SYSTEM . 'library/dockercart/extension_store.php';
+
+					$store = new DockercartExtensionStore($this->registry);
+					$store->removeInstalledMeta($code);
+				}
+
+				if (is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
+					require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
+
+					$licensing = new DockercartLicensing($this->registry);
+					$licensing->removeLicense($code);
 				}
 			}
+
+			$json['success'] = $this->language->get('text_success');
+		}
 
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
