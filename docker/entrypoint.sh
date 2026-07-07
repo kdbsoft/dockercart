@@ -511,14 +511,25 @@ fix_permissions
 # Устанавливаем Composer зависимости, если vendor отсутствует (первый запуск / свежий clone)
 install_composer_deps
 
+# Backup role: one-shot worker (started by host cron via
+# `docker compose run --rm --no-deps backup-worker`). Runs the PHP worker
+# directly, then exits. No Apache/OCMOD/Manticore.
+if [ "$DOCKERCART_ROLE" = "backup" ]; then
+    ensure_app_configs
+    wait_for_mysql
+    apply_php_settings
+    mkdir -p /var/www/storage/backup
+    ensure_rclone_config
+    echo "Starting DockerCart backup worker..."
+    exec php /var/www/html/bin/dockercart_backup_s3.php "$@"
+fi
+
 # Scheduler role: lightweight startup, no Apache/OCMOD/Manticore
 if [ "$DOCKERCART_ROLE" = "scheduler" ]; then
     ensure_app_configs
     wait_for_mysql
     apply_php_settings
     mkdir -p /var/www/storage/logs/scheduler
-    mkdir -p /var/www/storage/backup
-    ensure_rclone_config
     echo "Starting DockerCart scheduler..."
     exec php /var/www/html/bin/dockercart_scheduler.php
 fi

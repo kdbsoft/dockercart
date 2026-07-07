@@ -104,6 +104,17 @@ services:
       - PHP_POST_MAX_SIZE=${PHP_POST_MAX_SIZE:-100M}
       - PHP_MAX_EXECUTION_TIME=${PHP_MAX_EXECUTION_TIME:-300}
       - GIT_EXCLUDE_FILE=${GIT_EXCLUDE_FILE:-/var/www/git-exclude}
+      # Backup to S3 (optional; worker reads these to dump+tar+upload)
+      - BACKUP_S3_ENABLED=${BACKUP_S3_ENABLED:-false}
+      - BACKUP_S3_PROVIDER=${BACKUP_S3_PROVIDER:-}
+      - BACKUP_S3_ENDPOINT=${BACKUP_S3_ENDPOINT:-}
+      - BACKUP_S3_REGION=${BACKUP_S3_REGION:-}
+      - BACKUP_S3_BUCKET=${BACKUP_S3_BUCKET:-}
+      - BACKUP_S3_ACCESS_KEY_ID=${BACKUP_S3_ACCESS_KEY_ID:-}
+      - BACKUP_S3_SECRET_ACCESS_KEY=${BACKUP_S3_SECRET_ACCESS_KEY:-}
+      - BACKUP_S3_PATH=${BACKUP_S3_PATH:-dockercart/backups}
+      - BACKUP_S3_RETENTION_DAYS=${BACKUP_S3_RETENTION_DAYS:-7}
+      - BACKUP_S3_INSECURE=${BACKUP_S3_INSECURE:-false}
     depends_on:
       mariadb:
         condition: service_healthy
@@ -333,6 +344,41 @@ services:
         "-c",
         "chmod 777 /home/vsftpd/${FTP_USER:-images} && exec /usr/sbin/run-vsftpd.sh",
       ]
+    networks:
+      - dockercart-network
+
+  # One-shot backup worker. Started by host cron via:
+  #   docker compose run --rm --no-deps backup-worker
+  # Never started by `make up` (profile: backup). Reuses the same image as apache/scheduler.
+  backup-worker:
+    profiles:
+      - backup
+    image: dockercart_apache:latest
+    container_name: dockercart_backup_worker
+    environment:
+      - DOCKERCART_ROLE=backup
+      - DB_HOSTNAME=${DB_HOSTNAME:-mariadb}
+      - DB_USERNAME=${DB_USERNAME:-dockercart}
+      - DB_PASSWORD=${DB_PASSWORD:-dockercart_password}
+      - DB_DATABASE=${DB_DATABASE:-dockercart}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_PREFIX=${DB_PREFIX:-oc_}
+      - TZ=${TZ:-UTC}
+      - BACKUP_S3_ENABLED=${BACKUP_S3_ENABLED:-false}
+      - BACKUP_S3_PROVIDER=${BACKUP_S3_PROVIDER:-}
+      - BACKUP_S3_ENDPOINT=${BACKUP_S3_ENDPOINT:-}
+      - BACKUP_S3_REGION=${BACKUP_S3_REGION:-}
+      - BACKUP_S3_BUCKET=${BACKUP_S3_BUCKET:-}
+      - BACKUP_S3_ACCESS_KEY_ID=${BACKUP_S3_ACCESS_KEY_ID:-}
+      - BACKUP_S3_SECRET_ACCESS_KEY=${BACKUP_S3_SECRET_ACCESS_KEY:-}
+      - BACKUP_S3_PATH=${BACKUP_S3_PATH:-dockercart/backups}
+      - BACKUP_S3_RETENTION_DAYS=${BACKUP_S3_RETENTION_DAYS:-7}
+      - BACKUP_S3_INSECURE=${BACKUP_S3_INSECURE:-false}
+    volumes:
+      - ./upload:/var/www/html:z
+      - ./storage:/var/www/storage:z
+    mem_limit: 1G
+    cpus: "2.0"
     networks:
       - dockercart-network
 

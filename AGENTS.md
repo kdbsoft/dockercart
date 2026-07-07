@@ -67,17 +67,18 @@ Example: `registerTask('novapost_sync', 'NovaPost Sync', 'php /var/www/html/bin/
 **Never** hardcode handler classes, task_type literals, or worker commands in `bin/dockercart_scheduler.php`.
 ---
 ## Backup to S3 (optional)
-Scheduled `tar.gz` backup of **DB + `./upload/image` + `./storage/download` + `./storage/modification`** to S3 / S3-compatible storage. Off by default.
+One-shot `tar.gz` backup of **DB + `./upload/image` + `./storage/download` + `./storage/modification`** to S3 / S3-compatible storage. Off by default. Runs via **host cron** (not the scheduler daemon) to isolate heavy dump/tar/upload work from business workers.
 
-- **Worker**: `upload/bin/dockercart_backup_s3.php` — registered as singleton scheduler task `backup_s3` via migration `20260706_register_backup_s3_task.sql`. Disabled by default; user toggles schedule in admin **System → Scheduler**.
-- **S3 client**: `rclone` (installed in Dockerfile). Config `/var/www/storage/.rclone.conf` is generated at container start by `ensure_rclone_config()` in `docker/entrypoint.sh` from `BACKUP_S3_*` env vars. `RCLONE_CONFIG` env is exported so the worker (spawned by the scheduler daemon) inherits it.
+- **Worker**: `upload/bin/dockercart_backup_s3.php` — PHP CLI, runs in the `backup-worker` compose service (profile `backup`, never started by `make up`). Reuses `dockercart_apache:latest` image.
+- **Trigger**: host cron → `COMPOSE_PROFILES=backup docker compose run --rm --no-deps backup-worker`. `COMPOSE_PROFILES=backup` is a Compose-spec standard env var — works identically with docker compose v2 and podman-compose. Install the cron entry with `sudo ./install-backup-cron.sh` (reads `BACKUP_S3_SCHEDULE` from `.env`, writes `/etc/cron.d/dockercart-backup`). Manual one-shot: `make backup-s3`. Do NOT put `COMPOSE_PROFILES` in `.env` — it would make `make up` start the backup worker alongside the main stack.
+- **S3 client**: `rclone` (installed in Dockerfile). Config `/var/www/storage/.rclone.conf` generated at container start by `ensure_rclone_config()` in `docker/entrypoint.sh` (backup-role branch) from `BACKUP_S3_*` env vars. `RCLONE_CONFIG` env is exported so the worker inherits it.
 - **Credentials stay in `.env`** — never written to the database. Worker reads them via `getenv()`.
 - **Staging dir**: `/var/www/storage/backup/` (host `./storage/backup/`). Local tar.gz is deleted immediately after successful upload (kept only on upload failure, for manual recovery).
 - **Retention**: worker deletes S3 objects older than `BACKUP_S3_RETENTION_DAYS` (default 7) under `BACKUP_S3_PATH`. Only `dockercart_*.tar.gz` files are deleted — other objects in the prefix are left alone.
-- **Status**: worker writes JSON to `oc_dockercart_scheduler_task.last_result` (status, size, s3_key, retention_deleted). Worker log: `/var/www/storage/logs/scheduler/worker_backup_s3_<taskId>.log`.
-- **To enable**: set `BACKUP_S3_ENABLED=true` + credentials in `.env` → `make scheduler-restart` (and `make up` for apache) → enable the "Backup to S3" task in admin UI.
+- **Logs**: `./storage/logs/backup.log` (cron redirects worker stdout/stderr there).
+- **To enable**: set `BACKUP_S3_ENABLED=true` + credentials + `BACKUP_S3_SCHEDULE` in `.env` → `make up` (builds image with rclone) → `sudo ./install-backup-cron.sh`.
 
-**Required env vars** (see `.env.example`): `BACKUP_S3_ENABLED`, `BACKUP_S3_PROVIDER`, `BACKUP_S3_ENDPOINT`, `BACKUP_S3_REGION`, `BACKUP_S3_BUCKET`, `BACKUP_S3_ACCESS_KEY_ID`, `BACKUP_S3_SECRET_ACCESS_KEY`, `BACKUP_S3_PATH`, `BACKUP_S3_RETENTION_DAYS`, `BACKUP_S3_INSECURE`.
+**Required env vars** (see `.env.example`): `BACKUP_S3_ENABLED`, `BACKUP_S3_SCHEDULE`, `BACKUP_S3_CRON_USER`, `BACKUP_S3_PROVIDER`, `BACKUP_S3_ENDPOINT`, `BACKUP_S3_REGION`, `BACKUP_S3_BUCKET`, `BACKUP_S3_ACCESS_KEY_ID`, `BACKUP_S3_SECRET_ACCESS_KEY`, `BACKUP_S3_PATH`, `BACKUP_S3_RETENTION_DAYS`, `BACKUP_S3_INSECURE`.
 ---
 ## Frontend (DockerCart Theme)
 - **Tailwind CSS 3** + **Lucide icons** (not Font Awesome) + **ES6+** vanilla JS
