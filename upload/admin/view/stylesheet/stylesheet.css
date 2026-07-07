@@ -1195,6 +1195,7 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
     background-color: rgba(0, 0, 0, 0.1);
     font-size: 13px;
     font-weight: 500;
+    text-align: right;
 }
 
 .tile-footer a {
