@@ -34,6 +34,7 @@ class ModelExtensionReportProduct extends Model {
 
 	public function reset() {
 		$this->db->query("UPDATE " . DB_PREFIX . "product SET viewed = '0'");
+		$this->db->query("TRUNCATE TABLE `" . DB_PREFIX . "dockercart_viewed_product`");
 	}
 
 	public function getPurchased($data = array()) {
