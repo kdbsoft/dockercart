@@ -296,6 +296,10 @@ class ModelExtensionReportCustomer extends Model {
 		return $query->row['total'];
 	}
 
+	public function reset() {
+		$this->db->query("TRUNCATE TABLE `" . DB_PREFIX . "customer_activity`");
+	}
+
 	public function getCustomerSearches($data = array()) {
 		$sql = "SELECT cs.customer_id, cs.keyword, cs.category_id, cs.products, cs.ip, cs.date_added, CONCAT(c.firstname, ' ', c.lastname) AS customer FROM " . DB_PREFIX . "customer_search cs LEFT JOIN " . DB_PREFIX . "customer c ON (cs.customer_id = c.customer_id)";
 

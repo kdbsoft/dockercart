@@ -30,3 +30,4 @@ $_['text_edit_subtitle'] = 'Настройте параметры и опции 
 // Dashboard Info Subtitle
 
 $_['text_activity_subtitle'] = 'Последние события магазина и действия пользователей';
+$_['text_view_all']           = 'Вся активность';
