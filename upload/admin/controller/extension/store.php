@@ -1146,10 +1146,14 @@ class ControllerExtensionStore extends Controller {
 
 		if ($gateway_ip !== 'host.docker.internal') {
 			$parsed = parse_url($url);
-			$port = $parsed['port'] ?? (strtolower($parsed['scheme'] ?? 'http') === 'https' ? 443 : 80);
-			curl_setopt($ch, CURLOPT_RESOLVE, array(
-				$parsed['host'] . ':' . $port . ':' . $gateway_ip
-			));
+			$host = $parsed['host'] ?? '';
+
+			if (str_contains($host, 'developer.dockercart.net')) {
+				$port = $parsed['port'] ?? (strtolower($parsed['scheme'] ?? 'http') === 'https' ? 443 : 80);
+				curl_setopt($ch, CURLOPT_RESOLVE, array(
+					$host . ':' . $port . ':' . $gateway_ip
+				));
+			}
 		}
 
 		$response = curl_exec($ch);
