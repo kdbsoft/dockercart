@@ -31,6 +31,7 @@ $_['text_license_key'] = 'License Key';
 $_['text_activate_key'] = 'Activate Key';
 $_['text_set_key'] = 'Set Key';
 $_['text_license_management'] = 'Purchased Add-ons';
+$_['column_action']            = 'Action';
 $_['text_status'] = 'Status';
 $_['text_expires'] = 'Expires';
 $_['text_last_verified'] = 'Last Verified';

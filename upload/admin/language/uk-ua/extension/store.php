@@ -31,6 +31,7 @@ $_['text_license_key'] = 'Ліцензійний ключ';
 $_['text_activate_key'] = 'Активувати ключ';
 $_['text_set_key'] = 'Задати ключ';
 $_['text_license_management'] = 'Придбані доповнення';
+$_['column_action']            = 'Дія';
 $_['text_status'] = 'Статус';
 $_['text_expires'] = 'Закінчується';
 $_['text_last_verified'] = 'Остання перевірка';

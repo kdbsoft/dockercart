@@ -148,7 +148,7 @@
 									<th>{{ text_status }}</th>
 									<th>{{ text_expires }}</th>
 									<th>{{ text_last_verified }}</th>
-									<th></th>
+									<th class="text-right">{{ column_action }}</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -191,7 +191,7 @@
 									</td>
 									<td>{{ license.expires_at ?? '—' }}</td>
 									<td>{{ license.last_verified ?? text_no_license }}</td>
-									<td>
+									<td class="text-right">
 										{% if license.update_available %}
 										<button class="btn btn-xs btn-warning store-update-btn" data-sku="{{ license.ext_sku }}" title="{{ text_update }}"><i class="fa fa-arrow-up"></i></button>
 										{% endif %}
