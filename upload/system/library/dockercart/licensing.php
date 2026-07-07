@@ -8,7 +8,7 @@ class DockercartLicensing {
 	private $config;
 	private $logger;
 
-	const LICENSING_API = 'http://licensing.docker.localhost:8080';
+	const LICENSING_API = 'https://developer.dockercart.net';
 	const GRACE_DAYS = 7;
 	const VALIDATE_TTL = 604800;
 
@@ -28,10 +28,6 @@ class DockercartLicensing {
 	}
 
 	public function getApiUrl(): string {
-		if (defined('LICENSING_API_URL') && LICENSING_API_URL !== '') {
-			return LICENSING_API_URL;
-		}
-
 		return self::LICENSING_API;
 	}
 

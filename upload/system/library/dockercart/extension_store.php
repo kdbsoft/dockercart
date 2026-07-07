@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 class DockercartExtensionStore {
-	const YML_ENDPOINT = 'http://licensing.docker.localhost:8080/api/v1/yml/';
-	const STORE_DOMAIN = 'https://dockercart.net/extensions';
+	const YML_ENDPOINT = 'https://developer.dockercart.net/api/v1/yml/';
+	const STORE_DOMAIN = 'https://store.dockercart.net/';
 	const CACHE_TTL = 1800;
 	const LICENSING_CACHE_TTL = 1800;
 
@@ -17,9 +17,7 @@ class DockercartExtensionStore {
 	public function __construct($registry) {
 		$this->registry = $registry;
 		$this->cache_dir = DIR_STORAGE . 'dockercart/extension_store/';
-		$this->api_url = defined('LICENSING_API_URL')
-			? LICENSING_API_URL
-			: 'http://licensing.docker.localhost:8080';
+		$this->api_url = 'https://developer.dockercart.net';
 	}
 
 	public function resolveLanguage(): string {
