@@ -141,6 +141,8 @@ class ControllerExtensionReportCustomerActivity extends Controller {
 			);
 		}
 
+		$data['reset'] = $this->url->link('extension/report/customer_activity/reset', 'user_token=' . $this->session->data['user_token'], true);
+
 		$data['user_token'] = $this->session->data['user_token'];
 
 		$url = '';
@@ -177,5 +179,21 @@ class ControllerExtensionReportCustomerActivity extends Controller {
 		$data['filter_date_end'] = $filter_date_end;
 
 		return $this->load->view('extension/report/customer_activity_info', $data);
+	}
+
+	public function reset() {
+		$this->load->language('extension/report/customer_activity');
+
+		if (!$this->user->hasPermission('modify', 'extension/report/customer_activity')) {
+			$this->session->data['error'] = $this->language->get('error_permission');
+		} else {
+			$this->load->model('extension/report/customer');
+
+			$this->model_extension_report_customer->reset();
+
+			$this->session->data['success'] = $this->language->get('text_success');
+		}
+
+		$this->response->redirect($this->url->link('report/report', 'user_token=' . $this->session->data['user_token'] . '&code=customer_activity', true));
 	}
 }
