@@ -1,6 +1,17 @@
 <?php
 // Simple health check endpoint for DockerCart
-// Usage: visit /healthcheck.php
+// Usage: curl -H "X-Healthcheck-Token: <token>" /healthcheck.php
+
+$healthcheckToken = getenv('HEALTHCHECK_TOKEN');
+if ($healthcheckToken === false || $healthcheckToken === '') {
+    return;
+}
+
+$headerToken = $_SERVER['HTTP_X_HEALTHCHECK_TOKEN'] ?? '';
+if ($headerToken !== $healthcheckToken) {
+    http_response_code(403);
+    return;
+}
 
 header('Content-Type: application/json; charset=utf-8');
 
