@@ -64,6 +64,36 @@ class ControllerExtensionStore extends Controller {
 			$categories_tree = $store->buildCategoriesTree($yml);
 		}
 
+		// Count offers per category from raw YML
+		$category_counts = array();
+
+		if ($yml !== null) {
+			foreach ($yml->shop->offers->offer as $offer) {
+				$cat_id = (string) $offer->categoryId;
+				$category_counts[$cat_id] = ($category_counts[$cat_id] ?? 0) + 1;
+			}
+		}
+
+		// Recursively enrich categories with cumulative counts
+		$enrichCount = function (&$cats) use ($category_counts, &$enrichCount) {
+			foreach ($cats as &$cat) {
+				$count = $category_counts[$cat['id']] ?? 0;
+
+				if (!empty($cat['children'])) {
+					$enrichCount($cat['children']);
+
+					foreach ($cat['children'] as $child) {
+						$count += $child['count'];
+					}
+				}
+
+				$cat['count'] = $count;
+			}
+			unset($cat);
+		};
+
+		$enrichCount($categories_tree);
+
 		$selected_category = $this->request->get['category_id'] ?? '';
 		$selected_category = (string) $selected_category;
 		$offer_category_ids = null;
@@ -93,6 +123,7 @@ class ControllerExtensionStore extends Controller {
 		$data['base_url'] = $this->url->link('extension/store', 'user_token=' . $this->session->data['user_token'], true);
 
 		$data['total_offers'] = count($offers);
+		$data['total_categories_count'] = array_sum($category_counts);
 
 		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('text_extension'),
