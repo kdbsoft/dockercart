@@ -141,7 +141,13 @@ ensure_robots_txt() {
         url="${DOCKERCART_HTTPS_URL%/}"
     fi
 
-    cat > "$robots_file" <<-EOF
+    if [ "${DISALLOW_INDEXING:-NO}" = "YES" ]; then
+        cat > "$robots_file" <<-EOF
+	User-agent: *
+	Disallow: /
+	EOF
+    else
+        cat > "$robots_file" <<-EOF
 	User-agent: *
 	Allow: /catalog/view/javascript/
 	Allow: /catalog/view/theme/
@@ -171,6 +177,7 @@ ensure_robots_txt() {
 
 	Sitemap: ${url}/sitemap.xml
 	EOF
+    fi
 
     if [ "$(id -u)" -eq 0 ]; then
         chown www-data:staff "$robots_file" 2>/dev/null || true
