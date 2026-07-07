@@ -59,6 +59,27 @@
 	font-size: 12px;
 }
 
+.store-cat-count {
+	display: inline-block;
+	float: right;
+	min-width: 18px;
+	height: 18px;
+	line-height: 18px;
+	padding: 0 6px;
+	font-size: 11px;
+	font-weight: 600;
+	color: #666;
+	background: #e8e8e8;
+	border-radius: 9px;
+	text-align: center;
+	margin-top: 1px;
+}
+
+.store-categories-tree li.active > a .store-cat-count {
+	color: #fff;
+	background: rgba(255, 255, 255, 0.25);
+}
+
 .store-grid {
 	display: flex;
 	flex-wrap: wrap;

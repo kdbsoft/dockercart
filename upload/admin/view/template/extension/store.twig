@@ -35,21 +35,21 @@
 								<div class="store-categories-header">{{ text_categories }}</div>
 								<ul class="store-categories-tree">
 									<li class="{% if selected_category == '' %}active{% endif %}">
-										<a href="{{ base_url }}" data-category-id="">{{ text_all_categories }}</a>
+										<a href="{{ base_url }}" data-category-id="">{{ text_all_categories }} <span class="store-cat-count">{{ total_categories_count }}</span></a>
 									</li>
 									{% for category in categories_tree %}
 										<li class="{% if selected_category == category.id %}active{% endif %}">
-											<a href="{{ base_url }}&category_id={{ category.id }}" data-category-id="{{ category.id }}">{{ category.name }}</a>
+											<a href="{{ base_url }}&category_id={{ category.id }}" data-category-id="{{ category.id }}">{{ category.name }} <span class="store-cat-count">{{ category.count }}</span></a>
 											{% if category.children %}
 											<ul>
 												{% for child in category.children %}
 												<li class="{% if selected_category == child.id %}active{% endif %}">
-													<a href="{{ base_url }}&category_id={{ child.id }}" data-category-id="{{ child.id }}">{{ child.name }}</a>
+													<a href="{{ base_url }}&category_id={{ child.id }}" data-category-id="{{ child.id }}">{{ child.name }} <span class="store-cat-count">{{ child.count }}</span></a>
 													{% if child.children %}
 													<ul>
 														{% for grandchild in child.children %}
 														<li class="{% if selected_category == grandchild.id %}active{% endif %}">
-															<a href="{{ base_url }}&category_id={{ grandchild.id }}" data-category-id="{{ grandchild.id }}">{{ grandchild.name }}</a>
+															<a href="{{ base_url }}&category_id={{ grandchild.id }}" data-category-id="{{ grandchild.id }}">{{ grandchild.name }} <span class="store-cat-count">{{ grandchild.count }}</span></a>
 														</li>
 														{% endfor %}
 													</ul>
