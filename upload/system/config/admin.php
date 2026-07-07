@@ -39,38 +39,14 @@ $_['action_event'] = array(
 	'controller/*/after' => array(
 		'event/language/after'
 	),
-	'controller/extension/module/*/before' => array(
-		'event/dockercart_license_admin'
-	),
-	'controller/extension/feed/*/before' => array(
-		'event/dockercart_license_admin'
-	),
-	'controller/extension/payment/*/before' => array(
-		'event/dockercart_license_admin'
-	),
-	'controller/extension/shipping/*/before' => array(
-		'event/dockercart_license_admin'
-	),
-	'controller/extension/total/*/before' => array(
+	'controller/extension/*/*/before' => array(
 		'event/dockercart_license_admin'
 	),
 	'view/*/before' => array(
 		999  => 'event/language',
 		1000 => 'event/theme'
 	),
-	'view/extension/module/*/after' => array(
-		'event/dockercart_about_tab'
-	),
-	'view/extension/feed/*/after' => array(
-		'event/dockercart_about_tab'
-	),
-	'view/extension/payment/*/after' => array(
-		'event/dockercart_about_tab'
-	),
-	'view/extension/shipping/*/after' => array(
-		'event/dockercart_about_tab'
-	),
-	'view/extension/total/*/after' => array(
+	'view/extension/*/*/after' => array(
 		'event/dockercart_about_tab'
 	)
 );
