@@ -646,6 +646,19 @@ class ControllerExtensionStore extends Controller {
 				'token' => $token,
 			]);
 
+			// Consolidate: replace the previous install record with this update's record.
+			// processInstallXml already removed the old modification row (by code),
+			// and the new files have overwritten the old ones on disk. We only need to
+			// drop the stale extension_install + extension_path rows and repoint the meta.
+			$old_extension_install_id = (int)($meta['extension_install_id'] ?? 0);
+
+			if ($old_extension_install_id && $old_extension_install_id !== $extension_install_id) {
+				$this->model_setting_extension->deleteExtensionPathsByExtensionInstallId($old_extension_install_id);
+				$this->model_setting_extension->deleteExtensionInstall($old_extension_install_id);
+
+				$store->updateInstalledMetaExtensionInstallId($code, $extension_install_id);
+			}
+
 			$store->updateInstalledMetaVersion($code, $current_version['version']);
 
 			$this->db->query("COMMIT");

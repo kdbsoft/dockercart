@@ -68,6 +68,10 @@ class ModelSettingExtension extends Model {
 	public function deleteExtensionPath($extension_path_id) {
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "extension_path` WHERE `extension_path_id` = '" . (int)$extension_path_id . "'");
 	}
+
+	public function deleteExtensionPathsByExtensionInstallId($extension_install_id) {
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "extension_path` WHERE `extension_install_id` = '" . (int)$extension_install_id . "'");
+	}
 	
 	public function getExtensionPathsByExtensionInstallId($extension_install_id) {
 		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "extension_path` WHERE `extension_install_id` = '" . (int)$extension_install_id . "' ORDER BY `date_added` ASC");
