@@ -30,8 +30,6 @@
 
     <ul class="nav nav-tabs dcx-profile-tabs" id="gt-tabs" role="tablist">
       <li class="active"><a href="#gt-tab-general" class="js-gt-tab" data-tab="gt-tab-general" data-title="{{ text_tab_general }}" data-subtitle="{{ text_tab_general_subtitle }}" data-icon="fa-language"><i class="fa fa-language"></i> {{ text_tab_general }}</a></li>
-      <li><a href="#gt-tab-license" class="js-gt-tab" data-tab="gt-tab-license" data-title="{{ text_tab_license }}" data-subtitle="{{ text_tab_license_subtitle }}" data-icon="fa-key"><i class="fa fa-key"></i> {{ text_tab_license }}</a></li>
-      <li><a href="#gt-tab-about" class="js-gt-tab" data-tab="gt-tab-about" data-title="{{ text_tab_about }}" data-subtitle="{{ text_tab_about_subtitle }}" data-icon="fa-info-circle"><i class="fa fa-info-circle"></i> {{ text_tab_about }}</a></li>
     </ul>
 
     <div class="dcx-shell">
@@ -134,44 +132,7 @@
               </div>
             </div>
 
-            <div id="gt-tab-license" class="dcx-tab-pane">
-              <div class="dcx-section">
-                <h4>{{ text_section_license_info }}</h4>
 
-                <div class="form-group">
-                  <label class="col-sm-3 control-label" for="input-license-key">{{ entry_license_key }}</label>
-                  <div class="col-sm-9">
-                    <input type="text" name="module_dockercart_google_translation_license_key" value="{{ module_dockercart_google_translation_license_key }}" id="input-license-key" class="form-control" placeholder="DCGT-XXXXXXXXXXXXXXXX-YYYYYYYYYYYY" />
-                    <small class="form-text text-muted" style="margin-top: 5px; display: inline-block;">
-                      <i class="fa fa-info-circle"></i> {{ text_license_domain }}: <strong>{{ license_domain }}</strong>
-                    </small>
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label class="col-sm-3 control-label" for="input-public-key">{{ entry_public_key }}</label>
-                  <div class="col-sm-9">
-                    <textarea name="module_dockercart_google_translation_public_key" id="input-public-key" rows="8" class="form-control" placeholder="-----BEGIN PUBLIC KEY-----&#10;...&#10;-----END PUBLIC KEY-----">{{ module_dockercart_google_translation_public_key }}</textarea>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div id="gt-tab-about" class="dcx-tab-pane">
-              <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                <h4>{{ text_tab_about }}</h4>
-                <table class="table table-bordered dcx-table">
-                 <tr>
-                    <td><strong>{{ text_developer }}</strong></td>
-                    <td>{{ text_developer_name }}</td>
-                  </tr>
-                  <tr>
-                    <td><strong>{{ text_contact }}</strong></td>
-                    <td><a href="mailto:support@dockercart.net">support@dockercart.net</a></td>
-                  </tr>
-                </table>
-              </div>
-            </div>
           </form>
         </div>
       </div>
@@ -200,7 +161,7 @@ $(document).on('click', '.js-gt-tab', function(e) {
   $('#gt-tabs > li').removeClass('active');
   $(this).closest('li').addClass('active');
 
-  $('#gt-tab-general, #gt-tab-license, #gt-tab-about').removeClass('active');
+  $('#gt-tab-general').removeClass('active');
   $('#' + tabId).addClass('active');
 
   updateGoogleTranslationPanelHeader(this);

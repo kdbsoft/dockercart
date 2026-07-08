@@ -20,9 +20,7 @@ class ModelExtensionModuleDockercartGoogleTranslation extends Model {
             'module_dockercart_google_translation_api_key' => getenv('GOOGLE_TRANSLATE_API_KEY') ?: '',
             'module_dockercart_google_translation_match_threshold' => 90,
             'module_dockercart_google_translation_force_overwrite' => 0,
-            'module_dockercart_google_translation_price_per_million' => 20,
-            'module_dockercart_google_translation_license_key' => '',
-            'module_dockercart_google_translation_public_key' => ''
+            'module_dockercart_google_translation_price_per_million' => 20
         );
 
         $this->model_setting_setting->editSetting('module_dockercart_google_translation', $defaults);
