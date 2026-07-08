@@ -184,8 +184,8 @@
 										<span class="label label-danger">Expired</span>
 										{% elseif license.status == 'invalid' %}
 										<span class="label label-danger">Invalid</span>
-										{% else %}
-										<span class="label label-default">{{ license.status }}</span>
+										{% elseif license.status == 'unknown' %}
+										<span class="label label-warning">Not Verified</span>
 										{% endif %}
 										{% if license.is_test %}<small class="text-muted"> (test)</small>{% endif %}
 									</td>
@@ -197,6 +197,9 @@
 										{% endif %}
 										{% if license.is_installed %}
 										<button class="btn btn-xs btn-danger store-uninstall-btn" data-sku="{{ license.ext_sku }}" title="{{ text_uninstall }}"><i class="fa fa-trash-o"></i></button>
+										{% endif %}
+										{% if license.status != 'active' %}
+										<button class="btn btn-xs btn-success store-verify-btn" data-module-code="{{ license.module_code }}" title="{{ text_verify }}"><i class="fa fa-check"></i> {{ text_verify }}</button>
 										{% endif %}
 									</td>
 								</tr>
@@ -531,6 +534,24 @@ $(document).ready(function() {
 		var sku = $btn.data('sku');
 
 		$.post('{{ uninstall_url }}', { sku: sku }, function(resp) {
+			if (resp.error) {
+				alert(resp.error);
+				$btn.prop('disabled', false);
+			} else {
+				alert(resp.message);
+				location.reload();
+			}
+		}, 'json').fail(function() {
+			alert('{{ text_error }}');
+			$btn.prop('disabled', false);
+		});
+	});
+
+	$(document).on('click', '.store-verify-btn', function() {
+		var $btn = $(this).prop('disabled', true);
+		var moduleCode = $btn.data('module-code');
+
+		$.post('{{ verify_license_url }}', { module_code: moduleCode }, function(resp) {
 			if (resp.error) {
 				alert(resp.error);
 				$btn.prop('disabled', false);
