@@ -119,6 +119,7 @@ class ControllerExtensionStore extends Controller {
 		$data['update_url'] = $this->url->link('extension/store/update', 'user_token=' . $this->session->data['user_token'], true);
 		$data['activate_key_url'] = $this->url->link('extension/store/activateKey', 'user_token=' . $this->session->data['user_token'], true);
 		$data['set_license_key_url'] = $this->url->link('extension/store/setLicenseKey', 'user_token=' . $this->session->data['user_token'], true);
+		$data['verify_license_url'] = $this->url->link('extension/store/verifyLicense', 'user_token=' . $this->session->data['user_token'], true);
 		$data['uninstall_url'] = $this->url->link('extension/store/uninstall', 'user_token=' . $this->session->data['user_token'], true);
 		$data['base_url'] = $this->url->link('extension/store', 'user_token=' . $this->session->data['user_token'], true);
 
@@ -1011,6 +1012,69 @@ class ControllerExtensionStore extends Controller {
 
 		$json['success'] = true;
 		$json['message'] = $this->language->get('text_license_key_updated');
+
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function verifyLicense() {
+		$this->load->language('extension/store');
+		$this->response->addHeader('Content-Type: application/json');
+
+		$json = array();
+
+		if ($this->request->server['REQUEST_METHOD'] !== 'POST') {
+			$json['error'] = 'Invalid request method';
+			$this->response->setOutput(json_encode($json));
+
+			return;
+		}
+
+		if (!$this->user->hasPermission('modify', 'extension/store')) {
+			$json['error'] = $this->language->get('error_permission');
+			$this->response->setOutput(json_encode($json));
+
+			return;
+		}
+
+		$module_code = $this->request->post['module_code'] ?? '';
+
+		if (empty($module_code)) {
+			$json['error'] = 'Module code is required';
+			$this->response->setOutput(json_encode($json));
+
+			return;
+		}
+
+		if (!preg_match('/^[a-zA-Z0-9_]+$/', $module_code)) {
+			$json['error'] = 'Invalid module code format';
+			$this->response->setOutput(json_encode($json));
+
+			return;
+		}
+
+		if (!is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
+			$json['error'] = 'Licensing library not found';
+			$this->response->setOutput(json_encode($json));
+
+			return;
+		}
+
+		require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
+		$licensing = new DockercartLicensing($this->registry);
+
+		$result = $licensing->validate($module_code, true);
+
+		if (!empty($result['valid'])) {
+			$json['success'] = true;
+			$json['message'] = $this->language->get('text_license_verified');
+			$json['status'] = $result['status'] ?? 'active';
+		} else {
+			$reason = $result['reason'] ?? 'unknown';
+			$json['error'] = $this->language->get('error_license_' . $reason);
+			if (empty($json['error']) || $json['error'] === 'error_license_' . $reason) {
+				$json['error'] = $this->language->get('error_license_invalid');
+			}
+		}
 
 		$this->response->setOutput(json_encode($json));
 	}
