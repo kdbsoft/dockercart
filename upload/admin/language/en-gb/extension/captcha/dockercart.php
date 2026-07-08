@@ -3,7 +3,7 @@
 $_['heading_title']    = 'Captcha';
 
 // Text
-$_['text_extension']   = 'Extensions';
+$_['text_extension']   = 'Add-ons';
 $_['text_success']     = 'Success: You have modified Captcha!';
 $_['text_edit']        = 'Edit Captcha';
 $_['text_edit_subtitle'] = 'Configure math slider captcha settings and options';

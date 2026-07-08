@@ -3,7 +3,7 @@
 $_['heading_title']     = 'SEO Description';
 
 // Text
-$_['text_extension']    = 'Extensions';
+$_['text_extension']    = 'Add-ons';
 $_['text_success']      = 'Success: You have modified SEO Description module!';
 $_['text_edit']         = 'Edit SEO Description Module';
 $_['text_default_module_name'] = 'SEO Description';

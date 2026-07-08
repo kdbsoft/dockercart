@@ -14,7 +14,7 @@
 $_['heading_title']    = '1-Click Checkout';
 
 // Text
-$_['text_extension']   = 'Extensions';
+$_['text_extension']   = 'Add-ons';
 $_['text_success']     = 'Success: You have modified 1-Click Checkout module!';
 $_['text_edit']        = 'Edit 1-Click Checkout Module';
 $_['text_enabled']     = 'Enabled';

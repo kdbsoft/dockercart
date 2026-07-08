@@ -3,7 +3,7 @@
 $_['heading_title']    = 'Marketing Report';
 
 // Text
-$_['text_extension']   = 'Extensions';
+$_['text_extension']   = 'Add-ons';
 $_['text_edit']        = 'Edit Marketing Report';
 $_['text_success']     = 'Success: You have modified marketing report!';
 $_['text_filter']      = 'Filter';

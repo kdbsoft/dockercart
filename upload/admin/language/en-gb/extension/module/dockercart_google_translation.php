@@ -3,7 +3,7 @@
 $_['heading_title'] = 'Google Cloud Translation';
 $_['heading_title_menu'] = 'Google Cloud Translation';
 
-$_['text_extension'] = 'Extensions';
+$_['text_extension'] = 'Add-ons';
 $_['text_success'] = 'Success: You have modified Google Cloud Translation module!';
 $_['text_edit'] = 'Google Cloud Translation Settings';
 $_['text_module_subtitle'] = 'Translate language files and language-dependent database fields via Google Cloud Translation';

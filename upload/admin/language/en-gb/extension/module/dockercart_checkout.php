@@ -3,7 +3,7 @@
 $_["heading_title"] = "Checkout";
 
 // Text
-$_["text_extension"] = "Extensions";
+$_["text_extension"] = "Add-ons";
 $_["text_success"] = "Success: You have modified Checkout settings!";
 $_["text_edit"] = "Edit Checkout";
 $_["text_enabled"] = "Enabled";

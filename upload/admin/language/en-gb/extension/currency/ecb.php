@@ -3,7 +3,7 @@
 $_['heading_title']    = 'European Central Bank Currency Converter';
 
 // Text
-$_['text_extension']   = 'Extensions';
+$_['text_extension']   = 'Add-ons';
 $_['text_success']     = 'Success: You have modified European Central Bank Currency Converter!';
 $_['text_edit']        = 'Edit European Central Bank Currency Converter';
 $_['text_edit']       .= '<br><br>';

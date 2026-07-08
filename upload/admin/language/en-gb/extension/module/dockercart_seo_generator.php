@@ -4,7 +4,7 @@ $_['heading_title']    = 'SEO Generator';
 $_['heading_title_menu'] = 'SEO Generator';
 
 // Text
-$_['text_extension']   = 'Extensions';
+$_['text_extension']   = 'Add-ons';
 $_['text_success']     = 'Success: You have modified SEO Generator module!';
 $_['text_edit']        = 'Edit Module';
 $_['text_enabled']     = 'Enabled';

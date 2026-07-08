@@ -4,7 +4,7 @@ $_['heading_title'] = 'Import/Export Excel';
 $_['heading_title_menu'] = 'Import/Export Excel';
 
 // Text
-$_['text_extension'] = 'Extensions';
+$_['text_extension'] = 'Add-ons';
 $_['text_success'] = 'Success: You have modified Import/Export Excel module!';
 $_['text_edit'] = 'Edit Import/Export Excel';
 $_['text_module_subtitle'] = 'Manage suppliers, run import/export jobs, and monitor integration status';

@@ -4,7 +4,7 @@ $_['heading_title'] = 'Import YML';
 $_['heading_title_menu'] = 'Import YML';
 
 // Text
-$_['text_extension'] = 'Extensions';
+$_['text_extension'] = 'Add-ons';
 $_['text_success'] = 'Success: You have modified Import YML module!';
 $_['text_edit'] = 'Edit Import YML';
 $_['text_module_subtitle'] = 'Manage YML import settings, license, and profile execution workflows';

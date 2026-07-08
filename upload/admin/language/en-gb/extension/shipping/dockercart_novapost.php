@@ -5,7 +5,7 @@
 
 $_['heading_title']          = 'Nova Post';
 $_['text_dockercart_novapost'] = '<a href="https://novapost.com/" target="_blank"><img src="view/image/shipping/novapost.png" alt="NovaPost" title="NovaPost" style="border: 1px solid #EEEEEE;" width="150" /></a>';
-$_['text_extension']         = 'Extensions';
+$_['text_extension']         = 'Add-ons';
 $_['text_success']           = 'Settings saved successfully!';
 $_['text_edit']              = 'Edit NovaPost Shipping';
 $_['text_enabled']           = 'Enabled';

@@ -7,7 +7,7 @@
 $_['heading_title']    = 'Google Base';
 
 // Text
-$_['text_extension']   = 'Extensions';
+$_['text_extension']   = 'Add-ons';
 $_['text_success']     = 'Success: You have modified Google Base module settings!';
 $_['text_edit']        = 'Edit Google Base';
 $_['text_enabled']     = 'Enabled';

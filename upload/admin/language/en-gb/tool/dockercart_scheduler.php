@@ -3,7 +3,7 @@
 $_['heading_title'] = 'Scheduler';
 
 // Text
-$_['text_extension']        = 'Extensions';
+$_['text_extension']        = 'Add-ons';
 $_['text_success']          = 'Success: Scheduler settings updated!';
 $_['text_enabled']          = 'Enabled';
 $_['text_disabled']         = 'Disabled';

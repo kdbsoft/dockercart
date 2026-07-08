@@ -3,7 +3,7 @@
 $_['heading_title']                    = 'Newsletter';
 
 // Text
-$_['text_extension']                   = 'Extensions';
+$_['text_extension']                   = 'Add-ons';
 $_['text_success']                     = 'Newsletter module settings saved successfully!';
 $_['text_edit']                        = 'Newsletter module settings';
 $_['text_enabled']                     = 'Enabled';

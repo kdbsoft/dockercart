@@ -3,7 +3,7 @@
 $_['heading_title']    = 'Viewed Products';
 
 // Text
-$_['text_extension']   = 'Extensions';
+$_['text_extension']   = 'Add-ons';
 $_['text_success']     = 'Success: You have modified viewed products module!';
 $_['text_edit']        = 'Edit Viewed Products Module';
 

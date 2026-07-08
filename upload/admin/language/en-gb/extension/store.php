@@ -1,11 +1,11 @@
 <?php
 
-$_['heading_title'] = 'Extensions Store';
+$_['heading_title'] = 'Add-ons Store';
 
-$_['text_extension'] = 'Extensions';
-$_['text_success'] = 'Success: You have modified extensions store!';
-$_['text_edit'] = 'Edit Extensions Store Module';
-$_['text_extensions_store'] = 'Extensions Store';
+$_['text_extension'] = 'Add-ons';
+$_['text_success'] = 'Success: You have modified add-ons store!';
+$_['text_edit'] = 'Edit Add-ons Store Module';
+$_['text_extensions_store'] = 'Add-ons Store';
 $_['text_all_categories'] = 'All Categories';
 $_['text_categories'] = 'Categories';
 $_['text_free'] = 'Free';
@@ -17,8 +17,8 @@ $_['text_parameter'] = 'Parameter';
 $_['text_value'] = 'Value';
 $_['text_refresh'] = 'Refresh';
 $_['text_home'] = 'Home';
-$_['text_no_extensions'] = 'No extensions found in this category.';
-$_['text_extensions_found'] = 'extensions found';
+$_['text_no_extensions'] = 'No add-ons found in this category.';
+$_['text_extensions_found'] = 'add-ons found';
 $_['text_cache_cleared'] = 'Store cache has been cleared.';
 $_['text_no_description'] = 'No description available.';
 $_['text_error_detail'] = 'Failed to load extension details. Please try again.';
@@ -57,7 +57,7 @@ $_['text_uninstall'] = 'Uninstall';
 $_['text_confirm_uninstall'] = 'Are you sure you want to uninstall this extension? This will remove all files and data.';
 $_['text_uninstall_success'] = 'Extension uninstalled successfully';
 
-$_['error_permission'] = 'Warning: You do not have permission to modify extensions store!';
+$_['error_permission'] = 'Warning: You do not have permission to modify add-ons store!';
 $_['error_fetch'] = 'Failed to load extensions catalog from server. Please try again later.';
 $_['error_license_required'] = 'License key is required to install this extension.';
 $_['error_license_activation'] = 'Failed to activate license. Please check your key.';

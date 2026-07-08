@@ -3,7 +3,7 @@
 $_['heading_title'] = 'Export YML';
 
 // Text
-$_['text_extension'] = 'Extensions';
+$_['text_extension'] = 'Add-ons';
 $_['text_success'] = 'Success: You have modified Export YML feed!';
 $_['text_edit'] = 'Edit Export YML';
 $_['text_enabled'] = 'Enabled';
