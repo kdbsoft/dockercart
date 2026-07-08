@@ -17,7 +17,6 @@ $_['text_extension'] = 'Доповнення';
 $_['text_success'] = 'Успіх: Ви змінили останні замовлення на панелі інструментів!';
 $_['text_badge_guest_order'] = 'Гостьове замовлення';
 $_['text_badge_registered_order'] = 'Зареєстрований клієнт';
-$_['text_badge_oneclick_order'] = 'Замовлення в 1 клік';
 $_['text_badge_guest'] = 'Гість';
 $_['text_badge_registered'] = 'Зареєстрований';
 $_['text_tracking_number'] = 'Номер відстеження';

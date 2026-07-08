@@ -3,23 +3,6 @@ class ControllerCommonCart extends Controller {
 	public function index() {
 		$this->load->language('common/cart');
 
-		// 1-Click Checkout module data
-		$data['oneclickcheckout_enabled'] = false;
-		$data['oneclickcheckout_modal'] = '';
-		$data['button_oneclickcheckout_cart'] = '';
-		$data['dockercart_version'] = defined('DOCKERCART_VERSION') ? DOCKERCART_VERSION : '';
-
-		if ($this->config->get('module_dockercart_oneclickcheckout_status')) {
-			$this->load->language('extension/module/dockercart_oneclickcheckout');
-			$data['button_oneclickcheckout_cart'] = $this->language->get('button_oneclickcheckout_cart');
-
-			$modal_html = $this->load->controller('extension/module/dockercart_oneclickcheckout/getModalHtml');
-			if ($modal_html) {
-				$data['oneclickcheckout_modal'] = $modal_html;
-				$data['oneclickcheckout_enabled'] = true;
-			}
-		}
-
 		// Totals
 		$this->load->model('setting/extension');
 

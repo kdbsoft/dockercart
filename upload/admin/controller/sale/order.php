@@ -264,7 +264,6 @@ class ControllerSaleOrder extends Controller {
 			$order_type_badge_class = $this->getOrderTypeBadgeClass($result);
 			$customer_type = $this->getCustomerType($result);
 			$customer_type_badge_class = $this->getCustomerTypeBadgeClass($result);
-			$is_oneclick = !empty($result['payment_code']) && $result['payment_code'] === 'oneclickcheckout';
 			$status_badge_class = $this->getOrderStatusBadgeClass((int)$result['order_status_id'], $processing_statuses, $complete_statuses, $fraud_status);
 
 			$data['orders'][] = array(
@@ -272,7 +271,6 @@ class ControllerSaleOrder extends Controller {
 				'customer'      => $result['customer'],
 				'customer_type' => $customer_type,
 				'customer_type_badge_class' => $customer_type_badge_class,
-				'is_oneclick'   => $is_oneclick,
 				'order_type'    => $order_type,
 				'order_type_badge_class' => $order_type_badge_class,
 				'order_status_id' => $result['order_status_id'],
@@ -1800,10 +1798,6 @@ class ControllerSaleOrder extends Controller {
 	}
 
 	private function getOrderType($order) {
-		if (!empty($order['payment_code']) && $order['payment_code'] === 'oneclickcheckout') {
-			return $this->language->get('text_badge_oneclick_order');
-		}
-
 		if (!empty($order['customer_id'])) {
 			return $this->language->get('text_badge_registered_order');
 		}
@@ -1812,10 +1806,6 @@ class ControllerSaleOrder extends Controller {
 	}
 
 	private function getOrderTypeBadgeClass($order) {
-		if (!empty($order['payment_code']) && $order['payment_code'] === 'oneclickcheckout') {
-			return 'label label-info';
-		}
-
 		if (!empty($order['customer_id'])) {
 			return 'label label-primary';
 		}

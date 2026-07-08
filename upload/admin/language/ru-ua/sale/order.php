@@ -131,7 +131,6 @@ $_['text_voucher'] = 'Добавить ваучер(ы)';
 $_['text_website'] = 'Веб-сайт:';
 $_['text_badge_guest_order'] = 'Гостевой заказ';
 $_['text_badge_registered_order'] = 'Зарегистрированный клиент';
-$_['text_badge_oneclick_order']   = 'Заказ в 1 клик';
 $_['text_badge_guest'] = 'Гость';
 $_['text_badge_registered'] = 'Зарегистрированный';
 $_['text_confirm_mass_delete']    = 'Вы уверены, что хотите удалить выбранные заказы?';
