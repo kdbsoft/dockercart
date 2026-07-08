@@ -34,7 +34,7 @@
 <script type="text/javascript" src="{{ script }}{% if script|slice(0,4) != 'http' and script|slice(0,2) != '//' %}?v={{ dockercart_version }}{% endif %}"></script>
 {% endfor %}
 </head>
-<body data-user-token="{{ user_token }}" data-default-language-id="{{ dockercart_default_language_id }}" data-google-translation-enabled="{{ dockercart_google_translation_enabled }}">
+<body data-user-token="{{ user_token }}">
 <div id="container">
 <header id="header" class="navbar navbar-static-top">
   <div class="container-fluid">
@@ -60,7 +60,6 @@
     </ul>
     {% endif %} </div>
 </header>
-<script src="view/javascript/dockercart_google_translation_inline.js" type="text/javascript"></script>
 <script type="text/javascript">
 document.addEventListener('DOMContentLoaded', function() {
   if (window.lucide && typeof window.lucide.createIcons === 'function') {

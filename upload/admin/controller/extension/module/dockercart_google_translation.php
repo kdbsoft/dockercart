@@ -87,6 +87,7 @@ class ControllerExtensionModuleDockercartGoogleTranslation extends Controller {
 
         $this->registerCacheFlushEvents();
         $this->registerMenuEvent();
+        $this->registerHeaderEvents();
     }
 
     public function uninstall() {
@@ -341,6 +342,34 @@ class ControllerExtensionModuleDockercartGoogleTranslation extends Controller {
             'href' => $this->url->link('extension/module/dockercart_google_translation', 'user_token=' . $this->session->data['user_token'], true),
             'children' => array()
         );
+    }
+
+    private function registerHeaderEvents() {
+        $this->load->model('setting/event');
+        $this->model_setting_event->addEvent(
+            'dockercart_google_translation_header_after',
+            'admin/view/common/header/after',
+            'extension/module/dockercart_google_translation/eventHeaderAfter'
+        );
+    }
+
+    public function getConfig() {
+        $this->load->model('extension/module/dockercart_google_translation');
+        $this->load->model('localisation/language');
+
+        $json = array(
+            'enabled' => (int)$this->config->get('module_dockercart_google_translation_status'),
+            'default_language_id' => $this->model_extension_module_dockercart_google_translation->getDefaultLanguageId()
+        );
+
+        $this->response->addHeader('Content-Type: application/json');
+        $this->response->setOutput(json_encode($json));
+    }
+
+    public function eventHeaderAfter(&$route, &$data, &$output) {
+        if ((int)$this->config->get('module_dockercart_google_translation_status')) {
+            $output .= '<script src="view/javascript/dockercart_google_translation_inline.js" type="text/javascript"></script>';
+        }
     }
 
     private function flushSystemCacheSafe() {
