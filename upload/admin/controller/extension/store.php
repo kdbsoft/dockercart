@@ -420,6 +420,7 @@ class ControllerExtensionStore extends Controller {
 			$download_data = $store->getDownloadUrl($sku, $version_id, $license_key);
 
 			if ($download_data === null || empty($download_data['downloadUrl'])) {
+				$this->log->write('Extension Store install: getDownloadUrl returned null/empty — sku=' . $sku . ' version_id=' . $version_id);
 				$json['error'] = $this->language->get('error_download_failed');
 				$this->response->setOutput(json_encode($json));
 
@@ -627,6 +628,7 @@ class ControllerExtensionStore extends Controller {
 			$download_data = $store->getDownloadUrl($sku, $version_id, $license_key);
 
 			if ($download_data === null || empty($download_data['downloadUrl'])) {
+				$this->log->write('Extension Store update: getDownloadUrl returned null/empty — sku=' . $sku . ' version_id=' . $version_id);
 				$json['error'] = $this->language->get('error_download_failed');
 				$this->response->setOutput(json_encode($json));
 
@@ -1162,6 +1164,7 @@ class ControllerExtensionStore extends Controller {
 		curl_close($ch);
 
 		if ($http_code !== 200 || $response === false) {
+			$this->log->write('Extension Store downloadFile failed: URL=' . $url . ' HTTP=' . $http_code . ' cURL=' . $curl_error);
 			return false;
 		}
 
