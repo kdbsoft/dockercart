@@ -278,6 +278,25 @@
 	color: #333;
 }
 
+.store-modal-description h1,
+.store-modal-description h2,
+.store-modal-description h3,
+.store-modal-description h4,
+.store-modal-description h5,
+.store-modal-description h6 {
+	margin: 0 0 8px;
+	color: #333;
+	font-weight: 600;
+	line-height: 1.4;
+}
+
+.store-modal-description h1 { font-size: 18px; }
+.store-modal-description h2 { font-size: 16px; }
+.store-modal-description h3 { font-size: 15px; }
+.store-modal-description h4 { font-size: 14px; }
+.store-modal-description h5 { font-size: 13px; }
+.store-modal-description h6 { font-size: 12px; }
+
 .store-modal-params {
 	margin-top: 16px;
 	display: flex;
