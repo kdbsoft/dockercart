@@ -501,6 +501,16 @@ EOF
     echo "rclone config generated (RCLONE_CONFIG=${rc_conf})."
 }
 
+# Настраиваем logrotate и запускаем cron для ежедневной ротации логов
+setup_logrotate() {
+    if [ -f "/etc/logrotate.d/dockercart" ]; then
+        echo "Starting cron daemon for log rotation..."
+        cron
+    else
+        echo "WARNING: logrotate config not found at /etc/logrotate.d/dockercart"
+    fi
+}
+
 # Основная логика
 # Emit a small diagnostic header so logs show which entrypoint version ran.
 # We print the script modification time (as embedded in the image at build time)
@@ -540,6 +550,9 @@ if [ "$DOCKERCART_ROLE" = "scheduler" ]; then
     echo "Starting DockerCart scheduler..."
     exec php /var/www/html/bin/dockercart_scheduler.php
 fi
+
+# Настраиваем ротацию логов (error.log и др.)
+setup_logrotate
 
 # Создаем конфиги приложения, если отсутствуют
 ensure_app_configs

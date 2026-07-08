@@ -16,7 +16,9 @@ RUN apt-get update && apt-get install -y \
     libsasl2-dev \
     zlib1g-dev \
     unzip \
+    cron \
     default-mysql-client \
+    logrotate \
     rclone \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -64,6 +66,8 @@ RUN chown -R www-data:www-data /var/www/html /var/www/storage \
 COPY docker/php.prod.ini /usr/local/etc/php/conf.d/dockercart.ini
 
 COPY docker/apache.conf /etc/apache2/sites-available/000-default.conf
+
+COPY docker/logrotate/dockercart /etc/logrotate.d/dockercart
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
