@@ -7,7 +7,7 @@
 $_['heading_title']                = 'Universal Payment';
 
 // Text
-$_['text_extension']               = 'Extensions';
+$_['text_extension']               = 'Add-ons';
 $_['text_success']                 = 'Success: You have modified Universal Payment settings!';
 $_['text_success_add']             = 'Success: Payment method has been added!';
 $_['text_success_edit']            = 'Success: Payment method has been updated!';

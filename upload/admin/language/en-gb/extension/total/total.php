@@ -3,7 +3,7 @@
 $_['heading_title']    = 'Total';
 
 // Text
-$_['text_extension']   = 'Extensions';
+$_['text_extension']   = 'Add-ons';
 $_['text_success']     = 'Success: You have modified total totals!';
 $_['text_edit']        = 'Edit Total Total';
 // Subtitle

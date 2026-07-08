@@ -3,7 +3,7 @@
 $_['heading_title']    = 'Sitemap';
 
 $_['text_home']        = 'Home';
-$_['text_extension']   = 'Extensions';
+$_['text_extension']   = 'Add-ons';
 $_['text_success']     = 'Success: You have modified Sitemap module!';
 $_['text_edit']        = 'Edit Sitemap Module';
 $_['text_module_subtitle'] = 'Configure sitemap generation and content rules';

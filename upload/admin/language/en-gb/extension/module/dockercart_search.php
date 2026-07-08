@@ -4,7 +4,7 @@ $_['heading_title']     = 'Search (Manticore)';
 $_['heading_title_menu'] = 'Search Index';
 
 // Text
-$_['text_extension']    = 'Extensions';
+$_['text_extension']    = 'Add-ons';
 $_['text_success']      = 'Success: Module settings have been saved!';
 $_['text_edit']         = 'Edit Search Settings';
 $_['text_enabled']      = 'Enabled';

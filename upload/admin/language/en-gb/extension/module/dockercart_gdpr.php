@@ -3,7 +3,7 @@
 $_['heading_title']                    = 'GDPR & Privacy';
 
 // Text
-$_['text_extension']                   = 'Extensions';
+$_['text_extension']                   = 'Add-ons';
 $_['text_success']                     = 'GDPR module settings saved successfully!';
 $_['text_edit']                        = 'GDPR & Privacy Settings';
 $_['text_enabled']                     = 'Enabled';

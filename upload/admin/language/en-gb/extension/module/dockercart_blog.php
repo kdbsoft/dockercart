@@ -11,7 +11,7 @@
 $_['heading_title']    = 'Blog';
 
 // Text
-$_['text_extension']   = 'Extensions';
+$_['text_extension']   = 'Add-ons';
 $_['text_success']     = 'Success: You have modified Blog module!';
 $_['text_seo_urls_reinstalled'] = 'SEO URLs for blog system pages have been successfully reinstalled!';
 $_['text_edit']        = 'Edit Blog Module';
