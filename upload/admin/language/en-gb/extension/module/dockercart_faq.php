@@ -5,7 +5,7 @@ $_['heading_title_menu']           = 'FAQ';
 
 // Text
 $_['text_home']                    = 'Home';
-$_['text_extension']               = 'Extensions';
+$_['text_extension']               = 'Add-ons';
 $_['text_success']                 = 'Success: You have modified FAQ settings!';
 $_['text_edit']                    = 'Edit FAQ';
 $_['text_default']                 = 'Default';

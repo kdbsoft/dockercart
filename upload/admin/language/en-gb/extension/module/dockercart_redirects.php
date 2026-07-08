@@ -5,7 +5,7 @@ $_['heading_title_menu'] = 'Redirect Manager';
 $_['heading_import']    = 'Import Redirects';
 
 // Text
-$_['text_extension']    = 'Extensions';
+$_['text_extension']    = 'Add-ons';
 $_['text_success_add']  = 'Success: Redirect has been added!';
 $_['text_success_edit'] = 'Success: Redirect has been updated!';
 $_['text_success_delete'] = 'Success: Redirect(s) have been deleted!';

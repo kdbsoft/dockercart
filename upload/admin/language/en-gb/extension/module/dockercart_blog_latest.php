@@ -3,7 +3,7 @@
 $_['heading_title']    = 'Blog - Latest Posts';
 
 // Text
-$_['text_extension']   = 'Extensions';
+$_['text_extension']   = 'Add-ons';
 $_['text_success']     = 'Success: You have modified Blog Latest Posts module!';
 $_['text_edit']        = 'Edit Blog Latest Posts Module';
 $_['text_default_module_name'] = 'Blog - Latest Posts';

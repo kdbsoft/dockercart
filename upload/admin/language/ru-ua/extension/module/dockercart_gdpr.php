@@ -3,7 +3,7 @@
 $_['heading_title']                    = 'GDPR и конфиденциальность';
 
 // Text
-$_['text_extension']                   = 'Расширения';
+$_['text_extension']                   = 'Дополнения';
 $_['text_success']                     = 'Настройки GDPR сохранены!';
 $_['text_edit']                        = 'Настройки GDPR и конфиденциальности';
 $_['text_enabled']                     = 'Включено';

@@ -2,7 +2,7 @@
 $_['heading_title']              = 'WayForPay';
 
 $_['text_dockercart_wayforpay']  = '<a href="https://wayforpay.com/" target="_blank"><img src="view/image/payment/dockercart_wayforpay.png" alt="WayForPay" title="WayForPay" style="border: 1px solid #EEEEEE;" width="150" /></a>';
-$_['text_extension']             = 'Extensions';
+$_['text_extension']             = 'Add-ons';
 $_['text_success']               = 'Success: You have modified WayForPay account details!';
 $_['text_edit']                  = 'Edit WayForPay';
 $_['text_edit_subtitle']         = 'Configure extension settings and options';

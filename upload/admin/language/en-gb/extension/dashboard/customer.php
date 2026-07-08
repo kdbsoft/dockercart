@@ -3,7 +3,7 @@
 $_['heading_title']    = 'Registrations';
 
 // Text
-$_['text_extension']   = 'Extensions';
+$_['text_extension']   = 'Add-ons';
 $_['text_success']     = 'Success: You have modified dashboard customer!';
 $_['text_edit']        = 'Edit Dashboard Customer';
 $_['text_view']        = 'View more →';

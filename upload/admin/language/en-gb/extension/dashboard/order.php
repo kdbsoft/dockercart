@@ -3,7 +3,7 @@
 $_['heading_title']    = 'Completed Orders';
 
 // Text
-$_['text_extension']   = 'Extensions';
+$_['text_extension']   = 'Add-ons';
 $_['text_success']     = 'Success: You have modified dashboard orders!';
 $_['text_edit']        = 'Edit Dashboard Orders';
 $_['text_view']        = 'View more →';

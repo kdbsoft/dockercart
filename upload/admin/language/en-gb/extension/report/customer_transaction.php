@@ -3,7 +3,7 @@
 $_['heading_title']         = 'Customer Transaction Report';
 
 // Column
-$_['text_extension']        = 'Extensions';
+$_['text_extension']        = 'Add-ons';
 $_['text_edit']             = 'Edit Customer Transaction Report';
 $_['text_success']          = 'Success: You have modified customer credit report!';
 $_['text_filter']           = 'Filter';

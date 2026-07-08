@@ -3,7 +3,7 @@
 $_['heading_title']    = 'Category';
 
 // Text
-$_['text_extension']   = 'Extensions';
+$_['text_extension']   = 'Add-ons';
 $_['text_success']     = 'Success: You have modified category module!';
 $_['text_edit']        = 'Edit Category Module';
 // Subtitle

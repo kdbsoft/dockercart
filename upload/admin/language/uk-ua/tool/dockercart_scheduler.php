@@ -3,7 +3,7 @@
 $_['heading_title'] = 'Планувальник';
 
 // Text
-$_['text_extension']        = 'Модулі';
+$_['text_extension']        = 'Доповнення';
 $_['text_success']          = 'Налаштування планувальника оновлено!';
 $_['text_enabled']          = 'Увімкнено';
 $_['text_disabled']         = 'Вимкнено';
