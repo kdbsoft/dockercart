@@ -17,7 +17,6 @@ $_['text_extension'] = 'Дополнения';
 $_['text_success'] = 'Успех: Вы изменили список последних заказов на панели управления!';
 $_['text_badge_guest_order'] = 'Гостевой заказ';
 $_['text_badge_registered_order'] = 'Зарегистрированный клиент';
-$_['text_badge_oneclick_order'] = 'Заказ в 1 клик';
 $_['text_badge_guest'] = 'Гость';
 $_['text_badge_registered'] = 'Зарегистрированный';
 $_['text_tracking_number'] = 'Номер отслеживания';

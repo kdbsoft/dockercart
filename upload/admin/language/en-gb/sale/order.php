@@ -66,7 +66,6 @@ $_['text_restock']               = 'Success: Products have been restocked!';
 $_['text_upload']                = 'Your file was successfully uploaded!';
 $_['text_badge_guest_order']      = 'Guest order';
 $_['text_badge_registered_order'] = 'Registered customer';
-$_['text_badge_oneclick_order']   = '1-click order';
 $_['text_badge_guest']            = 'Guest';
 $_['text_badge_registered']       = 'Registered';
 $_['text_confirm_mass_delete']    = 'Are you sure you want to delete the selected orders?';
