@@ -3,10 +3,8 @@
 
     const body = document.body || document.documentElement;
     const userToken = body ? (body.getAttribute('data-user-token') || '') : '';
-    const defaultLanguageId = parseInt(body ? (body.getAttribute('data-default-language-id') || '0') : '0', 10);
-    const isModuleEnabled = body ? (body.getAttribute('data-google-translation-enabled') === '1') : false;
 
-    if (!userToken || !defaultLanguageId || !isModuleEnabled) {
+    if (!userToken) {
         return;
     }
 
@@ -272,6 +270,8 @@
         });
     }
 
+    let defaultLanguageId = 0;
+
     function init() {
         collectLanguageIds();
         scanAndDecorate(document);
@@ -293,9 +293,26 @@
         });
     }
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
+    async function bootstrap() {
+        try {
+            const response = await fetch('index.php?route=extension/module/dockercart_google_translation/getConfig&user_token=' + encodeURIComponent(userToken));
+            const config = await response.json();
+
+            if (!config.enabled || !config.default_language_id) {
+                return;
+            }
+
+            defaultLanguageId = parseInt(config.default_language_id, 10);
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+        } catch (e) {
+            // Module not available, skip
+        }
     }
+
+    bootstrap();
 })();
