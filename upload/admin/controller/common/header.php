@@ -104,9 +104,6 @@ class ControllerCommonHeader extends Controller {
 			}
 		}
 
-		$data['dockercart_default_language_id'] = $store_language_id;
-		$data['dockercart_google_translation_enabled'] = (int)$this->config->get('module_dockercart_google_translation_status');
-
 		return $this->load->view('common/header', $data);
 	}
 }
