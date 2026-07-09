@@ -67,24 +67,21 @@ Done. First boot handles **everything**:
 Six containers. One network. Zero exposed ports (except Nginx).
 
 ```
-                              Internet
+                               Internet
                                    │
                          ┌─────────▼─────────┐
-                         │   nginx:alpine      │
-                         │  TLS · gzip · cache │
-                         └────┬───────────┬───┘
+                         │   nginx:alpine    │
+                         └────┬───────────┬──┘
                               │           │
                   ┌───────────▼───┐  ┌────▼──────────┐
-                  │   Apache     │  │   Scheduler   │
-                  │  PHP 8.5      │  │  Cron daemon   │
+                  │   PHP apache  │  │   Scheduler   │
                   └───────┬───────┘  └───────────────┘
                           │
               ┌───────────┼───────────┐
               │           │           │
     ┌─────────▼──┐  ┌────▼────┐  ┌──▼──────────┐
     │  MariaDB   │  │  Redis  │  │  Manticore  │
-    │  DB  11    │  │ Cache   │  │  Search 15   │
-    └────────────┘  └─────────┘  └──────────────┘
+    └────────────┘  └─────────┘  └─────────────┘
 
     Optional: FTP (vsftpd — chrooted to ./upload/image)
 ```
