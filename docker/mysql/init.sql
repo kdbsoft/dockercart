@@ -139,7 +139,7 @@ CREATE TABLE `oc_api_session` (
   `date_added` datetime NOT NULL,
   `date_modified` datetime NOT NULL,
   PRIMARY KEY (`api_session_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1023 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1025 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -150,31 +150,8 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_api_session` WRITE;
 /*!40000 ALTER TABLE `oc_api_session` DISABLE KEYS */;
 INSERT INTO `oc_api_session` VALUES
-(998,3,'e119b2613f6c3f1e6a8efe3cc2','10.89.1.7','2026-07-06 14:26:22','2026-07-06 14:26:22'),
-(999,3,'b80b4a08913ba7a46f46e4c445','10.89.1.7','2026-07-06 14:26:26','2026-07-06 14:26:26'),
-(1000,3,'3532f94dd8025fb6f4e8338000','10.89.1.7','2026-07-06 14:26:28','2026-07-06 14:26:28'),
-(1001,3,'f723872bfb3270cdb9d2c0b929','10.89.1.7','2026-07-06 14:46:43','2026-07-06 14:46:43'),
-(1002,3,'2421e0a317c7d5279ef8aa286b','10.89.1.7','2026-07-06 14:48:55','2026-07-06 14:48:59'),
-(1003,3,'3e779a263fcfde682fc92ecf2c','10.89.1.7','2026-07-06 14:48:59','2026-07-06 14:48:59'),
-(1004,3,'e0627ad34f3bd5f6e8dd2b7a2c','10.89.1.7','2026-07-06 14:50:31','2026-07-06 14:50:31'),
-(1005,3,'e4f2e5407063cbd2ac33406f2f','10.89.1.7','2026-07-06 15:03:11','2026-07-06 15:03:11'),
-(1006,3,'eccf218718bd94bf68ded9e498','10.89.1.7','2026-07-06 15:10:31','2026-07-06 15:10:31'),
-(1007,3,'8c4e36df1b9fcb4c4c6f5d8003','10.89.1.7','2026-07-06 17:13:56','2026-07-06 17:13:56'),
-(1008,3,'d7cfed137f5fe2e23813e5e203','10.89.1.7','2026-07-07 07:52:18','2026-07-07 07:52:18'),
-(1009,3,'8b9505d01c3e08ef4b331291dc','10.89.1.7','2026-07-07 08:10:33','2026-07-07 08:10:33'),
-(1010,3,'0bf8ea735377f404fe3343c4d2','10.89.1.7','2026-07-07 08:10:41','2026-07-07 08:10:41'),
-(1011,3,'e128e33bda6beb6d5eba4f96af','10.89.1.7','2026-07-07 08:18:35','2026-07-07 08:18:35'),
-(1012,3,'4eedff410a40beeea392e96bfa','10.89.1.7','2026-07-07 08:22:37','2026-07-07 08:22:37'),
-(1013,3,'30616715ff5fcbdc82cc0e1246','10.89.1.7','2026-07-07 08:49:12','2026-07-07 08:49:12'),
-(1014,3,'57ad4eb96c95e332abb76a0280','10.89.1.7','2026-07-07 09:12:12','2026-07-07 09:12:12'),
-(1015,3,'6d14363f0f0f76496ce98d4fea','10.89.1.7','2026-07-07 10:22:23','2026-07-07 10:22:23'),
-(1016,3,'af8dead1b40834d8cb57a4861e','10.89.1.7','2026-07-08 08:21:53','2026-07-08 08:21:53'),
-(1017,3,'42a0d2ea2520e28e72457edeae','10.89.1.7','2026-07-08 09:11:21','2026-07-08 09:11:21'),
-(1018,3,'9ef909327d5aebe9d6d2d9c4b4','10.89.1.7','2026-07-08 11:26:41','2026-07-08 11:26:41'),
-(1019,3,'bbd13b7a97f6876421166efc5c','10.89.1.7','2026-07-08 11:59:31','2026-07-08 11:59:31'),
-(1020,3,'3b4b6887306aef21067d7dd259','10.89.1.7','2026-07-08 17:58:15','2026-07-08 17:58:15'),
-(1021,3,'8daa0b98b914247311583c7015','10.89.1.7','2026-07-08 17:58:21','2026-07-08 17:58:21'),
-(1022,3,'268e4fd24e713ab5afc7be8078','10.89.1.7','2026-07-08 17:58:47','2026-07-08 17:58:47');
+(1023,3,'964b4f349c240396aff9ce8215','10.89.1.7','2026-07-09 15:40:01','2026-07-09 15:40:03'),
+(1024,3,'fea4515196f009bdf19e1866f5','10.89.1.7','2026-07-09 15:40:03','2026-07-09 15:40:03');
 /*!40000 ALTER TABLE `oc_api_session` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -2543,7 +2520,7 @@ CREATE TABLE `oc_customer_activity` (
   `ip` varchar(40) NOT NULL,
   `date_added` datetime NOT NULL,
   PRIMARY KEY (`customer_activity_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2553,9 +2530,6 @@ CREATE TABLE `oc_customer_activity` (
 SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_customer_activity` WRITE;
 /*!40000 ALTER TABLE `oc_customer_activity` DISABLE KEYS */;
-INSERT INTO `oc_customer_activity` VALUES
-(1,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":97}','10.89.1.7','2026-07-08 17:58:11'),
-(2,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":98}','10.89.1.7','2026-07-08 17:58:44');
 /*!40000 ALTER TABLE `oc_customer_activity` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -2932,7 +2906,7 @@ CREATE TABLE `oc_dockercart_extension_meta` (
   UNIQUE KEY `code` (`code`),
   KEY `idx_sku` (`sku`),
   KEY `idx_extension_install_id` (`extension_install_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3072,7 +3046,7 @@ CREATE TABLE `oc_dockercart_license` (
   PRIMARY KEY (`license_id`),
   UNIQUE KEY `module_code` (`module_code`),
   KEY `idx_sku` (`sku`)
-) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3082,10 +3056,6 @@ CREATE TABLE `oc_dockercart_license` (
 SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_dockercart_license` WRITE;
 /*!40000 ALTER TABLE `oc_dockercart_license` DISABLE KEYS */;
-INSERT INTO `oc_dockercart_license` VALUES
-(20,'dockercart_gallery','dockercart_gallery','DCL-DOCKER-c86ce275-3fd4-4afc-9b18-c93c0c5ba809','dockercart.local','812067ead7d7abaeaa3f4fc6fc082ea6','active',0,NULL,'2026-07-09 09:06:47','2026-07-09 09:06:47',0,0,NULL,'2026-07-08 16:58:38','2026-07-09 09:06:47'),
-(21,'dockercart_filter','dockercart_filter','DCL-DOCKER-185b5245-515e-4d7b-bc77-5a035dc385ea','dockercart.local','812067ead7d7abaeaa3f4fc6fc082ea6','active',0,NULL,'2026-07-08 17:28:38','2026-07-08 17:28:38',0,0,NULL,'2026-07-08 16:58:38','2026-07-08 17:28:38'),
-(22,'dockercart_google_translation','dockercart_google_translation','DCL-DOCKER-bfc16a0d-9210-4648-b55c-9441425126af','dockercart.local','812067ead7d7abaeaa3f4fc6fc082ea6','active',0,NULL,'2026-07-09 09:06:51','2026-07-09 09:06:51',0,0,NULL,'2026-07-08 16:58:38','2026-07-09 09:06:51');
 /*!40000 ALTER TABLE `oc_dockercart_license` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -4184,7 +4154,7 @@ CREATE TABLE `oc_dockercart_viewed_product` (
   KEY `idx_customer_modified` (`customer_id`,`date_modified`),
   KEY `idx_session_modified` (`session_id`,`date_modified`),
   KEY `idx_product_id` (`product_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4194,19 +4164,6 @@ CREATE TABLE `oc_dockercart_viewed_product` (
 SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_dockercart_viewed_product` WRITE;
 /*!40000 ALTER TABLE `oc_dockercart_viewed_product` DISABLE KEYS */;
-INSERT INTO `oc_dockercart_viewed_product` VALUES
-(1,NULL,'1e60173cd64b3d1d615641f33c',5021,'2026-07-07 10:22:08','2026-07-07 10:22:08'),
-(2,NULL,'1e60173cd64b3d1d615641f33c',5012,'2026-07-07 17:49:30','2026-07-07 17:49:30'),
-(7,NULL,'3973420c75147b20ba7280c974',5077,'2026-07-08 11:46:19','2026-07-08 11:46:19'),
-(8,NULL,'3973420c75147b20ba7280c974',5079,'2026-07-08 11:46:22','2026-07-08 11:46:22'),
-(9,NULL,'3973420c75147b20ba7280c974',5078,'2026-07-08 11:46:25','2026-07-08 11:46:25'),
-(10,NULL,'3973420c75147b20ba7280c974',5076,'2026-07-08 11:46:27','2026-07-08 11:46:27'),
-(11,NULL,'3973420c75147b20ba7280c974',5037,'2026-07-08 11:46:55','2026-07-08 11:46:55'),
-(12,NULL,'3973420c75147b20ba7280c974',5038,'2026-07-08 11:47:01','2026-07-08 11:47:01'),
-(13,NULL,'3973420c75147b20ba7280c974',5040,'2026-07-08 12:04:26','2026-07-08 12:04:26'),
-(14,NULL,'3973420c75147b20ba7280c974',5061,'2026-07-08 12:04:32','2026-07-08 12:04:32'),
-(16,NULL,'3973420c75147b20ba7280c974',5075,'2026-07-08 12:04:41','2026-07-08 12:04:41'),
-(26,NULL,'3973420c75147b20ba7280c974',5023,'2026-07-08 18:34:29','2026-07-08 18:34:29');
 /*!40000 ALTER TABLE `oc_dockercart_viewed_product` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -4282,7 +4239,7 @@ CREATE TABLE `oc_event` (
   `status` tinyint(1) NOT NULL,
   `sort_order` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`event_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=875 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=881 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4366,7 +4323,7 @@ CREATE TABLE `oc_extension` (
   `type` varchar(32) NOT NULL,
   `code` varchar(32) NOT NULL,
   PRIMARY KEY (`extension_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=374 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=376 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4450,7 +4407,7 @@ CREATE TABLE `oc_extension_install` (
   `filename` varchar(255) NOT NULL,
   `date_added` datetime NOT NULL,
   PRIMARY KEY (`extension_install_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=92 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=94 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4478,7 +4435,7 @@ CREATE TABLE `oc_extension_path` (
   `path` varchar(255) NOT NULL,
   `date_added` datetime NOT NULL,
   PRIMARY KEY (`extension_path_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1211 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=1239 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -5242,7 +5199,7 @@ CREATE TABLE `oc_modification` (
   `status` tinyint(1) NOT NULL,
   `date_added` datetime NOT NULL,
   PRIMARY KEY (`modification_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=63 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=65 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -5704,9 +5661,7 @@ LOCK TABLES `oc_order` WRITE;
 /*!40000 ALTER TABLE `oc_order` DISABLE KEYS */;
 INSERT INTO `oc_order` VALUES
 (93,0,'INV-2025-00',0,'DockerCart','http://dockercart.local:8080/',0,1,'John','Doe','admin@dockercart.local','+380 (38) 111-11-11','','','[]','','','','','','','','Ukraine',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Cash on Delivery','dockercart_universal.dockercart_universal_4','','','','','','','','Ukraine',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Universal Shipping 1','dockercart_universal.dockercart_universal_3','','',88981.8194,0,0,0.0000,0,'',1,0,'UAH',1.00000000,'10.89.1.7','10.89.0.2, 10.89.0.2','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36','ru-RU,ru;q=0.7','2026-07-03 14:20:46','2026-07-03 14:20:46'),
-(94,0,'INV-2025-00',0,'DockerCart','http://dockercart.local:8080/',0,1,'John','Doe','admin@dockercart.local','+380 (38) 111-11-11','','','[]','','','','','','','','Ukraine',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Cash on Delivery','dockercart_universal.dockercart_universal_4','','','','','','','','Ukraine',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Universal Shipping 1','dockercart_universal.dockercart_universal_3','','',88981.8194,0,0,0.0000,0,'',1,0,'UAH',1.00000000,'10.89.1.7','10.89.0.2, 10.89.0.2','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36','ru-RU,ru;q=0.7','2026-07-03 14:20:50','2026-07-03 14:20:50'),
-(97,0,'',0,'DockerCart','http://dockercart.local:8080/',0,1,'John','Doe','admin@dockercart.local','+380381111111','','','[]','John','Doe','','','','','','',0,'',0,'','[]','1-Click Checkout','oneclickcheckout','John','Doe','','','','','','',0,'',0,'','[]','1-Click Checkout','oneclickcheckout','','test',58281.6718,1,0,0.0000,0,'',3,4,'UAH',1.00000000,'10.89.1.7','10.89.0.2, 10.89.0.2','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36','ru-RU,ru;q=0.7','2026-07-08 17:58:11','2026-07-08 17:58:11'),
-(98,0,'',0,'DockerCart','http://dockercart.local:8080/',0,1,'John','Doe','admin@dockercart.local','+380381111111','','','[]','John','Doe','','','','','','',0,'',0,'','[]','1-Click Checkout','oneclickcheckout','John','Doe','','','','','','',0,'',0,'','[]','1-Click Checkout','oneclickcheckout','','tw',88981.8194,1,0,0.0000,0,'',3,4,'UAH',1.00000000,'10.89.1.7','10.89.0.2, 10.89.0.2','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36','ru-RU,ru;q=0.7','2026-07-08 17:58:44','2026-07-08 17:58:44');
+(94,0,'INV-2025-00',0,'DockerCart','http://dockercart.local:8080/',0,1,'John','Doe','admin@dockercart.local','+380 (38) 111-11-11','','','[]','','','','','','','','Ukraine',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Cash on Delivery','dockercart_universal.dockercart_universal_4','','','','','','','','Ukraine',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Universal Shipping 1','dockercart_universal.dockercart_universal_3','','',88981.8194,0,0,0.0000,0,'',1,0,'UAH',1.00000000,'10.89.1.7','10.89.0.2, 10.89.0.2','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36','ru-RU,ru;q=0.7','2026-07-03 14:20:50','2026-07-03 14:20:50');
 /*!40000 ALTER TABLE `oc_order` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -5727,7 +5682,7 @@ CREATE TABLE `oc_order_history` (
   `comment` mediumtext NOT NULL,
   `date_added` datetime NOT NULL,
   PRIMARY KEY (`order_history_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=226 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=228 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -5737,9 +5692,6 @@ CREATE TABLE `oc_order_history` (
 SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_order_history` WRITE;
 /*!40000 ALTER TABLE `oc_order_history` DISABLE KEYS */;
-INSERT INTO `oc_order_history` VALUES
-(224,97,1,1,'1-Click Checkout Order','2026-07-08 17:58:11'),
-(225,98,1,1,'1-Click Checkout Order (Cart)','2026-07-08 17:58:44');
 /*!40000 ALTER TABLE `oc_order_history` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -5776,9 +5728,7 @@ INSERT INTO `oc_order_option` VALUES
 (240,93,161,9223,9940,'Color','Silver','color'),
 (241,93,161,9046,9864,'Warranty','Standard 12 Months','radio'),
 (242,94,162,9223,9940,'Color','Silver','color'),
-(243,94,162,9046,9864,'Warranty','Standard 12 Months','radio'),
-(248,98,166,9223,9940,'Цвет','Серебро','color'),
-(249,98,166,9046,9864,'Гарантия','Стандартный 12 месяцев','radio');
+(243,94,162,9046,9864,'Warranty','Standard 12 Months','radio');
 /*!40000 ALTER TABLE `oc_order_option` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -5816,9 +5766,7 @@ LOCK TABLES `oc_order_product` WRITE;
 /*!40000 ALTER TABLE `oc_order_product` DISABLE KEYS */;
 INSERT INTO `oc_order_product` VALUES
 (161,93,5023,'Adidas Ultraboost Light','DEMO-5023',1.00,88981.8194,88981.8194,0.0000,0),
-(162,94,5023,'Adidas Ultraboost Light','DEMO-5023',1.00,88981.8194,88981.8194,0.0000,0),
-(165,97,5023,'Adidas Ultraboost Light','DEMO-5023',1.00,58281.6718,58281.6718,0.0000,0),
-(166,98,5023,'Adidas Ultraboost Light','DEMO-5023',1.00,88981.8194,88981.8194,0.0000,0);
+(162,94,5023,'Adidas Ultraboost Light','DEMO-5023',1.00,88981.8194,88981.8194,0.0000,0);
 /*!40000 ALTER TABLE `oc_order_product` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -6007,11 +5955,7 @@ INSERT INTO `oc_order_total` VALUES
 (276,93,'total','Total',88981.8194,9),
 (277,94,'sub_total','Sub-Total',88981.8194,1),
 (278,94,'shipping','Universal Shipping 1',0.0000,3),
-(279,94,'total','Total',88981.8194,9),
-(286,97,'sub_total','Sub-Total',58281.6718,1),
-(287,97,'total','Total',58281.6718,9),
-(288,98,'sub_total','Сумма',88981.8194,1),
-(289,98,'total','Итого',88981.8194,9);
+(279,94,'total','Total',88981.8194,9);
 /*!40000 ALTER TABLE `oc_order_total` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -6111,7 +6055,7 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_product` WRITE;
 /*!40000 ALTER TABLE `oc_product` DISABLE KEYS */;
 INSERT INTO `oc_product` VALUES
-(5001,'DEMO-5001','SKU-5001','','','','','','A1',25.00,0,7,'catalog/demo/demo-seed/products/electronics/apple-iphone-15-pro.jpg',310,1,0.0000,1,0,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,0,1,1,'2026-03-03 08:51:04','2026-05-30 16:40:02'),
+(5001,'DEMO-5001','SKU-5001','','','','','','A1',25.00,0,7,'catalog/demo/demo-seed/products/electronics/apple-iphone-15-pro.jpg',310,1,0.0000,1,0,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,0,1,0,'2026-03-03 08:51:04','2026-05-30 16:40:02'),
 (5002,'DEMO-5002','SKU-5002','','','','','','A1',25.00,0,7,'catalog/demo/demo-seed/products/electronics/samsung-galaxy-s24-ultra.jpg',312,1,61349.1282,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,1,1,0,'2026-03-03 08:51:04','2026-03-03 08:51:04'),
 (5003,'DEMO-5003','SKU-5003','','','','','','A1',32.00,0,7,'catalog/demo/demo-seed/products/electronics/google-pixel-8-pro.jpg',302,1,45999.0544,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,2,1,0,'2026-03-03 08:51:04','2026-03-03 08:51:04'),
 (5004,'DEMO-5004','SKU-5004','','','','','','A1',39.00,0,7,'catalog/demo/demo-seed/products/electronics/oneplus-12.jpg',304,1,40882.3632,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,3,1,0,'2026-03-03 08:51:04','2026-03-03 08:51:04'),
@@ -6122,18 +6066,18 @@ INSERT INTO `oc_product` VALUES
 (5009,'DEMO-5009','SKU-5009','','','','','','A1',74.00,0,7,'catalog/demo/demo-seed/products/electronics/bose-quietcomfort-ultra.jpg',302,1,21950.6055,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,8,1,0,'2026-03-03 08:51:04','2026-03-03 08:51:04'),
 (5010,'DEMO-5010','SKU-5010','','','','','','A1',81.00,0,7,'catalog/demo/demo-seed/products/electronics/jbl-charge-5.jpg',304,1,7623.8700,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,9,1,0,'2026-03-03 08:51:04','2026-03-03 08:51:04'),
 (5011,'DEMO-5011','SKU-5011','','','','','','A1',0.00,0,7,'catalog/demo/demo-seed/products/home-kitchen/instant-pot-duo-plus.jpg',308,1,4553.8552,0,0,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,0,1,0,'2026-03-03 08:51:04','2026-05-30 11:35:52'),
-(5012,'DEMO-5012','SKU-5012','','','','','','A1',28.00,0,7,'catalog/demo/demo-seed/products/home-kitchen/philips-airfryer-xxl.jpg',310,1,10182.2156,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,1,1,1,'2026-03-03 08:51:04','2026-03-03 08:51:04'),
+(5012,'DEMO-5012','SKU-5012','','','','','','A1',28.00,0,7,'catalog/demo/demo-seed/products/home-kitchen/philips-airfryer-xxl.jpg',310,1,10182.2156,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,1,1,0,'2026-03-03 08:51:04','2026-03-03 08:51:04'),
 (5013,'DEMO-5013','SKU-5013','','','','','','A1',35.00,0,7,'catalog/demo/demo-seed/products/home-kitchen/delonghi-magnifica-evo.jpg',312,1,28090.6350,0,0,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,2,1,0,'2026-03-03 08:51:04','2026-05-30 16:37:55'),
 (5014,'DEMO-5014','SKU-5014','','','','','','A1',42.00,0,7,'catalog/demo/demo-seed/products/home-kitchen/kitchenaid-artisan-mixer.jpg',302,1,25532.2894,0,0,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,0.50,0.10,3,1,0,'2026-03-03 08:51:05','2026-04-27 08:57:15'),
 (5015,'DEMO-5015','SKU-5015','','','','','','A1',48.00,0,7,'catalog/demo/demo-seed/products/home-kitchen/tefal-ingenio-cookware-set.jpg',304,1,6600.5317,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,4,1,0,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
-(5016,'DEMO-5016','SKU-5016','','','','','','A1',56.00,0,7,'catalog/demo/demo-seed/products/home-kitchen/le-creuset-dutch-oven.jpg',306,1,14275.5686,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,5,1,1,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
+(5016,'DEMO-5016','SKU-5016','','','','','','A1',56.00,0,7,'catalog/demo/demo-seed/products/home-kitchen/le-creuset-dutch-oven.jpg',306,1,14275.5686,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,5,1,0,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
 (5017,'DEMO-5017','SKU-5017','','','','','','A1',63.00,0,7,'catalog/demo/demo-seed/products/home-kitchen/dyson-v15-detect.jpg',308,1,38324.0175,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,6,1,0,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
 (5018,'DEMO-5018','SKU-5018','','','','','','A1',70.00,0,7,'catalog/demo/demo-seed/products/home-kitchen/irobot-roomba-j7-plus.jpg',310,1,40882.3632,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,7,1,0,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
 (5019,'DEMO-5019','SKU-5019','','','','','','A1',77.00,0,7,'catalog/demo/demo-seed/products/home-kitchen/ninja-foodi-blender.jpg',312,1,8647.2082,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,8,1,0,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
 (5020,'DEMO-5020','SKU-5020','','','','','','A1',84.00,0,7,'catalog/demo/demo-seed/products/home-kitchen/nespresso-vertuo-next.jpg',302,1,6600.5317,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,9,1,0,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
-(5021,'DEMO-5021','SKU-5021','','','','','','A1',24.00,0,7,'catalog/demo/demo-seed/products/fashion/levis-501-original-jeans.jpg',306,1,4553.8552,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,0,1,1,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
+(5021,'DEMO-5021','SKU-5021','','','','','','A1',24.00,0,7,'catalog/demo/demo-seed/products/fashion/levis-501-original-jeans.jpg',306,1,4553.8552,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,0,1,0,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
 (5022,'DEMO-5022','SKU-5022','','','','','','A1',31.00,0,7,'catalog/demo/demo-seed/products/fashion/nike-air-max-270.jpg',308,1,6600.5317,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,1,1,0,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
-(5023,'DEMO-5023','SKU-5023','','','','','','A1',23.00,0,7,'catalog/demo/demo-seed/products/electronics/apple-macbook-air-m3.jpg',310,1,61349.1282,0,0,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,2,1,12,'2026-03-03 08:51:05','2026-06-29 19:39:22'),
+(5023,'DEMO-5023','SKU-5023','','','','','','A1',23.00,0,7,'catalog/demo/demo-seed/products/electronics/apple-macbook-air-m3.jpg',310,1,61349.1282,0,0,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,2,1,0,'2026-03-03 08:51:05','2026-06-29 19:39:22'),
 (5024,'DEMO-5024','SKU-5024','','','','','','A1',45.00,0,7,'catalog/demo/demo-seed/products/fashion/uniqlo-ultra-light-down-jacket.jpg',312,1,4042.1861,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,3,1,0,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
 (5025,'DEMO-5025','SKU-5025','','','','','','A1',52.00,0,7,'catalog/demo/demo-seed/products/fashion/calvin-klein-slim-fit-shirt.jpg',302,1,3530.5170,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,4,1,0,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
 (5026,'DEMO-5026','SKU-5026','','','','','','A1',59.00,0,7,'catalog/demo/demo-seed/products/fashion/tommy-hilfiger-polo-shirt.jpg',304,1,4553.8552,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,5,1,0,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
@@ -6147,10 +6091,10 @@ INSERT INTO `oc_product` VALUES
 (5034,'DEMO-5034','SKU-5034','','','','','','A1',0.00,0,7,'catalog/demo/demo-seed/products/sports-outdoors/yeti-rambler-36oz-bottle.jpg',310,1,2507.1787,0,0,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,3,1,0,'2026-03-03 08:51:06','2026-06-24 10:41:14'),
 (5035,'DEMO-5035','SKU-5035','','','','','','A1',55.00,0,7,'catalog/demo/demo-seed/products/sports-outdoors/coleman-sundome-tent.jpg',312,1,4553.8552,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,4,1,0,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
 (5036,'DEMO-5036','SKU-5036','','','','','','A1',62.00,0,7,'catalog/demo/demo-seed/products/sports-outdoors/osprey-atmos-ag-65.jpg',302,1,12740.5612,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,5,1,0,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
-(5037,'DEMO-5037','SKU-5037','','','','','','A1',69.00,0,7,'catalog/demo/demo-seed/products/sports-outdoors/black-diamond-spot-400.jpg',304,1,2507.1787,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,6,1,2,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
-(5038,'DEMO-5038','SKU-5038','','','','','','A1',76.00,0,7,'catalog/demo/demo-seed/products/sports-outdoors/gopro-hero12-black.jpg',306,1,22973.9438,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,7,1,1,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
+(5037,'DEMO-5037','SKU-5037','','','','','','A1',69.00,0,7,'catalog/demo/demo-seed/products/sports-outdoors/black-diamond-spot-400.jpg',304,1,2507.1787,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,6,1,0,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
+(5038,'DEMO-5038','SKU-5038','','','','','','A1',76.00,0,7,'catalog/demo/demo-seed/products/sports-outdoors/gopro-hero12-black.jpg',306,1,22973.9438,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,7,1,0,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
 (5039,'DEMO-5039','SKU-5039','','','','','','A1',83.00,0,7,'catalog/demo/demo-seed/products/sports-outdoors/schwinn-ic4-indoor-bike.jpg',308,1,45999.0544,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,8,1,0,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
-(5040,'DEMO-5040','SKU-5040','','','','','','A1',90.00,0,7,'catalog/demo/demo-seed/products/sports-outdoors/therm-a-rest-neoair-xlite.jpg',310,1,10182.2156,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,9,1,1,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
+(5040,'DEMO-5040','SKU-5040','','','','','','A1',90.00,0,7,'catalog/demo/demo-seed/products/sports-outdoors/therm-a-rest-neoair-xlite.jpg',310,1,10182.2156,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,9,1,0,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
 (5041,'DEMO-5041','SKU-5041','','','','','','A1',30.00,0,7,'catalog/demo/demo-seed/products/beauty-health/cerave-hydrating-cleanser.jpg',302,1,716.3400,0,0,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,0,1,0,'2026-03-03 08:51:06','2026-07-06 17:23:29'),
 (5042,'DEMO-5042','SKU-5042','','','','','','A1',37.00,0,7,'catalog/demo/demo-seed/products/beauty-health/la-roche-posay-anthelios-spf50.jpg',304,1,972.1713,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,1,1,0,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
 (5043,'DEMO-5043','SKU-5043','','','','','','A1',43.00,0,7,'catalog/demo/demo-seed/products/beauty-health/the-ordinary-niacinamide-10.jpg',306,1,460.5022,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,2,1,0,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
@@ -6171,7 +6115,7 @@ INSERT INTO `oc_product` VALUES
 (5058,'DEMO-5058','SKU-5058','','','','','','A1',82.00,0,7,'catalog/demo/demo-seed/products/toys-games/hasbro-monopoly-classic.jpg',302,1,1228.0059,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,7,1,0,'2026-03-03 08:51:07','2026-03-03 08:51:07'),
 (5059,'DEMO-5059','SKU-5059','','','','','','A1',89.00,0,7,'catalog/demo/demo-seed/products/toys-games/jenga-classic-game.jpg',304,1,972.1713,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,8,1,0,'2026-03-03 08:51:07','2026-03-03 08:51:07'),
 (5060,'DEMO-5060','SKU-5060','','','','','','A1',96.00,0,7,'catalog/demo/demo-seed/products/toys-games/hot-wheels-20-car-pack.jpg',306,1,716.3368,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,9,1,0,'2026-03-03 08:51:07','2026-03-03 08:51:07'),
-(5061,'DEMO-5061','SKU-5061','','','','','','A1',36.00,0,7,'catalog/demo/demo-seed/products/books-media/atomic-habits-by-james-clear.jpg',310,1,716.3368,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,0,1,1,'2026-03-03 08:51:07','2026-03-03 08:51:07'),
+(5061,'DEMO-5061','SKU-5061','','','','','','A1',36.00,0,7,'catalog/demo/demo-seed/products/books-media/atomic-habits-by-james-clear.jpg',310,1,716.3368,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,0,1,0,'2026-03-03 08:51:07','2026-03-03 08:51:07'),
 (5062,'DEMO-5062','SKU-5062','','','','','','A1',43.00,0,7,'catalog/demo/demo-seed/products/books-media/deep-work-by-cal-newport.jpg',312,1,716.3368,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,1,1,0,'2026-03-03 08:51:07','2026-05-28 09:02:02'),
 (5063,'DEMO-5063','SKU-5063','','','','','','A1',47.00,0,7,'catalog/demo/demo-seed/products/books-media/the-psychology-of-money.jpg',302,1,716.3368,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,2,1,0,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
 (5064,'DEMO-5064','SKU-5064','','','','','','A1',55.00,0,7,'catalog/demo/demo-seed/products/books-media/sapiens-by-yuval-noah-harari.jpg',304,1,716.3368,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,3,1,0,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
@@ -6185,11 +6129,11 @@ INSERT INTO `oc_product` VALUES
 (5072,'DEMO-5072','SKU-5072','','','','','','A1',46.00,0,7,'catalog/demo/demo-seed/products/automotive/noco-boost-plus-gb40.jpg',310,1,5065.5243,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,1,1,0,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
 (5073,'DEMO-5073','SKU-5073','','','','','','A1',53.00,0,7,'catalog/demo/demo-seed/products/automotive/michelin-easy-grip-wipers.jpg',312,1,1995.5096,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,2,1,0,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
 (5074,'DEMO-5074','SKU-5074','','','','','','A1',60.00,0,7,'catalog/demo/demo-seed/products/automotive/bosch-icon-wiper-blades.jpg',302,1,1739.6750,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,3,1,0,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
-(5075,'DEMO-5075','SKU-5075','','','','','','A1',67.00,0,7,'catalog/demo/demo-seed/products/automotive/armor-all-cleaning-wipes.jpg',304,1,9.0000,0,3,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,4,1,1,'2026-03-03 08:51:08','2026-06-20 11:31:20'),
-(5076,'DEMO-5076','SKU-5076','','','','','','A1',74.00,0,7,'catalog/demo/demo-seed/products/automotive/meguiars-ultimate-wax.jpg',306,1,1228.0059,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,5,1,1,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
-(5077,'DEMO-5077','SKU-5077','','','','','','A1',79.00,0,7,'catalog/demo/demo-seed/products/automotive/anker-roav-bluetooth-receiver.jpg',308,1,0.0000,1,0,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,6,1,1,'2026-03-03 08:51:08','2026-05-27 18:16:49'),
-(5078,'DEMO-5078','SKU-5078','','','','','','A1',88.00,0,7,'catalog/demo/demo-seed/products/automotive/pioneer-sph-10bt-car-stereo.jpg',310,1,15298.9069,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,7,1,1,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
-(5079,'DEMO-5079','SKU-5079','','','','','','A1',95.00,0,7,'catalog/demo/demo-seed/products/automotive/philips-x-tremevision-headlight-bulbs.jpg',312,1,1739.6750,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,8,1,1,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
+(5075,'DEMO-5075','SKU-5075','','','','','','A1',67.00,0,7,'catalog/demo/demo-seed/products/automotive/armor-all-cleaning-wipes.jpg',304,1,9.0000,0,3,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,4,1,0,'2026-03-03 08:51:08','2026-06-20 11:31:20'),
+(5076,'DEMO-5076','SKU-5076','','','','','','A1',74.00,0,7,'catalog/demo/demo-seed/products/automotive/meguiars-ultimate-wax.jpg',306,1,1228.0059,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,5,1,0,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
+(5077,'DEMO-5077','SKU-5077','','','','','','A1',79.00,0,7,'catalog/demo/demo-seed/products/automotive/anker-roav-bluetooth-receiver.jpg',308,1,0.0000,1,0,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,6,1,0,'2026-03-03 08:51:08','2026-05-27 18:16:49'),
+(5078,'DEMO-5078','SKU-5078','','','','','','A1',88.00,0,7,'catalog/demo/demo-seed/products/automotive/pioneer-sph-10bt-car-stereo.jpg',310,1,15298.9069,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,7,1,0,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
+(5079,'DEMO-5079','SKU-5079','','','','','','A1',95.00,0,7,'catalog/demo/demo-seed/products/automotive/philips-x-tremevision-headlight-bulbs.jpg',312,1,1739.6750,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,8,1,0,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
 (5080,'DEMO-5080','SKU-5080','','','','','','A1',17.00,0,7,'catalog/demo/demo-seed/products/automotive/weathertech-floorliner-set.jpg',302,1,10182.2156,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,9,1,0,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
 (5081,'DEMO-5081','SKU-5081','','','','','','A1',42.00,0,7,'catalog/demo/demo-seed/products/pet-supplies/furbo-360-dog-camera.jpg',306,1,10182.2156,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,0,1,0,'2026-03-03 08:51:09','2026-03-03 08:51:09'),
 (5082,'DEMO-5082','SKU-5082','','','','','','A1',49.00,0,7,'catalog/demo/demo-seed/products/pet-supplies/petsafe-drinkwell-fountain.jpg',308,1,2507.1787,0,NULL,0,9,'2026-03-03',1.00000000,1,20.00000000,15.00000000,10.00000000,1,1,1.00,1.00,1,1,0,'2026-03-03 08:51:09','2026-03-03 08:51:09'),
@@ -13749,7 +13693,7 @@ CREATE TABLE `oc_seo_url` (
   KEY `idx_store_id` (`store_id`),
   KEY `idx_store_language_query` (`store_id`,`language_id`,`query`(191)),
   KEY `idx_store_keyword` (`store_id`,`keyword`(191))
-) ENGINE=InnoDB AUTO_INCREMENT=6180 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=6186 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -14252,8 +14196,9 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_session` WRITE;
 /*!40000 ALTER TABLE `oc_session` DISABLE KEYS */;
 INSERT INTO `oc_session` VALUES
-('22d8306a89338828280c4d97bb','{\"language\":\"ru-ua\",\"currency\":\"UAH\"}','2026-07-09 11:57:55'),
-('3973420c75147b20ba7280c974','{\"language\":\"ru-ua\",\"currency\":\"UAH\"}','2026-07-08 16:34:30');
+('22d8306a89338828280c4d97bb','{\"language\":\"ru-ua\",\"currency\":\"UAH\"}','2026-07-09 12:53:44'),
+('3973420c75147b20ba7280c974','{\"language\":\"ru-ua\",\"currency\":\"UAH\"}','2026-07-08 16:34:30'),
+('964b4f349c240396aff9ce8215','{\"api_id\":\"3\",\"language\":\"ru-ua\",\"currency\":\"UAH\"}','2026-07-09 13:40:03');
 /*!40000 ALTER TABLE `oc_session` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -14274,7 +14219,7 @@ CREATE TABLE `oc_setting` (
   `value` mediumtext NOT NULL,
   `serialized` tinyint(1) NOT NULL,
   PRIMARY KEY (`setting_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=25382 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=25386 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -23781,4 +23726,4 @@ SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2026-07-09 13:58:26
+-- Dump completed on 2026-07-09 16:24:25
