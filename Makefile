@@ -155,7 +155,7 @@ dump-init: ## Regenerate docker/mysql/init.sql from running MariaDB
 	mv $$TMP_FILE docker/mysql/init.sql; \
 	echo "Dump written to docker/mysql/init.sql — review and commit when ready."
 
-clean: down ## DESTRUCTIVE: Stop containers and remove all volumes
+clean: ## DESTRUCTIVE: Stop containers and remove all volumes
 	@echo "WARNING: All database data will be lost."
 	@read -p "Continue? (y/N): " confirm && [ "$$confirm" = "y" ] || exit 1
 	@$(COMPOSE) down -v
