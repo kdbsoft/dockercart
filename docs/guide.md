@@ -28,7 +28,7 @@
 ### Installation
 
 ```bash
-git clone https://github.com/mathflow-bit/dockercart.git
+git clone https://github.com/kdbsoft/dockercart.git
 cd dockercart
 cp .env.example .env
 ```

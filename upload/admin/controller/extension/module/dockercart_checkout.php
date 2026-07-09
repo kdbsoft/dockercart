@@ -6,7 +6,7 @@
  * Installation WITHOUT OCMOD - uses OpenCart Event System only
  *
  * License: GNU General Public License v3.0 (GPL-3.0)
- * Copyright (c) mathflow-bit
+ * Copyright (c) kdbsoft
  */
 
 class ControllerExtensionModuleDockercartCheckout extends Controller
