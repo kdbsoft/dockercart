@@ -61,12 +61,9 @@ export-yml-[0-9]*-*.xml
 # If you want to ignore backup installer artifacts in development mode:
 # /upload/backup.install/*
 
-# Ignore all vendor files included by composer and the lock file
-/tests/phpunit/vendor/*
-/tests/phpunit/composer.lock
-
-# Test Config File
-/tests/phpunit/bootstrap.php
+# PHPUnit cache
+.phpunit.cache/
+.php-cs-fixer.cache
 
 # IDE Project files
 /.idea
