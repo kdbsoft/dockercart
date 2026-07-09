@@ -264,6 +264,17 @@ class DockercartExtensionStore {
 			}
 		}
 
+		// Also check local licenses (for manual key entry in local dev)
+		$db = $this->registry->get('db');
+		$local_result = $db->query(
+			"SELECT `module_code`, `sku`, `license_key`, `status`
+			 FROM `" . DB_PREFIX . "dockercart_license`"
+		);
+		$local_licenses = array();
+		foreach ($local_result->rows as $row) {
+			$local_licenses[$row['module_code']] = $row;
+		}
+
 		foreach ($offers as &$offer) {
 			$offer['state'] = 'buy';
 			$offer['license_key'] = null;
@@ -278,6 +289,17 @@ class DockercartExtensionStore {
 				$offer['is_licensed'] = true;
 				$offer['license_key'] = $licensed_map[$sku]['licenseKey'] ?? null;
 				$offer['license_status'] = $licensed_map[$sku]['licenseStatus'] ?? null;
+			}
+
+			// Fallback: check local license by derived module_code
+			if (!$offer['is_licensed']) {
+				$module_code = 'dockercart_' . preg_replace('/^dockercart_/i', '', $sku);
+				if (isset($local_licenses[$module_code])) {
+					$lic = $local_licenses[$module_code];
+					$offer['is_licensed'] = true;
+					$offer['license_key'] = $lic['license_key'];
+					$offer['license_status'] = $lic['status'];
+				}
 			}
 
 			$meta = $this->getInstalledMeta($sku);

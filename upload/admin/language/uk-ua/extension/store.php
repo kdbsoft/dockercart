@@ -27,6 +27,7 @@ $_['text_changelog'] = 'Що нового';
 $_['text_install'] = 'Встановити';
 $_['text_update'] = 'Оновити';
 $_['text_up_to_date'] = 'Актуально';
+$_['text_enter_key'] = 'Ввести ліцензійний ключ';
 $_['text_license_key'] = 'Ліцензійний ключ';
 $_['text_activate_key'] = 'Активувати ключ';
 $_['text_verify'] = 'Перевірити';

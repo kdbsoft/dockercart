@@ -91,29 +91,38 @@
 											{% endif %}
 										</div>
 										<div class="store-card-footer">
-											<span class="store-card-price">
-												{% if offer.price > 0 %}
-												${{ offer.price|number_format(0, '.', ',') }}
-												{% else %}
-												<strong class="text-success">{{ text_free }}</strong>
+											<div class="store-card-footer-row">
+												<span class="store-card-price">
+													{% if offer.price > 0 %}
+													${{ offer.price|number_format(0, '.', ',') }}
+													{% else %}
+													<strong class="text-success">{{ text_free }}</strong>
+													{% endif %}
+												</span>
+												{% if offer.state == 'buy' %}
+												<a href="{{ offer.buy_url }}" class="btn btn-sm btn-primary store-card-btn" target="_blank" rel="noopener">
+													<i class="fa fa-shopping-cart"></i> {{ text_buy }}
+												</a>
+												{% elseif offer.state == 'install' %}
+												<button class="btn btn-sm btn-success store-card-btn store-install-btn" data-sku="{{ offer.sku }}">
+													<i class="fa fa-download"></i> {{ text_install }}
+												</button>
+												{% elseif offer.state == 'update' %}
+												<button class="btn btn-sm btn-warning store-card-btn store-update-btn" data-sku="{{ offer.sku }}">
+													<i class="fa fa-arrow-up"></i> {{ text_update }}
+												</button>
+												{% elseif offer.state == 'up_to_date' %}
+												<span class="label label-success store-card-btn-label">{{ text_up_to_date }}</span>
+												{% elseif offer.state in ['revoked', 'expired'] %}
+												<span class="label label-danger store-card-btn-label">{{ attribute(_context, 'text_state_' ~ offer.state) }}</span>
 												{% endif %}
-											</span>
-											{% if offer.state == 'buy' %}
-											<a href="{{ offer.buy_url }}" class="btn btn-sm btn-primary store-card-btn" target="_blank" rel="noopener">
-												<i class="fa fa-shopping-cart"></i> {{ text_buy }}
-											</a>
-											{% elseif offer.state == 'install' %}
-											<button class="btn btn-sm btn-success store-card-btn store-install-btn" data-sku="{{ offer.sku }}">
-												<i class="fa fa-download"></i> {{ text_install }}
-											</button>
-											{% elseif offer.state == 'update' %}
-											<button class="btn btn-sm btn-warning store-card-btn store-update-btn" data-sku="{{ offer.sku }}">
-												<i class="fa fa-arrow-up"></i> {{ text_update }}
-											</button>
-											{% elseif offer.state == 'up_to_date' %}
-											<span class="label label-success store-card-btn-label">{{ text_up_to_date }}</span>
-											{% elseif offer.state in ['revoked', 'expired'] %}
-											<span class="label label-danger store-card-btn-label">{{ attribute(_context, 'text_state_' ~ offer.state) }}</span>
+											</div>
+											{% if offer.state == 'buy' and offer.price > 0 %}
+											<div class="store-card-enter-key">
+												<a class="store-enter-key-link" data-module-code="{{ 'dockercart_' ~ offer.sku|replace({'dockercart_': '', 'DOCKERCART_': ''}) }}" data-sku="{{ offer.sku }}">
+													<i class="fa fa-key"></i> {{ text_enter_key }}
+												</a>
+											</div>
 											{% endif %}
 										</div>
 									</div>
@@ -266,6 +275,7 @@
 					<label for="key-modal-key-input">{{ text_license_key }}</label>
 					<input type="text" id="key-modal-key-input" class="form-control" placeholder="DCL-..." />
 					<input type="hidden" id="key-modal-module-code" />
+					<input type="hidden" id="key-modal-sku" />
 				</div>
 			</div>
 			<div class="modal-footer">
@@ -395,7 +405,8 @@ $(document).ready(function() {
 		});
 	}
 
-	$('.store-grid').on('click', '.store-card', function() {
+	$('.store-grid').on('click', '.store-card', function(e) {
+		if ($(e.target).closest('.store-enter-key-link').length) return;
 		var sku = $(this).data('sku');
 		showModal(sku);
 	});
@@ -498,7 +509,18 @@ $(document).ready(function() {
 		var moduleCode = $(this).data('module-code');
 		var key = $(this).data('full-key') || '';
 		$keyModalModuleCode.val(moduleCode);
+		$('#key-modal-sku').val('');
 		$keyModalInput.val(key);
+		$keyModal.modal('show');
+	});
+
+	$(document).on('click', '.store-enter-key-link', function(e) {
+		e.stopPropagation();
+		var moduleCode = $(this).data('module-code');
+		var sku = $(this).data('sku');
+		$keyModalModuleCode.val(moduleCode);
+		$('#key-modal-sku').val(sku);
+		$keyModalInput.val('');
 		$keyModal.modal('show');
 	});
 
@@ -506,6 +528,7 @@ $(document).ready(function() {
 		var $btn = $(this).prop('disabled', true);
 		var moduleCode = $keyModalModuleCode.val();
 		var key = $keyModalInput.val().trim();
+		var sku = $('#key-modal-sku').val();
 
 		if (!key) {
 			$btn.prop('disabled', false);
@@ -513,7 +536,7 @@ $(document).ready(function() {
 			return;
 		}
 
-		$.post('{{ set_license_key_url }}', { module_code: moduleCode, license_key: key }, function(resp) {
+		$.post('{{ set_license_key_url }}', { module_code: moduleCode, license_key: key, sku: sku }, function(resp) {
 			if (resp.error) {
 				$btn.prop('disabled', false);
 				alert(resp.error);
