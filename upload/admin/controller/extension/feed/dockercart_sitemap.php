@@ -11,7 +11,7 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
         
         // Initialize centralized logger
         require_once DIR_SYSTEM . 'library/dockercart_logger.php';
-        $this->logger = new DockercartLogger($this->registry, 'googlebase');
+        $this->logger = new DockercartLogger($this->registry, 'sitemap');
     }
 
     public function index() {
