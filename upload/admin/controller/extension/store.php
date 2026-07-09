@@ -977,6 +977,7 @@ class ControllerExtensionStore extends Controller {
 
 		$module_code = $this->request->post['module_code'] ?? '';
 		$license_key = $this->request->post['license_key'] ?? '';
+		$sku = $this->request->post['sku'] ?? '';
 
 		if (empty($module_code) || empty($license_key)) {
 			$json['error'] = 'Module code and license key are required';
@@ -1008,7 +1009,7 @@ class ControllerExtensionStore extends Controller {
 
 		require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
 		$licensing = new DockercartLicensing($this->registry);
-		$licensing->setLicenseKey($module_code, '', $license_key);
+		$licensing->setLicenseKey($module_code, $sku, $license_key);
 
 		$json['success'] = true;
 		$json['message'] = $this->language->get('text_license_key_updated');

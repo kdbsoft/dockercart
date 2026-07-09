@@ -190,10 +190,37 @@
 .store-card-footer {
 	padding: 6px 12px 10px;
 	border-top: 1px solid #f5f5f5;
+}
+
+.store-card-footer-row {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	gap: 8px;
+}
+
+.store-card-enter-key {
+	margin-top: 6px;
+	padding-top: 6px;
+	border-top: 1px dashed #eee;
+	text-align: center;
+}
+
+.store-card-enter-key a {
+	font-size: 11px;
+	color: #5a7fb5;
+	cursor: pointer;
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.store-card-enter-key a:hover {
+	color: #2a5a9a;
+	text-decoration: underline;
+}
+
+.store-card-enter-key a i {
+	margin-right: 4px;
 }
 
 .store-card-buy-btn {

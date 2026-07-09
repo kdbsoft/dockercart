@@ -27,6 +27,7 @@ $_['text_changelog'] = 'What\'s New';
 $_['text_install'] = 'Install';
 $_['text_update'] = 'Update';
 $_['text_up_to_date'] = 'Up to Date';
+$_['text_enter_key'] = 'Enter License Key';
 $_['text_license_key'] = 'License Key';
 $_['text_activate_key'] = 'Activate Key';
 $_['text_verify'] = 'Verify';
