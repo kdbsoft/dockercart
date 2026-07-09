@@ -3,6 +3,8 @@
 $finder = PhpCsFixer\Finder::create()
     ->in(__DIR__ . '/upload/')
     ->exclude([])
+    ->notPath('config.php')
+    ->notPath('admin/config.php')
     ->notName('*.min.php')
     ->ignoreDotFiles(true)
     ->ignoreVCS(true);

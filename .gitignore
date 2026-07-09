@@ -86,31 +86,13 @@ build-extension.sh
 !/.github/workflows/
 !/.github/workflows/**
 
-# Local documentation drafts and working notes
-/docs/
-!/docs/modules/
-
 /docker/nginx/cache/
 /docker/nginx/cache/**
-
-/.serena/
 
 *.backup
 /docker/mysql/*.bak*
 /docker/mysql/*.tmp
 /docker/mysql/*.tmp*
-
-# Development session artifacts
-INSTALLATION_UPDATE_SUMMARY.md
-DOCUMENTATION.md
-PRODUCTION.md
-SSL_SETUP.md
-CHANGELOG.md
-!/CHANGELOG.md
-QUICK_START.md
-
-# Temporary test/debug scripts
-check-multicurrency.sh
 
 # SSL / certificate artifacts (self-signed and Let's Encrypt)
 # Ignore generated self-signed certificates and private keys
@@ -136,11 +118,6 @@ check-multicurrency.sh
 /docker/letsencrypt/*.log
 /docker/letsencrypt/*.lock
 
-
-/__pycache__/
-*.pyc
-*.pyo
-*.pyd
 
 # Ignore custom local Dockercart prefixed artifacts
 **/dockercart_custom_*
