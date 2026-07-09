@@ -397,6 +397,15 @@ class DockercartLicensing {
 			return 0;
 		}
 
+		// Test domains: skip auto-populate so users enter keys manually via the card UI.
+		// The server marks every license as isTest=true when the domain is non-production.
+		foreach ($items as $item) {
+			if (!empty($item['isTest'])) {
+				$this->logger->info('AutoPopulate: test domain detected, skipping');
+				return 0;
+			}
+		}
+
 		$count = 0;
 		$fingerprint_escaped = $this->db->escape($fingerprint);
 		$domain_escaped = $this->db->escape($domain);
