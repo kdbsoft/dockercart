@@ -90,5 +90,3 @@ Thumbs.db
 
 # Backups directory
 backups/
-
-build-extension.sh

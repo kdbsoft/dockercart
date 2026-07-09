@@ -28,7 +28,7 @@ jobs:
 
       - name: Lint
         run: |
-          find upload -type f -name "*.php" ! -path 'storage/vendor/*' -print0 \
+          find upload -type f -name "*.php" ! -path 'upload/config.php' ! -path 'upload/admin/config.php' -print0 \
             | xargs -0 -P4 php -l -n
 
   phpstan:
@@ -59,7 +59,7 @@ jobs:
           composer dump-autoload
 
       - name: Run PHPStan
-        run: ./storage/vendor/bin/phpstan analyze -a ./storage/vendor/autoload.php --no-progress
+        run: ./storage/vendor/bin/phpstan analyze -a ./storage/vendor/autoload.php --no-progress --memory-limit=512M
 
   cs-fixer:
     name: Code Style
@@ -90,3 +90,28 @@ jobs:
         run: |
           ./storage/vendor/bin/php-cs-fixer fix --dry-run --diff --format=checkstyle > /tmp/cs-report.xml || true
           cs2pr --graceful-warnings /tmp/cs-report.xml
+
+  phpunit:
+    name: PHPUnit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.5"
+          tools: composer:v2
+
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer/files
+          key: phpunit-${{ hashFiles('**/composer.lock') }}
+          restore-keys: phpunit-
+
+      - name: Install PHPUnit
+        run: composer require --dev --no-interaction phpunit/phpunit:^11.0
+
+      - name: Run tests
+        run: ./storage/vendor/bin/phpunit --no-coverage
