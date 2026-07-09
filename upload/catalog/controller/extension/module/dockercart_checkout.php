@@ -4,7 +4,7 @@
  * Handles event system hooks for catalog side
  *
  * @package    DockerCart Checkout
- * @author     mathflow-bit
+ * @author     kdbsoft
  * @license    GNU General Public License v3.0 (GPL-3.0)
  */
 
