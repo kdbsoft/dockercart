@@ -407,6 +407,37 @@ SQL
     echo "DockerCart bootstrap finished."
 }
 
+# Всегда синхронизирует config_url/config_ssl из DOCKERCART_URL с БД
+ensure_store_url() {
+    local db_host="${DB_HOSTNAME:-mariadb}"
+    local db_user="${DB_USERNAME:-dockercart}"
+    local db_pass="${DB_PASSWORD:-dockercart_password}"
+    local db_name="${DB_DATABASE:-dockercart}"
+    local db_prefix="${DB_PREFIX:-oc_}"
+    local url="${DOCKERCART_URL:-http://dockercart.local}"
+    url="${url%/}/"
+
+    # Проверяем, совпадает ли текущее значение в БД
+    local current
+    current=$(MYSQL_PWD="${db_pass}" mysql -h"${db_host}" -u"${db_user}" --skip-ssl \
+        -N -B -e "SELECT \`value\` FROM \`${db_prefix}setting\` WHERE \`key\` = 'config_url' AND store_id = 0" \
+        "${db_name}" 2>/dev/null || true)
+
+    if [ "${current}" = "${url}" ]; then
+        return 0
+    fi
+
+    echo "Updating store URL to: ${url}"
+    MYSQL_PWD="${db_pass}" mysql -h"${db_host}" -u"${db_user}" --skip-ssl "${db_name}" <<SQL
+SET NAMES utf8mb4;
+DELETE FROM \`${db_prefix}setting\` WHERE \`key\` IN ('config_url', 'config_ssl') AND store_id = 0;
+INSERT INTO \`${db_prefix}setting\` (store_id, \`code\`, \`key\`, \`value\`, serialized) VALUES
+  (0, 'config', 'config_url', '${url}', 0),
+  (0, 'config', 'config_ssl', '${url}', 0);
+SQL
+    echo "Store URL updated."
+}
+
 wait_for_manticore() {
     echo "Waiting for Manticore to be ready..."
     local max_attempts=30
@@ -567,6 +598,8 @@ wait_for_mysql
 initialize_database || echo "WARNING: Database initialization failed — continuing anyway"
 
 apply_php_settings
+
+ensure_store_url
 
 # rclone config for S3 backup worker (also lets `make shell` users run the
 # worker manually; no-op when BACKUP_S3_ENABLED != true).
