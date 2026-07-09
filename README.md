@@ -51,11 +51,11 @@ make up
 
 Done. First boot handles **everything**:
 
-- ✅ Generates `config.php` from environment variables
-- ✅ Seeds the database and applies migrations
-- ✅ Builds the full-text search index
-- ✅ Sets correct file permissions
-- ✅ No web installer — no human in the loop
+- Generates `config.php` from environment variables
+- Seeds the database and applies migrations
+- Builds the full-text search index
+- Sets correct file permissions
+- No web installer — no human in the loop
 
 **Admin panel:** `http://dockercart.local/admin`  
 **Default credentials** (change in `.env`): `admin` / `admin123`
@@ -67,7 +67,7 @@ Done. First boot handles **everything**:
 Six containers. One network. Zero exposed ports (except Nginx).
 
 ```
-                              🌐  Internet
+                              Internet
                                    │
                          ┌─────────▼─────────┐
                          │   nginx:alpine      │
@@ -75,18 +75,18 @@ Six containers. One network. Zero exposed ports (except Nginx).
                          └────┬───────────┬───┘
                               │           │
                   ┌───────────▼───┐  ┌────▼──────────┐
-                  │  🐘 Apache    │  │  ⏰ Scheduler  │
+                  │   Apache     │  │   Scheduler   │
                   │  PHP 8.5      │  │  Cron daemon   │
                   └───────┬───────┘  └───────────────┘
                           │
               ┌───────────┼───────────┐
               │           │           │
     ┌─────────▼──┐  ┌────▼────┐  ┌──▼──────────┐
-    │ 🐬 MariaDB │  │ 🔴 Redis│  │ 🦀 Manticore │
+    │  MariaDB   │  │  Redis  │  │  Manticore  │
     │  DB  11    │  │ Cache   │  │  Search 15   │
     └────────────┘  └─────────┘  └──────────────┘
 
-    📁 Optional: FTP (vsftpd — chrooted to ./upload/image)
+    Optional: FTP (vsftpd — chrooted to ./upload/image)
 ```
 
 **How traffic flows:** Nginx is the sole entry point — it handles TLS termination, gzip compression, and static asset caching. Apache runs the PHP application behind it with no exposed ports. MariaDB stores your data, Redis handles caching and sessions, Manticore powers full-text search. The scheduler daemon runs background tasks (cron, syncs, feeds).
@@ -99,14 +99,14 @@ Everything communicates over a shared `dockercart-network` bridge. See the [full
 
 | Layer | Technology | Why |
 |---|---|---|
-| 🐘 Application | [PHP 8.5](https://www.php.net/) + [Apache 2.4](https://httpd.apache.org/) | Battle-tested PHP runtime |
-| 🔄 Reverse proxy | [Nginx](https://nginx.org/) (alpine) | Blazing fast, tiny footprint |
-| 🐬 Database | [MariaDB 11](https://mariadb.org/) | MySQL-compatible, rock solid |
-| 🔴 Cache & sessions | [Redis 7](https://redis.io/) | Sub-millisecond reads |
-| 🔍 Full-text search | [Manticore Search 15](https://manticoresearch.com/) | SQL-compatible, fast indexing |
-| 🛡️ Reverse proxy (alt) | [Traefik v3](https://traefik.io/) | *Optional* — for existing infra |
-| 🔒 SSL | [Let's Encrypt](https://letsencrypt.org/) / self-signed | Auto-renewal via certbot |
-| 🎨 Frontend | ES6+ · [Tailwind CSS 3](https://tailwindcss.com/) · [Lucide](https://lucide.dev/) | Modern, zero jQuery |
+| Application | [PHP 8.5](https://www.php.net/) + [Apache 2.4](https://httpd.apache.org/) | Battle-tested PHP runtime |
+| Reverse proxy | [Nginx](https://nginx.org/) (alpine) | Blazing fast, tiny footprint |
+| Database | [MariaDB 11](https://mariadb.org/) | MySQL-compatible, rock solid |
+| Cache & sessions | [Redis 7](https://redis.io/) | Sub-millisecond reads |
+| Full-text search | [Manticore Search 15](https://manticoresearch.com/) | SQL-compatible, fast indexing |
+| Reverse proxy (alt) | [Traefik v3](https://traefik.io/) | *Optional* — for existing infra |
+| SSL | [Let's Encrypt](https://letsencrypt.org/) / self-signed | Auto-renewal via certbot |
+| Frontend | ES6+ · [Tailwind CSS 3](https://tailwindcss.com/) · [Lucide](https://lucide.dev/) | Modern, zero jQuery |
 
 ---
 
@@ -118,17 +118,17 @@ All modes invoked via `make`. Container names prefixed `dockercart_`. Full detai
 
 | Mode | Command | What you get |
 |---|---|---|
-| 🌐 HTTP | `make up` | Plain HTTP on port 80 |
-| 🔐 HTTPS (self-signed) | `make ssl` | Quick HTTPS for dev/staging |
-| 🔒 HTTPS (Let's Encrypt) | `make le` | Production SSL with auto-renew |
+| HTTP | `make up` | Plain HTTP on port 80 |
+| HTTPS (self-signed) | `make ssl` | Quick HTTPS for dev/staging |
+| HTTPS (Let's Encrypt) | `make le` | Production SSL with auto-renew |
 
 ### 🔀 Traefik (external reverse proxy)
 
 | Mode | Command |
 |---|---|
-| 🌐 HTTP | `make traefik` |
-| 🔐 HTTPS (self-signed) | `make traefik-ssl` |
-| 🔒 HTTPS (Let's Encrypt) | `make traefik-le` |
+| HTTP | `make traefik` |
+| HTTPS (self-signed) | `make traefik-ssl` |
+| HTTPS (Let's Encrypt) | `make traefik-le` |
 
 ### 📁 FTP (optional add-on)
 
@@ -145,13 +145,13 @@ Config files are **generated at container start** — never edit them manually.
 
 | Variable | Purpose |
 |---|---|
-| `DOCKERCART_URL` | 🌐 Store base URL |
-| `DB_*` | 🐬 Database credentials |
-| `ADMIN_USERNAME` / `ADMIN_PASSWORD` | 👤 Default admin account |
-| `CACHE_ENGINE` | 🔴 `redis` (default) or `file` |
-| `REDIS_MAXMEMORY` | 💾 Redis memory limit |
-| `PHP_MEMORY_LIMIT` | 🧠 PHP memory limit |
-| `MARIADB_CONFIG_SIZE` | ⚡ InnoDB profile: `s` · `m` · `l` |
+| `DOCKERCART_URL` | Store base URL |
+| `DB_*` | Database credentials |
+| `ADMIN_USERNAME` / `ADMIN_PASSWORD` | Default admin account |
+| `CACHE_ENGINE` | `redis` (default) or `file` |
+| `REDIS_MAXMEMORY` | Redis memory limit |
+| `PHP_MEMORY_LIMIT` | PHP memory limit |
+| `MARIADB_CONFIG_SIZE` | InnoDB profile: `s` · `m` · `l` |
 
 Full reference → [`docs/guide.md`](docs/guide.md#3-configuration)
 
@@ -161,23 +161,23 @@ Full reference → [`docs/guide.md`](docs/guide.md#3-configuration)
 
 | | Resource | Link |
 |---|---|---|
-| 📖 | Developer guide | [`docs/guide.md`](docs/guide.md) |
-| ✨ | Capabilities | [dockercart.net/capabilities](https://dockercart.net/capabilities) |
-| 📋 | Changelog | [dockercart.net/changelog](https://dockercart.net/changelog) |
-| 🖥️ | Live demo | [demo.dockercart.net](https://demo.dockercart.net) |
-| 🛒 | Add-ons store | [store.dockercart.net](https://store.dockercart.net) |
-| 🔄 | Core updates (`make update`) | [`docs/guide.md`](docs/guide.md#9-core-updates) |
-| 🐛 | Issues | [GitHub Issues](https://github.com/kdbsoft/dockercart/issues) |
-| 🔒 | Security policy | [`SECURITY.md`](SECURITY.md) |
+| | Developer guide | [`docs/guide.md`](docs/guide.md) |
+| | Capabilities | [dockercart.net/capabilities](https://dockercart.net/capabilities) |
+| | Changelog | [dockercart.net/changelog](https://dockercart.net/changelog) |
+| | Live demo | [demo.dockercart.net](https://demo.dockercart.net) |
+| | Add-ons store | [store.dockercart.net](https://store.dockercart.net) |
+| | Core updates (`make update`) | [`docs/guide.md`](docs/guide.md#9-core-updates) |
+| | Issues | [GitHub Issues](https://github.com/kdbsoft/dockercart/issues) |
+| | Security policy | [`SECURITY.md`](SECURITY.md) |
 
 ---
 
 ## 🤝 Contributing
 
-1. 🍴 Fork & create a feature branch
-2. 📝 Write focused commits following [Conventional Commits](https://www.conventionalcommits.org/)
-3. 🧪 Test with `make up`
-4. 🚀 Submit a pull request
+1. Fork & create a feature branch
+2. Write focused commits following [Conventional Commits](https://www.conventionalcommits.org/)
+3. Test with `make up`
+4. Submit a pull request
 
 ---
 
