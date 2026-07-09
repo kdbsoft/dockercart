@@ -6,7 +6,7 @@
  * Main checkout page controller with AJAX handlers
  *
  * License: GNU General Public License v3.0 (GPL-3.0)
- * Copyright (c) mathflow-bit
+ * Copyright (c) kdbsoft
  */
 
 class ControllerCheckoutDockercartCheckout extends Controller

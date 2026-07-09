@@ -15,7 +15,7 @@
   &nbsp;
   <a href="https://demo.dockercart.net"><img src="https://img.shields.io/badge/Live%20Demo-6366f1?style=flat-square&logo=google-chrome&logoColor=white" alt="Live Demo"></a>
   &nbsp;
-  <a href="https://github.com/mathflow-bit/dockercart/issues"><img src="https://img.shields.io/badge/Issues-6366f1?style=flat-square&logo=github&logoColor=white" alt="Issues"></a>
+  <a href="https://github.com/kdbsoft/dockercart/issues"><img src="https://img.shields.io/badge/Issues-6366f1?style=flat-square&logo=github&logoColor=white" alt="Issues"></a>
 </p>
 
 <p align="center">
@@ -43,7 +43,7 @@ No web installer. No `/install` directory. No manual config. Just `make up` and 
 ## 🚀 Quick Start
 
 ```bash
-git clone https://github.com/mathflow-bit/dockercart.git
+git clone https://github.com/kdbsoft/dockercart.git
 cd dockercart
 cp .env.example .env
 make up
@@ -167,7 +167,7 @@ Full reference → [`docs/guide.md`](docs/guide.md#3-configuration)
 | 🖥️ | Live demo | [demo.dockercart.net](https://demo.dockercart.net) |
 | 🛒 | Add-ons store | [store.dockercart.net](https://store.dockercart.net) |
 | 🔄 | Core updates (`make update`) | [`docs/guide.md`](docs/guide.md#9-core-updates) |
-| 🐛 | Issues | [GitHub Issues](https://github.com/mathflow-bit/dockercart/issues) |
+| 🐛 | Issues | [GitHub Issues](https://github.com/kdbsoft/dockercart/issues) |
 | 🔒 | Security policy | [`SECURITY.md`](SECURITY.md) |
 
 ---
