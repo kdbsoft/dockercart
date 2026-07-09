@@ -566,7 +566,9 @@ if [ "$DOCKERCART_ROLE" = "backup" ]; then
     ensure_app_configs
     wait_for_mysql
     apply_php_settings
-    mkdir -p /var/www/storage/backup
+mkdir -p /var/www/storage/backup
+mkdir -p /var/www/storage/upload
+chown -R www-data:staff /var/www/storage/upload/ || true
     ensure_rclone_config
     echo "Starting DockerCart backup worker..."
     exec php /var/www/html/bin/dockercart_backup_s3.php "$@"
