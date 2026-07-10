@@ -81,25 +81,116 @@ body, button, input, select, textarea { font-family: 'Manrope', sans-serif; }
 }
 
 /* ── Category dropdown hover ──────────────────────────────── */
-.dc-cat-item { position: relative; }
-.dc-cat-dropdown {
-  visibility: hidden;
-  opacity: 0;
-  pointer-events: none;
+.dc-cat-item {
+  position: relative;
+}
+
+/* ── Dropdown portal (outside scroll container) ──────────── */
+.dc-dd-portal {
   position: absolute;
   top: 100%;
   left: 0;
-  min-width: 240px;
+  z-index: 100;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
   transform: translateY(6px);
   transition: opacity 0.18s ease, transform 0.18s ease, visibility 0s linear 0.18s;
-  max-width: calc(100vw - 32px);
 }
-.dc-cat-item:hover > .dc-cat-dropdown {
+.dc-dd-portal.is-open {
   visibility: visible;
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0);
   transition: opacity 0.18s ease, transform 0.18s ease, visibility 0s linear 0s;
+}
+
+.dc-cat-dropdown {
+  min-width: 240px;
+  max-width: calc(100vw - 32px);
+}
+
+/* ── Horizontal nav: scroll + fade edges ──────────────────── */
+.dc-hnav-scroll {
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  box-sizing: border-box;
+}
+.dc-hnav-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.dc-hnav-fade {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  z-index: 2;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  opacity: 0;
+}
+.dc-hnav-fade.is-visible {
+  opacity: 1;
+}
+.dc-hnav-fade-left {
+  left: 16px;
+  background: linear-gradient(to right, #fff 30%, transparent);
+}
+.dc-hnav-fade-right {
+  right: 16px;
+  background: linear-gradient(to left, #fff 30%, transparent);
+}
+
+.dc-hnav-accents {
+  position: absolute;
+  right: 16px;
+  top: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  z-index: 3;
+  padding-left: 12px;
+  background: linear-gradient(to right, transparent, #fff 8px);
+}
+
+/* ── Horizontal nav scroll buttons ────────────────────────── */
+.dc-hnav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.92);
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.15s;
+  color: #6b7280;
+}
+.dc-hnav-btn:hover {
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  color: #374151;
+}
+.dc-hnav-btn.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+.dc-hnav-btn-left {
+  left: 4px;
+}
+.dc-hnav-btn-right {
+  right: 4px;
 }
 
 /* ── Horizontal mega-menu: inline 3-level layout ──────────── */
