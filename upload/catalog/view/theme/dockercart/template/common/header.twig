@@ -698,4 +698,103 @@ document.addEventListener('DOMContentLoaded', function () {
 
   setupVerticalCatalogMenu();
 });
+
+/* ── Horizontal nav — scroll, buttons, dropdown portals ────── */
+document.addEventListener('DOMContentLoaded', function () {
+  var wrap = document.getElementById('dc-hnav-wrap');
+  var scrollEl = document.getElementById('dc-hnav-scroll');
+  var fadeLeft = document.getElementById('dc-hnav-fade-left');
+  var fadeRight = document.getElementById('dc-hnav-fade-right');
+  var btnLeft = document.getElementById('dc-hnav-btn-left');
+  var btnRight = document.getElementById('dc-hnav-btn-right');
+  if (!scrollEl || !wrap) return;
+
+  // ── Fade / button visibility ──
+  function updateEdgeIndicators() {
+    var atLeft = scrollEl.scrollLeft <= 0;
+    var atRight = scrollEl.scrollLeft >= scrollEl.scrollWidth - scrollEl.offsetWidth;
+    fadeLeft && fadeLeft.classList.toggle('is-visible', !atLeft);
+    fadeRight && fadeRight.classList.toggle('is-visible', !atRight);
+    btnLeft && btnLeft.classList.toggle('is-visible', !atLeft);
+    btnRight && btnRight.classList.toggle('is-visible', !atRight);
+  }
+
+  // ── Keep scrollable area clear of accent links ──
+  function syncAccentPadding() {
+    var acc = wrap.querySelector('.dc-hnav-accents');
+    if (!acc) return;
+    var nr = scrollEl.getBoundingClientRect();
+    var ar = acc.getBoundingClientRect();
+    scrollEl.style.paddingRight = Math.max(0, Math.round(nr.right - ar.left)) + 'px';
+    updateEdgeIndicators();
+  }
+
+  syncAccentPadding();
+  scrollEl.addEventListener('scroll', updateEdgeIndicators);
+  window.addEventListener('resize', syncAccentPadding);
+
+  btnLeft && btnLeft.addEventListener('click', function () {
+    scrollEl.scrollBy({ left: -300, behavior: 'smooth' });
+  });
+  btnRight && btnRight.addEventListener('click', function () {
+    scrollEl.scrollBy({ left: 300, behavior: 'smooth' });
+  });
+
+  // ── Dropdown portals ──
+  var activePortal = null;
+  var closeTimer = null;
+
+  function posPortal(portal, item) {
+    var wrapRect = wrap.getBoundingClientRect();
+    var left = item.getBoundingClientRect().left - wrapRect.left;
+    var portalW = portal.offsetWidth || 240;
+    var maxLeft = wrap.offsetWidth - portalW - 16;
+    portal.style.left = Math.max(0, Math.min(left, maxLeft)) + 'px';
+  }
+
+  function openPortal(idx, item) {
+    if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+    var portal = document.querySelector('.dc-dd-portal[data-dc-cat-portal="' + idx + '"]');
+    if (!portal) return;
+    if (activePortal && activePortal !== portal) activePortal.classList.remove('is-open');
+    posPortal(portal, item);
+    portal.classList.add('is-open');
+    activePortal = portal;
+  }
+
+  function scheduleClose() {
+    if (closeTimer) clearTimeout(closeTimer);
+    closeTimer = setTimeout(function () {
+      if (activePortal) { activePortal.classList.remove('is-open'); activePortal = null; }
+    }, 120);
+  }
+
+  // Hover on nav items
+  scrollEl.addEventListener('mouseover', function (e) {
+    var item = e.target.closest('.dc-cat-item.has-children[data-dc-cat-idx]');
+    if (item) openPortal(item.getAttribute('data-dc-cat-idx'), item);
+  });
+
+  scrollEl.addEventListener('mouseleave', function () { scheduleClose(); });
+
+  // Hover on portal cancels close; leave portal schedules close
+  wrap.addEventListener('mouseover', function (e) {
+    if (e.target.closest('.dc-dd-portal') && closeTimer) {
+      clearTimeout(closeTimer); closeTimer = null;
+    }
+  });
+
+  wrap.addEventListener('mouseleave', function (e) {
+    if (!e.relatedTarget || !wrap.contains(e.relatedTarget)) scheduleClose();
+  });
+
+  // Reposition portal on scroll
+  scrollEl.addEventListener('scroll', function () {
+    if (activePortal) {
+      var idx = activePortal.getAttribute('data-dc-cat-portal');
+      var item = scrollEl.querySelector('.dc-cat-item[data-dc-cat-idx="' + idx + '"]');
+      if (item) posPortal(activePortal, item);
+    }
+  });
+});
 </script>
