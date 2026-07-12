@@ -283,18 +283,18 @@ $(document).ready(function() {
 	fmBindEvents();
 });
 
-$('#button-parent').on('click', function(e) {
+// Delegated on #modal-image so it survives partial content replacement
+$('#modal-image').off('click', '#button-parent').on('click', '#button-parent', function(e) {
 	e.preventDefault();
 	fmLoadMain($(this).attr('href'));
 });
 
-$('#button-refresh').on('click', function(e) {
+$('#modal-image').off('click', '#button-refresh').on('click', '#button-refresh', function(e) {
 	e.preventDefault();
 	fmReloadFull($(this).attr('href'));
 });
-//--></script>
-<script type="text/javascript"><!--
-$('#modal-image #button-delete').on('click', function(e) {
+
+$('#modal-image').off('click', '#button-delete').on('click', '#button-delete', function(e) {
 	if (confirm('{{ text_confirm }}')) {
 		$.ajax({
 			url: 'index.php?route=common/filemanager/delete&user_token={{ user_token }}',
@@ -311,7 +311,6 @@ $('#modal-image #button-delete').on('click', function(e) {
 				if (json['error']) {
 					alert(json['error']);
 				}
-
 				if (json['success']) {
 					alert(json['success']);
 					$('#button-refresh').trigger('click');
@@ -334,14 +333,14 @@ function fmToggleBranch($el) {
 	$li.find('> .tree-item .tree-folder-icon').toggleClass('fa-folder fa-folder-open');
 }
 
-$('.sidebar-tree').on('click', '.tree-toggle, .tree-folder-icon', function(e) {
+$('.sidebar-tree').off('click', '.tree-toggle, .tree-folder-icon').on('click', '.tree-toggle, .tree-folder-icon', function(e) {
 	e.preventDefault();
 	e.stopPropagation();
 	fmToggleBranch($(this));
 });
 
 // Directory tree: navigate on row click (entire .tree-item is clickable)
-$('.sidebar-tree').on('click', '.tree-item', function(e) {
+$('.sidebar-tree').off('click', '.tree-item').on('click', '.tree-item', function(e) {
 	if ($(e.target).closest('.tree-toggle, .tree-folder-icon').length) return;
 	e.preventDefault();
 	fmLoadMain(fmBuildUrl($(this).data('directory') || '', ''));
@@ -359,7 +358,7 @@ function fmApplySize() {
 	} catch(e) {}
 }
 
-$('#modal-image').on('input', '.fm-size-slider', function() {
+$('#modal-image').off('input', '.fm-size-slider').on('input', '.fm-size-slider', function() {
 	var size = parseInt($(this).val());
 	$('.filemanager-grid').css('--thumb-size', size + 'px');
 	$('.fm-size-preset').removeClass('active');
@@ -367,7 +366,7 @@ $('#modal-image').on('input', '.fm-size-slider', function() {
 	try { sessionStorage.setItem('fm_thumb_size', size); } catch(e) {}
 });
 
-$('#modal-image').on('click', '.fm-size-preset', function() {
+$('#modal-image').off('click', '.fm-size-preset').on('click', '.fm-size-preset', function() {
 	var size = parseInt($(this).data('size'));
 	$('.filemanager-grid').css('--thumb-size', size + 'px');
 	$('.fm-size-slider').val(size);
