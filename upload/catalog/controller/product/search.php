@@ -846,4 +846,38 @@ class ControllerProductSearch extends Controller {
 			'total' => $product_total,
 		)));
 	}
+
+	public function log() {
+		$json = ['success' => false];
+
+		if (isset($this->request->get['search']) && $this->config->get('config_customer_search')) {
+			$search = html_entity_decode(html_entity_decode(trim((string)$this->request->get['search']), ENT_QUOTES, 'UTF-8'), ENT_QUOTES, 'UTF-8');
+
+			if ($search === '') {
+				$this->response->addHeader('Content-Type: application/json');
+				$this->response->setOutput(json_encode($json));
+				return;
+			}
+
+			$this->load->model('account/search');
+
+			$customer_id = $this->customer->isLogged() ? $this->customer->getId() : 0;
+			$ip = $this->request->server['REMOTE_ADDR'] ?? '';
+
+			$this->model_account_search->addSearch([
+				'keyword'      => $search,
+				'category_id'  => (int)($this->request->get['category_id'] ?? 0),
+				'sub_category' => (int)($this->request->get['sub_category'] ?? 0),
+				'description'  => (int)($this->request->get['description'] ?? 0),
+				'products'     => (int)($this->request->get['products'] ?? 0),
+				'customer_id'  => $customer_id,
+				'ip'           => $ip
+			]);
+
+			$json['success'] = true;
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
 }

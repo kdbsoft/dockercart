@@ -86,14 +86,15 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
             }
 
             $json[] = [
-                'type'       => 'product',
-                'product_id' => $result['product_id'],
-                'name'       => strip_tags(html_entity_decode($result['name'], ENT_QUOTES, 'UTF-8')),
-                'model'      => $result['model'] ?? '',
-                'image'      => $image,
-                'price'      => $price,
-                'special'    => $special,
-                'href'       => $this->url->link('product/product', 'product_id=' . $result['product_id'])
+                'type'        => 'product',
+                'product_id'  => $result['product_id'],
+                'category_id' => (int)($result['category_id'] ?? 0),
+                'name'        => strip_tags(html_entity_decode($result['name'], ENT_QUOTES, 'UTF-8')),
+                'model'       => $result['model'] ?? '',
+                'image'       => $image,
+                'price'       => $price,
+                'special'     => $special,
+                'href'        => $this->url->link('product/product', 'product_id=' . $result['product_id'])
             ];
         }
 
@@ -103,9 +104,10 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
 
             foreach ($category_results as $cat) {
                 $json[] = [
-                    'type' => 'category',
-                    'name' => strip_tags(html_entity_decode($cat['name'], ENT_QUOTES, 'UTF-8')),
-                    'href' => $this->url->link('product/category', 'path=' . (int)$cat['category_id'])
+                    'type'        => 'category',
+                    'category_id' => (int)$cat['category_id'],
+                    'name'        => strip_tags(html_entity_decode($cat['name'], ENT_QUOTES, 'UTF-8')),
+                    'href'        => $this->url->link('product/category', 'path=' . (int)$cat['category_id'])
                 ];
             }
         }
