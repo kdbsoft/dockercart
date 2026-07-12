@@ -38,6 +38,9 @@ class ControllerCommonFileManager extends Controller {
 
 		$this->load->model('tool/image');
 
+		// Build directory tree for the sidebar
+		$data['directory_tree'] = $this->getDirectoryTree();
+
 		if (substr(str_replace('\\', '/', realpath($directory) . '/' . $filter_name), 0, strlen(DIR_IMAGE . 'catalog')) == str_replace('\\', '/', DIR_IMAGE . 'catalog')) {
 			// Get directories
 			$directories = glob($directory . '/' . $filter_name . '*', GLOB_ONLYDIR);
@@ -475,6 +478,29 @@ class ControllerCommonFileManager extends Controller {
 
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
+	}
+
+	private function getDirectoryTree(?string $path = null): array {
+		if ($path === null) {
+			$path = DIR_IMAGE . 'catalog';
+		}
+
+		$result = array();
+		$directories = glob($path . '/*', GLOB_ONLYDIR);
+
+		if ($directories) {
+			natsort($directories);
+
+			foreach ($directories as $dir) {
+				$result[] = array(
+					'name'     => basename($dir),
+					'path'     => utf8_substr($dir, utf8_strlen(DIR_IMAGE . 'catalog/')),
+					'children' => $this->getDirectoryTree($dir)
+				);
+			}
+		}
+
+		return $result;
 	}
 
 	private function isProtected(string $path): bool {

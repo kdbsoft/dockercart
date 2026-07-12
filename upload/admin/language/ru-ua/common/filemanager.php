@@ -1,5 +1,12 @@
 <?php
 
+$_['text_navigation'] = 'Навигация';
+$_['text_directories'] = 'Директории';
+$_['text_size'] = 'Размер миниатюр';
+$_['text_size_small'] = 'М';
+$_['text_size_medium'] = 'С';
+$_['text_size_large'] = 'Б';
+
 $_['entry_folder'] = 'Название папки';
 $_['entry_search'] = 'Поиск..';
 $_['error_delete'] = 'Внимание: Вы не можете удалить эту директорию!';
