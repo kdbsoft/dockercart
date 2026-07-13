@@ -87,6 +87,47 @@ class ControllerCommonHeader extends Controller {
 					'href' => $result['url']
 				);
 			}
+
+			// Languages
+			$this->load->model('localisation/language');
+
+			$all_languages = $this->model_localisation_language->getLanguages();
+
+			$current_language_code = isset($this->session->data['language']) ? $this->session->data['language'] : $this->config->get('config_admin_language');
+
+			$route = isset($this->request->get['route']) ? $this->request->get['route'] : 'common/dashboard';
+
+			$url_params = 'user_token=' . $this->session->data['user_token'];
+
+			$ignored = array('route', 'user_token', 'language');
+
+			foreach ($this->request->get as $key => $value) {
+				if (!in_array($key, $ignored)) {
+					if (is_array($value)) {
+						foreach ($value as $vk => $vv) {
+							$url_params .= '&' . $key . '[' . $vk . ']=' . $vv;
+						}
+					} else {
+						$url_params .= '&' . $key . '=' . $value;
+					}
+				}
+			}
+
+			$data['languages'] = array();
+
+			foreach ($all_languages as $code => $language) {
+				if (!$language['status']) {
+					continue;
+				}
+
+				$data['languages'][] = array(
+					'name' => $language['name'],
+					'code' => $language['code'],
+					'href' => $this->url->link($route, $url_params . '&language=' . $language['code'], true)
+				);
+			}
+
+			$data['current_language_code'] = $current_language_code;
 		}
 
 		$store_language_id = (int)$this->config->get('config_language_id');
