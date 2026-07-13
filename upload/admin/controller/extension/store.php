@@ -203,17 +203,14 @@ class ControllerExtensionStore extends Controller {
 					$params = array();
 					$yml_changelog = '';
 
+					if (isset($offer->changelog)) {
+						$yml_changelog = strip_tags((string) $offer->changelog, '<p><br><strong><em><b><i><u><ul><ol><li><a><code><pre><blockquote><h1><h2><h3><h4>');
+					}
+
 					foreach ($offer->param as $param) {
-						$code = (string) $param['code'];
-
-						if ($code === 'changelog') {
-							$yml_changelog = strip_tags((string) $param, '<p><br><strong><em><b><i><u><ul><ol><li><a><code><pre><blockquote><h1><h2><h3><h4>');
-							continue;
-						}
-
 						$params[] = array(
 							'name' => (string) $param['name'],
-							'code' => $code,
+							'code' => (string) $param['code'],
 							'value' => (string) $param,
 						);
 					}
