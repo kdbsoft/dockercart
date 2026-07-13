@@ -113,7 +113,7 @@ class ControllerCommonColumnLeft extends Controller {
 
 			// Import (populated by events)
 			$catalog[] = array(
-				'name'     => 'Import',
+				'name'     => $this->language->get('text_import'),
 				'href'     => '',
 				'children' => array()
 			);
@@ -136,7 +136,7 @@ class ControllerCommonColumnLeft extends Controller {
 
 			if ($feeds) {
 				$catalog[] = array(
-					'name'     => 'Feeds',
+					'name'     => $this->language->get('text_feed'),
 					'href'     => '',
 					'children' => $feeds
 				);
@@ -634,13 +634,15 @@ class ControllerCommonColumnLeft extends Controller {
 			}
 
 			// Scheduler
-			$system[] = array(
-				'id'       => 'menu-scheduler',
-				'icon'	   => 'fa-clock-o',
-				'name'	   => 'Scheduler',
-				'href'     => $this->url->link('tool/dockercart_scheduler', 'user_token=' . $this->session->data['user_token'], true),
-				'children' => array()
-			);
+			if ($this->user->hasPermission('access', 'tool/dockercart_scheduler')) {
+				$system[] = array(
+					'id'       => 'menu-scheduler',
+					'icon'	   => 'fa-clock-o',
+					'name'	   => $this->language->get('text_scheduler'),
+					'href'     => $this->url->link('tool/dockercart_scheduler', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
 
 			// Reports
 			if ($this->user->hasPermission('access', 'report/report')) {
