@@ -371,7 +371,7 @@ $(document).ready(function() {
 			}
 
 			if (data.update_changelog) {
-				var updateHtml = '<div class="store-changelog-title">{{ text_whats_new|escape('js') }}</div>';
+				var updateHtml = '<div class="store-changelog-title">{{ text_whats_new|escape('js') }} ' + data.version + '</div>';
 				updateHtml += data.update_changelog;
 				$modalUpdateChangelog.html(updateHtml).show();
 			}
