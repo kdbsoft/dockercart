@@ -54,9 +54,7 @@ jobs:
           restore-keys: phpstan-
 
       - name: Install PHPStan
-        run: |
-          composer require --dev --no-interaction phpstan/phpstan:2.1.51
-          composer dump-autoload
+        run: composer install --no-interaction
 
       - name: Run PHPStan
         run: ./storage/vendor/bin/phpstan analyze -a ./storage/vendor/autoload.php --no-progress --memory-limit=512M
@@ -84,7 +82,7 @@ jobs:
           restore-keys: cs-fixer-${{ runner.os }}-
 
       - name: Install PHP-CS-Fixer
-        run: composer require --dev --no-interaction -w friendsofphp/php-cs-fixer v3.95.1
+        run: composer require --dev --no-interaction -w php-cs-fixer/shim ^3.95
 
       - name: Run PHP-CS-Fixer
         run: |
