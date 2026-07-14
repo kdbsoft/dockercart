@@ -157,6 +157,10 @@ class DockercartInstallHelper {
 			} else {
 				$parent = dirname($dest);
 
+				while ($parent !== '/' && !is_dir($parent)) {
+					$parent = dirname($parent);
+				}
+
 				if (!is_dir($parent) || !is_writable($parent)) {
 					$not_writable[] = $parts[0] . '/' . $parts[1];
 				}
