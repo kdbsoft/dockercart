@@ -1,3 +1,9 @@
+## [2.0.4](https://github.com/kdbsoft/dockercart/compare/v2.0.3...v2.0.4) (2026-07-14)
+
+### Bug Fixes
+
+* **ci:** fix RegistryPropertyReflectionExtension bugs and ignore propertyReadOnly ([c6651d1](https://github.com/kdbsoft/dockercart/commit/c6651d1cc8b25de65b5e42f0d8d23f1a18b535ea))
+
 ## [2.0.3](https://github.com/kdbsoft/dockercart/compare/v2.0.2...v2.0.3) (2026-07-14)
 
 ### Bug Fixes
