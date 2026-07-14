@@ -157,7 +157,7 @@ Full reference → [`docs/guide.md`](docs/guide.md#3-configuration)
 ## 📚 Resources
 
 | Resource | Link |
-|---|---|---|
+|---|---|
 | Developer guide | [`docs/guide.md`](docs/guide.md) |
 | Capabilities | [dockercart.net/capabilities](https://dockercart.net/capabilities) |
 | Changelog | [dockercart.net/changelog](https://dockercart.net/changelog) |
