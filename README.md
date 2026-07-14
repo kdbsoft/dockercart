@@ -1,6 +1,6 @@
 # 🛒 DockerCart
 
-> ### ⚡ Zero to production store in 60 seconds
+> ### ⚡ Production-ready store in 15 minutes
 
 <p align="center">
   <img src="upload/image/dockercart_preview.png" alt="DockerCart Preview" width="800">
@@ -156,16 +156,16 @@ Full reference → [`docs/guide.md`](docs/guide.md#3-configuration)
 
 ## 📚 Resources
 
-| | Resource | Link |
+| Resource | Link |
 |---|---|---|
-| | Developer guide | [`docs/guide.md`](docs/guide.md) |
-| | Capabilities | [dockercart.net/capabilities](https://dockercart.net/capabilities) |
-| | Changelog | [dockercart.net/changelog](https://dockercart.net/changelog) |
-| | Live demo | [demo.dockercart.net](https://demo.dockercart.net) |
-| | Add-ons store | [store.dockercart.net](https://store.dockercart.net) |
-| | Core updates (`make update`) | [`docs/guide.md`](docs/guide.md#9-core-updates) |
-| | Issues | [GitHub Issues](https://github.com/kdbsoft/dockercart/issues) |
-| | Security policy | [`SECURITY.md`](SECURITY.md) |
+| Developer guide | [`docs/guide.md`](docs/guide.md) |
+| Capabilities | [dockercart.net/capabilities](https://dockercart.net/capabilities) |
+| Changelog | [dockercart.net/changelog](https://dockercart.net/changelog) |
+| Live demo | [demo.dockercart.net](https://demo.dockercart.net) |
+| Add-ons store | [store.dockercart.net](https://store.dockercart.net) |
+| Core updates (`make update`) | [`docs/guide.md`](docs/guide.md#9-core-updates) |
+| Issues | [GitHub Issues](https://github.com/kdbsoft/dockercart/issues) |
+| Security policy | [`SECURITY.md`](SECURITY.md) |
 
 ---
 
