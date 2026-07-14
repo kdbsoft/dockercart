@@ -324,26 +324,16 @@ $('#modal-image').off('click', '#button-delete').on('click', '#button-delete', f
 });
 //--></script>
 <script type="text/javascript"><!--
-// Directory tree: expand/collapse (delegated — sidebar stays across partial loads)
-function fmToggleBranch($el) {
-	var $li = $el.closest('li');
-	if (!$li.find('> ul').length) return;
-	$li.toggleClass('expanded');
-	$li.find('> .tree-item .tree-toggle').toggleClass('fa-chevron-right fa-chevron-down');
-	$li.find('> .tree-item .tree-folder-icon').toggleClass('fa-folder fa-folder-open');
-}
-
-$('.sidebar-tree').off('click', '.tree-toggle, .tree-folder-icon').on('click', '.tree-toggle, .tree-folder-icon', function(e) {
-	e.preventDefault();
-	e.stopPropagation();
-	fmToggleBranch($(this));
-});
-
 // Directory tree: navigate on row click (entire .tree-item is clickable)
 $('.sidebar-tree').off('click', '.tree-item').on('click', '.tree-item', function(e) {
-	if ($(e.target).closest('.tree-toggle, .tree-folder-icon').length) return;
 	e.preventDefault();
-	fmLoadMain(fmBuildUrl($(this).data('directory') || '', ''));
+	var directory = $(this).data('directory') || '';
+	if ($(this).closest('li').hasClass('expanded')) {
+		var parentDirectory = directory.substring(0, directory.lastIndexOf('/'));
+		fmLoadMain(fmBuildUrl(parentDirectory, ''));
+	} else {
+		fmLoadMain(fmBuildUrl(directory, ''));
+	}
 });
 
 // Thumbnail size slider (delegated on #modal-image so it survives partial content replacement)
