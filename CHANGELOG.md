@@ -1,3 +1,10 @@
+## [2.0.2](https://github.com/kdbsoft/dockercart/compare/v2.0.1...v2.0.2) (2026-07-14)
+
+### Bug Fixes
+
+* **ci:** mark config.php paths as optional in phpstan.neon ([613e371](https://github.com/kdbsoft/dockercart/commit/613e371c0a2c01334f57fbdc7349d10be8e54c6f))
+* **ci:** update Lint workflow for php-cs-fixer/shim ([ee79d0f](https://github.com/kdbsoft/dockercart/commit/ee79d0f302d6395de150172bc0889128f9d02617))
+
 ## [2.0.1](https://github.com/kdbsoft/dockercart/compare/v2.0.0...v2.0.1) (2026-07-14)
 
 ### Bug Fixes
