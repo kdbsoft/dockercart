@@ -1,3 +1,88 @@
+## [1.48.0](https://github.com/kdbsoft/dockercart/compare/v1.47.7...v1.48.0) (2026-07-14)
+
+### ⚠ BREAKING CHANGES
+
+* Remove Memcached cache engine support
+* switch default deployment mode to standalone
+
+### Features
+
+* add auto sync schedule and refactor sync CLI ([a3297c7](https://github.com/kdbsoft/dockercart/commit/a3297c79f54d9e916bb606bb00f1e52b6d5f9c37))
+* add dev tooling, tests, and documentation ([f3a2b41](https://github.com/kdbsoft/dockercart/commit/f3a2b41d828ec8ef9af5080da89aa52f586584a3))
+* add directory tree sidebar and thumbnail size controls ([47e11aa](https://github.com/kdbsoft/dockercart/commit/47e11aa5f001921a0e801f4f581b71d7d7c86365))
+* add DISALLOW_INDEXING env var to block crawlers ([c6c57a6](https://github.com/kdbsoft/dockercart/commit/c6c57a62c36c32eff34764b6fdb2588fdb7f98cc))
+* add Facebook Pixel analytics extension ([16e9723](https://github.com/kdbsoft/dockercart/commit/16e97235915350b3fcd620abb47c028ffaff74b7))
+* add GDPR/CCPA privacy consent module ([2b4d8fc](https://github.com/kdbsoft/dockercart/commit/2b4d8fce26554f774359298d2d3ad0e6b9033f83))
+* add Import/Feeds submenus to Catalog sidebar ([c5b8048](https://github.com/kdbsoft/dockercart/commit/c5b80482917d40d0b06b24822af71ff7af742487))
+* add language switcher to admin header ([4d85fb5](https://github.com/kdbsoft/dockercart/commit/4d85fb5371699fa94793e713f6ba1f09ab37af7f))
+* add license verification to extension store ([86245f7](https://github.com/kdbsoft/dockercart/commit/86245f75efb3141382ac4d5d363963f2502fdfb0))
+* add licensing framework and migrations ([7fda79a](https://github.com/kdbsoft/dockercart/commit/7fda79ac3ef236499787e2209c209955de95a9c5))
+* add log rotation with cron and logrotate ([7c30b97](https://github.com/kdbsoft/dockercart/commit/7c30b97ec8feab3e75bc00e34b4bf7d373aec530))
+* add logo support for shipping extensions ([3c48df4](https://github.com/kdbsoft/dockercart/commit/3c48df4be05f6929708a7da73b12ff507bb88628))
+* add math slider captcha module ([2c3ab99](https://github.com/kdbsoft/dockercart/commit/2c3ab99d5ca4a386f6760fe3cb0d0685b0bcf5f5))
+* add Microsoft Clarity analytics extension ([450cfce](https://github.com/kdbsoft/dockercart/commit/450cfce14bf3054364b3b519507d25af886dbf41))
+* add optional S3 backup worker ([ecc7a11](https://github.com/kdbsoft/dockercart/commit/ecc7a116ad14489c1ee2561c8eee365d1b43d733))
+* add per-profile cron scheduling to feed modules ([0d65273](https://github.com/kdbsoft/dockercart/commit/0d65273fb94ca4c0cc72210d5b6061261d687b15))
+* add reset and view-all for customer activity ([28b4615](https://github.com/kdbsoft/dockercart/commit/28b4615d7cb66df4e2200fb474a98beea961371b))
+* add scheduled sitemap generation ([a95de8b](https://github.com/kdbsoft/dockercart/commit/a95de8b7eb8c6084d899cb0183265e04f66b6d50))
+* add token authentication to healthcheck ([6514375](https://github.com/kdbsoft/dockercart/commit/6514375c8bf5ee8ecf83b5e9c13b047214b37be7))
+* add universal scheduler and admin UI ([5432681](https://github.com/kdbsoft/dockercart/commit/543268187e65762b3ca48a7fe1ba201ef0d48a0b))
+* add upload storage dir for backup role ([8b40c1e](https://github.com/kdbsoft/dockercart/commit/8b40c1e809573d05c1c747fc49b34d3a50e142b8))
+* add vendor JS/CSS assets for admin and catalog ([0dd2a14](https://github.com/kdbsoft/dockercart/commit/0dd2a14d1a5253110b4dd17280cced6cc706491c))
+* Add writability check to extension store installer ([8fc7d28](https://github.com/kdbsoft/dockercart/commit/8fc7d2845e46d902ecf22d17f83cdab04c18e97e))
+* **admin:** add extension store ([4ce68d5](https://github.com/kdbsoft/dockercart/commit/4ce68d5b6f7012360777d1b6b36f8fe641315db7))
+* allow manual license key entry for store extensions ([e844f97](https://github.com/kdbsoft/dockercart/commit/e844f97d450f5be8973038cb5e39442174a10c4c))
+* bundle vendor deps and generate robots.txt ([2d61982](https://github.com/kdbsoft/dockercart/commit/2d61982faa1dbb22b19d512ea618d516f5aed59c))
+* check file writability before overwriting ([5c51794](https://github.com/kdbsoft/dockercart/commit/5c517948d427bce822a6aac3d8882f300c979a92))
+* convert sitemap feed to CLI and scheduler ([5f6b85c](https://github.com/kdbsoft/dockercart/commit/5f6b85c5351fe07c5659bd52bd0530ad850d3214))
+* integrate dockercart_gdpr module ([1090361](https://github.com/kdbsoft/dockercart/commit/10903619db70b263a9dbdfffcaca7fc621bd0151))
+* license system WIP ([a3142e6](https://github.com/kdbsoft/dockercart/commit/a3142e60d2c8ac597123e1e167a22d833c2c1df1))
+* localize admin menu items ([b9d6bef](https://github.com/kdbsoft/dockercart/commit/b9d6bef942f29aa2e1c76dc65e313458f2e13c49))
+* log search queries on autocomplete click ([cc006c9](https://github.com/kdbsoft/dockercart/commit/cc006c92eb1d533026bcd6bff6c121078110d968))
+* make license key optional for module install ([ff3c67e](https://github.com/kdbsoft/dockercart/commit/ff3c67e12dd493cc086b75104a66b8523dab7c65))
+* make timezone configurable via TZ env var ([9f875d5](https://github.com/kdbsoft/dockercart/commit/9f875d51f6f98c30bbfa11f36a50b2ed24bced9e))
+* migrate import/export cron to CLI runner ([478a8a1](https://github.com/kdbsoft/dockercart/commit/478a8a1ae21831e84677b365678d8ed4d0e0a41c))
+* remove built-in Google Base feed module ([2832c53](https://github.com/kdbsoft/dockercart/commit/2832c53aab64dec11d4b1724a704b3c651179a77))
+* remove Fixer Currency Converter extension ([33e8495](https://github.com/kdbsoft/dockercart/commit/33e8495e5d7e10fdde01ca05cce5dacab59baa6f))
+* remove Google Shopping extension ([dd721d8](https://github.com/kdbsoft/dockercart/commit/dd721d850517d8316f0dbe22f24ee3773e952f9a))
+* remove license verification from sitemap module ([cfb9e9e](https://github.com/kdbsoft/dockercart/commit/cfb9e9ee7b404890656cc1ec557296f86369706f))
+* Remove Memcached cache engine support ([0d0db3a](https://github.com/kdbsoft/dockercart/commit/0d0db3a203703ac53c2e0e9efe5732133f63e7cc))
+* **store:** display changelog in extension details modal ([ca55dae](https://github.com/kdbsoft/dockercart/commit/ca55dae9e3485395039d635273c27ede20169ba2))
+* Sync store URL from env to database ([ccd8d64](https://github.com/kdbsoft/dockercart/commit/ccd8d64290c9bf615a0bba251d2bc233e7a04e0d))
+* use DockercartLicensing, update modules ([ff75429](https://github.com/kdbsoft/dockercart/commit/ff75429bf559c31b00f5672212bd8754b4fccce8))
+* use scheduler for YML feed generation ([d154ea6](https://github.com/kdbsoft/dockercart/commit/d154ea6d6ea1970dfc67e1c932b6273701453ad8))
+
+### Bug Fixes
+
+* add approval buttons and messages ([f6c51a3](https://github.com/kdbsoft/dockercart/commit/f6c51a3b9cf6169031d3f5ae645204dcece16613))
+* add heading styles for store modal description ([63ac6fb](https://github.com/kdbsoft/dockercart/commit/63ac6fbef377cc712c5a350aab6f4660bac5c7a9))
+* banner grid layout and slideshow styles ([c041d02](https://github.com/kdbsoft/dockercart/commit/c041d021067c83a0bb53542b7068c3034883c1c4))
+* correct ru-ua translation for 'disabled' ([2490f1b](https://github.com/kdbsoft/dockercart/commit/2490f1be00ba2c6c8fef37e979d1bbdcba50c5e4))
+* exclude zero-status orders from chart queries ([939c6f2](https://github.com/kdbsoft/dockercart/commit/939c6f2b8ad3fb83e472774d4ccfbfe6040670ff))
+* **export_yml:** remove .htaccess fallback generation ([5a083b1](https://github.com/kdbsoft/dockercart/commit/5a083b183ef6f7ec764b49ac5dbd370c397208c1))
+* handle empty currency symbol in chart ([fdc728b](https://github.com/kdbsoft/dockercart/commit/fdc728bee63ed15da40bd35e4b6e64c4c7478b92))
+* hide zero-price option values on product page ([0601193](https://github.com/kdbsoft/dockercart/commit/0601193e05d19bee236098af240d30690069305e))
+* prevent undefined index in blog comment view ([e835b47](https://github.com/kdbsoft/dockercart/commit/e835b475f2a36540216a117e39057e0371dee17e))
+* prevent uninstall of active modules ([a12fefa](https://github.com/kdbsoft/dockercart/commit/a12fefaa37f618b8cc8505eb4710b80531ca01aa))
+* purge extension install records and data ([ec4efa5](https://github.com/kdbsoft/dockercart/commit/ec4efa59289689b4a35dc5a104c65bd9d3ae4ef6))
+* remove redundant clean dependency on down ([352d5dc](https://github.com/kdbsoft/dockercart/commit/352d5dcf9f13f7039e9808aa39e7c263dee8e39e))
+* reorder unignore rules for image files ([4bfa7b6](https://github.com/kdbsoft/dockercart/commit/4bfa7b61596aff246b00b410deefdca1d0d8923f))
+* replace rename with copy+unlink in extension install ([b3ddbf6](https://github.com/kdbsoft/dockercart/commit/b3ddbf687d919c014f3e72bd99084421cace0b13))
+* reset viewed product cache and detail table ([c66bdd5](https://github.com/kdbsoft/dockercart/commit/c66bdd546621808b43395389575d7ead8cab1a47))
+* reverse extension install order and date format ([65e8a57](https://github.com/kdbsoft/dockercart/commit/65e8a57e122cc5d0a831f129912ede20feb0868a))
+* revise currency refresh schedule and seed data ([11c0f96](https://github.com/kdbsoft/dockercart/commit/11c0f9623092d9f20ba3063e29fc62585607e951))
+* scope curl resolve to developer domain ([a8bf1d4](https://github.com/kdbsoft/dockercart/commit/a8bf1d4ba9b8104f31e7f97b87f201fb08a4a3ba))
+* show option price when value is zero ([9d0c6bc](https://github.com/kdbsoft/dockercart/commit/9d0c6bc579edda2eb8b4776b71f98df0cd95897c))
+* skip auto-populate for test domains ([57d8bf4](https://github.com/kdbsoft/dockercart/commit/57d8bf43086ca9ef1c446fddc0b999918e4435bb))
+* toggle directory tree navigation on row click ([1f0cd59](https://github.com/kdbsoft/dockercart/commit/1f0cd597afacb5bef65ba2ed68047df9e73cf09b))
+* use delegated event binding for file manager ([d4dc041](https://github.com/kdbsoft/dockercart/commit/d4dc041804322ba32b5e226e4d6a5acb32b8c052))
+* use exact setting code and key in migration ([aa201af](https://github.com/kdbsoft/dockercart/commit/aa201af03bcd59f925db11a299bc97825db41bae))
+* use production endpoints for licensing and store ([97ec846](https://github.com/kdbsoft/dockercart/commit/97ec846e8e8f76604d115cbd890aaf70db231852))
+
+### Code Refactoring
+
+* switch default deployment mode to standalone ([b6ae310](https://github.com/kdbsoft/dockercart/commit/b6ae310fb17e90b3fc38eba3394122eaaa37ed67))
+
 ## [1.47.7](https://github.com/mathflow-bit/dockercart/compare/v1.47.6...v1.47.7) (2026-06-27)
 
 ### Bug Fixes
