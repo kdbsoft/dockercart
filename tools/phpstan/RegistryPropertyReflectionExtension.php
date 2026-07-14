@@ -10,6 +10,7 @@ use PHPStan\Type\Generic\GenericObjectType;
 use PHPStan\Type\NullType;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\TypeCombinator;
+use PHPStan\Type\UnionType;
 use Registry;
 
 class RegistryPropertyReflectionExtension implements PropertiesClassReflectionExtension {
@@ -20,21 +21,24 @@ class RegistryPropertyReflectionExtension implements PropertiesClassReflectionEx
 			return false;
 		}
 
-		return preg_match('/^model_.+$/', $propertyName, $matches) === 1;
+		return true;
 	}
 
 	public function getProperty(ClassReflection $classReflection, string $propertyName): PropertyReflection {
-		preg_match('/^(model_.+)$/', $propertyName, $matches);
-		$className = $this->convertSnakeToStudly($matches[1]);
+		if (preg_match('/^model_.+$/', $propertyName, $matches) === 1) {
+			$className = $this->convertSnakeToStudly($matches[1]);
 
-		$type = new NullType();
-		if ($this->reflectionProvider->hasClass($className)) {
-			$found = new ObjectType($className);
-			$type = new GenericObjectType('\Proxy', [$found]);
-			$type = TypeCombinator::addNull($type);
+			$type = new NullType();
+			if ($this->reflectionProvider->hasClass($className)) {
+				$found = new ObjectType($className);
+				$type = new GenericObjectType('\Proxy', [$found]);
+				$type = TypeCombinator::addNull($type);
+			}
+
+			return new LoadedProperty($classReflection, $type);
 		}
 
-		return new LoadedProperty($classReflection, $type);
+		return new LoadedProperty($classReflection, new UnionType(new ObjectType('object'), new NullType()));
 	}
 
 	private function convertSnakeToStudly(string $value): string {
