@@ -116,6 +116,7 @@ services:
       - BACKUP_S3_PATH=${BACKUP_S3_PATH:-dockercart/backups}
       - BACKUP_S3_RETENTION_DAYS=${BACKUP_S3_RETENTION_DAYS:-7}
       - BACKUP_S3_INSECURE=${BACKUP_S3_INSECURE:-false}
+      - DISALLOW_INDEXING=${DISALLOW_INDEXING:-NO}
     depends_on:
       mariadb:
         condition: service_healthy
