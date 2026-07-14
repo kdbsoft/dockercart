@@ -1,13 +1,13 @@
 <?php
 /**
  * DockerCart Search Module - Admin Controller
- * 
+ *
  * Provides Manticore Search integration for OpenCart
  * Handles module settings, indexing, and search configuration
- * 
+ *
  * @package    DockerCart
  * @subpackage Module
- * @author     DockerCart Team
+ * @author     DockerCart Official
  * @copyright  2026 DockerCart
  * @license    MIT
  * @version    1.0.3
@@ -16,18 +16,18 @@
 class ControllerExtensionModuleDockercartSearch extends Controller {
     private $error = [];
     private $logger;
-    
+
     /**
      * Constructor - Initialize logger
      */
     public function __construct($registry) {
         parent::__construct($registry);
-        
+
         // Initialize centralized logger
         require_once DIR_SYSTEM . 'library/dockercart_logger.php';
         $this->logger = new DockercartLogger($this->registry, 'search');
     }
-    
+
     /**
      * Main module settings page
      */
@@ -36,9 +36,9 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
         $this->load->model('extension/module/dockercart_search');
         $this->load->model('setting/setting');
         $this->load->model('localisation/language');
-        
+
         $this->document->setTitle($this->language->get('heading_title'));
-        
+
         // Handle form submission
         if ($this->request->server['REQUEST_METHOD'] == 'POST' && $this->validateForm()) {
             if (isset($this->request->post['module_dockercart_search_query_mappings'])) {
@@ -46,66 +46,66 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
             }
 
             $this->model_setting_setting->editSetting('module_dockercart_search', $this->request->post);
-            
+
             $this->session->data['success'] = $this->language->get('text_success');
-            
+
             $this->response->redirect($this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true));
         }
-        
+
         // Prepare data for view
         $data = $this->prepareViewData();
-        
+
         // Load languages for multi-language settings
         $data['languages'] = $this->model_localisation_language->getLanguages();
-        
+
         // Load header, column left, footer
         $data['header'] = $this->load->controller('common/header');
         $data['column_left'] = $this->load->controller('common/column_left');
         $data['footer'] = $this->load->controller('common/footer');
-        
+
         $this->response->setOutput($this->load->view('extension/module/dockercart_search', $data));
     }
-    
+
     /**
      * Prepare data for view
      */
     private function prepareViewData() {
         $data = [];
-        
+
         // Breadcrumbs
         $data['breadcrumbs'] = [];
-        
+
         $data['breadcrumbs'][] = [
             'text' => $this->language->get('text_home'),
             'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
         ];
-        
+
         $data['breadcrumbs'][] = [
             'text' => $this->language->get('text_extension'),
             'href' => $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true)
         ];
-        
+
         $data['breadcrumbs'][] = [
             'text' => $this->language->get('heading_title'),
             'href' => $this->url->link('extension/module/dockercart_search', 'user_token=' . $this->session->data['user_token'], true)
         ];
-        
+
         // Actions
         $data['action'] = $this->url->link('extension/module/dockercart_search', 'user_token=' . $this->session->data['user_token'], true);
         $data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true);
         $data['reindex_url'] = $this->url->link('extension/module/dockercart_search/reindex', 'user_token=' . $this->session->data['user_token'], true);
         $data['test_connection_url'] = $this->url->link('extension/module/dockercart_search/testConnection', 'user_token=' . $this->session->data['user_token'], true);
         $data['apply_morphology_url'] = $this->url->link('extension/module/dockercart_search/applyMorphology', 'user_token=' . $this->session->data['user_token'], true);
-        
+
         // Language strings
         $data['heading_title'] = $this->language->get('heading_title');
         $data['text_edit'] = $this->language->get('text_edit');
         $data['text_enabled'] = $this->language->get('text_enabled');
         $data['text_disabled'] = $this->language->get('text_disabled');
-        
+
         // Errors
         $data['error_warning'] = isset($this->error['warning']) ? $this->error['warning'] : '';
-        
+
         // Module settings
         $data['module_dockercart_search_status'] = $this->getConfigValue('module_dockercart_search_status', 0);
         $data['module_dockercart_search_host'] = $this->getConfigValue('module_dockercart_search_host', 'manticore');
@@ -116,18 +116,18 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
         $data['module_dockercart_search_min_chars'] = $this->getConfigValue('module_dockercart_search_min_chars', 3);
         $data['module_dockercart_search_results_limit'] = $this->getConfigValue('module_dockercart_search_results_limit', 20);
         $data['module_dockercart_search_query_mappings'] = $this->getConfigValue('module_dockercart_search_query_mappings', '');
-        
+
         // Note: Morphology is configured in docker/manticore/manticore.conf
         // Current settings: stem_en, lemmatize_ru
-        
+
         $data['user_token'] = $this->session->data['user_token'];
-        
+
         // Check Manticore connection
         $data['manticore_connected'] = $this->model_extension_module_dockercart_search->testConnection();
-        
+
         return $data;
     }
-    
+
     /**
      * Get config value with default
      */
@@ -137,18 +137,18 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
         } elseif ($this->config->has($key)) {
             return $this->config->get($key);
         }
-        
+
         return $default;
     }
-    
+
     /**
      * Test Manticore connection (AJAX)
      */
     public function testConnection() {
         $this->load->model('extension/module/dockercart_search');
-        
+
         $json = [];
-        
+
         if ($this->model_extension_module_dockercart_search->testConnection()) {
             $json['success'] = true;
             $json['message'] = 'Successfully connected to Manticore Search';
@@ -156,23 +156,23 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
             $json['success'] = false;
             $json['message'] = 'Failed to connect to Manticore Search: ' . $this->model_extension_module_dockercart_search->getLastError();
         }
-        
+
         $this->response->addHeader('Content-Type: application/json');
         $this->response->setOutput(json_encode($json));
     }
-    
+
     /**
      * Reindex all products (AJAX)
      */
     public function reindex() {
         $this->load->model('extension/module/dockercart_search');
         $this->load->language('extension/module/dockercart_search');
-        
+
         $json = [];
-        
+
         try {
             $result = $this->model_extension_module_dockercart_search->reindexAll();
-            
+
             if ($result['success']) {
                 $json['success'] = true;
                 $json['message'] = sprintf(
@@ -191,11 +191,11 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
             $json['message'] = 'Exception: ' . $e->getMessage();
             $this->logger->error('Reindex exception: ' . $e->getMessage());
         }
-        
+
         $this->response->addHeader('Content-Type: application/json');
         $this->response->setOutput(json_encode($json));
     }
-    
+
     /**
      * Install module - creates database table and registers events
      */
@@ -203,7 +203,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
         $this->load->model('extension/module/dockercart_search');
         $this->load->model('setting/event');
         $this->load->model('setting/setting');
-        
+
         // Register events for automatic indexing
         $events = [
             // Product events
@@ -222,7 +222,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
                 'trigger' => 'admin/model/catalog/product/deleteProduct/after',
                 'action'  => 'extension/module/dockercart_search/eventProductDelete'
             ],
-            
+
             // Category events
             [
                 'code'    => 'dockercart_search_category_add',
@@ -239,7 +239,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
                 'trigger' => 'admin/model/catalog/category/deleteCategory/after',
                 'action'  => 'extension/module/dockercart_search/eventCategoryDelete'
             ],
-            
+
             // Manufacturer events
             [
                 'code'    => 'dockercart_search_manufacturer_add',
@@ -256,7 +256,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
                 'trigger' => 'admin/model/catalog/manufacturer/deleteManufacturer/after',
                 'action'  => 'extension/module/dockercart_search/eventManufacturerDelete'
             ],
-            
+
             // Information events
             [
                 'code'    => 'dockercart_search_information_add',
@@ -273,14 +273,14 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
                 'trigger' => 'admin/model/catalog/information/deleteInformation/after',
                 'action'  => 'extension/module/dockercart_search/eventInformationDelete'
             ],
-            
+
             // Frontend: Add autocomplete script to header
             [
                 'code'    => 'dockercart_search_autocomplete',
                 'trigger' => 'catalog/view/common/header/after',
                 'action'  => 'extension/module/dockercart_search/addAutocompleteScript'
             ],
-            
+
             // Frontend: Override standard search with Manticore (after getProducts completes)
             [
                 'code'    => 'dockercart_search_override',
@@ -288,11 +288,11 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
                 'action'  => 'extension/module/dockercart_search/overrideGetProducts'
             ]
         ];
-        
+
         foreach ($events as $event) {
             // Delete if exists (for clean reinstall)
             $this->db->query("DELETE FROM `" . DB_PREFIX . "event` WHERE `code` = '" . $this->db->escape($event['code']) . "'");
-            
+
             // Add event
             $this->model_setting_event->addEvent(
                 $event['code'],
@@ -300,7 +300,10 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
                 $event['action']
             );
         }
-        
+
+        // Register admin menu event
+        $this->registerMenuEvent();
+
         // Set default settings
         $this->model_setting_setting->editSetting('module_dockercart_search', [
             'module_dockercart_search_status' => 0,
@@ -313,16 +316,16 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
             'module_dockercart_search_results_limit' => 20,
             'module_dockercart_search_query_mappings' => ''
         ]);
-        
+
         $this->logger->info('Module installed successfully');
     }
-    
+
     /**
      * Uninstall module - removes events
      */
     public function uninstall() {
         $this->load->model('setting/event');
-        
+
         // Remove all events
         $events = [
             'dockercart_search_product_add',
@@ -337,16 +340,17 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
             'dockercart_search_information_add',
             'dockercart_search_information_edit',
             'dockercart_search_information_delete',
-            'dockercart_search_override'
+            'dockercart_search_override',
+            'dockercart_search_admin_menu'
         ];
-        
+
         foreach ($events as $event_code) {
             $this->db->query("DELETE FROM `" . DB_PREFIX . "event` WHERE `code` = '" . $this->db->escape($event_code) . "'");
         }
-        
+
         $this->logger->info('Module uninstalled successfully');
     }
-    
+
     /**
      * Validate form data
      */
@@ -354,7 +358,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
         if (!$this->user->hasPermission('modify', 'extension/module/dockercart_search')) {
             $this->error['warning'] = $this->language->get('error_permission');
         }
-        
+
         return !$this->error;
     }
 
@@ -372,7 +376,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
 
         return trim(implode("\n", $normalized));
     }
-    
+
     // Event handlers (will be called by OpenCart event system)
 
     public function eventProductAdd($route, $args, $output) {
@@ -517,5 +521,50 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
 
             $this->logger->info("Information page {$args[0]} deleted from index");
         }
+    }
+
+    private function registerMenuEvent() {
+        $this->load->model('setting/event');
+        $this->db->query("DELETE FROM `" . DB_PREFIX . "event` WHERE `code` = 'dockercart_search_admin_menu'");
+        $this->model_setting_event->addEvent(
+            'dockercart_search_admin_menu',
+            'admin/view/common/column_left/before',
+            'extension/module/dockercart_search/eventAdminMenu',
+            1,
+            0
+        );
+    }
+
+    public function eventAdminMenu(&$route, &$data, &$output) {
+        $this->load->language('extension/module/dockercart_search');
+
+        if (!$this->user->hasPermission('access', 'extension/module/dockercart_search')) {
+            return;
+        }
+
+        $menu = array(
+            'name' => $this->language->get('heading_title_menu'),
+            'href' => $this->url->link('extension/module/dockercart_search', 'user_token=' . $this->session->data['user_token'], true),
+            'children' => array()
+        );
+
+        if (!isset($data['menus']) || !is_array($data['menus'])) {
+            return;
+        }
+
+        foreach ($data['menus'] as &$item) {
+            if (isset($item['id']) && $item['id'] === 'menu-catalog' && isset($item['children']) && is_array($item['children'])) {
+                $item['children'][] = $menu;
+                return;
+            }
+        }
+
+        $data['menus'][] = array(
+            'id' => 'menu-dockercart-search',
+            'icon' => 'fa-search',
+            'name' => $this->language->get('heading_title_menu'),
+            'href' => $this->url->link('extension/module/dockercart_search', 'user_token=' . $this->session->data['user_token'], true),
+            'children' => array()
+        );
     }
 }

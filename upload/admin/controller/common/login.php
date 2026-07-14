@@ -7,7 +7,11 @@ class ControllerCommonLogin extends Controller {
 
 		$this->document->setTitle($this->language->get('heading_title'));
 
-		if ($this->user->isLogged() && isset($this->request->get['user_token']) && ($this->request->get['user_token'] == $this->session->data['user_token'])) {
+		if ($this->user->isLogged()) {
+			if (!isset($this->session->data['user_token'])) {
+				$this->session->data['user_token'] = token(32);
+			}
+
 			$this->response->redirect($this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true));
 		}
 
@@ -86,6 +90,8 @@ class ControllerCommonLogin extends Controller {
 
 		$languages = array();
 
+		$token = isset($this->session->data['user_token']) ? '&user_token=' . $this->session->data['user_token'] : '';
+
 		foreach ($all_languages as $code => $lang) {
 			if (!$lang['status']) {
 				continue;
@@ -94,7 +100,7 @@ class ControllerCommonLogin extends Controller {
 			$languages[] = array(
 				'name' => $lang['name'],
 				'code' => $lang['code'],
-				'href' => $this->url->link('common/login', 'language=' . $lang['code'], true)
+				'href' => $this->url->link('common/login', 'language=' . $lang['code'] . $token, true)
 			);
 		}
 

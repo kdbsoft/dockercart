@@ -1,11 +1,12 @@
 <?php
 // Heading
-$_['heading_title']     = 'DockerCart Search (Manticore)';
+$_['heading_title']     = 'Search (Manticore)';
+$_['heading_title_menu'] = 'Search Index';
 
 // Text
-$_['text_extension']    = 'Extensions';
+$_['text_extension']    = 'Add-ons';
 $_['text_success']      = 'Success: Module settings have been saved!';
-$_['text_edit']         = 'Edit DockerCart Search Settings';
+$_['text_edit']         = 'Edit Search Settings';
 $_['text_enabled']      = 'Enabled';
 $_['text_disabled']     = 'Disabled';
 $_['text_yes']          = 'Yes';
@@ -26,7 +27,7 @@ $_['text_tab_indexing_subtitle'] = 'Reindex catalog data into Manticore';
 $_['text_tab_about_subtitle'] = 'Module information and support contacts';
 $_['text_module_settings'] = 'Module Settings';
 $_['text_developer'] = 'Developer';
-$_['text_developer_name'] = 'DockerCart Team';
+$_['text_developer_name'] = 'DockerCart Official';
 $_['text_contact'] = 'Contact';
 
 // Entry

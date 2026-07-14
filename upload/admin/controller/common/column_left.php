@@ -111,6 +111,37 @@ class ControllerCommonColumnLeft extends Controller {
 				);
 			}
 
+			// Import (populated by events)
+			$catalog[] = array(
+				'name'     => $this->language->get('text_import'),
+				'href'     => '',
+				'children' => array()
+			);
+
+			// Feeds
+			$feeds = array();
+			$this->load->model('setting/extension');
+			$feed_extensions = $this->model_setting_extension->getInstalled('feed');
+
+			foreach ($feed_extensions as $extension) {
+				if ($this->user->hasPermission('access', 'extension/feed/' . $extension)) {
+					$this->load->language('extension/feed/' . $extension, 'extension');
+					$feeds[] = array(
+						'name'     => $this->language->get('extension')->get('heading_title'),
+						'href'     => $this->url->link('extension/feed/' . $extension, 'user_token=' . $this->session->data['user_token'], true),
+						'children' => array()
+					);
+				}
+			}
+
+			if ($feeds) {
+				$catalog[] = array(
+					'name'     => $this->language->get('text_feed'),
+					'href'     => '',
+					'children' => $feeds
+				);
+			}
+
 			if ($catalog) {
 				$data['menus'][] = array(
 					'id'       => 'menu-catalog',
@@ -123,6 +154,14 @@ class ControllerCommonColumnLeft extends Controller {
 
 			// Extension
 			$marketplace = array();
+
+			if ($this->user->hasPermission('access', 'extension/store')) {
+				$marketplace[] = array(
+					'name'	   => $this->language->get('text_extensions_store'),
+					'href'     => $this->url->link('extension/store', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
 
 			if ($this->user->hasPermission('access', 'marketplace/installer')) {
 				$marketplace[] = array(
@@ -594,6 +633,26 @@ class ControllerCommonColumnLeft extends Controller {
 				);
 			}
 
+			// Scheduler
+			if ($this->user->hasPermission('access', 'tool/dockercart_scheduler')) {
+				$system[] = array(
+					'id'       => 'menu-scheduler',
+					'icon'	   => 'fa-clock-o',
+					'name'	   => $this->language->get('text_scheduler'),
+					'href'     => $this->url->link('tool/dockercart_scheduler', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
+			// Reports
+			if ($this->user->hasPermission('access', 'report/report')) {
+				$system[] = array(
+					'name'	   => $this->language->get('text_reports'),
+					'href'     => $this->url->link('report/report', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
 			if ($system) {
 				$data['menus'][] = array(
 					'id'       => 'menu-system',
@@ -601,34 +660,6 @@ class ControllerCommonColumnLeft extends Controller {
 					'name'	   => $this->language->get('text_system'),
 					'href'     => '',
 					'children' => $system
-				);
-			}
-
-			$report = array();
-
-			if ($this->user->hasPermission('access', 'report/report')) {
-				$report[] = array(
-					'name'	   => $this->language->get('text_reports'),
-					'href'     => $this->url->link('report/report', 'user_token=' . $this->session->data['user_token'], true),
-					'children' => array()
-				);
-			}
-
-			if ($this->user->hasPermission('access', 'report/online')) {
-				$report[] = array(
-					'name'	   => $this->language->get('text_online'),
-					'href'     => $this->url->link('report/online', 'user_token=' . $this->session->data['user_token'], true),
-					'children' => array()
-				);
-			}
-
-			if ($report) {
-				$data['menus'][] = array(
-					'id'       => 'menu-report',
-					'icon'	   => 'fa-bar-chart',
-					'name'	   => $this->language->get('text_reports'),
-					'href'     => '',
-					'children' => $report
 				);
 			}
 

@@ -23,7 +23,7 @@
         {% if orders %}
         {% for order in orders %}
         <tr>
-          <td class="text-right" style="padding-top:8px;padding-bottom:8px;"><div style="margin-bottom:4px;">{{ order.order_id }}{% if order.is_oneclick %}<br><span class="{{ order.order_type_badge_class }}" style="font-size:10px;">{{ order.order_type }}</span>{% endif %}</div></td>
+          <td class="text-right" style="padding-top:8px;padding-bottom:8px;"><div style="margin-bottom:4px;">{{ order.order_id }}</div></td>
           <td style="padding-top:8px;padding-bottom:8px;">{{ order.customer }}<br><small class="text-muted">{{ order.customer_type }}</small></td>
           <td><span class="{{ order.order_status_badge_class }}">{{ order.status }}</span></td>
           <td>{{ order.date_added }}</td>

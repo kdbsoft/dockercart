@@ -23,10 +23,6 @@ node_modules/
 export-yml-[0-9]*-*.xml
 /upload/export-yml-[0-9]*-*.xml
 
-# Image File
-!/upload/image/no_image.jpg
-!/upload/image/catalog/cart.png
-
 # Robots.txt
 /upload/robots.txt
 
@@ -53,6 +49,8 @@ export-yml-[0-9]*-*.xml
 !/upload/image/catalog/demo/**
 !/upload/image/catalog/social/
 !/upload/image/catalog/social/**
+!/upload/image/no_image.jpg
+!/upload/image/catalog/cart.png
 
 # Flags
 # remove sharp char if you want to add flags to gitignore
@@ -61,12 +59,9 @@ export-yml-[0-9]*-*.xml
 # If you want to ignore backup installer artifacts in development mode:
 # /upload/backup.install/*
 
-# Ignore all vendor files included by composer and the lock file
-/tests/phpunit/vendor/*
-/tests/phpunit/composer.lock
-
-# Test Config File
-/tests/phpunit/bootstrap.php
+# PHPUnit cache
+.phpunit.cache/
+.php-cs-fixer.cache
 
 # IDE Project files
 /.idea
@@ -86,31 +81,13 @@ build-extension.sh
 !/.github/workflows/
 !/.github/workflows/**
 
-# Local documentation drafts and working notes
-/docs/
-!/docs/modules/
-
 /docker/nginx/cache/
 /docker/nginx/cache/**
-
-/.serena/
 
 *.backup
 /docker/mysql/*.bak*
 /docker/mysql/*.tmp
 /docker/mysql/*.tmp*
-
-# Development session artifacts
-INSTALLATION_UPDATE_SUMMARY.md
-DOCUMENTATION.md
-PRODUCTION.md
-SSL_SETUP.md
-CHANGELOG.md
-!/CHANGELOG.md
-QUICK_START.md
-
-# Temporary test/debug scripts
-check-multicurrency.sh
 
 # SSL / certificate artifacts (self-signed and Let's Encrypt)
 # Ignore generated self-signed certificates and private keys
@@ -137,11 +114,6 @@ check-multicurrency.sh
 /docker/letsencrypt/*.lock
 
 
-/__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
 # Ignore custom local Dockercart prefixed artifacts
 **/dockercart_custom_*
 **/dc_custom_*
@@ -149,5 +121,8 @@ check-multicurrency.sh
 
 backups/
 sitemap.xml
+google-base*.xml
+
 
 /.cache/
+.omo/

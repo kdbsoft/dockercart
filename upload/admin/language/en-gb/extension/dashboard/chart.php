@@ -3,7 +3,7 @@
 $_['heading_title']    = 'Sales Analytics';
 
 // Text
-$_['text_extension']   = 'Extensions';
+$_['text_extension']   = 'Add-ons';
 $_['text_success']     = 'Success: You have modified dashboard chart!';
 $_['text_edit']        = 'Edit Dashboard Chart';
 $_['text_order']       = 'Orders';

@@ -81,25 +81,116 @@ body, button, input, select, textarea { font-family: 'Manrope', sans-serif; }
 }
 
 /* ── Category dropdown hover ──────────────────────────────── */
-.dc-cat-item { position: relative; }
-.dc-cat-dropdown {
-  visibility: hidden;
-  opacity: 0;
-  pointer-events: none;
+.dc-cat-item {
+  position: relative;
+}
+
+/* ── Dropdown portal (outside scroll container) ──────────── */
+.dc-dd-portal {
   position: absolute;
   top: 100%;
   left: 0;
-  min-width: 240px;
+  z-index: 100;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
   transform: translateY(6px);
   transition: opacity 0.18s ease, transform 0.18s ease, visibility 0s linear 0.18s;
-  max-width: calc(100vw - 32px);
 }
-.dc-cat-item:hover > .dc-cat-dropdown {
+.dc-dd-portal.is-open {
   visibility: visible;
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0);
   transition: opacity 0.18s ease, transform 0.18s ease, visibility 0s linear 0s;
+}
+
+.dc-cat-dropdown {
+  min-width: 240px;
+  max-width: calc(100vw - 32px);
+}
+
+/* ── Horizontal nav: scroll + fade edges ──────────────────── */
+.dc-hnav-scroll {
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  box-sizing: border-box;
+}
+.dc-hnav-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.dc-hnav-fade {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  z-index: 2;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  opacity: 0;
+}
+.dc-hnav-fade.is-visible {
+  opacity: 1;
+}
+.dc-hnav-fade-left {
+  left: 16px;
+  background: linear-gradient(to right, #fff 30%, transparent);
+}
+.dc-hnav-fade-right {
+  right: 16px;
+  background: linear-gradient(to left, #fff 30%, transparent);
+}
+
+.dc-hnav-accents {
+  position: absolute;
+  right: 16px;
+  top: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  z-index: 3;
+  padding-left: 12px;
+  background: linear-gradient(to right, transparent, #fff 8px);
+}
+
+/* ── Horizontal nav scroll buttons ────────────────────────── */
+.dc-hnav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.92);
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.15s;
+  color: #6b7280;
+}
+.dc-hnav-btn:hover {
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  color: #374151;
+}
+.dc-hnav-btn.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+.dc-hnav-btn-left {
+  left: 4px;
+}
+.dc-hnav-btn-right {
+  right: 4px;
 }
 
 /* ── Horizontal mega-menu: inline 3-level layout ──────────── */
@@ -465,314 +556,6 @@ footer .dc-social a:hover i { color: white; }
 
 /* ── Suppress leftover Bootstrap global styles ───────────── */
 body { padding-top: 0 !important; }
-
-/* =============================================================
-   DockerCart 1-Click Checkout — theme overrides
-   ============================================================= */
-
-/* ── Button wrapper ───────────────────────────────────────── */
-.dockercart-oneclickcheckout-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-/* ── Base button reset ────────────────────────────────────── */
-.dockercart-oneclickcheckout-button.btn {
-  display: block;
-  width: 100%;
-  padding: 12px 20px;
-  font-family: 'Manrope', sans-serif;
-  font-size: 0.875rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  text-transform: none;
-  border-radius: 12px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  position: relative;
-  overflow: hidden;
-}
-.dockercart-oneclickcheckout-button.btn::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(255,255,255,0);
-  transition: background 0.15s;
-}
-.dockercart-oneclickcheckout-button.btn:hover::before { background: rgba(255,255,255,0.08); }
-.dockercart-oneclickcheckout-button.btn:active  { transform: translateY(1px) !important; }
-
-/* ── Color themes ─────────────────────────────────────────── */
-.dockercart-oneclickcheckout-button.theme-purple {
-  background: #111827 !important;
-  box-shadow: 0 4px 14px rgba(15,23,42,.22) !important;
-}
-.dockercart-oneclickcheckout-button.theme-blue {
-  background: #111827 !important;
-  box-shadow: 0 4px 14px rgba(15,23,42,.22) !important;
-}
-.dockercart-oneclickcheckout-button.theme-green {
-  background: #111827 !important;
-  box-shadow: 0 4px 14px rgba(15,23,42,.22) !important;
-}
-.dockercart-oneclickcheckout-button.theme-red {
-  background: #111827 !important;
-  box-shadow: 0 4px 14px rgba(15,23,42,.22) !important;
-}
-.dockercart-oneclickcheckout-button.theme-orange {
-  background: #111827 !important;
-  box-shadow: 0 4px 14px rgba(15,23,42,.22) !important;
-}
-.dockercart-oneclickcheckout-button.theme-pink {
-  background: #111827 !important;
-  box-shadow: 0 4px 14px rgba(15,23,42,.22) !important;
-}
-.dockercart-oneclickcheckout-button.theme-teal {
-  background: #111827 !important;
-  box-shadow: 0 4px 14px rgba(15,23,42,.22) !important;
-}
-.dockercart-oneclickcheckout-button.theme-dark {
-  background: #111827 !important;
-  box-shadow: 0 4px 14px rgba(15,23,42,.22) !important;
-}
-
-/* ── Modal backdrop ───────────────────────────────────────── */
-body.modal-open { overflow: hidden; }
-#oneclickcheckout-modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 4000;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  overflow-y: auto;
-}
-#oneclickcheckout-modal.in {
-  display: flex;
-}
-#oneclickcheckout-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 3990;
-  background: rgba(15, 23, 42, 0.52);
-  backdrop-filter: blur(4px);
-}
-
-/* ── Modal dialog ─────────────────────────────────────────── */
-#oneclickcheckout-modal .modal-dialog {
-  width: 100%;
-  max-width: 480px;
-  margin: 40px auto;
-  position: relative;
-  z-index: 1;
-}
-@media (max-width: 540px) {
-  #oneclickcheckout-modal {
-    align-items: flex-end;
-    padding: 0;
-  }
-  #oneclickcheckout-modal .modal-dialog { margin: 0; max-width: 100%; }
-  #oneclickcheckout-modal .modal-content { border-radius: 24px 24px 0 0; }
-}
-
-/* ── Modal content card ───────────────────────────────────── */
-#oneclickcheckout-modal .modal-content {
-  border: none !important;
-  border-radius: 24px !important;
-  box-shadow: 0 25px 60px rgba(0,0,0,.18) !important;
-  overflow: hidden;
-  font-family: 'Manrope', sans-serif;
-}
-
-/* ── Modal header ─────────────────────────────────────────── */
-#oneclickcheckout-modal .modal-header {
-  background: #fff;
-  border-bottom: 1px solid #f1f5f9 !important;
-  padding: 20px 24px 16px !important;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-#oneclickcheckout-modal .modal-title {
-  font-size: 1.1rem !important;
-  font-weight: 800 !important;
-  color: #111827 !important;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-#oneclickcheckout-modal .modal-title::before {
-  content: '';
-}
-
-/* ── Hero banner badge & primary button styles ───────────────────────── */
-.banner-slide__badge {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--accent, #3b82f6);
-  color: #fff;
-}
-
-.banner-slide__btn--primary {
-  background: var(--accent, #3b82f6);
-  border: 1px solid var(--accent, #3b82f6);
-  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
-}
-.banner-slide__btn--primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 30px rgba(2,6,23,0.18);
-  filter: brightness(0.92);
-}
-
-#oneclickcheckout-modal .close {
-  font-size: 1.5rem !important;
-  line-height: 1 !important;
-  opacity: .4 !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  border: none !important;
-  background: none !important;
-  cursor: pointer;
-  color: #374151 !important;
-  transition: opacity .15s !important;
-}
-#oneclickcheckout-modal .close:hover { opacity: .8 !important; }
-
-/* ── Modal body ───────────────────────────────────────────── */
-#oneclickcheckout-modal .modal-body {
-  padding: 20px 24px 24px !important;
-  background: #fff;
-}
-
-/* ── Modal footer ─────────────────────────────────────────── */
-#oneclickcheckout-modal .modal-footer {
-  display: flex;
-  gap: 10px;
-  padding: 0 24px 24px !important;
-  border: none !important;
-  background: #fff;
-}
-#oneclickcheckout-modal .modal-footer .btn {
-  margin: 0 !important;
-  border-radius: 12px !important;
-  font-weight: 700 !important;
-  font-size: 0.875rem !important;
-  padding: 11px 16px !important;
-  transition: all .2s ease !important;
-}
-#oneclickcheckout-modal .btn-cancel {
-  flex: 0 0 auto;
-  min-width: 112px;
-  border: 1px solid #d1d5db !important;
-  color: #374151 !important;
-  background: #fff !important;
-}
-#oneclickcheckout-modal .btn-cancel:hover {
-  border-color: #9ca3af !important;
-  background: #f9fafb !important;
-}
-
-/* ── Form groups ──────────────────────────────────────────── */
-#oneclickcheckout-form .form-group {
-  margin-bottom: 14px !important;
-}
-#oneclickcheckout-form label {
-  font-size: 0.8rem !important;
-  font-weight: 600 !important;
-  color: #374151 !important;
-  margin-bottom: 5px !important;
-  display: block;
-}
-#oneclickcheckout-form label .required { color: #ef4444 !important; }
-
-/* ── Inputs ───────────────────────────────────────────────── */
-#oneclickcheckout-form input[type="text"],
-#oneclickcheckout-form input[type="email"],
-#oneclickcheckout-form input[type="tel"],
-#oneclickcheckout-form textarea,
-#oneclickcheckout-form select {
-  width: 100% !important;
-  padding: 10px 14px !important;
-  border: 1.5px solid #e5e7eb !important;
-  border-radius: 12px !important;
-  font-size: 0.875rem !important;
-  font-family: 'Manrope', sans-serif !important;
-  color: #111827 !important;
-  background: #fff !important;
-  outline: none !important;
-  transition: border-color .15s !important;
-  box-shadow: none !important;
-}
-#oneclickcheckout-form input[readonly],
-#oneclickcheckout-form textarea[readonly],
-#oneclickcheckout-form select[disabled],
-#oneclickcheckout-form input[disabled],
-#oneclickcheckout-form textarea[disabled] {
-  background: #f8fafc !important;
-  border-color: #d1d5db !important;
-  color: #6b7280 !important;
-  cursor: not-allowed !important;
-  opacity: 1 !important;
-}
-#oneclickcheckout-form input:focus,
-#oneclickcheckout-form textarea:focus,
-#oneclickcheckout-form select:focus {
-  border-color: #2563eb !important;
-  box-shadow: 0 0 0 3px rgba(37,99,235,.1) !important;
-}
-#oneclickcheckout-form input.has-error,
-#oneclickcheckout-form select.has-error,
-#oneclickcheckout-form textarea.has-error {
-  border-color: #ef4444 !important;
-  box-shadow: 0 0 0 3px rgba(239,68,68,.1) !important;
-}
-
-/* ── Error alert ──────────────────────────────────────────── */
-#oneclickcheckout-error {
-  background: #fef2f2 !important;
-  border: 1px solid #fecaca !important;
-  border-radius: 12px !important;
-  color: #dc2626 !important;
-  font-size: 0.8rem !important;
-  padding: 10px 14px !important;
-  margin-bottom: 14px !important;
-}
-#oneclickcheckout-error ul { margin: 0; padding-left: 16px; }
-
-/* ── Submit button ────────────────────────────────────────── */
-#oneclickcheckout-submit {
-  display: block !important;
-  width: 100% !important;
-  flex: 1 1 auto;
-  padding: 12px 20px !important;
-  background: #2563eb !important;
-  color: #fff !important;
-  font-weight: 700 !important;
-  font-size: 0.875rem !important;
-  border: none !important;
-  border-radius: 12px !important;
-  cursor: pointer !important;
-  transition: background .2s !important;
-  font-family: 'Manrope', sans-serif !important;
-  letter-spacing: .02em !important;
-}
-#oneclickcheckout-submit:hover { background: #1d4ed8 !important; }
-#oneclickcheckout-submit:active { background: #1e40af !important; }
-
-/* Theme-based submit button color */
-.theme-purple  #oneclickcheckout-submit { background: #2563eb !important; }
-.theme-green   #oneclickcheckout-submit { background: #2563eb !important; }
-.theme-red     #oneclickcheckout-submit { background: #2563eb !important; }
-.theme-orange  #oneclickcheckout-submit { background: #2563eb !important; }
-.theme-pink    #oneclickcheckout-submit { background: #2563eb !important; }
-.theme-teal    #oneclickcheckout-submit { background: #2563eb !important; }
-.theme-dark    #oneclickcheckout-submit { background: #2563eb !important; }
 
 /* =============================================================
    DockerCart Success / Logout pages

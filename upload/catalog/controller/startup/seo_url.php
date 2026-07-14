@@ -22,7 +22,7 @@ class ControllerStartupSeoUrl extends Controller
     private $hasLanguagePrefixInUrl = false;
     private $languagesCache = null;
 
-    // SEO URL maps (loaded from cache/memcached once per request)
+    // SEO URL maps (loaded from cache once per request)
     private $seoUrlCacheLoaded = false;
     private $blogSeoUrlCacheLoaded = false;
     private $seoKeywordsByQuery = [];
@@ -140,7 +140,7 @@ class ControllerStartupSeoUrl extends Controller
      * Initialize request state properties
      * Called once at the beginning of index() to avoid repeated calculations
      */
-    private function initializeRequestState()
+    public function initializeRequestState()
     {
         $method = isset($this->request->server["REQUEST_METHOD"])
             ? strtoupper($this->request->server["REQUEST_METHOD"])

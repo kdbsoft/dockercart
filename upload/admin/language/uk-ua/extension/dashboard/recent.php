@@ -13,17 +13,16 @@ $_['entry_width'] = 'Ширина';
 $_['error_permission'] = 'Увага: Ви не маєте дозволу на зміну останніх замовлень на панелі інструментів!';
 $_['heading_title'] = 'Останні замовлення';
 $_['text_edit'] = 'Редагувати панель інструментів Останні замовлення';
-$_['text_extension'] = 'Розширення';
+$_['text_extension'] = 'Доповнення';
 $_['text_success'] = 'Успіх: Ви змінили останні замовлення на панелі інструментів!';
 $_['text_badge_guest_order'] = 'Гостьове замовлення';
 $_['text_badge_registered_order'] = 'Зареєстрований клієнт';
-$_['text_badge_oneclick_order'] = 'Замовлення в 1 клік';
 $_['text_badge_guest'] = 'Гість';
 $_['text_badge_registered'] = 'Зареєстрований';
 $_['text_tracking_number'] = 'Номер відстеження';
 // Subtitle
 
-$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції розширення';
+$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції доповнення';
 // Dashboard Info Subtitle
 
 $_['text_recent_subtitle'] = 'Огляд останніх замовлень клієнтів';

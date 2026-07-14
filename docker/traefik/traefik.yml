@@ -36,7 +36,7 @@ providers:
     watch: true
 
 certificatesResolvers:
-  letsencrypt:
+  le:
     acme:
       email: ${LE_EMAIL:-admin@example.com}
       storage: /etc/traefik/acme/acme.json
@@ -44,7 +44,7 @@ certificatesResolvers:
         entryPoint: http
       certificatesDuration: 2160h
 
-  letsencrypt-staging:
+  le-staging:
     acme:
       email: ${LE_EMAIL:-admin@example.com}
       storage: /etc/traefik/acme/acme-staging.json

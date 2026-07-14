@@ -1,5 +1,5 @@
 {
-  "name": "mathflow-bit/dockercart",
+  "name": "kdbsoft/dockercart",
   "type": "project",
   "description": "DockerCart is a modern, open-source e-commerce platform built on top of OpenCart. It offers a sleek, user-friendly interface and a powerful set of features to help you create and manage your online store with ease.",
   "keywords": [
@@ -20,6 +20,11 @@
     "twig/twig": "^3.21.1",
     "cardinity/cardinity-sdk-php": ">=v3.3.6",
     "novadigital/novapost-api-sdk": "^1.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^11.0",
+    "phpstan/phpstan": "^2.1",
+    "friendsofphp/php-cs-fixer": "^3.95"
   },
   "autoload": {
     "psr-4": {

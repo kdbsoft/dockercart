@@ -1,29 +1,29 @@
 <?php
 /**
  * DockerCart Blog - Main Admin Controller
- * 
+ *
  * @package    DockerCart Blog
  * @version    1.0.0
- * @author     DockerCart Team
+ * @author     DockerCart Official
  * @copyright  2025 DockerCart
  * @license    Proprietary
- * 
+ *
  * Description: Main module controller for DockerCart Blog extension.
  *              Handles module installation, uninstallation, event registration,
  *              and module settings management using OpenCart Event System.
- * 
+ *
  * Features:
  * - Event-based integration (no OCMOD)
  * - Automatic database schema installation
- * - Event registration for admin menu, routes, sitemap
+ * - Event registration for admin menu, routes
  * - Multi-store and multi-language support
  * - Clean uninstallation with data preservation option
- * 
+ *
  * Compatible: OpenCart 3.0.0 - 3.0.3.8+
  */
 
 class ControllerExtensionModuleDockercartBlog extends Controller {
-	
+
 	/**
 	 * Module error container
 	 * @var array
@@ -32,12 +32,12 @@ class ControllerExtensionModuleDockercartBlog extends Controller {
 
 	/**
 	 * Main module settings page
-	 * 
+	 *
 	 * Displays module configuration form with tabs for:
 	 * - General settings
 	 * - Display options
 	 * - Comment settings
-	 * - SEO/Sitemap settings
+	 * - SEO settings
 	 */
 	public function index() {
 		// Load dependencies
@@ -111,7 +111,7 @@ class ControllerExtensionModuleDockercartBlog extends Controller {
 			'module_dockercart_blog_show_date',
 			'module_dockercart_blog_show_views',
 			'module_dockercart_blog_latest_limit',
-			'module_dockercart_blog_sitemap'
+
 		);
 
 		foreach ($settings as $setting) {
@@ -160,10 +160,10 @@ class ControllerExtensionModuleDockercartBlog extends Controller {
 
 	/**
 	 * Install module
-	 * 
+	 *
 	 * Performs:
 	 * 1. Database schema installation
-	 * 2. Event registration for admin menu, routes, sitemap
+	 * 2. Event registration for admin menu, routes
 	 * 3. Initial settings configuration
 	 * 4. Permission setup
 	 */
@@ -258,22 +258,22 @@ class ControllerExtensionModuleDockercartBlog extends Controller {
 
 				// Check if SEO URL already exists
 				$check = $this->db->query(
-					"SELECT * FROM " . DB_PREFIX . "seo_url 
-					WHERE query = '" . $this->db->escape($route) . "' 
-					AND store_id = '0' 
+					"SELECT * FROM " . DB_PREFIX . "seo_url
+					WHERE query = '" . $this->db->escape($route) . "'
+					AND store_id = '0'
 					AND language_id = '" . (int)$language['language_id'] . "'"
 				);
 
 				if (!$check->num_rows) {
 					// Create SEO URL
 					$this->db->query(
-						"INSERT INTO " . DB_PREFIX . "seo_url 
-						SET store_id = '0', 
-						language_id = '" . (int)$language['language_id'] . "', 
-						query = '" . $this->db->escape($route) . "', 
+						"INSERT INTO " . DB_PREFIX . "seo_url
+						SET store_id = '0',
+						language_id = '" . (int)$language['language_id'] . "',
+						query = '" . $this->db->escape($route) . "',
 						keyword = '" . $this->db->escape($keyword) . "'"
 					);
-					
+
 					$this->log->write('DockerCart Blog: SEO URL created - ' . $route . ' => ' . $keyword . ' (lang: ' . $language['code'] . ')');
 				}
 			}
@@ -284,7 +284,7 @@ class ControllerExtensionModuleDockercartBlog extends Controller {
 
 	/**
 	 * Uninstall module
-	 * 
+	 *
 	 * Performs:
 	 * 1. Event unregistration
 	 * 2. Optional: database cleanup (preserves data by default)
@@ -345,11 +345,10 @@ class ControllerExtensionModuleDockercartBlog extends Controller {
 
 	/**
 	 * Register OpenCart events for module integration
-	 * 
+	 *
 	 * Events registered:
 	 * - admin/view/common/column_left/before: Add blog menu to admin
 	 * - catalog/controller/startup/router/before: Register blog routes
-	 * - catalog/controller/feed/google_sitemap/before: Add blog to sitemap
 	 * - admin/model/catalog/product/deleteProduct/after: Cleanup related data
 	 */
 	private function registerEvents() {
@@ -376,15 +375,6 @@ class ControllerExtensionModuleDockercartBlog extends Controller {
 			0
 		);
 
-		// Sitemap integration
-		$this->model_setting_event->addEvent(
-			'dockercart_blog_sitemap',
-			'catalog/controller/feed/google_sitemap/before',
-			'extension/module/dockercart_blog/eventSitemap',
-			1,
-			0
-		);
-
 		// SEO URL rewrite
 		$this->model_setting_event->addEvent(
 			'dockercart_blog_seo_url',
@@ -400,16 +390,15 @@ class ControllerExtensionModuleDockercartBlog extends Controller {
 	 */
 	private function unregisterEvents() {
 		$this->load->model('setting/event');
-		
+
 		$this->model_setting_event->deleteEventByCode('dockercart_blog_admin_menu');
 		$this->model_setting_event->deleteEventByCode('dockercart_blog_routes');
-		$this->model_setting_event->deleteEventByCode('dockercart_blog_sitemap');
 		$this->model_setting_event->deleteEventByCode('dockercart_blog_seo_url');
 	}
 
 	/**
 	 * Event handler: Add blog menu to admin sidebar
-	 * 
+	 *
 	 * @param string $route
 	 * @param array $data
 	 * @param string $output
@@ -474,7 +463,7 @@ class ControllerExtensionModuleDockercartBlog extends Controller {
 
 	/**
 	 * Validate form data
-	 * 
+	 *
 	 * @return bool
 	 */
 	protected function validate() {

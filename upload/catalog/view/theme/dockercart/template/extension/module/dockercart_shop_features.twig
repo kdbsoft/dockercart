@@ -12,8 +12,8 @@
     {% endif %}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {% for feature in features %}
-        <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm  group hover:shadow-md transition">
-          <div class="w-14 h-14 rounded-2xl {{ feature.icon_bg }} flex items-center justify-center mb-4 {{ feature.icon_hover_bg }} transition">
+        <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm text-center group hover:shadow-md transition">
+          <div class="w-14 h-14 rounded-2xl {{ feature.icon_bg }} flex items-center justify-center mb-4 mx-auto {{ feature.icon_hover_bg }} transition">
             <i data-lucide="{{ feature.icon }}" class="w-7 h-7 {{ feature.icon_text }} group-hover:text-white transition"></i>
           </div>
           <h3 class="font-bold text-gray-900 mb-1">{{ feature.title }}</h3>

@@ -44,7 +44,7 @@ class ModelSettingExtension extends Model {
 			$limit = 10;
 		}		
 		
-		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "extension_install` ORDER BY date_added ASC LIMIT " . (int)$start . "," . (int)$limit);
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "extension_install` ORDER BY date_added DESC LIMIT " . (int)$start . "," . (int)$limit);
 	
 		return $query->rows;
 	}
@@ -67,6 +67,10 @@ class ModelSettingExtension extends Model {
 		
 	public function deleteExtensionPath($extension_path_id) {
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "extension_path` WHERE `extension_path_id` = '" . (int)$extension_path_id . "'");
+	}
+
+	public function deleteExtensionPathsByExtensionInstallId($extension_install_id) {
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "extension_path` WHERE `extension_install_id` = '" . (int)$extension_install_id . "'");
 	}
 	
 	public function getExtensionPathsByExtensionInstallId($extension_install_id) {

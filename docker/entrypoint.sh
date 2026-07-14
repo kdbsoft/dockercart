@@ -128,28 +128,63 @@ wait_for_mysql() {
     echo "MariaDB is up and running!"
 }
 
-# Генерация robots.txt при первом старте (если файл отсутствует в bind mount)
+# Генерация robots.txt при каждом старте (как config.php)
 ensure_robots_txt() {
     local robots_file="/var/www/html/robots.txt"
 
-    if [ -f "$robots_file" ]; then
-        echo "robots.txt already exists, skipping generation"
-        return
+    echo "Regenerating $robots_file ..."
+
+    local url="${DOCKERCART_URL:-http://dockercart.local}"
+    url="${url%/}"
+
+    if [ "${DOCKERCART_SSL_ENABLED:-false}" = "true" ] && [ -n "${DOCKERCART_HTTPS_URL:-}" ]; then
+        url="${DOCKERCART_HTTPS_URL%/}"
     fi
 
-    echo "Generating restrictive robots.txt at first start (Disallow: /)..."
-    cat > "$robots_file" <<EOF
-# DockerCart first-start safe default.
-# Keep site closed for indexing until you review SEO settings.
-# To open crawling, replace this file with robots-dist.txt and set your real domain in Sitemap.
-User-agent: *
-Disallow: /
-EOF
+    if [ "${DISALLOW_INDEXING:-NO}" = "YES" ]; then
+        cat > "$robots_file" <<-EOF
+	User-agent: *
+	Disallow: /
+	EOF
+    else
+        cat > "$robots_file" <<-EOF
+	User-agent: *
+	Allow: /catalog/view/javascript/
+	Allow: /catalog/view/theme/
+	Allow: /image/
+
+	Disallow: /admin/
+	Disallow: /system/
+	Disallow: /storage/
+	Disallow: /tool-
+	Disallow: /*/tool-
+	Disallow: /account-
+	Disallow: /*/account-
+	Disallow: /checkout-
+	Disallow: /*/checkout-
+	Disallow: /affiliate-
+	Disallow: /*/affiliate-
+	Disallow: /product-search
+	Disallow: /*/product-search
+	Disallow: /product-compare
+	Disallow: /*/product-compare
+	Disallow: /*?*sort=
+	Disallow: /*?*order=
+	Disallow: /*?*limit=
+	Disallow: /*?*page=
+	Disallow: /*?*tracking=
+	Disallow: /*?*utm_
+
+	Sitemap: ${url}/sitemap.xml
+	EOF
+    fi
 
     if [ "$(id -u)" -eq 0 ]; then
         chown www-data:staff "$robots_file" 2>/dev/null || true
         chmod 664 "$robots_file" 2>/dev/null || true
     fi
+
+    echo "$robots_file regenerated (sitemap: ${url}/sitemap.xml)"
 }
 
 # Гарантированно создаем config.php файлы (если их нет на хосте/в bind mount)
@@ -208,16 +243,12 @@ define('DB_PREFIX', $env('DB_PREFIX', 'oc_'));
 // Cache
 $cache_engine = $env('CACHE_ENGINE', 'redis');
 if ($cache_engine === 'redis' && !class_exists('Redis', false)) {
-	$cache_engine = class_exists('Memcached', false) ? 'memcached' : 'file';
+	$cache_engine = 'file';
 }
 define('CACHE_ENGINE', $cache_engine);
 define('REDIS_HOSTNAME', $env('REDIS_HOSTNAME', 'redis'));
 define('REDIS_PORT', $env('REDIS_PORT', '6379'));
 define('REDIS_PASSWORD', $env('REDIS_PASSWORD', 'dockercart_redis_pass'));
-define('MEMCACHED_HOSTNAME', $env('MEMCACHED_HOSTNAME', 'memcached'));
-define('MEMCACHED_PORT', $env('MEMCACHED_PORT', '11211'));
-define('CACHE_HOSTNAME', $env('CACHE_HOSTNAME', 'memcached'));
-define('CACHE_PORT', $env('CACHE_PORT', '11211'));
 define('CACHE_PREFIX', $env('CACHE_PREFIX', 'oc_'));
 define('IMAGE_MAX_DIMENSION', getenv('IMAGE_MAX_DIMENSION') ?: '2560');
 
@@ -280,16 +311,12 @@ define('DB_PREFIX', $env('DB_PREFIX', 'oc_'));
 // Cache
 $cache_engine = $env('CACHE_ENGINE', 'redis');
 if ($cache_engine === 'redis' && !class_exists('Redis', false)) {
-	$cache_engine = class_exists('Memcached', false) ? 'memcached' : 'file';
+	$cache_engine = 'file';
 }
 define('CACHE_ENGINE', $cache_engine);
 define('REDIS_HOSTNAME', $env('REDIS_HOSTNAME', 'redis'));
 define('REDIS_PORT', $env('REDIS_PORT', '6379'));
 define('REDIS_PASSWORD', $env('REDIS_PASSWORD', 'dockercart_redis_pass'));
-define('MEMCACHED_HOSTNAME', $env('MEMCACHED_HOSTNAME', 'memcached'));
-define('MEMCACHED_PORT', $env('MEMCACHED_PORT', '11211'));
-define('CACHE_HOSTNAME', $env('CACHE_HOSTNAME', 'memcached'));
-define('CACHE_PORT', $env('CACHE_PORT', '11211'));
 define('CACHE_PREFIX', $env('CACHE_PREFIX', 'oc_'));
 define('IMAGE_MAX_DIMENSION', getenv('IMAGE_MAX_DIMENSION') ?: '2560');
 
@@ -380,6 +407,37 @@ SQL
     echo "DockerCart bootstrap finished."
 }
 
+# Всегда синхронизирует config_url/config_ssl из DOCKERCART_URL с БД
+ensure_store_url() {
+    local db_host="${DB_HOSTNAME:-mariadb}"
+    local db_user="${DB_USERNAME:-dockercart}"
+    local db_pass="${DB_PASSWORD:-dockercart_password}"
+    local db_name="${DB_DATABASE:-dockercart}"
+    local db_prefix="${DB_PREFIX:-oc_}"
+    local url="${DOCKERCART_URL:-http://dockercart.local}"
+    url="${url%/}/"
+
+    # Проверяем, совпадает ли текущее значение в БД
+    local current
+    current=$(MYSQL_PWD="${db_pass}" mysql -h"${db_host}" -u"${db_user}" --skip-ssl \
+        -N -B -e "SELECT \`value\` FROM \`${db_prefix}setting\` WHERE \`key\` = 'config_url' AND store_id = 0" \
+        "${db_name}" 2>/dev/null || true)
+
+    if [ "${current}" = "${url}" ]; then
+        return 0
+    fi
+
+    echo "Updating store URL to: ${url}"
+    MYSQL_PWD="${db_pass}" mysql -h"${db_host}" -u"${db_user}" --skip-ssl "${db_name}" <<SQL
+SET NAMES utf8mb4;
+DELETE FROM \`${db_prefix}setting\` WHERE \`key\` IN ('config_url', 'config_ssl') AND store_id = 0;
+INSERT INTO \`${db_prefix}setting\` (store_id, \`code\`, \`key\`, \`value\`, serialized) VALUES
+  (0, 'config', 'config_url', '${url}', 0),
+  (0, 'config', 'config_ssl', '${url}', 0);
+SQL
+    echo "Store URL updated."
+}
+
 wait_for_manticore() {
     echo "Waiting for Manticore to be ready..."
     local max_attempts=30
@@ -419,6 +477,71 @@ initialize_manticore_index() {
     ) &
 }
 
+# Применяем PHP настройки из переменных окружения (если заданы)
+apply_php_settings() {
+    local ini_file="/usr/local/etc/php/conf.d/zzz-dockercart-env.ini"
+
+    cat > "$ini_file" <<PHP
+[PHP]
+; DockerCart runtime overrides from environment variables
+memory_limit = ${PHP_MEMORY_LIMIT:-256M}
+max_execution_time = ${PHP_MAX_EXECUTION_TIME:-300}
+upload_max_filesize = ${PHP_UPLOAD_MAX_FILESIZE:-100M}
+post_max_size = ${PHP_POST_MAX_SIZE:-100M}
+date.timezone = ${TZ:-UTC}
+PHP
+
+    if [ "${DOCKERCART_SSL_ENABLED:-false}" = "true" ] || [ "${DOCKERCART_FORCE_SSL:-0}" -eq 1 ]; then
+        echo "session.cookie_secure = On" >> "$ini_file"
+    fi
+
+    echo "Applied PHP settings from environment (${ini_file})"
+}
+
+# Generate rclone config for S3 backups from BACKUP_S3_* env vars.
+# Writes /var/www/storage/.rclone.conf (chmod 600) and exports RCLONE_CONFIG.
+# No-op when BACKUP_S3_ENABLED != true or required creds are missing.
+ensure_rclone_config() {
+    local rc_conf="/var/www/storage/.rclone.conf"
+
+    if [ "${BACKUP_S3_ENABLED:-false}" != "true" ]; then
+        return 0
+    fi
+
+    if [ -z "${BACKUP_S3_BUCKET:-}" ] || [ -z "${BACKUP_S3_ACCESS_KEY_ID:-}" ] || [ -z "${BACKUP_S3_SECRET_ACCESS_KEY:-}" ]; then
+        echo "WARNING: BACKUP_S3_ENABLED=true but BACKUP_S3_BUCKET/ACCESS_KEY_ID/SECRET_ACCESS_KEY not set — skipping rclone config."
+        return 0
+    fi
+
+    echo "Generating rclone config at ${rc_conf}..."
+    cat > "$rc_conf" <<EOF
+[s3]
+type = s3
+provider = ${BACKUP_S3_PROVIDER:-Other}
+endpoint = ${BACKUP_S3_ENDPOINT:-}
+region = ${BACKUP_S3_REGION:-}
+access_key_id = ${BACKUP_S3_ACCESS_KEY_ID}
+secret_access_key = ${BACKUP_S3_SECRET_ACCESS_KEY}
+no_check_certificate = ${BACKUP_S3_INSECURE:-false}
+EOF
+    chmod 600 "$rc_conf" 2>/dev/null || true
+    if [ "$(id -u)" -eq 0 ]; then
+        chown www-data:staff "$rc_conf" 2>/dev/null || true
+    fi
+    export RCLONE_CONFIG="$rc_conf"
+    echo "rclone config generated (RCLONE_CONFIG=${rc_conf})."
+}
+
+# Настраиваем logrotate и запускаем cron для ежедневной ротации логов
+setup_logrotate() {
+    if [ -f "/etc/logrotate.d/dockercart" ]; then
+        echo "Starting cron daemon for log rotation..."
+        cron
+    else
+        echo "WARNING: logrotate config not found at /etc/logrotate.d/dockercart"
+    fi
+}
+
 # Основная логика
 # Emit a small diagnostic header so logs show which entrypoint version ran.
 # We print the script modification time (as embedded in the image at build time)
@@ -436,10 +559,38 @@ fix_permissions
 # Устанавливаем Composer зависимости, если vendor отсутствует (первый запуск / свежий clone)
 install_composer_deps
 
+# Backup role: one-shot worker (started by host cron via
+# `docker compose run --rm --no-deps backup-worker`). Runs the PHP worker
+# directly, then exits. No Apache/OCMOD/Manticore.
+if [ "$DOCKERCART_ROLE" = "backup" ]; then
+    ensure_app_configs
+    wait_for_mysql
+    apply_php_settings
+mkdir -p /var/www/storage/backup
+mkdir -p /var/www/storage/upload
+chown -R www-data:staff /var/www/storage/upload/ || true
+    ensure_rclone_config
+    echo "Starting DockerCart backup worker..."
+    exec php /var/www/html/bin/dockercart_backup_s3.php "$@"
+fi
+
+# Scheduler role: lightweight startup, no Apache/OCMOD/Manticore
+if [ "$DOCKERCART_ROLE" = "scheduler" ]; then
+    ensure_app_configs
+    wait_for_mysql
+    apply_php_settings
+    mkdir -p /var/www/storage/logs/scheduler
+    echo "Starting DockerCart scheduler..."
+    exec php /var/www/html/bin/dockercart_scheduler.php
+fi
+
+# Настраиваем ротацию логов (error.log и др.)
+setup_logrotate
+
 # Создаем конфиги приложения, если отсутствуют
 ensure_app_configs
 
-# Генерируем robots.txt, если отсутствует
+# Генерируем robots.txt при каждом старте
 ensure_robots_txt
 
 # Ждем MariaDB
@@ -448,27 +599,14 @@ wait_for_mysql
 # Инициализация БД (если MariaDB пропустила init из-за существующего volume)
 initialize_database || echo "WARNING: Database initialization failed — continuing anyway"
 
-# Применяем PHP настройки из переменных окружения (если заданы)
-apply_php_settings() {
-    local ini_file="/usr/local/etc/php/conf.d/zzz-dockercart-env.ini"
-
-    cat > "$ini_file" <<PHP
-[PHP]
-; DockerCart runtime overrides from environment variables
-memory_limit = ${PHP_MEMORY_LIMIT:-256M}
-max_execution_time = ${PHP_MAX_EXECUTION_TIME:-300}
-upload_max_filesize = ${PHP_UPLOAD_MAX_FILESIZE:-100M}
-post_max_size = ${PHP_POST_MAX_SIZE:-100M}
-PHP
-
-    if [ "${DOCKERCART_SSL_ENABLED:-false}" = "true" ] || [ "${DOCKERCART_FORCE_SSL:-0}" -eq 1 ]; then
-        echo "session.cookie_secure = On" >> "$ini_file"
-    fi
-
-    echo "Applied PHP settings from environment (${ini_file})"
-}
-
 apply_php_settings
+
+ensure_store_url
+
+# rclone config for S3 backup worker (also lets `make shell` users run the
+# worker manually; no-op when BACKUP_S3_ENABLED != true).
+mkdir -p /var/www/storage/backup
+ensure_rclone_config
 
 # Перестраиваем OCMOD модификации (читает XML из БД и файлов, пересоздаёт кэш)
 echo "Refreshing OCMOD modifications..."

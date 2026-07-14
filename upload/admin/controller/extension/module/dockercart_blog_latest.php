@@ -1,17 +1,17 @@
 <?php
 /**
  * DockerCart Blog - Latest Posts Module (Admin Controller)
- * 
+ *
  * @package    DockerCart Blog
  * @version    1.0.0
- * @author     DockerCart Team
- * 
+ * @author     DockerCart Official
+ *
  * Description: Admin controller for Latest Posts widget module.
  *              Allows displaying recent blog posts in any layout position.
  */
 
 class ControllerExtensionModuleDockercartBlogLatest extends Controller {
-	
+
 	private $error = array();
 
 	public function index() {

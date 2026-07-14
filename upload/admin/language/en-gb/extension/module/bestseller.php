@@ -3,7 +3,7 @@
 $_['heading_title']    = 'Bestsellers';
 
 // Text
-$_['text_extension']   = 'Extensions';
+$_['text_extension']   = 'Add-ons';
 $_['text_success']     = 'Success: You have modified bestsellers module!';
 $_['text_edit']        = 'Edit Bestsellers Module';
 $_['text_default_module_name'] = 'Bestsellers';

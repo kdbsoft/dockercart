@@ -1,11 +1,11 @@
 <?php
 /**
  * DockerCart Blog - Latest Posts Module Controller
- * 
+ *
  * @package    DockerCart Blog
  * @version    1.0.0
- * @author     DockerCart Team
- * 
+ * @author     DockerCart Official
+ *
  * Description: Renders latest blog posts section matching index.html design
  */
 
@@ -13,7 +13,7 @@ class ControllerExtensionModuleDockercartBlogLatest extends Controller {
 
 	/**
 	 * Index method - render latest blog posts module
-	 * 
+	 *
 	 * @param array $setting Module settings
 	 * @return string Rendered HTML
 	 */
@@ -80,7 +80,7 @@ class ControllerExtensionModuleDockercartBlogLatest extends Controller {
 			$category_color     = $colors[0]; // Default to first color
 			$category_info      = null;
 			$primary_category_id = 0;
-			
+
 			$post_categories = $this->model_extension_module_dockercart_blog_post->getPostCategories($post['post_id']);
 
 			if (!empty($post_categories)) {

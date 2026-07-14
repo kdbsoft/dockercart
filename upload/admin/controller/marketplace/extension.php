@@ -149,13 +149,11 @@ class ControllerMarketplaceExtension extends Controller {
 						$sort_order = (string)$this->config->get($type . '_' . $code . '_sort_order');
 					}
 
-					// Payment external link
+					// External link / logo
 					$ext_link = '';
-					if ($type === 'payment') {
-						$text_link = $this->language->get('ext_lang')->get('text_' . $code);
-						if ($text_link !== 'text_' . $code) {
-							$ext_link = $text_link;
-						}
+					$text_link = $this->language->get('ext_lang')->get('text_' . $code);
+					if ($text_link !== 'text_' . $code) {
+						$ext_link = $text_link;
 					}
 
 				$extensions[] = array(
@@ -205,6 +203,7 @@ class ControllerMarketplaceExtension extends Controller {
 		$data['text_no_results']    = $this->language->get('text_no_results');
 		$data['text_instances']     = $this->language->get('text_instances');
 		$data['text_confirm']       = $this->language->get('text_confirm');
+		$data['text_official']      = $this->language->get('text_official');
 
 		$data['text_confirm_instance'] = $this->language->get('text_confirm_instance');
 
@@ -283,17 +282,63 @@ class ControllerMarketplaceExtension extends Controller {
 
 			$this->model_setting_extension->uninstall($type, $extension);
 
-			// Module-specific: remove all module instances
 			if ($type === 'module') {
 				$this->load->model('setting/module');
 				$this->model_setting_module->deleteModulesByCode($extension);
 			}
 
-			// Call the extension's own uninstall method if it exists
 			$this->load->controller('extension/' . $type . '/' . $extension . '/uninstall');
 
 			$this->load->model('user/user_group');
 			$this->model_user_user_group->removePermissions('extension/' . $type . '/' . $extension);
+
+			if (is_file(DIR_SYSTEM . 'library/dockercart/extension_store.php')) {
+				require_once DIR_SYSTEM . 'library/dockercart/extension_store.php';
+				$store = new DockercartExtensionStore($this->registry);
+				$store->removeInstalledMeta($extension);
+			}
+
+			if (is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
+				require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
+				$licensing = new DockercartLicensing($this->registry);
+				$licensing->removeLicense($extension);
+			}
+
+			$this->session->data['success'] = $this->language->get('text_success');
+
+			$json['success'] = $this->language->get('text_success');
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function update() {
+		$this->load->language('marketplace/extension');
+
+		$json = array();
+
+		$type      = isset($this->request->get['type'])      ? (string)$this->request->get['type']      : '';
+		$extension = isset($this->request->get['extension']) ? (string)$this->request->get['extension'] : '';
+
+		$valid_types = $this->getValidTypes();
+
+		if (!in_array($type, $valid_types)) {
+			$json['error'] = $this->language->get('error_permission');
+		} elseif (!$this->user->hasPermission('modify', 'extension/extension/' . $type)) {
+			$json['error'] = $this->language->get('error_permission');
+		} elseif (empty($extension) || strlen($extension) < 1 || strlen($extension) > 64
+			|| !preg_match('/^[a-zA-Z0-9_]+$/', $extension)
+		) {
+			$json['error'] = $this->language->get('error_permission');
+		} else {
+			$from_version = $this->request->get['from'] ?? '0.0.0';
+			$to_version = $this->request->get['to'] ?? '';
+
+			$this->load->controller('extension/' . $type . '/' . $extension . '/update', array(
+				'from' => $from_version,
+				'to' => $to_version,
+			));
 
 			$this->session->data['success'] = $this->language->get('text_success');
 

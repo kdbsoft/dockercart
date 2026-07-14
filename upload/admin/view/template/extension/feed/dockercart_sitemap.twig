@@ -9,7 +9,7 @@
     <div class="container-fluid">
       <div class="pull-right">
         <button type="submit" form="form-dockercart-sitemap" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
-        <button id="button-generate" type="button" data-toggle="tooltip" title="{{ button_generate }}" class="btn btn-success" {% if not license_valid %}disabled{% endif %}><i class="fa fa-refresh"></i></button>
+        <button id="button-generate" type="button" data-toggle="tooltip" title="{{ button_generate }}" class="btn btn-success"><i class="fa fa-refresh"></i></button>
         <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
       </div>
       <h1>{{ heading_title }}</h1>
@@ -34,7 +34,6 @@
 
     <ul class="nav nav-tabs dcx-profile-tabs" id="sitemap-tabs" role="tablist">
       <li class="active"><a href="#sitemap-tab-general" class="js-sitemap-tab" data-tab="sitemap-tab-general" data-title="{{ text_tab_general }}" data-subtitle="{{ text_tab_general_subtitle }}" data-icon="fa-sliders"><i class="fa fa-sliders"></i> {{ text_tab_general }}</a></li>
-      <li><a href="#sitemap-tab-license" class="js-sitemap-tab" data-tab="sitemap-tab-license" data-title="{{ text_tab_license }}" data-subtitle="{{ text_tab_license_subtitle }}" data-icon="fa-key"><i class="fa fa-key"></i> {{ text_tab_license }}</a></li>
       <li><a href="#sitemap-tab-about" class="js-sitemap-tab" data-tab="sitemap-tab-about" data-title="{{ text_tab_about }}" data-subtitle="{{ text_tab_about_subtitle }}" data-icon="fa-info-circle"><i class="fa fa-info-circle"></i> {{ text_tab_about }}</a></li>
     </ul>
 
@@ -80,6 +79,18 @@
                     <div class="dcx-sitemap-url">Last generated: <strong id="sitemap-last-generated">Never</strong></div>
                     {% endif %}
                   </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="input-schedule">{{ entry_schedule }}</label>
+                <div class="col-sm-9">
+                  <select name="dockercart_sitemap_schedule" id="input-schedule" class="form-control">
+                    {% for value, label in schedule_options %}
+                      <option value="{{ value }}" {% if value == dockercart_sitemap_schedule %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                  <p class="help-block">{{ help_schedule }}</p>
                 </div>
               </div>
             </div>
@@ -322,16 +333,6 @@
 
           <div class="form-group">
             <label class="col-sm-3 control-label">
-              <span data-toggle="tooltip" title="{{ help_cache_seconds }}">{{ entry_cache_seconds }}</span>
-            </label>
-            <div class="col-sm-9">
-              <input type="text" name="dockercart_sitemap_cache_seconds" value="{{ dockercart_sitemap_cache_seconds }}" placeholder="86400" class="form-control" />
-              <p class="help-block">{{ help_cache_seconds }}</p>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="col-sm-3 control-label">
               <span data-toggle="tooltip" title="{{ help_create_gzip }}">{{ entry_create_gzip }}</span>
             </label>
             <div class="col-sm-9">
@@ -345,49 +346,6 @@
 
             </div>
 
-          </div>
-
-          <div id="sitemap-tab-license" class="dcx-tab-pane">
-            <div class="dcx-section">
-              <h4>{{ text_section_license_info }}</h4>
-
-              <div class="form-group">
-                <label class="col-sm-3 control-label" for="input-license-key">{{ entry_license_key|default('License Key') }}</label>
-                <div class="col-sm-9">
-                  <input type="text" name="module_dockercart_sitemap_license_key" value="{{ module_dockercart_sitemap_license_key }}" placeholder="DCSS-XXXXXXXXXXXXXXXX-YYYYYYYYYYYY" id="input-license-key" class="form-control" />
-                  <small class="form-text text-muted" style="margin-top: 5px;">
-                    <i class="fa fa-info-circle"></i> {{ text_license_domain|default('License bound to domain') }}: <strong>{{ license_domain|default('unknown') }}</strong>
-                  </small>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label class="col-sm-3 control-label" for="input-public-key">{{ entry_public_key|default('Public Key') }}</label>
-                <div class="col-sm-9">
-                  <textarea name="module_dockercart_sitemap_public_key" id="input-public-key" rows="8" class="form-control" placeholder="-----BEGIN PUBLIC KEY-----&#10;...&#10;-----END PUBLIC KEY-----">{{ module_dockercart_sitemap_public_key }}</textarea>
-                  <small class="form-text text-muted" style="margin-top: 5px;">
-                    <i class="fa fa-shield"></i> {{ help_public_key|default('This public key is used to verify license signatures. Get it from your vendor.') }}
-                  </small>
-                </div>
-              </div>
-
-              <div id="license-info" class="form-group" style="display: none;">
-                <div class="col-sm-offset-3 col-sm-9">
-                  <div class="alert alert-info">
-                    <h4><i class="fa fa-info-circle"></i> {{ text_license|default('License Information') }}</h4>
-                    <p id="license-details"></p>
-                  </div>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label class="col-sm-3 control-label"></label>
-                <div class="col-sm-9">
-                  <button type="button" class="btn btn-info" id="btn-verify-license"><i class="fa fa-check-circle"></i> {{ button_verify_license|default('Verify License') }}</button>
-                  <span id="license-status" style="margin-left: 10px;"></span>
-                </div>
-              </div>
-            </div>
           </div>
 
           <div id="sitemap-tab-about" class="dcx-tab-pane">
@@ -434,7 +392,7 @@ $(document).on('click', '.js-sitemap-tab', function(e) {
   $('#sitemap-tabs > li').removeClass('active');
   $(this).closest('li').addClass('active');
 
-  $('#sitemap-tab-general, #sitemap-tab-license, #sitemap-tab-about').removeClass('active');
+  $('#sitemap-tab-general, #sitemap-tab-about').removeClass('active');
   $('#' + tabId).addClass('active');
 
   updateSitemapPanelHeader(this);
@@ -512,102 +470,4 @@ updateSitemapPanelHeader($('#sitemap-tabs > li.active a.js-sitemap-tab'));
   });
 })();
 /* ]]> */
-</script>
-
-<script>
-/* License save + verify (copied from Dockercart Filter behavior) */
-document.addEventListener('DOMContentLoaded', function() {
-  var btnVerify = document.getElementById('btn-verify-license');
-  var licenseInput = document.getElementById('input-license-key');
-  var licenseStatus = document.getElementById('license-status');
-  var licenseInfo = document.getElementById('license-info');
-  var licenseDetails = document.getElementById('license-details');
-  var publicKeyInput = document.getElementById('input-public-key');
-
-  function saveLicenseKey(licenseKey) {
-    var publicKey = publicKeyInput.value.trim();
-
-    return fetch('{{ license_save_ajax }}'.replace(/&amp;/g, '&'), {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest'
-      },
-      body: JSON.stringify({ license_key: licenseKey, public_key: publicKey })
-    }).then(function(resp) { return resp.json(); });
-  }
-
-  function verifyLicense() {
-    var licenseKey = licenseInput.value.trim();
-    var publicKey = publicKeyInput.value.trim();
-
-    if (!licenseKey) {
-      licenseStatus.innerHTML = '<span class="label label-danger">Please enter license key</span>';
-      return;
-    }
-
-    if (!publicKey) {
-      licenseStatus.innerHTML = '<span class="label label-danger">Please enter public key</span>';
-      return;
-    }
-
-    btnVerify.disabled = true;
-    var originalText = btnVerify.innerHTML;
-    btnVerify.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Verifying...';
-    licenseStatus.innerHTML = '';
-    licenseInfo.style.display = 'none';
-
-    // Save keys first to persist (non-blocking if save fails)
-    saveLicenseKey(licenseKey).catch(function(e){ /* ignore save errors here */ });
-
-    fetch('{{ license_verify_ajax }}'.replace(/&amp;/g, '&'), {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest'
-      },
-      body: JSON.stringify({ license_key: licenseKey, public_key: publicKey })
-    })
-    .then(function(resp) { return resp.json(); })
-    .then(function(data) {
-      btnVerify.disabled = false;
-      btnVerify.innerHTML = originalText;
-
-      if (data.valid) {
-        licenseStatus.innerHTML = '<span class="label label-success"><i class="fa fa-check"></i> Valid</span>';
-        var infoHtml = '<strong>Status:</strong> Active<br>';
-        infoHtml += '<strong>Domain:</strong> ' + (data.domain || '{{ license_domain }}') + '<br>';
-        if (data.expires_formatted) {
-          infoHtml += '<strong>Expires:</strong> ' + data.expires_formatted + '<br>';
-        } else {
-          infoHtml += '<strong>Type:</strong> Lifetime License<br>';
-        }
-        if (data.license_id) infoHtml += '<strong>License ID:</strong> ' + data.license_id;
-        licenseDetails.innerHTML = infoHtml;
-        licenseInfo.style.display = 'block';
-      } else {
-        licenseStatus.innerHTML = '<span class="label label-danger"><i class="fa fa-times"></i> Invalid</span>';
-        licenseDetails.innerHTML = data.error ? ('<strong>Error:</strong> ' + data.error) : '';
-        licenseInfo.style.display = 'block';
-      }
-    })
-    .catch(function(err) {
-      btnVerify.disabled = false;
-      btnVerify.innerHTML = originalText;
-      licenseStatus.innerHTML = '<span class="label label-danger">Error: ' + (err.message || err) + '</span>';
-    });
-  }
-
-  if (btnVerify) {
-    licenseInput.addEventListener('input', function() { licenseStatus.innerHTML = ''; licenseInfo.style.display = 'none'; });
-    btnVerify.addEventListener('click', function() { verifyLicense(); });
-
-    // Auto-verify when page loads if license exists
-    if (licenseInput.value.trim()) {
-      setTimeout(function() { verifyLicense(); }, 500);
-    }
-  }
-});
 </script>

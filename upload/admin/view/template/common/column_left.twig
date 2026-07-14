@@ -9,6 +9,7 @@
           <ul id="collapse{{ i }}" class="collapse">
             {% set j = 0 %}
             {% for children_1 in menu.children %}
+              {% if children_1.href or children_1.children %}
               <li>{% if children_1.href %}
                   <a href="{{ children_1.href }}">{{ children_1.name }}</a>
                 {% else %}
@@ -35,6 +36,7 @@
                     {% endfor %}
                   </ul>
                 {% endif %} </li>
+              {% endif %}
               {% set j = j + 1 %}
             {% endfor %}
           </ul>

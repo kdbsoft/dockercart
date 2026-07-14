@@ -143,6 +143,9 @@ class ControllerExtensionReportProductViewed extends Controller {
 
 			$this->model_extension_report_product->reset();
 
+			$this->cache->delete('dash_viewed_product_ajax');
+			$this->cache->delete('dash_viewed_product_spark');
+
 			$this->session->data['success'] = $this->language->get('text_success');
 		}
 

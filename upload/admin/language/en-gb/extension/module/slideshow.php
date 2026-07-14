@@ -3,7 +3,7 @@
 $_['heading_title']    = 'Slideshow';
 
 // Text
-$_['text_extension']   = 'Extensions';
+$_['text_extension']   = 'Add-ons';
 $_['text_success']     = 'Success: You have modified slideshow module!';
 $_['text_edit']        = 'Edit Slideshow Module';
 $_['text_default_module_name'] = 'Slideshow';
