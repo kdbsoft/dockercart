@@ -1,3 +1,9 @@
+## [2.0.3](https://github.com/kdbsoft/dockercart/compare/v2.0.2...v2.0.3) (2026-07-14)
+
+### Bug Fixes
+
+* **ci:** resolve all PHPStan 2.2.5 errors ([0d7aee3](https://github.com/kdbsoft/dockercart/commit/0d7aee35fba2ee01cb06a9b831e279529687d5d5))
+
 ## [2.0.2](https://github.com/kdbsoft/dockercart/compare/v2.0.1...v2.0.2) (2026-07-14)
 
 ### Bug Fixes
