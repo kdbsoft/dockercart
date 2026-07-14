@@ -1,3 +1,13 @@
+## [2.0.0](https://github.com/kdbsoft/dockercart/compare/v1.48.0...v2.0.0) (2026-07-14)
+
+### ⚠ BREAKING CHANGES
+
+* switch to 2.0.0 version
+
+### Code Refactoring
+
+* switch to 2.0.0 version ([1e46ab9](https://github.com/kdbsoft/dockercart/commit/1e46ab91bb4130d12a9062433cfa230a303fedee))
+
 ## [1.48.0](https://github.com/kdbsoft/dockercart/compare/v1.47.7...v1.48.0) (2026-07-14)
 
 ### ⚠ BREAKING CHANGES
