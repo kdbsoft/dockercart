@@ -1,3 +1,9 @@
+## [2.0.6](https://github.com/kdbsoft/dockercart/compare/v2.0.5...v2.0.6) (2026-07-14)
+
+### Bug Fixes
+
+* fix writability check for nested install paths ([acae9eb](https://github.com/kdbsoft/dockercart/commit/acae9ebef67beb1dbe3599b81f094e5f57cdcbbf))
+
 ## [2.0.5](https://github.com/kdbsoft/dockercart/compare/v2.0.4...v2.0.5) (2026-07-14)
 
 ### Bug Fixes
