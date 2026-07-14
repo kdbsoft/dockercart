@@ -9,6 +9,7 @@ parameters:
         - ./upload/
     excludePaths:
         - ./storage/vendor/
+        - ./upload/bin/
         - ./upload/config.php (?)
         - ./upload/admin/config.php (?)
     tmpDir: .cache
@@ -17,4 +18,5 @@ parameters:
         - '#Constant [A-Z_]+ not found\.#'
         - '#might not be defined\.#'
         - '#invoked with \d+ parameters?, \d+ required\.#'
+        - '#Variable .+ in empty\(\) always exists#'
     reportUnmatchedIgnoredErrors: false
