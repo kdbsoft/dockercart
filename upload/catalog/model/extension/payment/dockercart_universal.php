@@ -4,7 +4,7 @@
  * Returns one suitable payment method based on configured records.
  *
  * @package    DockerCart
- * @author     DockerCart Team
+ * @author     DockerCart Official
  * @copyright  2024-2026 DockerCart
  * @license    MIT
  */

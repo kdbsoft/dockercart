@@ -1,0 +1,134 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <a href="{{ cancel|default('') }}" data-toggle="tooltip" title="{{ button_cancel|default('') }}" class="btn btn-default" style="display:none;"><i class="fa fa-reply"></i></a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+
+    {# Scheduler container status #}
+    <div class="panel panel-default" style="margin-bottom:20px;">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-info-circle"></i> {{ text_scheduler_status }}</h3>
+      </div>
+      <div class="panel-body">
+        <p class="text-muted"><i class="fa fa-clock-o"></i> {{ text_scheduler_running }}</p>
+      </div>
+    </div>
+
+    {# Unified Scheduled Tasks #}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-clock-o"></i> {{ heading_title }}</h3>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+          <thead>
+            <tr>
+              <th>{{ column_source }}</th>
+              <th>{{ column_name }}</th>
+              <th>{{ column_schedule }}</th>
+              <th>{{ column_last_run }}</th>
+              <th>{{ column_status }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if tasks is not empty %}
+              {% for task in tasks %}
+              <tr>
+                <td><span class="label label-info">{{ task.task_type }}</span></td>
+                <td>{{ task.task_name }}</td>
+                <td>
+                  <select class="form-control scheduler-schedule-select"
+                     data-task_id="{{ task.task_id }}"
+                     style="width:auto;display:inline-block;">
+                    <option value="" {% if task.cron_schedule == '' %}selected{% endif %}>{{ text_cron_disabled }}</option>
+                    <option value="every_15m" {% if task.cron_schedule == 'every_15m' %}selected{% endif %}>{{ text_every_15m }}</option>
+                    <option value="every_30m" {% if task.cron_schedule == 'every_30m' %}selected{% endif %}>{{ text_every_30m }}</option>
+                    <option value="hourly" {% if task.cron_schedule == 'hourly' %}selected{% endif %}>{{ text_hourly }}</option>
+                    <option value="every_6h" {% if task.cron_schedule == 'every_6h' %}selected{% endif %}>{{ text_every_6h }}</option>
+                    <option value="every_12h" {% if task.cron_schedule == 'every_12h' %}selected{% endif %}>{{ text_every_12h }}</option>
+                    <option value="daily" {% if task.cron_schedule == 'daily' %}selected{% endif %}>{{ text_daily }}</option>
+                  </select>
+                </td>
+                <td>{{ task.last_run ? task.last_run : text_never }}</td>
+                <td>
+                  <select class="form-control toggle-scheduler-task"
+                     data-task_id="{{ task.task_id }}"
+                     style="width:auto;display:inline-block;">
+                    <option value="1" {% if task.cron_enabled %}selected{% endif %}>{{ text_enabled }}</option>
+                    <option value="0" {% if not task.cron_enabled %}selected{% endif %}>{{ text_disabled }}</option>
+                  </select>
+                </td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="5" class="text-center">{{ text_no_tasks }}</td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+<script>
+$('.toggle-scheduler-task').on('change', function() {
+    var $select = $(this);
+    $.ajax({
+        url: 'index.php?route=tool/dockercart_scheduler/toggleTask&user_token={{ user_token }}',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+            task_id: $select.data('task_id'),
+            enabled: $select.val()
+        },
+        success: function(json) {
+            if (json.success) {
+                location.reload();
+            } else {
+                alert(json.error || 'Toggle failed');
+            }
+        },
+        error: function() {
+            alert('Request failed');
+        }
+    });
+});
+
+$('.scheduler-schedule-select').on('change', function() {
+    var $select = $(this);
+    $.ajax({
+        url: 'index.php?route=tool/dockercart_scheduler/updateSchedule&user_token={{ user_token }}',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+            task_id: $select.data('task_id'),
+            schedule: $select.val()
+        },
+        success: function(json) {
+            if (json.success) {
+                location.reload();
+            } else {
+                alert(json.error || 'Update failed');
+            }
+        },
+        error: function() {
+            alert('Request failed');
+        }
+    });
+});
+</script>
+{{ footer }}

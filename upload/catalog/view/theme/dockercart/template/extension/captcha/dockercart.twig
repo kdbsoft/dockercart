@@ -1,0 +1,210 @@
+<fieldset>
+  <legend>{{ text_captcha }}</legend>
+  <div class="form-group required">
+    {% if route|slice(0, 9) == 'checkout/' %}
+    <label class="control-label" for="input-payment-captcha">{{ entry_captcha }}</label>
+    <div class="dockercart-captcha" data-min="{{ slider_min }}" data-max="{{ slider_max }}">
+      <p class="captcha-question">{{ question }}</p>
+      <div class="captcha-slider">
+        <div class="captcha-slider__track">
+          <div class="captcha-slider__fill"></div>
+        </div>
+        <div class="captcha-slider__handle" tabindex="0" role="slider" aria-valuemin="{{ slider_min }}" aria-valuemax="{{ slider_max }}" aria-valuenow="0">
+          <span class="captcha-slider__value">0</span>
+        </div>
+      </div>
+      <input type="hidden" name="captcha" value="0" />
+      {% if error_captcha %}
+      <div class="text-danger">{{ error_captcha }}</div>
+      {% endif %}
+    </div>
+    {% else %}
+    <label class="col-sm-2 control-label" for="input-captcha">{{ entry_captcha }}</label>
+    <div class="col-sm-10">
+      <div class="dockercart-captcha" data-min="{{ slider_min }}" data-max="{{ slider_max }}">
+        <p class="captcha-question">{{ question }}</p>
+        <div class="captcha-slider">
+          <div class="captcha-slider__track">
+            <div class="captcha-slider__fill"></div>
+          </div>
+          <div class="captcha-slider__handle" tabindex="0" role="slider" aria-valuemin="{{ slider_min }}" aria-valuemax="{{ slider_max }}" aria-valuenow="0">
+            <span class="captcha-slider__value">0</span>
+          </div>
+        </div>
+        <input type="hidden" name="captcha" value="0" />
+        {% if error_captcha %}
+        <div class="text-danger">{{ error_captcha }}</div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</fieldset>
+
+<style>
+.dockercart-captcha {
+  max-width: 320px;
+  padding: 16px 0;
+}
+.captcha-question {
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 16px;
+  color: #1f2937;
+  letter-spacing: 0.5px;
+  user-select: none;
+}
+.captcha-slider {
+  position: relative;
+  width: 100%;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+}
+.captcha-slider__track {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 9999px;
+}
+.captcha-slider__fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: #3b82f6;
+  border-radius: 9999px;
+  width: 0%;
+  pointer-events: none;
+}
+.captcha-slider__handle {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  background: #ffffff;
+  border: 2px solid #3b82f6;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  cursor: grab;
+  transform: translate(-50%, -50%);
+  top: 50%;
+  left: 0%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+  transition: box-shadow 0.15s;
+}
+.captcha-slider__handle:hover {
+  border-color: #2563eb;
+}
+.captcha-slider__handle:focus-visible {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.35);
+}
+.captcha-slider__handle:active {
+  cursor: grabbing;
+}
+.captcha-slider__value {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 13px;
+  font-weight: 700;
+  color: #2563eb;
+  background: #ffffff;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid #bfdbfe;
+  white-space: nowrap;
+  pointer-events: none;
+}
+</style>
+
+<script>
+document.querySelectorAll('.dockercart-captcha').forEach(function(el) {
+  var track = el.querySelector('.captcha-slider');
+  var handle = el.querySelector('.captcha-slider__handle');
+  var fill = el.querySelector('.captcha-slider__fill');
+  var valueDisplay = handle.querySelector('.captcha-slider__value');
+  var input = el.querySelector('input[name="captcha"]');
+  var min = parseInt(el.getAttribute('data-min'), 10) || 0;
+  var max = parseInt(el.getAttribute('data-max'), 10) || 10;
+  var value = 0;
+  var dragging = false;
+
+  function getValueFromClientX(clientX) {
+    var rect = track.getBoundingClientRect();
+    var x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+    var percent = x / rect.width;
+    return Math.round(min + percent * (max - min));
+  }
+
+  function updateUI(val) {
+    value = Math.max(min, Math.min(max, val));
+    var percent = ((value - min) / (max - min)) * 100;
+    handle.style.left = percent + '%';
+    fill.style.width = percent + '%';
+    valueDisplay.textContent = value;
+    input.value = value;
+    handle.setAttribute('aria-valuenow', value);
+  }
+
+  function onPointerDown(e) {
+    e.preventDefault();
+    dragging = true;
+    var clientX = e.clientX || (e.touches && e.touches[0].clientX);
+    if (clientX !== undefined) {
+      updateUI(getValueFromClientX(clientX));
+    }
+    handle.focus();
+  }
+
+  function onPointerMove(e) {
+    if (!dragging) return;
+    var clientX = e.clientX;
+    if (clientX === undefined && e.touches) {
+      clientX = e.touches[0].clientX;
+    }
+    if (clientX !== undefined) {
+      updateUI(getValueFromClientX(clientX));
+    }
+  }
+
+  function onPointerUp() {
+    dragging = false;
+  }
+
+  function onKeyDown(e) {
+    var step = 1;
+    if (e.shiftKey) step = 5;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      updateUI(value + step);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      updateUI(value - step);
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      updateUI(min);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      updateUI(max);
+    }
+  }
+
+  handle.addEventListener('mousedown', onPointerDown);
+  handle.addEventListener('touchstart', onPointerDown, { passive: true });
+  document.addEventListener('mousemove', onPointerMove);
+  document.addEventListener('mouseup', onPointerUp);
+  document.addEventListener('touchmove', onPointerMove, { passive: true });
+  document.addEventListener('touchend', onPointerUp);
+  handle.addEventListener('keydown', onKeyDown);
+});
+</script>

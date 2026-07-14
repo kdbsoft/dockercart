@@ -156,12 +156,6 @@ class ControllerAccountOrder extends Controller {
 				$data['success'] = '';
 			}
 
-			if ($order_info['invoice_no']) {
-				$data['invoice_no'] = $order_info['invoice_prefix'] . $order_info['invoice_no'];
-			} else {
-				$data['invoice_no'] = '';
-			}
-
 			$data['order_id'] = (int)$this->request->get['order_id'];
 			$data['date_added'] = date($this->language->get('date_format_short'), strtotime($order_info['date_added']));
 			$data['tracking_number'] = $order_info['tracking_number'];

@@ -3,7 +3,7 @@
 $_['heading_title']    = 'Category Tree';
 
 // Text
-$_['text_extension']   = 'Extensions';
+$_['text_extension']   = 'Add-ons';
 $_['text_success']     = 'Success: You have modified category tree module!';
 $_['text_edit']        = 'Edit Category Tree Module';
 $_['text_default_module_name'] = 'Category Tree';

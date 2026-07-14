@@ -4,9 +4,9 @@
 
 | Version | Supported |
 |---|---|
-| 1.x.x (current) | ✅ Yes |
+| 2.x.x (current) | ✅ Yes |
 
-Only the latest `1.x.x` release line receives security fixes.
+Only the latest `2.x.x` release line receives security fixes.
 
 ---
 
@@ -96,7 +96,7 @@ upstream security patches.
 ### HTTPS
 
 Always use HTTPS in production. See [README.md](README.md) and
-[DEPLOYMENT.md](DEPLOYMENT.md) for current SSL and deployment options.
+[docs/guide.md](docs/guide.md#4-deployment) for current SSL and deployment options.
 
 ---
 

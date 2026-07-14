@@ -1,9 +1,9 @@
 <?php
 // Heading
-$_['heading_title']                     = 'DockerCart Shop Features';
+$_['heading_title']                     = 'Shop Features';
 
 // Text
-$_['text_extension']                    = 'Extensions';
+$_['text_extension']                    = 'Add-ons';
 $_['text_success']                      = 'Shop Features module settings saved successfully!';
 $_['text_edit']                         = 'Shop Features widget settings';
 $_['text_enabled']                      = 'Enabled';

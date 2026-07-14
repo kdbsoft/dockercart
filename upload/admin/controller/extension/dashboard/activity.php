@@ -88,6 +88,7 @@ class ControllerExtensionDashboardActivity extends Controller {
 
 		$data['text_activity_subtitle'] = $this->language->get('text_activity_subtitle');
 		$data['user_token'] = $this->session->data['user_token'];
+		$data['view_all'] = $this->url->link('report/report', 'user_token=' . $this->session->data['user_token'] . '&code=customer_activity', true);
 
 		$data['activities'] = array();
 

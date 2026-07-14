@@ -1,12 +1,12 @@
-# Docker Compose override for self-signed SSL configuration
-# Usage: docker compose -f docker-compose.yml -f docker-compose.ssl.yml up -d
+# Docker Compose override for standalone self-signed SSL mode
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.ssl.yml up -d
+#   make ssl
 
 services:
   nginx:
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.${DOCKERCART_ROUTER_NAME:-dockercart}.rule=Host(`${DOCKERCART_DOMAIN:-dockercart.local}`)"
-      - "traefik.http.routers.${DOCKERCART_ROUTER_NAME:-dockercart}.entrypoints=websecure"
-      - "traefik.http.routers.${DOCKERCART_ROUTER_NAME:-dockercart}.tls=true"
-      - "traefik.http.routers.${DOCKERCART_ROUTER_NAME:-dockercart}.tls.certresolver=selfsigned"
-      - "traefik.http.services.${DOCKERCART_ROUTER_NAME:-dockercart}.loadbalancer.server.port=80"
+    ports:
+      - "${DOCKERCART_HTTPS_PORT:-443}:443"
+    volumes:
+      - ./docker/ssl:/etc/ssl/dockercart:ro
+      - ./docker/nginx/ssl/dockercart.selfsigned.conf:/etc/nginx/conf.d/dockercart.ssl.conf:ro

@@ -39,8 +39,14 @@ $_['action_event'] = array(
 	'controller/*/after' => array(
 		'event/language/after'
 	),
+	'controller/extension/*/*/before' => array(
+		'event/dockercart_license_admin'
+	),
 	'view/*/before' => array(
 		999  => 'event/language',
 		1000 => 'event/theme'
+	),
+	'view/extension/*/*/after' => array(
+		'event/dockercart_about_tab'
 	)
 );

@@ -90,8 +90,17 @@ class ControllerExtensionExtensionShipping extends Controller {
 
 				$this->load->language('extension/shipping/' . $extension, 'extension');
 
+				$text_link = $this->language->get('extension')->get('text_' . $extension);
+
+				if ($text_link != 'text_' . $extension) {
+					$link = $text_link;
+				} else {
+					$link = '';
+				}
+
 				$data['extensions'][] = array(
 					'name'       => $this->language->get('extension')->get('heading_title'),
+					'link'       => $link,
 					'status'     => $this->config->get('shipping_' . $extension . '_status') ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
 					'sort_order' => $this->config->get('shipping_' . $extension . '_sort_order'),
 					'install'    => $this->url->link('extension/extension/shipping/install', 'user_token=' . $this->session->data['user_token'] . '&extension=' . $extension, true),

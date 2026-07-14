@@ -9,7 +9,20 @@ class Smtp extends \stdClass {
 	public $max_attempts = 3;
 	public $verp = false;
 
+	// Auth method: 'login' or 'oauth'
+	public $smtp_auth_method = 'login';
+
+	// OAuth 2.0 credentials
+	public $smtp_oauth_token = '';
+	public $smtp_oauth_refresh_token = '';
+	public $smtp_oauth_client_id = '';
+	public $smtp_oauth_client_secret = '';
+
 	public function send() {
+		if (empty($this->smtp_hostname)) {
+			return;
+		}
+
 		if (is_array($this->to)) {
 			$to = implode(',', $this->to);
 		} else {
@@ -90,129 +103,247 @@ class Smtp extends \stdClass {
 
 		if (!$handle) {
 			throw new \Exception('Error: ' . $errstr . ' (' . $errno . ')');
+		}
+
+		if (substr(PHP_OS, 0, 3) != 'WIN') {
+			socket_set_timeout($handle, $this->smtp_timeout, 0);
+		}
+
+		$this->readGreeting($handle);
+		$this->sendEhlo($handle);
+
+		if (substr($this->smtp_hostname, 0, 3) == 'tls') {
+			fputs($handle, 'STARTTLS' . "\r\n");
+			$this->handleReply($handle, 220, 'Error: STARTTLS not accepted from server!');
+
+			if (stream_socket_enable_crypto($handle, true, STREAM_CRYPTO_METHOD_TLS_CLIENT) !== true) {
+				throw new \Exception('Error: TLS could not be established!');
+			}
+
+			$this->sendEhlo($handle);
+		}
+
+		$this->authenticate($handle);
+
+		if ($this->verp) {
+			fputs($handle, 'MAIL FROM: <' . $this->from . '>XVERP' . "\r\n");
 		} else {
-			if (substr(PHP_OS, 0, 3) != 'WIN') {
-				socket_set_timeout($handle, $this->smtp_timeout, 0);
+			fputs($handle, 'MAIL FROM: <' . $this->from . '>' . "\r\n");
+		}
+
+		$this->handleReply($handle, 250, 'Error: MAIL FROM not accepted from server!');
+
+		if (!is_array($this->to)) {
+			fputs($handle, 'RCPT TO: <' . $this->to . '>' . "\r\n");
+
+			$reply = $this->handleReply($handle, false, 'RCPT TO [!array]');
+
+			if ((substr($reply, 0, 3) != 250) && (substr($reply, 0, 3) != 251)) {
+				throw new \Exception('Error: RCPT TO not accepted from server!');
 			}
+		} else {
+			foreach ($this->to as $recipient) {
+				fputs($handle, 'RCPT TO: <' . $recipient . '>' . "\r\n");
 
-			while ($line = fgets($handle, 515)) {
-				if (substr($line, 3, 1) == ' ') {
-					break;
-				}
-			}
-
-			fputs($handle, 'EHLO ' . getenv('SERVER_NAME') . "\r\n");
-
-			$reply = '';
-
-			while ($line = fgets($handle, 515)) {
-				$reply .= $line;
-
-				//some SMTP servers respond with 220 code before responding with 250. hence, we need to ignore 220 response string
-				if (substr($reply, 0, 3) == 220 && substr($line, 3, 1) == ' ') {
-					$reply = '';
-
-					continue;
-				} else if (substr($line, 3, 1) == ' ') {
-					break;
-				}
-			}
-
-			if (substr($reply, 0, 3) != 250) {
-				throw new \Exception('Error: EHLO not accepted from server!');
-			}
-
-			if (substr($this->smtp_hostname, 0, 3) == 'tls') {
-				fputs($handle, 'STARTTLS' . "\r\n");
-
-				$this->handleReply($handle, 220, 'Error: STARTTLS not accepted from server!');
-
-				if (stream_socket_enable_crypto($handle, true, STREAM_CRYPTO_METHOD_TLS_CLIENT) !== true) {
-					throw new \Exception('Error: TLS could not be established!');
-				}
-
-				fputs($handle, 'EHLO ' . getenv('SERVER_NAME') . "\r\n");
-
-				$this->handleReply($handle, 250, 'Error: EHLO not accepted from server!');
-			}
-
-			if (!empty($this->smtp_username) && !empty($this->smtp_password)) {
-				fputs($handle, 'AUTH LOGIN' . "\r\n");
-
-				$this->handleReply($handle, 334, 'Error: AUTH LOGIN not accepted from server!');
-
-				fputs($handle, base64_encode($this->smtp_username) . "\r\n");
-
-				$this->handleReply($handle, 334, 'Error: Username not accepted from server!');
-
-				fputs($handle, base64_encode($this->smtp_password) . "\r\n");
-
-				$this->handleReply($handle, 235, 'Error: Password not accepted from server!');
-
-			} else {
-				fputs($handle, 'HELO ' . getenv('SERVER_NAME') . "\r\n");
-
-				$this->handleReply($handle, 250, 'Error: HELO not accepted from server!');
-			}
-
-			if ($this->verp) {
-				fputs($handle, 'MAIL FROM: <' . $this->from . '>XVERP' . "\r\n");
-			} else {
-				fputs($handle, 'MAIL FROM: <' . $this->from . '>' . "\r\n");
-			}
-
-			$this->handleReply($handle, 250, 'Error: MAIL FROM not accepted from server!');
-
-			if (!is_array($this->to)) {
-				fputs($handle, 'RCPT TO: <' . $this->to . '>' . "\r\n");
-
-				$reply = $this->handleReply($handle, false, 'RCPT TO [!array]');
+				$reply = $this->handleReply($handle, false, 'RCPT TO [array]');
 
 				if ((substr($reply, 0, 3) != 250) && (substr($reply, 0, 3) != 251)) {
 					throw new \Exception('Error: RCPT TO not accepted from server!');
 				}
-			} else {
-				foreach ($this->to as $recipient) {
-					fputs($handle, 'RCPT TO: <' . $recipient . '>' . "\r\n");
-
-					$reply = $this->handleReply($handle, false, 'RCPT TO [array]');
-
-					if ((substr($reply, 0, 3) != 250) && (substr($reply, 0, 3) != 251)) {
-						throw new \Exception('Error: RCPT TO not accepted from server!');
-					}
-				}
 			}
-
-			fputs($handle, 'DATA' . "\r\n");
-
-			$this->handleReply($handle, 354, 'Error: DATA not accepted from server!');
-
-			// According to rfc 821 we should not send more than 1000 including the CRLF
-			$message = str_replace("\r\n", "\n", $header . $message);
-			$message = str_replace("\r", "\n", $message);
-
-			$lines = explode("\n", $message);
-
-			foreach ($lines as $line) {
-				// $results = str_split($line, $length);
-				// see https://php.watch/versions/8.2/str_split-empty-string-empty-array
-				$results = ($line === '') ? [''] : str_split($line, 998);
-
-				foreach ($results as $result) {
-					fputs($handle, $result . "\r\n");
-				}
-			}
-
-			fputs($handle, '.' . "\r\n");
-
-			$this->handleReply($handle, 250, 'Error: DATA not accepted from server!');
-
-			fputs($handle, 'QUIT' . "\r\n");
-
-			$this->handleReply($handle, 221, 'Error: QUIT not accepted from server!');
-
-			fclose($handle);
 		}
+
+		fputs($handle, 'DATA' . "\r\n");
+
+		$this->handleReply($handle, 354, 'Error: DATA not accepted from server!');
+
+		// According to rfc 821 we should not send more than 1000 including the CRLF
+		$message = str_replace("\r\n", "\n", $header . $message);
+		$message = str_replace("\r", "\n", $message);
+
+		$lines = explode("\n", $message);
+
+		foreach ($lines as $line) {
+			$results = ($line === '') ? [''] : str_split($line, 998);
+
+			foreach ($results as $result) {
+				fputs($handle, $result . "\r\n");
+			}
+		}
+
+		fputs($handle, '.' . "\r\n");
+
+		$this->handleReply($handle, 250, 'Error: DATA not accepted from server!');
+
+		fputs($handle, 'QUIT' . "\r\n");
+
+		$this->handleReply($handle, 221, 'Error: QUIT not accepted from server!');
+
+		fclose($handle);
+	}
+
+	private function readGreeting($handle) {
+		while ($line = fgets($handle, 515)) {
+			if (substr($line, 3, 1) == ' ') {
+				break;
+			}
+		}
+	}
+
+	private function sendEhlo($handle) {
+		fputs($handle, 'EHLO ' . getenv('SERVER_NAME') . "\r\n");
+
+		$reply = '';
+
+		while ($line = fgets($handle, 515)) {
+			$reply .= $line;
+
+			if (substr($reply, 0, 3) == 220 && substr($line, 3, 1) == ' ') {
+				$reply = '';
+				continue;
+			} else if (substr($line, 3, 1) == ' ') {
+				break;
+			}
+		}
+
+		if (substr($reply, 0, 3) != 250) {
+			throw new \Exception('Error: EHLO not accepted from server!');
+		}
+
+		return $reply;
+	}
+
+	private function authenticate($handle) {
+		if (!$this->smtp_username) {
+			fputs($handle, 'HELO ' . getenv('SERVER_NAME') . "\r\n");
+			$this->handleReply($handle, 250, 'Error: HELO not accepted from server!');
+			return;
+		}
+
+		if ($this->smtp_auth_method === 'oauth') {
+			$this->authenticateXoauth2($handle);
+		} else {
+			$this->authenticateLogin($handle);
+		}
+	}
+
+	private function authenticateLogin($handle) {
+		fputs($handle, 'AUTH LOGIN' . "\r\n");
+		$this->handleReply($handle, 334, 'Error: AUTH LOGIN not accepted from server!');
+
+		fputs($handle, base64_encode($this->smtp_username) . "\r\n");
+		$this->handleReply($handle, 334, 'Error: Username not accepted from server!');
+
+		fputs($handle, base64_encode($this->smtp_password) . "\r\n");
+		$this->handleReply($handle, 235, 'Error: Password not accepted from server!');
+	}
+
+	private function authenticateXoauth2($handle) {
+		$max_retry = 2;
+
+		for ($attempt = 0; $attempt < $max_retry; $attempt++) {
+			$sasl = "user=" . $this->smtp_username . "\1auth=Bearer " . $this->smtp_oauth_token . "\1\1";
+
+			fputs($handle, 'AUTH XOAUTH2 ' . base64_encode($sasl) . "\r\n");
+
+			$reply = $this->handleReply($handle, false, 'AUTH XOAUTH2');
+
+			$code = substr($reply, 0, 3);
+
+			if ($code == 235) {
+				return;
+			}
+
+			// Token expired — refresh and retry once
+			if ($code == 535 && $attempt == 0 && $this->smtp_oauth_refresh_token) {
+				$new_token = $this->refreshOauthToken();
+
+				if ($new_token) {
+					$this->smtp_oauth_token = $new_token;
+					continue;
+				}
+			}
+
+			throw new \Exception('Error: XOAUTH2 authentication failed!');
+		}
+	}
+
+	private function refreshOauthToken() {
+		$token_endpoint = $this->getTokenEndpoint();
+
+		if (!$token_endpoint) {
+			return false;
+		}
+
+		$post_fields = http_build_query([
+			'client_id'     => $this->smtp_oauth_client_id,
+			'client_secret' => $this->smtp_oauth_client_secret,
+			'refresh_token' => $this->smtp_oauth_refresh_token,
+			'grant_type'    => 'refresh_token',
+		]);
+
+		if (!function_exists('curl_init')) {
+			// Fallback — file_get_contents
+			$context = stream_context_create([
+				'http' => [
+					'method'  => 'POST',
+					'header'  => "Content-Type: application/x-www-form-urlencoded\r\n",
+					'content' => $post_fields,
+					'timeout' => 15,
+				],
+			]);
+
+			$response = @file_get_contents($token_endpoint, false, $context);
+		} else {
+			$ch = curl_init($token_endpoint);
+			curl_setopt($ch, CURLOPT_POST, true);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $post_fields);
+			curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+
+			$response = curl_exec($ch);
+			$error = curl_error($ch);
+			curl_close($ch);
+
+			if ($error || !$response) {
+				return false;
+			}
+		}
+
+		if (!$response) {
+			return false;
+		}
+
+		$data = json_decode($response, true);
+
+		if (!isset($data['access_token'])) {
+			return false;
+		}
+
+		return $data['access_token'];
+	}
+
+	private function getTokenEndpoint() {
+		$host = strtolower($this->smtp_hostname);
+
+		// Strip tls:// or ssl:// prefix
+		if (substr($host, 0, 6) == 'tls://') {
+			$host = substr($host, 6);
+		} elseif (substr($host, 0, 6) == 'ssl://') {
+			$host = substr($host, 6);
+		}
+
+		if (strpos($host, 'gmail.com') !== false || strpos($host, 'googlemail.com') !== false) {
+			return 'https://oauth2.googleapis.com/token';
+		}
+
+		if (strpos($host, 'outlook.com') !== false || strpos($host, 'office365.com') !== false) {
+			return 'https://login.microsoftonline.com/common/oauth2/v2.0/token';
+		}
+
+		return false;
 	}
 
 	private function handleReply($handle, $status_code = false, $error_text = false, $counter = 0) {

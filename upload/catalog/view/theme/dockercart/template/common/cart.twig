@@ -108,11 +108,6 @@
       <a href="{{ checkout }}" class="w-full flex items-center justify-center gap-2 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition shadow-md mb-2 text-sm">
         <i data-lucide="credit-card" class="w-4 h-4"></i>{{ text_checkout }}
       </a>
-      {% if oneclickcheckout_enabled and not products is empty %}
-      <button type="button" id="button-oneclickcheckout-cart" data-theme="theme-purple" class="w-full flex items-center justify-center gap-2 py-3 border border-purple-200 text-purple-700 font-medium rounded-xl hover:bg-purple-50 transition text-sm mb-2">
-        <i data-lucide="zap" class="w-4 h-4"></i>{{ button_oneclickcheckout }}
-      </button>
-      {% endif %}
       <a href="{{ cart }}" onclick="dcCloseCart()" class="w-full flex items-center justify-center gap-2 py-3 border border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition text-sm">
         <i data-lucide="shopping-bag" class="w-4 h-4"></i>{{ text_cart }}
       </a>
@@ -353,8 +348,3 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-{% if oneclickcheckout_modal %}
-{{ oneclickcheckout_modal }}
-<script src="catalog/view/javascript/dockercart_oneclickcheckout.js?v={{ dockercart_version }}"></script>
-<script src="catalog/view/javascript/common/phone-mask.js?v={{ dockercart_version }}"></script>
-{% endif %}

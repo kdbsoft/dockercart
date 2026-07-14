@@ -40,9 +40,6 @@
         <p class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-4">{{ text_order_detail }}</p>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div class="space-y-1.5">
-            {% if invoice_no %}
-            <p><span class="font-semibold text-gray-500">{{ text_invoice_no }}</span> <span class="text-gray-800">{{ invoice_no }}</span></p>
-            {% endif %}
             <p><span class="font-semibold text-gray-500">{{ text_order_id }}</span> <span class="text-gray-800 font-mono">#{{ order_id }}</span></p>
             <p><span class="font-semibold text-gray-500">{{ text_date_added }}</span> <span class="text-gray-800">{{ date_added }}</span></p>
           </div>

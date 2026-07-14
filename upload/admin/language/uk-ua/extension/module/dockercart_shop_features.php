@@ -1,9 +1,9 @@
 <?php
 // Heading
-$_['heading_title']                     = 'DockerCart Переваги магазину';
+$_['heading_title'] = 'Переваги магазину';
 
 // Text
-$_['text_extension']                    = 'Розширення';
+$_['text_extension']                    = 'Доповнення';
 $_['text_success']                      = 'Налаштування модуля переваг магазину успішно збережено!';
 $_['text_edit']                         = 'Налаштування віджета переваг';
 $_['text_enabled']                      = 'Увімкнено';

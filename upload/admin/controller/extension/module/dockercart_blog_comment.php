@@ -215,6 +215,9 @@ class ControllerExtensionModuleDockercartBlogComment extends Controller {
 		// Base URL for filter actions in JS
 		$data['filter_url'] = $this->url->link('extension/module/dockercart_blog_comment', 'user_token=' . $this->session->data['user_token'], true);
 
+		$data['error_warning'] = '';
+		$data['success'] = '';
+
 		$pagination = new Pagination();
 		$pagination->total = $comment_total;
 		$pagination->page = $page;

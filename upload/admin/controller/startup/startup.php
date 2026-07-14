@@ -26,7 +26,7 @@ class ControllerStartupStartup extends Controller {
 		// Language — with per-session override via GET param or session
 		$admin_language = $this->config->get('config_admin_language');
 
-		if (!isset($this->session->data['user_id']) && isset($this->request->get['language'])) {
+		if (isset($this->request->get['language'])) {
 			$this->session->data['language'] = $this->request->get['language'];
 			$admin_language = $this->request->get['language'];
 		} elseif (isset($this->session->data['language'])) {

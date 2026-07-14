@@ -4,7 +4,7 @@
  * Handles CRUD operations for shipping methods with database storage.
  *
  * @package    DockerCart
- * @author     DockerCart Team
+ * @author     DockerCart Official
  * @copyright  2024-2026 DockerCart
  * @license    MIT
  */
@@ -18,7 +18,7 @@ class ModelExtensionShippingDockercartUniversal extends Model {
 
         $this->ensureCostNullable();
     }
-    
+
     /**
      * Install database tables
      */
@@ -47,7 +47,7 @@ class ModelExtensionShippingDockercartUniversal extends Model {
                 KEY `idx_sort_order` (`sort_order`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         ");
-        
+
         // Method descriptions (multilingual)
         $this->db->query("
             CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "dockercart_universal_shipping_description` (
@@ -61,7 +61,7 @@ class ModelExtensionShippingDockercartUniversal extends Model {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         ");
     }
-    
+
     /**
      * Uninstall database tables
      */
@@ -69,7 +69,7 @@ class ModelExtensionShippingDockercartUniversal extends Model {
         $this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "dockercart_universal_shipping_description`");
         $this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "dockercart_universal_shipping`");
     }
-    
+
     /**
      * Add a new shipping method
      */
@@ -94,9 +94,9 @@ class ModelExtensionShippingDockercartUniversal extends Model {
             `date_added` = NOW(),
             `date_modified` = NOW()
         ");
-        
+
         $method_id = $this->db->getLastId();
-        
+
         // Add descriptions for each language
         if (!empty($data['method_description'])) {
             foreach ($data['method_description'] as $language_id => $value) {
@@ -110,10 +110,10 @@ class ModelExtensionShippingDockercartUniversal extends Model {
                 ");
             }
         }
-        
+
         return $method_id;
     }
-    
+
     /**
      * Edit existing shipping method
      */
@@ -137,10 +137,10 @@ class ModelExtensionShippingDockercartUniversal extends Model {
             `date_modified` = NOW()
             WHERE `method_id` = '" . (int)$method_id . "'
         ");
-        
+
         // Update descriptions
         $this->db->query("DELETE FROM `" . DB_PREFIX . "dockercart_universal_shipping_description` WHERE `method_id` = '" . (int)$method_id . "'");
-        
+
         if (!empty($data['method_description'])) {
             foreach ($data['method_description'] as $language_id => $value) {
                 $this->db->query("
@@ -154,7 +154,7 @@ class ModelExtensionShippingDockercartUniversal extends Model {
             }
         }
     }
-    
+
     /**
      * Delete shipping method
      */
@@ -187,7 +187,7 @@ class ModelExtensionShippingDockercartUniversal extends Model {
             }
         }
     }
-    
+
     /**
      * Get single shipping method
      */
@@ -196,10 +196,10 @@ class ModelExtensionShippingDockercartUniversal extends Model {
             SELECT * FROM `" . DB_PREFIX . "dockercart_universal_shipping`
             WHERE `method_id` = '" . (int)$method_id . "'
         ");
-        
+
         return $query->num_rows ? $query->row : null;
     }
-    
+
     /**
      * Get all shipping methods with descriptions for current language
      */
@@ -210,37 +210,37 @@ class ModelExtensionShippingDockercartUniversal extends Model {
             LEFT JOIN `" . DB_PREFIX . "dockercart_universal_shipping_description` md
                 ON (m.method_id = md.method_id AND md.language_id = '" . (int)$this->config->get('config_language_id') . "')
         ";
-        
+
         $sql .= " ORDER BY m.sort_order ASC, m.method_id ASC";
-        
+
         if (isset($data['start']) || isset($data['limit'])) {
             if ($data['start'] < 0) {
                 $data['start'] = 0;
             }
-            
+
             if ($data['limit'] < 1) {
                 $data['limit'] = 20;
             }
-            
+
             $sql .= " LIMIT " . (int)$data['start'] . "," . (int)$data['limit'];
         }
-        
+
         $query = $this->db->query($sql);
-        
+
         return $query->rows;
     }
-    
+
     /**
      * Get method descriptions for all languages
      */
     public function getMethodDescriptions(int $method_id): array {
         $method_description_data = [];
-        
+
         $query = $this->db->query("
             SELECT * FROM `" . DB_PREFIX . "dockercart_universal_shipping_description`
             WHERE `method_id` = '" . (int)$method_id . "'
         ");
-        
+
         foreach ($query->rows as $result) {
             $method_description_data[$result['language_id']] = [
                 'name'          => $result['name'],
@@ -248,16 +248,16 @@ class ModelExtensionShippingDockercartUniversal extends Model {
                 'delivery_time' => $result['delivery_time']
             ];
         }
-        
+
         return $method_description_data;
     }
-    
+
     /**
      * Get total count of shipping methods
      */
     public function getTotalMethods(): int {
         $query = $this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "dockercart_universal_shipping`");
-        
+
         return (int)$query->row['total'];
     }
 }

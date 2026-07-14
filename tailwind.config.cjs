@@ -3,7 +3,9 @@ module.exports = {
   content: [
     './upload/**/*.twig',
     './upload/**/*.js',
-    './upload/**/*.php',
+    './upload/{admin/{controller,model,language,view,cli},catalog,system,bin,cron}/**/*.php',
+    './upload/index.php',
+    './upload/healthcheck.php',
     './html/**/*.html'
   ],
   safelist: [

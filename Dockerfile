@@ -13,11 +13,13 @@ RUN apt-get update && apt-get install -y \
     libmcrypt-dev \
     libicu-dev \
     libcurl4-openssl-dev \
-    libmemcached-dev \
     libsasl2-dev \
     zlib1g-dev \
     unzip \
+    cron \
     default-mysql-client \
+    logrotate \
+    rclone \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -32,8 +34,9 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
         xml \
         mbstring \
         curl \
-    && pecl install memcached redis \
-    && docker-php-ext-enable memcached redis
+        pcntl \
+    && pecl install redis \
+    && docker-php-ext-enable redis
 
 # Add www-data to the staff group (GID=50) so it can write to FTP-owned image dirs
 RUN groupadd -f -g 50 staff && usermod -aG staff www-data
@@ -63,6 +66,8 @@ RUN chown -R www-data:www-data /var/www/html /var/www/storage \
 COPY docker/php.prod.ini /usr/local/etc/php/conf.d/dockercart.ini
 
 COPY docker/apache.conf /etc/apache2/sites-available/000-default.conf
+
+COPY docker/logrotate/dockercart /etc/logrotate.d/dockercart
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 

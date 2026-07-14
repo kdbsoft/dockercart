@@ -1,0 +1,11 @@
+# Docker Compose override for Traefik non-SSL mode (HTTP)
+# Usage: docker compose -f docker-compose.traefik.yml -f docker-compose.traefik.no-ssl.yml up -d
+# Included automatically unless --ssl or --le is specified
+
+services:
+  nginx:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.${DOCKERCART_ROUTER_NAME:-dockercart}.rule=Host(`${DOCKERCART_DOMAIN:-dockercart.local}`)"
+      - "traefik.http.routers.${DOCKERCART_ROUTER_NAME:-dockercart}.entrypoints=web"
+      - "traefik.http.services.${DOCKERCART_ROUTER_NAME:-dockercart}.loadbalancer.server.port=80"

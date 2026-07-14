@@ -18,12 +18,6 @@ class ControllerExtensionCurrencyEcb extends Controller {
 			return false;
 		}
 
-		if (!empty($this->config->get('currency_ecb_ip'))) {
-			if ($_SERVER['REMOTE_ADDR'] != $this->config->get('currency_ecb_ip')) {
-				return false;
-			}
-		}
-
 		$this->load->model('extension/currency/ecb');
 		$this->model_extension_currency_ecb->refresh();
 
