@@ -3,7 +3,7 @@
 $_['heading_title']                = 'Recent Activity';
 
 // Text
-$_['text_extension']               = 'Extensions';
+$_['text_extension']               = 'Add-ons';
 $_['text_success']                 = 'Success: You have modified dashboard activity!';
 $_['text_edit']                    = 'Edit Dashboard Recent Activity';
 $_['text_activity_register']       = '<a href="customer_id=%d">%s</a> registered a new account.';
@@ -28,6 +28,7 @@ $_['text_edit_subtitle'] = 'Configure extension settings and options';
 // Dashboard Info Subtitle
 
 $_['text_activity_subtitle'] = 'Latest store events and user actions';
+$_['text_view_all']           = 'View all activity';
 
 
 

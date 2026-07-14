@@ -1,6 +1,6 @@
 <?php
 $_['heading_title']     = 'SEO-описание';
-$_['text_extension']    = 'Расширения';
+$_['text_extension']    = 'Дополнения';
 $_['text_success']      = 'Успех: Вы успешно модифицировали модуль SEO-описания!';
 $_['text_edit']         = 'Редактировать модуль SEO-описания';
 $_['text_default_module_name'] = 'SEO-описание';

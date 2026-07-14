@@ -6,7 +6,7 @@
  * Installation WITHOUT OCMOD - uses OpenCart Event System only
  *
  * License: GNU General Public License v3.0 (GPL-3.0)
- * Copyright (c) mathflow-bit
+ * Copyright (c) kdbsoft
  */
 
 class ControllerExtensionModuleDockercartCheckout extends Controller
@@ -207,9 +207,6 @@ class ControllerExtensionModuleDockercartCheckout extends Controller
             "guest_create_account" => 1,
             "show_company" => 0,
             "show_tax_id" => 0,
-            "recaptcha_enabled" => 0,
-            "recaptcha_site_key" => "",
-            "recaptcha_secret_key" => "",
             "custom_css" => "",
             "custom_js" => "",
             "require_telephone" => 1,
@@ -803,7 +800,6 @@ class ControllerExtensionModuleDockercartCheckout extends Controller
             "module_dockercart_checkout_guest_create_account" => 1,
             "module_dockercart_checkout_show_company" => 0,
             "module_dockercart_checkout_show_tax_id" => 0,
-            "module_dockercart_checkout_recaptcha_enabled" => 0,
             "module_dockercart_checkout_journal3_compat" => 1,
             "module_dockercart_checkout_debug" => 0,
             "module_dockercart_checkout_default_country_id" => "",
@@ -1799,17 +1795,6 @@ class ControllerExtensionModuleDockercartCheckout extends Controller
                 ];
             }
         }
-
-        // For other modules that support multiple methods:
-        // - royal_mail: Generates methods based on weight (1st_class, 2nd_class, etc.)
-        // - auspost: Returns available services from API
-        // - fedex: Returns available services from API
-        // - ec_ship: Returns available services from API
-        // These typically generate methods dynamically based on API responses or
-        // calculated rates, so we can't enumerate them without a sample address.
-        // For now, these modules will use module-level configuration.
-        // Future enhancement: Add database tables to store method configurations
-        // for these modules, similar to dockercart_universal.
 
         return $methods;
     }

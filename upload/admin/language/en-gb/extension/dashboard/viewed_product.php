@@ -3,10 +3,10 @@
 $_['heading_title']    = 'Product Views';
 
 // Text
-$_['text_extension']   = 'Extensions';
+$_['text_extension']   = 'Add-ons';
 $_['text_success']     = 'Success: You have modified dashboard product views!';
 $_['text_edit']        = 'Edit Dashboard Product Views';
-$_['text_view']        = 'View more...';
+$_['text_view']        = 'View more →';
 $_['text_all_time']    = 'All Time';
 $_['text_today']       = 'Today';
 $_['text_yesterday']   = 'Yesterday';

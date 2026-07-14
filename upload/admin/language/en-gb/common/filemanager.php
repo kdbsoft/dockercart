@@ -7,6 +7,14 @@ $_['text_uploaded']    = 'Success: Your file has been uploaded!';
 $_['text_directory']   = 'Success: Directory created!';
 $_['text_delete']      = 'Success: Your file or directory has been deleted!';
 
+// Text
+$_['text_navigation'] = 'Navigation';
+$_['text_directories'] = 'Directories';
+$_['text_size']        = 'Thumbnail Size';
+$_['text_size_small']  = 'S';
+$_['text_size_medium'] = 'M';
+$_['text_size_large']  = 'L';
+
 // Entry
 $_['entry_search']     = 'Search..';
 $_['entry_folder']     = 'Folder Name';

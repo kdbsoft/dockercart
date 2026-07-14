@@ -1,24 +1,75 @@
 <?php
-// *	@copyright		Pavel Kravchenko; https://opencartforum.com/profile/711752-paulkravchenko/
 
-// Heading
-$_['heading_title']    = 'Магазин розширень';
+$_['heading_title'] = 'Магазин доповнень';
 
-// Text
-$_['text_success']     = 'Налаштування змінені';
-$_['text_list']        = 'Список розширень';
-$_['text_license']     = 'Ліцензія';
-$_['text_free']        = 'Безкоштовні';
-$_['text_commercial']  = 'Платні';
-$_['text_category']    = 'Всі категорії';
-$_['text_theme']       = 'Шаблони';
-$_['text_payment']     = 'Методи оплати';
-$_['text_shipping']    = 'Методи доставки';
-$_['text_module']      = 'Модулі';
-$_['text_total']       = 'Історія замовлень';
-$_['text_feed']        = 'Канали просування';
-$_['text_report']      = 'Звіти';
-$_['text_other']       = 'Інше';
+$_['text_extension'] = 'Доповнення';
+$_['text_success'] = 'Успіх: Ви змінили магазин доповнень!';
+$_['text_edit'] = 'Редагувати модуль магазину доповнень';
+$_['text_extensions_store'] = 'Магазин доповнень';
+$_['text_all_categories'] = 'Усі категорії';
+$_['text_categories'] = 'Категорії';
+$_['text_free'] = 'Безкоштовно';
+$_['text_buy'] = 'Купити';
+$_['text_close'] = 'Закрити';
+$_['text_loading'] = 'Завантаження...';
+$_['text_error'] = 'Помилка';
+$_['text_parameter'] = 'Параметр';
+$_['text_value'] = 'Значення';
+$_['text_refresh'] = 'Оновити';
+$_['text_home'] = 'Головна';
+$_['text_no_extensions'] = 'Доповнення не знайдено в цій категорії.';
+$_['text_extensions_found'] = 'доповнень знайдено';
+$_['text_cache_cleared'] = 'Кеш магазину очищено.';
+$_['text_no_description'] = 'Опис відсутній.';
+$_['text_error_detail'] = 'Не вдалося завантажити деталі доповнення. Будь ласка, спробуйте ще раз.';
+$_['text_installed'] = 'Встановлено';
+$_['text_changelog'] = 'Що нового';
+$_['text_install'] = 'Встановити';
+$_['text_update'] = 'Оновити';
+$_['text_up_to_date'] = 'Актуально';
+$_['text_enter_key'] = 'Ввести ліцензійний ключ';
+$_['text_license_key'] = 'Ліцензійний ключ';
+$_['text_activate_key'] = 'Активувати ключ';
+$_['text_verify'] = 'Перевірити';
+$_['text_set_key'] = 'Задати ключ';
+$_['text_license_management'] = 'Придбані доповнення';
+$_['column_action']            = 'Дія';
+$_['text_status'] = 'Статус';
+$_['text_expires'] = 'Закінчується';
+$_['text_last_verified'] = 'Остання перевірка';
+$_['text_no_license'] = 'Ніколи';
+$_['text_state_buy'] = 'Купити';
+$_['text_state_install'] = 'Встановити';
+$_['text_state_update'] = 'Доступне оновлення';
+$_['text_state_up_to_date'] = 'Актуально';
+$_['text_state_revoked'] = 'Відкликано';
+$_['text_state_expired'] = 'Закінчився';
+$_['text_whats_new'] = 'Що нового у версії';
+$_['text_install_success'] = 'Доповнення встановлено (v%s)';
+$_['text_update_success'] = 'Оновлено з v%s до v%s';
+$_['text_license_activated'] = 'Ліцензію активовано';
+$_['text_license_key_updated'] = 'Ліцензійний ключ оновлено';
+$_['text_confirm_install'] = 'Ви впевнені, що хочете встановити це доповнення?';
+$_['text_confirm_update'] = 'Ви впевнені, що хочете оновити це доповнення?';
+$_['text_version'] = 'Версія';
+$_['text_name'] = 'Назва';
+$_['text_sku'] = 'Артикул';
+$_['text_copied'] = 'Скопійовано';
+$_['text_uninstall'] = 'Видалити';
+$_['text_confirm_uninstall'] = 'Ви впевнені, що хочете видалити це доповнення? Усі файли та дані буде видалено.';
+$_['text_uninstall_success'] = 'Доповнення успішно видалено';
 
-// Error
-$_['error_permission'] = 'У вас недостатньо прав для внесення змін';
+$_['error_permission'] = 'Попередження: У вас немає прав для зміни магазину доповнень!';
+$_['error_fetch'] = 'Не вдалося завантажити каталог доповнень із сервера. Спробуйте пізніше.';
+$_['error_license_required'] = 'Для встановлення потрібен ліцензійний ключ.';
+$_['error_license_activation'] = 'Не вдалося активувати ліцензію. Перевірте ключ.';
+$_['error_already_installed'] = 'Це доповнення вже встановлено.';
+$_['error_not_installed'] = 'Це доповнення не встановлено.';
+$_['error_up_to_date'] = 'Доповнення вже актуальної версії.';
+$_['error_download_failed'] = 'Не вдалося завантажити пакет доповнення.';
+$_['error_license_expired'] = 'Ліцензія закінчилася або недійсна. Будь ласка, продовжіть ліцензію.';
+$_['text_license_verified'] = 'Ліцензію успішно перевірено';
+$_['error_license_network_error'] = 'Не вдалося з\'єднатися з сервером ліцензій. Спробуйте пізніше.';
+$_['error_license_no_license'] = 'Для цього модуля не знайдено ліцензійний ключ.';
+$_['error_license_invalid'] = 'Ліцензія недійсна або відкликана.';
+$_['error_writable'] = 'Увага: Наступні файли недоступні для запису та не можуть бути перезаписані:<br>%s';

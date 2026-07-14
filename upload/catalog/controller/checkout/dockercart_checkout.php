@@ -6,7 +6,7 @@
  * Main checkout page controller with AJAX handlers
  *
  * License: GNU General Public License v3.0 (GPL-3.0)
- * Copyright (c) mathflow-bit
+ * Copyright (c) kdbsoft
  */
 
 class ControllerCheckoutDockercartCheckout extends Controller
@@ -158,14 +158,6 @@ class ControllerCheckoutDockercartCheckout extends Controller
         );
         $data["journal3_compat"] = $this->config->get(
             "module_dockercart_checkout_journal3_compat",
-        );
-
-        // reCAPTCHA
-        $data["recaptcha_enabled"] = $this->config->get(
-            "module_dockercart_checkout_recaptcha_enabled",
-        );
-        $data["recaptcha_site_key"] = $this->config->get(
-            "module_dockercart_checkout_recaptcha_site_key",
         );
 
         // Load and process checkout blocks
@@ -625,16 +617,23 @@ class ControllerCheckoutDockercartCheckout extends Controller
         $data["google_analytics"] =
             $ga !== null ? html_entity_decode($ga, ENT_QUOTES, "UTF-8") : "";
 
-        $data["base"] = $server;
-        $data["description"] = $this->document->getDescription();
-        $data["keywords"] = $this->document->getKeywords();
-        $data["links"] = $this->document->getLinks();
-        $data["styles"] = $this->document->getStyles();
-        $data["scripts"] = $this->document->getScripts("dockercart_checkout");
-        $data["lang"] = $this->language->get("code");
-        $data["direction"] = $this->language->get("direction");
+		$data["base"] = $server;
+		$data["description"] = $this->document->getDescription();
+		$data["keywords"] = $this->document->getKeywords();
+		$data["links"] = $this->document->getLinks();
+		$data["styles"] = $this->document->getStyles();
+		$data["scripts"] = $this->document->getScripts("dockercart_checkout");
+		$data["lang"] = $this->language->get("code");
+		$data["direction"] = $this->language->get("direction");
 
-        $this->response->setOutput(
+		// Captcha
+		if ($this->config->get('captcha_' . $this->config->get('config_captcha') . '_status') && in_array('guest', (array)$this->config->get('config_captcha_page'))) {
+			$data['captcha'] = $this->load->controller('extension/captcha/' . $this->config->get('config_captcha'));
+		} else {
+			$data['captcha'] = '';
+		}
+
+		$this->response->setOutput(
             $this->load->view("checkout/dockercart_checkout", $data),
         );
     }
@@ -2103,22 +2102,34 @@ class ControllerCheckoutDockercartCheckout extends Controller
             $json["redirect"] = $this->url->link("checkout/cart");
         }
 
-        // Validate terms agreement
-        if (
-            !empty($this->config->get("config_checkout_id")) &&
-            empty($data["agree"])
-        ) {
-            // Return a structured field error so the frontend highlights the
-            // specific 'agree' field instead of showing a duplicate generic
-            // notification. Frontend showFieldErrors() will display this properly.
-            $json["error"] =
-                isset($json["error"]) && is_array($json["error"])
-                    ? $json["error"]
-                    : [];
-            $json["error"]["agree"] = $this->language->get("error_agree");
-        }
+		// Validate terms agreement
+		if (
+			!empty($this->config->get("config_checkout_id")) &&
+			empty($data["agree"])
+		) {
+			// Return a structured field error so the frontend highlights the
+			// specific 'agree' field instead of showing a duplicate generic
+			// notification. Frontend showFieldErrors() will display this properly.
+			$json["error"] =
+				isset($json["error"]) && is_array($json["error"])
+					? $json["error"]
+					: [];
+			$json["error"]["agree"] = $this->language->get("error_agree");
+		}
 
-        // Validate customer/guest
+		// Validate captcha if enabled for checkout page
+		if ($this->config->get('captcha_' . $this->config->get('config_captcha') . '_status') && in_array('guest', (array)$this->config->get('config_captcha_page'))) {
+			$this->request->post['captcha'] = isset($data['captcha']) ? $data['captcha'] : '';
+			$captcha = $this->load->controller('extension/captcha/' . $this->config->get('config_captcha') . '/validate');
+
+			if ($captcha) {
+				$json['error']['captcha'] = $captcha;
+				// Return fresh captcha HTML so the frontend can re-render it
+				$json['captcha_html'] = $this->load->controller('extension/captcha/' . $this->config->get('config_captcha'));
+			}
+		}
+
+		// Validate customer/guest
         if (
             !$this->customer->isLogged() &&
             !$this->config->get("config_checkout_guest")
@@ -2613,54 +2624,6 @@ class ControllerCheckoutDockercartCheckout extends Controller
                         $method_data[$code] = $method_item;
                     }
                 } else {
-                    // Add extra diagnostics for common built-in methods
-                    if ($result["code"] === "cod") {
-                        try {
-                            $cod_geo = (int) $this->config->get(
-                                "payment_cod_geo_zone_id",
-                            );
-                            $cod_total_threshold = (float) $this->config->get(
-                                "payment_cod_total",
-                            );
-                            $hasShipping = $this->cart->hasShipping()
-                                ? "1"
-                                : "0";
-                            $query = $this->db->query(
-                                "SELECT COUNT(*) AS cnt FROM " .
-                                    DB_PREFIX .
-                                    "zone_to_geo_zone WHERE geo_zone_id = '" .
-                                    $cod_geo .
-                                    "' AND country_id = '" .
-                                    (int) $this->session->data[
-                                        "payment_address"
-                                    ]["country_id"] .
-                                    "' AND (zone_id = '" .
-                                    (int) $this->session->data[
-                                        "payment_address"
-                                    ]["zone_id"] .
-                                    "' OR zone_id = '0')",
-                            );
-                            $this->logger->debug(
-                                "COD diagnostics: geo_zone_id=" .
-                                    $cod_geo .
-                                    ", threshold=" .
-                                    $cod_total_threshold .
-                                    ", hasShipping=" .
-                                    $hasShipping .
-                                    ", geo_match_count=" .
-                                    ($query->row["cnt"] ?? 0),
-                            );
-                        } catch (Exception $e) {
-                        }
-                    }
-
-                    if ($result["code"] === "free_checkout") {
-                        $this->logger->debug(
-                            "Free checkout diagnostics: cart_total=" .
-                                (float) $this->cart->getTotal(),
-                        );
-                    }
-
                     $this->logger->debug(
                         "Payment method " .
                             $result["code"] .

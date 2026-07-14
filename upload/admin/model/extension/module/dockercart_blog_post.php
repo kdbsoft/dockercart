@@ -1,11 +1,11 @@
 <?php
 /**
  * DockerCart Blog - Post Admin Model
- * 
+ *
  * @package    DockerCart Blog
  * @version    1.0.0
- * @author     DockerCart Team
- * 
+ * @author     DockerCart Official
+ *
  * Description: Model for blog post management in admin panel.
  *              Handles CRUD operations, filtering, sorting, SEO URLs.
  */
@@ -14,7 +14,7 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 
 	/**
 	 * Add new blog post
-	 * 
+	 *
 	 * @param array $data Post data
 	 * @return int Post ID
 	 */
@@ -26,15 +26,15 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 			$date_published_sql = "date_published = NOW(), ";
 		}
 
-		$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_post` SET 
-			author_id = '" . (int)$data['author_id'] . "', 
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_post` SET
+			author_id = '" . (int)$data['author_id'] . "',
 			image = '" . $this->db->escape($data['image']) . "',
-			status = '" . (int)$data['status'] . "', 
-			featured = '" . (int)$data['featured'] . "', 
-			allow_comments = '" . (int)$data['allow_comments'] . "', 
-			sort_order = '" . (int)$data['sort_order'] . "', 
+			status = '" . (int)$data['status'] . "',
+			featured = '" . (int)$data['featured'] . "',
+			allow_comments = '" . (int)$data['allow_comments'] . "',
+			sort_order = '" . (int)$data['sort_order'] . "',
 			" . $date_published_sql . "
-			date_added = NOW(), 
+			date_added = NOW(),
 			date_modified = NOW()");
 
 		$post_id = $this->db->getLastId();
@@ -42,14 +42,14 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 		// Post descriptions (multi-language)
 		if (isset($data['post_description'])) {
 			foreach ($data['post_description'] as $language_id => $value) {
-				$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_post_description` SET 
-					post_id = '" . (int)$post_id . "', 
-					language_id = '" . (int)$language_id . "', 
-					name = '" . $this->db->escape($value['title']) . "', 
-					description = '" . $this->db->escape($value['excerpt']) . "', 
-					content = '" . $this->db->escape($value['content']) . "', 
-					meta_title = '" . $this->db->escape($value['meta_title']) . "', 
-					meta_description = '" . $this->db->escape($value['meta_description']) . "', 
+				$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_post_description` SET
+					post_id = '" . (int)$post_id . "',
+					language_id = '" . (int)$language_id . "',
+					name = '" . $this->db->escape($value['title']) . "',
+					description = '" . $this->db->escape($value['excerpt']) . "',
+					content = '" . $this->db->escape($value['content']) . "',
+					meta_title = '" . $this->db->escape($value['meta_title']) . "',
+					meta_description = '" . $this->db->escape($value['meta_description']) . "',
 					meta_keyword = '" . $this->db->escape($value['meta_keyword']) . "'");
 			}
 		}
@@ -57,8 +57,8 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 		// Post to store
 		if (isset($data['post_store'])) {
 			foreach ($data['post_store'] as $store_id) {
-				$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_post_to_store` SET 
-					post_id = '" . (int)$post_id . "', 
+				$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_post_to_store` SET
+					post_id = '" . (int)$post_id . "',
 					store_id = '" . (int)$store_id . "'");
 			}
 		}
@@ -66,8 +66,8 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 		// Post to category
 		if (isset($data['post_category'])) {
 			foreach ($data['post_category'] as $category_id) {
-				$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_post_to_category` SET 
-					post_id = '" . (int)$post_id . "', 
+				$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_post_to_category` SET
+					post_id = '" . (int)$post_id . "',
 					category_id = '" . (int)$category_id . "'");
 			}
 		}
@@ -80,9 +80,9 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 					foreach ($tag_array as $tag) {
 						$tag = trim($tag);
 						if ($tag) {
-							$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_post_tag` SET 
-								post_id = '" . (int)$post_id . "', 
-								language_id = '" . (int)$language_id . "', 
+							$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_post_tag` SET
+								post_id = '" . (int)$post_id . "',
+								language_id = '" . (int)$language_id . "',
 								tag = '" . $this->db->escape($tag) . "'");
 						}
 					}
@@ -96,10 +96,10 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 			foreach ($data['post_seo_url'] as $store_id => $language) {
 				foreach ($language as $language_id => $keyword) {
 					if (trim($keyword)) {
-						$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_seo_url` SET 
-							store_id = '" . (int)$store_id . "', 
-							language_id = '" . (int)$language_id . "', 
-							query = 'blog_post_id=" . (int)$post_id . "', 
+						$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_seo_url` SET
+							store_id = '" . (int)$store_id . "',
+							language_id = '" . (int)$language_id . "',
+							query = 'blog_post_id=" . (int)$post_id . "',
 							keyword = '" . $this->db->escape($keyword) . "'");
 						$seo_url_updated = true;
 					}
@@ -124,7 +124,7 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 
 	/**
 	 * Edit existing blog post
-	 * 
+	 *
 	 * @param int $post_id
 	 * @param array $data
 	 */
@@ -136,15 +136,15 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 			$date_published_sql = "date_published = NOW(), ";
 		}
 
-		$this->db->query("UPDATE `" . DB_PREFIX . "blog_post` SET 
-			author_id = '" . (int)$data['author_id'] . "', 
+		$this->db->query("UPDATE `" . DB_PREFIX . "blog_post` SET
+			author_id = '" . (int)$data['author_id'] . "',
 			image = '" . $this->db->escape($data['image']) . "',
-			status = '" . (int)$data['status'] . "', 
-			featured = '" . (int)$data['featured'] . "', 
-			allow_comments = '" . (int)$data['allow_comments'] . "', 
-			sort_order = '" . (int)$data['sort_order'] . "', 
+			status = '" . (int)$data['status'] . "',
+			featured = '" . (int)$data['featured'] . "',
+			allow_comments = '" . (int)$data['allow_comments'] . "',
+			sort_order = '" . (int)$data['sort_order'] . "',
 			" . $date_published_sql . "
-			date_modified = NOW() 
+			date_modified = NOW()
 			WHERE post_id = '" . (int)$post_id . "'");
 
 		// Delete old descriptions
@@ -153,14 +153,14 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 		// Insert new descriptions
 		if (isset($data['post_description'])) {
 			foreach ($data['post_description'] as $language_id => $value) {
-				$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_post_description` SET 
-					post_id = '" . (int)$post_id . "', 
-					language_id = '" . (int)$language_id . "', 
-					name = '" . $this->db->escape($value['title']) . "', 
-					description = '" . $this->db->escape($value['excerpt']) . "', 
-					content = '" . $this->db->escape($value['content']) . "', 
-					meta_title = '" . $this->db->escape($value['meta_title']) . "', 
-					meta_description = '" . $this->db->escape($value['meta_description']) . "', 
+				$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_post_description` SET
+					post_id = '" . (int)$post_id . "',
+					language_id = '" . (int)$language_id . "',
+					name = '" . $this->db->escape($value['title']) . "',
+					description = '" . $this->db->escape($value['excerpt']) . "',
+					content = '" . $this->db->escape($value['content']) . "',
+					meta_title = '" . $this->db->escape($value['meta_title']) . "',
+					meta_description = '" . $this->db->escape($value['meta_description']) . "',
 					meta_keyword = '" . $this->db->escape($value['meta_keyword']) . "'");
 			}
 		}
@@ -169,8 +169,8 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "blog_post_to_store` WHERE post_id = '" . (int)$post_id . "'");
 		if (isset($data['post_store'])) {
 			foreach ($data['post_store'] as $store_id) {
-				$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_post_to_store` SET 
-					post_id = '" . (int)$post_id . "', 
+				$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_post_to_store` SET
+					post_id = '" . (int)$post_id . "',
 					store_id = '" . (int)$store_id . "'");
 			}
 		}
@@ -179,8 +179,8 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "blog_post_to_category` WHERE post_id = '" . (int)$post_id . "'");
 		if (isset($data['post_category'])) {
 			foreach ($data['post_category'] as $category_id) {
-				$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_post_to_category` SET 
-					post_id = '" . (int)$post_id . "', 
+				$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_post_to_category` SET
+					post_id = '" . (int)$post_id . "',
 					category_id = '" . (int)$category_id . "'");
 			}
 		}
@@ -194,9 +194,9 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 					foreach ($tag_array as $tag) {
 						$tag = trim($tag);
 						if ($tag) {
-							$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_post_tag` SET 
-								post_id = '" . (int)$post_id . "', 
-								language_id = '" . (int)$language_id . "', 
+							$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_post_tag` SET
+								post_id = '" . (int)$post_id . "',
+								language_id = '" . (int)$language_id . "',
 								tag = '" . $this->db->escape($tag) . "'");
 						}
 					}
@@ -208,8 +208,8 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "blog_post_to_product` WHERE post_id = '" . (int)$post_id . "'");
 		if (isset($data['post_product'])) {
 			foreach ($data['post_product'] as $product_id) {
-				$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_post_to_product` SET 
-					post_id = '" . (int)$post_id . "', 
+				$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_post_to_product` SET
+					post_id = '" . (int)$post_id . "',
 					product_id = '" . (int)$product_id . "'");
 			}
 		}
@@ -218,8 +218,8 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "blog_post_to_product_category` WHERE post_id = '" . (int)$post_id . "'");
 		if (isset($data['post_product_category'])) {
 			foreach ($data['post_product_category'] as $category_id) {
-				$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_post_to_product_category` SET 
-					post_id = '" . (int)$post_id . "', 
+				$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_post_to_product_category` SET
+					post_id = '" . (int)$post_id . "',
 					category_id = '" . (int)$category_id . "'");
 			}
 		}
@@ -228,8 +228,8 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "blog_post_to_manufacturer` WHERE post_id = '" . (int)$post_id . "'");
 		if (isset($data['post_manufacturer'])) {
 			foreach ($data['post_manufacturer'] as $manufacturer_id) {
-				$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_post_to_manufacturer` SET 
-					post_id = '" . (int)$post_id . "', 
+				$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_post_to_manufacturer` SET
+					post_id = '" . (int)$post_id . "',
 					manufacturer_id = '" . (int)$manufacturer_id . "'");
 			}
 		}
@@ -241,10 +241,10 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 			foreach ($data['post_seo_url'] as $store_id => $language) {
 				foreach ($language as $language_id => $keyword) {
 					if (trim($keyword)) {
-						$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_seo_url` SET 
-							store_id = '" . (int)$store_id . "', 
-							language_id = '" . (int)$language_id . "', 
-							query = 'blog_post_id=" . (int)$post_id . "', 
+						$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_seo_url` SET
+							store_id = '" . (int)$store_id . "',
+							language_id = '" . (int)$language_id . "',
+							query = 'blog_post_id=" . (int)$post_id . "',
 							keyword = '" . $this->db->escape($keyword) . "'");
 					}
 				}
@@ -266,7 +266,7 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 
 	/**
 	 * Delete blog post
-	 * 
+	 *
 	 * @param int $post_id
 	 */
 	public function deletePost($post_id) {
@@ -391,7 +391,7 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 
 	/**
 	 * Get single post
-	 * 
+	 *
 	 * @param int $post_id
 	 * @return array|false
 	 */
@@ -403,15 +403,15 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 
 	/**
 	 * Get posts with filtering and pagination
-	 * 
+	 *
 	 * @param array $data Filters
 	 * @return array
 	 */
 	public function getPosts($data = array()) {
-		$sql = "SELECT bp.*, bpd.name, ba.name as author_name 
-				FROM `" . DB_PREFIX . "blog_post` bp 
-				LEFT JOIN `" . DB_PREFIX . "blog_post_description` bpd ON (bp.post_id = bpd.post_id) 
-				LEFT JOIN `" . DB_PREFIX . "blog_author` ba ON (bp.author_id = ba.author_id) 
+		$sql = "SELECT bp.*, bpd.name, ba.name as author_name
+				FROM `" . DB_PREFIX . "blog_post` bp
+				LEFT JOIN `" . DB_PREFIX . "blog_post_description` bpd ON (bp.post_id = bpd.post_id)
+				LEFT JOIN `" . DB_PREFIX . "blog_author` ba ON (bp.author_id = ba.author_id)
 				WHERE bpd.language_id = '" . (int)$this->config->get('config_language_id') . "'";
 
 		if (!empty($data['filter_name'])) {
@@ -459,20 +459,20 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 		}
 
 		$query = $this->db->query($sql);
-		
+
 		return $query->rows;
 	}
 
 	/**
 	 * Get total posts count
-	 * 
+	 *
 	 * @param array $data Filters
 	 * @return int
 	 */
 	public function getTotalPosts($data = array()) {
-		$sql = "SELECT COUNT(DISTINCT bp.post_id) AS total 
-				FROM `" . DB_PREFIX . "blog_post` bp 
-				LEFT JOIN `" . DB_PREFIX . "blog_post_description` bpd ON (bp.post_id = bpd.post_id) 
+		$sql = "SELECT COUNT(DISTINCT bp.post_id) AS total
+				FROM `" . DB_PREFIX . "blog_post` bp
+				LEFT JOIN `" . DB_PREFIX . "blog_post_description` bpd ON (bp.post_id = bpd.post_id)
 				WHERE bpd.language_id = '" . (int)$this->config->get('config_language_id') . "'";
 
 		if (!empty($data['filter_name'])) {
@@ -494,7 +494,7 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 
 	/**
 	 * Get post descriptions for all languages
-	 * 
+	 *
 	 * @param int $post_id
 	 * @return array
 	 */
@@ -542,7 +542,7 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 
 	/**
 	 * Get post categories
-	 * 
+	 *
 	 * @param int $post_id
 	 * @return array
 	 */
@@ -560,7 +560,7 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 
 	/**
 	 * Get post stores
-	 * 
+	 *
 	 * @param int $post_id
 	 * @return array
 	 */
@@ -578,7 +578,7 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 
 	/**
 	 * Get post tags
-	 * 
+	 *
 	 * @param int $post_id
 	 * @return array
 	 */
@@ -591,11 +591,11 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 			if (!isset($post_tag_data[$result['language_id']])) {
 				$post_tag_data[$result['language_id']] = '';
 			}
-			
+
 			if ($post_tag_data[$result['language_id']]) {
 				$post_tag_data[$result['language_id']] .= ', ';
 			}
-			
+
 			$post_tag_data[$result['language_id']] .= $result['tag'];
 		}
 
@@ -604,13 +604,13 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 
 	/**
 	 * Get post SEO URLs
-	 * 
+	 *
 	 * @param int $post_id
 	 * @return array
 	 */
 	public function getPostSeoUrls($post_id) {
 		$post_seo_url_data = array();
-		
+
 		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "blog_seo_url` WHERE query = 'blog_post_id=" . (int)$post_id . "'");
 
 		foreach ($query->rows as $result) {

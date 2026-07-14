@@ -762,35 +762,8 @@ hr {
 
 </style>
 
-<!-- Lucide icons (CDN UMD + local fallback) -->
-<script>
-  (function() {
-    // Prefer UMD/Global build from CDN which exposes `lucide` on window
-    var script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/lucide@0.255.0/dist/lucide.min.js';
-    script.async = true;
-    script.onload = function() {
-      try {
-        if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
-          // Render icons present in the DOM
-          lucide.createIcons();
-        }
-      } catch (err) {
-        console.warn('Lucide load error:', err);
-      }
-    };
-    script.onerror = function() {
-      // If CDN fails, load local fallback
-      var fallback = document.createElement('script');
-      fallback.src = 'view/javascript/lucide.min.js';
-      fallback.onload = function() {
-        try { if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') lucide.createIcons(); } catch (e) { console.warn('Lucide fallback error:', e); }
-      };
-      document.head.appendChild(fallback);
-    };
-    document.head.appendChild(script);
-  })();
-</script>
+<!-- Lucide icons (local) -->
+<script src="view/javascript/lucide.min.js"></script>
 
 {{ column_left }}
 
@@ -1385,35 +1358,6 @@ hr {
                   </label>
                   <div class="col-sm-9">
                     <input type="number" name="module_dockercart_checkout_cache_ttl" id="input-cache-ttl" value="{{ module_dockercart_checkout_cache_ttl }}" class="form-control" min="0" max="86400">
-                  </div>
-                </div>
-
-                <hr>
-                <h4><i data-lucide="shield"></i> reCAPTCHA</h4>
-
-                <div class="form-group">
-                  <label class="col-sm-3 control-label" for="input-recaptcha-enabled">
-                    <span data-toggle="tooltip" title="{{ help_recaptcha }}">{{ entry_recaptcha_enabled }}</span>
-                  </label>
-                  <div class="col-sm-9">
-                    <select name="module_dockercart_checkout_recaptcha_enabled" id="input-recaptcha-enabled" class="form-control">
-                      <option value="1" {% if module_dockercart_checkout_recaptcha_enabled == 1 %}selected{% endif %}>{{ text_yes }}</option>
-                      <option value="0" {% if module_dockercart_checkout_recaptcha_enabled == 0 %}selected{% endif %}>{{ text_no }}</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label class="col-sm-3 control-label" for="input-recaptcha-site-key">{{ entry_recaptcha_site_key }}</label>
-                  <div class="col-sm-9">
-                    <input type="text" name="module_dockercart_checkout_recaptcha_site_key" id="input-recaptcha-site-key" value="{{ module_dockercart_checkout_recaptcha_site_key }}" class="form-control">
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label class="col-sm-3 control-label" for="input-recaptcha-secret-key">{{ entry_recaptcha_secret_key }}</label>
-                  <div class="col-sm-9">
-                    <input type="text" name="module_dockercart_checkout_recaptcha_secret_key" id="input-recaptcha-secret-key" value="{{ module_dockercart_checkout_recaptcha_secret_key }}" class="form-control">
                   </div>
                 </div>
 

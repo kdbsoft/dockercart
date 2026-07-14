@@ -220,18 +220,26 @@ class ControllerMarketingContact extends Controller {
 					foreach ($emails as $email) {
 						if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
 							$mail = new Mail($this->config->get('config_mail_engine'));
-							$mail->parameter = $this->config->get('config_mail_parameter');
 							$mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
 							$mail->smtp_username = $this->config->get('config_mail_smtp_username');
 							$mail->smtp_password = html_entity_decode($this->config->get('config_mail_smtp_password'), ENT_QUOTES, 'UTF-8');
 							$mail->smtp_port = $this->config->get('config_mail_smtp_port');
 							$mail->smtp_timeout = $this->config->get('config_mail_smtp_timeout');
+							$mail->smtp_auth_method = $this->config->get('config_mail_smtp_auth_method');
+							$mail->smtp_oauth_token = $this->config->get('config_mail_smtp_oauth_token');
+							$mail->smtp_oauth_refresh_token = $this->config->get('config_mail_smtp_oauth_refresh_token');
+							$mail->smtp_oauth_client_id = $this->config->get('config_mail_smtp_oauth_client_id');
+							$mail->smtp_oauth_client_secret = $this->config->get('config_mail_smtp_oauth_client_secret');
 
 							$mail->setTo($email);
 							$mail->setFrom($store_email);
 							$mail->setSender(html_entity_decode($store_name, ENT_QUOTES, 'UTF-8'));
 							$mail->setSubject(html_entity_decode($this->request->post['subject'], ENT_QUOTES, 'UTF-8'));
 							$mail->setHtml($message);
+							$mail->on_token_refresh = function ($token) {
+								$this->db->query("UPDATE " . DB_PREFIX . "setting SET `value` = '" . $this->db->escape($token) . "' WHERE `key` = 'config_mail_smtp_oauth_token' AND `store_id` = '" . (int)$this->config->get('config_store_id') . "'");
+							};
+
 							$mail->send();
 						}
 					}

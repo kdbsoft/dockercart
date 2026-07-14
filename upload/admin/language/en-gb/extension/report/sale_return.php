@@ -3,7 +3,7 @@
 $_['heading_title']     = 'Returns Report';
 
 // Text
-$_['text_extension']    = 'Extensions';
+$_['text_extension']    = 'Add-ons';
 $_['text_edit']         = 'Edit Returns Report';
 $_['text_success']      = 'Success: You have modified returns report!';
 $_['text_filter']       = 'Filter';

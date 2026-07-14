@@ -1,10 +1,10 @@
 <?php
 // Heading
-$_['heading_title']     = 'DockerCart Theme Settings';
+$_['heading_title']     = 'Theme Settings';
 
 // Text
-$_['text_extension']    = 'Extensions';
-$_['text_success']      = 'Success: DockerCart theme settings have been updated.';
+$_['text_extension']    = 'Add-ons';
+$_['text_success']      = 'Success: Theme settings have been updated.';
 $_['text_edit']         = 'Edit Theme Settings';
 $_['text_enabled']      = 'Enabled';
 $_['text_disabled']     = 'Disabled';

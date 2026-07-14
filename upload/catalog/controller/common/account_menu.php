@@ -42,14 +42,14 @@ class ControllerCommonAccountMenu extends Controller {
 						'href' => $this->url->link('account/viewed', '', true),
 						'icon' => 'history',
 					),
-					'account/newsletter' => array(
-						'text' => $this->language->get('text_newsletter'),
-						'href' => $this->url->link('account/newsletter', '', true),
-						'icon' => 'mail',
-					),
+				'account/newsletter' => array(
+					'text' => $this->language->get('text_newsletter'),
+					'href' => $this->url->link('account/newsletter', '', true),
+					'icon' => 'mail',
 				),
-			),
-			array(
+				),
+		),
+		array(
 				'heading' => $this->language->get('text_my_orders'),
 				'children' => array(
 					'account/order' => array(

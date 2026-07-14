@@ -1,6 +1,4 @@
 <?php
-// Error Reporting
-error_reporting(E_ALL);
 
 // Check Version
 if (version_compare(phpversion(), '8.1.0', '<') == true) {
@@ -103,7 +101,7 @@ if (isset($_SERVER['REQUEST_URI'])) {
 			$path = $parts[0];
 			$query = isset($parts[1]) ? '?' . $parts[1] : '';
 		}
-	
+
 		// Replace multiple consecutive slashes with single slash
 		$normalized_path = preg_replace('#/+#', '/', $path);
 
@@ -176,5 +174,5 @@ require_once(DIR_SYSTEM . 'helper/general.php');
 require_once(DIR_SYSTEM . 'helper/utf8.php');
 
 function start($application_config) {
-	require_once(DIR_SYSTEM . 'framework.php');	
+	require_once(DIR_SYSTEM . 'framework.php');
 }

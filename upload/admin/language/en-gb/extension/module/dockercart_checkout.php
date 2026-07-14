@@ -1,11 +1,11 @@
 <?php
 // Heading
-$_["heading_title"] = "DockerCart Checkout";
+$_["heading_title"] = "Checkout";
 
 // Text
-$_["text_extension"] = "Extensions";
-$_["text_success"] = "Success: You have modified DockerCart Checkout settings!";
-$_["text_edit"] = "Edit DockerCart Checkout";
+$_["text_extension"] = "Add-ons";
+$_["text_success"] = "Success: You have modified Checkout settings!";
+$_["text_edit"] = "Edit Checkout";
 $_["text_enabled"] = "Enabled";
 $_["text_disabled"] = "Disabled";
 $_["text_yes"] = "Yes";
@@ -21,11 +21,11 @@ $_["tab_license"] = "License (GPL-3.0)";
 
 // General Settings
 $_["entry_status"] = "Module Status";
-$_["help_status"] = "Enable or disable the DockerCart Checkout module";
+$_["help_status"] = "Enable or disable the checkout module";
 
 $_["entry_redirect_standard"] = "Redirect Standard Checkout";
 $_["help_redirect_standard"] =
-    "Automatically redirect users from the standard OpenCart checkout (checkout/checkout) to DockerCart Checkout";
+    "Automatically redirect users from the standard OpenCart checkout (checkout/checkout) to the checkout page";
 
 $_["entry_show_progress"] = "Show Progress Bar";
 $_["help_show_progress"] =
@@ -135,12 +135,6 @@ $_["entry_cache_ttl"] = "Template Cache TTL";
 $_["help_cache_ttl"] =
     "Cache lifetime in seconds (0 = no cache, useful for development). Max: 86400";
 
-$_["entry_recaptcha_enabled"] = "Enable reCAPTCHA";
-$_["help_recaptcha"] = "Enable Google reCAPTCHA v3 for spam protection";
-
-$_["entry_recaptcha_site_key"] = "reCAPTCHA Site Key";
-$_["entry_recaptcha_secret_key"] = "reCAPTCHA Secret Key";
-
 // Method Overrides
 $_["tab_method_overrides"] = "Method Overrides";
 $_["text_method_overrides"] =
@@ -216,7 +210,7 @@ $_["text_info"] =
 
 // Errors
 $_["error_permission"] =
-    "Warning: You do not have permission to modify DockerCart Checkout!";
+    "Warning: You do not have permission to modify Checkout!";
 $_["error_cache_ttl"] = "Cache TTL must be between 0 and 86400 seconds!";
 $_["error_license_required"] = "License key is not required in the GPL version";
 $_["error_license_invalid"] =
@@ -231,7 +225,7 @@ $_["error_exception"] = "Error: %s";
 $_["error_missing_block_index_or_fields"] = "Missing block_index or fields.";
 $_["error_block_index_not_found"] = "Block index not found";
 $_["text_block_fields_saved"] = "Block fields saved successfully";
-$_["text_layout_name"] = "DockerCart Checkout";
+$_["text_layout_name"] = "Checkout";
 // Modal / UI strings
 $_["text_block_settings"] = "Block Settings";
 $_["text_modal_instructions"] =

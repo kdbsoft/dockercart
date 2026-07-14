@@ -13,8 +13,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 <script type="text/javascript" src="view/javascript/jquery/jquery-3.7.1.min.js"></script>
 <script type="text/javascript" src="view/javascript/bootstrap/js/bootstrap.min.js"></script>
-<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script src="view/javascript/lucide.min.js"></script>
+<script src="view/javascript/chart.min.js"></script>
 <link href="view/stylesheet/bootstrap.css" type="text/css" rel="stylesheet" />
 <link href="view/javascript/font-awesome/css/font-awesome.min.css" type="text/css" rel="stylesheet" />
 <script src="view/javascript/jquery/datetimepicker/moment/moment.min.js" type="text/javascript"></script>
@@ -34,13 +34,20 @@
 <script type="text/javascript" src="{{ script }}{% if script|slice(0,4) != 'http' and script|slice(0,2) != '//' %}?v={{ dockercart_version }}{% endif %}"></script>
 {% endfor %}
 </head>
-<body data-user-token="{{ user_token }}" data-default-language-id="{{ dockercart_default_language_id }}" data-google-translation-enabled="{{ dockercart_google_translation_enabled }}">
+<body data-user-token="{{ user_token }}">
 <div id="container">
 <header id="header" class="navbar navbar-static-top">
   <div class="container-fluid">
     <div id="header-logo" class="navbar-header"><a href="{{ home }}" class="navbar-brand"><img src="view/image/logo.png" alt="{{ heading_title }}" title="{{ heading_title }}" /></a></div>
     {% if logged %}<a href="#" id="button-menu" class="hidden-md hidden-lg"><span class="fa fa-bars"></span></a>
     <ul class="nav navbar-nav navbar-right">
+      <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><b>{{ (current_language_code|split('-'))|first|upper }}</b> <i class="fa fa-caret-down fa-fw"></i></a>
+        <ul class="dropdown-menu dropdown-menu-right">
+          {% for language in languages %}
+          <li{% if language.code == current_language_code %} class="active"{% endif %}><a href="{{ language.href }}">{{ language.name }}</a></li>
+          {% endfor %}
+        </ul>
+      </li>
       <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><img src="{{ image }}" alt="{{ firstname }} {{ lastname }}" title="{{ username }}" id="user-profile" class="img-circle" />{{ firstname }} {{ lastname }} <i class="fa fa-caret-down fa-fw"></i></a>
         <ul class="dropdown-menu dropdown-menu-right">
           <li><a href="{{ profile }}"><i class="fa fa-user-circle-o fa-fw"></i> {{ text_profile }}</a></li>
@@ -60,7 +67,6 @@
     </ul>
     {% endif %} </div>
 </header>
-<script src="view/javascript/dockercart_google_translation_inline.js" type="text/javascript"></script>
 <script type="text/javascript">
 document.addEventListener('DOMContentLoaded', function() {
   if (window.lucide && typeof window.lucide.createIcons === 'function') {

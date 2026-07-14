@@ -3,7 +3,7 @@
 $_['heading_title']    = 'Specials';
 
 // Text
-$_['text_extension']   = 'Extensions';
+$_['text_extension']   = 'Add-ons';
 $_['text_success']     = 'Success: You have modified module specials!';
 $_['text_edit']        = 'Edit Specials Module';
 $_['text_default_module_name'] = 'Specials';

@@ -119,7 +119,6 @@ class ControllerCommonDeveloper extends Controller {
 		if (!$this->user->hasPermission('modify', 'common/developer')) {
 			$json['error'] = $this->language->get('error_permission');
 		} else {
-			// Clear memcache
 			$this->cache->flush();
 
 			$json['success'] = $this->language->get('text_clear_cache_success');

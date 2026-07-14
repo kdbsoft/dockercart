@@ -1,19 +1,19 @@
 <?php
 /**
  * DockerCart Search Module - Catalog Controller
- * 
+ *
  * Handles search requests and autocomplete on frontend
- * 
+ *
  * @package    DockerCart
  * @subpackage Module
- * @author     DockerCart Team
+ * @author     DockerCart Official
  * @copyright  2026 DockerCart
  * @license    MIT
  * @version    1.0.3
  */
 
 class ControllerExtensionModuleDockercartSearch extends Controller {
-    
+
     /**
      * Autocomplete suggestions (AJAX endpoint)
      * Returns products, categories and manufacturers grouped by type.
@@ -86,14 +86,15 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
             }
 
             $json[] = [
-                'type'       => 'product',
-                'product_id' => $result['product_id'],
-                'name'       => strip_tags(html_entity_decode($result['name'], ENT_QUOTES, 'UTF-8')),
-                'model'      => $result['model'] ?? '',
-                'image'      => $image,
-                'price'      => $price,
-                'special'    => $special,
-                'href'       => $this->url->link('product/product', 'product_id=' . $result['product_id'])
+                'type'        => 'product',
+                'product_id'  => $result['product_id'],
+                'category_id' => (int)($result['category_id'] ?? 0),
+                'name'        => strip_tags(html_entity_decode($result['name'], ENT_QUOTES, 'UTF-8')),
+                'model'       => $result['model'] ?? '',
+                'image'       => $image,
+                'price'       => $price,
+                'special'     => $special,
+                'href'        => $this->url->link('product/product', 'product_id=' . $result['product_id'])
             ];
         }
 
@@ -103,9 +104,10 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
 
             foreach ($category_results as $cat) {
                 $json[] = [
-                    'type' => 'category',
-                    'name' => strip_tags(html_entity_decode($cat['name'], ENT_QUOTES, 'UTF-8')),
-                    'href' => $this->url->link('product/category', 'path=' . (int)$cat['category_id'])
+                    'type'        => 'category',
+                    'category_id' => (int)$cat['category_id'],
+                    'name'        => strip_tags(html_entity_decode($cat['name'], ENT_QUOTES, 'UTF-8')),
+                    'href'        => $this->url->link('product/category', 'path=' . (int)$cat['category_id'])
                 ];
             }
         }
@@ -136,7 +138,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
         $this->response->addHeader('Content-Type: application/json');
         $this->response->setOutput(json_encode($json));
     }
-    
+
     /**
      * Override getProducts when called from search page
      * This intercepts the model call AFTER standard database search and replaces results
@@ -151,45 +153,45 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
         if (isset($this->request->get['tag']) && trim((string)$this->request->get['tag']) !== '') {
             return;
         }
-        
+
         // Only override when search parameter is present
         if (!isset($this->request->get['search']) || empty($this->request->get['search'])) {
             return; // Not a search request
         }
-        
+
         $search = $this->request->get['search'];
         $min_chars = $this->config->get('module_dockercart_search_min_chars') ?: 3;
-        
+
         if (mb_strlen($search) < $min_chars) {
             return; // Let standard search handle validation
         }
-        
+
         // Get filter data from args (passed to getProducts)
         $filter_data = isset($args[0]) ? $args[0] : [];
-        
+
         // Use Manticore search
         $this->load->model('extension/module/dockercart_search');
-        
+
         $search_options = [
             'limit' => isset($filter_data['limit']) ? (int)$filter_data['limit'] : 20,
             'offset' => isset($filter_data['start']) ? (int)$filter_data['start'] : 0
         ];
-        
+
         // Add category filter if specified
         if (isset($filter_data['filter_category_id']) && $filter_data['filter_category_id']) {
             $search_options['category_id'] = (int)$filter_data['filter_category_id'];
         }
-        
+
         // Add sub-category filter
         if (!empty($filter_data['filter_sub_category'])) {
             $search_options['sub_category'] = true;
         }
-        
+
         // Search in description if checkbox is checked
         if (isset($this->request->get['description']) && $this->request->get['description']) {
             $search_options['description'] = true;
         }
-        
+
         // Perform Manticore search
         $search_results = $this->model_extension_module_dockercart_search->search($search, $search_options);
 
@@ -209,7 +211,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
         // Store total for pagination
         $this->registry->set('manticore_search_total', $total);
     }
-    
+
     /**
      * Add autocomplete script to header (via event)
      */
@@ -220,7 +222,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
         if (!$this->config->get('module_dockercart_search_autocomplete')) {
             return;
         }
-        
+
         // Add autocomplete JavaScript before </head>
         $script = '<script src="catalog/view/javascript/dockercart_search_autocomplete.js?v=' . DOCKERCART_VERSION . '"></script>' . "\n";
         $script .= '<script>' . "\n";
@@ -238,7 +240,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
         $script .= '};' . "\n";
         $script .= '</script>' . "\n";
         $script .= '</head>';
-        
+
         $output = str_replace('</head>', $script, $output);
     }
 }

@@ -5,7 +5,7 @@
  * geo zones, order total conditions and multilingual descriptions.
  *
  * @package    DockerCart
- * @author     DockerCart Team
+ * @author     DockerCart Official
  * @copyright  2024-2026 DockerCart
  * @license    MIT
  */

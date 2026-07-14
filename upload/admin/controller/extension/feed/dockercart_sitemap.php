@@ -11,7 +11,7 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
         
         // Initialize centralized logger
         require_once DIR_SYSTEM . 'library/dockercart_logger.php';
-        $this->logger = new DockercartLogger($this->registry, 'googlebase');
+        $this->logger = new DockercartLogger($this->registry, 'sitemap');
     }
 
     public function index() {
@@ -48,6 +48,15 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
                 }
             }
             $this->model_setting_setting->editSetting('module_dockercart_sitemap', $module_data);
+
+            // Update scheduler task
+            $tasks = $this->dockercart_scheduler->getTasksByType('dockercart_sitemap_generate');
+            $task = !empty($tasks) ? $tasks[0] : null;
+            if ($task) {
+                $schedule = $this->request->post['dockercart_sitemap_schedule'] ?? $task['cron_schedule'];
+                $this->dockercart_scheduler->setSchedule((int)$task['task_id'], $schedule);
+                $this->dockercart_scheduler->setEnabled((int)$task['task_id'], !empty($schedule));
+            }
 
             $this->session->data['success'] = $this->language->get('text_success');
 
@@ -108,7 +117,6 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
             'dockercart_sitemap_information_changefreq',
             'dockercart_sitemap_max_urls',
             'dockercart_sitemap_max_file_size_mb'
-            ,'dockercart_sitemap_cache_seconds'
             ,'dockercart_sitemap_create_gzip'
         );
 
@@ -150,9 +158,6 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
         if (!isset($data['dockercart_sitemap_max_file_size_mb'])) {
             $data['dockercart_sitemap_max_file_size_mb'] = '50';
         }
-        if (!isset($data['dockercart_sitemap_cache_seconds'])) {
-            $data['dockercart_sitemap_cache_seconds'] = '86400';
-        }
         if (!isset($data['dockercart_sitemap_create_gzip'])) {
             $data['dockercart_sitemap_create_gzip'] = 0;
         }
@@ -170,72 +175,55 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
 
         $data['sitemap_url'] = HTTP_CATALOG . 'sitemap.xml';
 
-        $data['last_generated'] = $this->config->get('dockercart_sitemap_last_generated');
-        $data['sitemap_file_count'] = (int)$this->config->get('dockercart_sitemap_file_count');
+        $sitemap_files = glob(DIR_APPLICATION . '../sitemap*.xml');
+        $sitemap_gzfiles = glob(DIR_APPLICATION . '../sitemap*.xml.gz');
+        $sitemap_all = array_merge($sitemap_files ?: [], $sitemap_gzfiles ?: []);
+        if (!empty($sitemap_all)) {
+            $latest_mtime = 0;
+            foreach ($sitemap_all as $sf) {
+                $mt = filemtime($sf);
+                if ($mt > $latest_mtime) {
+                    $latest_mtime = $mt;
+                }
+            }
+            $data['last_generated'] = date('c', $latest_mtime);
+        } else {
+            $data['last_generated'] = '';
+        }
+        $data['sitemap_file_count'] = count(array_unique($sitemap_all));
 
         $data['generate_ajax'] = $this->url->link('extension/feed/dockercart_sitemap/ajaxGenerate', 'user_token=' . $this->session->data['user_token'], true);
 
+        // Scheduler info
+        $tasks = $this->dockercart_scheduler->getTasksByType('dockercart_sitemap_generate');
+        $task = !empty($tasks) ? $tasks[0] : null;
 
+        $data['schedule_options'] = array(
+            ''          => $this->language->get('text_cron_disabled'),
+            'every_15m' => $this->language->get('text_every_15m'),
+            'every_30m' => $this->language->get('text_every_30m'),
+            'hourly'    => $this->language->get('text_hourly'),
+            'every_6h'  => $this->language->get('text_every_6h'),
+            'every_12h' => $this->language->get('text_every_12h'),
+            'daily'     => $this->language->get('text_daily'),
+        );
 
-        $module_settings = $this->model_setting_setting->getSetting('module_dockercart_sitemap');
-
-        if (isset($this->request->post['module_dockercart_sitemap_license_key'])) {
-            $data['module_dockercart_sitemap_license_key'] = $this->request->post['module_dockercart_sitemap_license_key'];
+        if (isset($this->request->post['dockercart_sitemap_schedule'])) {
+            $data['dockercart_sitemap_schedule'] = $this->request->post['dockercart_sitemap_schedule'];
         } else {
-            $data['module_dockercart_sitemap_license_key'] = isset($module_settings['module_dockercart_sitemap_license_key']) ? $module_settings['module_dockercart_sitemap_license_key'] : '';
-        }
-
-        if (isset($this->request->post['module_dockercart_sitemap_public_key'])) {
-            $data['module_dockercart_sitemap_public_key'] = $this->request->post['module_dockercart_sitemap_public_key'];
-        } else {
-            $data['module_dockercart_sitemap_public_key'] = isset($module_settings['module_dockercart_sitemap_public_key']) ? $module_settings['module_dockercart_sitemap_public_key'] : '';
+            $data['dockercart_sitemap_schedule'] = $task ? ($task['cron_schedule'] ?? 'daily') : 'daily';
         }
 
 
-        $data['license_verify_ajax'] = $this->url->link('extension/feed/dockercart_sitemap/verifyLicenseAjax', 'user_token=' . $this->session->data['user_token'], true);
-        $data['license_save_ajax'] = $this->url->link('extension/feed/dockercart_sitemap/saveLicenseKeyAjax', 'user_token=' . $this->session->data['user_token'], true);
 
+        $data['entry_limits_heading'] = $this->language->get('entry_limits_heading');
+        $data['entry_max_urls'] = $this->language->get('entry_max_urls');
+        $data['help_max_urls'] = $this->language->get('help_max_urls');
+        $data['entry_max_file_size_mb'] = $this->language->get('entry_max_file_size_mb');
+        $data['help_max_file_size_mb'] = $this->language->get('help_max_file_size_mb');
 
-    $data['license_domain'] = $_SERVER['HTTP_HOST'] ?? 'unknown';
-
-
-        $data['license_valid'] = false;
-        $data['license_message'] = '';
-        try {
-            if (file_exists(DIR_SYSTEM . 'library/dockercart_license.php')) {
-                require_once(DIR_SYSTEM . 'library/dockercart_license.php');
-
-                $license_key = $data['module_dockercart_sitemap_license_key'] ?? '';
-                $public_key = $data['module_dockercart_sitemap_public_key'] ?? '';
-                
-                if (!empty($license_key)) {
-                    $license = new DockercartLicense($this->registry);
-                    if (!empty($public_key)) {
-                        $res = $license->verifyWithPublicKey((string)$license_key, (string)$public_key, 'dockercart_sitemap', true);
-                    } else {
-                        $res = $license->verify((string)$license_key, 'dockercart_sitemap', true);
-                    }
-                    $data['license_valid'] = !empty($res['valid']);
-                    $data['license_message'] = $res['error'] ?? '';
-                }
-            }
-        } catch (Throwable $e) {
-            $data['license_valid'] = false;
-            $data['license_message'] = 'License check error: ' . $e->getMessage();
-        }
-
-
-    $data['entry_limits_heading'] = $this->language->get('entry_limits_heading');
-    $data['entry_max_urls'] = $this->language->get('entry_max_urls');
-    $data['help_max_urls'] = $this->language->get('help_max_urls');
-    $data['entry_max_file_size_mb'] = $this->language->get('entry_max_file_size_mb');
-    $data['help_max_file_size_mb'] = $this->language->get('help_max_file_size_mb');
-    $data['entry_cache_seconds'] = $this->language->get('entry_cache_seconds');
-    $data['help_cache_seconds'] = $this->language->get('help_cache_seconds');
-
-    // Simple inline labels (no lang file required for backward compatibility)
-    $data['entry_create_gzip'] = 'Create gzipped sitemap files';
-    $data['help_create_gzip'] = 'When enabled, the generator will create .xml.gz versions of sitemap fragments and update the sitemap index to reference the compressed files. XML is generated by default.';
+        $data['entry_create_gzip'] = 'Create gzipped sitemap files';
+        $data['help_create_gzip'] = 'When enabled, the generator will create .xml.gz versions of sitemap fragments and update the sitemap index to reference the compressed files. XML is generated by default.';
 
         $data['header'] = $this->load->controller('common/header');
         $data['column_left'] = $this->load->controller('common/column_left');
@@ -243,99 +231,6 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
 
         $this->response->setOutput($this->load->view('extension/feed/dockercart_sitemap', $data));
     }
-
-    public function verifyLicenseAjax() {
-        $json = array();
-
-        $input = file_get_contents('php://input');
-        $data = json_decode($input, true);
-
-        $license_key = isset($data['license_key']) ? $data['license_key'] : '';
-        $public_key = isset($data['public_key']) ? $data['public_key'] : '';
-
-        if (empty($license_key)) {
-            $json['valid'] = false;
-            $json['error'] = 'License key is empty';
-            $this->response->addHeader('Content-Type: application/json');
-            $this->response->setOutput(json_encode($json));
-            return;
-        }
-
-        if (!file_exists(DIR_SYSTEM . 'library/dockercart_license.php')) {
-            $json['valid'] = false;
-            $json['error'] = 'License library not found';
-            $this->response->addHeader('Content-Type: application/json');
-            $this->response->setOutput(json_encode($json));
-            return;
-        }
-
-        require_once(DIR_SYSTEM . 'library/dockercart_license.php');
-
-        if (!class_exists('DockercartLicense')) {
-            $json['valid'] = false;
-            $json['error'] = 'DockercartLicense class not found';
-            $this->response->addHeader('Content-Type: application/json');
-            $this->response->setOutput(json_encode($json));
-            return;
-        }
-
-        try {
-            $license = new DockercartLicense($this->registry);
-
-            if (!empty($public_key)) {
-                $result = $license->verifyWithPublicKey($license_key, $public_key, 'dockercart_sitemap', true);
-            } else {
-                $result = $license->verify($license_key, 'dockercart_sitemap', true);
-            }
-
-            $json = $result;
-        } catch (Exception $e) {
-            $json['valid'] = false;
-            $json['error'] = 'Error: ' . $e->getMessage();
-        }
-
-        $this->response->addHeader('Content-Type: application/json');
-        $this->response->setOutput(json_encode($json));
-    }
-
-    public function saveLicenseKeyAjax() {
-        $json = array();
-
-        $input = file_get_contents('php://input');
-        $data = json_decode($input, true);
-
-        $license_key = isset($data['license_key']) ? $data['license_key'] : '';
-        $public_key = isset($data['public_key']) ? $data['public_key'] : '';
-
-        if (!$this->user->hasPermission('modify', 'extension/feed/dockercart_sitemap')) {
-            $json['success'] = false;
-            $json['error'] = 'No permission';
-            $this->response->addHeader('Content-Type: application/json');
-            $this->response->setOutput(json_encode($json));
-            return;
-        }
-
-        try {
-            $this->load->model('setting/setting');
-
-
-            $this->model_setting_setting->editSettingValue('module_dockercart_sitemap', 'module_dockercart_sitemap_license_key', $license_key);
-
-            if (!empty($public_key)) {
-                $this->model_setting_setting->editSettingValue('module_dockercart_sitemap', 'module_dockercart_sitemap_public_key', $public_key);
-            }
-
-            $json['success'] = true;
-        } catch (Exception $e) {
-            $json['success'] = false;
-            $json['error'] = $e->getMessage();
-        }
-
-        $this->response->addHeader('Content-Type: application/json');
-        $this->response->setOutput(json_encode($json));
-    }
-
-
 
     public function ajaxGenerate() {
         $this->load->language('extension/feed/dockercart_sitemap');
@@ -357,38 +252,14 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
             });
 
 
+            $cli_script = DIR_APPLICATION . '../bin/dockercart_sitemap_generate.php';
+            $cmd = sprintf('php %s 2>&1', escapeshellarg($cli_script));
+            $output = [];
+            $return_code = 0;
+            exec($cmd, $output, $return_code);
 
-            $catalog_url = (defined('HTTP_CATALOG') ? rtrim(HTTP_CATALOG, '/') : rtrim($this->config->get('config_url'), '/')) . '/index.php?route=extension/feed/dockercart_sitemap';
-
-            $catalog_url .= '&regenerate=1&admin_request=1';
-
-
-            @array_map('unlink', glob(DIR_APPLICATION . '../sitemap*.xml'));
-
-
-            if (function_exists('curl_init')) {
-                $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, $catalog_url);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-                curl_setopt($ch, CURLOPT_TIMEOUT, 120);
-
-                curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-                $response = curl_exec($ch);
-                $curl_errno = curl_errno($ch);
-                $curl_error = curl_error($ch);
-                $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-                if ($curl_errno || $http_code >= 400) {
-                    throw new \RuntimeException('Catalog generation failed: ' . ($curl_error ?: 'HTTP ' . $http_code));
-                }
-            } else {
-
-                $context = stream_context_create(array('http' => array('timeout' => 120)));
-                $response = @file_get_contents($catalog_url, false, $context);
-                if ($response === false) {
-                    throw new \RuntimeException('Catalog generation failed: file_get_contents error');
-                }
+            if ($return_code !== 0) {
+                throw new \RuntimeException('Catalog generation failed: ' . implode("\n", $output));
             }
 
 
@@ -399,23 +270,22 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
             $gzfiles = glob(DIR_APPLICATION . '../sitemap*.xml.gz');
             $files = $files ?: array();
             $gzfiles = $gzfiles ?: array();
-            // Merge and keep unique
             $files = array_values(array_unique(array_merge($files, $gzfiles)));
 
-
-            $this->load->model('setting/setting');
-            $last_generated = date('c');
+            if (!empty($files)) {
+                $latest_mtime = 0;
+                foreach ($files as $sf) {
+                    $mt = filemtime($sf);
+                    if ($mt > $latest_mtime) {
+                        $latest_mtime = $mt;
+                    }
+                }
+                $last_generated = date('c', $latest_mtime);
+            } else {
+                $last_generated = '';
+            }
             $file_count = count($files);
 
-
-            $current_settings = $this->model_setting_setting->getSetting('dockercart_sitemap');
-
-
-            $current_settings['dockercart_sitemap_last_generated'] = $last_generated;
-            $current_settings['dockercart_sitemap_file_count'] = $file_count;
-
-
-            $this->model_setting_setting->editSetting('dockercart_sitemap', $current_settings);
 
             $json['success'] = $this->language->get('text_generated');
             $json['files'] = array();
@@ -460,74 +330,32 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
             'dockercart_sitemap_information_changefreq' => 'monthly',
             'dockercart_sitemap_max_urls' => '50000',
             'dockercart_sitemap_max_file_size_mb' => '50',
-            'dockercart_sitemap_cache_seconds' => '86400',
             'dockercart_sitemap_create_gzip' => 0,
-            'module_dockercart_sitemap_license_key' => '',
-            'module_dockercart_sitemap_public_key' => ''
+            'dockercart_sitemap_schedule' => 'daily',
+            'dockercart_sitemap_autogenerate' => 0
         );
 
         $this->model_setting_setting->editSetting('dockercart_sitemap', $defaults);
         $this->model_setting_setting->editSetting('module_dockercart_sitemap', $defaults);
         $this->model_setting_setting->editSettingValue('feed_dockercart_sitemap', 'feed_dockercart_sitemap_status', 0);
 
+        // Register scheduled sitemap generation task
+        $this->dockercart_scheduler->registerTask(
+            'dockercart_sitemap_generate',
+            'Sitemap Generate',
+            'php /var/www/html/bin/dockercart_sitemap_generate.php',
+            '0 3 * * *'
+        );
 
-
-        $webroot = DIR_APPLICATION . '../';
-        $htaccess = $webroot . '.htaccess';
-
-        $marker_start = "# DockerCart Sitemap - BEGIN\n";
-        $marker_end = "# DockerCart Sitemap - END\n";
-
-        $snippet = $marker_start
-            . "<IfModule mod_rewrite.c>\n"
-            . "RewriteEngine On\n"
-            . "RewriteRule ^sitemap\\.xml$ index.php?route=extension/feed/dockercart_sitemap [L,QSA]\n"
-            . "</IfModule>\n"
-            . $marker_end;
-
-        $standard_rules = "# OpenCart SEO URL Rules - BEGIN\n"
-            . "<IfModule mod_rewrite.c>\n"
-            . "RewriteEngine On\n"
-            . "RewriteBase /\n"
-            . "RewriteRule ^sitemap\\.xml$ index.php?route=extension/feed/google_sitemap [L]\n"
-            . "RewriteRule ^googlebase\\.xml$ index.php?route=extension/feed/google_base [L]\n"
-            . "RewriteRule ^install(/.*)?$ index.php?route=error/not_found [L]\n"
-            . "RewriteRule ^system/storage/(.*) index.php?route=error/not_found [L]\n"
-            . "RewriteCond %{REQUEST_FILENAME} !-f\n"
-            . "RewriteCond %{REQUEST_FILENAME} !-d\n"
-            . "RewriteCond %{REQUEST_URI} !.*\\.(ico|gif|jpg|jpeg|png|js|css)\n"
-            . "RewriteRule ^([^?]*) index.php?_route_=$1 [L,QSA]\n"
-            . "</IfModule>\n"
-            . "# OpenCart SEO URL Rules - END\n";
-
-        try {
-            if (file_exists($htaccess)) {
-                $content = @file_get_contents($htaccess);
-                if ($content !== false) {
-
-                    if (strpos($content, 'DockerCart Sitemap - BEGIN') === false) {
-                        @copy($htaccess, $htaccess . '.bak.' . time());
-
-                        $content = $snippet . "\n" . $content;
-                        @file_put_contents($htaccess, $content, LOCK_EX);
-                    }
-                }
-            } else {
-                $content = $snippet . "\n" . $standard_rules;
-                @file_put_contents($htaccess, $content, LOCK_EX);
-                @chmod($htaccess, 0644);
-            }
-        } catch (\Throwable $e) {
-
-            $this->logger->info('DockerCart Sitemap: failed to update .htaccess: ' . $e->getMessage());
-        }
     }
-
 
 
     public function uninstall() {
         $this->load->model('setting/setting');
         $this->model_setting_setting->deleteSetting('dockercart_sitemap');
+
+        // Unregister scheduled sitemap generation task
+        $this->dockercart_scheduler->unregisterTask('dockercart_sitemap_generate');
 
 
         $files = glob(DIR_APPLICATION . '../sitemap*.xml');
@@ -535,20 +363,6 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
             foreach ($files as $file) {
                 if (is_file($file)) {
                     @unlink($file);
-                }
-            }
-        }
-
-
-        $webroot = DIR_APPLICATION . '../';
-        $htaccess = $webroot . '.htaccess';
-        if (file_exists($htaccess)) {
-            $content = @file_get_contents($htaccess);
-            if ($content !== false) {
-
-                $new = preg_replace('/# DockerCart Sitemap - BEGIN[\s\S]*?# DockerCart Sitemap - END\n?/i', '', $content);
-                if ($new !== null && $new !== $content) {
-                    @file_put_contents($htaccess, $new, LOCK_EX);
                 }
             }
         }
@@ -594,13 +408,6 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
             $max_mb = $this->request->post['dockercart_sitemap_max_file_size_mb'];
             if (!ctype_digit((string)$max_mb) || (int)$max_mb < 1 || (int)$max_mb > 1024) {
                 $this->error['warning'] = $this->language->get('error_max_file_size_mb');
-            }
-        }
-
-        if (isset($this->request->post['dockercart_sitemap_cache_seconds'])) {
-            $cache = $this->request->post['dockercart_sitemap_cache_seconds'];
-            if (!ctype_digit((string)$cache) || (int)$cache < 60 || (int)$cache > 31536000) {
-                $this->error['warning'] = $this->language->get('error_cache_seconds');
             }
         }
 

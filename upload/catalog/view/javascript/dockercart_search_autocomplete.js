@@ -4,7 +4,7 @@
  *
  * @package    DockerCart
  * @subpackage Module
- * @author     DockerCart Team
+ * @author     DockerCart Official
  * @copyright  2026 DockerCart
  * @license    MIT
  * @version    2.0.0
@@ -39,7 +39,8 @@
         var debounceTimer;
         var suggestBox;
         var currentQuery = '';
-
+        var lastLoggedQuery = '';
+ 
         createSuggestBox();
 
         searchInput.addEventListener('input',   handleInput);
@@ -165,6 +166,22 @@
             setTimeout(function() { hideSuggestions(); }, 200);
         }
 
+        function logSearch(query, catId, products) {
+            if (!query || query === lastLoggedQuery) return;
+            lastLoggedQuery = query;
+            var url = 'index.php?route=product/search/log&search=' + encodeURIComponent(query);
+            if (catId) {
+                url += '&category_id=' + encodeURIComponent(catId);
+            }
+            if (products !== undefined) {
+                url += '&products=' + encodeURIComponent(products);
+            }
+            fetch(url, {
+                keepalive: true,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            }).catch(function() {});
+        }
+
         function fetchSuggestions(query) {
             if (query === currentQuery) { return; }
             currentQuery = query;
@@ -196,7 +213,7 @@
             if (categories.length) {
                 appendGroupHeader(suggestBox, svgFolder(), (config.labels && config.labels.categories) ? config.labels.categories : 'Categories');
                 categories.forEach(function(item) {
-                    var row = makeSimpleRow(item.name, item.href, svgFolder());
+                    var row = makeSimpleRow(item.name, item.href, svgFolder(), item.category_id);
                     suggestBox.appendChild(row);
                 });
             }
@@ -231,13 +248,14 @@
             box.appendChild(hdr);
         }
 
-        function makeSimpleRow(name, href, iconSvg) {
+        function makeSimpleRow(name, href, iconSvg, catId) {
             var row = document.createElement('a');
             row.href = href;
             row.className = 'dc-si';
             row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 14px;text-decoration:none;color:#1f2937;font-size:13px;transition:background .15s;cursor:pointer;';
             row.innerHTML = '<span style="flex-shrink:0;color:#6b7280;">' + iconSvg + '</span><span style="flex:1;font-weight:500;">' + escHtml(name) + '</span>';
             addRowHover(row);
+            row.addEventListener('click', function() { logSearch(currentQuery, catId || 0, 0); });
             return row;
         }
 
@@ -293,6 +311,7 @@
             row.appendChild(priceDiv);
 
             addRowHover(row);
+            row.addEventListener('click', function() { logSearch(currentQuery, item.category_id || 0, 1); });
             return row;
         }
 

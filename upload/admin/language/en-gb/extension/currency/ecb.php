@@ -3,7 +3,7 @@
 $_['heading_title']    = 'European Central Bank Currency Converter';
 
 // Text
-$_['text_extension']   = 'Extensions';
+$_['text_extension']   = 'Add-ons';
 $_['text_success']     = 'Success: You have modified European Central Bank Currency Converter!';
 $_['text_edit']        = 'Edit European Central Bank Currency Converter';
 $_['text_edit']       .= '<br><br>';
@@ -17,15 +17,8 @@ $_['text_edit_subtitle'] = 'Configure extension settings and options';
 
 
 // Entry
-$_['entry_ip']         = 'Server IP-address';
-$_['entry_cron']       = 'CRON command';
 $_['entry_status']     = 'Status';
-
-// Help
-$_['help_ip']          = 'Optional IP-address for server running a CRON task for refreshing the currency rates.';
-$_['help_cron']        = 'Use this command when setting up a CRON task on your server.';
 
 // Error
 $_['error_permission'] = 'Warning: You do not have permission to modify European Central Bank Currency Converter!';
 $_['error_euro']       = 'This extension requires the Euro as an available currency!';
-$_['error_ip']         = 'Invalid IP-address!';

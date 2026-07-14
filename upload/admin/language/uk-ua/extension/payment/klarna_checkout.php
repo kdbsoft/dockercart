@@ -5,7 +5,7 @@
 $_['heading_title']						 = 'Klarna Checkout';
 
 // Text
-$_['text_extension']					 = 'Extensions';
+$_['text_extension']					 = 'Доповнення';
 $_['text_success']						 = 'Success: You have modified Klarna Checkout account details!';
 $_['text_edit']							 = 'Edit Klarna Checkout';
 $_['text_live']							 = 'Live';

@@ -8,13 +8,13 @@
  */
 
 // Heading
-$_['heading_title']    = 'DockerCart Blog';
+$_['heading_title']    = 'Blog';
 
 // Text
-$_['text_extension']   = 'Extensions';
-$_['text_success']     = 'Success: You have modified DockerCart Blog module!';
+$_['text_extension']   = 'Add-ons';
+$_['text_success']     = 'Success: You have modified Blog module!';
 $_['text_seo_urls_reinstalled'] = 'SEO URLs for blog system pages have been successfully reinstalled!';
-$_['text_edit']        = 'Edit DockerCart Blog Module';
+$_['text_edit']        = 'Edit Blog Module';
 $_['text_blog']        = 'Blog';
 $_['text_posts']       = 'Posts';
 $_['text_categories']  = 'Categories';
@@ -54,14 +54,14 @@ $_['entry_show_author'] = 'Show Author';
 $_['entry_show_date']  = 'Show Date';
 $_['entry_show_views'] = 'Show Views';
 $_['entry_latest_limit'] = 'Latest Posts Limit';
-$_['entry_sitemap']    = 'Add to Sitemap';
+
 
 // Help
 $_['help_posts_per_page'] = 'Number of posts per page in listing (recommended 10-20)';
 $_['help_moderate_comments'] = 'Comments require approval before publishing';
 $_['help_captcha']     = 'Spam protection when adding comments';
 $_['help_latest_limit'] = 'Number of posts in "Latest Posts" widget (1-20)';
-$_['help_sitemap']     = 'Automatically add blog posts to XML sitemap';
+
 
 // Error
 $_['error_permission'] = 'Warning: You do not have permission to modify this module!';

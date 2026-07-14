@@ -45,7 +45,7 @@ class ControllerMarketplaceInstaller extends Controller {
 			$data['histories'][] = array(
 				'extension_install_id' => $result['extension_install_id'],
 				'filename'             => $result['filename'],
-				'date_added'           => date($this->language->get('date_format_short'), strtotime($result['date_added']))
+				'date_added'           => date('d/m/Y H:i', strtotime($result['date_added']))
 			);
 		}
 		
@@ -135,7 +135,7 @@ class ControllerMarketplaceInstaller extends Controller {
 		}
 		
 		if (isset($this->request->files['file']['name'])) {
-			if (substr($this->request->files['file']['name'], -10) != '.ocmod.zip') {
+			if (substr(strtolower($this->request->files['file']['name']), -10) != '.ocmod.zip') {
 				$json['error'] = $this->language->get('error_filetype');
 			}
 

@@ -28,14 +28,15 @@ else
 fi
 
 compose() {
-    if [ "${STANDALONE:-0}" = "1" ]; then
-        FILES="-f docker-compose.standalone.yml"
-        if docker ps -a --format '{{.Names}}' 2>/dev/null | grep -qFx "${CERTBOT_CONTAINER_NAME:-dockercart_certbot}"; then
-            FILES="$FILES -f docker-compose.standalone.letsencrypt.yml"
-        fi
+    if [ "${TRAEFIK:-0}" = "1" ]; then
+        FILES="-f docker-compose.traefik.yml"
         docker compose $FILES "$@"
     else
-        docker compose "$@"
+        FILES="-f docker-compose.yml"
+        if docker ps -a --format '{{.Names}}' 2>/dev/null | grep -qFx "${CERTBOT_CONTAINER_NAME:-dockercart_certbot}"; then
+            FILES="$FILES -f docker-compose.le.yml"
+        fi
+        docker compose $FILES "$@"
     fi
 }
 
@@ -72,7 +73,7 @@ elif [ "$LOCAL" = "$BASE" ]; then
 	# Single-file bind mounts (e.g. VERSION) are bound by inode at container creation time.
 	# git pull replaces files with new inodes, so the running container keeps reading the
 	# old content.  Force-recreate apache to re-bind all single-file mounts to their
-	# current inodes.  --no-deps avoids touching mariadb/memcached unnecessarily.
+	# current inodes.  --no-deps avoids touching mariadb unnecessarily.
 	log "Recreating apache container to refresh bind mounts (VERSION and config files)..."
 	compose up --force-recreate --no-deps -d apache
 
