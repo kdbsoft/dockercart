@@ -1,3 +1,9 @@
+## [2.0.1](https://github.com/kdbsoft/dockercart/compare/v2.0.0...v2.0.1) (2026-07-14)
+
+### Bug Fixes
+
+* **deps:** replace php-cs-fixer with shim to resolve phpstan conflict ([c89e149](https://github.com/kdbsoft/dockercart/commit/c89e149af6e86c3f24e93584811bd54ab31d506b))
+
 ## [2.0.0](https://github.com/kdbsoft/dockercart/compare/v1.48.0...v2.0.0) (2026-07-14)
 
 ### ⚠ BREAKING CHANGES
