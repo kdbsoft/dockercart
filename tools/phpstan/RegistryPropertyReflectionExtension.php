@@ -25,7 +25,7 @@ class RegistryPropertyReflectionExtension implements PropertiesClassReflectionEx
 	}
 
 	public function getProperty(ClassReflection $classReflection, string $propertyName): PropertyReflection {
-		if (preg_match('/^model_.+$/', $propertyName, $matches) === 1) {
+		if (preg_match('/^(model_.+)$/', $propertyName, $matches) === 1) {
 			$className = $this->convertSnakeToStudly($matches[1]);
 
 			$type = new NullType();
@@ -38,7 +38,7 @@ class RegistryPropertyReflectionExtension implements PropertiesClassReflectionEx
 			return new LoadedProperty($classReflection, $type);
 		}
 
-		return new LoadedProperty($classReflection, new UnionType(new ObjectType('object'), new NullType()));
+		return new LoadedProperty($classReflection, new UnionType([new ObjectType('object'), new NullType()]));
 	}
 
 	private function convertSnakeToStudly(string $value): string {
