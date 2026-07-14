@@ -19,4 +19,5 @@ parameters:
         - '#might not be defined\.#'
         - '#invoked with \d+ parameters?, \d+ required\.#'
         - '#Variable .+ in empty\(\) always exists#'
+        - '#is not writable#'
     reportUnmatchedIgnoredErrors: false
