@@ -1,3 +1,9 @@
+## [2.0.5](https://github.com/kdbsoft/dockercart/compare/v2.0.4...v2.0.5) (2026-07-14)
+
+### Bug Fixes
+
+* DISALLOW_INDEXING param ([b534712](https://github.com/kdbsoft/dockercart/commit/b53471295c38775da40319ff6e31aab599cb4a32))
+
 ## [2.0.4](https://github.com/kdbsoft/dockercart/compare/v2.0.3...v2.0.4) (2026-07-14)
 
 ### Bug Fixes
