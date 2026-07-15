@@ -1,9 +1,0 @@
-# Exclude downloaded images
-images/
-
-# Exclude config (contains credentials)
-config.yaml
-
-# Python
-__pycache__/
-*.pyc
