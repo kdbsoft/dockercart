@@ -167,6 +167,8 @@ class ModelCatalogProduct extends Model
             }
         }
 
+        $valid_images = $this->getValidProductImages($data);
+
         if (isset($data["product_option"])) {
             foreach ($data["product_option"] as $product_option) {
                 if (
@@ -487,6 +489,16 @@ class ModelCatalogProduct extends Model
         $this->db->query(
             "DELETE FROM " .
                 DB_PREFIX .
+                "product_option_value_color_image WHERE product_option_value_id IN (SELECT product_option_value_id FROM " .
+                DB_PREFIX .
+                "product_option_value WHERE product_id = '" .
+                (int) $product_id .
+                "')",
+        );
+
+        $this->db->query(
+            "DELETE FROM " .
+                DB_PREFIX .
                 "dockercart_product_option_value_customer_group_price WHERE product_option_value_id IN (SELECT product_option_value_id FROM " .
                 DB_PREFIX .
                 "product_option_value WHERE product_id = '" .
@@ -507,6 +519,8 @@ class ModelCatalogProduct extends Model
                 (int) $product_id .
                 "'",
         );
+
+        $valid_images = $this->getValidProductImages($data);
 
         if (isset($data["product_option"])) {
             foreach ($data["product_option"] as $product_option) {
@@ -966,6 +980,10 @@ class ModelCatalogProduct extends Model
             }
         }
 
+        if (!empty($valid_images)) {
+            $this->saveProductOptionColorImages($data, $product_id, $valid_images);
+        }
+
         $this->cache->delete("product");
     }
 
@@ -1149,6 +1167,16 @@ class ModelCatalogProduct extends Model
         $this->db->query(
             "DELETE FROM " .
                 DB_PREFIX .
+                "product_option_value_color_image WHERE product_option_value_id IN (SELECT product_option_value_id FROM " .
+                DB_PREFIX .
+                "product_option_value WHERE product_id = '" .
+                (int) $product_id .
+                "')",
+        );
+
+        $this->db->query(
+            "DELETE FROM " .
+                DB_PREFIX .
                 "dockercart_product_option_value_customer_group_price WHERE product_option_value_id IN (SELECT product_option_value_id FROM " .
                 DB_PREFIX .
                 "product_option_value WHERE product_id = '" .
@@ -1169,6 +1197,8 @@ class ModelCatalogProduct extends Model
                 (int) $product_id .
                 "'",
         );
+
+        $valid_images = $this->getValidProductImages($data);
 
         if (isset($data["product_option"])) {
             foreach ($data["product_option"] as $product_option) {
@@ -1298,6 +1328,10 @@ class ModelCatalogProduct extends Model
                     );
                 }
             }
+        }
+
+        if (!empty($valid_images)) {
+            $this->saveProductOptionColorImages($data, $product_id, $valid_images);
         }
 
         $this->db->query(
@@ -2257,6 +2291,34 @@ class ModelCatalogProduct extends Model
             ];
         }
 
+        $all_pov_ids = array();
+
+        foreach ($product_option_data as &$po) {
+            foreach ($po["product_option_value"] as $pov) {
+                $all_pov_ids[] = (int)$pov["product_option_value_id"];
+            }
+        }
+        unset($po);
+
+        $color_images_map = array();
+
+        if (!empty($all_pov_ids)) {
+            $ci_query = $this->db->query("SELECT product_option_value_id, image FROM " . DB_PREFIX . "product_option_value_color_image WHERE product_option_value_id IN (" . implode(",", array_unique($all_pov_ids)) . ") ORDER BY sort_order ASC");
+
+            foreach ($ci_query->rows as $ci) {
+                $color_images_map[(int)$ci["product_option_value_id"]][] = $ci["image"];
+            }
+        }
+
+        foreach ($product_option_data as &$po) {
+            foreach ($po["product_option_value"] as &$pov) {
+                $pov_id = (int)$pov["product_option_value_id"];
+                $pov["color_images"] = isset($color_images_map[$pov_id]) ? $color_images_map[$pov_id] : array();
+            }
+            unset($pov);
+        }
+        unset($po);
+
         return $product_option_data;
     }
 
@@ -2746,5 +2808,87 @@ class ModelCatalogProduct extends Model
         );
 
         return $query->row["total"];
+    }
+
+    private function getValidProductImages($data) {
+        $valid = array();
+
+        if (!empty($data['image'])) {
+            $valid[] = $data['image'];
+        }
+
+        if (!empty($data['product_image'])) {
+            foreach ($data['product_image'] as $product_image) {
+                if (!empty($product_image['image'])) {
+                    $valid[] = $product_image['image'];
+                }
+            }
+        }
+
+        return $valid;
+    }
+
+    private function saveColorImages($product_option_value_id, $color_images, $valid_images) {
+        $filtered = array();
+        $seen = array();
+
+        foreach ($color_images as $image) {
+            $image = trim($image);
+
+            if ($image === '' || isset($seen[$image])) {
+                continue;
+            }
+
+            if (in_array($image, $valid_images)) {
+                $seen[$image] = true;
+                $filtered[] = $image;
+            }
+        }
+
+        $sort_order = 0;
+
+        foreach ($filtered as $image) {
+            $this->db->query("INSERT INTO " . DB_PREFIX . "product_option_value_color_image SET product_option_value_id = '" . (int)$product_option_value_id . "', image = '" . $this->db->escape($image) . "', sort_order = '" . (int)$sort_order . "'");
+            $sort_order++;
+        }
+    }
+
+    private function saveProductOptionColorImages($data, $product_id, $valid_images) {
+        if (!isset($data['product_option'])) {
+            return;
+        }
+
+        $query = $this->db->query("SELECT pov.product_option_value_id, pov.option_value_id, po.option_id FROM " . DB_PREFIX . "product_option_value pov LEFT JOIN " . DB_PREFIX . "product_option po ON (pov.product_option_id = po.product_option_id) WHERE pov.product_id = '" . (int)$product_id . "'");
+
+        $pov_map = array();
+
+        foreach ($query->rows as $row) {
+            $pov_map[(int)$row['option_id']][(int)$row['option_value_id']] = (int)$row['product_option_value_id'];
+        }
+
+        foreach ($data['product_option'] as $product_option) {
+            if ($product_option['type'] != 'color') {
+                continue;
+            }
+
+            if (empty($product_option['product_option_value'])) {
+                continue;
+            }
+
+            foreach ($product_option['product_option_value'] as $pov) {
+                if (empty($pov['color_images'])) {
+                    continue;
+                }
+
+                $option_id = (int)$product_option['option_id'];
+                $option_value_id = (int)$pov['option_value_id'];
+
+                if (!isset($pov_map[$option_id][$option_value_id])) {
+                    continue;
+                }
+
+                $this->saveColorImages($pov_map[$option_id][$option_value_id], $pov['color_images'], $valid_images);
+            }
+        }
     }
 }
