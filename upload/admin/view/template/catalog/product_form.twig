@@ -711,6 +711,10 @@
                                       <i class="fa fa-star"></i> {{ entry_hit }}
                                     </label>
                                   </div>
+                                  <div class="dc-opt-card__color-images">
+                                    <label class="dc-opt-card__color-images-label"><i class="fa fa-image"></i> {{ entry_color_images }}</label>
+                                    <div class="dc-color-img-picker" data-opt-row="{{ option_row }}" data-ov-row="{{ option_value_row }}" data-selected="{{ product_option_value.color_images|default([])|json_encode|e('html_attr') }}"></div>
+                                  </div>
                                   {% endif %}
                                   <div class="dc-opt-card__cg">
                                     <button type="button" class="btn btn-default btn-xs dc-opt-card__cg-toggle" onclick="event.stopPropagation();$(this).closest('.dc-opt-card__cg').find('.dc-opt-card__cg-body').slideToggle(150);">
@@ -1666,6 +1670,10 @@
 		  html += '        <i class="fa fa-star"></i> {{ entry_hit|e('js') }}';
 		  html += '      </label>';
 		  html += '    </div>';
+		  html += '    <div class="dc-opt-card__color-images">';
+		  html += '      <label class="dc-opt-card__color-images-label"><i class="fa fa-image"></i> {{ entry_color_images|e('js') }}</label>';
+		  html += '      <div class="dc-color-img-picker" data-opt-row="' + option_row + '" data-ov-row="' + ovRow + '" data-selected="[]"></div>';
+		  html += '    </div>';
 	  }
 	  html += '    <div class="dc-opt-card__cg">';
 	  html += '      <button type="button" class="btn btn-default btn-xs dc-opt-card__cg-toggle" onclick="event.stopPropagation();$(this).closest(\'.dc-opt-card__cg\').find(\'.dc-opt-card__cg-body\').slideToggle(150);">';
@@ -1688,6 +1696,7 @@
 	  var card = dcBuildOptionValueCard(option_row, option_value_row, '', firstName, '', '0', '0', '+', '0', '+', '0', '+', false);
 	  $('#option-value' + option_row).append(card);
 	  $('[data-toggle="tooltip"]').tooltip();
+	  dcRefreshColorImagePickers();
 	  option_value_row++;
   }
 
@@ -1708,6 +1717,7 @@
 		  }
 	  });
 	  $('[data-toggle="tooltip"]').tooltip();
+	  dcRefreshColorImagePickers();
   }
 
   //--></script>
@@ -1769,6 +1779,99 @@
 		  }
 	  } else {
 		  $badges.find('.dc-opt-badge--hit').remove();
+	  }
+  }
+
+  function dcRefreshColorImagePickers() {
+	  var $pickers = $('.dc-color-img-picker');
+	  if (!$pickers.length) return;
+
+	  var imgs = [];
+	  var $mainImg = $('input[name="image"]');
+	  if ($mainImg.length && $mainImg.val()) {
+		  imgs.push({ path: $mainImg.val(), thumb: $('#thumb-image img').attr('src') || '{{ placeholder|e("js") }}' });
+	  }
+	  $('#images tbody tr').each(function() {
+		  var $inp = $(this).find('input[name$="[image]"]');
+		  if ($inp.length && $inp.val()) {
+			  var $thumbImg = $(this).find('a.img-thumbnail img');
+			  imgs.push({ path: $inp.val(), thumb: $thumbImg.attr('src') || '{{ placeholder|e("js") }}' });
+		  }
+	  });
+
+	  $pickers.each(function() {
+		  var $picker = $(this);
+		  var selected = [];
+		  try {
+			  selected = JSON.parse($picker.attr('data-selected'));
+		  } catch(e) { selected = []; }
+		  if (!Array.isArray(selected)) selected = [];
+
+		  var html = '';
+
+		  if (!imgs.length) {
+			  html = '<span class="text-muted" style="font-size:11px;">{{ text_color_images_empty|e("js") }}</span>';
+		  } else {
+			  html = '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">';
+
+			  for (var i = 0; i < imgs.length; i++) {
+				  var isSel = selected.indexOf(imgs[i].path) !== -1;
+				  html += '<div class="dc-color-img-thumb' + (isSel ? ' dc-color-img-thumb--sel' : '') + '" data-img="' + imgs[i].path + '" style="width:48px;height:48px;border:2px solid ' + (isSel ? '#2563eb' : '#e5e7eb') + ';border-radius:6px;overflow:hidden;cursor:pointer;position:relative;" onclick="dcToggleColorImage(this)">';
+				  html += '<img src="' + imgs[i].thumb + '" style="width:100%;height:100%;object-fit:cover;" />';
+				  if (isSel) {
+					  html += '<span style="position:absolute;top:2px;right:2px;width:14px;height:14px;background:#2563eb;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;">&#10003;</span>';
+				  }
+				  html += '</div>';
+			  }
+
+			  html += '</div>';
+		  }
+
+		  var optRow = $picker.attr('data-opt-row');
+		  var ovRow = $picker.attr('data-ov-row');
+
+		  var hiddenHtml = '';
+		  for (var s = 0; s < selected.length; s++) {
+			  hiddenHtml += '<input type="hidden" name="product_option[' + optRow + '][product_option_value][' + ovRow + '][color_images][]" value="' + selected[s] + '" />';
+		  }
+
+		  $picker.html(html + hiddenHtml);
+	  });
+  }
+
+  function dcToggleColorImage(el) {
+	  var $el = $(el);
+	  var img = $el.attr('data-img');
+	  var $picker = $el.closest('.dc-color-img-picker');
+	  var $thumb = $el;
+
+	  var isSel = $thumb.hasClass('dc-color-img-thumb--sel');
+
+	  if (isSel) {
+		  $thumb.removeClass('dc-color-img-thumb--sel');
+		  $thumb.css('border-color', '#e5e7eb');
+		  $thumb.find('span').remove();
+	  } else {
+		  $thumb.addClass('dc-color-img-thumb--sel');
+		  $thumb.css('border-color', '#2563eb');
+		  if (!$thumb.find('span').length) {
+			  $thumb.append('<span style="position:absolute;top:2px;right:2px;width:14px;height:14px;background:#2563eb;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;">&#10003;</span>');
+		  }
+	  }
+
+	  var selected = [];
+	  $picker.find('.dc-color-img-thumb--sel').each(function() {
+		  selected.push($(this).attr('data-img'));
+	  });
+
+	  $picker.attr('data-selected', JSON.stringify(selected));
+	  $picker.find('input[name$="[color_images][]"]').remove();
+
+	  var optRow = $picker.attr('data-opt-row');
+	  var ovRow = $picker.attr('data-ov-row');
+
+	  for (var s = 0; s < selected.length; s++) {
+		  $picker.append('<input type="hidden" name="product_option[' + optRow + '][product_option_value][' + ovRow + '][color_images][]" value="' + selected[s] + '" />');
 	  }
   }
 
@@ -1921,6 +2024,7 @@
 
 	  $('#images tbody').append(html);
 
+	  dcRefreshColorImagePickers();
 	  image_row++;
   }
 
@@ -1972,4 +2076,19 @@
 <!-- /Category Tree Modal -->
 
 </div>
+
+<script type="text/javascript"><!--
+$(document).ready(function() {
+    dcRefreshColorImagePickers();
+});
+
+$(document).on('change', 'input[name="image"], input[name^="product_image"]', function() {
+    setTimeout(dcRefreshColorImagePickers, 150);
+});
+
+$(document).on('click', '#images .btn-danger, #images button[onclick*="remove"]', function() {
+    setTimeout(dcRefreshColorImagePickers, 200);
+});
+//--></script>
+
 {{ footer }}

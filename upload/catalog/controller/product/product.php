@@ -424,12 +424,13 @@ class ControllerProductProduct extends Controller {
 					$display_h = 600;
 				}
 
-				$data['images'][] = array(
-					'popup' => ($this->request->server['HTTPS'] ? $this->config->get('config_ssl') : $this->config->get('config_url')) . 'image/' . $result['image'],
-					'display' => $this->model_tool_image->resize($result['image'], $display_w, $display_h),
-					'thumb' => $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_height')),
-					'orientation' => $orientation
-				);
+			$data['images'][] = array(
+				'image'       => $result['image'],
+				'popup' => ($this->request->server['HTTPS'] ? $this->config->get('config_ssl') : $this->config->get('config_url')) . 'image/' . $result['image'],
+				'display' => $this->model_tool_image->resize($result['image'], $display_w, $display_h),
+				'thumb' => $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_height')),
+				'orientation' => $orientation
+			);
 			}
 
 			if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
@@ -526,8 +527,9 @@ class ControllerProductProduct extends Controller {
 						'price_prefix'            => $option_value['price_prefix'],
 						'quantity'                => $option_value['quantity'],
 						'subtract'                => $option_value['subtract'],
-						'is_hit'                  => !empty($option_value['is_hit']),
-					);
+					'is_hit'                  => !empty($option_value['is_hit']),
+					'color_images'            => isset($option_value['color_images']) ? $option_value['color_images'] : array(),
+				);
 				}
 
 				usort($product_option_value_data, function ($a, $b) {
@@ -551,6 +553,46 @@ class ControllerProductProduct extends Controller {
 					'required'             => $option['required']
 				);
 			}
+
+		$gallery_map = array();
+
+		if (!empty($product_info['image'])) {
+			$gallery_map[$product_info['image']] = array(
+				'display'     => $data['display'],
+				'popup'       => $data['popup'],
+				'orientation' => $data['image_orientation']
+			);
+		}
+
+		foreach ($data['images'] as $img) {
+			if (!empty($img['image'])) {
+				$gallery_map[$img['image']] = $img;
+			}
+		}
+
+		foreach ($data['options'] as &$option) {
+			if ($option['type'] != 'color') {
+				continue;
+			}
+
+			foreach ($option['product_option_value'] as &$option_value) {
+				$resolved = array();
+
+				if (!empty($option_value['color_images'])) {
+					foreach ($option_value['color_images'] as $image_path) {
+						if (isset($gallery_map[$image_path])) {
+							$resolved[] = $gallery_map[$image_path];
+						}
+					}
+				}
+
+				$option_value['color_images'] = $resolved;
+			}
+			unset($option_value);
+
+			break;
+		}
+		unset($option);
 
 			if (!isset($data['minimum'])) {
 				$data['minimum'] = 1;
