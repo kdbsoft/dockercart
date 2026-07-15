@@ -159,6 +159,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$marketplace[] = array(
 					'name'	   => $this->language->get('text_extensions_store'),
 					'href'     => $this->url->link('extension/store', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'     => 'fa-usd',
 					'children' => array()
 				);
 			}
