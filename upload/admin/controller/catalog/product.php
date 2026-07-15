@@ -1168,6 +1168,7 @@ class ControllerCatalogProduct extends Controller {
 					'weight'                  => $product_option_value['weight'],
 					'weight_prefix'           => $product_option_value['weight_prefix'],
 					'is_hit'                  => isset($product_option_value['is_hit']) ? (int)$product_option_value['is_hit'] : 0,
+					'color_images'            => isset($product_option_value['color_images']) ? $product_option_value['color_images'] : array(),
 					'customer_group_prices'   => isset($product_option_value['customer_group_prices']) ? $product_option_value['customer_group_prices'] : array()
 				);
 				}
