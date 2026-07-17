@@ -414,7 +414,7 @@ class ControllerExtensionModuleDockercartBlog extends Controller {
 		// Prepare blog menu item
 		$blog_menu = array(
 			'id'       => 'menu-dockercart-blog',
-			'icon'     => 'fa-newspaper-o',
+			'icon'     => 'newspaper',
 			'name'     => $this->language->get('text_blog'),
 			'href'     => '',
 			'children' => array(
