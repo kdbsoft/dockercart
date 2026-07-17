@@ -484,7 +484,7 @@
               </button>
             </div>
             <div class="tab-pane" id="tab-option">
-              <div class="dc-option-mode-selector" style="margin-bottom:15px;padding:10px 15px;background:#f7f7f7;border-radius:4px;display:flex;align-items:center;gap:12px">
+              <div class="dc-option-mode-selector" style="margin-bottom:15px;padding:10px 15px;background:#f7f7f7;border-radius:4px">
                 <label style="margin:0;font-weight:600">{{ entry_option_mode }}:</label>
                 <span id="dc-option-mode-label" class="label {% if is_configurable %}label-primary{% else %}label-default{% endif %}" style="font-size:13px">
                   <i class="fa fa-circle"></i> {% if is_configurable %}{{ text_mode_combined }}{% else %}{{ text_mode_simple }}{% endif %}
@@ -870,8 +870,8 @@
               </div>
               <div class="promo-section">
                 <div class="promo-section__header"><i class="fa fa-gift"></i> {{ text_promo_gifts }}</div>
-                <div class="table-responsive" style="overflow:visible;">
-                  <table id="gift" class="table table-hover pricing-table" style="overflow:visible;">
+                <div class="table-responsive">
+                  <table id="gift" class="table table-hover pricing-table">
                     <thead>
                       <tr>
                         <td class="text-left">{{ entry_gift_product }}</td>
@@ -964,6 +964,9 @@
               .promo-section:last-child { margin-bottom: 0; }
               .promo-section__header { font-weight: 600; color: #4a5568; font-size: 14px; padding: 8px 0 6px; border-bottom: 1px solid #e2e5e8; margin-bottom: 10px; }
               #tab-promotions .table-responsive { overflow: visible; }
+              @media (max-width: 767px) {
+                #tab-promotions .table-responsive { overflow-x: auto; }
+              }
               body > .ui-autocomplete,
               #tab-promotions .ui-autocomplete { z-index: 1050 !important; max-height: 250px; overflow-y: auto; }
             </style>
@@ -2132,11 +2135,12 @@ $(document).on('click', '#images .btn-danger, #images button[onclick*="remove"]'
 .attribute-table { border-collapse: separate; border-spacing: 0; }
 .attribute-table > thead > tr > td { border-bottom: 2px solid #e2e5e8; font-weight: 600; color: #4a5568; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; }
 .attribute-table > tbody > tr.attribute-row > td { padding: 8px 12px; border-bottom: 1px solid #edf2f7; vertical-align: top; }
+.attribute-table > tbody > tr.attribute-row > td:nth-child(2) { white-space: normal; }
 .attribute-table > tbody > tr.attribute-row:hover > td { background: #f8fafc; }
 .attribute-table > tbody > tr.attribute-row:last-child > td { border-bottom: none; }
 .attribute-name-input { border: 1px solid #e2e5e8; border-radius: 4px; height: 36px; font-size: 13px; }
 .attribute-name-input:focus { border-color: #88b1ff; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
-.attribute-text-group { margin-bottom: 4px; }
+.attribute-text-group { width: 100%; margin-bottom: 4px; }
 .attribute-text-group:last-child { margin-bottom: 0; }
 .lang-addon { background: #f1f5f9; border: 1px solid #e2e5e8; border-right: none; border-radius: 4px 0 0 4px; padding: 0 8px; font-size: 10px; font-weight: 600; color: #64748b; letter-spacing: 0.3px; }
 .attribute-textarea { border: 1px solid #e2e5e8; border-radius: 0 4px 4px 0; font-size: 13px; resize: vertical; min-height: 48px; }
@@ -2145,6 +2149,10 @@ $(document).on('click', '#images .btn-danger, #images button[onclick*="remove"]'
 .btn-remove-attr:hover { color: #ef4444; }
 .dc-attr-add-btn { display: block; width: 100%; padding: 10px 12px; color: #3b82f6; font-size: 15px; font-weight: 500; border: none; background: none; border-radius: 6px; cursor: pointer; transition: all 0.2s; margin-top: 8px; text-align: left; }
 .dc-attr-add-btn:hover { color: #2563eb; background: #eff6ff; }
+.dc-option-mode-selector { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+@media (max-width: 767px) {
+  .dc-option-mode-selector { flex-direction: column; align-items: flex-start; }
+}
 </style>
 
 {{ footer }}
