@@ -32,3 +32,5 @@ $_['text_search_options'] = 'Опції пошуку';
 $_['text_stock'] = 'Немає в наявності';
 $_['text_store'] = 'Магазини';
 $_['text_support'] = 'Форум підтримки';
+$_['text_search_placeholder'] = 'Пошук...';
+$_['text_view_all_results'] = 'Показати всі результати';

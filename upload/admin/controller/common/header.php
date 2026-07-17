@@ -128,6 +128,9 @@ class ControllerCommonHeader extends Controller {
 			}
 
 			$data['current_language_code'] = $current_language_code;
+
+			$data['admin_search_url'] = $this->url->link('common/admin_search', 'user_token=' . $this->session->data['user_token'], true);
+			$data['admin_search_suggest_url'] = $this->url->link('common/admin_search/suggest', 'user_token=' . $this->session->data['user_token'], true);
 		}
 
 		$store_language_id = (int)$this->config->get('config_language_id');

@@ -12,3 +12,5 @@ $_['text_documentation'] = 'Documentation';
 $_['text_logout']        = 'Logout';
 $_['text_clear_cache']    = 'Reset Cache';
 $_['text_clear_cache_success'] = 'Cache has been reset successfully.';
+$_['text_search_placeholder'] = 'Search...';
+$_['text_view_all_results'] = 'View all results';

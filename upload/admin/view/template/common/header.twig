@@ -65,12 +65,151 @@
       </li>
       <li><a href="{{ logout }}"><i class="fa fa-sign-out"></i> <span class="hidden-xs hidden-sm hidden-md">{{ text_logout }}</span></a></li>
     </ul>
+    <div class="admin-search-wrap">
+      <div class="admin-search-box">
+        <input type="text" class="admin-search-input" placeholder="{{ text_search_placeholder }}" autocomplete="off" data-suggest-url="{{ admin_search_suggest_url }}" data-search-url="{{ admin_search_url }}">
+        <i class="fa fa-search admin-search-icon"></i>
+      </div>
+      <ul class="admin-search-dropdown"></ul>
+    </div>
     {% endif %} </div>
 </header>
 <script type="text/javascript">
 document.addEventListener('DOMContentLoaded', function() {
   if (window.lucide && typeof window.lucide.createIcons === 'function') {
     window.lucide.createIcons();
+  }
+
+  // Admin search autocomplete
+  var searchInput = document.querySelector('.admin-search-input');
+  var dropdown = document.querySelector('.admin-search-dropdown');
+  var suggestTimer = null;
+  var userToken = document.body.dataset.userToken;
+
+  if (searchInput && dropdown && searchInput.dataset.suggestUrl) {
+    searchInput.addEventListener('input', function() {
+      clearTimeout(suggestTimer);
+      var query = this.value.trim();
+
+      if (query.length < 2) {
+        dropdown.style.display = 'none';
+        return;
+      }
+
+      suggestTimer = setTimeout(function() {
+        var url = searchInput.dataset.suggestUrl + '&search=' + encodeURIComponent(query);
+
+        fetch(url)
+          .then(function(response) { return response.json(); })
+          .then(function(data) {
+            dropdown.innerHTML = '';
+
+            if (data.length === 0) {
+              dropdown.style.display = 'none';
+              return;
+            }
+
+            var grouped = {};
+            data.forEach(function(item) {
+              if (!grouped[item.type]) {
+                grouped[item.type] = [];
+              }
+              grouped[item.type].push(item);
+            });
+
+            for (var type in grouped) {
+              var header = document.createElement('li');
+              header.className = 'admin-search-group-header';
+              header.textContent = grouped[type][0].type_label;
+              dropdown.appendChild(header);
+
+              grouped[type].forEach(function(item) {
+                var li = document.createElement('li');
+                var a = document.createElement('a');
+                a.href = item.href;
+
+                var content = '<div class="admin-search-item">';
+                if (item.image) {
+                  content += '<img src="' + item.image + '" alt="" class="admin-search-item-image">';
+                } else {
+                  content += '<div class="admin-search-item-icon"><i class="fa ' + getIconClass(item.type) + '"></i></div>';
+                }
+                content += '<div class="admin-search-item-info">';
+                content += '<div class="admin-search-item-name">' + escapeHtml(item.name) + '</div>';
+                if (item.subtitle) {
+                  content += '<div class="admin-search-item-subtitle">' + escapeHtml(item.subtitle) + '</div>';
+                }
+                content += '</div>';
+                content += '</div>';
+
+                a.innerHTML = content;
+                li.appendChild(a);
+                dropdown.appendChild(li);
+              });
+            }
+
+            var divider = document.createElement('li');
+            divider.className = 'admin-search-divider';
+            dropdown.appendChild(divider);
+
+            var viewAll = document.createElement('li');
+            var viewAllLink = document.createElement('a');
+            viewAllLink.href = 'index.php?route=common/admin_search&user_token=' + userToken + '&search=' + encodeURIComponent(query);
+            viewAllLink.className = 'admin-search-view-all';
+            viewAllLink.innerHTML = '<i class="fa fa-search"></i> {{ text_view_all_results|default('View all results') }}';
+            viewAll.appendChild(viewAllLink);
+            dropdown.appendChild(viewAll);
+
+            dropdown.style.display = 'block';
+          })
+          .catch(function(error) {
+            console.error('Search error:', error);
+            dropdown.style.display = 'none';
+          });
+      }, 300);
+    });
+
+    searchInput.addEventListener('blur', function() {
+      setTimeout(function() {
+        dropdown.style.display = 'none';
+      }, 200);
+    });
+
+    searchInput.addEventListener('focus', function() {
+      if (this.value.trim().length >= 2 && dropdown.innerHTML) {
+        dropdown.style.display = 'block';
+      }
+    });
+
+    searchInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        dropdown.style.display = 'none';
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        var query = this.value.trim();
+        if (query) {
+          window.location.href = 'index.php?route=common/admin_search&user_token=' + userToken + '&search=' + encodeURIComponent(query);
+        }
+      }
+    });
+  }
+
+  function getIconClass(type) {
+    var icons = {
+      'product': 'fa-tag',
+      'category': 'fa-folder',
+      'manufacturer': 'fa-industry',
+      'information': 'fa-file-text-o',
+      'order': 'fa-shopping-cart',
+      'customer': 'fa-user'
+    };
+    return icons[type] || 'fa-circle';
+  }
+
+  function escapeHtml(text) {
+    var div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
 });
 </script>
