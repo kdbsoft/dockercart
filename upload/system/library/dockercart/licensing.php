@@ -17,14 +17,7 @@ class DockercartLicensing {
 		$this->db = $registry->get('db');
 		$this->config = $registry->get('config');
 
-		if (is_file(DIR_SYSTEM . 'library/dockercart_logger.php')) {
-			require_once DIR_SYSTEM . 'library/dockercart_logger.php';
-			$this->logger = new DockercartLogger($this->registry, 'licensing');
-		} else {
-			$this->logger = new class {
-				public function __call($name, $args) {}
-			};
-		}
+		$this->logger = new DockercartLogger($this->registry, 'licensing');
 	}
 
 	public function getApiUrl(): string {
