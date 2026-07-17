@@ -26,10 +26,16 @@ class ConfigurableVariantTest extends TestCase
             define('DB_PREFIX', $prefix);
         }
 
-        $con = new \mysqli($host, $user, $pass, $name, $port);
+        try {
+            $con = new \mysqli($host, $user, $pass, $name, $port);
 
-        if ($con->connect_errno) {
-            self::markTestSkipped('Database connection not available: ' . $con->connect_error);
+            if ($con->connect_errno) {
+                self::markTestSkipped('Database connection not available: ' . $con->connect_error);
+
+                return;
+            }
+        } catch (\mysqli_sql_exception $e) {
+            self::markTestSkipped('Database connection not available: ' . $e->getMessage());
 
             return;
         }
