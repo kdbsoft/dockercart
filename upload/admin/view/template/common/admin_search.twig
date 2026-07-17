@@ -1,0 +1,113 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <form action="{{ action }}" method="get" class="form-inline">
+          <input type="hidden" name="route" value="common/admin_search">
+          <input type="hidden" name="user_token" value="{{ user_token }}">
+          <div class="input-group">
+            <input type="text" name="search" value="{{ search }}" class="form-control" placeholder="{{ text_search_placeholder }}" autofocus>
+            <span class="input-group-btn">
+              <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> {{ button_search }}</button>
+            </span>
+          </div>
+        </form>
+      </div>
+      <h1>{{ heading_title }}</h1>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if search %}
+      {% if total > 0 %}
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title"><i class="fa fa-list"></i> {{ text_results }}</h3>
+          </div>
+          <div class="panel-body">
+            <ul class="nav nav-tabs">
+              <li{% if active_type == 'all' %} class="active"{% endif %}>
+                <a href="{{ action }}&user_token={{ user_token }}&search={{ search|url_encode }}&type=all">{{ text_all }}{% if type_totals.all is defined %} ({{ type_totals.all }}){% endif %}</a>
+              </li>
+              {% if 'product' in types %}
+              <li{% if active_type == 'product' %} class="active"{% endif %}>
+                <a href="{{ action }}&user_token={{ user_token }}&search={{ search|url_encode }}&type=product">{{ text_product }}{% if type_totals.product is defined %} ({{ type_totals.product }}){% endif %}</a>
+              </li>
+              {% endif %}
+              {% if 'category' in types %}
+              <li{% if active_type == 'category' %} class="active"{% endif %}>
+                <a href="{{ action }}&user_token={{ user_token }}&search={{ search|url_encode }}&type=category">{{ text_category }}{% if type_totals.category is defined %} ({{ type_totals.category }}){% endif %}</a>
+              </li>
+              {% endif %}
+              {% if 'manufacturer' in types %}
+              <li{% if active_type == 'manufacturer' %} class="active"{% endif %}>
+                <a href="{{ action }}&user_token={{ user_token }}&search={{ search|url_encode }}&type=manufacturer">{{ text_manufacturer }}{% if type_totals.manufacturer is defined %} ({{ type_totals.manufacturer }}){% endif %}</a>
+              </li>
+              {% endif %}
+              {% if 'information' in types %}
+              <li{% if active_type == 'information' %} class="active"{% endif %}>
+                <a href="{{ action }}&user_token={{ user_token }}&search={{ search|url_encode }}&type=information">{{ text_information }}{% if type_totals.information is defined %} ({{ type_totals.information }}){% endif %}</a>
+              </li>
+              {% endif %}
+              {% if 'order' in types %}
+              <li{% if active_type == 'order' %} class="active"{% endif %}>
+                <a href="{{ action }}&user_token={{ user_token }}&search={{ search|url_encode }}&type=order">{{ text_order }}{% if type_totals.order is defined %} ({{ type_totals.order }}){% endif %}</a>
+              </li>
+              {% endif %}
+              {% if 'customer' in types %}
+              <li{% if active_type == 'customer' %} class="active"{% endif %}>
+                <a href="{{ action }}&user_token={{ user_token }}&search={{ search|url_encode }}&type=customer">{{ text_customer }}{% if type_totals.customer is defined %} ({{ type_totals.customer }}){% endif %}</a>
+              </li>
+              {% endif %}
+            </ul>
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover">
+                <thead>
+                  <tr>
+                    <td class="text-left" width="120">{{ column_type }}</td>
+                    <td class="text-left">{{ column_name }}</td>
+                    <td class="text-left">{{ column_details }}</td>
+                    <td class="text-right" width="100">{{ column_action }}</td>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for result in results %}
+                  <tr>
+                    <td class="text-left">
+                      <span class="label label-{{ result.type == 'product' ? 'primary' : (result.type == 'category' ? 'success' : (result.type == 'manufacturer' ? 'info' : (result.type == 'information' ? 'warning' : (result.type == 'order' ? 'danger' : 'default')))) }}">
+                        {{ result.type_label }}
+                      </span>
+                    </td>
+                    <td class="text-left">
+                      <a href="{{ result.href }}">{{ result.name }}</a>
+                    </td>
+                    <td class="text-left">
+                      {% if result.subtitle %}
+                        <small class="text-muted">{{ result.subtitle }}</small>
+                      {% endif %}
+                    </td>
+                    <td class="text-right">
+                      <a href="{{ result.href }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <div class="row">
+              <div class="col-sm-6 text-left">{{ pagination }}</div>
+              <div class="col-sm-6 text-right">
+                {{ text_showing }} {{ results_start }} {{ text_to }} {{ results_end }} {{ text_of }} {{ total }} {{ text_results }}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% else %}
+        <div class="alert alert-warning"><i class="fa fa-exclamation-circle"></i> {{ text_no_results }}</div>
+      {% endif %}
+    {% else %}
+      <div class="alert alert-info"><i class="fa fa-info-circle"></i> {{ text_enter_search }}</div>
+    {% endif %}
+  </div>
+</div>
+{{ footer }}
