@@ -10,7 +10,6 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
         parent::__construct($registry);
         
         // Initialize centralized logger
-        require_once DIR_SYSTEM . 'library/dockercart_logger.php';
         $this->logger = new DockercartLogger($this->registry, 'sitemap');
     }
 
