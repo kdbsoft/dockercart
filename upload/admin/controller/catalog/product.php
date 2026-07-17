@@ -22,6 +22,18 @@ class ControllerCatalogProduct extends Controller {
 		$this->load->model('catalog/product');
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
+			// Exclude main image from product_image array to prevent duplication
+			if (isset($this->request->post['product_image']) && isset($this->request->post['image'])) {
+				$main_image = $this->request->post['image'];
+				$filtered = array();
+				foreach ($this->request->post['product_image'] as $row) {
+					if ($row['image'] !== $main_image) {
+						$filtered[] = $row;
+					}
+				}
+				$this->request->post['product_image'] = $filtered;
+			}
+
 			$product_id = $this->model_catalog_product->addProduct($this->request->post);
 
 			$this->session->data['success'] = $this->language->get('text_success');
@@ -94,9 +106,18 @@ class ControllerCatalogProduct extends Controller {
 		error_log('product_id: ' . (isset($this->request->get['product_id']) ? $this->request->get['product_id'] : 'NOT SET'));
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
-			error_log('=== PRODUCT EDIT: POST request validated ===');
-			error_log('POST keys: ' . implode(', ', array_keys($this->request->post)));
-			
+			// Exclude main image from product_image array to prevent duplication
+			if (isset($this->request->post['product_image']) && isset($this->request->post['image'])) {
+				$main_image = $this->request->post['image'];
+				$filtered = array();
+				foreach ($this->request->post['product_image'] as $row) {
+					if ($row['image'] !== $main_image) {
+						$filtered[] = $row;
+					}
+				}
+				$this->request->post['product_image'] = $filtered;
+			}
+
 			$this->model_catalog_product->editProduct($this->request->get['product_id'], $this->request->post);
 
 			$this->session->data['success'] = $this->language->get('text_success');
@@ -1390,6 +1411,17 @@ class ControllerCatalogProduct extends Controller {
 		}
 
 		$data['product_images'] = array();
+
+		// Prepend main image to product_images so it appears in the grid
+		if (!empty($data['image'])) {
+			$has_main = false;
+			foreach ($product_images as $pi) {
+				if ($pi['image'] === $data['image']) { $has_main = true; break; }
+			}
+			if (!$has_main) {
+				array_unshift($product_images, array('image' => $data['image'], 'sort_order' => -1));
+			}
+		}
 
 		foreach ($product_images as $product_image) {
 			if (is_file(DIR_IMAGE . $product_image['image'])) {
