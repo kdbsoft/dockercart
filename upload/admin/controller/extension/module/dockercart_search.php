@@ -175,11 +175,13 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
             if ($result['success']) {
                 $json['success'] = true;
                 $json['message'] = sprintf(
-                    'Reindexing completed: %d products, %d categories, %d manufacturers, %d information pages',
+                    'Reindexing completed: %d products, %d categories, %d manufacturers, %d information pages, %d orders, %d customers',
                     $result['products'],
                     $result['categories'],
                     $result['manufacturers'],
-                    $result['information']
+                    $result['information'],
+                    $result['orders'],
+                    $result['customers']
                 );
             } else {
                 $json['success'] = false;
@@ -273,6 +275,57 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
                 'action'  => 'extension/module/dockercart_search/eventInformationDelete'
             ],
 
+            // Order events
+            [
+                'code'    => 'dockercart_search_order_add',
+                'trigger' => 'catalog/model/checkout/order/addOrder/after',
+                'action'  => 'extension/module/dockercart_search/eventOrderAdd'
+            ],
+            [
+                'code'    => 'dockercart_search_order_edit',
+                'trigger' => 'catalog/model/checkout/order/editOrder/after',
+                'action'  => 'extension/module/dockercart_search/eventOrderEdit'
+            ],
+            [
+                'code'    => 'dockercart_search_order_delete',
+                'trigger' => 'catalog/model/checkout/order/deleteOrder/after',
+                'action'  => 'extension/module/dockercart_search/eventOrderDelete'
+            ],
+            [
+                'code'    => 'dockercart_search_order_status_change',
+                'trigger' => 'catalog/model/checkout/order/addOrderHistory/after',
+                'action'  => 'extension/module/dockercart_search/eventOrderStatusChange'
+            ],
+
+            // Customer events (admin)
+            [
+                'code'    => 'dockercart_search_customer_add',
+                'trigger' => 'admin/model/customer/customer/addCustomer/after',
+                'action'  => 'extension/module/dockercart_search/eventCustomerAdd'
+            ],
+            [
+                'code'    => 'dockercart_search_customer_edit',
+                'trigger' => 'admin/model/customer/customer/editCustomer/after',
+                'action'  => 'extension/module/dockercart_search/eventCustomerEdit'
+            ],
+            [
+                'code'    => 'dockercart_search_customer_delete',
+                'trigger' => 'admin/model/customer/customer/deleteCustomer/after',
+                'action'  => 'extension/module/dockercart_search/eventCustomerDelete'
+            ],
+
+            // Customer events (catalog)
+            [
+                'code'    => 'dockercart_search_customer_add_front',
+                'trigger' => 'catalog/model/account/customer/addCustomer/after',
+                'action'  => 'extension/module/dockercart_search/eventCustomerAddFront'
+            ],
+            [
+                'code'    => 'dockercart_search_customer_edit_front',
+                'trigger' => 'catalog/model/account/customer/editCustomer/after',
+                'action'  => 'extension/module/dockercart_search/eventCustomerEditFront'
+            ],
+
             // Frontend: Add autocomplete script to header
             [
                 'code'    => 'dockercart_search_autocomplete',
@@ -339,6 +392,15 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
             'dockercart_search_information_add',
             'dockercart_search_information_edit',
             'dockercart_search_information_delete',
+            'dockercart_search_order_add',
+            'dockercart_search_order_edit',
+            'dockercart_search_order_delete',
+            'dockercart_search_order_status_change',
+            'dockercart_search_customer_add',
+            'dockercart_search_customer_edit',
+            'dockercart_search_customer_delete',
+            'dockercart_search_customer_add_front',
+            'dockercart_search_customer_edit_front',
             'dockercart_search_override',
             'dockercart_search_admin_menu'
         ];
@@ -519,6 +581,87 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
             $this->model_extension_module_dockercart_search->deleteInformation($args[0]);
 
             $this->logger->info("Information page {$args[0]} deleted from index");
+        }
+    }
+
+    public function eventOrderAdd($route, $args, $output) {
+        if ($this->config->get('module_dockercart_search_status')) {
+            $this->load->model('extension/module/dockercart_search');
+            $this->model_extension_module_dockercart_search->indexOrder($output);
+
+            $this->logger->info("Order {$output} indexed");
+        }
+    }
+
+    public function eventOrderEdit($route, $args) {
+        if ($this->config->get('module_dockercart_search_status') && isset($args[0])) {
+            $this->load->model('extension/module/dockercart_search');
+            $this->model_extension_module_dockercart_search->indexOrder($args[0]);
+
+            $this->logger->info("Order {$args[0]} re-indexed");
+        }
+    }
+
+    public function eventOrderDelete($route, $args) {
+        if ($this->config->get('module_dockercart_search_status') && isset($args[0])) {
+            $this->load->model('extension/module/dockercart_search');
+            $this->model_extension_module_dockercart_search->deleteOrder($args[0]);
+
+            $this->logger->info("Order {$args[0]} deleted from index");
+        }
+    }
+
+    public function eventOrderStatusChange($route, $args) {
+        if ($this->config->get('module_dockercart_search_status') && isset($args[0])) {
+            $this->load->model('extension/module/dockercart_search');
+            $this->model_extension_module_dockercart_search->indexOrder($args[0]);
+
+            $this->logger->info("Order {$args[0]} re-indexed (status change)");
+        }
+    }
+
+    public function eventCustomerAdd($route, $args, $output) {
+        if ($this->config->get('module_dockercart_search_status')) {
+            $this->load->model('extension/module/dockercart_search');
+            $this->model_extension_module_dockercart_search->indexCustomer($output);
+
+            $this->logger->info("Customer {$output} indexed");
+        }
+    }
+
+    public function eventCustomerEdit($route, $args) {
+        if ($this->config->get('module_dockercart_search_status') && isset($args[0])) {
+            $this->load->model('extension/module/dockercart_search');
+            $this->model_extension_module_dockercart_search->indexCustomer($args[0]);
+
+            $this->logger->info("Customer {$args[0]} re-indexed");
+        }
+    }
+
+    public function eventCustomerDelete($route, $args) {
+        if ($this->config->get('module_dockercart_search_status') && isset($args[0])) {
+            $this->load->model('extension/module/dockercart_search');
+            $this->model_extension_module_dockercart_search->deleteCustomer($args[0]);
+
+            $this->logger->info("Customer {$args[0]} deleted from index");
+        }
+    }
+
+    public function eventCustomerAddFront($route, $args, $output) {
+        if ($this->config->get('module_dockercart_search_status')) {
+            $this->load->model('extension/module/dockercart_search');
+            $this->model_extension_module_dockercart_search->indexCustomer($output);
+
+            $this->logger->info("Customer {$output} indexed (front registration)");
+        }
+    }
+
+    public function eventCustomerEditFront($route, $args) {
+        if ($this->config->get('module_dockercart_search_status') && isset($args[0])) {
+            $this->load->model('extension/module/dockercart_search');
+            $this->model_extension_module_dockercart_search->indexCustomer($args[0]);
+
+            $this->logger->info("Customer {$args[0]} re-indexed (front profile edit)");
         }
     }
 
