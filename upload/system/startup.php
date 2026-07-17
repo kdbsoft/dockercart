@@ -145,15 +145,28 @@ if (defined('DIR_STORAGE') && is_file(DIR_STORAGE . 'vendor/autoload.php')) {
 }
 
 function library($class) {
-	$file = DIR_SYSTEM . 'library/' . str_replace('\\', '/', strtolower($class)) . '.php';
+	$parts = explode('\\', $class);
+	$className = array_pop($parts);
+	$namespace = implode('/', array_map('strtolower', $parts));
 
-	if (is_file($file)) {
-		include_once(modification($file));
+	$snakeCase = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $className));
+	$lowerCase = strtolower($className);
 
-		return true;
-	} else {
-		return false;
+	$prefix = $namespace ? $namespace . '/' : '';
+	$files = [
+		DIR_SYSTEM . 'library/' . $prefix . $snakeCase . '.php',
+		DIR_SYSTEM . 'library/' . $prefix . $lowerCase . '.php',
+	];
+
+	foreach ($files as $file) {
+		if (is_file($file)) {
+			include_once(modification($file));
+
+			return true;
+		}
 	}
+
+	return false;
 }
 
 spl_autoload_register('library');
