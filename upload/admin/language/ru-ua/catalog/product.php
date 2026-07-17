@@ -27,6 +27,7 @@ $_['entry_download'] = 'Загрузки';
 $_['entry_ean'] = 'EAN';
 $_['entry_height'] = 'Высота';
 $_['entry_image'] = 'Изображение';
+$_['text_main_image'] = 'Главное изображение';
 $_['entry_isbn'] = 'ISBN';
 $_['entry_jan'] = 'JAN';
 $_['entry_keyword'] = 'Ключевое слово';
