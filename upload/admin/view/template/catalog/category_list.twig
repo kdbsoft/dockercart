@@ -143,11 +143,10 @@
         </div>
         <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-category">
           <div class="table-responsive">
-            <table class="table table-bordered table-hover" id="category-tree-table">
+            <table class="table table-hover" id="category-tree-table">
               <thead>
                 <tr>
                   <td style="width: 32px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
-                  <td style="width: 120px;" class="text-center">{{ column_image }}</td>
                   <td class="text-left">{% if sort == 'name' %}
                     <a href="{{ sort_name }}" class="{{ order|lower }}">{{ column_name }}</a>
                     {% else %}
@@ -158,6 +157,7 @@
                     {% else %}
                     <a href="{{ sort_sort_order }}">{{ column_sort_order }}</a>
                     {% endif %}</td>
+                  <td class="text-left">{{ column_status }}</td>
                   <td class="text-right">{{ column_action }}</td>
                 </tr>
               </thead>
@@ -170,9 +170,9 @@
                     {% else %}
                     <input type="checkbox" name="selected[]" value="{{ category.category_id }}" />
                     {% endif %}</td>
-                  <td class="text-center"><input type="hidden" id="input-image-{{ category.category_id }}" value="{{ category.image_path }}" /><a href="javascript:void(0);" class="category-image-edit" id="thumb-image-{{ category.category_id }}" data-category-id="{{ category.category_id }}">{% if category.image %} <img src="{{ category.image }}" alt="{{ category.name }}" class="img-thumbnail" /> {% else %} <span class="img-thumbnail list"><i class="fa fa-camera fa-2x"></i></span> {% endif %}</a></td>
                   <td class="text-left">
                     <div class="category-name-cell" style="padding-left: {{ category.indent }}px;">
+                      <input type="hidden" id="input-image-{{ category.category_id }}" value="{{ category.image_path }}" /><a href="javascript:void(0);" class="category-image-edit" id="thumb-image-{{ category.category_id }}" data-category-id="{{ category.category_id }}" style="flex:0 0 auto;line-height:0;">{% if category.image %} <img src="{{ category.image }}" alt="{{ category.name }}" class="img-thumbnail" /> {% else %} <span class="img-thumbnail list"><i class="fa fa-camera fa-2x"></i></span> {% endif %}</a>
                       {% if category.has_children %}
                       <button type="button" class="category-toggle" data-category-toggle="{{ category.category_id }}" aria-label="Toggle subcategories" aria-expanded="false">
                         <i class="fa fa-chevron-right" aria-hidden="true"></i>
@@ -188,6 +188,16 @@
                   </td>
                   <td class="text-right">
                     <span class="inline-edit" data-category-id="{{ category.category_id }}" data-field="sort_order" data-value="{{ category.sort_order_raw }}">{{ category.sort_order }}<i class="fa fa-pencil-square-o inline-edit-icon"></i></span>
+                  </td>
+                  <td class="text-left">
+                    <span class="inline-edit" data-category-id="{{ category.category_id }}" data-field="status" data-value="{{ category.status_raw }}">
+                      {% if category.status %}
+                      <span class="label label-success">{{ text_enabled }}</span>
+                      {% else %}
+                      <span class="label label-danger">{{ text_disabled }}</span>
+                      {% endif %}
+                      <i class="fa fa-pencil-square-o inline-edit-icon"></i>
+                    </span>
                   </td>
                   <td class="text-right"><a href="{{ category.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a> <a href="{{ category.copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default"><i class="fa fa-copy"></i></a> <a href="{{ category.delete }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="return confirm('{{ text_confirm }}');"><i class="fa fa-trash-o"></i></a></td>
                 </tr>
@@ -624,6 +634,41 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 			error: function() {
 				$span.html($span.data('display'));
 			}
+		});
+	} else if (field === 'status') {
+		var $select = $('<select class="form-control input-sm" style="width:auto;display:inline-block;">');
+		$select.append('<option value="1"' + (rawValue == 1 ? ' selected' : '') + '>{{ text_enabled }}</option>');
+		$select.append('<option value="0"' + (rawValue == 0 ? ' selected' : '') + '>{{ text_disabled }}</option>');
+		$span.html($select);
+		$select.focus();
+		var saved = false;
+
+		$select.on('change', function() {
+			saved = true;
+			var newValue = $(this).val();
+
+			$.ajax({
+				url: 'index.php?route=catalog/category/updateField&user_token={{ user_token }}',
+				type: 'post',
+				dataType: 'json',
+				data: { category_id: categoryId, field: field, value: newValue },
+				success: function(json) {
+					if (json['error']) {
+						$span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
+						setTimeout(function() { $span.html($span.data('display')); }, 3000);
+					} else {
+						$span.data('value', newValue);
+						$span.html(json['value_html'] + '<i class="fa fa-pencil-square-o inline-edit-icon"></i>');
+					}
+				},
+				error: function() {
+					$span.html($span.data('display'));
+				}
+			});
+		});
+
+		$select.on('blur', function() {
+			if (!saved) $span.html($span.data('display'));
 		});
 	} else {
 		var currentDisplay = $span.clone().children('.inline-edit-icon').remove().end().text().trim();

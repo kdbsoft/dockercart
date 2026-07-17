@@ -3,7 +3,8 @@
 $_['column_action'] = 'Действие';
 $_['column_image'] = 'Изображение';
 $_['column_model'] = 'Модель';
-$_['column_name'] = 'Название товара';
+$_['column_name'] = 'Товар';
+$_['column_category'] = 'Категории';
 $_['column_price'] = 'Цена';
 $_['column_quantity'] = 'Количество';
 $_['column_status'] = 'Статус';
@@ -116,6 +117,7 @@ $_['text_max'] = 'До';
 $_['text_minus'] = '-';
 $_['text_option'] = 'Опция';
 $_['text_option_value'] = 'Значение опции';
+$_['text_variant'] = 'вар.';
 $_['text_percent'] = 'Процент';
 $_['text_plus'] = '+';
 $_['text_success'] = 'Успех: Вы изменили товар!';

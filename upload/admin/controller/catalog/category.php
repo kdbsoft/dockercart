@@ -294,6 +294,8 @@ class ControllerCatalogCategory extends Controller {
 				'name_raw'      => $parent_category['name'],
 				'sort_order'    => $parent_category['sort_order'],
 				'sort_order_raw'=> $parent_category['sort_order'],
+				'status'        => $parent_category['status'],
+				'status_raw'    => $parent_category['status'],
 				'edit'          => $this->url->link('catalog/category/edit', 'user_token=' . $this->session->data['user_token'] . '&category_id=' . $parent_category_id . $url, true),
 				'copy'          => $this->url->link('catalog/category/copy', 'user_token=' . $this->session->data['user_token'] . '&category_id=' . $parent_category_id . $url, true),
 				'delete'        => $this->url->link('catalog/category/delete', 'user_token=' . $this->session->data['user_token'] . '&category_id=' . $parent_category_id . $url, true)
@@ -364,6 +366,9 @@ class ControllerCatalogCategory extends Controller {
 
 		$data['user_token'] = $this->session->data['user_token'];
 
+		$data['text_enabled'] = $this->language->get('text_enabled');
+		$data['text_disabled'] = $this->language->get('text_disabled');
+
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');
@@ -398,6 +403,8 @@ class ControllerCatalogCategory extends Controller {
 				'name_raw'      => $child_category['name'],
 				'sort_order'    => $child_category['sort_order'],
 				'sort_order_raw'=> $child_category['sort_order'],
+				'status'        => $child_category['status'],
+				'status_raw'    => $child_category['status'],
 				'edit'          => $this->url->link('catalog/category/edit', 'user_token=' . $this->session->data['user_token'] . '&category_id=' . $category_id . $url, true),
 				'copy'          => $this->url->link('catalog/category/copy', 'user_token=' . $this->session->data['user_token'] . '&category_id=' . $category_id . $url, true),
 				'delete'        => $this->url->link('catalog/category/delete', 'user_token=' . $this->session->data['user_token'] . '&category_id=' . $category_id . $url, true)
@@ -842,6 +849,16 @@ class ControllerCatalogCategory extends Controller {
 					$json['success'] = true;
 					$json['value_html'] = (string)$val;
 				}
+			} elseif ($field === 'status') {
+				$val = (int)$value;
+				$this->model_catalog_category->updateCategoryField($category_id, array('status' => $val));
+
+				if ($val) {
+					$json['value_html'] = '<span class="label label-success">' . $this->language->get('text_enabled') . '</span>';
+				} else {
+					$json['value_html'] = '<span class="label label-danger">' . $this->language->get('text_disabled') . '</span>';
+				}
+				$json['success'] = true;
 			} else {
 				$json['error'] = 'Invalid field';
 			}

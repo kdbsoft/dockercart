@@ -495,6 +495,35 @@ class ControllerCatalogProduct extends Controller {
 			$currency_map[(int)$currency['currency_id']] = $currency['code'];
 		}
 
+		$product_ids = array_map(function($r) { return (int)$r['product_id']; }, $results);
+		$categories_by_product = array();
+		$options_by_product = array();
+		$option_qty_by_product = array();
+
+		if ($product_ids) {
+			$ids_str = implode(',', $product_ids);
+			$cat_query = $this->db->query("SELECT p2c.product_id, GROUP_CONCAT(cd.name SEPARATOR ', ') AS categories, GROUP_CONCAT(p2c.category_id SEPARATOR ',') AS category_ids FROM " . DB_PREFIX . "product_to_category p2c LEFT JOIN " . DB_PREFIX . "category_description cd ON (p2c.category_id = cd.category_id AND cd.language_id = '" . (int)$this->config->get('config_language_id') . "') WHERE p2c.product_id IN (" . $ids_str . ") GROUP BY p2c.product_id");
+
+			foreach ($cat_query->rows as $row) {
+				$categories_by_product[$row['product_id']] = $row;
+			}
+
+			$opt_query = $this->db->query("SELECT product_id, COUNT(*) AS option_count FROM " . DB_PREFIX . "product_option WHERE product_id IN (" . $ids_str . ") GROUP BY product_id");
+
+			foreach ($opt_query->rows as $row) {
+				$options_by_product[$row['product_id']] = (int)$row['option_count'];
+			}
+
+			$opt_qty_query = $this->db->query("SELECT product_id, SUM(quantity) AS total_qty, COUNT(*) AS values_count FROM " . DB_PREFIX . "product_option_value WHERE product_id IN (" . $ids_str . ") GROUP BY product_id");
+
+			foreach ($opt_qty_query->rows as $row) {
+				$option_qty_by_product[$row['product_id']] = array(
+					'total_qty'    => (float)$row['total_qty'],
+					'values_count' => (int)$row['values_count']
+				);
+			}
+		}
+
 		foreach ($results as $result) {
 			if (is_file(DIR_IMAGE . $result['image'])) {
 				$image = $this->model_tool_image->resize($result['image'], 40, 40);
@@ -518,26 +547,44 @@ class ControllerCatalogProduct extends Controller {
 				}
 			}
 
+			$pid = $result['product_id'];
+			$cat_data = isset($categories_by_product[$pid]) ? $categories_by_product[$pid] : null;
+			$option_count = isset($options_by_product[$pid]) ? $options_by_product[$pid] : 0;
+			$has_options = $option_count > 0;
+			$opt_qty = isset($option_qty_by_product[$pid]) ? $option_qty_by_product[$pid] : null;
+
+			if ($has_options && $opt_qty) {
+				$display_qty = $this->formatQuantityForDisplay($opt_qty['total_qty']);
+			} else {
+				$display_qty = $this->formatQuantityForDisplay($result['quantity']);
+			}
+
 			$data['products'][] = array(
-				'product_id'  => $result['product_id'],
-				'image'       => $image,
-				'image_path'  => $result['image'],
-				'name'        => $result['name'],
-				'name_raw'    => $result['name'],
-				'model'       => $result['model'],
-				'model_raw'   => $result['model'],
-				'price'       => $price_info['formatted'],
-				'price_raw'   => $result['price'],
+				'product_id'    => $pid,
+				'image'         => $image,
+				'image_path'    => $result['image'],
+				'name'          => $result['name'],
+				'name_raw'      => $result['name'],
+				'model'         => $result['model'],
+				'model_raw'     => $result['model'],
+				'price'         => $price_info['formatted'],
+				'price_raw'     => $result['price'],
 				'price_currency_code' => $price_info['code'],
-				'special'     => $special,
-				'special_raw' => $special_raw,
-				'quantity'    => $this->formatQuantityForDisplay($result['quantity']),
-				'quantity_raw'=> $result['quantity'],
-				'status'      => $result['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
-				'status_raw'  => $result['status'],
-				'edit'        => $this->url->link('catalog/product/edit', 'user_token=' . $this->session->data['user_token'] . '&product_id=' . $result['product_id'] . $url, true),
-				'copy'        => $this->url->link('catalog/product/copy', 'user_token=' . $this->session->data['user_token'] . '&product_id=' . $result['product_id'] . $url, true),
-				'delete'      => $this->url->link('catalog/product/delete', 'user_token=' . $this->session->data['user_token'] . '&product_id=' . $result['product_id'] . $url, true)
+				'special'       => $special,
+				'special_raw'   => $special_raw,
+				'quantity'      => $display_qty,
+				'quantity_raw'  => $has_options ? 0 : $result['quantity'],
+				'status'        => $result['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
+				'status_raw'    => $result['status'],
+				'categories'    => $cat_data ? $cat_data['categories'] : '',
+				'categories_raw'=> $cat_data ? $cat_data['category_ids'] : '',
+				'has_options'   => $has_options,
+				'option_count'  => $option_count,
+				'option_qty_sum'=> $opt_qty ? (float)$opt_qty['total_qty'] : 0,
+				'option_values_count' => $opt_qty ? (int)$opt_qty['values_count'] : 0,
+				'edit'          => $this->url->link('catalog/product/edit', 'user_token=' . $this->session->data['user_token'] . '&product_id=' . $pid . $url, true),
+				'copy'          => $this->url->link('catalog/product/copy', 'user_token=' . $this->session->data['user_token'] . '&product_id=' . $pid . $url, true),
+				'delete'        => $this->url->link('catalog/product/delete', 'user_token=' . $this->session->data['user_token'] . '&product_id=' . $pid . $url, true)
 			);
 		}
 
@@ -698,6 +745,11 @@ class ControllerCatalogProduct extends Controller {
 
 		$data['text_min'] = $this->language->get('text_min');
 		$data['text_max'] = $this->language->get('text_max');
+		$data['text_options'] = $this->language->get('text_option') . 's';
+		$data['text_variant'] = $this->language->get('text_variant');
+		$data['column_category'] = $this->language->get('column_category');
+		$data['text_enabled'] = $this->language->get('text_enabled');
+		$data['text_disabled'] = $this->language->get('text_disabled');
 
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
@@ -1705,7 +1757,13 @@ class ControllerCatalogProduct extends Controller {
 				} else {
 					$this->model_catalog_product->updateProductField($product_id, array('status' => $val));
 					$json['success'] = true;
-					$json['value_html'] = $val ? $this->language->get('text_enabled') : $this->language->get('text_disabled');
+
+					$this->load->language('catalog/product');
+					if ($val) {
+						$json['value_html'] = '<span class="label label-success">' . $this->language->get('text_enabled') . '</span>';
+					} else {
+						$json['value_html'] = '<span class="label label-danger">' . $this->language->get('text_disabled') . '</span>';
+					}
 				}
 			} elseif ($field === 'quantity') {
 				$normalized = $this->normalizeDecimal($value);
@@ -1718,15 +1776,31 @@ class ControllerCatalogProduct extends Controller {
 					$display = $this->formatQuantityForDisplay($normalized);
 
 					if ($normalized <= 0) {
-						$label_class = 'label-warning';
+						$json['value_html'] = '<span style="color:#e74c3c;font-weight:600;">' . $display . '</span>';
 					} elseif ($normalized <= 5) {
-						$label_class = 'label-danger';
+						$json['value_html'] = '<span style="color:#e67e22;font-weight:600;">' . $display . '</span>';
 					} else {
-						$label_class = 'label-success';
+						$json['value_html'] = '<span style="color:#27ae60;font-weight:600;">' . $display . '</span>';
 					}
-
-					$json['value_html'] = '<span class="label ' . $label_class . '">' . $display . '</span>';
 				}
+			} elseif ($field === 'categories') {
+				$raw = isset($this->request->post['value']) ? $this->request->post['value'] : '';
+				$category_ids = $raw ? array_map('intval', explode(',', $raw)) : array();
+
+				$this->load->model('catalog/product');
+				$this->model_catalog_product->updateProductCategories($product_id, $category_ids);
+
+				$json['success'] = true;
+
+				$cat_names = array();
+				if ($category_ids) {
+					$cat_query = $this->db->query("SELECT cd.name FROM " . DB_PREFIX . "category_description cd WHERE cd.category_id IN (" . implode(',', array_map('intval', $category_ids)) . ") AND cd.language_id = '" . (int)$this->config->get('config_language_id') . "'");
+					foreach ($cat_query->rows as $cat_row) {
+						$cat_names[] = $cat_row['name'];
+					}
+				}
+
+				$json['value_html'] = $cat_names ? implode(', ', $cat_names) : '';
 			} else {
 				$json['error'] = 'Invalid field';
 			}
