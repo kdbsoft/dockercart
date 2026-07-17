@@ -1,3 +1,25 @@
+## [2.1.0](https://github.com/kdbsoft/dockercart/compare/v2.0.6...v2.1.0) (2026-07-17)
+
+### Features
+
+* add admin global search ([1f5bc50](https://github.com/kdbsoft/dockercart/commit/1f5bc50b0b5deeeeb3cbcf307c6ef579ba3d74f4))
+* add configurable (variant-based) products ([7f0e8cd](https://github.com/kdbsoft/dockercart/commit/7f0e8cddaad25fa77bfd9b5c1dbc37ed1fb427ef))
+* add multilingual tax support and fix image popover ([e5fad7c](https://github.com/kdbsoft/dockercart/commit/e5fad7cb29736ec69b5254a94bdead611617f7a7))
+* add orders and customers to Manticore search ([0e5c15c](https://github.com/kdbsoft/dockercart/commit/0e5c15c47d56255b93a5b6660e1f38bed11a3c34))
+* add status and categories columns to admin lists ([451072d](https://github.com/kdbsoft/dockercart/commit/451072d67d554931f5cfe82aa4cc90ad769d9659))
+* allow assigning product images to color option values ([04fa6a4](https://github.com/kdbsoft/dockercart/commit/04fa6a47e3d210547694aec90691d3cbe1ca34e5))
+* simplify admin tabs for products and categories ([706b2be](https://github.com/kdbsoft/dockercart/commit/706b2bee4c8418e60927e07263aa6a8cc31d5271))
+
+### Bug Fixes
+
+* add fatal error shutdown handler ([96cdf5a](https://github.com/kdbsoft/dockercart/commit/96cdf5a789f81870efcd013ecf628ff49bb4c40d))
+* add IF NOT EXISTS to index creation in migration ([9f691bf](https://github.com/kdbsoft/dockercart/commit/9f691bf463d62b19f49a9578db7dab384a706f5a))
+* add text_main_image language string for star button ([786c7b5](https://github.com/kdbsoft/dockercart/commit/786c7b596b9272bccf74b4db7ac0a2d09d3329dd))
+* correct ru-UA translations ([e9494f9](https://github.com/kdbsoft/dockercart/commit/e9494f997671b96a7f647df39dd98ce0d6722109))
+* fix gift autocomplete behavior and language typo ([f7ff58f](https://github.com/kdbsoft/dockercart/commit/f7ff58f3e5b4090e280fae8dc60af668d8226942))
+* make image cards fully draggable ([ba93f26](https://github.com/kdbsoft/dockercart/commit/ba93f26f6289c11fe146b7e0519f9cdeed23221c))
+* prioritize dcRecalcOptionPrice for price updates ([4edfa16](https://github.com/kdbsoft/dockercart/commit/4edfa16356eb5305400c490cd612503dd69636a4))
+
 ## [2.0.6](https://github.com/kdbsoft/dockercart/compare/v2.0.5...v2.0.6) (2026-07-14)
 
 ### Bug Fixes
