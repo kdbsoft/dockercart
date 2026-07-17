@@ -4,7 +4,21 @@ class ControllerStartupError extends Controller {
 		$this->registry->set('log', new Log($this->config->get('config_error_filename') ? $this->config->get('config_error_filename') : $this->config->get('error_filename')));
 		
 		error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
-		set_error_handler(array($this, 'handler'));	
+		set_error_handler(array($this, 'handler'));
+
+		register_shutdown_function(function() {
+			$last_error = error_get_last();
+
+			if ($last_error && in_array($last_error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_CORE_WARNING, E_COMPILE_ERROR, E_COMPILE_WARNING])) {
+				if ($this->config->get('config_error_display')) {
+					echo '<b>Fatal Error</b>: ' . $last_error['message'] . ' in <b>' . $last_error['file'] . '</b> on line <b>' . $last_error['line'] . '</b>';
+				}
+
+				if ($this->config->get('config_error_log')) {
+					$this->log->write('PHP Fatal Error: ' . $last_error['message'] . ' in ' . $last_error['file'] . ' on line ' . $last_error['line']);
+				}
+			}
+		});
 	}
 	
 	public function handler($code, $message, $file, $line) {
