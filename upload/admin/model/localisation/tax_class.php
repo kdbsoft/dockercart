@@ -1,9 +1,15 @@
 <?php
 class ModelLocalisationTaxClass extends Model {
 	public function addTaxClass($data) {
-		$this->db->query("INSERT INTO " . DB_PREFIX . "tax_class SET title = '" . $this->db->escape($data['title']) . "', description = '" . $this->db->escape($data['description']) . "', date_added = NOW()");
+		foreach ($data['tax_class_description'] as $language_id => $value) {
+			if (isset($tax_class_id)) {
+				$this->db->query("INSERT INTO " . DB_PREFIX . "tax_class SET tax_class_id = '" . (int)$tax_class_id . "', language_id = '" . (int)$language_id . "', title = '" . $this->db->escape($value['title']) . "', description = '" . $this->db->escape($value['description']) . "', date_added = NOW(), date_modified = NOW()");
+			} else {
+				$this->db->query("INSERT INTO " . DB_PREFIX . "tax_class SET language_id = '" . (int)$language_id . "', title = '" . $this->db->escape($value['title']) . "', description = '" . $this->db->escape($value['description']) . "', date_added = NOW(), date_modified = NOW()");
 
-		$tax_class_id = $this->db->getLastId();
+				$tax_class_id = $this->db->getLastId();
+			}
+		}
 
 		if (isset($data['tax_rule'])) {
 			foreach ($data['tax_rule'] as $tax_rule) {
@@ -12,12 +18,16 @@ class ModelLocalisationTaxClass extends Model {
 		}
 
 		$this->cache->delete('tax_class');
-		
+
 		return $tax_class_id;
 	}
 
 	public function editTaxClass($tax_class_id, $data) {
-		$this->db->query("UPDATE " . DB_PREFIX . "tax_class SET title = '" . $this->db->escape($data['title']) . "', description = '" . $this->db->escape($data['description']) . "', date_modified = NOW() WHERE tax_class_id = '" . (int)$tax_class_id . "'");
+		$this->db->query("DELETE FROM " . DB_PREFIX . "tax_class WHERE tax_class_id = '" . (int)$tax_class_id . "'");
+
+		foreach ($data['tax_class_description'] as $language_id => $value) {
+			$this->db->query("INSERT INTO " . DB_PREFIX . "tax_class SET tax_class_id = '" . (int)$tax_class_id . "', language_id = '" . (int)$language_id . "', title = '" . $this->db->escape($value['title']) . "', description = '" . $this->db->escape($value['description']) . "', date_modified = NOW(), date_added = NOW()");
+		}
 
 		$this->db->query("DELETE FROM " . DB_PREFIX . "tax_rule WHERE tax_class_id = '" . (int)$tax_class_id . "'");
 
@@ -38,14 +48,14 @@ class ModelLocalisationTaxClass extends Model {
 	}
 
 	public function getTaxClass($tax_class_id) {
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "tax_class WHERE tax_class_id = '" . (int)$tax_class_id . "'");
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "tax_class WHERE tax_class_id = '" . (int)$tax_class_id . "' AND language_id = '" . (int)$this->config->get('config_language_id') . "'");
 
 		return $query->row;
 	}
 
 	public function getTaxClasses($data = array()) {
 		if ($data) {
-			$sql = "SELECT * FROM " . DB_PREFIX . "tax_class";
+			$sql = "SELECT * FROM " . DB_PREFIX . "tax_class WHERE language_id = '" . (int)$this->config->get('config_language_id') . "'";
 
 			$sql .= " ORDER BY title";
 
@@ -71,22 +81,37 @@ class ModelLocalisationTaxClass extends Model {
 
 			return $query->rows;
 		} else {
-			$tax_class_data = $this->cache->get('tax_class');
+			$tax_class_data = $this->cache->get('tax_class.' . (int)$this->config->get('config_language_id'));
 
 			if (!$tax_class_data) {
-				$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "tax_class");
+				$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "tax_class WHERE language_id = '" . (int)$this->config->get('config_language_id') . "'");
 
 				$tax_class_data = $query->rows;
 
-				$this->cache->set('tax_class', $tax_class_data);
+				$this->cache->set('tax_class.' . (int)$this->config->get('config_language_id'), $tax_class_data);
 			}
 
 			return $tax_class_data;
 		}
 	}
 
+	public function getTaxClassDescriptions($tax_class_id) {
+		$tax_class_data = array();
+
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "tax_class WHERE tax_class_id = '" . (int)$tax_class_id . "'");
+
+		foreach ($query->rows as $result) {
+			$tax_class_data[$result['language_id']] = array(
+				'title'       => $result['title'],
+				'description' => $result['description']
+			);
+		}
+
+		return $tax_class_data;
+	}
+
 	public function getTotalTaxClasses() {
-		$query = $this->db->query("SELECT COUNT(*) AS total FROM " . DB_PREFIX . "tax_class");
+		$query = $this->db->query("SELECT COUNT(*) AS total FROM " . DB_PREFIX . "tax_class WHERE language_id = '" . (int)$this->config->get('config_language_id') . "'");
 
 		return $query->row['total'];
 	}

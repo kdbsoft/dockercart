@@ -223,6 +223,10 @@ class ControllerLocalisationTaxClass extends Controller {
 			$url .= '&order=' . $this->request->get['order'];
 		}
 
+		if (isset($this->request->get['page'])) {
+			$url .= '&page=' . $this->request->get['page'];
+		}
+
 		$pagination = new Pagination();
 		$pagination->total = $tax_class_total;
 		$pagination->page = $page;
@@ -258,13 +262,13 @@ class ControllerLocalisationTaxClass extends Controller {
 		if (isset($this->error['title'])) {
 			$data['error_title'] = $this->error['title'];
 		} else {
-			$data['error_title'] = '';
+			$data['error_title'] = array();
 		}
 
 		if (isset($this->error['description'])) {
 			$data['error_description'] = $this->error['description'];
 		} else {
-			$data['error_description'] = '';
+			$data['error_description'] = array();
 		}
 
 		$url = '';
@@ -301,24 +305,16 @@ class ControllerLocalisationTaxClass extends Controller {
 
 		$data['cancel'] = $this->url->link('localisation/tax_class', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
-		if (isset($this->request->get['tax_class_id']) && ($this->request->server['REQUEST_METHOD'] != 'POST')) {
-			$tax_class_info = $this->model_localisation_tax_class->getTaxClass($this->request->get['tax_class_id']);
-		}
+		$this->load->model('localisation/language');
 
-		if (isset($this->request->post['title'])) {
-			$data['title'] = $this->request->post['title'];
-		} elseif (!empty($tax_class_info)) {
-			$data['title'] = $tax_class_info['title'];
-		} else {
-			$data['title'] = '';
-		}
+		$data['languages'] = $this->model_localisation_language->getLanguages();
 
-		if (isset($this->request->post['description'])) {
-			$data['description'] = $this->request->post['description'];
-		} elseif (!empty($tax_class_info)) {
-			$data['description'] = $tax_class_info['description'];
+		if (isset($this->request->post['tax_class_description'])) {
+			$data['tax_class_description'] = $this->request->post['tax_class_description'];
+		} elseif (isset($this->request->get['tax_class_id'])) {
+			$data['tax_class_description'] = $this->model_localisation_tax_class->getTaxClassDescriptions($this->request->get['tax_class_id']);
 		} else {
-			$data['description'] = '';
+			$data['tax_class_description'] = array();
 		}
 
 		$this->load->model('localisation/tax_rate');
@@ -345,12 +341,14 @@ class ControllerLocalisationTaxClass extends Controller {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
-		if ((utf8_strlen($this->request->post['title']) < 3) || (utf8_strlen($this->request->post['title']) > 32)) {
-			$this->error['title'] = $this->language->get('error_title');
-		}
+		foreach ($this->request->post['tax_class_description'] as $language_id => $value) {
+			if ((utf8_strlen($value['title']) < 3) || (utf8_strlen($value['title']) > 32)) {
+				$this->error['title'][$language_id] = $this->language->get('error_title');
+			}
 
-		if ((utf8_strlen($this->request->post['description']) < 3) || (utf8_strlen($this->request->post['description']) > 255)) {
-			$this->error['description'] = $this->language->get('error_description');
+			if ((utf8_strlen($value['description']) < 3) || (utf8_strlen($value['description']) > 255)) {
+				$this->error['description'][$language_id] = $this->language->get('error_description');
+			}
 		}
 
 		return !$this->error;

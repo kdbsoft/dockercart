@@ -168,6 +168,9 @@ $(document).ready(function() {
 
 		e.preventDefault();
 
+		// clean up any previous outside-click handler
+		$(document).off('click.image-popover');
+
 		// destroy all image popovers
 		$('a[data-toggle="image"]').popover('destroy');
 
@@ -187,6 +190,14 @@ $(document).ready(function() {
 		});
 
 		$element.popover('show');
+
+		$(document).on('click.image-popover', function(e) {
+			if ($(e.target).closest('.popover').length || $(e.target).closest($element).length) {
+				return;
+			}
+			$('a[data-toggle="image"]').popover('destroy');
+			$(document).off('click.image-popover');
+		});
 
 		setTimeout(function(){ // fix bind events on new popover when 
 
@@ -221,16 +232,18 @@ $(document).ready(function() {
 					}
 				});
 
-				$element.popover('destroy');
-			});
+			$(document).off('click.image-popover');
+			$element.popover('destroy');
+		});
 
-			$('#button-clear').on('click', function() {
-				$element.find('img').attr('src', $element.find('img').attr('data-placeholder'));
+		$('#button-clear').on('click', function() {
+			$element.find('img').attr('src', $element.find('img').attr('data-placeholder'));
 
-				$element.parent().find('input').val('');
+			$element.parent().find('input').val('');
 
-				$element.popover('destroy');
-			});
+			$(document).off('click.image-popover');
+			$element.popover('destroy');
+		});
 			
 		}, 250); // end timeout fix
 			
