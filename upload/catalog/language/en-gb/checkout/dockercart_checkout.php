@@ -43,6 +43,7 @@ $_["text_price"] = "Price";
 $_["text_total"] = "Total";
 $_["text_empty_cart"] = "Your shopping cart is empty!";
 $_["text_items"] = "%s item(s)";
+$_["text_model"] = "Product Code:";
 
 // Customer
 $_["text_your_details"] = "Your Details";

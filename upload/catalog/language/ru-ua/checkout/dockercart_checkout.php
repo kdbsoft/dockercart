@@ -110,6 +110,7 @@ $_["text_custom_fields"] = "Дополнительная информация";
 $_["text_customer_details"] = "Данные клиента";
 $_["text_default_address"] = "По умолчанию";
 $_["text_empty_cart"] = "Ваша корзина пуста!";
+$_["text_model"] = "Код товара:";
 $_["text_enter_coupon_code"] = "Пожалуйста, введите код купона";
 $_["text_field_address_1"] = "Адрес / Отделение";
 $_["text_field_address_2"] = "Продолжение адреса";

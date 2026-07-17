@@ -594,6 +594,83 @@ class ControllerProductProduct extends Controller {
 		}
 		unset($option);
 
+			if (!empty($product_info['is_configurable'])) {
+				$pc = new ProductConfigurable($this->registry);
+
+				$configurable = $pc->getConfigurable($product_id);
+				$variants = $pc->getVariants($product_id);
+				$axes = $pc->getConfigurableOptions($product_id);
+				$default_variant = !empty($configurable['default_variant_id']) ? $pc->getVariant($configurable['default_variant_id']) : array();
+
+				$axis_option_ids = array_column($axes, 'option_id');
+				$formatted_axes = array();
+
+				if (!empty($axis_option_ids)) {
+					$po_query = $this->db->query("SELECT product_option_id, option_id FROM " . DB_PREFIX . "product_option WHERE product_id = '" . (int)$product_id . "' AND option_id IN (" . implode(',', array_map('intval', $axis_option_ids)) . ")");
+					$po_map = array();
+					$po_ids = array();
+
+					foreach ($po_query->rows as $row) {
+						$po_map[(int)$row['option_id']] = (int)$row['product_option_id'];
+						$po_ids[] = (int)$row['product_option_id'];
+					}
+
+					$pov_map = array();
+
+					if (!empty($po_ids)) {
+						$pov_query = $this->db->query("SELECT product_option_value_id, option_value_id, product_option_id FROM " . DB_PREFIX . "product_option_value WHERE product_option_id IN (" . implode(',', $po_ids) . ")");
+						foreach ($pov_query->rows as $row) {
+							$pid = (int)$row['product_option_id'];
+							$ov_id = (int)$row['option_value_id'];
+							$pov_id = (int)$row['product_option_value_id'];
+							$pov_map[$pid][$ov_id] = $pov_id;
+						}
+					}
+
+					foreach ($axes as $axe) {
+						$oid = (int)$axe['option_id'];
+						$pid = isset($po_map[$oid]) ? $po_map[$oid] : 0;
+
+						$formatted_axes[] = array(
+							'option_id' => $oid,
+							'po_id'     => $pid,
+							'name'      => $axe['name'],
+							'type'      => $axe['type'],
+							'pov_map'   => isset($pov_map[$pid]) ? $pov_map[$pid] : new stdClass(),
+						);
+					}
+				}
+
+				$tax_class_id = (int)$product_info['tax_class_id'];
+				$tax = $this->config->get('config_tax');
+				$currency_code = isset($this->session->data['currency']) ? $this->session->data['currency'] : $this->config->get('config_currency');
+
+				foreach ($variants as &$variant) {
+					if (isset($variant['price']) && $variant['price'] !== '') {
+						$variant['price'] = (float)$this->currency->format(
+							$this->tax->calculate((float)$variant['price'], $tax_class_id, $tax),
+							$currency_code, '', false
+						);
+					}
+				}
+				unset($variant);
+
+				if (!empty($default_variant) && isset($default_variant['price'])) {
+					$default_variant['price'] = (float)$this->currency->format(
+						$this->tax->calculate((float)$default_variant['price'], $tax_class_id, $tax),
+						$currency_code, '', false
+					);
+				}
+
+				$data['is_configurable'] = true;
+				$data['dc_variant_json'] = json_encode(array(
+					'axes'               => $formatted_axes,
+					'variants'           => $variants,
+					'default_variant_id' => (int)($configurable['default_variant_id'] ?? 0),
+					'default_variant'    => $default_variant,
+				));
+			}
+
 			if (!isset($data['minimum'])) {
 				$data['minimum'] = 1;
 			}
@@ -798,89 +875,83 @@ class ControllerProductProduct extends Controller {
 
 		$data['bundles'] = array();
 
-		$bundle_file = DIR_SYSTEM . 'library/product_bundle.php';
+		$bundle_lib = new ProductBundle($this->registry);
+		$bundle_results = $bundle_lib->getBundlesByProduct($product_id, (int)$this->config->get('config_store_id'));
 
-		if (file_exists($bundle_file)) {
-			require_once $bundle_file;
+		$bundles = array();
 
-			$bundle_lib = new ProductBundle($this->registry);
-			$bundle_results = $bundle_lib->getBundlesByProduct($product_id, (int)$this->config->get('config_store_id'));
+		foreach ($bundle_results as $bundle) {
+			$bundle_products = $bundle_lib->getBundleProducts($bundle['bundle_id']);
 
-			$bundles = array();
+			$products_data = array();
+			$original_total = 0;
 
-			foreach ($bundle_results as $bundle) {
-				$bundle_products = $bundle_lib->getBundleProducts($bundle['bundle_id']);
+			foreach ($bundle_products as $bp) {
+				$bp_info = $this->model_catalog_product->getProduct($bp['product_id']);
 
-				$products_data = array();
-				$original_total = 0;
+				if ($bp_info) {
+					$bp_price = (float)$bp_info['price'];
 
-				foreach ($bundle_products as $bp) {
-					$bp_info = $this->model_catalog_product->getProduct($bp['product_id']);
-
-					if ($bp_info) {
-						$bp_price = (float)$bp_info['price'];
-
-						if (!is_null($bp_info['special']) && (float)$bp_info['special'] < $bp_price) {
-							$bp_price = (float)$bp_info['special'];
-						}
-
-						$original_total += $bp_price;
-
-						$products_data[] = array(
-							'product_id'  => $bp_info['product_id'],
-							'name'        => $bp_info['name'],
-							'thumb'       => $this->model_tool_image->resize($bp_info['image'], 100, 100),
-							'price'       => $this->currency->format($this->tax->calculate($bp_price, $bp_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']),
-							'price_value' => $bp_price,
-							'href'        => $this->url->link('product/product', 'product_id=' . $bp_info['product_id'])
-						);
-					}
-				}
-
-				if (count($products_data) >= 2) {
-					$discount_value = (float)$bundle['discount_value'];
-					$bundle_total = $original_total;
-
-					if ($bundle['discount_type'] == 'percentage') {
-						$bundle_total = $original_total * (1 - $discount_value / 100);
-					} else {
-						$bundle_total = max(0, $original_total - $discount_value);
+					if (!is_null($bp_info['special']) && (float)$bp_info['special'] < $bp_price) {
+						$bp_price = (float)$bp_info['special'];
 					}
 
-					if ($bundle['discount_type'] == 'percentage') {
-						$discount_text = (int)$discount_value . '%';
-					} else {
-						$discount_text = $this->currency->format($discount_value, $this->session->data['currency']);
-					}
+					$original_total += $bp_price;
 
-					$all_in_stock = true;
-					foreach ($bundle_products as $bp) {
-						$bp_stock_info = $this->model_catalog_product->getProduct($bp['product_id']);
-						if ($bp_stock_info && (float)$bp_stock_info['quantity'] <= 0 && empty($bp_stock_info['preorder'])) {
-							$all_in_stock = false;
-							break;
-						}
-					}
-
-					$bundles[] = array(
-						'bundle_id'                 => $bundle['bundle_id'],
-						'name'                      => $bundle['name'],
-						'products'                  => $products_data,
-						'original_total'            => $original_total,
-						'total'                     => $bundle_total,
-						'original_total_formatted'  => $this->currency->format($original_total, $this->session->data['currency']),
-						'total_formatted'           => $this->currency->format($bundle_total, $this->session->data['currency']),
-						'you_save_formatted'        => $this->currency->format(max(0, $original_total - $bundle_total), $this->session->data['currency']),
-						'discount_type'             => $bundle['discount_type'],
-						'discount_value'            => $discount_value,
-						'discount_text'             => $discount_text,
-						'all_in_stock'              => $all_in_stock,
+					$products_data[] = array(
+						'product_id'  => $bp_info['product_id'],
+						'name'        => $bp_info['name'],
+						'thumb'       => $this->model_tool_image->resize($bp_info['image'], 100, 100),
+						'price'       => $this->currency->format($this->tax->calculate($bp_price, $bp_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']),
+						'price_value' => $bp_price,
+						'href'        => $this->url->link('product/product', 'product_id=' . $bp_info['product_id'])
 					);
 				}
 			}
 
-			$data['bundles'] = $bundles;
+			if (count($products_data) >= 2) {
+				$discount_value = (float)$bundle['discount_value'];
+				$bundle_total = $original_total;
+
+				if ($bundle['discount_type'] == 'percentage') {
+					$bundle_total = $original_total * (1 - $discount_value / 100);
+				} else {
+					$bundle_total = max(0, $original_total - $discount_value);
+				}
+
+				if ($bundle['discount_type'] == 'percentage') {
+					$discount_text = (int)$discount_value . '%';
+				} else {
+					$discount_text = $this->currency->format($discount_value, $this->session->data['currency']);
+				}
+
+				$all_in_stock = true;
+				foreach ($bundle_products as $bp) {
+					$bp_stock_info = $this->model_catalog_product->getProduct($bp['product_id']);
+					if ($bp_stock_info && (float)$bp_stock_info['quantity'] <= 0 && empty($bp_stock_info['preorder'])) {
+						$all_in_stock = false;
+						break;
+					}
+				}
+
+				$bundles[] = array(
+					'bundle_id'                 => $bundle['bundle_id'],
+					'name'                      => $bundle['name'],
+					'products'                  => $products_data,
+					'original_total'            => $original_total,
+					'total'                     => $bundle_total,
+					'original_total_formatted'  => $this->currency->format($original_total, $this->session->data['currency']),
+					'total_formatted'           => $this->currency->format($bundle_total, $this->session->data['currency']),
+					'you_save_formatted'        => $this->currency->format(max(0, $original_total - $bundle_total), $this->session->data['currency']),
+					'discount_type'             => $bundle['discount_type'],
+					'discount_value'            => $discount_value,
+					'discount_text'             => $discount_text,
+					'all_in_stock'              => $all_in_stock,
+				);
+			}
 		}
+
+		$data['bundles'] = $bundles;
 
 		$data['text_bundle_title'] = $this->language->get('text_bundle_title');
 		$data['text_bundle_save'] = $this->language->get('text_bundle_save');

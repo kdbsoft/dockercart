@@ -129,6 +129,26 @@ class ModelCatalogProduct extends Model {
 				'has_gift'         => !empty($query->row['has_gift']),
 				'call_for_price'   => !empty($query->row['call_for_price'])
 			);
+
+			$pc = new ProductConfigurable($this->registry);
+			$configurable = $pc->getConfigurable($product_id);
+
+			if (!empty($configurable)) {
+				$product_data['is_configurable'] = true;
+				$product_data['configurable_options'] = $pc->getConfigurableOptions($product_id);
+				$product_data['variants'] = $pc->getVariants($product_id);
+
+				$default_variant = $pc->getDefaultVariant($product_id);
+
+				if ($default_variant) {
+					$product_data['default_variant'] = $default_variant;
+					$product_data['default_variant_id'] = $default_variant['variant_id'];
+				}
+
+				$aggregated_stock = $pc->getAggregatedStock($product_id);
+				$product_data['variants_in_stock'] = $aggregated_stock['variants_in_stock'];
+				$product_data['total_variants'] = $aggregated_stock['total_variants'];
+			}
 		} else {
 			$product_data = false;
 		}
@@ -489,6 +509,24 @@ class ModelCatalogProduct extends Model {
 			unset($pov);
 		}
 		unset($po);
+
+		$pc = new ProductConfigurable($this->registry);
+
+		if ($pc->isConfigurable($product_id)) {
+			$configurable_options = $pc->getConfigurableOptions($product_id);
+			$configurable_option_ids = array();
+
+			foreach ($configurable_options as $co) {
+				$configurable_option_ids[] = (int)$co['option_id'];
+			}
+
+			foreach ($product_option_data as &$option) {
+				if (in_array((int)$option['option_id'], $configurable_option_ids)) {
+					$option['is_configurable_axis'] = true;
+				}
+			}
+			unset($option);
+		}
 
 		return $product_option_data;
 	}

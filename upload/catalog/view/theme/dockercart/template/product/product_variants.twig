@@ -1,0 +1,229 @@
+{% if is_configurable and dc_variant_json %}
+<script type="text/javascript"><!--
+(function() {
+	var matrix = {{ dc_variant_json|raw }};
+	if (!matrix.axes || !matrix.axes.length) return;
+
+	var productEl = document.getElementById('product');
+	if (!productEl) return;
+
+	var variantMap = {};
+	var compatMap = {};
+
+	matrix.variants.forEach(function(v) {
+		var key = (v.values || []).map(function(vv) {
+			return vv.option_id + ':' + vv.option_value_id;
+		}).sort().join('|');
+		variantMap[key] = v;
+
+		(v.values || []).forEach(function(vv) {
+			if (!compatMap[vv.option_id]) compatMap[vv.option_id] = {};
+			if (!compatMap[vv.option_id][vv.option_value_id]) compatMap[vv.option_id][vv.option_value_id] = {};
+
+			(v.values || []).forEach(function(other) {
+				if (other.option_id === vv.option_id && other.option_value_id === vv.option_value_id) return;
+				compatMap[vv.option_id][vv.option_value_id][other.option_id + ':' + other.option_value_id] = true;
+			});
+		});
+	});
+
+	var variantInput = document.getElementById('dc-variant-id');
+	var priceEl = document.getElementById('dc-unit-price');
+	var mainImgEl = productEl.querySelector('img#dc-main-img');
+	var cartBtn = document.getElementById('button-cart');
+	var defaultImgSrc = mainImgEl ? mainImgEl.src : '';
+	var originalBasePrice = priceEl ? parseFloat(priceEl.dataset.basePrice || '0') : 0;
+	var skuEl = document.getElementById('dc-variant-sku');
+	var originalSku = skuEl ? skuEl.textContent : '';
+
+	function getOvIdForPov(axis, povId) {
+		if (!axis.pov_map) return null;
+		for (var ovId in axis.pov_map) {
+			if (axis.pov_map[ovId] == povId) return parseInt(ovId);
+		}
+		return null;
+	}
+
+	function isValueAvailable(axis, ovId, currentSelection) {
+		if (!compatMap[axis.option_id] || !compatMap[axis.option_id][ovId]) return false;
+		var compat = compatMap[axis.option_id][ovId];
+
+		for (var selOid in currentSelection) {
+			if (selOid == axis.option_id) continue;
+			var pair = selOid + ':' + currentSelection[selOid];
+			if (!compat[pair]) return false;
+		}
+		return true;
+	}
+
+	function updateAvailableOptions() {
+		var currentSelection = {};
+
+		matrix.axes.forEach(function(axis) {
+			if (!axis.po_id) return;
+			var input = productEl.querySelector('input[name="option[' + axis.po_id + ']"]:checked');
+			if (!input) input = productEl.querySelector('select[name="option[' + axis.po_id + ']"]');
+			if (input && input.value) {
+				var ovId = getOvIdForPov(axis, input.value);
+				if (ovId) currentSelection[axis.option_id] = ovId;
+			}
+		});
+
+		matrix.axes.forEach(function(axis) {
+			if (!axis.po_id) return;
+
+			var inputs = productEl.querySelectorAll('input[name="option[' + axis.po_id + ']"]');
+			if (!inputs.length) {
+				var sel = productEl.querySelector('select[name="option[' + axis.po_id + ']"]');
+				inputs = sel ? sel.options : [];
+			}
+
+			inputs.forEach(function(inp) {
+				var val = inp.value;
+				if (inp.tagName === 'INPUT') val = inp.value;
+				if (!val) return;
+
+				var ovId = getOvIdForPov(axis, val);
+				if (!ovId) return;
+
+				var available = Object.keys(currentSelection).length === 0 || isValueAvailable(axis, ovId, currentSelection);
+
+				if (inp.tagName === 'OPTION') {
+					if (val) inp.disabled = !available;
+				} else {
+					inp.disabled = !available;
+					var label = inp.closest('label');
+					if (label) {
+						if (!available) {
+							label.style.opacity = '0.35';
+							label.style.pointerEvents = 'none';
+						} else {
+							label.style.opacity = '';
+							label.style.pointerEvents = '';
+						}
+					}
+				}
+			});
+		});
+	}
+
+	function getSelectedAxes() {
+		var allSet = true;
+
+		for (var a = 0; a < matrix.axes.length; a++) {
+			var axis = matrix.axes[a];
+			if (!axis.po_id) continue;
+
+			var input = productEl.querySelector('input[name="option[' + axis.po_id + ']"]:checked');
+			if (!input) input = productEl.querySelector('select[name="option[' + axis.po_id + ']"]');
+
+			if (input && input.value) {
+				var ovId = getOvIdForPov(axis, input.value);
+				if (!ovId) { allSet = false; break; }
+				axis._selected = { po_id: axis.po_id, pov_id: input.value, ov_id: ovId };
+			} else {
+				axis._selected = null;
+				allSet = false;
+			}
+		}
+		return allSet ? matrix.axes : null;
+	}
+
+	function resolveVariant(axes) {
+		if (!axes) return null;
+		var pairs = [];
+		axes.forEach(function(axis) {
+			if (axis._selected) {
+				pairs.push(axis.option_id + ':' + axis._selected.ov_id);
+			}
+		});
+		pairs.sort();
+		return variantMap[pairs.join('|')] || null;
+	}
+
+	function updateVariantUI(variant) {
+		if (variantInput) variantInput.value = variant ? variant.variant_id : '';
+
+		if (priceEl) {
+			var price = (variant && variant.price !== null && variant.price !== undefined) ? parseFloat(variant.price) : originalBasePrice;
+			if (isNaN(price)) price = originalBasePrice;
+			priceEl.dataset.currentPrice = String(price);
+			if (typeof dcFormatMoney === 'function') {
+				var symbol = priceEl.dataset.currencySymbol || '';
+				priceEl.textContent = dcFormatMoney(price, symbol);
+			}
+		}
+
+		if (skuEl) {
+			skuEl.textContent = (variant && variant.sku) ? variant.sku : originalSku;
+		}
+
+		if (typeof dcUpdateSubtotal === 'function') dcUpdateSubtotal();
+
+		if (variant && variant.image && mainImgEl) {
+			mainImgEl.src = variant.image;
+		} else if (mainImgEl && defaultImgSrc) {
+			mainImgEl.src = defaultImgSrc;
+		}
+
+		if (variant && variant.quantity <= 0 && variant.subtract == 1) {
+			if (cartBtn) { cartBtn.disabled = true; cartBtn.textContent = '{{ text_out_of_stock|default("Out of Stock") }}'; }
+		} else {
+			if (cartBtn && cartBtn.dataset.originalText) {
+				cartBtn.disabled = false;
+				cartBtn.textContent = cartBtn.dataset.originalText;
+			}
+		}
+
+		updateAvailableOptions();
+	}
+
+	document.addEventListener('change', function(e) {
+		var target = e.target;
+		var name = target.name || '';
+		var matches = name.match(/option\[(\d+)\]/);
+		if (!matches) return;
+		var poId = parseInt(matches[1]);
+
+		var isAxis = false;
+		for (var a = 0; a < matrix.axes.length; a++) {
+			if (matrix.axes[a].po_id === poId) { isAxis = true; break; }
+		}
+		if (!isAxis) return;
+
+		var axes = getSelectedAxes();
+		updateVariantUI(axes ? resolveVariant(axes) : null);
+	});
+
+	if (document.readyState !== 'loading') {
+		if (cartBtn && !cartBtn.dataset.originalText) {
+			cartBtn.dataset.originalText = cartBtn.textContent;
+		}
+
+		if (matrix.default_variant_id && matrix.default_variant) {
+			var dv = matrix.default_variant;
+			if (dv.values) {
+				dv.values.forEach(function(vv) {
+					var axis = null;
+					for (var a = 0; a < matrix.axes.length; a++) {
+						if (matrix.axes[a].option_id == vv.option_id) { axis = matrix.axes[a]; break; }
+					}
+					if (!axis || !axis.po_id) return;
+					var povId = axis.pov_map ? axis.pov_map[vv.option_value_id] : null;
+					if (!povId) return;
+
+					var input = productEl.querySelector('input[name="option[' + axis.po_id + '"][value="' + povId + '"]');
+					if (input) {
+						input.checked = true;
+						input.dispatchEvent(new Event('change', {bubbles: true}));
+					}
+				});
+				updateVariantUI(dv);
+			}
+		} else {
+			updateAvailableOptions();
+		}
+	}
+})();
+//--></script>
+{% endif %}

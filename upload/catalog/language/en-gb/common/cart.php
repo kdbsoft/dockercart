@@ -6,3 +6,4 @@ $_['text_cart_empty_hint'] = 'Add something to get started!';
 $_['text_cart']      = 'View Cart';
 $_['text_checkout']  = 'Checkout';
 $_['text_cart_drawer'] = 'Your Cart';
+$_['text_model'] = 'Product Code:';

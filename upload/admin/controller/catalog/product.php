@@ -1181,8 +1181,35 @@ class ControllerCatalogProduct extends Controller {
 				'name'                 => $this->decodeHtmlEntitiesForDisplay($product_option['name']),
 				'type'                 => $product_option['type'],
 				'value'                => isset($product_option['value']) ? $product_option['value'] : '',
-				'required'             => $product_option['required']
+				'required'             => $product_option['required'],
+				'is_axis'              => false
 			);
+		}
+
+		$this->load->model('catalog/product_configurable');
+
+		$product_id_for_form = isset($this->request->get['product_id']) ? (int)$this->request->get['product_id'] : 0;
+		$data['is_configurable'] = false;
+		$data['axis_option_ids'] = array();
+
+		if ($product_id_for_form) {
+			$data['is_configurable'] = $this->model_catalog_product_configurable->isConfigurable($product_id_for_form);
+
+			if ($data['is_configurable']) {
+				$axes = $this->model_catalog_product_configurable->getConfigurableOptions($product_id_for_form);
+
+				foreach ($axes as $axis) {
+					$data['axis_option_ids'][] = (int)$axis['option_id'];
+				}
+
+				foreach ($data['product_options'] as &$po) {
+					if (in_array((int)$po['option_id'], $data['axis_option_ids'])) {
+						$po['is_axis'] = true;
+					}
+				}
+
+			unset($po);
+			}
 		}
 
 		$data['option_values'] = array();
@@ -1409,6 +1436,8 @@ class ControllerCatalogProduct extends Controller {
 
 		$data['layouts'] = $this->model_design_layout->getLayouts();
 
+		$this->load->language('catalog/product_configurable');
+
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');
@@ -1541,6 +1570,29 @@ class ControllerCatalogProduct extends Controller {
 								break;
 							}
 						}
+					}
+				}
+			}
+		}
+
+		if (isset($this->request->post['product_option']) && is_array($this->request->post['product_option']) && isset($this->request->get['product_id'])) {
+			$this->load->model('catalog/product_configurable');
+
+			$axes = $this->model_catalog_product_configurable->getConfigurableOptions((int)$this->request->get['product_id']);
+			$axis_option_ids = array();
+
+			foreach ($axes as $axis) {
+				$axis_option_ids[] = (int)$axis['option_id'];
+			}
+
+			if (!empty($axis_option_ids)) {
+				foreach ($this->request->post['product_option'] as $product_option) {
+					$option_id = isset($product_option['option_id']) ? (int)$product_option['option_id'] : 0;
+
+					if ($option_id && in_array($option_id, $axis_option_ids)) {
+						$this->error['option'][$option_id] = $this->language->get('error_option_is_axis');
+
+						break;
 					}
 				}
 			}

@@ -35,3 +35,4 @@ $_['text_trial'] = '%s кожні %s %s для %s платежів, тоді ';
 $_['text_until_cancelled'] = 'до скасування';
 $_['text_week'] = 'тиждень';
 $_['text_year'] = 'рік';
+$_['text_model'] = 'Код товару:';

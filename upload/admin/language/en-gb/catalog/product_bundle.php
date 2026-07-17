@@ -1,5 +1,5 @@
 <?php
-$_['heading_title']         = 'Product Bundles';
+$_['heading_title']         = 'Bundle Discounts';
 
 $_['text_success']          = 'Success: You have modified product bundles!';
 $_['text_list']             = 'Bundle List';

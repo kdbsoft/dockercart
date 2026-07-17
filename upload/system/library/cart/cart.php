@@ -244,10 +244,19 @@ class Cart
 
                 $option_data = [];
 
+                $axis_option_ids = [];
+                $axis_query = $this->db->query("SELECT option_id FROM " . DB_PREFIX . "product_configurable_option WHERE product_id = '" . (int)$cart["product_id"] . "'");
+                foreach ($axis_query->rows as $row) {
+                    $axis_option_ids[] = (int)$row['option_id'];
+                }
+
                 foreach (
                     json_decode($cart["option"])
                     as $product_option_id => $value
                 ) {
+                    if ($product_option_id === 'variant_id') {
+                        continue;
+                    }
                     $option_query = $this->db->query(
                         "SELECT po.product_option_id, po.option_id, od.name, o.type FROM " .
                             DB_PREFIX .
@@ -265,6 +274,8 @@ class Cart
                     );
 
                     if ($option_query->num_rows) {
+                        $is_axis = !empty($axis_option_ids) && in_array((int)$option_query->row['option_id'], $axis_option_ids);
+
                         if (
                             $option_query->row["type"] == "select" ||
                             $option_query->row["type"] == "radio" ||
@@ -293,46 +304,48 @@ class Cart
                             );
 
                             if ($option_value_query->num_rows) {
-                                if (
-                                    $option_value_query->row["price_prefix"] ==
-                                    "+"
-                                ) {
-                                    $option_price +=
-                                        $option_value_query->row["price"];
-                                } elseif (
-                                    $option_value_query->row["price_prefix"] ==
-                                    "-"
-                                ) {
-                                    $option_price -=
-                                        $option_value_query->row["price"];
-                                }
+                                if (!$is_axis) {
+                                    if (
+                                        $option_value_query->row["price_prefix"] ==
+                                        "+"
+                                    ) {
+                                        $option_price +=
+                                            $option_value_query->row["price"];
+                                    } elseif (
+                                        $option_value_query->row["price_prefix"] ==
+                                        "-"
+                                    ) {
+                                        $option_price -=
+                                            $option_value_query->row["price"];
+                                    }
 
-                                if (
-                                    $option_value_query->row["points_prefix"] ==
-                                    "+"
-                                ) {
-                                    $option_points +=
-                                        $option_value_query->row["points"];
-                                } elseif (
-                                    $option_value_query->row["points_prefix"] ==
-                                    "-"
-                                ) {
-                                    $option_points -=
-                                        $option_value_query->row["points"];
-                                }
+                                    if (
+                                        $option_value_query->row["points_prefix"] ==
+                                        "+"
+                                    ) {
+                                        $option_points +=
+                                            $option_value_query->row["points"];
+                                    } elseif (
+                                        $option_value_query->row["points_prefix"] ==
+                                        "-"
+                                    ) {
+                                        $option_points -=
+                                            $option_value_query->row["points"];
+                                    }
 
-                                if (
-                                    $option_value_query->row["weight_prefix"] ==
-                                    "+"
-                                ) {
-                                    $option_weight +=
-                                        $option_value_query->row["weight"];
-                                } elseif (
-                                    $option_value_query->row["weight_prefix"] ==
-                                    "-"
-                                ) {
-                                    $option_weight -=
-                                        $option_value_query->row["weight"];
+                                    if (
+                                        $option_value_query->row["weight_prefix"] ==
+                                        "+"
+                                    ) {
+                                        $option_weight +=
+                                            $option_value_query->row["weight"];
+                                    } elseif (
+                                        $option_value_query->row["weight_prefix"] ==
+                                        "-"
+                                    ) {
+                                        $option_weight -=
+                                            $option_value_query->row["weight"];
+                                    }
                                 }
 
                                 $option_value_quantity = (float) $option_value_query->row["quantity"];
@@ -408,52 +421,54 @@ class Cart
                                 );
 
                                 if ($option_value_query->num_rows) {
-                                    if (
-                                        $option_value_query->row[
-                                            "price_prefix"
-                                        ] == "+"
-                                    ) {
-                                        $option_price +=
-                                            $option_value_query->row["price"];
-                                    } elseif (
-                                        $option_value_query->row[
-                                            "price_prefix"
-                                        ] == "-"
-                                    ) {
-                                        $option_price -=
-                                            $option_value_query->row["price"];
-                                    }
+                                    if (!$is_axis) {
+                                        if (
+                                            $option_value_query->row[
+                                                "price_prefix"
+                                            ] == "+"
+                                        ) {
+                                            $option_price +=
+                                                $option_value_query->row["price"];
+                                        } elseif (
+                                            $option_value_query->row[
+                                                "price_prefix"
+                                            ] == "-"
+                                        ) {
+                                            $option_price -=
+                                                $option_value_query->row["price"];
+                                        }
 
-                                    if (
-                                        $option_value_query->row[
-                                            "points_prefix"
-                                        ] == "+"
-                                    ) {
-                                        $option_points +=
-                                            $option_value_query->row["points"];
-                                    } elseif (
-                                        $option_value_query->row[
-                                            "points_prefix"
-                                        ] == "-"
-                                    ) {
-                                        $option_points -=
-                                            $option_value_query->row["points"];
-                                    }
+                                        if (
+                                            $option_value_query->row[
+                                                "points_prefix"
+                                            ] == "+"
+                                        ) {
+                                            $option_points +=
+                                                $option_value_query->row["points"];
+                                        } elseif (
+                                            $option_value_query->row[
+                                                "points_prefix"
+                                            ] == "-"
+                                        ) {
+                                            $option_points -=
+                                                $option_value_query->row["points"];
+                                        }
 
-                                    if (
-                                        $option_value_query->row[
-                                            "weight_prefix"
-                                        ] == "+"
-                                    ) {
-                                        $option_weight +=
-                                            $option_value_query->row["weight"];
-                                    } elseif (
-                                        $option_value_query->row[
-                                            "weight_prefix"
-                                        ] == "-"
-                                    ) {
-                                        $option_weight -=
-                                            $option_value_query->row["weight"];
+                                        if (
+                                            $option_value_query->row[
+                                                "weight_prefix"
+                                            ] == "+"
+                                        ) {
+                                            $option_weight +=
+                                                $option_value_query->row["weight"];
+                                        } elseif (
+                                            $option_value_query->row[
+                                                "weight_prefix"
+                                            ] == "-"
+                                        ) {
+                                            $option_weight -=
+                                                $option_value_query->row["weight"];
+                                        }
                                     }
 
                                     $option_value_quantity = (float) $option_value_query->row["quantity"];
@@ -538,80 +553,111 @@ class Cart
                     }
                 }
 
-                $price = $product_query->row["price"];
+                $decoded_options = json_decode($cart["option"], true);
+                $variant_id = isset($decoded_options['variant_id']) ? (int)$decoded_options['variant_id'] : 0;
+                $variant_sku = '';
 
-                // DockerCart: Per-product customer group price override
-                $customer_group_price_query = $this->db->query(
-                    "SELECT price FROM " .
-                        DB_PREFIX .
-                        "dockercart_product_customer_group_price WHERE product_id = '" .
-                        (int) $cart["product_id"] .
-                        "' AND customer_group_id = '" .
-                        (int) $this->config->get("config_customer_group_id") .
-                        "'",
-                );
-                $has_customer_group_price =
-                    $customer_group_price_query->num_rows &&
-                    (float) $customer_group_price_query->row["price"] > 0;
+                if ($variant_id > 0) {
+                    $variant_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_variant WHERE variant_id = '" . $variant_id . "' AND product_id = '" . (int)$cart["product_id"] . "' AND status = '1'");
 
-                if ($has_customer_group_price) {
-                    $price = (float) $customer_group_price_query->row["price"];
-                }
+                    if ($variant_query->num_rows) {
+                        $variant_sku = $variant_query->row['sku'];
+                        $product_query->row['price'] = (float)$variant_query->row['price'];
+                        $product_query->row['quantity'] = (float)$variant_query->row['quantity'];
+                        $product_query->row['subtract'] = (int)$variant_query->row['subtract'];
+                        $product_query->row['weight'] = (float)$variant_query->row['weight'];
+                        $product_query->row['weight_class_id'] = (int)$variant_query->row['weight_class_id'];
 
-                // Product Discounts
-                $discount_quantity = 0;
+                        if (!empty($variant_sku)) {
+                            $product_query->row['model'] = $variant_sku;
+                        }
 
-                foreach ($cart_query->rows as $cart_2) {
-                    if ($cart_2["product_id"] == $cart["product_id"]) {
-                        $discount_quantity += $cart_2["quantity"];
+                        $variant_cg_query = $this->db->query("SELECT price FROM " . DB_PREFIX . "dockercart_product_variant_customer_group_price WHERE variant_id = '" . (int)$variant_id . "' AND customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "'");
+
+                        if ($variant_cg_query->num_rows && (float)$variant_cg_query->row['price'] > 0) {
+                            $product_query->row['price'] = (float)$variant_cg_query->row['price'];
+                        }
+                    } else {
+                        $stock = false;
                     }
                 }
 
-                $product_discount_query = $this->db->query(
-                    "SELECT price FROM " .
-                        DB_PREFIX .
-                        "product_discount WHERE product_id = '" .
-                        (int) $cart["product_id"] .
-                        "' AND customer_group_id = '" .
-                        (int) $this->config->get("config_customer_group_id") .
-                        "' AND quantity <= '" .
-                        (float) $discount_quantity .
-                        "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) ORDER BY quantity DESC, priority ASC, price ASC LIMIT 1",
-                );
+                $price = $product_query->row["price"];
 
-                if (
-                    $product_discount_query->num_rows &&
-                    (float) $product_discount_query->row["price"] <
-                        (float) $price
-                ) {
-                    $price = (float) $product_discount_query->row["price"];
-                }
+                if (!$variant_id) {
+                    // DockerCart: Per-product customer group price override
+                    $customer_group_price_query = $this->db->query(
+                        "SELECT price FROM " .
+                            DB_PREFIX .
+                            "dockercart_product_customer_group_price WHERE product_id = '" .
+                            (int) $cart["product_id"] .
+                            "' AND customer_group_id = '" .
+                            (int) $this->config->get("config_customer_group_id") .
+                            "'",
+                    );
+                    $has_customer_group_price =
+                        $customer_group_price_query->num_rows &&
+                        (float) $customer_group_price_query->row["price"] > 0;
 
-                // Product Specials
-                $product_special_query = $this->db->query(
-                    "SELECT price FROM " .
-                        DB_PREFIX .
-                        "product_special WHERE product_id = '" .
-                        (int) $cart["product_id"] .
-                        "' AND customer_group_id = '" .
-                        (int) $this->config->get("config_customer_group_id") .
-                        "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) ORDER BY priority ASC, price ASC LIMIT 1",
-                );
+                    if ($has_customer_group_price) {
+                        $price = (float) $customer_group_price_query->row["price"];
+                    }
 
-                if (
-                    $product_special_query->num_rows &&
-                    (float) $product_special_query->row["price"] <
-                        (float) $price
-                ) {
-                    $price = (float) $product_special_query->row["price"];
-                }
+                    // Product Discounts
+                    $discount_quantity = 0;
 
-                if ($has_customer_group_price) {
-                    // Per-product group price set — skip global % discount/markup
-                } elseif ($customer_group_discount > 0) {
-                    $price *= (100 - $customer_group_discount) / 100;
-                } elseif ($customer_group_markup > 0) {
-                    $price *= (100 + $customer_group_markup) / 100;
+                    foreach ($cart_query->rows as $cart_2) {
+                        if ($cart_2["product_id"] == $cart["product_id"]) {
+                            $discount_quantity += $cart_2["quantity"];
+                        }
+                    }
+
+                    $product_discount_query = $this->db->query(
+                        "SELECT price FROM " .
+                            DB_PREFIX .
+                            "product_discount WHERE product_id = '" .
+                            (int) $cart["product_id"] .
+                            "' AND customer_group_id = '" .
+                            (int) $this->config->get("config_customer_group_id") .
+                            "' AND quantity <= '" .
+                            (float) $discount_quantity .
+                            "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) ORDER BY quantity DESC, priority ASC, price ASC LIMIT 1",
+                    );
+
+                    if (
+                        $product_discount_query->num_rows &&
+                        (float) $product_discount_query->row["price"] <
+                            (float) $price
+                    ) {
+                        $price = (float) $product_discount_query->row["price"];
+                    }
+
+                    // Product Specials
+                    $product_special_query = $this->db->query(
+                        "SELECT price FROM " .
+                            DB_PREFIX .
+                            "product_special WHERE product_id = '" .
+                            (int) $cart["product_id"] .
+                            "' AND customer_group_id = '" .
+                            (int) $this->config->get("config_customer_group_id") .
+                            "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) ORDER BY priority ASC, price ASC LIMIT 1",
+                    );
+
+                    if (
+                        $product_special_query->num_rows &&
+                        (float) $product_special_query->row["price"] <
+                            (float) $price
+                    ) {
+                        $price = (float) $product_special_query->row["price"];
+                    }
+
+                    if ($has_customer_group_price) {
+                        // Per-product group price set — skip global % discount/markup
+                    } elseif ($customer_group_discount > 0) {
+                        $price *= (100 - $customer_group_discount) / 100;
+                    } elseif ($customer_group_markup > 0) {
+                        $price *= (100 + $customer_group_markup) / 100;
+                    }
                 }
 
                 // Reward Points
@@ -739,6 +785,8 @@ class Cart
                 $product_data[] = [
                     "cart_id" => $cart["cart_id"],
                     "product_id" => $product_query->row["product_id"],
+                    "variant_id" => $variant_id,
+                    "variant_sku" => $variant_sku,
                     "name" => $product_query->row["name"],
                     "model" => $product_query->row["model"],
                     "shipping" => $product_query->row["shipping"],
