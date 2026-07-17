@@ -59,7 +59,7 @@ $_['entry_quantity'] = 'Количество';
 $_['entry_quantity_step'] = 'Шаг количества';
 $_['entry_related'] = 'Сопутствующие товары';
 $_['entry_gift_product'] = 'Товар-подарок';
-$_['entry_required'] = 'Необходимый';
+$_['entry_required'] = 'Обязательно';
 $_['entry_reward'] = 'Бонусные баллы';
 $_['entry_shipping'] = 'Требуется доставка';
 $_['entry_sku'] = 'SKU';
@@ -130,5 +130,3 @@ $_['text_filter_hint']    = 'Можно ввести часть названия
 $_['text_add_product_subtitle'] = 'Добавить новый товар в каталог';
 
 $_['text_edit_product_subtitle'] = 'Редактировать данные и настройки товара';
-
-
