@@ -41,7 +41,7 @@
     <div id="header-logo" class="navbar-header"><a href="{{ home }}" class="navbar-brand"><img src="view/image/logo.png" alt="{{ heading_title }}" title="{{ heading_title }}" /></a></div>
     {% if logged %}<a href="#" id="button-menu" class="hidden-md hidden-lg"><span class="fa fa-bars"></span></a>
     <ul class="nav navbar-nav navbar-right">
-      <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><b>{{ (current_language_code|split('-'))|first|upper }}</b> <i class="fa fa-caret-down fa-fw"></i></a>
+      <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><i data-lucide="globe-2" width="14" height="14" style="vertical-align: middle;"></i> <b>{{ (current_language_code|split('-'))|first|upper }}</b> <i class="fa fa-caret-down fa-fw"></i></a>
         <ul class="dropdown-menu dropdown-menu-right">
           {% for language in languages %}
           <li{% if language.code == current_language_code %} class="active"{% endif %}><a href="{{ language.href }}">{{ language.name }}</a></li>

@@ -337,7 +337,7 @@ class ControllerExtensionModuleDockercartNewsletter extends Controller {
         // If marketing menu not found, add standalone menu entry
         $data['menus'][] = array(
             'id' => 'menu-dockercart-newsletter',
-            'icon' => 'fa-envelope',
+            'icon' => 'mail',
             'name' => $this->language->get('text_subscribers'),
             'href' => $this->url->link('extension/module/dockercart_newsletter', 'user_token=' . $this->session->data['user_token'] . ($this->getDefaultModuleId() > 0 ? '&module_id=' . $this->getDefaultModuleId() : ''), true),
             'children' => array()
