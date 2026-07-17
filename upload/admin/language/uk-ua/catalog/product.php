@@ -31,6 +31,7 @@ $_['entry_ean'] = 'EAN';
 $_['entry_heading'] = 'Назва';
 $_['entry_height'] = 'Висота';
 $_['entry_image'] = 'Зображення';
+$_['text_main_image'] = 'Головне зображення';
 $_['entry_isbn'] = 'ISBN';
 $_['entry_jan'] = 'JAN';
 $_['entry_keyword'] = 'Ключове слово';
