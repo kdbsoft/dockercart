@@ -1,6 +1,6 @@
 <?php
 
-$_['tab_general'] = 'Общие';
+$_['tab_general'] = 'Общее';
 $_['column_action'] = 'Действие';
 $_['column_image'] = 'Изображение';
 $_['column_model'] = 'Модель';

@@ -35,7 +35,6 @@
           <ul class="nav nav-tabs dcx-profile-tabs">
             <li class="active"><a href="#tab-general" data-toggle="tab"><i class="fa fa-folder-open"></i> {{ tab_general }}</a></li>
             <li><a href="#tab-data" data-toggle="tab"><i class="fa fa-database"></i> {{ tab_data }}</a></li>
-            <li><a href="#tab-seo" data-toggle="tab"><i class="fa fa-sitemap"></i> {{ tab_seo }}</a></li>
           </ul>
           <div class="tab-content">
             <div class="tab-pane dcx-tab-pane active" id="tab-general">
@@ -136,37 +135,23 @@
                   </select>
                 </div>
               </div>
-            </div>
-            <div class="tab-pane dcx-tab-pane" id="tab-seo">
-              <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                <h4>{{ tab_seo }}</h4>
+              <fieldset>
+                <legend><i class="fa fa-sitemap"></i> {{ tab_seo }}</legend>
                 <div class="alert alert-info"><i class="fa fa-info-circle"></i> {{ text_keyword }}</div>
-              <div class="table-responsive">
-                <table class="table table-hover dcx-table">
-                  <thead>
-                    <tr>
-                      <td class="text-left">{{ entry_store }}</td>
-                      <td class="text-left">{{ entry_keyword }}</td>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for store in stores %}
-                    <tr>
-                      <td class="text-left">{{ store.name }}</td>
-                      <td class="text-left">
-                        {% for language in languages %}
-                        <div class="input-group">
-                          <span class="input-group-addon"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span></span>
-                          <input type="text" name="category_seo_url[{{ store.store_id }}][{{ language.language_id }}]" value="{% if category_seo_url[store.store_id][language.language_id] %}{{ category_seo_url[store.store_id][language.language_id] }}{% endif %}" placeholder="{{ entry_keyword }}" class="form-control" />
-                        </div>
-                        {% endfor %}
-                      </td>
-                    </tr>
+                {% for store in stores %}
+                <div class="form-group">
+                  <label class="col-sm-3 control-label">{{ store.name }}</label>
+                  <div class="col-sm-9">
+                    {% for language in languages %}
+                    <div class="input-group">
+                      <span class="input-group-addon"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span></span>
+                      <input type="text" name="category_seo_url[{{ store.store_id }}][{{ language.language_id }}]" value="{% if category_seo_url[store.store_id][language.language_id] %}{{ category_seo_url[store.store_id][language.language_id] }}{% endif %}" placeholder="{{ entry_keyword }}" class="form-control" />
+                    </div>
                     {% endfor %}
-                  </tbody>
-                </table>
+                  </div>
                 </div>
-              </div>
+                {% endfor %}
+              </fieldset>
             </div>
           </div>
         </form>

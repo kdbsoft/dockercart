@@ -35,8 +35,6 @@
           <ul class="nav nav-tabs dcx-profile-tabs">
             <li class="active"><a href="#tab-general" data-toggle="tab"><i class="fa fa-pencil-square-o"></i> {{ tab_general }}</a></li>
             <li><a href="#tab-data" data-toggle="tab"><i class="fa fa-database"></i> {{ tab_data }}</a></li>
-            <li><a href="#tab-seo" data-toggle="tab"><i class="fa fa-sitemap"></i> {{ tab_seo }}</a></li>
-            <li><a href="#tab-recommended" data-toggle="tab"><i class="fa fa-thumbs-up"></i> {{ tab_recommended }}</a></li>
           </ul>
           <div class="tab-content">
             <div class="tab-pane dcx-tab-pane active" id="tab-general">
@@ -234,84 +232,68 @@
                 </div>
               </div>
               </div>
-            </div>
-            <div class="tab-pane dcx-tab-pane" id="tab-seo">
-              <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                <h4>{{ tab_seo }}</h4>
+              <fieldset>
+                <legend><i class="fa fa-sitemap"></i> {{ tab_seo }}</legend>
                 <div class="alert alert-info"><i class="fa fa-info-circle"></i> {{ text_keyword }}</div>
-              <div class="table-responsive">
-                <table class="table table-hover dcx-table">
-                  <thead>
-                    <tr>
-                      <td class="text-left">{{ entry_store }}</td>
-                      <td class="text-left">{{ entry_keyword }}</td>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for store in stores %}
-                    <tr>
-                      <td class="text-left">{{ store.name }}</td>
-                      <td class="text-left">
-                        {% for language in languages %}
-                        <div class="input-group">
-                          <span class="input-group-addon"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span></span>
-                          <input type="text" name="post_seo_url[{{ store.store_id }}][{{ language.language_id }}]" value="{% if post_seo_url[store.store_id][language.language_id] %}{{ post_seo_url[store.store_id][language.language_id] }}{% endif %}" placeholder="{{ entry_keyword }}" class="form-control" />
-                        </div>
-                        {% endfor %}
-                      </td>
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-                </div>
-              </div>
-            </div>
-            <div class="tab-pane dcx-tab-pane" id="tab-recommended">
-              <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                <h4>{{ tab_recommended }}</h4>
-              <div class="form-group">
-                <label class="col-sm-3 control-label" for="input-product">{{ entry_related_product }}</label>
-                <div class="col-sm-9">
-                  <input type="text" name="product" value="" placeholder="{{ entry_related_product }}" id="input-product" class="form-control" />
-                  <div id="product-related" class="well well-sm" style="height: 150px; overflow: auto;">
-                    {% for product_recommendation in product_recommendations %}
-                    <div id="product-related{{ product_recommendation.product_id }}">
-                      <i class="fa fa-minus-circle"></i> {{ product_recommendation.name }}
-                      <input type="hidden" name="post_product[]" value="{{ product_recommendation.product_id }}" />
+                {% for store in stores %}
+                <div class="form-group">
+                  <label class="col-sm-3 control-label">{{ store.name }}</label>
+                  <div class="col-sm-9">
+                    {% for language in languages %}
+                    <div class="input-group">
+                      <span class="input-group-addon"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span></span>
+                      <input type="text" name="post_seo_url[{{ store.store_id }}][{{ language.language_id }}]" value="{% if post_seo_url[store.store_id][language.language_id] %}{{ post_seo_url[store.store_id][language.language_id] }}{% endif %}" placeholder="{{ entry_keyword }}" class="form-control" />
                     </div>
                     {% endfor %}
                   </div>
                 </div>
-              </div>
-              <div class="form-group">
-                <label class="col-sm-3 control-label" for="input-product-category">{{ entry_related_category }}</label>
-                <div class="col-sm-9">
-                  <input type="text" name="product_category" value="" placeholder="{{ entry_related_category }}" id="input-product-category" class="form-control" />
-                  <div id="product-category-related" class="well well-sm" style="height: 150px; overflow: auto;">
-                    {% for product_category_recommendation in product_category_recommendations %}
-                    <div id="product-category-related{{ product_category_recommendation.category_id }}">
-                      <i class="fa fa-minus-circle"></i> {{ product_category_recommendation.name }}
-                      <input type="hidden" name="post_product_category[]" value="{{ product_category_recommendation.category_id }}" />
+                {% endfor %}
+              </fieldset>
+              <fieldset>
+                <legend><i class="fa fa-thumbs-up"></i> {{ tab_recommended }}</legend>
+                <div class="form-group">
+                  <label class="col-sm-3 control-label" for="input-product">{{ entry_related_product }}</label>
+                  <div class="col-sm-9">
+                    <input type="text" name="product" value="" placeholder="{{ entry_related_product }}" id="input-product" class="form-control" />
+                    <div id="product-related" class="well well-sm" style="height: 150px; overflow: auto;">
+                      {% for product_recommendation in product_recommendations %}
+                      <div id="product-related{{ product_recommendation.product_id }}">
+                        <i class="fa fa-minus-circle"></i> {{ product_recommendation.name }}
+                        <input type="hidden" name="post_product[]" value="{{ product_recommendation.product_id }}" />
+                      </div>
+                      {% endfor %}
                     </div>
-                    {% endfor %}
                   </div>
                 </div>
-              </div>
-              <div class="form-group">
-                <label class="col-sm-3 control-label" for="input-manufacturer">{{ entry_related_manufacturer }}</label>
-                <div class="col-sm-9">
-                  <input type="text" name="manufacturer" value="" placeholder="{{ entry_related_manufacturer }}" id="input-manufacturer" class="form-control" />
-                  <div id="manufacturer-related" class="well well-sm" style="height: 150px; overflow: auto;">
-                    {% for manufacturer_recommendation in manufacturer_recommendations %}
-                    <div id="manufacturer-related{{ manufacturer_recommendation.manufacturer_id }}">
-                      <i class="fa fa-minus-circle"></i> {{ manufacturer_recommendation.name }}
-                      <input type="hidden" name="post_manufacturer[]" value="{{ manufacturer_recommendation.manufacturer_id }}" />
+                <div class="form-group">
+                  <label class="col-sm-3 control-label" for="input-product-category">{{ entry_related_category }}</label>
+                  <div class="col-sm-9">
+                    <input type="text" name="product_category" value="" placeholder="{{ entry_related_category }}" id="input-product-category" class="form-control" />
+                    <div id="product-category-related" class="well well-sm" style="height: 150px; overflow: auto;">
+                      {% for product_category_recommendation in product_category_recommendations %}
+                      <div id="product-category-related{{ product_category_recommendation.category_id }}">
+                        <i class="fa fa-minus-circle"></i> {{ product_category_recommendation.name }}
+                        <input type="hidden" name="post_product_category[]" value="{{ product_category_recommendation.category_id }}" />
+                      </div>
+                      {% endfor %}
                     </div>
-                    {% endfor %}
                   </div>
                 </div>
-              </div>
-              </div>
+                <div class="form-group">
+                  <label class="col-sm-3 control-label" for="input-manufacturer">{{ entry_related_manufacturer }}</label>
+                  <div class="col-sm-9">
+                    <input type="text" name="manufacturer" value="" placeholder="{{ entry_related_manufacturer }}" id="input-manufacturer" class="form-control" />
+                    <div id="manufacturer-related" class="well well-sm" style="height: 150px; overflow: auto;">
+                      {% for manufacturer_recommendation in manufacturer_recommendations %}
+                      <div id="manufacturer-related{{ manufacturer_recommendation.manufacturer_id }}">
+                        <i class="fa fa-minus-circle"></i> {{ manufacturer_recommendation.name }}
+                        <input type="hidden" name="post_manufacturer[]" value="{{ manufacturer_recommendation.manufacturer_id }}" />
+                      </div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
             </div>
           </div>
         </form>
