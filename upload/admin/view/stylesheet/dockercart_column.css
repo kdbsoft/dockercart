@@ -32,6 +32,12 @@
 	z-index: 10;
 }
 
+@media (max-width: 767px) {
+	#column-left {
+		padding-top: 80px;
+	}
+}
+
 #column-left::before {
 	content: '';
 	position: fixed;
