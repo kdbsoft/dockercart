@@ -1,4 +1,6 @@
 <?php
+/** @property \DB $db
+ * @property \Config $config */
 class ProductConfigurable {
 	private $registry;
 
