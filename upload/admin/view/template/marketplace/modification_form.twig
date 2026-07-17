@@ -27,7 +27,7 @@
       </div>
       <div class="panel-body">
         <ul class="nav nav-tabs">
-          <li class="active"><a href="#tab-general" data-toggle="tab"><i class="fa fa-cog"></i> {{ tab_general }}</a></li>
+          <li class="active"><a href="#tab-general" data-toggle="tab"><i class="fa fa-file-text"></i> {{ tab_general }}</a></li>
           <li><a href="#tab-xml" data-toggle="tab"><i class="fa fa-code"></i> {{ tab_xml }}</a></li>
           <li{% if test_results %} class="flash-tab"{% endif %}><a href="#tab-test" data-toggle="tab"><i class="fa fa-flask"></i> {{ tab_test }}{% if test_results %} <span class="label label-{{ test_results.status == 'error' ? 'danger' : (test_results.status == 'warning' ? 'warning' : 'success') }}">!</span>{% endif %}</a></li>
         </ul>
