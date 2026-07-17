@@ -1,14 +1,6 @@
 <?php
 class ModelExtensionTotalProductBundle extends Model {
 	public function getTotal($total) {
-		$bundle_file = DIR_SYSTEM . 'library/product_bundle.php';
-
-		if (!file_exists($bundle_file)) {
-			return;
-		}
-
-		require_once $bundle_file;
-
 		$bundle_lib = new ProductBundle($this->registry);
 		$active_bundles = $bundle_lib->getActiveBundles((int)$this->config->get('config_store_id'));
 
