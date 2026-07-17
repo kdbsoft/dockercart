@@ -1,0 +1,478 @@
+<div id="dc-variant-axes-section" style="display:none;margin-bottom:20px"></div>
+<div id="dc-variant-matrix-section" style="display:none"></div>
+<div id="dc-variant-container">
+  <div class="text-center"><i class="fa fa-spinner fa-spin fa-2x"></i></div>
+</div>
+
+<script type="text/javascript"><!--
+var dcVariantRowIdx = 0;
+
+function getDcProductId() {
+	var matches = /[&?]product_id=(\d+)/.exec(window.location.href);
+	return matches ? matches[1] : '0';
+}
+
+function loadVariantMatrix() {
+	var productId = getDcProductId();
+	var container = $('#dc-variant-container');
+
+	if (!productId || productId == '0') {
+		container.html('<div class="alert alert-info">{{ text_save_product_first }}</div>');
+		$('#dc-variant-axes-section').hide();
+		$('#dc-variant-matrix-section').hide();
+
+		return;
+	}
+
+	$.ajax({
+		url: 'index.php?route=catalog/product_configurable/getMatrix&user_token={{ user_token }}&product_id=' + productId,
+		dataType: 'json',
+		beforeSend: function() {
+			container.html('<div class="text-center"><i class="fa fa-spinner fa-spin fa-2x"></i></div>');
+		},
+		success: function(json) {
+			container.html('');
+
+			if (json.error) {
+				container.html('<div class="alert alert-danger">' + json.error + '</div>');
+
+				return;
+			}
+
+			renderVariantMatrix(productId, json);
+			renderAxesSelector(productId, json);
+		},
+		error: function() {
+			container.html('<div class="alert alert-danger">{{ text_load_error }}</div>');
+		}
+	});
+}
+
+function renderAxesSelector(productId, json) {
+	var section = $('#dc-variant-axes-section');
+	var axes = json.configurable_options || [];
+
+	section.show();
+
+	var html = '<label>{{ entry_configurable_axes }}</label>';
+	html += '<input type="text" name="configurable_option" value="" placeholder="{{ entry_select_option }}" id="input-configurable-option" class="form-control input-sm" style="max-width:350px"/>';
+	html += '<div class="dc-configurable-axes-list" id="dc-configurable-axes-list" style="margin-top:10px">';
+
+	for (var i = 0; i < axes.length; i++) {
+		html += '<div class="dc-axe-item" style="display:inline-block;margin-right:8px;margin-bottom:4px;padding:4px 8px;background:#f0f0f0;border-radius:3px" data-option-id="' + axes[i].option_id + '">';
+		html += '<i class="fa fa-arrows"></i> ' + axes[i].name;
+		html += ' <span class="text-muted">(' + axes[i].type + ')</span>';
+		html += ' <button type="button" class="close" onclick="removeAxe(this, ' + productId + ', ' + axes[i].option_id + ')" style="font-size:16px;line-height:1">&times;</button>';
+		html += '</div>';
+	}
+
+	html += '</div>';
+
+	section.html(html);
+
+	$('#input-configurable-option').autocomplete({
+		source: function(request, response) {
+			$.ajax({
+				url: 'index.php?route=catalog/option/autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+				dataType: 'json',
+				success: function(json) {
+					response($.map(json, function(item) {
+						return {
+							label: item.name,
+							value: item.option_id
+						};
+					}));
+				}
+			});
+		},
+		select: function(item) {
+			$('#input-configurable-option').val('');
+			addConfigurableAxe(productId, item.value);
+		}
+	});
+}
+
+function addConfigurableAxe(productId, optionId) {
+	var currentIds = [];
+	$('#dc-configurable-axes-list .dc-axe-item').each(function() {
+		var id = $(this).data('option-id');
+		if (id) currentIds.push(id);
+	});
+
+	if (currentIds.indexOf(optionId) >= 0) {
+		return;
+	}
+
+	currentIds.push(optionId);
+
+	$.ajax({
+		url: 'index.php?route=catalog/product_configurable/setAxes&user_token={{ user_token }}',
+		type: 'POST',
+		data: {
+			product_id: productId,
+			option_ids: currentIds
+		},
+		dataType: 'json',
+		beforeSend: function() {},
+		success: function(json) {
+			if (json.error) {
+				alert(json.error);
+
+				return;
+			}
+
+			loadVariantMatrix();
+		}
+	});
+}
+
+function removeAxe(btn, productId, optionId) {
+	var currentIds = [];
+	$('#dc-configurable-axes-list .dc-axe-item').each(function() {
+		var id = $(this).data('option-id');
+		if (id && id != optionId) currentIds.push(id);
+	});
+
+	$.ajax({
+		url: 'index.php?route=catalog/product_configurable/setAxes&user_token={{ user_token }}',
+		type: 'POST',
+		data: {
+			product_id: productId,
+			option_ids: currentIds
+		},
+		dataType: 'json',
+		success: function(json) {
+			if (json.error) {
+				alert(json.error);
+
+				return;
+			}
+
+			loadVariantMatrix();
+		}
+	});
+}
+
+function renderVariantMatrix(productId, json) {
+	var section = $('#dc-variant-matrix-section');
+	var variants = json.variants || [];
+	var axes = json.configurable_options || [];
+	var isConfigurable = json.is_configurable;
+
+	if (!axes.length) {
+		section.html('<p class="text-muted">{{ text_no_axes }}</p>').show();
+
+		return;
+	}
+
+	section.show();
+
+	var html = '<h4>{{ text_variants }} <small>(' + variants.length + ')</small></h4>';
+	html += '<div class="row" style="margin-bottom:12px">';
+	html += '<div class="col-sm-12">';
+	html += '<button type="button" class="btn btn-primary btn-sm" onclick="addVariantRow(' + productId + ')"><i class="fa fa-plus"></i> {{ button_add_variant }}</button>';
+	html += ' <button type="button" class="btn btn-warning btn-sm" onclick="generateVariants(' + productId + ')" title="{{ help_generate }}"><i class="fa fa-magic"></i> {{ button_generate }}</button>';
+	html += '</div></div>';
+	html += '<div class="table-responsive">';
+	html += '<table class="table table-bordered table-hover dc-variant-table" id="dc-variant-table">';
+	html += '<thead><tr>';
+
+	for (var a = 0; a < axes.length; a++) {
+		html += '<th>' + axes[a].name + '</th>';
+	}
+
+	html += '<th>{{ column_sku }}</th>';
+	html += '<th>{{ column_price }}</th>';
+	html += '<th>{{ column_quantity }}</th>';
+	html += '<th>{{ column_image }}</th>';
+	html += '<th>{{ column_default }}</th>';
+	html += '<th>{{ column_status }}</th>';
+	html += '<th class="text-center">{{ column_action }}</th>';
+	html += '</tr></thead>';
+	html += '<tbody id="dc-variant-tbody">';
+
+	for (var v = 0; v < variants.length; v++) {
+		html += buildVariantRow(productId, variants[v], axes, json.default_variant_id);
+	}
+
+	html += '</tbody>';
+	html += '</table>';
+	html += '</div>';
+
+	section.html(html);
+}
+
+function buildVariantRow(productId, variant, axes, defaultVariantId) {
+	dcVariantRowIdx++;
+	var rowIdx = dcVariantRowIdx;
+	var isDefault = variant.is_default == 1 || variant.variant_id == defaultVariantId;
+	var isActive = variant.status == 1;
+	var image = variant.image || '';
+	var variantId = variant.variant_id || 0;
+	var optionValues = {};
+
+	if (variant.values) {
+		for (var j = 0; j < variant.values.length; j++) {
+			optionValues[variant.values[j].option_id] = variant.values[j].option_value_id;
+		}
+	}
+
+	var html = '<tr id="dc-variant-row-' + rowIdx + '" class="' + (isDefault ? 'info' : '') + '">';
+
+	for (var a = 0; a < axes.length; a++) {
+		var axeOptionId = axes[a].option_id;
+		html += '<td><select class="form-control input-sm dc-variant-value" data-option-id="' + axeOptionId + '" onchange="markVariantRowDirty(' + rowIdx + ')">';
+		html += '<option value="">{{ text_select }}</option>';
+
+		for (var k in axes[a].values) {
+			var ovId = axes[a].values[k].option_value_id;
+			var ovName = axes[a].values[k].name;
+			var selected = (optionValues[axeOptionId] == ovId) ? ' selected="selected"' : '';
+			html += '<option value="' + ovId + '"' + selected + '>' + ovName + '</option>';
+		}
+
+		html += '</select></td>';
+	}
+
+	html += '<td><input type="text" class="form-control input-sm dc-variant-sku" value="' + (variant.sku || '') + '" onchange="markVariantRowDirty(' + rowIdx + ')" style="min-width:100px"/></td>';
+	html += '<td><input type="number" step="0.0001" class="form-control input-sm dc-variant-price" value="' + (variant.price || '0') + '" onchange="markVariantRowDirty(' + rowIdx + ')" style="min-width:90px"/></td>';
+	html += '<td><input type="number" step="0.01" class="form-control input-sm dc-variant-qty" value="' + (variant.quantity || '0') + '" onchange="markVariantRowDirty(' + rowIdx + ')" style="min-width:70px"/></td>';
+	html += '<td>';
+	html += '<div class="dc-variant-image-preview" style="margin-bottom:4px">' + (image ? '<img src="' + image + '" style="max-width:60px;max-height:60px"/>' : '') + '</div>';
+	html += '<div class="input-group input-group-sm">';
+	html += '<input type="text" class="form-control dc-variant-image" value="' + image + '" onchange="markVariantRowDirty(' + rowIdx + ')"/>';
+	html += '<span class="input-group-btn"><button type="button" onclick="openVariantImagePicker(this, ' + rowIdx + ')" class="btn btn-default btn-sm"><i class="fa fa-image"></i></button></span>';
+	html += '</div>';
+	html += '</td>';
+	html += '<td class="text-center"><input type="radio" name="dc_variant_default" class="dc-variant-default" onchange="setDefaultVariant(' + productId + ', ' + variantId + ', ' + rowIdx + ')" ' + (isDefault ? 'checked="checked"' : '') + '/></td>';
+	html += '<td class="text-center"><input type="checkbox" class="dc-variant-status" ' + (isActive ? 'checked="checked"' : '') + ' onchange="markVariantRowDirty(' + rowIdx + ')"/></td>';
+	html += '<td class="text-center">';
+	html += '<button type="button" class="btn btn-success btn-sm dc-variant-save-btn" onclick="saveVariantRow(' + productId + ', ' + variantId + ', ' + rowIdx + ')" title="{{ button_save }}"><i class="fa fa-check"></i></button>';
+	html += ' <button type="button" class="btn btn-danger btn-sm" onclick="deleteVariant(' + variantId + ', ' + productId + ')"><i class="fa fa-trash"></i></button>';
+	html += '</td>';
+	html += '</tr>';
+
+	return html;
+}
+
+function addVariantRow(productId) {
+	var axes = [];
+
+	$('#dc-variant-table thead th').each(function() {
+		var th = $(this).text().trim();
+
+		if (th !== '{{ column_sku }}' && th !== '{{ column_price }}' && th !== '{{ column_quantity }}' && th !== '{{ column_image }}' && th !== '{{ column_default }}' && th !== '{{ column_status }}' && th !== '{{ column_action }}') {
+			axes.push({name: th, option_id: 0});
+		}
+	});
+
+	var rowIdx = ++dcVariantRowIdx;
+	var variantId = 0;
+	var html = '<tr id="dc-variant-row-' + rowIdx + '">';
+
+	for (var a = 0; a < axes.length; a++) {
+		html += '<td><select class="form-control input-sm dc-variant-value" onchange="markVariantRowDirty(' + rowIdx + ')"><option value="">{{ text_select }}</option></select></td>';
+	}
+
+	html += '<td><input type="text" class="form-control input-sm dc-variant-sku" value="" onchange="markVariantRowDirty(' + rowIdx + ')" style="min-width:100px"/></td>';
+	html += '<td><input type="number" step="0.0001" class="form-control input-sm dc-variant-price" value="0" onchange="markVariantRowDirty(' + rowIdx + ')" style="min-width:90px"/></td>';
+	html += '<td><input type="number" step="0.01" class="form-control input-sm dc-variant-qty" value="0" onchange="markVariantRowDirty(' + rowIdx + ')" style="min-width:70px"/></td>';
+	html += '<td>';
+	html += '<div class="dc-variant-image-preview" style="margin-bottom:4px"></div>';
+	html += '<div class="input-group input-group-sm">';
+	html += '<input type="text" class="form-control dc-variant-image" value="" onchange="markVariantRowDirty(' + rowIdx + ')"/>';
+	html += '<span class="input-group-btn"><button type="button" onclick="openVariantImagePicker(this, ' + rowIdx + ')" class="btn btn-default btn-sm"><i class="fa fa-image"></i></button></span>';
+	html += '</div>';
+	html += '</td>';
+	html += '<td class="text-center"><input type="radio" name="dc_variant_default" class="dc-variant-default"/></td>';
+	html += '<td class="text-center"><input type="checkbox" class="dc-variant-status" checked="checked"/></td>';
+	html += '<td class="text-center">';
+	html += '<button type="button" class="btn btn-success btn-sm dc-variant-save-btn" onclick="saveVariantRow(' + productId + ', 0, ' + rowIdx + ')" title="{{ button_save }}"><i class="fa fa-check"></i></button>';
+	html += ' <button type="button" class="btn btn-danger btn-sm" onclick="deleteVariant(0, ' + productId + ', ' + rowIdx + ')"><i class="fa fa-trash"></i></button>';
+	html += '</td>';
+	html += '</tr>';
+
+	$('#dc-variant-tbody').prepend(html);
+
+	// Populate the selects with option values from the axes
+	loadAxesOptionValues(rowIdx, productId);
+	markVariantRowDirty(rowIdx);
+}
+
+function loadAxesOptionValues(rowIdx, productId) {
+	$.ajax({
+		url: 'index.php?route=catalog/product_configurable/getMatrix&user_token={{ user_token }}&product_id=' + productId,
+		dataType: 'json',
+		success: function(json) {
+			if (json.configurable_options) {
+				var selects = $('#dc-variant-row-' + rowIdx + ' .dc-variant-value');
+				selects.each(function(i) {
+					var sel = $(this);
+					var axe = json.configurable_options[i];
+
+					if (axe) {
+						sel.data('option-id', axe.option_id);
+						sel.empty();
+						sel.append('<option value="">{{ text_select }}</option>');
+
+						for (var k in axe.values) {
+							sel.append('<option value="' + axe.values[k].option_value_id + '">' + axe.values[k].name + '</option>');
+						}
+					}
+				});
+			}
+		}
+	});
+}
+
+function markVariantRowDirty(rowIdx) {
+	$('#dc-variant-row-' + rowIdx).addClass('warning');
+	$('#dc-variant-row-' + rowIdx + ' .dc-variant-save-btn').prop('disabled', false);
+}
+
+function saveVariantRow(productId, variantId, rowIdx) {
+	var row = $('#dc-variant-row-' + rowIdx);
+	var values = [];
+	var hasValues = true;
+
+	row.find('.dc-variant-value').each(function() {
+		var ovId = $(this).val();
+		var oId = $(this).data('option-id') || 0;
+
+		if (!ovId) {
+			hasValues = false;
+		} else {
+			values.push({
+				option_id: oId,
+				option_value_id: ovId
+			});
+		}
+	});
+
+	if (!hasValues) {
+		alert('{{ error_variant_values }}');
+
+		return;
+	}
+
+	var data = {
+		product_id: productId,
+		variant_id: variantId,
+		sku: row.find('.dc-variant-sku').val() || '',
+		upc: '',
+		ean: '',
+		mpn: '',
+		price: row.find('.dc-variant-price').val() || 0,
+		quantity: row.find('.dc-variant-qty').val() || 0,
+		subtract: 1,
+		weight: 0,
+		weight_class_id: 0,
+		image: row.find('.dc-variant-image').val() || '',
+		sort_order: 0,
+		status: row.find('.dc-variant-status').is(':checked') ? 1 : 0,
+		is_default: row.find('.dc-variant-default').is(':checked') ? 1 : 0,
+		values: values
+	};
+
+	$.ajax({
+		url: 'index.php?route=catalog/product_configurable/saveVariant&user_token={{ user_token }}',
+		type: 'POST',
+		data: data,
+		dataType: 'json',
+		success: function(json) {
+			if (json.error) {
+				alert(json.error);
+			} else {
+				row.removeClass('warning');
+				row.find('.dc-variant-save-btn').prop('disabled', true);
+				loadVariantMatrix();
+			}
+		}
+	});
+}
+
+function setDefaultVariant(productId, variantId, rowIdx) {
+	if (!variantId) return;
+
+	$.ajax({
+		url: 'index.php?route=catalog/product_configurable/setDefault&user_token={{ user_token }}',
+		type: 'POST',
+		data: {variant_id: variantId},
+		dataType: 'json',
+		success: function(json) {
+			if (json.error) {
+				alert(json.error);
+			} else {
+				loadVariantMatrix();
+			}
+		}
+	});
+}
+
+function deleteVariant(variantId, productId, rowIdx) {
+	if (variantId == 0) {
+		$('#dc-variant-row-' + (rowIdx || dcVariantRowIdx)).remove();
+
+		return;
+	}
+
+	if (!confirm('{{ text_confirm_delete_variant }}')) {
+		return;
+	}
+
+	$.ajax({
+		url: 'index.php?route=catalog/product_configurable/deleteVariant&user_token={{ user_token }}',
+		type: 'POST',
+		data: {variant_id: variantId},
+		dataType: 'json',
+		success: function(json) {
+			if (json.error) {
+				alert(json.error);
+			} else {
+				loadVariantMatrix();
+			}
+		}
+	});
+}
+
+function generateVariants(productId) {
+	if (!confirm('{{ text_confirm_generate }}')) {
+		return;
+	}
+
+	$.ajax({
+		url: 'index.php?route=catalog/product_configurable/generate&user_token={{ user_token }}',
+		type: 'POST',
+		data: {product_id: productId},
+		dataType: 'json',
+		success: function(json) {
+			if (json.error) {
+				alert(json.error);
+			} else {
+				alert(json.success);
+				loadVariantMatrix();
+			}
+		}
+	});
+}
+
+function openVariantImagePicker(btn, rowIdx) {
+	$('#modal-image').off('click', '#button-image').on('click', '#button-image', function() {
+		var thumb = $('#modal-image input[name="value"]').val();
+
+		$('#dc-variant-row-' + rowIdx + ' .dc-variant-image').val(thumb);
+		$('#dc-variant-row-' + rowIdx + ' .dc-variant-image-preview').html(thumb ? '<img src="' + thumb + '" style="max-width:60px;max-height:60px"/>' : '');
+		markVariantRowDirty(rowIdx);
+
+		$('#modal-image').modal('hide');
+	});
+
+	$('#modal-image').modal('show');
+}
+//--></script>
+
+<style>
+.dc-variant-table th { white-space: nowrap; font-size: 12px; }
+.dc-variant-table td { vertical-align: middle; }
+.dc-variant-table .dc-variant-save-btn:disabled { opacity: 0.4; }
+</style>

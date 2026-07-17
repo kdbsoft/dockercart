@@ -43,6 +43,7 @@
             {% for option in product.option %}
             <p class="text-xs text-gray-400 mt-0.5">{{ option.name }}: {{ option.value }}</p>
             {% endfor %}
+            {% if product.model %}<p class="text-xs text-gray-400 mt-0.5">{{ text_model }} {{ product.model }}</p>{% endif %}
             <div class="flex items-center justify-between mt-2">
               <div class="flex items-center gap-1.5">
                 <button onclick="dcCartAdjust('{{ product.cart_id }}', -1, '{{ product.quantity_step|default(1) }}', '{{ product.minimum|default(1) }}', '{{ product.quantity }}')" class="w-6 h-6 rounded-md bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-sm font-bold transition" aria-label="Decrease quantity">−</button>

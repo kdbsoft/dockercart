@@ -381,6 +381,12 @@ class ControllerCheckoutCart extends Controller {
 				}
 			}
 
+			if (!empty($product_info['is_configurable'])) {
+				if (empty($option['variant_id'])) {
+					$json['error']['variant'] = 'Please select all product options to add this item to your cart.';
+				}
+			}
+
 			if (!$json && $this->validateRequestedQuantity($product_info, $quantity, $json)) {
 				$this->cart->add($this->request->post['product_id'], $quantity, $option);
 
@@ -460,19 +466,14 @@ class ControllerCheckoutCart extends Controller {
 		}
 
 		if ($bundle_id) {
-			$bundle_file = DIR_SYSTEM . 'library/product_bundle.php';
+			$bundle_lib = new ProductBundle($this->registry);
+			$bundle_products = $bundle_lib->getBundleProducts($bundle_id);
 
-			if (file_exists($bundle_file)) {
-				require_once $bundle_file;
+			if (count($bundle_products) >= 2) {
+				$this->load->model('catalog/product');
 
-				$bundle_lib = new ProductBundle($this->registry);
-				$bundle_products = $bundle_lib->getBundleProducts($bundle_id);
-
-				if (count($bundle_products) >= 2) {
-					$this->load->model('catalog/product');
-
-					foreach ($bundle_products as $bp) {
-						$product_info = $this->model_catalog_product->getProduct($bp['product_id']);
+				foreach ($bundle_products as $bp) {
+					$product_info = $this->model_catalog_product->getProduct($bp['product_id']);
 
 					if ($product_info) {
 						if (!empty($product_info['call_for_price'])) {
@@ -487,10 +488,10 @@ class ControllerCheckoutCart extends Controller {
 
 						$default_quantity = $this->getMinimumQuantity($product_info);
 						$this->cart->add($bp['product_id'], $default_quantity, array(), 0);
-						}
 					}
+				}
 
-					if (!isset($json['error'])) {
+				if (!isset($json['error'])) {
 						$json['success'] = sprintf($this->language->get('text_success_bundle'), $this->url->link('checkout/cart'));
 
 						unset($this->session->data['shipping_method']);
@@ -538,10 +539,7 @@ class ControllerCheckoutCart extends Controller {
 							array_multisort($sort_order, SORT_ASC, $totals);
 						}
 
-						$json['total'] = sprintf($this->language->get('text_items'), $this->cart->countProducts() + (isset($this->session->data['vouchers']) ? count($this->session->data['vouchers']) : 0), $this->currency->format($total, $this->session->data['currency']));
-					}
-				} else {
-					$json['error'] = $this->language->get('error_bundle_invalid');
+					$json['total'] = sprintf($this->language->get('text_items'), $this->cart->countProducts() + (isset($this->session->data['vouchers']) ? count($this->session->data['vouchers']) : 0), $this->currency->format($total, $this->session->data['currency']));
 				}
 			} else {
 				$json['error'] = $this->language->get('error_bundle_invalid');

@@ -39,3 +39,4 @@ $_['error_call_for_price']     = 'This product cannot be added to the cart. Plea
 $_['error_bundle_invalid']     = 'Warning: This bundle is not available!';
 
 $_['text_bundle_discount']     = 'Bundle Discount';
+$_['text_model']               = 'Product Code:';

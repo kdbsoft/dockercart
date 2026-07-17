@@ -119,6 +119,7 @@ $_['tab_links']                     = 'Links';
 $_['tab_log']                       = 'Log';
 $_['tab_image']                     = 'Image';
 $_['tab_option']                    = 'Option';
+$_['tab_options_variants']          = 'Options & Variants';
 $_['tab_server']                    = 'Server';
 $_['tab_seo']                       = 'SEO';
 $_['tab_store']                     = 'Store';

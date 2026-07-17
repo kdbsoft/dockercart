@@ -33,7 +33,7 @@
             <li><a href="#tab-data" data-toggle="tab"><i class="fa fa-database"></i> {{ tab_data }}</a></li>
             <li><a href="#tab-links" data-toggle="tab"><i class="fa fa-link"></i> {{ tab_links }}</a></li>
             <li><a href="#tab-attribute" data-toggle="tab"><i class="fa fa-tags"></i> {{ tab_attribute }}</a></li>
-            <li><a href="#tab-option" data-toggle="tab"><i class="fa fa-list"></i> {{ tab_option }}</a></li>
+            <li><a href="#tab-option" data-toggle="tab"><i class="fa fa-list"></i> {{ tab_options_variants }}</a></li>
             <li><a href="#tab-discount" data-toggle="tab"><i class="fa fa-percent"></i> {{ tab_discount }}</a></li>
             <li><a href="#tab-special" data-toggle="tab"><i class="fa fa-star"></i> {{ tab_special }}</a></li>
             <li><a href="#tab-gift" data-toggle="tab"><i class="fa fa-gift"></i> {{ tab_gift }}</a></li>
@@ -318,7 +318,7 @@
               <div class="form-group">
                 <label class="col-sm-2 control-label" for="input-length">{{ entry_dimension }}</label>
                 <div class="col-sm-10">
-                  <div class="row">
+              <div class="row{% if is_configurable %} dc-opts-axis-hidden{% endif %}">
                     <div class="col-sm-4">
                       <input type="text" name="length" value="{{ length }}" placeholder="{{ entry_length }}" id="input-length" class="form-control"/>
                     </div>
@@ -516,13 +516,32 @@
               </div>
             </div>
             <div class="tab-pane" id="tab-option">
+              <div class="dc-option-mode-selector" style="margin-bottom:15px;padding:10px 15px;background:#f7f7f7;border-radius:4px;display:flex;align-items:center;gap:12px">
+                <label style="margin:0;font-weight:600">{{ entry_option_mode }}:</label>
+                <span id="dc-option-mode-label" class="label {% if is_configurable %}label-primary{% else %}label-default{% endif %}" style="font-size:13px">
+                  <i class="fa fa-circle"></i> {% if is_configurable %}{{ text_mode_combined }}{% else %}{{ text_mode_simple }}{% endif %}
+                </span>
+                <button type="button" id="dc-toggle-mode-btn" class="btn btn-sm btn-default">
+                  {% if is_configurable %}
+                    <i class="fa fa-arrow-left"></i> {{ text_switch_to_simple }}
+                  {% else %}
+                    {{ text_switch_to_combined }} <i class="fa fa-arrow-right"></i>
+                  {% endif %}
+                </button>
+                <span id="dc-mode-saved" style="color:green;display:none;font-size:12px"><i class="fa fa-check"></i> {{ text_success_mode }}</span>
+              </div>
+
+              <div id="dc-variants-section" {% if not is_configurable %}style="display:none"{% endif %}>
+                {% include 'catalog/product_variants.twig' %}
+              </div>
+
               <div class="row">
                 <div class="col-sm-3">
                   <div class="dc-opt-sidebar">
                     <ul class="dc-opt-sidebar__list" id="option-sidebar-list">
                       {% set option_row = 0 %}
                       {% for product_option in product_options %}
-                        <li class="dc-opt-sidebar__item" data-target="option-section{{ option_row }}">
+                        <li class="dc-opt-sidebar__item{% if product_option.is_axis %} dc-option-axis{% endif %}" data-target="option-section{{ option_row }}">
                           <a href="javascript:void(0)" onclick="dcScrollToOption('option-section{{ option_row }}')">
                             <i class="fa fa-circle"></i> {{ product_option.name }}{% if product_option.required %} <span class="dc-opt-sidebar__required">*</span>{% endif %}
                             <small class="text-muted">({{ product_option.type }})</small>
@@ -542,7 +561,7 @@
                     {% set option_row = 0 %}
                     {% set option_value_row = 0 %}
                     {% for product_option in product_options %}
-                      <div class="dc-option-section" id="option-section{{ option_row }}">
+                      <div class="dc-option-section{% if product_option.is_axis %} dc-option-axis{% endif %}" id="option-section{{ option_row }}">
                         <div class="dc-option-section__header">
                           <span class="dc-option-section__title">{{ product_option.name }}</span>
                           <span class="dc-option-section__type">({{ product_option.type }})</span>
@@ -1424,6 +1443,77 @@
   //--></script>
   <script type="text/javascript"><!--
   var option_row = {{ option_row }};
+  var dcOptionMode = {{ is_configurable ? "'combined'" : "'simple'" }};
+  var dcAxisOptionIds = {{ axis_option_ids|json_encode|raw }};
+
+  $(document).ready(function() {
+    if (dcOptionMode === 'combined') {
+      loadVariantMatrix();
+    }
+
+    $('#dc-toggle-mode-btn').on('click', function() {
+      var newMode = (dcOptionMode === 'simple') ? 'combined' : 'simple';
+
+      if (newMode === 'simple') {
+        if (!confirm('{{ text_confirm_switch_to_simple|e("js") }}')) {
+          return;
+        }
+      }
+
+      var productId = getDcProductId();
+
+      if (!productId || productId == '0') {
+        alert('{{ text_save_product_first|e("js") }}');
+        return;
+      }
+
+      $.ajax({
+        url: 'index.php?route=catalog/product_configurable/setMode&user_token={{ user_token }}',
+        type: 'POST',
+        data: {product_id: productId, mode: newMode},
+        dataType: 'json',
+        success: function(json) {
+          if (json.error) {
+            alert(json.error);
+            return;
+          }
+
+          dcOptionMode = newMode;
+
+          var $simpleOptions = $('#tab-option .row:first');
+          var $axes = $('.dc-option-axis', $simpleOptions);
+
+          if (newMode === 'simple') {
+            $simpleOptions.removeClass('dc-opts-axis-hidden');
+            $axes.find(':input').prop('disabled', false);
+            $('#dc-variants-section').hide();
+          } else {
+            $simpleOptions.addClass('dc-opts-axis-hidden');
+            $axes.find(':input').prop('disabled', true);
+            $('#dc-variants-section').show();
+            loadVariantMatrix();
+          }
+
+          $('#dc-mode-saved').fadeIn(200).delay(1500).fadeOut(400);
+
+          var newLabel = newMode === 'combined' ? '{{ text_mode_combined }}' : '{{ text_mode_simple }}';
+          var newBtnHtml = newMode === 'combined'
+            ? '<i class="fa fa-arrow-left"></i> {{ text_switch_to_simple }}'
+            : '{{ text_switch_to_combined }} <i class="fa fa-arrow-right"></i>';
+          var newSpanClass = newMode === 'combined' ? 'label-primary' : 'label-default';
+
+          $('#dc-toggle-mode-btn').html(newBtnHtml);
+          $('#dc-option-mode-label').removeClass('label-primary label-default').addClass(newSpanClass).html('<i class="fa fa-circle"></i> ' + newLabel);
+        }
+      });
+    });
+
+    $('a[href="#tab-option"]').on('shown.bs.tab', function() {
+      if (dcOptionMode === 'combined') {
+        loadVariantMatrix();
+      }
+    });
+  });
 
   function dcScrollToOption(sectionId) {
 	  var el = document.getElementById(sectionId);
@@ -2090,5 +2180,9 @@ $(document).on('click', '#images .btn-danger, #images button[onclick*="remove"]'
     setTimeout(dcRefreshColorImagePickers, 200);
 });
 //--></script>
+
+<style>
+.dc-opts-axis-hidden .dc-option-axis { display: none; }
+</style>
 
 {{ footer }}

@@ -126,6 +126,7 @@ $_['tab_links'] = 'Связи';
 $_['tab_log'] = 'Лог';
 $_['tab_image'] = 'Изображение';
 $_['tab_option'] = 'Опции';
+$_['tab_options_variants'] = 'Опции и варианты';
 $_['tab_server'] = 'Сервер';
 $_['tab_seopro'] = 'SeoPro';
 $_['tab_seo'] = 'SEO';
