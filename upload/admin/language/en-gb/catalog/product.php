@@ -139,6 +139,7 @@ $_['error_keyword']          = 'SEO URL already in use!';
 $_['error_unique']           = 'SEO URL must be unique!';
 $_['error_invalid_price']     = 'Invalid price value!';
 $_['error_invalid_quantity']  = 'Invalid quantity value!';
+$_['error_option_is_axis']     = 'This option cannot be added as a simple option because it is used as a variant axis. Manage it in the Combined Variants mode.';
 $_['error_quantity_step']     = 'Quantity Step must be a positive number with up to 2 decimal places!';
 $_['error_minimum_value']     = 'Minimum Quantity must be a positive number with up to 2 decimal places!';
 $_['error_minimum_step']      = 'Minimum Quantity must be divisible by Quantity Step!';

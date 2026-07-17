@@ -672,6 +672,7 @@ select[disabled] {
                 <div class="flex-1 min-w-0">
                   <h4 class="font-medium text-text-primary text-sm mb-1 truncate">{{ product.name }}{% if product.preorder %} <span class="text-amber-500 text-xs font-semibold">({{ text_preorder }})</span>{% endif %}</h4>
                   <p class="text-sm text-text-secondary">{{ text_quantity }}: {{ product.quantity }}</p>
+                  {% if product.model %}<p class="text-xs text-text-secondary">{{ text_model }} {{ product.model }}</p>{% endif %}
                   {% if product.option %}
                     {% for option in product.option %}
                     <p class="text-xs text-text-secondary">{{ option.name }}: {{ option.value }}</p>
@@ -803,6 +804,7 @@ select[disabled] {
           <span class="text-text-secondary">{{ product.quantity }}x {{ product.name }}</span>
           <span class="text-text-primary font-medium">{{ product.total }}</span>
         </div>
+        {% if product.model %}<p class="text-xs text-text-secondary ml-4 -mt-1.5 mb-2">{{ text_model }} {{ product.model }}</p>{% endif %}
         {% endfor %}
       {% endif %}
     </div>

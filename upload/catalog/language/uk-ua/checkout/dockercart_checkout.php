@@ -114,6 +114,7 @@ $_["text_email_invalid"] =
 $_["text_email_required_create_account"] =
     'Електронна пошта обов\'язкова для створення облікового запису!';
 $_["text_empty_cart"] = "Ваш кошик порожній!";
+$_["text_model"] = "Код товару:";
 $_["text_enter_coupon_code"] = "Будь ласка, введіть код купона";
 $_["text_field_address_1"] = "Адреса / Відділення";
 $_["text_field_address_2"] = "Продовження адреси";

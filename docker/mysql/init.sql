@@ -3225,6 +3225,23 @@ COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
+-- Table structure for table `oc_dockercart_product_variant_customer_group_price`
+--
+
+DROP TABLE IF EXISTS `oc_dockercart_product_variant_customer_group_price`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_dockercart_product_variant_customer_group_price` (
+  `variant_customer_group_price_id` int(11) NOT NULL AUTO_INCREMENT,
+  `variant_id` int(11) NOT NULL,
+  `customer_group_id` int(11) NOT NULL DEFAULT 0,
+  `price` decimal(15,4) NOT NULL DEFAULT 0.0000,
+  PRIMARY KEY (`variant_customer_group_price_id`),
+  UNIQUE KEY `variant_group` (`variant_id`,`customer_group_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `oc_dockercart_product_option_value_image`
 --
 
@@ -5788,6 +5805,8 @@ CREATE TABLE `oc_order_product` (
   `total` decimal(15,4) NOT NULL DEFAULT 0.0000,
   `tax` decimal(15,4) NOT NULL DEFAULT 0.0000,
   `reward` int(11) NOT NULL,
+  `variant_id` int(11) NOT NULL DEFAULT 0,
+  `variant_sku` varchar(64) NOT NULL DEFAULT '',
   PRIMARY KEY (`order_product_id`),
   KEY `order_id` (`order_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=167 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
@@ -5801,8 +5820,8 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_order_product` WRITE;
 /*!40000 ALTER TABLE `oc_order_product` DISABLE KEYS */;
 INSERT INTO `oc_order_product` VALUES
-(161,93,5023,'Adidas Ultraboost Light','DEMO-5023',1.00,88981.8194,88981.8194,0.0000,0),
-(162,94,5023,'Adidas Ultraboost Light','DEMO-5023',1.00,88981.8194,88981.8194,0.0000,0);
+(161,93,5023,'Adidas Ultraboost Light','DEMO-5023',1.00,88981.8194,88981.8194,0.0000,0,0,''),
+(162,94,5023,'Adidas Ultraboost Light','DEMO-5023',1.00,88981.8194,88981.8194,0.0000,0,0,'');
 /*!40000 ALTER TABLE `oc_order_product` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -7115,6 +7134,36 @@ INSERT INTO `oc_product_bundle_store` VALUES
 UNLOCK TABLES;
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_product_configurable`
+--
+
+DROP TABLE IF EXISTS `oc_product_configurable`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_product_configurable` (
+  `product_id` int(11) NOT NULL,
+  `is_configurable` tinyint(1) NOT NULL DEFAULT 0,
+  `default_variant_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `oc_product_configurable_option`
+--
+
+DROP TABLE IF EXISTS `oc_product_configurable_option`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_product_configurable_option` (
+  `product_id` int(11) NOT NULL,
+  `option_id` int(11) NOT NULL,
+  `position` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`product_id`,`option_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `oc_product_description`
@@ -13297,6 +13346,51 @@ INSERT INTO `oc_product_to_store` VALUES
 UNLOCK TABLES;
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_product_variant`
+--
+
+DROP TABLE IF EXISTS `oc_product_variant`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_product_variant` (
+  `variant_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_id` int(11) NOT NULL,
+  `sku` varchar(64) NOT NULL DEFAULT '',
+  `upc` varchar(12) NOT NULL DEFAULT '',
+  `ean` varchar(14) NOT NULL DEFAULT '',
+  `mpn` varchar(64) NOT NULL DEFAULT '',
+  `price` decimal(15,4) NOT NULL DEFAULT 0.0000,
+  `quantity` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `subtract` tinyint(1) NOT NULL DEFAULT 1,
+  `weight` decimal(15,8) NOT NULL DEFAULT 0.00000000,
+  `weight_class_id` int(11) NOT NULL DEFAULT 0,
+  `image` varchar(255) NOT NULL DEFAULT '',
+  `sort_order` int(11) NOT NULL DEFAULT 0,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `is_default` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`variant_id`),
+  KEY `product_id` (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `oc_product_variant_value`
+--
+
+DROP TABLE IF EXISTS `oc_product_variant_value`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_product_variant_value` (
+  `variant_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `option_id` int(11) NOT NULL,
+  `option_value_id` int(11) NOT NULL,
+  PRIMARY KEY (`variant_id`,`option_id`),
+  KEY `variant_id` (`variant_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `oc_recurring`

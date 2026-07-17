@@ -85,10 +85,10 @@
           <div class="flex text-sm text-amber-400 gap-0.5">{% for i in 1..5 %}{% if rating >= i %}★{% else %}<span class="text-gray-300">★</span>{% endif %}{% endfor %}</div>
           <a href="#" onclick="document.querySelector('.tab-btn[data-tab=\'review\']').click();return false;" class="text-sm text-gray-500 hover:text-blue-600 transition">{{ reviews }}</a>
           <span class="text-sm text-gray-300">|</span>
-          <span class="text-sm text-gray-500">{{ text_model }} {{ model }}</span>
+          <span class="text-sm text-gray-500">{{ text_model }} <span id="dc-variant-sku">{{ model }}</span></span>
         </div>
         {% else %}
-        <p class="text-sm text-gray-500 mt-3">{{ text_model }} {{ model }}</p>
+        <p class="text-sm text-gray-500 mt-3">{{ text_model }} <span id="dc-variant-sku">{{ model }}</span></p>
         {% endif %}
 
         {% set show_call_for_price = (call_for_price is defined and call_for_price) or ((call_for_price_status is defined and call_for_price_status) and call_for_price_phone is defined and call_for_price_phone and dc_base_price_value is defined and dc_base_price_value <= 0) %}
@@ -256,6 +256,7 @@
           {% endif %}
 
           <input type="hidden" name="product_id" value="{{ product_id }}" />
+          <input type="hidden" name="option[variant_id]" value="" id="dc-variant-id" />
 
           <!-- Qty + Cart + Wishlist -->
           <div class="mt-6 flex flex-wrap items-center gap-3">
@@ -524,7 +525,7 @@ function dcRecalcOptionPrice() {
   var priceEl = document.getElementById('dc-unit-price');
   if (!priceEl) return;
 
-  var basePrice = parseFloat(priceEl.dataset.basePrice || '0');
+  var basePrice = parseFloat(priceEl.dataset.currentPrice || priceEl.dataset.basePrice || '0');
   if (!basePrice) {
     dcUpdateSubtotal();
     return;
@@ -1164,5 +1165,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 {% include 'dockercart/template/common/partials/schema_product.twig' %}
+{% include 'dockercart/template/product/product_variants.twig' %}
 
 {{ footer }}

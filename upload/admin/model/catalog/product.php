@@ -984,7 +984,19 @@ class ModelCatalogProduct extends Model
             $this->saveProductOptionColorImages($data, $product_id, $valid_images);
         }
 
+        if (isset($data['product_configurable'])) {
+            $pc = new ProductConfigurable($this->registry);
+
+            if (!empty($data['product_configurable']['is_configurable'])) {
+                $pc->setConfigurable($product_id, 1);
+                $option_ids = isset($data['product_configurable']['configurable_options']) ? $data['product_configurable']['configurable_options'] : array();
+                $pc->setConfigurableOptions($product_id, $option_ids);
+            }
+        }
+
         $this->cache->delete("product");
+
+        return $product_id;
     }
 
     public function editProduct($product_id, $data)
@@ -1119,91 +1131,108 @@ class ModelCatalogProduct extends Model
             }
         }
 
-        $this->db->query(
-            "DELETE FROM " .
-                DB_PREFIX .
-                "product_attribute WHERE product_id = '" .
-                (int) $product_id .
-                "'",
-        );
+		$this->db->query(
+			"DELETE FROM " .
+				DB_PREFIX .
+				"product_attribute WHERE product_id = '" .
+				(int) $product_id .
+				"'",
+		);
 
-        if (!empty($data["product_attribute"])) {
-            foreach ($data["product_attribute"] as $product_attribute) {
-                if ($product_attribute["attribute_id"]) {
-                    $this->db->query(
-                        "DELETE FROM " .
-                            DB_PREFIX .
-                            "product_attribute WHERE product_id = '" .
-                            (int) $product_id .
-                            "' AND attribute_id = '" .
-                            (int) $product_attribute["attribute_id"] .
-                            "'",
-                    );
+		if (!empty($data["product_attribute"])) {
+			foreach ($data["product_attribute"] as $product_attribute) {
+				if ($product_attribute["attribute_id"]) {
+					$this->db->query(
+						"DELETE FROM " .
+							DB_PREFIX .
+							"product_attribute WHERE product_id = '" .
+							(int) $product_id .
+							"' AND attribute_id = '" .
+							(int) $product_attribute["attribute_id"] .
+							"'",
+					);
 
-                    foreach (
-                        $product_attribute["product_attribute_description"]
-                        as $language_id => $product_attribute_description
-                    ) {
-                        $this->db->query(
-                            "INSERT INTO " .
-                                DB_PREFIX .
-                                "product_attribute SET product_id = '" .
-                                (int) $product_id .
-                                "', attribute_id = '" .
-                                (int) $product_attribute["attribute_id"] .
-                                "', language_id = '" .
-                                (int) $language_id .
-                                "', text = '" .
-                                $this->db->escape(
-                                    $product_attribute_description["text"],
-                                ) .
-                                "'",
-                        );
-                    }
-                }
-            }
-        }
+					foreach (
+						$product_attribute["product_attribute_description"]
+						as $language_id => $product_attribute_description
+					) {
+						$this->db->query(
+							"INSERT INTO " .
+								DB_PREFIX .
+								"product_attribute SET product_id = '" .
+								(int) $product_id .
+								"', attribute_id = '" .
+								(int) $product_attribute["attribute_id"] .
+								"', language_id = '" .
+								(int) $language_id .
+								"', text = '" .
+								$this->db->escape(
+									$product_attribute_description["text"],
+								) .
+								"'",
+						);
+					}
+				}
+			}
+		}
 
-        $this->db->query(
-            "DELETE FROM " .
-                DB_PREFIX .
-                "product_option_value_color_image WHERE product_option_value_id IN (SELECT product_option_value_id FROM " .
-                DB_PREFIX .
-                "product_option_value WHERE product_id = '" .
-                (int) $product_id .
-                "')",
-        );
+		$axis_option_ids = array();
+		$axis_query = $this->db->query("SELECT option_id FROM " . DB_PREFIX . "product_configurable_option WHERE product_id = '" . (int)$product_id . "'");
 
-        $this->db->query(
-            "DELETE FROM " .
-                DB_PREFIX .
-                "dockercart_product_option_value_customer_group_price WHERE product_option_value_id IN (SELECT product_option_value_id FROM " .
-                DB_PREFIX .
-                "product_option_value WHERE product_id = '" .
-                (int) $product_id .
-                "')",
-        );
-        $this->db->query(
-            "DELETE FROM " .
-                DB_PREFIX .
-                "product_option_value WHERE product_id = '" .
-                (int) $product_id .
-                "'",
-        );
-        $this->db->query(
-            "DELETE FROM " .
-                DB_PREFIX .
-                "product_option WHERE product_id = '" .
-                (int) $product_id .
-                "'",
-        );
+		foreach ($axis_query->rows as $row) {
+			$axis_option_ids[] = (int)$row['option_id'];
+		}
 
-        $valid_images = $this->getValidProductImages($data);
+		$axis_exclude_sql = '';
 
-        if (isset($data["product_option"])) {
-            foreach ($data["product_option"] as $product_option) {
-                if (
-                    $product_option["type"] == "select" ||
+		if (!empty($axis_option_ids)) {
+			$axis_exclude_sql = " AND option_id NOT IN (" . implode(',', $axis_option_ids) . ")";
+		}
+
+		$this->db->query(
+			"DELETE FROM " .
+				DB_PREFIX .
+				"product_option_value_color_image WHERE product_option_value_id IN (SELECT product_option_value_id FROM " .
+				DB_PREFIX .
+				"product_option_value WHERE product_id = '" .
+				(int) $product_id .
+				"'" . $axis_exclude_sql . ")",
+		);
+
+		$this->db->query(
+			"DELETE FROM " .
+				DB_PREFIX .
+				"dockercart_product_option_value_customer_group_price WHERE product_option_value_id IN (SELECT product_option_value_id FROM " .
+				DB_PREFIX .
+				"product_option_value WHERE product_id = '" .
+				(int) $product_id .
+				"'" . $axis_exclude_sql . ")",
+		);
+		$this->db->query(
+			"DELETE FROM " .
+				DB_PREFIX .
+				"product_option_value WHERE product_id = '" .
+				(int) $product_id .
+				"'" . $axis_exclude_sql,
+		);
+		$this->db->query(
+			"DELETE FROM " .
+				DB_PREFIX .
+				"product_option WHERE product_id = '" .
+				(int) $product_id .
+				"'" . $axis_exclude_sql,
+		);
+
+		$valid_images = $this->getValidProductImages($data);
+
+		if (isset($data["product_option"])) {
+			foreach ($data["product_option"] as $product_option) {
+				if (!empty($axis_option_ids) && in_array((int)$product_option['option_id'], $axis_option_ids)) {
+					continue;
+				}
+
+				if (
+					$product_option["type"] == "select" ||
                     $product_option["type"] == "radio" ||
                     $product_option["type"] == "checkbox" ||
                     $product_option["type"] == "image" ||
@@ -1670,6 +1699,18 @@ class ModelCatalogProduct extends Model
             }
         }
 
+        if (isset($data['product_configurable'])) {
+            $pc = new ProductConfigurable($this->registry);
+
+            if (!empty($data['product_configurable']['is_configurable'])) {
+                $pc->setConfigurable($product_id, 1);
+                $option_ids = isset($data['product_configurable']['configurable_options']) ? $data['product_configurable']['configurable_options'] : array();
+                $pc->setConfigurableOptions($product_id, $option_ids);
+            } else {
+                $pc->setConfigurable($product_id, 0);
+            }
+        }
+
         $this->cache->delete("product");
     }
 
@@ -1738,7 +1779,51 @@ class ModelCatalogProduct extends Model
 
             $data["product_seo_url"] = $seo_urls;
 
-            $this->addProduct($data);
+            $new_product_id = $this->addProduct($data);
+
+            if ($new_product_id) {
+                $pc = new ProductConfigurable($this->registry);
+
+                if ($pc->isConfigurable($product_id)) {
+                    $source_axes = $pc->getConfigurableOptions($product_id);
+                    $source_variants = $pc->getVariants($product_id);
+
+                    if (!empty($source_axes)) {
+                        $option_ids = array_column($source_axes, 'option_id');
+                        $pc->setConfigurableOptions($new_product_id, $option_ids);
+                    }
+
+                    foreach ($source_variants as $variant) {
+                        $variant_data = array(
+                            'sku'             => $variant['sku'],
+                            'upc'             => $variant['upc'],
+                            'ean'             => $variant['ean'],
+                            'mpn'             => $variant['mpn'],
+                            'price'           => $variant['price'],
+                            'quantity'        => $variant['quantity'],
+                            'subtract'        => $variant['subtract'],
+                            'weight'          => $variant['weight'],
+                            'weight_class_id' => $variant['weight_class_id'],
+                            'image'           => $variant['image'],
+                            'sort_order'      => $variant['sort_order'],
+                            'status'          => $variant['status'],
+                            'is_default'      => $variant['is_default'],
+                            'values'          => array(),
+                        );
+
+                        if (!empty($variant['values'])) {
+                            foreach ($variant['values'] as $val) {
+                                $variant_data['values'][] = array(
+                                    'option_id'       => $val['option_id'],
+                                    'option_value_id' => $val['option_value_id'],
+                                );
+                            }
+                        }
+
+                        $pc->addVariant($new_product_id, $variant_data);
+                    }
+                }
+            }
         }
     }
 
@@ -1925,6 +2010,9 @@ class ModelCatalogProduct extends Model
 
         $this->load->model("design/seo_url");
         $this->model_design_seo_url->invalidateSeoUrlCache();
+
+        $pc = new ProductConfigurable($this->registry);
+        $pc->deleteAllVariants($product_id);
 
         $this->cache->delete("product");
     }
