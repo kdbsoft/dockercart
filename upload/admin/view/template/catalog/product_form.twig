@@ -394,13 +394,10 @@
                     <div id="product-images">
                       {% set image_row = 0 %}
                       {% for product_image in product_images %}
-                      <div class="dc-img-card{% if product_image.image == image %} active{% endif %}" data-row="{{ image_row }}">
+                      <div class="dc-img-card{% if product_image.image == image %} active{% endif %}" data-row="{{ image_row }}" title="Перетащите для изменения порядка">
                         <input type="hidden" name="product_image[{{ image_row }}][image]" value="{{ product_image.image }}" id="input-image{{ image_row }}"/>
                         <input type="hidden" name="product_image[{{ image_row }}][sort_order]" value="{{ product_image.sort_order }}" class="dc-img-sort-order"/>
-                        {% if product_image.image != image %}
-                        <div class="dc-img-drag" title="Перетащить"><i class="fa fa-bars"></i></div>
-                        {% endif %}
-                        <a href="" id="thumb-image{{ image_row }}" data-toggle="image" class="dc-img-link"><img src="{{ product_image.thumb }}" alt="" title="" data-placeholder="{{ placeholder }}"/></a>
+                        <a href="" id="thumb-image{{ image_row }}" data-toggle="image" class="dc-img-link"><img src="{{ product_image.thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" draggable="false"/></a>
                         <button type="button" class="dc-img-star" onclick="setImageActive({{ image_row }});" title="{{ entry_image }}"><i class="fa fa-star"></i></button>
                         <button type="button" onclick="removeImage({{ image_row }});" class="dc-img-remove" title="{{ button_remove }}"><i class="fa fa-times"></i></button>
                       </div>
@@ -1971,11 +1968,10 @@
   var image_row = {{ image_row }};
 
   function addImage() {
-    var html = '<div class="dc-img-card" data-row="' + image_row + '">';
+    var html = '<div class="dc-img-card" data-row="' + image_row + '" title="Перетащите для изменения порядка">';
     html += '<input type="hidden" name="product_image[' + image_row + '][image]" value="" id="input-image' + image_row + '"/>';
     html += '<input type="hidden" name="product_image[' + image_row + '][sort_order]" value="0" class="dc-img-sort-order"/>';
-    html += '<div class="dc-img-drag" title="Перетащить"><i class="fa fa-bars"></i></div>';
-    html += '<a href="" id="thumb-image' + image_row + '" data-toggle="image" class="dc-img-link"><img src="{{ placeholder }}" alt="" title="" data-placeholder="{{ placeholder }}"/></a>';
+    html += '<a href="" id="thumb-image' + image_row + '" data-toggle="image" class="dc-img-link"><img src="{{ placeholder }}" alt="" title="" data-placeholder="{{ placeholder }}" draggable="false"/></a>';
     html += '<button type="button" class="dc-img-star" onclick="setImageActive(' + image_row + ');"><i class="fa fa-star"></i></button>';
     html += '<button type="button" onclick="removeImage(' + image_row + ');" class="dc-img-remove"><i class="fa fa-times"></i></button>';
     html += '</div>';
@@ -1990,10 +1986,8 @@
   function setImageActive(row) {
     var $prev = $('#product-images .dc-img-card.active');
     $prev.removeClass('active');
-    $prev.find('.dc-img-drag').show();
     var $card = $('#product-images .dc-img-card[data-row="' + row + '"]');
     $card.addClass('active');
-    $card.find('.dc-img-drag').hide();
     $('#input-image').val($('#input-image' + row).val());
     $('#product-images').prepend($card);
   }
@@ -2021,8 +2015,7 @@
   if (typeof Sortable !== 'undefined') {
     Sortable.create(document.getElementById('product-images'), {
       animation: 150,
-      handle: '.dc-img-drag',
-      filter: '.dc-img-card.active',
+      filter: '.dc-img-card.active, .dc-img-star, .dc-img-remove, input',
       ghostClass: 'dc-img-ghost',
       chosenClass: 'dc-img-chosen',
       onEnd: function() {
@@ -2122,16 +2115,18 @@ $(document).on('click', '#images .btn-danger, #images button[onclick*="remove"]'
 .dc-cgp-remove { padding: 4px 6px; color: #999; font-size: 14px; }
 .dc-cgp-remove:hover { color: #c00; text-decoration: none; }
 #product-images { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 16px; }
-.dc-img-card { border: 1px solid #e2e5e8; border-radius: 6px; padding: 10px; text-align: center; position: relative; background: #fff; min-height: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.dc-img-card { border: 1px solid #e2e5e8; border-radius: 6px; padding: 10px; text-align: center; position: relative; background: #fff; min-height: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: grab; transition: all 0.2s ease; }
+.dc-img-card:not(.active):hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-color: #cbd5e0; }
+.dc-img-card:active { cursor: grabbing; }
 .dc-img-card.active { border-color: #f0ad4e; box-shadow: 0 0 0 1px #f0ad4e; }
-.dc-img-link { display: block; margin-bottom: 8px; }
-.dc-img-link img { width: 100%; height: 100px; object-fit: cover; border-radius: 4px; }
-.dc-img-star { position: absolute; top: 6px; left: 6px; background: none; border: none; cursor: pointer; color: #ccc; font-size: 14px; padding: 2px; line-height: 1; z-index: 2; }
-.dc-img-star:hover, .dc-img-card.active .dc-img-star { color: #f0ad4e; }
-.dc-img-drag { position: absolute; top: 6px; right: 6px; cursor: grab; color: #ccc; font-size: 14px; padding: 2px; z-index: 2; }
-.dc-img-drag:hover { color: #888; }
-.dc-img-remove { position: absolute; bottom: 6px; right: 6px; background: none; border: none; color: #ccc; font-size: 14px; padding: 2px; line-height: 1; z-index: 2; }
-.dc-img-remove:hover { color: #c00; }
+.dc-img-link { display: block; margin-bottom: 8px; cursor: pointer; }
+.dc-img-link img { width: 100%; height: 100px; object-fit: cover; border-radius: 4px; user-select: none; }
+.dc-img-star { position: absolute; top: 6px; left: 6px; background: rgba(255,255,255,0.85); border: none; cursor: pointer; color: #ccc; font-size: 16px; padding: 4px; line-height: 1; z-index: 2; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+.dc-img-star:hover { background: rgba(240,173,78,0.2); color: #f0ad4e; }
+.dc-img-card.active .dc-img-star { color: #f0ad4e; background: rgba(240,173,78,0.15); }
+.dc-img-remove { position: absolute; top: 6px; right: 6px; background: rgba(255,255,255,0.85); border: none; cursor: pointer; color: #ccc; font-size: 16px; padding: 4px; line-height: 1; z-index: 2; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+.dc-img-remove:hover { background: rgba(204,0,0,0.15); color: #c00; }
+.dc-img-card .dc-img-link, .dc-img-card .dc-img-star, .dc-img-card .dc-img-remove { cursor: pointer; }
 .dc-img-ghost { opacity: 0.3; border: 2px dashed #3b82f6; background: #eff6ff; }
 .dc-img-chosen { box-shadow: 0 4px 12px rgba(0,0,0,0.15); transform: scale(1.03); }
 .attribute-table { border-collapse: separate; border-spacing: 0; }
