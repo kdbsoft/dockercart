@@ -158,7 +158,7 @@
 			skuEl.textContent = (variant && variant.sku) ? variant.sku : originalSku;
 		}
 
-		if (typeof dcUpdateSubtotal === 'function') dcUpdateSubtotal();
+		if (typeof dcRecalcOptionPrice === 'function') dcRecalcOptionPrice(); else if (typeof dcUpdateSubtotal === 'function') dcUpdateSubtotal();
 
 		if (variant && variant.image && mainImgEl) {
 			mainImgEl.src = variant.image;
