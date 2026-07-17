@@ -18,7 +18,12 @@ $_['text_option_value']      = 'Option Value';
 $_['text_variant']           = 'var.';
 $_['text_percent']           = 'Percentage';
 $_['text_amount']            = 'Fixed Amount';
+$_['text_promo_discounts']   = 'Discounts';
+$_['text_promo_specials']    = 'Specials';
+$_['text_promo_gifts']       = 'Gifts';
+$_['text_promo_rewards']     = 'Reward Points';
 $_['text_keyword']           = 'Do not use spaces, instead replace spaces with - and make sure the SEO URL is globally unique.';
+$_['text_layout_info']       = 'You can override the default page layout for this product. Leave empty to use the default layout.';
 // Subtitle
 
 $_['text_list_subtitle'] = 'Browse, filter and manage your products';
@@ -32,6 +37,9 @@ $_['text_add_product_subtitle'] = 'Add a new product to the catalog';
 $_['text_edit_product_subtitle'] = 'Edit product details and settings';
 
 
+
+// Tab
+$_['tab_general']            = 'General';
 
 // Column
 $_['column_name']            = 'Product';
@@ -62,12 +70,13 @@ $_['entry_location']         = 'Location';
 $_['entry_shipping']         = 'Requires Shipping';
 $_['entry_manufacturer']     = 'Manufacturer';
 $_['entry_date_available']   = 'Date Available';
-$_['entry_quantity']         = 'Quantity';
-$_['entry_minimum']          = 'Minimum Quantity';
+$_['entry_quantity']         = 'Qty';
+$_['entry_minimum']          = 'Min. Qty';
 $_['entry_quantity_step']     = 'Quantity Step';
 $_['entry_preorder']         = 'Allow Pre-Order';
 $_['entry_price']            = 'Price';
 $_['entry_call_for_price']   = 'Call for price';
+$_['help_call_for_price']    = 'Hide the price and show a "Call for price" message instead';
 $_['entry_tax_class']        = 'Tax Class';
 $_['entry_points']           = 'Points';
 $_['entry_option_points']    = 'Points';
@@ -93,7 +102,7 @@ $_['entry_attribute_group']  = 'Attribute Group';
 $_['entry_text']             = 'Text';
 $_['entry_option']           = 'Option';
 $_['entry_option_value']     = 'Option Value';
-$_['entry_option_value_cg_price']      = 'CG';
+$_['entry_option_value_cg_price']      = 'Group prices';
 $_['button_option_value_cg_price_add'] = 'Add';
 $_['button_add_all_values']    = 'Add all values';
 $_['text_qty_short']           = 'pcs';
@@ -124,6 +133,8 @@ $_['help_manufacturer']      = '(Autocomplete)';
 $_['help_minimum']           = 'Force a minimum ordered amount';
 $_['help_quantity_step']      = 'Quantity increment step. For example: 0.10 allows 0.10, 0.20, 0.30...';
 $_['help_preorder']          = 'Allow customers to place pre-orders when product quantity is zero';
+$_['help_subtract']          = 'Subtract stock when order is placed';
+$_['help_shipping']          = 'Whether this product requires shipping';
 $_['help_points']            = 'Number of points needed to buy this item. If you don\'t want this product to be purchased with points leave as 0.';
 $_['help_category']          = '(Autocomplete)';
 $_['help_download']          = '(Autocomplete)';
