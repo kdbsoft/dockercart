@@ -525,7 +525,7 @@ function dcRecalcOptionPrice() {
   var priceEl = document.getElementById('dc-unit-price');
   if (!priceEl) return;
 
-  var basePrice = parseFloat(priceEl.dataset.currentPrice || priceEl.dataset.basePrice || '0');
+  var basePrice = parseFloat(priceEl.dataset.basePrice || '0');
   if (!basePrice) {
     dcUpdateSubtotal();
     return;
