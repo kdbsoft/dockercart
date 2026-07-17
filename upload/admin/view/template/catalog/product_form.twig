@@ -874,7 +874,7 @@
               <div class="promo-section">
                 <div class="promo-section__header">{{ text_promo_gifts }}</div>
                 <div class="table-responsive" style="overflow:visible;">
-                  <table id="gift" class="table table-hover pricing-table">
+                  <table id="gift" class="table table-hover pricing-table" style="overflow:visible;">
                     <thead>
                       <tr>
                         <td class="text-left">{{ entry_gift_product }}</td>
@@ -889,7 +889,7 @@
                       {% set gift_row = 0 %}
                       {% for product_gift in product_gifts %}
                         <tr id="gift-row{{ gift_row }}" class="pricing-row">
-                          <td class="text-left">
+                          <td class="text-left" style="overflow:visible;">
                             <input type="text" name="product_gift[{{ gift_row }}][gift_product_name]" value="{{ product_gift.gift_product_name }}" placeholder="{{ entry_gift_product }}" class="form-control" autocomplete="off"/>
                             <input type="hidden" name="product_gift[{{ gift_row }}][gift_product_id]" value="{{ product_gift.gift_product_id }}"/>
                           </td>
@@ -1886,7 +1886,7 @@
 
   function addGift() {
 	  html = '<tr id="gift-row' + gift_row + '" class="pricing-row">';
-	  html += '  <td class="text-left"><input type="text" name="product_gift[' + gift_row + '][gift_product_name]" value="" placeholder="{{ entry_gift_product }}" class="form-control" autocomplete="off" /><input type="hidden" name="product_gift[' + gift_row + '][gift_product_id]" value="" /></td>';
+	  html += '  <td class="text-left" style="overflow:visible;"><input type="text" name="product_gift[' + gift_row + '][gift_product_name]" value="" placeholder="{{ entry_gift_product }}" class="form-control" autocomplete="off" /><input type="hidden" name="product_gift[' + gift_row + '][gift_product_id]" value="" /></td>';
 	  html += '  <td class="text-right"><input type="text" name="product_gift[' + gift_row + '][minimum_quantity]" value="1" placeholder="{{ entry_minimum }}" class="form-control text-right" /></td>';
 	  html += '  <td class="text-left"><div class="input-group date"><input type="text" name="product_gift[' + gift_row + '][date_start]" value="" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button></span></div></td>';
 	  html += '  <td class="text-left"><div class="input-group date"><input type="text" name="product_gift[' + gift_row + '][date_end]" value="" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button></span></div></td>';
@@ -1911,8 +1911,6 @@
 	  var $idInput = $('input[name=\'product_gift[' + gift_row + '][gift_product_id]\']');
 
 	  $input.autocomplete({
-		  'appendTo': 'body',
-		  'minLength': 1,
 		  'source': function(request, response) {
 			  $.ajax({
 				  url: 'index.php?route=catalog/product/autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
@@ -1927,11 +1925,9 @@
 				  }
 			  });
 		  },
-		  'select': function(event, ui) {
-			  $input.val(ui.item.label);
-			  $idInput.val(ui.item.value);
-			  $input.autocomplete('close');
-			  return false;
+		  'select': function(item) {
+			  $input.val(item['label']);
+			  $idInput.val(item['value']);
 		  }
 	  });
 
@@ -1943,7 +1939,7 @@
   }
 
   $('#gift').on('focus', 'input[name$="[gift_product_name]"]', function() {
-	  if ($(this).data('ui-autocomplete')) return;
+	  if ($(this).closest('.dc-autocomplete-wrap').length) return;
 	  var match = $(this).attr('name').match(/\[(\d+)\]/);
 	  if (match) {
 		  giftAutocomplete(match[1]);

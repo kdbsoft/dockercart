@@ -303,6 +303,7 @@ $(document).ready(function() {
 
 				if (value && el.items[value]) {
 					el.select(el.items[value]);
+					el.hide();
 					$wrapperEl.toggleClass('has-value', !!$this.val());
 				}
 			}
