@@ -2,7 +2,8 @@
 
 $_['column_image'] = 'Зображення';
 $_['column_action'] = 'Дія';
-$_['column_name'] = 'Назва категорії';
+$_['column_name'] = 'Категорія';
+$_['column_status'] = 'Статус';
 $_['column_noindex'] = 'Індексація';
 $_['column_sort_order'] = 'Порядок сортування';
 $_['entry_column'] = 'Колонки';

@@ -2885,6 +2885,17 @@ class ModelCatalogProduct extends Model
         }
     }
 
+    public function updateProductCategories($product_id, $category_ids)
+    {
+        $this->db->query("DELETE FROM " . DB_PREFIX . "product_to_category WHERE product_id = '" . (int)$product_id . "'");
+
+        if (!empty($category_ids)) {
+            foreach ($category_ids as $category_id) {
+                $this->db->query("INSERT INTO " . DB_PREFIX . "product_to_category SET product_id = '" . (int)$product_id . "', category_id = '" . (int)$category_id . "'");
+            }
+        }
+    }
+
     public function getTotalProductsByLayoutId($layout_id)
     {
         $query = $this->db->query(

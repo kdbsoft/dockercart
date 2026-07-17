@@ -104,13 +104,13 @@
       <div class="panel-body">
         <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-product">
               <div class="table-responsive">
-                <table class="table table-bordered table-hover">
+                <table class="table table-hover">
                   <thead>
                     <tr>
                       <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
-                      <td style="width: 120px;" class="text-center">{{ column_image }}</td>
                       <td class="text-left">{% if sort == 'pd.name' %} <a href="{{ sort_name }}" class="{{ order|lower }}">{{ column_name }}</a> {% else %} <a href="{{ sort_name }}">{{ column_name }}</a> {% endif %}</td>
                       <td class="text-left">{% if sort == 'p.model' %} <a href="{{ sort_model }}" class="{{ order|lower }}">{{ column_model }}</a> {% else %} <a href="{{ sort_model }}">{{ column_model }}</a> {% endif %}</td>
+                      <td class="text-left">{{ column_category }}</td>
                       <td class="text-right">{% if sort == 'p.price' %} <a href="{{ sort_price }}" class="{{ order|lower }}">{{ column_price }}</a> {% else %} <a href="{{ sort_price }}">{{ column_price }}</a> {% endif %}</td>
                       <td class="text-right">{% if sort == 'p.quantity' %} <a href="{{ sort_quantity }}" class="{{ order|lower }}">{{ column_quantity }}</a> {% else %} <a href="{{ sort_quantity }}">{{ column_quantity }}</a> {% endif %}</td>
                       <td class="text-left">{% if sort == 'p.status' %} <a href="{{ sort_status }}" class="{{ order|lower }}">{{ column_status }}</a> {% else %} <a href="{{ sort_status }}">{{ column_status }}</a> {% endif %}</td>
@@ -127,8 +127,8 @@
                       {% else %}
                       <input type="checkbox" name="selected[]" value="{{ product.product_id }}" />
                       {% endif %}</td>
-                    <td class="text-center"><input type="hidden" id="input-image-{{ product.product_id }}" value="{{ product.image_path }}" /><a href="javascript:void(0);" class="product-image-edit" id="thumb-image-{{ product.product_id }}" data-product-id="{{ product.product_id }}">{% if product.image %} <img src="{{ product.image }}" alt="{{ product.name }}" class="img-thumbnail" /> {% else %} <span class="img-thumbnail list"><i class="fa fa-camera fa-2x"></i></span> {% endif %}</a></td>
-                    <td class="text-left">
+                    <td class="text-left" style="white-space:nowrap;">
+                      <input type="hidden" id="input-image-{{ product.product_id }}" value="{{ product.image_path }}" /><a href="javascript:void(0);" class="product-image-edit" id="thumb-image-{{ product.product_id }}" data-product-id="{{ product.product_id }}" style="display:inline-block;vertical-align:middle;margin-right:8px;">{% if product.image %} <img src="{{ product.image }}" alt="{{ product.name }}" class="img-thumbnail" /> {% else %} <span class="img-thumbnail list"><i class="fa fa-camera fa-2x"></i></span> {% endif %}</a>
                       <span class="inline-edit" data-product-id="{{ product.product_id }}" data-field="name" data-value="{{ product.name_raw }}">
                         {{ product.name }}
                         <i class="fa fa-pencil-square-o inline-edit-icon"></i>
@@ -137,6 +137,12 @@
                     <td class="text-left">
                       <span class="inline-edit" data-product-id="{{ product.product_id }}" data-field="model" data-value="{{ product.model_raw }}">
                         {{ product.model }}
+                        <i class="fa fa-pencil-square-o inline-edit-icon"></i>
+                      </span>
+                    </td>
+                    <td class="text-left">
+                      <span class="inline-edit" data-product-id="{{ product.product_id }}" data-field="categories" data-value="{{ product.categories_raw }}">
+                        {{ product.categories }}
                         <i class="fa fa-pencil-square-o inline-edit-icon"></i>
                       </span>
                     </td>
@@ -151,14 +157,38 @@
                       {% endif %}
                     </td>
                     <td class="text-right">
-                      <span class="inline-edit" data-product-id="{{ product.product_id }}" data-field="quantity" data-value="{{ product.quantity_raw }}">
-                        {% if product.quantity <= 0 %} <span class="label label-danger">{{ product.quantity }}</span> {% elseif product.quantity <= 5 %} <span class="label label-warning">{{ product.quantity }}</span> {% else %} <span class="label label-success">{{ product.quantity }}</span> {% endif %}
-                        <i class="fa fa-pencil-square-o inline-edit-icon"></i>
-                      </span>
+                      {% if product.has_options %}
+                        {% set qty_val = product.option_qty_sum %}
+                        <span title="{{ text_options }}: {{ product.option_values_count }}">
+                          {% if qty_val <= 0 %}
+                            <span style="color:#e74c3c;font-weight:600;">{{ product.quantity }}</span>
+                          {% elseif qty_val <= 5 %}
+                            <span style="color:#e67e22;font-weight:600;">{{ product.quantity }}</span>
+                          {% else %}
+                            <span style="color:#27ae60;font-weight:600;">{{ product.quantity }}</span>
+                          {% endif %}
+                          <small style="color:#6c757d;font-size:11px;"> ({{ product.option_values_count }} {{ text_variant }})</small>
+                        </span>
+                      {% else %}
+                        <span class="inline-edit" data-product-id="{{ product.product_id }}" data-field="quantity" data-value="{{ product.quantity_raw }}">
+                          {% if product.quantity <= 0 %}
+                            <span style="color:#e74c3c;font-weight:600;">{{ product.quantity }}</span>
+                          {% elseif product.quantity <= 5 %}
+                            <span style="color:#e67e22;font-weight:600;">{{ product.quantity }}</span>
+                          {% else %}
+                            <span style="color:#27ae60;font-weight:600;">{{ product.quantity }}</span>
+                          {% endif %}
+                          <i class="fa fa-pencil-square-o inline-edit-icon"></i>
+                        </span>
+                      {% endif %}
                     </td>
                     <td class="text-left">
                       <span class="inline-edit" data-product-id="{{ product.product_id }}" data-field="status" data-value="{{ product.status_raw }}">
-                        {{ product.status }}
+                        {% if product.status_raw %}
+                        <span class="label label-success">{{ text_enabled }}</span>
+                        {% else %}
+                        <span class="label label-danger">{{ text_disabled }}</span>
+                        {% endif %}
                         <i class="fa fa-pencil-square-o inline-edit-icon"></i>
                       </span>
                     </td>
@@ -356,7 +386,7 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 	e.stopPropagation();
 
 	var $span = $(this).closest('.inline-edit');
-	if ($span.find('input').length) return;
+	if ($span.find('input, select').length) return;
 
 	var field = $span.data('field');
 	var rawValue = $span.data('value');
@@ -475,6 +505,37 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 				$span.html($span.data('display'));
 			}
 		});
+	} else if (field === 'categories') {
+		editProductId = $span.data('product-id');
+		var categoryIds = rawValue ? String(rawValue).split(',') : [];
+
+		selectedCategories = [];
+		categoryIds.forEach(function(id) {
+			if (id) {
+				selectedCategories.push({category_id: id, name: ''});
+			}
+		});
+
+		if (!categoryTreeLoaded) {
+			loadCategoryTree();
+		}
+
+		$('#category-tree-modal').modal('show');
+
+		var checkLoaded = setInterval(function() {
+			if (categoryTreeLoaded) {
+				clearInterval(checkLoaded);
+				$('#category-tree-container .category-check').prop('checked', false);
+				selectedCategories.forEach(function(sel) {
+					var $cb = $('#category-tree-container .category-check[value="' + sel.category_id + '"]');
+					if ($cb.length) {
+						$cb.prop('checked', true);
+						$cb.parents('ul.category-children').show().prev('.category-node').find('.category-toggle i.fa')
+							.removeClass('fa-plus-square-o').addClass('fa-minus-square-o');
+					}
+				});
+			}
+		}, 100);
 	} else {
 		var currentDisplay = $span.clone().children('.inline-edit-icon').remove().children('.label').remove().end().text().trim();
 
@@ -558,6 +619,198 @@ $(document).on('click', '.product-image-edit', function(e) {
 			$('#modal-image').modal('show');
 		}
 	});
+});
+//--></script>
+
+<!-- Category Tree Modal -->
+<div id="category-tree-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">{{ entry_category }}</h4>
+      </div>
+      <div class="modal-body">
+        <div class="form-group" style="margin-bottom:10px">
+          <input type="text" id="category-tree-search" class="form-control" placeholder="{{ text_filter }}" />
+        </div>
+        <div id="category-tree-container" style="max-height:400px;overflow-y:auto;border:1px solid #ddd;border-radius:3px;padding:8px">
+          <div class="text-center text-muted">{{ text_loading }}</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
+        <button type="button" class="btn btn-primary" id="category-tree-confirm">{{ button_continue }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /Category Tree Modal -->
+
+<script type="text/javascript"><!--
+var selectedCategories = [];
+var categoryTreeLoaded = false;
+var editProductId = null;
+
+function loadCategoryTree() {
+	$.ajax({
+		url: 'index.php?route=catalog/category/tree&user_token={{ user_token }}',
+		dataType: 'json',
+		success: function(data) {
+			renderCategoryTree(data);
+		},
+		error: function() {
+			$('#category-tree-container').html('<div class="text-center text-danger">{{ text_no_results }}</div>');
+		}
+	});
+}
+
+function renderCategoryTree(data) {
+	var $container = $('#category-tree-container');
+	var $ul = $('<ul class="category-tree list-unstyled" style="margin:0"></ul>');
+
+	if (!data.length) {
+		$container.html('<div class="text-center text-muted">{{ text_no_results }}</div>');
+		return;
+	}
+
+	data.forEach(function(cat) {
+		if (cat.level === 0) {
+			$ul.append(createCategoryNode(cat, data));
+		}
+	});
+
+	$container.html($ul);
+	categoryTreeLoaded = true;
+
+	selectedCategories.forEach(function(sel) {
+		var $cb = $container.find('.category-check[value="' + sel.category_id + '"]');
+		if ($cb.length) {
+			$cb.prop('checked', true);
+			$cb.parents('ul.category-children').show().prev('.category-node').find('.category-toggle i.fa')
+				.removeClass('fa-plus-square-o').addClass('fa-minus-square-o');
+		}
+	});
+}
+
+function createCategoryNode(cat, allData) {
+	var $li = $('<li></li>');
+	var $div = $('<div class="category-node" style="white-space:nowrap;padding:2px 0"></div>');
+	var indent = cat.level * 20;
+	$div.css('padding-left', indent + 'px');
+
+	if (cat.has_children) {
+		var $toggle = $('<span class="category-toggle" style="cursor:pointer;display:inline-block;width:16px;text-align:center"><i class="fa fa-plus-square-o"></i></span>');
+		$toggle.data('id', cat.category_id);
+		$div.append($toggle);
+	} else {
+		$div.append($('<span style="display:inline-block;width:16px"></span>'));
+	}
+
+	var escName = $('<span>').text(cat.name).html();
+	var escPath = $('<span>').text(cat.path || cat.name).html();
+
+	var $label = $('<label style="font-weight:normal;margin:0 0 0 4px;cursor:pointer"></label>');
+	var $checkbox = $('<input type="checkbox" class="category-check" value="' + cat.category_id + '" data-name="' + escName + '" data-path="' + escPath + '">');
+	$label.append($checkbox).append(' ' + cat.name);
+	$div.append($label);
+	$li.append($div);
+
+	if (cat.has_children) {
+		var $children = $('<ul class="category-children list-unstyled" style="display:none;margin:0"></ul>');
+		allData.forEach(function(child) {
+			if (child.parent_id === cat.category_id) {
+				$children.append(createCategoryNode(child, allData));
+			}
+		});
+		$li.append($children);
+	}
+
+	return $li;
+}
+
+$(document).on('click', '.category-toggle', function(e) {
+	e.stopPropagation();
+	var $children = $(this).closest('li').find('> ul.category-children');
+	var $icon = $(this).find('i.fa');
+	if ($children.is(':visible')) {
+		$children.slideUp(150);
+		$icon.removeClass('fa-minus-square-o').addClass('fa-plus-square-o');
+	} else {
+		$children.slideDown(150);
+		$icon.removeClass('fa-plus-square-o').addClass('fa-minus-square-o');
+	}
+});
+
+$(document).on('change', '.category-check', function() {
+	var $cb = $(this);
+	var $li = $cb.closest('li');
+
+	if ($cb.is(':checked')) {
+		$li.parents('li').find('> .category-node > label > .category-check').prop('checked', true);
+	} else {
+		$li.find('.category-check').prop('checked', false);
+	}
+});
+
+$('#category-tree-search').on('input', function() {
+	var query = $(this).val().toLowerCase().trim();
+	var $container = $('#category-tree-container');
+
+	if (!query) {
+		$container.find('li').show();
+		$container.find('ul.category-children').hide();
+		$container.find('.category-toggle i.fa')
+			.removeClass('fa-minus-square-o').addClass('fa-plus-square-o');
+		return;
+	}
+
+	$container.find('li').each(function() {
+		var name = $(this).find('.category-node label').text().toLowerCase();
+		if (name.indexOf(query) !== -1) {
+			$(this).show();
+			$(this).parents('ul.category-children').show();
+			$(this).parents('li').find('> .category-node > .category-toggle i.fa')
+				.removeClass('fa-plus-square-o').addClass('fa-minus-square-o');
+		} else {
+			$(this).hide();
+		}
+	});
+});
+
+$(document).on('click', '#category-tree-confirm', function() {
+	var categoryIds = [];
+	var categoryNames = [];
+
+	$('#category-tree-container .category-check:checked').each(function() {
+		categoryIds.push($(this).val());
+		categoryNames.push($(this).data('path'));
+	});
+
+	if (editProductId) {
+		var currentProductId = editProductId;
+		$.ajax({
+			url: 'index.php?route=catalog/product/updateField&user_token={{ user_token }}',
+			type: 'post',
+			dataType: 'json',
+			data: { product_id: currentProductId, field: 'categories', value: categoryIds.join(',') },
+			success: function(json) {
+				if (json['error']) {
+					alert(json['error']);
+				} else {
+					var $span = $('.inline-edit[data-product-id="' + currentProductId + '"][data-field="categories"]');
+					$span.data('value', categoryIds.join(','));
+					$span.html(json['value_html'] + '<i class="fa fa-pencil-square-o inline-edit-icon"></i>');
+				}
+			},
+			error: function() {
+				alert('Error');
+			}
+		});
+	}
+
+	editProductId = null;
+	$('#category-tree-modal').modal('hide');
 });
 //--></script>
 {{ footer }}

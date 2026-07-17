@@ -26,7 +26,8 @@ $_['button_collapse_all']     = 'Collapse all';
 
 // Column
 $_['column_image']           = 'Image';
-$_['column_name']            = 'Category Name';
+$_['column_name']            = 'Category';
+$_['column_status']          = 'Status';
 $_['column_sort_order']      = 'Sort Order';
 $_['column_action']          = 'Action';
 
