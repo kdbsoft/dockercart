@@ -9,7 +9,7 @@
       <option value="today">{{ text_today }}</option>
     </select>
   </div>
-  <div class="tile-body"><i class="fa fa-eye"></i>
+  <div class="tile-body"><i data-lucide="eye" width="40" height="40"></i>
     <canvas class="tile-sparkline"></canvas>
     <div class="tile-body-right">
       <h2 class="tile-total">—</h2>
@@ -58,8 +58,11 @@
     $.getJSON('index.php?route=extension/dashboard/viewed_product/ajax&user_token={{ user_token }}&period=' + period, function(json) {
       $tile.find('.tile-total').text(json.total);
       if (json.show_change) {
-        var icon = json.direction === 'up' ? 'fa-arrow-up' : 'fa-arrow-down';
-        $tile.find('.tile-pct').html('<i class="fa ' + icon + '"></i> ' + json.percentage + '%');
+        var icon = json.direction === 'up' ? 'arrow-up' : 'arrow-down';
+        $tile.find('.tile-pct').html('<i data-lucide="' + icon + '" width="24" height="24"></i> ' + json.percentage + '%');
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+            window.lucide.createIcons();
+        }
       } else {
         $tile.find('.tile-pct').empty();
       }
