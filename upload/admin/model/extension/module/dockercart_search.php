@@ -65,6 +65,8 @@ class ModelExtensionModuleDockercartSearch extends Model {
             'categories'   => 0,
             'manufacturers'=> 0,
             'information'  => 0,
+            'orders'       => 0,
+            'customers'    => 0,
             'error'        => ''
         ];
 
@@ -77,26 +79,21 @@ class ModelExtensionModuleDockercartSearch extends Model {
         }
 
         try {
-            // Apply schema migrations BEFORE truncating so new columns are ready
             $this->applySchemaUpdates();
 
-            // Truncate all indexes
             $manticore->truncate('products');
             $manticore->truncate('categories');
             $manticore->truncate('manufacturers');
             $manticore->truncate('information');
+            $manticore->truncate('orders');
+            $manticore->truncate('customers');
 
-            // Reindex products
             $result['products'] = $this->reindexProducts();
-
-            // Reindex categories
             $result['categories'] = $this->reindexCategories();
-
-            // Reindex manufacturers
             $result['manufacturers'] = $this->reindexManufacturers();
-
-            // Reindex information pages
             $result['information'] = $this->reindexInformation();
+            $result['orders'] = $this->reindexOrders();
+            $result['customers'] = $this->reindexCustomers();
 
         } catch (Exception $e) {
             $result['success'] = false;
@@ -123,18 +120,16 @@ class ModelExtensionModuleDockercartSearch extends Model {
             return;
         }
 
-        // Columns to add to the products RT index.
-        // 'text' in Manticore creates a full-text indexed + stored field,
-        // equivalent to having both rt_field and rt_attr_string in manticore.conf.
         $products_columns = ['upc', 'ean', 'jan', 'isbn', 'mpn'];
 
         foreach ($products_columns as $col) {
-            // Intentionally ignore errors (column may already exist)
             $manticore->query("ALTER TABLE `products` ADD COLUMN `{$col}` text");
         }
 
-        // Add MVA attribute for all category IDs (if not exists)
         $manticore->query("ALTER TABLE `products` ADD COLUMN `category_ids` multi");
+
+        $this->createOrderIndexSchema();
+        $this->createCustomerIndexSchema();
     }
 
     /**
@@ -492,6 +487,210 @@ class ModelExtensionModuleDockercartSearch extends Model {
         return true;
     }
 
+    public function createOrderIndexSchema() {
+        $manticore = $this->getManticore();
+
+        if (!$manticore->connect()) {
+            return false;
+        }
+
+        $manticore->query("CREATE TABLE IF NOT EXISTS orders (
+            id BIGINT PRIMARY KEY,
+            firstname TEXT,
+            lastname TEXT,
+            email TEXT,
+            telephone TEXT,
+            payment_firstname TEXT,
+            payment_lastname TEXT,
+            payment_company TEXT,
+            payment_address_1 TEXT,
+            payment_address_2 TEXT,
+            payment_city TEXT,
+            payment_postcode TEXT,
+            payment_country TEXT,
+            payment_zone TEXT,
+            shipping_firstname TEXT,
+            shipping_lastname TEXT,
+            shipping_company TEXT,
+            shipping_address_1 TEXT,
+            shipping_address_2 TEXT,
+            shipping_city TEXT,
+            shipping_postcode TEXT,
+            shipping_country TEXT,
+            shipping_zone TEXT,
+            comment TEXT,
+            tracking_number TEXT,
+            store_id BIGINT,
+            customer_id BIGINT,
+            customer_group_id BIGINT,
+            order_status_id BIGINT,
+            total FLOAT,
+            currency_code TEXT,
+            order_status_name TEXT,
+            language_id BIGINT,
+            date_added BIGINT,
+            date_modified BIGINT
+        )");
+
+        return true;
+    }
+
+    public function createCustomerIndexSchema() {
+        $manticore = $this->getManticore();
+
+        if (!$manticore->connect()) {
+            return false;
+        }
+
+        $manticore->query("CREATE TABLE IF NOT EXISTS customers (
+            id BIGINT PRIMARY KEY,
+            firstname TEXT,
+            lastname TEXT,
+            email TEXT,
+            telephone TEXT,
+            company TEXT,
+            store_id BIGINT,
+            customer_group_id BIGINT,
+            status BIGINT,
+            customer_group_name TEXT,
+            language_id BIGINT,
+            date_added BIGINT
+        )");
+
+        return true;
+    }
+
+    public function indexOrder($order_id) {
+        $manticore = $this->getManticore();
+
+        $query = $this->db->query("
+            SELECT o.*, os.name AS order_status_name
+            FROM " . DB_PREFIX . "order o
+            LEFT JOIN " . DB_PREFIX . "order_status os ON (o.order_status_id = os.order_status_id AND os.language_id = o.language_id)
+            WHERE o.order_id = '" . (int)$order_id . "'
+        ");
+
+        if (!$query->num_rows) {
+            return false;
+        }
+
+        $order = $query->row;
+
+        $doc = [
+            'id' => (int)$order_id,
+            'store_id' => (int)$order['store_id'],
+            'customer_id' => (int)$order['customer_id'],
+            'customer_group_id' => (int)$order['customer_group_id'],
+            'order_status_id' => (int)$order['order_status_id'],
+            'total' => (float)$order['total'],
+            'currency_code' => $order['currency_code'],
+            'order_status_name' => $order['order_status_name'] ?? '',
+            'language_id' => (int)$order['language_id'],
+            'date_added' => strtotime($order['date_added']),
+            'date_modified' => strtotime($order['date_modified']),
+            'firstname' => $order['firstname'],
+            'lastname' => $order['lastname'],
+            'email' => $order['email'],
+            'telephone' => $order['telephone'],
+            'payment_firstname' => $order['payment_firstname'],
+            'payment_lastname' => $order['payment_lastname'],
+            'payment_company' => $order['payment_company'],
+            'payment_address_1' => $order['payment_address_1'],
+            'payment_address_2' => $order['payment_address_2'],
+            'payment_city' => $order['payment_city'],
+            'payment_postcode' => $order['payment_postcode'],
+            'payment_country' => $order['payment_country'],
+            'payment_zone' => $order['payment_zone'],
+            'shipping_firstname' => $order['shipping_firstname'],
+            'shipping_lastname' => $order['shipping_lastname'],
+            'shipping_company' => $order['shipping_company'],
+            'shipping_address_1' => $order['shipping_address_1'],
+            'shipping_address_2' => $order['shipping_address_2'],
+            'shipping_city' => $order['shipping_city'],
+            'shipping_postcode' => $order['shipping_postcode'],
+            'shipping_country' => $order['shipping_country'],
+            'shipping_zone' => $order['shipping_zone'],
+            'comment' => $order['comment'],
+            'tracking_number' => $order['tracking_number'] ?? '',
+        ];
+
+        return $manticore->replace('orders', $doc);
+    }
+
+    public function deleteOrder($order_id) {
+        $manticore = $this->getManticore();
+        return $manticore->delete('orders', (int)$order_id);
+    }
+
+    private function reindexOrders() {
+        $manticore = $this->getManticore();
+
+        $count = 0;
+
+        $orders = $this->db->query("SELECT order_id FROM " . DB_PREFIX . "order");
+
+        foreach ($orders->rows as $order) {
+            $this->indexOrder($order['order_id']);
+            $count++;
+        }
+
+        return $count;
+    }
+
+    public function indexCustomer($customer_id) {
+        $manticore = $this->getManticore();
+
+        $query = $this->db->query("
+            SELECT c.*, cg.name AS customer_group_name
+            FROM " . DB_PREFIX . "customer c
+            LEFT JOIN " . DB_PREFIX . "customer_group cg ON (c.customer_group_id = cg.customer_group_id)
+            WHERE c.customer_id = '" . (int)$customer_id . "'
+        ");
+
+        if (!$query->num_rows) {
+            return false;
+        }
+
+        $customer = $query->row;
+
+        $doc = [
+            'id' => (int)$customer_id,
+            'store_id' => (int)$customer['store_id'],
+            'customer_group_id' => (int)$customer['customer_group_id'],
+            'status' => (int)$customer['status'],
+            'customer_group_name' => $customer['customer_group_name'] ?? '',
+            'language_id' => (int)$customer['language_id'],
+            'date_added' => strtotime($customer['date_added']),
+            'firstname' => $customer['firstname'],
+            'lastname' => $customer['lastname'],
+            'email' => $customer['email'],
+            'telephone' => $customer['telephone'],
+            'company' => $customer['company'] ?? '',
+        ];
+
+        return $manticore->replace('customers', $doc);
+    }
+
+    public function deleteCustomer($customer_id) {
+        $manticore = $this->getManticore();
+        return $manticore->delete('customers', (int)$customer_id);
+    }
+
+    private function reindexCustomers() {
+        $manticore = $this->getManticore();
+
+        $count = 0;
+
+        $customers = $this->db->query("SELECT customer_id FROM " . DB_PREFIX . "customer");
+
+        foreach ($customers->rows as $customer) {
+            $this->indexCustomer($customer['customer_id']);
+            $count++;
+        }
+
+        return $count;
+    }
+
     /**
      * Build searchable code string for article-like fields.
      * Adds compact variant without spaces/underscores/hyphens.
@@ -580,7 +779,7 @@ class ModelExtensionModuleDockercartSearch extends Model {
         $this->load->model('localisation/language');
 
         $languages = $this->model_localisation_language->getLanguages();
-        $tables = ['products', 'categories', 'manufacturers', 'information'];
+        $tables = ['products', 'categories', 'manufacturers', 'information', 'orders', 'customers'];
 
         $result = [
             'success' => true,
