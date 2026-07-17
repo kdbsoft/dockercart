@@ -171,6 +171,24 @@ class ModelLocalisationLanguage extends Model {
 
 		$this->cache->delete('stock_status');
 
+		// Tax Class
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "tax_class WHERE language_id = '" . (int)$this->config->get('config_language_id') . "'");
+
+		foreach ($query->rows as $tax_class) {
+			$this->db->query("INSERT INTO " . DB_PREFIX . "tax_class SET tax_class_id = '" . (int)$tax_class['tax_class_id'] . "', language_id = '" . (int)$language_id . "', title = '" . $this->db->escape($tax_class['title']) . "', description = '" . $this->db->escape($tax_class['description']) . "', date_added = NOW(), date_modified = NOW()");
+		}
+
+		$this->cache->delete('tax_class');
+
+		// Tax Rate
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "tax_rate WHERE language_id = '" . (int)$this->config->get('config_language_id') . "'");
+
+		foreach ($query->rows as $tax_rate) {
+			$this->db->query("INSERT INTO " . DB_PREFIX . "tax_rate SET tax_rate_id = '" . (int)$tax_rate['tax_rate_id'] . "', language_id = '" . (int)$language_id . "', geo_zone_id = '" . (int)$tax_rate['geo_zone_id'] . "', name = '" . $this->db->escape($tax_rate['name']) . "', rate = '" . (float)$tax_rate['rate'] . "', `type` = '" . $this->db->escape($tax_rate['type']) . "', date_added = NOW(), date_modified = NOW()");
+		}
+
+		$this->cache->delete('tax_rate');
+
 		// Voucher Theme
 		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "voucher_theme_description WHERE language_id = '" . (int)$this->config->get('config_language_id') . "'");
 
