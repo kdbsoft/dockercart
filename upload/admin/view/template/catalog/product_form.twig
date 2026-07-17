@@ -398,7 +398,7 @@
                         <input type="hidden" name="product_image[{{ image_row }}][image]" value="{{ product_image.image }}" id="input-image{{ image_row }}"/>
                         <input type="hidden" name="product_image[{{ image_row }}][sort_order]" value="{{ product_image.sort_order }}" class="dc-img-sort-order"/>
                         <a href="" id="thumb-image{{ image_row }}" data-toggle="image" class="dc-img-link"><img src="{{ product_image.thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" draggable="false"/></a>
-                        <button type="button" class="dc-img-star" onclick="setImageActive({{ image_row }});" title="{{ entry_image }}"><i class="fa fa-star"></i></button>
+                        <button type="button" class="dc-img-star" onclick="setImageActive({{ image_row }});" title="{{ text_main_image }}"><i class="fa fa-star"></i></button>
                         <button type="button" onclick="removeImage({{ image_row }});" class="dc-img-remove" title="{{ button_remove }}"><i class="fa fa-times"></i></button>
                       </div>
                       {% set image_row = image_row + 1 %}
@@ -1972,7 +1972,7 @@
     html += '<input type="hidden" name="product_image[' + image_row + '][image]" value="" id="input-image' + image_row + '"/>';
     html += '<input type="hidden" name="product_image[' + image_row + '][sort_order]" value="0" class="dc-img-sort-order"/>';
     html += '<a href="" id="thumb-image' + image_row + '" data-toggle="image" class="dc-img-link"><img src="{{ placeholder }}" alt="" title="" data-placeholder="{{ placeholder }}" draggable="false"/></a>';
-    html += '<button type="button" class="dc-img-star" onclick="setImageActive(' + image_row + ');"><i class="fa fa-star"></i></button>';
+    html += '<button type="button" class="dc-img-star" onclick="setImageActive(' + image_row + ');" title="{{ text_main_image }}"><i class="fa fa-star"></i></button>';
     html += '<button type="button" onclick="removeImage(' + image_row + ');" class="dc-img-remove"><i class="fa fa-times"></i></button>';
     html += '</div>';
     $('#product-images').append(html);
