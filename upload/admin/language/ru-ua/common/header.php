@@ -10,3 +10,5 @@ $_['text_logout'] = 'Выйти';
 $_['text_profile'] = 'Ваш профиль';
 $_['text_store'] = 'Магазины';
 $_['text_support'] = 'Форум поддержки';
+$_['text_search_placeholder'] = 'Поиск...';
+$_['text_view_all_results'] = 'Показать все результаты';
