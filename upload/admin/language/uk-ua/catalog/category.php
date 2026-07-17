@@ -1,5 +1,7 @@
 <?php
 
+$_['tab_general'] = 'Загальне';
+
 $_['column_image'] = 'Зображення';
 $_['column_action'] = 'Дія';
 $_['column_name'] = 'Категорія';

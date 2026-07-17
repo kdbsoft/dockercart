@@ -1,5 +1,7 @@
 <?php
 
+$_['tab_general'] = 'Загальне';
+
 $_['column_action'] = 'Дія';
 $_['column_noindex'] = 'Індексація';
 $_['column_sort_order'] = 'Порядок сортування';
