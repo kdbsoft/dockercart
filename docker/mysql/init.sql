@@ -14936,11 +14936,12 @@ DROP TABLE IF EXISTS `oc_tax_class`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `oc_tax_class` (
   `tax_class_id` int(11) NOT NULL AUTO_INCREMENT,
+  `language_id` int(11) NOT NULL,
   `title` varchar(32) NOT NULL,
   `description` varchar(255) NOT NULL,
   `date_added` datetime NOT NULL,
   `date_modified` datetime NOT NULL,
-  PRIMARY KEY (`tax_class_id`)
+  PRIMARY KEY (`tax_class_id`,`language_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -14952,8 +14953,12 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_tax_class` WRITE;
 /*!40000 ALTER TABLE `oc_tax_class` DISABLE KEYS */;
 INSERT INTO `oc_tax_class` VALUES
-(9,'Taxable Goods','Taxed goods','2009-01-06 23:21:53','2011-09-23 14:07:50'),
-(10,'Downloadable Products','Downloadable','2011-09-21 22:19:39','2011-09-22 10:27:36');
+(9,1,'Taxable Goods','Taxed goods','2009-01-06 23:21:53','2011-09-23 14:07:50'),
+(9,2,'Товари, що оподатковуються','Товари, що підлягають оподаткуванню','2009-01-06 23:21:53','2011-09-23 14:07:50'),
+(9,3,'Товары, облагаемые налогом','Товары, подлежащие налогообложению','2009-01-06 23:21:53','2011-09-23 14:07:50'),
+(10,1,'Downloadable Products','Downloadable','2011-09-21 22:19:39','2011-09-22 10:27:36'),
+(10,2,'Цифрові товари','Цифрові товари','2011-09-21 22:19:39','2011-09-22 10:27:36'),
+(10,3,'Цифровые товары','Цифровые товары','2011-09-21 22:19:39','2011-09-22 10:27:36');
 /*!40000 ALTER TABLE `oc_tax_class` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -14968,13 +14973,14 @@ DROP TABLE IF EXISTS `oc_tax_rate`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `oc_tax_rate` (
   `tax_rate_id` int(11) NOT NULL AUTO_INCREMENT,
+  `language_id` int(11) NOT NULL,
   `geo_zone_id` int(11) NOT NULL DEFAULT 0,
   `name` varchar(32) NOT NULL,
   `rate` decimal(15,4) NOT NULL DEFAULT 0.0000,
   `type` char(1) NOT NULL,
   `date_added` datetime NOT NULL,
   `date_modified` datetime NOT NULL,
-  PRIMARY KEY (`tax_rate_id`)
+  PRIMARY KEY (`tax_rate_id`,`language_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=88 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -14986,8 +14992,12 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_tax_rate` WRITE;
 /*!40000 ALTER TABLE `oc_tax_rate` DISABLE KEYS */;
 INSERT INTO `oc_tax_rate` VALUES
-(86,3,'VAT (20%)',20.0000,'P','2011-03-09 21:17:10','2011-09-22 22:24:29'),
-(87,3,'Eco Tax (-2.00)',2.0000,'F','2011-09-21 21:49:23','2011-09-23 00:40:19');
+(86,1,3,'VAT (20%)',20.0000,'P','2011-03-09 21:17:10','2011-09-22 22:24:29'),
+(86,2,3,'ПДВ (20%)',20.0000,'P','2011-03-09 21:17:10','2011-09-22 22:24:29'),
+(86,3,3,'НДС (20%)',20.0000,'P','2011-03-09 21:17:10','2011-09-22 22:24:29'),
+(87,1,3,'Eco Tax (-2.00)',2.0000,'F','2011-09-21 21:49:23','2011-09-23 00:40:19'),
+(87,2,3,'Екологічний податок (-2.00)',2.0000,'F','2011-09-21 21:49:23','2011-09-23 00:40:19'),
+(87,3,3,'Экологический налог (-2.00)',2.0000,'F','2011-09-21 21:49:23','2011-09-23 00:40:19');
 /*!40000 ALTER TABLE `oc_tax_rate` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
