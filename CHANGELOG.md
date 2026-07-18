@@ -1,3 +1,9 @@
+## [2.1.1](https://github.com/kdbsoft/dockercart/compare/v2.1.0...v2.1.1) (2026-07-18)
+
+### Bug Fixes
+
+* remove unused price_display column migration ([53ca9f6](https://github.com/kdbsoft/dockercart/commit/53ca9f6b68fb9ee74de3c91b0b3a351b713bce3b))
+
 ## [2.1.0](https://github.com/kdbsoft/dockercart/compare/v2.0.6...v2.1.0) (2026-07-17)
 
 ### Features
