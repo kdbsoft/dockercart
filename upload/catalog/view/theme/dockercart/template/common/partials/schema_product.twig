@@ -9,7 +9,32 @@
   "brand": {
     "@type": "Brand",
     "name": "{{ manufacturer|striptags|trim|e('js') }}"
-  }{% endif %}{% if price is defined and price %},
+  }{% endif %}{% if price is defined and price %}{% if is_configurable is defined and is_configurable and schema_variants is defined and schema_variants %},
+  "offers": {
+    "@type": "AggregateOffer",
+    "url": "{{ schema_product_url is defined and schema_product_url ? schema_product_url|e('js') : '' }}",
+    "priceCurrency": "{{ currency_code is defined and currency_code ? currency_code|e('js') : 'USD' }}",
+    "lowPrice": "{{ schema_variant_low_price|default(0)|number_format(2, '.', '') }}",
+    "highPrice": "{{ schema_variant_high_price|default(0)|number_format(2, '.', '') }}",
+    "availability": "https://schema.org/{% if schema_any_preorder is defined and schema_any_preorder %}PreOrder{% elseif schema_any_in_stock is defined and schema_any_in_stock %}InStock{% else %}OutOfStock{% endif %}",
+    "itemCondition": "https://schema.org/NewCondition"
+  },
+  "hasVariant": [
+{% for variant in schema_variants %}
+    {
+      "@type": "Product",
+      "sku": "{{ variant.sku|e('js') }}"{% if variant.image %},
+      "image": ["{{ variant.image|e('js') }}"]{% endif %},
+      "offers": {
+        "@type": "Offer",
+        "url": "{{ variant.url|e('js') }}",
+        "priceCurrency": "{{ currency_code is defined and currency_code ? currency_code|e('js') : 'USD' }}",
+        "price": "{{ variant.price|default(0)|number_format(2, '.', '') }}",
+        "availability": "https://schema.org/{% if variant.is_in_stock %}InStock{% else %}OutOfStock{% endif %}"
+      }
+    }{% if not loop.last %},{% endif %}
+{% endfor %}
+  ]{% else %},
   "offers": {
     "@type": "Offer",
     "url": "{{ schema_product_url is defined and schema_product_url ? schema_product_url|e('js') : '' }}",
@@ -17,7 +42,7 @@
     "price": "{{ dc_base_price_value|default(0)|number_format(2, '.', '') }}",
     "availability": "https://schema.org/{% if is_preorder is defined and is_preorder %}PreOrder{% elseif is_in_stock is defined and is_in_stock %}InStock{% else %}OutOfStock{% endif %}",
     "itemCondition": "https://schema.org/NewCondition"
-  }{% endif %}{% if rating is defined and rating and review_count is defined and review_count > 0 %},
+  }{% endif %}{% endif %}{% if rating is defined and rating and review_count is defined and review_count > 0 %},
   "aggregateRating": {
     "@type": "AggregateRating",
     "ratingValue": "{{ rating }}",

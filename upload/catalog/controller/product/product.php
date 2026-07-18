@@ -669,6 +669,34 @@ class ControllerProductProduct extends Controller {
 					'default_variant_id' => (int)($configurable['default_variant_id'] ?? 0),
 					'default_variant'    => $default_variant,
 				));
+
+				// Schema.org variant data
+				$base_url = $this->request->server['HTTPS'] ? $this->config->get('config_ssl') : $this->config->get('config_url');
+				$base_price_fallback = !empty($data['dc_base_price_value']) ? (float)$data['dc_base_price_value'] : null;
+				$prices = array();
+				$schema_variants = array();
+
+				foreach ($variants as $v) {
+					if (!$v['status']) continue;
+
+					$v_price = isset($v['price']) && $v['price'] !== '' ? (float)$v['price'] : $base_price_fallback;
+					if ($v_price !== null) $prices[] = $v_price;
+
+					$schema_variants[] = array(
+						'variant_id'  => (int)$v['variant_id'],
+						'sku'         => $v['sku'],
+						'price'       => $v_price,
+						'image'       => $v['image'] ? $base_url . 'image/' . $v['image'] : '',
+						'url'         => $data['schema_product_url'] . '?variant_id=' . (int)$v['variant_id'],
+						'is_in_stock' => (int)$v['quantity'] > 0,
+					);
+				}
+
+				$data['schema_variants'] = $schema_variants;
+				$data['schema_variant_low_price'] = $prices ? min($prices) : null;
+				$data['schema_variant_high_price'] = $prices ? max($prices) : null;
+				$data['schema_any_in_stock'] = !empty(array_filter(array_column($schema_variants, 'is_in_stock')));
+				$data['schema_any_preorder'] = !empty($product_info['preorder']);
 			}
 
 			if (!isset($data['minimum'])) {
