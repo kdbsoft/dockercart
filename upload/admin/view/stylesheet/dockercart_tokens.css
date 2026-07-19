@@ -1,0 +1,159 @@
+:root {
+	--dc-blue-50: #eff6ff;
+	--dc-blue-100: #dbeafe;
+	--dc-blue-200: #bfdbfe;
+	--dc-blue-400: #60a5fa;
+	--dc-blue-500: #3b82f6;
+	--dc-blue-600: #2563eb;
+	--dc-blue-700: #1d4ed8;
+	--dc-blue-800: #1e40af;
+	--dc-blue-900: #1e3a5f;
+
+	--dc-indigo-500: #6366f1;
+	--dc-indigo-600: #4f46e5;
+	--dc-indigo-700: #4338ca;
+
+	--dc-violet-500: #8b5cf6;
+	--dc-violet-600: #7c3aed;
+
+	--dc-purple-500: #a855f7;
+	--dc-purple-600: #9333ea;
+	--dc-purple-700: #7e22ce;
+
+	--dc-cyan-500: #06b6d4;
+	--dc-cyan-600: #0891b2;
+
+	--dc-emerald-500: #10b981;
+	--dc-emerald-600: #059669;
+
+	--dc-green-50: #f0fdf4;
+	--dc-green-100: #dcfce7;
+	--dc-green-200: #bbf7d0;
+	--dc-green-400: #4ade80;
+	--dc-green-500: #22c55e;
+	--dc-green-600: #16a34a;
+	--dc-green-700: #15803d;
+	--dc-green-800: #166534;
+
+	--dc-amber-50: #fffbeb;
+	--dc-amber-100: #fef3c7;
+	--dc-amber-200: #fde68a;
+	--dc-amber-500: #f59e0b;
+	--dc-amber-600: #d97706;
+	--dc-amber-800: #92400e;
+
+	--dc-orange-500: #f97316;
+	--dc-orange-600: #ea580c;
+	--dc-orange-700: #c2410c;
+	--dc-orange-800: #9a3412;
+
+	--dc-red-50: #fef2f2;
+	--dc-red-100: #fee2e2;
+	--dc-red-200: #fecaca;
+	--dc-red-500: #ef4444;
+	--dc-red-600: #dc2626;
+	--dc-red-700: #b91c1c;
+	--dc-red-800: #991b1b;
+	--dc-red-900: #7f1d1d;
+
+	--dc-sky-50: #f0f9ff;
+	--dc-sky-100: #e0f2fe;
+	--dc-sky-500: #0ea5e9;
+	--dc-sky-600: #0284c7;
+	--dc-sky-800: #075985;
+
+	--dc-slate-50: #f8fafc;
+	--dc-slate-100: #f1f5f9;
+	--dc-slate-200: #e2e8f0;
+	--dc-slate-300: #cbd5e1;
+	--dc-slate-400: #94a3b8;
+	--dc-slate-500: #64748b;
+	--dc-slate-600: #475569;
+	--dc-slate-700: #334155;
+	--dc-slate-800: #1e293b;
+	--dc-slate-900: #0f172a;
+
+	--dc-gray-50: #f9fafb;
+	--dc-gray-100: #f3f4f6;
+	--dc-gray-200: #e5e7eb;
+	--dc-gray-300: #d1d5db;
+	--dc-gray-400: #9ca3af;
+	--dc-gray-500: #6b7280;
+	--dc-gray-600: #4b5563;
+	--dc-gray-700: #374151;
+	--dc-gray-800: #1f2937;
+	--dc-gray-900: #111827;
+
+	--dc-body-bg: #f6f6f6;
+	--dc-header-bg: #ffffff;
+	--dc-surface: #ffffff;
+	--dc-surface-alt: #f9fafb;
+
+	--dc-text: #545454;
+	--dc-text-heading: #4c4d5a;
+	--dc-text-dark: #1f2937;
+	--dc-text-muted: #6b7280;
+	--dc-text-faint: #9ca3af;
+
+	--dc-border: #e5e7eb;
+	--dc-border-soft: #f0f0f0;
+	--dc-border-medium: #d1d5db;
+
+	--dc-primary: var(--dc-blue-500);
+	--dc-primary-hover: var(--dc-blue-600);
+	--dc-primary-active: var(--dc-blue-700);
+	--dc-primary-light: var(--dc-blue-50);
+	--dc-primary-ring: rgba(59, 130, 246, 0.15);
+
+	--dc-success: var(--dc-green-500);
+	--dc-success-hover: var(--dc-green-600);
+	--dc-success-light: var(--dc-green-100);
+	--dc-success-text: var(--dc-green-800);
+
+	--dc-warning: var(--dc-amber-500);
+	--dc-warning-hover: var(--dc-amber-600);
+	--dc-warning-light: var(--dc-amber-100);
+	--dc-warning-text: var(--dc-amber-800);
+
+	--dc-danger: var(--dc-red-500);
+	--dc-danger-hover: var(--dc-red-600);
+	--dc-danger-light: var(--dc-red-100);
+	--dc-danger-text: var(--dc-red-800);
+
+	--dc-info: var(--dc-cyan-500);
+	--dc-info-hover: var(--dc-cyan-600);
+	--dc-info-light: var(--dc-sky-100);
+	--dc-info-text: var(--dc-sky-800);
+
+	--dc-radius-xs: 4px;
+	--dc-radius-sm: 5px;
+	--dc-radius-md: 6px;
+	--dc-radius-lg: 8px;
+	--dc-radius-xl: 10px;
+	--dc-radius-2xl: 12px;
+	--dc-radius-3xl: 14px;
+	--dc-radius-full: 999px;
+
+	--dc-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+	--dc-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+	--dc-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+	--dc-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+	--dc-shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 20px rgba(0, 0, 0, 0.1);
+
+	--dc-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	--dc-font-mono: Monaco, Menlo, 'Ubuntu Mono', monospace;
+
+	--dc-transition-fast: 150ms ease;
+	--dc-transition-base: 250ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}

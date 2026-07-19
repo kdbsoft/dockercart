@@ -30,7 +30,7 @@ $_['text_list_subtitle'] = 'Browse, filter and manage your products';
 
 $_['text_filter_subtitle'] = 'Narrow results by specific criteria';
 
-$_['text_filter_hint']    = 'You can enter part of the name or model to search';
+$_['text_filter_hint']    = 'Hint: You can enter part of the name or model to search';
 
 $_['text_add_product_subtitle'] = 'Add a new product to the catalog';
 
@@ -40,6 +40,9 @@ $_['text_edit_product_subtitle'] = 'Edit product details and settings';
 
 // Tab
 $_['tab_general']            = 'General';
+$_['tab_description']        = 'Description';
+$_['tab_prices_stock_group'] = 'Prices & Stock';
+$_['tab_params_group']      = 'Parameters';
 
 // Column
 $_['column_name']            = 'Product';
@@ -157,3 +160,12 @@ $_['error_option_is_axis']     = 'This option cannot be added as a simple option
 $_['error_quantity_step']     = 'Quantity Step must be a positive number with up to 2 decimal places!';
 $_['error_minimum_value']     = 'Minimum Quantity must be a positive number with up to 2 decimal places!';
 $_['error_minimum_step']      = 'Minimum Quantity must be divisible by Quantity Step!';
+$_['text_all_languages']      = 'All languages';
+$_['text_drag_to_reorder']    = 'Drag to reorder';
+$_['entry_video']                    = 'Video';
+$_['entry_video_youtube_placeholder'] = 'YouTube URL or video ID';
+$_['button_browse_mp4']              = 'Browse MP4';
+$_['help_video_combined']            = 'Enter a YouTube URL/ID or click "Browse MP4" to upload a video file.';
+$_['text_youtube_video']             = 'YouTube video';
+$_['entry_model_3d']          = '3D Model';
+$_['help_model_3d']           = 'Upload a GLB 3D model file';
