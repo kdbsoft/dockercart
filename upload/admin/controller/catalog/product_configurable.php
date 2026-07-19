@@ -228,7 +228,7 @@ class ControllerCatalogProductConfigurable extends Controller {
 						INNER JOIN " . DB_PREFIX . "product_option po ON (pov.product_option_id = po.product_option_id)
 						WHERE po.product_id = '" . (int)$product_id . "'
 						AND pov.option_id IN (" . $new_axes_list . ")
-						AND (pov.price != '0' OR pov.quantity != '0')
+						AND (pov.price != '0')
 					");
 
 					if ($conflict_query->num_rows) {

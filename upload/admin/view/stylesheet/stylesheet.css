@@ -2642,8 +2642,8 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
 }
 
 .dc-opt-cards {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
     gap: 6px;
 }
 

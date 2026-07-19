@@ -646,10 +646,9 @@
                               <div class="dc-opt-card" id="option-value-row{{ option_value_row }}">
                                 <div class="dc-opt-card__header">
                                   <span class="dc-opt-card__title">{% for ov in option_values[product_option.option_id]|default([]) %}{% if ov.option_value_id == product_option_value.option_value_id %}{{ ov.name }}{% endif %}{% endfor %}</span>
-                                  <span class="dc-opt-card__badges">
-                                    {% if product_option_value.is_hit %}<span class="dc-opt-badge dc-opt-badge--hit">{{ entry_hit }}</span>{% endif %}
-                                    <span class="dc-opt-badge {% if product_option_value.quantity > 0 %}dc-opt-badge--qty-ok{% else %}dc-opt-badge--qty-zero{% endif %}" data-badge="qty">{{ product_option_value.quantity }} {{ text_qty_short }}</span>
-                                    {% if product_option_value.price != 0 %}
+<span class="dc-opt-card__badges">
+                                     {% if product_option_value.is_hit %}<span class="dc-opt-badge dc-opt-badge--hit">{{ entry_hit }}</span>{% endif %}
+                                     {% if product_option_value.price != 0 %}
                                       <span class="dc-opt-badge dc-opt-badge--price" data-badge="price">{{ product_option_value.price_prefix }}{{ product_option_value.price }}</span>
                                     {% else %}
                                       <span class="dc-opt-badge dc-opt-badge--price" data-badge="price" style="display:none"></span>
@@ -660,35 +659,19 @@
                                 <div class="dc-opt-card__body">
                                   <input type="hidden" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][product_option_value_id]" value="{{ product_option_value.product_option_value_id }}"/>
                                   <input type="hidden" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][is_hit]" value="0"/>
-                                  <div class="dc-opt-card__grid">
-                                    <div class="dc-opt-card__field">
-                                      <label>{{ entry_option_value }}</label>
-                                      <select name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][option_value_id]" class="form-control" onchange="dcUpdateCardTitle(this)">
-                                        {% if option_values[product_option.option_id] %}
-                                          {% for option_value in option_values[product_option.option_id] %}
-                                            <option value="{{ option_value.option_value_id }}"{% if option_value.option_value_id == product_option_value.option_value_id %} selected="selected"{% endif %}>{{ option_value.name }}</option>
-                                          {% endfor %}
-                                        {% endif %}
-                                      </select>
-                                    </div>
-                                    <div class="dc-opt-card__field">
-                                      <label>{{ entry_quantity }}</label>
-                                      <input type="text" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][quantity]" value="{{ product_option_value.quantity }}" placeholder="{{ entry_quantity }}" class="form-control" oninput="dcUpdateBadges(this)" />
-                                    </div>
-                                    <div class="dc-opt-card__field">
-                                      <label>{{ entry_subtract }}</label>
-                                      <select name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][subtract]" class="form-control">
-                                        {% if product_option_value.subtract %}
-                                          <option value="1" selected="selected">{{ text_yes }}</option>
-                                          <option value="0">{{ text_no }}</option>
-                                        {% else %}
-                                          <option value="1">{{ text_yes }}</option>
-                                          <option value="0" selected="selected">{{ text_no }}</option>
-                                        {% endif %}
-                                      </select>
-                                    </div>
-                                    <div class="dc-opt-card__field">
-                                      <label>{{ entry_price }}</label>
+<div class="dc-opt-card__grid">
+                                     <div class="dc-opt-card__field">
+                                       <label>{{ entry_option_value }}</label>
+                                       <select name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][option_value_id]" class="form-control" onchange="dcUpdateCardTitle(this)">
+                                         {% if option_values[product_option.option_id] %}
+                                           {% for option_value in option_values[product_option.option_id] %}
+                                             <option value="{{ option_value.option_value_id }}"{% if option_value.option_value_id == product_option_value.option_value_id %} selected="selected"{% endif %}>{{ option_value.name }}</option>
+                                           {% endfor %}
+                                         {% endif %}
+                                       </select>
+                                     </div>
+                                     <div class="dc-opt-card__field">
+                                       <label>{{ entry_price }}</label>
                                       <div class="option-value-prefix-group">
                                         <select name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][price_prefix]" class="form-control option-value-prefix-select">
                                           <option value="+"{% if product_option_value.price_prefix == '+' %} selected="selected"{% endif %}>+</option>
@@ -1622,7 +1605,7 @@
   <script type="text/javascript"><!--
   var option_value_row = {{ option_value_row }};
 
-  function dcBuildOptionValueCard(option_row, ovRow, optionValueId, optionValueName, quantity, subtract, price, price_prefix, points, points_prefix, weight, weight_prefix, isHit) {
+  function dcBuildOptionValueCard(option_row, ovRow, optionValueId, optionValueName, price, price_prefix, points, points_prefix, weight, weight_prefix, isHit) {
 	  var html = '';
 	  var optionType = $('#option-section' + option_row + ' input[name$="[type]"]').val();
 	  html += '<div class="dc-opt-card" id="option-value-row' + ovRow + '">';
@@ -1632,7 +1615,6 @@
 	  if (isHit) {
 		  html += '      <span class="dc-opt-badge dc-opt-badge--hit">{{ entry_hit|e('js') }}</span>';
 	  }
-	  html += '      <span class="dc-opt-badge ' + (parseFloat(quantity) > 0 ? 'dc-opt-badge--qty-ok' : 'dc-opt-badge--qty-zero') + '" data-badge="qty">' + quantity + ' {{ text_qty_short|e('js') }}</span>';
 	  if (parseFloat(price) != 0) {
 		  html += '      <span class="dc-opt-badge dc-opt-badge--price" data-badge="price">' + price_prefix + price + '</span>';
 	  } else {
@@ -1655,17 +1637,6 @@
 		  });
 	  }
 	  html += optsHtml;
-	  html += '        </select>';
-	  html += '      </div>';
-	  html += '      <div class="dc-opt-card__field">';
-	  html += '        <label>{{ entry_quantity|e('js') }}</label>';
-	  html += '        <input type="text" name="product_option[' + option_row + '][product_option_value][' + ovRow + '][quantity]" value="' + quantity + '" placeholder="{{ entry_quantity|e('js') }}" class="form-control" oninput="dcUpdateBadges(this)" />';
-	  html += '      </div>';
-	  html += '      <div class="dc-opt-card__field">';
-	  html += '        <label>{{ entry_subtract|e('js') }}</label>';
-	  html += '        <select name="product_option[' + option_row + '][product_option_value][' + ovRow + '][subtract]" class="form-control">';
-	  html += '          <option value="1"' + (subtract == '1' ? ' selected="selected"' : '') + '>{{ text_yes|e('js') }}</option>';
-	  html += '          <option value="0"' + (subtract == '0' ? ' selected="selected"' : '') + '>{{ text_no|e('js') }}</option>';
 	  html += '        </select>';
 	  html += '      </div>';
 	  html += '      <div class="dc-opt-card__field">';
@@ -1729,7 +1700,7 @@
   function addOptionValue(option_row) {
 	  var $opts = $('#option-values' + option_row);
 	  var firstName = $opts.find('option:first').text() || '';
-	  var card = dcBuildOptionValueCard(option_row, option_value_row, '', firstName, '', '0', '0', '+', '0', '+', '0', '+', false);
+	  var card = dcBuildOptionValueCard(option_row, option_value_row, '', firstName, '', '0', '+', '0', '+', '0', '+', false);
 	  $('#option-value' + option_row).append(card);
 	  $('[data-toggle="tooltip"]').tooltip();
 	  dcRefreshColorImagePickers();
@@ -1747,7 +1718,7 @@
 		  var ovId = $(this).val();
 		  var ovName = $(this).text();
 		  if (existing.indexOf(ovId) === -1) {
-			  var card = dcBuildOptionValueCard(option_row, option_value_row, ovId, ovName, '', '0', '0', '+', '0', '+', '0', '+', false);
+			  var card = dcBuildOptionValueCard(option_row, option_value_row, ovId, ovName, '', '0', '+', '0', '+', '0', '+', false);
 			  $('#option-value' + option_row).append(card);
 			  option_value_row++;
 		  }

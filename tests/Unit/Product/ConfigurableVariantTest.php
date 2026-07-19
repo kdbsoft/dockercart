@@ -291,19 +291,15 @@ class ConfigurableVariantTest extends TestCase
 
         self::$db->query("INSERT INTO " . DB_PREFIX . "product_option SET product_id = '" . self::$testProductId . "', option_id = '99901', value = '', required = '1'");
         $po_id = self::$db->getLastId();
-        self::$db->query("INSERT INTO " . DB_PREFIX . "product_option_value SET product_option_id = '" . (int)$po_id . "', product_id = '" . self::$testProductId . "', option_id = '99901', option_value_id = '99911', quantity = '50', subtract = '1', price = '10.0000', price_prefix = '+', points = '0', points_prefix = '+', weight = '0', weight_prefix = '+'");
+        self::$db->query("INSERT INTO " . DB_PREFIX . "product_option_value SET product_option_id = '" . (int)$po_id . "', product_id = '" . self::$testProductId . "', option_id = '99901', option_value_id = '99911', price = '10.0000', price_prefix = '+', points = '0', points_prefix = '+', weight = '0', weight_prefix = '+'");
 
-        $before = self::$db->query("SELECT price, quantity, subtract FROM " . DB_PREFIX . "product_option_value WHERE product_id = '" . self::$testProductId . "' AND option_id = '99901' AND option_value_id = '99911'");
+        $before = self::$db->query("SELECT price FROM " . DB_PREFIX . "product_option_value WHERE product_id = '" . self::$testProductId . "' AND option_id = '99901' AND option_value_id = '99911'");
         $this->assertEquals('10.0000', $before->row['price']);
-        $this->assertEquals('50', $before->row['quantity']);
-        $this->assertEquals('1', $before->row['subtract']);
 
         self::$pc->setConfigurableOptions(self::$testProductId, [99901]);
 
-        $after = self::$db->query("SELECT price, quantity, subtract FROM " . DB_PREFIX . "product_option_value WHERE product_id = '" . self::$testProductId . "' AND option_id = '99901' AND option_value_id = '99911'");
+        $after = self::$db->query("SELECT price FROM " . DB_PREFIX . "product_option_value WHERE product_id = '" . self::$testProductId . "' AND option_id = '99901' AND option_value_id = '99911'");
         $this->assertEquals('0', $after->row['price']);
-        $this->assertEquals('0', $after->row['quantity']);
-        $this->assertEquals('0', $after->row['subtract']);
     }
 
     /** @depends testSetConfigurableOptionsZeroesExistingNonZeroValues */
@@ -311,12 +307,11 @@ class ConfigurableVariantTest extends TestCase
     {
         self::$pc->setConfigurableOptions(self::$testProductId, [99902]);
 
-        $pov = self::$db->query("SELECT price, quantity FROM " . DB_PREFIX . "product_option_value WHERE product_id = '" . self::$testProductId . "' AND option_id = '99902'");
+        $pov = self::$db->query("SELECT price FROM " . DB_PREFIX . "product_option_value WHERE product_id = '" . self::$testProductId . "' AND option_id = '99902'");
         $this->assertGreaterThan(0, $pov->num_rows);
 
         foreach ($pov->rows as $row) {
             $this->assertEquals('0', $row['price']);
-            $this->assertEquals('0', $row['quantity']);
         }
     }
 
@@ -337,10 +332,9 @@ class ConfigurableVariantTest extends TestCase
 
         self::$pc->disableConfigurable(self::$testProductId);
 
-        $pov = self::$db->query("SELECT price, quantity FROM " . DB_PREFIX . "product_option_value WHERE product_id = '" . self::$testProductId . "' AND option_id = '99902'");
+        $pov = self::$db->query("SELECT price FROM " . DB_PREFIX . "product_option_value WHERE product_id = '" . self::$testProductId . "' AND option_id = '99902'");
         foreach ($pov->rows as $row) {
             $this->assertEquals('0', $row['price']);
-            $this->assertEquals('0', $row['quantity']);
         }
 
         self::$pc->deleteAllVariants(self::$testProductId);
