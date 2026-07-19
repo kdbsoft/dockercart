@@ -93,7 +93,7 @@
           <div class="form-group">
             <label class="col-sm-2 control-label">{{ entry_layout }}</label>
             <div class="col-sm-10">
-              <select name="layout" class="form-control" style="max-width:200px;">
+              <select name="layout" class="form-control">
                 <option value="grid" {% if layout == 'grid' %}selected{% endif %}>{{ text_layout_grid }}</option>
                 <option value="stack" {% if layout == 'stack' %}selected{% endif %}>{{ text_layout_stack }}</option>
               </select>
@@ -102,7 +102,7 @@
           <div class="form-group">
             <label class="col-sm-2 control-label">{{ entry_full_width }}</label>
             <div class="col-sm-10">
-              <select name="full_width" class="form-control" style="max-width:200px;">
+              <select name="full_width" class="form-control">
                 <option value="0" {% if not full_width %}selected{% endif %}>{{ text_full_width_disabled }}</option>
                 <option value="1" {% if full_width %}selected{% endif %}>{{ text_full_width_enabled }}</option>
               </select>
