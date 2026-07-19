@@ -1,6 +1,11 @@
 <?php
 
-$_['tab_general'] = 'Загальне';
+$_['tab_description'] = 'Опис';
+$_['tab_links_group'] = 'Зв\'язки';
+$_['tab_images_group'] = 'Зображення';
+$_['tab_params_group'] = 'Параметри';
+$_['tab_seo'] = 'SEO';
+$_['tab_design'] = 'Дизайн';
 
 $_['column_image'] = 'Зображення';
 $_['column_action'] = 'Дія';
@@ -16,13 +21,13 @@ $_['entry_icon'] = 'Іконка';
 $_['entry_background_image'] = 'Фонове зображення';
 $_['entry_keyword'] = 'Ключове слово';
 $_['entry_layout'] = 'Перевизначення макета';
-$_['entry_meta_description'] = 'Опис метатегу';
+$_['entry_meta_description'] = 'Мета-опис';
 $_['entry_meta_h1'] = 'HTML-тег H1';
-$_['entry_meta_keyword'] = 'Ключові слова метатегів';
+$_['entry_meta_keyword'] = 'Мета-ключові слова';
 $_['entry_meta_title'] = 'Метатег Title';
 $_['entry_name'] = 'Назва категорії';
 $_['entry_noindex'] = 'Індексація';
-$_['entry_parent'] = 'Верхня категорія';
+$_['entry_parent'] = 'Батьківська категорія';
 $_['entry_related_article'] = 'Рекомендовані статті:';
 $_['entry_related_wb'] = 'Рекомендовані товари:';
 $_['entry_sort_order'] = 'Порядок сортування';

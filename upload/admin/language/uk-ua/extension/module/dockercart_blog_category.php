@@ -1,5 +1,9 @@
 <?php
 
+$_['tab_description'] = 'Опис';
+$_['tab_params_group'] = 'Параметри';
+$_['tab_images_group'] = 'Зображення';
+
 $_['column_action'] = 'Дія';
 $_['column_name'] = 'Назва категорії';
 $_['column_sort_order'] = 'Порядок сортування';
@@ -7,8 +11,8 @@ $_['column_status'] = 'Статус';
 $_['entry_description'] = 'Опис';
 $_['entry_image'] = 'Зображення';
 $_['entry_keyword'] = 'Ключове слово';
-$_['entry_meta_description'] = 'Опис метатегу';
-$_['entry_meta_keyword'] = 'Ключові слова метатегів';
+$_['entry_meta_description'] = 'Мета-опис';
+$_['entry_meta_keyword'] = 'Мета-ключові слова';
 $_['entry_meta_title'] = 'Метатег Title';
 $_['entry_name'] = 'Назва категорії';
 $_['entry_parent'] = 'Батьківська категорія';

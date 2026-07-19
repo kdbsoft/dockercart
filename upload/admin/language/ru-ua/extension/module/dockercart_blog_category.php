@@ -1,5 +1,9 @@
 <?php
 
+$_['tab_description'] = 'Описание';
+$_['tab_params_group'] = 'Параметры';
+$_['tab_images_group'] = 'Изображения';
+
 $_['column_action'] = 'Действие';
 $_['column_name'] = 'Название категории';
 $_['column_sort_order'] = 'Порядок сортировки';

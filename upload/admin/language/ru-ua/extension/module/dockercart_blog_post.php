@@ -1,5 +1,9 @@
 <?php
 
+$_['tab_description'] = 'Описание';
+$_['tab_params_group'] = 'Параметры';
+$_['tab_images_group'] = 'Изображения';
+
 $_['button_add'] = 'Добавить новую';
 $_['button_cancel'] = 'Отмена';
 $_['button_delete'] = 'Удалить';
