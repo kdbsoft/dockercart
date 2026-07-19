@@ -69,3 +69,5 @@ $_['button_cart'] = 'В корзину';
 // Messenger
 $_['text_write_in_messenger']    = 'Написать в';
 $_['text_we_are_in_messengers']  = 'Мы в мессенджерах';
+$_['text_video']                 = 'Смотреть видео';
+$_['text_view_3d']               = 'Посмотреть в 3D';

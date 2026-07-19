@@ -79,6 +79,18 @@ class ModelCatalogProduct extends Model
             );
         }
 
+        if (isset($data["model_3d"])) {
+            $this->db->query(
+                "UPDATE " .
+                    DB_PREFIX .
+                    "product SET model_3d = '" .
+                    $this->db->escape($data["model_3d"]) .
+                    "' WHERE product_id = '" .
+                    (int) $product_id .
+                    "'",
+            );
+        }
+
         foreach ($data["product_description"] as $language_id => $value) {
             $this->db->query(
                 "INSERT INTO " .
@@ -386,15 +398,39 @@ class ModelCatalogProduct extends Model
 
         if (isset($data["product_image"])) {
             foreach ($data["product_image"] as $product_image) {
+                $language_id = !empty($product_image["language_id"]) ? (int) $product_image["language_id"] : "NULL";
                 $this->db->query(
                     "INSERT INTO " .
                         DB_PREFIX .
                         "product_image SET product_id = '" .
                         (int) $product_id .
-                        "', image = '" .
+                        "', language_id = " .
+                        $language_id .
+                        ", image = '" .
                         $this->db->escape($product_image["image"]) .
                         "', sort_order = '" .
                         (int) $product_image["sort_order"] .
+                        "'",
+                );
+            }
+        }
+
+        if (isset($data["product_video"])) {
+            foreach ($data["product_video"] as $product_video) {
+                $language_id = !empty($product_video["language_id"]) ? (int) $product_video["language_id"] : "NULL";
+                $this->db->query(
+                    "INSERT INTO " .
+                        DB_PREFIX .
+                        "product_video SET product_id = '" .
+                        (int) $product_id .
+                        "', language_id = " .
+                        $language_id .
+                        ", video_type = '" .
+                        $this->db->escape($product_video["video_type"]) .
+                        "', video = '" .
+                        $this->db->escape($product_video["video"]) .
+                        "', sort_order = '" .
+                        (int) $product_video["sort_order"] .
                         "'",
                 );
             }
@@ -779,12 +815,15 @@ class ModelCatalogProduct extends Model
 
         if (isset($data["product_image"])) {
             foreach ($data["product_image"] as $product_image) {
+                $language_id = !empty($product_image["language_id"]) ? (int) $product_image["language_id"] : "NULL";
                 $this->db->query(
                     "INSERT INTO " .
                         DB_PREFIX .
                         "product_image SET product_id = '" .
                         (int) $product_id .
-                        "', image = '" .
+                        "', language_id = " .
+                        $language_id .
+                        ", image = '" .
                         $this->db->escape($product_image["image"]) .
                         "', sort_order = '" .
                         (int) $product_image["sort_order"] .
@@ -1071,6 +1110,18 @@ class ModelCatalogProduct extends Model
                     DB_PREFIX .
                     "product SET image = '" .
                     $this->db->escape($data["image"]) .
+                    "' WHERE product_id = '" .
+                    (int) $product_id .
+                    "'",
+            );
+        }
+
+        if (isset($data["model_3d"])) {
+            $this->db->query(
+                "UPDATE " .
+                    DB_PREFIX .
+                    "product SET model_3d = '" .
+                    $this->db->escape($data["model_3d"]) .
                     "' WHERE product_id = '" .
                     (int) $product_id .
                     "'",
@@ -1498,15 +1549,47 @@ class ModelCatalogProduct extends Model
 
         if (isset($data["product_image"])) {
             foreach ($data["product_image"] as $product_image) {
+                $language_id = !empty($product_image["language_id"]) ? (int) $product_image["language_id"] : "NULL";
                 $this->db->query(
                     "INSERT INTO " .
                         DB_PREFIX .
                         "product_image SET product_id = '" .
                         (int) $product_id .
-                        "', image = '" .
+                        "', language_id = " .
+                        $language_id .
+                        ", image = '" .
                         $this->db->escape($product_image["image"]) .
                         "', sort_order = '" .
                         (int) $product_image["sort_order"] .
+                        "'",
+                );
+            }
+        }
+
+        $this->db->query(
+            "DELETE FROM " .
+                DB_PREFIX .
+                "product_video WHERE product_id = '" .
+                (int) $product_id .
+                "'",
+        );
+
+        if (isset($data["product_video"])) {
+            foreach ($data["product_video"] as $product_video) {
+                $language_id = !empty($product_video["language_id"]) ? (int) $product_video["language_id"] : "NULL";
+                $this->db->query(
+                    "INSERT INTO " .
+                        DB_PREFIX .
+                        "product_video SET product_id = '" .
+                        (int) $product_id .
+                        "', language_id = " .
+                        $language_id .
+                        ", video_type = '" .
+                        $this->db->escape($product_video["video_type"]) .
+                        "', video = '" .
+                        $this->db->escape($product_video["video"]) .
+                        "', sort_order = '" .
+                        (int) $product_video["sort_order"] .
                         "'",
                 );
             }
@@ -1748,6 +1831,7 @@ class ModelCatalogProduct extends Model
             );
             $data["product_discount"] = $this->getProductDiscounts($product_id);
             $data["product_image"] = $this->getProductImages($product_id);
+            $data["product_video"] = $this->getProductVideos($product_id);
             $data["product_option"] = $this->getProductOptions($product_id);
             $data["product_related"] = $this->getProductRelated($product_id);
             $data["product_reward"] = $this->getProductRewards($product_id);
@@ -2441,6 +2525,19 @@ class ModelCatalogProduct extends Model
             "SELECT * FROM " .
                 DB_PREFIX .
                 "product_image WHERE product_id = '" .
+                (int) $product_id .
+                "' ORDER BY sort_order ASC",
+        );
+
+        return $query->rows;
+    }
+
+    public function getProductVideos($product_id)
+    {
+        $query = $this->db->query(
+            "SELECT * FROM " .
+                DB_PREFIX .
+                "product_video WHERE product_id = '" .
                 (int) $product_id .
                 "' ORDER BY sort_order ASC",
         );

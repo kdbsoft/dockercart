@@ -50,7 +50,7 @@ class ControllerCommonFileManager extends Controller {
 			}
 
 			// Get files — always show both images and videos
-			$files = glob($directory . '/' . $filter_name . '*.{jpg,jpeg,png,gif,webp,svg,mp4,webm,ogv,JPG,JPEG,PNG,GIF,WEBP,SVG,MP4,WEBM,OGV}', GLOB_BRACE);
+			$files = glob($directory . '/' . $filter_name . '*.{jpg,jpeg,png,gif,webp,svg,mp4,webm,ogv,glb,JPG,JPEG,PNG,GIF,WEBP,SVG,MP4,WEBM,OGV,GLB}', GLOB_BRACE);
 
 			if (!$files) {
 				$files = array();
@@ -90,10 +90,13 @@ class ControllerCommonFileManager extends Controller {
 			} elseif (is_file($image)) {
 				$ext = utf8_strtolower(pathinfo($image, PATHINFO_EXTENSION));
 				$is_video = in_array($ext, array('mp4', 'webm', 'ogv'));
+				$is_model = in_array($ext, array('glb'));
 				$is_svg = ($ext === 'svg');
 
 				if ($is_video) {
-					$thumb = $this->model_tool_image->resize('no_image.png', 100, 100);
+					$thumb = $server . 'image/video_placeholder.svg';
+				} elseif ($is_model) {
+					$thumb = $server . 'image/model_3d_placeholder.svg';
 				} elseif ($is_svg) {
 					$thumb = $server . 'image/' . utf8_substr($image, utf8_strlen(DIR_IMAGE));
 				} else {
@@ -275,10 +278,11 @@ class ControllerCommonFileManager extends Controller {
 					}
 
 					// Allowed extensions (both image and video regardless of type)
-					$allowed_ext = array('jpg', 'jpeg', 'gif', 'png', 'webp', 'svg', 'mp4', 'webm', 'ogv');
+					$allowed_ext = array('jpg', 'jpeg', 'gif', 'png', 'webp', 'svg', 'mp4', 'webm', 'ogv', 'glb');
 					$allowed_mime = array(
 						'image/jpeg', 'image/pjpeg', 'image/png', 'image/x-png', 'image/gif', 'image/webp', 'image/svg+xml',
-						'video/mp4', 'video/webm', 'video/ogg'
+						'video/mp4', 'video/webm', 'video/ogg',
+						'model/gltf-binary'
 					);
 
 					if (!in_array(utf8_strtolower(utf8_substr(strrchr($filename, '.'), 1)), $allowed_ext)) {

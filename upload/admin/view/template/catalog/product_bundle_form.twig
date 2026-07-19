@@ -30,120 +30,110 @@
 </div>
       <div class="panel-body">
         <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-bundle" class="form-horizontal">
-          <ul class="nav nav-tabs">
-            <li class="active"><a href="#tab-general" data-toggle="tab"><i class="fa fa-file-text"></i> {{ tab_general }}</a></li>
-            <li><a href="#tab-data" data-toggle="tab"><i class="fa fa-database"></i> {{ tab_data }}</a></li>
-          </ul>
-          <div class="tab-content">
-            <div class="tab-pane active" id="tab-general">
-              <div class="form-group">
-                <label class="col-sm-2 control-label" for="input-name">{{ entry_name }}</label>
-                <div class="col-sm-10">
-                  <input type="text" name="name" value="{{ name }}" placeholder="{{ entry_name }}" id="input-name" class="form-control" />
-                  {% if error_name %}<div class="text-danger">{{ error_name }}</div>{% endif %}
-                  <div class="help-block">{{ help_name }}</div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-name">{{ entry_name }}</label>
+            <div class="col-sm-10">
+              <input type="text" name="name" value="{{ name }}" placeholder="{{ entry_name }}" id="input-name" class="form-control" />
+              {% if error_name %}<div class="text-danger">{{ error_name }}</div>{% endif %}
+              <div class="help-block">{{ help_name }}</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-product"><span data-toggle="tooltip" title="{{ help_product }}">{{ entry_product }}</span></label>
+            <div class="col-sm-10">
+              <input type="text" name="product" value="" placeholder="{{ text_select_product }}" id="input-product" class="form-control" autocomplete="off" />
+              {% if error_products %}<div class="text-danger">{{ error_products }}</div>{% endif %}
+              <div id="bundle-products" class="well well-sm" style="height: 200px; overflow: auto; margin-top: 10px;">
+                {% for product in bundle_products %}
+                <div id="bundle-product{{ product.product_id }}"><i class="fa fa-minus-circle"></i> {{ product.name }} ({{ product.model }}) — {{ product.price }}
+                  <input type="hidden" name="bundle_product[]" value="{{ product.product_id }}" />
                 </div>
-              </div>
-              <div class="form-group">
-                <label class="col-sm-2 control-label" for="input-product"><span data-toggle="tooltip" title="{{ help_product }}">{{ entry_product }}</span></label>
-                <div class="col-sm-10">
-                  <input type="text" name="product" value="" placeholder="{{ text_select_product }}" id="input-product" class="form-control" autocomplete="off" />
-                  {% if error_products %}<div class="text-danger">{{ error_products }}</div>{% endif %}
-                  <div id="bundle-products" class="well well-sm" style="height: 200px; overflow: auto; margin-top: 10px;">
-                    {% for product in bundle_products %}
-                    <div id="bundle-product{{ product.product_id }}"><i class="fa fa-minus-circle"></i> {{ product.name }} ({{ product.model }}) — {{ product.price }}
-                      <input type="hidden" name="bundle_product[]" value="{{ product.product_id }}" />
-                    </div>
-                    {% endfor %}
-                  </div>
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="col-sm-2 control-label" for="input-discount-type"><span data-toggle="tooltip" title="{{ help_discount_type }}">{{ entry_discount_type }}</span></label>
-                <div class="col-sm-10">
-                  <select name="discount_type" id="input-discount-type" class="form-control">
-                    <option value="percentage" {% if discount_type == 'percentage' %}selected{% endif %}>{{ text_percentage }}</option>
-                    <option value="fixed" {% if discount_type == 'fixed' %}selected{% endif %}>{{ text_fixed }}</option>
-                  </select>
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="col-sm-2 control-label" for="input-discount-value"><span data-toggle="tooltip" title="{{ help_discount_value }}">{{ entry_discount_value }}</span></label>
-                <div class="col-sm-10">
-                  <input type="text" name="discount_value" value="{{ discount_value }}" placeholder="{{ entry_discount_value }}" id="input-discount-value" class="form-control" />
-                  {% if error_discount_value %}<div class="text-danger">{{ error_discount_value }}</div>{% endif %}
-                </div>
+                {% endfor %}
               </div>
             </div>
-            <div class="tab-pane" id="tab-data">
-              <div class="form-group">
-                <label class="col-sm-2 control-label" for="input-date-start">{{ entry_date_start }}</label>
-                <div class="col-sm-3">
-                  <div class="input-group date">
-                    <input type="text" name="date_start" value="{{ date_start }}" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" id="input-date-start" class="form-control" />
-                    <span class="input-group-btn"><button class="btn btn-default" type="button"><i class="fa fa-calendar"></i></button></span>
-                  </div>
-                </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-discount-type"><span data-toggle="tooltip" title="{{ help_discount_type }}">{{ entry_discount_type }}</span></label>
+            <div class="col-sm-10">
+              <select name="discount_type" id="input-discount-type" class="form-control">
+                <option value="percentage" {% if discount_type == 'percentage' %}selected{% endif %}>{{ text_percentage }}</option>
+                <option value="fixed" {% if discount_type == 'fixed' %}selected{% endif %}>{{ text_fixed }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-discount-value"><span data-toggle="tooltip" title="{{ help_discount_value }}">{{ entry_discount_value }}</span></label>
+            <div class="col-sm-10">
+              <input type="text" name="discount_value" value="{{ discount_value }}" placeholder="{{ entry_discount_value }}" id="input-discount-value" class="form-control" />
+              {% if error_discount_value %}<div class="text-danger">{{ error_discount_value }}</div>{% endif %}
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-date-start">{{ entry_date_start }}</label>
+            <div class="col-sm-3">
+              <div class="input-group date">
+                <input type="text" name="date_start" value="{{ date_start }}" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" id="input-date-start" class="form-control" />
+                <span class="input-group-btn"><button class="btn btn-default" type="button"><i class="fa fa-calendar"></i></button></span>
               </div>
-              <div class="form-group">
-                <label class="col-sm-2 control-label" for="input-date-end">{{ entry_date_end }}</label>
-                <div class="col-sm-3">
-                  <div class="input-group date">
-                    <input type="text" name="date_end" value="{{ date_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" id="input-date-end" class="form-control" />
-                    <span class="input-group-btn"><button class="btn btn-default" type="button"><i class="fa fa-calendar"></i></button></span>
-                  </div>
-                  {% if error_date_end %}<div class="text-danger">{{ error_date_end }}</div>{% endif %}
-                </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-date-end">{{ entry_date_end }}</label>
+            <div class="col-sm-3">
+              <div class="input-group date">
+                <input type="text" name="date_end" value="{{ date_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" id="input-date-end" class="form-control" />
+                <span class="input-group-btn"><button class="btn btn-default" type="button"><i class="fa fa-calendar"></i></button></span>
               </div>
-              <div class="form-group">
-                <label class="col-sm-2 control-label" for="input-sort-order">{{ entry_sort_order }}</label>
-                <div class="col-sm-10">
-                  <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control" />
+              {% if error_date_end %}<div class="text-danger">{{ error_date_end }}</div>{% endif %}
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-sort-order">{{ entry_sort_order }}</label>
+            <div class="col-sm-10">
+              <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label"><span data-toggle="tooltip" title="{{ help_auto_renew }}">{{ entry_auto_renew }}</span></label>
+            <div class="col-sm-10">
+              <label class="radio-inline">{% if auto_renew %}
+                <input type="radio" name="auto_renew" value="1" checked="checked" />
+                {{ text_yes }}
+                {% else %}
+                <input type="radio" name="auto_renew" value="1" />
+                {{ text_yes }}
+                {% endif %}</label>
+              <label class="radio-inline">{% if not auto_renew %}
+                <input type="radio" name="auto_renew" value="0" checked="checked" />
+                {{ text_no }}
+                {% else %}
+                <input type="radio" name="auto_renew" value="0" />
+                {{ text_no }}
+                {% endif %}</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label">{{ entry_store }}</label>
+            <div class="col-sm-10">
+              <div class="well well-sm" style="height: 150px; overflow: auto;">
+                {% for store in stores %}
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" name="bundle_store[]" value="{{ store.store_id }}" {% if store.store_id in bundle_store %}checked{% endif %} />
+                    {{ store.name }}
+                  </label>
                 </div>
+                {% endfor %}
               </div>
-              <div class="form-group">
-                <label class="col-sm-2 control-label"><span data-toggle="tooltip" title="{{ help_auto_renew }}">{{ entry_auto_renew }}</span></label>
-                <div class="col-sm-10">
-                  <label class="radio-inline">{% if auto_renew %}
-                    <input type="radio" name="auto_renew" value="1" checked="checked" />
-                    {{ text_yes }}
-                    {% else %}
-                    <input type="radio" name="auto_renew" value="1" />
-                    {{ text_yes }}
-                    {% endif %}</label>
-                  <label class="radio-inline">{% if not auto_renew %}
-                    <input type="radio" name="auto_renew" value="0" checked="checked" />
-                    {{ text_no }}
-                    {% else %}
-                    <input type="radio" name="auto_renew" value="0" />
-                    {{ text_no }}
-                    {% endif %}</label>
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="col-sm-2 control-label">{{ entry_store }}</label>
-                <div class="col-sm-10">
-                  <div class="well well-sm" style="height: 150px; overflow: auto;">
-                    {% for store in stores %}
-                    <div class="checkbox">
-                      <label>
-                        <input type="checkbox" name="bundle_store[]" value="{{ store.store_id }}" {% if store.store_id in bundle_store %}checked{% endif %} />
-                        {{ store.name }}
-                      </label>
-                    </div>
-                    {% endfor %}
-                  </div>
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
-                <div class="col-sm-10">
-                  <select name="status" id="input-status" class="form-control">
-                    <option value="1" {% if status %}selected{% endif %}>{{ text_enabled }}</option>
-                    <option value="0" {% if not status %}selected{% endif %}>{{ text_disabled }}</option>
-                  </select>
-                </div>
-              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
+            <div class="col-sm-10">
+              <select name="status" id="input-status" class="form-control">
+                <option value="1" {% if status %}selected{% endif %}>{{ text_enabled }}</option>
+                <option value="0" {% if not status %}selected{% endif %}>{{ text_disabled }}</option>
+              </select>
             </div>
           </div>
         </form>

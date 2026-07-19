@@ -30,6 +30,18 @@
   .dc-color-option.active { border-color: #2563eb; background: #eff6ff; }
   .dc-color-option.oos { cursor: not-allowed; border-color: #f3f4f6; opacity: 0.5; }
 
+  /* ── 3D Modal (vanilla, no Bootstrap) ──────────────── */
+  .dc-modal-overlay { position: fixed; inset: 0; z-index: 1050; background: rgba(0,0,0,0.5); }
+  .dc-modal-overlay.dc-hidden { display: none; }
+  #model-3d-modal { position: fixed; z-index: 1060; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90vw; display: none; }
+  #model-3d-modal.dc-open { display: block; }
+  #model-3d-modal .modal-dialog { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-width: 90vw; margin: 0 auto; }
+  #model-3d-modal .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #e5e7eb; }
+  #model-3d-modal .modal-header .close { background: none; border: none; font-size: 24px; cursor: pointer; color: #6b7280; padding: 0; line-height: 1; }
+  #model-3d-modal .modal-header .close:hover { color: #111827; }
+  #model-3d-modal .modal-title { margin: 0; font-size: 16px; font-weight: 600; }
+  #model-3d-modal .modal-body { padding: 0; }
+
 </style>
 
 <main class="py-20 sm:py-2 lg:py-4 px-4 sm:px-6 lg:px-8 bg-white">
@@ -57,7 +69,7 @@
             </span>
           </button>
         </div>
-        {% if images %}
+        {% if images or model_3d or (video_type and video_url) %}
         <div class="grid grid-cols-4 gap-3 mt-3">
           <button class="dc-thumb active rounded-2xl border-2 overflow-hidden" data-img="{{ display is not empty ? display : 'image/no_image.png' }}" data-display="{{ display is not empty ? display : 'image/no_image.png' }}" data-popup="{{ popup is not empty ? popup : 'image/no_image.png' }}" data-orientation="{{ image_orientation }}">
             <img src="{{ thumb is not empty ? thumb : 'image/no_image.png' }}" alt="{{ heading_title }}" class="w-full h-20 object-cover" />
@@ -67,9 +79,55 @@
             <img src="{{ image.thumb is not empty ? image.thumb : 'image/no_image.png' }}" alt="{{ heading_title }}" class="w-full h-20 object-cover" />
           </button>
           {% endfor %}
+          {% if video_type and video_url %}
+          <button type="button" class="dc-thumb dc-thumb-media rounded-2xl border-2 border-gray-200 overflow-hidden flex flex-col items-center justify-center bg-gray-900 h-20" onclick="toggleProductVideo(this)">
+            <i data-lucide="play-circle" class="w-8 h-8 text-white mb-1"></i>
+            <span class="text-white text-[10px]">{{ text_video }}</span>
+          </button>
+          {% endif %}
+          {% if model_3d %}
+          <button type="button" class="dc-thumb dc-thumb-media rounded-2xl border-2 border-gray-200 overflow-hidden flex flex-col items-center justify-center bg-gray-900 h-20" onclick="open3DViewer(this)">
+            <i data-lucide="box" class="w-8 h-8 text-white mb-1"></i>
+            <span class="text-white text-[10px]">3D</span>
+          </button>
+          {% endif %}
         </div>
         {% endif %}
+        <div id="dc-video-player" class="mt-3 rounded-3xl overflow-hidden" style="display:none;">
+          {% if video_type == 'youtube' %}
+          <iframe src="" id="dc-youtube-iframe" data-src="{{ video_url }}" class="w-full aspect-video" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+          {% elseif video_type == 'mp4' %}
+          <video id="dc-mp4-video" class="w-full aspect-video" controls playsinline preload="metadata">
+            <source src="{{ video_url }}" type="video/mp4">
+          </video>
+          {% endif %}
+        </div>
       </div>
+
+      <!-- 3D Model Modal -->
+      {% if model_3d %}
+      <div id="model-3d-modal">
+        <div class="modal-dialog">
+          <div class="modal-header">
+            <h4 class="modal-title">{{ heading_title }} — 3D</h4>
+            <button type="button" class="close" onclick="closeModal3d()" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          </div>
+          <div class="modal-body">
+            <model-viewer id="dc-model-viewer" src="{{ model_3d_url }}" alt="{{ heading_title }}" auto-rotate camera-controls ar ar-modes="webxr scene-viewer quick-look" style="width:100%;height:70vh;"></model-viewer>
+          </div>
+        </div>
+      </div>
+      <script type="importmap">
+      {
+        "imports": {
+          "@google/model-viewer": "https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"
+        }
+      }
+      </script>
+      <script type="module">
+        import '@google/model-viewer';
+      </script>
+      {% endif %}
 
       <!-- Info -->
       <div>
@@ -654,7 +712,7 @@ function initOptionButtons() {
 /* ── Gallery + GLightbox ───────────────────────────────── */
 const initGallery = () => {
   const mainImg = document.getElementById('dc-main-img');
-  const thumbs  = [...document.querySelectorAll('.dc-thumb')];
+  const thumbs  = [...document.querySelectorAll('.dc-thumb:not(.dc-thumb-media)')];
   const zoomBtn = document.getElementById('dc-zoom-btn');
   if (!zoomBtn) return;
 
@@ -674,10 +732,14 @@ const initGallery = () => {
 
   let activeIdx = 0;
 
+  let dcActiveImageThumb = thumbs.find(t => t.classList.contains('active')) || thumbs[0] || null;
+
   thumbs.forEach((btn, idx) => {
     btn.addEventListener('click', () => {
       thumbs.forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.dc-thumb-media').forEach(t => t.classList.remove('active'));
       btn.classList.add('active');
+      dcActiveImageThumb = btn;
       if (mainImg) {
         const newOrient = btn.dataset.orientation || 'landscape';
         Object.values(aspectMap).forEach(cls => mainImg.classList.remove(cls));
@@ -686,6 +748,16 @@ const initGallery = () => {
         mainImg.src = btn.dataset.display || btn.dataset.popup;
         if (btn.dataset.popup) mainImg.dataset.popup = btn.dataset.popup;
       }
+
+      // Сховати відео-плеєр при перемиканні на зображення
+      const videoPlayer = document.getElementById('dc-video-player');
+      if (videoPlayer) videoPlayer.style.display = 'none';
+      if (mainImg) mainImg.style.display = '';
+      if (zoomBtn) zoomBtn.style.display = '';
+
+      const mp4Video = document.getElementById('dc-mp4-video');
+      if (mp4Video) mp4Video.pause();
+
       activeIdx = idx;
     });
   });
@@ -728,6 +800,78 @@ document.addEventListener('DOMContentLoaded', function() {
 
   if (typeof lucide !== 'undefined') lucide.createIcons();
 });
+
+function toggleProductVideo(btn) {
+  var player = document.getElementById('dc-video-player');
+  var mainImg = document.getElementById('dc-main-img');
+  var zoomBtn = document.getElementById('dc-zoom-btn');
+
+  if (!player) return;
+
+  if (player.style.display === 'none') {
+    player.style.display = 'block';
+    if (mainImg) mainImg.style.display = 'none';
+    if (zoomBtn) zoomBtn.style.display = 'none';
+
+    document.querySelectorAll('.dc-thumb').forEach(function(t) { t.classList.remove('active'); });
+    if (btn) btn.classList.add('active');
+
+    var youtubeIframe = document.getElementById('dc-youtube-iframe');
+    if (youtubeIframe && !youtubeIframe.src) {
+      youtubeIframe.src = youtubeIframe.dataset.src;
+    }
+
+    var mp4Video = document.getElementById('dc-mp4-video');
+    if (mp4Video) {
+      mp4Video.currentTime = 0;
+      mp4Video.play().catch(function() {});
+    }
+  } else {
+    player.style.display = 'none';
+    if (mainImg) mainImg.style.display = '';
+    if (zoomBtn) zoomBtn.style.display = '';
+
+    var mp4Video = document.getElementById('dc-mp4-video');
+    if (mp4Video) mp4Video.pause();
+
+    var restoreThumb = dcActiveImageThumb || document.querySelector('.dc-thumb:not(.dc-thumb-media)');
+    document.querySelectorAll('.dc-thumb').forEach(function(t) { t.classList.remove('active'); });
+    if (restoreThumb) restoreThumb.classList.add('active');
+  }
+}
+
+function open3DViewer(btn) {
+  var modal = document.getElementById('model-3d-modal');
+  if (modal) {
+    document.querySelectorAll('.dc-thumb').forEach(function(t) { t.classList.remove('active'); });
+    if (btn) btn.classList.add('active');
+
+    var backdrop = document.getElementById('dc-modal-backdrop');
+    if (!backdrop) {
+      backdrop = document.createElement('div');
+      backdrop.id = 'dc-modal-backdrop';
+      backdrop.className = 'dc-modal-overlay dc-hidden';
+      backdrop.addEventListener('click', function(e) {
+        if (e.target === backdrop) closeModal3d();
+      });
+      document.body.appendChild(backdrop);
+    }
+    backdrop.classList.remove('dc-hidden');
+    modal.classList.add('dc-open');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeModal3d() {
+  var modal = document.getElementById('model-3d-modal');
+  var backdrop = document.getElementById('dc-modal-backdrop');
+  if (modal) modal.classList.remove('dc-open');
+  if (backdrop) backdrop.classList.add('dc-hidden');
+  document.body.style.overflow = '';
+  var restoreThumb = dcActiveImageThumb || document.querySelector('.dc-thumb:not(.dc-thumb-media)');
+  document.querySelectorAll('.dc-thumb').forEach(function(t) { t.classList.remove('active'); });
+  if (restoreThumb) restoreThumb.classList.add('active');
+}
 </script>
 
 <script type="text/javascript">
