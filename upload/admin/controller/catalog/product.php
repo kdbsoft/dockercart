@@ -548,7 +548,6 @@ class ControllerCatalogProduct extends Controller {
 
 		$product_ids = array_map(function($r) { return (int)$r['product_id']; }, $results);
 		$categories_by_product = array();
-		$options_by_product = array();
 		$option_qty_by_product = array();
 
 		if ($product_ids) {
@@ -559,15 +558,9 @@ class ControllerCatalogProduct extends Controller {
 				$categories_by_product[$row['product_id']] = $row;
 			}
 
-			$opt_query = $this->db->query("SELECT product_id, COUNT(*) AS option_count FROM " . DB_PREFIX . "product_option WHERE product_id IN (" . $ids_str . ") GROUP BY product_id");
+			$variant_qty_query = $this->db->query("SELECT pv.product_id, SUM(pv.quantity) AS total_qty, COUNT(*) AS values_count FROM " . DB_PREFIX . "product_configurable pc INNER JOIN " . DB_PREFIX . "product_variant pv ON (pv.product_id = pc.product_id) WHERE pc.is_configurable = '1' AND pv.status = '1' AND pc.product_id IN (" . $ids_str . ") GROUP BY pv.product_id");
 
-			foreach ($opt_query->rows as $row) {
-				$options_by_product[$row['product_id']] = (int)$row['option_count'];
-			}
-
-			$opt_qty_query = $this->db->query("SELECT product_id, SUM(quantity) AS total_qty, COUNT(*) AS values_count FROM " . DB_PREFIX . "product_option_value WHERE product_id IN (" . $ids_str . ") GROUP BY product_id");
-
-			foreach ($opt_qty_query->rows as $row) {
+			foreach ($variant_qty_query->rows as $row) {
 				$option_qty_by_product[$row['product_id']] = array(
 					'total_qty'    => (float)$row['total_qty'],
 					'values_count' => (int)$row['values_count']
@@ -600,9 +593,9 @@ class ControllerCatalogProduct extends Controller {
 
 			$pid = $result['product_id'];
 			$cat_data = isset($categories_by_product[$pid]) ? $categories_by_product[$pid] : null;
-			$option_count = isset($options_by_product[$pid]) ? $options_by_product[$pid] : 0;
-			$has_options = $option_count > 0;
 			$opt_qty = isset($option_qty_by_product[$pid]) ? $option_qty_by_product[$pid] : null;
+			$has_options = $opt_qty !== null;
+			$option_count = $opt_qty ? (int)$opt_qty['values_count'] : 0;
 
 			if ($has_options && $opt_qty) {
 				$display_qty = $this->formatQuantityForDisplay($opt_qty['total_qty']);
