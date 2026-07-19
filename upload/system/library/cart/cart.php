@@ -282,7 +282,7 @@ class Cart
                             $option_query->row["type"] == "color"
                         ) {
                             $option_value_query = $this->db->query(
-                                "SELECT pov.option_value_id, ovd.name, pov.quantity, pov.subtract, COALESCE(cgp.price, pov.price) AS price, COALESCE(cgp.price_prefix, pov.price_prefix) AS price_prefix, pov.points, pov.points_prefix, pov.weight, pov.weight_prefix FROM " .
+                                "SELECT pov.option_value_id, ovd.name, COALESCE(cgp.price, pov.price) AS price, COALESCE(cgp.price_prefix, pov.price_prefix) AS price_prefix, pov.points, pov.points_prefix, pov.weight, pov.weight_prefix FROM " .
                                     DB_PREFIX .
                                     "product_option_value pov LEFT JOIN " .
                                     DB_PREFIX .
@@ -348,17 +348,6 @@ class Cart
                                     }
                                 }
 
-                                $option_value_quantity = (float) $option_value_query->row["quantity"];
-
-                                if (
-                                    $option_value_query->row["subtract"] &&
-                                    !(int)$product_query->row['preorder'] &&
-                                    ($option_value_quantity <= 0 ||
-                                        $option_value_quantity < $cart["quantity"])
-                                ) {
-                                    $stock = false;
-                                }
-
                                 $option_data[] = [
                                     "product_option_id" => $product_option_id,
                                     "product_option_value_id" => $value,
@@ -371,10 +360,6 @@ class Cart
                                     "name" => $option_query->row["name"],
                                     "value" => $option_value_query->row["name"],
                                     "type" => $option_query->row["type"],
-                                    "quantity" =>
-                                        $option_value_query->row["quantity"],
-                                    "subtract" =>
-                                        $option_value_query->row["subtract"],
                                     "price" =>
                                         $option_value_query->row["price"],
                                     "price_prefix" =>
@@ -401,7 +386,7 @@ class Cart
                         ) {
                             foreach ($value as $product_option_value_id) {
                                 $option_value_query = $this->db->query(
-                                    "SELECT pov.option_value_id, pov.quantity, pov.subtract, COALESCE(cgp.price, pov.price) AS price, COALESCE(cgp.price_prefix, pov.price_prefix) AS price_prefix, pov.points, pov.points_prefix, pov.weight, pov.weight_prefix, ovd.name FROM " .
+                                    "SELECT pov.option_value_id, COALESCE(cgp.price, pov.price) AS price, COALESCE(cgp.price_prefix, pov.price_prefix) AS price_prefix, pov.points, pov.points_prefix, pov.weight, pov.weight_prefix, ovd.name FROM " .
                                         DB_PREFIX .
                                         "product_option_value pov LEFT JOIN " .
                                         DB_PREFIX .
@@ -471,17 +456,6 @@ class Cart
                                         }
                                     }
 
-                                    $option_value_quantity = (float) $option_value_query->row["quantity"];
-
-                                    if (
-                                        $option_value_query->row["subtract"] &&
-                                        !(int)$product_query->row['preorder'] &&
-                                        ($option_value_quantity <= 0 ||
-                                            $option_value_quantity < $cart["quantity"])
-                                    ) {
-                                        $stock = false;
-                                    }
-
                                     $option_data[] = [
                                         "product_option_id" => $product_option_id,
                                         "product_option_value_id" => $product_option_value_id,
@@ -495,14 +469,6 @@ class Cart
                                         "value" =>
                                             $option_value_query->row["name"],
                                         "type" => $option_query->row["type"],
-                                        "quantity" =>
-                                            $option_value_query->row[
-                                                "quantity"
-                                            ],
-                                        "subtract" =>
-                                            $option_value_query->row[
-                                                "subtract"
-                                            ],
                                         "price" =>
                                             $option_value_query->row["price"],
                                         "price_prefix" =>
@@ -540,8 +506,6 @@ class Cart
                                 "name" => $option_query->row["name"],
                                 "value" => $value,
                                 "type" => $option_query->row["type"],
-                                "quantity" => "",
-                                "subtract" => "",
                                 "price" => "",
                                 "price_prefix" => "",
                                 "points" => "",
