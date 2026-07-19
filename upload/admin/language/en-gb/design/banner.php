@@ -26,6 +26,7 @@ $_['entry_accent_hint']      = 'Used for badge background and [bracketed] text i
 $_['entry_primary_btn_text'] = 'Button Text';
 $_['entry_image']            = 'Image';
 $_['entry_link']             = 'Link';
+$_['entry_link_type']         = 'Link Type';
 $_['entry_link_search']      = 'Search by name...';
 $_['entry_status']           = 'Status';
 $_['entry_sort_order']       = 'Sort Order';

@@ -13,6 +13,7 @@ $_['entry_accent_hint'] = 'Используется в качестве фона
 $_['entry_accent_text'] = 'Акцентный текст';
 $_['entry_image'] = 'Изображение';
 $_['entry_link'] = 'Ссылка';
+$_['entry_link_type'] = 'Тип ссылки';
 $_['entry_link_search'] = 'Поиск по названию...';
 $_['entry_name'] = 'Название баннера';
 $_['entry_primary_btn_text'] = 'Текст кнопки';
