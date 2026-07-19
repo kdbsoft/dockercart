@@ -57,7 +57,7 @@ class ProductConfigurable {
 			$values = $this->db->query("SELECT option_value_id FROM " . DB_PREFIX . "option_value WHERE option_id = '" . (int)$option_id . "' ORDER BY sort_order ASC");
 
 			foreach ($values->rows as $val) {
-				$this->db->query("INSERT INTO " . DB_PREFIX . "product_option_value SET product_option_id = '" . (int)$product_option_id . "', product_id = '" . (int)$product_id . "', option_id = '" . (int)$option_id . "', option_value_id = '" . (int)$val['option_value_id'] . "', quantity = '0', subtract = '1', price = '0', price_prefix = '+', points = '0', points_prefix = '+', weight = '0', weight_prefix = '+'");
+				$this->db->query("INSERT INTO " . DB_PREFIX . "product_option_value SET product_option_id = '" . (int)$product_option_id . "', product_id = '" . (int)$product_id . "', option_id = '" . (int)$option_id . "', option_value_id = '" . (int)$val['option_value_id'] . "', price = '0', price_prefix = '+', points = '0', points_prefix = '+', weight = '0', weight_prefix = '+'");
 			}
 		}
 
@@ -223,7 +223,7 @@ class ProductConfigurable {
 			$this->db->query("
 				UPDATE " . DB_PREFIX . "product_option_value pov
 				INNER JOIN " . DB_PREFIX . "product_option po ON (pov.product_option_id = po.product_option_id)
-				SET pov.price = '0', pov.quantity = '0', pov.subtract = '0'
+				SET pov.price = '0'
 				WHERE po.product_id = '" . (int)$product_id . "'
 				AND pov.option_id IN (" . implode(',', $axis_option_ids) . ")
 			");

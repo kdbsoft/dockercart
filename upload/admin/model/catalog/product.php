@@ -222,10 +222,6 @@ class ModelCatalogProduct extends Model
                                     (int) $product_option_value[
                                         "option_value_id"
                                     ] .
-                                    "', quantity = '" .
-                                    (int) $product_option_value["quantity"] .
-                                    "', subtract = '" .
-                                    (int) $product_option_value["subtract"] .
                                     "', price = '" .
                                     (float) $product_option_value["price"] .
                                     "', price_prefix = '" .
@@ -599,10 +595,6 @@ class ModelCatalogProduct extends Model
                                     (int) $product_option_value[
                                         "option_value_id"
                                     ] .
-                                    "', quantity = '" .
-                                    (int) $product_option_value["quantity"] .
-                                    "', subtract = '" .
-                                    (int) $product_option_value["subtract"] .
                                     "', price = '" .
                                     (float) $product_option_value["price"] .
                                     "', price_prefix = '" .
@@ -1327,10 +1319,6 @@ class ModelCatalogProduct extends Model
                                     (int) $product_option_value[
                                         "option_value_id"
                                     ] .
-                                    "', quantity = '" .
-                                    (int) $product_option_value["quantity"] .
-                                    "', subtract = '" .
-                                    (int) $product_option_value["subtract"] .
                                     "', price = '" .
                                     (float) $product_option_value["price"] .
                                     "', price_prefix = '" .
@@ -2400,12 +2388,16 @@ class ModelCatalogProduct extends Model
             $product_option_value_data = [];
 
             $product_option_value_query = $this->db->query(
-                "SELECT * FROM " .
+                "SELECT pov.product_option_value_id, pov.product_option_id, pov.product_id, pov.option_id, pov.option_value_id, pov.price, pov.price_prefix, pov.points, pov.points_prefix, pov.weight, pov.weight_prefix, pov.is_hit, ovd.name, ov.image, ov.color_code FROM " .
                     DB_PREFIX .
                     "product_option_value pov LEFT JOIN " .
                     DB_PREFIX .
-                    "option_value ov ON(pov.option_value_id = ov.option_value_id) WHERE pov.product_option_id = '" .
+                    "option_value ov ON(pov.option_value_id = ov.option_value_id) LEFT JOIN " .
+                    DB_PREFIX .
+                    "option_value_description ovd ON(ov.option_value_id = ovd.option_value_id) WHERE pov.product_option_id = '" .
                     (int) $product_option["product_option_id"] .
+                    "' AND ovd.language_id = '" .
+                    (int) $this->config->get("config_language_id") .
                     "' ORDER BY ov.sort_order ASC",
             );
 
@@ -2439,8 +2431,6 @@ class ModelCatalogProduct extends Model
                         $product_option_value["product_option_value_id"],
                     "option_value_id" =>
                         $product_option_value["option_value_id"],
-                    "quantity" => $product_option_value["quantity"],
-                    "subtract" => $product_option_value["subtract"],
                     "price" => $product_option_value["price"],
                     "price_prefix" => $product_option_value["price_prefix"],
                     "points" => $product_option_value["points"],
@@ -2497,7 +2487,7 @@ class ModelCatalogProduct extends Model
     public function getProductOptionValue($product_id, $product_option_value_id)
     {
         $query = $this->db->query(
-            "SELECT pov.option_value_id, ovd.name, pov.quantity, pov.subtract, COALESCE(cgp.price, pov.price) AS price, COALESCE(cgp.price_prefix, pov.price_prefix) AS price_prefix, pov.points, pov.points_prefix, pov.weight, pov.weight_prefix FROM " .
+            "SELECT pov.option_value_id, ovd.name, COALESCE(cgp.price, pov.price) AS price, COALESCE(cgp.price_prefix, pov.price_prefix) AS price_prefix, pov.points, pov.points_prefix, pov.weight, pov.weight_prefix FROM " .
                 DB_PREFIX .
                 "product_option_value pov LEFT JOIN " .
                 DB_PREFIX .
