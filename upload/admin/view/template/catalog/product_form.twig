@@ -506,7 +506,7 @@
                   </tbody>
                 </table>
               </div>
-              <button type="button" onclick="addAttribute();" class="dc-attr-add-btn">
+              <button type="button" onclick="addAttribute();" class="btn btn-primary btn-sm">
                 <i class="fa fa-plus-circle"></i> {{ button_attribute_add }}
               </button>
             </div>
@@ -820,7 +820,7 @@
                     </tbody>
                   </table>
                 </div>
-                <button type="button" onclick="addDiscount();" class="dc-attr-add-btn">
+                <button type="button" onclick="addDiscount();" class="btn btn-primary btn-sm">
                   <i class="fa fa-plus-circle"></i> {{ button_discount_add }}
                 </button>
               </div>
@@ -874,7 +874,7 @@
                     </tbody>
                   </table>
                 </div>
-                <button type="button" onclick="addSpecial();" class="dc-attr-add-btn">
+                <button type="button" onclick="addSpecial();" class="btn btn-primary btn-sm">
                   <i class="fa fa-plus-circle"></i> {{ button_special_add }}
                 </button>
               </div>
@@ -921,7 +921,7 @@
                     </tbody>
                   </table>
                 </div>
-                <button type="button" onclick="addGift();" class="dc-attr-add-btn">
+                <button type="button" onclick="addGift();" class="btn btn-primary btn-sm">
                   <i class="fa fa-plus-circle"></i> {{ button_gift_add }}
                 </button>
               </div>
@@ -2263,10 +2263,8 @@ $(document).on('click', '#images .btn-danger, #images button[onclick*="remove"],
 .attribute-textarea { border: 1px solid #e2e5e8; border-radius: 0 4px 4px 0; font-size: 13px; resize: vertical; min-height: 48px; }
 .attribute-textarea:focus { border-color: #88b1ff; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
 .btn-remove-attr { color: #94a3b8; font-size: 16px; text-decoration: none; padding: 4px; }
-.btn-remove-attr:hover { color: #ef4444; }
-.dc-attr-add-btn { display: block; width: 100%; padding: 10px 12px; color: #3b82f6; font-size: 15px; font-weight: 500; border: none; background: none; border-radius: 6px; cursor: pointer; transition: all 0.2s; margin-top: 8px; text-align: left; }
-.dc-attr-add-btn:hover { color: #2563eb; background: #eff6ff; }
-.dc-option-mode-selector { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+              .btn-remove-attr:hover { color: #ef4444; }
+              .dc-option-mode-selector { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 @media (max-width: 767px) {
   .dc-option-mode-selector { flex-direction: column; align-items: flex-start; }
 }
