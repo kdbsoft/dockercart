@@ -13,6 +13,7 @@ $_['entry_accent_hint'] = 'Використовується для фону зн
 $_['entry_accent_text'] = 'Акцентний текст';
 $_['entry_image'] = 'Зображення';
 $_['entry_link'] = 'Посилання';
+$_['entry_link_type'] = 'Тип посилання';
 $_['entry_link_search'] = 'Пошук за назвою...';
 $_['entry_name'] = 'Назва банера';
 $_['entry_primary_btn_text'] = 'Текст кнопки';
