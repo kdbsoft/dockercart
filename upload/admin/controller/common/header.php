@@ -57,7 +57,7 @@ class ControllerCommonHeader extends Controller {
 				$data['username']  = $user_info['username'];
 				$data['user_group'] = $user_info['user_group'];
 
-				if (is_file(DIR_IMAGE . $user_info['image'])) {
+				if ($user_info['image'] && file_exists(DIR_IMAGE . $user_info['image'])) {
 					$data['image'] = $this->model_tool_image->resize($user_info['image'], 45, 45);
 				} else {
 					$data['image'] = $this->model_tool_image->resize('profile.png', 45, 45);

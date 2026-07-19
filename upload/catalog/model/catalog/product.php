@@ -102,6 +102,7 @@ class ModelCatalogProduct extends Model {
 				'quantity'         => (float)$query->row['quantity'],
 				'preorder'         => (int)$query->row['preorder'],
 				'image'            => $query->row['image'],
+				'model_3d'         => $query->row['model_3d'],
 				'manufacturer_id'  => $query->row['manufacturer_id'],
 				'manufacturer'     => $query->row['manufacturer'],
 				'price'            => $price,
@@ -537,9 +538,36 @@ class ModelCatalogProduct extends Model {
 		return $query->rows;
 	}
 
-	public function getProductImages($product_id) {
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_image WHERE product_id = '" . (int)$product_id . "' ORDER BY sort_order ASC");
+	public function getProductImages($product_id, $language_id = null) {
+		if ($language_id !== null) {
+			// Check if language-specific images exist for the given language
+			$specific = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_image WHERE product_id = '" . (int)$product_id . "' AND language_id = '" . (int)$language_id . "' ORDER BY sort_order ASC");
+			if ($specific->num_rows > 0) {
+				return $specific->rows;
+			}
 
+			// Fall back to global images
+			$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_image WHERE product_id = '" . (int)$product_id . "' AND language_id IS NULL ORDER BY sort_order ASC");
+			return $query->rows;
+		}
+
+		// No language specified: return all images (backward compatible)
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_image WHERE product_id = '" . (int)$product_id . "' ORDER BY sort_order ASC");
+		return $query->rows;
+	}
+
+	public function getProductVideos($product_id, $language_id = null) {
+		if ($language_id !== null) {
+			$specific = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_video WHERE product_id = '" . (int)$product_id . "' AND language_id = '" . (int)$language_id . "' ORDER BY sort_order ASC");
+			if ($specific->num_rows > 0) {
+				return $specific->rows;
+			}
+
+			$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_video WHERE product_id = '" . (int)$product_id . "' AND language_id IS NULL ORDER BY sort_order ASC");
+			return $query->rows;
+		}
+
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_video WHERE product_id = '" . (int)$product_id . "' ORDER BY sort_order ASC");
 		return $query->rows;
 	}
 

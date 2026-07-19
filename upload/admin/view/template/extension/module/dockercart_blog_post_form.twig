@@ -33,14 +33,15 @@
       <div class="dcx-panel-body">
         <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-post" class="form-horizontal dcx-form">
           <ul class="nav nav-tabs dcx-profile-tabs">
-            <li class="active"><a href="#tab-general" data-toggle="tab"><i class="fa fa-pencil-square-o"></i> {{ tab_general }}</a></li>
-            <li><a href="#tab-data" data-toggle="tab"><i class="fa fa-database"></i> {{ tab_data }}</a></li>
+            <li class="active"><a href="#tab-description" data-toggle="tab"><i class="fa fa-file-text"></i> {{ tab_description }}</a></li>
+            <li><a href="#tab-params" data-toggle="tab"><i class="fa fa-sliders"></i> {{ tab_params_group }}</a></li>
+            <li><a href="#tab-images" data-toggle="tab"><i class="fa fa-image"></i> {{ tab_images_group }}</a></li>
+            <li><a href="#tab-recommended" data-toggle="tab"><i class="fa fa-thumbs-up"></i> {{ tab_recommended }}</a></li>
+            <li><a href="#tab-seo" data-toggle="tab"><i class="fa fa-sitemap"></i> {{ tab_seo }}</a></li>
           </ul>
           <div class="tab-content">
-            <div class="tab-pane dcx-tab-pane active" id="tab-general">
-              <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                <h4>{{ tab_general }}</h4>
-                <ul class="nav nav-tabs dcx-profile-tabs" id="language">
+            <div class="tab-pane dcx-tab-pane active" id="tab-description">
+              <ul class="nav nav-tabs" id="language">
                 {% for language in languages %}
                 <li{% if loop.first %} class="active"{% endif %}><a href="#language{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
                 {% endfor %}
@@ -49,8 +50,8 @@
                 {% for language in languages %}
                 <div class="tab-pane{% if loop.first %} active{% endif %}" id="language{{ language.language_id }}">
                   <div class="form-group required">
-                    <label class="col-sm-3 control-label" for="input-title{{ language.language_id }}">{{ entry_title }}</label>
-                    <div class="col-sm-9">
+                    <label class="col-sm-2 control-label" for="input-title{{ language.language_id }}">{{ entry_title }}</label>
+                    <div class="col-sm-10">
                       <input type="text" name="post_description[{{ language.language_id }}][title]" value="{{ (post_description[language.language_id] ? post_description[language.language_id].title)|e('html_attr') }}" placeholder="{{ entry_title }}" id="input-title{{ language.language_id }}" class="form-control" />
                       {% if error_title[language.language_id] %}
                       <div class="text-danger">{{ error_title[language.language_id] }}</div>
@@ -58,14 +59,14 @@
                     </div>
                   </div>
                   <div class="form-group">
-                    <label class="col-sm-3 control-label" for="input-excerpt{{ language.language_id }}">{{ entry_excerpt }}</label>
-                    <div class="col-sm-9">
+                    <label class="col-sm-2 control-label" for="input-excerpt{{ language.language_id }}">{{ entry_excerpt }}</label>
+                    <div class="col-sm-10">
                       <textarea name="post_description[{{ language.language_id }}][excerpt]" rows="3" placeholder="{{ entry_excerpt }}" id="input-excerpt{{ language.language_id }}" class="form-control">{{ post_description[language.language_id] ? post_description[language.language_id].excerpt }}</textarea>
                     </div>
                   </div>
                   <div class="form-group required">
-                    <label class="col-sm-3 control-label" for="input-content{{ language.language_id }}">{{ entry_content }}</label>
-                    <div class="col-sm-9">
+                    <label class="col-sm-2 control-label" for="input-content{{ language.language_id }}">{{ entry_content }}</label>
+                    <div class="col-sm-10">
                       <textarea name="post_description[{{ language.language_id }}][content]" placeholder="{{ entry_content }}" id="input-content{{ language.language_id }}" data-toggle="summernote" data-lang="{{ summernote }}" class="form-control">{{ post_description[language.language_id] ? post_description[language.language_id].content }}</textarea>
                       {% if error_content[language.language_id] %}
                       <div class="text-danger">{{ error_content[language.language_id] }}</div>
@@ -73,41 +74,38 @@
                     </div>
                   </div>
                   <div class="form-group">
-                    <label class="col-sm-3 control-label" for="input-meta-title{{ language.language_id }}">{{ entry_meta_title }}</label>
-                    <div class="col-sm-9">
+                    <label class="col-sm-2 control-label" for="input-meta-title{{ language.language_id }}">{{ entry_meta_title }}</label>
+                    <div class="col-sm-10">
                       <input type="text" name="post_description[{{ language.language_id }}][meta_title]" value="{{ (post_description[language.language_id] ? post_description[language.language_id].meta_title)|e('html_attr') }}" placeholder="{{ entry_meta_title }}" id="input-meta-title{{ language.language_id }}" class="form-control" />
                     </div>
                   </div>
                   <div class="form-group">
-                    <label class="col-sm-3 control-label" for="input-meta-description{{ language.language_id }}">{{ entry_meta_description }}</label>
-                    <div class="col-sm-9">
+                    <label class="col-sm-2 control-label" for="input-meta-description{{ language.language_id }}">{{ entry_meta_description }}</label>
+                    <div class="col-sm-10">
                       <textarea name="post_description[{{ language.language_id }}][meta_description]" rows="5" placeholder="{{ entry_meta_description }}" id="input-meta-description{{ language.language_id }}" class="form-control">{{ post_description[language.language_id] ? post_description[language.language_id].meta_description }}</textarea>
                     </div>
                   </div>
                   <div class="form-group">
-                    <label class="col-sm-3 control-label" for="input-meta-keyword{{ language.language_id }}">{{ entry_meta_keyword }}</label>
-                    <div class="col-sm-9">
+                    <label class="col-sm-2 control-label" for="input-meta-keyword{{ language.language_id }}">{{ entry_meta_keyword }}</label>
+                    <div class="col-sm-10">
                       <textarea name="post_description[{{ language.language_id }}][meta_keyword]" rows="5" placeholder="{{ entry_meta_keyword }}" id="input-meta-keyword{{ language.language_id }}" class="form-control">{{ post_description[language.language_id] ? post_description[language.language_id].meta_keyword }}</textarea>
                     </div>
                   </div>
                   <div class="form-group">
-                    <label class="col-sm-3 control-label" for="input-tags{{ language.language_id }}">{{ entry_tags }}</label>
-                    <div class="col-sm-9">
+                    <label class="col-sm-2 control-label" for="input-tags{{ language.language_id }}">{{ entry_tags }}</label>
+                    <div class="col-sm-10">
                       <input type="text" name="post_description[{{ language.language_id }}][tags]" value="{{ (post_description[language.language_id] ? post_description[language.language_id].tags)|e('html_attr') }}" placeholder="{{ entry_tags }}" id="input-tags{{ language.language_id }}" class="form-control" />
                       <span class="help-block">{{ help_tags }}</span>
                     </div>
                   </div>
                 </div>
                 {% endfor %}
-                </div>
               </div>
             </div>
-            <div class="tab-pane dcx-tab-pane" id="tab-data">
-              <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                <h4>{{ tab_data }}</h4>
+            <div class="tab-pane dcx-tab-pane" id="tab-params">
               <div class="form-group required">
-                <label class="col-sm-3 control-label" for="input-category">{{ entry_category }}</label>
-                <div class="col-sm-9">
+                <label class="col-sm-2 control-label" for="input-category">{{ entry_category }}</label>
+                <div class="col-sm-10">
                   <select name="category_id" id="input-category" class="form-control">
                     <option value="">{{ text_select }}</option>
                     {% for category in categories %}
@@ -124,8 +122,8 @@
                 </div>
               </div>
               <div class="form-group required">
-                <label class="col-sm-3 control-label" for="input-author">{{ entry_author }}</label>
-                <div class="col-sm-9">
+                <label class="col-sm-2 control-label" for="input-author">{{ entry_author }}</label>
+                <div class="col-sm-10">
                   <select name="author_id" id="input-author" class="form-control">
                     <option value="">{{ text_select }}</option>
                     {% for author in authors %}
@@ -142,8 +140,8 @@
                 </div>
               </div>
               <div class="form-group">
-                <label class="col-sm-3 control-label">{{ entry_store }}</label>
-                <div class="col-sm-9">
+                <label class="col-sm-2 control-label">{{ entry_store }}</label>
+                <div class="col-sm-10">
                   <div class="well well-sm" style="height: 150px; overflow: auto;">
                     <div class="checkbox">
                       <label>
@@ -165,15 +163,8 @@
                 </div>
               </div>
               <div class="form-group">
-                <label class="col-sm-3 control-label" for="input-image">{{ entry_image }}</label>
-                <div class="col-sm-9">
-                  <a href="" id="thumb-image" data-toggle="image" class="img-thumbnail"><img src="{{ thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
-                  <input type="hidden" name="image" value="{{ image }}" id="input-image" />
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="col-sm-3 control-label" for="input-featured">{{ entry_featured }}</label>
-                <div class="col-sm-9">
+                <label class="col-sm-2 control-label" for="input-featured">{{ entry_featured }}</label>
+                <div class="col-sm-10">
                   <select name="featured" id="input-featured" class="form-control">
                     {% if featured %}
                     <option value="1" selected="selected">{{ text_yes }}</option>
@@ -186,8 +177,8 @@
                 </div>
               </div>
               <div class="form-group">
-                <label class="col-sm-3 control-label" for="input-allow-comments">{{ entry_allow_comments }}</label>
-                <div class="col-sm-9">
+                <label class="col-sm-2 control-label" for="input-allow-comments">{{ entry_allow_comments }}</label>
+                <div class="col-sm-10">
                   <select name="allow_comments" id="input-allow-comments" class="form-control">
                     {% if allow_comments %}
                     <option value="1" selected="selected">{{ text_yes }}</option>
@@ -200,14 +191,14 @@
                 </div>
               </div>
               <div class="form-group">
-                <label class="col-sm-3 control-label" for="input-sort-order">{{ entry_sort_order }}</label>
-                <div class="col-sm-9">
+                <label class="col-sm-2 control-label" for="input-sort-order">{{ entry_sort_order }}</label>
+                <div class="col-sm-10">
                   <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control" />
                 </div>
               </div>
               <div class="form-group">
-                <label class="col-sm-3 control-label" for="input-date-published">{{ entry_date_published }}</label>
-                <div class="col-sm-9">
+                <label class="col-sm-2 control-label" for="input-date-published">{{ entry_date_published }}</label>
+                <div class="col-sm-10">
                   <div class="input-group datetime">
                     <input type="text" name="date_published" value="{{ date_published }}" placeholder="{{ entry_date_published }}" data-date-format="YYYY-MM-DD HH:mm:ss" id="input-date-published" class="form-control" />
                     <span class="input-group-btn">
@@ -218,8 +209,8 @@
                 </div>
               </div>
               <div class="form-group">
-                <label class="col-sm-3 control-label" for="input-status">{{ entry_status }}</label>
-                <div class="col-sm-9">
+                <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
+                <div class="col-sm-10">
                   <select name="status" id="input-status" class="form-control">
                     {% if status %}
                     <option value="1" selected="selected">{{ text_enabled }}</option>
@@ -231,69 +222,86 @@
                   </select>
                 </div>
               </div>
+            </div>
+            <div class="tab-pane dcx-tab-pane" id="tab-images">
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-image">{{ entry_image }}</label>
+                <div class="col-sm-10">
+                  <a href="" id="thumb-image" data-toggle="image" class="img-thumbnail"><img src="{{ thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
+                  <input type="hidden" name="image" value="{{ image }}" id="input-image" />
+                </div>
               </div>
-              <fieldset>
-                <legend><i class="fa fa-sitemap"></i> {{ tab_seo }}</legend>
-                <div class="alert alert-info"><i class="fa fa-info-circle"></i> {{ text_keyword }}</div>
-                {% for store in stores %}
-                <div class="form-group">
-                  <label class="col-sm-3 control-label">{{ store.name }}</label>
-                  <div class="col-sm-9">
-                    {% for language in languages %}
-                    <div class="input-group">
-                      <span class="input-group-addon"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span></span>
-                      <input type="text" name="post_seo_url[{{ store.store_id }}][{{ language.language_id }}]" value="{% if post_seo_url[store.store_id][language.language_id] %}{{ post_seo_url[store.store_id][language.language_id] }}{% endif %}" placeholder="{{ entry_keyword }}" class="form-control" />
+            </div>
+            <div class="tab-pane dcx-tab-pane" id="tab-recommended">
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-product">{{ entry_related_product }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="product" value="" placeholder="{{ entry_related_product }}" id="input-product" class="form-control" />
+                  <div id="product-related" class="well well-sm" style="height: 150px; overflow: auto;">
+                    {% for product_recommendation in product_recommendations %}
+                    <div id="product-related{{ product_recommendation.product_id }}">
+                      <i class="fa fa-minus-circle"></i> {{ product_recommendation.name }}
+                      <input type="hidden" name="post_product[]" value="{{ product_recommendation.product_id }}" />
                     </div>
                     {% endfor %}
                   </div>
                 </div>
-                {% endfor %}
-              </fieldset>
-              <fieldset>
-                <legend><i class="fa fa-thumbs-up"></i> {{ tab_recommended }}</legend>
-                <div class="form-group">
-                  <label class="col-sm-3 control-label" for="input-product">{{ entry_related_product }}</label>
-                  <div class="col-sm-9">
-                    <input type="text" name="product" value="" placeholder="{{ entry_related_product }}" id="input-product" class="form-control" />
-                    <div id="product-related" class="well well-sm" style="height: 150px; overflow: auto;">
-                      {% for product_recommendation in product_recommendations %}
-                      <div id="product-related{{ product_recommendation.product_id }}">
-                        <i class="fa fa-minus-circle"></i> {{ product_recommendation.name }}
-                        <input type="hidden" name="post_product[]" value="{{ product_recommendation.product_id }}" />
-                      </div>
-                      {% endfor %}
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-product-category">{{ entry_related_category }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="product_category" value="" placeholder="{{ entry_related_category }}" id="input-product-category" class="form-control" />
+                  <div id="product-category-related" class="well well-sm" style="height: 150px; overflow: auto;">
+                    {% for product_category_recommendation in product_category_recommendations %}
+                    <div id="product-category-related{{ product_category_recommendation.category_id }}">
+                      <i class="fa fa-minus-circle"></i> {{ product_category_recommendation.name }}
+                      <input type="hidden" name="post_product_category[]" value="{{ product_category_recommendation.category_id }}" />
                     </div>
+                    {% endfor %}
                   </div>
                 </div>
-                <div class="form-group">
-                  <label class="col-sm-3 control-label" for="input-product-category">{{ entry_related_category }}</label>
-                  <div class="col-sm-9">
-                    <input type="text" name="product_category" value="" placeholder="{{ entry_related_category }}" id="input-product-category" class="form-control" />
-                    <div id="product-category-related" class="well well-sm" style="height: 150px; overflow: auto;">
-                      {% for product_category_recommendation in product_category_recommendations %}
-                      <div id="product-category-related{{ product_category_recommendation.category_id }}">
-                        <i class="fa fa-minus-circle"></i> {{ product_category_recommendation.name }}
-                        <input type="hidden" name="post_product_category[]" value="{{ product_category_recommendation.category_id }}" />
-                      </div>
-                      {% endfor %}
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-manufacturer">{{ entry_related_manufacturer }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="manufacturer" value="" placeholder="{{ entry_related_manufacturer }}" id="input-manufacturer" class="form-control" />
+                  <div id="manufacturer-related" class="well well-sm" style="height: 150px; overflow: auto;">
+                    {% for manufacturer_recommendation in manufacturer_recommendations %}
+                    <div id="manufacturer-related{{ manufacturer_recommendation.manufacturer_id }}">
+                      <i class="fa fa-minus-circle"></i> {{ manufacturer_recommendation.name }}
+                      <input type="hidden" name="post_manufacturer[]" value="{{ manufacturer_recommendation.manufacturer_id }}" />
                     </div>
+                    {% endfor %}
                   </div>
                 </div>
-                <div class="form-group">
-                  <label class="col-sm-3 control-label" for="input-manufacturer">{{ entry_related_manufacturer }}</label>
-                  <div class="col-sm-9">
-                    <input type="text" name="manufacturer" value="" placeholder="{{ entry_related_manufacturer }}" id="input-manufacturer" class="form-control" />
-                    <div id="manufacturer-related" class="well well-sm" style="height: 150px; overflow: auto;">
-                      {% for manufacturer_recommendation in manufacturer_recommendations %}
-                      <div id="manufacturer-related{{ manufacturer_recommendation.manufacturer_id }}">
-                        <i class="fa fa-minus-circle"></i> {{ manufacturer_recommendation.name }}
-                        <input type="hidden" name="post_manufacturer[]" value="{{ manufacturer_recommendation.manufacturer_id }}" />
-                      </div>
+              </div>
+            </div>
+            <div class="tab-pane dcx-tab-pane" id="tab-seo">
+              <div class="alert alert-info"><i class="fa fa-info-circle"></i> {{ text_keyword }}</div>
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <td class="text-left" style="width:200px;">{{ entry_store }}</td>
+                      {% for language in languages %}
+                      <td class="text-left"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> <span style="color:#6b7280;">{{ language.name }}</span></td>
                       {% endfor %}
-                    </div>
-                  </div>
-                </div>
-              </fieldset>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for store in stores %}
+                    <tr>
+                      <td>{{ store.name }}</td>
+                      {% for language in languages %}
+                      <td>
+                        <input type="text" name="post_seo_url[{{ store.store_id }}][{{ language.language_id }}]" value="{% if post_seo_url[store.store_id][language.language_id] %}{{ post_seo_url[store.store_id][language.language_id] }}{% endif %}" placeholder="{{ entry_keyword }}" class="form-control" />
+                      </td>
+                      {% endfor %}
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </form>

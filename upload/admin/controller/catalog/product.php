@@ -22,16 +22,31 @@ class ControllerCatalogProduct extends Controller {
 		$this->load->model('catalog/product');
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
-			// Exclude main image from product_image array to prevent duplication
-			if (isset($this->request->post['product_image']) && isset($this->request->post['image'])) {
-				$main_image = $this->request->post['image'];
-				$filtered = array();
-				foreach ($this->request->post['product_image'] as $row) {
-					if ($row['image'] !== $main_image) {
-						$filtered[] = $row;
-					}
-				}
-				$this->request->post['product_image'] = $filtered;
+			// Auto-detect video from unified fields (no selector)
+			$video_youtube = !empty($this->request->post['video_youtube']) ? $this->request->post['video_youtube'] : '';
+			$video_mp4 = !empty($this->request->post['video_mp4']) ? $this->request->post['video_mp4'] : '';
+
+			if (!empty($video_youtube)) {
+				$this->request->post['video_type'] = 'youtube';
+				$this->request->post['video'] = $this->extractYouTubeId($video_youtube);
+			} elseif (!empty($video_mp4)) {
+				$this->request->post['video_type'] = 'mp4';
+				$this->request->post['video'] = $video_mp4;
+			} else {
+				$this->request->post['video_type'] = '';
+				$this->request->post['video'] = '';
+			}
+
+			// Convert flat video fields to product_video array format
+			if (!empty($this->request->post['video_type']) && !empty($this->request->post['video'])) {
+				$this->request->post['product_video'] = array(
+					array(
+						'video_type'  => $this->request->post['video_type'],
+						'video'       => $this->request->post['video'],
+						'language_id' => '',
+						'sort_order'  => 0
+					)
+				);
 			}
 
 			$product_id = $this->model_catalog_product->addProduct($this->request->post);
@@ -106,16 +121,31 @@ class ControllerCatalogProduct extends Controller {
 		error_log('product_id: ' . (isset($this->request->get['product_id']) ? $this->request->get['product_id'] : 'NOT SET'));
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
-			// Exclude main image from product_image array to prevent duplication
-			if (isset($this->request->post['product_image']) && isset($this->request->post['image'])) {
-				$main_image = $this->request->post['image'];
-				$filtered = array();
-				foreach ($this->request->post['product_image'] as $row) {
-					if ($row['image'] !== $main_image) {
-						$filtered[] = $row;
-					}
-				}
-				$this->request->post['product_image'] = $filtered;
+			// Auto-detect video from unified fields (no selector)
+			$video_youtube = !empty($this->request->post['video_youtube']) ? $this->request->post['video_youtube'] : '';
+			$video_mp4 = !empty($this->request->post['video_mp4']) ? $this->request->post['video_mp4'] : '';
+
+			if (!empty($video_youtube)) {
+				$this->request->post['video_type'] = 'youtube';
+				$this->request->post['video'] = $this->extractYouTubeId($video_youtube);
+			} elseif (!empty($video_mp4)) {
+				$this->request->post['video_type'] = 'mp4';
+				$this->request->post['video'] = $video_mp4;
+			} else {
+				$this->request->post['video_type'] = '';
+				$this->request->post['video'] = '';
+			}
+
+			// Convert flat video fields to product_video array format
+			if (!empty($this->request->post['video_type']) && !empty($this->request->post['video'])) {
+				$this->request->post['product_video'] = array(
+					array(
+						'video_type'  => $this->request->post['video_type'],
+						'video'       => $this->request->post['video'],
+						'language_id' => '',
+						'sort_order'  => 0
+					)
+				);
 			}
 
 			$this->model_catalog_product->editProduct($this->request->get['product_id'], $this->request->post);
@@ -1410,20 +1440,27 @@ class ControllerCatalogProduct extends Controller {
 			$product_images = array();
 		}
 
-		$data['product_images'] = array();
+		$data['product_images_global'] = array();
+		$data['product_images_by_lang'] = array();
 
-		// Prepend main image to product_images so it appears in the grid
-		if (!empty($data['image'])) {
-			$has_main = false;
-			foreach ($product_images as $pi) {
-				if ($pi['image'] === $data['image']) { $has_main = true; break; }
-			}
-			if (!$has_main) {
-				array_unshift($product_images, array('image' => $data['image'], 'sort_order' => -1));
+		// Separate into global (language_id is NULL/empty) and per-language
+		$images_global = array();
+		$images_by_lang = array();
+
+		foreach ($product_images as $pi) {
+			$lang_id = isset($pi['language_id']) ? $pi['language_id'] : null;
+			if (empty($lang_id)) {
+				$images_global[] = $pi;
+			} else {
+				$lang = (int) $lang_id;
+				if (!isset($images_by_lang[$lang])) {
+					$images_by_lang[$lang] = array();
+				}
+				$images_by_lang[$lang][] = $pi;
 			}
 		}
 
-		foreach ($product_images as $product_image) {
+		foreach ($images_global as $product_image) {
 			if (is_file(DIR_IMAGE . $product_image['image'])) {
 				$image = $product_image['image'];
 				$thumb = $product_image['image'];
@@ -1432,12 +1469,71 @@ class ControllerCatalogProduct extends Controller {
 				$thumb = 'no_image.png';
 			}
 
-			$data['product_images'][] = array(
-				'image'      => $image,
-				'thumb'      => $this->model_tool_image->resize($thumb, 100, 100),
-				'sort_order' => $product_image['sort_order']
+			$data['product_images_global'][] = array(
+				'image'       => $image,
+				'thumb'       => $this->model_tool_image->resize($thumb, 100, 100),
+				'sort_order'  => $product_image['sort_order'],
+				'language_id' => ''
 			);
 		}
+
+		foreach ($images_by_lang as $lang_id => $lang_images) {
+			$data['product_images_by_lang'][$lang_id] = array();
+			foreach ($lang_images as $product_image) {
+				if (is_file(DIR_IMAGE . $product_image['image'])) {
+					$image = $product_image['image'];
+					$thumb = $product_image['image'];
+				} else {
+					$image = '';
+					$thumb = 'no_image.png';
+				}
+
+				$data['product_images_by_lang'][$lang_id][] = array(
+					'image'       => $image,
+					'thumb'       => $this->model_tool_image->resize($thumb, 100, 100),
+					'sort_order'  => $product_image['sort_order'],
+					'language_id' => $lang_id
+				);
+			}
+		}
+
+		// Video
+		if (isset($this->request->post['video_type']) && isset($this->request->post['video'])) {
+			$data['video_type'] = $this->request->post['video_type'];
+			$data['video'] = $this->request->post['video'];
+		} elseif (isset($this->request->get['product_id'])) {
+			$product_videos = $this->model_catalog_product->getProductVideos($this->request->get['product_id']);
+			if (!empty($product_videos)) {
+				$first_video = $product_videos[0];
+				$data['video_type'] = $first_video['video_type'];
+				$data['video'] = $first_video['video'];
+			} else {
+				$data['video_type'] = '';
+				$data['video'] = '';
+			}
+		} else {
+			$data['video_type'] = '';
+			$data['video'] = '';
+		}
+
+		$data['video_thumb'] = $this->model_tool_image->resize('video_placeholder.svg', 100, 100);
+		$data['video_placeholder'] = $this->model_tool_image->resize('video_placeholder.svg', 100, 100);
+
+		// 3D Model
+		if (isset($this->request->post['model_3d'])) {
+			$data['model_3d'] = $this->request->post['model_3d'];
+		} elseif (!empty($product_info)) {
+			$data['model_3d'] = $product_info['model_3d'];
+		} else {
+			$data['model_3d'] = '';
+		}
+
+		if (!empty($data['model_3d']) && is_file(DIR_IMAGE . $data['model_3d'])) {
+			$data['model_3d_thumb'] = $this->model_tool_image->resize('model_3d_placeholder.svg', 100, 100);
+		} else {
+			$data['model_3d_thumb'] = $this->model_tool_image->resize('model_3d_placeholder.svg', 100, 100);
+		}
+		$data['model_3d_placeholder'] = $this->model_tool_image->resize('model_3d_placeholder.svg', 100, 100);
 
 		// Downloads
 		$this->load->model('catalog/download');
@@ -2027,5 +2123,22 @@ class ControllerCatalogProduct extends Controller {
 			'formatted' => $this->currency->format($amount, $this->config->get('config_currency')),
 			'code'      => '',
 		];
+	}
+
+	private function extractYouTubeId($value): string {
+		$value = trim($value);
+		if (preg_match('/^[A-Za-z0-9_-]{11}$/', $value)) {
+			return $value;
+		}
+		$patterns = [
+			'/(?:youtube\.com|youtu\.be|youtube-nocookie\.com)\/(?:watch\?v=|embed\/|shorts\/)?([A-Za-z0-9_-]{11})/',
+			'/^[A-Za-z0-9_-]{11}$/'
+		];
+		foreach ($patterns as $pattern) {
+			if (preg_match($pattern, $value, $matches)) {
+				return $matches[1];
+			}
+		}
+		return $value;
 	}
 }

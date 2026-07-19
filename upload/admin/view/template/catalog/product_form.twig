@@ -1,5 +1,6 @@
 {{ header }}{{ column_left }}
 <div id="content">
+  <link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
   <div class="page-header">
     <div class="container-fluid">
       <div class="pull-right">
@@ -28,15 +29,19 @@
 </div>
       <div class="panel-body">
         <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-product" class="form-horizontal">
-          <ul class="nav nav-tabs">
-            <li class="active"><a href="#tab-general" data-toggle="tab"><i class="fa fa-file-text"></i> {{ tab_general }}</a></li>
-            <li><a href="#tab-data" data-toggle="tab"><i class="fa fa-database"></i> {{ tab_data }}</a></li>
-            <li><a href="#tab-attribute" data-toggle="tab"><i class="fa fa-tags"></i> {{ tab_attributes }}</a></li>
+          <ul class="nav nav-tabs dcx-profile-tabs">
+            <li class="active"><a href="#tab-description" data-toggle="tab"><i class="fa fa-file-text"></i> {{ tab_description }}</a>            </li>
+            <li><a href="#tab-data" data-toggle="tab"><i class="fa fa-sliders"></i> {{ tab_params_group }}</a></li>
+            <li><a href="#tab-prices-stock" data-toggle="tab"><i class="fa fa-credit-card"></i> {{ tab_prices_stock_group }}</a></li>
+            <li><a href="#tab-images" data-toggle="tab"><i class="fa fa-image"></i> {{ tab_images_group }}</a></li>
+            <li><a href="#tab-attribute" data-toggle="tab"><i class="fa fa-list-alt"></i> {{ tab_attributes }}</a></li>
             <li><a href="#tab-option" data-toggle="tab"><i class="fa fa-list"></i> {{ tab_options }}</a></li>
             <li><a href="#tab-promotions" data-toggle="tab"><i class="fa fa-percent"></i> {{ tab_promotions }}</a></li>
+            <li><a href="#tab-seo" data-toggle="tab"><i class="fa fa-sitemap"></i> {{ tab_seo }}</a></li>
+            <li><a href="#tab-design" data-toggle="tab"><i class="fa fa-paint-brush"></i> {{ tab_design }}</a></li>
           </ul>
           <div class="tab-content">
-            <div class="tab-pane active" id="tab-general">
+            <div class="tab-pane dcx-tab-pane active" id="tab-description">
               <ul class="nav nav-tabs" id="language">
                 {% for language in languages %}
                   <li><a href="#language{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
@@ -87,197 +92,105 @@
                   </div>
                 {% endfor %}</div>
             </div>
-            <div class="tab-pane" id="tab-data">
+            <div class="tab-pane dcx-tab-pane" id="tab-data">
 
-              <fieldset>
-                <legend><i class="fa fa-list-alt"></i> {{ tab_main_group }}</legend>
-                <div class="form-group required">
-                  <label class="col-sm-2 control-label" for="input-model">{{ entry_model }}</label>
-                  <div class="col-sm-10">
-                    <input type="text" name="model" value="{{ model }}" placeholder="{{ entry_model }}" id="input-model" class="form-control"/>
-                    {% if error_model %}
-                      <div class="text-danger">{{ error_model }}</div>
-                    {% endif %}</div>
+              <div class="form-group required">
+                <label class="col-sm-2 control-label" for="input-model">{{ entry_model }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="model" value="{{ model }}" placeholder="{{ entry_model }}" id="input-model" class="form-control"/>
+                  {% if error_model %}
+                    <div class="text-danger">{{ error_model }}</div>
+                  {% endif %}</div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-sku"><span data-toggle="tooltip" title="{{ help_sku }}">{{ entry_sku }}</span></label>
+                <div class="col-sm-10">
+                  <input type="text" name="sku" value="{{ sku }}" placeholder="{{ entry_sku }}" id="input-sku" class="form-control"/>
                 </div>
+              </div>
+              <div class="dc-article-extra" style="display:{% if upc or ean or jan or isbn or mpn %}block{% else %}none{% endif %};">
                 <div class="form-group">
-                  <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
+                  <label class="col-sm-2 control-label" for="input-upc"><span data-toggle="tooltip" title="{{ help_upc }}">{{ entry_upc }}</span></label>
                   <div class="col-sm-10">
-                    <select name="status" id="input-status" class="form-control">
-                      {% if status %}
-                        <option value="1" selected="selected">{{ text_enabled }}</option>
-                        <option value="0">{{ text_disabled }}</option>
-                      {% else %}
-                        <option value="1">{{ text_enabled }}</option>
-                        <option value="0" selected="selected">{{ text_disabled }}</option>
-                      {% endif %}
-                    </select>
+                    <input type="text" name="upc" value="{{ upc }}" placeholder="{{ entry_upc }}" id="input-upc" class="form-control"/>
                   </div>
                 </div>
                 <div class="form-group">
-                  <label class="col-sm-2 control-label" for="input-sort-order">{{ entry_sort_order }}</label>
+                  <label class="col-sm-2 control-label" for="input-ean"><span data-toggle="tooltip" title="{{ help_ean }}">{{ entry_ean }}</span></label>
                   <div class="col-sm-10">
-                    <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control"/>
-                  </div>
-                </div>
-              </fieldset>
-
-              <fieldset>
-                <legend><i class="fa fa-money"></i> {{ tab_prices_group }}</legend>
-                <div class="form-group">
-                  <label class="col-sm-2 control-label" for="input-price">{{ entry_price }}</label>
-                  <div class="col-sm-10">
-                    <input type="text" name="price" value="{{ price }}" placeholder="{{ entry_price }}" id="input-price" class="form-control"/>
-                    <div style="margin-top:5px;">
-                      <label style="font-weight:normal;cursor:pointer;">
-                        <input type="checkbox" name="call_for_price" value="1" id="input-call-for-price"{% if call_for_price %} checked{% endif %} /> {{ entry_call_for_price }}
-                        <i class="fa fa-question-circle text-muted" data-toggle="tooltip" title="{{ help_call_for_price }}"></i>
-                      </label>
-                    </div>
+                    <input type="text" name="ean" value="{{ ean }}" placeholder="{{ entry_ean }}" id="input-ean" class="form-control"/>
                   </div>
                 </div>
                 <div class="form-group">
-                  <label class="col-sm-2 control-label">{{ entry_customer_group_price }}</label>
+                  <label class="col-sm-2 control-label" for="input-jan"><span data-toggle="tooltip" title="{{ help_jan }}">{{ entry_jan }}</span></label>
                   <div class="col-sm-10">
-                    <div id="customer-group-prices">
-                      {% set customer_group_price_row = 0 %}
-                      {% for product_customer_group_price in product_customer_group_prices %}
-                      <div class="dc-cgp-row" id="customer-group-price-row{{ customer_group_price_row }}">
-                        <select name="product_customer_group_price[{{ customer_group_price_row }}][customer_group_id]" class="form-control dc-cgp-select">
-                          {% for customer_group in customer_groups %}
-                            {% if customer_group.customer_group_id == product_customer_group_price.customer_group_id %}
-                              <option value="{{ customer_group.customer_group_id }}" selected="selected">{{ customer_group.name }}</option>
-                            {% else %}
-                              <option value="{{ customer_group.customer_group_id }}">{{ customer_group.name }}</option>
-                            {% endif %}
-                          {% endfor %}
-                        </select>
-                        <input type="text" name="product_customer_group_price[{{ customer_group_price_row }}][price]" value="{{ product_customer_group_price.price }}" placeholder="{{ entry_price }}" class="form-control dc-cgp-price"/>
-                        <button type="button" onclick="$('#customer-group-price-row{{ customer_group_price_row }}').remove();" class="btn btn-link dc-cgp-remove" title="{{ button_remove }}"><i class="fa fa-times"></i></button>
+                    <input type="text" name="jan" value="{{ jan }}" placeholder="{{ entry_jan }}" id="input-jan" class="form-control"/>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-isbn"><span data-toggle="tooltip" title="{{ help_isbn }}">{{ entry_isbn }}</span></label>
+                  <div class="col-sm-10">
+                    <input type="text" name="isbn" value="{{ isbn }}" placeholder="{{ entry_isbn }}" id="input-isbn" class="form-control"/>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-mpn"><span data-toggle="tooltip" title="{{ help_mpn }}">{{ entry_mpn }}</span></label>
+                  <div class="col-sm-10">
+                    <input type="text" name="mpn" value="{{ mpn }}" placeholder="{{ entry_mpn }}" id="input-mpn" class="form-control"/>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-location">{{ entry_location }}</label>
+                  <div class="col-sm-10">
+                    <input type="text" name="location" value="{{ location }}" placeholder="{{ entry_location }}" id="input-location" class="form-control"/>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="col-sm-10 col-sm-offset-2">
+                  <button type="button" id="toggle-articles" class="btn btn-default btn-sm"><i class="fa fa-toggle-off"></i> <span id="toggle-articles-text">{{ button_show_articles }}</span></button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-manufacturer"><span data-toggle="tooltip" title="{{ help_manufacturer }}">{{ entry_manufacturer }}</span></label>
+                <div class="col-sm-10">
+                  <input type="text" name="manufacturer" value="{{ manufacturer|e('html_attr') }}" placeholder="{{ entry_manufacturer }}" id="input-manufacturer" class="form-control"/> <input type="hidden" name="manufacturer_id" value="{{ manufacturer_id }}"/>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label"><span data-toggle="tooltip" title="{{ help_category }}">{{ entry_category }}</span></label>
+                <div class="col-sm-10">
+                  <button type="button" id="category-tree-btn" class="btn btn-default" style="margin-bottom:5px"><i class="fa fa-folder-open"></i> {{ button_select_category }}</button>
+                  <div id="product-category" class="well well-sm" style="height: 150px; overflow: auto;"> {% for product_category in product_categories %}
+                      <div id="product-category{{ product_category.category_id }}"><i class="fa fa-minus-circle"></i> {{ product_category.name }}
+                        <input type="hidden" name="product_category[]" value="{{ product_category.category_id }}"/>
                       </div>
-                      {% set customer_group_price_row = customer_group_price_row + 1 %}
-                      {% endfor %}
-                    </div>
-                    <button type="button" onclick="addCustomerGroupPrice();" class="btn btn-default btn-sm"><i class="fa fa-plus"></i> {{ button_customer_group_price_add }}</button>
-                  </div>
+                    {% endfor %}</div>
                 </div>
-                <div class="form-group">
-                  <label class="col-sm-2 control-label" for="input-tax-class">{{ entry_tax_class }}</label>
-                  <div class="col-sm-10">
-                    <select name="tax_class_id" id="input-tax-class" class="form-control">
-                      <option value="0">{{ text_none }}</option>
-                      {% for tax_class in tax_classes %}
-                        {% if tax_class.tax_class_id == tax_class_id %}
-                          <option value="{{ tax_class.tax_class_id }}" selected="selected">{{ tax_class.title }}</option>
-                        {% else %}
-                          <option value="{{ tax_class.tax_class_id }}">{{ tax_class.title }}</option>
-                        {% endif %}
-                      {% endfor %}
-                    </select>
-                  </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-related"><span data-toggle="tooltip" title="{{ help_related }}">{{ entry_related }}</span></label>
+                <div class="col-sm-10">
+                  <input type="text" name="related" value="" placeholder="{{ entry_related }}" id="input-related" class="form-control"/>
+                  <div id="product-related" class="well well-sm" style="height: 150px; overflow: auto;"> {% for product_related in product_relateds %}
+                      <div id="product-related{{ product_related.product_id }}"><i class="fa fa-minus-circle"></i> {{ product_related.name }}
+                        <input type="hidden" name="product_related[]" value="{{ product_related.product_id }}"/>
+                      </div>
+                    {% endfor %}</div>
                 </div>
-              </fieldset>
-
-              <fieldset>
-                <legend><i class="fa fa-cubes"></i> {{ tab_stock_group }}</legend>
-                <div class="form-group">
-                  <label class="col-sm-2 control-label" for="input-quantity">{{ entry_quantity }}</label>
-                  <div class="col-sm-10">
-                    <input type="text" name="quantity" value="{{ quantity }}" placeholder="{{ entry_quantity }}" id="input-quantity" class="form-control"/>
-                    <div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:15px;">
-                      <label style="font-weight:normal;cursor:pointer;">
-                        <input type="checkbox" name="subtract" value="1"{% if subtract %} checked{% endif %} /> {{ entry_subtract }}
-                        <i class="fa fa-question-circle text-muted" data-toggle="tooltip" title="{{ help_subtract }}"></i>
-                      </label>
-                      <label style="font-weight:normal;cursor:pointer;">
-                        <input type="checkbox" name="preorder" value="1"{% if preorder %} checked{% endif %} /> {{ entry_preorder }}
-                        <i class="fa fa-question-circle text-muted" data-toggle="tooltip" title="{{ help_preorder }}"></i>
-                      </label>
-                      <label style="font-weight:normal;cursor:pointer;">
-                        <input type="checkbox" name="shipping" value="1"{% if shipping %} checked{% endif %} /> {{ entry_shipping }}
-                        <i class="fa fa-question-circle text-muted" data-toggle="tooltip" title="{{ help_shipping }}"></i>
-                      </label>
-                    </div>
-                  </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-download"><span data-toggle="tooltip" title="{{ help_download }}">{{ entry_download }}</span></label>
+                <div class="col-sm-10">
+                  <input type="text" name="download" value="" placeholder="{{ entry_download }}" id="input-download" class="form-control"/>
+                  <div id="product-download" class="well well-sm" style="height: 150px; overflow: auto;"> {% for product_download in product_downloads %}
+                      <div id="product-download{{ product_download.download_id }}"><i class="fa fa-minus-circle"></i> {{ product_download.name }}
+                        <input type="hidden" name="product_download[]" value="{{ product_download.download_id }}"/>
+                      </div>
+                    {% endfor %}</div>
                 </div>
-                <div class="form-group">
-                  <label class="col-sm-2 control-label" for="input-minimum"><span data-toggle="tooltip" title="{{ help_minimum }}">{{ entry_minimum }}</span></label>
-                  <div class="col-sm-10">
-                    <input type="text" name="minimum" value="{{ minimum }}" placeholder="{{ entry_minimum }}" id="input-minimum" class="form-control"/>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label class="col-sm-2 control-label" for="input-quantity-step"><span data-toggle="tooltip" title="{{ help_quantity_step }}">{{ entry_quantity_step }}</span></label>
-                  <div class="col-sm-10">
-                    <input type="text" name="quantity_step" value="{{ quantity_step }}" placeholder="{{ entry_quantity_step }}" id="input-quantity-step" class="form-control"/>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label class="col-sm-2 control-label" for="input-date-available">{{ entry_date_available }}</label>
-                  <div class="col-sm-3">
-                    <div class="input-group date">
-                      <input type="text" name="date_available" value="{{ date_available }}" placeholder="{{ entry_date_available }}" data-date-format="YYYY-MM-DD" id="input-date-available" class="form-control"/> <span class="input-group-btn">
-                      <button class="btn btn-default" type="button"><i class="fa fa-calendar"></i></button>
-                      </span></div>
-                  </div>
-                </div>
-              </fieldset>
-
-              <fieldset>
-                <legend><i class="fa fa-barcode"></i> {{ tab_articles_group }}</legend>
-                <div class="form-group">
-                  <label class="col-sm-2 control-label" for="input-sku"><span data-toggle="tooltip" title="{{ help_sku }}">{{ entry_sku }}</span></label>
-                  <div class="col-sm-10">
-                    <input type="text" name="sku" value="{{ sku }}" placeholder="{{ entry_sku }}" id="input-sku" class="form-control"/>
-                  </div>
-                </div>
-                <div class="dc-article-extra" style="display:{% if upc or ean or jan or isbn or mpn %}block{% else %}none{% endif %};">
-                  <div class="form-group">
-                    <label class="col-sm-2 control-label" for="input-upc"><span data-toggle="tooltip" title="{{ help_upc }}">{{ entry_upc }}</span></label>
-                    <div class="col-sm-10">
-                      <input type="text" name="upc" value="{{ upc }}" placeholder="{{ entry_upc }}" id="input-upc" class="form-control"/>
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-sm-2 control-label" for="input-ean"><span data-toggle="tooltip" title="{{ help_ean }}">{{ entry_ean }}</span></label>
-                    <div class="col-sm-10">
-                      <input type="text" name="ean" value="{{ ean }}" placeholder="{{ entry_ean }}" id="input-ean" class="form-control"/>
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-sm-2 control-label" for="input-jan"><span data-toggle="tooltip" title="{{ help_jan }}">{{ entry_jan }}</span></label>
-                    <div class="col-sm-10">
-                      <input type="text" name="jan" value="{{ jan }}" placeholder="{{ entry_jan }}" id="input-jan" class="form-control"/>
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-sm-2 control-label" for="input-isbn"><span data-toggle="tooltip" title="{{ help_isbn }}">{{ entry_isbn }}</span></label>
-                    <div class="col-sm-10">
-                      <input type="text" name="isbn" value="{{ isbn }}" placeholder="{{ entry_isbn }}" id="input-isbn" class="form-control"/>
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-sm-2 control-label" for="input-mpn"><span data-toggle="tooltip" title="{{ help_mpn }}">{{ entry_mpn }}</span></label>
-                    <div class="col-sm-10">
-                      <input type="text" name="mpn" value="{{ mpn }}" placeholder="{{ entry_mpn }}" id="input-mpn" class="form-control"/>
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-sm-2 control-label" for="input-location">{{ entry_location }}</label>
-                    <div class="col-sm-10">
-                      <input type="text" name="location" value="{{ location }}" placeholder="{{ entry_location }}" id="input-location" class="form-control"/>
-                    </div>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <div class="col-sm-10 col-sm-offset-2">
-                    <button type="button" id="toggle-articles" class="btn btn-default btn-sm"><i class="fa fa-toggle-off"></i> <span id="toggle-articles-text">{{ button_show_articles }}</span></button>
-                  </div>
-                </div>
-              </fieldset>
-
-              <fieldset>
-                <legend><i class="fa fa-ruler-combined"></i> {{ tab_dimensions_group }}</legend>
-                <div class="form-group">
+              </div>
+              <div class="form-group">
                   <label class="col-sm-2 control-label" for="input-length">{{ entry_dimension }}</label>
                   <div class="col-sm-10">
                     <div class="row{% if is_configurable %} dc-opts-axis-hidden{% endif %}">
@@ -303,8 +216,8 @@
                       </div>
                     </div>
                   </div>
-                </div>
-                <div class="form-group">
+              </div>
+              <div class="form-group">
                   <label class="col-sm-2 control-label" for="input-weight">{{ entry_weight }}</label>
                   <div class="col-sm-10">
                     <div class="row">
@@ -324,135 +237,249 @@
                       </div>
                     </div>
                   </div>
-                </div>
-              </fieldset>
-
-              <fieldset>
-                <legend><i class="fa fa-link"></i> {{ tab_links_group }}</legend>
-                <div class="form-group">
-                  <label class="col-sm-2 control-label" for="input-manufacturer"><span data-toggle="tooltip" title="{{ help_manufacturer }}">{{ entry_manufacturer }}</span></label>
-                  <div class="col-sm-10">
-                    <input type="text" name="manufacturer" value="{{ manufacturer|e('html_attr') }}" placeholder="{{ entry_manufacturer }}" id="input-manufacturer" class="form-control"/> <input type="hidden" name="manufacturer_id" value="{{ manufacturer_id }}"/>
+              </div>
+              <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-date-available">{{ entry_date_available }}</label>
+                  <div class="col-sm-3">
+                    <div class="input-group date">
+                      <input type="text" name="date_available" value="{{ date_available }}" placeholder="{{ entry_date_available }}" data-date-format="YYYY-MM-DD" id="input-date-available" class="form-control"/> <span class="input-group-btn">
+                      <button class="btn btn-default" type="button"><i class="fa fa-calendar"></i></button>
+                      </span></div>
                   </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-sort-order">{{ entry_sort_order }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control"/>
                 </div>
-                <div class="form-group">
-                  <label class="col-sm-2 control-label"><span data-toggle="tooltip" title="{{ help_category }}">{{ entry_category }}</span></label>
-                  <div class="col-sm-10">
-                    <button type="button" id="category-tree-btn" class="btn btn-default" style="margin-bottom:5px"><i class="fa fa-folder-open"></i> {{ button_select_category }}</button>
-                    <div id="product-category" class="well well-sm" style="height: 150px; overflow: auto;"> {% for product_category in product_categories %}
-                        <div id="product-category{{ product_category.category_id }}"><i class="fa fa-minus-circle"></i> {{ product_category.name }}
-                          <input type="hidden" name="product_category[]" value="{{ product_category.category_id }}"/>
-                        </div>
-                      {% endfor %}</div>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label class="col-sm-2 control-label">{{ entry_store }}</label>
-                  <div class="col-sm-10">
-                    <div class="well well-sm" style="height: 150px; overflow: auto;"> {% for store in stores %}
-                        <div class="checkbox">
-                          <label> {% if store.store_id in product_store %}
-                              <input type="checkbox" name="product_store[]" value="{{ store.store_id }}" checked="checked"/>
-                              {{ store.name }}
-                            {% else %}
-                              <input type="checkbox" name="product_store[]" value="{{ store.store_id }}"/>
-                              {{ store.name }}
-                            {% endif %} </label>
-                        </div>
-                      {% endfor %}</div>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label class="col-sm-2 control-label" for="input-download"><span data-toggle="tooltip" title="{{ help_download }}">{{ entry_download }}</span></label>
-                  <div class="col-sm-10">
-                    <input type="text" name="download" value="" placeholder="{{ entry_download }}" id="input-download" class="form-control"/>
-                    <div id="product-download" class="well well-sm" style="height: 150px; overflow: auto;"> {% for product_download in product_downloads %}
-                        <div id="product-download{{ product_download.download_id }}"><i class="fa fa-minus-circle"></i> {{ product_download.name }}
-                          <input type="hidden" name="product_download[]" value="{{ product_download.download_id }}"/>
-                        </div>
-                      {% endfor %}</div>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label class="col-sm-2 control-label" for="input-related"><span data-toggle="tooltip" title="{{ help_related }}">{{ entry_related }}</span></label>
-                  <div class="col-sm-10">
-                    <input type="text" name="related" value="" placeholder="{{ entry_related }}" id="input-related" class="form-control"/>
-                    <div id="product-related" class="well well-sm" style="height: 150px; overflow: auto;"> {% for product_related in product_relateds %}
-                        <div id="product-related{{ product_related.product_id }}"><i class="fa fa-minus-circle"></i> {{ product_related.name }}
-                          <input type="hidden" name="product_related[]" value="{{ product_related.product_id }}"/>
-                        </div>
-                      {% endfor %}</div>
-                  </div>
-                </div>
-              </fieldset>
-
-              <fieldset>
-                <legend><i class="fa fa-image"></i> {{ tab_images_group }}</legend>
-                <div class="form-group">
-                  <label class="col-sm-2 control-label">{{ entry_image }}</label>
-                  <div class="col-sm-10">
-                    <div id="product-images">
-                      {% set image_row = 0 %}
-                      {% for product_image in product_images %}
-                      <div class="dc-img-card{% if product_image.image == image %} active{% endif %}" data-row="{{ image_row }}" title="Перетащите для изменения порядка">
-                        <input type="hidden" name="product_image[{{ image_row }}][image]" value="{{ product_image.image }}" id="input-image{{ image_row }}"/>
-                        <input type="hidden" name="product_image[{{ image_row }}][sort_order]" value="{{ product_image.sort_order }}" class="dc-img-sort-order"/>
-                        <a href="" id="thumb-image{{ image_row }}" data-toggle="image" class="dc-img-link"><img src="{{ product_image.thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" draggable="false"/></a>
-                        <button type="button" class="dc-img-star" onclick="setImageActive({{ image_row }});" title="{{ text_main_image }}"><i class="fa fa-star"></i></button>
-                        <button type="button" onclick="removeImage({{ image_row }});" class="dc-img-remove" title="{{ button_remove }}"><i class="fa fa-times"></i></button>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label">{{ entry_store }}</label>
+                <div class="col-sm-10">
+                  <div class="well well-sm" style="height: 150px; overflow: auto;"> {% for store in stores %}
+                      <div class="checkbox">
+                        <label> {% if store.store_id in product_store %}
+                            <input type="checkbox" name="product_store[]" value="{{ store.store_id }}" checked="checked"/>
+                            {{ store.name }}
+                          {% else %}
+                            <input type="checkbox" name="product_store[]" value="{{ store.store_id }}"/>
+                            {{ store.name }}
+                          {% endif %} </label>
                       </div>
-                      {% set image_row = image_row + 1 %}
+                    {% endfor %}</div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
+                <div class="col-sm-10">
+                  <select name="status" id="input-status" class="form-control">
+                    {% if status %}
+                      <option value="1" selected="selected">{{ text_enabled }}</option>
+                      <option value="0">{{ text_disabled }}</option>
+                    {% else %}
+                      <option value="1">{{ text_enabled }}</option>
+                      <option value="0" selected="selected">{{ text_disabled }}</option>
+                    {% endif %}
+                  </select>
+                </div>
+              </div>
+
+            </div>
+            <div class="tab-pane dcx-tab-pane" id="tab-prices-stock">
+              <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-price">{{ entry_price }}</label>
+                  <div class="col-sm-10">
+                    <input type="text" name="price" value="{{ price }}" placeholder="{{ entry_price }}" id="input-price" class="form-control"/>
+                    <div style="margin-top:5px;">
+                      <label style="font-weight:normal;cursor:pointer;">
+                        <input type="checkbox" name="call_for_price" value="1" id="input-call-for-price"{% if call_for_price %} checked{% endif %} /> {{ entry_call_for_price }}
+                        <i class="fa fa-question-circle text-muted" data-toggle="tooltip" title="{{ help_call_for_price }}"></i>
+                      </label>
+                    </div>
+                  </div>
+              </div>
+              <div class="form-group">
+                  <label class="col-sm-2 control-label">{{ entry_customer_group_price }}</label>
+                  <div class="col-sm-10">
+                    <div id="customer-group-prices">
+                      {% set customer_group_price_row = 0 %}
+                      {% for product_customer_group_price in product_customer_group_prices %}
+                      <div class="dc-cgp-row" id="customer-group-price-row{{ customer_group_price_row }}">
+                        <select name="product_customer_group_price[{{ customer_group_price_row }}][customer_group_id]" class="form-control dc-cgp-select">
+                          {% for customer_group in customer_groups %}
+                            {% if customer_group.customer_group_id == product_customer_group_price.customer_group_id %}
+                              <option value="{{ customer_group.customer_group_id }}" selected="selected">{{ customer_group.name }}</option>
+                            {% else %}
+                              <option value="{{ customer_group.customer_group_id }}">{{ customer_group.name }}</option>
+                            {% endif %}
+                          {% endfor %}
+                        </select>
+                        <input type="text" name="product_customer_group_price[{{ customer_group_price_row }}][price]" value="{{ product_customer_group_price.price }}" placeholder="{{ entry_price }}" class="form-control dc-cgp-price"/>
+                        <button type="button" onclick="$('#customer-group-price-row{{ customer_group_price_row }}').remove();" class="btn btn-link dc-cgp-remove" title="{{ button_remove }}"><i class="fa fa-times"></i></button>
+                      </div>
+                      {% set customer_group_price_row = customer_group_price_row + 1 %}
                       {% endfor %}
                     </div>
-                    <input type="hidden" name="image" value="{{ image }}" id="input-image"/>
-                    <button type="button" onclick="addImage();" class="btn btn-default" style="margin-top:12px;"><i class="fa fa-plus"></i> {{ button_image_add }}</button>
+                    <button type="button" onclick="addCustomerGroupPrice();" class="btn btn-default btn-sm"><i class="fa fa-plus"></i> {{ button_customer_group_price_add }}</button>
                   </div>
-                </div>
-              </fieldset>
-
-              <fieldset>
-                <legend><i class="fa fa-sitemap"></i> {{ tab_seo }}</legend>
-                <div class="alert alert-info"><i class="fa fa-info-circle"></i> {{ text_keyword }}</div>
-                {% for store in stores %}
-                <div class="form-group">
-                  <label class="col-sm-2 control-label">{{ store.name }}</label>
+              </div>
+              <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-tax-class">{{ entry_tax_class }}</label>
                   <div class="col-sm-10">
-                    {% for language in languages %}
-                    <div class="input-group"><span class="input-group-addon"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span></span> <input type="text" name="product_seo_url[{{ store.store_id }}][{{ language.language_id }}]" value="{% if product_seo_url[store.store_id][language.language_id] %}{{ product_seo_url[store.store_id][language.language_id] }}{% endif %}" placeholder="{{ entry_keyword }}" class="form-control"/>
-                    </div>
-                    {% if error_keyword[store.store_id][language.language_id] %}
-                    <div class="text-danger">{{ error_keyword[store.store_id][language.language_id] }}</div>
-                    {% endif %}
-                    {% endfor %}
-                  </div>
-                </div>
-                {% endfor %}
-              </fieldset>
-
-              <fieldset>
-                <legend><i class="fa fa-paint-brush"></i> {{ tab_design }}</legend>
-                <div class="alert alert-info"><i class="fa fa-info-circle"></i> {{ text_layout_info }}</div>
-                {% for store in stores %}
-                <div class="form-group">
-                  <label class="col-sm-2 control-label">{{ store.name }}</label>
-                  <div class="col-sm-10">
-                    <select name="product_layout[{{ store.store_id }}]" class="form-control">
-                      <option value=""></option>
-                      {% for layout in layouts %}
-                      {% if product_layout[store.store_id] and product_layout[store.store_id] == layout.layout_id %}
-                      <option value="{{ layout.layout_id }}" selected="selected">{{ layout.name }}</option>
-                      {% else %}
-                      <option value="{{ layout.layout_id }}">{{ layout.name }}</option>
-                      {% endif %}
+                    <select name="tax_class_id" id="input-tax-class" class="form-control">
+                      <option value="0">{{ text_none }}</option>
+                      {% for tax_class in tax_classes %}
+                        {% if tax_class.tax_class_id == tax_class_id %}
+                          <option value="{{ tax_class.tax_class_id }}" selected="selected">{{ tax_class.title }}</option>
+                        {% else %}
+                          <option value="{{ tax_class.tax_class_id }}">{{ tax_class.title }}</option>
+                        {% endif %}
                       {% endfor %}
                     </select>
                   </div>
-                </div>
-                {% endfor %}
-              </fieldset>
-
+              </div>
+              <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-quantity">{{ entry_quantity }}</label>
+                  <div class="col-sm-10">
+                    <input type="text" name="quantity" value="{{ quantity }}" placeholder="{{ entry_quantity }}" id="input-quantity" class="form-control"/>
+                    <div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:15px;">
+                      <label style="font-weight:normal;cursor:pointer;">
+                        <input type="checkbox" name="subtract" value="1"{% if subtract %} checked{% endif %} /> {{ entry_subtract }}
+                        <i class="fa fa-question-circle text-muted" data-toggle="tooltip" title="{{ help_subtract }}"></i>
+                      </label>
+                      <label style="font-weight:normal;cursor:pointer;">
+                        <input type="checkbox" name="preorder" value="1"{% if preorder %} checked{% endif %} /> {{ entry_preorder }}
+                        <i class="fa fa-question-circle text-muted" data-toggle="tooltip" title="{{ help_preorder }}"></i>
+                      </label>
+                      <label style="font-weight:normal;cursor:pointer;">
+                        <input type="checkbox" name="shipping" value="1"{% if shipping %} checked{% endif %} /> {{ entry_shipping }}
+                        <i class="fa fa-question-circle text-muted" data-toggle="tooltip" title="{{ help_shipping }}"></i>
+                      </label>
+                    </div>
+                  </div>
+              </div>
+              <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-minimum"><span data-toggle="tooltip" title="{{ help_minimum }}">{{ entry_minimum }}</span></label>
+                  <div class="col-sm-10">
+                    <input type="text" name="minimum" value="{{ minimum }}" placeholder="{{ entry_minimum }}" id="input-minimum" class="form-control"/>
+                  </div>
+              </div>
+              <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-quantity-step"><span data-toggle="tooltip" title="{{ help_quantity_step }}">{{ entry_quantity_step }}</span></label>
+                  <div class="col-sm-10">
+                    <input type="text" name="quantity_step" value="{{ quantity_step }}" placeholder="{{ entry_quantity_step }}" id="input-quantity-step" class="form-control"/>
+                  </div>
+              </div>
             </div>
-            <div class="tab-pane" id="tab-attribute">
+            <div class="tab-pane dcx-tab-pane" id="tab-images">
+                <div class="form-group">
+                  <label class="col-sm-2 control-label">{{ entry_image }}</label>
+                  <div class="col-sm-10">
+                    <div class="dc-img-card dc-img-card--main" style="width:130px;cursor:default;position:relative;">
+                      <a href="" id="thumb-image" data-toggle="image" class="dc-img-link" style="margin:0;"><img src="{{ thumb }}" alt="" title="" style="width:100%;height:100px;object-fit:cover;border-radius:4px;display:block;" data-placeholder="{{ placeholder }}" /></a>
+                      <input type="hidden" name="image" value="{{ image }}" id="input-image"/>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label">{{ entry_additional_image }}</label>
+                  <div class="col-sm-10">
+                    <ul class="nav nav-tabs" id="language-images">
+                      <li class="active"><a href="#tab-image-all" data-toggle="tab"><i class="fa fa-globe"></i> {{ text_all_languages }}</a></li>
+                      {% for language in languages %}
+                      <li><a href="#tab-image-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
+                      {% endfor %}
+                    </ul>
+                    <div class="tab-content" style="padding-top:12px;">
+                      {% set image_row = 0 %}
+                      <div class="tab-pane active" id="tab-image-all">
+                        <div class="product-images" id="product-images-all">
+                          {% for product_image in product_images_global %}
+                          <div class="dc-img-card" data-row="{{ image_row }}" title="{{ text_drag_to_reorder }}">
+                            <input type="hidden" name="product_image[{{ image_row }}][image]" value="{{ product_image.image }}" id="input-image{{ image_row }}"/>
+                            <input type="hidden" name="product_image[{{ image_row }}][sort_order]" value="{{ product_image.sort_order }}" class="dc-img-sort-order"/>
+                            <input type="hidden" name="product_image[{{ image_row }}][language_id]" value="{{ product_image.language_id }}"/>
+                            <a href="" id="thumb-image{{ image_row }}" data-toggle="image" class="dc-img-link"><img src="{{ product_image.thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" draggable="false"/></a>
+                            <button type="button" onclick="removeImage({{ image_row }});" class="dc-img-remove" title="{{ button_remove }}"><i class="fa fa-times"></i></button>
+                          </div>
+                          {% set image_row = image_row + 1 %}
+                          {% endfor %}
+                        </div>
+                        <button type="button" onclick="addImage('');" class="btn btn-default" style="margin-top:12px;"><i class="fa fa-plus"></i> {{ button_image_add }}</button>
+                      </div>
+                      {% for language in languages %}
+                      <div class="tab-pane" id="tab-image-{{ language.language_id }}">
+                        <div class="product-images" id="product-images-{{ language.language_id }}">
+                          {% set lang_images = product_images_by_lang[language.language_id] is defined ? product_images_by_lang[language.language_id] : [] %}
+                          {% for product_image in lang_images %}
+                          <div class="dc-img-card" data-row="{{ image_row }}" title="{{ text_drag_to_reorder }}">
+                            <input type="hidden" name="product_image[{{ image_row }}][image]" value="{{ product_image.image }}" id="input-image{{ image_row }}"/>
+                            <input type="hidden" name="product_image[{{ image_row }}][sort_order]" value="{{ product_image.sort_order }}" class="dc-img-sort-order"/>
+                            <input type="hidden" name="product_image[{{ image_row }}][language_id]" value="{{ product_image.language_id }}"/>
+                            <a href="" id="thumb-image{{ image_row }}" data-toggle="image" class="dc-img-link"><img src="{{ product_image.thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" draggable="false"/></a>
+                            <button type="button" onclick="removeImage({{ image_row }});" class="dc-img-remove" title="{{ button_remove }}"><i class="fa fa-times"></i></button>
+                          </div>
+                          {% set image_row = image_row + 1 %}
+                          {% endfor %}
+                        </div>
+                        <button type="button" onclick="addImage('{{ language.language_id }}');" class="btn btn-default" style="margin-top:12px;"><i class="fa fa-plus"></i> {{ button_image_add }}</button>
+                      </div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label">{{ entry_video }}</label>
+                  <div class="col-sm-10">
+                    <div class="dc-video-wrapper" style="max-width:500px;">
+                      <div class="input-group" style="margin-bottom:8px;">
+                        <span class="input-group-addon"><i class="fa fa-youtube-play"></i></span>
+                        <input type="text" name="video_youtube" value="{{ video_type == 'youtube' ? video : '' }}" id="input-video-youtube" class="form-control" placeholder="{{ entry_video_youtube_placeholder }}" />
+                        <span class="input-group-btn">
+                          <button type="button" onclick="clearProductVideo()" class="btn btn-default" title="{{ button_remove }}"><i class="fa fa-trash-o"></i></button>
+                        </span>
+                      </div>
+                      <div id="video-youtube-preview" style="margin-bottom:8px;{{ video_type == 'youtube' and video ? '' : 'display:none;' }}">
+                        <img src="https://img.youtube.com/vi/{{ video }}/hqdefault.jpg" id="video-youtube-thumb-img" style="max-height:90px;border-radius:4px;" />
+                        <div style="font-size:11px;color:#6b7280;margin-top:4px;">{{ text_youtube_video }}</div>
+                      </div>
+                      <div id="video-mp4-block" style="margin-bottom:8px;{{ video_type == 'mp4' and video ? '' : 'display:none;' }}">
+                        <div class="dc-video-card">
+                          <a href="" id="thumb-product-video" data-toggle="image" data-type="video" class="dc-video-card__link">
+                            <img src="{{ video_thumb }}" data-placeholder="{{ video_placeholder }}" class="dc-video-card__img" />
+                            <div class="dc-video-card__overlay"{% if not (video_type == 'mp4' and video) %} style="display:none;"{% endif %}>
+                              <i data-lucide="film" class="dc-video-card__icon"></i>
+                              <span class="dc-video-card__name">{{ video }}</span>
+                            </div>
+                          </a>
+                          <button type="button" onclick="clearProductVideo()" class="dc-video-card__remove" title="{{ button_remove }}"><i class="fa fa-times"></i></button>
+                          <input type="hidden" name="video_mp4" value="{{ video }}" id="input-product-video" />
+                        </div>
+                      </div>
+                      <button type="button" onclick="openVideoFileManager();" class="btn btn-default" id="button-browse-mp4"><i class="fa fa-folder-open"></i> {{ button_browse_mp4 }}</button>
+                      <span class="help-block text-muted">{{ help_video_combined }}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label">{{ entry_model_3d }}</label>
+                  <div class="col-sm-10">
+                    <div class="dc-video-card">
+                      <a href="" id="thumb-model-3d" data-toggle="image" data-type="model_3d" class="dc-video-card__link">
+                        <img src="{{ model_3d_thumb }}" data-placeholder="{{ model_3d_placeholder }}" class="dc-video-card__img" />
+                        <div class="dc-video-card__overlay"{% if not model_3d %} style="display:none;"{% endif %}>
+                          <i data-lucide="box" class="dc-video-card__icon"></i>
+                          <span class="dc-video-card__name">{{ model_3d }}</span>
+                        </div>
+                      </a>
+                      <button type="button" onclick="clearModel3d()" class="dc-video-card__remove" title="{{ button_remove }}"><i class="fa fa-times"></i></button>
+                      <input type="hidden" name="model_3d" value="{{ model_3d }}" id="input-model-3d" />
+                    </div>
+                    <div class="help-block text-muted" style="margin-top:8px;">{{ help_model_3d }}</div>
+                  </div>
+                </div>
+            </div>
+            <div class="tab-pane dcx-tab-pane" id="tab-attribute">
               <div class="table-responsive">
                 <table id="attribute" class="table table-hover attribute-table">
                   <thead>
@@ -483,7 +510,7 @@
                 <i class="fa fa-plus-circle"></i> {{ button_attribute_add }}
               </button>
             </div>
-            <div class="tab-pane" id="tab-option">
+            <div class="tab-pane dcx-tab-pane" id="tab-option">
               <div class="dc-option-mode-selector" style="margin-bottom:15px;padding:10px 15px;background:#f7f7f7;border-radius:4px">
                 <label style="margin:0;font-weight:600">{{ entry_option_mode }}:</label>
                 <span id="dc-option-mode-label" class="label {% if is_configurable %}label-primary{% else %}label-default{% endif %}" style="font-size:13px">
@@ -757,7 +784,7 @@
                 </div>
               </div>
             </div>
-            <div class="tab-pane" id="tab-promotions">
+            <div class="tab-pane dcx-tab-pane" id="tab-promotions">
               <div class="promo-section">
                 <div class="promo-section__header"><i class="fa fa-percent"></i> {{ text_promo_discounts }}</div>
                 <div class="table-responsive">
@@ -945,7 +972,7 @@
             </div>
             <style>
               .pricing-table { border-collapse: separate; border-spacing: 0; }
-              .pricing-table > thead > tr > td { border-bottom: 2px solid #e2e5e8; font-weight: 600; color: #4a5568; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; background: #fafbfc; }
+              .pricing-table > thead > tr > td { border-bottom: 2px solid #e2e5e8; font-weight: 600; color: #4a5568; font-size: 12px; padding: 10px 12px; background: #fafbfc; }
               .pricing-table > tbody > tr.pricing-row > td { padding: 6px 8px; border-bottom: 1px solid #edf2f7; vertical-align: middle; }
               .pricing-table > tbody > tr.pricing-row:hover > td { background: #f8fafc; }
               .pricing-table > tbody > tr.pricing-row:last-child > td { border-bottom: none; }
@@ -970,6 +997,68 @@
               body > .ui-autocomplete,
               #tab-promotions .ui-autocomplete { z-index: 1050 !important; max-height: 250px; overflow-y: auto; }
             </style>
+            <div class="tab-pane dcx-tab-pane" id="tab-seo">
+              <div class="alert alert-info"><i class="fa fa-info-circle"></i> {{ text_keyword }}</div>
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <td class="text-left" style="width:200px;">{{ entry_store }}</td>
+                      {% for language in languages %}
+                      <td class="text-left"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> <span style="color:#6b7280;">{{ language.name }}</span></td>
+                      {% endfor %}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for store in stores %}
+                    <tr>
+                      <td>{{ store.name }}</td>
+                      {% for language in languages %}
+                      <td>
+                        <input type="text" name="product_seo_url[{{ store.store_id }}][{{ language.language_id }}]" value="{% if product_seo_url[store.store_id][language.language_id] %}{{ product_seo_url[store.store_id][language.language_id] }}{% endif %}" placeholder="{{ entry_keyword }}" class="form-control" />
+                        {% if error_keyword[store.store_id][language.language_id] %}
+                        <div class="text-danger">{{ error_keyword[store.store_id][language.language_id] }}</div>
+                        {% endif %}
+                      </td>
+                      {% endfor %}
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="tab-pane dcx-tab-pane" id="tab-design">
+              <div class="alert alert-info"><i class="fa fa-info-circle"></i> {{ text_layout_info }}</div>
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <td class="text-left" style="width:200px;">{{ entry_store }}</td>
+                      <td class="text-left">{{ entry_layout }}</td>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for store in stores %}
+                    <tr>
+                      <td>{{ store.name }}</td>
+                      <td>
+                        <select name="product_layout[{{ store.store_id }}]" class="form-control">
+                          <option value=""></option>
+                          {% for layout in layouts %}
+                          {% if product_layout[store.store_id] and product_layout[store.store_id] == layout.layout_id %}
+                          <option value="{{ layout.layout_id }}" selected="selected">{{ layout.name }}</option>
+                          {% else %}
+                          <option value="{{ layout.layout_id }}">{{ layout.name }}</option>
+                          {% endif %}
+                          {% endfor %}
+                        </select>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </form>
       </div>
@@ -1738,12 +1827,14 @@
 	  if ($mainImg.length && $mainImg.val()) {
 		  imgs.push({ path: $mainImg.val(), thumb: $('#thumb-image img').attr('src') || '{{ placeholder|e("js") }}' });
 	  }
-	  $('#images tbody tr').each(function() {
-		  var $inp = $(this).find('input[name$="[image]"]');
-		  if ($inp.length && $inp.val()) {
-			  var $thumbImg = $(this).find('a.img-thumbnail img');
-			  imgs.push({ path: $inp.val(), thumb: $thumbImg.attr('src') || '{{ placeholder|e("js") }}' });
-		  }
+	  $('.product-images').each(function() {
+		  $(this).find('.dc-img-card').each(function() {
+			  var $inp = $(this).find('input[name$="[image]"]');
+			  if ($inp.length && $inp.val()) {
+				  var $thumbImg = $(this).find('.dc-img-link img');
+				  imgs.push({ path: $inp.val(), thumb: $thumbImg.attr('src') || '{{ placeholder|e("js") }}' });
+			  }
+		  });
 	  });
 
 	  $pickers.each(function() {
@@ -1970,67 +2061,115 @@
   <script type="text/javascript"><!--
   var image_row = {{ image_row }};
 
-  function addImage() {
-    var html = '<div class="dc-img-card" data-row="' + image_row + '" title="Перетащите для изменения порядка">';
+  function addImage(language_id) {
+    var $container = language_id === ''
+      ? $('#product-images-all')
+      : $('#product-images-' + language_id);
+    var html = '<div class="dc-img-card" data-row="' + image_row + '" title="{{ text_drag_to_reorder }}">';
     html += '<input type="hidden" name="product_image[' + image_row + '][image]" value="" id="input-image' + image_row + '"/>';
     html += '<input type="hidden" name="product_image[' + image_row + '][sort_order]" value="0" class="dc-img-sort-order"/>';
+    html += '<input type="hidden" name="product_image[' + image_row + '][language_id]" value="' + language_id + '"/>';
     html += '<a href="" id="thumb-image' + image_row + '" data-toggle="image" class="dc-img-link"><img src="{{ placeholder }}" alt="" title="" data-placeholder="{{ placeholder }}" draggable="false"/></a>';
-    html += '<button type="button" class="dc-img-star" onclick="setImageActive(' + image_row + ');" title="{{ text_main_image }}"><i class="fa fa-star"></i></button>';
     html += '<button type="button" onclick="removeImage(' + image_row + ');" class="dc-img-remove"><i class="fa fa-times"></i></button>';
     html += '</div>';
-    $('#product-images').append(html);
-    if ($('#product-images .dc-img-card').length === 1) {
-      setImageActive(image_row);
-    }
+    $container.append(html);
     dcRefreshColorImagePickers();
     image_row++;
   }
 
-  function setImageActive(row) {
-    var $prev = $('#product-images .dc-img-card.active');
-    $prev.removeClass('active');
-    var $card = $('#product-images .dc-img-card[data-row="' + row + '"]');
-    $card.addClass('active');
-    $('#input-image').val($('#input-image' + row).val());
-    $('#product-images').prepend($card);
-  }
-
   function removeImage(row) {
-    var $card = $('#product-images .dc-img-card[data-row="' + row + '"]');
+    var $card = $('.product-images .dc-img-card[data-row="' + row + '"]');
     $card.remove();
-    var $active = $('#product-images .dc-img-card.active');
-    if (!$active.length) {
-      var $first = $('#product-images .dc-img-card').first();
-      if ($first.length) {
-        setImageActive(parseInt($first.attr('data-row')));
-      } else {
-        $('#input-image').val('');
-      }
-    }
+    dcRefreshColorImagePickers();
   }
 
   function updateImageSortOrders() {
-    $('#product-images .dc-img-card').each(function(i) {
-      $(this).find('.dc-img-sort-order').val(i);
+    $('.product-images').each(function() {
+      $(this).find('.dc-img-card').each(function(i) {
+        $(this).find('.dc-img-sort-order').val(i);
+      });
     });
   }
 
   if (typeof Sortable !== 'undefined') {
-    Sortable.create(document.getElementById('product-images'), {
-      animation: 150,
-      filter: '.dc-img-card.active, .dc-img-star, .dc-img-remove, input',
-      ghostClass: 'dc-img-ghost',
-      chosenClass: 'dc-img-chosen',
-      onEnd: function() {
-        var $active = $('#product-images .dc-img-card.active');
-        var $first = $('#product-images .dc-img-card').first();
-        if ($active.length && !$first.hasClass('active')) {
-          $('#product-images').prepend($active);
+    $('.product-images').each(function() {
+      Sortable.create(this, {
+        animation: 150,
+        filter: '.dc-img-remove, input',
+        ghostClass: 'dc-img-ghost',
+        chosenClass: 'dc-img-chosen',
+        onEnd: function() {
+          updateImageSortOrders();
         }
-        updateImageSortOrders();
+      });
+    });
+  }
+
+  function clearProductVideo() {
+    $('#input-video-youtube').val('');
+    $('#video-youtube-preview').hide();
+    var $card = $('#video-mp4-block').find('.dc-video-card');
+    $card.find('.dc-video-card__img').attr('src', $card.find('.dc-video-card__img').attr('data-placeholder'));
+    $card.find('.dc-video-card__overlay').hide();
+    $('#input-product-video').val('');
+    $('#video-mp4-block').hide();
+  }
+
+  function clearModel3d() {
+    var $card = $('#thumb-model-3d').closest('.dc-video-card');
+    $card.find('.dc-video-card__img').attr('src', $card.find('.dc-video-card__img').attr('data-placeholder'));
+    $card.find('.dc-video-card__overlay').hide();
+    $('#input-model-3d').val('');
+  }
+
+  function openVideoFileManager() {
+    $('#modal-image').remove();
+    $.ajax({
+      url: 'index.php?route=common/filemanager&user_token=' + getURLVar('user_token')
+           + '&target=input-product-video&thumb=thumb-product-video&type=video',
+      dataType: 'html',
+      beforeSend: function() {
+        $('#button-browse-mp4').prop('disabled', true);
+      },
+      complete: function() {
+        $('#button-browse-mp4').prop('disabled', false);
+      },
+      success: function(html) {
+        $('body').append('<div id="modal-image" class="modal">' + html + '</div>');
+        $('#modal-image').modal('show');
       }
     });
   }
+
+  $(document).on('input', '#input-video-youtube', function() {
+    var val = $(this).val().trim();
+    if (val) {
+      $('#video-mp4-block').hide();
+      $('#input-product-video').val('');
+      $('#video-mp4-block').find('.dc-video-card__img').attr('src', $('#video-mp4-block').find('.dc-video-card__img').attr('data-placeholder'));
+      $('#video-mp4-block').find('.dc-video-card__overlay').hide();
+      $('#video-youtube-preview').show();
+      $('#video-youtube-thumb-img').attr('src', 'https://img.youtube.com/vi/' + encodeURIComponent(val) + '/hqdefault.jpg');
+    } else {
+      $('#video-youtube-preview').hide();
+    }
+  });
+
+  $(document).on('hidden.bs.modal', '#modal-image', function() {
+    var mp4Val = $('#input-product-video').val();
+    if (mp4Val) {
+      $('#video-youtube-preview').hide();
+      $('#input-video-youtube').val('');
+      $('#video-mp4-block').show();
+      $('#video-mp4-block').find('.dc-video-card__overlay').show();
+      $('#video-mp4-block').find('.dc-video-card__name').text(mp4Val);
+    }
+    var modelVal = $('#input-model-3d').val();
+    if (modelVal) {
+      $('#thumb-model-3d').closest('.dc-video-card').find('.dc-video-card__overlay').show();
+      $('#thumb-model-3d').closest('.dc-video-card').find('.dc-video-card__name').text(modelVal);
+    }
+  });
 
   //--></script>
   <script type="text/javascript"><!--
@@ -2105,7 +2244,7 @@ $(document).on('change', 'input[name="image"], input[name^="product_image"]', fu
     setTimeout(dcRefreshColorImagePickers, 150);
 });
 
-$(document).on('click', '#images .btn-danger, #images button[onclick*="remove"]', function() {
+$(document).on('click', '#images .btn-danger, #images button[onclick*="remove"], .product-images .dc-img-remove', function() {
     setTimeout(dcRefreshColorImagePickers, 200);
 });
 //--></script>
@@ -2117,23 +2256,30 @@ $(document).on('click', '#images .btn-danger, #images button[onclick*="remove"]'
 .dc-cgp-price { width: 130px; flex: 0 0 130px; }
 .dc-cgp-remove { padding: 4px 6px; color: #999; font-size: 14px; }
 .dc-cgp-remove:hover { color: #c00; text-decoration: none; }
-#product-images { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 16px; }
-.dc-img-card { border: 1px solid #e2e5e8; border-radius: 6px; padding: 10px; text-align: center; position: relative; background: #fff; min-height: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: grab; transition: all 0.2s ease; }
-.dc-img-card:not(.active):hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-color: #cbd5e0; }
+.product-images { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 16px; }
+.dc-img-card { border: 1px solid #e2e5e8; border-radius: 6px; padding: 4px; text-align: center; position: relative; background: #fff; max-width: 130px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: grab; transition: all 0.2s ease; }
+.dc-img-card:hover { border-color: #cbd5e0; }
 .dc-img-card:active { cursor: grabbing; }
-.dc-img-card.active { border-color: #f0ad4e; box-shadow: 0 0 0 1px #f0ad4e; }
-.dc-img-link { display: block; margin-bottom: 8px; cursor: pointer; }
+.dc-img-card--main { cursor: default; min-height: 0; padding: 4px; }
+.dc-img-card--main:hover { transform: none; box-shadow: none; border-color: #e2e5e8; }
+.dc-img-link { display: block; cursor: pointer; }
 .dc-img-link img { width: 100%; height: 100px; object-fit: cover; border-radius: 4px; user-select: none; }
-.dc-img-star { position: absolute; top: 6px; left: 6px; background: rgba(255,255,255,0.85); border: none; cursor: pointer; color: #ccc; font-size: 16px; padding: 4px; line-height: 1; z-index: 2; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
-.dc-img-star:hover { background: rgba(240,173,78,0.2); color: #f0ad4e; }
-.dc-img-card.active .dc-img-star { color: #f0ad4e; background: rgba(240,173,78,0.15); }
-.dc-img-remove { position: absolute; top: 6px; right: 6px; background: rgba(255,255,255,0.85); border: none; cursor: pointer; color: #ccc; font-size: 16px; padding: 4px; line-height: 1; z-index: 2; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+.dc-img-remove { position: absolute; top: 6px; right: 6px; background: rgba(255,255,255,0.85); border: none; cursor: pointer; color: #4b5563; font-size: 16px; padding: 4px; line-height: 1; z-index: 2; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
 .dc-img-remove:hover { background: rgba(204,0,0,0.15); color: #c00; }
-.dc-img-card .dc-img-link, .dc-img-card .dc-img-star, .dc-img-card .dc-img-remove { cursor: pointer; }
+.dc-img-card .dc-img-link, .dc-img-card .dc-img-remove { cursor: pointer; }
 .dc-img-ghost { opacity: 0.3; border: 2px dashed #3b82f6; background: #eff6ff; }
 .dc-img-chosen { box-shadow: 0 4px 12px rgba(0,0,0,0.15); transform: scale(1.03); }
+.dc-video-card { position: relative; display: inline-block; width: 130px; height: 140px; border: 1px solid #e2e5e8; border-radius: 6px; background: #1f2937; overflow: hidden; cursor: pointer; transition: all 0.2s ease; }
+.dc-video-card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-color: #cbd5e0; }
+.dc-video-card__link { display: block; width: 100%; height: 100%; position: relative; }
+.dc-video-card__img { width: 100%; height: 100%; object-fit: cover; }
+.dc-video-card__overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(31,41,55,0.85); gap: 6px; padding: 8px; }
+.dc-video-card__icon { width: 32px; height: 32px; stroke: #9ca3af; flex-shrink: 0; }
+.dc-video-card__name { font-size: 10px; color: #9ca3af; word-break: break-all; text-align: center; line-height: 1.2; max-width: 100%; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.dc-video-card__remove { position: absolute; top: 6px; right: 6px; background: rgba(255,255,255,0.85); border: none; cursor: pointer; color: #4b5563; font-size: 14px; padding: 3px; line-height: 1; z-index: 2; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+.dc-video-card__remove:hover { background: rgba(204,0,0,0.15); color: #c00; }
 .attribute-table { border-collapse: separate; border-spacing: 0; }
-.attribute-table > thead > tr > td { border-bottom: 2px solid #e2e5e8; font-weight: 600; color: #4a5568; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; }
+.attribute-table > thead > tr > td { border-bottom: 2px solid #e2e5e8; font-weight: 600; color: #4a5568; font-size: 12px; padding: 10px 12px; }
 .attribute-table > tbody > tr.attribute-row > td { padding: 8px 12px; border-bottom: 1px solid #edf2f7; vertical-align: top; }
 .attribute-table > tbody > tr.attribute-row > td:nth-child(2) { white-space: normal; }
 .attribute-table > tbody > tr.attribute-row:hover > td { background: #f8fafc; }

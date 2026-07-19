@@ -1,5 +1,6 @@
 {{ header }}{{ column_left }}
 <div id="content">
+  <link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
   <div class="page-header">
     <div class="container-fluid">
       <div class="pull-right">
@@ -19,22 +20,26 @@
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
-    <div class="panel panel-default">
-      <div class="panel-heading">
-  <div class="panel-heading__icon"><i class="fa fa-pencil"></i></div>
-  <div>
-    <h3 class="panel-title">{{ text_form }}</h3>
-    <div class="panel-heading__subtitle">{{ text_form_subtitle }}</div>
-  </div>
-</div>
-      <div class="panel-body">
-        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-category" class="form-horizontal">
-          <ul class="nav nav-tabs">
-            <li class="active"><a href="#tab-description" data-toggle="tab"><i class="fa fa-file-text"></i> {{ tab_general }}</a></li>
-            <li><a href="#tab-data" data-toggle="tab"><i class="fa fa-database"></i> {{ tab_data }}</a></li>
+    <div class="dcx-shell">
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i class="fa fa-folder"></i></div>
+          <div>
+            <h3 class="dcx-panel-title">{{ text_form }}</h3>
+            <div class="dcx-panel-subtitle">{{ text_form_subtitle }}</div>
+          </div>
+        </div>
+        <div class="dcx-panel-body">
+          <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-category" class="form-horizontal dcx-form">
+          <ul class="nav nav-tabs dcx-profile-tabs">
+            <li class="active"><a href="#tab-description" data-toggle="tab"><i class="fa fa-file-text"></i> {{ tab_description }}</a></li>
+            <li><a href="#tab-params" data-toggle="tab"><i class="fa fa-sliders"></i> {{ tab_params_group }}</a></li>
+            <li><a href="#tab-images" data-toggle="tab"><i class="fa fa-image"></i> {{ tab_images_group }}</a></li>
+            <li><a href="#tab-seo" data-toggle="tab"><i class="fa fa-sitemap"></i> {{ tab_seo }}</a></li>
+            <li><a href="#tab-design" data-toggle="tab"><i class="fa fa-paint-brush"></i> {{ tab_design }}</a></li>
           </ul>
           <div class="tab-content">
-            <div class="tab-pane active" id="tab-description">
+            <div class="tab-pane dcx-tab-pane active" id="tab-description">
               <ul class="nav nav-tabs" id="language">
                 {% for language in languages %}
                 <li><a href="#language{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
@@ -83,147 +88,152 @@
                 {% endfor %}
               </div>
             </div>
-            <div class="tab-pane" id="tab-data">
-              <fieldset>
-                <legend><i class="fa fa-link"></i> {{ tab_links_group }}</legend>
-                <div class="form-group">
-                  <label class="col-sm-2 control-label" for="input-parent">{{ entry_parent }}</label>
-                  <div class="col-sm-10">
-                    <input type="text" name="path" value="{{ path|e('html_attr') }}" placeholder="{{ entry_parent }}" id="input-parent" class="form-control" />
-                    <input type="hidden" name="parent_id" value="{{ parent_id }}" />
-                    {% if error_parent %}
-                    <div class="text-danger">{{ error_parent }}</div>
-                    {% endif %}
-                  </div>
+            <div class="tab-pane dcx-tab-pane" id="tab-params">
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-parent">{{ entry_parent }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="path" value="{{ path|e('html_attr') }}" placeholder="{{ entry_parent }}" id="input-parent" class="form-control" />
+                  <input type="hidden" name="parent_id" value="{{ parent_id }}" />
+                  {% if error_parent %}
+                  <div class="text-danger">{{ error_parent }}</div>
+                  {% endif %}
                 </div>
-                <div class="form-group">
-                  <label class="col-sm-2 control-label">{{ entry_store }}</label>
-                  <div class="col-sm-10">
-                    <div class="well well-sm" style="height: 150px; overflow: auto;">
-                      {% for store in stores %}
-                      <div class="checkbox">
-                        <label>
-                          {% if store.store_id in category_store %}
-                          <input type="checkbox" name="category_store[]" value="{{ store.store_id }}" checked="checked" />
-                          {{ store.name }}
-                          {% else %}
-                          <input type="checkbox" name="category_store[]" value="{{ store.store_id }}" />
-                          {{ store.name }}
-                          {% endif %}
-                        </label>
-                      </div>
-                      {% endfor %}
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-top"><span data-toggle="tooltip" title="{{ help_top }}">{{ entry_top }}</span></label>
+                <div class="col-sm-10">
+                  <select name="top" id="input-top" class="form-control">
+                    <option value="1"{% if top %} selected="selected"{% endif %}>{{ text_enabled }}</option>
+                    <option value="0"{% if not top %} selected="selected"{% endif %}>{{ text_disabled }}</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-sort-order">{{ entry_sort_order }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label">{{ entry_store }}</label>
+                <div class="col-sm-10">
+                  <div class="well well-sm" style="height: 150px; overflow: auto;">
+                    {% for store in stores %}
+                    <div class="checkbox">
+                      <label>
+                        {% if store.store_id in category_store %}
+                        <input type="checkbox" name="category_store[]" value="{{ store.store_id }}" checked="checked" />
+                        {{ store.name }}
+                        {% else %}
+                        <input type="checkbox" name="category_store[]" value="{{ store.store_id }}" />
+                        {{ store.name }}
+                        {% endif %}
+                      </label>
                     </div>
-                  </div>
-                </div>
-              </fieldset>
-
-              <fieldset>
-                <legend><i class="fa fa-image"></i> {{ tab_images_group }}</legend>
-                <div class="form-group">
-                  <label class="col-sm-2 control-label">{{ entry_image }}</label>
-                  <div class="col-sm-10"><a href="" id="thumb-image" data-toggle="image" class="img-thumbnail"><img src="{{ thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
-                    <input type="hidden" name="image" value="{{ image }}" id="input-image" />
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label class="col-sm-2 control-label" for="input-icon"><span data-toggle="tooltip" title="{{ help_icon }}">{{ entry_icon }}</span></label>
-                  <div class="col-sm-10"><a href="" id="thumb-icon" data-toggle="image" class="img-thumbnail"><img src="{{ icon_thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
-                    <input type="hidden" name="icon" value="{{ icon }}" id="input-icon" />
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label class="col-sm-2 control-label">{{ entry_background_image }}</label>
-                  <div class="col-sm-10"><a href="" id="thumb-background" data-toggle="image" class="img-thumbnail"><img src="{{ background_thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
-                    <input type="hidden" name="background_image" value="{{ background_image }}" id="input-background" />
-                  </div>
-                </div>
-              </fieldset>
-
-              <fieldset>
-                <legend><i class="fa fa-sliders"></i> {{ tab_params_group }}</legend>
-                <div class="form-group">
-                  <label class="col-sm-2 control-label" for="input-top"><span data-toggle="tooltip" title="{{ help_top }}">{{ entry_top }}</span></label>
-                  <div class="col-sm-10">
-                    <select name="top" id="input-top" class="form-control">
-                      <option value="1"{% if top %} selected="selected"{% endif %}>{{ text_enabled }}</option>
-                      <option value="0"{% if not top %} selected="selected"{% endif %}>{{ text_disabled }}</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label class="col-sm-2 control-label" for="input-column"><span data-toggle="tooltip" title="{{ help_column }}">{{ entry_column }}</span></label>
-                  <div class="col-sm-10">
-                    <input type="text" name="column" value="{{ column }}" placeholder="{{ entry_column }}" id="input-column" class="form-control" />
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label class="col-sm-2 control-label" for="input-sort-order">{{ entry_sort_order }}</label>
-                  <div class="col-sm-10">
-                    <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control" />
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
-                  <div class="col-sm-10">
-                    <select name="status" id="input-status" class="form-control">
-                      {% if status %}
-                      <option value="1" selected="selected">{{ text_enabled }}</option>
-                      <option value="0">{{ text_disabled }}</option>
-                      {% else %}
-                      <option value="1">{{ text_enabled }}</option>
-                      <option value="0" selected="selected">{{ text_disabled }}</option>
-                      {% endif %}
-                    </select>
-                  </div>
-                </div>
-              </fieldset>
-
-              <fieldset>
-                <legend><i class="fa fa-sitemap"></i> {{ tab_seo }}</legend>
-                <div class="alert alert-info"><i class="fa fa-info-circle"></i> {{ text_keyword }}</div>
-                {% for store in stores %}
-                <div class="form-group">
-                  <label class="col-sm-2 control-label">{{ store.name }}</label>
-                  <div class="col-sm-10">
-                    {% for language in languages %}
-                    <div class="input-group"><span class="input-group-addon"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span></span>
-                      <input type="text" name="category_seo_url[{{ store.store_id }}][{{ language.language_id }}]" value="{% if category_seo_url[store.store_id][language.language_id] %}{{ category_seo_url[store.store_id][language.language_id] }}{% endif %}" placeholder="{{ entry_keyword }}" class="form-control" />
-                    </div>
-                    {% if error_keyword[store.store_id][language.language_id] %}
-                    <div class="text-danger">{{ error_keyword[store.store_id][language.language_id] }}</div>
-                    {% endif %}
                     {% endfor %}
                   </div>
                 </div>
-                {% endfor %}
-              </fieldset>
-
-              <fieldset>
-                <legend><i class="fa fa-paint-brush"></i> {{ tab_design }}</legend>
-                <div class="alert alert-info"><i class="fa fa-info-circle"></i> {{ text_layout_info }}</div>
-                {% for store in stores %}
-                <div class="form-group">
-                  <label class="col-sm-2 control-label">{{ store.name }}</label>
-                  <div class="col-sm-10">
-                    <select name="category_layout[{{ store.store_id }}]" class="form-control">
-                      <option value=""></option>
-                      {% for layout in layouts %}
-                      {% if category_layout[store.store_id] and category_layout[store.store_id] == layout.layout_id %}
-                      <option value="{{ layout.layout_id }}" selected="selected">{{ layout.name }}</option>
-                      {% else %}
-                      <option value="{{ layout.layout_id }}">{{ layout.name }}</option>
-                      {% endif %}
-                      {% endfor %}
-                    </select>
-                  </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
+                <div class="col-sm-10">
+                  <select name="status" id="input-status" class="form-control">
+                    {% if status %}
+                    <option value="1" selected="selected">{{ text_enabled }}</option>
+                    <option value="0">{{ text_disabled }}</option>
+                    {% else %}
+                    <option value="1">{{ text_enabled }}</option>
+                    <option value="0" selected="selected">{{ text_disabled }}</option>
+                    {% endif %}
+                  </select>
                 </div>
-                {% endfor %}
-              </fieldset>
-
+              </div>
+            </div>
+            <div class="tab-pane dcx-tab-pane" id="tab-images">
+              <div class="form-group">
+                <label class="col-sm-2 control-label">{{ entry_image }}</label>
+                <div class="col-sm-10"><a href="" id="thumb-image" data-toggle="image" class="img-thumbnail"><img src="{{ thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
+                  <input type="hidden" name="image" value="{{ image }}" id="input-image" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-icon"><span data-toggle="tooltip" title="{{ help_icon }}">{{ entry_icon }}</span></label>
+                <div class="col-sm-10"><a href="" id="thumb-icon" data-toggle="image" class="img-thumbnail"><img src="{{ icon_thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
+                  <input type="hidden" name="icon" value="{{ icon }}" id="input-icon" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label">{{ entry_background_image }}</label>
+                <div class="col-sm-10"><a href="" id="thumb-background" data-toggle="image" class="img-thumbnail"><img src="{{ background_thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
+                  <input type="hidden" name="background_image" value="{{ background_image }}" id="input-background" />
+                </div>
+              </div>
+            </div>
+            <div class="tab-pane dcx-tab-pane" id="tab-seo">
+              <div class="alert alert-info"><i class="fa fa-info-circle"></i> {{ text_keyword }}</div>
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <td class="text-left" style="width:200px;">{{ entry_store }}</td>
+                      {% for language in languages %}
+                      <td class="text-left"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> <span style="color:#6b7280;">{{ language.name }}</span></td>
+                      {% endfor %}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for store in stores %}
+                    <tr>
+                      <td>{{ store.name }}</td>
+                      {% for language in languages %}
+                      <td>
+                        <input type="text" name="category_seo_url[{{ store.store_id }}][{{ language.language_id }}]" value="{% if category_seo_url[store.store_id][language.language_id] %}{{ category_seo_url[store.store_id][language.language_id] }}{% endif %}" placeholder="{{ entry_keyword }}" class="form-control" />
+                        {% if error_keyword[store.store_id][language.language_id] %}
+                        <div class="text-danger">{{ error_keyword[store.store_id][language.language_id] }}</div>
+                        {% endif %}
+                      </td>
+                      {% endfor %}
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="tab-pane dcx-tab-pane" id="tab-design">
+              <div class="alert alert-info"><i class="fa fa-info-circle"></i> {{ text_layout_info }}</div>
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <td class="text-left" style="width:200px;">{{ entry_store }}</td>
+                      <td class="text-left">{{ entry_layout }}</td>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for store in stores %}
+                    <tr>
+                      <td>{{ store.name }}</td>
+                      <td>
+                        <select name="category_layout[{{ store.store_id }}]" class="form-control">
+                          <option value=""></option>
+                          {% for layout in layouts %}
+                          {% if category_layout[store.store_id] and category_layout[store.store_id] == layout.layout_id %}
+                          <option value="{{ layout.layout_id }}" selected="selected">{{ layout.name }}</option>
+                          {% else %}
+                          <option value="{{ layout.layout_id }}">{{ layout.name }}</option>
+                          {% endif %}
+                          {% endfor %}
+                        </select>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </form>
+        </div>
       </div>
     </div>
   </div>

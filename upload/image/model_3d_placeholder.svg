@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+  <rect width="400" height="400" fill="#1f2937"/>
+  <g transform="translate(200,180)">
+    <polygon points="0,-60 55,30 -55,30" fill="none" stroke="#6b7280" stroke-width="4" stroke-linejoin="round"/>
+    <line x1="0" y1="-60" x2="0" y2="30" stroke="#6b7280" stroke-width="4" stroke-linecap="round"/>
+    <line x1="-55" y1="30" x2="0" y2="80" stroke="#6b7280" stroke-width="4" stroke-linecap="round"/>
+    <line x1="55" y1="30" x2="0" y2="80" stroke="#6b7280" stroke-width="4" stroke-linecap="round"/>
+    <line x1="0" y1="30" x2="0" y2="80" stroke="#6b7280" stroke-width="4" stroke-linecap="round"/>
+    <line x1="-55" y1="30" x2="0" y2="-15" stroke="#6b7280" stroke-width="2" stroke-dasharray="4,4"/>
+    <line x1="55" y1="30" x2="0" y2="-15" stroke="#6b7280" stroke-width="2" stroke-dasharray="4,4"/>
+    <text x="0" y="110" text-anchor="middle" fill="#9ca3af" font-family="system-ui,-apple-system,sans-serif" font-size="18" font-weight="500">3D Model</text>
+  </g>
+</svg>

@@ -164,7 +164,6 @@ $(document).ready(function() {
 	// Image Manager
 	$(document).on('click', 'a[data-toggle=\'image\']', function(e) {
 		var $element = $(this);
-		var $popover = $element.data('bs.popover'); // element has bs popover?
 
 		e.preventDefault();
 
@@ -175,11 +174,12 @@ $(document).ready(function() {
 		$('a[data-toggle="image"]').popover('destroy');
 
 		// remove flickering (do not re-add popover when clicking for removal)
-		if ($popover) {
+		if ($element.data('bs.popover')) {
 			return;
 		}
 
 		$element.popover({
+			container: 'body',
 			html: true,
 			sanitize: false,
 			placement: 'right',

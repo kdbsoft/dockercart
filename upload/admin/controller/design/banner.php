@@ -20,6 +20,28 @@ class ControllerDesignBanner extends Controller {
 		$this->load->model('design/banner');
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
+			// Auto-detect video type from unified fields (no selector)
+			if (isset($this->request->post['banner_image'])) {
+				foreach ($this->request->post['banner_image'] as $language_id => &$slides) {
+					foreach ($slides as &$slide) {
+						$youtube = !empty($slide['video_youtube']) ? $slide['video_youtube'] : '';
+						$mp4 = !empty($slide['video_mp4']) ? $slide['video_mp4'] : '';
+						if (!empty($youtube)) {
+							$slide['video_type'] = 'youtube';
+							$slide['video'] = $youtube;
+						} elseif (!empty($mp4)) {
+							$slide['video_type'] = 'mp4';
+							$slide['video'] = $mp4;
+						} else {
+							$slide['video_type'] = '';
+							$slide['video'] = '';
+						}
+						unset($slide['video_youtube'], $slide['video_mp4']);
+					}
+				}
+				unset($slides, $slide);
+			}
+
 			$this->model_design_banner->addBanner($this->request->post);
 
 			$this->session->data['success'] = $this->language->get('text_success');
@@ -52,6 +74,28 @@ class ControllerDesignBanner extends Controller {
 		$this->load->model('design/banner');
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
+			// Auto-detect video type from unified fields (no selector)
+			if (isset($this->request->post['banner_image'])) {
+				foreach ($this->request->post['banner_image'] as $language_id => &$slides) {
+					foreach ($slides as &$slide) {
+						$youtube = !empty($slide['video_youtube']) ? $slide['video_youtube'] : '';
+						$mp4 = !empty($slide['video_mp4']) ? $slide['video_mp4'] : '';
+						if (!empty($youtube)) {
+							$slide['video_type'] = 'youtube';
+							$slide['video'] = $youtube;
+						} elseif (!empty($mp4)) {
+							$slide['video_type'] = 'mp4';
+							$slide['video'] = $mp4;
+						} else {
+							$slide['video_type'] = '';
+							$slide['video'] = '';
+						}
+						unset($slide['video_youtube'], $slide['video_mp4']);
+					}
+				}
+				unset($slides, $slide);
+			}
+
 			$this->model_design_banner->editBanner($this->request->get['banner_id'], $this->request->post);
 
 			$this->session->data['success'] = $this->language->get('text_success');

@@ -398,7 +398,7 @@ class ControllerProductProduct extends Controller {
 
 			$data['images'] = array();
 
-			$results = $this->model_catalog_product->getProductImages($product_id);
+			$results = $this->model_catalog_product->getProductImages($product_id, $this->config->get('config_language_id'));
 
 			foreach ($results as $result) {
 				$orientation = 'landscape';
@@ -431,6 +431,34 @@ class ControllerProductProduct extends Controller {
 				'thumb' => $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_height')),
 				'orientation' => $orientation
 			);
+			}
+
+			// Video
+			$video_data = $this->model_catalog_product->getProductVideos($product_id, $this->config->get('config_language_id'));
+			$data['video_type'] = !empty($video_data) ? $video_data[0]['video_type'] : '';
+			$data['video'] = !empty($video_data) ? $video_data[0]['video'] : '';
+			$data['video_url'] = '';
+
+			if ($data['video_type'] === 'youtube' && $data['video']) {
+				$video_id = $data['video'];
+				if (preg_match('/[A-Za-z0-9_-]{11}/', $video_id, $m)) {
+					$video_id = $m[0];
+				}
+				$data['video_url'] = 'https://www.youtube.com/embed/' . urlencode($video_id) . '?autoplay=1&mute=1&loop=1&playlist=' . urlencode($video_id) . '&controls=0&showinfo=0&rel=0&enablejsapi=1';
+			} elseif ($data['video_type'] === 'mp4' && $data['video']) {
+				if (filter_var($data['video'], FILTER_VALIDATE_URL)) {
+					$data['video_url'] = $data['video'];
+				} elseif (is_file(DIR_IMAGE . $data['video'])) {
+					$data['video_url'] = ($this->request->server['HTTPS'] ? $this->config->get('config_ssl') : $this->config->get('config_url')) . 'image/' . ltrim($data['video'], '/');
+				}
+			}
+
+			// 3D Model
+			$data['model_3d'] = !empty($product_info['model_3d']) ? $product_info['model_3d'] : '';
+			$data['model_3d_url'] = '';
+
+			if ($data['model_3d'] && is_file(DIR_IMAGE . $data['model_3d'])) {
+				$data['model_3d_url'] = ($this->request->server['HTTPS'] ? $this->config->get('config_ssl') : $this->config->get('config_url')) . 'image/' . ltrim($data['model_3d'], '/');
 			}
 
 			if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {

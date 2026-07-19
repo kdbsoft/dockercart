@@ -69,6 +69,8 @@ $_['tab_review']               = 'Reviews (%s)';
 // Messenger
 $_['text_write_in_messenger']    = 'Write in';
 $_['text_we_are_in_messengers']  = 'We are on messengers';
+$_['text_video']                 = 'Watch video';
+$_['text_view_3d']               = 'View in 3D';
 
 // Error
 $_['error_name']               = 'Warning: Review Name must be between 3 and 25 characters!';
