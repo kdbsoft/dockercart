@@ -33,6 +33,7 @@ $_['column_sort_order']      = 'Sort Order';
 $_['column_action']          = 'Action';
 
 // Entry
+$_['tab_description']        = 'Description';
 $_['entry_name']             = 'Category Name';
 $_['entry_description']      = 'Description';
 $_['entry_meta_title'] 	     = 'Meta Tag Title';
@@ -41,6 +42,7 @@ $_['entry_meta_description'] = 'Meta Tag Description';
 $_['entry_store']            = 'Stores';
 $_['entry_keyword']          = 'Keyword';
 $_['entry_parent']           = 'Parent';
+$_['tab_images_group']       = 'Images';
 $_['entry_image']            = 'Image';
 $_['entry_icon']             = 'Icon';
 $_['entry_background_image'] = 'Background Image';

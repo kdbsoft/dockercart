@@ -1,6 +1,8 @@
 <?php
 
 $_['tab_general'] = 'Загальне';
+$_['tab_description'] = 'Опис';
+$_['tab_params_group'] = 'Параметри';
 
 $_['column_action'] = 'Дія';
 $_['column_noindex'] = 'Індексація';
@@ -12,9 +14,9 @@ $_['entry_full_width'] = 'На всю ширину';
 $_['entry_description'] = 'Опис';
 $_['entry_keyword'] = 'Ключове слово';
 $_['entry_layout'] = 'Перевизначення макета';
-$_['entry_meta_description'] = 'Опис метатегу';
+$_['entry_meta_description'] = 'Мета-опис';
 $_['entry_meta_h1'] = 'HTML-тег H1';
-$_['entry_meta_keyword'] = 'Ключові слова метатегів';
+$_['entry_meta_keyword'] = 'Мета-ключові слова';
 $_['entry_meta_title'] = 'Метатег Title';
 $_['entry_noindex'] = 'Індексація';
 $_['entry_sort_order'] = 'Порядок сортування';
@@ -54,5 +56,6 @@ $_['text_list_subtitle'] = 'Керуйте сторінками інформац
 $_['text_add_information_subtitle'] = 'Створити нову інформаційну сторінку';
 
 $_['text_edit_information_subtitle'] = 'Редагувати вміст інформаційної сторінки';
+$_['text_layout_info'] = 'Ви можете перевизначити стандартне відображення сторінки цієї інформації. Залиште порожнім для використання шаблону за замовчуванням.';
 
 

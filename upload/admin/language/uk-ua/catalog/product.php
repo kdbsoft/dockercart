@@ -1,6 +1,9 @@
 <?php
 
 $_['tab_general'] = 'Загальне';
+$_['tab_description'] = 'Опис';
+$_['tab_prices_stock_group'] = 'Ціни та наявність';
+$_['tab_params_group'] = 'Параметри';
 $_['column_action'] = 'Дія';
 $_['column_category'] = 'Категорія';
 $_['column_image'] = 'Зображення';
@@ -12,8 +15,8 @@ $_['column_price'] = 'Ціна';
 $_['column_quantity'] = 'Кількість';
 $_['column_status'] = 'Статус';
 $_['entry_additional_image'] = 'Додаткові зображення';
-$_['entry_attribute'] = 'Характеристика';
-$_['entry_attribute_group'] = 'Група характеристик';
+$_['entry_attribute'] = 'Атрибут';
+$_['entry_attribute_group'] = 'Група атрибутів';
 $_['entry_category'] = 'Категорії';
 $_['button_select_category'] = 'Вибрати категорії';
 $_['entry_customer_group'] = 'Група клієнтів';
@@ -42,9 +45,9 @@ $_['entry_location'] = 'Розташування';
 $_['entry_main_category'] = 'Головна категорія';
 $_['entry_manufacturer'] = 'Виробник';
 $_['entry_max'] = 'До';
-$_['entry_meta_description'] = 'Опис метатегу';
+$_['entry_meta_description'] = 'Мета-опис';
 $_['entry_meta_h1'] = 'HTML-тег H1';
-$_['entry_meta_keyword'] = 'Ключові слова метатегів';
+$_['entry_meta_keyword'] = 'Мета-ключові слова';
 $_['entry_meta_title'] = 'Метатег Title';
 $_['entry_min'] = 'Від';
 $_['entry_minimum'] = 'Мін. кіл-ть';
@@ -162,10 +165,17 @@ $_['text_list_subtitle'] = 'Перегляд, фільтрування та ке
 
 $_['text_filter_subtitle'] = 'Звузити результати за критеріями';
 
-$_['text_filter_hint']    = 'Можна ввести частину назви або частину артикулу (моделі) для пошуку';
+$_['text_filter_hint']    = 'Підказка: Можна ввести частину назви або частину артикулу (моделі) для пошуку';
 
 $_['text_add_product_subtitle'] = 'Додати новий товар до каталогу';
 
 $_['text_edit_product_subtitle'] = 'Редагувати дані та налаштування товару';
-
-
+$_['text_all_languages']      = 'Всі мови';
+$_['text_drag_to_reorder']    = 'Перетягніть для зміни порядку';
+$_['entry_video']                    = 'Відео';
+$_['entry_video_youtube_placeholder'] = 'YouTube URL або ID відео';
+$_['button_browse_mp4']              = 'Вибрати MP4';
+$_['help_video_combined']            = 'Введіть YouTube URL/ID або натисніть "Вибрати MP4" для завантаження відеофайлу.';
+$_['text_youtube_video']             = 'YouTube відео';
+$_['entry_model_3d']          = '3D Модель';
+$_['help_model_3d']           = 'Завантажте 3D модель у форматі GLB';

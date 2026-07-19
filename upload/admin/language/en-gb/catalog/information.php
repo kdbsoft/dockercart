@@ -43,6 +43,7 @@ $_['entry_layout']           = 'Layout Override';
 $_['help_bottom']            = 'Display in the bottom footer.';
 $_['help_top']               = 'Display in the top navigation bar of the header.';
 $_['help_full_width']        = 'Display the page content without width restriction, spanning the full screen.';
+$_['text_layout_info']       = 'You can override the default page layout for this information page. Leave empty to use the default layout.';
 
 // Error
 $_['error_warning']          = 'Warning: Please check the form carefully for errors!';

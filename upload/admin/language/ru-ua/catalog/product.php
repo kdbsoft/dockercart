@@ -1,6 +1,9 @@
 <?php
 
 $_['tab_general'] = 'Общее';
+$_['tab_description'] = 'Описание';
+$_['tab_prices_stock_group'] = 'Цены и остатки';
+$_['tab_params_group'] = 'Параметры';
 $_['column_action'] = 'Действие';
 $_['column_image'] = 'Изображение';
 $_['column_model'] = 'Модель';
@@ -10,8 +13,8 @@ $_['column_price'] = 'Цена';
 $_['column_quantity'] = 'Количество';
 $_['column_status'] = 'Статус';
 $_['entry_additional_image'] = 'Дополнительные изображения';
-$_['entry_attribute'] = 'Характеристика';
-$_['entry_attribute_group'] = 'Группа характеристик';
+$_['entry_attribute'] = 'Атрибут';
+$_['entry_attribute_group'] = 'Группа атрибутов';
 $_['entry_category'] = 'Категории';
 $_['button_select_category'] = 'Выбрать категории';
 $_['entry_customer_group'] = 'Группа клиентов';
@@ -36,8 +39,8 @@ $_['entry_length'] = 'Длина';
 $_['entry_length_class'] = 'Класс длины';
 $_['entry_location'] = 'Расположение';
 $_['entry_manufacturer'] = 'Производитель';
-$_['entry_meta_description'] = 'Описание метатега';
-$_['entry_meta_keyword'] = 'Ключевые слова метатегов';
+$_['entry_meta_description'] = 'Мета-описание';
+$_['entry_meta_keyword'] = 'Мета-ключевые слова';
 $_['entry_meta_title'] = 'Метатег Заголовок';
 $_['entry_minimum'] = 'Мин. кол-во';
 $_['entry_model'] = 'Модель';
@@ -115,7 +118,7 @@ $_['text_amount'] = 'Фиксированная сумма';
 $_['text_default'] = 'По умолчанию';
 $_['text_edit'] = 'Редактировать товар';
 $_['text_filter'] = 'Фильтр';
-$_['text_keyword'] = 'Не используйте пробелы, вместо них замените пробелы дефисом (-) и убедитесь, что SEO-URL уникален во всем мире.';
+$_['text_keyword'] = 'Не используйте пробелы, вместо них замените пробелы дефисом (-) и убедитесь, что SEO-URL уникален во всей системе.';
 $_['text_layout_info'] = 'Вы можете переопределить стандартное отображение страницы этого товара. Оставьте пустым для использования шаблона по умолчанию.';
 $_['text_promo_discounts'] = 'Скидки';
 $_['text_promo_specials'] = 'Акции';
@@ -137,8 +140,17 @@ $_['text_list_subtitle'] = 'Просмотр, фильтрация и управ
 
 $_['text_filter_subtitle'] = 'Сузить результаты по критериям';
 
-$_['text_filter_hint']    = 'Можно ввести часть названия или часть артикула (модели) для поиска';
+$_['text_filter_hint']    = 'Подсказка: Можно ввести часть названия или часть артикула (модели) для поиска';
 
 $_['text_add_product_subtitle'] = 'Добавить новый товар в каталог';
 
 $_['text_edit_product_subtitle'] = 'Редактировать данные и настройки товара';
+$_['text_all_languages']      = 'Все языки';
+$_['text_drag_to_reorder']    = 'Перетащите для изменения порядка';
+$_['entry_video']                    = 'Видео';
+$_['entry_video_youtube_placeholder'] = 'YouTube URL или ID видео';
+$_['button_browse_mp4']              = 'Выбрать MP4';
+$_['help_video_combined']            = 'Введите YouTube URL/ID или нажмите "Выбрать MP4" для загрузки видеофайла.';
+$_['text_youtube_video']             = 'YouTube видео';
+$_['entry_model_3d']          = '3D Модель';
+$_['help_model_3d']           = 'Загрузите 3D модель в формате GLB';
