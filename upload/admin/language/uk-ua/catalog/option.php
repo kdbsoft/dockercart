@@ -3,7 +3,6 @@
 $_['column_action'] = 'Дія';
 $_['column_name'] = 'Назва опції';
 $_['column_sort_order'] = 'Порядок сортування';
-$_['entry_image'] = 'Зображення';
 $_['entry_color'] = 'Колір';
 $_['entry_name'] = 'Назва опції';
 $_['entry_option_value'] = 'Назва значення опції';
@@ -27,7 +26,7 @@ $_['text_file'] = 'Файл';
 $_['text_image'] = 'Зображення';
 $_['text_input'] = 'Вхід';
 $_['text_list'] = 'Список опцій';
-$_['text_option'] = 'Варіант';
+$_['text_option'] = 'Опція';
 $_['text_radio'] = 'Радіо';
 $_['text_select'] = 'Виберіть';
 $_['text_success'] = 'Успіх: Ви змінили параметри!';

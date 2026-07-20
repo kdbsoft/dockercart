@@ -241,7 +241,6 @@
               <label class="cursor-pointer">
                 <input type="radio" name="option[{{ option.product_option_id }}]" value="{{ option_value.product_option_value_id }}" data-option-price="{{ option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}" class="sr-only dc-option-radio" />
                 <span class="option-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-sm font-semibold select-none border-gray-200">
-                  {% if option_value.image %}<img src="{{ option_value.image }}" alt="{{ option_value.name }}" class="w-5 h-5 rounded object-cover" />{% endif %}
                   {{ option_value.name }}{% if option_value.price and option_value.price_value != 0 %} ({{ option_value.price_prefix }}{{ option_value.price }}){% endif %}
                 </span>
               </label>
@@ -262,7 +261,6 @@
               <label class="cursor-pointer">
                 <input type="checkbox" name="option[{{ option.product_option_id }}][]" value="{{ option_value.product_option_value_id }}" data-option-price="{{ option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}" class="sr-only dc-option-checkbox" />
                 <span class="option-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-sm font-semibold select-none border-gray-200">
-                  {% if option_value.image %}<img src="{{ option_value.image }}" alt="{{ option_value.name }}" class="w-5 h-5 rounded object-cover" />{% endif %}
                   {{ option_value.name }}{% if option_value.price and option_value.price_value != 0 %} ({{ option_value.price_prefix }}{{ option_value.price }}){% endif %}
                 </span>
               </label>
