@@ -732,6 +732,7 @@ body { padding-top: 0 !important; }
 .dc-view-all-link {
   display: inline-block;
   background: transparent;
+  white-space: nowrap;
   color: #2563eb;
   text-decoration: none;
   padding: 4px 12px;
