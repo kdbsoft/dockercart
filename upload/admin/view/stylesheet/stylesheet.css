@@ -2659,6 +2659,41 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
     box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
 
+.dc-opt-card {
+    cursor: grab;
+}
+
+.dc-opt-card:active {
+    cursor: grabbing;
+}
+
+.dc-opt-card__handle {
+    color: var(--dc-gray-400);
+    font-size: 15px;
+    line-height: 1;
+    padding: 0 6px 0 0;
+    flex-shrink: 0;
+    align-self: center;
+    cursor: inherit;
+    transition: color var(--dc-transition-fast), transform var(--dc-transition-fast);
+}
+
+.dc-opt-card:hover .dc-opt-card__handle {
+    color: var(--dc-blue-600);
+    transform: scale(1.25);
+}
+
+.dc-opt-ghost {
+    opacity: 0.4;
+    border: 2px dashed #3b82f6;
+    background: #eff6ff;
+}
+
+.dc-opt-chosen {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transform: scale(1.02);
+}
+
 .dc-opt-card__header {
     display: flex;
     align-items: center;
