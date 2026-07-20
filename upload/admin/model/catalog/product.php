@@ -2397,7 +2397,7 @@ class ModelCatalogProduct extends Model
             $product_option_value_data = [];
 
             $product_option_value_query = $this->db->query(
-                "SELECT pov.product_option_value_id, pov.product_option_id, pov.product_id, pov.option_id, pov.option_value_id, pov.price, pov.price_prefix, pov.points, pov.points_prefix, pov.weight, pov.weight_prefix, pov.is_hit, ovd.name, ov.image, ov.color_code FROM " .
+                "SELECT pov.product_option_value_id, pov.product_option_id, pov.product_id, pov.option_id, pov.option_value_id, pov.price, pov.price_prefix, pov.points, pov.points_prefix, pov.weight, pov.weight_prefix, pov.is_hit, ovd.name, ov.color_code FROM " .
                     DB_PREFIX .
                     "product_option_value pov LEFT JOIN " .
                     DB_PREFIX .

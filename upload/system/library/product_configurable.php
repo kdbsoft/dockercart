@@ -84,7 +84,7 @@ class ProductConfigurable {
 	}
 
 	public function getOptionValues($option_id) {
-		$query = $this->db->query("SELECT ov.option_value_id, ovd.name, ov.color_code, ov.image FROM " . DB_PREFIX . "option_value ov LEFT JOIN " . DB_PREFIX . "option_value_description ovd ON (ov.option_value_id = ovd.option_value_id) WHERE ov.option_id = '" . (int)$option_id . "' AND ovd.language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY ov.sort_order ASC");
+		$query = $this->db->query("SELECT ov.option_value_id, ovd.name, ov.color_code FROM " . DB_PREFIX . "option_value ov LEFT JOIN " . DB_PREFIX . "option_value_description ovd ON (ov.option_value_id = ovd.option_value_id) WHERE ov.option_id = '" . (int)$option_id . "' AND ovd.language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY ov.sort_order ASC");
 
 		return $query->rows;
 	}
