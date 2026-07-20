@@ -405,6 +405,7 @@
                           {% set image_row = image_row + 1 %}
                           {% endfor %}
                         </div>
+                        <small class="form-text text-muted" style="display:block; margin-bottom:12px;">{{ text_drag_to_reorder }}</small>
                         <button type="button" onclick="addImage('');" class="btn btn-default" style="margin-top:12px;"><i class="fa fa-plus"></i> {{ button_image_add }}</button>
                       </div>
                       {% for language in languages %}
@@ -422,11 +423,11 @@
                           {% set image_row = image_row + 1 %}
                           {% endfor %}
                         </div>
+                        <small class="form-text text-muted" style="display:block; margin-bottom:12px;">{{ text_drag_to_reorder }}</small>
                         <button type="button" onclick="addImage('{{ language.language_id }}');" class="btn btn-default" style="margin-top:12px;"><i class="fa fa-plus"></i> {{ button_image_add }}</button>
                       </div>
 {% endfor %}
                      </div>
-                     <small class="form-text text-muted" style="display:block; margin-top:12px;">{{ text_drag_to_reorder }}</small>
                    </div>
                  </div>
                 <div class="form-group">
@@ -646,6 +647,7 @@
                             {% for product_option_value in product_option.product_option_value %}
                               <div class="dc-opt-card" id="option-value-row{{ option_value_row }}">
                                 <div class="dc-opt-card__header">
+                                  <span class="dc-opt-card__handle" title="{{ text_drag_to_reorder }}" aria-hidden="true"><i class="fa fa-arrows slide-drag-handle"></i></span>
                                   <span class="dc-opt-card__title">{% for ov in option_values[product_option.option_id]|default([]) %}{% if ov.option_value_id == product_option_value.option_value_id %}{{ ov.name }}{% endif %}{% endfor %}</span>
 <span class="dc-opt-card__badges">
                                      {% if product_option_value.is_hit %}<span class="dc-opt-badge dc-opt-badge--hit">{{ entry_hit }}</span>{% endif %}
@@ -660,6 +662,7 @@
                                 <div class="dc-opt-card__body">
                                   <input type="hidden" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][product_option_value_id]" value="{{ product_option_value.product_option_value_id }}"/>
                                   <input type="hidden" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][is_hit]" value="0"/>
+                                  <input type="hidden" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][sort_order]" value="{{ option_value_row }}" class="dc-opt-sort-order"/>
 <div class="dc-opt-card__grid">
                                      <div class="dc-opt-card__field">
                                        <label>{{ entry_option_value }}</label>
@@ -748,6 +751,7 @@
                               {% set option_value_row = option_value_row + 1 %}
                             {% endfor %}
                           </div>
+                          <small class="form-text text-muted" style="display:block; margin-top:6px;">{{ text_drag_to_reorder }}</small>
                           <div class="dc-opt-actions">
                             <button type="button" class="btn btn-primary btn-sm" onclick="addOptionValue('{{ option_row }}');"><i class="fa fa-plus-circle"></i> {{ button_option_value_add }}</button>
                             <button type="button" class="btn btn-default btn-sm" onclick="addAllOptionValues('{{ option_row }}');"><i class="fa fa-plus-square"></i> {{ button_add_all_values }}</button>
@@ -1610,6 +1614,7 @@
 	  var optionType = $('#option-section' + option_row + ' input[name$="[type]"]').val();
 	  html += '<div class="dc-opt-card" id="option-value-row' + ovRow + '">';
 	  html += '  <div class="dc-opt-card__header">';
+  html += '    <span class="dc-opt-card__handle" title="{{ text_drag_to_reorder }}" aria-hidden="true"><i class="fa fa-arrows slide-drag-handle"></i></span>';
 	  html += '    <span class="dc-opt-card__title">' + (optionValueName || '') + '</span>';
 	  html += '    <span class="dc-opt-card__badges">';
 	  if (isHit) {
@@ -1626,6 +1631,7 @@
 	  html += '  <div class="dc-opt-card__body">';
 	  html += '    <input type="hidden" name="product_option[' + option_row + '][product_option_value][' + ovRow + '][product_option_value_id]" value="" />';
 	  html += '    <input type="hidden" name="product_option[' + option_row + '][product_option_value][' + ovRow + '][is_hit]" value="0" />';
+	  html += '    <input type="hidden" name="product_option[' + option_row + '][product_option_value][' + ovRow + '][sort_order]" value="' + ovRow + '" class="dc-opt-sort-order" />';
 	  html += '    <div class="dc-opt-card__grid">';
 	  html += '      <div class="dc-opt-card__field">';
 	  html += '        <label>{{ entry_option_value|e('js') }}</label>';
@@ -2072,6 +2078,27 @@
         onEnd: function() {
           updateImageSortOrders();
         }
+      });
+    });
+
+    $('.dc-opt-cards').each(function() {
+      Sortable.create(this, {
+        animation: 150,
+        filter: '.dc-opt-card__remove, input, select, textarea, button, .dc-color-img-picker, .dc-img-link',
+        preventOnFilter: false,
+        ghostClass: 'dc-opt-ghost',
+        chosenClass: 'dc-opt-chosen',
+        onEnd: function() {
+          updateOptionValueSortOrders();
+        }
+      });
+    });
+  }
+
+  function updateOptionValueSortOrders() {
+    $('.dc-opt-cards').each(function() {
+      $(this).find('.dc-opt-card').each(function(i) {
+        $(this).find('.dc-opt-sort-order').val(i);
       });
     });
   }

@@ -242,7 +242,7 @@ class ModelCatalogProduct extends Model
                                     ) .
                                     "', is_hit = '" .
                                     (int) ($product_option_value["is_hit"] ?? 0) .
-                                    "'",
+                                    "', sort_order = '" . (int) ($product_option_value["sort_order"] ?? 0) . "'",
                             );
 
                             $product_option_value_id = $this->db->getLastId();
@@ -615,7 +615,7 @@ class ModelCatalogProduct extends Model
                                     ) .
                                     "', is_hit = '" .
                                     (int) ($product_option_value["is_hit"] ?? 0) .
-                                    "'",
+                                    "', sort_order = '" . (int) ($product_option_value["sort_order"] ?? 0) . "'",
                             );
 
                             $product_option_value_id = $this->db->getLastId();
@@ -1339,7 +1339,7 @@ class ModelCatalogProduct extends Model
                                     ) .
                                     "', is_hit = '" .
                                     (int) ($product_option_value["is_hit"] ?? 0) .
-                                    "'",
+                                    "', sort_order = '" . (int) ($product_option_value["sort_order"] ?? 0) . "'",
                             );
 
                             if (
@@ -1984,6 +1984,15 @@ class ModelCatalogProduct extends Model
         $this->db->query(
             "DELETE FROM " .
                 DB_PREFIX .
+                "product_option_value_color_image WHERE product_option_value_id IN (SELECT product_option_value_id FROM " .
+                DB_PREFIX .
+                "product_option_value WHERE product_id = '" .
+                (int) $product_id .
+                "')",
+        );
+        $this->db->query(
+            "DELETE FROM " .
+                DB_PREFIX .
                 "product_option_value WHERE product_id = '" .
                 (int) $product_id .
                 "'",
@@ -2398,7 +2407,7 @@ class ModelCatalogProduct extends Model
                     (int) $product_option["product_option_id"] .
                     "' AND ovd.language_id = '" .
                     (int) $this->config->get("config_language_id") .
-                    "' ORDER BY ov.sort_order ASC",
+                    "' ORDER BY pov.sort_order ASC, pov.product_option_value_id ASC",
             );
 
             foreach (
