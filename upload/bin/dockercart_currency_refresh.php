@@ -81,6 +81,17 @@ try {
 	$config->set('config_store_id',    0);
 	$config->set('config_language_id', 1);
 
+	// Load all settings from DB (same as admin startup controller) so the
+	// ECB model's refresh() can read currency_ecb_status / config_currency_engine.
+	$query = $db->query("SELECT * FROM `" . DB_PREFIX . "setting` WHERE store_id = '0'");
+	foreach ($query->rows as $result) {
+		if (!$result['serialized']) {
+			$config->set($result['key'], $result['value']);
+		} else {
+			$config->set($result['key'], json_decode($result['value'], true));
+		}
+	}
+
 	// Load model and refresh
 	$loader->model('extension/currency/ecb');
 	$model = $registry->get('model_extension_currency_ecb');
