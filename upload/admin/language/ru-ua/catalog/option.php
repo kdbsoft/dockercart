@@ -1,11 +1,10 @@
 <?php
 
 $_['column_action'] = 'Действие';
-$_['column_name'] = 'Название варианта';
+$_['column_name'] = 'Название опции';
 $_['column_sort_order'] = 'Порядок сортировки';
-$_['entry_image'] = 'Изображение';
 $_['entry_color'] = 'Цвет';
-$_['entry_name'] = 'Название варианта';
+$_['entry_name'] = 'Название опции';
 $_['entry_option_value'] = 'Название значения параметра';
 $_['entry_sort_order'] = 'Порядок сортировки';
 $_['entry_type'] = 'Тип';
@@ -22,18 +21,18 @@ $_['text_color'] = 'Цвет';
 $_['text_choose'] = 'Выбирать';
 $_['text_date'] = 'Дата';
 $_['text_datetime'] = 'Дата и время';
-$_['text_edit'] = 'Вариант редактирования';
+$_['text_edit'] = 'Редактирование опции';
 $_['text_file'] = 'Файл';
 $_['text_input'] = 'Вход';
-$_['text_list'] = 'Список вариантов';
-$_['text_option'] = 'Вариант';
+$_['text_list'] = 'Список опций';
+$_['text_option'] = 'Опция';
 $_['text_radio'] = 'Радио';
 $_['text_select'] = 'Выбирать';
 $_['text_success'] = 'Успех: Вы изменили опции!';
 $_['text_text'] = 'Текст';
 $_['text_textarea'] = 'Текстовое поле';
 $_['text_time'] = 'Время';
-$_['text_value'] = 'Значения опционов';
+$_['text_value'] = 'Значения опций';
 // Subtitle
 
 $_['text_list_subtitle'] = 'Управляйте опциями и значениями товаров';
