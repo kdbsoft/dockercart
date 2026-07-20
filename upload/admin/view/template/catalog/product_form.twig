@@ -424,10 +424,11 @@
                         </div>
                         <button type="button" onclick="addImage('{{ language.language_id }}');" class="btn btn-default" style="margin-top:12px;"><i class="fa fa-plus"></i> {{ button_image_add }}</button>
                       </div>
-                      {% endfor %}
-                    </div>
-                  </div>
-                </div>
+{% endfor %}
+                     </div>
+                     <small class="form-text text-muted" style="display:block; margin-top:12px;">{{ text_drag_to_reorder }}</small>
+                   </div>
+                 </div>
                 <div class="form-group">
                   <label class="col-sm-2 control-label">{{ entry_video }}</label>
                   <div class="col-sm-10">
@@ -965,7 +966,6 @@
               .pricing-table .input-group { margin-bottom: 0; }
               .pricing-table .input-group .form-control,
               .pricing-table .input-group .input-group-btn .btn { height: 34px !important; border-color: #e2e5e8; }
-              .pricing-table .input-group .form-control { border-radius: 4px 0 0 4px; }
               .pricing-table .input-group .input-group-btn .btn { padding: 4px 8px; border-radius: 0 4px 4px 0; display: flex; align-items: center; justify-content: center; }
               .auto-renew-cb { width: 16px; height: 16px; cursor: pointer; }
               .btn-remove-pricing { color: #94a3b8; font-size: 15px; text-decoration: none; padding: 2px; }

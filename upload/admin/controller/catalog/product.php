@@ -809,6 +809,8 @@ class ControllerCatalogProduct extends Controller {
 		    ? $this->language->get('text_add_product_subtitle')
 		    : $this->language->get('text_edit_product_subtitle');
 
+		$data['text_drag_to_reorder'] = $this->language->get('text_drag_to_reorder');
+
 		if (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];
 		} else {
