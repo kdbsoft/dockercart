@@ -135,6 +135,7 @@ class ControllerExtensionModuleFeatured extends Controller {
 			}
 			$data['categories'] = $categories;
 			$data['category_filter'] = !empty($setting['category_filter']) ? (int)$setting['category_filter'] : 0;
+			$data['text_all_categories'] = $this->language->get('text_all_categories');
 			$data['text_other'] = $this->language->get('text_other');
 		}
 
