@@ -67,8 +67,24 @@
             <span class="zoom-hint absolute bottom-3 right-3 inline-flex items-center gap-1.5 bg-gray-900/80 text-white text-[11px] font-semibold px-2.5 py-1.5 rounded-lg backdrop-blur-sm">
               <i data-lucide="zoom-in" class="w-3.5 h-3.5"></i> {{ text_zoom }}
             </span>
+            {% if video_type and video_url %}
+            <span id="dc-video-overlay" role="button" tabindex="0" onclick="event.stopPropagation(); toggleProductVideo()" onkeydown="if(event.key==='Enter'){event.stopPropagation(); toggleProductVideo()}" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 flex items-center justify-center rounded-full bg-gray-900/60 hover:bg-gray-900/80 text-white backdrop-blur-sm cursor-pointer transition-transform duration-200 hover:scale-110 hover:shadow-xl" aria-label="{{ text_video }}">
+              <i data-lucide="play" class="w-12 h-12"></i>
+            </span>
+            {% endif %}
           </button>
         </div>
+        {% if video_type and video_url %}
+        <div id="dc-video-player" class="rounded-3xl border border-gray-100 bg-gray-50 overflow-hidden" style="display:none;">
+          {% if video_type == 'youtube' %}
+          <iframe src="" id="dc-youtube-iframe" data-src="{{ video_url }}" class="w-full aspect-video" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+          {% elseif video_type == 'mp4' %}
+          <video id="dc-mp4-video" class="w-full aspect-video" controls playsinline preload="metadata">
+            <source src="{{ video_url }}" type="video/mp4">
+          </video>
+          {% endif %}
+        </div>
+        {% endif %}
         {% if images or model_3d or (video_type and video_url) %}
         <div class="grid grid-cols-4 gap-3 mt-3">
           <button class="dc-thumb active rounded-2xl border-2 overflow-hidden" data-img="{{ display is not empty ? display : 'image/no_image.png' }}" data-display="{{ display is not empty ? display : 'image/no_image.png' }}" data-popup="{{ popup is not empty ? popup : 'image/no_image.png' }}" data-orientation="{{ image_orientation }}">
@@ -79,12 +95,6 @@
             <img src="{{ image.thumb is not empty ? image.thumb : 'image/no_image.png' }}" alt="{{ heading_title }}" class="w-full h-20 object-cover" />
           </button>
           {% endfor %}
-          {% if video_type and video_url %}
-          <button type="button" class="dc-thumb dc-thumb-media rounded-2xl border-2 border-gray-200 overflow-hidden flex flex-col items-center justify-center bg-gray-900 h-20" onclick="toggleProductVideo(this)">
-            <i data-lucide="play-circle" class="w-8 h-8 text-white mb-1"></i>
-            <span class="text-white text-[10px]">{{ text_video }}</span>
-          </button>
-          {% endif %}
           {% if model_3d %}
           <button type="button" class="dc-thumb dc-thumb-media rounded-2xl border-2 border-gray-200 overflow-hidden flex flex-col items-center justify-center bg-gray-900 h-20" onclick="open3DViewer(this)">
             <i data-lucide="box" class="w-8 h-8 text-white mb-1"></i>
@@ -93,15 +103,6 @@
           {% endif %}
         </div>
         {% endif %}
-        <div id="dc-video-player" class="mt-3 rounded-3xl overflow-hidden" style="display:none;">
-          {% if video_type == 'youtube' %}
-          <iframe src="" id="dc-youtube-iframe" data-src="{{ video_url }}" class="w-full aspect-video" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
-          {% elseif video_type == 'mp4' %}
-          <video id="dc-mp4-video" class="w-full aspect-video" controls playsinline preload="metadata">
-            <source src="{{ video_url }}" type="video/mp4">
-          </video>
-          {% endif %}
-        </div>
       </div>
 
       <!-- 3D Model Modal -->
@@ -701,10 +702,17 @@ function initOptionButtons() {
 }
 
 /* ── Gallery + GLightbox ───────────────────────────────── */
+let dcActiveImageThumb = null;
 const initGallery = () => {
   const mainImg = document.getElementById('dc-main-img');
   const thumbs  = [...document.querySelectorAll('.dc-thumb:not(.dc-thumb-media)')];
   const zoomBtn = document.getElementById('dc-zoom-btn');
+  const videoOverlay = document.getElementById('dc-video-overlay');
+  const syncVideoOverlay = () => {
+    if (!videoOverlay) return;
+    const isMain = !thumbs.length || dcActiveImageThumb === thumbs[0];
+    videoOverlay.style.display = isMain ? '' : 'none';
+  };
   if (!zoomBtn) return;
 
   const aspectMap = {
@@ -723,7 +731,7 @@ const initGallery = () => {
 
   let activeIdx = 0;
 
-  let dcActiveImageThumb = thumbs.find(t => t.classList.contains('active')) || thumbs[0] || null;
+  dcActiveImageThumb = thumbs.find(t => t.classList.contains('active')) || thumbs[0] || null;
 
   thumbs.forEach((btn, idx) => {
     btn.addEventListener('click', () => {
@@ -749,11 +757,14 @@ const initGallery = () => {
       const mp4Video = document.getElementById('dc-mp4-video');
       if (mp4Video) mp4Video.pause();
 
+      syncVideoOverlay();
       activeIdx = idx;
     });
   });
 
   if (lb) zoomBtn.addEventListener('click', () => lb.openAt(activeIdx));
+
+  syncVideoOverlay();
 };
 
 /* ── Tabs ──────────────────────────────────────────────── */
@@ -792,7 +803,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if (typeof lucide !== 'undefined') lucide.createIcons();
 });
 
-function toggleProductVideo(btn) {
+function toggleProductVideo() {
   var player = document.getElementById('dc-video-player');
   var mainImg = document.getElementById('dc-main-img');
   var zoomBtn = document.getElementById('dc-zoom-btn');
@@ -803,9 +814,6 @@ function toggleProductVideo(btn) {
     player.style.display = 'block';
     if (mainImg) mainImg.style.display = 'none';
     if (zoomBtn) zoomBtn.style.display = 'none';
-
-    document.querySelectorAll('.dc-thumb').forEach(function(t) { t.classList.remove('active'); });
-    if (btn) btn.classList.add('active');
 
     var youtubeIframe = document.getElementById('dc-youtube-iframe');
     if (youtubeIframe && !youtubeIframe.src) {
@@ -825,9 +833,16 @@ function toggleProductVideo(btn) {
     var mp4Video = document.getElementById('dc-mp4-video');
     if (mp4Video) mp4Video.pause();
 
-    var restoreThumb = dcActiveImageThumb || document.querySelector('.dc-thumb:not(.dc-thumb-media)');
+    var restoreThumb = dcActiveImageThumb || document.querySelector('.dc-thumb');
     document.querySelectorAll('.dc-thumb').forEach(function(t) { t.classList.remove('active'); });
     if (restoreThumb) restoreThumb.classList.add('active');
+
+    var videoOverlay = document.getElementById('dc-video-overlay');
+    if (videoOverlay) {
+      var allThumbs = [...document.querySelectorAll('.dc-thumb:not(.dc-thumb-media)')];
+      var isMain = !allThumbs.length || dcActiveImageThumb === allThumbs[0];
+      videoOverlay.style.display = isMain ? '' : 'none';
+    }
   }
 }
 
