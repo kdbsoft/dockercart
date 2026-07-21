@@ -165,6 +165,10 @@ function addConfigurableAxe(productId, optionId) {
 }
 
 function removeAxe(btn, productId, optionId) {
+	if (!confirm('{{ text_confirm_remove_axis|e("js") }}')) {
+		return;
+	}
+
 	var currentIds = [];
 	$('#dc-configurable-axes-list .dc-axe-item').each(function() {
 		var id = $(this).data('option-id');

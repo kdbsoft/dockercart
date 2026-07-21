@@ -13,6 +13,13 @@ class ProductConfigurable {
 	}
 
 	public function setConfigurableOptions($product_id, $option_ids) {
+		$old_option_ids = array();
+		$old_query = $this->db->query("SELECT option_id FROM " . DB_PREFIX . "product_configurable_option WHERE product_id = '" . (int)$product_id . "'");
+
+		foreach ($old_query->rows as $row) {
+			$old_option_ids[] = (int)$row['option_id'];
+		}
+
 		$this->db->query("DELETE FROM " . DB_PREFIX . "product_configurable_option WHERE product_id = '" . (int)$product_id . "'");
 
 		$position = 0;
@@ -28,6 +35,28 @@ class ProductConfigurable {
 
 		if (!$is_configurable) {
 			$this->deleteAllVariants($product_id);
+		}
+
+		// When axes are removed (but some remain), delete all variants — they would
+		// become unresolvable as their hashes include the removed axis values.
+		if ($is_configurable) {
+			$removed = array_diff($old_option_ids, array_map('intval', $option_ids));
+
+			if (!empty($removed)) {
+				$vids_query = $this->db->query("SELECT variant_id FROM " . DB_PREFIX . "product_variant WHERE product_id = '" . (int)$product_id . "'");
+				$vids = array();
+
+				foreach ($vids_query->rows as $row) {
+					$vids[] = (int)$row['variant_id'];
+				}
+
+				if (!empty($vids)) {
+					$ids = implode(',', $vids);
+					$this->db->query("DELETE FROM " . DB_PREFIX . "dockercart_product_variant_customer_group_price WHERE variant_id IN (" . $ids . ")");
+					$this->db->query("DELETE FROM " . DB_PREFIX . "product_variant_value WHERE product_id = '" . (int)$product_id . "'");
+					$this->db->query("DELETE FROM " . DB_PREFIX . "product_variant WHERE product_id = '" . (int)$product_id . "'");
+				}
+			}
 		}
 
 		foreach ($option_ids as $option_id) {
