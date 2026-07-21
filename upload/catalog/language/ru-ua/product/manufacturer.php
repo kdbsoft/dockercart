@@ -37,3 +37,4 @@ $_['text_refine'] = 'Уточніть пошук';
 $_['text_refine_categories'] = 'Категорії';
 $_['text_back_to'] = 'Назад до %s';
 $_['text_all_brands'] = 'Всі товари %s';
+$_['text_price_from'] = 'от';

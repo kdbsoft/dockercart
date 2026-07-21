@@ -54,11 +54,27 @@ class ModelCatalogProductConfigurable extends Model {
 		return $this->lib()->deleteAllVariants($product_id);
 	}
 
-	public function disableConfigurable($product_id) {
-		return $this->lib()->disableConfigurable($product_id);
+	public function findDuplicateVariant($product_id, $variant_hash, $exclude_variant_id = 0) {
+		return $this->lib()->findDuplicateVariant($product_id, $variant_hash, $exclude_variant_id);
+	}
+
+	public function disableConfigurable($product_id, $purge_variants = true) {
+		return $this->lib()->disableConfigurable($product_id, $purge_variants);
 	}
 
 	public function setConfigurable($product_id, $is_configurable) {
 		return $this->lib()->setConfigurable($product_id, $is_configurable);
+	}
+
+	public function getVariantCustomerGroupPrices($product_id) {
+		return $this->lib()->getVariantCustomerGroupPrices($product_id);
+	}
+
+	public function setVariantCustomerGroupPrice($variant_id, $customer_group_id, $price) {
+		$this->lib()->setVariantCustomerGroupPrice($variant_id, $customer_group_id, $price);
+	}
+
+	public function deleteAllVariantCustomerGroupPrices($variant_id) {
+		$this->lib()->deleteAllVariantCustomerGroupPrices($variant_id);
 	}
 }

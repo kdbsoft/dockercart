@@ -841,6 +841,12 @@ class ControllerCatalogProduct extends Controller {
 			$data['error_keyword'] = '';
 		}
 
+		if (isset($this->error['option'])) {
+			$data['error_option'] = $this->error['option'];
+		} else {
+			$data['error_option'] = array();
+		}
+
 		$url = '';
 
 		if (isset($this->request->get['filter_name'])) {
@@ -1258,13 +1264,12 @@ class ControllerCatalogProduct extends Controller {
 					'product_option_value_id' => $product_option_value['product_option_value_id'],
 					'option_value_id'         => $product_option_value['option_value_id'],
 					'price'                   => $product_option_value['price'],
-					'price_prefix'            => $product_option_value['price_prefix'],
+					'price_prefix'            => isset($product_option_value['price_prefix']) ? $product_option_value['price_prefix'] : '+',
 					'points'                  => $product_option_value['points'],
-					'points_prefix'           => $product_option_value['points_prefix'],
+					'points_prefix'           => isset($product_option_value['points_prefix']) ? $product_option_value['points_prefix'] : '+',
 					'weight'                  => $product_option_value['weight'],
-					'weight_prefix'           => $product_option_value['weight_prefix'],
+					'weight_prefix'           => isset($product_option_value['weight_prefix']) ? $product_option_value['weight_prefix'] : '+',
 					'is_hit'                  => isset($product_option_value['is_hit']) ? (int)$product_option_value['is_hit'] : 0,
-					'color_images'            => isset($product_option_value['color_images']) ? $product_option_value['color_images'] : array(),
 					'customer_group_prices'   => isset($product_option_value['customer_group_prices']) ? $product_option_value['customer_group_prices'] : array()
 				);
 				}
@@ -1508,6 +1513,9 @@ class ControllerCatalogProduct extends Controller {
 			$data['video_type'] = '';
 			$data['video'] = '';
 		}
+
+		$video_id = $this->extractYouTubeId((string)$data['video']);
+		$data['video_youtube_id'] = preg_match('/^[A-Za-z0-9_-]{11}$/', $video_id) ? $video_id : '';
 
 		$data['video_thumb'] = $this->model_tool_image->resize('video_placeholder.svg', 100, 100);
 		$data['video_placeholder'] = $this->model_tool_image->resize('video_placeholder.svg', 100, 100);
@@ -1764,8 +1772,6 @@ class ControllerCatalogProduct extends Controller {
 
 					if ($option_id && in_array($option_id, $axis_option_ids)) {
 						$this->error['option'][$option_id] = $this->language->get('error_option_is_axis');
-
-						break;
 					}
 				}
 			}
@@ -2069,7 +2075,7 @@ class ControllerCatalogProduct extends Controller {
 									'option_value_id'         => $product_option_value['option_value_id'],
 									'name'                    => $option_value_info['name'],
 									'price'                   => (float)$product_option_value['price'] ? $this->currency->format($product_option_value['price'], $this->config->get('config_currency')) : false,
-									'price_prefix'            => $product_option_value['price_prefix']
+									'price_prefix'            => isset($product_option_value['price_prefix']) ? $product_option_value['price_prefix'] : '+'
 								);
 							}
 						}

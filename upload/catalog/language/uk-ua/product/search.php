@@ -43,3 +43,4 @@ $_['text_refine'] = 'Уточнити пошук';
 $_['text_refine_categories'] = 'Категорії';
 $_['text_all_categories'] = 'Усі категорії';
 $_['text_gift_badge'] = 'ПОДАРУНОК';
+$_['text_price_from'] = 'від';

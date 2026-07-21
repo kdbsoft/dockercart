@@ -13,13 +13,20 @@ $_['text_select'] = '--- Выбрать ---';
 $_['text_confirm_delete_variant'] = 'Вы уверены, что хотите удалить этот вариант?';
 $_['text_confirm_generate'] = 'Будут сгенерированы все возможные комбинации выбранных опций. Существующие варианты с той же комбинацией не будут дублироваться. Продолжить?';
 $_['text_load_error'] = 'Не удалось загрузить данные вариантов. Попробуйте ещё раз.';
+$_['text_saving'] = 'Збереження...';
+$_['text_saved'] = 'Збережено';
+$_['text_new_variant'] = 'Новий';
+$_['text_unsaved_changes'] = 'Є незбережені зміни.';
+$_['text_loading_options'] = 'Завантаження значень...';
 
 $_['entry_configurable_axes'] = 'Конфигурируемые опции (оси варианта)';
 $_['entry_select_option'] = 'Поиск опции...';
 
 $_['column_sku'] = 'Артикул';
 $_['column_price'] = 'Цена';
+$_['column_cg_prices'] = 'Цена гр.';
 $_['column_quantity'] = 'Количество';
+$_['column_weight'] = 'Масса';
 $_['column_image'] = 'Изображение';
 $_['column_default'] = 'По умолч.';
 $_['column_status'] = 'Статус';
@@ -28,6 +35,12 @@ $_['column_action'] = 'Действие';
 $_['button_add_variant'] = 'Добавить вариант';
 $_['button_generate'] = 'Сгенерировать';
 $_['button_save'] = 'Сохранить';
+
+$_['entry_cg_prices'] = 'Цены для групп';
+$_['entry_cg_customer_group'] = 'Группа';
+$_['entry_cg_group_price'] = 'Цена';
+$_['button_cg_add'] = 'Добавить';
+$_['entry_variant_articles'] = 'Другие артикулы';
 
 $_['help_generate'] = 'Авто-генерация всех комбинаций из выбранных опций';
 
@@ -51,3 +64,4 @@ $_['error_axis_is_simple_option'] = 'Эта опция уже используе
 $_['error_variant_value_unknown_axis'] = 'Одно из выбранных значений относится к опции, не являющейся осью.';
 $_['error_invalid_mode'] = 'Некорректный режим опций.';
 $_['text_success_mode'] = 'Режим опций обновлён.';
+$_['entry_axis_lock_warning'] = 'Цена, баллы и вес для осевых опций настраиваются на уровне варианта и недоступны для редактирования здесь.';

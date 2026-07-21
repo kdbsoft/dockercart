@@ -46,3 +46,4 @@ $_['text_gift_badge']  = 'GIFT';
 $_['text_view_grid']   = 'Grid';
 $_['text_view_list']   = 'List';
 $_['text_view_table']  = 'Table';
+$_['text_price_from']  = 'from';

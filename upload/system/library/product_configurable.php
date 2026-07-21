@@ -76,14 +76,20 @@ class ProductConfigurable {
 		$options = array();
 
 		foreach ($query->rows as $row) {
-			$row['values'] = $this->getOptionValues($row['option_id']);
+			$row['values'] = $this->getOptionValues($row['option_id'], $product_id);
 			$options[] = $row;
 		}
 
 		return $options;
 	}
 
-	public function getOptionValues($option_id) {
+	public function getOptionValues($option_id, $product_id = null) {
+		if ($product_id !== null) {
+			$query = $this->db->query("SELECT ov.option_value_id, ovd.name, ov.color_code FROM " . DB_PREFIX . "product_option_value pov LEFT JOIN " . DB_PREFIX . "option_value ov ON (pov.option_value_id = ov.option_value_id) LEFT JOIN " . DB_PREFIX . "option_value_description ovd ON (ov.option_value_id = ovd.option_value_id) WHERE pov.product_id = '" . (int)$product_id . "' AND pov.option_id = '" . (int)$option_id . "' AND ovd.language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY ov.sort_order ASC");
+
+			return $query->rows;
+		}
+
 		$query = $this->db->query("SELECT ov.option_value_id, ovd.name, ov.color_code FROM " . DB_PREFIX . "option_value ov LEFT JOIN " . DB_PREFIX . "option_value_description ovd ON (ov.option_value_id = ovd.option_value_id) WHERE ov.option_id = '" . (int)$option_id . "' AND ovd.language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY ov.sort_order ASC");
 
 		return $query->rows;
@@ -122,7 +128,17 @@ class ProductConfigurable {
 	}
 
 	public function addVariant($product_id, $data) {
-		$this->db->query("INSERT INTO " . DB_PREFIX . "product_variant SET product_id = '" . (int)$product_id . "', sku = '" . $this->db->escape(isset($data['sku']) ? $data['sku'] : '') . "', upc = '" . $this->db->escape(isset($data['upc']) ? $data['upc'] : '') . "', ean = '" . $this->db->escape(isset($data['ean']) ? $data['ean'] : '') . "', mpn = '" . $this->db->escape(isset($data['mpn']) ? $data['mpn'] : '') . "', price = '" . (float)(isset($data['price']) ? $data['price'] : 0) . "', quantity = '" . (float)(isset($data['quantity']) ? $data['quantity'] : 0) . "', subtract = '" . (int)(isset($data['subtract']) ? $data['subtract'] : 1) . "', weight = '" . (float)(isset($data['weight']) ? $data['weight'] : 0) . "', weight_class_id = '" . (int)(isset($data['weight_class_id']) ? $data['weight_class_id'] : 0) . "', image = '" . $this->db->escape(isset($data['image']) ? $data['image'] : '') . "', sort_order = '" . (int)(isset($data['sort_order']) ? $data['sort_order'] : 0) . "', status = '" . (int)(isset($data['status']) ? $data['status'] : 1) . "', is_default = '" . (int)(!empty($data['is_default'])) . "'");
+		$variant_hash = $this->buildVariantHashFromValues(isset($data['values']) ? $data['values'] : array());
+
+		if ($variant_hash !== '') {
+			$conflict = $this->db->query("SELECT variant_id FROM " . DB_PREFIX . "product_variant WHERE product_id = '" . (int)$product_id . "' AND variant_hash = '" . $this->db->escape($variant_hash) . "'");
+
+			if ($conflict->num_rows) {
+				throw new \RuntimeException('Variant with the same option combination already exists for this product');
+			}
+		}
+
+		$this->db->query("INSERT INTO " . DB_PREFIX . "product_variant SET product_id = '" . (int)$product_id . "', sku = '" . $this->db->escape(isset($data['sku']) ? $data['sku'] : '') . "', upc = '" . $this->db->escape(isset($data['upc']) ? $data['upc'] : '') . "', ean = '" . $this->db->escape(isset($data['ean']) ? $data['ean'] : '') . "', mpn = '" . $this->db->escape(isset($data['mpn']) ? $data['mpn'] : '') . "', price = '" . (float)(isset($data['price']) ? $data['price'] : 0) . "', quantity = '" . (float)(isset($data['quantity']) ? $data['quantity'] : 0) . "', subtract = '" . (int)(isset($data['subtract']) ? $data['subtract'] : 1) . "', weight = '" . (float)(isset($data['weight']) ? $data['weight'] : 0) . "', weight_class_id = '" . (int)(isset($data['weight_class_id']) ? $data['weight_class_id'] : 0) . "', image = '" . $this->db->escape(isset($data['image']) ? $data['image'] : '') . "', variant_hash = '" . $this->db->escape($variant_hash) . "', sort_order = '" . (int)(isset($data['sort_order']) ? $data['sort_order'] : 0) . "', status = '" . (int)(isset($data['status']) ? $data['status'] : 1) . "'");
 
 		$variant_id = $this->db->getLastId();
 
@@ -130,11 +146,6 @@ class ProductConfigurable {
 			foreach ($data['values'] as $value) {
 				$this->db->query("INSERT INTO " . DB_PREFIX . "product_variant_value SET variant_id = '" . (int)$variant_id . "', product_id = '" . (int)$product_id . "', option_id = '" . (int)$value['option_id'] . "', option_value_id = '" . (int)$value['option_value_id'] . "'");
 			}
-		}
-
-		if (!empty($data['is_default'])) {
-			$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET is_default = '0' WHERE product_id = '" . (int)$product_id . "' AND variant_id != '" . (int)$variant_id . "'");
-			$this->db->query("UPDATE " . DB_PREFIX . "product_configurable SET default_variant_id = '" . (int)$variant_id . "' WHERE product_id = '" . (int)$product_id . "'");
 		}
 
 		$this->touchProduct($product_id);
@@ -151,12 +162,23 @@ class ProductConfigurable {
 
 		$product_id = (int)$variant_query->row['product_id'];
 
-		$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET sku = '" . $this->db->escape(isset($data['sku']) ? $data['sku'] : '') . "', upc = '" . $this->db->escape(isset($data['upc']) ? $data['upc'] : '') . "', ean = '" . $this->db->escape(isset($data['ean']) ? $data['ean'] : '') . "', mpn = '" . $this->db->escape(isset($data['mpn']) ? $data['mpn'] : '') . "', price = '" . (float)(isset($data['price']) ? $data['price'] : 0) . "', quantity = '" . (float)(isset($data['quantity']) ? $data['quantity'] : 0) . "', subtract = '" . (int)(isset($data['subtract']) ? $data['subtract'] : 1) . "', weight = '" . (float)(isset($data['weight']) ? $data['weight'] : 0) . "', weight_class_id = '" . (int)(isset($data['weight_class_id']) ? $data['weight_class_id'] : 0) . "', image = '" . $this->db->escape(isset($data['image']) ? $data['image'] : '') . "', sort_order = '" . (int)(isset($data['sort_order']) ? $data['sort_order'] : 0) . "', status = '" . (int)(isset($data['status']) ? $data['status'] : 1) . "', is_default = '" . (int)(!empty($data['is_default'])) . "' WHERE variant_id = '" . (int)$variant_id . "'");
+		$hash_update = '';
+		$variant_hash = '';
 
-		if (!empty($data['is_default'])) {
-			$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET is_default = '0' WHERE product_id = '" . (int)$product_id . "' AND variant_id != '" . (int)$variant_id . "'");
-			$this->db->query("UPDATE " . DB_PREFIX . "product_configurable SET default_variant_id = '" . (int)$variant_id . "' WHERE product_id = '" . (int)$product_id . "'");
+		if (isset($data['values'])) {
+			$variant_hash = $this->buildVariantHashFromValues($data['values']);
+			$hash_update = ", variant_hash = '" . $this->db->escape($variant_hash) . "'";
+
+			if ($variant_hash !== '') {
+				$conflict = $this->db->query("SELECT variant_id FROM " . DB_PREFIX . "product_variant WHERE product_id = '" . (int)$product_id . "' AND variant_hash = '" . $this->db->escape($variant_hash) . "' AND variant_id != '" . (int)$variant_id . "'");
+
+				if ($conflict->num_rows) {
+					throw new \RuntimeException('Variant with the same option combination already exists for this product');
+				}
+			}
 		}
+
+		$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET sku = '" . $this->db->escape(isset($data['sku']) ? $data['sku'] : '') . "', upc = '" . $this->db->escape(isset($data['upc']) ? $data['upc'] : '') . "', ean = '" . $this->db->escape(isset($data['ean']) ? $data['ean'] : '') . "', mpn = '" . $this->db->escape(isset($data['mpn']) ? $data['mpn'] : '') . "', price = '" . (float)(isset($data['price']) ? $data['price'] : 0) . "', quantity = '" . (float)(isset($data['quantity']) ? $data['quantity'] : 0) . "', subtract = '" . (int)(isset($data['subtract']) ? $data['subtract'] : 1) . "', weight = '" . (float)(isset($data['weight']) ? $data['weight'] : 0) . "', weight_class_id = '" . (int)(isset($data['weight_class_id']) ? $data['weight_class_id'] : 0) . "', image = '" . $this->db->escape(isset($data['image']) ? $data['image'] : '') . "'" . $hash_update . ", sort_order = '" . (int)(isset($data['sort_order']) ? $data['sort_order'] : 0) . "', status = '" . (int)(isset($data['status']) ? $data['status'] : 1) . "' WHERE variant_id = '" . (int)$variant_id . "'");
 
 		if (isset($data['values'])) {
 			$this->db->query("DELETE FROM " . DB_PREFIX . "product_variant_value WHERE variant_id = '" . (int)$variant_id . "'");
@@ -184,10 +206,21 @@ class ProductConfigurable {
 			}
 		}
 
+		$this->db->query("DELETE FROM " . DB_PREFIX . "dockercart_product_variant_customer_group_price WHERE variant_id = '" . (int)$variant_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "product_variant_value WHERE variant_id = '" . (int)$variant_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "product_variant WHERE variant_id = '" . (int)$variant_id . "'");
 
 		if ($product_id) {
+			$default_query = $this->db->query("SELECT default_variant_id FROM " . DB_PREFIX . "product_configurable WHERE product_id = '" . (int)$product_id . "'");
+
+			if ($default_query->num_rows && empty($default_query->row['default_variant_id'])) {
+				$next_default = $this->db->query("SELECT variant_id FROM " . DB_PREFIX . "product_variant WHERE product_id = '" . (int)$product_id . "' AND status = '1' ORDER BY sort_order ASC, variant_id ASC LIMIT 1");
+
+				if ($next_default->num_rows) {
+					$this->db->query("UPDATE " . DB_PREFIX . "product_configurable SET default_variant_id = '" . (int)$next_default->row['variant_id'] . "' WHERE product_id = '" . (int)$product_id . "'");
+				}
+			}
+
 			$this->touchProduct($product_id);
 		}
 	}
@@ -201,6 +234,7 @@ class ProductConfigurable {
 		}
 
 		if (!empty($variant_ids)) {
+			$this->db->query("DELETE FROM " . DB_PREFIX . "dockercart_product_variant_customer_group_price WHERE variant_id IN (" . implode(',', $variant_ids) . ")");
 			$this->db->query("DELETE FROM " . DB_PREFIX . "product_variant_value WHERE product_id = '" . (int)$product_id . "'");
 			$this->db->query("DELETE FROM " . DB_PREFIX . "product_variant WHERE product_id = '" . (int)$product_id . "'");
 		}
@@ -211,7 +245,22 @@ class ProductConfigurable {
 		$this->touchProduct($product_id);
 	}
 
-	public function disableConfigurable($product_id) {
+	/**
+	 * Disables configurable mode for a product.
+	 *
+	 * - Zeroes axis product_option_value.price (so the option becomes a regular simple option).
+	 * - Sets product_configurable.is_configurable = 0.
+	 * - When $purge_variants is true (default), also deletes all variants and axis
+	 *   configuration via deleteAllVariants(). This is the typical admin "switch to
+	 *   simple" flow.
+	 * - When $purge_variants is false, only the is_configurable flag is flipped and
+	 *   axis POV prices are zeroed; variants remain in the database (useful for
+	 *   temporarily disabling configurable mode without losing variant data).
+	 *
+	 * @param int $product_id
+	 * @param bool $purge_variants When true, deletes variants + axes. Default true.
+	 */
+	public function disableConfigurable($product_id, $purge_variants = true) {
 		$axis_query = $this->db->query("SELECT option_id FROM " . DB_PREFIX . "product_configurable_option WHERE product_id = '" . (int)$product_id . "'");
 		$axis_option_ids = array();
 
@@ -229,7 +278,13 @@ class ProductConfigurable {
 			");
 		}
 
-		$this->touchProduct($product_id);
+		$this->setConfigurable($product_id, 0);
+
+		if ($purge_variants) {
+			$this->deleteAllVariants($product_id);
+		} else {
+			$this->touchProduct($product_id);
+		}
 	}
 
 	public function setDefaultVariant($variant_id) {
@@ -238,40 +293,26 @@ class ProductConfigurable {
 		if ($variant_query->num_rows) {
 			$product_id = (int)$variant_query->row['product_id'];
 			$this->db->query("UPDATE " . DB_PREFIX . "product_configurable SET default_variant_id = '" . (int)$variant_id . "' WHERE product_id = '" . (int)$product_id . "'");
-			$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET is_default = '1' WHERE variant_id = '" . (int)$variant_id . "'");
-			$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET is_default = '0' WHERE product_id = '" . (int)$product_id . "' AND variant_id != '" . (int)$variant_id . "'");
 
 			$this->touchProduct($product_id);
 		}
 	}
 
 	public function resolveVariant($product_id, $option_values) {
-		ksort($option_values);
-		$num_axes = count($option_values);
-
-		if ($num_axes == 0) {
+		if (empty($option_values)) {
 			return array();
 		}
 
-		$sql = "SELECT vv.variant_id FROM " . DB_PREFIX . "product_variant_value vv "
-			. "INNER JOIN " . DB_PREFIX . "product_variant v ON (vv.variant_id = v.variant_id) "
-			. "WHERE vv.product_id = '" . (int)$product_id . "' AND v.status = '1' "
-			. "AND vv.variant_id IN ("
-			. "  SELECT variant_id FROM " . DB_PREFIX . "product_variant_value "
-			. "  WHERE product_id = '" . (int)$product_id . "' "
-			. "  GROUP BY variant_id HAVING COUNT(*) = '" . (int)$num_axes . "'"
-			. ") ";
+		$hash = $this->buildVariantHash($option_values);
 
-		foreach ($option_values as $option_id => $option_value_id) {
-			$sql .= " AND vv.variant_id IN (SELECT variant_id FROM " . DB_PREFIX . "product_variant_value WHERE option_id = '" . (int)$option_id . "' AND option_value_id = '" . (int)$option_value_id . "')";
+		if ($hash === '') {
+			return array();
 		}
 
-		$sql .= " GROUP BY vv.variant_id LIMIT 1";
-
-		$query = $this->db->query($sql);
+		$query = $this->db->query("SELECT variant_id FROM " . DB_PREFIX . "product_variant WHERE product_id = '" . (int)$product_id . "' AND variant_hash = '" . $this->db->escape($hash) . "' AND status = '1' LIMIT 1");
 
 		if ($query->num_rows) {
-			return $this->getVariant($query->row['variant_id']);
+			return $this->getVariant((int)$query->row['variant_id']);
 		}
 
 		return array();
@@ -307,8 +348,12 @@ class ProductConfigurable {
 		return false;
 	}
 
-	public function getAggregatedPriceRange($product_id) {
-		$query = $this->db->query("SELECT MIN(price) AS min_price, MAX(price) AS max_price FROM " . DB_PREFIX . "product_variant WHERE product_id = '" . (int)$product_id . "' AND status = '1'");
+	public function getAggregatedPriceRange($product_id, $customer_group_id = null) {
+		if ($customer_group_id !== null) {
+			$query = $this->db->query("SELECT MIN(COALESCE(cgp.price, pv.price)) AS min_price, MAX(COALESCE(cgp.price, pv.price)) AS max_price FROM " . DB_PREFIX . "product_variant pv LEFT JOIN " . DB_PREFIX . "dockercart_product_variant_customer_group_price cgp ON (cgp.variant_id = pv.variant_id AND cgp.customer_group_id = '" . (int)$customer_group_id . "') WHERE pv.product_id = '" . (int)$product_id . "' AND pv.status = '1'");
+		} else {
+			$query = $this->db->query("SELECT MIN(price) AS min_price, MAX(price) AS max_price FROM " . DB_PREFIX . "product_variant WHERE product_id = '" . (int)$product_id . "' AND status = '1'");
+		}
 
 		if ($query->num_rows) {
 			return array(
@@ -334,6 +379,21 @@ class ProductConfigurable {
 		return array('total_stock' => 0, 'variants_in_stock' => 0, 'total_variants' => 0);
 	}
 
+	public function getVariantCustomerGroupPrices($product_id) {
+		$query = $this->db->query("SELECT cgp.variant_id, cgp.customer_group_id, cgp.price FROM " . DB_PREFIX . "dockercart_product_variant_customer_group_price cgp INNER JOIN " . DB_PREFIX . "product_variant pv ON (cgp.variant_id = pv.variant_id) WHERE pv.product_id = '" . (int)$product_id . "'");
+
+		$result = array();
+
+		foreach ($query->rows as $row) {
+			$result[(int)$row['variant_id']][] = array(
+				'customer_group_id' => (int)$row['customer_group_id'],
+				'price' => $row['price'],
+			);
+		}
+
+		return $result;
+	}
+
 	public function getVariantCustomerGroupPrice($variant_id, $customer_group_id) {
 		$query = $this->db->query("SELECT price FROM " . DB_PREFIX . "dockercart_product_variant_customer_group_price WHERE variant_id = '" . (int)$variant_id . "' AND customer_group_id = '" . (int)$customer_group_id . "'");
 
@@ -354,6 +414,62 @@ class ProductConfigurable {
 
 	public function deleteAllVariantCustomerGroupPrices($variant_id) {
 		$this->db->query("DELETE FROM " . DB_PREFIX . "dockercart_product_variant_customer_group_price WHERE variant_id = '" . (int)$variant_id . "'");
+	}
+
+	public function buildVariantHash(array $option_values) {
+		if (empty($option_values)) {
+			return '';
+		}
+
+		ksort($option_values);
+
+		$parts = array();
+
+		foreach ($option_values as $option_id => $option_value_id) {
+			$parts[] = (int)$option_value_id;
+		}
+
+		return implode('-', $parts);
+	}
+
+	public function buildVariantHashFromValues(array $values) {
+		if (empty($values)) {
+			return '';
+		}
+
+		$map = array();
+
+		foreach ($values as $value) {
+			if (!isset($value['option_id'], $value['option_value_id'])) {
+				continue;
+			}
+
+			$map[(int)$value['option_id']] = (int)$value['option_value_id'];
+		}
+
+		return $this->buildVariantHash($map);
+	}
+
+	public function rebuildVariantHashes($product_id) {
+		$this->db->query("UPDATE " . DB_PREFIX . "product_variant v JOIN (SELECT variant_id, GROUP_CONCAT(option_value_id ORDER BY option_id SEPARATOR '-') AS h FROM " . DB_PREFIX . "product_variant_value WHERE product_id = '" . (int)$product_id . "' GROUP BY variant_id) t ON t.variant_id = v.variant_id SET v.variant_hash = t.h WHERE v.product_id = '" . (int)$product_id . "'");
+
+		$this->touchProduct($product_id);
+	}
+
+	public function findDuplicateVariant($product_id, $variant_hash, $exclude_variant_id = 0) {
+		if ($variant_hash === '') {
+			return false;
+		}
+
+		$sql = "SELECT variant_id FROM " . DB_PREFIX . "product_variant WHERE product_id = '" . (int)$product_id . "' AND variant_hash = '" . $this->db->escape($variant_hash) . "'";
+
+		if ($exclude_variant_id) {
+			$sql .= " AND variant_id != '" . (int)$exclude_variant_id . "'";
+		}
+
+		$query = $this->db->query($sql . " LIMIT 1");
+
+		return $query->num_rows ? (int)$query->row['variant_id'] : false;
 	}
 
 	private function touchProduct($product_id) {

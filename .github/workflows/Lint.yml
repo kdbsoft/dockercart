@@ -113,3 +113,71 @@ jobs:
 
       - name: Run tests
         run: ./storage/vendor/bin/phpunit --no-coverage
+
+  phpunit-db:
+    name: PHPUnit (DB integration)
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:11.8
+        env:
+          MARIADB_ROOT_PASSWORD: root_password
+          MARIADB_DATABASE: dockercart_test
+          MARIADB_USER: dockercart
+          MARIADB_PASSWORD: dockercart_password
+        ports:
+          - 3306:3306
+        options: >-
+          --healthcmd="mysqladmin ping -h localhost -u root -proot_password"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.5"
+          tools: composer:v2
+          extensions: mbstring, mysqli
+
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer/files
+          key: phpunit-db-${{ hashFiles('**/composer.lock') }}
+          restore-keys: phpunit-db-
+
+      - name: Install PHPUnit
+        run: composer require --dev --no-interaction phpunit/phpunit:^11.0
+
+      - name: Wait for MariaDB
+        run: |
+          for i in $(seq 1 30); do
+            if mysql -h 127.0.0.1 -u dockercart -pdockercart_password -e "SELECT 1" dockercart_test &>/dev/null; then
+              echo "MariaDB is ready"
+              break
+            fi
+            echo "Waiting for MariaDB... ($i/30)"
+            sleep 2
+          done
+
+      - name: Load schema
+        run: |
+          mysql -h 127.0.0.1 -u dockercart -pdockercart_password dockercart_test < docker/mysql/init.sql
+          for f in docker/mysql/migrations/*.sql; do
+            echo "-> Applying $f"
+            mysql -h 127.0.0.1 -u dockercart -pdockercart_password dockercart_test < "$f"
+          done
+
+      - name: Run DB integration tests
+        env:
+          DB_HOSTNAME: 127.0.0.1
+          DB_USERNAME: dockercart
+          DB_PASSWORD: dockercart_password
+          DB_DATABASE: dockercart_test
+          DB_PORT: 3306
+          DB_PREFIX: oc_
+        run: ./storage/vendor/bin/phpunit --no-coverage --testsuite unit

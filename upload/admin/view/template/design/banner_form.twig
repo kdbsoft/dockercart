@@ -281,7 +281,7 @@
                             <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][video_youtube]" value="{{ banner_image.video_type == 'youtube' ? banner_image.video : '' }}" class="form-control dc-banner-video-youtube" placeholder="{{ entry_video_youtube_placeholder }}" />
                           </div>
                           <div class="dc-banner-youtube-preview" style="margin-top:8px;{{ banner_image.video_type == 'youtube' and banner_image.video ? '' : 'display:none;' }}">
-                            <img src="https://img.youtube.com/vi/{{ banner_image.video }}/hqdefault.jpg" class="dc-banner-youtube-thumb" style="max-height:90px;border-radius:4px;" />
+                            <img src="{{ (banner_image.video_type == 'youtube' and banner_image.video_youtube_id) ? ('https://img.youtube.com/vi/' ~ banner_image.video_youtube_id ~ '/hqdefault.jpg') : video_placeholder }}" class="dc-banner-youtube-thumb" style="max-height:90px;border-radius:4px;" data-placeholder="{{ video_placeholder }}" onerror="this.onerror=null;this.src='{{ video_placeholder }}';" />
                             <div style="font-size:11px;color:#6b7280;margin-top:4px;">YouTube</div>
                           </div>
                         </div>
@@ -713,11 +713,34 @@ function updateMp4Preview($block) {
   }
 }
 
+function dcExtractYouTubeId(value) {
+  value = (value || '').trim();
+  if (/^[A-Za-z0-9_-]{11}$/.test(value)) {
+    return value;
+  }
+  var patterns = [
+    /(?:youtube\.com|youtu\.be|youtube-nocookie\.com)\/(?:watch\?v=|embed\/|shorts\/)?([A-Za-z0-9_-]{11})/,
+    /^([A-Za-z0-9_-]{11})$/
+  ];
+  for (var i = 0; i < patterns.length; i++) {
+    var m = value.match(patterns[i]);
+    if (m) {
+      return m[1];
+    }
+  }
+  return '';
+}
+
 function updateYoutubePreview($input) {
   var val = $input.val().trim();
   var $preview = $input.closest('.form-group').find('.dc-banner-youtube-preview');
   if (val) {
-    $preview.find('.dc-banner-youtube-thumb').attr('src', 'https://img.youtube.com/vi/' + encodeURIComponent(val) + '/hqdefault.jpg');
+    var ytId = dcExtractYouTubeId(val);
+    if (ytId) {
+      $preview.find('.dc-banner-youtube-thumb').attr('src', 'https://img.youtube.com/vi/' + ytId + '/hqdefault.jpg');
+    } else {
+      $preview.find('.dc-banner-youtube-thumb').attr('src', $preview.find('.dc-banner-youtube-thumb').attr('data-placeholder') || '');
+    }
     $preview.show();
   } else {
     $preview.hide();

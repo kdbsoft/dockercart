@@ -28,7 +28,7 @@ class ControllerDesignBanner extends Controller {
 						$mp4 = !empty($slide['video_mp4']) ? $slide['video_mp4'] : '';
 						if (!empty($youtube)) {
 							$slide['video_type'] = 'youtube';
-							$slide['video'] = $youtube;
+							$slide['video'] = $this->extractYouTubeId($youtube);
 						} elseif (!empty($mp4)) {
 							$slide['video_type'] = 'mp4';
 							$slide['video'] = $mp4;
@@ -82,7 +82,7 @@ class ControllerDesignBanner extends Controller {
 						$mp4 = !empty($slide['video_mp4']) ? $slide['video_mp4'] : '';
 						if (!empty($youtube)) {
 							$slide['video_type'] = 'youtube';
-							$slide['video'] = $youtube;
+							$slide['video'] = $this->extractYouTubeId($youtube);
 						} elseif (!empty($mp4)) {
 							$slide['video_type'] = 'mp4';
 							$slide['video'] = $mp4;
@@ -424,6 +424,11 @@ class ControllerDesignBanner extends Controller {
 			$link = isset($banner_image['link']) ? $banner_image['link'] : '';
 			$link_data = $this->parseSlideLink($link);
 
+			$video_youtube_id = $this->extractYouTubeId($video);
+			if (!preg_match('/^[A-Za-z0-9_-]{11}$/', $video_youtube_id)) {
+				$video_youtube_id = '';
+			}
+
 			$data['banner_images'][$key][] = array(
 				'title'              => $banner_image['title'],
 				'subtitle'           => isset($banner_image['subtitle']) ? $banner_image['subtitle'] : '',
@@ -440,6 +445,7 @@ class ControllerDesignBanner extends Controller {
 				'thumb_portrait'     => $this->model_tool_image->resize($thumb_portrait, 100, 100),
 				'video_type'         => isset($banner_image['video_type']) ? $banner_image['video_type'] : '',
 				'video'              => $video,
+				'video_youtube_id'   => $video_youtube_id,
 				'video_thumb'        => $this->model_tool_image->resize($video_thumb, 100, 100),
 				'sort_order'         => $banner_image['sort_order']
 		);
@@ -542,6 +548,23 @@ $this->response->setOutput($this->load->view('design/banner_form', $data));
 		}
 
 		return '';
+	}
+
+	private function extractYouTubeId($value): string {
+		$value = trim((string)$value);
+		if (preg_match('/^[A-Za-z0-9_-]{11}$/', $value)) {
+			return $value;
+		}
+		$patterns = [
+			'/(?:youtube\.com|youtu\.be|youtube-nocookie\.com)\/(?:watch\?v=|embed\/|shorts\/)?([A-Za-z0-9_-]{11})/',
+			'/^[A-Za-z0-9_-]{11}$/'
+		];
+		foreach ($patterns as $pattern) {
+			if (preg_match($pattern, $value, $matches)) {
+				return $matches[1];
+			}
+		}
+		return $value;
 	}
 
 	protected function validateForm() {

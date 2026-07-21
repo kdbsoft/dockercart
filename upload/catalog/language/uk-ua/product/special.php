@@ -43,3 +43,4 @@ $_['text_special_tagline'] = 'Ексклюзивні пропозиції — н
 $_['text_products']  = 'товарів';
 $_['text_load_more'] = 'Показати ще';
 $_['text_gift_badge'] = 'ПОДАРУНОК';
+$_['text_price_from'] = 'від';

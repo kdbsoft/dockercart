@@ -14,6 +14,7 @@
 8. [Release Workflow](#8-release-workflow)
 9. [Core Updates](#9-core-updates)
 10. [Security](#10-security)
+11. [Configurable Products & Variants](#11-configurable-products--variants)
 
 ---
 
@@ -555,3 +556,74 @@ See [`SECURITY.md`](../SECURITY.md) for the full policy.
 - Keep base images updated: `docker compose pull && docker compose up -d`
 - Ensure `./storage/` is not publicly accessible
 - Image execution is disabled in Apache — do not remove this restriction
+
+---
+
+## 11. Configurable Products & Variants
+
+Configurable products (a.k.a. "combined variants") allow a single product to have
+multiple purchasable variants defined by axis options (e.g. Size × Color). This is
+the DockerCart equivalent of OpenCart's product options, but with a dedicated variant
+layer that holds its own SKU, price, stock, and image per combination.
+
+### Data Model
+
+| Table | Purpose |
+|---|---|
+| `oc_product_configurable` | Per-product configurable flag + `default_variant_id` (single source of truth for default) |
+| `oc_product_configurable_option` | Axis options for a product (e.g. Size, Color) |
+| `oc_product_variant` | One row per purchasable variant: SKU, price, quantity, image, `variant_hash` |
+| `oc_product_variant_value` | Maps a variant to its axis option values (one row per axis) |
+| `oc_dockercart_product_variant_customer_group_price` | B2B price override per variant + customer group |
+
+### variant_hash — O(1) Variant Resolution
+
+`oc_product_variant.variant_hash` is a denormalized string built from the variant's
+option value IDs, ordered by option ID and joined with `-` (e.g. `"123-456"`).
+
+- **Built by:** `ProductConfigurable::buildVariantHash()` / `buildVariantHashFromValues()`
+- **Maintained on:** `addVariant()`, `updateVariant()` (when `values` change)
+- **Rebuilt by:** `rebuildVariantHashes($product_id)` — called after `setConfigurableOptions`
+- **Unique index:** `ux_product_variant_hash (product_id, variant_hash)` — prevents duplicates
+- **Used by:** `resolveVariant()` — single SELECT with unique index instead of N subselects
+
+Changing the hash format is a **breaking change** that requires `rebuildVariantHashes()`
+on all configurable products.
+
+### Default Variant
+
+The default variant is stored exclusively in `oc_product_configurable.default_variant_id`.
+
+- Set via `setDefaultVariant($variant_id)` (admin AJAX action `setDefault`)
+- When the default variant is deleted, a new default is auto-selected: first active
+  variant by `sort_order ASC, variant_id ASC`
+- The legacy `oc_product_variant.is_default` column was removed in migration
+  `20260721_drop_is_default.sql`
+
+### Axis Option Prices
+
+For axis options (options used as variant axes), `product_option_value.price` is always
+`0`. The real price lives on `product_variant.price`. This is enforced by:
+
+1. `setConfigurableOptions()` zeroes existing POV prices when an option becomes an axis
+2. Admin UI renders axis POV price/points/weight fields as `readonly` with a lock icon
+3. `dcValidateAxisPrices()` JS handler zeroes any non-zero axis price on form submit
+4. Migration `20260721_zero_axis_pov_prices.sql` cleans up legacy non-zero values
+
+### B2B / Customer Group Prices
+
+`ProductConfigurable::getAggregatedPriceRange($product_id, $customer_group_id)` accepts
+an optional customer group ID. When provided, it `LEFT JOIN`s
+`dockercart_product_variant_customer_group_price` and uses `COALESCE(cgp.price, pv.price)`.
+
+The storefront (`product/product.php`) and cart (`cart.php`) both pass
+`config_customer_group_id` so B2B customers see their negotiated variant prices.
+
+### Known Limitations
+
+- `oc_product_special` is **not applied** to configurable product variants. Specials
+  only affect the base product price, which is `0` for configurable products. B2B
+  variant prices should be managed via `dockercart_product_variant_customer_group_price`.
+- Removing an axis from a configurable product does not delete existing variants.
+  Variants with values for a removed axis will become unresolvable (their hash includes
+  the removed axis). Re-create variants after changing axes.

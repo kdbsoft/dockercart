@@ -220,7 +220,7 @@
               <div class="form-group">
                   <label class="col-sm-2 control-label" for="input-weight">{{ entry_weight }}</label>
                   <div class="col-sm-10">
-                    <div class="row">
+              <div class="row">
                       <div class="col-sm-6">
                         <input type="text" name="weight" value="{{ weight }}" placeholder="{{ entry_weight }}" id="input-weight" class="form-control"/>
                       </div>
@@ -442,7 +442,7 @@
                         </span>
                       </div>
                       <div id="video-youtube-preview" style="margin-bottom:8px;{{ video_type == 'youtube' and video ? '' : 'display:none;' }}">
-                        <img src="https://img.youtube.com/vi/{{ video }}/hqdefault.jpg" id="video-youtube-thumb-img" style="max-height:90px;border-radius:4px;" />
+                        <img src="{{ (video_type == 'youtube' and video_youtube_id) ? ('https://img.youtube.com/vi/' ~ video_youtube_id ~ '/hqdefault.jpg') : video_placeholder }}" id="video-youtube-thumb-img" style="max-height:90px;border-radius:4px;" data-placeholder="{{ video_placeholder }}" onerror="this.onerror=null;this.src='{{ video_placeholder }}';" />
                         <div style="font-size:11px;color:#6b7280;margin-top:4px;">{{ text_youtube_video }}</div>
                       </div>
                       <div id="video-mp4-block" style="margin-bottom:8px;{{ video_type == 'mp4' and video ? '' : 'display:none;' }}">
@@ -497,10 +497,9 @@
                     {% for product_attribute in product_attributes %}
                       <tr id="attribute-row{{ attribute_row }}" class="attribute-row">
                         <td class="text-left"><input type="text" name="product_attribute[{{ attribute_row }}][name]" value="{{ product_attribute.name|e('html_attr') }}" placeholder="{{ entry_attribute }}" class="form-control attribute-name-input" style="position:relative;"/><input type="hidden" name="product_attribute[{{ attribute_row }}][attribute_id]" value="{{ product_attribute.attribute_id }}"/></td>
-                        <td class="text-left">{% for language in languages %}
-                            <div class="input-group attribute-text-group"><span class="input-group-addon lang-addon"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span></span> <textarea name="product_attribute[{{ attribute_row }}][product_attribute_description][{{ language.language_id }}][text]" rows="3" placeholder="{{ entry_text }}" class="form-control attribute-textarea">{{ product_attribute.product_attribute_description[language.language_id] ? product_attribute.product_attribute_description[language.language_id].text }}</textarea>
-                            </div>
-                          {% endfor %}</td>
+                        <td class="text-left"><div class="attribute-texts">{% for language in languages %}
+                            <div class="input-group attribute-text-group"><span class="input-group-addon lang-addon"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span></span><input type="text" name="product_attribute[{{ attribute_row }}][product_attribute_description][{{ language.language_id }}][text]" value="{{ (product_attribute.product_attribute_description[language.language_id] ? product_attribute.product_attribute_description[language.language_id].text)|e('html_attr') }}" placeholder="{{ entry_text }}" class="form-control attribute-text-input" /></div>
+                          {% endfor %}</div></td>
                         <td class="text-center"><button type="button" onclick="$('#attribute-row{{ attribute_row }}').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-link btn-remove-attr"><i class="fa fa-times"></i></button></td>
                       </tr>
                     {% set attribute_row = attribute_row + 1 %}
@@ -532,8 +531,9 @@
                 {% include 'catalog/product_variants.twig' %}
               </div>
 
-              <div class="row">
+              <div class="row" style="margin-top: 30px">
                 <div class="col-sm-3">
+                  <h4>{{ tab_options }} <small id="dc-option-count">({{ product_options|length }})</small></h4>
                   <div class="dc-opt-sidebar">
                     <ul class="dc-opt-sidebar__list" id="option-sidebar-list">
                       {% set option_row = 0 %}
@@ -580,6 +580,9 @@
                             </button>
                           </div>
                         </div>
+                        {% if error_option[product_option.option_id] is defined %}
+                        <div class="alert alert-danger" style="margin:5px 15px"><i class="fa fa-exclamation-circle"></i> {{ error_option[product_option.option_id] }}</div>
+                        {% endif %}
                         <div class="dc-option-section__body">
                           <input type="hidden" name="product_option[{{ option_row }}][product_option_id]" value="{{ product_option.product_option_id }}"/>
                           <input type="hidden" name="product_option[{{ option_row }}][name]" value="{{ product_option.name|e('html_attr') }}"/>
@@ -674,34 +677,34 @@
                                          {% endif %}
                                        </select>
                                      </div>
-                                     <div class="dc-opt-card__field">
-                                       <label>{{ entry_price }}</label>
-                                      <div class="option-value-prefix-group">
-                                        <select name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][price_prefix]" class="form-control option-value-prefix-select">
-                                          <option value="+"{% if product_option_value.price_prefix == '+' %} selected="selected"{% endif %}>+</option>
-                                          <option value="-"{% if product_option_value.price_prefix == '-' %} selected="selected"{% endif %}>-</option>
-                                        </select>
-                                        <input type="text" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][price]" value="{{ product_option_value.price }}" placeholder="{{ entry_price }}" class="form-control option-value-prefix-input" oninput="dcUpdateBadges(this)" />
-                                      </div>
-                                    </div>
-                                    <div class="dc-opt-card__field">
-                                      <label>{{ entry_option_points }}</label>
-                                      <div class="option-value-prefix-group">
-                                        <select name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][points_prefix]" class="form-control option-value-prefix-select">
-                                          <option value="+"{% if product_option_value.points_prefix == '+' %} selected="selected"{% endif %}>+</option>
-                                          <option value="-"{% if product_option_value.points_prefix == '-' %} selected="selected"{% endif %}>-</option>
-                                        </select>
-                                        <input type="text" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][points]" value="{{ product_option_value.points }}" placeholder="{{ entry_points }}" class="form-control option-value-prefix-input" />
-                                      </div>
-                                    </div>
-                                    <div class="dc-opt-card__field">
-                                      <label>{{ entry_weight }}</label>
-                                      <div class="option-value-prefix-group">
-                                        <select name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][weight_prefix]" class="form-control option-value-prefix-select">
-                                          <option value="+"{% if product_option_value.weight_prefix == '+' %} selected="selected"{% endif %}>+</option>
-                                          <option value="-"{% if product_option_value.weight_prefix == '-' %} selected="selected"{% endif %}>-</option>
-                                        </select>
-                                        <input type="text" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][weight]" value="{{ product_option_value.weight }}" placeholder="{{ entry_weight }}" class="form-control option-value-prefix-input" />
+                                      <div class="dc-opt-card__field{% if product_option.is_axis %} dc-opt-card__field--locked{% endif %}">
+                                        <label>{{ entry_price }}</label>
+                                       <div class="option-value-prefix-group">
+                                         <select name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][price_prefix]" class="form-control option-value-prefix-select"{% if product_option.is_axis %} disabled="disabled"{% endif %}>
+                                           <option value="+"{% if product_option_value.price_prefix == '+' %} selected="selected"{% endif %}>+</option>
+                                           <option value="-"{% if product_option_value.price_prefix == '-' %} selected="selected"{% endif %}>-</option>
+                                         </select>
+                                         <input type="text" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][price]" value="{{ product_option_value.price }}" placeholder="{{ entry_price }}" class="form-control option-value-prefix-input"{% if product_option.is_axis %} readonly="readonly" data-axis-price="1"{% endif %} oninput="dcUpdateBadges(this)" />
+                                       </div>
+                                     </div>
+                                     <div class="dc-opt-card__field{% if product_option.is_axis %} dc-opt-card__field--locked{% endif %}">
+                                       <label>{{ entry_option_points }}</label>
+                                       <div class="option-value-prefix-group">
+                                         <select name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][points_prefix]" class="form-control option-value-prefix-select"{% if product_option.is_axis %} disabled="disabled"{% endif %}>
+                                           <option value="+"{% if product_option_value.points_prefix == '+' %} selected="selected"{% endif %}>+</option>
+                                           <option value="-"{% if product_option_value.points_prefix == '-' %} selected="selected"{% endif %}>-</option>
+                                         </select>
+                                         <input type="text" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][points]" value="{{ product_option_value.points }}" placeholder="{{ entry_points }}" class="form-control option-value-prefix-input"{% if product_option.is_axis %} readonly="readonly"{% endif %} />
+                                       </div>
+                                     </div>
+                                     <div class="dc-opt-card__field{% if product_option.is_axis %} dc-opt-card__field--locked{% endif %}">
+                                       <label>{{ entry_weight }}</label>
+                                       <div class="option-value-prefix-group">
+                                         <select name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][weight_prefix]" class="form-control option-value-prefix-select"{% if product_option.is_axis %} disabled="disabled"{% endif %}>
+                                           <option value="+"{% if product_option_value.weight_prefix == '+' %} selected="selected"{% endif %}>+</option>
+                                           <option value="-"{% if product_option_value.weight_prefix == '-' %} selected="selected"{% endif %}>-</option>
+                                         </select>
+                                         <input type="text" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][weight]" value="{{ product_option_value.weight }}" placeholder="{{ entry_weight }}" class="form-control option-value-prefix-input"{% if product_option.is_axis %} readonly="readonly"{% endif %} />
                                       </div>
                                     </div>
                                   </div>
@@ -711,10 +714,6 @@
                                       <input type="checkbox" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][is_hit]" value="1"{% if product_option_value.is_hit %} checked{% endif %} onchange="$(this).closest('.dc-opt-card').find('input[name$=\\'[is_hit\\']]').val(this.checked ? 1 : 0);dcUpdateHitBadge(this)"/>
                                       <i class="fa fa-star"></i> {{ entry_hit }}
                                     </label>
-                                  </div>
-                                  <div class="dc-opt-card__color-images">
-                                    <label class="dc-opt-card__color-images-label"><i class="fa fa-image"></i> {{ entry_color_images }}</label>
-                                    <div class="dc-color-img-picker" data-opt-row="{{ option_row }}" data-ov-row="{{ option_value_row }}" data-selected="{{ product_option_value.color_images|default([])|json_encode|e('html_attr') }}"></div>
                                   </div>
                                   {% endif %}
                                   <div class="dc-opt-card__cg">
@@ -1331,11 +1330,11 @@
   function addAttribute() {
 	  html = '<tr id="attribute-row' + attribute_row + '" class="attribute-row">';
 	  html += '  <td class="text-left"><input type="text" name="product_attribute[' + attribute_row + '][name]" value="" placeholder="{{ entry_attribute }}" class="form-control attribute-name-input" style="position:relative;" /><input type="hidden" name="product_attribute[' + attribute_row + '][attribute_id]" value="" /></td>';
-	  html += '  <td class="text-left">';
+	  html += '  <td class="text-left"><div class="attribute-texts">';
     {% for language in languages %}
-	  html += '<div class="input-group attribute-text-group"><span class="input-group-addon lang-addon"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span></span><textarea name="product_attribute[' + attribute_row + '][product_attribute_description][{{ language.language_id }}][text]" rows="3" placeholder="{{ entry_text }}" class="form-control attribute-textarea"></textarea></div>';
+	  html += '<div class="input-group attribute-text-group"><span class="input-group-addon lang-addon"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span></span><input type="text" name="product_attribute[' + attribute_row + '][product_attribute_description][{{ language.language_id }}][text]" value="" placeholder="{{ entry_text }}" class="form-control attribute-text-input" /></div>';
     {% endfor %}
-	  html += '  </td>';
+	  html += '</div></td>';
 	  html += '  <td class="text-center"><button type="button" onclick="$(\'#attribute-row' + attribute_row + '\').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-link btn-remove-attr"><i class="fa fa-times"></i></button></td>';
 	  html += '</tr>';
 
@@ -1446,7 +1445,21 @@
         loadVariantMatrix();
       }
     });
+
+    $('#form-product').on('submit', dcValidateAxisPrices);
   });
+
+  function dcValidateAxisPrices() {
+    if (dcOptionMode !== 'combined') return true;
+
+    $('.dc-option-axis [data-axis-price="1"]').each(function() {
+      if (parseFloat($(this).val()) > 0) {
+        $(this).val(0);
+      }
+    });
+
+    return true;
+  }
 
   function dcScrollToOption(sectionId) {
 	  var el = document.getElementById(sectionId);
@@ -1456,6 +1469,12 @@
   function dcRemoveOption(option_row) {
 	  $('#option-section' + option_row).remove();
 	  $('#option-sidebar-list li[data-target="option-section' + option_row + '"]').remove();
+	  updateOptionCount();
+  }
+
+  function updateOptionCount() {
+	  var count = $('#option-sidebar-list li').length;
+	  $('#dc-option-count').text('(' + count + ')');
   }
 
   $('input[name=\'option\']').autocomplete({
@@ -1477,6 +1496,12 @@
 		  });
 	  },
 	  'select': function(item) {
+		  if (dcAxisOptionIds.indexOf(parseInt(item.value)) >= 0) {
+			  showToast('{{ error_simple_option_is_axis|e("js") }}', 'error');
+			  $('input[name=\'option\']').val('').blur();
+			  return;
+		  }
+
 		  var html = '';
 		  html += '<div class="dc-option-section" id="option-section' + option_row + '">';
 		  html += '  <div class="dc-option-section__header">';
@@ -1563,6 +1588,7 @@
 		  $('#dc-options-container').append(html);
 
 		  $('#option-sidebar-list').append('<li class="dc-opt-sidebar__item" data-target="option-section' + option_row + '"><a href="javascript:void(0)" onclick="dcScrollToOption(\'option-section' + option_row + '\')"><i class="fa fa-circle"></i> ' + item['label'] + ' <span class="dc-opt-sidebar__required">*</span> <small class="text-muted">(' + item['type'] + ')</small></a><button type="button" class="dc-opt-sidebar__remove" onclick="dcRemoveOption(\'' + option_row + '\')" title="{{ button_remove|e('js') }}">&times;</button></li>');
+		  updateOptionCount();
 
 		  $('[data-toggle=\'tooltip\']').tooltip({
 			  container: 'body',
@@ -1683,10 +1709,6 @@
 		  html += '        <i class="fa fa-star"></i> {{ entry_hit|e('js') }}';
 		  html += '      </label>';
 		  html += '    </div>';
-		  html += '    <div class="dc-opt-card__color-images">';
-		  html += '      <label class="dc-opt-card__color-images-label"><i class="fa fa-image"></i> {{ entry_color_images|e('js') }}</label>';
-		  html += '      <div class="dc-color-img-picker" data-opt-row="' + option_row + '" data-ov-row="' + ovRow + '" data-selected="[]"></div>';
-		  html += '    </div>';
 	  }
 	  html += '    <div class="dc-opt-card__cg">';
 	  html += '      <button type="button" class="btn btn-default btn-xs dc-opt-card__cg-toggle" onclick="event.stopPropagation();$(this).closest(\'.dc-opt-card__cg\').find(\'.dc-opt-card__cg-body\').slideToggle(150);">';
@@ -1709,7 +1731,6 @@
 	  var card = dcBuildOptionValueCard(option_row, option_value_row, '', firstName, '', '0', '+', '0', '+', '0', '+', false);
 	  $('#option-value' + option_row).append(card);
 	  $('[data-toggle="tooltip"]').tooltip();
-	  dcRefreshColorImagePickers();
 	  option_value_row++;
   }
 
@@ -1730,7 +1751,6 @@
 		  }
 	  });
 	  $('[data-toggle="tooltip"]').tooltip();
-	  dcRefreshColorImagePickers();
   }
 
   //--></script>
@@ -1792,101 +1812,6 @@
 		  }
 	  } else {
 		  $badges.find('.dc-opt-badge--hit').remove();
-	  }
-  }
-
-  function dcRefreshColorImagePickers() {
-	  var $pickers = $('.dc-color-img-picker');
-	  if (!$pickers.length) return;
-
-	  var imgs = [];
-	  var $mainImg = $('input[name="image"]');
-	  if ($mainImg.length && $mainImg.val()) {
-		  imgs.push({ path: $mainImg.val(), thumb: $('#thumb-image img').attr('src') || '{{ placeholder|e("js") }}' });
-	  }
-	  $('.product-images').each(function() {
-		  $(this).find('.dc-img-card').each(function() {
-			  var $inp = $(this).find('input[name$="[image]"]');
-			  if ($inp.length && $inp.val()) {
-				  var $thumbImg = $(this).find('.dc-img-link img');
-				  imgs.push({ path: $inp.val(), thumb: $thumbImg.attr('src') || '{{ placeholder|e("js") }}' });
-			  }
-		  });
-	  });
-
-	  $pickers.each(function() {
-		  var $picker = $(this);
-		  var selected = [];
-		  try {
-			  selected = JSON.parse($picker.attr('data-selected'));
-		  } catch(e) { selected = []; }
-		  if (!Array.isArray(selected)) selected = [];
-
-		  var html = '';
-
-		  if (!imgs.length) {
-			  html = '<span class="text-muted" style="font-size:11px;">{{ text_color_images_empty|e("js") }}</span>';
-		  } else {
-			  html = '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">';
-
-			  for (var i = 0; i < imgs.length; i++) {
-				  var isSel = selected.indexOf(imgs[i].path) !== -1;
-				  html += '<div class="dc-color-img-thumb' + (isSel ? ' dc-color-img-thumb--sel' : '') + '" data-img="' + imgs[i].path + '" style="width:48px;height:48px;border:2px solid ' + (isSel ? '#2563eb' : '#e5e7eb') + ';border-radius:6px;overflow:hidden;cursor:pointer;position:relative;" onclick="dcToggleColorImage(this)">';
-				  html += '<img src="' + imgs[i].thumb + '" style="width:100%;height:100%;object-fit:cover;" />';
-				  if (isSel) {
-					  html += '<span style="position:absolute;top:2px;right:2px;width:14px;height:14px;background:#2563eb;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;">&#10003;</span>';
-				  }
-				  html += '</div>';
-			  }
-
-			  html += '</div>';
-		  }
-
-		  var optRow = $picker.attr('data-opt-row');
-		  var ovRow = $picker.attr('data-ov-row');
-
-		  var hiddenHtml = '';
-		  for (var s = 0; s < selected.length; s++) {
-			  hiddenHtml += '<input type="hidden" name="product_option[' + optRow + '][product_option_value][' + ovRow + '][color_images][]" value="' + selected[s] + '" />';
-		  }
-
-		  $picker.html(html + hiddenHtml);
-	  });
-  }
-
-  function dcToggleColorImage(el) {
-	  var $el = $(el);
-	  var img = $el.attr('data-img');
-	  var $picker = $el.closest('.dc-color-img-picker');
-	  var $thumb = $el;
-
-	  var isSel = $thumb.hasClass('dc-color-img-thumb--sel');
-
-	  if (isSel) {
-		  $thumb.removeClass('dc-color-img-thumb--sel');
-		  $thumb.css('border-color', '#e5e7eb');
-		  $thumb.find('span').remove();
-	  } else {
-		  $thumb.addClass('dc-color-img-thumb--sel');
-		  $thumb.css('border-color', '#2563eb');
-		  if (!$thumb.find('span').length) {
-			  $thumb.append('<span style="position:absolute;top:2px;right:2px;width:14px;height:14px;background:#2563eb;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;">&#10003;</span>');
-		  }
-	  }
-
-	  var selected = [];
-	  $picker.find('.dc-color-img-thumb--sel').each(function() {
-		  selected.push($(this).attr('data-img'));
-	  });
-
-	  $picker.attr('data-selected', JSON.stringify(selected));
-	  $picker.find('input[name$="[color_images][]"]').remove();
-
-	  var optRow = $picker.attr('data-opt-row');
-	  var ovRow = $picker.attr('data-ov-row');
-
-	  for (var s = 0; s < selected.length; s++) {
-		  $picker.append('<input type="hidden" name="product_option[' + optRow + '][product_option_value][' + ovRow + '][color_images][]" value="' + selected[s] + '" />');
 	  }
   }
 
@@ -2050,14 +1975,12 @@
     html += '<button type="button" onclick="removeImage(' + image_row + ');" class="dc-img-remove"><i class="fa fa-times"></i></button>';
     html += '</div>';
     $container.append(html);
-    dcRefreshColorImagePickers();
     image_row++;
   }
 
   function removeImage(row) {
     var $card = $('.product-images .dc-img-card[data-row="' + row + '"]');
     $card.remove();
-    dcRefreshColorImagePickers();
   }
 
   function updateImageSortOrders() {
@@ -2084,7 +2007,7 @@
     $('.dc-opt-cards').each(function() {
       Sortable.create(this, {
         animation: 150,
-        filter: '.dc-opt-card__remove, input, select, textarea, button, .dc-color-img-picker, .dc-img-link',
+        filter: '.dc-opt-card__remove, input, select, textarea, button, .dc-img-link',
         preventOnFilter: false,
         ghostClass: 'dc-opt-ghost',
         chosenClass: 'dc-opt-chosen',
@@ -2139,15 +2062,38 @@
     });
   }
 
+  function dcExtractYouTubeId(value) {
+    value = (value || '').trim();
+    if (/^[A-Za-z0-9_-]{11}$/.test(value)) {
+      return value;
+    }
+    var patterns = [
+      /(?:youtube\.com|youtu\.be|youtube-nocookie\.com)\/(?:watch\?v=|embed\/|shorts\/)?([A-Za-z0-9_-]{11})/,
+      /^([A-Za-z0-9_-]{11})$/
+    ];
+    for (var i = 0; i < patterns.length; i++) {
+      var m = value.match(patterns[i]);
+      if (m) {
+        return m[1];
+      }
+    }
+    return '';
+  }
+
   $(document).on('input', '#input-video-youtube', function() {
     var val = $(this).val().trim();
     if (val) {
+      var ytId = dcExtractYouTubeId(val);
       $('#video-mp4-block').hide();
       $('#input-product-video').val('');
       $('#video-mp4-block').find('.dc-video-card__img').attr('src', $('#video-mp4-block').find('.dc-video-card__img').attr('data-placeholder'));
       $('#video-mp4-block').find('.dc-video-card__overlay').hide();
       $('#video-youtube-preview').show();
-      $('#video-youtube-thumb-img').attr('src', 'https://img.youtube.com/vi/' + encodeURIComponent(val) + '/hqdefault.jpg');
+      if (ytId) {
+        $('#video-youtube-thumb-img').attr('src', 'https://img.youtube.com/vi/' + ytId + '/hqdefault.jpg');
+      } else {
+        $('#video-youtube-thumb-img').attr('src', $('#video-youtube-thumb-img').attr('data-placeholder') || '');
+      }
     } else {
       $('#video-youtube-preview').hide();
     }
@@ -2233,22 +2179,11 @@
 
 </div>
 
-<script type="text/javascript"><!--
-$(document).ready(function() {
-    dcRefreshColorImagePickers();
-});
-
-$(document).on('change', 'input[name="image"], input[name^="product_image"]', function() {
-    setTimeout(dcRefreshColorImagePickers, 150);
-});
-
-$(document).on('click', '#images .btn-danger, #images button[onclick*="remove"], .product-images .dc-img-remove', function() {
-    setTimeout(dcRefreshColorImagePickers, 200);
-});
-//--></script>
-
 <style>
 .dc-opts-axis-hidden .dc-option-axis { display: none; }
+.dc-opt-card__field--locked { opacity: 0.55; position: relative; }
+.dc-opt-card__field--locked::after { content: "\f023"; font-family: FontAwesome; position: absolute; top: 4px; right: 6px; font-size: 11px; color: #888; }
+.dc-opt-card__field--locked input[readonly] { background-color: #f5f5f5; cursor: not-allowed; }
 .dc-cgp-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; max-width: 500px; }
 .dc-cgp-select { width: 200px; flex: 0 0 200px; }
 .dc-cgp-price { width: 130px; flex: 0 0 130px; }
@@ -2284,11 +2219,13 @@ $(document).on('click', '#images .btn-danger, #images button[onclick*="remove"],
 .attribute-table > tbody > tr.attribute-row:last-child > td { border-bottom: none; }
 .attribute-name-input { border: 1px solid #e2e5e8; border-radius: 4px; height: 36px; font-size: 13px; }
 .attribute-name-input:focus { border-color: #88b1ff; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
-.attribute-text-group { width: 100%; margin-bottom: 4px; }
-.attribute-text-group:last-child { margin-bottom: 0; }
+.attribute-texts { display: flex; flex-wrap: wrap; gap: 6px; }
+.attribute-texts .input-group { margin-bottom: 0; }
+.attribute-texts .input-group + .input-group { margin-bottom: 0; }
+.attribute-text-group { width: auto; margin-bottom: 0; flex: 1 1 160px; }
 .lang-addon { background: #f1f5f9; border: 1px solid #e2e5e8; border-right: none; border-radius: 4px 0 0 4px; padding: 0 8px; font-size: 10px; font-weight: 600; color: #64748b; letter-spacing: 0.3px; }
-.attribute-textarea { border: 1px solid #e2e5e8; border-radius: 0 4px 4px 0; font-size: 13px; resize: vertical; min-height: 48px; }
-.attribute-textarea:focus { border-color: #88b1ff; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+.attribute-text-input { border: 1px solid #e2e5e8; border-radius: 0 4px 4px 0; font-size: 13px; height: 34px; min-width: 0; }
+.attribute-text-input:focus { border-color: #88b1ff; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
 .btn-remove-attr { color: #94a3b8; font-size: 16px; text-decoration: none; padding: 4px; }
               .btn-remove-attr:hover { color: #ef4444; }
               .dc-option-mode-selector { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }

@@ -383,7 +383,13 @@ class ControllerCheckoutCart extends Controller {
 
 			if (!empty($product_info['is_configurable'])) {
 				if (empty($option['variant_id'])) {
-					$json['error']['variant'] = 'Please select all product options to add this item to your cart.';
+					$json['error']['variant'] = $this->language->get('error_variant_required');
+				} else {
+					$pc = new ProductConfigurable($this->registry);
+
+					if (!$pc->getVariant((int)$option['variant_id'])) {
+						$json['error']['variant'] = $this->language->get('error_variant_invalid');
+					}
 				}
 			}
 

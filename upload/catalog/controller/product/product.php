@@ -544,18 +544,17 @@ class ControllerProductProduct extends Controller {
 						$price = false;
 					}
 
-					$product_option_value_data[] = array(
-						'product_option_value_id' => $option_value['product_option_value_id'],
-						'option_value_id'         => $option_value['option_value_id'],
-						'name'                    => $option_value['name'],
-						'color_code'              => $option_value['color_code'],
-						'price'                   => $price,
-						'price_value'             => (float)$this->currency->format($this->tax->calculate($option_value['price'], $product_info['tax_class_id'], $this->config->get('config_tax') ? 'P' : false), $this->session->data['currency'], '', false),
-						'price_prefix'            => $option_value['price_prefix'],
-					'is_hit'                  => !empty($option_value['is_hit']),
-					'color_images'            => isset($option_value['color_images']) ? $option_value['color_images'] : array(),
+				$product_option_value_data[] = array(
+					'product_option_value_id' => $option_value['product_option_value_id'],
+					'option_value_id'         => $option_value['option_value_id'],
+					'name'                    => $option_value['name'],
+					'color_code'              => $option_value['color_code'],
+					'price'                   => $price,
+					'price_value'             => (float)$this->currency->format($this->tax->calculate($option_value['price'], $product_info['tax_class_id'], $this->config->get('config_tax') ? 'P' : false), $this->session->data['currency'], '', false),
+					'price_prefix'            => $option_value['price_prefix'],
+				'is_hit'                  => !empty($option_value['is_hit']),
 				);
-			}
+		}
 
 			$data['options'][] = array(
 					'product_option_id'    => $option['product_option_id'],
@@ -567,46 +566,6 @@ class ControllerProductProduct extends Controller {
 					'required'             => $option['required']
 				);
 			}
-
-		$gallery_map = array();
-
-		if (!empty($product_info['image'])) {
-			$gallery_map[$product_info['image']] = array(
-				'display'     => $data['display'],
-				'popup'       => $data['popup'],
-				'orientation' => $data['image_orientation']
-			);
-		}
-
-		foreach ($data['images'] as $img) {
-			if (!empty($img['image'])) {
-				$gallery_map[$img['image']] = $img;
-			}
-		}
-
-		foreach ($data['options'] as &$option) {
-			if ($option['type'] != 'color') {
-				continue;
-			}
-
-			foreach ($option['product_option_value'] as &$option_value) {
-				$resolved = array();
-
-				if (!empty($option_value['color_images'])) {
-					foreach ($option_value['color_images'] as $image_path) {
-						if (isset($gallery_map[$image_path])) {
-							$resolved[] = $gallery_map[$image_path];
-						}
-					}
-				}
-
-				$option_value['color_images'] = $resolved;
-			}
-			unset($option_value);
-
-			break;
-		}
-		unset($option);
 
 			if (!empty($product_info['is_configurable'])) {
 				$pc = new ProductConfigurable($this->registry);
@@ -655,26 +614,41 @@ class ControllerProductProduct extends Controller {
 					}
 				}
 
-				$tax_class_id = (int)$product_info['tax_class_id'];
-				$tax = $this->config->get('config_tax');
-				$currency_code = isset($this->session->data['currency']) ? $this->session->data['currency'] : $this->config->get('config_currency');
+			$tax_class_id = (int)$product_info['tax_class_id'];
+			$tax = $this->config->get('config_tax');
+			$currency_code = isset($this->session->data['currency']) ? $this->session->data['currency'] : $this->config->get('config_currency');
+			$customer_group_id = (int)$this->config->get('config_customer_group_id');
 
-				foreach ($variants as &$variant) {
-					if (isset($variant['price']) && $variant['price'] !== '') {
-						$variant['price'] = (float)$this->currency->format(
-							$this->tax->calculate((float)$variant['price'], $tax_class_id, $tax),
-							$currency_code, '', false
-						);
-					}
+			foreach ($variants as &$variant) {
+				$variant_cg_price = $pc->getVariantCustomerGroupPrice((int)$variant['variant_id'], $customer_group_id);
+
+				if ($variant_cg_price !== null) {
+					$variant['price'] = $variant_cg_price;
 				}
-				unset($variant);
 
-				if (!empty($default_variant) && isset($default_variant['price'])) {
+				if (isset($variant['price']) && $variant['price'] !== '') {
+					$variant['price'] = (float)$this->currency->format(
+						$this->tax->calculate((float)$variant['price'], $tax_class_id, $tax),
+						$currency_code, '', false
+					);
+				}
+			}
+			unset($variant);
+
+			if (!empty($default_variant)) {
+				$default_cg_price = $pc->getVariantCustomerGroupPrice((int)$default_variant['variant_id'], $customer_group_id);
+
+				if ($default_cg_price !== null) {
+					$default_variant['price'] = $default_cg_price;
+				}
+
+				if (isset($default_variant['price'])) {
 					$default_variant['price'] = (float)$this->currency->format(
 						$this->tax->calculate((float)$default_variant['price'], $tax_class_id, $tax),
 						$currency_code, '', false
 					);
 				}
+			}
 
 				$data['is_configurable'] = true;
 				$data['dc_variant_json'] = json_encode(array(
@@ -707,8 +681,22 @@ class ControllerProductProduct extends Controller {
 				}
 
 				$data['schema_variants'] = $schema_variants;
-				$data['schema_variant_low_price'] = $prices ? min($prices) : null;
-				$data['schema_variant_high_price'] = $prices ? max($prices) : null;
+
+				$price_range = $pc->getAggregatedPriceRange($product_id, $customer_group_id);
+
+				if ($price_range['min'] > 0 || $price_range['max'] > 0) {
+					$data['schema_variant_low_price'] = (float)$this->currency->format(
+						$this->tax->calculate($price_range['min'], $tax_class_id, $tax),
+						$currency_code, '', false
+					);
+					$data['schema_variant_high_price'] = (float)$this->currency->format(
+						$this->tax->calculate($price_range['max'], $tax_class_id, $tax),
+						$currency_code, '', false
+					);
+				} else {
+					$data['schema_variant_low_price'] = $prices ? min($prices) : null;
+					$data['schema_variant_high_price'] = $prices ? max($prices) : null;
+				}
 				$data['schema_any_in_stock'] = !empty(array_filter(array_column($schema_variants, 'is_in_stock')));
 				$data['schema_any_preorder'] = !empty($product_info['preorder']);
 			}

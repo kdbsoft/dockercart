@@ -39,3 +39,4 @@ $_['text_refine']      = 'Refine Search';
 $_['text_refine_categories'] = 'Categories';
 $_['text_back_to']     = 'Back to %s';
 $_['text_all_brands']  = 'All %s products';
+$_['text_price_from']  = 'from';

@@ -179,7 +179,7 @@ class ModelCatalogProduct extends Model
             }
         }
 
-        $valid_images = $this->getValidProductImages($data);
+        $axis_option_ids = $this->getAxisOptionIdsForGuard($data, 0);
 
         if (isset($data["product_option"])) {
             foreach ($data["product_option"] as $product_option) {
@@ -205,10 +205,16 @@ class ModelCatalogProduct extends Model
 
                         $product_option_id = $this->db->getLastId();
 
+                        $is_axis = in_array((int)$product_option["option_id"], $axis_option_ids, true);
+
                         foreach (
                             $product_option["product_option_value"]
                             as $product_option_value
                         ) {
+                            $pov_price = $is_axis ? 0 : (float) $product_option_value["price"];
+                            $pov_points = $is_axis ? 0 : (int) $product_option_value["points"];
+                            $pov_weight = $is_axis ? 0 : (float) $product_option_value["weight"];
+
                             $this->db->query(
                                 "INSERT INTO " .
                                     DB_PREFIX .
@@ -223,19 +229,19 @@ class ModelCatalogProduct extends Model
                                         "option_value_id"
                                     ] .
                                     "', price = '" .
-                                    (float) $product_option_value["price"] .
+                                    $pov_price .
                                     "', price_prefix = '" .
                                     $this->db->escape(
                                         $product_option_value["price_prefix"],
                                     ) .
                                     "', points = '" .
-                                    (int) $product_option_value["points"] .
+                                    $pov_points .
                                     "', points_prefix = '" .
                                     $this->db->escape(
                                         $product_option_value["points_prefix"],
                                     ) .
                                     "', weight = '" .
-                                    (float) $product_option_value["weight"] .
+                                    $pov_weight .
                                     "', weight_prefix = '" .
                                     $this->db->escape(
                                         $product_option_value["weight_prefix"],
@@ -521,16 +527,6 @@ class ModelCatalogProduct extends Model
         $this->db->query(
             "DELETE FROM " .
                 DB_PREFIX .
-                "product_option_value_color_image WHERE product_option_value_id IN (SELECT product_option_value_id FROM " .
-                DB_PREFIX .
-                "product_option_value WHERE product_id = '" .
-                (int) $product_id .
-                "')",
-        );
-
-        $this->db->query(
-            "DELETE FROM " .
-                DB_PREFIX .
                 "dockercart_product_option_value_customer_group_price WHERE product_option_value_id IN (SELECT product_option_value_id FROM " .
                 DB_PREFIX .
                 "product_option_value WHERE product_id = '" .
@@ -552,8 +548,6 @@ class ModelCatalogProduct extends Model
                 "'",
         );
 
-        $valid_images = $this->getValidProductImages($data);
-
         if (isset($data["product_option"])) {
             foreach ($data["product_option"] as $product_option) {
                 if (
@@ -567,7 +561,9 @@ class ModelCatalogProduct extends Model
                         $this->db->query(
                             "INSERT INTO " .
                                 DB_PREFIX .
-                                "product_option SET product_id = '" .
+                                "product_option SET product_option_id = '" .
+                                (int) $product_option["product_option_id"] .
+                                "', product_id = '" .
                                 (int) $product_id .
                                 "', option_id = '" .
                                 (int) $product_option["option_id"] .
@@ -578,10 +574,16 @@ class ModelCatalogProduct extends Model
 
                         $product_option_id = $this->db->getLastId();
 
+                        $is_axis = in_array((int)$product_option["option_id"], $axis_option_ids, true);
+
                         foreach (
                             $product_option["product_option_value"]
                             as $product_option_value
                         ) {
+                            $pov_price = $is_axis ? 0 : (float) $product_option_value["price"];
+                            $pov_points = $is_axis ? 0 : (int) $product_option_value["points"];
+                            $pov_weight = $is_axis ? 0 : (float) $product_option_value["weight"];
+
                             $this->db->query(
                                 "INSERT INTO " .
                                     DB_PREFIX .
@@ -596,19 +598,19 @@ class ModelCatalogProduct extends Model
                                         "option_value_id"
                                     ] .
                                     "', price = '" .
-                                    (float) $product_option_value["price"] .
+                                    $pov_price .
                                     "', price_prefix = '" .
                                     $this->db->escape(
                                         $product_option_value["price_prefix"],
                                     ) .
                                     "', points = '" .
-                                    (int) $product_option_value["points"] .
+                                    $pov_points .
                                     "', points_prefix = '" .
                                     $this->db->escape(
                                         $product_option_value["points_prefix"],
                                     ) .
                                     "', weight = '" .
-                                    (float) $product_option_value["weight"] .
+                                    $pov_weight .
                                     "', weight_prefix = '" .
                                     $this->db->escape(
                                         $product_option_value["weight_prefix"],
@@ -1011,10 +1013,6 @@ class ModelCatalogProduct extends Model
             }
         }
 
-        if (!empty($valid_images)) {
-            $this->saveProductOptionColorImages($data, $product_id, $valid_images);
-        }
-
         if (isset($data['product_configurable'])) {
             $pc = new ProductConfigurable($this->registry);
 
@@ -1022,6 +1020,7 @@ class ModelCatalogProduct extends Model
                 $pc->setConfigurable($product_id, 1);
                 $option_ids = isset($data['product_configurable']['configurable_options']) ? $data['product_configurable']['configurable_options'] : array();
                 $pc->setConfigurableOptions($product_id, $option_ids);
+                $pc->rebuildVariantHashes($product_id);
             }
         }
 
@@ -1235,16 +1234,6 @@ class ModelCatalogProduct extends Model
 		$this->db->query(
 			"DELETE FROM " .
 				DB_PREFIX .
-				"product_option_value_color_image WHERE product_option_value_id IN (SELECT product_option_value_id FROM " .
-				DB_PREFIX .
-				"product_option_value WHERE product_id = '" .
-				(int) $product_id .
-				"'" . $axis_exclude_sql . ")",
-		);
-
-		$this->db->query(
-			"DELETE FROM " .
-				DB_PREFIX .
 				"dockercart_product_option_value_customer_group_price WHERE product_option_value_id IN (SELECT product_option_value_id FROM " .
 				DB_PREFIX .
 				"product_option_value WHERE product_id = '" .
@@ -1265,8 +1254,6 @@ class ModelCatalogProduct extends Model
 				(int) $product_id .
 				"'" . $axis_exclude_sql,
 		);
-
-		$valid_images = $this->getValidProductImages($data);
 
 		if (isset($data["product_option"])) {
 			foreach ($data["product_option"] as $product_option) {
@@ -1396,10 +1383,6 @@ class ModelCatalogProduct extends Model
                     );
                 }
             }
-        }
-
-        if (!empty($valid_images)) {
-            $this->saveProductOptionColorImages($data, $product_id, $valid_images);
         }
 
         $this->db->query(
@@ -1777,6 +1760,7 @@ class ModelCatalogProduct extends Model
                 $pc->setConfigurable($product_id, 1);
                 $option_ids = isset($data['product_configurable']['configurable_options']) ? $data['product_configurable']['configurable_options'] : array();
                 $pc->setConfigurableOptions($product_id, $option_ids);
+                $pc->rebuildVariantHashes($product_id);
             } else {
                 $pc->setConfigurable($product_id, 0);
             }
@@ -1879,7 +1863,6 @@ class ModelCatalogProduct extends Model
                             'image'           => $variant['image'],
                             'sort_order'      => $variant['sort_order'],
                             'status'          => $variant['status'],
-                            'is_default'      => $variant['is_default'],
                             'values'          => array(),
                         );
 
@@ -1976,15 +1959,6 @@ class ModelCatalogProduct extends Model
             "DELETE FROM " .
                 DB_PREFIX .
                 "dockercart_product_option_value_customer_group_price WHERE product_option_value_id IN (SELECT product_option_value_id FROM " .
-                DB_PREFIX .
-                "product_option_value WHERE product_id = '" .
-                (int) $product_id .
-                "')",
-        );
-        $this->db->query(
-            "DELETE FROM " .
-                DB_PREFIX .
-                "product_option_value_color_image WHERE product_option_value_id IN (SELECT product_option_value_id FROM " .
                 DB_PREFIX .
                 "product_option_value WHERE product_id = '" .
                 (int) $product_id .
@@ -2093,6 +2067,9 @@ class ModelCatalogProduct extends Model
         $this->model_design_seo_url->invalidateSeoUrlCache();
 
         $pc = new ProductConfigurable($this->registry);
+        // deleteAllVariants handles cache invalidation + touchProduct; FK CASCADE
+        // (migration 20260721_add_product_variant_fk.sql) is a second-level guard
+        // for direct SQL deletes but does not replace this PHP cleanup.
         $pc->deleteAllVariants($product_id);
 
         $this->cache->delete("product");
@@ -2461,34 +2438,6 @@ class ModelCatalogProduct extends Model
                 "required" => $product_option["required"],
             ];
         }
-
-        $all_pov_ids = array();
-
-        foreach ($product_option_data as &$po) {
-            foreach ($po["product_option_value"] as $pov) {
-                $all_pov_ids[] = (int)$pov["product_option_value_id"];
-            }
-        }
-        unset($po);
-
-        $color_images_map = array();
-
-        if (!empty($all_pov_ids)) {
-            $ci_query = $this->db->query("SELECT product_option_value_id, image FROM " . DB_PREFIX . "product_option_value_color_image WHERE product_option_value_id IN (" . implode(",", array_unique($all_pov_ids)) . ") ORDER BY sort_order ASC");
-
-            foreach ($ci_query->rows as $ci) {
-                $color_images_map[(int)$ci["product_option_value_id"]][] = $ci["image"];
-            }
-        }
-
-        foreach ($product_option_data as &$po) {
-            foreach ($po["product_option_value"] as &$pov) {
-                $pov_id = (int)$pov["product_option_value_id"];
-                $pov["color_images"] = isset($color_images_map[$pov_id]) ? $color_images_map[$pov_id] : array();
-            }
-            unset($pov);
-        }
-        unset($po);
 
         return $product_option_data;
     }
@@ -3005,85 +2954,31 @@ class ModelCatalogProduct extends Model
         return $query->row["total"];
     }
 
-    private function getValidProductImages($data) {
-        $valid = array();
+    /**
+     * Returns option_ids that are configured as variant axes for this product.
+     * Combines axes from the submitted $data payload (new save) with any axes
+     * already persisted in oc_product_configurable_option (existing edit).
+     * Used to server-side guard axis POV price/points/weight against manual
+     * tampering via curl or disabled JS.
+     */
+    private function getAxisOptionIdsForGuard($data, $product_id = 0) {
+        $axis_option_ids = array();
 
-        if (!empty($data['image'])) {
-            $valid[] = $data['image'];
-        }
-
-        if (!empty($data['product_image'])) {
-            foreach ($data['product_image'] as $product_image) {
-                if (!empty($product_image['image'])) {
-                    $valid[] = $product_image['image'];
-                }
+        if (!empty($data['product_configurable']['configurable_options']) && is_array($data['product_configurable']['configurable_options'])) {
+            foreach ($data['product_configurable']['configurable_options'] as $option_id) {
+                $axis_option_ids[] = (int)$option_id;
             }
         }
 
-        return $valid;
+        if ($product_id) {
+            $existing_query = $this->db->query("SELECT option_id FROM " . DB_PREFIX . "product_configurable_option WHERE product_id = '" . (int)$product_id . "'");
+
+            foreach ($existing_query->rows as $row) {
+                $axis_option_ids[] = (int)$row['option_id'];
+            }
+        }
+
+        return array_unique($axis_option_ids);
     }
 
-    private function saveColorImages($product_option_value_id, $color_images, $valid_images) {
-        $filtered = array();
-        $seen = array();
-
-        foreach ($color_images as $image) {
-            $image = trim($image);
-
-            if ($image === '' || isset($seen[$image])) {
-                continue;
-            }
-
-            if (in_array($image, $valid_images)) {
-                $seen[$image] = true;
-                $filtered[] = $image;
-            }
-        }
-
-        $sort_order = 0;
-
-        foreach ($filtered as $image) {
-            $this->db->query("INSERT INTO " . DB_PREFIX . "product_option_value_color_image SET product_option_value_id = '" . (int)$product_option_value_id . "', image = '" . $this->db->escape($image) . "', sort_order = '" . (int)$sort_order . "'");
-            $sort_order++;
-        }
-    }
-
-    private function saveProductOptionColorImages($data, $product_id, $valid_images) {
-        if (!isset($data['product_option'])) {
-            return;
-        }
-
-        $query = $this->db->query("SELECT pov.product_option_value_id, pov.option_value_id, po.option_id FROM " . DB_PREFIX . "product_option_value pov LEFT JOIN " . DB_PREFIX . "product_option po ON (pov.product_option_id = po.product_option_id) WHERE pov.product_id = '" . (int)$product_id . "'");
-
-        $pov_map = array();
-
-        foreach ($query->rows as $row) {
-            $pov_map[(int)$row['option_id']][(int)$row['option_value_id']] = (int)$row['product_option_value_id'];
-        }
-
-        foreach ($data['product_option'] as $product_option) {
-            if ($product_option['type'] != 'color') {
-                continue;
-            }
-
-            if (empty($product_option['product_option_value'])) {
-                continue;
-            }
-
-            foreach ($product_option['product_option_value'] as $pov) {
-                if (empty($pov['color_images'])) {
-                    continue;
-                }
-
-                $option_id = (int)$product_option['option_id'];
-                $option_value_id = (int)$pov['option_value_id'];
-
-                if (!isset($pov_map[$option_id][$option_value_id])) {
-                    continue;
-                }
-
-                $this->saveColorImages($pov_map[$option_id][$option_value_id], $pov['color_images'], $valid_images);
-            }
-        }
-    }
 }

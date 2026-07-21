@@ -87,8 +87,13 @@
         {% endif %}
         {% if images or model_3d or (video_type and video_url) %}
         <div class="grid grid-cols-4 gap-3 mt-3">
-          <button class="dc-thumb active rounded-2xl border-2 overflow-hidden" data-img="{{ display is not empty ? display : 'image/no_image.png' }}" data-display="{{ display is not empty ? display : 'image/no_image.png' }}" data-popup="{{ popup is not empty ? popup : 'image/no_image.png' }}" data-orientation="{{ image_orientation }}">
+          <button class="dc-thumb active relative rounded-2xl border-2 overflow-hidden" data-img="{{ display is not empty ? display : 'image/no_image.png' }}" data-display="{{ display is not empty ? display : 'image/no_image.png' }}" data-popup="{{ popup is not empty ? popup : 'image/no_image.png' }}" data-orientation="{{ image_orientation }}">
             <img src="{{ thumb is not empty ? thumb : 'image/no_image.png' }}" alt="{{ heading_title }}" class="w-full h-20 object-cover" />
+            {% if video_type and video_url %}
+            <span class="pointer-events-none absolute bottom-1 right-1 inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-900/80 text-white">
+              <i data-lucide="play" class="w-3.5 h-3.5"></i>
+            </span>
+            {% endif %}
           </button>
           {% for image in images %}
           <button class="dc-thumb rounded-2xl border-2 border-gray-200 overflow-hidden" data-img="{{ image.display is not empty ? image.display : 'image/no_image.png' }}" data-display="{{ image.display is not empty ? image.display : 'image/no_image.png' }}" data-popup="{{ image.popup is not empty ? image.popup : 'image/no_image.png' }}" data-orientation="{{ image.orientation }}">
@@ -224,7 +229,7 @@
             <div class="flex flex-wrap gap-2" id="input-option{{ option.product_option_id }}">
               {% for option_value in option.product_option_value %}
               <label class="cursor-pointer">
-                <input type="radio" name="option[{{ option.product_option_id }}]" value="{{ option_value.product_option_value_id }}" data-option-price="{{ option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}" {% if option_value.color_images|length %}data-color-images="{{ option_value.color_images|json_encode|e('html_attr') }}"{% endif %} class="sr-only dc-option-radio" />
+                <input type="radio" name="option[{{ option.product_option_id }}]" value="{{ option_value.product_option_value_id }}" data-option-price="{{ option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}" class="sr-only dc-option-radio" />
                 <span class="dc-color-option">
                   <span class="dc-color-swatch{% if option_value.is_hit %} dc-color-swatch--hit{% endif %}" style="background-color: {{ option_value.color_code }}">
                     {% if option_value.is_hit %}<span class="dc-color-hit" title="Hit">&#9733;</span>{% endif %}
@@ -670,16 +675,6 @@ function initOptionButtons() {
       if (radioGroup) radioGroup.classList.remove('dc-option-required-error');
 
       dcRecalcOptionPrice();
-
-      if (radio.dataset.colorImages) {
-        var imgs;
-        try { imgs = JSON.parse(radio.dataset.colorImages); } catch(e) { imgs = null; }
-        if (imgs && imgs.length > 0) {
-          var firstDisplay = imgs[0].display;
-          var thumb = document.querySelector('.dc-thumb[data-display="' + firstDisplay.replace(/"/g, '&quot;') + '"]');
-          if (thumb) thumb.click();
-        }
-      }
     });
   });
   document.querySelectorAll('.dc-option-checkbox').forEach(function(cb) {
