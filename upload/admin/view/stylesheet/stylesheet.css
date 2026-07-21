@@ -1613,6 +1613,23 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
+/* Status accent — override generic blue ::before */
+.ext-card .panel-heading::before {
+    background: var(--dc-gray-300);
+}
+
+.ext-card.panel-success .panel-heading::before {
+    background: linear-gradient(180deg, var(--dc-green-500), var(--dc-green-700));
+}
+
+.ext-card.panel-default:not(.ext-card-not-installed) .panel-heading::before {
+    background: linear-gradient(180deg, var(--dc-gray-300), var(--dc-gray-400));
+}
+
+.ext-card.ext-card-not-installed .panel-heading::before {
+    background: linear-gradient(180deg, var(--dc-amber-400), var(--dc-amber-600));
+}
+
 .ext-instances {
     margin-top: 8px;
     border-top: 1px solid var(--dc-border-soft);
