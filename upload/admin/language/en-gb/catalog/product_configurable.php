@@ -66,3 +66,4 @@ $_['error_variant_value_unknown_axis'] = 'One of the values belongs to an option
 $_['error_invalid_mode'] = 'Invalid option mode.';
 $_['text_success_mode'] = 'Option mode updated.';
 $_['entry_axis_lock_warning'] = 'Price, points and weight are managed per-variant for axis options and cannot be edited here.';
+$_['text_confirm_remove_axis'] = 'Removing an axis will delete all existing variants. Re-create them via "Generate Combinations". Continue?';

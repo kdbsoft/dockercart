@@ -40,6 +40,8 @@ class ConfigurableVariantTest extends TestCase
 
                 return;
             }
+
+            $con->close();
         } catch (\mysqli_sql_exception $e) {
             self::markTestSkipped('Database connection not available: ' . $e->getMessage());
 
@@ -47,13 +49,15 @@ class ConfigurableVariantTest extends TestCase
         }
 
         require_once __DIR__ . '/../../../upload/system/library/db/mysqli.php';
-        $dbDriver = new \DB\MySQLi($con);
+        $dbDriver = new \DB\MySQLi($host, $user, $pass, $name, $port);
+        require_once __DIR__ . '/../../../upload/system/library/config.php';
         require_once __DIR__ . '/../../../upload/system/engine/registry.php';
+        require_once __DIR__ . '/../../../upload/system/library/product_configurable.php';
         $registry = new \Registry();
         $registry->set('db', $dbDriver);
 
-        $config = new \stdClass();
-        $config->config_language_id = 1;
+        $config = new \Config();
+        $config->set('config_language_id', 1);
         $registry->set('config', $config);
 
         $pc = new \ProductConfigurable($registry);
@@ -288,6 +292,32 @@ class ConfigurableVariantTest extends TestCase
     }
 
     /** @depends testUpdateVariant */
+    public function testRemovingAxisDeletesVariants(): void
+    {
+        $before = self::$pc->getVariants(self::$testProductId);
+        $this->assertNotEmpty($before);
+
+        $this->assertTrue(self::$pc->isConfigurable(self::$testProductId));
+
+        self::$pc->setConfigurableOptions(self::$testProductId, [99901]);
+
+        $this->assertTrue(self::$pc->isConfigurable(self::$testProductId));
+        $this->assertEmpty(self::$pc->getVariants(self::$testProductId));
+
+        // Re-add Color axis for subsequent tests
+        self::$pc->setConfigurableOptions(self::$testProductId, [99901, 99902]);
+        self::$variantIds[] = self::$pc->addVariant(self::$testProductId, [
+            'sku' => 'REBUILD-S-RED',
+            'price' => 10.00,
+            'quantity' => 5,
+            'values' => [
+                ['option_id' => 99901, 'option_value_id' => 99911],
+                ['option_id' => 99902, 'option_value_id' => 99921],
+            ],
+        ]);
+    }
+
+    /** @depends testRemovingAxisDeletesVariants */
     public function testSetConfigurableOptionsZeroesExistingNonZeroValues(): void
     {
         self::$db->query("DELETE FROM " . DB_PREFIX . "product_option_value WHERE product_id = '" . self::$testProductId . "'");
@@ -346,7 +376,7 @@ class ConfigurableVariantTest extends TestCase
         $this->assertFalse(self::$pc->isConfigurable(self::$testProductId));
     }
 
-    /** @depends testDisableConfigurableZeroesAxisValues */
+    /** @depends testRemovingAxisDeletesVariants */
     public function testSetConfigurablePreservesZeroValues(): void
     {
         self::$pc->setConfigurable(self::$testProductId, 1);

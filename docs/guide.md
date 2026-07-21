@@ -624,6 +624,5 @@ The storefront (`product/product.php`) and cart (`cart.php`) both pass
 - `oc_product_special` is **not applied** to configurable product variants. Specials
   only affect the base product price, which is `0` for configurable products. B2B
   variant prices should be managed via `dockercart_product_variant_customer_group_price`.
-- Removing an axis from a configurable product does not delete existing variants.
-  Variants with values for a removed axis will become unresolvable (their hash includes
-  the removed axis). Re-create variants after changing axes.
+- Removing an axis from a configurable product deletes all existing variants for that
+  product. Re-create them via the "Generate Combinations" button after changing axes.
