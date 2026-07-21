@@ -256,11 +256,14 @@ function buildVariantRow(productId, variant, axes, defaultVariantId) {
 	var optionValues = {};
 	var cgHasPrices = variant.customer_group_prices && variant.customer_group_prices.length;
 	var hasArticles = variant.upc || variant.ean || variant.mpn;
+	var hasSpecials = variant.variant_specials && variant.variant_specials.length;
 	var articlesVisible = hasArticles;
 	var cgVisible = cgHasPrices;
-	var subrowVisible = articlesVisible || cgVisible;
+	var specialsVisible = hasSpecials;
+	var subrowVisible = articlesVisible || cgVisible || specialsVisible;
 	var artBtnClass = articlesVisible ? 'btn-primary' : 'btn-default';
 	var cgBtnClass = cgVisible ? 'btn-primary' : 'btn-default';
+	var specialBtnClass = specialsVisible ? 'btn-primary' : 'btn-default';
 
 	if (variant.values) {
 		for (var j = 0; j < variant.values.length; j++) {
@@ -290,7 +293,7 @@ function buildVariantRow(productId, variant, axes, defaultVariantId) {
 	}
 
 	html += '<td><div style="display:flex;gap:4px;align-items:center"><input type="text" class="form-control input-sm dc-variant-sku" value="' + (variant.sku || '') + '" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:90px;flex:1"/><button type="button" class="btn ' + artBtnClass + ' btn-xs dc-articles-toggle" onclick="toggleVariantArticles(' + rowIdx + ')" title="{{ entry_variant_articles|e("js") }}"><i class="fa fa-barcode"></i></button></div></td>';
-	html += '<td><div style="display:flex;gap:4px;align-items:center"><input type="number" step="0.0001" class="form-control input-sm dc-variant-price" value="' + (variant.price || '0') + '" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:80px;flex:1"/><button type="button" class="btn ' + cgBtnClass + ' btn-xs dc-cg-toggle" onclick="toggleVariantCgPrices(' + rowIdx + ')" title="{{ entry_cg_prices|e("js") }}"><i class="fa fa-users"></i></button></div></td>';
+	html += '<td><div style="display:flex;gap:4px;align-items:center"><input type="number" step="0.0001" class="form-control input-sm dc-variant-price" value="' + (variant.price || '0') + '" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:80px;flex:1"/><button type="button" class="btn ' + cgBtnClass + ' btn-xs dc-cg-toggle" onclick="toggleVariantCgPrices(' + rowIdx + ')" title="{{ entry_cg_prices|e("js") }}"><i class="fa fa-users"></i></button><button type="button" class="btn ' + specialBtnClass + ' btn-xs dc-special-toggle" onclick="toggleVariantSpecials(' + rowIdx + ')" title="{{ entry_special|e("js") }}"><i class="fa fa-star"></i></button></div></td>';
 	html += '<td><input type="number" step="0.01" class="form-control input-sm dc-variant-qty" value="' + (variant.quantity || '0') + '" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:70px"/></td>';
 	html += '<td><input type="number" step="0.001" class="form-control input-sm dc-variant-weight" value="' + (variant.weight || '') + '" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:70px"/></td>';
 	html += '<td>';
@@ -349,6 +352,42 @@ function buildVariantRow(productId, variant, axes, defaultVariantId) {
 
 	html += '</div>';
 	html += '<button type="button" class="btn btn-primary btn-xs dc-cg-add-btn" onclick="addVariantCgPrice(' + rowIdx + ')"><i class="fa fa-plus-circle"></i> {{ button_cg_add|e("js") }}</button>';
+	html += '</div>';
+
+	html += '<div class="dc-subrow-section dc-special-section" id="dc-special-section-' + rowIdx + '" style="display:' + (specialsVisible ? 'block' : 'none') + '">';
+	html += '<div class="dc-subrow-section-label"><i class="fa fa-star"></i> {{ entry_special|e("js") }}</div>';
+	html += '<div class="dc-special-header">';
+	html += '<span class="dc-special-header-group">{{ entry_cg_customer_group|e("js") }}</span>';
+	html += '<span class="dc-special-header-priority">{{ entry_priority|e("js") }}</span>';
+	html += '<span class="dc-special-header-price">{{ entry_price|e("js") }}</span>';
+	html += '<span class="dc-special-header-date">{{ entry_date_start|e("js") }}</span>';
+	html += '<span class="dc-special-header-date">{{ entry_date_end|e("js") }}</span>';
+	html += '<span class="dc-special-header-renew">{{ entry_auto_renew|e("js") }}</span>';
+	html += '<span class="dc-special-header-action"></span>';
+	html += '</div>';
+	html += '<div class="dc-special-prices" id="dc-special-prices-' + rowIdx + '">';
+
+	if (variant.variant_specials) {
+		for (var s = 0; s < variant.variant_specials.length; s++) {
+			var sp = variant.variant_specials[s];
+			html += '<div class="dc-special-row">';
+			html += '<select class="form-control input-sm dc-special-group" onchange="scheduleAutoSave(' + rowIdx + ')">';
+			{% for customer_group in customer_groups %}
+			html += '<option value="{{ customer_group.customer_group_id }}"' + ({{ customer_group.customer_group_id }} == sp.customer_group_id ? ' selected="selected"' : '') + '>{{ customer_group.name|escape("js") }}</option>';
+			{% endfor %}
+			html += '</select>';
+			html += '<input type="number" step="0.0001" class="form-control input-sm dc-special-priority" value="' + (sp.priority || '1') + '" placeholder="{{ entry_priority|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:55px"/>';
+			html += '<input type="number" step="0.0001" class="form-control input-sm dc-special-price" value="' + (sp.price || '') + '" placeholder="{{ entry_price|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:100px"/>';
+			html += '<input type="date" class="form-control input-sm dc-special-date-start" value="' + (sp.date_start && sp.date_start != '0000-00-00' ? sp.date_start : '') + '" placeholder="{{ entry_date_start|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:120px"/>';
+			html += '<input type="date" class="form-control input-sm dc-special-date-end" value="' + (sp.date_end && sp.date_end != '0000-00-00' ? sp.date_end : '') + '" placeholder="{{ entry_date_end|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:120px"/>';
+			html += '<input type="checkbox" class="dc-special-auto-renew"' + (sp.auto_renew ? ' checked="checked"' : '') + ' onchange="scheduleAutoSave(' + rowIdx + ')"/>';
+			html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-special-row\').remove();scheduleAutoSave(' + rowIdx + ')"><i class="fa fa-minus-circle"></i></button>';
+			html += '</div>';
+		}
+	}
+
+	html += '</div>';
+	html += '<button type="button" class="btn btn-primary btn-xs dc-special-add-btn" onclick="addVariantSpecialRow(' + rowIdx + ')"><i class="fa fa-plus-circle"></i> {{ button_special_add|e("js") }}</button>';
 	html += '</div>';
 
 	html += '</div>';
@@ -473,7 +512,8 @@ function toggleVariantArticles(rowIdx) {
 	btn.toggleClass('btn-default btn-primary');
 	var sectionVisible = section.css('display') !== 'none';
 	var cgVisible = $('#dc-cg-section-' + rowIdx).css('display') !== 'none';
-	subrow.css('display', (sectionVisible || cgVisible) ? 'table-row' : 'none');
+	var specialsVisible = $('#dc-special-section-' + rowIdx).css('display') !== 'none';
+	subrow.css('display', (sectionVisible || cgVisible || specialsVisible) ? 'table-row' : 'none');
 }
 
 function toggleVariantCgPrices(rowIdx) {
@@ -484,7 +524,20 @@ function toggleVariantCgPrices(rowIdx) {
 	btn.toggleClass('btn-default btn-primary');
 	var cgVisible = section.css('display') !== 'none';
 	var articlesVisible = $('#dc-articles-section-' + rowIdx).css('display') !== 'none';
-	subrow.css('display', (cgVisible || articlesVisible) ? 'table-row' : 'none');
+	var specialsVisible = $('#dc-special-section-' + rowIdx).css('display') !== 'none';
+	subrow.css('display', (cgVisible || articlesVisible || specialsVisible) ? 'table-row' : 'none');
+}
+
+function toggleVariantSpecials(rowIdx) {
+	var section = $('#dc-special-section-' + rowIdx);
+	var btn = $('#dc-variant-row-' + rowIdx).find('.dc-special-toggle');
+	var subrow = $('#dc-variant-cg-row-' + rowIdx);
+	section.toggle();
+	btn.toggleClass('btn-default btn-primary');
+	var specialsVisible = section.css('display') !== 'none';
+	var articlesVisible = $('#dc-articles-section-' + rowIdx).css('display') !== 'none';
+	var cgVisible = $('#dc-cg-section-' + rowIdx).css('display') !== 'none';
+	subrow.css('display', (specialsVisible || articlesVisible || cgVisible) ? 'table-row' : 'none');
 }
 
 function addVariantCgPrice(rowIdx) {
@@ -498,6 +551,23 @@ function addVariantCgPrice(rowIdx) {
 	html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-cg-row\').remove();scheduleAutoSave(' + rowIdx + ')"><i class="fa fa-minus-circle"></i></button>';
 	html += '</div>';
 	$('#dc-cg-prices-' + rowIdx).append(html);
+}
+
+function addVariantSpecialRow(rowIdx) {
+	var html = '<div class="dc-special-row">';
+	html += '<select class="form-control input-sm dc-special-group" onchange="scheduleAutoSave(' + rowIdx + ')">';
+	{% for customer_group in customer_groups %}
+	html += '<option value="{{ customer_group.customer_group_id }}">{{ customer_group.name|escape("js") }}</option>';
+	{% endfor %}
+	html += '</select>';
+	html += '<input type="number" step="0.0001" class="form-control input-sm dc-special-priority" value="1" placeholder="{{ entry_priority|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:55px"/>';
+	html += '<input type="number" step="0.0001" class="form-control input-sm dc-special-price" placeholder="{{ entry_price|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:100px"/>';
+	html += '<input type="date" class="form-control input-sm dc-special-date-start" placeholder="{{ entry_date_start|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:120px"/>';
+	html += '<input type="date" class="form-control input-sm dc-special-date-end" placeholder="{{ entry_date_end|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:120px"/>';
+	html += '<input type="checkbox" class="dc-special-auto-renew" onchange="scheduleAutoSave(' + rowIdx + ')"/>';
+	html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-special-row\').remove();scheduleAutoSave(' + rowIdx + ')"><i class="fa fa-minus-circle"></i></button>';
+	html += '</div>';
+	$('#dc-special-prices-' + rowIdx).append(html);
 }
 
 function onVariantStatusChange(rowIdx) {
@@ -523,7 +593,10 @@ function onVariantStarClick(rowIdx) {
 function scheduleAutoSave(rowIdx) {
 	var row = $('#dc-variant-row-' + rowIdx);
 	var state = row.data('state');
-	if (state === 'saving' || state === 'new-loading') return;
+	if (state === 'saving' || state === 'new-loading') {
+		row.data('pending', true);
+		return;
+	}
 	if (dcAxesLoading[rowIdx]) return;
 
 	row.data('state', 'dirty').removeClass('dc-state-clean dc-state-saving dc-state-error dc-state-flash').addClass('dc-state-dirty');
@@ -602,6 +675,27 @@ function saveVariantRow(rowIdx, onSuccess) {
 	});
 	data.customer_group_prices = cgPrices;
 
+	var specialPrices = [];
+	$('#dc-special-prices-' + rowIdx + ' .dc-special-row').each(function() {
+		var groupId = $(this).find('.dc-special-group').val();
+		var price = $(this).find('.dc-special-price').val();
+		var priority = $(this).find('.dc-special-priority').val();
+		var dateStart = $(this).find('.dc-special-date-start').val();
+		var dateEnd = $(this).find('.dc-special-date-end').val();
+		var autoRenew = $(this).find('.dc-special-auto-renew').is(':checked') ? 1 : 0;
+		if (groupId && price !== '' && price !== undefined) {
+			specialPrices.push({
+				customer_group_id: groupId,
+				price: price,
+				priority: priority || 1,
+				date_start: dateStart || '0000-00-00',
+				date_end: dateEnd || '0000-00-00',
+				auto_renew: autoRenew
+			});
+		}
+	});
+	data.variant_specials = specialPrices;
+
 	$.ajax({
 		url: 'index.php?route=catalog/product_configurable/saveVariant&user_token={{ user_token }}',
 		type: 'POST',
@@ -617,6 +711,17 @@ function saveVariantRow(rowIdx, onSuccess) {
 				}
 				row.removeClass('dc-new dc-state-saving dc-state-dirty dc-state-error').addClass('dc-state-flash');
 				row.data('state', 'clean');
+
+				if (row.data('pending')) {
+					row.data('pending', false);
+					showToast('{{ text_saved|e("js") }}', 'success');
+					setTimeout(function() {
+						row.removeClass('dc-state-flash');
+					}, 1500);
+					saveVariantRow(rowIdx, onSuccess);
+					return;
+				}
+
 				showToast('{{ text_saved|e("js") }}', 'success');
 
 				var status = row.find('.dc-variant-status').is(':checked') ? 1 : 0;
@@ -872,4 +977,19 @@ $(window).on('beforeunload', function() {
 .dc-cg-add-btn { margin-top: 4px; }
 .dc-cg-toggle { border-color: #ced4da; }
 .dc-cg-toggle.btn-primary { color: #fff; background-color: #007bff; border-color: #007bff; }
+.dc-special-toggle { border-color: #ced4da; }
+.dc-special-toggle.btn-primary { color: #fff; background-color: #f0ad4e; border-color: #eea236; }
+.dc-special-section { flex: 1.5; min-width: 0; }
+.dc-special-header { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; font-size: 11px; font-weight: 600; color: #6c757d; }
+.dc-special-header-group { width: 140px; flex-shrink: 0; }
+.dc-special-header-priority { width: 55px; flex-shrink: 0; }
+.dc-special-header-price { width: 100px; flex-shrink: 0; }
+.dc-special-header-date { width: 120px; flex-shrink: 0; }
+.dc-special-header-renew { width: 50px; flex-shrink: 0; text-align: center; }
+.dc-special-header-action { flex: 1; }
+.dc-special-prices { margin-bottom: 4px; }
+.dc-special-row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+.dc-special-row:last-of-type { margin-bottom: 0; }
+.dc-special-row select { width: 140px; flex-shrink: 0; }
+.dc-special-add-btn { margin-top: 4px; }
 </style>

@@ -236,6 +236,7 @@ class ProductConfigurable {
 		}
 
 		$this->db->query("DELETE FROM " . DB_PREFIX . "dockercart_product_variant_customer_group_price WHERE variant_id = '" . (int)$variant_id . "'");
+		$this->db->query("DELETE FROM " . DB_PREFIX . "dockercart_product_variant_special WHERE variant_id = '" . (int)$variant_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "product_variant_value WHERE variant_id = '" . (int)$variant_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "product_variant WHERE variant_id = '" . (int)$variant_id . "'");
 
@@ -264,6 +265,7 @@ class ProductConfigurable {
 
 		if (!empty($variant_ids)) {
 			$this->db->query("DELETE FROM " . DB_PREFIX . "dockercart_product_variant_customer_group_price WHERE variant_id IN (" . implode(',', $variant_ids) . ")");
+			$this->db->query("DELETE FROM " . DB_PREFIX . "dockercart_product_variant_special WHERE variant_id IN (" . implode(',', $variant_ids) . ")");
 			$this->db->query("DELETE FROM " . DB_PREFIX . "product_variant_value WHERE product_id = '" . (int)$product_id . "'");
 			$this->db->query("DELETE FROM " . DB_PREFIX . "product_variant WHERE product_id = '" . (int)$product_id . "'");
 		}
@@ -499,6 +501,58 @@ class ProductConfigurable {
 		$query = $this->db->query($sql . " LIMIT 1");
 
 		return $query->num_rows ? (int)$query->row['variant_id'] : false;
+	}
+
+	public function getVariantSpecials($variant_id) {
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "dockercart_product_variant_special WHERE variant_id = '" . (int)$variant_id . "' ORDER BY priority ASC, price ASC");
+
+		return $query->rows;
+	}
+
+	public function getVariantsSpecials($product_id) {
+		$query = $this->db->query("SELECT vs.* FROM " . DB_PREFIX . "dockercart_product_variant_special vs INNER JOIN " . DB_PREFIX . "product_variant pv ON (vs.variant_id = pv.variant_id) WHERE pv.product_id = '" . (int)$product_id . "'");
+
+		$result = array();
+
+		foreach ($query->rows as $row) {
+			$result[(int)$row['variant_id']][] = array(
+				'variant_special_id' => (int)$row['variant_special_id'],
+				'customer_group_id'  => (int)$row['customer_group_id'],
+				'priority'           => (int)$row['priority'],
+				'price'              => $row['price'],
+				'date_start'         => $row['date_start'],
+				'date_end'           => $row['date_end'],
+				'auto_renew'         => (int)$row['auto_renew'],
+			);
+		}
+
+		return $result;
+	}
+
+	public function getVariantSpecialPrice($variant_id, $customer_group_id) {
+		$query = $this->db->query("SELECT price FROM " . DB_PREFIX . "dockercart_product_variant_special WHERE variant_id = '" . (int)$variant_id . "' AND customer_group_id = '" . (int)$customer_group_id . "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) ORDER BY priority ASC, price ASC LIMIT 1");
+
+		if ($query->num_rows) {
+			return (float)$query->row['price'];
+		}
+
+		return null;
+	}
+
+	public function setVariantSpecials($variant_id, $specials) {
+		$this->db->query("DELETE FROM " . DB_PREFIX . "dockercart_product_variant_special WHERE variant_id = '" . (int)$variant_id . "'");
+
+		foreach ($specials as $special) {
+			if (empty($special['customer_group_id']) || !isset($special['price']) || $special['price'] === '') {
+				continue;
+			}
+
+			$this->db->query("INSERT INTO " . DB_PREFIX . "dockercart_product_variant_special SET variant_id = '" . (int)$variant_id . "', customer_group_id = '" . (int)$special['customer_group_id'] . "', priority = '" . (int)(isset($special['priority']) ? $special['priority'] : 1) . "', price = '" . (float)$special['price'] . "', date_start = '" . $this->db->escape(isset($special['date_start']) ? $special['date_start'] : '0000-00-00') . "', date_end = '" . $this->db->escape(isset($special['date_end']) ? $special['date_end'] : '0000-00-00') . "', auto_renew = '" . (int)(!empty($special['auto_renew'])) . "'");
+		}
+	}
+
+	public function deleteAllVariantSpecials($variant_id) {
+		$this->db->query("DELETE FROM " . DB_PREFIX . "dockercart_product_variant_special WHERE variant_id = '" . (int)$variant_id . "'");
 	}
 
 	private function touchProduct($product_id) {

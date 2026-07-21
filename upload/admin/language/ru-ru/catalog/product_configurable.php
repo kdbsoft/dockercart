@@ -43,6 +43,11 @@ $_['entry_cg_customer_group'] = 'Группа';
 $_['entry_cg_group_price'] = 'Цена';
 $_['button_cg_add'] = 'Добавить';
 $_['entry_variant_articles'] = 'Другие артикулы';
+$_['entry_special'] = 'Акции';
+$_['entry_priority'] = 'Приоритет';
+$_['entry_date_start'] = 'Дата начала';
+$_['entry_date_end'] = 'Дата окончания';
+$_['entry_auto_renew'] = 'Автопродление';
 
 $_['help_generate'] = 'Авто-генерация всех комбинаций из выбранных опций';
 

@@ -622,13 +622,34 @@ class ControllerProductProduct extends Controller {
 			foreach ($variants as &$variant) {
 				$variant_cg_price = $pc->getVariantCustomerGroupPrice((int)$variant['variant_id'], $customer_group_id);
 
+				$effective_price = (float)$variant['price'];
+
 				if ($variant_cg_price !== null) {
+					$effective_price = $variant_cg_price;
 					$variant['price'] = $variant_cg_price;
+				}
+
+				$variant_special_price = $pc->getVariantSpecialPrice((int)$variant['variant_id'], $customer_group_id);
+
+				if ($variant_special_price !== null && $variant_special_price < $effective_price) {
+					$variant['special'] = $variant_special_price;
+					$variant['special_from'] = $effective_price;
 				}
 
 				if (isset($variant['price']) && $variant['price'] !== '') {
 					$variant['price'] = (float)$this->currency->format(
 						$this->tax->calculate((float)$variant['price'], $tax_class_id, $tax),
+						$currency_code, '', false
+					);
+				}
+
+				if (isset($variant['special'])) {
+					$variant['special'] = (float)$this->currency->format(
+						$this->tax->calculate((float)$variant['special'], $tax_class_id, $tax),
+						$currency_code, '', false
+					);
+					$variant['special_from'] = (float)$this->currency->format(
+						$this->tax->calculate((float)$variant['special_from'], $tax_class_id, $tax),
 						$currency_code, '', false
 					);
 				}
@@ -638,13 +659,34 @@ class ControllerProductProduct extends Controller {
 			if (!empty($default_variant)) {
 				$default_cg_price = $pc->getVariantCustomerGroupPrice((int)$default_variant['variant_id'], $customer_group_id);
 
+				$default_effective_price = (float)$default_variant['price'];
+
 				if ($default_cg_price !== null) {
+					$default_effective_price = $default_cg_price;
 					$default_variant['price'] = $default_cg_price;
+				}
+
+				$default_special_price = $pc->getVariantSpecialPrice((int)$default_variant['variant_id'], $customer_group_id);
+
+				if ($default_special_price !== null && $default_special_price < $default_effective_price) {
+					$default_variant['special'] = $default_special_price;
+					$default_variant['special_from'] = $default_effective_price;
 				}
 
 				if (isset($default_variant['price'])) {
 					$default_variant['price'] = (float)$this->currency->format(
 						$this->tax->calculate((float)$default_variant['price'], $tax_class_id, $tax),
+						$currency_code, '', false
+					);
+				}
+
+				if (isset($default_variant['special'])) {
+					$default_variant['special'] = (float)$this->currency->format(
+						$this->tax->calculate((float)$default_variant['special'], $tax_class_id, $tax),
+						$currency_code, '', false
+					);
+					$default_variant['special_from'] = (float)$this->currency->format(
+						$this->tax->calculate((float)$default_variant['special_from'], $tax_class_id, $tax),
 						$currency_code, '', false
 					);
 				}
