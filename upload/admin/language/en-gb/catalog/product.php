@@ -80,6 +80,7 @@ $_['entry_preorder']         = 'Allow Pre-Order';
 $_['entry_price']            = 'Price';
 $_['entry_call_for_price']   = 'Call for price';
 $_['help_call_for_price']    = 'Hide the price and show a "Call for price" message instead';
+$_['help_configurable_specials'] = 'For configurable products, special prices are managed per variant in the Variants tab.';
 $_['entry_tax_class']        = 'Tax Class';
 $_['entry_points']           = 'Points';
 $_['entry_option_points']    = 'Points';

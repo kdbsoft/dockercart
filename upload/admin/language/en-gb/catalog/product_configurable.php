@@ -41,7 +41,11 @@ $_['entry_cg_customer_group'] = 'Customer group';
 $_['entry_cg_group_price'] = 'Price';
 $_['button_cg_add'] = 'Add';
 $_['entry_variant_articles'] = 'Other articles';
-
+$_['entry_special'] = 'Specials';
+$_['entry_priority'] = 'Priority';
+$_['entry_date_start'] = 'Date Start';
+$_['entry_date_end'] = 'Date End';
+$_['entry_auto_renew'] = 'Auto-renew';
 
 $_['help_generate'] = 'Auto-generate all possible combinations from the configured options';
 

@@ -77,4 +77,20 @@ class ModelCatalogProductConfigurable extends Model {
 	public function deleteAllVariantCustomerGroupPrices($variant_id) {
 		$this->lib()->deleteAllVariantCustomerGroupPrices($variant_id);
 	}
+
+	public function getVariantSpecials($variant_id) {
+		return $this->lib()->getVariantSpecials($variant_id);
+	}
+
+	public function getVariantsSpecials($product_id) {
+		return $this->lib()->getVariantsSpecials($product_id);
+	}
+
+	public function setVariantSpecials($variant_id, $specials) {
+		$this->lib()->setVariantSpecials($variant_id, $specials);
+	}
+
+	public function deleteAllVariantSpecials($variant_id) {
+		$this->lib()->deleteAllVariantSpecials($variant_id);
+	}
 }

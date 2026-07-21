@@ -569,6 +569,26 @@ class Cart
 
                 $price = $product_query->row["price"];
 
+                if ($variant_id > 0) {
+                    $variant_special_query = $this->db->query(
+                        "SELECT price FROM " .
+                            DB_PREFIX .
+                            "dockercart_product_variant_special WHERE variant_id = '" .
+                            (int) $variant_id .
+                            "' AND customer_group_id = '" .
+                            (int) $this->config->get("config_customer_group_id") .
+                            "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) ORDER BY priority ASC, price ASC LIMIT 1",
+                    );
+
+                    if (
+                        $variant_special_query->num_rows &&
+                        (float) $variant_special_query->row["price"] <
+                            (float) $price
+                    ) {
+                        $price = (float) $variant_special_query->row["price"];
+                    }
+                }
+
                 if (!$variant_id) {
                     // DockerCart: Per-product customer group price override
                     $customer_group_price_query = $this->db->query(

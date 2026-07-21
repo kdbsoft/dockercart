@@ -345,4 +345,145 @@ class ProductConfigurableTest extends TestCase
 		$this->assertArrayHasKey('min', $range);
 		$this->assertArrayHasKey('max', $range);
 	}
+
+	/** @depends testAddVariantComputesHash */
+	public function testSetAndGetVariantSpecials(): void
+	{
+		$variants = self::$pc->getVariants(self::$testProductId);
+		$this->assertNotEmpty($variants);
+
+		$vid = 0;
+		foreach ($variants as $v) {
+			if ((int)$v['status'] === 1) {
+				$vid = (int)$v['variant_id'];
+				break;
+			}
+		}
+
+		$this->assertGreaterThan(0, $vid);
+
+		$specials = array(
+			array(
+				'customer_group_id' => 1,
+				'priority'          => 1,
+				'price'             => 9.99,
+				'date_start'        => '2026-01-01',
+				'date_end'          => '2026-12-31',
+				'auto_renew'        => 0,
+			),
+			array(
+				'customer_group_id' => 2,
+				'priority'          => 1,
+				'price'             => 14.99,
+				'date_start'        => '0000-00-00',
+				'date_end'          => '0000-00-00',
+				'auto_renew'        => 0,
+			),
+		);
+
+		self::$pc->setVariantSpecials($vid, $specials);
+
+		$saved = self::$pc->getVariantSpecials($vid);
+		$this->assertCount(2, $saved);
+
+		$found = array();
+		foreach ($saved as $s) {
+			$found[(int)$s['customer_group_id']] = (float)$s['price'];
+		}
+
+		$this->assertArrayHasKey(1, $found);
+		$this->assertEquals(9.99, $found[1]);
+		$this->assertArrayHasKey(2, $found);
+		$this->assertEquals(14.99, $found[2]);
+
+		self::$pc->deleteAllVariantSpecials($vid);
+	}
+
+	/** @depends testSetAndGetVariantSpecials */
+	public function testGetVariantSpecialPrice(): void
+	{
+		$variants = self::$pc->getVariants(self::$testProductId);
+		$this->assertNotEmpty($variants);
+
+		$vid = 0;
+		foreach ($variants as $v) {
+			if ((int)$v['status'] === 1) {
+				$vid = (int)$v['variant_id'];
+				break;
+			}
+		}
+
+		$this->assertGreaterThan(0, $vid);
+
+		$specials = array(
+			array(
+				'customer_group_id' => 1,
+				'priority'          => 1,
+				'price'             => 7.77,
+				'date_start'        => '2026-01-01',
+				'date_end'          => '2099-12-31',
+				'auto_renew'        => 0,
+			),
+		);
+
+		self::$pc->setVariantSpecials($vid, $specials);
+
+		$price = self::$pc->getVariantSpecialPrice($vid, 1);
+
+		$this->assertNotNull($price);
+		$this->assertEquals(7.77, $price);
+
+		$no_price = self::$pc->getVariantSpecialPrice($vid, 999);
+		$this->assertNull($no_price);
+
+		self::$pc->deleteAllVariantSpecials($vid);
+	}
+
+	/** @depends testAddVariantComputesHash */
+	public function testGetVariantsSpecials(): void
+	{
+		$specials = self::$pc->getVariantsSpecials(self::$testProductId);
+		$this->assertIsArray($specials);
+	}
+
+	/** @depends testAddVariantComputesHash */
+	public function testDeleteVariantCascadesSpecials(): void
+	{
+		$variants = self::$pc->getVariants(self::$testProductId);
+		$this->assertNotEmpty($variants);
+
+		$test_vid = self::$pc->addVariant(self::$testProductId, [
+			'sku' => 'CASCADE-SPECIALS',
+			'price' => 50.00,
+			'quantity' => 5,
+			'status' => 1,
+			'values' => [
+				['option_id' => 99001, 'option_value_id' => 99012],
+				['option_id' => 99002, 'option_value_id' => 99021],
+			],
+		]);
+
+		$this->assertGreaterThan(0, $test_vid);
+
+		self::$pc->setVariantSpecials($test_vid, [
+			[
+				'customer_group_id' => 1,
+				'priority'          => 1,
+				'price'             => 25.00,
+				'date_start'        => '0000-00-00',
+				'date_end'          => '0000-00-00',
+				'auto_renew'        => 0,
+			],
+		]);
+
+		$saved = self::$pc->getVariantSpecials($test_vid);
+		$this->assertCount(1, $saved);
+
+		self::$pc->deleteVariant($test_vid);
+
+		$after_delete = self::$pc->getVariantSpecials($test_vid);
+		$this->assertCount(0, $after_delete);
+
+		self::$variantIds = array_filter(self::$variantIds, fn($id) => $id !== $test_vid);
+	}
 }

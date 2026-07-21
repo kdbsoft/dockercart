@@ -40,9 +40,11 @@ class ControllerCatalogProductConfigurable extends Controller {
 		}
 
 		$cg_prices = $this->model_catalog_product_configurable->getVariantCustomerGroupPrices($product_id);
+		$variant_specials = $this->model_catalog_product_configurable->getVariantsSpecials($product_id);
 
 		foreach ($json['variants'] as &$v) {
 			$v['customer_group_prices'] = isset($cg_prices[(int)$v['variant_id']]) ? $cg_prices[(int)$v['variant_id']] : array();
+			$v['variant_specials'] = isset($variant_specials[(int)$v['variant_id']]) ? $variant_specials[(int)$v['variant_id']] : array();
 		}
 
 		unset($v);
@@ -138,18 +140,20 @@ class ControllerCatalogProductConfigurable extends Controller {
 					$json['variant_id'] = $this->model_catalog_product_configurable->addVariant($product_id, $data);
 				}
 
-				if (isset($this->request->post['customer_group_prices'])) {
-					$variant_id = $json['variant_id'];
-					$this->model_catalog_product_configurable->deleteAllVariantCustomerGroupPrices($variant_id);
+				$variant_id = $json['variant_id'];
+				$this->model_catalog_product_configurable->deleteAllVariantCustomerGroupPrices($variant_id);
+				$cg_prices = isset($this->request->post['customer_group_prices']) ? $this->request->post['customer_group_prices'] : [];
 
-					foreach ($this->request->post['customer_group_prices'] as $cg) {
-						if (!empty($cg['customer_group_id']) && isset($cg['price']) && $cg['price'] !== '') {
-							$this->model_catalog_product_configurable->setVariantCustomerGroupPrice(
-								$variant_id, (int)$cg['customer_group_id'], (float)$cg['price']
-							);
-						}
+				foreach ($cg_prices as $cg) {
+					if (!empty($cg['customer_group_id']) && isset($cg['price']) && $cg['price'] !== '') {
+						$this->model_catalog_product_configurable->setVariantCustomerGroupPrice(
+							$variant_id, (int)$cg['customer_group_id'], (float)$cg['price']
+						);
 					}
 				}
+
+				$specials = isset($this->request->post['variant_specials']) ? $this->request->post['variant_specials'] : [];
+				$this->model_catalog_product_configurable->setVariantSpecials($variant_id, $specials);
 
 				$json['success'] = $this->language->get('text_success_variant');
 			} catch (\RuntimeException $e) {

@@ -29,6 +29,10 @@
 
 	var variantInput = document.getElementById('dc-variant-id');
 	var priceEl = document.getElementById('dc-unit-price');
+	var priceSpecialEl = document.getElementById('dc-unit-price-special');
+	var priceStrikethroughEl = document.getElementById('dc-unit-price-strikethrough');
+	var priceRegularContainer = document.getElementById('dc-price-regular');
+	var priceSpecialContainer = document.getElementById('dc-price-special');
 	var mainImgEl = productEl.querySelector('img#dc-main-img');
 	var cartBtn = document.getElementById('button-cart');
 	var defaultImgSrc = mainImgEl ? mainImgEl.src : '';
@@ -144,13 +148,36 @@
 	function updateVariantUI(variant) {
 		if (variantInput) variantInput.value = variant ? variant.variant_id : '';
 
-		if (priceEl) {
-			var price = (variant && variant.price !== null && variant.price !== undefined) ? parseFloat(variant.price) : originalBasePrice;
-			if (isNaN(price)) price = originalBasePrice;
-			priceEl.dataset.currentPrice = String(price);
-			if (typeof dcFormatMoney === 'function') {
-				var symbol = priceEl.dataset.currencySymbol || '';
-				priceEl.textContent = dcFormatMoney(price, symbol);
+		var hasSpecial = variant && variant.special !== undefined && variant.special !== null && variant.special_from !== undefined && variant.special < variant.special_from;
+
+		if (priceEl && priceRegularContainer && priceSpecialContainer) {
+			if (hasSpecial) {
+				priceRegularContainer.classList.add('hidden');
+				priceSpecialContainer.classList.remove('hidden');
+
+				var specialPrice = parseFloat(variant.special);
+				var regularPrice = parseFloat(variant.special_from);
+
+				if (!isNaN(specialPrice)) {
+					priceEl.dataset.currentPrice = String(specialPrice);
+				}
+
+				if (typeof dcFormatMoney === 'function') {
+					var symbol = priceEl.dataset.currencySymbol || '';
+					if (priceSpecialEl) priceSpecialEl.textContent = dcFormatMoney(specialPrice, symbol);
+					if (priceStrikethroughEl) priceStrikethroughEl.textContent = dcFormatMoney(regularPrice, symbol);
+				}
+			} else {
+				priceSpecialContainer.classList.add('hidden');
+				priceRegularContainer.classList.remove('hidden');
+
+				var price = (variant && variant.price !== null && variant.price !== undefined) ? parseFloat(variant.price) : originalBasePrice;
+				if (isNaN(price)) price = originalBasePrice;
+				priceEl.dataset.currentPrice = String(price);
+				if (typeof dcFormatMoney === 'function') {
+					var symbol = priceEl.dataset.currencySymbol || '';
+					priceEl.textContent = dcFormatMoney(price, symbol);
+				}
 			}
 		}
 
