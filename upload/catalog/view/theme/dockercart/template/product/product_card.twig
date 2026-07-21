@@ -15,6 +15,7 @@
     link_hover       — e.g. "hover:text-blue-600 transition"
     btn_cart_classes — e.g. "bg-blue-600 text-white hover:bg-blue-700"
 #}
+{% set dc_price_prefix = (product.is_configurable is defined and product.is_configurable and text_price_from is defined and text_price_from) ? text_price_from ~ ' ' : '' %}
 {% if view_mode == 'table' %}
 
 <div class="product-card dc-table-row" data-id="{{ product.product_id }}" data-href="{{ product.href }}" data-description="{{ product.description }}" data-model="{{ product.model|default('') }}" data-in-wishlist="{{ product.in_wishlist|default(0) }}" data-rating="{{ product.rating|default(0) }}" data-stock="{{ (product.stock is defined ? product.stock : '')|e('html_attr') }}" data-is-in-stock="{{ product.is_in_stock ? 1 : 0 }}" data-minimum="{{ product.minimum|default(1) }}" data-call-for-price="{{ (product.call_for_price is defined and product.call_for_price) or (call_for_price_status is defined and call_for_price_status and call_for_price_phone is defined and call_for_price_phone and product.price_raw is defined and product.price_raw <= 0) ? 1 : 0 }}">
@@ -45,7 +46,7 @@
       <span class="text-sm font-extrabold text-gray-900">{{ product.special }}</span>
       <span class="text-[11px] text-red-400 line-through">{{ product.price }}</span>
     {% elseif product.price %}
-      <span class="text-sm font-extrabold text-gray-900">{{ product.price }}</span>
+      <span class="text-sm font-extrabold text-gray-900">{{ dc_price_prefix }}{{ product.price }}</span>
     {% endif %}
   </div>
   <div class="flex items-center gap-0.5">
@@ -131,7 +132,7 @@
             <span class="text-lg sm:text-xl font-extrabold text-gray-900">{{ product.special }}</span>
             <span class="text-xs text-red-400 line-through">{{ product.price }}</span>
           {% elseif product.price %}
-            <span class="text-lg sm:text-xl font-extrabold text-gray-900">{{ product.price }}</span>
+            <span class="text-lg sm:text-xl font-extrabold text-gray-900">{{ dc_price_prefix }}{{ product.price }}</span>
           {% endif %}
         </div>
       <div class="flex items-center gap-2">
@@ -217,7 +218,7 @@
           <span class="text-base sm:text-lg font-extrabold text-gray-900">{{ product.special }}</span>
           <span class="text-xs text-red-400 line-through ml-1">{{ product.price }}</span>
         {% elseif product.price %}
-          <span class="text-base sm:text-lg font-extrabold text-gray-900">{{ product.price }}</span>
+          <span class="text-base sm:text-lg font-extrabold text-gray-900">{{ dc_price_prefix }}{{ product.price }}</span>
         {% endif %}
       </div>
       {% if not cfp and product.is_in_stock %}

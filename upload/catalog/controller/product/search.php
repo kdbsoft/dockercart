@@ -430,6 +430,7 @@ class ControllerProductSearch extends Controller {
 					'in_wishlist' => in_array((int)$result['product_id'], $wishlist_ids) ? 1 : 0,
 					'has_gift'    => !empty($result['has_gift']),
 					'call_for_price' => !empty($result['call_for_price']),
+					'is_configurable' => !empty($result['is_configurable']),
 					'href'        => $this->url->link('product/product', 'product_id=' . $result['product_id'] . $url)
 				);
 			}
@@ -669,6 +670,7 @@ class ControllerProductSearch extends Controller {
 		$data['page']            = $page;
 		$data['view_mode']       = $view_mode;
 		$data['text_gift_badge'] = $this->language->get('text_gift_badge');
+		$data['text_price_from'] = $this->language->get('text_price_from');
 		$data['text_call_for_price'] = $this->language->get('text_call_for_price');
 		$data['text_model'] = $this->language->get('text_model');
 		$data['text_quantity'] = $this->language->get('text_quantity');
@@ -816,6 +818,7 @@ class ControllerProductSearch extends Controller {
 				'is_preorder' => empty($stock_quantity) && !empty($result['preorder']),
 				'in_wishlist' => in_array((int)$result['product_id'], $wishlist_ids) ? 1 : 0,
 				'has_gift'    => !empty($result['has_gift']),
+				'is_configurable' => !empty($result['is_configurable']),
 				'category'    => '',
 				'href'        => $this->url->link('product/product', 'product_id=' . $result['product_id'] . $url)
 			);
@@ -830,6 +833,7 @@ class ControllerProductSearch extends Controller {
 				'text_reviews'     => $this->language->get('text_reviews_word'),
 				'text_sale'        => '',
 				'text_gift_badge'  => $this->language->get('text_gift_badge'),
+				'text_price_from'  => $this->language->get('text_price_from'),
 				'text_call_for_price' => $this->language->get('text_call_for_price'),
 				'button_cart'      => $this->language->get('button_cart'),
 				'btn_quick_hover'  => 'hover:bg-blue-600',

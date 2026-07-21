@@ -343,6 +343,11 @@ textarea.form-control {
     margin-bottom: 10px;
 }
 
+.attribute-texts { display: flex; flex-wrap: wrap; gap: 6px; }
+.attribute-texts .input-group { margin-bottom: 0; }
+.attribute-texts .input-group + .input-group { margin-bottom: 0; }
+.attribute-text-group { width: auto; margin-bottom: 0; flex: 1 1 160px; }
+
 .input-group .form-control {
     border-radius: 0;
     border: 1px solid var(--dc-border-medium);

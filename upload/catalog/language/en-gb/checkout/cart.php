@@ -37,6 +37,8 @@ $_['error_required']           = '%s required!';
 $_['error_product']            = 'Warning: There are no products in your cart!';
 $_['error_call_for_price']     = 'This product cannot be added to the cart. Please contact us for pricing.';
 $_['error_bundle_invalid']     = 'Warning: This bundle is not available!';
+$_['error_variant_required']   = 'Please select all product options to add this item to your cart.';
+$_['error_variant_invalid']    = 'The selected variant is not available. Please choose a valid variant.';
 
 $_['text_bundle_discount']     = 'Bundle Discount';
 $_['text_model']               = 'Product Code:';

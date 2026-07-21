@@ -47,3 +47,4 @@ $_['text_all_categories'] = 'All Categories';
 $_['entry_search']      = 'Search Criteria';
 $_['entry_description'] = 'Search in product descriptions';
 $_['text_gift_badge']  = 'GIFT';
+$_['text_price_from']  = 'from';

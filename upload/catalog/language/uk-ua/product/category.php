@@ -44,3 +44,4 @@ $_['text_tax']       = 'Без ПДВ:';
 $_['text_back_to']   = 'Назад до %s';
 $_['text_load_more'] = 'Показати ще';
 $_['text_gift_badge'] = 'ПОДАРУНОК';
+$_['text_price_from'] = 'від';
