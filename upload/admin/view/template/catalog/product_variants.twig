@@ -313,9 +313,9 @@ function buildVariantRow(productId, variant, axes, defaultVariantId) {
 	html += '<div class="dc-subrow-section dc-articles-section" id="dc-articles-section-' + rowIdx + '" style="display:' + (articlesVisible ? 'block' : 'none') + '">';
 	html += '<div class="dc-subrow-section-label"><i class="fa fa-barcode"></i> {{ entry_variant_articles|e("js") }}</div>';
 	html += '<div class="dc-subrow-fields">';
-	html += '<label>{{ entry_upc|e("js") }}<input type="text" class="form-control input-sm dc-variant-upc" value="' + (variant.upc || '') + '" placeholder="UPC" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
-	html += '<label>{{ entry_ean|e("js") }}<input type="text" class="form-control input-sm dc-variant-ean" value="' + (variant.ean || '') + '" placeholder="EAN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
-	html += '<label>{{ entry_mpn|e("js") }}<input type="text" class="form-control input-sm dc-variant-mpn" value="' + (variant.mpn || '') + '" placeholder="MPN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
+	html += '<label><span>{{ entry_upc|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-upc" value="' + (variant.upc || '') + '" placeholder="UPC" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
+	html += '<label><span>{{ entry_ean|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-ean" value="' + (variant.ean || '') + '" placeholder="EAN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
+	html += '<label><span>{{ entry_mpn|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-mpn" value="' + (variant.mpn || '') + '" placeholder="MPN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
 	html += '</div>';
 	html += '</div>';
 
@@ -392,9 +392,9 @@ function addVariantRow(productId) {
 	html += '<div class="dc-subrow-section dc-articles-section" id="dc-articles-section-' + rowIdx + '" style="display:none">';
 	html += '<div class="dc-subrow-section-label"><i class="fa fa-barcode"></i> {{ entry_variant_articles|e("js") }}</div>';
 	html += '<div class="dc-subrow-fields">';
-	html += '<label>{{ entry_upc|e("js") }}<input type="text" class="form-control input-sm dc-variant-upc" value="" placeholder="UPC" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
-	html += '<label>{{ entry_ean|e("js") }}<input type="text" class="form-control input-sm dc-variant-ean" value="" placeholder="EAN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
-	html += '<label>{{ entry_mpn|e("js") }}<input type="text" class="form-control input-sm dc-variant-mpn" value="" placeholder="MPN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
+	html += '<label><span>{{ entry_upc|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-upc" value="" placeholder="UPC" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
+	html += '<label><span>{{ entry_ean|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-ean" value="" placeholder="EAN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
+	html += '<label><span>{{ entry_mpn|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-mpn" value="" placeholder="MPN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
 	html += '</div>';
 	html += '</div>';
 
@@ -852,7 +852,8 @@ $(window).on('beforeunload', function() {
 .dc-subrow-section-label { font-size: 11px; font-weight: 600; color: #495057; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 8px; padding-bottom: 5px; border-bottom: 1px solid #e9ecef; }
 .dc-subrow-section-label i { margin-right: 4px; color: #6c757d; }
 .dc-subrow-fields { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
-.dc-subrow-fields label { display: flex; flex-direction: column; gap: 2px; font-size: 11px; font-weight: 600; color: #6c757d; margin: 0; }
+.dc-subrow-fields label { display: flex; flex-direction: column; gap: 2px; font-size: 11px; font-weight: normal; color: #6c757d; margin: 0; }
+.dc-subrow-fields label span { font-weight: 600; }
 .dc-subrow-fields input { width: 120px; }
 .dc-cg-header { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; font-size: 11px; font-weight: 600; color: #6c757d; }
 .dc-cg-header-group { width: 180px; flex-shrink: 0; }
