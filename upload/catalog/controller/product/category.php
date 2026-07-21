@@ -328,20 +328,21 @@ class ControllerProductCategory extends Controller {
 					'name'        => $result['name'],
 					'model'       => $result['model'],
 					'description' => utf8_substr(trim(strip_tags(html_entity_decode($result['description'], ENT_QUOTES, 'UTF-8'))), 0, $this->config->get('theme_' . $this->config->get('config_theme') . '_product_description_length')) . '..',
-					'price'       => $price,
-					'price_raw'   => (float)$result['price'],
-					'special'     => $special,
-					'discount'    => $discount_percent,
-					'tax'         => $tax,
-					'minimum'     => $result['minimum'] > 0 ? $result['minimum'] : 1,
-					'rating'      => $result['rating'],
-					'reviews'     => isset($result['reviews']) ? $result['reviews'] : 0,
-					'stock'       => $stock,
-					'is_in_stock' => ($stock_quantity > 0) || !empty($result['preorder']),
-					'is_preorder' => empty($stock_quantity) && !empty($result['preorder']),
-					'in_wishlist' => in_array((int)$result['product_id'], $wishlist_ids) ? 1 : 0,
-					'has_gift'    => !empty($result['has_gift']),
-					'call_for_price' => !empty($result['call_for_price']),
+				'price'       => $price,
+				'price_raw'   => (float)$result['price'],
+				'special'     => $special,
+				'discount'    => $discount_percent,
+				'tax'         => $tax,
+				'minimum'     => $result['minimum'] > 0 ? $result['minimum'] : 1,
+				'rating'      => $result['rating'],
+				'reviews'     => isset($result['reviews']) ? $result['reviews'] : 0,
+				'stock'       => $stock,
+				'is_in_stock' => ($stock_quantity > 0) || !empty($result['preorder']),
+				'is_preorder' => empty($stock_quantity) && !empty($result['preorder']),
+				'in_wishlist' => in_array((int)$result['product_id'], $wishlist_ids) ? 1 : 0,
+				'has_gift'    => !empty($result['has_gift']),
+				'call_for_price' => !empty($result['call_for_price']),
+				'is_configurable' => !empty($result['is_configurable']),
 					'category'    => '',
 					'href'        => $this->url->link('product/product', 'path=' . $this->request->get['path'] . '&product_id=' . $result['product_id'] . $url)
 				);
@@ -544,6 +545,7 @@ class ControllerProductCategory extends Controller {
 			$data['text_back_to'] = $this->language->get('text_back_to');
 			$data['text_quick_view'] = $this->language->get('text_quick_view');
 			$data['text_gift_badge'] = $this->language->get('text_gift_badge');
+		$data['text_price_from'] = $this->language->get('text_price_from');
 			$data['text_call_for_price'] = $this->language->get('text_call_for_price');
 			$data['text_category_description'] = $this->language->get('text_category_description');
 			$data['text_model'] = $this->language->get('text_model');
@@ -953,6 +955,7 @@ class ControllerProductCategory extends Controller {
 				'in_wishlist' => in_array((int)$result['product_id'], $wishlist_ids) ? 1 : 0,
 				'has_gift'    => !empty($result['has_gift']),
 				'call_for_price' => !empty($result['call_for_price']),
+				'is_configurable' => !empty($result['is_configurable']),
 				'category'    => '',
 				'href'        => $this->url->link('product/product', 'path=' . (isset($this->request->get['path']) ? $this->request->get['path'] : '') . '&product_id=' . $result['product_id'])
 			);
@@ -967,6 +970,7 @@ class ControllerProductCategory extends Controller {
 				'text_reviews'     => $this->language->get('text_reviews_word'),
 				'text_sale'        => '',
 				'text_gift_badge'  => $this->language->get('text_gift_badge'),
+				'text_price_from'  => $this->language->get('text_price_from'),
 				'text_call_for_price' => $this->language->get('text_call_for_price'),
 				'button_cart'      => $this->language->get('button_cart'),
 				'btn_quick_hover'  => 'hover:bg-blue-600',

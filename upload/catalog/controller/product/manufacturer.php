@@ -441,6 +441,7 @@ class ControllerProductManufacturer extends Controller {
 					'is_preorder' => empty($stock_quantity) && !empty($result['preorder']),
 					'has_gift'    => !empty($result['has_gift']),
 					'call_for_price' => !empty($result['call_for_price']),
+					'is_configurable' => !empty($result['is_configurable']),
 					'href'        => $this->url->link('product/product', 'manufacturer_id=' . $result['manufacturer_id'] . '&product_id=' . $result['product_id'] . $url)
 				);
 			}
@@ -598,6 +599,7 @@ class ControllerProductManufacturer extends Controller {
 			$data['text_load_more']  = $this->language->get('text_load_more');
 			$data['page']            = $page;
 			$data['text_gift_badge'] = $this->language->get('text_gift_badge');
+		$data['text_price_from'] = $this->language->get('text_price_from');
 			$data['text_call_for_price'] = $this->language->get('text_call_for_price');
 			$data['view_mode']       = $view_mode;
 
@@ -771,6 +773,7 @@ class ControllerProductManufacturer extends Controller {
 				'is_preorder' => empty($stock_quantity) && !empty($result['preorder']),
 				'in_wishlist' => in_array((int)$result['product_id'], $wishlist_ids) ? 1 : 0,
 				'has_gift'    => !empty($result['has_gift']),
+				'is_configurable' => !empty($result['is_configurable']),
 				'href'        => $this->url->link('product/product', 'manufacturer_id=' . $result['manufacturer_id'] . '&product_id=' . $result['product_id'])
 			);
 		}
@@ -784,6 +787,7 @@ class ControllerProductManufacturer extends Controller {
 				'text_reviews'     => $this->language->get('text_reviews_word'),
 				'text_sale'        => 'SALE',
 				'text_gift_badge'  => $this->language->get('text_gift_badge'),
+				'text_price_from'  => $this->language->get('text_price_from'),
 				'text_call_for_price' => $this->language->get('text_call_for_price'),
 				'button_cart'      => $this->language->get('button_cart'),
 				'btn_quick_hover'  => 'hover:bg-blue-600',

@@ -1,15 +1,42 @@
 <div id="dc-variant-axes-section" style="display:none;margin-bottom:20px"></div>
 <div id="dc-variant-matrix-section" style="display:none"></div>
 <div id="dc-variant-container">
-  <div class="text-center"><i class="fa fa-spinner fa-spin fa-2x"></i></div>
+	<div class="text-center"><i class="fa fa-spinner fa-spin fa-2x"></i></div>
 </div>
+<div id="dc-variant-toasts"></div>
 
 <script type="text/javascript"><!--
 var dcVariantRowIdx = 0;
+var dcSaveTimers = {};
+var dcAxesLoading = {};
+var dcCurrentDefaultId = 0;
+var dcCurrentAxes = [];
 
 function getDcProductId() {
 	var matches = /[&?]product_id=(\d+)/.exec(window.location.href);
 	return matches ? matches[1] : '0';
+}
+
+function showToast(msg, type, dur) {
+	var $container = $('#dc-variant-toasts');
+	var cls = type === 'error' ? 'dc-toast-error' : 'dc-toast-success';
+	var icon = type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle';
+	var $toast = $('<div class="dc-toast ' + cls + '"><i class="fa ' + icon + '"></i> ' + msg + '</div>');
+	$container.append($toast);
+	$toast.hide().fadeIn(200);
+	if (type !== 'error' || dur) {
+		setTimeout(function() {
+			$toast.fadeOut(300, function() { $toast.remove(); });
+		}, dur || 2500);
+	} else {
+		$toast.on('click', function() {
+			$toast.fadeOut(200, function() { $toast.remove(); });
+		});
+	}
+	var $toasts = $container.children();
+	if ($toasts.length > 5) {
+		$toasts.first().fadeOut(200, function() { $(this).remove(); });
+	}
 }
 
 function loadVariantMatrix() {
@@ -17,10 +44,9 @@ function loadVariantMatrix() {
 	var container = $('#dc-variant-container');
 
 	if (!productId || productId == '0') {
-		container.html('<div class="alert alert-info">{{ text_save_product_first }}</div>');
+		container.html('<div class="alert alert-info">{{ text_save_product_first|e("js") }}</div>');
 		$('#dc-variant-axes-section').hide();
 		$('#dc-variant-matrix-section').hide();
-
 		return;
 	}
 
@@ -35,15 +61,18 @@ function loadVariantMatrix() {
 
 			if (json.error) {
 				container.html('<div class="alert alert-danger">' + json.error + '</div>');
-
 				return;
 			}
 
+			dcCurrentDefaultId = json.default_variant_id || 0;
 			renderVariantMatrix(productId, json);
 			renderAxesSelector(productId, json);
+
+			var axes = json.configurable_options || [];
+			dcAxisOptionIds = axes.map(function(a) { return parseInt(a.option_id); });
 		},
 		error: function() {
-			container.html('<div class="alert alert-danger">{{ text_load_error }}</div>');
+			container.html('<div class="alert alert-danger">{{ text_load_error|e("js") }}</div>');
 		}
 	});
 }
@@ -54,8 +83,8 @@ function renderAxesSelector(productId, json) {
 
 	section.show();
 
-	var html = '<label>{{ entry_configurable_axes }}</label>';
-	html += '<input type="text" name="configurable_option" value="" placeholder="{{ entry_select_option }}" id="input-configurable-option" class="form-control input-sm" style="max-width:350px"/>';
+	var html = '<label>{{ entry_configurable_axes|e("js") }}</label>';
+	html += '<input type="text" name="configurable_option" value="" placeholder="{{ entry_select_option|e("js") }}" id="input-configurable-option" class="form-control input-sm" style="max-width:350px"/>';
 	html += '<div class="dc-configurable-axes-list" id="dc-configurable-axes-list" style="margin-top:10px">';
 
 	for (var i = 0; i < axes.length; i++) {
@@ -67,7 +96,6 @@ function renderAxesSelector(productId, json) {
 	}
 
 	html += '</div>';
-
 	section.html(html);
 
 	$('#input-configurable-option').autocomplete({
@@ -103,6 +131,18 @@ function addConfigurableAxe(productId, optionId) {
 		return;
 	}
 
+	var conflictSimple = false;
+	$('#dc-options-container .dc-option-section:not(.dc-option-axis) input[name$="[option_id]"]').each(function() {
+		if (parseInt($(this).val()) === optionId) {
+			conflictSimple = true;
+			return false;
+		}
+	});
+	if (conflictSimple) {
+		showToast('{{ error_axis_conflicts_simple|e("js") }}', 'error');
+		return;
+	}
+
 	currentIds.push(optionId);
 
 	$.ajax({
@@ -113,11 +153,9 @@ function addConfigurableAxe(productId, optionId) {
 			option_ids: currentIds
 		},
 		dataType: 'json',
-		beforeSend: function() {},
 		success: function(json) {
 			if (json.error) {
-				alert(json.error);
-
+				showToast(json.error, 'error');
 				return;
 			}
 
@@ -143,8 +181,7 @@ function removeAxe(btn, productId, optionId) {
 		dataType: 'json',
 		success: function(json) {
 			if (json.error) {
-				alert(json.error);
-
+				showToast(json.error, 'error');
 				return;
 			}
 
@@ -160,20 +197,20 @@ function renderVariantMatrix(productId, json) {
 	var isConfigurable = json.is_configurable;
 
 	if (!axes.length) {
-		section.html('<p class="text-muted">{{ text_no_axes }}</p>').show();
-
+		section.html('<p class="text-muted">{{ text_no_axes|e("js") }}</p>').show();
 		return;
 	}
 
+	dcCurrentAxes = axes;
 	section.show();
 
-	var html = '<h4>{{ text_variants }} <small>(' + variants.length + ')</small></h4>';
+	var html = '<h4>{{ text_variants|e("js") }} <small id="dc-variant-count">(' + variants.length + ')</small></h4>';
 	html += '<div class="row" style="margin-bottom:12px">';
 	html += '<div class="col-sm-12">';
-	html += '<button type="button" class="btn btn-primary btn-sm" onclick="addVariantRow(' + productId + ')"><i class="fa fa-plus"></i> {{ button_add_variant }}</button>';
-	html += ' <button type="button" class="btn btn-warning btn-sm" onclick="generateVariants(' + productId + ')" title="{{ help_generate }}"><i class="fa fa-magic"></i> {{ button_generate }}</button>';
+	html += '<button type="button" class="btn btn-primary btn-sm" onclick="addVariantRow(' + productId + ')"><i class="fa fa-plus"></i> {{ button_add_variant|e("js") }}</button>';
+	html += ' <button type="button" class="btn btn-warning btn-sm" onclick="generateVariants(' + productId + ')" title="{{ help_generate|e("js") }}"><i class="fa fa-magic"></i> {{ button_generate|e("js") }}</button>';
 	html += '</div></div>';
-	html += '<div class="table-responsive">';
+	html += '<div class="dc-variant-scroll-wrapper">';
 	html += '<table class="table table-hover dc-variant-table" id="dc-variant-table">';
 	html += '<thead><tr>';
 
@@ -181,13 +218,14 @@ function renderVariantMatrix(productId, json) {
 		html += '<th>' + axes[a].name + '</th>';
 	}
 
-	html += '<th>{{ column_sku }}</th>';
-	html += '<th>{{ column_price }}</th>';
-	html += '<th>{{ column_quantity }}</th>';
-	html += '<th>{{ column_image }}</th>';
-	html += '<th>{{ column_default }}</th>';
-	html += '<th>{{ column_status }}</th>';
-	html += '<th class="text-center">{{ column_action }}</th>';
+	html += '<th>{{ column_sku|e("js") }}</th>';
+	html += '<th>{{ column_price|e("js") }}</th>';
+	html += '<th>{{ column_quantity|e("js") }}</th>';
+	html += '<th>{{ column_weight|e("js") }}</th>';
+	html += '<th>{{ column_image|e("js") }}</th>';
+	html += '<th class="text-center">{{ column_default|e("js") }}</th>';
+	html += '<th class="text-center">{{ column_status|e("js") }}</th>';
+	html += '<th class="text-center">{{ column_action|e("js") }}</th>';
 	html += '</tr></thead>';
 	html += '<tbody id="dc-variant-tbody">';
 
@@ -205,11 +243,20 @@ function renderVariantMatrix(productId, json) {
 function buildVariantRow(productId, variant, axes, defaultVariantId) {
 	dcVariantRowIdx++;
 	var rowIdx = dcVariantRowIdx;
-	var isDefault = variant.is_default == 1 || variant.variant_id == defaultVariantId;
+	var isDefault = variant.variant_id == defaultVariantId;
 	var isActive = variant.status == 1;
 	var image = variant.image || '';
+	var thumb = variant.thumb || '{{ placeholder|e("js") }}';
 	var variantId = variant.variant_id || 0;
+	var isNew = variantId === 0;
 	var optionValues = {};
+	var cgHasPrices = variant.customer_group_prices && variant.customer_group_prices.length;
+	var hasArticles = variant.upc || variant.ean || variant.mpn;
+	var articlesVisible = hasArticles;
+	var cgVisible = cgHasPrices;
+	var subrowVisible = articlesVisible || cgVisible;
+	var artBtnClass = articlesVisible ? 'btn-primary' : 'btn-default';
+	var cgBtnClass = cgVisible ? 'btn-primary' : 'btn-default';
 
 	if (variant.values) {
 		for (var j = 0; j < variant.values.length; j++) {
@@ -217,12 +264,16 @@ function buildVariantRow(productId, variant, axes, defaultVariantId) {
 		}
 	}
 
-	var html = '<tr id="dc-variant-row-' + rowIdx + '" class="' + (isDefault ? 'info' : '') + '">';
+	var rowClasses = 'dc-state-clean';
+	if (isNew) rowClasses += ' dc-new';
+	if (!isActive) rowClasses += ' dc-disabled';
+
+	var html = '<tr id="dc-variant-row-' + rowIdx + '" class="' + rowClasses + '" data-variant-id="' + variantId + '" data-row-idx="' + rowIdx + '">';
 
 	for (var a = 0; a < axes.length; a++) {
 		var axeOptionId = axes[a].option_id;
-		html += '<td><select class="form-control input-sm dc-variant-value" data-option-id="' + axeOptionId + '" onchange="markVariantRowDirty(' + rowIdx + ')">';
-		html += '<option value="">{{ text_select }}</option>';
+		html += '<td><select class="form-control input-sm dc-variant-value" data-option-id="' + axeOptionId + '" onchange="onVariantAxisChange(' + rowIdx + ')">';
+		html += '<option value="">{{ text_select|e("js") }}</option>';
 
 		for (var k in axes[a].values) {
 			var ovId = axes[a].values[k].option_value_id;
@@ -234,76 +285,149 @@ function buildVariantRow(productId, variant, axes, defaultVariantId) {
 		html += '</select></td>';
 	}
 
-	html += '<td><input type="text" class="form-control input-sm dc-variant-sku" value="' + (variant.sku || '') + '" onchange="markVariantRowDirty(' + rowIdx + ')" style="min-width:100px"/></td>';
-	html += '<td><input type="number" step="0.0001" class="form-control input-sm dc-variant-price" value="' + (variant.price || '0') + '" onchange="markVariantRowDirty(' + rowIdx + ')" style="min-width:90px"/></td>';
-	html += '<td><input type="number" step="0.01" class="form-control input-sm dc-variant-qty" value="' + (variant.quantity || '0') + '" onchange="markVariantRowDirty(' + rowIdx + ')" style="min-width:70px"/></td>';
+	html += '<td><div style="display:flex;gap:4px;align-items:center"><input type="text" class="form-control input-sm dc-variant-sku" value="' + (variant.sku || '') + '" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:90px;flex:1"/><button type="button" class="btn ' + artBtnClass + ' btn-xs dc-articles-toggle" onclick="toggleVariantArticles(' + rowIdx + ')" title="{{ entry_variant_articles|e("js") }}"><i class="fa fa-barcode"></i></button></div></td>';
+	html += '<td><div style="display:flex;gap:4px;align-items:center"><input type="number" step="0.0001" class="form-control input-sm dc-variant-price" value="' + (variant.price || '0') + '" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:80px;flex:1"/><button type="button" class="btn ' + cgBtnClass + ' btn-xs dc-cg-toggle" onclick="toggleVariantCgPrices(' + rowIdx + ')" title="{{ entry_cg_prices|e("js") }}"><i class="fa fa-users"></i></button></div></td>';
+	html += '<td><input type="number" step="0.01" class="form-control input-sm dc-variant-qty" value="' + (variant.quantity || '0') + '" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:70px"/></td>';
+	html += '<td><input type="number" step="0.001" class="form-control input-sm dc-variant-weight" value="' + (variant.weight || '') + '" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:70px"/></td>';
 	html += '<td>';
-	html += '<div class="dc-variant-image-preview" style="margin-bottom:4px">' + (image ? '<img src="' + image + '" style="max-width:60px;max-height:60px"/>' : '') + '</div>';
-	html += '<div class="input-group input-group-sm">';
-	html += '<input type="text" class="form-control dc-variant-image" value="' + image + '" onchange="markVariantRowDirty(' + rowIdx + ')"/>';
-	html += '<span class="input-group-btn"><button type="button" onclick="openVariantImagePicker(this, ' + rowIdx + ')" class="btn btn-default btn-sm"><i class="fa fa-image"></i></button></span>';
+	html += '<div style="position:relative;width:50px;height:50px;display:inline-block">';
+	html += '<a href="" id="dc-variant-thumb-' + rowIdx + '" style="margin:0;display:block" onclick="openVariantImagePicker(' + rowIdx + '); return false">';
+	html += '<img src="' + thumb + '" data-placeholder="{{ placeholder|e("js") }}" style="width:50px;height:50px;object-fit:cover;border-radius:4px;border:1px solid #ddd"/>';
+	html += '</a>';
+	html += '<button type="button" class="dc-img-remove" onclick="clearVariantImage(' + rowIdx + ')" title="{{ button_remove|e("js") }}"><i class="fa fa-times"></i></button>';
+	html += '<input type="hidden" class="dc-variant-image" id="dc-variant-input-' + rowIdx + '" value="' + image + '"/>';
 	html += '</div>';
 	html += '</td>';
-	html += '<td class="text-center"><input type="radio" name="dc_variant_default" class="dc-variant-default" onchange="setDefaultVariant(' + productId + ', ' + variantId + ', ' + rowIdx + ')" ' + (isDefault ? 'checked="checked"' : '') + '/></td>';
-	html += '<td class="text-center"><input type="checkbox" class="dc-variant-status" ' + (isActive ? 'checked="checked"' : '') + ' onchange="markVariantRowDirty(' + rowIdx + ')"/></td>';
+	html += '<td class="text-center"><button type="button" class="dc-star-btn' + (isDefault ? ' dc-star-active' : '') + '" onclick="onVariantStarClick(' + rowIdx + ')" title="{{ column_default|e("js") }}"><i class="fa ' + (isDefault ? 'fa-star' : 'fa-star-o') + '"></i></button></td>';
+	html += '<td class="text-center"><label class="dc-toggle"><input type="checkbox" class="dc-variant-status"' + (isActive ? ' checked="checked"' : '') + ' onchange="onVariantStatusChange(' + rowIdx + ')"/><span class="dc-toggle-slider"></span></label></td>';
 	html += '<td class="text-center">';
-	html += '<button type="button" class="btn btn-success btn-sm dc-variant-save-btn" onclick="saveVariantRow(' + productId + ', ' + variantId + ', ' + rowIdx + ')" title="{{ button_save }}"><i class="fa fa-check"></i></button>';
-	html += ' <button type="button" class="btn btn-danger btn-sm" onclick="deleteVariant(' + variantId + ', ' + productId + ')"><i class="fa fa-trash"></i></button>';
+	html += '<button type="button" class="btn btn-danger btn-sm" onclick="deleteVariant(' + rowIdx + ')" title="{{ column_action|e("js") }}"><i class="fa fa-trash"></i></button>';
 	html += '</td>';
 	html += '</tr>';
+
+	html += '<tr id="dc-variant-cg-row-' + rowIdx + '" class="dc-variant-cg-subrow" style="display:' + (subrowVisible ? '' : 'none') + '">';
+	html += '<td colspan="' + (axes.length + 8) + '">';
+	html += '<div class="dc-cg-inner">';
+	html += '<div class="dc-subrow-split">';
+
+	html += '<div class="dc-subrow-section dc-articles-section" id="dc-articles-section-' + rowIdx + '" style="display:' + (articlesVisible ? 'block' : 'none') + '">';
+	html += '<div class="dc-subrow-section-label"><i class="fa fa-barcode"></i> {{ entry_variant_articles|e("js") }}</div>';
+	html += '<div class="dc-subrow-fields">';
+	html += '<label>{{ entry_upc|e("js") }}<input type="text" class="form-control input-sm dc-variant-upc" value="' + (variant.upc || '') + '" placeholder="UPC" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
+	html += '<label>{{ entry_ean|e("js") }}<input type="text" class="form-control input-sm dc-variant-ean" value="' + (variant.ean || '') + '" placeholder="EAN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
+	html += '<label>{{ entry_mpn|e("js") }}<input type="text" class="form-control input-sm dc-variant-mpn" value="' + (variant.mpn || '') + '" placeholder="MPN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
+	html += '</div>';
+	html += '</div>';
+
+	html += '<div class="dc-subrow-section dc-cg-section" id="dc-cg-section-' + rowIdx + '" style="display:' + (cgVisible ? 'block' : 'none') + '">';
+	html += '<div class="dc-subrow-section-label"><i class="fa fa-users"></i> {{ entry_cg_prices|e("js") }}</div>';
+	html += '<div class="dc-cg-header">';
+	html += '<span class="dc-cg-header-group">{{ entry_cg_customer_group|e("js") }}</span>';
+	html += '<span class="dc-cg-header-price">{{ entry_cg_group_price|e("js") }}</span>';
+	html += '<span class="dc-cg-header-action"></span>';
+	html += '</div>';
+	html += '<div class="dc-cg-prices" id="dc-cg-prices-' + rowIdx + '">';
+
+	if (variant.customer_group_prices) {
+		for (var c = 0; c < variant.customer_group_prices.length; c++) {
+			var cg = variant.customer_group_prices[c];
+			html += '<div class="dc-cg-row">';
+			html += '<select class="form-control input-sm dc-cg-group" onchange="scheduleAutoSave(' + rowIdx + ')">';
+			{% for customer_group in customer_groups %}
+			html += '<option value="{{ customer_group.customer_group_id }}"' + ({{ customer_group.customer_group_id }} == cg.customer_group_id ? ' selected="selected"' : '') + '>{{ customer_group.name|escape("js") }}</option>';
+			{% endfor %}
+			html += '</select>';
+			html += '<input type="number" step="0.0001" class="form-control input-sm dc-cg-price" value="' + (cg.price || '') + '" placeholder="{{ entry_price|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')"/>';
+			html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-cg-row\').remove();scheduleAutoSave(' + rowIdx + ')"><i class="fa fa-minus-circle"></i></button>';
+			html += '</div>';
+		}
+	}
+
+	html += '</div>';
+	html += '<button type="button" class="btn btn-primary btn-xs dc-cg-add-btn" onclick="addVariantCgPrice(' + rowIdx + ')"><i class="fa fa-plus-circle"></i> {{ button_cg_add|e("js") }}</button>';
+	html += '</div>';
+
+	html += '</div>';
+	html += '</div></td></tr>';
 
 	return html;
 }
 
 function addVariantRow(productId) {
-	var axes = [];
-
-	$('#dc-variant-table thead th').each(function() {
-		var th = $(this).text().trim();
-
-		if (th !== '{{ column_sku }}' && th !== '{{ column_price }}' && th !== '{{ column_quantity }}' && th !== '{{ column_image }}' && th !== '{{ column_default }}' && th !== '{{ column_status }}' && th !== '{{ column_action }}') {
-			axes.push({name: th, option_id: 0});
-		}
-	});
+	var axes = dcCurrentAxes;
+	if (!axes || !axes.length) return;
 
 	var rowIdx = ++dcVariantRowIdx;
-	var variantId = 0;
-	var html = '<tr id="dc-variant-row-' + rowIdx + '">';
+	var html = '<tr id="dc-variant-row-' + rowIdx + '" class="dc-state-dirty dc-new" data-variant-id="0" data-row-idx="' + rowIdx + '">';
 
 	for (var a = 0; a < axes.length; a++) {
-		html += '<td><select class="form-control input-sm dc-variant-value" onchange="markVariantRowDirty(' + rowIdx + ')"><option value="">{{ text_select }}</option></select></td>';
+		html += '<td><select class="form-control input-sm dc-variant-value" data-option-id="' + axes[a].option_id + '" onchange="onVariantAxisChange(' + rowIdx + ')"><option value="">{{ text_select|e("js") }}</option></select></td>';
 	}
 
-	html += '<td><input type="text" class="form-control input-sm dc-variant-sku" value="" onchange="markVariantRowDirty(' + rowIdx + ')" style="min-width:100px"/></td>';
-	html += '<td><input type="number" step="0.0001" class="form-control input-sm dc-variant-price" value="0" onchange="markVariantRowDirty(' + rowIdx + ')" style="min-width:90px"/></td>';
-	html += '<td><input type="number" step="0.01" class="form-control input-sm dc-variant-qty" value="0" onchange="markVariantRowDirty(' + rowIdx + ')" style="min-width:70px"/></td>';
+	html += '<td><div style="display:flex;gap:4px;align-items:center"><input type="text" class="form-control input-sm dc-variant-sku" value="" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:90px;flex:1"/><button type="button" class="btn btn-default btn-xs dc-articles-toggle" onclick="toggleVariantArticles(' + rowIdx + ')" title="{{ entry_variant_articles|e("js") }}"><i class="fa fa-barcode"></i></button></div></td>';
+	html += '<td><div style="display:flex;gap:4px;align-items:center"><input type="number" step="0.0001" class="form-control input-sm dc-variant-price" value="0" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:80px;flex:1"/><button type="button" class="btn btn-default btn-xs dc-cg-toggle" onclick="toggleVariantCgPrices(' + rowIdx + ')" title="{{ entry_cg_prices|e("js") }}"><i class="fa fa-users"></i></button></div></td>';
+	html += '<td><input type="number" step="0.01" class="form-control input-sm dc-variant-qty" value="0" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:70px"/></td>';
+	html += '<td><input type="number" step="0.001" class="form-control input-sm dc-variant-weight" value="" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:70px"/></td>';
 	html += '<td>';
-	html += '<div class="dc-variant-image-preview" style="margin-bottom:4px"></div>';
-	html += '<div class="input-group input-group-sm">';
-	html += '<input type="text" class="form-control dc-variant-image" value="" onchange="markVariantRowDirty(' + rowIdx + ')"/>';
-	html += '<span class="input-group-btn"><button type="button" onclick="openVariantImagePicker(this, ' + rowIdx + ')" class="btn btn-default btn-sm"><i class="fa fa-image"></i></button></span>';
+	html += '<div style="position:relative;width:50px;height:50px;display:inline-block">';
+	html += '<a href="" id="dc-variant-thumb-' + rowIdx + '" style="margin:0;display:block" onclick="openVariantImagePicker(' + rowIdx + '); return false">';
+	html += '<img src="{{ placeholder|e("js") }}" data-placeholder="{{ placeholder|e("js") }}" style="width:50px;height:50px;object-fit:cover;border-radius:4px;border:1px solid #ddd"/>';
+	html += '</a>';
+	html += '<button type="button" class="dc-img-remove" onclick="clearVariantImage(' + rowIdx + ')" title="{{ button_remove|e("js") }}"><i class="fa fa-times"></i></button>';
+	html += '<input type="hidden" class="dc-variant-image" id="dc-variant-input-' + rowIdx + '" value=""/>';
 	html += '</div>';
 	html += '</td>';
-	html += '<td class="text-center"><input type="radio" name="dc_variant_default" class="dc-variant-default"/></td>';
-	html += '<td class="text-center"><input type="checkbox" class="dc-variant-status" checked="checked"/></td>';
+	html += '<td class="text-center"><button type="button" class="dc-star-btn" onclick="onVariantStarClick(' + rowIdx + ')" title="{{ column_default|e("js") }}"><i class="fa fa-star-o"></i></button></td>';
+	html += '<td class="text-center"><label class="dc-toggle"><input type="checkbox" class="dc-variant-status" checked="checked" onchange="onVariantStatusChange(' + rowIdx + ')"/><span class="dc-toggle-slider"></span></label></td>';
 	html += '<td class="text-center">';
-	html += '<button type="button" class="btn btn-success btn-sm dc-variant-save-btn" onclick="saveVariantRow(' + productId + ', 0, ' + rowIdx + ')" title="{{ button_save }}"><i class="fa fa-check"></i></button>';
-	html += ' <button type="button" class="btn btn-danger btn-sm" onclick="deleteVariant(0, ' + productId + ', ' + rowIdx + ')"><i class="fa fa-trash"></i></button>';
+	html += '<button type="button" class="btn btn-danger btn-sm" onclick="deleteVariant(' + rowIdx + ')" title="{{ column_action|e("js") }}"><i class="fa fa-trash"></i></button>';
 	html += '</td>';
 	html += '</tr>';
 
-	$('#dc-variant-tbody').prepend(html);
+	html += '<tr id="dc-variant-cg-row-' + rowIdx + '" class="dc-variant-cg-subrow" style="display:none">';
+	html += '<td colspan="' + (axes.length + 8) + '">';
+	html += '<div class="dc-cg-inner">';
+	html += '<div class="dc-subrow-split">';
 
-	// Populate the selects with option values from the axes
+	html += '<div class="dc-subrow-section dc-articles-section" id="dc-articles-section-' + rowIdx + '" style="display:none">';
+	html += '<div class="dc-subrow-section-label"><i class="fa fa-barcode"></i> {{ entry_variant_articles|e("js") }}</div>';
+	html += '<div class="dc-subrow-fields">';
+	html += '<label>{{ entry_upc|e("js") }}<input type="text" class="form-control input-sm dc-variant-upc" value="" placeholder="UPC" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
+	html += '<label>{{ entry_ean|e("js") }}<input type="text" class="form-control input-sm dc-variant-ean" value="" placeholder="EAN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
+	html += '<label>{{ entry_mpn|e("js") }}<input type="text" class="form-control input-sm dc-variant-mpn" value="" placeholder="MPN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
+	html += '</div>';
+	html += '</div>';
+
+	html += '<div class="dc-subrow-section dc-cg-section" id="dc-cg-section-' + rowIdx + '" style="display:none">';
+	html += '<div class="dc-subrow-section-label"><i class="fa fa-users"></i> {{ entry_cg_prices|e("js") }}</div>';
+	html += '<div class="dc-cg-header">';
+	html += '<span class="dc-cg-header-group">{{ entry_cg_customer_group|e("js") }}</span>';
+	html += '<span class="dc-cg-header-price">{{ entry_cg_group_price|e("js") }}</span>';
+	html += '<span class="dc-cg-header-action"></span>';
+	html += '</div>';
+	html += '<div class="dc-cg-prices" id="dc-cg-prices-' + rowIdx + '"></div>';
+	html += '<button type="button" class="btn btn-primary btn-xs dc-cg-add-btn" onclick="addVariantCgPrice(' + rowIdx + ')"><i class="fa fa-plus-circle"></i> {{ button_cg_add|e("js") }}</button>';
+	html += '</div>';
+
+	html += '</div>';
+	html += '</div></td></tr>';
+
+	$('#dc-variant-tbody').prepend(html);
 	loadAxesOptionValues(rowIdx, productId);
-	markVariantRowDirty(rowIdx);
+	updateRowCount();
 }
 
 function loadAxesOptionValues(rowIdx, productId) {
+	dcAxesLoading[rowIdx] = true;
+	$('#dc-variant-row-' + rowIdx + ' .dc-variant-value').first().after('<span class="dc-loading-indicator"><i class="fa fa-spinner fa-spin"></i></span>');
+
 	$.ajax({
 		url: 'index.php?route=catalog/product_configurable/getMatrix&user_token={{ user_token }}&product_id=' + productId,
 		dataType: 'json',
 		success: function(json) {
+			dcAxesLoading[rowIdx] = false;
+			$('#dc-variant-row-' + rowIdx + ' .dc-loading-indicator').remove();
+
 			if (json.configurable_options) {
 				var selects = $('#dc-variant-row-' + rowIdx + ' .dc-variant-value');
 				selects.each(function(i) {
@@ -313,7 +437,7 @@ function loadAxesOptionValues(rowIdx, productId) {
 					if (axe) {
 						sel.data('option-id', axe.option_id);
 						sel.empty();
-						sel.append('<option value="">{{ text_select }}</option>');
+						sel.append('<option value="">{{ text_select|e("js") }}</option>');
 
 						for (var k in axe.values) {
 							sel.append('<option value="' + axe.values[k].option_value_id + '">' + axe.values[k].name + '</option>');
@@ -321,26 +445,108 @@ function loadAxesOptionValues(rowIdx, productId) {
 					}
 				});
 			}
+		},
+		error: function() {
+			dcAxesLoading[rowIdx] = false;
+			$('#dc-variant-row-' + rowIdx + ' .dc-loading-indicator').remove();
 		}
 	});
 }
 
-function markVariantRowDirty(rowIdx) {
-	$('#dc-variant-row-' + rowIdx).addClass('warning');
-	$('#dc-variant-row-' + rowIdx + ' .dc-variant-save-btn').prop('disabled', false);
+function onVariantAxisChange(rowIdx) {
+	scheduleAutoSave(rowIdx);
 }
 
-function saveVariantRow(productId, variantId, rowIdx) {
+function onVariantFieldInput(rowIdx) {
+	scheduleAutoSave(rowIdx);
+}
+
+function toggleVariantArticles(rowIdx) {
+	var section = $('#dc-articles-section-' + rowIdx);
+	var btn = $('#dc-variant-row-' + rowIdx).find('.dc-articles-toggle');
+	var subrow = $('#dc-variant-cg-row-' + rowIdx);
+	section.toggle();
+	btn.toggleClass('btn-default btn-primary');
+	var sectionVisible = section.css('display') !== 'none';
+	var cgVisible = $('#dc-cg-section-' + rowIdx).css('display') !== 'none';
+	subrow.css('display', (sectionVisible || cgVisible) ? 'table-row' : 'none');
+}
+
+function toggleVariantCgPrices(rowIdx) {
+	var section = $('#dc-cg-section-' + rowIdx);
+	var btn = $('#dc-variant-row-' + rowIdx).find('.dc-cg-toggle');
+	var subrow = $('#dc-variant-cg-row-' + rowIdx);
+	section.toggle();
+	btn.toggleClass('btn-default btn-primary');
+	var cgVisible = section.css('display') !== 'none';
+	var articlesVisible = $('#dc-articles-section-' + rowIdx).css('display') !== 'none';
+	subrow.css('display', (cgVisible || articlesVisible) ? 'table-row' : 'none');
+}
+
+function addVariantCgPrice(rowIdx) {
+	var html = '<div class="dc-cg-row">';
+	html += '<select class="form-control input-sm dc-cg-group" onchange="scheduleAutoSave(' + rowIdx + ')">';
+	{% for customer_group in customer_groups %}
+	html += '<option value="{{ customer_group.customer_group_id }}">{{ customer_group.name|escape("js") }}</option>';
+	{% endfor %}
+	html += '</select>';
+	html += '<input type="number" step="0.0001" class="form-control input-sm dc-cg-price" placeholder="{{ entry_price|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')"/>';
+	html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-cg-row\').remove();scheduleAutoSave(' + rowIdx + ')"><i class="fa fa-minus-circle"></i></button>';
+	html += '</div>';
+	$('#dc-cg-prices-' + rowIdx).append(html);
+}
+
+function onVariantStatusChange(rowIdx) {
+	if (dcSaveTimers[rowIdx]) {
+		clearTimeout(dcSaveTimers[rowIdx]);
+		delete dcSaveTimers[rowIdx];
+	}
+	saveVariantRow(rowIdx);
+}
+
+function onVariantStarClick(rowIdx) {
 	var row = $('#dc-variant-row-' + rowIdx);
+	var vid = parseInt(row.data('variant-id')) || 0;
+
+	if (!vid) {
+		showToast('{{ text_saving|e("js") }}: {{ text_save_product_first|e("js") }}', 'error');
+		return;
+	}
+
+	setDefaultVariant(rowIdx);
+}
+
+function scheduleAutoSave(rowIdx) {
+	var row = $('#dc-variant-row-' + rowIdx);
+	var state = row.data('state');
+	if (state === 'saving' || state === 'new-loading') return;
+	if (dcAxesLoading[rowIdx]) return;
+
+	row.data('state', 'dirty').removeClass('dc-state-clean dc-state-saving dc-state-error dc-state-flash').addClass('dc-state-dirty');
+
+	if (dcSaveTimers[rowIdx]) {
+		clearTimeout(dcSaveTimers[rowIdx]);
+	}
+
+	dcSaveTimers[rowIdx] = setTimeout(function() {
+		delete dcSaveTimers[rowIdx];
+		saveVariantRow(rowIdx);
+	}, 600);
+}
+
+function saveVariantRow(rowIdx, onSuccess) {
+	var row = $('#dc-variant-row-' + rowIdx);
+	var pid = getDcProductId();
+	var vid = parseInt(row.data('variant-id')) || 0;
 	var values = [];
-	var hasValues = true;
+	var allSelected = true;
 
 	row.find('.dc-variant-value').each(function() {
 		var ovId = $(this).val();
 		var oId = $(this).data('option-id') || 0;
 
 		if (!ovId) {
-			hasValues = false;
+			allSelected = false;
 		} else {
 			values.push({
 				option_id: oId,
@@ -349,30 +555,48 @@ function saveVariantRow(productId, variantId, rowIdx) {
 		}
 	});
 
-	if (!hasValues) {
-		alert('{{ error_variant_values }}');
-
+	if (!allSelected) {
+		row.find('.dc-variant-value').each(function() {
+			if (!$(this).val()) {
+				$(this).addClass('dc-field-error');
+				(function(el) {
+					setTimeout(function() { el.removeClass('dc-field-error'); }, 2000);
+				})($(this));
+			}
+		});
 		return;
 	}
 
+	row.data('state', 'saving').removeClass('dc-state-dirty dc-state-error dc-state-flash').addClass('dc-state-saving');
+
+	var cgRow = $('#dc-variant-cg-row-' + rowIdx);
 	var data = {
-		product_id: productId,
-		variant_id: variantId,
+		product_id: pid,
+		variant_id: vid,
 		sku: row.find('.dc-variant-sku').val() || '',
-		upc: '',
-		ean: '',
-		mpn: '',
+		upc: cgRow.find('.dc-variant-upc').val() || '',
+		ean: cgRow.find('.dc-variant-ean').val() || '',
+		mpn: cgRow.find('.dc-variant-mpn').val() || '',
 		price: row.find('.dc-variant-price').val() || 0,
 		quantity: row.find('.dc-variant-qty').val() || 0,
 		subtract: 1,
-		weight: 0,
-		weight_class_id: 0,
+		weight: row.find('.dc-variant-weight').val() || 0,
+		weight_class_id: {{ weight_class_id|e("js") }},
 		image: row.find('.dc-variant-image').val() || '',
 		sort_order: 0,
 		status: row.find('.dc-variant-status').is(':checked') ? 1 : 0,
-		is_default: row.find('.dc-variant-default').is(':checked') ? 1 : 0,
 		values: values
 	};
+
+	var cgPrices = [];
+	$('#dc-cg-prices-' + rowIdx + ' .dc-cg-row').each(function() {
+		var groupId = $(this).find('.dc-cg-group').val();
+		var price = $(this).find('.dc-cg-price').val();
+		if (groupId && price !== '' && price !== undefined) {
+			cgPrices.push({customer_group_id: groupId, price: price});
+		}
+	});
+	data.customer_group_prices = cgPrices;
 
 	$.ajax({
 		url: 'index.php?route=catalog/product_configurable/saveVariant&user_token={{ user_token }}',
@@ -381,62 +605,132 @@ function saveVariantRow(productId, variantId, rowIdx) {
 		dataType: 'json',
 		success: function(json) {
 			if (json.error) {
-				alert(json.error);
+				row.data('state', 'error').removeClass('dc-state-saving dc-state-dirty dc-state-flash').addClass('dc-state-error');
+				showToast(json.error, 'error');
 			} else {
-				row.removeClass('warning');
-				row.find('.dc-variant-save-btn').prop('disabled', true);
-				loadVariantMatrix();
+				if (vid === 0 && json.variant_id) {
+					row.data('variant-id', json.variant_id);
+				}
+				row.removeClass('dc-new dc-state-saving dc-state-dirty dc-state-error').addClass('dc-state-flash');
+				row.data('state', 'clean');
+				showToast('{{ text_saved|e("js") }}', 'success');
+
+				var status = row.find('.dc-variant-status').is(':checked') ? 1 : 0;
+				if (status) {
+					row.removeClass('dc-disabled');
+				} else {
+					row.addClass('dc-disabled');
+				}
+
+				setTimeout(function() {
+					row.removeClass('dc-state-flash');
+				}, 1500);
+
+				if (typeof onSuccess === 'function') {
+					onSuccess();
+				}
 			}
+		},
+		error: function() {
+			row.data('state', 'error').removeClass('dc-state-saving dc-state-flash').addClass('dc-state-error');
+			showToast('{{ text_load_error|e("js") }}', 'error');
 		}
 	});
 }
 
-function setDefaultVariant(productId, variantId, rowIdx) {
-	if (!variantId) return;
+function setDefaultVariant(rowIdx) {
+	var row = $('#dc-variant-row-' + rowIdx);
+	var vid = parseInt(row.data('variant-id')) || 0;
+	if (!vid) return;
+
+	var prevDefault = dcCurrentDefaultId;
+	dcCurrentDefaultId = vid;
+
+	$('.dc-star-btn').removeClass('dc-star-active').find('i').removeClass('fa-star').addClass('fa-star-o');
+	row.find('.dc-star-btn').addClass('dc-star-active').find('i').removeClass('fa-star-o').addClass('fa-star');
 
 	$.ajax({
 		url: 'index.php?route=catalog/product_configurable/setDefault&user_token={{ user_token }}',
 		type: 'POST',
-		data: {variant_id: variantId},
+		data: {variant_id: vid},
 		dataType: 'json',
 		success: function(json) {
 			if (json.error) {
-				alert(json.error);
+				dcCurrentDefaultId = prevDefault;
+				rebuildDefaultStars();
+				showToast(json.error, 'error');
 			} else {
-				loadVariantMatrix();
+				showToast('{{ text_saved|e("js") }}', 'success', 1500);
 			}
+		},
+		error: function() {
+			dcCurrentDefaultId = prevDefault;
+			rebuildDefaultStars();
+			showToast('{{ text_load_error|e("js") }}', 'error');
 		}
 	});
 }
 
-function deleteVariant(variantId, productId, rowIdx) {
-	if (variantId == 0) {
-		$('#dc-variant-row-' + (rowIdx || dcVariantRowIdx)).remove();
+function rebuildDefaultStars() {
+	$('.dc-star-btn').each(function() {
+		var $btn = $(this);
+		var $row = $btn.closest('tr');
+		var vid = parseInt($row.data('variant-id')) || 0;
+		if (vid == dcCurrentDefaultId) {
+			$btn.addClass('dc-star-active').find('i').removeClass('fa-star-o').addClass('fa-star');
+		} else {
+			$btn.removeClass('dc-star-active').find('i').removeClass('fa-star').addClass('fa-star-o');
+		}
+	});
+}
 
+function deleteVariant(rowIdx) {
+	var row = $('#dc-variant-row-' + rowIdx);
+	var vid = parseInt(row.data('variant-id')) || 0;
+	var pid = getDcProductId();
+
+	if (!vid) {
+		row.fadeOut(200, function() {
+			$(this).remove();
+			updateRowCount();
+		});
 		return;
 	}
 
-	if (!confirm('{{ text_confirm_delete_variant }}')) {
+	if (!confirm('{{ text_confirm_delete_variant|e("js") }}')) {
 		return;
 	}
 
 	$.ajax({
 		url: 'index.php?route=catalog/product_configurable/deleteVariant&user_token={{ user_token }}',
 		type: 'POST',
-		data: {variant_id: variantId},
+		data: {variant_id: vid},
 		dataType: 'json',
 		success: function(json) {
 			if (json.error) {
-				alert(json.error);
+				showToast(json.error, 'error');
 			} else {
-				loadVariantMatrix();
+				row.fadeOut(200, function() {
+					$(this).remove();
+					updateRowCount();
+				});
+
+				if (json.default_variant_id !== undefined) {
+					dcCurrentDefaultId = json.default_variant_id;
+					rebuildDefaultStars();
+				}
+
+				showToast('{{ text_saved|e("js") }}', 'success', 1500);
 			}
+		},
+		error: function() {
+			showToast('{{ text_load_error|e("js") }}', 'error');
 		}
 	});
 }
 
 function generateVariants(productId) {
-	if (!confirm('{{ text_confirm_generate }}')) {
+	if (!confirm('{{ text_confirm_generate|e("js") }}')) {
 		return;
 	}
 
@@ -447,32 +741,130 @@ function generateVariants(productId) {
 		dataType: 'json',
 		success: function(json) {
 			if (json.error) {
-				alert(json.error);
+				showToast(json.error, 'error');
 			} else {
-				alert(json.success);
+				showToast(json.success, 'success');
 				loadVariantMatrix();
 			}
+		},
+		error: function() {
+			showToast('{{ text_load_error|e("js") }}', 'error');
 		}
 	});
 }
 
-function openVariantImagePicker(btn, rowIdx) {
-	$('#modal-image').off('click', '#button-image').on('click', '#button-image', function() {
-		var thumb = $('#modal-image input[name="value"]').val();
+function openVariantImagePicker(rowIdx) {
+	var $input = $('#dc-variant-input-' + rowIdx);
+	var originalValue = $input.val();
 
-		$('#dc-variant-row-' + rowIdx + ' .dc-variant-image').val(thumb);
-		$('#dc-variant-row-' + rowIdx + ' .dc-variant-image-preview').html(thumb ? '<img src="' + thumb + '" style="max-width:60px;max-height:60px"/>' : '');
-		markVariantRowDirty(rowIdx);
+	$('#modal-image').remove();
 
-		$('#modal-image').modal('hide');
+	$.ajax({
+		url: 'index.php?route=common/filemanager&user_token=' + getURLVar('user_token') + '&target=dc-variant-input-' + rowIdx + '&thumb=dc-variant-thumb-' + rowIdx + '&type=image',
+		dataType: 'html',
+		success: function(html) {
+			$('body').append('<div id="modal-image" class="modal">' + html + '</div>');
+			$('#modal-image').modal('show');
+			$('#modal-image').on('hidden.bs.modal', function() {
+				if ($input.val() !== originalValue) {
+					scheduleAutoSave(rowIdx);
+				}
+				$('#modal-image').off('hidden.bs.modal');
+			});
+		}
 	});
-
-	$('#modal-image').modal('show');
 }
+
+function clearVariantImage(rowIdx) {
+	var $input = $('#dc-variant-input-' + rowIdx);
+	var placeholder = '{{ placeholder|e("js") }}';
+
+	if (!$input.val()) {
+		return;
+	}
+
+	$('#dc-variant-thumb-' + rowIdx).find('img').attr('src', placeholder);
+	$input.val('');
+	scheduleAutoSave(rowIdx);
+}
+
+function updateRowCount() {
+	var count = $('#dc-variant-tbody tr').length;
+	$('#dc-variant-count').text('(' + count + ')');
+}
+
+$(window).on('beforeunload', function() {
+	if ($('#dc-variant-tbody').find('tr.dc-state-dirty, tr.dc-state-saving').length) {
+		return '{{ text_unsaved_changes|e("js") }}';
+	}
+});
 //--></script>
 
 <style>
-.dc-variant-table th { white-space: nowrap; font-size: 12px; }
+#dc-variant-toasts { position: fixed; bottom: 20px; right: 20px; z-index: 99999; max-width: 350px; display: flex; flex-direction: column; gap: 8px; }
+.dc-toast { padding: 10px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 8px; animation: dcToastIn 0.2s ease; }
+.dc-toast i { font-size: 14px; flex-shrink: 0; }
+.dc-toast-success { background: #d4edda; color: #155724; border-left: 4px solid #28a745; }
+.dc-toast-error { background: #f8d7da; color: #721c24; border-left: 4px solid #dc3545; }
+@keyframes dcToastIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+
+.dc-variant-scroll-wrapper { overflow-x: auto; }
+
+.dc-variant-table th { white-space: nowrap; font-size: 12px; font-weight: 600; background: #fff; position: sticky; top: 0; z-index: 5; box-shadow: inset 0 -2px 0 #dee2e6; }
 .dc-variant-table td { vertical-align: middle; }
-.dc-variant-table .dc-variant-save-btn:disabled { opacity: 0.4; }
+.dc-variant-table tbody tr { transition: background-color 0.2s, border-left-color 0.3s, opacity 0.3s; }
+.dc-variant-table tbody tr:hover { background-color: #f0f4ff; }
+.dc-variant-table tbody tr:nth-child(even) { background-color: #fafbfc; }
+.dc-variant-table tbody tr:nth-child(even):hover { background-color: #f0f4ff; }
+
+.dc-variant-table tr.dc-state-dirty { border-left: 3px solid #ffc107; }
+.dc-variant-table tr.dc-state-saving { border-left: 3px solid #6c757d; opacity: 0.75; }
+.dc-variant-table tr.dc-state-saving * { pointer-events: none; }
+.dc-variant-table tr.dc-state-error { border-left: 3px solid #dc3545; }
+.dc-variant-table tr.dc-state-flash { border-left: 3px solid #28a745; }
+.dc-variant-table tr.dc-new { }
+.dc-variant-table tr.dc-disabled { opacity: 0.55; }
+
+.dc-field-error { border-color: #dc3545 !important; box-shadow: 0 0 0 2px rgba(220,53,69,0.15); }
+
+.dc-loading-indicator { margin-left: 6px; color: #6c757d; font-size: 12px; }
+
+.dc-toggle { position: relative; display: inline-block; width: 38px; height: 22px; cursor: pointer; }
+.dc-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+.dc-toggle .dc-toggle-slider { position: absolute; inset: 0; background-color: #adb5bd; border-radius: 22px; transition: background-color 0.25s; }
+.dc-toggle .dc-toggle-slider::before { content: ""; position: absolute; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: #fff; border-radius: 50%; transition: transform 0.25s; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+.dc-toggle input:checked + .dc-toggle-slider { background-color: #28a745; }
+.dc-toggle input:checked + .dc-toggle-slider::before { transform: translateX(16px); }
+
+.dc-star-btn { background: none; border: none; padding: 2px 4px; cursor: pointer; font-size: 18px; color: #ccc; transition: color 0.15s, transform 0.15s; line-height: 1; }
+.dc-star-btn:hover { color: #f0ad4e; transform: scale(1.2); }
+.dc-star-btn.dc-star-active { color: #f0ad4e; }
+.dc-star-btn.dc-star-active:hover { color: #e09800; }
+
+.dc-variant-table .dc-img-remove { position: absolute; width: 16px; height: 16px; font-size: 10px; top: 2px; right: 2px; padding: 0; border-radius: 50%; background: rgba(0,0,0,0.6); color: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; }
+.dc-img-remove i { margin: 0; }
+.dc-variant-table div:hover > .dc-img-remove { opacity: 1; }
+
+.dc-variant-cg-subrow td { padding: 0 !important; }
+.dc-cg-inner { padding: 12px 16px; background: #fff; border: 1px solid #dee2e6; border-top: 2px solid #007bff; border-radius: 0 0 6px 6px; margin: 0 12px 8px; }
+.dc-subrow-split { display: flex; gap: 20px; align-items: flex-start; }
+.dc-subrow-section { flex: 1; min-width: 0; }
+.dc-subrow-section-label { font-size: 11px; font-weight: 600; color: #495057; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 8px; padding-bottom: 5px; border-bottom: 1px solid #e9ecef; }
+.dc-subrow-section-label i { margin-right: 4px; color: #6c757d; }
+.dc-subrow-fields { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+.dc-subrow-fields label { display: flex; flex-direction: column; gap: 2px; font-size: 11px; font-weight: 600; color: #6c757d; margin: 0; }
+.dc-subrow-fields input { width: 120px; }
+.dc-cg-header { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; font-size: 11px; font-weight: 600; color: #6c757d; }
+.dc-cg-header-group { width: 180px; flex-shrink: 0; }
+.dc-cg-header-price { width: 110px; flex-shrink: 0; }
+.dc-cg-header-action { flex: 1; }
+.dc-cg-prices { margin-bottom: 4px; }
+.dc-cg-row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+.dc-cg-row:last-of-type { margin-bottom: 0; }
+.dc-variant-table .form-control { height: 28px; line-height: 1.4; padding: 3px 8px; font-size: 12px; }
+.dc-cg-row select { width: 180px; flex-shrink: 0; }
+.dc-cg-row input { width: 110px; flex-shrink: 0; }
+.dc-cg-add-btn { margin-top: 4px; }
+.dc-cg-toggle { border-color: #ced4da; }
+.dc-cg-toggle.btn-primary { color: #fff; background-color: #007bff; border-color: #007bff; }
 </style>

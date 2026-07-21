@@ -43,3 +43,4 @@ $_['text_special_tagline'] = 'Exclusive deals updated regularly — don\'t miss 
 $_['text_products']  = 'products';
 $_['text_load_more'] = 'Show More';
 $_['text_gift_badge'] = 'GIFT';
+$_['text_price_from'] = 'from';

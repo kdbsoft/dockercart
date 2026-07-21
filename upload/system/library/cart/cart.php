@@ -9,9 +9,11 @@ class Cart
     private $db;
     private $tax;
     private $weight;
+    private $registry;
 
     public function __construct($registry)
     {
+        $this->registry = $registry;
         $this->config = $registry->get("config");
         $this->customer = $registry->get("customer");
         $this->session = $registry->get("session");
@@ -222,13 +224,15 @@ class Cart
             $cart["quantity"] = (float) $cart["quantity"];
 
             $product_query = $this->db->query(
-                "SELECT * FROM " .
+                "SELECT p.*, pd.*, pco.axis_ids FROM " .
                     DB_PREFIX .
                     "product_to_store p2s LEFT JOIN " .
                     DB_PREFIX .
                     "product p ON (p2s.product_id = p.product_id) LEFT JOIN " .
                     DB_PREFIX .
-                    "product_description pd ON (p.product_id = pd.product_id) WHERE p2s.store_id = '" .
+                    "product_description pd ON (p.product_id = pd.product_id) LEFT JOIN (SELECT product_id, GROUP_CONCAT(option_id) AS axis_ids FROM " .
+                    DB_PREFIX .
+                    "product_configurable_option GROUP BY product_id) pco ON (pco.product_id = p.product_id) WHERE p2s.store_id = '" .
                     (int) $this->config->get("config_store_id") .
                     "' AND p2s.product_id = '" .
                     (int) $cart["product_id"] .
@@ -245,10 +249,13 @@ class Cart
                 $option_data = [];
 
                 $axis_option_ids = [];
-                $axis_query = $this->db->query("SELECT option_id FROM " . DB_PREFIX . "product_configurable_option WHERE product_id = '" . (int)$cart["product_id"] . "'");
-                foreach ($axis_query->rows as $row) {
-                    $axis_option_ids[] = (int)$row['option_id'];
+                if (!empty($product_query->row['axis_ids'])) {
+                    foreach (explode(',', $product_query->row['axis_ids']) as $aid) {
+                        $axis_option_ids[] = (int)$aid;
+                    }
                 }
+
+                $axis_selection = [];
 
                 foreach (
                     json_decode($cart["option"])
@@ -304,6 +311,10 @@ class Cart
                             );
 
                             if ($option_value_query->num_rows) {
+                                if ($is_axis) {
+                                    $axis_selection[(int)$option_query->row['option_id']] = (int)$option_value_query->row['option_value_id'];
+                                }
+
                                 if (!$is_axis) {
                                     if (
                                         $option_value_query->row["price_prefix"] ==
@@ -521,8 +532,20 @@ class Cart
                 $variant_id = isset($decoded_options['variant_id']) ? (int)$decoded_options['variant_id'] : 0;
                 $variant_sku = '';
 
+                if ($variant_id > 0 && !empty($axis_selection)) {
+                    $pc = new \ProductConfigurable($this->registry);
+                    $resolved = $pc->resolveVariant((int)$cart["product_id"], $axis_selection);
+
+                    if (!empty($resolved) && (int)$resolved['variant_id'] !== $variant_id) {
+                        $variant_id = (int)$resolved['variant_id'];
+                    } elseif (empty($resolved)) {
+                        $variant_id = 0;
+                        $stock = false;
+                    }
+                }
+
                 if ($variant_id > 0) {
-                    $variant_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_variant WHERE variant_id = '" . $variant_id . "' AND product_id = '" . (int)$cart["product_id"] . "' AND status = '1'");
+                    $variant_query = $this->db->query("SELECT pv.*, cgp.price AS cg_price FROM " . DB_PREFIX . "product_variant pv LEFT JOIN " . DB_PREFIX . "dockercart_product_variant_customer_group_price cgp ON (cgp.variant_id = pv.variant_id AND cgp.customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "') WHERE pv.variant_id = '" . $variant_id . "' AND pv.product_id = '" . (int)$cart["product_id"] . "' AND pv.status = '1'");
 
                     if ($variant_query->num_rows) {
                         $variant_sku = $variant_query->row['sku'];
@@ -536,10 +559,8 @@ class Cart
                             $product_query->row['model'] = $variant_sku;
                         }
 
-                        $variant_cg_query = $this->db->query("SELECT price FROM " . DB_PREFIX . "dockercart_product_variant_customer_group_price WHERE variant_id = '" . (int)$variant_id . "' AND customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "'");
-
-                        if ($variant_cg_query->num_rows && (float)$variant_cg_query->row['price'] > 0) {
-                            $product_query->row['price'] = (float)$variant_cg_query->row['price'];
+                        if ($variant_query->row['cg_price'] !== null && (float)$variant_query->row['cg_price'] > 0) {
+                            $product_query->row['price'] = (float)$variant_query->row['cg_price'];
                         }
                     } else {
                         $stock = false;

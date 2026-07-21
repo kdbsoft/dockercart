@@ -42,3 +42,4 @@ $_['text_tax']       = 'Без учета налога:';
 $_['text_back_to']   = 'Назад к %s';
 $_['text_load_more'] = 'Показать ещё';
 $_['text_gift_badge'] = 'ПОДАРОК';
+$_['text_price_from'] = 'от';

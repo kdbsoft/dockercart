@@ -29,6 +29,24 @@ class ControllerCatalogProductConfigurable extends Controller {
 			$json['default_variant_id'] = (int)$configurable['default_variant_id'];
 		}
 
+		$this->load->model('tool/image');
+
+		foreach ($json['variants'] as &$v) {
+			if (!empty($v['image'])) {
+				$v['thumb'] = $this->model_tool_image->resize($v['image'], 60, 60);
+			} else {
+				$v['thumb'] = $this->model_tool_image->resize('no_image.png', 60, 60);
+			}
+		}
+
+		$cg_prices = $this->model_catalog_product_configurable->getVariantCustomerGroupPrices($product_id);
+
+		foreach ($json['variants'] as &$v) {
+			$v['customer_group_prices'] = isset($cg_prices[(int)$v['variant_id']]) ? $cg_prices[(int)$v['variant_id']] : array();
+		}
+
+		unset($v);
+
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
 	}
@@ -92,39 +110,19 @@ class ControllerCatalogProductConfigurable extends Controller {
 		if (!$json) {
 			$product_id = (int)$this->request->post['product_id'];
 			$values = $this->request->post['values'];
-
-			$pairs = array();
-
-			foreach ($values as $value) {
-				$pairs[] = (int)$value['option_id'] . ':' . (int)$value['option_value_id'];
-			}
-
-			sort($pairs);
-			$combo_key = implode('|', $pairs);
-
-			$existing_variants = $this->model_catalog_product_configurable->getVariants($product_id);
 			$current_variant_id = !empty($this->request->post['variant_id']) ? (int)$this->request->post['variant_id'] : 0;
 
-			foreach ($existing_variants as $v) {
-				if ((int)$v['variant_id'] === $current_variant_id) {
-					continue;
-				}
+			$hash_parts = array();
+			foreach ($values as $value) {
+				$hash_parts[(int)$value['option_id']] = (int)$value['option_value_id'];
+			}
+			ksort($hash_parts);
+			$variant_hash = implode('-', $hash_parts);
 
-				if (!empty($v['values'])) {
-					$existing_pairs = array();
+			$duplicate_id = $this->model_catalog_product_configurable->findDuplicateVariant($product_id, $variant_hash, $current_variant_id);
 
-					foreach ($v['values'] as $vv) {
-						$existing_pairs[] = (int)$vv['option_id'] . ':' . (int)$vv['option_value_id'];
-					}
-
-					sort($existing_pairs);
-
-					if (implode('|', $existing_pairs) === $combo_key) {
-						$json['error'] = $this->language->get('error_variant_duplicate');
-
-						break;
-					}
-				}
+			if ($duplicate_id) {
+				$json['error'] = $this->language->get('error_variant_duplicate');
 			}
 		}
 
@@ -132,14 +130,31 @@ class ControllerCatalogProductConfigurable extends Controller {
 			$product_id = (int)$this->request->post['product_id'];
 			$data = $this->request->post;
 
-			if (!empty($data['variant_id'])) {
-				$this->model_catalog_product_configurable->updateVariant((int)$data['variant_id'], $data);
-				$json['variant_id'] = (int)$data['variant_id'];
-			} else {
-				$json['variant_id'] = $this->model_catalog_product_configurable->addVariant($product_id, $data);
-			}
+			try {
+				if (!empty($data['variant_id'])) {
+					$this->model_catalog_product_configurable->updateVariant((int)$data['variant_id'], $data);
+					$json['variant_id'] = (int)$data['variant_id'];
+				} else {
+					$json['variant_id'] = $this->model_catalog_product_configurable->addVariant($product_id, $data);
+				}
 
-			$json['success'] = $this->language->get('text_success_variant');
+				if (isset($this->request->post['customer_group_prices'])) {
+					$variant_id = $json['variant_id'];
+					$this->model_catalog_product_configurable->deleteAllVariantCustomerGroupPrices($variant_id);
+
+					foreach ($this->request->post['customer_group_prices'] as $cg) {
+						if (!empty($cg['customer_group_id']) && isset($cg['price']) && $cg['price'] !== '') {
+							$this->model_catalog_product_configurable->setVariantCustomerGroupPrice(
+								$variant_id, (int)$cg['customer_group_id'], (float)$cg['price']
+							);
+						}
+					}
+				}
+
+				$json['success'] = $this->language->get('text_success_variant');
+			} catch (\RuntimeException $e) {
+				$json['error'] = $this->language->get('error_variant_duplicate');
+			}
 		}
 
 		$this->response->addHeader('Content-Type: application/json');
@@ -160,13 +175,21 @@ class ControllerCatalogProductConfigurable extends Controller {
 			$json['error'] = $this->language->get('error_variant_id');
 		}
 
-		if (!$json) {
-			$this->model_catalog_product_configurable->deleteVariant((int)$this->request->post['variant_id']);
-			$json['success'] = $this->language->get('text_success_variant');
-		}
+	if (!$json) {
+		$variant_query = $this->db->query("SELECT product_id FROM " . DB_PREFIX . "product_variant WHERE variant_id = '" . (int)$this->request->post['variant_id'] . "'");
+		$deleted_product_id = $variant_query->num_rows ? (int)$variant_query->row['product_id'] : 0;
 
-		$this->response->addHeader('Content-Type: application/json');
-		$this->response->setOutput(json_encode($json));
+		$this->model_catalog_product_configurable->deleteVariant((int)$this->request->post['variant_id']);
+		$json['success'] = $this->language->get('text_success_variant');
+
+		if ($deleted_product_id) {
+			$configurable = $this->model_catalog_product_configurable->getConfigurable($deleted_product_id);
+			$json['default_variant_id'] = $configurable ? (int)$configurable['default_variant_id'] : 0;
+		}
+	}
+
+	$this->response->addHeader('Content-Type: application/json');
+	$this->response->setOutput(json_encode($json));
 	}
 
 	public function setDefault() {
@@ -183,10 +206,11 @@ class ControllerCatalogProductConfigurable extends Controller {
 			$json['error'] = $this->language->get('error_variant_id');
 		}
 
-		if (!$json) {
-			$this->model_catalog_product_configurable->setDefaultVariant((int)$this->request->post['variant_id']);
-			$json['success'] = $this->language->get('text_success_default');
-		}
+	if (!$json) {
+		$this->model_catalog_product_configurable->setDefaultVariant((int)$this->request->post['variant_id']);
+		$json['success'] = $this->language->get('text_success_default');
+		$json['default_variant_id'] = (int)$this->request->post['variant_id'];
+	}
 
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
@@ -271,7 +295,6 @@ class ControllerCatalogProductConfigurable extends Controller {
 
 			if ($mode === 'simple') {
 				$this->model_catalog_product_configurable->disableConfigurable($product_id);
-				$this->model_catalog_product_configurable->deleteAllVariants($product_id);
 			} else {
 				$this->model_catalog_product_configurable->setConfigurable($product_id, 1);
 			}
@@ -360,7 +383,6 @@ class ControllerCatalogProductConfigurable extends Controller {
 						'image' => '',
 						'sort_order' => 0,
 						'status' => 1,
-						'is_default' => 0,
 						'values' => array(),
 					);
 

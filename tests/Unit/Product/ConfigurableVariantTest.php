@@ -26,8 +26,14 @@ class ConfigurableVariantTest extends TestCase
             define('DB_PREFIX', $prefix);
         }
 
-        try {
-            $con = new \mysqli($host, $user, $pass, $name, $port);
+		if (!class_exists(\mysqli::class)) {
+			self::markTestSkipped('mysqli extension not available');
+
+			return;
+		}
+
+		try {
+			$con = new \mysqli($host, $user, $pass, $name, $port);
 
             if ($con->connect_errno) {
                 self::markTestSkipped('Database connection not available: ' . $con->connect_error);
@@ -222,26 +228,25 @@ class ConfigurableVariantTest extends TestCase
         $this->assertNull(self::$pc->getVariantCustomerGroupPrice($vid, 2));
     }
 
-    /** @depends testAddMoreVariants */
-    public function testSetDefaultVariant(): void
-    {
-        $variants = self::$pc->getVariants(self::$testProductId);
-        $this->assertCount(3, $variants);
+	/** @depends testAddMoreVariants */
+	public function testSetDefaultVariant(): void
+	{
+		$variants = self::$pc->getVariants(self::$testProductId);
+		$this->assertCount(3, $variants);
 
-        $firstId = (int)$variants[0]['variant_id'];
-        $lastId = (int)$variants[2]['variant_id'];
+		$firstId = (int)$variants[0]['variant_id'];
+		$lastId = (int)$variants[2]['variant_id'];
 
-        self::$pc->setDefaultVariant($firstId);
+		self::$pc->setDefaultVariant($firstId);
 
-        $config = self::$pc->getConfigurable(self::$testProductId);
-        $this->assertEquals($firstId, (int)$config['default_variant_id']);
+		$config = self::$pc->getConfigurable(self::$testProductId);
+		$this->assertEquals($firstId, (int)$config['default_variant_id']);
 
-        self::$pc->setDefaultVariant($lastId);
+		self::$pc->setDefaultVariant($lastId);
 
-        $first = self::$pc->getVariant($firstId);
-        $this->assertEquals(0, (int)$first['is_default']);
-        $this->assertEquals(1, (int)self::$pc->getVariant($lastId)['is_default']);
-    }
+		$config = self::$pc->getConfigurable(self::$testProductId);
+		$this->assertEquals($lastId, (int)$config['default_variant_id']);
+	}
 
     /** @depends testAddMoreVariants */
     public function testDeleteVariant(): void
@@ -337,7 +342,6 @@ class ConfigurableVariantTest extends TestCase
             $this->assertEquals('0', $row['price']);
         }
 
-        self::$pc->deleteAllVariants(self::$testProductId);
         $this->assertEmpty(self::$pc->getVariants(self::$testProductId));
         $this->assertFalse(self::$pc->isConfigurable(self::$testProductId));
     }

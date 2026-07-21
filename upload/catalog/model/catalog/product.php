@@ -149,7 +149,18 @@ class ModelCatalogProduct extends Model {
 				$aggregated_stock = $pc->getAggregatedStock($product_id);
 				$product_data['variants_in_stock'] = $aggregated_stock['variants_in_stock'];
 				$product_data['total_variants'] = $aggregated_stock['total_variants'];
+
+			$aggregated_price = $pc->getAggregatedPriceRange($product_id, (int)$this->config->get('config_customer_group_id'));
+			$product_data['variant_price_min'] = $aggregated_price['min'];
+			$product_data['variant_price_max'] = $aggregated_price['max'];
+
+			if ($aggregated_price['min'] > 0) {
+				$product_data['base_price'] = $product_data['price'];
+				$product_data['price'] = $aggregated_price['min'];
+				$product_data['discount'] = false;
+				$product_data['special'] = false;
 			}
+		}
 		} else {
 			$product_data = false;
 		}
@@ -479,34 +490,6 @@ class ModelCatalogProduct extends Model {
 				'required'             => $product_option['required']
 			);
 		}
-
-		$all_pov_ids = array();
-
-		foreach ($product_option_data as &$po) {
-			foreach ($po['product_option_value'] as $pov) {
-				$all_pov_ids[] = (int)$pov['product_option_value_id'];
-			}
-		}
-		unset($po);
-
-		$color_images_map = array();
-
-		if (!empty($all_pov_ids)) {
-			$ci_query = $this->db->query("SELECT product_option_value_id, image FROM " . DB_PREFIX . "product_option_value_color_image WHERE product_option_value_id IN (" . implode(",", array_unique($all_pov_ids)) . ") ORDER BY sort_order ASC");
-
-			foreach ($ci_query->rows as $ci) {
-				$color_images_map[(int)$ci['product_option_value_id']][] = $ci['image'];
-			}
-		}
-
-		foreach ($product_option_data as &$po) {
-			foreach ($po['product_option_value'] as &$pov) {
-				$pov_id = (int)$pov['product_option_value_id'];
-				$pov['color_images'] = isset($color_images_map[$pov_id]) ? $color_images_map[$pov_id] : array();
-			}
-			unset($pov);
-		}
-		unset($po);
 
 		$pc = new ProductConfigurable($this->registry);
 
