@@ -1756,27 +1756,6 @@ class ControllerCatalogProduct extends Controller {
 			}
 		}
 
-		if (isset($this->request->post['product_option']) && is_array($this->request->post['product_option']) && isset($this->request->get['product_id'])) {
-			$this->load->model('catalog/product_configurable');
-
-			$axes = $this->model_catalog_product_configurable->getConfigurableOptions((int)$this->request->get['product_id']);
-			$axis_option_ids = array();
-
-			foreach ($axes as $axis) {
-				$axis_option_ids[] = (int)$axis['option_id'];
-			}
-
-			if (!empty($axis_option_ids)) {
-				foreach ($this->request->post['product_option'] as $product_option) {
-					$option_id = isset($product_option['option_id']) ? (int)$product_option['option_id'] : 0;
-
-					if ($option_id && in_array($option_id, $axis_option_ids)) {
-						$this->error['option'][$option_id] = $this->language->get('error_option_is_axis');
-					}
-				}
-			}
-		}
-
 		if ($this->error && !isset($this->error['warning'])) {
 			$this->error['warning'] = $this->language->get('error_warning');
 		}
