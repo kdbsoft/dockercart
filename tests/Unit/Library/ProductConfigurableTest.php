@@ -34,26 +34,30 @@ class ProductConfigurableTest extends TestCase
 		try {
 			$con = new \mysqli($host, $user, $pass, $name, $port);
 
-			if ($con->connect_errno) {
-				self::markTestSkipped('Database connection not available: ' . $con->connect_error);
+            if ($con->connect_errno) {
+                self::markTestSkipped('Database connection not available: ' . $con->connect_error);
 
-				return;
-			}
-		} catch (\mysqli_sql_exception $e) {
-			self::markTestSkipped('Database connection not available: ' . $e->getMessage());
+                return;
+            }
 
-			return;
-		}
+            $con->close();
+        } catch (\mysqli_sql_exception $e) {
+            self::markTestSkipped('Database connection not available: ' . $e->getMessage());
 
-		require_once __DIR__ . '/../../../upload/system/library/db/mysqli.php';
-		$dbDriver = new \DB\MySQLi($con);
-		require_once __DIR__ . '/../../../upload/system/engine/registry.php';
-		$registry = new \Registry();
-		$registry->set('db', $dbDriver);
+            return;
+        }
 
-		$config = new \stdClass();
-		$config->config_language_id = 1;
-		$registry->set('config', $config);
+        require_once __DIR__ . '/../../../upload/system/library/db/mysqli.php';
+        $dbDriver = new \DB\MySQLi($host, $user, $pass, $name, $port);
+        require_once __DIR__ . '/../../../upload/system/library/config.php';
+        require_once __DIR__ . '/../../../upload/system/engine/registry.php';
+        require_once __DIR__ . '/../../../upload/system/library/product_configurable.php';
+        $registry = new \Registry();
+        $registry->set('db', $dbDriver);
+
+        $config = new \Config();
+        $config->set('config_language_id', 1);
+        $registry->set('config', $config);
 
 		$pc = new \ProductConfigurable($registry);
 
