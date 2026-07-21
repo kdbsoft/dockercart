@@ -575,6 +575,7 @@ layer that holds its own SKU, price, stock, and image per combination.
 | `oc_product_variant` | One row per purchasable variant: SKU, price, quantity, image, `variant_hash` |
 | `oc_product_variant_value` | Maps a variant to its axis option values (one row per axis) |
 | `oc_dockercart_product_variant_customer_group_price` | B2B price override per variant + customer group |
+| `oc_dockercart_product_variant_special` | Per-variant special prices (customer group, priority, date range, auto-renew) |
 
 ### variant_hash — O(1) Variant Resolution
 
@@ -619,10 +620,16 @@ an optional customer group ID. When provided, it `LEFT JOIN`s
 The storefront (`product/product.php`) and cart (`cart.php`) both pass
 `config_customer_group_id` so B2B customers see their negotiated variant prices.
 
-### Known Limitations
+### Variant Specials
 
-- `oc_product_special` is **not applied** to configurable product variants. Specials
-  only affect the base product price, which is `0` for configurable products. B2B
-  variant prices should be managed via `dockercart_product_variant_customer_group_price`.
-- Removing an axis from a configurable product deletes all existing variants for that
-  product. Re-create them via the "Generate Combinations" button after changing axes.
+Configurable products support per-variant special prices via the
+`oc_dockercart_product_variant_special` table (managed in the admin Variants tab).
+
+- Each variant can have multiple special price entries (different customer groups,
+  priorities, date ranges).
+- Specials are evaluated with `ORDER BY priority ASC, price ASC LIMIT 1` (same as
+  `oc_product_special` for simple products).
+- A variant special replaces the variant's effective price only when the special
+  price is **lower** than the effective price (base variant price or B2B
+  customer-group override).
+- The storefront product page and cart both apply variant specials.

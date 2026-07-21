@@ -839,6 +839,7 @@
               </div>
               <div class="promo-section">
                 <div class="promo-section__header"><i class="fa fa-star"></i> {{ text_promo_specials }}</div>
+                <p class="text-muted small" id="dc-special-note-configurable" style="display:none"><i class="fa fa-info-circle"></i> {{ help_configurable_specials|default('For configurable products, special prices are managed per variant in the Variants tab.') }}</p>
                 <div class="table-responsive">
                   <table id="special" class="table table-hover pricing-table">
                     <thead>
@@ -1387,10 +1388,21 @@
   var dcOptionMode = {{ is_configurable ? "'combined'" : "'simple'" }};
   var dcAxisOptionIds = {{ axis_option_ids|json_encode|raw }};
 
+  function dcUpdateSpecialNote() {
+    var note = $('#dc-special-note-configurable');
+    if (dcOptionMode === 'combined') {
+      note.show();
+    } else {
+      note.hide();
+    }
+  }
+
   $(document).ready(function() {
     if (dcOptionMode === 'combined') {
       loadVariantMatrix();
     }
+
+    dcUpdateSpecialNote();
 
     $('#dc-toggle-mode-btn').on('click', function() {
       var newMode = (dcOptionMode === 'simple') ? 'combined' : 'simple';
@@ -1445,6 +1457,7 @@
 
           $('#dc-toggle-mode-btn').html(newBtnHtml);
           $('#dc-option-mode-label').removeClass('label-primary label-default').addClass(newSpanClass).html('<i class="fa fa-circle"></i> ' + newLabel);
+          dcUpdateSpecialNote();
         }
       });
     });

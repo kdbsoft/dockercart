@@ -154,6 +154,8 @@ class ModelCatalogProduct extends Model {
 			$product_data['variant_price_min'] = $aggregated_price['min'];
 			$product_data['variant_price_max'] = $aggregated_price['max'];
 
+			$product_data['variant_specials'] = $pc->getVariantsSpecials($product_id);
+
 			if ($aggregated_price['min'] > 0) {
 				$product_data['base_price'] = $product_data['price'];
 				$product_data['price'] = $aggregated_price['min'];
@@ -799,6 +801,27 @@ class ModelCatalogProduct extends Model {
 								AND ps2.priority = ps.priority
 								AND ps2.price = ps.price
 								AND ps2.date_end > CURDATE()
+						)",
+			),
+			'variant_special' => array(
+				'table'  => 'dockercart_product_variant_special',
+				'insert' => "
+					INSERT INTO " . DB_PREFIX . "dockercart_product_variant_special (variant_id, customer_group_id, priority, price, date_start, date_end, auto_renew)
+					SELECT pvs.variant_id, pvs.customer_group_id, pvs.priority, pvs.price,
+						CURDATE(),
+						DATE_ADD(CURDATE(), INTERVAL DATEDIFF(pvs.date_end, pvs.date_start) DAY),
+						1
+					FROM " . DB_PREFIX . "dockercart_product_variant_special pvs
+					WHERE pvs.auto_renew = '1'
+						AND pvs.date_end < CURDATE()
+						AND pvs.date_end != '0000-00-00'
+						AND NOT EXISTS (
+							SELECT 1 FROM " . DB_PREFIX . "dockercart_product_variant_special pvs2
+							WHERE pvs2.variant_id = pvs.variant_id
+								AND pvs2.customer_group_id = pvs.customer_group_id
+								AND pvs2.priority = pvs.priority
+								AND pvs2.price = pvs.price
+								AND pvs2.date_end > CURDATE()
 						)",
 			),
 			'discount' => array(
