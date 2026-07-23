@@ -810,6 +810,7 @@ class ControllerMarketplaceModification extends Controller {
 
 	protected function getFormData() {
 		$data['text_form'] = !isset($this->request->get['modification_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
+		$data['text_form_subtitle'] = $this->language->get('text_form_subtitle');
 
 		if (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];
@@ -1421,6 +1422,7 @@ class ControllerMarketplaceModification extends Controller {
 		}
 
 		$data['user_token'] = $this->session->data['user_token'];
+		$data['text_list_subtitle'] = $this->language->get('text_modification_list_subtitle');
 
 		if (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];

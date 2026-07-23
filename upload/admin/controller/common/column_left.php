@@ -35,15 +35,6 @@ class ControllerCommonColumnLeft extends Controller {
 			);
 		}
 
-		if ($this->user->hasPermission('access', 'catalog/product_bundle')) {
-			$catalog[] = array(
-				'name'	   => $this->language->get('text_product_bundle'),
-				'href'     => $this->url->link('catalog/product_bundle', 'user_token=' . $this->session->data['user_token'], true),
-				'children' => array()
-			);
-		}
-
-
 			// Attributes
 			$attribute = array();
 

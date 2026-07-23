@@ -31,29 +31,24 @@
     {% endif %}
 
     <ul class="nav nav-tabs dcx-profile-tabs" id="search-tabs" role="tablist">
-      <li class="active"><a href="#search-tab-general" class="js-search-tab" data-tab="search-tab-general" data-title="{{ tab_general }}" data-subtitle="{{ text_tab_general_subtitle }}" data-icon="fa-sliders"><i class="fa fa-sliders"></i> {{ tab_general }}</a></li>
-      <li><a href="#search-tab-connection" class="js-search-tab" data-tab="search-tab-connection" data-title="{{ tab_connection }}" data-subtitle="{{ text_tab_connection_subtitle }}" data-icon="fa-plug"><i class="fa fa-plug"></i> {{ tab_connection }}</a></li>
-      <li><a href="#search-tab-autocomplete" class="js-search-tab" data-tab="search-tab-autocomplete" data-title="{{ tab_autocomplete }}" data-subtitle="{{ text_tab_autocomplete_subtitle }}" data-icon="fa-bolt"><i class="fa fa-bolt"></i> {{ tab_autocomplete }}</a></li>
-      <li><a href="#search-tab-indexing" class="js-search-tab" data-tab="search-tab-indexing" data-title="{{ tab_indexing }}" data-subtitle="{{ text_tab_indexing_subtitle }}" data-icon="fa-refresh"><i class="fa fa-refresh"></i> {{ tab_indexing }}</a></li>
-      <li><a href="#search-tab-about" class="js-search-tab" data-tab="search-tab-about" data-title="{{ tab_about }}" data-subtitle="{{ text_tab_about_subtitle }}" data-icon="fa-info-circle"><i class="fa fa-info-circle"></i> {{ tab_about }}</a></li>
+      <li class="active"><a href="#search-tab-general" class="js-search-tab" data-tab="search-tab-general" data-title="{{ tab_general }}" data-subtitle="{{ text_tab_general_subtitle }}"><i data-lucide="sliders-horizontal" width="16" height="16" style="vertical-align:middle"></i> {{ tab_general }}</a></li>
+      <li><a href="#search-tab-connection" class="js-search-tab" data-tab="search-tab-connection" data-title="{{ tab_connection }}" data-subtitle="{{ text_tab_connection_subtitle }}"><i data-lucide="plug" width="16" height="16" style="vertical-align:middle"></i> {{ tab_connection }}</a></li>
+      <li><a href="#search-tab-autocomplete" class="js-search-tab" data-tab="search-tab-autocomplete" data-title="{{ tab_autocomplete }}" data-subtitle="{{ text_tab_autocomplete_subtitle }}"><i data-lucide="zap" width="16" height="16" style="vertical-align:middle"></i> {{ tab_autocomplete }}</a></li>
+      <li><a href="#search-tab-indexing" class="js-search-tab" data-tab="search-tab-indexing" data-title="{{ tab_indexing }}" data-subtitle="{{ text_tab_indexing_subtitle }}"><i data-lucide="refresh-cw" width="16" height="16" style="vertical-align:middle"></i> {{ tab_indexing }}</a></li>
+      <li><a href="#search-tab-about" class="js-search-tab" data-tab="search-tab-about" data-title="{{ tab_about }}" data-subtitle="{{ text_tab_about_subtitle }}"><i data-lucide="info" width="16" height="16" style="vertical-align:middle"></i> {{ tab_about }}</a></li>
     </ul>
 
+    <div class="section-heading">
+      <h2 id="search-tab-title">{{ tab_general }}</h2>
+      <p class="section-heading-subtitle" id="search-tab-subtitle">{{ text_tab_general_subtitle }}</p>
+    </div>
     <div class="dcx-shell">
       <div class="dcx-panel">
-        <div class="dcx-panel-head">
-          <div class="dcx-panel-head__icon"><i id="search-tab-icon" class="fa fa-sliders"></i></div>
-          <div>
-            <h3 class="dcx-panel-title" id="search-tab-title">{{ tab_general }}</h3>
-            <div class="dcx-panel-subtitle" id="search-tab-subtitle">{{ text_tab_general_subtitle }}</div>
-          </div>
-        </div>
         <div class="dcx-panel-body">
           <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-dockercart-search" class="form-horizontal dcx-form">
 
             <div id="search-tab-general" class="dcx-tab-pane active">
               <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                <h4>{{ text_module_settings }}</h4>
-
                 <div class="form-group required">
                   <label class="col-sm-3 control-label" for="input-status">{{ entry_status }}</label>
                   <div class="col-sm-9">
@@ -93,8 +88,6 @@
 
             <div id="search-tab-connection" class="dcx-tab-pane">
               <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                <h4>{{ tab_connection }}</h4>
-
                 <div class="form-group required">
                   <label class="col-sm-3 control-label" for="input-host">{{ entry_host }}</label>
                   <div class="col-sm-9">
@@ -130,8 +123,6 @@
 
             <div id="search-tab-autocomplete" class="dcx-tab-pane">
               <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                <h4>{{ tab_autocomplete }}</h4>
-
                 <div class="form-group">
                   <label class="col-sm-3 control-label" for="input-autocomplete">{{ entry_autocomplete }}</label>
                   <div class="col-sm-9">
@@ -155,8 +146,6 @@
 
             <div id="search-tab-indexing" class="dcx-tab-pane">
               <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                <h4>{{ tab_indexing }}</h4>
-
                 <div class="alert alert-warning"><i class="fa fa-exclamation-triangle"></i> {{ text_reindex_warning }}</div>
 
                 <div class="form-group">
@@ -180,7 +169,6 @@
 
             <div id="search-tab-about" class="dcx-tab-pane">
               <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                <h4>{{ tab_about }}</h4>
                 <table class="table table-bordered dcx-table">
                    <tr>
                     <td><strong>{{ text_developer }}</strong></td>
@@ -206,11 +194,9 @@ function updateSearchPanelHeader(tabLink) {
   var $tab = $(tabLink);
   var title = $tab.data('title') || '{{ tab_general|e('js') }}';
   var subtitle = $tab.data('subtitle') || '{{ text_tab_general_subtitle }}';
-  var icon = String($tab.data('icon') || 'fa-sliders').replace(/[^a-z0-9\-]/gi, '');
 
   $('#search-tab-title').text(title);
   $('#search-tab-subtitle').text(subtitle);
-  $('#search-tab-icon').attr('class', 'fa ' + icon);
 }
 
 $(document).on('click', '.js-search-tab', function(e) {

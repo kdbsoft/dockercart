@@ -1,9 +1,9 @@
 <?php
 
-$_['column_date_end'] = 'Дата окончания';
+$_['column_date_end'] = 'Дата конца';
 $_['column_date_start'] = 'Дата начала';
 $_['column_returns'] = 'Нет. Возвраты не принимаются.';
-$_['entry_date_end'] = 'Дата окончания';
+$_['entry_date_end'] = 'Дата конца';
 $_['entry_date_start'] = 'Дата начала';
 $_['entry_group'] = 'Группировать по';
 $_['entry_sort_order'] = 'Порядок сортировки';
@@ -22,5 +22,3 @@ $_['text_year'] = 'Годы';
 // Subtitle
 
 $_['text_edit_subtitle'] = 'Настройте параметры и опции дополнения';
-
-

@@ -165,6 +165,8 @@ class ControllerExtensionModuleDockercartBlogCategory extends Controller {
 		$data['copy'] = $this->url->link('extension/module/dockercart_blog_category/copy', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('extension/module/dockercart_blog_category/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
+		$data['text_list_subtitle'] = $this->language->get('text_list_subtitle');
+
 		$data['categories'] = array();
 
 		$filter_data = array(
@@ -229,6 +231,7 @@ class ControllerExtensionModuleDockercartBlogCategory extends Controller {
 
 	protected function getForm() {
 		$data['text_form'] = !isset($this->request->get['category_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
+		$data['text_form_subtitle'] = !isset($this->request->get['category_id']) ? $this->language->get('text_add_category_subtitle') : $this->language->get('text_edit_category_subtitle');
 
 		$url = '';
 

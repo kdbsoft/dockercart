@@ -1,5 +1,6 @@
 {{ header }}{{ column_left }}
 <div id="content">
+  <link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
   <div class="page-header">
     <div class="container-fluid">
       <div class="pull-right">
@@ -14,16 +15,14 @@
     </div>
   </div>
   <div class="container-fluid">
-    <div class="panel panel-default">
-      <div class="panel-heading">
-  <div class="panel-heading__icon"><i class="fa fa-envelope"></i></div>
-  <div>
-    <h3 class="panel-title">{{ heading_title }}</h3>
-    <div class="panel-heading__subtitle">{{ text_mail_subtitle }}</div>
-  </div>
-</div>
-      <div class="panel-body">
-        <form class="form-horizontal">
+    <div class="section-heading">
+      <h2>{{ heading_title }}</h2>
+      <p class="section-heading-subtitle">{{ text_mail_subtitle }}</p>
+    </div>
+    <div class="dcx-shell">
+      <div class="dcx-panel">
+        <div class="dcx-panel-body">
+          <form class="form-horizontal">
           <div class="form-group">
             <label class="col-sm-2 control-label" for="input-store">{{ entry_store }}</label>
             <div class="col-sm-10">
@@ -89,22 +88,15 @@
           <div class="form-group required">
             <label class="col-sm-2 control-label" for="input-message">{{ entry_message }}</label>
             <div class="col-sm-10">
-              <textarea name="message" placeholder="{{ entry_message }}" id="input-message" data-toggle="summernote" data-lang="{{ summernote }}" class="form-control"></textarea>
+              <textarea name="message" placeholder="{{ entry_message }}" id="input-message" data-toggle="tinymce" class="form-control"></textarea>
             </div>
           </div>
         </form>
       </div>
     </div>
   </div>
-  <link href="view/javascript/codemirror/lib/codemirror.css" rel="stylesheet" />
-  <link href="view/javascript/codemirror/theme/monokai.css" rel="stylesheet" />
-  <script type="text/javascript" src="view/javascript/codemirror/lib/codemirror.js"></script> 
-  <script type="text/javascript" src="view/javascript/codemirror/lib/xml.js"></script> 
-  <script type="text/javascript" src="view/javascript/codemirror/lib/formatting.js"></script> 
-  <script type="text/javascript" src="view/javascript/summernote/summernote.min.js"></script>
-  <link href="view/javascript/summernote/summernote.min.css" rel="stylesheet" />
-  <script type="text/javascript" src="view/javascript/summernote/summernote-image-attributes.js"></script> 
-  <script type="text/javascript" src="view/javascript/summernote/opencart.js"></script> 
+  </div>
+  <script type="text/javascript" src="view/javascript/tinymce/opencart.js"></script> 
   <script type="text/javascript"><!--
 $('select[name=\'to\']').on('change', function() {
 	$('.to').hide();

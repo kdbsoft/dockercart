@@ -84,13 +84,13 @@
 	--dc-gray-800: #1f2937;
 	--dc-gray-900: #111827;
 
-	--dc-body-bg: #f6f6f6;
+	--dc-body-bg: #f5f6f8;
 	--dc-header-bg: #ffffff;
 	--dc-surface: #ffffff;
-	--dc-surface-alt: #f9fafb;
+	--dc-surface-alt: #f8f9fb;
 
 	--dc-text: #545454;
-	--dc-text-heading: #4c4d5a;
+	--dc-text-heading: #1a1a1a;
 	--dc-text-dark: #1f2937;
 	--dc-text-muted: #6b7280;
 	--dc-text-faint: #9ca3af;
@@ -99,31 +99,43 @@
 	--dc-border-soft: #f0f0f0;
 	--dc-border-medium: #d1d5db;
 
-	--dc-primary: var(--dc-blue-500);
-	--dc-primary-hover: var(--dc-blue-600);
-	--dc-primary-active: var(--dc-blue-700);
-	--dc-primary-light: var(--dc-blue-50);
-	--dc-primary-ring: rgba(59, 130, 246, 0.15);
+	--dc-primary: #5b7ea8;
+	--dc-primary-hover: #4a6d96;
+	--dc-primary-active: #3d5d82;
+	--dc-primary-light: #f0f4f8;
+	--dc-primary-ring: rgba(91, 126, 168, 0.15);
 
-	--dc-success: var(--dc-green-500);
-	--dc-success-hover: var(--dc-green-600);
-	--dc-success-light: var(--dc-green-100);
-	--dc-success-text: var(--dc-green-800);
+	--dc-success: #5a9a6d;
+	--dc-success-hover: #4d8c60;
+	--dc-success-light: #e8f0eb;
+	--dc-success-text: #3d6b4a;
 
-	--dc-warning: var(--dc-amber-500);
-	--dc-warning-hover: var(--dc-amber-600);
-	--dc-warning-light: var(--dc-amber-100);
-	--dc-warning-text: var(--dc-amber-800);
+	--dc-warning: #c4a040;
+	--dc-warning-hover: #b3914a;
+	--dc-warning-light: #f5f0e0;
+	--dc-warning-text: #7a6428;
 
-	--dc-danger: var(--dc-red-500);
-	--dc-danger-hover: var(--dc-red-600);
-	--dc-danger-light: var(--dc-red-100);
-	--dc-danger-text: var(--dc-red-800);
+	--dc-danger: #c77070;
+	--dc-danger-hover: #b86666;
+	--dc-danger-light: #f5e4e4;
+	--dc-danger-text: #8b3f3f;
 
-	--dc-info: var(--dc-cyan-500);
-	--dc-info-hover: var(--dc-cyan-600);
-	--dc-info-light: var(--dc-sky-100);
-	--dc-info-text: var(--dc-sky-800);
+	--dc-info: #4a97a8;
+	--dc-info-hover: #468a9a;
+	--dc-info-light: #e0f0f4;
+	--dc-info-text: #2e5f6b;
+
+	/* Tile background colors (desaturated variants for muted look) */
+	--dc-tile-success: #5a9a6d;
+	--dc-tile-success-end: #4d8c60;
+	--dc-tile-warning: #c4a040;
+	--dc-tile-warning-end: #b3914a;
+	--dc-tile-danger: #c77070;
+	--dc-tile-danger-end: #b86666;
+	--dc-tile-info: #4a97a8;
+	--dc-tile-info-end: #468a9a;
+	--dc-tile-purple: #9180c0;
+	--dc-tile-purple-end: #8a78b4;
 
 	--dc-radius-xs: 4px;
 	--dc-radius-sm: 5px;

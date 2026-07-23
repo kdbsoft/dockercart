@@ -21,6 +21,9 @@ $_['entry_progress']    = 'Progress';
 // Help
 $_['help_upload']       = 'Requires a modification file with extension \'.ocmod.zip\'.';
 
+// Subtitle
+$_['text_installer_list_subtitle'] = 'Upload and install extension packages';
+
 // Error
 $_['error_permission']  = 'Warning: You do not have permission to modify extensions!';
 $_['error_install']     = 'Extension installation taking place please wait a few seconds before trying to install!';

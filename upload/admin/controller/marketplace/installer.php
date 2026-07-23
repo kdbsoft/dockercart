@@ -18,7 +18,8 @@ class ControllerMarketplaceInstaller extends Controller {
 		);
 
 		$data['user_token'] = $this->session->data['user_token'];
-		
+		$data['text_list_subtitle'] = $this->language->get('text_installer_list_subtitle');
+
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');

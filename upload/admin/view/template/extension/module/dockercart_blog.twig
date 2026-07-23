@@ -29,22 +29,19 @@
     </div>
     {% endif %}
 
-    <ul class="nav nav-tabs dcx-profile-tabs" role="tablist">
-      <li class="active"><a href="#tab-general" data-toggle="tab"><i class="fa fa-sliders"></i> {{ tab_general }}</a></li>
-      <li><a href="#tab-display" data-toggle="tab"><i class="fa fa-desktop"></i> {{ tab_display }}</a></li>
-      <li><a href="#tab-comments" data-toggle="tab"><i class="fa fa-comments"></i> {{ tab_comments }}</a></li>
-      <li><a href="#tab-about" data-toggle="tab"><i class="fa fa-info-circle"></i> {{ tab_about }}</a></li>
+    <ul class="nav nav-tabs dcx-profile-tabs" id="blog-tabs" role="tablist">
+      <li class="active"><a href="#tab-general" class="js-blog-tab" data-tab="tab-general" data-title="{{ tab_general }}" data-subtitle="{{ text_tab_general_subtitle }}"><i data-lucide="sliders-horizontal" width="16" height="16" style="vertical-align:middle"></i> {{ tab_general }}</a></li>
+      <li><a href="#tab-display" class="js-blog-tab" data-tab="tab-display" data-title="{{ tab_display }}" data-subtitle="{{ text_tab_display_subtitle }}"><i data-lucide="monitor" width="16" height="16" style="vertical-align:middle"></i> {{ tab_display }}</a></li>
+      <li><a href="#tab-comments" class="js-blog-tab" data-tab="tab-comments" data-title="{{ tab_comments }}" data-subtitle="{{ text_tab_comments_subtitle }}"><i data-lucide="message-square-text" width="16" height="16" style="vertical-align:middle"></i> {{ tab_comments }}</a></li>
+      <li><a href="#tab-about" class="js-blog-tab" data-tab="tab-about" data-title="{{ tab_about }}" data-subtitle="{{ text_tab_about_subtitle }}"><i data-lucide="info" width="16" height="16" style="vertical-align:middle"></i> {{ tab_about }}</a></li>
     </ul>
 
+    <div class="section-heading">
+      <h2 id="blog-tab-title">{{ tab_general }}</h2>
+      <p class="section-heading-subtitle" id="blog-tab-subtitle">{{ text_tab_general_subtitle }}</p>
+    </div>
     <div class="dcx-shell">
       <div class="dcx-panel">
-        <div class="dcx-panel-head">
-          <div class="dcx-panel-head__icon"><i class="fa fa-pencil"></i></div>
-          <div>
-            <h3 class="dcx-panel-title">{{ text_edit }}</h3>
-            <div class="dcx-panel-subtitle">{{ text_settings }}</div>
-          </div>
-        </div>
         <div class="dcx-panel-body">
           <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-dockercart-blog" class="form-horizontal dcx-form">
             <input type="hidden" name="user_token" value="{{ user_token }}" />
@@ -60,10 +57,8 @@
             </div>
 
             <div class="tab-content">
-              <div class="tab-pane dcx-tab-pane active" id="tab-general">
+              <div class="dcx-tab-pane active" id="tab-general">
                 <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                  <h4>{{ tab_general }}</h4>
-
                   <div class="form-group">
                     <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
                     <div class="col-sm-10">
@@ -92,10 +87,8 @@
                 </div>
               </div>
 
-              <div class="tab-pane dcx-tab-pane" id="tab-display">
+              <div class="dcx-tab-pane" id="tab-display">
                 <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                  <h4>{{ tab_display }}</h4>
-
                   <div class="form-group">
                     <label class="col-sm-2 control-label" for="input-show-author">{{ entry_show_author }}</label>
                     <div class="col-sm-10">
@@ -154,10 +147,8 @@
                 </div>
               </div>
 
-              <div class="tab-pane dcx-tab-pane" id="tab-comments">
+              <div class="dcx-tab-pane" id="tab-comments">
                 <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                  <h4>{{ tab_comments }}</h4>
-
                   <div class="form-group">
                     <label class="col-sm-2 control-label" for="input-allow-comments">{{ entry_allow_comments }}</label>
                     <div class="col-sm-10">
@@ -206,9 +197,8 @@
                 </div>
               </div>
 
-              <div class="tab-pane dcx-tab-pane" id="tab-about">
+              <div class="dcx-tab-pane" id="tab-about">
                 <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                  <h4>{{ tab_about }}</h4>
                   <table class="table table-bordered dcx-table">
                     <tr>
                       <td style="width:220px;"><strong>{{ text_module_label }}</strong></td>
@@ -232,4 +222,30 @@
     </div>
   </div>
 </div>
+<script type="text/javascript">
+function updateBlogTabHeader(tabLink) {
+  var $tab = $(tabLink);
+  var title = $tab.data('title') || '{{ tab_general|e('js') }}';
+  var subtitle = $tab.data('subtitle') || '{{ text_tab_general_subtitle|e('js') }}';
+
+  $('#blog-tab-title').text(title);
+  $('#blog-tab-subtitle').text(subtitle);
+}
+
+$(document).on('click', '.js-blog-tab', function(e) {
+  e.preventDefault();
+  var tabId = $(this).data('tab');
+  if (!tabId) return;
+
+  $('#blog-tabs > li').removeClass('active');
+  $(this).closest('li').addClass('active');
+
+  $('#tab-general, #tab-display, #tab-comments, #tab-about').removeClass('active');
+  $('#' + tabId).addClass('active');
+
+  updateBlogTabHeader(this);
+});
+
+updateBlogTabHeader($('#blog-tabs > li.active a.js-blog-tab'));
+</script>
 {{ footer }}

@@ -1,27 +1,27 @@
-{{ header }}{{ column_left }}
+{{ header }}
+{{ column_left }}
 <div id="content">
   <div class="page-header">
     <div class="container-fluid">
-      <div class="pull-right">
-        <a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa fa-plus"></i></a>
-        <button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="confirm('{{ text_confirm }}') ? $('#form-zone').submit() : false;"><i class="fa fa-trash-o"></i></button>
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="pull-right">
+            <a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary btn--icon"><i data-lucide="plus" width="16" height="16"></i></a>
+            <button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="confirm('{{ text_confirm }}') ? $('#form-zone').submit() : false;"><i data-lucide="trash-2" width="16" height="16"></i></button>
+          </div>
+          <h1 class="page-header__title">{{ heading_title }}</h1>
+        </div>
       </div>
-      <h1>{{ heading_title }}</h1>
-      <ul class="breadcrumb">
-        {% for breadcrumb in breadcrumbs %}
-        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
-        {% endfor %}
-      </ul>
     </div>
   </div>
   <div class="container-fluid">
     {% if error_warning %}
-    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+    <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
     {% if success %}
-    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+    <div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> {{ success }}
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
@@ -33,96 +33,71 @@
             <select name="filter_country_id" id="input-filter-country" class="form-control">
               <option value="0">{{ text_all }}</option>
               {% for country in countries %}
-                <option value="{{ country.country_id }}" {% if country.country_id == filter_country_id %}selected="selected"{% endif %}>{{ country.name }}</option>
+              <option value="{{ country.country_id }}" {% if country.country_id == filter_country_id %}selected="selected"{% endif %}>{{ country.name }}</option>
               {% endfor %}
             </select>
           </div>
           <div class="filter-actions">
-            <button type="button" id="button-filter" class="btn btn-default"><i class="fa fa-filter"></i> {{ button_filter }}</button>
+            <button type="button" id="button-filter" class="btn btn-default"><i data-lucide="filter" width="14" height="14"></i> {{ button_filter }}</button>
           </div>
         </div>
       </div>
     </div>
-    <div class="row">
-      <div class="col-md-12">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-  <div class="panel-heading__icon"><i class="fa fa-list"></i></div>
-  <div>
-    <h3 class="panel-title">{{ text_list }}</h3>
-    <div class="panel-heading__subtitle">{{ text_list_subtitle }}</div>
-  </div>
-</div>
-          <div class="panel-body">
-            <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-zone">
-              <div class="table-responsive">
-                <table class="table table-hover">
-                  <thead>
-                    <tr>
-                      <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
-                      <td class="text-left">{% if sort == 'c.name' %}
-                        <a href="{{ sort_country }}" class="{{ order|lower }}">{{ column_country }}</a>
-                        {% else %}
-                        <a href="{{ sort_country }}">{{ column_country }}</a>
-                        {% endif %}</td>
-                      <td class="text-left">{% if sort == 'z.name' %}
-                        <a href="{{ sort_name }}" class="{{ order|lower }}">{{ column_name }}</a>
-                        {% else %}
-                        <a href="{{ sort_name }}">{{ column_name }}</a>
-                        {% endif %}</td>
-                      <td class="text-left">{% if sort == 'z.code' %}
-                        <a href="{{ sort_code }}" class="{{ order|lower }}">{{ column_code }}</a>
-                        {% else %}
-                        <a href="{{ sort_code }}">{{ column_code }}</a>
-                        {% endif %}</td>
-                      <td class="text-right">{{ column_action }}</td>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% if zones %}
-                    {% for zone in zones %}
-                    <tr>
-                      <td class="text-center">{% if zone.zone_id in selected %}
-                        <input type="checkbox" name="selected[]" value="{{ zone.zone_id }}" checked="checked" />
-                        {% else %}
-                        <input type="checkbox" name="selected[]" value="{{ zone.zone_id }}" />
-                        {% endif %}</td>
-                      <td class="text-left">{{ zone.country }}</td>
-                      <td class="text-left">{{ zone.name }}</td>
-                      <td class="text-left">{{ zone.code }}</td>
-                      <td class="text-right"><a href="{{ zone.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
-                    </tr>
-                    {% endfor %}
-                    {% else %}
-                    <tr>
-                      <td class="text-center" colspan="5">{{ text_no_results }}</td>
-                    </tr>
-                    {% endif %}
-                  </tbody>
-                </table>
-              </div>
-            </form>
-            <div class="row">
-              <div class="col-sm-6 text-left">{{ pagination }}</div>
-              <div class="col-sm-6 text-right">{{ results }}</div>
-            </div>
-          </div>
-        </div>
+    <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-zone">
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+          <thead>
+            <tr>
+              <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
+              <td class="text-left">{% if sort == 'c.name' %}<a href="{{ sort_country }}" class="{{ order|lower }} sortable">{{ column_country }}</a>{% else %}<a href="{{ sort_country }}" class="sortable">{{ column_country }}</a>{% endif %}</td>
+              <td class="text-left">{% if sort == 'z.name' %}<a href="{{ sort_name }}" class="{{ order|lower }} sortable">{{ column_name }}</a>{% else %}<a href="{{ sort_name }}" class="sortable">{{ column_name }}</a>{% endif %}</td>
+              <td class="text-left">{% if sort == 'z.code' %}<a href="{{ sort_code }}" class="{{ order|lower }} sortable">{{ column_code }}</a>{% else %}<a href="{{ sort_code }}" class="sortable">{{ column_code }}</a>{% endif %}</td>
+              <td class="text-right">{{ column_action }}</td>
+            </tr>
+          </thead>
+          <tbody>
+            {% if zones %}
+            {% for zone in zones %}
+            <tr>
+              <td class="text-center">{% if zone.zone_id in selected %}
+                <input type="checkbox" name="selected[]" value="{{ zone.zone_id }}" checked="checked" />
+                {% else %}
+                <input type="checkbox" name="selected[]" value="{{ zone.zone_id }}" />
+                {% endif %}</td>
+              <td class="text-left">{{ zone.country }}</td>
+              <td class="text-left">{{ zone.name }}</td>
+              <td class="text-left">{{ zone.code }}</td>
+              <td class="text-right"><a href="{{ zone.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a></td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+              <td class="text-center" colspan="5">{{ text_no_results }}</td>
+            </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </form>
+    <div class="pagination-wrap">
+      <div class="row">
+        <div class="col-sm-6 text-left">{{ pagination }}</div>
+        <div class="col-sm-6 text-right">{{ results }}</div>
       </div>
     </div>
   </div>
 </div>
 <script type="text/javascript"><!--
 $('#button-filter').on('click', function() {
-  var url = 'index.php?route=localisation/zone&user_token={{ user_token }}';
+	var url = 'index.php?route=localisation/zone&user_token={{ user_token }}';
 
-  var filter_country_id = $('select[name=\'filter_country_id\']').val();
+	var filter_country_id = $('select[name=\'filter_country_id\']').val();
 
-  if (filter_country_id && filter_country_id != '0') {
-    url += '&filter_country_id=' + encodeURIComponent(filter_country_id);
-  }
+	if (filter_country_id && filter_country_id != '0') {
+		url += '&filter_country_id=' + encodeURIComponent(filter_country_id);
+	}
 
-  location = url;
+	location = url;
 });
 //--></script>
 {{ footer }}

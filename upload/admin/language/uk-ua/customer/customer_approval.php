@@ -1,7 +1,7 @@
 <?php
 
 $_['column_action'] = 'Дія';
-$_['column_customer_group'] = 'Група клієнтів';
+$_['column_customer_group'] = 'Група покупців';
 $_['column_date_added'] = 'Дата додавання';
 $_['column_email'] = 'Електронна пошта';
 $_['column_name'] = 'Ім\'я клієнта';
@@ -10,7 +10,7 @@ $_['button_approve'] = 'Підтвердити';
 $_['button_deny'] = 'Відхилити';
 $_['button_edit'] = 'Редагувати';
 $_['button_filter'] = 'Фільтр';
-$_['entry_customer_group'] = 'Група клієнтів';
+$_['entry_customer_group'] = 'Група покупців';
 $_['entry_date_added'] = 'Дата додавання';
 $_['entry_email'] = 'Електронна пошта';
 $_['entry_name'] = 'Ім\'я клієнта';

@@ -19,14 +19,11 @@
     align-items: center;
   }
 
-  .category-search-wrap {
-    min-width: 240px;
-    max-width: 360px;
-    width: 100%;
-  }
-
-  .category-search-wrap .form-control {
-    height: 34px;
+  #expand-all-categories,
+  #collapse-all-categories {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
   }
 
   #category-tree-table td {
@@ -65,12 +62,12 @@
     flex: 0 0 auto;
   }
 
-  .category-toggle .fa {
+  .category-toggle .lucide {
     font-size: 10px;
     transition: transform .15s ease;
   }
 
-  .category-toggle[aria-expanded="true"] .fa {
+  .category-toggle[aria-expanded="true"] .lucide {
     transform: rotate(90deg);
   }
 
@@ -97,62 +94,57 @@
 <div id="content">
   <div class="page-header">
     <div class="container-fluid">
-      <div class="pull-right"><a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa fa-plus"></i></a> <a href="{{ repair }}" data-toggle="tooltip" title="{{ button_rebuild }}" class="btn btn-default"><i class="fa fa-refresh"></i></a>
-        <button type="submit" form="form-category" formaction="{{ copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default"><i class="fa fa-copy"></i></button>
-        <button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="confirm('{{ text_confirm }}') ? $('#form-category').submit() : false;"><i class="fa fa-trash-o"></i></button>
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="pull-right">
+            <a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary btn--icon"><i data-lucide="plus" width="16" height="16"></i></a>
+            <a href="{{ repair }}" data-toggle="tooltip" title="{{ button_rebuild }}" class="btn btn-default btn--icon"><i data-lucide="refresh-cw" width="16" height="16"></i></a>
+            <button type="submit" form="form-category" formaction="{{ copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default btn--icon"><i data-lucide="copy" width="16" height="16"></i></button>
+            <button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="confirm('{{ text_confirm }}') ? $('#form-category').submit() : false;"><i data-lucide="trash-2" width="16" height="16"></i></button>
+          </div>
+          <h1 class="page-header__title">{{ heading_title }}</h1>
+        </div>
       </div>
-      <h1>{{ heading_title }}</h1>
-      <ul class="breadcrumb">
-        {% for breadcrumb in breadcrumbs %}
-        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
-        {% endfor %}
-      </ul>
     </div>
   </div>
   <div class="container-fluid">
     {% if error_warning %}
-    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+    <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
     {% if success %}
-    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+    <div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> {{ success }}
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
-    <div class="panel panel-default">
-      <div class="panel-heading">
-  <div class="panel-heading__icon"><i class="fa fa-list"></i></div>
-  <div>
-    <h3 class="panel-title">{{ text_list }}</h3>
-    <div class="panel-heading__subtitle">{{ text_list_subtitle }}</div>
-  </div>
-</div>
-      <div class="panel-body">
-        <div class="category-toolbar">
-          <div class="category-toolbar-actions">
-            <button type="button" class="btn btn-default btn-sm" id="expand-all-categories"><i class="fa fa-plus-square-o"></i> {{ button_expand_all }}</button>
-            <button type="button" class="btn btn-default btn-sm" id="collapse-all-categories"><i class="fa fa-minus-square-o"></i> {{ button_collapse_all }}</button>
-          </div>
-          <div class="category-search-wrap">
-            <input type="search" id="category-tree-search" class="form-control" placeholder="{{ text_quick_find }}" autocomplete="off" />
-          </div>
+    <div class="category-toolbar">
+      <div class="category-toolbar-actions">
+        <button type="button" class="btn btn-default btn-sm" id="expand-all-categories"><i data-lucide="chevrons-down-up" width="14" height="14"></i> {{ button_expand_all }}</button>
+        <button type="button" class="btn btn-default btn-sm" id="collapse-all-categories"><i data-lucide="chevrons-up-down" width="14" height="14"></i> {{ button_collapse_all }}</button>
+      </div>
+      <div class="category-search-wrap">
+        <div class="search-input-wrap">
+          <i data-lucide="search" width="14" height="14" class="search-input-icon"></i>
+          <input type="search" id="category-tree-search" class="form-control" placeholder="{{ text_quick_find }}" autocomplete="off" />
         </div>
-        <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-category">
-          <div class="table-responsive">
-            <table class="table table-hover" id="category-tree-table">
+      </div>
+    </div>
+    <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-category">
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover" id="category-tree-table">
               <thead>
                 <tr>
                   <td style="width: 32px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
                   <td class="text-left">{% if sort == 'name' %}
-                    <a href="{{ sort_name }}" class="{{ order|lower }}">{{ column_name }}</a>
+                    <a href="{{ sort_name }}" class="{{ order|lower }} sortable">{{ column_name }}</a>
                     {% else %}
-                    <a href="{{ sort_name }}">{{ column_name }}</a>
+                    <a href="{{ sort_name }}" class="sortable">{{ column_name }}</a>
                     {% endif %}</td>
                   <td class="text-right">{% if sort == 'sort_order' %}
-                    <a href="{{ sort_sort_order }}" class="{{ order|lower }}">{{ column_sort_order }}</a>
+                    <a href="{{ sort_sort_order }}" class="{{ order|lower }} sortable">{{ column_sort_order }}</a>
                     {% else %}
-                    <a href="{{ sort_sort_order }}">{{ column_sort_order }}</a>
+                    <a href="{{ sort_sort_order }}" class="sortable">{{ column_sort_order }}</a>
                     {% endif %}</td>
                   <td class="text-left">{{ column_status }}</td>
                   <td class="text-right">{{ column_action }}</td>
@@ -169,34 +161,34 @@
                     {% endif %}</td>
                   <td class="text-left">
                     <div class="category-name-cell" style="padding-left: {{ category.indent }}px;">
-                      <input type="hidden" id="input-image-{{ category.category_id }}" value="{{ category.image_path }}" /><a href="javascript:void(0);" class="category-image-edit" id="thumb-image-{{ category.category_id }}" data-category-id="{{ category.category_id }}" style="flex:0 0 auto;line-height:0;">{% if category.image %} <img src="{{ category.image }}" alt="{{ category.name }}" class="img-thumbnail" /> {% else %} <span class="img-thumbnail list"><i class="fa fa-camera fa-2x"></i></span> {% endif %}</a>
+                      <input type="hidden" id="input-image-{{ category.category_id }}" value="{{ category.image_path }}" /><a href="javascript:void(0);" class="category-image-edit" id="thumb-image-{{ category.category_id }}" data-category-id="{{ category.category_id }}" style="flex:0 0 auto;line-height:0;">{% if category.image %} <img src="{{ category.image }}" alt="{{ category.name }}" class="img-thumbnail" /> {% else %} <span class="img-thumbnail list"><i data-lucide="camera" width="24" height="24"></i></span> {% endif %}</a>
                       {% if category.has_children %}
                       <button type="button" class="category-toggle" data-category-toggle="{{ category.category_id }}" aria-label="Toggle subcategories" aria-expanded="false">
-                        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                        <i data-lucide="chevron-right" width="14" height="14"></i>
                       </button>
                       {% else %}
                       <span class="category-toggle-spacer" aria-hidden="true"></span>
                       {% endif %}
                       {% if category.level > 0 %}<span class="category-depth-badge">L{{ category.level }}</span>{% endif %}
                       <span class="category-name-text">
-                        <span class="inline-edit" data-category-id="{{ category.category_id }}" data-field="name" data-value="{{ category.name_raw }}">{{ category.name }}<i class="fa fa-pencil-square-o inline-edit-icon"></i></span>
+                        <span class="inline-edit" data-category-id="{{ category.category_id }}" data-field="name" data-value="{{ category.name_raw }}">{{ category.name }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
                       </span>
                     </div>
                   </td>
                   <td class="text-right">
-                    <span class="inline-edit" data-category-id="{{ category.category_id }}" data-field="sort_order" data-value="{{ category.sort_order_raw }}">{{ category.sort_order }}<i class="fa fa-pencil-square-o inline-edit-icon"></i></span>
+                    <span class="inline-edit" data-category-id="{{ category.category_id }}" data-field="sort_order" data-value="{{ category.sort_order_raw }}">{{ category.sort_order }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
                   </td>
                   <td class="text-left">
                     <span class="inline-edit" data-category-id="{{ category.category_id }}" data-field="status" data-value="{{ category.status_raw }}">
                       {% if category.status %}
-                      <span class="label label-success">{{ text_enabled }}</span>
+                      <span class="page-header__badge page-header__badge--active">{{ text_enabled }}</span>
                       {% else %}
-                      <span class="label label-danger">{{ text_disabled }}</span>
+                      <span class="page-header__badge page-header__badge--inactive">{{ text_disabled }}</span>
                       {% endif %}
-                      <i class="fa fa-pencil-square-o inline-edit-icon"></i>
+                      <i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>
                     </span>
                   </td>
-                  <td class="text-right"><a href="{{ category.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a> <a href="{{ category.copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default"><i class="fa fa-copy"></i></a> <a href="{{ category.delete }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="return confirm('{{ text_confirm }}');"><i class="fa fa-trash-o"></i></a></td>
+                  <td class="text-right"><a href="{{ category.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a> <a href="{{ category.copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default btn--icon"><i data-lucide="copy" width="14" height="14"></i></a> <a href="{{ category.delete }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="return confirm('{{ text_confirm }}');"><i data-lucide="trash-2" width="14" height="14"></i></a></td>
                 </tr>
                 {% endfor %}
                 {% else %}
@@ -208,12 +200,12 @@
             </table>
           </div>
         </form>
-        <div class="row">
-          <div class="col-sm-6 text-left">{{ pagination }}</div>
-          <div class="col-sm-6 text-right">{{ results }}</div>
+        <div class="pagination-wrap">
+          <div class="row">
+            <div class="col-sm-6 text-left">{{ pagination }}</div>
+            <div class="col-sm-6 text-right">{{ results }}</div>
+          </div>
         </div>
-      </div>
-    </div>
   </div>
 </div>
 <script>
@@ -540,14 +532,6 @@ $(document).on('click', '.category-image-edit', function(e) {
 	});
 });
 //--></script>
-<style>
-.inline-edit { cursor: default; }
-.inline-edit .inline-edit-icon { margin-left: 4px; font-size: 13px; opacity: 0.3; cursor: pointer; }
-.inline-edit:hover .inline-edit-icon { opacity: 0.8; }
-.inline-edit-input { width: 80px; text-align: right; display: inline-block !important; height: 28px; padding: 3px 8px; }
-.inline-edit-name-input { width: 200px; display: inline-block !important; height: 28px; padding: 3px 8px; }
-.inline-edit-error { margin-left: 4px; font-size: 11px; white-space: nowrap; }
-</style>
 <script type="text/javascript"><!--
 $(document).on('click', '.inline-edit-icon', function(e) {
 	e.stopPropagation();
@@ -606,7 +590,8 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 							} else {
 								reverted = true;
 								$span.data('value', res['value_html']);
-								$span.html(res['value_html'] + '<i class="fa fa-pencil-square-o inline-edit-icon"></i>');
+								$span.html(res['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+								lucide.createIcons({ nodes: [$span[0]] });
 							}
 						},
 						error: function() {
@@ -655,7 +640,8 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 						setTimeout(function() { $span.html($span.data('display')); }, 3000);
 					} else {
 						$span.data('value', newValue);
-						$span.html(json['value_html'] + '<i class="fa fa-pencil-square-o inline-edit-icon"></i>');
+						$span.html(json['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+						lucide.createIcons({ nodes: [$span[0]] });
 					}
 				},
 				error: function() {
@@ -692,7 +678,8 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 						setTimeout(function() { $span.html($span.data('display')); }, 3000);
 					} else {
 						$span.data('value', newValue);
-						$span.html(json['value_html'] + '<i class="fa fa-pencil-square-o inline-edit-icon"></i>');
+						$span.html(json['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+						lucide.createIcons({ nodes: [$span[0]] });
 					}
 				},
 				error: function() {

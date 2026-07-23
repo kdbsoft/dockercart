@@ -8,6 +8,8 @@ class ModelCatalogProduct extends Model
                 DB_PREFIX .
                 "product SET model = '" .
                 $this->db->escape($data["model"]) .
+                "', main_category_id = '" .
+                (int) ($data["main_category_id"] ?? 0) .
                 "', sku = '" .
                 $this->db->escape($data["sku"]) .
                 "', upc = '" .
@@ -59,7 +61,7 @@ class ModelCatalogProduct extends Model
                 "', status = '" .
                 (int) $data["status"] .
                 "', tax_class_id = '" .
-                (int) $data["tax_class_id"] .
+                (int) ($data["tax_class_id"] ?? 0) .
                 "', sort_order = '" .
                 (int) $data["sort_order"] .
                 "', date_added = NOW(), date_modified = NOW()",
@@ -1036,6 +1038,8 @@ class ModelCatalogProduct extends Model
                 DB_PREFIX .
                 "product SET model = '" .
                 $this->db->escape($data["model"]) .
+                "', main_category_id = '" .
+                (int) ($data["main_category_id"] ?? 0) .
                 "', sku = '" .
                 $this->db->escape($data["sku"]) .
                 "', upc = '" .
@@ -1087,7 +1091,7 @@ class ModelCatalogProduct extends Model
                 "', status = '" .
                 (int) $data["status"] .
                 "', tax_class_id = '" .
-                (int) $data["tax_class_id"] .
+                (int) ($data["tax_class_id"] ?? 0) .
                 "', sort_order = '" .
                 (int) $data["sort_order"] .
                 "', date_modified = NOW() WHERE product_id = '" .

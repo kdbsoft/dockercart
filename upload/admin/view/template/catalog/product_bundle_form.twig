@@ -20,14 +20,11 @@
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
+    <div class="section-heading">
+      <h2>{{ text_form }}</h2>
+      <p class="section-heading-subtitle">{{ text_form_subtitle }}</p>
+    </div>
     <div class="panel panel-default">
-      <div class="panel-heading">
-  <div class="panel-heading__icon"><i class="fa fa-pencil"></i></div>
-  <div>
-    <h3 class="panel-title">{{ text_form }}</h3>
-    <div class="panel-heading__subtitle">{{ text_form_subtitle }}</div>
-  </div>
-</div>
       <div class="panel-body">
         <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-bundle" class="form-horizontal">
           <div class="form-group">

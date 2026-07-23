@@ -679,14 +679,6 @@ class ControllerCatalogOption extends Controller {
 							'name'            => strip_tags(html_entity_decode($option_value['name'], ENT_QUOTES, 'UTF-8'))
 						);
 					}
-
-					$sort_order = array();
-
-					foreach ($option_value_data as $key => $value) {
-						$sort_order[$key] = $value['name'];
-					}
-
-					array_multisort($sort_order, SORT_ASC, $option_value_data);
 				}
 
 				$type = '';
@@ -727,5 +719,29 @@ class ControllerCatalogOption extends Controller {
 
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
+	}
+
+	public function tree() {
+		$this->load->model('catalog/option');
+
+		$options = $this->model_catalog_option->getOptions([
+			'start' => 0,
+			'limit' => 500
+		]);
+
+		$tree = [];
+
+		foreach ($options as $option) {
+			$tree[] = [
+				'category_id'  => (int)$option['option_id'],
+				'name'         => strip_tags(html_entity_decode($option['name'], ENT_QUOTES, 'UTF-8')),
+				'level'        => 0,
+				'has_children' => false,
+				'path'         => strip_tags(html_entity_decode($option['name'], ENT_QUOTES, 'UTF-8'))
+			];
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($tree));
 	}
 }

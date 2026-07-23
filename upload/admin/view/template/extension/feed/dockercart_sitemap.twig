@@ -33,19 +33,16 @@
     {% endif %}
 
     <ul class="nav nav-tabs dcx-profile-tabs" id="sitemap-tabs" role="tablist">
-      <li class="active"><a href="#sitemap-tab-general" class="js-sitemap-tab" data-tab="sitemap-tab-general" data-title="{{ text_tab_general }}" data-subtitle="{{ text_tab_general_subtitle }}" data-icon="fa-sliders"><i class="fa fa-sliders"></i> {{ text_tab_general }}</a></li>
-      <li><a href="#sitemap-tab-about" class="js-sitemap-tab" data-tab="sitemap-tab-about" data-title="{{ text_tab_about }}" data-subtitle="{{ text_tab_about_subtitle }}" data-icon="fa-info-circle"><i class="fa fa-info-circle"></i> {{ text_tab_about }}</a></li>
+      <li class="active"><a href="#sitemap-tab-general" class="js-sitemap-tab" data-tab="sitemap-tab-general" data-title="{{ text_tab_general }}" data-subtitle="{{ text_tab_general_subtitle }}"><i data-lucide="sliders-horizontal" width="16" height="16" style="vertical-align:middle"></i> {{ text_tab_general }}</a></li>
+      <li><a href="#sitemap-tab-about" class="js-sitemap-tab" data-tab="sitemap-tab-about" data-title="{{ text_tab_about }}" data-subtitle="{{ text_tab_about_subtitle }}"><i data-lucide="info" width="16" height="16" style="vertical-align:middle"></i> {{ text_tab_about }}</a></li>
     </ul>
 
+    <div class="section-heading">
+      <h2 id="sitemap-tab-title">{{ text_tab_general }}</h2>
+      <p class="section-heading-subtitle" id="sitemap-tab-subtitle">{{ text_tab_general_subtitle }}</p>
+    </div>
     <div class="dcx-shell">
       <div class="dcx-panel">
-        <div class="dcx-panel-head">
-          <div class="dcx-panel-head__icon"><i id="sitemap-tab-icon" class="fa fa-sliders"></i></div>
-          <div>
-            <h3 class="dcx-panel-title" id="sitemap-tab-title">{{ text_tab_general }}</h3>
-            <div class="dcx-panel-subtitle" id="sitemap-tab-subtitle">{{ text_tab_general_subtitle }}</div>
-          </div>
-        </div>
         <div class="dcx-panel-body">
           <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-dockercart-sitemap" class="form-horizontal dcx-form">
 
@@ -377,11 +374,9 @@ function updateSitemapPanelHeader(tabLink) {
   var $tab = $(tabLink);
   var title = $tab.data('title') || '{{ text_tab_general }}';
   var subtitle = $tab.data('subtitle') || '{{ text_tab_general_subtitle }}';
-  var icon = String($tab.data('icon') || 'fa-sliders').replace(/[^a-z0-9\-]/gi, '');
 
   $('#sitemap-tab-title').text(title);
   $('#sitemap-tab-subtitle').text(subtitle);
-  $('#sitemap-tab-icon').attr('class', 'fa ' + icon);
 }
 
 $(document).on('click', '.js-sitemap-tab', function(e) {

@@ -180,5 +180,4 @@ $_['error_upload_8']                = 'Заборонений тип файлу'
 $_['error_upload_999']              = 'Виникла невідома помилка';
 $_['error_curl']                    = 'CURL: Код помилки (%s): %s';
 
-$_['summernote']                    = 'uk-UA';
 $_['datepicker']                    = 'uk';
