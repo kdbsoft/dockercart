@@ -1,0 +1,10 @@
+ALTER TABLE `oc_length_class` MODIFY COLUMN `value` decimal(15,4) NOT NULL;
+ALTER TABLE `oc_weight_class` MODIFY COLUMN `value` decimal(15,4) NOT NULL DEFAULT 0.0000;
+ALTER TABLE `oc_product` MODIFY COLUMN `weight` decimal(15,4) NOT NULL DEFAULT 0.0000;
+ALTER TABLE `oc_product` MODIFY COLUMN `length` decimal(15,4) NOT NULL DEFAULT 0.0000;
+ALTER TABLE `oc_product` MODIFY COLUMN `width` decimal(15,4) NOT NULL DEFAULT 0.0000;
+ALTER TABLE `oc_product` MODIFY COLUMN `height` decimal(15,4) NOT NULL DEFAULT 0.0000;
+ALTER TABLE `oc_product_option_value` MODIFY COLUMN `weight` decimal(15,4) NOT NULL;
+ALTER TABLE `oc_product_variant` MODIFY COLUMN `weight` decimal(15,4) NOT NULL DEFAULT 0.0000;
+ALTER TABLE `oc_dockercart_universal_shipping` MODIFY COLUMN `min_weight` decimal(15,4) DEFAULT NULL;
+ALTER TABLE `oc_dockercart_universal_shipping` MODIFY COLUMN `max_weight` decimal(15,4) DEFAULT NULL;
