@@ -221,7 +221,9 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 
 		$results = $this->model_extension_module_dockercart_blog_post->getPosts($filter_data);
 
-		// Load category model for getting categories
+		$data['text_list_subtitle'] = $this->language->get('text_list_subtitle');
+
+	// Load category model for getting categories
 		$this->load->model('extension/module/dockercart_blog_category');
 
 		foreach ($results as $result) {
@@ -307,6 +309,8 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 		$data['sort_name'] = $this->url->link('extension/module/dockercart_blog_post', 'user_token=' . $this->session->data['user_token'] . '&sort=bpd.name' . $url, true);
 		$data['sort_status'] = $this->url->link('extension/module/dockercart_blog_post', 'user_token=' . $this->session->data['user_token'] . '&sort=bp.status' . $url, true);
 		$data['sort_date'] = $this->url->link('extension/module/dockercart_blog_post', 'user_token=' . $this->session->data['user_token'] . '&sort=bp.date_published' . $url, true);
+		$data['sort_views'] = $this->url->link('extension/module/dockercart_blog_post', 'user_token=' . $this->session->data['user_token'] . '&sort=bp.views' . $url, true);
+		$data['sort_comments'] = $this->url->link('extension/module/dockercart_blog_post', 'user_token=' . $this->session->data['user_token'] . '&sort=comment_count' . $url, true);
 
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
@@ -320,6 +324,7 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 	 */
 	protected function getForm() {
 		$data['text_form'] = !isset($this->request->get['post_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
+		$data['text_form_subtitle'] = !isset($this->request->get['post_id']) ? $this->language->get('text_add_post_subtitle') : $this->language->get('text_edit_post_subtitle');
 
 		if (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];

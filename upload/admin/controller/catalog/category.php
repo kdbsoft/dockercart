@@ -422,6 +422,21 @@ class ControllerCatalogCategory extends Controller {
 		    ? $this->language->get('text_add_category_subtitle')
 		    : $this->language->get('text_edit_category_subtitle');
 
+		$data['text_tab_params_title'] = $this->language->get('text_tab_params_title');
+		$data['text_tab_params_subtitle'] = $this->language->get('text_tab_params_subtitle');
+		$data['text_tab_seo_title'] = $this->language->get('text_tab_seo_title');
+		$data['text_tab_seo_subtitle'] = $this->language->get('text_tab_seo_subtitle');
+		$data['text_tab_design_title'] = $this->language->get('text_tab_design_title');
+		$data['text_tab_design_subtitle'] = $this->language->get('text_tab_design_subtitle');
+
+		$data['text_status_card'] = $this->language->get('text_status_card');
+		$data['text_organization_card'] = $this->language->get('text_organization_card');
+		$data['text_seo_card'] = $this->language->get('text_seo_card');
+		$data['text_design_card'] = $this->language->get('text_design_card');
+		$data['text_seo_preview'] = $this->language->get('text_seo_preview');
+		$data['text_url_handle'] = $this->language->get('text_url_handle');
+		$data['text_visibility'] = $this->language->get('text_visibility');
+
 		if (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];
 		} else {
@@ -506,6 +521,12 @@ class ControllerCatalogCategory extends Controller {
 
 		$data['category_description'] = $this->decodeDescriptionFields($data['category_description'], array('name', 'meta_title'));
 
+		$data['category_name'] = '';
+		$lang_id = (int)$this->config->get('config_language_id');
+		if (!empty($data['category_description'][$lang_id]['name'])) {
+			$data['category_name'] = $data['category_description'][$lang_id]['name'];
+		}
+
 		if (isset($this->request->post['path'])) {
 			$data['path'] = $this->request->post['path'];
 		} elseif (!empty($category_info)) {
@@ -561,14 +582,14 @@ class ControllerCatalogCategory extends Controller {
 		$this->load->model('tool/image');
 
 		if (isset($this->request->post['image']) && is_file(DIR_IMAGE . $this->request->post['image'])) {
-			$data['thumb'] = $this->model_tool_image->resize($this->request->post['image'], 100, 100);
+			$data['thumb'] = $this->model_tool_image->resize($this->request->post['image'], 140, 140);
 		} elseif (!empty($category_info) && is_file(DIR_IMAGE . $category_info['image'])) {
-			$data['thumb'] = $this->model_tool_image->resize($category_info['image'], 100, 100);
+			$data['thumb'] = $this->model_tool_image->resize($category_info['image'], 140, 140);
 		} else {
-			$data['thumb'] = $this->model_tool_image->resize('no_image.png', 100, 100);
+			$data['thumb'] = $this->model_tool_image->resize('no_image.png', 140, 140);
 		}
 
-		$data['placeholder'] = $this->model_tool_image->resize('no_image.png', 100, 100);
+		$data['placeholder'] = $this->model_tool_image->resize('no_image.png', 140, 140);
 
 		if (isset($this->request->post['icon'])) {
 			$data['icon'] = $this->request->post['icon'];
@@ -579,11 +600,11 @@ class ControllerCatalogCategory extends Controller {
 		}
 
 		if (isset($this->request->post['icon']) && is_file(DIR_IMAGE . $this->request->post['icon'])) {
-			$data['icon_thumb'] = $this->model_tool_image->resize($this->request->post['icon'], 100, 100);
+			$data['icon_thumb'] = $this->model_tool_image->resize($this->request->post['icon'], 140, 140);
 		} elseif (!empty($category_info) && is_file(DIR_IMAGE . $category_info['icon'])) {
-			$data['icon_thumb'] = $this->model_tool_image->resize($category_info['icon'], 100, 100);
+			$data['icon_thumb'] = $this->model_tool_image->resize($category_info['icon'], 140, 140);
 		} else {
-			$data['icon_thumb'] = $this->model_tool_image->resize('no_image.png', 100, 100);
+			$data['icon_thumb'] = $this->model_tool_image->resize('no_image.png', 140, 140);
 		}
 
 		if (isset($this->request->post['background_image'])) {
@@ -595,12 +616,42 @@ class ControllerCatalogCategory extends Controller {
 		}
 
 		if (isset($this->request->post['background_image']) && is_file(DIR_IMAGE . $this->request->post['background_image'])) {
-			$data['background_thumb'] = $this->model_tool_image->resize($this->request->post['background_image'], 100, 100);
+			$data['background_thumb'] = $this->model_tool_image->resize($this->request->post['background_image'], 140, 140);
 		} elseif (!empty($category_info) && is_file(DIR_IMAGE . $category_info['background_image'])) {
-			$data['background_thumb'] = $this->model_tool_image->resize($category_info['background_image'], 100, 100);
+			$data['background_thumb'] = $this->model_tool_image->resize($category_info['background_image'], 140, 140);
 		} else {
-			$data['background_thumb'] = $this->model_tool_image->resize('no_image.png', 100, 100);
+			$data['background_thumb'] = $this->model_tool_image->resize('no_image.png', 140, 140);
 		}
+
+		if (isset($this->request->post['banner_image'])) {
+			$data['banner_image'] = $this->request->post['banner_image'];
+		} elseif (!empty($category_info)) {
+			$data['banner_image'] = $category_info['banner_image'];
+		} else {
+			$data['banner_image'] = '';
+		}
+
+		if (isset($this->request->post['banner_image']) && is_file(DIR_IMAGE . $this->request->post['banner_image'])) {
+			$data['banner_thumb'] = $this->model_tool_image->resize($this->request->post['banner_image'], 140, 140);
+		} elseif (!empty($category_info) && is_file(DIR_IMAGE . $category_info['banner_image'])) {
+			$data['banner_thumb'] = $this->model_tool_image->resize($category_info['banner_image'], 140, 140);
+		} else {
+			$data['banner_thumb'] = $this->model_tool_image->resize('no_image.png', 140, 140);
+		}
+
+		$banner_link = '';
+
+		if (isset($this->request->post['banner_link'])) {
+			$banner_link = $this->request->post['banner_link'];
+		} elseif (!empty($category_info)) {
+			$banner_link = $category_info['banner_link'];
+		}
+
+		$parsed_link = $this->parseBannerLink($banner_link);
+		$data['banner_link'] = $banner_link;
+		$data['banner_link_type'] = $parsed_link['type'];
+		$data['banner_link_value'] = $parsed_link['value'];
+		$data['banner_link_entity_name'] = $parsed_link['entity_name'];
 
 		if (isset($this->request->post['top'])) {
 			$data['top'] = $this->request->post['top'];
@@ -650,9 +701,32 @@ class ControllerCatalogCategory extends Controller {
 			$data['category_layout'] = array();
 		}
 
+		if (isset($this->request->post['category_related'])) {
+			$category_relateds = $this->request->post['category_related'];
+		} elseif (isset($this->request->get['category_id'])) {
+			$category_relateds = $this->model_catalog_category->getCategoryRelated($this->request->get['category_id']);
+		} else {
+			$category_relateds = array();
+		}
+
+		$data['category_relateds'] = array();
+
+		foreach ($category_relateds as $related_id) {
+			$related_info = $this->model_catalog_category->getCategory($related_id);
+
+			if ($related_info) {
+				$data['category_relateds'][] = array(
+					'category_id' => $related_id,
+					'name'        => $related_info['name']
+				);
+			}
+		}
+
 		$this->load->model('design/layout');
 
 		$data['layouts'] = $this->model_design_layout->getLayouts();
+
+		$data['dockercart_version'] = defined('DOCKERCART_VERSION') ? DOCKERCART_VERSION : '';
 
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
@@ -699,6 +773,100 @@ class ControllerCatalogCategory extends Controller {
 		}
 
 		return $decoded;
+	}
+
+	private function parseBannerLink($link) {
+		$result = array(
+			'type'        => 'custom',
+			'value'       => $link,
+			'entity_name' => ''
+		);
+
+		if (empty($link)) {
+			return $result;
+		}
+
+		$clean = html_entity_decode($link, ENT_QUOTES, 'UTF-8');
+
+		if (preg_match('/^https?:\/\/[^\/]+\/?(?:index\.php)?\?(.*)$/', $clean, $urlMatch)) {
+			$clean = $urlMatch[1];
+		} elseif (preg_match('/^\/?(?:index\.php)?\?(.*)$/', $clean, $pathMatch)) {
+			$clean = $pathMatch[1];
+		} elseif (strpos($clean, '?') === 0) {
+			$clean = substr($clean, 1);
+		}
+
+		if (preg_match('/^route=([^&]+)&(.+)$/', $clean, $m)) {
+			$route = urldecode($m[1]);
+			$params = array();
+			parse_str($m[2], $params);
+
+			$map = array(
+				'product/product'             => array('type' => 'product', 'key' => 'product_id'),
+				'product/category'            => array('type' => 'category', 'key' => 'path'),
+				'product/manufacturer/info'   => array('type' => 'manufacturer', 'key' => 'manufacturer_id'),
+				'information/information'     => array('type' => 'information', 'key' => 'information_id'),
+				'blog/post'                   => array('type' => 'blog', 'key' => 'blog_post_id'),
+			);
+
+			if (isset($map[$route]) && isset($params[$map[$route]['key']])) {
+				$result['type'] = $map[$route]['type'];
+				$result['value'] = $params[$map[$route]['key']];
+				$result['entity_name'] = $this->getBannerLinkEntityName($result['type'], $result['value']);
+			}
+		}
+
+		return $result;
+	}
+
+	private function getBannerLinkEntityName($type, $value) {
+		if (empty($value)) {
+			return '';
+		}
+
+		switch ($type) {
+			case 'product':
+				$this->load->model('catalog/product');
+				$info = $this->model_catalog_product->getProduct((int)$value);
+				return $info ? $info['name'] : '';
+
+			case 'category':
+				$this->load->model('catalog/category');
+				$descriptions = $this->model_catalog_category->getCategoryDescriptions((int)$value);
+				if ($descriptions) {
+					$lang_id = (int)$this->config->get('config_language_id');
+					if (isset($descriptions[$lang_id])) {
+						return $descriptions[$lang_id]['name'];
+					}
+					return reset($descriptions)['name'];
+				}
+				return '';
+
+			case 'manufacturer':
+				$this->load->model('catalog/manufacturer');
+				$info = $this->model_catalog_manufacturer->getManufacturer((int)$value);
+				return $info ? $info['name'] : '';
+
+			case 'information':
+				$this->load->model('catalog/information');
+				$descriptions = $this->model_catalog_information->getInformationDescriptions((int)$value);
+				if ($descriptions) {
+					$first = reset($descriptions);
+					return isset($first['title']) ? $first['title'] : '';
+				}
+				return '';
+
+			case 'blog':
+				$this->load->model('extension/module/dockercart_blog_post');
+				$descriptions = $this->model_extension_module_dockercart_blog_post->getPostDescriptions((int)$value);
+				if ($descriptions) {
+					$first = reset($descriptions);
+					return isset($first['title']) ? $first['title'] : '';
+				}
+				return '';
+		}
+
+		return '';
 	}
 
 	protected function validateForm() {

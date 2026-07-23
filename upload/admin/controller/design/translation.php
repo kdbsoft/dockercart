@@ -159,6 +159,7 @@ class ControllerDesignTranslation extends Controller {
 
 		$data['add'] = $this->url->link('design/translation/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('design/translation/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
+		$data['text_list_subtitle'] = $this->language->get('text_list_subtitle');
 
 		$data['translations'] = array();
 

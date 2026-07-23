@@ -1,23 +1,24 @@
-{{ header }}{{ column_left }}
+{{ header }}
+{{ column_left }}
 <div id="content">
   <div class="page-header">
     <div class="container-fluid">
-      <div class="pull-right"></div>
-      <h1>{{ heading_title }}</h1>
-      <ul class="breadcrumb">
-        {% for breadcrumb in breadcrumbs %}
-        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
-        {% endfor %}
-      </ul>
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="pull-right"></div>
+          <h1 class="page-header__title">{{ heading_title }}</h1>
+        </div>
+      </div>
     </div>
   </div>
-  <div class="container-fluid">{% if error_warning %}
-    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
     {% if success %}
-    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+    <div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> {{ success }}
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
@@ -53,7 +54,7 @@
               <option value="customer" selected="selected">{{ text_customer }}</option>
               {% else %}
               <option value="customer">{{ text_customer }}</option>
-              {% endif %}              
+              {% endif %}
               {% if filter_type == 'affiliate' %}
               <option value="affiliate" selected="selected">{{ text_affiliate }}</option>
               {% else %}
@@ -65,46 +66,32 @@
             <label for="input-date-added">{{ entry_date_added }}</label>
             <div class="filter-field-date date" data-date-format="YYYY-MM-DD">
               <input type="text" name="filter_date_added" value="{{ filter_date_added }}" placeholder="{{ entry_date_added }}" id="input-date-added" class="form-control" />
-              <button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button>
+              <button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button>
             </div>
           </div>
           <div class="filter-actions">
-            <button type="button" id="button-filter" class="btn btn-default"><i class="fa fa-filter"></i> {{ button_filter }}</button>
+            <button type="button" id="button-filter" class="btn btn-default"><i data-lucide="filter" width="14" height="14"></i> {{ button_filter }}</button>
           </div>
         </div>
       </div>
     </div>
-    <div class="row">
-      <div class="col-md-12">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-  <div class="panel-heading__icon"><i class="fa fa-list"></i></div>
-  <div>
-    <h3 class="panel-title">{{ text_list }}</h3>
-    <div class="panel-heading__subtitle">{{ text_list_subtitle }}</div>
+    <div id="customer-approval"></div>
   </div>
 </div>
-          <div class="panel-body">
-            <div id="customer-approval"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <script type="text/javascript"><!--
+<script type="text/javascript"><!--
 $('#customer-approval').delegate('.pagination a', 'click', function(e) {
 	e.preventDefault();
 
 	$('#customer-approval').load(this.href);
 });
-  
+
 $('#customer-approval').load('index.php?route=customer/customer_approval/customer_approval&user_token={{ user_token }}');
 
 $('#customer-approval').on('click', '.btn-success, .btn-danger', function(e) {
 	e.preventDefault();
-	
+
 	var element = this;
-	
+
 	$.ajax({
 		url: $(element).attr('href'),
 		dataType: 'json',
@@ -118,13 +105,15 @@ $('#customer-approval').on('click', '.btn-success, .btn-danger', function(e) {
 			$('.alert-dismissible').remove();
 
 			if (json['error']) {
-				$('#customer-approval').before('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+				$('#customer-approval').before('<div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+				lucide.createIcons();
 			}
 
 			if (json['success']) {
 				$('#customer-approval').load('index.php?route=customer/customer_approval/customer_approval&user_token={{ user_token }}');
 
-				$('#customer-approval').before('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+				$('#customer-approval').before('<div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+				lucide.createIcons();
 			}
 		},
 		error: function(xhr, ajaxOptions, thrownError) {
@@ -135,46 +124,51 @@ $('#customer-approval').on('click', '.btn-success, .btn-danger', function(e) {
 
 $('#button-filter').on('click', function() {
 	url = '';
-	
+
 	var filter_name = $('input[name=\'filter_name\']').val();
-	
+
 	if (filter_name) {
 		url += '&filter_name=' + encodeURIComponent(filter_name);
 	}
-	
+
 	var filter_email = $('input[name=\'filter_email\']').val();
-	
+
 	if (filter_email) {
 		url += '&filter_email=' + encodeURIComponent(filter_email);
-	}	
-		
+	}
+
 	var filter_customer_group_id = $('select[name=\'filter_customer_group_id\']').val();
-	
+
 	if (filter_customer_group_id !== '') {
 		url += '&filter_customer_group_id=' + encodeURIComponent(filter_customer_group_id);
-	}	
-	
+	}
+
 	var filter_type = $('select[name=\'filter_type\']').val();
-	
+
 	if (filter_type !== '') {
 		url += '&filter_type=' + filter_type;
 	}
-			
+
 	var filter_date_added = $('input[name=\'filter_date_added\']').val();
-	
+
 	if (filter_date_added) {
 		url += '&filter_date_added=' + encodeURIComponent(filter_date_added);
 	}
-	
+
 	$('#customer-approval').load('index.php?route=customer/customer_approval/customer_approval&user_token={{ user_token }}' + url);
 });
-//--></script> 
-  <script type="text/javascript"><!--
+//--></script>
+<script type="text/javascript"><!--
+$('#filter-customer input, #filter-customer select').on('keypress', function(e) {
+	if (e.which == 13) { $('#button-filter').trigger('click'); }
+});
+//--></script>
+<script type="text/javascript"><!--
 $('input[name=\'filter_name\']').autocomplete({
 	'source': function(request, response) {
 		$.ajax({
 			url: 'index.php?route=customer/customer/autocomplete&user_token={{ user_token }}&filter_name=' +  encodeURIComponent(request),
-			dataType: 'json',			
+			dataType: 'json',
 			success: function(json) {
 				response($.map(json, function(item) {
 					return {
@@ -187,14 +181,14 @@ $('input[name=\'filter_name\']').autocomplete({
 	},
 	'select': function(item) {
 		$('input[name=\'filter_name\']').val(item['label']);
-	}	
+	}
 });
 
 $('input[name=\'filter_email\']').autocomplete({
 	'source': function(request, response) {
 		$.ajax({
 			url: 'index.php?route=customer/customer/autocomplete&user_token={{ user_token }}&filter_email=' +  encodeURIComponent(request),
-			dataType: 'json',			
+			dataType: 'json',
 			success: function(json) {
 				response($.map(json, function(item) {
 					return {
@@ -207,13 +201,15 @@ $('input[name=\'filter_email\']').autocomplete({
 	},
 	'select': function(item) {
 		$('input[name=\'filter_email\']').val(item['label']);
-	}	
+	}
 });
-//--></script> 
-  <script type="text/javascript"><!--
+//--></script>
+<script src="view/javascript/jquery/datetimepicker/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+<link href="view/javascript/jquery/datetimepicker/bootstrap-datetimepicker.min.css" type="text/css" rel="stylesheet" media="screen" />
+<script type="text/javascript"><!--
 $('.date').datetimepicker({
 	language: '{{ datepicker }}',
 	pickTime: false
 });
-//--></script></div>
+//--></script>
 {{ footer }}

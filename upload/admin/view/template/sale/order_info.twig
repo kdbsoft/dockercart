@@ -1,5 +1,6 @@
 {{ header }}{{ column_left }}
 <div id="content">
+  <link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
   <div class="page-header">
     <div class="container-fluid">
       <div class="pull-right"><a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
@@ -12,6 +13,10 @@
     </div>
   </div>
   <div class="container-fluid">
+    <div class="section-heading">
+      <h2>{{ heading_title }} {% if order_status %}<span class="order-status-badge {{ status_badge_class }}">{{ order_status }}</span>{% endif %}</h2>
+      <p class="section-heading-subtitle">{{ text_order_info_subtitle }}</p>
+    </div>
     <div class="row">
       <div class="col-md-8">
 

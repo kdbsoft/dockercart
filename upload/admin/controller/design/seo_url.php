@@ -245,6 +245,7 @@ class ControllerDesignSeoUrl extends Controller {
 
 		$data['add'] = $this->url->link('design/seo_url/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('design/seo_url/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
+		$data['text_list_subtitle'] = $this->language->get('text_list_subtitle');
 
 		$data['seo_urls'] = array();
 

@@ -1,27 +1,28 @@
-{{ header }}{{ column_left }}
+{{ header }}
+{{ column_left }}
 <div id="content">
   <div class="page-header">
     <div class="container-fluid">
-      <div class="pull-right">
-        <a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa fa-plus"></i></a>
-        <button type="submit" form="form-review" formaction="{{ copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default"><i class="fa fa-copy"></i></button>
-        <button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="confirm('{{ text_confirm }}') ? $('#form-review').submit() : false;"><i class="fa fa-trash-o"></i></button>
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="pull-right">
+            <a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary btn--icon"><i data-lucide="plus" width="16" height="16"></i></a>
+            <button type="submit" form="form-review" formaction="{{ copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default btn--icon"><i data-lucide="copy" width="16" height="16"></i></button>
+            <button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="confirm('{{ text_confirm }}') ? $('#form-review').submit() : false;"><i data-lucide="trash-2" width="16" height="16"></i></button>
+          </div>
+          <h1 class="page-header__title">{{ heading_title }}</h1>
+        </div>
       </div>
-      <h1>{{ heading_title }}</h1>
-      <ul class="breadcrumb">
-        {% for breadcrumb in breadcrumbs %}
-        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
-        {% endfor %}
-      </ul>
     </div>
   </div>
-  <div class="container-fluid">{% if error_warning %}
-    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
     {% if success %}
-    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+    <div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> {{ success }}
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
@@ -39,8 +40,8 @@
           <div class="filter-field">
             <label for="input-status">{{ entry_status }}</label>
             <select name="filter_status" id="input-status" class="form-control">
-              <option value=""></option>                           
-                {% if filter_status == '1' %}                  
+              <option value=""></option>
+                {% if filter_status == '1' %}
                   <option value="1" selected="selected">{{ text_enabled }}</option>
                 {% else %}
                   <option value="1">{{ text_enabled }}</option>
@@ -48,139 +49,117 @@
                 {% if filter_status == '0' %}
                   <option value="0" selected="selected">{{ text_disabled }}</option>
                 {% else %}
-                  <option value="0">{{ text_disabled }}</option>              
-                {% endif %}                
+                  <option value="0">{{ text_disabled }}</option>
+                {% endif %}
             </select>
           </div>
           <div class="filter-field">
             <label for="input-date-added">{{ entry_date_added }}</label>
             <div class="filter-field-date date" data-date-format="YYYY-MM-DD">
               <input type="text" name="filter_date_added" value="{{ filter_date_added }}" placeholder="{{ entry_date_added }}" id="input-date-added" class="form-control" />
-              <button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button>
+              <button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button>
             </div>
           </div>
           <div class="filter-actions">
-            <button type="button" id="button-filter" class="btn btn-default"><i class="fa fa-filter"></i> {{ button_filter }}</button>
+            <button type="button" id="button-filter" class="btn btn-default"><i data-lucide="filter" width="14" height="14"></i> {{ button_filter }}</button>
           </div>
         </div>
       </div>
     </div>
-    <div class="row">
-      <div class="col-md-12">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-  <div class="panel-heading__icon"><i class="fa fa-list"></i></div>
-  <div>
-    <h3 class="panel-title">{{ text_list }}</h3>
-    <div class="panel-heading__subtitle">{{ text_list_subtitle }}</div>
+        <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-review">
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+              <thead>
+                <tr>
+                  <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
+                  <td class="text-left">{% if sort == 'pd.name' %}<a href="{{ sort_product }}" class="{{ order|lower }} sortable">{{ column_product }}</a>{% else %}<a href="{{ sort_product }}" class="sortable">{{ column_product }}</a>{% endif %}</td>
+                  <td class="text-left">{% if sort == 'r.author' %}<a href="{{ sort_author }}" class="{{ order|lower }} sortable">{{ column_author }}</a>{% else %}<a href="{{ sort_author }}" class="sortable">{{ column_author }}</a>{% endif %}</td>
+                  <td class="text-right">{% if sort == 'r.rating' %}<a href="{{ sort_rating }}" class="{{ order|lower }} sortable">{{ column_rating }}</a>{% else %}<a href="{{ sort_rating }}" class="sortable">{{ column_rating }}</a>{% endif %}</td>
+                  <td class="text-left">{% if sort == 'r.status' %}<a href="{{ sort_status }}" class="{{ order|lower }} sortable">{{ column_status }}</a>{% else %}<a href="{{ sort_status }}" class="sortable">{{ column_status }}</a>{% endif %}</td>
+                  <td class="text-left">{% if sort == 'r.date_added' %}<a href="{{ sort_date_added }}" class="{{ order|lower }} sortable">{{ column_date_added }}</a>{% else %}<a href="{{ sort_date_added }}" class="sortable">{{ column_date_added }}</a>{% endif %}</td>
+                  <td class="text-right">{{ column_action }}</td>
+                </tr>
+              </thead>
+              <tbody>
+              {% if reviews %}
+              {% for review in reviews %}
+              <tr>
+                <td class="text-center">{% if review.review_id in selected %}
+                  <input type="checkbox" name="selected[]" value="{{ review.review_id }}" checked="checked" />
+                  {% else %}
+                  <input type="checkbox" name="selected[]" value="{{ review.review_id }}" />
+                  {% endif %}</td>
+                <td class="text-left">{{ review.name }}</td>
+                <td class="text-left">
+                  <span class="inline-edit" data-review-id="{{ review.review_id }}" data-field="author" data-value="{{ review.author_raw }}">{{ review.author }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
+                </td>
+                <td class="text-right">
+                  <span class="inline-edit" data-review-id="{{ review.review_id }}" data-field="rating" data-value="{{ review.rating_raw }}">{{ review.rating }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
+                </td>
+                <td class="text-left">
+                  <span class="inline-edit" data-review-id="{{ review.review_id }}" data-field="status" data-value="{{ review.status_raw }}">{{ review.status }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
+                </td>
+                <td class="text-left">
+                  <span class="inline-edit" data-review-id="{{ review.review_id }}" data-field="date_added" data-value="{{ review.date_added_raw }}">{{ review.date_added }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
+                </td>
+                <td class="text-right"><a href="{{ review.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a> <a href="{{ review.copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default btn--icon"><i data-lucide="copy" width="14" height="14"></i></a> <a href="{{ review.delete }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="return confirm('{{ text_confirm }}');"><i data-lucide="trash-2" width="14" height="14"></i></a></td>
+              </tr>
+              {% endfor %}
+              {% else %}
+              <tr>
+                <td class="text-center" colspan="7">{{ text_no_results }}</td>
+              </tr>
+              {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </form>
+        <div class="pagination-wrap">
+          <div class="row">
+            <div class="col-sm-6 text-left">{{ pagination }}</div>
+            <div class="col-sm-6 text-right">{{ results }}</div>
+          </div>
+        </div>
   </div>
 </div>
-          <div class="panel-body">
-            <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-review">
-              <div class="table-responsive">
-                <table class="table table-hover">
-                  <thead>
-                    <tr>
-                      <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
-                      <td class="text-left">{% if sort == 'pd.name' %} <a href="{{ sort_product }}" class="{{ order|lower }}">{{ column_product }}</a> {% else %} <a href="{{ sort_product }}">{{ column_product }}</a> {% endif %}</td>
-                      <td class="text-left">{% if sort == 'r.author' %} <a href="{{ sort_author }}" class="{{ order|lower }}">{{ column_author }}</a> {% else %} <a href="{{ sort_author }}">{{ column_author }}</a> {% endif %}</td>
-                      <td class="text-right">{% if sort == 'r.rating' %} <a href="{{ sort_rating }}" class="{{ order|lower }}">{{ column_rating }}</a> {% else %} <a href="{{ sort_rating }}">{{ column_rating }}</a> {% endif %}</td>
-                      <td class="text-left">{% if sort == 'r.status' %} <a href="{{ sort_status }}" class="{{ order|lower }}">{{ column_status }}</a> {% else %} <a href="{{ sort_status }}">{{ column_status }}</a> {% endif %}</td>
-                      <td class="text-left">{% if sort == 'r.date_added' %} <a href="{{ sort_date_added }}" class="{{ order|lower }}">{{ column_date_added }}</a> {% else %} <a href="{{ sort_date_added }}">{{ column_date_added }}</a> {% endif %}</td>
-                      <td class="text-right">{{ column_action }}</td>
-                    </tr>
-                  </thead>
-                  <tbody>
-                  
-                  {% if reviews %}
-                  {% for review in reviews %}
-                  <tr>
-                    <td class="text-center">{% if review.review_id in selected %}
-                      <input type="checkbox" name="selected[]" value="{{ review.review_id }}" checked="checked" />
-                      {% else %}
-                      <input type="checkbox" name="selected[]" value="{{ review.review_id }}" />
-                      {% endif %}</td>
-                    <td class="text-left">{{ review.name }}</td>
-                    <td class="text-left">
-                      <span class="inline-edit" data-review-id="{{ review.review_id }}" data-field="author" data-value="{{ review.author_raw }}">{{ review.author }}<i class="fa fa-pencil-square-o inline-edit-icon"></i></span>
-                    </td>
-                    <td class="text-right">
-                      <span class="inline-edit" data-review-id="{{ review.review_id }}" data-field="rating" data-value="{{ review.rating_raw }}">{{ review.rating }}<i class="fa fa-pencil-square-o inline-edit-icon"></i></span>
-                    </td>
-                    <td class="text-left">
-                      <span class="inline-edit" data-review-id="{{ review.review_id }}" data-field="status" data-value="{{ review.status_raw }}">{{ review.status }}<i class="fa fa-pencil-square-o inline-edit-icon"></i></span>
-                    </td>
-                    <td class="text-left">
-                      <span class="inline-edit" data-review-id="{{ review.review_id }}" data-field="date_added" data-value="{{ review.date_added_raw }}">{{ review.date_added }}<i class="fa fa-pencil-square-o inline-edit-icon"></i></span>
-                    </td>
-                    <td class="text-right"><a href="{{ review.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a> <a href="{{ review.copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default"><i class="fa fa-copy"></i></a> <a href="{{ review.delete }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="return confirm('{{ text_confirm }}');"><i class="fa fa-trash-o"></i></a></td>
-                  </tr>
-                  {% endfor %}
-                  {% else %}
-                  <tr>
-                    <td class="text-center" colspan="7">{{ text_no_results }}</td>
-                  </tr>
-                  {% endif %}
-                    </tbody>
-                  
-                </table>
-              </div>
-            </form>
-            <div class="row">
-              <div class="col-sm-6 text-left">{{ pagination }}</div>
-              <div class="col-sm-6 text-right">{{ results }}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <script type="text/javascript"><!--
+<script type="text/javascript"><!--
 $('#button-filter').on('click', function() {
 	url = 'index.php?route=catalog/review&user_token={{ user_token }}';
-	
+
 	var filter_product = $('input[name=\'filter_product\']').val();
-	
+
 	if (filter_product) {
 		url += '&filter_product=' + encodeURIComponent(filter_product);
 	}
-	
+
 	var filter_author = $('input[name=\'filter_author\']').val();
-	
+
 	if (filter_author) {
 		url += '&filter_author=' + encodeURIComponent(filter_author);
 	}
-	
+
 	var filter_status = $('select[name=\'filter_status\']').val();
-	
+
 	if (filter_status !== '') {
-		url += '&filter_status=' + encodeURIComponent(filter_status); 
-	}		
-			
+		url += '&filter_status=' + encodeURIComponent(filter_status);
+	}
+
 	var filter_date_added = $('input[name=\'filter_date_added\']').val();
-	
+
 	if (filter_date_added) {
 		url += '&filter_date_added=' + encodeURIComponent(filter_date_added);
 	}
 
 	location = url;
 });
-//--></script> 
-  <script type="text/javascript"><!--
+//--></script>
+<script type="text/javascript"><!--
 $('.date').datetimepicker({
 	language: '{{ datepicker }}',
 	pickTime: false
 });
 //--></script>
-<style>
-.inline-edit { cursor: default; }
-.inline-edit .inline-edit-icon { margin-left: 4px; font-size: 13px; opacity: 0.3; cursor: pointer; }
-.inline-edit:hover .inline-edit-icon { opacity: 0.8; }
-.inline-edit-input { width: 100px; text-align: left; display: inline-block !important; height: 28px; padding: 3px 8px; }
-.inline-edit-error { margin-left: 4px; font-size: 11px; white-space: nowrap; }
-</style>
 <script type="text/javascript"><!--
-// IE and Edge fix!
 $('button[form=\'form-review\']').on('click', function(e) {
 	$('#form-review').attr('action', $(this).attr('formaction'));
 });
@@ -222,7 +201,8 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 						setTimeout(function() { $span.html($span.data('display')); }, 3000);
 					} else {
 						$span.data('value', newValue);
-						$span.html(json['value_html'] + '<i class="fa fa-pencil-square-o inline-edit-icon"></i>');
+						$span.html(json['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+						lucide.createIcons({ nodes: [$span[0]] });
 					}
 				},
 				error: function() {
@@ -261,7 +241,8 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 						setTimeout(function() { $span.html($span.data('display')); }, 3000);
 					} else {
 						$span.data('value', newValue);
-						$span.html(json['value_html'] + '<i class="fa fa-pencil-square-o inline-edit-icon"></i>');
+						$span.html(json['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+						lucide.createIcons({ nodes: [$span[0]] });
 					}
 				},
 				error: function() {
@@ -306,7 +287,8 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 						setTimeout(function() { $span.html($span.data('display')); }, 3000);
 					} else {
 						$span.data('value', newValue);
-						$span.html(json['value_html'] + '<i class="fa fa-pencil-square-o inline-edit-icon"></i>');
+						$span.html(json['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+						lucide.createIcons({ nodes: [$span[0]] });
 					}
 				},
 				error: function() {
@@ -322,5 +304,5 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 		});
 	}
 });
-//--></script></div>
+//--></script>
 {{ footer }}

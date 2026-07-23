@@ -47,3 +47,5 @@ $_['text_view_grid']   = 'Grid';
 $_['text_view_list']   = 'List';
 $_['text_view_table']  = 'Table';
 $_['text_price_from']  = 'from';
+$_['text_related_categories'] = 'Related Categories';
+$_['text_you_may_also_like']  = 'You may also like';

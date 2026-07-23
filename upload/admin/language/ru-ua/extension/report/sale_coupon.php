@@ -5,7 +5,7 @@ $_['column_code'] = 'Код';
 $_['column_name'] = 'Название купона';
 $_['column_orders'] = 'Заказы';
 $_['column_total'] = 'Общий';
-$_['entry_date_end'] = 'Дата окончания';
+$_['entry_date_end'] = 'Дата конца';
 $_['entry_date_start'] = 'Дата начала';
 $_['entry_sort_order'] = 'Порядок сортировки';
 $_['entry_status'] = 'Статус';
@@ -18,5 +18,3 @@ $_['text_success'] = 'Успех: Вы отредактировали отчет
 // Subtitle
 
 $_['text_edit_subtitle'] = 'Настройте параметры и опции дополнения';
-
-

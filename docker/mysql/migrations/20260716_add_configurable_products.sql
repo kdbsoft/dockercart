@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS `oc_product_variant` (
   `price` decimal(15,4) NOT NULL DEFAULT 0.0000,
   `quantity` decimal(15,2) NOT NULL DEFAULT 0.00,
   `subtract` tinyint(1) NOT NULL DEFAULT 1,
-  `weight` decimal(15,8) NOT NULL DEFAULT 0.00000000,
+  `weight` decimal(15,4) NOT NULL DEFAULT 0.0000,
   `weight_class_id` int(11) NOT NULL DEFAULT 0,
   `image` varchar(255) NOT NULL DEFAULT '',
   `sort_order` int(11) NOT NULL DEFAULT 0,

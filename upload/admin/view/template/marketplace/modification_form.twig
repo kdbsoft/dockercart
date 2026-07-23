@@ -1,5 +1,6 @@
 {{ header }}{{ column_left }}
 <div id="content">
+  <link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
   <div class="page-header">
     <div class="container-fluid">
       <div class="pull-right">
@@ -21,17 +22,19 @@
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_form }}</h3>
-      </div>
-      <div class="panel-body">
-        <ul class="nav nav-tabs">
-          <li class="active"><a href="#tab-general" data-toggle="tab"><i class="fa fa-file-text"></i> {{ tab_general }}</a></li>
-          <li><a href="#tab-xml" data-toggle="tab"><i class="fa fa-code"></i> {{ tab_xml }}</a></li>
-          <li{% if test_results %} class="flash-tab"{% endif %}><a href="#tab-test" data-toggle="tab"><i class="fa fa-flask"></i> {{ tab_test }}{% if test_results %} <span class="label label-{{ test_results.status == 'error' ? 'danger' : (test_results.status == 'warning' ? 'warning' : 'success') }}">!</span>{% endif %}</a></li>
-        </ul>
-         <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-modification" class="form-horizontal">
+    <div class="section-heading">
+      <h2>{{ text_form }}</h2>
+      <p class="section-heading-subtitle">{{ text_form_subtitle }}</p>
+    </div>
+    <div class="dcx-shell">
+      <div class="dcx-panel">
+        <div class="dcx-panel-body">
+          <ul class="nav nav-tabs">
+            <li class="active"><a href="#tab-general" data-toggle="tab"><i data-lucide="file-text" width="16" height="16" style="vertical-align:middle"></i> {{ tab_general }}</a></li>
+            <li><a href="#tab-xml" data-toggle="tab"><i data-lucide="code" width="16" height="16" style="vertical-align:middle"></i> {{ tab_xml }}</a></li>
+            <li{% if test_results %} class="flash-tab"{% endif %}><a href="#tab-test" data-toggle="tab"><i data-lucide="flask-conical" width="16" height="16" style="vertical-align:middle"></i> {{ tab_test }}{% if test_results %} <span class="label label-{{ test_results.status == 'error' ? 'danger' : (test_results.status == 'warning' ? 'warning' : 'success') }}">!</span>{% endif %}</a></li>
+          </ul>
+          <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-modification" class="form-horizontal">
           <input type="hidden" name="user_token" value="{{ user_token }}" />
           {% if modification_id %}<input type="hidden" name="modification_id" value="{{ modification_id }}" />{% endif %}
           <div class="tab-content">
@@ -176,6 +179,7 @@
             </div>
           </div>
         </form>
+        </div>
       </div>
     </div>
   </div>

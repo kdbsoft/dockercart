@@ -1,5 +1,6 @@
 {{ header }}{{ column_left }}
 <div id="content">
+  <link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
   <div class="page-header">
     <div class="container-fluid">
       <div class="pull-right">
@@ -14,29 +15,31 @@
     </div>
   </div>
   <div class="container-fluid">
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h3 class="panel-title"><i class="fa fa-flask"></i> {{ text_test }} &mdash; {{ source_name|e('html') }}</h3>
-      </div>
-      <div class="panel-body">
-        {% if test_results.status == 'success' %}
-        <div class="alert alert-success"><i class="fa fa-check-circle"></i> {{ text_test_success }}</div>
-        {% elseif test_results.status == 'warning' %}
-        <div class="alert alert-warning"><i class="fa fa-exclamation-triangle"></i> {{ text_test_warning }}</div>
-        {% else %}
-        <div class="alert alert-danger"><i class="fa fa-times-circle"></i> {{ text_test_error }}</div>
-        {% endif %}
+    <div class="section-heading">
+      <h2>{{ text_test }} &mdash; {{ source_name|e('html') }}</h2>
+      <p class="section-heading-subtitle">{{ text_test_result }}</p>
+    </div>
+    <div class="dcx-shell">
+      <div class="dcx-panel">
+        <div class="dcx-panel-body">
+          {% if test_results.status == 'success' %}
+          <div class="alert alert-success"><i class="fa fa-check-circle"></i> {{ text_test_success }}</div>
+          {% elseif test_results.status == 'warning' %}
+          <div class="alert alert-warning"><i class="fa fa-exclamation-triangle"></i> {{ text_test_warning }}</div>
+          {% else %}
+          <div class="alert alert-danger"><i class="fa fa-times-circle"></i> {{ text_test_error }}</div>
+          {% endif %}
 
-        {% if test_results.messages %}
-        <div class="well well-sm" style="font-family: monospace; font-size: 12px; max-height: 400px; overflow-y: auto;">
-          {% for msg in test_results.messages %}
-           <div class="test-msg-{{ msg.type }}">{{ msg.text|e('html') }}</div>
-          {% endfor %}
-        </div>
-        {% endif %}
+          {% if test_results.messages %}
+          <div class="well well-sm" style="font-family: monospace; font-size: 12px; max-height: 400px; overflow-y: auto;">
+            {% for msg in test_results.messages %}
+             <div class="test-msg-{{ msg.type }}">{{ msg.text|e('html') }}</div>
+            {% endfor %}
+          </div>
+          {% endif %}
 
-        {% if test_results.files %}
-        <table class="table table-hover">
+          {% if test_results.files %}
+          <table class="table table-bordered">
           <thead>
             <tr>
               <td>{{ column_file }}</td>
@@ -79,6 +82,8 @@
           </tbody>
         </table>
         {% endif %}
+        </div>
+        </div>
       </div>
     </div>
   </div>

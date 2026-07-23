@@ -190,12 +190,19 @@ class ControllerProductProduct extends Controller {
 			if (isset($this->request->get['path'])) {
 				$url .= '&path=' . $this->request->get['path'];
 			} else {
-				// If no path provided, try to get from product's first category
-				$product_categories = $this->model_catalog_product->getCategories($product_id);
+				// If no path provided, try main_category_id first, then first category
+				$first_category_id = 0;
 
-				if (!empty($product_categories)) {
-					// Get the path for the first category
-					$first_category_id = $product_categories[0]['category_id'];
+				if (!empty($product_info['main_category_id']) && (int)$product_info['main_category_id'] > 0) {
+					$first_category_id = (int)$product_info['main_category_id'];
+				} else {
+					$product_categories = $this->model_catalog_product->getCategories($product_id);
+					if (!empty($product_categories)) {
+						$first_category_id = $product_categories[0]['category_id'];
+					}
+				}
+
+				if ($first_category_id > 0) {
 					$category_path = $this->getCategoryPath($first_category_id);
 
 					if ($category_path) {
@@ -898,11 +905,20 @@ class ControllerProductProduct extends Controller {
 				}
 
 				$category_name = '';
-				$product_categories = $this->model_catalog_product->getCategories((int)$result['product_id']);
-				if (!empty($product_categories[0]['category_id'])) {
-					$category_info = $this->model_catalog_category->getCategory((int)$product_categories[0]['category_id']);
+				$rel_main_cat = !empty($result['main_category_id']) ? (int)$result['main_category_id'] : 0;
+				if ($rel_main_cat > 0) {
+					$category_info = $this->model_catalog_category->getCategory($rel_main_cat);
 					if ($category_info && !empty($category_info['name'])) {
 						$category_name = $category_info['name'];
+					}
+				}
+				if (empty($category_name)) {
+					$product_categories = $this->model_catalog_product->getCategories((int)$result['product_id']);
+					if (!empty($product_categories[0]['category_id'])) {
+						$category_info = $this->model_catalog_category->getCategory((int)$product_categories[0]['category_id']);
+						if ($category_info && !empty($category_info['name'])) {
+							$category_name = $category_info['name'];
+						}
 					}
 				}
 

@@ -9,6 +9,8 @@ $_['text_edit']         = 'Edit Comment';
 $_['text_enabled']      = 'Enabled';
 $_['text_disabled']     = 'Disabled';
 $_['text_filter']       = 'Filter';
+$_['text_list_subtitle'] = 'Manage blog comments';
+$_['text_edit_comment_subtitle'] = 'Edit comment details';
 
 // Column
 $_['column_post']       = 'Post';

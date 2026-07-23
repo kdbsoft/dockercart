@@ -3,7 +3,7 @@
 $_['column_action'] = 'Действие';
 $_['column_amount'] = 'Количество';
 $_['column_comment'] = 'Комментарий';
-$_['column_customer_group'] = 'Группа клиентов';
+$_['column_customer_group'] = 'Группа покупателей';
 $_['column_date_added'] = 'Дата добавления';
 $_['column_description'] = 'Описание';
 $_['column_email'] = 'Электронная почта';
@@ -29,7 +29,7 @@ $_['entry_commission'] = 'Комиссия (%)';
 $_['entry_company'] = 'Компания';
 $_['entry_confirm'] = 'Подтверждать';
 $_['entry_country'] = 'Страна';
-$_['entry_customer_group'] = 'Группа клиентов';
+$_['entry_customer_group'] = 'Группа покупателей';
 $_['entry_date_added'] = 'Дата добавления';
 $_['entry_default'] = 'Адрес по умолчанию';
 $_['entry_description'] = 'Описание';

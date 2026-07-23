@@ -408,7 +408,8 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 	 * @return array
 	 */
 	public function getPosts($data = array()) {
-		$sql = "SELECT bp.*, bpd.name, ba.name as author_name
+		$sql = "SELECT bp.*, bpd.name, ba.name as author_name,
+				(SELECT COUNT(*) FROM `" . DB_PREFIX . "blog_comment` bc WHERE bc.post_id = bp.post_id AND bc.status = 1) as comment_count
 				FROM `" . DB_PREFIX . "blog_post` bp
 				LEFT JOIN `" . DB_PREFIX . "blog_post_description` bpd ON (bp.post_id = bpd.post_id)
 				LEFT JOIN `" . DB_PREFIX . "blog_author` ba ON (bp.author_id = ba.author_id)
@@ -431,6 +432,7 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 			'bp.date_published',
 			'bp.status',
 			'bp.views',
+			'comment_count',
 			'bp.sort_order'
 		);
 

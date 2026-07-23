@@ -2,7 +2,7 @@
   <div id="filter-report" class="col-md-3 col-md-push-9 col-sm-12 hidden-sm hidden-xs">
     <div class="panel panel-default">
       <div class="panel-heading">
-  <div class="panel-heading__icon"><i class="fa fa-filter"></i></div>
+  <div class="panel-heading__icon"><i data-lucide="filter" width="14" height="14"></i></div>
   <div>
     <h3 class="panel-title">{{ text_filter }}</h3>
     <div class="panel-heading__subtitle">{{ text_filter_subtitle }}</div>
@@ -14,7 +14,7 @@
           <div class="input-group date">
             <input type="text" name="filter_date_start" value="{{ filter_date_start }}" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" id="input-date-start" class="form-control" />
             <span class="input-group-btn">
-            <button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button>
+            <button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button>
             </span></div>
         </div>
         <div class="form-group">
@@ -26,7 +26,7 @@
           <div class="input-group date">
             <input type="text" name="filter_date_end" value="{{ filter_date_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" id="input-date-end" class="form-control" />
             <span class="input-group-btn">
-            <button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button>
+            <button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button>
             </span></div>
         </div>
         <div class="form-group">
@@ -43,7 +43,7 @@
           </select>
         </div>
         <div class="form-group text-right">
-          <button type="button" id="button-filter" class="btn btn-default"><i class="fa fa-filter"></i> {{ button_filter }}</button>
+          <button type="button" id="button-filter" class="btn btn-default"><i data-lucide="filter" width="14" height="14"></i> {{ button_filter }}</button>
         </div>
       </div>
     </div>
@@ -52,7 +52,7 @@
     <div class="panel panel-default">
       <div class="panel-heading">
 
-        <div class="panel-heading__icon"><i class="fa fa-bar-chart"></i></div>
+        <div class="panel-heading__icon"><i data-lucide="bar-chart-2" width="16" height="16"></i></div>
 
         <div>
 
@@ -64,7 +64,7 @@
       </div>
       <div class="panel-body">
         <div class="table-responsive">
-          <table class="table table-hover">
+          <table class="table table-hover table-bordered">
             <thead>
               <tr>
                 <td class="text-left">{{ column_customer }}</td>
@@ -89,7 +89,7 @@
               <td class="text-right">{{ customer.orders }}</td>
               <td class="text-right">{{ customer.products }}</td>
               <td class="text-right">{{ customer.total }}</td>
-              <td class="text-right"><a href="{{ customer.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
+              <td class="text-right"><a href="{{ customer.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a></td>
             </tr>
             {% endfor %}
             {% else %}
@@ -102,7 +102,7 @@
           </table>
         </div>
         <div class="row">
-          <div class="col-sm-6 text-left">{{ pagination }}</div>
+          <div class="col-sm-6 text-left"><div class="pagination-wrap">{{ pagination }}</div></div>
           <div class="col-sm-6 text-right">{{ results }}</div>
         </div>
       </div>

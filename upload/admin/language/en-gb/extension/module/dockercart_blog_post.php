@@ -26,6 +26,9 @@ $_['text_confirm']         = 'Are you sure?';
 $_['text_no_results']      = 'No results found!';
 $_['text_select']          = '-- Select --';
 $_['text_keyword']         = 'Search Engine Optimized URL (SEO URL) - do not use spaces, only use the word separator "-" instead:';
+$_['text_list_subtitle']   = 'Manage blog posts';
+$_['text_add_post_subtitle'] = 'Create a new blog post';
+$_['text_edit_post_subtitle'] = 'Edit blog post details';
 
 // Column
 $_['column_title']         = 'Post Title';

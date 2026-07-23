@@ -1,6 +1,7 @@
 {{ header }}{{ column_left }}
 <div id="content">
-<div class="page-header">
+  <link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
+  <div class="page-header">
   <div class="container-fluid">
     <div class="pull-right">
       <button type="submit" form="form-return" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
@@ -19,21 +20,19 @@
     <button type="button" class="close" data-dismiss="alert">&times;</button>
   </div>
   {% endif %}
-  <div class="panel panel-default">
-    <div class="panel-heading">
-  <div class="panel-heading__icon"><i class="fa fa-pencil"></i></div>
-  <div>
-    <h3 class="panel-title">{{ text_form }}</h3>
-    <div class="panel-heading__subtitle">{{ text_form_subtitle }}</div>
-  </div>
-</div>
-    <div class="panel-body">
-      <ul class="nav nav-tabs">
-        <li class="active"><a href="#tab-general" data-toggle="tab"><i class="fa fa-file-text"></i> {{ tab_general }}</a></li>
-        {% if return_id %}
-        <li><a href="#tab-history" data-toggle="tab"><i class="fa fa-history"></i> {{ tab_history }}</a></li>
-        {% endif %}
-      </ul>
+    <div class="section-heading">
+      <h2>{{ text_form }}</h2>
+      <p class="section-heading-subtitle">{{ text_form_subtitle }}</p>
+    </div>
+    <div class="dcx-shell">
+      <div class="dcx-panel">
+        <div class="dcx-panel-body">
+          <ul class="nav nav-tabs">
+            <li class="active"><a href="#tab-general" data-toggle="tab"><i class="fa fa-file-text"></i> {{ tab_general }}</a></li>
+            {% if return_id %}
+            <li><a href="#tab-history" data-toggle="tab"><i class="fa fa-history"></i> {{ tab_history }}</a></li>
+            {% endif %}
+          </ul>
       <div class="tab-content">
         <div class="tab-pane active" id="tab-general">
           <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-return" class="form-horizontal">
@@ -240,9 +239,11 @@
           </fieldset>
         </div>
         {% endif %}
-      </div>
     </div>
   </div>
+</div>
+  </div>
+</div>
   <script type="text/javascript"><!--
 $('input[name=\'customer\']').autocomplete({
 	'source': function(request, response) {

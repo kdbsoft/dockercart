@@ -9,6 +9,11 @@ $_['text_add']          = 'Add Banner';
 $_['text_edit']         = 'Edit Banner';
 $_['text_default']      = 'Default';
 
+// Subtitle
+$_['text_list_subtitle']           = 'Manage promotional banners and slides';
+$_['text_add_subtitle']            = 'Create a new promotional banner';
+$_['text_edit_subtitle']           = 'Edit banner slides and settings';
+
 // Column
 $_['column_name']       = 'Banner Name';
 $_['column_status']     = 'Status';

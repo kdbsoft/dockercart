@@ -394,6 +394,7 @@ class ControllerDesignLayout extends Controller {
 
 		$data['sort'] = $sort;
 		$data['order'] = $order;
+		$data['text_list_subtitle'] = $this->language->get('text_list_subtitle');
 
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');

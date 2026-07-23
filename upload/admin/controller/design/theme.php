@@ -18,6 +18,7 @@ class ControllerDesignTheme extends Controller {
 		);
 
 		$data['user_token'] = $this->session->data['user_token'];
+		$data['text_edit_subtitle'] = $this->language->get('text_theme_subtitle');
 
 		$data['stores'] = array();
 

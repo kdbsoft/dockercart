@@ -180,5 +180,4 @@ $_['error_upload_8'] = 'Запрещенный тип файла';
 $_['error_upload_999'] = 'Возниклая неизвестная ошибка';
 $_['error_curl'] = 'CURL: Код ошибки (%s): %s';
 
-$_['summernote'] = 'ru-UA';
 $_['datepicker'] = 'ru';
