@@ -2,14 +2,14 @@
 
 $_['column_action'] = 'Действие';
 $_['column_customer'] = 'Имя клиента';
-$_['column_customer_group'] = 'Группа клиентов';
+$_['column_customer_group'] = 'Группа покупателей';
 $_['column_email'] = 'Электронная почта';
 $_['column_orders'] = 'Нет заказов.';
 $_['column_points'] = 'Бонусные баллы';
 $_['column_status'] = 'Статус';
 $_['column_total'] = 'Общий';
 $_['entry_customer'] = 'Клиент';
-$_['entry_date_end'] = 'Дата окончания';
+$_['entry_date_end'] = 'Дата конца';
 $_['entry_date_start'] = 'Дата начала';
 $_['entry_sort_order'] = 'Порядок сортировки';
 $_['entry_status'] = 'Статус';
@@ -22,5 +22,3 @@ $_['text_success'] = 'Успех: Вы внесли изменения в отч
 // Subtitle
 
 $_['text_edit_subtitle'] = 'Настройте параметры и опции дополнения';
-
-

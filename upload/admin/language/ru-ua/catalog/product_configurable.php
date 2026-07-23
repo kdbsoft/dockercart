@@ -44,7 +44,7 @@ $_['entry_variant_articles'] = 'Другие артикулы';
 $_['entry_special'] = 'Акции';
 $_['entry_priority'] = 'Приоритет';
 $_['entry_date_start'] = 'Дата начала';
-$_['entry_date_end'] = 'Дата окончания';
+$_['entry_date_end'] = 'Дата конца';
 $_['entry_auto_renew'] = 'Автопродление';
 
 $_['help_generate'] = 'Авто-генерация всех комбинаций из выбранных опций';

@@ -3,7 +3,7 @@
 $_['column_action'] = 'Дія';
 $_['column_amount'] = 'Сума';
 $_['column_comment'] = 'Коментар';
-$_['column_customer_group'] = 'Група клієнтів';
+$_['column_customer_group'] = 'Група покупців';
 $_['column_date_added'] = 'Дата додавання';
 $_['column_description'] = 'Опис';
 $_['column_email'] = 'Електронна пошта';
@@ -29,7 +29,7 @@ $_['entry_commission'] = 'Комісія (%)';
 $_['entry_company'] = 'Компанія';
 $_['entry_confirm'] = 'Підтвердити';
 $_['entry_country'] = 'Країна';
-$_['entry_customer_group'] = 'Група клієнтів';
+$_['entry_customer_group'] = 'Група покупців';
 $_['entry_date_added'] = 'Дата додавання';
 $_['entry_default'] = 'Адреса за замовчуванням';
 $_['entry_description'] = 'Опис';

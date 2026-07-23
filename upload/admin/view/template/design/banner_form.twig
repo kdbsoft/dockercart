@@ -141,18 +141,16 @@
     </div>
     {% endif %}
 
+    <div class="section-heading">
+      <h2>{{ text_form }}</h2>
+      <p class="section-heading-subtitle">{{ text_form_subtitle }}</p>
+    </div>
+
     <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-banner" class="form-horizontal">
 
       <div class="dcx-shell">
 
         <div class="dcx-panel">
-          <div class="dcx-panel-head">
-            <div class="dcx-panel-head__icon"><i class="fa fa-image"></i></div>
-            <div>
-              <h3 class="dcx-panel-title">{{ text_form }}</h3>
-              <div class="dcx-panel-subtitle">{{ heading_title }}</div>
-            </div>
-          </div>
           <div class="dcx-panel-body">
 
             <fieldset class="dcx-banner-general">
@@ -756,103 +754,6 @@ function updateAllVideoPreviews() {
   });
 }
 
-function getAutocompleteRoute(type) {
-  var map = {
-    'product': 'catalog/product/autocomplete',
-    'category': 'catalog/category/autocomplete',
-    'manufacturer': 'catalog/manufacturer/autocomplete',
-    'information': 'catalog/information/autocomplete',
-    'blog': 'extension/module/dockercart_blog_post/autocomplete'
-  };
-  return map[type] || '';
-}
-
-function getAutocompleteIdKey(type) {
-  var map = {
-    'product': 'product_id',
-    'category': 'category_id',
-    'manufacturer': 'manufacturer_id',
-    'information': 'information_id',
-    'blog': 'blog_post_id'
-  };
-  return map[type] || '';
-}
-
-function getEntityRoute(type) {
-  var map = {
-    'product': 'route=product/product&product_id=',
-    'category': 'route=product/category&path=',
-    'manufacturer': 'route=product/manufacturer/info&manufacturer_id=',
-    'information': 'route=information/information&information_id=',
-    'blog': 'route=blog/post&blog_post_id='
-  };
-  return map[type] || '';
-}
-
-function initLinkAutocomplete($input) {
-  $input.autocomplete({
-    'source': function(request, response) {
-      var $card = $input.closest('.banner-slide-card');
-      var type = $card.find('.dc-link-type').val();
-      var route = getAutocompleteRoute(type);
-      if (!route || type === 'custom') {
-        response([]);
-        return;
-      }
-      $.ajax({
-        url: 'index.php?route=' + route + '&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
-        dataType: 'json',
-        success: function(json) {
-          response($.map(json, function(item) {
-            return {
-              label: item['name'],
-              value: item[getAutocompleteIdKey(type)]
-            }
-          }));
-        }
-      });
-    },
-    'select': function(item) {
-      var $card = $input.closest('.banner-slide-card');
-      var type = $card.find('.dc-link-type').val();
-      $card.find('.dc-link-hidden').val(getEntityRoute(type) + item.value);
-      $input.val(item['label']);
-    }
-  });
-}
-
-function toggleLinkField($select, isInit) {
-  var $card = $select.closest('.banner-slide-card');
-  var val = $select.val();
-  $card.find('.dc-link-custom').toggle(val === 'custom');
-  $card.find('.dc-link-entity').toggle(val !== 'custom');
-  if (!isInit) {
-    if (val === 'custom') {
-      $card.find('.dc-link-hidden').val($card.find('.dc-link-custom-input').val());
-    } else {
-      $card.find('.dc-link-hidden').val('');
-    }
-  }
-}
-
-function initLinkFields(container) {
-  container.find('.dc-link-type').off('change.dcLink').on('change.dcLink', function() {
-    toggleLinkField($(this));
-  });
-  container.find('.dc-link-custom-input').off('input.dcLink').on('input.dcLink', function() {
-    var $card = $(this).closest('.banner-slide-card');
-    if ($card.find('.dc-link-type').val() === 'custom') {
-      $card.find('.dc-link-hidden').val($(this).val());
-    }
-  });
-  container.find('.dc-link-autocomplete').each(function() {
-    initLinkAutocomplete($(this));
-  });
-  container.find('.dc-link-type').each(function() {
-    toggleLinkField($(this), true);
-  });
-}
-
 function initVideoFields(container) {
   container.find('.dc-banner-video-youtube').each(function() {
     updateYoutubePreview($(this));
@@ -896,7 +797,7 @@ $(document).ready(function() {
 
   $('.banner-slide-card').each(function() {
     initColorInputs($(this));
-    initLinkFields($(this));
+    DcLinkField.init($(this), { hiddenClass: null });
   });
 
   $(document).on('dragstart', '.banner-slide-card', function(e) {

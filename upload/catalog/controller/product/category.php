@@ -236,6 +236,40 @@ class ControllerProductCategory extends Controller {
 
 			$has_subcategories = !empty($subcategory_ids);
 
+			$data['related_categories'] = array();
+
+			$related_categories = $this->model_catalog_category->getCategoryRelated($category_id);
+
+			foreach ($related_categories as $related) {
+				$data['related_categories'][] = array(
+					'category_id' => $related['category_id'],
+					'name'        => $related['name'],
+					'href'        => $this->url->link('product/category', 'path=' . (int)$related['category_id']),
+					'thumb'       => $related['image'] ? $this->model_tool_image->resize($related['image'], 140, 140) : ''
+				);
+			}
+
+			$data['category_banner'] = array();
+
+			if (!empty($category_info['banner_image'])) {
+				$banner_link = '';
+
+				if (!empty($category_info['banner_link'])) {
+					if (preg_match('/^route=([^&]+)&(.+)$/', $category_info['banner_link'], $m)) {
+						$banner_link = $this->url->link($m[1], $m[2], true);
+					} else {
+						$banner_link = $category_info['banner_link'];
+					}
+				}
+
+				$data['category_banner'] = array(
+					'image' => $this->model_tool_image->resize($category_info['banner_image'], 1200, 400),
+					'link'  => $banner_link
+				);
+			}
+
+			$data['banner_position'] = $page === 1 ? 5 : 3;
+
 			$filter_data = array(
 				'filter_category_id'  => $category_id,
 				'filter_sub_category' => $has_subcategories,
@@ -870,6 +904,27 @@ class ControllerProductCategory extends Controller {
 
 		$has_subcategories = !empty($this->getCachedCategorySubcategories($category_id));
 
+		$category_banner_html = '';
+
+		if (!empty($category_info['banner_image'])) {
+			$banner_link = '';
+
+			if (!empty($category_info['banner_link'])) {
+				if (preg_match('/^route=([^&]+)&(.+)$/', $category_info['banner_link'], $m)) {
+					$banner_link = $this->url->link($m[1], $m[2], true);
+				} else {
+					$banner_link = $category_info['banner_link'];
+				}
+			}
+
+			$banner_image = $this->model_tool_image->resize($category_info['banner_image'], 1200, 400);
+
+			$banner_tag_open = $banner_link ? '<a href="' . $banner_link . '">' : '';
+			$banner_tag_close = $banner_link ? '</a>' : '';
+
+			$category_banner_html = '<div class="col-span-2 sm:col-span-3 xl:col-span-4 h-48 lg:h-64 rounded-2xl overflow-hidden shadow-sm bg-gray-100">' . $banner_tag_open . '<img src="' . $banner_image . '" alt="" class="w-full h-full object-cover" loading="lazy" />' . $banner_tag_close . '</div>';
+		}
+
 		$filter_data = array(
 			'filter_category_id'  => $category_id,
 			'filter_sub_category' => $has_subcategories,
@@ -961,8 +1016,18 @@ class ControllerProductCategory extends Controller {
 			);
 		}
 
+		$banner_position = $page === 1 ? 5 : 3;
+
+		if ($category_banner_html && $banner_position <= count($products)) {
+			array_splice($products, $banner_position - 1, 0, array(array('_banner' => $category_banner_html)));
+		}
+
 		$html = '';
 		foreach ($products as $product) {
+			if (isset($product['_banner'])) {
+				$html .= $product['_banner'];
+				continue;
+			}
 			$html .= $this->load->view('product/product_card_ajax', array(
 				'product'          => $product,
 				'view_mode'        => $view_mode,

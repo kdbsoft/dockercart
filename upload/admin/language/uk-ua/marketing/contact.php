@@ -2,7 +2,7 @@
 
 $_['entry_affiliate'] = 'Партнерська програма';
 $_['entry_customer'] = 'Клієнт';
-$_['entry_customer_group'] = 'Група клієнтів';
+$_['entry_customer_group'] = 'Група покупців';
 $_['entry_message'] = 'Повідомлення';
 $_['entry_product'] = 'Товари';
 $_['entry_store'] = 'Від';
@@ -20,7 +20,7 @@ $_['text_affiliate'] = 'Партнери';
 $_['text_affiliate_all'] = 'Усі партнери';
 $_['text_customer'] = 'Покупці';
 $_['text_customer_all'] = 'Усі покупці';
-$_['text_customer_group'] = 'Група клієнтів';
+$_['text_customer_group'] = 'Група покупців';
 $_['text_default'] = 'За замовчуванням';
 $_['text_list'] = 'Список розсилки';
 $_['text_newsletter'] = 'Усі підписники розсилки';

@@ -10,8 +10,8 @@ $_['text_add']          = 'Add Modification';
 $_['text_edit']         = 'Edit Modification';
 $_['text_form']         = 'Modification Form';
 // Subtitle
-
 $_['text_modification_list_subtitle'] = 'Manage OCMOD file modifications';
+$_['text_form_subtitle'] = 'Add or edit an OCMOD modification';
 
 // Tabs
 $_['tab_general']       = 'General';
@@ -52,6 +52,7 @@ $_['column_operations'] = 'Operations';
 
 // Test
 $_['text_test']         = 'Test OCMOD';
+$_['text_test_result']  = 'Dry-run test results for the selected modification';
 $_['text_test_success'] = 'Test passed: all operations matched successfully.';
 $_['text_test_warning'] = 'Test completed with warnings — some operations may not match.';
 $_['text_test_error']   = 'Test failed — errors found in the modification.';

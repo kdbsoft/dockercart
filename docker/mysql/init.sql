@@ -4125,8 +4125,8 @@ CREATE TABLE `oc_dockercart_universal_shipping` (
   `tax_class_id` int(11) NOT NULL DEFAULT 0,
   `min_total` decimal(15,4) DEFAULT NULL,
   `max_total` decimal(15,4) DEFAULT NULL,
-  `min_weight` decimal(15,8) DEFAULT NULL,
-  `max_weight` decimal(15,8) DEFAULT NULL,
+  `min_weight` decimal(15,4) DEFAULT NULL,
+  `max_weight` decimal(15,4) DEFAULT NULL,
   `free_shipping_threshold` decimal(15,4) DEFAULT NULL,
   `status` tinyint(1) NOT NULL DEFAULT 1,
   `sort_order` int(3) NOT NULL DEFAULT 0,
@@ -5010,7 +5010,7 @@ DROP TABLE IF EXISTS `oc_length_class`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `oc_length_class` (
   `length_class_id` int(11) NOT NULL AUTO_INCREMENT,
-  `value` decimal(15,8) NOT NULL,
+  `value` decimal(15,4) NOT NULL,
   PRIMARY KEY (`length_class_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -5023,9 +5023,9 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_length_class` WRITE;
 /*!40000 ALTER TABLE `oc_length_class` DISABLE KEYS */;
 INSERT INTO `oc_length_class` VALUES
-(1,1.00000000),
-(2,10.00000000),
-(3,0.39370000);
+(1,1.0000),
+(2,10.0000),
+(3,0.3937);
 /*!40000 ALTER TABLE `oc_length_class` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -6112,6 +6112,7 @@ DROP TABLE IF EXISTS `oc_product`;
 CREATE TABLE `oc_product` (
   `product_id` int(11) NOT NULL AUTO_INCREMENT,
   `model` varchar(64) NOT NULL,
+  `main_category_id` int(11) NOT NULL DEFAULT 0,
   `sku` varchar(64) NOT NULL,
   `upc` varchar(12) NOT NULL,
   `ean` varchar(14) NOT NULL,
@@ -6132,11 +6133,11 @@ CREATE TABLE `oc_product` (
   `points` int(11) NOT NULL DEFAULT 0,
   `tax_class_id` int(11) NOT NULL,
   `date_available` date NOT NULL DEFAULT '0000-00-00',
-  `weight` decimal(15,8) NOT NULL DEFAULT 0.00000000,
+  `weight` decimal(15,4) NOT NULL DEFAULT 0.0000,
   `weight_class_id` int(11) NOT NULL DEFAULT 0,
-  `length` decimal(15,8) NOT NULL DEFAULT 0.00000000,
-  `width` decimal(15,8) NOT NULL DEFAULT 0.00000000,
-  `height` decimal(15,8) NOT NULL DEFAULT 0.00000000,
+  `length` decimal(15,4) NOT NULL DEFAULT 0.0000,
+  `width` decimal(15,4) NOT NULL DEFAULT 0.0000,
+  `height` decimal(15,4) NOT NULL DEFAULT 0.0000,
   `length_class_id` int(11) NOT NULL DEFAULT 0,
   `subtract` tinyint(1) NOT NULL DEFAULT 1,
   `minimum` decimal(15,2) NOT NULL DEFAULT 1.00,
@@ -10671,7 +10672,7 @@ CREATE TABLE `oc_product_option_value` (
   `price_prefix` varchar(1) NOT NULL,
   `points` int(11) NOT NULL,
   `points_prefix` varchar(1) NOT NULL,
-  `weight` decimal(15,8) NOT NULL,
+  `weight` decimal(15,4) NOT NULL,
   `weight_prefix` varchar(1) NOT NULL,
   `is_hit` tinyint(1) NOT NULL DEFAULT 0,
   `sort_order` int(11) NOT NULL DEFAULT 0,
@@ -13479,7 +13480,7 @@ CREATE TABLE `oc_product_variant` (
   `price` decimal(15,4) NOT NULL DEFAULT 0.0000,
   `quantity` decimal(15,4) DEFAULT 0.0000,
   `subtract` tinyint(1) DEFAULT 0,
-  `weight` decimal(15,8) NOT NULL DEFAULT 0.00000000,
+  `weight` decimal(15,4) NOT NULL DEFAULT 0.0000,
   `weight_class_id` int(11) NOT NULL DEFAULT 0,
   `image` varchar(255) NOT NULL DEFAULT '',
   `variant_hash` varchar(255) NOT NULL DEFAULT '',
@@ -15520,7 +15521,7 @@ DROP TABLE IF EXISTS `oc_weight_class`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `oc_weight_class` (
   `weight_class_id` int(11) NOT NULL AUTO_INCREMENT,
-  `value` decimal(15,8) NOT NULL DEFAULT 0.00000000,
+  `value` decimal(15,4) NOT NULL DEFAULT 0.0000,
   PRIMARY KEY (`weight_class_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -15533,10 +15534,10 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_weight_class` WRITE;
 /*!40000 ALTER TABLE `oc_weight_class` DISABLE KEYS */;
 INSERT INTO `oc_weight_class` VALUES
-(1,1.00000000),
-(2,1000.00000000),
-(5,2.20460000),
-(6,35.27400000);
+(1,1.0000),
+(2,1000.0000),
+(5,2.2046),
+(6,35.2740);
 /*!40000 ALTER TABLE `oc_weight_class` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;

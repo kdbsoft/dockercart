@@ -10,12 +10,21 @@ $_['text_edit']         = 'Edit Category';
 $_['text_default']      = 'Default';
 $_['text_enabled']      = 'Enabled';
 $_['text_disabled']     = 'Disabled';
+$_['text_list_subtitle'] = 'Manage blog categories';
+$_['text_add_category_subtitle'] = 'Create a new blog category';
+$_['text_edit_category_subtitle'] = 'Edit blog category';
 
 // Column
 $_['column_name']       = 'Category Name';
 $_['column_status']     = 'Status';
 $_['column_sort_order'] = 'Sort Order';
 $_['column_action']     = 'Action';
+
+// Tab
+$_['tab_description']   = 'Description';
+$_['tab_params_group']  = 'Settings';
+$_['tab_images_group']  = 'Images';
+$_['tab_seo']           = 'SEO';
 
 // Entry
 $_['entry_name']        = 'Category Name';

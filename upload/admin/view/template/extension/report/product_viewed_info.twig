@@ -1,9 +1,9 @@
 <div class="panel panel-default">
   <div class="panel-heading">
     <div class="pull-right">
-      <a href="{{ reset }}" class="btn btn-danger btn-xs"><i class="fa fa-refresh"></i> {{ button_reset }}</a>
+      <a href="{{ reset }}" class="btn btn-danger btn-xs"><i data-lucide="refresh-cw" width="14" height="14"></i> {{ button_reset }}</a>
     </div>
-    <div class="panel-heading__icon"><i class="fa fa-filter"></i></div>
+    <div class="panel-heading__icon"><i data-lucide="filter" width="14" height="14"></i></div>
     <div>
       <h3 class="panel-title">{{ heading_title }}</h3>
       <div class="panel-heading__subtitle">{{ text_report_subtitle }}</div>
@@ -41,7 +41,7 @@
       </table>
     </div>
     <div class="row">
-      <div class="col-sm-6 text-left">{{ pagination }}</div>
+      <div class="col-sm-6 text-left"><div class="pagination-wrap">{{ pagination }}</div></div>
       <div class="col-sm-6 text-right">{{ results }}</div>
     </div>
   </div>

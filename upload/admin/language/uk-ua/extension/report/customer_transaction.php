@@ -2,7 +2,7 @@
 
 $_['column_action'] = 'Дія';
 $_['column_customer'] = 'Ім\'я клієнта';
-$_['column_customer_group'] = 'Група клієнтів';
+$_['column_customer_group'] = 'Група покупців';
 $_['column_email'] = 'Електронна пошта';
 $_['column_status'] = 'Статус';
 $_['column_total'] = 'Всього';

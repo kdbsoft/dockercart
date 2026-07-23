@@ -89,6 +89,7 @@ class ControllerCustomerCustomerApproval extends Controller {
 			'href' => $this->url->link('customer/customer_approval', 'user_token=' . $this->session->data['user_token'], true)
 		);
 		
+		$data['text_list_subtitle'] = $this->language->get('text_list_subtitle');
 		$data['filter_name'] = $filter_name;
 		$data['filter_email'] = $filter_email;
 		$data['filter_customer_group_id'] = $filter_customer_group_id;

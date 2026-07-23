@@ -353,6 +353,7 @@ class ControllerExtensionThemeDockercart extends Controller {
 			$data['theme_dockercart_image_location_height'] = 50;
 		}
 
+		$data['text_edit_subtitle'] = $this->language->get('text_edit_subtitle');
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');

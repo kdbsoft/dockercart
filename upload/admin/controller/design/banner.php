@@ -201,6 +201,7 @@ class ControllerDesignBanner extends Controller {
 
 		$data['add'] = $this->url->link('design/banner/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('design/banner/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
+		$data['text_list_subtitle'] = $this->language->get('text_list_subtitle');
 
 		$data['banners'] = array();
 
@@ -291,6 +292,9 @@ class ControllerDesignBanner extends Controller {
 
 	protected function getForm() {
 		$data['text_form'] = !isset($this->request->get['banner_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
+		$data['text_form_subtitle'] = !isset($this->request->get['banner_id'])
+		    ? $this->language->get('text_add_subtitle')
+		    : $this->language->get('text_edit_subtitle');
 
 		// Localization keys for banner_form.twig
 		$data['text_tab_general']        = $this->language->get('text_tab_general');

@@ -1,55 +1,39 @@
-{{ header }}{{ column_left }}
+{{ header }}
+{{ column_left }}
 <div id="content">
   <div class="page-header">
     <div class="container-fluid">
-      <div class="pull-right"><a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa fa-plus"></i></a>
-        <button type="submit" form="form-option" formaction="{{ copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default"><i class="fa fa-copy"></i></button>
-        <button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="confirm('{{ text_confirm }}') ? $('#form-option').submit() : false;"><i class="fa fa-trash-o"></i></button>
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="pull-right">
+            <a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary btn--icon"><i data-lucide="plus" width="16" height="16"></i></a>
+            <button type="submit" form="form-option" formaction="{{ copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default btn--icon"><i data-lucide="copy" width="16" height="16"></i></button>
+            <button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="confirm('{{ text_confirm }}') ? $('#form-option').submit() : false;"><i data-lucide="trash-2" width="16" height="16"></i></button>
+          </div>
+          <h1 class="page-header__title">{{ heading_title }}</h1>
+        </div>
       </div>
-      <h1>{{ heading_title }}</h1>
-      <ul class="breadcrumb">
-        {% for breadcrumb in breadcrumbs %}
-        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
-        {% endfor %}
-      </ul>
     </div>
   </div>
   <div class="container-fluid">
     {% if error_warning %}
-    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+    <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
     {% if success %}
-    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+    <div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> {{ success }}
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
-    <div class="panel panel-default">
-      <div class="panel-heading">
-  <div class="panel-heading__icon"><i class="fa fa-list"></i></div>
-  <div>
-    <h3 class="panel-title">{{ text_list }}</h3>
-    <div class="panel-heading__subtitle">{{ text_list_subtitle }}</div>
-  </div>
-</div>
-      <div class="panel-body">
         <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-option">
           <div class="table-responsive">
-            <table class="table table-hover">
+            <table class="table table-bordered table-hover">
               <thead>
                 <tr>
                   <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
-                  <td class="text-left">{% if sort == 'od.name' %}
-                    <a href="{{ sort_name }}" class="{{ order|lower }}">{{ column_name }}</a>
-                    {% else %}
-                    <a href="{{ sort_name }}">{{ column_name }}</a>
-                    {% endif %}</td>
-                  <td class="text-right">{% if sort == 'o.sort_order' %}
-                    <a href="{{ sort_sort_order }}" class="{{ order|lower }}">{{ column_sort_order }}</a>
-                    {% else %}
-                    <a href="{{ sort_sort_order }}">{{ column_sort_order }}</a>
-                    {% endif %}</td>
+                  <td class="text-left">{% if sort == 'od.name' %}<a href="{{ sort_name }}" class="{{ order|lower }} sortable">{{ column_name }}</a>{% else %}<a href="{{ sort_name }}" class="sortable">{{ column_name }}</a>{% endif %}</td>
+                  <td class="text-right">{% if sort == 'o.sort_order' %}<a href="{{ sort_sort_order }}" class="{{ order|lower }} sortable">{{ column_sort_order }}</a>{% else %}<a href="{{ sort_sort_order }}" class="sortable">{{ column_sort_order }}</a>{% endif %}</td>
                   <td class="text-right">{{ column_action }}</td>
                 </tr>
               </thead>
@@ -63,12 +47,12 @@
                     <input type="checkbox" name="selected[]" value="{{ option.option_id }}" />
                     {% endif %}</td>
                   <td class="text-left">
-                    <span class="inline-edit" data-option-id="{{ option.option_id }}" data-field="name" data-value="{{ option.name_raw }}">{{ option.name }}<i class="fa fa-pencil-square-o inline-edit-icon"></i></span>
+                    <span class="inline-edit" data-option-id="{{ option.option_id }}" data-field="name" data-value="{{ option.name_raw }}">{{ option.name }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
                   </td>
                   <td class="text-right">
-                    <span class="inline-edit" data-option-id="{{ option.option_id }}" data-field="sort_order" data-value="{{ option.sort_order_raw }}">{{ option.sort_order }}<i class="fa fa-pencil-square-o inline-edit-icon"></i></span>
+                    <span class="inline-edit" data-option-id="{{ option.option_id }}" data-field="sort_order" data-value="{{ option.sort_order_raw }}">{{ option.sort_order }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
                   </td>
-                  <td class="text-right"><a href="{{ option.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a> <a href="{{ option.copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default"><i class="fa fa-copy"></i></a> <a href="{{ option.delete }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="return confirm('{{ text_confirm }}');"><i class="fa fa-trash-o"></i></a></td>
+                  <td class="text-right"><a href="{{ option.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a> <a href="{{ option.copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default btn--icon"><i data-lucide="copy" width="14" height="14"></i></a> <a href="{{ option.delete }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="return confirm('{{ text_confirm }}');"><i data-lucide="trash-2" width="14" height="14"></i></a></td>
                 </tr>
                 {% endfor %}
                 {% else %}
@@ -80,25 +64,15 @@
             </table>
           </div>
         </form>
-        <div class="row">
-          <div class="col-sm-6 text-left">{{ pagination }}</div>
-          <div class="col-sm-6 text-right">{{ results }}</div>
+        <div class="pagination-wrap">
+          <div class="row">
+            <div class="col-sm-6 text-left">{{ pagination }}</div>
+            <div class="col-sm-6 text-right">{{ results }}</div>
+          </div>
         </div>
-      </div>
-    </div>
   </div>
 </div>
-<style>
-.inline-edit { cursor: default; }
-.inline-edit .inline-edit-icon { margin-left: 4px; font-size: 13px; opacity: 0.3; cursor: pointer; }
-.inline-edit:hover .inline-edit-icon { opacity: 0.8; }
-.inline-edit-input { width: 80px; text-align: right; display: inline-block !important; height: 28px; padding: 3px 8px; }
-.inline-edit-input-left { width: 200px; text-align: left; display: inline-block !important; height: 28px; padding: 3px 8px; }
-.inline-edit-name-input { width: 200px; display: inline-block !important; height: 28px; padding: 3px 8px; }
-.inline-edit-error { margin-left: 4px; font-size: 11px; white-space: nowrap; }
-</style>
 <script type="text/javascript"><!--
-// IE and Edge fix!
 $('button[form=\'form-option\']').on('click', function(e) {
 	$('#form-option').attr('action', $(this).attr('formaction'));
 });
@@ -161,7 +135,8 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 							} else {
 								reverted = true;
 								$span.data('value', res['value_html']);
-								$span.html(res['value_html'] + '<i class="fa fa-pencil-square-o inline-edit-icon"></i>');
+								$span.html(res['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+								lucide.createIcons({ nodes: [$span[0]] });
 							}
 						},
 						error: function() {
@@ -210,7 +185,8 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 						setTimeout(function() { $span.html($span.data('display')); }, 3000);
 					} else {
 						$span.data('value', newValue);
-						$span.html(json['value_html'] + '<i class="fa fa-pencil-square-o inline-edit-icon"></i>');
+						$span.html(json['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+						lucide.createIcons({ nodes: [$span[0]] });
 					}
 				},
 				error: function() {

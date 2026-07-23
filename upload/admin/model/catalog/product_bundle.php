@@ -167,6 +167,17 @@ class ModelCatalogProductBundle extends Model {
 		return $query->row['total'];
 	}
 
+	public function getBundlesByProduct($product_id) {
+		$query = $this->db->query(
+			"SELECT DISTINCT b.* FROM " . DB_PREFIX . "product_bundle b "
+			. "INNER JOIN " . DB_PREFIX . "product_bundle_product bp ON (b.bundle_id = bp.bundle_id) "
+			. "WHERE bp.product_id = '" . (int) $product_id . "' "
+			. "ORDER BY b.sort_order ASC, b.name ASC"
+		);
+
+		return $query->rows;
+	}
+
 	public function getBundleProducts($bundle_id) {
 		$query = $this->db->query("SELECT product_id FROM " . DB_PREFIX . "product_bundle_product WHERE bundle_id = '" . (int)$bundle_id . "'");
 

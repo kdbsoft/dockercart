@@ -31,6 +31,8 @@
 <link href="{{ link.href }}" rel="{{ link.rel }}" />
 {% endfor %}
 <script src="view/javascript/common.js?v={{ dockercart_version }}" type="text/javascript"></script>
+<script src="view/javascript/dcx-components.js?v={{ dockercart_version }}" type="text/javascript"></script>
+<script src="view/javascript/dc-link-field.js?v={{ dockercart_version }}" type="text/javascript"></script>
 <script src="view/javascript/tinymce/tinymce.min.js" type="text/javascript"></script>
 {% for script in scripts %}
 <script type="text/javascript" src="{{ script }}{% if script|slice(0,4) != 'http' and script|slice(0,2) != '//' %}?v={{ dockercart_version }}{% endif %}"></script>
@@ -41,18 +43,18 @@
 <header id="header" class="navbar navbar-static-top">
   <div class="container-fluid">
     <div id="header-logo" class="navbar-header"><a href="{{ home }}" class="navbar-brand"><img src="view/image/logo.png" alt="{{ heading_title }}" title="{{ heading_title }}" /></a></div>
-    {% if logged %}<a href="#" id="button-menu" class="hidden-md hidden-lg"><span class="fa fa-bars"></span></a>
+    {% if logged %}<a href="#" id="button-menu" class="hidden-md hidden-lg"><i data-lucide="menu" width="20" height="20"></i></a>
     <ul class="nav navbar-nav navbar-right">
-      <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><i data-lucide="globe-2" width="14" height="14" style="vertical-align: middle;"></i> <b>{{ (current_language_code|split('-'))|first|upper }}</b> <i class="fa fa-caret-down fa-fw"></i></a>
+      <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><i data-lucide="globe-2" width="14" height="14" style="vertical-align: middle;"></i> <b>{{ (current_language_code|split('-'))|first|upper }}</b> <i data-lucide="chevron-down" width="12" height="12"></i></a>
         <ul class="dropdown-menu dropdown-menu-right">
           {% for language in languages %}
           <li{% if language.code == current_language_code %} class="active"{% endif %}><a href="{{ language.href }}">{{ language.name }}</a></li>
           {% endfor %}
         </ul>
       </li>
-      <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><img src="{{ image }}" alt="{{ firstname }} {{ lastname }}" title="{{ username }}" id="user-profile" class="img-circle" />{{ firstname }} {{ lastname }} <i class="fa fa-caret-down fa-fw"></i></a>
+      <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><img src="{{ image }}" alt="{{ firstname }} {{ lastname }}" title="{{ username }}" id="user-profile" class="img-circle" />{{ firstname }} {{ lastname }} <i data-lucide="chevron-down" width="12" height="12"></i></a>
         <ul class="dropdown-menu dropdown-menu-right">
-          <li><a href="{{ profile }}"><i class="fa fa-user-circle-o fa-fw"></i> {{ text_profile }}</a></li>
+          <li><a href="{{ profile }}"><i data-lucide="circle-user" width="16" height="16"></i> {{ text_profile }}</a></li>
           <li role="separator" class="divider"></li>
           <li class="dropdown-header">{{ text_store }}</li>
           {% for store in stores %}
@@ -60,17 +62,17 @@
           {% endfor %}
           <li role="separator" class="divider"></li>
           <li class="dropdown-header">{{ text_help }}</li>
-          <li><a href="https://dockercart.net" target="_blank"><i class="fa fa-cube fa-fw"></i> {{ text_homepage }}</a></li>
-          <li><a href="https://dockercart.net/docs" target="_blank"><i class="fa fa-file-text-o fa-fw"></i> {{ text_documentation }}</a></li>
-          <li><a href="https://dockercart.net" target="_blank"><i class="fa fa-comments-o fa-fw"></i> {{ text_support }}</a></li>
+          <li><a href="https://dockercart.net" target="_blank"><i data-lucide="package" width="16" height="16"></i> {{ text_homepage }}</a></li>
+          <li><a href="https://dockercart.net/docs" target="_blank"><i data-lucide="file-text" width="16" height="16"></i> {{ text_documentation }}</a></li>
+          <li><a href="https://dockercart.net" target="_blank"><i data-lucide="message-circle" width="16" height="16"></i> {{ text_support }}</a></li>
         </ul>
       </li>
-      <li><a href="{{ logout }}"><i class="fa fa-sign-out"></i> <span class="hidden-xs hidden-sm hidden-md">{{ text_logout }}</span></a></li>
+      <li><a href="{{ logout }}"><i data-lucide="log-out" width="16" height="16"></i> <span class="hidden-xs hidden-sm hidden-md">{{ text_logout }}</span></a></li>
     </ul>
     <div class="admin-search-wrap">
       <div class="admin-search-box">
         <input type="text" class="admin-search-input" placeholder="{{ text_search_placeholder }}" autocomplete="off" data-suggest-url="{{ admin_search_suggest_url }}" data-search-url="{{ admin_search_url }}">
-        <i class="fa fa-search admin-search-icon"></i>
+        <i data-lucide="search" class="admin-search-icon" width="16" height="16"></i>
       </div>
       <ul class="admin-search-dropdown"></ul>
     </div>
@@ -134,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (item.image) {
                   content += '<img src="' + item.image + '" alt="" class="admin-search-item-image">';
                 } else {
-                  content += '<div class="admin-search-item-icon"><i class="fa ' + getIconClass(item.type) + '"></i></div>';
+                  content += '<div class="admin-search-item-icon"><i data-lucide="' + getLucideIcon(item.type) + '"></i></div>';
                 }
                 content += '<div class="admin-search-item-info">';
                 content += '<div class="admin-search-item-name">' + escapeHtml(item.name) + '</div>';
@@ -158,11 +160,15 @@ document.addEventListener('DOMContentLoaded', function() {
             var viewAllLink = document.createElement('a');
             viewAllLink.href = 'index.php?route=common/admin_search&user_token=' + userToken + '&search=' + encodeURIComponent(query);
             viewAllLink.className = 'admin-search-view-all';
-            viewAllLink.innerHTML = '<i class="fa fa-search"></i> {{ text_view_all_results|default('View all results') }}';
+            viewAllLink.innerHTML = '<i data-lucide="search" width="18" height="18"></i> {{ text_view_all_results|default('View all results') }}';
             viewAll.appendChild(viewAllLink);
             dropdown.appendChild(viewAll);
 
             dropdown.style.display = 'block';
+
+            if (window.lucide && typeof window.lucide.createIcons === 'function') {
+              window.lucide.createIcons({ nodes: [dropdown] });
+            }
           })
           .catch(function(error) {
             console.error('Search error:', error);
@@ -196,16 +202,16 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  function getIconClass(type) {
+  function getLucideIcon(type) {
     var icons = {
-      'product': 'fa-tag',
-      'category': 'fa-folder',
-      'manufacturer': 'fa-industry',
-      'information': 'fa-file-text-o',
-      'order': 'fa-shopping-cart',
-      'customer': 'fa-user'
+      'product': 'tag',
+      'category': 'folder',
+      'manufacturer': 'factory',
+      'information': 'file-text',
+      'order': 'shopping-cart',
+      'customer': 'user'
     };
-    return icons[type] || 'fa-circle';
+    return icons[type] || 'circle';
   }
 
   function escapeHtml(text) {

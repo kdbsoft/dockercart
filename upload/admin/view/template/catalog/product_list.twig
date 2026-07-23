@@ -1,33 +1,38 @@
-{{ header }}{{ column_left }}
+{{ header }}
+<link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
 {% if text_min is not defined %}
 {% set text_min = 'Min' %}
 {% endif %}
 {% if text_max is not defined %}
 {% set text_max = 'Max' %}
 {% endif %}
+<style>
+small.text-muted svg { vertical-align: middle; }
+</style>
+{{ column_left }}
 <div id="content">
   <div class="page-header">
     <div class="container-fluid">
-      <div class="pull-right">
-        <a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa fa-plus"></i></a>
-        <button type="submit" form="form-product" formaction="{{ copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default"><i class="fa fa-copy"></i></button>
-        <button type="button" form="form-product" formaction="{{ delete }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="confirm('{{ text_confirm }}') ? $('#form-product').submit() : false;"><i class="fa fa-trash-o"></i></button>
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="pull-right">
+            <a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary btn--icon"><i data-lucide="plus" width="16" height="16"></i></a>
+            <button type="submit" form="form-product" formaction="{{ copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default btn--icon"><i data-lucide="copy" width="16" height="16"></i></button>
+            <button type="button" form="form-product" formaction="{{ delete }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="confirm('{{ text_confirm }}') ? $('#form-product').submit() : false;"><i data-lucide="trash-2" width="16" height="16"></i></button>
+          </div>
+          <h1 class="page-header__title">{{ heading_title }}</h1>
+        </div>
       </div>
-      <h1>{{ heading_title }}</h1>
-      <ul class="breadcrumb">
-        {% for breadcrumb in breadcrumbs %}
-        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
-        {% endfor %}
-      </ul>
     </div>
   </div>
-  <div class="container-fluid">{% if error_warning %}
-    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
     {% if success %}
-    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+    <div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> {{ success }}
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
@@ -79,41 +84,53 @@
           </div>
           <div class="filter-field">
             <label>{{ entry_category }}</label>
-            <input type="text" name="filter_category" value="{{ filter_category }}" placeholder="{{ entry_category }}" id="input-category" class="form-control" />
-            <input type="hidden" name="filter_category_id" value="{{ filter_category_id }}" id="input-category-id" />
+            <div class="dcx-tree-select"
+                 data-url="index.php?route=catalog/category/tree&user_token={{ user_token }}"
+                 data-none-text="{{ text_none }}"
+                 data-placeholder="{{ entry_category }}">
+              <div class="dcx-tree-select__input-wrap">
+                <input type="text" name="filter_category" value="{{ filter_category }}" placeholder="{{ entry_category }}" class="dcx-tree-select__input form-control" autocomplete="off" />
+                <input type="hidden" name="filter_category_id" value="{{ filter_category_id }}" />
+                <span class="dcx-tree-select__toggle">
+                  <i data-lucide="chevron-down" width="16" height="16"></i>
+                </span>
+              </div>
+              <div class="dcx-tree-select__dropdown">
+                <div class="dcx-tree-select__search">
+                  <input type="text" class="form-control" placeholder="{{ text_quick_find }}" />
+                  <i data-lucide="search" width="14" height="14"></i>
+                </div>
+                <div class="dcx-tree-select__list">
+                  <div class="dcx-tree-select__item dcx-tree-select__item--none" data-id="0" data-name="{{ text_none }}">
+                    <span class="dcx-tree-select__label">{{ text_none }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           <div class="filter-actions">
-            <button type="button" id="button-filter" class="btn btn-default"><i class="fa fa-filter"></i> {{ button_filter }}</button>
+            <button type="button" id="button-filter" class="btn btn-default"><i data-lucide="filter" width="14" height="14"></i> {{ button_filter }}</button>
           </div>
           {% if text_filter_hint %}
           <div class="filter-field" style="width:100%;flex-basis:100%;">
-            <small class="text-muted"><i class="fa fa-info-circle"></i> {{ text_filter_hint }}</small>
+            <small class="text-muted" style="display:inline-flex;align-items:center;gap:4px;"><i data-lucide="info" width="14" height="14"></i> {{ text_filter_hint }}</small>
           </div>
           {% endif %}
         </div>
       </div>
     </div>
-    <div class="panel panel-default">
-      <div class="panel-heading">
-  <div class="panel-heading__icon"><i class="fa fa-list"></i></div>
-  <div>
-    <h3 class="panel-title">{{ text_list }}</h3>
-    <div class="panel-heading__subtitle">{{ text_list_subtitle }}</div>
-  </div>
-</div>
-      <div class="panel-body">
         <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-product">
               <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table table-bordered table-hover">
                   <thead>
                     <tr>
                       <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
-                      <td class="text-left">{% if sort == 'pd.name' %} <a href="{{ sort_name }}" class="{{ order|lower }}">{{ column_name }}</a> {% else %} <a href="{{ sort_name }}">{{ column_name }}</a> {% endif %}</td>
-                      <td class="text-left">{% if sort == 'p.model' %} <a href="{{ sort_model }}" class="{{ order|lower }}">{{ column_model }}</a> {% else %} <a href="{{ sort_model }}">{{ column_model }}</a> {% endif %}</td>
+                      <td class="text-left">{% if sort == 'pd.name' %} <a href="{{ sort_name }}" class="{{ order|lower }} sortable">{{ column_name }}</a> {% else %} <a href="{{ sort_name }}" class="sortable">{{ column_name }}</a> {% endif %}</td>
+                      <td class="text-left">{% if sort == 'p.model' %} <a href="{{ sort_model }}" class="{{ order|lower }} sortable">{{ column_model }}</a> {% else %} <a href="{{ sort_model }}" class="sortable">{{ column_model }}</a> {% endif %}</td>
                       <td class="text-left">{{ column_category }}</td>
-                      <td class="text-right">{% if sort == 'p.price' %} <a href="{{ sort_price }}" class="{{ order|lower }}">{{ column_price }}</a> {% else %} <a href="{{ sort_price }}">{{ column_price }}</a> {% endif %}</td>
-                      <td class="text-right">{% if sort == 'p.quantity' %} <a href="{{ sort_quantity }}" class="{{ order|lower }}">{{ column_quantity }}</a> {% else %} <a href="{{ sort_quantity }}">{{ column_quantity }}</a> {% endif %}</td>
-                      <td class="text-left">{% if sort == 'p.status' %} <a href="{{ sort_status }}" class="{{ order|lower }}">{{ column_status }}</a> {% else %} <a href="{{ sort_status }}">{{ column_status }}</a> {% endif %}</td>
+                      <td class="text-right">{% if sort == 'p.price' %} <a href="{{ sort_price }}" class="{{ order|lower }} sortable">{{ column_price }}</a> {% else %} <a href="{{ sort_price }}" class="sortable">{{ column_price }}</a> {% endif %}</td>
+                      <td class="text-right">{% if sort == 'p.quantity' %} <a href="{{ sort_quantity }}" class="{{ order|lower }} sortable">{{ column_quantity }}</a> {% else %} <a href="{{ sort_quantity }}" class="sortable">{{ column_quantity }}</a> {% endif %}</td>
+                      <td class="text-left">{% if sort == 'p.status' %} <a href="{{ sort_status }}" class="{{ order|lower }} sortable">{{ column_status }}</a> {% else %} <a href="{{ sort_status }}" class="sortable">{{ column_status }}</a> {% endif %}</td>
                       <td class="text-right">{{ column_action }}</td>
                     </tr>
                   </thead>
@@ -128,32 +145,32 @@
                       <input type="checkbox" name="selected[]" value="{{ product.product_id }}" />
                       {% endif %}</td>
                     <td class="text-left" style="white-space:nowrap;">
-                      <input type="hidden" id="input-image-{{ product.product_id }}" value="{{ product.image_path }}" /><a href="javascript:void(0);" class="product-image-edit" id="thumb-image-{{ product.product_id }}" data-product-id="{{ product.product_id }}" style="display:inline-block;vertical-align:middle;margin-right:8px;">{% if product.image %} <img src="{{ product.image }}" alt="{{ product.name }}" class="img-thumbnail" /> {% else %} <span class="img-thumbnail list"><i class="fa fa-camera fa-2x"></i></span> {% endif %}</a>
+                      <input type="hidden" id="input-image-{{ product.product_id }}" value="{{ product.image_path }}" /><a href="javascript:void(0);" class="product-image-edit" id="thumb-image-{{ product.product_id }}" data-product-id="{{ product.product_id }}" style="display:inline-block;vertical-align:middle;margin-right:8px;">{% if product.image %} <img src="{{ product.image }}" alt="{{ product.name }}" class="img-thumbnail" /> {% else %} <span class="img-thumbnail list"><i data-lucide="camera" width="24" height="24"></i></span> {% endif %}</a>
                       <span class="inline-edit" data-product-id="{{ product.product_id }}" data-field="name" data-value="{{ product.name_raw }}">
                         {{ product.name }}
-                        <i class="fa fa-pencil-square-o inline-edit-icon"></i>
+                        <i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>
                       </span>
                     </td>
                     <td class="text-left">
                       <span class="inline-edit" data-product-id="{{ product.product_id }}" data-field="model" data-value="{{ product.model_raw }}">
                         {{ product.model }}
-                        <i class="fa fa-pencil-square-o inline-edit-icon"></i>
+                        <i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>
                       </span>
                     </td>
                     <td class="text-left">
                       <span class="inline-edit" data-product-id="{{ product.product_id }}" data-field="categories" data-value="{{ product.categories_raw }}">
                         {{ product.categories }}
-                        <i class="fa fa-pencil-square-o inline-edit-icon"></i>
+                        <i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>
                       </span>
                     </td>
                     <td class="text-right">
                       {% if product.special %}
                         <span style="text-decoration: line-through;">
-                          <span class="inline-edit" data-product-id="{{ product.product_id }}" data-field="price" data-value="{{ product.price_raw }}">{{ product.price }}<i class="fa fa-pencil-square-o inline-edit-icon"></i></span>
+                          <span class="inline-edit" data-product-id="{{ product.product_id }}" data-field="price" data-value="{{ product.price_raw }}">{{ product.price }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
                         </span><br/>
                         <div class="text-danger">{{ product.special }}</div>
                       {% else %}
-                        <span class="inline-edit" data-product-id="{{ product.product_id }}" data-field="price" data-value="{{ product.price_raw }}">{{ product.price }}<i class="fa fa-pencil-square-o inline-edit-icon"></i></span>
+                        <span class="inline-edit" data-product-id="{{ product.product_id }}" data-field="price" data-value="{{ product.price_raw }}">{{ product.price }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
                       {% endif %}
                     </td>
                     <td class="text-right">
@@ -178,21 +195,21 @@
                           {% else %}
                             <span style="color:#27ae60;font-weight:600;">{{ product.quantity }}</span>
                           {% endif %}
-                          <i class="fa fa-pencil-square-o inline-edit-icon"></i>
+                          <i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>
                         </span>
                       {% endif %}
                     </td>
                     <td class="text-left">
                       <span class="inline-edit" data-product-id="{{ product.product_id }}" data-field="status" data-value="{{ product.status_raw }}">
                         {% if product.status_raw %}
-                        <span class="label label-success">{{ text_enabled }}</span>
+                        <span class="page-header__badge page-header__badge--active">{{ text_enabled }}</span>
                         {% else %}
-                        <span class="label label-danger">{{ text_disabled }}</span>
+                        <span class="page-header__badge page-header__badge--inactive">{{ text_disabled }}</span>
                         {% endif %}
-                        <i class="fa fa-pencil-square-o inline-edit-icon"></i>
+                        <i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>
                       </span>
                     </td>
-                    <td class="text-right"><a href="{{ product.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a> <a href="{{ product.copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default"><i class="fa fa-copy"></i></a> <a href="{{ product.delete }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="return confirm('{{ text_confirm }}');"><i class="fa fa-trash-o"></i></a></td>
+                    <td class="text-right"><a href="{{ product.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a> <a href="{{ product.copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default btn--icon"><i data-lucide="copy" width="14" height="14"></i></a> <a href="{{ product.delete }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="return confirm('{{ text_confirm }}');"><i data-lucide="trash-2" width="14" height="14"></i></a></td>
                   </tr>
                   {% endfor %}
                   {% else %}
@@ -205,15 +222,15 @@
                 </table>
               </div>
             </form>
-            <div class="row">
-              <div class="col-sm-6 text-left">{{ pagination }}</div>
-              <div class="col-sm-6 text-right">{{ results }}</div>
+            <div class="pagination-wrap">
+              <div class="row">
+                <div class="col-sm-6 text-left">{{ pagination }}</div>
+                <div class="col-sm-6 text-right">{{ results }}</div>
+              </div>
             </div>
-          </div>
-        </div>
-    </div>
   </div>
-  <script type="text/javascript"><!--
+</div>
+<script type="text/javascript"><!--
 $('#button-filter').on('click', function() {
 	var url = '';
 
@@ -273,7 +290,7 @@ $('#button-filter').on('click', function() {
 
 	var filter_category_id = $('input[name=\'filter_category_id\']').val();
 
-	if (filter_category_id) {
+	if (filter_category_id && filter_category_id !== '0') {
 		url += '&filter_category_id=' + encodeURIComponent(filter_category_id);
 	}
 
@@ -352,35 +369,7 @@ $('input[name=\'filter_manufacturer\']').autocomplete({
 		$('input[name=\'filter_manufacturer\']').val(item['label']);
 	}
 });
-
-$('input[name=\'filter_category\']').autocomplete({
-	'source': function(request, response) {
-		$.ajax({
-			url: 'index.php?route=catalog/category/autocomplete&user_token={{ user_token }}&filter_name=' +  encodeURIComponent(request),
-			dataType: 'json',
-			success: function(json) {
-				response($.map(json, function(item) {
-					return {
-						label: item['name'],
-						value: item['category_id']
-					}
-				}));
-			}
-		});
-	},
-	'select': function(item) {
-		$('input[name=\'filter_category\']').val(item['label']);
-		$('input[name=\'filter_category_id\']').val(item['value']);
-	}
-});
 //--></script>
-<style>
-.inline-edit { cursor: default; }
-.inline-edit .inline-edit-icon { margin-left: 4px; font-size: 13px; opacity: 0.3; cursor: pointer; }
-.inline-edit:hover .inline-edit-icon { opacity: 0.8; }
-.inline-edit-input { width: 100px; text-align: right; display: inline-block !important; }
-.inline-edit-error { margin-left: 4px; font-size: 11px; white-space: nowrap; }
-</style>
 <script type="text/javascript"><!--
 $(document).on('click', '.inline-edit-icon', function(e) {
 	e.stopPropagation();
@@ -418,7 +407,8 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 						setTimeout(function() { $span.html($span.data('display')); }, 3000);
 					} else {
 						$span.data('value', newValue);
-						$span.html(json['value_html'] + '<i class="fa fa-pencil-square-o inline-edit-icon"></i>');
+						$span.html(json['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+						lucide.createIcons({ nodes: [$span[0]] });
 					}
 				},
 				error: function() {
@@ -479,7 +469,8 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 							} else {
 								reverted = true;
 								$span.data('value', res['value_html']);
-								$span.html(res['value_html'] + '<i class="fa fa-pencil-square-o inline-edit-icon"></i>');
+								$span.html(res['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+								lucide.createIcons({ nodes: [$span[0]] });
 							}
 						},
 						error: function() {
@@ -509,35 +500,21 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 		editProductId = $span.data('product-id');
 		var categoryIds = rawValue ? String(rawValue).split(',') : [];
 
-		selectedCategories = [];
-		categoryIds.forEach(function(id) {
-			if (id) {
-				selectedCategories.push({category_id: id, name: ''});
-			}
-		});
+		var $treeSelect = $('#category-tree-modal .dcx-tree-select');
+		var treeInstance = $treeSelect.data('dcx-tree-select');
 
-		if (!categoryTreeLoaded) {
-			loadCategoryTree();
+		if (!treeInstance) {
+			DcxTreeSelect.init('#category-tree-modal .dcx-tree-select');
+			treeInstance = $treeSelect.data('dcx-tree-select');
+		}
+
+		if (treeInstance) {
+			treeInstance.setSelected(categoryIds);
 		}
 
 		$('#category-tree-modal').modal('show');
-
-		var checkLoaded = setInterval(function() {
-			if (categoryTreeLoaded) {
-				clearInterval(checkLoaded);
-				$('#category-tree-container .category-check').prop('checked', false);
-				selectedCategories.forEach(function(sel) {
-					var $cb = $('#category-tree-container .category-check[value="' + sel.category_id + '"]');
-					if ($cb.length) {
-						$cb.prop('checked', true);
-						$cb.parents('ul.category-children').show().prev('.category-node').find('.category-toggle i.fa')
-							.removeClass('fa-plus-square-o').addClass('fa-minus-square-o');
-					}
-				});
-			}
-		}, 100);
 	} else {
-		var currentDisplay = $span.clone().children('.inline-edit-icon').remove().children('.label').remove().end().text().trim();
+		var currentDisplay = $span.clone().children('.inline-edit-icon').remove().children('.page-header__badge').remove().end().text().trim();
 
 		$span.html('<input type="text" class="form-control input-sm inline-edit-input" value="' + rawValue + '">');
 		var $input = $span.find('input');
@@ -562,7 +539,8 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 						setTimeout(function() { $span.html($span.data('display')); }, 3000);
 					} else {
 						$span.data('value', newValue);
-						$span.html(json['value_html'] + '<i class="fa fa-pencil-square-o inline-edit-icon"></i>');
+						$span.html(json['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+						lucide.createIcons({ nodes: [$span[0]] });
 					}
 				},
 				error: function() {
@@ -628,14 +606,19 @@ $(document).on('click', '.product-image-edit', function(e) {
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">{{ entry_category }}</h4>
+        <h4 class="modal-title"><i data-lucide="folder-tree" width="18" height="18" style="margin-right:8px;"></i>{{ text_select_category }}</h4>
       </div>
       <div class="modal-body">
-        <div class="form-group" style="margin-bottom:10px">
-          <input type="text" id="category-tree-search" class="form-control" placeholder="{{ text_filter }}" />
-        </div>
-        <div id="category-tree-container" style="max-height:400px;overflow-y:auto;border:1px solid #ddd;border-radius:3px;padding:8px">
-          <div class="text-center text-muted">{{ text_loading }}</div>
+        <div class="dcx-tree-select"
+             data-url="index.php?route=catalog/category/tree&user_token={{ user_token }}"
+             data-mode="multi"
+             data-none-text="{{ text_none }}"
+             data-placeholder="{{ text_filter }}">
+          <div class="dcx-tree-select__search">
+            <input type="text" class="form-control" placeholder="{{ text_filter }}" id="category-tree-search" />
+            <i data-lucide="search" width="14" height="14"></i>
+          </div>
+          <div class="dcx-tree-select__list" style="max-height:400px"></div>
         </div>
       </div>
       <div class="modal-footer">
@@ -648,166 +631,39 @@ $(document).on('click', '.product-image-edit', function(e) {
 <!-- /Category Tree Modal -->
 
 <script type="text/javascript"><!--
-var selectedCategories = [];
-var categoryTreeLoaded = false;
 var editProductId = null;
 
-function loadCategoryTree() {
+$(document).on('click', '#category-tree-confirm', function() {
+	var $treeSelect = $('#category-tree-modal .dcx-tree-select');
+	var treeInstance = $treeSelect.data('dcx-tree-select');
+
+	if (!treeInstance || !editProductId) {
+		$('#category-tree-modal').modal('hide');
+		return;
+	}
+
+	var categoryIds = Object.keys(treeInstance.selectedItems);
+	var currentProductId = editProductId;
+
 	$.ajax({
-		url: 'index.php?route=catalog/category/tree&user_token={{ user_token }}',
+		url: 'index.php?route=catalog/product/updateField&user_token={{ user_token }}',
+		type: 'post',
 		dataType: 'json',
-		success: function(data) {
-			renderCategoryTree(data);
+		data: { product_id: currentProductId, field: 'categories', value: categoryIds.join(',') },
+		success: function(json) {
+			if (json['error']) {
+				alert(json['error']);
+			} else {
+				var $span = $('.inline-edit[data-product-id="' + currentProductId + '"][data-field="categories"]');
+				$span.data('value', categoryIds.join(','));
+				$span.html(json['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+				lucide.createIcons({ nodes: [$span[0]] });
+			}
 		},
 		error: function() {
-			$('#category-tree-container').html('<div class="text-center text-danger">{{ text_no_results }}</div>');
+			alert('Error');
 		}
 	});
-}
-
-function renderCategoryTree(data) {
-	var $container = $('#category-tree-container');
-	var $ul = $('<ul class="category-tree list-unstyled" style="margin:0"></ul>');
-
-	if (!data.length) {
-		$container.html('<div class="text-center text-muted">{{ text_no_results }}</div>');
-		return;
-	}
-
-	data.forEach(function(cat) {
-		if (cat.level === 0) {
-			$ul.append(createCategoryNode(cat, data));
-		}
-	});
-
-	$container.html($ul);
-	categoryTreeLoaded = true;
-
-	selectedCategories.forEach(function(sel) {
-		var $cb = $container.find('.category-check[value="' + sel.category_id + '"]');
-		if ($cb.length) {
-			$cb.prop('checked', true);
-			$cb.parents('ul.category-children').show().prev('.category-node').find('.category-toggle i.fa')
-				.removeClass('fa-plus-square-o').addClass('fa-minus-square-o');
-		}
-	});
-}
-
-function createCategoryNode(cat, allData) {
-	var $li = $('<li></li>');
-	var $div = $('<div class="category-node" style="white-space:nowrap;padding:2px 0"></div>');
-	var indent = cat.level * 20;
-	$div.css('padding-left', indent + 'px');
-
-	if (cat.has_children) {
-		var $toggle = $('<span class="category-toggle" style="cursor:pointer;display:inline-block;width:16px;text-align:center"><i class="fa fa-plus-square-o"></i></span>');
-		$toggle.data('id', cat.category_id);
-		$div.append($toggle);
-	} else {
-		$div.append($('<span style="display:inline-block;width:16px"></span>'));
-	}
-
-	var escName = $('<span>').text(cat.name).html();
-	var escPath = $('<span>').text(cat.path || cat.name).html();
-
-	var $label = $('<label style="font-weight:normal;margin:0 0 0 4px;cursor:pointer"></label>');
-	var $checkbox = $('<input type="checkbox" class="category-check" value="' + cat.category_id + '" data-name="' + escName + '" data-path="' + escPath + '">');
-	$label.append($checkbox).append(' ' + cat.name);
-	$div.append($label);
-	$li.append($div);
-
-	if (cat.has_children) {
-		var $children = $('<ul class="category-children list-unstyled" style="display:none;margin:0"></ul>');
-		allData.forEach(function(child) {
-			if (child.parent_id === cat.category_id) {
-				$children.append(createCategoryNode(child, allData));
-			}
-		});
-		$li.append($children);
-	}
-
-	return $li;
-}
-
-$(document).on('click', '.category-toggle', function(e) {
-	e.stopPropagation();
-	var $children = $(this).closest('li').find('> ul.category-children');
-	var $icon = $(this).find('i.fa');
-	if ($children.is(':visible')) {
-		$children.slideUp(150);
-		$icon.removeClass('fa-minus-square-o').addClass('fa-plus-square-o');
-	} else {
-		$children.slideDown(150);
-		$icon.removeClass('fa-plus-square-o').addClass('fa-minus-square-o');
-	}
-});
-
-$(document).on('change', '.category-check', function() {
-	var $cb = $(this);
-	var $li = $cb.closest('li');
-
-	if ($cb.is(':checked')) {
-		$li.parents('li').find('> .category-node > label > .category-check').prop('checked', true);
-	} else {
-		$li.find('.category-check').prop('checked', false);
-	}
-});
-
-$('#category-tree-search').on('input', function() {
-	var query = $(this).val().toLowerCase().trim();
-	var $container = $('#category-tree-container');
-
-	if (!query) {
-		$container.find('li').show();
-		$container.find('ul.category-children').hide();
-		$container.find('.category-toggle i.fa')
-			.removeClass('fa-minus-square-o').addClass('fa-plus-square-o');
-		return;
-	}
-
-	$container.find('li').each(function() {
-		var name = $(this).find('.category-node label').text().toLowerCase();
-		if (name.indexOf(query) !== -1) {
-			$(this).show();
-			$(this).parents('ul.category-children').show();
-			$(this).parents('li').find('> .category-node > .category-toggle i.fa')
-				.removeClass('fa-plus-square-o').addClass('fa-minus-square-o');
-		} else {
-			$(this).hide();
-		}
-	});
-});
-
-$(document).on('click', '#category-tree-confirm', function() {
-	var categoryIds = [];
-	var categoryNames = [];
-
-	$('#category-tree-container .category-check:checked').each(function() {
-		categoryIds.push($(this).val());
-		categoryNames.push($(this).data('path'));
-	});
-
-	if (editProductId) {
-		var currentProductId = editProductId;
-		$.ajax({
-			url: 'index.php?route=catalog/product/updateField&user_token={{ user_token }}',
-			type: 'post',
-			dataType: 'json',
-			data: { product_id: currentProductId, field: 'categories', value: categoryIds.join(',') },
-			success: function(json) {
-				if (json['error']) {
-					alert(json['error']);
-				} else {
-					var $span = $('.inline-edit[data-product-id="' + currentProductId + '"][data-field="categories"]');
-					$span.data('value', categoryIds.join(','));
-					$span.html(json['value_html'] + '<i class="fa fa-pencil-square-o inline-edit-icon"></i>');
-				}
-			},
-			error: function() {
-				alert('Error');
-			}
-		});
-	}
 
 	editProductId = null;
 	$('#category-tree-modal').modal('hide');

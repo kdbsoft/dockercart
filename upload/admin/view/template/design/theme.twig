@@ -1,5 +1,6 @@
 {{ header }}{{ column_left }}
 <div id="content">
+  <link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
   <div class="page-header">
     <div class="container-fluid">
       <h1>{{ heading_title }}</h1>
@@ -11,51 +12,48 @@
     </div>
   </div>
   <div class="container-fluid">
-    <div class="panel panel-default">
-      <div class="panel-heading">
-  <div class="panel-heading__icon"><i class="fa fa-list"></i></div>
-  <div>
-    <h3 class="panel-title">{{ text_edit }}</h3>
-    <div class="panel-heading__subtitle">{{ text_edit_subtitle }}</div>
-  </div>
-</div>
-      <div class="panel-body">
-        <div class="row">
-          <div class="col-lg-3 col-md-3 col-sm-12">
-            <div class="list-group">
-              <div class="list-group-item">
-                <h4 class="list-group-item-heading">{{ text_store }}</h4>
-              </div>
-              <div class="list-group-item">
-                <select name="store_id" class="form-control">
-                  <option value="0">{{ text_default }}</option>
-                  {% for store in stores %}
-                  <option value="{{ store.store_id }}">{{ store.name }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-            </div>
-            <div class="list-group">
-              <div class="list-group-item">
-                <h4 class="list-group-item-heading">{{ text_template }}</h4>
-              </div>
-              <div id="path"></div>
-            </div>
+    <div class="section-heading">
+      <h2>{{ text_edit }}</h2>
+      <p class="section-heading-subtitle">{{ text_edit_subtitle }}</p>
+    </div>
+    <div class="dcx-shell">
+      <div class="dcx-panel">
+        <div class="dcx-panel-body">
+          <div class="row">
+      <div class="col-lg-3 col-md-3 col-sm-12">
+        <div class="list-group">
+          <div class="list-group-item">
+            <h4 class="list-group-item-heading">{{ text_store }}</h4>
           </div>
-          <div class="col-lg-9 col-md-9 col-sm-12">
-            <div class="alert alert-info"><i class="fa fa-info-circle"></i> {{ text_twig }}</div>
-            <div id="recent">
-              <fieldset>
-                <legend>{{ text_history }}</legend>
-                <div id="history"></div>
-              </fieldset>
-            </div>            
-            <div id="code" style="display: none;">
-              <ul class="nav nav-tabs">
-              </ul>
-              <div class="tab-content"></div>
-            </div>
+          <div class="list-group-item">
+            <select name="store_id" class="form-control">
+              <option value="0">{{ text_default }}</option>
+              {% for store in stores %}
+              <option value="{{ store.store_id }}">{{ store.name }}</option>
+              {% endfor %}
+            </select>
           </div>
+        </div>
+        <div class="list-group">
+          <div class="list-group-item">
+            <h4 class="list-group-item-heading">{{ text_template }}</h4>
+          </div>
+          <div id="path"></div>
+        </div>
+      </div>
+      <div class="col-lg-9 col-md-9 col-sm-12">
+        <div class="alert alert-info"><i class="fa fa-info-circle"></i> {{ text_twig }}</div>
+        <div id="recent">
+          <legend>{{ text_history }}</legend>
+          <div id="history"></div>
+        </div>            
+        <div id="code" style="display: none;">
+          <ul class="nav nav-tabs">
+          </ul>
+          <div class="tab-content"></div>
+        </div>
+      </div>
+    </div>
         </div>
       </div>
     </div>

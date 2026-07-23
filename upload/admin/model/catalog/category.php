@@ -17,6 +17,14 @@ class ModelCatalogCategory extends Model {
 			$this->db->query("UPDATE " . DB_PREFIX . "category SET background_image = '" . $this->db->escape($data['background_image']) . "' WHERE category_id = '" . (int)$category_id . "'");
 		}
 
+		if (isset($data['banner_image'])) {
+			$this->db->query("UPDATE " . DB_PREFIX . "category SET banner_image = '" . $this->db->escape($data['banner_image']) . "' WHERE category_id = '" . (int)$category_id . "'");
+		}
+
+		if (isset($data['banner_link'])) {
+			$this->db->query("UPDATE " . DB_PREFIX . "category SET banner_link = '" . $this->db->escape($data['banner_link']) . "' WHERE category_id = '" . (int)$category_id . "'");
+		}
+
 		foreach ($data['category_description'] as $language_id => $value) {
 			$this->db->query("INSERT INTO " . DB_PREFIX . "category_description SET category_id = '" . (int)$category_id . "', language_id = '" . (int)$language_id . "', name = '" . $this->db->escape($value['name']) . "', description = '" . $this->db->escape($value['description']) . "', meta_title = '" . $this->db->escape($value['meta_title']) . "', meta_description = '" . $this->db->escape($value['meta_description']) . "', meta_keyword = '" . $this->db->escape($value['meta_keyword']) . "'");
 		}
@@ -64,6 +72,12 @@ class ModelCatalogCategory extends Model {
 			}
 		}
 
+		if (isset($data['category_related'])) {
+			foreach ($data['category_related'] as $related_id) {
+				$this->db->query("INSERT INTO " . DB_PREFIX . "category_related SET category_id = '" . (int)$category_id . "', related_id = '" . (int)$related_id . "'");
+			}
+		}
+
 		// Clear all category cache
 		$this->cache->delete('category');
 
@@ -81,11 +95,19 @@ class ModelCatalogCategory extends Model {
 			$this->db->query("UPDATE " . DB_PREFIX . "category SET icon = '" . $this->db->escape($data['icon']) . "' WHERE category_id = '" . (int)$category_id . "'");
 		}
 
-		if (isset($data['background_image'])) {
-			$this->db->query("UPDATE " . DB_PREFIX . "category SET background_image = '" . $this->db->escape($data['background_image']) . "' WHERE category_id = '" . (int)$category_id . "'");
-		}
+	if (isset($data['background_image'])) {
+		$this->db->query("UPDATE " . DB_PREFIX . "category SET background_image = '" . $this->db->escape($data['background_image']) . "' WHERE category_id = '" . (int)$category_id . "'");
+	}
 
-		$this->db->query("DELETE FROM " . DB_PREFIX . "category_description WHERE category_id = '" . (int)$category_id . "'");
+	if (isset($data['banner_image'])) {
+		$this->db->query("UPDATE " . DB_PREFIX . "category SET banner_image = '" . $this->db->escape($data['banner_image']) . "' WHERE category_id = '" . (int)$category_id . "'");
+	}
+
+	if (isset($data['banner_link'])) {
+		$this->db->query("UPDATE " . DB_PREFIX . "category SET banner_link = '" . $this->db->escape($data['banner_link']) . "' WHERE category_id = '" . (int)$category_id . "'");
+	}
+
+	$this->db->query("DELETE FROM " . DB_PREFIX . "category_description WHERE category_id = '" . (int)$category_id . "'");
 
 		foreach ($data['category_description'] as $language_id => $value) {
 			$this->db->query("INSERT INTO " . DB_PREFIX . "category_description SET category_id = '" . (int)$category_id . "', language_id = '" . (int)$language_id . "', name = '" . $this->db->escape($value['name']) . "', description = '" . $this->db->escape($value['description']) . "', meta_title = '" . $this->db->escape($value['meta_title']) . "', meta_description = '" . $this->db->escape($value['meta_description']) . "', meta_keyword = '" . $this->db->escape($value['meta_keyword']) . "'");
@@ -177,6 +199,14 @@ class ModelCatalogCategory extends Model {
 			}
 		}
 
+		$this->db->query("DELETE FROM " . DB_PREFIX . "category_related WHERE category_id = '" . (int)$category_id . "'");
+
+		if (isset($data['category_related'])) {
+			foreach ($data['category_related'] as $related_id) {
+				$this->db->query("INSERT INTO " . DB_PREFIX . "category_related SET category_id = '" . (int)$category_id . "', related_id = '" . (int)$related_id . "'");
+			}
+		}
+
 		// Clear all category cache
 		$this->cache->delete('category');
 		// Clear specific category caches for all language and store combinations
@@ -208,6 +238,7 @@ class ModelCatalogCategory extends Model {
 		$this->db->query("DELETE FROM " . DB_PREFIX . "product_to_category WHERE category_id = '" . (int)$category_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "seo_url WHERE query = 'category_id=" . (int)$category_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "coupon_category WHERE category_id = '" . (int)$category_id . "'");
+		$this->db->query("DELETE FROM " . DB_PREFIX . "category_related WHERE category_id = '" . (int)$category_id . "'");
 
 		$this->load->model('design/seo_url');
 		$this->model_design_seo_url->invalidateSeoUrlCache();
@@ -252,11 +283,14 @@ class ModelCatalogCategory extends Model {
 		$data["status"] = $category["status"];
 		$data["image"] = $category["image"];
 		$data["background_image"] = $category["background_image"];
+		$data["banner_image"] = $category["banner_image"];
+		$data["banner_link"] = $category["banner_link"];
 		$data["category_description"] = $this->getCategoryDescriptions(
 			$category_id,
 		);
 		$data["category_store"] = $this->getCategoryStores($category_id);
 		$data["category_layout"] = $this->getCategoryLayouts($category_id);
+		$data["category_related"] = $this->getCategoryRelated($category_id);
 
 		$seo_urls = $this->getCategorySeoUrls($category_id);
 
@@ -321,11 +355,14 @@ class ModelCatalogCategory extends Model {
 		$data["status"] = $category["status"];
 		$data["image"] = $category["image"];
 		$data["background_image"] = $category["background_image"];
+		$data["banner_image"] = $category["banner_image"];
+		$data["banner_link"] = $category["banner_link"];
 		$data["category_description"] = $this->getCategoryDescriptions(
 			$category_id,
 		);
 		$data["category_store"] = $this->getCategoryStores($category_id);
 		$data["category_layout"] = $this->getCategoryLayouts($category_id);
+		$data["category_related"] = $this->getCategoryRelated($category_id);
 
 		$seo_urls = $this->getCategorySeoUrls($category_id);
 
@@ -684,6 +721,18 @@ class ModelCatalogCategory extends Model {
 		if (!empty($sets)) {
 			$this->db->query("UPDATE " . DB_PREFIX . "category SET " . implode(', ', $sets) . " WHERE category_id = '" . (int)$category_id . "'");
 		}
+	}
+
+	public function getCategoryRelated($category_id) {
+		$category_related_data = array();
+
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "category_related WHERE category_id = '" . (int)$category_id . "'");
+
+		foreach ($query->rows as $result) {
+			$category_related_data[] = $result['related_id'];
+		}
+
+		return $category_related_data;
 	}
 
 	public function updateCategoryNames($category_id, $names) {

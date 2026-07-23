@@ -3,7 +3,6 @@ class ControllerCatalogProduct extends Controller {
 	private $error = array();
 
 	public function index() {
-		error_log('=== PRODUCT CONTROLLER: index() called ===');
 		$this->load->language('catalog/product');
 
 		$this->document->setTitle($this->language->get('heading_title'));
@@ -14,7 +13,6 @@ class ControllerCatalogProduct extends Controller {
 	}
 
 	public function add() {
-		error_log('=== PRODUCT CONTROLLER: add() called ===');
 		$this->load->language('catalog/product');
 
 		$this->document->setTitle($this->language->get('heading_title'));
@@ -50,6 +48,44 @@ class ControllerCatalogProduct extends Controller {
 			}
 
 			$product_id = $this->model_catalog_product->addProduct($this->request->post);
+
+			if (!empty($this->request->post['product_bundle']) && is_array($this->request->post['product_bundle'])) {
+				$this->load->model('catalog/product_bundle');
+
+				$product_store = !empty($this->request->post['product_store']) ? array_map('intval', $this->request->post['product_store']) : array(0);
+
+				foreach ($this->request->post['product_bundle'] as $bundle_entry) {
+					if (empty($bundle_entry['bundle_product_ids']) || empty($bundle_entry['discount_value'])) {
+						continue;
+					}
+
+					$product_ids = array_filter(array_map('intval', explode(',', $bundle_entry['bundle_product_ids'])));
+					$all_products = array_unique(array_merge(array((int) $product_id), $product_ids));
+
+					$data = array(
+						'name'            => '',
+						'discount_type'   => !empty($bundle_entry['discount_type']) ? $bundle_entry['discount_type'] : 'percentage',
+						'discount_value'  => (float) $bundle_entry['discount_value'],
+						'date_start'      => !empty($bundle_entry['date_start']) ? $bundle_entry['date_start'] : '0000-00-00',
+						'date_end'        => !empty($bundle_entry['date_end']) ? $bundle_entry['date_end'] : '0000-00-00',
+						'status'          => 1,
+						'sort_order'      => 0,
+						'auto_renew'      => !empty($bundle_entry['auto_renew']),
+						'bundle_product'  => $all_products,
+						'bundle_store'    => $product_store
+					);
+
+					if (empty($data['date_start'])) {
+						$data['date_start'] = '0000-00-00';
+					}
+
+					if (empty($data['date_end'])) {
+						$data['date_end'] = '0000-00-00';
+					}
+
+					$this->model_catalog_product_bundle->addBundle($data);
+				}
+			}
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
@@ -116,10 +152,6 @@ class ControllerCatalogProduct extends Controller {
 
 		$this->load->model('catalog/product');
 
-		error_log('=== PRODUCT EDIT: Method called ===');
-		error_log('REQUEST_METHOD: ' . $this->request->server['REQUEST_METHOD']);
-		error_log('product_id: ' . (isset($this->request->get['product_id']) ? $this->request->get['product_id'] : 'NOT SET'));
-
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
 			// Auto-detect video from unified fields (no selector)
 			$video_youtube = !empty($this->request->post['video_youtube']) ? $this->request->post['video_youtube'] : '';
@@ -149,6 +181,61 @@ class ControllerCatalogProduct extends Controller {
 			}
 
 			$this->model_catalog_product->editProduct($this->request->get['product_id'], $this->request->post);
+
+			$this->load->model('catalog/product_bundle');
+
+			$current_product_id = (int) $this->request->get['product_id'];
+			$product_store = !empty($this->request->post['product_store']) ? array_map('intval', $this->request->post['product_store']) : array(0);
+			$submitted_bundle_ids = array();
+
+			if (!empty($this->request->post['product_bundle']) && is_array($this->request->post['product_bundle'])) {
+				foreach ($this->request->post['product_bundle'] as $bundle_entry) {
+					if (empty($bundle_entry['bundle_product_ids']) || empty($bundle_entry['discount_value'])) {
+						continue;
+					}
+
+					$product_ids = array_filter(array_map('intval', explode(',', $bundle_entry['bundle_product_ids'])));
+					$all_products = array_unique(array_merge(array($current_product_id), $product_ids));
+
+					$data = array(
+						'name'            => '',
+						'discount_type'   => !empty($bundle_entry['discount_type']) ? $bundle_entry['discount_type'] : 'percentage',
+						'discount_value'  => (float) $bundle_entry['discount_value'],
+						'date_start'      => !empty($bundle_entry['date_start']) ? $bundle_entry['date_start'] : '0000-00-00',
+						'date_end'        => !empty($bundle_entry['date_end']) ? $bundle_entry['date_end'] : '0000-00-00',
+						'status'          => 1,
+						'sort_order'      => 0,
+						'auto_renew'      => !empty($bundle_entry['auto_renew']),
+						'bundle_product'  => $all_products,
+						'bundle_store'    => $product_store
+					);
+
+					if (empty($data['date_start'])) {
+						$data['date_start'] = '0000-00-00';
+					}
+
+					if (empty($data['date_end'])) {
+						$data['date_end'] = '0000-00-00';
+					}
+
+					$bundle_id = !empty($bundle_entry['bundle_id']) ? (int) $bundle_entry['bundle_id'] : 0;
+
+					if ($bundle_id) {
+						$this->model_catalog_product_bundle->editBundle($bundle_id, $data);
+						$submitted_bundle_ids[] = $bundle_id;
+					} else {
+						$this->model_catalog_product_bundle->addBundle($data);
+					}
+				}
+			}
+
+			$existing_bundles = $this->model_catalog_product_bundle->getBundlesByProduct($current_product_id);
+
+			foreach ($existing_bundles as $eb) {
+				if (!in_array((int) $eb['bundle_id'], $submitted_bundle_ids)) {
+					$this->model_catalog_product_bundle->deleteBundle((int) $eb['bundle_id']);
+				}
+			}
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
@@ -794,6 +881,7 @@ class ControllerCatalogProduct extends Controller {
 		$data['column_category'] = $this->language->get('column_category');
 		$data['text_enabled'] = $this->language->get('text_enabled');
 		$data['text_disabled'] = $this->language->get('text_disabled');
+		$data['text_select_category'] = $this->language->get('text_select_category');
 
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
@@ -803,6 +891,9 @@ class ControllerCatalogProduct extends Controller {
 	}
 
 	protected function getForm() {
+		$this->load->language('catalog/product_bundle');
+		$this->load->language('catalog/product_configurable');
+
 		$data['heading_title'] = $this->language->get('heading_title');
 		$data['text_form'] = !isset($this->request->get['product_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
 		$data['text_form_subtitle'] = !isset($this->request->get['product_id'])
@@ -810,6 +901,86 @@ class ControllerCatalogProduct extends Controller {
 		    : $this->language->get('text_edit_product_subtitle');
 
 		$data['text_drag_to_reorder'] = $this->language->get('text_drag_to_reorder');
+
+		// Panel titles
+		$data['text_panel_description_title']    = $this->language->get('text_panel_description_title');
+		$data['text_panel_description_subtitle'] = $this->language->get('text_panel_description_subtitle');
+		$data['text_panel_identifiers_title']    = $this->language->get('text_panel_identifiers_title');
+		$data['text_panel_identifiers_subtitle'] = $this->language->get('text_panel_identifiers_subtitle');
+		$data['text_panel_organization_title']   = $this->language->get('text_panel_organization_title');
+		$data['text_panel_organization_subtitle'] = $this->language->get('text_panel_organization_subtitle');
+		$data['text_panel_dimensions_title']     = $this->language->get('text_panel_dimensions_title');
+		$data['text_panel_dimensions_subtitle']  = $this->language->get('text_panel_dimensions_subtitle');
+		$data['text_panel_settings_title']       = $this->language->get('text_panel_settings_title');
+		$data['text_panel_settings_subtitle']    = $this->language->get('text_panel_settings_subtitle');
+		$data['text_panel_pricing_title']        = $this->language->get('text_panel_pricing_title');
+		$data['text_panel_pricing_subtitle']     = $this->language->get('text_panel_pricing_subtitle');
+		$data['text_panel_inventory_title']      = $this->language->get('text_panel_inventory_title');
+		$data['text_panel_inventory_subtitle']   = $this->language->get('text_panel_inventory_subtitle');
+		$data['text_panel_media_title']          = $this->language->get('text_panel_media_title');
+		$data['text_panel_media_subtitle']       = $this->language->get('text_panel_media_subtitle');
+		$data['text_panel_attributes_title']     = $this->language->get('text_panel_attributes_title');
+		$data['text_panel_attributes_subtitle']  = $this->language->get('text_panel_attributes_subtitle');
+		$data['text_help_attributes']         = $this->language->get('text_help_attributes');
+		$data['text_panel_options_title']        = $this->language->get('text_panel_options_title');
+		$data['text_panel_options_subtitle']     = $this->language->get('text_panel_options_subtitle');
+		$data['text_help_options_mode']        = $this->language->get('text_help_options_mode');
+		$data['text_panel_discounts_title']      = $this->language->get('text_panel_discounts_title');
+		$data['text_panel_discounts_subtitle']   = $this->language->get('text_panel_discounts_subtitle');
+		$data['text_panel_specials_title']       = $this->language->get('text_panel_specials_title');
+		$data['text_panel_specials_subtitle']    = $this->language->get('text_panel_specials_subtitle');
+		$data['text_panel_gifts_title']          = $this->language->get('text_panel_gifts_title');
+		$data['text_panel_gifts_subtitle']       = $this->language->get('text_panel_gifts_subtitle');
+		$data['text_panel_rewards_title']        = $this->language->get('text_panel_rewards_title');
+		$data['text_panel_rewards_subtitle']     = $this->language->get('text_panel_rewards_subtitle');
+		$data['text_panel_seo_title']            = $this->language->get('text_panel_seo_title');
+		$data['text_panel_seo_subtitle']         = $this->language->get('text_panel_seo_subtitle');
+		$data['text_panel_design_title']         = $this->language->get('text_panel_design_title');
+		$data['text_panel_design_subtitle']      = $this->language->get('text_panel_design_subtitle');
+
+		$data['text_no_discounts'] = $this->language->get('text_no_discounts');
+		$data['text_no_specials']  = $this->language->get('text_no_specials');
+		$data['text_no_gifts']     = $this->language->get('text_no_gifts');
+		$data['text_panel_promo_title']    = $this->language->get('text_panel_promo_title');
+		$data['text_panel_promo_subtitle'] = $this->language->get('text_panel_promo_subtitle');
+		$data['text_no_promo']             = $this->language->get('text_no_promo');
+		$data['text_promo_discount']       = $this->language->get('text_promo_discount');
+		$data['text_promo_special']        = $this->language->get('text_promo_special');
+		$data['text_promo_gift']           = $this->language->get('text_promo_gift');
+		$data['button_promo_add']          = $this->language->get('button_promo_add');
+
+		$data['text_panel_bundles_title']    = $this->language->get('text_panel_bundles_title');
+		$data['text_panel_bundles_subtitle'] = $this->language->get('text_panel_bundles_subtitle');
+		$data['text_no_bundles']             = $this->language->get('text_no_bundles');
+		$data['text_promo_bundle']           = $this->language->get('text_promo_bundle');
+		$data['button_bundle_add']           = $this->language->get('button_bundle_add');
+		$data['button_bundle_edit']          = $this->language->get('button_bundle_edit');
+		$data['button_bundle_remove']        = $this->language->get('button_bundle_remove');
+		$data['button_bundle_delete']        = $this->language->get('button_bundle_delete');
+		$data['entry_bundle_name']           = $this->language->get('entry_bundle_name');
+		$data['entry_bundle_products']       = $this->language->get('entry_bundle_products');
+		$data['help_bundle_products']        = $this->language->get('help_bundle_products');
+		$data['error_bundle_products']       = $this->language->get('error_bundle_products');
+		$data['error_bundle_discount']       = $this->language->get('error_bundle_discount');
+		$data['text_bundle_delete_confirm']  = $this->language->get('text_bundle_delete_confirm');
+		$data['text_bundle_remove_confirm']  = $this->language->get('text_bundle_remove_confirm');
+		$data['text_bundle_other_products']  = $this->language->get('text_bundle_other_products');
+
+		// Sidebar card titles
+		$data['text_seo_card']    = $this->language->get('text_seo_card');
+		$data['text_design_card'] = $this->language->get('text_design_card');
+		$data['text_seo_preview'] = $this->language->get('text_seo_preview');
+		$data['text_organization_card'] = $this->language->get('text_organization_card');
+		$data['text_status_card'] = $this->language->get('text_status_card');
+		$data['entry_main_category'] = $this->language->get('entry_main_category');
+		$data['help_main_category'] = $this->language->get('help_main_category');
+		$data['help_category'] = $this->language->get('help_category');
+		$data['button_select_category'] = $this->language->get('button_select_category');
+		$data['text_select_category'] = $this->language->get('text_select_category');
+		$data['entry_categories_display'] = $this->language->get('entry_categories_display');
+		$data['text_picker_type_to_search'] = $this->language->get('text_picker_type_to_search');
+		$data['text_picker_no_results'] = $this->language->get('text_picker_no_results');
+		$data['text_picker_error'] = $this->language->get('text_picker_error');
 
 		if (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];
@@ -921,12 +1092,30 @@ class ControllerCatalogProduct extends Controller {
 
 		$data['product_description'] = $this->decodeDescriptionFields($data['product_description'], array('name', 'meta_title'));
 
+		// Product name for page header
+		if (isset($this->request->post['product_description'][$this->config->get('config_language_id')]['name'])) {
+			$data['product_name'] = $this->request->post['product_description'][$this->config->get('config_language_id')]['name'];
+		} elseif (!empty($product_info)) {
+			$descriptions = $this->model_catalog_product->getProductDescriptions($this->request->get['product_id']);
+			$data['product_name'] = isset($descriptions[$this->config->get('config_language_id')]['name']) ? $descriptions[$this->config->get('config_language_id')]['name'] : '';
+		} else {
+			$data['product_name'] = '';
+		}
+
 		if (isset($this->request->post['model'])) {
 			$data['model'] = $this->request->post['model'];
 		} elseif (!empty($product_info)) {
 			$data['model'] = $product_info['model'];
 		} else {
 			$data['model'] = '';
+		}
+
+		if (isset($this->request->post['main_category_id'])) {
+			$data['main_category_id'] = $this->request->post['main_category_id'];
+		} elseif (!empty($product_info)) {
+			$data['main_category_id'] = $product_info['main_category_id'];
+		} else {
+			$data['main_category_id'] = 0;
 		}
 
 		if (isset($this->request->post['sku'])) {
@@ -1217,6 +1406,15 @@ class ControllerCatalogProduct extends Controller {
 			}
 		}
 
+		// Main category name
+		$data['main_category_name'] = '';
+		if (!empty($data['main_category_id'])) {
+			$main_cat = $this->model_catalog_category->getCategory($data['main_category_id']);
+			if ($main_cat) {
+				$data['main_category_name'] = ($main_cat['path']) ? $main_cat['path'] . ' &gt; ' . $main_cat['name'] : $main_cat['name'];
+			}
+		}
+
 		// Attributes
 		$this->load->model('catalog/attribute');
 
@@ -1290,6 +1488,7 @@ class ControllerCatalogProduct extends Controller {
 		$this->load->model('catalog/product_configurable');
 
 		$product_id_for_form = isset($this->request->get['product_id']) ? (int)$this->request->get['product_id'] : 0;
+		$data['product_id'] = $product_id_for_form;
 		$data['is_configurable'] = false;
 		$data['axis_option_ids'] = array();
 
@@ -1420,14 +1619,14 @@ class ControllerCatalogProduct extends Controller {
 		$this->load->model('tool/image');
 
 		if (isset($this->request->post['image']) && is_file(DIR_IMAGE . $this->request->post['image'])) {
-			$data['thumb'] = $this->model_tool_image->resize($this->request->post['image'], 100, 100);
+			$data['thumb'] = $this->model_tool_image->resize($this->request->post['image'], 260, 200);
 		} elseif (!empty($product_info) && is_file(DIR_IMAGE . $product_info['image'])) {
-			$data['thumb'] = $this->model_tool_image->resize($product_info['image'], 100, 100);
+			$data['thumb'] = $this->model_tool_image->resize($product_info['image'], 260, 200);
 		} else {
-			$data['thumb'] = $this->model_tool_image->resize('no_image.png', 100, 100);
+			$data['thumb'] = $this->model_tool_image->resize('no_image.png', 260, 200);
 		}
 
-		$data['placeholder'] = $this->model_tool_image->resize('no_image.png', 100, 100);
+		$data['placeholder'] = $this->model_tool_image->resize('no_image.png', 260, 200);
 
 		// Images
 		if (isset($this->request->post['product_image'])) {
@@ -1618,6 +1817,42 @@ class ControllerCatalogProduct extends Controller {
 		$data['layouts'] = $this->model_design_layout->getLayouts();
 
 		$this->load->language('catalog/product_configurable');
+
+		$this->load->model('catalog/product_bundle');
+
+		$data['product_bundles'] = array();
+
+		if (isset($this->request->get['product_id'])) {
+			$bundle_results = $this->model_catalog_product_bundle->getBundlesByProduct((int) $this->request->get['product_id']);
+
+			foreach ($bundle_results as $bundle) {
+				$bundle_products = $this->model_catalog_product_bundle->getBundleProducts($bundle['bundle_id']);
+				$products_for_template = array();
+
+				foreach ($bundle_products as $product_id) {
+					$product_info = $this->model_catalog_product->getProduct((int) $product_id);
+
+					if ($product_info) {
+						$products_for_template[] = array(
+							'product_id' => $product_info['product_id'],
+							'name'       => $product_info['name'],
+							'price'      => $this->currency->format($product_info['price'], $this->config->get('config_currency'))
+						);
+					}
+				}
+
+				$data['product_bundles'][] = array(
+					'bundle_id'       => $bundle['bundle_id'],
+					'discount_type'   => $bundle['discount_type'],
+					'discount_value'  => $bundle['discount_value'],
+					'date_start'      => ($bundle['date_start'] != '0000-00-00') ? $bundle['date_start'] : '',
+					'date_end'        => ($bundle['date_end'] != '0000-00-00') ? $bundle['date_end'] : '',
+					'auto_renew'      => (int) $bundle['auto_renew'],
+					'products'        => $products_for_template,
+					'product_ids_csv' => implode(',', $bundle_products)
+				);
+			}
+		}
 
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
@@ -2118,5 +2353,248 @@ class ControllerCatalogProduct extends Controller {
 			}
 		}
 		return $value;
+	}
+
+	public function getBundles() {
+		$json = array();
+
+		if (!$this->user->hasPermission('access', 'catalog/product')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		if (!isset($this->request->get['product_id'])) {
+			$json['error'] = 'Invalid request';
+		}
+
+		if (!isset($json['error'])) {
+			$product_id = (int) $this->request->get['product_id'];
+
+			$this->load->model('catalog/product_bundle');
+
+			$bundle_results = $this->model_catalog_product_bundle->getBundlesByProduct($product_id);
+
+			$json['bundles'] = array();
+
+			foreach ($bundle_results as $bundle) {
+				$bundle_products = $this->model_catalog_product_bundle->getBundleProducts($bundle['bundle_id']);
+
+				$other_products = array();
+
+				foreach ($bundle_products as $bp) {
+					if ((int) $bp['product_id'] !== $product_id) {
+						$product_info = $this->model_catalog_product->getProduct($bp['product_id']);
+
+						if ($product_info) {
+							$other_products[] = array(
+								'product_id' => $product_info['product_id'],
+								'name'       => $product_info['name'],
+								'model'      => $product_info['model'],
+								'price'      => $this->currency->format($product_info['price'], $this->config->get('config_currency'))
+							);
+						}
+					}
+				}
+
+				$discount_text = '';
+
+				if ($bundle['discount_type'] == 'percentage') {
+					$discount_text = '-' . $this->currency->format($bundle['discount_value'], $this->config->get('config_currency'), 1) . '%';
+				} else {
+					$discount_text = '-' . $this->currency->format($bundle['discount_value'], $this->session->data['currency']);
+				}
+
+				$json['bundles'][] = array(
+					'bundle_id'       => $bundle['bundle_id'],
+					'name'            => $bundle['name'] ?: '',
+					'discount_type'   => $bundle['discount_type'],
+					'discount_value'  => $bundle['discount_value'],
+					'discount_text'   => $discount_text,
+					'date_start'      => ($bundle['date_start'] != '0000-00-00') ? $bundle['date_start'] : '',
+					'date_end'        => ($bundle['date_end'] != '0000-00-00') ? $bundle['date_end'] : '',
+					'status'          => (int) $bundle['status'],
+					'sort_order'      => (int) $bundle['sort_order'],
+					'auto_renew'      => (int) $bundle['auto_renew'],
+					'other_products'  => $other_products,
+					'product_count'   => count($bundle_products)
+				);
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function getBundleProducts() {
+		$json = array();
+
+		if (!$this->user->hasPermission('access', 'catalog/product')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		if (!isset($this->request->get['bundle_id'])) {
+			$json['error'] = 'Invalid request';
+		}
+
+		if (!isset($json['error'])) {
+			$bundle_id = (int) $this->request->get['bundle_id'];
+
+			$this->load->model('catalog/product_bundle');
+			$this->load->model('catalog/product');
+
+			$bundle_info = $this->model_catalog_product_bundle->getBundle($bundle_id);
+
+			if ($bundle_info) {
+				$bundle_products = $this->model_catalog_product_bundle->getBundleProducts($bundle_id);
+
+				$json['bundle'] = array(
+					'bundle_id'      => $bundle_info['bundle_id'],
+					'name'           => $bundle_info['name'],
+					'discount_type'  => $bundle_info['discount_type'],
+					'discount_value' => $bundle_info['discount_value'],
+					'date_start'     => ($bundle_info['date_start'] != '0000-00-00') ? $bundle_info['date_start'] : '',
+					'date_end'       => ($bundle_info['date_end'] != '0000-00-00') ? $bundle_info['date_end'] : '',
+					'status'         => (int) $bundle_info['status'],
+					'sort_order'     => (int) $bundle_info['sort_order'],
+					'auto_renew'     => (int) $bundle_info['auto_renew'],
+					'products'       => array()
+				);
+
+				$json['bundle']['stores'] = $this->model_catalog_product_bundle->getBundleStores($bundle_id);
+
+				foreach ($bundle_products as $bp) {
+					$product_info = $this->model_catalog_product->getProduct($bp['product_id']);
+
+					if ($product_info) {
+						$json['bundle']['products'][] = array(
+							'product_id' => $product_info['product_id'],
+							'name'       => $product_info['name'],
+							'model'      => $product_info['model'],
+							'price'      => $this->currency->format($product_info['price'], $this->config->get('config_currency'))
+						);
+					}
+				}
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function saveBundle() {
+		$json = array();
+
+		if (!$this->user->hasPermission('modify', 'catalog/product_bundle')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		if (!isset($this->request->post['product_id']) || !isset($this->request->post['bundle_products']) || !is_array($this->request->post['bundle_products']) || count($this->request->post['bundle_products']) < 1) {
+			$json['error'] = $this->language->get('error_bundle_products');
+		}
+
+		if (!isset($this->request->post['discount_value']) || (float) $this->request->post['discount_value'] <= 0) {
+			$json['error'] = $this->language->get('error_bundle_discount');
+		}
+
+		if (!isset($json['error'])) {
+			$this->load->model('catalog/product_bundle');
+
+			$current_product_id = (int) $this->request->post['product_id'];
+			$bundle_id = isset($this->request->post['bundle_id']) ? (int) $this->request->post['bundle_id'] : 0;
+
+			$all_products = array_merge(array($current_product_id), array_map('intval', $this->request->post['bundle_products']));
+			$all_products = array_unique($all_products);
+
+			$data = array(
+				'name'            => isset($this->request->post['name']) ? trim($this->request->post['name']) : '',
+				'discount_type'   => isset($this->request->post['discount_type']) ? $this->request->post['discount_type'] : 'percentage',
+				'discount_value'  => (float) $this->request->post['discount_value'],
+				'date_start'      => isset($this->request->post['date_start']) ? $this->request->post['date_start'] : '0000-00-00',
+				'date_end'        => isset($this->request->post['date_end']) ? $this->request->post['date_end'] : '0000-00-00',
+				'status'          => isset($this->request->post['status']) ? (int) $this->request->post['status'] : 1,
+				'sort_order'      => isset($this->request->post['sort_order']) ? (int) $this->request->post['sort_order'] : 0,
+				'auto_renew'      => !empty($this->request->post['auto_renew']),
+				'bundle_product'  => $all_products,
+				'bundle_store'    => isset($this->request->post['bundle_store']) ? array_map('intval', $this->request->post['bundle_store']) : array(0)
+			);
+
+			if (empty($data['date_start'])) {
+				$data['date_start'] = '0000-00-00';
+			}
+
+			if (empty($data['date_end'])) {
+				$data['date_end'] = '0000-00-00';
+			}
+
+			if ($bundle_id) {
+				$this->model_catalog_product_bundle->editBundle($bundle_id, $data);
+			} else {
+				$bundle_id = $this->model_catalog_product_bundle->addBundle($data);
+			}
+
+			$json['success'] = true;
+			$json['bundle_id'] = $bundle_id;
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function removeProductFromBundle() {
+		$json = array();
+
+		if (!$this->user->hasPermission('modify', 'catalog/product_bundle')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		if (!isset($this->request->post['bundle_id']) || !isset($this->request->post['product_id'])) {
+			$json['error'] = 'Invalid request';
+		}
+
+		if (!isset($json['error'])) {
+			$bundle_id = (int) $this->request->post['bundle_id'];
+			$product_id = (int) $this->request->post['product_id'];
+
+			$this->load->model('catalog/product_bundle');
+
+			$this->db->query("DELETE FROM " . DB_PREFIX . "product_bundle_product WHERE bundle_id = '" . (int) $bundle_id . "' AND product_id = '" . (int) $product_id . "'");
+
+			$remaining = $this->model_catalog_product_bundle->getBundleProducts($bundle_id);
+
+			if (count($remaining) < 2) {
+				$this->model_catalog_product_bundle->deleteBundle($bundle_id);
+
+				$json['bundle_deleted'] = true;
+			}
+
+			$json['success'] = true;
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function deleteBundle() {
+		$json = array();
+
+		if (!$this->user->hasPermission('modify', 'catalog/product_bundle')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		if (!isset($this->request->post['bundle_id'])) {
+			$json['error'] = 'Invalid request';
+		}
+
+		if (!isset($json['error'])) {
+			$bundle_id = (int) $this->request->post['bundle_id'];
+
+			$this->load->model('catalog/product_bundle');
+
+			$this->model_catalog_product_bundle->deleteBundle($bundle_id);
+
+			$json['success'] = true;
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
 	}
 }

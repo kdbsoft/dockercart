@@ -43,3 +43,5 @@ $_['text_back_to']   = 'Назад к %s';
 $_['text_load_more'] = 'Показать ещё';
 $_['text_gift_badge'] = 'ПОДАРОК';
 $_['text_price_from'] = 'от';
+$_['text_related_categories'] = 'Связанные категории';
+$_['text_you_may_also_like']  = 'Вам также может понравиться';

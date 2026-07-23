@@ -333,6 +333,7 @@ class ControllerSaleReturn extends Controller {
 
 		$data['add'] = $this->url->link('sale/return/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('sale/return/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
+		$data['text_list_subtitle'] = $this->language->get('text_list_subtitle');
 
 		$data['returns'] = array();
 

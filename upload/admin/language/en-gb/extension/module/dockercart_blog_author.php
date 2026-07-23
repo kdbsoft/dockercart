@@ -11,14 +11,17 @@
 $_['heading_title']     = 'Blog - Authors';
 
 // Text
-$_['text_success']      = 'Success: You have modified blog authors!';
-$_['text_list']         = 'Author List';
-$_['text_add']          = 'Add Author';
-$_['text_edit']         = 'Edit Author';
-$_['text_home']         = 'Home';
-$_['text_enabled']      = 'Enabled';
-$_['text_disabled']     = 'Disabled';
-$_['text_no_results']   = 'No results found!';
+$_['text_success']       = 'Success: You have modified blog authors!';
+$_['text_list']          = 'Author List';
+$_['text_add']           = 'Add Author';
+$_['text_edit']          = 'Edit Author';
+$_['text_home']          = 'Home';
+$_['text_enabled']       = 'Enabled';
+$_['text_disabled']      = 'Disabled';
+$_['text_no_results']    = 'No results found!';
+$_['text_list_subtitle'] = 'Manage blog authors';
+$_['text_add_author_subtitle'] = 'Create a new blog author';
+$_['text_edit_author_subtitle'] = 'Edit blog author details';
 
 // Column
 $_['column_name']       = 'Author Name';

@@ -234,6 +234,7 @@ class ControllerSaleOrder extends Controller {
 		);
 
 		$data['delete'] = str_replace('&amp;', '&', $this->url->link('sale/order/delete', 'user_token=' . $this->session->data['user_token'] . $url, true));
+		$data['text_list_subtitle'] = $this->language->get('text_list_subtitle');
 
 		$data['orders'] = array();
 

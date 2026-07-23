@@ -16,16 +16,13 @@
     </div>
   </div>
   <div class="container-fluid">
+    <div class="section-heading">
+      <h2>{{ text_form }}</h2>
+      <p class="section-heading-subtitle">{{ text_form_subtitle }}</p>
+    </div>
     <div class="dcx-shell">
       <div class="dcx-panel">
-      <div class="dcx-panel-head">
-        <div class="dcx-panel-head__icon"><i class="fa fa-pencil"></i></div>
-        <div>
-          <h3 class="dcx-panel-title">{{ text_form }}</h3>
-          <div class="dcx-panel-subtitle">{{ text_edit }}</div>
-        </div>
-      </div>
-      <div class="dcx-panel-body">
+        <div class="dcx-panel-body">
         <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-comment" class="form-horizontal dcx-form">
           <div class="form-group">
             <label class="col-sm-2 control-label" for="input-author">{{ entry_author }}</label>

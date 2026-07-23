@@ -1,5 +1,6 @@
 {{ header }}{{ column_left }}
 <div id="content">
+  <link rel="stylesheet" href="view/stylesheet/dockercart_dcx_ui.css" />
   <div class="page-header">
     <div class="container-fluid">
       <div class="pull-right">
@@ -22,22 +23,20 @@
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
-    <div class="panel panel-default">
-      <div class="panel-heading">
-  <div class="panel-heading__icon"><i class="fa fa-pencil"></i></div>
-  <div>
-    <h3 class="panel-title">{{ text_form }}</h3>
-    <div class="panel-heading__subtitle">{{ text_form_subtitle }}</div>
-  </div>
-</div>
-      <div class="panel-body">
-        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-voucher" class="form-horizontal">
-          <ul class="nav nav-tabs">
-            <li class="active"><a href="#tab-general" data-toggle="tab"><i class="fa fa-file-text"></i> {{ tab_general }}</a></li>
-            {% if voucher_id %}
-            <li><a href="#tab-history" data-toggle="tab"><i class="fa fa-history"></i> {{ tab_history }}</a></li>
-            {% endif %}
-          </ul>
+    <div class="section-heading">
+      <h2>{{ text_form }}</h2>
+      <p class="section-heading-subtitle">{{ text_form_subtitle }}</p>
+    </div>
+    <div class="dcx-shell">
+      <div class="dcx-panel">
+        <div class="dcx-panel-body">
+          <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-voucher" class="form-horizontal">
+            <ul class="nav nav-tabs">
+              <li class="active"><a href="#tab-general" data-toggle="tab"><i class="fa fa-file-text"></i> {{ tab_general }}</a></li>
+              {% if voucher_id %}
+              <li><a href="#tab-history" data-toggle="tab"><i class="fa fa-history"></i> {{ tab_history }}</a></li>
+              {% endif %}
+            </ul>
           <div class="tab-content">
             <div class="tab-pane active" id="tab-general">
               <div class="form-group required">

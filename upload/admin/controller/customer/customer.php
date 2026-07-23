@@ -345,6 +345,7 @@ class ControllerCustomerCustomer extends Controller {
 
 		$data['add'] = $this->url->link('customer/customer/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('customer/customer/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
+		$data['text_list_subtitle'] = $this->language->get('text_list_subtitle');
 
 		$this->load->model('setting/store');
 

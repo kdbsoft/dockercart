@@ -1377,26 +1377,46 @@ class ControllerStartupSeoUrl extends Controller
 
                 // Get primary category for product
                 if (!isset($this->request->get["path"])) {
-                    $product_categories = $this->db->query(
-                        "SELECT category_id FROM " .
+                    $category_id = 0;
+
+                    // Try main_category_id first
+                    $product_main = $this->db->query(
+                        "SELECT main_category_id FROM " .
                             DB_PREFIX .
-                            "product_to_category
+                            "product
                         WHERE product_id = '" .
                             (int) $this->request->get["product_id"] .
                             "'
                         LIMIT 1",
                     );
 
-                    if ($product_categories->num_rows) {
-                        $category_id = $product_categories->row["category_id"];
+                    if ($product_main->num_rows && (int) $product_main->row["main_category_id"] > 0) {
+                        $category_id = (int) $product_main->row["main_category_id"];
+                    } else {
+                        // Fallback to first category from product_to_category
+                        $product_categories = $this->db->query(
+                            "SELECT category_id FROM " .
+                                DB_PREFIX .
+                                "product_to_category
+                            WHERE product_id = '" .
+                                (int) $this->request->get["product_id"] .
+                                "'
+                            LIMIT 1",
+                        );
 
+                        if ($product_categories->num_rows) {
+                            $category_id = (int) $product_categories->row["category_id"];
+                        }
+                    }
+
+                    if ($category_id > 0) {
                         // Get full category path from root using category_path table
                         $category_path = $this->db->query(
                             "SELECT path_id FROM " .
                                 DB_PREFIX .
                                 "category_path
                             WHERE category_id = '" .
-                                (int) $category_id .
+                                $category_id .
                                 "'
                             ORDER BY level ASC",
                         );

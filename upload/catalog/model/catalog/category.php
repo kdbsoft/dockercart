@@ -78,6 +78,19 @@ class ModelCatalogCategory extends Model {
 		return $categories;
 	}
 
+	public function getCategoryRelated($category_id) {
+		$cache_key = 'category.related.' . (int)$category_id . '.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_store_id');
+		$category_related_data = $this->cache->get($cache_key);
+
+		if (!$category_related_data) {
+			$query = $this->db->query("SELECT cr.related_id AS category_id, cd.name, c.image FROM " . DB_PREFIX . "category_related cr LEFT JOIN " . DB_PREFIX . "category c ON (cr.related_id = c.category_id) LEFT JOIN " . DB_PREFIX . "category_description cd ON (cr.related_id = cd.category_id AND cd.language_id = '" . (int)$this->config->get('config_language_id') . "') LEFT JOIN " . DB_PREFIX . "category_to_store c2s ON (cr.related_id = c2s.category_id AND c2s.store_id = '" . (int)$this->config->get('config_store_id') . "') WHERE cr.category_id = '" . (int)$category_id . "' AND c.status = '1' ORDER BY cd.name ASC");
+			$category_related_data = $query->rows;
+			$this->cache->set($cache_key, $category_related_data, 3600);
+		}
+
+		return $category_related_data;
+	}
+
 	public function getCategoryProductCounts(array $product_ids) {
 		if (empty($product_ids)) {
 			return array();

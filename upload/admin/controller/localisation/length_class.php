@@ -271,6 +271,12 @@ class ControllerLocalisationLengthClass extends Controller {
 			$data['error_unit'] = array();
 		}
 
+		if (isset($this->error['value'])) {
+			$data['error_value'] = $this->error['value'];
+		} else {
+			$data['error_value'] = '';
+		}
+
 		$url = '';
 
 		if (isset($this->request->get['sort'])) {
@@ -339,6 +345,10 @@ class ControllerLocalisationLengthClass extends Controller {
 	protected function validateForm() {
 		if (!$this->user->hasPermission('modify', 'localisation/length_class')) {
 			$this->error['warning'] = $this->language->get('error_permission');
+		}
+
+		if (!isset($this->request->post['value']) || !is_numeric($this->request->post['value']) || $this->request->post['value'] < 0) {
+			$this->error['value'] = $this->language->get('error_value');
 		}
 
 		foreach ($this->request->post['length_class_description'] as $language_id => $value) {

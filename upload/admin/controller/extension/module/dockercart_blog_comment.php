@@ -180,6 +180,8 @@ class ControllerExtensionModuleDockercartBlogComment extends Controller {
 		$data['approve'] = $this->url->link('extension/module/dockercart_blog_comment/approve', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('extension/module/dockercart_blog_comment/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
+		$data['text_list_subtitle'] = $this->language->get('text_list_subtitle');
+
 		$data['comments'] = array();
 
 		$filter_data = array(
@@ -237,6 +239,7 @@ class ControllerExtensionModuleDockercartBlogComment extends Controller {
 
 	protected function getForm() {
 		$data['text_form'] = $this->language->get('text_edit');
+		$data['text_form_subtitle'] = $this->language->get('text_edit_comment_subtitle');
 
 		$url = '';
 

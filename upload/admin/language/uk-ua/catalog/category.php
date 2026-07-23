@@ -3,7 +3,7 @@
 $_['tab_description'] = 'Опис';
 $_['tab_links_group'] = 'Зв\'язки';
 $_['tab_images_group'] = 'Зображення';
-$_['tab_params_group'] = 'Параметри';
+$_['tab_params_group'] = 'Медіа';
 $_['tab_seo'] = 'SEO';
 $_['tab_design'] = 'Дизайн';
 
@@ -19,12 +19,12 @@ $_['entry_description_bottom'] = 'Опис знизу:';
 $_['entry_image'] = 'Зображення';
 $_['entry_icon'] = 'Іконка';
 $_['entry_background_image'] = 'Фонове зображення';
-$_['entry_keyword'] = 'Ключове слово';
+$_['entry_keyword'] = 'SEO найменування';
 $_['entry_layout'] = 'Перевизначення макета';
 $_['entry_meta_description'] = 'Мета-опис';
 $_['entry_meta_h1'] = 'HTML-тег H1';
 $_['entry_meta_keyword'] = 'Мета-ключові слова';
-$_['entry_meta_title'] = 'Метатег Title';
+$_['entry_meta_title'] = 'Мета-заголовок';
 $_['entry_name'] = 'Назва категорії';
 $_['entry_noindex'] = 'Індексація';
 $_['entry_parent'] = 'Батьківська категорія';
@@ -33,7 +33,22 @@ $_['entry_related_wb'] = 'Рекомендовані товари:';
 $_['entry_sort_order'] = 'Порядок сортування';
 $_['entry_status'] = 'Статус';
 $_['entry_store'] = 'Магазини';
+$_['entry_related'] = 'Супутні категорії';
+$_['text_select_related'] = 'Вибрати супутні категорії';
+$_['text_selected'] = 'обрано';
 $_['entry_top'] = 'Відображати в меню';
+$_['entry_banner_image'] = 'Зображення банера';
+$_['entry_banner_link'] = 'Посилання банера';
+$_['text_banner_card'] = 'Банер у лістингу';
+$_['text_link_custom'] = 'Довільне посилання';
+$_['text_link_product'] = 'Товар';
+$_['text_link_category'] = 'Категорія';
+$_['text_link_manufacturer'] = 'Виробник';
+$_['text_link_information'] = 'Інформаційна сторінка';
+$_['text_link_blog'] = 'Стаття блогу';
+$_['entry_link'] = 'Посилання';
+$_['entry_link_search'] = 'Пошук за назвою...';
+$_['help_banner_image'] = 'Відображає рекламний банер у списку товарів категорії.';
 $_['error_keyword'] = 'URL-адреса SEO вже використовується!';
 $_['error_meta_h1'] = 'HTML-тег H1 має містити від 0 до 255 символів';
 $_['error_meta_title'] = 'Мета-заголовок має бути більше 1 та менше 255 символів!';
@@ -47,7 +62,6 @@ $_['heading_title'] = 'Категорії';
 $_['help_column'] = 'Кількість стовпців для використання для трьох нижніх категорій. Працює лише для батьківських категорій верхнього рівня.';
 $_['help_keyword'] = 'Має бути унікальним на всю систему, без пробілів та спецсимволів';
 $_['help_noindex'] = 'Індексація в пошукових системах Google, Bing та інших';
-$_['help_related'] = 'Почніть вводити назву для пошуку';
 $_['help_top'] = 'Відображати у верхньому рядку меню. Працює лише для верхніх батьківських категорій.';
 $_['help_icon'] = 'Маленька іконка, яка відображається поруч з назвою категорії в навігації шапки. Рекомендується: SVG або PNG, 24×24 px.';
 $_['text_add'] = 'Додати категорію';
@@ -67,6 +81,24 @@ $_['text_add_category_subtitle'] = 'Створити нову категорію
 
 $_['text_edit_category_subtitle'] = 'Редагувати назву та налаштування категорії';
 
+// Tab titles
+$_['text_tab_params_title']    = 'Налаштування';
+$_['text_tab_seo_title']       = 'SEO';
+$_['text_tab_design_title']    = 'Дизайн';
+
+// Tab subtitles
+$_['text_tab_params_subtitle'] = 'Вкажіть батьківську категорію, завантажте зображення та налаштуйте статус і доступ до магазинів';
+$_['text_tab_seo_subtitle']    = 'Пропишіть унікальні SEO-ключі для кожного магазину та мови для покращення позицій';
+$_['text_tab_design_subtitle'] = 'Налаштуйте індивідуальний макет для кожного магазину або залиште дизайн за замовчуванням';
 
 $_['button_expand_all'] = 'Розгорнути все';
 $_['button_collapse_all'] = 'Згорнути все';
+
+// Sidebar cards
+$_['text_status_card']        = 'Статус';
+$_['text_organization_card']  = 'Організація';
+$_['text_seo_card']           = 'Посилання';
+$_['text_design_card']        = 'Тема';
+$_['text_seo_preview']        = 'Попередній перегляд';
+$_['text_url_handle']         = 'URL-адреса';
+$_['text_visibility']         = 'Видимість';

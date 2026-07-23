@@ -62,5 +62,7 @@ $_['text_unmodified'] = 'Без змін';
 // Subtitle
 
 $_['text_modification_list_subtitle'] = 'Керуйте модифікаціями файлів OCMOD';
+$_['text_form_subtitle'] = 'Додайте або відредагуйте модифікацію OCMOD';
+$_['text_test_result'] = 'Результати тестування для вибраної модифікації';
 
 
