@@ -297,6 +297,7 @@ var DcxUI = (function() {
 	};
 
 	Picker.prototype.close = function() {
+		if (!this.isOpen) return;
 		this.isOpen = false;
 		this.$dropdown.hide();
 		if (this.$searchInput) this.$searchInput.val('');

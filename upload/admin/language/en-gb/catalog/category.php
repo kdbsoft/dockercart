@@ -79,6 +79,7 @@ $_['entry_link_search']       = 'Search by name...';
 $_['help_top']               = 'Display in the top menu bar. Only works for the top parent categories.';
 $_['help_column']            = 'Number of columns to use for the bottom 3 categories. Only works for the top parent categories.';
 $_['help_banner_image']      = 'Display a promotional banner in the product listing.';
+$_['help_icon']              = 'Small icon displayed next to the category name in the header navigation. Recommended: SVG or PNG, 24×24 px.';
 $_['help_related']           = 'Complementary categories to visit alongside this one. E.g., "Light Bulbs" for "Lamps".';
 
 // Error
