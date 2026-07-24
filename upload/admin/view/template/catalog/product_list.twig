@@ -158,7 +158,7 @@ small.text-muted svg { vertical-align: middle; }
                     </td>
                     <td class="text-left">
                       <span class="inline-edit" data-product-id="{{ product.product_id }}" data-field="categories" data-value="{{ product.categories_raw }}">
-                        {{ product.categories }}
+                        {{ product.categories|raw }}
                         <i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>
                       </span>
                     </td>
