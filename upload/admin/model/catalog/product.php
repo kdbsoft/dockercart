@@ -903,6 +903,69 @@ class ModelCatalogProduct extends Model
             }
         }
 
+
+        $this->db->query(
+            "DELETE FROM " .
+                DB_PREFIX .
+                "product_upsell WHERE product_id = '" .
+                (int) $product_id .
+                "'",
+        );
+
+        if (isset($data["product_upsell"])) {
+            foreach ($data["product_upsell"] as $upsell_id) {
+                $this->db->query(
+                    "DELETE FROM " .
+                        DB_PREFIX .
+                        "product_upsell WHERE product_id = '" .
+                        (int) $product_id .
+                        "' AND upsell_id = '" .
+                        (int) $upsell_id .
+                        "'",
+                );
+                $this->db->query(
+                    "INSERT INTO " .
+                        DB_PREFIX .
+                        "product_upsell SET product_id = '" .
+                        (int) $product_id .
+                        "', upsell_id = '" .
+                        (int) $upsell_id .
+                        "'",
+                );
+            }
+        }
+
+        $this->db->query(
+            "DELETE FROM " .
+                DB_PREFIX .
+                "product_accessory WHERE product_id = '" .
+                (int) $product_id .
+                "'",
+        );
+
+        if (isset($data["product_accessory"])) {
+            foreach ($data["product_accessory"] as $accessory_id) {
+                $this->db->query(
+                    "DELETE FROM " .
+                        DB_PREFIX .
+                        "product_accessory WHERE product_id = '" .
+                        (int) $product_id .
+                        "' AND accessory_id = '" .
+                        (int) $accessory_id .
+                        "'",
+                );
+                $this->db->query(
+                    "INSERT INTO " .
+                        DB_PREFIX .
+                        "product_accessory SET product_id = '" .
+                        (int) $product_id .
+                        "', accessory_id = '" .
+                        (int) $accessory_id .
+                        "'",
+                );
+            }
+        }
+
         $this->db->query(
             "DELETE FROM " .
                 DB_PREFIX .
@@ -1620,6 +1683,69 @@ class ModelCatalogProduct extends Model
             }
         }
 
+
+        $this->db->query(
+            "DELETE FROM " .
+                DB_PREFIX .
+                "product_upsell WHERE product_id = '" .
+                (int) $product_id .
+                "'",
+        );
+
+        if (isset($data["product_upsell"])) {
+            foreach ($data["product_upsell"] as $upsell_id) {
+                $this->db->query(
+                    "DELETE FROM " .
+                        DB_PREFIX .
+                        "product_upsell WHERE product_id = '" .
+                        (int) $product_id .
+                        "' AND upsell_id = '" .
+                        (int) $upsell_id .
+                        "'",
+                );
+                $this->db->query(
+                    "INSERT INTO " .
+                        DB_PREFIX .
+                        "product_upsell SET product_id = '" .
+                        (int) $product_id .
+                        "', upsell_id = '" .
+                        (int) $upsell_id .
+                        "'",
+                );
+            }
+        }
+
+        $this->db->query(
+            "DELETE FROM " .
+                DB_PREFIX .
+                "product_accessory WHERE product_id = '" .
+                (int) $product_id .
+                "'",
+        );
+
+        if (isset($data["product_accessory"])) {
+            foreach ($data["product_accessory"] as $accessory_id) {
+                $this->db->query(
+                    "DELETE FROM " .
+                        DB_PREFIX .
+                        "product_accessory WHERE product_id = '" .
+                        (int) $product_id .
+                        "' AND accessory_id = '" .
+                        (int) $accessory_id .
+                        "'",
+                );
+                $this->db->query(
+                    "INSERT INTO " .
+                        DB_PREFIX .
+                        "product_accessory SET product_id = '" .
+                        (int) $product_id .
+                        "', accessory_id = '" .
+                        (int) $accessory_id .
+                        "'",
+                );
+            }
+        }
+
         $this->db->query(
             "DELETE FROM " .
                 DB_PREFIX .
@@ -1760,6 +1886,8 @@ class ModelCatalogProduct extends Model
             $data["product_video"] = $this->getProductVideos($product_id);
             $data["product_option"] = $this->getProductOptions($product_id);
             $data["product_related"] = $this->getProductRelated($product_id);
+            $data["product_upsell"] = $this->getProductUpsell($product_id);
+            $data["product_accessory"] = $this->getProductAccessory($product_id);
             $data["product_reward"] = $this->getProductRewards($product_id);
             $data["product_special"] = $this->getProductSpecials($product_id);
             $data["product_gift"] = $this->getProductGifts($product_id);
@@ -1929,6 +2057,20 @@ class ModelCatalogProduct extends Model
             "DELETE FROM " .
                 DB_PREFIX .
                 "product_related WHERE product_id = '" .
+                (int) $product_id .
+                "'",
+        );
+        $this->db->query(
+            "DELETE FROM " .
+                DB_PREFIX .
+                "product_upsell WHERE product_id = '" .
+                (int) $product_id .
+                "'",
+        );
+        $this->db->query(
+            "DELETE FROM " .
+                DB_PREFIX .
+                "product_accessory WHERE product_id = '" .
                 (int) $product_id .
                 "'",
         );
@@ -2611,6 +2753,44 @@ class ModelCatalogProduct extends Model
         }
 
         return $product_related_data;
+    }
+
+    public function getProductUpsell($product_id)
+    {
+        $product_upsell_data = [];
+
+        $query = $this->db->query(
+            "SELECT * FROM " .
+                DB_PREFIX .
+                "product_upsell WHERE product_id = '" .
+                (int) $product_id .
+                "'",
+        );
+
+        foreach ($query->rows as $result) {
+            $product_upsell_data[] = $result["upsell_id"];
+        }
+
+        return $product_upsell_data;
+    }
+
+    public function getProductAccessory($product_id)
+    {
+        $product_accessory_data = [];
+
+        $query = $this->db->query(
+            "SELECT * FROM " .
+                DB_PREFIX .
+                "product_accessory WHERE product_id = '" .
+                (int) $product_id .
+                "'",
+        );
+
+        foreach ($query->rows as $result) {
+            $product_accessory_data[] = $result["accessory_id"];
+        }
+
+        return $product_accessory_data;
     }
 
     public function getTotalProducts($data = [])

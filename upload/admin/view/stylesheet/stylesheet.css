@@ -1093,6 +1093,42 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
     background: linear-gradient(135deg, var(--dc-tile-purple), var(--dc-tile-purple-end));
 }
 
+.tile-neutral {
+    background: var(--dc-surface);
+    color: var(--dc-text-dark);
+    border: 1px solid var(--dc-border);
+}
+
+.tile-neutral .tile-heading {
+    background-color: var(--dc-gray-50);
+    border-bottom: 1px solid var(--dc-border);
+    color: var(--dc-text-dark);
+}
+
+.tile-neutral .tile-footer {
+    background-color: var(--dc-gray-50);
+    border-top: 1px solid var(--dc-border);
+}
+
+.tile-neutral .tile-footer a {
+    color: var(--dc-primary);
+}
+
+.tile-neutral .tile-period-select {
+    background: var(--dc-surface);
+    border: 1px solid var(--dc-border-medium);
+    color: var(--dc-text-dark);
+}
+
+.tile-neutral .tile-period-select:hover {
+    background: var(--dc-gray-50);
+}
+
+.tile-neutral .tile-period-select option {
+    background: var(--dc-surface);
+    color: var(--dc-text-dark);
+}
+
 .tile-heading {
     padding: 12px 16px;
     text-transform: uppercase;
@@ -1207,6 +1243,45 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
 .tile-period-select option {
     background: var(--dc-text-dark);
     color: var(--dc-surface);
+}
+
+/* Tri tile layout — 3 metrics in a row */
+.tile--tri .tile-row {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+}
+
+.tile--tri .tile-metric {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.tile--tri .tile-metric-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.7;
+}
+
+.tile--tri .tile-metric-value {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tile--tri .tile-pct {
+    font-size: 12px;
+}
+
+.tile--tri .tile-pct i {
+    vertical-align: middle;
 }
 
 /* Dashboard chart */

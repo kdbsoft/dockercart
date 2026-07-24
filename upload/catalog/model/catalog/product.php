@@ -566,6 +566,30 @@ class ModelCatalogProduct extends Model {
 		return $product_data;
 	}
 
+	public function getProductUpsell($product_id) {
+		$product_data = array();
+
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_upsell pu LEFT JOIN " . DB_PREFIX . "product p ON (pu.upsell_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE pu.product_id = '" . (int)$product_id . "' AND p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "'");
+
+		foreach ($query->rows as $result) {
+			$product_data[$result['upsell_id']] = $this->getProduct($result['upsell_id']);
+		}
+
+		return $product_data;
+	}
+
+	public function getProductAccessory($product_id) {
+		$product_data = array();
+
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_accessory pa LEFT JOIN " . DB_PREFIX . "product p ON (pa.accessory_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE pa.product_id = '" . (int)$product_id . "' AND p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "'");
+
+		foreach ($query->rows as $result) {
+			$product_data[$result['accessory_id']] = $this->getProduct($result['accessory_id']);
+		}
+
+		return $product_data;
+	}
+
 	public function getProductLayoutId($product_id) {
 		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_to_layout WHERE product_id = '" . (int)$product_id . "' AND store_id = '" . (int)$this->config->get('config_store_id') . "'");
 
