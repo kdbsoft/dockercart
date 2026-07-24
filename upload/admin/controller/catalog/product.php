@@ -1799,6 +1799,48 @@ class ControllerCatalogProduct extends Controller {
 			}
 		}
 
+		if (isset($this->request->post['product_upsell'])) {
+			$products = $this->request->post['product_upsell'];
+		} elseif (isset($this->request->get['product_id'])) {
+			$products = $this->model_catalog_product->getProductUpsell($this->request->get['product_id']);
+		} else {
+			$products = array();
+		}
+
+		$data['product_upsells'] = array();
+
+		foreach ($products as $product_id) {
+			$upsell_info = $this->model_catalog_product->getProduct($product_id);
+
+			if ($upsell_info) {
+				$data['product_upsells'][] = array(
+					'product_id' => $upsell_info['product_id'],
+					'name'       => $upsell_info['name']
+				);
+			}
+		}
+
+		if (isset($this->request->post['product_accessory'])) {
+			$products = $this->request->post['product_accessory'];
+		} elseif (isset($this->request->get['product_id'])) {
+			$products = $this->model_catalog_product->getProductAccessory($this->request->get['product_id']);
+		} else {
+			$products = array();
+		}
+
+		$data['product_accessories'] = array();
+
+		foreach ($products as $product_id) {
+			$accessory_info = $this->model_catalog_product->getProduct($product_id);
+
+			if ($accessory_info) {
+				$data['product_accessories'][] = array(
+					'product_id' => $accessory_info['product_id'],
+					'name'       => $accessory_info['name']
+				);
+			}
+		}
+
 		if (isset($this->request->post['points'])) {
 			$data['points'] = $this->request->post['points'];
 		} elseif (!empty($product_info)) {

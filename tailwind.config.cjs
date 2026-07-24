@@ -20,6 +20,10 @@ module.exports = {
     'group-hover:bg-green-600',
     'group-hover:bg-orange-600',
     'group-hover:bg-red-600',
+    'hover:bg-blue-600',
+    'hover:bg-emerald-600',
+    'hover:bg-amber-600',
+    'group-hover:bg-amber-600',
   ],
   theme: {
     extend: {

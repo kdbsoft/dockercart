@@ -86,8 +86,10 @@
                           </div>
                           <div class="dcx-field">
                             <label class="dcx-label" for="input-tag{{ language.language_id }}">{{ entry_tag }}</label>
-                            <div class="dcx-field-icon-wrap">
-                              <input type="text" name="product_description[{{ language.language_id }}][tag]" value="{{ product_description[language.language_id] ? product_description[language.language_id].tag }}" placeholder="{{ entry_tag }}" id="input-tag{{ language.language_id }}" class="form-control"/>
+                            <div class="dc-tag-input">
+                              <input type="text" id="input-tag{{ language.language_id }}" class="form-control dc-tag-input__field" placeholder="{{ entry_tag }}"/>
+                              <div class="dc-tag-input__tags" id="tag-chips{{ language.language_id }}"></div>
+                              <input type="hidden" name="product_description[{{ language.language_id }}][tag]" value="{{ product_description[language.language_id] ? product_description[language.language_id].tag }}"/>
                               <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_tag }}"><i data-lucide="help-circle" width="16" height="16" class="text-muted"></i></span>
                             </div>
                           </div>
@@ -1191,6 +1193,50 @@
               <div id="product-related" class="dcx-picker__well" style="height: 150px; overflow: auto;"> {% for product_related in product_relateds %}
                   <div class="dcx-picker__well-item" data-id="{{ product_related.product_id }}"><i data-lucide="minus-circle" width="14" height="14" class="dcx-picker__well-remove"></i> <span class="dcx-picker__well-label">{{ product_related.name }}</span>
                     <input type="hidden" name="product_related[]" value="{{ product_related.product_id }}"/>
+                  </div>
+                {% endfor %}</div>
+            </div>
+            <div class="dcx-sidebar-card__field">
+              <label class="dcx-sidebar-card__label" for="input-upsell">{{ entry_upsell }} <span data-toggle="tooltip" title="{{ help_upsell }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span></label>
+              <div class="dcx-picker"
+                   data-url="index.php?route=catalog/product/autocomplete&user_token={{ user_token }}"
+                   data-well="#product-upsell"
+                   data-input-name="product_upsell[]"
+                   data-placeholder="{{ entry_upsell }}"
+                   data-id-key="product_id"
+                   data-name-key="name"
+                   data-sub-key="model"
+                   data-min-chars="0"
+                   data-text-type-to-search="{{ text_picker_type_to_search }}"
+                   data-text-no-results="{{ text_picker_no_results }}"
+                   data-text-error="{{ text_picker_error }}">
+                <input type="text" class="dcx-picker__input form-control" placeholder="{{ entry_upsell }}" />
+              </div>
+              <div id="product-upsell" class="dcx-picker__well" style="height: 150px; overflow: auto;"> {% for product_upsell in product_upsells %}
+                  <div class="dcx-picker__well-item" data-id="{{ product_upsell.product_id }}"><i data-lucide="minus-circle" width="14" height="14" class="dcx-picker__well-remove"></i> <span class="dcx-picker__well-label">{{ product_upsell.name }}</span>
+                    <input type="hidden" name="product_upsell[]" value="{{ product_upsell.product_id }}"/>
+                  </div>
+                {% endfor %}</div>
+            </div>
+            <div class="dcx-sidebar-card__field">
+              <label class="dcx-sidebar-card__label" for="input-accessory">{{ entry_accessory }} <span data-toggle="tooltip" title="{{ help_accessory }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span></label>
+              <div class="dcx-picker"
+                   data-url="index.php?route=catalog/product/autocomplete&user_token={{ user_token }}"
+                   data-well="#product-accessory"
+                   data-input-name="product_accessory[]"
+                   data-placeholder="{{ entry_accessory }}"
+                   data-id-key="product_id"
+                   data-name-key="name"
+                   data-sub-key="model"
+                   data-min-chars="0"
+                   data-text-type-to-search="{{ text_picker_type_to_search }}"
+                   data-text-no-results="{{ text_picker_no_results }}"
+                   data-text-error="{{ text_picker_error }}">
+                <input type="text" class="dcx-picker__input form-control" placeholder="{{ entry_accessory }}" />
+              </div>
+              <div id="product-accessory" class="dcx-picker__well" style="height: 150px; overflow: auto;"> {% for product_accessory in product_accessories %}
+                  <div class="dcx-picker__well-item" data-id="{{ product_accessory.product_id }}"><i data-lucide="minus-circle" width="14" height="14" class="dcx-picker__well-remove"></i> <span class="dcx-picker__well-label">{{ product_accessory.name }}</span>
+                    <input type="hidden" name="product_accessory[]" value="{{ product_accessory.product_id }}"/>
                   </div>
                 {% endfor %}</div>
             </div>
@@ -2487,6 +2533,82 @@ $(document).on('click', '#product-category .dcx-tree-select__well-remove', funct
   $('#category-modal-count').text(count > 0 ? count + ' {{ entry_category }}' : '{{ button_select_category }}');
   $('#product-category').toggle(count > 0);
 });
+
+// ── Tag chip input ──
+function dcTagSyncHidden($field) {
+  var $wrap = $field.closest('.dc-tag-input');
+  var tags = [];
+  $wrap.find('.dc-tag-chip').each(function() {
+    tags.push($(this).data('tag'));
+  });
+  $wrap.find('input[type="hidden"]').val(tags.join(','));
+}
+
+function dcTagAddChip($field, value) {
+  value = value.replace(/[,;]\s*$/, '').trim();
+  if (!value) return false;
+  var $wrap = $field.closest('.dc-tag-input');
+  var $tags = $wrap.find('.dc-tag-input__tags');
+  var exists = false;
+  $tags.find('.dc-tag-chip').each(function() {
+    if ($(this).data('tag').toLowerCase() === value.toLowerCase()) {
+      exists = true;
+      return false;
+    }
+  });
+  if (exists) return false;
+  var chip = '<span class="dc-tag-chip" data-tag="' + value.replace(/"/g, '&quot;') + '">' +
+    escapeHtml(value) +
+    ' <button type="button" class="dc-tag-chip__remove"><i data-lucide="x" width="12" height="12"></i></button></span>';
+  $tags.append(chip);
+  lucide.createIcons({ nodes: [$tags[0]] });
+  dcTagSyncHidden($field);
+  return true;
+}
+
+{% for language in languages %}
+(function() {
+  var $input = $('#input-tag{{ language.language_id }}');
+  var $wrap = $input.closest('.dc-tag-input');
+  var val = $input.closest('.dc-tag-input').find('input[type="hidden"]').val();
+  if (val) {
+    var parts = val.split(',');
+    for (var i = 0; i < parts.length; i++) {
+      var t = parts[i].trim();
+      if (t) dcTagAddChip($input, t);
+    }
+  }
+  $input.on('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      if (dcTagAddChip($input, $input.val())) {
+        $input.val('');
+      }
+    }
+    if (e.key === 'Backspace' && !$input.val()) {
+      var $chips = $wrap.find('.dc-tag-chip');
+      if ($chips.length) {
+        $chips.last().remove();
+        dcTagSyncHidden($input);
+      }
+    }
+  });
+  $input.on('blur', function() {
+    var v = $input.val();
+    if (v.trim()) {
+      if (dcTagAddChip($input, v)) {
+        $input.val('');
+      } else {
+        $input.val('');
+      }
+    }
+  });
+  $wrap.on('click', '.dc-tag-chip__remove', function() {
+    $(this).closest('.dc-tag-chip').remove();
+    dcTagSyncHidden($input);
+  });
+})();
+{% endfor %}
 
 function escapeHtml(text) {
   if (!text) return '';

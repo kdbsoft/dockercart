@@ -4,6 +4,16 @@
 .dcx-field-icon { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; z-index: 1; }
 .dcx-field-help { font-size: 12px; color: var(--dc-text-muted); margin-top: 2px; }
 
+/* ── Tag chip input ── */
+.dc-tag-input { position: relative; }
+.dc-tag-input .dc-tag-input__field { width: 100%; padding-right: 30px; }
+.dc-tag-input .dcx-field-icon { top: 10px; transform: none; }
+.dc-tag-input__tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.dc-tag-input__tags:empty { display: none; }
+.dc-tag-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; background: var(--dc-gray-100); border: 1px solid var(--dc-border); border-radius: var(--dc-radius-sm); font-size: 12px; line-height: 1.4; white-space: nowrap; }
+.dc-tag-chip__remove { background: none; border: none; color: var(--dc-text-faint); cursor: pointer; padding: 0; margin-left: 2px; display: flex; align-items: center; border-radius: 50%; transition: color var(--dc-transition-fast); }
+.dc-tag-chip__remove:hover { color: var(--dc-red-500); }
+
 /* ── Article extra identifiers ── */
 .dc-article-extra { display: flex; flex-direction: column; gap: 14px; }
 

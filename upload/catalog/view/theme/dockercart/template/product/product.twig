@@ -501,6 +501,57 @@
       </div>
     </section>
     {% endif %}
+
+    {% if upsell_products %}
+    <section class="mt-12">
+      <div class="flex items-end justify-between mb-6">
+        <div>
+          <p class="text-emerald-600 text-sm font-semibold uppercase tracking-widest mb-1">{{ text_you_may_upgrade }}</p>
+          <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ text_upsell }}</h2>
+        </div>
+        {% if upsell_products|length > 4 %}
+        <a href="#" id="dc-upsell-view-all" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700">{{ text_view_all|default('View All →') }}</a>
+        {% endif %}
+      </div>
+      <div id="dc-upsell-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        {% for product in upsell_products %}
+        {% include 'dockercart/template/product/product_card_widget.twig' with {
+          product: product,
+          accent_color: 'emerald-600',
+          btn_cart_classes: 'bg-emerald-600 text-white hover:bg-emerald-700',
+          btn_quick_hover: 'hover:bg-emerald-600',
+          card_extra: loop.index > 4 ? 'dc-upsell-extra hidden' : ''
+        } %}
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+    {% if accessory_products %}
+    <section class="mt-12">
+      <div class="flex items-end justify-between mb-6">
+        <div>
+          <p class="text-amber-600 text-sm font-semibold uppercase tracking-widest mb-1">{{ text_you_may_also_need }}</p>
+          <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ text_accessory }}</h2>
+        </div>
+        {% if accessory_products|length > 4 %}
+        <a href="#" id="dc-accessory-view-all" class="text-sm font-semibold text-amber-600 hover:text-amber-700">{{ text_view_all|default('View All →') }}</a>
+        {% endif %}
+      </div>
+      <div id="dc-accessory-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        {% for product in accessory_products %}
+        {% include 'dockercart/template/product/product_card_widget.twig' with {
+          product: product,
+          accent_color: 'amber-600',
+          btn_cart_classes: 'bg-amber-600 text-white hover:bg-amber-700',
+          btn_quick_hover: 'hover:bg-amber-600',
+          card_extra: loop.index > 4 ? 'dc-accessory-extra hidden' : ''
+        } %}
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
   {# Move content_bottom to the very end of the page container so it renders at the bottom #}
   {{ content_bottom }}
 
@@ -800,6 +851,28 @@ document.addEventListener('DOMContentLoaded', function() {
         item.classList.remove('hidden');
       });
       relatedViewAll.style.display = 'none';
+    });
+  }
+
+  var upsellViewAll = document.getElementById('dc-upsell-view-all');
+  if (upsellViewAll) {
+    upsellViewAll.addEventListener('click', function(e) {
+      e.preventDefault();
+      document.querySelectorAll('.dc-upsell-extra').forEach(function(item) {
+        item.classList.remove('hidden');
+      });
+      upsellViewAll.style.display = 'none';
+    });
+  }
+
+  var accessoryViewAll = document.getElementById('dc-accessory-view-all');
+  if (accessoryViewAll) {
+    accessoryViewAll.addEventListener('click', function(e) {
+      e.preventDefault();
+      document.querySelectorAll('.dc-accessory-extra').forEach(function(item) {
+        item.classList.remove('hidden');
+      });
+      accessoryViewAll.style.display = 'none';
     });
   }
 

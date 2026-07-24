@@ -124,6 +124,8 @@ $_['help_main_category']     = 'Primary category for SEO and breadcrumbs';
 $_['button_select_category'] = 'Select Categories';
 $_['entry_download']         = 'Downloads';
 $_['entry_related']          = 'Related Products';
+$_['entry_upsell']           = 'Upsell Products';
+$_['entry_accessory']        = 'Accessories';
 $_['entry_gift_product']     = 'Gift Product';
 $_['entry_tag']              = 'Product Tags';
 $_['entry_reward']           = 'Reward Points';
@@ -146,12 +148,14 @@ $_['help_shipping']          = 'Whether this product requires shipping';
 $_['help_points']            = 'Number of points needed to buy this item. If you don\'t want this product to be purchased with points leave as 0.';
 $_['help_category']          = 'Select all categories where this product should appear';
 $_['help_download']          = '(Autocomplete)';
-$_['help_related']           = 'Products shown alongside this one to encourage cross-selling. E.g., accessories, compatible items.';
+$_['help_related']           = 'Products shown alongside this one to encourage cross-selling. E.g., compatible items, bundle suggestions.';
+$_['help_upsell']            = 'More expensive or better alternatives to suggest. E.g., premium versions, upgrades.';
+$_['help_accessory']         = 'Compatible accessories and add-ons for this product. E.g., cases, chargers, cables.';
 $_['text_picker_type_to_search'] = 'Type to search...';
 $_['text_picker_no_results']  = 'No results found';
 $_['text_picker_error']       = 'Error loading results';
 $_['help_gift_product']      = '(Autocomplete)';
-$_['help_tag']               = 'Comma separated';
+$_['help_tag']               = 'Tags help customers find your product via search. Enter a word and press Enter to add.';
 
 // Error
 $_['error_warning']          = 'Warning: Please check the form carefully for errors!';

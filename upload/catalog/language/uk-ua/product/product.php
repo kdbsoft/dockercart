@@ -32,6 +32,8 @@ $_['text_note'] = '<span class="text-danger">Примітка:</span> HTML не 
 $_['text_option'] = 'Доступні опції';
 $_['text_points'] = 'Ціна в бонусних балах:';
 $_['text_related'] = 'Супутні товари';
+$_['text_upsell'] = 'Рекомендовані товари';
+$_['text_you_may_upgrade'] = 'Можливо, вам підійде краще';
 $_['text_bundle_title'] = 'Разом дешевше';
 $_['text_bundle_save'] = 'Комплект';
 $_['button_bundle_add'] = 'Додати комплект у кошик';
@@ -45,6 +47,8 @@ $_['text_warranty_desc'] = 'Офіційна гарантія';
 $_['text_returns'] = 'Повернення';
 $_['text_returns_desc'] = '14 днів на повернення';
 $_['text_you_may_also_like'] = 'Можливо, вам сподобається';
+$_['text_you_may_also_need'] = 'Можливо, вам також знадобиться';
+$_['text_accessory']         = 'Аксесуари';
 $_['text_view_all'] = 'Показати всі →';
 $_['text_quick_view'] = 'Швидкий перегляд';
 $_['text_reward'] = 'Бонусні бали:';
