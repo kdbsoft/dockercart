@@ -690,6 +690,25 @@ class ControllerCatalogProduct extends Controller {
 				$display_qty = $this->formatQuantityForDisplay($result['quantity']);
 			}
 
+			$main_cat_id = (int)($result['main_category_id'] ?? 0);
+			$cat_display = '';
+
+			if ($cat_data && $cat_data['categories']) {
+				$cat_names = array_map('trim', explode(', ', $cat_data['categories']));
+				$cat_ids_arr = array_map('intval', explode(',', $cat_data['category_ids']));
+
+				$display_parts = [];
+				foreach ($cat_names as $idx => $cat_name) {
+					$cid = $cat_ids_arr[$idx] ?? 0;
+					if ($main_cat_id && $cid === $main_cat_id) {
+						$display_parts[] = '<strong>' . htmlspecialchars($cat_name, ENT_QUOTES, 'UTF-8') . '</strong>';
+					} else {
+						$display_parts[] = htmlspecialchars($cat_name, ENT_QUOTES, 'UTF-8');
+					}
+				}
+				$cat_display = implode(', ', $display_parts);
+			}
+
 			$data['products'][] = array(
 				'product_id'    => $pid,
 				'image'         => $image,
@@ -707,7 +726,7 @@ class ControllerCatalogProduct extends Controller {
 				'quantity_raw'  => $has_options ? 0 : $result['quantity'],
 				'status'        => $result['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
 				'status_raw'    => $result['status'],
-				'categories'    => $cat_data ? $cat_data['categories'] : '',
+				'categories'    => $cat_display,
 				'categories_raw'=> $cat_data ? $cat_data['category_ids'] : '',
 				'has_options'   => $has_options,
 				'option_count'  => $option_count,
@@ -2135,15 +2154,26 @@ class ControllerCatalogProduct extends Controller {
 
 				$json['success'] = true;
 
-				$cat_names = array();
+				$main_cat_id = 0;
+				$main_q = $this->db->query("SELECT main_category_id FROM " . DB_PREFIX . "product WHERE product_id = '" . (int)$product_id . "'");
+				if ($main_q->num_rows) {
+					$main_cat_id = (int)$main_q->row['main_category_id'];
+				}
+
+				$cat_display_parts = array();
 				if ($category_ids) {
-					$cat_query = $this->db->query("SELECT cd.name FROM " . DB_PREFIX . "category_description cd WHERE cd.category_id IN (" . implode(',', array_map('intval', $category_ids)) . ") AND cd.language_id = '" . (int)$this->config->get('config_language_id') . "'");
+					$cat_query = $this->db->query("SELECT cd.category_id, cd.name FROM " . DB_PREFIX . "category_description cd WHERE cd.category_id IN (" . implode(',', array_map('intval', $category_ids)) . ") AND cd.language_id = '" . (int)$this->config->get('config_language_id') . "'");
 					foreach ($cat_query->rows as $cat_row) {
-						$cat_names[] = $cat_row['name'];
+						$name = htmlspecialchars($cat_row['name'], ENT_QUOTES, 'UTF-8');
+						if ($main_cat_id && (int)$cat_row['category_id'] === $main_cat_id) {
+							$cat_display_parts[] = '<strong>' . $name . '</strong>';
+						} else {
+							$cat_display_parts[] = $name;
+						}
 					}
 				}
 
-				$json['value_html'] = $cat_names ? implode(', ', $cat_names) : '';
+				$json['value_html'] = $cat_display_parts ? implode(', ', $cat_display_parts) : '';
 			} else {
 				$json['error'] = 'Invalid field';
 			}
