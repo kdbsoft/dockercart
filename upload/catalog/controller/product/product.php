@@ -870,6 +870,7 @@ class ControllerProductProduct extends Controller {
 			$data['text_write_in_messenger'] = $this->language->get('text_write_in_messenger');
 			$data['text_we_are_in_messengers'] = $this->language->get('text_we_are_in_messengers');
 			$data['text_you_may_also_like'] = $this->language->get('text_you_may_also_like');
+			$data['text_you_may_also_need'] = $this->language->get('text_you_may_also_need');
 			$data['text_view_all'] = $this->language->get('text_view_all');
 			$data['text_quick_view'] = $this->language->get('text_quick_view');
 			$data['text_total'] = $this->language->get('text_total');
@@ -963,6 +964,208 @@ class ControllerProductProduct extends Controller {
 				}
 
 				$data['products'][] = array(
+					'product_id'  => $result['product_id'],
+					'thumb'       => $image,
+					'name'        => $result['name'],
+					'model'       => $result['model'],
+					'manufacturer'=> isset($result['manufacturer']) ? $result['manufacturer'] : '',
+					'category'    => $category_name,
+					'description' => utf8_substr(trim(strip_tags(html_entity_decode($result['description'], ENT_QUOTES, 'UTF-8'))), 0, $this->config->get('theme_' . $this->config->get('config_theme') . '_product_description_length')) . '..',
+					'price'       => $price,
+					'price_raw'   => (float)$result['price'],
+					'special'     => $special,
+					'discount'    => $discount_percent,
+					'tax'         => $tax,
+					'minimum'     => $this->formatQuantityValue(($result['minimum'] > 0 ? $result['minimum'] : 1)),
+					'quantity_step' => (isset($result['quantity_step']) && (float)$result['quantity_step'] > 0) ? $result['quantity_step'] : 1,
+					'stock'       => $stock,
+					'is_in_stock' => ($stock_quantity > 0) || !empty($result['preorder']),
+					'is_preorder' => empty($stock_quantity) && !empty($result['preorder']),
+					'rating'      => $rating,
+					'reviews'     => isset($result['reviews']) ? (int)$result['reviews'] : 0,
+					'in_wishlist' => in_array((int)$result['product_id'], $wishlist_ids) ? 1 : 0,
+					'call_for_price' => !empty($result['call_for_price']),
+					'href'        => $this->url->link('product/product', 'product_id=' . $result['product_id'])
+				);
+			}
+
+			$data['upsell_products'] = array();
+
+			$results = $this->model_catalog_product->getProductUpsell($product_id);
+
+			foreach ($results as $result) {
+				if ($result['image']) {
+					$image = $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_related_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_related_height'));
+				} else {
+					$image = $this->model_tool_image->resize('placeholder.png', $this->config->get('theme_' . $this->config->get('config_theme') . '_image_related_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_related_height'));
+				}
+
+				if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
+					$price = $this->currency->format($this->tax->calculate($result['price'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				} else {
+					$price = false;
+				}
+
+				if (!is_null($result['special']) && (float)$result['special'] >= 0) {
+					$special = $this->currency->format($this->tax->calculate($result['special'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+					$tax_price = (float)$result['special'];
+				} else {
+					$special = false;
+					$tax_price = (float)$result['price'];
+				}
+
+				if ($this->config->get('config_tax')) {
+					$tax = $this->currency->format($tax_price, $this->session->data['currency']);
+				} else {
+					$tax = false;
+				}
+
+				if ($this->config->get('config_review_status')) {
+					$rating = (int)$result['rating'];
+				} else {
+					$rating = false;
+				}
+
+				$stock_quantity = (int)($result['quantity'] ?? 0);
+
+				if ($stock_quantity <= 0) {
+					$stock = !empty($result['preorder'])
+						? $this->language->get('text_preorder')
+						: $this->language->get('text_out_of_stock');
+				} elseif ($this->config->get('config_stock_display')) {
+					$stock = $stock_quantity;
+				} else {
+					$stock = $this->language->get('text_instock');
+				}
+
+				$discount_percent = 0;
+				if (!is_null($result['special']) && $result['price'] > 0) {
+					$discount_percent = (int)round((1 - ((float)$result['special'] / (float)$result['price'])) * 100);
+					if ($discount_percent < 0) {
+						$discount_percent = 0;
+					}
+				}
+
+				$category_name = '';
+				$rel_main_cat = !empty($result['main_category_id']) ? (int)$result['main_category_id'] : 0;
+				if ($rel_main_cat > 0) {
+					$category_info = $this->model_catalog_category->getCategory($rel_main_cat);
+					if ($category_info && !empty($category_info['name'])) {
+						$category_name = $category_info['name'];
+					}
+				}
+				if (empty($category_name)) {
+					$product_categories = $this->model_catalog_product->getCategories((int)$result['product_id']);
+					if (!empty($product_categories[0]['category_id'])) {
+						$category_info = $this->model_catalog_category->getCategory((int)$product_categories[0]['category_id']);
+						if ($category_info && !empty($category_info['name'])) {
+							$category_name = $category_info['name'];
+						}
+					}
+				}
+
+				$data['upsell_products'][] = array(
+					'product_id'  => $result['product_id'],
+					'thumb'       => $image,
+					'name'        => $result['name'],
+					'model'       => $result['model'],
+					'manufacturer'=> isset($result['manufacturer']) ? $result['manufacturer'] : '',
+					'category'    => $category_name,
+					'description' => utf8_substr(trim(strip_tags(html_entity_decode($result['description'], ENT_QUOTES, 'UTF-8'))), 0, $this->config->get('theme_' . $this->config->get('config_theme') . '_product_description_length')) . '..',
+					'price'       => $price,
+					'price_raw'   => (float)$result['price'],
+					'special'     => $special,
+					'discount'    => $discount_percent,
+					'tax'         => $tax,
+					'minimum'     => $this->formatQuantityValue(($result['minimum'] > 0 ? $result['minimum'] : 1)),
+					'quantity_step' => (isset($result['quantity_step']) && (float)$result['quantity_step'] > 0) ? $result['quantity_step'] : 1,
+					'stock'       => $stock,
+					'is_in_stock' => ($stock_quantity > 0) || !empty($result['preorder']),
+					'is_preorder' => empty($stock_quantity) && !empty($result['preorder']),
+					'rating'      => $rating,
+					'reviews'     => isset($result['reviews']) ? (int)$result['reviews'] : 0,
+					'in_wishlist' => in_array((int)$result['product_id'], $wishlist_ids) ? 1 : 0,
+					'call_for_price' => !empty($result['call_for_price']),
+					'href'        => $this->url->link('product/product', 'product_id=' . $result['product_id'])
+				);
+			}
+
+			$data['accessory_products'] = array();
+
+			$results = $this->model_catalog_product->getProductAccessory($product_id);
+
+			foreach ($results as $result) {
+				if ($result['image']) {
+					$image = $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_related_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_related_height'));
+				} else {
+					$image = $this->model_tool_image->resize('placeholder.png', $this->config->get('theme_' . $this->config->get('config_theme') . '_image_related_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_related_height'));
+				}
+
+				if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
+					$price = $this->currency->format($this->tax->calculate($result['price'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				} else {
+					$price = false;
+				}
+
+				if (!is_null($result['special']) && (float)$result['special'] >= 0) {
+					$special = $this->currency->format($this->tax->calculate($result['special'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+					$tax_price = (float)$result['special'];
+				} else {
+					$special = false;
+					$tax_price = (float)$result['price'];
+				}
+
+				if ($this->config->get('config_tax')) {
+					$tax = $this->currency->format($tax_price, $this->session->data['currency']);
+				} else {
+					$tax = false;
+				}
+
+				if ($this->config->get('config_review_status')) {
+					$rating = (int)$result['rating'];
+				} else {
+					$rating = false;
+				}
+
+				$stock_quantity = (int)($result['quantity'] ?? 0);
+
+				if ($stock_quantity <= 0) {
+					$stock = !empty($result['preorder'])
+						? $this->language->get('text_preorder')
+						: $this->language->get('text_out_of_stock');
+				} elseif ($this->config->get('config_stock_display')) {
+					$stock = $stock_quantity;
+				} else {
+					$stock = $this->language->get('text_instock');
+				}
+
+				$discount_percent = 0;
+				if (!is_null($result['special']) && $result['price'] > 0) {
+					$discount_percent = (int)round((1 - ((float)$result['special'] / (float)$result['price'])) * 100);
+					if ($discount_percent < 0) {
+						$discount_percent = 0;
+					}
+				}
+
+				$category_name = '';
+				$rel_main_cat = !empty($result['main_category_id']) ? (int)$result['main_category_id'] : 0;
+				if ($rel_main_cat > 0) {
+					$category_info = $this->model_catalog_category->getCategory($rel_main_cat);
+					if ($category_info && !empty($category_info['name'])) {
+						$category_name = $category_info['name'];
+					}
+				}
+				if (empty($category_name)) {
+					$product_categories = $this->model_catalog_product->getCategories((int)$result['product_id']);
+					if (!empty($product_categories[0]['category_id'])) {
+						$category_info = $this->model_catalog_category->getCategory((int)$product_categories[0]['category_id']);
+						if ($category_info && !empty($category_info['name'])) {
+							$category_name = $category_info['name'];
+						}
+					}
+				}
+
+				$data['accessory_products'][] = array(
 					'product_id'  => $result['product_id'],
 					'thumb'       => $image,
 					'name'        => $result['name'],
