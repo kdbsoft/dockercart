@@ -335,6 +335,46 @@ class ControllerProductProduct extends Controller {
 			$data['in_wishlist'] = in_array($product_id, $wishlist_ids) ? 1 : 0;
 			$data['in_compare'] = isset($this->session->data['compare']) && in_array($product_id, $this->session->data['compare']) ? 1 : 0;
 
+			// Build schema category from main_category_id or first assigned category
+			$schema_category = '';
+			$schema_category_id = !empty($product_info['main_category_id']) ? (int)$product_info['main_category_id'] : 0;
+
+			if (!$schema_category_id) {
+				$product_cats = $this->model_catalog_product->getCategories($product_id);
+				if (!empty($product_cats)) {
+					$schema_category_id = (int)$product_cats[0]['category_id'];
+				}
+			}
+
+			if ($schema_category_id) {
+				$this->load->model('catalog/category');
+				$cat_parts = array();
+				$current_id = $schema_category_id;
+				$visited = array();
+
+				while ($current_id && !in_array($current_id, $visited)) {
+					$visited[] = $current_id;
+					$cat_info = $this->model_catalog_category->getCategory($current_id);
+
+					if ($cat_info) {
+						$cat_parts[] = $cat_info['name'];
+						$current_id = (int)$cat_info['parent_id'];
+
+						if (!$current_id || $current_id === (int)$cat_info['category_id']) {
+							break;
+						}
+					} else {
+						break;
+					}
+				}
+
+				if ($cat_parts) {
+					$schema_category = implode(' > ', array_reverse($cat_parts));
+				}
+			}
+
+			$data['schema_category'] = $schema_category;
+
 			// Currency symbols for client-side formatting
 			$display_currency = isset($this->session->data['currency']) ? $this->session->data['currency'] : $this->config->get('config_currency');
 			$data['currency_symbol_left'] = $this->currency->getSymbolLeft($display_currency);

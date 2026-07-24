@@ -5,7 +5,8 @@
   "@type": "Product",
   "name": "{{ heading_title|striptags|trim|e('js') }}"{% if thumb is defined and thumb %},
   "image": ["{{ thumb|e('js') }}"]{% endif %}{% if model is defined and model %},
-  "sku": "{{ model|e('js') }}"{% endif %}{% if manufacturer is defined and manufacturer %},
+  "sku": "{{ model|e('js') }}"{% endif %}{% if schema_category is defined and schema_category %},
+  "category": "{{ schema_category|e('js') }}"{% endif %}{% if manufacturer is defined and manufacturer %},
   "brand": {
     "@type": "Brand",
     "name": "{{ manufacturer|striptags|trim|e('js') }}"

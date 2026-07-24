@@ -84,8 +84,9 @@ class ModelCatalogProduct extends Model {
 			}
 
 			$product_data = array(
-				'product_id'       => $query->row['product_id'],
-				'name'             => $query->row['name'],
+			'product_id'       => $query->row['product_id'],
+			'main_category_id' => isset($query->row['main_category_id']) ? (int)$query->row['main_category_id'] : 0,
+			'name'             => $query->row['name'],
 				'description'      => $query->row['description'],
 				'meta_title'       => $query->row['meta_title'],
 				'meta_description' => $query->row['meta_description'],
