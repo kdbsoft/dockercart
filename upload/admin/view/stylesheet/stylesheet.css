@@ -692,13 +692,6 @@ div.required .control-label:not(span):before, td.required:before {
     border-radius: var(--dc-radius-lg);
 }
 
-.table thead td span[data-toggle="tooltip"]:after, label.control-label span:after, label.dcx-label span[data-toggle="tooltip"]:after {
-    font-family: FontAwesome;
-    color: var(--dc-primary);
-    content: "\f059";
-    margin-left: 4px;
-}
-
 fieldset {
     border: 1px solid var(--dc-border);
     border-radius: var(--dc-radius-lg);
