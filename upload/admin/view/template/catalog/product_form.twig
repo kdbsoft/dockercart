@@ -1168,7 +1168,7 @@
           </div>
           <div class="dcx-sidebar-card__body">
             <div class="dcx-sidebar-card__field">
-              <label class="dcx-sidebar-card__label" for="input-manufacturer"><span data-toggle="tooltip" title="{{ help_manufacturer }}">{{ entry_manufacturer }}</span></label>
+              <label class="dcx-sidebar-card__label" for="input-manufacturer">{{ entry_manufacturer }} <span data-toggle="tooltip" title="{{ help_manufacturer }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span></label>
               <div class="dcx-field-icon-wrap">
                 <span class="dcx-field-icon"><i data-lucide="search" width="14" height="14" class="text-muted"></i></span>
                 <input type="text" name="manufacturer" value="{{ manufacturer|e('html_attr') }}" placeholder="{{ entry_manufacturer }}" id="input-manufacturer" class="form-control"/>
