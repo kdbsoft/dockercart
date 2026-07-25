@@ -328,7 +328,9 @@ class ModelCatalogProduct extends Model
                         $this->db->escape($product_discount["date_end"]) .
                         "', auto_renew = '" .
                         (int) (!empty($product_discount["auto_renew"])) .
-                        "', date_added = NOW()",
+                        "', date_added = '" .
+						$this->db->escape(!empty($product_discount['date_added']) ? $product_discount['date_added'] : date('Y-m-d H:i:s')) .
+						"'",
                 );
             }
         }
@@ -352,7 +354,9 @@ class ModelCatalogProduct extends Model
                         $this->db->escape($product_special["date_end"]) .
                         "', auto_renew = '" .
                         (int) (!empty($product_special["auto_renew"])) .
-                        "', date_added = NOW()",
+                        "', date_added = '" .
+						$this->db->escape(!empty($product_special['date_added']) ? $product_special['date_added'] : date('Y-m-d H:i:s')) .
+						"'",
                 );
             }
         }
@@ -374,7 +378,9 @@ class ModelCatalogProduct extends Model
                         $this->db->escape($product_gift["date_end"]) .
                         "', auto_renew = '" .
                         (int) (!empty($product_gift["auto_renew"])) .
-                        "', date_added = NOW()",
+                        "', date_added = '" .
+						$this->db->escape(!empty($product_gift['date_added']) ? $product_gift['date_added'] : date('Y-m-d H:i:s')) .
+						"'",
                 );
             }
         }
@@ -400,7 +406,9 @@ class ModelCatalogProduct extends Model
                         $this->db->escape($product_bxgy["date_end"]) .
                         "', auto_renew = '" .
                         (int) (!empty($product_bxgy["auto_renew"])) .
-                        "', date_added = NOW()",
+                        "', date_added = '" .
+						$this->db->escape(!empty($product_bxgy['date_added']) ? $product_bxgy['date_added'] : date('Y-m-d H:i:s')) .
+						"'",
                 );
             }
         }
@@ -731,7 +739,9 @@ class ModelCatalogProduct extends Model
                         $this->db->escape($product_discount["date_end"]) .
                         "', auto_renew = '" .
                         (int) (!empty($product_discount["auto_renew"])) .
-                        "', date_added = NOW()",
+                        "', date_added = '" .
+						$this->db->escape(!empty($product_discount['date_added']) ? $product_discount['date_added'] : date('Y-m-d H:i:s')) .
+						"'",
                 );
             }
         }
@@ -763,7 +773,9 @@ class ModelCatalogProduct extends Model
                         $this->db->escape($product_special["date_end"]) .
                         "', auto_renew = '" .
                         (int) (!empty($product_special["auto_renew"])) .
-                        "', date_added = NOW()",
+                        "', date_added = '" .
+						$this->db->escape(!empty($product_special['date_added']) ? $product_special['date_added'] : date('Y-m-d H:i:s')) .
+						"'",
                 );
             }
         }
@@ -793,7 +805,9 @@ class ModelCatalogProduct extends Model
                         $this->db->escape($product_gift["date_end"]) .
                         "', auto_renew = '" .
                         (int) (!empty($product_gift["auto_renew"])) .
-                        "', date_added = NOW()",
+                        "', date_added = '" .
+						$this->db->escape(!empty($product_gift['date_added']) ? $product_gift['date_added'] : date('Y-m-d H:i:s')) .
+						"'",
                 );
             }
         }
@@ -827,7 +841,9 @@ class ModelCatalogProduct extends Model
                         $this->db->escape($product_bxgy["date_end"]) .
                         "', auto_renew = '" .
                         (int) (!empty($product_bxgy["auto_renew"])) .
-                        "', date_added = NOW()",
+                        "', date_added = '" .
+						$this->db->escape(!empty($product_bxgy['date_added']) ? $product_bxgy['date_added'] : date('Y-m-d H:i:s')) .
+						"'",
                 );
             }
         }
@@ -1516,7 +1532,9 @@ class ModelCatalogProduct extends Model
                         $this->db->escape($product_discount["date_end"]) .
                         "', auto_renew = '" .
                         (int) (!empty($product_discount["auto_renew"])) .
-                        "', date_added = NOW()",
+                        "', date_added = '" .
+						$this->db->escape(!empty($product_discount['date_added']) ? $product_discount['date_added'] : date('Y-m-d H:i:s')) .
+						"'",
                 );
             }
         }
@@ -1548,7 +1566,9 @@ class ModelCatalogProduct extends Model
                         $this->db->escape($product_special["date_end"]) .
                         "', auto_renew = '" .
                         (int) (!empty($product_special["auto_renew"])) .
-                        "', date_added = NOW()",
+                        "', date_added = '" .
+						$this->db->escape(!empty($product_special['date_added']) ? $product_special['date_added'] : date('Y-m-d H:i:s')) .
+						"'",
                 );
             }
         }
@@ -1578,7 +1598,9 @@ class ModelCatalogProduct extends Model
                         $this->db->escape($product_gift["date_end"]) .
                         "', auto_renew = '" .
                         (int) (!empty($product_gift["auto_renew"])) .
-                        "', date_added = NOW()",
+                        "', date_added = '" .
+						$this->db->escape(!empty($product_gift['date_added']) ? $product_gift['date_added'] : date('Y-m-d H:i:s')) .
+						"'",
                 );
             }
         }
@@ -1612,7 +1634,9 @@ class ModelCatalogProduct extends Model
                         $this->db->escape($product_bxgy["date_end"]) .
                         "', auto_renew = '" .
                         (int) (!empty($product_bxgy["auto_renew"])) .
-                        "', date_added = NOW()",
+                        "', date_added = '" .
+						$this->db->escape(!empty($product_bxgy['date_added']) ? $product_bxgy['date_added'] : date('Y-m-d H:i:s')) .
+						"'",
                 );
             }
         }
@@ -1979,6 +2003,15 @@ class ModelCatalogProduct extends Model
             $data["product_image"] = $this->getProductImages($product_id);
             $data["product_video"] = $this->getProductVideos($product_id);
             $data["product_option"] = $this->getProductOptions($product_id);
+
+            array_walk($data["product_option"], function (&$option) {
+                $option["product_option_id"] = 0;
+                if (isset($option["product_option_value"])) {
+                    array_walk($option["product_option_value"], function (&$value) {
+                        $value["product_option_value_id"] = 0;
+                    });
+                }
+            });
             $data["product_related"] = $this->getProductRelated($product_id);
             $data["product_upsell"] = $this->getProductUpsell($product_id);
             $data["product_accessory"] = $this->getProductAccessory($product_id);

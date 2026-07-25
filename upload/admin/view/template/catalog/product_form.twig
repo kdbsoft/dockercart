@@ -816,30 +816,24 @@
                 <div class="dcx-panel-body">
                   <p class="text-muted small" id="dc-special-note-configurable" style="display:none"><i data-lucide="info" width="14" height="14"></i> {{ help_configurable_specials|default('For configurable products, special prices are managed per variant in the Variants tab.') }}</p>
                   <div id="promo-container">
-                    {% set promo_has_cards = false %}
-                    {% set discount_row = 0 %}
-                    {% set special_row = 0 %}
-                    {% set gift_row = 0 %}
-                    {% set bxgy_row = 0 %}
-                    {% set bundle_row = 0 %}
-
-                    {% for product_discount in product_discounts %}
-                      {% set promo_has_cards = true %}
-                    <div class="dc-promo-card" id="discount-row{{ discount_row }}">
+                    {% for promo in all_promotions %}
+                      {% if promo.promo_type == 'discount' %}
+                    <div class="dc-promo-card" id="discount-row{{ promo.row_index }}">
                       <div class="dc-promo-card__actions">
                         <label class="dc-promo-card__toggle">
-                          <input type="checkbox" name="product_discount[{{ discount_row }}][auto_renew]" value="1" class="auto-renew-cb" {% if product_discount.auto_renew %}checked{% endif %} />
+                          <input type="checkbox" name="product_discount[{{ promo.row_index }}][auto_renew]" value="1" class="auto-renew-cb" {% if promo.auto_renew %}checked{% endif %} />
                           <span>{{ entry_auto_renew }}</span>
                         </label>
-                        <button type="button" onclick="removePromoCard('discount-row{{ discount_row }}')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
+                        <button type="button" onclick="removePromoCard('discount-row{{ promo.row_index }}')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
                       </div>
+                      <input type="hidden" name="product_discount[{{ promo.row_index }}][date_added]" value="{{ promo.date_added }}" />
                       <span class="dc-promo-badge dc-promo-badge--discount">{{ text_promo_discount }}</span>
                       <div class="dc-promo-card__grid">
                         <div class="dc-promo-card__field">
                           <label>{{ entry_customer_group }}</label>
-                          <select name="product_discount[{{ discount_row }}][customer_group_id]" class="form-control">
+                          <select name="product_discount[{{ promo.row_index }}][customer_group_id]" class="form-control">
                             {% for customer_group in customer_groups %}
-                              {% if customer_group.customer_group_id == product_discount.customer_group_id %}
+                              {% if customer_group.customer_group_id == promo.customer_group_id %}
                                 <option value="{{ customer_group.customer_group_id }}" selected="selected">{{ customer_group.name }}</option>
                               {% else %}
                                 <option value="{{ customer_group.customer_group_id }}">{{ customer_group.name }}</option>
@@ -849,52 +843,49 @@
                         </div>
                         <div class="dc-promo-card__field">
                           <label>{{ entry_quantity }}</label>
-                          <input type="text" name="product_discount[{{ discount_row }}][quantity]" value="{{ product_discount.quantity }}" placeholder="{{ entry_quantity }}" class="form-control"/>
+                          <input type="text" name="product_discount[{{ promo.row_index }}][quantity]" value="{{ promo.quantity }}" placeholder="{{ entry_quantity }}" class="form-control"/>
                         </div>
                         <div class="dc-promo-card__field">
                           <label>{{ entry_priority }}</label>
-                          <input type="text" name="product_discount[{{ discount_row }}][priority]" value="{{ product_discount.priority }}" placeholder="{{ entry_priority }}" class="form-control"/>
+                          <input type="text" name="product_discount[{{ promo.row_index }}][priority]" value="{{ promo.priority }}" placeholder="{{ entry_priority }}" class="form-control"/>
                         </div>
                         <div class="dc-promo-card__field">
                           <label>{{ entry_price }}</label>
-                          <input type="text" name="product_discount[{{ discount_row }}][price]" value="{{ product_discount.price }}" placeholder="{{ entry_price }}" class="form-control"/>
+                          <input type="text" name="product_discount[{{ promo.row_index }}][price]" value="{{ promo.price }}" placeholder="{{ entry_price }}" class="form-control"/>
                         </div>
                         <div class="dc-promo-card__field">
                           <label>{{ entry_date_start }}</label>
                           <div class="input-group date">
-                            <input type="text" name="product_discount[{{ discount_row }}][date_start]" value="{{ product_discount.date_start }}" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" class="form-control"/>
+                            <input type="text" name="product_discount[{{ promo.row_index }}][date_start]" value="{{ promo.date_start }}" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" class="form-control"/>
                             <span class="input-group-btn"><button class="btn btn-default" type="button"><i data-lucide="calendar" width="14" height="14"></i></button></span>
                           </div>
                         </div>
                         <div class="dc-promo-card__field">
                           <label>{{ entry_date_end }}</label>
                           <div class="input-group date">
-                            <input type="text" name="product_discount[{{ discount_row }}][date_end]" value="{{ product_discount.date_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" class="form-control"/>
+                            <input type="text" name="product_discount[{{ promo.row_index }}][date_end]" value="{{ promo.date_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" class="form-control"/>
                             <span class="input-group-btn"><button class="btn btn-default" type="button"><i data-lucide="calendar" width="14" height="14"></i></button></span>
                           </div>
                         </div>
                       </div>
                     </div>
-                    {% set discount_row = discount_row + 1 %}
-                    {% endfor %}
-
-                    {% for product_special in product_specials %}
-                      {% set promo_has_cards = true %}
-                    <div class="dc-promo-card" id="special-row{{ special_row }}">
+                      {% elseif promo.promo_type == 'special' %}
+                    <div class="dc-promo-card" id="special-row{{ promo.row_index }}">
                       <div class="dc-promo-card__actions">
                         <label class="dc-promo-card__toggle">
-                          <input type="checkbox" name="product_special[{{ special_row }}][auto_renew]" value="1" class="auto-renew-cb" {% if product_special.auto_renew %}checked{% endif %} />
+                          <input type="checkbox" name="product_special[{{ promo.row_index }}][auto_renew]" value="1" class="auto-renew-cb" {% if promo.auto_renew %}checked{% endif %} />
                           <span>{{ entry_auto_renew }}</span>
                         </label>
-                        <button type="button" onclick="removePromoCard('special-row{{ special_row }}')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
+                        <button type="button" onclick="removePromoCard('special-row{{ promo.row_index }}')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
                       </div>
+                      <input type="hidden" name="product_special[{{ promo.row_index }}][date_added]" value="{{ promo.date_added }}" />
                       <span class="dc-promo-badge dc-promo-badge--special">{{ text_promo_special }}</span>
                       <div class="dc-promo-card__grid">
                         <div class="dc-promo-card__field">
                           <label>{{ entry_customer_group }}</label>
-                          <select name="product_special[{{ special_row }}][customer_group_id]" class="form-control">
+                          <select name="product_special[{{ promo.row_index }}][customer_group_id]" class="form-control">
                             {% for customer_group in customer_groups %}
-                              {% if customer_group.customer_group_id == product_special.customer_group_id %}
+                              {% if customer_group.customer_group_id == promo.customer_group_id %}
                                 <option value="{{ customer_group.customer_group_id }}" selected="selected">{{ customer_group.name }}</option>
                               {% else %}
                                 <option value="{{ customer_group.customer_group_id }}">{{ customer_group.name }}</option>
@@ -904,172 +895,163 @@
                         </div>
                         <div class="dc-promo-card__field">
                           <label>{{ entry_priority }}</label>
-                          <input type="text" name="product_special[{{ special_row }}][priority]" value="{{ product_special.priority }}" placeholder="{{ entry_priority }}" class="form-control"/>
+                          <input type="text" name="product_special[{{ promo.row_index }}][priority]" value="{{ promo.priority }}" placeholder="{{ entry_priority }}" class="form-control"/>
                         </div>
                         <div class="dc-promo-card__field">
                           <label>{{ entry_price }}</label>
-                          <input type="text" name="product_special[{{ special_row }}][price]" value="{{ product_special.price }}" placeholder="{{ entry_price }}" class="form-control"/>
+                          <input type="text" name="product_special[{{ promo.row_index }}][price]" value="{{ promo.price }}" placeholder="{{ entry_price }}" class="form-control"/>
                         </div>
                         <div class="dc-promo-card__field">
                           <label>{{ entry_date_start }}</label>
                           <div class="input-group date">
-                            <input type="text" name="product_special[{{ special_row }}][date_start]" value="{{ product_special.date_start }}" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" class="form-control"/>
+                            <input type="text" name="product_special[{{ promo.row_index }}][date_start]" value="{{ promo.date_start }}" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" class="form-control"/>
                             <span class="input-group-btn"><button class="btn btn-default" type="button"><i data-lucide="calendar" width="14" height="14"></i></button></span>
                           </div>
                         </div>
                         <div class="dc-promo-card__field">
                           <label>{{ entry_date_end }}</label>
                           <div class="input-group date">
-                            <input type="text" name="product_special[{{ special_row }}][date_end]" value="{{ product_special.date_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" class="form-control"/>
+                            <input type="text" name="product_special[{{ promo.row_index }}][date_end]" value="{{ promo.date_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" class="form-control"/>
                             <span class="input-group-btn"><button class="btn btn-default" type="button"><i data-lucide="calendar" width="14" height="14"></i></button></span>
                           </div>
                         </div>
                       </div>
                     </div>
-                    {% set special_row = special_row + 1 %}
-                    {% endfor %}
-
-                    {% for product_gift in product_gifts %}
-                      {% set promo_has_cards = true %}
-                    <div class="dc-promo-card" id="gift-row{{ gift_row }}">
+                      {% elseif promo.promo_type == 'gift' %}
+                    <div class="dc-promo-card" id="gift-row{{ promo.row_index }}">
                       <div class="dc-promo-card__actions">
                         <label class="dc-promo-card__toggle">
-                          <input type="checkbox" name="product_gift[{{ gift_row }}][auto_renew]" value="1" class="auto-renew-cb" {% if product_gift.auto_renew %}checked{% endif %} />
+                          <input type="checkbox" name="product_gift[{{ promo.row_index }}][auto_renew]" value="1" class="auto-renew-cb" {% if promo.auto_renew %}checked{% endif %} />
                           <span>{{ entry_auto_renew }}</span>
                         </label>
-                        <button type="button" onclick="removePromoCard('gift-row{{ gift_row }}')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
+                        <button type="button" onclick="removePromoCard('gift-row{{ promo.row_index }}')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
                       </div>
+                      <input type="hidden" name="product_gift[{{ promo.row_index }}][date_added]" value="{{ promo.date_added }}" />
                       <span class="dc-promo-badge dc-promo-badge--gift">{{ text_promo_gift }}</span>
                       <div class="dc-promo-card__grid">
                         <div class="dc-promo-card__field dc-promo-card__field--wide">
                           <label>{{ entry_gift_product }}</label>
                           <div style="position:relative;">
-                            <input type="text" name="product_gift[{{ gift_row }}][gift_product_name]" value="{{ product_gift.gift_product_name }}" placeholder="{{ entry_gift_product }}" class="form-control" autocomplete="off"/>
-                            <input type="hidden" name="product_gift[{{ gift_row }}][gift_product_id]" value="{{ product_gift.gift_product_id }}"/>
+                            <input type="text" name="product_gift[{{ promo.row_index }}][gift_product_name]" value="{{ promo.gift_product_name }}" placeholder="{{ entry_gift_product }}" class="form-control" autocomplete="off"/>
+                            <input type="hidden" name="product_gift[{{ promo.row_index }}][gift_product_id]" value="{{ promo.gift_product_id }}"/>
                           </div>
                         </div>
                         <div class="dc-promo-card__field">
                           <label>{{ entry_minimum }}</label>
-                          <input type="text" name="product_gift[{{ gift_row }}][minimum_quantity]" value="{{ product_gift.minimum_quantity }}" placeholder="{{ entry_minimum }}" class="form-control"/>
+                          <input type="text" name="product_gift[{{ promo.row_index }}][minimum_quantity]" value="{{ promo.minimum_quantity }}" placeholder="{{ entry_minimum }}" class="form-control"/>
                         </div>
                         <div class="dc-promo-card__field">
                           <label>{{ entry_date_start }}</label>
                           <div class="input-group date">
-                            <input type="text" name="product_gift[{{ gift_row }}][date_start]" value="{{ product_gift.date_start }}" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" class="form-control"/>
+                            <input type="text" name="product_gift[{{ promo.row_index }}][date_start]" value="{{ promo.date_start }}" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" class="form-control"/>
                             <span class="input-group-btn"><button class="btn btn-default" type="button"><i data-lucide="calendar" width="14" height="14"></i></button></span>
                           </div>
                         </div>
                         <div class="dc-promo-card__field">
                           <label>{{ entry_date_end }}</label>
                           <div class="input-group date">
-                            <input type="text" name="product_gift[{{ gift_row }}][date_end]" value="{{ product_gift.date_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" class="form-control"/>
+                            <input type="text" name="product_gift[{{ promo.row_index }}][date_end]" value="{{ promo.date_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" class="form-control"/>
                             <span class="input-group-btn"><button class="btn btn-default" type="button"><i data-lucide="calendar" width="14" height="14"></i></button></span>
                           </div>
                         </div>
                       </div>
                     </div>
-                    {% set gift_row = gift_row + 1 %}
-                    {% endfor %}
-
-                    {% for product_bxgy in product_bxgy_rules %}
-                      {% set promo_has_cards = true %}
-                    <div class="dc-promo-card" id="bxgy-row{{ bxgy_row }}">
+                      {% elseif promo.promo_type == 'bxgy' %}
+                    <div class="dc-promo-card" id="bxgy-row{{ promo.row_index }}">
                       <div class="dc-promo-card__actions">
                         <label class="dc-promo-card__toggle">
-                          <input type="checkbox" name="product_bxgy[{{ bxgy_row }}][auto_renew]" value="1" class="auto-renew-cb" {% if product_bxgy.auto_renew %}checked{% endif %} />
+                          <input type="checkbox" name="product_bxgy[{{ promo.row_index }}][auto_renew]" value="1" class="auto-renew-cb" {% if promo.auto_renew %}checked{% endif %} />
                           <span>{{ entry_auto_renew }}</span>
                         </label>
-                        <button type="button" onclick="removePromoCard('bxgy-row{{ bxgy_row }}')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
+                        <button type="button" onclick="removePromoCard('bxgy-row{{ promo.row_index }}')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
                       </div>
+                      <input type="hidden" name="product_bxgy[{{ promo.row_index }}][date_added]" value="{{ promo.date_added }}" />
                       <span class="dc-promo-badge dc-promo-badge--bxgy">{{ text_promo_bxgy }}</span>
                       <div class="dc-promo-card__grid">
                         <div class="dc-promo-card__field dc-promo-card__field--wide">
                           <label>{{ entry_bxgy_reward_product }}</label>
                           <div style="position:relative;">
-                            <input type="text" name="product_bxgy[{{ bxgy_row }}][reward_product_name]" value="{{ product_bxgy.reward_product_name }}" placeholder="{{ entry_bxgy_reward_product }}" class="form-control" autocomplete="off"/>
-                            <input type="hidden" name="product_bxgy[{{ bxgy_row }}][reward_product_id]" value="{{ product_bxgy.reward_product_id }}"/>
+                            <input type="text" name="product_bxgy[{{ promo.row_index }}][reward_product_name]" value="{{ promo.reward_product_name }}" placeholder="{{ entry_bxgy_reward_product }}" class="form-control" autocomplete="off"/>
+                            <input type="hidden" name="product_bxgy[{{ promo.row_index }}][reward_product_id]" value="{{ promo.reward_product_id }}"/>
                           </div>
                         </div>
                         <div class="dc-promo-card__field">
                           <label>{{ entry_bxgy_trigger_quantity }}</label>
-                          <input type="text" name="product_bxgy[{{ bxgy_row }}][trigger_quantity]" value="{{ product_bxgy.trigger_quantity }}" placeholder="{{ entry_bxgy_trigger_quantity }}" class="form-control"/>
+                          <input type="text" name="product_bxgy[{{ promo.row_index }}][trigger_quantity]" value="{{ promo.trigger_quantity }}" placeholder="{{ entry_bxgy_trigger_quantity }}" class="form-control"/>
                         </div>
                         <div class="dc-promo-card__field">
                           <label>{{ entry_bxgy_discount_value }}</label>
-                          <input type="text" name="product_bxgy[{{ bxgy_row }}][discount_value]" value="{{ product_bxgy.discount_value }}" placeholder="{{ entry_bxgy_discount_value }}" class="form-control"/>
+                          <input type="text" name="product_bxgy[{{ promo.row_index }}][discount_value]" value="{{ promo.discount_value }}" placeholder="{{ entry_bxgy_discount_value }}" class="form-control"/>
                         </div>
                         <div class="dc-promo-card__field">
                           <label>{{ entry_date_start }}</label>
                           <div class="input-group date">
-                            <input type="text" name="product_bxgy[{{ bxgy_row }}][date_start]" value="{{ product_bxgy.date_start }}" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" class="form-control"/>
+                            <input type="text" name="product_bxgy[{{ promo.row_index }}][date_start]" value="{{ promo.date_start }}" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" class="form-control"/>
                             <span class="input-group-btn"><button class="btn btn-default" type="button"><i data-lucide="calendar" width="14" height="14"></i></button></span>
                           </div>
                         </div>
                         <div class="dc-promo-card__field">
                           <label>{{ entry_date_end }}</label>
                           <div class="input-group date">
-                            <input type="text" name="product_bxgy[{{ bxgy_row }}][date_end]" value="{{ product_bxgy.date_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" class="form-control"/>
+                            <input type="text" name="product_bxgy[{{ promo.row_index }}][date_end]" value="{{ promo.date_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" class="form-control"/>
                             <span class="input-group-btn"><button class="btn btn-default" type="button"><i data-lucide="calendar" width="14" height="14"></i></button></span>
                           </div>
                         </div>
                       </div>
                     </div>
-                    {% set bxgy_row = bxgy_row + 1 %}
-                    {% endfor %}
-
-                    {% for product_bundle in product_bundles %}
-                      {% set promo_has_cards = true %}
-                    <div class="dc-promo-card dc-promo-card--bundle" id="bundle-row{{ bundle_row }}">
+                      {% elseif promo.promo_type == 'bundle' %}
+                    <div class="dc-promo-card dc-promo-card--bundle" id="bundle-row{{ promo.row_index }}">
                       <div class="dc-promo-card__actions">
                         <label class="dc-promo-card__toggle">
-                          <input type="checkbox" name="product_bundle[{{ bundle_row }}][auto_renew]" value="1" class="auto-renew-cb" {% if product_bundle.auto_renew %}checked{% endif %} />
+                          <input type="checkbox" name="product_bundle[{{ promo.row_index }}][auto_renew]" value="1" class="auto-renew-cb" {% if promo.auto_renew %}checked{% endif %} />
                           <span>{{ entry_auto_renew }}</span>
                         </label>
-                        <button type="button" onclick="removeBundleCard('bundle-row{{ bundle_row }}', {{ product_bundle.bundle_id }})" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
+                        <button type="button" onclick="removeBundleCard('bundle-row{{ promo.row_index }}', {{ promo.bundle_id }})" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
                       </div>
+                      <input type="hidden" name="product_bundle[{{ promo.row_index }}][date_added]" value="{{ promo.date_added }}" />
                       <span class="dc-promo-badge dc-promo-badge--bundle">{{ text_promo_bundle }}</span>
                       <div class="dc-promo-card__grid">
                         <div class="dc-promo-card__field" style="display:none;">
-                          <input type="hidden" name="product_bundle[{{ bundle_row }}][bundle_id]" value="{{ product_bundle.bundle_id }}" />
+                          <input type="hidden" name="product_bundle[{{ promo.row_index }}][bundle_id]" value="{{ promo.bundle_id }}" />
                         </div>
                         <div class="dc-promo-card__field dc-promo-card__field--wide">
                           <label>{{ entry_bundle_products }}</label>
                           <div style="position:relative;">
-                            <input type="text" name="product_bundle[{{ bundle_row }}][bundle_products_text]" value="" placeholder="{{ entry_bundle_products }}" class="form-control bundle-product-input" autocomplete="off" />
+                            <input type="text" name="product_bundle[{{ promo.row_index }}][bundle_products_text]" value="" placeholder="{{ entry_bundle_products }}" class="form-control bundle-product-input" autocomplete="off" />
                           </div>
-                          <input type="hidden" name="product_bundle[{{ bundle_row }}][bundle_product_ids]" value="{{ product_bundle.product_ids_csv }}" />
+                          <input type="hidden" name="product_bundle[{{ promo.row_index }}][bundle_product_ids]" value="{{ promo.product_ids_csv }}" />
                         </div>
                         <div class="dc-promo-card__field">
                           <label>{{ entry_discount_type }}</label>
-                          <select name="product_bundle[{{ bundle_row }}][discount_type]" class="form-control">
-                            <option value="percentage" {% if product_bundle.discount_type == 'percentage' %}selected{% endif %}>{{ text_percentage }}</option>
-                            <option value="fixed" {% if product_bundle.discount_type == 'fixed' %}selected{% endif %}>{{ text_fixed }}</option>
+                          <select name="product_bundle[{{ promo.row_index }}][discount_type]" class="form-control">
+                            <option value="percentage" {% if promo.discount_type == 'percentage' %}selected{% endif %}>{{ text_percentage }}</option>
+                            <option value="fixed" {% if promo.discount_type == 'fixed' %}selected{% endif %}>{{ text_fixed }}</option>
                           </select>
                         </div>
                         <div class="dc-promo-card__field">
                           <label>{{ entry_discount_value }}</label>
-                          <input type="text" name="product_bundle[{{ bundle_row }}][discount_value]" value="{{ product_bundle.discount_value }}" placeholder="{{ entry_discount_value }}" class="form-control" />
+                          <input type="text" name="product_bundle[{{ promo.row_index }}][discount_value]" value="{{ promo.discount_value }}" placeholder="{{ entry_discount_value }}" class="form-control" />
                         </div>
                         <div class="dc-promo-card__field">
                           <label>{{ entry_date_start }}</label>
-                          <div class="input-group date"><input type="text" name="product_bundle[{{ bundle_row }}][date_start]" value="{{ product_bundle.date_start }}" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button></span></div>
+                          <div class="input-group date"><input type="text" name="product_bundle[{{ promo.row_index }}][date_start]" value="{{ promo.date_start }}" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button></span></div>
                         </div>
                         <div class="dc-promo-card__field">
                           <label>{{ entry_date_end }}</label>
-                          <div class="input-group date"><input type="text" name="product_bundle[{{ bundle_row }}][date_end]" value="{{ product_bundle.date_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button></span></div>
+                          <div class="input-group date"><input type="text" name="product_bundle[{{ promo.row_index }}][date_end]" value="{{ promo.date_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button></span></div>
                         </div>
                       </div>
                       <label style="font-size:12px;font-weight:500;color:var(--dc-text-muted);">{{ text_bundle_selected_products }}</label>
-                      <div class="bundle-selected-products" id="bundle-selected-{{ bundle_row }}">
-                        {% for bp in product_bundle.products %}
+                      <div class="bundle-selected-products" id="bundle-selected-{{ promo.row_index }}">
+                        {% for bp in promo.products %}
                         <span class="dc-chip" data-product-id="{{ bp.product_id }}">{{ bp.name|escape }} ({{ bp.price }}) <button type="button" onclick="removeBundleProduct(this, {{ bp.product_id }})" class="dc-chip__remove"><i data-lucide="x" width="12" height="12"></i></button></span>
                         {% endfor %}
                       </div>
                     </div>
-                    {% set bundle_row = bundle_row + 1 %}
+                      {% endif %}
                     {% endfor %}
 
-                    {% if not promo_has_cards %}
+                    {% if all_promotions is empty %}
                     <div class="dc-promo-empty" id="promo-empty"><i data-lucide="tag" width="32" height="32" style="opacity:0.25;margin-bottom:6px;"></i><div>{{ text_no_promo }}</div></div>
                     {% endif %}
                   </div>
@@ -2019,6 +2001,7 @@
 	  html += '    <label class="dc-promo-card__toggle"><input type="checkbox" name="product_discount[' + discount_row + '][auto_renew]" value="1" class="auto-renew-cb" /><span>{{ entry_auto_renew }}</span></label>';
 	  html += '    <button type="button" onclick="removePromoCard(\'discount-row' + discount_row + '\')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>';
 	  html += '  </div>';
+	  html += '  <input type="hidden" name="product_discount[' + discount_row + '][date_added]" value="' + new Date().toISOString().slice(0, 19).replace('T', ' ') + '" />';
 	  html += '  <span class="dc-promo-badge dc-promo-badge--discount">{{ text_promo_discount }}</span>';
 	  html += '  <div class="dc-promo-card__grid">';
 	  html += '    <div class="dc-promo-card__field">';
@@ -2067,6 +2050,7 @@
 	  html += '    <label class="dc-promo-card__toggle"><input type="checkbox" name="product_special[' + special_row + '][auto_renew]" value="1" class="auto-renew-cb" /><span>{{ entry_auto_renew }}</span></label>';
 	  html += '    <button type="button" onclick="removePromoCard(\'special-row' + special_row + '\')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>';
 	  html += '  </div>';
+	  html += '  <input type="hidden" name="product_special[' + special_row + '][date_added]" value="' + new Date().toISOString().slice(0, 19).replace('T', ' ') + '" />';
 	  html += '  <span class="dc-promo-badge dc-promo-badge--special">{{ text_promo_special }}</span>';
 	  html += '  <div class="dc-promo-card__grid">';
 	  html += '    <div class="dc-promo-card__field">';
@@ -2111,6 +2095,7 @@
 	  html += '    <label class="dc-promo-card__toggle"><input type="checkbox" name="product_gift[' + gift_row + '][auto_renew]" value="1" class="auto-renew-cb" /><span>{{ entry_auto_renew }}</span></label>';
 	  html += '    <button type="button" onclick="removePromoCard(\'gift-row' + gift_row + '\')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>';
 	  html += '  </div>';
+	  html += '  <input type="hidden" name="product_gift[' + gift_row + '][date_added]" value="' + new Date().toISOString().slice(0, 19).replace('T', ' ') + '" />';
 	  html += '  <span class="dc-promo-badge dc-promo-badge--gift">{{ text_promo_gift }}</span>';
 	  html += '  <div class="dc-promo-card__grid">';
 	  html += '    <div class="dc-promo-card__field dc-promo-card__field--wide">';
@@ -2191,6 +2176,7 @@
 	  html += '    <label class="dc-promo-card__toggle"><input type="checkbox" name="product_bxgy[' + bxgy_row + '][auto_renew]" value="1" class="auto-renew-cb" /><span>{{ entry_auto_renew }}</span></label>';
 	  html += '    <button type="button" onclick="removePromoCard(\'bxgy-row' + bxgy_row + '\')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>';
 	  html += '  </div>';
+	  html += '  <input type="hidden" name="product_bxgy[' + bxgy_row + '][date_added]" value="' + new Date().toISOString().slice(0, 19).replace('T', ' ') + '" />';
 	  html += '  <span class="dc-promo-badge dc-promo-badge--bxgy">{{ text_promo_bxgy }}</span>';
 	  html += '  <div class="dc-promo-card__grid">';
 	  html += '    <div class="dc-promo-card__field dc-promo-card__field--wide">';
@@ -2275,6 +2261,7 @@
 	  html += '    <label class="dc-promo-card__toggle"><input type="checkbox" name="product_bundle[' + bundle_row + '][auto_renew]" value="1" class="auto-renew-cb" /><span>{{ entry_auto_renew }}</span></label>';
 	  html += '    <button type="button" onclick="removeBundleCard(\'bundle-row' + bundle_row + '\', 0)" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>';
 	  html += '  </div>';
+	  html += '  <input type="hidden" name="product_bundle[' + bundle_row + '][date_added]" value="' + new Date().toISOString().slice(0, 19).replace('T', ' ') + '" />';
 	  html += '  <span class="dc-promo-badge dc-promo-badge--bundle">{{ text_promo_bundle }}</span>';
 	  html += '  <div class="dc-promo-card__grid">';
 	  html += '    <div class="dc-promo-card__field" style="display:none;"><input type="hidden" name="product_bundle[' + bundle_row + '][bundle_id]" value="" /></div>';

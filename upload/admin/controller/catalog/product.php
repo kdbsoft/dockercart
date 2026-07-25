@@ -1571,7 +1571,8 @@ class ControllerCatalogProduct extends Controller {
 				'price'             => $product_discount['price'],
 				'date_start'        => ($product_discount['date_start'] != '0000-00-00') ? $product_discount['date_start'] : '',
 				'date_end'          => ($product_discount['date_end'] != '0000-00-00') ? $product_discount['date_end'] : '',
-				'auto_renew'        => !empty($product_discount['auto_renew'])
+				'auto_renew'        => !empty($product_discount['auto_renew']),
+				'date_added'        => $product_discount['date_added'] ?? '0000-00-00 00:00:00'
 			);
 		}
 
@@ -1592,7 +1593,8 @@ class ControllerCatalogProduct extends Controller {
 				'price'             => $product_special['price'],
 				'date_start'        => ($product_special['date_start'] != '0000-00-00') ? $product_special['date_start'] : '',
 				'date_end'          => ($product_special['date_end'] != '0000-00-00') ? $product_special['date_end'] : '',
-				'auto_renew'        => !empty($product_special['auto_renew'])
+				'auto_renew'        => !empty($product_special['auto_renew']),
+				'date_added'        => $product_special['date_added'] ?? '0000-00-00 00:00:00'
 			);
 		}
 
@@ -1613,7 +1615,8 @@ class ControllerCatalogProduct extends Controller {
 				'minimum_quantity'  => $product_gift['minimum_quantity'],
 				'date_start'        => ($product_gift['date_start'] != '0000-00-00') ? $product_gift['date_start'] : '',
 				'date_end'          => ($product_gift['date_end'] != '0000-00-00') ? $product_gift['date_end'] : '',
-				'auto_renew'        => !empty($product_gift['auto_renew'])
+				'auto_renew'        => !empty($product_gift['auto_renew']),
+				'date_added'        => $product_gift['date_added'] ?? '0000-00-00 00:00:00'
 			);
 		}
 
@@ -1637,7 +1640,8 @@ class ControllerCatalogProduct extends Controller {
 				'discount_value'     => $product_bxgy['discount_value'],
 				'date_start'         => ($product_bxgy['date_start'] != '0000-00-00') ? $product_bxgy['date_start'] : '',
 				'date_end'           => ($product_bxgy['date_end'] != '0000-00-00') ? $product_bxgy['date_end'] : '',
-				'auto_renew'         => !empty($product_bxgy['auto_renew'])
+				'auto_renew'         => !empty($product_bxgy['auto_renew']),
+				'date_added'         => $product_bxgy['date_added'] ?? '0000-00-00 00:00:00'
 			);
 		}
 
@@ -1941,11 +1945,41 @@ class ControllerCatalogProduct extends Controller {
 					'date_start'      => ($bundle['date_start'] != '0000-00-00') ? $bundle['date_start'] : '',
 					'date_end'        => ($bundle['date_end'] != '0000-00-00') ? $bundle['date_end'] : '',
 					'auto_renew'      => (int) $bundle['auto_renew'],
+					'date_added'      => $bundle['date_added'] ?? '0000-00-00 00:00:00',
 					'products'        => $products_for_template,
 					'product_ids_csv' => implode(',', $bundle_products)
 				);
 			}
 		}
+
+		$data['all_promotions'] = array_merge(
+			array_map(fn($v, $k) => ['promo_type' => 'discount', 'row_index' => $k] + $v,
+				$data['product_discounts'], array_keys($data['product_discounts'])),
+			array_map(fn($v, $k) => ['promo_type' => 'special', 'row_index' => $k] + $v,
+				$data['product_specials'], array_keys($data['product_specials'])),
+			array_map(fn($v, $k) => ['promo_type' => 'gift', 'row_index' => $k] + $v,
+				$data['product_gifts'], array_keys($data['product_gifts'])),
+			array_map(fn($v, $k) => ['promo_type' => 'bxgy', 'row_index' => $k] + $v,
+				$data['product_bxgy_rules'], array_keys($data['product_bxgy_rules'])),
+			array_map(fn($v, $k) => ['promo_type' => 'bundle', 'row_index' => $k] + $v,
+				$data['product_bundles'], array_keys($data['product_bundles']))
+		);
+
+		$typeSort = ['discount' => 0, 'special' => 1, 'gift' => 2, 'bxgy' => 3, 'bundle' => 4];
+
+		usort($data['all_promotions'], fn($a, $b) => (
+			$cmp = strcmp($b['date_added'] ?? '0000-00-00 00:00:00', $a['date_added'] ?? '0000-00-00 00:00:00')
+		) ? $cmp : (
+			($a['row_index'] * 5 + ($typeSort[$a['promo_type']] ?? 0))
+			<=>
+			($b['row_index'] * 5 + ($typeSort[$b['promo_type']] ?? 0))
+		));
+
+		$data['discount_row'] = count($data['product_discounts']);
+		$data['special_row']  = count($data['product_specials']);
+		$data['gift_row']     = count($data['product_gifts']);
+		$data['bxgy_row']     = count($data['product_bxgy_rules']);
+		$data['bundle_row']   = count($data['product_bundles']);
 
 		$this->document->addStyle('view/stylesheet/product_form.css');
 
