@@ -802,6 +802,12 @@ class ModelCatalogProduct extends Model {
 		return $query->rows;
 	}
 
+	public function getProductBxgy($product_id) {
+		$query = $this->db->query("SELECT bx.*, pd.name AS reward_product_name FROM " . DB_PREFIX . "product_bxgy bx LEFT JOIN " . DB_PREFIX . "product_description pd ON (bx.reward_product_id = pd.product_id AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "') WHERE bx.product_id = '" . (int)$product_id . "' AND (bx.date_start = '0000-00-00' OR bx.date_start <= NOW()) AND (bx.date_end = '0000-00-00' OR bx.date_end >= NOW()) ORDER BY bx.trigger_quantity ASC");
+
+		return $query->rows;
+	}
+
 	private function autoRenewProductEntities() {
 		static $done = [];
 

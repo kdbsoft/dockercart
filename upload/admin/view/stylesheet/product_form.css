@@ -122,6 +122,7 @@
 .dc-promo-badge--special { background: #dbeafe; color: #1e40af; }
 .dc-promo-badge--gift { background: #fce7f3; color: #9d174d; }
 .dc-promo-badge--bundle { background: #fef3c7; color: #92400e; }
+.dc-promo-badge--bxgy { background: #ede9fe; color: #5b21b6; }
 
 /* ── Bundle chips ── */
 .bundle-selected-products { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; align-items: center; }

@@ -338,6 +338,133 @@ class ControllerStartupStartup extends Controller {
 			setcookie('tracking', $this->request->get['tracking'], time() + 3600 * 24 * 1000, '/');
 		
 			$this->db->query("UPDATE `" . DB_PREFIX . "marketing` SET clicks = (clicks + 1) WHERE code = '" . $this->db->escape($this->request->get['tracking']) . "'");
+		}
+
+		// Traffic source tracking (once per session)
+		if (!$is_xhr && !isset($this->session->data['dc_traffic_source'])) {
+			$source   = '';
+			$medium   = 'none';
+			$campaign = '';
+
+			// 1. UTM parameters (highest priority)
+			if (!empty($this->request->get['utm_source'])) {
+				$source   = $this->db->escape(html_entity_decode($this->request->get['utm_source']));
+				$medium   = !empty($this->request->get['utm_medium']) ? $this->db->escape(html_entity_decode($this->request->get['utm_medium'])) : 'none';
+				$campaign = !empty($this->request->get['utm_campaign']) ? $this->db->escape(html_entity_decode($this->request->get['utm_campaign'])) : '';
+			}
+
+			// 2. Ad platform click IDs
+			if ($source === '') {
+				$click_id_map = array(
+					'gclid'    => array('source' => 'google',    'medium' => 'cpc'),
+					'dclid'    => array('source' => 'google',    'medium' => 'display'),
+					'fbclid'   => array('source' => 'facebook',  'medium' => 'cpc'),
+					'msclkid'  => array('source' => 'microsoft', 'medium' => 'cpc'),
+					'ttclid'   => array('source' => 'tiktok',    'medium' => 'cpc'),
+					'twclid'   => array('source' => 'twitter',   'medium' => 'cpc'),
+					'li_fat_id'=> array('source' => 'linkedin',  'medium' => 'cpc'),
+					'epik'     => array('source' => 'pinterest','medium' => 'cpc'),
+					'pid'      => array('source' => 'pinterest','medium' => 'cpc'),
+					'ScCid'    => array('source' => 'snapchat',  'medium' => 'cpc'),
+					'mc_eid'   => array('source' => 'mailchimp', 'medium' => 'email'),
+					'yclid'    => array('source' => 'yandex',    'medium' => 'cpc'),
+				);
+
+				foreach ($click_id_map as $param => $info) {
+					if (!empty($this->request->get[$param])) {
+						$source = $info['source'];
+						$medium = $info['medium'];
+						break;
+					}
+				}
+
+				// Klaviyo: ki_* prefix
+				if ($source === '') {
+					foreach ($this->request->get as $key => $value) {
+						if (strpos($key, 'ki_') === 0 && $value !== '') {
+							$source = 'klaviyo';
+							$medium = 'email';
+							break;
+						}
+					}
+				}
+			}
+
+			// 3. HTTP_REFERER (medium priority)
+			if ($source === '' && !empty($this->request->server['HTTP_REFERER'])) {
+				$referer = parse_url($this->request->server['HTTP_REFERER']);
+				if (!empty($referer['host'])) {
+					$host = strtolower($referer['host']);
+					$host = preg_replace('/^www\./', '', $host);
+
+					$domain_map = array(
+						'google'       => array('google',    'organic'),
+						'google.com'   => array('google',    'organic'),
+						'google.co.uk' => array('google',    'organic'),
+						'google.de'    => array('google',    'organic'),
+						'google.fr'    => array('google',    'organic'),
+						'google.es'    => array('google',    'organic'),
+						'google.it'    => array('google',    'organic'),
+						'google.ru'    => array('google',    'organic'),
+						'google.com.ua'=> array('google',    'organic'),
+						'bing.com'     => array('bing',      'organic'),
+						'bing.co.uk'   => array('bing',      'organic'),
+						'yandex'       => array('yandex',    'organic'),
+						'yandex.ru'    => array('yandex',    'organic'),
+						'yandex.ua'    => array('yandex',    'organic'),
+						'yandex.com'   => array('yandex',    'organic'),
+						'facebook.com' => array('facebook',  'social'),
+						'fb.com'       => array('facebook',  'social'),
+						'instagram.com'=> array('instagram', 'social'),
+						'twitter.com'  => array('twitter',   'social'),
+						't.co'         => array('twitter',   'social'),
+						'x.com'        => array('twitter',   'social'),
+						'vk.com'       => array('vk',        'social'),
+						'vk.ru'        => array('vk',        'social'),
+						't.me'         => array('telegram',  'social'),
+						'telegram.org' => array('telegram',  'social'),
+						'youtube.com'  => array('youtube',   'social'),
+						'youtu.be'     => array('youtube',   'social'),
+						'linkedin.com' => array('linkedin',  'social'),
+						'pinterest.com'=> array('pinterest', 'social'),
+						'pinterest.co.uk' => array('pinterest', 'social'),
+						'reddit.com'   => array('reddit',    'social'),
+						'reddit.co.uk' => array('reddit',    'social'),
+						'trustpilot.com' => array('trustpilot', 'referral'),
+					);
+
+					$matched = false;
+					foreach ($domain_map as $domain => $info) {
+						if ($host === $domain || substr($host, -(strlen($domain) + 1)) === '.' . $domain) {
+							$source = $info[0];
+							$medium = $info[1];
+							$matched = true;
+							break;
+						}
+					}
+
+					// Unknown referer — use domain as source name
+					if (!$matched && $host !== $_SERVER['HTTP_HOST']) {
+						$source = preg_replace('/\.[^.]+$/', '', $host);
+						$medium = 'referral';
+					}
+				}
+			}
+
+			// 4. Direct (no source detected)
+			if ($source === '') {
+				$source = '';
+				$medium = 'none';
+			}
+
+			// Record once per session
+			$this->session->data['dc_traffic_source'] = true;
+
+			$session_id = $this->session->getId();
+
+			if ($session_id) {
+				$this->db->query("INSERT IGNORE INTO `" . DB_PREFIX . "dockercart_traffic_source` SET `session_id` = '" . $this->db->escape($session_id) . "', `source` = '" . $source . "', `medium` = '" . $medium . "', `campaign` = '" . $campaign . "', `date_added` = NOW()");
+			}
 		}		
 		
 		// Currency

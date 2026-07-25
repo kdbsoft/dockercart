@@ -41,4 +41,7 @@ $_['error_variant_required']   = 'Please select all product options to add this 
 $_['error_variant_invalid']    = 'The selected variant is not available. Please choose a valid variant.';
 
 $_['text_bundle_discount']     = 'Bundle Discount';
+$_['text_bxgy_discount']       = 'BXGY Discount';
+$_['text_bxgy_free_badge']     = 'BXGY: Free';
+$_['text_bxgy_percent_badge']  = 'BXGY: -%s%%';
 $_['text_model']               = 'Product Code:';

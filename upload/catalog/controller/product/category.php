@@ -263,7 +263,7 @@ class ControllerProductCategory extends Controller {
 				}
 
 				$data['category_banner'] = array(
-					'image' => $this->model_tool_image->resize($category_info['banner_image'], 1200, 400),
+					'image' => $this->model_tool_image->resize($category_info['banner_image'], 600, 600),
 					'link'  => $banner_link
 				);
 			}
@@ -917,12 +917,12 @@ class ControllerProductCategory extends Controller {
 				}
 			}
 
-			$banner_image = $this->model_tool_image->resize($category_info['banner_image'], 1200, 400);
+			$banner_image = $this->model_tool_image->resize($category_info['banner_image'], 600, 600);
 
 			$banner_tag_open = $banner_link ? '<a href="' . $banner_link . '">' : '';
 			$banner_tag_close = $banner_link ? '</a>' : '';
 
-			$category_banner_html = '<div class="col-span-2 sm:col-span-3 xl:col-span-4 h-48 lg:h-64 rounded-2xl overflow-hidden shadow-sm bg-gray-100">' . $banner_tag_open . '<img src="' . $banner_image . '" alt="" class="w-full h-full object-cover" loading="lazy" />' . $banner_tag_close . '</div>';
+			$category_banner_html = '<div class="product-card bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300">' . $banner_tag_open . '<img src="' . $banner_image . '" alt="" class="w-full h-full object-cover" loading="lazy" />' . $banner_tag_close . '</div>';
 		}
 
 		$filter_data = array(
