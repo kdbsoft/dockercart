@@ -17,6 +17,11 @@ $_['text_add_information_subtitle'] = 'Create a new information page';
 
 $_['text_edit_information_subtitle'] = 'Edit information page content';
 
+// Sidebar cards
+$_['text_status_card']  = 'Status';
+$_['text_seo_card']     = 'Links';
+$_['text_design_card']  = 'Theme';
+
 
 
 // Column
