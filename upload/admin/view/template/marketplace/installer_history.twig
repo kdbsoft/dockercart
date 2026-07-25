@@ -8,13 +8,12 @@
       </tr>
     </thead>
     <tbody>
-    
     {% if histories %}
     {% for history in histories %}
     <tr>
       <td>{{ history.filename }}</td>
       <td>{{ history.date_added }}</td>
-      <td class="text-right"><button type="button" value="{{ history.extension_install_id }}" data-loading="{{ text_loading }}" data-toggle="tooltip" title="{{ button_uninstall }}" class="btn btn-danger"><i class="fa fa-trash-o"></i></button></td>
+      <td class="text-right"><button type="button" value="{{ history.extension_install_id }}" data-loading="{{ text_loading }}" data-toggle="tooltip" title="{{ button_uninstall }}" class="btn btn-danger btn--icon"><i data-lucide="trash-2" width="14" height="14"></i></button></td>
     </tr>
     {% endfor %}
     {% else %}
@@ -23,10 +22,11 @@
     </tr>
     {% endif %}
     </tbody>
-    
   </table>
 </div>
-<div class="row">
-  <div class="col-sm-6 text-left">{{ pagination }}</div>
-  <div class="col-sm-6 text-right">{{ results }}</div>
+<div class="pagination-wrap">
+  <div class="row">
+    <div class="col-sm-6 text-left">{{ pagination }}</div>
+    <div class="col-sm-6 text-right">{{ results }}</div>
+  </div>
 </div>
