@@ -201,9 +201,9 @@ small.text-muted svg { vertical-align: middle; }
                     <td class="text-left">
                       <span class="inline-edit" data-product-id="{{ product.product_id }}" data-field="status" data-value="{{ product.status_raw }}">
                         {% if product.status_raw %}
-                        <span class="page-header__badge page-header__badge--active">{{ text_enabled }}</span>
+                        <span class="label label-success">{{ text_enabled }}</span>
                         {% else %}
-                        <span class="page-header__badge page-header__badge--inactive">{{ text_disabled }}</span>
+                        <span class="label label-danger">{{ text_disabled }}</span>
                         {% endif %}
                         <i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>
                       </span>
@@ -513,7 +513,7 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 
 		$('#category-tree-modal').modal('show');
 	} else {
-		var currentDisplay = $span.clone().children('.inline-edit-icon').remove().children('.page-header__badge').remove().end().text().trim();
+		var currentDisplay = $span.clone().children('.inline-edit-icon').remove().children('.label').remove().end().text().trim();
 
 		$span.html('<input type="text" class="form-control input-sm inline-edit-input" value="' + rawValue + '">');
 		var $input = $span.find('input');
