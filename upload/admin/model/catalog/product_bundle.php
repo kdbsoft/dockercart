@@ -1,7 +1,7 @@
 <?php
 class ModelCatalogProductBundle extends Model {
 	public function addBundle($data) {
-		$this->db->query("INSERT INTO " . DB_PREFIX . "product_bundle SET name = '" . $this->db->escape($data['name']) . "', discount_type = '" . $this->db->escape($data['discount_type']) . "', discount_value = '" . (float)$data['discount_value'] . "', date_start = '" . $this->db->escape($data['date_start']) . "', date_end = '" . $this->db->escape($data['date_end']) . "', status = '" . (int)$data['status'] . "', sort_order = '" . (int)$data['sort_order'] . "', auto_renew = '" . (int)(!empty($data['auto_renew'])) . "'");
+		$this->db->query("INSERT INTO " . DB_PREFIX . "product_bundle SET name = '" . $this->db->escape($data['name']) . "', discount_type = '" . $this->db->escape($data['discount_type']) . "', discount_value = '" . (float)$data['discount_value'] . "', date_start = '" . $this->db->escape($data['date_start']) . "', date_end = '" . $this->db->escape($data['date_end']) . "', status = '" . (int)$data['status'] . "', sort_order = '" . (int)$data['sort_order'] . "', auto_renew = '" . (int)(!empty($data['auto_renew'])) . "', date_added = NOW()");
 
 		$bundle_id = $this->db->getLastId();
 
@@ -172,7 +172,7 @@ class ModelCatalogProductBundle extends Model {
 			"SELECT DISTINCT b.* FROM " . DB_PREFIX . "product_bundle b "
 			. "INNER JOIN " . DB_PREFIX . "product_bundle_product bp ON (b.bundle_id = bp.bundle_id) "
 			. "WHERE bp.product_id = '" . (int) $product_id . "' "
-			. "ORDER BY b.sort_order ASC, b.name ASC"
+			. "ORDER BY b.date_added ASC"
 		);
 
 		return $query->rows;
