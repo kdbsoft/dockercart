@@ -1,0 +1,326 @@
+<div class="row">
+  <div id="filter-report" class="col-md-3 col-md-push-9 col-sm-12 hidden-sm hidden-xs">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <div class="panel-heading__icon"><i data-lucide="filter" width="14" height="14"></i></div>
+        <div>
+          <h3 class="panel-title">{{ text_filter }}</h3>
+          <div class="panel-heading__subtitle">{{ text_filter_subtitle }}</div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="form-group">
+          <label class="control-label" for="input-date-start">{{ entry_date_start }}</label>
+          <div class="input-group date">
+            <input type="text" name="filter_date_start" value="{{ filter_date_start }}" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" id="input-date-start" class="form-control" />
+            <span class="input-group-btn">
+            <button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button>
+            </span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="control-label" for="input-date-end">{{ entry_date_end }}</label>
+          <div class="input-group date">
+            <input type="text" name="filter_date_end" value="{{ filter_date_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" id="input-date-end" class="form-control" />
+            <span class="input-group-btn">
+            <button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button>
+            </span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="control-label" for="input-group">{{ entry_group }}</label>
+          <select name="filter_group" id="input-group" class="form-control">
+            {% for group in groups %}
+            {% if group.value == filter_group %}
+            <option value="{{ group.value }}" selected="selected">{{ group.text }}</option>
+            {% else %}
+            <option value="{{ group.value }}">{{ group.text }}</option>
+            {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="control-label" for="input-status">{{ entry_status }}</label>
+          <select name="filter_order_status_id" id="input-status" class="form-control">
+            <option value="0">{{ text_all_status }}</option>
+            {% for order_status in order_statuses %}
+            {% if order_status.order_status_id == filter_order_status_id %}
+            <option value="{{ order_status.order_status_id }}" selected="selected">{{ order_status.name }}</option>
+            {% else %}
+            <option value="{{ order_status.order_status_id }}">{{ order_status.name }}</option>
+            {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group text-right">
+          <button type="button" id="button-filter" class="btn btn-default"><i data-lucide="filter" width="14" height="14"></i> {{ button_filter }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-9 col-md-pull-3 col-sm-12">
+    <div class="row" style="margin-bottom:16px">
+      <div class="col-sm-2">
+        <div class="panel panel-default text-center" style="padding:12px">
+          <div style="font-size:24px;font-weight:700;line-height:1.2">{{ conversion_rate }}</div>
+          <div style="font-size:11px;color:#888;margin-top:4px">{{ text_conversion }}</div>
+          <div style="font-size:11px;color:#888">{{ text_orders }}: {{ completed_orders }}</div>
+        </div>
+      </div>
+      <div class="col-sm-2">
+        <div class="panel panel-default text-center" style="padding:12px">
+          <div style="font-size:24px;font-weight:700;line-height:1.2">{{ aov }}</div>
+          <div style="font-size:11px;color:#888;margin-top:4px">{{ text_aov }}</div>
+          <div style="font-size:11px;color:#888">{{ text_revenue }}: {{ revenue }}</div>
+        </div>
+      </div>
+      <div class="col-sm-2">
+        <div class="panel panel-default text-center" style="padding:12px">
+          <div style="font-size:24px;font-weight:700;line-height:1.2">{{ repeat_rate }}</div>
+          <div style="font-size:11px;color:#888;margin-top:4px">{{ text_repeat_rate }}</div>
+          <div style="font-size:11px;color:#888">{{ text_repeat_customers }}: {{ repeat_customers }}/{{ total_customers }}</div>
+        </div>
+      </div>
+      <div class="col-sm-2">
+        <div class="panel panel-default text-center" style="padding:12px">
+          <div style="font-size:24px;font-weight:700;line-height:1.2">{{ cancellation_rate }}</div>
+          <div style="font-size:11px;color:#888;margin-top:4px">{{ text_cancellation_rate }}</div>
+          <div style="font-size:11px;color:#888">{{ column_cancelled }}: {{ cancelled_orders }}/{{ total_orders }}</div>
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="panel panel-default text-center" style="padding:12px">
+          <div style="font-size:24px;font-weight:700;line-height:1.2">{{ revenue }}</div>
+          <div style="font-size:11px;color:#888;margin-top:4px">{{ text_revenue }}</div>
+          <div style="font-size:11px;color:#888">{{ text_orders }}: {{ total_orders }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <div class="panel-heading__icon"><i data-lucide="bar-chart-2" width="16" height="16"></i></div>
+        <div>
+          <h3 class="panel-title">{{ heading_title }}</h3>
+          <div class="panel-heading__subtitle">{{ text_report_subtitle }}</div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <td class="text-left">{{ column_date_start }}</td>
+                <td class="text-left">{{ column_date_end }}</td>
+                <td class="text-right">{{ column_orders }}</td>
+                <td class="text-right">{{ column_completed }}</td>
+                <td class="text-right">{{ column_conversion }}</td>
+                <td class="text-right">{{ column_revenue }}</td>
+                <td class="text-right">{{ column_aov }}</td>
+              </tr>
+            </thead>
+            <tbody>
+            {% if reports %}
+            {% for report in reports %}
+            <tr>
+              <td class="text-left">{{ report.date_start }}</td>
+              <td class="text-left">{{ report.date_end }}</td>
+              <td class="text-right">{{ report.total_orders }}</td>
+              <td class="text-right">{{ report.completed_orders }}</td>
+              <td class="text-right">{{ report.conversion_rate }}</td>
+              <td class="text-right">{{ report.revenue }}</td>
+              <td class="text-right">{{ report.aov }}</td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+              <td class="text-center" colspan="7">{{ text_no_results }}</td>
+            </tr>
+            {% endif %}
+            </tbody>
+          </table>
+        </div>
+        <div class="row">
+          <div class="col-sm-6 text-left"><div class="pagination-wrap">{{ pagination }}</div></div>
+          <div class="col-sm-6 text-right">{{ results }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" style="margin-bottom:16px">
+      <div class="col-sm-6">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <div class="panel-heading__icon"><i data-lucide="calendar" width="16" height="16"></i></div>
+            <div>
+              <h3 class="panel-title">{{ text_orders_by_day }}</h3>
+              <div class="panel-heading__subtitle">{{ text_orders_by_day_subtitle }}</div>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="table-responsive">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <td class="text-left">{{ column_day }}</td>
+                    <td class="text-right">{{ column_orders_count }}</td>
+                  </tr>
+                </thead>
+                <tbody>
+                {% for day in orders_by_day %}
+                <tr>
+                  <td class="text-left">{{ day.name }}</td>
+                  <td class="text-right">{{ day.total }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <div class="panel-heading__icon"><i data-lucide="clock" width="16" height="16"></i></div>
+            <div>
+              <h3 class="panel-title">{{ text_orders_by_hour }}</h3>
+              <div class="panel-heading__subtitle">{{ text_orders_by_hour_subtitle }}</div>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="table-responsive" style="max-height:400px;overflow-y:auto">
+              <table class="table table-bordered table-condensed">
+                <thead>
+                  <tr>
+                    <td class="text-left">{{ column_hour }}</td>
+                    <td class="text-right">{{ column_orders_count }}</td>
+                  </tr>
+                </thead>
+                <tbody>
+                {% for slot in orders_by_hour %}
+                <tr>
+                  <td class="text-left">{{ slot.hour }}</td>
+                  <td class="text-right">{{ slot.total }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <div class="panel-heading__icon"><i data-lucide="package" width="16" height="16"></i></div>
+        <div>
+          <h3 class="panel-title">{{ text_top_products }}</h3>
+          <div class="panel-heading__subtitle">{{ text_top_products_subtitle }}</div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <td class="text-left">{{ column_product }}</td>
+                <td class="text-left">{{ column_model }}</td>
+                <td class="text-right">{{ column_quantity }}</td>
+                <td class="text-right">{{ column_total }}</td>
+              </tr>
+            </thead>
+            <tbody>
+            {% if top_products %}
+            {% for product in top_products %}
+            <tr>
+              <td class="text-left">{{ product.name }}</td>
+              <td class="text-left">{{ product.model }}</td>
+              <td class="text-right">{{ product.quantity }}</td>
+              <td class="text-right">{{ product.total }}</td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+              <td class="text-center" colspan="4">{{ text_no_results }}</td>
+            </tr>
+            {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <div class="panel-heading__icon"><i data-lucide="folder-tree" width="16" height="16"></i></div>
+        <div>
+          <h3 class="panel-title">{{ text_revenue_by_category }}</h3>
+          <div class="panel-heading__subtitle">{{ text_revenue_by_category_subtitle }}</div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <td class="text-left">{{ column_category }}</td>
+                <td class="text-right">{{ column_sold }}</td>
+                <td class="text-right">{{ column_revenue }}</td>
+              </tr>
+            </thead>
+            <tbody>
+            {% if categories %}
+            {% for cat in categories %}
+            <tr>
+              <td class="text-left">{{ cat.name }}</td>
+              <td class="text-right">{{ cat.quantity_sold }}</td>
+              <td class="text-right">{{ cat.revenue }}</td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+              <td class="text-center" colspan="3">{{ text_no_results }}</td>
+            </tr>
+            {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript"><!--
+$('#button-filter').on('click', function() {
+  var url = '';
+
+  var filter_date_start = $('input[name=\'filter_date_start\']').val();
+  if (filter_date_start) {
+    url += '&filter_date_start=' + encodeURIComponent(filter_date_start);
+  }
+
+  var filter_date_end = $('input[name=\'filter_date_end\']').val();
+  if (filter_date_end) {
+    url += '&filter_date_end=' + encodeURIComponent(filter_date_end);
+  }
+
+  var filter_group = $('select[name=\'filter_group\']').val();
+  if (filter_group) {
+    url += '&filter_group=' + encodeURIComponent(filter_group);
+  }
+
+  var filter_order_status_id = $('select[name=\'filter_order_status_id\']').val();
+  if (filter_order_status_id != 0) {
+    url += '&filter_order_status_id=' + encodeURIComponent(filter_order_status_id);
+  }
+
+  location = 'index.php?route=report/report&code=dockercart_analytics&user_token={{ user_token }}' + url;
+});
+//--></script>
+<script type="text/javascript"><!--
+$('.date').datetimepicker({
+  language: '{{ datepicker }}',
+  pickTime: false
+});
+//--></script>
