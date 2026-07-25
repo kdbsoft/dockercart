@@ -33,6 +33,9 @@ $_['text_text'] = 'Текст';
 $_['text_textarea'] = 'Текстовое поле';
 $_['text_time'] = 'Время';
 $_['text_value'] = 'Значения опций';
+// Sidebar
+$_['text_settings_card']     = 'Настройки';
+
 // Subtitle
 
 $_['text_list_subtitle'] = 'Управляйте опциями и значениями товаров';
