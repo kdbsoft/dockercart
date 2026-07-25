@@ -18,6 +18,7 @@ class ControllerMarketplaceInstaller extends Controller {
 		);
 
 		$data['user_token'] = $this->session->data['user_token'];
+		$data['cancel'] = $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true);
 		$data['text_list_subtitle'] = $this->language->get('text_installer_list_subtitle');
 
 		$data['header'] = $this->load->controller('common/header');
