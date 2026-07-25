@@ -37,7 +37,7 @@ $_['tab_data'] = 'Дані';
 $_['tab_design'] = 'Дизайн';
 $_['tab_general'] = 'Загальне';
 $_['tab_description'] = 'Опис';
-$_['tab_params_group'] = 'Параметри';
+$_['tab_params_group'] = 'Медіа';
 $_['tab_images_group'] = 'Зображення';
 $_['tab_seo'] = 'SEO-оптимізація';
 $_['text_add'] = 'Додати виробника';
@@ -55,5 +55,10 @@ $_['text_list_subtitle'] = 'Керуйте виробниками товарів
 $_['text_add_manufacturer_subtitle'] = 'Додати нового виробника товарів';
 
 $_['text_edit_manufacturer_subtitle'] = 'Редагувати дані виробника';
+
+// Sidebar cards
+$_['text_status_card'] = 'Статус';
+$_['text_seo_card'] = 'Посилання';
+$_['text_seo_preview'] = 'Попередній перегляд';
 
 
