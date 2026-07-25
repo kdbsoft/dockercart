@@ -20,9 +20,16 @@ $_['text_edit_manufacturer_subtitle'] = 'Edit manufacturer details';
 
 
 // Tab
+$_['tab_description']   = 'Description';
+$_['tab_params_group']  = 'Media';
 $_['tab_general']       = 'General';
 $_['tab_data']          = 'Data';
 $_['tab_seo']           = 'SEO';
+
+// Sidebar cards
+$_['text_status_card']  = 'Status';
+$_['text_seo_card']     = 'Links';
+$_['text_seo_preview']  = 'Preview';
 
 // Column
 $_['column_name']       = 'Manufacturer Name';

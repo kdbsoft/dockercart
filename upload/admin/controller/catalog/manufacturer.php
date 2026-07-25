@@ -404,6 +404,16 @@ class ControllerCatalogManufacturer extends Controller {
 			$data['name'] = '';
 		}
 
+		$data['manufacturer_name'] = '';
+
+		if (!empty($this->request->post['manufacturer_description'][$this->config->get('config_language_id')]['name'])) {
+			$data['manufacturer_name'] = $this->request->post['manufacturer_description'][$this->config->get('config_language_id')]['name'];
+		} elseif (!empty($manufacturer_info)) {
+			$lang_id = $this->config->get('config_language_id');
+			$descriptions = $this->model_catalog_manufacturer->getManufacturerDescriptions($manufacturer_info['manufacturer_id']);
+			$data['manufacturer_name'] = isset($descriptions[$lang_id]['name']) ? $descriptions[$lang_id]['name'] : '';
+		}
+
 		$this->load->model('setting/store');
 
 		$data['stores'] = array();
