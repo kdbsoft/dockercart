@@ -1,0 +1,21 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <div class="panel-heading__icon"><i class="fa fa-globe"></i></div>
+    <div>
+      <h3 class="panel-title">{{ heading_title }}</h3>
+      <div class="panel-heading__subtitle">{{ text_traffic_subtitle }}</div>
+    </div>
+  </div>
+  <ul class="list-group">
+    {% if sources %}
+    {% for source in sources %}
+    <li class="list-group-item" style="display:flex;justify-content:space-between;align-items:center;">
+      <span>{{ source.name }}</span>
+      <span><strong>{{ source.visits }}</strong> <span class="text-muted">({{ source.pct }}%)</span></span>
+    </li>
+    {% endfor %}
+    {% else %}
+    <li class="list-group-item text-center">{{ text_no_results }}</li>
+    {% endif %}
+  </ul>
+</div>
