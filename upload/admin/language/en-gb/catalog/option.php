@@ -21,6 +21,9 @@ $_['text_datetime']      = 'Date &amp; Time';
 $_['text_time']          = 'Time';
 $_['text_option']        = 'Option';
 $_['text_value']         = 'Option Values';
+// Sidebar
+$_['text_settings_card']     = 'Settings';
+
 // Subtitle
 
 $_['text_list_subtitle'] = 'Manage product options and values';
