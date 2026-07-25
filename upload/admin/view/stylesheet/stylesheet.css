@@ -65,12 +65,24 @@ a {
 }
 
 .page-header__badge {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     padding: 3px 10px;
     font-size: 12px;
     font-weight: 500;
     border-radius: var(--dc-radius-full);
     line-height: 1.4;
+}
+
+.page-header__badge::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: currentColor;
+    opacity: 0.6;
 }
 
 .page-header__badge--active {
