@@ -23,7 +23,7 @@ $_['heading_title'] = 'Производители';
 $_['tab_data'] = 'Данные';
 $_['tab_general'] = 'Общее';
 $_['tab_description'] = 'Описание';
-$_['tab_params_group'] = 'Параметры';
+$_['tab_params_group'] = 'Медиа';
 $_['tab_images_group'] = 'Изображения';
 $_['tab_seo'] = 'SEO';
 $_['text_add'] = 'Добавить производителя';
@@ -39,3 +39,8 @@ $_['text_list_subtitle'] = 'Управляйте производителями 
 $_['text_add_manufacturer_subtitle'] = 'Добавить нового производителя товаров';
 
 $_['text_edit_manufacturer_subtitle'] = 'Редактировать данные производителя';
+
+// Sidebar cards
+$_['text_status_card'] = 'Статус';
+$_['text_seo_card'] = 'Ссылки';
+$_['text_seo_preview'] = 'Предпросмотр';
