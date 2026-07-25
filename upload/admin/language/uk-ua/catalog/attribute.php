@@ -17,6 +17,14 @@ $_['text_add'] = 'Додати атрибут';
 $_['text_edit'] = 'Редагувати атрибут';
 $_['text_list'] = 'Список атрибутів';
 $_['text_success'] = 'Успіх: Ви змінили атрибути!';
+
+// Tab
+$_['text_panel_attribute_title']    = 'Атрибут';
+$_['text_panel_attribute_subtitle'] = 'Налаштуйте назву атрибуту та групу';
+
+// Sidebar
+$_['text_settings_card']     = 'Налаштування';
+
 // Subtitle
 
 $_['text_list_subtitle'] = 'Визначте атрибути та значення товарів';

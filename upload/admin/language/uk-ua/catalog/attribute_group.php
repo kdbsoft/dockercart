@@ -15,6 +15,14 @@ $_['text_add'] = 'Додати групу атрибутів';
 $_['text_edit'] = 'Редагувати групу атрибутів';
 $_['text_list'] = 'Список груп атрибутів';
 $_['text_success'] = 'Успіх: Ви змінили групи атрибутів!';
+
+// Tab
+$_['text_panel_attribute_group_title']    = 'Група атрибутів';
+$_['text_panel_attribute_group_subtitle'] = 'Налаштуйте назву групи атрибутів';
+
+// Sidebar
+$_['text_settings_card']     = 'Налаштування';
+
 // Subtitle
 
 $_['text_list_subtitle'] = 'Групуйте атрибути для структурованих даних';
