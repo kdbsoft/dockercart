@@ -149,8 +149,7 @@
         </div>
       </div>
       {% set option_value_row = 0 %}
-      {% if option_values|length > 0 or type in ['select', 'radio', 'checkbox', 'image', 'color'] %}
-      <div class="row">
+      <div class="row" id="option-values-row"{% if type not in ['select', 'radio', 'checkbox', 'image', 'color'] and option_values|length == 0 %} style="display:none"{% endif %}>
         <div class="col-md-12 col-sm-12 col-lg-offset-1 col-lg-7 col-xl-offset-1 col-xl-7">
           <div class="dcx-shell">
             <div class="dcx-panel">
@@ -169,10 +168,7 @@
                         <i data-lucide="grip-vertical" width="14" height="14" class="slide-drag-handle"></i>
                       </span>
                       <span class="dc-opt-card__title">
-                        {% for language in languages %}
-                          {% set ov_name = option_value.option_value_description[language.language_id] ? option_value.option_value_description[language.language_id].name : '' %}
-                          {% if ov_name %}{{ ov_name }}{% endif %}
-                        {% endfor %}
+                        {{ option_value.option_value_description[admin_language_id] ? option_value.option_value_description[admin_language_id].name : '' }}
                       </span>
                       <button type="button" onclick="$('#option-value-row{{ option_value_row }}').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger btn-xs dc-opt-card__remove"><i data-lucide="minus-circle" width="14" height="14"></i></button>
                     </div>
@@ -212,7 +208,6 @@
           </div>
         </div>
       </div>
-      {% endif %}
     </form>
   </div>
 </div>
@@ -223,7 +218,7 @@ $('select[name=\'type\']').on('change', function() {
 	var showValues = this.value == 'select' || this.value == 'radio' || this.value == 'checkbox' || this.value == 'image' || this.value == 'color';
 	var showColor = this.value == 'color';
 
-	$('#option-values-cards').closest('.dcx-panel').toggle(showValues);
+	$('#option-values-row').toggle(showValues);
 	$('.dc-color-col').toggle(showColor);
 });
 
@@ -276,8 +271,7 @@ function initSortable() {
 			filter: '.dc-opt-card__remove, input, select, textarea, button',
 			preventOnFilter: false,
 			ghostClass: 'dc-opt-ghost',
-			chosenClass: 'dc-opt-chosen',
-			handle: '.dc-opt-card__handle'
+			chosenClass: 'dc-opt-chosen'
 		});
 	}
 }
