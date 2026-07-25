@@ -391,6 +391,12 @@ class ControllerCatalogAttribute extends Controller {
 
 		$data['attribute_description'] = $this->decodeDescriptionFields($data['attribute_description'], array('name'));
 
+		$data['entity_name'] = '';
+		$lang_id = (int)$this->config->get('config_language_id');
+		if (!empty($data['attribute_description'][$lang_id]['name'])) {
+			$data['entity_name'] = $data['attribute_description'][$lang_id]['name'];
+		}
+
 		if (isset($this->request->post['attribute_group_id'])) {
 			$data['attribute_group_id'] = $this->request->post['attribute_group_id'];
 		} elseif (!empty($attribute_info)) {

@@ -23,7 +23,7 @@ $_['text_panel_attribute_title']    = 'Атрибут';
 $_['text_panel_attribute_subtitle'] = 'Налаштуйте назву атрибуту та групу';
 
 // Sidebar
-$_['text_settings_card']     = 'Налаштування';
+$_['text_settings_card']     = 'Параметри';
 
 // Subtitle
 

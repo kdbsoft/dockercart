@@ -8,7 +8,18 @@
             <button type="submit" form="form-attribute" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary btn--icon"><i data-lucide="save" width="16" height="16"></i></button>
             <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default btn--icon"><i data-lucide="x" width="16" height="16"></i></a>
           </div>
-          <h1 class="page-header__title">{{ text_form }}</h1>
+          <a href="{{ cancel }}" class="page-header__link">
+            <span class="page-header__back">
+              <i data-lucide="arrow-left" width="20" height="20"></i>
+            </span>
+            <span class="page-header__title">
+              {% if entity_name %}
+                {{ entity_name }}
+              {% else %}
+                {{ text_form }}
+              {% endif %}
+            </span>
+          </a>
         </div>
       </div>
       {% if error_warning %}
@@ -62,7 +73,7 @@
         <div class="col-md-12 col-sm-12 col-lg-4 col-xl-3">
           <div class="dcx-sidebar-card">
             <div class="dcx-sidebar-card__header">
-              <div class="dcx-sidebar-card__header-icon"><i data-lucide="settings" width="16" height="16"></i></div>
+              <div class="dcx-sidebar-card__header-icon"><i data-lucide="sliders" width="16" height="16"></i></div>
               <h3 class="dcx-sidebar-card__title">{{ text_settings_card }}</h3>
             </div>
             <div class="dcx-sidebar-card__body">

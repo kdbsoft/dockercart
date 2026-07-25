@@ -21,7 +21,7 @@ $_['text_panel_attribute_group_title']    = 'Група атрибутів';
 $_['text_panel_attribute_group_subtitle'] = 'Налаштуйте назву групи атрибутів';
 
 // Sidebar
-$_['text_settings_card']     = 'Налаштування';
+$_['text_settings_card']     = 'Параметри';
 
 // Subtitle
 

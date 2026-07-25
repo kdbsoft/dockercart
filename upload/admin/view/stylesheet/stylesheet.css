@@ -3029,6 +3029,28 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
     flex-shrink: 0;
 }
 
+.dc-opt-card__lang-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dc-opt-card__lang-row .lang-code {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 5px;
+    background: var(--dc-gray-100);
+    border-radius: 3px;
+    color: var(--dc-text-dark);
+    flex: 0 0 auto;
+}
+
+.dc-opt-card__lang-row .form-control {
+    flex: 1;
+    height: 32px;
+    font-size: 13px;
+}
+
 .dc-opt-actions {
     display: flex;
     gap: 6px;

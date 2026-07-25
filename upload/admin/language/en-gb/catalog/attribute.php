@@ -13,7 +13,7 @@ $_['text_panel_attribute_title']    = 'Attribute';
 $_['text_panel_attribute_subtitle'] = 'Configure the attribute name and group';
 
 // Sidebar
-$_['text_settings_card']     = 'Settings';
+$_['text_settings_card']     = 'Parameters';
 
 // Subtitle
 $_['text_list_subtitle'] = 'Define product attributes and values';

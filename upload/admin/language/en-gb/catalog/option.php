@@ -22,7 +22,7 @@ $_['text_time']          = 'Time';
 $_['text_option']        = 'Option';
 $_['text_value']         = 'Option Values';
 // Sidebar
-$_['text_settings_card']     = 'Settings';
+$_['text_settings_card']     = 'Parameters';
 
 // Subtitle
 
