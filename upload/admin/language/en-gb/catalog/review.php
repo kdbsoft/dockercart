@@ -16,6 +16,9 @@ $_['text_add_review_subtitle'] = 'Moderate a new product review';
 
 $_['text_edit_review_subtitle'] = 'Edit review status and details';
 
+// Sidebar cards
+$_['text_review_card']  = 'Details';
+
 
 
 // Column
@@ -31,11 +34,11 @@ $_['entry_product']     = 'Product';
 $_['entry_author']      = 'Author';
 $_['entry_rating']      = 'Rating';
 $_['entry_status']      = 'Status';
-$_['entry_text']        = 'Text';
+$_['entry_text']        = 'Review Text';
 $_['entry_date_added']  = 'Date Added';
 
 // Help
-$_['help_product']      = '(Autocomplete)';
+$_['help_product']      = 'Start typing to search for a product';
 
 // Error
 $_['error_permission']  = 'Warning: You do not have permission to modify reviews!';
