@@ -396,6 +396,16 @@ class ControllerCatalogInformation extends Controller {
 
 		$data['information_description'] = $this->decodeDescriptionFields($data['information_description'], array('title', 'meta_title'));
 
+		$data['information_name'] = '';
+
+		if (!empty($this->request->post['information_description'][$this->config->get('config_language_id')]['title'])) {
+			$data['information_name'] = $this->request->post['information_description'][$this->config->get('config_language_id')]['title'];
+		} elseif (!empty($information_info)) {
+			$lang_id = $this->config->get('config_language_id');
+			$descriptions = $this->model_catalog_information->getInformationDescriptions($information_info['information_id']);
+			$data['information_name'] = isset($descriptions[$lang_id]['title']) ? $descriptions[$lang_id]['title'] : '';
+		}
+
 		$this->load->model('setting/store');
 
 		$data['stores'] = array();
