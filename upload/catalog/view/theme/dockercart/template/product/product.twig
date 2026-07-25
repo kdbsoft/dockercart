@@ -221,6 +221,32 @@
           </div>
         </div>
         {% endif %}
+        {% if bxgy_rules %}
+        <div class="mt-4 p-4 bg-violet-50 border border-violet-200 rounded-2xl">
+          <h3 class="text-sm font-bold text-violet-800 flex items-center gap-1.5 mb-3">
+            <i data-lucide="zap" class="w-4 h-4"></i> {{ text_bxgy }}
+          </h3>
+          <div class="space-y-3">
+          {% for rule in bxgy_rules %}
+          <div class="flex items-center gap-3">
+            <img src="{{ rule.image }}" alt="{{ rule.name }}" class="w-16 h-16 rounded-lg object-cover border border-violet-100"/>
+            <div class="flex-1 min-w-0">
+              <a href="{{ rule.href }}" class="text-sm font-medium text-gray-800 hover:text-violet-600 transition line-clamp-2">{{ rule.name }}</a>
+              <div class="flex items-center gap-1.5 mt-0.5">
+                <span class="text-xs text-red-400 line-through">{{ rule.original_price }}</span>
+                <span class="text-xs text-emerald-600 font-bold">{{ rule.discounted_price }}</span>
+                <span class="text-[10px] text-violet-500 font-semibold bg-violet-100 px-1.5 py-0.5 rounded">{{ rule.discount_text }}</span>
+              </div>
+              <p class="text-xs text-gray-500 mt-0.5">{{ text_bxgy_discount }} &middot; {{ rule.trigger_quantity }}x</p>
+            </div>
+            <button type="button" onclick="cart.add('{{ rule.reward_product_id }}', 1);" class="flex-shrink-0 p-2 rounded-xl bg-violet-100 hover:bg-violet-200 text-violet-700 hover:text-violet-800 transition" title="{{ button_cart }}">
+              <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+            </button>
+          </div>
+          {% endfor %}
+          </div>
+        </div>
+        {% endif %}
         <p id="dc-subtotal" class="{% if minimum is defined and minimum > 1 %}text-lg text-blue-700 font-bold mt-2{% else %}hidden text-lg text-blue-700 font-bold mt-2{% endif %}"></p>
         {% endif %}
 
@@ -485,19 +511,26 @@
           <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ text_related }}</h2>
         </div>
         {% if products|length > 4 %}
-        <a href="#" id="dc-related-view-all" class="text-sm font-semibold text-blue-600 hover:text-blue-700">{{ text_view_all|default('View All →') }}</a>
+        <a href="#" class="text-sm font-semibold text-blue-600 hover:text-blue-700">{{ text_view_all|default('View All →') }}</a>
         {% endif %}
       </div>
-      <div id="dc-related-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-        {% for product in products %}
-        {% include 'dockercart/template/product/product_card_widget.twig' with {
-          product: product,
-          accent_color: 'blue-600',
-          btn_cart_classes: 'bg-blue-600 text-white hover:bg-blue-700',
-          btn_quick_hover: 'hover:bg-blue-600',
-          card_extra: loop.index > 4 ? 'dc-related-extra hidden' : ''
-        } %}
-        {% endfor %}
+      <div class="dc-carousel">
+        <button type="button" class="dc-carousel-btn dc-carousel-prev" aria-label="Previous">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <div id="dc-related-grid" class="dc-carousel-track">
+          {% for product in products %}
+          {% include 'dockercart/template/product/product_card_widget.twig' with {
+            product: product,
+            accent_color: 'blue-600',
+            btn_cart_classes: 'bg-blue-600 text-white hover:bg-blue-700',
+            btn_quick_hover: 'hover:bg-blue-600'
+          } %}
+          {% endfor %}
+        </div>
+        <button type="button" class="dc-carousel-btn dc-carousel-next" aria-label="Next">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
       </div>
     </section>
     {% endif %}
@@ -510,19 +543,26 @@
           <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ text_upsell }}</h2>
         </div>
         {% if upsell_products|length > 4 %}
-        <a href="#" id="dc-upsell-view-all" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700">{{ text_view_all|default('View All →') }}</a>
+        <a href="#" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700">{{ text_view_all|default('View All →') }}</a>
         {% endif %}
       </div>
-      <div id="dc-upsell-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-        {% for product in upsell_products %}
-        {% include 'dockercart/template/product/product_card_widget.twig' with {
-          product: product,
-          accent_color: 'emerald-600',
-          btn_cart_classes: 'bg-emerald-600 text-white hover:bg-emerald-700',
-          btn_quick_hover: 'hover:bg-emerald-600',
-          card_extra: loop.index > 4 ? 'dc-upsell-extra hidden' : ''
-        } %}
-        {% endfor %}
+      <div class="dc-carousel">
+        <button type="button" class="dc-carousel-btn dc-carousel-prev" aria-label="Previous">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <div id="dc-upsell-grid" class="dc-carousel-track">
+          {% for product in upsell_products %}
+          {% include 'dockercart/template/product/product_card_widget.twig' with {
+            product: product,
+            accent_color: 'emerald-600',
+            btn_cart_classes: 'bg-emerald-600 text-white hover:bg-emerald-700',
+            btn_quick_hover: 'hover:bg-emerald-600'
+          } %}
+          {% endfor %}
+        </div>
+        <button type="button" class="dc-carousel-btn dc-carousel-next" aria-label="Next">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
       </div>
     </section>
     {% endif %}
@@ -535,19 +575,26 @@
           <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ text_accessory }}</h2>
         </div>
         {% if accessory_products|length > 4 %}
-        <a href="#" id="dc-accessory-view-all" class="text-sm font-semibold text-amber-600 hover:text-amber-700">{{ text_view_all|default('View All →') }}</a>
+        <a href="#" class="text-sm font-semibold text-amber-600 hover:text-amber-700">{{ text_view_all|default('View All →') }}</a>
         {% endif %}
       </div>
-      <div id="dc-accessory-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-        {% for product in accessory_products %}
-        {% include 'dockercart/template/product/product_card_widget.twig' with {
-          product: product,
-          accent_color: 'amber-600',
-          btn_cart_classes: 'bg-amber-600 text-white hover:bg-amber-700',
-          btn_quick_hover: 'hover:bg-amber-600',
-          card_extra: loop.index > 4 ? 'dc-accessory-extra hidden' : ''
-        } %}
-        {% endfor %}
+      <div class="dc-carousel">
+        <button type="button" class="dc-carousel-btn dc-carousel-prev" aria-label="Previous">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <div id="dc-accessory-grid" class="dc-carousel-track">
+          {% for product in accessory_products %}
+          {% include 'dockercart/template/product/product_card_widget.twig' with {
+            product: product,
+            accent_color: 'amber-600',
+            btn_cart_classes: 'bg-amber-600 text-white hover:bg-amber-700',
+            btn_quick_hover: 'hover:bg-amber-600'
+          } %}
+          {% endfor %}
+        </div>
+        <button type="button" class="dc-carousel-btn dc-carousel-next" aria-label="Next">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
       </div>
     </section>
     {% endif %}
@@ -843,38 +890,15 @@ document.addEventListener('DOMContentLoaded', function() {
   initTabs();
   dcUpdateSubtotal();
 
-  var relatedViewAll = document.getElementById('dc-related-view-all');
-  if (relatedViewAll) {
-    relatedViewAll.addEventListener('click', function(e) {
+  document.querySelectorAll('section').forEach(function(section) {
+    var track = section.querySelector('.dc-carousel-track');
+    var viewAll = section.querySelector('.flex a[href="#"]');
+    if (!track || !viewAll) return;
+    viewAll.addEventListener('click', function(e) {
       e.preventDefault();
-      document.querySelectorAll('.dc-related-extra').forEach(function(item) {
-        item.classList.remove('hidden');
-      });
-      relatedViewAll.style.display = 'none';
+      track.scrollTo({ left: track.scrollWidth, behavior: 'smooth' });
     });
-  }
-
-  var upsellViewAll = document.getElementById('dc-upsell-view-all');
-  if (upsellViewAll) {
-    upsellViewAll.addEventListener('click', function(e) {
-      e.preventDefault();
-      document.querySelectorAll('.dc-upsell-extra').forEach(function(item) {
-        item.classList.remove('hidden');
-      });
-      upsellViewAll.style.display = 'none';
-    });
-  }
-
-  var accessoryViewAll = document.getElementById('dc-accessory-view-all');
-  if (accessoryViewAll) {
-    accessoryViewAll.addEventListener('click', function(e) {
-      e.preventDefault();
-      document.querySelectorAll('.dc-accessory-extra').forEach(function(item) {
-        item.classList.remove('hidden');
-      });
-      accessoryViewAll.style.display = 'none';
-    });
-  }
+  });
 
   if (typeof lucide !== 'undefined') lucide.createIcons();
 });

@@ -891,3 +891,103 @@ body { padding-top: 0 !important; }
 /* ── Blog: читать статью → анимация стрелки ────────────────── */
 [data-lucide="arrow-right"]{transition:transform .2s ease}
 a:hover [data-lucide="arrow-right"]{transform:translateX(4px)}
+
+/* ── Product carousel ─────────────────────────────────────── */
+.dc-carousel {
+  position: relative;
+}
+
+.dc-carousel-track {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 8px;
+}
+
+.dc-carousel-track::-webkit-scrollbar {
+  height: 6px;
+}
+.dc-carousel-track::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+.dc-carousel-track::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+.dc-carousel-track::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.dc-carousel-track > * {
+  scroll-snap-align: start;
+  flex: 0 0 calc(50% - 0.5rem);
+}
+
+@media (min-width: 640px) {
+  .dc-carousel-track > * {
+    flex: 0 0 calc(33.333% - 0.667rem);
+  }
+}
+
+@media (min-width: 1024px) {
+  .dc-carousel-track > * {
+    flex: 0 0 calc(25% - 0.75rem);
+  }
+}
+
+@media (min-width: 1280px) {
+  .dc-carousel-track > * {
+    flex: 0 0 calc(20% - 0.8rem);
+  }
+}
+
+/* Carousel arrows */
+.dc-carousel-btn {
+  position: absolute;
+  top: 40%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #374151;
+}
+.dc-carousel-btn:hover {
+  background: #f9fafb;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: #d1d5db;
+}
+.dc-carousel-btn svg {
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+}
+
+.dc-carousel-prev {
+  left: -16px;
+}
+
+.dc-carousel-next {
+  right: -16px;
+}
+
+@media (max-width: 639px) {
+  .dc-carousel-btn {
+    display: none;
+  }
+  .dc-carousel-track {
+    gap: 0.75rem;
+  }
+}

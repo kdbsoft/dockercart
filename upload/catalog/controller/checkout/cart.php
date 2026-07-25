@@ -53,9 +53,14 @@ class ControllerCheckoutCart extends Controller {
 			$this->load->model('tool/image');
 			$this->load->model('tool/upload');
 
-			$data['products'] = array();
-
 			$products = $this->cart->getProducts();
+
+			// BXGY per-item discounts
+			$this->load->library('bxgy');
+			$bxgy_lib = new Bxgy($this->registry);
+			$bxgy_discounts = $bxgy_lib->getPerProductDiscounts($products);
+
+			$data['products'] = array();
 
 			foreach ($products as $product) {
 				$product_total = 0;
@@ -101,14 +106,30 @@ class ControllerCheckoutCart extends Controller {
 				if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
 					$unit_price = $this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax'));
 
-					$price = $this->currency->format($unit_price, $this->session->data['currency']);
-					$total = $this->currency->format($unit_price * $product['quantity'], $this->session->data['currency']);
+					$bxgy_key = (int) $product['product_id'];
+					$original_price = $price = $unit_price;
+					$original_total = $total = $unit_price * $product['quantity'];
+					$bxgy_original_price_fmt = false;
+					$bxgy_discount_text = '';
+
+					if (isset($bxgy_discounts[$bxgy_key])) {
+						$per_unit_discount = $bxgy_discounts[$bxgy_key]['discount_amount'];
+						$bxgy_original_price_fmt = $bxgy_discounts[$bxgy_key]['original_price_formatted'];
+						$bxgy_discount_text = $bxgy_discounts[$bxgy_key]['text'];
+						$price = max(0, $unit_price - $per_unit_discount);
+						$total = $price * $product['quantity'];
+					}
+
+					$price = $this->currency->format($price, $this->session->data['currency']);
+					$total = $this->currency->format($total, $this->session->data['currency']);
 				} else {
 					$price = false;
 					$total = false;
+					$bxgy_original_price_fmt = false;
+					$bxgy_discount_text = '';
 				}
 
-				$data['products'][] = array(
+				$product_data = array(
 					'cart_id'   => $product['cart_id'],
 					'thumb'     => $image,
 					'name'      => $product['name'],
@@ -124,6 +145,13 @@ class ControllerCheckoutCart extends Controller {
 					'total'     => $total,
 					'href'      => $this->url->link('product/product', 'product_id=' . $product['product_id'])
 				);
+
+				if ($bxgy_original_price_fmt) {
+					$product_data['bxgy_original_price'] = $bxgy_original_price_fmt;
+					$product_data['bxgy_discount_text'] = $bxgy_discount_text;
+				}
+
+				$data['products'][] = $product_data;
 			}
 
 			// Gift Voucher
