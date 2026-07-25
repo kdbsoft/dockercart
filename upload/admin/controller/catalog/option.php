@@ -388,6 +388,8 @@ class ControllerCatalogOption extends Controller {
 			$data['entity_name'] = $data['option_description'][$lang_id]['name'];
 		}
 
+		$data['admin_language_id'] = $lang_id;
+
 		if (isset($this->request->post['type'])) {
 			$data['type'] = $this->request->post['type'];
 		} elseif (!empty($option_info)) {
