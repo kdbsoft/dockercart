@@ -90,9 +90,9 @@
                   <td class="text-left">
                     <span class="inline-edit" data-category-id="{{ category.category_id }}" data-field="status" data-value="{{ category.status_raw }}">
                       {% if category.status %}
-                      <span class="page-header__badge page-header__badge--active">{{ text_enabled }}</span>
+                      <span class="label label-success">{{ text_enabled }}</span>
                       {% else %}
-                      <span class="page-header__badge page-header__badge--inactive">{{ text_disabled }}</span>
+                      <span class="label label-danger">{{ text_disabled }}</span>
                       {% endif %}
                       <i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>
                     </span>
