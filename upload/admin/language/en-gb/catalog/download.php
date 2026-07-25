@@ -16,6 +16,12 @@ $_['text_add_download_subtitle'] = 'Upload a new downloadable file';
 
 $_['text_edit_download_subtitle'] = 'Edit downloadable file settings';
 
+// Tab
+$_['tab_description']   = 'Description';
+
+// Sidebar cards
+$_['text_file_card']    = 'File';
+
 
 
 // Column

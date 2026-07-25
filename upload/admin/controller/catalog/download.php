@@ -395,6 +395,16 @@ class ControllerCatalogDownload extends Controller {
 			$data['download_description'] = array();
 		}
 
+		$data['download_name'] = '';
+
+		if (!empty($this->request->post['download_description'][$this->config->get('config_language_id')]['name'])) {
+			$data['download_name'] = $this->request->post['download_description'][$this->config->get('config_language_id')]['name'];
+		} elseif (!empty($download_info)) {
+			$lang_id = $this->config->get('config_language_id');
+			$descriptions = $this->model_catalog_download->getDownloadDescriptions($download_info['download_id']);
+			$data['download_name'] = isset($descriptions[$lang_id]['name']) ? $descriptions[$lang_id]['name'] : '';
+		}
+
 		if (isset($this->request->post['filename'])) {
 			$data['filename'] = $this->request->post['filename'];
 		} elseif (!empty($download_info)) {

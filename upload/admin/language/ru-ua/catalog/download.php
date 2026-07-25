@@ -30,4 +30,10 @@ $_['text_add_download_subtitle'] = 'Загрузить новый файл дл�
 
 $_['text_edit_download_subtitle'] = 'Редактировать настройки файла для скачивания';
 
+// Tab
+$_['tab_description'] = 'Описание';
+
+// Sidebar cards
+$_['text_file_card'] = 'Файл';
+
 
