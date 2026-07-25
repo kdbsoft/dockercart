@@ -1,0 +1,77 @@
+<div class="tile tile-neutral">
+  <div class="tile-heading">{{ heading_title }}
+    <select class="tile-period-select" data-widget="dockercart_repeat">
+      <option value="all">{{ text_all_time }}</option>
+      <option value="year">{{ text_year }}</option>
+      <option value="month">{{ text_month }}</option>
+      <option value="week">{{ text_week }}</option>
+      <option value="today">{{ text_today }}</option>
+    </select>
+  </div>
+  <div class="tile-body"><i data-lucide="refresh-cw" width="40" height="40"></i>
+    <canvas class="tile-sparkline"></canvas>
+    <div class="tile-body-right">
+      <h2 class="tile-total">—</h2>
+      <span class="tile-pct"></span>
+    </div>
+  </div>
+  <div class="tile-footer"><a href="{{ report }}">{{ text_view }}</a></div>
+</div>
+<script>
+(function() {
+  var key = 'dashboard_dc_repeat_period';
+  var $sel = $('.tile-period-select[data-widget="dockercart_repeat"]');
+  var $tile = $sel.closest('.tile');
+  var saved = localStorage.getItem(key) || 'month';
+  $sel.val(saved);
+
+  function drawSparkline(canvas, data) {
+    var ctx = canvas.getContext('2d');
+    canvas.width = canvas.offsetWidth * (window.devicePixelRatio || 1);
+    canvas.height = canvas.offsetHeight * (window.devicePixelRatio || 1);
+    ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+    var w = canvas.offsetWidth;
+    var h = canvas.offsetHeight;
+    ctx.clearRect(0, 0, w, h);
+    if (!data || data.length < 2) return;
+    var min = Math.min.apply(null, data);
+    var max = Math.max.apply(null, data);
+    var range = max - min || 1;
+    var step = w / (data.length - 1);
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    for (var i = 0; i < data.length; i++) {
+      var x = i * step;
+      var y = h - ((data[i] - min) / range) * (h - 6) - 3;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+
+  function loadWidget(period) {
+    localStorage.setItem(key, period);
+    $.getJSON('index.php?route=extension/dashboard/dockercart_repeat/ajax&user_token={{ user_token }}&period=' + period, function(json) {
+      $tile.find('.tile-total').text(json.total);
+      if (json.show_change) {
+        var icon = json.direction === 'up' ? 'arrow-up' : 'arrow-down';
+        $tile.find('.tile-pct').html('<i data-lucide="' + icon + '" width="24" height="24"></i> ' + json.percentage + '%');
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+            window.lucide.createIcons();
+        }
+      } else {
+        $tile.find('.tile-pct').empty();
+      }
+    });
+    $.getJSON('index.php?route=extension/dashboard/dockercart_repeat/sparkline&user_token={{ user_token }}&period=' + period, function(json) {
+      drawSparkline($tile.find('.tile-sparkline')[0], json.data);
+    });
+  }
+
+  loadWidget(saved);
+  $sel.on('change', function() { loadWidget($(this).val()); });
+})();
+</script>
