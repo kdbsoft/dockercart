@@ -304,11 +304,11 @@ class ControllerCatalogOption extends Controller {
 		$this->response->setOutput($this->load->view('catalog/option_list', $data));
 	}
 
-	protected function getForm() {
-		$data['text_form'] = !isset($this->request->get['option_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
-		$data['text_form_subtitle'] = !isset($this->request->get['option_id'])
-		    ? $this->language->get('text_add_option_subtitle')
-		    : $this->language->get('text_edit_option_subtitle');
+		protected function getForm() {
+			$data['text_form'] = $this->language->get('text_option');
+			$data['text_form_subtitle'] = !isset($this->request->get['option_id'])
+			    ? $this->language->get('text_add_option_subtitle')
+			    : $this->language->get('text_edit_option_subtitle');
 
 		if (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];
@@ -381,6 +381,12 @@ class ControllerCatalogOption extends Controller {
 		}
 
 		$data['option_description'] = $this->decodeDescriptionFields($data['option_description'], array('name'));
+
+		$data['entity_name'] = '';
+		$lang_id = (int)$this->config->get('config_language_id');
+		if (!empty($data['option_description'][$lang_id]['name'])) {
+			$data['entity_name'] = $data['option_description'][$lang_id]['name'];
+		}
 
 		if (isset($this->request->post['type'])) {
 			$data['type'] = $this->request->post['type'];

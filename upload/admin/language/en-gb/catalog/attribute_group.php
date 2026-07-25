@@ -13,7 +13,7 @@ $_['text_panel_attribute_group_title']    = 'Attribute Group';
 $_['text_panel_attribute_group_subtitle'] = 'Configure the attribute group name';
 
 // Sidebar
-$_['text_settings_card']     = 'Settings';
+$_['text_settings_card']     = 'Parameters';
 
 // Subtitle
 $_['text_list_subtitle'] = 'Group attributes for structured data';
