@@ -14,15 +14,23 @@
       </div>
     </div>
 
-    <div id="special-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-      {% for product in products %}
-        {% include 'dockercart/template/product/product_card_widget.twig' with {
-          product: product,
-          accent_color: 'red-600',
-          btn_cart_classes: 'bg-red-600 text-white hover:bg-red-700',
-          btn_quick_hover: 'hover:bg-red-600'
-        } %}
-      {% endfor %}
+    <div class="dc-carousel">
+      <button type="button" class="dc-carousel-btn dc-carousel-prev" aria-label="Previous">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <div id="special-grid" class="dc-carousel-track">
+        {% for product in products %}
+          {% include 'dockercart/template/product/product_card_widget.twig' with {
+            product: product,
+            accent_color: 'red-600',
+            btn_cart_classes: 'bg-red-600 text-white hover:bg-red-700',
+            btn_quick_hover: 'hover:bg-red-600'
+          } %}
+        {% endfor %}
+      </div>
+      <button type="button" class="dc-carousel-btn dc-carousel-next" aria-label="Next">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
     </div>
   </div>
 </section>

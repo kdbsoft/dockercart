@@ -966,7 +966,15 @@ class ControllerCatalogProduct extends Controller {
 		$data['text_promo_discount']       = $this->language->get('text_promo_discount');
 		$data['text_promo_special']        = $this->language->get('text_promo_special');
 		$data['text_promo_gift']           = $this->language->get('text_promo_gift');
+		$data['text_promo_bxgy']          = $this->language->get('text_promo_bxgy');
 		$data['button_promo_add']          = $this->language->get('button_promo_add');
+		$data['text_no_bxgy']             = $this->language->get('text_no_bxgy');
+		$data['entry_bxgy_reward_product']   = $this->language->get('entry_bxgy_reward_product');
+		$data['entry_bxgy_trigger_quantity'] = $this->language->get('entry_bxgy_trigger_quantity');
+		$data['entry_bxgy_discount_value']   = $this->language->get('entry_bxgy_discount_value');
+		$data['help_bxgy_reward_product']    = $this->language->get('help_bxgy_reward_product');
+		$data['help_bxgy_trigger_quantity']  = $this->language->get('help_bxgy_trigger_quantity');
+		$data['help_bxgy_discount_value']    = $this->language->get('help_bxgy_discount_value');
 
 		$data['text_panel_bundles_title']    = $this->language->get('text_panel_bundles_title');
 		$data['text_panel_bundles_subtitle'] = $this->language->get('text_panel_bundles_subtitle');
@@ -1606,6 +1614,30 @@ class ControllerCatalogProduct extends Controller {
 				'date_start'        => ($product_gift['date_start'] != '0000-00-00') ? $product_gift['date_start'] : '',
 				'date_end'          => ($product_gift['date_end'] != '0000-00-00') ? $product_gift['date_end'] : '',
 				'auto_renew'        => !empty($product_gift['auto_renew'])
+			);
+		}
+
+		if (isset($this->request->post['product_bxgy'])) {
+			$product_bxgy_rules = $this->request->post['product_bxgy'];
+		} elseif (isset($this->request->get['product_id'])) {
+			$product_bxgy_rules = $this->model_catalog_product->getProductBxgy($this->request->get['product_id']);
+		} else {
+			$product_bxgy_rules = array();
+		}
+
+		$data['product_bxgy_rules'] = array();
+
+		foreach ($product_bxgy_rules as $product_bxgy) {
+			$data['product_bxgy_rules'][] = array(
+				'product_bxgy_id'    => $product_bxgy['product_bxgy_id'] ?? 0,
+				'reward_product_id'  => $product_bxgy['reward_product_id'],
+				'reward_product_name' => $product_bxgy['reward_product_name'] ?? '',
+				'trigger_quantity'   => $product_bxgy['trigger_quantity'],
+				'discount_type'      => $product_bxgy['discount_type'],
+				'discount_value'     => $product_bxgy['discount_value'],
+				'date_start'         => ($product_bxgy['date_start'] != '0000-00-00') ? $product_bxgy['date_start'] : '',
+				'date_end'           => ($product_bxgy['date_end'] != '0000-00-00') ? $product_bxgy['date_end'] : '',
+				'auto_renew'         => !empty($product_bxgy['auto_renew'])
 			);
 		}
 

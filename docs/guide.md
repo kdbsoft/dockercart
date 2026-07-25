@@ -15,6 +15,7 @@
 9. [Core Updates](#9-core-updates)
 10. [Security](#10-security)
 11. [Configurable Products & Variants](#11-configurable-products--variants)
+12. [Buy X Get Y (BXGY)](#12-buy-x-get-y-bxgy)
 
 ---
 
@@ -633,3 +634,53 @@ Configurable products support per-variant special prices via the
   price is **lower** than the effective price (base variant price or B2B
   customer-group override).
 - The storefront product page and cart both apply variant specials.
+
+---
+
+## 12. Buy X Get Y (BXGY)
+
+BXGY promotions give customers a discount on a reward product when they buy a
+qualifying trigger product. Rules are configured per-product in the admin
+product edit form (Promotions section), similar to Gift Promotions.
+
+### Data Model
+
+Table `oc_product_bxgy`:
+
+| Column | Type | Description |
+|---|---|---|
+| `product_bxgy_id` | INT PK | Auto-increment |
+| `product_id` | INT | Trigger product (what the customer buys) |
+| `reward_product_id` | INT | Reward product (gets the discount) |
+| `trigger_quantity` | INT | How many trigger products to buy (default 1) |
+| `discount_type` | ENUM | `free` or `percentage` |
+| `discount_value` | DECIMAL | Discount value (0 for free, 50 for 50%) |
+| `date_start` | DATE | Start date (0000-00-00 = always) |
+| `date_end` | DATE | End date (0000-00-00 = always) |
+| `auto_renew` | TINYINT | Auto-renew when expired |
+
+### Calculation Logic
+
+Library: `system/library/bxgy.php`
+
+1. Collect all active BXGY rules for products currently in the cart.
+2. Count total trigger product quantities.
+3. For each reward product in the cart, find all applicable rules.
+4. Select the **best single rule** (highest discount) — rules do not stack on
+   the same reward product.
+5. Apply discount: `min qualifying, trigger_sets × price` for free, or
+   `min qualifying, trigger_sets × price × (value/100)` for percentage.
+
+### Cart Integration
+
+- `bxgy.php` library is loaded by `cart.php` controller.
+- Per-item BXGY discounts are passed to the cart and checkout templates.
+- Discounted items show: original price (strikethrough) + discounted price +
+  BXGY badge.
+- Total BXGY discount appears as a line in cart totals (via total extension).
+
+### Admin UI
+
+- Open product → Promotions section → Add Promotion → Buy X Get Y.
+- Each BXGY card has: Reward Product (autocomplete), Trigger Quantity,
+  Discount Type (Free/Percentage), Discount Value, Date Range, Auto-renew.

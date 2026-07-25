@@ -90,12 +90,28 @@
                   {% endif %}
                   {% if product.model %}<p class="text-xs text-gray-400 mt-0.5">{{ text_model }} {{ product.model }}</p>{% endif %}
                   {# Unit price – mobile #}
+                  {% if product.bxgy_original_price %}
+                  <div class="sm:hidden mt-1">
+                    <span class="text-xs text-red-400 line-through">{{ product.bxgy_original_price }}</span>
+                    <span class="text-sm font-semibold text-emerald-600">{{ product.price }}</span>
+                    <span class="text-[10px] text-emerald-500 font-bold">{{ product.bxgy_discount_text }}</span>
+                  </div>
+                  {% else %}
                   <p class="sm:hidden text-sm font-semibold text-gray-700 mt-1">{{ product.price }}</p>
+                  {% endif %}
                 </div>
 
                 {# Unit price – desktop #}
                 <div class="hidden sm:block w-24 text-right">
+                  {% if product.bxgy_original_price %}
+                  <div>
+                    <span class="text-xs text-red-400 line-through">{{ product.bxgy_original_price }}</span><br/>
+                    <span class="text-sm font-semibold text-emerald-600">{{ product.price }}</span>
+                    <span class="text-[10px] text-emerald-500 font-bold">{{ product.bxgy_discount_text }}</span>
+                  </div>
+                  {% else %}
                   <span class="text-sm font-semibold text-gray-700">{{ product.price }}</span>
+                  {% endif %}
                 </div>
 
                 {# Quantity input #}

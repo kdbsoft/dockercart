@@ -579,6 +579,48 @@ class ControllerProductProduct extends Controller {
 			$data['text_gift'] = $this->language->get('text_gift');
 			$data['text_gift_minimum'] = $this->language->get('text_gift_minimum');
 
+			// BXGY rules for this product (as trigger)
+			$bxgy_rules = $this->model_catalog_product->getProductBxgy($product_id);
+			$data['bxgy_rules'] = array();
+
+			foreach ($bxgy_rules as $rule) {
+				$reward_info = $this->model_catalog_product->getProduct($rule['reward_product_id']);
+
+				if (!$reward_info) {
+					continue;
+				}
+
+				if ($reward_info['image']) {
+					$reward_image = $this->model_tool_image->resize($reward_info['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_height'));
+				} else {
+					$reward_image = $this->model_tool_image->resize('placeholder.png', $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_height'));
+				}
+
+				$original_price = (float)$reward_info['price'];
+
+				if ($rule['discount_type'] === 'free') {
+					$discounted_price = 0;
+					$discount_text = $this->language->get('text_free');
+				} else {
+					$discounted_price = $original_price * (1 - (float)$rule['discount_value'] / 100);
+					$discount_text = '-' . (int)$rule['discount_value'] . '%';
+				}
+
+				$data['bxgy_rules'][] = array(
+					'reward_product_id' => $rule['reward_product_id'],
+					'name'              => $reward_info['name'],
+					'image'             => $reward_image,
+					'original_price'    => $this->currency->format($this->tax->calculate($original_price, $reward_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']),
+					'discounted_price'  => $this->currency->format($this->tax->calculate($discounted_price, $reward_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']),
+					'discount_text'     => $discount_text,
+					'trigger_quantity'  => (int)$rule['trigger_quantity'],
+					'href'              => $this->url->link('product/product', 'product_id=' . $rule['reward_product_id']),
+				);
+			}
+
+			$data['text_bxgy'] = $this->language->get('text_bxgy');
+			$data['text_bxgy_discount'] = $this->language->get('text_bxgy_discount');
+
 			$data['options'] = array();
 
 			foreach ($this->model_catalog_product->getProductOptions($product_id) as $option) {

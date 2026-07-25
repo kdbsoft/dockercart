@@ -820,6 +820,7 @@
                     {% set discount_row = 0 %}
                     {% set special_row = 0 %}
                     {% set gift_row = 0 %}
+                    {% set bxgy_row = 0 %}
                     {% set bundle_row = 0 %}
 
                     {% for product_discount in product_discounts %}
@@ -970,6 +971,52 @@
                     {% set gift_row = gift_row + 1 %}
                     {% endfor %}
 
+                    {% for product_bxgy in product_bxgy_rules %}
+                      {% set promo_has_cards = true %}
+                    <div class="dc-promo-card" id="bxgy-row{{ bxgy_row }}">
+                      <div class="dc-promo-card__actions">
+                        <label class="dc-promo-card__toggle">
+                          <input type="checkbox" name="product_bxgy[{{ bxgy_row }}][auto_renew]" value="1" class="auto-renew-cb" {% if product_bxgy.auto_renew %}checked{% endif %} />
+                          <span>{{ entry_auto_renew }}</span>
+                        </label>
+                        <button type="button" onclick="removePromoCard('bxgy-row{{ bxgy_row }}')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
+                      </div>
+                      <span class="dc-promo-badge dc-promo-badge--bxgy">{{ text_promo_bxgy }}</span>
+                      <div class="dc-promo-card__grid">
+                        <div class="dc-promo-card__field dc-promo-card__field--wide">
+                          <label>{{ entry_bxgy_reward_product }}</label>
+                          <div style="position:relative;">
+                            <input type="text" name="product_bxgy[{{ bxgy_row }}][reward_product_name]" value="{{ product_bxgy.reward_product_name }}" placeholder="{{ entry_bxgy_reward_product }}" class="form-control" autocomplete="off"/>
+                            <input type="hidden" name="product_bxgy[{{ bxgy_row }}][reward_product_id]" value="{{ product_bxgy.reward_product_id }}"/>
+                          </div>
+                        </div>
+                        <div class="dc-promo-card__field">
+                          <label>{{ entry_bxgy_trigger_quantity }}</label>
+                          <input type="text" name="product_bxgy[{{ bxgy_row }}][trigger_quantity]" value="{{ product_bxgy.trigger_quantity }}" placeholder="{{ entry_bxgy_trigger_quantity }}" class="form-control"/>
+                        </div>
+                        <div class="dc-promo-card__field">
+                          <label>{{ entry_bxgy_discount_value }}</label>
+                          <input type="text" name="product_bxgy[{{ bxgy_row }}][discount_value]" value="{{ product_bxgy.discount_value }}" placeholder="{{ entry_bxgy_discount_value }}" class="form-control"/>
+                        </div>
+                        <div class="dc-promo-card__field">
+                          <label>{{ entry_date_start }}</label>
+                          <div class="input-group date">
+                            <input type="text" name="product_bxgy[{{ bxgy_row }}][date_start]" value="{{ product_bxgy.date_start }}" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" class="form-control"/>
+                            <span class="input-group-btn"><button class="btn btn-default" type="button"><i data-lucide="calendar" width="14" height="14"></i></button></span>
+                          </div>
+                        </div>
+                        <div class="dc-promo-card__field">
+                          <label>{{ entry_date_end }}</label>
+                          <div class="input-group date">
+                            <input type="text" name="product_bxgy[{{ bxgy_row }}][date_end]" value="{{ product_bxgy.date_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" class="form-control"/>
+                            <span class="input-group-btn"><button class="btn btn-default" type="button"><i data-lucide="calendar" width="14" height="14"></i></button></span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    {% set bxgy_row = bxgy_row + 1 %}
+                    {% endfor %}
+
                     {% for product_bundle in product_bundles %}
                       {% set promo_has_cards = true %}
                     <div class="dc-promo-card dc-promo-card--bundle" id="bundle-row{{ bundle_row }}">
@@ -1035,6 +1082,7 @@
                         <a href="javascript:void(0)" onclick="addPromoCard('discount');$('#promo-add-dropdown').hide();" style="display:block;padding:8px 14px;font-size:13px;color:var(--dc-text-dark);text-decoration:none;"><span class="dc-promo-badge dc-promo-badge--discount" style="margin-right:6px;">{{ text_promo_discount }}</span></a>
                         <a href="javascript:void(0)" onclick="addPromoCard('special');$('#promo-add-dropdown').hide();" style="display:block;padding:8px 14px;font-size:13px;color:var(--dc-text-dark);text-decoration:none;"><span class="dc-promo-badge dc-promo-badge--special" style="margin-right:6px;">{{ text_promo_special }}</span></a>
                         <a href="javascript:void(0)" onclick="addPromoCard('gift');$('#promo-add-dropdown').hide();" style="display:block;padding:8px 14px;font-size:13px;color:var(--dc-text-dark);text-decoration:none;"><span class="dc-promo-badge dc-promo-badge--gift" style="margin-right:6px;">{{ text_promo_gift }}</span></a>
+                        <a href="javascript:void(0)" onclick="addPromoCard('bxgy');$('#promo-add-dropdown').hide();" style="display:block;padding:8px 14px;font-size:13px;color:var(--dc-text-dark);text-decoration:none;"><span class="dc-promo-badge dc-promo-badge--bxgy" style="margin-right:6px;">{{ text_promo_bxgy }}</span></a>
                         <a href="javascript:void(0)" onclick="addPromoCard('bundle');$('#promo-add-dropdown').hide();" style="display:block;padding:8px 14px;font-size:13px;color:var(--dc-text-dark);text-decoration:none;"><span class="dc-promo-badge dc-promo-badge--bundle" style="margin-right:6px;">{{ text_promo_bundle }}</span></a>
                       </div>
                     </div>
@@ -1951,6 +1999,7 @@
 	  if (type === 'discount') addDiscount();
 	  else if (type === 'special') addSpecial();
 	  else if (type === 'gift') addGift();
+	  else if (type === 'bxgy') addBxgy();
 	  else if (type === 'bundle') addBundle();
 	  $('#promo-add-dropdown').hide();
   }
@@ -2130,6 +2179,90 @@
 	  var match = $(this).attr('name').match(/\[(\d+)\]/);
 	  if (match) {
 		  giftAutocomplete(match[1]);
+	  }
+  });
+
+  var bxgy_row = {{ bxgy_row }};
+
+  function addBxgy() {
+	  $('#promo-empty').hide();
+	  var html = '<div class="dc-promo-card" id="bxgy-row' + bxgy_row + '">';
+	  html += '  <div class="dc-promo-card__actions">';
+	  html += '    <label class="dc-promo-card__toggle"><input type="checkbox" name="product_bxgy[' + bxgy_row + '][auto_renew]" value="1" class="auto-renew-cb" /><span>{{ entry_auto_renew }}</span></label>';
+	  html += '    <button type="button" onclick="removePromoCard(\'bxgy-row' + bxgy_row + '\')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>';
+	  html += '  </div>';
+	  html += '  <span class="dc-promo-badge dc-promo-badge--bxgy">{{ text_promo_bxgy }}</span>';
+	  html += '  <div class="dc-promo-card__grid">';
+	  html += '    <div class="dc-promo-card__field dc-promo-card__field--wide">';
+	  html += '      <label>{{ entry_bxgy_reward_product }}</label>';
+	  html += '      <div style="position:relative;">';
+	  html += '        <input type="text" name="product_bxgy[' + bxgy_row + '][reward_product_name]" value="" placeholder="{{ entry_bxgy_reward_product }}" class="form-control" autocomplete="off" />';
+	  html += '        <input type="hidden" name="product_bxgy[' + bxgy_row + '][reward_product_id]" value="" />';
+	  html += '      </div>';
+	  html += '    </div>';
+	  html += '    <div class="dc-promo-card__field">';
+	  html += '      <label>{{ entry_bxgy_trigger_quantity }}</label>';
+	  html += '      <input type="text" name="product_bxgy[' + bxgy_row + '][trigger_quantity]" value="1" placeholder="{{ entry_bxgy_trigger_quantity }}" class="form-control" />';
+	  html += '    </div>';
+	  html += '    <div class="dc-promo-card__field">';
+	  html += '      <label>{{ entry_bxgy_discount_value }}</label>';
+	  html += '      <input type="text" name="product_bxgy[' + bxgy_row + '][discount_value]" value="" placeholder="{{ entry_bxgy_discount_value }}" class="form-control" />';
+	  html += '    </div>';
+	  html += '    <div class="dc-promo-card__field">';
+	  html += '      <label>{{ entry_date_start }}</label>';
+	  html += '      <div class="input-group date"><input type="text" name="product_bxgy[' + bxgy_row + '][date_start]" value="" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button></span></div>';
+	  html += '    </div>';
+	  html += '    <div class="dc-promo-card__field">';
+	  html += '      <label>{{ entry_date_end }}</label>';
+	  html += '      <div class="input-group date"><input type="text" name="product_bxgy[' + bxgy_row + '][date_end]" value="" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button></span></div>';
+	  html += '    </div>';
+	  html += '  </div>';
+	  html += '</div>';
+
+	  $('#promo-container').append(html);
+	  lucide.createIcons();
+	  bxgyAutocomplete(bxgy_row);
+	  $('.date').datetimepicker({ language: '{{ datepicker }}', pickTime: false });
+	  bxgy_row++;
+  }
+
+  function bxgyAutocomplete(bxgy_row) {
+	  var $input = $('input[name=\'product_bxgy[' + bxgy_row + '][reward_product_name]\']');
+	  var $idInput = $('input[name=\'product_bxgy[' + bxgy_row + '][reward_product_id]\']');
+
+	  $input.autocomplete({
+		  'source': function(request, response) {
+			  $.ajax({
+				  url: 'index.php?route=catalog/product/autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+				  dataType: 'json',
+				  success: function(json) {
+					  response($.map(json, function(item) {
+						  return {
+							  label: item['name'],
+							  value: item['product_id']
+						  }
+					  }));
+				  }
+			  });
+		  },
+		  'select': function(item) {
+			  $input.val(item['label']);
+			  $idInput.val(item['value']);
+		  }
+	  });
+
+	  $input.on('input change', function() {
+		  if ($(this).val() === '') {
+			  $idInput.val('');
+		  }
+	  });
+  }
+
+  $('#promo-container').on('focus', 'input[name$="[reward_product_name]"]', function() {
+	  if ($(this).closest('.dc-autocomplete-wrap').length) return;
+	  var match = $(this).attr('name').match(/\[(\d+)\]/);
+	  if (match) {
+		  bxgyAutocomplete(match[1]);
 	  }
   });
 

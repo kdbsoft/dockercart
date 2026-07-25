@@ -379,6 +379,32 @@ class ModelCatalogProduct extends Model
             }
         }
 
+        if (isset($data["product_bxgy"])) {
+            foreach ($data["product_bxgy"] as $product_bxgy) {
+                $this->db->query(
+                    "INSERT INTO " .
+                        DB_PREFIX .
+                        "product_bxgy SET product_id = '" .
+                        (int) $product_id .
+                        "', reward_product_id = '" .
+                        (int) $product_bxgy["reward_product_id"] .
+                        "', trigger_quantity = '" .
+                        (int) $product_bxgy["trigger_quantity"] .
+                        "', discount_type = '" .
+                        "percentage" .
+                        "', discount_value = '" .
+                        (float) $product_bxgy["discount_value"] .
+                        "', date_start = '" .
+                        $this->db->escape($product_bxgy["date_start"]) .
+                        "', date_end = '" .
+                        $this->db->escape($product_bxgy["date_end"]) .
+                        "', auto_renew = '" .
+                        (int) (!empty($product_bxgy["auto_renew"])) .
+                        "'",
+                );
+            }
+        }
+
         if (isset($data["product_customer_group_price"])) {
             foreach (
                 $data["product_customer_group_price"]
@@ -767,6 +793,40 @@ class ModelCatalogProduct extends Model
                         $this->db->escape($product_gift["date_end"]) .
                         "', auto_renew = '" .
                         (int) (!empty($product_gift["auto_renew"])) .
+                        "'",
+                );
+            }
+        }
+
+        $this->db->query(
+            "DELETE FROM " .
+                DB_PREFIX .
+                "product_bxgy WHERE product_id = '" .
+                (int) $product_id .
+                "'",
+        );
+
+        if (isset($data["product_bxgy"])) {
+            foreach ($data["product_bxgy"] as $product_bxgy) {
+                $this->db->query(
+                    "INSERT INTO " .
+                        DB_PREFIX .
+                        "product_bxgy SET product_id = '" .
+                        (int) $product_id .
+                        "', reward_product_id = '" .
+                        (int) $product_bxgy["reward_product_id"] .
+                        "', trigger_quantity = '" .
+                        (int) $product_bxgy["trigger_quantity"] .
+                        "', discount_type = '" .
+                        "percentage" .
+                        "', discount_value = '" .
+                        (float) $product_bxgy["discount_value"] .
+                        "', date_start = '" .
+                        $this->db->escape($product_bxgy["date_start"]) .
+                        "', date_end = '" .
+                        $this->db->escape($product_bxgy["date_end"]) .
+                        "', auto_renew = '" .
+                        (int) (!empty($product_bxgy["auto_renew"])) .
                         "'",
                 );
             }
@@ -1526,6 +1586,40 @@ class ModelCatalogProduct extends Model
         $this->db->query(
             "DELETE FROM " .
                 DB_PREFIX .
+                "product_bxgy WHERE product_id = '" .
+                (int) $product_id .
+                "'",
+        );
+
+        if (isset($data["product_bxgy"])) {
+            foreach ($data["product_bxgy"] as $product_bxgy) {
+                $this->db->query(
+                    "INSERT INTO " .
+                        DB_PREFIX .
+                        "product_bxgy SET product_id = '" .
+                        (int) $product_id .
+                        "', reward_product_id = '" .
+                        (int) $product_bxgy["reward_product_id"] .
+                        "', trigger_quantity = '" .
+                        (int) $product_bxgy["trigger_quantity"] .
+                        "', discount_type = '" .
+                        "percentage" .
+                        "', discount_value = '" .
+                        (float) $product_bxgy["discount_value"] .
+                        "', date_start = '" .
+                        $this->db->escape($product_bxgy["date_start"]) .
+                        "', date_end = '" .
+                        $this->db->escape($product_bxgy["date_end"]) .
+                        "', auto_renew = '" .
+                        (int) (!empty($product_bxgy["auto_renew"])) .
+                        "'",
+                );
+            }
+        }
+
+        $this->db->query(
+            "DELETE FROM " .
+                DB_PREFIX .
                 "dockercart_product_customer_group_price WHERE product_id = '" .
                 (int) $product_id .
                 "'",
@@ -1891,6 +1985,7 @@ class ModelCatalogProduct extends Model
             $data["product_reward"] = $this->getProductRewards($product_id);
             $data["product_special"] = $this->getProductSpecials($product_id);
             $data["product_gift"] = $this->getProductGifts($product_id);
+            $data["product_bxgy"] = $this->getProductBxgy($product_id);
             $data["product_category"] = $this->getProductCategories(
                 $product_id,
             );
@@ -2092,6 +2187,13 @@ class ModelCatalogProduct extends Model
             "DELETE FROM " .
                 DB_PREFIX .
                 "product_gift WHERE product_id = '" .
+                (int) $product_id .
+                "'",
+        );
+        $this->db->query(
+            "DELETE FROM " .
+                DB_PREFIX .
+                "product_bxgy WHERE product_id = '" .
                 (int) $product_id .
                 "'",
         );
@@ -2620,6 +2722,23 @@ class ModelCatalogProduct extends Model
                 "') WHERE g.product_id = '" .
                 (int) $product_id .
                 "' ORDER BY g.minimum_quantity ASC",
+        );
+
+        return $query->rows;
+    }
+
+    public function getProductBxgy($product_id)
+    {
+        $query = $this->db->query(
+            "SELECT bx.*, pd.name AS reward_product_name FROM " .
+                DB_PREFIX .
+                "product_bxgy bx LEFT JOIN " .
+                DB_PREFIX .
+                "product_description pd ON (bx.reward_product_id = pd.product_id AND pd.language_id = '" .
+                (int) $this->config->get('config_language_id') .
+                "') WHERE bx.product_id = '" .
+                (int) $product_id .
+                "' ORDER BY bx.trigger_quantity ASC",
         );
 
         return $query->rows;

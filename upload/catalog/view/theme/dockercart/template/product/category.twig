@@ -162,7 +162,7 @@
               btn_cart_classes: 'bg-blue-600 text-white hover:bg-blue-700'
             } %}
             {% if category_banner and banner_position == loop.index %}
-            <div class="col-span-2 sm:col-span-3 xl:col-span-4 h-48 lg:h-64 rounded-2xl overflow-hidden shadow-sm bg-gray-100">
+            <div class="product-card bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300">
               {% if category_banner.link %}<a href="{{ category_banner.link }}" class="block w-full h-full">{% endif %}
                 <img src="{{ category_banner.image }}" alt="" class="w-full h-full object-cover" loading="lazy" />
               {% if category_banner.link %}</a>{% endif %}

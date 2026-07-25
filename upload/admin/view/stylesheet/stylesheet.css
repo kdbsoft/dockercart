@@ -1095,7 +1095,7 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
 
 .tile-neutral {
     background: var(--dc-surface);
-    color: var(--dc-text-dark);
+    color: var(--dc-text);
     border: 1px solid var(--dc-border);
 }
 
@@ -1117,7 +1117,7 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
 .tile-neutral .tile-period-select {
     background: var(--dc-surface);
     border: 1px solid var(--dc-border-medium);
-    color: var(--dc-text-dark);
+    color: var(--dc-text);
 }
 
 .tile-neutral .tile-period-select:hover {
@@ -1127,6 +1127,10 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
 .tile-neutral .tile-period-select option {
     background: var(--dc-surface);
     color: var(--dc-text-dark);
+}
+
+.tile-neutral .tile-body {
+    color: var(--dc-text);
 }
 
 .tile-heading {
@@ -1174,6 +1178,7 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
     display: flex;
     align-items: baseline;
     gap: 8px;
+    flex-shrink: 0;
 }
 
 .tile-body-right h2 {
@@ -1199,7 +1204,8 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
 }
 
 .tile-sparkline {
-    width: 120px;
+    flex: 1;
+    min-width: 120px;
     height: 36px;
     margin: 0 12px;
     display: block;

@@ -7617,6 +7617,40 @@ COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
+-- Table structure for table `oc_product_bxgy`
+--
+
+DROP TABLE IF EXISTS `oc_product_bxgy`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_product_bxgy` (
+  `product_bxgy_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_id` int(11) NOT NULL,
+  `reward_product_id` int(11) NOT NULL,
+  `trigger_quantity` int(11) NOT NULL DEFAULT 1,
+  `discount_type` enum('free','percentage') NOT NULL DEFAULT 'free',
+  `discount_value` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `date_start` date NOT NULL DEFAULT '0000-00-00',
+  `date_end` date NOT NULL DEFAULT '0000-00-00',
+  `auto_renew` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`product_bxgy_id`),
+  KEY `product_id` (`product_id`),
+  KEY `reward_product_id` (`reward_product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_product_bxgy`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_product_bxgy` WRITE;
+/*!40000 ALTER TABLE `oc_product_bxgy` DISABLE KEYS */;
+/*!40000 ALTER TABLE `oc_product_bxgy` ENABLE KEYS */;
+UNLOCK TABLES;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
 -- Table structure for table `oc_product_image`
 --
 
