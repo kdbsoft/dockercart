@@ -382,6 +382,12 @@ class ControllerCatalogAttributeGroup extends Controller {
 
 		$data['attribute_group_description'] = $this->decodeDescriptionFields($data['attribute_group_description'], array('name'));
 
+		$data['entity_name'] = '';
+		$lang_id = (int)$this->config->get('config_language_id');
+		if (!empty($data['attribute_group_description'][$lang_id]['name'])) {
+			$data['entity_name'] = $data['attribute_group_description'][$lang_id]['name'];
+		}
+
 		if (isset($this->request->post['sort_order'])) {
 			$data['sort_order'] = $this->request->post['sort_order'];
 		} elseif (!empty($attribute_group_info)) {

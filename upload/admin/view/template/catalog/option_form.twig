@@ -8,7 +8,18 @@
             <button type="submit" form="form-option" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary btn--icon"><i data-lucide="save" width="16" height="16"></i></button>
             <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default btn--icon"><i data-lucide="x" width="16" height="16"></i></a>
           </div>
-          <h1 class="page-header__title">{{ text_form }}</h1>
+          <a href="{{ cancel }}" class="page-header__link">
+            <span class="page-header__back">
+              <i data-lucide="arrow-left" width="20" height="20"></i>
+            </span>
+            <span class="page-header__title">
+              {% if entity_name %}
+                {{ entity_name }}
+              {% else %}
+                {{ text_option }}
+              {% endif %}
+            </span>
+          </a>
         </div>
       </div>
       {% if error_warning %}
@@ -29,7 +40,7 @@
           <div class="dcx-shell">
             <div class="dcx-panel">
               <div class="dcx-panel-head">
-                <div class="dcx-panel-head__icon"><i data-lucide="sliders" width="18" height="18"></i></div>
+                <div class="dcx-panel-head__icon"><i data-lucide="package" width="18" height="18"></i></div>
                 <div>
                   <div class="dcx-panel-title">{{ text_form }}</div>
                 </div>
@@ -62,7 +73,7 @@
         <div class="col-md-12 col-sm-12 col-lg-4 col-xl-3">
           <div class="dcx-sidebar-card">
             <div class="dcx-sidebar-card__header">
-              <div class="dcx-sidebar-card__header-icon"><i data-lucide="settings" width="16" height="16"></i></div>
+              <div class="dcx-sidebar-card__header-icon"><i data-lucide="sliders" width="16" height="16"></i></div>
               <h3 class="dcx-sidebar-card__title">{{ text_settings_card }}</h3>
             </div>
             <div class="dcx-sidebar-card__body">
@@ -137,6 +148,8 @@
           </div>
         </div>
       </div>
+      {% set option_value_row = 0 %}
+      {% if option_values|length > 0 or type in ['select', 'radio', 'checkbox', 'image', 'color'] %}
       <div class="row">
         <div class="col-md-12 col-sm-12 col-lg-offset-1 col-lg-7 col-xl-offset-1 col-xl-7">
           <div class="dcx-shell">
@@ -148,66 +161,70 @@
                 </div>
               </div>
               <div class="dcx-panel-body">
-                <table id="option-value" class="table table-bordered table-striped table-hover">
-                  <thead>
-                    <tr>
-                      <td class="text-left required">{{ entry_option_value }}</td>
-                      <td class="text-center dc-color-col">{{ entry_color }}</td>
-                      <td class="text-right">{{ entry_sort_order }}</td>
-                      <td></td>
-                    </tr>
-                  </thead>
-                  <tbody>
-
-                  {% set option_value_row = 0 %}
+                <div class="dc-opt-cards" id="option-values-cards">
                   {% for option_value in option_values %}
-                  <tr id="option-value-row{{ option_value_row }}">
-                      <td class="text-center"><input type="hidden" name="option_value[{{ option_value_row }}][option_value_id]" value="{{ option_value.option_value_id }}" />
-                      <div class="attribute-texts">
-                      {% for language in languages %}
-                      <div class="input-group attribute-text-group"><span class="input-group-addon"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span></span>
-                        <input type="text" name="option_value[{{ option_value_row }}][option_value_description][{{ language.language_id }}][name]" value="{{ (option_value.option_value_description[language.language_id] ? option_value.option_value_description[language.language_id].name)|e('html_attr') }}" placeholder="{{ entry_option_value }}" class="form-control" />
+                  <div class="dc-opt-card" id="option-value-row{{ option_value_row }}">
+                    <div class="dc-opt-card__header">
+                      <span class="dc-opt-card__handle" title="{{ text_drag_to_reorder|default('Drag to reorder') }}">
+                        <i data-lucide="grip-vertical" width="14" height="14" class="slide-drag-handle"></i>
+                      </span>
+                      <span class="dc-opt-card__title">
+                        {% for language in languages %}
+                          {% set ov_name = option_value.option_value_description[language.language_id] ? option_value.option_value_description[language.language_id].name : '' %}
+                          {% if ov_name %}{{ ov_name }}{% endif %}
+                        {% endfor %}
+                      </span>
+                      <button type="button" onclick="$('#option-value-row{{ option_value_row }}').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger btn-xs dc-opt-card__remove"><i data-lucide="minus-circle" width="14" height="14"></i></button>
+                    </div>
+                    <div class="dc-opt-card__body">
+                      <input type="hidden" name="option_value[{{ option_value_row }}][option_value_id]" value="{{ option_value.option_value_id }}" />
+                      <div class="dc-opt-card__field">
+                        <div class="dc-opt-card__languages" style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
+                        {% for language in languages %}
+                          <div class="dc-opt-card__lang-row">
+                            <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                            <input type="text" name="option_value[{{ option_value_row }}][option_value_description][{{ language.language_id }}][name]" value="{{ (option_value.option_value_description[language.language_id] ? option_value.option_value_description[language.language_id].name)|e('html_attr') }}" placeholder="{{ entry_option_value }}" class="form-control" />
+                          </div>
+                        {% endfor %}
+                        {% for language in languages %}
+                          {% if error_option_value[option_value_row][language.language_id] %}
+                          <div class="text-danger">{{ error_option_value[option_value_row][language.language_id] }}</div>
+                          {% endif %}
+                        {% endfor %}
+                        </div>
                       </div>
-                      {% endfor %}
+                      {% if type == 'color' %}
+                      <div class="dc-opt-card__field dc-color-col">
+                        <label>{{ entry_color }}</label>
+                        <input type="color" name="option_value[{{ option_value_row }}][color_code]" value="{{ option_value.color_code }}" class="form-control" style="width:50px;height:34px;padding:2px;cursor:pointer;" />
                       </div>
-                      {% for language in languages %}
-                      {% if error_option_value[option_value_row][language.language_id] %}
-                      <div class="text-danger">{{ error_option_value[option_value_row][language.language_id] }}</div>
                       {% endif %}
-                      {% endfor %}</td>
-                    <td class="text-center dc-color-col"><input type="color" name="option_value[{{ option_value_row }}][color_code]" value="{{ option_value.color_code }}" class="form-control" style="width:50px;height:34px;padding:2px;margin:0 auto;cursor:pointer;" /></td>
-                    <td class="text-right"><input type="text" name="option_value[{{ option_value_row }}][sort_order]" value="{{ option_value.sort_order }}" class="form-control" /></td>
-                    <td class="text-right"><button type="button" onclick="$('#option-value-row{{ option_value_row }}').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger btn--icon"><i data-lucide="minus-circle" width="14" height="14"></i></button></td>
-                  </tr>
+                    </div>
+                  </div>
                   {% set option_value_row = option_value_row + 1 %}
                   {% endfor %}
-                    </tbody>
-
-                  <tfoot>
-                    <tr>
-                      <td colspan="3"></td>
-                      <td class="text-right"><button type="button" onclick="addOptionValue();" data-toggle="tooltip" title="{{ button_option_value_add }}" class="btn btn-primary btn--icon"><i data-lucide="plus-circle" width="16" height="16"></i></button></td>
-                    </tr>
-                  </tfoot>
-                </table>
+                </div>
+                <div class="dc-opt-actions">
+                  <button type="button" onclick="addOptionValue();" data-toggle="tooltip" title="{{ button_option_value_add }}" class="btn btn-primary btn-sm"><i data-lucide="plus-circle" width="16" height="16"></i> {{ button_option_value_add }}</button>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+      {% endif %}
     </form>
   </div>
 </div>
+<script type="text/javascript" src="view/javascript/sortablejs/Sortable.min.js"></script>
 <script type="text/javascript"><!--
 $('#language a:first').tab('show');
 $('select[name=\'type\']').on('change', function() {
 	var showValues = this.value == 'select' || this.value == 'radio' || this.value == 'checkbox' || this.value == 'image' || this.value == 'color';
 	var showColor = this.value == 'color';
 
-	$('#option-value').toggle(showValues);
-
+	$('#option-values-cards').closest('.dcx-panel').toggle(showValues);
 	$('.dc-color-col').toggle(showColor);
-	$('#option-value tfoot tr td:first').attr('colspan', showColor ? 3 : 2);
 });
 
 $('select[name=\'type\']').trigger('change');
@@ -216,25 +233,66 @@ var option_value_row = {{ option_value_row }};
 
 function addOptionValue() {
 	var currentType = $('select[name="type"]').val();
-	html  = '<tr id="option-value-row' + option_value_row + '">';
-	html += '  <td class="text-left"><input type="hidden" name="option_value[' + option_value_row + '][option_value_id]" value="" />';
-	html += '  <div class="attribute-texts">';
+	html  = '<div class="dc-opt-card" id="option-value-row' + option_value_row + '">';
+	html += '  <div class="dc-opt-card__header">';
+	html += '    <span class="dc-opt-card__handle"><i data-lucide="grip-vertical" width="14" height="14" class="slide-drag-handle"></i></span>';
+	html += '    <span class="dc-opt-card__title">{{ entry_option_value }}</span>';
+	html += '    <button type="button" class="btn btn-danger btn-xs dc-opt-card__remove" onclick="$(\'#option-value-row' + option_value_row + '\').remove();">';
+	html += '      <i data-lucide="minus-circle" width="14" height="14"></i></button>';
+	html += '  </div>';
+	html += '  <div class="dc-opt-card__body">';
+	html += '    <input type="hidden" name="option_value[' + option_value_row + '][option_value_id]" value="" />';
+	html += '    <div class="dc-opt-card__field">';
+	html += '      <div class="dc-opt-card__languages" style="flex: 1; display: flex; flex-direction: column; gap: 6px;">';
 	{% for language in languages %}
-	html += '    <div class="input-group attribute-text-group">';
-	html += '      <span class="input-group-addon"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span></span><input type="text" name="option_value[' + option_value_row + '][option_value_description][{{ language.language_id }}][name]" value="" placeholder="{{ entry_option_value }}" class="form-control" />';
-    html += '    </div>';
+	html += '        <div class="dc-opt-card__lang-row">';
+	html += '          <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>';
+	html += '          <input type="text" name="option_value[' + option_value_row + '][option_value_description][{{ language.language_id }}][name]" value="" placeholder="{{ entry_option_value }}" class="form-control" />';
+	html += '        </div>';
 	{% endfor %}
-	html += '  </div></td>';
+	html += '      </div>';
+	html += '    </div>';
 	if (currentType === 'color') {
-		html += '  <td class="text-center dc-color-col"><input type="color" name="option_value[' + option_value_row + '][color_code]" value="" class="form-control" style="width:50px;height:34px;padding:2px;margin:0 auto;cursor:pointer;" /></td>';
+		html += '    <div class="dc-opt-card__field dc-color-col">';
+		html += '      <label>{{ entry_color }}</label>';
+		html += '      <input type="color" name="option_value[' + option_value_row + '][color_code]" value="" class="form-control" style="width:50px;height:34px;padding:2px;cursor:pointer;" />';
+		html += '    </div>';
 	}
-	html += '  <td class="text-right"><input type="text" name="option_value[' + option_value_row + '][sort_order]" value="" placeholder="{{ entry_sort_order }}" class="form-control" /></td>';
-	html += '  <td class="text-right"><button type="button" onclick="$(\'#option-value-row' + option_value_row + '\').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger btn--icon"><i data-lucide="minus-circle" width="14" height="14"></i></button></td>';
-	html += '</tr>';
+	html += '  </div>';
+	html += '</div>';
 
-	$('#option-value tbody').append(html);
+	$('#option-values-cards').append(html);
+	lucide.createIcons();
+	initSortable();
 
 	option_value_row++;
 }
+
+function initSortable() {
+	var el = document.getElementById('option-values-cards');
+	if (el && typeof Sortable !== 'undefined') {
+		Sortable.create(el, {
+			animation: 150,
+			filter: '.dc-opt-card__remove, input, select, textarea, button',
+			preventOnFilter: false,
+			ghostClass: 'dc-opt-ghost',
+			chosenClass: 'dc-opt-chosen',
+			handle: '.dc-opt-card__handle'
+		});
+	}
+}
+
+function updateOptionValueSortOrders() {
+	$('#option-values-cards .dc-opt-card').each(function(i) {
+		$(this).find('input[name$=\'[sort_order]\']').val(i);
+	});
+}
+
+$(document).ready(function() {
+	initSortable();
+	$('#form-option').on('submit', function() {
+		updateOptionValueSortOrders();
+	});
+});
 //--></script>
 {{ footer }}
