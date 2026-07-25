@@ -26,54 +26,54 @@
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
-        <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-attribute">
-          <div class="table-responsive">
-            <table class="table table-bordered table-hover">
-              <thead>
-                <tr>
-                  <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
-                  <td class="text-left">{% if sort == 'ad.name' %}<a href="{{ sort_name }}" class="{{ order|lower }} sortable">{{ column_name }}</a>{% else %}<a href="{{ sort_name }}" class="sortable">{{ column_name }}</a>{% endif %}</td>
-                  <td class="text-left">{% if sort == 'attribute_group' %}<a href="{{ sort_attribute_group }}" class="{{ order|lower }} sortable">{{ column_attribute_group }}</a>{% else %}<a href="{{ sort_attribute_group }}" class="sortable">{{ column_attribute_group }}</a>{% endif %}</td>
-                  <td class="text-right">{% if sort == 'a.sort_order' %}<a href="{{ sort_sort_order }}" class="{{ order|lower }} sortable">{{ column_sort_order }}</a>{% else %}<a href="{{ sort_sort_order }}" class="sortable">{{ column_sort_order }}</a>{% endif %}</td>
-                  <td class="text-right">{{ column_action }}</td>
-                </tr>
-              </thead>
-              <tbody>
-                {% if attributes %}
-                {% for attribute in attributes %}
-                <tr>
-                  <td class="text-center">{% if attribute.attribute_id in selected %}
-                    <input type="checkbox" name="selected[]" value="{{ attribute.attribute_id }}" checked="checked" />
-                    {% else %}
-                    <input type="checkbox" name="selected[]" value="{{ attribute.attribute_id }}" />
-                    {% endif %}</td>
-                  <td class="text-left">
-                    <span class="inline-edit" data-attribute-id="{{ attribute.attribute_id }}" data-field="name" data-value="{{ attribute.name_raw }}">{{ attribute.name }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
-                  </td>
-                  <td class="text-left">
-                    <span class="inline-edit" data-attribute-id="{{ attribute.attribute_id }}" data-field="attribute_group_id" data-value="{{ attribute.attribute_group_id_raw }}">{{ attribute.attribute_group }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
-                  </td>
-                  <td class="text-right">
-                    <span class="inline-edit" data-attribute-id="{{ attribute.attribute_id }}" data-field="sort_order" data-value="{{ attribute.sort_order_raw }}">{{ attribute.sort_order }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
-                  </td>
-                  <td class="text-right"><a href="{{ attribute.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a> <a href="{{ attribute.copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default btn--icon"><i data-lucide="copy" width="14" height="14"></i></a> <a href="{{ attribute.delete }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="return confirm('{{ text_confirm }}');"><i data-lucide="trash-2" width="14" height="14"></i></a></td>
-                </tr>
-                {% endfor %}
+    <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-attribute">
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+          <thead>
+            <tr>
+              <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
+              <td class="text-left">{% if sort == 'ad.name' %}<a href="{{ sort_name }}" class="{{ order|lower }} sortable">{{ column_name }}</a>{% else %}<a href="{{ sort_name }}" class="sortable">{{ column_name }}</a>{% endif %}</td>
+              <td class="text-left">{% if sort == 'attribute_group' %}<a href="{{ sort_attribute_group }}" class="{{ order|lower }} sortable">{{ column_attribute_group }}</a>{% else %}<a href="{{ sort_attribute_group }}" class="sortable">{{ column_attribute_group }}</a>{% endif %}</td>
+              <td class="text-right">{% if sort == 'a.sort_order' %}<a href="{{ sort_sort_order }}" class="{{ order|lower }} sortable">{{ column_sort_order }}</a>{% else %}<a href="{{ sort_sort_order }}" class="sortable">{{ column_sort_order }}</a>{% endif %}</td>
+              <td class="text-right">{{ column_action }}</td>
+            </tr>
+          </thead>
+          <tbody>
+            {% if attributes %}
+            {% for attribute in attributes %}
+            <tr>
+              <td class="text-center">{% if attribute.attribute_id in selected %}
+                <input type="checkbox" name="selected[]" value="{{ attribute.attribute_id }}" checked="checked" />
                 {% else %}
-                <tr>
-                  <td class="text-center" colspan="5">{{ text_no_results }}</td>
-                </tr>
-                {% endif %}
-              </tbody>
-            </table>
-          </div>
-        </form>
-        <div class="pagination-wrap">
-          <div class="row">
-            <div class="col-sm-6 text-left">{{ pagination }}</div>
-            <div class="col-sm-6 text-right">{{ results }}</div>
-          </div>
-        </div>
+                <input type="checkbox" name="selected[]" value="{{ attribute.attribute_id }}" />
+                {% endif %}</td>
+              <td class="text-left">
+                <span class="inline-edit" data-attribute-id="{{ attribute.attribute_id }}" data-field="name" data-value="{{ attribute.name_raw }}">{{ attribute.name }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
+              </td>
+              <td class="text-left">
+                <span class="inline-edit" data-attribute-id="{{ attribute.attribute_id }}" data-field="attribute_group_id" data-value="{{ attribute.attribute_group_id_raw }}">{{ attribute.attribute_group }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
+              </td>
+              <td class="text-right">
+                <span class="inline-edit" data-attribute-id="{{ attribute.attribute_id }}" data-field="sort_order" data-value="{{ attribute.sort_order_raw }}">{{ attribute.sort_order }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
+              </td>
+              <td class="text-right"><a href="{{ attribute.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a> <a href="{{ attribute.copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default btn--icon"><i data-lucide="copy" width="14" height="14"></i></a> <a href="{{ attribute.delete }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="return confirm('{{ text_confirm }}');"><i data-lucide="trash-2" width="14" height="14"></i></a></td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+              <td class="text-center" colspan="5">{{ text_no_results }}</td>
+            </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </form>
+    <div class="pagination-wrap">
+      <div class="row">
+        <div class="col-sm-6 text-left">{{ pagination }}</div>
+        <div class="col-sm-6 text-right">{{ results }}</div>
+      </div>
+    </div>
   </div>
 </div>
 <script type="text/javascript"><!--
@@ -148,8 +148,8 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 				}
 
 				var html = '<div class="inline-edit-names" style="white-space:nowrap;">';
-				$.each(json['languages'], function(i, lang) {
-					var val = json['names'][lang.language_id] || '';
+				$.each(json.languages, function(i, lang) {
+					var val = json.names[lang.language_id] || '';
 					html += '<div style="margin-bottom:2px;">';
 					html += '<span style="font-weight:bold;font-size:11px;margin-right:4px;">' + lang.name + ':</span>';
 					html += '<input type="text" class="form-control input-sm inline-edit-name-input" data-lang-id="' + lang.language_id + '" value="' + val.replace(/"/g, '&quot;') + '" style="width:200px;display:inline-block;">';

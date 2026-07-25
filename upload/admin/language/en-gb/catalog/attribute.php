@@ -7,8 +7,15 @@ $_['text_success']           = 'Success: You have modified attributes!';
 $_['text_list']              = 'Attribute List';
 $_['text_add']               = 'Add Attribute';
 $_['text_edit']              = 'Edit Attribute';
-// Subtitle
 
+// Tab
+$_['text_panel_attribute_title']    = 'Attribute';
+$_['text_panel_attribute_subtitle'] = 'Configure the attribute name and group';
+
+// Sidebar
+$_['text_settings_card']     = 'Settings';
+
+// Subtitle
 $_['text_list_subtitle'] = 'Define product attributes and values';
 
 $_['text_add_attribute_subtitle'] = 'Define a new product attribute';

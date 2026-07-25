@@ -7,8 +7,15 @@ $_['text_success']      = 'Success: You have modified attribute groups!';
 $_['text_list']         = 'Attribute Group List';
 $_['text_add']          = 'Add Attribute Group';
 $_['text_edit']         = 'Edit Attribute Group';
-// Subtitle
 
+// Tab
+$_['text_panel_attribute_group_title']    = 'Attribute Group';
+$_['text_panel_attribute_group_subtitle'] = 'Configure the attribute group name';
+
+// Sidebar
+$_['text_settings_card']     = 'Settings';
+
+// Subtitle
 $_['text_list_subtitle'] = 'Group attributes for structured data';
 
 $_['text_add_attribute_group_subtitle'] = 'Create a new attribute group';
