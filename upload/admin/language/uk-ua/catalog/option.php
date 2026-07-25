@@ -34,6 +34,9 @@ $_['text_text'] = 'Текст';
 $_['text_textarea'] = 'Текстове поле';
 $_['text_time'] = 'Час';
 $_['text_value'] = 'Значення опцій';
+// Sidebar
+$_['text_settings_card']     = 'Налаштування';
+
 // Subtitle
 
 $_['text_list_subtitle'] = 'Керуйте опціями та значеннями товарів';
