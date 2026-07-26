@@ -19,18 +19,20 @@ class ControllerCommonColumnLeft extends Controller {
 			// Catalog
 			$catalog = array();
 
-			if ($this->user->hasPermission('access', 'catalog/category')) {
-				$catalog[] = array(
-					'name'	   => $this->language->get('text_category'),
-					'href'     => $this->url->link('catalog/category', 'user_token=' . $this->session->data['user_token'], true),
-					'children' => array()
-				);
-			}
+		if ($this->user->hasPermission('access', 'catalog/category')) {
+			$catalog[] = array(
+				'name'	   => $this->language->get('text_category'),
+				'href'     => $this->url->link('catalog/category', 'user_token=' . $this->session->data['user_token'], true),
+				'icon'	   => 'folder-tree',
+				'children' => array()
+			);
+		}
 
 		if ($this->user->hasPermission('access', 'catalog/product')) {
 			$catalog[] = array(
 				'name'	   => $this->language->get('text_product'),
 				'href'     => $this->url->link('catalog/product', 'user_token=' . $this->session->data['user_token'], true),
+				'icon'	   => 'package',
 				'children' => array()
 			);
 		}
@@ -42,6 +44,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$attribute[] = array(
 					'name'     => $this->language->get('text_attribute'),
 					'href'     => $this->url->link('catalog/attribute', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'hash',
 					'children' => array()
 				);
 			}
@@ -50,6 +53,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$attribute[] = array(
 					'name'	   => $this->language->get('text_attribute_group'),
 					'href'     => $this->url->link('catalog/attribute_group', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'folder-open',
 					'children' => array()
 				);
 			}
@@ -58,6 +62,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$catalog[] = array(
 					'name'	   => $this->language->get('text_attribute'),
 					'href'     => '',
+					'icon'	   => 'layers',
 					'children' => $attribute
 				);
 			}
@@ -66,6 +71,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$catalog[] = array(
 					'name'	   => $this->language->get('text_option'),
 					'href'     => $this->url->link('catalog/option', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'sliders-horizontal',
 					'children' => array()
 				);
 			}
@@ -74,6 +80,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$catalog[] = array(
 					'name'	   => $this->language->get('text_manufacturer'),
 					'href'     => $this->url->link('catalog/manufacturer', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'factory',
 					'children' => array()
 				);
 			}
@@ -82,6 +89,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$catalog[] = array(
 					'name'	   => $this->language->get('text_download'),
 					'href'     => $this->url->link('catalog/download', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'download',
 					'children' => array()
 				);
 			}
@@ -90,6 +98,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$catalog[] = array(
 					'name'	   => $this->language->get('text_review'),
 					'href'     => $this->url->link('catalog/review', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'message-square',
 					'children' => array()
 				);
 			}
@@ -98,6 +107,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$catalog[] = array(
 					'name'	   => $this->language->get('text_information'),
 					'href'     => $this->url->link('catalog/information', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'file-text',
 					'children' => array()
 				);
 			}
@@ -106,6 +116,7 @@ class ControllerCommonColumnLeft extends Controller {
 			$catalog[] = array(
 				'name'     => $this->language->get('text_import'),
 				'href'     => '',
+				'icon'	   => 'upload',
 				'children' => array()
 			);
 
@@ -129,6 +140,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$catalog[] = array(
 					'name'     => $this->language->get('text_feed'),
 					'href'     => '',
+					'icon'	   => 'rss',
 					'children' => $feeds
 				);
 			}
@@ -159,6 +171,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$marketplace[] = array(
 					'name'	   => $this->language->get('text_installer'),
 					'href'     => $this->url->link('marketplace/installer', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'download',
 					'children' => array()
 				);
 			}
@@ -167,6 +180,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$marketplace[] = array(
 					'name'	   => $this->language->get('text_extension'),
 					'href'     => $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'component',
 					'children' => array()
 				);
 			}
@@ -175,6 +189,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$marketplace[] = array(
 					'name'	   => $this->language->get('text_modification'),
 					'href'     => $this->url->link('marketplace/modification', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'refresh-cw',
 					'children' => array()
 				);
 			}
@@ -183,6 +198,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$marketplace[] = array(
 					'name'	   => $this->language->get('text_event'),
 					'href'     => $this->url->link('marketplace/event', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'zap',
 					'children' => array()
 				);
 			}
@@ -263,6 +279,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$sale[] = array(
 					'name'	   => $this->language->get('text_order'),
 					'href'     => $this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'receipt',
 					'children' => array()
 				);
 			}
@@ -271,6 +288,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$sale[] = array(
 					'name'	   => $this->language->get('text_return'),
 					'href'     => $this->url->link('sale/return', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'rotate-ccw',
 					'children' => array()
 				);
 			}
@@ -282,6 +300,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$voucher[] = array(
 					'name'	   => $this->language->get('text_voucher'),
 					'href'     => $this->url->link('sale/voucher', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'ticket',
 					'children' => array()
 				);
 			}
@@ -290,6 +309,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$voucher[] = array(
 					'name'	   => $this->language->get('text_voucher_theme'),
 					'href'     => $this->url->link('sale/voucher_theme', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'palette',
 					'children' => array()
 				);
 			}
@@ -298,6 +318,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$sale[] = array(
 					'name'	   => $this->language->get('text_voucher'),
 					'href'     => '',
+					'icon'	   => 'gift',
 					'children' => $voucher
 				);
 			}
@@ -319,6 +340,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$customer[] = array(
 					'name'	   => $this->language->get('text_customer'),
 					'href'     => $this->url->link('customer/customer', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'user',
 					'children' => array()
 				);
 			}
@@ -327,6 +349,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$customer[] = array(
 					'name'	   => $this->language->get('text_customer_group'),
 					'href'     => $this->url->link('customer/customer_group', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'users',
 					'children' => array()
 				);
 			}
@@ -335,6 +358,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$customer[] = array(
 					'name'	   => $this->language->get('text_customer_approval'),
 					'href'     => $this->url->link('customer/customer_approval', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'user-check',
 					'children' => array()
 				);
 			}
@@ -343,6 +367,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$customer[] = array(
 					'name'	   => $this->language->get('text_custom_field'),
 					'href'     => $this->url->link('customer/custom_field', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'text',
 					'children' => array()
 				);
 			}
@@ -364,6 +389,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$marketing[] = array(
 					'name'	   => $this->language->get('text_marketing'),
 					'href'     => $this->url->link('marketing/marketing', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'megaphone',
 					'children' => array()
 				);
 			}
@@ -372,6 +398,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$marketing[] = array(
 					'name'	   => $this->language->get('text_coupon'),
 					'href'     => $this->url->link('marketing/coupon', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'tag',
 					'children' => array()
 				);
 			}
@@ -380,6 +407,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$marketing[] = array(
 					'name'	   => $this->language->get('text_contact'),
 					'href'     => $this->url->link('marketing/contact', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'mail',
 					'children' => array()
 				);
 			}
@@ -401,6 +429,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$system[] = array(
 					'name'	   => $this->language->get('text_setting'),
 					'href'     => $this->url->link('setting/store', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'sliders-horizontal',
 					'children' => array()
 				);
 			}
@@ -436,6 +465,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$system[] = array(
 					'name'	   => $this->language->get('text_users'),
 					'href'     => '',
+					'icon'	   => 'shield',
 					'children' => $user
 				);
 			}
@@ -589,6 +619,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$system[] = array(
 					'name'	   => $this->language->get('text_localisation'),
 					'href'     => '',
+					'icon'	   => 'globe',
 					'children' => $localisation
 				);
 			}
@@ -646,6 +677,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$system[] = array(
 					'name'	   => $this->language->get('text_reports'),
 					'href'     => $this->url->link('report/report', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'bar-chart-3',
 					'children' => array()
 				);
 			}
