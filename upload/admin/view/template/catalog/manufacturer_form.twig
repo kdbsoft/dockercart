@@ -15,6 +15,9 @@
             <span class="page-header__title">
               {% if manufacturer_name %}
                 {{ manufacturer_name }}
+                <span class="page-header__badge {{ status ? 'page-header__badge--active' : 'page-header__badge--inactive' }}">
+                  {{ status ? text_active : text_inactive }}
+                </span>
               {% else %}
                 {{ text_form }}
               {% endif %}
