@@ -231,22 +231,22 @@ class ControllerExtensionModuleDockercartBlog extends Controller {
 		$default_seo_urls = array(
 			'blog/category' => array(
 				'en-gb' => 'blog',
-				'ru-ru' => 'blog',
+				'ru-ua' => 'blog',
 				'default' => 'blog'
 			),
 			'blog/search' => array(
 				'en-gb' => 'blog-search',
-				'ru-ru' => 'blog-poisk',
+				'ru-ua' => 'blog-poisk',
 				'default' => 'blog-search'
 			),
 			'blog/author' => array(
 				'en-gb' => 'blog-author',
-				'ru-ru' => 'blog-avtor',
+				'ru-ua' => 'blog-avtor',
 				'default' => 'blog-author'
 			),
 			'blog/archive' => array(
 				'en-gb' => 'blog-archive',
-				'ru-ru' => 'blog-arhiv',
+				'ru-ua' => 'blog-arhiv',
 				'default' => 'blog-archive'
 			)
 		);
