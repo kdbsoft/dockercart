@@ -1,16 +1,160 @@
 {{ header }}{{ column_left }}
-<link href="view/stylesheet/layout_form.css?v={{ dockercart_version }}" type="text/css" rel="stylesheet" />
 <div id="content">
+<style>
+/* ── Layout Form: tip banner ── */
+.dcx-tip-banner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background-color: var(--dc-gray-50, #f7f7f7);
+    border-radius: var(--dc-radius-lg, 8px);
+    border-left: 4px solid var(--dc-primary, #3498db);
+    font-size: 13px;
+    color: var(--dc-text-dark);
+    margin-bottom: 16px;
+}
+.dcx-tip-banner i {
+    color: var(--dc-primary, #3498db);
+    flex-shrink: 0;
+}
+
+/* ── Layout Form: route rows ── */
+.dc-route-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--dc-border-soft, #eee);
+}
+.dc-route-row:last-child {
+    border-bottom: none;
+}
+.dc-route-row .dcx-field {
+    flex: 1;
+    margin-bottom: 0;
+}
+.dc-route-row .dcx-field:first-child {
+    max-width: 200px;
+    flex: 0 0 auto;
+}
+.dc-remove-route {
+    flex-shrink: 0;
+    padding: 6px;
+    color: var(--dc-text-muted);
+}
+.dc-remove-route:hover {
+    color: var(--dc-red-500);
+}
+
+/* ── Layout Form: module columns ── */
+.dc-module-column {
+    border: 1px solid var(--dc-border);
+    border-radius: var(--dc-radius-lg, 8px);
+    background: var(--dc-surface);
+    overflow: hidden;
+}
+.dc-module-column__header {
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dc-text-dark);
+    background: var(--dc-gray-50, #f7f7f7);
+    border-bottom: 1px solid var(--dc-border);
+    text-align: center;
+}
+.dc-module-column__list {
+    min-height: 60px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.dc-module-column__footer {
+    display: flex;
+    gap: 6px;
+    padding: 8px;
+    border-top: 1px solid var(--dc-border);
+    background: var(--dc-gray-50, #f7f7f7);
+}
+.dc-module-column__footer .form-control {
+    flex: 1;
+    height: 30px;
+    font-size: 12px;
+}
+
+/* ── Layout Form: module items ── */
+.dc-module-item {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    border: 1px solid var(--dc-border);
+    border-radius: var(--dc-radius-md, 6px);
+    background: var(--dc-surface);
+    transition: box-shadow 0.15s ease;
+}
+.dc-module-item:hover {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.dc-module-item__handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    flex-shrink: 0;
+    cursor: grab;
+    color: var(--dc-text-muted);
+    border-right: 1px solid var(--dc-border);
+    user-select: none;
+}
+.dc-module-item__handle:hover {
+    color: var(--dc-primary);
+    background: var(--dc-gray-50, #f7f7f7);
+}
+.dc-module-item__body {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+    min-width: 0;
+}
+.dc-module-item__body .form-control {
+    flex: 1;
+    height: 32px;
+    font-size: 12px;
+}
+.dc-module-item__actions {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+/* ── Layout Form: sortable states ── */
+.sortable-module-list.sortable-ghost {
+    opacity: 0.4;
+    background-color: #f0f0f0 !important;
+}
+.module-drag-item.sortable-chosen {
+    background-color: #e3f2fd !important;
+    box-shadow: inset 0 0 0 2px #2196F3;
+}
+
+/* ── Layout Form: spacing utilities ── */
+.dc-mt-sm { margin-top: 8px; }
+.dc-mt-md { margin-top: 16px; }
+</style>
   <div class="page-header">
     <div class="container-fluid">
       <div class="row">
         <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
           <div class="pull-right">
             {% if builder_url %}
-            <a href="{{ builder_url }}" class="btn btn-info btn--icon" target="_blank" data-toggle="tooltip" title="{{ text_switch_to_builder }}"><i data-lucide="wand-2" width="16" height="16"></i></a>
+            <a href="{{ builder_url }}" class="btn btn-info btn--icon" target="_blank" title="{{ text_switch_to_builder }}"><i data-lucide="wand-2" width="16" height="16"></i></a>
             {% endif %}
-            <button type="submit" form="form-layout" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary btn--icon"><i data-lucide="save" width="16" height="16"></i></button>
-            <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default btn--icon"><i data-lucide="x" width="16" height="16"></i></a>
+            <button type="submit" form="form-layout" title="{{ button_save }}" class="btn btn-primary btn--icon"><i data-lucide="save" width="16" height="16"></i></button>
+            <a href="{{ cancel }}" title="{{ button_cancel }}" class="btn btn-default btn--icon"><i data-lucide="x" width="16" height="16"></i></a>
           </div>
           <a href="{{ cancel }}" class="page-header__link">
             <span class="page-header__back">
@@ -36,7 +180,7 @@
   <div class="container-fluid">
     <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-layout">
     <div class="row">
-      <div class="col-md-12 col-sm-12 col-lg-offset-1 col-lg-7 col-xl-offset-1 col-xl-7">
+      <div class="col-md-12 col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
         <div class="dcx-shell">
           <div class="dcx-panel">
             <div class="dcx-panel-head">
@@ -72,38 +216,49 @@
           </div>
         </div>
       </div>
-      <div class="col-md-12 col-sm-12 col-lg-4 col-xl-3">
-        <div class="dcx-sidebar-card">
-          <div class="dcx-sidebar-card__header">
-            <div class="dcx-sidebar-card__header-icon"><i data-lucide="route" width="16" height="16"></i></div>
-            <h3 class="dcx-sidebar-card__title">{{ text_routes_card }}</h3>
-          </div>
-          <div class="dcx-sidebar-card__body">
-            {% set route_row = 0 %}
-            <div id="routes-container">
-              {% for layout_route in layout_routes %}
-              <div class="dcx-sidebar-card__field dc-route-row" id="route-row{{ route_row }}">
-                <div class="dc-route-row__fields">
-                  <label class="dcx-sidebar-card__label">{{ entry_store }}</label>
-                  <select name="layout_route[{{ route_row }}][store_id]" class="form-control">
-                    <option value="0">{{ text_default }}</option>
-                    {% for store in stores %}
-                    {% if store.store_id == layout_route.store_id %}
-                    <option value="{{ store.store_id }}" selected="selected">{{ store.name }}</option>
-                    {% else %}
-                    <option value="{{ store.store_id }}">{{ store.name }}</option>
-                    {% endif %}
-                    {% endfor %}
-                  </select>
-                  <label class="dcx-sidebar-card__label">{{ entry_route }}</label>
-                  <input type="text" name="layout_route[{{ route_row }}][route]" value="{{ layout_route.route }}" placeholder="{{ entry_route }}" class="form-control" />
-                </div>
-                <button type="button" onclick="$('#route-row{{ route_row }}').remove();" class="btn btn-link dc-remove-route" title="{{ button_remove }}"><i data-lucide="minus-circle" width="14" height="14"></i></button>
+    </div>
+    <div class="row dc-mt-md">
+      <div class="col-md-12 col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
+        <div class="dcx-shell">
+          <div class="dcx-panel">
+            <div class="dcx-panel-head">
+              <div class="dcx-panel-head__icon"><i data-lucide="route" width="18" height="18"></i></div>
+              <div>
+                <div class="dcx-panel-title">{{ text_routes_card }}</div>
               </div>
-              {% set route_row = route_row + 1 %}
-              {% endfor %}
             </div>
-            <button type="button" onclick="addRoute();" class="btn btn-default btn-sm btn-block"><i data-lucide="plus" width="14" height="14"></i> {{ button_route_add }}</button>
+            <div class="dcx-panel-body">
+              <div class="dcx-tip-banner">
+                <i data-lucide="info" width="16" height="16"></i> {{ text_route }}
+              </div>
+              {% set route_row = 0 %}
+              <div id="routes-container">
+                {% for layout_route in layout_routes %}
+                <div class="dc-route-row" id="route-row{{ route_row }}">
+                  <div class="dcx-field">
+                    <label class="dcx-label">{{ entry_store }}</label>
+                    <select name="layout_route[{{ route_row }}][store_id]" class="form-control">
+                      <option value="0">{{ text_default }}</option>
+                      {% for store in stores %}
+                      {% if store.store_id == layout_route.store_id %}
+                      <option value="{{ store.store_id }}" selected="selected">{{ store.name }}</option>
+                      {% else %}
+                      <option value="{{ store.store_id }}">{{ store.name }}</option>
+                      {% endif %}
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="dcx-field">
+                    <label class="dcx-label">{{ entry_route }}</label>
+                    <input type="text" name="layout_route[{{ route_row }}][route]" value="{{ layout_route.route }}" placeholder="{{ entry_route }}" class="form-control" />
+                  </div>
+                  <button type="button" onclick="$('#route-row{{ route_row }}').remove();" class="btn btn-link dc-remove-route" title="{{ button_remove }}"><i data-lucide="minus-circle" width="14" height="14"></i></button>
+                </div>
+                {% set route_row = route_row + 1 %}
+                {% endfor %}
+              </div>
+              <button type="button" onclick="addRoute();" class="btn btn-primary btn-sm"><i data-lucide="plus" width="14" height="14"></i> {{ button_route_add }}</button>
+            </div>
           </div>
         </div>
       </div>
@@ -157,8 +312,8 @@
                           <input type="hidden" name="layout_module[{{ module_row }}][position]" value="{{ layout_module.position }}" />
                           <input type="hidden" name="layout_module[{{ module_row }}][sort_order]" value="{{ layout_module.sort_order }}" />
                           <div class="dc-module-item__actions">
-                            <a href="{{ layout_module.edit }}" type="button" data-toggle="tooltip" title="{{ button_edit }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="pencil" width="14" height="14"></i></a>
-                            <button type="button" onclick="removeModule('module-row{{ module_row }}');" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger btn-sm"><i data-lucide="minus-circle" width="14" height="14"></i></button>
+                            <a href="{{ layout_module.edit }}" type="button" title="{{ button_edit }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="pencil" width="14" height="14"></i></a>
+                            <button type="button" onclick="removeModule('module-row{{ module_row }}');" title="{{ button_remove }}" class="btn btn-danger btn-sm"><i data-lucide="minus-circle" width="14" height="14"></i></button>
                           </div>
                         </div>
                       </div>
@@ -181,7 +336,7 @@
                         </optgroup>
                         {% endfor %}
                       </select>
-                      <button type="button" onclick="addModule('column-left');" data-toggle="tooltip" title="{{ button_module_add }}" class="btn btn-primary btn-sm"><i data-lucide="plus-circle" width="14" height="14"></i></button>
+                      <button type="button" onclick="addModule('column-left');" title="{{ button_module_add }}" class="btn btn-primary btn-sm"><i data-lucide="plus-circle" width="14" height="14"></i></button>
                     </div>
                   </div>
                 </div>
@@ -218,8 +373,8 @@
                           <input type="hidden" name="layout_module[{{ module_row }}][position]" value="{{ layout_module.position }}" />
                           <input type="hidden" name="layout_module[{{ module_row }}][sort_order]" value="{{ layout_module.sort_order }}" />
                           <div class="dc-module-item__actions">
-                            <a href="{{ layout_module.edit }}" type="button" data-toggle="tooltip" title="{{ button_edit }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="pencil" width="14" height="14"></i></a>
-                            <button type="button" onclick="removeModule('module-row{{ module_row }}');" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger btn-sm"><i data-lucide="minus-circle" width="14" height="14"></i></button>
+                            <a href="{{ layout_module.edit }}" type="button" title="{{ button_edit }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="pencil" width="14" height="14"></i></a>
+                            <button type="button" onclick="removeModule('module-row{{ module_row }}');" title="{{ button_remove }}" class="btn btn-danger btn-sm"><i data-lucide="minus-circle" width="14" height="14"></i></button>
                           </div>
                         </div>
                       </div>
@@ -242,7 +397,7 @@
                         </optgroup>
                         {% endfor %}
                       </select>
-                      <button type="button" onclick="addModule('content-top');" data-toggle="tooltip" title="{{ button_module_add }}" class="btn btn-primary btn-sm"><i data-lucide="plus-circle" width="14" height="14"></i></button>
+                      <button type="button" onclick="addModule('content-top');" title="{{ button_module_add }}" class="btn btn-primary btn-sm"><i data-lucide="plus-circle" width="14" height="14"></i></button>
                     </div>
                   </div>
                   <div class="dc-module-column dc-mt-sm" id="module-content-bottom">
@@ -277,8 +432,8 @@
                           <input type="hidden" name="layout_module[{{ module_row }}][position]" value="{{ layout_module.position }}" />
                           <input type="hidden" name="layout_module[{{ module_row }}][sort_order]" value="{{ layout_module.sort_order }}" />
                           <div class="dc-module-item__actions">
-                            <a href="{{ layout_module.edit }}" type="button" data-toggle="tooltip" title="{{ button_edit }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="pencil" width="14" height="14"></i></a>
-                            <button type="button" onclick="removeModule('module-row{{ module_row }}');" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger btn-sm"><i data-lucide="minus-circle" width="14" height="14"></i></button>
+                            <a href="{{ layout_module.edit }}" type="button" title="{{ button_edit }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="pencil" width="14" height="14"></i></a>
+                            <button type="button" onclick="removeModule('module-row{{ module_row }}');" title="{{ button_remove }}" class="btn btn-danger btn-sm"><i data-lucide="minus-circle" width="14" height="14"></i></button>
                           </div>
                         </div>
                       </div>
@@ -301,7 +456,7 @@
                         </optgroup>
                         {% endfor %}
                       </select>
-                      <button type="button" onclick="addModule('content-bottom');" data-toggle="tooltip" title="{{ button_module_add }}" class="btn btn-primary btn-sm"><i data-lucide="plus-circle" width="14" height="14"></i></button>
+                      <button type="button" onclick="addModule('content-bottom');" title="{{ button_module_add }}" class="btn btn-primary btn-sm"><i data-lucide="plus-circle" width="14" height="14"></i></button>
                     </div>
                   </div>
                 </div>
@@ -338,8 +493,8 @@
                           <input type="hidden" name="layout_module[{{ module_row }}][position]" value="{{ layout_module.position }}" />
                           <input type="hidden" name="layout_module[{{ module_row }}][sort_order]" value="{{ layout_module.sort_order }}" />
                           <div class="dc-module-item__actions">
-                            <a href="{{ layout_module.edit }}" data-toggle="tooltip" title="{{ button_edit }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="pencil" width="14" height="14"></i></a>
-                            <button type="button" onclick="removeModule('module-row{{ module_row }}');" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger btn-sm"><i data-lucide="minus-circle" width="14" height="14"></i></button>
+                            <a href="{{ layout_module.edit }}" title="{{ button_edit }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="pencil" width="14" height="14"></i></a>
+                            <button type="button" onclick="removeModule('module-row{{ module_row }}');" title="{{ button_remove }}" class="btn btn-danger btn-sm"><i data-lucide="minus-circle" width="14" height="14"></i></button>
                           </div>
                         </div>
                       </div>
@@ -362,7 +517,7 @@
                         </optgroup>
                         {% endfor %}
                       </select>
-                      <button type="button" onclick="addModule('column-right');" data-toggle="tooltip" title="{{ button_module_add }}" class="btn btn-primary btn-sm"><i data-lucide="plus-circle" width="14" height="14"></i></button>
+                      <button type="button" onclick="addModule('column-right');" title="{{ button_module_add }}" class="btn btn-primary btn-sm"><i data-lucide="plus-circle" width="14" height="14"></i></button>
                     </div>
                   </div>
                 </div>
@@ -447,16 +602,18 @@ $(document).ready(function() {
 var route_row = {{ route_row }};
 
 function addRoute() {
-  var html = '<div class="dcx-sidebar-card__field dc-route-row" id="route-row' + route_row + '">';
-  html += '  <div class="dc-route-row__fields">';
-  html += '    <label class="dcx-sidebar-card__label">{{ entry_store }}</label>';
+  var html = '<div class="dc-route-row" id="route-row' + route_row + '">';
+  html += '  <div class="dcx-field">';
+  html += '    <label class="dcx-label">{{ entry_store }}</label>';
   html += '    <select name="layout_route[' + route_row + '][store_id]" class="form-control">';
   html += '      <option value="0">{{ text_default }}</option>';
   {% for store in stores %}
   html += '      <option value="{{ store.store_id }}">{{ store.name|escape('js') }}</option>';
   {% endfor %}
   html += '    </select>';
-  html += '    <label class="dcx-sidebar-card__label">{{ entry_route }}</label>';
+  html += '  </div>';
+  html += '  <div class="dcx-field">';
+  html += '    <label class="dcx-label">{{ entry_route }}</label>';
   html += '    <input type="text" name="layout_route[' + route_row + '][route]" value="" placeholder="{{ entry_route }}" class="form-control" />';
   html += '  </div>';
   html += '  <button type="button" onclick="$(\'#route-row' + route_row + '\').remove();" class="btn btn-link dc-remove-route" title="{{ button_remove }}"><i data-lucide="minus-circle" width="14" height="14"></i></button>';
@@ -515,8 +672,8 @@ function addModule(type) {
   html += '    <input type="hidden" name="layout_module[' + module_row + '][position]" value="' + type.replace('-', '_') + '" />';
   html += '    <input type="hidden" name="layout_module[' + module_row + '][sort_order]" value="" />';
   html += '    <div class="dc-module-item__actions">';
-  html += '      <a href="" target="_blank" type="button" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn-sm"><i data-lucide="pencil" width="14" height="14"></i></a>';
-  html += '      <button type="button" onclick="removeModule(\'module-row' + module_row + '\');" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger btn-sm"><i data-lucide="minus-circle" width="14" height="14"></i></button>';
+  html += '      <a href="" target="_blank" type="button" title="{{ button_edit }}" class="btn btn-primary btn-sm"><i data-lucide="pencil" width="14" height="14"></i></a>';
+  html += '      <button type="button" onclick="removeModule(\'module-row' + module_row + '\');" title="{{ button_remove }}" class="btn btn-danger btn-sm"><i data-lucide="minus-circle" width="14" height="14"></i></button>';
   html += '    </div>';
   html += '  </div>';
   html += '</div>';
