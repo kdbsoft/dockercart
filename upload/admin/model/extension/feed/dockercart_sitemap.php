@@ -53,6 +53,7 @@ class ModelExtensionFeedDockercartSitemap extends Model {
                 manufacturer_id,
                 name
             FROM " . DB_PREFIX . "manufacturer
+            WHERE status = '1'
             ORDER BY manufacturer_id ASC
         ");
 

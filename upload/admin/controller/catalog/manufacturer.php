@@ -239,6 +239,8 @@ class ControllerCatalogManufacturer extends Controller {
 				'name_raw'        => $result['name'],
 				'sort_order'      => $result['sort_order'],
 				'sort_order_raw'  => $result['sort_order'],
+				'status'          => $result['status'],
+				'status_raw'      => $result['status'],
 				'edit'            => $this->url->link('catalog/manufacturer/edit', 'user_token=' . $this->session->data['user_token'] . '&manufacturer_id=' . $result['manufacturer_id'] . $url, true),
 				'copy'            => $this->url->link('catalog/manufacturer/copy', 'user_token=' . $this->session->data['user_token'] . '&manufacturer_id=' . $result['manufacturer_id'] . $url, true),
 				'delete'          => $this->url->link('catalog/manufacturer/delete', 'user_token=' . $this->session->data['user_token'] . '&manufacturer_id=' . $result['manufacturer_id'] . $url, true)
@@ -279,6 +281,7 @@ class ControllerCatalogManufacturer extends Controller {
 
 		$data['sort_name'] = $this->url->link('catalog/manufacturer', 'user_token=' . $this->session->data['user_token'] . '&sort=name' . $url, true);
 		$data['sort_sort_order'] = $this->url->link('catalog/manufacturer', 'user_token=' . $this->session->data['user_token'] . '&sort=sort_order' . $url, true);
+		$data['sort_status'] = $this->url->link('catalog/manufacturer', 'user_token=' . $this->session->data['user_token'] . '&sort=status' . $url, true);
 
 		$url = '';
 
@@ -466,6 +469,14 @@ class ControllerCatalogManufacturer extends Controller {
 			$data['sort_order'] = $manufacturer_info['sort_order'];
 		} else {
 			$data['sort_order'] = '';
+		}
+
+		if (isset($this->request->post['status'])) {
+			$data['status'] = $this->request->post['status'];
+		} elseif (!empty($manufacturer_info)) {
+			$data['status'] = $manufacturer_info['status'];
+		} else {
+			$data['status'] = 1;
 		}
 
 		$this->load->model('localisation/language');
@@ -729,6 +740,7 @@ class ControllerCatalogManufacturer extends Controller {
 
 			$filter_data = array(
 				'filter_name' => $this->request->get['filter_name'],
+				'filter_status' => 1,
 				'start'       => 0,
 				'limit'       => 5
 			);

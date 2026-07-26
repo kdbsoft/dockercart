@@ -1,7 +1,7 @@
 <?php
 class ModelCatalogManufacturer extends Model {
 	public function addManufacturer($data) {
-		$this->db->query("INSERT INTO " . DB_PREFIX . "manufacturer SET sort_order = '" . (int)$data['sort_order'] . "'");
+		$this->db->query("INSERT INTO " . DB_PREFIX . "manufacturer SET sort_order = '" . (int)$data['sort_order'] . "', status = '" . (isset($data['status']) ? (int)$data['status'] : 1) . "'");
 
 		$manufacturer_id = $this->db->getLastId();
 
@@ -51,7 +51,7 @@ class ModelCatalogManufacturer extends Model {
 	}
 
 	public function editManufacturer($manufacturer_id, $data) {
-		$this->db->query("UPDATE " . DB_PREFIX . "manufacturer SET sort_order = '" . (int)$data['sort_order'] . "' WHERE manufacturer_id = '" . (int)$manufacturer_id . "'");
+		$this->db->query("UPDATE " . DB_PREFIX . "manufacturer SET sort_order = '" . (int)$data['sort_order'] . "', status = '" . (isset($data['status']) ? (int)$data['status'] : 1) . "' WHERE manufacturer_id = '" . (int)$manufacturer_id . "'");
 
 		if (isset($data['image'])) {
 			$this->db->query("UPDATE " . DB_PREFIX . "manufacturer SET image = '" . $this->db->escape($data['image']) . "' WHERE manufacturer_id = '" . (int)$manufacturer_id . "'");
@@ -132,6 +132,7 @@ class ModelCatalogManufacturer extends Model {
 
 		$data["image"] = $manufacturer["image"];
 		$data["sort_order"] = $manufacturer["sort_order"];
+		$data["status"] = $manufacturer["status"];
 		$data["manufacturer_description"] = $this->getManufacturerDescriptions(
 			$manufacturer_id,
 		);
@@ -215,13 +216,24 @@ class ModelCatalogManufacturer extends Model {
 
 		$sql = "SELECT m.*, COALESCE(md.name, m.name) AS name FROM " . DB_PREFIX . "manufacturer m LEFT JOIN " . DB_PREFIX . "manufacturer_description md ON (m.manufacturer_id = md.manufacturer_id AND md.language_id = '" . $language_id . "')";
 
+		$where = array();
+
 		if (!empty($data['filter_name'])) {
-			$sql .= " WHERE COALESCE(md.name, m.name) LIKE '" . $this->db->escape($data['filter_name']) . "%'";
+			$where[] = "COALESCE(md.name, m.name) LIKE '" . $this->db->escape($data['filter_name']) . "%'";
+		}
+
+		if (isset($data['filter_status'])) {
+			$where[] = "m.status = '" . (int)$data['filter_status'] . "'";
+		}
+
+		if ($where) {
+			$sql .= " WHERE " . implode(' AND ', $where);
 		}
 
 		$sort_data = array(
 			'name',
-			'sort_order'
+			'sort_order',
+			'status'
 		);
 
 		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
@@ -302,7 +314,7 @@ class ModelCatalogManufacturer extends Model {
 	}
 
 	public function updateManufacturerField($manufacturer_id, $data) {
-		$int_fields = array('sort_order');
+		$int_fields = array('sort_order', 'status');
 
 		$sets = array();
 		foreach ($int_fields as $field) {

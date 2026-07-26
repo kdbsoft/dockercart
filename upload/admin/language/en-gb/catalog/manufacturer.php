@@ -34,6 +34,7 @@ $_['text_seo_preview']  = 'Preview';
 // Column
 $_['column_name']       = 'Manufacturer Name';
 $_['column_sort_order'] = 'Sort Order';
+$_['column_status']     = 'Status';
 $_['column_action']     = 'Action';
 
 // Entry
@@ -46,6 +47,7 @@ $_['entry_store']            = 'Stores';
 $_['entry_keyword']          = 'Keyword';
 $_['entry_image']            = 'Image';
 $_['entry_sort_order']       = 'Sort Order';
+$_['entry_status']           = 'Status';
 
 // Error
 $_['error_permission']  = 'Warning: You do not have permission to modify manufacturers!';

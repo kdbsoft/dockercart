@@ -360,7 +360,7 @@ class ModelExtensionModuleDockercartSearch extends Model {
 
         $count = 0;
 
-        $manufacturers = $this->db->query("SELECT * FROM " . DB_PREFIX . "manufacturer");
+        $manufacturers = $this->db->query("SELECT * FROM " . DB_PREFIX . "manufacturer WHERE status = 1");
 
         foreach ($manufacturers->rows as $manufacturer) {
             $this->indexManufacturer($manufacturer['manufacturer_id']);
@@ -390,7 +390,7 @@ class ModelExtensionModuleDockercartSearch extends Model {
         $doc = [
             'id' => (int)$manufacturer_id,
             'store_id' => (int)$this->config->get('config_store_id'),
-            'status' => 1,
+            'status' => (int)$manufacturer['status'],
             'sort_order' => (int)$manufacturer['sort_order'],
             'name' => $manufacturer['name'],
             'image' => $manufacturer['image']

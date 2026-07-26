@@ -5115,6 +5115,7 @@ CREATE TABLE `oc_manufacturer` (
   `name` varchar(64) NOT NULL,
   `image` varchar(255) DEFAULT NULL,
   `sort_order` int(11) NOT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`manufacturer_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=322 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -5127,19 +5128,19 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_manufacturer` WRITE;
 /*!40000 ALTER TABLE `oc_manufacturer` DISABLE KEYS */;
 INSERT INTO `oc_manufacturer` VALUES
-(301,'Apple','catalog/demo/demo-seed/manufacturers/apple.jpg',1),
-(302,'Samsung','catalog/demo/demo-seed/manufacturers/samsung.jpg',2),
-(303,'Sony','catalog/demo/demo-seed/manufacturers/sony.jpg',3),
-(304,'Nike','catalog/demo/demo-seed/manufacturers/nike.jpg',4),
-(305,'Adidas','catalog/demo/demo-seed/manufacturers/adidas.jpg',5),
-(306,'Philips','catalog/demo/demo-seed/manufacturers/philips.jpg',6),
-(307,'Garmin','catalog/demo/demo-seed/manufacturers/garmin.jpg',7),
-(308,'Dyson','catalog/demo/demo-seed/manufacturers/dyson.jpg',8),
-(309,'Nintendo','catalog/demo/demo-seed/manufacturers/nintendo.jpg',9),
-(310,'LEGO','catalog/demo/demo-seed/manufacturers/lego.jpg',10),
-(311,'Bosch','catalog/demo/demo-seed/manufacturers/bosch.jpg',11),
-(312,'Purina','catalog/demo/demo-seed/manufacturers/purina.jpg',12),
-(319,'RESSER',NULL,0);
+(301,'Apple','catalog/demo/demo-seed/manufacturers/apple.jpg',1,1),
+(302,'Samsung','catalog/demo/demo-seed/manufacturers/samsung.jpg',2,1),
+(303,'Sony','catalog/demo/demo-seed/manufacturers/sony.jpg',3,1),
+(304,'Nike','catalog/demo/demo-seed/manufacturers/nike.jpg',4,1),
+(305,'Adidas','catalog/demo/demo-seed/manufacturers/adidas.jpg',5,1),
+(306,'Philips','catalog/demo/demo-seed/manufacturers/philips.jpg',6,1),
+(307,'Garmin','catalog/demo/demo-seed/manufacturers/garmin.jpg',7,1),
+(308,'Dyson','catalog/demo/demo-seed/manufacturers/dyson.jpg',8,1),
+(309,'Nintendo','catalog/demo/demo-seed/manufacturers/nintendo.jpg',9,1),
+(310,'LEGO','catalog/demo/demo-seed/manufacturers/lego.jpg',10,1),
+(311,'Bosch','catalog/demo/demo-seed/manufacturers/bosch.jpg',11,1),
+(312,'Purina','catalog/demo/demo-seed/manufacturers/purina.jpg',12,1),
+(319,'RESSER',NULL,0,1);
 /*!40000 ALTER TABLE `oc_manufacturer` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
