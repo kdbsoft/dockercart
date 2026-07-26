@@ -237,6 +237,8 @@ class ControllerCatalogAttribute extends Controller {
 				'attribute_group_id_raw'=> $result['attribute_group_id'],
 				'sort_order'            => $result['sort_order'],
 				'sort_order_raw'        => $result['sort_order'],
+				'status'                => $result['status'],
+				'status_raw'            => $result['status'],
 				'edit'                  => $this->url->link('catalog/attribute/edit', 'user_token=' . $this->session->data['user_token'] . '&attribute_id=' . $result['attribute_id'] . $url, true),
 				'copy'                  => $this->url->link('catalog/attribute/copy', 'user_token=' . $this->session->data['user_token'] . '&attribute_id=' . $result['attribute_id'] . $url, true),
 				'delete'                => $this->url->link('catalog/attribute/delete', 'user_token=' . $this->session->data['user_token'] . '&attribute_id=' . $result['attribute_id'] . $url, true)
@@ -417,6 +419,21 @@ class ControllerCatalogAttribute extends Controller {
 			$data['sort_order'] = '';
 		}
 
+		if (isset($this->request->post['status'])) {
+			$data['status'] = $this->request->post['status'];
+		} elseif (!empty($attribute_info)) {
+			$data['status'] = $attribute_info['status'];
+		} else {
+			$data['status'] = true;
+		}
+
+		$data['text_status_card'] = $this->language->get('text_status_card');
+		$data['entry_status'] = $this->language->get('entry_status');
+		$data['text_enabled'] = $this->language->get('text_enabled');
+		$data['text_disabled'] = $this->language->get('text_disabled');
+		$data['text_active'] = $this->language->get('text_active');
+		$data['text_inactive'] = $this->language->get('text_inactive');
+
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');
@@ -544,6 +561,13 @@ class ControllerCatalogAttribute extends Controller {
 					$json['success'] = true;
 					$json['value_html'] = (string)$val;
 				}
+			} elseif ($field === 'status') {
+				$val = $value == '1' || $value === 1 || $value === 'true' ? 1 : 0;
+				$this->model_catalog_attribute->updateAttributeField($attribute_id, array('status' => $val));
+				$json['success'] = true;
+				$json['value_html'] = $val
+					? '<span class="label label-success">' . $this->language->get('text_enabled') . '</span>'
+					: '<span class="label label-danger">' . $this->language->get('text_disabled') . '</span>';
 			} elseif ($field === 'attribute_group_id') {
 				$val = (int)$value;
 

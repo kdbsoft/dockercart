@@ -1,7 +1,7 @@
 <?php
 class ModelCatalogOption extends Model {
 	public function addOption($data) {
-		$this->db->query("INSERT INTO `" . DB_PREFIX . "option` SET type = '" . $this->db->escape($data['type']) . "', sort_order = '" . (int)$data['sort_order'] . "'");
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "option` SET type = '" . $this->db->escape($data['type']) . "', sort_order = '" . (int)$data['sort_order'] . "', status = '" . (isset($data['status']) ? (int)$data['status'] : 1) . "'");
 
 		$option_id = $this->db->getLastId();
 
@@ -25,7 +25,7 @@ class ModelCatalogOption extends Model {
 	}
 
 	public function editOption($option_id, $data) {
-		$this->db->query("UPDATE `" . DB_PREFIX . "option` SET type = '" . $this->db->escape($data['type']) . "', sort_order = '" . (int)$data['sort_order'] . "' WHERE option_id = '" . (int)$option_id . "'");
+		$this->db->query("UPDATE `" . DB_PREFIX . "option` SET type = '" . $this->db->escape($data['type']) . "', sort_order = '" . (int)$data['sort_order'] . "', status = '" . (isset($data['status']) ? (int)$data['status'] : 1) . "' WHERE option_id = '" . (int)$option_id . "'");
 
 		$this->db->query("DELETE FROM " . DB_PREFIX . "option_description WHERE option_id = '" . (int)$option_id . "'");
 
@@ -81,6 +81,7 @@ class ModelCatalogOption extends Model {
 
 		$data["type"] = $option["type"];
 		$data["sort_order"] = $option["sort_order"];
+		$data["status"] = $option["status"];
 		$data["option_description"] = $this->getOptionDescriptions(
 			$option_id,
 		);
@@ -259,7 +260,7 @@ class ModelCatalogOption extends Model {
 	}
 
 	public function updateOptionField($option_id, $data) {
-		$int_fields = array('sort_order');
+		$int_fields = array('sort_order', 'status');
 
 		$sets = array();
 		foreach ($int_fields as $field) {

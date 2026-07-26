@@ -14,6 +14,7 @@ $_['text_panel_attribute_group_subtitle'] = 'Configure the attribute group name'
 
 // Sidebar
 $_['text_settings_card']     = 'Parameters';
+$_['text_status_card']       = 'Status';
 
 // Subtitle
 $_['text_list_subtitle'] = 'Group attributes for structured data';
@@ -27,11 +28,13 @@ $_['text_edit_attribute_group_subtitle'] = 'Edit attribute group settings';
 // Column
 $_['column_name']       = 'Attribute Group Name';
 $_['column_sort_order'] = 'Sort Order';
+$_['column_status']     = 'Status';
 $_['column_action']     = 'Action';
 
 // Entry
 $_['entry_name']        = 'Attribute Group Name';
 $_['entry_sort_order']  = 'Sort Order';
+$_['entry_status']      = 'Status';
 
 // Error
 $_['error_permission']  = 'Warning: You do not have permission to modify attribute groups!';

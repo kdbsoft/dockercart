@@ -1,7 +1,7 @@
 <?php
 class ModelCatalogAttribute extends Model {
 	public function addAttribute($data) {
-		$this->db->query("INSERT INTO " . DB_PREFIX . "attribute SET attribute_group_id = '" . (int)$data['attribute_group_id'] . "', sort_order = '" . (int)$data['sort_order'] . "'");
+		$this->db->query("INSERT INTO " . DB_PREFIX . "attribute SET attribute_group_id = '" . (int)$data['attribute_group_id'] . "', sort_order = '" . (int)$data['sort_order'] . "', status = '" . (isset($data['status']) ? (int)$data['status'] : 1) . "'");
 
 		$attribute_id = $this->db->getLastId();
 
@@ -13,7 +13,7 @@ class ModelCatalogAttribute extends Model {
 	}
 
 	public function editAttribute($attribute_id, $data) {
-		$this->db->query("UPDATE " . DB_PREFIX . "attribute SET attribute_group_id = '" . (int)$data['attribute_group_id'] . "', sort_order = '" . (int)$data['sort_order'] . "' WHERE attribute_id = '" . (int)$attribute_id . "'");
+		$this->db->query("UPDATE " . DB_PREFIX . "attribute SET attribute_group_id = '" . (int)$data['attribute_group_id'] . "', sort_order = '" . (int)$data['sort_order'] . "', status = '" . (isset($data['status']) ? (int)$data['status'] : 1) . "' WHERE attribute_id = '" . (int)$attribute_id . "'");
 
 		$this->db->query("DELETE FROM " . DB_PREFIX . "attribute_description WHERE attribute_id = '" . (int)$attribute_id . "'");
 
@@ -47,6 +47,7 @@ class ModelCatalogAttribute extends Model {
 
 		$data["attribute_group_id"] = $attribute["attribute_group_id"];
 		$data["sort_order"] = $attribute["sort_order"];
+		$data["status"] = $attribute["status"];
 		$data["attribute_description"] = $this->getAttributeDescriptions(
 			$attribute_id,
 		);
@@ -174,7 +175,7 @@ class ModelCatalogAttribute extends Model {
 	}
 
 	public function updateAttributeField($attribute_id, $data) {
-		$int_fields = array('sort_order', 'attribute_group_id');
+		$int_fields = array('sort_order', 'attribute_group_id', 'status');
 
 		$sets = array();
 		foreach ($int_fields as $field) {

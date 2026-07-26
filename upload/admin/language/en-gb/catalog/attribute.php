@@ -14,6 +14,7 @@ $_['text_panel_attribute_subtitle'] = 'Configure the attribute name and group';
 
 // Sidebar
 $_['text_settings_card']     = 'Parameters';
+$_['text_status_card']       = 'Status';
 
 // Subtitle
 $_['text_list_subtitle'] = 'Define product attributes and values';
@@ -28,12 +29,14 @@ $_['text_edit_attribute_subtitle'] = 'Edit attribute name and settings';
 $_['column_name']            = 'Attribute Name';
 $_['column_attribute_group'] = 'Attribute Group';
 $_['column_sort_order']      = 'Sort Order';
+$_['column_status']          = 'Status';
 $_['column_action']          = 'Action';
 
 // Entry
 $_['entry_name']             = 'Attribute Name';
 $_['entry_attribute_group']  = 'Attribute Group';
 $_['entry_sort_order']       = 'Sort Order';
+$_['entry_status']           = 'Status';
 
 // Error
 $_['error_permission']       = 'Warning: You do not have permission to modify attributes!';

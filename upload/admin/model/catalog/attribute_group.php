@@ -1,7 +1,7 @@
 <?php
 class ModelCatalogAttributeGroup extends Model {
 	public function addAttributeGroup($data) {
-		$this->db->query("INSERT INTO " . DB_PREFIX . "attribute_group SET sort_order = '" . (int)$data['sort_order'] . "'");
+		$this->db->query("INSERT INTO " . DB_PREFIX . "attribute_group SET sort_order = '" . (int)$data['sort_order'] . "', status = '" . (isset($data['status']) ? (int)$data['status'] : 1) . "'");
 
 		$attribute_group_id = $this->db->getLastId();
 
@@ -13,7 +13,7 @@ class ModelCatalogAttributeGroup extends Model {
 	}
 
 	public function editAttributeGroup($attribute_group_id, $data) {
-		$this->db->query("UPDATE " . DB_PREFIX . "attribute_group SET sort_order = '" . (int)$data['sort_order'] . "' WHERE attribute_group_id = '" . (int)$attribute_group_id . "'");
+		$this->db->query("UPDATE " . DB_PREFIX . "attribute_group SET sort_order = '" . (int)$data['sort_order'] . "', status = '" . (isset($data['status']) ? (int)$data['status'] : 1) . "' WHERE attribute_group_id = '" . (int)$attribute_group_id . "'");
 
 		$this->db->query("DELETE FROM " . DB_PREFIX . "attribute_group_description WHERE attribute_group_id = '" . (int)$attribute_group_id . "'");
 
@@ -46,6 +46,7 @@ class ModelCatalogAttributeGroup extends Model {
 		$data = [];
 
 		$data["sort_order"] = $group["sort_order"];
+		$data["status"] = $group["status"];
 		$data["attribute_group_description"] = $this->getAttributeGroupDescriptions(
 			$attribute_group_id,
 		);
@@ -164,7 +165,7 @@ class ModelCatalogAttributeGroup extends Model {
 	}
 
 	public function updateAttributeGroupField($attribute_group_id, $data) {
-		$int_fields = array('sort_order');
+		$int_fields = array('sort_order', 'status');
 
 		$sets = array();
 		foreach ($int_fields as $field) {

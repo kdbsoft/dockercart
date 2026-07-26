@@ -23,6 +23,7 @@ $_['text_option']        = 'Option';
 $_['text_value']         = 'Option Values';
 // Sidebar
 $_['text_settings_card']     = 'Parameters';
+$_['text_status_card']       = 'Status';
 
 // Subtitle
 
@@ -37,6 +38,7 @@ $_['text_edit_option_subtitle'] = 'Edit option values and settings';
 // Column
 $_['column_name']        = 'Option Name';
 $_['column_sort_order']  = 'Sort Order';
+$_['column_status']      = 'Status';
 $_['column_action']      = 'Action';
 
 // Entry
@@ -45,6 +47,7 @@ $_['entry_type']         = 'Type';
 $_['entry_option_value'] = 'Option Value Name';
 $_['entry_color']        = 'Color';
 $_['entry_sort_order']   = 'Sort Order';
+$_['entry_status']       = 'Status';
 
 // Error
 $_['error_permission']   = 'Warning: You do not have permission to modify options!';
