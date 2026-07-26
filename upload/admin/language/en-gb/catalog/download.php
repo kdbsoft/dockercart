@@ -8,6 +8,8 @@ $_['text_list']         = 'Download List';
 $_['text_add']          = 'Add Download';
 $_['text_edit']         = 'Edit Download';
 $_['text_upload']       = 'Your file was successfully uploaded!';
+$_['text_enabled']      = 'Enabled';
+$_['text_disabled']     = 'Disabled';
 // Subtitle
 
 $_['text_list_subtitle'] = 'Manage downloadable file assets';
@@ -26,6 +28,7 @@ $_['text_file_card']    = 'File';
 
 // Column
 $_['column_name']       = 'Download Name';
+$_['column_status']     = 'Status';
 $_['column_date_added'] = 'Date Added';
 $_['column_action']     = 'Action';
 
@@ -33,6 +36,7 @@ $_['column_action']     = 'Action';
 $_['entry_name']        = 'Download Name';
 $_['entry_filename']    = 'Filename';
 $_['entry_mask']        = 'Mask';
+$_['entry_status']      = 'Status';
 
 // Help
 $_['help_filename']     = 'You can upload via the upload button or use FTP to upload to the download directory and enter the details below.';

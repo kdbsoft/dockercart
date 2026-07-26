@@ -185,6 +185,12 @@ class ControllerCatalogDownload extends Controller {
 			$page = 1;
 		}
 
+		if (isset($this->request->get['filter_status'])) {
+			$filter_status = $this->request->get['filter_status'];
+		} else {
+			$filter_status = '';
+		}
+
 		$url = '';
 
 		if (isset($this->request->get['sort'])) {
@@ -197,6 +203,10 @@ class ControllerCatalogDownload extends Controller {
 
 		if (isset($this->request->get['page'])) {
 			$url .= '&page=' . $this->request->get['page'];
+		}
+
+		if (isset($this->request->get['filter_status'])) {
+			$url .= '&filter_status=' . $this->request->get['filter_status'];
 		}
 
 		$data['breadcrumbs'] = array();
@@ -218,13 +228,14 @@ class ControllerCatalogDownload extends Controller {
 		$data['downloads'] = array();
 
 		$filter_data = array(
-			'sort'  => $sort,
-			'order' => $order,
-			'start' => ($page - 1) * $this->config->get('config_limit_admin'),
-			'limit' => $this->config->get('config_limit_admin')
+			'filter_status' => $filter_status,
+			'sort'          => $sort,
+			'order'         => $order,
+			'start'         => ($page - 1) * $this->config->get('config_limit_admin'),
+			'limit'         => $this->config->get('config_limit_admin')
 		);
 
-		$download_total = $this->model_catalog_download->getTotalDownloads();
+		$download_total = $this->model_catalog_download->getTotalDownloads($filter_data);
 
 		$results = $this->model_catalog_download->getDownloads($filter_data);
 
@@ -233,6 +244,7 @@ class ControllerCatalogDownload extends Controller {
 				'download_id' => $result['download_id'],
 				'name'        => $result['name'],
 				'name_raw'    => $result['name'],
+				'status'      => $result['status'],
 				'date_added'  => date($this->language->get('date_format_short'), strtotime($result['date_added'])),
 				'edit'        => $this->url->link('catalog/download/edit', 'user_token=' . $this->session->data['user_token'] . '&download_id=' . $result['download_id'] . $url, true),
 				'copy'        => $this->url->link('catalog/download/copy', 'user_token=' . $this->session->data['user_token'] . '&download_id=' . $result['download_id'] . $url, true),
@@ -272,7 +284,12 @@ class ControllerCatalogDownload extends Controller {
 			$url .= '&page=' . $this->request->get['page'];
 		}
 
+		if (isset($this->request->get['filter_status'])) {
+			$url .= '&filter_status=' . $this->request->get['filter_status'];
+		}
+
 		$data['sort_name'] = $this->url->link('catalog/download', 'user_token=' . $this->session->data['user_token'] . '&sort=dd.name' . $url, true);
+		$data['sort_status'] = $this->url->link('catalog/download', 'user_token=' . $this->session->data['user_token'] . '&sort=d.status' . $url, true);
 		$data['sort_date_added'] = $this->url->link('catalog/download', 'user_token=' . $this->session->data['user_token'] . '&sort=d.date_added' . $url, true);
 
 		$url = '';
@@ -285,6 +302,10 @@ class ControllerCatalogDownload extends Controller {
 			$url .= '&order=' . $this->request->get['order'];
 		}
 
+		if (isset($this->request->get['filter_status'])) {
+			$url .= '&filter_status=' . $this->request->get['filter_status'];
+		}
+
 		$pagination = new Pagination();
 		$pagination->total = $download_total;
 		$pagination->page = $page;
@@ -295,6 +316,7 @@ class ControllerCatalogDownload extends Controller {
 
 		$data['results'] = sprintf($this->language->get('text_pagination'), ($download_total) ? (($page - 1) * $this->config->get('config_limit_admin')) + 1 : 0, ((($page - 1) * $this->config->get('config_limit_admin')) > ($download_total - $this->config->get('config_limit_admin'))) ? $download_total : ((($page - 1) * $this->config->get('config_limit_admin')) + $this->config->get('config_limit_admin')), $download_total, ceil($download_total / $this->config->get('config_limit_admin')));
 
+		$data['filter_status'] = $filter_status;
 		$data['sort'] = $sort;
 		$data['order'] = $order;
 
@@ -419,6 +441,14 @@ class ControllerCatalogDownload extends Controller {
 			$data['mask'] = $download_info['mask'];
 		} else {
 			$data['mask'] = '';
+		}
+
+		if (isset($this->request->post['status'])) {
+			$data['status'] = (int)$this->request->post['status'];
+		} elseif (!empty($download_info)) {
+			$data['status'] = (int)$download_info['status'];
+		} else {
+			$data['status'] = 1;
 		}
 
 		$data['header'] = $this->load->controller('common/header');
