@@ -41,6 +41,10 @@ $_['text_add_layout_subtitle'] = 'Створити новий макет сто�
 
 $_['text_edit_layout_subtitle'] = 'Редагувати правила призначення макету';
 
+// Sidebar cards
+$_['text_routes_card'] = 'Маршрути';
+$_['text_modules_card'] = 'Модулі';
+
 // Builder
 $_['text_switch_to_builder']  = 'Перейти до конструктора';
 $_['text_switch_to_classic']  = 'Класичний вигляд';
