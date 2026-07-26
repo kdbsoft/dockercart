@@ -685,18 +685,18 @@ class Cart
                 // Downloads
                 $download_data = [];
 
-                $download_query = $this->db->query(
-                    "SELECT * FROM " .
-                        DB_PREFIX .
-                        "product_to_download p2d LEFT JOIN " .
-                        DB_PREFIX .
-                        "download d ON (p2d.download_id = d.download_id) LEFT JOIN " .
-                        DB_PREFIX .
-                        "download_description dd ON (d.download_id = dd.download_id) WHERE p2d.product_id = '" .
-                        (int) $cart["product_id"] .
-                        "' AND dd.language_id = '" .
-                        (int) $this->config->get("config_language_id") .
-                        "'",
+				$download_query = $this->db->query(
+					"SELECT * FROM " .
+						DB_PREFIX .
+						"product_to_download p2d LEFT JOIN " .
+						DB_PREFIX .
+						"download d ON (p2d.download_id = d.download_id) LEFT JOIN " .
+						DB_PREFIX .
+						"download_description dd ON (d.download_id = dd.download_id) WHERE p2d.product_id = '" .
+						(int) $cart["product_id"] .
+						"' AND dd.language_id = '" .
+						(int) $this->config->get("config_language_id") .
+						"' AND d.status = '1'",
                 );
 
                 foreach ($download_query->rows as $download) {
