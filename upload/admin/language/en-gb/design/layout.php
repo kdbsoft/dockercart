@@ -24,6 +24,10 @@ $_['text_add_layout_subtitle'] = 'Create a new page layout';
 
 $_['text_edit_layout_subtitle'] = 'Edit layout assignment rules';
 
+// Sidebar cards
+$_['text_routes_card']    = 'Routes';
+$_['text_modules_card']   = 'Modules';
+
 
 
 // Column
