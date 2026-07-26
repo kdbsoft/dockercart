@@ -27,6 +27,7 @@ $_['text_design_card']  = 'Theme';
 // Column
 $_['column_title']           = 'Information Title';
 $_['column_sort_order']      = 'Sort Order';
+$_['column_status']          = 'Status';
 $_['column_action']          = 'Action';
 
 // Entry

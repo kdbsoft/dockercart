@@ -215,10 +215,11 @@ class ModelCatalogInformation extends Model {
 				$sql .= " AND id.title LIKE '%" . $this->db->escape($data['filter_name']) . "%'";
 			}
 
-			$sort_data = array(
-				'id.title',
-				'i.sort_order'
-			);
+		$sort_data = array(
+			'id.title',
+			'i.sort_order',
+			'i.status'
+		);
 
 			if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
 				$sql .= " ORDER BY " . $data['sort'];
@@ -329,7 +330,7 @@ class ModelCatalogInformation extends Model {
 	}
 
 	public function updateInformationField($information_id, $data) {
-		$int_fields = array('sort_order');
+		$int_fields = array('sort_order', 'status');
 
 		$sets = array();
 		foreach ($int_fields as $field) {

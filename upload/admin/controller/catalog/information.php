@@ -233,6 +233,8 @@ class ControllerCatalogInformation extends Controller {
 				'title_raw'      => $result['title'],
 				'sort_order'     => $result['sort_order'],
 				'sort_order_raw' => $result['sort_order'],
+				'status'         => $result['status'],
+				'status_raw'     => $result['status'],
 				'edit'           => $this->url->link('catalog/information/edit', 'user_token=' . $this->session->data['user_token'] . '&information_id=' . $result['information_id'] . $url, true),
 				'copy'           => $this->url->link('catalog/information/copy', 'user_token=' . $this->session->data['user_token'] . '&information_id=' . $result['information_id'] . $url, true),
 				'delete'         => $this->url->link('catalog/information/delete', 'user_token=' . $this->session->data['user_token'] . '&information_id=' . $result['information_id'] . $url, true)
@@ -271,8 +273,12 @@ class ControllerCatalogInformation extends Controller {
 			$url .= '&page=' . $this->request->get['page'];
 		}
 
+		$data['text_enabled'] = $this->language->get('text_enabled');
+		$data['text_disabled'] = $this->language->get('text_disabled');
+
 		$data['sort_title'] = $this->url->link('catalog/information', 'user_token=' . $this->session->data['user_token'] . '&sort=id.title' . $url, true);
 		$data['sort_sort_order'] = $this->url->link('catalog/information', 'user_token=' . $this->session->data['user_token'] . '&sort=i.sort_order' . $url, true);
+		$data['sort_status'] = $this->url->link('catalog/information', 'user_token=' . $this->session->data['user_token'] . '&sort=i.status' . $url, true);
 
 		$url = '';
 
@@ -611,6 +617,16 @@ class ControllerCatalogInformation extends Controller {
 					$json['success'] = true;
 					$json['value_html'] = (string)$val;
 				}
+			} elseif ($field === 'status') {
+				$val = (int)$value;
+				$this->model_catalog_information->updateInformationField($information_id, array('status' => $val));
+
+				if ($val) {
+					$json['value_html'] = '<span class="label label-success">' . $this->language->get('text_enabled') . '</span>';
+				} else {
+					$json['value_html'] = '<span class="label label-danger">' . $this->language->get('text_disabled') . '</span>';
+				}
+				$json['success'] = true;
 			} else {
 				$json['error'] = 'Invalid field';
 			}
