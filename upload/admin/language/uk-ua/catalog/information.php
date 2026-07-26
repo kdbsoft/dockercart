@@ -7,6 +7,7 @@ $_['tab_params_group'] = 'Параметри';
 $_['column_action'] = 'Дія';
 $_['column_noindex'] = 'Індексація';
 $_['column_sort_order'] = 'Порядок сортування';
+$_['column_status'] = 'Статус';
 $_['column_title'] = 'Назва інформації';
 $_['entry_bottom'] = 'Нижній колонтитул';
 $_['entry_top'] = 'Верхній колонтитул';

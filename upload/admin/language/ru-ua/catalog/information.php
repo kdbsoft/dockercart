@@ -6,6 +6,7 @@ $_['tab_params_group'] = 'Параметры';
 
 $_['column_action'] = 'Действие';
 $_['column_sort_order'] = 'Порядок сортировки';
+$_['column_status'] = 'Статус';
 $_['column_title'] = 'Заголовок информации';
 $_['entry_bottom'] = 'Нижний колонтитул';
 $_['entry_top'] = 'Верхний колонтитул';
