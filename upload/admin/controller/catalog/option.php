@@ -231,6 +231,8 @@ class ControllerCatalogOption extends Controller {
 				'name_raw'       => $result['name'],
 				'sort_order'     => $result['sort_order'],
 				'sort_order_raw' => $result['sort_order'],
+				'status'         => $result['status'],
+				'status_raw'     => $result['status'],
 				'edit'           => $this->url->link('catalog/option/edit', 'user_token=' . $this->session->data['user_token'] . '&option_id=' . $result['option_id'] . $url, true),
 				'copy'           => $this->url->link('catalog/option/copy', 'user_token=' . $this->session->data['user_token'] . '&option_id=' . $result['option_id'] . $url, true),
 				'delete'         => $this->url->link('catalog/option/delete', 'user_token=' . $this->session->data['user_token'] . '&option_id=' . $result['option_id'] . $url, true)
@@ -406,6 +408,21 @@ class ControllerCatalogOption extends Controller {
 			$data['sort_order'] = '';
 		}
 
+		if (isset($this->request->post['status'])) {
+			$data['status'] = $this->request->post['status'];
+		} elseif (!empty($option_info)) {
+			$data['status'] = $option_info['status'];
+		} else {
+			$data['status'] = true;
+		}
+
+		$data['text_status_card'] = $this->language->get('text_status_card');
+		$data['entry_status'] = $this->language->get('entry_status');
+		$data['text_enabled'] = $this->language->get('text_enabled');
+		$data['text_disabled'] = $this->language->get('text_disabled');
+		$data['text_active'] = $this->language->get('text_active');
+		$data['text_inactive'] = $this->language->get('text_inactive');
+
 		if (isset($this->request->post['option_value'])) {
 			$option_values = $this->request->post['option_value'];
 		} elseif (isset($this->request->get['option_id'])) {
@@ -564,6 +581,13 @@ class ControllerCatalogOption extends Controller {
 					$json['success'] = true;
 					$json['value_html'] = (string)$val;
 				}
+			} elseif ($field === 'status') {
+				$val = $value == '1' || $value === 1 || $value === 'true' ? 1 : 0;
+				$this->model_catalog_option->updateOptionField($option_id, array('status' => $val));
+				$json['success'] = true;
+				$json['value_html'] = $val
+					? '<span class="label label-success">' . $this->language->get('text_enabled') . '</span>'
+					: '<span class="label label-danger">' . $this->language->get('text_disabled') . '</span>';
 			} else {
 				$json['error'] = 'Invalid field';
 			}

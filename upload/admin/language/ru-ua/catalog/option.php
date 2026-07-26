@@ -3,10 +3,12 @@
 $_['column_action'] = 'Действие';
 $_['column_name'] = 'Название опции';
 $_['column_sort_order'] = 'Порядок сортировки';
+$_['column_status'] = 'Статус';
 $_['entry_color'] = 'Цвет';
 $_['entry_name'] = 'Название опции';
 $_['entry_option_value'] = 'Название значения параметра';
 $_['entry_sort_order'] = 'Порядок сортировки';
+$_['entry_status'] = 'Статус';
 $_['entry_type'] = 'Тип';
 $_['error_name'] = 'Название параметра должно содержать от 1 до 128 символов!';
 $_['error_option_value'] = 'Имя параметра должно содержать от 1 до 128 символов!';
@@ -35,6 +37,7 @@ $_['text_time'] = 'Время';
 $_['text_value'] = 'Значения опций';
 // Sidebar
 $_['text_settings_card']     = 'Параметры';
+$_['text_status_card']       = 'Статус';
 
 // Subtitle
 
