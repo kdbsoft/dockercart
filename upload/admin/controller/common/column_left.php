@@ -204,6 +204,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$design[] = array(
 					'name'	   => $this->language->get('text_layout'),
 					'href'     => $this->url->link('design/layout', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'layout-grid',
 					'children' => array()
 				);
 			}
@@ -212,6 +213,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$design[] = array(
 					'name'	   => $this->language->get('text_theme'),
 					'href'     => $this->url->link('design/theme', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'palette',
 					'children' => array()
 				);
 			}
@@ -220,6 +222,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$design[] = array(
 					'name'	   => $this->language->get('text_language_editor'),
 					'href'     => $this->url->link('design/translation', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'globe',
 					'children' => array()
 				);
 			}
@@ -228,6 +231,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$design[] = array(
 					'name'	   => $this->language->get('text_banner'),
 					'href'     => $this->url->link('design/banner', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'image',
 					'children' => array()
 				);
 			}
@@ -237,6 +241,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$design[] = array(
 					'name'	   => $this->language->get('text_seo_url'),
 					'href'     => $this->url->link('design/seo_url', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'link',
 					'children' => array()
 				);
 			}
