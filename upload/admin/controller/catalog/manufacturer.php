@@ -639,6 +639,13 @@ class ControllerCatalogManufacturer extends Controller {
 					$json['success'] = true;
 					$json['value_html'] = (string)$val;
 				}
+			} elseif ($field === 'status') {
+				$val = $value == '1' || $value === 1 || $value === 'true' ? 1 : 0;
+				$this->model_catalog_manufacturer->updateManufacturerField($manufacturer_id, array('status' => $val));
+				$json['success'] = true;
+				$json['value_html'] = $val
+					? '<span class="label label-success">' . $this->language->get('text_enabled') . '</span>'
+					: '<span class="label label-danger">' . $this->language->get('text_disabled') . '</span>';
 			} else {
 				$json['error'] = 'Invalid field';
 			}

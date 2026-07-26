@@ -53,11 +53,16 @@
                   <td class="text-right">
                     <span class="inline-edit" data-manufacturer-id="{{ manufacturer.manufacturer_id }}" data-field="sort_order" data-value="{{ manufacturer.sort_order_raw }}">{{ manufacturer.sort_order }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
                   </td>
-                  <td class="text-right">{% if manufacturer.status %}
+                  <td class="text-right">
+                    <span class="inline-edit" data-manufacturer-id="{{ manufacturer.manufacturer_id }}" data-field="status" data-value="{{ manufacturer.status_raw }}">
+                    {% if manufacturer.status %}
                     <span class="label label-success">{{ text_enabled }}</span>
                     {% else %}
                     <span class="label label-danger">{{ text_disabled }}</span>
-                    {% endif %}</td>
+                    {% endif %}
+                    <i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>
+                    </span>
+                  </td>
                   <td class="text-right"><a href="{{ manufacturer.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a> <a href="{{ manufacturer.copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default btn--icon"><i data-lucide="copy" width="14" height="14"></i></a> <a href="{{ manufacturer.delete }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="return confirm('{{ text_confirm }}');"><i data-lucide="trash-2" width="14" height="14"></i></a></td>
                 </tr>
                 {% endfor %}
@@ -167,6 +172,42 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 			error: function() {
 				$span.html($span.data('display'));
 			}
+		});
+	} else if (field === 'status') {
+		var $select = $('<select class="form-control input-sm" style="width:auto;display:inline-block;">');
+		$select.append('<option value="1"' + (rawValue == 1 ? ' selected' : '') + '>{{ text_enabled }}</option>');
+		$select.append('<option value="0"' + (rawValue == 0 ? ' selected' : '') + '>{{ text_disabled }}</option>');
+		$span.html($select);
+		$select.focus();
+		var saved = false;
+
+		$select.on('change', function() {
+			saved = true;
+			var newValue = $(this).val();
+
+			$.ajax({
+				url: 'index.php?route=catalog/manufacturer/updateField&user_token={{ user_token }}',
+				type: 'post',
+				dataType: 'json',
+				data: { manufacturer_id: manufacturerId, field: field, value: newValue },
+				success: function(json) {
+					if (json['error']) {
+						$span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
+						setTimeout(function() { $span.html($span.data('display')); }, 3000);
+					} else {
+						$span.data('value', newValue);
+						$span.html(json['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+						lucide.createIcons({ nodes: [$span[0]] });
+					}
+				},
+				error: function() {
+					$span.html($span.data('display'));
+				}
+			});
+		});
+
+		$select.on('blur', function() {
+			if (!saved) $span.html($span.data('display'));
 		});
 	} else {
 		$span.html('<input type="text" class="form-control input-sm inline-edit-input" value="' + rawValue + '">');
