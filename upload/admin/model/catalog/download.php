@@ -1,7 +1,7 @@
 <?php
 class ModelCatalogDownload extends Model {
 	public function addDownload($data) {
-		$this->db->query("INSERT INTO " . DB_PREFIX . "download SET filename = '" . $this->db->escape($data['filename']) . "', mask = '" . $this->db->escape($data['mask']) . "', date_added = NOW()");
+		$this->db->query("INSERT INTO " . DB_PREFIX . "download SET filename = '" . $this->db->escape($data['filename']) . "', mask = '" . $this->db->escape($data['mask']) . "', status = '" . (int)$data['status'] . "', date_added = NOW()");
 
 		$download_id = $this->db->getLastId();
 
@@ -13,7 +13,7 @@ class ModelCatalogDownload extends Model {
 	}
 
 	public function editDownload($download_id, $data) {
-		$this->db->query("UPDATE " . DB_PREFIX . "download SET filename = '" . $this->db->escape($data['filename']) . "', mask = '" . $this->db->escape($data['mask']) . "' WHERE download_id = '" . (int)$download_id . "'");
+		$this->db->query("UPDATE " . DB_PREFIX . "download SET filename = '" . $this->db->escape($data['filename']) . "', mask = '" . $this->db->escape($data['mask']) . "', status = '" . (int)$data['status'] . "' WHERE download_id = '" . (int)$download_id . "'");
 
 		$this->db->query("DELETE FROM " . DB_PREFIX . "download_description WHERE download_id = '" . (int)$download_id . "'");
 
@@ -47,6 +47,7 @@ class ModelCatalogDownload extends Model {
 
 		$data["filename"] = $download["filename"];
 		$data["mask"] = $download["mask"];
+		$data["status"] = $download["status"];
 		$data["download_description"] = $this->getDownloadDescriptions(
 			$download_id,
 		);
@@ -110,8 +111,13 @@ class ModelCatalogDownload extends Model {
 			$sql .= " AND dd.name LIKE '" . $this->db->escape($data['filter_name']) . "%'";
 		}
 
+		if (isset($data['filter_status']) && $data['filter_status'] !== '') {
+			$sql .= " AND d.status = '" . (int)$data['filter_status'] . "'";
+		}
+
 		$sort_data = array(
 			'dd.name',
+			'd.status',
 			'd.date_added'
 		);
 
@@ -156,8 +162,18 @@ class ModelCatalogDownload extends Model {
 		return $download_description_data;
 	}
 
-	public function getTotalDownloads() {
-		$query = $this->db->query("SELECT COUNT(*) AS total FROM " . DB_PREFIX . "download");
+	public function getTotalDownloads($data = array()) {
+		$sql = "SELECT COUNT(*) AS total FROM " . DB_PREFIX . "download d LEFT JOIN " . DB_PREFIX . "download_description dd ON (d.download_id = dd.download_id) WHERE dd.language_id = '" . (int)$this->config->get('config_language_id') . "'";
+
+		if (!empty($data['filter_name'])) {
+			$sql .= " AND dd.name LIKE '" . $this->db->escape($data['filter_name']) . "%'";
+		}
+
+		if (isset($data['filter_status']) && $data['filter_status'] !== '') {
+			$sql .= " AND d.status = '" . (int)$data['filter_status'] . "'";
+		}
+
+		$query = $this->db->query($sql);
 
 		return $query->row['total'];
 	}
