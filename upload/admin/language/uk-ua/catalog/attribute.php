@@ -4,9 +4,11 @@ $_['column_action'] = 'Дія';
 $_['column_attribute_group'] = 'Група атрибутів';
 $_['column_name'] = 'Назва атрибуту';
 $_['column_sort_order'] = 'Порядок сортування';
+$_['column_status'] = 'Статус';
 $_['entry_attribute_group'] = 'Група атрибутів';
 $_['entry_name'] = 'Назва атрибуту';
 $_['entry_sort_order'] = 'Порядок сортування';
+$_['entry_status'] = 'Статус';
 $_['error_attribute_group'] = 'Обов\'язкова група атрибутів!';
 $_['error_name'] = 'Назва атрибуту має містити від 1 до 64 символів!';
 $_['error_permission'] = 'Увага: У вас немає дозволу на зміну атрибутів!';
@@ -24,6 +26,7 @@ $_['text_panel_attribute_subtitle'] = 'Налаштуйте назву атри�
 
 // Sidebar
 $_['text_settings_card']     = 'Параметри';
+$_['text_status_card']       = 'Статус';
 
 // Subtitle
 

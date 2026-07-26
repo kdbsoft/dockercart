@@ -15,6 +15,9 @@
             <span class="page-header__title">
               {% if entity_name %}
                 {{ entity_name }}
+                <span class="page-header__badge {{ status ? 'page-header__badge--active' : 'page-header__badge--inactive' }}">
+                  {{ status ? text_active : text_inactive }}
+                </span>
               {% else %}
                 {{ text_option }}
               {% endif %}
@@ -73,10 +76,22 @@
         <div class="col-md-12 col-sm-12 col-lg-4 col-xl-3">
           <div class="dcx-sidebar-card">
             <div class="dcx-sidebar-card__header">
-              <div class="dcx-sidebar-card__header-icon"><i data-lucide="sliders" width="16" height="16"></i></div>
-              <h3 class="dcx-sidebar-card__title">{{ text_settings_card }}</h3>
+              <div class="dcx-sidebar-card__header-icon"><i data-lucide="toggle-right" width="16" height="16"></i></div>
+              <h3 class="dcx-sidebar-card__title">{{ text_status_card }}</h3>
             </div>
             <div class="dcx-sidebar-card__body">
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label" for="input-status">{{ entry_status }}</label>
+                <select name="status" id="input-status" class="form-control">
+                  {% if status %}
+                  <option value="1" selected="selected">{{ text_enabled }}</option>
+                  <option value="0">{{ text_disabled }}</option>
+                  {% else %}
+                  <option value="1">{{ text_enabled }}</option>
+                  <option value="0" selected="selected">{{ text_disabled }}</option>
+                  {% endif %}
+                </select>
+              </div>
               <div class="dcx-sidebar-card__field">
                 <label class="dcx-sidebar-card__label" for="input-type">{{ entry_type }}</label>
                 <select name="type" id="input-type" class="form-control">

@@ -3,10 +3,12 @@
 $_['column_action'] = 'Дія';
 $_['column_name'] = 'Назва опції';
 $_['column_sort_order'] = 'Порядок сортування';
+$_['column_status'] = 'Статус';
 $_['entry_color'] = 'Колір';
 $_['entry_name'] = 'Назва опції';
 $_['entry_option_value'] = 'Назва значення опції';
 $_['entry_sort_order'] = 'Порядок сортування';
+$_['entry_status'] = 'Статус';
 $_['entry_type'] = 'Тип';
 $_['error_name'] = 'Назва опції має містити від 1 до 128 символів!';
 $_['error_option_value'] = 'Назва значення опції має містити від 1 до 128 символів!';
@@ -36,6 +38,7 @@ $_['text_time'] = 'Час';
 $_['text_value'] = 'Значення опцій';
 // Sidebar
 $_['text_settings_card']     = 'Параметри';
+$_['text_status_card']       = 'Статус';
 
 // Subtitle
 
