@@ -3,6 +3,7 @@
 $_['column_action'] = 'Действие';
 $_['column_name'] = 'Название производителя';
 $_['column_sort_order'] = 'Порядок сортировки';
+$_['column_status'] = 'Статус';
 $_['entry_description'] = 'Описание';
 $_['entry_image'] = 'Изображение';
 $_['entry_keyword'] = 'Ключевое слово';
@@ -11,6 +12,7 @@ $_['entry_meta_keyword'] = 'Мета-ключевые слова';
 $_['entry_meta_title'] = 'Мета-заголовок';
 $_['entry_name'] = 'Название производителя';
 $_['entry_sort_order'] = 'Порядок сортировки';
+$_['entry_status'] = 'Статус';
 $_['entry_store'] = 'Магазины';
 $_['error_keyword'] = 'SEO-ссылка уже используется!';
 $_['error_meta_title'] = 'Мета-заголовок должен содержать более 1 и менее 255 символов!';

@@ -125,6 +125,18 @@
               </div>
             </div>
             <div class="dcx-sidebar-card__field">
+              <label class="dcx-sidebar-card__label" for="input-status">{{ entry_status }}</label>
+              <select name="status" id="input-status" class="form-control">
+                {% if status %}
+                  <option value="1" selected="selected">{{ text_enabled }}</option>
+                  <option value="0">{{ text_disabled }}</option>
+                {% else %}
+                  <option value="1">{{ text_enabled }}</option>
+                  <option value="0" selected="selected">{{ text_disabled }}</option>
+                {% endif %}
+              </select>
+            </div>
+            <div class="dcx-sidebar-card__field">
               <label class="dcx-sidebar-card__label" for="input-sort-order">{{ entry_sort_order }}</label>
               <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control" />
             </div>
