@@ -320,6 +320,7 @@ class ControllerExtensionModuleDockercartNewsletter extends Controller {
         $menu = array(
             'name' => $this->language->get('text_subscribers'),
             'href' => $this->url->link('extension/module/dockercart_newsletter', 'user_token=' . $this->session->data['user_token'] . ($this->getDefaultModuleId() > 0 ? '&module_id=' . $this->getDefaultModuleId() : ''), true),
+            'icon' => 'users',
             'children' => array()
         );
 

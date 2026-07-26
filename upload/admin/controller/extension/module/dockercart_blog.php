@@ -421,26 +421,31 @@ class ControllerExtensionModuleDockercartBlog extends Controller {
 				array(
 					'name' => $this->language->get('text_posts'),
 					'href' => $this->url->link('extension/module/dockercart_blog_post', 'user_token=' . $this->session->data['user_token'], true),
+					'icon' => 'file-text',
 					'children' => array()
 				),
 				array(
 					'name' => $this->language->get('text_categories'),
 					'href' => $this->url->link('extension/module/dockercart_blog_category', 'user_token=' . $this->session->data['user_token'], true),
+					'icon' => 'folder-tree',
 					'children' => array()
 				),
 				array(
 					'name' => $this->language->get('text_authors'),
 					'href' => $this->url->link('extension/module/dockercart_blog_author', 'user_token=' . $this->session->data['user_token'], true),
+					'icon' => 'pen-tool',
 					'children' => array()
 				),
 				array(
 					'name' => $this->language->get('text_comments'),
 					'href' => $this->url->link('extension/module/dockercart_blog_comment', 'user_token=' . $this->session->data['user_token'], true),
+					'icon' => 'message-square',
 					'children' => array()
 				),
 				array(
 					'name' => $this->language->get('text_settings'),
 					'href' => $this->url->link('extension/module/dockercart_blog', 'user_token=' . $this->session->data['user_token'], true),
+					'icon' => 'settings',
 					'children' => array()
 				)
 			)
