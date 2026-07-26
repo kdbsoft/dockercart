@@ -158,6 +158,11 @@
 	flex-shrink: 0;
 }
 
+/* Rotate arrow 90deg when section is open */
+.parent:not(.collapsed) .menu-arrow {
+	transform: rotate(90deg);
+}
+
 /* 1st lvl */
 #menu > li {
 	position: relative;

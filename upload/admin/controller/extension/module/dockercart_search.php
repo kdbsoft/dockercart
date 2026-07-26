@@ -686,6 +686,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
         $menu = array(
             'name' => $this->language->get('heading_title_menu'),
             'href' => $this->url->link('extension/module/dockercart_search', 'user_token=' . $this->session->data['user_token'], true),
+            'icon' => 'search',
             'children' => array()
         );
 

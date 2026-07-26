@@ -4,7 +4,7 @@
     {% set i = 0 %}
     {% for menu in menus %}
     <li id="{{ menu.id }}">
-        {% if menu.href %}<a href="{{ menu.href }}"><i data-lucide="{{ menu.icon }}"></i> {{ menu.name }}</a>{% else %}<a href="#collapse{{ i }}" data-toggle="collapse" class="parent collapsed"><i data-lucide="{{ menu.icon }}"></i> {{ menu.name }} <i data-lucide="chevron-down" class="menu-arrow"></i></a>{% endif %}
+        {% if menu.href %}<a href="{{ menu.href }}"><i data-lucide="{{ menu.icon }}"></i> {{ menu.name }}</a>{% else %}<a href="#collapse{{ i }}" data-toggle="collapse" class="parent collapsed"><i data-lucide="{{ menu.icon }}"></i> {{ menu.name }} <i data-lucide="chevron-right" class="menu-arrow"></i></a>{% endif %}
         {% if menu.children %}
           <ul id="collapse{{ i }}" class="collapse">
             {% set j = 0 %}
@@ -13,7 +13,7 @@
               <li>{% if children_1.href %}
                   <a href="{{ children_1.href }}">{% if children_1.icon %}<i data-lucide="{{ children_1.icon }}"></i> {% endif %}{{ children_1.name }}</a>
                 {% else %}
-                  <a href="#collapse{{ i }}-{{ j }}" data-toggle="collapse" class="parent collapsed">{{ children_1.name }} <i data-lucide="chevron-down" class="menu-arrow"></i></a>
+                  <a href="#collapse{{ i }}-{{ j }}" data-toggle="collapse" class="parent collapsed">{% if children_1.icon %}<i data-lucide="{{ children_1.icon }}"></i> {% endif %}{{ children_1.name }} <i data-lucide="chevron-right" class="menu-arrow"></i></a>
                 {% endif %}
 
                 {% if children_1.children %}
@@ -23,7 +23,7 @@
                       <li>{% if children_2.href %}
                           <a href="{{ children_2.href }}">{{ children_2.name }}</a>
                         {% else %}
-                          <a href="#collapse-{{ i }}-{{ j }}-{{ k }}" data-toggle="collapse" class="parent collapsed">{{ children_2.name }} <i data-lucide="chevron-down" class="menu-arrow"></i></a>
+                          <a href="#collapse-{{ i }}-{{ j }}-{{ k }}" data-toggle="collapse" class="parent collapsed">{{ children_2.name }} <i data-lucide="chevron-right" class="menu-arrow"></i></a>
                         {% endif %}
                         {% if children_2.children %}
                           <ul id="collapse-{{ i }}-{{ j }}-{{ k }}" class="collapse">

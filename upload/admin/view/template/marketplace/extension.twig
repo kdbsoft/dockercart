@@ -14,12 +14,12 @@
   <div class="container-fluid">
 
     {% if error_warning %}
-    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+    <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle"></i> {{ error_warning }}
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
     {% if success %}
-    <div id="ext-alert-success" class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+    <div id="ext-alert-success" class="alert alert-success alert-dismissible"><i data-lucide="check-circle"></i> {{ success }}
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
@@ -29,13 +29,21 @@
       .ext-toolbar-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
       .ext-toolbar-search { flex: 1 1 260px; min-width: 200px; max-width: 400px; }
       .ext-toolbar-filters { flex: 0 0 auto; white-space: nowrap; }
+      #content .label svg[data-lucide] { width: 12px; height: 12px; vertical-align: -2px; }
+      #content .alert svg[data-lucide] { width: 16px; height: 16px; vertical-align: -3px; }
+      #content .panel-footer .btn svg[data-lucide] { width: 14px; height: 14px; vertical-align: -2px; }
+      #content .ext-instance svg[data-lucide] { width: 14px; height: 14px; }
+      #content .ext-group-heading svg[data-lucide] { width: 18px; height: 18px; vertical-align: -3px; }
+      #content .ext-card .panel-heading svg[data-lucide] { width: 20px; height: 20px; vertical-align: -4px; }
+      #content .ext-type-btn svg[data-lucide] { width: 14px; height: 14px; vertical-align: -2px; margin-right: 4px; }
+      #content .ext-empty-state svg[data-lucide], #ext-empty-state svg[data-lucide] { width: 48px; height: 48px; }
     </style>
     <div class="panel panel-default">
       <div class="panel-body" style="padding-bottom:8px;">
         <div class="ext-toolbar-row">
           <div class="ext-toolbar-search">
             <div class="input-group">
-              <span class="input-group-addon"><i class="fa fa-search"></i></span>
+              <span class="input-group-addon"><i data-lucide="search"></i></span>
               <input type="text" id="ext-search" class="form-control" placeholder="{{ text_search }}" autocomplete="off">
             </div>
           </div>
@@ -52,7 +60,7 @@
           </button>
           {% for tf in type_filters %}
           <button type="button" class="ext-type-btn {% if filter_type == tf.type %}active{% endif %}" data-type="{{ tf.type }}">
-            <i class="fa {{ tf.icon }}"></i>
+            <i data-lucide="{{ tf.icon }}"></i>
             {{ tf.label }}
             <span class="ext-type-count">{{ tf.count }}</span>
           </button>
@@ -65,7 +73,7 @@
     {% for group in groups %}
     <div class="ext-group" data-type="{{ group.type }}">
       <h4 class="ext-group-heading">
-        <i class="fa {{ group.icon }}"></i>
+        <i data-lucide="{{ group.icon }}"></i>
         {{ group.label }}
         <small>{{ group.extensions|length }} {{ text_ext_short }}</small>
       </h4>
@@ -82,10 +90,10 @@
             <a href="{{ ext.edit }}" class="ext-card-link">
             {% endif %}
             <div class="panel-heading">
-              <i class="fa {{ group.icon }} fa-lg" style="color:{% if ext.installed %}{% if ext.status_raw %}#166534{% else %}#6b7280{% endif %}{% else %}#9ca3af{% endif %};"></i>
+              <i data-lucide="{{ group.icon }}" style="width:20px;height:20px;color:{% if ext.installed %}{% if ext.status_raw %}#166534{% else %}#6b7280{% endif %}{% else %}#9ca3af{% endif %};"></i>
               <strong title="{{ ext.name|striptags }}">{{ ext.name|raw }}</strong>
               {% if ext.is_official %}
-              <span style="font-size:11px;color:#2563eb;vertical-align:middle;margin-left:4px;"><i class="fa fa-check-circle"></i> {{ text_official }}</span>
+              <span style="font-size:11px;color:#2563eb;vertical-align:middle;margin-left:4px;"><i data-lucide="check-circle"></i> {{ text_official }}</span>
               {% endif %}
             </div>
             {% if ext.installed %}
@@ -97,18 +105,18 @@
               <div style="margin-bottom:8px;display:flex;align-items:center;flex-wrap:wrap;gap:4px;">
                 {% if ext.installed %}
                   {% if ext.status_raw %}
-                  <span class="label label-success"><i class="fa fa-check-circle"></i> {{ text_enabled }}</span>
+                  <span class="label label-success"><i data-lucide="check-circle"></i> {{ text_enabled }}</span>
                   {% else %}
-                  <span class="label label-default"><i class="fa fa-circle-o"></i> {{ text_disabled }}</span>
+                  <span class="label label-default"><i data-lucide="circle"></i> {{ text_disabled }}</span>
                   {% endif %}
                 {% else %}
-                  <span class="label label-warning"><i class="fa fa-download"></i> {{ text_not_installed }}</span>
+                  <span class="label label-warning"><i data-lucide="download"></i> {{ text_not_installed }}</span>
                 {% endif %}
                 {% if ext.sort_order is not empty %}
-                <span class="label label-default" title="Sort order"><i class="fa fa-sort"></i> {{ ext.sort_order }}</span>
+                <span class="label label-default" title="Sort order"><i data-lucide="arrow-up-down"></i> {{ ext.sort_order }}</span>
                 {% endif %}
                 {% if ext.instance_count > 0 %}
-                <span class="label label-info"><i class="fa fa-clone"></i> {{ ext.instance_count }} {{ text_instances }}</span>
+                <span class="label label-info"><i data-lucide="copy"></i> {{ ext.instance_count }} {{ text_instances }}</span>
                 {% endif %}
               </div>
 
@@ -116,14 +124,14 @@
               <div class="ext-instances">
                 {% for instance in ext.instances %}
                 <div class="ext-instance">
-                  <i class="fa fa-folder-open" style="color:#6b7280;flex-shrink:0;"></i>
+                  <i data-lucide="folder-open" style="width:16px;height:16px;color:#6b7280;flex-shrink:0;"></i>
                   <span title="{{ instance.name }}">{{ instance.name }}</span>
-                  <a href="{{ instance.edit }}" class="btn btn-xs btn-info" title="{{ button_edit }}"><i class="fa fa-pencil"></i></a>
-                  <button type="button" class="btn btn-xs btn-warning btn-instance-delete" title="{{ button_delete }}" data-url="{{ instance.delete }}" data-name="{{ instance.name }}" data-confirm="{{ text_confirm_instance }}"><i class="fa fa-trash-o"></i></button>
+                  <a href="{{ instance.edit }}" class="btn btn-xs btn-info" title="{{ button_edit }}"><i data-lucide="pencil"></i></a>
+                  <button type="button" class="btn btn-xs btn-warning btn-instance-delete" title="{{ button_delete }}" data-url="{{ instance.delete }}" data-name="{{ instance.name }}" data-confirm="{{ text_confirm_instance }}"><i data-lucide="trash-2"></i></button>
                 </div>
                 {% endfor %}
                 <div style="margin-top:4px;">
-                  <a href="{{ ext.edit }}" style="font-size:12px;"><i class="fa fa-plus-circle"></i> {{ button_add }}</a>
+                  <a href="{{ ext.edit }}" style="font-size:12px;"><i data-lucide="plus-circle"></i> {{ button_add }}</a>
                 </div>
               </div>
               {% endif %}
@@ -138,7 +146,7 @@
             <div class="panel-footer">
               {% if ext.installed %}
                 <a href="{{ ext.edit }}" class="btn btn-xs btn-primary" title="{{ button_edit }}">
-                  <i class="fa fa-pencil"></i> {{ button_edit }}
+                  <i data-lucide="pencil"></i> {{ button_edit }}
                 </a>
                 <button type="button"
                         class="btn btn-xs btn-danger btn-ext-uninstall"
@@ -146,7 +154,7 @@
                         data-url="{{ ext.uninstall_url }}"
                         data-name="{{ ext.name|striptags }}"
                         data-confirm="{{ text_confirm }}">
-                  <i class="fa fa-minus-circle"></i>
+                  <i data-lucide="minus-circle"></i>
                 </button>
               {% else %}
                 <button type="button"
@@ -154,7 +162,7 @@
                         title="{{ button_install }}"
                         data-url="{{ ext.install_url }}"
                         data-name="{{ ext.name|striptags }}">
-                  <i class="fa fa-plus-circle"></i> {{ button_install }}
+                  <i data-lucide="plus-circle"></i> {{ button_install }}
                 </button>
               {% endif %}
             </div>
@@ -165,13 +173,13 @@
     </div>{# end .ext-group #}
     {% else %}
     <div class="text-center text-muted" style="padding:40px 0;">
-      <i class="fa fa-puzzle-piece fa-3x" style="display:block;margin-bottom:10px;opacity:0.5;"></i>
+      <i data-lucide="puzzle" style="width:48px;height:48px;display:block;margin-bottom:10px;opacity:0.5;"></i>
       {{ text_no_results }}
     </div>
     {% endfor %}
 
     <div id="ext-empty-state">
-      <i class="fa fa-search fa-3x"></i>
+      <i data-lucide="search" style="width:48px;height:48px;"></i>
       {{ text_no_results }}
     </div>
 
@@ -249,18 +257,20 @@
   // ---- Install / Uninstall via AJAX ----
   function showAlert(msg, type) {
     var cls = type === 'error' ? 'alert-danger' : 'alert-success';
-    var icon = type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle';
-    var html = '<div class="alert ' + cls + ' alert-dismissible"><i class="fa ' + icon + '"></i> ' + msg + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>';
+    var icon = type === 'error' ? 'alert-circle' : 'check-circle';
+    var html = '<div class="alert ' + cls + ' alert-dismissible"><i data-lucide="' + icon + '"></i> ' + msg + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>';
     var $alert = $(html);
     $('#ext-alert-success, #ext-alert-danger').remove();
     $('#content > .container-fluid').prepend($alert);
+    lucide.createIcons({ nodes: $alert.find('[data-lucide]').toArray() });
   }
 
   function doExtAction(url, $btn, onSuccess) {
     $btn.prop('disabled', true);
     var $icon = $btn.find('i');
-    var origClass = $icon.attr('class');
-    $icon.attr('class', 'fa fa-spinner fa-spin');
+    var origHtml = $icon[0].outerHTML;
+    $icon.replaceWith('<i data-lucide="loader" class="lucide-spin"></i>');
+    lucide.createIcons({ nodes: [$btn.find('.lucide-spin')[0]] });
 
     $.ajax({
       url: url,
@@ -279,13 +289,15 @@
           });
         } else {
           showAlert(json.error || 'Error', 'error');
-          $icon.attr('class', origClass);
+          $btn.find('[data-lucide="loader"]').replaceWith(origHtml);
+          lucide.createIcons({ nodes: $btn.find('[data-lucide]').toArray() });
           $btn.prop('disabled', false);
         }
       },
       error: function(xhr) {
         showAlert('Server error: ' + xhr.status, 'error');
-        $icon.attr('class', origClass);
+        $btn.find('[data-lucide="loader"]').replaceWith(origHtml);
+        lucide.createIcons({ nodes: $btn.find('[data-lucide]').toArray() });
         $btn.prop('disabled', false);
       }
     });
@@ -350,8 +362,9 @@
 
     $btn.prop('disabled', true);
     var $icon = $btn.find('i');
-    var origClass = $icon.attr('class');
-    $icon.attr('class', 'fa fa-spinner fa-spin');
+    var origHtml = $icon[0].outerHTML;
+    $icon.replaceWith('<i data-lucide="loader" class="lucide-spin"></i>');
+    lucide.createIcons({ nodes: [$btn.find('.lucide-spin')[0]] });
 
     $.ajax({
       url: url,
@@ -363,13 +376,15 @@
           window.location.href = buildReloadUrl();
         } else {
           showAlert(json.error || 'Error', 'error');
-          $icon.attr('class', origClass);
+          $btn.find('[data-lucide="loader"]').replaceWith(origHtml);
+          lucide.createIcons({ nodes: $btn.find('[data-lucide]').toArray() });
           $btn.prop('disabled', false);
         }
       },
       error: function(xhr) {
         showAlert('Server error: ' + xhr.status, 'error');
-        $icon.attr('class', origClass);
+        $btn.find('[data-lucide="loader"]').replaceWith(origHtml);
+        lucide.createIcons({ nodes: $btn.find('[data-lucide]').toArray() });
         $btn.prop('disabled', false);
       }
     });

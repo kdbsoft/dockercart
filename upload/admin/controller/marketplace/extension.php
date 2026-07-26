@@ -4,20 +4,20 @@ class ControllerMarketplaceExtension extends Controller {
 
 	// Icon map per extension type
 	private $type_icons = array(
-		'module'    => 'fa-puzzle-piece',
-		'payment'   => 'fa-credit-card',
-		'shipping'  => 'fa-truck',
-		'total'     => 'fa-calculator',
-		'dashboard' => 'fa-tachometer',
-		'analytics' => 'fa-line-chart',
-		'report'    => 'fa-bar-chart',
-		'feed'      => 'fa-rss',
-		'theme'     => 'fa-paint-brush',
-		'captcha'   => 'fa-shield',
-		'advertise' => 'fa-bullhorn',
-		'fraud'     => 'fa-ban',
-		'menu'      => 'fa-bars',
-		'currency'  => 'fa-money',
+		'module'    => 'puzzle',
+		'payment'   => 'credit-card',
+		'shipping'  => 'truck',
+		'total'     => 'calculator',
+		'dashboard' => 'gauge',
+		'analytics' => 'line-chart',
+		'report'    => 'bar-chart',
+		'feed'      => 'rss',
+		'theme'     => 'paintbrush',
+		'captcha'   => 'shield',
+		'advertise' => 'megaphone',
+		'fraud'     => 'ban',
+		'menu'      => 'menu',
+		'currency'  => 'banknote',
 	);
 
 	public function index() {
@@ -78,7 +78,7 @@ class ControllerMarketplaceExtension extends Controller {
 
 				$this->load->language('extension/extension/' . $type, 'type_lang');
 				$type_label = $this->language->get('type_lang')->get('heading_title');
-				$type_icon  = isset($this->type_icons[$type]) ? $this->type_icons[$type] : 'fa-plug';
+				$type_icon  = isset($this->type_icons[$type]) ? $this->type_icons[$type] : 'plug';
 
 				$installed_list = $this->model_setting_extension->getInstalled($type);
 
