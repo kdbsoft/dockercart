@@ -144,16 +144,17 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
      * Test Manticore connection (AJAX)
      */
     public function testConnection() {
+        $this->load->language('extension/module/dockercart_search');
         $this->load->model('extension/module/dockercart_search');
 
         $json = [];
 
         if ($this->model_extension_module_dockercart_search->testConnection()) {
             $json['success'] = true;
-            $json['message'] = 'Successfully connected to Manticore Search';
+            $json['message'] = $this->language->get('text_connection_success');
         } else {
             $json['success'] = false;
-            $json['message'] = 'Failed to connect to Manticore Search: ' . $this->model_extension_module_dockercart_search->getLastError();
+            $json['message'] = $this->language->get('text_connection_failed') . ' ' . $this->model_extension_module_dockercart_search->getLastError();
         }
 
         $this->response->addHeader('Content-Type: application/json');
@@ -175,17 +176,15 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
             if ($result['success']) {
                 $json['success'] = true;
                 $json['message'] = sprintf(
-                    'Reindexing completed: %d products, %d categories, %d manufacturers, %d information pages, %d orders, %d customers',
+                    $this->language->get('text_reindex_success'),
                     $result['products'],
                     $result['categories'],
                     $result['manufacturers'],
-                    $result['information'],
-                    $result['orders'],
-                    $result['customers']
+                    $result['information']
                 );
             } else {
                 $json['success'] = false;
-                $json['message'] = 'Reindexing failed: ' . $result['error'];
+                $json['message'] = $this->language->get('text_reindex_failed') . ' ' . $result['error'];
             }
         } catch (Exception $e) {
             $json['success'] = false;

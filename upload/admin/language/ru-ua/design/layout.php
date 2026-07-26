@@ -35,6 +35,10 @@ $_['text_add_layout_subtitle'] = 'Создать новый макет стра�
 
 $_['text_edit_layout_subtitle'] = 'Редактировать правила назначения макета';
 
+// Sidebar cards
+$_['text_routes_card'] = 'Маршруты';
+$_['text_modules_card'] = 'Модули';
+
 // Builder
 $_['text_switch_to_builder']  = 'Перейти в конструктор';
 $_['text_switch_to_classic']  = 'Классический вид';

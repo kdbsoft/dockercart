@@ -1,0 +1,136 @@
+/* ── Layout Form: tip banner ── */
+.dcx-tip-banner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background-color: var(--dc-gray-50, #f7f7f7);
+    border-radius: var(--dc-radius-lg, 8px);
+    border-left: 4px solid var(--dc-primary, #3498db);
+    font-size: 13px;
+    color: var(--dc-text-dark);
+    margin-bottom: 16px;
+}
+.dcx-tip-banner i {
+    color: var(--dc-primary, #3498db);
+    flex-shrink: 0;
+}
+
+/* ── Layout Form: route rows ── */
+.dc-route-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+.dc-route-row__fields {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.dc-remove-route {
+    flex-shrink: 0;
+    padding: 6px;
+    color: var(--dc-text-muted);
+}
+.dc-remove-route:hover {
+    color: var(--dc-red-500);
+}
+
+/* ── Layout Form: module columns ── */
+.dc-module-column {
+    border: 1px solid var(--dc-border);
+    border-radius: var(--dc-radius-lg, 8px);
+    background: var(--dc-surface);
+    overflow: hidden;
+}
+.dc-module-column__header {
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dc-text-dark);
+    background: var(--dc-gray-50, #f7f7f7);
+    border-bottom: 1px solid var(--dc-border);
+    text-align: center;
+}
+.dc-module-column__list {
+    min-height: 60px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.dc-module-column__footer {
+    display: flex;
+    gap: 6px;
+    padding: 8px;
+    border-top: 1px solid var(--dc-border);
+    background: var(--dc-gray-50, #f7f7f7);
+}
+.dc-module-column__footer .form-control {
+    flex: 1;
+    height: 30px;
+    font-size: 12px;
+}
+
+/* ── Layout Form: module items ── */
+.dc-module-item {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    border: 1px solid var(--dc-border);
+    border-radius: var(--dc-radius-md, 6px);
+    background: var(--dc-surface);
+    transition: box-shadow 0.15s ease;
+}
+.dc-module-item:hover {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.dc-module-item__handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    flex-shrink: 0;
+    cursor: grab;
+    color: var(--dc-text-muted);
+    border-right: 1px solid var(--dc-border);
+    user-select: none;
+}
+.dc-module-item__handle:hover {
+    color: var(--dc-primary);
+    background: var(--dc-gray-50, #f7f7f7);
+}
+.dc-module-item__body {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+    min-width: 0;
+}
+.dc-module-item__body .form-control {
+    flex: 1;
+    height: 32px;
+    font-size: 12px;
+}
+.dc-module-item__actions {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+/* ── Layout Form: sortable states ── */
+.sortable-module-list.sortable-ghost {
+    opacity: 0.4;
+    background-color: #f0f0f0 !important;
+}
+.module-drag-item.sortable-chosen {
+    background-color: #e3f2fd !important;
+    box-shadow: inset 0 0 0 2px #2196F3;
+}
+
+/* ── Layout Form: spacing utilities ── */
+.dc-mt-sm { margin-top: 8px; }
+.dc-mt-md { margin-top: 16px; }

@@ -86,3 +86,6 @@ $_['text_reindex_warning'] = 'Reindexing may take several minutes for large cata
 $_['text_reindexing'] = 'Reindexing...';
 $_['text_reindex_confirm'] = 'Are you sure you want to reindex all data? This may take several minutes.';
 $_['text_error_label'] = 'Error';
+
+$_['text_reindex_success'] = 'Reindexing completed: %s products, %s categories, %s manufacturers, %s information pages';
+$_['text_reindex_failed'] = 'Reindexing failed!';
