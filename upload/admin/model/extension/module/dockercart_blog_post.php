@@ -670,6 +670,7 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 			}
 		}
 		if (!empty($sets)) {
+			$sets[] = "`date_modified` = NOW()";
 			$this->db->query("UPDATE `" . DB_PREFIX . "blog_post` SET " . implode(', ', $sets) . " WHERE post_id = '" . (int)$post_id . "'");
 		}
 	}

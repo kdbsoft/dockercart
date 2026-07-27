@@ -381,4 +381,25 @@ class ModelExtensionModuleDockercartBlogCategory extends Model {
 			}
 		}
 	}
+
+	public function updateCategoryField($category_id, $data) {
+		$allowed = array('sort_order', 'status');
+		$sets = array();
+		foreach ($allowed as $field) {
+			if (isset($data[$field])) {
+				$sets[] = "`" . $field . "` = '" . (int)$data[$field] . "'";
+			}
+		}
+		if (!empty($sets)) {
+			$sets[] = "`date_modified` = NOW()";
+			$this->db->query("UPDATE `" . DB_PREFIX . "blog_category` SET " . implode(', ', $sets) . " WHERE category_id = '" . (int)$category_id . "'");
+		}
+	}
+
+	public function updateCategoryNames($category_id, $names) {
+		foreach ($names as $language_id => $name) {
+			$name = trim((string)$name);
+			$this->db->query("UPDATE `" . DB_PREFIX . "blog_category_description` SET name = '" . $this->db->escape($name) . "' WHERE category_id = '" . (int)$category_id . "' AND language_id = '" . (int)$language_id . "'");
+		}
+	}
 }

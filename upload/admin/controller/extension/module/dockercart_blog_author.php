@@ -155,6 +155,7 @@ class ControllerExtensionModuleDockercartBlogAuthor extends Controller {
 				'name'       => $result['name'],
 				'email'      => $result['email'],
 				'status'     => $result['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
+				'status_raw' => $result['status'],
 				'sort_order' => $result['sort_order'],
 				'selected'   => isset($this->request->post['selected']) && in_array($result['author_id'], $this->request->post['selected']),
 				'edit'       => $this->url->link('extension/module/dockercart_blog_author/edit', 'user_token=' . $this->session->data['user_token'] . '&author_id=' . $result['author_id'] . $url, true),
@@ -193,6 +194,8 @@ class ControllerExtensionModuleDockercartBlogAuthor extends Controller {
 		$data['pagination'] = $pagination->render();
 
 		$data['results'] = sprintf($this->language->get('text_pagination'), ($author_total) ? (($page - 1) * $this->config->get('config_limit_admin')) + 1 : 0, ((($page - 1) * $this->config->get('config_limit_admin')) > ($author_total - $this->config->get('config_limit_admin'))) ? $author_total : ((($page - 1) * $this->config->get('config_limit_admin')) + $this->config->get('config_limit_admin')), $author_total, ceil($author_total / $this->config->get('config_limit_admin')));
+
+		$data['user_token'] = $this->session->data['user_token'];
 
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
@@ -360,5 +363,40 @@ class ControllerExtensionModuleDockercartBlogAuthor extends Controller {
 		}
 
 		return !$this->error;
+	}
+
+	public function updateField() {
+		$json = array();
+
+		if (!$this->user->hasPermission('modify', 'extension/module/dockercart_blog_author')) {
+			$json['error'] = $this->language->get('error_permission');
+		} elseif (!isset($this->request->post['author_id']) || !isset($this->request->post['field']) || !isset($this->request->post['value'])) {
+			$json['error'] = 'Invalid request';
+		}
+
+		if (!isset($json['error'])) {
+			$author_id = (int)$this->request->post['author_id'];
+			$field = $this->request->post['field'];
+			$value = $this->request->post['value'];
+
+			$this->load->model('extension/module/dockercart_blog_author');
+
+			if ($field === 'status') {
+				$val = (int)$value;
+				$this->model_extension_module_dockercart_blog_author->updateAuthorField($author_id, array('status' => $val));
+
+				if ($val) {
+					$json['value_html'] = '<span class="label label-success">' . $this->language->get('text_enabled') . '</span>';
+				} else {
+					$json['value_html'] = '<span class="label label-danger">' . $this->language->get('text_disabled') . '</span>';
+				}
+				$json['success'] = true;
+			} else {
+				$json['error'] = 'Invalid field';
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
 	}
 }

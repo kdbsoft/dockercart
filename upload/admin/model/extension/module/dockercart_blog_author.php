@@ -135,4 +135,18 @@ class ModelExtensionModuleDockercartBlogAuthor extends Model {
 		$query = $this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "blog_author`");
 		return $query->row['total'];
 	}
+
+	public function updateAuthorField($author_id, $data) {
+		$allowed = array('status');
+		$sets = array();
+		foreach ($allowed as $field) {
+			if (isset($data[$field])) {
+				$sets[] = "`" . $field . "` = '" . (int)$data[$field] . "'";
+			}
+		}
+		if (!empty($sets)) {
+			$sets[] = "`date_modified` = NOW()";
+			$this->db->query("UPDATE `" . DB_PREFIX . "blog_author` SET " . implode(', ', $sets) . " WHERE author_id = '" . (int)$author_id . "'");
+		}
+	}
 }
