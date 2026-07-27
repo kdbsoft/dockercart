@@ -2,48 +2,53 @@
 <div id="content">
   <div class="page-header">
     <div class="container-fluid">
-      <div class="pull-right"><a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
-      <h1>{{ heading_title }} {% if order_status %}<span class="order-status-badge {{ status_badge_class }}">{{ order_status }}</span>{% endif %}</h1>
-      <ul class="breadcrumb">
-        {% for breadcrumb in breadcrumbs %}
-          <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
-        {% endfor %}
-      </ul>
+      <div class="row">
+        <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
+          <div class="pull-right">
+            <a href="{{ cancel }}" class="btn btn-default btn--icon"><i data-lucide="x" width="16" height="16"></i></a>
+          </div>
+          <a href="{{ cancel }}" class="page-header__link">
+            <span class="page-header__back">
+              <i data-lucide="arrow-left" width="20" height="20"></i>
+            </span>
+            <span class="page-header__title">
+              {{ heading_title }}
+              {% if order_status %}<span class="page-header__badge {{ status_badge_class }}">{{ order_status }}</span>{% endif %}
+            </span>
+          </a>
+        </div>
+      </div>
     </div>
   </div>
   <div class="container-fluid">
-    <div class="section-heading">
-      <h2>{{ heading_title }} {% if order_status %}<span class="order-status-badge {{ status_badge_class }}">{{ order_status }}</span>{% endif %}</h2>
-      <p class="section-heading-subtitle">{{ text_order_info_subtitle }}</p>
-    </div>
     <div class="row">
       <div class="col-md-8">
 
         <div class="order-address-row">
-          <div class="order-address-card">
-            <div class="order-address-card__header">
-              <h4 class="order-address-card__title">{{ text_payment_address }}</h4>
-              <button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="payment_address" data-title="{{ text_payment_address }}" data-target="#quick-payment-address"><i class="fa fa-pencil"></i></button>
+          <div class="dcx-address-card">
+            <div class="dcx-address-card__header">
+              <h4 class="dcx-address-card__title">{{ text_payment_address }}</h4>
+              <button type="button" class="btn btn-default btn-xs btn--icon btn-quick-edit" data-field="payment_address" data-title="{{ text_payment_address }}" data-target="#quick-payment-address"><i data-lucide="pencil" width="12" height="12"></i></button>
             </div>
-            <div class="order-address-card__body" id="quick-payment-address">{{ payment_address }}</div>
+            <div class="dcx-address-card__body" id="quick-payment-address">{{ payment_address }}</div>
           </div>
           {% if shipping_method %}
-          <div class="order-address-card">
-            <div class="order-address-card__header">
-              <h4 class="order-address-card__title">{{ text_shipping_address }}</h4>
-              <button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="shipping_address" data-title="{{ text_shipping_address }}" data-target="#quick-shipping-address"><i class="fa fa-pencil"></i></button>
+          <div class="dcx-address-card">
+            <div class="dcx-address-card__header">
+              <h4 class="dcx-address-card__title">{{ text_shipping_address }}</h4>
+              <button type="button" class="btn btn-default btn-xs btn--icon btn-quick-edit" data-field="shipping_address" data-title="{{ text_shipping_address }}" data-target="#quick-shipping-address"><i data-lucide="pencil" width="12" height="12"></i></button>
             </div>
-            <div class="order-address-card__body" id="quick-shipping-address">{{ shipping_address }}</div>
+            <div class="dcx-address-card__body" id="quick-shipping-address">{{ shipping_address }}</div>
           </div>
           {% endif %}
         </div>
 
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <div class="panel-heading__icon"><i class="fa fa-info-circle"></i></div>
+        <div class="dcx-panel">
+          <div class="dcx-panel-head">
+            <div class="dcx-panel-head__icon"><i data-lucide="shopping-cart" width="18" height="18"></i></div>
             <div>
-              <h3 class="panel-title">{{ text_panel_order_contents }}</h3>
-              <div class="panel-heading__subtitle">{{ text_order_contents_subtitle }}</div>
+              <div class="dcx-panel-title">{{ text_panel_order_contents }}</div>
+              <div class="dcx-panel-subtitle">{{ text_order_contents_subtitle }}</div>
             </div>
           </div>
           <div class="panel-body">
@@ -88,7 +93,7 @@
                   <td class="text-right"><input type="text" name="product[{{ inline_product_row }}][discount]" value="{{ product.discount_percent is defined ? product.discount_percent : 0 }}" class="order-product-input gt-no-translate" data-gt-inline-ignore="1" /></td>
                   <td class="text-right">{{ product.price }}</td>
                   <td class="text-right">{{ product.total }}</td>
-                  <td class="text-right"><button type="button" class="btn btn-danger btn-xs button-inline-remove-item"><i class="fa fa-trash"></i></button></td>
+                  <td class="text-right"><button type="button" class="btn btn-danger btn-xs button-inline-remove-item"><i data-lucide="trash-2" width="12" height="12"></i></button></td>
                 </tr>
                 {% set inline_product_row = inline_product_row + 1 %}
                 {% endfor %}
@@ -122,7 +127,7 @@
               </div>
               <div class="order-product-add-field order-product-add-field--action">
                 <label class="control-label">&nbsp;</label>
-                <button type="button" id="button-inline-add-product" class="btn btn-primary"><i class="fa fa-plus"></i> {{ button_product_add }}</button>
+                <button type="button" id="button-inline-add-product" class="btn btn-primary"><i data-lucide="plus" width="14" height="14"></i> {{ button_product_add }}</button>
               </div>
             </div>
 
@@ -132,144 +137,131 @@
                   <label class="control-label" for="input-inline-coupon">{{ entry_coupon }}</label>
                   <div class="input-group">
                     <input type="text" id="input-inline-coupon" value="" class="form-control" placeholder="{{ entry_coupon }}" />
-                    <span class="input-group-btn"><button type="button" id="button-inline-apply-coupon" class="btn btn-warning"><i class="fa fa-ticket"></i> {{ button_apply }}</button></span>
+                    <span class="input-group-btn"><button type="button" id="button-inline-apply-coupon" class="btn btn-warning"><i data-lucide="ticket" width="14" height="14"></i> {{ button_apply }}</button></span>
                   </div>
                 </div>
               </div>
             </div>
 
             <div class="text-right" style="padding-top:16px;border-top:1px solid #e5e7eb;margin-top:4px">
-              <button type="button" id="button-inline-save-items" data-loading-text="{{ text_loading }}" class="btn btn-success"><i class="fa fa-check-circle"></i> {{ button_save }}</button>
+              <button type="button" id="button-inline-save-items" data-loading-text="{{ text_loading }}" class="btn btn-success"><i data-lucide="check-circle" width="14" height="14"></i> {{ button_save }}</button>
             </div>
           </div>
         </div>
 
       </div>
       <div class="col-md-4">
-        <div class="order-sidebar">
+        <div class="dcx-sidebar-cards">
 
-          <div class="order-sidebar-card">
-            <div class="order-sidebar-card__header">
-              <div class="order-sidebar-card__icon order-sidebar-card__icon--blue"><i class="fa fa-user"></i></div>
-              <h3 class="order-sidebar-card__title">{{ text_panel_customer }}</h3>
+          <div class="dcx-sidebar-card">
+            <div class="dcx-sidebar-card__header">
+              <div class="dcx-sidebar-card__header-icon"><i data-lucide="user" width="16" height="16"></i></div>
+              <h3 class="dcx-sidebar-card__title">{{ text_panel_customer }}</h3>
             </div>
-            <div class="order-sidebar-card__body">
-              <div class="order-sidebar-row">
-                <span class="order-sidebar-row__icon"><i class="fa fa-user"></i></span>
-                <span class="order-sidebar-row__label">{{ text_customer }}</span>
-                <span class="order-sidebar-row__value" id="quick-customer-name">{% if customer %}<a href="{{ customer }}" target="_blank">{{ firstname }} {{ lastname }}</a>{% else %}{{ firstname }} {{ lastname }}{% endif %}</span>
-                <span class="order-sidebar-row__actions"><button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="customer_name" data-title="{{ text_customer }}" data-firstname="{{ firstname|e('html_attr') }}" data-lastname="{{ lastname|e('html_attr') }}" data-target="#quick-customer-name"><i class="fa fa-pencil"></i></button></span>
+            <div class="dcx-sidebar-card__body">
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label">{{ text_customer }}</label>
+                <div class="dcx-sidebar-card__value" id="quick-customer-name">{% if customer %}<a href="{{ customer }}" target="_blank">{{ firstname }} {{ lastname }}</a>{% else %}{{ firstname }} {{ lastname }}{% endif %}</div>
+                <div class="dcx-sidebar-card__actions"><button type="button" class="btn btn-default btn-xs btn--icon btn-quick-edit" data-field="customer_name" data-title="{{ text_customer }}" data-firstname="{{ firstname|e('html_attr') }}" data-lastname="{{ lastname|e('html_attr') }}" data-target="#quick-customer-name"><i data-lucide="pencil" width="12" height="12"></i></button></div>
               </div>
-              <div class="order-sidebar-row">
-                <span class="order-sidebar-row__icon"><i class="fa fa-group"></i></span>
-                <span class="order-sidebar-row__label">{{ text_customer_group }}</span>
-                <span class="order-sidebar-row__value">{{ customer_group }}</span>
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label">{{ text_customer_group }}</label>
+                <div class="dcx-sidebar-card__value">{{ customer_group }}</div>
               </div>
-              <div class="order-sidebar-row">
-                <span class="order-sidebar-row__icon"><i class="fa fa-envelope-o"></i></span>
-                <span class="order-sidebar-row__label">{{ text_email }}</span>
-                <span class="order-sidebar-row__value" id="quick-email"><a href="mailto:{{ email }}">{{ email }}</a></span>
-                <span class="order-sidebar-row__actions"><button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="email" data-title="{{ text_email }}" data-value="{{ email|e('html_attr') }}" data-target="#quick-email"><i class="fa fa-pencil"></i></button></span>
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label">{{ text_email }}</label>
+                <div class="dcx-sidebar-card__value" id="quick-email"><a href="mailto:{{ email }}">{{ email }}</a></div>
+                <div class="dcx-sidebar-card__actions"><button type="button" class="btn btn-default btn-xs btn--icon btn-quick-edit" data-field="email" data-title="{{ text_email }}" data-value="{{ email|e('html_attr') }}" data-target="#quick-email"><i data-lucide="pencil" width="12" height="12"></i></button></div>
               </div>
-              <div class="order-sidebar-row">
-                <span class="order-sidebar-row__icon"><i class="fa fa-phone"></i></span>
-                <span class="order-sidebar-row__label">{{ text_telephone }}</span>
-                <span class="order-sidebar-row__value" id="quick-telephone">{{ telephone }}</span>
-                <span class="order-sidebar-row__actions"><button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="telephone" data-title="{{ text_telephone }}" data-value="{{ telephone|e('html_attr') }}" data-target="#quick-telephone"><i class="fa fa-pencil"></i></button></span>
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label">{{ text_telephone }}</label>
+                <div class="dcx-sidebar-card__value" id="quick-telephone">{{ telephone }}</div>
+                <div class="dcx-sidebar-card__actions"><button type="button" class="btn btn-default btn-xs btn--icon btn-quick-edit" data-field="telephone" data-title="{{ text_telephone }}" data-value="{{ telephone|e('html_attr') }}" data-target="#quick-telephone"><i data-lucide="pencil" width="12" height="12"></i></button></div>
               </div>
               {% if tax_number %}
-              <div class="order-sidebar-row">
-                <span class="order-sidebar-row__icon"><i class="fa fa-id-card-o"></i></span>
-                <span class="order-sidebar-row__label">{{ text_tax_number }}</span>
-                <span class="order-sidebar-row__value" id="quick-tax-number">{{ tax_number }}</span>
-                <span class="order-sidebar-row__actions"><button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="tax_number" data-title="{{ text_tax_number }}" data-value="{{ tax_number|e('html_attr') }}" data-target="#quick-tax-number"><i class="fa fa-pencil"></i></button></span>
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label">{{ text_tax_number }}</label>
+                <div class="dcx-sidebar-card__value" id="quick-tax-number">{{ tax_number }}</div>
+                <div class="dcx-sidebar-card__actions"><button type="button" class="btn btn-default btn-xs btn--icon btn-quick-edit" data-field="tax_number" data-title="{{ text_tax_number }}" data-value="{{ tax_number|e('html_attr') }}" data-target="#quick-tax-number"><i data-lucide="pencil" width="12" height="12"></i></button></div>
               </div>
               {% endif %}
             </div>
           </div>
 
-          <div class="order-sidebar-card">
-            <div class="order-sidebar-card__header">
-              <div class="order-sidebar-card__icon order-sidebar-card__icon--green"><i class="fa fa-credit-card"></i></div>
-              <h3 class="order-sidebar-card__title">{{ text_panel_order_info }}</h3>
+          <div class="dcx-sidebar-card">
+            <div class="dcx-sidebar-card__header">
+              <div class="dcx-sidebar-card__header-icon"><i data-lucide="credit-card" width="16" height="16"></i></div>
+              <h3 class="dcx-sidebar-card__title">{{ text_panel_order_info }}</h3>
             </div>
-            <div class="order-sidebar-card__body">
-              <div class="order-sidebar-row">
-                <span class="order-sidebar-row__icon"><i class="fa fa-shopping-cart"></i></span>
-                <span class="order-sidebar-row__label">{{ text_store }}</span>
-                <span class="order-sidebar-row__value"><a href="{{ store_url }}" target="_blank">{{ store_name }}</a></span>
+            <div class="dcx-sidebar-card__body">
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label">{{ text_store }}</label>
+                <div class="dcx-sidebar-card__value"><a href="{{ store_url }}" target="_blank">{{ store_name }}</a></div>
               </div>
-              <div class="order-sidebar-row">
-                <span class="order-sidebar-row__icon"><i class="fa fa-calendar"></i></span>
-                <span class="order-sidebar-row__label">{{ text_date_added }}</span>
-                <span class="order-sidebar-row__value">{{ date_added }}</span>
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label">{{ text_date_added }}</label>
+                <div class="dcx-sidebar-card__value">{{ date_added }}</div>
               </div>
-              <div class="order-sidebar-row">
-                <span class="order-sidebar-row__icon"><i class="fa fa-credit-card"></i></span>
-                <span class="order-sidebar-row__label">{{ text_payment_method }}</span>
-                <span class="order-sidebar-row__value" id="quick-payment-method">{{ payment_method }}</span>
-                <span class="order-sidebar-row__actions"><button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="payment_method" data-title="{{ text_payment_method }}" data-value="{{ payment_method|e('html_attr') }}" data-code="{{ payment_code|e('html_attr') }}" data-target="#quick-payment-method"><i class="fa fa-pencil"></i></button></span>
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label">{{ text_payment_method }}</label>
+                <div class="dcx-sidebar-card__value" id="quick-payment-method">{{ payment_method }}</div>
+                <div class="dcx-sidebar-card__actions"><button type="button" class="btn btn-default btn-xs btn--icon btn-quick-edit" data-field="payment_method" data-title="{{ text_payment_method }}" data-value="{{ payment_method|e('html_attr') }}" data-code="{{ payment_code|e('html_attr') }}" data-target="#quick-payment-method"><i data-lucide="pencil" width="12" height="12"></i></button></div>
               </div>
               {% if shipping_method %}
-              <div class="order-sidebar-row">
-                <span class="order-sidebar-row__icon"><i class="fa fa-truck"></i></span>
-                <span class="order-sidebar-row__label">{{ text_shipping_method }}</span>
-                <span class="order-sidebar-row__value" id="quick-shipping-method">{{ shipping_method }}</span>
-                <span class="order-sidebar-row__actions"><button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="shipping_method" data-title="{{ text_shipping_method }}" data-value="{{ shipping_method|e('html_attr') }}" data-code="{{ shipping_code|e('html_attr') }}" data-target="#quick-shipping-method"><i class="fa fa-pencil"></i></button></span>
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label">{{ text_shipping_method }}</label>
+                <div class="dcx-sidebar-card__value" id="quick-shipping-method">{{ shipping_method }}</div>
+                <div class="dcx-sidebar-card__actions"><button type="button" class="btn btn-default btn-xs btn--icon btn-quick-edit" data-field="shipping_method" data-title="{{ text_shipping_method }}" data-value="{{ shipping_method|e('html_attr') }}" data-code="{{ shipping_code|e('html_attr') }}" data-target="#quick-shipping-method"><i data-lucide="pencil" width="12" height="12"></i></button></div>
               </div>
               {% endif %}
-              <div class="order-sidebar-row">
-                <span class="order-sidebar-row__icon"><i class="fa fa-map-marker"></i></span>
-                <span class="order-sidebar-row__label">{{ text_tracking_number }}</span>
-                <span class="order-sidebar-row__value" id="quick-tracking-number">{{ tracking_number }}</span>
-                <span class="order-sidebar-row__actions"><button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="tracking_number" data-title="{{ text_tracking_number }}" data-value="{{ tracking_number|e('html_attr') }}" data-target="#quick-tracking-number"><i class="fa fa-pencil"></i></button></span>
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label">{{ text_tracking_number }}</label>
+                <div class="dcx-sidebar-card__value" id="quick-tracking-number">{{ tracking_number }}</div>
+                <div class="dcx-sidebar-card__actions"><button type="button" class="btn btn-default btn-xs btn--icon btn-quick-edit" data-field="tracking_number" data-title="{{ text_tracking_number }}" data-value="{{ tracking_number|e('html_attr') }}" data-target="#quick-tracking-number"><i data-lucide="pencil" width="12" height="12"></i></button></div>
               </div>
-              <div class="order-sidebar-row">
-                <span class="order-sidebar-row__icon"><i class="fa fa-comment"></i></span>
-                <span class="order-sidebar-row__label">{{ text_comment }}</span>
-                <span class="order-sidebar-row__value" id="quick-comment">{% if comment %}{{ comment|raw }}{% else %}<span class="text-muted">{{ text_none }}</span>{% endif %}</span>
-                <span class="order-sidebar-row__actions"><button type="button" class="btn btn-default btn-xs btn-quick-edit" data-field="comment" data-title="{{ entry_comment }}" data-value="{{ order_comment_raw|e('html_attr') }}" data-target="#quick-comment"><i class="fa fa-pencil"></i></button></span>
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label">{{ text_comment }}</label>
+                <div class="dcx-sidebar-card__value" id="quick-comment">{% if comment %}{{ comment|raw }}{% else %}<span class="text-muted">{{ text_none }}</span>{% endif %}</div>
+                <div class="dcx-sidebar-card__actions"><button type="button" class="btn btn-default btn-xs btn--icon btn-quick-edit" data-field="comment" data-title="{{ entry_comment }}" data-value="{{ order_comment_raw|e('html_attr') }}" data-target="#quick-comment"><i data-lucide="pencil" width="12" height="12"></i></button></div>
               </div>
             </div>
           </div>
 
-          <div class="order-sidebar-card">
-            <div class="order-sidebar-card__header">
-              <div class="order-sidebar-card__icon order-sidebar-card__icon--amber"><i class="fa fa-cog"></i></div>
-              <h3 class="order-sidebar-card__title">{{ text_panel_order_tools }}</h3>
+          <div class="dcx-sidebar-card">
+            <div class="dcx-sidebar-card__header">
+              <div class="dcx-sidebar-card__header-icon"><i data-lucide="settings" width="16" height="16"></i></div>
+              <h3 class="dcx-sidebar-card__title">{{ text_panel_order_tools }}</h3>
             </div>
-            <div class="order-sidebar-card__body">
-              <div class="order-sidebar-row">
-                <span class="order-sidebar-row__icon"><i class="fa fa-star"></i></span>
-                <span class="order-sidebar-row__label">{{ text_reward }}</span>
-                <span class="order-sidebar-row__value">{{ reward }}</span>
-                <span class="order-sidebar-row__actions">
+            <div class="dcx-sidebar-card__body">
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label">{{ text_reward }}</label>
+                <div class="dcx-sidebar-card__value">{{ reward }}</div>
+                <div class="dcx-sidebar-card__actions">
                   {% if customer and reward %}
                     {% if not reward_total %}
-                    <button id="button-reward-add" data-loading-text="{{ text_loading }}" data-toggle="tooltip" title="{{ button_reward_add }}" class="btn btn-success btn-xs"><i class="fa fa-plus-circle"></i></button>
+                    <button id="button-reward-add" data-loading-text="{{ text_loading }}" title="{{ button_reward_add }}" class="btn btn-success btn-xs btn--icon"><i data-lucide="plus-circle" width="12" height="12"></i></button>
                     {% else %}
-                    <button id="button-reward-remove" data-loading-text="{{ text_loading }}" data-toggle="tooltip" title="{{ button_reward_remove }}" class="btn btn-danger btn-xs"><i class="fa fa-minus-circle"></i></button>
+                    <button id="button-reward-remove" data-loading-text="{{ text_loading }}" title="{{ button_reward_remove }}" class="btn btn-danger btn-xs btn--icon"><i data-lucide="minus-circle" width="12" height="12"></i></button>
                     {% endif %}
                   {% else %}
-                  <button disabled="disabled" class="btn btn-success btn-xs"><i class="fa fa-plus-circle"></i></button>
+                  <button disabled="disabled" class="btn btn-success btn-xs btn--icon"><i data-lucide="plus-circle" width="12" height="12"></i></button>
                   {% endif %}
-                </span>
+                </div>
               </div>
-              <div class="order-sidebar-row">
-                <span class="order-sidebar-row__icon"><i class="fa fa-users"></i></span>
-                <span class="order-sidebar-row__label">{{ text_affiliate }}</span>
-                <span class="order-sidebar-row__value">{{ commission }}{% if affiliate %} ({{ affiliate_firstname }} {{ affiliate_lastname }}){% endif %}</span>
-                <span class="order-sidebar-row__actions">
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label">{{ text_affiliate }}</label>
+                <div class="dcx-sidebar-card__value">{{ commission }}{% if affiliate %} ({{ affiliate_firstname }} {{ affiliate_lastname }}){% endif %}</div>
+                <div class="dcx-sidebar-card__actions">
                   {% if affiliate %}
                     {% if not commission_total %}
-                    <button id="button-commission-add" data-loading-text="{{ text_loading }}" data-toggle="tooltip" title="{{ button_commission_add }}" class="btn btn-success btn-xs"><i class="fa fa-plus-circle"></i></button>
+                    <button id="button-commission-add" data-loading-text="{{ text_loading }}" title="{{ button_commission_add }}" class="btn btn-success btn-xs btn--icon"><i data-lucide="plus-circle" width="12" height="12"></i></button>
                     {% else %}
-                    <button id="button-commission-remove" data-loading-text="{{ text_loading }}" data-toggle="tooltip" title="{{ button_commission_remove }}" class="btn btn-danger btn-xs"><i class="fa fa-minus-circle"></i></button>
+                    <button id="button-commission-remove" data-loading-text="{{ text_loading }}" title="{{ button_commission_remove }}" class="btn btn-danger btn-xs btn--icon"><i data-lucide="minus-circle" width="12" height="12"></i></button>
                     {% endif %}
                   {% else %}
-                  <button disabled="disabled" class="btn btn-success btn-xs"><i class="fa fa-plus-circle"></i></button>
+                  <button disabled="disabled" class="btn btn-success btn-xs btn--icon"><i data-lucide="plus-circle" width="12" height="12"></i></button>
                   {% endif %}
-                </span>
+                </div>
               </div>
             </div>
           </div>
@@ -277,18 +269,18 @@
         </div>
       </div>
     </div>
-    <div class="panel panel-default" style="margin-top:20px">
-      <div class="panel-heading">
-  <div class="panel-heading__icon"><i class="fa fa-comment-o"></i></div>
+    <div class="dcx-panel" style="margin-top:20px">
+      <div class="dcx-panel-head">
+  <div class="dcx-panel-head__icon"><i data-lucide="message-square" width="18" height="18"></i></div>
   <div>
-    <h3 class="panel-title">{{ text_history }}</h3>
-    <div class="panel-heading__subtitle">{{ text_history_subtitle }}</div>
+    <div class="dcx-panel-title">{{ text_history }}</div>
+    <div class="dcx-panel-subtitle">{{ text_history_subtitle }}</div>
   </div>
 </div>
       <div class="panel-body">
         <ul class="nav nav-tabs">
-          <li class="active"><a href="#tab-history" data-toggle="tab"><i class="fa fa-history"></i> {{ tab_history }}</a></li>
-          <li><a href="#tab-additional" data-toggle="tab"><i class="fa fa-plus-circle"></i> {{ tab_additional }}</a></li>
+          <li class="active"><a href="#tab-history" data-toggle="tab"><i data-lucide="clock" width="14" height="14"></i> {{ tab_history }}</a></li>
+          <li><a href="#tab-additional" data-toggle="tab"><i data-lucide="plus-circle" width="14" height="14"></i> {{ tab_additional }}</a></li>
           {% for tab in tabs %}
             <li><a href="#tab-{{ tab.code }}" data-toggle="tab">{{ tab.title }}</a></li>
           {% endfor %}
@@ -339,7 +331,7 @@
               </form>
             </fieldset>
             <div class="text-right">
-              <button id="button-history" data-loading-text="{{ text_loading }}" class="btn btn-primary"><i class="fa fa-plus-circle"></i> {{ button_history_add }}</button>
+              <button id="button-history" data-loading-text="{{ text_loading }}" class="btn btn-primary"><i data-lucide="plus-circle" width="14" height="14"></i> {{ button_history_add }}</button>
             </div>
           </div>
           <div class="tab-pane" id="tab-additional"> {% if account_custom_fields %}
@@ -455,7 +447,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
-          <button type="button" id="button-quick-edit-save" class="btn btn-primary" data-loading-text="{{ text_loading }}"><i class="fa fa-check"></i> {{ button_save }}</button>
+          <button type="button" id="button-quick-edit-save" class="btn btn-primary" data-loading-text="{{ text_loading }}"><i data-lucide="check" width="14" height="14"></i> {{ button_save }}</button>
         </div>
       </div>
     </div>
@@ -477,7 +469,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
-          <button type="button" id="button-inline-option-add" class="btn btn-primary" data-loading-text="{{ text_loading }}"><i class="fa fa-plus"></i> {{ button_product_add }}</button>
+          <button type="button" id="button-inline-option-add" class="btn btn-primary" data-loading-text="{{ text_loading }}"><i data-lucide="plus" width="14" height="14"></i> {{ button_product_add }}</button>
         </div>
       </div>
     </div>
@@ -763,7 +755,7 @@
 
   function showInlineAlert(type, text) {
     $('.alert-dismissible').remove();
-    $('#content > .container-fluid').prepend('<div class="alert alert-' + type + ' alert-dismissible"><i class="fa ' + (type === 'danger' ? 'fa-exclamation-circle' : 'fa-check-circle') + '"></i> ' + text + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+    $('#content > .container-fluid').prepend('<div class="alert alert-' + type + ' alert-dismissible"><i data-lucide="' + (type === 'danger' ? 'alert-circle' : 'check-circle') + '" width="16" height="16"></i> ' + text + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
   }
 
   function inlineReindexCartRows() {
@@ -902,7 +894,7 @@
         $('.alert-dismissible').remove();
 
         if (json['error']) {
-          $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+          $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
           return;
         }
 
@@ -995,7 +987,7 @@
           }
 
           $('#modal-quick-edit').modal('hide');
-          $('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+          $('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
         }
       },
       error: function(xhr, ajaxOptions, thrownError) {
@@ -1169,22 +1161,22 @@
         html += '<div class="form-group' + requiredClass + '">';
         html += '  <label class="col-sm-3 control-label">' + option['name'] + '</label>';
         html += '  <div class="col-sm-9">';
-        html += '    <button type="button" id="inline-button-upload' + optionId + '" data-loading-text="{{ text_loading }}" class="btn btn-default"><i class="fa fa-upload"></i> {{ button_upload }}</button>';
+        html += '    <button type="button" id="inline-button-upload' + optionId + '" data-loading-text="{{ text_loading }}" class="btn btn-default"><i data-lucide="upload" width="14" height="14"></i> {{ button_upload }}</button>';
         html += '    <input type="hidden" name="option[' + optionId + ']" value="' + (option['value'] || '') + '" id="inline-input-option' + optionId + '" />';
         html += '  </div>';
         html += '</div>';
       }
 
       if (option['type'] == 'date') {
-        html += '<div class="form-group' + requiredClass + '"><label class="col-sm-3 control-label" for="inline-input-option' + optionId + '">' + option['name'] + '</label><div class="col-sm-9"><div class="input-group date"><input type="text" name="option[' + optionId + ']" value="' + (option['value'] || '') + '" data-date-format="YYYY-MM-DD" id="inline-input-option' + optionId + '" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button></span></div></div></div>';
+        html += '<div class="form-group' + requiredClass + '"><label class="col-sm-3 control-label" for="inline-input-option' + optionId + '">' + option['name'] + '</label><div class="col-sm-9"><div class="input-group date"><input type="text" name="option[' + optionId + ']" value="' + (option['value'] || '') + '" data-date-format="YYYY-MM-DD" id="inline-input-option' + optionId + '" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button></span></div></div></div>';
       }
 
       if (option['type'] == 'datetime') {
-        html += '<div class="form-group' + requiredClass + '"><label class="col-sm-3 control-label" for="inline-input-option' + optionId + '">' + option['name'] + '</label><div class="col-sm-9"><div class="input-group datetime"><input type="text" name="option[' + optionId + ']" value="' + (option['value'] || '') + '" data-date-format="YYYY-MM-DD HH:mm" id="inline-input-option' + optionId + '" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button></span></div></div></div>';
+        html += '<div class="form-group' + requiredClass + '"><label class="col-sm-3 control-label" for="inline-input-option' + optionId + '">' + option['name'] + '</label><div class="col-sm-9"><div class="input-group datetime"><input type="text" name="option[' + optionId + ']" value="' + (option['value'] || '') + '" data-date-format="YYYY-MM-DD HH:mm" id="inline-input-option' + optionId + '" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button></span></div></div></div>';
       }
 
       if (option['type'] == 'time') {
-        html += '<div class="form-group' + requiredClass + '"><label class="col-sm-3 control-label" for="inline-input-option' + optionId + '">' + option['name'] + '</label><div class="col-sm-9"><div class="input-group time"><input type="text" name="option[' + optionId + ']" value="' + (option['value'] || '') + '" data-date-format="HH:mm" id="inline-input-option' + optionId + '" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button></span></div></div></div>';
+        html += '<div class="form-group' + requiredClass + '"><label class="col-sm-3 control-label" for="inline-input-option' + optionId + '">' + option['name'] + '</label><div class="col-sm-9"><div class="input-group time"><input type="text" name="option[' + optionId + ']" value="' + (option['value'] || '') + '" data-date-format="HH:mm" id="inline-input-option' + optionId + '" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button></span></div></div></div>';
       }
     }
 
@@ -1305,7 +1297,7 @@
         productsHtml += '  <td class="text-right"><input type="text" name="product[' + i + '][discount]" value="' + (discounts[i] !== undefined ? discounts[i] : 0) + '" class="order-product-input gt-no-translate" data-gt-inline-ignore="1" /></td>';
         productsHtml += '  <td class="text-right">' + product['price'] + '</td>';
         productsHtml += '  <td class="text-right">' + product['total'] + '</td>';
-        productsHtml += '  <td class="text-right"><button type="button" class="btn btn-danger btn-xs button-inline-remove-item"><i class="fa fa-trash"></i></button></td>';
+        productsHtml += '  <td class="text-right"><button type="button" class="btn btn-danger btn-xs button-inline-remove-item"><i data-lucide="trash-2" width="12" height="12"></i></button></td>';
         productsHtml += '</tr>';
       }
     }
@@ -1801,13 +1793,13 @@
 			  $('.alert-dismissible').remove();
 
 			  if (json['error']) {
-				  $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + '</div>');
+				  $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> ' + json['error'] + '</div>');
 			  }
 
 			  if (json['success']) {
-				  $('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> ' + json['success'] + '</div>');
+				  $('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> ' + json['success'] + '</div>');
 
-				  $('#button-reward-add').replaceWith('<button id="button-reward-remove" data-toggle="tooltip" title="{{ button_reward_remove }}" class="btn btn-danger btn-xs"><i class="fa fa-minus-circle"></i></button>');
+				  $('#button-reward-add').replaceWith('<button id="button-reward-remove" data-toggle="tooltip" title="{{ button_reward_remove }}" class="btn btn-danger btn-xs"><i data-lucide="minus-circle" width="12" height="12"></i></button>');
 			  }
 		  },
 		  error: function(xhr, ajaxOptions, thrownError) {
@@ -1831,13 +1823,13 @@
 			  $('.alert-dismissible').remove();
 
 			  if (json['error']) {
-				  $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + '</div>');
+				  $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> ' + json['error'] + '</div>');
 			  }
 
 			  if (json['success']) {
-				  $('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> ' + json['success'] + '</div>');
+				  $('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> ' + json['success'] + '</div>');
 
-				  $('#button-reward-remove').replaceWith('<button id="button-reward-add" data-toggle="tooltip" title="{{ button_reward_add }}" class="btn btn-success btn-xs"><i class="fa fa-plus-circle"></i></button>');
+				  $('#button-reward-remove').replaceWith('<button id="button-reward-add" data-toggle="tooltip" title="{{ button_reward_add }}" class="btn btn-success btn-xs"><i data-lucide="plus-circle" width="12" height="12"></i></button>');
 			  }
 		  },
 		  error: function(xhr, ajaxOptions, thrownError) {
@@ -1861,13 +1853,13 @@
 			  $('.alert-dismissible').remove();
 
 			  if (json['error']) {
-				  $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + '</div>');
+				  $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> ' + json['error'] + '</div>');
 			  }
 
 			  if (json['success']) {
-				  $('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> ' + json['success'] + '</div>');
+				  $('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> ' + json['success'] + '</div>');
 
-				  $('#button-commission-add').replaceWith('<button id="button-commission-remove" data-toggle="tooltip" title="{{ button_commission_remove }}" class="btn btn-danger btn-xs"><i class="fa fa-minus-circle"></i></button>');
+				  $('#button-commission-add').replaceWith('<button id="button-commission-remove" data-toggle="tooltip" title="{{ button_commission_remove }}" class="btn btn-danger btn-xs"><i data-lucide="minus-circle" width="12" height="12"></i></button>');
 			  }
 		  },
 		  error: function(xhr, ajaxOptions, thrownError) {
@@ -1891,13 +1883,13 @@
 			  $('.alert-dismissible').remove();
 
 			  if (json['error']) {
-				  $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + '</div>');
+				  $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> ' + json['error'] + '</div>');
 			  }
 
 			  if (json['success']) {
-				  $('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> ' + json['success'] + '</div>');
+				  $('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> ' + json['success'] + '</div>');
 
-				  $('#button-commission-remove').replaceWith('<button id="button-commission-add" data-toggle="tooltip" title="{{ button_commission_add }}" class="btn btn-success btn-xs"><i class="fa fa-plus-circle"></i></button>');
+				  $('#button-commission-remove').replaceWith('<button id="button-commission-add" data-toggle="tooltip" title="{{ button_commission_add }}" class="btn btn-success btn-xs"><i data-lucide="plus-circle" width="12" height="12"></i></button>');
 			  }
 		  },
 		  error: function(xhr, ajaxOptions, thrownError) {
@@ -1918,10 +1910,10 @@
 		  $('.alert').remove();
 		  if (json['error']) {
 			  if (json['error']['key']) {
-				  $('#content > .container-fluid').prepend('<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> ' + json['error']['key'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+				  $('#content > .container-fluid').prepend('<div class="alert alert-danger"><i data-lucide="alert-circle" width="16" height="16"></i> ' + json['error']['key'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
 			  }
 			  if (json['error']['ip']) {
-				  $('#content > .container-fluid').prepend('<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> ' + json['error']['ip'] + ' <button type="button" id="button-ip-add" data-loading-text="{{ text_loading }}" class="btn btn-danger btn-xs pull-right"><i class="fa fa-plus"></i>{{ button_ip_add }}</button></div>');
+				  $('#content > .container-fluid').prepend('<div class="alert alert-danger"><i data-lucide="alert-circle" width="16" height="16"></i> ' + json['error']['ip'] + ' <button type="button" id="button-ip-add" data-loading-text="{{ text_loading }}" class="btn btn-danger btn-xs pull-right"><i data-lucide="plus" width="12" height="12"></i>{{ button_ip_add }}</button></div>');
 			  }
 		  }
 		  if (json['token']) {
@@ -1957,13 +1949,13 @@
 			  $('.alert-dismissible').remove();
 
 			  if (json['error']) {
-				  $('#history').before('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+				  $('#history').before('<div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
 			  }
 
 			  if (json['success']) {
 				  $('#history').load('index.php?route=sale/order/history&user_token={{ user_token }}&order_id={{ order_id }}');
 
-				  $('#history').before('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+				  $('#history').before('<div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
 
 				  $('textarea[name=\'comment\']').val('');
 			  }

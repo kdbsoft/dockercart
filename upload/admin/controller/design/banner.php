@@ -154,6 +154,43 @@ class ControllerDesignBanner extends Controller {
 		$this->getList();
 	}
 
+	public function updateField() {
+		$json = array();
+
+		if (!$this->user->hasPermission('modify', 'design/banner')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		if (!isset($this->request->post['banner_id']) || !isset($this->request->post['field']) || !isset($this->request->post['value'])) {
+			$json['error'] = 'Invalid request';
+		}
+
+		if (!isset($json['error'])) {
+			$banner_id = (int)$this->request->post['banner_id'];
+			$field = $this->request->post['field'];
+			$value = $this->request->post['value'];
+
+			$this->load->model('design/banner');
+
+			if ($field === 'status') {
+				$val = (int)$value;
+				$this->model_design_banner->editBannerField($banner_id, $val);
+
+				if ($val) {
+					$json['value_html'] = '<span class="label label-success">' . $this->language->get('text_enabled') . '</span>';
+				} else {
+					$json['value_html'] = '<span class="label label-danger">' . $this->language->get('text_disabled') . '</span>';
+				}
+				$json['success'] = true;
+			} else {
+				$json['error'] = 'Invalid field';
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
 	protected function getList() {
 		if (isset($this->request->get['sort'])) {
 			$sort = $this->request->get['sort'];
@@ -221,6 +258,7 @@ class ControllerDesignBanner extends Controller {
 				'banner_id' => $result['banner_id'],
 				'name'      => $result['name'],
 				'status'    => ($result['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled')),
+				'status_raw' => (int)$result['status'],
 				'edit'      => $this->url->link('design/banner/edit', 'user_token=' . $this->session->data['user_token'] . '&banner_id=' . $result['banner_id'] . $url, true)
 			);
 		}

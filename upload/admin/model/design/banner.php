@@ -58,6 +58,10 @@ class ModelDesignBanner extends Model {
 		$this->db->query("DELETE FROM " . DB_PREFIX . "banner_image WHERE banner_id = '" . (int)$banner_id . "'");
 	}
 
+	public function editBannerField($banner_id, $status) {
+		$this->db->query("UPDATE " . DB_PREFIX . "banner SET status = '" . (int)$status . "' WHERE banner_id = '" . (int)$banner_id . "'");
+	}
+
 	public function getBannerDescriptions($banner_id) {
 		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "banner_description WHERE banner_id = '" . (int)$banner_id . "'");
 

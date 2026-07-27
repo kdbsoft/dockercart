@@ -2,322 +2,390 @@
 <div id="content">
   <div class="page-header">
     <div class="container-fluid">
-      <div class="pull-right">
-        <button type="submit" form="form-post" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
-        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+      <div class="row">
+        <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
+          <div class="pull-right">
+            <button type="submit" form="form-post" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary btn--icon"><i data-lucide="save" width="16" height="16"></i></button>
+            <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default btn--icon"><i data-lucide="x" width="16" height="16"></i></a>
+          </div>
+          <a href="{{ cancel }}" class="page-header__link">
+            <span class="page-header__back">
+              <i data-lucide="arrow-left" width="20" height="20"></i>
+            </span>
+            <span class="page-header__title">
+              {% if post_name %}
+                {{ post_name }}
+                <span class="page-header__badge {{ status ? 'page-header__badge--active' : 'page-header__badge--inactive' }}">
+                  {{ status ? text_active : text_inactive }}
+                </span>
+              {% else %}
+                {{ text_form }}
+              {% endif %}
+            </span>
+          </a>
+        </div>
       </div>
-      <h1>{{ heading_title }}</h1>
-      <ul class="breadcrumb">
-        {% for breadcrumb in breadcrumbs %}
-        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
-        {% endfor %}
-      </ul>
+      {% if error_warning %}
+      <div class="row">
+        <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
+          <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+          </div>
+        </div>
+      </div>
+      {% endif %}
     </div>
   </div>
   <div class="container-fluid">
-    {% if error_warning %}
-    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
-      <button type="button" class="close" data-dismiss="alert">&times;</button>
-    </div>
-    {% endif %}
-    <div class="section-heading">
-      <h2>{{ text_form }}</h2>
-      <p class="section-heading-subtitle">{{ text_form_subtitle }}</p>
-    </div>
-    <div class="dcx-shell">
-      <div class="dcx-panel">
-        <div class="dcx-panel-body">
-        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-post" class="form-horizontal dcx-form">
-          <ul class="nav nav-tabs dcx-profile-tabs">
-            <li class="active"><a href="#tab-description" data-toggle="tab"><i data-lucide="file-text" width="16" height="16" style="vertical-align:middle"></i> {{ tab_description }}</a></li>
-            <li><a href="#tab-params" data-toggle="tab"><i data-lucide="sliders-horizontal" width="16" height="16" style="vertical-align:middle"></i> {{ tab_params_group }}</a></li>
-            <li><a href="#tab-images" data-toggle="tab"><i data-lucide="image" width="16" height="16" style="vertical-align:middle"></i> {{ tab_images_group }}</a></li>
-            <li><a href="#tab-recommended" data-toggle="tab"><i data-lucide="thumbs-up" width="16" height="16" style="vertical-align:middle"></i> {{ tab_recommended }}</a></li>
-            <li><a href="#tab-seo" data-toggle="tab"><i data-lucide="globe" width="16" height="16" style="vertical-align:middle"></i> {{ tab_seo }}</a></li>
-          </ul>
-          <div class="tab-content">
-            <div class="tab-pane dcx-tab-pane active" id="tab-description">
+    <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-post">
+    <div class="row">
+      <div class="col-md-12 col-sm-12 col-lg-offset-1 col-lg-7 col-xl-offset-1 col-xl-7">
+        <div class="dcx-shell">
+          <div class="dcx-panel">
+            <div class="dcx-panel-head">
+              <div class="dcx-panel-head__icon"><i data-lucide="file-text" width="18" height="18"></i></div>
+              <div>
+                <div class="dcx-panel-title">{{ tab_description }}</div>
+              </div>
+            </div>
+            <div class="dcx-panel-body">
               <ul class="nav nav-tabs" id="language">
                 {% for language in languages %}
-                <li{% if loop.first %} class="active"{% endif %}><a href="#language{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
+                <li><a href="#language{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
                 {% endfor %}
               </ul>
               <div class="tab-content">
                 {% for language in languages %}
-                <div class="tab-pane{% if loop.first %} active{% endif %}" id="language{{ language.language_id }}">
-                  <div class="form-group required">
-                    <label class="col-sm-2 control-label" for="input-title{{ language.language_id }}">{{ entry_title }}</label>
-                    <div class="col-sm-10">
+                <div class="tab-pane" id="language{{ language.language_id }}">
+                  <div class="dcx-fields">
+                    <div class="dcx-field required">
+                      <label class="dcx-label" for="input-title{{ language.language_id }}">{{ entry_title }}</label>
                       <input type="text" name="post_description[{{ language.language_id }}][title]" value="{{ (post_description[language.language_id] ? post_description[language.language_id].title)|e('html_attr') }}" placeholder="{{ entry_title }}" id="input-title{{ language.language_id }}" class="form-control" />
                       {% if error_title[language.language_id] %}
                       <div class="text-danger">{{ error_title[language.language_id] }}</div>
                       {% endif %}
                     </div>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-sm-2 control-label" for="input-excerpt{{ language.language_id }}">{{ entry_excerpt }}</label>
-                    <div class="col-sm-10">
+                    <div class="dcx-field">
+                      <label class="dcx-label" for="input-excerpt{{ language.language_id }}">{{ entry_excerpt }}</label>
                       <textarea name="post_description[{{ language.language_id }}][excerpt]" rows="3" placeholder="{{ entry_excerpt }}" id="input-excerpt{{ language.language_id }}" class="form-control">{{ post_description[language.language_id] ? post_description[language.language_id].excerpt }}</textarea>
                     </div>
-                  </div>
-                  <div class="form-group required">
-                    <label class="col-sm-2 control-label" for="input-content{{ language.language_id }}">{{ entry_content }}</label>
-                    <div class="col-sm-10">
+                    <div class="dcx-field required">
+                      <label class="dcx-label" for="input-content{{ language.language_id }}">{{ entry_content }}</label>
                       <textarea name="post_description[{{ language.language_id }}][content]" placeholder="{{ entry_content }}" id="input-content{{ language.language_id }}" data-toggle="tinymce" class="form-control">{{ post_description[language.language_id] ? post_description[language.language_id].content }}</textarea>
                       {% if error_content[language.language_id] %}
                       <div class="text-danger">{{ error_content[language.language_id] }}</div>
                       {% endif %}
                     </div>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-sm-2 control-label" for="input-meta-title{{ language.language_id }}">{{ entry_meta_title }}</label>
-                    <div class="col-sm-10">
+                    <div class="dcx-field">
+                      <label class="dcx-label" for="input-meta-title{{ language.language_id }}">{{ entry_meta_title }}</label>
                       <input type="text" name="post_description[{{ language.language_id }}][meta_title]" value="{{ (post_description[language.language_id] ? post_description[language.language_id].meta_title)|e('html_attr') }}" placeholder="{{ entry_meta_title }}" id="input-meta-title{{ language.language_id }}" class="form-control" />
                     </div>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-sm-2 control-label" for="input-meta-description{{ language.language_id }}">{{ entry_meta_description }}</label>
-                    <div class="col-sm-10">
+                    <div class="dcx-field">
+                      <label class="dcx-label" for="input-meta-description{{ language.language_id }}">{{ entry_meta_description }}</label>
                       <textarea name="post_description[{{ language.language_id }}][meta_description]" rows="5" placeholder="{{ entry_meta_description }}" id="input-meta-description{{ language.language_id }}" class="form-control">{{ post_description[language.language_id] ? post_description[language.language_id].meta_description }}</textarea>
                     </div>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-sm-2 control-label" for="input-meta-keyword{{ language.language_id }}">{{ entry_meta_keyword }}</label>
-                    <div class="col-sm-10">
+                    <div class="dcx-field">
+                      <label class="dcx-label" for="input-meta-keyword{{ language.language_id }}">{{ entry_meta_keyword }}</label>
                       <textarea name="post_description[{{ language.language_id }}][meta_keyword]" rows="5" placeholder="{{ entry_meta_keyword }}" id="input-meta-keyword{{ language.language_id }}" class="form-control">{{ post_description[language.language_id] ? post_description[language.language_id].meta_keyword }}</textarea>
                     </div>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-sm-2 control-label" for="input-tags{{ language.language_id }}">{{ entry_tags }}</label>
-                    <div class="col-sm-10">
-                      <input type="text" name="post_description[{{ language.language_id }}][tags]" value="{{ (post_description[language.language_id] ? post_description[language.language_id].tags)|e('html_attr') }}" placeholder="{{ entry_tags }}" id="input-tags{{ language.language_id }}" class="form-control" />
-                      <span class="help-block">{{ help_tags }}</span>
+                    <div class="dcx-field">
+                      <label class="dcx-label" for="input-tag{{ language.language_id }}">{{ entry_tags }}
+                        <span data-toggle="tooltip" title="{{ help_tags }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+                      </label>
+                      <div class="dc-tag-input">
+                        <input type="text" id="input-tag{{ language.language_id }}" class="form-control dc-tag-input__field" placeholder="{{ entry_tags }}" />
+                        <div class="dc-tag-input__tags" id="tag-chips{{ language.language_id }}"></div>
+                        <input type="hidden" name="post_description[{{ language.language_id }}][tags]" value="{{ post_description[language.language_id] ? post_description[language.language_id].tags }}" />
+                      </div>
                     </div>
                   </div>
                 </div>
                 {% endfor %}
               </div>
             </div>
-            <div class="tab-pane dcx-tab-pane" id="tab-params">
-              <div class="form-group required">
-                <label class="col-sm-2 control-label" for="input-category">{{ entry_category }}</label>
-                <div class="col-sm-10">
-                  <select name="category_id" id="input-category" class="form-control">
-                    <option value="">{{ text_select }}</option>
-                    {% for category in categories %}
-                    {% if category.category_id == category_id %}
-                    <option value="{{ category.category_id }}" selected="selected">{{ category.name }}</option>
-                    {% else %}
-                    <option value="{{ category.category_id }}">{{ category.name }}</option>
-                    {% endif %}
-                    {% endfor %}
-                  </select>
-                  {% if error_category %}
-                  <div class="text-danger">{{ error_category }}</div>
-                  {% endif %}
-                </div>
-              </div>
-              <div class="form-group required">
-                <label class="col-sm-2 control-label" for="input-author">{{ entry_author }}</label>
-                <div class="col-sm-10">
-                  <select name="author_id" id="input-author" class="form-control">
-                    <option value="">{{ text_select }}</option>
-                    {% for author in authors %}
-                    {% if author.author_id == author_id %}
-                    <option value="{{ author.author_id }}" selected="selected">{{ author.name }}</option>
-                    {% else %}
-                    <option value="{{ author.author_id }}">{{ author.name }}</option>
-                    {% endif %}
-                    {% endfor %}
-                  </select>
-                  {% if error_author %}
-                  <div class="text-danger">{{ error_author }}</div>
-                  {% endif %}
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="col-sm-2 control-label">{{ entry_store }}</label>
-                <div class="col-sm-10">
-                  <div class="well well-sm" style="height: 150px; overflow: auto;">
-                    <div class="checkbox">
-                      <label>
-                        <input type="checkbox" name="post_store[]" value="0" {% if 0 in post_store %}checked="checked"{% endif %} />
-                        {{ text_default }}
-                      </label>
-                    </div>
-                    {% for store in stores %}
-                      {% if store.store_id != 0 %}
-                      <div class="checkbox">
-                        <label>
-                          <input type="checkbox" name="post_store[]" value="{{ store.store_id }}" {% if store.store_id in post_store %}checked="checked"{% endif %} />
-                          {{ store.name }}
-                        </label>
-                      </div>
-                      {% endif %}
-                    {% endfor %}
-                  </div>
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="col-sm-2 control-label" for="input-featured">{{ entry_featured }}</label>
-                <div class="col-sm-10">
-                  <select name="featured" id="input-featured" class="form-control">
-                    {% if featured %}
-                    <option value="1" selected="selected">{{ text_yes }}</option>
-                    <option value="0">{{ text_no }}</option>
-                    {% else %}
-                    <option value="1">{{ text_yes }}</option>
-                    <option value="0" selected="selected">{{ text_no }}</option>
-                    {% endif %}
-                  </select>
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="col-sm-2 control-label" for="input-allow-comments">{{ entry_allow_comments }}</label>
-                <div class="col-sm-10">
-                  <select name="allow_comments" id="input-allow-comments" class="form-control">
-                    {% if allow_comments %}
-                    <option value="1" selected="selected">{{ text_yes }}</option>
-                    <option value="0">{{ text_no }}</option>
-                    {% else %}
-                    <option value="1">{{ text_yes }}</option>
-                    <option value="0" selected="selected">{{ text_no }}</option>
-                    {% endif %}
-                  </select>
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="col-sm-2 control-label" for="input-sort-order">{{ entry_sort_order }}</label>
-                <div class="col-sm-10">
-                  <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control" />
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="col-sm-2 control-label" for="input-date-published">{{ entry_date_published }}</label>
-                <div class="col-sm-10">
-                  <div class="input-group datetime">
-                    <input type="text" name="date_published" value="{{ date_published }}" placeholder="{{ entry_date_published }}" data-date-format="YYYY-MM-DD HH:mm:ss" id="input-date-published" class="form-control" />
-                    <span class="input-group-btn">
-                      <button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button>
-                    </span>
-                  </div>
-                  <span class="help-block">{{ help_date_published }}</span>
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
-                <div class="col-sm-10">
-                  <select name="status" id="input-status" class="form-control">
-                    {% if status %}
-                    <option value="1" selected="selected">{{ text_enabled }}</option>
-                    <option value="0">{{ text_disabled }}</option>
-                    {% else %}
-                    <option value="1">{{ text_enabled }}</option>
-                    <option value="0" selected="selected">{{ text_disabled }}</option>
-                    {% endif %}
-                  </select>
-                </div>
+          </div>
+          <div class="dcx-panel" style="margin-top: 16px;">
+            <div class="dcx-panel-head">
+              <div class="dcx-panel-head__icon"><i data-lucide="image" width="18" height="18"></i></div>
+              <div>
+                <div class="dcx-panel-title">{{ text_media_card }}</div>
               </div>
             </div>
-            <div class="tab-pane dcx-tab-pane" id="tab-images">
-              <div class="form-group">
-                <label class="col-sm-2 control-label" for="input-image">{{ entry_image }}</label>
-                <div class="col-sm-10">
+            <div class="dcx-panel-body">
+              <div class="dcx-fields">
+                <div class="dcx-field">
+                  <label class="dcx-label">{{ entry_image }}</label>
                   <a href="" id="thumb-image" data-toggle="image" class="img-thumbnail"><img src="{{ thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
                   <input type="hidden" name="image" value="{{ image }}" id="input-image" />
                 </div>
               </div>
             </div>
-            <div class="tab-pane dcx-tab-pane" id="tab-recommended">
-              <div class="form-group">
-                <label class="col-sm-2 control-label" for="input-product">{{ entry_related_product }}</label>
-                <div class="col-sm-10">
-                  <input type="text" name="product" value="" placeholder="{{ entry_related_product }}" id="input-product" class="form-control" />
-                  <div id="product-related" class="well well-sm" style="height: 150px; overflow: auto;">
-                    {% for product_recommendation in product_recommendations %}
-                    <div id="product-related{{ product_recommendation.product_id }}">
-                      <i class="fa fa-minus-circle"></i> {{ product_recommendation.name }}
-                      <input type="hidden" name="post_product[]" value="{{ product_recommendation.product_id }}" />
-                    </div>
-                    {% endfor %}
-                  </div>
-                </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-12 col-sm-12 col-lg-4 col-xl-3">
+        <div class="dcx-sidebar-card">
+          <div class="dcx-sidebar-card__header">
+            <div class="dcx-sidebar-card__header-icon"><i data-lucide="toggle-right" width="16" height="16"></i></div>
+            <h3 class="dcx-sidebar-card__title">{{ text_status_card }}</h3>
+          </div>
+          <div class="dcx-sidebar-card__body">
+            <div class="dcx-sidebar-card__field">
+              <label class="dcx-sidebar-card__label" for="input-status">{{ entry_status }}</label>
+              <select name="status" id="input-status" class="form-control">
+                {% if status %}
+                <option value="1" selected="selected">{{ text_enabled }}</option>
+                <option value="0">{{ text_disabled }}</option>
+                {% else %}
+                <option value="1">{{ text_enabled }}</option>
+                <option value="0" selected="selected">{{ text_disabled }}</option>
+                {% endif %}
+              </select>
+            </div>
+            <div class="dcx-sidebar-card__field">
+              <label class="dcx-sidebar-card__label" for="input-featured">{{ entry_featured }}</label>
+              <select name="featured" id="input-featured" class="form-control">
+                {% if featured %}
+                <option value="1" selected="selected">{{ text_yes }}</option>
+                <option value="0">{{ text_no }}</option>
+                {% else %}
+                <option value="1">{{ text_yes }}</option>
+                <option value="0" selected="selected">{{ text_no }}</option>
+                {% endif %}
+              </select>
+            </div>
+            <div class="dcx-sidebar-card__field">
+              <label class="dcx-sidebar-card__checkbox">
+                <input type="checkbox" name="allow_comments" value="1" {% if allow_comments %}checked="checked"{% endif %} id="input-allow-comments" />
+                <span>{{ entry_allow_comments }}</span>
+              </label>
+            </div>
+            <div class="dcx-sidebar-card__field">
+              <label class="dcx-sidebar-card__label" for="input-sort-order">{{ entry_sort_order }}</label>
+              <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control" />
+            </div>
+            <div class="dcx-sidebar-card__field">
+              <label class="dcx-sidebar-card__label" for="input-date-published">{{ entry_date_published }}</label>
+              <div class="input-group datetime">
+                <input type="text" name="date_published" value="{{ date_published }}" placeholder="{{ entry_date_published }}" data-date-format="YYYY-MM-DD HH:mm:ss" id="input-date-published" class="form-control" />
+                <span class="input-group-btn">
+                  <button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button>
+                </span>
               </div>
-              <div class="form-group">
-                <label class="col-sm-2 control-label" for="input-product-category">{{ entry_related_category }}</label>
-                <div class="col-sm-10">
-                  <input type="text" name="product_category" value="" placeholder="{{ entry_related_category }}" id="input-product-category" class="form-control" />
-                  <div id="product-category-related" class="well well-sm" style="height: 150px; overflow: auto;">
-                    {% for product_category_recommendation in product_category_recommendations %}
-                    <div id="product-category-related{{ product_category_recommendation.category_id }}">
-                      <i class="fa fa-minus-circle"></i> {{ product_category_recommendation.name }}
-                      <input type="hidden" name="post_product_category[]" value="{{ product_category_recommendation.category_id }}" />
-                    </div>
-                    {% endfor %}
-                  </div>
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="col-sm-2 control-label" for="input-manufacturer">{{ entry_related_manufacturer }}</label>
-                <div class="col-sm-10">
-                  <input type="text" name="manufacturer" value="" placeholder="{{ entry_related_manufacturer }}" id="input-manufacturer" class="form-control" />
-                  <div id="manufacturer-related" class="well well-sm" style="height: 150px; overflow: auto;">
-                    {% for manufacturer_recommendation in manufacturer_recommendations %}
-                    <div id="manufacturer-related{{ manufacturer_recommendation.manufacturer_id }}">
-                      <i class="fa fa-minus-circle"></i> {{ manufacturer_recommendation.name }}
-                      <input type="hidden" name="post_manufacturer[]" value="{{ manufacturer_recommendation.manufacturer_id }}" />
-                    </div>
-                    {% endfor %}
-                  </div>
-                </div>
+              <span class="help-block">{{ help_date_published }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="dcx-sidebar-card">
+          <div class="dcx-sidebar-card__header">
+            <div class="dcx-sidebar-card__header-icon"><i data-lucide="folder-tree" width="16" height="16"></i></div>
+            <h3 class="dcx-sidebar-card__title">{{ text_organization_card }}</h3>
+          </div>
+          <div class="dcx-sidebar-card__body">
+            <div class="dcx-sidebar-card__field">
+              <label class="dcx-sidebar-card__label" for="input-category">{{ entry_category }}</label>
+              <select name="category_id" id="input-category" class="form-control">
+                <option value="">{{ text_select }}</option>
+                {% for category in categories %}
+                {% if category.category_id == category_id %}
+                <option value="{{ category.category_id }}" selected="selected">{{ category.name }}</option>
+                {% else %}
+                <option value="{{ category.category_id }}">{{ category.name }}</option>
+                {% endif %}
+                {% endfor %}
+              </select>
+              {% if error_category %}
+              <div class="text-danger">{{ error_category }}</div>
+              {% endif %}
+            </div>
+            <div class="dcx-sidebar-card__field">
+              <label class="dcx-sidebar-card__label" for="input-author">{{ entry_author }}</label>
+              <select name="author_id" id="input-author" class="form-control">
+                <option value="">{{ text_select }}</option>
+                {% for author in authors %}
+                {% if author.author_id == author_id %}
+                <option value="{{ author.author_id }}" selected="selected">{{ author.name }}</option>
+                {% else %}
+                <option value="{{ author.author_id }}">{{ author.name }}</option>
+                {% endif %}
+                {% endfor %}
+              </select>
+              {% if error_author %}
+              <div class="text-danger">{{ error_author }}</div>
+              {% endif %}
+            </div>
+            <div class="dcx-sidebar-card__field">
+              <label class="dcx-sidebar-card__label">{{ entry_store }}</label>
+              <div class="dcx-sidebar-card__stores">
+                {% for store in stores %}
+                <label class="dcx-sidebar-card__store-item">
+                  <input type="checkbox" name="post_store[]" value="{{ store.store_id }}" {% if store.store_id in post_store %}checked="checked"{% endif %} />
+                  <span>{{ store.name }}</span>
+                </label>
+                {% endfor %}
               </div>
             </div>
-            <div class="tab-pane dcx-tab-pane" id="tab-seo">
-              <div class="alert alert-info"><i class="fa fa-info-circle"></i> {{ text_keyword }}</div>
-              <div class="table-responsive">
-                <table class="table table-bordered table-hover">
-                  <thead>
-                    <tr>
-                      <td class="text-left" style="width:200px;">{{ entry_store }}</td>
-                      {% for language in languages %}
-                      <td class="text-left"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> <span style="color:#6b7280;">{{ language.name }}</span></td>
-                      {% endfor %}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for store in stores %}
-                    <tr>
-                      <td>{{ store.name }}</td>
-                      {% for language in languages %}
-                      <td>
-                        <input type="text" name="post_seo_url[{{ store.store_id }}][{{ language.language_id }}]" value="{% if post_seo_url[store.store_id][language.language_id] %}{{ post_seo_url[store.store_id][language.language_id] }}{% endif %}" placeholder="{{ entry_keyword }}" class="form-control" />
-                      </td>
-                      {% endfor %}
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
+            <div class="dcx-sidebar-card__field">
+              <label class="dcx-sidebar-card__label" for="input-product">{{ entry_related_product }}
+                <span data-toggle="tooltip" title="{{ help_related_product }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+              </label>
+              <input type="text" name="product" value="" placeholder="{{ entry_related_product }}" id="input-product" class="form-control" />
+              <div id="product-related" class="dcx-picker__well" style="height: 100px; overflow: auto; margin-top: 6px;">
+                {% for product_recommendation in product_recommendations %}
+                <div class="dcx-picker__well-item" data-id="{{ product_recommendation.product_id }}">
+                  <i data-lucide="minus-circle" width="14" height="14" class="dcx-picker__well-remove"></i>
+                  <span class="dcx-picker__well-label">{{ product_recommendation.name }}</span>
+                  <input type="hidden" name="post_product[]" value="{{ product_recommendation.product_id }}" />
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="dcx-sidebar-card__field">
+              <label class="dcx-sidebar-card__label" for="input-product-category">{{ entry_related_category }}
+                <span data-toggle="tooltip" title="{{ help_related_category }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+              </label>
+              <input type="text" name="product_category" value="" placeholder="{{ entry_related_category }}" id="input-product-category" class="form-control" />
+              <div id="product-category-related" class="dcx-picker__well" style="height: 100px; overflow: auto; margin-top: 6px;">
+                {% for product_category_recommendation in product_category_recommendations %}
+                <div class="dcx-picker__well-item" data-id="{{ product_category_recommendation.category_id }}">
+                  <i data-lucide="minus-circle" width="14" height="14" class="dcx-picker__well-remove"></i>
+                  <span class="dcx-picker__well-label">{{ product_category_recommendation.name }}</span>
+                  <input type="hidden" name="post_product_category[]" value="{{ product_category_recommendation.category_id }}" />
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="dcx-sidebar-card__field">
+              <label class="dcx-sidebar-card__label" for="input-manufacturer">{{ entry_related_manufacturer }}
+                <span data-toggle="tooltip" title="{{ help_related_manufacturer }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+              </label>
+              <input type="text" name="manufacturer" value="" placeholder="{{ entry_related_manufacturer }}" id="input-manufacturer" class="form-control" />
+              <div id="manufacturer-related" class="dcx-picker__well" style="height: 100px; overflow: auto; margin-top: 6px;">
+                {% for manufacturer_recommendation in manufacturer_recommendations %}
+                <div class="dcx-picker__well-item" data-id="{{ manufacturer_recommendation.manufacturer_id }}">
+                  <i data-lucide="minus-circle" width="14" height="14" class="dcx-picker__well-remove"></i>
+                  <span class="dcx-picker__well-label">{{ manufacturer_recommendation.name }}</span>
+                  <input type="hidden" name="post_manufacturer[]" value="{{ manufacturer_recommendation.manufacturer_id }}" />
+                </div>
+                {% endfor %}
               </div>
             </div>
           </div>
-        </form>
+        </div>
+        <div class="dcx-sidebar-card">
+          <div class="dcx-sidebar-card__header">
+            <div class="dcx-sidebar-card__header-icon"><i data-lucide="link" width="16" height="16"></i></div>
+            <h3 class="dcx-sidebar-card__title">{{ text_seo_card }}</h3>
+          </div>
+          <div class="dcx-sidebar-card__body">
+            <div class="dcx-sidebar-card__help"><i data-lucide="info" width="16" height="16"></i> {{ text_keyword }}</div>
+            <div class="dcx-sidebar-card__links">
+              {% for store in stores %}
+                {% if stores|length > 1 %}
+                <div class="dcx-sidebar-card__store-label">{{ store.name }}</div>
+                {% endif %}
+                {% for language in languages %}
+                <div class="dcx-sidebar-card__link-item">
+                  <label class="dcx-sidebar-card__link-label">
+                    <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                    {{ language.name }}
+                  </label>
+                  <input type="text" name="post_seo_url[{{ store.store_id }}][{{ language.language_id }}]" value="{% if post_seo_url[store.store_id][language.language_id] %}{{ post_seo_url[store.store_id][language.language_id] }}{% endif %}" placeholder="{{ entry_keyword }}" class="form-control" />
+                </div>
+                {% endfor %}
+              {% endfor %}
+            </div>
+            <div class="dcx-seo-preview">
+              <span class="dcx-seo-preview__label">{{ text_seo_preview }}</span>
+              <span class="dcx-seo-preview__url">yoursite.com/blog/</span><span id="seo-url-preview">...</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-    </div>
+    </form>
   </div>
-</div>
-<script type="text/javascript" src="view/javascript/tinymce/dc.js"></script> 
-<script type="text/javascript"><!--
+  <script type="text/javascript" src="view/javascript/tinymce/dc.js"></script>
+  <script type="text/javascript"><!--
 $('#language a:first').tab('show');
-//--></script>
-<script type="text/javascript"><!--
+$('[data-toggle="tooltip"]').tooltip();
+
 $('.datetime').datetimepicker({
 	language: '{{ datepicker }}',
 	pickDate: true,
 	pickTime: true
 });
-//--></script>
-<script type="text/javascript"><!--
+
+// Tag chip input
+function dcTagSyncHidden($field) {
+	var $wrap = $field.closest('.dc-tag-input');
+	var tags = [];
+	$wrap.find('.dc-tag-chip').each(function() {
+		tags.push($(this).data('tag'));
+	});
+	$wrap.find('input[type="hidden"]').val(tags.join(','));
+}
+
+function escapeHtml(str) {
+	return $('<span>').text(str).html();
+}
+
+function dcTagAddChip($field, value) {
+	value = value.replace(/[,;]\s*$/, '').trim();
+	if (!value) return false;
+	var $wrap = $field.closest('.dc-tag-input');
+	var $tags = $wrap.find('.dc-tag-input__tags');
+	var exists = false;
+	$tags.find('.dc-tag-chip').each(function() {
+		if ($(this).data('tag').toLowerCase() === value.toLowerCase()) {
+			exists = true;
+			return false;
+		}
+	});
+	if (exists) return false;
+	var chip = '<span class="dc-tag-chip" data-tag="' + value.replace(/"/g, '&quot;') + '">' +
+		escapeHtml(value) +
+		' <button type="button" class="dc-tag-chip__remove"><i data-lucide="x" width="12" height="12"></i></button></span>';
+	$tags.append(chip);
+	lucide.createIcons({ nodes: [$tags[0]] });
+	dcTagSyncHidden($field);
+	return true;
+}
+
+{% for language in languages %}
+(function() {
+	var $input = $('#input-tag{{ language.language_id }}');
+	var $wrap = $input.closest('.dc-tag-input');
+	var val = $input.closest('.dc-tag-input').find('input[type="hidden"]').val();
+	if (val) {
+		var parts = val.split(',');
+		for (var i = 0; i < parts.length; i++) {
+			var t = parts[i].trim();
+			if (t) dcTagAddChip($input, t);
+		}
+	}
+	$input.on('keydown', function(e) {
+		if (e.key === 'Enter' || e.key === ',') {
+			e.preventDefault();
+			if (dcTagAddChip($input, $input.val())) { $input.val(''); }
+		}
+		if (e.key === 'Backspace' && !$input.val()) {
+			var $chips = $wrap.find('.dc-tag-chip');
+			if ($chips.length) { $chips.last().remove(); dcTagSyncHidden($input); }
+		}
+	});
+	$input.on('blur', function() {
+		var v = $input.val();
+		if (v.trim()) { if (dcTagAddChip($input, v)) { $input.val(''); } }
+	});
+	$wrap.on('click', '.dc-tag-chip__remove', function() {
+		$(this).closest('.dc-tag-chip').remove();
+		dcTagSyncHidden($input);
+	});
+})();
+{% endfor %}
+
+// Recommended autocomplete
 $('input[name=\'product\']').autocomplete({
 	'source': function(request, response) {
 		$.ajax({
@@ -335,8 +403,9 @@ $('input[name=\'product\']').autocomplete({
 	},
 	'select': function(item) {
 		$('input[name=\'product\']').val('');
-		$('#product-related' + item['value']).remove();
-		$('#product-related').append('<div id="product-related' + item['value'] + '"><i class="fa fa-minus-circle"></i> ' + item['label'] + '<input type="hidden" name="post_product[]" value="' + item['value'] + '" /></div>');
+		if ($('#product-related .dcx-picker__well-item[data-id="' + item['value'] + '"]').length) return;
+		$('#product-related').append('<div class="dcx-picker__well-item" data-id="' + item['value'] + '"><i data-lucide="minus-circle" width="14" height="14" class="dcx-picker__well-remove"></i> <span class="dcx-picker__well-label">' + item['label'] + '</span><input type="hidden" name="post_product[]" value="' + item['value'] + '" /></div>');
+		lucide.createIcons();
 	}
 });
 
@@ -357,8 +426,9 @@ $('input[name=\'product_category\']').autocomplete({
 	},
 	'select': function(item) {
 		$('input[name=\'product_category\']').val('');
-		$('#product-category-related' + item['value']).remove();
-		$('#product-category-related').append('<div id="product-category-related' + item['value'] + '"><i class="fa fa-minus-circle"></i> ' + item['label'] + '<input type="hidden" name="post_product_category[]" value="' + item['value'] + '" /></div>');
+		if ($('#product-category-related .dcx-picker__well-item[data-id="' + item['value'] + '"]').length) return;
+		$('#product-category-related').append('<div class="dcx-picker__well-item" data-id="' + item['value'] + '"><i data-lucide="minus-circle" width="14" height="14" class="dcx-picker__well-remove"></i> <span class="dcx-picker__well-label">' + item['label'] + '</span><input type="hidden" name="post_product_category[]" value="' + item['value'] + '" /></div>');
+		lucide.createIcons();
 	}
 });
 
@@ -379,13 +449,24 @@ $('input[name=\'manufacturer\']').autocomplete({
 	},
 	'select': function(item) {
 		$('input[name=\'manufacturer\']').val('');
-		$('#manufacturer-related' + item['value']).remove();
-		$('#manufacturer-related').append('<div id="manufacturer-related' + item['value'] + '"><i class="fa fa-minus-circle"></i> ' + item['label'] + '<input type="hidden" name="post_manufacturer[]" value="' + item['value'] + '" /></div>');
+		if ($('#manufacturer-related .dcx-picker__well-item[data-id="' + item['value'] + '"]').length) return;
+		$('#manufacturer-related').append('<div class="dcx-picker__well-item" data-id="' + item['value'] + '"><i data-lucide="minus-circle" width="14" height="14" class="dcx-picker__well-remove"></i> <span class="dcx-picker__well-label">' + item['label'] + '</span><input type="hidden" name="post_manufacturer[]" value="' + item['value'] + '" /></div>');
+		lucide.createIcons();
 	}
 });
 
-$('#product-related, #product-category-related, #manufacturer-related').delegate('.fa-minus-circle', 'click', function() {
-	$(this).parent().remove();
+$(document).on('click', '.dcx-picker__well-remove', function() {
+	$(this).closest('.dcx-picker__well-item').remove();
+});
+
+$('input[name^="post_seo_url"]').on('input', function() {
+	var firstVal = $('input[name^="post_seo_url"]:first').val();
+	if (firstVal) {
+		$('#seo-url-preview').text(firstVal);
+	} else {
+		$('#seo-url-preview').text('...');
+	}
 });
 //--></script>
+</div>
 {{ footer }}

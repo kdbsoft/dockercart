@@ -47,12 +47,27 @@
                 {% for post in posts %}
                 <tr>
                   <td class="text-center">{% if post.selected %}<input type="checkbox" name="selected[]" value="{{ post.post_id }}" checked="checked" />{% else %}<input type="checkbox" name="selected[]" value="{{ post.post_id }}" />{% endif %}</td>
-                  <td class="text-left">{{ post.name }}</td>
-                  <td class="text-left">{{ post.category }}</td>
-                  <td class="text-left">{{ post.author }}</td>
+                  <td class="text-left">
+                    <span class="inline-edit" data-post-id="{{ post.post_id }}" data-field="name" data-value="{{ post.name_raw|e('html_attr') }}">{{ post.name }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
+                  </td>
+                  <td class="text-left">
+                    <span class="inline-edit" data-post-id="{{ post.post_id }}" data-field="category_id" data-value="{{ post.category_id }}">{{ post.category }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
+                  </td>
+                  <td class="text-left">
+                    <span class="inline-edit" data-post-id="{{ post.post_id }}" data-field="author_id" data-value="{{ post.author_id }}">{{ post.author }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
+                  </td>
                   <td class="text-right">{{ post.views }}</td>
                   <td class="text-right">{{ post.comments }}</td>
-                  <td class="text-left">{{ post.status }}</td>
+                  <td class="text-left">
+                    <span class="inline-edit" data-post-id="{{ post.post_id }}" data-field="status" data-value="{{ post.status_raw }}">
+                      {% if post.status_raw %}
+                      <span class="label label-success">{{ text_enabled }}</span>
+                      {% else %}
+                      <span class="label label-danger">{{ text_disabled }}</span>
+                      {% endif %}
+                      <i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>
+                    </span>
+                  </td>
                   <td class="text-right">{{ post.date_created }}</td>
                   <td class="text-right"><a href="{{ post.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a> <a href="{{ post.copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default btn--icon"><i data-lucide="copy" width="14" height="14"></i></a> <a href="{{ post.delete }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="return confirm('{{ text_confirm }}');"><i data-lucide="trash-2" width="14" height="14"></i></a></td>
                 </tr>
@@ -75,8 +90,240 @@
   </div>
 </div>
 <script type="text/javascript"><!--
+var blogCategories = {{ blog_categories_json }};
+var blogAuthors = {{ blog_authors_json }};
+
 $('button[form=\'form-post\']').on('click', function(e) {
 	$('#form-post').attr('action', $(this).attr('formaction'));
+});
+
+$(document).on('click', '.inline-edit-icon', function(e) {
+	e.stopPropagation();
+	var $span = $(this).closest('.inline-edit');
+	var postId = $span.data('post-id');
+	var field = $span.data('field');
+	var rawValue = $span.data('value');
+
+	if (field === 'name') {
+		$.ajax({
+			url: 'index.php?route=extension/module/dockercart_blog_post/getName&user_token={{ user_token }}&post_id=' + postId,
+			dataType: 'json',
+			success: function(json) {
+				if (json['error']) {
+					$span.html('<span class="text-danger">' + json['error'] + '</span>');
+					return;
+				}
+				var html = '<div class="inline-edit-names" style="white-space:nowrap;">';
+				$.each(json['languages'], function(i, lang) {
+					var val = json['names'][lang.language_id] || '';
+					html += '<div style="margin-bottom:2px;">';
+					html += '<span style="font-weight:bold;font-size:11px;margin-right:4px;">' + lang.name + ':</span>';
+					html += '<input type="text" class="form-control input-sm inline-edit-name-input" data-lang-id="' + lang.language_id + '" value="' + val.replace(/"/g, '&quot;') + '" style="width:200px;display:inline-block;">';
+					html += '</div>';
+				});
+				html += '<div style="margin-top:4px;"><button type="button" class="btn btn-primary btn-xs inline-edit-name-save">{{ button_save }}</button></div>';
+				$span.html(html);
+				$span.find('.inline-edit-name-input:first').focus();
+
+				var reverted = false;
+				var revertFn = function() {
+					if (reverted) return;
+					reverted = true;
+					$span.html(json['names'][{{ config_language_id }}] || '') ;
+					$span.append('<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+					lucide.createIcons();
+				};
+
+				$(document).on('click.inlineEditName' + postId, function(e2) {
+					if (!$span.find(e2.target).length && !$(e2.target).closest('.inline-edit-names').length) {
+						revertFn();
+						$(document).off('click.inlineEditName' + postId);
+					}
+				});
+
+				$span.find('.inline-edit-name-save').on('click', function() {
+					var names = {};
+					$span.find('.inline-edit-name-input').each(function() {
+						names[$(this).data('lang-id')] = $(this).val();
+					});
+					$.ajax({
+						url: 'index.php?route=extension/module/dockercart_blog_post/updateNames&user_token={{ user_token }}',
+						type: 'post',
+						data: { post_id: postId, names: names },
+						dataType: 'json',
+						success: function(resp) {
+							if (resp['error_names']) {
+								$span.find('.inline-edit-name-input').each(function() {
+									var $inp = $(this);
+									var e = resp['error_names'][$inp.data('lang-id')];
+									$inp.toggleClass('has-error', !!e);
+									$inp.closest('div').find('.text-danger').remove();
+									if (e) $inp.after('<span class="text-danger">' + e + '</span>');
+								});
+								return;
+							}
+							reverted = true;
+							$(document).off('click.inlineEditName' + postId);
+							$span.html(resp['value_html']);
+							$span.append('<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+							$span.data('value', resp['value_html']);
+							lucide.createIcons();
+						}
+					});
+				});
+			}
+		});
+	} else if (field === 'status') {
+		var $select = $('<select class="form-control input-sm" style="width:auto;display:inline-block;">');
+		$select.append('<option value="1"' + (rawValue == 1 ? ' selected' : '') + '>{{ text_enabled }}</option>');
+		$select.append('<option value="0"' + (rawValue == 0 ? ' selected' : '') + '>{{ text_disabled }}</option>');
+		$span.html($select);
+
+		var saved = false;
+		$select.on('change', function() {
+			saved = true;
+			$.ajax({
+				url: 'index.php?route=extension/module/dockercart_blog_post/updateField&user_token={{ user_token }}',
+				type: 'post',
+				data: { post_id: postId, field: 'status', value: $select.val() },
+				dataType: 'json',
+				success: function(resp) {
+					if (resp['success']) {
+						$span.html(resp['value_html']);
+						$span.data('value', $select.val());
+						$span.append('<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+						lucide.createIcons();
+					}
+				}
+			});
+		});
+
+		$select.on('blur', function() {
+			if (!saved) {
+				$span.html(rawValue == 1 ? '<span class="label label-success">{{ text_enabled }}</span>' : '<span class="label label-danger">{{ text_disabled }}</span>');
+				$span.append('<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+				lucide.createIcons();
+			}
+		});
+	} else if (field === 'category_id') {
+		var $select = $('<select class="form-control input-sm" style="width:auto;display:inline-block;">');
+		$select.append('<option value="">-- {{ text_select }} --</option>');
+		$.each(blogCategories, function(i, cat) {
+			$select.append('<option value="' + cat.category_id + '"' + (rawValue == cat.category_id ? ' selected' : '') + '>' + cat.name.replace(/"/g, '&quot;') + '</option>');
+		});
+		$span.html($select);
+
+		var saved = false;
+		$select.on('change', function() {
+			saved = true;
+			$.ajax({
+				url: 'index.php?route=extension/module/dockercart_blog_post/updateField&user_token={{ user_token }}',
+				type: 'post',
+				data: { post_id: postId, field: 'category_id', value: $select.val() },
+				dataType: 'json',
+				success: function(resp) {
+					if (resp['success']) {
+						$span.html(resp['value_html']);
+						$span.data('value', $select.val());
+						$span.append('<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+						lucide.createIcons();
+					}
+				}
+			});
+		});
+
+		$select.on('blur', function() {
+			if (!saved) {
+				var origText = '—';
+				$.each(blogCategories, function(i, cat) {
+					if (cat.category_id == rawValue) { origText = cat.name; return false; }
+				});
+				$span.html(origText);
+				$span.append('<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+				lucide.createIcons();
+			}
+		});
+	} else if (field === 'author_id') {
+		var $select = $('<select class="form-control input-sm" style="width:auto;display:inline-block;">');
+		$select.append('<option value="">-- {{ text_select }} --</option>');
+		$.each(blogAuthors, function(i, author) {
+			$select.append('<option value="' + author.author_id + '"' + (rawValue == author.author_id ? ' selected' : '') + '>' + author.name.replace(/"/g, '&quot;') + '</option>');
+		});
+		$span.html($select);
+
+		var saved = false;
+		$select.on('change', function() {
+			saved = true;
+			$.ajax({
+				url: 'index.php?route=extension/module/dockercart_blog_post/updateField&user_token={{ user_token }}',
+				type: 'post',
+				data: { post_id: postId, field: 'author_id', value: $select.val() },
+				dataType: 'json',
+				success: function(resp) {
+					if (resp['success']) {
+						$span.html(resp['value_html']);
+						$span.data('value', $select.val());
+						$span.append('<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+						lucide.createIcons();
+					}
+				}
+			});
+		});
+
+		$select.on('blur', function() {
+			if (!saved) {
+				var origText = '—';
+				$.each(blogAuthors, function(i, author) {
+					if (author.author_id == rawValue) { origText = author.name; return false; }
+				});
+				$span.html(origText);
+				$span.append('<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+				lucide.createIcons();
+			}
+		});
+	} else {
+		var currentDisplay = $span.clone().children('.inline-edit-icon').remove().end().text().trim();
+		$span.html('<input type="text" class="form-control input-sm inline-edit-input" value="' + rawValue + '">');
+		$span.find('input').focus().select();
+
+		var saved = false;
+		var saveFn = function() {
+			if (saved) return;
+			saved = true;
+			var val = $span.find('input').val();
+			$.ajax({
+				url: 'index.php?route=extension/module/dockercart_blog_post/updateField&user_token={{ user_token }}',
+				type: 'post',
+				data: { post_id: postId, field: field, value: val },
+				dataType: 'json',
+				success: function(resp) {
+					if (resp['success']) {
+						$span.html(resp['value_html']);
+						$span.data('value', val);
+					} else {
+						$span.html(currentDisplay);
+						if (resp['error']) {
+							$span.prepend('<span class="text-danger" style="margin-right:4px;">' + resp['error'] + '</span>');
+							setTimeout(function() { $span.find('.text-danger').remove(); }, 3000);
+						}
+					}
+					$span.append('<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+					lucide.createIcons();
+				}
+			});
+		};
+
+		$span.find('input').on('blur', saveFn);
+		$span.find('input').on('keydown', function(e) {
+			if (e.key === 'Enter') { e.preventDefault(); saveFn(); }
+			if (e.key === 'Escape') {
+				saved = true;
+				$span.html(currentDisplay);
+				$span.append('<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+				lucide.createIcons();
+			}
+		});
+	}
 });
 //--></script>
 {{ footer }}

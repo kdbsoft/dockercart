@@ -140,7 +140,23 @@ class ModelDesignSeoUrl extends Model {
 		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "seo_url` WHERE query = '" . $this->db->escape($query) . "' AND language_id = '" . (int)$language_id . "' AND seo_url_id != '" . (int)$seo_url_id . "'");
 
 		return $query->rows;
-	}	
+	}
+
+	public function getSeoUrlsArray($query) {
+		$seo_url_data = array();
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "seo_url` WHERE query = '" . $this->db->escape($query) . "'");
+
+		foreach ($query->rows as $result) {
+			$seo_url_data[$result['store_id']][$result['language_id']] = $result['keyword'];
+		}
+
+		return $seo_url_data;
+	}
+
+	public function deleteSeoUrlsByQuery($query) {
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "seo_url` WHERE query = '" . $this->db->escape($query) . "'");
+		$this->invalidateSeoUrlCache();
+	}
 
 	public function getSeoUrlsByKeywordId($seo_url_id, $keyword, $language_id) {
 		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "seo_url` WHERE keyword = '" . $this->db->escape($keyword) . "' AND language_id = '" . (int)$language_id . "' AND seo_url_id != '" . (int)$seo_url_id . "'");

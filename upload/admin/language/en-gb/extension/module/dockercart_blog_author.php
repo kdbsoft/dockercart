@@ -29,6 +29,9 @@ $_['column_email']      = 'Email';
 $_['column_status']     = 'Status';
 $_['column_action']     = 'Action';
 
+// Text - Cards
+$_['text_status_card']  = 'Status';
+
 // Entry
 $_['entry_name']        = 'Author Name';
 $_['entry_email']       = 'Email';
