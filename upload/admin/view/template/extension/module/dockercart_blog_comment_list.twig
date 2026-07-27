@@ -6,8 +6,8 @@
       <div class="row">
         <div class="col-sm-12">
           <div class="pull-right">
-            <button type="button" data-toggle="tooltip" title="{{ button_approve }}" class="btn btn-success btn--icon" onclick="$('#form-comment').attr('action', '{{ approve }}'); $('#form-comment').submit();"><i data-lucide="check" width="16" height="16"></i></button>
-            <button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="confirm('{{ text_confirm }}') ? ($('#form-comment').attr('action', '{{ delete }}'), $('#form-comment').submit()) : false;"><i data-lucide="trash-2" width="16" height="16"></i></button>
+            <button type="button" title="{{ button_approve }}" class="btn btn-success btn--icon" onclick="$('#form-comment').attr('action', '{{ approve }}'); $('#form-comment').submit();"><i data-lucide="check" width="16" height="16"></i></button>
+            <button type="button" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="confirm('{{ text_confirm }}') ? ($('#form-comment').attr('action', '{{ delete }}'), $('#form-comment').submit()) : false;"><i data-lucide="trash-2" width="16" height="16"></i></button>
           </div>
           <h1 class="page-header__title">{{ heading_title }}</h1>
         </div>
@@ -56,7 +56,7 @@
             </div>
           </div>
           <div class="table-responsive">
-            <table class="table table-bordered table-hover">
+            <table class="table table-hover dcx-table">
               <thead>
                 <tr>
                   <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
@@ -78,10 +78,19 @@
                   <td class="text-left">{{ comment.post_name }}</td>
                   <td class="text-left">{{ comment.author }}</td>
                   <td class="text-center">{{ comment.rating }}</td>
-                  <td class="text-left">{{ comment.status }}</td>
+                  <td class="text-left">
+                    <span class="inline-edit" data-comment-id="{{ comment.comment_id }}" data-field="status" data-value="{{ comment.status_raw }}">
+                      {% if comment.status_raw %}
+                      <span class="label label-success">{{ text_enabled }}</span>
+                      {% else %}
+                      <span class="label label-danger">{{ text_disabled }}</span>
+                      {% endif %}
+                      <i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>
+                    </span>
+                  </td>
                   <td class="text-left">{{ comment.date_added }}</td>
                   <td class="text-right">
-                    <a href="{{ comment.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a>
+                    <a href="{{ comment.edit }}" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a>
                   </td>
                 </tr>
                 {% endfor %}
@@ -135,6 +144,58 @@ $('#button-filter').on('click', function() {
 $('#filter-comment input, #filter-comment select').on('keypress', function(e) {
 	if (e.which == 13) {
 		$('#button-filter').trigger('click');
+	}
+});
+//--></script>
+<script type="text/javascript"><!--
+$(document).on('click', '.inline-edit-icon', function(e) {
+	e.stopPropagation();
+
+	var $span = $(this).closest('.inline-edit');
+	if ($span.find('select').length) return;
+
+	var field = $span.data('field');
+	var rawValue = $span.data('value');
+	var commentId = $span.data('comment-id');
+
+	$span.data('display', $span.html());
+
+	if (field === 'status') {
+		var $select = $('<select class="form-control input-sm" style="width:auto;display:inline-block;">');
+		$select.append('<option value="1"' + (rawValue == 1 ? ' selected' : '') + '>{{ text_enabled }}</option>');
+		$select.append('<option value="0"' + (rawValue == 0 ? ' selected' : '') + '>{{ text_disabled }}</option>');
+		$span.html($select);
+		$select.focus();
+		var saved = false;
+
+		$select.on('change', function() {
+			saved = true;
+			var newValue = $(this).val();
+
+			$.ajax({
+				url: 'index.php?route=extension/module/dockercart_blog_comment/updateField&user_token={{ user_token }}',
+				type: 'post',
+				data: { comment_id: commentId, field: field, value: newValue },
+				dataType: 'json',
+				success: function(json) {
+					if (json['error']) {
+						$span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
+						setTimeout(function() { $span.html($span.data('display')); }, 3000);
+					} else {
+						$span.data('value', newValue);
+						$span.html(json['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+						lucide.createIcons({ nodes: [$span[0]] });
+					}
+				},
+				error: function() {
+					$span.html($span.data('display'));
+				}
+			});
+		});
+
+		$select.on('blur', function() {
+			if (!saved) $span.html($span.data('display'));
+		});
 	}
 });
 //--></script>

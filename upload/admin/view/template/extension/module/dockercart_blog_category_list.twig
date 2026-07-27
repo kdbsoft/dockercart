@@ -6,9 +6,9 @@
       <div class="row">
         <div class="col-sm-12">
           <div class="pull-right">
-            <a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary btn--icon"><i data-lucide="plus" width="16" height="16"></i></a>
-            <button type="submit" form="form-category" formaction="{{ copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default btn--icon"><i data-lucide="copy" width="16" height="16"></i></button>
-            <button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="confirm('{{ text_confirm }}') ? $('#form-category').submit() : false;"><i data-lucide="trash-2" width="16" height="16"></i></button>
+            <a href="{{ add }}" title="{{ button_add }}" class="btn btn-primary btn--icon"><i data-lucide="plus" width="16" height="16"></i></a>
+            <button type="submit" form="form-category" formaction="{{ copy }}" title="{{ button_copy }}" class="btn btn-default btn--icon"><i data-lucide="copy" width="16" height="16"></i></button>
+            <button type="button" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="confirm('{{ text_confirm }}') ? $('#form-category').submit() : false;"><i data-lucide="trash-2" width="16" height="16"></i></button>
           </div>
           <h1 class="page-header__title">{{ heading_title }}</h1>
         </div>
@@ -28,7 +28,7 @@
     {% endif %}
         <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-category">
           <div class="table-responsive">
-            <table class="table table-bordered table-hover">
+            <table class="table table-hover dcx-table">
               <thead>
                 <tr>
                   <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
@@ -49,11 +49,24 @@
                     <input type="checkbox" name="selected[]" value="{{ category.category_id }}" />
                     {% endif %}
                   </td>
-                  <td class="text-left">{{ category.name }}</td>
-                  <td class="text-left">{{ category.status }}</td>
-                  <td class="text-center">{{ category.sort_order }}</td>
+                  <td class="text-left">
+                    <span class="inline-edit" data-category-id="{{ category.category_id }}" data-field="name" data-value="{{ category.name_raw|e('html_attr') }}">{{ category.name }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
+                  </td>
+                  <td class="text-left">
+                    <span class="inline-edit" data-category-id="{{ category.category_id }}" data-field="status" data-value="{{ category.status_raw }}">
+                      {% if category.status_raw %}
+                      <span class="label label-success">{{ text_enabled }}</span>
+                      {% else %}
+                      <span class="label label-danger">{{ text_disabled }}</span>
+                      {% endif %}
+                      <i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>
+                    </span>
+                  </td>
+                  <td class="text-center">
+                    <span class="inline-edit" data-category-id="{{ category.category_id }}" data-field="sort_order" data-value="{{ category.sort_order_raw }}">{{ category.sort_order }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
+                  </td>
                   <td class="text-right">
-                    <a href="{{ category.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a> <a href="{{ category.copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default btn--icon"><i data-lucide="copy" width="14" height="14"></i></a> <a href="{{ category.delete }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="return confirm('{{ text_confirm }}');"><i data-lucide="trash-2" width="14" height="14"></i></a>
+                    <a href="{{ category.edit }}" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a> <a href="{{ category.copy }}" title="{{ button_copy }}" class="btn btn-default btn--icon"><i data-lucide="copy" width="14" height="14"></i></a> <a href="{{ category.delete }}" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="return confirm('{{ text_confirm }}');"><i data-lucide="trash-2" width="14" height="14"></i></a>
                   </td>
                 </tr>
                 {% endfor %}
@@ -77,6 +90,174 @@
 <script type="text/javascript"><!--
 $('button[form=\'form-category\']').on('click', function(e) {
 	$('#form-category').attr('action', $(this).attr('formaction'));
+});
+//--></script>
+<script type="text/javascript"><!--
+$(document).on('click', '.inline-edit-icon', function(e) {
+	e.stopPropagation();
+
+	var $span = $(this).closest('.inline-edit');
+	if ($span.find('input, select').length) return;
+
+	var field = $span.data('field');
+	var rawValue = $span.data('value');
+	var categoryId = $span.data('category-id');
+
+	$span.data('display', $span.html());
+
+	if (field === 'name') {
+		$.ajax({
+			url: 'index.php?route=extension/module/dockercart_blog_category/getName&user_token={{ user_token }}&category_id=' + categoryId,
+			dataType: 'json',
+			success: function(json) {
+				if (json['error']) {
+					$span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
+					setTimeout(function() { $span.html($span.data('display')); }, 3000);
+					return;
+				}
+
+				var html = '<div class="inline-edit-names" style="white-space:nowrap;">';
+				$.each(json['languages'], function(i, lang) {
+					var val = json['names'][lang.language_id] || '';
+					html += '<div style="margin-bottom:2px;">';
+					html += '<span style="font-weight:bold;font-size:11px;margin-right:4px;">' + lang.name + ':</span>';
+					html += '<input type="text" class="form-control input-sm inline-edit-name-input" data-lang-id="' + lang.language_id + '" value="' + val.replace(/"/g, '&quot;') + '" style="width:200px;display:inline-block;">';
+					html += '</div>';
+				});
+				html += '<div style="margin-top:4px;"><button type="button" class="btn btn-primary btn-xs inline-edit-name-save">{{ button_save }}</button></div>';
+				html += '</div>';
+
+				$span.html(html);
+				$span.find('input').first().focus();
+
+				var reverted = false;
+
+				$span.on('click', '.inline-edit-name-save', function() {
+					var names = {};
+					$span.find('.inline-edit-name-input').each(function() {
+						names[$(this).data('lang-id')] = $(this).val();
+					});
+
+					$.ajax({
+						url: 'index.php?route=extension/module/dockercart_blog_category/updateNames&user_token={{ user_token }}',
+						type: 'post',
+						data: { category_id: categoryId, names: names },
+						dataType: 'json',
+						success: function(res) {
+							if (res['error_names']) {
+								$span.find('.inline-edit-name-input').each(function() {
+									var $inp = $(this);
+									var e = res['error_names'][$inp.data('lang-id')];
+									$inp.toggleClass('has-error', !!e);
+									$inp.closest('div').find('.text-danger').remove();
+									if (e) $inp.after('<span class="text-danger">' + e + '</span>');
+								});
+								return;
+							}
+							reverted = true;
+							$span.data('value', res['value_html']);
+							$span.html(res['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+							lucide.createIcons({ nodes: [$span[0]] });
+						},
+						error: function() {
+							$span.html($span.data('display'));
+						}
+					});
+				});
+
+				$span.find('.inline-edit-name-input').on('keydown', function(e) {
+					if (e.which === 27) {
+						reverted = true;
+						$span.html($span.data('display'));
+					}
+				});
+
+				$(document).one('click', function(e) {
+					if (!$(e.target).closest('.inline-edit-names').length && !reverted) {
+						$span.html($span.data('display'));
+					}
+				});
+			},
+			error: function() {
+				$span.html($span.data('display'));
+			}
+		});
+	} else if (field === 'status') {
+		var $select = $('<select class="form-control input-sm" style="width:auto;display:inline-block;">');
+		$select.append('<option value="1"' + (rawValue == 1 ? ' selected' : '') + '>{{ text_enabled }}</option>');
+		$select.append('<option value="0"' + (rawValue == 0 ? ' selected' : '') + '>{{ text_disabled }}</option>');
+		$span.html($select);
+		$select.focus();
+		var saved = false;
+
+		$select.on('change', function() {
+			saved = true;
+			var newValue = $(this).val();
+
+			$.ajax({
+				url: 'index.php?route=extension/module/dockercart_blog_category/updateField&user_token={{ user_token }}',
+				type: 'post',
+				data: { category_id: categoryId, field: field, value: newValue },
+				dataType: 'json',
+				success: function(json) {
+					if (json['error']) {
+						$span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
+						setTimeout(function() { $span.html($span.data('display')); }, 3000);
+					} else {
+						$span.data('value', newValue);
+						$span.html(json['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+						lucide.createIcons({ nodes: [$span[0]] });
+					}
+				},
+				error: function() {
+					$span.html($span.data('display'));
+				}
+			});
+		});
+
+		$select.on('blur', function() {
+			if (!saved) $span.html($span.data('display'));
+		});
+	} else if (field === 'sort_order') {
+		var currentDisplay = $span.data('display');
+		$span.html('<input type="text" class="form-control input-sm inline-edit-input" value="' + rawValue + '">');
+		var $input = $span.find('input');
+		$input.focus().select();
+
+		function revert() {
+			$span.html(currentDisplay);
+		}
+
+		function save() {
+			var newValue = $input.val();
+
+			$.ajax({
+				url: 'index.php?route=extension/module/dockercart_blog_category/updateField&user_token={{ user_token }}',
+				type: 'post',
+				data: { category_id: categoryId, field: field, value: newValue },
+				dataType: 'json',
+				success: function(json) {
+					if (json['error']) {
+						$span.html(currentDisplay + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
+						setTimeout(function() { $span.html(currentDisplay); }, 3000);
+					} else {
+						$span.data('value', newValue);
+						$span.html(json['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+						lucide.createIcons({ nodes: [$span[0]] });
+					}
+				},
+				error: function() {
+					revert();
+				}
+			});
+		}
+
+		$input.on('blur', save);
+		$input.on('keydown', function(e) {
+			if (e.which === 13) { e.preventDefault(); $input.trigger('blur'); }
+			if (e.which === 27) { revert(); }
+		});
+	}
 });
 //--></script>
 {{ footer }}
