@@ -93,6 +93,7 @@ class ControllerExtensionModuleDockercartBlog extends Controller {
 		$data['action'] = $this->url->link('extension/module/dockercart_blog', 'user_token=' . $this->session->data['user_token'], true);
 		$data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true);
 		$data['user_token'] = $this->session->data['user_token'];
+		$data['text_form'] = $this->language->get('text_form');
 
 		// Links to management pages
 		$data['link_posts'] = $this->url->link('extension/module/dockercart_blog_post', 'user_token=' . $this->session->data['user_token'], true);
@@ -121,6 +122,8 @@ class ControllerExtensionModuleDockercartBlog extends Controller {
 				$data[$setting] = $this->config->get($setting);
 			}
 		}
+
+		$data['blog_status'] = isset($data['module_dockercart_blog_status']) ? (int)$data['module_dockercart_blog_status'] : 0;
 
 		// Error handling
 		if (isset($this->error['warning'])) {
