@@ -6,9 +6,9 @@
       <div class="row">
         <div class="col-sm-12">
           <div class="pull-right">
-            <a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary btn--icon"><i data-lucide="plus" width="16" height="16"></i></a>
-            <button type="submit" form="form-post" formaction="{{ copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default btn--icon"><i data-lucide="copy" width="16" height="16"></i></button>
-            <button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="confirm('{{ text_confirm }}') ? $('#form-post').submit() : false;"><i data-lucide="trash-2" width="16" height="16"></i></button>
+            <a href="{{ add }}" title="{{ button_add }}" class="btn btn-primary btn--icon"><i data-lucide="plus" width="16" height="16"></i></a>
+            <button type="submit" form="form-post" formaction="{{ copy }}" title="{{ button_copy }}" class="btn btn-default btn--icon"><i data-lucide="copy" width="16" height="16"></i></button>
+            <button type="button" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="confirm('{{ text_confirm }}') ? $('#form-post').submit() : false;"><i data-lucide="trash-2" width="16" height="16"></i></button>
           </div>
           <h1 class="page-header__title">{{ heading_title }}</h1>
         </div>
@@ -28,7 +28,7 @@
     {% endif %}
         <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-post">
           <div class="table-responsive">
-            <table class="table table-bordered table-hover dcx-table">
+            <table class="table table-hover dcx-table">
               <thead>
                 <tr>
                   <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
@@ -69,7 +69,7 @@
                     </span>
                   </td>
                   <td class="text-right">{{ post.date_created }}</td>
-                  <td class="text-right"><a href="{{ post.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a> <a href="{{ post.copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default btn--icon"><i data-lucide="copy" width="14" height="14"></i></a> <a href="{{ post.delete }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="return confirm('{{ text_confirm }}');"><i data-lucide="trash-2" width="14" height="14"></i></a></td>
+                  <td class="text-right"><a href="{{ post.edit }}" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a> <a href="{{ post.copy }}" title="{{ button_copy }}" class="btn btn-default btn--icon"><i data-lucide="copy" width="14" height="14"></i></a> <a href="{{ post.delete }}" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="return confirm('{{ text_confirm }}');"><i data-lucide="trash-2" width="14" height="14"></i></a></td>
                 </tr>
                 {% endfor %}
                 {% else %}
@@ -96,13 +96,19 @@ var blogAuthors = {{ blog_authors_json }};
 $('button[form=\'form-post\']').on('click', function(e) {
 	$('#form-post').attr('action', $(this).attr('formaction'));
 });
-
+//--></script>
+<script type="text/javascript"><!--
 $(document).on('click', '.inline-edit-icon', function(e) {
 	e.stopPropagation();
+
 	var $span = $(this).closest('.inline-edit');
-	var postId = $span.data('post-id');
+	if ($span.find('input, select').length) return;
+
 	var field = $span.data('field');
 	var rawValue = $span.data('value');
+	var postId = $span.data('post-id');
+
+	$span.data('display', $span.html());
 
 	if (field === 'name') {
 		$.ajax({
@@ -110,9 +116,11 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 			dataType: 'json',
 			success: function(json) {
 				if (json['error']) {
-					$span.html('<span class="text-danger">' + json['error'] + '</span>');
+					$span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
+					setTimeout(function() { $span.html($span.data('display')); }, 3000);
 					return;
 				}
+
 				var html = '<div class="inline-edit-names" style="white-space:nowrap;">';
 				$.each(json['languages'], function(i, lang) {
 					var val = json['names'][lang.language_id] || '';
@@ -122,40 +130,29 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 					html += '</div>';
 				});
 				html += '<div style="margin-top:4px;"><button type="button" class="btn btn-primary btn-xs inline-edit-name-save">{{ button_save }}</button></div>';
+				html += '</div>';
+
 				$span.html(html);
-				$span.find('.inline-edit-name-input:first').focus();
+				$span.find('input').first().focus();
 
 				var reverted = false;
-				var revertFn = function() {
-					if (reverted) return;
-					reverted = true;
-					$span.html(json['names'][{{ config_language_id }}] || '') ;
-					$span.append('<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
-					lucide.createIcons();
-				};
 
-				$(document).on('click.inlineEditName' + postId, function(e2) {
-					if (!$span.find(e2.target).length && !$(e2.target).closest('.inline-edit-names').length) {
-						revertFn();
-						$(document).off('click.inlineEditName' + postId);
-					}
-				});
-
-				$span.find('.inline-edit-name-save').on('click', function() {
+				$span.on('click', '.inline-edit-name-save', function() {
 					var names = {};
 					$span.find('.inline-edit-name-input').each(function() {
 						names[$(this).data('lang-id')] = $(this).val();
 					});
+
 					$.ajax({
 						url: 'index.php?route=extension/module/dockercart_blog_post/updateNames&user_token={{ user_token }}',
 						type: 'post',
 						data: { post_id: postId, names: names },
 						dataType: 'json',
-						success: function(resp) {
-							if (resp['error_names']) {
+						success: function(res) {
+							if (res['error_names']) {
 								$span.find('.inline-edit-name-input').each(function() {
 									var $inp = $(this);
-									var e = resp['error_names'][$inp.data('lang-id')];
+									var e = res['error_names'][$inp.data('lang-id')];
 									$inp.toggleClass('has-error', !!e);
 									$inp.closest('div').find('.text-danger').remove();
 									if (e) $inp.after('<span class="text-danger">' + e + '</span>');
@@ -163,14 +160,31 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 								return;
 							}
 							reverted = true;
-							$(document).off('click.inlineEditName' + postId);
-							$span.html(resp['value_html']);
-							$span.append('<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
-							$span.data('value', resp['value_html']);
-							lucide.createIcons();
+							$span.data('value', res['value_html']);
+							$span.html(res['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+							lucide.createIcons({ nodes: [$span[0]] });
+						},
+						error: function() {
+							$span.html($span.data('display'));
 						}
 					});
 				});
+
+				$span.find('.inline-edit-name-input').on('keydown', function(e) {
+					if (e.which === 27) {
+						reverted = true;
+						$span.html($span.data('display'));
+					}
+				});
+
+				$(document).one('click', function(e) {
+					if (!$(e.target).closest('.inline-edit-names').length && !reverted) {
+						$span.html($span.data('display'));
+					}
+				});
+			},
+			error: function() {
+				$span.html($span.data('display'));
 			}
 		});
 	} else if (field === 'status') {
@@ -178,32 +192,36 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 		$select.append('<option value="1"' + (rawValue == 1 ? ' selected' : '') + '>{{ text_enabled }}</option>');
 		$select.append('<option value="0"' + (rawValue == 0 ? ' selected' : '') + '>{{ text_disabled }}</option>');
 		$span.html($select);
-
+		$select.focus();
 		var saved = false;
+
 		$select.on('change', function() {
 			saved = true;
+			var newValue = $(this).val();
+
 			$.ajax({
 				url: 'index.php?route=extension/module/dockercart_blog_post/updateField&user_token={{ user_token }}',
 				type: 'post',
-				data: { post_id: postId, field: 'status', value: $select.val() },
+				data: { post_id: postId, field: field, value: newValue },
 				dataType: 'json',
-				success: function(resp) {
-					if (resp['success']) {
-						$span.html(resp['value_html']);
-						$span.data('value', $select.val());
-						$span.append('<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
-						lucide.createIcons();
+				success: function(json) {
+					if (json['error']) {
+						$span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
+						setTimeout(function() { $span.html($span.data('display')); }, 3000);
+					} else {
+						$span.data('value', newValue);
+						$span.html(json['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+						lucide.createIcons({ nodes: [$span[0]] });
 					}
+				},
+				error: function() {
+					$span.html($span.data('display'));
 				}
 			});
 		});
 
 		$select.on('blur', function() {
-			if (!saved) {
-				$span.html(rawValue == 1 ? '<span class="label label-success">{{ text_enabled }}</span>' : '<span class="label label-danger">{{ text_disabled }}</span>');
-				$span.append('<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
-				lucide.createIcons();
-			}
+			if (!saved) $span.html($span.data('display'));
 		});
 	} else if (field === 'category_id') {
 		var $select = $('<select class="form-control input-sm" style="width:auto;display:inline-block;">');
@@ -212,36 +230,36 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 			$select.append('<option value="' + cat.category_id + '"' + (rawValue == cat.category_id ? ' selected' : '') + '>' + cat.name.replace(/"/g, '&quot;') + '</option>');
 		});
 		$span.html($select);
-
+		$select.focus();
 		var saved = false;
+
 		$select.on('change', function() {
 			saved = true;
+			var newValue = $(this).val();
+
 			$.ajax({
 				url: 'index.php?route=extension/module/dockercart_blog_post/updateField&user_token={{ user_token }}',
 				type: 'post',
-				data: { post_id: postId, field: 'category_id', value: $select.val() },
+				data: { post_id: postId, field: field, value: newValue },
 				dataType: 'json',
-				success: function(resp) {
-					if (resp['success']) {
-						$span.html(resp['value_html']);
-						$span.data('value', $select.val());
-						$span.append('<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
-						lucide.createIcons();
+				success: function(json) {
+					if (json['error']) {
+						$span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
+						setTimeout(function() { $span.html($span.data('display')); }, 3000);
+					} else {
+						$span.data('value', newValue);
+						$span.html(json['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+						lucide.createIcons({ nodes: [$span[0]] });
 					}
+				},
+				error: function() {
+					$span.html($span.data('display'));
 				}
 			});
 		});
 
 		$select.on('blur', function() {
-			if (!saved) {
-				var origText = '—';
-				$.each(blogCategories, function(i, cat) {
-					if (cat.category_id == rawValue) { origText = cat.name; return false; }
-				});
-				$span.html(origText);
-				$span.append('<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
-				lucide.createIcons();
-			}
+			if (!saved) $span.html($span.data('display'));
 		});
 	} else if (field === 'author_id') {
 		var $select = $('<select class="form-control input-sm" style="width:auto;display:inline-block;">');
@@ -250,78 +268,75 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 			$select.append('<option value="' + author.author_id + '"' + (rawValue == author.author_id ? ' selected' : '') + '>' + author.name.replace(/"/g, '&quot;') + '</option>');
 		});
 		$span.html($select);
-
+		$select.focus();
 		var saved = false;
+
 		$select.on('change', function() {
 			saved = true;
+			var newValue = $(this).val();
+
 			$.ajax({
 				url: 'index.php?route=extension/module/dockercart_blog_post/updateField&user_token={{ user_token }}',
 				type: 'post',
-				data: { post_id: postId, field: 'author_id', value: $select.val() },
+				data: { post_id: postId, field: field, value: newValue },
 				dataType: 'json',
-				success: function(resp) {
-					if (resp['success']) {
-						$span.html(resp['value_html']);
-						$span.data('value', $select.val());
-						$span.append('<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
-						lucide.createIcons();
+				success: function(json) {
+					if (json['error']) {
+						$span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
+						setTimeout(function() { $span.html($span.data('display')); }, 3000);
+					} else {
+						$span.data('value', newValue);
+						$span.html(json['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+						lucide.createIcons({ nodes: [$span[0]] });
 					}
+				},
+				error: function() {
+					$span.html($span.data('display'));
 				}
 			});
 		});
 
 		$select.on('blur', function() {
-			if (!saved) {
-				var origText = '—';
-				$.each(blogAuthors, function(i, author) {
-					if (author.author_id == rawValue) { origText = author.name; return false; }
-				});
-				$span.html(origText);
-				$span.append('<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
-				lucide.createIcons();
-			}
+			if (!saved) $span.html($span.data('display'));
 		});
 	} else {
-		var currentDisplay = $span.clone().children('.inline-edit-icon').remove().end().text().trim();
+		var currentDisplay = $span.data('display');
 		$span.html('<input type="text" class="form-control input-sm inline-edit-input" value="' + rawValue + '">');
-		$span.find('input').focus().select();
+		var $input = $span.find('input');
+		$input.focus().select();
 
-		var saved = false;
-		var saveFn = function() {
-			if (saved) return;
-			saved = true;
-			var val = $span.find('input').val();
+		function revert() {
+			$span.html(currentDisplay);
+		}
+
+		function save() {
+			var newValue = $input.val();
+
 			$.ajax({
 				url: 'index.php?route=extension/module/dockercart_blog_post/updateField&user_token={{ user_token }}',
 				type: 'post',
-				data: { post_id: postId, field: field, value: val },
+				data: { post_id: postId, field: field, value: newValue },
 				dataType: 'json',
-				success: function(resp) {
-					if (resp['success']) {
-						$span.html(resp['value_html']);
-						$span.data('value', val);
+				success: function(json) {
+					if (json['error']) {
+						$span.html(currentDisplay + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
+						setTimeout(function() { $span.html(currentDisplay); }, 3000);
 					} else {
-						$span.html(currentDisplay);
-						if (resp['error']) {
-							$span.prepend('<span class="text-danger" style="margin-right:4px;">' + resp['error'] + '</span>');
-							setTimeout(function() { $span.find('.text-danger').remove(); }, 3000);
-						}
+						$span.data('value', newValue);
+						$span.html(json['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+						lucide.createIcons({ nodes: [$span[0]] });
 					}
-					$span.append('<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
-					lucide.createIcons();
+				},
+				error: function() {
+					revert();
 				}
 			});
-		};
+		}
 
-		$span.find('input').on('blur', saveFn);
-		$span.find('input').on('keydown', function(e) {
-			if (e.key === 'Enter') { e.preventDefault(); saveFn(); }
-			if (e.key === 'Escape') {
-				saved = true;
-				$span.html(currentDisplay);
-				$span.append('<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
-				lucide.createIcons();
-			}
+		$input.on('blur', save);
+		$input.on('keydown', function(e) {
+			if (e.which === 13) { e.preventDefault(); $input.trigger('blur'); }
+			if (e.which === 27) { revert(); }
 		});
 	}
 });

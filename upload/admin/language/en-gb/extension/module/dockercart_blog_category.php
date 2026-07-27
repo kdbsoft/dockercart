@@ -13,6 +13,10 @@ $_['text_disabled']     = 'Disabled';
 $_['text_list_subtitle'] = 'Manage blog categories';
 $_['text_add_category_subtitle'] = 'Create a new blog category';
 $_['text_edit_category_subtitle'] = 'Edit blog category';
+$_['text_none']              = 'None';
+$_['text_quick_find']        = 'Type to filter';
+$_['text_active']            = 'Active';
+$_['text_inactive']          = 'Inactive';
 
 // Column
 $_['column_name']       = 'Category Name';
@@ -52,3 +56,10 @@ $_['error_permission']  = 'Warning: You do not have permission to modify blog ca
 $_['error_name']        = 'Category Name must be between 1 and 255 characters!';
 $_['error_meta_title']  = 'Meta Title must be between 1 and 255 characters!';
 $_['error_description']   = 'Category description is required!';
+$_['error_invalid_sort_order'] = 'Warning: Sort order must be a non-negative number!';
+
+// Button
+$_['button_save']       = 'Save';
+
+// Text
+$_['text_select']       = '-- Select --';

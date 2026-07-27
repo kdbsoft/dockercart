@@ -6,9 +6,9 @@
       <div class="row">
         <div class="col-sm-12">
           <div class="pull-right">
-            <a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary btn--icon"><i data-lucide="plus" width="16" height="16"></i></a>
-            <button type="submit" form="form-author" formaction="{{ copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default btn--icon"><i data-lucide="copy" width="16" height="16"></i></button>
-            <button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="confirm('{{ text_confirm }}') ? $('#form-author').submit() : false;"><i data-lucide="trash-2" width="16" height="16"></i></button>
+            <a href="{{ add }}" title="{{ button_add }}" class="btn btn-primary btn--icon"><i data-lucide="plus" width="16" height="16"></i></a>
+            <button type="submit" form="form-author" formaction="{{ copy }}" title="{{ button_copy }}" class="btn btn-default btn--icon"><i data-lucide="copy" width="16" height="16"></i></button>
+            <button type="button" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="confirm('{{ text_confirm }}') ? $('#form-author').submit() : false;"><i data-lucide="trash-2" width="16" height="16"></i></button>
           </div>
           <h1 class="page-header__title">{{ heading_title }}</h1>
         </div>
@@ -28,7 +28,7 @@
     {% endif %}
         <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-author">
           <div class="table-responsive">
-            <table class="table table-bordered table-hover">
+            <table class="table table-hover dcx-table">
               <thead>
                 <tr>
                   <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
@@ -51,9 +51,18 @@
                   </td>
                   <td class="text-left">{{ author.name }}</td>
                   <td class="text-left">{{ author.email }}</td>
-                  <td class="text-left">{{ author.status }}</td>
+                  <td class="text-left">
+                    <span class="inline-edit" data-author-id="{{ author.author_id }}" data-field="status" data-value="{{ author.status_raw }}">
+                      {% if author.status_raw %}
+                      <span class="label label-success">{{ text_enabled }}</span>
+                      {% else %}
+                      <span class="label label-danger">{{ text_disabled }}</span>
+                      {% endif %}
+                      <i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>
+                    </span>
+                  </td>
                   <td class="text-right">
-                    <a href="{{ author.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a> <a href="{{ author.copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default btn--icon"><i data-lucide="copy" width="14" height="14"></i></a> <a href="{{ author.delete }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="return confirm('{{ text_confirm }}');"><i data-lucide="trash-2" width="14" height="14"></i></a>
+                    <a href="{{ author.edit }}" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a> <a href="{{ author.copy }}" title="{{ button_copy }}" class="btn btn-default btn--icon"><i data-lucide="copy" width="14" height="14"></i></a> <a href="{{ author.delete }}" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="return confirm('{{ text_confirm }}');"><i data-lucide="trash-2" width="14" height="14"></i></a>
                   </td>
                 </tr>
                 {% endfor %}
@@ -77,6 +86,58 @@
 <script type="text/javascript"><!--
 $('button[form=\'form-author\']').on('click', function(e) {
 	$('#form-author').attr('action', $(this).attr('formaction'));
+});
+//--></script>
+<script type="text/javascript"><!--
+$(document).on('click', '.inline-edit-icon', function(e) {
+	e.stopPropagation();
+
+	var $span = $(this).closest('.inline-edit');
+	if ($span.find('select').length) return;
+
+	var field = $span.data('field');
+	var rawValue = $span.data('value');
+	var authorId = $span.data('author-id');
+
+	$span.data('display', $span.html());
+
+	if (field === 'status') {
+		var $select = $('<select class="form-control input-sm" style="width:auto;display:inline-block;">');
+		$select.append('<option value="1"' + (rawValue == 1 ? ' selected' : '') + '>{{ text_enabled }}</option>');
+		$select.append('<option value="0"' + (rawValue == 0 ? ' selected' : '') + '>{{ text_disabled }}</option>');
+		$span.html($select);
+		$select.focus();
+		var saved = false;
+
+		$select.on('change', function() {
+			saved = true;
+			var newValue = $(this).val();
+
+			$.ajax({
+				url: 'index.php?route=extension/module/dockercart_blog_author/updateField&user_token={{ user_token }}',
+				type: 'post',
+				data: { author_id: authorId, field: field, value: newValue },
+				dataType: 'json',
+				success: function(json) {
+					if (json['error']) {
+						$span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
+						setTimeout(function() { $span.html($span.data('display')); }, 3000);
+					} else {
+						$span.data('value', newValue);
+						$span.html(json['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+						lucide.createIcons({ nodes: [$span[0]] });
+					}
+				},
+				error: function() {
+					$span.html($span.data('display'));
+				}
+			});
+		});
+
+		$select.on('blur', function() {
+			if (!saved) $span.html($span.data('display'));
+		});
+	}
 });
 //--></script>
 {{ footer }}

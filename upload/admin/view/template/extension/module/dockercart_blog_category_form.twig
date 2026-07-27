@@ -16,7 +16,7 @@
               {% if category_name %}
                 {{ category_name }}
                 <span class="page-header__badge {{ status ? 'page-header__badge--active' : 'page-header__badge--inactive' }}">
-                  {{ status ? text_enabled : text_disabled }}
+                  {{ status ? text_active : text_inactive }}
                 </span>
               {% else %}
                 {{ text_form }}
@@ -142,16 +142,24 @@
           <div class="dcx-sidebar-card__body">
             <div class="dcx-sidebar-card__field">
               <label class="dcx-sidebar-card__label" for="input-parent">{{ entry_parent }}</label>
-              <select name="parent_id" id="input-parent" class="form-control">
-                <option value="0">{{ text_none|default('') }}</option>
-                {% for category in categories %}
-                {% if category.category_id == parent_id %}
-                <option value="{{ category.category_id }}" selected="selected">{{ category.name }}</option>
-                {% else %}
-                <option value="{{ category.category_id }}">{{ category.name }}</option>
-                {% endif %}
-                {% endfor %}
-              </select>
+              <div class="dcx-tree-select" data-url="index.php?route=extension/module/dockercart_blog_category/tree&user_token={{ user_token }}" data-none-text="{{ text_none }}" data-placeholder="{{ text_quick_find }}">
+                <div class="dcx-tree-select__input-wrap">
+                  <input type="text" name="path" value="{{ path|e('html_attr') }}" placeholder="{{ entry_parent }}" id="input-parent" class="dcx-tree-select__input form-control" autocomplete="off" />
+                  <input type="hidden" name="parent_id" value="{{ parent_id }}" />
+                  <span class="dcx-tree-select__toggle"><i data-lucide="chevron-down" width="16" height="16"></i></span>
+                </div>
+                <div class="dcx-tree-select__dropdown">
+                  <div class="dcx-tree-select__search">
+                    <input type="text" class="form-control" placeholder="{{ text_quick_find }}" />
+                    <i data-lucide="search" width="14" height="14"></i>
+                  </div>
+                  <div class="dcx-tree-select__list">
+                    <div class="dcx-tree-select__item dcx-tree-select__item--none" data-id="0" data-name="{{ text_none }}">
+                      <span class="dcx-tree-select__label">{{ text_none }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
             <div class="dcx-sidebar-card__field">
               <label class="dcx-sidebar-card__label">{{ entry_store }}</label>

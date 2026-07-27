@@ -122,4 +122,20 @@ class ModelExtensionModuleDockercartBlogComment extends Model {
 				WHERE post_id = '" . (int)$post_id . "' AND status = '1'");
 		return $query->row['total'];
 	}
+
+	public function updateCommentField($comment_id, $data) {
+		$allowed = array('status');
+		$sets = array();
+		foreach ($allowed as $field) {
+			if (isset($data[$field])) {
+				$sets[] = "`" . $field . "` = '" . (int)$data[$field] . "'";
+			}
+		}
+		if (!empty($sets)) {
+			$sets[] = "`date_modified` = NOW()";
+			$this->db->query("UPDATE `" . DB_PREFIX . "blog_comment` SET " . implode(', ', $sets) . " WHERE comment_id = '" . (int)$comment_id . "'");
+			$this->cache->delete('blog.comment');
+			$this->cache->delete('blog.post');
+		}
+	}
 }

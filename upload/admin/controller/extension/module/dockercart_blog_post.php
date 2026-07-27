@@ -334,6 +334,7 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 		$data['sort_comments'] = $this->url->link('extension/module/dockercart_blog_post', 'user_token=' . $this->session->data['user_token'] . '&sort=comment_count' . $url, true);
 
 		$data['config_language_id'] = $this->config->get('config_language_id');
+		$data['user_token'] = $this->session->data['user_token'];
 
 		// Pass all categories and authors for inline editing selects
 		$data['blog_categories'] = $this->model_extension_module_dockercart_blog_category->getCategories();
@@ -416,11 +417,13 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 
 		$data['post_description'] = $this->decodeDescriptionFields($data['post_description'], array('title', 'meta_title', 'tags'));
 
-		// Post name for page header
+		// Post name for page header (use admin language)
 		$data['post_name'] = '';
 		if (!empty($data['post_description'])) {
-			$first = reset($data['post_description']);
-			$data['post_name'] = $first['title'] ?? '';
+			$language_id = (int)$this->config->get('config_language_id');
+			$data['post_name'] = $data['post_description'][$language_id]['title']
+				?? reset($data['post_description'])['title']
+				?? '';
 		}
 
 		// Status
@@ -835,9 +838,7 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 
 		if (!$this->user->hasPermission('modify', 'extension/module/dockercart_blog_post')) {
 			$json['error'] = $this->language->get('error_permission');
-		}
-
-		if (!isset($this->request->post['post_id']) || !isset($this->request->post['field']) || !isset($this->request->post['value'])) {
+		} elseif (!isset($this->request->post['post_id']) || !isset($this->request->post['field']) || !isset($this->request->post['value'])) {
 			$json['error'] = 'Invalid request';
 		}
 
@@ -872,9 +873,10 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 				$val = (int)$value;
 				$this->model_extension_module_dockercart_blog_post->updatePostCategory($post_id, $val);
 				$this->load->model('extension/module/dockercart_blog_category');
-				$cat_info = $this->model_extension_module_dockercart_blog_category->getCategory($val);
-				if ($cat_info) {
-					$json['value_html'] = htmlspecialchars($cat_info['name'], ENT_QUOTES, 'UTF-8');
+				$cat_descriptions = $this->model_extension_module_dockercart_blog_category->getCategoryDescriptions($val);
+				$lang_id = (int)$this->config->get('config_language_id');
+				if (isset($cat_descriptions[$lang_id]) && $cat_descriptions[$lang_id]['name']) {
+					$json['value_html'] = htmlspecialchars($cat_descriptions[$lang_id]['name'], ENT_QUOTES, 'UTF-8');
 				} else {
 					$json['value_html'] = '—';
 				}
@@ -904,9 +906,7 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 
 		if (!$this->user->hasPermission('modify', 'extension/module/dockercart_blog_post')) {
 			$json['error'] = $this->language->get('error_permission');
-		}
-
-		if (!isset($this->request->get['post_id'])) {
+		} elseif (!isset($this->request->get['post_id'])) {
 			$json['error'] = 'Invalid request';
 		}
 
@@ -939,9 +939,7 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 
 		if (!$this->user->hasPermission('modify', 'extension/module/dockercart_blog_post')) {
 			$json['error'] = $this->language->get('error_permission');
-		}
-
-		if (!isset($this->request->post['post_id']) || !isset($this->request->post['names'])) {
+		} elseif (!isset($this->request->post['post_id']) || !isset($this->request->post['names'])) {
 			$json['error'] = 'Invalid request';
 		}
 

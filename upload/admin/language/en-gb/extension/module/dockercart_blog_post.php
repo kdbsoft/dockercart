@@ -1,7 +1,7 @@
 <?php
 /**
  * DockerCart Blog - Post Management - Language File (English)
- * 
+ *
  * @package    DockerCart Blog
  * @version    1.0.0
  * @language   English (en-gb)
@@ -63,7 +63,7 @@ $_['entry_store']          = 'Store';
 $_['entry_keyword']        = 'Keyword';
 
 // Help
-$_['help_tags']                = 'Comma separated';
+$_['help_tags']                = 'Enter tags for the post and press Enter.';
 $_['help_date_published']      = 'Set a future date/time to schedule publication. The post will not appear on the frontend until this date.';
 $_['help_related_product']     = 'Recommended products for this post.';
 $_['help_related_category']    = 'Recommended product categories for this post.';
