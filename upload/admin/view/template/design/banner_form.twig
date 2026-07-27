@@ -96,8 +96,8 @@
     .position-radio-group input[type="radio"] { display: none; }
     .slide-advanced-toggle { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: #9ca3af; cursor: pointer; margin-top: 10px; border: none; background: none; padding: 0; }
     .slide-advanced-toggle:hover { color: #6366f1; }
-    .slide-advanced-toggle .fa { transition: transform .2s; font-size: 10px; }
-    .slide-advanced-toggle.open .fa { transform: rotate(90deg); }
+    .slide-advanced-toggle svg { transition: transform .2s; font-size: 10px; }
+    .slide-advanced-toggle.open svg { transform: rotate(90deg); }
     .slide-advanced-body { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid #f3f4f6; }
     .slide-advanced-body.open { display: block; }
     .banner-slide-card.collapsed .banner-slide-card__body { display: none; }
@@ -120,258 +120,267 @@
 
   <div class="page-header">
     <div class="container-fluid">
-      <div class="pull-right">
-        <button type="submit" form="form-banner" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
-        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+      <div class="row">
+        <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
+          <div class="pull-right">
+            <button type="submit" form="form-banner" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary btn--icon"><i data-lucide="save" width="16" height="16"></i></button>
+            <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default btn--icon"><i data-lucide="x" width="16" height="16"></i></a>
+          </div>
+          <a href="{{ cancel }}" class="page-header__link">
+            <span class="page-header__back">
+              <i data-lucide="arrow-left" width="20" height="20"></i>
+            </span>
+            <span class="page-header__title">
+              {{ text_form }}
+              <span class="page-header__badge {{ status ? 'page-header__badge--active' : 'page-header__badge--inactive' }}">
+                {{ status ? text_enabled : text_disabled }}
+              </span>
+            </span>
+          </a>
+        </div>
       </div>
-      <h1>{{ heading_title }}</h1>
-      <ul class="breadcrumb">
-        {% for breadcrumb in breadcrumbs %}
-        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
-        {% endfor %}
-      </ul>
     </div>
   </div>
 
   <div class="container-fluid">
     {% if error_warning %}
-    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+    <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
 
-    <div class="section-heading">
-      <h2>{{ text_form }}</h2>
-      <p class="section-heading-subtitle">{{ text_form_subtitle }}</p>
-    </div>
+    <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-banner">
+    <div class="row">
+      <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
 
-    <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-banner" class="form-horizontal">
-
-      <div class="dcx-shell">
-
-        <div class="dcx-panel">
-          <div class="dcx-panel-body">
-
-            <fieldset class="dcx-banner-general">
-              <legend><i class="fa fa-cog"></i> {{ text_general_settings }}</legend>
-
-              <div class="form-group required">
-                <label class="col-sm-2 control-label">{{ entry_name }}</label>
-                <div class="col-sm-10">
-                        <ul class="nav nav-tabs" id="banner-name-language" style="margin-bottom:8px;border-bottom:1px solid #e5e7eb;">
-                    {% for language in languages %}
-                    <li {% if loop.first %}class="active"{% endif %}>
-                      <a href="#banner-name-{{ language.language_id }}" data-toggle="tab">
-                        <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
-                      </a>
-                    </li>
-                    {% endfor %}
-                  </ul>
-                  <div class="tab-content">
-                    {% for language in languages %}
-                    <div class="tab-pane {% if loop.first %}active{% endif %}" id="banner-name-{{ language.language_id }}">
-                      <input type="text" name="banner_description[{{ language.language_id }}][name]" value="{{ banner_descriptions[language.language_id].name ?? '' }}" placeholder="{{ entry_name }}" class="form-control" />
-                      {% if error_name[language.language_id] is defined %}<div class="text-danger">{{ error_name[language.language_id] }}</div>{% endif %}
-                    </div>
-                    {% endfor %}
-                  </div>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
-                <div class="col-sm-10">
-                  <select name="status" id="input-status" class="form-control">
-                    <option value="1" {% if status %}selected="selected"{% endif %}>{{ text_enabled }}</option>
-                    <option value="0" {% if not status %}selected="selected"{% endif %}>{{ text_disabled }}</option>
-                  </select>
-                </div>
-              </div>
-            </fieldset>
-
-            <fieldset>
-              <legend><i class="fa fa-list-alt"></i> {{ text_slides_by_language }}</legend>
-
-                <ul class="nav nav-tabs" id="language">
-              {% for language in languages %}
-              <li {% if loop.first %}class="active"{% endif %}>
-                <a href="#language{{ language.language_id }}" data-toggle="tab">
-                  <span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}
-                </a>
-              </li>
-              {% endfor %}
-                </ul>
-
-                <div class="tab-content">
-              {% set image_row = 0 %}
-              {% for language in languages %}
-              <div class="tab-pane {% if loop.first %}active{% endif %}" id="language{{ language.language_id }}">
-
-                <div id="slide-list-{{ language.language_id }}">
-                  {% if banner_images[language.language_id] %}
-                  {% for banner_image in banner_images[language.language_id] %}
-                  <div class="banner-slide-card collapsed" draggable="true" id="image-row{{ image_row }}">
-                    <div class="banner-slide-card__head" style="cursor:pointer;">
-                      <span>
-                        <i class="fa fa-arrows slide-drag-handle"></i>
-                        <i class="fa fa-chevron-right banner-slide-card__toggle"></i>
-                        <span class="banner-slide-card__num"><i class="fa fa-image" style="margin-right:6px;"></i><span class="slide-label">{% if banner_image.title %}{{ banner_image.title }}{% else %}{{ text_slide }} #{{ loop.index }}{% endif %}</span></span>
-                      </span>
-                      <span>
-                        <button type="button" onclick="duplicateSlide({{ image_row }}, {{ language.language_id }}); event.stopPropagation();" class="btn btn-default btn-xs btn-duplicate"><i class="fa fa-clone"></i></button>
-                        <button type="button" onclick="removeSlide({{ image_row }}); event.stopPropagation();" class="btn btn-danger btn-xs"><i class="fa fa-trash-o"></i> {{ button_remove }}</button>
-                      </span>
-                    </div>
-                    <div class="banner-slide-card__body">
-
-                      {# ── Content ── #}
-                      <div class="slide-section">
-                        <div class="slide-section__title"><i class="fa fa-pencil"></i> {{ text_tab_general }}</div>
-                        <div class="btn-row-2col">
-                          <div class="form-group">
-                            <label>{{ entry_title }}</label>
-                            <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][title]" value="{{ banner_image.title }}" placeholder="{{ entry_title }}" class="form-control slide-title-input" />
-                            <div class="accent-hint">{{ entry_title_hint }}</div>
-                          </div>
-                          <div class="form-group">
-                            <label>{{ entry_subtitle }}</label>
-                            <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][subtitle]" value="{{ banner_image.subtitle }}" placeholder="{{ entry_subtitle }}" class="form-control" />
-                            <div class="accent-hint accent-hint--spacer">&nbsp;</div>
-                          </div>
-                        </div>
-                        <div class="form-group">
-                          <label>{{ entry_content_position }}</label>
-                          <div class="position-radio-group">
-                            <label><input type="radio" name="banner_image[{{ language.language_id }}][{{ image_row }}][content_position]" value="left" {% if banner_image.content_position == 'left' %}checked{% endif %} /><i class="fa fa-align-left"></i> {{ text_content_position_left }}</label>
-                            <label><input type="radio" name="banner_image[{{ language.language_id }}][{{ image_row }}][content_position]" value="center" {% if banner_image.content_position == 'center' %}checked{% endif %} /><i class="fa fa-align-center"></i> {{ text_content_position_center }}</label>
-                            <label><input type="radio" name="banner_image[{{ language.language_id }}][{{ image_row }}][content_position]" value="right" {% if banner_image.content_position == 'right' %}checked{% endif %} /><i class="fa fa-align-right"></i> {{ text_content_position_right }}</label>
-                          </div>
-                        </div>
-                      </div>
-
-                      {# ── Media ── #}
-                      <div class="slide-section">
-                        <div class="slide-section__title"><i class="fa fa-image"></i> {{ entry_image }}</div>
-                        <div class="form-group">
-                          <div class="slide-images-row">
-                            <div class="slide-image-block">
-                              <a href="" id="thumb-image{{ image_row }}" data-toggle="image" class="img-thumbnail"><img src="{{ banner_image.thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" style="max-height:90px;" /></a>
-                              <input type="hidden" name="banner_image[{{ language.language_id }}][{{ image_row }}][image]" value="{{ banner_image.image }}" id="input-image{{ image_row }}" />
-                              <small>{{ text_landscape }}</small>
-                            </div>
-                            <div class="slide-image-block">
-                              <a href="" id="thumb-image-portrait{{ image_row }}" data-toggle="image" class="img-thumbnail"><img src="{{ banner_image.thumb_portrait }}" alt="" title="" data-placeholder="{{ placeholder }}" style="max-height:90px;" /></a>
-                              <input type="hidden" name="banner_image[{{ language.language_id }}][{{ image_row }}][image_portrait]" value="{{ banner_image.image_portrait }}" id="input-image-portrait{{ image_row }}" />
-                              <small>{{ text_portrait }}</small>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {# ── Video ── #}
-                      <div class="slide-section">
-                        <div class="slide-section__title"><i class="fa fa-video-camera"></i> {{ entry_video }}</div>
-                        <div class="form-group">
-                          <label>{{ entry_video_youtube }}</label>
-                          <div class="input-group" style="max-width:400px;">
-                            <span class="input-group-addon"><i class="fa fa-youtube-play"></i></span>
-                            <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][video_youtube]" value="{{ banner_image.video_type == 'youtube' ? banner_image.video : '' }}" class="form-control dc-banner-video-youtube" placeholder="{{ entry_video_youtube_placeholder }}" />
-                          </div>
-                          <div class="dc-banner-youtube-preview" style="margin-top:8px;{{ banner_image.video_type == 'youtube' and banner_image.video ? '' : 'display:none;' }}">
-                            <img src="{{ (banner_image.video_type == 'youtube' and banner_image.video_youtube_id) ? ('https://img.youtube.com/vi/' ~ banner_image.video_youtube_id ~ '/hqdefault.jpg') : video_placeholder }}" class="dc-banner-youtube-thumb" style="max-height:90px;border-radius:4px;" data-placeholder="{{ video_placeholder }}" onerror="this.onerror=null;this.src='{{ video_placeholder }}';" />
-                            <div style="font-size:11px;color:#6b7280;margin-top:4px;">YouTube</div>
-                          </div>
-                        </div>
-                        <div class="form-group">
-                          <label>{{ entry_video_mp4 }}</label>
-                          <div class="slide-video-block">
-                            <a href="" id="thumb-video{{ image_row }}" data-toggle="image" data-type="video" class="img-thumbnail dc-video-thumb" style="width:130px;height:100px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
-                              <img src="{{ video_placeholder }}" alt="" title="" data-placeholder="{{ video_placeholder }}" class="dc-video-thumb__img" style="max-height:90px;{{ banner_image.video_type == 'mp4' and banner_image.video ? 'display:none;' : '' }}" />
-                              <div class="dc-video-thumb__overlay" style="{{ banner_image.video_type == 'mp4' and banner_image.video ? '' : 'display:none;' }};display:flex;flex-direction:column;align-items:center;gap:4px;">
-                                <i data-lucide="film" class="dc-video-thumb__icon" style="width:20px;height:20px;stroke:#9ca3af;"></i>
-                                <span class="dc-video-thumb__name" style="font-size:10px;color:#9ca3af;word-break:break-all;text-align:center;">{{ banner_image.video }}</span>
-                              </div>
-                            </a>
-                            <input type="hidden" name="banner_image[{{ language.language_id }}][{{ image_row }}][video_mp4]" value="{{ banner_image.video }}" id="input-video{{ image_row }}" />
-                            <small>{{ text_mp4 }}</small>
-                          </div>
-                        </div>
-                      </div>
-
-                      {# ── Link ── #}
-                      <div class="slide-section">
-                        <div class="slide-section__title"><i class="fa fa-link"></i> {{ entry_link }}</div>
-                        <div class="form-group">
-                          <label>{{ entry_link }}</label>
-                          <div class="dc-link-row">
-                            <select class="form-control dc-link-type" style="max-width:200px;">
-                              <option value="custom" {{ banner_image.link_type == 'custom' or not banner_image.link_type ? 'selected' : '' }}>{{ text_link_custom }}</option>
-                              <option value="product" {{ banner_image.link_type == 'product' ? 'selected' : '' }}>{{ text_link_product }}</option>
-                              <option value="category" {{ banner_image.link_type == 'category' ? 'selected' : '' }}>{{ text_link_category }}</option>
-                              <option value="manufacturer" {{ banner_image.link_type == 'manufacturer' ? 'selected' : '' }}>{{ text_link_manufacturer }}</option>
-                              <option value="information" {{ banner_image.link_type == 'information' ? 'selected' : '' }}>{{ text_link_information }}</option>
-                              <option value="blog" {{ banner_image.link_type == 'blog' ? 'selected' : '' }}>{{ text_link_blog }}</option>
-                            </select>
-                            <div class="dc-link-custom"{{ banner_image.link_type is not empty and banner_image.link_type != 'custom' ? ' style="display:none;"' : '' }}>
-                              <input type="text" class="form-control dc-link-custom-input" value="{{ banner_image.link }}" placeholder="{{ entry_link }}" />
-                            </div>
-                            <div class="dc-link-entity"{{ not banner_image.link_type or banner_image.link_type == 'custom' ? ' style="display:none;"' : '' }}>
-                              <input type="text" class="form-control dc-link-autocomplete" value="{{ banner_image.link_entity_name }}" placeholder="{{ entry_link_search }}" data-type="{{ banner_image.link_type }}" data-value="{{ banner_image.link_value }}" />
-                            </div>
-                          </div>
-                        </div>
-                        <input type="hidden" name="banner_image[{{ language.language_id }}][{{ image_row }}][link]" value="{{ banner_image.link }}" class="dc-link-hidden" />
-                      </div>
-
-                      {# ── Badge ── #}
-                      <div class="slide-section">
-                        <div class="slide-section__title"><i class="fa fa-tag"></i> {{ entry_accent_text }}</div>
-                        <div class="btn-row-2col">
-                          <div class="form-group">
-                            <label>{{ entry_accent_text }}</label>
-                            <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][accent_text]" value="{{ banner_image.accent_text }}" placeholder="{{ placeholder_accent_text }}" class="form-control" />
-                          </div>
-                          <div class="form-group">
-                            <label>{{ entry_accent_color }}</label>
-                            <div style="display:flex;gap:8px;align-items:center;">
-                              <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][accent_color]" value="{{ banner_image.accent_color|default('#6366f1') }}" class="form-control dc-color-input accent-color-text" data-default-color="#6366f1" placeholder="#6366f1" style="flex:1;" maxlength="16" />
-                            </div>
-                            <div class="accent-hint">{{ entry_accent_hint }}</div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {# ── Button ── #}
-                      <div class="slide-section">
-                        <div class="slide-section__title"><i class="fa fa-hand-o-up"></i> {{ entry_primary_btn_text }}</div>
-                        <div class="form-group">
-                          <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][primary_btn_text]" value="{{ banner_image.primary_btn_text }}" class="form-control" />
-                        </div>
-                      </div>
-
-                    </div>
-                  </div>
-                  {% set image_row = image_row + 1 %}
-                  {% endfor %}
-                  {% else %}
-                  <div class="no-slides-msg" id="no-slides-{{ language.language_id }}"><i class="fa fa-picture-o" style="font-size:22px;margin-bottom:8px;display:block;"></i>{{ text_no_slides }}</div>
-                  {% endif %}
-                </div>
-
-                <div class="add-slide-btn-wrap">
-                  <button type="button" onclick="addSlide({{ language.language_id }});" class="btn btn-primary btn-sm"><i class="fa fa-plus-circle"></i> {{ button_add_slide }}</button>
-                </div>
-
-              </div>
-              {% endfor %}
-                </div>
-
-            </fieldset>
-
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i data-lucide="settings" width="18" height="18"></i></div>
+          <div>
+            <div class="dcx-panel-title">{{ text_general_settings }}</div>
           </div>
         </div>
+        <div class="dcx-panel-body">
+          <div class="dcx-fields">
+            <div class="dcx-field required">
+              <label class="dcx-label">{{ entry_name }}</label>
+              <ul class="nav nav-tabs" id="banner-name-language" style="margin-bottom:8px;border-bottom:1px solid var(--dc-border);">
+                {% for language in languages %}
+                <li {% if loop.first %}class="active"{% endif %}>
+                  <a href="#banner-name-{{ language.language_id }}" data-toggle="tab">
+                    <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                  </a>
+                </li>
+                {% endfor %}
+              </ul>
+              <div class="tab-content">
+                {% for language in languages %}
+                <div class="tab-pane {% if loop.first %}active{% endif %}" id="banner-name-{{ language.language_id }}">
+                  <input type="text" name="banner_description[{{ language.language_id }}][name]" value="{{ banner_descriptions[language.language_id].name ?? '' }}" placeholder="{{ entry_name }}" class="form-control" />
+                  {% if error_name[language.language_id] is defined %}<div class="text-danger">{{ error_name[language.language_id] }}</div>{% endif %}
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="dcx-field">
+              <label class="dcx-label" for="input-status">{{ entry_status }}</label>
+              <select name="status" id="input-status" class="form-control">
+                <option value="1" {% if status %}selected="selected"{% endif %}>{{ text_enabled }}</option>
+                <option value="0" {% if not status %}selected="selected"{% endif %}>{{ text_disabled }}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      </div>{# /dcx-shell #}
+      <div class="dcx-panel" style="margin-top: 16px;">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i data-lucide="layers" width="18" height="18"></i></div>
+          <div>
+            <div class="dcx-panel-title">{{ text_slides_by_language }}</div>
+          </div>
+        </div>
+        <div class="dcx-panel-body">
+
+              <ul class="nav nav-tabs" id="language">
+            {% for language in languages %}
+            <li {% if loop.first %}class="active"{% endif %}>
+              <a href="#language{{ language.language_id }}" data-toggle="tab">
+                <span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}
+              </a>
+            </li>
+            {% endfor %}
+              </ul>
+
+              <div class="tab-content">
+            {% set image_row = 0 %}
+            {% for language in languages %}
+            <div class="tab-pane {% if loop.first %}active{% endif %}" id="language{{ language.language_id }}">
+
+              <div id="slide-list-{{ language.language_id }}">
+                {% if banner_images[language.language_id] %}
+                {% for banner_image in banner_images[language.language_id] %}
+                <div class="banner-slide-card collapsed" draggable="true" id="image-row{{ image_row }}">
+                  <div class="banner-slide-card__head" style="cursor:pointer;">
+                    <span>
+                      <i data-lucide="grip-vertical" width="14" height="14" class="slide-drag-handle"></i>
+                      <i data-lucide="chevron-right" width="14" height="14" class="banner-slide-card__toggle"></i>
+                      <span class="banner-slide-card__num"><i data-lucide="image" width="14" height="14" style="margin-right:6px;"></i><span class="slide-label">{% if banner_image.title %}{{ banner_image.title }}{% else %}{{ text_slide }} #{{ loop.index }}{% endif %}</span></span>
+                    </span>
+                    <span>
+                      <button type="button" onclick="duplicateSlide({{ image_row }}, {{ language.language_id }}); event.stopPropagation();" class="btn btn-default btn-xs btn-duplicate"><i data-lucide="copy" width="14" height="14"></i></button>
+                      <button type="button" onclick="removeSlide({{ image_row }}); event.stopPropagation();" class="btn btn-danger btn-xs"><i data-lucide="trash-2" width="14" height="14"></i> {{ button_remove }}</button>
+                    </span>
+                  </div>
+                  <div class="banner-slide-card__body">
+
+                    {# ── Content ── #}
+                    <div class="slide-section">
+                      <div class="slide-section__title"><i data-lucide="pencil" width="14" height="14"></i> {{ text_tab_general }}</div>
+                      <div class="btn-row-2col">
+                        <div class="form-group">
+                          <label>{{ entry_title }}</label>
+                          <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][title]" value="{{ banner_image.title }}" placeholder="{{ entry_title }}" class="form-control slide-title-input" />
+                          <div class="accent-hint">{{ entry_title_hint }}</div>
+                        </div>
+                        <div class="form-group">
+                          <label>{{ entry_subtitle }}</label>
+                          <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][subtitle]" value="{{ banner_image.subtitle }}" placeholder="{{ entry_subtitle }}" class="form-control" />
+                          <div class="accent-hint accent-hint--spacer">&nbsp;</div>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label>{{ entry_content_position }}</label>
+                        <div class="position-radio-group">
+                          <label><input type="radio" name="banner_image[{{ language.language_id }}][{{ image_row }}][content_position]" value="left" {% if banner_image.content_position == 'left' %}checked{% endif %} /><i data-lucide="align-left" width="14" height="14"></i> {{ text_content_position_left }}</label>
+                          <label><input type="radio" name="banner_image[{{ language.language_id }}][{{ image_row }}][content_position]" value="center" {% if banner_image.content_position == 'center' %}checked{% endif %} /><i data-lucide="align-center" width="14" height="14"></i> {{ text_content_position_center }}</label>
+                          <label><input type="radio" name="banner_image[{{ language.language_id }}][{{ image_row }}][content_position]" value="right" {% if banner_image.content_position == 'right' %}checked{% endif %} /><i data-lucide="align-right" width="14" height="14"></i> {{ text_content_position_right }}</label>
+                        </div>
+                      </div>
+                    </div>
+
+                    {# ── Media ── #}
+                    <div class="slide-section">
+                      <div class="slide-section__title"><i data-lucide="image" width="14" height="14"></i> {{ entry_image }}</div>
+                      <div class="form-group">
+                        <div class="slide-images-row">
+                          <div class="slide-image-block">
+                            <a href="" id="thumb-image{{ image_row }}" data-toggle="image" class="img-thumbnail"><img src="{{ banner_image.thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" style="max-height:90px;" /></a>
+                            <input type="hidden" name="banner_image[{{ language.language_id }}][{{ image_row }}][image]" value="{{ banner_image.image }}" id="input-image{{ image_row }}" />
+                            <small>{{ text_landscape }}</small>
+                          </div>
+                          <div class="slide-image-block">
+                            <a href="" id="thumb-image-portrait{{ image_row }}" data-toggle="image" class="img-thumbnail"><img src="{{ banner_image.thumb_portrait }}" alt="" title="" data-placeholder="{{ placeholder }}" style="max-height:90px;" /></a>
+                            <input type="hidden" name="banner_image[{{ language.language_id }}][{{ image_row }}][image_portrait]" value="{{ banner_image.image_portrait }}" id="input-image-portrait{{ image_row }}" />
+                            <small>{{ text_portrait }}</small>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {# ── Video ── #}
+                    <div class="slide-section">
+                      <div class="slide-section__title"><i data-lucide="video" width="14" height="14"></i> {{ entry_video }}</div>
+                      <div class="form-group">
+                        <label>{{ entry_video_youtube }}</label>
+                        <div class="input-group" style="max-width:400px;">
+                          <span class="input-group-addon"><i data-lucide="youtube" width="14" height="14"></i></span>
+                          <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][video_youtube]" value="{{ banner_image.video_type == 'youtube' ? banner_image.video : '' }}" class="form-control dc-banner-video-youtube" placeholder="{{ entry_video_youtube_placeholder }}" />
+                        </div>
+                        <div class="dc-banner-youtube-preview" style="margin-top:8px;{{ banner_image.video_type == 'youtube' and banner_image.video ? '' : 'display:none;' }}">
+                          <img src="{{ (banner_image.video_type == 'youtube' and banner_image.video_youtube_id) ? ('https://img.youtube.com/vi/' ~ banner_image.video_youtube_id ~ '/hqdefault.jpg') : video_placeholder }}" class="dc-banner-youtube-thumb" style="max-height:90px;border-radius:4px;" data-placeholder="{{ video_placeholder }}" onerror="this.onerror=null;this.src='{{ video_placeholder }}';" />
+                          <div style="font-size:11px;color:#6b7280;margin-top:4px;">YouTube</div>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label>{{ entry_video_mp4 }}</label>
+                        <div class="slide-video-block">
+                          <a href="" id="thumb-video{{ image_row }}" data-toggle="image" data-type="video" class="img-thumbnail dc-video-thumb" style="width:130px;height:100px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+                            <img src="{{ video_placeholder }}" alt="" title="" data-placeholder="{{ video_placeholder }}" class="dc-video-thumb__img" style="max-height:90px;{{ banner_image.video_type == 'mp4' and banner_image.video ? 'display:none;' : '' }}" />
+                            <div class="dc-video-thumb__overlay" style="{{ banner_image.video_type == 'mp4' and banner_image.video ? '' : 'display:none;' }};display:flex;flex-direction:column;align-items:center;gap:4px;">
+                              <i data-lucide="film" class="dc-video-thumb__icon" style="width:20px;height:20px;stroke:#9ca3af;"></i>
+                              <span class="dc-video-thumb__name" style="font-size:10px;color:#9ca3af;word-break:break-all;text-align:center;">{{ banner_image.video }}</span>
+                            </div>
+                          </a>
+                          <input type="hidden" name="banner_image[{{ language.language_id }}][{{ image_row }}][video_mp4]" value="{{ banner_image.video }}" id="input-video{{ image_row }}" />
+                          <small>{{ text_mp4 }}</small>
+                        </div>
+                      </div>
+                    </div>
+
+                    {# ── Link ── #}
+                    <div class="slide-section">
+                      <div class="slide-section__title"><i data-lucide="link" width="14" height="14"></i> {{ entry_link }}</div>
+                      <div class="form-group">
+                        <label>{{ entry_link }}</label>
+                        <div class="dc-link-row">
+                          <select class="form-control dc-link-type" style="max-width:200px;">
+                            <option value="custom" {{ banner_image.link_type == 'custom' or not banner_image.link_type ? 'selected' : '' }}>{{ text_link_custom }}</option>
+                            <option value="product" {{ banner_image.link_type == 'product' ? 'selected' : '' }}>{{ text_link_product }}</option>
+                            <option value="category" {{ banner_image.link_type == 'category' ? 'selected' : '' }}>{{ text_link_category }}</option>
+                            <option value="manufacturer" {{ banner_image.link_type == 'manufacturer' ? 'selected' : '' }}>{{ text_link_manufacturer }}</option>
+                            <option value="information" {{ banner_image.link_type == 'information' ? 'selected' : '' }}>{{ text_link_information }}</option>
+                            <option value="blog" {{ banner_image.link_type == 'blog' ? 'selected' : '' }}>{{ text_link_blog }}</option>
+                          </select>
+                          <div class="dc-link-custom"{{ banner_image.link_type is not empty and banner_image.link_type != 'custom' ? ' style="display:none;"' : '' }}>
+                            <input type="text" class="form-control dc-link-custom-input" value="{{ banner_image.link }}" placeholder="{{ entry_link }}" />
+                          </div>
+                          <div class="dc-link-entity"{{ not banner_image.link_type or banner_image.link_type == 'custom' ? ' style="display:none;"' : '' }}>
+                            <input type="text" class="form-control dc-link-autocomplete" value="{{ banner_image.link_entity_name }}" placeholder="{{ entry_link_search }}" data-type="{{ banner_image.link_type }}" data-value="{{ banner_image.link_value }}" />
+                          </div>
+                        </div>
+                      </div>
+                      <input type="hidden" name="banner_image[{{ language.language_id }}][{{ image_row }}][link]" value="{{ banner_image.link }}" class="dc-link-hidden" />
+                    </div>
+
+                    {# ── Badge ── #}
+                    <div class="slide-section">
+                      <div class="slide-section__title"><i data-lucide="tag" width="14" height="14"></i> {{ entry_accent_text }}</div>
+                      <div class="btn-row-2col">
+                        <div class="form-group">
+                          <label>{{ entry_accent_text }}</label>
+                          <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][accent_text]" value="{{ banner_image.accent_text }}" placeholder="{{ placeholder_accent_text }}" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                          <label>{{ entry_accent_color }}</label>
+                          <div style="display:flex;gap:8px;align-items:center;">
+                            <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][accent_color]" value="{{ banner_image.accent_color|default('#6366f1') }}" class="form-control dc-color-input accent-color-text" data-default-color="#6366f1" placeholder="#6366f1" style="flex:1;" maxlength="16" />
+                          </div>
+                          <div class="accent-hint">{{ entry_accent_hint }}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {# ── Button ── #}
+                    <div class="slide-section">
+                      <div class="slide-section__title"><i data-lucide="mouse-pointer-click" width="14" height="14"></i> {{ entry_primary_btn_text }}</div>
+                      <div class="form-group">
+                        <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][primary_btn_text]" value="{{ banner_image.primary_btn_text }}" class="form-control" />
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+                {% set image_row = image_row + 1 %}
+                {% endfor %}
+                {% else %}
+                <div class="no-slides-msg" id="no-slides-{{ language.language_id }}"><i data-lucide="image" width="22" height="22" style="margin-bottom:8px;display:block;"></i>{{ text_no_slides }}</div>
+                {% endif %}
+              </div>
+
+              <div class="add-slide-btn-wrap">
+                <button type="button" onclick="addSlide({{ language.language_id }});" class="btn btn-primary btn-sm"><i data-lucide="plus-circle" width="14" height="14"></i> {{ button_add_slide }}</button>
+              </div>
+
+            </div>
+            {% endfor %}
+              </div>
+
+        </div>{# /dcx-panel-body #}
+      </div>{# /dcx-panel #}
+
+      </div>{# /col #}
+    </div>{# /row #}
     </form>
   </div>
 
@@ -569,34 +578,34 @@ function addSlide(language_id) {
   var html = '<div class="banner-slide-card collapsed" draggable="true" id="image-row' + row + '">';
   html += '<div class="banner-slide-card__head" style="cursor:pointer;">';
   html += '<span>';
-  html += '<i class="fa fa-arrows slide-drag-handle"></i> ';
-  html += '<i class="fa fa-chevron-right banner-slide-card__toggle"></i> ';
-  html += '<span class="banner-slide-card__num"><i class="fa fa-image" style="margin-right:6px;"></i><span class="slide-label">{{ text_slide }} #' + row + '</span></span></span>';
+  html += '<i data-lucide="grip-vertical" width="14" height="14" class="slide-drag-handle"></i> ';
+  html += '<i data-lucide="chevron-right" width="14" height="14" class="banner-slide-card__toggle"></i> ';
+  html += '<span class="banner-slide-card__num"><i data-lucide="image" width="14" height="14" style="margin-right:6px;"></i><span class="slide-label">{{ text_slide }} #' + row + '</span></span></span>';
   html += '<span>';
-  html += '<button type="button" onclick="duplicateSlide(' + row + ',' + language_id + '); event.stopPropagation();" class="btn btn-default btn-xs btn-duplicate"><i class="fa fa-clone"></i></button> ';
-  html += '<button type="button" onclick="removeSlide(' + row + '); event.stopPropagation();" class="btn btn-danger btn-xs"><i class="fa fa-trash-o"></i> {{ button_remove }}</button>';
+  html += '<button type="button" onclick="duplicateSlide(' + row + ',' + language_id + '); event.stopPropagation();" class="btn btn-default btn-xs btn-duplicate"><i data-lucide="copy" width="14" height="14"></i></button> ';
+  html += '<button type="button" onclick="removeSlide(' + row + '); event.stopPropagation();" class="btn btn-danger btn-xs"><i data-lucide="trash-2" width="14" height="14"></i> {{ button_remove }}</button>';
   html += '</span>';
   html += '</div>';
   html += '<div class="banner-slide-card__body">';
 
   // Content
   html += '<div class="slide-section">';
-  html += '<div class="slide-section__title"><i class="fa fa-pencil"></i> {{ text_tab_general }}</div>';
+  html += '<div class="slide-section__title"><i data-lucide="pencil" width="14" height="14"></i> {{ text_tab_general }}</div>';
   html += '<div class="btn-row-2col">';
   html += '<div class="form-group"><label>{{ entry_title }}</label><input type="text" name="' + pfx + '[title]" value="" placeholder="{{ entry_title }}" class="form-control slide-title-input" /><div class="accent-hint">{{ entry_title_hint }}</div></div>';
   html += '<div class="form-group"><label>{{ entry_subtitle }}</label><input type="text" name="' + pfx + '[subtitle]" value="" placeholder="{{ entry_subtitle }}" class="form-control" /><div class="accent-hint accent-hint--spacer">&nbsp;</div></div>';
   html += '</div>';
   html += '<div class="form-group"><label>{{ entry_content_position }}</label>';
   html += '<div class="position-radio-group">';
-  html += '<label><input type="radio" name="' + pfx + '[content_position]" value="left" checked /><i class="fa fa-align-left"></i> {{ text_content_position_left }}</label>';
-  html += '<label><input type="radio" name="' + pfx + '[content_position]" value="center" /><i class="fa fa-align-center"></i> {{ text_content_position_center }}</label>';
-  html += '<label><input type="radio" name="' + pfx + '[content_position]" value="right" /><i class="fa fa-align-right"></i> {{ text_content_position_right }}</label>';
+  html += '<label><input type="radio" name="' + pfx + '[content_position]" value="left" checked /><i data-lucide="align-left" width="14" height="14"></i> {{ text_content_position_left }}</label>';
+  html += '<label><input type="radio" name="' + pfx + '[content_position]" value="center" /><i data-lucide="align-center" width="14" height="14"></i> {{ text_content_position_center }}</label>';
+  html += '<label><input type="radio" name="' + pfx + '[content_position]" value="right" /><i data-lucide="align-right" width="14" height="14"></i> {{ text_content_position_right }}</label>';
   html += '</div></div>';
   html += '</div>';
 
   // Media
   html += '<div class="slide-section">';
-  html += '<div class="slide-section__title"><i class="fa fa-image"></i> {{ entry_image }}</div>';
+  html += '<div class="slide-section__title"><i data-lucide="image" width="14" height="14"></i> {{ entry_image }}</div>';
   html += '<div class="form-group">';
   html += '<div class="slide-images-row">';
   html += '<div class="slide-image-block">';
@@ -615,11 +624,11 @@ function addSlide(language_id) {
 
   // Video
   html += '<div class="slide-section">';
-  html += '<div class="slide-section__title"><i class="fa fa-video-camera"></i> {{ entry_video }}</div>';
+  html += '<div class="slide-section__title"><i data-lucide="video" width="14" height="14"></i> {{ entry_video }}</div>';
   html += '<div class="form-group">';
   html += '<label>{{ entry_video_youtube }}</label>';
   html += '<div class="input-group" style="max-width:400px;">';
-  html += '<span class="input-group-addon"><i class="fa fa-youtube-play"></i></span>';
+  html += '<span class="input-group-addon"><i data-lucide="youtube" width="14" height="14"></i></span>';
   html += '<input type="text" name="' + pfx + '[video_youtube]" value="" class="form-control dc-banner-video-youtube" placeholder="{{ entry_video_youtube_placeholder }}" />';
   html += '</div>';
   html += '<div class="dc-banner-youtube-preview" style="margin-top:8px;display:none;"></div>';
@@ -642,7 +651,7 @@ function addSlide(language_id) {
 
   // Link
   html += '<div class="slide-section">';
-  html += '<div class="slide-section__title"><i class="fa fa-link"></i> {{ entry_link }}</div>';
+  html += '<div class="slide-section__title"><i data-lucide="link" width="14" height="14"></i> {{ entry_link }}</div>';
   html += '<div class="form-group">';
   html += '<label>{{ entry_link }}</label>';
   html += '<div class="dc-link-row">';
@@ -663,7 +672,7 @@ function addSlide(language_id) {
 
   // Badge
   html += '<div class="slide-section">';
-  html += '<div class="slide-section__title"><i class="fa fa-tag"></i> {{ entry_accent_text }}</div>';
+  html += '<div class="slide-section__title"><i data-lucide="tag" width="14" height="14"></i> {{ entry_accent_text }}</div>';
   html += '<div class="btn-row-2col">';
   html += '<div class="form-group"><label>{{ entry_accent_text }}</label><input type="text" name="' + pfx + '[accent_text]" value="" placeholder="{{ placeholder_accent_text }}" class="form-control" /></div>';
   html += '<div class="form-group"><label>{{ entry_accent_color }}</label><div style="display:flex;gap:8px;align-items:center;"><input type="text" name="' + pfx + '[accent_color]" value="#6366f1" class="form-control dc-color-input accent-color-text" data-default-color="#6366f1" placeholder="#6366f1" style="flex:1;" maxlength="16" /></div><div class="accent-hint">{{ entry_accent_hint }}</div></div>';
@@ -672,7 +681,7 @@ function addSlide(language_id) {
 
   // Button
   html += '<div class="slide-section">';
-  html += '<div class="slide-section__title"><i class="fa fa-hand-o-up"></i> {{ entry_primary_btn_text }}</div>';
+  html += '<div class="slide-section__title"><i data-lucide="mouse-pointer-click" width="14" height="14"></i> {{ entry_primary_btn_text }}</div>';
   html += '<div class="form-group"><input type="text" name="' + pfx + '[primary_btn_text]" value="" class="form-control" /></div>';
   html += '</div>';
 
@@ -918,6 +927,7 @@ $(document).ready(function() {
   });
 
   $('#language a:first').tab('show');
+
 });
 </script>
 

@@ -7,6 +7,7 @@ $_['column_date_added'] = 'Дата додавання';
 $_['column_post'] = 'Пост';
 $_['column_rating'] = 'Рейтинг';
 $_['column_status'] = 'Статус';
+$_['text_status_card'] = 'Статус';
 $_['entry_author'] = 'Автор';
 $_['entry_date_added'] = 'Дата додавання';
 $_['entry_email'] = 'Електронна пошта';

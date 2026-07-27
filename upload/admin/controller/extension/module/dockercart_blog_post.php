@@ -227,28 +227,33 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 		$this->load->model('extension/module/dockercart_blog_category');
 
 		foreach ($results as $result) {
-			// Get post categories
-			$post_categories = $this->db->query("SELECT GROUP_CONCAT(bcd.name) as categories FROM `" . DB_PREFIX . "blog_post_to_category` bpc
-				LEFT JOIN `" . DB_PREFIX . "blog_category` bc ON (bpc.category_id = bc.category_id)
-				LEFT JOIN `" . DB_PREFIX . "blog_category_description` bcd ON (bc.category_id = bcd.category_id)
+			// Get post categories for each post
+			$post_cats = $this->db->query("SELECT GROUP_CONCAT(bcd.name SEPARATOR ', ') as names, GROUP_CONCAT(bpc.category_id SEPARATOR ',') as ids FROM `" . DB_PREFIX . "blog_post_to_category` bpc
+				LEFT JOIN `" . DB_PREFIX . "blog_category_description` bcd ON (bpc.category_id = bcd.category_id)
 				WHERE bpc.post_id = '" . (int)$result['post_id'] . "' AND bcd.language_id = '" . (int)$this->config->get('config_language_id') . "'")->row;
 
-			$category_text = !empty($post_categories['categories']) ? $post_categories['categories'] : '—';
+			$category_name = !empty($post_cats['names']) ? $post_cats['names'] : '—';
+			$category_ids = !empty($post_cats['ids']) ? explode(',', $post_cats['ids']) : array();
+			$first_category_id = !empty($category_ids) ? (int)$category_ids[0] : 0;
 
 			$data['posts'][] = array(
-				'post_id'      => $result['post_id'],
-				'name'         => $result['name'],
-				'category'     => $category_text,
-				'author'       => $result['author_name'],
-				'views'        => isset($result['views']) ? $result['views'] : 0,
-				'comments'     => isset($result['comment_count']) ? $result['comment_count'] : 0,
-				'status'       => $result['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
-				'date_created' => isset($result['date_published']) && $result['date_published'] ? date('Y-m-d H:i:s', strtotime($result['date_published'])) : '—',
-				'featured'     => $result['featured'] ? $this->language->get('text_yes') : $this->language->get('text_no'),
-				'selected'     => isset($this->request->post['selected']) && in_array($result['post_id'], $this->request->post['selected']),
-				'edit'         => $this->url->link('extension/module/dockercart_blog_post/edit', 'user_token=' . $this->session->data['user_token'] . '&post_id=' . $result['post_id'] . $url, true),
-				'copy'         => $this->url->link('extension/module/dockercart_blog_post/copy', 'user_token=' . $this->session->data['user_token'] . '&post_id=' . $result['post_id'] . $url, true),
-				'delete'       => $this->url->link('extension/module/dockercart_blog_post/delete', 'user_token=' . $this->session->data['user_token'] . '&post_id=' . $result['post_id'] . $url, true)
+				'post_id'       => $result['post_id'],
+				'name'          => $result['name'],
+				'name_raw'      => $result['name'],
+				'category'      => $category_name,
+				'category_id'   => $first_category_id,
+				'author'        => $result['author_name'],
+				'author_id'     => (int)$result['author_id'],
+				'views'         => isset($result['views']) ? $result['views'] : 0,
+				'comments'      => isset($result['comment_count']) ? $result['comment_count'] : 0,
+				'status'        => $result['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
+				'status_raw'    => $result['status'],
+				'date_created'  => isset($result['date_published']) && $result['date_published'] ? date('Y-m-d H:i:s', strtotime($result['date_published'])) : '—',
+				'featured'      => $result['featured'] ? $this->language->get('text_yes') : $this->language->get('text_no'),
+				'selected'      => isset($this->request->post['selected']) && in_array($result['post_id'], $this->request->post['selected']),
+				'edit'          => $this->url->link('extension/module/dockercart_blog_post/edit', 'user_token=' . $this->session->data['user_token'] . '&post_id=' . $result['post_id'] . $url, true),
+				'copy'          => $this->url->link('extension/module/dockercart_blog_post/copy', 'user_token=' . $this->session->data['user_token'] . '&post_id=' . $result['post_id'] . $url, true),
+				'delete'        => $this->url->link('extension/module/dockercart_blog_post/delete', 'user_token=' . $this->session->data['user_token'] . '&post_id=' . $result['post_id'] . $url, true)
 			);
 		}
 
@@ -311,6 +316,15 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 		$data['sort_date'] = $this->url->link('extension/module/dockercart_blog_post', 'user_token=' . $this->session->data['user_token'] . '&sort=bp.date_published' . $url, true);
 		$data['sort_views'] = $this->url->link('extension/module/dockercart_blog_post', 'user_token=' . $this->session->data['user_token'] . '&sort=bp.views' . $url, true);
 		$data['sort_comments'] = $this->url->link('extension/module/dockercart_blog_post', 'user_token=' . $this->session->data['user_token'] . '&sort=comment_count' . $url, true);
+
+		$data['config_language_id'] = $this->config->get('config_language_id');
+
+		// Pass all categories and authors for inline editing selects
+		$data['blog_categories'] = $this->model_extension_module_dockercart_blog_category->getCategories();
+		$this->load->model('extension/module/dockercart_blog_author');
+		$data['blog_authors'] = $this->model_extension_module_dockercart_blog_author->getAuthors();
+		$data['blog_categories_json'] = json_encode($data['blog_categories']);
+		$data['blog_authors_json'] = json_encode($data['blog_authors']);
 
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
@@ -385,6 +399,13 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 		}
 
 		$data['post_description'] = $this->decodeDescriptionFields($data['post_description'], array('title', 'meta_title', 'tags'));
+
+		// Post name for page header
+		$data['post_name'] = '';
+		if (!empty($data['post_description'])) {
+			$first = reset($data['post_description']);
+			$data['post_name'] = $first['title'] ?? '';
+		}
 
 		// Status
 		if (isset($this->request->post['status'])) {
@@ -765,6 +786,156 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 		}
 
 		return !$this->error;
+	}
+
+	public function updateField() {
+		$json = array();
+
+		if (!$this->user->hasPermission('modify', 'extension/module/dockercart_blog_post')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		if (!isset($this->request->post['post_id']) || !isset($this->request->post['field']) || !isset($this->request->post['value'])) {
+			$json['error'] = 'Invalid request';
+		}
+
+		if (!isset($json['error'])) {
+			$post_id = (int)$this->request->post['post_id'];
+			$field = $this->request->post['field'];
+			$value = $this->request->post['value'];
+
+			$this->load->model('extension/module/dockercart_blog_post');
+
+			if ($field === 'sort_order') {
+				$val = (int)$value;
+
+				if ($val < 0) {
+					$json['error'] = $this->language->get('error_invalid_sort_order');
+				} else {
+					$this->model_extension_module_dockercart_blog_post->updatePostField($post_id, array('sort_order' => $val));
+					$json['success'] = true;
+					$json['value_html'] = (string)$val;
+				}
+			} elseif ($field === 'status') {
+				$val = (int)$value;
+				$this->model_extension_module_dockercart_blog_post->updatePostField($post_id, array('status' => $val));
+
+				if ($val) {
+					$json['value_html'] = '<span class="label label-success">' . $this->language->get('text_enabled') . '</span>';
+				} else {
+					$json['value_html'] = '<span class="label label-danger">' . $this->language->get('text_disabled') . '</span>';
+				}
+				$json['success'] = true;
+			} elseif ($field === 'category_id') {
+				$val = (int)$value;
+				$this->model_extension_module_dockercart_blog_post->updatePostCategory($post_id, $val);
+				$this->load->model('extension/module/dockercart_blog_category');
+				$cat_info = $this->model_extension_module_dockercart_blog_category->getCategory($val);
+				if ($cat_info) {
+					$json['value_html'] = htmlspecialchars($cat_info['name'], ENT_QUOTES, 'UTF-8');
+				} else {
+					$json['value_html'] = '—';
+				}
+				$json['success'] = true;
+			} elseif ($field === 'author_id') {
+				$val = (int)$value;
+				$this->model_extension_module_dockercart_blog_post->updatePostField($post_id, array('author_id' => $val));
+				$this->load->model('extension/module/dockercart_blog_author');
+				$author_info = $this->model_extension_module_dockercart_blog_author->getAuthor($val);
+				if ($author_info) {
+					$json['value_html'] = htmlspecialchars($author_info['name'], ENT_QUOTES, 'UTF-8');
+				} else {
+					$json['value_html'] = '—';
+				}
+				$json['success'] = true;
+			} else {
+				$json['error'] = 'Invalid field';
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function getName() {
+		$json = array();
+
+		if (!$this->user->hasPermission('modify', 'extension/module/dockercart_blog_post')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		if (!isset($this->request->get['post_id'])) {
+			$json['error'] = 'Invalid request';
+		}
+
+		if (!isset($json['error'])) {
+			$post_id = (int)$this->request->get['post_id'];
+
+			$this->load->model('extension/module/dockercart_blog_post');
+			$this->load->model('localisation/language');
+
+			$languages = $this->model_localisation_language->getLanguages();
+			$descriptions = $this->model_extension_module_dockercart_blog_post->getPostDescriptions($post_id);
+
+			$names = array();
+			foreach ($languages as $language) {
+				$lid = $language['language_id'];
+				$names[$lid] = isset($descriptions[$lid]) ? $descriptions[$lid]['title'] : '';
+			}
+
+			$json['success'] = true;
+			$json['languages'] = array_values($languages);
+			$json['names'] = $names;
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function updateNames() {
+		$json = array();
+
+		if (!$this->user->hasPermission('modify', 'extension/module/dockercart_blog_post')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		if (!isset($this->request->post['post_id']) || !isset($this->request->post['names'])) {
+			$json['error'] = 'Invalid request';
+		}
+
+		if (!isset($json['error'])) {
+			$post_id = (int)$this->request->post['post_id'];
+			$names = $this->request->post['names'];
+
+			$this->load->model('extension/module/dockercart_blog_post');
+			$this->load->model('localisation/language');
+
+			$languages = $this->model_localisation_language->getLanguages();
+			$error_names = array();
+
+			foreach ($languages as $language) {
+				$lid = $language['language_id'];
+				if (isset($names[$lid])) {
+					$name = trim((string)$names[$lid]);
+					if (utf8_strlen($name) < 1 || utf8_strlen($name) > 255) {
+						$error_names[$lid] = $this->language->get('error_title');
+					}
+				}
+			}
+
+			if (!empty($error_names)) {
+				$json['error'] = $this->language->get('error_title');
+				$json['error_names'] = $error_names;
+			} else {
+				$this->model_extension_module_dockercart_blog_post->updatePostNames($post_id, $names);
+				$json['success'] = true;
+				$first = reset($names);
+				$json['value_html'] = htmlspecialchars((string)$first, ENT_QUOTES, 'UTF-8');
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
 	}
 
 	/**

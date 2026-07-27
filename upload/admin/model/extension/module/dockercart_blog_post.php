@@ -658,6 +658,34 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 		return $post_manufacturer_data;
 	}
 
+	public function updatePostField($post_id, $data) {
+		$allowed = array('sort_order', 'status', 'author_id');
+		$sets = array();
+		foreach ($allowed as $field) {
+			if (isset($data[$field])) {
+				$sets[] = "`" . $field . "` = '" . (int)$data[$field] . "'";
+			}
+		}
+		if (!empty($sets)) {
+			$this->db->query("UPDATE `" . DB_PREFIX . "blog_post` SET " . implode(', ', $sets) . " WHERE post_id = '" . (int)$post_id . "'");
+		}
+	}
+
+	public function updatePostCategory($post_id, $category_id) {
+		$category_id = (int)$category_id;
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "blog_post_to_category` WHERE post_id = '" . (int)$post_id . "'");
+		if ($category_id) {
+			$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_post_to_category` SET post_id = '" . (int)$post_id . "', category_id = '" . $category_id . "'");
+		}
+	}
+
+	public function updatePostNames($post_id, $names) {
+		foreach ($names as $language_id => $name) {
+			$name = trim((string)$name);
+			$this->db->query("UPDATE `" . DB_PREFIX . "blog_post_description` SET name = '" . $this->db->escape($name) . "' WHERE post_id = '" . (int)$post_id . "' AND language_id = '" . (int)$language_id . "'");
+		}
+	}
+
 	private function deleteRecommendationCache($post_id) {
 		$this->load->model('localisation/language');
 		$this->load->model('setting/store');

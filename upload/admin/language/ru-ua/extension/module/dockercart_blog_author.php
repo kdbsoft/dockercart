@@ -4,6 +4,7 @@ $_['column_action'] = 'Действие';
 $_['column_email'] = 'Электронная почта';
 $_['column_name'] = 'Имя автора';
 $_['column_status'] = 'Статус';
+$_['text_status_card'] = 'Статус';
 $_['entry_bio'] = 'Биография';
 $_['entry_email'] = 'Электронная почта';
 $_['entry_image'] = 'Фото';
