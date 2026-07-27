@@ -1,123 +1,89 @@
-{{ header }}{{ column_left }}
+{{ header }}
+{{ column_left }}
 <div id="content">
   <div class="page-header">
     <div class="container-fluid">
-      <div class="pull-right">
-        <button type="button" id="button-send" data-toggle="tooltip" title="{{ button_send }}" class="btn btn-warning"><i class="fa fa-envelope"></i></button>
-        <a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa fa-plus"></i></a>
-        <button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="confirm('{{ text_confirm }}') ? $('#form-voucher').submit() : false;"><i class="fa fa-trash-o"></i></button>
-      </div>
-      <h1>{{ heading_title }}</h1>
-      <ul class="breadcrumb">
-        {% for breadcrumb in breadcrumbs %}
-        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
-        {% endfor %}
-      </ul>
-    </div>
-  </div>
-  <div class="container-fluid">
-    {% if error_warning %}
-    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
-      <button type="button" class="close" data-dismiss="alert">&times;</button>
-    </div>
-    {% endif %}
-    {% if success %}
-    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
-      <button type="button" class="close" data-dismiss="alert">&times;</button>
-    </div>
-    {% endif %}
-    <div class="section-heading">
-      <h2>{{ text_list }}</h2>
-      <p class="section-heading-subtitle">{{ text_list_subtitle }}</p>
-    </div>
-    <div class="dcx-shell">
-      <div class="dcx-panel">
-        <div class="dcx-panel-body">
-          <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-voucher">
-            <div class="table-responsive">
-              <table class="table table-bordered table-hover">
-                <thead>
-                  <tr>
-                    <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
-                    <td class="text-left">{% if sort == 'v.code' %}
-                      <a href="{{ sort_code }}" class="{{ order|lower }}">{{ column_code }}</a>
-                      {% else %}
-                      <a href="{{ sort_code }}">{{ column_code }}</a>
-                      {% endif %}</td>
-                    <td class="text-left">{% if sort == 'v.from_name' %}
-                      <a href="{{ sort_from }}" class="{{ order|lower }}">{{ column_from }}</a>
-                      {% else %}
-                      <a href="{{ sort_from }}">{{ column_from }}</a>
-                      {% endif %}</td>
-                    <td class="text-left">{% if sort == 'v.to_name' %}
-                      <a href="{{ sort_to }}" class="{{ order|lower }}">{{ column_to }}</a>
-                      {% else %}
-                      <a href="{{ sort_to }}">{{ column_to }}</a>
-                      {% endif %}</td>
-                    <td class="text-right">{% if sort == 'v.amount' %}
-                      <a href="{{ sort_amount }}" class="{{ order|lower }}">{{ column_amount }}</a>
-                      {% else %}
-                      <a href="{{ sort_amount }}">{{ column_amount }}</a>
-                      {% endif %}</td>
-                    <td class="text-left">{% if sort == 'theme' %}
-                      <a href="{{ sort_theme }}" class="{{ order|lower }}">{{ column_theme }}</a>
-                      {% else %}
-                      <a href="{{ sort_theme }}">{{ column_theme }}</a>
-                      {% endif %}</td>
-                    <td class="text-left">{% if sort == 'v.status' %}
-                      <a href="{{ sort_status }}" class="{{ order|lower }}">{{ column_status }}</a>
-                      {% else %}
-                      <a href="{{ sort_status }}">{{ column_status }}</a>
-                      {% endif %}</td>
-                    <td class="text-left">{% if sort == 'v.date_added' %}
-                      <a href="{{ sort_date_added }}" class="{{ order|lower }}">{{ column_date_added }}</a>
-                      {% else %}
-                      <a href="{{ sort_date_added }}">{{ column_date_added }}</a>
-                      {% endif %}</td>
-                    <td class="text-right">{{ column_action }}</td>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% if vouchers %}
-                  {% for voucher in vouchers %}
-                  <tr>
-                    <td class="text-center">{% if voucher.voucher_id in selected %}
-                      <input type="checkbox" name="selected[]" value="{{ voucher.voucher_id }}" checked="checked" />
-                      {% else %}
-                      <input type="checkbox" name="selected[]" value="{{ voucher.voucher_id }}" />
-                      {% endif %}</td>
-                    <td class="text-left">{{ voucher.code }}</td>
-                    <td class="text-left">{{ voucher.from }}</td>
-                    <td class="text-left">{{ voucher.to }}</td>
-                    <td class="text-right">{{ voucher.amount }}</td>
-                    <td class="text-left">{{ voucher.theme }}</td>
-                    <td class="text-left">{{ voucher.status }}</td>
-                    <td class="text-left">{{ voucher.date_added }}</td>
-                    <td class="text-right">
-                    {% if voucher.order %}
-                    <a href="{{ voucher.order }}" data-toggle="tooltip" title="{{ button_order }}" class="btn btn-info"><i class="fa fa fa-eye"></i></a>
-                    {% endif %}
-                    <a href="{{ voucher.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
-                  </tr>
-                  {% endfor %}
-                  {% else %}
-                  <tr>
-                    <td class="text-center" colspan="9">{{ text_no_results }}</td>
-                  </tr>
-                  {% endif %}
-                </tbody>
-              </table>
-            </div>
-          </form>
-          <div class="row">
-            <div class="col-sm-6 text-left">{{ pagination }}</div>
-            <div class="col-sm-6 text-right">{{ results }}</div>
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="pull-right">
+            <button type="button" id="button-send" data-toggle="tooltip" title="{{ button_send }}" class="btn btn-default btn--icon"><i data-lucide="mail" width="16" height="16"></i></button>
+            <a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary btn--icon"><i data-lucide="plus" width="16" height="16"></i></a>
+            <button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="confirm('{{ text_confirm }}') ? $('#form-voucher').submit() : false;"><i data-lucide="trash-2" width="16" height="16"></i></button>
           </div>
+          <h1 class="page-header__title">{{ heading_title }}</h1>
         </div>
       </div>
     </div>
   </div>
-  <script type="text/javascript"><!--
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-voucher">
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+          <thead>
+            <tr>
+              <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
+              <td class="text-left">{% if sort == 'v.code' %}<a href="{{ sort_code }}" class="{{ order|lower }} sortable">{{ column_code }}</a>{% else %}<a href="{{ sort_code }}" class="sortable">{{ column_code }}</a>{% endif %}</td>
+              <td class="text-left">{% if sort == 'v.from_name' %}<a href="{{ sort_from }}" class="{{ order|lower }} sortable">{{ column_from }}</a>{% else %}<a href="{{ sort_from }}" class="sortable">{{ column_from }}</a>{% endif %}</td>
+              <td class="text-left">{% if sort == 'v.to_name' %}<a href="{{ sort_to }}" class="{{ order|lower }} sortable">{{ column_to }}</a>{% else %}<a href="{{ sort_to }}" class="sortable">{{ column_to }}</a>{% endif %}</td>
+              <td class="text-right">{% if sort == 'v.amount' %}<a href="{{ sort_amount }}" class="{{ order|lower }} sortable">{{ column_amount }}</a>{% else %}<a href="{{ sort_amount }}" class="sortable">{{ column_amount }}</a>{% endif %}</td>
+              <td class="text-left">{% if sort == 'theme' %}<a href="{{ sort_theme }}" class="{{ order|lower }} sortable">{{ column_theme }}</a>{% else %}<a href="{{ sort_theme }}" class="sortable">{{ column_theme }}</a>{% endif %}</td>
+              <td class="text-left">{% if sort == 'v.status' %}<a href="{{ sort_status }}" class="{{ order|lower }} sortable">{{ column_status }}</a>{% else %}<a href="{{ sort_status }}" class="sortable">{{ column_status }}</a>{% endif %}</td>
+              <td class="text-left">{% if sort == 'v.date_added' %}<a href="{{ sort_date_added }}" class="{{ order|lower }} sortable">{{ column_date_added }}</a>{% else %}<a href="{{ sort_date_added }}" class="sortable">{{ column_date_added }}</a>{% endif %}</td>
+              <td class="text-right">{{ column_action }}</td>
+            </tr>
+          </thead>
+          <tbody>
+            {% if vouchers %}
+            {% for voucher in vouchers %}
+            <tr>
+              <td class="text-center">{% if voucher.voucher_id in selected %}
+                <input type="checkbox" name="selected[]" value="{{ voucher.voucher_id }}" checked="checked" />
+                {% else %}
+                <input type="checkbox" name="selected[]" value="{{ voucher.voucher_id }}" />
+                {% endif %}</td>
+              <td class="text-left">{{ voucher.code }}</td>
+              <td class="text-left">{{ voucher.from }}</td>
+              <td class="text-left">{{ voucher.to }}</td>
+              <td class="text-right">{{ voucher.amount }}</td>
+              <td class="text-left">{{ voucher.theme }}</td>
+              <td class="text-left">{{ voucher.status }}</td>
+              <td class="text-left">{{ voucher.date_added }}</td>
+              <td class="text-right">
+                {% if voucher.order %}
+                <a href="{{ voucher.order }}" data-toggle="tooltip" title="{{ button_order }}" class="btn btn-info btn--icon"><i data-lucide="eye" width="14" height="14"></i></a>
+                {% endif %}
+                <a href="{{ voucher.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a>
+              </td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+              <td class="text-center" colspan="9">{{ text_no_results }}</td>
+            </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </form>
+    <div class="pagination-wrap">
+      <div class="row">
+        <div class="col-sm-6 text-left">{{ pagination }}</div>
+        <div class="col-sm-6 text-right">{{ results }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript"><!--
 $('#button-send').on('click', function() {
 	$.ajax({
 		url: 'index.php?route=sale/voucher/send&user_token={{ user_token }}',
@@ -125,28 +91,32 @@ $('#button-send').on('click', function() {
 		dataType: 'json',
 		data: $('input[name^=\'selected\']:checked'),
 		beforeSend: function() {
-			$('#button-send i').replaceWith('<i class="fa fa-circle-o-notch fa-spin"></i>');
 			$('#button-send').prop('disabled', true);
-		},	
+			$('#button-send i').replaceWith('<i data-lucide="loader" width="16" height="16" class="lucide-spin"></i>');
+			lucide.createIcons({ nodes: [document.getElementById('button-send')] });
+		},
 		complete: function() {
-			$('#button-send i').replaceWith('<i class="fa fa-envelope"></i>');
 			$('#button-send').prop('disabled', false);
+			$('#button-send i').replaceWith('<i data-lucide="mail" width="16" height="16"></i>');
+			lucide.createIcons({ nodes: [document.getElementById('button-send')] });
 		},
 		success: function(json) {
 			$('.alert-dismissible').remove();
-			
+
 			if (json['error']) {
-				$('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + '</div>');
+				$('#content > .container-fluid').first().prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> ' + json['error'] + '</div>');
+				lucide.createIcons();
 			}
-			
+
 			if (json['success']) {
-				$('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> ' + json['success'] + '</div>');
-			}		
+				$('#content > .container-fluid').first().prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> ' + json['success'] + '</div>');
+				lucide.createIcons();
+			}
 		},
 		error: function(xhr, ajaxOptions, thrownError) {
 			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
 		}
-	});	
-})
-//--></script></div>
+	});
+});
+//--></script>
 {{ footer }}

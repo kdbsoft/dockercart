@@ -37,7 +37,17 @@ $_['text_add_customer_subtitle'] = 'Register a new customer account';
 
 $_['text_edit_customer_subtitle'] = 'Edit customer account details';
 
-
+// Panel / Card titles
+$_['text_account_card']       = 'Account';
+$_['text_password_card']      = 'Password';
+$_['text_other_card']         = 'Other';
+$_['text_address_card']       = 'Address';
+$_['text_affiliate_card']     = 'Affiliate';
+$_['text_payment_card']       = 'Payment';
+$_['text_history_card']       = 'Order History';
+$_['text_transaction_card']   = 'Transactions';
+$_['text_reward_card']        = 'Reward Points';
+$_['text_ip_card']            = 'IP Addresses';
 
 // Column
 $_['column_name']               = 'Customer Name';

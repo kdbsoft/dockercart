@@ -13,7 +13,7 @@ $_['heading_title'] = 'Теми ваучерів';
 $_['text_add'] = 'Додати тему ваучера';
 $_['text_edit'] = 'Редагувати тему ваучера';
 $_['text_list'] = 'Список тем ваучерів';
-$_['text_success'] = 'Успіх: Ви змінили теми ваучерів!';
+$_['text_success'] = 'Успех: Ви змінили теми ваучерів!';
 // Subtitle
 
 $_['text_list_subtitle'] = 'Керуйте шаблонами дизайнів сертифікатів';
@@ -22,4 +22,5 @@ $_['text_add_voucher_theme_subtitle'] = 'Створити новий шабло�
 
 $_['text_edit_voucher_theme_subtitle'] = 'Редагувати дизайн теми сертифіката';
 
-
+// Panel / Card titles
+$_['text_design_card'] = 'Дизайн';

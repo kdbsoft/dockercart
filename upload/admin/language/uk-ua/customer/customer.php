@@ -116,4 +116,14 @@ $_['text_add_customer_subtitle'] = 'Зареєструвати новий обл
 
 $_['text_edit_customer_subtitle'] = 'Редагувати дані облікового запису клієнта';
 
-
+// Panel / Card titles
+$_['text_account_card']       = 'Обліковий запис';
+$_['text_password_card']      = 'Пароль';
+$_['text_other_card']         = 'Інше';
+$_['text_address_card']       = 'Адреса';
+$_['text_affiliate_card']     = 'Партнер';
+$_['text_payment_card']       = 'Оплата';
+$_['text_history_card']       = 'Історія замовлень';
+$_['text_transaction_card']   = 'Транзакції';
+$_['text_reward_card']        = 'Бонусні бали';
+$_['text_ip_card']            = 'IP-адреси';

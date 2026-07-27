@@ -42,4 +42,8 @@ $_['text_add_voucher_subtitle'] = 'Создать новый подарочны�
 
 $_['text_edit_voucher_subtitle'] = 'Редактировать настройки подарочного сертификата';
 
+// Panel / Card titles
+$_['text_status_card']       = 'Статус';
+$_['text_details_card']      = 'Детали';
+$_['text_history_card']      = 'История погашений';
 

@@ -15,6 +15,10 @@ $_['text_add_voucher_subtitle'] = 'Create a new gift voucher';
 
 $_['text_edit_voucher_subtitle'] = 'Edit gift voucher settings';
 
+// Panel / Card titles
+$_['text_status_card']       = 'Status';
+$_['text_details_card']      = 'Details';
+$_['text_history_card']      = 'Redemption History';
 
 
 // Column

@@ -15,7 +15,10 @@ $_['text_add_customer_group_subtitle'] = 'Create a new customer group';
 
 $_['text_edit_customer_group_subtitle'] = 'Edit customer group settings';
 
-
+// Panel / Card titles
+$_['text_group_card'] = 'Customer Group';
+$_['text_description_card'] = 'Description';
+$_['text_settings_card'] = 'Settings';
 
 // Column
 $_['column_name']       = 'Customer Group Name';

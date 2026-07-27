@@ -293,6 +293,7 @@ a:hover, a:focus {
 /* Navs / Pills (vertical sidebar tabs) */
 .nav-pills > li > a {
     color: var(--dc-text-muted);
+    cursor: pointer;
     border: none;
     border-radius: var(--dc-radius-md);
     padding: 10px 14px;

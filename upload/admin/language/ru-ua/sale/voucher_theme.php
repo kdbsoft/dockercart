@@ -22,4 +22,6 @@ $_['text_add_voucher_theme_subtitle'] = 'Создать новый шаблон 
 
 $_['text_edit_voucher_theme_subtitle'] = 'Редактировать дизайн темы сертификата';
 
+// Panel / Card titles
+$_['text_design_card'] = 'Дизайн';
 

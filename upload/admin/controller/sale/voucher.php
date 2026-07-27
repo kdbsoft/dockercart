@@ -271,6 +271,10 @@ class ControllerSaleVoucher extends Controller {
 		    ? $this->language->get('text_add_voucher_subtitle')
 		    : $this->language->get('text_edit_voucher_subtitle');
 
+		$data['text_status_card'] = $this->language->get('text_status_card');
+		$data['text_details_card'] = $this->language->get('text_details_card');
+		$data['text_history_card'] = $this->language->get('text_history_card');
+
 		if (isset($this->request->get['voucher_id'])) {
 			$data['voucher_id'] = (int)$this->request->get['voucher_id'];
 		} else {
@@ -366,6 +370,8 @@ class ControllerSaleVoucher extends Controller {
 		} else {
 			$data['code'] = '';
 		}
+
+		$data['voucher_name'] = $data['code'] ?: $this->language->get('text_form');
 
 		if (isset($this->request->post['from_name'])) {
 			$data['from_name'] = $this->request->post['from_name'];

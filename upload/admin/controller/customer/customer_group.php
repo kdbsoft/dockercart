@@ -256,6 +256,8 @@ class ControllerCustomerCustomerGroup extends Controller {
 		    ? $this->language->get('text_add_customer_group_subtitle')
 		    : $this->language->get('text_edit_customer_group_subtitle');
 
+		$data['text_group_card'] = $this->language->get('text_group_card');
+
 		if (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];
 		} else {
@@ -329,6 +331,10 @@ class ControllerCustomerCustomerGroup extends Controller {
 		} else {
 			$data['customer_group_description'] = array();
 		}
+
+		$data['customer_group_name'] = !empty($data['customer_group_description'][$this->config->get('config_language_id')]['name'])
+		    ? $data['customer_group_description'][$this->config->get('config_language_id')]['name']
+		    : $this->language->get('text_form');
 
 		if (isset($this->request->post['approval'])) {
 			$data['approval'] = $this->request->post['approval'];
