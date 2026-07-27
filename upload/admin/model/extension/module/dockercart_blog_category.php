@@ -326,4 +326,59 @@ class ModelExtensionModuleDockercartBlogCategory extends Model {
 
 		return $category_store_data;
 	}
+
+	public function getTreeCategories() {
+		$language_id = (int)$this->config->get('config_language_id');
+
+		$query = $this->db->query(
+			"SELECT bc.category_id, bc.parent_id, bc.sort_order, bcd.name
+			FROM `" . DB_PREFIX . "blog_category` bc
+			LEFT JOIN `" . DB_PREFIX . "blog_category_description` bcd
+				ON (bc.category_id = bcd.category_id AND bcd.language_id = '" . $language_id . "')
+			ORDER BY bc.sort_order ASC, bcd.name ASC"
+		);
+
+		$rows = $query->rows;
+
+		$children_map = array();
+		$by_id = array();
+
+		foreach ($rows as $row) {
+			$id = (int)$row['category_id'];
+			$pid = (int)$row['parent_id'];
+			$by_id[$id] = $row;
+			$children_map[$pid][] = $row;
+		}
+
+		$result = array();
+
+		foreach ($rows as $row) {
+			if ((int)$row['parent_id'] === 0) {
+				$this->walkTree($result, $children_map, $by_id, (int)$row['category_id'], 0, '');
+			}
+		}
+
+		return $result;
+	}
+
+	private function walkTree(array &$result, array &$children_map, array &$by_id, $category_id, $level, $parent_path) {
+		$cat = $by_id[$category_id];
+		$path = $parent_path ? $parent_path . ' > ' . $cat['name'] : $cat['name'];
+
+		$result[] = array(
+			'category_id'  => $category_id,
+			'parent_id'    => (int)$cat['parent_id'],
+			'name'         => $cat['name'],
+			'path'         => $path,
+			'level'        => $level,
+			'has_children' => !empty($children_map[$category_id]),
+			'sort_order'   => $cat['sort_order'],
+		);
+
+		if (!empty($children_map[$category_id])) {
+			foreach ($children_map[$category_id] as $child) {
+				$this->walkTree($result, $children_map, $by_id, (int)$child['category_id'], $level + 1, $path);
+			}
+		}
+	}
 }

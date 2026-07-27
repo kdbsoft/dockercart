@@ -143,16 +143,10 @@
               </select>
             </div>
             <div class="dcx-sidebar-card__field">
-              <label class="dcx-sidebar-card__label" for="input-featured">{{ entry_featured }}</label>
-              <select name="featured" id="input-featured" class="form-control">
-                {% if featured %}
-                <option value="1" selected="selected">{{ text_yes }}</option>
-                <option value="0">{{ text_no }}</option>
-                {% else %}
-                <option value="1">{{ text_yes }}</option>
-                <option value="0" selected="selected">{{ text_no }}</option>
-                {% endif %}
-              </select>
+              <label class="dcx-sidebar-card__checkbox">
+                <input type="checkbox" name="featured" value="1" {% if featured %}checked="checked"{% endif %} id="input-featured" />
+                <span>{{ entry_featured }}</span>
+              </label>
             </div>
             <div class="dcx-sidebar-card__field">
               <label class="dcx-sidebar-card__checkbox">
@@ -183,17 +177,28 @@
           </div>
           <div class="dcx-sidebar-card__body">
             <div class="dcx-sidebar-card__field">
-              <label class="dcx-sidebar-card__label" for="input-category">{{ entry_category }}</label>
-              <select name="category_id" id="input-category" class="form-control">
-                <option value="">{{ text_select }}</option>
-                {% for category in categories %}
-                {% if category.category_id == category_id %}
-                <option value="{{ category.category_id }}" selected="selected">{{ category.name }}</option>
-                {% else %}
-                <option value="{{ category.category_id }}">{{ category.name }}</option>
-                {% endif %}
-                {% endfor %}
-              </select>
+              <label class="dcx-sidebar-card__label">{{ entry_category }}</label>
+              <div class="dcx-tree-select"
+                   data-url="index.php?route=extension/module/dockercart_blog_category/tree&user_token={{ user_token }}"
+                   data-none-text="{{ text_none }}"
+                   data-placeholder="{{ text_quick_find }}">
+                <div class="dcx-tree-select__input-wrap">
+                  <input type="text" name="category_path" value="{{ category_path }}" placeholder="{{ entry_category }}" class="dcx-tree-select__input form-control" autocomplete="off" />
+                  <input type="hidden" name="category_id" value="{{ category_id }}" />
+                  <span class="dcx-tree-select__toggle"><i data-lucide="chevron-down" width="16" height="16"></i></span>
+                </div>
+                <div class="dcx-tree-select__dropdown">
+                  <div class="dcx-tree-select__search">
+                    <input type="text" class="form-control" placeholder="{{ text_quick_find }}" />
+                    <i data-lucide="search" width="14" height="14"></i>
+                  </div>
+                  <div class="dcx-tree-select__list">
+                    <div class="dcx-tree-select__item dcx-tree-select__item--none" data-id="0" data-name="{{ text_none }}">
+                      <span class="dcx-tree-select__label">{{ text_none }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
               {% if error_category %}
               <div class="text-danger">{{ error_category }}</div>
               {% endif %}
@@ -241,15 +246,18 @@
               </div>
             </div>
             <div class="dcx-sidebar-card__field">
-              <label class="dcx-sidebar-card__label" for="input-product-category">{{ entry_related_category }}
+              <label class="dcx-sidebar-card__label">{{ entry_related_category }}
                 <span data-toggle="tooltip" title="{{ help_related_category }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
               </label>
-              <input type="text" name="product_category" value="" placeholder="{{ entry_related_category }}" id="input-product-category" class="form-control" />
-              <div id="product-category-related" class="dcx-picker__well" style="height: 100px; overflow: auto; margin-top: 6px;">
+              <button type="button" class="btn btn-default btn-sm btn-block" id="btn-open-related-category-modal" style="text-align:left;">
+                <i data-lucide="folder-tree" width="14" height="14" style="margin-right:6px;"></i>
+                <span id="related-category-modal-count">{% if product_category_recommendations|length > 0 %}{{ product_category_recommendations|length }} {{ button_select_category }}{% else %}{{ button_select_category }}{% endif %}</span>
+              </button>
+              <div id="post-product-category" class="dcx-tree-select__well" style="height: 100px; overflow: auto; margin-top: 6px;">
                 {% for product_category_recommendation in product_category_recommendations %}
-                <div class="dcx-picker__well-item" data-id="{{ product_category_recommendation.category_id }}">
-                  <i data-lucide="minus-circle" width="14" height="14" class="dcx-picker__well-remove"></i>
-                  <span class="dcx-picker__well-label">{{ product_category_recommendation.name }}</span>
+                <div class="dcx-tree-select__well-item" data-id="{{ product_category_recommendation.category_id }}">
+                  <i data-lucide="minus-circle" width="14" height="14" class="dcx-tree-select__well-remove"></i>
+                  <span class="dcx-tree-select__well-label">{{ product_category_recommendation.name }}</span>
                   <input type="hidden" name="post_product_category[]" value="{{ product_category_recommendation.category_id }}" />
                 </div>
                 {% endfor %}
@@ -304,6 +312,35 @@
       </div>
     </div>
     </form>
+  </div>
+  <div id="related-category-tree-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title"><i data-lucide="folder-tree" width="18" height="18" style="margin-right:8px;"></i>{{ text_select_category }}</h4>
+        </div>
+        <div class="modal-body">
+          <div id="related-category-tree" class="dcx-tree-select"
+               data-url="index.php?route=catalog/category/tree&user_token={{ user_token }}"
+               data-mode="multi"
+               data-none-text="{{ text_none }}"
+               data-placeholder="{{ text_quick_find }}">
+            <div class="dcx-tree-select__search">
+              <input type="text" class="form-control" placeholder="{{ text_quick_find }}" id="related-category-tree-search" />
+              <i data-lucide="search" width="14" height="14"></i>
+            </div>
+            <div class="dcx-tree-select__list" style="max-height:400px;overflow-y:auto;"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
+          <button type="button" class="btn btn-primary" id="related-category-tree-confirm">
+            <i data-lucide="check" width="14" height="14"></i> {{ button_continue }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
   <script type="text/javascript" src="view/javascript/tinymce/dc.js"></script>
   <script type="text/javascript"><!--
@@ -409,29 +446,6 @@ $('input[name=\'product\']').autocomplete({
 	}
 });
 
-$('input[name=\'product_category\']').autocomplete({
-	'source': function(request, response) {
-		$.ajax({
-			url: 'index.php?route=catalog/category/autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
-			dataType: 'json',
-			success: function(json) {
-				response($.map(json, function(item) {
-					return {
-						label: item['name'],
-						value: item['category_id']
-					}
-				}));
-			}
-		});
-	},
-	'select': function(item) {
-		$('input[name=\'product_category\']').val('');
-		if ($('#product-category-related .dcx-picker__well-item[data-id="' + item['value'] + '"]').length) return;
-		$('#product-category-related').append('<div class="dcx-picker__well-item" data-id="' + item['value'] + '"><i data-lucide="minus-circle" width="14" height="14" class="dcx-picker__well-remove"></i> <span class="dcx-picker__well-label">' + item['label'] + '</span><input type="hidden" name="post_product_category[]" value="' + item['value'] + '" /></div>');
-		lucide.createIcons();
-	}
-});
-
 $('input[name=\'manufacturer\']').autocomplete({
 	'source': function(request, response) {
 		$.ajax({
@@ -457,6 +471,64 @@ $('input[name=\'manufacturer\']').autocomplete({
 
 $(document).on('click', '.dcx-picker__well-remove', function() {
 	$(this).closest('.dcx-picker__well-item').remove();
+});
+
+// Related category modal
+var relatedCategoryTreeInstance = null;
+
+$('#btn-open-related-category-modal').on('click', function() {
+	var $tree = $('#related-category-tree');
+	relatedCategoryTreeInstance = $tree.data('dcx-tree-select');
+	if (!relatedCategoryTreeInstance) {
+		DcxTreeSelect.init('#related-category-tree');
+		relatedCategoryTreeInstance = $tree.data('dcx-tree-select');
+	}
+
+	var currentIds = [];
+	$('#post-product-category .dcx-tree-select__well-item').each(function() {
+		currentIds.push($(this).data('id'));
+	});
+	relatedCategoryTreeInstance.setSelected(currentIds);
+
+	$('#related-category-tree-modal').modal('show');
+});
+
+$('#related-category-tree-confirm').on('click', function() {
+	if (!relatedCategoryTreeInstance) {
+		$('#related-category-tree-modal').modal('hide');
+		return;
+	}
+
+	var ids = relatedCategoryTreeInstance.getSelectedIds();
+	var $well = $('#post-product-category');
+	$well.empty();
+
+	var allItems = relatedCategoryTreeInstance.cache || [];
+	for (var i = 0; i < ids.length; i++) {
+		for (var j = 0; j < allItems.length; j++) {
+			if (String(allItems[j].category_id) === String(ids[i])) {
+				var name = allItems[j].path || allItems[j].name;
+				$well.append('<div class="dcx-tree-select__well-item" data-id="' + ids[i] + '">'
+					+ '<i data-lucide="minus-circle" width="14" height="14" class="dcx-tree-select__well-remove"></i> '
+					+ '<span class="dcx-tree-select__well-label">' + name + '</span>'
+					+ '<input type="hidden" name="post_product_category[]" value="' + ids[i] + '"/></div>');
+				break;
+			}
+		}
+	}
+
+	$('#related-category-modal-count').text(ids.length > 0 ? ids.length + ' {{ entry_category }}' : '{{ button_select_category }}');
+	$well.toggle(ids.length > 0);
+	lucide.createIcons();
+	relatedCategoryTreeInstance.close();
+	$('#related-category-tree-modal').modal('hide');
+});
+
+$(document).on('click', '#post-product-category .dcx-tree-select__well-remove', function() {
+	$(this).closest('.dcx-tree-select__well-item').remove();
+	var count = $('#post-product-category .dcx-tree-select__well-item').length;
+	$('#related-category-modal-count').text(count > 0 ? count + ' {{ entry_category }}' : '{{ button_select_category }}');
+	$('#post-product-category').toggle(count > 0);
 });
 
 $('input[name^="post_seo_url"]').on('input', function() {
