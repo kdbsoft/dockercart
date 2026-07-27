@@ -25,6 +25,7 @@ $_['text_default']         = 'Default';
 $_['text_confirm']         = 'Are you sure?';
 $_['text_no_results']      = 'No results found!';
 $_['text_select']          = '-- Select --';
+$_['text_quick_find']      = 'Quick find category...';
 $_['text_keyword']         = 'Search Engine Optimized URL (SEO URL) - do not use spaces, only use the word separator "-" instead:';
 $_['text_list_subtitle']   = 'Manage blog posts';
 $_['text_add_post_subtitle'] = 'Create a new blog post';
@@ -73,6 +74,7 @@ $_['button_edit']          = 'Edit';
 $_['button_delete']        = 'Delete';
 $_['button_cancel']        = 'Cancel';
 $_['button_save']          = 'Save';
+$_['button_select_category'] = 'Select Categories';
 
 // Error
 $_['error_permission']     = 'Warning: You do not have permission to modify blog posts!';
@@ -100,6 +102,7 @@ $_['text_media_card']      = 'Media';
 $_['text_seo_preview']     = 'Preview';
 $_['text_active']          = 'Active';
 $_['text_inactive']        = 'Inactive';
+$_['text_select_category'] = 'Select Categories';
 
 // Entry - Recommended
 $_['entry_related_product']     = 'Products';

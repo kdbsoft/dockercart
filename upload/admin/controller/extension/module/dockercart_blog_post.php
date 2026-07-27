@@ -39,6 +39,14 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 			// Prepare data for model
 			$post_data = $this->request->post;
 
+			// Default unchecked checkboxes to 0
+			if (!isset($post_data['featured'])) {
+				$post_data['featured'] = 0;
+			}
+			if (!isset($post_data['allow_comments'])) {
+				$post_data['allow_comments'] = 0;
+			}
+
 			// Convert single category_id to post_category array
 			if (isset($post_data['category_id']) && $post_data['category_id']) {
 				$post_data['post_category'] = array($post_data['category_id']);
@@ -71,6 +79,14 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
 			// Prepare data for model
 			$post_data = $this->request->post;
+
+			// Default unchecked checkboxes to 0
+			if (!isset($post_data['featured'])) {
+				$post_data['featured'] = 0;
+			}
+			if (!isset($post_data['allow_comments'])) {
+				$post_data['allow_comments'] = 0;
+			}
 
 			// Convert single category_id to post_category array
 			if (isset($post_data['category_id']) && $post_data['category_id']) {
@@ -425,7 +441,7 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 			$data['featured'] = 0;
 		}
 
-		// Category ID
+		// Category ID & name for tree-select
 		if (isset($this->request->post['category_id'])) {
 			$data['category_id'] = $this->request->post['category_id'];
 		} elseif (!empty($post_info)) {
@@ -434,6 +450,18 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 			$data['category_id'] = !empty($post_categories) ? (int)$post_categories[0] : 0;
 		} else {
 			$data['category_id'] = 0;
+		}
+
+		// Load category name for tree-select initial display
+		$data['category_path'] = '';
+		if ($data['category_id']) {
+			$category_descriptions = $this->model_extension_module_dockercart_blog_category->getCategoryDescriptions($data['category_id']);
+			if (!empty($category_descriptions)) {
+				$language_id = $this->config->get('config_language_id');
+				$data['category_path'] = isset($category_descriptions[$language_id]['name'])
+					? $category_descriptions[$language_id]['name']
+					: reset($category_descriptions)['name'];
+			}
 		}
 
 		// Author
@@ -481,8 +509,7 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 			$data['allow_comments'] = 1;
 		}
 
-		// Load categories for dropdown
-		$data['categories'] = $this->model_extension_module_dockercart_blog_category->getCategories();
+		$data['text_quick_find'] = $this->language->get('text_quick_find');
 
 		// Load authors for dropdown
 		$data['authors'] = $this->model_extension_module_dockercart_blog_author->getAuthors();

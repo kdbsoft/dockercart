@@ -1981,8 +1981,6 @@ class ControllerCatalogProduct extends Controller {
 		$data['bxgy_row']     = count($data['product_bxgy_rules']);
 		$data['bundle_row']   = count($data['product_bundles']);
 
-		$this->document->addStyle('view/stylesheet/product_form.css');
-
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');
