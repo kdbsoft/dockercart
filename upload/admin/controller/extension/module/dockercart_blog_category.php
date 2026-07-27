@@ -472,4 +472,13 @@ class ControllerExtensionModuleDockercartBlogCategory extends Controller {
 
 		return !$this->error;
 	}
+
+	public function tree() {
+		$this->load->model('extension/module/dockercart_blog_category');
+
+		$results = $this->model_extension_module_dockercart_blog_category->getTreeCategories();
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($results));
+	}
 }
