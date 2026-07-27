@@ -89,13 +89,12 @@
                       <textarea name="post_description[{{ language.language_id }}][meta_keyword]" rows="5" placeholder="{{ entry_meta_keyword }}" id="input-meta-keyword{{ language.language_id }}" class="form-control">{{ post_description[language.language_id] ? post_description[language.language_id].meta_keyword }}</textarea>
                     </div>
                     <div class="dcx-field">
-                      <label class="dcx-label" for="input-tag{{ language.language_id }}">{{ entry_tags }}
-                        <span data-toggle="tooltip" title="{{ help_tags }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
-                      </label>
+                      <label class="dcx-label" for="input-tag{{ language.language_id }}">{{ entry_tags }}</label>
                       <div class="dc-tag-input">
                         <input type="text" id="input-tag{{ language.language_id }}" class="form-control dc-tag-input__field" placeholder="{{ entry_tags }}" />
                         <div class="dc-tag-input__tags" id="tag-chips{{ language.language_id }}"></div>
                         <input type="hidden" name="post_description[{{ language.language_id }}][tags]" value="{{ post_description[language.language_id] ? post_description[language.language_id].tags }}" />
+                        <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_tags }}"><i data-lucide="help-circle" width="16" height="16" class="text-muted"></i></span>
                       </div>
                     </div>
                   </div>
@@ -117,6 +116,11 @@
                   <label class="dcx-label">{{ entry_image }}</label>
                   <a href="" id="thumb-image" data-toggle="image" class="img-thumbnail"><img src="{{ thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
                   <input type="hidden" name="image" value="{{ image }}" id="input-image" />
+                </div>
+                <div class="dcx-field">
+                  <label class="dcx-label">{{ entry_background_image }}</label>
+                  <a href="" id="thumb-background" data-toggle="image" class="img-thumbnail"><img src="{{ background_thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
+                  <input type="hidden" name="background_image" value="{{ background_image }}" id="input-background" />
                 </div>
               </div>
             </div>
@@ -235,7 +239,7 @@
                 <span data-toggle="tooltip" title="{{ help_related_product }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
               </label>
               <input type="text" name="product" value="" placeholder="{{ entry_related_product }}" id="input-product" class="form-control" />
-              <div id="product-related" class="dcx-picker__well" style="height: 100px; overflow: auto; margin-top: 6px;">
+              <div id="product-related" class="dcx-picker__well" style="height: 150px; overflow: auto; margin-top: 6px;">
                 {% for product_recommendation in product_recommendations %}
                 <div class="dcx-picker__well-item" data-id="{{ product_recommendation.product_id }}">
                   <i data-lucide="minus-circle" width="14" height="14" class="dcx-picker__well-remove"></i>
@@ -253,7 +257,7 @@
                 <i data-lucide="folder-tree" width="14" height="14" style="margin-right:6px;"></i>
                 <span id="related-category-modal-count">{% if product_category_recommendations|length > 0 %}{{ product_category_recommendations|length }} {{ button_select_category }}{% else %}{{ button_select_category }}{% endif %}</span>
               </button>
-              <div id="post-product-category" class="dcx-tree-select__well" style="height: 100px; overflow: auto; margin-top: 6px;">
+              <div id="post-product-category" class="dcx-tree-select__well" style="height: 150px; overflow: auto; margin-top: 6px;">
                 {% for product_category_recommendation in product_category_recommendations %}
                 <div class="dcx-tree-select__well-item" data-id="{{ product_category_recommendation.category_id }}">
                   <i data-lucide="minus-circle" width="14" height="14" class="dcx-tree-select__well-remove"></i>
@@ -268,7 +272,7 @@
                 <span data-toggle="tooltip" title="{{ help_related_manufacturer }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
               </label>
               <input type="text" name="manufacturer" value="" placeholder="{{ entry_related_manufacturer }}" id="input-manufacturer" class="form-control" />
-              <div id="manufacturer-related" class="dcx-picker__well" style="height: 100px; overflow: auto; margin-top: 6px;">
+              <div id="manufacturer-related" class="dcx-picker__well" style="height: 150px; overflow: auto; margin-top: 6px;">
                 {% for manufacturer_recommendation in manufacturer_recommendations %}
                 <div class="dcx-picker__well-item" data-id="{{ manufacturer_recommendation.manufacturer_id }}">
                   <i data-lucide="minus-circle" width="14" height="14" class="dcx-picker__well-remove"></i>
@@ -352,6 +356,11 @@ $('.datetime').datetimepicker({
 	pickDate: true,
 	pickTime: true
 });
+
+// Hide empty wells
+$('#product-related').toggle($('#product-related .dcx-picker__well-item').length > 0);
+$('#post-product-category').toggle($('#post-product-category .dcx-tree-select__well-item').length > 0);
+$('#manufacturer-related').toggle($('#manufacturer-related .dcx-picker__well-item').length > 0);
 
 // Tag chip input
 function dcTagSyncHidden($field) {
@@ -442,6 +451,7 @@ $('input[name=\'product\']').autocomplete({
 		$('input[name=\'product\']').val('');
 		if ($('#product-related .dcx-picker__well-item[data-id="' + item['value'] + '"]').length) return;
 		$('#product-related').append('<div class="dcx-picker__well-item" data-id="' + item['value'] + '"><i data-lucide="minus-circle" width="14" height="14" class="dcx-picker__well-remove"></i> <span class="dcx-picker__well-label">' + item['label'] + '</span><input type="hidden" name="post_product[]" value="' + item['value'] + '" /></div>');
+		$('#product-related').toggle(true);
 		lucide.createIcons();
 	}
 });
@@ -465,12 +475,15 @@ $('input[name=\'manufacturer\']').autocomplete({
 		$('input[name=\'manufacturer\']').val('');
 		if ($('#manufacturer-related .dcx-picker__well-item[data-id="' + item['value'] + '"]').length) return;
 		$('#manufacturer-related').append('<div class="dcx-picker__well-item" data-id="' + item['value'] + '"><i data-lucide="minus-circle" width="14" height="14" class="dcx-picker__well-remove"></i> <span class="dcx-picker__well-label">' + item['label'] + '</span><input type="hidden" name="post_manufacturer[]" value="' + item['value'] + '" /></div>');
+		$('#manufacturer-related').toggle(true);
 		lucide.createIcons();
 	}
 });
 
 $(document).on('click', '.dcx-picker__well-remove', function() {
+	var $well = $(this).closest('.dcx-picker__well');
 	$(this).closest('.dcx-picker__well-item').remove();
+	$well.toggle($well.find('.dcx-picker__well-item').length > 0);
 });
 
 // Related category modal

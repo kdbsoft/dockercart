@@ -27,6 +27,7 @@ $_['entry_date_published'] = 'Дата публикации';
 $_['entry_excerpt'] = 'Краткое описание';
 $_['entry_featured'] = 'Избранная запись';
 $_['entry_image'] = 'Изображение';
+$_['entry_background_image'] = 'Фоновое изображение';
 $_['entry_keyword'] = 'Ключевое слово';
 $_['entry_meta_description'] = 'Meta описание';
 $_['entry_meta_keyword'] = 'Meta ключевые слова';
