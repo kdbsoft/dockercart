@@ -64,6 +64,9 @@
     height: 34px;
     font-size: 13px;
 }
+.dcx-panel-body textarea.form-control {
+    height: auto;
+}
 
 /* Generic form field */
 .dcx-fields {
@@ -1448,6 +1451,42 @@ div.dcx-field.required > .dcx-label:before {
 .dc-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; background: var(--dc-gray-100); border: 1px solid var(--dc-border); border-radius: var(--dc-radius-sm); font-size: 12px; line-height: 1.4; white-space: nowrap; }
 .dc-chip__remove { background: none; border: none; color: var(--dc-text-faint); cursor: pointer; padding: 0; margin-left: 2px; display: flex; align-items: center; border-radius: 50%; transition: color var(--dc-transition-fast); }
 .dc-chip__remove:hover { color: var(--dc-red-500); }
+
+/* ── Voucher history ── */
+.voucher-history-list { display: flex; flex-direction: column; gap: 12px; }
+.voucher-history-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--dc-border-soft);
+  border-radius: var(--dc-radius-lg);
+  background: var(--dc-surface);
+}
+.voucher-history-entry__icon {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--dc-radius-md);
+  background: var(--dc-gray-100);
+  color: var(--dc-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.voucher-history-entry__info { flex: 1 1 auto; min-width: 0; }
+.voucher-history-entry__title { font-size: 13px; font-weight: 600; color: var(--dc-text-dark); }
+.voucher-history-entry__meta { font-size: 12px; color: var(--dc-text-muted); margin-top: 2px; }
+.voucher-history-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 32px 16px;
+  color: var(--dc-text-muted);
+  text-align: center;
+}
+.voucher-history-empty p { margin: 0; font-size: 13px; }
 
 /* ── Responsive ── */
 @media (max-width: 767px) {

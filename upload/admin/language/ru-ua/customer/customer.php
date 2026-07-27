@@ -115,4 +115,14 @@ $_['text_add_customer_subtitle'] = 'Зарегистрировать новую 
 
 $_['text_edit_customer_subtitle'] = 'Редактировать данные учётной записи клиента';
 
-
+// Panel / Card titles
+$_['text_account_card']       = 'Аккаунт';
+$_['text_password_card']      = 'Пароль';
+$_['text_other_card']         = 'Прочее';
+$_['text_address_card']       = 'Адрес';
+$_['text_affiliate_card']     = 'Партнёр';
+$_['text_payment_card']       = 'Оплата';
+$_['text_history_card']       = 'История заказов';
+$_['text_transaction_card']   = 'Транзакции';
+$_['text_reward_card']        = 'Бонусные баллы';
+$_['text_ip_card']            = 'IP-адреса';

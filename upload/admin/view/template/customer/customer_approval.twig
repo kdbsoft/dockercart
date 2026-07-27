@@ -5,7 +5,6 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col-sm-12">
-          <div class="pull-right"></div>
           <h1 class="page-header__title">{{ heading_title }}</h1>
         </div>
       </div>
@@ -23,8 +22,6 @@
     </div>
     {% endif %}
     <div id="filter-customer" class="filter-bar">
-      <div class="panel panel-default">
-        <div class="panel-body">
           <div class="filter-field">
             <label for="input-name">{{ entry_name }}</label>
             <input type="text" name="filter_name" value="{{ filter_name }}" placeholder="{{ entry_name }}" id="input-name" class="form-control" />
@@ -72,8 +69,6 @@
           <div class="filter-actions">
             <button type="button" id="button-filter" class="btn btn-default"><i data-lucide="filter" width="14" height="14"></i> {{ button_filter }}</button>
           </div>
-        </div>
-      </div>
     </div>
     <div id="customer-approval"></div>
   </div>

@@ -15,7 +15,8 @@ $_['text_add_voucher_theme_subtitle'] = 'Create a new voucher template';
 
 $_['text_edit_voucher_theme_subtitle'] = 'Edit voucher theme design';
 
-
+// Panel / Card titles
+$_['text_design_card'] = 'Design';
 
 // Column
 $_['column_name']       = 'Voucher Theme Name';
