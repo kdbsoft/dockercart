@@ -78,3 +78,4 @@ $_['text_link_manufacturer'] = 'Производитель';
 $_['text_link_information']  = 'Информационная страница';
 $_['text_link_blog']         = 'Запись блога';
 $_['help_link_type']         = 'Выберите тип ссылки';
+$_['entry_video_youtube_placeholder'] = 'ID видео YouTube (напр. dQw4w9WgXcQ)';

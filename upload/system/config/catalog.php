@@ -32,6 +32,7 @@ $_['library_autoload']   = array();
 $_['action_pre_action']  = array(
 	'startup/session',
 	'startup/startup',
+	'startup/theme',
 	'startup/error',
 	'startup/event',
 	'startup/maintenance',
@@ -48,11 +49,7 @@ $_['action_event'] = array(
 		'event/language/after'
 	),	
 	'view/*/before' => array(
-		500  => 'event/theme',
 		998  => 'event/language',
-	),
-	'language/*/after' => array(
-		'event/translation'
 	),
 	//'view/*/before' => array(
 	//	1000  => 'event/debug/before'

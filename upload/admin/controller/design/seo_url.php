@@ -20,7 +20,19 @@ class ControllerDesignSeoUrl extends Controller {
 		$this->load->model('design/seo_url');
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
-			$this->model_design_seo_url->addSeoUrl($this->request->post);
+			$query = $this->request->post['query'];
+			$this->model_design_seo_url->deleteSeoUrlsByQuery($query);
+
+			if (isset($this->request->post['seo_url'])) {
+				foreach ($this->request->post['seo_url'] as $store_id => $languages) {
+					foreach ($languages as $language_id => $keyword) {
+						if ($keyword !== '') {
+							$this->db->query("INSERT INTO `" . DB_PREFIX . "seo_url` SET store_id = '" . (int)$store_id . "', language_id = '" . (int)$language_id . "', query = '" . $this->db->escape($query) . "', keyword = '" . $this->db->escape($keyword) . "'");
+						}
+					}
+				}
+				$this->model_design_seo_url->invalidateSeoUrlCache();
+			}
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
@@ -68,7 +80,19 @@ class ControllerDesignSeoUrl extends Controller {
 		$this->load->model('design/seo_url');
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
-			$this->model_design_seo_url->editSeoUrl($this->request->get['seo_url_id'], $this->request->post);
+			$query = $this->request->post['query'];
+			$this->model_design_seo_url->deleteSeoUrlsByQuery($query);
+
+			if (isset($this->request->post['seo_url'])) {
+				foreach ($this->request->post['seo_url'] as $store_id => $languages) {
+					foreach ($languages as $language_id => $keyword) {
+						if ($keyword !== '') {
+							$this->db->query("INSERT INTO `" . DB_PREFIX . "seo_url` SET store_id = '" . (int)$store_id . "', language_id = '" . (int)$language_id . "', query = '" . $this->db->escape($query) . "', keyword = '" . $this->db->escape($keyword) . "'");
+						}
+					}
+				}
+				$this->model_design_seo_url->invalidateSeoUrlCache();
+			}
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
@@ -410,7 +434,7 @@ class ControllerDesignSeoUrl extends Controller {
 		if (isset($this->error['keyword'])) {
 			$data['error_keyword'] = $this->error['keyword'];
 		} else {
-			$data['error_keyword'] = '';
+			$data['error_keyword'] = array();
 		}
 
 		$url = '';
@@ -459,14 +483,6 @@ class ControllerDesignSeoUrl extends Controller {
 			$data['query'] = '';
 		}
 
-		if (isset($this->request->post['keyword'])) {
-			$data['keyword'] = $this->request->post['keyword'];
-		} elseif (!empty($seo_url_info)) {
-			$data['keyword'] = $seo_url_info['keyword'];
-		} else {
-			$data['keyword'] = '';
-		}
-
 		$this->load->model('setting/store');
 
 		$data['stores'] = array();
@@ -485,24 +501,16 @@ class ControllerDesignSeoUrl extends Controller {
 			);
 		}
 
-		if (isset($this->request->post['store_id'])) {
-			$data['store_id'] = $this->request->post['store_id'];
-		} elseif (!empty($seo_url_info)) {
-			$data['store_id'] = $seo_url_info['store_id'];
-		} else {
-			$data['store_id'] = '';
-		}
-
 		$this->load->model('localisation/language');
 
 		$data['languages'] = $this->model_localisation_language->getLanguages();
 
-		if (isset($this->request->post['language_id'])) {
-			$data['language_id'] = $this->request->post['language_id'];
+		if (isset($this->request->post['seo_url'])) {
+			$data['seo_url'] = $this->request->post['seo_url'];
 		} elseif (!empty($seo_url_info)) {
-			$data['language_id'] = $seo_url_info['language_id'];
+			$data['seo_url'] = $this->model_design_seo_url->getSeoUrlsArray($seo_url_info['query']);
 		} else {
-			$data['language_id'] = '';
+			$data['seo_url'] = array();
 		}
 
 		$data['header'] = $this->load->controller('common/header');
@@ -517,36 +525,24 @@ class ControllerDesignSeoUrl extends Controller {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
-		if(isset($this->request->get['seo_url_id']) && $this->request->get['seo_url_id']) {
-			$seo_urls = $this->model_design_seo_url->getSeoUrlsByQueryId($this->request->get['seo_url_id'], $this->request->post['query'], $this->request->post['language_id']);
-		} else {
-			$seo_urls = $this->model_design_seo_url->getSeoUrlsByQuery($this->request->post['query'], $this->request->post['language_id']);
-		}
-		
-		foreach ($seo_urls as $seo_url) {
-			if ($seo_url['store_id'] == $this->request->post['store_id'] && $seo_url['query'] == $this->request->post['query']) {
-				$this->error['query'] = $this->language->get('error_query_exists');
-
-				break;
-			}
-		}
-
-		if (!$this->request->post['query']) {
+		if (!isset($this->request->post['query']) || !$this->request->post['query']) {
 			$this->error['query'] = $this->language->get('error_query');
 		}
 
-		$seo_urls = $this->model_design_seo_url->getSeoUrlsByKeyword($this->request->post['keyword'], $this->request->post['language_id']);
-
-		foreach ($seo_urls as $seo_url) {
-			if ($seo_url['store_id'] == $this->request->post['store_id'] && $seo_url['query'] != $this->request->post['query']) {
-				$this->error['keyword'] = $this->language->get('error_exists');
-
-				break;
+		if (isset($this->request->post['seo_url'])) {
+			foreach ($this->request->post['seo_url'] as $store_id => $languages) {
+				foreach ($languages as $language_id => $keyword) {
+					if ($keyword !== '') {
+						$existing = $this->model_design_seo_url->getSeoUrlsByKeyword($keyword, $language_id);
+						foreach ($existing as $seo_url) {
+							if ($seo_url['store_id'] == $store_id && $seo_url['query'] != $this->request->post['query']) {
+								$this->error['keyword'][$store_id][$language_id] = $this->language->get('error_exists');
+								break;
+							}
+						}
+					}
+				}
 			}
-		}
-
-		if (!$this->request->post['keyword']) {
-			$this->error['keyword'] = $this->language->get('error_keyword');
 		}
 
 		return !$this->error;

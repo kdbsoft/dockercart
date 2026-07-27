@@ -9,6 +9,10 @@ $_['text_add']         = 'Add SEO URL';
 $_['text_edit']        = 'Edit SEO URL';
 $_['text_filter']      = 'Filter';
 $_['text_default']     = 'Default';
+$_['text_seo_card']    = 'Links';
+$_['text_keyword']     = 'Do not use spaces, instead replace spaces with - and make sure the SEO URL is globally unique.';
+$_['text_seo_preview'] = 'Preview';
+$_['text_seo_url_base'] = 'yoursite.com/';
 // Subtitle
 
 $_['text_list_subtitle'] = 'Manage SEO-friendly URL aliases';
@@ -16,8 +20,6 @@ $_['text_list_subtitle'] = 'Manage SEO-friendly URL aliases';
 $_['text_add_seo_url_subtitle'] = 'Create a new SEO URL alias';
 
 $_['text_edit_seo_url_subtitle'] = 'Edit SEO URL mapping';
-
-
 
 // Column
 $_['column_query']     = 'Query';
@@ -29,8 +31,6 @@ $_['column_action']    = 'Action';
 // Entry
 $_['entry_query']        = 'Query';
 $_['entry_keyword']      = 'Keyword';
-$_['entry_store']        = 'Store';
-$_['entry_language']     = 'Language';
 
 // Error
 $_['error_permission']   = 'Warning: You do not have permission to modify SEO URL!';

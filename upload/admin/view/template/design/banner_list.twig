@@ -45,11 +45,14 @@
               </td>
               <td class="text-left">{{ banner.name }}</td>
               <td class="text-left">
-                {% if banner.status == text_enabled %}
-                <span class="page-header__badge page-header__badge--active">{{ banner.status }}</span>
-                {% else %}
-                <span class="page-header__badge page-header__badge--inactive">{{ banner.status }}</span>
-                {% endif %}
+                <span class="inline-edit" data-banner-id="{{ banner.banner_id }}" data-field="status" data-value="{{ banner.status_raw }}">
+                  {% if banner.status_raw %}
+                  <span class="label label-success">{{ text_enabled }}</span>
+                  {% else %}
+                  <span class="label label-danger">{{ text_disabled }}</span>
+                  {% endif %}
+                  <i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>
+                </span>
               </td>
               <td class="text-right"><a href="{{ banner.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a></td>
             </tr>
@@ -71,4 +74,56 @@
     </div>
   </div>
 </div>
+<script type="text/javascript"><!--
+$(document).on('click', '.inline-edit-icon', function(e) {
+  e.stopPropagation();
+  var $span = $(this).closest('.inline-edit');
+  if ($span.find('select').length) return;
+
+  var bannerId = $span.data('banner-id');
+  var currentValue = $span.data('value');
+
+  $span.data('display', $span.html());
+
+  var $select = $('<select class="form-control input-sm" style="width:auto;display:inline-block;">');
+  $select.append('<option value="1"' + (currentValue == 1 ? ' selected' : '') + '>{{ text_enabled }}</option>');
+  $select.append('<option value="0"' + (currentValue == 0 ? ' selected' : '') + '>{{ text_disabled }}</option>');
+
+  $span.html($select);
+  $select.focus();
+
+  var saved = false;
+
+  $select.on('change', function() {
+    saved = true;
+    var newValue = $(this).val();
+
+    $.ajax({
+      url: 'index.php?route=design/banner/updateField&user_token={{ user_token }}',
+      type: 'post',
+      dataType: 'json',
+      data: { banner_id: bannerId, field: 'status', value: newValue },
+      success: function(json) {
+        if (json['error']) {
+          $span.html($span.data('display'));
+        }
+        if (json['success']) {
+          $span.data('value', newValue);
+          $span.html(json['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+          lucide.createIcons({ nodes: [$span[0]] });
+        }
+      },
+      error: function() {
+        $span.html($span.data('display'));
+      }
+    });
+  });
+
+  $select.on('blur', function() {
+    if (!saved) {
+      $span.html($span.data('display'));
+    }
+  });
+});
+//--></script>
 {{ footer }}

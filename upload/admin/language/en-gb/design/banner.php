@@ -35,6 +35,10 @@ $_['entry_link_type']         = 'Link Type';
 $_['entry_link_search']      = 'Search by name...';
 $_['entry_status']           = 'Status';
 $_['entry_sort_order']       = 'Sort Order';
+$_['entry_content_position'] = 'Content Position';
+$_['text_content_position_left']   = 'Left';
+$_['text_content_position_center'] = 'Center';
+$_['text_content_position_right']  = 'Right';
 
 $_['text_link_custom']       = 'Custom URL';
 $_['text_link_product']      = 'Product';

@@ -112,6 +112,15 @@ class ControllerCommonColumnLeft extends Controller {
 				);
 			}
 
+			if ($this->user->hasPermission('access', 'design/seo_url')) {
+				$catalog[] = array(
+					'name'	   => $this->language->get('text_seo_url'),
+					'href'     => $this->url->link('design/seo_url', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'link',
+					'children' => array()
+				);
+			}
+
 			// Import (populated by events)
 			$catalog[] = array(
 				'name'     => $this->language->get('text_import'),
@@ -225,39 +234,11 @@ class ControllerCommonColumnLeft extends Controller {
 				);
 			}
 
-			if ($this->user->hasPermission('access', 'design/theme')) {
-				$design[] = array(
-					'name'	   => $this->language->get('text_theme'),
-					'href'     => $this->url->link('design/theme', 'user_token=' . $this->session->data['user_token'], true),
-					'icon'	   => 'palette',
-					'children' => array()
-				);
-			}
-
-			if ($this->user->hasPermission('access', 'design/translation')) {
-				$design[] = array(
-					'name'	   => $this->language->get('text_language_editor'),
-					'href'     => $this->url->link('design/translation', 'user_token=' . $this->session->data['user_token'], true),
-					'icon'	   => 'globe',
-					'children' => array()
-				);
-			}
-
 			if ($this->user->hasPermission('access', 'design/banner')) {
 				$design[] = array(
 					'name'	   => $this->language->get('text_banner'),
 					'href'     => $this->url->link('design/banner', 'user_token=' . $this->session->data['user_token'], true),
 					'icon'	   => 'image',
-					'children' => array()
-				);
-			}
-
-
-			if ($this->user->hasPermission('access', 'design/seo_url')) {
-				$design[] = array(
-					'name'	   => $this->language->get('text_seo_url'),
-					'href'     => $this->url->link('design/seo_url', 'user_token=' . $this->session->data['user_token'], true),
-					'icon'	   => 'link',
 					'children' => array()
 				);
 			}

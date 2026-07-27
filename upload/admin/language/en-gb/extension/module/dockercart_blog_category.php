@@ -26,6 +26,12 @@ $_['tab_params_group']  = 'Settings';
 $_['tab_images_group']  = 'Images';
 $_['tab_seo']           = 'SEO';
 
+// Text - Cards
+$_['text_status_card']     = 'Status';
+$_['text_organization_card'] = 'Organization';
+$_['text_seo_card']        = 'SEO';
+$_['text_seo_preview']     = 'Preview';
+
 // Entry
 $_['entry_name']        = 'Category Name';
 $_['entry_description'] = 'Description';

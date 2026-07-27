@@ -284,6 +284,12 @@ class ControllerExtensionModuleDockercartBlogCategory extends Controller {
 
 		$data['category_description'] = $this->decodeDescriptionFields($data['category_description'], array('name', 'meta_title'));
 
+		// Category name for page header
+		$data['category_name'] = '';
+		if (!empty($category_info)) {
+			$data['category_name'] = $category_info['name'];
+		}
+
 		// Errors for template
 		if (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];

@@ -61,8 +61,11 @@ $_['entry_store']          = 'Store';
 $_['entry_keyword']        = 'Keyword';
 
 // Help
-$_['help_tags']            = 'Comma separated';
-$_['help_date_published']  = 'Set a future date/time to schedule publication. The post will not appear on the frontend until this date.';
+$_['help_tags']                = 'Comma separated';
+$_['help_date_published']      = 'Set a future date/time to schedule publication. The post will not appear on the frontend until this date.';
+$_['help_related_product']     = 'Recommended products for this post.';
+$_['help_related_category']    = 'Recommended product categories for this post.';
+$_['help_related_manufacturer'] = 'Recommended manufacturers for this post.';
 
 // Button
 $_['button_add']           = 'Add New';
@@ -76,14 +79,27 @@ $_['error_permission']     = 'Warning: You do not have permission to modify blog
 $_['error_description']    = 'Warning: Post content is required!';
 $_['error_title']          = 'Warning: Post title must be between 1 and 255 characters!';
 $_['error_content']        = 'Warning: Post content is required!';
-$_['error_category']       = 'Warning: Please select a category!';
-$_['error_author']         = 'Warning: Please select an author!';
+$_['error_category']           = 'Warning: Please select a category!';
+$_['error_author']             = 'Warning: Please select an author!';
+$_['error_invalid_sort_order'] = 'Warning: Sort order must be a non-negative number!';
 
 // Tab
+$_['tab_description']      = 'Description';
+$_['tab_params_group']     = 'Settings';
+$_['tab_images_group']     = 'Images';
 $_['tab_general']          = 'General';
 $_['tab_data']             = 'Data';
 $_['tab_seo']              = 'SEO';
-$_['tab_recommended']       = 'Recommended';
+$_['tab_recommended']      = 'Recommended';
+
+// Text - Cards
+$_['text_status_card']     = 'Status';
+$_['text_organization_card'] = 'Organization';
+$_['text_seo_card']        = 'SEO';
+$_['text_media_card']      = 'Media';
+$_['text_seo_preview']     = 'Preview';
+$_['text_active']          = 'Active';
+$_['text_inactive']        = 'Inactive';
 
 // Entry - Recommended
 $_['entry_related_product']     = 'Products';

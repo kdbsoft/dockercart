@@ -44,7 +44,6 @@ $_['action_event'] = array(
 	),
 	'view/*/before' => array(
 		999  => 'event/language',
-		1000 => 'event/theme'
 	),
 	'view/extension/*/*/after' => array(
 		'event/dockercart_about_tab'

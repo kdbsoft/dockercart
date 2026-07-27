@@ -20,6 +20,9 @@ $_['column_status']     = 'Status';
 $_['column_date_added'] = 'Date Added';
 $_['column_action']     = 'Action';
 
+// Text - Cards
+$_['text_status_card']  = 'Status';
+
 // Entry
 $_['entry_post']        = 'Post';
 $_['entry_author']      = 'Author';
