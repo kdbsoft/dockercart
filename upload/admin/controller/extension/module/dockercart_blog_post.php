@@ -575,6 +575,21 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 			$data['thumb'] = $this->model_tool_image->resize('placeholder.png', 200, 200);
 		}
 
+		// Background image
+		if (isset($this->request->post['background_image'])) {
+			$data['background_image'] = $this->request->post['background_image'];
+		} elseif (!empty($post_info)) {
+			$data['background_image'] = $post_info['background_image'];
+		} else {
+			$data['background_image'] = '';
+		}
+
+		if ($data['background_image'] && is_file(DIR_IMAGE . $data['background_image'])) {
+			$data['background_thumb'] = $this->model_tool_image->resize($data['background_image'], 140, 140);
+		} else {
+			$data['background_thumb'] = $this->model_tool_image->resize('placeholder.png', 140, 140);
+		}
+
 		// Load SEO URLs from post_info if available
 		if (isset($this->request->post['post_seo_url'])) {
 			$data['post_seo_url'] = $this->request->post['post_seo_url'];

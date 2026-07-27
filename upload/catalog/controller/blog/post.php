@@ -95,6 +95,13 @@ class ControllerBlogPost extends Controller {
 				$data['thumb'] = '';
 			}
 
+			// Background image
+			if (!empty($post_info['background_image'])) {
+				$data['background_image'] = $this->model_tool_image->resize($post_info['background_image'], 1920, 400);
+			} else {
+				$data['background_image'] = '';
+			}
+
 			// Categories
 			$data['categories'] = array();
 			$categories = $this->model_extension_module_dockercart_blog_post->getPostCategories($post_id);

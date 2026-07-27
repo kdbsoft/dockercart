@@ -27,6 +27,7 @@ $_['entry_date_published'] = 'Дата публікації';
 $_['entry_excerpt'] = 'Уривок';
 $_['entry_featured'] = 'Рекомендовані';
 $_['entry_image'] = 'Рекомендоване зображення';
+$_['entry_background_image'] = 'Фонове зображення';
 $_['entry_keyword'] = 'Ключове слово';
 $_['entry_meta_description'] = 'Метаопис';
 $_['entry_meta_keyword'] = 'Мета-ключові слова';

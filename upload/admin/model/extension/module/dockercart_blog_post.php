@@ -29,6 +29,7 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 		$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_post` SET
 			author_id = '" . (int)$data['author_id'] . "',
 			image = '" . $this->db->escape($data['image']) . "',
+			background_image = '" . $this->db->escape($data['background_image']) . "',
 			status = '" . (int)$data['status'] . "',
 			featured = '" . (int)$data['featured'] . "',
 			allow_comments = '" . (int)$data['allow_comments'] . "',
@@ -139,6 +140,7 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 		$this->db->query("UPDATE `" . DB_PREFIX . "blog_post` SET
 			author_id = '" . (int)$data['author_id'] . "',
 			image = '" . $this->db->escape($data['image']) . "',
+			background_image = '" . $this->db->escape($data['background_image']) . "',
 			status = '" . (int)$data['status'] . "',
 			featured = '" . (int)$data['featured'] . "',
 			allow_comments = '" . (int)$data['allow_comments'] . "',
@@ -314,6 +316,7 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 
 		$data["author_id"] = $post["author_id"];
 		$data["image"] = $post["image"];
+		$data["background_image"] = $post["background_image"];
 		$data["status"] = $post["status"];
 		$data["featured"] = $post["featured"];
 		$data["allow_comments"] = $post["allow_comments"];
