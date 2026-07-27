@@ -35,6 +35,10 @@ $_['entry_link']        = 'Link';
 $_['entry_xml']         = 'XML Code';
 $_['entry_status']      = 'Status';
 
+// Cards
+$_['text_details_card'] = 'Details';
+$_['text_status_card']  = 'Status';
+
 // Help
 $_['help_code']         = 'Unique code identifier for the modification. Used to prevent duplicates.';
 $_['help_xml']          = 'Full OCMOD XML. Use the Test button to validate before saving.';
