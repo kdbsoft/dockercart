@@ -51,6 +51,7 @@ $_['entry_category']       = 'Category';
 $_['entry_status']         = 'Status';
 $_['entry_featured']       = 'Featured';
 $_['entry_image']          = 'Featured Image';
+$_['entry_background_image'] = 'Background Image';
 $_['entry_date_published'] = 'Published Date';
 $_['entry_allow_comments'] = 'Allow Comments';
 $_['entry_sort_order']     = 'Sort Order';
