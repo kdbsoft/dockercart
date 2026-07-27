@@ -543,6 +543,17 @@ class ControllerCustomerCustomer extends Controller {
 		    ? $this->language->get('text_add_customer_subtitle')
 		    : $this->language->get('text_edit_customer_subtitle');
 
+		$data['text_account_card'] = $this->language->get('text_account_card');
+		$data['text_password_card'] = $this->language->get('text_password_card');
+		$data['text_other_card'] = $this->language->get('text_other_card');
+		$data['text_address_card'] = $this->language->get('text_address_card');
+		$data['text_affiliate_card'] = $this->language->get('text_affiliate_card');
+		$data['text_payment_card'] = $this->language->get('text_payment_card');
+		$data['text_history_card'] = $this->language->get('text_history_card');
+		$data['text_transaction_card'] = $this->language->get('text_transaction_card');
+		$data['text_reward_card'] = $this->language->get('text_reward_card');
+		$data['text_ip_card'] = $this->language->get('text_ip_card');
+
 		$data['user_token'] = $this->session->data['user_token'];
 
 		if (isset($this->request->get['customer_id'])) {
@@ -736,6 +747,8 @@ class ControllerCustomerCustomer extends Controller {
 		} else {
 			$data['lastname'] = '';
 		}
+
+		$data['customer_name'] = trim($data['firstname'] . ' ' . $data['lastname']) ?: $this->language->get('text_form');
 
 		if (isset($this->request->post['email'])) {
 			$data['email'] = $this->request->post['email'];

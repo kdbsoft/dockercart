@@ -33,4 +33,8 @@ $_['text_add_customer_group_subtitle'] = 'Создать новую группу
 
 $_['text_edit_customer_group_subtitle'] = 'Редактировать настройки группы покупателей';
 
+// Panel / Card titles
+$_['text_group_card'] = 'Группа покупателей';
+$_['text_description_card'] = 'Описание';
+$_['text_settings_card'] = 'Настройки';
 

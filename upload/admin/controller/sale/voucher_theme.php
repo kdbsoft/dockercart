@@ -250,6 +250,8 @@ class ControllerSaleVoucherTheme extends Controller {
 		    ? $this->language->get('text_add_voucher_theme_subtitle')
 		    : $this->language->get('text_edit_voucher_theme_subtitle');
 
+		$data['text_design_card'] = $this->language->get('text_design_card');
+
 		if (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];
 		} else {
@@ -319,6 +321,10 @@ class ControllerSaleVoucherTheme extends Controller {
 		} else {
 			$data['voucher_theme_description'] = array();
 		}
+
+		$data['voucher_theme_name'] = !empty($data['voucher_theme_description'][$this->config->get('config_language_id')]['name'])
+		    ? $data['voucher_theme_description'][$this->config->get('config_language_id')]['name']
+		    : $this->language->get('text_form');
 
 		if (isset($this->request->post['image'])) {
 			$data['image'] = $this->request->post['image'];
