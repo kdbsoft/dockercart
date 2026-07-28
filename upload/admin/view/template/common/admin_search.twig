@@ -2,111 +2,142 @@
 <div id="content">
   <div class="page-header">
     <div class="container-fluid">
-      <div class="pull-right">
-        <form action="{{ action }}" method="get" class="form-inline">
-          <input type="hidden" name="route" value="common/admin_search">
-          <input type="hidden" name="user_token" value="{{ user_token }}">
-          <div class="input-group">
-            <input type="text" name="search" value="{{ search }}" class="form-control" placeholder="{{ text_search_placeholder }}" autofocus>
-            <span class="input-group-btn">
-              <button type="submit" class="btn btn-primary"><i data-lucide="search"></i> {{ button_search }}</button>
+      <div class="row">
+        <div class="col-sm-12 col-lg-offset-1 col-lg-10 col-xl-offset-2 col-xl-8">
+          <a href="{{ cancel }}" class="page-header__link">
+            <span class="page-header__back">
+              <i data-lucide="arrow-left" width="20" height="20"></i>
             </span>
-          </div>
-        </form>
+            <span class="page-header__title">{{ heading_title }}</span>
+          </a>
+        </div>
       </div>
-      <h1>{{ heading_title }}</h1>
     </div>
   </div>
   <div class="container-fluid">
+    <div class="row">
+      <div class="col-sm-12 col-lg-offset-1 col-lg-10 col-xl-offset-2 col-xl-8">
+        <form action="{{ action }}" method="get" id="form-search">
+          <input type="hidden" name="route" value="common/admin_search">
+          <input type="hidden" name="user_token" value="{{ user_token }}">
+          <div class="dcx-shell">
+            <div class="dcx-panel">
+              <div class="dcx-panel-head">
+                <div class="dcx-panel-head__icon"><i data-lucide="search" width="18" height="18"></i></div>
+                <div>
+                  <div class="dcx-panel-title">{{ heading_title }}</div>
+                </div>
+              </div>
+              <div class="dcx-panel-body">
+                <div class="dcx-fields">
+                  <div class="dcx-field">
+                    <input type="text" name="search" value="{{ search }}" placeholder="{{ text_search_placeholder }}" class="form-control" autofocus />
+                  </div>
+                  <div class="dcx-field">
+                    <button type="submit" class="btn btn-primary"><i data-lucide="search" width="14" height="14"></i> {{ button_search }}</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
     {% if search %}
       {% if total > 0 %}
-        <div class="panel panel-default">
-          <div class="dcx-panel-heading">
-            <h3 class="dcx-panel-title"><i data-lucide="list"></i> {{ text_results }}</h3>
-          </div>
-          <div class="panel-body">
-            <ul class="nav nav-tabs">
-              <li{% if active_type == 'all' %} class="active"{% endif %}>
-                <a href="{{ action }}&user_token={{ user_token }}&search={{ search|url_encode }}&type=all">{{ text_all }}{% if type_totals.all is defined %} ({{ type_totals.all }}){% endif %}</a>
-              </li>
-              {% if 'product' in types %}
-              <li{% if active_type == 'product' %} class="active"{% endif %}>
-                <a href="{{ action }}&user_token={{ user_token }}&search={{ search|url_encode }}&type=product">{{ text_product }}{% if type_totals.product is defined %} ({{ type_totals.product }}){% endif %}</a>
-              </li>
-              {% endif %}
-              {% if 'category' in types %}
-              <li{% if active_type == 'category' %} class="active"{% endif %}>
-                <a href="{{ action }}&user_token={{ user_token }}&search={{ search|url_encode }}&type=category">{{ text_category }}{% if type_totals.category is defined %} ({{ type_totals.category }}){% endif %}</a>
-              </li>
-              {% endif %}
-              {% if 'manufacturer' in types %}
-              <li{% if active_type == 'manufacturer' %} class="active"{% endif %}>
-                <a href="{{ action }}&user_token={{ user_token }}&search={{ search|url_encode }}&type=manufacturer">{{ text_manufacturer }}{% if type_totals.manufacturer is defined %} ({{ type_totals.manufacturer }}){% endif %}</a>
-              </li>
-              {% endif %}
-              {% if 'information' in types %}
-              <li{% if active_type == 'information' %} class="active"{% endif %}>
-                <a href="{{ action }}&user_token={{ user_token }}&search={{ search|url_encode }}&type=information">{{ text_information }}{% if type_totals.information is defined %} ({{ type_totals.information }}){% endif %}</a>
-              </li>
-              {% endif %}
-              {% if 'order' in types %}
-              <li{% if active_type == 'order' %} class="active"{% endif %}>
-                <a href="{{ action }}&user_token={{ user_token }}&search={{ search|url_encode }}&type=order">{{ text_order }}{% if type_totals.order is defined %} ({{ type_totals.order }}){% endif %}</a>
-              </li>
-              {% endif %}
-              {% if 'customer' in types %}
-              <li{% if active_type == 'customer' %} class="active"{% endif %}>
-                <a href="{{ action }}&user_token={{ user_token }}&search={{ search|url_encode }}&type=customer">{{ text_customer }}{% if type_totals.customer is defined %} ({{ type_totals.customer }}){% endif %}</a>
-              </li>
-              {% endif %}
-            </ul>
-            <div class="table-responsive">
-              <table class="table table-hover">
-                <thead>
-                  <tr>
-                    <td class="text-left" width="120">{{ column_type }}</td>
-                    <td class="text-left">{{ column_name }}</td>
-                    <td class="text-left">{{ column_details }}</td>
-                    <td class="text-right" width="100">{{ column_action }}</td>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for result in results %}
-                  <tr>
-                    <td class="text-left">
-                      <span class="label label-{{ result.type == 'product' ? 'primary' : (result.type == 'category' ? 'success' : (result.type == 'manufacturer' ? 'info' : (result.type == 'information' ? 'warning' : (result.type == 'order' ? 'danger' : 'default')))) }}">
-                        {{ result.type_label }}
-                      </span>
-                    </td>
-                    <td class="text-left">
-                      <a href="{{ result.href }}">{{ result.name }}</a>
-                    </td>
-                    <td class="text-left">
-                      {% if result.subtitle %}
-                        <small class="text-muted">{{ result.subtitle }}</small>
-                      {% endif %}
-                    </td>
-                    <td class="text-right">
-                      <a href="{{ result.href }}" title="{{ button_edit }}" class="btn btn-primary"><i data-lucide="pencil"></i></a>
-                    </td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
+    <div class="row">
+      <div class="col-sm-12 col-lg-offset-1 col-lg-10 col-xl-offset-2 col-xl-8">
+        <div class="dcx-shell form-row--spaced">
+          <div class="dcx-panel">
+            <div class="dcx-panel-head">
+              <div class="dcx-panel-head__icon"><i data-lucide="list" width="18" height="18"></i></div>
+              <div>
+                <div class="dcx-panel-title">{{ text_results }}</div>
+                <div class="dcx-panel-heading__subtitle">{{ text_showing }} {{ results_start }} {{ text_to }} {{ results_end }} {{ text_of }} {{ total }} {{ text_results }}</div>
+              </div>
             </div>
-            <div class="row">
-              <div class="col-sm-6 text-left">{{ pagination }}</div>
-              <div class="col-sm-6 text-right">
-                {{ text_showing }} {{ results_start }} {{ text_to }} {{ results_end }} {{ text_of }} {{ total }} {{ text_results }}
+            <div class="dcx-panel-body">
+              <ul class="dcx-pills">
+                <li{% if active_type == 'all' %} class="active"{% endif %}><a href="{{ action }}&user_token={{ user_token }}&search={{ search|url_encode }}&type=all"><i data-lucide="layers" width="14" height="14"></i> {{ text_all }}{% if type_totals.all is defined %} ({{ type_totals.all }}){% endif %}</a></li>
+                {% if 'product' in types %}
+                <li{% if active_type == 'product' %} class="active"{% endif %}><a href="{{ action }}&user_token={{ user_token }}&search={{ search|url_encode }}&type=product"><i data-lucide="package" width="14" height="14"></i> {{ text_product }}{% if type_totals.product is defined %} ({{ type_totals.product }}){% endif %}</a></li>
+                {% endif %}
+                {% if 'category' in types %}
+                <li{% if active_type == 'category' %} class="active"{% endif %}><a href="{{ action }}&user_token={{ user_token }}&search={{ search|url_encode }}&type=category"><i data-lucide="folder" width="14" height="14"></i> {{ text_category }}{% if type_totals.category is defined %} ({{ type_totals.category }}){% endif %}</a></li>
+                {% endif %}
+                {% if 'manufacturer' in types %}
+                <li{% if active_type == 'manufacturer' %} class="active"{% endif %}><a href="{{ action }}&user_token={{ user_token }}&search={{ search|url_encode }}&type=manufacturer"><i data-lucide="factory" width="14" height="14"></i> {{ text_manufacturer }}{% if type_totals.manufacturer is defined %} ({{ type_totals.manufacturer }}){% endif %}</a></li>
+                {% endif %}
+                {% if 'information' in types %}
+                <li{% if active_type == 'information' %} class="active"{% endif %}><a href="{{ action }}&user_token={{ user_token }}&search={{ search|url_encode }}&type=information"><i data-lucide="file-text" width="14" height="14"></i> {{ text_information }}{% if type_totals.information is defined %} ({{ type_totals.information }}){% endif %}</a></li>
+                {% endif %}
+                {% if 'order' in types %}
+                <li{% if active_type == 'order' %} class="active"{% endif %}><a href="{{ action }}&user_token={{ user_token }}&search={{ search|url_encode }}&type=order"><i data-lucide="shopping-cart" width="14" height="14"></i> {{ text_order }}{% if type_totals.order is defined %} ({{ type_totals.order }}){% endif %}</a></li>
+                {% endif %}
+                {% if 'customer' in types %}
+                <li{% if active_type == 'customer' %} class="active"{% endif %}><a href="{{ action }}&user_token={{ user_token }}&search={{ search|url_encode }}&type=customer"><i data-lucide="user" width="14" height="14"></i> {{ text_customer }}{% if type_totals.customer is defined %} ({{ type_totals.customer }}){% endif %}</a></li>
+                {% endif %}
+              </ul>
+              <div class="table-responsive">
+                <table class="table table-hover dcx-table">
+                  <thead>
+                    <tr>
+                      <td class="text-left" width="120">{{ column_type }}</td>
+                      <td class="text-left">{{ column_name }}</td>
+                      <td class="text-left">{{ column_details }}</td>
+                      <td class="text-right" width="60"></td>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for result in results %}
+                    <tr>
+                      <td class="text-left">
+                        <span class="label label-{{ result.type == 'product' ? 'primary' : (result.type == 'category' ? 'success' : (result.type == 'manufacturer' ? 'info' : (result.type == 'information' ? 'warning' : (result.type == 'order' ? 'danger' : 'default')))) }}">
+                          {{ result.type_label }}
+                        </span>
+                      </td>
+                      <td class="text-left">
+                        <a href="{{ result.href }}">{{ result.name }}</a>
+                      </td>
+                      <td class="text-left">
+                        {% if result.subtitle %}
+                          <small class="text-muted">{{ result.subtitle }}</small>
+                        {% endif %}
+                      </td>
+                      <td class="text-right">
+                        <a href="{{ result.href }}" title="{{ button_edit }}" class="btn btn-info btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              <div class="row" style="margin-top:12px;">
+                <div class="col-sm-6 text-left">{{ pagination }}</div>
+                <div class="col-sm-6 text-right text-muted" style="font-size:12px;line-height:32px;"></div>
               </div>
             </div>
           </div>
         </div>
+      </div>
+    </div>
       {% else %}
-        <div class="alert alert-warning"><i data-lucide="alert-circle"></i> {{ text_no_results }}</div>
+    <div class="row">
+      <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
+        <div class="dcx-shell form-row--spaced">
+          <div class="alert alert-warning"><i data-lucide="alert-circle" width="16" height="16"></i> {{ text_no_results }}</div>
+        </div>
+      </div>
+    </div>
       {% endif %}
     {% else %}
-      <div class="alert alert-info"><i data-lucide="info"></i> {{ text_enter_search }}</div>
+    <div class="row">
+      <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
+        <div class="dcx-shell form-row--spaced">
+          <div class="alert alert-info"><i data-lucide="info" width="16" height="16"></i> {{ text_enter_search }}</div>
+        </div>
+      </div>
+    </div>
     {% endif %}
   </div>
 </div>

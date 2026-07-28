@@ -3174,7 +3174,8 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
     position: absolute;
     top: 100%;
     left: 0;
-    right: 0;
+    width: 100%;
+    max-width: 320px;
     z-index: 1050;
     margin-top: 4px;
     padding: 8px 0;
@@ -3270,12 +3271,14 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
     align-items: center;
     justify-content: center;
     gap: 6px;
+    width: 100%;
     padding: 10px 16px;
     color: var(--dc-primary);
     font-size: 13px;
     font-weight: 500;
     text-align: center;
     text-decoration: none;
+    box-sizing: border-box;
 }
 
 .admin-search-view-all:hover {
@@ -3286,13 +3289,18 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
 @media (max-width: 767px) {
     .admin-search-wrap {
         width: 100%;
-        margin: 5px 0;
+        margin: 8px 0;
         padding: 0 15px;
         box-sizing: border-box;
         order: 10;
+        flex-basis: 100%;
     }
 
     .admin-search-box {
+        max-width: 100%;
+    }
+
+    .admin-search-dropdown {
         max-width: 100%;
     }
 
