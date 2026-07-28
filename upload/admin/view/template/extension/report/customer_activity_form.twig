@@ -4,7 +4,7 @@
   <div class="page-header">
     <div class="container-fluid">
       <div class="row">
-        <div class="col-lg-offset-2 col-lg-7 col-xl-offset-1 col-xl-7">
+        <div class="col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
           <div class="pull-right">
             <button type="submit" form="form-total" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary btn--icon"><i data-lucide="save" width="16" height="16"></i></button>
             <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default btn--icon"><i data-lucide="reply" width="16" height="16"></i></a>
@@ -24,7 +24,10 @@
       </div>
     </div>
   </div>
-  <div class="dcx-shell">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-12 col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
+          <div class="dcx-shell">
     {% if error_warning %}
     <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
       <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -59,6 +62,9 @@
             </div>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
       </div>
     </div>
   </div>
