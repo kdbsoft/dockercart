@@ -1,19 +1,22 @@
 <nav id="column-left">
-  <div id="navigation"><i data-lucide="menu"></i> {{ text_navigation }}</div>
+  <div id="navigation">
+    <span id="sidebar-toggle" title="Toggle sidebar"><i data-lucide="panel-left-close" width="18" height="18"></i></span>
+    <span class="nav-text">{{ text_navigation }}</span>
+  </div>
   <ul id="menu">
     {% set i = 0 %}
     {% for menu in menus %}
     <li id="{{ menu.id }}">
-        {% if menu.href %}<a href="{{ menu.href }}"><i data-lucide="{{ menu.icon }}"></i> {{ menu.name }}</a>{% else %}<a href="#collapse{{ i }}" data-toggle="collapse" class="parent collapsed"><i data-lucide="{{ menu.icon }}"></i> {{ menu.name }} <i data-lucide="chevron-right" class="menu-arrow"></i></a>{% endif %}
+        {% if menu.href %}<a href="{{ menu.href }}" title="{{ menu.name }}"><i data-lucide="{{ menu.icon }}"></i> {{ menu.name }}</a>{% else %}<a href="#collapse{{ i }}" data-toggle="collapse" class="parent collapsed" title="{{ menu.name }}"><i data-lucide="{{ menu.icon }}"></i> {{ menu.name }} <i data-lucide="chevron-right" class="menu-arrow"></i></a>{% endif %}
         {% if menu.children %}
           <ul id="collapse{{ i }}" class="collapse">
             {% set j = 0 %}
             {% for children_1 in menu.children %}
               {% if children_1.href or children_1.children %}
               <li>{% if children_1.href %}
-                  <a href="{{ children_1.href }}">{% if children_1.icon %}<i data-lucide="{{ children_1.icon }}"></i> {% endif %}{{ children_1.name }}</a>
+                  <a href="{{ children_1.href }}" title="{{ children_1.name }}">{% if children_1.icon %}<i data-lucide="{{ children_1.icon }}"></i> {% endif %}{{ children_1.name }}</a>
                 {% else %}
-                  <a href="#collapse{{ i }}-{{ j }}" data-toggle="collapse" class="parent collapsed">{% if children_1.icon %}<i data-lucide="{{ children_1.icon }}"></i> {% endif %}{{ children_1.name }} <i data-lucide="chevron-right" class="menu-arrow"></i></a>
+                  <a href="#collapse{{ i }}-{{ j }}" data-toggle="collapse" class="parent collapsed" title="{{ children_1.name }}">{% if children_1.icon %}<i data-lucide="{{ children_1.icon }}"></i> {% endif %}{{ children_1.name }} <i data-lucide="chevron-right" class="menu-arrow"></i></a>
                 {% endif %}
 
                 {% if children_1.children %}
@@ -21,14 +24,14 @@
                     {% set k = 0 %}
                     {% for children_2 in children_1.children %}
                       <li>{% if children_2.href %}
-                          <a href="{{ children_2.href }}">{{ children_2.name }}</a>
+                          <a href="{{ children_2.href }}" title="{{ children_2.name }}">{{ children_2.name }}</a>
                         {% else %}
-                          <a href="#collapse-{{ i }}-{{ j }}-{{ k }}" data-toggle="collapse" class="parent collapsed">{{ children_2.name }} <i data-lucide="chevron-right" class="menu-arrow"></i></a>
+                          <a href="#collapse-{{ i }}-{{ j }}-{{ k }}" data-toggle="collapse" class="parent collapsed" title="{{ children_2.name }}">{{ children_2.name }} <i data-lucide="chevron-right" class="menu-arrow"></i></a>
                         {% endif %}
                         {% if children_2.children %}
                           <ul id="collapse-{{ i }}-{{ j }}-{{ k }}" class="collapse">
                             {% for children_3 in children_2.children %}
-                              <li><a href="{{ children_3.href }}">{{ children_3.name }}</a></li>
+                              <li><a href="{{ children_3.href }}" title="{{ children_3.name }}">{{ children_3.name }}</a></li>
                             {% endfor %}
                           </ul>
                         {% endif %}</li>
