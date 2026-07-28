@@ -115,25 +115,20 @@
               </select>
             </div>
             <div class="dcx-sidebar-card__field">
-              <label class="dcx-sidebar-card__checkbox">
-                <input type="checkbox" name="top" value="1" {% if top %}checked="checked"{% endif %} id="input-top" />
-                <span>{{ entry_top }}</span>
-                <span data-toggle="tooltip" title="{{ help_top }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
-              </label>
-            </div>
-            <div class="dcx-sidebar-card__field">
-              <label class="dcx-sidebar-card__checkbox">
-                <input type="checkbox" name="bottom" value="1" {% if bottom %}checked="checked"{% endif %} id="input-bottom" />
-                <span>{{ entry_bottom }}</span>
-                <span data-toggle="tooltip" title="{{ help_bottom }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
-              </label>
-            </div>
-            <div class="dcx-sidebar-card__field">
-              <label class="dcx-sidebar-card__checkbox">
-                <input type="checkbox" name="full_width" value="1" {% if full_width %}checked="checked"{% endif %} id="input-full-width" />
-                <span>{{ entry_full_width }}</span>
-                <span data-toggle="tooltip" title="{{ help_full_width }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
-              </label>
+              <div class="dcx-checkbox-group">
+                <label class="dcx-checkbox-label">
+                  <input type="checkbox" name="top" value="1" {% if top %}checked="checked"{% endif %} id="input-top" /> {{ entry_top }}
+                  <span data-toggle="tooltip" title="{{ help_top }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+                </label>
+                <label class="dcx-checkbox-label">
+                  <input type="checkbox" name="bottom" value="1" {% if bottom %}checked="checked"{% endif %} id="input-bottom" /> {{ entry_bottom }}
+                  <span data-toggle="tooltip" title="{{ help_bottom }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+                </label>
+                <label class="dcx-checkbox-label">
+                  <input type="checkbox" name="full_width" value="1" {% if full_width %}checked="checked"{% endif %} id="input-full-width" /> {{ entry_full_width }}
+                  <span data-toggle="tooltip" title="{{ help_full_width }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+                </label>
+              </div>
             </div>
             <div class="dcx-sidebar-card__field">
               <label class="dcx-sidebar-card__label" for="input-sort-order">{{ entry_sort_order }}</label>

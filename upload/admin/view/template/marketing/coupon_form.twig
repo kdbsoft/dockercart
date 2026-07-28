@@ -178,22 +178,19 @@
               </select>
             </div>
             <div class="dcx-sidebar-card__field">
-              <label class="dcx-sidebar-card__checkbox">
-                <input type="checkbox" name="logged" value="1" {% if logged %}checked="checked"{% endif %} />
-                <span data-toggle="tooltip" title="{{ help_logged }}">{{ entry_logged }}</span>
-              </label>
-            </div>
-            <div class="dcx-sidebar-card__field">
-              <label class="dcx-sidebar-card__checkbox">
-                <input type="checkbox" name="shipping" value="1" {% if shipping %}checked="checked"{% endif %} />
-                <span>{{ entry_shipping }}</span>
-              </label>
-            </div>
-            <div class="dcx-sidebar-card__field">
-              <label class="dcx-sidebar-card__checkbox">
-                <input type="checkbox" name="auto_renew" value="1" {% if auto_renew %}checked="checked"{% endif %} />
-                <span data-toggle="tooltip" title="{{ help_auto_renew }}">{{ entry_auto_renew }}</span>
-              </label>
+              <div class="dcx-checkbox-group">
+                <label class="dcx-checkbox-label">
+                  <input type="checkbox" name="logged" value="1" {% if logged %}checked="checked"{% endif %} /> {{ entry_logged }}
+                  <span data-toggle="tooltip" title="{{ help_logged }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+                </label>
+                <label class="dcx-checkbox-label">
+                  <input type="checkbox" name="shipping" value="1" {% if shipping %}checked="checked"{% endif %} /> {{ entry_shipping }}
+                </label>
+                <label class="dcx-checkbox-label">
+                  <input type="checkbox" name="auto_renew" value="1" {% if auto_renew %}checked="checked"{% endif %} /> {{ entry_auto_renew }}
+                  <span data-toggle="tooltip" title="{{ help_auto_renew }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+                </label>
+              </div>
             </div>
             <div class="dcx-sidebar-card__field">
               <label class="dcx-sidebar-card__label" for="input-uses-total">
