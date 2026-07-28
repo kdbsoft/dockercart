@@ -136,8 +136,6 @@ class ControllerExtensionModuleDockercartBlogAuthor extends Controller {
 		$data['copy'] = $this->url->link('extension/module/dockercart_blog_author/copy', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('extension/module/dockercart_blog_author/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
-		$data['text_list_subtitle'] = $this->language->get('text_list_subtitle');
-
 		$data['authors'] = array();
 
 		$filter_data = array(
@@ -207,6 +205,8 @@ class ControllerExtensionModuleDockercartBlogAuthor extends Controller {
 	protected function getForm() {
 		$data['text_form'] = !isset($this->request->get['author_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
 		$data['text_form_subtitle'] = !isset($this->request->get['author_id']) ? $this->language->get('text_add_author_subtitle') : $this->language->get('text_edit_author_subtitle');
+		$data['text_active'] = $this->language->get('text_active');
+		$data['text_inactive'] = $this->language->get('text_inactive');
 
 		if (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];
