@@ -3,12 +3,19 @@
   <div class="page-header">
     <div class="container-fluid">
       <div class="row">
-        <div class="col-sm-12 col-lg-offset-1 col-lg-7 col-xl-offset-1 col-xl-7">
+        <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
           <a href="{{ cancel }}" class="page-header__link">
             <span class="page-header__back">
               <i data-lucide="arrow-left" width="20" height="20"></i>
             </span>
-            <span class="page-header__title">{{ heading_title }}</span>
+            <span class="page-header__title">
+              {{ heading_title }}
+              {% if status is defined %}
+              <span class="page-header__badge {{ status ? 'page-header__badge--active' : 'page-header__badge--inactive' }}">
+                {{ status ? text_active : text_inactive }}
+              </span>
+              {% endif %}
+            </span>
           </a>
         </div>
         <div class="col-sm-12 col-lg-3 col-xl-3" style="text-align:right;">
@@ -18,7 +25,7 @@
       </div>
       {% if error_warning %}
       <div class="row">
-        <div class="col-sm-12 col-lg-offset-1 col-lg-7 col-xl-offset-1 col-xl-7">
+        <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
           <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
@@ -27,7 +34,7 @@
       {% endif %}
       {% if warning %}
       <div class="row">
-        <div class="col-sm-12 col-lg-offset-1 col-lg-7 col-xl-offset-1 col-xl-7">
+        <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
           <div class="alert alert-warning alert-dismissible"><i data-lucide="alert-triangle" width="16" height="16"></i> {{ warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
@@ -36,7 +43,7 @@
       {% endif %}
       {% if success %}
       <div class="row">
-        <div class="col-sm-12 col-lg-offset-1 col-lg-7 col-xl-offset-1 col-xl-7">
+        <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
           <div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> {{ success }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
@@ -48,7 +55,7 @@
   <div class="container-fluid">
     <form action="{{ action }}" method="post" id="form-module">
     <div class="row">
-      <div class="col-md-12 col-sm-12 col-lg-offset-1 col-lg-7 col-xl-offset-1 col-xl-7">
+      <div class="col-md-12 col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
         <div class="dcx-shell">
           <div class="dcx-panel">
             <div class="dcx-panel-head">
@@ -160,7 +167,7 @@
     </form>
 
     <div class="row">
-      <div class="col-md-12 col-sm-12 col-lg-offset-1 col-lg-7 col-xl-offset-1 col-xl-7">
+      <div class="col-md-12 col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
         <div class="dcx-shell form-row--spaced">
           <div class="dcx-panel">
             <div class="dcx-panel-head">

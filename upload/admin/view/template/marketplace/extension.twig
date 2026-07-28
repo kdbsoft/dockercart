@@ -280,8 +280,8 @@
 
   function doExtAction(url, $btn, onSuccess) {
     $btn.prop('disabled', true);
-    var $icon = $btn.find('i');
-    var origHtml = $icon[0].outerHTML;
+    var $icon = $btn.find('[data-lucide]');
+    var origHtml = $icon.length ? $icon[0].outerHTML : '';
     $icon.replaceWith('<i data-lucide="loader" class="lucide-spin"></i>');
     lucide.createIcons({ nodes: [$btn.find('.lucide-spin')[0]] });
 
@@ -374,8 +374,8 @@
     var url = $btn.data('url');
 
     $btn.prop('disabled', true);
-    var $icon = $btn.find('i');
-    var origHtml = $icon[0].outerHTML;
+    var $icon = $btn.find('[data-lucide]');
+    var origHtml = $icon.length ? $icon[0].outerHTML : '';
     $icon.replaceWith('<i data-lucide="loader" class="lucide-spin"></i>');
     lucide.createIcons({ nodes: [$btn.find('.lucide-spin')[0]] });
 
