@@ -1,40 +1,12 @@
 {{ header }}{{ column_left }}
 <div id="content">
-
-<style>
-/* DockerCart Universal Payment module styles */
-.dc-payment-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-bottom:16px; }
-.dc-payment-card { background:#fff; border:1px solid #e6e9ef; border-radius:10px; padding:12px 14px; display:flex; flex-direction:column; gap:6px; }
-.dc-payment-card__k { font-size:11px; text-transform:uppercase; color:#8b96a7; letter-spacing:.04em; }
-.dc-payment-card__v { font-size:20px; font-weight:600; line-height:1.2; color:#2a3445; }
-.dc-payment-table { width:100%; }
-.dc-payment-table thead th { font-size:11px; color:#6f7b8f; text-transform:uppercase; letter-spacing:.04em; font-weight:600; background:#f8fafc; padding:10px 12px; }
-.dc-payment-table tbody td { padding:12px; vertical-align:middle; border-bottom:1px solid #f0f3f8; }
-.dc-payment-table tbody tr:hover { background:#fafbfe; }
-.dc-payment-name { font-weight:600; color:#2f3f59; }
-.dc-payment-desc { font-size:12px; color:#8b96a7; margin-top:2px; }
-.dc-payment-badge { display:inline-block; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:600; }
-.dc-payment-badge--on { background:#e9f7ef; color:#1e7e34; }
-.dc-payment-badge--off { background:#fdecee; color:#b02a37; }
-.dc-payment-actions { display:flex; gap:6px; justify-content:flex-end; }
-.dc-payment-empty { text-align:center; padding:40px 20px; color:#8b96a7; }
-.dc-payment-empty i { font-size:48px; display:block; margin-bottom:12px; opacity:0.5; }
-@media (max-width: 767px) {
-  .dc-payment-grid { grid-template-columns:1fr; }
-}
-</style>
-
-  <div class="page-header">
-    <div class="container-fluid">
+  <div class="container-fluid">
+    <div class="page-header">
       <div class="row">
-        <div class="col-lg-offset-2 col-lg-7 col-xl-offset-1 col-xl-7">
+        <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
           <div class="pull-right">
-            <button type="submit" form="form-payment" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary btn--icon">
-              <i data-lucide="save" width="16" height="16"></i>
-            </button>
-            <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default btn--icon">
-              <i data-lucide="x" width="16" height="16"></i>
-            </a>
+            <button type="submit" form="form-payment" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary btn--icon"><i data-lucide="save" width="16" height="16"></i></button>
+            <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default btn--icon"><i data-lucide="x" width="16" height="16"></i></a>
           </div>
           <a href="{{ cancel }}" class="page-header__link">
             <span class="page-header__back"><i data-lucide="arrow-left" width="20" height="20"></i></span>
@@ -48,9 +20,10 @@
             </span>
           </a>
         </div>
+      </div>
       {% if error_warning %}
       <div class="row">
-        <div class="col-lg-offset-2 col-lg-7 col-xl-offset-1 col-xl-7">
+        <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
           <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
@@ -59,7 +32,7 @@
       {% endif %}
       {% if success %}
       <div class="row">
-        <div class="col-lg-offset-2 col-lg-7 col-xl-offset-1 col-xl-7">
+        <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
           <div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> {{ success }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
@@ -68,10 +41,9 @@
       {% endif %}
     </div>
   </div>
-
   <div class="container-fluid">
     <div class="row">
-      <div class="col-lg-offset-2 col-lg-7 col-xl-offset-1 col-xl-7">
+      <div class="col-md-12 col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
         <div class="dcx-shell">
           <div class="dcx-panel">
             <div class="dcx-panel-head">
@@ -82,100 +54,82 @@
               </div>
             </div>
             <div class="dcx-panel-body">
-
-              <ul class="nav nav-tabs dcx-profile-tabs" role="tablist">
+              <ul class="dcx-pills">
                 <li class="active"><a href="#tab-methods" data-toggle="tab"><i data-lucide="list" width="14" height="14"></i> {{ tab_methods }}</a></li>
                 <li><a href="#tab-settings" data-toggle="tab"><i data-lucide="settings" width="14" height="14"></i> {{ tab_settings }}</a></li>
               </ul>
-
-              <div class="tab-content" style="margin-top:16px;">
+              <div class="tab-content">
                 <div class="tab-pane active" id="tab-methods">
-
-                  <div class="dc-payment-grid">
-                    <div class="dc-payment-card">
-                      <div class="dc-payment-card__k">{{ text_total_methods }}</div>
-                      <div class="dc-payment-card__v">{{ payment_methods|length }}</div>
-                    </div>
-                    <div class="dc-payment-card">
-                      <div class="dc-payment-card__k">{{ text_active_methods }}</div>
-                      <div class="dc-payment-card__v">{{ payment_methods|filter(m => m.status == 1)|length }}</div>
-                    </div>
-                    <div class="dc-payment-card">
-                      <div class="dc-payment-card__k">{{ text_geo_zones }}</div>
-                      <div class="dc-payment-card__v">{{ geo_zones|length }}</div>
+                  <div class="dcx-fields" style="margin-bottom:16px;">
+                    <div class="dcx-fields dcx-fields--row">
+                      <div class="dcx-field">
+                        <label class="dcx-label">{{ text_total_methods }}</label>
+                        <div style="font-size:24px;font-weight:700;color:var(--dc-text-dark);">{{ payment_methods|length }}</div>
+                      </div>
+                      <div class="dcx-field">
+                        <label class="dcx-label">{{ text_active_methods }}</label>
+                        <div style="font-size:24px;font-weight:700;color:var(--dc-green-600);">{{ payment_methods|filter(m => m.status == 1)|length }}</div>
+                      </div>
+                      <div class="dcx-field">
+                        <label class="dcx-label">{{ text_geo_zones }}</label>
+                        <div style="font-size:24px;font-weight:700;color:var(--dc-text-dark);">{{ geo_zones|length }}</div>
+                      </div>
                     </div>
                   </div>
-
-                  <div style="margin-bottom:12px;">
+                  <div style="margin-bottom:16px;">
                     <a href="{{ add }}" class="btn btn-primary"><i data-lucide="plus" width="14" height="14"></i> {{ button_add_method }}</a>
                   </div>
-
                   {% if payment_methods %}
-                  <div class="table-responsive">
-                    <table class="table dc-payment-table">
-                      <thead>
-                        <tr>
-                          <th>{{ column_name }}</th>
-                          <th>{{ column_geo_zone }}</th>
-                          <th>{{ column_status }}</th>
-                          <th>{{ column_sort_order }}</th>
-                          <th style="text-align:right;">{{ column_action }}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {% for method in payment_methods %}
-                        <tr id="method-row-{{ method.method_id }}">
-                          <td>
-                            <div class="dc-payment-name">{{ method.name ? method.name : text_unnamed }}</div>
-                            {% if method.description %}
-                            <div class="dc-payment-desc">{{ method.description|slice(0, 90) }}{% if method.description|length > 90 %}...{% endif %}</div>
-                            {% endif %}
-                          </td>
-                          <td>
-                            {% set geo_zone_name = text_all_zones %}
+                  <div class="dc-shipping-list">
+                    {% for method in payment_methods %}
+                    <div class="dc-shipping-item" id="method-row-{{ method.method_id }}">
+                      <div class="dc-shipping-item__icon">
+                        <i data-lucide="credit-card" width="16" height="16"></i>
+                      </div>
+                      <div class="dc-shipping-item__body">
+                        <div class="dc-shipping-item__name">
+                          {{ method.name ? method.name : text_unnamed }}
+                          {% if method.status %}
+                          <span class="label label-success">{{ text_enabled }}</span>
+                          {% else %}
+                          <span class="label label-danger">{{ text_disabled }}</span>
+                          {% endif %}
+                        </div>
+                        <div class="dc-shipping-item__meta">
+                          <span><i data-lucide="map-pin" width="12" height="12"></i>
                             {% for geo_zone in geo_zones %}
-                              {% if geo_zone.geo_zone_id == method.geo_zone_id %}
-                                {% set geo_zone_name = geo_zone.name %}
-                              {% endif %}
-                            {% endfor %}
-                            {{ geo_zone_name }}
-                          </td>
-                          <td>
-                            {% if method.status %}
-                            <span class="dc-payment-badge dc-payment-badge--on">{{ text_enabled }}</span>
-                            {% else %}
-                            <span class="dc-payment-badge dc-payment-badge--off">{{ text_disabled }}</span>
-                            {% endif %}
-                          </td>
-                          <td>{{ method.sort_order }}</td>
-                          <td class="dc-payment-actions">
-                            <a href="{{ method.edit }}" class="btn btn-sm btn-primary" data-toggle="tooltip" title="{{ button_edit }}"><i data-lucide="pencil" width="14" height="14"></i></a>
-                            <button type="button" class="btn btn-sm btn-danger btn-delete" data-method-id="{{ method.method_id }}" data-toggle="tooltip" title="{{ button_delete }}"><i data-lucide="trash-2" width="14" height="14"></i></button>
-                          </td>
-                        </tr>
-                        {% endfor %}
-                      </tbody>
-                    </table>
+                              {% if geo_zone.geo_zone_id == method.geo_zone_id %}{{ geo_zone.name }}{% endif %}
+                            {% else %}{{ text_all_zones }}{% endfor %}
+                          </span>
+                          <span><i data-lucide="arrow-down-up" width="12" height="12"></i> {{ method.sort_order }}</span>
+                        </div>
+                        {% if method.description %}
+                        <div class="dc-shipping-item__desc">{{ method.description|slice(0, 100) }}{% if method.description|length > 100 %}...{% endif %}</div>
+                        {% endif %}
+                      </div>
+                      <div class="dc-shipping-item__actions">
+                        <a href="{{ method.edit }}" class="btn btn-info btn--icon" data-toggle="tooltip" title="{{ button_edit }}"><i data-lucide="pencil" width="14" height="14"></i></a>
+                        <button type="button" class="btn btn-danger btn--icon btn-delete" data-method-id="{{ method.method_id }}" data-toggle="tooltip" title="{{ button_delete }}"><i data-lucide="trash-2" width="14" height="14"></i></button>
+                      </div>
+                    </div>
+                    {% endfor %}
                   </div>
                   {% else %}
-                  <div class="dc-payment-empty">
+                  <div class="dc-shipping-empty">
                     <i data-lucide="credit-card" width="48" height="48"></i>
                     <p>{{ text_no_methods }}</p>
                     <a href="{{ add }}" class="btn btn-primary"><i data-lucide="plus" width="14" height="14"></i> {{ button_add_method }}</a>
                   </div>
                   {% endif %}
                 </div>
-
                 <div class="tab-pane" id="tab-settings">
-                  <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-payment" class="dcx-form">
-
+                  <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-payment">
                     <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
                       <h4><i data-lucide="settings" width="16" height="16"></i> {{ text_general_settings }}</h4>
-
                       <div class="dcx-fields">
                         <div class="dcx-field">
                           <label class="dcx-label" for="input-status">{{ entry_status }}</label>
-                          <select name="payment_dockercart_universal_status" id="input-status" class="form-control" style="max-width:200px;">
+                          <select name="payment_dockercart_universal_status" id="input-status" class="form-control">
                             {% if payment_dockercart_universal_status %}
                             <option value="1" selected>{{ text_enabled }}</option>
                             <option value="0">{{ text_disabled }}</option>
@@ -185,17 +139,15 @@
                             {% endif %}
                           </select>
                         </div>
-
                         <div class="dcx-field">
                           <label class="dcx-label" for="input-order-status">{{ entry_order_status }}</label>
-                          <select name="payment_dockercart_universal_order_status_id" id="input-order-status" class="form-control" style="max-width:300px;">
+                          <select name="payment_dockercart_universal_order_status_id" id="input-order-status" class="form-control">
                             {% for order_status in order_statuses %}
                             <option value="{{ order_status.order_status_id }}" {% if order_status.order_status_id == payment_dockercart_universal_order_status_id %}selected{% endif %}>{{ order_status.name }}</option>
                             {% endfor %}
                           </select>
                           <div class="help-block">{{ help_order_status }}</div>
                         </div>
-
                         <div class="dcx-field">
                           <label class="dcx-label" for="input-sort-order">{{ entry_sort_order }}</label>
                           <input type="text" name="payment_dockercart_universal_sort_order" value="{{ payment_dockercart_universal_sort_order }}" id="input-sort-order" class="form-control" style="max-width:100px;" />
@@ -206,7 +158,6 @@
                   </form>
                 </div>
               </div>
-
             </div>
           </div>
         </div>
@@ -214,12 +165,10 @@
     </div>
   </div>
 </div>
-
 <script>
 $(function() {
   $('.btn-delete').on('click', function() {
     var methodId = $(this).data('method-id');
-
     if (confirm('{{ text_confirm_delete }}')) {
       $.ajax({
         url: 'index.php?route=extension/payment/dockercart_universal/delete&user_token={{ user_token }}',
@@ -228,19 +177,56 @@ $(function() {
         data: { method_id: methodId },
         success: function(json) {
           if (json.success) {
-            $('#method-row-' + methodId).fadeOut(300, function() {
-              $(this).remove();
-            });
+            $('#method-row-' + methodId).fadeOut(300, function() { $(this).remove(); });
           } else if (json.error) {
             alert(json.error);
           }
         },
-        error: function() {
-          alert('{{ error_ajax }}');
-        }
+        error: function() { alert('{{ error_ajax }}'); }
       });
     }
   });
 });
 </script>
+<style>
+.dc-shipping-list { display: flex; flex-direction: column; gap: 8px; }
+.dc-shipping-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--dc-border-soft);
+  border-radius: var(--dc-radius-lg);
+  background: var(--dc-surface);
+  transition: border-color .15s;
+}
+.dc-shipping-item:hover { border-color: var(--dc-border); }
+.dc-shipping-item__icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--dc-radius-md);
+  background: var(--dc-gray-100);
+  color: var(--dc-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dc-shipping-item__body { flex: 1; min-width: 0; }
+.dc-shipping-item__name { font-size: 14px; font-weight: 600; color: var(--dc-text-dark); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.dc-shipping-item__meta { display: flex; align-items: center; gap: 12px; margin-top: 4px; font-size: 12px; color: var(--dc-text-muted); flex-wrap: wrap; }
+.dc-shipping-item__meta span { display: inline-flex; align-items: center; gap: 4px; }
+.dc-shipping-item__desc { font-size: 12px; color: var(--dc-text-muted); margin-top: 4px; }
+.dc-shipping-item__actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.dc-shipping-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 32px 16px;
+  color: var(--dc-text-muted);
+  text-align: center;
+}
+.dc-shipping-empty p { margin: 0; font-size: 13px; }
+</style>
 {{ footer }}
