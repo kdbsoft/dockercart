@@ -31,4 +31,7 @@ $_['text_add_marketing_subtitle'] = 'Додати нову маркетинго�
 
 $_['text_edit_marketing_subtitle'] = 'Редагувати джерело відстеження маркетингу';
 
+// Panel / Card titles
+$_['text_campaign_card'] = 'Кампанія';
+
 

@@ -359,6 +359,8 @@ class ControllerMarketingMarketing extends Controller {
 		    ? $this->language->get('text_add_marketing_subtitle')
 		    : $this->language->get('text_edit_marketing_subtitle');
 
+		$data['text_campaign_card'] = $this->language->get('text_campaign_card');
+
 		if (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];
 		} else {
@@ -438,6 +440,8 @@ class ControllerMarketingMarketing extends Controller {
 		} else {
 			$data['name'] = '';
 		}
+
+		$data['marketing_name'] = $data['name'] ?: $this->language->get('text_form');
 
 		if (isset($this->request->post['description'])) {
 			$data['description'] = $this->request->post['description'];

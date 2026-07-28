@@ -3,7 +3,7 @@
   <div class="page-header">
     <div class="container-fluid">
       <div class="row">
-        <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
+        <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
           <div class="pull-right">
             <button type="submit" form="form-customer-group" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary btn--icon"><i data-lucide="save" width="16" height="16"></i></button>
             <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default btn--icon"><i data-lucide="x" width="16" height="16"></i></a>
@@ -24,7 +24,7 @@
       </div>
       {% if error_warning %}
       <div class="row">
-        <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
+        <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
           <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
@@ -36,7 +36,7 @@
   <div class="container-fluid">
     <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-customer-group">
     <div class="row">
-      <div class="col-md-12 col-sm-12 col-lg-offset-1 col-lg-7 col-xl-offset-1 col-xl-7">
+      <div class="col-md-12 col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
         <div class="dcx-shell">
           <div class="dcx-panel">
             <div class="dcx-panel-head">
@@ -46,89 +46,63 @@
               </div>
             </div>
             <div class="dcx-panel-body">
-              <ul class="nav nav-tabs" id="language">
-                {% for language in languages %}
-                <li><a href="#language{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
-                {% endfor %}
-              </ul>
-              <div class="tab-content">
-                {% for language in languages %}
-                <div class="tab-pane" id="language{{ language.language_id }}">
-                  <div class="dcx-fields">
-                    <div class="dcx-field required">
-                      <label class="dcx-label" for="input-name{{ language.language_id }}">{{ entry_name }}</label>
-                      <input type="text" name="customer_group_description[{{ language.language_id }}][name]" value="{{ customer_group_description[language.language_id] ? customer_group_description[language.language_id].name }}" placeholder="{{ entry_name }}" id="input-name{{ language.language_id }}" class="form-control" />
-                      {% if error_name[language.language_id] %}
-                      <div class="text-danger">{{ error_name[language.language_id] }}</div>
-                      {% endif %}
-                    </div>
-                    <div class="dcx-field">
-                      <label class="dcx-label" for="input-description{{ language.language_id }}">{{ entry_description }}</label>
-                      <textarea name="customer_group_description[{{ language.language_id }}][description]" rows="5" placeholder="{{ entry_description }}" id="input-description{{ language.language_id }}" class="form-control">{{ customer_group_description[language.language_id] ? customer_group_description[language.language_id].description }}</textarea>
-                    </div>
+              <div class="dcx-fields">
+                <div class="dcx-field required">
+                  <label class="dcx-label">{{ entry_name }}</label>
+                  {% for language in languages %}
+                  <div class="dc-attr-row__value">
+                    <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                    <input type="text" name="customer_group_description[{{ language.language_id }}][name]" value="{{ customer_group_description[language.language_id] ? customer_group_description[language.language_id].name }}" placeholder="{{ entry_name }}" class="form-control" />
+                  </div>
+                  {% if error_name[language.language_id] %}
+                  <div class="text-danger">{{ error_name[language.language_id] }}</div>
+                  {% endif %}
+                  {% endfor %}
+                </div>
+                <div class="dcx-field">
+                  <label class="dcx-label">{{ entry_description }}</label>
+                  {% for language in languages %}
+                  <div class="dc-attr-row__value">
+                    <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                    <textarea name="customer_group_description[{{ language.language_id }}][description]" rows="3" placeholder="{{ entry_description }}" class="form-control">{{ customer_group_description[language.language_id] ? customer_group_description[language.language_id].description }}</textarea>
+                  </div>
+                  {% endfor %}
+                </div>
+                <div class="dcx-field">
+                  <label class="dcx-label">{{ entry_approval }}</label>
+                  <div class="dcx-checkbox-group">
+                    <label class="dcx-checkbox-label">
+                      <input type="hidden" name="approval" value="0" />
+                      <input type="checkbox" name="approval" value="1"{% if approval %} checked{% endif %} /> {{ entry_approval }}
+                      <span data-toggle="tooltip" title="{{ help_approval }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+                    </label>
                   </div>
                 </div>
-                {% endfor %}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-12 col-sm-12 col-lg-4 col-xl-3">
-        <div class="dcx-sidebar-card">
-          <div class="dcx-sidebar-card__header">
-            <div class="dcx-sidebar-card__header-icon"><i data-lucide="sliders" width="16" height="16"></i></div>
-            <h3 class="dcx-sidebar-card__title">{{ text_settings_card }}</h3>
-          </div>
-          <div class="dcx-sidebar-card__body">
-            <div class="dcx-sidebar-card__field">
-              <label class="dcx-sidebar-card__label">
-                <span data-toggle="tooltip" title="{{ help_approval }}">{{ entry_approval }}</span>
-              </label>
-              <div>
-                <label class="radio-inline">
-                  {% if approval %}
-                  <input type="radio" name="approval" value="1" checked="checked" />
-                  {{ text_yes }}
-                  {% else %}
-                  <input type="radio" name="approval" value="1" />
-                  {{ text_yes }}
+                <div class="dcx-field">
+                  <label class="dcx-label" for="input-sort-order">{{ entry_sort_order }}</label>
+                  <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control" />
+                </div>
+                <div class="dcx-field">
+                  <label class="dcx-label" for="input-discount-percent">{{ entry_discount_percent }}</label>
+                  <div class="input-group">
+                    <input type="number" name="discount_percent" value="{{ discount_percent }}" placeholder="{{ entry_discount_percent }}" id="input-discount-percent" class="form-control" min="0" max="100" step="0.01" />
+                    <span class="input-group-addon">%</span>
+                  </div>
+                  {% if error_discount_percent %}
+                  <div class="text-danger">{{ error_discount_percent }}</div>
                   {% endif %}
-                </label>
-                <label class="radio-inline">
-                  {% if not approval %}
-                  <input type="radio" name="approval" value="0" checked="checked" />
-                  {{ text_no }}
-                  {% else %}
-                  <input type="radio" name="approval" value="0" />
-                  {{ text_no }}
+                </div>
+                <div class="dcx-field">
+                  <label class="dcx-label" for="input-markup-percent">{{ entry_markup_percent }}</label>
+                  <div class="input-group">
+                    <input type="number" name="markup_percent" value="{{ markup_percent }}" placeholder="{{ entry_markup_percent }}" id="input-markup-percent" class="form-control" min="0" max="100" step="0.01" />
+                    <span class="input-group-addon">%</span>
+                  </div>
+                  {% if error_markup_percent %}
+                  <div class="text-danger">{{ error_markup_percent }}</div>
                   {% endif %}
-                </label>
+                </div>
               </div>
-            </div>
-            <div class="dcx-sidebar-card__field">
-              <label class="dcx-sidebar-card__label" for="input-sort-order">{{ entry_sort_order }}</label>
-              <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control" />
-            </div>
-            <div class="dcx-sidebar-card__field">
-              <label class="dcx-sidebar-card__label" for="input-discount-percent">{{ entry_discount_percent }}</label>
-              <div class="input-group">
-                <input type="number" name="discount_percent" value="{{ discount_percent }}" placeholder="{{ entry_discount_percent }}" id="input-discount-percent" class="form-control" min="0" max="100" step="0.01" />
-                <span class="input-group-addon">%</span>
-              </div>
-              {% if error_discount_percent %}
-              <div class="text-danger">{{ error_discount_percent }}</div>
-              {% endif %}
-            </div>
-            <div class="dcx-sidebar-card__field">
-              <label class="dcx-sidebar-card__label" for="input-markup-percent">{{ entry_markup_percent }}</label>
-              <div class="input-group">
-                <input type="number" name="markup_percent" value="{{ markup_percent }}" placeholder="{{ entry_markup_percent }}" id="input-markup-percent" class="form-control" min="0" max="100" step="0.01" />
-                <span class="input-group-addon">%</span>
-              </div>
-              {% if error_markup_percent %}
-              <div class="text-danger">{{ error_markup_percent }}</div>
-              {% endif %}
             </div>
           </div>
         </div>
@@ -136,8 +110,5 @@
     </div>
     </form>
   </div>
-  <script type="text/javascript"><!--
-$('#language a:first').tab('show');
-//--></script>
 </div>
 {{ footer }}

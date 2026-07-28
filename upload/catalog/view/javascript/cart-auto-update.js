@@ -288,7 +288,10 @@ function updateHeaderTotals(totalText) {
 
         // Also update any element with id 'cart-total' directly
         const cartTotalRaw = document.getElementById('cart-total');
-        if (cartTotalRaw) cartTotalRaw.innerHTML = '<i class="fa fa-shopping-cart"></i> ' + totalText;
+        if (cartTotalRaw) {
+            cartTotalRaw.innerHTML = '<i data-lucide="shopping-cart" width="16" height="16"></i> ' + totalText;
+            if (window.lucide) lucide.createIcons({ nodes: [cartTotalRaw] });
+        }
     } catch (e) {
         // silent
     }

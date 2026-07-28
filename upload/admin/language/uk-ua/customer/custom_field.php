@@ -51,4 +51,9 @@ $_['text_add_custom_field_subtitle'] = 'Визначити нове корист
 
 $_['text_edit_custom_field_subtitle'] = 'Редагувати налаштування користувацького поля';
 
+// Panel / Card titles
+$_['text_custom_field_card'] = 'Налаштовуване поле';
+$_['text_values_card'] = 'Значення';
+$_['text_settings_card'] = 'Налаштування';
+
 

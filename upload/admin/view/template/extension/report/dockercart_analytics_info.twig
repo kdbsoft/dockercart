@@ -1,59 +1,61 @@
 <div class="row">
   <div id="filter-report" class="col-md-3 col-md-push-9 col-sm-12 hidden-sm hidden-xs">
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <div class="panel-heading__icon"><i data-lucide="filter" width="14" height="14"></i></div>
+    <div class="dcx-panel">
+      <div class="dcx-panel-head">
+        <div class="dcx-panel-head__icon"><i data-lucide="filter" width="14" height="14"></i></div>
         <div>
-          <h3 class="panel-title">{{ text_filter }}</h3>
-          <div class="panel-heading__subtitle">{{ text_filter_subtitle }}</div>
+          <h3 class="dcx-panel-title">{{ text_filter }}</h3>
+          <div class="dcx-panel-head__subtitle">{{ text_filter_subtitle }}</div>
         </div>
       </div>
-      <div class="panel-body">
-        <div class="form-group">
-          <label class="control-label" for="input-date-start">{{ entry_date_start }}</label>
-          <div class="input-group date">
-            <input type="text" name="filter_date_start" value="{{ filter_date_start }}" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" id="input-date-start" class="form-control" />
-            <span class="input-group-btn">
-            <button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button>
-            </span>
+      <div class="dcx-panel-body">
+        <div class="dcx-fields">
+          <div class="dcx-field">
+            <label class="dcx-label" for="input-date-start">{{ entry_date_start }}</label>
+            <div class="input-group date">
+              <input type="text" name="filter_date_start" value="{{ filter_date_start }}" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" id="input-date-start" class="form-control" />
+              <span class="input-group-btn">
+              <button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button>
+              </span>
+            </div>
           </div>
-        </div>
-        <div class="form-group">
-          <label class="control-label" for="input-date-end">{{ entry_date_end }}</label>
-          <div class="input-group date">
-            <input type="text" name="filter_date_end" value="{{ filter_date_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" id="input-date-end" class="form-control" />
-            <span class="input-group-btn">
-            <button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button>
-            </span>
+          <div class="dcx-field">
+            <label class="dcx-label" for="input-date-end">{{ entry_date_end }}</label>
+            <div class="input-group date">
+              <input type="text" name="filter_date_end" value="{{ filter_date_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" id="input-date-end" class="form-control" />
+              <span class="input-group-btn">
+              <button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button>
+              </span>
+            </div>
           </div>
-        </div>
-        <div class="form-group">
-          <label class="control-label" for="input-group">{{ entry_group }}</label>
-          <select name="filter_group" id="input-group" class="form-control">
-            {% for group in groups %}
-            {% if group.value == filter_group %}
-            <option value="{{ group.value }}" selected="selected">{{ group.text }}</option>
-            {% else %}
-            <option value="{{ group.value }}">{{ group.text }}</option>
-            {% endif %}
-            {% endfor %}
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="control-label" for="input-status">{{ entry_status }}</label>
-          <select name="filter_order_status_id" id="input-status" class="form-control">
-            <option value="0">{{ text_all_status }}</option>
-            {% for order_status in order_statuses %}
-            {% if order_status.order_status_id == filter_order_status_id %}
-            <option value="{{ order_status.order_status_id }}" selected="selected">{{ order_status.name }}</option>
-            {% else %}
-            <option value="{{ order_status.order_status_id }}">{{ order_status.name }}</option>
-            {% endif %}
-            {% endfor %}
-          </select>
-        </div>
-        <div class="form-group text-right">
-          <button type="button" id="button-filter" class="btn btn-default"><i data-lucide="filter" width="14" height="14"></i> {{ button_filter }}</button>
+          <div class="dcx-field">
+            <label class="dcx-label" for="input-group">{{ entry_group }}</label>
+            <select name="filter_group" id="input-group" class="form-control">
+              {% for group in groups %}
+              {% if group.value == filter_group %}
+              <option value="{{ group.value }}" selected="selected">{{ group.text }}</option>
+              {% else %}
+              <option value="{{ group.value }}">{{ group.text }}</option>
+              {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+          <div class="dcx-field">
+            <label class="dcx-label" for="input-status">{{ entry_status }}</label>
+            <select name="filter_order_status_id" id="input-status" class="form-control">
+              <option value="0">{{ text_all_status }}</option>
+              {% for order_status in order_statuses %}
+              {% if order_status.order_status_id == filter_order_status_id %}
+              <option value="{{ order_status.order_status_id }}" selected="selected">{{ order_status.name }}</option>
+              {% else %}
+              <option value="{{ order_status.order_status_id }}">{{ order_status.name }}</option>
+              {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+          <div class="dcx-field text-right">
+            <button type="button" id="button-filter" class="btn btn-default"><i data-lucide="filter" width="14" height="14"></i> {{ button_filter }}</button>
+          </div>
         </div>
       </div>
     </div>
@@ -61,35 +63,35 @@
   <div class="col-md-9 col-md-pull-3 col-sm-12">
     <div class="row" style="margin-bottom:16px">
       <div class="col-sm-2">
-        <div class="panel panel-default text-center" style="padding:12px">
+        <div class="dcx-panel text-center" style="padding:12px">
           <div style="font-size:24px;font-weight:700;line-height:1.2">{{ conversion_rate }}</div>
           <div style="font-size:11px;color:#888;margin-top:4px">{{ text_conversion }}</div>
           <div style="font-size:11px;color:#888">{{ text_orders }}: {{ completed_orders }}</div>
         </div>
       </div>
       <div class="col-sm-2">
-        <div class="panel panel-default text-center" style="padding:12px">
+        <div class="dcx-panel text-center" style="padding:12px">
           <div style="font-size:24px;font-weight:700;line-height:1.2">{{ aov }}</div>
           <div style="font-size:11px;color:#888;margin-top:4px">{{ text_aov }}</div>
           <div style="font-size:11px;color:#888">{{ text_revenue }}: {{ revenue }}</div>
         </div>
       </div>
       <div class="col-sm-2">
-        <div class="panel panel-default text-center" style="padding:12px">
+        <div class="dcx-panel text-center" style="padding:12px">
           <div style="font-size:24px;font-weight:700;line-height:1.2">{{ repeat_rate }}</div>
           <div style="font-size:11px;color:#888;margin-top:4px">{{ text_repeat_rate }}</div>
           <div style="font-size:11px;color:#888">{{ text_repeat_customers }}: {{ repeat_customers }}/{{ total_customers }}</div>
         </div>
       </div>
       <div class="col-sm-2">
-        <div class="panel panel-default text-center" style="padding:12px">
+        <div class="dcx-panel text-center" style="padding:12px">
           <div style="font-size:24px;font-weight:700;line-height:1.2">{{ cancellation_rate }}</div>
           <div style="font-size:11px;color:#888;margin-top:4px">{{ text_cancellation_rate }}</div>
           <div style="font-size:11px;color:#888">{{ column_cancelled }}: {{ cancelled_orders }}/{{ total_orders }}</div>
         </div>
       </div>
       <div class="col-sm-4">
-        <div class="panel panel-default text-center" style="padding:12px">
+        <div class="dcx-panel text-center" style="padding:12px">
           <div style="font-size:24px;font-weight:700;line-height:1.2">{{ revenue }}</div>
           <div style="font-size:11px;color:#888;margin-top:4px">{{ text_revenue }}</div>
           <div style="font-size:11px;color:#888">{{ text_orders }}: {{ total_orders }}</div>
@@ -97,15 +99,15 @@
       </div>
     </div>
 
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <div class="panel-heading__icon"><i data-lucide="bar-chart-2" width="16" height="16"></i></div>
+    <div class="dcx-panel">
+      <div class="dcx-panel-head">
+        <div class="dcx-panel-head__icon"><i data-lucide="bar-chart-2" width="16" height="16"></i></div>
         <div>
-          <h3 class="panel-title">{{ heading_title }}</h3>
-          <div class="panel-heading__subtitle">{{ text_report_subtitle }}</div>
+          <h3 class="dcx-panel-title">{{ heading_title }}</h3>
+          <div class="dcx-panel-head__subtitle">{{ text_report_subtitle }}</div>
         </div>
       </div>
-      <div class="panel-body">
+      <div class="dcx-panel-body">
         <div class="table-responsive">
           <table class="table table-bordered">
             <thead>
@@ -149,15 +151,15 @@
 
     <div class="row" style="margin-bottom:16px">
       <div class="col-sm-6">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <div class="panel-heading__icon"><i data-lucide="calendar" width="16" height="16"></i></div>
+        <div class="dcx-panel">
+          <div class="dcx-panel-head">
+            <div class="dcx-panel-head__icon"><i data-lucide="calendar" width="16" height="16"></i></div>
             <div>
-              <h3 class="panel-title">{{ text_orders_by_day }}</h3>
-              <div class="panel-heading__subtitle">{{ text_orders_by_day_subtitle }}</div>
+              <h3 class="dcx-panel-title">{{ text_orders_by_day }}</h3>
+              <div class="dcx-panel-head__subtitle">{{ text_orders_by_day_subtitle }}</div>
             </div>
           </div>
-          <div class="panel-body">
+          <div class="dcx-panel-body">
             <div class="table-responsive">
               <table class="table table-bordered">
                 <thead>
@@ -180,15 +182,15 @@
         </div>
       </div>
       <div class="col-sm-6">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <div class="panel-heading__icon"><i data-lucide="clock" width="16" height="16"></i></div>
+        <div class="dcx-panel">
+          <div class="dcx-panel-head">
+            <div class="dcx-panel-head__icon"><i data-lucide="clock" width="16" height="16"></i></div>
             <div>
-              <h3 class="panel-title">{{ text_orders_by_hour }}</h3>
-              <div class="panel-heading__subtitle">{{ text_orders_by_hour_subtitle }}</div>
+              <h3 class="dcx-panel-title">{{ text_orders_by_hour }}</h3>
+              <div class="dcx-panel-head__subtitle">{{ text_orders_by_hour_subtitle }}</div>
             </div>
           </div>
-          <div class="panel-body">
+          <div class="dcx-panel-body">
             <div class="table-responsive" style="max-height:400px;overflow-y:auto">
               <table class="table table-bordered table-condensed">
                 <thead>
@@ -212,15 +214,15 @@
       </div>
     </div>
 
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <div class="panel-heading__icon"><i data-lucide="package" width="16" height="16"></i></div>
+    <div class="dcx-panel">
+      <div class="dcx-panel-head">
+        <div class="dcx-panel-head__icon"><i data-lucide="package" width="16" height="16"></i></div>
         <div>
-          <h3 class="panel-title">{{ text_top_products }}</h3>
-          <div class="panel-heading__subtitle">{{ text_top_products_subtitle }}</div>
+          <h3 class="dcx-panel-title">{{ text_top_products }}</h3>
+          <div class="dcx-panel-head__subtitle">{{ text_top_products_subtitle }}</div>
         </div>
       </div>
-      <div class="panel-body">
+      <div class="dcx-panel-body">
         <div class="table-responsive">
           <table class="table table-bordered">
             <thead>
@@ -252,15 +254,15 @@
       </div>
     </div>
 
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <div class="panel-heading__icon"><i data-lucide="folder-tree" width="16" height="16"></i></div>
+    <div class="dcx-panel">
+      <div class="dcx-panel-head">
+        <div class="dcx-panel-head__icon"><i data-lucide="folder-tree" width="16" height="16"></i></div>
         <div>
-          <h3 class="panel-title">{{ text_revenue_by_category }}</h3>
-          <div class="panel-heading__subtitle">{{ text_revenue_by_category_subtitle }}</div>
+          <h3 class="dcx-panel-title">{{ text_revenue_by_category }}</h3>
+          <div class="dcx-panel-head__subtitle">{{ text_revenue_by_category_subtitle }}</div>
         </div>
       </div>
-      <div class="panel-body">
+      <div class="dcx-panel-body">
         <div class="table-responsive">
           <table class="table table-bordered">
             <thead>

@@ -293,6 +293,10 @@ class ControllerCustomerCustomField extends Controller {
 		    ? $this->language->get('text_add_custom_field_subtitle')
 		    : $this->language->get('text_edit_custom_field_subtitle');
 
+		$data['text_custom_field_card'] = $this->language->get('text_custom_field_card');
+		$data['text_values_card'] = $this->language->get('text_values_card');
+		$data['text_settings_card'] = $this->language->get('text_settings_card');
+
 		if (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];
 		} else {
@@ -362,6 +366,10 @@ class ControllerCustomerCustomField extends Controller {
 		} else {
 			$data['custom_field_description'] = array();
 		}
+
+		$data['custom_field_name'] = !empty($data['custom_field_description'][$this->config->get('config_language_id')]['name'])
+		    ? $data['custom_field_description'][$this->config->get('config_language_id')]['name']
+		    : $this->language->get('text_form');
 
 		if (isset($this->request->post['location'])) {
 			$data['location'] = $this->request->post['location'];

@@ -70,14 +70,14 @@ class ControllerEventDockercartAboutTab extends Controller {
 
 		if ($is_dcx) {
 			return sprintf(
-				'<li><a href="#dc-about-pane" class="js-dc-about-tab" data-tab="dc-about-pane" data-title="%s" data-subtitle="%s" data-icon="fa-info-circle"><i class="fa fa-info-circle"></i> %s</a></li>',
+				'<li><a href="#dc-about-pane" class="js-dc-about-tab" data-tab="dc-about-pane" data-title="%s" data-subtitle="%s" data-icon="info"><i data-lucide="info" width="14" height="14"></i> %s</a></li>',
 				$tab_label,
 				$subtitle,
 				$tab_label
 			);
 		}
 
-		return '<li><a href="#dc-about-pane" data-toggle="tab"><i class="fa fa-info-circle"></i> ' . $tab_label . '</a></li>';
+		return '<li><a href="#dc-about-pane" data-toggle="tab"><i data-lucide="info" width="14" height="14"></i> ' . $tab_label . '</a></li>';
 	}
 
 	private function buildTabPane(array $meta, ?array $license, string $module_code): string {
@@ -158,7 +158,7 @@ class ControllerEventDockercartAboutTab extends Controller {
 		$full_key_attr = htmlspecialchars((string)$license['license_key'], ENT_QUOTES, 'UTF-8');
 
 		$html = '<table class="table table-bordered dcx-table">';
-		$html .= '<tr><td style="width:200px;"><strong>' . $text_key . '</strong></td><td><code class="dc-license-key" style="cursor:pointer;" data-full-key="' . $full_key_attr . '">' . $key_masked . '</code> <i class="fa fa-pencil dc-license-edit" style="cursor:pointer;margin-left:4px;" data-full-key="' . $full_key_attr . '"></i></td></tr>';
+		$html .= '<tr><td style="width:200px;"><strong>' . $text_key . '</strong></td><td><code class="dc-license-key" style="cursor:pointer;" data-full-key="' . $full_key_attr . '">' . $key_masked . '</code> <i data-lucide="pencil" width="14" height="14" class="dc-license-edit" style="cursor:pointer;margin-left:4px;" data-full-key="' . $full_key_attr . '"></i></td></tr>';
 		$html .= '<tr><td><strong>' . htmlspecialchars((string)$this->language->get('text_status'), ENT_QUOTES, 'UTF-8') . '</strong></td><td><span class="label label-' . $status_class . '">' . $status_human . '</span>' . $is_test . '</td></tr>';
 		$html .= '<tr><td><strong>' . $text_domain . '</strong></td><td>' . $domain . '</td></tr>';
 		$html .= '<tr><td><strong>' . $text_expires . '</strong></td><td>' . $expires . '</td></tr>';
@@ -267,8 +267,9 @@ class ControllerEventDockercartAboutTab extends Controller {
 	if (\$head.length) {
 		\$head.find('.dcx-panel-title').text(\$t.data('title') || 'About');
 		\$head.find('.dcx-panel-subtitle').text(\$t.data('subtitle') || '');
-		var icon = String(\$t.data('icon') || 'fa-info-circle').replace(/[^a-z0-9\\-]/gi, '');
-		\$head.find('.dcx-panel-head__icon i').attr('class', 'fa ' + icon);
+		var icon = String(\$t.data('icon') || 'info').replace(/[^a-z0-9\\-]/gi, '');
+		\$head.find('.dcx-panel-head__icon i').attr('data-lucide', icon);
+		if (window.lucide) lucide.createIcons({ nodes: [\$head.find('.dcx-panel-head__icon')[0]] });
 	}
 });
 

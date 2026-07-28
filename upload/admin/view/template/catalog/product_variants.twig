@@ -1,7 +1,7 @@
 <div id="dc-variant-axes-section" style="display:none;margin-bottom:20px"></div>
 <div id="dc-variant-matrix-section" style="display:none"></div>
 <div id="dc-variant-container">
-	<div class="text-center"><i class="fa fa-spinner fa-spin fa-2x"></i></div>
+	<div class="text-center"><span class="dc-spinner dc-spinner--lg"></span></div>
 </div>
 <div id="dc-variant-toasts"></div>
 
@@ -20,9 +20,10 @@ function getDcProductId() {
 function showToast(msg, type, dur) {
 	var $container = $('#dc-variant-toasts');
 	var cls = type === 'error' ? 'dc-toast-error' : 'dc-toast-success';
-	var icon = type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle';
-	var $toast = $('<div class="dc-toast ' + cls + '"><i class="fa ' + icon + '"></i> ' + msg + '</div>');
+	var icon = type === 'error' ? 'alert-circle' : 'check-circle';
+	var $toast = $('<div class="dc-toast ' + cls + '"><i data-lucide="' + icon + '"></i> ' + msg + '</div>');
 	$container.append($toast);
+	lucide.createIcons({ nodes: [$toast[0]] });
 	$toast.hide().fadeIn(200);
 	if (type !== 'error' || dur) {
 		setTimeout(function() {
@@ -54,7 +55,7 @@ function loadVariantMatrix() {
 		url: 'index.php?route=catalog/product_configurable/getMatrix&user_token={{ user_token }}&product_id=' + productId,
 		dataType: 'json',
 		beforeSend: function() {
-			container.html('<div class="text-center"><i class="fa fa-spinner fa-spin fa-2x"></i></div>');
+			container.html('<div class="text-center"><span class="dc-spinner dc-spinner--lg"></span></div>');
 		},
 		success: function(json) {
 			container.html('');
@@ -108,7 +109,7 @@ function renderAxesSelector(productId, json) {
 
 	for (var i = 0; i < axes.length; i++) {
 		html += '<div class="dc-axe-item" style="display:inline-block;margin-right:8px;margin-bottom:4px;padding:4px 8px;background:#f0f0f0;border-radius:3px" data-option-id="' + axes[i].option_id + '">';
-		html += '<i class="fa fa-arrows"></i> ' + axes[i].name;
+		html += '<i data-lucide="grip-vertical" width="14" height="14"></i> ' + axes[i].name;
 		html += ' <span class="text-muted">(' + axes[i].type + ')</span>';
 		html += ' <button type="button" class="close" onclick="removeAxe(this, ' + productId + ', ' + axes[i].option_id + ')" style="font-size:16px;line-height:1">&times;</button>';
 		html += '</div>';
@@ -241,8 +242,8 @@ function renderVariantMatrix(productId, json) {
 	var html = '<h4>{{ text_variants|e("js") }} <small id="dc-variant-count">(' + variants.length + ')</small></h4>';
 	html += '<div class="row" style="margin-bottom:12px">';
 	html += '<div class="col-sm-12">';
-	html += '<button type="button" class="btn btn-primary btn-sm" onclick="addVariantRow(' + productId + ')"><i class="fa fa-plus"></i> {{ button_add_variant|e("js") }}</button>';
-	html += ' <button type="button" class="btn btn-warning btn-sm" onclick="generateVariants(' + productId + ')" title="{{ help_generate|e("js") }}"><i class="fa fa-magic"></i> {{ button_generate|e("js") }}</button>';
+	html += '<button type="button" class="btn btn-primary btn-sm" onclick="addVariantRow(' + productId + ')"><i data-lucide="plus"></i> {{ button_add_variant|e("js") }}</button>';
+	html += ' <button type="button" class="btn btn-warning btn-sm" onclick="generateVariants(' + productId + ')" title="{{ help_generate|e("js") }}"><i data-lucide="wand-2"></i> {{ button_generate|e("js") }}</button>';
 	html += '</div></div>';
 	html += '<div class="dc-variant-scroll-wrapper">';
 	html += '<table class="table table-bordered table-hover dc-variant-table" id="dc-variant-table">';
@@ -273,6 +274,7 @@ function renderVariantMatrix(productId, json) {
 	html += '</div>';
 
 	section.html(html);
+	lucide.createIcons();
 }
 
 function buildVariantRow(productId, variant, axes, defaultVariantId) {
@@ -308,7 +310,7 @@ function buildVariantRow(productId, variant, axes, defaultVariantId) {
 
 	var html = '<tr id="dc-variant-row-' + rowIdx + '" class="' + rowClasses + '" data-variant-id="' + variantId + '" data-row-idx="' + rowIdx + '">';
 
-	html += '<td class="dc-col-sku"><div style="display:flex;gap:4px;align-items:center"><input type="text" class="form-control input-sm dc-variant-sku" value="' + (variant.sku || '') + '" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:90px"/><button type="button" class="btn ' + artBtnClass + ' btn-xs dc-articles-toggle" onclick="toggleVariantArticles(' + rowIdx + ')" title="{{ entry_variant_articles|e("js") }}"><i class="fa fa-barcode"></i></button></div></td>';
+	html += '<td class="dc-col-sku"><div style="display:flex;gap:4px;align-items:center"><input type="text" class="form-control input-sm dc-variant-sku" value="' + (variant.sku || '') + '" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:90px"/><button type="button" class="btn ' + artBtnClass + ' btn-xs dc-articles-toggle" onclick="toggleVariantArticles(' + rowIdx + ')" title="{{ entry_variant_articles|e("js") }}"><i data-lucide="scan-line"></i></button></div></td>';
 
 	for (var a = 0; a < axes.length; a++) {
 		var axeOptionId = axes[a].option_id;
@@ -325,7 +327,7 @@ function buildVariantRow(productId, variant, axes, defaultVariantId) {
 		html += '</select></td>';
 	}
 
-	html += '<td><div style="display:flex;gap:4px;align-items:center"><input type="number" step="0.0001" class="form-control input-sm dc-variant-price" value="' + (variant.price || '0') + '" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:80px"/><button type="button" class="btn ' + cgBtnClass + ' btn-xs dc-cg-toggle" onclick="toggleVariantCgPrices(' + rowIdx + ')" title="{{ entry_cg_prices|e("js") }}"><i class="fa fa-users"></i></button><button type="button" class="btn ' + specialBtnClass + ' btn-xs dc-special-toggle" onclick="toggleVariantSpecials(' + rowIdx + ')" title="{{ entry_special|e("js") }}"><i class="fa fa-star"></i></button></div></td>';
+	html += '<td><div style="display:flex;gap:4px;align-items:center"><input type="number" step="0.0001" class="form-control input-sm dc-variant-price" value="' + (variant.price || '0') + '" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:80px"/><button type="button" class="btn ' + cgBtnClass + ' btn-xs dc-cg-toggle" onclick="toggleVariantCgPrices(' + rowIdx + ')" title="{{ entry_cg_prices|e("js") }}"><i data-lucide="users"></i></button><button type="button" class="btn ' + specialBtnClass + ' btn-xs dc-special-toggle" onclick="toggleVariantSpecials(' + rowIdx + ')" title="{{ entry_special|e("js") }}"><i data-lucide="star"></i></button></div></td>';
 	html += '<td><input type="number" step="0.01" class="form-control input-sm dc-variant-qty" value="' + (variant.quantity || '0') + '" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:70px"/></td>';
 	html += '<td><input type="number" step="0.001" class="form-control input-sm dc-variant-weight" value="' + (variant.weight || '') + '" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:70px"/></td>';
 	html += '<td>';
@@ -333,14 +335,14 @@ function buildVariantRow(productId, variant, axes, defaultVariantId) {
 	html += '<a href="" id="dc-variant-thumb-' + rowIdx + '" style="margin:0;display:block" onclick="openVariantImagePicker(' + rowIdx + '); return false">';
 	html += '<img src="' + thumb + '" data-placeholder="{{ placeholder|e("js") }}" style="width:50px;height:50px;object-fit:cover;border-radius:4px;border:1px solid #ddd"/>';
 	html += '</a>';
-	html += '<button type="button" class="dc-img-remove" onclick="clearVariantImage(' + rowIdx + ')" title="{{ button_remove|e("js") }}"><i class="fa fa-times"></i></button>';
+	html += '<button type="button" class="dc-img-remove" onclick="clearVariantImage(' + rowIdx + ')" title="{{ button_remove|e("js") }}"><i data-lucide="x"></i></button>';
 	html += '<input type="hidden" class="dc-variant-image" id="dc-variant-input-' + rowIdx + '" value="' + image + '"/>';
 	html += '</div>';
 	html += '</td>';
-	html += '<td class="text-center"><button type="button" class="dc-star-btn' + (isDefault ? ' dc-star-active' : '') + '" onclick="onVariantStarClick(' + rowIdx + ')" title="{{ column_default|e("js") }}"><i class="fa ' + (isDefault ? 'fa-star' : 'fa-star-o') + '"></i></button></td>';
+	html += '<td class="text-center"><button type="button" class="dc-star-btn' + (isDefault ? ' dc-star-active' : '') + '" onclick="onVariantStarClick(' + rowIdx + ')" title="{{ column_default|e("js") }}"><i data-lucide="star"></i></button></td>';
 	html += '<td class="text-center"><label class="dc-toggle"><input type="checkbox" class="dc-variant-status"' + (isActive ? ' checked="checked"' : '') + ' onchange="onVariantStatusChange(' + rowIdx + ')"/><span class="dc-toggle-slider"></span></label></td>';
 	html += '<td class="text-center">';
-	html += '<button type="button" class="btn btn-danger btn-sm" onclick="deleteVariant(' + rowIdx + ')" title="{{ column_action|e("js") }}"><i class="fa fa-trash"></i></button>';
+	html += '<button type="button" class="btn btn-danger btn-sm" onclick="deleteVariant(' + rowIdx + ')" title="{{ column_action|e("js") }}"><i data-lucide="trash-2"></i></button>';
 	html += '</td>';
 	html += '</tr>';
 
@@ -349,16 +351,16 @@ function buildVariantRow(productId, variant, axes, defaultVariantId) {
 	html += '<div class="dc-cg-inner">';
 
 	html += '<div class="dc-subrow-tabs">';
-	html += '<button type="button" class="dc-subrow-tab' + (articlesVisible ? ' dc-subrow-tab--active' : '') + '" data-tab="articles" data-row="' + rowIdx + '"><i class="fa fa-barcode"></i> {{ entry_variant_articles|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
-	html += '<button type="button" class="dc-subrow-tab' + (cgVisible ? ' dc-subrow-tab--active' : '') + '" data-tab="cg" data-row="' + rowIdx + '"><i class="fa fa-users"></i> {{ entry_cg_prices|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
-	html += '<button type="button" class="dc-subrow-tab' + (specialsVisible ? ' dc-subrow-tab--active' : '') + '" data-tab="specials" data-row="' + rowIdx + '"><i class="fa fa-star"></i> {{ entry_special|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
+	html += '<button type="button" class="dc-subrow-tab' + (articlesVisible ? ' dc-subrow-tab--active' : '') + '" data-tab="articles" data-row="' + rowIdx + '"><i data-lucide="scan-line"></i> {{ entry_variant_articles|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
+	html += '<button type="button" class="dc-subrow-tab' + (cgVisible ? ' dc-subrow-tab--active' : '') + '" data-tab="cg" data-row="' + rowIdx + '"><i data-lucide="users"></i> {{ entry_cg_prices|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
+	html += '<button type="button" class="dc-subrow-tab' + (specialsVisible ? ' dc-subrow-tab--active' : '') + '" data-tab="specials" data-row="' + rowIdx + '"><i data-lucide="star"></i> {{ entry_special|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
 	html += '</div>';
 
 	html += '<div class="dc-subrow-panel' + (articlesVisible ? ' dc-subrow-panel--active' : '') + '" id="dc-panel-articles-' + rowIdx + '"' + (articlesVisible ? '' : ' style="display:none"') + '>';
 	html += '<div class="dc-subrow-fields">';
-	html += '<label><span>{{ entry_upc|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-upc" value="' + (variant.upc || '') + '" placeholder="UPC" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
-	html += '<label><span>{{ entry_ean|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-ean" value="' + (variant.ean || '') + '" placeholder="EAN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
-	html += '<label><span>{{ entry_mpn|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-mpn" value="' + (variant.mpn || '') + '" placeholder="MPN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
+	html += '<label><span><i data-lucide="scan-line" width="12" height="12"></i> {{ entry_upc|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-upc" value="' + (variant.upc || '') + '" placeholder="UPC" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
+	html += '<label><span><i data-lucide="hash" width="12" height="12"></i> {{ entry_ean|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-ean" value="' + (variant.ean || '') + '" placeholder="EAN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
+	html += '<label><span><i data-lucide="tag" width="12" height="12"></i> {{ entry_mpn|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-mpn" value="' + (variant.mpn || '') + '" placeholder="MPN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
 	html += '</div>';
 	html += '</div>';
 
@@ -380,13 +382,13 @@ function buildVariantRow(productId, variant, axes, defaultVariantId) {
 			{% endfor %}
 			html += '</select>';
 			html += '<input type="number" step="0.0001" class="form-control input-sm dc-cg-price" value="' + (cg.price || '') + '" placeholder="{{ entry_price|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')"/>';
-			html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-cg-row\').remove();updateSubrowBadges(' + rowIdx + ');scheduleAutoSave(' + rowIdx + ')"><i class="fa fa-minus-circle"></i></button>';
+			html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-cg-row\').remove();updateSubrowBadges(' + rowIdx + ');scheduleAutoSave(' + rowIdx + ')"><i data-lucide="minus-circle"></i></button>';
 			html += '</div>';
 		}
 	}
 
 	html += '</div>';
-	html += '<button type="button" class="btn btn-primary btn-xs dc-cg-add-btn" onclick="addVariantCgPrice(' + rowIdx + ')"><i class="fa fa-plus-circle"></i> {{ button_cg_add|e("js") }}</button>';
+	html += '<button type="button" class="btn btn-primary btn-xs dc-cg-add-btn" onclick="addVariantCgPrice(' + rowIdx + ')"><i data-lucide="plus-circle"></i> {{ button_cg_add|e("js") }}</button>';
 	html += '</div>';
 
 	html += '<div class="dc-subrow-panel' + (specialsVisible ? ' dc-subrow-panel--active' : '') + '" id="dc-panel-specials-' + rowIdx + '"' + (specialsVisible ? '' : ' style="display:none"') + '>';
@@ -415,13 +417,13 @@ function buildVariantRow(productId, variant, axes, defaultVariantId) {
 			html += '<input type="date" class="form-control input-sm dc-special-date-start" value="' + (sp.date_start && sp.date_start != '0000-00-00' ? sp.date_start : '') + '" placeholder="{{ entry_date_start|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:120px"/>';
 			html += '<input type="date" class="form-control input-sm dc-special-date-end" value="' + (sp.date_end && sp.date_end != '0000-00-00' ? sp.date_end : '') + '" placeholder="{{ entry_date_end|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:120px"/>';
 			html += '<input type="checkbox" class="dc-special-auto-renew"' + (sp.auto_renew ? ' checked="checked"' : '') + ' onchange="scheduleAutoSave(' + rowIdx + ')"/>';
-			html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-special-row\').remove();updateSubrowBadges(' + rowIdx + ');scheduleAutoSave(' + rowIdx + ')"><i class="fa fa-minus-circle"></i></button>';
+			html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-special-row\').remove();updateSubrowBadges(' + rowIdx + ');scheduleAutoSave(' + rowIdx + ')"><i data-lucide="minus-circle"></i></button>';
 			html += '</div>';
 		}
 	}
 
 	html += '</div>';
-	html += '<button type="button" class="btn btn-primary btn-xs dc-special-add-btn" onclick="addVariantSpecialRow(' + rowIdx + ')"><i class="fa fa-plus-circle"></i> {{ button_special_add|e("js") }}</button>';
+	html += '<button type="button" class="btn btn-primary btn-xs dc-special-add-btn" onclick="addVariantSpecialRow(' + rowIdx + ')"><i data-lucide="plus-circle"></i> {{ button_special_add|e("js") }}</button>';
 	html += '</div>';
 
 	html += '</div></td></tr>';
@@ -436,13 +438,13 @@ function addVariantRow(productId) {
 	var rowIdx = ++dcVariantRowIdx;
 	var html = '<tr id="dc-variant-row-' + rowIdx + '" class="dc-state-dirty dc-new" data-variant-id="0" data-row-idx="' + rowIdx + '">';
 
-	html += '<td class="dc-col-sku"><div style="display:flex;gap:4px;align-items:center"><input type="text" class="form-control input-sm dc-variant-sku" value="" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:90px"/><button type="button" class="btn btn-default btn-xs dc-articles-toggle" onclick="toggleVariantArticles(' + rowIdx + ')" title="{{ entry_variant_articles|e("js") }}"><i class="fa fa-barcode"></i></button></div></td>';
+	html += '<td class="dc-col-sku"><div style="display:flex;gap:4px;align-items:center"><input type="text" class="form-control input-sm dc-variant-sku" value="" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:90px"/><button type="button" class="btn btn-default btn-xs dc-articles-toggle" onclick="toggleVariantArticles(' + rowIdx + ')" title="{{ entry_variant_articles|e("js") }}"><i data-lucide="scan-line"></i></button></div></td>';
 
 	for (var a = 0; a < axes.length; a++) {
 		html += '<td><select class="form-control input-sm dc-variant-value" data-option-id="' + axes[a].option_id + '" onchange="onVariantAxisChange(' + rowIdx + ')"><option value="">{{ text_select|e("js") }}</option></select></td>';
 	}
 
-	html += '<td><div style="display:flex;gap:4px;align-items:center"><input type="number" step="0.0001" class="form-control input-sm dc-variant-price" value="0" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:80px"/><button type="button" class="btn btn-default btn-xs dc-cg-toggle" onclick="toggleVariantCgPrices(' + rowIdx + ')" title="{{ entry_cg_prices|e("js") }}"><i class="fa fa-users"></i></button></div></td>';
+	html += '<td><div style="display:flex;gap:4px;align-items:center"><input type="number" step="0.0001" class="form-control input-sm dc-variant-price" value="0" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:80px"/><button type="button" class="btn btn-default btn-xs dc-cg-toggle" onclick="toggleVariantCgPrices(' + rowIdx + ')" title="{{ entry_cg_prices|e("js") }}"><i data-lucide="users"></i></button></div></td>';
 	html += '<td><input type="number" step="0.01" class="form-control input-sm dc-variant-qty" value="0" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:70px"/></td>';
 	html += '<td><input type="number" step="0.001" class="form-control input-sm dc-variant-weight" value="" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:70px"/></td>';
 	html += '<td>';
@@ -450,14 +452,14 @@ function addVariantRow(productId) {
 	html += '<a href="" id="dc-variant-thumb-' + rowIdx + '" style="margin:0;display:block" onclick="openVariantImagePicker(' + rowIdx + '); return false">';
 	html += '<img src="{{ placeholder|e("js") }}" data-placeholder="{{ placeholder|e("js") }}" style="width:50px;height:50px;object-fit:cover;border-radius:4px;border:1px solid #ddd"/>';
 	html += '</a>';
-	html += '<button type="button" class="dc-img-remove" onclick="clearVariantImage(' + rowIdx + ')" title="{{ button_remove|e("js") }}"><i class="fa fa-times"></i></button>';
+	html += '<button type="button" class="dc-img-remove" onclick="clearVariantImage(' + rowIdx + ')" title="{{ button_remove|e("js") }}"><i data-lucide="x"></i></button>';
 	html += '<input type="hidden" class="dc-variant-image" id="dc-variant-input-' + rowIdx + '" value=""/>';
 	html += '</div>';
 	html += '</td>';
-	html += '<td class="text-center"><button type="button" class="dc-star-btn" onclick="onVariantStarClick(' + rowIdx + ')" title="{{ column_default|e("js") }}"><i class="fa fa-star-o"></i></button></td>';
+	html += '<td class="text-center"><button type="button" class="dc-star-btn" onclick="onVariantStarClick(' + rowIdx + ')" title="{{ column_default|e("js") }}"><i data-lucide="star"></i></button></td>';
 	html += '<td class="text-center"><label class="dc-toggle"><input type="checkbox" class="dc-variant-status" checked="checked" onchange="onVariantStatusChange(' + rowIdx + ')"/><span class="dc-toggle-slider"></span></label></td>';
 	html += '<td class="text-center">';
-	html += '<button type="button" class="btn btn-danger btn-sm" onclick="deleteVariant(' + rowIdx + ')" title="{{ column_action|e("js") }}"><i class="fa fa-trash"></i></button>';
+	html += '<button type="button" class="btn btn-danger btn-sm" onclick="deleteVariant(' + rowIdx + ')" title="{{ column_action|e("js") }}"><i data-lucide="trash-2"></i></button>';
 	html += '</td>';
 	html += '</tr>';
 
@@ -466,16 +468,16 @@ function addVariantRow(productId) {
 	html += '<div class="dc-cg-inner">';
 
 	html += '<div class="dc-subrow-tabs">';
-	html += '<button type="button" class="dc-subrow-tab dc-subrow-tab--active" data-tab="articles" data-row="' + rowIdx + '"><i class="fa fa-barcode"></i> {{ entry_variant_articles|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
-	html += '<button type="button" class="dc-subrow-tab" data-tab="cg" data-row="' + rowIdx + '"><i class="fa fa-users"></i> {{ entry_cg_prices|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
-	html += '<button type="button" class="dc-subrow-tab" data-tab="specials" data-row="' + rowIdx + '"><i class="fa fa-star"></i> {{ entry_special|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
+	html += '<button type="button" class="dc-subrow-tab dc-subrow-tab--active" data-tab="articles" data-row="' + rowIdx + '"><i data-lucide="scan-line"></i> {{ entry_variant_articles|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
+	html += '<button type="button" class="dc-subrow-tab" data-tab="cg" data-row="' + rowIdx + '"><i data-lucide="users"></i> {{ entry_cg_prices|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
+	html += '<button type="button" class="dc-subrow-tab" data-tab="specials" data-row="' + rowIdx + '"><i data-lucide="star"></i> {{ entry_special|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
 	html += '</div>';
 
 	html += '<div class="dc-subrow-panel dc-subrow-panel--active" id="dc-panel-articles-' + rowIdx + '">';
 	html += '<div class="dc-subrow-fields">';
-	html += '<label><span>{{ entry_upc|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-upc" value="" placeholder="UPC" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
-	html += '<label><span>{{ entry_ean|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-ean" value="" placeholder="EAN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
-	html += '<label><span>{{ entry_mpn|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-mpn" value="" placeholder="MPN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
+	html += '<label><span><i data-lucide="scan-line" width="12" height="12"></i> {{ entry_upc|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-upc" value="" placeholder="UPC" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
+	html += '<label><span><i data-lucide="hash" width="12" height="12"></i> {{ entry_ean|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-ean" value="" placeholder="EAN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
+	html += '<label><span><i data-lucide="tag" width="12" height="12"></i> {{ entry_mpn|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-mpn" value="" placeholder="MPN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
 	html += '</div>';
 	html += '</div>';
 
@@ -486,7 +488,7 @@ function addVariantRow(productId) {
 	html += '<span class="dc-cg-header-action"></span>';
 	html += '</div>';
 	html += '<div class="dc-cg-prices" id="dc-cg-prices-' + rowIdx + '"></div>';
-	html += '<button type="button" class="btn btn-primary btn-xs dc-cg-add-btn" onclick="addVariantCgPrice(' + rowIdx + ')"><i class="fa fa-plus-circle"></i> {{ button_cg_add|e("js") }}</button>';
+	html += '<button type="button" class="btn btn-primary btn-xs dc-cg-add-btn" onclick="addVariantCgPrice(' + rowIdx + ')"><i data-lucide="plus-circle"></i> {{ button_cg_add|e("js") }}</button>';
 	html += '</div>';
 
 	html += '<div class="dc-subrow-panel" id="dc-panel-specials-' + rowIdx + '" style="display:none">';
@@ -500,19 +502,20 @@ function addVariantRow(productId) {
 	html += '<span class="dc-special-header-action"></span>';
 	html += '</div>';
 	html += '<div class="dc-special-prices" id="dc-special-prices-' + rowIdx + '"></div>';
-	html += '<button type="button" class="btn btn-primary btn-xs dc-special-add-btn" onclick="addVariantSpecialRow(' + rowIdx + ')"><i class="fa fa-plus-circle"></i> {{ button_special_add|e("js") }}</button>';
+	html += '<button type="button" class="btn btn-primary btn-xs dc-special-add-btn" onclick="addVariantSpecialRow(' + rowIdx + ')"><i data-lucide="plus-circle"></i> {{ button_special_add|e("js") }}</button>';
 	html += '</div>';
 
 	html += '</div></td></tr>';
 
 	$('#dc-variant-tbody').prepend(html);
+	lucide.createIcons();
 	loadAxesOptionValues(rowIdx, productId);
 	updateRowCount();
 }
 
 function loadAxesOptionValues(rowIdx, productId) {
 	dcAxesLoading[rowIdx] = true;
-	$('#dc-variant-row-' + rowIdx + ' .dc-variant-value').first().after('<span class="dc-loading-indicator"><i class="fa fa-spinner fa-spin"></i></span>');
+	$('#dc-variant-row-' + rowIdx + ' .dc-variant-value').first().after('<span class="dc-loading-indicator"><span class="dc-spinner"></span></span>');
 
 	$.ajax({
 		url: 'index.php?route=catalog/product_configurable/getMatrix&user_token={{ user_token }}&product_id=' + productId,
@@ -614,7 +617,7 @@ function addVariantCgPrice(rowIdx) {
 	{% endfor %}
 	html += '</select>';
 	html += '<input type="number" step="0.0001" class="form-control input-sm dc-cg-price" placeholder="{{ entry_price|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')"/>';
-	html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-cg-row\').remove();updateSubrowBadges(' + rowIdx + ');scheduleAutoSave(' + rowIdx + ')"><i class="fa fa-minus-circle"></i></button>';
+	html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-cg-row\').remove();updateSubrowBadges(' + rowIdx + ');scheduleAutoSave(' + rowIdx + ')"><i data-lucide="minus-circle"></i></button>';
 	html += '</div>';
 	$('#dc-cg-prices-' + rowIdx).append(html);
 	updateSubrowBadges(rowIdx);
@@ -632,7 +635,7 @@ function addVariantSpecialRow(rowIdx) {
 	html += '<input type="date" class="form-control input-sm dc-special-date-start" placeholder="{{ entry_date_start|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:120px"/>';
 	html += '<input type="date" class="form-control input-sm dc-special-date-end" placeholder="{{ entry_date_end|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:120px"/>';
 	html += '<input type="checkbox" class="dc-special-auto-renew" onchange="scheduleAutoSave(' + rowIdx + ')"/>';
-	html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-special-row\').remove();updateSubrowBadges(' + rowIdx + ');scheduleAutoSave(' + rowIdx + ')"><i class="fa fa-minus-circle"></i></button>';
+	html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-special-row\').remove();updateSubrowBadges(' + rowIdx + ');scheduleAutoSave(' + rowIdx + ')"><i data-lucide="minus-circle"></i></button>';
 	html += '</div>';
 	$('#dc-special-prices-' + rowIdx).append(html);
 	updateSubrowBadges(rowIdx);
@@ -823,8 +826,8 @@ function setDefaultVariant(rowIdx) {
 	var prevDefault = dcCurrentDefaultId;
 	dcCurrentDefaultId = vid;
 
-	$('.dc-star-btn').removeClass('dc-star-active').find('i').removeClass('fa-star').addClass('fa-star-o');
-	row.find('.dc-star-btn').addClass('dc-star-active').find('i').removeClass('fa-star-o').addClass('fa-star');
+	$('.dc-star-btn').removeClass('dc-star-active');
+	row.find('.dc-star-btn').addClass('dc-star-active');
 
 	$.ajax({
 		url: 'index.php?route=catalog/product_configurable/setDefault&user_token={{ user_token }}',
@@ -854,9 +857,9 @@ function rebuildDefaultStars() {
 		var $row = $btn.closest('tr');
 		var vid = parseInt($row.data('variant-id')) || 0;
 		if (vid == dcCurrentDefaultId) {
-			$btn.addClass('dc-star-active').find('i').removeClass('fa-star-o').addClass('fa-star');
+			$btn.addClass('dc-star-active');
 		} else {
-			$btn.removeClass('dc-star-active').find('i').removeClass('fa-star').addClass('fa-star-o');
+			$btn.removeClass('dc-star-active');
 		}
 	});
 }
@@ -1018,6 +1021,12 @@ $(window).on('beforeunload', function() {
 
 .dc-field-error { border-color: #dc3545 !important; box-shadow: 0 0 0 2px rgba(220,53,69,0.15); }
 
+.dc-star-btn.dc-star-active svg { fill: currentColor; }
+
+.dc-spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #adb5bd; border-top-color: #495057; border-radius: 50%; animation: dc-spin 0.6s linear infinite; vertical-align: middle; }
+.dc-spinner--lg { width: 32px; height: 32px; border-width: 3px; }
+@keyframes dc-spin { to { transform: rotate(360deg); } }
+
 .dc-loading-indicator { margin-left: 6px; color: #6c757d; font-size: 12px; }
 
 .dc-toggle { position: relative; display: inline-block; width: 38px; height: 22px; cursor: pointer; }
@@ -1043,7 +1052,8 @@ $(window).on('beforeunload', function() {
 .dc-subrow-tab { padding: 10px 16px; border: none; background: none; font-size: 12px; font-weight: 500; color: #6c757d; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; display: flex; align-items: center; gap: 6px; position: relative; }
 .dc-subrow-tab:hover { color: #495057; background: #f8f9fa; }
 .dc-subrow-tab--active { color: #007bff; border-bottom-color: #007bff; font-weight: 600; }
-.dc-subrow-tab i { font-size: 12px; }
+.dc-subrow-tab i,
+.dc-subrow-tab svg { width: 12px; height: 12px; }
 .dc-subrow-tab__badge { background: #6c757d; color: #fff; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px; min-width: 16px; text-align: center; line-height: 1.3; }
 .dc-subrow-tab--active .dc-subrow-tab__badge { background: #007bff; }
 .dc-subrow-panel { padding: 16px; }
@@ -1054,7 +1064,7 @@ $(window).on('beforeunload', function() {
 
 .dc-subrow-fields { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
 .dc-subrow-fields label { display: flex; flex-direction: column; gap: 2px; font-size: 11px; font-weight: normal; color: #6c757d; margin: 0; }
-.dc-subrow-fields label span { font-weight: 600; }
+.dc-subrow-fields label span { font-weight: 600; display: flex; align-items: center; gap: 4px; }
 .dc-subrow-fields input { width: 120px; }
 
 .dc-cg-header { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; font-size: 11px; font-weight: 600; color: #6c757d; }
@@ -1067,9 +1077,14 @@ $(window).on('beforeunload', function() {
 .dc-cg-row select { width: 180px; flex-shrink: 0; }
 .dc-cg-row input { width: 110px; flex-shrink: 0; }
 .dc-cg-add-btn { margin-top: 4px; }
+.dc-articles-toggle { border-color: #ced4da; }
+.dc-articles-toggle svg { width: 12px; height: 12px; }
+.dc-articles-toggle.btn-primary { color: #fff; background-color: #007bff; border-color: #007bff; }
 .dc-cg-toggle { border-color: #ced4da; }
+.dc-cg-toggle svg { width: 12px; height: 12px; }
 .dc-cg-toggle.btn-primary { color: #fff; background-color: #007bff; border-color: #007bff; }
 .dc-special-toggle { border-color: #ced4da; }
+.dc-special-toggle svg { width: 12px; height: 12px; }
 .dc-special-toggle.btn-primary { color: #fff; background-color: #f0ad4e; border-color: #eea236; }
 .dc-special-header { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; font-size: 11px; font-weight: 600; color: #6c757d; }
 .dc-special-header-group { width: 140px; flex-shrink: 0; }
@@ -1083,4 +1098,11 @@ $(window).on('beforeunload', function() {
 .dc-special-row:last-of-type { margin-bottom: 0; }
 .dc-special-row select { width: 140px; flex-shrink: 0; }
 .dc-special-add-btn { margin-top: 4px; }
+
+.dc-variant-table .btn-sm i[data-lucide],
+.dc-variant-table .btn-sm svg { width: 14px; height: 14px; }
+.dc-variant-table .btn-xs i[data-lucide],
+.dc-variant-table .btn-xs svg { width: 12px; height: 12px; }
+#dc-variant-matrix-section > .row .btn i[data-lucide],
+#dc-variant-matrix-section > .row .btn svg { width: 14px; height: 14px; }
 </style>
