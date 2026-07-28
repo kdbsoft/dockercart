@@ -330,6 +330,10 @@ class ControllerExtensionModuleDockercartCheckout extends Controller
 	// Load countries for default country dropdown (model already loaded above)
 	$data["admin_countries"] = $this->model_localisation_country->getCountries();
 
+	$data["text_active"] = $this->language->get("text_active");
+	$data["text_inactive"] = $this->language->get("text_inactive");
+	$data["text_module_description"] = $this->language->get("text_module_description");
+
         $data["user_token"] = $this->session->data["user_token"];
 
         $data["header"] = $this->load->controller("common/header");
