@@ -1,311 +1,310 @@
 {{ header }}{{ column_left }}
 <div id="content">
-
   <div class="page-header">
     <div class="container-fluid">
-      <div class="pull-right">
-        <button type="submit" form="form-module" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
-        <button type="button" data-toggle="tooltip" title="{{ button_export }}" class="btn btn-default" onclick="location='{{ export }}';"><i class="fa fa-download"></i></button>
-        <button type="button" data-toggle="tooltip" title="{{ button_import }}" class="btn btn-default" onclick="$('#import-modal').modal('show');"><i class="fa fa-upload"></i></button>
-        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_back }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+      <div class="row">
+        <div class="col-sm-12 col-lg-offset-1 col-lg-7 col-xl-offset-1 col-xl-7">
+          <a href="{{ cancel }}" class="page-header__link">
+            <span class="page-header__back">
+              <i data-lucide="arrow-left" width="20" height="20"></i>
+            </span>
+            <span class="page-header__title">{{ heading_title }}</span>
+          </a>
+        </div>
+        <div class="col-sm-12 col-lg-3 col-xl-3" style="text-align:right;">
+          <button type="submit" form="form-module" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary btn--icon"><i data-lucide="save" width="16" height="16"></i></button>
+          <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_back }}" class="btn btn-default btn--icon"><i data-lucide="x" width="16" height="16"></i></a>
+        </div>
       </div>
-      <h1>{{ heading_title }}</h1>
-      <ul class="breadcrumb">
-        {% for breadcrumb in breadcrumbs %}
-          <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
-        {% endfor %}
-      </ul>
-    </div>
-  </div>
-
-  <div class="container-fluid">
-    {% if error_warning %}
-      <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
-        <button type="button" class="close" data-dismiss="alert">&times;</button>
-      </div>
-    {% endif %}
-
-    {% if warning %}
-      <div class="alert alert-warning alert-dismissible"><i class="fa fa-exclamation-triangle"></i> {{ warning }}
-        <button type="button" class="close" data-dismiss="alert">&times;</button>
-      </div>
-    {% endif %}
-
-    {% if success %}
-      <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
-        <button type="button" class="close" data-dismiss="alert">&times;</button>
-      </div>
-    {% endif %}
-
-    <div class="dc-ix-cards">
-      <div class="dc-ix-card">
-        <div class="dc-ix-card__k">{{ text_stats_total }}</div>
-        <div class="dc-ix-card__v">{{ stats_total }}</div>
-      </div>
-      <div class="dc-ix-card">
-        <div class="dc-ix-card__k">{{ text_stats_guest }}</div>
-        <div class="dc-ix-card__v">{{ stats_guest }}</div>
-      </div>
-      <div class="dc-ix-card">
-        <div class="dc-ix-card__k">{{ text_stats_customer }}</div>
-        <div class="dc-ix-card__v">{{ stats_customer }}</div>
-      </div>
-      <div class="dc-ix-card">
-        <div class="dc-ix-card__k">{{ text_csv_tools }}</div>
-        <div class="dc-ix-card__v">{{ text_csv_tools }}</div>
-      </div>
-    </div>
-
-    <ul class="nav nav-tabs dcx-profile-tabs" id="newsletter-tabs" role="tablist">
-      <li class="active"><a href="#newsletter-settings" class="js-newsletter-tab" data-tab="newsletter-settings" data-title="{{ text_module_settings }}" data-subtitle="{{ text_edit }}" data-icon="fa-sliders"><i class="fa fa-sliders"></i> {{ text_module_settings }}</a></li>
-      <li><a href="#newsletter-subscribers" class="js-newsletter-tab" data-tab="newsletter-subscribers" data-title="{{ text_subscribers }}" data-subtitle="{{ text_list }}" data-icon="fa-users"><i class="fa fa-users"></i> {{ text_subscribers }}</a></li>
-    </ul>
-
-    <div class="dcx-shell">
-      <div class="dcx-panel">
-        <div class="dcx-panel-head">
-          <div class="dcx-panel-head__icon"><i id="newsletter-tab-icon" class="fa fa-sliders"></i></div>
-          <div>
-            <h3 class="dcx-panel-title" id="newsletter-tab-title">{{ text_module_settings }}</h3>
-            <div class="dcx-panel-subtitle" id="newsletter-tab-subtitle">{{ text_edit }}</div>
+      {% if error_warning %}
+      <div class="row">
+        <div class="col-sm-12 col-lg-offset-1 col-lg-7 col-xl-offset-1 col-xl-7">
+          <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
         </div>
-
-        <div class="dcx-panel-body">
-          <div id="newsletter-settings" class="dcx-tab-pane active">
-            <form action="{{ action }}" method="post" id="form-module" class="form-horizontal dcx-form">
-              <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                <h4>{{ text_module_settings }}</h4>
-
-                <div class="form-group required">
-                  <label class="col-sm-2 control-label">{{ entry_name }}</label>
-                  <div class="col-sm-10">
-                    <ul class="nav nav-tabs" style="margin-bottom:10px;">
-                      {% for language in languages %}
-                      <li{% if loop.first %} class="active"{% endif %}><a href="#name-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
-                      {% endfor %}
-                    </ul>
-                    <div class="tab-content">
-                      {% for language in languages %}
-                      <div class="tab-pane{% if loop.first %} active{% endif %}" id="name-lang-{{ language.language_id }}">
-                        <input type="text" name="name_translation[{{ language.language_id }}]" value="{{ name_translation[language.language_id] }}" placeholder="{{ entry_name }}" class="form-control" />
-                      </div>
-                      {% endfor %}
-                    </div>
-                    {% if error_name %}
-                      <div class="text-danger">{{ error_name }}</div>
-                    {% endif %}
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
-                  <div class="col-sm-10">
-                    <select name="status" id="input-status" class="form-control">
-                      <option value="1" {% if status %}selected="selected"{% endif %}>{{ text_enabled }}</option>
-                      <option value="0" {% if not status %}selected="selected"{% endif %}>{{ text_disabled }}</option>
-                    </select>
-                  </div>
-                </div>
-
-                <h4>{{ text_multilingual_settings }}</h4>
-
-                <ul class="nav nav-tabs dcx-profile-tabs" id="language-tabs" role="tablist" style="margin-bottom: 15px;">
-                  {% for language in languages %}
-                    <li{% if loop.first %} class="active"{% endif %}><a href="#newsletter-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
-                  {% endfor %}
-                </ul>
-
-                <div class="tab-content">
-                  {% for language in languages %}
-                    <div class="tab-pane dcx-tab-pane{% if loop.first %} active{% endif %}" id="newsletter-lang-{{ language.language_id }}">
-                      <div class="form-group">
-                        <label class="col-sm-2 control-label" for="input-title-{{ language.language_id }}">{{ entry_title }}</label>
-                        <div class="col-sm-10">
-                          <input type="text" name="module_settings[{{ language.language_id }}][title]" value="{{ module_settings[language.language_id].title }}" placeholder="{{ entry_title }}" id="input-title-{{ language.language_id }}" class="form-control" />
-                        </div>
-                      </div>
-
-                      <div class="form-group">
-                        <label class="col-sm-2 control-label" for="input-subtitle-{{ language.language_id }}">{{ entry_subtitle }}</label>
-                        <div class="col-sm-10">
-                          <textarea name="module_settings[{{ language.language_id }}][subtitle]" rows="2" placeholder="{{ entry_subtitle }}" id="input-subtitle-{{ language.language_id }}" class="form-control">{{ module_settings[language.language_id].subtitle }}</textarea>
-                        </div>
-                      </div>
-
-                      <div class="form-group">
-                        <label class="col-sm-2 control-label" for="input-placeholder-{{ language.language_id }}">{{ entry_placeholder }}</label>
-                        <div class="col-sm-10">
-                          <input type="text" name="module_settings[{{ language.language_id }}][placeholder]" value="{{ module_settings[language.language_id].placeholder }}" placeholder="{{ entry_placeholder }}" id="input-placeholder-{{ language.language_id }}" class="form-control" />
-                        </div>
-                      </div>
-
-                      <div class="form-group">
-                        <label class="col-sm-2 control-label" for="input-button-text-{{ language.language_id }}">{{ entry_button_text }}</label>
-                        <div class="col-sm-10">
-                          <input type="text" name="module_settings[{{ language.language_id }}][button_text]" value="{{ module_settings[language.language_id].button_text }}" placeholder="{{ entry_button_text }}" id="input-button-text-{{ language.language_id }}" class="form-control" />
-                        </div>
-                      </div>
-
-                      <div class="form-group">
-                        <label class="col-sm-2 control-label" for="input-privacy-text-{{ language.language_id }}">{{ entry_privacy_text }}</label>
-                        <div class="col-sm-10">
-                          <textarea name="module_settings[{{ language.language_id }}][privacy_text]" rows="2" placeholder="{{ entry_privacy_text }}" id="input-privacy-text-{{ language.language_id }}" class="form-control">{{ module_settings[language.language_id].privacy_text }}</textarea>
-                        </div>
-                      </div>
-
-                      <div class="form-group">
-                        <label class="col-sm-2 control-label" for="input-success-text-{{ language.language_id }}">{{ entry_success_text }}</label>
-                        <div class="col-sm-10">
-                          <input type="text" name="module_settings[{{ language.language_id }}][success_text]" value="{{ module_settings[language.language_id].success_text }}" placeholder="{{ entry_success_text }}" id="input-success-text-{{ language.language_id }}" class="form-control" />
-                        </div>
-                      </div>
-
-                      <div class="form-group">
-                        <label class="col-sm-2 control-label" for="input-already-text-{{ language.language_id }}">{{ entry_already_text }}</label>
-                        <div class="col-sm-10">
-                          <input type="text" name="module_settings[{{ language.language_id }}][already_text]" value="{{ module_settings[language.language_id].already_text }}" placeholder="{{ entry_already_text }}" id="input-already-text-{{ language.language_id }}" class="form-control" />
-                        </div>
-                      </div>
-                    </div>
-                  {% endfor %}
-                </div>
-              </div>
-            </form>
+      </div>
+      {% endif %}
+      {% if warning %}
+      <div class="row">
+        <div class="col-sm-12 col-lg-offset-1 col-lg-7 col-xl-offset-1 col-xl-7">
+          <div class="alert alert-warning alert-dismissible"><i data-lucide="alert-triangle" width="16" height="16"></i> {{ warning }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
-
-          <div id="newsletter-subscribers" class="dcx-tab-pane">
-            <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-              <h4>{{ text_subscribers }}</h4>
-
-              <form action="{{ filter_action }}" method="get" class="form-inline" style="margin-bottom: 15px; display:flex; gap: 8px; flex-wrap: wrap;">
-                <input type="hidden" name="route" value="extension/module/dockercart_newsletter" />
-                <input type="hidden" name="user_token" value="{{ user_token }}" />
-                <div class="form-group">
-                  <label class="sr-only" for="input-filter-email">{{ entry_filter_email }}</label>
-                  <input type="text" id="input-filter-email" name="filter_email" value="{{ filter_email }}" placeholder="{{ entry_filter_email }}" class="form-control" />
+        </div>
+      </div>
+      {% endif %}
+      {% if success %}
+      <div class="row">
+        <div class="col-sm-12 col-lg-offset-1 col-lg-7 col-xl-offset-1 col-xl-7">
+          <div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> {{ success }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="container-fluid">
+    <form action="{{ action }}" method="post" id="form-module">
+    <div class="row">
+      <div class="col-md-12 col-sm-12 col-lg-offset-1 col-lg-7 col-xl-offset-1 col-xl-7">
+        <div class="dcx-shell">
+          <div class="dcx-panel">
+            <div class="dcx-panel-head">
+              <div class="dcx-panel-head__icon"><i data-lucide="settings" width="18" height="18"></i></div>
+              <div><div class="dcx-panel-title">{{ text_module_settings }}</div></div>
+            </div>
+            <div class="dcx-panel-body">
+              <div class="dcx-fields">
+                <div class="dcx-field required">
+                  <label class="dcx-label">{{ entry_name }}</label>
+                  {% for language in languages %}
+                  <div class="dc-attr-row__value">
+                    <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                    <input type="text" name="name_translation[{{ language.language_id }}]" value="{{ name_translation[language.language_id] }}" placeholder="{{ entry_name }}" class="form-control" />
+                  </div>
+                  {% endfor %}
+                  {% if error_name %}<div class="text-danger">{{ error_name }}</div>{% endif %}
                 </div>
-                <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> {{ button_filter }}</button>
-                <a href="{{ filter_action }}" class="btn btn-default">{{ button_clear }}</a>
-              </form>
-
-              <div class="table-responsive">
-                <table class="table table-hover dcx-table">
-                  <thead>
-                    <tr>
-                      <td>{{ column_email }}</td>
-                      <td>{{ column_type }}</td>
-                      <td>{{ column_source }}</td>
-                      <td class="text-center">{{ column_status }}</td>
-                      <td class="text-center">{{ column_date_added }}</td>
-                      <td class="text-right">{{ column_action }}</td>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% if subscribers %}
-                      {% for subscriber in subscribers %}
-                        <tr>
-                          <td>{{ subscriber.email }}</td>
-                          <td>
-                            {% if subscriber.subscriber_type == 'customer' %}
-                              <span class="label label-info">{{ text_registered_customer }}</span>
-                            {% else %}
-                              <span class="label label-default">{{ text_guest_subscriber }}</span>
-                            {% endif %}
-                          </td>
-                          <td>{{ subscriber.source }}</td>
-                          <td class="text-center">
-                            {% if subscriber.status %}
-                              <span class="label label-success">{{ text_enabled }}</span>
-                            {% else %}
-                              <span class="label label-danger">{{ text_disabled }}</span>
-                            {% endif %}
-                          </td>
-                          <td class="text-center">{{ subscriber.date_added }}</td>
-                          <td class="text-right">
-                            <a href="{{ subscriber.delete }}" class="btn btn-danger btn-xs" onclick="return confirm('{{ button_delete }}?');" title="{{ button_delete }}"><i class="fa fa-trash"></i></a>
-                          </td>
-                        </tr>
-                      {% endfor %}
-                    {% else %}
-                      <tr>
-                        <td class="text-center" colspan="6">{{ text_no_results }}</td>
-                      </tr>
-                    {% endif %}
-                  </tbody>
-                </table>
+                <div class="dcx-field">
+                  <label class="dcx-label" for="input-status">{{ entry_status }}</label>
+                  <select name="status" id="input-status" class="form-control">
+                    <option value="1" {% if status %}selected="selected"{% endif %}>{{ text_enabled }}</option>
+                    <option value="0" {% if not status %}selected="selected"{% endif %}>{{ text_disabled }}</option>
+                  </select>
+                </div>
               </div>
-
-              <div class="row">
-                <div class="col-sm-6 text-left">{{ pagination }}</div>
-                <div class="col-sm-6 text-right">{{ results }}</div>
+            </div>
+          </div>
+          <div class="dcx-panel form-row--spaced">
+            <div class="dcx-panel-head">
+              <div class="dcx-panel-head__icon"><i data-lucide="languages" width="18" height="18"></i></div>
+              <div><div class="dcx-panel-title">{{ text_multilingual_settings }}</div></div>
+            </div>
+            <div class="dcx-panel-body">
+              <ul class="nav nav-tabs" id="language">
+                {% for language in languages %}
+                <li><a href="#language{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
+                {% endfor %}
+              </ul>
+              <div class="tab-content">
+                {% for language in languages %}
+                <div class="tab-pane" id="language{{ language.language_id }}">
+                  <div class="dcx-fields">
+                    <div class="dcx-field">
+                      <label class="dcx-label" for="input-title-{{ language.language_id }}">{{ entry_title }}</label>
+                      <input type="text" name="module_settings[{{ language.language_id }}][title]" value="{{ module_settings[language.language_id].title }}" placeholder="{{ entry_title }}" id="input-title-{{ language.language_id }}" class="form-control" />
+                    </div>
+                    <div class="dcx-field">
+                      <label class="dcx-label" for="input-subtitle-{{ language.language_id }}">{{ entry_subtitle }}</label>
+                      <textarea name="module_settings[{{ language.language_id }}][subtitle]" rows="2" placeholder="{{ entry_subtitle }}" id="input-subtitle-{{ language.language_id }}" class="form-control">{{ module_settings[language.language_id].subtitle }}</textarea>
+                    </div>
+                    <div class="dcx-field">
+                      <label class="dcx-label" for="input-placeholder-{{ language.language_id }}">{{ entry_placeholder }}</label>
+                      <input type="text" name="module_settings[{{ language.language_id }}][placeholder]" value="{{ module_settings[language.language_id].placeholder }}" placeholder="{{ entry_placeholder }}" id="input-placeholder-{{ language.language_id }}" class="form-control" />
+                    </div>
+                    <div class="dcx-field">
+                      <label class="dcx-label" for="input-button-text-{{ language.language_id }}">{{ entry_button_text }}</label>
+                      <input type="text" name="module_settings[{{ language.language_id }}][button_text]" value="{{ module_settings[language.language_id].button_text }}" placeholder="{{ entry_button_text }}" id="input-button-text-{{ language.language_id }}" class="form-control" />
+                    </div>
+                    <div class="dcx-field">
+                      <label class="dcx-label" for="input-privacy-text-{{ language.language_id }}">{{ entry_privacy_text }}</label>
+                      <textarea name="module_settings[{{ language.language_id }}][privacy_text]" rows="2" placeholder="{{ entry_privacy_text }}" id="input-privacy-text-{{ language.language_id }}" class="form-control">{{ module_settings[language.language_id].privacy_text }}</textarea>
+                    </div>
+                    <div class="dcx-field">
+                      <label class="dcx-label" for="input-success-text-{{ language.language_id }}">{{ entry_success_text }}</label>
+                      <input type="text" name="module_settings[{{ language.language_id }}][success_text]" value="{{ module_settings[language.language_id].success_text }}" placeholder="{{ entry_success_text }}" id="input-success-text-{{ language.language_id }}" class="form-control" />
+                    </div>
+                    <div class="dcx-field">
+                      <label class="dcx-label" for="input-already-text-{{ language.language_id }}">{{ entry_already_text }}</label>
+                      <input type="text" name="module_settings[{{ language.language_id }}][already_text]" value="{{ module_settings[language.language_id].already_text }}" placeholder="{{ entry_already_text }}" id="input-already-text-{{ language.language_id }}" class="form-control" />
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-12 col-sm-12 col-lg-offset-0 col-lg-3 col-xl-offset-0 col-xl-3">
+        <div class="dcx-shell">
+          <div class="dcx-sidebar-card">
+            <div class="dcx-sidebar-card__header">
+              <div class="dcx-sidebar-card__header-icon"><i data-lucide="users" width="16" height="16"></i></div>
+              <h3 class="dcx-sidebar-card__title">{{ text_subscribers }}</h3>
+            </div>
+            <div class="dcx-sidebar-card__body">
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label">{{ text_stats_total }}</label>
+                <div style="font-size:20px;font-weight:600;color:var(--dc-text-dark);">{{ stats_total }}</div>
+              </div>
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label">{{ text_stats_guest }}</label>
+                <div style="font-size:20px;font-weight:600;color:var(--dc-text-dark);">{{ stats_guest }}</div>
+              </div>
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label">{{ text_stats_customer }}</label>
+                <div style="font-size:20px;font-weight:600;color:var(--dc-text-dark);">{{ stats_customer }}</div>
+              </div>
+              <div class="dcx-sidebar-card__field" style="margin-top:12px;">
+                <button type="button" class="btn btn-default btn-sm btn-block" onclick="location='{{ export }}';"><i data-lucide="download" width="14" height="14"></i> {{ button_export }}</button>
+                <button type="button" class="btn btn-default btn-sm btn-block" style="margin-top:8px;" onclick="$('#import-modal').modal('show');"><i data-lucide="upload" width="14" height="14"></i> {{ button_import }}</button>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+    </form>
+
+    <div class="row">
+      <div class="col-md-12 col-sm-12 col-lg-offset-1 col-lg-7 col-xl-offset-1 col-xl-7">
+        <div class="dcx-shell form-row--spaced">
+          <div class="dcx-panel">
+            <div class="dcx-panel-head">
+              <div class="dcx-panel-head__icon"><i data-lucide="users" width="18" height="18"></i></div>
+              <div><div class="dcx-panel-title">{{ text_subscribers }}</div></div>
+            </div>
+            <div class="dcx-panel-body">
+              <form action="{{ filter_action }}" method="get" style="margin-bottom:15px;display:flex;gap:8px;flex-wrap:wrap;">
+                <input type="hidden" name="route" value="extension/module/dockercart_newsletter" />
+                <input type="hidden" name="user_token" value="{{ user_token }}" />
+                <div class="dcx-field" style="flex:1;min-width:200px;">
+                  <input type="text" id="input-filter-email" name="filter_email" value="{{ filter_email }}" placeholder="{{ entry_filter_email }}" class="form-control" />
+                </div>
+                <button type="submit" class="btn btn-primary"><i data-lucide="search" width="14" height="14"></i> {{ button_filter }}</button>
+                <a href="{{ filter_action }}" class="btn btn-default">{{ button_clear }}</a>
+              </form>
+
+              {% if subscribers %}
+              <div class="dc-newsletter-list">
+                {% for subscriber in subscribers %}
+                <div class="dc-newsletter-item">
+                  <div class="dc-newsletter-item__icon">
+                    {% if subscriber.subscriber_type == 'customer' %}
+                    <i data-lucide="user" width="16" height="16"></i>
+                    {% else %}
+                    <i data-lucide="user-plus" width="16" height="16"></i>
+                    {% endif %}
+                  </div>
+                  <div class="dc-newsletter-item__body">
+                    <div class="dc-newsletter-item__email">{{ subscriber.email }}</div>
+                    <div class="dc-newsletter-item__meta">
+                      {% if subscriber.subscriber_type == 'customer' %}
+                      <span class="label label-info">{{ text_registered_customer }}</span>
+                      {% else %}
+                      <span class="label label-default">{{ text_guest_subscriber }}</span>
+                      {% endif %}
+                      <span class="dc-newsletter-item__source">{{ subscriber.source }}</span>
+                      <span class="dc-newsletter-item__date">{{ subscriber.date_added }}</span>
+                    </div>
+                  </div>
+                  <div class="dc-newsletter-item__actions">
+                    {% if subscriber.status %}
+                    <span class="label label-success">{{ text_enabled }}</span>
+                    {% else %}
+                    <span class="label label-danger">{{ text_disabled }}</span>
+                    {% endif %}
+                    <a href="{{ subscriber.delete }}" class="btn btn-danger btn-xs" onclick="return confirm('{{ button_delete }}?');" title="{{ button_delete }}"><i data-lucide="trash-2" width="12" height="12"></i></a>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+              {% else %}
+              <div class="dc-newsletter-empty">
+                <i data-lucide="inbox" width="32" height="32"></i>
+                <p>{{ text_no_results }}</p>
+              </div>
+              {% endif %}
+
+              <div class="pagination-wrap">
+                <div class="row">
+                  <div class="col-sm-6 text-left">{{ pagination }}</div>
+                  <div class="col-sm-6 text-right">{{ results }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
-
 <div id="import-modal" class="modal fade" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title"><i class="fa fa-upload"></i> {{ heading_import }}</h4>
+        <h4 class="modal-title"><i data-lucide="upload" width="18" height="18" style="margin-right:8px;"></i>{{ heading_import }}</h4>
       </div>
       <div class="modal-body">
         <form id="form-import" enctype="multipart/form-data">
-          <div class="form-group">
-            <label>{{ text_select_file }}</label>
-            <input type="file" name="file" class="form-control" accept=".csv" />
+          <div class="dcx-fields">
+            <div class="dcx-field">
+              <label class="dcx-label">{{ text_select_file }}</label>
+              <input type="file" name="file" class="form-control" accept=".csv" />
+            </div>
           </div>
-          <div class="alert alert-info">
-            {{ text_import_format }}
+          <div class="alert alert-info" style="margin-top:12px;">
+            <i data-lucide="info" width="16" height="16" style="vertical-align:middle;margin-right:4px;"></i> {{ text_import_format }}
           </div>
         </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
-        <button type="button" class="btn btn-primary" id="button-import"><i class="fa fa-upload"></i> {{ button_import }}</button>
+        <button type="button" class="btn btn-primary" id="button-import"><i data-lucide="upload" width="14" height="14"></i> {{ button_import }}</button>
       </div>
     </div>
   </div>
 </div>
-
-<script type="text/javascript">
-function updateNewsletterPanelHeader(tabLink) {
-  var $tab = $(tabLink);
-  var title = $tab.data('title') || '{{ text_module_settings }}';
-  var subtitle = $tab.data('subtitle') || '{{ text_edit }}';
-  var icon = String($tab.data('icon') || 'fa-sliders').replace(/[^a-z0-9\-]/gi, '');
-
-  $('#newsletter-tab-title').text(title);
-  $('#newsletter-tab-subtitle').text(subtitle);
-  $('#newsletter-tab-icon').attr('class', 'fa ' + icon);
+<style>
+.dc-newsletter-list { display: flex; flex-direction: column; gap: 8px; }
+.dc-newsletter-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--dc-border-soft);
+  border-radius: var(--dc-radius-lg);
+  background: var(--dc-surface);
+  transition: border-color .15s;
 }
-
-$(document).on('click', '.js-newsletter-tab', function(e) {
-  e.preventDefault();
-
-  var tabId = $(this).data('tab');
-  if (!tabId) return;
-
-  $('#newsletter-tabs > li').removeClass('active');
-  $(this).closest('li').addClass('active');
-
-  $('#newsletter-settings, #newsletter-subscribers').removeClass('active');
-  $('#' + tabId).addClass('active');
-
-  updateNewsletterPanelHeader(this);
-});
-
-updateNewsletterPanelHeader($('#newsletter-tabs > li.active a.js-newsletter-tab'));
-
+.dc-newsletter-item:hover { border-color: var(--dc-border); }
+.dc-newsletter-item__icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--dc-radius-md);
+  background: var(--dc-gray-100);
+  color: var(--dc-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dc-newsletter-item__body { flex: 1; min-width: 0; }
+.dc-newsletter-item__email { font-size: 13px; font-weight: 600; color: var(--dc-text-dark); }
+.dc-newsletter-item__meta { display: flex; align-items: center; gap: 8px; margin-top: 4px; font-size: 12px; color: var(--dc-text-muted); flex-wrap: wrap; }
+.dc-newsletter-item__source { }
+.dc-newsletter-item__date { }
+.dc-newsletter-item__actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.dc-newsletter-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 32px 16px;
+  color: var(--dc-text-muted);
+  text-align: center;
+}
+.dc-newsletter-empty p { margin: 0; font-size: 13px; }
+</style>
+<script type="text/javascript"><!--
+$('#language a:first').tab('show');
 $('#button-import').on('click', function() {
   var formData = new FormData($('#form-import')[0]);
-
   $.ajax({
     url: '{{ import }}',
     type: 'post',
@@ -315,25 +314,22 @@ $('#button-import').on('click', function() {
     contentType: false,
     processData: false,
     beforeSend: function() {
-      $('#button-import').button('loading');
+      $('#button-import').prop('disabled', true);
     },
     complete: function() {
-      $('#button-import').button('reset');
+      $('#button-import').prop('disabled', false);
     },
     success: function(json) {
       $('.alert-dismissible').remove();
-
       if (json.error) {
-        $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json.error + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+        $('#content > .container-fluid').first().prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> ' + json.error + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+        lucide.createIcons();
       }
-
       if (json.success) {
-        $('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> ' + json.success + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+        $('#content > .container-fluid').first().prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> ' + json.success + '</div>');
+        lucide.createIcons();
         $('#import-modal').modal('hide');
-
-        setTimeout(function() {
-          location.reload();
-        }, 900);
+        setTimeout(function() { location.reload(); }, 900);
       }
     },
     error: function(xhr, ajaxOptions, thrownError) {
@@ -341,6 +337,5 @@ $('#button-import').on('click', function() {
     }
   });
 });
-</script>
-
+//--></script>
 {{ footer }}

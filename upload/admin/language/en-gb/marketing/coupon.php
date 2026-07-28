@@ -18,7 +18,11 @@ $_['text_add_coupon_subtitle'] = 'Create a new discount coupon';
 
 $_['text_edit_coupon_subtitle'] = 'Edit coupon rules and limits';
 
-
+// Panel / Card titles
+$_['text_coupon_card'] = 'Coupon';
+$_['text_history_card'] = 'Usage History';
+$_['text_parameters_card'] = 'Parameters';
+$_['text_select_categories'] = 'Select Categories';
 
 // Column
 $_['column_name']         = 'Coupon Name';

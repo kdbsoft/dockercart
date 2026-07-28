@@ -3,7 +3,7 @@
   <div class="page-header">
     <div class="container-fluid">
       <div class="row">
-        <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
+        <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
           <div class="pull-right">
             <button type="submit" form="form-author" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary btn--icon"><i data-lucide="save" width="16" height="16"></i></button>
             <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default btn--icon"><i data-lucide="x" width="16" height="16"></i></a>
@@ -27,7 +27,7 @@
       </div>
       {% if error_warning %}
       <div class="row">
-        <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
+        <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
           <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
@@ -39,7 +39,7 @@
   <div class="container-fluid">
     <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-author">
     <div class="row">
-      <div class="col-md-12 col-sm-12 col-lg-offset-1 col-lg-7 col-xl-offset-1 col-xl-7">
+      <div class="col-md-12 col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
         <div class="dcx-shell">
           <div class="dcx-panel">
             <div class="dcx-panel-head">
@@ -73,33 +73,23 @@
                   <label class="dcx-label" for="input-bio">{{ entry_bio }}</label>
                   <textarea name="bio" rows="5" placeholder="{{ entry_bio }}" id="input-bio" class="form-control">{{ bio }}</textarea>
                 </div>
+                <div class="dcx-field">
+                  <label class="dcx-label" for="input-status">{{ entry_status }}</label>
+                  <select name="status" id="input-status" class="form-control">
+                    {% if status %}
+                    <option value="1" selected="selected">{{ text_enabled }}</option>
+                    <option value="0">{{ text_disabled }}</option>
+                    {% else %}
+                    <option value="1">{{ text_enabled }}</option>
+                    <option value="0" selected="selected">{{ text_disabled }}</option>
+                    {% endif %}
+                  </select>
+                </div>
+                <div class="dcx-field">
+                  <label class="dcx-label" for="input-sort-order">{{ entry_sort_order }}</label>
+                  <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control" />
+                </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-12 col-sm-12 col-lg-4 col-xl-3">
-        <div class="dcx-sidebar-card">
-          <div class="dcx-sidebar-card__header">
-            <div class="dcx-sidebar-card__header-icon"><i data-lucide="toggle-right" width="16" height="16"></i></div>
-            <h3 class="dcx-sidebar-card__title">{{ text_status_card }}</h3>
-          </div>
-          <div class="dcx-sidebar-card__body">
-            <div class="dcx-sidebar-card__field">
-              <label class="dcx-sidebar-card__label" for="input-status">{{ entry_status }}</label>
-              <select name="status" id="input-status" class="form-control">
-                {% if status %}
-                <option value="1" selected="selected">{{ text_enabled }}</option>
-                <option value="0">{{ text_disabled }}</option>
-                {% else %}
-                <option value="1">{{ text_enabled }}</option>
-                <option value="0" selected="selected">{{ text_disabled }}</option>
-                {% endif %}
-              </select>
-            </div>
-            <div class="dcx-sidebar-card__field">
-              <label class="dcx-sidebar-card__label" for="input-sort-order">{{ entry_sort_order }}</label>
-              <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control" />
             </div>
           </div>
         </div>

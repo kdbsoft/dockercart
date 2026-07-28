@@ -9,7 +9,7 @@
           <div class="input-group">
             <input type="text" name="search" value="{{ search }}" class="form-control" placeholder="{{ text_search_placeholder }}" autofocus>
             <span class="input-group-btn">
-              <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> {{ button_search }}</button>
+              <button type="submit" class="btn btn-primary"><i data-lucide="search"></i> {{ button_search }}</button>
             </span>
           </div>
         </form>
@@ -21,8 +21,8 @@
     {% if search %}
       {% if total > 0 %}
         <div class="panel panel-default">
-          <div class="panel-heading">
-            <h3 class="panel-title"><i class="fa fa-list"></i> {{ text_results }}</h3>
+          <div class="dcx-panel-heading">
+            <h3 class="dcx-panel-title"><i data-lucide="list"></i> {{ text_results }}</h3>
           </div>
           <div class="panel-body">
             <ul class="nav nav-tabs">
@@ -87,7 +87,7 @@
                       {% endif %}
                     </td>
                     <td class="text-right">
-                      <a href="{{ result.href }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a>
+                      <a href="{{ result.href }}" title="{{ button_edit }}" class="btn btn-primary"><i data-lucide="pencil"></i></a>
                     </td>
                   </tr>
                   {% endfor %}
@@ -103,10 +103,10 @@
           </div>
         </div>
       {% else %}
-        <div class="alert alert-warning"><i class="fa fa-exclamation-circle"></i> {{ text_no_results }}</div>
+        <div class="alert alert-warning"><i data-lucide="alert-circle"></i> {{ text_no_results }}</div>
       {% endif %}
     {% else %}
-      <div class="alert alert-info"><i class="fa fa-info-circle"></i> {{ text_enter_search }}</div>
+      <div class="alert alert-info"><i data-lucide="info"></i> {{ text_enter_search }}</div>
     {% endif %}
   </div>
 </div>

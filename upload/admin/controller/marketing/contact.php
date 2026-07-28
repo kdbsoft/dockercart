@@ -23,6 +23,8 @@ class ControllerMarketingContact extends Controller {
 
 		$data['text_mail_subtitle'] = $this->language->get('text_mail_subtitle');
 
+		$data['text_mail_card'] = $this->language->get('text_mail_card');
+
 		$data['cancel'] = $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true);
 
 		$this->load->model('setting/store');
