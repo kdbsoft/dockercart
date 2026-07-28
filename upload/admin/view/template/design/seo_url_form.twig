@@ -3,7 +3,7 @@
   <div class="page-header">
     <div class="container-fluid">
       <div class="row">
-        <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
+        <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
           <div class="pull-right">
             <button type="submit" form="form-seo-url" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary btn--icon"><i data-lucide="save" width="16" height="16"></i></button>
             <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default btn--icon"><i data-lucide="x" width="16" height="16"></i></a>
@@ -18,7 +18,7 @@
       </div>
       {% if error_warning %}
       <div class="row">
-        <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
+        <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
           <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
@@ -30,53 +30,50 @@
   <div class="container-fluid">
     <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-seo-url">
     <div class="row">
-      <div class="col-md-12 col-sm-12 col-lg-offset-1 col-lg-7 col-xl-offset-1 col-xl-7">
+      <div class="col-md-12 col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
         <div class="dcx-shell">
           <div class="dcx-panel">
+            <div class="dcx-panel-head">
+              <div class="dcx-panel-head__icon"><i data-lucide="link" width="18" height="18"></i></div>
+              <div>
+                <div class="dcx-panel-title">{{ text_form }}</div>
+              </div>
+            </div>
             <div class="dcx-panel-body">
-              <div class="form-group required">
-                <label class="col-sm-2 control-label" for="input-query">{{ entry_query }}</label>
-                <div class="col-sm-10">
+              <div class="dcx-fields">
+                <div class="dcx-field required">
+                  <label class="dcx-label" for="input-query">{{ entry_query }}</label>
                   <input type="text" name="query" value="{{ query }}" placeholder="{{ entry_query }}" id="input-query" class="form-control" />
                   {% if error_query %}
                   <div class="text-danger">{{ error_query }}</div>
                   {% endif %}
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-12 col-sm-12 col-lg-4 col-xl-3">
-        <div class="dcx-sidebar-card">
-          <div class="dcx-sidebar-card__header">
-            <div class="dcx-sidebar-card__header-icon"><i data-lucide="link" width="16" height="16"></i></div>
-            <h3 class="dcx-sidebar-card__title">{{ text_seo_card }}</h3>
-          </div>
-          <div class="dcx-sidebar-card__body">
-            <div class="dcx-sidebar-card__help"><i data-lucide="info" width="16" height="16"></i> {{ text_keyword }}</div>
-            <div class="dcx-sidebar-card__links">
-              {% for store in stores %}
-                {% if stores|length > 1 %}
-                <div class="dcx-sidebar-card__store-label">{{ store.name }}</div>
-                {% endif %}
-                {% for language in languages %}
-                <div class="dcx-sidebar-card__link-item">
-                  <label class="dcx-sidebar-card__link-label">
-                    <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
-                    {{ language.name }}
-                  </label>
-                  <input type="text" name="seo_url[{{ store.store_id }}][{{ language.language_id }}]" value="{% if seo_url[store.store_id][language.language_id] %}{{ seo_url[store.store_id][language.language_id] }}{% endif %}" placeholder="{{ entry_keyword }}" class="form-control" />
-                  {% if error_keyword[store.store_id][language.language_id] %}
-                  <div class="text-danger">{{ error_keyword[store.store_id][language.language_id] }}</div>
+                {% for store in stores %}
+                  {% if stores|length > 1 %}
+                  <div class="dcx-field">
+                    <label class="dcx-label">{{ store.name }}</label>
+                  </div>
                   {% endif %}
-                </div>
+                  <div class="dcx-field required">
+                    <label class="dcx-label">{{ entry_keyword }}</label>
+                    {% for language in languages %}
+                    <div class="dc-attr-row__value">
+                      <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                      <input type="text" name="seo_url[{{ store.store_id }}][{{ language.language_id }}]" value="{% if seo_url[store.store_id][language.language_id] %}{{ seo_url[store.store_id][language.language_id] }}{% endif %}" placeholder="{{ entry_keyword }}" class="form-control" />
+                    </div>
+                    {% if error_keyword[store.store_id][language.language_id] %}
+                    <div class="text-danger">{{ error_keyword[store.store_id][language.language_id] }}</div>
+                    {% endif %}
+                    {% endfor %}
+                  </div>
                 {% endfor %}
-              {% endfor %}
-            </div>
-            <div class="dcx-seo-preview">
-              <span class="dcx-seo-preview__label">{{ text_seo_preview }}</span>
-              <span class="dcx-seo-preview__url">{{ text_seo_url_base }}</span><span id="seo-url-preview">...</span>
+                <div class="dcx-field">
+                  <div class="dcx-seo-preview">
+                    <span class="dcx-seo-preview__label">{{ text_seo_preview }}</span>
+                    <span class="dcx-seo-preview__url">{{ text_seo_url_base }}</span><span id="seo-url-preview">...</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

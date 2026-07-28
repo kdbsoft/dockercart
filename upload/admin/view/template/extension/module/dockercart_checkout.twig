@@ -770,27 +770,27 @@ hr {
 <div id="content"><div class="dc-checkout-admin">
   <div class="page-header">
     <div class="container-fluid">
-      <div class="pull-right">
-        <button type="submit" form="form-dockercart-checkout" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary btn-lg" id="button-save">
-          <i data-lucide="save"></i> {{ button_save }}
-        </button>
+      <div class="row">
+        <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
+          <div class="pull-right">
+            <button type="submit" form="form-dockercart-checkout" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary btn-lg" id="button-save">
+              <i data-lucide="save"></i> {{ button_save }}
+            </button>
 
-        <button type="button" data-toggle="tooltip" title="{{ button_apply|default('Apply') }}" class="btn btn-success btn-lg" id="button-apply">
-          <i data-lucide="check"></i> {{ button_apply|default('Apply') }}
-        </button>
+            <button type="button" data-toggle="tooltip" title="{{ button_apply|default('Apply') }}" class="btn btn-success btn-lg" id="button-apply">
+              <i data-lucide="check"></i> {{ button_apply|default('Apply') }}
+            </button>
 
-        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default btn-lg">
-          <i data-lucide="x"></i> {{ button_cancel }}
-        </a>
+            <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default btn-lg">
+              <i data-lucide="x"></i> {{ button_cancel }}
+            </a>
+          </div>
+          <a href="{{ cancel }}" class="page-header__link">
+            <span class="page-header__back"><i data-lucide="arrow-left" width="20" height="20"></i></span>
+            <span class="page-header__title">{{ heading_title }}</span>
+          </a>
+        </div>
       </div>
-      <h1>
-        {{ heading_title }}
-      </h1>
-      <ul class="breadcrumb">
-        {% for breadcrumb in breadcrumbs %}
-        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
-        {% endfor %}
-      </ul>
     </div>
   </div>
   <div class="container-fluid">
@@ -869,8 +869,8 @@ hr {
                         <i data-lucide="toggle-right"></i> {{ text_module_status|default('Module Status') }}
                       </div>
                     <div class="dc-card-body">
-                      <div class="form-group">
-                        <label class="col-sm-4 control-label" for="input-status">
+                      <div class="dcx-field">
+                        <label class="dcx-label" for="input-status">
                           <span data-toggle="tooltip" title="{{ help_status }}">{{ entry_status }}</span>
                         </label>
                         <div class="col-sm-8">
@@ -892,8 +892,8 @@ hr {
                       </div>
                     <div class="dc-card-body">
 
-                      <div class="form-group">
-                        <label class="col-sm-4 control-label" for="input-redirect-standard">
+                      <div class="dcx-field">
+                        <label class="dcx-label" for="input-redirect-standard">
                           <span data-toggle="tooltip" title="{{ help_redirect_standard }}">{{ entry_redirect_standard }}</span>
                         </label>
                         <div class="col-sm-8">
@@ -907,8 +907,8 @@ hr {
                         </div>
                       </div>
 
-                      <div class="form-group">
-                        <label class="col-sm-4 control-label" for="input-show-progress">
+                      <div class="dcx-field">
+                        <label class="dcx-label" for="input-show-progress">
                           <span data-toggle="tooltip" title="{{ help_show_progress }}">{{ entry_show_progress }}</span>
                         </label>
                         <div class="col-sm-8">
@@ -924,8 +924,8 @@ hr {
 
                       {# Geo-detect option removed from admin UI #}
 
-                      <div class="form-group">
-                        <label class="col-sm-4 control-label" for="input-guest-create-account">
+                      <div class="dcx-field">
+                        <label class="dcx-label" for="input-guest-create-account">
                           <span data-toggle="tooltip" title="{{ help_guest_create_account }}">{{ entry_guest_create_account }}</span>
                         </label>
                         <div class="col-sm-8">
@@ -946,8 +946,8 @@ hr {
                         <i data-lucide="map-pin"></i> {{ entry_default_country|default('Default Location') }}
                       </div>
                     <div class="dc-card-body">
-                      <div class="form-group">
-                        <label class="col-sm-4 control-label" for="input-default-country">
+                      <div class="dcx-field">
+                        <label class="dcx-label" for="input-default-country">
                           <span data-toggle="tooltip" title="{{ help_default_country|default('Pre-selected country when customer has not chosen one yet.') }}">{{ entry_default_country|default('Default Country') }}</span>
                         </label>
                         <div class="col-sm-8">
@@ -959,8 +959,8 @@ hr {
                           </select>
                         </div>
                       </div>
-                      <div class="form-group">
-                        <label class="col-sm-4 control-label" for="input-default-zone">
+                      <div class="dcx-field">
+                        <label class="dcx-label" for="input-default-zone">
                           <span data-toggle="tooltip" title="{{ help_default_zone|default('Pre-selected region/state when customer has not chosen one yet.') }}">{{ entry_default_zone|default('Default Region / State') }}</span>
                         </label>
                         <div class="col-sm-8">
@@ -1059,8 +1059,8 @@ hr {
             <div class="tab-pane" id="tab-design">
               <div style="margin-top: 15px;">
 
-                <div class="form-group">
-                  <label class="col-sm-2 control-label" for="input-theme">
+                <div class="dcx-field">
+                  <label class="dcx-label" for="input-theme">
                     <span data-toggle="tooltip" title="{{ help_theme }}">{{ entry_theme }}</span>
                   </label>
                   <div class="col-sm-10">
@@ -1074,8 +1074,8 @@ hr {
 
                 {# Journal 3 Compatibility option removed from admin UI #}
 
-                <div class="form-group">
-                  <label class="col-sm-2 control-label" for="input-custom-css">
+                <div class="dcx-field">
+                  <label class="dcx-label" for="input-custom-css">
                     <span data-toggle="tooltip" title="{{ help_custom_css }}">{{ entry_custom_css }}</span>
                   </label>
                   <div class="col-sm-10">
@@ -1083,8 +1083,8 @@ hr {
                   </div>
                 </div>
 
-                <div class="form-group">
-                  <label class="col-sm-2 control-label" for="input-custom-js">
+                <div class="dcx-field">
+                  <label class="dcx-label" for="input-custom-js">
                     <span data-toggle="tooltip" title="{{ help_custom_js }}">{{ entry_custom_js }}</span>
                   </label>
                   <div class="col-sm-10">
@@ -1352,8 +1352,8 @@ hr {
             <div class="tab-pane" id="tab-advanced">
               <div style="margin-top: 15px;">
 
-                <div class="form-group">
-                  <label class="col-sm-3 control-label" for="input-cache-ttl">
+                <div class="dcx-field">
+                  <label class="dcx-label" for="input-cache-ttl">
                     <span data-toggle="tooltip" title="{{ help_cache_ttl }}">{{ entry_cache_ttl }}</span>
                   </label>
                   <div class="col-sm-9">
@@ -1363,8 +1363,8 @@ hr {
 
                 <hr>
 
-                <div class="form-group">
-                  <label class="col-sm-3 control-label" for="input-debug">
+                <div class="dcx-field">
+                  <label class="dcx-label" for="input-debug">
                     <span data-toggle="tooltip" title="{{ help_debug }}">{{ entry_debug }}</span>
                   </label>
                   <div class="col-sm-9">

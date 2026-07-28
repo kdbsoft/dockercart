@@ -3,7 +3,7 @@
   <div class="page-header">
     <div class="container-fluid">
       <div class="row">
-        <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
+        <div class="col-sm-12 col-lg-offset-2 col-lg-8 col-xl-offset-2 col-xl-8">
           <div class="pull-right">
             <button type="submit" form="form-theme-voucher" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary btn--icon"><i data-lucide="save" width="16" height="16"></i></button>
             <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default btn--icon"><i data-lucide="x" width="16" height="16"></i></a>
@@ -24,7 +24,7 @@
       </div>
       {% if error_warning %}
       <div class="row">
-        <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
+        <div class="col-sm-12 col-lg-offset-2 col-lg-8 col-xl-offset-2 col-xl-8">
           <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
@@ -47,17 +47,18 @@
             </div>
             <div class="dcx-panel-body">
               <div class="dcx-fields">
-                {% for language in languages %}
                 <div class="dcx-field required">
-                  <label class="dcx-label" for="input-name{{ language.language_id }}">
-                    <span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ entry_name }}
-                  </label>
-                  <input type="text" name="voucher_theme_description[{{ language.language_id }}][name]" value="{{ voucher_theme_description[language.language_id] ? voucher_theme_description[language.language_id].name }}" placeholder="{{ entry_name }}" id="input-name{{ language.language_id }}" class="form-control" />
+                  <label class="dcx-label">{{ entry_name }}</label>
+                  {% for language in languages %}
+                  <div class="dc-attr-row__value">
+                    <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                    <input type="text" name="voucher_theme_description[{{ language.language_id }}][name]" value="{{ voucher_theme_description[language.language_id] ? voucher_theme_description[language.language_id].name }}" placeholder="{{ entry_name }}" class="form-control" />
+                  </div>
                   {% if error_name[language.language_id] %}
                   <div class="text-danger">{{ error_name[language.language_id] }}</div>
                   {% endif %}
+                  {% endfor %}
                 </div>
-                {% endfor %}
                 <div class="dcx-field required">
                   <label class="dcx-label">{{ entry_image }}</label>
                   <a href="" id="thumb-image" data-toggle="image" class="img-thumbnail"><img src="{{ thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>

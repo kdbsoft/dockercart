@@ -4,35 +4,38 @@
   <div class="page-header">
     <div class="container-fluid">
       <div class="row">
-        <div class="col-sm-12">
+        <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
           <div class="pull-right">
             <button type="submit" form="form-total" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary btn--icon"><i data-lucide="save" width="16" height="16"></i></button>
             <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default btn--icon"><i data-lucide="reply" width="16" height="16"></i></a>
           </div>
-          <h1 class="page-header__title">{{ heading_title }}</h1>
+          <a href="{{ cancel }}" class="page-header__link">
+            <span class="page-header__back"><i data-lucide="arrow-left" width="20" height="20"></i></span>
+            <span class="page-header__title">{{ heading_title }}</span>
+          </a>
         </div>
       </div>
     </div>
   </div>
-  <div class="container-fluid">
+  <div class="dcx-shell">
     {% if error_warning %}
     <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <div class="panel-heading__icon"><i data-lucide="pencil" width="16" height="16"></i></div>
+    <div class="dcx-panel">
+      <div class="dcx-panel-head">
+        <div class="dcx-panel-head__icon"><i data-lucide="pencil" width="16" height="16"></i></div>
         <div>
-          <h3 class="panel-title">{{ text_edit }}</h3>
-          <div class="panel-heading__subtitle">{{ text_edit_subtitle }}</div>
+          <h3 class="dcx-panel-title">{{ text_edit }}</h3>
+          <div class="dcx-panel-head__subtitle">{{ text_edit_subtitle }}</div>
         </div>
       </div>
-      <div class="panel-body">
-        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-total" class="form-horizontal">
-          <div class="form-group">
-            <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
-            <div class="col-sm-10">
+      <div class="dcx-panel-body">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-total">
+          <div class="dcx-fields">
+            <div class="dcx-field">
+              <label class="dcx-label" for="input-status">{{ entry_status }}</label>
               <select name="report_customer_activity_status" id="input-status" class="form-control">
                 {% if report_customer_activity_status %}
                 <option value="1" selected="selected">{{ text_enabled }}</option>
@@ -43,10 +46,8 @@
                 {% endif %}
               </select>
             </div>
-          </div>
-          <div class="form-group">
-            <label class="col-sm-2 control-label" for="input-sort-order">{{ entry_sort_order }}</label>
-            <div class="col-sm-10">
+            <div class="dcx-field">
+              <label class="dcx-label" for="input-sort-order">{{ entry_sort_order }}</label>
               <input type="text" name="report_customer_activity_sort_order" value="{{ report_customer_activity_sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control" />
             </div>
           </div>

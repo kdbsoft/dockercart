@@ -5,8 +5,12 @@
     --dcx-muted: var(--dc-text-muted);
     --dcx-blue: var(--dc-primary-active);
 }
-.dcx-shell {
+.dcx-shell + .dcx-shell {
+    margin-top: 16px;
+}
 
+.form-row--spaced {
+    margin-top: 16px;
 }
 .dcx-panel {
     border: 1px solid var(--dc-border);
@@ -66,6 +70,40 @@
 }
 .dcx-panel-body textarea.form-control {
     height: auto;
+}
+
+/* Panel heading (dashboard panels inside .panel.panel-default) */
+.dcx-panel-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    position: relative;
+    border-bottom: 1px solid var(--dc-border);
+    background: var(--dc-surface);
+    color: inherit;
+}
+.dcx-panel-heading__icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: var(--dc-radius-lg);
+    background: var(--dc-gray-100);
+    color: var(--dc-text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+.dcx-panel-heading__subtitle {
+    margin-top: 2px;
+    font-size: 12px;
+    color: var(--dc-text-muted);
+    font-weight: 400;
+}
+.dcx-panel-heading .tile-period-select,
+.dcx-panel-heading > .pull-right {
+    margin-left: auto;
 }
 
 /* Generic form field */
@@ -185,6 +223,43 @@
     font-size: 12px;
     color: var(--dc-text-muted);
     margin-top: 2px;
+}
+.dcx-field-rating {
+    display: flex;
+    gap: 4px;
+}
+.dcx-field-rating__item {
+    cursor: pointer;
+}
+.dcx-field-rating__item input[type="radio"] {
+    display: none;
+}
+.dcx-field-rating__star {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--dc-radius-md);
+    border: 1px solid var(--dc-border);
+    background: var(--dc-surface);
+    color: var(--dc-text-muted);
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.15s ease;
+}
+.dcx-field-rating__star:hover {
+    border-color: var(--dc-primary);
+    color: var(--dc-primary);
+}
+.dcx-field-rating__star--active {
+    background: var(--dc-primary);
+    border-color: var(--dc-primary);
+    color: #fff;
+}
+.dcx-field-rating__star--active:hover {
+    background: var(--dc-primary-hover, var(--dc-primary));
+    color: #fff;
 }
 .dcx-label {
     font-size: 12px;
@@ -1452,6 +1527,97 @@ div.dcx-field.required > .dcx-label:before {
 .dc-chip__remove { background: none; border: none; color: var(--dc-text-faint); cursor: pointer; padding: 0; margin-left: 2px; display: flex; align-items: center; border-radius: 50%; transition: color var(--dc-transition-fast); }
 .dc-chip__remove:hover { color: var(--dc-red-500); }
 
+/* ── Coupon history ── */
+.coupon-history-list { display: flex; flex-direction: column; gap: 12px; }
+.coupon-history-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--dc-border-soft);
+  border-radius: var(--dc-radius-lg);
+  background: var(--dc-surface);
+}
+.coupon-history-entry__icon {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--dc-radius-md);
+  background: var(--dc-gray-100);
+  color: var(--dc-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.coupon-history-entry__info { flex: 1 1 auto; min-width: 0; }
+.coupon-history-entry__title { font-size: 13px; font-weight: 600; color: var(--dc-text-dark); }
+.coupon-history-entry__meta { font-size: 12px; color: var(--dc-text-muted); margin-top: 2px; }
+.coupon-history-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 32px 16px;
+  color: var(--dc-text-muted);
+  text-align: center;
+}
+.coupon-history-empty p { margin: 0; font-size: 13px; }
+
+/* ── Custom field values ── */
+.custom-field-values-list { display: flex; flex-direction: column; gap: 12px; }
+.custom-field-value-entry {
+  border: 1px solid var(--dc-border-soft);
+  border-radius: var(--dc-radius-lg);
+  background: var(--dc-surface);
+  overflow: hidden;
+}
+.custom-field-value-entry__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--dc-gray-50);
+  border-bottom: 1px solid var(--dc-border-soft);
+}
+.custom-field-value-entry__icon {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--dc-radius-md);
+  background: var(--dc-gray-100);
+  color: var(--dc-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.custom-field-value-entry__title {
+  flex: 1 1 auto;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dc-text-dark);
+}
+.custom-field-value-entry__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.custom-field-value-entry__body {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.custom-field-value-entry__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.custom-field-value-entry__label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dc-text-muted);
+}
+
 /* ── Voucher history ── */
 .voucher-history-list { display: flex; flex-direction: column; gap: 12px; }
 .voucher-history-entry {
@@ -1497,4 +1663,55 @@ div.dcx-field.required > .dcx-label:before {
 @media (max-width: 768px) {
   .dc-promo-card__grid .dc-promo-card__field,
   .dc-promo-card__grid .dc-promo-card__field--wide { flex: 1 1 100%; min-width: 0; }
+}
+
+/* ── dcx-pills: pill-style tab navigation ── */
+.dcx-pills {
+    display: inline-flex;
+    gap: 4px;
+    padding: 4px;
+    background: var(--dc-primary-light);
+    border-radius: var(--dc-radius-full);
+    list-style: none;
+    margin: 0 0 20px 0;
+    flex-wrap: wrap;
+}
+.dcx-pills > li {
+    margin: 0;
+}
+.dcx-pills > li > a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: var(--dc-radius-full);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--dc-text-muted);
+    text-decoration: none;
+    transition: background var(--dc-transition-fast), color var(--dc-transition-fast);
+    border: none;
+    background: transparent;
+    line-height: 1.4;
+}
+.dcx-pills > li > a:hover {
+    background: rgba(255,255,255,0.6);
+    color: var(--dc-text-dark);
+    text-decoration: none;
+    border: none;
+}
+.dcx-pills > li.active > a,
+.dcx-pills > li.active > a:focus {
+    background: var(--dc-surface);
+    color: var(--dc-primary);
+    box-shadow: var(--dc-shadow-xs);
+    text-decoration: none;
+    border: none;
+}
+.dcx-pills > li > a > i {
+    opacity: 0.7;
+    flex-shrink: 0;
+}
+.dcx-pills > li.active > a > i {
+    opacity: 1;
 }

@@ -18,7 +18,8 @@ $_['text_product']         = 'Products';
 
 $_['text_mail_subtitle'] = 'Send emails to customers';
 
-
+// Panel / Card titles
+$_['text_mail_card'] = 'Mail';
 
 // Entry
 $_['entry_store']          = 'From';

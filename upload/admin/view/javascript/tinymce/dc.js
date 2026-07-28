@@ -34,11 +34,11 @@ $(document).ready(function() {
 					url: 'index.php?route=common/filemanager&user_token=' + getURLVar('user_token'),
 					dataType: 'html',
 					beforeSend: function() {
-						$('#button-image i').replaceWith('<i class="fa fa-circle-o-notch fa-spin"></i>');
+						$('#button-image i, #button-image svg').addClass('dc-spin');
 						$('#button-image').prop('disabled', true);
 					},
 					complete: function() {
-						$('#button-image i').replaceWith('<i class="fa fa-upload"></i>');
+						$('#button-image i, #button-image svg').removeClass('dc-spin');
 						$('#button-image').prop('disabled', false);
 					},
 					success: function(html) {

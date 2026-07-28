@@ -286,8 +286,10 @@ a:hover, a:focus {
     background: transparent;
 }
 
-.nav-tabs > li > a > .fa {
-    font-size: 13px;
+.nav-tabs > li > a > svg {
+    width: 14px;
+    height: 14px;
+    vertical-align: middle;
 }
 
 /* Navs / Pills (vertical sidebar tabs) */
@@ -317,8 +319,11 @@ a:hover, a:focus {
     margin-left: -3px;
 }
 
-.nav-pills > li > a > .fa {
+.nav-pills > li > a > svg {
     margin-right: 5px;
+    width: 14px;
+    height: 14px;
+    vertical-align: middle;
 }
 
 .form-control {
@@ -1740,8 +1745,10 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
 	height: 100%;
 }
 
-#filemanager .fa-folder.fa-5x {
+#filemanager .file-icon svg {
 	font-size: calc(var(--thumb-size, 100px) * 0.7);
+	width: 1em;
+	height: 1em;
 }
 
 @media (max-width: 1200px) {
@@ -1805,10 +1812,11 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
     gap: 8px;
 }
 
-.ext-card .panel-heading i.fa {
+.ext-card .panel-heading i[data-lucide],
+.ext-card .panel-heading svg {
     flex-shrink: 0;
     width: 20px;
-    text-align: center;
+    height: 20px;
 }
 
 .ext-card .panel-heading strong {
@@ -3409,4 +3417,7 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
 @keyframes lucide-spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
+}
+.dc-spin {
+    animation: lucide-spin 0.8s linear infinite;
 }

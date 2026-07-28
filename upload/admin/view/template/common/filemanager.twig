@@ -3,11 +3,11 @@
 <li{% if node.path == active %} class="active"{% endif %} data-path="{{ node.path }}">
 	<div class="tree-item{% if node.path == active %} active{% endif %}" data-directory="{{ node.path }}">
 		{% if node.children %}
-		<i class="fa fa-chevron-right tree-toggle"></i>
+		<i data-lucide="chevron-right" class="tree-toggle" width="14" height="14"></i>
 		{% else %}
 		<span class="tree-toggle-placeholder"></span>
 		{% endif %}
-		<i class="fa fa-folder tree-folder-icon"></i>
+		<i data-lucide="folder" class="tree-folder-icon" width="16" height="16"></i>
 		<span class="tree-link">{{ node.name }}</span>
 	</div>
 	{% if node.children %}
@@ -29,7 +29,7 @@
       <div class="filemanager-layout">
         <div class="filemanager-sidebar">
           <div class="sidebar-header">
-            <i class="fa fa-folder-open"></i> {{ text_navigation }}
+            <i data-lucide="folder-open"></i> {{ text_navigation }}
           </div>
           <div class="sidebar-tree">
             <ul>
@@ -40,17 +40,17 @@
         <div class="filemanager-main" id="filemanager-main">
           <div class="row fm-toolbar">
             <div class="col-sm-7">
-              <a href="{{ parent }}" data-toggle="tooltip" title="{{ button_parent }}" id="button-parent" class="btn btn-default"><i class="fa fa-level-up"></i></a>
-              <a href="{{ refresh }}" data-toggle="tooltip" title="{{ button_refresh }}" id="button-refresh" class="btn btn-default"><i class="fa fa-refresh"></i></a>
-              <button type="button" data-toggle="tooltip" title="{{ button_upload }}" id="button-upload" class="btn btn-primary"><i class="fa fa-upload"></i></button>
-              <button type="button" data-toggle="tooltip" title="{{ button_folder }}" id="button-folder" class="btn btn-default"><i class="fa fa-folder"></i></button>
-              <button type="button" data-toggle="tooltip" title="{{ button_delete }}" id="button-delete" class="btn btn-danger"><i class="fa fa-trash-o"></i></button>
+              <a href="{{ parent }}" title="{{ button_parent }}" id="button-parent" class="btn btn-default"><i data-lucide="arrow-up-to-line"></i></a>
+              <a href="{{ refresh }}" title="{{ button_refresh }}" id="button-refresh" class="btn btn-default"><i data-lucide="refresh-cw"></i></a>
+              <button type="button" title="{{ button_upload }}" id="button-upload" class="btn btn-primary"><i data-lucide="upload"></i></button>
+              <button type="button" title="{{ button_folder }}" id="button-folder" class="btn btn-default"><i data-lucide="folder-plus"></i></button>
+              <button type="button" title="{{ button_delete }}" id="button-delete" class="btn btn-danger"><i data-lucide="trash-2"></i></button>
             </div>
             <div class="col-sm-5">
               <div class="input-group">
                 <input type="text" name="search" value="{{ filter_name }}" placeholder="{{ entry_search }}" class="form-control">
                 <span class="input-group-btn">
-                <button type="button" data-toggle="tooltip" title="{{ button_search }}" id="button-search" class="btn btn-primary"><i class="fa fa-search"></i></button>
+                <button type="button" title="{{ button_search }}" id="button-search" class="btn btn-primary"><i data-lucide="search"></i></button>
                 </span>
               </div>
             </div>
@@ -68,7 +68,7 @@
             {% for image in images %}
             <div class="filemanager-item text-center">
               {% if image.type == 'directory' %}
-              <div class="filemanager-thumb"><a href="{{ image.href }}" class="directory"><i class="fa fa-folder fa-5x"></i></a></div>
+              <div class="filemanager-thumb"><a href="{{ image.href }}" class="directory"><i data-lucide="folder" style="width:48px;height:48px"></i></a></div>
               <label>
                 <input type="checkbox" name="path[]" value="{{ image.path }}" />
                 {{ image.name }}</label>
@@ -109,13 +109,21 @@ function fmBuildUrl(directory, filter_name) {
 	return url;
 }
 
+function fmSetIcon($parent, selector, iconName) {
+	var $old = $parent.find(selector);
+	if (!$old.length) return;
+	var cls = $old.attr('class') || '';
+	var $new = $('<i data-lucide="' + iconName + '" class="' + cls + '"></i>');
+	$old.replaceWith($new);
+}
+
 function fmUpdateActiveTree(directory) {
 	// Reset old active branch icons to closed
 	$('.sidebar-tree li.active').each(function() {
 		var $li = $(this);
 		$li.removeClass('expanded');
-		$li.find('> .tree-item .tree-toggle').removeClass('fa-chevron-down').addClass('fa-chevron-right');
-		$li.find('> .tree-item .tree-folder-icon').removeClass('fa-folder-open').addClass('fa-folder');
+		fmSetIcon($li, '> .tree-item .tree-toggle', 'chevron-right');
+		fmSetIcon($li, '> .tree-item .tree-folder-icon', 'folder');
 	});
 	$('.sidebar-tree .tree-item').removeClass('active');
 	$('.sidebar-tree li').removeClass('active');
@@ -125,13 +133,16 @@ function fmUpdateActiveTree(directory) {
 			$li.addClass('active');
 			$li.children('.tree-item').addClass('active');
 			$li.addClass('expanded');
-			$li.find('> .tree-item .tree-toggle').removeClass('fa-chevron-right').addClass('fa-chevron-down');
-			$li.find('> .tree-item .tree-folder-icon').removeClass('fa-folder').addClass('fa-folder-open');
+			fmSetIcon($li, '> .tree-item .tree-toggle', 'chevron-down');
+			fmSetIcon($li, '> .tree-item .tree-folder-icon', 'folder-open');
 			$li.parents('li').addClass('expanded');
-			$li.parents('li').children('.tree-item').find('.tree-toggle').removeClass('fa-chevron-right').addClass('fa-chevron-down');
-			$li.parents('li').children('.tree-item').find('.tree-folder-icon').removeClass('fa-folder').addClass('fa-folder-open');
+			$li.parents('li').children('.tree-item').each(function() {
+				fmSetIcon($(this).parent(), '> .tree-item .tree-toggle', 'chevron-down');
+				fmSetIcon($(this).parent(), '> .tree-item .tree-folder-icon', 'folder-open');
+			});
 		}
 	}
+	lucide.createIcons();
 }
 
 function fmBindEvents() {
@@ -189,12 +200,13 @@ function fmBindEvents() {
 					contentType: false,
 					processData: false,
 					beforeSend: function() {
-						$('#button-upload i').replaceWith('<i class="fa fa-circle-o-notch fa-spin"></i>');
+						$('#button-upload i').replaceWith('<span class="dc-spinner"></span>');
 						$('#button-upload').prop('disabled', true);
 					},
 					complete: function() {
-						$('#button-upload i').replaceWith('<i class="fa fa-upload"></i>');
+						$('#button-upload .dc-spinner').replaceWith('<i data-lucide="upload"></i>');
 						$('#button-upload').prop('disabled', false);
+						lucide.createIcons();
 					},
 					success: function(json) {
 						if (json['error']) {
@@ -224,12 +236,13 @@ function fmBindEvents() {
 		content: function() {
 			html  = '<div class="input-group">';
 			html += '  <input type="text" name="folder" value="" placeholder="{{ entry_folder }}" class="form-control">';
-			html += '  <span class="input-group-btn"><button type="button" title="{{ button_folder }}" id="button-create" class="btn btn-primary"><i class="fa fa-plus-circle"></i></button></span>';
+			html += '  <span class="input-group-btn"><button type="button" title="{{ button_folder }}" id="button-create" class="btn btn-primary"><i data-lucide="plus-circle"></i></button></span>';
 			html += '</div>';
 			return html;
 		}
 	});
 	$('#button-folder').off('shown.bs.popover').on('shown.bs.popover', function() {
+		lucide.createIcons();
 		$('#button-create').off('click').on('click', function() {
 			$.ajax({
 				url: 'index.php?route=common/filemanager/folder&user_token={{ user_token }}&directory=' + encodeURIComponent(fmCurrentDirectory),

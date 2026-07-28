@@ -1,6 +1,6 @@
 <?php
 // Heading
-$_['heading_title']     = 'Search (Manticore)';
+$_['heading_title']     = 'Search';
 $_['heading_title_menu'] = 'Search Index';
 
 // Text

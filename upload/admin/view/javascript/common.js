@@ -76,7 +76,7 @@ $(document).ready(function() {
 
 			var html = '<div id="dcx-error-summary" class="alert alert-danger alert-dismissible">'
 				+ '<button type="button" class="close" data-dismiss="alert">&times;</button>'
-				+ '<p style="margin:0 0 6px;"><i class="fa fa-exclamation-circle"></i> <strong>' + label + '</strong></p>'
+				+ '<p style="margin:0 0 6px;"><i data-lucide="alert-circle" width="16" height="16"></i> <strong>' + label + '</strong></p>'
 				+ '<ul style="margin:0;padding-left:20px;">' + list + '</ul>'
 				+ '</div>';
 
@@ -85,6 +85,7 @@ $(document).ready(function() {
 				$target.children('.alert').first().length
 					? $target.children('.alert').first().after(html)
 					: $target.prepend(html);
+				lucide.createIcons();
 			}
 		}
 	}
@@ -185,11 +186,12 @@ $(document).ready(function() {
 			placement: 'right',
 			trigger: 'manual',
 			content: function() {
-				return '<div style="display:flex;gap:8px;"><button type="button" id="button-image" class="btn btn-primary"><i class="fa fa-pencil"></i></button><button type="button" id="button-clear" class="btn btn-danger"><i class="fa fa-trash-o"></i></button></div>';
+				return '<div style="display:flex;gap:8px;"><button type="button" id="button-image" class="btn btn-primary"><i data-lucide="pencil" width="14" height="14"></i></button><button type="button" id="button-clear" class="btn btn-danger"><i data-lucide="trash-2" width="14" height="14"></i></button></div>';
 			}
 		});
 
 		$element.popover('show');
+		lucide.createIcons();
 
 		$(document).on('click.image-popover', function(e) {
 			if ($(e.target).closest('.popover').length || $(e.target).closest($element).length) {
@@ -215,14 +217,14 @@ $(document).ready(function() {
 					beforeSend: function() {
 						$button.prop('disabled', true);
 						if ($icon.length) {
-							$icon.attr('class', 'fa fa-circle-o-notch fa-spin');
+							$icon.addClass('dc-spin');
 						}
 					},
 					complete: function() {
 						$button.prop('disabled', false);
 
 						if ($icon.length) {
-							$icon.attr('class', 'fa fa-pencil');
+							$icon.removeClass('dc-spin');
 						}
 					},
 					success: function(html) {

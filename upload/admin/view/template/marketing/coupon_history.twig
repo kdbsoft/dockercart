@@ -1,32 +1,28 @@
-<div class="table-responsive">
-  <table class="table table-hover">
-    <thead>
-      <tr>
-        <td class="text-right">{{ column_order_id }}</td>
-        <td class="text-left">{{ column_customer }}</td>
-        <td class="text-right">{{ column_amount }}</td>
-        <td class="text-left">{{ column_date_added }}</td>
-      </tr>
-    </thead>
-    <tbody>
-      {% if histories %}
-      {% for history in histories %}
-      <tr>
-        <td class="text-right">{{ history.order_id }}</td>
-        <td class="text-left">{{ history.customer }}</td>
-        <td class="text-right">{{ history.amount }}</td>
-        <td class="text-left">{{ history.date_added }}</td>
-      </tr>
-      {% endfor %}
-      {% else %}
-      <tr>
-        <td class="text-center" colspan="4">{{ text_no_results }}</td>
-      </tr>
-      {% endif %}
-    </tbody>
-  </table>
+{% if histories %}
+<div class="coupon-history-list">
+  {% for history in histories %}
+  <div class="coupon-history-entry">
+    <div class="coupon-history-entry__icon">
+      <i data-lucide="shopping-bag" width="16" height="16"></i>
+    </div>
+    <div class="coupon-history-entry__info">
+      <div class="coupon-history-entry__title">
+        {{ column_order_id }} #{{ history.order_id }} &mdash; {{ history.customer }}
+      </div>
+      <div class="coupon-history-entry__meta">
+        {{ history.amount }} &middot; {{ history.date_added }}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
 </div>
 <div class="row">
   <div class="col-sm-6 text-left">{{ pagination }}</div>
   <div class="col-sm-6 text-right">{{ results }}</div>
 </div>
+{% else %}
+<div class="coupon-history-empty">
+  <i data-lucide="inbox" width="32" height="32"></i>
+  <p>{{ text_no_results }}</p>
+</div>
+{% endif %}

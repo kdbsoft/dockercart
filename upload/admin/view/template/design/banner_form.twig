@@ -121,7 +121,7 @@
   <div class="page-header">
     <div class="container-fluid">
       <div class="row">
-        <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
+        <div class="col-sm-12 col-lg-offset-2 col-lg-8 col-xl-offset-2 col-xl-8">
           <div class="pull-right">
             <button type="submit" form="form-banner" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary btn--icon"><i data-lucide="save" width="16" height="16"></i></button>
             <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default btn--icon"><i data-lucide="x" width="16" height="16"></i></a>
@@ -151,7 +151,7 @@
 
     <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-banner">
     <div class="row">
-      <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
+      <div class="col-sm-12 col-lg-offset-2 col-lg-8 col-xl-offset-2 col-xl-8">
 
       <div class="dcx-panel">
         <div class="dcx-panel-head">
@@ -164,23 +164,13 @@
           <div class="dcx-fields">
             <div class="dcx-field required">
               <label class="dcx-label">{{ entry_name }}</label>
-              <ul class="nav nav-tabs" id="banner-name-language" style="margin-bottom:8px;border-bottom:1px solid var(--dc-border);">
-                {% for language in languages %}
-                <li {% if loop.first %}class="active"{% endif %}>
-                  <a href="#banner-name-{{ language.language_id }}" data-toggle="tab">
-                    <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
-                  </a>
-                </li>
-                {% endfor %}
-              </ul>
-              <div class="tab-content">
-                {% for language in languages %}
-                <div class="tab-pane {% if loop.first %}active{% endif %}" id="banner-name-{{ language.language_id }}">
-                  <input type="text" name="banner_description[{{ language.language_id }}][name]" value="{{ banner_descriptions[language.language_id].name ?? '' }}" placeholder="{{ entry_name }}" class="form-control" />
-                  {% if error_name[language.language_id] is defined %}<div class="text-danger">{{ error_name[language.language_id] }}</div>{% endif %}
-                </div>
-                {% endfor %}
+              {% for language in languages %}
+              <div class="dc-attr-row__value">
+                <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                <input type="text" name="banner_description[{{ language.language_id }}][name]" value="{{ banner_descriptions[language.language_id].name ?? '' }}" placeholder="{{ entry_name }}" class="form-control" />
               </div>
+              {% if error_name[language.language_id] is defined %}<div class="text-danger">{{ error_name[language.language_id] }}</div>{% endif %}
+              {% endfor %}
             </div>
             <div class="dcx-field">
               <label class="dcx-label" for="input-status">{{ entry_status }}</label>

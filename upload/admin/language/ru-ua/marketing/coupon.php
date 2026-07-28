@@ -54,3 +54,9 @@ $_['text_list_subtitle'] = 'Управляйте купонами скидок';
 $_['text_add_coupon_subtitle'] = 'Создать новый купон скидки';
 
 $_['text_edit_coupon_subtitle'] = 'Редактировать правила и лимиты купона';
+
+// Panel / Card titles
+$_['text_coupon_card'] = 'Купон';
+$_['text_history_card'] = 'История использований';
+$_['text_parameters_card'] = 'Параметры';
+$_['text_select_categories'] = 'Выбор категорий';

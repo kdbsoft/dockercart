@@ -1,9 +1,9 @@
 <div class="panel panel-default">
-  <div class="panel-heading">
-    <div class="panel-heading__icon"><i class="fa fa-shopping-cart"></i></div>
+  <div class="dcx-panel-heading">
+    <div class="dcx-panel-heading__icon"><i data-lucide="shopping-cart"></i></div>
     <div>
-      <h3 class="panel-title">{{ heading_title }}</h3>
-      <div class="panel-heading__subtitle">{{ text_recent_subtitle }}</div>
+      <h3 class="dcx-panel-title">{{ heading_title }}</h3>
+      <div class="dcx-panel-heading__subtitle">{{ text_recent_subtitle }}</div>
     </div>
     <a href="{{ orders_link }}" class="btn btn-default btn-xs pull-right" style="margin-left: 10px;">{{ text_view_all }}</a>
   </div>
@@ -28,7 +28,7 @@
           <td><span class="{{ order.order_status_badge_class }}">{{ order.status }}</span></td>
           <td>{{ order.date_added }}</td>
           <td class="text-right">{{ order.total }}</td>
-          <td class="text-right"><a href="{{ order.view }}" data-toggle="tooltip" title="{{ button_view }}" class="btn btn-info"><i class="fa fa-eye"></i></a></td>
+          <td class="text-right"><a href="{{ order.view }}" title="{{ button_view }}" class="btn btn-info"><i data-lucide="eye"></i></a></td>
         </tr>
         {% endfor %}
         {% else %}

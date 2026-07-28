@@ -32,7 +32,10 @@ $_['text_add_custom_field_subtitle'] = 'Define a new custom field';
 
 $_['text_edit_custom_field_subtitle'] = 'Edit custom field settings';
 
-
+// Panel / Card titles
+$_['text_custom_field_card'] = 'Custom Field';
+$_['text_values_card'] = 'Values';
+$_['text_settings_card'] = 'Settings';
 
 // Column
 $_['column_name']          = 'Custom Field Name';

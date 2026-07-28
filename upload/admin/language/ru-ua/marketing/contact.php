@@ -31,4 +31,7 @@ $_['text_success'] = 'Ваше сообщение успешно отправл�
 
 $_['text_mail_subtitle'] = 'Отправить письма клиентам';
 
+// Panel / Card titles
+$_['text_mail_card'] = 'Почта';
+
 

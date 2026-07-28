@@ -55,4 +55,10 @@ $_['text_add_coupon_subtitle'] = 'Створити новий купон зни�
 
 $_['text_edit_coupon_subtitle'] = 'Редагувати правила та ліміти купона';
 
+// Panel / Card titles
+$_['text_coupon_card'] = 'Купон';
+$_['text_history_card'] = 'Історія використань';
+$_['text_parameters_card'] = 'Параметри';
+$_['text_select_categories'] = 'Вибір категорій';
+
 

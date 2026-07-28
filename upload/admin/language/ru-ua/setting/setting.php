@@ -191,6 +191,7 @@ $_['text_captcha'] = 'Капча';
 $_['text_checkout'] = 'Оформление заказа';
 $_['text_contact'] = 'Контакт';
 $_['text_edit'] = 'Редактировать настройки';
+$_['text_configuration'] = 'Конфигурация';
 $_['text_error'] = 'Обработка ошибок';
 $_['text_general'] = 'Общий';
 $_['text_guest'] = 'Гостевая оплата';

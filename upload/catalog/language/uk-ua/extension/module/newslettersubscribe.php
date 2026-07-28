@@ -10,7 +10,7 @@ $_['entry_email'] 		 = 'Email';
 $_['entry_name'] 		 = 'Ім’я';
 
 //Buttons
-$_['entry_button'] 		 = 'Підписатись <i class="fa fa-long-arrow-right"></i>';
+$_['entry_button'] 		 = 'Підписатись <i data-lucide="arrow-right" width="14" height="14"></i>';
 $_['entry_unbutton'] 	 = 'Відписатись';
 
 //text

@@ -184,51 +184,25 @@
         <div class="dcx-shell">
           <div class="dcx-panel">
             <div class="dcx-panel-head">
-              <div class="dcx-panel-head__icon"><i data-lucide="file-text" width="18" height="18"></i></div>
+              <div class="dcx-panel-head__icon"><i data-lucide="layout" width="18" height="18"></i></div>
               <div>
-                <div class="dcx-panel-title">{{ tab_description }}</div>
+                <div class="dcx-panel-title">{{ text_form }}</div>
               </div>
             </div>
             <div class="dcx-panel-body">
-              <ul class="nav nav-tabs" id="layout-name-language">
-                {% for language in languages %}
-                <li {% if loop.first %}class="active"{% endif %}>
-                  <a href="#layout-name-{{ language.language_id }}" data-toggle="tab">
-                    <span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}
-                  </a>
-                </li>
-                {% endfor %}
-              </ul>
-              <div class="tab-content">
-                {% for language in languages %}
-                <div class="tab-pane {% if loop.first %}active{% endif %}" id="layout-name-{{ language.language_id }}">
-                  <div class="dcx-fields">
-                    <div class="dcx-field required">
-                      <label class="dcx-label" for="input-name{{ language.language_id }}">{{ entry_name }}</label>
-                      <input type="text" name="layout_description[{{ language.language_id }}][name]" value="{{ layout_descriptions[language.language_id].name ?? '' }}" placeholder="{{ entry_name }}" id="input-name{{ language.language_id }}" class="form-control" />
-                      {% if error_name[language.language_id] is defined %}<div class="text-danger">{{ error_name[language.language_id] }}</div>{% endif %}
-                    </div>
+              <div class="dcx-fields">
+                <div class="dcx-field required">
+                  <label class="dcx-label">{{ entry_name }}</label>
+                  {% for language in languages %}
+                  <div class="dc-attr-row__value">
+                    <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                    <input type="text" name="layout_description[{{ language.language_id }}][name]" value="{{ layout_descriptions[language.language_id].name ?? '' }}" placeholder="{{ entry_name }}" class="form-control" />
                   </div>
+                  {% if error_name[language.language_id] is defined %}<div class="text-danger">{{ error_name[language.language_id] }}</div>{% endif %}
+                  {% endfor %}
                 </div>
-                {% endfor %}
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="row dc-mt-md">
-      <div class="col-md-12 col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
-        <div class="dcx-shell">
-          <div class="dcx-panel">
-            <div class="dcx-panel-head">
-              <div class="dcx-panel-head__icon"><i data-lucide="navigation" width="18" height="18"></i></div>
-              <div>
-                <div class="dcx-panel-title">{{ text_routes_card }}</div>
-              </div>
-            </div>
-            <div class="dcx-panel-body">
-              <div class="dcx-tip-banner">
+              <div class="dcx-tip-banner" style="margin-top: 16px;">
                 <i data-lucide="info" width="16" height="16"></i> {{ text_route }}
               </div>
               {% set route_row = 0 %}

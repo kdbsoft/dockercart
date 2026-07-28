@@ -16,6 +16,8 @@ $_['text_add_marketing_subtitle'] = 'Add a new marketing campaign';
 
 $_['text_edit_marketing_subtitle'] = 'Edit marketing tracking source';
 
+// Panel / Card titles
+$_['text_campaign_card'] = 'Campaign';
 
 		
 // Column

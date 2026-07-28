@@ -6,6 +6,7 @@ $_['heading_title']                  = 'Settings';
 $_['text_stores']                    = 'Stores';
 $_['text_success']                   = 'Success: You have modified settings!';
 $_['text_edit']                      = 'Edit Setting';
+$_['text_configuration']             = 'Configuration';
 $_['text_product']                   = 'Products';
 $_['text_review']                    = 'Reviews';
 $_['text_voucher']                   = 'Vouchers';

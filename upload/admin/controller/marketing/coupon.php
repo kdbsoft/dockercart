@@ -260,6 +260,11 @@ class ControllerMarketingCoupon extends Controller {
 		    ? $this->language->get('text_add_coupon_subtitle')
 		    : $this->language->get('text_edit_coupon_subtitle');
 
+		$data['text_coupon_card'] = $this->language->get('text_coupon_card');
+		$data['text_history_card'] = $this->language->get('text_history_card');
+		$data['text_parameters_card'] = $this->language->get('text_parameters_card');
+		$data['text_select_categories'] = $this->language->get('text_select_categories');
+
 		$data['user_token'] = $this->session->data['user_token'];
 
 		if (isset($this->request->get['coupon_id'])) {
@@ -343,6 +348,8 @@ class ControllerMarketingCoupon extends Controller {
 		} else {
 			$data['name'] = '';
 		}
+
+		$data['coupon_name'] = $data['name'] ?: $this->language->get('text_form');
 
 		if (isset($this->request->post['code'])) {
 			$data['code'] = $this->request->post['code'];

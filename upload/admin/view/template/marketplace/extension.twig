@@ -2,25 +2,32 @@
 <div id="content">
   <div class="page-header">
     <div class="container-fluid">
-      <h1>{{ heading_title }}</h1>
-      <ul class="breadcrumb">
-        {% for breadcrumb in breadcrumbs %}
-        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
-        {% endfor %}
-      </ul>
+      <div class="row">
+        <div class="col-sm-12">
+          <h1 class="page-header__title">{{ heading_title }}</h1>
+        </div>
+      </div>
     </div>
   </div>
 
   <div class="container-fluid">
 
     {% if error_warning %}
-    <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle"></i> {{ error_warning }}
-      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+      </div>
     </div>
     {% endif %}
     {% if success %}
-    <div id="ext-alert-success" class="alert alert-success alert-dismissible"><i data-lucide="check-circle"></i> {{ success }}
-      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <div class="row">
+      <div class="col-sm-12">
+        <div id="ext-alert-success" class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> {{ success }}
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+      </div>
     </div>
     {% endif %}
 
@@ -38,33 +45,39 @@
       #content .ext-type-btn svg[data-lucide] { width: 14px; height: 14px; vertical-align: -2px; margin-right: 4px; }
       #content .ext-empty-state svg[data-lucide], #ext-empty-state svg[data-lucide] { width: 48px; height: 48px; }
     </style>
-    <div class="panel panel-default">
-      <div class="panel-body" style="padding-bottom:8px;">
-        <div class="ext-toolbar-row">
-          <div class="ext-toolbar-search">
-            <div class="input-group">
-              <span class="input-group-addon"><i data-lucide="search"></i></span>
-              <input type="text" id="ext-search" class="form-control" placeholder="{{ text_search }}" autocomplete="off">
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="dcx-shell">
+          <div class="dcx-panel">
+            <div class="dcx-panel-body" style="padding-bottom:8px;">
+              <div class="ext-toolbar-row">
+                <div class="ext-toolbar-search">
+                  <div class="input-group">
+                    <span class="input-group-addon"><i data-lucide="search" width="16" height="16"></i></span>
+                    <input type="text" id="ext-search" class="form-control" placeholder="{{ text_search }}" autocomplete="off">
+                  </div>
+                </div>
+                <div class="ext-toolbar-filters">
+                  <label class="checkbox-inline" style="font-weight:normal;cursor:pointer;margin:0;">
+                    <input type="checkbox" id="ext-filter-installed"> {{ text_installed }}
+                  </label>
+                  <span id="ext-visible-count" class="text-muted" style="font-size:12px;"></span>
+                </div>
+              </div>
+              <div class="ext-type-filter" id="ext-type-filter" role="group">
+                <button type="button" class="ext-type-btn {% if filter_type == '' or filter_type == 'all' %}active{% endif %}" data-type="all">
+                  {{ text_all }}
+                </button>
+                {% for tf in type_filters %}
+                <button type="button" class="ext-type-btn {% if filter_type == tf.type %}active{% endif %}" data-type="{{ tf.type }}">
+                  <i data-lucide="{{ tf.icon }}"></i>
+                  {{ tf.label }}
+                  <span class="ext-type-count">{{ tf.count }}</span>
+                </button>
+                {% endfor %}
+              </div>
             </div>
           </div>
-          <div class="ext-toolbar-filters">
-            <label class="checkbox-inline" style="font-weight:normal;cursor:pointer;margin:0;">
-              <input type="checkbox" id="ext-filter-installed"> {{ text_installed }}
-            </label>
-            <span id="ext-visible-count" class="text-muted" style="font-size:12px;"></span>
-          </div>
-        </div>
-        <div class="ext-type-filter" id="ext-type-filter" role="group">
-          <button type="button" class="ext-type-btn {% if filter_type == '' or filter_type == 'all' %}active{% endif %}" data-type="all">
-            {{ text_all }}
-          </button>
-          {% for tf in type_filters %}
-          <button type="button" class="ext-type-btn {% if filter_type == tf.type %}active{% endif %}" data-type="{{ tf.type }}">
-            <i data-lucide="{{ tf.icon }}"></i>
-            {{ tf.label }}
-            <span class="ext-type-count">{{ tf.count }}</span>
-          </button>
-          {% endfor %}
         </div>
       </div>
     </div>
