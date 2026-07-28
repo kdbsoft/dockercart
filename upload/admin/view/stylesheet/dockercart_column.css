@@ -144,6 +144,13 @@
 	background: rgba(255, 255, 255, 0.1);
 }
 
+/* ── Sidebar toggle icons ── */
+
+#column-left:not(.collapsed) .dc-sidebar-icon-collapsed,
+#column-left.collapsed .dc-sidebar-icon-expanded {
+	display: none;
+}
+
 .nav-text {
 	white-space: nowrap;
 	overflow: hidden;
