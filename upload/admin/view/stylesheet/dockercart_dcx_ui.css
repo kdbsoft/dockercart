@@ -1422,7 +1422,7 @@ div.dcx-field.required > .dcx-label:before {
 /* ── Option axis / configurable mode ── */
 .dc-opts-axis-hidden .dc-option-axis { display: none; }
 .dc-opt-card__field--locked { opacity: 0.55; position: relative; }
-.dc-opt-card__field--locked::after { content: "\f023"; font-family: FontAwesome; position: absolute; top: 4px; right: 6px; font-size: 11px; color: #888; }
+.dc-opt-card__field--locked::after { content: "\1F512"; position: absolute; top: 4px; right: 6px; font-size: 11px; color: #888; }
 .dc-opt-card__field--locked input[readonly] { background-color: #f5f5f5; cursor: not-allowed; }
 .dc-opt-card__cg-row .form-control,
 .dc-opt-card__cg-row .option-value-prefix-select,
