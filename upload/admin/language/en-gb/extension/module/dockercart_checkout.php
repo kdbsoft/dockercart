@@ -22,6 +22,11 @@ $_["tab_license"] = "License (GPL-3.0)";
 // General Settings
 $_["entry_status"] = "Module Status";
 $_["help_status"] = "Enable or disable the checkout module";
+$_["text_checkout_settings"] = "Checkout Settings";
+$_["text_select"] = "--- None ---";
+$_["text_select_country_first"] = "Select a country first, then choose a region";
+$_["column_block_fields"] = "Fields";
+$_["text_country_region_always_visible"] = "Country and Region are always visible";
 
 $_["entry_redirect_standard"] = "Redirect Standard Checkout";
 $_["help_redirect_standard"] =
@@ -187,6 +192,10 @@ $_["text_license_checking"] =
     "License key verification is disabled in the GPL version";
 
 // Buttons
+$_["text_active"] = "Active";
+$_["text_inactive"] = "Inactive";
+$_["text_module_description"] = "One-page checkout configuration for DockerCart";
+
 $_["button_save"] = "Save";
 $_["button_cancel"] = "Cancel";
 $_["button_apply"] = "Apply";
