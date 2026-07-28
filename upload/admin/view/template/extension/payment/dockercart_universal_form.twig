@@ -1,46 +1,29 @@
 {{ header }}{{ column_left }}
 <div id="content">
-
-<style>
-/* Form-specific styles for universal payment */
-.dc-lang-tabs { margin-bottom:10px !important; }
-.dc-lang-tabs > li > a { padding:6px 12px; font-size:12px; display:flex; align-items:center; gap:6px; }
-.dc-lang-tabs > li > a img { width:16px; height:12px; object-fit:cover; border-radius:2px; }
-.dc-lang-pane { display:none; }
-.dc-lang-pane.active { display:block; }
-.dc-condition-row { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-bottom:16px; }
-.dc-condition-group { background:#f8fafc; border:1px solid #e8edf6; border-radius:8px; padding:14px 16px; }
-.dc-condition-group--shipping { grid-column: 1 / -1; }
-.dc-shipping-methods-select { width: 100%; min-height: 260px; font-size: 12px; }
-.dc-condition-group h5 { margin:0 0 10px 0; font-size:13px; font-weight:600; color:#4a5568; display:flex; align-items:center; gap:6px; }
-.dc-condition-group h5 i { color:#2f65b9; font-size:14px; }
-.dc-condition-group .dcx-field { margin-left:0; margin-right:0; }
-.dc-condition-group .dcx-label { margin-bottom:6px; text-align:left; }
-@media (max-width: 991px) {
-  .dc-condition-row { grid-template-columns:1fr; }
-}
-</style>
-
-  <div class="page-header">
-    <div class="container-fluid">
+  <div class="container-fluid">
+    <div class="page-header">
       <div class="row">
-        <div class="col-lg-offset-2 col-lg-7 col-xl-offset-1 col-xl-7">
+        <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
           <div class="pull-right">
-            <button type="submit" form="form-method" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary btn--icon">
-              <i data-lucide="save" width="16" height="16"></i>
-            </button>
-            <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default btn--icon">
-              <i data-lucide="x" width="16" height="16"></i>
-            </a>
+            <button type="submit" form="form-method" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary btn--icon"><i data-lucide="save" width="16" height="16"></i></button>
+            <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default btn--icon"><i data-lucide="x" width="16" height="16"></i></a>
           </div>
           <a href="{{ cancel }}" class="page-header__link">
             <span class="page-header__back"><i data-lucide="arrow-left" width="20" height="20"></i></span>
-            <span class="page-header__title">{{ heading_title }}</span>
+            <span class="page-header__title">
+              {{ heading_title }}
+              {% if status is defined %}
+              <span class="page-header__badge {{ status ? 'page-header__badge--active' : 'page-header__badge--inactive' }}">
+                {{ status ? text_active : text_inactive }}
+              </span>
+              {% endif %}
+            </span>
           </a>
         </div>
+      </div>
       {% if error_warning %}
       <div class="row">
-        <div class="col-lg-offset-2 col-lg-7 col-xl-offset-1 col-xl-7">
+        <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
           <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
@@ -49,10 +32,9 @@
       {% endif %}
     </div>
   </div>
-
   <div class="container-fluid">
     <div class="row">
-      <div class="col-lg-offset-2 col-lg-7 col-xl-offset-1 col-xl-7">
+      <div class="col-md-12 col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
         <div class="dcx-shell">
           <div class="dcx-panel">
             <div class="dcx-panel-head">
@@ -63,27 +45,19 @@
               </div>
             </div>
             <div class="dcx-panel-body">
-
-              <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-method" class="dcx-form">
-
+              <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-method">
                 <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
                   <h4><i data-lucide="languages" width="16" height="16"></i> {{ text_name_description }}</h4>
-
-                  <ul class="nav nav-tabs dc-lang-tabs" id="lang-tabs">
+                  <ul class="nav nav-tabs" id="lang-tabs">
                     {% for language in languages %}
                     <li{% if loop.first %} class="active"{% endif %}>
-                      <a href="#lang-{{ language.language_id }}" data-toggle="tab">
-                        <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
-                        {{ language.name }}
-                      </a>
+                      <a href="#lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a>
                     </li>
                     {% endfor %}
                   </ul>
-
                   <div class="tab-content">
                     {% for language in languages %}
-                    <div class="tab-pane dc-lang-pane{% if loop.first %} active{% endif %}" id="lang-{{ language.language_id }}">
-
+                    <div class="tab-pane{% if loop.first %} active{% endif %}" id="lang-{{ language.language_id }}">
                       <div class="dcx-fields">
                         <div class="dcx-field{% if error_name[language.language_id] %} has-error{% endif %}">
                           <label class="dcx-label" for="input-name-{{ language.language_id }}">{{ entry_name }} <span class="text-danger">*</span></label>
@@ -92,73 +66,56 @@
                           <div class="text-danger">{{ error_name[language.language_id] }}</div>
                           {% endif %}
                         </div>
-
                         <div class="dcx-field">
                           <label class="dcx-label" for="input-description-{{ language.language_id }}">{{ entry_description }}</label>
                           <textarea name="method_description[{{ language.language_id }}][description]" rows="4" placeholder="{{ entry_description }}" id="input-description-{{ language.language_id }}" class="form-control">{{ method_description[language.language_id].description }}</textarea>
                           <div class="help-block">{{ help_description }}</div>
                         </div>
                       </div>
-
                     </div>
                     {% endfor %}
                   </div>
                 </div>
-
                 <div class="dcx-section">
                   <h4><i data-lucide="filter" width="16" height="16"></i> {{ text_conditions }}</h4>
-
-                  <div class="dc-condition-row">
-                    <div class="dc-condition-group">
-                      <h5><i data-lucide="globe" width="14" height="14"></i> {{ text_geo_restriction }}</h5>
-                      <div class="dcx-field" style="margin-bottom:0;">
-                        <label class="dcx-label">{{ entry_geo_zone }}</label>
-                        <select name="geo_zone_id" class="form-control">
-                          <option value="0">{{ text_all_zones }}</option>
-                          {% for geo_zone in geo_zones %}
-                          <option value="{{ geo_zone.geo_zone_id }}"{% if geo_zone.geo_zone_id == geo_zone_id %} selected{% endif %}>{{ geo_zone.name }}</option>
-                          {% endfor %}
-                        </select>
-                      </div>
+                  <div class="dcx-fields dcx-fields--row">
+                    <div class="dcx-field">
+                      <label class="dcx-label">{{ entry_geo_zone }}</label>
+                      <select name="geo_zone_id" class="form-control">
+                        <option value="0">{{ text_all_zones }}</option>
+                        {% for geo_zone in geo_zones %}
+                        <option value="{{ geo_zone.geo_zone_id }}"{% if geo_zone.geo_zone_id == geo_zone_id %} selected{% endif %}>{{ geo_zone.name }}</option>
+                        {% endfor %}
+                      </select>
                     </div>
-
-                    <div class="dc-condition-group">
-                      <h5><i data-lucide="shopping-cart" width="14" height="14"></i> {{ text_order_total_range }}</h5>
-                      <div class="dcx-field" style="margin-bottom:8px;">
-                        <label class="dcx-label">{{ entry_min_total }}</label>
-                        <input type="text" name="min_total" value="{{ min_total }}" placeholder="0.00" class="form-control" />
-                      </div>
-                      <div class="dcx-field" style="margin-bottom:0;">
-                        <label class="dcx-label">{{ entry_max_total }}</label>
-                        <input type="text" name="max_total" value="{{ max_total }}" placeholder="{{ text_unlimited }}" class="form-control" />
-                      </div>
+                    <div class="dcx-field">
+                      <label class="dcx-label">{{ entry_min_total }}</label>
+                      <input type="text" name="min_total" value="{{ min_total }}" placeholder="0.00" class="form-control" />
                     </div>
-
-                    <div class="dc-condition-group dc-condition-group--shipping">
-                      <h5><i data-lucide="truck" width="14" height="14"></i> {{ text_shipping_dependency }}</h5>
-                      <div class="dcx-field" style="margin-bottom:0;">
-                        <label class="dcx-label">{{ entry_shipping_methods }}</label>
-                        <select name="shipping_methods[]" class="form-control dc-shipping-methods-select" multiple size="10">
-                          {% for shipping_method in available_shipping_methods %}
-                          <option value="{{ shipping_method.code }}" title="{{ shipping_method.label }}"{% if shipping_method.code in shipping_methods %} selected{% endif %}>{{ shipping_method.label }}</option>
-                          {% endfor %}
-                        </select>
-                        <div class="help-block">{{ help_shipping_methods }}</div>
-                        {% if not available_shipping_methods %}
-                        <div class="help-block text-warning">{{ text_no_shipping_methods_available }}</div>
-                        {% endif %}
-                      </div>
+                    <div class="dcx-field">
+                      <label class="dcx-label">{{ entry_max_total }}</label>
+                      <input type="text" name="max_total" value="{{ max_total }}" placeholder="{{ text_unlimited }}" class="form-control" />
                     </div>
                   </div>
+                  <div class="dcx-field">
+                    <label class="dcx-label">{{ entry_shipping_methods }}</label>
+                    <select name="shipping_methods[]" class="form-control" multiple size="10" style="max-width:400px;">
+                      {% for shipping_method in available_shipping_methods %}
+                      <option value="{{ shipping_method.code }}" title="{{ shipping_method.label }}"{% if shipping_method.code in shipping_methods %} selected{% endif %}>{{ shipping_method.label }}</option>
+                      {% endfor %}
+                    </select>
+                    <div class="help-block">{{ help_shipping_methods }}</div>
+                    {% if not available_shipping_methods %}
+                    <div class="help-block text-warning">{{ text_no_shipping_methods_available }}</div>
+                    {% endif %}
+                  </div>
                 </div>
-
                 <div class="dcx-section">
                   <h4><i data-lucide="settings" width="16" height="16"></i> {{ text_status_sorting }}</h4>
-
-                  <div class="dcx-fields">
+                  <div class="dcx-fields dcx-fields--row">
                     <div class="dcx-field">
                       <label class="dcx-label" for="input-status">{{ entry_status }}</label>
-                      <select name="status" id="input-status" class="form-control" style="max-width:180px;">
+                      <select name="status" id="input-status" class="form-control">
                         {% if status %}
                         <option value="1" selected>{{ text_enabled }}</option>
                         <option value="0">{{ text_disabled }}</option>
@@ -168,14 +125,12 @@
                         {% endif %}
                       </select>
                     </div>
-
                     <div class="dcx-field">
                       <label class="dcx-label" for="input-sort-order">{{ entry_sort_order }}</label>
                       <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="0" id="input-sort-order" class="form-control" style="max-width:100px;" />
                     </div>
                   </div>
                 </div>
-
               </form>
             </div>
           </div>
@@ -184,15 +139,4 @@
     </div>
   </div>
 </div>
-
-<script>
-$(function() {
-  $('#lang-tabs a').click(function(e) {
-    e.preventDefault();
-    $(this).tab('show');
-    $('.dc-lang-pane').removeClass('active');
-    $($(this).attr('href')).addClass('active');
-  });
-});
-</script>
 {{ footer }}
