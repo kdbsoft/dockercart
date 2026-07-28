@@ -356,8 +356,11 @@ select.form-control {
     background-repeat: no-repeat;
     background-position: right 12px center;
     padding-right: 38px;
-    height: 34px;
-    line-height: 1.42857143;
+}
+
+select[multiple].form-control {
+    height: auto;
+    padding-right: 12px;
 }
 
 .table .form-control {

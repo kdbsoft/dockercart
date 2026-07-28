@@ -115,6 +115,10 @@
 .dcx-fields--row {
     flex-direction: row;
     flex-wrap: wrap;
+    margin-top: 12px;
+}
+.dcx-fields--row:first-child {
+    margin-top: 0;
 }
 .dcx-fields--row .dcx-field {
     flex: 1 1 0;
@@ -1340,6 +1344,14 @@ div.dcx-field.required > .dcx-label:before {
     display: flex;
     flex-direction: column;
     gap: 4px;
+}
+
+.dcx-fields > .dcx-checkbox-group {
+    margin-top: -8px;
+}
+
+.dcx-fields > .dcx-field:has(> .dcx-checkbox-group):not(:first-child) {
+    margin-top: -10px;
 }
 
 .dcx-checkbox-label {
