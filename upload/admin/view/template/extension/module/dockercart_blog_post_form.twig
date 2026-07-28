@@ -149,16 +149,14 @@
               </select>
             </div>
             <div class="dcx-sidebar-card__field">
-              <label class="dcx-sidebar-card__checkbox">
-                <input type="checkbox" name="featured" value="1" {% if featured %}checked="checked"{% endif %} id="input-featured" />
-                <span>{{ entry_featured }}</span>
-              </label>
-            </div>
-            <div class="dcx-sidebar-card__field">
-              <label class="dcx-sidebar-card__checkbox">
-                <input type="checkbox" name="allow_comments" value="1" {% if allow_comments %}checked="checked"{% endif %} id="input-allow-comments" />
-                <span>{{ entry_allow_comments }}</span>
-              </label>
+              <div class="dcx-checkbox-group">
+                <label class="dcx-checkbox-label">
+                  <input type="checkbox" name="featured" value="1" {% if featured %}checked="checked"{% endif %} id="input-featured" /> {{ entry_featured }}
+                </label>
+                <label class="dcx-checkbox-label">
+                  <input type="checkbox" name="allow_comments" value="1" {% if allow_comments %}checked="checked"{% endif %} id="input-allow-comments" /> {{ entry_allow_comments }}
+                </label>
+              </div>
             </div>
             <div class="dcx-sidebar-card__field">
               <label class="dcx-sidebar-card__label" for="input-sort-order">{{ entry_sort_order }}</label>
