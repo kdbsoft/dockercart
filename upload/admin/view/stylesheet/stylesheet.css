@@ -2092,8 +2092,7 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
 }
 
 .list-check li::before {
-    font-family: 'FontAwesome';
-    content: '\f00c';
+    content: '\2713';
     margin-left: -30px;
     width: 29px;
     display: inline-block;
