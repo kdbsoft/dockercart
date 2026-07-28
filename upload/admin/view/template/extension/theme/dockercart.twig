@@ -1,11 +1,9 @@
 {{ header }}{{ column_left }}
 <div id="content">
   <div class="container-fluid">
-  <div class="page-header">
-
-
+    <div class="page-header">
       <div class="row">
-        <div class="col-md-12 col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
+        <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
           <div class="pull-right">
             <button type="submit" form="form-theme" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary btn--icon"><i data-lucide="save" width="16" height="16"></i></button>
             <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default btn--icon"><i data-lucide="x" width="16" height="16"></i></a>
@@ -22,27 +20,30 @@
             </span>
           </a>
         </div>
-          {% if error_warning %}
+      </div>
+      {% if error_warning %}
       <div class="row">
-        <div class="col-md-12 col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
+        <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
           <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
         </div>
       </div>
       {% endif %}
-
-        </div>
-
-    <div class="section-heading">
-      <h2>{{ text_edit }}</h2>
-      <p class="section-heading-subtitle">{{ text_edit_subtitle }}</p>
-      </div>
-</div>
-<div class="container-fluid"><div class="row">
+    </div>
+  </div>
+  <div class="container-fluid">
+    <div class="row">
       <div class="col-md-12 col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
         <div class="dcx-shell">
           <div class="dcx-panel">
+            <div class="dcx-panel-head">
+              <div class="dcx-panel-head__icon"><i data-lucide="settings" width="18" height="18"></i></div>
+              <div>
+                <div class="dcx-panel-title">{{ text_edit }}</div>
+                <div class="dcx-panel-subtitle">{{ text_edit_subtitle }}</div>
+              </div>
+            </div>
             <div class="dcx-panel-body">
               <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-theme">
                 <div class="dcx-fields">
@@ -121,11 +122,11 @@
                   </div>
                   <div class="dcx-field required">
                     <label class="dcx-label" for="input-image-category-width">{{ entry_image_category }}</label>
-                    <div class="row">
-                      <div class="col-sm-6">
+                    <div class="dcx-fields dcx-fields--row">
+                      <div class="dcx-field">
                         <input type="text" name="theme_dockercart_image_category_width" value="{{ theme_dockercart_image_category_width }}" placeholder="{{ entry_width }}" id="input-image-category-width" class="form-control" />
                       </div>
-                      <div class="col-sm-6">
+                      <div class="dcx-field">
                         <input type="text" name="theme_dockercart_image_category_height" value="{{ theme_dockercart_image_category_height }}" placeholder="{{ entry_height }}" class="form-control" />
                       </div>
                     </div>
@@ -135,11 +136,11 @@
                   </div>
                   <div class="dcx-field required">
                     <label class="dcx-label" for="input-image-product-width">{{ entry_image_product }}</label>
-                    <div class="row">
-                      <div class="col-sm-6">
+                    <div class="dcx-fields dcx-fields--row">
+                      <div class="dcx-field">
                         <input type="text" name="theme_dockercart_image_product_width" value="{{ theme_dockercart_image_product_width }}" placeholder="{{ entry_width }}" id="input-image-product-width" class="form-control" />
                       </div>
-                      <div class="col-sm-6">
+                      <div class="dcx-field">
                         <input type="text" name="theme_dockercart_image_product_height" value="{{ theme_dockercart_image_product_height }}" placeholder="{{ entry_height }}" class="form-control" />
                       </div>
                     </div>
@@ -149,11 +150,11 @@
                   </div>
                   <div class="dcx-field required">
                     <label class="dcx-label" for="input-image-additional-width">{{ entry_image_additional }}</label>
-                    <div class="row">
-                      <div class="col-sm-6">
+                    <div class="dcx-fields dcx-fields--row">
+                      <div class="dcx-field">
                         <input type="text" name="theme_dockercart_image_additional_width" value="{{ theme_dockercart_image_additional_width }}" placeholder="{{ entry_width }}" id="input-image-additional-width" class="form-control" />
                       </div>
-                      <div class="col-sm-6">
+                      <div class="dcx-field">
                         <input type="text" name="theme_dockercart_image_additional_height" value="{{ theme_dockercart_image_additional_height }}" placeholder="{{ entry_height }}" class="form-control" />
                       </div>
                     </div>
@@ -163,11 +164,11 @@
                   </div>
                   <div class="dcx-field required">
                     <label class="dcx-label" for="input-image-related">{{ entry_image_related }}</label>
-                    <div class="row">
-                      <div class="col-sm-6">
+                    <div class="dcx-fields dcx-fields--row">
+                      <div class="dcx-field">
                         <input type="text" name="theme_dockercart_image_related_width" value="{{ theme_dockercart_image_related_width }}" placeholder="{{ entry_width }}" id="input-image-related" class="form-control" />
                       </div>
-                      <div class="col-sm-6">
+                      <div class="dcx-field">
                         <input type="text" name="theme_dockercart_image_related_height" value="{{ theme_dockercart_image_related_height }}" placeholder="{{ entry_height }}" class="form-control" />
                       </div>
                     </div>
@@ -177,11 +178,11 @@
                   </div>
                   <div class="dcx-field required">
                     <label class="dcx-label" for="input-image-compare">{{ entry_image_compare }}</label>
-                    <div class="row">
-                      <div class="col-sm-6">
+                    <div class="dcx-fields dcx-fields--row">
+                      <div class="dcx-field">
                         <input type="text" name="theme_dockercart_image_compare_width" value="{{ theme_dockercart_image_compare_width }}" placeholder="{{ entry_width }}" id="input-image-compare" class="form-control" />
                       </div>
-                      <div class="col-sm-6">
+                      <div class="dcx-field">
                         <input type="text" name="theme_dockercart_image_compare_height" value="{{ theme_dockercart_image_compare_height }}" placeholder="{{ entry_height }}" class="form-control" />
                       </div>
                     </div>
@@ -191,11 +192,11 @@
                   </div>
                   <div class="dcx-field required">
                     <label class="dcx-label" for="input-image-wishlist">{{ entry_image_wishlist }}</label>
-                    <div class="row">
-                      <div class="col-sm-6">
+                    <div class="dcx-fields dcx-fields--row">
+                      <div class="dcx-field">
                         <input type="text" name="theme_dockercart_image_wishlist_width" value="{{ theme_dockercart_image_wishlist_width }}" placeholder="{{ entry_width }}" id="input-image-wishlist" class="form-control" />
                       </div>
-                      <div class="col-sm-6">
+                      <div class="dcx-field">
                         <input type="text" name="theme_dockercart_image_wishlist_height" value="{{ theme_dockercart_image_wishlist_height }}" placeholder="{{ entry_height }}" class="form-control" />
                       </div>
                     </div>
@@ -205,11 +206,11 @@
                   </div>
                   <div class="dcx-field required">
                     <label class="dcx-label" for="input-image-cart">{{ entry_image_cart }}</label>
-                    <div class="row">
-                      <div class="col-sm-6">
+                    <div class="dcx-fields dcx-fields--row">
+                      <div class="dcx-field">
                         <input type="text" name="theme_dockercart_image_cart_width" value="{{ theme_dockercart_image_cart_width }}" placeholder="{{ entry_width }}" id="input-image-cart" class="form-control" />
                       </div>
-                      <div class="col-sm-6">
+                      <div class="dcx-field">
                         <input type="text" name="theme_dockercart_image_cart_height" value="{{ theme_dockercart_image_cart_height }}" placeholder="{{ entry_height }}" class="form-control" />
                       </div>
                     </div>
@@ -219,11 +220,11 @@
                   </div>
                   <div class="dcx-field required">
                     <label class="dcx-label" for="input-image-location">{{ entry_image_location }}</label>
-                    <div class="row">
-                      <div class="col-sm-6">
+                    <div class="dcx-fields dcx-fields--row">
+                      <div class="dcx-field">
                         <input type="text" name="theme_dockercart_image_location_width" value="{{ theme_dockercart_image_location_width }}" placeholder="{{ entry_width }}" id="input-image-location" class="form-control" />
                       </div>
-                      <div class="col-sm-6">
+                      <div class="dcx-field">
                         <input type="text" name="theme_dockercart_image_location_height" value="{{ theme_dockercart_image_location_height }}" placeholder="{{ entry_height }}" class="form-control" />
                       </div>
                     </div>
