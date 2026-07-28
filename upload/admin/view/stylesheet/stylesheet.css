@@ -372,6 +372,7 @@ select[multiple].form-control {
 .table select.form-control {
     padding-right: 32px;
     background-size: 14px;
+    line-height: normal;
 }
 
 textarea.form-control {
