@@ -110,8 +110,8 @@
                         {% endif %}
                       </div>
                       <div class="dc-shipping-item__actions">
-                        <a href="{{ method.edit }}" class="btn btn-info btn--icon" data-toggle="tooltip" title="{{ button_edit }}"><i data-lucide="pencil" width="14" height="14"></i></a>
-                        <button type="button" class="btn btn-danger btn--icon btn-delete" data-method-id="{{ method.method_id }}" data-toggle="tooltip" title="{{ button_delete }}"><i data-lucide="trash-2" width="14" height="14"></i></button>
+                        <a href="{{ method.edit }}" class="btn btn-info btn-xs btn--icon" data-toggle="tooltip" title="{{ button_edit }}"><i data-lucide="pencil" width="12" height="12"></i></a>
+                        <button type="button" class="btn btn-danger btn-xs btn--icon btn-delete" data-method-id="{{ method.method_id }}" data-toggle="tooltip" title="{{ button_delete }}"><i data-lucide="trash-2" width="12" height="12"></i></button>
                       </div>
                     </div>
                     {% endfor %}
@@ -231,5 +231,15 @@ $(function() {
   text-align: center;
 }
 .dc-shipping-empty p { margin: 0; font-size: 13px; }
+.dc-shipping-item__actions .btn-xs.btn--icon {
+  padding: 4px;
+  min-width: 26px;
+  min-height: 24px;
+}
+.dc-shipping-item__actions .btn-xs.btn--icon i,
+.dc-shipping-item__actions .btn-xs.btn--icon svg {
+  width: 12px;
+  height: 12px;
+}
 </style>
 {{ footer }}
