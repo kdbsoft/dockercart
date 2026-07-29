@@ -664,6 +664,14 @@ class ControllerProductProduct extends Controller {
 				$axes = $pc->getConfigurableOptions($product_id);
 				$default_variant = !empty($configurable['default_variant_id']) ? $pc->getVariant($configurable['default_variant_id']) : array();
 
+				// If ?variant_id matches the default variant, 301 redirect to clean product URL
+				$variant_from_url = isset($this->request->get['variant_id']) ? (int)$this->request->get['variant_id'] : 0;
+				if ($variant_from_url && !empty($configurable['default_variant_id']) && (int)$configurable['default_variant_id'] === $variant_from_url) {
+					$clean_url = $this->url->link('product/product', 'product_id=' . $product_id);
+					$this->response->redirect($clean_url, 301);
+					exit();
+				}
+
 				$axis_option_ids = array_column($axes, 'option_id');
 				$formatted_axes = array();
 
@@ -742,6 +750,16 @@ class ControllerProductProduct extends Controller {
 						$currency_code, '', false
 					);
 				}
+
+				// Variant tax (formatted string for display)
+				$variant['tax_text'] = '';
+				if ($this->config->get('config_tax')) {
+					$tax_price_for_variant = isset($variant['special']) ? (float)$variant['special'] : (float)$variant['price'];
+					$variant['tax_text'] = $this->currency->format(
+						$this->tax->calculate($tax_price_for_variant, $tax_class_id, $tax),
+						$this->session->data['currency']
+					);
+				}
 			}
 			unset($variant);
 
@@ -801,12 +819,21 @@ class ControllerProductProduct extends Controller {
 					$v_price = isset($v['price']) && $v['price'] !== '' ? (float)$v['price'] : $base_price_fallback;
 					if ($v_price !== null) $prices[] = $v_price;
 
+					// Build variant name from option values (e.g., "Red, XL")
+					$v_name_parts = array();
+					if (!empty($v['values'])) {
+						foreach ($v['values'] as $vv) {
+							$v_name_parts[] = $vv['name'];
+						}
+					}
+
 					$schema_variants[] = array(
 						'variant_id'  => (int)$v['variant_id'],
+						'name'        => implode(', ', $v_name_parts),
 						'sku'         => $v['sku'],
 						'price'       => $v_price,
 						'image'       => $v['image'] ? $base_url . 'image/' . $v['image'] : '',
-						'url'         => $data['schema_product_url'] . '?variant_id=' . (int)$v['variant_id'],
+						'url'         => $this->url->link('product/product', 'product_id=' . $product_id . '&variant_id=' . (int)$v['variant_id']),
 						'is_in_stock' => (int)$v['quantity'] > 0,
 					);
 				}
@@ -830,6 +857,78 @@ class ControllerProductProduct extends Controller {
 				}
 				$data['schema_any_in_stock'] = !empty(array_filter(array_column($schema_variants, 'is_in_stock')));
 				$data['schema_any_preorder'] = !empty($product_info['preorder']);
+
+				/* ── Server-side variant pre-selection from URL ?variant_id ── */
+				$variant_id_from_url = isset($this->request->get['variant_id']) ? (int)$this->request->get['variant_id'] : 0;
+				$selected_variant = array();
+				$variant_selected_pov_ids = array();
+
+				// Try URL variant first, fall back to default variant
+				if ($variant_id_from_url) {
+					foreach ($variants as $v) {
+						if ((int)$v['variant_id'] === $variant_id_from_url) {
+							$selected_variant = $v;
+							break;
+						}
+					}
+				}
+
+				if (empty($selected_variant) && !empty($default_variant)) {
+					$selected_variant = $default_variant;
+				}
+
+				if (!empty($selected_variant)) {
+					$data['variant_sku'] = $selected_variant['sku'] ?? '';
+					if (!empty($selected_variant['values'])) {
+						foreach ($selected_variant['values'] as $vv) {
+							$ov_id = (int)$vv['option_value_id'];
+							$oid = (int)$vv['option_id'];
+							foreach ($formatted_axes as $axe) {
+								if ((int)$axe['option_id'] === $oid) {
+									$pov_id = isset($axe['pov_map'][$ov_id]) ? (int)$axe['pov_map'][$ov_id] : 0;
+									if ($pov_id) {
+										$variant_selected_pov_ids[$pov_id] = true;
+									}
+									break;
+								}
+							}
+						}
+					}
+				}
+
+				$data['variant_selected'] = !empty($variant_selected_pov_ids) ? array_keys($variant_selected_pov_ids) : array();
+				$data['variant_id'] = !empty($selected_variant) ? (int)$selected_variant['variant_id'] : 0;
+
+				// Override base product price/SKU/image with selected variant's data
+				if (!empty($selected_variant) && $data['price'] !== false) {
+					if (isset($selected_variant['price']) && $selected_variant['price'] !== '' && (float)$selected_variant['price'] > 0) {
+						$sv_price = (float)$selected_variant['price'];
+						$data['dc_base_price_value'] = $sv_price;
+						$data['price'] = $this->currency->format(
+							$this->tax->calculate($sv_price, $tax_class_id, $tax),
+							$this->session->data['currency']
+						);
+
+						if (isset($selected_variant['special'])) {
+							$sv_special = (float)$selected_variant['special'];
+							$data['special'] = $this->currency->format(
+								$this->tax->calculate($sv_special, $tax_class_id, $tax),
+								$this->session->data['currency']
+							);
+						}
+
+						if ($this->config->get('config_tax')) {
+							$tax_price = isset($selected_variant['special']) ? (float)$selected_variant['special'] : $sv_price;
+							$data['tax'] = $this->currency->format(
+								$this->tax->calculate($tax_price, $tax_class_id, $tax),
+								$this->session->data['currency']
+							);
+						}
+					}
+					if (!empty($selected_variant['sku'])) {
+						$data['variant_sku'] = $selected_variant['sku'];
+					}
+				}
 			}
 
 			if (!isset($data['minimum'])) {
