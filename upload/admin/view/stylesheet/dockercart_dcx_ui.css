@@ -165,7 +165,7 @@
 .dcx-banner-layout__thumb img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     display: block;
 }
 .dcx-banner-layout__link {
@@ -434,6 +434,8 @@ div.dcx-field.required > .dcx-label:before {
     color: var(--dc-primary);
     opacity: 0.8;
 }
+.dcx-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.dcx-section-header h4 { margin: 0; }
 
 .dcx-table > thead > tr > td {
     font-size: 12px;
