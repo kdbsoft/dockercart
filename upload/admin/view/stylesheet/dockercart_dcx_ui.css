@@ -116,6 +116,7 @@
     flex-direction: row;
     flex-wrap: wrap;
     margin-top: 12px;
+    align-items: flex-end;
 }
 .dcx-fields--row:first-child {
     margin-top: 0;
@@ -1746,4 +1747,17 @@ div.dcx-field.required > .dcx-label:before {
 }
 .dcx-pills > li.active > a > i {
     opacity: 1;
+}
+
+@media (max-width: 767px) {
+  .dcx-pills {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    border-radius: var(--dc-radius-lg);
+  }
+  .dcx-pills > li > a {
+    padding: 10px 14px;
+    border-radius: var(--dc-radius-md);
+  }
 }
