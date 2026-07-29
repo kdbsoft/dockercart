@@ -122,6 +122,7 @@ class ControllerMarketplaceExtension extends Controller {
 
 					// Module instance count + list
 					$instance_count = 0;
+					$has_enabled_instance = false;
 					$instances = array();
 					if ($type === 'module' && $installed) {
 					$modules = $this->model_setting_module->getModulesByCode($code);
@@ -133,15 +134,27 @@ class ControllerMarketplaceExtension extends Controller {
 						if (isset($setting_info['name_translation'][$language_id]) && $setting_info['name_translation'][$language_id] !== '') {
 							$module_name = $setting_info['name_translation'][$language_id];
 						}
+						$module_enabled = isset($setting_info['status']) && $setting_info['status'];
+						if ($module_enabled) {
+							$has_enabled_instance = true;
+						}
 						$instances[] = array(
 							'module_id' => $module['module_id'],
 							'name'      => $module_name,
-							'status'    => (isset($setting_info['status']) && $setting_info['status']) ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
+							'status'    => $module_enabled ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
 							'edit'      => $this->url->link('extension/module/' . $code, 'user_token=' . $this->session->data['user_token'] . '&module_id=' . $module['module_id'], true),
 							'delete'    => $this->url->link('marketplace/extension/deleteModule', 'user_token=' . $this->session->data['user_token'] . '&module_id=' . $module['module_id'], true)
 						);
 					}
 				}
+
+				// If at least one instance is enabled → extension shows Enabled; all disabled → Disabled
+					if ($instance_count > 0) {
+						$status_raw  = $has_enabled_instance;
+						$status_text = $has_enabled_instance
+							? $this->language->get('text_enabled')
+							: $this->language->get('text_disabled');
+					}
 
 				// Optional sort_order
 					$sort_order = '';
