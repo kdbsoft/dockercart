@@ -202,7 +202,7 @@
 
           <!-- Compare -->
           <a href="{{ compare }}" class="p-2 rounded-lg hover:bg-gray-100 transition relative group" title="{{ text_compare|default('Compare') }}" id="compare-total">
-            <i data-lucide="bar-chart-2" class="w-5 h-5 text-gray-600 group-hover:text-blue-500 transition"></i>            <span class="absolute -top-1 -right-1 bg-blue-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center leading-none">{{ compare_total|default(0) }}</span>          </a>
+            <i data-lucide="chart-no-axes-column" class="w-5 h-5 text-gray-600 group-hover:text-blue-500 transition"></i>            <span class="absolute -top-1 -right-1 bg-blue-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center leading-none">{{ compare_total|default(0) }}</span>          </a>
 
           <!-- Cart -->
           {{ cart }}
@@ -215,13 +215,13 @@
             <div id="dc-account-dd" class="dc-account-dd hidden bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 w-48">
               {% if logged %}
                 <a href="{{ account }}" class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
-                  <i data-lucide="user-circle" class="w-4 h-4"></i>{{ text_account }}
+                  <i data-lucide="circle-user" class="w-4 h-4"></i>{{ text_account }}
                 </a>
                 <a href="{{ order }}" class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
                   <i data-lucide="package" class="w-4 h-4"></i>{{ text_order }}
                 </a>
                 <a href="{{ viewed }}" class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
-                  <i data-lucide="history" class="w-4 h-4"></i>{{ text_viewed }}
+                  <i data-lucide="rotate-ccw-clock" class="w-4 h-4"></i>{{ text_viewed }}
                 </a>
                 <a href="{{ transaction }}" class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
                   <i data-lucide="receipt" class="w-4 h-4"></i>{{ text_transaction }}
@@ -243,7 +243,7 @@
                   <i data-lucide="user-plus" class="w-4 h-4"></i>{{ text_register }}
                 </a>
                 <a href="{{ viewed }}" class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
-                  <i data-lucide="history" class="w-4 h-4"></i>{{ text_viewed }}
+                  <i data-lucide="rotate-ccw-clock" class="w-4 h-4"></i>{{ text_viewed }}
                 </a>
               {% endif %}
             </div>
@@ -316,7 +316,7 @@
   <!-- Other links -->
   <nav class="px-5 py-3 flex flex-col gap-1">
     <a href="{{ home }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-700 font-medium hover:bg-blue-50 hover:text-blue-600 transition text-sm">
-      <i data-lucide="home" class="w-4 h-4"></i>{{ text_home }}
+      <i data-lucide="house" class="w-4 h-4"></i>{{ text_home }}
     </a>
     <a href="{{ new_arrivals }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-teal-600 font-semibold hover:bg-teal-50 transition text-sm">
       <i data-lucide="sparkles" class="w-4 h-4"></i>{{ text_new_arrivals }}
@@ -343,7 +343,7 @@
   <div class="px-5 py-4 border-t border-gray-100 flex flex-col gap-3">
     {% if logged %}
       <a href="{{ account }}" class="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition">
-        <i data-lucide="user-circle" class="w-4 h-4"></i>{{ text_account }}
+        <i data-lucide="circle-user" class="w-4 h-4"></i>{{ text_account }}
       </a>
       <a href="{{ logout }}" class="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gray-100 text-sm font-semibold text-gray-600 hover:bg-gray-200 transition">
         {{ text_logout }}
