@@ -88,11 +88,11 @@ $('input[name=\'developer_theme\'], input[name=\'developer_sass\']').on('change'
             $('.alert-dismissible').remove();
 
             if (json['error']) {
-                $('#modal-developer .modal-body').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle"></i> ' + json['error']['warning'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+                $('#modal-developer .modal-body').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert"></i> ' + json['error']['warning'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
             }
 
             if (json['success']) {
-				$('#modal-developer .modal-body').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="check-circle"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+				$('#modal-developer .modal-body').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="circle-check"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
 			}			
 		},
 		error: function(xhr, ajaxOptions, thrownError) {
@@ -117,11 +117,11 @@ $('#modal-developer table button').on('click', function() {
             $('.alert-dismissible').remove();
 
             if (json['error']) {
-                $('#modal-developer .modal-body').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle"></i> ' + json['error']['warning'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+                $('#modal-developer .modal-body').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert"></i> ' + json['error']['warning'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
             }
 
             if (json['success']) {
-				$('#modal-developer .modal-body').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="check-circle"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+				$('#modal-developer .modal-body').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="circle-check"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
 			}			
 		},
 		error: function(xhr, ajaxOptions, thrownError) {

@@ -144,7 +144,7 @@
 
   <div class="container-fluid">
     {% if error_warning %}
-    <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
+    <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
@@ -242,9 +242,9 @@
                       <div class="form-group">
                         <label>{{ entry_content_position }}</label>
                         <div class="position-radio-group">
-                          <label><input type="radio" name="banner_image[{{ language.language_id }}][{{ image_row }}][content_position]" value="left" {% if banner_image.content_position == 'left' %}checked{% endif %} /><i data-lucide="align-left" width="14" height="14"></i> {{ text_content_position_left }}</label>
-                          <label><input type="radio" name="banner_image[{{ language.language_id }}][{{ image_row }}][content_position]" value="center" {% if banner_image.content_position == 'center' %}checked{% endif %} /><i data-lucide="align-center" width="14" height="14"></i> {{ text_content_position_center }}</label>
-                          <label><input type="radio" name="banner_image[{{ language.language_id }}][{{ image_row }}][content_position]" value="right" {% if banner_image.content_position == 'right' %}checked{% endif %} /><i data-lucide="align-right" width="14" height="14"></i> {{ text_content_position_right }}</label>
+                          <label><input type="radio" name="banner_image[{{ language.language_id }}][{{ image_row }}][content_position]" value="left" {% if banner_image.content_position == 'left' %}checked{% endif %} /><i data-lucide="align-start-vertical" width="14" height="14"></i> {{ text_content_position_left }}</label>
+                          <label><input type="radio" name="banner_image[{{ language.language_id }}][{{ image_row }}][content_position]" value="center" {% if banner_image.content_position == 'center' %}checked{% endif %} /><i data-lucide="align-center-vertical" width="14" height="14"></i> {{ text_content_position_center }}</label>
+                          <label><input type="radio" name="banner_image[{{ language.language_id }}][{{ image_row }}][content_position]" value="right" {% if banner_image.content_position == 'right' %}checked{% endif %} /><i data-lucide="align-end-vertical" width="14" height="14"></i> {{ text_content_position_right }}</label>
                         </div>
                       </div>
                     </div>
@@ -274,7 +274,7 @@
                       <div class="form-group">
                         <label>{{ entry_video_youtube }}</label>
                         <div class="input-group" style="max-width:400px;">
-                          <span class="input-group-addon"><i data-lucide="youtube" width="14" height="14"></i></span>
+                          <span class="input-group-addon"><i data-lucide="video" width="14" height="14"></i></span>
                           <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][video_youtube]" value="{{ banner_image.video_type == 'youtube' ? banner_image.video : '' }}" class="form-control dc-banner-video-youtube" placeholder="{{ entry_video_youtube_placeholder }}" />
                         </div>
                         <div class="dc-banner-youtube-preview" style="margin-top:8px;{{ banner_image.video_type == 'youtube' and banner_image.video ? '' : 'display:none;' }}">
@@ -359,7 +359,7 @@
               </div>
 
               <div class="add-slide-btn-wrap">
-                <button type="button" onclick="addSlide({{ language.language_id }});" class="btn btn-primary btn-sm"><i data-lucide="plus-circle" width="14" height="14"></i> {{ button_add_slide }}</button>
+                <button type="button" onclick="addSlide({{ language.language_id }});" class="btn btn-primary btn-sm"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_add_slide }}</button>
               </div>
 
             </div>
@@ -587,9 +587,9 @@ function addSlide(language_id) {
   html += '</div>';
   html += '<div class="form-group"><label>{{ entry_content_position }}</label>';
   html += '<div class="position-radio-group">';
-  html += '<label><input type="radio" name="' + pfx + '[content_position]" value="left" checked /><i data-lucide="align-left" width="14" height="14"></i> {{ text_content_position_left }}</label>';
-  html += '<label><input type="radio" name="' + pfx + '[content_position]" value="center" /><i data-lucide="align-center" width="14" height="14"></i> {{ text_content_position_center }}</label>';
-  html += '<label><input type="radio" name="' + pfx + '[content_position]" value="right" /><i data-lucide="align-right" width="14" height="14"></i> {{ text_content_position_right }}</label>';
+  html += '<label><input type="radio" name="' + pfx + '[content_position]" value="left" checked /><i data-lucide="align-start-vertical" width="14" height="14"></i> {{ text_content_position_left }}</label>';
+  html += '<label><input type="radio" name="' + pfx + '[content_position]" value="center" /><i data-lucide="align-center-vertical" width="14" height="14"></i> {{ text_content_position_center }}</label>';
+  html += '<label><input type="radio" name="' + pfx + '[content_position]" value="right" /><i data-lucide="align-end-vertical" width="14" height="14"></i> {{ text_content_position_right }}</label>';
   html += '</div></div>';
   html += '</div>';
 
@@ -618,7 +618,7 @@ function addSlide(language_id) {
   html += '<div class="form-group">';
   html += '<label>{{ entry_video_youtube }}</label>';
   html += '<div class="input-group" style="max-width:400px;">';
-  html += '<span class="input-group-addon"><i data-lucide="youtube" width="14" height="14"></i></span>';
+  html += '<span class="input-group-addon"><i data-lucide="video" width="14" height="14"></i></span>';
   html += '<input type="text" name="' + pfx + '[video_youtube]" value="" class="form-control dc-banner-video-youtube" placeholder="{{ entry_video_youtube_placeholder }}" />';
   html += '</div>';
   html += '<div class="dc-banner-youtube-preview" style="margin-top:8px;display:none;"></div>';

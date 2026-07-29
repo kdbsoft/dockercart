@@ -152,7 +152,7 @@
         <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
           <div class="pull-right">
             {% if builder_url %}
-            <a href="{{ builder_url }}" class="btn btn-info btn--icon" target="_blank" title="{{ text_switch_to_builder }}"><i data-lucide="wand-2" width="16" height="16"></i></a>
+            <a href="{{ builder_url }}" class="btn btn-info btn--icon" target="_blank" title="{{ text_switch_to_builder }}"><i data-lucide="wand-sparkles" width="16" height="16"></i></a>
             {% endif %}
             <button type="submit" form="form-layout" title="{{ button_save }}" class="btn btn-primary btn--icon"><i data-lucide="save" width="16" height="16"></i></button>
             <a href="{{ cancel }}" title="{{ button_cancel }}" class="btn btn-default btn--icon"><i data-lucide="x" width="16" height="16"></i></a>
@@ -170,7 +170,7 @@
       {% if error_warning %}
       <div class="row">
         <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
-          <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
+          <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
         </div>
@@ -185,7 +185,7 @@
         <div class="dcx-shell">
           <div class="dcx-panel">
             <div class="dcx-panel-head">
-              <div class="dcx-panel-head__icon"><i data-lucide="layout" width="18" height="18"></i></div>
+              <div class="dcx-panel-head__icon"><i data-lucide="columns-2" width="18" height="18"></i></div>
               <div>
                 <div class="dcx-panel-title">{{ text_form }}</div>
               </div>
@@ -227,7 +227,7 @@
                     <label class="dcx-label">{{ entry_route }}</label>
                     <input type="text" name="layout_route[{{ route_row }}][route]" value="{{ layout_route.route }}" placeholder="{{ entry_route }}" class="form-control" />
                   </div>
-                  <button type="button" onclick="$('#route-row{{ route_row }}').remove();" class="btn btn-link dc-remove-route" title="{{ button_remove }}"><i data-lucide="minus-circle" width="14" height="14"></i></button>
+                  <button type="button" onclick="$('#route-row{{ route_row }}').remove();" class="btn btn-link dc-remove-route" title="{{ button_remove }}"><i data-lucide="circle-minus" width="14" height="14"></i></button>
                 </div>
                 {% set route_row = route_row + 1 %}
                 {% endfor %}
@@ -288,7 +288,7 @@
                           <input type="hidden" name="layout_module[{{ module_row }}][sort_order]" value="{{ layout_module.sort_order }}" />
                           <div class="dc-module-item__actions">
                             <a href="{{ layout_module.edit }}" type="button" title="{{ button_edit }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="pencil" width="14" height="14"></i></a>
-                            <button type="button" onclick="removeModule('module-row{{ module_row }}');" title="{{ button_remove }}" class="btn btn-danger btn-sm"><i data-lucide="minus-circle" width="14" height="14"></i></button>
+                            <button type="button" onclick="removeModule('module-row{{ module_row }}');" title="{{ button_remove }}" class="btn btn-danger btn-sm"><i data-lucide="circle-minus" width="14" height="14"></i></button>
                           </div>
                         </div>
                       </div>
@@ -311,7 +311,7 @@
                         </optgroup>
                         {% endfor %}
                       </select>
-                      <button type="button" onclick="addModule('column-left');" title="{{ button_module_add }}" class="btn btn-primary btn-sm"><i data-lucide="plus-circle" width="14" height="14"></i></button>
+                      <button type="button" onclick="addModule('column-left');" title="{{ button_module_add }}" class="btn btn-primary btn-sm"><i data-lucide="circle-plus" width="14" height="14"></i></button>
                     </div>
                   </div>
                 </div>
@@ -349,7 +349,7 @@
                           <input type="hidden" name="layout_module[{{ module_row }}][sort_order]" value="{{ layout_module.sort_order }}" />
                           <div class="dc-module-item__actions">
                             <a href="{{ layout_module.edit }}" type="button" title="{{ button_edit }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="pencil" width="14" height="14"></i></a>
-                            <button type="button" onclick="removeModule('module-row{{ module_row }}');" title="{{ button_remove }}" class="btn btn-danger btn-sm"><i data-lucide="minus-circle" width="14" height="14"></i></button>
+                            <button type="button" onclick="removeModule('module-row{{ module_row }}');" title="{{ button_remove }}" class="btn btn-danger btn-sm"><i data-lucide="circle-minus" width="14" height="14"></i></button>
                           </div>
                         </div>
                       </div>
@@ -372,7 +372,7 @@
                         </optgroup>
                         {% endfor %}
                       </select>
-                      <button type="button" onclick="addModule('content-top');" title="{{ button_module_add }}" class="btn btn-primary btn-sm"><i data-lucide="plus-circle" width="14" height="14"></i></button>
+                      <button type="button" onclick="addModule('content-top');" title="{{ button_module_add }}" class="btn btn-primary btn-sm"><i data-lucide="circle-plus" width="14" height="14"></i></button>
                     </div>
                   </div>
                   <div class="dc-module-column dc-mt-sm" id="module-content-bottom">
@@ -408,7 +408,7 @@
                           <input type="hidden" name="layout_module[{{ module_row }}][sort_order]" value="{{ layout_module.sort_order }}" />
                           <div class="dc-module-item__actions">
                             <a href="{{ layout_module.edit }}" type="button" title="{{ button_edit }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="pencil" width="14" height="14"></i></a>
-                            <button type="button" onclick="removeModule('module-row{{ module_row }}');" title="{{ button_remove }}" class="btn btn-danger btn-sm"><i data-lucide="minus-circle" width="14" height="14"></i></button>
+                            <button type="button" onclick="removeModule('module-row{{ module_row }}');" title="{{ button_remove }}" class="btn btn-danger btn-sm"><i data-lucide="circle-minus" width="14" height="14"></i></button>
                           </div>
                         </div>
                       </div>
@@ -431,7 +431,7 @@
                         </optgroup>
                         {% endfor %}
                       </select>
-                      <button type="button" onclick="addModule('content-bottom');" title="{{ button_module_add }}" class="btn btn-primary btn-sm"><i data-lucide="plus-circle" width="14" height="14"></i></button>
+                      <button type="button" onclick="addModule('content-bottom');" title="{{ button_module_add }}" class="btn btn-primary btn-sm"><i data-lucide="circle-plus" width="14" height="14"></i></button>
                     </div>
                   </div>
                 </div>
@@ -469,7 +469,7 @@
                           <input type="hidden" name="layout_module[{{ module_row }}][sort_order]" value="{{ layout_module.sort_order }}" />
                           <div class="dc-module-item__actions">
                             <a href="{{ layout_module.edit }}" title="{{ button_edit }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="pencil" width="14" height="14"></i></a>
-                            <button type="button" onclick="removeModule('module-row{{ module_row }}');" title="{{ button_remove }}" class="btn btn-danger btn-sm"><i data-lucide="minus-circle" width="14" height="14"></i></button>
+                            <button type="button" onclick="removeModule('module-row{{ module_row }}');" title="{{ button_remove }}" class="btn btn-danger btn-sm"><i data-lucide="circle-minus" width="14" height="14"></i></button>
                           </div>
                         </div>
                       </div>
@@ -492,7 +492,7 @@
                         </optgroup>
                         {% endfor %}
                       </select>
-                      <button type="button" onclick="addModule('column-right');" title="{{ button_module_add }}" class="btn btn-primary btn-sm"><i data-lucide="plus-circle" width="14" height="14"></i></button>
+                      <button type="button" onclick="addModule('column-right');" title="{{ button_module_add }}" class="btn btn-primary btn-sm"><i data-lucide="circle-plus" width="14" height="14"></i></button>
                     </div>
                   </div>
                 </div>
@@ -591,7 +591,7 @@ function addRoute() {
   html += '    <label class="dcx-label">{{ entry_route }}</label>';
   html += '    <input type="text" name="layout_route[' + route_row + '][route]" value="" placeholder="{{ entry_route }}" class="form-control" />';
   html += '  </div>';
-  html += '  <button type="button" onclick="$(\'#route-row' + route_row + '\').remove();" class="btn btn-link dc-remove-route" title="{{ button_remove }}"><i data-lucide="minus-circle" width="14" height="14"></i></button>';
+  html += '  <button type="button" onclick="$(\'#route-row' + route_row + '\').remove();" class="btn btn-link dc-remove-route" title="{{ button_remove }}"><i data-lucide="circle-minus" width="14" height="14"></i></button>';
   html += '</div>';
 
   $('#routes-container').append(html);
@@ -648,7 +648,7 @@ function addModule(type) {
   html += '    <input type="hidden" name="layout_module[' + module_row + '][sort_order]" value="" />';
   html += '    <div class="dc-module-item__actions">';
   html += '      <a href="" target="_blank" type="button" title="{{ button_edit }}" class="btn btn-primary btn-sm"><i data-lucide="pencil" width="14" height="14"></i></a>';
-  html += '      <button type="button" onclick="removeModule(\'module-row' + module_row + '\');" title="{{ button_remove }}" class="btn btn-danger btn-sm"><i data-lucide="minus-circle" width="14" height="14"></i></button>';
+  html += '      <button type="button" onclick="removeModule(\'module-row' + module_row + '\');" title="{{ button_remove }}" class="btn btn-danger btn-sm"><i data-lucide="circle-minus" width="14" height="14"></i></button>';
   html += '    </div>';
   html += '  </div>';
   html += '</div>';

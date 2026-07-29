@@ -28,7 +28,7 @@
       {% if error_warning %}
       <div class="row">
         <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
-          <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
+          <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
         </div>
@@ -169,7 +169,7 @@
                       <span class="dc-opt-card__title">
                         {{ option_value.option_value_description[admin_language_id] ? option_value.option_value_description[admin_language_id].name : '' }}
                       </span>
-                      <button type="button" onclick="$('#option-value-row{{ option_value_row }}').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger btn-xs dc-opt-card__remove"><i data-lucide="minus-circle" width="14" height="14"></i></button>
+                      <button type="button" onclick="$('#option-value-row{{ option_value_row }}').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger btn-xs dc-opt-card__remove"><i data-lucide="circle-minus" width="14" height="14"></i></button>
                     </div>
                     <div class="dc-opt-card__body">
                       <input type="hidden" name="option_value[{{ option_value_row }}][option_value_id]" value="{{ option_value.option_value_id }}" />
@@ -200,7 +200,7 @@
                   {% endfor %}
                 </div>
                 <div class="dc-opt-actions">
-                  <button type="button" onclick="addOptionValue();" data-toggle="tooltip" title="{{ button_option_value_add }}" class="btn btn-primary btn-sm"><i data-lucide="plus-circle" width="16" height="16"></i> {{ button_option_value_add }}</button>
+                  <button type="button" onclick="addOptionValue();" data-toggle="tooltip" title="{{ button_option_value_add }}" class="btn btn-primary btn-sm"><i data-lucide="circle-plus" width="16" height="16"></i> {{ button_option_value_add }}</button>
                 </div>
               </div>
             </div>
@@ -231,7 +231,7 @@ function addOptionValue() {
 	html += '    <span class="dc-opt-card__handle"><i data-lucide="grip-vertical" width="14" height="14" class="slide-drag-handle"></i></span>';
 	html += '    <span class="dc-opt-card__title">{{ entry_option_value }}</span>';
 	html += '    <button type="button" class="btn btn-danger btn-xs dc-opt-card__remove" onclick="$(\'#option-value-row' + option_value_row + '\').remove();">';
-	html += '      <i data-lucide="minus-circle" width="14" height="14"></i></button>';
+	html += '      <i data-lucide="circle-minus" width="14" height="14"></i></button>';
 	html += '  </div>';
 	html += '  <div class="dc-opt-card__body">';
 	html += '    <input type="hidden" name="option_value[' + option_value_row + '][option_value_id]" value="" />';

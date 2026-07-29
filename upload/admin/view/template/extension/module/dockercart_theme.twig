@@ -14,8 +14,8 @@
 }
 
 .dc-logo-card {
-  background: #f8fafc;
-  border: 1px solid #e2e8f2;
+  background: var(--dc-gray-50);
+  border: 1px solid var(--dc-border-soft);
   border-radius: 10px;
   padding: 14px;
   display: flex;
@@ -25,29 +25,29 @@
 .dc-logo-card__label {
   font-size: 12px;
   font-weight: 700;
-  color: #4a5568;
+  color: var(--dc-text-dark);
   text-transform: uppercase;
   letter-spacing: .04em;
   display: flex;
   align-items: center;
   gap: 6px;
 }
-.dc-logo-card__label i { color: #2f65b9; }
+.dc-logo-card__label i { color: var(--dc-primary); }
 .dc-logo-thumb-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 200px;
   height: 80px;
-  background: #fff;
-  border: 2px dashed #c8d4e3;
+  background: var(--dc-surface);
+  border: 2px dashed var(--dc-border);
   border-radius: 8px;
   cursor: pointer;
   transition: border-color .2s, box-shadow .2s;
   overflow: hidden;
 }
 .dc-logo-thumb-link:hover {
-  border-color: #2f65b9;
+  border-color: var(--dc-primary);
   box-shadow: 0 0 0 3px rgba(47,101,185,.1);
 }
 .dc-logo-thumb-link img {
@@ -71,8 +71,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #fff;
-  border: 1px solid #e2e8f2;
+  background: var(--dc-surface);
+  border: 1px solid var(--dc-border-soft);
   border-radius: 8px;
   padding: 10px 12px;
   transition: box-shadow .2s, border-color .2s;
@@ -85,8 +85,8 @@
   min-width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: #eaf1ff;
-  color: #2f65b9;
+  background: var(--dc-primary-50);
+  color: var(--dc-primary);
   font-size: 11px;
   font-weight: 700;
   display: flex;
@@ -124,8 +124,8 @@
   justify-content: center;
   width: 100px;
   height: 40px;
-  background: #fff;
-  border: 2px dashed #c8d4e3;
+  background: var(--dc-surface);
+  border: 2px dashed var(--dc-border);
   border-radius: 6px;
   cursor: pointer;
   overflow: hidden;
@@ -143,8 +143,8 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  background: #fff;
-  border: 2px dashed #c8d4e3;
+  background: var(--dc-surface);
+  border: 2px dashed var(--dc-border);
   border-radius: 6px;
   cursor: pointer;
   overflow: hidden;
@@ -156,7 +156,7 @@
   object-fit: contain;
 }
 .dc-payment-thumb-link:hover,
-.dc-social-thumb-link:hover { border-color: #2f65b9; }
+.dc-social-thumb-link:hover { border-color: var(--dc-primary); }
 /* Feature icon picker button – matches social icons style */
 .dc-feature-icon-picker-btn {
   display: inline-flex;
@@ -164,17 +164,17 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  background: #fff;
-  border: 2px dashed #c8d4e3;
+  background: var(--dc-surface);
+  border: 2px dashed var(--dc-border);
   border-radius: 6px;
   cursor: pointer;
   overflow: hidden;
   transition: border-color .2s;
   padding: 0;
   font-size: 18px;
-  color: #333;
+  color: var(--dc-text-dark);
 }
-.dc-feature-icon-picker-btn:hover { border-color: #2f65b9; }
+.dc-feature-icon-picker-btn:hover { border-color: var(--dc-primary); }
 .dc-payment-clear-btn {
   position: absolute;
   top: -6px;
@@ -183,7 +183,7 @@
   height: 16px;
   border-radius: 50%;
   background: #ef4444;
-  color: #fff;
+  color: var(--dc-surface);
   border: none;
   cursor: pointer;
   font-size: 9px;
@@ -204,8 +204,8 @@
 .dc-theme-features-table thead th {
   font-size: 12px;
   font-weight: 700;
-  color: #4a5568;
-  background: #f8fafc;
+  color: var(--dc-text-dark);
+  background: var(--dc-gray-50);
 }
 .dc-theme-features-table .form-control {
   min-height: 30px;
@@ -233,113 +233,145 @@
 .dc-feature-label {
   font-size: 11px;
   font-weight: 700;
-  color: #667085;
+  color: var(--dc-text-muted);
   margin-bottom: 4px;
 }
 /* Icon picker modal */
 .dc-icon-picker-modal { display:none; position:fixed; inset:0; z-index:12000; }
 .dc-icon-picker-backdrop { position:absolute; inset:0; background:rgba(0,0,0,0.45); }
-.dc-icon-picker-panel { position:relative; max-width:860px; margin:6vh auto; background:#fff; border-radius:10px; padding:16px; box-shadow:0 10px 40px rgba(2,6,23,0.28); }
+.dc-icon-picker-panel { position:relative; max-width:860px; margin:6vh auto; background:var(--dc-surface); border-radius:10px; padding:16px; box-shadow:0 10px 40px rgba(2,6,23,0.28); }
 .dc-icon-picker-header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
 .dc-icon-picker-search { width:100%; max-width:480px; }
 .dc-icon-picker-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(56px,1fr)); gap:8px; max-height:56vh; overflow:auto; padding:6px; }
-.dc-icon-option { display:flex; align-items:center; justify-content:center; gap:6px; border:1px solid #e6eef8; background:#f8fbff; padding:8px; border-radius:8px; cursor:pointer; }
+.dc-icon-option { display:flex; align-items:center; justify-content:center; gap:6px; border:1px solid var(--dc-border-soft); background:#f8fbff; padding:8px; border-radius:8px; cursor:pointer; }
 .dc-icon-option:hover { background:#eaf4ff; border-color:#cfe8ff; }
 .dc-icon-option i { width:18px; height:18px; }
 .dc-icon-sm { width:14px; height:14px; display:inline-block; }
+
+/* ── DCX theme utility classes ─────────────────────────────────────────── */
+.dc-theme-select-sm { max-width: 200px; }
+.dc-theme-select-md { max-width: 240px; }
+.dc-theme-code-textarea { font-family: monospace; min-height: 140px; white-space: pre; tab-size: 2; }
+.dcx-section--flush { margin-top: 0; padding-top: 0; border-top: 0; }
+.dc-theme-feature-field { margin-left: 0; margin-right: 0; }
+.dc-theme-feature-field--last { margin-left: 0; margin-right: 0; margin-bottom: 0; }
+.dc-theme-sort-input { width: 82px; }
+.dc-theme-flex-shrink { flex-shrink: 0; }
+.dc-theme-flex-grow { flex: 1; min-width: 0; }
+.dc-logo-thumb-link--favicon { width: 100px; height: 100px; }
+.dc-logo-thumb-link--favicon img { max-height: 92px; }
+.dc-logo-card--favicon { max-width: 460px; }
+.dc-logo-card--mt { margin-top: 16px; }
+.dcx-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.dcx-section-header h4 { margin: 0; }
+.dc-rows-help { margin-top: 10px; }
+.dc-theme-section-divider { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--dc-border-soft); }
+.dc-theme-fab-row { display: flex; align-items: center; gap: 16px; }
+.dc-theme-fab-help { margin: 0; font-size: 12px; color: var(--dc-text-muted); }
+.dc-theme-messenger-name { max-width: 160px; }
+.dc-logo-card__actions-group { display: flex; flex-direction: column; gap: 6px; margin-left: 8px; }
+.dc-help-text { font-size: 12px; color: var(--dc-text-muted); margin: 0; }
+.dc-help-text--mt { font-size: 12px; color: var(--dc-text-muted); margin: 4px 0 0; }
 </style>
 
   <div class="page-header">
     <div class="container-fluid">
       <div class="row">
-        <div class="col-lg-offset-2 col-lg-7 col-xl-offset-1 col-xl-7">
+        <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
           <div class="pull-right">
-            <button type="submit" form="form-dockercart-theme" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary btn--icon">
-              <i data-lucide="save" width="16" height="16"></i>
-            </button>
-            <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default btn--icon">
-              <i data-lucide="x" width="16" height="16"></i>
-            </a>
+            <button type="submit" form="form-dockercart-theme" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary btn--icon"><i data-lucide="save" width="16" height="16"></i></button>
+            <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default btn--icon"><i data-lucide="x" width="16" height="16"></i></a>
           </div>
           <a href="{{ cancel }}" class="page-header__link">
             <span class="page-header__back"><i data-lucide="arrow-left" width="20" height="20"></i></span>
-            <span class="page-header__title">{{ heading_title }}</span>
+            <span class="page-header__title">
+              {{ heading_title }}
+              {% if dockercart_theme_status is defined %}
+              <span class="page-header__badge {{ dockercart_theme_status ? 'page-header__badge--active' : 'page-header__badge--inactive' }}">
+                {{ dockercart_theme_status ? text_enabled : text_disabled }}
+              </span>
+              {% endif %}
+            </span>
           </a>
         </div>
       </div>
+      {% if error_warning %}
+      <div class="row">
+        <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
+          <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      {% if success %}
+      <div class="row">
+        <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
+          <div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> {{ success }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+          </div>
+        </div>
+      </div>
+      {% endif %}
     </div>
   </div>
 
   <div class="container-fluid">
-
-    {% if error_warning %}
-    <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
-      <button type="button" class="close" data-dismiss="alert">&times;</button>
-    </div>
-    {% endif %}
-
-    {% if success %}
-    <div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> {{ success }}
-      <button type="button" class="close" data-dismiss="alert">&times;</button>
-    </div>
-    {% endif %}
-
-    <ul class="nav nav-tabs dcx-profile-tabs" id="dc-theme-tabs" role="tablist">
-      <li class="active"><a href="#dc-theme-tab-general" class="js-dc-theme-tab" data-tab="dc-theme-tab-general" data-title="{{ text_tab_general }}" data-subtitle="{{ text_tab_general_subtitle }}" data-icon="file-text"><i data-lucide="file-text" width="16" height="16"></i> {{ text_tab_general }}</a></li>
-      <li><a href="#dc-theme-tab-social-payments" class="js-dc-theme-tab" data-tab="dc-theme-tab-social-payments" data-title="{{ text_tab_social_payments }}" data-subtitle="{{ text_tab_social_payments_subtitle }}" data-icon="share-2"><i data-lucide="share-2" width="16" height="16"></i> {{ text_tab_social_payments }}</a></li>
-      <li><a href="#dc-theme-tab-features" class="js-dc-theme-tab" data-tab="dc-theme-tab-features" data-title="{{ text_tab_features }}" data-subtitle="{{ text_tab_features_subtitle }}" data-icon="wand-2"><i data-lucide="wand-2" width="16" height="16"></i> {{ text_tab_features }}</a></li>
-      <li><a href="#dc-theme-tab-links" class="js-dc-theme-tab" data-tab="dc-theme-tab-links" data-title="{{ text_tab_links }}" data-subtitle="{{ text_tab_links_subtitle }}" data-icon="link"><i data-lucide="link" width="16" height="16"></i> {{ text_tab_links }}</a></li>
-      <li><a href="#dc-theme-tab-custom-code" class="js-dc-theme-tab" data-tab="dc-theme-tab-custom-code" data-title="{{ text_tab_custom_code }}" data-subtitle="{{ text_tab_custom_code_subtitle }}" data-icon="code"><i data-lucide="code" width="16" height="16"></i> {{ text_tab_custom_code }}</a></li>
-    </ul>
+    <div class="row">
+      <div class="col-md-12 col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
 
     <div class="dcx-shell">
       <div class="dcx-panel">
         <div class="dcx-panel-head">
           <div class="dcx-panel-head__icon"><i id="dc-theme-tab-icon" data-lucide="settings" width="18" height="18"></i></div>
           <div>
-            <h3 class="dcx-panel-title" id="dc-theme-tab-title">{{ text_tab_general }}</h3>
+            <div class="dcx-panel-title" id="dc-theme-tab-title">{{ text_tab_general }}</div>
             <div class="dcx-panel-subtitle" id="dc-theme-tab-subtitle">{{ text_tab_general_subtitle }}</div>
           </div>
         </div>
         <div class="dcx-panel-body">
 
-          <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-dockercart-theme" class="form-horizontal dcx-form">
+          <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-dockercart-theme">
 
-            <div id="dc-theme-tab-general" class="dcx-tab-pane active">
+            <ul class="dcx-pills" id="dc-theme-tabs">
+              <li class="active"><a href="#dc-theme-tab-general" class="js-dc-theme-tab" data-tab="dc-theme-tab-general" data-title="{{ text_tab_general }}" data-subtitle="{{ text_tab_general_subtitle }}" data-icon="file-text"><i data-lucide="file-text" width="14" height="14"></i> {{ text_tab_general }}</a></li>
+              <li><a href="#dc-theme-tab-social-payments" class="js-dc-theme-tab" data-tab="dc-theme-tab-social-payments" data-title="{{ text_tab_social_payments }}" data-subtitle="{{ text_tab_social_payments_subtitle }}" data-icon="share-2"><i data-lucide="share-2" width="14" height="14"></i> {{ text_tab_social_payments }}</a></li>
+              <li><a href="#dc-theme-tab-features" class="js-dc-theme-tab" data-tab="dc-theme-tab-features" data-title="{{ text_tab_features }}" data-subtitle="{{ text_tab_features_subtitle }}" data-icon="wand-sparkles"><i data-lucide="wand-sparkles" width="14" height="14"></i> {{ text_tab_features }}</a></li>
+              <li><a href="#dc-theme-tab-links" class="js-dc-theme-tab" data-tab="dc-theme-tab-links" data-title="{{ text_tab_links }}" data-subtitle="{{ text_tab_links_subtitle }}" data-icon="link"><i data-lucide="link" width="14" height="14"></i> {{ text_tab_links }}</a></li>
+              <li><a href="#dc-theme-tab-custom-code" class="js-dc-theme-tab" data-tab="dc-theme-tab-custom-code" data-title="{{ text_tab_custom_code }}" data-subtitle="{{ text_tab_custom_code_subtitle }}" data-icon="code"><i data-lucide="code" width="14" height="14"></i> {{ text_tab_custom_code }}</a></li>
+            </ul>
+
+            <div class="tab-content">
+
+            <div id="dc-theme-tab-general" class="tab-pane active">
 
             {# ─────────────────────── Section: General ────────────────────────── #}
-            <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+            <div class="dcx-section dcx-section--flush">
               <h4><i data-lucide="settings" width="16" height="16"></i> {{ text_section_general|default('Настройки модуля') }}</h4>
 
-              <div class="form-group">
-                <label class="col-sm-3 control-label" for="input-status">{{ entry_status }}</label>
-                <div class="col-sm-9">
-                  <select name="dockercart_theme_status" id="input-status" class="form-control" style="max-width:200px;">
+              <div class="dcx-fields">
+                <div class="dcx-field">
+                  <label class="dcx-label" for="input-status">{{ entry_status }}</label>
+                  <select name="dockercart_theme_status" id="input-status" class="form-control dc-theme-select-sm">
                     <option value="1" {% if dockercart_theme_status == 1 %}selected="selected"{% endif %}>{{ text_enabled }}</option>
                     <option value="0" {% if dockercart_theme_status == 0 %}selected="selected"{% endif %}>{{ text_disabled }}</option>
                   </select>
                 </div>
-              </div>
-
-              <div class="form-group">
-                <label class="col-sm-3 control-label" for="input-menu-type">{{ entry_menu_type }}</label>
-                <div class="col-sm-9">
-                  <select name="dockercart_theme_menu_type" id="input-menu-type" class="form-control" style="max-width:240px;">
+                <div class="dcx-field">
+                  <label class="dcx-label" for="input-menu-type">{{ entry_menu_type }}</label>
+                  <select name="dockercart_theme_menu_type" id="input-menu-type" class="form-control dc-theme-select-md">
                     <option value="horizontal" {% if dockercart_theme_menu_type == 'horizontal' %}selected="selected"{% endif %}>{{ text_menu_horizontal }}</option>
                     <option value="vertical" {% if dockercart_theme_menu_type == 'vertical' %}selected="selected"{% endif %}>{{ text_menu_vertical }}</option>
                   </select>
-                  <p class="help-block">{{ help_menu_type }}</p>
+                  <div class="help-block">{{ help_menu_type }}</div>
                 </div>
-              </div>
-
-              <div class="form-group">
-                <label class="col-sm-3 control-label" for="input-call-for-price-status">{{ entry_call_for_price_status }}</label>
-                <div class="col-sm-9">
-                  <select name="dockercart_theme_call_for_price_status" id="input-call-for-price-status" class="form-control" style="max-width:200px;">
+                <div class="dcx-field">
+                  <label class="dcx-label" for="input-call-for-price-status">{{ entry_call_for_price_status }}</label>
+                  <select name="dockercart_theme_call_for_price_status" id="input-call-for-price-status" class="form-control dc-theme-select-sm">
                     <option value="1" {% if dockercart_theme_call_for_price_status == 1 %}selected="selected"{% endif %}>{{ text_enabled }}</option>
                     <option value="0" {% if dockercart_theme_call_for_price_status == 0 %}selected="selected"{% endif %}>{{ text_disabled }}</option>
                   </select>
-                  <p class="help-block">{{ help_call_for_price_status }}</p>
+                  <div class="help-block">{{ help_call_for_price_status }}</div>
                 </div>
               </div>
             </div>
@@ -362,7 +394,7 @@
                       </a>
                       <input type="hidden" name="dockercart_theme_logo_dark" id="input-logo-dark" value="{{ dockercart_theme_logo_dark }}" />
                     </div>
-                    <div style="display:flex;flex-direction:column;gap:6px;margin-left:8px;">
+                    <div class="dc-logo-card__actions-group">
                       <button type="button" class="btn btn-default btn-sm" id="btn-open-dark">
                         <i data-lucide="folder-open" width="14" height="14"></i> {{ button_image|default('Выбрать') }}
                       </button>
@@ -371,7 +403,7 @@
                       </button>
                     </div>
                   </div>
-                  <p class="help-block" style="font-size:12px;color:#8b96a7;margin:0;">{{ help_logo_dark }}</p>
+                  <div class="help-block dc-help-text">{{ help_logo_dark }}</div>
                 </div>
 
                 {# Light logo #}
@@ -386,7 +418,7 @@
                       </a>
                       <input type="hidden" name="dockercart_theme_logo_light" id="input-logo-light" value="{{ dockercart_theme_logo_light }}" />
                     </div>
-                    <div style="display:flex;flex-direction:column;gap:6px;margin-left:8px;">
+                    <div class="dc-logo-card__actions-group">
                       <button type="button" class="btn btn-default btn-sm" id="btn-open-light">
                         <i data-lucide="folder-open" width="14" height="14"></i> {{ button_image|default('Выбрать') }}
                       </button>
@@ -395,23 +427,23 @@
                       </button>
                     </div>
                   </div>
-                  <p class="help-block" style="font-size:12px;color:#8b96a7;margin:0;">{{ help_logo_light }}</p>
+                  <div class="help-block dc-help-text">{{ help_logo_light }}</div>
                 </div>
 
               </div>
 
-              <div class="dc-logo-card" style="margin-top:16px;max-width:460px;">
+              <div class="dc-logo-card dc-logo-card--mt dc-logo-card--favicon">
                 <div class="dc-logo-card__label">
                   <i data-lucide="star" width="16" height="16"></i> {{ entry_favicon_master }}
                 </div>
                 <div class="dc-logo-card__actions">
                   <div>
-                    <a href="" id="thumb-favicon-master" data-toggle="image" class="dc-logo-thumb-link" style="width:100px;height:100px;">
-                      <img src="{{ favicon_master_thumb }}" data-placeholder="{{ placeholder_favicon }}" alt="" style="max-height:92px;" />
+                    <a href="" id="thumb-favicon-master" data-toggle="image" class="dc-logo-thumb-link dc-logo-thumb-link--favicon">
+                      <img src="{{ favicon_master_thumb }}" data-placeholder="{{ placeholder_favicon }}" alt="" />
                     </a>
                     <input type="hidden" name="dockercart_theme_favicon_master" id="input-favicon-master" value="{{ dockercart_theme_favicon_master }}" />
                   </div>
-                  <div style="display:flex;flex-direction:column;gap:6px;margin-left:8px;">
+                  <div class="dc-logo-card__actions-group">
                     <button type="button" class="btn btn-default btn-sm" id="btn-open-favicon-master">
                       <i data-lucide="folder-open" width="14" height="14"></i> {{ button_image|default('Выбрать') }}
                     </button>
@@ -420,19 +452,19 @@
                     </button>
                   </div>
                 </div>
-                <p class="help-block" style="font-size:12px;color:#8b96a7;margin:0;">{{ help_favicon_master }}</p>
-                <p class="help-block" style="font-size:12px;color:#8b96a7;margin:4px 0 0;">{{ help_favicon_master_hint }}</p>
+                <div class="help-block dc-help-text">{{ help_favicon_master }}</div>
+                <div class="help-block dc-help-text--mt">{{ help_favicon_master_hint }}</div>
               </div>
             </div>
 
             </div>{# /dc-theme-tab-general #}
 
-            <div id="dc-theme-tab-social-payments" class="dcx-tab-pane">
+            <div id="dc-theme-tab-social-payments" class="tab-pane">
 
             {# ─────────────────────── Section: Social icons ───────────────────── #}
             <div class="dcx-section">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-                <h4 style="margin:0;"><i data-lucide="share-2" width="16" height="16"></i> {{ entry_social_block }}</h4>
+              <div class="dcx-section-header">
+                <h4><i data-lucide="share-2" width="16" height="16"></i> {{ entry_social_block }}</h4>
                 <button type="button" id="btn-add-social" class="btn btn-primary btn-sm">
                   <i data-lucide="plus" width="14" height="14"></i> {{ button_add_social|default('Добавить') }}
                 </button>
@@ -459,10 +491,10 @@
                 {% endfor %}
               </div>
 
-              <p class="help-block" style="margin-top:10px;">{{ help_social_block }}</p>
+              <div class="help-block dc-rows-help">{{ help_social_block }}</div>
 
               {# Messenger FAB toggle #}
-              <div style="margin-top:16px;padding-top:14px;border-top:1px solid #e8eaec;display:flex;align-items:center;gap:16px;">
+              <div class="dc-theme-section-divider dc-theme-fab-row">
                 <label style="font-weight:600;margin:0;white-space:nowrap;">{{ entry_messenger_fab_status }}</label>
                 <div class="btn-group" role="group" id="messenger-fab-toggle">
                   <label class="btn btn-sm {{ dockercart_theme_messenger_fab_status ? 'btn-primary' : 'btn-default' }}" style="margin:0;">
@@ -472,13 +504,13 @@
                     <input type="radio" name="dockercart_theme_messenger_fab_status" value="0" {{ not dockercart_theme_messenger_fab_status ? 'checked' : '' }} style="display:none;"> {{ text_disabled }}
                   </label>
                 </div>
-                <span class="help-block" style="margin:0;font-size:12px;color:#8b96a7;">{{ help_messenger_fab_status }}</span>
+                <span class="help-block dc-theme-fab-help">{{ help_messenger_fab_status }}</span>
               </div>
 
               {# Messenger icons rows #}
-              <div style="margin-top:16px;padding-top:14px;border-top:1px solid #e8eaec;">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-                  <h4 style="margin:0;"><i data-lucide="message-circle" width="16" height="16"></i> {{ entry_messenger_block }}</h4>
+              <div class="dc-theme-section-divider">
+                <div class="dcx-section-header">
+                  <h4><i data-lucide="message-circle" width="16" height="16"></i> {{ entry_messenger_block }}</h4>
                   <button type="button" id="btn-add-messenger" class="btn btn-primary btn-sm">
                     <i data-lucide="plus" width="14" height="14"></i> {{ button_add_messenger|default('Добавить') }}
                   </button>
@@ -498,7 +530,7 @@
                       </button>
                     </div>
                     <input type="text" name="dockercart_theme_messenger_link[]" value="{{ item.link }}" placeholder="https://..." class="form-control dc-row-link-input" />
-                    <input type="text" name="dockercart_theme_messenger_name[]" value="{{ item.name }}" placeholder="{{ entry_messenger_name }}" class="form-control dc-row-link-input" style="max-width:160px;" />
+                    <input type="text" name="dockercart_theme_messenger_name[]" value="{{ item.name }}" placeholder="{{ entry_messenger_name }}" class="form-control dc-row-link-input dc-theme-messenger-name" />
                     <button type="button" class="btn btn-danger btn-sm js-remove-messenger-row">
                       <i data-lucide="x" width="14" height="14"></i>
                     </button>
@@ -506,14 +538,14 @@
                   {% endfor %}
                 </div>
 
-                <p class="help-block" style="margin-top:10px;">{{ help_messenger_block }}</p>
+                <div class="help-block dc-rows-help">{{ help_messenger_block }}</div>
               </div>
             </div>
 
             {# ─────────────────────── Section: Payment icons ──────────────────── #}
             <div class="dcx-section">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-                <h4 style="margin:0;"><i data-lucide="credit-card" width="16" height="16"></i> {{ entry_payment_block }}</h4>
+              <div class="dcx-section-header">
+                <h4><i data-lucide="credit-card" width="16" height="16"></i> {{ entry_payment_block }}</h4>
                 <button type="button" id="btn-add-payment" class="btn btn-primary btn-sm">
                   <i data-lucide="plus" width="14" height="14"></i> {{ button_add_payment|default('Добавить') }}
                 </button>
@@ -540,17 +572,17 @@
                 {% endfor %}
               </div>
 
-              <p class="help-block" style="margin-top:10px;">{{ help_payment_block }}</p>
+              <div class="help-block dc-rows-help">{{ help_payment_block }}</div>
             </div>
 
             </div>{# /dc-theme-tab-social-payments #}
 
-            <div id="dc-theme-tab-features" class="dcx-tab-pane">
+            <div id="dc-theme-tab-features" class="tab-pane">
 
             {# ─────────────────────── Product card features ─────────────────── #}
             <div class="dcx-section">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-                <h4 style="margin:0;"><i data-lucide="wand-2" width="16" height="16"></i> {{ entry_features_product }}</h4>
+              <div class="dcx-section-header">
+                <h4><i data-lucide="wand-sparkles" width="16" height="16"></i> {{ entry_features_product }}</h4>
                 <button type="button" class="btn btn-primary btn-sm js-add-theme-feature" data-target="product-features-body" data-field="dockercart_theme_product_features" data-prefix="product-feature-row" data-counter="product">
                   <i data-lucide="plus" width="14" height="14"></i> {{ button_add_feature }}
                 </button>
@@ -559,13 +591,13 @@
                 {% for idx, feature in dockercart_theme_product_features %}
                 <div class="dc-row-item dc-feature-row" id="product-feature-row-{{ idx }}">
                   <span class="dc-row-item__num">{{ idx + 1 }}</span>
-                  <div style="flex-shrink:0;">
+                  <div class="dc-theme-flex-shrink">
                     <input type="hidden" name="dockercart_theme_product_features[{{ idx }}][icon]" id="product-feature-icon-{{ idx }}" value="{{ feature.icon|default('truck') }}" />
                     <button type="button" class="dc-feature-icon-picker-btn dc-icon-picker-button" data-target="#product-feature-icon-{{ idx }}" title="{{ text_search_icons|default('Search icons...') }}">
                       <i data-lucide="{{ feature.icon|default('truck') }}" class="dc-icon-sm"></i>
                     </button>
                   </div>
-                  <div style="flex:1;min-width:0;">
+                  <div class="dc-theme-flex-grow">
                     <ul class="nav nav-tabs dc-feature-tabs" role="tablist">
                       {% for language in languages %}
                       <li{% if loop.first %} class="active"{% endif %}><a href="#product-feature-{{ idx }}-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
@@ -574,23 +606,23 @@
                     <div class="tab-content">
                       {% for language in languages %}
                       <div class="tab-pane{% if loop.first %} active{% endif %}" id="product-feature-{{ idx }}-lang-{{ language.language_id }}">
-                        <div class="form-group" style="margin-left:0;margin-right:0;">
+                        <div class="form-group dc-theme-feature-field">
                           <label class="control-label dc-feature-label">{{ entry_feature_title }}</label>
                           <input type="text" name="dockercart_theme_product_features[{{ idx }}][title][{{ language.language_id }}]" value="{{ feature.title[language.language_id]|default('') }}" class="form-control" />
                         </div>
-                        <div class="form-group" style="margin-left:0;margin-right:0;">
+                        <div class="form-group dc-theme-feature-field">
                           <label class="control-label dc-feature-label">{{ entry_feature_text }}</label>
                           <textarea name="dockercart_theme_product_features[{{ idx }}][text][{{ language.language_id }}]" rows="2" class="form-control">{{ feature.text[language.language_id]|default('') }}</textarea>
                         </div>
-                        <div class="form-group" style="margin-left:0;margin-right:0;margin-bottom:0;">
+                        <div class="form-group dc-theme-feature-field--last">
                           <label class="control-label dc-feature-label">{{ entry_feature_sort_order }}</label>
-                          <input type="number" name="dockercart_theme_product_features[{{ idx }}][sort_order]" value="{{ feature.sort_order|default(loop.index0) }}" class="form-control" style="width:82px;" />
+                          <input type="number" name="dockercart_theme_product_features[{{ idx }}][sort_order]" value="{{ feature.sort_order|default(loop.index0) }}" class="form-control dc-theme-sort-input" />
                         </div>
                       </div>
                       {% endfor %}
                     </div>
                   </div>
-                  <button type="button" class="btn btn-danger btn-sm js-remove-theme-feature-row" style="flex-shrink:0;">
+                  <button type="button" class="btn btn-danger btn-sm js-remove-theme-feature-row dc-theme-flex-shrink">
                     <i data-lucide="x" width="14" height="14"></i>
                   </button>
                 </div>
@@ -600,8 +632,8 @@
 
             {# ─────────────────────── Category features ─────────────────── #}
             <div class="dcx-section">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-                <h4 style="margin:0;"><i data-lucide="wand-2" width="16" height="16"></i> {{ entry_features_category }}</h4>
+              <div class="dcx-section-header">
+                <h4><i data-lucide="wand-sparkles" width="16" height="16"></i> {{ entry_features_category }}</h4>
                 <button type="button" class="btn btn-primary btn-sm js-add-theme-feature" data-target="category-features-body" data-field="dockercart_theme_category_features" data-prefix="category-feature-row" data-counter="category">
                   <i data-lucide="plus" width="14" height="14"></i> {{ button_add_feature }}
                 </button>
@@ -610,13 +642,13 @@
                 {% for idx, feature in dockercart_theme_category_features %}
                 <div class="dc-row-item dc-feature-row" id="category-feature-row-{{ idx }}">
                   <span class="dc-row-item__num">{{ idx + 1 }}</span>
-                  <div style="flex-shrink:0;">
+                  <div class="dc-theme-flex-shrink">
                     <input type="hidden" name="dockercart_theme_category_features[{{ idx }}][icon]" id="category-feature-icon-{{ idx }}" value="{{ feature.icon|default('truck') }}" />
                     <button type="button" class="dc-feature-icon-picker-btn dc-icon-picker-button" data-target="#category-feature-icon-{{ idx }}" title="{{ text_search_icons|default('Search icons...') }}">
                       <i data-lucide="{{ feature.icon|default('truck') }}" class="dc-icon-sm"></i>
                     </button>
                   </div>
-                  <div style="flex:1;min-width:0;">
+                  <div class="dc-theme-flex-grow">
                     <ul class="nav nav-tabs dc-feature-tabs" role="tablist">
                       {% for language in languages %}
                       <li{% if loop.first %} class="active"{% endif %}><a href="#category-feature-{{ idx }}-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
@@ -625,23 +657,23 @@
                     <div class="tab-content">
                       {% for language in languages %}
                       <div class="tab-pane{% if loop.first %} active{% endif %}" id="category-feature-{{ idx }}-lang-{{ language.language_id }}">
-                        <div class="form-group" style="margin-left:0;margin-right:0;">
+                        <div class="form-group dc-theme-feature-field">
                           <label class="control-label dc-feature-label">{{ entry_feature_title }}</label>
                           <input type="text" name="dockercart_theme_category_features[{{ idx }}][title][{{ language.language_id }}]" value="{{ feature.title[language.language_id]|default('') }}" class="form-control" />
                         </div>
-                        <div class="form-group" style="margin-left:0;margin-right:0;">
+                        <div class="form-group dc-theme-feature-field">
                           <label class="control-label dc-feature-label">{{ entry_feature_text }}</label>
                           <textarea name="dockercart_theme_category_features[{{ idx }}][text][{{ language.language_id }}]" rows="2" class="form-control">{{ feature.text[language.language_id]|default('') }}</textarea>
                         </div>
-                        <div class="form-group" style="margin-left:0;margin-right:0;margin-bottom:0;">
+                        <div class="form-group dc-theme-feature-field--last">
                           <label class="control-label dc-feature-label">{{ entry_feature_sort_order }}</label>
-                          <input type="number" name="dockercart_theme_category_features[{{ idx }}][sort_order]" value="{{ feature.sort_order|default(loop.index0) }}" class="form-control" style="width:82px;" />
+                          <input type="number" name="dockercart_theme_category_features[{{ idx }}][sort_order]" value="{{ feature.sort_order|default(loop.index0) }}" class="form-control dc-theme-sort-input" />
                         </div>
                       </div>
                       {% endfor %}
                     </div>
                   </div>
-                  <button type="button" class="btn btn-danger btn-sm js-remove-theme-feature-row" style="flex-shrink:0;">
+                  <button type="button" class="btn btn-danger btn-sm js-remove-theme-feature-row dc-theme-flex-shrink">
                     <i data-lucide="x" width="14" height="14"></i>
                   </button>
                 </div>
@@ -651,8 +683,8 @@
 
             {# ─────────────────────── Quick view features ─────────────────── #}
             <div class="dcx-section">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-                <h4 style="margin:0;"><i data-lucide="wand-2" width="16" height="16"></i> {{ entry_features_quickview }}</h4>
+              <div class="dcx-section-header">
+                <h4><i data-lucide="wand-sparkles" width="16" height="16"></i> {{ entry_features_quickview }}</h4>
                 <button type="button" class="btn btn-primary btn-sm js-add-theme-feature" data-target="quickview-features-body" data-field="dockercart_theme_quickview_features" data-prefix="quickview-feature-row" data-counter="quickview">
                   <i data-lucide="plus" width="14" height="14"></i> {{ button_add_feature }}
                 </button>
@@ -661,13 +693,13 @@
                 {% for idx, feature in dockercart_theme_quickview_features %}
                 <div class="dc-row-item dc-feature-row" id="quickview-feature-row-{{ idx }}">
                   <span class="dc-row-item__num">{{ idx + 1 }}</span>
-                  <div style="flex-shrink:0;">
+                  <div class="dc-theme-flex-shrink">
                     <input type="hidden" name="dockercart_theme_quickview_features[{{ idx }}][icon]" id="quickview-feature-icon-{{ idx }}" value="{{ feature.icon|default('truck') }}" />
                     <button type="button" class="dc-feature-icon-picker-btn dc-icon-picker-button" data-target="#quickview-feature-icon-{{ idx }}" title="{{ text_search_icons|default('Search icons...') }}">
                       <i data-lucide="{{ feature.icon|default('truck') }}" class="dc-icon-sm"></i>
                     </button>
                   </div>
-                  <div style="flex:1;min-width:0;">
+                  <div class="dc-theme-flex-grow">
                     <ul class="nav nav-tabs dc-feature-tabs" role="tablist">
                       {% for language in languages %}
                       <li{% if loop.first %} class="active"{% endif %}><a href="#quickview-feature-{{ idx }}-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
@@ -676,39 +708,39 @@
                     <div class="tab-content">
                       {% for language in languages %}
                       <div class="tab-pane{% if loop.first %} active{% endif %}" id="quickview-feature-{{ idx }}-lang-{{ language.language_id }}">
-                        <div class="form-group" style="margin-left:0;margin-right:0;">
+                        <div class="form-group dc-theme-feature-field">
                           <label class="control-label dc-feature-label">{{ entry_feature_title }}</label>
                           <input type="text" name="dockercart_theme_quickview_features[{{ idx }}][title][{{ language.language_id }}]" value="{{ feature.title[language.language_id]|default('') }}" class="form-control" />
                         </div>
-                        <div class="form-group" style="margin-left:0;margin-right:0;">
+                        <div class="form-group dc-theme-feature-field">
                           <label class="control-label dc-feature-label">{{ entry_feature_text }}</label>
                           <textarea name="dockercart_theme_quickview_features[{{ idx }}][text][{{ language.language_id }}]" rows="2" class="form-control">{{ feature.text[language.language_id]|default('') }}</textarea>
                         </div>
-                        <div class="form-group" style="margin-left:0;margin-right:0;margin-bottom:0;">
+                        <div class="form-group dc-theme-feature-field--last">
                           <label class="control-label dc-feature-label">{{ entry_feature_sort_order }}</label>
-                          <input type="number" name="dockercart_theme_quickview_features[{{ idx }}][sort_order]" value="{{ feature.sort_order|default(loop.index0) }}" class="form-control" style="width:82px;" />
+                          <input type="number" name="dockercart_theme_quickview_features[{{ idx }}][sort_order]" value="{{ feature.sort_order|default(loop.index0) }}" class="form-control dc-theme-sort-input" />
                         </div>
                       </div>
                       {% endfor %}
                     </div>
                   </div>
-                  <button type="button" class="btn btn-danger btn-sm js-remove-theme-feature-row" style="flex-shrink:0;">
+                  <button type="button" class="btn btn-danger btn-sm js-remove-theme-feature-row dc-theme-flex-shrink">
                     <i data-lucide="x" width="14" height="14"></i>
                   </button>
                 </div>
                 {% endfor %}
               </div>
-              <p class="help-block" style="margin-top:10px;">{{ help_theme_features }}</p>
+              <div class="help-block dc-rows-help">{{ help_theme_features }}</div>
             </div>
 
             </div>{# /dc-theme-tab-features #}
 
-            <div id="dc-theme-tab-links" class="dcx-tab-pane">
+            <div id="dc-theme-tab-links" class="tab-pane">
 
             {# ─────────────────────── Section: Header Links ─────────────────────── #}
             <div class="dcx-section">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-                <h4 style="margin:0;"><i data-lucide="external-link" width="16" height="16"></i> {{ entry_header_links }}</h4>
+              <div class="dcx-section-header">
+                <h4><i data-lucide="external-link" width="16" height="16"></i> {{ entry_header_links }}</h4>
                 <button type="button" class="btn btn-primary btn-sm js-add-header-link">
                   <i data-lucide="plus" width="14" height="14"></i> {{ button_add_header_link }}
                 </button>
@@ -718,7 +750,7 @@
                 {% for idx, item in dockercart_theme_header_links %}
                 <div class="dc-row-item dc-header-link-row" id="header-link-row-{{ idx }}">
                   <span class="dc-row-item__num">{{ idx + 1 }}</span>
-                  <div style="flex:1;min-width:0;">
+                  <div class="dc-theme-flex-grow">
                     <ul class="nav nav-tabs dc-feature-tabs" role="tablist">
                       {% for language in languages %}
                       <li{% if loop.first %} class="active"{% endif %}><a href="#header-link-{{ idx }}-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
@@ -727,11 +759,11 @@
                     <div class="tab-content">
                       {% for language in languages %}
                       <div class="tab-pane{% if loop.first %} active{% endif %}" id="header-link-{{ idx }}-lang-{{ language.language_id }}">
-                        <div class="form-group" style="margin-left:0;margin-right:0;">
+                        <div class="form-group dc-theme-feature-field">
                           <label class="control-label dc-feature-label">{{ entry_link_title }}</label>
                           <input type="text" name="dockercart_theme_header_links[{{ idx }}][title][{{ language.language_id }}]" value="{{ item.title[language.language_id]|default('') }}" class="form-control" />
                         </div>
-                        <div class="form-group" style="margin-left:0;margin-right:0;margin-bottom:0;">
+                        <div class="form-group dc-theme-feature-field--last">
                           <label class="control-label dc-feature-label">{{ entry_link_url }}</label>
                           <input type="text" name="dockercart_theme_header_links[{{ idx }}][url][{{ language.language_id }}]" value="{{ item.url[language.language_id]|default('') }}" class="form-control" placeholder="https://..." />
                         </div>
@@ -739,20 +771,20 @@
                       {% endfor %}
                     </div>
                   </div>
-                  <button type="button" class="btn btn-danger btn-sm js-remove-header-link-row" style="flex-shrink:0;">
+                  <button type="button" class="btn btn-danger btn-sm js-remove-header-link-row dc-theme-flex-shrink">
                     <i data-lucide="x" width="14" height="14"></i>
                   </button>
                 </div>
                 {% endfor %}
               </div>
 
-              <p class="help-block" style="margin-top:10px;">{{ help_header_links }}</p>
+              <div class="help-block dc-rows-help">{{ help_header_links }}</div>
             </div>
 
             {# ─────────────────────── Section: Footer Links ─────────────────────── #}
             <div class="dcx-section">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-                <h4 style="margin:0;"><i data-lucide="external-link" width="16" height="16"></i> {{ entry_footer_links }}</h4>
+              <div class="dcx-section-header">
+                <h4><i data-lucide="external-link" width="16" height="16"></i> {{ entry_footer_links }}</h4>
                 <button type="button" class="btn btn-primary btn-sm js-add-footer-link">
                   <i data-lucide="plus" width="14" height="14"></i> {{ button_add_footer_link }}
                 </button>
@@ -762,7 +794,7 @@
                 {% for idx, item in dockercart_theme_footer_links %}
                 <div class="dc-row-item dc-footer-link-row" id="footer-link-row-{{ idx }}">
                   <span class="dc-row-item__num">{{ idx + 1 }}</span>
-                  <div style="flex:1;min-width:0;">
+                  <div class="dc-theme-flex-grow">
                     <ul class="nav nav-tabs dc-feature-tabs" role="tablist">
                       {% for language in languages %}
                       <li{% if loop.first %} class="active"{% endif %}><a href="#footer-link-{{ idx }}-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
@@ -771,11 +803,11 @@
                     <div class="tab-content">
                       {% for language in languages %}
                       <div class="tab-pane{% if loop.first %} active{% endif %}" id="footer-link-{{ idx }}-lang-{{ language.language_id }}">
-                        <div class="form-group" style="margin-left:0;margin-right:0;">
+                        <div class="form-group dc-theme-feature-field">
                           <label class="control-label dc-feature-label">{{ entry_link_title }}</label>
                           <input type="text" name="dockercart_theme_footer_links[{{ idx }}][title][{{ language.language_id }}]" value="{{ item.title[language.language_id]|default('') }}" class="form-control" />
                         </div>
-                        <div class="form-group" style="margin-left:0;margin-right:0;margin-bottom:0;">
+                        <div class="form-group dc-theme-feature-field--last">
                           <label class="control-label dc-feature-label">{{ entry_link_url }}</label>
                           <input type="text" name="dockercart_theme_footer_links[{{ idx }}][url][{{ language.language_id }}]" value="{{ item.url[language.language_id]|default('') }}" class="form-control" placeholder="https://..." />
                         </div>
@@ -783,28 +815,28 @@
                       {% endfor %}
                     </div>
                   </div>
-                  <button type="button" class="btn btn-danger btn-sm js-remove-footer-link-row" style="flex-shrink:0;">
+                  <button type="button" class="btn btn-danger btn-sm js-remove-footer-link-row dc-theme-flex-shrink">
                     <i data-lucide="x" width="14" height="14"></i>
                   </button>
                 </div>
                 {% endfor %}
               </div>
 
-              <p class="help-block" style="margin-top:10px;">{{ help_footer_links }}</p>
+              <div class="help-block dc-rows-help">{{ help_footer_links }}</div>
             </div>
 
             </div>{# /dc-theme-tab-links #}
 
-            <div id="dc-theme-tab-custom-code" class="dcx-tab-pane">
+            <div id="dc-theme-tab-custom-code" class="tab-pane">
 
             {# ─────────────────────── Section: Custom CSS ───────────────────── #}
             <div class="dcx-section">
-              <h4><i data-lucide="css" width="16" height="16"></i> {{ entry_custom_css }}</h4>
-              <div class="form-group">
-                <label class="col-sm-3 control-label" for="input-custom-css">{{ entry_custom_css }}</label>
-                <div class="col-sm-9">
-                  <textarea name="dockercart_theme_custom_css" id="input-custom-css" class="form-control" style="font-family:monospace;min-height:140px;white-space:pre;tab-size:2;">{{ dockercart_theme_custom_css }}</textarea>
-                  <p class="help-block">{{ help_custom_css }}</p>
+              <h4><i data-lucide="file-code" width="16" height="16"></i> {{ entry_custom_css }}</h4>
+              <div class="dcx-fields">
+                <div class="dcx-field">
+                  <label class="dcx-label" for="input-custom-css">{{ entry_custom_css }}</label>
+                  <textarea name="dockercart_theme_custom_css" id="input-custom-css" class="form-control dc-theme-code-textarea">{{ dockercart_theme_custom_css }}</textarea>
+                  <div class="help-block">{{ help_custom_css }}</div>
                 </div>
               </div>
             </div>
@@ -812,20 +844,25 @@
             {# ─────────────────────── Section: Custom JS ─────────────────────── #}
             <div class="dcx-section">
               <h4><i data-lucide="code" width="16" height="16"></i> {{ entry_custom_js }}</h4>
-              <div class="form-group">
-                <label class="col-sm-3 control-label" for="input-custom-js">{{ entry_custom_js }}</label>
-                <div class="col-sm-9">
-                  <textarea name="dockercart_theme_custom_js" id="input-custom-js" class="form-control" style="font-family:monospace;min-height:140px;white-space:pre;tab-size:2;">{{ dockercart_theme_custom_js }}</textarea>
-                  <p class="help-block">{{ help_custom_js }}</p>
+              <div class="dcx-fields">
+                <div class="dcx-field">
+                  <label class="dcx-label" for="input-custom-js">{{ entry_custom_js }}</label>
+                  <textarea name="dockercart_theme_custom_js" id="input-custom-js" class="form-control dc-theme-code-textarea">{{ dockercart_theme_custom_js }}</textarea>
+                  <div class="help-block">{{ help_custom_js }}</div>
                 </div>
               </div>
             </div>
 
             </div>{# /dc-theme-tab-custom-code #}
 
+            </div>{# /tab-content #}
+
           </form>
 
         </div>
+      </div>
+    </div>
+
       </div>
     </div>
 
@@ -898,13 +935,13 @@
     {% set default_lang = languages[0] %}
     html += '<div class="dc-row-item dc-feature-row" id="' + rowPrefix + '-' + rowIndex + '">';
     html += '<span class="dc-row-item__num">' + (rowIndex + 1) + '</span>';
-    html += '<div style="flex-shrink:0;">';
+    html += '<div class="dc-theme-flex-shrink">';
     html += '<input type="hidden" name="' + fieldName + '[' + rowIndex + '][icon]" id="' + rowPrefix + '-icon-' + rowIndex + '" value="truck" />';
     html += '<button type="button" class="dc-feature-icon-picker-btn dc-icon-picker-button" data-target="#' + rowPrefix + '-icon-' + rowIndex + '" title="{{ text_search_icons|e('html_attr') }}">';
     html += '<i data-lucide="truck" class="dc-icon-sm"></i>';
     html += '</button>';
     html += '</div>';
-    html += '<div style="flex:1;min-width:0;">';
+    html += '<div class="dc-theme-flex-grow">';
     html += '<ul class="nav nav-tabs dc-feature-tabs" role="tablist">';
     {% for language in languages %}
     html += '<li{% if loop.first %} class="active"{% endif %}><a href="#' + rowPrefix + '-' + rowIndex + '-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>';
@@ -913,23 +950,23 @@
     html += '<div class="tab-content">';
     {% for language in languages %}
     html += '<div class="tab-pane{% if loop.first %} active{% endif %}" id="' + rowPrefix + '-' + rowIndex + '-lang-{{ language.language_id }}">';
-    html += '<div class="form-group" style="margin-left:0;margin-right:0;">';
+    html += '<div class="form-group dc-theme-feature-field">';
     html += '<label class="control-label dc-feature-label">{{ entry_feature_title|e('js') }}</label>';
     html += '<input type="text" name="' + fieldName + '[' + rowIndex + '][title][{{ language.language_id }}]" value="" class="form-control" />';
     html += '</div>';
-    html += '<div class="form-group" style="margin-left:0;margin-right:0;">';
+    html += '<div class="form-group dc-theme-feature-field">';
     html += '<label class="control-label dc-feature-label">{{ entry_feature_text|e('js') }}</label>';
     html += '<textarea name="' + fieldName + '[' + rowIndex + '][text][{{ language.language_id }}]" rows="2" class="form-control"></textarea>';
     html += '</div>';
-    html += '<div class="form-group" style="margin-left:0;margin-right:0;margin-bottom:0;">';
+    html += '<div class="form-group dc-theme-feature-field--last">';
     html += '<label class="control-label dc-feature-label">{{ entry_feature_sort_order|e('js') }}</label>';
-    html += '<input type="number" name="' + fieldName + '[' + rowIndex + '][sort_order]" value="' + escapeHtml(sortOrder) + '" class="form-control" style="width:82px;" />';
+    html += '<input type="number" name="' + fieldName + '[' + rowIndex + '][sort_order]" value="' + escapeHtml(sortOrder) + '" class="form-control dc-theme-sort-input" />';
     html += '</div>';
     html += '</div>';
     {% endfor %}
     html += '</div>';
     html += '</div>';
-    html += '<button type="button" class="btn btn-danger btn-sm js-remove-theme-feature-row" style="flex-shrink:0;"><i data-lucide="x" width="14" height="14"></i></button>';
+    html += '<button type="button" class="btn btn-danger btn-sm js-remove-theme-feature-row dc-theme-flex-shrink"><i data-lucide="x" width="14" height="14"></i></button>';
     html += '</div>';
 
     return html;
@@ -939,7 +976,7 @@
     var html = '';
     html += '<div class="dc-row-item dc-header-link-row" id="header-link-row-' + rowIndex + '">';
     html += '<span class="dc-row-item__num">' + (rowIndex + 1) + '</span>';
-    html += '<div style="flex:1;min-width:0;">';
+    html += '<div class="dc-theme-flex-grow">';
     html += '<ul class="nav nav-tabs dc-feature-tabs" role="tablist">';
     {% for language in languages %}
     html += '<li{% if loop.first %} class="active"{% endif %}><a href="#header-link-' + rowIndex + '-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>';
@@ -948,11 +985,11 @@
     html += '<div class="tab-content">';
     {% for language in languages %}
     html += '<div class="tab-pane{% if loop.first %} active{% endif %}" id="header-link-' + rowIndex + '-lang-{{ language.language_id }}">';
-    html += '<div class="form-group" style="margin-left:0;margin-right:0;">';
+    html += '<div class="form-group dc-theme-feature-field">';
     html += '<label class="control-label dc-feature-label">{{ entry_link_title|e('js') }}</label>';
     html += '<input type="text" name="dockercart_theme_header_links[' + rowIndex + '][title][{{ language.language_id }}]" value="" class="form-control" />';
     html += '</div>';
-    html += '<div class="form-group" style="margin-left:0;margin-right:0;margin-bottom:0;">';
+    html += '<div class="form-group dc-theme-feature-field--last">';
     html += '<label class="control-label dc-feature-label">{{ entry_link_url|e('js') }}</label>';
     html += '<input type="text" name="dockercart_theme_header_links[' + rowIndex + '][url][{{ language.language_id }}]" value="" class="form-control" placeholder="https://..." />';
     html += '</div>';
@@ -960,7 +997,7 @@
     {% endfor %}
     html += '</div>';
     html += '</div>';
-    html += '<button type="button" class="btn btn-danger btn-sm js-remove-header-link-row" style="flex-shrink:0;"><i data-lucide="x" width="14" height="14"></i></button>';
+    html += '<button type="button" class="btn btn-danger btn-sm js-remove-header-link-row dc-theme-flex-shrink"><i data-lucide="x" width="14" height="14"></i></button>';
     html += '</div>';
     return html;
   }
@@ -969,7 +1006,7 @@
     var html = '';
     html += '<div class="dc-row-item dc-footer-link-row" id="footer-link-row-' + rowIndex + '">';
     html += '<span class="dc-row-item__num">' + (rowIndex + 1) + '</span>';
-    html += '<div style="flex:1;min-width:0;">';
+    html += '<div class="dc-theme-flex-grow">';
     html += '<ul class="nav nav-tabs dc-feature-tabs" role="tablist">';
     {% for language in languages %}
     html += '<li{% if loop.first %} class="active"{% endif %}><a href="#footer-link-' + rowIndex + '-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>';
@@ -978,11 +1015,11 @@
     html += '<div class="tab-content">';
     {% for language in languages %}
     html += '<div class="tab-pane{% if loop.first %} active{% endif %}" id="footer-link-' + rowIndex + '-lang-{{ language.language_id }}">';
-    html += '<div class="form-group" style="margin-left:0;margin-right:0;">';
+    html += '<div class="form-group dc-theme-feature-field">';
     html += '<label class="control-label dc-feature-label">{{ entry_link_title|e('js') }}</label>';
     html += '<input type="text" name="dockercart_theme_footer_links[' + rowIndex + '][title][{{ language.language_id }}]" value="" class="form-control" />';
     html += '</div>';
-    html += '<div class="form-group" style="margin-left:0;margin-right:0;margin-bottom:0;">';
+    html += '<div class="form-group dc-theme-feature-field--last">';
     html += '<label class="control-label dc-feature-label">{{ entry_link_url|e('js') }}</label>';
     html += '<input type="text" name="dockercart_theme_footer_links[' + rowIndex + '][url][{{ language.language_id }}]" value="" class="form-control" placeholder="https://..." />';
     html += '</div>';
@@ -990,7 +1027,7 @@
     {% endfor %}
     html += '</div>';
     html += '</div>';
-    html += '<button type="button" class="btn btn-danger btn-sm js-remove-footer-link-row" style="flex-shrink:0;"><i data-lucide="x" width="14" height="14"></i></button>';
+    html += '<button type="button" class="btn btn-danger btn-sm js-remove-footer-link-row dc-theme-flex-shrink"><i data-lucide="x" width="14" height="14"></i></button>';
     html += '</div>';
     return html;
   }
@@ -1003,18 +1040,26 @@
     $('#' + thumbId + ' img').attr('src', placeholder);
   });
 
-  /* ── Manual "open" buttons for logos (fallback for older OC builds) ── */
+  /* ── Manual "open" buttons for logos — load filemanager directly in modal ── */
+  function fmOpen(target, thumb) {
+    $('#modal-image').remove();
+    $.ajax({
+      url: 'index.php?route=common/filemanager&user_token=' + userToken + '&target=' + target + '&thumb=' + thumb + '&type=image',
+      dataType: 'html',
+      success: function(html) {
+        $('body').append('<div id="modal-image" class="modal">' + html + '</div>');
+        $('#modal-image').modal('show');
+      }
+    });
+  }
   $('#btn-open-dark').on('click', function() {
-    var url = 'index.php?route=common/filemanager&user_token=' + userToken + '&target=input-logo-dark&thumb=thumb-logo-dark';
-    window.open(url, 'filemanager', 'width=1200,height=700,scrollbars=yes');
+    fmOpen('input-logo-dark', 'thumb-logo-dark');
   });
   $('#btn-open-light').on('click', function() {
-    var url = 'index.php?route=common/filemanager&user_token=' + userToken + '&target=input-logo-light&thumb=thumb-logo-light';
-    window.open(url, 'filemanager', 'width=1200,height=700,scrollbars=yes');
+    fmOpen('input-logo-light', 'thumb-logo-light');
   });
   $('#btn-open-favicon-master').on('click', function() {
-    var url = 'index.php?route=common/filemanager&user_token=' + userToken + '&target=input-favicon-master&thumb=thumb-favicon-master';
-    window.open(url, 'filemanager', 'width=1200,height=700,scrollbars=yes');
+    fmOpen('input-favicon-master', 'thumb-favicon-master');
   });
 
   /* ── Social image clear ─────────────────────────────────────────── */
@@ -1065,6 +1110,7 @@
       + '<button type="button" class="btn btn-danger btn-sm js-remove-social-row"><i data-lucide="x" width="14" height="14"></i></button>'
       + '</div>';
     $('#social-rows').append(html);
+    renderLucideIcons();
     renumberRows('#social-rows', '.dc-row-item__num');
   });
 
@@ -1091,6 +1137,7 @@
       + '<button type="button" class="btn btn-danger btn-sm js-remove-payment-row"><i data-lucide="x" width="14" height="14"></i></button>'
       + '</div>';
     $('#payment-rows').append(html);
+    renderLucideIcons();
     renumberRows('#payment-rows', '.dc-row-item__num');
   });
 
@@ -1123,10 +1170,11 @@
       +   '<button type="button" class="dc-payment-clear-btn js-clear-messenger-thumb" data-input="input-messenger-row-' + idx + '" data-thumb="thumb-messenger-row-' + idx + '" title="Очистить"><i data-lucide="x" width="14" height="14"></i></button>'
       + '</div>'
       + '<input type="text" name="dockercart_theme_messenger_link[]" value="" placeholder="https://..." class="form-control dc-row-link-input" />'
-      + '<input type="text" name="dockercart_theme_messenger_name[]" value="" placeholder="{{ entry_messenger_name|e('js') }}" class="form-control dc-row-link-input" style="max-width:160px;" />'
+      + '<input type="text" name="dockercart_theme_messenger_name[]" value="" placeholder="{{ entry_messenger_name|e('js') }}" class="form-control dc-row-link-input dc-theme-messenger-name" />'
       + '<button type="button" class="btn btn-danger btn-sm js-remove-messenger-row"><i data-lucide="x" width="14" height="14"></i></button>'
       + '</div>';
     $('#messenger-rows').append(html);
+    renderLucideIcons();
     renumberRows('#messenger-rows', '.dc-row-item__num');
   });
 
@@ -1141,6 +1189,7 @@
     var idx = linkRowCounters.header++;
     var sortOrder = $('#header-link-rows .dc-row-item').length;
     $('#header-link-rows').append(buildHeaderLinkRow(idx, sortOrder));
+    renderLucideIcons();
     renumberRows('#header-link-rows', '.dc-row-item__num');
   });
 
@@ -1155,6 +1204,7 @@
     var idx = linkRowCounters.footer++;
     var sortOrder = $('#footer-link-rows .dc-row-item').length;
     $('#footer-link-rows').append(buildFooterLinkRow(idx, sortOrder));
+    renderLucideIcons();
     renumberRows('#footer-link-rows', '.dc-row-item__num');
   });
 
@@ -1280,6 +1330,7 @@
   updateDcThemePanelHeader($('#dc-theme-tabs > li.active a.js-dc-theme-tab'));
 
   renderLucideIcons();
+  $(document).ready(function() { renderLucideIcons(); });
 
 })(jQuery);
 </script>
