@@ -76,7 +76,7 @@ $(document).ready(function() {
 
 			var html = '<div id="dcx-error-summary" class="alert alert-danger alert-dismissible">'
 				+ '<button type="button" class="close" data-dismiss="alert">&times;</button>'
-				+ '<p style="margin:0 0 6px;"><i data-lucide="alert-circle" width="16" height="16"></i> <strong>' + label + '</strong></p>'
+				+ '<p style="margin:0 0 6px;"><i data-lucide="circle-alert" width="16" height="16"></i> <strong>' + label + '</strong></p>'
 				+ '<ul style="margin:0;padding-left:20px;">' + list + '</ul>'
 				+ '</div>';
 

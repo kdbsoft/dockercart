@@ -43,7 +43,7 @@ var DcxUI = (function() {
 		$.each(selectedItems, function(id, name) {
 			$well.append(
 				'<div class="' + p + '__well-item" data-id="' + id + '">' +
-				'<i data-lucide="minus-circle" width="14" height="14" class="' + p + '__well-remove"></i> ' +
+				'<i data-lucide="circle-minus" width="14" height="14" class="' + p + '__well-remove"></i> ' +
 				'<span class="' + p + '__well-label">' + name + '</span>' +
 				(opts.inputName ? '<input type="hidden" name="' + opts.inputName + '" value="' + id + '"/>' : '') +
 				'</div>'
@@ -65,7 +65,7 @@ var DcxUI = (function() {
 			if (!$well.find('.' + p + '__well-item[data-id="' + id + '"]').length) {
 				$well.append(
 					'<div class="' + p + '__well-item" data-id="' + id + '">' +
-					'<i data-lucide="minus-circle" width="14" height="14" class="' + p + '__well-remove"></i> ' +
+					'<i data-lucide="circle-minus" width="14" height="14" class="' + p + '__well-remove"></i> ' +
 					'<span class="' + p + '__well-label">' + name + '</span>' +
 					(opts.inputName ? '<input type="hidden" name="' + opts.inputName + '" value="' + id + '"/>' : '') +
 					'</div>'
@@ -238,7 +238,7 @@ var DcxUI = (function() {
 
 			var $item = $('<div class="dcx-picker__item' + (isChecked ? ' dcx-picker__item--selected' : '') + '" data-id="' + id + '" data-name="' + name.replace(/"/g, '&quot;') + '"></div>');
 
-			var checkIcon = isChecked ? 'check-square' : 'square';
+			var checkIcon = isChecked ? 'square-check' : 'square';
 			$item.append('<span class="dcx-picker__item-check"><i data-lucide="' + checkIcon + '" width="16" height="16"></i></span>');
 
 			if (thumb) {
@@ -275,7 +275,7 @@ var DcxUI = (function() {
 		} else {
 			this.selectedItems[id] = name;
 			$item.addClass('dcx-picker__item--selected');
-			$icon.attr('data-lucide', 'check-square');
+			$icon.attr('data-lucide', 'square-check');
 		}
 
 		_renderIcons($icon[0]);
@@ -467,7 +467,7 @@ var DcxUI = (function() {
 			}
 
 			if (self.mode === 'multi') {
-				var checkIcon = isChecked ? 'check-square' : 'square';
+				var checkIcon = isChecked ? 'square-check' : 'square';
 				$item.append('<label class="dcx-tree-select__checkbox"><i data-lucide="' + checkIcon + '" width="16" height="16"></i><input type="checkbox"' + (isChecked ? ' checked' : '') + ' style="display:none;"/></label>');
 			}
 
@@ -580,7 +580,7 @@ var DcxUI = (function() {
 
 		var $icon = $item.find('.dcx-tree-select__checkbox [data-lucide]');
 		if ($icon.length) {
-			$icon.attr('data-lucide', checked ? 'check-square' : 'square');
+			$icon.attr('data-lucide', checked ? 'square-check' : 'square');
 			_renderIcons($icon.toArray());
 		}
 
@@ -606,7 +606,7 @@ var DcxUI = (function() {
 			$(this).find('.dcx-tree-select__checkbox input').prop('checked', isChecked);
 			var $icon = $(this).find('.dcx-tree-select__checkbox [data-lucide]');
 			if ($icon.length) {
-				$icon.attr('data-lucide', isChecked ? 'check-square' : 'square');
+				$icon.attr('data-lucide', isChecked ? 'square-check' : 'square');
 			}
 		});
 		_renderIcons();
