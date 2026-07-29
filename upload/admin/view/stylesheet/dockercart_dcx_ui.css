@@ -359,15 +359,16 @@ div.dcx-field.required > .dcx-label:before {
     line-height: 1.5;
     padding: 8px 12px;
     color: var(--dc-gray-900);
-    box-shadow: none;
+    box-shadow: var(--dc-shadow-input);
 }
 .dcx-form .form-control:focus {
     border-color: var(--dc-primary);
-    box-shadow: 0 0 0 2px var(--dc-primary-ring);
+    box-shadow: var(--dc-shadow-input-focus);
     background: var(--dc-surface);
 }
 .dcx-form .form-control:hover {
     border-color: var(--dc-gray-400);
+    box-shadow: var(--dc-shadow-input-hover);
 }
 .dcx-form textarea.form-control {
     height: auto;

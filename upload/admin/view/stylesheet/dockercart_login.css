@@ -149,6 +149,7 @@ body::before {
 	color: var(--dc-login-text);
 	background: var(--dc-surface);
 	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+	box-shadow: var(--dc-shadow-input);
 	outline: none;
 	-webkit-appearance: none;
 }
@@ -159,11 +160,12 @@ body::before {
 
 .input-wrap .form-control:focus {
 	border-color: var(--dc-login-primary);
-	box-shadow: 0 0 0 3px var(--dc-login-primary-ring);
+	box-shadow: var(--dc-shadow-input-focus);
 }
 
 .input-wrap .form-control:hover:not(:focus) {
 	border-color: var(--dc-login-border-hover);
+	box-shadow: var(--dc-shadow-input-hover);
 }
 
 /* Language selector */
