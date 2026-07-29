@@ -84,9 +84,9 @@ class ModelCatalogProduct extends Model {
 			}
 
 			$product_data = array(
-			'product_id'       => $query->row['product_id'],
-			'main_category_id' => isset($query->row['main_category_id']) ? (int)$query->row['main_category_id'] : 0,
-			'name'             => $query->row['name'],
+    			'product_id'       => $query->row['product_id'],
+    			'main_category_id' => isset($query->row['main_category_id']) ? (int)$query->row['main_category_id'] : 0,
+    			'name'             => $query->row['name'],
 				'description'      => $query->row['description'],
 				'meta_title'       => $query->row['meta_title'],
 				'meta_description' => $query->row['meta_description'],
@@ -145,25 +145,96 @@ class ModelCatalogProduct extends Model {
 				if ($default_variant) {
 					$product_data['default_variant'] = $default_variant;
 					$product_data['default_variant_id'] = $default_variant['variant_id'];
+
+					$product_data['default_option_value_ids'] = array();
+					if (!empty($default_variant['values'])) {
+						foreach ($default_variant['values'] as $dv) {
+							$product_data['default_option_value_ids'][] = (int)$dv['option_value_id'];
+						}
+					}
+
+					// Override base product data with default variant values
+					if (isset($default_variant['price']) && $default_variant['price'] !== '' && (float)$default_variant['price'] > 0) {
+						$product_data['base_price'] = $product_data['price'];
+						$product_data['price'] = (float)$default_variant['price'];
+					}
+					if (isset($default_variant['quantity'])) {
+						$product_data['quantity'] = (float)$default_variant['quantity'];
+					}
+					if (isset($default_variant['subtract'])) {
+						$product_data['subtract'] = (int)$default_variant['subtract'];
+					}
+					if (!empty($default_variant['sku'])) {
+						$product_data['model'] = $default_variant['sku'];
+					}
+					if (!empty($default_variant['upc'])) {
+						$product_data['upc'] = $default_variant['upc'];
+					}
+					if (!empty($default_variant['ean'])) {
+						$product_data['ean'] = $default_variant['ean'];
+					}
+					if (!empty($default_variant['mpn'])) {
+						$product_data['mpn'] = $default_variant['mpn'];
+					}
+					if (!empty($default_variant['image'])) {
+						$product_data['image'] = $default_variant['image'];
+					}
+					if (isset($default_variant['weight']) && (float)$default_variant['weight'] > 0) {
+						$product_data['weight'] = (float)$default_variant['weight'];
+					}
+					if (isset($default_variant['weight_class_id']) && (int)$default_variant['weight_class_id'] > 0) {
+						$product_data['weight_class_id'] = (int)$default_variant['weight_class_id'];
+					}
+
+					// Override special price from variant
+					$variant_special = $pc->getVariantSpecialPrice((int)$default_variant['variant_id'], (int)$this->config->get('config_customer_group_id'));
+					if ($variant_special !== null && (float)$variant_special < (float)$product_data['price']) {
+						$product_data['special'] = (float)$variant_special;
+					}
 				}
 
 				$aggregated_stock = $pc->getAggregatedStock($product_id);
 				$product_data['variants_in_stock'] = $aggregated_stock['variants_in_stock'];
 				$product_data['total_variants'] = $aggregated_stock['total_variants'];
 
-			$aggregated_price = $pc->getAggregatedPriceRange($product_id, (int)$this->config->get('config_customer_group_id'));
-			$product_data['variant_price_min'] = $aggregated_price['min'];
-			$product_data['variant_price_max'] = $aggregated_price['max'];
+				$product_data['variant_specials'] = $pc->getVariantsSpecials($product_id);
 
-			$product_data['variant_specials'] = $pc->getVariantsSpecials($product_id);
-
-			if ($aggregated_price['min'] > 0) {
-				$product_data['base_price'] = $product_data['price'];
-				$product_data['price'] = $aggregated_price['min'];
-				$product_data['discount'] = false;
-				$product_data['special'] = false;
+				// Build variant swatches for listing cards
+				$swatches = array();
+				if (!empty($product_data['variants'])) {
+					$used_values = array();
+					foreach ($product_data['variants'] as $v) {
+						if (!$v['status']) continue;
+						if (!empty($v['values'])) {
+							foreach ($v['values'] as $vv) {
+								$ov_key = $vv['option_id'] . '_' . $vv['option_value_id'];
+								if (!isset($used_values[$vv['option_id']])) {
+									$used_values[$vv['option_id']] = array();
+								}
+								if (!isset($used_values[$vv['option_id']][$vv['option_value_id']])) {
+									$used_values[$vv['option_id']][$vv['option_value_id']] = array(
+										'option_value_id' => (int)$vv['option_value_id'],
+										'name'            => $vv['name'],
+										'variant_id'      => (int)$v['variant_id'],
+										'image'           => $v['image'] ?? '',
+									);
+								}
+							}
+						}
+					}
+					foreach ($product_data['configurable_options'] as $axis) {
+						$oid = (int)$axis['option_id'];
+						if (!empty($used_values[$oid])) {
+							$swatches[$oid] = array(
+								'option_id'   => $oid,
+								'name'        => $axis['name'],
+								'values'      => array_values($used_values[$oid]),
+							);
+						}
+					}
+				}
+				$product_data['variant_swatches'] = $swatches;
 			}
-		}
 		} else {
 			$product_data = false;
 		}
@@ -390,18 +461,18 @@ class ModelCatalogProduct extends Model {
 
 	public function getPopularProducts($limit) {
 		$product_data = $this->cache->get('product.popular.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_store_id') . '.' . $this->config->get('config_customer_group_id') . '.' . (int)$limit);
-	
+
 		if (!$product_data) {
 			$product_data = array();
 			$query = $this->db->query("SELECT p.product_id FROM " . DB_PREFIX . "product p LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "' ORDER BY p.viewed DESC, p.date_added DESC LIMIT " . (int)$limit);
-	
+
 			foreach ($query->rows as $result) {
 				$product_data[$result['product_id']] = $this->getProduct($result['product_id']);
 			}
-			
+
 			$this->cache->set('product.popular.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_store_id') . '.' . $this->config->get('config_customer_group_id') . '.' . (int)$limit, $product_data);
 		}
-		
+
 		return $product_data;
 	}
 
@@ -785,13 +856,13 @@ class ModelCatalogProduct extends Model {
 	}
 
 	public function checkProductCategory($product_id, $category_ids) {
-		
+
 		$implode = array();
 
 		foreach ($category_ids as $category_id) {
 			$implode[] = (int)$category_id;
 		}
-		
+
 		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_to_category WHERE product_id = '" . (int)$product_id . "' AND category_id IN(" . implode(',', $implode) . ")");
   	    return $query->row;
 	}
