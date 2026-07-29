@@ -407,6 +407,10 @@ class ControllerMarketplaceExtension extends Controller {
 		if (!$installed) {
 			return false;
 		}
+		// Blog sub-modules inherit status from the main blog module
+		if ($type === 'module' && strpos($code, 'dockercart_blog_') === 0 && $code !== 'dockercart_blog') {
+			return (bool)$this->config->get('module_dockercart_blog_status');
+		}
 		if ($type === 'feed') {
 			$status = $this->config->get('feed_' . $code . '_status');
 			if ($status === null) {
