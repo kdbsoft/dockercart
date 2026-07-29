@@ -130,7 +130,7 @@ small.text-muted svg { vertical-align: middle; }
                       <td class="text-right">{% if sort == 'p.price' %} <a href="{{ sort_price }}" class="{{ order|lower }} sortable">{{ column_price }}</a> {% else %} <a href="{{ sort_price }}" class="sortable">{{ column_price }}</a> {% endif %}</td>
                       <td class="text-right">{% if sort == 'p.quantity' %} <a href="{{ sort_quantity }}" class="{{ order|lower }} sortable">{{ column_quantity }}</a> {% else %} <a href="{{ sort_quantity }}" class="sortable">{{ column_quantity }}</a> {% endif %}</td>
                       <td class="text-left">{% if sort == 'p.status' %} <a href="{{ sort_status }}" class="{{ order|lower }} sortable">{{ column_status }}</a> {% else %} <a href="{{ sort_status }}" class="sortable">{{ column_status }}</a> {% endif %}</td>
-                      <td class="text-right">{{ column_action }}</td>
+                      <td class="text-right" style="white-space:nowrap;">{{ column_action }}</td>
                     </tr>
                   </thead>
                   <tbody>
@@ -208,7 +208,7 @@ small.text-muted svg { vertical-align: middle; }
                         <i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>
                       </span>
                     </td>
-                    <td class="text-right"><a href="{{ product.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a> <a href="{{ product.copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default btn--icon"><i data-lucide="copy" width="14" height="14"></i></a> <a href="{{ product.delete }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="return confirm('{{ text_confirm }}');"><i data-lucide="trash-2" width="14" height="14"></i></a></td>
+                    <td class="text-right" style="white-space:nowrap;"><a href="{{ product.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a> <a href="{{ product.copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default btn--icon"><i data-lucide="copy" width="14" height="14"></i></a> <a href="{{ product.delete }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="return confirm('{{ text_confirm }}');"><i data-lucide="trash-2" width="14" height="14"></i></a></td>
                   </tr>
                   {% endfor %}
                   {% else %}
