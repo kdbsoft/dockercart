@@ -139,10 +139,10 @@
       <div>
         <div class="flex items-center gap-2 mb-3">
           {% if manufacturer %}<span class="text-xs font-bold uppercase tracking-widest text-blue-600">{{ manufacturer }}</span>{% endif %}
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {% if is_preorder is defined and is_preorder %}bg-amber-100 text-amber-700{% elseif is_in_stock %}bg-emerald-100 text-emerald-700{% else %}bg-red-100 text-red-600{% endif %}">{{ stock }}</span>
+          <span id="dc-stock-badge" data-stock-display="{{ config_stock_display ? '1' : '0' }}" data-text-instock="{{ text_instock }}" data-text-preorder="{{ text_preorder }}" data-text-out-of-stock="{{ text_out_of_stock }}" class="px-2 py-0.5 rounded-full text-[10px] font-bold {% if is_preorder is defined and is_preorder %}bg-amber-100 text-amber-700{% elseif is_in_stock %}bg-emerald-100 text-emerald-700{% else %}bg-red-100 text-red-600{% endif %}">{{ stock }}</span>
         </div>
 
-        <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 leading-tight">{{ heading_title }}</h1>
+        <h1 id="dc-product-name" data-base-name="{{ base_product_name }}" data-base-meta-title="{{ base_meta_title }}" class="text-2xl sm:text-3xl font-extrabold text-gray-900 leading-tight">{{ heading_title }}</h1>
 
         {% if review_status %}
         <div class="flex flex-wrap items-center gap-3 mt-3">
@@ -354,22 +354,20 @@
           <!-- Qty + Cart + Wishlist -->
           <div class="mt-6 flex flex-wrap items-center gap-3">
             {% if not show_call_for_price %}
-            {% if is_in_stock %}
-            <div class="inline-flex items-center border border-gray-200 rounded-xl overflow-hidden flex-shrink-0">
+            <div id="dc-qty-wrap" class="inline-flex items-center border border-gray-200 rounded-xl overflow-hidden flex-shrink-0{% if not is_in_stock %} hidden{% endif %}">
               <button type="button" class="w-10 h-10 text-lg font-bold text-gray-500 hover:bg-gray-50 transition" onclick="dcChangeQty(-1)">−</button>
               <input type="number" name="quantity" value="{{ minimum }}" id="input-quantity" min="{{ minimum }}" step="{{ quantity_step|default(1) }}" oninput="dcUpdateSubtotal()" class="w-16 text-center text-sm font-semibold border-0 outline-none py-2 bg-transparent" />
               <button type="button" class="w-10 h-10 text-lg font-bold text-gray-500 hover:bg-gray-50 transition" onclick="dcChangeQty(1)">+</button>
             </div>
 
-            <button type="button" id="button-cart" data-loading-text="{{ text_loading }}"
-              class="flex-1 min-w-0 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl transition text-sm shadow-md shadow-blue-200 whitespace-nowrap flex items-center justify-center gap-2">
+            <button type="button" id="button-cart" data-loading-text="{{ text_loading }}" data-out-of-stock="{{ text_out_of_stock }}"
+              class="flex-1 min-w-0 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl transition text-sm shadow-md shadow-blue-200 whitespace-nowrap flex items-center justify-center gap-2{% if not is_in_stock %} hidden{% endif %}">
               <i data-lucide="shopping-cart" class="w-5 h-5"></i>{{ button_cart }}
             </button>
-            {% else %}
-            <span class="inline-flex items-center gap-2 px-4 py-3 bg-gray-100 text-gray-500 font-semibold rounded-xl text-sm">
+
+            <span id="dc-out-of-stock" class="inline-flex items-center gap-2 px-4 py-3 bg-gray-100 text-gray-500 font-semibold rounded-xl text-sm{% if is_in_stock %} hidden{% endif %}">
               <i data-lucide="circle-x" class="w-5 h-5"></i>{{ text_out_of_stock }}
             </span>
-            {% endif %}
             {% endif %}
 
             <div class="flex items-center gap-3 w-full sm:w-auto sm:flex-shrink-0">
@@ -1206,7 +1204,8 @@ function closeModal3d() {
 
     if (cartButton) {
       cartButton.addEventListener('click', function() {
-        var originalText = cartButton.textContent;
+        if (cartButton.disabled) return;
+        var originalHTML = cartButton.innerHTML;
         var loadingText = cartButton.getAttribute('data-loading-text') || '...';
 
         cartButton.disabled = true;
@@ -1266,7 +1265,8 @@ function closeModal3d() {
         })
         .finally(function() {
           cartButton.disabled = false;
-          cartButton.textContent = originalText;
+          cartButton.innerHTML = originalHTML;
+          if (window.lucide) lucide.createIcons({ nodes: [cartButton] });
         });
       });
     }

@@ -304,6 +304,12 @@ class ControllerProductProduct extends Controller {
 			$this->document->addLink($this->url->link('product/product', 'product_id=' . $product_id), 'canonical');
 
 			$data['heading_title'] = $product_info['name'];
+			$data['base_product_name'] = $product_info['name'];
+			$data['text_instock'] = $this->language->get('text_instock');
+			$data['text_preorder'] = $this->language->get('text_preorder');
+			$data['text_out_of_stock'] = $this->language->get('text_out_of_stock');
+			$data['config_stock_display'] = $this->config->get('config_stock_display');
+			$data['base_meta_title'] = $product_info['meta_title'];
 
 			$minimum_quantity = isset($product_info['minimum']) ? (float)$product_info['minimum'] : 1;
 
@@ -898,6 +904,26 @@ class ControllerProductProduct extends Controller {
 
 				$data['variant_selected'] = !empty($variant_selected_pov_ids) ? array_keys($variant_selected_pov_ids) : array();
 				$data['variant_id'] = !empty($selected_variant) ? (int)$selected_variant['variant_id'] : 0;
+
+				// Override stock status based on selected variant
+				if (!empty($selected_variant)) {
+					$data['is_in_stock'] = ((int)$selected_variant['quantity'] > 0) || !empty($product_info['preorder']);
+					$data['is_preorder'] = ((int)$selected_variant['quantity'] <= 0) && !empty($product_info['preorder']);
+					if (!$data['is_in_stock']) {
+						$data['stock'] = $this->language->get('text_out_of_stock');
+					}
+
+					// Override heading and meta title with variant suffix
+					if (!empty($selected_variant['values'])) {
+						$attr_names = array();
+						foreach ($selected_variant['values'] as $vv) {
+							$attr_names[] = $vv['name'];
+						}
+						$suffix = implode(' / ', $attr_names);
+						$data['heading_title'] .= ' — ' . $suffix;
+						$this->document->setTitle($product_info['meta_title'] . ' — ' . $suffix);
+					}
+				}
 
 				// Override base product price/SKU/image with selected variant's data
 				if (!empty($selected_variant) && $data['price'] !== false) {
