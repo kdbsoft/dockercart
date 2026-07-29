@@ -30,7 +30,7 @@
     "@tailwindcss/browser": "^4.3.2",
     "chart.js": "^4.5.1",
     "glightbox": "^3.3.1",
-    "lucide": "^0.577.0",
+    "lucide": "^1.25.0",
     "sortablejs": "^1.15.7"
   }
 }
