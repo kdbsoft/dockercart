@@ -1,3 +1,17 @@
+## [2.2.0](https://github.com/kdbsoft/dockercart/compare/v2.1.1...v2.2.0) (2026-07-19)
+
+### Features
+
+* add link type label and restyle banner form ([d2b31bc](https://github.com/kdbsoft/dockercart/commit/d2b31bc28722029caafb042e8a8e6e59357873a1))
+* add multilingual product images, video and 3D model support ([cf85142](https://github.com/kdbsoft/dockercart/commit/cf8514279303b73fca1da0ef88858ebba9a0d3f1))
+* add schema variant data for configurable products ([f2bef4a](https://github.com/kdbsoft/dockercart/commit/f2bef4ad8423d511802a624c056b84b1602f051b))
+
+### Bug Fixes
+
+* guard category column against undefined index ([da99f43](https://github.com/kdbsoft/dockercart/commit/da99f43cf11363fd4f332c3857430ad770165a6e))
+* **i18n:** update ru-ua and uk-ua admin translations ([728ed15](https://github.com/kdbsoft/dockercart/commit/728ed15f95ebb938db3155c5240b61348fe65ac1))
+* use variant data for product option display ([2f09973](https://github.com/kdbsoft/dockercart/commit/2f09973a63e4bfd9d304fcaf7ab648fdb68d68c8))
+
 ## [2.1.1](https://github.com/kdbsoft/dockercart/compare/v2.1.0...v2.1.1) (2026-07-18)
 
 ### Bug Fixes
