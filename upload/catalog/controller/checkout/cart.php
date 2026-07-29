@@ -383,7 +383,7 @@ class ControllerCheckoutCart extends Controller {
 				$json['error']['call_for_price'] = $this->language->get('error_call_for_price');
 			}
 
-			if ((float)$product_info['quantity'] <= 0 && empty($product_info['preorder']) && !$this->config->get('config_stock_checkout')) {
+			if ((float)$product_info['quantity'] <= 0 && empty($product_info['preorder']) && !$this->config->get('config_stock_checkout') && empty($product_info['is_configurable'])) {
 				$json['error']['stock'] = $this->language->get('error_stock');
 			}
 
@@ -414,9 +414,12 @@ class ControllerCheckoutCart extends Controller {
 					$json['error']['variant'] = $this->language->get('error_variant_required');
 				} else {
 					$pc = new ProductConfigurable($this->registry);
+					$variant_info = $pc->getVariant((int)$option['variant_id']);
 
-					if (!$pc->getVariant((int)$option['variant_id'])) {
+					if (!$variant_info) {
 						$json['error']['variant'] = $this->language->get('error_variant_invalid');
+					} elseif ((float)$variant_info['quantity'] <= 0 && empty($variant_info['preorder']) && !$this->config->get('config_stock_checkout')) {
+						$json['error']['stock'] = $this->language->get('error_stock');
 					}
 				}
 			}
