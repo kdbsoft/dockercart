@@ -377,6 +377,8 @@ class ControllerProductCategory extends Controller {
 				'has_gift'    => !empty($result['has_gift']),
 				'call_for_price' => !empty($result['call_for_price']),
 				'is_configurable' => !empty($result['is_configurable']),
+				'variant_swatches' => !empty($result['variant_swatches']) ? $result['variant_swatches'] : array(),
+				'default_option_value_ids' => !empty($result['default_option_value_ids']) ? $result['default_option_value_ids'] : array(),
 					'category'    => '',
 					'href'        => $this->url->link('product/product', 'path=' . $this->request->get['path'] . '&product_id=' . $result['product_id'] . $url)
 				);
@@ -579,8 +581,7 @@ class ControllerProductCategory extends Controller {
 			$data['text_back_to'] = $this->language->get('text_back_to');
 			$data['text_quick_view'] = $this->language->get('text_quick_view');
 			$data['text_gift_badge'] = $this->language->get('text_gift_badge');
-		$data['text_price_from'] = $this->language->get('text_price_from');
-			$data['text_call_for_price'] = $this->language->get('text_call_for_price');
+		$data['text_call_for_price'] = $this->language->get('text_call_for_price');
 			$data['text_category_description'] = $this->language->get('text_category_description');
 			$data['text_model'] = $this->language->get('text_model');
 			$data['text_quantity'] = $this->language->get('text_quantity');
@@ -1011,6 +1012,8 @@ class ControllerProductCategory extends Controller {
 				'has_gift'    => !empty($result['has_gift']),
 				'call_for_price' => !empty($result['call_for_price']),
 				'is_configurable' => !empty($result['is_configurable']),
+				'variant_swatches' => !empty($result['variant_swatches']) ? $result['variant_swatches'] : array(),
+				'default_option_value_ids' => !empty($result['default_option_value_ids']) ? $result['default_option_value_ids'] : array(),
 				'category'    => '',
 				'href'        => $this->url->link('product/product', 'path=' . (isset($this->request->get['path']) ? $this->request->get['path'] : '') . '&product_id=' . $result['product_id'])
 			);
@@ -1035,7 +1038,6 @@ class ControllerProductCategory extends Controller {
 				'text_reviews'     => $this->language->get('text_reviews_word'),
 				'text_sale'        => '',
 				'text_gift_badge'  => $this->language->get('text_gift_badge'),
-				'text_price_from'  => $this->language->get('text_price_from'),
 				'text_call_for_price' => $this->language->get('text_call_for_price'),
 				'button_cart'      => $this->language->get('button_cart'),
 				'btn_quick_hover'  => 'hover:bg-blue-600',
