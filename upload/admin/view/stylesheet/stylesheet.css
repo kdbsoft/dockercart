@@ -3336,6 +3336,10 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
     }
 }
 
+.img-thumbnail {
+    border-radius: 6px;
+}
+
 /* ── Search input in list pages (e.g. category tree filter) ── */
 .category-search-wrap {
     min-width: 240px;
