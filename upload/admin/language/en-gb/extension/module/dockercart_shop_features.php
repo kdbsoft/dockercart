@@ -45,6 +45,8 @@ $_['button_cancel']                     = 'Cancel';
 $_['button_back']                       = 'Back';
 $_['button_add_feature']                = 'Add feature';
 $_['button_remove']                     = 'Remove';
+$_['button_delete']                     = 'Delete';
+$_['button_delete_confirm']             = 'Delete this widget?';
 $_['button_edit']                       = 'Edit';
 
 // Error
