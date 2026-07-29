@@ -24,7 +24,8 @@
 {% for variant in schema_variants %}
     {
       "@type": "Product",
-      "sku": "{{ variant.sku|e('js') }}"{% if variant.image %},
+      "name": "{{ variant.name ? (heading_title|striptags|trim|e('js') ~ ' — ' ~ variant.name|e('js')) : heading_title|striptags|trim|e('js') }}"{% if variant.sku %},
+      "sku": "{{ variant.sku|e('js') }}"{% endif %}{% if variant.image %},
       "image": ["{{ variant.image|e('js') }}"]{% endif %},
       "offers": {
         "@type": "Offer",
