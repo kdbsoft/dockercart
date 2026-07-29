@@ -207,7 +207,7 @@
                 <div class="dcx-panel-body">
                   <div class="dcx-fields">
                     <div class="row">
-                      <div class="col-sm-3">
+                      <div class="col-sm-12 col-lg-6 col-xl-3">
                         <div class="dcx-field">
                           <label class="dcx-label" for="input-price">{{ entry_price }}</label>
                           <input type="text" name="price" value="{{ price }}" placeholder="{{ entry_price }}" id="input-price" class="form-control"/>
@@ -276,7 +276,7 @@
                 <div class="dcx-panel-body">
                   <div class="dcx-fields">
                     <div class="row">
-                      <div class="col-sm-3">
+                      <div class="col-sm-12 col-lg-6 col-xl-3">
                         <div class="dcx-field">
                           <label class="dcx-label" for="input-quantity">{{ entry_quantity }}</label>
                           <input type="text" name="quantity" value="{{ quantity }}" placeholder="{{ entry_quantity }}" id="input-quantity" class="form-control"/>
@@ -298,7 +298,7 @@
                       </div>
                     </div>
                     <div class="row">
-                      <div class="col-sm-2">
+                      <div class="col-sm-6 col-lg-4 col-xl-3">
                         <div class="dcx-field">
                           <label class="dcx-label" for="input-minimum">{{ entry_minimum }}</label>
                           <div class="dcx-field-icon-wrap">
@@ -307,7 +307,7 @@
                           </div>
                         </div>
                       </div>
-                      <div class="col-sm-2">
+                      <div class="col-sm-6 col-lg-4 col-xl-3">
                         <div class="dcx-field">
                           <label class="dcx-label" for="input-quantity-step">{{ entry_quantity_step }}</label>
                           <div class="dcx-field-icon-wrap">
@@ -333,16 +333,16 @@
                     <div class="dcx-field">
                       <label class="dcx-label" for="input-length">{{ entry_dimension }}</label>
                       <div class="row{% if is_configurable %} dc-opts-axis-hidden{% endif %}">
-                        <div class="col-sm-2">
+                        <div class="col-sm-6 col-lg-3">
                           <input type="text" name="length" value="{{ length }}" placeholder="{{ entry_length }}" id="input-length" class="form-control"/>
                         </div>
-                        <div class="col-sm-2">
+                        <div class="col-sm-6 col-lg-3">
                           <input type="text" name="width" value="{{ width }}" placeholder="{{ entry_width }}" id="input-width" class="form-control"/>
                         </div>
-                        <div class="col-sm-2">
+                        <div class="col-sm-6 col-lg-3">
                           <input type="text" name="height" value="{{ height }}" placeholder="{{ entry_height }}" id="input-height" class="form-control"/>
                         </div>
-                        <div class="col-sm-2">
+                        <div class="col-sm-6 col-lg-3">
                           <select name="length_class_id" id="input-length-class" class="form-control">
                             {% for length_class in length_classes %}
                               {% if length_class.length_class_id == length_class_id %}
@@ -358,10 +358,10 @@
                     <div class="dcx-field">
                       <label class="dcx-label" for="input-weight">{{ entry_weight }}</label>
                       <div class="row">
-                        <div class="col-sm-2">
+                        <div class="col-sm-6 col-lg-3">
                           <input type="text" name="weight" value="{{ weight }}" placeholder="{{ entry_weight }}" id="input-weight" class="form-control"/>
                         </div>
-                        <div class="col-sm-2">
+                        <div class="col-sm-6 col-lg-3">
                           <select name="weight_class_id" id="input-weight-class" class="form-control">
                             {% for weight_class in weight_classes %}
                               {% if weight_class.weight_class_id == weight_class_id %}
