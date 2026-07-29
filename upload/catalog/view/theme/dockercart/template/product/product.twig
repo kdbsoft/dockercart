@@ -149,10 +149,10 @@
           <div class="flex text-sm text-amber-400 gap-0.5">{% for i in 1..5 %}{% if rating >= i %}★{% else %}<span class="text-gray-300">★</span>{% endif %}{% endfor %}</div>
           <a href="#" onclick="document.querySelector('.tab-btn[data-tab=\'review\']').click();return false;" class="text-sm text-gray-500 hover:text-blue-600 transition">{{ reviews }}</a>
           <span class="text-sm text-gray-300">|</span>
-          <span class="text-sm text-gray-500">{{ text_model }} <span id="dc-variant-sku">{{ model }}</span></span>
+          <span class="text-sm text-gray-500">{{ text_model }} <span id="dc-variant-sku" data-base-sku="{{ model }}">{{ is_configurable and variant_sku is defined and variant_sku ? variant_sku : model }}</span></span>
         </div>
         {% else %}
-        <p class="text-sm text-gray-500 mt-3">{{ text_model }} <span id="dc-variant-sku">{{ model }}</span></p>
+        <p class="text-sm text-gray-500 mt-3">{{ text_model }} <span id="dc-variant-sku" data-base-sku="{{ model }}">{{ is_configurable and variant_sku is defined and variant_sku ? variant_sku : model }}</span></p>
         {% endif %}
 
         {% set show_call_for_price = (call_for_price is defined and call_for_price) or ((call_for_price_status is defined and call_for_price_status) and call_for_price_phone is defined and call_for_price_phone and dc_base_price_value is defined and dc_base_price_value <= 0) %}
@@ -167,14 +167,14 @@
           {% elseif not special %}
             <div class="flex items-baseline gap-3 flex-wrap" id="dc-price-regular">
               <span id="dc-unit-price" data-base-price="{{ dc_base_price_value|default(0) }}" data-current-price="{{ dc_base_price_value|default(0) }}" class="text-2xl sm:text-3xl font-extrabold text-gray-900">{{ price }}</span>
-              {% if tax %}<span class="text-xs text-gray-400">{{ text_tax }} {{ tax }}</span>{% endif %}
+              {% if tax %}<span class="text-xs text-gray-400" id="dc-unit-tax">{{ text_tax }} {{ tax }}</span>{% endif %}
             </div>
             <div class="flex flex-col gap-1 hidden" id="dc-price-special">
               <span class="text-xs font-bold bg-red-500 text-white px-2 py-0.5 rounded-lg self-start" id="dc-sale-badge">{{ text_sale }}</span>
               <div class="flex items-baseline gap-2 sm:gap-3 flex-wrap">
                 <span id="dc-unit-price-special" class="text-2xl sm:text-3xl font-extrabold text-gray-900"></span>
                 <span id="dc-unit-price-strikethrough" class="text-sm sm:text-lg text-red-400 line-through"></span>
-                {% if tax %}<span class="text-xs text-gray-400">{{ text_tax }} {{ tax }}</span>{% endif %}
+                {% if tax %}<span class="text-xs text-gray-400" id="dc-unit-tax">{{ text_tax }} {{ tax }}</span>{% endif %}
               </div>
             </div>
           {% else %}
@@ -183,7 +183,7 @@
               <div class="flex items-baseline gap-2 sm:gap-3 flex-wrap">
                 <span id="dc-unit-price" data-base-price="{{ dc_base_price_value|default(0) }}" data-current-price="{{ dc_base_price_value|default(0) }}" class="text-2xl sm:text-3xl font-extrabold text-gray-900">{{ special }}</span>
                 <span class="text-sm sm:text-lg text-red-400 line-through">{{ price }}</span>
-                {% if tax %}<span class="text-xs text-gray-400">{{ text_tax }} {{ tax }}</span>{% endif %}
+                {% if tax %}<span class="text-xs text-gray-400" id="dc-unit-tax">{{ text_tax }} {{ tax }}</span>{% endif %}
               </div>
         </div>
         {% if you_save_amount %}
@@ -262,9 +262,10 @@
             {% if option.type == 'color' %}
             <div class="flex flex-wrap gap-2" id="input-option{{ option.product_option_id }}">
               {% for option_value in option.product_option_value %}
+              {% set is_selected = is_configurable and variant_selected is defined and option_value.product_option_value_id in variant_selected %}
               <label class="cursor-pointer">
-                <input type="radio" name="option[{{ option.product_option_id }}]" value="{{ option_value.product_option_value_id }}" data-option-price="{{ option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}" class="sr-only dc-option-radio" />
-                <span class="dc-color-option">
+                <input type="radio" name="option[{{ option.product_option_id }}]" value="{{ option_value.product_option_value_id }}" data-option-price="{{ option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}" class="sr-only dc-option-radio"{{ is_selected ? ' checked' : '' }} />
+                <span class="dc-color-option{{ is_selected ? ' active' : '' }}">
                   <span class="dc-color-swatch{% if option_value.is_hit %} dc-color-swatch--hit{% endif %}" style="background-color: {{ option_value.color_code }}">
                     {% if option_value.is_hit %}<span class="dc-color-hit" title="Hit">&#9733;</span>{% endif %}
                   </span>
@@ -278,9 +279,10 @@
             {% elseif option.type == 'radio' %}
             <div class="flex flex-wrap gap-2" id="input-option{{ option.product_option_id }}">
               {% for option_value in option.product_option_value %}
+              {% set is_selected = is_configurable and variant_selected is defined and option_value.product_option_value_id in variant_selected %}
               <label class="cursor-pointer">
-                <input type="radio" name="option[{{ option.product_option_id }}]" value="{{ option_value.product_option_value_id }}" data-option-price="{{ option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}" class="sr-only dc-option-radio" />
-                <span class="option-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-sm font-semibold select-none border-gray-200">
+                <input type="radio" name="option[{{ option.product_option_id }}]" value="{{ option_value.product_option_value_id }}" data-option-price="{{ option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}" class="sr-only dc-option-radio"{{ is_selected ? ' checked' : '' }} />
+                <span class="option-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-sm font-semibold select-none border-gray-200{{ is_selected ? ' active' : '' }}">
                   {{ option_value.name }}{% if option_value.price and option_value.price_value != 0 %} ({{ option_value.price_prefix }}{{ option_value.price }}){% endif %}
                 </span>
               </label>
@@ -291,16 +293,18 @@
             <select name="option[{{ option.product_option_id }}]" id="input-option{{ option.product_option_id }}" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm bg-white focus:outline-none focus:border-blue-400 transition appearance-none">
               <option value="">{{ text_select }}</option>
               {% for option_value in option.product_option_value %}
-              <option value="{{ option_value.product_option_value_id }}" data-option-price="{{ option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}">{{ option_value.name }}{% if option_value.price and option_value.price_value != 0 %} ({{ option_value.price_prefix }}{{ option_value.price }}){% endif %}</option>
+              {% set is_selected = is_configurable and variant_selected is defined and option_value.product_option_value_id in variant_selected %}
+              <option value="{{ option_value.product_option_value_id }}" data-option-price="{{ option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}"{{ is_selected ? ' selected' : '' }}>{{ option_value.name }}{% if option_value.price and option_value.price_value != 0 %} ({{ option_value.price_prefix }}{{ option_value.price }}){% endif %}</option>
               {% endfor %}
             </select>
 
             {% elseif option.type == 'checkbox' %}
             <div class="flex flex-wrap gap-2" id="input-option{{ option.product_option_id }}">
               {% for option_value in option.product_option_value %}
+              {% set is_selected = is_configurable and variant_selected is defined and option_value.product_option_value_id in variant_selected %}
               <label class="cursor-pointer">
-                <input type="checkbox" name="option[{{ option.product_option_id }}][]" value="{{ option_value.product_option_value_id }}" data-option-price="{{ option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}" class="sr-only dc-option-checkbox" />
-                <span class="option-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-sm font-semibold select-none border-gray-200">
+                <input type="checkbox" name="option[{{ option.product_option_id }}][]" value="{{ option_value.product_option_value_id }}" data-option-price="{{ option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}" class="sr-only dc-option-checkbox"{{ is_selected ? ' checked' : '' }} />
+                <span class="option-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-sm font-semibold select-none border-gray-200{{ is_selected ? ' active' : '' }}">
                   {{ option_value.name }}{% if option_value.price and option_value.price_value != 0 %} ({{ option_value.price_prefix }}{{ option_value.price }}){% endif %}
                 </span>
               </label>
@@ -345,7 +349,7 @@
           {% endif %}
 
           <input type="hidden" name="product_id" value="{{ product_id }}" />
-          <input type="hidden" name="option[variant_id]" value="" id="dc-variant-id" />
+          <input type="hidden" name="option[variant_id]" value="{{ is_configurable and variant_id is defined ? variant_id : '' }}" id="dc-variant-id" />
 
           <!-- Qty + Cart + Wishlist -->
           <div class="mt-6 flex flex-wrap items-center gap-3">
