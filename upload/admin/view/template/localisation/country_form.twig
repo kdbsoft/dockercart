@@ -68,7 +68,7 @@
                   </div>
                 </div>
                 <div class="dcx-field">
-                  <label class="dcx-label"><span data-toggle="tooltip" data-html="true" title="{{ help_address_format|escape('html') }}">{{ entry_address_format }}</span></label>
+                  <label class="dcx-label">{{ entry_address_format }} <span data-toggle="tooltip" data-html="true" title="{{ help_address_format|escape('html') }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                   {% for language in languages %}
                   <div class="dc-attr-row__value"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
                     <textarea name="country_description[{{ language.language_id }}][address_format]" rows="5" placeholder="{{ entry_address_format }}" class="form-control">{{ country_description[language.language_id] ? country_description[language.language_id].address_format }}</textarea>
@@ -76,21 +76,20 @@
                   {% endfor %}
                 </div>
                 <div class="dcx-field">
-                  <label class="dcx-label" for="input-phone-format"><span data-toggle="tooltip" data-html="true" title="{{ help_phone_format|escape('html') }}">{{ entry_phone_format }}</span></label>
+                  <label class="dcx-label" for="input-phone-format">{{ entry_phone_format }} <span data-toggle="tooltip" data-html="true" title="{{ help_phone_format|escape('html') }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                   <input type="text" name="phone_format" value="{{ phone_format }}" placeholder="{{ entry_phone_format }}" id="input-phone-format" class="form-control" />
                 </div>
                 <div class="dcx-field">
                   <label class="dcx-label">{{ entry_postcode_required }}</label>
-                  <div class="dcx-checkbox-group">
-                    <label class="dcx-checkbox-label">
-                      <input type="radio" name="postcode_required" value="1"{% if postcode_required %} checked{% endif %} />
-                      {{ text_yes }}
-                    </label>
-                    <label class="dcx-checkbox-label">
-                      <input type="radio" name="postcode_required" value="0"{% if not postcode_required %} checked{% endif %} />
-                      {{ text_no }}
-                    </label>
-                  </div>
+                  <select name="postcode_required" class="form-control">
+                    {% if postcode_required %}
+                    <option value="1" selected="selected">{{ text_yes }}</option>
+                    <option value="0">{{ text_no }}</option>
+                    {% else %}
+                    <option value="1">{{ text_yes }}</option>
+                    <option value="0" selected="selected">{{ text_no }}</option>
+                    {% endif %}
+                  </select>
                 </div>
                 <div class="dcx-field">
                   <label class="dcx-label" for="input-status">{{ entry_status }}</label>

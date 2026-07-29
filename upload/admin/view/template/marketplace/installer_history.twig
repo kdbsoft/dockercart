@@ -1,29 +1,39 @@
-<div class="table-responsive">
-  <table class="table table-bordered">
-    <thead>
-      <tr>
-        <th>{{ column_filename }}</th>
-        <th>{{ column_date_added }}</th>
-        <th class="text-right">{{ column_action }}</th>
-      </tr>
-    </thead>
-    <tbody>
-    {% if histories %}
-    {% for history in histories %}
-    <tr>
-      <td>{{ history.filename }}</td>
-      <td>{{ history.date_added }}</td>
-      <td class="text-right"><button type="button" value="{{ history.extension_install_id }}" data-loading="{{ text_loading }}" data-toggle="tooltip" title="{{ button_uninstall }}" class="btn btn-danger btn--icon"><i data-lucide="trash-2" width="14" height="14"></i></button></td>
-    </tr>
-    {% endfor %}
-    {% else %}
-    <tr>
-      <td colspan="3" class="text-center">{{ text_no_results }}</td>
-    </tr>
-    {% endif %}
-    </tbody>
-  </table>
+<div class="dc-history-list">
+{% if histories %}
+{% for history in histories %}
+<div class="dc-history-item">
+  <div class="dc-history-item__info">
+    <div class="dc-history-item__filename">
+      <i data-lucide="file" width="14" height="14" class="text-muted"></i>
+      {{ history.filename }}
+    </div>
+    <div class="dc-history-item__date">
+      <i data-lucide="calendar" width="12" height="12" class="text-muted"></i>
+      {{ history.date_added }}
+    </div>
+  </div>
+  <div class="dc-history-item__action">
+    <button type="button" value="{{ history.extension_install_id }}" data-loading="{{ text_loading }}" data-toggle="tooltip" title="{{ button_uninstall }}" class="btn btn-danger btn--icon"><i data-lucide="trash-2" width="14" height="14"></i></button>
+  </div>
 </div>
+{% endfor %}
+{% else %}
+<div class="dc-history-empty">
+  <i data-lucide="inbox" width="24" height="24" class="text-muted"></i>
+  <span>{{ text_no_results }}</span>
+</div>
+{% endif %}
+</div>
+<style>
+.dc-history-list { display: flex; flex-direction: column; gap: 8px; }
+.dc-history-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; transition: border-color 0.15s; }
+.dc-history-item:hover { border-color: #007bff; }
+.dc-history-item__info { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.dc-history-item__filename { font-size: 13px; font-weight: 500; color: #212529; display: flex; align-items: center; gap: 6px; word-break: break-all; }
+.dc-history-item__date { font-size: 11px; color: #6c757d; display: flex; align-items: center; gap: 4px; }
+.dc-history-item__action { flex-shrink: 0; margin-left: 12px; }
+.dc-history-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 32px 16px; color: #6c757d; font-size: 13px; }
+</style>
 <div class="pagination-wrap">
   <div class="row">
     <div class="col-sm-6 text-left">{{ pagination }}</div>

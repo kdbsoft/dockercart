@@ -63,18 +63,6 @@
                     {% endfor %}
                   </div>
                   <div class="dcx-field required">
-                    <label class="dcx-label" for="input-status">{{ entry_status }}</label>
-                    <select name="status" id="input-status" class="form-control">
-                      {% if status %}
-                      <option value="1" selected="selected">{{ text_enabled }}</option>
-                      <option value="0">{{ text_disabled }}</option>
-                      {% else %}
-                      <option value="1">{{ text_enabled }}</option>
-                      <option value="0" selected="selected">{{ text_disabled }}</option>
-                      {% endif %}
-                    </select>
-                  </div>
-                  <div class="dcx-field required">
                     <label class="dcx-label" for="input-type">{{ entry_type }}</label>
                     <select name="type" id="input-type" class="form-control">
                       <optgroup label="{{ text_choose }}">
@@ -140,6 +128,18 @@
                   <div class="dcx-field">
                     <label class="dcx-label" for="input-sort-order">{{ entry_sort_order }}</label>
                     <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control" />
+                  </div>
+                  <div class="dcx-field required">
+                    <label class="dcx-label" for="input-status">{{ entry_status }}</label>
+                    <select name="status" id="input-status" class="form-control">
+                      {% if status %}
+                      <option value="1" selected="selected">{{ text_enabled }}</option>
+                      <option value="0">{{ text_disabled }}</option>
+                      {% else %}
+                      <option value="1">{{ text_enabled }}</option>
+                      <option value="0" selected="selected">{{ text_disabled }}</option>
+                      {% endif %}
+                    </select>
                   </div>
                 </div>
               </div>

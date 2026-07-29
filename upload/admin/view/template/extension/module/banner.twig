@@ -77,33 +77,37 @@
                       </span>
                     </div>
                   </div>
-                  <div class="dcx-field">
-                    <label class="dcx-label" for="input-width">{{ entry_width }}</label>
-                    <input type="text" name="width" value="{{ width }}" placeholder="{{ entry_width }}" id="input-width" class="form-control" />
-                    {% if error_width %}
-                    <div class="text-danger">{{ error_width }}</div>
-                    {% endif %}
+                  <div style="display:flex;gap:12px">
+                    <div class="dcx-field" style="flex:1">
+                      <label class="dcx-label" for="input-width">{{ entry_width }}</label>
+                      <input type="text" name="width" value="{{ width }}" placeholder="{{ entry_width }}" id="input-width" class="form-control" />
+                      {% if error_width %}
+                      <div class="text-danger">{{ error_width }}</div>
+                      {% endif %}
+                    </div>
+                    <div class="dcx-field" style="flex:1">
+                      <label class="dcx-label" for="input-height">{{ entry_height }}</label>
+                      <input type="text" name="height" value="{{ height }}" placeholder="{{ entry_height }}" id="input-height" class="form-control" />
+                      {% if error_height %}
+                      <div class="text-danger">{{ error_height }}</div>
+                      {% endif %}
+                    </div>
                   </div>
-                  <div class="dcx-field">
-                    <label class="dcx-label" for="input-height">{{ entry_height }}</label>
-                    <input type="text" name="height" value="{{ height }}" placeholder="{{ entry_height }}" id="input-height" class="form-control" />
-                    {% if error_height %}
-                    <div class="text-danger">{{ error_height }}</div>
-                    {% endif %}
-                  </div>
-                  <div class="dcx-field">
-                    <label class="dcx-label">{{ entry_layout }}</label>
-                    <select name="layout" class="form-control">
-                      <option value="grid" {% if layout == 'grid' %}selected{% endif %}>{{ text_layout_grid }}</option>
-                      <option value="stack" {% if layout == 'stack' %}selected{% endif %}>{{ text_layout_stack }}</option>
-                    </select>
-                  </div>
-                  <div class="dcx-field">
-                    <label class="dcx-label">{{ entry_full_width }}</label>
-                    <select name="full_width" class="form-control">
-                      <option value="0" {% if not full_width %}selected{% endif %}>{{ text_full_width_disabled }}</option>
-                      <option value="1" {% if full_width %}selected{% endif %}>{{ text_full_width_enabled }}</option>
-                    </select>
+                  <div style="display:flex;gap:12px">
+                    <div class="dcx-field" style="flex:1">
+                      <label class="dcx-label">{{ entry_layout }}</label>
+                      <select name="layout" class="form-control">
+                        <option value="grid" {% if layout == 'grid' %}selected{% endif %}>{{ text_layout_grid }}</option>
+                        <option value="stack" {% if layout == 'stack' %}selected{% endif %}>{{ text_layout_stack }}</option>
+                      </select>
+                    </div>
+                    <div class="dcx-field" style="flex:1">
+                      <label class="dcx-label">{{ entry_full_width }}</label>
+                      <select name="full_width" class="form-control">
+                        <option value="0" {% if not full_width %}selected{% endif %}>{{ text_full_width_disabled }}</option>
+                        <option value="1" {% if full_width %}selected{% endif %}>{{ text_full_width_enabled }}</option>
+                      </select>
+                    </div>
                   </div>
                   <div class="dcx-field">
                     <label class="dcx-label" for="input-status">{{ entry_status }}</label>
