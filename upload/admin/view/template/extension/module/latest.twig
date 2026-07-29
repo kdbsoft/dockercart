@@ -57,7 +57,7 @@
                     {% if error_name %}<div class="text-danger">{{ error_name }}</div>{% endif %}
                   </div>
                   <div class="dcx-field">
-                    <label class="dcx-label" for="input-product"><span data-toggle="tooltip" title="{{ help_product }}">{{ entry_product }}</span></label>
+                    <label class="dcx-label" for="input-product">{{ entry_product }} <span data-toggle="tooltip" title="{{ help_product }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                     <input type="text" name="product_name" value="" placeholder="{{ entry_product }}" id="input-product" class="form-control" />
                     <div id="latest-product" class="well well-sm" style="height: 150px; overflow: auto;">
                       {% for product in products %}
@@ -68,7 +68,7 @@
                     </div>
                   </div>
                   <div class="dcx-field">
-                    <label class="dcx-label" for="input-category-filter"><span data-toggle="tooltip" title="{{ help_category_filter }}">{{ entry_category_filter }}</span></label>
+                    <label class="dcx-label" for="input-category-filter">{{ entry_category_filter }} <span data-toggle="tooltip" title="{{ help_category_filter }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                     <select name="category_filter" id="input-category-filter" class="form-control">
                       {% if category_filter %}
                       <option value="1" selected="selected">{{ text_enabled }}</option>
@@ -83,19 +83,21 @@
                     <label class="dcx-label" for="input-limit">{{ entry_limit }}</label>
                     <input type="text" name="limit" value="{{ limit }}" placeholder="{{ entry_limit }}" id="input-limit" class="form-control" />
                   </div>
-                  <div class="dcx-field">
-                    <label class="dcx-label" for="input-width">{{ entry_width }}</label>
-                    <input type="text" name="width" value="{{ width }}" placeholder="{{ entry_width }}" id="input-width" class="form-control" />
-                    {% if error_width %}
-                    <div class="text-danger">{{ error_width }}</div>
-                    {% endif %}
-                  </div>
-                  <div class="dcx-field">
-                    <label class="dcx-label" for="input-height">{{ entry_height }}</label>
-                    <input type="text" name="height" value="{{ height }}" placeholder="{{ entry_height }}" id="input-height" class="form-control" />
-                    {% if error_height %}
-                    <div class="text-danger">{{ error_height }}</div>
-                    {% endif %}
+                  <div style="display:flex;gap:12px">
+                    <div class="dcx-field" style="flex:1">
+                      <label class="dcx-label" for="input-width">{{ entry_width }}</label>
+                      <input type="text" name="width" value="{{ width }}" placeholder="{{ entry_width }}" id="input-width" class="form-control" />
+                      {% if error_width %}
+                      <div class="text-danger">{{ error_width }}</div>
+                      {% endif %}
+                    </div>
+                    <div class="dcx-field" style="flex:1">
+                      <label class="dcx-label" for="input-height">{{ entry_height }}</label>
+                      <input type="text" name="height" value="{{ height }}" placeholder="{{ entry_height }}" id="input-height" class="form-control" />
+                      {% if error_height %}
+                      <div class="text-danger">{{ error_height }}</div>
+                      {% endif %}
+                    </div>
                   </div>
                   <div class="dcx-field">
                     <label class="dcx-label" for="input-status">{{ entry_status }}</label>

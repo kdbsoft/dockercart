@@ -65,7 +65,7 @@
                   {% endfor %}
                 </div>
                 <div class="dcx-field">
-                  <label class="dcx-label" for="input-value"><span data-toggle="tooltip" title="{{ help_value }}">{{ entry_value }}</span></label>
+                  <label class="dcx-label" for="input-value">{{ entry_value }} <span data-toggle="tooltip" title="{{ help_value }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                   <input type="text" name="value" value="{{ value }}" placeholder="{{ entry_value }}" id="input-value" class="form-control" />
                   {% if error_value %}
                   <div class="text-danger">{{ error_value }}</div>

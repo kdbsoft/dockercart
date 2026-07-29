@@ -65,14 +65,14 @@
                   {% endif %}
                 </div>
                 <div class="dcx-field required">
-                  <label class="dcx-label" for="input-locale"><span data-toggle="tooltip" title="{{ help_locale }}">{{ entry_locale }}</span></label>
+                  <label class="dcx-label" for="input-locale">{{ entry_locale }} <span data-toggle="tooltip" title="{{ help_locale }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                   <input type="text" name="locale" value="{{ locale }}" placeholder="{{ entry_locale }}" id="input-locale" class="form-control" />
                   {% if error_locale %}
                   <div class="text-danger">{{ error_locale }}</div>
                   {% endif %}
                 </div>
                 <div class="dcx-field">
-                  <label class="dcx-label" for="input-status"><span data-toggle="tooltip" title="{{ help_status }}">{{ entry_status }}</span></label>
+                  <label class="dcx-label" for="input-status">{{ entry_status }} <span data-toggle="tooltip" title="{{ help_status }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                   <select name="status" id="input-status" class="form-control">
                     {% if status %}
                     <option value="1" selected="selected">{{ text_enabled }}</option>

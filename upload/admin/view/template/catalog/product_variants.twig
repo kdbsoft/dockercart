@@ -354,6 +354,7 @@ function buildVariantRow(productId, variant, axes, defaultVariantId) {
 	html += '<button type="button" class="dc-subrow-tab' + (articlesVisible ? ' dc-subrow-tab--active' : '') + '" data-tab="articles" data-row="' + rowIdx + '"><i data-lucide="scan-line"></i> {{ entry_variant_articles|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
 	html += '<button type="button" class="dc-subrow-tab' + (cgVisible ? ' dc-subrow-tab--active' : '') + '" data-tab="cg" data-row="' + rowIdx + '"><i data-lucide="users"></i> {{ entry_cg_prices|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
 	html += '<button type="button" class="dc-subrow-tab' + (specialsVisible ? ' dc-subrow-tab--active' : '') + '" data-tab="specials" data-row="' + rowIdx + '"><i data-lucide="star"></i> {{ entry_special|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
+	html += '<button type="button" class="dc-subrow-close" onclick="closeSubrow(' + rowIdx + ')" title="{{ button_close|e("js") }}"><i data-lucide="x"></i></button>';
 	html += '</div>';
 
 	html += '<div class="dc-subrow-panel' + (articlesVisible ? ' dc-subrow-panel--active' : '') + '" id="dc-panel-articles-' + rowIdx + '"' + (articlesVisible ? '' : ' style="display:none"') + '>';
@@ -471,6 +472,7 @@ function addVariantRow(productId) {
 	html += '<button type="button" class="dc-subrow-tab dc-subrow-tab--active" data-tab="articles" data-row="' + rowIdx + '"><i data-lucide="scan-line"></i> {{ entry_variant_articles|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
 	html += '<button type="button" class="dc-subrow-tab" data-tab="cg" data-row="' + rowIdx + '"><i data-lucide="users"></i> {{ entry_cg_prices|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
 	html += '<button type="button" class="dc-subrow-tab" data-tab="specials" data-row="' + rowIdx + '"><i data-lucide="star"></i> {{ entry_special|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
+	html += '<button type="button" class="dc-subrow-close" onclick="closeSubrow(' + rowIdx + ')" title="{{ button_close|e("js") }}"><i data-lucide="x"></i></button>';
 	html += '</div>';
 
 	html += '<div class="dc-subrow-panel dc-subrow-panel--active" id="dc-panel-articles-' + rowIdx + '">';
@@ -570,6 +572,10 @@ function toggleVariantSpecials(rowIdx) {
 	switchSubrowTab(rowIdx, 'specials');
 }
 
+function closeSubrow(rowIdx) {
+	$('#dc-variant-cg-row-' + rowIdx).hide();
+}
+
 function switchSubrowTab(rowIdx, tab) {
 	var $subrow = $('#dc-variant-cg-row-' + rowIdx);
 	$subrow.show();
@@ -620,6 +626,7 @@ function addVariantCgPrice(rowIdx) {
 	html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-cg-row\').remove();updateSubrowBadges(' + rowIdx + ');scheduleAutoSave(' + rowIdx + ')"><i data-lucide="circle-minus"></i></button>';
 	html += '</div>';
 	$('#dc-cg-prices-' + rowIdx).append(html);
+	lucide.createIcons();
 	updateSubrowBadges(rowIdx);
 }
 
@@ -638,6 +645,7 @@ function addVariantSpecialRow(rowIdx) {
 	html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-special-row\').remove();updateSubrowBadges(' + rowIdx + ');scheduleAutoSave(' + rowIdx + ')"><i data-lucide="circle-minus"></i></button>';
 	html += '</div>';
 	$('#dc-special-prices-' + rowIdx).append(html);
+	lucide.createIcons();
 	updateSubrowBadges(rowIdx);
 }
 
@@ -1056,6 +1064,9 @@ $(window).on('beforeunload', function() {
 .dc-subrow-tab svg { width: 12px; height: 12px; }
 .dc-subrow-tab__badge { background: #6c757d; color: #fff; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px; min-width: 16px; text-align: center; line-height: 1.3; }
 .dc-subrow-tab--active .dc-subrow-tab__badge { background: #007bff; }
+.dc-subrow-close { margin-left: auto; padding: 8px 12px; border: none; background: none; color: #6c757d; cursor: pointer; display: flex; align-items: center; transition: color 0.15s; }
+.dc-subrow-close:hover { color: #dc3545; }
+.dc-subrow-close i, .dc-subrow-close svg { width: 14px; height: 14px; }
 .dc-subrow-panel { padding: 16px; }
 .dc-subrow-panel:empty { display: none; }
 

@@ -89,11 +89,11 @@
                             {% endif %}
                           </div>
                           <div class="dcx-field">
-                            <label class="dcx-label" for="input-open{{ language.language_id }}"><span data-toggle="tooltip" title="{{ help_open }}">{{ entry_open }}</span></label>
+                            <label class="dcx-label" for="input-open{{ language.language_id }}">{{ entry_open }} <span data-toggle="tooltip" title="{{ help_open }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                             <textarea name="config_open_i18n[{{ language.language_id }}]" rows="5" placeholder="{{ entry_open }}" id="input-open{{ language.language_id }}" class="form-control">{{ config_open_i18n[language.language_id] is defined ? config_open_i18n[language.language_id] : '' }}</textarea>
                           </div>
                           <div class="dcx-field">
-                            <label class="dcx-label" for="input-comment{{ language.language_id }}"><span data-toggle="tooltip" title="{{ help_comment }}">{{ entry_comment }}</span></label>
+                            <label class="dcx-label" for="input-comment{{ language.language_id }}">{{ entry_comment }} <span data-toggle="tooltip" title="{{ help_comment }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                             <textarea name="config_comment_i18n[{{ language.language_id }}]" rows="5" placeholder="{{ entry_comment }}" id="input-comment{{ language.language_id }}" class="form-control">{{ config_comment_i18n[language.language_id] is defined ? config_comment_i18n[language.language_id] : '' }}</textarea>
                           </div>
                         </div>
@@ -136,7 +136,7 @@
                         </label>
                       </div>
                       <div class="dcx-field">
-                        <label class="dcx-label" for="input-geocode"><span data-toggle="tooltip" title="{{ help_geocode }}">{{ entry_geocode }}</span></label>
+                        <label class="dcx-label" for="input-geocode">{{ entry_geocode }} <span data-toggle="tooltip" title="{{ help_geocode }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                         <input type="text" name="config_geocode" value="{{ config_geocode }}" placeholder="{{ entry_geocode }}" id="input-geocode" class="form-control" />
                       </div>
                       <div class="dcx-fields dcx-fields--row">
@@ -174,7 +174,7 @@
                       </div>
                       {% if locations %}
                       <div class="dcx-field">
-                        <label class="dcx-label"><span data-toggle="tooltip" title="{{ help_location }}">{{ entry_location }}</span></label>
+                        <label class="dcx-label">{{ entry_location }} <span data-toggle="tooltip" title="{{ help_location }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                         {% for location in locations %}
                         <div class="checkbox">
                           <label>
@@ -283,7 +283,7 @@
                       </div>
                       <div class="dcx-fields dcx-fields--row">
                         <div class="dcx-field">
-                          <label class="dcx-label" for="input-currency"><span data-toggle="tooltip" title="{{ help_currency }}">{{ entry_currency }}</span></label>
+                          <label class="dcx-label" for="input-currency">{{ entry_currency }} <span data-toggle="tooltip" title="{{ help_currency }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                           <select name="config_currency" id="input-currency" class="form-control">
                             {% for currency in currencies %}
                             {% if currency.code == config_currency %}
@@ -359,7 +359,7 @@
                   </div>
                   <div class="tab-pane" id="tab-option">
                     <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                      <h4><i data-lucide="package" width="16" height="16"></i> {{ text_product }}</h4>
+                      <div class="dcx-section-header"><h4><i data-lucide="package" width="16" height="16"></i> {{ text_product }}</h4></div>
                       <div class="dcx-fields">
                         <div class="dcx-checkbox-group">
                           <label class="dcx-checkbox-label">
@@ -369,7 +369,7 @@
                           </label>
                         </div>
                         <div class="dcx-field required" style="max-width: 50%;">
-                          <label class="dcx-label" for="input-admin-limit"><span data-toggle="tooltip" title="{{ help_limit_admin }}">{{ entry_limit_admin }}</span></label>
+                          <label class="dcx-label" for="input-admin-limit">{{ entry_limit_admin }} <span data-toggle="tooltip" title="{{ help_limit_admin }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                           <input type="text" name="config_limit_admin" value="{{ config_limit_admin }}" placeholder="{{ entry_limit_admin }}" id="input-admin-limit" class="form-control" />
                           {% if error_limit_admin %}
                           <div class="text-danger">{{ error_limit_admin }}</div>
@@ -378,7 +378,7 @@
                       </div>
                     </div>
                     <div class="dcx-section">
-                      <h4><i data-lucide="message-square" width="16" height="16"></i> {{ text_review }}</h4>
+                      <div class="dcx-section-header"><h4><i data-lucide="message-square" width="16" height="16"></i> {{ text_review }}</h4></div>
                       <div class="dcx-fields">
                         <div class="dcx-checkbox-group">
                           <label class="dcx-checkbox-label">
@@ -395,17 +395,17 @@
                       </div>
                     </div>
                     <div class="dcx-section">
-                      <h4><i data-lucide="ticket" width="16" height="16"></i> {{ text_voucher }}</h4>
+                      <div class="dcx-section-header"><h4><i data-lucide="ticket" width="16" height="16"></i> {{ text_voucher }}</h4></div>
                       <div class="dcx-fields dcx-fields--row">
                         <div class="dcx-field required">
-                          <label class="dcx-label" for="input-voucher-min"><span data-toggle="tooltip" title="{{ help_voucher_min }}">{{ entry_voucher_min }}</span></label>
+                          <label class="dcx-label" for="input-voucher-min">{{ entry_voucher_min }} <span data-toggle="tooltip" title="{{ help_voucher_min }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                           <input type="text" name="config_voucher_min" value="{{ config_voucher_min }}" placeholder="{{ entry_voucher_min }}" id="input-voucher-min" class="form-control" />
                           {% if error_voucher_min %}
                           <div class="text-danger">{{ error_voucher_min }}</div>
                           {% endif %}
                         </div>
                         <div class="dcx-field required">
-                          <label class="dcx-label" for="input-voucher-max"><span data-toggle="tooltip" title="{{ help_voucher_max }}">{{ entry_voucher_max }}</span></label>
+                          <label class="dcx-label" for="input-voucher-max">{{ entry_voucher_max }} <span data-toggle="tooltip" title="{{ help_voucher_max }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                           <input type="text" name="config_voucher_max" value="{{ config_voucher_max }}" placeholder="{{ entry_voucher_max }}" id="input-voucher-max" class="form-control" />
                           {% if error_voucher_max %}
                           <div class="text-danger">{{ error_voucher_max }}</div>
@@ -414,7 +414,7 @@
                       </div>
                     </div>
                     <div class="dcx-section">
-                      <h4><i data-lucide="receipt" width="16" height="16"></i> {{ text_tax }}</h4>
+                      <div class="dcx-section-header"><h4><i data-lucide="receipt" width="16" height="16"></i> {{ text_tax }}</h4></div>
                       <div class="dcx-fields">
                         <div class="dcx-checkbox-group">
                           <label class="dcx-checkbox-label">
@@ -424,7 +424,7 @@
                         </div>
                         <div class="dcx-fields dcx-fields--row">
                           <div class="dcx-field">
-                            <label class="dcx-label" for="input-tax-default"><span data-toggle="tooltip" title="{{ help_tax_default }}">{{ entry_tax_default }}</span></label>
+                            <label class="dcx-label" for="input-tax-default">{{ entry_tax_default }} <span data-toggle="tooltip" title="{{ help_tax_default }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                             <select name="config_tax_default" id="input-tax-default" class="form-control">
                               <option value="">{{ text_none }}</option>
                               {% if config_tax_default == 'shipping' %}
@@ -440,7 +440,7 @@
                             </select>
                           </div>
                           <div class="dcx-field">
-                            <label class="dcx-label" for="input-tax-customer"><span data-toggle="tooltip" title="{{ help_tax_customer }}">{{ entry_tax_customer }}</span></label>
+                            <label class="dcx-label" for="input-tax-customer">{{ entry_tax_customer }} <span data-toggle="tooltip" title="{{ help_tax_customer }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                             <select name="config_tax_customer" id="input-tax-customer" class="form-control">
                               <option value="">{{ text_none }}</option>
                               {% if config_tax_customer == 'shipping' %}
@@ -459,7 +459,7 @@
                       </div>
                     </div>
                     <div class="dcx-section">
-                      <h4><i data-lucide="users" width="16" height="16"></i> {{ text_account }}</h4>
+                      <div class="dcx-section-header"><h4><i data-lucide="users" width="16" height="16"></i> {{ text_account }}</h4></div>
                       <div class="dcx-fields">
                         <div class="dcx-checkbox-group">
                           <label class="dcx-checkbox-label">
@@ -484,7 +484,7 @@
                         </div>
                         <div class="dcx-fields dcx-fields--row">
                           <div class="dcx-field" style="max-width: 50%;">
-                            <label class="dcx-label" for="input-customer-group"><span data-toggle="tooltip" title="{{ help_customer_group }}">{{ entry_customer_group }}</span></label>
+                            <label class="dcx-label" for="input-customer-group">{{ entry_customer_group }} <span data-toggle="tooltip" title="{{ help_customer_group }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                             <select name="config_customer_group_id" id="input-customer-group" class="form-control">
                               {% for customer_group in customer_groups %}
                               {% if customer_group.customer_group_id == config_customer_group_id %}
@@ -496,7 +496,7 @@
                             </select>
                           </div>
                           <div class="dcx-field" style="max-width: 50%;">
-                            <label class="dcx-label" for="input-login-attempts"><span data-toggle="tooltip" title="{{ help_login_attempts }}">{{ entry_login_attempts }}</span></label>
+                            <label class="dcx-label" for="input-login-attempts">{{ entry_login_attempts }} <span data-toggle="tooltip" title="{{ help_login_attempts }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                             <input type="text" name="config_login_attempts" value="{{ config_login_attempts }}" placeholder="{{ entry_login_attempts }}" id="input-login-attempts" class="form-control" />
                             {% if error_login_attempts %}
                             <div class="text-danger">{{ error_login_attempts }}</div>
@@ -504,7 +504,7 @@
                           </div>
                         </div>
                         <div class="dcx-field">
-                          <label class="dcx-label"><span data-toggle="tooltip" title="{{ help_customer_group_display }}">{{ entry_customer_group_display }}</span></label>
+                          <label class="dcx-label">{{ entry_customer_group_display }} <span data-toggle="tooltip" title="{{ help_customer_group_display }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                           {% for customer_group in customer_groups %}
                           <div class="checkbox">
                             <label>
@@ -523,7 +523,7 @@
                           {% endif %}
                         </div>
                         <div class="dcx-field" style="max-width: 50%;">
-                          <label class="dcx-label" for="input-account"><span data-toggle="tooltip" title="{{ help_account }}">{{ entry_account }}</span></label>
+                          <label class="dcx-label" for="input-account">{{ entry_account }} <span data-toggle="tooltip" title="{{ help_account }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                           <select name="config_account_id" id="input-account" class="form-control">
                             <option value="0">{{ text_none }}</option>
                             {% for information in informations %}
@@ -538,7 +538,7 @@
                       </div>
                     </div>
                     <div class="dcx-section">
-                      <h4><i data-lucide="shopping-cart" width="16" height="16"></i> {{ text_checkout }}</h4>
+                      <div class="dcx-section-header"><h4><i data-lucide="shopping-cart" width="16" height="16"></i> {{ text_checkout }}</h4></div>
                       <div class="dcx-fields">
                         <div class="dcx-checkbox-group">
                           <label class="dcx-checkbox-label">
@@ -554,7 +554,7 @@
                         </div>
                         <div class="dcx-fields dcx-fields--row">
                           <div class="dcx-field" style="max-width: 50%;">
-                            <label class="dcx-label" for="input-checkout"><span data-toggle="tooltip" title="{{ help_checkout }}">{{ entry_checkout }}</span></label>
+                            <label class="dcx-label" for="input-checkout">{{ entry_checkout }} <span data-toggle="tooltip" title="{{ help_checkout }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                             <select name="config_checkout_id" id="input-checkout" class="form-control">
                               <option value="0">{{ text_none }}</option>
                               {% for information in informations %}
@@ -567,7 +567,7 @@
                             </select>
                           </div>
                           <div class="dcx-field" style="max-width: 50%;">
-                            <label class="dcx-label" for="input-order-status"><span data-toggle="tooltip" title="{{ help_order_status }}">{{ entry_order_status }}</span></label>
+                            <label class="dcx-label" for="input-order-status">{{ entry_order_status }} <span data-toggle="tooltip" title="{{ help_order_status }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                             <select name="config_order_status_id" id="input-order-status" class="form-control">
                               {% for order_status in order_statuses %}
                               {% if order_status.order_status_id == config_order_status_id %}
@@ -581,7 +581,7 @@
                         </div>
                         <div class="dcx-fields dcx-fields--row">
                           <div class="dcx-field" style="max-width: 50%;">
-                            <label class="dcx-label" for="input-fraud-status"><span data-toggle="tooltip" title="{{ help_fraud_status }}">{{ entry_fraud_status }}</span></label>
+                            <label class="dcx-label" for="input-fraud-status">{{ entry_fraud_status }} <span data-toggle="tooltip" title="{{ help_fraud_status }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                             <select name="config_fraud_status_id" id="input-fraud-status" class="form-control">
                               {% for order_status in order_statuses %}
                               {% if order_status.order_status_id == config_fraud_status_id %}
@@ -593,7 +593,7 @@
                             </select>
                           </div>
                           <div class="dcx-field" style="max-width: 50%;">
-                            <label class="dcx-label" for="input-api"><span data-toggle="tooltip" title="{{ help_api }}">{{ entry_api }}</span></label>
+                            <label class="dcx-label" for="input-api">{{ entry_api }} <span data-toggle="tooltip" title="{{ help_api }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                             <select name="config_api_id" id="input-api" class="form-control">
                               <option value="0">{{ text_none }}</option>
                               {% for api in apis %}
@@ -607,7 +607,7 @@
                           </div>
                         </div>
                         <div class="dcx-field">
-                          <label class="dcx-label" for="input-process-status"><span data-toggle="tooltip" title="{{ help_processing_status }}">{{ entry_processing_status }}</span></label>
+                          <label class="dcx-label" for="input-process-status">{{ entry_processing_status }} <span data-toggle="tooltip" title="{{ help_processing_status }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                           <div class="well well-sm" style="height: 150px; overflow: auto;">
                             {% for order_status in order_statuses %}
                             <div class="checkbox">
@@ -628,7 +628,7 @@
                           {% endif %}
                         </div>
                         <div class="dcx-field">
-                          <label class="dcx-label" for="input-complete-status"><span data-toggle="tooltip" title="{{ help_complete_status }}">{{ entry_complete_status }}</span></label>
+                          <label class="dcx-label" for="input-complete-status">{{ entry_complete_status }} <span data-toggle="tooltip" title="{{ help_complete_status }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                           <div class="well well-sm" style="height: 150px; overflow: auto;">
                             {% for order_status in order_statuses %}
                             <div class="checkbox">
@@ -651,7 +651,7 @@
                       </div>
                     </div>
                     <div class="dcx-section">
-                      <h4><i data-lucide="package" width="16" height="16"></i> {{ text_stock }}</h4>
+                      <div class="dcx-section-header"><h4><i data-lucide="package" width="16" height="16"></i> {{ text_stock }}</h4></div>
                       <div class="dcx-fields">
                         <div class="dcx-checkbox-group">
                           <label class="dcx-checkbox-label">
@@ -673,7 +673,7 @@
                       </div>
                     </div>
                     <div class="dcx-section">
-                      <h4><i data-lucide="handshake" width="16" height="16"></i> {{ text_affiliate }}</h4>
+                      <div class="dcx-section-header"><h4><i data-lucide="handshake" width="16" height="16"></i> {{ text_affiliate }}</h4></div>
                       <div class="dcx-fields">
                         <div class="dcx-checkbox-group">
                           <label class="dcx-checkbox-label">
@@ -706,12 +706,12 @@
                             </select>
                           </div>
                           <div class="dcx-field" style="max-width: 50%;">
-                            <label class="dcx-label" for="input-affiliate-commission"><span data-toggle="tooltip" title="{{ help_affiliate_commission }}">{{ entry_affiliate_commission }}</span></label>
+                            <label class="dcx-label" for="input-affiliate-commission">{{ entry_affiliate_commission }} <span data-toggle="tooltip" title="{{ help_affiliate_commission }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                             <input type="text" name="config_affiliate_commission" value="{{ config_affiliate_commission }}" placeholder="{{ entry_affiliate_commission }}" id="input-affiliate-commission" class="form-control" />
                           </div>
                         </div>
                         <div class="dcx-field" style="max-width: 50%;">
-                          <label class="dcx-label" for="input-affiliate"><span data-toggle="tooltip" title="{{ help_affiliate }}">{{ entry_affiliate }}</span></label>
+                          <label class="dcx-label" for="input-affiliate">{{ entry_affiliate }} <span data-toggle="tooltip" title="{{ help_affiliate }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                           <select name="config_affiliate_id" id="input-affiliate" class="form-control">
                             <option value="0">{{ text_none }}</option>
                             {% for information in informations %}
@@ -726,10 +726,10 @@
                       </div>
                     </div>
                     <div class="dcx-section">
-                      <h4><i data-lucide="rotate-ccw" width="16" height="16"></i> {{ text_return }}</h4>
+                      <div class="dcx-section-header"><h4><i data-lucide="rotate-ccw" width="16" height="16"></i> {{ text_return }}</h4></div>
                       <div class="dcx-fields dcx-fields--row">
                         <div class="dcx-field" style="max-width: 50%;">
-                          <label class="dcx-label" for="input-return"><span data-toggle="tooltip" title="{{ help_return }}">{{ entry_return }}</span></label>
+                          <label class="dcx-label" for="input-return">{{ entry_return }} <span data-toggle="tooltip" title="{{ help_return }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                           <select name="config_return_id" id="input-return" class="form-control">
                             <option value="0">{{ text_none }}</option>
                             {% for information in informations %}
@@ -742,7 +742,7 @@
                           </select>
                         </div>
                         <div class="dcx-field" style="max-width: 50%;">
-                          <label class="dcx-label" for="input-return-status"><span data-toggle="tooltip" title="{{ help_return_status }}">{{ entry_return_status }}</span></label>
+                          <label class="dcx-label" for="input-return-status">{{ entry_return_status }} <span data-toggle="tooltip" title="{{ help_return_status }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                           <select name="config_return_status_id" id="input-return-status" class="form-control">
                             {% for return_status in return_statuses %}
                             {% if return_status.return_status_id == config_return_status_id %}
@@ -756,10 +756,10 @@
                       </div>
                     </div>
                     <div class="dcx-section">
-                      <h4><i data-lucide="shield" width="16" height="16"></i> {{ text_captcha }}</h4>
+                      <div class="dcx-section-header"><h4><i data-lucide="shield" width="16" height="16"></i> {{ text_captcha }}</h4></div>
                       <div class="dcx-fields">
                         <div class="dcx-field" style="max-width: 50%;">
-                          <label class="dcx-label"><span data-toggle="tooltip" title="{{ help_captcha }}">{{ entry_captcha }}</span></label>
+                          <label class="dcx-label">{{ entry_captcha }} <span data-toggle="tooltip" title="{{ help_captcha }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                           <select name="config_captcha" id="input-captcha" class="form-control">
                             <option value="">{{ text_none }}</option>
                             {% for captcha in captchas %}
@@ -800,32 +800,32 @@
                         <input type="hidden" name="config_logo" value="{{ config_logo }}" id="input-logo" />
                       </div>
                       <div class="dcx-field">
-                        <label class="dcx-label" for="input-icon"><span data-toggle="tooltip" title="{{ help_icon }}">{{ entry_icon }}</span></label>
+                        <label class="dcx-label" for="input-icon">{{ entry_icon }} <span data-toggle="tooltip" title="{{ help_icon }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                         <a href="" id="thumb-icon" data-toggle="image" class="img-thumbnail"><img src="{{ icon }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
                         <input type="hidden" name="config_icon" value="{{ config_icon }}" id="input-icon" />
                       </div>
                       <div class="dcx-field" style="max-width: 50%;">
-                        <label class="dcx-label" for="input-image-max-dimension"><span data-toggle="tooltip" title="{{ help_image_max_dimension }}">{{ entry_image_max_dimension }}</span></label>
+                        <label class="dcx-label" for="input-image-max-dimension">{{ entry_image_max_dimension }} <span data-toggle="tooltip" title="{{ help_image_max_dimension }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                         <input type="number" name="config_image_max_dimension" value="{{ config_image_max_dimension }}" id="input-image-max-dimension" class="form-control" min="0" max="10000" />
                       </div>
                     </div>
                   </div>
                   <div class="tab-pane" id="tab-mail">
                     <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                      <h4><i data-lucide="mail" width="16" height="16"></i> {{ text_smtp }}</h4>
+                      <div class="dcx-section-header"><h4><i data-lucide="mail" width="16" height="16"></i> {{ text_smtp }}</h4></div>
                       <div class="dcx-fields">
                         <div class="dcx-field" style="max-width: 50%;">
-                          <label class="dcx-label"><span data-toggle="tooltip" title="{{ help_mail_engine }}">{{ entry_mail_engine }}</span></label>
+                          <label class="dcx-label">{{ entry_mail_engine }} <span data-toggle="tooltip" title="{{ help_mail_engine }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                           <input type="hidden" name="config_mail_engine" value="smtp" />
                           <p class="form-control-static">{{ text_smtp }}</p>
                         </div>
                         <div class="dcx-fields dcx-fields--row">
                           <div class="dcx-field" style="max-width: 50%;">
-                            <label class="dcx-label" for="input-mail-smtp-hostname"><span data-toggle="tooltip" title="{{ help_mail_smtp_hostname }}">{{ entry_mail_smtp_hostname }}</span></label>
+                            <label class="dcx-label" for="input-mail-smtp-hostname">{{ entry_mail_smtp_hostname }} <span data-toggle="tooltip" title="{{ help_mail_smtp_hostname }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                             <input type="text" name="config_mail_smtp_hostname" value="{{ config_mail_smtp_hostname }}" placeholder="{{ entry_mail_smtp_hostname }}" id="input-mail-smtp-hostname" class="form-control" />
                           </div>
                           <div class="dcx-field" style="max-width: 50%;">
-                            <label class="dcx-label" for="input-mail-smtp-auth-method"><span data-toggle="tooltip" title="{{ help_mail_smtp_auth_method }}">{{ entry_mail_smtp_auth_method }}</span></label>
+                            <label class="dcx-label" for="input-mail-smtp-auth-method">{{ entry_mail_smtp_auth_method }} <span data-toggle="tooltip" title="{{ help_mail_smtp_auth_method }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                             <select name="config_mail_smtp_auth_method" id="input-mail-smtp-auth-method" class="form-control">
                               {% if config_mail_smtp_auth_method == 'oauth' %}
                               <option value="login">{{ text_auth_login }}</option>
@@ -854,13 +854,13 @@
                           <input type="text" name="config_mail_smtp_oauth_refresh_token" value="{{ config_mail_smtp_oauth_refresh_token }}" placeholder="{{ entry_mail_smtp_oauth_refresh_token }}" id="input-mail-smtp-oauth-refresh-token" class="form-control" />
                         </div>
                         <div class="dcx-field" style="max-width: 50%;">
-                          <label class="dcx-label" for="input-mail-smtp-oauth-token"><span data-toggle="tooltip" title="{{ help_mail_smtp_oauth_token }}">{{ entry_mail_smtp_oauth_token }}</span></label>
+                          <label class="dcx-label" for="input-mail-smtp-oauth-token">{{ entry_mail_smtp_oauth_token }} <span data-toggle="tooltip" title="{{ help_mail_smtp_oauth_token }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                           <input type="text" name="config_mail_smtp_oauth_token" value="{{ config_mail_smtp_oauth_token }}" placeholder="{{ entry_mail_smtp_oauth_token }}" id="input-mail-smtp-oauth-token" class="form-control" />
                         </div>
                       </div>
                     </div>
                     <div class="dcx-section">
-                      <h4><i data-lucide="user" width="16" height="16"></i> {{ entry_mail_smtp_username }}</h4>
+                      <div class="dcx-section-header"><h4><i data-lucide="user" width="16" height="16"></i> {{ entry_mail_smtp_username }}</h4></div>
                       <div class="dcx-fields">
                         <div class="dcx-fields dcx-fields--row">
                           <div class="dcx-field" style="max-width: 50%;">
@@ -868,7 +868,7 @@
                             <input type="text" name="config_mail_smtp_username" value="{{ config_mail_smtp_username }}" placeholder="{{ entry_mail_smtp_username }}" id="input-mail-smtp-username" class="form-control" />
                           </div>
                           <div class="dcx-field" style="max-width: 50%;">
-                            <label class="dcx-label" for="input-mail-smtp-password"><span data-toggle="tooltip" title="{{ help_mail_smtp_password }}">{{ entry_mail_smtp_password }}</span></label>
+                            <label class="dcx-label" for="input-mail-smtp-password">{{ entry_mail_smtp_password }} <span data-toggle="tooltip" title="{{ help_mail_smtp_password }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                             <input type="text" name="config_mail_smtp_password" value="{{ config_mail_smtp_password }}" placeholder="{{ entry_mail_smtp_password }}" id="input-mail-smtp-password" class="form-control" />
                           </div>
                         </div>
@@ -885,11 +885,11 @@
                       </div>
                     </div>
                     <div class="dcx-section">
-                      <h4><i data-lucide="bell" width="16" height="16"></i> {{ text_mail_alert }}</h4>
+                      <div class="dcx-section-header"><h4><i data-lucide="bell" width="16" height="16"></i> {{ text_mail_alert }}</h4></div>
                       <div class="dcx-fields">
                         <div class="dcx-fields dcx-fields--row">
                           <div class="dcx-field">
-                            <label class="dcx-label"><span data-toggle="tooltip" title="{{ help_mail_alert }}">{{ entry_mail_alert }}</span></label>
+                            <label class="dcx-label">{{ entry_mail_alert }} <span data-toggle="tooltip" title="{{ help_mail_alert }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                             <div class="well well-sm" style="height: 150px; overflow: auto;">
                               {% for mail_alert in mail_alerts %}
                               <div class="checkbox">
@@ -907,7 +907,7 @@
                             </div>
                           </div>
                           <div class="dcx-field" style="max-width: 50%;">
-                            <label class="dcx-label" for="input-mail-alert-email"><span data-toggle="tooltip" title="{{ help_mail_alert_email }}">{{ entry_mail_alert_email }}</span></label>
+                            <label class="dcx-label" for="input-mail-alert-email">{{ entry_mail_alert_email }} <span data-toggle="tooltip" title="{{ help_mail_alert_email }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                             <textarea name="config_mail_alert_email" rows="5" placeholder="{{ entry_mail_alert_email }}" id="input-alert-email" class="form-control">{{ config_mail_alert_email }}</textarea>
                           </div>
                         </div>
@@ -916,7 +916,7 @@
                   </div>
                   <div class="tab-pane" id="tab-server">
                     <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                      <h4><i data-lucide="settings" width="16" height="16"></i> {{ text_general }}</h4>
+                      <div class="dcx-section-header"><h4><i data-lucide="settings" width="16" height="16"></i> {{ text_general }}</h4></div>
                       <div class="dcx-fields">
                         <div class="dcx-checkbox-group">
                           <label class="dcx-checkbox-label">
@@ -936,17 +936,17 @@
                           </label>
                         </div>
                         <div class="dcx-field">
-                          <label class="dcx-label" for="input-robots"><span data-toggle="tooltip" title="{{ help_robots }}">{{ entry_robots }}</span></label>
+                          <label class="dcx-label" for="input-robots">{{ entry_robots }} <span data-toggle="tooltip" title="{{ help_robots }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                           <textarea name="config_robots" rows="5" placeholder="{{ entry_robots }}" id="input-robots" class="form-control">{{ config_robots }}</textarea>
                         </div>
                         <div class="dcx-field" style="max-width: 50%;">
-                          <label class="dcx-label" for="input-compression"><span data-toggle="tooltip" title="{{ help_compression }}">{{ entry_compression }}</span></label>
+                          <label class="dcx-label" for="input-compression">{{ entry_compression }} <span data-toggle="tooltip" title="{{ help_compression }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                           <input type="text" name="config_compression" value="{{ config_compression }}" placeholder="{{ entry_compression }}" id="input-compression" class="form-control" />
                         </div>
                       </div>
                     </div>
                     <div class="dcx-section">
-                      <h4><i data-lucide="shield" width="16" height="16"></i> {{ text_security }}</h4>
+                      <div class="dcx-section-header"><h4><i data-lucide="shield" width="16" height="16"></i> {{ text_security }}</h4></div>
                       <div class="dcx-fields">
                         <div class="dcx-checkbox-group">
                           <label class="dcx-checkbox-label">
@@ -966,7 +966,7 @@
                           </label>
                         </div>
                         <div class="dcx-field">
-                          <label class="dcx-label" for="input-encryption"><span data-toggle="tooltip" title="{{ help_encryption }}">{{ entry_encryption }}</span></label>
+                          <label class="dcx-label" for="input-encryption">{{ entry_encryption }} <span data-toggle="tooltip" title="{{ help_encryption }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                           <textarea name="config_encryption" rows="5" placeholder="{{ entry_encryption }}" id="input-encryption" class="form-control">{{ config_encryption }}</textarea>
                           {% if error_encryption %}
                           <div class="text-danger">{{ error_encryption }}</div>
@@ -975,24 +975,24 @@
                       </div>
                     </div>
                     <div class="dcx-section">
-                      <h4><i data-lucide="upload" width="16" height="16"></i> {{ text_upload }}</h4>
+                      <div class="dcx-section-header"><h4><i data-lucide="upload" width="16" height="16"></i> {{ text_upload }}</h4></div>
                       <div class="dcx-fields">
                         <div class="dcx-field" style="max-width: 50%;">
-                          <label class="dcx-label" for="input-file-max-size"><span data-toggle="tooltip" title="{{ help_file_max_size }}">{{ entry_file_max_size }}</span></label>
+                          <label class="dcx-label" for="input-file-max-size">{{ entry_file_max_size }} <span data-toggle="tooltip" title="{{ help_file_max_size }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                           <input type="text" name="config_file_max_size" value="{{ config_file_max_size }}" placeholder="{{ entry_file_max_size }}" id="input-file-max-size" class="form-control" />
                         </div>
                         <div class="dcx-field">
-                          <label class="dcx-label" for="input-file-ext-allowed"><span data-toggle="tooltip" title="{{ help_file_ext_allowed }}">{{ entry_file_ext_allowed }}</span></label>
+                          <label class="dcx-label" for="input-file-ext-allowed">{{ entry_file_ext_allowed }} <span data-toggle="tooltip" title="{{ help_file_ext_allowed }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                           <textarea name="config_file_ext_allowed" rows="5" placeholder="{{ entry_file_ext_allowed }}" id="input-file-ext-allowed" class="form-control">{{ config_file_ext_allowed }}</textarea>
                         </div>
                         <div class="dcx-field">
-                          <label class="dcx-label" for="input-file-mime-allowed"><span data-toggle="tooltip" title="{{ help_file_mime_allowed }}">{{ entry_file_mime_allowed }}</span></label>
+                          <label class="dcx-label" for="input-file-mime-allowed">{{ entry_file_mime_allowed }} <span data-toggle="tooltip" title="{{ help_file_mime_allowed }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                           <textarea name="config_file_mime_allowed" rows="5" placeholder="{{ entry_file_mime_allowed }}" id="input-file-mime-allowed" class="form-control">{{ config_file_mime_allowed }}</textarea>
                         </div>
                       </div>
                     </div>
                     <div class="dcx-section">
-                      <h4><i data-lucide="triangle-alert" width="16" height="16"></i> {{ text_error }}</h4>
+                      <div class="dcx-section-header"><h4><i data-lucide="triangle-alert" width="16" height="16"></i> {{ text_error }}</h4></div>
                       <div class="dcx-fields">
                         <div class="dcx-checkbox-group">
                           <label class="dcx-checkbox-label">

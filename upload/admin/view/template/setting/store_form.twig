@@ -62,14 +62,14 @@
                   <div class="tab-pane active" id="tab-general">
                     <div class="dcx-fields">
                       <div class="dcx-field required">
-                        <label class="dcx-label" for="input-url"><span data-toggle="tooltip" data-html="true" title="{{ help_url|escape('html') }}">{{ entry_url }}</span></label>
+                        <label class="dcx-label" for="input-url">{{ entry_url }} <span data-toggle="tooltip" data-html="true" title="{{ help_url|escape('html') }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                         <input type="text" name="config_url" value="{{ config_url }}" placeholder="{{ entry_url }}" id="input-url" class="form-control" />
                         {% if error_url %}
                         <div class="text-danger">{{ error_url }}</div>
                         {% endif %}
                       </div>
                       <div class="dcx-field">
-                        <label class="dcx-label" for="input-ssl"><span data-toggle="tooltip" data-html="true" title="{{ help_ssl }}">{{ entry_ssl }}</span></label>
+                        <label class="dcx-label" for="input-ssl">{{ entry_ssl }} <span data-toggle="tooltip" data-html="true" title="{{ help_ssl }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                         <input type="text" name="config_ssl" value="{{ config_ssl }}" placeholder="{{ entry_ssl }}" id="input-ssl" class="form-control" />
                       </div>
                       <div class="dcx-field required">
@@ -137,7 +137,7 @@
                         {% endif %}
                       </div>
                       <div class="dcx-field">
-                        <label class="dcx-label" for="input-geocode"><span data-toggle="tooltip" data-container="#tab-general" title="{{ help_geocode }}">{{ entry_geocode }}</span></label>
+                        <label class="dcx-label" for="input-geocode">{{ entry_geocode }} <span data-toggle="tooltip" data-container="#tab-general" title="{{ help_geocode }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                         <input type="text" name="config_geocode" value="{{ config_geocode }}" placeholder="{{ entry_geocode }}" id="input-geocode" class="form-control" />
                       </div>
                       <div class="dcx-field required">
@@ -182,16 +182,16 @@
                         <p class="help-block">{{ help_images }}</p>
                       </div>
                       <div class="dcx-field">
-                        <label class="dcx-label" for="input-open"><span data-toggle="tooltip" title="{{ help_open }}">{{ entry_open }}</span></label>
+                        <label class="dcx-label" for="input-open">{{ entry_open }} <span data-toggle="tooltip" title="{{ help_open }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                         <textarea name="config_open" rows="5" placeholder="{{ entry_open }}" id="input-open" class="form-control">{{ config_open }}</textarea>
                       </div>
                       <div class="dcx-field">
-                        <label class="dcx-label" for="input-comment"><span data-toggle="tooltip" title="{{ help_comment }}">{{ entry_comment }}</span></label>
+                        <label class="dcx-label" for="input-comment">{{ entry_comment }} <span data-toggle="tooltip" title="{{ help_comment }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                         <textarea name="config_comment" rows="5" placeholder="{{ entry_comment }}" id="input-comment" class="form-control">{{ config_comment }}</textarea>
                       </div>
                       {% if locations %}
                       <div class="dcx-field">
-                        <label class="dcx-label"><span data-toggle="tooltip" title="{{ help_location }}">{{ entry_location }}</span></label>
+                        <label class="dcx-label">{{ entry_location }} <span data-toggle="tooltip" title="{{ help_location }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                         {% for location in locations %}
                         <div class="checkbox">
                           <label>
@@ -244,7 +244,7 @@
                           </select>
                         </div>
                         <div class="dcx-field">
-                          <label class="dcx-label" for="input-currency"><span data-toggle="tooltip" title="{{ help_currency }}">{{ entry_currency }}</span></label>
+                          <label class="dcx-label" for="input-currency">{{ entry_currency }} <span data-toggle="tooltip" title="{{ help_currency }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                           <select name="config_currency" id="input-currency" class="form-control">
                             {% for currency in currencies %}
                             {% if currency.code == config_currency %}
@@ -260,7 +260,7 @@
                   </div>
                   <div class="tab-pane" id="tab-option">
                     <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                      <h4><i data-lucide="receipt" width="16" height="16"></i> {{ text_tax }}</h4>
+                      <div class="dcx-section-header"><h4><i data-lucide="receipt" width="16" height="16"></i> {{ text_tax }}</h4></div>
                       <div class="dcx-fields">
                         <div class="dcx-checkbox-group">
                           <label class="dcx-checkbox-label">
@@ -270,7 +270,7 @@
                         </div>
                         <div class="dcx-fields dcx-fields--row">
                           <div class="dcx-field">
-                            <label class="dcx-label" for="input-tax-default"><span data-toggle="tooltip" title="{{ help_tax_default }}">{{ entry_tax_default }}</span></label>
+                            <label class="dcx-label" for="input-tax-default">{{ entry_tax_default }} <span data-toggle="tooltip" title="{{ help_tax_default }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                             <select name="config_tax_default" id="input-tax-default" class="form-control">
                               <option value="">{{ text_none }}</option>
                               {% if config_tax_default == 'shipping' %}
@@ -286,7 +286,7 @@
                             </select>
                           </div>
                           <div class="dcx-field">
-                            <label class="dcx-label" for="input-tax-customer"><span data-toggle="tooltip" title="{{ help_tax_customer }}">{{ entry_tax_customer }}</span></label>
+                            <label class="dcx-label" for="input-tax-customer">{{ entry_tax_customer }} <span data-toggle="tooltip" title="{{ help_tax_customer }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                             <select name="config_tax_customer" id="input-tax-customer" class="form-control">
                               <option value="">{{ text_none }}</option>
                               {% if config_tax_customer == 'shipping' %}
@@ -305,11 +305,11 @@
                       </div>
                     </div>
                     <div class="dcx-section">
-                      <h4><i data-lucide="users" width="16" height="16"></i> {{ text_account }}</h4>
+                      <div class="dcx-section-header"><h4><i data-lucide="users" width="16" height="16"></i> {{ text_account }}</h4></div>
                       <div class="dcx-fields">
                         <div class="dcx-fields dcx-fields--row">
                           <div class="dcx-field" style="max-width:50%;">
-                            <label class="dcx-label" for="input-customer-group"><span data-toggle="tooltip" title="{{ help_customer_group }}">{{ entry_customer_group }}</span></label>
+                            <label class="dcx-label" for="input-customer-group">{{ entry_customer_group }} <span data-toggle="tooltip" title="{{ help_customer_group }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                             <select name="config_customer_group_id" id="input-customer-group" class="form-control">
                               {% for customer_group in customer_groups %}
                               {% if customer_group.customer_group_id == config_customer_group_id %}
@@ -321,7 +321,7 @@
                             </select>
                           </div>
                           <div class="dcx-field" style="max-width:50%;">
-                            <label class="dcx-label" for="input-account"><span data-toggle="tooltip" title="{{ help_account }}">{{ entry_account }}</span></label>
+                            <label class="dcx-label" for="input-account">{{ entry_account }} <span data-toggle="tooltip" title="{{ help_account }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                             <select name="config_account_id" id="input-account" class="form-control">
                               <option value="0">{{ text_none }}</option>
                               {% for information in informations %}
@@ -335,7 +335,7 @@
                           </div>
                         </div>
                         <div class="dcx-field">
-                          <label class="dcx-label"><span data-toggle="tooltip" title="{{ help_customer_group_display }}">{{ entry_customer_group_display }}</span></label>
+                          <label class="dcx-label">{{ entry_customer_group_display }} <span data-toggle="tooltip" title="{{ help_customer_group_display }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                           {% for customer_group in customer_groups %}
                           <div class="checkbox">
                             <label>
@@ -363,7 +363,7 @@
                       </div>
                     </div>
                     <div class="dcx-section">
-                      <h4><i data-lucide="shopping-cart" width="16" height="16"></i> {{ text_checkout }}</h4>
+                      <div class="dcx-section-header"><h4><i data-lucide="shopping-cart" width="16" height="16"></i> {{ text_checkout }}</h4></div>
                       <div class="dcx-fields">
                         <div class="dcx-checkbox-group">
                           <label class="dcx-checkbox-label">
@@ -379,7 +379,7 @@
                         </div>
                         <div class="dcx-fields dcx-fields--row">
                           <div class="dcx-field" style="max-width:50%;">
-                            <label class="dcx-label" for="input-checkout"><span data-toggle="tooltip" title="{{ help_checkout }}">{{ entry_checkout }}</span></label>
+                            <label class="dcx-label" for="input-checkout">{{ entry_checkout }} <span data-toggle="tooltip" title="{{ help_checkout }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                             <select name="config_checkout_id" id="input-checkout" class="form-control">
                               <option value="0">{{ text_none }}</option>
                               {% for information in informations %}
@@ -392,7 +392,7 @@
                             </select>
                           </div>
                           <div class="dcx-field" style="max-width:50%;">
-                            <label class="dcx-label" for="input-order-status"><span data-toggle="tooltip" title="{{ help_order_status }}">{{ entry_order_status }}</span></label>
+                            <label class="dcx-label" for="input-order-status">{{ entry_order_status }} <span data-toggle="tooltip" title="{{ help_order_status }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                             <select name="config_order_status_id" id="input-order-status" class="form-control">
                               {% for order_status in order_statuses %}
                               {% if order_status.order_status_id == config_order_status_id %}
@@ -407,7 +407,7 @@
                       </div>
                     </div>
                     <div class="dcx-section">
-                      <h4><i data-lucide="package" width="16" height="16"></i> {{ text_stock }}</h4>
+                      <div class="dcx-section-header"><h4><i data-lucide="package" width="16" height="16"></i> {{ text_stock }}</h4></div>
                       <div class="dcx-fields">
                         <div class="dcx-checkbox-group">
                           <label class="dcx-checkbox-label">
@@ -432,12 +432,12 @@
                         <input type="hidden" name="config_logo" value="{{ config_logo }}" id="input-logo" />
                       </div>
                       <div class="dcx-field">
-                        <label class="dcx-label" for="input-icon"><span data-toggle="tooltip" title="{{ help_icon }}">{{ entry_icon }}</span></label>
+                        <label class="dcx-label" for="input-icon">{{ entry_icon }} <span data-toggle="tooltip" title="{{ help_icon }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                         <a href="" id="thumb-icon" data-toggle="image" class="img-thumbnail"><img src="{{ icon }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
                         <input type="hidden" name="config_icon" value="{{ config_icon }}" id="input-icon" />
                       </div>
                       <div class="dcx-field">
-                        <label class="dcx-label" for="input-image-max-dimension"><span data-toggle="tooltip" title="{{ help_image_max_dimension }}">{{ entry_image_max_dimension }}</span></label>
+                        <label class="dcx-label" for="input-image-max-dimension">{{ entry_image_max_dimension }} <span data-toggle="tooltip" title="{{ help_image_max_dimension }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                         <input type="number" name="config_image_max_dimension" value="{{ config_image_max_dimension }}" id="input-image-max-dimension" class="form-control" min="0" max="10000" />
                       </div>
                     </div>
@@ -445,7 +445,7 @@
                   <div class="tab-pane" id="tab-server">
                     <div class="dcx-fields">
                       <div class="dcx-field">
-                        <label class="dcx-label"><span data-toggle="tooltip" title="{{ help_secure }}">{{ entry_secure }}</span></label>
+                        <label class="dcx-label">{{ entry_secure }} <span data-toggle="tooltip" title="{{ help_secure }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                         <div class="dcx-checkbox-group">
                           <label class="dcx-checkbox-label">
                             <input type="hidden" name="config_secure" value="0" />

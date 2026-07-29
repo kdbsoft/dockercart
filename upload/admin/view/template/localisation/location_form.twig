@@ -57,7 +57,7 @@
                   {% endif %}
                 </div>
                 <div class="dcx-field">
-                  <label class="dcx-label" for="input-geocode"><span data-toggle="tooltip" title="{{ help_geocode }}">{{ entry_geocode }}</span></label>
+                  <label class="dcx-label" for="input-geocode">{{ entry_geocode }} <span data-toggle="tooltip" title="{{ help_geocode }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                   <input type="text" name="geocode" value="{{ geocode }}" placeholder="{{ entry_geocode }}" id="input-geocode" class="form-control" />
                 </div>
                 <div class="row">
@@ -83,11 +83,11 @@
                   <input type="hidden" name="image" value="{{ image }}" id="input-image" />
                 </div>
                 <div class="dcx-field">
-                  <label class="dcx-label" for="input-open"><span data-toggle="tooltip" title="{{ help_open }}">{{ entry_open }}</span></label>
+                  <label class="dcx-label" for="input-open">{{ entry_open }} <span data-toggle="tooltip" title="{{ help_open }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                   <textarea name="open" rows="5" placeholder="{{ entry_open }}" id="input-open" class="form-control">{{ open }}</textarea>
                 </div>
                 <div class="dcx-field">
-                  <label class="dcx-label" for="input-comment"><span data-toggle="tooltip" title="{{ help_comment }}">{{ entry_comment }}</span></label>
+                  <label class="dcx-label" for="input-comment">{{ entry_comment }} <span data-toggle="tooltip" title="{{ help_comment }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                   <textarea name="comment" rows="5" placeholder="{{ entry_comment }}" id="input-comment" class="form-control">{{ comment }}</textarea>
                 </div>
               </div>

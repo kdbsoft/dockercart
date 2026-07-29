@@ -40,25 +40,16 @@
               <div class="dcx-panel-body">
                 <div class="dcx-fields">
                   <div class="dcx-field">
-                    <label class="dcx-label"><span data-toggle="tooltip" title="{{ help_admin }}">{{ entry_admin }}</span></label>
-                    <label class="radio-inline">
+                    <label class="dcx-label">{{ entry_admin }} <span data-toggle="tooltip" title="{{ help_admin }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                    <select name="module_store_admin" class="form-control">
                       {% if module_store_admin %}
-                      <input type="radio" name="module_store_admin" value="1" checked="checked" />
-                      {{ text_yes }}
+                      <option value="1" selected="selected">{{ text_yes }}</option>
+                      <option value="0">{{ text_no }}</option>
                       {% else %}
-                      <input type="radio" name="module_store_admin" value="1" />
-                      {{ text_yes }}
+                      <option value="1">{{ text_yes }}</option>
+                      <option value="0" selected="selected">{{ text_no }}</option>
                       {% endif %}
-                    </label>
-                    <label class="radio-inline">
-                      {% if not module_store_admin %}
-                      <input type="radio" name="module_store_admin" value="0" checked="checked" />
-                      {{ text_no }}
-                      {% else %}
-                      <input type="radio" name="module_store_admin" value="0" />
-                      {{ text_no }}
-                      {% endif %}
-                    </label>
+                    </select>
                   </div>
                   <div class="dcx-field">
                     <label class="dcx-label" for="input-status">{{ entry_status }}</label>
