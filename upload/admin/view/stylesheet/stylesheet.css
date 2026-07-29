@@ -3432,3 +3432,7 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
 .dc-spin {
     animation: lucide-spin 0.8s linear infinite;
 }
+
+.panel > .list-group .list-group-item:first-child {
+    border-top: 0
+}
