@@ -45,6 +45,8 @@ $_['button_cancel']                     = 'Скасувати';
 $_['button_back']                       = 'Назад';
 $_['button_add_feature']                = 'Додати перевагу';
 $_['button_remove']                     = 'Видалити';
+$_['button_delete']                     = 'Видалити';
+$_['button_delete_confirm']             = 'Видалити цей віджет?';
 $_['button_edit']                       = 'Редагувати';
 
 // Error
