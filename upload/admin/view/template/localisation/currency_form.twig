@@ -51,7 +51,7 @@
                   {% endif %}
                 </div>
                 <div class="dcx-field required">
-                  <label class="dcx-label" for="input-code"><span data-toggle="tooltip" title="{{ help_code }}">{{ entry_code }}</span></label>
+                  <label class="dcx-label" for="input-code">{{ entry_code }} <span data-toggle="tooltip" title="{{ help_code }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                   <input type="text" name="code" value="{{ code }}" placeholder="{{ entry_code }}" id="input-code" class="form-control" />
                   {% if error_code %}
                   <div class="text-danger">{{ error_code }}</div>
@@ -80,7 +80,7 @@
                   </div>
                   <div class="col-sm-3">
                     <div class="dcx-field">
-                      <label class="dcx-label" for="input-value"><span data-toggle="tooltip" title="{{ help_value }}">{{ entry_value }}</span></label>
+                      <label class="dcx-label" for="input-value">{{ entry_value }} <span data-toggle="tooltip" title="{{ help_value }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                       <input type="text" name="value" value="{{ value }}" placeholder="{{ entry_value }}" id="input-value" class="form-control" />
                     </div>
                   </div>

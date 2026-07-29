@@ -57,7 +57,7 @@
                     {% if error_name %}<div class="text-danger">{{ error_name }}</div>{% endif %}
                   </div>
                   <div class="dcx-field">
-                    <label class="dcx-label" for="input-max-depth"><span data-toggle="tooltip" title="{{ help_max_depth }}">{{ entry_max_depth }}</span></label>
+                    <label class="dcx-label" for="input-max-depth">{{ entry_max_depth }} <span data-toggle="tooltip" title="{{ help_max_depth }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                     <input type="number" name="max_depth" value="{{ max_depth }}" min="0" placeholder="{{ entry_max_depth }}" id="input-max-depth" class="form-control" />
                   </div>
                   <div class="dcx-field">

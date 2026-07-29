@@ -52,7 +52,7 @@
                     </select>
                   </div>
                   <div class="dcx-field">
-                    <label class="dcx-label" for="input-category"><span data-toggle="tooltip" title="{{ help_categories }}">{{ entry_categories }}</span></label>
+                    <label class="dcx-label" for="input-category">{{ entry_categories }} <span data-toggle="tooltip" title="{{ help_categories }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                     <input type="text" name="category" value="" placeholder="{{ entry_categories }}" id="input-category" class="form-control" />
                     <div id="module-category-categories" class="well well-sm" style="height: 150px; overflow: auto;">
                       {% for category in categories %}

@@ -45,6 +45,10 @@
         <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-total">
           <div class="dcx-fields">
             <div class="dcx-field">
+              <label class="dcx-label" for="input-sort-order">{{ entry_sort_order }}</label>
+              <input type="text" name="report_product_viewed_sort_order" value="{{ report_product_viewed_sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control" />
+            </div>
+            <div class="dcx-field">
               <label class="dcx-label" for="input-status">{{ entry_status }}</label>
               <select name="report_product_viewed_status" id="input-status" class="form-control">
                 {% if report_product_viewed_status %}
@@ -55,10 +59,6 @@
                 <option value="0" selected="selected">{{ text_disabled }}</option>
                 {% endif %}
               </select>
-            </div>
-            <div class="dcx-field">
-              <label class="dcx-label" for="input-sort-order">{{ entry_sort_order }}</label>
-              <input type="text" name="report_product_viewed_sort_order" value="{{ report_product_viewed_sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control" />
             </div>
           </div>
         </form>
