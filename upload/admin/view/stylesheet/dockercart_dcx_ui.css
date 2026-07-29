@@ -1507,6 +1507,14 @@ div.dcx-field.required > .dcx-label:before {
 .btn-remove-attr { color: #94a3b8; font-size: 16px; text-decoration: none; padding: 4px; }
 .btn-remove-attr:hover { color: #ef4444; }
 
+@media (max-width: 767px) {
+  .dc-attr-row { flex-direction: column; }
+  .dc-attr-row__name { flex: none; width: 100%; }
+  .dc-attr-row__values { width: 100%; }
+  .dc-attr-row .btn-remove-attr { position: absolute; top: 8px; right: 8px; }
+  .dc-attr-row { position: relative; }
+}
+
 /* ── Promo cards ── */
 .dc-promo-card { position: relative; border: 1px solid var(--dc-border); border-radius: var(--dc-radius-lg); padding: 36px 18px 14px; margin-bottom: 10px; background: var(--dc-surface-alt); }
 .dc-promo-card--reward { background: transparent; padding-top: 14px; }
