@@ -28,7 +28,7 @@
       {% if error_warning %}
       <div class="row">
         <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
-          <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
+          <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
         </div>
@@ -62,10 +62,10 @@
                         <li class="active"><a href="#tab-customer" data-toggle="tab"><i data-lucide="user" width="14" height="14"></i> {{ tab_general }}</a></li>
                         {% set address_row = 1 %}
                         {% for address in addresses %}
-                        <li><a href="#tab-address{{ address_row }}" data-toggle="tab"><i data-lucide="minus-circle" width="14" height="14" onclick="$('#address a:first').tab('show'); $('#address a[href=\'#tab-address{{ address_row }}\']').parent().remove(); $('#tab-address{{ address_row }}').remove();"></i> {{ tab_address }} {{ address_row }}</a></li>
+                        <li><a href="#tab-address{{ address_row }}" data-toggle="tab"><i data-lucide="circle-minus" width="14" height="14" onclick="$('#address a:first').tab('show'); $('#address a[href=\'#tab-address{{ address_row }}\']').parent().remove(); $('#tab-address{{ address_row }}').remove();"></i> {{ tab_address }} {{ address_row }}</a></li>
                         {% set address_row = address_row + 1 %}
                         {% endfor %}
-                        <li id="address-add"><a onclick="addAddress();"><i data-lucide="plus-circle" width="14" height="14"></i> {{ button_address_add }}</a></li>
+                        <li id="address-add"><a onclick="addAddress();"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_address_add }}</a></li>
                       </ul>
                     </div>
                     <div class="col-sm-10">
@@ -725,7 +725,7 @@
                   </div>
                   <div class="dcx-panel" style="margin-bottom:16px;">
                     <div class="dcx-panel-head">
-                      <div class="dcx-panel-head__icon"><i data-lucide="plus-circle" width="18" height="18"></i></div>
+                      <div class="dcx-panel-head__icon"><i data-lucide="circle-plus" width="18" height="18"></i></div>
                       <div><div class="dcx-panel-title">{{ text_history_add }}</div></div>
                     </div>
                     <div class="dcx-panel-body">
@@ -736,7 +736,7 @@
                         </div>
                       </div>
                       <div class="text-right">
-                        <button id="button-history" data-loading-text="{{ text_loading }}" class="btn btn-primary"><i data-lucide="plus-circle" width="14" height="14"></i> {{ button_history_add }}</button>
+                        <button id="button-history" data-loading-text="{{ text_loading }}" class="btn btn-primary"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_history_add }}</button>
                       </div>
                     </div>
                   </div>
@@ -753,7 +753,7 @@
                   </div>
                   <div class="dcx-panel" style="margin-bottom:16px;">
                     <div class="dcx-panel-head">
-                      <div class="dcx-panel-head__icon"><i data-lucide="plus-circle" width="18" height="18"></i></div>
+                      <div class="dcx-panel-head__icon"><i data-lucide="circle-plus" width="18" height="18"></i></div>
                       <div><div class="dcx-panel-title">{{ text_transaction_add }}</div></div>
                     </div>
                     <div class="dcx-panel-body">
@@ -768,7 +768,7 @@
                         </div>
                       </div>
                       <div class="text-right">
-                        <button type="button" id="button-transaction" data-loading-text="{{ text_loading }}" class="btn btn-primary"><i data-lucide="plus-circle" width="14" height="14"></i> {{ button_transaction_add }}</button>
+                        <button type="button" id="button-transaction" data-loading-text="{{ text_loading }}" class="btn btn-primary"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_transaction_add }}</button>
                       </div>
                     </div>
                   </div>
@@ -785,7 +785,7 @@
                   </div>
                   <div class="dcx-panel" style="margin-bottom:16px;">
                     <div class="dcx-panel-head">
-                      <div class="dcx-panel-head__icon"><i data-lucide="plus-circle" width="18" height="18"></i></div>
+                      <div class="dcx-panel-head__icon"><i data-lucide="circle-plus" width="18" height="18"></i></div>
                       <div><div class="dcx-panel-title">{{ text_reward_add }}</div></div>
                     </div>
                     <div class="dcx-panel-body">
@@ -802,7 +802,7 @@
                         </div>
                       </div>
                       <div class="text-right">
-                        <button type="button" id="button-reward" data-loading-text="{{ text_loading }}" class="btn btn-primary"><i data-lucide="plus-circle" width="14" height="14"></i> {{ button_reward_add }}</button>
+                        <button type="button" id="button-reward" data-loading-text="{{ text_loading }}" class="btn btn-primary"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_reward_add }}</button>
                       </div>
                     </div>
                   </div>
@@ -1006,7 +1006,7 @@
     $('select[name=\'customer_group_id\']').trigger('change');
     $('select[name=\'address[' + address_row + '][country_id]\']').trigger('change');
 
-    $('#address-add').before('<li><a href="#tab-address' + address_row + '" data-toggle="tab"><i data-lucide="minus-circle" width="14" height="14" onclick="$(\'#address a:first\').tab(\'show\'); $(\'a[href=\\\'#tab-address' + address_row + '\\\']\').parent().remove(); $(\'#tab-address' + address_row + '\').remove();"></i> {{ tab_address|e('js') }} ' + address_row + '</a></li>');
+    $('#address-add').before('<li><a href="#tab-address' + address_row + '" data-toggle="tab"><i data-lucide="circle-minus" width="14" height="14" onclick="$(\'#address a:first\').tab(\'show\'); $(\'a[href=\\\'#tab-address' + address_row + '\\\']\').parent().remove(); $(\'#tab-address' + address_row + '\').remove();"></i> {{ tab_address|e('js') }} ' + address_row + '</a></li>');
     lucide.createIcons();
 
     $('#address a[href=\'#tab-address' + address_row + '\']').tab('show');
@@ -1086,11 +1086,11 @@
       success: function(json) {
         $('.alert-dismissible').remove();
         if (json['error']) {
-          $('#tab-history').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+          $('#tab-history').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
           lucide.createIcons();
         }
         if (json['success']) {
-          $('#tab-history').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> ' + json['success'] + '</div>');
+          $('#tab-history').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> ' + json['success'] + '</div>');
           lucide.createIcons();
           $('#history').load('index.php?route=customer/customer/history&user_token={{ user_token }}&customer_id={{ customer_id }}');
           $('#tab-history textarea[name=\'comment\']').val('');
@@ -1118,11 +1118,11 @@
       success: function(json) {
         $('.alert-dismissible').remove();
         if (json['error']) {
-          $('#tab-transaction').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+          $('#tab-transaction').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
           lucide.createIcons();
         }
         if (json['success']) {
-          $('#tab-transaction').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> ' + json['success'] + '</div>');
+          $('#tab-transaction').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> ' + json['success'] + '</div>');
           lucide.createIcons();
           $('#transaction').load('index.php?route=customer/customer/transaction&user_token={{ user_token }}&customer_id={{ customer_id }}');
           $('#tab-transaction input[name=\'amount\']').val('');
@@ -1151,11 +1151,11 @@
       success: function(json) {
         $('.alert-dismissible').remove();
         if (json['error']) {
-          $('#tab-reward').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+          $('#tab-reward').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
           lucide.createIcons();
         }
         if (json['success']) {
-          $('#tab-reward').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> ' + json['success'] + '</div>');
+          $('#tab-reward').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> ' + json['success'] + '</div>');
           lucide.createIcons();
           $('#reward').load('index.php?route=customer/customer/reward&user_token={{ user_token }}&customer_id={{ customer_id }}');
           $('#tab-reward input[name=\'points\']').val('');

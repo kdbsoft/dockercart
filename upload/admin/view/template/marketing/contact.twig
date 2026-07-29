@@ -125,7 +125,7 @@ $('input[name=\'customers\']').autocomplete({
     $('input[name=\'customers\']').val('');
     $('#customer' + item['value']).remove();
     var $well = $('#input-customer').parent().find('.dcx-picker__well');
-    $well.show().append('<div class="dcx-picker__well-item" id="customer' + item['value'] + '"><i data-lucide="minus-circle" width="14" height="14" class="dcx-picker__well-remove"></i> <span class="dcx-picker__well-label">' + item['label'] + '</span><input type="hidden" name="customer[]" value="' + item['value'] + '" /></div>');
+    $well.show().append('<div class="dcx-picker__well-item" id="customer' + item['value'] + '"><i data-lucide="circle-minus" width="14" height="14" class="dcx-picker__well-remove"></i> <span class="dcx-picker__well-label">' + item['label'] + '</span><input type="hidden" name="customer[]" value="' + item['value'] + '" /></div>');
     lucide.createIcons();
   }
 });
@@ -151,7 +151,7 @@ $('input[name=\'affiliates\']').autocomplete({
     $('input[name=\'affiliates\']').val('');
     $('#affiliate' + item['value']).remove();
     var $well = $('#input-affiliate').parent().find('.dcx-picker__well');
-    $well.show().append('<div class="dcx-picker__well-item" id="affiliate' + item['value'] + '"><i data-lucide="minus-circle" width="14" height="14" class="dcx-picker__well-remove"></i> <span class="dcx-picker__well-label">' + item['label'] + '</span><input type="hidden" name="affiliate[]" value="' + item['value'] + '" /></div>');
+    $well.show().append('<div class="dcx-picker__well-item" id="affiliate' + item['value'] + '"><i data-lucide="circle-minus" width="14" height="14" class="dcx-picker__well-remove"></i> <span class="dcx-picker__well-label">' + item['label'] + '</span><input type="hidden" name="affiliate[]" value="' + item['value'] + '" /></div>');
     lucide.createIcons();
   }
 });
@@ -177,7 +177,7 @@ $('input[name=\'products\']').autocomplete({
     $('input[name=\'products\']').val('');
     $('#product' + item['value']).remove();
     var $well = $('#input-product').parent().find('.dcx-picker__well');
-    $well.show().append('<div class="dcx-picker__well-item" id="product' + item['value'] + '"><i data-lucide="minus-circle" width="14" height="14" class="dcx-picker__well-remove"></i> <span class="dcx-picker__well-label">' + item['label'] + '</span><input type="hidden" name="product[]" value="' + item['value'] + '" /></div>');
+    $well.show().append('<div class="dcx-picker__well-item" id="product' + item['value'] + '"><i data-lucide="circle-minus" width="14" height="14" class="dcx-picker__well-remove"></i> <span class="dcx-picker__well-label">' + item['label'] + '</span><input type="hidden" name="product[]" value="' + item['value'] + '" /></div>');
     lucide.createIcons();
   }
 });
@@ -203,11 +203,11 @@ function send(url) {
 
       if (json['error']) {
         if (json['error']['warning']) {
-          $('#content > .container-fluid').first().prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> ' + json['error']['warning'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+          $('#content > .container-fluid').first().prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> ' + json['error']['warning'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
           lucide.createIcons();
         }
         if (json['error']['email']) {
-          $('#content > .container-fluid').first().prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> ' + json['error']['email'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+          $('#content > .container-fluid').first().prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> ' + json['error']['email'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
           lucide.createIcons();
         }
         if (json['error']['subject']) {
@@ -219,7 +219,7 @@ function send(url) {
       }
 
       if (json['success']) {
-        $('#content > .container-fluid').first().prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> ' + json['success'] + '</div>');
+        $('#content > .container-fluid').first().prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> ' + json['success'] + '</div>');
         lucide.createIcons();
       }
 

@@ -19,7 +19,7 @@
       {% if error_warning %}
       <div class="row">
         <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
-          <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
+          <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
         </div>
@@ -28,7 +28,7 @@
       {% if success %}
       <div class="row">
         <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
-          <div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> {{ success }}
+          <div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> {{ success }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
         </div>
@@ -52,9 +52,9 @@
               <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-store">
                 <ul class="dcx-pills">
                   <li class="active"><a href="#tab-general" data-toggle="tab"><i data-lucide="file-text" width="14" height="14"></i> {{ tab_general }}</a></li>
-                  <li><a href="#tab-store" data-toggle="tab"><i data-lucide="home" width="14" height="14"></i> {{ tab_store }}</a></li>
+                  <li><a href="#tab-store" data-toggle="tab"><i data-lucide="house" width="14" height="14"></i> {{ tab_store }}</a></li>
                   <li><a href="#tab-local" data-toggle="tab"><i data-lucide="globe" width="14" height="14"></i> {{ tab_local }}</a></li>
-                  <li><a href="#tab-option" data-toggle="tab"><i data-lucide="sliders" width="14" height="14"></i> {{ tab_option }}</a></li>
+                  <li><a href="#tab-option" data-toggle="tab"><i data-lucide="sliders-vertical" width="14" height="14"></i> {{ tab_option }}</a></li>
                   <li><a href="#tab-image" data-toggle="tab"><i data-lucide="image" width="14" height="14"></i> {{ tab_image }}</a></li>
                   <li><a href="#tab-server" data-toggle="tab"><i data-lucide="server" width="14" height="14"></i> {{ tab_server }}</a></li>
                 </ul>
@@ -164,7 +164,7 @@
                           <label class="dcx-checkbox-label">
                             <input type="hidden" name="config_contact_form_status" value="0" />
                             <input type="checkbox" name="config_contact_form_status" value="1"{% if config_contact_form_status %} checked="checked"{% endif %}> {{ entry_contact_form_status }}
-                            <span data-toggle="tooltip" title="{{ help_contact_form_status }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+                            <span data-toggle="tooltip" title="{{ help_contact_form_status }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
                           </label>
                         </div>
                       </div>
@@ -357,7 +357,7 @@
                           <label class="dcx-checkbox-label">
                             <input type="hidden" name="config_customer_price" value="0" />
                             <input type="checkbox" name="config_customer_price" value="1"{% if config_customer_price %} checked="checked"{% endif %}> {{ entry_customer_price }}
-                            <span data-toggle="tooltip" title="{{ help_customer_price }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+                            <span data-toggle="tooltip" title="{{ help_customer_price }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
                           </label>
                         </div>
                       </div>
@@ -369,12 +369,12 @@
                           <label class="dcx-checkbox-label">
                             <input type="hidden" name="config_cart_weight" value="0" />
                             <input type="checkbox" name="config_cart_weight" value="1"{% if config_cart_weight %} checked="checked"{% endif %}> {{ entry_cart_weight }}
-                            <span data-toggle="tooltip" title="{{ help_cart_weight }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+                            <span data-toggle="tooltip" title="{{ help_cart_weight }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
                           </label>
                           <label class="dcx-checkbox-label">
                             <input type="hidden" name="config_checkout_guest" value="0" />
                             <input type="checkbox" name="config_checkout_guest" value="1"{% if config_checkout_guest %} checked="checked"{% endif %}> {{ entry_checkout_guest }}
-                            <span data-toggle="tooltip" title="{{ help_checkout_guest }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+                            <span data-toggle="tooltip" title="{{ help_checkout_guest }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
                           </label>
                         </div>
                         <div class="dcx-fields dcx-fields--row">
@@ -413,12 +413,12 @@
                           <label class="dcx-checkbox-label">
                             <input type="hidden" name="config_stock_display" value="0" />
                             <input type="checkbox" name="config_stock_display" value="1"{% if config_stock_display %} checked="checked"{% endif %}> {{ entry_stock_display }}
-                            <span data-toggle="tooltip" title="{{ help_stock_display }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+                            <span data-toggle="tooltip" title="{{ help_stock_display }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
                           </label>
                           <label class="dcx-checkbox-label">
                             <input type="hidden" name="config_stock_checkout" value="0" />
                             <input type="checkbox" name="config_stock_checkout" value="1"{% if config_stock_checkout %} checked="checked"{% endif %}> {{ entry_stock_checkout }}
-                            <span data-toggle="tooltip" title="{{ help_stock_checkout }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+                            <span data-toggle="tooltip" title="{{ help_stock_checkout }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
                           </label>
                         </div>
                       </div>
@@ -450,7 +450,7 @@
                           <label class="dcx-checkbox-label">
                             <input type="hidden" name="config_secure" value="0" />
                             <input type="checkbox" name="config_secure" value="1"{% if config_secure %} checked="checked"{% endif %}> {{ entry_secure }}
-                            <span data-toggle="tooltip" title="{{ help_secure }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+                            <span data-toggle="tooltip" title="{{ help_secure }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
                           </label>
                         </div>
                       </div>

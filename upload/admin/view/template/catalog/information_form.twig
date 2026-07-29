@@ -28,7 +28,7 @@
       {% if error_warning %}
       <div class="row">
         <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
-          <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
+          <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
         </div>
@@ -118,15 +118,15 @@
               <div class="dcx-checkbox-group">
                 <label class="dcx-checkbox-label">
                   <input type="checkbox" name="top" value="1" {% if top %}checked="checked"{% endif %} id="input-top" /> {{ entry_top }}
-                  <span data-toggle="tooltip" title="{{ help_top }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+                  <span data-toggle="tooltip" title="{{ help_top }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
                 </label>
                 <label class="dcx-checkbox-label">
                   <input type="checkbox" name="bottom" value="1" {% if bottom %}checked="checked"{% endif %} id="input-bottom" /> {{ entry_bottom }}
-                  <span data-toggle="tooltip" title="{{ help_bottom }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+                  <span data-toggle="tooltip" title="{{ help_bottom }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
                 </label>
                 <label class="dcx-checkbox-label">
                   <input type="checkbox" name="full_width" value="1" {% if full_width %}checked="checked"{% endif %} id="input-full-width" /> {{ entry_full_width }}
-                  <span data-toggle="tooltip" title="{{ help_full_width }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+                  <span data-toggle="tooltip" title="{{ help_full_width }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
                 </label>
               </div>
             </div>
@@ -181,7 +181,7 @@
         </div>
         <div class="dcx-sidebar-card">
           <div class="dcx-sidebar-card__header">
-            <div class="dcx-sidebar-card__header-icon"><i data-lucide="layout" width="16" height="16"></i></div>
+            <div class="dcx-sidebar-card__header-icon"><i data-lucide="columns-2" width="16" height="16"></i></div>
             <h3 class="dcx-sidebar-card__title">{{ text_design_card }}</h3>
           </div>
           <div class="dcx-sidebar-card__body">

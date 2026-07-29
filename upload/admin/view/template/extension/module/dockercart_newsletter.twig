@@ -19,14 +19,17 @@
             </span>
           </a>
         </div>
-        <div class="col-sm-12 col-lg-3 col-xl-3" style="text-align:right;">
-          <button type="submit" form="form-module" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary btn--icon"><i data-lucide="save" width="16" height="16"></i></button>
-          <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_back }}" class="btn btn-default btn--icon"><i data-lucide="x" width="16" height="16"></i></a>
+        <div class="col-lg-4 col-xl-3">
+          <div class="pull-right">
+            <button type="submit" form="form-module" class="btn btn-primary btn--icon"><i data-lucide="save" width="16" height="16"></i></button>
+            <a href="{{ cancel }}" class="btn btn-default btn--icon"><i data-lucide="x" width="16" height="16"></i></a>
+          </div>
         </div>
+      </div>
       {% if error_warning %}
       <div class="row">
         <div class="col-lg-offset-2 col-lg-7 col-xl-offset-1 col-xl-7">
-          <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
+          <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
         </div>
@@ -35,7 +38,7 @@
       {% if warning %}
       <div class="row">
         <div class="col-lg-offset-2 col-lg-7 col-xl-offset-1 col-xl-7">
-          <div class="alert alert-warning alert-dismissible"><i data-lucide="alert-triangle" width="16" height="16"></i> {{ warning }}
+          <div class="alert alert-warning alert-dismissible"><i data-lucide="triangle-alert" width="16" height="16"></i> {{ warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
         </div>
@@ -44,7 +47,7 @@
       {% if success %}
       <div class="row">
         <div class="col-lg-offset-2 col-lg-7 col-xl-offset-1 col-xl-7">
-          <div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> {{ success }}
+          <div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> {{ success }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
         </div>
@@ -134,7 +137,7 @@
           </div>
         </div>
       </div>
-      <div class="col-md-12 col-sm-12 col-lg-offset-0 col-lg-3 col-xl-offset-0 col-xl-3">
+      <div class="col-md-12 col-sm-12 col-lg-4 col-xl-3">
         <div class="dcx-shell">
           <div class="dcx-sidebar-card">
             <div class="dcx-sidebar-card__header">
@@ -328,11 +331,11 @@ $('#button-import').on('click', function() {
     success: function(json) {
       $('.alert-dismissible').remove();
       if (json.error) {
-        $('#content > .container-fluid').first().prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> ' + json.error + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+        $('#content > .container-fluid').first().prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> ' + json.error + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
         lucide.createIcons();
       }
       if (json.success) {
-        $('#content > .container-fluid').first().prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> ' + json.success + '</div>');
+        $('#content > .container-fluid').first().prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> ' + json.success + '</div>');
         lucide.createIcons();
         $('#import-modal').modal('hide');
         setTimeout(function() { location.reload(); }, 900);

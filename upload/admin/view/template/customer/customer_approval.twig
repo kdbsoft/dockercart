@@ -13,12 +13,12 @@
   </div>
   <div class="container-fluid">
     {% if error_warning %}
-    <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
+    <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
     {% if success %}
-    <div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> {{ success }}
+    <div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> {{ success }}
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
@@ -70,7 +70,7 @@
             </div>
           </div>
           <div class="filter-actions">
-            <button type="button" id="button-filter" class="btn btn-default"><i data-lucide="filter" width="14" height="14"></i> {{ button_filter }}</button>
+            <button type="button" id="button-filter" class="btn btn-default"><i data-lucide="funnel" width="14" height="14"></i> {{ button_filter }}</button>
           </div>
         </div>
       </div>
@@ -105,14 +105,14 @@ $('#customer-approval').on('click', '.btn-success, .btn-danger', function(e) {
 			$('.alert-dismissible').remove();
 
 			if (json['error']) {
-				$('#customer-approval').before('<div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+				$('#customer-approval').before('<div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
 				lucide.createIcons();
 			}
 
 			if (json['success']) {
 				$('#customer-approval').load('index.php?route=customer/customer_approval/customer_approval&user_token={{ user_token }}');
 
-				$('#customer-approval').before('<div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+				$('#customer-approval').before('<div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
 				lucide.createIcons();
 			}
 		},

@@ -31,7 +31,7 @@
       {% if error_warning %}
       <div class="row">
         <div class="col-lg-offset-2 col-lg-7 col-xl-offset-1 col-xl-7">
-          <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
+          <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
         </div>
@@ -96,7 +96,7 @@
                         <input type="text" id="input-tag{{ language.language_id }}" class="form-control dc-tag-input__field" placeholder="{{ entry_tags }}" />
                         <div class="dc-tag-input__tags" id="tag-chips{{ language.language_id }}"></div>
                         <input type="hidden" name="post_description[{{ language.language_id }}][tags]" value="{{ post_description[language.language_id] ? post_description[language.language_id].tags }}" />
-                        <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_tags }}"><i data-lucide="help-circle" width="16" height="16" class="text-muted"></i></span>
+                        <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_tags }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span>
                       </div>
                     </div>
                   </div>
@@ -236,13 +236,13 @@
             </div>
             <div class="dcx-sidebar-card__field">
               <label class="dcx-sidebar-card__label" for="input-product">{{ entry_related_product }}
-                <span data-toggle="tooltip" title="{{ help_related_product }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+                <span data-toggle="tooltip" title="{{ help_related_product }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
               </label>
               <input type="text" name="product" value="" placeholder="{{ entry_related_product }}" id="input-product" class="form-control" />
               <div id="product-related" class="dcx-picker__well" style="height: 150px; overflow: auto; margin-top: 6px;">
                 {% for product_recommendation in product_recommendations %}
                 <div class="dcx-picker__well-item" data-id="{{ product_recommendation.product_id }}">
-                  <i data-lucide="minus-circle" width="14" height="14" class="dcx-picker__well-remove"></i>
+                  <i data-lucide="circle-minus" width="14" height="14" class="dcx-picker__well-remove"></i>
                   <span class="dcx-picker__well-label">{{ product_recommendation.name }}</span>
                   <input type="hidden" name="post_product[]" value="{{ product_recommendation.product_id }}" />
                 </div>
@@ -251,7 +251,7 @@
             </div>
             <div class="dcx-sidebar-card__field">
               <label class="dcx-sidebar-card__label">{{ entry_related_category }}
-                <span data-toggle="tooltip" title="{{ help_related_category }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+                <span data-toggle="tooltip" title="{{ help_related_category }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
               </label>
               <button type="button" class="btn btn-default btn-sm btn-block" id="btn-open-related-category-modal" style="text-align:left;">
                 <i data-lucide="folder-tree" width="14" height="14" style="margin-right:6px;"></i>
@@ -260,7 +260,7 @@
               <div id="post-product-category" class="dcx-tree-select__well" style="height: 150px; overflow: auto; margin-top: 6px;">
                 {% for product_category_recommendation in product_category_recommendations %}
                 <div class="dcx-tree-select__well-item" data-id="{{ product_category_recommendation.category_id }}">
-                  <i data-lucide="minus-circle" width="14" height="14" class="dcx-tree-select__well-remove"></i>
+                  <i data-lucide="circle-minus" width="14" height="14" class="dcx-tree-select__well-remove"></i>
                   <span class="dcx-tree-select__well-label">{{ product_category_recommendation.name }}</span>
                   <input type="hidden" name="post_product_category[]" value="{{ product_category_recommendation.category_id }}" />
                 </div>
@@ -269,13 +269,13 @@
             </div>
             <div class="dcx-sidebar-card__field">
               <label class="dcx-sidebar-card__label" for="input-manufacturer">{{ entry_related_manufacturer }}
-                <span data-toggle="tooltip" title="{{ help_related_manufacturer }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+                <span data-toggle="tooltip" title="{{ help_related_manufacturer }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
               </label>
               <input type="text" name="manufacturer" value="" placeholder="{{ entry_related_manufacturer }}" id="input-manufacturer" class="form-control" />
               <div id="manufacturer-related" class="dcx-picker__well" style="height: 150px; overflow: auto; margin-top: 6px;">
                 {% for manufacturer_recommendation in manufacturer_recommendations %}
                 <div class="dcx-picker__well-item" data-id="{{ manufacturer_recommendation.manufacturer_id }}">
-                  <i data-lucide="minus-circle" width="14" height="14" class="dcx-picker__well-remove"></i>
+                  <i data-lucide="circle-minus" width="14" height="14" class="dcx-picker__well-remove"></i>
                   <span class="dcx-picker__well-label">{{ manufacturer_recommendation.name }}</span>
                   <input type="hidden" name="post_manufacturer[]" value="{{ manufacturer_recommendation.manufacturer_id }}" />
                 </div>
@@ -450,7 +450,7 @@ $('input[name=\'product\']').autocomplete({
 	'select': function(item) {
 		$('input[name=\'product\']').val('');
 		if ($('#product-related .dcx-picker__well-item[data-id="' + item['value'] + '"]').length) return;
-		$('#product-related').append('<div class="dcx-picker__well-item" data-id="' + item['value'] + '"><i data-lucide="minus-circle" width="14" height="14" class="dcx-picker__well-remove"></i> <span class="dcx-picker__well-label">' + item['label'] + '</span><input type="hidden" name="post_product[]" value="' + item['value'] + '" /></div>');
+		$('#product-related').append('<div class="dcx-picker__well-item" data-id="' + item['value'] + '"><i data-lucide="circle-minus" width="14" height="14" class="dcx-picker__well-remove"></i> <span class="dcx-picker__well-label">' + item['label'] + '</span><input type="hidden" name="post_product[]" value="' + item['value'] + '" /></div>');
 		$('#product-related').toggle(true);
 		lucide.createIcons();
 	}
@@ -474,7 +474,7 @@ $('input[name=\'manufacturer\']').autocomplete({
 	'select': function(item) {
 		$('input[name=\'manufacturer\']').val('');
 		if ($('#manufacturer-related .dcx-picker__well-item[data-id="' + item['value'] + '"]').length) return;
-		$('#manufacturer-related').append('<div class="dcx-picker__well-item" data-id="' + item['value'] + '"><i data-lucide="minus-circle" width="14" height="14" class="dcx-picker__well-remove"></i> <span class="dcx-picker__well-label">' + item['label'] + '</span><input type="hidden" name="post_manufacturer[]" value="' + item['value'] + '" /></div>');
+		$('#manufacturer-related').append('<div class="dcx-picker__well-item" data-id="' + item['value'] + '"><i data-lucide="circle-minus" width="14" height="14" class="dcx-picker__well-remove"></i> <span class="dcx-picker__well-label">' + item['label'] + '</span><input type="hidden" name="post_manufacturer[]" value="' + item['value'] + '" /></div>');
 		$('#manufacturer-related').toggle(true);
 		lucide.createIcons();
 	}
@@ -522,7 +522,7 @@ $('#related-category-tree-confirm').on('click', function() {
 			if (String(allItems[j].category_id) === String(ids[i])) {
 				var name = allItems[j].path || allItems[j].name;
 				$well.append('<div class="dcx-tree-select__well-item" data-id="' + ids[i] + '">'
-					+ '<i data-lucide="minus-circle" width="14" height="14" class="dcx-tree-select__well-remove"></i> '
+					+ '<i data-lucide="circle-minus" width="14" height="14" class="dcx-tree-select__well-remove"></i> '
 					+ '<span class="dcx-tree-select__well-label">' + name + '</span>'
 					+ '<input type="hidden" name="post_product_category[]" value="' + ids[i] + '"/></div>');
 				break;

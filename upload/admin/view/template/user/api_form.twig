@@ -19,7 +19,7 @@
       {% if error_warning %}
       <div class="row">
         <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
-          <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
+          <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
         </div>
@@ -44,7 +44,7 @@
               <ul class="nav nav-tabs">
                 <li class="active"><a href="#tab-general" data-toggle="tab"><i data-lucide="file-text" width="14" height="14"></i> {{ tab_general }}</a></li>
                 <li><a href="#tab-ip" data-toggle="tab"><i data-lucide="shield" width="14" height="14"></i> {{ tab_ip }}</a></li>
-                <li><a href="#tab-session" data-toggle="tab"><i data-lucide="desktop" width="14" height="14"></i> {{ tab_session }}</a></li>
+                <li><a href="#tab-session" data-toggle="tab"><i data-lucide="monitor" width="14" height="14"></i> {{ tab_session }}</a></li>
               </ul>
               <div class="tab-content">
                 <div class="tab-pane active" id="tab-general">
@@ -92,12 +92,12 @@
                       <div class="dc-api-ip-item__field">
                         <input type="text" name="api_ip[]" value="{{ api_ip.ip }}" placeholder="{{ entry_ip }}" class="form-control" />
                       </div>
-                      <button type="button" onclick="$('#ip-row{{ ip_row }}').remove()" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger btn--icon"><i data-lucide="minus-circle" width="16" height="16"></i></button>
+                      <button type="button" onclick="$('#ip-row{{ ip_row }}').remove()" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger btn--icon"><i data-lucide="circle-minus" width="16" height="16"></i></button>
                     </div>
                     {% set ip_row = ip_row + 1 %}
                     {% endfor %}
                   </div>
-                  <button type="button" onclick="addIp()" class="btn btn-primary btn-sm" style="margin-top:12px;"><i data-lucide="plus-circle" width="14" height="14"></i> {{ button_ip_add }}</button>
+                  <button type="button" onclick="addIp()" class="btn btn-primary btn-sm" style="margin-top:12px;"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_ip_add }}</button>
                 </div>
                 <div class="tab-pane" id="tab-session">
                   {% if api_sessions %}
@@ -112,7 +112,7 @@
                           <span><i data-lucide="clock" width="12" height="12"></i> {{ api_session.date_modified }}</span>
                         </div>
                       </div>
-                      <button type="button" value="{{ api_session.api_session_id }}" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger btn--icon dc-api-session-item__remove"><i data-lucide="minus-circle" width="16" height="16"></i></button>
+                      <button type="button" value="{{ api_session.api_session_id }}" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger btn--icon dc-api-session-item__remove"><i data-lucide="circle-minus" width="16" height="16"></i></button>
                     </div>
                     {% endfor %}
                   </div>
@@ -152,7 +152,7 @@ function addIp() {
 	html += '  <div class="dc-api-ip-item__field">';
 	html += '    <input type="text" name="api_ip[]" value="" placeholder="{{ entry_ip }}" class="form-control" />';
 	html += '  </div>';
-	html += '  <button type="button" onclick="$(\'#ip-row' + ip_row + '\').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger btn--icon"><i data-lucide="minus-circle" width="16" height="16"></i></button>';
+	html += '  <button type="button" onclick="$(\'#ip-row' + ip_row + '\').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger btn--icon"><i data-lucide="circle-minus" width="16" height="16"></i></button>';
 	html += '</div>';
 
 	$('#ip-list').append(html);
@@ -182,12 +182,12 @@ $('#tab-session').on('click', '.dc-api-session-item__remove', function(e) {
 			$('.alert-dismissible').remove();
 
 			if (json['error']) {
-				$('#tab-session').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+				$('#tab-session').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
 				lucide.createIcons();
 			}
 
 			if (json['success']) {
-				$('#tab-session').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+				$('#tab-session').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
 				lucide.createIcons();
 
 				$(node).closest('.dc-api-session-item').remove();

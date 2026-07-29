@@ -17,12 +17,12 @@
   </div>
   <div class="container-fluid">
     {% if error_warning %}
-    <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
+    <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
     {% if success %}
-    <div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> {{ success }}
+    <div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> {{ success }}
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
@@ -61,7 +61,7 @@
             </div>
           </div>
           <div class="filter-actions">
-            <button type="button" id="button-filter" class="btn btn-default"><i data-lucide="filter" width="14" height="14"></i> {{ button_filter }}</button>
+            <button type="button" id="button-filter" class="btn btn-default"><i data-lucide="funnel" width="14" height="14"></i> {{ button_filter }}</button>
           </div>
         </div>
       </div>

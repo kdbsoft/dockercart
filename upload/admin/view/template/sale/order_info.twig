@@ -144,7 +144,7 @@
             </div>
 
             <div class="text-right" style="padding-top:16px;border-top:1px solid #e5e7eb;margin-top:4px">
-              <button type="button" id="button-inline-save-items" data-loading-text="{{ text_loading }}" class="btn btn-success"><i data-lucide="check-circle" width="14" height="14"></i> {{ button_save }}</button>
+              <button type="button" id="button-inline-save-items" data-loading-text="{{ text_loading }}" class="btn btn-success"><i data-lucide="circle-check" width="14" height="14"></i> {{ button_save }}</button>
             </div>
           </div>
         </div>
@@ -239,12 +239,12 @@
                 <div class="dcx-sidebar-card__actions">
                   {% if customer and reward %}
                     {% if not reward_total %}
-                    <button id="button-reward-add" data-loading-text="{{ text_loading }}" title="{{ button_reward_add }}" class="btn btn-success btn-xs btn--icon"><i data-lucide="plus-circle" width="12" height="12"></i></button>
+                    <button id="button-reward-add" data-loading-text="{{ text_loading }}" title="{{ button_reward_add }}" class="btn btn-success btn-xs btn--icon"><i data-lucide="circle-plus" width="12" height="12"></i></button>
                     {% else %}
-                    <button id="button-reward-remove" data-loading-text="{{ text_loading }}" title="{{ button_reward_remove }}" class="btn btn-danger btn-xs btn--icon"><i data-lucide="minus-circle" width="12" height="12"></i></button>
+                    <button id="button-reward-remove" data-loading-text="{{ text_loading }}" title="{{ button_reward_remove }}" class="btn btn-danger btn-xs btn--icon"><i data-lucide="circle-minus" width="12" height="12"></i></button>
                     {% endif %}
                   {% else %}
-                  <button disabled="disabled" class="btn btn-success btn-xs btn--icon"><i data-lucide="plus-circle" width="12" height="12"></i></button>
+                  <button disabled="disabled" class="btn btn-success btn-xs btn--icon"><i data-lucide="circle-plus" width="12" height="12"></i></button>
                   {% endif %}
                 </div>
               </div>
@@ -254,12 +254,12 @@
                 <div class="dcx-sidebar-card__actions">
                   {% if affiliate %}
                     {% if not commission_total %}
-                    <button id="button-commission-add" data-loading-text="{{ text_loading }}" title="{{ button_commission_add }}" class="btn btn-success btn-xs btn--icon"><i data-lucide="plus-circle" width="12" height="12"></i></button>
+                    <button id="button-commission-add" data-loading-text="{{ text_loading }}" title="{{ button_commission_add }}" class="btn btn-success btn-xs btn--icon"><i data-lucide="circle-plus" width="12" height="12"></i></button>
                     {% else %}
-                    <button id="button-commission-remove" data-loading-text="{{ text_loading }}" title="{{ button_commission_remove }}" class="btn btn-danger btn-xs btn--icon"><i data-lucide="minus-circle" width="12" height="12"></i></button>
+                    <button id="button-commission-remove" data-loading-text="{{ text_loading }}" title="{{ button_commission_remove }}" class="btn btn-danger btn-xs btn--icon"><i data-lucide="circle-minus" width="12" height="12"></i></button>
                     {% endif %}
                   {% else %}
-                  <button disabled="disabled" class="btn btn-success btn-xs btn--icon"><i data-lucide="plus-circle" width="12" height="12"></i></button>
+                  <button disabled="disabled" class="btn btn-success btn-xs btn--icon"><i data-lucide="circle-plus" width="12" height="12"></i></button>
                   {% endif %}
                 </div>
               </div>
@@ -280,7 +280,7 @@
       <div class="panel-body">
         <ul class="nav nav-tabs">
           <li class="active"><a href="#tab-history" data-toggle="tab"><i data-lucide="clock" width="14" height="14"></i> {{ tab_history }}</a></li>
-          <li><a href="#tab-additional" data-toggle="tab"><i data-lucide="plus-circle" width="14" height="14"></i> {{ tab_additional }}</a></li>
+          <li><a href="#tab-additional" data-toggle="tab"><i data-lucide="circle-plus" width="14" height="14"></i> {{ tab_additional }}</a></li>
           {% for tab in tabs %}
             <li><a href="#tab-{{ tab.code }}" data-toggle="tab">{{ tab.title }}</a></li>
           {% endfor %}
@@ -331,7 +331,7 @@
               </form>
             </fieldset>
             <div class="text-right">
-              <button id="button-history" data-loading-text="{{ text_loading }}" class="btn btn-primary"><i data-lucide="plus-circle" width="14" height="14"></i> {{ button_history_add }}</button>
+              <button id="button-history" data-loading-text="{{ text_loading }}" class="btn btn-primary"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_history_add }}</button>
             </div>
           </div>
           <div class="tab-pane" id="tab-additional"> {% if account_custom_fields %}
@@ -755,7 +755,7 @@
 
   function showInlineAlert(type, text) {
     $('.alert-dismissible').remove();
-    $('#content > .container-fluid').prepend('<div class="alert alert-' + type + ' alert-dismissible"><i data-lucide="' + (type === 'danger' ? 'alert-circle' : 'check-circle') + '" width="16" height="16"></i> ' + text + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+    $('#content > .container-fluid').prepend('<div class="alert alert-' + type + ' alert-dismissible"><i data-lucide="' + (type === 'danger' ? 'circle-alert' : 'circle-check') + '" width="16" height="16"></i> ' + text + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
   }
 
   function inlineReindexCartRows() {
@@ -894,7 +894,7 @@
         $('.alert-dismissible').remove();
 
         if (json['error']) {
-          $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+          $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
           return;
         }
 
@@ -987,7 +987,7 @@
           }
 
           $('#modal-quick-edit').modal('hide');
-          $('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+          $('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
         }
       },
       error: function(xhr, ajaxOptions, thrownError) {
@@ -1793,13 +1793,13 @@
 			  $('.alert-dismissible').remove();
 
 			  if (json['error']) {
-				  $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> ' + json['error'] + '</div>');
+				  $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> ' + json['error'] + '</div>');
 			  }
 
 			  if (json['success']) {
-				  $('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> ' + json['success'] + '</div>');
+				  $('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> ' + json['success'] + '</div>');
 
-				  $('#button-reward-add').replaceWith('<button id="button-reward-remove" data-toggle="tooltip" title="{{ button_reward_remove }}" class="btn btn-danger btn-xs"><i data-lucide="minus-circle" width="12" height="12"></i></button>');
+				  $('#button-reward-add').replaceWith('<button id="button-reward-remove" data-toggle="tooltip" title="{{ button_reward_remove }}" class="btn btn-danger btn-xs"><i data-lucide="circle-minus" width="12" height="12"></i></button>');
 			  }
 		  },
 		  error: function(xhr, ajaxOptions, thrownError) {
@@ -1823,13 +1823,13 @@
 			  $('.alert-dismissible').remove();
 
 			  if (json['error']) {
-				  $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> ' + json['error'] + '</div>');
+				  $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> ' + json['error'] + '</div>');
 			  }
 
 			  if (json['success']) {
-				  $('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> ' + json['success'] + '</div>');
+				  $('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> ' + json['success'] + '</div>');
 
-				  $('#button-reward-remove').replaceWith('<button id="button-reward-add" data-toggle="tooltip" title="{{ button_reward_add }}" class="btn btn-success btn-xs"><i data-lucide="plus-circle" width="12" height="12"></i></button>');
+				  $('#button-reward-remove').replaceWith('<button id="button-reward-add" data-toggle="tooltip" title="{{ button_reward_add }}" class="btn btn-success btn-xs"><i data-lucide="circle-plus" width="12" height="12"></i></button>');
 			  }
 		  },
 		  error: function(xhr, ajaxOptions, thrownError) {
@@ -1853,13 +1853,13 @@
 			  $('.alert-dismissible').remove();
 
 			  if (json['error']) {
-				  $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> ' + json['error'] + '</div>');
+				  $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> ' + json['error'] + '</div>');
 			  }
 
 			  if (json['success']) {
-				  $('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> ' + json['success'] + '</div>');
+				  $('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> ' + json['success'] + '</div>');
 
-				  $('#button-commission-add').replaceWith('<button id="button-commission-remove" data-toggle="tooltip" title="{{ button_commission_remove }}" class="btn btn-danger btn-xs"><i data-lucide="minus-circle" width="12" height="12"></i></button>');
+				  $('#button-commission-add').replaceWith('<button id="button-commission-remove" data-toggle="tooltip" title="{{ button_commission_remove }}" class="btn btn-danger btn-xs"><i data-lucide="circle-minus" width="12" height="12"></i></button>');
 			  }
 		  },
 		  error: function(xhr, ajaxOptions, thrownError) {
@@ -1883,13 +1883,13 @@
 			  $('.alert-dismissible').remove();
 
 			  if (json['error']) {
-				  $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> ' + json['error'] + '</div>');
+				  $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> ' + json['error'] + '</div>');
 			  }
 
 			  if (json['success']) {
-				  $('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> ' + json['success'] + '</div>');
+				  $('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> ' + json['success'] + '</div>');
 
-				  $('#button-commission-remove').replaceWith('<button id="button-commission-add" data-toggle="tooltip" title="{{ button_commission_add }}" class="btn btn-success btn-xs"><i data-lucide="plus-circle" width="12" height="12"></i></button>');
+				  $('#button-commission-remove').replaceWith('<button id="button-commission-add" data-toggle="tooltip" title="{{ button_commission_add }}" class="btn btn-success btn-xs"><i data-lucide="circle-plus" width="12" height="12"></i></button>');
 			  }
 		  },
 		  error: function(xhr, ajaxOptions, thrownError) {
@@ -1910,10 +1910,10 @@
 		  $('.alert').remove();
 		  if (json['error']) {
 			  if (json['error']['key']) {
-				  $('#content > .container-fluid').prepend('<div class="alert alert-danger"><i data-lucide="alert-circle" width="16" height="16"></i> ' + json['error']['key'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+				  $('#content > .container-fluid').prepend('<div class="alert alert-danger"><i data-lucide="circle-alert" width="16" height="16"></i> ' + json['error']['key'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
 			  }
 			  if (json['error']['ip']) {
-				  $('#content > .container-fluid').prepend('<div class="alert alert-danger"><i data-lucide="alert-circle" width="16" height="16"></i> ' + json['error']['ip'] + ' <button type="button" id="button-ip-add" data-loading-text="{{ text_loading }}" class="btn btn-danger btn-xs pull-right"><i data-lucide="plus" width="12" height="12"></i>{{ button_ip_add }}</button></div>');
+				  $('#content > .container-fluid').prepend('<div class="alert alert-danger"><i data-lucide="circle-alert" width="16" height="16"></i> ' + json['error']['ip'] + ' <button type="button" id="button-ip-add" data-loading-text="{{ text_loading }}" class="btn btn-danger btn-xs pull-right"><i data-lucide="plus" width="12" height="12"></i>{{ button_ip_add }}</button></div>');
 			  }
 		  }
 		  if (json['token']) {
@@ -1949,13 +1949,13 @@
 			  $('.alert-dismissible').remove();
 
 			  if (json['error']) {
-				  $('#history').before('<div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+				  $('#history').before('<div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
 			  }
 
 			  if (json['success']) {
 				  $('#history').load('index.php?route=sale/order/history&user_token={{ user_token }}&order_id={{ order_id }}');
 
-				  $('#history').before('<div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+				  $('#history').before('<div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
 
 				  $('textarea[name=\'comment\']').val('');
 			  }

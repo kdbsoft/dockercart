@@ -25,7 +25,7 @@
     {% if error_warning %}
     <div class="row">
       <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
-        <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
+        <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
           <button type="button" class="close" data-dismiss="alert">&times;</button>
         </div>
       </div>
@@ -34,7 +34,7 @@
     {% if success %}
     <div class="row">
       <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
-        <div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> {{ success }}
+        <div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> {{ success }}
           <button type="button" class="close" data-dismiss="alert">&times;</button>
         </div>
       </div>
@@ -59,10 +59,10 @@
 
               <ul class="dcx-pills">
                 <li class="active"><a href="#tab-general" data-toggle="tab"><i data-lucide="settings" width="14" height="14"></i> {{ tab_general }}</a></li>
-                <li><a href="#tab-blocks" data-toggle="tab"><i data-lucide="layout" width="14" height="14"></i> {{ tab_blocks }}</a></li>
+                <li><a href="#tab-blocks" data-toggle="tab"><i data-lucide="columns-2" width="14" height="14"></i> {{ tab_blocks }}</a></li>
                 <li><a href="#tab-design" data-toggle="tab"><i data-lucide="paintbrush" width="14" height="14"></i> {{ tab_design }}</a></li>
-                <li><a href="#tab-method-overrides" data-toggle="tab"><i data-lucide="edit-3" width="14" height="14"></i> {{ tab_method_overrides }}</a></li>
-                <li><a href="#tab-advanced" data-toggle="tab"><i data-lucide="sliders" width="14" height="14"></i> {{ tab_advanced }}</a></li>
+                <li><a href="#tab-method-overrides" data-toggle="tab"><i data-lucide="pen" width="14" height="14"></i> {{ tab_method_overrides }}</a></li>
+                <li><a href="#tab-advanced" data-toggle="tab"><i data-lucide="sliders-vertical" width="14" height="14"></i> {{ tab_advanced }}</a></li>
               </ul>
 
               <div class="tab-content">
@@ -96,9 +96,9 @@
                         if (!response.ok) throw new Error('Network response was not ok');
                         return response.text();
                       }).then(function() {
-                        createAlert('success', '<i data-lucide="check-circle"></i> {{ text_success|default("Settings saved") | e('js') }}');
+                        createAlert('success', '<i data-lucide="circle-check"></i> {{ text_success|default("Settings saved") | e('js') }}');
                       }).catch(function(err) {
-                        createAlert('danger', '<i data-lucide="alert-circle"></i> ' + (err.message || 'Save failed'), 'dc-apply-alert-error');
+                        createAlert('danger', '<i data-lucide="circle-alert"></i> ' + (err.message || 'Save failed'), 'dc-apply-alert-error');
                       }).finally(function() {
                         applyBtn.disabled = false;
                       });
@@ -182,7 +182,7 @@
                 <!-- BLOCKS TAB -->
                 <div class="tab-pane" id="tab-blocks">
                   <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                    <h4><i data-lucide="layout" width="16" height="16"></i> {{ text_blocks_title|default('Manage Checkout Blocks') }}</h4>
+                    <h4><i data-lucide="columns-2" width="16" height="16"></i> {{ text_blocks_title|default('Manage Checkout Blocks') }}</h4>
                     <div class="dc-blocks-container">
                       <div class="dc-blocks-header">
                         <div class="dc-block-col-name">{{ column_block_name|default('Block Name') }}</div>
@@ -464,7 +464,7 @@
                 <!-- ADVANCED TAB -->
                 <div class="tab-pane" id="tab-advanced">
                   <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                    <h4><i data-lucide="sliders" width="16" height="16"></i> {{ tab_advanced }}</h4>
+                    <h4><i data-lucide="sliders-vertical" width="16" height="16"></i> {{ tab_advanced }}</h4>
                     <div class="dcx-fields">
                       <div class="dcx-field">
                         <label class="dcx-label" for="input-cache-ttl">{{ entry_cache_ttl }}</label>
@@ -804,7 +804,7 @@ const DockercartCheckout = (() => {
         <i data-lucide="plus"></i> {{ button_add_row|default("Add Row") }}
       </button>
     </div>`;
-    content += `<h4 style="margin:0 0 12px;font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;"><i data-lucide="layout" style="width:18px;height:18px;color:var(--dc-primary);"></i> {{ text_rows_configuration|default("Rows Configuration") }}</h4>`;
+    content += `<h4 style="margin:0 0 12px;font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;"><i data-lucide="columns-2" style="width:18px;height:18px;color:var(--dc-primary);"></i> {{ text_rows_configuration|default("Rows Configuration") }}</h4>`;
     content += `<div class="dc-modal-rows-list" data-block-index="${currentBlockIndex}">`;
 
     if (currentBlockRows && currentBlockRows.length > 0) {

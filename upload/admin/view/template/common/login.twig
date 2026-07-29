@@ -22,14 +22,14 @@
 
 		{% if success %}
 		<div class="alert alert-success">
-			<i data-lucide="check-circle-2"></i>
+			<i data-lucide="circle-check-big"></i>
 			<span>{{ success }}</span>
 		</div>
 		{% endif %}
 
 		{% if error_warning %}
 		<div class="alert alert-danger">
-			<i data-lucide="alert-circle"></i>
+			<i data-lucide="circle-alert"></i>
 			<span>{{ error_warning }}</span>
 		</div>
 		{% endif %}
@@ -42,7 +42,7 @@
 					<option value="{{ language.href }}" {% if language.code == language_code %}selected{% endif %}>{{ language.name }}</option>
 					{% endfor %}
 				</select>
-				<i data-lucide="globe-2" class="input-icon"></i>
+				<i data-lucide="globe" class="input-icon"></i>
 			</div>
 		</div>
 

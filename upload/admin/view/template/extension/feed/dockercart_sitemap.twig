@@ -25,7 +25,7 @@
       {% if error_warning %}
       <div class="row">
         <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-1 col-xl-7">
-          <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
+          <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
         </div>
@@ -34,7 +34,7 @@
       {% if success %}
       <div class="row">
         <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-1 col-xl-7">
-          <div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> {{ success }}
+          <div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> {{ success }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
         </div>
@@ -110,7 +110,7 @@
                 <div class="tab-pane active" id="tab-products">
                   <div class="dcx-fields">
                     <div class="dcx-field">
-                      <label class="dcx-label">{{ entry_products }} <span data-toggle="tooltip" title="{{ help_products }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span></label>
+                      <label class="dcx-label">{{ entry_products }} <span data-toggle="tooltip" title="{{ help_products }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                       <div class="dcx-checkbox-group">
                         <label class="dcx-checkbox-label">
                           <input type="radio" name="dockercart_sitemap_products" value="1" {% if dockercart_sitemap_products %}checked="checked"{% endif %} /> {{ text_enabled }}
@@ -122,11 +122,11 @@
                     </div>
                     <div class="dcx-fields dcx-fields--row">
                       <div class="dcx-field">
-                        <label class="dcx-label">{{ entry_product_priority }} <span data-toggle="tooltip" title="{{ help_priority }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span></label>
+                        <label class="dcx-label">{{ entry_product_priority }} <span data-toggle="tooltip" title="{{ help_priority }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                         <input type="text" name="dockercart_sitemap_product_priority" value="{{ dockercart_sitemap_product_priority }}" placeholder="0.8" class="form-control" />
                       </div>
                       <div class="dcx-field">
-                        <label class="dcx-label">{{ entry_product_changefreq }} <span data-toggle="tooltip" title="{{ help_changefreq }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span></label>
+                        <label class="dcx-label">{{ entry_product_changefreq }} <span data-toggle="tooltip" title="{{ help_changefreq }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                         <select name="dockercart_sitemap_product_changefreq" class="form-control">
                           {% for value, text in changefreq_options %}
                             {% if value == dockercart_sitemap_product_changefreq %}
@@ -143,7 +143,7 @@
                 <div class="tab-pane" id="tab-categories">
                   <div class="dcx-fields">
                     <div class="dcx-field">
-                      <label class="dcx-label">{{ entry_categories }} <span data-toggle="tooltip" title="{{ help_categories }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span></label>
+                      <label class="dcx-label">{{ entry_categories }} <span data-toggle="tooltip" title="{{ help_categories }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                       <div class="dcx-checkbox-group">
                         <label class="dcx-checkbox-label">
                           <input type="radio" name="dockercart_sitemap_categories" value="1" {% if dockercart_sitemap_categories %}checked="checked"{% endif %} /> {{ text_enabled }}
@@ -155,11 +155,11 @@
                     </div>
                     <div class="dcx-fields dcx-fields--row">
                       <div class="dcx-field">
-                        <label class="dcx-label">{{ entry_category_priority }} <span data-toggle="tooltip" title="{{ help_priority }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span></label>
+                        <label class="dcx-label">{{ entry_category_priority }} <span data-toggle="tooltip" title="{{ help_priority }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                         <input type="text" name="dockercart_sitemap_category_priority" value="{{ dockercart_sitemap_category_priority }}" placeholder="0.9" class="form-control" />
                       </div>
                       <div class="dcx-field">
-                        <label class="dcx-label">{{ entry_category_changefreq }} <span data-toggle="tooltip" title="{{ help_changefreq }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span></label>
+                        <label class="dcx-label">{{ entry_category_changefreq }} <span data-toggle="tooltip" title="{{ help_changefreq }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                         <select name="dockercart_sitemap_category_changefreq" class="form-control">
                           {% for value, text in changefreq_options %}
                             {% if value == dockercart_sitemap_category_changefreq %}
@@ -176,7 +176,7 @@
                 <div class="tab-pane" id="tab-manufacturers">
                   <div class="dcx-fields">
                     <div class="dcx-field">
-                      <label class="dcx-label">{{ entry_manufacturers }} <span data-toggle="tooltip" title="{{ help_manufacturers }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span></label>
+                      <label class="dcx-label">{{ entry_manufacturers }} <span data-toggle="tooltip" title="{{ help_manufacturers }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                       <div class="dcx-checkbox-group">
                         <label class="dcx-checkbox-label">
                           <input type="radio" name="dockercart_sitemap_manufacturers" value="1" {% if dockercart_sitemap_manufacturers %}checked="checked"{% endif %} /> {{ text_enabled }}
@@ -188,11 +188,11 @@
                     </div>
                     <div class="dcx-fields dcx-fields--row">
                       <div class="dcx-field">
-                        <label class="dcx-label">{{ entry_manufacturer_priority }} <span data-toggle="tooltip" title="{{ help_priority }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span></label>
+                        <label class="dcx-label">{{ entry_manufacturer_priority }} <span data-toggle="tooltip" title="{{ help_priority }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                         <input type="text" name="dockercart_sitemap_manufacturer_priority" value="{{ dockercart_sitemap_manufacturer_priority }}" placeholder="0.7" class="form-control" />
                       </div>
                       <div class="dcx-field">
-                        <label class="dcx-label">{{ entry_manufacturer_changefreq }} <span data-toggle="tooltip" title="{{ help_changefreq }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span></label>
+                        <label class="dcx-label">{{ entry_manufacturer_changefreq }} <span data-toggle="tooltip" title="{{ help_changefreq }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                         <select name="dockercart_sitemap_manufacturer_changefreq" class="form-control">
                           {% for value, text in changefreq_options %}
                             {% if value == dockercart_sitemap_manufacturer_changefreq %}
@@ -209,7 +209,7 @@
                 <div class="tab-pane" id="tab-information">
                   <div class="dcx-fields">
                     <div class="dcx-field">
-                      <label class="dcx-label">{{ entry_information }} <span data-toggle="tooltip" title="{{ help_information }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span></label>
+                      <label class="dcx-label">{{ entry_information }} <span data-toggle="tooltip" title="{{ help_information }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                       <div class="dcx-checkbox-group">
                         <label class="dcx-checkbox-label">
                           <input type="radio" name="dockercart_sitemap_information" value="1" {% if dockercart_sitemap_information %}checked="checked"{% endif %} /> {{ text_enabled }}
@@ -221,11 +221,11 @@
                     </div>
                     <div class="dcx-fields dcx-fields--row">
                       <div class="dcx-field">
-                        <label class="dcx-label">{{ entry_information_priority }} <span data-toggle="tooltip" title="{{ help_priority }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span></label>
+                        <label class="dcx-label">{{ entry_information_priority }} <span data-toggle="tooltip" title="{{ help_priority }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                         <input type="text" name="dockercart_sitemap_information_priority" value="{{ dockercart_sitemap_information_priority }}" placeholder="0.5" class="form-control" />
                       </div>
                       <div class="dcx-field">
-                        <label class="dcx-label">{{ entry_information_changefreq }} <span data-toggle="tooltip" title="{{ help_changefreq }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span></label>
+                        <label class="dcx-label">{{ entry_information_changefreq }} <span data-toggle="tooltip" title="{{ help_changefreq }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                         <select name="dockercart_sitemap_information_changefreq" class="form-control">
                           {% for value, text in changefreq_options %}
                             {% if value == dockercart_sitemap_information_changefreq %}
@@ -254,12 +254,12 @@
             </div>
             <div class="dcx-sidebar-card__body">
               <div class="dcx-sidebar-card__field">
-                <label class="dcx-sidebar-card__label">{{ entry_max_urls }} <span data-toggle="tooltip" title="{{ help_max_urls }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span></label>
+                <label class="dcx-sidebar-card__label">{{ entry_max_urls }} <span data-toggle="tooltip" title="{{ help_max_urls }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                 <input type="text" name="dockercart_sitemap_max_urls" value="{{ dockercart_sitemap_max_urls }}" placeholder="50000" class="form-control" />
                 <p class="help-block">{{ help_max_urls }}</p>
               </div>
               <div class="dcx-sidebar-card__field">
-                <label class="dcx-sidebar-card__label">{{ entry_max_file_size_mb }} <span data-toggle="tooltip" title="{{ help_max_file_size_mb }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span></label>
+                <label class="dcx-sidebar-card__label">{{ entry_max_file_size_mb }} <span data-toggle="tooltip" title="{{ help_max_file_size_mb }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                 <input type="text" name="dockercart_sitemap_max_file_size_mb" value="{{ dockercart_sitemap_max_file_size_mb }}" placeholder="50" class="form-control" />
                 <p class="help-block">{{ help_max_file_size_mb }}</p>
               </div>
@@ -268,7 +268,7 @@
                   <input type="hidden" name="dockercart_sitemap_create_gzip" value="0" />
                   <input type="checkbox" name="dockercart_sitemap_create_gzip" value="1" {% if dockercart_sitemap_create_gzip %}checked="checked"{% endif %} />
                   <span>{{ entry_create_gzip }}</span>
-                  <span data-toggle="tooltip" title="{{ help_create_gzip }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+                  <span data-toggle="tooltip" title="{{ help_create_gzip }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
                 </label>
               </div>
             </div>

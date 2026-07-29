@@ -25,7 +25,7 @@
       {% if error_warning %}
       <div class="row">
         <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
-          <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
+          <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
         </div>
@@ -74,7 +74,7 @@
                     <label class="dcx-checkbox-label">
                       <input type="hidden" name="approval" value="0" />
                       <input type="checkbox" name="approval" value="1"{% if approval %} checked{% endif %} /> {{ entry_approval }}
-                      <span data-toggle="tooltip" title="{{ help_approval }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+                      <span data-toggle="tooltip" title="{{ help_approval }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
                     </label>
                   </div>
                 </div>

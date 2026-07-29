@@ -28,7 +28,7 @@
       {% if error_warning %}
       <div class="row">
         <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
-          <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
+          <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
         </div>
@@ -90,7 +90,7 @@
                               <input type="text" id="input-tag{{ language.language_id }}" class="form-control dc-tag-input__field" placeholder="{{ entry_tag }}"/>
                               <div class="dc-tag-input__tags" id="tag-chips{{ language.language_id }}"></div>
                               <input type="hidden" name="product_description[{{ language.language_id }}][tag]" value="{{ product_description[language.language_id] ? product_description[language.language_id].tag }}"/>
-                              <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_tag }}"><i data-lucide="help-circle" width="16" height="16" class="text-muted"></i></span>
+                              <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_tag }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span>
                             </div>
                           </div>
                         </div>
@@ -100,7 +100,7 @@
               </div>
               <div class="dcx-panel" style="margin-top: 16px;">
                 <div class="dcx-panel-head">
-                  <div class="dcx-panel-head__icon"><i data-lucide="sliders" width="18" height="18"></i></div>
+                  <div class="dcx-panel-head__icon"><i data-lucide="sliders-vertical" width="18" height="18"></i></div>
                   <div>
                     <div class="dcx-panel-title">{{ text_panel_identifiers_title }}</div>
 
@@ -113,7 +113,7 @@
                         <label class="dcx-label" for="input-model">{{ entry_model }}</label>
                         <div class="dcx-field-icon-wrap">
                           <input type="text" name="model" value="{{ model }}" placeholder="{{ entry_model }}" id="input-model" class="form-control"/>
-                          <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_model }}"><i data-lucide="help-circle" width="16" height="16" class="text-muted"></i></span>
+                          <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_model }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span>
                         </div>
                         {% if error_model %}
                           <div class="text-danger">{{ error_model }}</div>
@@ -125,7 +125,7 @@
                         <label class="dcx-label" for="input-sku">{{ entry_sku }}</label>
                         <div class="dcx-field-icon-wrap">
                           <input type="text" name="sku" value="{{ sku }}" placeholder="{{ entry_sku }}" id="input-sku" class="form-control"/>
-                          <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_sku }}"><i data-lucide="help-circle" width="16" height="16" class="text-muted"></i></span>
+                          <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_sku }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span>
                         </div>
                       </div>
                     </div>
@@ -137,7 +137,7 @@
                           <label class="dcx-label" for="input-upc">{{ entry_upc }}</label>
                           <div class="dcx-field-icon-wrap">
                             <input type="text" name="upc" value="{{ upc }}" placeholder="{{ entry_upc }}" id="input-upc" class="form-control"/>
-                            <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_upc }}"><i data-lucide="help-circle" width="16" height="16" class="text-muted"></i></span>
+                            <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_upc }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span>
                           </div>
                         </div>
                       </div>
@@ -146,7 +146,7 @@
                           <label class="dcx-label" for="input-ean">{{ entry_ean }}</label>
                           <div class="dcx-field-icon-wrap">
                             <input type="text" name="ean" value="{{ ean }}" placeholder="{{ entry_ean }}" id="input-ean" class="form-control"/>
-                            <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_ean }}"><i data-lucide="help-circle" width="16" height="16" class="text-muted"></i></span>
+                            <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_ean }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span>
                           </div>
                         </div>
                       </div>
@@ -157,7 +157,7 @@
                           <label class="dcx-label" for="input-jan">{{ entry_jan }}</label>
                           <div class="dcx-field-icon-wrap">
                             <input type="text" name="jan" value="{{ jan }}" placeholder="{{ entry_jan }}" id="input-jan" class="form-control"/>
-                            <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_jan }}"><i data-lucide="help-circle" width="16" height="16" class="text-muted"></i></span>
+                            <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_jan }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span>
                           </div>
                         </div>
                       </div>
@@ -166,7 +166,7 @@
                           <label class="dcx-label" for="input-isbn">{{ entry_isbn }}</label>
                           <div class="dcx-field-icon-wrap">
                             <input type="text" name="isbn" value="{{ isbn }}" placeholder="{{ entry_isbn }}" id="input-isbn" class="form-control"/>
-                            <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_isbn }}"><i data-lucide="help-circle" width="16" height="16" class="text-muted"></i></span>
+                            <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_isbn }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span>
                           </div>
                         </div>
                       </div>
@@ -177,7 +177,7 @@
                           <label class="dcx-label" for="input-mpn">{{ entry_mpn }}</label>
                           <div class="dcx-field-icon-wrap">
                             <input type="text" name="mpn" value="{{ mpn }}" placeholder="{{ entry_mpn }}" id="input-mpn" class="form-control"/>
-                            <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_mpn }}"><i data-lucide="help-circle" width="16" height="16" class="text-muted"></i></span>
+                            <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_mpn }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span>
                           </div>
                         </div>
                       </div>
@@ -214,7 +214,7 @@
                           <div class="dcx-checkbox-group">
                             <label class="dcx-checkbox-label">
                               <input type="checkbox" name="call_for_price" value="1" id="input-call-for-price"{% if call_for_price %} checked{% endif %} /> {{ entry_call_for_price }}
-                              <span data-toggle="tooltip" title="{{ help_call_for_price }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+                              <span data-toggle="tooltip" title="{{ help_call_for_price }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
                             </label>
                           </div>
                         </div>
@@ -283,15 +283,15 @@
                           <div class="dcx-checkbox-group">
                             <label class="dcx-checkbox-label">
                               <input type="checkbox" name="subtract" value="1"{% if subtract %} checked{% endif %} /> {{ entry_subtract }}
-                              <span data-toggle="tooltip" title="{{ help_subtract }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+                              <span data-toggle="tooltip" title="{{ help_subtract }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
                             </label>
                             <label class="dcx-checkbox-label">
                               <input type="checkbox" name="preorder" value="1"{% if preorder %} checked{% endif %} /> {{ entry_preorder }}
-                              <span data-toggle="tooltip" title="{{ help_preorder }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+                              <span data-toggle="tooltip" title="{{ help_preorder }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
                             </label>
                             <label class="dcx-checkbox-label">
                               <input type="checkbox" name="shipping" value="1"{% if shipping %} checked{% endif %} /> {{ entry_shipping }}
-                              <span data-toggle="tooltip" title="{{ help_shipping }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+                              <span data-toggle="tooltip" title="{{ help_shipping }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
                             </label>
                           </div>
                         </div>
@@ -303,7 +303,7 @@
                           <label class="dcx-label" for="input-minimum">{{ entry_minimum }}</label>
                           <div class="dcx-field-icon-wrap">
                             <input type="text" name="minimum" value="{{ minimum }}" placeholder="{{ entry_minimum }}" id="input-minimum" class="form-control"/>
-                            <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_minimum }}"><i data-lucide="help-circle" width="16" height="16" class="text-muted"></i></span>
+                            <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_minimum }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span>
                           </div>
                         </div>
                       </div>
@@ -312,7 +312,7 @@
                           <label class="dcx-label" for="input-quantity-step">{{ entry_quantity_step }}</label>
                           <div class="dcx-field-icon-wrap">
                             <input type="text" name="quantity_step" value="{{ quantity_step }}" placeholder="{{ entry_quantity_step }}" id="input-quantity-step" class="form-control"/>
-                            <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_quantity_step }}"><i data-lucide="help-circle" width="16" height="16" class="text-muted"></i></span>
+                            <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_quantity_step }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span>
                           </div>
                         </div>
                       </div>
@@ -452,7 +452,7 @@
                       <label class="dcx-label">{{ entry_video }}</label>
                       <div class="dc-video-wrapper" style="max-width:500px;">
                         <div class="input-group" style="margin-bottom:8px;">
-                          <span class="input-group-addon"><i data-lucide="youtube" width="14" height="14"></i></span>
+                          <span class="input-group-addon"><i data-lucide="video" width="14" height="14"></i></span>
                           <input type="text" name="video_youtube" value="{{ video_type == 'youtube' ? video : '' }}" id="input-video-youtube" class="form-control" placeholder="{{ entry_video_youtube_placeholder }}" />
                           <span class="input-group-btn">
                             <button type="button" onclick="clearProductVideo()" class="btn btn-default" title="{{ button_remove }}"><i data-lucide="trash-2" width="14" height="14"></i></button>
@@ -501,7 +501,7 @@
                 <div class="dcx-panel-head">
                   <div class="dcx-panel-head__icon"><i data-lucide="list-checks" width="18" height="18"></i></div>
                   <div>
-                    <div class="dcx-panel-title">{{ text_panel_attributes_title }} <span data-toggle="tooltip" title="{{ text_help_attributes }}"><i data-lucide="help-circle" width="16" height="16" class="text-muted"></i></span></div>
+                    <div class="dcx-panel-title">{{ text_panel_attributes_title }} <span data-toggle="tooltip" title="{{ text_help_attributes }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span></div>
                   </div>
                 </div>
                 <div class="dcx-panel-body">
@@ -527,7 +527,7 @@
                     {% endfor %}
                   </div>
                   <button type="button" onclick="addAttribute();" class="btn btn-primary btn-sm" style="margin-top:8px;">
-                    <i data-lucide="plus-circle" width="14" height="14"></i> {{ button_attribute_add }}
+                    <i data-lucide="circle-plus" width="14" height="14"></i> {{ button_attribute_add }}
                   </button>
                 </div>
               </div>
@@ -535,7 +535,7 @@
                 <div class="dcx-panel-head">
                   <div class="dcx-panel-head__icon"><i data-lucide="list" width="18" height="18"></i></div>
                   <div>
-                    <div class="dcx-panel-title">{{ text_panel_options_title }} <span data-toggle="tooltip" title="{{ text_help_options_mode }}"><i data-lucide="help-circle" width="16" height="16" class="text-muted"></i></span></div>
+                    <div class="dcx-panel-title">{{ text_panel_options_title }} <span data-toggle="tooltip" title="{{ text_help_options_mode }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span></div>
                   </div>
                 </div>
                 <div class="dcx-panel-body">
@@ -593,7 +593,7 @@
                           <div class="dc-axis-info-banner"><i data-lucide="info" width="14" height="14"></i> {{ entry_axis_lock_warning }}</div>
                           {% endif %}
                           {% if error_option[product_option.option_id] is defined %}
-                          <div class="alert alert-danger" style="margin:5px 15px"><i data-lucide="alert-circle" width="14" height="14"></i> {{ error_option[product_option.option_id] }}</div>
+                          <div class="alert alert-danger" style="margin:5px 15px"><i data-lucide="circle-alert" width="14" height="14"></i> {{ error_option[product_option.option_id] }}</div>
                           {% endif %}
                           <div class="dc-option-section__body">
                             <input type="hidden" name="product_option[{{ option_row }}][product_option_id]" value="{{ product_option.product_option_id }}"/>
@@ -672,7 +672,7 @@
                                         <span class="dc-opt-badge dc-opt-badge--price" data-badge="price" style="display:none"></span>
                                       {% endif %}
                                     </span>
-                                     <button type="button" class="btn btn-danger btn-xs dc-opt-card__remove"{% if product_option.is_axis %} style="display:none"{% endif %} onclick="$(this).closest('.dc-opt-card').remove();" data-toggle="tooltip" title="{{ button_remove }}"><i data-lucide="minus-circle" width="14" height="14"></i></button>
+                                     <button type="button" class="btn btn-danger btn-xs dc-opt-card__remove"{% if product_option.is_axis %} style="display:none"{% endif %} onclick="$(this).closest('.dc-opt-card').remove();" data-toggle="tooltip" title="{{ button_remove }}"><i data-lucide="circle-minus" width="14" height="14"></i></button>
                                   </div>
                                   <div class="dc-opt-card__body">
                                     <input type="hidden" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][product_option_value_id]" value="{{ product_option_value.product_option_value_id }}"/>
@@ -749,12 +749,12 @@
                                                 </select>
                                                 <input type="text" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][customer_group_price][{{ cg_row }}][price]" value="{{ cg_price.price }}" placeholder="{{ entry_price }}" class="form-control option-value-prefix-input" />
             </div>
-                                              <button type="button" onclick="$(this).closest('.dc-opt-card__cg-row').remove();" class="btn btn-danger btn-xs"><i data-lucide="minus-circle" width="14" height="14"></i></button>
+                                              <button type="button" onclick="$(this).closest('.dc-opt-card__cg-row').remove();" class="btn btn-danger btn-xs"><i data-lucide="circle-minus" width="14" height="14"></i></button>
                                             </div>
                                             {% set cg_row = cg_row + 1 %}
                                           {% endfor %}
                                         </div>
-                                        <button type="button" class="btn btn-primary btn-xs" style="margin-top:4px;" onclick="addOptionValueCgPrice(this, '{{ option_row }}', '{{ option_value_row }}');"><i data-lucide="plus-circle" width="14" height="14"></i> {{ button_option_value_cg_price_add }}</button>
+                                        <button type="button" class="btn btn-primary btn-xs" style="margin-top:4px;" onclick="addOptionValueCgPrice(this, '{{ option_row }}', '{{ option_value_row }}');"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_option_value_cg_price_add }}</button>
                                       </div>
                                     </div>
                                   </div>
@@ -765,8 +765,8 @@
                             {% if not product_option.is_axis %}
                             <small class="form-text text-muted" style="display:block; margin-top:6px;">{{ text_drag_to_reorder }}</small>
                             <div class="dc-opt-actions">
-                              <button type="button" class="btn btn-primary btn-sm" onclick="addOptionValue('{{ option_row }}');"><i data-lucide="plus-circle" width="14" height="14"></i> {{ button_option_value_add }}</button>
-                              <button type="button" class="btn btn-default btn-sm" onclick="addAllOptionValues('{{ option_row }}');"><i data-lucide="plus-square" width="14" height="14"></i> {{ button_add_all_values }}</button>
+                              <button type="button" class="btn btn-primary btn-sm" onclick="addOptionValue('{{ option_row }}');"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_option_value_add }}</button>
+                              <button type="button" class="btn btn-default btn-sm" onclick="addAllOptionValues('{{ option_row }}');"><i data-lucide="square-plus" width="14" height="14"></i> {{ button_add_all_values }}</button>
                             </div>
                             {% endif %}
                             <select id="option-values{{ option_row }}" style="display: none;">
@@ -783,7 +783,7 @@
                     {% endfor %}
                     </div>
                     <div class="dc-opt-add" style="margin-top: 15px; padding: 15px; background: var(--dc-gray-50); border-radius: var(--dc-radius-lg); border: 1px dashed var(--dc-primary-active);">
-                      <h4 style="margin: 0 0 10px 0; font-size: 14px; color: var(--dc-primary-active);"><i data-lucide="plus-circle" width="16" height="16"></i> {{ button_option_add }}</h4>
+                      <h4 style="margin: 0 0 10px 0; font-size: 14px; color: var(--dc-primary-active);"><i data-lucide="circle-plus" width="16" height="16"></i> {{ button_option_add }}</h4>
                       <div class="dcx-tree-select"
                            data-url="index.php?route=catalog/option/tree&user_token={{ user_token }}"
                            data-id-key="option_id"
@@ -810,7 +810,7 @@
                 <div class="dcx-panel-head">
                   <div class="dcx-panel-head__icon"><i data-lucide="percent" width="18" height="18"></i></div>
                   <div>
-                    <div class="dcx-panel-title">{{ text_panel_promo_title }} <span data-toggle="tooltip" title="{{ text_panel_promo_subtitle }}"><i data-lucide="help-circle" width="16" height="16" class="text-muted"></i></span></div>
+                    <div class="dcx-panel-title">{{ text_panel_promo_title }} <span data-toggle="tooltip" title="{{ text_panel_promo_subtitle }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span></div>
                   </div>
                 </div>
                 <div class="dcx-panel-body">
@@ -1075,7 +1075,7 @@
                 <div class="dcx-panel-head">
                   <div class="dcx-panel-head__icon"><i data-lucide="trophy" width="18" height="18"></i></div>
                   <div>
-                    <div class="dcx-panel-title">{{ text_panel_rewards_title }} <span data-toggle="tooltip" title="{{ text_panel_rewards_subtitle }}"><i data-lucide="help-circle" width="16" height="16" class="text-muted"></i></span></div>
+                    <div class="dcx-panel-title">{{ text_panel_rewards_title }} <span data-toggle="tooltip" title="{{ text_panel_rewards_subtitle }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span></div>
                   </div>
                 </div>
                 <div class="dcx-panel-body">
@@ -1084,7 +1084,7 @@
                       <label class="dcx-label" for="input-points">{{ entry_points }}</label>
                       <div class="dcx-field-icon-wrap" style="max-width:100px;">
                         <input type="text" name="points" value="{{ points }}" placeholder="{{ entry_points }}" id="input-points" class="form-control"/>
-                        <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_points }}"><i data-lucide="help-circle" width="16" height="16" class="text-muted"></i></span>
+                        <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_points }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span>
                       </div>
                     </div>
                   </div>
@@ -1150,7 +1150,7 @@
           </div>
           <div class="dcx-sidebar-card__body">
             <div class="dcx-sidebar-card__field">
-              <label class="dcx-sidebar-card__label" for="input-manufacturer">{{ entry_manufacturer }} <span data-toggle="tooltip" title="{{ help_manufacturer }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span></label>
+              <label class="dcx-sidebar-card__label" for="input-manufacturer">{{ entry_manufacturer }} <span data-toggle="tooltip" title="{{ help_manufacturer }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
               <div class="dcx-field-icon-wrap">
                 <span class="dcx-field-icon"><i data-lucide="search" width="14" height="14" class="text-muted"></i></span>
                 <input type="text" name="manufacturer" value="{{ manufacturer|e('html_attr') }}" placeholder="{{ entry_manufacturer }}" id="input-manufacturer" class="form-control"/>
@@ -1169,7 +1169,7 @@
               </div>
             </div>
             <div class="dcx-sidebar-card__field">
-              <label class="dcx-sidebar-card__label">{{ entry_main_category }} <span data-toggle="tooltip" title="{{ help_main_category }}"><i data-lucide="help-circle" width="14" height="14" style="cursor:help;color:var(--dc-text-muted);"></i></span></label>
+              <label class="dcx-sidebar-card__label">{{ entry_main_category }} <span data-toggle="tooltip" title="{{ help_main_category }}"><i data-lucide="circle-question-mark" width="14" height="14" style="cursor:help;color:var(--dc-text-muted);"></i></span></label>
               <div class="dcx-tree-select"
                    data-url="index.php?route=catalog/category/tree&user_token={{ user_token }}"
                    data-none-text="{{ text_none }}"
@@ -1193,19 +1193,19 @@
               </div>
             </div>
             <div class="dcx-sidebar-card__field">
-              <label class="dcx-sidebar-card__label">{{ entry_categories_display }} <span data-toggle="tooltip" title="{{ help_category }}"><i data-lucide="help-circle" width="14" height="14" style="cursor:help;color:var(--dc-text-muted);"></i></span></label>
+              <label class="dcx-sidebar-card__label">{{ entry_categories_display }} <span data-toggle="tooltip" title="{{ help_category }}"><i data-lucide="circle-question-mark" width="14" height="14" style="cursor:help;color:var(--dc-text-muted);"></i></span></label>
               <button type="button" class="btn btn-default btn-sm btn-block" id="btn-open-category-modal" style="text-align:left;">
                 <i data-lucide="folder-tree" width="14" height="14" style="margin-right:6px;"></i>
                 <span id="category-modal-count">{% if product_categories|length > 0 %}{{ product_categories|length }} {{ button_select_category }}{% else %}{{ button_select_category }}{% endif %}</span>
               </button>
               <div id="product-category" class="dcx-tree-select__well" style="height: 150px; overflow: auto; margin-top: 6px;"> {% for product_category in product_categories %}
-                  <div class="dcx-tree-select__well-item" data-id="{{ product_category.category_id }}"><i data-lucide="minus-circle" width="14" height="14" class="dcx-tree-select__well-remove"></i> <span class="dcx-tree-select__well-label">{{ product_category.name }}</span>
+                  <div class="dcx-tree-select__well-item" data-id="{{ product_category.category_id }}"><i data-lucide="circle-minus" width="14" height="14" class="dcx-tree-select__well-remove"></i> <span class="dcx-tree-select__well-label">{{ product_category.name }}</span>
                     <input type="hidden" name="product_category[]" value="{{ product_category.category_id }}"/>
                   </div>
                 {% endfor %}</div>
             </div>
             <div class="dcx-sidebar-card__field">
-              <label class="dcx-sidebar-card__label" for="input-related">{{ entry_related }} <span data-toggle="tooltip" title="{{ help_related }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span></label>
+              <label class="dcx-sidebar-card__label" for="input-related">{{ entry_related }} <span data-toggle="tooltip" title="{{ help_related }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
               <div class="dcx-picker"
                    data-url="index.php?route=catalog/product/autocomplete&user_token={{ user_token }}"
                    data-well="#product-related"
@@ -1221,13 +1221,13 @@
                 <input type="text" class="dcx-picker__input form-control" placeholder="{{ entry_related }}" />
               </div>
               <div id="product-related" class="dcx-picker__well" style="height: 150px; overflow: auto;"> {% for product_related in product_relateds %}
-                  <div class="dcx-picker__well-item" data-id="{{ product_related.product_id }}"><i data-lucide="minus-circle" width="14" height="14" class="dcx-picker__well-remove"></i> <span class="dcx-picker__well-label">{{ product_related.name }}</span>
+                  <div class="dcx-picker__well-item" data-id="{{ product_related.product_id }}"><i data-lucide="circle-minus" width="14" height="14" class="dcx-picker__well-remove"></i> <span class="dcx-picker__well-label">{{ product_related.name }}</span>
                     <input type="hidden" name="product_related[]" value="{{ product_related.product_id }}"/>
                   </div>
                 {% endfor %}</div>
             </div>
             <div class="dcx-sidebar-card__field">
-              <label class="dcx-sidebar-card__label" for="input-upsell">{{ entry_upsell }} <span data-toggle="tooltip" title="{{ help_upsell }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span></label>
+              <label class="dcx-sidebar-card__label" for="input-upsell">{{ entry_upsell }} <span data-toggle="tooltip" title="{{ help_upsell }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
               <div class="dcx-picker"
                    data-url="index.php?route=catalog/product/autocomplete&user_token={{ user_token }}"
                    data-well="#product-upsell"
@@ -1243,13 +1243,13 @@
                 <input type="text" class="dcx-picker__input form-control" placeholder="{{ entry_upsell }}" />
               </div>
               <div id="product-upsell" class="dcx-picker__well" style="height: 150px; overflow: auto;"> {% for product_upsell in product_upsells %}
-                  <div class="dcx-picker__well-item" data-id="{{ product_upsell.product_id }}"><i data-lucide="minus-circle" width="14" height="14" class="dcx-picker__well-remove"></i> <span class="dcx-picker__well-label">{{ product_upsell.name }}</span>
+                  <div class="dcx-picker__well-item" data-id="{{ product_upsell.product_id }}"><i data-lucide="circle-minus" width="14" height="14" class="dcx-picker__well-remove"></i> <span class="dcx-picker__well-label">{{ product_upsell.name }}</span>
                     <input type="hidden" name="product_upsell[]" value="{{ product_upsell.product_id }}"/>
                   </div>
                 {% endfor %}</div>
             </div>
             <div class="dcx-sidebar-card__field">
-              <label class="dcx-sidebar-card__label" for="input-accessory">{{ entry_accessory }} <span data-toggle="tooltip" title="{{ help_accessory }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span></label>
+              <label class="dcx-sidebar-card__label" for="input-accessory">{{ entry_accessory }} <span data-toggle="tooltip" title="{{ help_accessory }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
               <div class="dcx-picker"
                    data-url="index.php?route=catalog/product/autocomplete&user_token={{ user_token }}"
                    data-well="#product-accessory"
@@ -1265,7 +1265,7 @@
                 <input type="text" class="dcx-picker__input form-control" placeholder="{{ entry_accessory }}" />
               </div>
               <div id="product-accessory" class="dcx-picker__well" style="height: 150px; overflow: auto;"> {% for product_accessory in product_accessories %}
-                  <div class="dcx-picker__well-item" data-id="{{ product_accessory.product_id }}"><i data-lucide="minus-circle" width="14" height="14" class="dcx-picker__well-remove"></i> <span class="dcx-picker__well-label">{{ product_accessory.name }}</span>
+                  <div class="dcx-picker__well-item" data-id="{{ product_accessory.product_id }}"><i data-lucide="circle-minus" width="14" height="14" class="dcx-picker__well-remove"></i> <span class="dcx-picker__well-label">{{ product_accessory.name }}</span>
                     <input type="hidden" name="product_accessory[]" value="{{ product_accessory.product_id }}"/>
                   </div>
                 {% endfor %}</div>
@@ -1295,7 +1295,7 @@
                 </div>
               </div>
               <div id="product-download" class="dcx-tree-select__well" style="height: 150px; overflow: auto;"> {% for product_download in product_downloads %}
-                  <div class="dcx-tree-select__well-item" data-id="{{ product_download.download_id }}"><i data-lucide="minus-circle" width="14" height="14" class="dcx-tree-select__well-remove"></i> <span class="dcx-tree-select__well-label">{{ product_download.name }}</span>
+                  <div class="dcx-tree-select__well-item" data-id="{{ product_download.download_id }}"><i data-lucide="circle-minus" width="14" height="14" class="dcx-tree-select__well-remove"></i> <span class="dcx-tree-select__well-label">{{ product_download.name }}</span>
                     <input type="hidden" name="product_download[]" value="{{ product_download.download_id }}"/>
                   </div>
                 {% endfor %}</div>
@@ -1337,7 +1337,7 @@
         </div>
         <div class="dcx-sidebar-card">
           <div class="dcx-sidebar-card__header">
-            <div class="dcx-sidebar-card__header-icon"><i data-lucide="layout" width="16" height="16"></i></div>
+            <div class="dcx-sidebar-card__header-icon"><i data-lucide="columns-2" width="16" height="16"></i></div>
             <h3 class="dcx-sidebar-card__title">{{ text_design_card }}</h3>
           </div>
           <div class="dcx-sidebar-card__body">
@@ -1739,8 +1739,8 @@
 	  if (item['type'] == 'select' || item['type'] == 'radio' || item['type'] == 'checkbox' || item['type'] == 'image' || item['type'] == 'color') {
 		  html += '    <div class="dc-opt-cards" id="option-value' + option_row + '"></div>';
 		  html += '    <div class="dc-opt-actions">';
-		  html += '      <button type="button" class="btn btn-primary btn-sm" onclick="addOptionValue(\'' + option_row + '\');"><i data-lucide="plus-circle" width="14" height="14"></i> {{ button_option_value_add|e('js') }}</button>';
-		  html += '      <button type="button" class="btn btn-default btn-sm" onclick="addAllOptionValues(\'' + option_row + '\');"><i data-lucide="plus-square" width="14" height="14"></i> {{ button_add_all_values|e('js') }}</button>';
+		  html += '      <button type="button" class="btn btn-primary btn-sm" onclick="addOptionValue(\'' + option_row + '\');"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_option_value_add|e('js') }}</button>';
+		  html += '      <button type="button" class="btn btn-default btn-sm" onclick="addAllOptionValues(\'' + option_row + '\');"><i data-lucide="square-plus" width="14" height="14"></i> {{ button_add_all_values|e('js') }}</button>';
 		  html += '    </div>';
 
 		  html += '    <select id="option-values' + option_row + '" style="display: none;">';
@@ -1800,7 +1800,7 @@
 		  html += '      <span class="dc-opt-badge dc-opt-badge--price" data-badge="price" style="display:none"></span>';
 	  }
 	  html += '    </span>';
-	  html += '    <button type="button" class="btn btn-danger btn-xs dc-opt-card__remove" onclick="$(this).closest(\'.dc-opt-card\').remove();" data-toggle="tooltip" title="{{ button_remove|e('js') }}"><i data-lucide="minus-circle" width="14" height="14"></i></button>';
+	  html += '    <button type="button" class="btn btn-danger btn-xs dc-opt-card__remove" onclick="$(this).closest(\'.dc-opt-card\').remove();" data-toggle="tooltip" title="{{ button_remove|e('js') }}"><i data-lucide="circle-minus" width="14" height="14"></i></button>';
 	  html += '  </div>';
 	  html += '  <div class="dc-opt-card__body">';
 	  html += '    <input type="hidden" name="product_option[' + option_row + '][product_option_value][' + ovRow + '][product_option_value_id]" value="" />';
@@ -1864,7 +1864,7 @@
 	  html += '      </button>';
 	  html += '      <div class="dc-opt-card__cg-body" style="display:none">';
 	  html += '        <div class="dc-cg-prices" id="option-value-cg' + option_row + '-' + ovRow + '"></div>';
-	  html += '        <button type="button" class="btn btn-primary btn-xs" style="margin-top:4px;" onclick="addOptionValueCgPrice(this, \'' + option_row + '\', \'' + ovRow + '\');"><i data-lucide="plus-circle" width="14" height="14"></i> {{ button_option_value_cg_price_add|e('js') }}</button>';
+	  html += '        <button type="button" class="btn btn-primary btn-xs" style="margin-top:4px;" onclick="addOptionValueCgPrice(this, \'' + option_row + '\', \'' + ovRow + '\');"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_option_value_cg_price_add|e('js') }}</button>';
 	  html += '      </div>';
 	  html += '    </div>';
 	  html += '  </div>';
@@ -1920,7 +1920,7 @@
 	  html += '    </select>';
 	  html += '    <input type="text" name="product_option[' + option_row + '][product_option_value][' + option_value_row + '][customer_group_price][' + cg_row + '][price]" value="" placeholder="{{ entry_price|e('js') }}" class="form-control option-value-prefix-input" />';
 	  html += '  </div>';
-	  html += '  <button type="button" onclick="$(this).closest(\'.dc-opt-card__cg-row\').remove();" class="btn btn-danger btn-xs"><i data-lucide="minus-circle" width="14" height="14"></i></button>';
+	  html += '  <button type="button" onclick="$(this).closest(\'.dc-opt-card__cg-row\').remove();" class="btn btn-danger btn-xs"><i data-lucide="circle-minus" width="14" height="14"></i></button>';
 	  html += '</div>';
 
 	  $(button).closest('.dc-opt-card__cg-body').find('.dc-cg-prices').append(html);
@@ -2630,7 +2630,7 @@ $('#category-tree-confirm').on('click', function() {
     for (var j = 0; j < allItems.length; j++) {
       if (String(allItems[j].category_id) === String(ids[i])) {
         var name = allItems[j].path || allItems[j].name;
-        $well.append('<div class="dcx-tree-select__well-item" data-id="' + ids[i] + '"><i data-lucide="minus-circle" width="14" height="14" class="dcx-tree-select__well-remove"></i> <span class="dcx-tree-select__well-label">' + name + '</span><input type="hidden" name="product_category[]" value="' + ids[i] + '"/></div>');
+        $well.append('<div class="dcx-tree-select__well-item" data-id="' + ids[i] + '"><i data-lucide="circle-minus" width="14" height="14" class="dcx-tree-select__well-remove"></i> <span class="dcx-tree-select__well-label">' + name + '</span><input type="hidden" name="product_category[]" value="' + ids[i] + '"/></div>');
         break;
       }
     }

@@ -25,7 +25,7 @@
       {% if error_warning %}
       <div class="row">
         <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
-          <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
+          <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
         </div>
@@ -112,7 +112,7 @@
                   <input type="text" name="product" value="" placeholder="{{ entry_product }}" id="input-product" class="form-control" />
                   {% if coupon_product %}
                   <div id="coupon-product" class="dcx-picker__well">{% for coupon_product in coupon_product %}
-                    <div class="dcx-picker__well-item" id="coupon-product{{ coupon_product.product_id }}"><i data-lucide="minus-circle" width="14" height="14" class="dcx-picker__well-remove"></i> <span class="dcx-picker__well-label">{{ coupon_product.name }}</span>
+                    <div class="dcx-picker__well-item" id="coupon-product{{ coupon_product.product_id }}"><i data-lucide="circle-minus" width="14" height="14" class="dcx-picker__well-remove"></i> <span class="dcx-picker__well-label">{{ coupon_product.name }}</span>
                       <input type="hidden" name="coupon_product[]" value="{{ coupon_product.product_id }}" />
                     </div>
                     {% endfor %}</div>
@@ -130,7 +130,7 @@
                   </button>
                   {% if coupon_category %}
                   <div id="coupon-category" class="dcx-tree-select__well">{% for coupon_category in coupon_category %}
-                    <div class="dcx-tree-select__well-item" data-id="{{ coupon_category.category_id }}"><i data-lucide="minus-circle" width="14" height="14" class="dcx-tree-select__well-remove"></i> <span class="dcx-tree-select__well-label">{{ coupon_category.name }}</span>
+                    <div class="dcx-tree-select__well-item" data-id="{{ coupon_category.category_id }}"><i data-lucide="circle-minus" width="14" height="14" class="dcx-tree-select__well-remove"></i> <span class="dcx-tree-select__well-label">{{ coupon_category.name }}</span>
                       <input type="hidden" name="coupon_category[]" value="{{ coupon_category.category_id }}" />
                     </div>
                     {% endfor %}</div>
@@ -181,14 +181,14 @@
               <div class="dcx-checkbox-group">
                 <label class="dcx-checkbox-label">
                   <input type="checkbox" name="logged" value="1" {% if logged %}checked="checked"{% endif %} /> {{ entry_logged }}
-                  <span data-toggle="tooltip" title="{{ help_logged }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+                  <span data-toggle="tooltip" title="{{ help_logged }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
                 </label>
                 <label class="dcx-checkbox-label">
                   <input type="checkbox" name="shipping" value="1" {% if shipping %}checked="checked"{% endif %} /> {{ entry_shipping }}
                 </label>
                 <label class="dcx-checkbox-label">
                   <input type="checkbox" name="auto_renew" value="1" {% if auto_renew %}checked="checked"{% endif %} /> {{ entry_auto_renew }}
-                  <span data-toggle="tooltip" title="{{ help_auto_renew }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+                  <span data-toggle="tooltip" title="{{ help_auto_renew }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
                 </label>
               </div>
             </div>
@@ -254,7 +254,7 @@ $('input[name=\'product\']').autocomplete({
   'select': function(item) {
     $('input[name=\'product\']').val('');
     $('#coupon-product' + item['value']).remove();
-    $('#coupon-product').show().append('<div class="dcx-picker__well-item" id="coupon-product' + item['value'] + '"><i data-lucide="minus-circle" width="14" height="14" class="dcx-picker__well-remove"></i> <span class="dcx-picker__well-label">' + item['label'] + '</span><input type="hidden" name="coupon_product[]" value="' + item['value'] + '" /></div>');
+    $('#coupon-product').show().append('<div class="dcx-picker__well-item" id="coupon-product' + item['value'] + '"><i data-lucide="circle-minus" width="14" height="14" class="dcx-picker__well-remove"></i> <span class="dcx-picker__well-label">' + item['label'] + '</span><input type="hidden" name="coupon_product[]" value="' + item['value'] + '" /></div>');
     lucide.createIcons();
   }
 });
@@ -293,7 +293,7 @@ $('#coupon-category-confirm').on('click', function() {
     for (var j = 0; j < allItems.length; j++) {
       if (String(allItems[j].category_id) === String(ids[i])) {
         var name = allItems[j].path || allItems[j].name;
-        $well.append('<div class="dcx-tree-select__well-item" data-id="' + ids[i] + '"><i data-lucide="minus-circle" width="14" height="14" class="dcx-tree-select__well-remove"></i> <span class="dcx-tree-select__well-label">' + name + '</span><input type="hidden" name="coupon_category[]" value="' + ids[i] + '"/></div>');
+        $well.append('<div class="dcx-tree-select__well-item" data-id="' + ids[i] + '"><i data-lucide="circle-minus" width="14" height="14" class="dcx-tree-select__well-remove"></i> <span class="dcx-tree-select__well-label">' + name + '</span><input type="hidden" name="coupon_category[]" value="' + ids[i] + '"/></div>');
         break;
       }
     }

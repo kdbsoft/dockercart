@@ -6,7 +6,7 @@
       <div class="row">
         <div class="col-sm-12">
           <div class="pull-right">
-            <button type="button" data-toggle="tooltip" title="{{ button_filter }}" onclick="$('#filter-report').toggleClass('hidden-sm hidden-xs');" class="btn btn-default btn--icon hidden-md hidden-lg"><i data-lucide="filter" width="16" height="16"></i></button>
+            <button type="button" data-toggle="tooltip" title="{{ button_filter }}" onclick="$('#filter-report').toggleClass('hidden-sm hidden-xs');" class="btn btn-default btn--icon hidden-md hidden-lg"><i data-lucide="funnel" width="16" height="16"></i></button>
           </div>
           <h1 class="page-header__title">{{ heading_title }}</h1>
         </div>
@@ -16,7 +16,7 @@
   <div class="container-fluid">
     <div class="panel panel-default">
       <div class="panel-heading">
-        <div class="panel-heading__icon"><i data-lucide="bar-chart-2" width="16" height="16"></i></div>
+        <div class="panel-heading__icon"><i data-lucide="chart-no-axes-column" width="16" height="16"></i></div>
         <div>
           <h3 class="panel-title">{{ text_type }}</h3>
           <div class="panel-heading__subtitle">{{ text_report_subtitle }}</div>
@@ -34,7 +34,7 @@
               {% endif %}
               {% endfor %}
             </select>
-            <span class="input-group-addon"><i data-lucide="filter" width="14" height="14"></i> {{ text_filter }}</span></div>
+            <span class="input-group-addon"><i data-lucide="funnel" width="14" height="14"></i> {{ text_filter }}</span></div>
         </div>
       </div>
     </div>

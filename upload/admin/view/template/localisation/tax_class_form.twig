@@ -19,7 +19,7 @@
       {% if error_warning %}
       <div class="row">
         <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
-          <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
+          <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
         </div>
@@ -115,7 +115,7 @@
                   {% set tax_rule_row = tax_rule_row + 1 %}
                   {% endfor %}
                 </div>
-                <button type="button" onclick="addRule();" class="btn btn-primary btn-sm"><i data-lucide="plus-circle" width="14" height="14"></i> {{ button_rule_add }}</button>
+                <button type="button" onclick="addRule();" class="btn btn-primary btn-sm"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_rule_add }}</button>
               </div>
             </div>
           </div>

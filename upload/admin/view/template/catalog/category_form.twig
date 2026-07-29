@@ -28,7 +28,7 @@
       {% if error_warning %}
       <div class="row">
         <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
-          <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
+          <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
         </div>
@@ -107,7 +107,7 @@
           <div class="dcx-field">
             <div style="display:flex;align-items:center;gap:4px;">
               <label class="dcx-label" for="input-icon">{{ entry_icon }}</label>
-              <span data-toggle="tooltip" title="{{ help_icon }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+              <span data-toggle="tooltip" title="{{ help_icon }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
             </div>
             <a href="" id="thumb-icon" data-toggle="image" class="img-thumbnail"><img src="{{ icon_thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
             <input type="hidden" name="icon" value="{{ icon }}" id="input-icon" />
@@ -132,7 +132,7 @@
               <div class="dcx-banner-layout__link">
                 <div style="display:flex;align-items:center;gap:4px;">
                   <label class="dcx-label">{{ entry_banner_link }}</label>
-                  <span data-toggle="tooltip" title="{{ help_banner_image }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+                  <span data-toggle="tooltip" title="{{ help_banner_image }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
                 </div>
                 <div class="dc-link-row">
                   <select class="form-control dc-link-type dc-link-type-select">
@@ -181,7 +181,7 @@
               <label class="dcx-sidebar-card__checkbox">
                 <input type="checkbox" name="top" value="1" {% if top %}checked="checked"{% endif %} id="input-top" />
                 <span>{{ entry_top }}</span>
-                <span data-toggle="tooltip" title="{{ help_top }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+                <span data-toggle="tooltip" title="{{ help_top }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
               </label>
             </div>
             <div class="dcx-sidebar-card__field">
@@ -232,13 +232,13 @@
               </div>
             </div>
             <div class="dcx-sidebar-card__field">
-              <label class="dcx-sidebar-card__label">{{ entry_related }} <span data-toggle="tooltip" title="{{ help_related }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span></label>
+              <label class="dcx-sidebar-card__label">{{ entry_related }} <span data-toggle="tooltip" title="{{ help_related }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
               <button type="button" class="btn btn-default btn-sm btn-block" id="btn-open-related-category-modal">
                 <i data-lucide="folder-tree" width="14" height="14"></i>
                 <span id="related-category-count">{% if category_relateds|length > 0 %}{{ category_relateds|length }} {{ text_selected }}{% else %}{{ text_select_related }}{% endif %}</span>
               </button>
               <div id="category-related" class="dcx-tree-select__well">{% for category_related in category_relateds %}
-                  <div class="dcx-tree-select__well-item" data-id="{{ category_related.category_id }}"><i data-lucide="minus-circle" width="14" height="14" class="dcx-tree-select__well-remove"></i> <span class="dcx-tree-select__well-label">{{ category_related.name }}</span>
+                  <div class="dcx-tree-select__well-item" data-id="{{ category_related.category_id }}"><i data-lucide="circle-minus" width="14" height="14" class="dcx-tree-select__well-remove"></i> <span class="dcx-tree-select__well-label">{{ category_related.name }}</span>
                     <input type="hidden" name="category_related[]" value="{{ category_related.category_id }}" />
                   </div>
                 {% endfor %}</div>
@@ -279,7 +279,7 @@
         </div>
         <div class="dcx-sidebar-card">
           <div class="dcx-sidebar-card__header">
-            <div class="dcx-sidebar-card__header-icon"><i data-lucide="layout" width="16" height="16"></i></div>
+            <div class="dcx-sidebar-card__header-icon"><i data-lucide="columns-2" width="16" height="16"></i></div>
             <h3 class="dcx-sidebar-card__title">{{ text_design_card }}</h3>
           </div>
           <div class="dcx-sidebar-card__body">
@@ -385,7 +385,7 @@ $('#related-category-confirm').on('click', function() {
     for (var j = 0; j < allItems.length; j++) {
       if (String(allItems[j].category_id) === String(ids[i])) {
         var name = allItems[j].path || allItems[j].name;
-        $well.append('<div class="dcx-tree-select__well-item" data-id="' + ids[i] + '"><i data-lucide="minus-circle" width="14" height="14" class="dcx-tree-select__well-remove"></i> <span class="dcx-tree-select__well-label">' + name + '</span><input type="hidden" name="category_related[]" value="' + ids[i] + '"/></div>');
+        $well.append('<div class="dcx-tree-select__well-item" data-id="' + ids[i] + '"><i data-lucide="circle-minus" width="14" height="14" class="dcx-tree-select__well-remove"></i> <span class="dcx-tree-select__well-label">' + name + '</span><input type="hidden" name="category_related[]" value="' + ids[i] + '"/></div>');
         break;
       }
     }
