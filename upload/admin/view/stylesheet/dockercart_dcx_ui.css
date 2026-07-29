@@ -1749,7 +1749,7 @@ div.dcx-field.required > .dcx-label:before {
     opacity: 1;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 991px) {
   .dcx-pills {
     display: flex;
     flex-direction: column;
