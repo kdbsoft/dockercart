@@ -77,6 +77,41 @@ class ControllerStartupSeoUrl extends Controller
             }
         }
 
+        // Handle ?variant_id=N:
+        //   - If /variant-N already in path → just strip ?variant_id from query
+        //   - Otherwise → 301 redirect to /variant-N in path
+        if (
+            $this->isGetRequest &&
+            !$this->isXhr &&
+            $this->config->get("config_seo_url") &&
+            isset($this->request->get["variant_id"]) &&
+            isset($this->request->get["_route_"]) &&
+            $this->request->get["_route_"] !== ""
+        ) {
+            $variant_id = (int) $this->request->get["variant_id"];
+            if ($variant_id > 0) {
+                $route_path = $this->request->get["_route_"];
+
+                if (preg_match('/\/variant-\d+$/', $route_path)) {
+                    // /variant-N already in path — only clean ?variant_id from query
+                    $remaining = $this->buildRemainingQueryString(["_route_", "route", "variant_id"]);
+                    $redirect_url = $this->buildRedirectUrl(
+                        "/" . $this->calculateLanguagePrefix() . $route_path . $remaining,
+                    );
+                    $this->response->redirect($redirect_url, 301);
+                    exit();
+                } else {
+                    // No /variant-N in path yet — redirect with variant suffix
+                    $remaining = $this->buildRemainingQueryString(["_route_", "route", "variant_id"]);
+                    $redirect_url = $this->buildRedirectUrl(
+                        "/" . $this->calculateLanguagePrefix() . $route_path . "/variant-" . $variant_id . $remaining,
+                    );
+                    $this->response->redirect($redirect_url, 301);
+                    exit();
+                }
+            }
+        }
+
         // Decode SEO URL for both GET and POST requests
         // This ensures POST requests to SEO URLs (e.g., /login) are routed correctly
         $this->decodeSeoUrl();
@@ -226,6 +261,15 @@ class ControllerStartupSeoUrl extends Controller
             $url = $this->getSeoKeyword("product_id=" . $product_id);
             if ($url) {
                 unset($data["product_id"], $data["path"], $data["route"]);
+                
+                // Append /variant-N to the SEO URL path
+                if (isset($data["variant_id"])) {
+                    $variant_id = (int) $data["variant_id"];
+                    if ($variant_id > 0) {
+                        $url .= "/variant-" . $variant_id;
+                    }
+                    unset($data["variant_id"]);
+                }
             } else {
                 $fallback = $this->buildEntityFallbackKeyword(
                     "product",
@@ -236,6 +280,15 @@ class ControllerStartupSeoUrl extends Controller
                 if ($fallback) {
                     $url = $fallback;
                     unset($data["product_id"], $data["path"], $data["route"]);
+                    
+                    // Append /variant-N to the fallback SEO URL path
+                    if (isset($data["variant_id"])) {
+                        $variant_id = (int) $data["variant_id"];
+                        if ($variant_id > 0) {
+                            $url .= "/variant-" . $variant_id;
+                        }
+                        unset($data["variant_id"]);
+                    }
                 }
             }
         } elseif (
@@ -880,10 +933,21 @@ class ControllerStartupSeoUrl extends Controller
             "path",
             "manufacturer_id",
             "information_id",
+            "variant_id",
         ];
         $remaining_query = $this->buildRemainingQueryString($excluded_params);
+
+        // Append /variant-N to the SEO URL path when present
+        $variant_suffix = "";
+        if (isset($this->request->get["variant_id"])) {
+            $vid = (int) $this->request->get["variant_id"];
+            if ($vid > 0) {
+                $variant_suffix = "/variant-" . $vid;
+            }
+        }
+
         $redirect_url = $this->buildRedirectUrl(
-            "/" . $this->calculateLanguagePrefix() . $canonical_keyword . $remaining_query,
+            "/" . $this->calculateLanguagePrefix() . $canonical_keyword . $variant_suffix . $remaining_query,
         );
 
         $this->response->redirect($redirect_url, 301);
@@ -1050,14 +1114,25 @@ class ControllerStartupSeoUrl extends Controller
             "category_id",
             "blog_author_id",
             "author_id",
+            "variant_id",
         ];
         $remaining_query = $this->buildRemainingQueryString($excluded_params);
+
+        // Append /variant-N to the SEO URL path when present
+        $variant_suffix = "";
+        if (isset($this->request->get["variant_id"])) {
+            $vid = (int) $this->request->get["variant_id"];
+            if ($vid > 0) {
+                $variant_suffix = "/variant-" . $vid;
+            }
+        }
 
         // Build and perform redirect with language prefix
         $redirect_url = $this->buildRedirectUrl(
             "/" .
                 $this->calculateLanguagePrefix() .
                 $seo_keyword .
+                $variant_suffix .
                 $remaining_query,
         );
 
@@ -1285,9 +1360,20 @@ class ControllerStartupSeoUrl extends Controller
     {
         $detected_types = [];
         $matched = [];
+        $has_variant_suffix = false;
 
         // Process each segment of the URL
         foreach ($parts as $part) {
+            // Intercept /variant-N as a product variant suffix
+            if (preg_match('/^variant-(\d+)$/', $part, $vm)) {
+                $variant_id = (int) $vm[1];
+                if ($variant_id > 0) {
+                    $this->request->get["variant_id"] = $variant_id;
+                }
+                $has_variant_suffix = true;
+                continue;
+            }
+
             $resolved_query = $this->getSeoQueryByKeyword($part);
 
             if ($resolved_query !== "") {
@@ -1316,6 +1402,19 @@ class ControllerStartupSeoUrl extends Controller
                     $this->request->get["route"] = $resolved_query;
                     $detected_types[] = "route";
                 }
+            } elseif (preg_match('/^product-(\d+)$/', $part, $fm)) {
+                // Fallback: product-N without DB keyword
+                $this->request->get["product_id"] = (int) $fm[1];
+                $detected_types[] = "product";
+            } elseif (preg_match('/^category-(\d+)$/', $part, $fm)) {
+                $this->request->get["path"] = (int) $fm[1];
+                $detected_types[] = "category";
+            } elseif (preg_match('/^brand-(\d+)$/', $part, $fm)) {
+                $this->request->get["manufacturer_id"] = (int) $fm[1];
+                $detected_types[] = "manufacturer";
+            } elseif (preg_match('/^page-(\d+)$/', $part, $fm)) {
+                $this->request->get["information_id"] = (int) $fm[1];
+                $detected_types[] = "information";
             } else {
                 // Part not found in DB - invalid SEO URL segment
                 $this->request->get["route"] = "error/not_found";
@@ -1324,7 +1423,7 @@ class ControllerStartupSeoUrl extends Controller
         }
 
         // Handle multi-segment URLs with canonical redirect (only for GET requests)
-        if ($this->isGetRequest && count($parts) > 1) {
+        if ($this->isGetRequest && count($parts) > 1 && !$has_variant_suffix) {
             $unique_types = array_values(array_unique($detected_types));
             $has_product = isset($this->request->get["product_id"]);
             $has_manufacturer = isset($this->request->get["manufacturer_id"]);
@@ -1544,6 +1643,15 @@ class ControllerStartupSeoUrl extends Controller
      */
     private function decodeFallbackEntityKeyword($keyword)
     {
+        // variant-N: redirect to product page with /variant-N suffix
+        if (preg_match('/^variant-(\d+)$/', $keyword, $matches)) {
+            $variant_id = (int) $matches[1];
+            // variant-N alone is invalid — variant must have a parent product.
+            // If we reach here, treat as 404 (variant without product context).
+            $this->request->get["route"] = "error/not_found";
+            return true;
+        }
+
         if (preg_match('/^category-(\d+)$/', $keyword, $matches)) {
             $category_id = (int) $matches[1];
             $seo_keyword = $this->getSeoKeyword("category_id=" . $category_id);
