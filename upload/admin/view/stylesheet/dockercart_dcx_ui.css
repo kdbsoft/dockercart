@@ -817,6 +817,11 @@ div.dcx-field.required > .dcx-label:before {
     text-transform: none;
     letter-spacing: 0;
 }
+
+.dcx-sidebar-card__checkbox [data-toggle="tooltip"] {
+    height: 14px;
+}
+
 .dcx-sidebar-card__body .form-control {
     height: 34px;
     font-size: 13px;
@@ -1360,11 +1365,15 @@ div.dcx-field.required > .dcx-label:before {
     display: inline-flex;
     align-items: center;
     gap: 8px 6px;
+    color: var(--dc-text-dark);
 }
 
 .dcx-checkbox-label input[type="checkbox"] {
     margin: 0;
     flex-shrink: 0;
+}
+.dcx-checkbox-label [data-toggle="tooltip"] {
+    height: 14px;
 }
 
 /* ── Rating stars ── */
