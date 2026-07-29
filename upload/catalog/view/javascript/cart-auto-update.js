@@ -324,13 +324,13 @@ function showNotification(type, message) {
 	let bgColor = 'bg-green-50';
 	let borderColor = 'border-green-200';
 	let textColor = 'text-green-700';
-	let icon = 'check-circle';
+	let icon = 'circle-check';
 	
 	if (type === 'error') {
 		bgColor = 'bg-red-50';
 		borderColor = 'border-red-200';
 		textColor = 'text-red-700';
-		icon = 'alert-circle';
+		icon = 'circle-alert';
 	}
 	
 	// Create notification element
