@@ -2134,6 +2134,7 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
     border-radius: var(--dc-radius-lg);
     box-shadow: none;
     padding: 16px;
+    margin-bottom: 0
 }
 
 .dropdown-menu + .well.well-sm {
