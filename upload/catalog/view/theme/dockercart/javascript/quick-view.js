@@ -492,7 +492,7 @@
   };
 
   QuickView._applyCompareState = function(btn, active) {
-    const icon = btn.querySelector('[data-lucide="bar-chart-2"]');
+    const icon = btn.querySelector('[data-lucide="chart-no-axes-column"]');
     if (active) {
       btn.classList.add('bg-blue-50', 'border-blue-200');
       btn.classList.add('in-wishlist');
@@ -685,7 +685,7 @@
     button.className = 'compare-btn wishlist-btn block mt-2 w-8 h-8 rounded-full bg-white shadow-md border border-gray-200 flex items-center justify-center hover:bg-blue-50 transition';
     button.setAttribute('aria-label', 'Add to compare');
     button.dataset.inCompare = isActive ? '1' : '0';
-    button.innerHTML = '<i data-lucide="bar-chart-2" class="w-3.5 h-3.5 text-gray-400"></i>';
+    button.innerHTML = '<i data-lucide="chart-no-axes-column" class="w-3.5 h-3.5 text-gray-400"></i>';
     button.addEventListener('click', function(event) {
       event.stopPropagation();
       window.dcToggleCompare(productId, button);
