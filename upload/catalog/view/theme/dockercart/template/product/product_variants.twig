@@ -38,7 +38,9 @@
 	var defaultImgSrc = mainImgEl ? mainImgEl.src : '';
 	var originalBasePrice = priceEl ? parseFloat(priceEl.dataset.basePrice || '0') : 0;
 	var skuEl = document.getElementById('dc-variant-sku');
-	var originalSku = skuEl ? skuEl.textContent : '';
+	var originalSku = skuEl ? (skuEl.dataset.baseSku || skuEl.textContent) : '';
+	var isInitPhase = true;
+	var taxEl = document.querySelector('[id^="dc-unit-tax"]');
 
 	function getOvIdForPov(axis, povId) {
 		if (!axis.pov_map) return null;
@@ -171,7 +173,7 @@
 				priceSpecialContainer.classList.add('hidden');
 				priceRegularContainer.classList.remove('hidden');
 
-				var price = (variant && variant.price !== null && variant.price !== undefined) ? parseFloat(variant.price) : originalBasePrice;
+				var price = (variant && variant.price !== null && variant.price !== undefined && parseFloat(variant.price) > 0) ? parseFloat(variant.price) : originalBasePrice;
 				if (isNaN(price)) price = originalBasePrice;
 				priceEl.dataset.currentPrice = String(price);
 				if (typeof dcFormatMoney === 'function') {
@@ -183,6 +185,26 @@
 
 		if (skuEl) {
 			skuEl.textContent = (variant && variant.sku) ? variant.sku : originalSku;
+		}
+
+		// Tax
+		if (taxEl && variant && variant.tax_text) {
+			taxEl.textContent = '{{ text_tax|e('js') }} ' + variant.tax_text;
+		} else if (taxEl) {
+			taxEl.textContent = '';
+		}
+
+		// Sync base price for dcRecalcOptionPrice so it doesn't overwrite variant price
+		if (variant && variant.price !== null && variant.price !== undefined && parseFloat(variant.price) > 0) {
+			var vPrice = parseFloat(variant.price);
+			if (priceEl) {
+				priceEl.dataset.basePrice = String(vPrice);
+				priceEl.dataset.currentPrice = String(vPrice);
+			}
+		} else {
+			if (priceEl && originalBasePrice > 0) {
+				priceEl.dataset.basePrice = String(originalBasePrice);
+			}
 		}
 
 		if (typeof dcRecalcOptionPrice === 'function') dcRecalcOptionPrice(); else if (typeof dcUpdateSubtotal === 'function') dcUpdateSubtotal();
@@ -205,6 +227,70 @@
 		updateAvailableOptions();
 	}
 
+	/* ── URL sync: update /variant-N in pathname ── */
+	function updateVariantUrl(variantId) {
+		if (!window.history || !window.history.replaceState) return;
+		var path = window.location.pathname;
+		// Remove any existing /variant-N suffix
+		path = path.replace(/\/variant-\d+$/, '');
+		if (variantId) {
+			path += '/variant-' + variantId;
+		}
+		var newUrl = path + window.location.search + window.location.hash;
+		if (newUrl !== window.location.pathname + window.location.search + window.location.hash) {
+			window.history.replaceState({}, '', newUrl);
+		}
+	}
+
+	/* ── Set axes from a variant (silent, no events) ── */
+	function applyVariantAxes(variant) {
+		if (!variant || !variant.values || !Array.isArray(variant.values)) return;
+		variant.values.forEach(function(vv) {
+			var axis = null;
+			for (var a = 0; a < matrix.axes.length; a++) {
+				if (matrix.axes[a].option_id == vv.option_id) { axis = matrix.axes[a]; break; }
+			}
+			if (!axis || !axis.po_id) return;
+			var povId = axis.pov_map ? axis.pov_map[vv.option_value_id] : null;
+			if (!povId) return;
+
+			var inputs = productEl.querySelectorAll('input[name="option[' + axis.po_id + ']"]');
+			if (inputs.length) {
+				for (var ii = 0; ii < inputs.length; ii++) {
+					inputs[ii].checked = (inputs[ii].value == povId);
+				}
+			} else {
+				var sel = productEl.querySelector('select[name="option[' + axis.po_id + ']"]');
+				if (sel) {
+					for (var i = 0; i < sel.options.length; i++) {
+						if (sel.options[i].value == povId) {
+							sel.value = povId;
+							break;
+						}
+					}
+				}
+			}
+		});
+	}
+
+	/* ── Sync .active class on axis radio labels ── */
+	function syncAxisActiveClasses() {
+		matrix.axes.forEach(function(axis) {
+			if (!axis.po_id) return;
+			productEl.querySelectorAll('input[name="option[' + axis.po_id + ']"]').forEach(function(r) {
+				if (r.nextElementSibling) {
+					r.nextElementSibling.classList.toggle('active', r.checked);
+				}
+			});
+		});
+	}
+
+	/* ── Resolve variant from current inputs ── */
+	function getCurrentVariant() {
+		var axes = getSelectedAxes();
+		return axes ? resolveVariant(axes) : null;
+	}
+
 	document.addEventListener('change', function(e) {
 		var target = e.target;
 		var name = target.name || '';
@@ -218,38 +304,26 @@
 		}
 		if (!isAxis) return;
 
-		var axes = getSelectedAxes();
-		updateVariantUI(axes ? resolveVariant(axes) : null);
+		var variant = getCurrentVariant();
+		updateVariantUI(variant);
+		syncAxisActiveClasses();
+		if (!isInitPhase) {
+			updateVariantUrl(variant ? variant.variant_id : null);
+		}
 	});
 
-	if (document.readyState !== 'loading') {
+	if (document.readyState !== 'loading') { init(); }
+	else { document.addEventListener('DOMContentLoaded', init); }
+
+	function init() {
 		if (cartBtn && !cartBtn.dataset.originalText) {
 			cartBtn.dataset.originalText = cartBtn.textContent;
 		}
 
-		if (matrix.default_variant_id && matrix.default_variant) {
-			var dv = matrix.default_variant;
-			if (dv.values) {
-				dv.values.forEach(function(vv) {
-					var axis = null;
-					for (var a = 0; a < matrix.axes.length; a++) {
-						if (matrix.axes[a].option_id == vv.option_id) { axis = matrix.axes[a]; break; }
-					}
-					if (!axis || !axis.po_id) return;
-					var povId = axis.pov_map ? axis.pov_map[vv.option_value_id] : null;
-					if (!povId) return;
-
-					var input = productEl.querySelector('input[name="option[' + axis.po_id + '"][value="' + povId + '"]');
-					if (input) {
-						input.checked = true;
-						input.dispatchEvent(new Event('change', {bubbles: true}));
-					}
-				});
-				updateVariantUI(dv);
-			}
-		} else {
-			updateAvailableOptions();
-		}
+		// Server already rendered the correct price/SKU/checked state for the
+		// selected variant. Just initialise the compatibility matrix.
+		updateAvailableOptions();
+		isInitPhase = false;
 	}
 })();
 //--></script>
