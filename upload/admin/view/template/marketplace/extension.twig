@@ -15,7 +15,7 @@
     {% if error_warning %}
     <div class="row">
       <div class="col-sm-12">
-        <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
+        <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
           <button type="button" class="close" data-dismiss="alert">&times;</button>
         </div>
       </div>
@@ -24,7 +24,7 @@
     {% if success %}
     <div class="row">
       <div class="col-sm-12">
-        <div id="ext-alert-success" class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> {{ success }}
+        <div id="ext-alert-success" class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> {{ success }}
           <button type="button" class="close" data-dismiss="alert">&times;</button>
         </div>
       </div>
@@ -36,13 +36,13 @@
       .ext-toolbar-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
       .ext-toolbar-search { flex: 1 1 260px; min-width: 200px; max-width: 400px; }
       .ext-toolbar-filters { flex: 0 0 auto; white-space: nowrap; }
-      #content .label svg[data-lucide] { width: 12px; height: 12px; vertical-align: -2px; }
-      #content .alert svg[data-lucide] { width: 16px; height: 16px; vertical-align: -3px; }
-      #content .panel-footer .btn svg[data-lucide] { width: 14px; height: 14px; vertical-align: -2px; }
-      #content .ext-instance svg[data-lucide] { width: 14px; height: 14px; }
-      #content .ext-group-heading svg[data-lucide] { width: 18px; height: 18px; vertical-align: -3px; }
-      #content .ext-card .panel-heading svg[data-lucide] { width: 20px; height: 20px; vertical-align: -4px; }
-      #content .ext-type-btn svg[data-lucide] { width: 14px; height: 14px; vertical-align: -2px; margin-right: 4px; }
+      #content .label svg[data-lucide] { width: 12px !important; height: 12px !important; vertical-align: -2px; }
+      #content .alert svg[data-lucide] { width: 16px !important; height: 16px !important; vertical-align: -3px; }
+      #content .ext-card .panel-footer .btn svg[data-lucide] { width: 14px !important; height: 14px !important; vertical-align: -2px; }
+      #content .ext-instances svg[data-lucide] { width: 14px !important; height: 14px !important; }
+      #content .ext-group-heading svg[data-lucide] { width: 18px !important; height: 18px !important; vertical-align: -3px; }
+      #content .ext-card .panel-heading svg[data-lucide] { width: 20px !important; height: 20px !important; vertical-align: -4px; }
+      #content .ext-type-btn svg[data-lucide] { width: 14px !important; height: 14px !important; vertical-align: -2px; margin-right: 4px; }
       #content .ext-empty-state svg[data-lucide], #ext-empty-state svg[data-lucide] { width: 48px; height: 48px; }
     </style>
     <div class="row">
@@ -106,7 +106,7 @@
               <i data-lucide="{{ group.icon }}" style="width:20px;height:20px;color:{% if ext.installed %}{% if ext.status_raw %}#166534{% else %}#6b7280{% endif %}{% else %}#9ca3af{% endif %};"></i>
               <strong title="{{ ext.name|striptags }}">{{ ext.name|raw }}</strong>
               {% if ext.is_official %}
-              <span style="font-size:11px;color:#2563eb;vertical-align:middle;margin-left:4px;"><i data-lucide="check-circle"></i> {{ text_official }}</span>
+              <span style="font-size:11px;color:#2563eb;vertical-align:middle;margin-left:4px;"><i data-lucide="circle-check"></i> {{ text_official }}</span>
               {% endif %}
             </div>
             {% if ext.installed %}
@@ -118,7 +118,7 @@
               <div style="margin-bottom:8px;display:flex;align-items:center;flex-wrap:wrap;gap:4px;">
                 {% if ext.installed %}
                   {% if ext.status_raw %}
-                  <span class="label label-success"><i data-lucide="check-circle"></i> {{ text_enabled }}</span>
+                  <span class="label label-success"><i data-lucide="circle-check"></i> {{ text_enabled }}</span>
                   {% else %}
                   <span class="label label-default"><i data-lucide="circle"></i> {{ text_disabled }}</span>
                   {% endif %}
@@ -144,7 +144,7 @@
                 </div>
                 {% endfor %}
                 <div style="margin-top:4px;">
-                  <a href="{{ ext.edit }}" style="font-size:12px;"><i data-lucide="plus-circle"></i> {{ button_add }}</a>
+                  <a href="{{ ext.edit }}" class="btn btn-xs btn-default"><i data-lucide="circle-plus"></i> {{ button_add }}</a>
                 </div>
               </div>
               {% endif %}
@@ -167,7 +167,7 @@
                         data-url="{{ ext.uninstall_url }}"
                         data-name="{{ ext.name|striptags }}"
                         data-confirm="{{ text_confirm }}">
-                  <i data-lucide="minus-circle"></i>
+                  <i data-lucide="circle-minus"></i>
                 </button>
               {% else %}
                 <button type="button"
@@ -175,7 +175,7 @@
                         title="{{ button_install }}"
                         data-url="{{ ext.install_url }}"
                         data-name="{{ ext.name|striptags }}">
-                  <i data-lucide="plus-circle"></i> {{ button_install }}
+                  <i data-lucide="circle-plus"></i> {{ button_install }}
                 </button>
               {% endif %}
             </div>
@@ -270,7 +270,7 @@
   // ---- Install / Uninstall via AJAX ----
   function showAlert(msg, type) {
     var cls = type === 'error' ? 'alert-danger' : 'alert-success';
-    var icon = type === 'error' ? 'alert-circle' : 'check-circle';
+    var icon = type === 'error' ? 'circle-alert' : 'circle-check';
     var html = '<div class="alert ' + cls + ' alert-dismissible"><i data-lucide="' + icon + '"></i> ' + msg + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>';
     var $alert = $(html);
     $('#ext-alert-success, #ext-alert-danger').remove();

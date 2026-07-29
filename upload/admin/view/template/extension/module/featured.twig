@@ -1,11 +1,9 @@
 {{ header }}{{ column_left }}
 <div id="content">
-  <div class="container-fluid">
   <div class="page-header">
-
-
+    <div class="container-fluid">
       <div class="row">
-        <div class="col-md-12 col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
+        <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
           <div class="pull-right">
             <button type="submit" form="form-module" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary btn--icon"><i data-lucide="save" width="16" height="16"></i></button>
             <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default btn--icon"><i data-lucide="x" width="16" height="16"></i></a>
@@ -22,55 +20,48 @@
             </span>
           </a>
         </div>
-          {% if error_warning %}
+      </div>
+      {% if error_warning %}
       <div class="row">
-        <div class="col-md-12 col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
-          <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
+        <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
+          <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
         </div>
       </div>
       {% endif %}
+    </div>
   </div>
-</div>
-<div class="container-fluid"><div class="row">
-      <div class="col-md-12 col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
-        <div class="dcx-shell">
-          <div class="dcx-panel">
-            <div class="dcx-panel-head">
-              <div class="dcx-panel-head__icon"><i data-lucide="pencil" width="18" height="18"></i></div>
-              <div>
-                <div class="dcx-panel-title">{{ text_edit }}</div>
-                <div class="dcx-panel-subtitle">{{ text_edit_subtitle }}</div>
+  <div class="container-fluid">
+    <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-module">
+      <div class="row">
+        <div class="col-md-12 col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
+          <div class="dcx-shell">
+            <div class="dcx-panel">
+              <div class="dcx-panel-head">
+                <div class="dcx-panel-head__icon"><i data-lucide="pencil" width="18" height="18"></i></div>
+                <div>
+                  <div class="dcx-panel-title">{{ text_edit }}</div>
+                </div>
               </div>
-            </div>
-            <div class="dcx-panel-body">
-              <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-module">
+              <div class="dcx-panel-body">
                 <div class="dcx-fields">
-                  <div class="dcx-field">
+                  <div class="dcx-field required">
                     <label class="dcx-label">{{ entry_name }}</label>
-                    <ul class="nav nav-tabs" style="margin-bottom:10px;">
-                      {% for language in languages %}
-                      <li{% if loop.first %} class="active"{% endif %}><a href="#name-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
-                      {% endfor %}
-                    </ul>
-                    <div class="tab-content">
-                      {% for language in languages %}
-                      <div class="tab-pane{% if loop.first %} active{% endif %}" id="name-lang-{{ language.language_id }}">
-                        <input type="text" name="name_translation[{{ language.language_id }}]" value="{{ name_translation[language.language_id] }}" placeholder="{{ entry_name }}" class="form-control" />
-                      </div>
-                      {% endfor %}
+                    {% for language in languages %}
+                    <div class="dc-attr-row__value">
+                      <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                      <input type="text" name="name_translation[{{ language.language_id }}]" value="{{ name_translation[language.language_id] }}" placeholder="{{ entry_name }}" class="form-control" />
                     </div>
-                    {% if error_name %}
-                    <div class="text-danger">{{ error_name }}</div>
-                    {% endif %}
+                    {% endfor %}
+                    {% if error_name %}<div class="text-danger">{{ error_name }}</div>{% endif %}
                   </div>
                   <div class="dcx-field">
                     <label class="dcx-label" for="input-product"><span data-toggle="tooltip" title="{{ help_product }}">{{ entry_product }}</span></label>
                     <input type="text" name="product_name" value="" placeholder="{{ entry_product }}" id="input-product" class="form-control" />
                     <div id="featured-product" class="well well-sm" style="height: 150px; overflow: auto;">
                       {% for product in products %}
-                      <div id="featured-product{{ product.product_id }}"><i data-lucide="minus-circle" width="14" height="14"></i> {{ product.name }}
+                      <div id="featured-product{{ product.product_id }}"><i data-lucide="circle-minus" width="14" height="14"></i> {{ product.name }}
                         <input type="hidden" name="product[]" value="{{ product.product_id }}" />
                       </div>
                       {% endfor %}
@@ -119,14 +110,15 @@
                     </select>
                   </div>
                 </div>
-              </form>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </form>
   </div>
-  <script type="text/javascript"><!--
+</div>
+<script type="text/javascript"><!--
 $('input[name=\'product_name\']').autocomplete({
 	source: function(request, response) {
 		$.ajax({
@@ -144,16 +136,16 @@ $('input[name=\'product_name\']').autocomplete({
 	},
 	select: function(item) {
 		$('input[name=\'product_name\']').val('');
-		
+
 		$('#featured-product' + item['value']).remove();
-		
-		$('#featured-product').append('<div id="featured-product' + item['value'] + '"><i data-lucide="minus-circle" width="14" height="14"></i> ' + item['label'] + '<input type="hidden" name="product[]" value="' + item['value'] + '" /></div>');
+
+		$('#featured-product').append('<div id="featured-product' + item['value'] + '"><i data-lucide="circle-minus" width="14" height="14"></i> ' + item['label'] + '<input type="hidden" name="product[]" value="' + item['value'] + '" /></div>');
 		lucide.createIcons();
 	}
 });
-	
-$('#featured-product').delegate('i[data-lucide="minus-circle"]', 'click', function() {
+
+$('#featured-product').delegate('i[data-lucide="circle-minus"]', 'click', function() {
 	$(this).parent().remove();
 });
-//--></script></div>
+//--></script>
 {{ footer }}

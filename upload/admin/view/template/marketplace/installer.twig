@@ -30,7 +30,7 @@
             <div class="dcx-panel-body">
               <div class="dcx-fields">
                 <div class="dcx-field">
-                  <label class="dcx-label" for="button-upload">{{ entry_upload }} <span data-toggle="tooltip" title="{{ help_upload }}"><i data-lucide="help-circle" width="16" height="16" class="text-muted"></i></span></label>
+                  <label class="dcx-label" for="button-upload">{{ entry_upload }} <span data-toggle="tooltip" title="{{ help_upload }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span></label>
                   <div class="dcx-field-icon-wrap">
                     <button type="button" id="button-upload" data-loading-text="{{ text_loading }}" class="btn btn-primary"><i data-lucide="upload" width="14" height="14"></i> {{ button_upload }}</button>
                   </div>
@@ -183,12 +183,12 @@ $('#history').on('click', '.btn-danger', function(e) {
 			$('.alert-dismissible').remove();
 
 			if (json['error']) {
-				$('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+				$('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
 				lucide.createIcons();
 			}
 
 			if (json['success']) {
-				$('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+				$('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
 				lucide.createIcons();
 
 				$('#history').load('index.php?route=marketplace/installer/history&user_token={{ user_token }}');

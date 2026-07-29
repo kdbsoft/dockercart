@@ -20,7 +20,7 @@ function getDcProductId() {
 function showToast(msg, type, dur) {
 	var $container = $('#dc-variant-toasts');
 	var cls = type === 'error' ? 'dc-toast-error' : 'dc-toast-success';
-	var icon = type === 'error' ? 'alert-circle' : 'check-circle';
+	var icon = type === 'error' ? 'circle-alert' : 'circle-check';
 	var $toast = $('<div class="dc-toast ' + cls + '"><i data-lucide="' + icon + '"></i> ' + msg + '</div>');
 	$container.append($toast);
 	lucide.createIcons({ nodes: [$toast[0]] });
@@ -243,7 +243,7 @@ function renderVariantMatrix(productId, json) {
 	html += '<div class="row" style="margin-bottom:12px">';
 	html += '<div class="col-sm-12">';
 	html += '<button type="button" class="btn btn-primary btn-sm" onclick="addVariantRow(' + productId + ')"><i data-lucide="plus"></i> {{ button_add_variant|e("js") }}</button>';
-	html += ' <button type="button" class="btn btn-warning btn-sm" onclick="generateVariants(' + productId + ')" title="{{ help_generate|e("js") }}"><i data-lucide="wand-2"></i> {{ button_generate|e("js") }}</button>';
+	html += ' <button type="button" class="btn btn-warning btn-sm" onclick="generateVariants(' + productId + ')" title="{{ help_generate|e("js") }}"><i data-lucide="wand-sparkles"></i> {{ button_generate|e("js") }}</button>';
 	html += '</div></div>';
 	html += '<div class="dc-variant-scroll-wrapper">';
 	html += '<table class="table table-bordered table-hover dc-variant-table" id="dc-variant-table">';
@@ -382,13 +382,13 @@ function buildVariantRow(productId, variant, axes, defaultVariantId) {
 			{% endfor %}
 			html += '</select>';
 			html += '<input type="number" step="0.0001" class="form-control input-sm dc-cg-price" value="' + (cg.price || '') + '" placeholder="{{ entry_price|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')"/>';
-			html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-cg-row\').remove();updateSubrowBadges(' + rowIdx + ');scheduleAutoSave(' + rowIdx + ')"><i data-lucide="minus-circle"></i></button>';
+			html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-cg-row\').remove();updateSubrowBadges(' + rowIdx + ');scheduleAutoSave(' + rowIdx + ')"><i data-lucide="circle-minus"></i></button>';
 			html += '</div>';
 		}
 	}
 
 	html += '</div>';
-	html += '<button type="button" class="btn btn-primary btn-xs dc-cg-add-btn" onclick="addVariantCgPrice(' + rowIdx + ')"><i data-lucide="plus-circle"></i> {{ button_cg_add|e("js") }}</button>';
+	html += '<button type="button" class="btn btn-primary btn-xs dc-cg-add-btn" onclick="addVariantCgPrice(' + rowIdx + ')"><i data-lucide="circle-plus"></i> {{ button_cg_add|e("js") }}</button>';
 	html += '</div>';
 
 	html += '<div class="dc-subrow-panel' + (specialsVisible ? ' dc-subrow-panel--active' : '') + '" id="dc-panel-specials-' + rowIdx + '"' + (specialsVisible ? '' : ' style="display:none"') + '>';
@@ -417,13 +417,13 @@ function buildVariantRow(productId, variant, axes, defaultVariantId) {
 			html += '<input type="date" class="form-control input-sm dc-special-date-start" value="' + (sp.date_start && sp.date_start != '0000-00-00' ? sp.date_start : '') + '" placeholder="{{ entry_date_start|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:120px"/>';
 			html += '<input type="date" class="form-control input-sm dc-special-date-end" value="' + (sp.date_end && sp.date_end != '0000-00-00' ? sp.date_end : '') + '" placeholder="{{ entry_date_end|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:120px"/>';
 			html += '<input type="checkbox" class="dc-special-auto-renew"' + (sp.auto_renew ? ' checked="checked"' : '') + ' onchange="scheduleAutoSave(' + rowIdx + ')"/>';
-			html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-special-row\').remove();updateSubrowBadges(' + rowIdx + ');scheduleAutoSave(' + rowIdx + ')"><i data-lucide="minus-circle"></i></button>';
+			html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-special-row\').remove();updateSubrowBadges(' + rowIdx + ');scheduleAutoSave(' + rowIdx + ')"><i data-lucide="circle-minus"></i></button>';
 			html += '</div>';
 		}
 	}
 
 	html += '</div>';
-	html += '<button type="button" class="btn btn-primary btn-xs dc-special-add-btn" onclick="addVariantSpecialRow(' + rowIdx + ')"><i data-lucide="plus-circle"></i> {{ button_special_add|e("js") }}</button>';
+	html += '<button type="button" class="btn btn-primary btn-xs dc-special-add-btn" onclick="addVariantSpecialRow(' + rowIdx + ')"><i data-lucide="circle-plus"></i> {{ button_special_add|e("js") }}</button>';
 	html += '</div>';
 
 	html += '</div></td></tr>';
@@ -488,7 +488,7 @@ function addVariantRow(productId) {
 	html += '<span class="dc-cg-header-action"></span>';
 	html += '</div>';
 	html += '<div class="dc-cg-prices" id="dc-cg-prices-' + rowIdx + '"></div>';
-	html += '<button type="button" class="btn btn-primary btn-xs dc-cg-add-btn" onclick="addVariantCgPrice(' + rowIdx + ')"><i data-lucide="plus-circle"></i> {{ button_cg_add|e("js") }}</button>';
+	html += '<button type="button" class="btn btn-primary btn-xs dc-cg-add-btn" onclick="addVariantCgPrice(' + rowIdx + ')"><i data-lucide="circle-plus"></i> {{ button_cg_add|e("js") }}</button>';
 	html += '</div>';
 
 	html += '<div class="dc-subrow-panel" id="dc-panel-specials-' + rowIdx + '" style="display:none">';
@@ -502,7 +502,7 @@ function addVariantRow(productId) {
 	html += '<span class="dc-special-header-action"></span>';
 	html += '</div>';
 	html += '<div class="dc-special-prices" id="dc-special-prices-' + rowIdx + '"></div>';
-	html += '<button type="button" class="btn btn-primary btn-xs dc-special-add-btn" onclick="addVariantSpecialRow(' + rowIdx + ')"><i data-lucide="plus-circle"></i> {{ button_special_add|e("js") }}</button>';
+	html += '<button type="button" class="btn btn-primary btn-xs dc-special-add-btn" onclick="addVariantSpecialRow(' + rowIdx + ')"><i data-lucide="circle-plus"></i> {{ button_special_add|e("js") }}</button>';
 	html += '</div>';
 
 	html += '</div></td></tr>';
@@ -617,7 +617,7 @@ function addVariantCgPrice(rowIdx) {
 	{% endfor %}
 	html += '</select>';
 	html += '<input type="number" step="0.0001" class="form-control input-sm dc-cg-price" placeholder="{{ entry_price|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')"/>';
-	html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-cg-row\').remove();updateSubrowBadges(' + rowIdx + ');scheduleAutoSave(' + rowIdx + ')"><i data-lucide="minus-circle"></i></button>';
+	html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-cg-row\').remove();updateSubrowBadges(' + rowIdx + ');scheduleAutoSave(' + rowIdx + ')"><i data-lucide="circle-minus"></i></button>';
 	html += '</div>';
 	$('#dc-cg-prices-' + rowIdx).append(html);
 	updateSubrowBadges(rowIdx);
@@ -635,7 +635,7 @@ function addVariantSpecialRow(rowIdx) {
 	html += '<input type="date" class="form-control input-sm dc-special-date-start" placeholder="{{ entry_date_start|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:120px"/>';
 	html += '<input type="date" class="form-control input-sm dc-special-date-end" placeholder="{{ entry_date_end|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:120px"/>';
 	html += '<input type="checkbox" class="dc-special-auto-renew" onchange="scheduleAutoSave(' + rowIdx + ')"/>';
-	html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-special-row\').remove();updateSubrowBadges(' + rowIdx + ');scheduleAutoSave(' + rowIdx + ')"><i data-lucide="minus-circle"></i></button>';
+	html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-special-row\').remove();updateSubrowBadges(' + rowIdx + ');scheduleAutoSave(' + rowIdx + ')"><i data-lucide="circle-minus"></i></button>';
 	html += '</div>';
 	$('#dc-special-prices-' + rowIdx).append(html);
 	updateSubrowBadges(rowIdx);
