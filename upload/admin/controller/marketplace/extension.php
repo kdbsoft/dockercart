@@ -421,6 +421,10 @@ class ControllerMarketplaceExtension extends Controller {
 			}
 			return (bool)$status;
 		}
-		return (bool)$this->config->get($type . '_' . $code . '_status');
+		$status = $this->config->get($type . '_' . $code . '_status');
+		if ($status === null) {
+			$status = $this->config->get($code . '_status');
+		}
+		return (bool)$status;
 	}
 }
