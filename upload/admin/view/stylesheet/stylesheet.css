@@ -333,19 +333,19 @@ a:hover, a:focus {
     font-size: 13px;
     color: var(--dc-gray-900);
     background: var(--dc-surface);
-    box-shadow: none;
+    box-shadow: var(--dc-shadow-input);
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
     height: 34px;
 }
 
 .form-control:hover {
     border-color: var(--dc-gray-400);
-    box-shadow: none;
+    box-shadow: var(--dc-shadow-input-hover);
 }
 
 .form-control:focus {
     border-color: var(--dc-primary);
-    box-shadow: 0 0 0 2px var(--dc-primary-ring);
+    box-shadow: var(--dc-shadow-input-focus);
     outline: none;
 }
 
@@ -443,12 +443,12 @@ textarea.form-control {
 .input-group .form-control:focus {
     z-index: 2;
     border-color: var(--dc-primary);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    box-shadow: var(--dc-shadow-input-focus);
 }
 
 .input-group:focus-within .input-group-addon {
     border-color: var(--dc-primary);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    box-shadow: 0 0 0 2px var(--dc-primary-ring);
 }
 .input-group:focus-within .input-group-btn .btn {
     border-color: var(--dc-primary);
@@ -551,13 +551,28 @@ div.required .control-label:not(span):before, td.required:before {
     font-size: 13px;
     font-weight: 500;
     padding: 6px 12px;
-    transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
     border: 1px solid transparent;
+    box-shadow: var(--dc-shadow-button);
+}
+
+.btn:hover {
+    box-shadow: var(--dc-shadow-button-hover);
+    transform: translateY(-0.5px);
 }
 
 .btn:active,
 .btn.active {
+    box-shadow: var(--dc-shadow-button-active);
+    transform: translateY(0);
+}
+
+.btn.disabled,
+.btn[disabled],
+fieldset[disabled] .btn {
     box-shadow: none;
+    transform: none;
+    pointer-events: none;
 }
 
 .inline-edit { cursor: default; }
@@ -611,6 +626,7 @@ div.required .control-label:not(span):before, td.required:before {
     background: var(--dc-gray-50);
     border-color: var(--dc-border-medium);
     color: var(--dc-text-dark);
+    box-shadow: var(--dc-shadow-button-hover);
 }
 
 .btn-primary {
@@ -623,6 +639,7 @@ div.required .control-label:not(span):before, td.required:before {
 .btn-primary:focus-visible {
     background: var(--dc-primary-hover);
     border-color: var(--dc-primary-hover);
+    box-shadow: var(--dc-shadow-button-hover), 0 0 0 1px rgba(91, 126, 168, 0.15);
 }
 
 .btn-success {
@@ -635,6 +652,7 @@ div.required .control-label:not(span):before, td.required:before {
 .btn-success:focus-visible {
     background: var(--dc-success-hover);
     border-color: var(--dc-success-hover);
+    box-shadow: var(--dc-shadow-button-hover), 0 0 0 1px rgba(90, 154, 109, 0.15);
 }
 
 .btn-warning {
@@ -647,6 +665,7 @@ div.required .control-label:not(span):before, td.required:before {
 .btn-warning:focus-visible {
     background: var(--dc-warning-hover);
     border-color: var(--dc-warning-hover);
+    box-shadow: var(--dc-shadow-button-hover), 0 0 0 1px rgba(196, 160, 64, 0.15);
 }
 
 .btn-danger {
@@ -659,6 +678,7 @@ div.required .control-label:not(span):before, td.required:before {
 .btn-danger:focus-visible {
     background: var(--dc-danger-hover);
     border-color: var(--dc-danger-hover);
+    box-shadow: var(--dc-shadow-button-hover), 0 0 0 1px rgba(199, 112, 112, 0.15);
 }
 
 .btn-info {
@@ -671,6 +691,7 @@ div.required .control-label:not(span):before, td.required:before {
 .btn-info:focus-visible {
     background: var(--dc-info-hover);
     border-color: var(--dc-info-hover);
+    box-shadow: var(--dc-shadow-button-hover), 0 0 0 1px rgba(74, 151, 168, 0.15);
 }
 
 .btn-link {
