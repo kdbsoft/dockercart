@@ -202,33 +202,59 @@ class ModelCatalogProduct extends Model {
 				// Build variant swatches for listing cards
 				$swatches = array();
 				if (!empty($product_data['variants'])) {
-					$used_values = array();
+					// Map of option_id => option_value_id for the default variant
+					$default_map = array();
+					if (!empty($default_variant['values'])) {
+						foreach ($default_variant['values'] as $dv) {
+							$default_map[(int)$dv['option_id']] = (int)$dv['option_value_id'];
+						}
+					}
+
+					$best_variant = array();
 					foreach ($product_data['variants'] as $v) {
 						if (!$v['status']) continue;
-						if (!empty($v['values'])) {
-							foreach ($v['values'] as $vv) {
-								$ov_key = $vv['option_id'] . '_' . $vv['option_value_id'];
-								if (!isset($used_values[$vv['option_id']])) {
-									$used_values[$vv['option_id']] = array();
-								}
-								if (!isset($used_values[$vv['option_id']][$vv['option_value_id']])) {
-									$used_values[$vv['option_id']][$vv['option_value_id']] = array(
-										'option_value_id' => (int)$vv['option_value_id'],
-										'name'            => $vv['name'],
-										'variant_id'      => (int)$v['variant_id'],
-										'image'           => $v['image'] ?? '',
-									);
-								}
+						if (empty($v['values'])) continue;
+
+						// Count how many other option values match the default variant
+						$match = 0;
+						foreach ($v['values'] as $vv) {
+							$oid = (int)$vv['option_id'];
+							if (isset($default_map[$oid]) && (int)$vv['option_value_id'] === $default_map[$oid]) {
+								$match++;
+							}
+						}
+
+						// For each option value in this variant, keep the best match
+						foreach ($v['values'] as $vv) {
+							$oid = (int)$vv['option_id'];
+							$ovid = (int)$vv['option_value_id'];
+							if (!isset($best_variant[$oid][$ovid]) || $match > $best_variant[$oid][$ovid]['match']) {
+								$best_variant[$oid][$ovid] = array(
+									'variant_id' => (int)$v['variant_id'],
+									'name'       => $vv['name'],
+									'image'      => $v['image'] ?? '',
+									'match'      => $match,
+								);
 							}
 						}
 					}
+
 					foreach ($product_data['configurable_options'] as $axis) {
 						$oid = (int)$axis['option_id'];
-						if (!empty($used_values[$oid])) {
+						if (!empty($best_variant[$oid])) {
+							$values = array();
+							foreach ($best_variant[$oid] as $ovid => $bv) {
+								$values[] = array(
+									'option_value_id' => $ovid,
+									'name'            => $bv['name'],
+									'variant_id'      => $bv['variant_id'],
+									'image'           => $bv['image'],
+								);
+							}
 							$swatches[$oid] = array(
-								'option_id'   => $oid,
-								'name'        => $axis['name'],
-								'values'      => array_values($used_values[$oid]),
+								'option_id' => $oid,
+								'name'      => $axis['name'],
+								'values'    => $values,
 							);
 						}
 					}
