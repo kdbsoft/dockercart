@@ -363,7 +363,7 @@
             </button>
             {% else %}
             <span class="inline-flex items-center gap-2 px-4 py-3 bg-gray-100 text-gray-500 font-semibold rounded-xl text-sm">
-              <i data-lucide="x-circle" class="w-5 h-5"></i>{{ text_out_of_stock }}
+              <i data-lucide="circle-x" class="w-5 h-5"></i>{{ text_out_of_stock }}
             </span>
             {% endif %}
             {% endif %}
@@ -377,7 +377,7 @@
 
               <button type="button" onclick="{% if in_compare|default(0) %}compare.remove('{{ product_id }}'){% else %}compare.add('{{ product_id }}'){% endif %};" title="{{ button_compare }}"
                 class="flex-1 sm:flex-none rounded-xl border {% if in_compare|default(0) %}border-blue-300 bg-blue-50{% else %}border-gray-200 hover:border-blue-200 hover:bg-blue-50{% endif %} flex items-center justify-center gap-2 transition flex-shrink-0 px-3 py-2.5">
-                <i data-lucide="bar-chart-2" class="w-5 h-5 {% if in_compare|default(0) %}text-blue-500 fill-blue-400{% else %}text-gray-500{% endif %}"></i>
+                <i data-lucide="chart-no-axes-column" class="w-5 h-5 {% if in_compare|default(0) %}text-blue-500 fill-blue-400{% else %}text-gray-500{% endif %}"></i>
                 <span class="inline sm:hidden text-sm font-semibold text-gray-600">{{ button_compare }}</span>
               </button>
             </div>
@@ -1013,7 +1013,7 @@ function closeModal3d() {
             compareBtn.setAttribute('onclick', "compare.remove('" + product_id + "');");
             compareBtn.classList.remove('border-gray-200', 'hover:border-blue-200', 'hover:bg-blue-50');
             compareBtn.classList.add('border-blue-300', 'bg-blue-50');
-            var icon = compareBtn.querySelector('i[data-lucide="bar-chart-2"]');
+            var icon = compareBtn.querySelector('i[data-lucide="chart-no-axes-column"]');
             if (icon) {
               icon.classList.remove('text-gray-500');
               icon.classList.add('text-blue-500', 'fill-blue-400');
@@ -1051,7 +1051,7 @@ function closeModal3d() {
             compareBtn.setAttribute('onclick', "compare.add('" + product_id + "');");
             compareBtn.classList.remove('border-blue-300', 'bg-blue-50');
             compareBtn.classList.add('border-gray-200', 'hover:border-blue-200', 'hover:bg-blue-50');
-            var icon = compareBtn.querySelector('i[data-lucide="bar-chart-2"]');
+            var icon = compareBtn.querySelector('i[data-lucide="chart-no-axes-column"]');
             if (icon) {
               icon.classList.remove('text-blue-500', 'fill-blue-400');
               icon.classList.add('text-gray-500');
