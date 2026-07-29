@@ -9,23 +9,142 @@
   .dc-icon-picker-header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
   .dc-icon-picker-search { width:100%; max-width:480px; }
   .dc-icon-picker-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(56px,1fr)); gap:8px; max-height:56vh; overflow:auto; padding:6px; }
-  .dc-icon-option { display:flex; align-items:center; justify-content:center; gap:6px; border:1px solid #e6eef8; background:#f8fbff; padding:8px; border-radius:8px; cursor:pointer; }
-  .dc-icon-option:hover { background:#eaf4ff; border-color:#cfe8ff; }
-  .dc-icon-option i { width:18px; height:18px; }
-  .dc-icon-sm { width:14px; height:14px; display:inline-block; }
-  .dc-icon-picker-btn { display:inline-flex; align-items:center; gap:6px; border:1px solid #d0d5dd; background:#fff; padding:6px 12px; border-radius:6px; cursor:pointer; white-space:nowrap; }
-  .dc-icon-picker-btn:hover { background:#f5f7fa; border-color:#98a2b3; }
-  .dc-icon-picker-btn i { width:16px; height:16px; }
+  .dc-icon-option { display:flex; align-items:center; justify-content:center; border:1px solid var(--dc-border-soft); background:var(--dc-surface); padding:10px; border-radius:var(--dc-radius-md); cursor:pointer; transition: all .15s; }
+  .dc-icon-option:hover { background:var(--dc-primary-50); border-color:var(--dc-primary-200); color:var(--dc-primary); }
+  .dc-icon-option i { width:20px; height:20px; }
+
+  .dc-icon-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--dc-border-soft);
+    border-radius: var(--dc-radius-md);
+    background: var(--dc-surface);
+    cursor: pointer;
+    transition: all .15s;
+    flex-shrink: 0;
+  }
+  .dc-icon-trigger:hover { border-color: var(--dc-primary-300); background: var(--dc-primary-50); }
+  .dc-icon-trigger i { width: 18px; height: 18px; color: var(--dc-text-muted); }
+  .dc-icon-trigger:hover i { color: var(--dc-primary); }
+
+  .sf-icon-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sf-icon-display__preview {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--dc-border-soft);
+    border-radius: var(--dc-radius-md);
+    background: var(--dc-primary-50);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .sf-icon-display__preview:hover { border-color: var(--dc-primary-300); }
+  .sf-icon-display__preview i { width: 18px; height: 18px; color: var(--dc-primary); }
+  .sf-icon-display__name {
+    font-size: 12px;
+    color: var(--dc-text-muted);
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .dc-features-list { display:flex; flex-direction:column; gap:12px; }
+  .dc-features-card {
+    border: 1px solid var(--dc-border-soft);
+    border-radius: var(--dc-radius-lg);
+    background: var(--dc-surface);
+    overflow: hidden;
+    transition: border-color .15s;
+  }
+  .dc-features-card:hover { border-color: var(--dc-border); }
+  .dc-features-card__head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--dc-gray-50);
+    border-bottom: 1px solid var(--dc-border-soft);
+  }
+  .dc-features-card__head-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--dc-text-dark);
+    white-space: nowrap;
+  }
+  .dc-features-card__sort {
+    width: 70px;
+    flex-shrink: 0;
+  }
+  .dc-features-card__sort .form-control { height: 32px; font-size: 13px; text-align: center; }
+  .dc-features-card__body { padding: 14px; }
+  .dc-features-card__body .nav-tabs { margin-bottom: 12px; }
+  .dc-features-card__body .dcx-fields { gap: 10px; }
+  .dc-features-card__remove { flex-shrink: 0; margin-left: auto; }
+
+  .sf-widget-list { display: flex; flex-direction: column; gap: 4px; }
+  .sf-widget-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    border: 1px solid var(--dc-border-soft);
+    border-radius: var(--dc-radius-md);
+    background: var(--dc-surface);
+    transition: all .15s;
+  }
+  .sf-widget-item:hover { border-color: var(--dc-border); background: var(--dc-gray-50); }
+  .sf-widget-item.active {
+    border-color: var(--dc-primary);
+    background: var(--dc-primary-50);
+  }
+  .sf-widget-item__link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+    text-decoration: none;
+    color: var(--dc-text);
+  }
+  .sf-widget-item.active .sf-widget-item__link { color: var(--dc-primary); font-weight: 600; }
+  .sf-widget-item__icon {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--dc-radius-md);
+    background: var(--dc-gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--dc-text-muted);
+  }
+  .sf-widget-item.active .sf-widget-item__icon { background: var(--dc-primary-100); color: var(--dc-primary); }
+  .sf-widget-item__name { font-size: 13px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sf-widget-item__delete {
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity .15s;
+    padding: 2px 6px;
+  }
+  .sf-widget-item:hover .sf-widget-item__delete { opacity: 1; }
+  .sf-widget-empty { padding: 20px; color: var(--dc-text-muted); font-size: 13px; text-align: center; }
   </style>
 
   <div class="page-header">
     <div class="container-fluid">
       <div class="row">
         <div class="col-lg-offset-2 col-lg-7 col-xl-offset-1 col-xl-7">
-          <div class="pull-right">
-            <button type="submit" form="form-module" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary btn--icon"><i data-lucide="save" width="16" height="16"></i></button>
-            <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_back }}" class="btn btn-default btn--icon"><i data-lucide="x" width="16" height="16"></i></a>
-          </div>
           <a href="{{ cancel }}" class="page-header__link">
             <span class="page-header__back"><i data-lucide="arrow-left" width="20" height="20"></i></span>
             <span class="page-header__title">
@@ -38,6 +157,12 @@
             </span>
           </a>
         </div>
+        <div class="col-lg-4 col-xl-3">
+          <div class="pull-right">
+            <button type="submit" form="form-module" class="btn btn-primary btn--icon"><i data-lucide="save" width="16" height="16"></i></button>
+            <a href="{{ cancel }}" class="btn btn-default btn--icon"><i data-lucide="x" width="16" height="16"></i></a>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -46,7 +171,7 @@
     {% if error_warning %}
     <div class="row">
       <div class="col-lg-offset-2 col-lg-7 col-xl-offset-1 col-xl-7">
-        <div class="alert alert-danger alert-dismissible"><i data-lucide="alert-circle" width="16" height="16"></i> {{ error_warning }}
+        <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
           <button type="button" class="close" data-dismiss="alert">&times;</button>
         </div>
       </div>
@@ -56,44 +181,16 @@
     {% if success %}
     <div class="row">
       <div class="col-lg-offset-2 col-lg-7 col-xl-offset-1 col-xl-7">
-        <div class="alert alert-success alert-dismissible"><i data-lucide="check-circle" width="16" height="16"></i> {{ success }}
+        <div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> {{ success }}
           <button type="button" class="close" data-dismiss="alert">&times;</button>
         </div>
       </div>
     </div>
     {% endif %}
 
-    <div class="row" style="margin-bottom: 15px;">
-      <div class="col-sm-4">
-        <div class="dcx-shell">
-          <div class="dcx-panel">
-            <div class="dcx-panel-head">
-              <div class="dcx-panel-head__icon"><i data-lucide="layout-list" width="18" height="18"></i></div>
-              <div>
-                <div class="dcx-panel-title">{{ text_widgets }}</div>
-              </div>
-            </div>
-            <div class="dcx-panel-body" style="padding: 0;">
-              {% if widgets %}
-                <div class="list-group" style="margin-bottom: 0;">
-                  {% for widget in widgets %}
-                    <a href="{{ widget.href }}" class="list-group-item{% if widget.active %} active{% endif %}">
-                      {{ widget.name }}
-                    </a>
-                  {% endfor %}
-                </div>
-              {% else %}
-                <div style="padding: 15px; color: #8c8c8c;">{{ text_no_widgets }}</div>
-              {% endif %}
-            </div>
-            <div class="panel-footer">
-              <a href="{{ new_widget }}" class="btn btn-primary btn-sm"><i data-lucide="plus" width="14" height="14"></i> {{ text_create_widget }}</a>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-sm-8">
+    <form action="{{ action }}" method="post" id="form-module">
+    <div class="row">
+      <div class="col-md-12 col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-1 col-xl-7">
         <div class="dcx-shell">
           <div class="dcx-panel">
             <div class="dcx-panel-head">
@@ -103,138 +200,150 @@
               </div>
             </div>
             <div class="dcx-panel-body">
-              <form action="{{ action }}" method="post" id="form-module" class="form-horizontal">
-                <div class="dcx-fields">
-                  <div class="dcx-field required">
-                    <label class="dcx-label">{{ entry_name }}</label>
-                    <ul class="nav nav-tabs" style="margin-bottom:10px;">
+              <div class="dcx-fields">
+                <div class="dcx-field">
+                  <label class="dcx-label" for="input-status">{{ entry_status }}</label>
+                  <select name="status" id="input-status" class="form-control">
+                    <option value="1" {% if status %}selected="selected"{% endif %}>{{ text_enabled }}</option>
+                    <option value="0" {% if not status %}selected="selected"{% endif %}>{{ text_disabled }}</option>
+                  </select>
+                </div>
+
+                <div class="dcx-field required">
+                  <label class="dcx-label">{{ entry_name }}</label>
+                  {% for language in languages %}
+                  <div class="dc-attr-row__value">
+                    <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                    <input type="text" name="name_translation[{{ language.language_id }}]" value="{{ name_translation[language.language_id] }}" placeholder="{{ entry_name }}" class="form-control" />
+                  </div>
+                  {% endfor %}
+                  {% if error_name %}<div class="text-danger">{{ error_name }}</div>{% endif %}
+                </div>
+
+                <div class="dcx-field">
+                  <ul class="nav nav-tabs" role="tablist">
+                    {% for language in languages %}
+                    <li{% if loop.first %} class="active"{% endif %}><a href="#section-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
+                    {% endfor %}
+                  </ul>
+                  <div class="tab-content">
+                    {% for language in languages %}
+                    <div class="tab-pane{% if loop.first %} active{% endif %}" id="section-lang-{{ language.language_id }}">
+                      <div class="dcx-fields">
+                        <div class="dcx-field">
+                          <label class="dcx-label">{{ entry_section_title }}</label>
+                          <input type="text" name="section_title[{{ language.language_id }}]" value="{{ section_title[language.language_id]|default('') }}" placeholder="{{ entry_section_title }}" class="form-control" />
+                        </div>
+                        <div class="dcx-field">
+                          <label class="dcx-label">{{ entry_section_subtitle }}</label>
+                          <textarea name="section_subtitle[{{ language.language_id }}]" rows="2" placeholder="{{ entry_section_subtitle }}" class="form-control">{{ section_subtitle[language.language_id]|default('') }}</textarea>
+                        </div>
+                      </div>
+                    </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dcx-shell" style="margin-top: 12px;">
+          <div class="dcx-panel">
+            <div class="dcx-panel-head">
+              <div class="dcx-panel-head__icon"><i data-lucide="layout-list" width="18" height="18"></i></div>
+              <div>
+                <div class="dcx-panel-title">{{ text_features }}</div>
+              </div>
+              <div class="pull-right">
+                <button type="button" id="button-add-feature" class="btn btn-primary btn-sm"><i data-lucide="plus" width="14" height="14"></i> {{ button_add_feature }}</button>
+              </div>
+            </div>
+            <div class="dcx-panel-body">
+              <div class="dc-features-list" id="features-list">
+                {% set feature_row = 0 %}
+                {% for feature in features %}
+                <div class="dc-features-card" id="feature-row-{{ feature_row }}">
+                  <div class="dc-features-card__head">
+                    <input type="hidden" name="features[{{ feature_row }}][icon]" id="feature-icon-{{ feature_row }}" value="{{ feature.icon|default('truck') }}" />
+                    <div class="sf-icon-display">
+                      <div class="sf-icon-display__preview dc-icon-picker-button" data-target="#feature-icon-{{ feature_row }}" title="{{ feature.icon|default('truck') }}">
+                        <i data-lucide="{{ feature.icon|default('truck') }}"></i>
+                      </div>
+                      <span class="sf-icon-display__name dc-icon-label">{{ feature.icon|default('truck') }}</span>
+                    </div>
+                    <span class="dc-features-card__head-label">{{ entry_sort_order }}</span>
+                    <div class="dc-features-card__sort">
+                      <input type="number" name="features[{{ feature_row }}][sort_order]" value="{{ feature.sort_order|default(0) }}" class="form-control" />
+                    </div>
+                    <button type="button" onclick="$('#feature-row-{{ feature_row }}').remove();" class="btn btn-danger btn--icon dc-features-card__remove" title="{{ button_remove }}"><i data-lucide="trash-2" width="14" height="14"></i></button>
+                  </div>
+                  <div class="dc-features-card__body">
+                    <ul class="nav nav-tabs" role="tablist">
                       {% for language in languages %}
-                      <li{% if loop.first %} class="active"{% endif %}><a href="#name-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
+                      <li{% if loop.first %} class="active"{% endif %}><a href="#feature-{{ feature_row }}-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
                       {% endfor %}
                     </ul>
                     <div class="tab-content">
                       {% for language in languages %}
-                      <div class="tab-pane{% if loop.first %} active{% endif %}" id="name-lang-{{ language.language_id }}">
-                        <input type="text" name="name_translation[{{ language.language_id }}]" value="{{ name_translation[language.language_id] }}" placeholder="{{ entry_name }}" class="form-control" />
+                      <div class="tab-pane{% if loop.first %} active{% endif %}" id="feature-{{ feature_row }}-lang-{{ language.language_id }}">
+                        <div class="dcx-fields">
+                          <div class="dcx-field">
+                            <label class="dcx-label">{{ entry_title }}</label>
+                            <input type="text" name="features[{{ feature_row }}][title][{{ language.language_id }}]" value="{{ feature.title[language.language_id]|default('') }}" class="form-control" />
+                          </div>
+                          <div class="dcx-field">
+                            <label class="dcx-label">{{ entry_text }}</label>
+                            <textarea name="features[{{ feature_row }}][text][{{ language.language_id }}]" rows="3" class="form-control">{{ feature.text[language.language_id]|default('') }}</textarea>
+                          </div>
+                        </div>
                       </div>
                       {% endfor %}
                     </div>
-                    {% if error_name %}
-                      <div class="text-danger">{{ error_name }}</div>
+                  </div>
+                </div>
+                {% set feature_row = feature_row + 1 %}
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-12 col-sm-12 col-lg-4 col-xl-3">
+        <div class="dcx-shell">
+          <div class="dcx-sidebar-card">
+            <div class="dcx-sidebar-card__header">
+              <div class="dcx-sidebar-card__header-icon"><i data-lucide="layout-list" width="16" height="16"></i></div>
+              <h3 class="dcx-sidebar-card__title">{{ text_widgets }}</h3>
+            </div>
+            <div class="dcx-sidebar-card__body">
+              {% if widgets %}
+                <div class="sf-widget-list">
+                  {% for widget in widgets %}
+                  <div class="sf-widget-item{% if widget.active %} active{% endif %}">
+                    <a href="{{ widget.href }}" class="sf-widget-item__link">
+                      <div class="sf-widget-item__icon"><i data-lucide="{% if widget.active %}check-circle{% else %}circle{% endif %}" width="14" height="14"></i></div>
+                      <span class="sf-widget-item__name">{{ widget.name }}</span>
+                    </a>
+                    {% if widget.delete %}
+                    <button type="button" class="sf-widget-item__delete btn btn-danger btn-xs" onclick="if(confirm('{{ button_delete_confirm|default("Delete this widget?") }}')) location='{{ widget.delete }}';" title="{{ button_remove }}"><i data-lucide="trash-2" width="12" height="12"></i></button>
                     {% endif %}
                   </div>
-
-                  <div class="dcx-field">
-                    <label class="dcx-label" for="input-status">{{ entry_status }}</label>
-                    <select name="status" id="input-status" class="form-control">
-                      <option value="1" {% if status %}selected="selected"{% endif %}>{{ text_enabled }}</option>
-                      <option value="0" {% if not status %}selected="selected"{% endif %}>{{ text_disabled }}</option>
-                    </select>
-                  </div>
-
-                  <div class="dcx-field">
-                    <label class="dcx-label">{{ entry_section_title }}</label>
-                    <ul class="nav nav-tabs" role="tablist" style="margin-bottom: 10px;">
-                      {% for language in languages %}
-                        <li{% if loop.first %} class="active"{% endif %}><a href="#section-title-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
-                      {% endfor %}
-                    </ul>
-                    <div class="tab-content">
-                      {% for language in languages %}
-                        <div class="tab-pane{% if loop.first %} active{% endif %}" id="section-title-lang-{{ language.language_id }}">
-                          <input type="text" name="section_title[{{ language.language_id }}]" value="{{ section_title[language.language_id]|default('') }}" placeholder="{{ entry_section_title }}" class="form-control" />
-                        </div>
-                      {% endfor %}
-                    </div>
-                  </div>
-                  <div class="dcx-field">
-                    <label class="dcx-label">{{ entry_section_subtitle }}</label>
-                    <ul class="nav nav-tabs" role="tablist" style="margin-bottom: 10px;">
-                      {% for language in languages %}
-                        <li{% if loop.first %} class="active"{% endif %}><a href="#section-subtitle-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
-                      {% endfor %}
-                    </ul>
-                    <div class="tab-content">
-                      {% for language in languages %}
-                        <div class="tab-pane{% if loop.first %} active{% endif %}" id="section-subtitle-lang-{{ language.language_id }}">
-                          <textarea name="section_subtitle[{{ language.language_id }}]" rows="2" placeholder="{{ entry_section_subtitle }}" class="form-control">{{ section_subtitle[language.language_id]|default('') }}</textarea>
-                        </div>
-                      {% endfor %}
-                    </div>
-                  </div>
+                  {% endfor %}
                 </div>
-
-                <hr />
-                <h4 style="margin-top: 0;">{{ text_features }}</h4>
-
-                <div class="table-responsive">
-                  <table class="table table-hover" id="features-table">
-                    <thead>
-                      <tr>
-                        <th style="width: 220px;">{{ entry_icon }}</th>
-                        <th>{{ text_multilingual_settings }}</th>
-                        <th style="width: 120px;">{{ entry_sort_order }}</th>
-                        <th style="width: 80px;">{{ column_action }}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {% set feature_row = 0 %}
-                      {% for feature in features %}
-                        <tr id="feature-row-{{ feature_row }}">
-                          <td>
-                            <input type="hidden" name="features[{{ feature_row }}][icon]" id="feature-icon-{{ feature_row }}" value="{{ feature.icon|default('truck') }}" />
-                            <button type="button" class="dc-icon-picker-btn dc-icon-picker-button" data-target="#feature-icon-{{ feature_row }}" title="{{ feature.icon|default('truck') }}">
-                              <i data-lucide="{{ feature.icon|default('truck') }}" class="dc-icon-sm"></i>
-                              <span class="dc-icon-label">{{ feature.icon|default('truck') }}</span>
-                            </button>
-                          </td>
-                          <td>
-                            <ul class="nav nav-tabs" role="tablist" style="margin-bottom: 10px;">
-                              {% for language in languages %}
-                                <li{% if loop.first %} class="active"{% endif %}><a href="#feature-{{ feature_row }}-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
-                              {% endfor %}
-                            </ul>
-
-                            <div class="tab-content">
-                              {% for language in languages %}
-                                <div class="tab-pane{% if loop.first %} active{% endif %}" id="feature-{{ feature_row }}-lang-{{ language.language_id }}">
-                                  <div class="dcx-field" style="margin-left: 0; margin-right: 0;">
-                                    <label class="dcx-label">{{ entry_title }}</label>
-                                    <input type="text" name="features[{{ feature_row }}][title][{{ language.language_id }}]" value="{{ feature.title[language.language_id]|default('') }}" class="form-control" />
-                                  </div>
-                                  <div class="dcx-field" style="margin-left: 0; margin-right: 0; margin-bottom: 0;">
-                                    <label class="dcx-label">{{ entry_text }}</label>
-                                    <textarea name="features[{{ feature_row }}][text][{{ language.language_id }}]" rows="3" class="form-control">{{ feature.text[language.language_id]|default('') }}</textarea>
-                                  </div>
-                                </div>
-                              {% endfor %}
-                            </div>
-                          </td>
-                          <td>
-                            <input type="number" name="features[{{ feature_row }}][sort_order]" value="{{ feature.sort_order|default(0) }}" class="form-control" />
-                          </td>
-                          <td class="text-center">
-                            <button type="button" onclick="$('#feature-row-{{ feature_row }}').remove();" class="btn btn-danger btn--icon" title="{{ button_remove }}"><i data-lucide="trash-2" width="14" height="14"></i></button>
-                          </td>
-                        </tr>
-                        {% set feature_row = feature_row + 1 %}
-                      {% endfor %}
-                    </tbody>
-                    <tfoot>
-                      <tr>
-                        <td colspan="4" class="text-right">
-                          <button type="button" id="button-add-feature" class="btn btn-primary"><i data-lucide="plus" width="14" height="14"></i> {{ button_add_feature }}</button>
-                        </td>
-                      </tr>
-                    </tfoot>
-                  </table>
-                </div>
-              </form>
+              {% else %}
+                <div class="sf-widget-empty">{{ text_no_widgets }}</div>
+              {% endif %}
+              <div class="dcx-sidebar-card__field" style="margin-top:12px;">
+                <a href="{{ new_widget }}" class="btn btn-default btn-sm btn-block"><i data-lucide="plus" width="14" height="14"></i> {{ text_create_widget }}</a>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+    </form>
   </div>
 </div>
 
@@ -270,7 +379,6 @@ function renderLucideIcons() {
   }
 }
 
-// Icon picker modal
 var __dc_icon_picker_target = null;
 var __dc_icon_picker_preview = null;
 var __dc_icon_picker_label = null;
@@ -281,7 +389,7 @@ $(document).on('click', '.dc-icon-picker-button', function(e) {
   var target = $btn.data('target');
   __dc_icon_picker_target = $(target);
   __dc_icon_picker_preview = $btn.find('i[data-lucide]');
-  __dc_icon_picker_label = $btn.find('.dc-icon-label');
+  __dc_icon_picker_label = $btn.closest('.sf-icon-display').find('.dc-icon-label');
   $('#dc-icon-picker-modal').removeClass('hidden').show();
   $('#dc-icon-picker-search').val('');
   $('#dc-icon-picker-grid button').show();
@@ -303,10 +411,10 @@ $(document).on('click', '#dc-icon-picker-grid button.dc-icon-option', function(e
     __dc_icon_picker_label.text(icon);
   }
   if (__dc_icon_picker_target && __dc_icon_picker_target.attr('id')) {
-    var btn = $('[data-target="#' + __dc_icon_picker_target.attr('id') + '"]');
-    if (btn.length) {
-      btn.attr('title', icon);
-      btn.find('i[data-lucide]').attr('data-lucide', icon);
+    var wrapper = $('[data-target="#' + __dc_icon_picker_target.attr('id') + '"]');
+    if (wrapper.length) {
+      wrapper.attr('title', icon);
+      wrapper.find('i[data-lucide]').attr('data-lucide', icon);
     }
   }
   renderLucideIcons();
@@ -327,43 +435,47 @@ $(document).on('input', '#dc-icon-picker-search', function() {
 
 $('#button-add-feature').on('click', function() {
   var html = '';
-  html += '<tr id="feature-row-' + feature_row + '">';
-  html += '  <td>';
+  html += '<div class="dc-features-card" id="feature-row-' + feature_row + '">';
+  html += '  <div class="dc-features-card__head">';
   html += '    <input type="hidden" name="features[' + feature_row + '][icon]" id="feature-icon-' + feature_row + '" value="truck" />';
-  html += '    <button type="button" class="dc-icon-picker-btn dc-icon-picker-button" data-target="#feature-icon-' + feature_row + '" title="truck">';
-  html += '      <i data-lucide="truck" class="dc-icon-sm"></i>';
-  html += '      <span class="dc-icon-label">truck</span>';
-  html += '    </button>';
-  html += '  </td>';
-
-  html += '  <td>';
-  html += '    <ul class="nav nav-tabs" role="tablist" style="margin-bottom: 10px;">';
+  html += '    <div class="sf-icon-display">';
+  html += '      <div class="sf-icon-display__preview dc-icon-picker-button" data-target="#feature-icon-' + feature_row + '" title="truck">';
+  html += '        <i data-lucide="truck"></i>';
+  html += '      </div>';
+  html += '      <span class="sf-icon-display__name dc-icon-label">truck</span>';
+  html += '    </div>';
+  html += '    <span class="dc-features-card__head-label">{{ entry_sort_order }}</span>';
+  html += '    <div class="dc-features-card__sort">';
+  html += '      <input type="number" name="features[' + feature_row + '][sort_order]" value="' + feature_row + '" class="form-control" />';
+  html += '    </div>';
+  html += '    <button type="button" onclick="$(\'#feature-row-' + feature_row + '\').remove();" class="btn btn-danger btn--icon dc-features-card__remove" title="{{ button_remove }}"><i data-lucide="trash-2" width="14" height="14"></i></button>';
+  html += '  </div>';
+  html += '  <div class="dc-features-card__body">';
+  html += '    <ul class="nav nav-tabs" role="tablist">';
   {% for language in languages %}
   html += '      <li{% if loop.first %} class="active"{% endif %}><a href="#feature-' + feature_row + '-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>';
   {% endfor %}
   html += '    </ul>';
-
   html += '    <div class="tab-content">';
   {% for language in languages %}
   html += '      <div class="tab-pane{% if loop.first %} active{% endif %}" id="feature-' + feature_row + '-lang-{{ language.language_id }}">';
-  html += '        <div class="dcx-field" style="margin-left: 0; margin-right: 0;">';
-  html += '          <label class="dcx-label">{{ entry_title }}</label>';
-  html += '          <input type="text" name="features[' + feature_row + '][title][{{ language.language_id }}]" value="" class="form-control" />';
-  html += '        </div>';
-  html += '        <div class="dcx-field" style="margin-left: 0; margin-right: 0; margin-bottom: 0;">';
-  html += '          <label class="dcx-label">{{ entry_text }}</label>';
-  html += '          <textarea name="features[' + feature_row + '][text][{{ language.language_id }}]" rows="3" class="form-control"></textarea>';
+  html += '        <div class="dcx-fields">';
+  html += '          <div class="dcx-field">';
+  html += '            <label class="dcx-label">{{ entry_title }}</label>';
+  html += '            <input type="text" name="features[' + feature_row + '][title][{{ language.language_id }}]" value="" class="form-control" />';
+  html += '          </div>';
+  html += '          <div class="dcx-field">';
+  html += '            <label class="dcx-label">{{ entry_text }}</label>';
+  html += '            <textarea name="features[' + feature_row + '][text][{{ language.language_id }}]" rows="3" class="form-control"></textarea>';
+  html += '          </div>';
   html += '        </div>';
   html += '      </div>';
   {% endfor %}
   html += '    </div>';
-  html += '  </td>';
+  html += '  </div>';
+  html += '</div>';
 
-  html += '  <td><input type="number" name="features[' + feature_row + '][sort_order]" value="' + feature_row + '" class="form-control" /></td>';
-  html += '  <td class="text-center"><button type="button" onclick="$(\'#feature-row-' + feature_row + '\').remove();" class="btn btn-danger btn--icon" title="{{ button_remove }}"><i data-lucide="trash-2" width="14" height="14"></i></button></td>';
-  html += '</tr>';
-
-  $('#features-table tbody').append(html);
+  $('#features-list').append(html);
   renderLucideIcons();
   feature_row++;
 });
