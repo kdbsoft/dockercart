@@ -376,9 +376,9 @@ class ControllerSaleOrderDetail extends Controller {
 			if (!$order_status_id) {
 				$json['error'] = $this->language->get('error_order_status');
 			} else {
-				$this->load->model('checkout/order');
+				$this->load->model('sale/order');
 
-				$this->model_checkout_order->addOrderHistory($order_id, $order_status_id, $comment, $notify, $override);
+				$this->model_sale_order->addOrderHistory($order_id, $order_status_id, $comment, $notify, $override);
 
 				$json['success'] = $this->language->get('text_success');
 			}

@@ -869,6 +869,72 @@ class ModelSaleOrder extends Model {
 		return (int)$query->row['total'];
 	}
 
+	public function deleteOrder($order_id) {
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "order` WHERE order_id = '" . (int)$order_id . "'");
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "order_product` WHERE order_id = '" . (int)$order_id . "'");
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "order_option` WHERE order_id = '" . (int)$order_id . "'");
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "order_voucher` WHERE order_id = '" . (int)$order_id . "'");
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "order_total` WHERE order_id = '" . (int)$order_id . "'");
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "order_history` WHERE order_id = '" . (int)$order_id . "'");
+		$this->db->query("DELETE `or`, ort FROM `" . DB_PREFIX . "order_recurring` `or`, `" . DB_PREFIX . "order_recurring_transaction` `ort` WHERE order_id = '" . (int)$order_id . "' AND ort.order_recurring_id = `or`.order_recurring_id");
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "customer_transaction` WHERE order_id = '" . (int)$order_id . "'");
+
+		$order_vouchers = $this->getOrderVouchers($order_id);
+
+		foreach ($order_vouchers as $order_voucher) {
+			$this->db->query("UPDATE `" . DB_PREFIX . "voucher` SET `status` = '0' WHERE voucher_id = '" . (int)$order_voucher['voucher_id'] . "'");
+		}
+	}
+
+	public function addOrderHistory($order_id, $order_status_id, $comment = '', $notify = false, $override = false) {
+		$order_info = $this->getOrder($order_id);
+
+		if ($order_info) {
+			$processing_statuses = (array)$this->config->get('config_processing_status');
+			$complete_statuses = (array)$this->config->get('config_complete_status');
+
+			// Transition from non-proc/complete to proc/complete → subtract stock, add affiliate commission
+			if (!in_array($order_info['order_status_id'], array_merge($processing_statuses, $complete_statuses)) && in_array($order_status_id, array_merge($processing_statuses, $complete_statuses))) {
+				$order_products = $this->getOrderProducts($order_id);
+
+				foreach ($order_products as $order_product) {
+					$this->db->query("UPDATE " . DB_PREFIX . "product SET quantity = (quantity - " . (float)$order_product['quantity'] . ") WHERE product_id = '" . (int)$order_product['product_id'] . "' AND subtract = '1'");
+
+					if ((int)$order_product['variant_id'] > 0) {
+						$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET quantity = (quantity - " . (float)$order_product['quantity'] . ") WHERE variant_id = '" . (int)$order_product['variant_id'] . "' AND subtract = '1'");
+					}
+				}
+
+				if ($order_info['affiliate_id'] && $this->config->get('config_affiliate_auto')) {
+					$this->db->query("INSERT INTO `" . DB_PREFIX . "customer_transaction` SET customer_id = '" . (int)$order_info['affiliate_id'] . "', order_id = '" . (int)$order_id . "', description = '" . $this->db->escape('Order #' . $order_id) . "', amount = '" . (float)$order_info['commission'] . "', date_added = NOW()");
+				}
+			}
+
+			$this->db->query("UPDATE `" . DB_PREFIX . "order` SET order_status_id = '" . (int)$order_status_id . "', date_modified = NOW() WHERE order_id = '" . (int)$order_id . "'");
+
+			$this->db->query("INSERT INTO " . DB_PREFIX . "order_history SET order_id = '" . (int)$order_id . "', order_status_id = '" . (int)$order_status_id . "', notify = '" . (int)$notify . "', comment = '" . $this->db->escape($comment) . "', date_added = NOW()");
+
+			// Reversal from proc/complete to non-proc/complete → restock, remove affiliate commission
+			if (in_array($order_info['order_status_id'], array_merge($processing_statuses, $complete_statuses)) && !in_array($order_status_id, array_merge($processing_statuses, $complete_statuses))) {
+				$order_products = $this->getOrderProducts($order_id);
+
+				foreach ($order_products as $order_product) {
+					$this->db->query("UPDATE `" . DB_PREFIX . "product` SET quantity = (quantity + " . (float)$order_product['quantity'] . ") WHERE product_id = '" . (int)$order_product['product_id'] . "' AND subtract = '1'");
+
+					if ((int)$order_product['variant_id'] > 0) {
+						$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET quantity = (quantity + " . (float)$order_product['quantity'] . ") WHERE variant_id = '" . (int)$order_product['variant_id'] . "' AND subtract = '1'");
+					}
+				}
+
+				if ($order_info['affiliate_id']) {
+					$this->db->query("DELETE FROM `" . DB_PREFIX . "customer_transaction` WHERE order_id = '" . (int)$order_id . "'");
+				}
+			}
+
+			$this->cache->delete('product');
+		}
+	}
+
 	public function addOrderNote($order_id, $comment, $notify = false) {
 		$query = $this->db->query("SELECT order_status_id FROM `" . DB_PREFIX . "order` WHERE order_id = '" . (int)$order_id . "'");
 
