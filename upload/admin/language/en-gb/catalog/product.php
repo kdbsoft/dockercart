@@ -47,7 +47,7 @@ $_['tab_params_group']      = 'Parameters';
 // Column
 $_['column_name']            = 'Product';
 $_['column_category']        = 'Categories';
-$_['column_model']           = 'Model';
+$_['column_model']           = 'Product Code';
 $_['column_image']           = 'Image';
 $_['column_price']           = 'Price';
 $_['column_quantity']        = 'Quantity';
@@ -62,7 +62,7 @@ $_['entry_meta_keyword']     = 'Meta Tag Keywords';
 $_['entry_meta_description'] = 'Meta Tag Description';
 $_['entry_store']            = 'Stores';
 $_['entry_keyword']          = 'Keyword';
-$_['entry_model']            = 'Model';
+$_['entry_model']            = 'Product Code';
 $_['entry_sku']              = 'SKU';
 $_['entry_upc']              = 'UPC';
 $_['entry_ean']              = 'EAN';
@@ -187,7 +187,7 @@ $_['help_model_3d']           = 'Upload a GLB 3D model file';
 // Panel titles
 $_['text_panel_description_title']    = 'Description';
 $_['text_panel_description_subtitle'] = 'Product name, description and SEO metadata per language';
-$_['text_panel_identifiers_title']    = 'Model & Identifiers';
+$_['text_panel_identifiers_title']    = 'Product Codes';
 $_['text_panel_identifiers_subtitle'] = 'SKU, UPC, EAN and other product identifiers';
 $_['text_panel_organization_title']   = 'Organization';
 $_['text_panel_organization_subtitle'] = 'Manufacturer, categories, related products and downloads';

@@ -2,7 +2,7 @@
 
 $_['column_action'] = 'Дія';
 $_['column_image'] = 'Зображення';
-$_['column_model'] = 'Модель';
+$_['column_model'] = 'Код товара';
 $_['column_name'] = 'Назва товару';
 $_['column_price'] = 'Ціна за одиницю';
 $_['column_stock'] = 'Запас';

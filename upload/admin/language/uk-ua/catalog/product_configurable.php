@@ -22,7 +22,7 @@ $_['text_loading_options'] = 'Завантаження значень...';
 $_['entry_configurable_axes'] = 'Конфігурувані опції (осі варіанта)';
 $_['entry_select_option'] = 'Пошук опції...';
 
-$_['column_sku'] = 'Артикул';
+$_['column_sku'] = 'Код товара';
 $_['column_price'] = 'Ціна';
 $_['column_cg_prices'] = 'Ціна гр.';
 $_['column_quantity'] = 'Кількість';

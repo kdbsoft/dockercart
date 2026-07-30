@@ -23,8 +23,8 @@ $_['text_price_asc']    = 'Price (Low &gt; High)';
 $_['text_price_desc']   = 'Price (High &gt; Low)';
 $_['text_rating_asc']   = 'Rating (Lowest)';
 $_['text_rating_desc']  = 'Rating (Highest)';
-$_['text_model_asc']    = 'Model (A - Z)';
-$_['text_model_desc']   = 'Model (Z - A)';
+$_['text_model_asc']    = 'Product Code (A - Z)';
+$_['text_model_desc']   = 'Product Code (Z - A)';
 $_['text_limit']        = 'Show:';
 // New arrivals / specials additions
 $_['text_new_arrivals'] = 'New Arrivals';

@@ -22,7 +22,7 @@ $_['text_loading_options'] = 'Loading options...';
 $_['entry_configurable_axes'] = 'Configurable Options (variant axes)';
 $_['entry_select_option'] = 'Search option...';
 
-$_['column_sku'] = 'SKU';
+$_['column_sku'] = 'Product Code';
 $_['column_price'] = 'Price';
 $_['column_cg_prices'] = 'Group pr.';
 $_['column_quantity'] = 'Quantity';
@@ -40,7 +40,7 @@ $_['entry_cg_prices'] = 'Group Prices';
 $_['entry_cg_customer_group'] = 'Customer group';
 $_['entry_cg_group_price'] = 'Price';
 $_['button_cg_add'] = 'Add';
-$_['entry_variant_articles'] = 'Other articles';
+$_['entry_variant_articles'] = 'Other Codes';
 $_['entry_special'] = 'Specials';
 $_['entry_priority'] = 'Priority';
 $_['entry_date_start'] = 'Date Start';
