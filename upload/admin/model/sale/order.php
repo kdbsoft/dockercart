@@ -770,7 +770,7 @@ class ModelSaleOrder extends Model {
 			price = '" . (float)$price . "',
 			total = '" . (float)$total . "',
 			tax = '" . (float)$tax_total . "',
-			reward = '" . (int)$product_info['reward'] . "',
+			reward = '" . (int)($product_info['reward'] ?? 0) . "',
 			variant_id = '0',
 			variant_sku = ''
 		");
