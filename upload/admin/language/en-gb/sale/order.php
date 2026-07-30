@@ -4,6 +4,7 @@ $_['heading_title']              = 'Orders';
 
 // Text
 $_['text_success']               = 'Success: You have modified orders!';
+$_['text_order_saved']           = 'Order saved successfully!';
 $_['text_list']                  = 'Order List';
 $_['text_add']                   = 'Add Order';
 $_['text_edit']                  = 'Edit Order';
@@ -149,7 +150,7 @@ $_['entry_postcode']             = 'Postcode';
 $_['entry_country']              = 'Country';
 $_['entry_zone']                 = 'Region / State';
 $_['entry_zone_code']            = 'Region / State Code';
-$_['entry_product']              = 'Choose Product';
+$_['entry_product']              = 'Add product to order';
 $_['entry_option']               = 'Choose Option(s)';
 $_['entry_quantity']             = 'Quantity';
 $_['entry_to_name']              = 'Recipient\'s Name';
