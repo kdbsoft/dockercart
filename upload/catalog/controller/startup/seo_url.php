@@ -859,10 +859,9 @@ class ControllerStartupSeoUrl extends Controller
      */
     private function generateSeoUrlFromRoute($route)
     {
-        // Skip generating URLs for admin, api, install routes
+        // Skip generating URLs for admin, install routes
         if (
             strpos($route, "admin") === 0 ||
-            strpos($route, "api") === 0 ||
             strpos($route, "install") === 0
         ) {
             return "";
@@ -1601,10 +1600,9 @@ class ControllerStartupSeoUrl extends Controller
             return false;
         }
 
-        // Skip admin, api, install routes
+        // Skip admin, install routes
         if (
             strpos($potential_route, "admin") === 0 ||
-            strpos($potential_route, "api") === 0 ||
             strpos($potential_route, "install") === 0
         ) {
             return false;

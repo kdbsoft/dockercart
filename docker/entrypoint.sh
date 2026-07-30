@@ -390,19 +390,12 @@ VALUES \
    '${admin_hash}', \
    'DockerCart', 'Admin', '${admin_email}', '', '', '', 1, NOW());
 
-DELETE FROM \`${db_prefix}setting\` WHERE \`key\` IN ('config_email', 'config_url', 'config_ssl', 'config_encryption', 'config_api_id');
+DELETE FROM \`${db_prefix}setting\` WHERE \`key\` IN ('config_email', 'config_url', 'config_ssl', 'config_encryption');
 INSERT INTO \`${db_prefix}setting\` (store_id, \`code\`, \`key\`, \`value\`, serialized) VALUES
   (0, 'config', 'config_email', '${admin_email}', 0),
   (0, 'config', 'config_url', '${url}', 0),
   (0, 'config', 'config_ssl', '${url}', 0),
   (0, 'config', 'config_encryption', REPLACE(UUID(), '-', ''), 0);
-
-DELETE FROM \`${db_prefix}api\` WHERE username = 'Default';
-INSERT INTO \`${db_prefix}api\` (username, \`key\`, status, date_added, date_modified)
-VALUES ('Default', REPLACE(UUID(), '-', ''), 1, NOW(), NOW());
-SET @api_id = LAST_INSERT_ID();
-INSERT INTO \`${db_prefix}setting\` (store_id, \`code\`, \`key\`, \`value\`, serialized)
-VALUES (0, 'config', 'config_api_id', @api_id, 0);
 SQL
     echo "DockerCart bootstrap finished."
 }
