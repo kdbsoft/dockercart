@@ -21,13 +21,11 @@ class Cart
         $this->tax = $registry->get("tax");
         $this->weight = $registry->get("weight");
 
-        // Remove expired carts:
-        // - API carts expire quickly (1 hour)
-        // - Guest carts (customer_id = 0) kept longer (30 days) to avoid accidental loss when session IDs rotate
+        // Remove guest carts (customer_id = 0) that are older than 30 days to avoid accumulation when session IDs rotate
         $this->db->query(
             "DELETE FROM " .
                 DB_PREFIX .
-                "cart WHERE (api_id > '0' AND date_added < DATE_SUB(NOW(), INTERVAL 1 HOUR)) OR (customer_id = '0' AND date_added < DATE_SUB(NOW(), INTERVAL 30 DAY))",
+                "cart WHERE customer_id = '0' AND date_added < DATE_SUB(NOW(), INTERVAL 30 DAY)",
         );
 
         // Try to recover guest carts when session id has changed by using a persistent cookie.
@@ -84,7 +82,7 @@ class Cart
                     DB_PREFIX .
                     "cart SET session_id = '" .
                     $this->db->escape($this->session->getId()) .
-                    "' WHERE api_id = '0' AND customer_id = '" .
+                    "' WHERE customer_id = '" .
                     (int) $this->customer->getId() .
                     "'",
             );
@@ -93,7 +91,7 @@ class Cart
             $cart_query = $this->db->query(
                 "SELECT * FROM " .
                     DB_PREFIX .
-                    "cart WHERE api_id = '0' AND customer_id = '0' AND session_id = '" .
+                    "cart WHERE customer_id = '0' AND session_id = '" .
                     $this->db->escape($this->session->getId()) .
                     "'",
             );
@@ -208,11 +206,7 @@ class Cart
         $cart_query = $this->db->query(
             "SELECT * FROM " .
                 DB_PREFIX .
-                "cart WHERE api_id = '" .
-                (isset($this->session->data["api_id"])
-                    ? (int) $this->session->data["api_id"]
-                    : 0) .
-                "' AND customer_id = '" .
+                "cart WHERE customer_id = '" .
                 (int) $this->customer->getId() .
                 "' AND session_id = '" .
                 $this->db->escape($this->session->getId()) .
@@ -846,11 +840,7 @@ class Cart
         $query = $this->db->query(
             "SELECT COUNT(*) AS total FROM " .
                 DB_PREFIX .
-                "cart WHERE api_id = '" .
-                (isset($this->session->data["api_id"])
-                    ? (int) $this->session->data["api_id"]
-                    : 0) .
-                "' AND customer_id = '" .
+                "cart WHERE customer_id = '" .
                 (int) $this->customer->getId() .
                 "' AND session_id = '" .
                 $this->db->escape($this->session->getId()) .
@@ -865,11 +855,7 @@ class Cart
             $this->db->query(
                 "INSERT INTO " .
                     DB_PREFIX .
-                    "cart SET api_id = '" .
-                    (isset($this->session->data["api_id"])
-                        ? (int) $this->session->data["api_id"]
-                        : 0) .
-                    "', customer_id = '" .
+                    "cart SET customer_id = '" .
                     (int) $this->customer->getId() .
                     "', session_id = '" .
                     $this->db->escape($this->session->getId()) .
@@ -887,11 +873,7 @@ class Cart
                     DB_PREFIX .
                     "cart SET quantity = (quantity + " .
                     (float) $quantity .
-                    ") WHERE api_id = '" .
-                    (isset($this->session->data["api_id"])
-                        ? (int) $this->session->data["api_id"]
-                        : 0) .
-                    "' AND customer_id = '" .
+                    ") WHERE customer_id = '" .
                     (int) $this->customer->getId() .
                     "' AND session_id = '" .
                     $this->db->escape($this->session->getId()) .
@@ -913,12 +895,8 @@ class Cart
                 DB_PREFIX .
                 "cart SET quantity = '" .
                 (float) $quantity .
-                "' WHERE cart_id = '" .
+                    "' WHERE cart_id = '" .
                 (int) $cart_id .
-                "' AND api_id = '" .
-                (isset($this->session->data["api_id"])
-                    ? (int) $this->session->data["api_id"]
-                    : 0) .
                 "' AND customer_id = '" .
                 (int) $this->customer->getId() .
                 "' AND session_id = '" .
@@ -934,10 +912,6 @@ class Cart
                 DB_PREFIX .
                 "cart WHERE cart_id = '" .
                 (int) $cart_id .
-                "' AND api_id = '" .
-                (isset($this->session->data["api_id"])
-                    ? (int) $this->session->data["api_id"]
-                    : 0) .
                 "' AND customer_id = '" .
                 (int) $this->customer->getId() .
                 "' AND session_id = '" .
@@ -951,11 +925,7 @@ class Cart
         $this->db->query(
             "DELETE FROM " .
                 DB_PREFIX .
-                "cart WHERE api_id = '" .
-                (isset($this->session->data["api_id"])
-                    ? (int) $this->session->data["api_id"]
-                    : 0) .
-                "' AND customer_id = '" .
+                "cart WHERE customer_id = '" .
                 (int) $this->customer->getId() .
                 "' AND session_id = '" .
                 $this->db->escape($this->session->getId()) .
