@@ -532,13 +532,13 @@ class Cart
                 $variant_id = isset($decoded_options['variant_id']) ? (int)$decoded_options['variant_id'] : 0;
                 $variant_sku = '';
 
-                if ($variant_id > 0 && !empty($axis_selection)) {
+                if (!empty($axis_selection)) {
                     $pc = new \ProductConfigurable($this->registry);
                     $resolved = $pc->resolveVariant((int)$cart["product_id"], $axis_selection);
 
-                    if (!empty($resolved) && (int)$resolved['variant_id'] !== $variant_id) {
+                    if (!empty($resolved)) {
                         $variant_id = (int)$resolved['variant_id'];
-                    } elseif (empty($resolved)) {
+                    } elseif ($variant_id > 0) {
                         $variant_id = 0;
                         $stock = false;
                     }

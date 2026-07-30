@@ -2019,15 +2019,17 @@ class ControllerCheckoutDockercartCheckout extends Controller
         // Add products from cart
         foreach ($this->cart->getProducts() as $product) {
             $order_data["products"][] = [
-                "product_id" => $product["product_id"],
-                "name" => $product["name"],
-                "model" => $product["model"],
-                "quantity" => $product["quantity"],
-                "price" => $product["price"],
-                "total" => $product["total"],
-                "tax" => isset($product["tax"]) ? $product["tax"] : 0,
-                "reward" => isset($product["reward"]) ? $product["reward"] : 0,
-                "option" => isset($product["option"]) ? $product["option"] : [],
+                "product_id"  => $product["product_id"],
+                "variant_id"  => isset($product["variant_id"]) ? (int)$product["variant_id"] : 0,
+                "variant_sku" => isset($product["variant_sku"]) ? $product["variant_sku"] : '',
+                "name"        => $product["name"],
+                "model"       => $product["model"],
+                "quantity"    => $product["quantity"],
+                "price"       => $product["price"],
+                "total"       => $product["total"],
+                "tax"         => isset($product["tax"]) ? $product["tax"] : 0,
+                "reward"      => isset($product["reward"]) ? $product["reward"] : 0,
+                "option"      => isset($product["option"]) ? $product["option"] : [],
             ];
         }
 
