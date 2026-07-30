@@ -690,16 +690,6 @@ class ControllerSettingSetting extends Controller {
 
 		$data['order_statuses'] = $this->model_localisation_order_status->getOrderStatuses();
 
-		if (isset($this->request->post['config_api_id'])) {
-			$data['config_api_id'] = $this->request->post['config_api_id'];
-		} else {
-			$data['config_api_id'] = $this->config->get('config_api_id');
-		}
-
-		$this->load->model('user/api');
-
-		$data['apis'] = $this->model_user_api->getApis();
-
 		if (isset($this->request->post['config_stock_display'])) {
 			$data['config_stock_display'] = $this->request->post['config_stock_display'];
 		} else {

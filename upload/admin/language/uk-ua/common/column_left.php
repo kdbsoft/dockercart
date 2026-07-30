@@ -2,7 +2,6 @@
 
 $_['text_affiliate'] = 'Партнерська програма';
 $_['text_analytics'] = 'Аналітікс';
-$_['text_api'] = 'API';
 $_['text_attribute'] = 'Атрибути';
 $_['text_attribute_group'] = 'Групи атрибутів';
 $_['text_backup'] = 'Резервне копіювання / Відновлення';

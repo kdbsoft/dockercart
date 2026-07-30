@@ -379,31 +379,7 @@ class ControllerSaleOrder extends Controller {
 
 		$data['order_statuses'] = $this->model_localisation_order_status->getOrderStatuses();
 
-		// API login
 		$data['catalog'] = $this->request->server['HTTPS'] ? HTTPS_CATALOG : HTTP_CATALOG;
-		
-		// API login
-		$this->load->model('user/api');
-
-		$api_info = $this->model_user_api->getApi($this->config->get('config_api_id'));
-
-		if ($api_info && $this->user->hasPermission('modify', 'sale/order')) {
-			$session = new Session($this->config->get('session_engine'), $this->registry);
-			
-			$session->start();
-					
-			$this->model_user_api->deleteApiSessionBySessionId($session->getId());
-			
-			$this->model_user_api->addApiSession($api_info['api_id'], $session->getId(), $this->request->server['REMOTE_ADDR']);
-			
-			$session->data['api_id'] = $api_info['api_id'];
-
-			$session->data['language'] = isset($this->session->data['language']) ? $this->session->data['language'] : $this->config->get('config_language');
-
-			$data['api_token'] = $session->getId();
-		} else {
-			$data['api_token'] = '';
-		}
 
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
@@ -630,7 +606,71 @@ class ControllerSaleOrder extends Controller {
 		$this->response->setOutput(json_encode($json));
 	}
 
+	public function deleteOrder(): void {
+		$this->load->language('sale/order');
 
+		$json = [];
+
+		if (!$this->user->hasPermission('modify', 'sale/order')) {
+			$json['error'] = $this->language->get('error_permission');
+		} else {
+			$order_id = (int)($this->request->get['order_id'] ?? 0);
+
+			if ($order_id) {
+				$this->load->model('checkout/order');
+
+				$order_info = $this->model_checkout_order->getOrder($order_id);
+
+				if ($order_info) {
+					$this->model_checkout_order->deleteOrder($order_id);
+
+					$json['success'] = $this->language->get('text_success');
+				} else {
+					$json['error'] = $this->language->get('error_action');
+				}
+			} else {
+				$json['error'] = $this->language->get('error_action');
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function addHistory(): void {
+		$this->load->language('sale/order');
+
+		$json = [];
+
+		if (!$this->user->hasPermission('modify', 'sale/order')) {
+			$json['error'] = $this->language->get('error_permission');
+		} else {
+			$order_id = (int)($this->request->get['order_id'] ?? 0);
+			$order_status_id = (int)($this->request->post['order_status_id'] ?? 0);
+			$comment = $this->request->post['comment'] ?? '';
+			$notify = !empty($this->request->post['notify']);
+			$override = !empty($this->request->post['override']);
+
+			if (!$order_status_id) {
+				$json['error'] = $this->language->get('error_order_status');
+			} else {
+				$this->load->model('checkout/order');
+
+				$order_info = $this->model_checkout_order->getOrder($order_id);
+
+				if ($order_info) {
+					$this->model_checkout_order->addOrderHistory($order_id, $order_status_id, $comment, $notify, $override);
+
+					$json['success'] = $this->language->get('text_success');
+				} else {
+					$json['error'] = $this->language->get('error_action');
+				}
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
 
 	private function getOrderType($order) {
 		if (!empty($order['customer_id'])) {

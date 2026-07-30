@@ -118,29 +118,21 @@
                   <input type="number" id="product-qty" class="form-control input-sm" value="1" min="1" style="width:70px">
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
 
-        {# Totals Panel #}
-        <div class="dcx-shell">
-          <div class="dcx-panel">
-            <div class="dcx-panel-head">
-              <div class="dcx-panel-head__icon"><i data-lucide="receipt" width="18" height="18"></i></div>
-              <div>
-                <div class="dcx-panel-title">{{ text_panel_totals }}</div>
-              </div>
-            </div>
-            <div class="dcx-panel-body">
-              <div class="order-totals">
+              {# Totals #}
+              <div class="order-totals-card">
                 {% for total in totals %}
                 {% set label = total.title %}
                 {% if total.code == 'sub_total' %}
                   {% set label = label ~ ' (' ~ text_items ~ ': ' ~ total_quantity ~ ')' %}
                 {% endif %}
-                <div class="order-total-row{% if loop.last %} order-total-row--final{% endif %}">
-                  <span class="order-total-label">{{ label }}</span>
-                  <span class="order-total-value">{{ total.text }}</span>
+                {% if loop.last %}
+                  <div class="order-totals-card__divider"></div>
+                {% endif %}
+                <div class="order-totals-card__row{% if loop.last %} order-totals-card__row--total{% endif %}">
+                  <span class="order-totals-card__label">{{ label }}</span>
+                  <span class="order-totals-card__line"></span>
+                  <span class="order-totals-card__value">{{ total.text }}</span>
                 </div>
                 {% endfor %}
               </div>
@@ -419,10 +411,16 @@
 .order-product-card__total { width:auto; text-align:right; font-size:13px; font-weight:600; color:#2563eb; min-width:90px; }
 .order-product-card__actions { width:30px; text-align:center; }
 
-.order-totals { padding:10px 16px; background:#f9fafb; border-top:1px solid #e5e7eb; text-align:right; }
-.order-total-row { display:flex; justify-content:flex-end; gap:20px; padding:2px 0; font-size:12px; }
-.order-total-row--final { font-weight:700; color:#2563eb; font-size:14px; padding-top:3px; }
-.order-total-value { min-width:80px; text-align:right; }
+.order-totals-card { padding:14px 20px 10px; border-top:1px solid #e5e7eb; background:#fafbfc; border-radius: 0 0 var(--dc-radius-xl) var(--dc-radius-xl); }
+.order-totals-card__row { display:flex; align-items:baseline; gap:6px; padding:4px 0; font-size:13px; color:#555; }
+.order-totals-card__row--total { padding-top:8px; }
+.order-totals-card__label { white-space:nowrap; flex-shrink:0; }
+.order-totals-card__line { flex:1; border-bottom:1px dotted #d1d5db; min-width:20px; margin-bottom:3px; }
+.order-totals-card__value { white-space:nowrap; flex-shrink:0; font-variant-numeric:tabular-nums; text-align:right; }
+.order-totals-card__row--total .order-totals-card__label { font-weight:700; color:#111; font-size:14px; }
+.order-totals-card__row--total .order-totals-card__line { border-bottom-style:solid; border-bottom-color:#2563eb; }
+.order-totals-card__row--total .order-totals-card__value { font-weight:700; color:#2563eb; font-size:14px; }
+.order-totals-card__divider { border-top:1px solid #e5e7eb; margin:4px 0 2px; }
 
 .order-add-product { padding:8px 16px 16px; }
 .order-add-product-form { display:flex; gap:6px; align-items:center; }
