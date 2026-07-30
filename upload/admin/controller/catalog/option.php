@@ -761,9 +761,38 @@ class ControllerCatalogOption extends Controller {
 			'limit' => 500
 		]);
 
+		$value_types = ['select', 'radio', 'checkbox', 'color'];
+		$option_ids = [];
+
+		foreach ($options as $option) {
+			if (in_array($option['type'], $value_types)) {
+				$option_ids[] = (int)$option['option_id'];
+			}
+		}
+
+		$options_with_values = [];
+
+		if (!empty($option_ids)) {
+			$query = $this->db->query("
+				SELECT ov.option_id, COUNT(ov.option_value_id) AS cnt
+				FROM " . DB_PREFIX . "option_value ov
+				WHERE ov.option_id IN (" . implode(',', $option_ids) . ")
+				GROUP BY ov.option_id
+				HAVING cnt > 0
+			");
+
+			foreach ($query->rows as $row) {
+				$options_with_values[(int)$row['option_id']] = true;
+			}
+		}
+
 		$tree = [];
 
 		foreach ($options as $option) {
+			if (!isset($options_with_values[(int)$option['option_id']])) {
+				continue;
+			}
+
 			$tree[] = [
 				'category_id'  => (int)$option['option_id'],
 				'name'         => strip_tags(html_entity_decode($option['name'], ENT_QUOTES, 'UTF-8')),
