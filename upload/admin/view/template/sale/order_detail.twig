@@ -1,0 +1,659 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
+          <a href="{{ cancel }}" class="page-header__link">
+            <span class="page-header__back"><i data-lucide="arrow-left" width="20" height="20"></i></span>
+            <span class="page-header__title">
+              {{ heading_title }}
+              <span class="page-header__badge page-header__badge--{{ status_badge_class }}">{{ order_status }}</span>
+            </span>
+          </a>
+          <div class="pull-right" id="header-actions">
+            <button type="button" id="btn-edit" class="btn btn-primary btn--icon hidden-xs" onclick="toggleEditMode()" data-toggle="tooltip" title="{{ button_edit }}">
+              <i data-lucide="pencil" width="16" height="16"></i>
+            </button>
+            <a href="{{ print_url }}" target="_blank" class="btn btn-default btn--icon" data-toggle="tooltip" title="{{ button_print }}">
+              <i data-lucide="printer" width="16" height="16"></i>
+            </a>
+            <div class="dropdown" style="display:inline-block">
+              <button class="btn btn-default btn--icon dropdown-toggle" type="button" data-toggle="dropdown" title="{{ text_more_actions }}">
+                <i data-lucide="more-horizontal" width="16" height="16"></i>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-right">
+                <li><a href="#" onclick="event.preventDefault();addReward();return false"><i data-lucide="star" width="14" height="14"></i> {{ button_reward_add }}</a></li>
+                <li><a href="#" onclick="event.preventDefault();removeReward();return false"><i data-lucide="star-off" width="14" height="14"></i> {{ button_reward_remove }}</a></li>
+                <li class="divider"></li>
+                <li><a href="#" onclick="event.preventDefault();addCommission();return false"><i data-lucide="coins" width="14" height="14"></i> {{ button_commission_add }}</a></li>
+                <li><a href="#" onclick="event.preventDefault();removeCommission();return false"><i data-lucide="coins-off" width="14" height="14"></i> {{ button_commission_remove }}</a></li>
+              </ul>
+            </div>
+            <span id="edit-actions" style="display:none">
+              <button type="button" id="btn-save" class="btn btn-primary btn--icon" onclick="saveChanges()" data-toggle="tooltip" title="{{ button_save }}">
+                <i data-lucide="save" width="16" height="16"></i>
+              </button>
+              <button type="button" class="btn btn-default btn--icon" onclick="toggleEditMode()" data-toggle="tooltip" title="{{ button_cancel }}">
+                <i data-lucide="x" width="16" height="16"></i>
+              </button>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-12 col-sm-12 col-lg-offset-1 col-lg-7 col-xl-offset-1 col-xl-7">
+
+        {# Edit mode label #}
+        <div id="edit-mode-banner" class="alert alert-warning" style="display:none;padding:6px 12px;margin-bottom:12px;font-size:12px">
+          <i data-lucide="edit-3" width="14" height="14"></i> {{ text_edit_mode }}. {{ text_edit_hint }}
+        </div>
+
+        {# Products Panel #}
+        <div class="dcx-shell">
+          <div class="dcx-panel">
+            <div class="dcx-panel-head">
+              <div class="dcx-panel-head__icon"><i data-lucide="package" width="18" height="18"></i></div>
+              <div>
+                <div class="dcx-panel-title">{{ text_panel_order_contents }}</div>
+              </div>
+            </div>
+            <div class="dcx-panel-body dcx-panel-body--flush">
+              {% for product in products %}
+              <div class="order-product-card" data-product-id="{{ product.product_id }}" data-order-product-id="{{ product.order_product_id }}">
+                <div class="order-product-card__thumb">
+                  <img src="{{ product.thumb }}" alt="{{ product.name }}">
+                </div>
+                <div class="order-product-card__info">
+                  <div class="order-product-card__name">
+                    <a href="{{ product.href }}" target="_blank">{{ product.name }}</a>
+                  </div>
+                  <div class="order-product-card__meta">
+                    <span class="order-product-card__model">{{ product.model }}</span>
+                    {% if product.option %}
+                      {% for option in product.option %}
+                        <span class="order-product-card__option">· {{ option.name }}: {{ option.value }}</span>
+                      {% endfor %}
+                    {% endif %}
+                  </div>
+                  {% if product.discount_percent > 0 %}
+                  <div class="order-product-card__discount">{{ product.discount_percent }}% {{ text_discount }}</div>
+                  {% endif %}
+                </div>
+                <div class="order-product-card__price">
+                  <span class="view-only">{{ product.price }}</span>
+                  <input type="text" class="form-control input-xs edit-only" value="{{ product.price_raw|round(2) }}" data-field="price" style="display:none">
+                </div>
+                <div class="order-product-card__mult">&times;</div>
+                <div class="order-product-card__qty">
+                  <span class="view-only">{{ product.quantity|round }}</span>
+                  <input type="number" class="form-control input-xs edit-only" value="{{ product.quantity|round }}" min="0" step="1" data-field="quantity" style="display:none">
+                </div>
+                <div class="order-product-card__total">= {{ product.total }}</div>
+                <div class="order-product-card__actions edit-only" style="display:none">
+                  <button type="button" class="btn btn-danger btn-xs btn--icon" onclick="removeProduct(this)" title="{{ button_remove }}">
+                    <i data-lucide="trash-2" width="13" height="13"></i>
+                  </button>
+                </div>
+              </div>
+              {% endfor %}
+
+              {# Add Product (edit mode) #}
+              <div class="order-add-product edit-only" style="display:none">
+                <hr class="order-hr">
+                <div class="order-add-product-form">
+                  <div class="input-group input-group-sm" style="max-width:420px">
+                    <input type="text" id="product-search" class="form-control" placeholder="{{ text_search_product }}">
+                    <input type="hidden" id="product-id" value="0">
+                    <span class="input-group-btn">
+                      <button type="button" class="btn btn-primary" onclick="addProduct()">
+                        <i data-lucide="plus" width="14" height="14"></i> {{ button_add }}
+                      </button>
+                    </span>
+                  </div>
+                  <input type="number" id="product-qty" class="form-control input-sm" value="1" min="1" style="width:70px">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {# Totals Panel #}
+        <div class="dcx-shell">
+          <div class="dcx-panel">
+            <div class="dcx-panel-head">
+              <div class="dcx-panel-head__icon"><i data-lucide="receipt" width="18" height="18"></i></div>
+              <div>
+                <div class="dcx-panel-title">{{ text_panel_totals }}</div>
+              </div>
+            </div>
+            <div class="dcx-panel-body">
+              <div class="order-totals">
+                {% for total in totals %}
+                {% set label = total.title %}
+                {% if total.code == 'sub_total' %}
+                  {% set label = label ~ ' (' ~ text_items ~ ': ' ~ total_quantity ~ ')' %}
+                {% endif %}
+                <div class="order-total-row{% if loop.last %} order-total-row--final{% endif %}">
+                  <span class="order-total-label">{{ label }}</span>
+                  <span class="order-total-value">{{ total.text }}</span>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {# Timeline #}
+        <div class="dcx-shell">
+          <div class="dcx-panel">
+            <div class="dcx-panel-head">
+              <div class="dcx-panel-head__icon"><i data-lucide="clock" width="18" height="18"></i></div>
+              <div>
+                <div class="dcx-panel-title">{{ text_timeline }}</div>
+              </div>
+            </div>
+            <div class="dcx-panel-body">
+              <div id="timeline-container" data-order-id="{{ order_id }}">
+                <div class="text-center"><i data-lucide="loader" width="18" height="18" class="spin"></i> {{ text_loading }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {# Sidebar #}
+      <div class="col-md-12 col-sm-12 col-lg-4 col-xl-3">
+
+        {# Buyer Card (customer + addresses) #}
+        <div class="dcx-sidebar-card">
+          <div class="dcx-sidebar-card__header">
+            <div class="dcx-sidebar-card__header-icon"><i data-lucide="user" width="16" height="16"></i></div>
+            <h3 class="dcx-sidebar-card__title">{{ text_buyer }}</h3>
+          </div>
+          <div class="dcx-sidebar-card__body">
+            <div class="dcx-sidebar-card__field">
+              <span class="dcx-sidebar-card__label">{{ entry_firstname }} / {{ entry_lastname }}</span>
+              <span class="dcx-sidebar-card__value view-only">{{ firstname }} {{ lastname }}</span>
+              <div class="edit-only" style="display:none">
+                <input type="text" class="form-control input-xs" value="{{ firstname }}" data-field="firstname" placeholder="{{ entry_firstname }}" style="width:48%;display:inline-block">
+                <input type="text" class="form-control input-xs" value="{{ lastname }}" data-field="lastname" placeholder="{{ entry_lastname }}" style="width:48%;display:inline-block">
+              </div>
+            </div>
+            <div class="dcx-sidebar-card__field">
+              <span class="dcx-sidebar-card__label">{{ entry_email }}</span>
+              <span class="dcx-sidebar-card__value view-only" data-field="email">{{ email }}</span>
+              <input type="email" class="form-control input-xs edit-only" value="{{ email }}" data-field="email" style="display:none">
+            </div>
+            <div class="dcx-sidebar-card__field">
+              <span class="dcx-sidebar-card__label">{{ entry_telephone }}</span>
+              <span class="dcx-sidebar-card__value view-only" data-field="telephone">{{ telephone }}</span>
+              <input type="text" class="form-control input-xs edit-only" value="{{ telephone }}" data-field="telephone" style="display:none">
+            </div>
+            <div class="dcx-sidebar-card__field">
+              <span class="dcx-sidebar-card__label">{{ entry_tax_number }}</span>
+              <span class="dcx-sidebar-card__value view-only" data-field="tax_number">{{ tax_number }}</span>
+              <input type="text" class="form-control input-xs edit-only" value="{{ tax_number }}" data-field="tax_number" style="display:none">
+            </div>
+            <div class="dcx-sidebar-card__field">
+              <span class="dcx-sidebar-card__label">{{ entry_customer_group }}</span>
+              <span class="dcx-sidebar-card__value">{{ customer_group }}</span>
+            </div>
+            {% if customer_link %}
+            <div class="dcx-sidebar-card__field" style="margin-top:4px">
+              <a href="{{ customer_link }}" target="_blank" class="btn btn-default btn-xs">
+                <i data-lucide="external-link" width="11" height="11"></i> {{ text_view_customer }}
+              </a>
+            </div>
+            {% endif %}
+
+            <div class="dcx-sidebar-card__divider"></div>
+
+            {# Shipping address first #}
+            <div class="dcx-sidebar-card__field">
+              <span class="dcx-sidebar-card__label">{{ text_shipping_address }}</span>
+              <span class="dcx-sidebar-card__value view-only">{{ shipping_address|raw }}</span>
+              <div class="edit-only" id="edit-shipping-address" style="display:none">
+                <input type="text" class="form-control input-xs" value="{{ shipping_firstname }}" data-address-field="shipping_firstname" placeholder="{{ entry_firstname }}" style="margin-bottom:3px">
+                <input type="text" class="form-control input-xs" value="{{ shipping_lastname }}" data-address-field="shipping_lastname" placeholder="{{ entry_lastname }}" style="margin-bottom:3px">
+                <input type="text" class="form-control input-xs" value="{{ shipping_address_1 }}" data-address-field="shipping_address_1" placeholder="{{ entry_address_1 }}" style="margin-bottom:3px">
+                <input type="text" class="form-control input-xs" value="{{ shipping_address_2 }}" data-address-field="shipping_address_2" placeholder="{{ entry_address_2 }}" style="margin-bottom:3px">
+                <div style="display:flex;gap:3px;margin-bottom:3px">
+                  <input type="text" class="form-control input-xs" value="{{ shipping_city }}" data-address-field="shipping_city" placeholder="{{ entry_city }}" style="flex:1">
+                  <input type="text" class="form-control input-xs" value="{{ shipping_postcode }}" data-address-field="shipping_postcode" placeholder="{{ entry_postcode }}" style="width:80px">
+                </div>
+                <select class="form-control input-xs" data-address-field="shipping_country_id" onchange="loadZones(this,'#edit-ship-zone')" style="margin-bottom:3px">
+                  {% for country in countries %}
+                  <option value="{{ country.country_id }}" {% if country.country_id == shipping_country_id %}selected{% endif %}>{{ country.name }}</option>
+                  {% endfor %}
+                </select>
+                <select class="form-control input-xs" id="edit-ship-zone" data-address-field="shipping_zone_id">
+                  <option value="0">{{ text_none }}</option>
+                </select>
+              </div>
+            </div>
+
+            {# Billing address — with same-as-shipping badge if they match #}
+            <div class="dcx-sidebar-card__field">
+              <span class="dcx-sidebar-card__label">{{ text_payer_address }}</span>
+              {% if addresses_match %}
+                <span class="dcx-sidebar-card__value">
+                  <span class="same-as-badge"><i data-lucide="corner-down-right" width="12" height="12"></i> {{ text_same_as_shipping }}</span>
+                </span>
+                <div class="edit-only" style="display:none;margin-top:4px">
+                  <label class="checkbox-inline" style="font-size:12px">
+                    <input type="checkbox" id="same-address-cb" checked onchange="toggleSameAddress()"> {{ text_same_as_shipping }}
+                  </label>
+                  <div id="edit-payment-address" style="display:none;margin-top:4px">
+                    <input type="text" class="form-control input-xs" value="{{ payment_firstname }}" data-address-field="payment_firstname" placeholder="{{ entry_firstname }}" style="margin-bottom:3px">
+                    <input type="text" class="form-control input-xs" value="{{ payment_lastname }}" data-address-field="payment_lastname" placeholder="{{ entry_lastname }}" style="margin-bottom:3px">
+                    <input type="text" class="form-control input-xs" value="{{ payment_address_1 }}" data-address-field="payment_address_1" placeholder="{{ entry_address_1 }}" style="margin-bottom:3px">
+                    <input type="text" class="form-control input-xs" value="{{ payment_address_2 }}" data-address-field="payment_address_2" placeholder="{{ entry_address_2 }}" style="margin-bottom:3px">
+                    <div style="display:flex;gap:3px;margin-bottom:3px">
+                      <input type="text" class="form-control input-xs" value="{{ payment_city }}" data-address-field="payment_city" placeholder="{{ entry_city }}" style="flex:1">
+                      <input type="text" class="form-control input-xs" value="{{ payment_postcode }}" data-address-field="payment_postcode" placeholder="{{ entry_postcode }}" style="width:80px">
+                    </div>
+                    <select class="form-control input-xs" data-address-field="payment_country_id" onchange="loadZones(this,'#edit-pay-zone')" style="margin-bottom:3px">
+                      {% for country in countries %}
+                      <option value="{{ country.country_id }}" {% if country.country_id == payment_country_id %}selected{% endif %}>{{ country.name }}</option>
+                      {% endfor %}
+                    </select>
+                    <select class="form-control input-xs" id="edit-pay-zone" data-address-field="payment_zone_id">
+                      <option value="0">{{ text_none }}</option>
+                    </select>
+                  </div>
+                </div>
+              {% else %}
+                <span class="dcx-sidebar-card__value view-only">{{ payment_address|raw }}</span>
+                <div class="edit-only" id="edit-payment-address" style="display:none">
+                  <input type="text" class="form-control input-xs" value="{{ payment_firstname }}" data-address-field="payment_firstname" placeholder="{{ entry_firstname }}" style="margin-bottom:3px">
+                  <input type="text" class="form-control input-xs" value="{{ payment_lastname }}" data-address-field="payment_lastname" placeholder="{{ entry_lastname }}" style="margin-bottom:3px">
+                  <input type="text" class="form-control input-xs" value="{{ payment_address_1 }}" data-address-field="payment_address_1" placeholder="{{ entry_address_1 }}" style="margin-bottom:3px">
+                  <input type="text" class="form-control input-xs" value="{{ payment_address_2 }}" data-address-field="payment_address_2" placeholder="{{ entry_address_2 }}" style="margin-bottom:3px">
+                  <div style="display:flex;gap:3px;margin-bottom:3px">
+                    <input type="text" class="form-control input-xs" value="{{ payment_city }}" data-address-field="payment_city" placeholder="{{ entry_city }}" style="flex:1">
+                    <input type="text" class="form-control input-xs" value="{{ payment_postcode }}" data-address-field="payment_postcode" placeholder="{{ entry_postcode }}" style="width:80px">
+                  </div>
+                  <select class="form-control input-xs" data-address-field="payment_country_id" onchange="loadZones(this,'#edit-pay-zone')" style="margin-bottom:3px">
+                    {% for country in countries %}
+                    <option value="{{ country.country_id }}" {% if country.country_id == payment_country_id %}selected{% endif %}>{{ country.name }}</option>
+                    {% endfor %}
+                  </select>
+                  <select class="form-control input-xs" id="edit-pay-zone" data-address-field="payment_zone_id">
+                    <option value="0">{{ text_none }}</option>
+                  </select>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        {# Order Card (status + payment/shipping + tools) #}
+        <div class="dcx-sidebar-card">
+          <div class="dcx-sidebar-card__header">
+            <div class="dcx-sidebar-card__header-icon"><i data-lucide="shopping-cart" width="16" height="16"></i></div>
+            <h3 class="dcx-sidebar-card__title">{{ text_order_detail }}</h3>
+          </div>
+          <div class="dcx-sidebar-card__body">
+            <div class="dcx-sidebar-card__field">
+              <span class="dcx-sidebar-card__label">{{ entry_store }}</span>
+              <span class="dcx-sidebar-card__value">{{ store_name }}</span>
+            </div>
+            <div class="dcx-sidebar-card__field">
+              <span class="dcx-sidebar-card__label">{{ entry_order_status }}</span>
+              <span class="dcx-sidebar-card__value view-only">{{ order_status }}</span>
+              <select class="form-control input-xs edit-only" id="edit-order-status" style="display:none">
+                {% for status in order_statuses %}
+                <option value="{{ status.order_status_id }}" {% if status.order_status_id == order_status_id %}selected{% endif %}>{{ status.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="dcx-sidebar-card__field">
+              <span class="dcx-sidebar-card__label">{{ entry_comment }}</span>
+              <div class="dcx-sidebar-card__value view-only">{{ comment|nl2br ?: '—' }}</div>
+              <textarea class="form-control input-xs edit-only" id="edit-comment" style="display:none" rows="2">{{ comment }}</textarea>
+            </div>
+
+            <div class="dcx-sidebar-card__divider"></div>
+
+            <div class="dcx-sidebar-card__field">
+              <span class="dcx-sidebar-card__label">{{ text_payment_method }}</span>
+              <span class="dcx-sidebar-card__value view-only" data-field="payment_method">{{ payment_method }}</span>
+              <input type="text" class="form-control input-xs edit-only" value="{{ payment_method }}" data-field="payment_method" style="display:none">
+            </div>
+            <div class="dcx-sidebar-card__field">
+              <span class="dcx-sidebar-card__label">{{ text_shipping_method }}</span>
+              <span class="dcx-sidebar-card__value view-only" data-field="shipping_method">{{ shipping_method }}</span>
+              <input type="text" class="form-control input-xs edit-only" value="{{ shipping_method }}" data-field="shipping_method" style="display:none">
+            </div>
+            <div class="dcx-sidebar-card__field">
+              <span class="dcx-sidebar-card__label">{{ entry_tracking_number }}</span>
+              <span class="dcx-sidebar-card__value view-only" data-field="tracking_number">{{ tracking_number ?: '—' }}</span>
+              <input type="text" class="form-control input-xs edit-only" value="{{ tracking_number }}" data-field="tracking_number" style="display:none">
+            </div>
+
+            <div class="dcx-sidebar-card__divider"></div>
+
+            <div class="dcx-sidebar-card__field">
+              <div class="dcx-sidebar-card__field-row">
+                <span class="dcx-sidebar-card__label">{{ text_reward }}</span>
+                <span class="dcx-sidebar-card__value">{{ reward }}</span>
+                <div class="dcx-sidebar-card__actions">
+                  <button type="button" class="btn btn-xs btn-success btn--icon" onclick="addReward()" title="{{ button_reward_add }}">
+                    <i data-lucide="plus" width="11" height="11"></i>
+                  </button>
+                  <button type="button" class="btn btn-xs btn-danger btn--icon" onclick="removeReward()" title="{{ button_reward_remove }}">
+                    <i data-lucide="minus" width="11" height="11"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            {% if affiliate_id %}
+            <div class="dcx-sidebar-card__field">
+              <div class="dcx-sidebar-card__field-row">
+                <span class="dcx-sidebar-card__label">{{ text_affiliate }}</span>
+                <span class="dcx-sidebar-card__value">{{ affiliate_firstname }} {{ affiliate_lastname }} ({{ commission }})</span>
+                <div class="dcx-sidebar-card__actions">
+                  <button type="button" class="btn btn-xs btn-success btn--icon" onclick="addCommission()" title="{{ button_commission_add }}">
+                    <i data-lucide="plus" width="11" height="11"></i>
+                  </button>
+                  <button type="button" class="btn btn-xs btn-danger btn--icon" onclick="removeCommission()" title="{{ button_commission_remove }}">
+                    <i data-lucide="minus" width="11" height="11"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+            <div class="dcx-sidebar-card__field">
+              <div class="order-browser-toggle" onclick="toggleBrowserInfo()">
+                <i data-lucide="chevron-right" width="12" height="12" id="browser-chevron"></i>
+                <span id="browser-toggle-text" style="font-size:11px">{{ text_show_browser_info }}</span>
+              </div>
+              <div id="browser-info" style="display:none;margin-top:6px">
+                <div class="dcx-sidebar-card__field">
+                  <span class="dcx-sidebar-card__label">{{ text_ip }}</span>
+                  <span class="dcx-sidebar-card__value">{{ ip }}</span>
+                </div>
+                <div class="dcx-sidebar-card__field">
+                  <span class="dcx-sidebar-card__label">{{ text_user_agent }}</span>
+                  <span class="dcx-sidebar-card__value" style="font-size:10px;word-break:break-all;color:#888">{{ user_agent }}</span>
+                </div>
+                <div class="dcx-sidebar-card__field">
+                  <span class="dcx-sidebar-card__label">{{ text_forwarded_ip }}</span>
+                  <span class="dcx-sidebar-card__value">{{ forwarded_ip ?: '—' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.dcx-panel-body--flush { padding:0; }
+.order-product-card { display:flex; align-items:center; gap:10px; padding:12px 16px; border-bottom:1px solid #f0f0f0; transition:background .15s; }
+.order-product-card:last-child { border-bottom:none; }
+.order-product-card:hover { background:#fafafa; }
+.order-product-card__thumb { width:40px; height:40px; flex-shrink:0; }
+.order-product-card__thumb img { width:40px; height:40px; border-radius:6px; object-fit:cover; display:block; }
+.order-product-card__info { flex:1; min-width:0; }
+.order-product-card__name { font-size:13px; font-weight:500; }
+.order-product-card__name a { color:inherit; }
+.order-product-card__name a:hover { color:#2563eb; }
+.order-product-card__meta { font-size:11px; color:#888; margin-top:1px; }
+.order-product-card__model { color:#999; }
+.order-product-card__option { color:#888; }
+.order-product-card__discount { font-size:11px; color:#e65100; margin-top:1px; }
+.order-product-card__price { width:90px; text-align:right; font-size:13px; color:#555; }
+.order-product-card__price input { width:90px; text-align:center; }
+.order-product-card__mult { width:16px; text-align:center; font-size:13px; color:#bbb; }
+.order-product-card__qty { width:50px; text-align:right; font-size:13px; color:#555; }
+.order-product-card__qty input { width:50px; text-align:center; }
+.order-product-card__total { width:auto; text-align:right; font-size:13px; font-weight:600; color:#2563eb; min-width:90px; }
+.order-product-card__actions { width:30px; text-align:center; }
+
+.order-totals { padding:10px 16px; background:#f9fafb; border-top:1px solid #e5e7eb; text-align:right; }
+.order-total-row { display:flex; justify-content:flex-end; gap:20px; padding:2px 0; font-size:12px; }
+.order-total-row--final { font-weight:700; color:#2563eb; font-size:14px; padding-top:3px; }
+.order-total-value { min-width:80px; text-align:right; }
+
+.order-add-product { padding:8px 16px 16px; }
+.order-add-product-form { display:flex; gap:6px; align-items:center; }
+
+.order-hr { margin:0; border:0; border-top:1px solid #e5e7eb; }
+
+.same-as-badge { font-size:11px; color:#2563eb; background:#eff6ff; padding:2px 8px; border-radius:4px; display:inline-flex; align-items:center; gap:4px; font-weight:500; }
+
+.dcx-sidebar-card__field-row { display:flex; align-items:center; gap:6px; width:100%; }
+
+.order-browser-toggle { font-size:11px; color:#666; cursor:pointer; display:flex; align-items:center; gap:4px; }
+.order-browser-toggle:hover { color:#333; }
+
+.input-xs { height:26px; padding:2px 6px; font-size:12px; line-height:1.4; border-radius:4px; }
+
+.spin { animation:spin 1s linear infinite; }
+@keyframes spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
+
+.timeline-entry { display:flex; gap:10px; padding:8px 0; border-bottom:1px solid #f3f4f6; }
+.timeline-entry:last-child { border-bottom:none; }
+.timeline-icon { width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.timeline-icon--system { background:#e8f4fd; color:#2563eb; }
+.timeline-icon--note { background:#fef3e2; color:#e65100; }
+.timeline-content { flex:1; min-width:0; }
+.timeline-header { display:flex; justify-content:space-between; font-size:11px; }
+.timeline-status { font-weight:500; }
+.timeline-date { color:#999; }
+.timeline-comment { font-size:12px; color:#555; margin-top:2px; white-space:pre-wrap; }
+.timeline-load-more { text-align:center; padding:6px; }
+.timeline-note-form { margin-top:10px; border-top:1px solid #eee; padding-top:10px; }
+.badge-note { background:#fef3e2; color:#e65100; font-weight:500; padding:1px 6px; border-radius:3px; font-size:10px; }
+</style>
+
+<script>
+const USER_TOKEN = '{{ user_token }}';
+const ORDER_ID = {{ order_id }};
+let isEditing = false;
+
+function toggleEditMode() {
+	isEditing = !isEditing;
+	document.querySelectorAll('.view-only').forEach(el => el.style.display = isEditing ? 'none' : '');
+	document.querySelectorAll('.edit-only').forEach(el => el.style.display = isEditing ? '' : 'none');
+	document.getElementById('btn-edit').style.display = isEditing ? 'none' : '';
+	document.getElementById('edit-actions').style.display = isEditing ? '' : 'none';
+	document.getElementById('edit-mode-banner').style.display = isEditing ? '' : 'none';
+	if (!isEditing) lucide.createIcons();
+}
+
+function toggleSameAddress() {
+	const cb = document.getElementById('same-address-cb');
+	const el = document.getElementById('edit-payment-address');
+	if (el) el.style.display = cb.checked ? 'none' : '';
+}
+
+function api(url, method, data) {
+	return fetch(url, {
+		method: method || 'POST',
+		headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+		body: data ? new URLSearchParams(data) : undefined
+	}).then(r => r.json());
+}
+
+function showAlert(msg, type) {
+	const c = document.querySelector('#content > .container-fluid');
+	c.insertAdjacentHTML('afterbegin',
+		'<div class="row"><div class="col-sm-12 col-lg-offset-1 col-lg-10 col-xl-offset-1 col-xl-10"><div class="alert alert-' + (type || 'success') + ' alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> ' +
+		msg + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div></div></div>');
+	lucide.createIcons();
+	setTimeout(() => { const a = c.querySelector('.alert'); if (a) a.remove(); }, 5000);
+}
+
+function saveChanges() {
+	const promises = [];
+	document.querySelectorAll('.order-product-card').forEach(card => {
+		const opid = card.dataset.orderProductId;
+		const qtyInput = card.querySelector('input[data-field="quantity"]');
+		const priceInput = card.querySelector('input[data-field="price"]');
+		if (qtyInput && qtyInput.value !== qtyInput.defaultValue) {
+			promises.push(api('index.php?route=sale/order_detail/updateProduct&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+				'POST', { order_product_id: opid, field: 'quantity', value: qtyInput.value }));
+		}
+		if (priceInput && priceInput.value !== priceInput.defaultValue) {
+			promises.push(api('index.php?route=sale/order_detail/updateProduct&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+				'POST', { order_product_id: opid, field: 'price', value: priceInput.value }));
+		}
+	});
+	document.querySelectorAll('.dcx-sidebar-card input[data-field], .dcx-sidebar-card select[data-field]').forEach(input => {
+		const viewEl = document.querySelector('.view-only[data-field="' + input.dataset.field + '"]');
+		if (viewEl && input.value !== viewEl.textContent.trim()) {
+			promises.push(api('index.php?route=sale/order_detail/updateField&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+				'POST', { field: input.dataset.field, value: input.value }));
+		}
+	});
+	const sameCb = document.getElementById('same-address-cb');
+	function collectAddr(id) {
+		const el = document.getElementById(id);
+		if (!el) return null;
+		const f = {};
+		el.querySelectorAll('[data-address-field]').forEach(e => { f[e.dataset.addressField] = e.value; });
+		return Object.keys(f).length ? f : null;
+	}
+	const shipF = collectAddr('edit-shipping-address');
+	if (shipF) promises.push(api('index.php?route=sale/order_detail/updateField&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID, 'POST', shipF));
+	if (!sameCb || !sameCb.checked) {
+		const payF = collectAddr('edit-payment-address');
+		if (payF) promises.push(api('index.php?route=sale/order_detail/updateField&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID, 'POST', payF));
+	}
+	const statusEl = document.getElementById('edit-order-status');
+	if (statusEl) {
+		const commentEl = document.getElementById('edit-comment');
+		promises.push(api('index.php?route=sale/order_detail/addHistory&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+			'POST', { order_status_id: statusEl.value, notify: '0', comment: commentEl ? commentEl.value : '' }));
+	}
+	Promise.all(promises).then(() => {
+		showAlert('{{ text_order_saved }}');
+		toggleEditMode();
+		location.reload();
+	});
+}
+
+function removeProduct(btn) {
+	const card = btn.closest('.order-product-card');
+	if (!confirm('{{ text_confirm }}')) return;
+	api('index.php?route=sale/order_detail/removeProduct&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+		'POST', { order_product_id: card.dataset.orderProductId }).then(j => { if (j.success) { card.remove(); location.reload(); } });
+}
+
+function addProduct() {
+	const pid = document.getElementById('product-id').value;
+	const qty = document.getElementById('product-qty').value || 1;
+	if (!pid || pid === '0') return;
+	api('index.php?route=sale/order_detail/addProduct&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+		'POST', { product_id: pid, quantity: qty }).then(j => { if (j.product) location.reload(); });
+}
+
+function loadTimeline(page) {
+	page = page || 1;
+	const c = document.getElementById('timeline-container');
+	api('index.php?route=sale/order_detail/getTimeline&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID + '&page=' + page, 'GET')
+		.then(j => { if (j.html) { c.innerHTML = j.html; lucide.createIcons(); } });
+}
+
+function addTimelineNote() {
+	const comment = document.getElementById('tl-note-comment').value;
+	const notify = document.getElementById('tl-note-notify') ? document.getElementById('tl-note-notify').checked : false;
+	if (!comment.trim()) return;
+	api('index.php?route=sale/order_detail/addNote&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+		'POST', { comment: comment, notify: notify ? '1' : '0' })
+		.then(j => { if (j.success) { document.getElementById('tl-note-comment').value = ''; loadTimeline(1); } });
+}
+
+function addTimelineHistory() {
+	const statusId = document.getElementById('tl-history-status').value;
+	const comment = document.getElementById('tl-history-comment').value;
+	const notify = document.getElementById('tl-history-notify') ? document.getElementById('tl-history-notify').checked : false;
+	const override = document.getElementById('tl-history-override') ? document.getElementById('tl-history-override').checked : false;
+	if (!statusId || statusId === '0') return;
+	api('index.php?route=sale/order_detail/addHistory&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+		'POST', { order_status_id: statusId, comment: comment, notify: notify ? '1' : '0', override: override ? '1' : '0' })
+		.then(j => { if (j.success) { document.getElementById('tl-history-comment').value = ''; loadTimeline(1); } });
+}
+
+function addReward() { api('index.php?route=sale/order_detail/addReward&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID, 'POST').then(j => { if (j.success) showAlert(j.success); }); }
+function removeReward() { api('index.php?route=sale/order_detail/removeReward&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID, 'POST').then(j => { if (j.success) showAlert(j.success); }); }
+function addCommission() { api('index.php?route=sale/order_detail/addCommission&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID, 'POST').then(j => { if (j.success) showAlert(j.success); }); }
+function removeCommission() { api('index.php?route=sale/order_detail/removeCommission&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID, 'POST').then(j => { if (j.success) showAlert(j.success); }); }
+
+function loadZones(countrySelect, targetSel) {
+	const countryId = countrySelect.value;
+	document.querySelector(targetSel).innerHTML = '<option value="0">{{ text_none }}</option>';
+	if (!countryId) return;
+	api('index.php?route=localisation/country/country&user_token=' + USER_TOKEN + '&country_id=' + countryId, 'GET').then(j => {
+		if (j.zone) {
+			const zones = typeof j.zone === 'string' ? JSON.parse(j.zone) : j.zone;
+			if (zones && zones.length) {
+				let h = '<option value="0">{{ text_none }}</option>';
+				zones.forEach(z => { h += '<option value="' + z.zone_id + '">' + z.name + '</option>'; });
+				document.querySelector(targetSel).innerHTML = h;
+			}
+		}
+	});
+}
+
+function toggleBrowserInfo() {
+	const el = document.getElementById('browser-info');
+	const ch = document.getElementById('browser-chevron');
+	const txt = document.getElementById('browser-toggle-text');
+	const open = el.style.display !== 'none';
+	el.style.display = open ? 'none' : '';
+	ch.style.transform = open ? '' : 'rotate(90deg)';
+	txt.textContent = open ? '{{ text_show_browser_info }}' : '{{ text_hide_browser_info }}';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+	loadTimeline(1);
+
+	const ps = document.getElementById('product-search');
+	if (ps) {
+		let debounce;
+		ps.addEventListener('input', function() {
+			clearTimeout(debounce);
+			debounce = setTimeout(() => {
+				const val = this.value.trim();
+				if (val.length < 2) { document.getElementById('product-id').value = '0'; return; }
+				api('index.php?route=catalog/product/autocomplete&user_token=' + USER_TOKEN + '&filter_name=' + encodeURIComponent(val), 'GET').then(j => {
+					let dd = document.querySelector('.dcx-search-dropdown');
+					if (dd) dd.remove();
+					if (j && j.length) {
+						const wrap = this.parentElement;
+						wrap.style.position = 'relative';
+						const d = document.createElement('div');
+						d.className = 'dcx-search-dropdown';
+						d.style.cssText = 'position:absolute;top:100%;left:0;right:0;z-index:100;background:#fff;border:1px solid #ddd;max-height:200px;overflow-y:auto;border-radius:4px';
+						j.forEach(p => {
+							const item = document.createElement('div');
+							item.style.cssText = 'padding:5px 8px;cursor:pointer;border-bottom:1px solid #f3f4f6;font-size:12px;display:flex;align-items:center;gap:6px';
+							item.innerHTML = '<img src="' + (p.image || '') + '" style="width:22px;height:22px;border-radius:3px;object-fit:cover"> ' + p.name;
+							item.onclick = function() {
+								document.getElementById('product-id').value = p.product_id;
+								ps.value = p.name;
+								if (d.parentNode) d.remove();
+							};
+							d.appendChild(item);
+						});
+						wrap.appendChild(d);
+					}
+				});
+			}, 200);
+		});
+		document.addEventListener('click', () => { const d = document.querySelector('.dcx-search-dropdown'); if (d) d.remove(); });
+	}
+});
+</script>
+{{ footer }}
