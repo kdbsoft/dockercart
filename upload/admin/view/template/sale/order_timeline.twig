@@ -1,4 +1,5 @@
 {% if entries %}
+  <div class="timeline-entries">
   {% for entry in entries %}
   <div class="timeline-entry" data-history-id="{{ entry.order_history_id }}">
     <div class="timeline-icon {% if entry.order_status_id == 0 %}timeline-icon--note{% else %}timeline-icon--system {% endif %}">
@@ -22,16 +23,13 @@
     </div>
   </div>
   {% endfor %}
+  </div>
 
-  {% if pages > 1 %}
+  {% if page < pages %}
   <div class="timeline-load-more">
-    {% if page > 1 %}
-    <a onclick="loadTimeline({{ page - 1 }})" class="btn btn-default btn-xs"><i data-lucide="chevron-left" width="12" height="12"></i> {{ text_previous }}</a>
-    {% endif %}
-    <span style="font-size:12px;color:#999;margin:0 8px">{{ page }} / {{ pages }}</span>
-    {% if page < pages %}
-    <a onclick="loadTimeline({{ page + 1 }})" class="btn btn-default btn-xs">{{ text_next }} <i data-lucide="chevron-right" width="12" height="12"></i></a>
-    {% endif %}
+    <button type="button" class="btn btn-default btn-xs" onclick="loadTimeline({{ page + 1 }})">
+      <i data-lucide="chevrons-down" width="12" height="12"></i> {{ text_load_more }}
+    </button>
   </div>
   {% endif %}
 {% else %}
@@ -40,13 +38,13 @@
 
 <div class="timeline-note-form">
   <ul class="nav nav-tabs" id="timeline-tabs">
-    <li class="active"><a href="#tl-note" data-toggle="tab">{{ text_add_note }}</a></li>
-    <li><a href="#tl-history" data-toggle="tab">{{ text_history_add }}</a></li>
+    <li class="active"><a href="#tl-note" data-toggle="tab"><i data-lucide="message-square-plus" width="14" height="14"></i> {{ text_add_note }}</a></li>
+    <li><a href="#tl-history" data-toggle="tab"><i data-lucide="history" width="14" height="14"></i> {{ text_history_add }}</a></li>
   </ul>
   <div class="tab-content" style="padding-top:12px">
     <div class="tab-pane active" id="tl-note">
       <div class="dcx-fields">
-        <textarea class="form-control input-sm" id="tl-note-comment" rows="2" placeholder="{{ entry_comment }}"></textarea>
+        <textarea class="form-control" id="tl-note-comment" rows="2" placeholder="{{ entry_comment }}"></textarea>
         <div style="display:flex;align-items:center;gap:8px">
           <label style="font-size:12px;font-weight:400;margin:0">
             <input type="checkbox" id="tl-note-notify"> {{ entry_notify }}
@@ -59,13 +57,13 @@
     </div>
     <div class="tab-pane" id="tl-history">
       <div class="dcx-fields">
-        <select class="form-control input-sm" id="tl-history-status">
+        <select class="form-control" id="tl-history-status">
           <option value="0">{{ text_select }}</option>
           {% for status in order_statuses %}
           <option value="{{ status.order_status_id }}">{{ status.name }}</option>
           {% endfor %}
         </select>
-        <textarea class="form-control input-sm" id="tl-history-comment" rows="2" placeholder="{{ entry_comment }}"></textarea>
+        <textarea class="form-control" id="tl-history-comment" rows="2" placeholder="{{ entry_comment }}"></textarea>
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
           <label style="font-size:12px;font-weight:400;margin:0">
             <input type="checkbox" id="tl-history-notify"> {{ entry_notify }}

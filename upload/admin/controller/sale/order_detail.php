@@ -7,6 +7,13 @@ class ControllerSaleOrderDetail extends Controller {
 	public function index(): void {
 		$this->load->language('sale/order');
 
+		if (isset($this->session->data['success'])) {
+			$data['success'] = $this->session->data['success'];
+			unset($this->session->data['success']);
+		} else {
+			$data['success'] = '';
+		}
+
 		$order_id = (int)($this->request->get['order_id'] ?? 0);
 
 		$this->load->model('sale/order');
@@ -230,6 +237,7 @@ class ControllerSaleOrderDetail extends Controller {
 		$this->load->model('tool/image');
 
 		$data['order_id'] = $order_id;
+		$data['heading_title'] = sprintf($this->language->get('text_order_number'), $order_id);
 		$data['store_name'] = $order_info['store_name'];
 		$data['store_url'] = $order_info['store_id'] == 0
 			? ($this->request->server['HTTPS'] ? HTTPS_CATALOG : HTTP_CATALOG)
@@ -292,7 +300,7 @@ class ControllerSaleOrderDetail extends Controller {
 		} else {
 			$order_id = (int)($this->request->get['order_id'] ?? 0);
 			$page = (int)($this->request->get['page'] ?? 1);
-			$limit = 20;
+			$limit = 5;
 			$start = ($page - 1) * $limit;
 
 			$this->load->model('sale/order');
@@ -451,7 +459,40 @@ class ControllerSaleOrderDetail extends Controller {
 
 			if (!isset($json['error'])) {
 				$this->model_sale_order->recalculateOrderTotals($order_id);
+
+				$order_info = $this->model_sale_order->getOrder($order_id);
+
+				$product = $this->db->query("SELECT * FROM `" . DB_PREFIX . "order_product` WHERE order_product_id = '" . (int)$order_product_id . "' AND order_id = '" . (int)$order_id . "'")->row;
+
 				$json['success'] = $this->language->get('text_order_saved');
+				$json['product_total'] = $this->currency->format(
+					$product['total'] + ($this->config->get('config_tax') ? ($product['tax'] * $product['quantity']) : 0),
+					$order_info['currency_code'],
+					$order_info['currency_value']
+				);
+				$json['product_price'] = $this->currency->format(
+					$product['price'] + ($this->config->get('config_tax') ? $product['tax'] : 0),
+					$order_info['currency_code'],
+					$order_info['currency_value']
+				);
+				$json['product_quantity'] = (int)$product['quantity'];
+
+				$totals = $this->model_sale_order->getOrderTotals($order_id);
+				$json['totals'] = [];
+
+				foreach ($totals as $total) {
+					$json['totals'][] = [
+						'code'  => $total['code'],
+						'title' => $total['title'],
+						'text'  => $this->currency->format($total['value'], $order_info['currency_code'], $order_info['currency_value']),
+						'value' => (float)$total['value'],
+					];
+				}
+
+				$json['total_quantity'] = array_sum(array_column(
+					$this->model_sale_order->getOrderProducts($order_id),
+					'quantity'
+				));
 			}
 		}
 
@@ -470,7 +511,15 @@ class ControllerSaleOrderDetail extends Controller {
 			$order_id = (int)($this->request->get['order_id'] ?? 0);
 			$product_id = (int)($this->request->post['product_id'] ?? 0);
 			$quantity = (int)($this->request->post['quantity'] ?? 1);
-			$options = $this->request->post['options'] ?? [];
+
+			$optionsRaw = $this->request->post['options'] ?? '[]';
+			$options = json_decode($optionsRaw, true);
+
+			if (!is_array($options)) {
+				$options = [];
+			}
+
+			error_log('addProduct: product_id=' . $product_id . ' options_raw=' . $optionsRaw . ' options_count=' . count($options));
 
 			if (!$product_id) {
 				$json['error'] = $this->language->get('error_action');
@@ -480,6 +529,7 @@ class ControllerSaleOrderDetail extends Controller {
 
 				if ($order_product_id) {
 					$this->model_sale_order->recalculateOrderTotals($order_id);
+					$this->session->data['success'] = $this->language->get('text_success');
 					$json['success'] = $this->language->get('text_success');
 					$this->load->model('tool/image');
 
@@ -750,5 +800,151 @@ class ControllerSaleOrderDetail extends Controller {
 		}
 
 		return $url;
+	}
+
+	public function getProductCard(): void {
+		$this->load->language('sale/order');
+
+		$json = [];
+
+		if (!$this->user->hasPermission('access', 'sale/order')) {
+			$json['error'] = $this->language->get('error_permission');
+		} else {
+			$product_id = (int)($this->request->get['product_id'] ?? 0);
+			$order_id = (int)($this->request->get['order_id'] ?? 0);
+			$order_product_id = (int)($this->request->get['order_product_id'] ?? 0);
+
+			if ($product_id) {
+				$this->load->model('catalog/product');
+				$this->load->model('tool/image');
+				$this->load->model('sale/order');
+
+				$order_info = $order_id ? $this->model_sale_order->getOrder($order_id) : null;
+				$product_info = $this->model_catalog_product->getProduct($product_id);
+
+				if ($product_info) {
+					$language_id = (int)$this->config->get('config_language_id');
+
+					$main_image = $product_info['image'] ?? '';
+					if (!empty($main_image) && is_file(DIR_IMAGE . $main_image)) {
+						$image = $this->model_tool_image->resize($main_image, 300, 300);
+						$image_full = HTTP_CATALOG . 'image/' . $main_image;
+					} else {
+						$image = $this->model_tool_image->resize('no_image.png', 300, 300);
+						$image_full = '';
+					}
+
+					$images = $this->model_catalog_product->getProductImages($product_id);
+					$gallery = [];
+					if ($image_full) {
+						$gallery[] = ['thumb' => $image, 'full' => $image_full];
+					}
+					foreach ($images as $img) {
+						if (!empty($img['image']) && is_file(DIR_IMAGE . $img['image'])) {
+							$gallery[] = [
+								'thumb' => $this->model_tool_image->resize($img['image'], 80, 80),
+								'full'  => $this->model_tool_image->resize($img['image'], 300, 300),
+							];
+						}
+					}
+
+					$attributes = $this->model_catalog_product->getProductAttributes($product_id);
+					$attr_data = [];
+					$this->load->model('catalog/attribute');
+					foreach ($attributes as $attr) {
+						$descs = $this->model_catalog_attribute->getAttributeDescriptions($attr['attribute_id']);
+						$name = $descs[$language_id]['name'] ?? '';
+						$text = strip_tags($attr['product_attribute_description'][$language_id]['text'] ?? '');
+						if ($name) {
+							$attr_data[] = ['name' => $name, 'text' => $text];
+						}
+					}
+
+					$codes = [];
+					if (!empty($product_info['sku'])) $codes[] = ['label' => 'SKU', 'value' => $product_info['sku']];
+					if (!empty($product_info['upc'])) $codes[] = ['label' => 'UPC', 'value' => $product_info['upc']];
+					if (!empty($product_info['ean'])) $codes[] = ['label' => 'EAN', 'value' => $product_info['ean']];
+					if (!empty($product_info['jan'])) $codes[] = ['label' => 'JAN', 'value' => $product_info['jan']];
+					if (!empty($product_info['isbn'])) $codes[] = ['label' => 'ISBN', 'value' => $product_info['isbn']];
+					if (!empty($product_info['mpn'])) $codes[] = ['label' => 'MPN', 'value' => $product_info['mpn']];
+
+					$variant_data = null;
+					$order_options = [];
+					if ($order_id && $order_product_id) {
+						$order_products = $this->model_sale_order->getOrderProducts($order_id);
+						$order_product = null;
+						foreach ($order_products as $op) {
+							if ((int)$op['order_product_id'] === $order_product_id) {
+								$order_product = $op;
+								break;
+							}
+						}
+
+						$order_price = $order_product ? (float)$order_product['price'] : 0;
+						$order_tax = $order_product ? (float)$order_product['tax'] : 0;
+						$order_total = $order_product ? (float)$order_product['total'] : 0;
+						$order_quantity = $order_product ? (int)$order_product['quantity'] : 0;
+
+						if ($order_product && !empty($order_product['variant_id'])) {
+							$variant_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_variant WHERE variant_id = '" . (int)$order_product['variant_id'] . "'");
+							if ($variant_query->row) {
+								$v = $variant_query->row;
+								$variant_data = [
+									'sku'  => $v['sku'] ?? '',
+									'upc'  => $v['upc'] ?? '',
+									'ean'  => $v['ean'] ?? '',
+									'mpn'  => $v['mpn'] ?? '',
+									'price' => $this->currency->format((float)$v['price'], $this->config->get('config_currency')),
+									'stock' => (int)$v['quantity'],
+								];
+								if (!empty($v['sku'])) $codes[] = ['label' => 'Variant SKU', 'value' => $v['sku']];
+								if (!empty($v['upc'])) $codes[] = ['label' => 'Variant UPC', 'value' => $v['upc']];
+								if (!empty($v['ean'])) $codes[] = ['label' => 'Variant EAN', 'value' => $v['ean']];
+								if (!empty($v['mpn'])) $codes[] = ['label' => 'Variant MPN', 'value' => $v['mpn']];
+							}
+						}
+
+						$options = $this->model_sale_order->getOrderOptions($order_id, $order_product_id);
+						foreach ($options as $opt) {
+							$order_options[] = [
+								'name'  => $opt['name'],
+								'value' => $opt['value'],
+							];
+						}
+					}
+
+					$description = strip_tags($product_info['description'] ?? '');
+
+					$currency_code = $order_info['currency_code'] ?? $this->config->get('config_currency');
+					$currency_value = $order_info['currency_value'] ?? 1;
+
+					$stock = ($variant_data && isset($variant_data['stock'])) ? $variant_data['stock'] : ($product_info['quantity'] ?? 0);
+
+					$data = [
+						'name'        => $product_info['name'] ?? '',
+						'model'       => $product_info['model'] ?? '',
+						'description' => $description,
+						'price'       => $this->currency->format($order_price + ($this->config->get('config_tax') ? $order_tax : 0), $currency_code, $currency_value),
+						'total'       => $this->currency->format($order_total + ($this->config->get('config_tax') ? ($order_tax * $order_quantity) : 0), $currency_code, $currency_value),
+						'quantity'    => $order_quantity,
+						'stock'       => $stock,
+						'status'      => $product_info['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
+						'image'       => $image,
+						'gallery'     => $gallery,
+						'codes'       => $codes,
+						'attributes'  => $attr_data,
+						'order_options' => $order_options,
+						'variant'     => $variant_data,
+						'href'        => $this->url->link('catalog/product/edit', 'user_token=' . $this->session->data['user_token'] . '&product_id=' . $product_id, true),
+					];
+
+					$json['success'] = true;
+					$json['html'] = $this->load->view('sale/order_product_card_modal', $data);
+				}
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
 	}
 }
