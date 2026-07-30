@@ -132,9 +132,6 @@ class ControllerExtensionModuleDockerCartCheckout extends Controller
     }
 
     /**
-     * Event: catalog/controller/api/cart/add/after
-     * Updates checkout page after cart add via AJAX
-     *
      * @param string $route
      * @param array $args
      * @param mixed $output

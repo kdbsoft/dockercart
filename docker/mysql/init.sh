@@ -38,10 +38,9 @@ fi
 
 USER_TABLE_EXISTS="$(MYSQL_PWD="${DB_PASSWORD}" mariadb -N -B -u"${DB_USER}" "${DB_NAME}" -e "SHOW TABLES LIKE '${DB_PREFIX}user';" 2>/dev/null || true)"
 SETTING_TABLE_EXISTS="$(MYSQL_PWD="${DB_PASSWORD}" mariadb -N -B -u"${DB_USER}" "${DB_NAME}" -e "SHOW TABLES LIKE '${DB_PREFIX}setting';" 2>/dev/null || true)"
-API_TABLE_EXISTS="$(MYSQL_PWD="${DB_PASSWORD}" mariadb -N -B -u"${DB_USER}" "${DB_NAME}" -e "SHOW TABLES LIKE '${DB_PREFIX}api';" 2>/dev/null || true)"
 PRODUCT_TABLE_EXISTS="$(MYSQL_PWD="${DB_PASSWORD}" mariadb -N -B -u"${DB_USER}" "${DB_NAME}" -e "SHOW TABLES LIKE '${DB_PREFIX}product';" 2>/dev/null || true)"
 
-if [ -z "${USER_TABLE_EXISTS}" ] || [ -z "${SETTING_TABLE_EXISTS}" ] || [ -z "${API_TABLE_EXISTS}" ]; then
+if [ -z "${USER_TABLE_EXISTS}" ] || [ -z "${SETTING_TABLE_EXISTS}" ]; then
   echo "[dockercart-init] WARNING: Required OpenCart tables are missing after seed import."
   echo "[dockercart-init] WARNING: Skipping admin/settings bootstrap. Fill docker/mysql/init.sql with a full dump and reinitialize DB volume."
   exit 0
@@ -75,21 +74,13 @@ VALUES
   );
 
 DELETE FROM \`${DB_PREFIX}setting\`
-WHERE \`key\` IN ('config_email', 'config_url', 'config_ssl', 'config_encryption', 'config_api_id');
+WHERE \`key\` IN ('config_email', 'config_url', 'config_ssl', 'config_encryption');
 
 INSERT INTO \`${DB_PREFIX}setting\` (store_id, \`code\`, \`key\`, \`value\`, serialized) VALUES
   (0, 'config', 'config_email', '${ADMIN_EMAIL_ESCAPED}', 0),
   (0, 'config', 'config_url', '${DOCKERCART_URL_ESCAPED}', 0),
   (0, 'config', 'config_ssl', '${DOCKERCART_URL_ESCAPED}', 0),
   (0, 'config', 'config_encryption', REPLACE(UUID(), '-', ''), 0);
-
-DELETE FROM \`${DB_PREFIX}api\` WHERE username = 'Default';
-INSERT INTO \`${DB_PREFIX}api\` (username, \`key\`, status, date_added, date_modified)
-VALUES ('Default', REPLACE(UUID(), '-', ''), 1, NOW(), NOW());
-
-SET @api_id = LAST_INSERT_ID();
-INSERT INTO \`${DB_PREFIX}setting\` (store_id, \`code\`, \`key\`, \`value\`, serialized)
-VALUES (0, 'config', 'config_api_id', @api_id, 0);
 SQL
 
 if [ -n "${PRODUCT_TABLE_EXISTS}" ]; then
