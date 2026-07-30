@@ -230,7 +230,7 @@ $('.button-order-delete').on('click', function(e) {
 	
 	if (confirm('{{ text_confirm }}')) {
 		$.ajax({
-      url: '{{ catalog }}index.php?route=api/order/delete&api_token={{ api_token }}&store_id={{ store_id }}&order_id=' + orderId,
+      url: 'index.php?route=sale/order/deleteOrder&user_token={{ user_token }}&order_id=' + orderId,
 			dataType: 'json',
 			beforeSend: function() {
         $(element).button('loading');
@@ -296,7 +296,7 @@ $('#button-delete').on('click', function(e) {
 		}
 
 		$.ajax({
-			url: '{{ catalog }}index.php?route=api/order/delete&api_token={{ api_token }}&store_id={{ store_id }}&order_id=' + orderIds[completed],
+			url: 'index.php?route=sale/order/deleteOrder&user_token={{ user_token }}&order_id=' + orderIds[completed],
 			dataType: 'json',
 			success: function(json) {
 				if (json['error']) {
@@ -335,7 +335,7 @@ $('.order-status-select').on('change', function() {
 	var notify = $(element).closest('td').find('.order-notify-check').prop('checked') ? 1 : 0;
 
 	$.ajax({
-		url: '{{ catalog }}index.php?route=api/order/history&api_token={{ api_token }}&store_id={{ store_id }}&order_id=' + orderId,
+		url: 'index.php?route=sale/order/addHistory&user_token={{ user_token }}&order_id=' + orderId,
 		type: 'post',
 		dataType: 'json',
 		data: 'order_status_id=' + encodeURIComponent(statusId) + '&notify=' + notify + '&comment=',
