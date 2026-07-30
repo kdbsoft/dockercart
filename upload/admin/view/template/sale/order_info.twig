@@ -22,47 +22,26 @@
   </div>
   <div class="container-fluid">
     <div class="row">
-      <div class="col-md-8">
-
-        <div class="order-address-row">
-          <div class="dcx-address-card">
-            <div class="dcx-address-card__header">
-              <h4 class="dcx-address-card__title">{{ text_payment_address }}</h4>
-              <button type="button" class="btn btn-default btn-xs btn--icon btn-quick-edit" data-field="payment_address" data-title="{{ text_payment_address }}" data-target="#quick-payment-address"><i data-lucide="pencil" width="12" height="12"></i></button>
-            </div>
-            <div class="dcx-address-card__body" id="quick-payment-address">{{ payment_address }}</div>
-          </div>
-          {% if shipping_method %}
-          <div class="dcx-address-card">
-            <div class="dcx-address-card__header">
-              <h4 class="dcx-address-card__title">{{ text_shipping_address }}</h4>
-              <button type="button" class="btn btn-default btn-xs btn--icon btn-quick-edit" data-field="shipping_address" data-title="{{ text_shipping_address }}" data-target="#quick-shipping-address"><i data-lucide="pencil" width="12" height="12"></i></button>
-            </div>
-            <div class="dcx-address-card__body" id="quick-shipping-address">{{ shipping_address }}</div>
-          </div>
-          {% endif %}
-        </div>
+      <div class="col-md-12 col-sm-12 col-lg-offset-1 col-lg-7 col-xl-offset-1 col-xl-7">
 
         <div class="dcx-panel">
           <div class="dcx-panel-head">
             <div class="dcx-panel-head__icon"><i data-lucide="shopping-cart" width="18" height="18"></i></div>
             <div>
               <div class="dcx-panel-title">{{ text_panel_order_contents }}</div>
-              <div class="dcx-panel-subtitle">{{ text_order_contents_subtitle }}</div>
             </div>
           </div>
-          <div class="panel-body">
+          <div class="dcx-panel-body">
             <div class="table-responsive">
-            <table class="order-product-table">
+            <table class="table table-bordered order-product-table">
               <thead>
                 <tr>
                   <th class="text-left">{{ column_product }}</th>
-                  <th class="text-left">{{ column_model }}</th>
-                  <th class="text-right">{{ column_quantity }}</th>
-                  <th class="text-right">{{ column_discount_percent }}</th>
-                  <th class="text-right">{{ column_price }}</th>
-                  <th class="text-right">{{ column_total }}</th>
-                  <th class="text-right"></th>
+                  <th class="text-center" style="width:90px;">{{ column_quantity }}</th>
+                  <th class="text-center" style="width:90px;">{{ column_discount_percent }}</th>
+                  <th class="text-right" style="width:110px;">{{ column_price }}</th>
+                  <th class="text-right" style="width:90px;">{{ column_total }}</th>
+                  <th style="width:40px;"></th>
                 </tr>
               </thead>
               <tbody id="inline-cart">
@@ -74,9 +53,11 @@
                     <a href="#" class="order-product-thumb btn-product-info" data-product-id="{{ product.product_id }}"><img src="{{ product.thumb }}" alt="{{ product.name|e('html_attr') }}" /></a>
                     {% endif %}
                     <a href="#" class="btn-product-info" data-product-id="{{ product.product_id }}">{{ product.name }}</a>
+                    {% for option in product.option %}
+                    <div class="order-product-option">{{ option.name }}: {{ option.value }}</div>
+                    {% endfor %}
                     <input type="hidden" name="product[{{ inline_product_row }}][product_id]" value="{{ product.product_id }}" />
                     {% for option in product.option %}
-                    <div class="order-product-option">- {{ option.name }}: {{ option.value }}</div>
                     {% if option.type == 'select' or option.type == 'radio' or option.type == 'image' %}
                     <input type="hidden" name="product[{{ inline_product_row }}][option][{{ option.product_option_id }}]" value="{{ option.product_option_value_id }}" />
                     {% endif %}
@@ -88,69 +69,229 @@
                     {% endif %}
                     {% endfor %}
                   </td>
-                  <td class="text-left">{{ product.model }}</td>
-                  <td class="text-right"><input type="text" name="product[{{ inline_product_row }}][quantity]" value="{{ product.quantity }}" class="order-product-input gt-no-translate" data-gt-inline-ignore="1" /></td>
-                  <td class="text-right"><input type="text" name="product[{{ inline_product_row }}][discount]" value="{{ product.discount_percent is defined ? product.discount_percent : 0 }}" class="order-product-input gt-no-translate" data-gt-inline-ignore="1" /></td>
+                  <td class="text-center"><input type="text" name="product[{{ inline_product_row }}][quantity]" value="{{ product.quantity }}" class="form-control input-sm order-product-input gt-no-translate" data-gt-inline-ignore="1" /></td>
+                  <td class="text-center"><input type="text" name="product[{{ inline_product_row }}][discount]" value="{{ product.discount_percent is defined ? product.discount_percent : 0 }}" class="form-control input-sm order-product-input gt-no-translate" data-gt-inline-ignore="1" /></td>
                   <td class="text-right">{{ product.price }}</td>
                   <td class="text-right">{{ product.total }}</td>
-                  <td class="text-right"><button type="button" class="btn btn-danger btn-xs button-inline-remove-item"><i data-lucide="trash-2" width="12" height="12"></i></button></td>
+                  <td class="text-center"><button type="button" class="btn btn-danger btn-xs button-inline-remove-item"><i data-lucide="trash-2" width="12" height="12"></i></button></td>
                 </tr>
                 {% set inline_product_row = inline_product_row + 1 %}
                 {% endfor %}
                 {% if not products %}
                 <tr class="inline-cart-empty">
-                  <td colspan="7" class="text-center">{{ text_no_results }}</td>
+                  <td colspan="6" class="text-center">{{ text_no_results }}</td>
                 </tr>
                 {% endif %}
               </tbody>
-              <tfoot id="inline-totals">
-                {% for total in totals %}
-                <tr>
-                  <td colspan="5" class="text-right">{{ total.title }}</td>
-                  <td class="text-right">{{ total.text }}</td>
-                  <td></td>
-                </tr>
-                {% endfor %}
-              </tfoot>
             </table>
             </div>
 
-            <div class="order-product-add-row">
-              <div class="order-product-add-field order-product-add-field--product">
-                <label class="control-label" for="input-inline-product">{{ entry_product }}</label>
-                <input type="text" id="input-inline-product" class="form-control" placeholder="{{ entry_product }}" />
-                <input type="hidden" id="input-inline-product-id" value="" />
-              </div>
-              <div class="order-product-add-field order-product-add-field--quantity">
-                <label class="control-label" for="input-inline-quantity">{{ entry_quantity }}</label>
-                <input type="text" id="input-inline-quantity" value="1" class="form-control order-product-input gt-no-translate" data-gt-inline-ignore="1" />
-              </div>
-              <div class="order-product-add-field order-product-add-field--action">
-                <label class="control-label">&nbsp;</label>
-                <button type="button" id="button-inline-add-product" class="btn btn-primary"><i data-lucide="plus" width="14" height="14"></i> {{ button_product_add }}</button>
+            <div class="order-totals-block" id="inline-totals">
+              <div class="order-totals-inner">
+                {% for total in totals %}
+                <div class="order-totals-row{% if loop.last %} order-totals-row--total{% endif %}">
+                  <span class="order-totals-label">{{ total.title }}</span>
+                  <span class="order-totals-value">{{ total.text }}</span>
+                </div>
+                {% endfor %}
               </div>
             </div>
 
-            <div class="row">
-              <div class="col-sm-6">
-                <div class="form-group">
-                  <label class="control-label" for="input-inline-coupon">{{ entry_coupon }}</label>
-                  <div class="input-group">
-                    <input type="text" id="input-inline-coupon" value="" class="form-control" placeholder="{{ entry_coupon }}" />
-                    <span class="input-group-btn"><button type="button" id="button-inline-apply-coupon" class="btn btn-warning"><i data-lucide="ticket" width="14" height="14"></i> {{ button_apply }}</button></span>
-                  </div>
+            <div class="dcx-section" style="margin-top:20px;">
+              <h4><i data-lucide="package" width="16" height="16"></i> {{ entry_product }}</h4>
+              <div class="dcx-fields dcx-fields--row">
+                <div class="dcx-field" style="flex:1;max-width:250px;">
+                  <input type="text" id="input-inline-product" class="form-control" placeholder="{{ entry_product_placeholder }}" />
+                  <input type="hidden" id="input-inline-product-id" value="" />
+                </div>
+                <div class="dcx-field" style="max-width:70px;">
+                  <input type="text" id="input-inline-quantity" value="1" class="form-control gt-no-translate" data-gt-inline-ignore="1" />
+                </div>
+                <div class="dcx-field" style="flex:0;">
+                  <button type="button" id="button-inline-add-product" class="btn btn-primary" style="min-width:160px;"><i data-lucide="plus" width="14" height="14"></i> {{ button_product_add }}</button>
                 </div>
               </div>
             </div>
 
-            <div class="text-right" style="padding-top:16px;border-top:1px solid #e5e7eb;margin-top:4px">
+            <div class="dcx-section" style="margin-top:16px;">
+              <h4><i data-lucide="ticket" width="16" height="16"></i> {{ entry_coupon }}</h4>
+              <div class="dcx-fields dcx-fields--row">
+                <div class="dcx-field" style="max-width:200px;">
+                  <input type="text" id="input-inline-coupon" class="form-control" placeholder="{{ entry_coupon }}" />
+                </div>
+                <div class="dcx-field" style="flex:0;">
+                  <button type="button" id="button-inline-apply-coupon" class="btn btn-warning"><i data-lucide="ticket" width="14" height="14"></i> {{ button_apply }}</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="text-right" style="padding-top:16px;border-top:1px solid var(--dc-border-soft);margin-top:16px">
               <button type="button" id="button-inline-save-items" data-loading-text="{{ text_loading }}" class="btn btn-success"><i data-lucide="circle-check" width="14" height="14"></i> {{ button_save }}</button>
             </div>
           </div>
         </div>
 
+        <div class="dcx-panel" style="margin-top:16px">
+          <div class="dcx-panel-head">
+            <div class="dcx-panel-head__icon"><i data-lucide="message-square" width="18" height="18"></i></div>
+            <div>
+              <div class="dcx-panel-title">{{ text_history }}</div>
+            </div>
+          </div>
+          <div class="dcx-panel-body">
+            <ul class="nav nav-tabs">
+              <li class="active"><a href="#tab-history" data-toggle="tab"><i data-lucide="clock" width="14" height="14"></i> {{ tab_history }}</a></li>
+              <li><a href="#tab-additional" data-toggle="tab"><i data-lucide="circle-plus" width="14" height="14"></i> {{ tab_additional }}</a></li>
+              {% for tab in tabs %}
+                <li><a href="#tab-{{ tab.code }}" data-toggle="tab">{{ tab.title }}</a></li>
+              {% endfor %}
+            </ul>
+            <div class="tab-content">
+              <div class="tab-pane active" id="tab-history">
+                <div id="history"></div>
+                <br/>
+                <div class="dcx-section">
+                  <h4><i data-lucide="circle-plus" width="16" height="16"></i> {{ text_history_add }}</h4>
+                  <div class="dcx-fields">
+                    <div class="dcx-field">
+                      <label class="dcx-label" for="input-order-status">{{ entry_order_status }}</label>
+                      <select name="order_status_id" id="input-order-status" class="form-control">
+                        {% for order_statuses in order_statuses %}
+                          {% if order_statuses.order_status_id == order_status_id %}
+                            <option value="{{ order_statuses.order_status_id }}" selected="selected">{{ order_statuses.name }}</option>
+                          {% else %}
+                            <option value="{{ order_statuses.order_status_id }}">{{ order_statuses.name }}</option>
+                          {% endif %}
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div class="dcx-field">
+                      <label class="dcx-label" for="input-override">
+                        {{ entry_override }}
+                        <span data-toggle="tooltip" title="{{ help_override }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
+                      </label>
+                      <div class="dcx-checkbox-group">
+                        <label class="dcx-checkbox-label"><input type="checkbox" name="override" value="1" id="input-override" /> {{ entry_override }}</label>
+                      </div>
+                    </div>
+                    <div class="dcx-field">
+                      <label class="dcx-label" for="input-notify">{{ entry_notify }}</label>
+                      <div class="dcx-checkbox-group">
+                        <label class="dcx-checkbox-label"><input type="checkbox" name="notify" value="1" id="input-notify" /> {{ entry_notify }}</label>
+                      </div>
+                    </div>
+                    <div class="dcx-field">
+                      <label class="dcx-label" for="input-comment">{{ entry_comment }}</label>
+                      <textarea name="comment" rows="4" id="input-comment" class="form-control"></textarea>
+                    </div>
+                  </div>
+                  <div class="text-right" style="margin-top:16px;">
+                    <button id="button-history" data-loading-text="{{ text_loading }}" class="btn btn-primary"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_history_add }}</button>
+                  </div>
+                </div>
+              </div>
+              <div class="tab-pane" id="tab-additional"> {% if account_custom_fields %}
+                  <div class="table-responsive">
+                    <table class="table table-bordered">
+                      <thead>
+                        <tr>
+                          <td colspan="2">{{ text_account_custom_field }}</td>
+                        </tr>
+                      </thead>
+                      <tbody>
+
+                        {% for custom_field in account_custom_fields %}
+                          <tr>
+                            <td>{{ custom_field.name }}</td>
+                            <td>{{ custom_field.value }}</td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+
+                    </table>
+                  </div>
+                {% endif %}
+                {% if payment_custom_fields %}
+                  <div class="table-responsive">
+                    <table class="table table-bordered">
+                      <thead>
+                        <tr>
+                          <td colspan="2">{{ text_payment_custom_field }}</td>
+                        </tr>
+                      </thead>
+                      <tbody>
+
+                        {% for custom_field in payment_custom_fields %}
+                          <tr>
+                            <td>{{ custom_field.name }}</td>
+                            <td>{{ custom_field.value }}</td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+
+                    </table>
+                  </div>
+                {% endif %}
+                {% if shipping_method and shipping_custom_fields %}
+                  <div class="table-responsive">
+                    <table class="table table-bordered">
+                      <thead>
+                        <tr>
+                          <td colspan="2">{{ text_shipping_custom_field }}</td>
+                        </tr>
+                      </thead>
+                      <tbody>
+
+                        {% for custom_field in shipping_custom_fields %}
+                          <tr>
+                            <td>{{ custom_field.name }}</td>
+                            <td>{{ custom_field.value }}</td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+
+                    </table>
+                  </div>
+                {% endif %}
+                <div class="table-responsive">
+                  <table class="table table-bordered">
+                    <thead>
+                      <tr>
+                        <td colspan="2">{{ text_browser }}</td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>{{ text_ip }}</td>
+                        <td>{{ ip }}</td>
+                      </tr>
+                      {% if forwarded_ip %}
+                        <tr>
+                          <td>{{ text_forwarded_ip }}</td>
+                          <td>{{ forwarded_ip }}</td>
+                        </tr>
+                      {% endif %}
+                      <tr>
+                        <td>{{ text_user_agent }}</td>
+                        <td>{{ user_agent }}</td>
+                      </tr>
+                      <tr>
+                        <td>{{ text_accept_language }}</td>
+                        <td>{{ accept_language }}</td>
+                      </tr>
+                    </tbody>
+
+                  </table>
+                </div>
+              </div>
+              {% for tab in tabs %}
+                <div class="tab-pane" id="tab-{{ tab.code }}">{{ tab.content }}</div>
+              {% endfor %} </div>
+          </div>
+        </div>
+
       </div>
-      <div class="col-md-4">
+      <div class="col-md-12 col-sm-12 col-lg-4 col-xl-3">
         <div class="dcx-sidebar-cards">
 
           <div class="dcx-sidebar-card">
@@ -161,8 +302,10 @@
             <div class="dcx-sidebar-card__body">
               <div class="dcx-sidebar-card__field">
                 <label class="dcx-sidebar-card__label">{{ text_customer }}</label>
-                <div class="dcx-sidebar-card__value" id="quick-customer-name">{% if customer %}<a href="{{ customer }}" target="_blank">{{ firstname }} {{ lastname }}</a>{% else %}{{ firstname }} {{ lastname }}{% endif %}</div>
-                <div class="dcx-sidebar-card__actions"><button type="button" class="btn btn-default btn-xs btn--icon btn-quick-edit" data-field="customer_name" data-title="{{ text_customer }}" data-firstname="{{ firstname|e('html_attr') }}" data-lastname="{{ lastname|e('html_attr') }}" data-target="#quick-customer-name"><i data-lucide="pencil" width="12" height="12"></i></button></div>
+                <div class="dcx-sidebar-card__field-row">
+                  <div class="dcx-sidebar-card__value" id="quick-customer-name">{% if customer %}<a href="{{ customer }}" target="_blank">{{ firstname }} {{ lastname }}</a>{% else %}{{ firstname }} {{ lastname }}{% endif %}</div>
+                  <div class="dcx-sidebar-card__actions"><button type="button" class="btn btn-default btn-xs btn--icon btn-quick-edit" data-field="customer_name" data-title="{{ text_customer }}" data-firstname="{{ firstname|e('html_attr') }}" data-lastname="{{ lastname|e('html_attr') }}" data-target="#quick-customer-name"><i data-lucide="pencil" width="12" height="12"></i></button></div>
+                </div>
               </div>
               <div class="dcx-sidebar-card__field">
                 <label class="dcx-sidebar-card__label">{{ text_customer_group }}</label>
@@ -170,19 +313,42 @@
               </div>
               <div class="dcx-sidebar-card__field">
                 <label class="dcx-sidebar-card__label">{{ text_email }}</label>
-                <div class="dcx-sidebar-card__value" id="quick-email"><a href="mailto:{{ email }}">{{ email }}</a></div>
-                <div class="dcx-sidebar-card__actions"><button type="button" class="btn btn-default btn-xs btn--icon btn-quick-edit" data-field="email" data-title="{{ text_email }}" data-value="{{ email|e('html_attr') }}" data-target="#quick-email"><i data-lucide="pencil" width="12" height="12"></i></button></div>
+                <div class="dcx-sidebar-card__field-row">
+                  <div class="dcx-sidebar-card__value" id="quick-email"><a href="mailto:{{ email }}">{{ email }}</a></div>
+                  <div class="dcx-sidebar-card__actions"><button type="button" class="btn btn-default btn-xs btn--icon btn-quick-edit" data-field="email" data-title="{{ text_email }}" data-value="{{ email|e('html_attr') }}" data-target="#quick-email"><i data-lucide="pencil" width="12" height="12"></i></button></div>
+                </div>
               </div>
               <div class="dcx-sidebar-card__field">
                 <label class="dcx-sidebar-card__label">{{ text_telephone }}</label>
-                <div class="dcx-sidebar-card__value" id="quick-telephone">{{ telephone }}</div>
-                <div class="dcx-sidebar-card__actions"><button type="button" class="btn btn-default btn-xs btn--icon btn-quick-edit" data-field="telephone" data-title="{{ text_telephone }}" data-value="{{ telephone|e('html_attr') }}" data-target="#quick-telephone"><i data-lucide="pencil" width="12" height="12"></i></button></div>
+                <div class="dcx-sidebar-card__field-row">
+                  <div class="dcx-sidebar-card__value" id="quick-telephone">{{ telephone }}</div>
+                  <div class="dcx-sidebar-card__actions"><button type="button" class="btn btn-default btn-xs btn--icon btn-quick-edit" data-field="telephone" data-title="{{ text_telephone }}" data-value="{{ telephone|e('html_attr') }}" data-target="#quick-telephone"><i data-lucide="pencil" width="12" height="12"></i></button></div>
+                </div>
               </div>
               {% if tax_number %}
               <div class="dcx-sidebar-card__field">
                 <label class="dcx-sidebar-card__label">{{ text_tax_number }}</label>
-                <div class="dcx-sidebar-card__value" id="quick-tax-number">{{ tax_number }}</div>
-                <div class="dcx-sidebar-card__actions"><button type="button" class="btn btn-default btn-xs btn--icon btn-quick-edit" data-field="tax_number" data-title="{{ text_tax_number }}" data-value="{{ tax_number|e('html_attr') }}" data-target="#quick-tax-number"><i data-lucide="pencil" width="12" height="12"></i></button></div>
+                <div class="dcx-sidebar-card__field-row">
+                  <div class="dcx-sidebar-card__value" id="quick-tax-number">{{ tax_number }}</div>
+                  <div class="dcx-sidebar-card__actions"><button type="button" class="btn btn-default btn-xs btn--icon btn-quick-edit" data-field="tax_number" data-title="{{ text_tax_number }}" data-value="{{ tax_number|e('html_attr') }}" data-target="#quick-tax-number"><i data-lucide="pencil" width="12" height="12"></i></button></div>
+                </div>
+              </div>
+              {% endif %}
+              <div class="dcx-sidebar-card__divider"></div>
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label">{{ text_payment_address }}</label>
+                <div class="dcx-sidebar-card__field-row">
+                  <div class="dcx-sidebar-card__address" id="quick-payment-address">{{ payment_address }}</div>
+                  <div class="dcx-sidebar-card__actions"><button type="button" class="btn btn-default btn-xs btn--icon btn-quick-edit" data-field="payment_address" data-title="{{ text_payment_address }}" data-target="#quick-payment-address"><i data-lucide="pencil" width="12" height="12"></i></button></div>
+                </div>
+              </div>
+              {% if shipping_method %}
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label">{{ text_shipping_address }}</label>
+                <div class="dcx-sidebar-card__field-row">
+                  <div class="dcx-sidebar-card__address" id="quick-shipping-address">{{ shipping_address }}</div>
+                  <div class="dcx-sidebar-card__actions"><button type="button" class="btn btn-default btn-xs btn--icon btn-quick-edit" data-field="shipping_address" data-title="{{ text_shipping_address }}" data-target="#quick-shipping-address"><i data-lucide="pencil" width="12" height="12"></i></button></div>
+                </div>
               </div>
               {% endif %}
             </div>
@@ -204,25 +370,33 @@
               </div>
               <div class="dcx-sidebar-card__field">
                 <label class="dcx-sidebar-card__label">{{ text_payment_method }}</label>
-                <div class="dcx-sidebar-card__value" id="quick-payment-method">{{ payment_method }}</div>
-                <div class="dcx-sidebar-card__actions"><button type="button" class="btn btn-default btn-xs btn--icon btn-quick-edit" data-field="payment_method" data-title="{{ text_payment_method }}" data-value="{{ payment_method|e('html_attr') }}" data-code="{{ payment_code|e('html_attr') }}" data-target="#quick-payment-method"><i data-lucide="pencil" width="12" height="12"></i></button></div>
+                <div class="dcx-sidebar-card__field-row">
+                  <div class="dcx-sidebar-card__value" id="quick-payment-method">{{ payment_method }}</div>
+                  <div class="dcx-sidebar-card__actions"><button type="button" class="btn btn-default btn-xs btn--icon btn-quick-edit" data-field="payment_method" data-title="{{ text_payment_method }}" data-value="{{ payment_method|e('html_attr') }}" data-code="{{ payment_code|e('html_attr') }}" data-target="#quick-payment-method"><i data-lucide="pencil" width="12" height="12"></i></button></div>
+                </div>
               </div>
               {% if shipping_method %}
               <div class="dcx-sidebar-card__field">
                 <label class="dcx-sidebar-card__label">{{ text_shipping_method }}</label>
-                <div class="dcx-sidebar-card__value" id="quick-shipping-method">{{ shipping_method }}</div>
-                <div class="dcx-sidebar-card__actions"><button type="button" class="btn btn-default btn-xs btn--icon btn-quick-edit" data-field="shipping_method" data-title="{{ text_shipping_method }}" data-value="{{ shipping_method|e('html_attr') }}" data-code="{{ shipping_code|e('html_attr') }}" data-target="#quick-shipping-method"><i data-lucide="pencil" width="12" height="12"></i></button></div>
+                <div class="dcx-sidebar-card__field-row">
+                  <div class="dcx-sidebar-card__value" id="quick-shipping-method">{{ shipping_method }}</div>
+                  <div class="dcx-sidebar-card__actions"><button type="button" class="btn btn-default btn-xs btn--icon btn-quick-edit" data-field="shipping_method" data-title="{{ text_shipping_method }}" data-value="{{ shipping_method|e('html_attr') }}" data-code="{{ shipping_code|e('html_attr') }}" data-target="#quick-shipping-method"><i data-lucide="pencil" width="12" height="12"></i></button></div>
+                </div>
               </div>
               {% endif %}
               <div class="dcx-sidebar-card__field">
                 <label class="dcx-sidebar-card__label">{{ text_tracking_number }}</label>
-                <div class="dcx-sidebar-card__value" id="quick-tracking-number">{{ tracking_number }}</div>
-                <div class="dcx-sidebar-card__actions"><button type="button" class="btn btn-default btn-xs btn--icon btn-quick-edit" data-field="tracking_number" data-title="{{ text_tracking_number }}" data-value="{{ tracking_number|e('html_attr') }}" data-target="#quick-tracking-number"><i data-lucide="pencil" width="12" height="12"></i></button></div>
+                <div class="dcx-sidebar-card__field-row">
+                  <div class="dcx-sidebar-card__value" id="quick-tracking-number">{{ tracking_number }}</div>
+                  <div class="dcx-sidebar-card__actions"><button type="button" class="btn btn-default btn-xs btn--icon btn-quick-edit" data-field="tracking_number" data-title="{{ text_tracking_number }}" data-value="{{ tracking_number|e('html_attr') }}" data-target="#quick-tracking-number"><i data-lucide="pencil" width="12" height="12"></i></button></div>
+                </div>
               </div>
               <div class="dcx-sidebar-card__field">
                 <label class="dcx-sidebar-card__label">{{ text_comment }}</label>
-                <div class="dcx-sidebar-card__value" id="quick-comment">{% if comment %}{{ comment|raw }}{% else %}<span class="text-muted">{{ text_none }}</span>{% endif %}</div>
-                <div class="dcx-sidebar-card__actions"><button type="button" class="btn btn-default btn-xs btn--icon btn-quick-edit" data-field="comment" data-title="{{ entry_comment }}" data-value="{{ order_comment_raw|e('html_attr') }}" data-target="#quick-comment"><i data-lucide="pencil" width="12" height="12"></i></button></div>
+                <div class="dcx-sidebar-card__field-row">
+                  <div class="dcx-sidebar-card__value" id="quick-comment">{% if comment %}{{ comment|raw }}{% else %}<span class="text-muted">{{ text_none }}</span>{% endif %}</div>
+                  <div class="dcx-sidebar-card__actions"><button type="button" class="btn btn-default btn-xs btn--icon btn-quick-edit" data-field="comment" data-title="{{ entry_comment }}" data-value="{{ order_comment_raw|e('html_attr') }}" data-target="#quick-comment"><i data-lucide="pencil" width="12" height="12"></i></button></div>
+                </div>
               </div>
             </div>
           </div>
@@ -235,202 +409,42 @@
             <div class="dcx-sidebar-card__body">
               <div class="dcx-sidebar-card__field">
                 <label class="dcx-sidebar-card__label">{{ text_reward }}</label>
-                <div class="dcx-sidebar-card__value">{{ reward }}</div>
-                <div class="dcx-sidebar-card__actions">
-                  {% if customer and reward %}
-                    {% if not reward_total %}
-                    <button id="button-reward-add" data-loading-text="{{ text_loading }}" title="{{ button_reward_add }}" class="btn btn-success btn-xs btn--icon"><i data-lucide="circle-plus" width="12" height="12"></i></button>
+                <div class="dcx-sidebar-card__field-row">
+                  <div class="dcx-sidebar-card__value">{{ reward }}</div>
+                  <div class="dcx-sidebar-card__actions">
+                    {% if customer and reward %}
+                      {% if not reward_total %}
+                      <button id="button-reward-add" data-loading-text="{{ text_loading }}" title="{{ button_reward_add }}" class="btn btn-success btn-xs btn--icon"><i data-lucide="circle-plus" width="12" height="12"></i></button>
+                      {% else %}
+                      <button id="button-reward-remove" data-loading-text="{{ text_loading }}" title="{{ button_reward_remove }}" class="btn btn-danger btn-xs btn--icon"><i data-lucide="circle-minus" width="12" height="12"></i></button>
+                      {% endif %}
                     {% else %}
-                    <button id="button-reward-remove" data-loading-text="{{ text_loading }}" title="{{ button_reward_remove }}" class="btn btn-danger btn-xs btn--icon"><i data-lucide="circle-minus" width="12" height="12"></i></button>
+                    <button disabled="disabled" class="btn btn-success btn-xs btn--icon"><i data-lucide="circle-plus" width="12" height="12"></i></button>
                     {% endif %}
-                  {% else %}
-                  <button disabled="disabled" class="btn btn-success btn-xs btn--icon"><i data-lucide="circle-plus" width="12" height="12"></i></button>
-                  {% endif %}
+                  </div>
                 </div>
               </div>
               <div class="dcx-sidebar-card__field">
                 <label class="dcx-sidebar-card__label">{{ text_affiliate }}</label>
-                <div class="dcx-sidebar-card__value">{{ commission }}{% if affiliate %} ({{ affiliate_firstname }} {{ affiliate_lastname }}){% endif %}</div>
-                <div class="dcx-sidebar-card__actions">
-                  {% if affiliate %}
-                    {% if not commission_total %}
-                    <button id="button-commission-add" data-loading-text="{{ text_loading }}" title="{{ button_commission_add }}" class="btn btn-success btn-xs btn--icon"><i data-lucide="circle-plus" width="12" height="12"></i></button>
+                <div class="dcx-sidebar-card__field-row">
+                  <div class="dcx-sidebar-card__value">{{ commission }}{% if affiliate %} ({{ affiliate_firstname }} {{ affiliate_lastname }}){% endif %}</div>
+                  <div class="dcx-sidebar-card__actions">
+                    {% if affiliate %}
+                      {% if not commission_total %}
+                      <button id="button-commission-add" data-loading-text="{{ text_loading }}" title="{{ button_commission_add }}" class="btn btn-success btn-xs btn--icon"><i data-lucide="circle-plus" width="12" height="12"></i></button>
+                      {% else %}
+                      <button id="button-commission-remove" data-loading-text="{{ text_loading }}" title="{{ button_commission_remove }}" class="btn btn-danger btn-xs btn--icon"><i data-lucide="circle-minus" width="12" height="12"></i></button>
+                      {% endif %}
                     {% else %}
-                    <button id="button-commission-remove" data-loading-text="{{ text_loading }}" title="{{ button_commission_remove }}" class="btn btn-danger btn-xs btn--icon"><i data-lucide="circle-minus" width="12" height="12"></i></button>
+                    <button disabled="disabled" class="btn btn-success btn-xs btn--icon"><i data-lucide="circle-plus" width="12" height="12"></i></button>
                     {% endif %}
-                  {% else %}
-                  <button disabled="disabled" class="btn btn-success btn-xs btn--icon"><i data-lucide="circle-plus" width="12" height="12"></i></button>
-                  {% endif %}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
         </div>
-      </div>
-    </div>
-    <div class="dcx-panel" style="margin-top:20px">
-      <div class="dcx-panel-head">
-  <div class="dcx-panel-head__icon"><i data-lucide="message-square" width="18" height="18"></i></div>
-  <div>
-    <div class="dcx-panel-title">{{ text_history }}</div>
-    <div class="dcx-panel-subtitle">{{ text_history_subtitle }}</div>
-  </div>
-</div>
-      <div class="panel-body">
-        <ul class="nav nav-tabs">
-          <li class="active"><a href="#tab-history" data-toggle="tab"><i data-lucide="clock" width="14" height="14"></i> {{ tab_history }}</a></li>
-          <li><a href="#tab-additional" data-toggle="tab"><i data-lucide="circle-plus" width="14" height="14"></i> {{ tab_additional }}</a></li>
-          {% for tab in tabs %}
-            <li><a href="#tab-{{ tab.code }}" data-toggle="tab">{{ tab.title }}</a></li>
-          {% endfor %}
-        </ul>
-        <div class="tab-content">
-          <div class="tab-pane active" id="tab-history">
-            <div id="history"></div>
-            <br/>
-            <fieldset>
-              <legend>{{ text_history_add }}</legend>
-              <form class="form-horizontal">
-                <div class="form-group">
-                  <label class="col-sm-2 control-label" for="input-order-status">{{ entry_order_status }}</label>
-                  <div class="col-sm-10">
-                    <select name="order_status_id" id="input-order-status" class="form-control">
-                      {% for order_statuses in order_statuses %}
-                        {% if order_statuses.order_status_id == order_status_id %}
-                          <option value="{{ order_statuses.order_status_id }}" selected="selected">{{ order_statuses.name }}</option>
-                        {% else %}
-                          <option value="{{ order_statuses.order_status_id }}">{{ order_statuses.name }}</option>
-                        {% endif %}
-                      {% endfor %}
-                    </select>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label class="col-sm-2 control-label" for="input-override"><span data-toggle="tooltip" title="{{ help_override }}">{{ entry_override }}</span></label>
-                  <div class="col-sm-10">
-                    <div class="checkbox">
-                      <input type="checkbox" name="override" value="1" id="input-override"/>
-                    </div>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label class="col-sm-2 control-label" for="input-notify">{{ entry_notify }}</label>
-                  <div class="col-sm-10">
-                    <div class="checkbox">
-                      <input type="checkbox" name="notify" value="1" id="input-notify"/>
-                    </div>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label class="col-sm-2 control-label" for="input-comment">{{ entry_comment }}</label>
-                  <div class="col-sm-10">
-                    <textarea name="comment" rows="8" id="input-comment" class="form-control"></textarea>
-                  </div>
-                </div>
-              </form>
-            </fieldset>
-            <div class="text-right">
-              <button id="button-history" data-loading-text="{{ text_loading }}" class="btn btn-primary"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_history_add }}</button>
-            </div>
-          </div>
-          <div class="tab-pane" id="tab-additional"> {% if account_custom_fields %}
-              <div class="table-responsive">
-                <table class="table table-bordered">
-                  <thead>
-                    <tr>
-                      <td colspan="2">{{ text_account_custom_field }}</td>
-                    </tr>
-                  </thead>
-                  <tbody>
-
-                    {% for custom_field in account_custom_fields %}
-                      <tr>
-                        <td>{{ custom_field.name }}</td>
-                        <td>{{ custom_field.value }}</td>
-                      </tr>
-                    {% endfor %}
-                  </tbody>
-
-                </table>
-              </div>
-            {% endif %}
-            {% if payment_custom_fields %}
-              <div class="table-responsive">
-                <table class="table table-bordered">
-                  <thead>
-                    <tr>
-                      <td colspan="2">{{ text_payment_custom_field }}</td>
-                    </tr>
-                  </thead>
-                  <tbody>
-
-                    {% for custom_field in payment_custom_fields %}
-                      <tr>
-                        <td>{{ custom_field.name }}</td>
-                        <td>{{ custom_field.value }}</td>
-                      </tr>
-                    {% endfor %}
-                  </tbody>
-
-                </table>
-              </div>
-            {% endif %}
-            {% if shipping_method and shipping_custom_fields %}
-              <div class="table-responsive">
-                <table class="table table-bordered">
-                  <thead>
-                    <tr>
-                      <td colspan="2">{{ text_shipping_custom_field }}</td>
-                    </tr>
-                  </thead>
-                  <tbody>
-
-                    {% for custom_field in shipping_custom_fields %}
-                      <tr>
-                        <td>{{ custom_field.name }}</td>
-                        <td>{{ custom_field.value }}</td>
-                      </tr>
-                    {% endfor %}
-                  </tbody>
-
-                </table>
-              </div>
-            {% endif %}
-            <div class="table-responsive">
-              <table class="table table-bordered">
-                <thead>
-                  <tr>
-                    <td colspan="2">{{ text_browser }}</td>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>{{ text_ip }}</td>
-                    <td>{{ ip }}</td>
-                  </tr>
-                  {% if forwarded_ip %}
-                    <tr>
-                      <td>{{ text_forwarded_ip }}</td>
-                      <td>{{ forwarded_ip }}</td>
-                    </tr>
-                  {% endif %}
-                  <tr>
-                    <td>{{ text_user_agent }}</td>
-                    <td>{{ user_agent }}</td>
-                  </tr>
-                  <tr>
-                    <td>{{ text_accept_language }}</td>
-                    <td>{{ accept_language }}</td>
-                  </tr>
-                </tbody>
-
-              </table>
-            </div>
-          </div>
-          {% for tab in tabs %}
-            <div class="tab-pane" id="tab-{{ tab.code }}">{{ tab.content }}</div>
-          {% endfor %} </div>
       </div>
     </div>
   </div>
@@ -957,6 +971,7 @@
               country_id: payload.country_id,
               zone_id: payload.zone_id
             };
+            inlineSyncAddresses();
           }
 
           if (quickEditState.field === 'shipping_address') {
@@ -971,6 +986,7 @@
               country_id: payload.country_id,
               zone_id: payload.zone_id
             };
+            inlineSyncAddresses();
           }
 
           if (quickEditState.field === 'payment_method' || quickEditState.field === 'shipping_method' || quickEditState.field === 'payment_address' || quickEditState.field === 'shipping_address') {
@@ -1270,12 +1286,13 @@
         }
 
         productsHtml += '<tr>';
-        productsHtml += '  <td class="text-left order-product-name">' + productThumb + '<a href="#" class="btn-product-info" data-product-id="' + productId + '">' + product['name'] + '</a><input type="hidden" name="product[' + i + '][product_id]" value="' + productId + '" />';
+        productsHtml += '<td class="text-left order-product-name">' + productThumb + '<a href="#" class="btn-product-info" data-product-id="' + productId + '">' + product['name'] + '</a>';
+        productsHtml += '<input type="hidden" name="product[' + i + '][product_id]" value="' + productId + '" />';
 
         if (product['option']) {
           for (var j = 0; j < product['option'].length; j++) {
             var option = product['option'][j];
-            productsHtml += '<div class="order-product-option">- ' + option['name'] + ': ' + option['value'] + '</div>';
+            productsHtml += '<div class="order-product-option">' + option['name'] + ': ' + option['value'] + '</div>';
 
             if (option['type'] == 'select' || option['type'] == 'radio' || option['type'] == 'image') {
               productsHtml += '<input type="hidden" name="product[' + i + '][option][' + option['product_option_id'] + ']" value="' + option['product_option_value_id'] + '" />';
@@ -1291,13 +1308,12 @@
           }
         }
 
-        productsHtml += '  </td>';
-        productsHtml += '  <td class="text-left">' + product['model'] + '</td>';
-        productsHtml += '  <td class="text-right"><input type="text" name="product[' + i + '][quantity]" value="' + product['quantity'] + '" class="order-product-input gt-no-translate" data-gt-inline-ignore="1" /></td>';
-        productsHtml += '  <td class="text-right"><input type="text" name="product[' + i + '][discount]" value="' + (discounts[i] !== undefined ? discounts[i] : 0) + '" class="order-product-input gt-no-translate" data-gt-inline-ignore="1" /></td>';
-        productsHtml += '  <td class="text-right">' + product['price'] + '</td>';
-        productsHtml += '  <td class="text-right">' + product['total'] + '</td>';
-        productsHtml += '  <td class="text-right"><button type="button" class="btn btn-danger btn-xs button-inline-remove-item"><i data-lucide="trash-2" width="12" height="12"></i></button></td>';
+        productsHtml += '</td>';
+        productsHtml += '<td class="text-center"><input type="text" name="product[' + i + '][quantity]" value="' + product['quantity'] + '" class="form-control input-sm order-product-input gt-no-translate" data-gt-inline-ignore="1" /></td>';
+        productsHtml += '<td class="text-center"><input type="text" name="product[' + i + '][discount]" value="' + (discounts[i] !== undefined ? discounts[i] : 0) + '" class="form-control input-sm order-product-input gt-no-translate" data-gt-inline-ignore="1" /></td>';
+        productsHtml += '<td class="text-right">' + product['price'] + '</td>';
+        productsHtml += '<td class="text-right">' + product['total'] + '</td>';
+        productsHtml += '<td class="text-center"><button type="button" class="btn btn-danger btn-xs button-inline-remove-item"><i data-lucide="trash-2" width="12" height="12"></i></button></td>';
         productsHtml += '</tr>';
       }
     }
@@ -1306,44 +1322,59 @@
       for (var v = 0; v < json['vouchers'].length; v++) {
         var voucher = json['vouchers'][v];
         productsHtml += '<tr>';
-        productsHtml += '  <td class="text-left">' + voucher['description'] + '</td>';
-        productsHtml += '  <td class="text-left"></td>';
-        productsHtml += '  <td class="text-right">1</td>';
-        productsHtml += '  <td class="text-right"></td>';
-        productsHtml += '  <td class="text-right">' + voucher['price'] + '</td>';
-        productsHtml += '  <td class="text-right">' + voucher['price'] + '</td>';
-        productsHtml += '  <td class="text-right"></td>';
+        productsHtml += '<td class="text-left">' + voucher['description'] + '</td>';
+        productsHtml += '<td class="text-center">1</td>';
+        productsHtml += '<td class="text-center"></td>';
+        productsHtml += '<td class="text-right">' + voucher['price'] + '</td>';
+        productsHtml += '<td class="text-right">' + voucher['price'] + '</td>';
+        productsHtml += '<td class="text-center"></td>';
         productsHtml += '</tr>';
       }
     }
 
     if (!productsHtml) {
-      productsHtml = '<tr class="inline-cart-empty"><td colspan="7" class="text-center">{{ text_no_results }}</td></tr>';
+      productsHtml = '<tr class="inline-cart-empty"><td colspan="6" class="text-center">{{ text_no_results }}</td></tr>';
     }
 
     $('#inline-cart').html(productsHtml);
     inlineReindexCartRows();
 
-    var totalsHtml = '';
+    var totalsHtml = '<div class="order-totals-inner">';
 
     if (json['totals'] && json['totals'].length) {
       for (var t = 0; t < json['totals'].length; t++) {
-        totalsHtml += '<tr><td colspan="5" class="text-right">' + json['totals'][t]['title'] + '</td><td class="text-right">' + json['totals'][t]['text'] + '</td><td></td></tr>';
+        var isLast = (t === json['totals'].length - 1);
+        totalsHtml += '<div class="order-totals-row' + (isLast ? ' order-totals-row--total' : '') + '"><span class="order-totals-label">' + json['totals'][t]['title'] + '</span><span class="order-totals-value">' + json['totals'][t]['text'] + '</span></div>';
       }
     }
 
+    totalsHtml += '</div>';
     $('#inline-totals').html(totalsHtml);
+  }
+
+  function inlineSyncAddresses() {
+    var promise = inlineApiRequest({
+      url: '{{ catalog }}index.php?route=api/payment/address&api_token={{ api_token }}&store_id={{ store_id }}',
+      type: 'post',
+      data: $.param(inlineState.payment)
+    });
+
+    if (inlineState.has_shipping) {
+      promise = promise.then(function() {
+        return inlineApiRequest({
+          url: '{{ catalog }}index.php?route=api/shipping/address&api_token={{ api_token }}&store_id={{ store_id }}',
+          type: 'post',
+          data: $.param(inlineState.shipping)
+        });
+      });
+    }
+
+    return promise;
   }
 
   function inlineSyncCheckoutContext(couponCode) {
     return inlineApiRequest({
-      url: '{{ catalog }}index.php?route=api/payment/address&api_token={{ api_token }}&store_id={{ store_id }}',
-      type: 'post',
-      data: $.param(inlineState.payment)
-    }).then(function() {
-      return inlineApiRequest({
-        url: '{{ catalog }}index.php?route=api/payment/methods&api_token={{ api_token }}&store_id={{ store_id }}'
-      });
+      url: '{{ catalog }}index.php?route=api/payment/methods&api_token={{ api_token }}&store_id={{ store_id }}'
     }).then(function() {
       if (inlineState.payment_code) {
         return inlineApiRequest({
@@ -1360,13 +1391,7 @@
       }
 
       return inlineApiRequest({
-        url: '{{ catalog }}index.php?route=api/shipping/address&api_token={{ api_token }}&store_id={{ store_id }}',
-        type: 'post',
-        data: $.param(inlineState.shipping)
-      }).then(function() {
-        return inlineApiRequest({
-          url: '{{ catalog }}index.php?route=api/shipping/methods&api_token={{ api_token }}&store_id={{ store_id }}'
-        });
+        url: '{{ catalog }}index.php?route=api/shipping/methods&api_token={{ api_token }}&store_id={{ store_id }}'
       }).then(function() {
         if (inlineState.shipping_code) {
           return inlineApiRequest({
@@ -1460,8 +1485,6 @@
         data: $.param(inlineState.customer)
       });
     }).then(function() {
-      return inlineSyncCheckoutContext(coupon);
-    }).then(function() {
       var orderData = 'comment=' + encodeURIComponent(inlineState.comment) + '&affiliate_id={{ affiliate_id|e('js') }}&skip_history=1';
 
       if (inlineState.payment_code) {
@@ -1519,7 +1542,7 @@
     $(this).closest('tr').remove();
 
     if (!$('#inline-cart tr').not('.inline-cart-empty').length) {
-      $('#inline-cart').html('<tr class="inline-cart-empty"><td colspan="7" class="text-center">{{ text_no_results }}</td></tr>');
+      $('#inline-cart').html('<tr class="inline-cart-empty"><td colspan="6" class="text-center">{{ text_no_results }}</td></tr>');
     }
 
     inlineReindexCartRows();
@@ -1918,6 +1941,7 @@
 		  }
 		  if (json['token']) {
 			  api_token = json['token'];
+			  inlineSyncAddresses();
 		  }
 	  },
 	  error: function(xhr, ajaxOptions, thrownError) {
@@ -1967,4 +1991,4 @@
   });
   //--></script>
 </div>
-{{ footer }} 
+{{ footer }}

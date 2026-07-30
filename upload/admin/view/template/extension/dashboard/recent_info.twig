@@ -7,36 +7,215 @@
     </div>
     <a href="{{ orders_link }}" class="btn btn-default btn-xs pull-right" style="margin-left: 10px;">{{ text_view_all }}</a>
   </div>
-  <div class="table-responsive">
-    <table class="table">
-      <thead>
-        <tr>
-          <td class="text-right">{{ column_order_id }}</td>
-          <td>{{ column_customer }}</td>
-          <td>{{ column_status }}</td>
-          <td>{{ column_date_added }}</td>
-          <td class="text-right">{{ column_total }}</td>
-          <td class="text-right">{{ column_action }}</td>
-        </tr>
-      </thead>
-      <tbody>
-        {% if orders %}
-        {% for order in orders %}
-        <tr>
-          <td class="text-right" style="padding-top:8px;padding-bottom:8px;"><div style="margin-bottom:4px;">{{ order.order_id }}</div></td>
-          <td style="padding-top:8px;padding-bottom:8px;">{{ order.customer }}<br><small class="text-muted">{{ order.customer_type }}</small></td>
-          <td><span class="{{ order.order_status_badge_class }}">{{ order.status }}</span></td>
-          <td>{{ order.date_added }}</td>
-          <td class="text-right">{{ order.total }}</td>
-          <td class="text-right"><a href="{{ order.view }}" title="{{ button_view }}" class="btn btn-info"><i data-lucide="eye"></i></a></td>
-        </tr>
-        {% endfor %}
-        {% else %}
-        <tr>
-          <td class="text-center" colspan="6">{{ text_no_results }}</td>
-        </tr>
+  <div style="padding: 14px 18px;">
+    {% if orders %}
+    <div class="dc-recent-orders">
+      {% for order in orders %}
+      <div class="dc-recent-order-card">
+        <div class="dc-recent-order-card__header">
+          <div class="dc-recent-order-card__avatar">
+            <i data-lucide="user" width="18" height="18"></i>
+          </div>
+          <div class="dc-recent-order-card__main">
+            <div class="dc-recent-order-card__row">
+              <span class="dc-recent-order-card__id">#{{ order.order_id }}</span>
+              <span class="{{ order.order_status_badge_class }}">{{ order.status }}</span>
+            </div>
+            <div class="dc-recent-order-card__customer">{{ order.customer }}</div>
+            <div class="dc-recent-order-card__meta">
+              <span class="dc-recent-order-card__type">{{ order.customer_type }}</span>
+              <span class="dc-recent-order-card__dot">&middot;</span>
+              <span class="dc-recent-order-card__date">{{ order.date_added }}</span>
+            </div>
+          </div>
+          <div class="dc-recent-order-card__right">
+            <div class="dc-recent-order-card__total">{{ order.total }}</div>
+            <a href="{{ order.view }}" class="btn btn-info btn-xs dc-recent-order-card__view-btn"><i data-lucide="eye" width="13" height="13"></i> {{ text_view }}</a>
+          </div>
+        </div>
+
+        {% if order.payment_method or order.shipping_method or order.tracking_number or order.products_count > 0 %}
+        <div class="dc-recent-order-card__details">
+          {% if order.products_count > 0 %}
+          <div class="dc-recent-order-card__products">
+            <i data-lucide="package" width="13" height="13" class="dc-recent-order-card__detail-icon"></i>
+            <span class="dc-recent-order-card__detail-text">
+              {{ order.total_items }} {{ text_products }}:
+              {% for name in order.product_names %}{{ name }}{% if not loop.last %}, {% endif %}{% endfor %}{% if order.has_more_products %} &hellip;{% endif %}
+            </span>
+          </div>
+          {% endif %}
+          {% if order.payment_method %}
+          <div class="dc-recent-order-card__payment">
+            <i data-lucide="credit-card" width="13" height="13" class="dc-recent-order-card__detail-icon"></i>
+            <span class="dc-recent-order-card__detail-text">{{ order.payment_method }}</span>
+          </div>
+          {% endif %}
+          {% if order.shipping_method %}
+          <div class="dc-recent-order-card__shipping">
+            <i data-lucide="truck" width="13" height="13" class="dc-recent-order-card__detail-icon"></i>
+            <span class="dc-recent-order-card__detail-text">{{ order.shipping_method }}</span>
+          </div>
+          {% endif %}
+          {% if order.tracking_number %}
+          <div class="dc-recent-order-card__tracking">
+            <i data-lucide="map-pin" width="13" height="13" class="dc-recent-order-card__detail-icon"></i>
+            <span class="dc-recent-order-card__detail-text">{{ text_tracking }}: {{ order.tracking_number }}</span>
+          </div>
+          {% endif %}
+        </div>
         {% endif %}
-      </tbody>
-    </table>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="dc-recent-orders-empty">
+      <i data-lucide="inbox" width="32" height="32"></i>
+      <span>{{ text_no_results }}</span>
+    </div>
+    {% endif %}
   </div>
 </div>
+
+<style>
+.dc-recent-orders {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.dc-recent-order-card {
+  border: 1px solid var(--dc-border-soft, #e5e7eb);
+  border-radius: var(--dc-radius-lg, 8px);
+  background: var(--dc-surface, #fff);
+  overflow: hidden;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.dc-recent-order-card:hover {
+  border-color: var(--dc-gray-300, #d1d5db);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+.dc-recent-order-card__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+}
+.dc-recent-order-card__avatar {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: var(--dc-radius-md, 6px);
+  background: var(--dc-gray-100, #f3f4f6);
+  color: var(--dc-text-muted, #6b7280);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dc-recent-order-card__main {
+  min-width: 0;
+  flex: 1;
+}
+.dc-recent-order-card__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+.dc-recent-order-card__id {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dc-text-dark, #1f2937);
+}
+.dc-recent-order-card__customer {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dc-text-dark, #1f2937);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 280px;
+}
+.dc-recent-order-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--dc-text-muted, #9ca3af);
+}
+.dc-recent-order-card__dot {
+  opacity: 0.5;
+}
+.dc-recent-order-card__right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.dc-recent-order-card__total {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dc-text-dark, #1f2937);
+  white-space: nowrap;
+}
+.dc-recent-order-card__view-btn {
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.dc-recent-order-card__details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  padding: 8px 14px;
+  padding-left: 62px;
+  border-top: 1px solid var(--dc-border-soft, #e5e7eb);
+  background: var(--dc-gray-50, #f9fafb);
+}
+.dc-recent-order-card__details > div {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--dc-text-muted, #6b7280);
+}
+.dc-recent-order-card__detail-icon {
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+.dc-recent-order-card__detail-text {
+  line-height: 1.3;
+}
+.dc-recent-order-card__products .dc-recent-order-card__detail-text {
+  color: var(--dc-text-dark, #374151);
+  font-weight: 500;
+}
+.dc-recent-orders-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 32px 16px;
+  color: var(--dc-text-muted, #9ca3af);
+  text-align: center;
+  font-size: 13px;
+}
+@media (max-width: 575px) {
+  .dc-recent-order-card__header {
+    flex-wrap: wrap;
+  }
+  .dc-recent-order-card__right {
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 4px;
+    padding-left: 48px;
+  }
+  .dc-recent-order-card__customer {
+    max-width: 100%;
+  }
+  .dc-recent-order-card__details {
+    padding-left: 14px;
+  }
+}
+</style>
