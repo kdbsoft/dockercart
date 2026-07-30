@@ -201,7 +201,7 @@ class ModelCatalogProduct extends Model
                                 "', option_id = '" .
                                 (int) $product_option["option_id"] .
                                 "', required = '" .
-                                (int) $product_option["required"] .
+                                (int) ($product_option["required"] ?? 0) .
                                 "'",
                         );
 
@@ -227,26 +227,26 @@ class ModelCatalogProduct extends Model
                                     "', option_id = '" .
                                     (int) $product_option["option_id"] .
                                     "', option_value_id = '" .
-                                    (int) $product_option_value[
+                                    (int) ($product_option_value[
                                         "option_value_id"
-                                    ] .
+                                    ] ?? 0) .
                                     "', price = '" .
                                     $pov_price .
                                     "', price_prefix = '" .
                                     $this->db->escape(
-                                        $product_option_value["price_prefix"],
+                                        $product_option_value["price_prefix"] ?? '+',
                                     ) .
                                     "', points = '" .
                                     $pov_points .
                                     "', points_prefix = '" .
                                     $this->db->escape(
-                                        $product_option_value["points_prefix"],
+                                        $product_option_value["points_prefix"] ?? '+',
                                     ) .
                                     "', weight = '" .
                                     $pov_weight .
                                     "', weight_prefix = '" .
                                     $this->db->escape(
-                                        $product_option_value["weight_prefix"],
+                                        $product_option_value["weight_prefix"] ?? '+',
                                     ) .
                                     "', is_hit = '" .
                                     (int) ($product_option_value["is_hit"] ?? 0) .
@@ -604,7 +604,7 @@ class ModelCatalogProduct extends Model
                                 "', option_id = '" .
                                 (int) $product_option["option_id"] .
                                 "', required = '" .
-                                (int) $product_option["required"] .
+                                (int) ($product_option["required"] ?? 0) .
                                 "'",
                         );
 
@@ -630,26 +630,26 @@ class ModelCatalogProduct extends Model
                                     "', option_id = '" .
                                     (int) $product_option["option_id"] .
                                     "', option_value_id = '" .
-                                    (int) $product_option_value[
+                                    (int) ($product_option_value[
                                         "option_value_id"
-                                    ] .
+                                    ] ?? 0) .
                                     "', price = '" .
                                     $pov_price .
                                     "', price_prefix = '" .
                                     $this->db->escape(
-                                        $product_option_value["price_prefix"],
+                                        $product_option_value["price_prefix"] ?? '+',
                                     ) .
                                     "', points = '" .
                                     $pov_points .
                                     "', points_prefix = '" .
                                     $this->db->escape(
-                                        $product_option_value["points_prefix"],
+                                        $product_option_value["points_prefix"] ?? '+',
                                     ) .
                                     "', weight = '" .
                                     $pov_weight .
                                     "', weight_prefix = '" .
                                     $this->db->escape(
-                                        $product_option_value["weight_prefix"],
+                                        $product_option_value["weight_prefix"] ?? '+',
                                     ) .
                                     "', is_hit = '" .
                                     (int) ($product_option_value["is_hit"] ?? 0) .
@@ -1397,7 +1397,7 @@ class ModelCatalogProduct extends Model
                                 "', option_id = '" .
                                 (int) $product_option["option_id"] .
                                 "', required = '" .
-                                (int) $product_option["required"] .
+                                (int) ($product_option["required"] ?? 0) .
                                 "'",
                         );
 
@@ -1421,26 +1421,26 @@ class ModelCatalogProduct extends Model
                                     "', option_id = '" .
                                     (int) $product_option["option_id"] .
                                     "', option_value_id = '" .
-                                    (int) $product_option_value[
+                                    (int) ($product_option_value[
                                         "option_value_id"
-                                    ] .
+                                    ] ?? 0) .
                                     "', price = '" .
                                     (float) $product_option_value["price"] .
                                     "', price_prefix = '" .
                                     $this->db->escape(
-                                        $product_option_value["price_prefix"],
+                                        $product_option_value["price_prefix"] ?? '+',
                                     ) .
                                     "', points = '" .
                                     (int) $product_option_value["points"] .
                                     "', points_prefix = '" .
                                     $this->db->escape(
-                                        $product_option_value["points_prefix"],
+                                        $product_option_value["points_prefix"] ?? '+',
                                     ) .
                                     "', weight = '" .
                                     (float) $product_option_value["weight"] .
                                     "', weight_prefix = '" .
                                     $this->db->escape(
-                                        $product_option_value["weight_prefix"],
+                                        $product_option_value["weight_prefix"] ?? '+',
                                     ) .
                                     "', is_hit = '" .
                                     (int) ($product_option_value["is_hit"] ?? 0) .

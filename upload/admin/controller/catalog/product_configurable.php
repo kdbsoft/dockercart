@@ -41,10 +41,12 @@ class ControllerCatalogProductConfigurable extends Controller {
 
 		$cg_prices = $this->model_catalog_product_configurable->getVariantCustomerGroupPrices($product_id);
 		$variant_specials = $this->model_catalog_product_configurable->getVariantsSpecials($product_id);
+		$variant_discounts = $this->model_catalog_product_configurable->getVariantsDiscounts($product_id);
 
 		foreach ($json['variants'] as &$v) {
 			$v['customer_group_prices'] = isset($cg_prices[(int)$v['variant_id']]) ? $cg_prices[(int)$v['variant_id']] : array();
 			$v['variant_specials'] = isset($variant_specials[(int)$v['variant_id']]) ? $variant_specials[(int)$v['variant_id']] : array();
+			$v['variant_discounts'] = isset($variant_discounts[(int)$v['variant_id']]) ? $variant_discounts[(int)$v['variant_id']] : array();
 		}
 
 		unset($v);
@@ -155,6 +157,9 @@ class ControllerCatalogProductConfigurable extends Controller {
 				$specials = isset($this->request->post['variant_specials']) ? $this->request->post['variant_specials'] : [];
 				$this->model_catalog_product_configurable->setVariantSpecials($variant_id, $specials);
 
+				$discounts = isset($this->request->post['variant_discounts']) ? $this->request->post['variant_discounts'] : [];
+				$this->model_catalog_product_configurable->setVariantDiscounts($variant_id, $discounts);
+
 				$json['success'] = $this->language->get('text_success_variant');
 			} catch (\RuntimeException $e) {
 				$json['error'] = $this->language->get('error_variant_duplicate');
@@ -238,37 +243,59 @@ class ControllerCatalogProductConfigurable extends Controller {
 			$product_id = (int)$this->request->post['product_id'];
 			$option_ids = isset($this->request->post['option_ids']) ? $this->request->post['option_ids'] : array();
 
-			if (!empty($option_ids)) {
-				$existing_axes = array();
-				$axes_query = $this->db->query("SELECT option_id FROM " . DB_PREFIX . "product_configurable_option WHERE product_id = '" . (int)$product_id . "'");
+			if (count($option_ids) > 3) {
+				$json['error'] = $this->language->get('error_max_axes');
+			}
+		}
 
-				foreach ($axes_query->rows as $row) {
-					$existing_axes[] = (int)$row['option_id'];
-				}
+		if (!$json && !empty($option_ids)) {
+			$product_id = (int)$this->request->post['product_id'];
+			$existing_axes = array();
+			$axes_query = $this->db->query("SELECT option_id FROM " . DB_PREFIX . "product_configurable_option WHERE product_id = '" . (int)$product_id . "'");
 
-				$new_axes = array_diff($option_ids, $existing_axes);
+			foreach ($axes_query->rows as $row) {
+				$existing_axes[] = (int)$row['option_id'];
+			}
 
-				if (!empty($new_axes)) {
-					$new_axes_list = implode(',', $new_axes);
-					$conflict_query = $this->db->query("
-						SELECT DISTINCT pov.option_id
-						FROM " . DB_PREFIX . "product_option_value pov
-						INNER JOIN " . DB_PREFIX . "product_option po ON (pov.product_option_id = po.product_option_id)
-						WHERE po.product_id = '" . (int)$product_id . "'
-						AND pov.option_id IN (" . $new_axes_list . ")
-						AND (pov.price != '0')
-					");
+			$new_axes = array_diff($option_ids, $existing_axes);
 
-					if ($conflict_query->num_rows) {
-						$json['error'] = $this->language->get('error_axis_is_simple_option');
-					}
+			if (!empty($new_axes)) {
+				$new_axes_list = implode(',', $new_axes);
+
+				$empty_query = $this->db->query("
+					SELECT o.option_id
+					FROM " . DB_PREFIX . "option o
+					LEFT JOIN " . DB_PREFIX . "option_value ov ON (o.option_id = ov.option_id)
+					WHERE o.option_id IN (" . $new_axes_list . ")
+					GROUP BY o.option_id
+					HAVING COUNT(ov.option_value_id) = 0
+				");
+
+				if ($empty_query->num_rows) {
+					$json['error'] = $this->language->get('error_axis_no_values');
 				}
 			}
 
-			if (!$json) {
-				$this->model_catalog_product_configurable->setConfigurableOptions((int)$this->request->post['product_id'], $option_ids);
-				$json['success'] = $this->language->get('text_success_axes');
+			if (!$json && !empty($new_axes)) {
+				$new_axes_list = implode(',', $new_axes);
+				$conflict_query = $this->db->query("
+					SELECT DISTINCT pov.option_id
+					FROM " . DB_PREFIX . "product_option_value pov
+					INNER JOIN " . DB_PREFIX . "product_option po ON (pov.product_option_id = po.product_option_id)
+					WHERE po.product_id = '" . (int)$product_id . "'
+					AND pov.option_id IN (" . $new_axes_list . ")
+					AND (pov.price != '0')
+				");
+
+				if ($conflict_query->num_rows) {
+					$json['error'] = $this->language->get('error_axis_is_simple_option');
+				}
 			}
+		}
+
+		if (!$json) {
+			$this->model_catalog_product_configurable->setConfigurableOptions((int)$this->request->post['product_id'], isset($option_ids) ? $option_ids : array());
+			$json['success'] = $this->language->get('text_success_axes');
 		}
 
 		$this->response->addHeader('Content-Type: application/json');
@@ -349,16 +376,19 @@ class ControllerCatalogProductConfigurable extends Controller {
 				$generated = 0;
 
 				$existing_variants = $this->model_catalog_product_configurable->getVariants($product_id);
+				$axis_count = count($axes);
 				$existing_map = array();
 
 				foreach ($existing_variants as $v) {
-					if (!empty($v['values'])) {
+					if (!empty($v['values']) && count($v['values']) === $axis_count) {
 						$pairs = array();
 						foreach ($v['values'] as $vv) {
 							$pairs[] = $vv['option_id'] . ':' . $vv['option_value_id'];
 						}
 						sort($pairs);
-						$existing_map[implode('|', $pairs)] = true;
+						$existing_map[implode('|', $pairs)] = (int)$v['variant_id'];
+					} elseif (!empty($v['variant_id'])) {
+						$this->model_catalog_product_configurable->deleteVariant((int)$v['variant_id']);
 					}
 				}
 
@@ -375,6 +405,7 @@ class ControllerCatalogProductConfigurable extends Controller {
 					}
 
 					$data = array(
+						'model' => '',
 						'sku' => '',
 						'upc' => '',
 						'ean' => '',

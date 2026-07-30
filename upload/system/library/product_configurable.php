@@ -167,7 +167,7 @@ class ProductConfigurable {
 			}
 		}
 
-		$this->db->query("INSERT INTO " . DB_PREFIX . "product_variant SET product_id = '" . (int)$product_id . "', sku = '" . $this->db->escape(isset($data['sku']) ? $data['sku'] : '') . "', upc = '" . $this->db->escape(isset($data['upc']) ? $data['upc'] : '') . "', ean = '" . $this->db->escape(isset($data['ean']) ? $data['ean'] : '') . "', mpn = '" . $this->db->escape(isset($data['mpn']) ? $data['mpn'] : '') . "', price = '" . (float)(isset($data['price']) ? $data['price'] : 0) . "', quantity = '" . (float)(isset($data['quantity']) ? $data['quantity'] : 0) . "', subtract = '" . (int)(isset($data['subtract']) ? $data['subtract'] : 1) . "', weight = '" . (float)(isset($data['weight']) ? $data['weight'] : 0) . "', weight_class_id = '" . (int)(isset($data['weight_class_id']) ? $data['weight_class_id'] : 0) . "', image = '" . $this->db->escape(isset($data['image']) ? $data['image'] : '') . "', variant_hash = '" . $this->db->escape($variant_hash) . "', sort_order = '" . (int)(isset($data['sort_order']) ? $data['sort_order'] : 0) . "', status = '" . (int)(isset($data['status']) ? $data['status'] : 1) . "'");
+		$this->db->query("INSERT INTO " . DB_PREFIX . "product_variant SET product_id = '" . (int)$product_id . "', model = '" . $this->db->escape(isset($data['model']) ? $data['model'] : '') . "', sku = '" . $this->db->escape(isset($data['sku']) ? $data['sku'] : '') . "', upc = '" . $this->db->escape(isset($data['upc']) ? $data['upc'] : '') . "', ean = '" . $this->db->escape(isset($data['ean']) ? $data['ean'] : '') . "', mpn = '" . $this->db->escape(isset($data['mpn']) ? $data['mpn'] : '') . "', price = '" . (float)(isset($data['price']) ? $data['price'] : 0) . "', quantity = '" . (float)(isset($data['quantity']) ? $data['quantity'] : 0) . "', subtract = '" . (int)(isset($data['subtract']) ? $data['subtract'] : 1) . "', weight = '" . (float)(isset($data['weight']) ? $data['weight'] : 0) . "', weight_class_id = '" . (int)(isset($data['weight_class_id']) ? $data['weight_class_id'] : 0) . "', image = '" . $this->db->escape(isset($data['image']) ? $data['image'] : '') . "', variant_hash = '" . $this->db->escape($variant_hash) . "', sort_order = '" . (int)(isset($data['sort_order']) ? $data['sort_order'] : 0) . "', status = '" . (int)(isset($data['status']) ? $data['status'] : 1) . "'");
 
 		$variant_id = $this->db->getLastId();
 
@@ -207,7 +207,7 @@ class ProductConfigurable {
 			}
 		}
 
-		$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET sku = '" . $this->db->escape(isset($data['sku']) ? $data['sku'] : '') . "', upc = '" . $this->db->escape(isset($data['upc']) ? $data['upc'] : '') . "', ean = '" . $this->db->escape(isset($data['ean']) ? $data['ean'] : '') . "', mpn = '" . $this->db->escape(isset($data['mpn']) ? $data['mpn'] : '') . "', price = '" . (float)(isset($data['price']) ? $data['price'] : 0) . "', quantity = '" . (float)(isset($data['quantity']) ? $data['quantity'] : 0) . "', subtract = '" . (int)(isset($data['subtract']) ? $data['subtract'] : 1) . "', weight = '" . (float)(isset($data['weight']) ? $data['weight'] : 0) . "', weight_class_id = '" . (int)(isset($data['weight_class_id']) ? $data['weight_class_id'] : 0) . "', image = '" . $this->db->escape(isset($data['image']) ? $data['image'] : '') . "'" . $hash_update . ", sort_order = '" . (int)(isset($data['sort_order']) ? $data['sort_order'] : 0) . "', status = '" . (int)(isset($data['status']) ? $data['status'] : 1) . "' WHERE variant_id = '" . (int)$variant_id . "'");
+		$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET model = '" . $this->db->escape(isset($data['model']) ? $data['model'] : '') . "', sku = '" . $this->db->escape(isset($data['sku']) ? $data['sku'] : '') . "', upc = '" . $this->db->escape(isset($data['upc']) ? $data['upc'] : '') . "', ean = '" . $this->db->escape(isset($data['ean']) ? $data['ean'] : '') . "', mpn = '" . $this->db->escape(isset($data['mpn']) ? $data['mpn'] : '') . "', price = '" . (float)(isset($data['price']) ? $data['price'] : 0) . "', quantity = '" . (float)(isset($data['quantity']) ? $data['quantity'] : 0) . "', subtract = '" . (int)(isset($data['subtract']) ? $data['subtract'] : 1) . "', weight = '" . (float)(isset($data['weight']) ? $data['weight'] : 0) . "', weight_class_id = '" . (int)(isset($data['weight_class_id']) ? $data['weight_class_id'] : 0) . "', image = '" . $this->db->escape(isset($data['image']) ? $data['image'] : '') . "'" . $hash_update . ", sort_order = '" . (int)(isset($data['sort_order']) ? $data['sort_order'] : 0) . "', status = '" . (int)(isset($data['status']) ? $data['status'] : 1) . "' WHERE variant_id = '" . (int)$variant_id . "'");
 
 		if (isset($data['values'])) {
 			$this->db->query("DELETE FROM " . DB_PREFIX . "product_variant_value WHERE variant_id = '" . (int)$variant_id . "'");
@@ -553,6 +553,53 @@ class ProductConfigurable {
 
 	public function deleteAllVariantSpecials($variant_id) {
 		$this->db->query("DELETE FROM " . DB_PREFIX . "dockercart_product_variant_special WHERE variant_id = '" . (int)$variant_id . "'");
+	}
+
+	public function getVariantsDiscounts($product_id) {
+		$query = $this->db->query("SELECT vd.* FROM " . DB_PREFIX . "dockercart_product_variant_discount vd INNER JOIN " . DB_PREFIX . "product_variant pv ON (vd.variant_id = pv.variant_id) WHERE pv.product_id = '" . (int)$product_id . "' ORDER BY vd.quantity ASC, vd.priority ASC");
+
+		$result = array();
+
+		foreach ($query->rows as $row) {
+			$result[(int)$row['variant_id']][] = array(
+				'variant_discount_id' => (int)$row['variant_discount_id'],
+				'customer_group_id'   => (int)$row['customer_group_id'],
+				'quantity'            => (int)$row['quantity'],
+				'priority'            => (int)$row['priority'],
+				'price'               => $row['price'],
+				'date_start'          => $row['date_start'],
+				'date_end'            => $row['date_end'],
+				'auto_renew'          => (int)$row['auto_renew'],
+			);
+		}
+
+		return $result;
+	}
+
+	public function getVariantDiscountPrice($variant_id, $customer_group_id, $quantity) {
+		$query = $this->db->query("SELECT price FROM " . DB_PREFIX . "dockercart_product_variant_discount WHERE variant_id = '" . (int)$variant_id . "' AND customer_group_id = '" . (int)$customer_group_id . "' AND quantity <= '" . (int)$quantity . "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) ORDER BY quantity DESC, priority ASC, price ASC LIMIT 1");
+
+		if ($query->num_rows) {
+			return (float)$query->row['price'];
+		}
+
+		return null;
+	}
+
+	public function setVariantDiscounts($variant_id, $discounts) {
+		$this->db->query("DELETE FROM " . DB_PREFIX . "dockercart_product_variant_discount WHERE variant_id = '" . (int)$variant_id . "'");
+
+		foreach ($discounts as $discount) {
+			if (empty($discount['customer_group_id']) || !isset($discount['price']) || $discount['price'] === '') {
+				continue;
+			}
+
+			$this->db->query("INSERT INTO " . DB_PREFIX . "dockercart_product_variant_discount SET variant_id = '" . (int)$variant_id . "', customer_group_id = '" . (int)$discount['customer_group_id'] . "', quantity = '" . (int)(isset($discount['quantity']) ? $discount['quantity'] : 0) . "', priority = '" . (int)(isset($discount['priority']) ? $discount['priority'] : 1) . "', price = '" . (float)$discount['price'] . "', date_start = '" . $this->db->escape(isset($discount['date_start']) ? $discount['date_start'] : '0000-00-00') . "', date_end = '" . $this->db->escape(isset($discount['date_end']) ? $discount['date_end'] : '0000-00-00') . "', auto_renew = '" . (int)(!empty($discount['auto_renew'])) . "'");
+		}
+	}
+
+	public function deleteAllVariantDiscounts($variant_id) {
+		$this->db->query("DELETE FROM " . DB_PREFIX . "dockercart_product_variant_discount WHERE variant_id = '" . (int)$variant_id . "'");
 	}
 
 	private function touchProduct($product_id) {
