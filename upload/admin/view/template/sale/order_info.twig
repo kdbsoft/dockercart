@@ -58,7 +58,7 @@
                     {% endfor %}
                     <input type="hidden" name="product[{{ inline_product_row }}][product_id]" value="{{ product.product_id }}" />
                     {% for option in product.option %}
-                    {% if option.type == 'select' or option.type == 'radio' or option.type == 'image' %}
+                    {% if option.type == 'select' or option.type == 'radio' or option.type == 'image' or option.type == 'color' %}
                     <input type="hidden" name="product[{{ inline_product_row }}][option][{{ option.product_option_id }}]" value="{{ option.product_option_value_id }}" />
                     {% endif %}
                     {% if option.type == 'checkbox' %}
@@ -1123,7 +1123,7 @@
       var optionId = option['product_option_id'];
       var requiredClass = option['required'] ? ' required' : '';
 
-      if (option['type'] == 'select' || option['type'] == 'radio' || option['type'] == 'image') {
+      if (option['type'] == 'select' || option['type'] == 'radio' || option['type'] == 'image' || option['type'] == 'color') {
         html += '<div class="form-group' + requiredClass + '">';
         html += '  <label class="col-sm-3 control-label" for="inline-input-option' + optionId + '">' + option['name'] + '</label>';
         html += '  <div class="col-sm-9"><select name="option[' + optionId + ']" id="inline-input-option' + optionId + '" class="form-control">';
@@ -1297,7 +1297,7 @@
             var option = product['option'][j];
             productsHtml += '<div class="order-product-option">' + option['name'] + ': ' + option['value'] + '</div>';
 
-            if (option['type'] == 'select' || option['type'] == 'radio' || option['type'] == 'image') {
+            if (option['type'] == 'select' || option['type'] == 'radio' || option['type'] == 'image' || option['type'] == 'color') {
               productsHtml += '<input type="hidden" name="product[' + i + '][option][' + option['product_option_id'] + ']" value="' + option['product_option_value_id'] + '" />';
             }
 
