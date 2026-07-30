@@ -243,7 +243,7 @@ services:
       - dockercart-network
 
   manticore:
-    image: manticoresearch/manticore:15.1.0
+    image: manticoresearch/manticore:latest
     container_name: ${MANTICORE_CONTAINER_NAME:-dockercart_manticore}
     restart: ${RESTART_POLICY:-unless-stopped}
     security_opt:
