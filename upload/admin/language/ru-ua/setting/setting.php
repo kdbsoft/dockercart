@@ -39,7 +39,7 @@ $_['entry_file_max_size'] = 'Максимальный размер файла';
 $_['entry_file_mime_allowed'] = 'Разрешенные MIME-типы файлов';
 $_['entry_fraud_status'] = 'Статус мошеннического заказа';
 $_['entry_geocode'] = 'Геокодирование';
-$_['entry_icon'] = 'Икона';
+$_['entry_icon'] = 'Иконка';
 $_['entry_image_max_dimension'] = 'Макс. размер изображения';
 $_['entry_image'] = 'Изображение';
 $_['entry_images'] = 'Изображения магазина (до 5)';
@@ -220,5 +220,3 @@ $_['text_voucher'] = 'Ваучеры';
 // Subtitle
 
 $_['text_setting_subtitle'] = 'Общие параметры конфигурации магазина';
-
-

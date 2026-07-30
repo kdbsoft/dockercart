@@ -17,7 +17,7 @@ $_['entry_customer_price'] = 'Отображение цен';
 $_['entry_email'] = 'Электронная почта';
 $_['entry_fax'] = 'Телефон 2';
 $_['entry_geocode'] = 'Геокодирование';
-$_['entry_icon'] = 'Икона';
+$_['entry_icon'] = 'Иконка';
 $_['entry_image'] = 'Изображение';
 $_['entry_images'] = 'Изображения магазина (до 5)';
 $_['entry_contact_form_status'] = 'Показывать контактную форму';
@@ -97,5 +97,3 @@ $_['text_list_subtitle'] = 'Управляйте несколькими экзе
 $_['text_add_store_subtitle'] = 'Добавить новый экземпляр магазина';
 
 $_['text_edit_store_subtitle'] = 'Редактировать URL и настройки магазина';
-
-
