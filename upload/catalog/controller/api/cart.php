@@ -56,11 +56,6 @@ class ControllerApiCart extends Controller {
 					}
 
 					$json['success'] = $this->language->get('text_success');
-
-					unset($this->session->data['shipping_method']);
-					unset($this->session->data['shipping_methods']);
-					unset($this->session->data['payment_method']);
-					unset($this->session->data['payment_methods']);
 				}
 			} elseif (isset($this->request->post['product_id'])) {
 				$this->load->model('catalog/product');
