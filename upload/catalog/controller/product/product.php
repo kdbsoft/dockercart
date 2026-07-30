@@ -922,6 +922,7 @@ class ControllerProductProduct extends Controller {
 						$suffix = implode(' / ', $attr_names);
 						$data['heading_title'] .= ' — ' . $suffix;
 						$this->document->setTitle($product_info['meta_title'] . ' — ' . $suffix);
+						$this->document->setDescription($product_info['meta_description'] . ' — ' . $suffix);
 					}
 				}
 
