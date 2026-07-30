@@ -665,4 +665,227 @@ class ModelSaleOrder extends Model {
 			KEY `order_id` (`order_id`)
 		) ENGINE=MyISAM DEFAULT CHARSET=utf8");
 	}
+
+	public function updateOrderField($order_id, $field, $value) {
+		$allowed = array(
+			'firstname', 'lastname', 'email', 'telephone', 'tax_number',
+			'payment_method', 'payment_code', 'shipping_method', 'shipping_code',
+			'payment_firstname', 'payment_lastname', 'payment_company',
+			'payment_address_1', 'payment_address_2', 'payment_city',
+			'payment_postcode', 'payment_zone', 'payment_zone_id',
+			'payment_country', 'payment_country_id',
+			'shipping_firstname', 'shipping_lastname', 'shipping_company',
+			'shipping_address_1', 'shipping_address_2', 'shipping_city',
+			'shipping_postcode', 'shipping_zone', 'shipping_zone_id',
+			'shipping_country', 'shipping_country_id',
+			'tracking_number', 'comment'
+		);
+
+		if (!in_array($field, $allowed)) {
+			return false;
+		}
+
+		$this->db->query("UPDATE `" . DB_PREFIX . "order` SET `" . $field . "` = '" . $this->db->escape((string)$value) . "', date_modified = NOW() WHERE order_id = '" . (int)$order_id . "'");
+
+		return true;
+	}
+
+	public function updateOrderProductQuantity($order_product_id, $order_id, $quantity) {
+		$product_query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "order_product` WHERE order_product_id = '" . (int)$order_product_id . "' AND order_id = '" . (int)$order_id . "'");
+
+		if (!$product_query->num_rows) {
+			return false;
+		}
+
+		$product = $product_query->row;
+		$quantity = (float)$quantity;
+
+		if ($quantity < 0) {
+			$quantity = 0;
+		}
+
+		$unit_price = (float)$product['price'];
+		$unit_tax = (float)$product['tax'];
+
+		$new_total = round($unit_price * $quantity, 4);
+		$new_tax = round($unit_tax * $quantity, 4);
+
+		$this->db->query("UPDATE `" . DB_PREFIX . "order_product` SET quantity = '" . (float)$quantity . "', total = '" . (float)$new_total . "', tax = '" . (float)$new_tax . "' WHERE order_product_id = '" . (int)$order_product_id . "'");
+
+		return true;
+	}
+
+	public function updateOrderProductPrice($order_product_id, $order_id, $price) {
+		$product_query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "order_product` WHERE order_product_id = '" . (int)$order_product_id . "' AND order_id = '" . (int)$order_id . "'");
+
+		if (!$product_query->num_rows) {
+			return false;
+		}
+
+		$product = $product_query->row;
+		$quantity = (float)$product['quantity'];
+		$price = (float)$price;
+
+		if ($price < 0) {
+			$price = 0;
+		}
+
+		$new_total = round($price * $quantity, 4);
+
+		$this->db->query("UPDATE `" . DB_PREFIX . "order_product` SET price = '" . (float)$price . "', total = '" . (float)$new_total . "' WHERE order_product_id = '" . (int)$order_product_id . "'");
+
+		return true;
+	}
+
+	public function addProductToOrder($order_id, $product_id, $quantity = 1, $options = array()) {
+		$this->load->model('catalog/product');
+
+		$product_info = $this->model_catalog_product->getProduct($product_id);
+
+		if (!$product_info) {
+			return false;
+		}
+
+		$quantity = max(1, (int)$quantity);
+
+		$price = (float)$product_info['price'];
+		$tax = 0.0;
+
+		if ($product_info['tax_class_id']) {
+			$tax_rates = $this->tax->getRates($price, $product_info['tax_class_id']);
+			foreach ($tax_rates as $tax_rate) {
+				$tax += $tax_rate['amount'];
+			}
+		}
+
+		$total = round($price * $quantity, 4);
+		$tax_total = round($tax * $quantity, 4);
+
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "order_product` SET
+			order_id = '" . (int)$order_id . "',
+			product_id = '" . (int)$product_id . "',
+			name = '" . $this->db->escape($product_info['name']) . "',
+			model = '" . $this->db->escape($product_info['model']) . "',
+			quantity = '" . (float)$quantity . "',
+			price = '" . (float)$price . "',
+			total = '" . (float)$total . "',
+			tax = '" . (float)$tax_total . "',
+			reward = '" . (int)$product_info['reward'] . "',
+			variant_id = '0',
+			variant_sku = ''
+		");
+
+		$order_product_id = $this->db->getLastId();
+
+		if ($options) {
+			foreach ($options as $option) {
+				$this->db->query("INSERT INTO `" . DB_PREFIX . "order_option` SET
+					order_id = '" . (int)$order_id . "',
+					order_product_id = '" . (int)$order_product_id . "',
+					product_option_id = '" . (int)$option['product_option_id'] . "',
+					product_option_value_id = '" . (int)$option['product_option_value_id'] . "',
+					name = '" . $this->db->escape($option['name']) . "',
+					value = '" . $this->db->escape($option['value']) . "',
+					type = '" . $this->db->escape($option['type']) . "'
+				");
+			}
+		}
+
+		return $order_product_id;
+	}
+
+	public function removeProductFromOrder($order_product_id, $order_id) {
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "order_option` WHERE order_product_id = '" . (int)$order_product_id . "' AND order_id = '" . (int)$order_id . "'");
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "order_product` WHERE order_product_id = '" . (int)$order_product_id . "' AND order_id = '" . (int)$order_id . "'");
+
+		return true;
+	}
+
+	public function recalculateOrderTotals($order_id) {
+		$products_query = $this->db->query("SELECT SUM(total) AS subtotal, SUM(tax) AS total_tax FROM `" . DB_PREFIX . "order_product` WHERE order_id = '" . (int)$order_id . "'");
+
+		$new_subtotal = (float)$products_query->row['subtotal'];
+		$new_tax = (float)$products_query->row['total_tax'];
+
+		if ($new_subtotal < 0) {
+			$new_subtotal = 0;
+		}
+
+		if ($new_tax < 0) {
+			$new_tax = 0;
+		}
+
+		$totals = $this->getOrderTotals($order_id);
+
+		$non_dynamic_total = 0.0;
+
+		foreach ($totals as $total) {
+			if ($total['code'] == 'sub_total') {
+				$this->db->query("UPDATE `" . DB_PREFIX . "order_total` SET value = '" . (float)$new_subtotal . "' WHERE order_total_id = '" . (int)$total['order_total_id'] . "'");
+			} elseif ($total['code'] == 'tax') {
+				$this->db->query("UPDATE `" . DB_PREFIX . "order_total` SET value = '" . (float)$new_tax . "' WHERE order_total_id = '" . (int)$total['order_total_id'] . "'");
+			} elseif ($total['code'] != 'total') {
+				$non_dynamic_total += (float)$total['value'];
+			}
+		}
+
+		$new_total = round($new_subtotal + $non_dynamic_total, 4);
+
+		foreach ($totals as $total) {
+			if ($total['code'] == 'total') {
+				$this->db->query("UPDATE `" . DB_PREFIX . "order_total` SET value = '" . (float)$new_total . "' WHERE order_total_id = '" . (int)$total['order_total_id'] . "'");
+				break;
+			}
+		}
+
+		$this->db->query("UPDATE `" . DB_PREFIX . "order` SET total = '" . (float)$new_total . "', date_modified = NOW() WHERE order_id = '" . (int)$order_id . "'");
+
+		return true;
+	}
+
+	public function getOrderTimeline($order_id, $start = 0, $limit = 20) {
+		if ($start < 0) {
+			$start = 0;
+		}
+
+		if ($limit < 1) {
+			$limit = 20;
+		}
+
+		$query = $this->db->query("SELECT oh.order_history_id, oh.order_status_id, oh.notify, oh.comment, oh.date_added,
+			os.name AS status_name
+			FROM " . DB_PREFIX . "order_history oh
+			LEFT JOIN " . DB_PREFIX . "order_status os ON oh.order_status_id = os.order_status_id AND os.language_id = '" . (int)$this->config->get('config_language_id') . "'
+			WHERE oh.order_id = '" . (int)$order_id . "'
+			ORDER BY oh.date_added DESC, oh.order_history_id DESC
+			LIMIT " . (int)$start . "," . (int)$limit);
+
+		return $query->rows;
+	}
+
+	public function countOrderTimeline($order_id) {
+		$query = $this->db->query("SELECT COUNT(*) AS total FROM " . DB_PREFIX . "order_history WHERE order_id = '" . (int)$order_id . "'");
+
+		return (int)$query->row['total'];
+	}
+
+	public function addOrderNote($order_id, $comment, $notify = false) {
+		$query = $this->db->query("SELECT order_status_id FROM `" . DB_PREFIX . "order` WHERE order_id = '" . (int)$order_id . "'");
+
+		if (!$query->num_rows) {
+			return false;
+		}
+
+		$current_status_id = (int)$query->row['order_status_id'];
+
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "order_history` SET
+			order_id = '" . (int)$order_id . "',
+			order_status_id = '0',
+			notify = '" . (int)$notify . "',
+			comment = '" . $this->db->escape($comment) . "',
+			date_added = NOW()
+		");
+
+		return true;
+	}
 }
