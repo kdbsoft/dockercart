@@ -1141,6 +1141,8 @@ class ControllerSaleOrder extends Controller {
 				$data['products'][] = array(
 					'order_product_id' => $product['order_product_id'],
 					'product_id'       => $product['product_id'],
+					'variant_id'       => isset($product['variant_id']) ? (int)$product['variant_id'] : 0,
+					'variant_sku'      => isset($product['variant_sku']) ? $product['variant_sku'] : '',
 					'name'    	 	   => $product['name'],
 					'model'    		   => $product['model'],
 					'option'   		   => $option_data,

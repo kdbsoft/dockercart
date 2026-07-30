@@ -205,17 +205,19 @@ class ControllerApiOrder extends Controller {
 					}
 
 					$order_data['products'][] = array(
-						'product_id' => $product['product_id'],
-						'name'       => $product['name'],
-						'model'      => $product['model'],
-						'option'     => $option_data,
-						'download'   => $product['download'],
-						'quantity'   => $product['quantity'],
-						'subtract'   => $product['subtract'],
-						'price'      => $product['price'],
-						'total'      => $product['total'],
-						'tax'        => $this->tax->getTax($product['price'], $product['tax_class_id']),
-						'reward'     => $product['reward']
+						'product_id'  => $product['product_id'],
+						'variant_id'  => isset($product['variant_id']) ? (int)$product['variant_id'] : 0,
+						'variant_sku' => isset($product['variant_sku']) ? $product['variant_sku'] : '',
+						'name'        => $product['name'],
+						'model'       => $product['model'],
+						'option'      => $option_data,
+						'download'    => $product['download'],
+						'quantity'    => $product['quantity'],
+						'subtract'    => $product['subtract'],
+						'price'       => $product['price'],
+						'total'       => $product['total'],
+						'tax'         => $this->tax->getTax($product['price'], $product['tax_class_id']),
+						'reward'      => $product['reward']
 					);
 				}
 
@@ -576,17 +578,19 @@ class ControllerApiOrder extends Controller {
 						}
 
 						$order_data['products'][] = array(
-							'product_id' => $product['product_id'],
-							'name'       => $product['name'],
-							'model'      => $product['model'],
-							'option'     => $option_data,
-							'download'   => $product['download'],
-							'quantity'   => $product['quantity'],
-							'subtract'   => $product['subtract'],
-							'price'      => $product['price'],
-							'total'      => $product['total'],
-							'tax'        => $this->tax->getTax($product['price'], $product['tax_class_id']),
-							'reward'     => $product['reward']
+							'product_id'  => $product['product_id'],
+							'variant_id'  => isset($product['variant_id']) ? (int)$product['variant_id'] : 0,
+							'variant_sku' => isset($product['variant_sku']) ? $product['variant_sku'] : '',
+							'name'        => $product['name'],
+							'model'       => $product['model'],
+							'option'      => $option_data,
+							'download'    => $product['download'],
+							'quantity'    => $product['quantity'],
+							'subtract'    => $product['subtract'],
+							'price'       => $product['price'],
+							'total'       => $product['total'],
+							'tax'         => $this->tax->getTax($product['price'], $product['tax_class_id']),
+							'reward'      => $product['reward']
 						);
 					}
 
