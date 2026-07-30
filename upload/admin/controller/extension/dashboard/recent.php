@@ -87,8 +87,12 @@ class ControllerExtensionDashboardRecent extends Controller {
 		$this->load->language('extension/dashboard/recent');
 
 		$data['text_recent_subtitle'] = $this->language->get('text_recent_subtitle');
-		$data['user_token'] = $this->session->data['user_token'];
-		$data['orders_link'] = $this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'], true);
+		$data['text_products']        = $this->language->get('text_products');
+		$data['text_tracking']        = $this->language->get('text_tracking');
+		$data['text_no_products']     = $this->language->get('text_no_products');
+		$data['text_view']            = $this->language->get('text_view');
+		$data['user_token']           = $this->session->data['user_token'];
+		$data['orders_link']          = $this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'], true);
 
 		// Last 5 Orders
 		$data['orders'] = array();
@@ -101,32 +105,84 @@ class ControllerExtensionDashboardRecent extends Controller {
 		);
 
 		$this->load->model('sale/order');
-		
+
 		$results = $this->model_sale_order->getOrders($filter_data);
+
+		if (!$results) {
+			return $this->load->view('extension/dashboard/recent_info', $data);
+		}
+
+		// Collect order IDs for batch product query
+		$order_ids = array();
+		foreach ($results as $result) {
+			$order_ids[] = (int)$result['order_id'];
+		}
+
+		// Batch: get all products for these orders in one query
+		$order_products = array();
+		if ($order_ids) {
+			$product_query = $this->db->query(
+				"SELECT order_id, name, quantity FROM " . DB_PREFIX . "order_product WHERE order_id IN (" . implode(',', $order_ids) . ") ORDER BY order_id, order_product_id ASC"
+			);
+			foreach ($product_query->rows as $row) {
+				$order_products[$row['order_id']][] = array(
+					'name'     => $row['name'],
+					'quantity' => (int)$row['quantity'],
+				);
+			}
+		}
 
 		$processing_statuses = (array)$this->config->get('config_processing_status');
 		$complete_statuses   = (array)$this->config->get('config_complete_status');
 		$fraud_status        = (int)$this->config->get('config_fraud_status_id');
 
 		foreach ($results as $result) {
+			$order_id = $result['order_id'];
 			$order_type = $this->getOrderType($result);
 			$order_type_badge_class = $this->getOrderTypeBadgeClass($result);
 			$customer_type = $this->getCustomerType($result);
 			$customer_type_badge_class = $this->getCustomerTypeBadgeClass($result);
 			$status_badge_class = $this->getOrderStatusBadgeClass((int)$result['order_status_id'], $processing_statuses, $complete_statuses, $fraud_status);
 
+			// Products summary
+			$products = isset($order_products[$order_id]) ? $order_products[$order_id] : array();
+			$total_items = 0;
+			foreach ($products as $p) {
+				$total_items += $p['quantity'];
+			}
+			$product_names = array();
+			$max_show = 3;
+			$count = 0;
+			foreach ($products as $p) {
+				if ($count >= $max_show) {
+					break;
+				}
+				$product_names[] = $p['name'];
+				$count++;
+			}
+			$has_more = count($products) > $max_show;
+
+			$tracking_number = !empty($result['tracking_number']) ? $result['tracking_number'] : '';
+
 			$data['orders'][] = array(
-				'order_id'   => $result['order_id'],
-				'customer'   => $result['customer'],
-				'customer_type' => $customer_type,
+				'order_id'                  => $result['order_id'],
+				'customer'                  => $result['customer'],
+				'customer_type'             => $customer_type,
 				'customer_type_badge_class' => $customer_type_badge_class,
-				'order_type' => $order_type,
-				'order_type_badge_class' => $order_type_badge_class,
-				'status'     => $result['order_status'],
-				'order_status_badge_class' => $status_badge_class,
-				'date_added' => date($this->language->get('datetime_format'), strtotime($result['date_added'])),
-				'total'      => $this->currency->format($result['total'], $result['currency_code'], $result['currency_value']),
-				'view'       => $this->url->link('sale/order/info', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $result['order_id'], true),
+				'order_type'                => $order_type,
+				'order_type_badge_class'    => $order_type_badge_class,
+				'status'                    => $result['order_status'],
+				'order_status_badge_class'  => $status_badge_class,
+				'date_added'                => date($this->language->get('datetime_format'), strtotime($result['date_added'])),
+				'total'                     => $this->currency->format($result['total'], $result['currency_code'], $result['currency_value']),
+				'view'                      => $this->url->link('sale/order/info', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $order_id, true),
+				'payment_method'            => !empty($result['payment_method']) ? $result['payment_method'] : '',
+				'shipping_method'           => !empty($result['shipping_method']) ? $result['shipping_method'] : '',
+				'tracking_number'           => $tracking_number,
+				'total_items'               => $total_items,
+				'product_names'             => $product_names,
+				'products_count'            => count($products),
+				'has_more_products'         => $has_more,
 			);
 		}
 

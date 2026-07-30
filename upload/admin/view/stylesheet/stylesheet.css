@@ -592,6 +592,17 @@ fieldset[disabled] .btn {
     justify-content: center;
 }
 
+.dcx-sidebar-card__actions .btn--icon {
+    padding: 2px 4px;
+    min-width: 22px;
+    min-height: 20px;
+}
+.dcx-sidebar-card__actions .btn--icon i,
+.dcx-sidebar-card__actions .btn--icon svg {
+    width: 11px;
+    height: 11px;
+}
+
 .table .btn--icon {
     padding: 5px;
     min-width: 32px;
@@ -2556,37 +2567,8 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
 }
 
 /* Product table */
-.order-product-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-}
-
-.order-product-table thead th {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--dc-text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    padding: 10px 12px;
-    border-bottom: 2px solid var(--dc-border);
-    background: var(--dc-gray-50);
-    white-space: nowrap;
-}
-
 .order-product-table tbody td {
-    padding: 10px 12px;
-    border-bottom: 1px solid var(--dc-gray-100);
     vertical-align: middle;
-    color: var(--dc-gray-700);
-}
-
-.order-product-table tbody tr:hover {
-    background: var(--dc-gray-50);
-}
-
-.order-product-table tbody tr:last-child td {
-    border-bottom: 2px solid var(--dc-border);
 }
 
 .order-product-thumb {
@@ -2596,8 +2578,8 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
 }
 
 .order-product-thumb img {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     object-fit: cover;
     border-radius: var(--dc-radius-md);
     border: 1px solid var(--dc-border);
@@ -2620,11 +2602,11 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
 }
 
 .order-product-input {
-    width: 60px;
-    height: 36px;
-    padding: 4px 8px;
+    width: 56px;
+    height: 30px;
+    padding: 2px 6px;
     font-size: 12px;
-    text-align: left;
+    text-align: center;
     border: 1px solid var(--dc-border-medium);
     border-radius: var(--dc-radius-md);
     background: var(--dc-surface);
@@ -2637,63 +2619,66 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-/* Totals row */
-.order-product-table tfoot td {
-    padding: 10px 12px;
-    font-weight: 600;
-    color: var(--dc-text-dark);
-    background: var(--dc-gray-50);
-}
-
-.order-product-table tfoot tr:last-child td {
-    border-bottom: none;
-    font-size: 15px;
-    color: var(--dc-primary);
-}
-
-/* Product add row (Choose Product + Quantity + Button) */
-.order-product-add-row {
-    display: inline-flex;
-    gap: 16px;
-    align-items: stretch;
-    flex-wrap: wrap;
-}
-
-.order-product-add-field {
+/* Totals block (right-aligned under table) */
+.order-totals-block {
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-}
-
-.order-product-add-field--product {
-    width: 280px;
-}
-
-.order-product-add-field--quantity {
-    width: 80px;
-}
-
-.order-product-add-field--quantity .order-product-input {
+    align-items: flex-end;
     width: 100%;
 }
 
-.order-product-add-field--action {
-    flex: 0 0 auto;
+.order-totals-inner {
+    display: inline-flex;
+    flex-direction: column;
+    min-width: 200px;
+    max-width: 280px;
+    width: fit-content;
 }
 
-.order-product-add-field .control-label {
-    display: block;
-    margin-bottom: 4px;
+.order-totals-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 3px 0;
 }
 
-.order-product-add-field--action .btn {
-    white-space: nowrap;
-    height: 36px;
+.order-totals-label {
+    color: var(--dc-text-muted);
+    font-size: 13px;
+}
+
+.order-totals-value {
+    font-weight: 600;
+    color: var(--dc-text-dark);
+    font-size: 13px;
+    margin-left: 16px;
+}
+
+.order-totals-row--total {
+    margin-top: 4px;
+    padding-top: 6px;
+}
+
+.order-totals-row--total .order-totals-label {
+    font-weight: 600;
+    color: var(--dc-text-dark);
+    font-size: 14px;
+}
+
+.order-totals-row--total .order-totals-value {
+    font-weight: 700;
+    color: var(--dc-primary);
+    font-size: 15px;
 }
 
 .order-address-card__header .btn {
-    padding: 2px 8px;
+    padding: 2px 6px;
     font-size: 11px;
+}
+.order-address-card__header .btn i,
+.order-address-card__header .btn svg {
+    width: 10px;
+    height: 10px;
 }
 
 /* Option value prefix/suffix merged input group */
