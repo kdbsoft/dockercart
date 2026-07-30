@@ -104,6 +104,7 @@ $_['text_panel_order_info'] = 'Информация о заказе';
 $_['text_panel_customer'] = 'Покупатель';
 $_['text_panel_order_tools'] = 'Действия по заказу';
 $_['text_panel_order_contents'] = 'Состав заказа';
+$_['text_panel_totals']          = 'Итого';
 $_['text_order_detail'] = 'Детали заказа';
 $_['text_order_id'] = 'Номер заказа:';
 $_['text_payment_address'] = 'Адрес для оплаты';
@@ -172,3 +173,31 @@ $_['text_enabled']               = 'Включено';
 $_['text_disabled']              = 'Отключено';
 
 $_['text_history_subtitle'] = 'Отслеживайте изменения статуса и заметки';
+
+$_['text_timeline']              = 'Хронология';
+$_['text_add_note']              = 'Добавить заметку';
+$_['text_note']                  = 'Заметка';
+$_['text_edit_mode']             = 'Режим редактирования';
+$_['text_view_customer']         = 'Просмотр профиля клиента';
+$_['text_next']                  = 'Вперед';
+$_['text_previous']              = 'Назад';
+$_['text_print_date']            = 'Дата печати';
+$_['text_print']                 = 'Печать';
+
+$_['button_print']               = 'Печать';
+
+$_['error_comment']              = 'Пожалуйста, введите комментарий!';
+$_['error_order_status']         = 'Пожалуйста, выберите статус заказа!';
+
+$_['text_payer_address']         = 'Адрес плательщика';
+$_['text_same_as_billing']       = 'Совпадает с адресом плательщика';
+$_['text_same_as_shipping']      = 'Совпадает с адресом доставки';
+$_['text_browser_info']          = 'Браузер и устройство';
+$_['text_search_product']        = 'Поиск товара по названию...';
+$_['text_edit_hint']             = 'Нажмите на поля для редактирования';
+$_['text_more_actions']          = 'Больше действий';
+$_['text_discount']              = 'Скидка';
+$_['text_items']                 = 'товаров';
+$_['text_buyer']                 = 'Покупатель';
+$_['text_show_browser_info']     = 'Показать информацию о браузере';
+$_['text_hide_browser_info']     = 'Скрыть информацию о браузере';
