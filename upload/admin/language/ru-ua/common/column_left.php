@@ -1,6 +1,5 @@
 <?php
 
-$_['text_api'] = 'API';
 $_['text_attribute'] = 'Атрибуты';
 $_['text_attribute_group'] = 'Группы атрибутов';
 $_['text_backup'] = 'Резервное копирование / Восстановление';

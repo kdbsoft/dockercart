@@ -592,19 +592,6 @@
                               {% endfor %}
                             </select>
                           </div>
-                          <div class="dcx-field" style="max-width: 50%;">
-                            <label class="dcx-label" for="input-api">{{ entry_api }} <span data-toggle="tooltip" title="{{ help_api }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
-                            <select name="config_api_id" id="input-api" class="form-control">
-                              <option value="0">{{ text_none }}</option>
-                              {% for api in apis %}
-                              {% if api.api_id == config_api_id %}
-                              <option value="{{ api.api_id }}" selected="selected">{{ api.username }}</option>
-                              {% else %}
-                              <option value="{{ api.api_id }}">{{ api.username }}</option>
-                              {% endif %}
-                              {% endfor %}
-                            </select>
-                          </div>
                         </div>
                         <div class="dcx-field">
                           <label class="dcx-label" for="input-process-status">{{ entry_processing_status }} <span data-toggle="tooltip" title="{{ help_processing_status }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
