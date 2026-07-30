@@ -40,6 +40,8 @@
 	var productNameEl = document.getElementById('dc-product-name');
 	var baseProductName = productNameEl ? (productNameEl.dataset.baseName || productNameEl.textContent.trim()) : '';
 	var baseMetaTitle = productNameEl ? (productNameEl.dataset.baseMetaTitle || document.title) : document.title;
+	var baseMetaDescEl = document.querySelector('meta[name="description"]');
+	var baseMetaDesc = baseMetaDescEl ? baseMetaDescEl.getAttribute('content') : '';
 	var stockBadgeEl = document.getElementById('dc-stock-badge');
 	var defaultImgSrc = mainImgEl ? mainImgEl.src : '';
 	var originalBasePrice = priceEl ? parseFloat(priceEl.dataset.basePrice || '0') : 0;
@@ -254,6 +256,26 @@
 			} else {
 				productNameEl.textContent = baseProductName;
 				document.title = baseMetaTitle;
+			}
+		}
+
+		// Update meta description
+		if (baseMetaDescEl && baseMetaDesc) {
+			var newDesc = (variant && variant.values && variant.values.length)
+				? baseMetaDesc + ' — ' + variant.values.map(function(v) { return v.name; }).join(' / ')
+				: baseMetaDesc;
+			baseMetaDescEl.setAttribute('content', newDesc);
+			var ogDesc = document.querySelector('meta[property="og:description"]');
+			if (ogDesc) ogDesc.setAttribute('content', newDesc);
+			var twDesc = document.querySelector('meta[name="twitter:description"]');
+			if (twDesc) twDesc.setAttribute('content', newDesc);
+			var ogTitle = document.querySelector('meta[property="og:title"]');
+			if (ogTitle) {
+				ogTitle.setAttribute('content',
+					(variant && variant.values && variant.values.length)
+						? baseMetaTitle + ' — ' + variant.values.map(function(v) { return v.name; }).join(' / ')
+						: baseMetaTitle
+				);
 			}
 		}
 
