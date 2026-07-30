@@ -1484,8 +1484,8 @@ div.dcx-field.required > .dcx-label:before {
 .dc-cgp-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; max-width: 500px; }
 .dc-cgp-select { width: 200px; flex: 0 0 200px; }
 .dc-cgp-price { width: 130px; flex: 0 0 130px; }
-.dc-cgp-remove { padding: 4px 6px; color: #999; font-size: 14px; }
-.dc-cgp-remove:hover { color: #c00; text-decoration: none; }
+.dc-cgp-remove { padding: 4px 6px; color: #999; font-size: 14px; border: 1px solid #ddd; border-radius: 3px; }
+.dc-cgp-remove:hover { color: #c00; text-decoration: none; border: 1px solid #ddd; }
 #customer-group-prices + .btn { max-width: 400px; display: block; }
 
 /* ── Product media gallery (Shopify-style) ── */

@@ -728,6 +728,7 @@
                                       </label>
                                     </div>
                                     {% endif %}
+                                    {% if not product_option.is_axis %}
                                     <div class="dc-opt-card__cg">
                                       <button type="button" class="btn btn-default btn-xs dc-opt-card__cg-toggle" onclick="event.stopPropagation();$(this).closest('.dc-opt-card__cg').find('.dc-opt-card__cg-body').slideToggle(150);">
                                         <i data-lucide="users" width="14" height="14"></i> {{ entry_option_value_cg_price }}
@@ -748,7 +749,7 @@
                                                   <option value="-"{% if cg_price.price_prefix == '-' %} selected="selected"{% endif %}>-</option>
                                                 </select>
                                                 <input type="text" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][customer_group_price][{{ cg_row }}][price]" value="{{ cg_price.price }}" placeholder="{{ entry_price }}" class="form-control option-value-prefix-input" />
-            </div>
+                                              </div>
                                               <button type="button" onclick="$(this).closest('.dc-opt-card__cg-row').remove();" class="btn btn-danger btn-xs"><i data-lucide="circle-minus" width="14" height="14"></i></button>
                                             </div>
                                             {% set cg_row = cg_row + 1 %}
@@ -757,6 +758,7 @@
                                         <button type="button" class="btn btn-primary btn-xs" style="margin-top:4px;" onclick="addOptionValueCgPrice(this, '{{ option_row }}', '{{ option_value_row }}');"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_option_value_cg_price_add }}</button>
                                       </div>
                                     </div>
+                                    {% endif %}
                                   </div>
                                 </div>
                                 {% set option_value_row = option_value_row + 1 %}
@@ -1858,6 +1860,7 @@
 		  html += '      </label>';
 		  html += '    </div>';
 	  }
+	  if (!$('#option-section' + option_row).hasClass('dc-option-axis')) {
 	  html += '    <div class="dc-opt-card__cg">';
 	  html += '      <button type="button" class="btn btn-default btn-xs dc-opt-card__cg-toggle" onclick="event.stopPropagation();$(this).closest(\'.dc-opt-card__cg\').find(\'.dc-opt-card__cg-body\').slideToggle(150);">';
 	  html += '        <i data-lucide="users" width="14" height="14"></i> {{ entry_option_value_cg_price|e('js') }}';
@@ -1867,6 +1870,7 @@
 	  html += '        <button type="button" class="btn btn-primary btn-xs" style="margin-top:4px;" onclick="addOptionValueCgPrice(this, \'' + option_row + '\', \'' + ovRow + '\');"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_option_value_cg_price_add|e('js') }}</button>';
 	  html += '      </div>';
 	  html += '    </div>';
+	  }
 	  html += '  </div>';
 	  html += '</div>';
 
