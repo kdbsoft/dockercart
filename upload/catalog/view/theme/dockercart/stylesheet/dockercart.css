@@ -1066,6 +1066,36 @@ a:hover [data-lucide="arrow-right"]{transform:translateX(4px)}
   border-color: #1d4ed8;
 }
 
+/* Color circle swatches */
+.dc-card-swatches__color-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #e5e7eb;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+.dc-card-swatches__color-dot:hover {
+  transform: scale(1.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+.dc-card-swatches__color-dot--active {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px #2563eb;
+}
+.dc-card-swatches__color-dot--active:hover {
+  box-shadow: 0 0 0 2px #2563eb, 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+.dc-card-swatches__color-dot-inner {
+  display: block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
 /* List view: swatches inline inside card (no absolute positioning) */
 .dc-card-swatches--list {
   position: static;
