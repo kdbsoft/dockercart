@@ -2,7 +2,7 @@
 
 $_['column_model'] = 'Код товара';
 $_['column_name'] = 'Название товара';
-$_['column_price'] = 'Цена за единицу товара';
+$_['column_price'] = 'Цена за ед.';
 $_['column_quantity'] = 'Количество';
 $_['column_total'] = 'Сумма';
 $_['entry_address'] = 'Выберите адрес';
