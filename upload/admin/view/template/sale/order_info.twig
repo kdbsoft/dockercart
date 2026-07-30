@@ -762,8 +762,10 @@
     return deferred.promise();
   }
 
-  function inlineSyncApiCartFromCurrentTable() {
-    var cartData = $('#inline-cart input[name^=\'product\'][type=\'text\'], #inline-cart input[name^=\'product\'][type=\'hidden\'], #inline-cart input[name^=\'product\'][type=\'radio\']:checked, #inline-cart input[name^=\'product\'][type=\'checkbox\']:checked, #inline-cart select[name^=\'product\'], #inline-cart textarea[name^=\'product\']').serialize();
+  function inlineSyncApiCartFromCurrentTable(preSerializedData) {
+    var cartData = preSerializedData || $('#inline-cart input[name^=\'product\'][type=\'text\'], #inline-cart input[name^=\'product\'][type=\'hidden\'], #inline-cart input[name^=\'product\'][type=\'radio\']:checked, #inline-cart input[name^=\'product\'][type=\'checkbox\']:checked, #inline-cart select[name^=\'product\'], #inline-cart textarea[name^=\'product\']').serialize();
+
+    console.log('SYNC_CART:', cartData);
 
     if (!cartData) {
       return $.Deferred().resolve().promise();
@@ -773,6 +775,9 @@
       url: '{{ catalog }}index.php?route=api/cart/add&api_token={{ api_token }}&store_id={{ store_id }}',
       type: 'post',
       data: cartData
+    }).then(function(json) {
+      console.log('SYNC_CART response:', json);
+      return json;
     });
   }
 
@@ -1798,6 +1803,10 @@
 
     var $button = $(this);
 
+    clearTimeout(inlineRecalcTimer);
+
+    var cartDataForSync = $('#inline-cart input[name^=\'product\'][type=\'text\'], #inline-cart input[name^=\'product\'][type=\'hidden\'], #inline-cart input[name^=\'product\'][type=\'radio\']:checked, #inline-cart input[name^=\'product\'][type=\'checkbox\']:checked, #inline-cart select[name^=\'product\'], #inline-cart textarea[name^=\'product\']').serialize();
+
     inlineSaving = true;
     $button.prop('disabled', true).button('loading');
     $('#inline-cart input[name$="[quantity]"]').prop('disabled', true);
@@ -1818,9 +1827,11 @@
 
     $(document).on('ajaxStop', reEnable);
 
-    inlinePersistOrderChanges({
-      reloadOnSuccess: false,
-      showSuccess: true
+    inlineSyncApiCartFromCurrentTable(cartDataForSync).then(function() {
+      return inlinePersistOrderChanges({
+        reloadOnSuccess: false,
+        showSuccess: true
+      });
     }).fail(function(error) {
       if (error && error.responseJSON && error.responseJSON.error) {
         showInlineAlert('danger', parseApiError(error.responseJSON.error));
