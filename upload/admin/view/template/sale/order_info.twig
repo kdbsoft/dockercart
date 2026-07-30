@@ -68,6 +68,9 @@
                     <input type="hidden" name="product[{{ inline_product_row }}][option][{{ option.product_option_id }}]" value="{{ (option.raw_value is defined ? option.raw_value : option.value)|e('html_attr') }}" />
                     {% endif %}
                     {% endfor %}
+                    {% if product.variant_id is defined and product.variant_id %}
+                    <input type="hidden" name="product[{{ inline_product_row }}][option][variant_id]" value="{{ product.variant_id }}" />
+                    {% endif %}
                   </td>
                   <td class="text-center"><input type="text" name="product[{{ inline_product_row }}][quantity]" value="{{ product.quantity }}" class="form-control input-sm order-product-input gt-no-translate" data-gt-inline-ignore="1" /></td>
                   <td class="text-center"><input type="text" name="product[{{ inline_product_row }}][discount]" value="{{ product.discount_percent is defined ? product.discount_percent : 0 }}" class="form-control input-sm order-product-input gt-no-translate" data-gt-inline-ignore="1" /></td>
@@ -1308,8 +1311,13 @@
           }
         }
 
+        if (product['variant_id']) {
+          productsHtml += '<input type="hidden" name="product[' + i + '][option][variant_id]" value="' + product['variant_id'] + '" />';
+        }
+
         productsHtml += '</td>';
-        productsHtml += '<td class="text-center"><input type="text" name="product[' + i + '][quantity]" value="' + product['quantity'] + '" class="form-control input-sm order-product-input gt-no-translate" data-gt-inline-ignore="1" /></td>';
+        var qty = parseFloat(product['quantity']) || 0;
+        productsHtml += '<td class="text-center"><input type="text" name="product[' + i + '][quantity]" value="' + qty.toFixed(2) + '" class="form-control input-sm order-product-input gt-no-translate" data-gt-inline-ignore="1" /></td>';
         productsHtml += '<td class="text-center"><input type="text" name="product[' + i + '][discount]" value="' + (discounts[i] !== undefined ? discounts[i] : 0) + '" class="form-control input-sm order-product-input gt-no-translate" data-gt-inline-ignore="1" /></td>';
         productsHtml += '<td class="text-right">' + product['price'] + '</td>';
         productsHtml += '<td class="text-right">' + product['total'] + '</td>';
@@ -1338,6 +1346,7 @@
 
     $('#inline-cart').html(productsHtml);
     inlineReindexCartRows();
+    lucide.createIcons({ nodes: [document.getElementById('inline-cart')] });
 
     var totalsHtml = '<div class="order-totals-inner">';
 
@@ -1373,8 +1382,10 @@
   }
 
   function inlineSyncCheckoutContext(couponCode) {
-    return inlineApiRequest({
-      url: '{{ catalog }}index.php?route=api/payment/methods&api_token={{ api_token }}&store_id={{ store_id }}'
+    return inlineSyncAddresses().then(function() {
+      return inlineApiRequest({
+        url: '{{ catalog }}index.php?route=api/payment/methods&api_token={{ api_token }}&store_id={{ store_id }}'
+      });
     }).then(function() {
       if (inlineState.payment_code) {
         return inlineApiRequest({

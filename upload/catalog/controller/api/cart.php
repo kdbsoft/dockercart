@@ -272,18 +272,20 @@ class ControllerApiCart extends Controller {
 				}
 
 				$json['products'][] = array(
-					'cart_id'    => $product['cart_id'],
-					'product_id' => $product['product_id'],
-					'name'       => $product['name'],
-					'model'      => $product['model'],
-					'thumb'      => $thumb,
-					'option'     => $option_data,
-					'quantity'   => $product['quantity'],
-					'stock'      => $product['stock'] ? true : !(!$this->config->get('config_stock_checkout') || $this->config->get('config_stock_warning')),
-					'shipping'   => $product['shipping'],
-					'price'      => $this->currency->format($display_price, $this->session->data['currency']),
-					'total'      => $this->currency->format($display_total, $this->session->data['currency']),
-					'reward'     => $product['reward']
+					'cart_id'      => $product['cart_id'],
+					'product_id'   => $product['product_id'],
+					'variant_id'   => isset($product['variant_id']) ? (int)$product['variant_id'] : 0,
+					'variant_sku'  => isset($product['variant_sku']) ? $product['variant_sku'] : '',
+					'name'         => $product['name'],
+					'model'        => $product['model'],
+					'thumb'        => $thumb,
+					'option'       => $option_data,
+					'quantity'     => $product['quantity'],
+					'stock'        => $product['stock'] ? true : !(!$this->config->get('config_stock_checkout') || $this->config->get('config_stock_warning')),
+					'shipping'     => $product['shipping'],
+					'price'        => $this->currency->format($display_price, $this->session->data['currency']),
+					'total'        => $this->currency->format($display_total, $this->session->data['currency']),
+					'reward'       => $product['reward']
 				);
 
 				$product_index++;
