@@ -53,20 +53,11 @@ class ControllerApiCart extends Controller {
 					$customer_id = (int)$this->customer->getId();
 					$session_id = $this->db->escape($this->session->getId());
 
-					error_log("BATCH_ADD before DELETE api=$api_id cust=$customer_id sess=$session_id products=" . count($products_to_add));
-					foreach ($products_to_add as $p) { error_log("BATCH_ADD product: id=" . $p['product_id'] . " qty=" . $p['quantity'] . " opt=" . json_encode($p['option'])); }
-
 					$this->db->query("DELETE FROM " . DB_PREFIX . "cart WHERE api_id = '" . $api_id . "' AND customer_id = '" . $customer_id . "' AND session_id = '" . $session_id . "'");
-
-					$deleted = $this->db->query("SELECT COUNT(*) AS cnt FROM " . DB_PREFIX . "cart WHERE api_id = '" . $api_id . "' AND customer_id = '" . $customer_id . "' AND session_id = '" . $session_id . "'");
-					error_log("BATCH_ADD after DELETE remaining=" . $deleted->row['cnt']);
 
 					foreach ($products_to_add as $product) {
 						$this->db->query("INSERT INTO " . DB_PREFIX . "cart SET api_id = '" . $api_id . "', customer_id = '" . $customer_id . "', session_id = '" . $session_id . "', product_id = '" . (int)$product['product_id'] . "', `option` = '" . $this->db->escape(json_encode($product['option'])) . "', quantity = '" . (float)$product['quantity'] . "', date_added = NOW()");
 					}
-
-					$after = $this->db->query("SELECT COUNT(*) AS cnt FROM " . DB_PREFIX . "cart WHERE api_id = '" . $api_id . "' AND customer_id = '" . $customer_id . "' AND session_id = '" . $session_id . "'");
-					error_log("BATCH_ADD after INSERT total=" . $after->row['cnt']);
 
 					$json['success'] = $this->language->get('text_success');
 				}
