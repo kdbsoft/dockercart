@@ -913,7 +913,8 @@ class ControllerSaleOrderDetail extends Controller {
 						}
 					}
 
-					$description = strip_tags($product_info['description'] ?? '');
+					$description = strip_tags(htmlspecialchars_decode($product_info['description'] ?? '', ENT_QUOTES));
+					$description = trim(preg_replace('/\s+/', ' ', $description));
 
 					$currency_code = $order_info['currency_code'] ?? $this->config->get('config_currency');
 					$currency_value = $order_info['currency_value'] ?? 1;
