@@ -1,0 +1,68 @@
+<div class="pcm">
+  <div class="pcm-header">
+    <div class="pcm-gallery">
+      {% if gallery|length > 1 %}
+      <div class="pcm-main-img" id="pcm-main-img"><img src="{{ gallery[0].full }}" alt="{{ name }}"></div>
+      <div class="pcm-thumbs">
+        {% for g in gallery %}
+        <img src="{{ g.thumb }}" data-full="{{ g.full }}" alt="" class="pcm-thumb{% if loop.first %} pcm-thumb--active{% endif %}" onclick="pcmSwitchImage(this)">
+        {% endfor %}
+      </div>
+      {% elseif gallery|length == 1 %}
+      <div class="pcm-main-img"><img src="{{ gallery[0].full }}" alt="{{ name }}"></div>
+      {% else %}
+      <div class="pcm-main-img"><img src="{{ image }}" alt="{{ name }}"></div>
+      {% endif %}
+    </div>
+    <div class="pcm-info">
+      <a href="{{ href }}" target="_blank" class="pcm-name">{{ name }}</a>
+      <div class="pcm-model">{{ model }}</div>
+
+      {% if codes %}
+      <div class="pcm-codes">
+        {% for c in codes %}
+        <span class="pcm-code"><span class="pcm-code__label">{{ c.label }}</span> {{ c.value }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="pcm-meta">
+        <span class="pcm-price">{{ price }}</span>
+        <span class="pcm-sep">&times;</span>
+        <span>{{ quantity }}</span>
+        <span class="pcm-sep">=</span>
+        <span class="pcm-total">{{ total }}</span>
+      </div>
+      <div class="pcm-sub">{{ text_stock }}: {{ stock }} &middot; {{ text_status }}: {{ status }}</div>
+
+      {% if order_options %}
+      <div class="pcm-options">
+        {% for opt in order_options %}
+        <div class="pcm-option"><span class="pcm-option__name">{{ opt.name }}:</span> {{ opt.value }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if description %}
+  <div class="pcm-section">
+    <div class="pcm-section__title">{{ text_description }}</div>
+    <div class="pcm-desc">{{ description }}</div>
+  </div>
+  {% endif %}
+
+  {% if attributes %}
+  <div class="pcm-section">
+    <div class="pcm-section__title">{{ text_attributes }}</div>
+    <table class="pcm-attrs">
+      {% for attr in attributes %}
+      <tr>
+        <td class="pcm-attrs__name">{{ attr.name }}</td>
+        <td>{{ attr.text }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+  {% endif %}
+</div>

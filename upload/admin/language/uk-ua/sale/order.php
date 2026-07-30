@@ -182,6 +182,7 @@ $_['text_edit_mode']             = 'Режим редагування';
 $_['text_view_customer']         = 'Перегляд профілю клієнта';
 $_['text_next']                  = 'Вперед';
 $_['text_previous']              = 'Назад';
+$_['text_load_more']             = 'Завантажити ще';
 $_['text_print_date']            = 'Дата друку';
 $_['text_print']                 = 'Друк';
 
@@ -194,6 +195,9 @@ $_['text_payer_address']         = 'Адреса платника';
 $_['text_same_as_billing']       = 'Збігається з адресою платника';
 $_['text_same_as_shipping']      = 'Збігається з адресою доставки';
 $_['text_browser_info']          = 'Браузер та пристрій';
+$_['text_stock']                 = 'Залишок';
+$_['text_description']           = 'Опис';
+$_['text_attributes']            = 'Атрибути';
 $_['text_search_product']        = 'Пошук товару за назвою...';
 $_['text_edit_hint']             = 'Натисніть на поля для редагування';
 $_['text_more_actions']          = 'Більше дій';
