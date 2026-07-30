@@ -22,7 +22,7 @@ $_['text_trial']               = '%s every %s %s for %s payments then ';
 // Column
 $_['column_image']             = 'Image';
 $_['column_name']              = 'Product Name';
-$_['column_model']             = 'Model';
+$_['column_model']             = 'Product Code';
 $_['column_quantity']          = 'Quantity';
 $_['column_price']             = 'Unit Price';
 $_['column_total']             = 'Total';

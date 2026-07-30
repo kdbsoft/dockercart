@@ -18,7 +18,7 @@ $_['text_edit_subtitle'] = 'Configure extension settings and options';
 $_['column_date_start'] = 'Date Start';
 $_['column_date_end']   = 'Date End';
 $_['column_name']       = 'Product Name';
-$_['column_model']      = 'Model';
+$_['column_model']      = 'Product Code';
 $_['column_quantity']   = 'Quantity';
 $_['column_total']      = 'Total';
 

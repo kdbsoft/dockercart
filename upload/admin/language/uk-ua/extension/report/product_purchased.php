@@ -2,7 +2,7 @@
 
 $_['column_date_end'] = 'Дата закінчення';
 $_['column_date_start'] = 'Дата початку';
-$_['column_model'] = 'Модель';
+$_['column_model'] = 'Код товара';
 $_['column_name'] = 'Назва товару';
 $_['column_quantity'] = 'Кількість';
 $_['column_total'] = 'Всього';
