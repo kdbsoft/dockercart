@@ -22,7 +22,9 @@ class ControllerApiCart extends Controller {
 					continue;
 				}
 
-				if ((float)$product_info['quantity'] <= 0 && empty($product_info['preorder']) && !$this->config->get('config_stock_checkout')) {
+				$is_configurable = !empty($product_info['is_configurable']);
+
+				if (!$is_configurable && (float)$product_info['quantity'] <= 0 && empty($product_info['preorder']) && !$this->config->get('config_stock_checkout')) {
 					$json['error']['stock'] = $this->language->get('error_stock');
 					continue;
 				}
@@ -66,7 +68,9 @@ class ControllerApiCart extends Controller {
 				$product_info = $this->model_catalog_product->getProduct($this->request->post['product_id']);
 
 				if ($product_info) {
-					if ((float)$product_info['quantity'] <= 0 && empty($product_info['preorder']) && !$this->config->get('config_stock_checkout')) {
+					$is_configurable = !empty($product_info['is_configurable']);
+
+					if (!$is_configurable && (float)$product_info['quantity'] <= 0 && empty($product_info['preorder']) && !$this->config->get('config_stock_checkout')) {
 						$json['error']['stock'] = $this->language->get('error_stock');
 					} else {
 
