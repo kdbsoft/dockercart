@@ -617,12 +617,12 @@ class ControllerSaleOrder extends Controller {
 			$order_id = (int)($this->request->get['order_id'] ?? 0);
 
 			if ($order_id) {
-				$this->load->model('checkout/order');
+				$this->load->model('sale/order');
 
-				$order_info = $this->model_checkout_order->getOrder($order_id);
+				$order_info = $this->model_sale_order->getOrder($order_id);
 
 				if ($order_info) {
-					$this->model_checkout_order->deleteOrder($order_id);
+					$this->model_sale_order->deleteOrder($order_id);
 
 					$json['success'] = $this->language->get('text_success');
 				} else {
@@ -654,12 +654,12 @@ class ControllerSaleOrder extends Controller {
 			if (!$order_status_id) {
 				$json['error'] = $this->language->get('error_order_status');
 			} else {
-				$this->load->model('checkout/order');
+				$this->load->model('sale/order');
 
-				$order_info = $this->model_checkout_order->getOrder($order_id);
+				$order_info = $this->model_sale_order->getOrder($order_id);
 
 				if ($order_info) {
-					$this->model_checkout_order->addOrderHistory($order_id, $order_status_id, $comment, $notify, $override);
+					$this->model_sale_order->addOrderHistory($order_id, $order_status_id, $comment, $notify, $override);
 
 					$json['success'] = $this->language->get('text_success');
 				} else {
