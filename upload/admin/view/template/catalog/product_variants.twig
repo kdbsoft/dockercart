@@ -261,7 +261,7 @@ function renderVariantMatrix(productId, json) {
 	html += '<th class="dc-th-image">{{ column_image|e("js") }}</th>';
 	html += '<th class="dc-th-default text-center">{{ column_default|e("js") }}</th>';
 	html += '<th class="dc-th-status text-center">{{ column_status|e("js") }}</th>';
-	html += '<th class="dc-th-action text-center">{{ column_action|e("js") }}</th>';
+	html += '<th class="dc-th-action text-center"></th>';
 	html += '</tr></thead>';
 	html += '<tbody id="dc-variant-tbody">';
 
@@ -342,7 +342,7 @@ function buildVariantRow(productId, variant, axes, defaultVariantId) {
 	html += '<td class="text-center"><button type="button" class="dc-star-btn' + (isDefault ? ' dc-star-active' : '') + '" onclick="onVariantStarClick(' + rowIdx + ')" title="{{ column_default|e("js") }}"><i data-lucide="star"></i></button></td>';
 	html += '<td class="text-center"><label class="dc-toggle"><input type="checkbox" class="dc-variant-status"' + (isActive ? ' checked="checked"' : '') + ' onchange="onVariantStatusChange(' + rowIdx + ')"/><span class="dc-toggle-slider"></span></label></td>';
 	html += '<td class="text-center">';
-	html += '<button type="button" class="btn btn-danger btn-sm" onclick="deleteVariant(' + rowIdx + ')" title="{{ column_action|e("js") }}"><i data-lucide="trash-2"></i></button>';
+	html += '<button type="button" class="btn btn-danger btn-sm" onclick="deleteVariant(' + rowIdx + ')"><i data-lucide="trash-2"></i></button>';
 	html += '</td>';
 	html += '</tr>';
 
@@ -460,7 +460,7 @@ function addVariantRow(productId) {
 	html += '<td class="text-center"><button type="button" class="dc-star-btn" onclick="onVariantStarClick(' + rowIdx + ')" title="{{ column_default|e("js") }}"><i data-lucide="star"></i></button></td>';
 	html += '<td class="text-center"><label class="dc-toggle"><input type="checkbox" class="dc-variant-status" checked="checked" onchange="onVariantStatusChange(' + rowIdx + ')"/><span class="dc-toggle-slider"></span></label></td>';
 	html += '<td class="text-center">';
-	html += '<button type="button" class="btn btn-danger btn-sm" onclick="deleteVariant(' + rowIdx + ')" title="{{ column_action|e("js") }}"><i data-lucide="trash-2"></i></button>';
+	html += '<button type="button" class="btn btn-danger btn-sm" onclick="deleteVariant(' + rowIdx + ')"><i data-lucide="trash-2"></i></button>';
 	html += '</td>';
 	html += '</tr>';
 

@@ -35,7 +35,7 @@
                   <td class="text-left">{% if sort == 'id.title' %}<a href="{{ sort_title }}" class="{{ order|lower }} sortable">{{ column_title }}</a>{% else %}<a href="{{ sort_title }}" class="sortable">{{ column_title }}</a>{% endif %}</td>
                   <td class="text-right">{% if sort == 'i.sort_order' %}<a href="{{ sort_sort_order }}" class="{{ order|lower }} sortable">{{ column_sort_order }}</a>{% else %}<a href="{{ sort_sort_order }}" class="sortable">{{ column_sort_order }}</a>{% endif %}</td>
                   <td class="text-left">{% if sort == 'i.status' %}<a href="{{ sort_status }}" class="{{ order|lower }} sortable">{{ column_status }}</a>{% else %}<a href="{{ sort_status }}" class="sortable">{{ column_status }}</a>{% endif %}</td>
-                  <td class="text-right">{{ column_action }}</td>
+                  <td class="text-right"></td>
                 </tr>
               </thead>
               <tbody>
