@@ -126,11 +126,25 @@
       {% for axis in product.variant_swatches %}
       <div class="dc-card-swatches__axis">
         <p class="dc-card-swatches__label">{{ axis.name }}</p>
+        {% if axis.type == 'color' %}
+        <div class="dc-card-swatches__pills">
+          {% for val in axis.values|slice(0, 8) %}
+          {% if val.color_code is defined and val.color_code %}
+          <a href="{{ dc_base_url }}/variant-{{ val.variant_id }}{{ dc_query_part }}" title="{{ val.name }}" class="dc-card-swatches__color-dot{% if val.option_value_id in product.default_option_value_ids %} dc-card-swatches__color-dot--active{% endif %}">
+            <span class="dc-card-swatches__color-dot-inner" style="background-color: {{ val.color_code }}"></span>
+          </a>
+          {% else %}
+          <a href="{{ dc_base_url }}/variant-{{ val.variant_id }}{{ dc_query_part }}" class="dc-card-swatches__pill{% if val.option_value_id in product.default_option_value_ids %} dc-card-swatches__pill--active{% endif %}">{{ val.name }}</a>
+          {% endif %}
+          {% endfor %}
+        </div>
+        {% else %}
         <div class="dc-card-swatches__pills">
           {% for val in axis.values|slice(0, 8) %}
           <a href="{{ dc_base_url }}/variant-{{ val.variant_id }}{{ dc_query_part }}" class="dc-card-swatches__pill{% if val.option_value_id in product.default_option_value_ids %} dc-card-swatches__pill--active{% endif %}">{{ val.name }}</a>
           {% endfor %}
         </div>
+        {% endif %}
       </div>
       {% endfor %}
     </div>
@@ -250,11 +264,25 @@
       {% for axis in product.variant_swatches %}
       <div class="dc-card-swatches__axis">
         <p class="dc-card-swatches__label">{{ axis.name }}</p>
+        {% if axis.type == 'color' %}
+        <div class="dc-card-swatches__pills">
+          {% for val in axis.values|slice(0, 8) %}
+          {% if val.color_code is defined and val.color_code %}
+          <a href="{{ dc_base_url }}/variant-{{ val.variant_id }}{{ dc_query_part }}" title="{{ val.name }}" class="dc-card-swatches__color-dot{% if val.option_value_id in product.default_option_value_ids %} dc-card-swatches__color-dot--active{% endif %}">
+            <span class="dc-card-swatches__color-dot-inner" style="background-color: {{ val.color_code }}"></span>
+          </a>
+          {% else %}
+          <a href="{{ dc_base_url }}/variant-{{ val.variant_id }}{{ dc_query_part }}" class="dc-card-swatches__pill{% if val.option_value_id in product.default_option_value_ids %} dc-card-swatches__pill--active{% endif %}">{{ val.name }}</a>
+          {% endif %}
+          {% endfor %}
+        </div>
+        {% else %}
         <div class="dc-card-swatches__pills">
           {% for val in axis.values|slice(0, 8) %}
           <a href="{{ dc_base_url }}/variant-{{ val.variant_id }}{{ dc_query_part }}" class="dc-card-swatches__pill{% if val.option_value_id in product.default_option_value_ids %} dc-card-swatches__pill--active{% endif %}">{{ val.name }}</a>
           {% endfor %}
         </div>
+        {% endif %}
       </div>
       {% endfor %}
     </div>

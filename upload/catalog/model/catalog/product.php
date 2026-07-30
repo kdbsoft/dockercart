@@ -239,21 +239,36 @@ class ModelCatalogProduct extends Model {
 						}
 					}
 
+					// Build color_code lookup from configurable_options values
+					$color_code_map = array();
+					foreach ($product_data['configurable_options'] as $axis) {
+						foreach ($axis['values'] as $vv) {
+							if (!empty($vv['color_code'])) {
+								$color_code_map[(int)$vv['option_value_id']] = $vv['color_code'];
+							}
+						}
+					}
+
 					foreach ($product_data['configurable_options'] as $axis) {
 						$oid = (int)$axis['option_id'];
 						if (!empty($best_variant[$oid])) {
 							$values = array();
 							foreach ($best_variant[$oid] as $ovid => $bv) {
-								$values[] = array(
+								$val = array(
 									'option_value_id' => $ovid,
 									'name'            => $bv['name'],
 									'variant_id'      => $bv['variant_id'],
 									'image'           => $bv['image'],
 								);
+								if (isset($color_code_map[$ovid])) {
+									$val['color_code'] = $color_code_map[$ovid];
+								}
+								$values[] = $val;
 							}
 							$swatches[$oid] = array(
 								'option_id' => $oid,
 								'name'      => $axis['name'],
+								'type'      => $axis['type'] ?? 'select',
 								'values'    => $values,
 							);
 						}
