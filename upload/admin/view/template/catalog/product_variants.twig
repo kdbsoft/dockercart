@@ -116,9 +116,18 @@ function renderAxesSelector(productId, json) {
 	}
 
 	html += '</div>';
+	if (axes.length >= 3) {
+		html += '<p class="text-muted" style="margin-top:6px;font-size:12px"><i data-lucide="info" width="12" height="12"></i> {{ text_max_axes_reached|e("js") }}</p>';
+	}
+
 	section.html(html);
 	lucide.createIcons();
-	DcxTreeSelect.init();
+
+	if (axes.length >= 3) {
+		section.find('.dc-opt-add-tree').hide();
+	} else {
+		DcxTreeSelect.init();
+	}
 
 	var $axisTree = section.find('.dcx-tree-select');
 	if ($axisTree.length) {
@@ -159,6 +168,11 @@ function addConfigurableAxe(productId, optionId) {
 	});
 
 	if (currentIds.indexOf(optionId) >= 0) {
+		return;
+	}
+
+	if (currentIds.length >= 3) {
+		showToast('{{ error_max_axes|e("js") }}', 'error');
 		return;
 	}
 
@@ -249,7 +263,7 @@ function renderVariantMatrix(productId, json) {
 	html += '<table class="table table-bordered table-hover dc-variant-table" id="dc-variant-table">';
 	html += '<thead><tr>';
 
-	html += '<th class="dc-col-sku dc-th-sku">{{ column_sku|e("js") }}</th>';
+	html += '<th class="dc-col-sku dc-th-sku">{{ column_model|e("js") }}</th>';
 
 	for (var a = 0; a < axes.length; a++) {
 		html += '<th class="dc-th-axis">' + axes[a].name + '</th>';
@@ -288,15 +302,18 @@ function buildVariantRow(productId, variant, axes, defaultVariantId) {
 	var isNew = variantId === 0;
 	var optionValues = {};
 	var cgHasPrices = variant.customer_group_prices && variant.customer_group_prices.length;
-	var hasArticles = variant.upc || variant.ean || variant.mpn;
+	var hasArticles = variant.sku || variant.upc || variant.ean || variant.mpn;
 	var hasSpecials = variant.variant_specials && variant.variant_specials.length;
+	var hasDiscounts = variant.variant_discounts && variant.variant_discounts.length;
 	var articlesVisible = hasArticles;
 	var cgVisible = cgHasPrices;
 	var specialsVisible = hasSpecials;
-	var subrowVisible = articlesVisible || cgVisible || specialsVisible;
+	var discountsVisible = hasDiscounts;
+	var subrowVisible = articlesVisible || cgVisible || specialsVisible || discountsVisible;
 	var artBtnClass = articlesVisible ? 'btn-primary' : 'btn-default';
 	var cgBtnClass = cgVisible ? 'btn-primary' : 'btn-default';
 	var specialBtnClass = specialsVisible ? 'btn-primary' : 'btn-default';
+	var discountBtnClass = discountsVisible ? 'btn-primary' : 'btn-default';
 
 	if (variant.values) {
 		for (var j = 0; j < variant.values.length; j++) {
@@ -310,7 +327,7 @@ function buildVariantRow(productId, variant, axes, defaultVariantId) {
 
 	var html = '<tr id="dc-variant-row-' + rowIdx + '" class="' + rowClasses + '" data-variant-id="' + variantId + '" data-row-idx="' + rowIdx + '">';
 
-	html += '<td class="dc-col-sku"><div style="display:flex;gap:4px;align-items:center"><input type="text" class="form-control input-sm dc-variant-sku" value="' + (variant.sku || '') + '" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:90px"/><button type="button" class="btn ' + artBtnClass + ' btn-xs dc-articles-toggle" onclick="toggleVariantArticles(' + rowIdx + ')" title="{{ entry_variant_articles|e("js") }}"><i data-lucide="scan-line"></i></button></div></td>';
+	html += '<td class="dc-col-sku"><div style="display:flex;gap:4px;align-items:center"><input type="text" class="form-control input-sm dc-variant-model" value="' + (variant.model || '') + '" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:90px"/><button type="button" class="btn ' + artBtnClass + ' btn-xs dc-articles-toggle" onclick="toggleVariantArticles(' + rowIdx + ')" title="{{ entry_variant_articles|e("js") }}"><i data-lucide="scan-line"></i></button></div></td>';
 
 	for (var a = 0; a < axes.length; a++) {
 		var axeOptionId = axes[a].option_id;
@@ -354,11 +371,13 @@ function buildVariantRow(productId, variant, axes, defaultVariantId) {
 	html += '<button type="button" class="dc-subrow-tab' + (articlesVisible ? ' dc-subrow-tab--active' : '') + '" data-tab="articles" data-row="' + rowIdx + '"><i data-lucide="scan-line"></i> {{ entry_variant_articles|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
 	html += '<button type="button" class="dc-subrow-tab' + (cgVisible ? ' dc-subrow-tab--active' : '') + '" data-tab="cg" data-row="' + rowIdx + '"><i data-lucide="users"></i> {{ entry_cg_prices|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
 	html += '<button type="button" class="dc-subrow-tab' + (specialsVisible ? ' dc-subrow-tab--active' : '') + '" data-tab="specials" data-row="' + rowIdx + '"><i data-lucide="star"></i> {{ entry_special|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
+	html += '<button type="button" class="dc-subrow-tab' + (discountsVisible ? ' dc-subrow-tab--active' : '') + '" data-tab="discounts" data-row="' + rowIdx + '"><i data-lucide="percent"></i> {{ entry_discount|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
 	html += '<button type="button" class="dc-subrow-close" onclick="closeSubrow(' + rowIdx + ')" title="{{ button_close|e("js") }}"><i data-lucide="x"></i></button>';
 	html += '</div>';
 
 	html += '<div class="dc-subrow-panel' + (articlesVisible ? ' dc-subrow-panel--active' : '') + '" id="dc-panel-articles-' + rowIdx + '"' + (articlesVisible ? '' : ' style="display:none"') + '>';
 	html += '<div class="dc-subrow-fields">';
+	html += '<label><span><i data-lucide="package" width="12" height="12"></i> {{ entry_sku|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-sku-article" value="' + (variant.sku || '') + '" placeholder="SKU" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
 	html += '<label><span><i data-lucide="scan-line" width="12" height="12"></i> {{ entry_upc|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-upc" value="' + (variant.upc || '') + '" placeholder="UPC" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
 	html += '<label><span><i data-lucide="hash" width="12" height="12"></i> {{ entry_ean|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-ean" value="' + (variant.ean || '') + '" placeholder="EAN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
 	html += '<label><span><i data-lucide="tag" width="12" height="12"></i> {{ entry_mpn|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-mpn" value="' + (variant.mpn || '') + '" placeholder="MPN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
@@ -427,6 +446,43 @@ function buildVariantRow(productId, variant, axes, defaultVariantId) {
 	html += '<button type="button" class="btn btn-primary btn-xs dc-special-add-btn" onclick="addVariantSpecialRow(' + rowIdx + ')"><i data-lucide="circle-plus"></i> {{ button_special_add|e("js") }}</button>';
 	html += '</div>';
 
+	html += '<div class="dc-subrow-panel' + (discountsVisible ? ' dc-subrow-panel--active' : '') + '" id="dc-panel-discounts-' + rowIdx + '"' + (discountsVisible ? '' : ' style="display:none"') + '>';
+	html += '<div class="dc-special-header">';
+	html += '<span class="dc-special-header-group">{{ entry_cg_customer_group|e("js") }}</span>';
+	html += '<span class="dc-special-header-quantity">{{ entry_quantity|e("js") }}</span>';
+	html += '<span class="dc-special-header-priority">{{ entry_priority|e("js") }}</span>';
+	html += '<span class="dc-special-header-price">{{ entry_price|e("js") }}</span>';
+	html += '<span class="dc-special-header-date">{{ entry_date_start|e("js") }}</span>';
+	html += '<span class="dc-special-header-date">{{ entry_date_end|e("js") }}</span>';
+	html += '<span class="dc-special-header-renew">{{ entry_auto_renew|e("js") }}</span>';
+	html += '<span class="dc-special-header-action"></span>';
+	html += '</div>';
+	html += '<div class="dc-special-prices" id="dc-discount-prices-' + rowIdx + '">';
+
+	if (variant.variant_discounts) {
+		for (var d = 0; d < variant.variant_discounts.length; d++) {
+			var disc = variant.variant_discounts[d];
+			html += '<div class="dc-special-row">';
+			html += '<select class="form-control input-sm dc-discount-group" onchange="scheduleAutoSave(' + rowIdx + ')">';
+			{% for customer_group in customer_groups %}
+			html += '<option value="{{ customer_group.customer_group_id }}"' + ({{ customer_group.customer_group_id }} == disc.customer_group_id ? ' selected="selected"' : '') + '>{{ customer_group.name|escape("js") }}</option>';
+			{% endfor %}
+			html += '</select>';
+			html += '<input type="number" class="form-control input-sm dc-discount-quantity" value="' + (disc.quantity || '1') + '" placeholder="{{ entry_quantity|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:70px"/>';
+			html += '<input type="number" step="0.0001" class="form-control input-sm dc-discount-priority" value="' + (disc.priority || '1') + '" placeholder="{{ entry_priority|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:70px"/>';
+			html += '<input type="number" step="0.0001" class="form-control input-sm dc-discount-price" value="' + (disc.price || '') + '" placeholder="{{ entry_price|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:100px"/>';
+			html += '<input type="date" class="form-control input-sm dc-discount-date-start" value="' + (disc.date_start && disc.date_start != '0000-00-00' ? disc.date_start : '') + '" placeholder="{{ entry_date_start|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:120px"/>';
+			html += '<input type="date" class="form-control input-sm dc-discount-date-end" value="' + (disc.date_end && disc.date_end != '0000-00-00' ? disc.date_end : '') + '" placeholder="{{ entry_date_end|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:120px"/>';
+			html += '<input type="checkbox" class="dc-discount-auto-renew"' + (disc.auto_renew ? ' checked="checked"' : '') + ' onchange="scheduleAutoSave(' + rowIdx + ')"/>';
+			html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-special-row\').remove();updateSubrowBadges(' + rowIdx + ');scheduleAutoSave(' + rowIdx + ')"><i data-lucide="circle-minus"></i></button>';
+			html += '</div>';
+		}
+	}
+
+	html += '</div>';
+	html += '<button type="button" class="btn btn-primary btn-xs dc-discount-add-btn" onclick="addVariantDiscountRow(' + rowIdx + ')"><i data-lucide="circle-plus"></i> {{ button_discount_add|e("js") }}</button>';
+	html += '</div>';
+
 	html += '</div></td></tr>';
 
 	return html;
@@ -439,7 +495,7 @@ function addVariantRow(productId) {
 	var rowIdx = ++dcVariantRowIdx;
 	var html = '<tr id="dc-variant-row-' + rowIdx + '" class="dc-state-dirty dc-new" data-variant-id="0" data-row-idx="' + rowIdx + '">';
 
-	html += '<td class="dc-col-sku"><div style="display:flex;gap:4px;align-items:center"><input type="text" class="form-control input-sm dc-variant-sku" value="" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:90px"/><button type="button" class="btn btn-default btn-xs dc-articles-toggle" onclick="toggleVariantArticles(' + rowIdx + ')" title="{{ entry_variant_articles|e("js") }}"><i data-lucide="scan-line"></i></button></div></td>';
+	html += '<td class="dc-col-sku"><div style="display:flex;gap:4px;align-items:center"><input type="text" class="form-control input-sm dc-variant-model" value="" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:90px"/><button type="button" class="btn btn-default btn-xs dc-articles-toggle" onclick="toggleVariantArticles(' + rowIdx + ')" title="{{ entry_variant_articles|e("js") }}"><i data-lucide="scan-line"></i></button></div></td>';
 
 	for (var a = 0; a < axes.length; a++) {
 		html += '<td><select class="form-control input-sm dc-variant-value" data-option-id="' + axes[a].option_id + '" onchange="onVariantAxisChange(' + rowIdx + ')"><option value="">{{ text_select|e("js") }}</option></select></td>';
@@ -472,11 +528,13 @@ function addVariantRow(productId) {
 	html += '<button type="button" class="dc-subrow-tab dc-subrow-tab--active" data-tab="articles" data-row="' + rowIdx + '"><i data-lucide="scan-line"></i> {{ entry_variant_articles|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
 	html += '<button type="button" class="dc-subrow-tab" data-tab="cg" data-row="' + rowIdx + '"><i data-lucide="users"></i> {{ entry_cg_prices|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
 	html += '<button type="button" class="dc-subrow-tab" data-tab="specials" data-row="' + rowIdx + '"><i data-lucide="star"></i> {{ entry_special|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
+	html += '<button type="button" class="dc-subrow-tab" data-tab="discounts" data-row="' + rowIdx + '"><i data-lucide="percent"></i> {{ entry_discount|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
 	html += '<button type="button" class="dc-subrow-close" onclick="closeSubrow(' + rowIdx + ')" title="{{ button_close|e("js") }}"><i data-lucide="x"></i></button>';
 	html += '</div>';
 
 	html += '<div class="dc-subrow-panel dc-subrow-panel--active" id="dc-panel-articles-' + rowIdx + '">';
 	html += '<div class="dc-subrow-fields">';
+	html += '<label><span><i data-lucide="package" width="12" height="12"></i> {{ entry_sku|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-sku-article" value="" placeholder="SKU" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
 	html += '<label><span><i data-lucide="scan-line" width="12" height="12"></i> {{ entry_upc|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-upc" value="" placeholder="UPC" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
 	html += '<label><span><i data-lucide="hash" width="12" height="12"></i> {{ entry_ean|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-ean" value="" placeholder="EAN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
 	html += '<label><span><i data-lucide="tag" width="12" height="12"></i> {{ entry_mpn|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-mpn" value="" placeholder="MPN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
@@ -505,6 +563,21 @@ function addVariantRow(productId) {
 	html += '</div>';
 	html += '<div class="dc-special-prices" id="dc-special-prices-' + rowIdx + '"></div>';
 	html += '<button type="button" class="btn btn-primary btn-xs dc-special-add-btn" onclick="addVariantSpecialRow(' + rowIdx + ')"><i data-lucide="circle-plus"></i> {{ button_special_add|e("js") }}</button>';
+	html += '</div>';
+
+	html += '<div class="dc-subrow-panel" id="dc-panel-discounts-' + rowIdx + '" style="display:none">';
+	html += '<div class="dc-special-header">';
+	html += '<span class="dc-special-header-group">{{ entry_cg_customer_group|e("js") }}</span>';
+	html += '<span class="dc-special-header-quantity">{{ entry_quantity|e("js") }}</span>';
+	html += '<span class="dc-special-header-priority">{{ entry_priority|e("js") }}</span>';
+	html += '<span class="dc-special-header-price">{{ entry_price|e("js") }}</span>';
+	html += '<span class="dc-special-header-date">{{ entry_date_start|e("js") }}</span>';
+	html += '<span class="dc-special-header-date">{{ entry_date_end|e("js") }}</span>';
+	html += '<span class="dc-special-header-renew">{{ entry_auto_renew|e("js") }}</span>';
+	html += '<span class="dc-special-header-action"></span>';
+	html += '</div>';
+	html += '<div class="dc-special-prices" id="dc-discount-prices-' + rowIdx + '"></div>';
+	html += '<button type="button" class="btn btn-primary btn-xs dc-discount-add-btn" onclick="addVariantDiscountRow(' + rowIdx + ')"><i data-lucide="circle-plus"></i> {{ button_discount_add|e("js") }}</button>';
 	html += '</div>';
 
 	html += '</div></td></tr>';
@@ -596,11 +669,12 @@ function updateSubrowBadges(rowIdx) {
 	var $subrow = $('#dc-variant-cg-row-' + rowIdx);
 
 	var articles = 0;
-	$row.find('.dc-variant-upc, .dc-variant-ean, .dc-variant-mpn').each(function() {
+	$row.find('.dc-variant-sku-article, .dc-variant-upc, .dc-variant-ean, .dc-variant-mpn').each(function() {
 		if ($(this).val()) articles++;
 	});
 	var cgCount = $subrow.find('#dc-cg-prices-' + rowIdx + ' .dc-cg-row').length;
 	var specCount = $subrow.find('#dc-special-prices-' + rowIdx + ' .dc-special-row').length;
+	var discCount = $subrow.find('#dc-discount-prices-' + rowIdx + ' .dc-special-row').length;
 
 	$row.find('.dc-articles-toggle').toggleClass('btn-primary', articles > 0).toggleClass('btn-default', articles === 0);
 	$row.find('.dc-cg-toggle').toggleClass('btn-primary', cgCount > 0).toggleClass('btn-default', cgCount === 0);
@@ -609,7 +683,7 @@ function updateSubrowBadges(rowIdx) {
 	var $tabs = $subrow.find('.dc-subrow-tab');
 	$tabs.each(function() {
 		var t = $(this).data('tab');
-		var count = t === 'articles' ? articles : (t === 'cg' ? cgCount : specCount);
+		var count = t === 'articles' ? articles : (t === 'cg' ? cgCount : (t === 'specials' ? specCount : discCount));
 		var $badge = $(this).find('.dc-subrow-tab__badge');
 		if (count > 0) { $badge.text(count).show(); } else { $badge.hide(); }
 	});
@@ -645,6 +719,26 @@ function addVariantSpecialRow(rowIdx) {
 	html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-special-row\').remove();updateSubrowBadges(' + rowIdx + ');scheduleAutoSave(' + rowIdx + ')"><i data-lucide="circle-minus"></i></button>';
 	html += '</div>';
 	$('#dc-special-prices-' + rowIdx).append(html);
+	lucide.createIcons();
+	updateSubrowBadges(rowIdx);
+}
+
+function addVariantDiscountRow(rowIdx) {
+	var html = '<div class="dc-special-row">';
+	html += '<select class="form-control input-sm dc-discount-group" onchange="scheduleAutoSave(' + rowIdx + ')">';
+	{% for customer_group in customer_groups %}
+	html += '<option value="{{ customer_group.customer_group_id }}">{{ customer_group.name|escape("js") }}</option>';
+	{% endfor %}
+	html += '</select>';
+	html += '<input type="number" class="form-control input-sm dc-discount-quantity" value="1" placeholder="{{ entry_quantity|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:70px"/>';
+	html += '<input type="number" step="0.0001" class="form-control input-sm dc-discount-priority" value="1" placeholder="{{ entry_priority|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:70px"/>';
+	html += '<input type="number" step="0.0001" class="form-control input-sm dc-discount-price" placeholder="{{ entry_price|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:100px"/>';
+	html += '<input type="date" class="form-control input-sm dc-discount-date-start" placeholder="{{ entry_date_start|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:120px"/>';
+	html += '<input type="date" class="form-control input-sm dc-discount-date-end" placeholder="{{ entry_date_end|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:120px"/>';
+	html += '<input type="checkbox" class="dc-discount-auto-renew" onchange="scheduleAutoSave(' + rowIdx + ')"/>';
+	html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-special-row\').remove();updateSubrowBadges(' + rowIdx + ');scheduleAutoSave(' + rowIdx + ')"><i data-lucide="circle-minus"></i></button>';
+	html += '</div>';
+	$('#dc-discount-prices-' + rowIdx).append(html);
 	lucide.createIcons();
 	updateSubrowBadges(rowIdx);
 }
@@ -729,7 +823,8 @@ function saveVariantRow(rowIdx, onSuccess) {
 	var data = {
 		product_id: pid,
 		variant_id: vid,
-		sku: row.find('.dc-variant-sku').val() || '',
+		model: row.find('.dc-variant-model').val() || '',
+		sku: cgRow.find('.dc-variant-sku-article').val() || '',
 		upc: cgRow.find('.dc-variant-upc').val() || '',
 		ean: cgRow.find('.dc-variant-ean').val() || '',
 		mpn: cgRow.find('.dc-variant-mpn').val() || '',
@@ -774,6 +869,29 @@ function saveVariantRow(rowIdx, onSuccess) {
 		}
 	});
 	data.variant_specials = specialPrices;
+
+	var discountPrices = [];
+	$('#dc-discount-prices-' + rowIdx + ' .dc-special-row').each(function() {
+		var groupId = $(this).find('.dc-discount-group').val();
+		var price = $(this).find('.dc-discount-price').val();
+		var quantity = $(this).find('.dc-discount-quantity').val();
+		var priority = $(this).find('.dc-discount-priority').val();
+		var dateStart = $(this).find('.dc-discount-date-start').val();
+		var dateEnd = $(this).find('.dc-discount-date-end').val();
+		var autoRenew = $(this).find('.dc-discount-auto-renew').is(':checked') ? 1 : 0;
+		if (groupId && price !== '' && price !== undefined) {
+			discountPrices.push({
+				customer_group_id: groupId,
+				quantity: quantity || 1,
+				price: price,
+				priority: priority || 1,
+				date_start: dateStart || '0000-00-00',
+				date_end: dateEnd || '0000-00-00',
+				auto_renew: autoRenew
+			});
+		}
+	});
+	data.variant_discounts = discountPrices;
 
 	$.ajax({
 		url: 'index.php?route=catalog/product_configurable/saveVariant&user_token={{ user_token }}',
@@ -1100,6 +1218,7 @@ $(window).on('beforeunload', function() {
 .dc-special-header { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; font-size: 11px; font-weight: 600; color: #6c757d; }
 .dc-special-header-group { width: 140px; flex-shrink: 0; }
 .dc-special-header-priority { width: 70px; flex-shrink: 0; }
+.dc-special-header-quantity { width: 70px; flex-shrink: 0; }
 .dc-special-header-price { width: 100px; flex-shrink: 0; }
 .dc-special-header-date { width: 120px; flex-shrink: 0; }
 .dc-special-header-renew { width: 50px; flex-shrink: 0; text-align: center; }
