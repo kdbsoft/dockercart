@@ -793,6 +793,28 @@ div.dcx-field.required > .dcx-label:before {
     flex-direction: column;
     gap: 6px;
 }
+.dcx-sidebar-card__field-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.dcx-sidebar-card__value {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+    word-break: break-word;
+}
+.dcx-sidebar-card__divider {
+    border-top: 1px solid var(--dc-border-soft);
+    margin: 4px 0;
+}
+.dcx-sidebar-card__address {
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--dc-text-muted);
+    white-space: pre-line;
+}
 .dcx-sidebar-card__label {
     font-size: 12px;
     font-weight: 500;
