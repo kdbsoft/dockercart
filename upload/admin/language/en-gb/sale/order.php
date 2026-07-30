@@ -195,6 +195,7 @@ $_['text_edit_mode']             = 'Edit Mode';
 $_['text_view_customer']         = 'View Customer Profile';
 $_['text_next']                  = 'Next';
 $_['text_previous']              = 'Previous';
+$_['text_load_more']             = 'Load more';
 $_['text_print_date']            = 'Print Date';
 $_['text_print']                 = 'Print';
 
@@ -211,5 +212,8 @@ $_['text_payer_address']         = 'Billing Address';
 $_['text_same_as_billing']       = 'Same as billing address';
 $_['text_same_as_shipping']      = 'Same as shipping address';
 $_['text_browser_info']          = 'Browser & Device';
+$_['text_stock']                 = 'Stock';
+$_['text_description']           = 'Description';
+$_['text_attributes']            = 'Attributes';
 $_['text_show_browser_info']     = 'Show browser info';
 $_['text_hide_browser_info']     = 'Hide browser info';

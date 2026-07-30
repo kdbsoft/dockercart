@@ -181,6 +181,7 @@ $_['text_edit_mode']             = 'Режим редактирования';
 $_['text_view_customer']         = 'Просмотр профиля клиента';
 $_['text_next']                  = 'Вперед';
 $_['text_previous']              = 'Назад';
+$_['text_load_more']             = 'Загрузить ещё';
 $_['text_print_date']            = 'Дата печати';
 $_['text_print']                 = 'Печать';
 
@@ -193,6 +194,9 @@ $_['text_payer_address']         = 'Адрес плательщика';
 $_['text_same_as_billing']       = 'Совпадает с адресом плательщика';
 $_['text_same_as_shipping']      = 'Совпадает с адресом доставки';
 $_['text_browser_info']          = 'Браузер и устройство';
+$_['text_stock']                 = 'Остаток';
+$_['text_description']           = 'Описание';
+$_['text_attributes']            = 'Атрибуты';
 $_['text_search_product']        = 'Поиск товара по названию...';
 $_['text_edit_hint']             = 'Нажмите на поля для редактирования';
 $_['text_more_actions']          = 'Больше действий';
