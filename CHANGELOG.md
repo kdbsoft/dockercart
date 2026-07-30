@@ -1,3 +1,32 @@
+## [2.4.0](https://github.com/kdbsoft/dockercart/compare/v2.3.0...v2.4.0) (2026-07-30)
+
+### Features
+
+* **api:** remove old OpenCart API framework ([9cb53e3](https://github.com/kdbsoft/dockercart/commit/9cb53e365e8079b0029c3449c00c1a084c4b5078))
+* **dashboard:** enhance recent orders with product info and tracking ([9122b44](https://github.com/kdbsoft/dockercart/commit/9122b445ab889e72da9304325dc3e17addcc6e38))
+* **meta:** update meta description dynamically on variant selection ([28b6678](https://github.com/kdbsoft/dockercart/commit/28b667884b92ec1e53bec807eb1b5d54e6659287))
+* **migration:** add variant discount and model migrations ([9f0c2d2](https://github.com/kdbsoft/dockercart/commit/9f0c2d2dd1a4760341ae200b1812a9078f708a02))
+* **order-detail:** add product card modal, product search, and timeline pagination ([8ec26ba](https://github.com/kdbsoft/dockercart/commit/8ec26ba711b83c1dbaab52c2c69d8c2820040073))
+* **order:** add color option type support in order info ([b88ec20](https://github.com/kdbsoft/dockercart/commit/b88ec20cf6bdb92d8fdc58fd5ae7796a46180844))
+* **order:** add order detail view with timeline ([37d6466](https://github.com/kdbsoft/dockercart/commit/37d646603499367e099952024a4abe85a7f7391c))
+* **order:** improve inline editing with save state and quantity format ([dd60ce9](https://github.com/kdbsoft/dockercart/commit/dd60ce9e85cfe20de8ebfa8ddf14f401bd137d89))
+* **order:** sync api cart before saving inline order changes ([89ec34d](https://github.com/kdbsoft/dockercart/commit/89ec34d225afad35d45fbb3462eb10a94f10c80d))
+* **product:** add configurable variant stock validation and UI ([ff6ae7d](https://github.com/kdbsoft/dockercart/commit/ff6ae7d55d790b3b28c54ef5aa9d6c51740d5daa))
+* **swatch:** render color circle swatches on product cards ([f7da953](https://github.com/kdbsoft/dockercart/commit/f7da953e52ec4623ab379a4f3c76d5955c787324))
+* **ui:** add discount tab, model column, max axes limit in product admin ([3e6d7d0](https://github.com/kdbsoft/dockercart/commit/3e6d7d08fcf954a5333dc621be803d32e732f4c2))
+* **variant:** add quantity discounts and model field support ([b3da270](https://github.com/kdbsoft/dockercart/commit/b3da270ce278be8017b75bd56b2ff44aa00821cc))
+* **variant:** add variant_id and variant_sku to order and cart responses ([c727687](https://github.com/kdbsoft/dockercart/commit/c727687d6a1ffa6311c8e21fca3d0119a4d955e5))
+* **variant:** allow configurable products in cart and add variant data to checkout ([aa18a8c](https://github.com/kdbsoft/dockercart/commit/aa18a8caca529455047e771d9a8d2ad97c722215))
+
+### Bug Fixes
+
+* **admin:** add table-bordered class to admin search table ([8993d25](https://github.com/kdbsoft/dockercart/commit/8993d254a18eaa4fb0d106203ae2d6849da2d1be))
+* **cart:** remove debug logging from batch add endpoint ([7253d50](https://github.com/kdbsoft/dockercart/commit/7253d5092a9f3abfdec01d3d4d148b6f4a0e639e))
+* **cart:** stop clearing shipping/payment methods on add to cart ([8a9a435](https://github.com/kdbsoft/dockercart/commit/8a9a43509d233f8cf40a93f798c02d0a0381fac5))
+* **model/sale:** handle null reward value in order product insert ([537993f](https://github.com/kdbsoft/dockercart/commit/537993fa4f4126e8417483d34bdd0274fbffdf55))
+* **order-detail:** normalize product description in card modal ([65938fc](https://github.com/kdbsoft/dockercart/commit/65938fc4b005d6b9918e542d28ac6cff556b5015))
+* **ru-ua:** correct icon translation and remove trailing blank lines ([1625264](https://github.com/kdbsoft/dockercart/commit/1625264be1ae1a0663da57f40a4dc0f6f2d88105))
+
 ## [2.3.0](https://github.com/kdbsoft/dockercart/compare/v2.2.0...v2.3.0) (2026-07-29)
 
 ### Features
