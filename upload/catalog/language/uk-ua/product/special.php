@@ -23,8 +23,8 @@ $_['text_price_asc']    = 'Ціна (низька → висока)';
 $_['text_price_desc']   = 'Ціна (висока → низька)';
 $_['text_rating_asc']   = 'Рейтинг (найнижчий)';
 $_['text_rating_desc']  = 'Рейтинг (найвищий)';
-$_['text_model_asc']    = 'Модель (А - Я)';
-$_['text_model_desc']   = 'Модель (Я - А)';
+$_['text_model_asc']    = 'Код товару (А - Я)';
+$_['text_model_desc']   = 'Код товару (Я - А)';
 $_['text_limit']        = 'Показати:';
 // New arrivals / specials additions
 $_['text_new_arrivals'] = 'Новинки';

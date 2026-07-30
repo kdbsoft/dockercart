@@ -97,7 +97,7 @@ $_['button_apply']                  = 'Apply';
 $_['button_category_add']           = 'Add Category';
 $_['button_order']                  = 'View Order';
 $_['button_buy']                    = 'Buy';
-$_['button_developer']              = 'Developer Setting'; 
+$_['button_developer']              = 'Developer Setting';
 
 // Tab
 $_['tab_affiliate']                 = 'Affiliate';
@@ -151,12 +151,12 @@ $_['tab_links_group']               = 'Links';
 $_['tab_images_group']              = 'Images and Video';
 $_['tab_params_group']              = 'Parameters';
 $_['tab_main_group']                = 'Main';
-$_['tab_articles_group']            = 'Articles';
+$_['tab_articles_group']            = 'Product Codes';
 $_['tab_prices_group']              = 'Prices';
 $_['tab_stock_group']               = 'Stock';
 $_['tab_dimensions_group']          = 'Dimensions';
-$_['button_show_articles']          = 'Show all articles';
-$_['button_hide_articles']          = 'Hide empty articles';
+$_['button_show_articles']          = 'Show all Codes';
+$_['button_hide_articles']          = 'Hide empty Codes';
 
 // Error
 $_['error_exception']               = 'Error Code(%s): %s in %s on line %s';
