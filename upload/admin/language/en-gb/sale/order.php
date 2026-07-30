@@ -31,6 +31,7 @@ $_['text_panel_order_info']      = 'Order Information';
 $_['text_panel_customer']        = 'Customer';
 $_['text_panel_order_tools']     = 'Order Actions';
 $_['text_panel_order_contents']  = 'Order Contents';
+$_['text_panel_totals']          = 'Totals';
 $_['text_payment_address']       = 'Payment Address';
 $_['text_shipping_address']      = 'Shipping Address';
 $_['text_comment']               = 'Customer Comment';
@@ -184,3 +185,31 @@ $_['error_warning']              = 'Warning: Please check the form carefully for
 $_['error_permission']           = 'Warning: You do not have permission to modify orders!';
 $_['error_action']               = 'Warning: Could not complete this action!';
 $_['error_filetype']             = 'Invalid file type!';
+$_['error_comment']              = 'Please enter a comment!';
+$_['error_order_status']         = 'Please select an order status!';
+
+$_['text_timeline']              = 'Timeline';
+$_['text_add_note']              = 'Add Note';
+$_['text_note']                  = 'Note';
+$_['text_edit_mode']             = 'Edit Mode';
+$_['text_view_customer']         = 'View Customer Profile';
+$_['text_next']                  = 'Next';
+$_['text_previous']              = 'Previous';
+$_['text_print_date']            = 'Print Date';
+$_['text_print']                 = 'Print';
+
+$_['button_print']               = 'Print';
+
+$_['text_search_product']        = 'Search product by name...';
+$_['text_edit_hint']             = 'Click fields to edit them inline';
+$_['text_more_actions']          = 'More actions';
+$_['text_discount']              = 'Discount';
+$_['text_items']                 = 'items';
+$_['text_buyer']                 = 'Buyer';
+
+$_['text_payer_address']         = 'Billing Address';
+$_['text_same_as_billing']       = 'Same as billing address';
+$_['text_same_as_shipping']      = 'Same as shipping address';
+$_['text_browser_info']          = 'Browser & Device';
+$_['text_show_browser_info']     = 'Show browser info';
+$_['text_hide_browser_info']     = 'Hide browser info';

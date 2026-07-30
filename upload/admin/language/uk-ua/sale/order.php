@@ -105,6 +105,7 @@ $_['text_panel_order_info'] = 'Інформація про замовлення'
 $_['text_panel_customer'] = 'Покупець';
 $_['text_panel_order_tools'] = 'Дії по замовленню';
 $_['text_panel_order_contents'] = 'Склад замовлення';
+$_['text_panel_totals']          = 'Разом';
 $_['text_order_detail'] = 'Деталі замовлення';
 $_['text_order_id'] = 'Номер замовлення:';
 $_['text_payment_address'] = 'Адреса для оплати';
@@ -173,3 +174,31 @@ $_['text_enabled']               = 'Увімкнено';
 $_['text_disabled']              = 'Вимкнено';
 
 $_['text_history_subtitle'] = 'Відстежуйте зміни статусу та нотатки';
+
+$_['text_timeline']              = 'Хронологія';
+$_['text_add_note']              = 'Додати нотатку';
+$_['text_note']                  = 'Нотатка';
+$_['text_edit_mode']             = 'Режим редагування';
+$_['text_view_customer']         = 'Перегляд профілю клієнта';
+$_['text_next']                  = 'Вперед';
+$_['text_previous']              = 'Назад';
+$_['text_print_date']            = 'Дата друку';
+$_['text_print']                 = 'Друк';
+
+$_['button_print']               = 'Друк';
+
+$_['error_comment']              = 'Будь ласка, введіть коментар!';
+$_['error_order_status']         = 'Будь ласка, виберіть статус замовлення!';
+
+$_['text_payer_address']         = 'Адреса платника';
+$_['text_same_as_billing']       = 'Збігається з адресою платника';
+$_['text_same_as_shipping']      = 'Збігається з адресою доставки';
+$_['text_browser_info']          = 'Браузер та пристрій';
+$_['text_search_product']        = 'Пошук товару за назвою...';
+$_['text_edit_hint']             = 'Натисніть на поля для редагування';
+$_['text_more_actions']          = 'Більше дій';
+$_['text_discount']              = 'Знижка';
+$_['text_items']                 = 'товарів';
+$_['text_buyer']                 = 'Покупець';
+$_['text_show_browser_info']     = 'Показати інформацію про браузер';
+$_['text_hide_browser_info']     = 'Приховати інформацію про браузер';
