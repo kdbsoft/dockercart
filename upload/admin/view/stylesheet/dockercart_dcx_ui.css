@@ -113,6 +113,7 @@
     gap: 18px;
 }
 .dcx-fields--row {
+    display: flex;
     flex-direction: row;
     flex-wrap: wrap;
     margin-top: 12px;
