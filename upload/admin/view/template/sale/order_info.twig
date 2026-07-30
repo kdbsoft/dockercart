@@ -72,7 +72,7 @@
                     <input type="hidden" name="product[{{ inline_product_row }}][option][variant_id]" value="{{ product.variant_id }}" />
                     {% endif %}
                   </td>
-                  <td class="text-center"><input type="text" name="product[{{ inline_product_row }}][quantity]" value="{{ product.quantity }}" class="form-control input-sm order-product-input gt-no-translate" data-gt-inline-ignore="1" /></td>
+                  <td class="text-center"><input type="text" name="product[{{ inline_product_row }}][quantity]" value="{{ product.quantity|number_format(2, '.', '') }}" class="form-control input-sm order-product-input gt-no-translate" data-gt-inline-ignore="1" /></td>
                   <td class="text-center"><input type="text" name="product[{{ inline_product_row }}][discount]" value="{{ product.discount_percent is defined ? product.discount_percent : 0 }}" class="form-control input-sm order-product-input gt-no-translate" data-gt-inline-ignore="1" /></td>
                   <td class="text-right">{{ product.price }}</td>
                   <td class="text-right">{{ product.total }}</td>
@@ -107,7 +107,7 @@
                   <input type="text" id="input-inline-product" class="form-control" placeholder="{{ entry_product_placeholder }}" />
                   <input type="hidden" id="input-inline-product-id" value="" />
                 </div>
-                <div class="dcx-field" style="max-width:70px;">
+                <div class="dcx-field" style="flex:0;min-width:55px;width:55px;">
                   <input type="text" id="input-inline-quantity" value="1" class="form-control gt-no-translate" data-gt-inline-ignore="1" />
                 </div>
                 <div class="dcx-field" style="flex:0;">
@@ -598,6 +598,8 @@
 
   var inlineRecalcTimer = null;
   var inlineDiscountPreviewTimer = null;
+  var inlineSaving = false;
+  var inlinePendingRecalc = null;
 
   function htmlDecode(value) {
     return $('<textarea/>').html(value || '').text();
@@ -750,7 +752,11 @@
         deferred.resolve(json || {});
       }
     }).fail(function(xhr, ajaxOptions, thrownError) {
-      deferred.reject(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+      if (thrownError === 'abort') {
+        deferred.reject('abort');
+      } else {
+        deferred.reject(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+      }
     });
 
     return deferred.promise();
@@ -772,7 +778,9 @@
 
   function showInlineAlert(type, text) {
     $('.alert-dismissible').remove();
-    $('#content > .container-fluid').prepend('<div class="alert alert-' + type + ' alert-dismissible"><i data-lucide="' + (type === 'danger' ? 'circle-alert' : 'circle-check') + '" width="16" height="16"></i> ' + text + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+    var alertHtml = '<div class="col-md-12 col-sm-12 col-lg-offset-1 col-lg-10 col-xl-offset-1 col-xl-10"><div class="alert alert-' + type + ' alert-dismissible"><i data-lucide="' + (type === 'danger' ? 'circle-alert' : 'circle-check') + '" width="16" height="16"></i> ' + text + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div></div>';
+    $('#content > .container-fluid > .row').prepend(alertHtml);
+    lucide.createIcons({ nodes: [document.querySelector('#content > .container-fluid > .row')] });
   }
 
   function inlineReindexCartRows() {
@@ -1487,6 +1495,7 @@
     var discounts = inlineCollectDiscounts();
 
     return inlineRecalculateCartPreview(false, {
+      skipCartReplace: true,
       couponCode: coupon,
       applyDiscountPreview: false
     }).then(function() {
@@ -1524,7 +1533,7 @@
       return inlineRequestDiscountPreview();
     }).done(function() {
       if (showSuccess) {
-        showInlineAlert('success', '{{ text_success|escape('js') }}');
+        showInlineAlert('success', '{{ text_order_saved|escape('js') }}');
       }
 
       if (reloadOnSuccess) {
@@ -1558,16 +1567,33 @@
 
     inlineReindexCartRows();
 
-    inlineRecalculateCartPreview(false).fail(function(error) {
-      showInlineAlert('danger', parseApiError(error));
+    if (inlinePendingRecalc) {
+      inlinePendingRecalc.abort();
+      inlinePendingRecalc = null;
+    }
+
+    inlinePendingRecalc = inlineRecalculateCartPreview(false).fail(function(error) {
+      if (error !== 'abort') {
+        showInlineAlert('danger', parseApiError(error));
+      }
+    }).always(function() {
+      inlinePendingRecalc = null;
     });
   });
 
   $('#inline-cart').on('keyup change', 'input[name$="[quantity]"]', function() {
     clearTimeout(inlineRecalcTimer);
     inlineRecalcTimer = setTimeout(function() {
-      inlineRecalculateCartPreview(false).fail(function(error) {
-        showInlineAlert('danger', parseApiError(error));
+      if (inlinePendingRecalc) {
+        inlinePendingRecalc.abort();
+        inlinePendingRecalc = null;
+      }
+      inlinePendingRecalc = inlineRecalculateCartPreview(false).fail(function(error) {
+        if (error !== 'abort') {
+          showInlineAlert('danger', parseApiError(error));
+        }
+      }).always(function() {
+        inlinePendingRecalc = null;
       });
     }, 400);
   });
@@ -1768,12 +1794,32 @@
   });
 
   $('#button-inline-save-items').on('click', function() {
+    if (inlineSaving) return;
+
     var $button = $(this);
 
-    $button.button('loading');
+    inlineSaving = true;
+    $button.prop('disabled', true).button('loading');
+    $('#inline-cart input[name$="[quantity]"]').prop('disabled', true);
+    $('#button-inline-add-product').prop('disabled', true);
+
+    var ajaxDone = false;
+
+    function reEnable() {
+      if (ajaxDone) return;
+      if ($.active > 0) return;
+      ajaxDone = true;
+      $(document).off('ajaxStop', reEnable);
+      inlineSaving = false;
+      $button.prop('disabled', false).button('reset');
+      $('#inline-cart input[name$="[quantity]"]').prop('disabled', false);
+      $('#button-inline-add-product').prop('disabled', false);
+    }
+
+    $(document).on('ajaxStop', reEnable);
 
     inlinePersistOrderChanges({
-      reloadOnSuccess: true,
+      reloadOnSuccess: false,
       showSuccess: true
     }).fail(function(error) {
       if (error && error.responseJSON && error.responseJSON.error) {
@@ -1781,8 +1827,6 @@
       } else {
         showInlineAlert('danger', parseApiError(error));
       }
-    }).always(function() {
-      $button.button('reset');
     });
   });
 
