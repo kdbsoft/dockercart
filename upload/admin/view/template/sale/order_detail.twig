@@ -62,11 +62,20 @@
 
         {# Products Panel #}
         <div class="dcx-shell">
-          <div class="dcx-panel">
+          <div class="dcx-panel" data-panel="order-products">
             <div class="dcx-panel-head">
               <div class="dcx-panel-head__icon"><i data-lucide="package" width="18" height="18"></i></div>
               <div>
                 <div class="dcx-panel-title">{{ text_panel_order_contents }}</div>
+              </div>
+              <a href="#" class="dcx-panel-edit-link" onclick="event.preventDefault(); togglePanelEditMode('order-products');"><i data-lucide="pencil" width="12" height="12"></i> {{ text_edit_order_contents }}</a>
+              <div class="dcx-panel-edit-actions">
+                <button type="button" class="btn btn-primary btn-xs" onclick="savePanelChanges('order-products')">
+                  <i data-lucide="check" width="13" height="13"></i> {{ button_save }}
+                </button>
+                <button type="button" class="btn btn-default btn-xs" onclick="togglePanelEditMode('order-products')">
+                  <i data-lucide="x" width="13" height="13"></i> {{ button_cancel }}
+                </button>
               </div>
             </div>
             <div class="dcx-panel-body dcx-panel-body--flush">
@@ -184,10 +193,19 @@
       <div class="col-md-12 col-sm-12 col-lg-4 col-xl-3">
 
         {# Buyer Card (customer + addresses) #}
-        <div class="dcx-sidebar-card">
+        <div class="dcx-sidebar-card" data-panel="buyer">
           <div class="dcx-sidebar-card__header">
             <div class="dcx-sidebar-card__header-icon"><i data-lucide="user" width="16" height="16"></i></div>
             <h3 class="dcx-sidebar-card__title">{{ text_buyer }}</h3>
+            <a href="#" class="dcx-sidebar-edit-link" onclick="event.preventDefault(); togglePanelEditMode('buyer');"><i data-lucide="pencil" width="12" height="12"></i> {{ text_edit_buyer }}</a>
+            <div class="dcx-sidebar-edit-actions">
+              <button type="button" class="btn btn-primary btn-xs" onclick="savePanelChanges('buyer')">
+                <i data-lucide="check" width="13" height="13"></i> {{ button_save }}
+              </button>
+              <button type="button" class="btn btn-default btn-xs" onclick="togglePanelEditMode('buyer')">
+                <i data-lucide="x" width="13" height="13"></i> {{ button_cancel }}
+              </button>
+            </div>
           </div>
           <div class="dcx-sidebar-card__body">
             <div class="dcx-sidebar-card__field">
@@ -247,37 +265,21 @@
               </div>
             </div>
 
-            {# Billing address — with same-as-shipping badge if they match #}
+            {# Payer address — with same-as-shipping badge if they match #}
             <div class="dcx-sidebar-card__field">
               <span class="dcx-sidebar-card__label">{{ text_payer_address }}</span>
               {% if addresses_match %}
                 <span class="dcx-sidebar-card__value">
                   <span class="same-as-badge"><i data-lucide="corner-down-right" width="12" height="12"></i> {{ text_same_as_shipping }}</span>
                 </span>
-                <div class="edit-only" style="display:none;margin-top:4px">
-                  <label class="checkbox-inline" style="font-size:12px">
-                    <input type="checkbox" id="same-address-cb" checked onchange="toggleSameAddress()"> {{ text_same_as_shipping }}
-                  </label>
-                  <div id="edit-payment-address" style="display:none;margin-top:4px">
-                    <input type="text" class="form-control" value="{{ payment_firstname }}" data-address-field="payment_firstname" placeholder="{{ entry_firstname }}" style="margin-bottom:3px">
-                    <input type="text" class="form-control" value="{{ payment_lastname }}" data-address-field="payment_lastname" placeholder="{{ entry_lastname }}" style="margin-bottom:3px">
-                    <input type="text" class="form-control" value="{{ payment_address_1 }}" data-address-field="payment_address_1" placeholder="{{ entry_address_1 }}" style="margin-bottom:3px">
-                    <input type="text" class="form-control" value="{{ payment_address_2 }}" data-address-field="payment_address_2" placeholder="{{ entry_address_2 }}" style="margin-bottom:3px">
-                    <input type="text" class="form-control" value="{{ payment_city }}" data-address-field="payment_city" placeholder="{{ entry_city }}" style="margin-bottom:3px">
-                    <input type="text" class="form-control" value="{{ payment_postcode }}" data-address-field="payment_postcode" placeholder="{{ entry_postcode }}" style="margin-bottom:3px">
-                    <select class="form-control" data-address-field="payment_country_id" onchange="loadZones(this,'#edit-pay-zone')" style="margin-bottom:3px">
-                      {% for country in countries %}
-                      <option value="{{ country.country_id }}" {% if country.country_id == payment_country_id %}selected{% endif %}>{{ country.name }}</option>
-                      {% endfor %}
-                    </select>
-                    <select class="form-control" id="edit-pay-zone" data-address-field="payment_zone_id">
-                      <option value="0">{{ text_none }}</option>
-                    </select>
-                  </div>
-                </div>
               {% else %}
                 <span class="dcx-sidebar-card__value view-only">{{ payment_address|raw }}</span>
-                <div class="edit-only" id="edit-payment-address" style="display:none">
+              {% endif %}
+              <div class="edit-only" style="display:none;margin-top:4px">
+                <label class="checkbox-inline" style="font-size:12px">
+                  <input type="checkbox" id="same-address-cb" {% if addresses_match %}checked{% endif %} onchange="toggleSameAddress()"> {{ text_same_as_shipping }}
+                </label>
+                <div id="edit-payment-address" style="display:none;margin-top:4px">
                   <input type="text" class="form-control" value="{{ payment_firstname }}" data-address-field="payment_firstname" placeholder="{{ entry_firstname }}" style="margin-bottom:3px">
                   <input type="text" class="form-control" value="{{ payment_lastname }}" data-address-field="payment_lastname" placeholder="{{ entry_lastname }}" style="margin-bottom:3px">
                   <input type="text" class="form-control" value="{{ payment_address_1 }}" data-address-field="payment_address_1" placeholder="{{ entry_address_1 }}" style="margin-bottom:3px">
@@ -293,16 +295,25 @@
                     <option value="0">{{ text_none }}</option>
                   </select>
                 </div>
-              {% endif %}
+              </div>
             </div>
           </div>
         </div>
 
         {# Order Card (status + payment/shipping + tools) #}
-        <div class="dcx-sidebar-card">
+        <div class="dcx-sidebar-card" data-panel="order-details">
           <div class="dcx-sidebar-card__header">
             <div class="dcx-sidebar-card__header-icon"><i data-lucide="shopping-cart" width="16" height="16"></i></div>
             <h3 class="dcx-sidebar-card__title">{{ text_order_detail }}</h3>
+            <a href="#" class="dcx-sidebar-edit-link" onclick="event.preventDefault(); togglePanelEditMode('order-details');"><i data-lucide="pencil" width="12" height="12"></i> {{ text_edit_order_detail }}</a>
+            <div class="dcx-sidebar-edit-actions">
+              <button type="button" class="btn btn-primary btn-xs" onclick="savePanelChanges('order-details')">
+                <i data-lucide="check" width="13" height="13"></i> {{ button_save }}
+              </button>
+              <button type="button" class="btn btn-default btn-xs" onclick="togglePanelEditMode('order-details')">
+                <i data-lucide="x" width="13" height="13"></i> {{ button_cancel }}
+              </button>
+            </div>
           </div>
           <div class="dcx-sidebar-card__body">
             <div class="dcx-sidebar-card__field">
@@ -327,17 +338,49 @@
             <div class="dcx-sidebar-card__field">
               <span class="dcx-sidebar-card__label">{{ text_payment_method }}</span>
               <span class="dcx-sidebar-card__value view-only" data-field="payment_method">{{ payment_method }}</span>
-              <input type="text" class="form-control edit-only" value="{{ payment_method }}" data-field="payment_method" style="display:none">
+              <select class="form-control edit-only" data-field="payment_method" data-code-field="payment_code" style="display:none">
+                {% if payment_code %}
+                  <option value="{{ payment_method }}" data-code="{{ payment_code }}" selected>{{ payment_method }}</option>
+                {% endif %}
+                {% for code, method in payment_methods %}
+                  {% if code != payment_code %}
+                    <option value="{{ method.title }}" data-code="{{ code }}">{{ method.title }}</option>
+                  {% endif %}
+                {% endfor %}
+              </select>
             </div>
             <div class="dcx-sidebar-card__field">
               <span class="dcx-sidebar-card__label">{{ text_shipping_method }}</span>
               <span class="dcx-sidebar-card__value view-only" data-field="shipping_method">{{ shipping_method }}</span>
-              <input type="text" class="form-control edit-only" value="{{ shipping_method }}" data-field="shipping_method" style="display:none">
+              <select class="form-control edit-only" data-field="shipping_method" data-code-field="shipping_code" style="display:none">
+                {% if shipping_code %}
+                  <option value="{{ shipping_method }}" data-code="{{ shipping_code }}" selected>{{ shipping_method }}</option>
+                {% endif %}
+                {% for code, method in shipping_methods %}
+                  {% if code != shipping_code %}
+                    <option value="{{ method.title }}" data-code="{{ code }}">{{ method.title }}</option>
+                  {% endif %}
+                {% endfor %}
+              </select>
             </div>
             <div class="dcx-sidebar-card__field">
               <span class="dcx-sidebar-card__label">{{ entry_tracking_number }}</span>
-              <span class="dcx-sidebar-card__value view-only" data-field="tracking_number">{{ tracking_number ?: '—' }}</span>
-              <input type="text" class="form-control edit-only" value="{{ tracking_number }}" data-field="tracking_number" style="display:none">
+              <span class="dcx-sidebar-card__value view-only" data-field="tracking_number">{{ tracking_number|replace({'|': ' | '}) ?: '—' }}</span>
+              <div class="edit-only" data-tracking-container data-original="{{ tracking_number }}" style="display:none">
+                {% set tracking_rows = tracking_numbers|length > 0 ? tracking_numbers : [''] %}
+                {% for number in tracking_rows %}
+                <div class="tracking-row">
+                  <input type="text" class="form-control" value="{{ number }}" data-tracking-input placeholder="{{ entry_tracking_number }}">
+                  <button type="button" class="btn btn-default btn-xs btn--icon tracking-row__remove" onclick="removeTrackingInput(this)" title="{{ button_remove_tracking }}">
+                    <i data-lucide="x" width="11" height="11"></i>
+                  </button>
+                </div>
+                {% endfor %}
+                <button type="button" class="btn btn-default btn-xs tracking-add-btn" onclick="addTrackingInput(this)" title="{{ button_add_tracking }}">
+                  <i data-lucide="plus" width="11" height="11"></i> {{ button_add_tracking }}
+                </button>
+                <div class="text-muted" style="font-size:11px;margin-top:4px">{{ text_tracking_max }}</div>
+              </div>
             </div>
 
             <div class="dcx-sidebar-card__field">
@@ -399,6 +442,17 @@
 </div>
 
 <style>
+.dcx-panel-edit-link { margin-left:auto; font-size:12px; color:var(--dc-primary,#2563eb); text-decoration:none; white-space:nowrap; padding:4px 10px; border-radius:var(--dc-radius-md,6px); border:1px solid var(--dc-primary,#2563eb); display:inline-flex; align-items:center; gap:5px; transition:all .15s; }
+.dcx-panel-edit-link:hover { color:#fff; background:var(--dc-primary,#2563eb); text-decoration:none; }
+.dcx-panel-edit-actions { display:none; gap:6px; margin-left:auto; align-items:center; }
+.dcx-panel[data-editing="true"] .dcx-panel-edit-link { display:none; }
+.dcx-panel[data-editing="true"] .dcx-panel-edit-actions { display:flex; }
+
+.dcx-sidebar-edit-link { margin-left:auto; font-size:11px; color:var(--dc-primary,#2563eb); text-decoration:none; white-space:nowrap; padding:3px 8px; border-radius:var(--dc-radius-md,6px); border:1px solid var(--dc-primary,#2563eb); display:inline-flex; align-items:center; gap:4px; transition:all .15s; }
+.dcx-sidebar-edit-link:hover { color:#fff; background:var(--dc-primary,#2563eb); text-decoration:none; }
+.dcx-sidebar-edit-actions { display:none; gap:4px; margin-left:auto; align-items:center; }
+.dcx-sidebar-card[data-editing="true"] .dcx-sidebar-edit-link { display:none; }
+.dcx-sidebar-card[data-editing="true"] .dcx-sidebar-edit-actions { display:flex; }
 .dcx-panel-body--flush { padding:0; }
 .order-products-list { display:flex; flex-direction:column; margin:0; padding:0; }
 .order-add-block { border:1px solid var(--dc-border); border-radius:var(--dc-radius-xl); padding:16px 20px 20px; margin:0 20px 20px; }
@@ -464,6 +518,10 @@
 
 .same-as-badge { font-size:11px; color:#2563eb; background:#eff6ff; padding:2px 8px; border-radius:4px; display:inline-flex; align-items:center; gap:4px; font-weight:500; }
 
+.tracking-row { display:flex; align-items:center; gap:6px; margin-bottom:3px; }
+.tracking-row input { flex:1; min-width:0; }
+.tracking-row__remove { flex-shrink:0; }
+
 .dcx-sidebar-card__field-row { display:flex; align-items:center; gap:6px; width:100%; }
 
 .order-browser-toggle { font-size:11px; color:#666; cursor:pointer; display:flex; align-items:center; gap:4px; }
@@ -527,6 +585,8 @@
 <script>
 const USER_TOKEN = '{{ user_token }}';
 const ORDER_ID = {{ order_id }};
+const SHIPPING_ZONE_ID = {{ shipping_zone_id }};
+const PAYMENT_ZONE_ID = {{ payment_zone_id }};
 let isEditing = false;
 
 function toggleEditMode() {
@@ -542,10 +602,197 @@ function toggleEditMode() {
 	document.getElementById('edit-mode-banner').style.display = '';
 }
 
+let activePanel = null;
+
+function togglePanelEditMode(panelId) {
+	if (isEditing) {
+		showAlert('Сначала завершите глобальное редактирование', 'warning');
+		return;
+	}
+	const panel = document.querySelector('[data-panel="' + panelId + '"]');
+	if (!panel) return;
+	if (activePanel === panelId) {
+		location.reload();
+		return;
+	}
+	activePanel = panelId;
+	panel.dataset.editing = 'true';
+	panel.querySelectorAll('.view-only').forEach(el => el.style.display = 'none');
+	panel.querySelectorAll('.edit-only').forEach(el => el.style.display = '');
+}
+
+function savePanelChanges(panelId) {
+	const panel = document.querySelector('[data-panel="' + panelId + '"]');
+	if (!panel) return;
+	if (panelId === 'order-products') {
+		Object.keys(recalcTimers).forEach(k => clearTimeout(recalcTimers[k]));
+		const promises = [];
+		panel.querySelectorAll('.order-product-card').forEach(card => {
+			const opid = card.dataset.orderProductId;
+			const qtyInput = card.querySelector('input[data-field="quantity"]');
+			const priceInput = card.querySelector('input[data-field="price"]');
+			if (qtyInput && qtyInput.value !== qtyInput.defaultValue) {
+				promises.push(api('index.php?route=sale/order_detail/updateProduct&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+					'POST', { order_product_id: opid, field: 'quantity', value: qtyInput.value }));
+			}
+			if (priceInput && priceInput.value !== priceInput.defaultValue) {
+				promises.push(api('index.php?route=sale/order_detail/updateProduct&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+					'POST', { order_product_id: opid, field: 'price', value: priceInput.value }));
+			}
+		});
+		Promise.all(promises).then(() => {
+			showAlertAndReload('{{ text_order_saved }}');
+		});
+	} else if (panelId === 'buyer') {
+		const promises = [];
+		panel.querySelectorAll('input[data-field], select[data-field]').forEach(input => {
+			const viewEl = panel.querySelector('.view-only[data-field="' + input.dataset.field + '"]');
+			const oldVal = viewEl ? viewEl.textContent.trim() : input.defaultValue;
+			if (input.value !== oldVal) {
+				promises.push(api('index.php?route=sale/order_detail/updateField&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+					'POST', { field: input.dataset.field, value: input.value }));
+			}
+		});
+		function collectAddrChanges(id) {
+			const el = panel.querySelector('#' + id);
+			if (!el) return [];
+			const changes = [];
+			el.querySelectorAll('[data-address-field]').forEach(e => {
+				if (e.value !== e.defaultValue) {
+					changes.push({ field: e.dataset.addressField, value: e.value });
+				}
+			});
+			return changes;
+		}
+		collectAddrChanges('edit-shipping-address').forEach(f => {
+			promises.push(api('index.php?route=sale/order_detail/updateField&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+				'POST', { field: f.field, value: f.value }));
+		});
+		const sameCb = panel.querySelector('#same-address-cb');
+		if (sameCb && sameCb.checked) {
+			syncPaymentFromShipping().forEach(f => {
+				promises.push(api('index.php?route=sale/order_detail/updateField&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+					'POST', { field: f.field, value: f.value }));
+			});
+		} else {
+			collectAddrChanges('edit-payment-address').forEach(f => {
+				promises.push(api('index.php?route=sale/order_detail/updateField&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+					'POST', { field: f.field, value: f.value }));
+			});
+		}
+		Promise.all(promises).then(() => {
+			showAlertAndReload('{{ text_order_saved }}');
+		});
+	} else if (panelId === 'order-details') {
+		const promises = [];
+		panel.querySelectorAll('input[data-field], select[data-field]').forEach(input => {
+			const viewEl = panel.querySelector('.view-only[data-field="' + input.dataset.field + '"]');
+			const oldVal = viewEl ? viewEl.textContent.trim() : input.defaultValue;
+			if (input.value !== oldVal) {
+				promises.push(api('index.php?route=sale/order_detail/updateField&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+					'POST', { field: input.dataset.field, value: input.value }));
+				if (input.dataset.codeField) {
+					const selectedOption = input.options[input.selectedIndex];
+					const newCode = selectedOption ? selectedOption.dataset.code : '';
+					const oldCodeEl = panel.querySelector('[data-field="' + input.dataset.codeField + '"]');
+					const oldCode = oldCodeEl ? oldCodeEl.textContent.trim() : '';
+					if (newCode && newCode !== oldCode) {
+						promises.push(api('index.php?route=sale/order_detail/updateField&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+							'POST', { field: input.dataset.codeField, value: newCode }));
+					}
+				}
+			}
+		});
+		const commentEl = panel.querySelector('#edit-comment');
+		if (commentEl && commentEl.value !== commentEl.defaultValue) {
+			promises.push(api('index.php?route=sale/order_detail/updateField&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+				'POST', { field: 'comment', value: commentEl.value }));
+		}
+		const statusEl = panel.querySelector('#edit-order-status');
+		if (statusEl) {
+			promises.push(api('index.php?route=sale/order_detail/addHistory&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+				'POST', { order_status_id: statusEl.value, notify: '0', comment: commentEl ? commentEl.value : '' }));
+		}
+		const trackingContainer = panel.querySelector('[data-tracking-container]');
+		if (trackingContainer) {
+			const joined = getTrackingJoined(trackingContainer);
+			if (joined !== (trackingContainer.dataset.original || '')) {
+				promises.push(api('index.php?route=sale/order_detail/updateField&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+					'POST', { field: 'tracking_number', value: joined }));
+			}
+		}
+		Promise.all(promises).then(() => {
+			showAlertAndReload('{{ text_order_saved }}');
+		});
+	}
+}
+
 function toggleSameAddress() {
 	const cb = document.getElementById('same-address-cb');
 	const el = document.getElementById('edit-payment-address');
 	if (el) el.style.display = cb.checked ? 'none' : '';
+}
+
+function syncPaymentFromShipping() {
+	const changes = [];
+	const shipEl = document.getElementById('edit-shipping-address');
+	const payEl = document.getElementById('edit-payment-address');
+	if (!shipEl || !payEl) return changes;
+	const ship = {};
+	shipEl.querySelectorAll('[data-address-field]').forEach(e => {
+		ship[e.dataset.addressField.replace(/^shipping_/, 'payment_')] = e.value;
+	});
+	payEl.querySelectorAll('[data-address-field]').forEach(e => {
+		const key = e.dataset.addressField;
+		const newVal = ship[key];
+		if (newVal !== undefined && newVal !== e.value && newVal !== e.defaultValue) {
+			changes.push({ field: key, value: newVal });
+		}
+	});
+	return changes;
+}
+
+function getTrackingInputs(scope) {
+	scope = scope || document;
+	return Array.from(scope.querySelectorAll('[data-tracking-input]'));
+}
+
+function getTrackingContainer(btn) {
+	return (btn && btn.closest('[data-tracking-container]')) || document.querySelector('[data-tracking-container]');
+}
+
+function getTrackingJoined(container) {
+	return getTrackingInputs(container).map(i => i.value.trim()).filter(Boolean).slice(0, 10).join('|');
+}
+
+function updateTrackingButtons(container) {
+	const count = getTrackingInputs(container).length;
+	const addBtn = container.querySelector('.tracking-add-btn');
+	if (addBtn) addBtn.style.display = count >= 10 ? 'none' : '';
+	container.querySelectorAll('.tracking-row__remove').forEach(btn => {
+		btn.style.display = count <= 1 ? 'none' : '';
+	});
+}
+
+function addTrackingInput(btn) {
+	const container = getTrackingContainer(btn);
+	if (!container) return;
+	if (getTrackingInputs(container).length >= 10) return;
+	const row = document.createElement('div');
+	row.className = 'tracking-row';
+	row.innerHTML = '<input type="text" class="form-control" data-tracking-input placeholder="{{ entry_tracking_number }}">' +
+		'<button type="button" class="btn btn-default btn-xs btn--icon tracking-row__remove" onclick="removeTrackingInput(this)" title="{{ button_remove_tracking }}">' +
+		'<i data-lucide="x" width="11" height="11"></i></button>';
+	container.insertBefore(row, container.querySelector('.tracking-add-btn'));
+	lucide.createIcons();
+	updateTrackingButtons(container);
+	row.querySelector('input').focus();
+}
+
+function removeTrackingInput(btn) {
+	const container = btn.closest('[data-tracking-container]');
+	btn.closest('.tracking-row').remove();
+	if (container) updateTrackingButtons(container);
 }
 
 function api(url, method, data) {
@@ -672,6 +919,12 @@ function showAlert(msg, type) {
 	setTimeout(() => { const a = c.querySelector('.alert'); if (a) a.remove(); }, 5000);
 }
 
+function showAlertAndReload(msg, type) {
+	sessionStorage.setItem('dc_flash_msg', msg);
+	sessionStorage.setItem('dc_flash_type', type || 'success');
+	location.reload();
+}
+
 let recalcTimers = {};
 
 function saveChanges() {
@@ -693,35 +946,69 @@ function saveChanges() {
 	});
 	document.querySelectorAll('.dcx-sidebar-card input[data-field], .dcx-sidebar-card select[data-field]').forEach(input => {
 		const viewEl = document.querySelector('.view-only[data-field="' + input.dataset.field + '"]');
-		if (viewEl && input.value !== viewEl.textContent.trim()) {
+		const oldVal = viewEl ? viewEl.textContent.trim() : input.defaultValue;
+		if (input.value !== oldVal) {
 			promises.push(api('index.php?route=sale/order_detail/updateField&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
 				'POST', { field: input.dataset.field, value: input.value }));
+			if (input.dataset.codeField) {
+				const selectedOption = input.options[input.selectedIndex];
+				const newCode = selectedOption ? selectedOption.dataset.code : '';
+				const oldCodeEl = document.querySelector('.view-only[data-field="' + input.dataset.codeField + '"]');
+				const oldCode = oldCodeEl ? oldCodeEl.textContent.trim() : '';
+				if (newCode && newCode !== oldCode) {
+					promises.push(api('index.php?route=sale/order_detail/updateField&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+						'POST', { field: input.dataset.codeField, value: newCode }));
+				}
+			}
 		}
 	});
 	const sameCb = document.getElementById('same-address-cb');
-	function collectAddr(id) {
+	function collectAddrChanges(id) {
 		const el = document.getElementById(id);
-		if (!el) return null;
-		const f = {};
-		el.querySelectorAll('[data-address-field]').forEach(e => { f[e.dataset.addressField] = e.value; });
-		return Object.keys(f).length ? f : null;
+		if (!el) return [];
+		const changes = [];
+		el.querySelectorAll('[data-address-field]').forEach(e => {
+			if (e.value !== e.defaultValue) {
+				changes.push({ field: e.dataset.addressField, value: e.value });
+			}
+		});
+		return changes;
 	}
-	const shipF = collectAddr('edit-shipping-address');
-	if (shipF) promises.push(api('index.php?route=sale/order_detail/updateField&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID, 'POST', shipF));
-	if (!sameCb || !sameCb.checked) {
-		const payF = collectAddr('edit-payment-address');
-		if (payF) promises.push(api('index.php?route=sale/order_detail/updateField&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID, 'POST', payF));
+	collectAddrChanges('edit-shipping-address').forEach(f => {
+		promises.push(api('index.php?route=sale/order_detail/updateField&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+			'POST', { field: f.field, value: f.value }));
+	});
+	if (sameCb && sameCb.checked) {
+		syncPaymentFromShipping().forEach(f => {
+			promises.push(api('index.php?route=sale/order_detail/updateField&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+				'POST', { field: f.field, value: f.value }));
+		});
+	} else {
+		collectAddrChanges('edit-payment-address').forEach(f => {
+			promises.push(api('index.php?route=sale/order_detail/updateField&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+				'POST', { field: f.field, value: f.value }));
+		});
 	}
 	const statusEl = document.getElementById('edit-order-status');
+	const commentEl = document.getElementById('edit-comment');
+	if (commentEl && commentEl.value !== commentEl.defaultValue) {
+		promises.push(api('index.php?route=sale/order_detail/updateField&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+			'POST', { field: 'comment', value: commentEl.value }));
+	}
 	if (statusEl) {
-		const commentEl = document.getElementById('edit-comment');
 		promises.push(api('index.php?route=sale/order_detail/addHistory&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
 			'POST', { order_status_id: statusEl.value, notify: '0', comment: commentEl ? commentEl.value : '' }));
 	}
+	const trackingContainer = document.querySelector('[data-tracking-container]');
+	if (trackingContainer) {
+		const joined = getTrackingJoined(trackingContainer);
+		if (joined !== (trackingContainer.dataset.original || '')) {
+			promises.push(api('index.php?route=sale/order_detail/updateField&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+				'POST', { field: 'tracking_number', value: joined }));
+		}
+	}
 	Promise.all(promises).then(() => {
-		showAlert('{{ text_order_saved }}');
-		toggleEditMode();
-		location.reload();
+		showAlertAndReload('{{ text_order_saved }}');
 	});
 }
 
@@ -789,8 +1076,9 @@ function addCommission() { api('index.php?route=sale/order_detail/addCommission&
 function removeCommission() { api('index.php?route=sale/order_detail/removeCommission&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID, 'POST').then(j => { if (j.success) showAlert(j.success); }); }
 
 const zonesCache = {};
-function loadZones(countrySelect, targetSel) {
+function loadZones(countrySelect, targetSel, currentZoneId) {
 	const countryId = countrySelect.value;
+	const zoneId = currentZoneId ? String(currentZoneId) : '0';
 	document.querySelector(targetSel).innerHTML = '<option value="0">{{ text_none }}</option>';
 	if (!countryId) return;
 	if (!zonesCache[countryId]) {
@@ -804,7 +1092,7 @@ function loadZones(countrySelect, targetSel) {
 	Promise.resolve(zonesCache[countryId]).then(zones => {
 		if (zones && zones.length) {
 			let h = '<option value="0">{{ text_none }}</option>';
-			zones.forEach(z => { h += '<option value="' + z.zone_id + '">' + z.name + '</option>'; });
+			zones.forEach(z => { h += '<option value="' + z.zone_id + '"' + (String(z.zone_id) === zoneId ? ' selected' : '') + '>' + z.name + '</option>'; });
 			document.querySelector(targetSel).innerHTML = h;
 		}
 	});
@@ -821,12 +1109,23 @@ function toggleBrowserInfo() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+	const flashMsg = sessionStorage.getItem('dc_flash_msg');
+	if (flashMsg) {
+		sessionStorage.removeItem('dc_flash_msg');
+		const flashType = sessionStorage.getItem('dc_flash_type') || 'success';
+		sessionStorage.removeItem('dc_flash_type');
+		showAlert(flashMsg, flashType);
+	}
+
 	loadTimeline(1);
 
 	const shipCountry = document.querySelector('[data-address-field="shipping_country_id"]');
-	if (shipCountry && shipCountry.value) loadZones(shipCountry, '#edit-ship-zone');
+	if (shipCountry && shipCountry.value) loadZones(shipCountry, '#edit-ship-zone', SHIPPING_ZONE_ID);
 	const payCountry = document.querySelector('[data-address-field="payment_country_id"]');
-	if (payCountry && payCountry.value) loadZones(payCountry, '#edit-pay-zone');
+	if (payCountry && payCountry.value) loadZones(payCountry, '#edit-pay-zone', PAYMENT_ZONE_ID);
+
+	const trackingContainer = document.querySelector('[data-tracking-container]');
+	if (trackingContainer) updateTrackingButtons(trackingContainer);
 
 	document.addEventListener('input', function(e) {
 		const input = e.target;

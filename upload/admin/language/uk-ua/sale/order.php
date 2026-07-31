@@ -105,6 +105,7 @@ $_['text_panel_order_info'] = 'Інформація про замовлення'
 $_['text_panel_customer'] = 'Покупець';
 $_['text_panel_order_tools'] = 'Дії по замовленню';
 $_['text_panel_order_contents'] = 'Склад замовлення';
+$_['text_edit_order_contents'] = 'Змінити замовлення';
 $_['text_panel_totals']          = 'Разом';
 $_['text_order_detail'] = 'Деталі замовлення';
 $_['text_order_id'] = 'Номер замовлення:';
@@ -188,6 +189,13 @@ $_['text_print']                 = 'Друк';
 
 $_['button_print']               = 'Друк';
 
+$_['button_save']                = 'Зберегти';
+$_['button_cancel']              = 'Скасувати';
+$_['button_add_tracking']        = 'Додати номер';
+$_['button_remove_tracking']     = 'Видалити';
+$_['text_tracking_numbers']      = 'Номери відстеження';
+$_['text_tracking_max']          = 'До 10 номерів';
+
 $_['error_comment']              = 'Будь ласка, введіть коментар!';
 $_['error_order_status']         = 'Будь ласка, виберіть статус замовлення!';
 
@@ -204,5 +212,7 @@ $_['text_more_actions']          = 'Більше дій';
 $_['text_discount']              = 'Знижка';
 $_['text_items']                 = 'товарів';
 $_['text_buyer']                 = 'Покупець';
+$_['text_edit_buyer']            = 'Змінити';
+$_['text_edit_order_detail']     = 'Змінити';
 $_['text_show_browser_info']     = 'Показати інформацію про браузер';
 $_['text_hide_browser_info']     = 'Приховати інформацію про браузер';
