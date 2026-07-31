@@ -33,3 +33,14 @@ $_['text_success'] = 'Успех: Вы добавили <a href="%s">%s</a> в <
 
 $_['text_product'] = 'товар';
 $_['text_products'] = 'товаров';
+
+// Payments
+$_['text_payment_status'] = 'Статус оплаты';
+$_['text_payment_status_unpaid'] = 'Не оплачен';
+$_['text_payment_status_partial'] = 'Оплачен частично';
+$_['text_payment_status_paid'] = 'Оплачен';
+$_['text_payment_status_overpaid'] = 'Переплата';
+$_['text_payment_paid_of'] = 'Оплачено:';
+$_['text_payment_remaining'] = 'Остаток';
+$_['column_payment_method'] = 'Способ оплаты';
+$_['column_payment_amount'] = 'Сумма';

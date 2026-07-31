@@ -43,6 +43,16 @@
               <div class="flex items-center gap-2">
                 <span class="text-base font-bold text-gray-900">#{{ order.order_id }}</span>
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ badge }}">{{ order.status }}</span>
+                {% if order.payment_status == 'paid' %}
+                  {% set payment_badge = 'bg-green-100 text-green-700' %}
+                {% elseif order.payment_status == 'partial' %}
+                  {% set payment_badge = 'bg-amber-100 text-amber-700' %}
+                {% elseif order.payment_status == 'overpaid' %}
+                  {% set payment_badge = 'bg-red-100 text-red-700' %}
+                {% else %}
+                  {% set payment_badge = 'bg-gray-100 text-gray-600' %}
+                {% endif %}
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ payment_badge }}" title="{{ text_payment_status }}">{{ order.payment_status_text }}</span>
               </div>
               <span class="text-sm text-gray-400 whitespace-nowrap">{{ order.date_added }}</span>
             </div>

@@ -39,3 +39,14 @@ $_['error_reorder']         = '%s is not currently available to be reordered.';
 
 $_['text_product']  = 'product';
 $_['text_products'] = 'products';
+
+// Payments
+$_['text_payment_status']          = 'Payment Status';
+$_['text_payment_status_unpaid']   = 'Unpaid';
+$_['text_payment_status_partial']  = 'Partially Paid';
+$_['text_payment_status_paid']     = 'Paid';
+$_['text_payment_status_overpaid'] = 'Overpaid';
+$_['text_payment_paid_of']         = 'Paid:';
+$_['text_payment_remaining']       = 'Remaining';
+$_['column_payment_method']        = 'Payment Method';
+$_['column_payment_amount']        = 'Amount';

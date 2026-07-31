@@ -18,8 +18,10 @@ $_['text_edit_subtitle'] = 'Configure extension settings and options';
 
 $_['text_recent_subtitle'] = 'Newest customer orders overview';
 $_['text_view_all']        = 'View all orders';
-
-
+$_['text_products']        = 'products';
+$_['text_tracking']        = 'Tracking';
+$_['text_view']            = 'Details';
+$_['text_no_products']     = 'No products';
 
 
 

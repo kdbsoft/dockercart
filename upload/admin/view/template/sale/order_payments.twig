@@ -1,0 +1,85 @@
+<div class="dcx-fields">
+  <div class="dcx-field">
+    <label class="dcx-label">{{ text_payment_status }}</label>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <span class="{{ payment_status_badge_class }}">{{ payment_status_text }}</span>
+      <span class="text-muted" style="font-size:12px">{{ text_payment_paid_of }} {{ paid_amount }} / {{ total }}</span>
+      {% if payment_status != 'paid' %}
+      <span class="text-muted" style="font-size:12px">{{ text_payment_remaining }}: {{ payment_remaining }}</span>
+      {% endif %}
+    </div>
+    <div class="payment-progress">
+      <div class="payment-progress__bar{% if payment_status == 'overpaid' %} payment-progress__bar--overpaid{% endif %}" style="width: {{ payment_progress }}%"></div>
+    </div>
+    {% if payment_status == 'overpaid' %}
+    <div class="dcx-payment-overpaid">
+      <div class="dcx-payment-overpaid__row">
+        <i data-lucide="triangle-alert" width="14" height="14" class="dcx-payment-overpaid__icon"></i>
+        <span class="dcx-payment-overpaid__amount">{{ text_payment_overpaid_amount }}: {{ payment_overpaid }}</span>
+        <button type="button" class="btn btn-xs btn-warning dcx-payment-overpaid__btn" onclick="removeOverpayment()">
+          <i data-lucide="undo-2" width="12" height="12"></i> {{ button_remove_overpayment }}
+        </button>
+      </div>
+      <div class="dcx-payment-overpaid__hint">{{ text_payment_overpaid_hint }}</div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% if payments %}
+<div class="dcx-payment-list">
+  {% for payment in payments %}
+  <div class="dcx-payment-item{% if payment.is_reversal %} dcx-payment-item--reversal{% endif %}">
+    <div class="dcx-payment-item__row">
+      <span class="dcx-payment-item__amount{% if payment.is_reversal %} text-danger{% else %} text-success{% endif %}">
+        {{ payment.is_reversal ? '−' : '+' }} {{ payment.amount }}
+      </span>
+      <span class="dcx-payment-item__date">{{ payment.date_added }}</span>
+      {% if not payment.is_reversal %}
+      <button type="button" class="btn btn-xs btn-danger btn--icon dcx-payment-item__remove" onclick="removePayment({{ payment.order_payment_id }})" title="{{ button_remove_payment }}">
+        <i data-lucide="x" width="11" height="11"></i>
+      </button>
+      {% endif %}
+    </div>
+    <div class="dcx-payment-item__meta">{{ payment.payment_method }}{% if payment.reference %} · {{ text_reference }}: {{ payment.reference }}{% endif %}</div>
+    {% if payment.comment %}
+    <div class="dcx-payment-item__comment">{{ payment.comment }}</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="text-muted" style="font-size:12px;margin-top:8px">{{ text_no_payments }}</div>
+{% endif %}
+
+<div class="dcx-payment-add">
+  <div class="order-add-title"><i data-lucide="credit-card" width="15" height="15"></i> {{ button_add_payment }}</div>
+  <div class="dcx-fields">
+    <div class="dcx-field">
+      <label class="dcx-label" for="payment-amount">{{ entry_payment_amount }}</label>
+      <input type="text" class="form-control" id="payment-amount" placeholder="0.00" />
+    </div>
+    <div class="dcx-field">
+      <label class="dcx-label" for="payment-method">{{ entry_payment_method }}</label>
+      <select class="form-control" id="payment-method">
+        <option value="" data-code="">{{ text_select }}</option>
+        {% for code, method in payment_methods %}
+        <option value="{{ method.title }}" data-code="{{ code }}" {% if code == payment_code %}selected{% endif %}>{{ method.title }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="dcx-field">
+      <label class="dcx-label" for="payment-reference">{{ entry_payment_reference }}</label>
+      <input type="text" class="form-control" id="payment-reference" />
+    </div>
+    <div class="dcx-field">
+      <label class="dcx-label" for="payment-comment">{{ entry_comment }}</label>
+      <textarea class="form-control" id="payment-comment" rows="2"></textarea>
+    </div>
+    <div class="dcx-field">
+      <button type="button" class="btn btn-success" onclick="addPayment()">
+        <i data-lucide="plus" width="14" height="14"></i> {{ button_add_payment }}
+      </button>
+    </div>
+  </div>
+</div>

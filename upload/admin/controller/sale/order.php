@@ -48,6 +48,10 @@ class ControllerSaleOrder extends Controller {
 		if (isset($this->request->get['filter_order_status_id'])) {
 			$url .= '&filter_order_status_id=' . $this->request->get['filter_order_status_id'];
 		}
+
+		if (isset($this->request->get['filter_payment_status'])) {
+			$url .= '&filter_payment_status=' . $this->request->get['filter_payment_status'];
+		}
 			
 		if (isset($this->request->get['filter_total'])) {
 			$url .= '&filter_total=' . $this->request->get['filter_total'];
@@ -57,9 +61,7 @@ class ControllerSaleOrder extends Controller {
 			$url .= '&filter_date_added=' . $this->request->get['filter_date_added'];
 		}
 
-		if (isset($this->request->get['filter_date_modified'])) {
-			$url .= '&filter_date_modified=' . $this->request->get['filter_date_modified'];
-		}
+
 
 		if (isset($this->request->get['sort'])) {
 			$url .= '&sort=' . $this->request->get['sort'];
@@ -100,6 +102,12 @@ class ControllerSaleOrder extends Controller {
 		} else {
 			$filter_order_status_id = '';
 		}
+
+		if (isset($this->request->get['filter_payment_status'])) {
+			$filter_payment_status = $this->request->get['filter_payment_status'];
+		} else {
+			$filter_payment_status = '';
+		}
 		
 		if (isset($this->request->get['filter_total'])) {
 			$filter_total = $this->request->get['filter_total'];
@@ -111,12 +119,6 @@ class ControllerSaleOrder extends Controller {
 			$filter_date_added = $this->request->get['filter_date_added'];
 		} else {
 			$filter_date_added = '';
-		}
-
-		if (isset($this->request->get['filter_date_modified'])) {
-			$filter_date_modified = $this->request->get['filter_date_modified'];
-		} else {
-			$filter_date_modified = '';
 		}
 
 		if (isset($this->request->get['sort'])) {
@@ -154,6 +156,10 @@ class ControllerSaleOrder extends Controller {
 		if (isset($this->request->get['filter_order_status_id'])) {
 			$url .= '&filter_order_status_id=' . $this->request->get['filter_order_status_id'];
 		}
+
+		if (isset($this->request->get['filter_payment_status'])) {
+			$url .= '&filter_payment_status=' . $this->request->get['filter_payment_status'];
+		}
 			
 		if (isset($this->request->get['filter_total'])) {
 			$url .= '&filter_total=' . $this->request->get['filter_total'];
@@ -163,9 +169,7 @@ class ControllerSaleOrder extends Controller {
 			$url .= '&filter_date_added=' . $this->request->get['filter_date_added'];
 		}
 
-		if (isset($this->request->get['filter_date_modified'])) {
-			$url .= '&filter_date_modified=' . $this->request->get['filter_date_modified'];
-		}
+
 
 		if (isset($this->request->get['sort'])) {
 			$url .= '&sort=' . $this->request->get['sort'];
@@ -201,9 +205,9 @@ class ControllerSaleOrder extends Controller {
 			'filter_customer'	     => $filter_customer,
 			'filter_order_status'    => $filter_order_status,
 			'filter_order_status_id' => $filter_order_status_id,
+			'filter_payment_status'  => $filter_payment_status,
 			'filter_total'           => $filter_total,
 			'filter_date_added'      => $filter_date_added,
-			'filter_date_modified'   => $filter_date_modified,
 			'sort'                   => $sort,
 			'order'                  => $order,
 			'start'                  => ($page - 1) * $this->config->get('config_limit_admin'),
@@ -218,12 +222,28 @@ class ControllerSaleOrder extends Controller {
 		$complete_statuses   = (array)$this->config->get('config_complete_status');
 		$fraud_status        = (int)$this->config->get('config_fraud_status_id');
 
+		$order_ids = array();
+		foreach ($results as $result) {
+			$order_ids[] = (int)$result['order_id'];
+		}
+
+		$order_items = array();
+		if ($order_ids) {
+			$item_query = $this->db->query(
+				"SELECT order_id, SUM(quantity) AS total_items FROM " . DB_PREFIX . "order_product WHERE order_id IN (" . implode(',', $order_ids) . ") GROUP BY order_id"
+			);
+			foreach ($item_query->rows as $row) {
+				$order_items[(int)$row['order_id']] = (int)$row['total_items'];
+			}
+		}
+
 		foreach ($results as $result) {
 			$order_type = $this->getOrderType($result);
 			$order_type_badge_class = $this->getOrderTypeBadgeClass($result);
 			$customer_type = $this->getCustomerType($result);
 			$customer_type_badge_class = $this->getCustomerTypeBadgeClass($result);
 			$status_badge_class = $this->getOrderStatusBadgeClass((int)$result['order_status_id'], $processing_statuses, $complete_statuses, $fraud_status);
+			$payment_status = $this->model_sale_order->getPaymentStatus($result['total'], $result['paid_amount']);
 
 			$data['orders'][] = array(
 				'order_id'      => $result['order_id'],
@@ -235,10 +255,16 @@ class ControllerSaleOrder extends Controller {
 				'order_status_id' => $result['order_status_id'],
 				'order_status'  => $result['order_status'] ? $result['order_status'] : $this->language->get('text_missing'),
 				'order_status_badge_class' => $status_badge_class,
+				'payment_status' => $payment_status,
+				'payment_status_text' => $this->language->get('text_payment_status_' . $payment_status),
+				'payment_status_badge_class' => $this->getPaymentStatusBadgeClass($payment_status),
+				'payment_method' => $result['payment_method'],
+				'paid_amount'   => $this->currency->format($result['paid_amount'], $result['currency_code'], $result['currency_value']),
+				'shipping_method' => $result['shipping_method'],
+				'items_count'   => isset($order_items[(int)$result['order_id']]) ? $order_items[(int)$result['order_id']] : 0,
 				'tracking_number' => $result['tracking_number'],
 				'total'         => $this->currency->format($result['total'], $result['currency_code'], $result['currency_value']),
 				'date_added'    => date($this->language->get('datetime_format'), strtotime($result['date_added'])),
-				'date_modified' => date($this->language->get('datetime_format'), strtotime($result['date_modified'])),
 				'shipping_code' => $result['shipping_code'],
 				'view'          => $this->url->link('sale/order_detail', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $result['order_id'] . $url, true),
 				'delete_id'     => $result['order_id']
@@ -286,6 +312,10 @@ class ControllerSaleOrder extends Controller {
 		if (isset($this->request->get['filter_order_status_id'])) {
 			$url .= '&filter_order_status_id=' . $this->request->get['filter_order_status_id'];
 		}
+
+		if (isset($this->request->get['filter_payment_status'])) {
+			$url .= '&filter_payment_status=' . $this->request->get['filter_payment_status'];
+		}
 			
 		if (isset($this->request->get['filter_total'])) {
 			$url .= '&filter_total=' . $this->request->get['filter_total'];
@@ -295,9 +325,7 @@ class ControllerSaleOrder extends Controller {
 			$url .= '&filter_date_added=' . $this->request->get['filter_date_added'];
 		}
 
-		if (isset($this->request->get['filter_date_modified'])) {
-			$url .= '&filter_date_modified=' . $this->request->get['filter_date_modified'];
-		}
+
 
 		if ($order == 'ASC') {
 			$url .= '&order=DESC';
@@ -333,6 +361,10 @@ class ControllerSaleOrder extends Controller {
 		if (isset($this->request->get['filter_order_status_id'])) {
 			$url .= '&filter_order_status_id=' . $this->request->get['filter_order_status_id'];
 		}
+
+		if (isset($this->request->get['filter_payment_status'])) {
+			$url .= '&filter_payment_status=' . $this->request->get['filter_payment_status'];
+		}
 			
 		if (isset($this->request->get['filter_total'])) {
 			$url .= '&filter_total=' . $this->request->get['filter_total'];
@@ -342,9 +374,7 @@ class ControllerSaleOrder extends Controller {
 			$url .= '&filter_date_added=' . $this->request->get['filter_date_added'];
 		}
 
-		if (isset($this->request->get['filter_date_modified'])) {
-			$url .= '&filter_date_modified=' . $this->request->get['filter_date_modified'];
-		}
+
 
 		if (isset($this->request->get['sort'])) {
 			$url .= '&sort=' . $this->request->get['sort'];
@@ -368,9 +398,16 @@ class ControllerSaleOrder extends Controller {
 		$data['filter_customer'] = $filter_customer;
 		$data['filter_order_status'] = $filter_order_status;
 		$data['filter_order_status_id'] = $filter_order_status_id;
+		$data['filter_payment_status'] = $filter_payment_status;
 		$data['filter_total'] = $filter_total;
 		$data['filter_date_added'] = $filter_date_added;
-		$data['filter_date_modified'] = $filter_date_modified;
+
+		$data['payment_statuses'] = array(
+			'unpaid'   => $this->language->get('text_payment_status_unpaid'),
+			'partial'  => $this->language->get('text_payment_status_partial'),
+			'paid'     => $this->language->get('text_payment_status_paid'),
+			'overpaid' => $this->language->get('text_payment_status_overpaid')
+		);
 
 		$data['sort'] = $sort;
 		$data['order'] = $order;
@@ -706,18 +743,31 @@ class ControllerSaleOrder extends Controller {
 
 	private function getOrderStatusBadgeClass($order_status_id, $processing_statuses, $complete_statuses, $fraud_status) {
 		if ($fraud_status && $order_status_id === $fraud_status) {
-			return 'order-status-badge label label-danger';
+			return 'page-header__badge page-header__badge--danger';
 		}
 
 		if (in_array($order_status_id, $processing_statuses)) {
-			return 'order-status-badge label label-warning';
+			return 'page-header__badge page-header__badge--warning page-header__badge--unfilled';
 		}
 
 		if (in_array($order_status_id, $complete_statuses)) {
-			return 'order-status-badge label label-success';
+			return 'page-header__badge page-header__badge--success';
 		}
 
-		return 'order-status-badge label label-default';
+		return 'page-header__badge page-header__badge--default page-header__badge--unfilled';
+	}
+
+	private function getPaymentStatusBadgeClass($payment_status) {
+		switch ($payment_status) {
+			case 'paid':
+				return 'page-header__badge page-header__badge--success';
+			case 'partial':
+				return 'page-header__badge page-header__badge--warning page-header__badge--unfilled';
+			case 'overpaid':
+				return 'page-header__badge page-header__badge--danger';
+			default:
+				return 'page-header__badge page-header__badge--default page-header__badge--unfilled';
+		}
 	}
 	
 	protected function validate() {

@@ -55,6 +55,51 @@
         </div>
       </div>
 
+      {# Payment Status #}
+      <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 mb-4">
+        <p class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-4">{{ text_payment_status }}</p>
+        <div class="flex flex-wrap items-center gap-3 text-sm">
+          {% if payment_status == 'paid' %}
+            {% set payment_badge = 'bg-green-100 text-green-700' %}
+          {% elseif payment_status == 'partial' %}
+            {% set payment_badge = 'bg-amber-100 text-amber-700' %}
+          {% elseif payment_status == 'overpaid' %}
+            {% set payment_badge = 'bg-red-100 text-red-700' %}
+          {% else %}
+            {% set payment_badge = 'bg-gray-100 text-gray-600' %}
+          {% endif %}
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ payment_badge }}">{{ payment_status_text }}</span>
+          <span class="text-gray-700">{{ text_payment_paid_of }} <b>{{ paid_amount }}</b> / {{ total }}</span>
+          {% if payment_status != 'paid' %}
+          <span class="text-gray-500">{{ text_payment_remaining }}: <b>{{ payment_remaining }}</b></span>
+          {% endif %}
+        </div>
+        {% if payments %}
+        <div class="mt-4 overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-gray-100 bg-gray-50">
+                <th class="text-left font-semibold text-gray-500 px-4 py-2">{{ column_date_added }}</th>
+                <th class="text-left font-semibold text-gray-500 px-4 py-2">{{ column_payment_method }}</th>
+                <th class="text-right font-semibold text-gray-500 px-4 py-2">{{ column_payment_amount }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for payment in payments %}
+              <tr class="border-b border-gray-50">
+                <td class="text-left text-gray-600 px-4 py-2">{{ payment.date_added }}</td>
+                <td class="text-left text-gray-700 px-4 py-2">{{ payment.payment_method }}</td>
+                <td class="text-right px-4 py-2 font-semibold {% if payment.is_reversal %}text-red-500{% else %}text-green-600{% endif %}">
+                  {{ payment.is_reversal ? '− ' : '+ ' }}{{ payment.amount }}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% endif %}
+      </div>
+
       {# Addresses #}
       <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 mb-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">

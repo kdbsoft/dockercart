@@ -125,6 +125,7 @@ class ModelSaleOrder extends Model {
 				'tracking_number'         => $order_query->row['tracking_number'],
 				'comment'                 => $order_query->row['comment'],
 				'total'                   => $order_query->row['total'],
+				'paid_amount'             => $order_query->row['paid_amount'],
 				'reward'                  => $reward,
 				'order_status_id'         => $order_query->row['order_status_id'],
 				'order_status'            => $order_query->row['order_status'],
@@ -150,7 +151,7 @@ class ModelSaleOrder extends Model {
 	}
 
 	public function getOrders($data = array()) {
-		$sql = "SELECT o.order_id, o.customer_id, o.payment_code, o.payment_method, o.shipping_method, CONCAT(o.firstname, ' ', o.lastname) AS customer, o.order_status_id, (SELECT os.name FROM " . DB_PREFIX . "order_status os WHERE os.order_status_id = o.order_status_id AND os.language_id = '" . (int)$this->config->get('config_language_id') . "') AS order_status, o.shipping_code, o.tracking_number, o.total, o.currency_code, o.currency_value, o.date_added, o.date_modified FROM `" . DB_PREFIX . "order` o";
+		$sql = "SELECT o.order_id, o.customer_id, o.payment_code, o.payment_method, o.shipping_method, CONCAT(o.firstname, ' ', o.lastname) AS customer, o.order_status_id, (SELECT os.name FROM " . DB_PREFIX . "order_status os WHERE os.order_status_id = o.order_status_id AND os.language_id = '" . (int)$this->config->get('config_language_id') . "') AS order_status, o.shipping_code, o.tracking_number, o.total, o.paid_amount, o.currency_code, o.currency_value, o.date_added, o.date_modified FROM `" . DB_PREFIX . "order` o";
 
 		if (!empty($data['filter_order_status'])) {
 			$implode = array();
@@ -190,6 +191,10 @@ class ModelSaleOrder extends Model {
 			$sql .= " AND o.total = '" . (float)$data['filter_total'] . "'";
 		}
 
+		if (!empty($data['filter_payment_status'])) {
+			$sql .= $this->getPaymentStatusFilterSql((string)$data['filter_payment_status'], 'o');
+		}
+
 		$sort_data = array(
 			'o.order_id',
 			'customer',
@@ -226,6 +231,23 @@ class ModelSaleOrder extends Model {
 		$query = $this->db->query($sql);
 
 		return $query->rows;
+	}
+
+	private function getPaymentStatusFilterSql(string $status, string $alias = ''): string {
+		$prefix = $alias ? $alias . '.' : '';
+
+		switch ($status) {
+			case 'unpaid':
+				return " AND " . $prefix . "paid_amount <= 0";
+			case 'partial':
+				return " AND " . $prefix . "paid_amount > 0 AND " . $prefix . "paid_amount < " . $prefix . "total";
+			case 'paid':
+				return " AND " . $prefix . "paid_amount >= " . $prefix . "total";
+			case 'overpaid':
+				return " AND " . $prefix . "paid_amount > " . $prefix . "total AND " . $prefix . "total > 0";
+			default:
+				return "";
+		}
 	}
 
 	public function getOrderProducts($order_id) {
@@ -297,6 +319,10 @@ class ModelSaleOrder extends Model {
 
 		if (!empty($data['filter_total'])) {
 			$sql .= " AND total = '" . (float)$data['filter_total'] . "'";
+		}
+
+		if (!empty($data['filter_payment_status'])) {
+			$sql .= $this->getPaymentStatusFilterSql((string)$data['filter_payment_status']);
 		}
 
 		$query = $this->db->query($sql);
@@ -520,11 +546,18 @@ class ModelSaleOrder extends Model {
 	public function applyLineDiscounts($order_id, $discounts = array()) {
 		$this->ensureOrderProductDiscountTable();
 
+		$order_query = $this->db->query("SELECT total FROM `" . DB_PREFIX . "order` WHERE order_id = '" . (int)$order_id . "'");
+
+		$old_total = (float)($order_query->num_rows ? $order_query->row['total'] : 0);
+
 		$order_products_query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "order_product` WHERE order_id = '" . (int)$order_id . "' ORDER BY order_product_id ASC");
 
 		if (!$order_products_query->num_rows) {
 			$this->db->query("DELETE FROM `" . DB_PREFIX . "order_product_discount` WHERE order_id = '" . (int)$order_id . "'");
-			return;
+			return array(
+				'old_total' => $old_total,
+				'new_total' => $old_total
+			);
 		}
 
 		$stored_discounts = $this->getOrderProductDiscounts($order_id);
@@ -599,7 +632,10 @@ class ModelSaleOrder extends Model {
 
 		if (abs($delta_subtotal) < 0.0001 && abs($delta_tax) < 0.0001) {
 			$this->db->query("UPDATE `" . DB_PREFIX . "order` SET date_modified = NOW() WHERE order_id = '" . (int)$order_id . "'");
-			return;
+			return array(
+				'old_total' => $old_total,
+				'new_total' => $old_total
+			);
 		}
 
 		$sub_total_query = $this->db->query("SELECT order_total_id, value FROM `" . DB_PREFIX . "order_total` WHERE order_id = '" . (int)$order_id . "' AND code = 'sub_total' ORDER BY sort_order ASC LIMIT 1");
@@ -639,7 +675,13 @@ class ModelSaleOrder extends Model {
 			$this->db->query("UPDATE `" . DB_PREFIX . "order` SET total = '" . (float)$new_order_total . "', date_modified = NOW() WHERE order_id = '" . (int)$order_id . "'");
 		} else {
 			$this->db->query("UPDATE `" . DB_PREFIX . "order` SET date_modified = NOW() WHERE order_id = '" . (int)$order_id . "'");
+			$new_order_total = $old_total;
 		}
+
+		return array(
+			'old_total' => $old_total,
+			'new_total' => $new_order_total
+		);
 	}
 
 	public function getOrderProductDiscounts($order_id) {
@@ -816,6 +858,10 @@ class ModelSaleOrder extends Model {
 	}
 
 	public function recalculateOrderTotals($order_id) {
+		$order_query = $this->db->query("SELECT total FROM `" . DB_PREFIX . "order` WHERE order_id = '" . (int)$order_id . "'");
+
+		$old_total = (float)($order_query->num_rows ? $order_query->row['total'] : 0);
+
 		$products_query = $this->db->query("SELECT SUM(total) AS subtotal, SUM(tax) AS total_tax FROM `" . DB_PREFIX . "order_product` WHERE order_id = '" . (int)$order_id . "'");
 
 		$new_subtotal = (float)$products_query->row['subtotal'];
@@ -854,7 +900,10 @@ class ModelSaleOrder extends Model {
 
 		$this->db->query("UPDATE `" . DB_PREFIX . "order` SET total = '" . (float)$new_total . "', date_modified = NOW() WHERE order_id = '" . (int)$order_id . "'");
 
-		return true;
+		return array(
+			'old_total' => $old_total,
+			'new_total' => $new_total
+		);
 	}
 
 	public function getOrderTimeline($order_id, $start = 0, $limit = 20) {
@@ -867,20 +916,168 @@ class ModelSaleOrder extends Model {
 		}
 
 		$query = $this->db->query("SELECT oh.order_history_id, oh.order_status_id, oh.notify, oh.comment, oh.date_added,
-			os.name AS status_name
+			os.name AS status_name, 'history' AS type, 0 AS amount, '' AS payment_method
 			FROM " . DB_PREFIX . "order_history oh
 			LEFT JOIN " . DB_PREFIX . "order_status os ON oh.order_status_id = os.order_status_id AND os.language_id = '" . (int)$this->config->get('config_language_id') . "'
 			WHERE oh.order_id = '" . (int)$order_id . "'
-			ORDER BY oh.date_added DESC, oh.order_history_id DESC
+			UNION ALL
+			SELECT op.order_payment_id, 0, 0, CONVERT(op.comment USING utf8mb4) COLLATE utf8mb4_general_ci, op.date_added,
+			op.payment_method COLLATE utf8mb4_general_ci AS status_name, 'payment' AS type, op.amount, op.payment_method COLLATE utf8mb4_general_ci
+			FROM " . DB_PREFIX . "order_payment op
+			WHERE op.order_id = '" . (int)$order_id . "'
+			ORDER BY date_added DESC, order_history_id DESC
 			LIMIT " . (int)$start . "," . (int)$limit);
 
 		return $query->rows;
 	}
 
 	public function countOrderTimeline($order_id) {
-		$query = $this->db->query("SELECT COUNT(*) AS total FROM " . DB_PREFIX . "order_history WHERE order_id = '" . (int)$order_id . "'");
+		$query = $this->db->query("SELECT (SELECT COUNT(*) FROM " . DB_PREFIX . "order_history WHERE order_id = '" . (int)$order_id . "') + (SELECT COUNT(*) FROM " . DB_PREFIX . "order_payment WHERE order_id = '" . (int)$order_id . "') AS total");
 
 		return (int)$query->row['total'];
+	}
+
+	public function getPaymentStatus($total, $paid_amount) {
+		$total = (float)$total;
+		$paid_amount = (float)$paid_amount;
+
+		if ($total <= 0) {
+			return 'paid';
+		}
+
+		if ($paid_amount <= 0) {
+			return 'unpaid';
+		}
+
+		if ($paid_amount > $total) {
+			return 'overpaid';
+		}
+
+		if ($paid_amount >= $total) {
+			return 'paid';
+		}
+
+		return 'partial';
+	}
+
+	public function getOrderPayment($order_payment_id) {
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "order_payment` WHERE order_payment_id = '" . (int)$order_payment_id . "'");
+
+		return $query->num_rows ? $query->row : false;
+	}
+
+	public function getOrderPayments($order_id) {
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "order_payment` WHERE order_id = '" . (int)$order_id . "' ORDER BY date_added ASC, order_payment_id ASC");
+
+		return $query->rows;
+	}
+
+	public function addOrderPayment($order_id, $amount, $reference = '', $comment = '', $payment_method = '', $payment_code = '') {
+		$order_info = $this->getOrder($order_id);
+
+		if (!$order_info) {
+			return false;
+		}
+
+		$amount = (float)$amount;
+
+		if ($amount <= 0) {
+			return false;
+		}
+
+		if ($payment_method === '') {
+			$payment_method = $order_info['payment_method'];
+		}
+
+		if ($payment_code === '') {
+			$payment_code = $order_info['payment_code'];
+		}
+
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "order_payment` SET
+			order_id = '" . (int)$order_id . "',
+			amount = '" . (float)$amount . "',
+			payment_method = '" . $this->db->escape($payment_method) . "',
+			payment_code = '" . $this->db->escape($payment_code) . "',
+			reference = '" . $this->db->escape($reference) . "',
+			comment = '" . $this->db->escape($comment) . "',
+			created_by = '" . (int)$this->user->getId() . "',
+			date_added = NOW()");
+
+		$order_payment_id = $this->db->getLastId();
+
+		$this->db->query("UPDATE `" . DB_PREFIX . "order` SET paid_amount = paid_amount + '" . (float)$amount . "', date_modified = NOW() WHERE order_id = '" . (int)$order_id . "'");
+
+		return $order_payment_id;
+	}
+
+	public function removeOrderPayment($order_payment_id, $comment = '') {
+		$payment = $this->getOrderPayment($order_payment_id);
+
+		if (!$payment) {
+			return false;
+		}
+
+		$amount = (float)$payment['amount'];
+
+		if ($amount <= 0) {
+			return false;
+		}
+
+		if ($comment === '') {
+			$comment = 'Reversal of #' . (int)$order_payment_id;
+		}
+
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "order_payment` SET
+			order_id = '" . (int)$payment['order_id'] . "',
+			amount = '" . (float)-$amount . "',
+			payment_method = '" . $this->db->escape($payment['payment_method']) . "',
+			payment_code = '" . $this->db->escape($payment['payment_code']) . "',
+			reference = '" . $this->db->escape($payment['reference']) . "',
+			comment = '" . $this->db->escape($comment) . "',
+			created_by = '" . (int)$this->user->getId() . "',
+			date_added = NOW()");
+
+		$reversal_id = $this->db->getLastId();
+
+		$this->db->query("UPDATE `" . DB_PREFIX . "order` SET paid_amount = paid_amount - '" . (float)$amount . "', date_modified = NOW() WHERE order_id = '" . (int)$payment['order_id'] . "'");
+
+		return $reversal_id;
+	}
+
+	public function removeOrderOverpayment($order_id, $comment = '') {
+		$order_info = $this->getOrder($order_id);
+
+		if (!$order_info) {
+			return false;
+		}
+
+		$total = (float)$order_info['total'];
+		$paid_amount = (float)$order_info['paid_amount'];
+		$overpaid = $paid_amount - $total;
+
+		if ($overpaid <= 0) {
+			return false;
+		}
+
+		if ($comment === '') {
+			$comment = 'Overpayment reversal';
+		}
+
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "order_payment` SET
+			order_id = '" . (int)$order_id . "',
+			amount = '" . (float)-$overpaid . "',
+			payment_method = '" . $this->db->escape($order_info['payment_method']) . "',
+			payment_code = '" . $this->db->escape($order_info['payment_code']) . "',
+			reference = '',
+			comment = '" . $this->db->escape($comment) . "',
+			created_by = '" . (int)$this->user->getId() . "',
+			date_added = NOW()");
+
+		$reversal_id = $this->db->getLastId();
+
+		$this->db->query("UPDATE `" . DB_PREFIX . "order` SET paid_amount = '" . (float)$total . "', date_modified = NOW() WHERE order_id = '" . (int)$order_id . "'");
+
+		return $reversal_id;
 	}
 
 	public function deleteOrder($order_id) {
@@ -890,6 +1087,7 @@ class ModelSaleOrder extends Model {
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "order_voucher` WHERE order_id = '" . (int)$order_id . "'");
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "order_total` WHERE order_id = '" . (int)$order_id . "'");
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "order_history` WHERE order_id = '" . (int)$order_id . "'");
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "order_payment` WHERE order_id = '" . (int)$order_id . "'");
 		$this->db->query("DELETE `or`, ort FROM `" . DB_PREFIX . "order_recurring` `or`, `" . DB_PREFIX . "order_recurring_transaction` `ort` WHERE order_id = '" . (int)$order_id . "' AND ort.order_recurring_id = `or`.order_recurring_id");
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "customer_transaction` WHERE order_id = '" . (int)$order_id . "'");
 

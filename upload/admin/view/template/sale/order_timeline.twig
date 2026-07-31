@@ -2,8 +2,10 @@
   <div class="timeline-entries">
   {% for entry in entries %}
   <div class="timeline-entry" data-history-id="{{ entry.order_history_id }}">
-    <div class="timeline-icon {% if entry.order_status_id == 0 %}timeline-icon--note{% else %}timeline-icon--system {% endif %}">
-      {% if entry.order_status_id == 0 %}
+    <div class="timeline-icon {% if entry.type == 'payment' %}timeline-icon--payment{% elseif entry.order_status_id == 0 %}timeline-icon--note{% else %}timeline-icon--system {% endif %}">
+      {% if entry.type == 'payment' %}
+      <i data-lucide="credit-card" width="14" height="14"></i>
+      {% elseif entry.order_status_id == 0 %}
       <i data-lucide="sticky-note" width="14" height="14"></i>
       {% else %}
       <i data-lucide="refresh-cw" width="14" height="14"></i>
@@ -16,6 +18,9 @@
       </div>
       {% if entry.comment %}
       <div class="timeline-comment">{{ entry.comment|raw }}</div>
+      {% endif %}
+      {% if entry.type == 'payment' and entry.payment_method %}
+      <div class="timeline-comment" style="color:#888;font-size:11px">{{ entry.payment_method }}</div>
       {% endif %}
       {% if entry.notify %}
       <span class="dcx-badge dcx-badge--info" style="font-size:10px;padding:1px 5px">{{ text_notify }}</span>
