@@ -53,11 +53,14 @@ class ControllerAccountOrder extends Controller {
 		foreach ($results as $result) {
 			$product_total = $this->model_account_order->getTotalOrderProductsByOrderId($result['order_id']);
 			$voucher_total = $this->model_account_order->getTotalOrderVouchersByOrderId($result['order_id']);
+			$payment_status = $this->model_account_order->getPaymentStatus($result['total'], $result['paid_amount']);
 
 			$data['orders'][] = array(
 				'order_id'   => $result['order_id'],
 				'name'       => $result['firstname'] . ' ' . $result['lastname'],
 				'status'     => $result['status'],
+				'payment_status' => $payment_status,
+				'payment_status_text' => $this->language->get('text_payment_status_' . $payment_status),
 				'tracking_number' => $result['tracking_number'],
 				'date_added' => date($this->language->get('datetime_format'), strtotime($result['date_added'])),
 				'products'   => ($product_total + $voucher_total),
@@ -195,6 +198,25 @@ class ControllerAccountOrder extends Controller {
 			$data['payment_address'] = str_replace(array("\r\n", "\r", "\n"), '<br />', preg_replace(array("/\s\s+/", "/\r\r+/", "/\n\n+/"), '<br />', trim(str_replace($find, $replace, $format))));
 
 			$data['payment_method'] = $order_info['payment_method'];
+
+			$data['total'] = $this->currency->format($order_info['total'], $order_info['currency_code'], $order_info['currency_value']);
+			$data['paid_amount'] = $this->currency->format($order_info['paid_amount'], $order_info['currency_code'], $order_info['currency_value']);
+			$data['payment_status'] = $this->model_account_order->getPaymentStatus($order_info['total'], $order_info['paid_amount']);
+			$data['payment_status_text'] = $this->language->get('text_payment_status_' . $data['payment_status']);
+			$data['payment_remaining'] = $this->currency->format(max(0, (float)$order_info['total'] - (float)$order_info['paid_amount']), $order_info['currency_code'], $order_info['currency_value']);
+
+			$data['payments'] = array();
+
+			$payments = $this->model_account_order->getOrderPayments($this->request->get['order_id']);
+
+			foreach ($payments as $payment) {
+				$data['payments'][] = array(
+					'amount'         => $this->currency->format(abs($payment['amount']), $order_info['currency_code'], $order_info['currency_value']),
+					'is_reversal'    => (float)$payment['amount'] < 0,
+					'payment_method' => $payment['payment_method'],
+					'date_added'     => date($this->language->get('date_format_short'), strtotime($payment['date_added'])),
+				);
+			}
 
 			if ($order_info['shipping_address_format']) {
 				$format = $order_info['shipping_address_format'];

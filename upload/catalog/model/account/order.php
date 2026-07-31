@@ -88,6 +88,7 @@ class ModelAccountOrder extends Model {
 				'shipping_method'         => $order_query->row['shipping_method'],
 				'comment'                 => $order_query->row['comment'],
 				'total'                   => $order_query->row['total'],
+				'paid_amount'             => $order_query->row['paid_amount'],
 				'order_status_id'         => $order_query->row['order_status_id'],
 				'language_id'             => $order_query->row['language_id'],
 				'currency_id'             => $order_query->row['currency_id'],
@@ -111,9 +112,38 @@ class ModelAccountOrder extends Model {
 			$limit = 1;
 		}
 
-		$query = $this->db->query("SELECT o.order_id, o.firstname, o.lastname, os.name as status, o.date_added, o.tracking_number, o.total, o.currency_code, o.currency_value FROM `" . DB_PREFIX . "order` o LEFT JOIN " . DB_PREFIX . "order_status os ON (o.order_status_id = os.order_status_id) WHERE o.customer_id = '" . (int)$this->customer->getId() . "' AND o.order_status_id > '0' AND o.store_id = '" . (int)$this->config->get('config_store_id') . "' AND os.language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY o.order_id DESC LIMIT " . (int)$start . "," . (int)$limit);
+		$query = $this->db->query("SELECT o.order_id, o.firstname, o.lastname, os.name as status, o.date_added, o.tracking_number, o.total, o.paid_amount, o.currency_code, o.currency_value FROM `" . DB_PREFIX . "order` o LEFT JOIN " . DB_PREFIX . "order_status os ON (o.order_status_id = os.order_status_id) WHERE o.customer_id = '" . (int)$this->customer->getId() . "' AND o.order_status_id > '0' AND o.store_id = '" . (int)$this->config->get('config_store_id') . "' AND os.language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY o.order_id DESC LIMIT " . (int)$start . "," . (int)$limit);
 
 		return $query->rows;
+	}
+
+	public function getOrderPayments($order_id) {
+		$query = $this->db->query("SELECT op.amount, op.payment_method, op.date_added FROM " . DB_PREFIX . "order_payment op LEFT JOIN `" . DB_PREFIX . "order` o ON (op.order_id = o.order_id) WHERE op.order_id = '" . (int)$order_id . "' AND o.customer_id = '" . (int)$this->customer->getId() . "' AND o.customer_id != '0' ORDER BY op.date_added ASC, op.order_payment_id ASC");
+
+		return $query->rows;
+	}
+
+	public function getPaymentStatus($total, $paid_amount) {
+		$total = (float)$total;
+		$paid_amount = (float)$paid_amount;
+
+		if ($total <= 0) {
+			return 'paid';
+		}
+
+		if ($paid_amount <= 0) {
+			return 'unpaid';
+		}
+
+		if ($paid_amount > $total) {
+			return 'overpaid';
+		}
+
+		if ($paid_amount >= $total) {
+			return 'paid';
+		}
+
+		return 'partial';
 	}
 
 	public function getOrderProduct($order_id, $order_product_id) {

@@ -211,6 +211,8 @@ class ControllerSaleOrderDetail extends Controller {
 		$this->load->model('customer/customer');
 		$data['reward_total'] = $this->model_customer_customer->getTotalCustomerRewardsByOrderId($order_id);
 
+		$data = array_merge($data, $this->getPaymentsPartialData($order_id));
+
 		$data['affiliate_firstname'] = $order_info['affiliate_firstname'];
 		$data['affiliate_lastname'] = $order_info['affiliate_lastname'];
 		$data['affiliate_id'] = (int)$order_info['affiliate_id'];
@@ -311,37 +313,49 @@ class ControllerSaleOrderDetail extends Controller {
 
 			$this->load->model('sale/order');
 
-			$entries = $this->model_sale_order->getOrderTimeline($order_id, $start, $limit);
-			$total = $this->model_sale_order->countOrderTimeline($order_id);
+			$order_info = $this->model_sale_order->getOrder($order_id);
 
-			$data['entries'] = [];
-			foreach ($entries as $entry) {
-				if ((int)$entry['order_status_id'] === 0) {
-					$status_name = '<span class="badge badge-note">' . $this->language->get('text_note') . '</span>';
-				} else {
-					$status_name = $entry['status_name'] ?? '';
+			if (!$order_info) {
+				$json['error'] = $this->language->get('error_action');
+			} else {
+				$entries = $this->model_sale_order->getOrderTimeline($order_id, $start, $limit);
+				$total = $this->model_sale_order->countOrderTimeline($order_id);
+
+				$data['entries'] = [];
+				foreach ($entries as $entry) {
+					if (($entry['type'] ?? 'history') === 'payment') {
+						$amount = (float)$entry['amount'];
+						$amount_text = $this->currency->format(abs($amount), $order_info['currency_code'], $order_info['currency_value']);
+						$status_name = '<span class="badge ' . ($amount >= 0 ? 'badge-success' : 'badge-danger') . '">' . ($amount >= 0 ? '+' : '−') . ' ' . $amount_text . '</span>';
+					} elseif ((int)$entry['order_status_id'] === 0) {
+						$status_name = '<span class="badge badge-note">' . $this->language->get('text_note') . '</span>';
+					} else {
+						$status_name = $entry['status_name'] ?? '';
+					}
+
+					$data['entries'][] = [
+						'order_history_id' => $entry['order_history_id'],
+						'type'             => $entry['type'] ?? 'history',
+						'status_name'      => $status_name,
+						'order_status_id'  => $entry['order_status_id'],
+						'comment'          => nl2br(htmlspecialchars($entry['comment'], ENT_QUOTES, 'UTF-8')),
+						'payment_method'   => htmlspecialchars($entry['payment_method'] ?? '', ENT_QUOTES, 'UTF-8'),
+						'notify'           => $entry['notify'],
+						'date_added'       => date($this->language->get('datetime_format'), strtotime($entry['date_added'])),
+					];
 				}
 
-				$data['entries'][] = [
-					'order_history_id' => $entry['order_history_id'],
-					'status_name'      => $status_name,
-					'order_status_id'  => $entry['order_status_id'],
-					'comment'          => nl2br(htmlspecialchars($entry['comment'], ENT_QUOTES, 'UTF-8')),
-					'notify'           => $entry['notify'],
-					'date_added'       => date($this->language->get('datetime_format'), strtotime($entry['date_added'])),
-				];
+				$this->load->model('localisation/order_status');
+				$data['order_statuses'] = $this->model_localisation_order_status->getOrderStatuses();
+
+				$data['page'] = $page;
+				$data['limit'] = $limit;
+				$data['total'] = $total;
+				$data['pages'] = ceil($total / $limit);
+
+				$json['success'] = true;
+				$json['html'] = $this->load->view('sale/order_timeline', $data);
 			}
-
-			$this->load->model('localisation/order_status');
-			$data['order_statuses'] = $this->model_localisation_order_status->getOrderStatuses();
-
-			$data['page'] = $page;
-			$data['limit'] = $limit;
-			$data['total'] = $total;
-			$data['pages'] = ceil($total / $limit);
-
-			$json['success'] = true;
-			$json['html'] = $this->load->view('sale/order_timeline', $data);
 		}
 
 		$this->response->addHeader('Content-Type: application/json');
@@ -477,7 +491,9 @@ class ControllerSaleOrderDetail extends Controller {
 			}
 
 			if (!isset($json['error'])) {
-				$this->model_sale_order->recalculateOrderTotals($order_id);
+				$recalc = $this->model_sale_order->recalculateOrderTotals($order_id);
+
+				$this->journalTotalChange($order_id, (float)$recalc['old_total'], (float)$recalc['new_total']);
 
 				$order_info = $this->model_sale_order->getOrder($order_id);
 
@@ -547,7 +563,10 @@ class ControllerSaleOrderDetail extends Controller {
 				$order_product_id = $this->model_sale_order->addProductToOrder($order_id, $product_id, $quantity, $options);
 
 				if ($order_product_id) {
-					$this->model_sale_order->recalculateOrderTotals($order_id);
+					$recalc = $this->model_sale_order->recalculateOrderTotals($order_id);
+
+					$this->journalTotalChange($order_id, (float)$recalc['old_total'], (float)$recalc['new_total']);
+
 					$this->session->data['success'] = $this->language->get('text_success');
 					$json['success'] = $this->language->get('text_success');
 					$this->load->model('tool/image');
@@ -610,7 +629,10 @@ class ControllerSaleOrderDetail extends Controller {
 
 			$this->load->model('sale/order');
 			$this->model_sale_order->removeProductFromOrder($order_product_id, $order_id);
-			$this->model_sale_order->recalculateOrderTotals($order_id);
+
+			$recalc = $this->model_sale_order->recalculateOrderTotals($order_id);
+
+			$this->journalTotalChange($order_id, (float)$recalc['old_total'], (float)$recalc['new_total']);
 
 			$json['success'] = $this->language->get('text_success');
 		}
@@ -630,7 +652,10 @@ class ControllerSaleOrderDetail extends Controller {
 			$order_id = (int)($this->request->get['order_id'] ?? 0);
 
 			$this->load->model('sale/order');
-			$this->model_sale_order->recalculateOrderTotals($order_id);
+
+			$recalc = $this->model_sale_order->recalculateOrderTotals($order_id);
+
+			$this->journalTotalChange($order_id, (float)$recalc['old_total'], (float)$recalc['new_total']);
 
 			$json['success'] = $this->language->get('text_success');
 		}
@@ -651,7 +676,10 @@ class ControllerSaleOrderDetail extends Controller {
 			$discounts = $this->request->post['discount'] ?? [];
 
 			$this->load->model('sale/order');
-			$this->model_sale_order->applyLineDiscounts($order_id, $discounts);
+
+			$recalc = $this->model_sale_order->applyLineDiscounts($order_id, $discounts);
+
+			$this->journalTotalChange($order_id, (float)$recalc['old_total'], (float)$recalc['new_total']);
 
 			$json['success'] = $this->language->get('text_success');
 		}
@@ -758,6 +786,257 @@ class ControllerSaleOrderDetail extends Controller {
 		$this->response->setOutput(json_encode($json));
 	}
 
+	public function addPayment(): void {
+		$this->load->language('sale/order');
+
+		$json = [];
+
+		if (!$this->user->hasPermission('modify', 'sale/order')) {
+			$json['error'] = $this->language->get('error_permission');
+		} else {
+			$order_id = (int)($this->request->get['order_id'] ?? 0);
+			$amount = (float)($this->request->post['amount'] ?? 0);
+			$reference = trim((string)($this->request->post['reference'] ?? ''));
+			$comment = trim((string)($this->request->post['comment'] ?? ''));
+			$payment_code = trim((string)($this->request->post['payment_code'] ?? ''));
+			$payment_method = trim((string)($this->request->post['payment_method'] ?? ''));
+
+			$this->load->model('sale/order');
+
+			$order_info = $this->model_sale_order->getOrder($order_id);
+
+			if (!$order_info) {
+				$json['error'] = $this->language->get('error_action');
+			} elseif ($amount <= 0) {
+				$json['error'] = $this->language->get('error_payment_amount');
+			} else {
+				$order_payment_id = $this->model_sale_order->addOrderPayment($order_id, $amount, $reference, $comment, $payment_method, $payment_code);
+
+				if (!$order_payment_id) {
+					$json['error'] = $this->language->get('error_action');
+				} else {
+					$paid_amount = (float)$order_info['paid_amount'] + $amount;
+					$total = (float)$order_info['total'];
+					$status = $this->model_sale_order->getPaymentStatus($total, $paid_amount);
+					$currency_code = $order_info['currency_code'];
+					$currency_value = $order_info['currency_value'];
+
+					$note = sprintf(
+						$this->language->get('text_payment_note_received'),
+						$this->currency->format($amount, $currency_code, $currency_value),
+						$this->currency->format($paid_amount, $currency_code, $currency_value),
+						$this->currency->format($total, $currency_code, $currency_value)
+					);
+
+					$this->model_sale_order->addOrderNote($order_id, $note);
+
+					if ($status === 'overpaid') {
+						$this->model_sale_order->addOrderNote($order_id, sprintf(
+							$this->language->get('text_payment_note_overpaid'),
+							$this->currency->format($paid_amount - $total, $currency_code, $currency_value)
+						));
+					}
+
+					$json['success'] = $this->language->get('text_payment_added');
+					$json['payments_html'] = $this->load->view('sale/order_payments', $this->getPaymentsPartialData($order_id));
+				}
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function removePayment(): void {
+		$this->load->language('sale/order');
+
+		$json = [];
+
+		if (!$this->user->hasPermission('modify', 'sale/order')) {
+			$json['error'] = $this->language->get('error_permission');
+		} else {
+			$order_payment_id = (int)($this->request->post['order_payment_id'] ?? 0);
+
+			$this->load->model('sale/order');
+
+			$payment = $this->model_sale_order->getOrderPayment($order_payment_id);
+
+			if (!$payment) {
+				$json['error'] = $this->language->get('error_action');
+			} else {
+				$order_id = (int)$payment['order_id'];
+				$order_info = $this->model_sale_order->getOrder($order_id);
+
+				$reversal_id = $this->model_sale_order->removeOrderPayment($order_payment_id, $this->language->get('text_payment_reversal_comment') . ' #' . $order_payment_id);
+
+				if (!$reversal_id) {
+					$json['error'] = $this->language->get('error_action');
+				} else {
+					$this->model_sale_order->addOrderNote($order_id, sprintf(
+						$this->language->get('text_payment_note_reversed'),
+						$this->currency->format((float)$payment['amount'], $order_info['currency_code'], $order_info['currency_value'])
+					));
+
+					$json['success'] = $this->language->get('text_payment_removed');
+					$json['payments_html'] = $this->load->view('sale/order_payments', $this->getPaymentsPartialData($order_id));
+				}
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function removeOverpayment(): void {
+		$this->load->language('sale/order');
+
+		$json = [];
+
+		if (!$this->user->hasPermission('modify', 'sale/order')) {
+			$json['error'] = $this->language->get('error_permission');
+		} else {
+			$order_id = (int)($this->request->get['order_id'] ?? 0);
+
+			$this->load->model('sale/order');
+
+			$order_info = $this->model_sale_order->getOrder($order_id);
+
+			if (!$order_info) {
+				$json['error'] = $this->language->get('error_action');
+			} else {
+				$overpaid = (float)$order_info['paid_amount'] - (float)$order_info['total'];
+
+				if ($overpaid <= 0) {
+					$json['error'] = $this->language->get('error_no_overpayment');
+				} else {
+					$reversal_id = $this->model_sale_order->removeOrderOverpayment($order_id, $this->language->get('text_overpayment_reversal_comment'));
+
+					if (!$reversal_id) {
+						$json['error'] = $this->language->get('error_action');
+					} else {
+						$this->model_sale_order->addOrderNote($order_id, sprintf(
+							$this->language->get('text_payment_note_overpaid_removed'),
+							$this->currency->format($overpaid, $order_info['currency_code'], $order_info['currency_value'])
+						));
+
+						$json['success'] = $this->language->get('text_overpayment_removed');
+						$json['payments_html'] = $this->load->view('sale/order_payments', $this->getPaymentsPartialData($order_id));
+					}
+				}
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	private function getPaymentsPartialData(int $order_id): array {
+		$order_info = $this->model_sale_order->getOrder($order_id);
+
+		$status = $this->model_sale_order->getPaymentStatus($order_info['total'], $order_info['paid_amount']);
+		$total = (float)$order_info['total'];
+		$paid_amount = (float)$order_info['paid_amount'];
+		$currency_code = $order_info['currency_code'];
+		$currency_value = $order_info['currency_value'];
+
+		return [
+			'payment_status'             => $status,
+			'payment_status_text'        => $this->language->get('text_payment_status_' . $status),
+			'payment_status_badge_class' => $this->getPaymentStatusBadgeClass($status),
+			'payment_status_header_badge_class' => $this->getPaymentStatusHeaderBadgeClass($status),
+			'paid_amount'                => $this->currency->format($paid_amount, $currency_code, $currency_value),
+			'paid_amount_raw'            => $paid_amount,
+			'total'                      => $this->currency->format($total, $currency_code, $currency_value),
+			'total_raw'                  => $total,
+			'payment_remaining'          => $this->currency->format(max(0, $total - $paid_amount), $currency_code, $currency_value),
+			'payment_overpaid'           => $this->currency->format(max(0, $paid_amount - $total), $currency_code, $currency_value),
+			'payment_progress'           => $this->getPaymentProgress($total, $paid_amount),
+			'payments'                   => $this->getPaymentsViewData($order_id, $order_info),
+			'payment_methods'            => $this->getAvailablePaymentMethods(),
+			'payment_code'               => $order_info['payment_code'],
+		];
+	}
+
+	private function getPaymentsViewData(int $order_id, array $order_info): array {
+		$payments = $this->model_sale_order->getOrderPayments($order_id);
+		$data = [];
+
+		foreach ($payments as $payment) {
+			$amount = (float)$payment['amount'];
+
+			$data[] = [
+				'order_payment_id' => (int)$payment['order_payment_id'],
+				'amount'           => $this->currency->format(abs($amount), $order_info['currency_code'], $order_info['currency_value']),
+				'amount_raw'       => $amount,
+				'is_reversal'      => $amount < 0,
+				'payment_method'   => $payment['payment_method'],
+				'reference'        => $payment['reference'],
+				'comment'          => $payment['comment'],
+				'date_added'       => date($this->language->get('datetime_format'), strtotime($payment['date_added'])),
+			];
+		}
+
+		return $data;
+	}
+
+	private function getPaymentStatusBadgeClass(string $status): string {
+		switch ($status) {
+			case 'paid':
+				return 'badge badge-success';
+			case 'partial':
+				return 'badge badge-warning';
+			case 'overpaid':
+				return 'badge badge-danger';
+			default:
+				return 'badge badge-default';
+		}
+	}
+
+	private function getPaymentStatusHeaderBadgeClass(string $status): string {
+		switch ($status) {
+			case 'paid':
+				return 'page-header__badge--success';
+			case 'partial':
+				return 'page-header__badge--warning page-header__badge--unfilled';
+			case 'overpaid':
+				return 'page-header__badge--danger';
+			default:
+				return 'page-header__badge--default page-header__badge--unfilled';
+		}
+	}
+
+	private function getPaymentProgress(float $total, float $paid): int {
+		if ($total <= 0) {
+			return 100;
+		}
+
+		return (int)min(100, round($paid / $total * 100));
+	}
+
+	private function journalTotalChange(int $order_id, float $old_total, float $new_total): void {
+		$order_info = $this->model_sale_order->getOrder($order_id);
+
+		if (!$order_info || abs($old_total - $new_total) < 0.0001) {
+			return;
+		}
+
+		$currency_code = $order_info['currency_code'];
+		$currency_value = $order_info['currency_value'];
+
+		$this->model_sale_order->addOrderNote($order_id, sprintf(
+			$this->language->get('text_payment_note_total_changed'),
+			$this->currency->format($old_total, $currency_code, $currency_value),
+			$this->currency->format($new_total, $currency_code, $currency_value)
+		));
+
+		if ((float)$order_info['paid_amount'] > $new_total) {
+			$this->model_sale_order->addOrderNote($order_id, sprintf(
+				$this->language->get('text_payment_note_total_changed_overpaid'),
+				$this->currency->format((float)$order_info['paid_amount'] - $new_total, $currency_code, $currency_value)
+			));
+		}
+	}
+
 	private function formatAddress(array $order_info, string $type): string {
 		$prefix = $type === 'payment' ? 'payment' : 'shipping';
 
@@ -790,14 +1069,14 @@ class ControllerSaleOrderDetail extends Controller {
 		}
 
 		if (in_array($status_id, $processing_statuses)) {
-			return 'warning';
+			return 'warning page-header__badge--unfilled';
 		}
 
 		if (in_array($status_id, $complete_statuses)) {
 			return 'success';
 		}
 
-		return 'default';
+		return 'default page-header__badge--unfilled';
 	}
 
 	private function getCustomerType(array $order_info): string {
@@ -947,7 +1226,7 @@ class ControllerSaleOrderDetail extends Controller {
 
 	private function buildFilterUrl(): string {
 		$url = '';
-		$params = ['filter_order_id', 'filter_customer', 'filter_order_status', 'filter_order_status_id', 'filter_total', 'filter_date_added', 'filter_date_modified', 'sort', 'order', 'page'];
+		$params = ['filter_order_id', 'filter_customer', 'filter_order_status', 'filter_order_status_id', 'filter_payment_status', 'filter_total', 'filter_date_added', 'sort', 'order', 'page'];
 
 		foreach ($params as $param) {
 			if (isset($this->request->get[$param])) {

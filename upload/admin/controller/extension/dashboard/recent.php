@@ -85,6 +85,7 @@ class ControllerExtensionDashboardRecent extends Controller {
 	
 	public function dashboard() {
 		$this->load->language('extension/dashboard/recent');
+		$this->load->language('sale/order');
 
 		$data['text_recent_subtitle'] = $this->language->get('text_recent_subtitle');
 		$data['text_products']        = $this->language->get('text_products');
@@ -143,6 +144,7 @@ class ControllerExtensionDashboardRecent extends Controller {
 			$customer_type = $this->getCustomerType($result);
 			$customer_type_badge_class = $this->getCustomerTypeBadgeClass($result);
 			$status_badge_class = $this->getOrderStatusBadgeClass((int)$result['order_status_id'], $processing_statuses, $complete_statuses, $fraud_status);
+			$payment_status = $this->model_sale_order->getPaymentStatus($result['total'], $result['paid_amount']);
 
 			// Products summary
 			$products = isset($order_products[$order_id]) ? $order_products[$order_id] : array();
@@ -173,6 +175,9 @@ class ControllerExtensionDashboardRecent extends Controller {
 				'order_type_badge_class'    => $order_type_badge_class,
 				'status'                    => $result['order_status'],
 				'order_status_badge_class'  => $status_badge_class,
+				'payment_status'            => $payment_status,
+				'payment_status_text'       => $this->language->get('text_payment_status_' . $payment_status),
+				'payment_status_badge_class' => $this->getPaymentStatusBadgeClass($payment_status),
 				'date_added'                => date($this->language->get('datetime_format'), strtotime($result['date_added'])),
 				'total'                     => $this->currency->format($result['total'], $result['currency_code'], $result['currency_value']),
 				'view'                      => $this->url->link('sale/order/info', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $order_id, true),
@@ -223,17 +228,30 @@ class ControllerExtensionDashboardRecent extends Controller {
 
 	private function getOrderStatusBadgeClass($order_status_id, $processing_statuses, $complete_statuses, $fraud_status) {
 		if ($fraud_status && $order_status_id === $fraud_status) {
-			return 'label label-danger';
+			return 'page-header__badge page-header__badge--danger';
 		}
 
 		if (in_array($order_status_id, $processing_statuses)) {
-			return 'label label-warning';
+			return 'page-header__badge page-header__badge--warning page-header__badge--unfilled';
 		}
 
 		if (in_array($order_status_id, $complete_statuses)) {
-			return 'label label-success';
+			return 'page-header__badge page-header__badge--success';
 		}
 
-		return 'label label-default';
+		return 'page-header__badge page-header__badge--default page-header__badge--unfilled';
+	}
+
+	private function getPaymentStatusBadgeClass($payment_status) {
+		switch ($payment_status) {
+			case 'paid':
+				return 'page-header__badge page-header__badge--success';
+			case 'partial':
+				return 'page-header__badge page-header__badge--warning page-header__badge--unfilled';
+			case 'overpaid':
+				return 'page-header__badge page-header__badge--danger';
+			default:
+				return 'page-header__badge page-header__badge--default page-header__badge--unfilled';
+		}
 	}
 }

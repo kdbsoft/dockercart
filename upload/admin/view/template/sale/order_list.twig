@@ -52,6 +52,15 @@
             </select>
           </div>
           <div class="filter-field">
+            <label for="input-payment-status">{{ text_payment_status }}</label>
+            <select name="filter_payment_status" id="input-payment-status" class="form-control">
+              <option value=""></option>
+              {% for value, text in payment_statuses %}
+              <option value="{{ value }}" {% if filter_payment_status == value %}selected="selected"{% endif %}>{{ text }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="filter-field">
             <label for="input-total">{{ entry_total }}</label>
             <input type="text" name="filter_total" value="{{ filter_total }}" placeholder="{{ entry_total }}" id="input-total" class="form-control" />
           </div>
@@ -59,13 +68,6 @@
             <label for="input-date-added">{{ entry_date_added }}</label>
             <div class="filter-field-date date" data-date-format="YYYY-MM-DD">
               <input type="text" name="filter_date_added" value="{{ filter_date_added }}" placeholder="{{ entry_date_added }}" id="input-date-added" class="form-control" />
-              <button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button>
-            </div>
-          </div>
-          <div class="filter-field">
-            <label for="input-date-modified">{{ entry_date_modified }}</label>
-            <div class="filter-field-date date" data-date-format="YYYY-MM-DD">
-              <input type="text" name="filter_date_modified" value="{{ filter_date_modified }}" placeholder="{{ entry_date_modified }}" id="input-date-modified" class="form-control" />
               <button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button>
             </div>
           </div>
@@ -83,10 +85,12 @@
                   <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked).trigger('change');" /></td>
                   <td class="text-right">{% if sort == 'o.order_id' %} <a href="{{ sort_order }}" class="{{ order|lower }}">{{ column_order_id }}</a> {% else %} <a href="{{ sort_order }}">{{ column_order_id }}</a> {% endif %}</td>
                   <td class="text-left">{% if sort == 'customer' %} <a href="{{ sort_customer }}" class="{{ order|lower }}">{{ column_customer }}</a> {% else %} <a href="{{ sort_customer }}">{{ column_customer }}</a> {% endif %}</td>
-                  <td class="text-left">{% if sort == 'order_status' %} <a href="{{ sort_status }}" class="{{ order|lower }}">{{ column_status }}</a> {% else %} <a href="{{ sort_status }}">{{ column_status }}</a> {% endif %}</td>
-                  <td class="text-right">{% if sort == 'o.total' %} <a href="{{ sort_total }}" class="{{ order|lower }}">{{ column_total }}</a> {% else %} <a href="{{ sort_total }}">{{ column_total }}</a> {% endif %}</td>
                   <td class="text-left">{% if sort == 'o.date_added' %} <a href="{{ sort_date_added }}" class="{{ order|lower }}">{{ column_date_added }}</a> {% else %} <a href="{{ sort_date_added }}">{{ column_date_added }}</a> {% endif %}</td>
-                  <td class="text-left">{% if sort == 'o.date_modified' %} <a href="{{ sort_date_modified }}" class="{{ order|lower }}">{{ column_date_modified }}</a> {% else %} <a href="{{ sort_date_modified }}">{{ column_date_modified }}</a> {% endif %}</td>
+                  <td class="text-left">{% if sort == 'order_status' %} <a href="{{ sort_status }}" class="{{ order|lower }}">{{ column_status }}</a> {% else %} <a href="{{ sort_status }}">{{ column_status }}</a> {% endif %}</td>
+                  <td class="text-left">{{ text_payment_status }}</td>
+                  <td class="text-left">{{ column_shipping }}</td>
+                  <td class="text-center">{{ column_items }}</td>
+                  <td class="text-right">{% if sort == 'o.total' %} <a href="{{ sort_total }}" class="{{ order|lower }}">{{ column_total }}</a> {% else %} <a href="{{ sort_total }}">{{ column_total }}</a> {% endif %}</td>
                   <td class="text-right"></td>
                 </tr>
               </thead>
@@ -103,17 +107,14 @@
                   <input type="hidden" name="shipping_code[]" value="{{ order.shipping_code }}" /></td>
                 <td class="text-right" style="padding-top:8px;padding-bottom:8px;"><div style="margin-bottom:4px;">{{ order.order_id }}</div><small class="text-muted">{{ text_tracking_number }}: <span class="tracking-value" id="tracking-{{ order.order_id }}">{{ order.tracking_number|replace({'|': ' | '}) }}</span> <button type="button" class="btn btn-default btn-xs btn-quick-edit-tracking" data-order-id="{{ order.order_id }}" data-value="{{ order.tracking_number|e('html_attr') }}"><i data-lucide="pencil" width="12" height="12"></i></button></small></td>
                 <td class="text-left" style="padding-top:8px;padding-bottom:8px;">{{ order.customer }}<br><small class="text-muted">{{ order.customer_type }}</small></td>
+                <td class="text-left" style="padding-top:8px;padding-bottom:8px;">{{ order.date_added }}</td>
                 <td class="text-left">
-                  <select class="form-control order-status-select" data-order-id="{{ order.order_id }}" data-current="{{ order.order_status_id }}">
-                    {% for status in order_statuses %}
-                    <option value="{{ status.order_status_id }}" {% if status.order_status_id == order.order_status_id %}selected{% endif %}>{{ status.name }}</option>
-                    {% endfor %}
-                  </select>
-                  <label style="margin-top: 4px; font-size: 11px; cursor: pointer;"><input type="checkbox" class="order-notify-check" data-order-id="{{ order.order_id }}" /> {{ text_notify }}</label>
+                  <span class="{{ order.order_status_badge_class }}">{{ order.order_status }}</span>
                 </td>
+                <td class="text-left"><span class="{{ order.payment_status_badge_class }}">{{ order.payment_status_text }}</span>{% if order.payment_method %}<div style="font-size:11px;color:#888;margin-top:2px">{{ order.payment_method }}</div>{% endif %}{% if order.paid_amount %}<div style="font-size:11px;color:#888;margin-top:1px">{{ order.paid_amount }}</div>{% endif %}</td>
+                <td class="text-left" style="font-size:12px;color:#555">{{ order.shipping_method }}</td>
+                <td class="text-center" style="padding-top:8px;padding-bottom:8px;">{{ order.items_count }}</td>
                 <td class="text-right">{{ order.total }}</td>
-                <td class="text-left">{{ order.date_added }}</td>
-                <td class="text-left">{{ order.date_modified }}</td>
                 <td class="text-right"><div style="min-width: 120px;">
                     <div class="btn-group"> <a href="{{ order.view }}" title="{{ button_view }}" class="btn btn-primary btn--icon"><i data-lucide="eye" width="16" height="16"></i></a>
                       <button type="button" data-order-id="{{ order.delete_id }}" data-loading-text="{{ text_loading }}" title="{{ button_delete }}" class="btn btn-danger btn--icon button-order-delete"><i data-lucide="trash-2" width="16" height="16"></i></button>
@@ -123,7 +124,7 @@
               {% endfor %}
               {% else %}
               <tr>
-                <td class="text-center" colspan="8">{{ text_no_results }}</td>
+                <td class="text-center" colspan="10">{{ text_no_results }}</td>
               </tr>
               {% endif %}
                 </tbody>
@@ -160,6 +161,12 @@ $('#button-filter').on('click', function() {
 		url += '&filter_order_status_id=' + encodeURIComponent(filter_order_status_id);
 	}
 
+	var filter_payment_status = $('select[name=\'filter_payment_status\']').val();
+
+	if (filter_payment_status) {
+		url += '&filter_payment_status=' + encodeURIComponent(filter_payment_status);
+	}
+
 	var filter_total = $('input[name=\'filter_total\']').val();
 
 	if (filter_total) {
@@ -170,12 +177,6 @@ $('#button-filter').on('click', function() {
 
 	if (filter_date_added) {
 		url += '&filter_date_added=' + encodeURIComponent(filter_date_added);
-	}
-
-	var filter_date_modified = $('input[name=\'filter_date_modified\']').val();
-
-	if (filter_date_modified) {
-		url += '&filter_date_modified=' + encodeURIComponent(filter_date_modified);
 	}
 
 	location = 'index.php?route=sale/order&user_token={{ user_token }}' + url;
@@ -323,7 +324,8 @@ $('#button-delete').on('click', function(e) {
   <script type="text/javascript"><!--
 $('.date').datetimepicker({
 	language: '{{ datepicker }}',
-	pickTime: false
+	pickTime: false,
+	format: 'YYYY-MM-DD'
 });
 //--></script>
   <script type="text/javascript"><!--
