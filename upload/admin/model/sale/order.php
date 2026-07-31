@@ -501,7 +501,8 @@ class ModelSaleOrder extends Model {
 
 		foreach ($allowed as $field) {
 			if (array_key_exists($field, $data)) {
-				$set[] = "`" . $field . "` = '" . $this->db->escape($data[$field]) . "'";
+				$value = ($field === 'tracking_number') ? $this->normalizeTrackingNumber($data[$field]) : $data[$field];
+				$set[] = "`" . $field . "` = '" . $this->db->escape($value) . "'";
 			}
 		}
 
@@ -685,9 +686,22 @@ class ModelSaleOrder extends Model {
 			return false;
 		}
 
+		if ($field === 'tracking_number') {
+			$value = $this->normalizeTrackingNumber($value);
+		}
+
 		$this->db->query("UPDATE `" . DB_PREFIX . "order` SET `" . $field . "` = '" . $this->db->escape((string)$value) . "', date_modified = NOW() WHERE order_id = '" . (int)$order_id . "'");
 
 		return true;
+	}
+
+	private function normalizeTrackingNumber($value) {
+		$numbers = array_map('trim', explode('|', (string)$value));
+		$numbers = array_values(array_filter($numbers, function($number) {
+			return $number !== '';
+		}));
+
+		return implode('|', array_slice($numbers, 0, 10));
 	}
 
 	public function updateOrderProductQuantity($order_product_id, $order_id, $quantity) {

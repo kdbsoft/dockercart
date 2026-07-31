@@ -60,7 +60,7 @@
           {% if order.tracking_number %}
           <div class="dc-recent-order-card__tracking">
             <i data-lucide="map-pin" width="13" height="13" class="dc-recent-order-card__detail-icon"></i>
-            <span class="dc-recent-order-card__detail-text">{{ text_tracking }}: {{ order.tracking_number }}</span>
+            <span class="dc-recent-order-card__detail-text">{{ text_tracking }}: {{ order.tracking_number|replace({'|': ' | '}) }}</span>
           </div>
           {% endif %}
         </div>
