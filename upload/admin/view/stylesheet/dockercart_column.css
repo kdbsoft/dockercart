@@ -121,6 +121,12 @@
 	letter-spacing: 0.5px;
 	border-bottom: 1px solid rgba(51, 65, 85, 0.6);
 	backdrop-filter: blur(4px);
+	cursor: pointer;
+	transition: background 0.15s;
+}
+
+#navigation:hover {
+	background: rgba(255, 255, 255, 0.06);
 }
 
 #navigation > svg[data-lucide],
