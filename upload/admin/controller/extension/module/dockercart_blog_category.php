@@ -141,26 +141,10 @@ class ControllerExtensionModuleDockercartBlogCategory extends Controller {
 			$url .= '&page=' . $this->request->get['page'];
 		}
 
-		$data['breadcrumbs'] = array();
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
-		);
-
 		// Add link to Extensions (modules) list without overriding module heading
 		$extension_lang = $this->load->language('extension/module/dockercart_blog');
-		$data['breadcrumbs'][] = array(
-			'text' => isset($extension_lang['text_extension']) ? $extension_lang['text_extension'] : $this->language->get('text_extension'),
-			'href' => $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true)
-		);
 		// Restore module-specific language to keep correct heading_title
 		$this->load->language('extension/module/dockercart_blog_category');
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('extension/module/dockercart_blog_category', 'user_token=' . $this->session->data['user_token'] . $url, true)
-		);
-
 		$data['add'] = $this->url->link('extension/module/dockercart_blog_category/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['copy'] = $this->url->link('extension/module/dockercart_blog_category/copy', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('extension/module/dockercart_blog_category/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
@@ -245,25 +229,10 @@ class ControllerExtensionModuleDockercartBlogCategory extends Controller {
 			$url .= '&page=' . $this->request->get['page'];
 		}
 
-		$data['breadcrumbs'] = array();
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
-		);
 		// Add link to Extensions (modules) list without overriding module heading
 		$extension_lang = $this->load->language('extension/module/dockercart_blog');
-		$data['breadcrumbs'][] = array(
-			'text' => isset($extension_lang['text_extension']) ? $extension_lang['text_extension'] : $this->language->get('text_extension'),
-			'href' => $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true)
-		);
 		// Restore module-specific language to keep correct heading_title
 		$this->load->language('extension/module/dockercart_blog_category');
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('extension/module/dockercart_blog_category', 'user_token=' . $this->session->data['user_token'] . $url, true)
-		);
-
 		if (!isset($this->request->get['category_id'])) {
 			$data['action'] = $this->url->link('extension/module/dockercart_blog_category/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		} else {

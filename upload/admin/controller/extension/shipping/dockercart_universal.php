@@ -34,23 +34,6 @@ class ControllerExtensionShippingDockercartUniversal extends Controller {
         }
 
         // Breadcrumbs
-        $data['breadcrumbs'] = [];
-
-        $data['breadcrumbs'][] = [
-            'text' => $this->language->get('text_home'),
-            'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
-        ];
-
-        $data['breadcrumbs'][] = [
-            'text' => $this->language->get('text_extension'),
-            'href' => $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=shipping', true)
-        ];
-
-        $data['breadcrumbs'][] = [
-            'text' => $this->language->get('heading_title'),
-            'href' => $this->url->link('extension/shipping/dockercart_universal', 'user_token=' . $this->session->data['user_token'], true)
-        ];
-
         // Errors
         $data['error_warning'] = $this->error['warning'] ?? '';
 
@@ -147,28 +130,6 @@ class ControllerExtensionShippingDockercartUniversal extends Controller {
         }
 
         // Breadcrumbs
-        $data['breadcrumbs'] = [];
-
-        $data['breadcrumbs'][] = [
-            'text' => $this->language->get('text_home'),
-            'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
-        ];
-
-        $data['breadcrumbs'][] = [
-            'text' => $this->language->get('text_extension'),
-            'href' => $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=shipping', true)
-        ];
-
-        $data['breadcrumbs'][] = [
-            'text' => $this->language->get('heading_title'),
-            'href' => $this->url->link('extension/shipping/dockercart_universal', 'user_token=' . $this->session->data['user_token'], true)
-        ];
-
-        $data['breadcrumbs'][] = [
-            'text' => $method_id ? $this->language->get('text_edit_method') : $this->language->get('text_add_method'),
-            'href' => $this->url->link('extension/shipping/dockercart_universal/form', 'user_token=' . $this->session->data['user_token'] . ($method_id ? '&method_id=' . $method_id : ''), true)
-        ];
-
         // Errors
         $data['error_warning'] = $this->error['warning'] ?? '';
         $data['error_name'] = $this->error['name'] ?? '';

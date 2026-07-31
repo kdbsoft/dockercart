@@ -77,28 +77,8 @@ class ControllerExtensionModuleDockercartNewsletter extends Controller {
             $data['error_name'] = '';
         }
 
-        $data['breadcrumbs'] = array();
-
-        $data['breadcrumbs'][] = array(
-            'text' => $this->language->get('text_home'),
-            'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
-        );
-
-        $data['breadcrumbs'][] = array(
-            'text' => $this->language->get('text_extension'),
-            'href' => $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true)
-        );
-
         if ($selected_module_id <= 0) {
-            $data['breadcrumbs'][] = array(
-                'text' => $this->language->get('heading_title'),
-                'href' => $this->url->link('extension/module/dockercart_newsletter', 'user_token=' . $this->session->data['user_token'], true)
-            );
         } else {
-            $data['breadcrumbs'][] = array(
-                'text' => $this->language->get('heading_title'),
-                'href' => $this->url->link('extension/module/dockercart_newsletter', 'user_token=' . $this->session->data['user_token'] . '&module_id=' . $selected_module_id, true)
-            );
         }
 
         if ($selected_module_id <= 0) {
