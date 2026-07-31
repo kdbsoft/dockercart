@@ -27,3 +27,7 @@ $_['text_edit_subtitle'] = 'Налаштуйте параметри та опц�
 
 $_['text_recent_subtitle'] = 'Огляд останніх замовлень клієнтів';
 $_['text_view_all']        = 'Всі замовлення';
+$_['text_products']        = 'товарів';
+$_['text_tracking']        = 'Відстеження';
+$_['text_view']            = 'Детальніше';
+$_['text_no_products']     = 'Немає товарів';

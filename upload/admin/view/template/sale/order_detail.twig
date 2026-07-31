@@ -9,6 +9,7 @@
             <span class="page-header__title">
               {{ heading_title }}
               <span class="page-header__badge page-header__badge--{{ status_badge_class }}">{{ order_status }}</span>
+              <span class="page-header__badge {{ payment_status_header_badge_class }}">{{ payment_status_text }}</span>
             </span>
           </a>
           <div class="pull-right" id="header-actions">
@@ -132,9 +133,9 @@
                         <input type="hidden" id="product-id" value="0">
                         <input type="hidden" id="product-price" value="0">
                         <div class="order-product-dropdown" id="product-dropdown"></div>
-                      </div>
                     </div>
                     <div id="product-options-container" style="display:none"></div>
+                  </div>
                   </div>
                   <div class="dcx-fields--row order-add-block__row">
                     <div class="dcx-field order-add-block__qty">
@@ -436,6 +437,19 @@
           </div>
         </div>
 
+        {# Payments Card #}
+        <div class="dcx-sidebar-card" data-panel="payments">
+          <div class="dcx-sidebar-card__header">
+            <div class="dcx-sidebar-card__header-icon"><i data-lucide="credit-card" width="16" height="16"></i></div>
+            <h3 class="dcx-sidebar-card__title">{{ text_payments }}</h3>
+          </div>
+          <div class="dcx-sidebar-card__body">
+            <div id="payments-card">
+              {% include 'sale/order_payments.twig' %}
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -535,6 +549,7 @@
 .timeline-icon { width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 .timeline-icon--system { background:#e8f4fd; color:#2563eb; }
 .timeline-icon--note { background:#fef3e2; color:#e65100; }
+.timeline-icon--payment { background:#e8f8ee; color:#16a34a; }
 .timeline-content { flex:1; min-width:0; }
 .timeline-header { display:flex; justify-content:space-between; font-size:11px; }
 .timeline-status { font-weight:500; }
@@ -543,6 +558,27 @@
 .timeline-load-more { text-align:center; padding:6px; }
 .timeline-note-form { margin-top:10px; border-top:1px solid #eee; padding-top:10px; }
 .badge-note { background:#fef3e2; color:#e65100; font-weight:500; padding:1px 6px; border-radius:3px; font-size:10px; }
+
+.payment-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-top:6px; }
+.payment-progress__bar { height:100%; background:#22c55e; border-radius:3px; transition:width .3s; }
+.payment-progress__bar--overpaid { background:#ef4444; }
+.dcx-payment-list { margin-top:12px; border-top:1px solid #f0f0f0; }
+.dcx-payment-item { padding:6px 0; border-bottom:1px solid #f5f5f5; }
+.dcx-payment-item:last-child { border-bottom:none; }
+.dcx-payment-item__row { display:flex; align-items:center; gap:8px; font-size:12px; }
+.dcx-payment-item__amount { font-weight:700; font-variant-numeric:tabular-nums; }
+.dcx-payment-item__date { color:#999; margin-left:auto; }
+.dcx-payment-item__remove { flex-shrink:0; }
+.dcx-payment-item__meta { font-size:11px; color:#888; margin-top:1px; }
+.dcx-payment-item__comment { font-size:11px; color:#666; margin-top:1px; white-space:pre-wrap; }
+.dcx-payment-add { margin-top:12px; border-top:1px solid #f0f0f0; padding-top:12px; }
+.dcx-payment-add .dcx-field { max-width:340px; }
+.dcx-payment-overpaid { margin-top:10px; padding:8px 10px; border:1px solid #fca5a5; border-radius:6px; background:#fef2f2; }
+.dcx-payment-overpaid__row { display:flex; align-items:center; gap:8px; font-size:12px; }
+.dcx-payment-overpaid__icon { color:#ef4444; flex-shrink:0; }
+.dcx-payment-overpaid__amount { font-weight:700; color:#b91c1c; }
+.dcx-payment-overpaid__btn { flex-shrink:0; margin-left:auto; }
+.dcx-payment-overpaid__hint { font-size:11px; color:#b91c1c; margin-top:4px; }
 
 .pcm-overlay { position:fixed; inset:0; z-index:2000; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; padding:24px; }
 .pcm-modal { position:relative; background:var(--dc-surface,#fff); border-radius:var(--dc-radius-xl,10px); box-shadow:0 8px 30px rgba(0,0,0,.18); max-width:520px; width:100%; max-height:80vh; overflow-y:auto; padding:24px; }
@@ -1074,6 +1110,63 @@ function addReward() { api('index.php?route=sale/order_detail/addReward&user_tok
 function removeReward() { api('index.php?route=sale/order_detail/removeReward&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID, 'POST').then(j => { if (j.success) showAlert(j.success); }); }
 function addCommission() { api('index.php?route=sale/order_detail/addCommission&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID, 'POST').then(j => { if (j.success) showAlert(j.success); }); }
 function removeCommission() { api('index.php?route=sale/order_detail/removeCommission&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID, 'POST').then(j => { if (j.success) showAlert(j.success); }); }
+
+function refreshPaymentsCard(html) {
+	const container = document.getElementById('payments-card');
+	if (container && html) container.innerHTML = html;
+	lucide.createIcons();
+}
+
+function addPayment() {
+	const amount = document.getElementById('payment-amount').value;
+	const methodSel = document.getElementById('payment-method');
+	const methodTitle = methodSel ? methodSel.value : '';
+	const methodCode = methodSel && methodSel.selectedIndex >= 0 ? methodSel.options[methodSel.selectedIndex].dataset.code : '';
+	const reference = document.getElementById('payment-reference').value;
+	const comment = document.getElementById('payment-comment').value;
+
+	if (!amount || parseFloat(amount) <= 0) {
+		showAlert('{{ error_payment_amount }}', 'warning');
+		return;
+	}
+
+	api('index.php?route=sale/order_detail/addPayment&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID, 'POST',
+		{ amount: amount, payment_method: methodTitle, payment_code: methodCode, reference: reference, comment: comment })
+		.then(j => {
+			if (j.error) { showAlert(j.error, 'danger'); return; }
+			refreshPaymentsCard(j.payments_html);
+			const amountInput = document.getElementById('payment-amount');
+			if (amountInput) amountInput.value = '';
+			const refInput = document.getElementById('payment-reference');
+			if (refInput) refInput.value = '';
+			const commentInput = document.getElementById('payment-comment');
+			if (commentInput) commentInput.value = '';
+			loadTimeline(1);
+			showAlert(j.success);
+		});
+}
+
+function removePayment(orderPaymentId) {
+	if (!confirm('{{ text_confirm_remove_payment }}')) return;
+	api('index.php?route=sale/order_detail/removePayment&user_token=' + USER_TOKEN, 'POST', { order_payment_id: orderPaymentId })
+		.then(j => {
+			if (j.error) { showAlert(j.error, 'danger'); return; }
+			refreshPaymentsCard(j.payments_html);
+			loadTimeline(1);
+			showAlert(j.success);
+		});
+}
+
+function removeOverpayment() {
+	if (!confirm('{{ text_confirm_remove_overpayment }}')) return;
+	api('index.php?route=sale/order_detail/removeOverpayment&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID, 'POST')
+		.then(j => {
+			if (j.error) { showAlert(j.error, 'danger'); return; }
+			refreshPaymentsCard(j.payments_html);
+			loadTimeline(1);
+			showAlert(j.success);
+		});
+}
 
 const zonesCache = {};
 function loadZones(countrySelect, targetSel, currentZoneId) {
