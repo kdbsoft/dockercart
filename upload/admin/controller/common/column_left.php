@@ -32,11 +32,11 @@ class ControllerCommonColumnLeft extends Controller {
 				$pending_orders = (int)$this->model_sale_order->getTotalOrdersExcludingStatuses($exclude_statuses);
 			}
 
-			// Pending returns count
+			// Pending returns count (exclude completed)
 			$pending_returns = 0;
 			if ($this->user->hasPermission('access', 'sale/return')) {
 				$this->load->model('sale/return');
-				$pending_returns = (int)$this->model_sale_return->getTotalReturnsByReturnStatusId(1);
+				$pending_returns = (int)$this->model_sale_return->getTotalReturnsExcludingStatuses(array(3));
 			}
 
 			if ($this->user->hasPermission('access', 'sale/order')) {

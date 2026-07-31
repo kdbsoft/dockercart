@@ -154,6 +154,22 @@ class ModelSaleReturn extends Model {
 		return $query->row['total'];
 	}
 
+	public function getTotalReturnsExcludingStatuses($exclude_status_ids = array()) {
+		$sql = "SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "return`";
+
+		if ($exclude_status_ids) {
+			$implode = array();
+			foreach ($exclude_status_ids as $status_id) {
+				$implode[] = (int)$status_id;
+			}
+			$sql .= " WHERE return_status_id NOT IN (" . implode(',', $implode) . ")";
+		}
+
+		$query = $this->db->query($sql);
+
+		return $query->row['total'];
+	}
+
 	public function getTotalReturnsByReturnReasonId($return_reason_id) {
 		$query = $this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "return` WHERE return_reason_id = '" . (int)$return_reason_id . "'");
 
