@@ -1,3 +1,9 @@
+## [2.4.1](https://github.com/kdbsoft/dockercart/compare/v2.4.0...v2.4.1) (2026-07-30)
+
+### Bug Fixes
+
+* **ci:** correct docker compose health check flag syntax ([1cba1f8](https://github.com/kdbsoft/dockercart/commit/1cba1f87a2bec6f5522900f85cdb1b41a041518f))
+
 ## [2.4.0](https://github.com/kdbsoft/dockercart/compare/v2.3.0...v2.4.0) (2026-07-30)
 
 ### Features
