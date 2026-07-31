@@ -100,7 +100,7 @@
                 <span class="text-gray-500">{{ order.products }} {{ order.products == 1 ? text_product : text_products }}</span>
                 {% if order.tracking_number %}
                 <span class="text-gray-300 mr-2">·</span>
-                <span class="text-gray-400 font-mono text-xs">{{ order.tracking_number }}</span>
+                <span class="text-gray-400 font-mono text-xs">{{ order.tracking_number|replace({'|': ' | '}) }}</span>
                 {% endif %}
               </div>
             </div>
