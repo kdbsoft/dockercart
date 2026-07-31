@@ -54,18 +54,6 @@ class ControllerToolDockercartScheduler extends Controller {
 			return;
 		}
 
-		$data['breadcrumbs'] = array();
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
-		);
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('tool/dockercart_scheduler', 'user_token=' . $this->session->data['user_token'], true)
-		);
-
 		$data['user_token'] = $this->session->data['user_token'];
 
 		$data['tasks'] = $this->model_tool_dockercart_scheduler->getAllScheduledTasks();

@@ -39,23 +39,6 @@ class ControllerExtensionModuleDockercartShopFeatures extends Controller {
         $data['error_warning'] = isset($this->error['warning']) ? $this->error['warning'] : '';
         $data['error_name'] = isset($this->error['name']) ? $this->error['name'] : '';
 
-        $data['breadcrumbs'] = array();
-
-        $data['breadcrumbs'][] = array(
-            'text' => $this->language->get('text_home'),
-            'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
-        );
-
-        $data['breadcrumbs'][] = array(
-            'text' => $this->language->get('text_extension'),
-            'href' => $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true)
-        );
-
-        $data['breadcrumbs'][] = array(
-            'text' => $this->language->get('heading_title'),
-            'href' => $this->url->link('extension/module/dockercart_shop_features', 'user_token=' . $this->session->data['user_token'] . ($selected_module_id > 0 ? '&module_id=' . $selected_module_id : ''), true)
-        );
-
         $data['action'] = $this->url->link('extension/module/dockercart_shop_features', 'user_token=' . $this->session->data['user_token'] . ($selected_module_id > 0 ? '&module_id=' . $selected_module_id : ''), true);
         $data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true);
         $data['new_widget'] = $this->url->link('extension/module/dockercart_shop_features', 'user_token=' . $this->session->data['user_token'], true);

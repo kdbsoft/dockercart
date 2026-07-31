@@ -131,23 +131,6 @@ class ControllerSettingSetting extends Controller {
 			$data['error_encryption'] = '';
 		}
 
-		$data['breadcrumbs'] = array();
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
-		);
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('text_stores'),
-			'href' => $this->url->link('setting/store', 'user_token=' . $this->session->data['user_token'], true)
-		);
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('setting/setting', 'user_token=' . $this->session->data['user_token'], true)
-		);
-
 		if (isset($this->session->data['success'])) {
 			$data['success'] = $this->session->data['success'];
 

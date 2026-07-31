@@ -30,16 +30,6 @@ class ControllerSaleOrderDetail extends Controller {
 
 		$url = $this->buildFilterUrl();
 
-		$data['breadcrumbs'] = [];
-		$data['breadcrumbs'][] = [
-			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
-		];
-		$data['breadcrumbs'][] = [
-			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'] . $url, true)
-		];
-
 		$data['cancel'] = $this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['print_url'] = $this->url->link('sale/order_detail/print', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $order_id, true);
 		$data['user_token'] = $this->session->data['user_token'];

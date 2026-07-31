@@ -209,18 +209,6 @@ class ControllerCatalogDownload extends Controller {
 			$url .= '&filter_status=' . $this->request->get['filter_status'];
 		}
 
-		$data['breadcrumbs'] = array();
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
-		);
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('catalog/download', 'user_token=' . $this->session->data['user_token'] . $url, true)
-		);
-
 		$data['add'] = $this->url->link('catalog/download/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['copy'] = $this->url->link('catalog/download/copy', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('catalog/download/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
@@ -372,18 +360,6 @@ class ControllerCatalogDownload extends Controller {
 		if (isset($this->request->get['page'])) {
 			$url .= '&page=' . $this->request->get['page'];
 		}
-
-		$data['breadcrumbs'] = array();
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
-		);
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('catalog/download', 'user_token=' . $this->session->data['user_token'] . $url, true)
-		);
 
 		if (!isset($this->request->get['download_id'])) {
 			$data['action'] = $this->url->link('catalog/download/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
