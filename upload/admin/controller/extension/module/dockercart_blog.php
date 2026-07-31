@@ -454,17 +454,17 @@ class ControllerExtensionModuleDockercartBlog extends Controller {
 			)
 		);
 
-		// Find the catalog menu position
+		// Find the customer menu position
 		if (isset($data['menus'])) {
 			$position = 0;
 			foreach ($data['menus'] as $key => $menu) {
-				if ($menu['id'] == 'menu-catalog') {
+				if ($menu['id'] == 'menu-customer') {
 					$position = $key + 1;
 					break;
 				}
 			}
 
-			// Insert blog menu after catalog
+			// Insert blog menu after customer
 			array_splice($data['menus'], $position, 0, array($blog_menu));
 		}
 	}
