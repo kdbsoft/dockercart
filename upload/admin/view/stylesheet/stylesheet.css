@@ -115,6 +115,12 @@ a {
     color: #fff;
 }
 
+.page-header__badge--unfilled::before {
+    background: transparent;
+    border: 1.5px solid currentColor;
+    opacity: 1;
+}
+
 .page-header h1 {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-weight: 600;
@@ -610,6 +616,18 @@ fieldset[disabled] .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+}
+
+.btn-xs.btn--icon {
+    padding: 2px 4px;
+    min-width: 22px;
+    min-height: 20px;
+}
+
+.btn-xs.btn--icon i,
+.btn-xs.btn--icon svg {
+    width: 11px;
+    height: 11px;
 }
 
 .dcx-sidebar-card__actions .btn--icon {
