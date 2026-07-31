@@ -331,18 +331,6 @@ class ControllerCustomerCustomer extends Controller {
 			$url .= '&page=' . $this->request->get['page'];
 		}
 
-		$data['breadcrumbs'] = array();
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
-		);
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('customer/customer', 'user_token=' . $this->session->data['user_token'] . $url, true)
-		);
-
 		$data['add'] = $this->url->link('customer/customer/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('customer/customer/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['text_list_subtitle'] = $this->language->get('text_list_subtitle');
@@ -695,18 +683,6 @@ class ControllerCustomerCustomer extends Controller {
 		if (isset($this->request->get['page'])) {
 			$url .= '&page=' . $this->request->get['page'];
 		}
-
-		$data['breadcrumbs'] = array();
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
-		);
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('customer/customer', 'user_token=' . $this->session->data['user_token'] . $url, true)
-		);
 
 		if (!isset($this->request->get['customer_id'])) {
 			$data['action'] = $this->url->link('customer/customer/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
@@ -1251,18 +1227,6 @@ class ControllerCustomerCustomer extends Controller {
 			$this->load->language('error/not_found');
 
 			$this->document->setTitle($this->language->get('heading_title'));
-
-			$data['breadcrumbs'] = array();
-
-			$data['breadcrumbs'][] = array(
-				'text' => $this->language->get('text_home'),
-				'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
-			);
-
-			$data['breadcrumbs'][] = array(
-				'text' => $this->language->get('heading_title'),
-				'href' => $this->url->link('error/not_found', 'user_token=' . $this->session->data['user_token'], true)
-			);
 
 			$data['header'] = $this->load->controller('common/header');
 			$data['column_left'] = $this->load->controller('common/column_left');

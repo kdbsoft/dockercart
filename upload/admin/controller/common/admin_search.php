@@ -19,18 +19,6 @@ class ControllerCommonAdminSearch extends Controller {
 
         $this->document->setTitle($this->language->get('heading_title'));
 
-        $data['breadcrumbs'] = [];
-
-        $data['breadcrumbs'][] = [
-            'text' => $this->language->get('text_home'),
-            'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
-        ];
-
-        $data['breadcrumbs'][] = [
-            'text' => $this->language->get('heading_title'),
-            'href' => $this->url->link('common/admin_search', 'user_token=' . $this->session->data['user_token'], true)
-        ];
-
         $search = isset($this->request->get['search']) ? trim($this->request->get['search']) : '';
         $type = isset($this->request->get['type']) ? trim($this->request->get['type']) : 'all';
         $page = isset($this->request->get['page']) ? (int)$this->request->get['page'] : 1;

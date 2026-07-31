@@ -769,23 +769,6 @@ class ControllerMarketplaceModification extends Controller {
 			$url .= '&page=' . $this->request->get['page'];
 		}
 
-		$data['breadcrumbs'] = array();
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
-		);
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('marketplace/modification', 'user_token=' . $this->session->data['user_token'], true)
-		);
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('text_test'),
-			'href' => $this->url->link('marketplace/modification/test', 'user_token=' . $this->session->data['user_token'] . '&modification_id=' . $this->request->get['modification_id'], true)
-		);
-
 		$data['source_name'] = $source_name;
 		$data['test_results'] = $test_results;
 		$data['cancel'] = $this->url->link('marketplace/modification', 'user_token=' . $this->session->data['user_token'] . $url, true);
@@ -849,18 +832,6 @@ class ControllerMarketplaceModification extends Controller {
 		if (isset($this->request->get['page'])) {
 			$url .= '&page=' . $this->request->get['page'];
 		}
-
-		$data['breadcrumbs'] = array();
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
-		);
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('marketplace/modification', 'user_token=' . $this->session->data['user_token'] . $url, true)
-		);
 
 		$modification_id = $this->request->get['modification_id'] ?? $this->request->post['modification_id'] ?? null;
 
@@ -1371,18 +1342,6 @@ class ControllerMarketplaceModification extends Controller {
 		if (isset($this->request->get['page'])) {
 			$url .= '&page=' . $this->request->get['page'];
 		}
-
-		$data['breadcrumbs'] = array();
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
-		);
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('marketplace/modification', 'user_token=' . $this->session->data['user_token'], true)
-		);
 
 		$data['add'] = $this->url->link('marketplace/modification/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['refresh'] = $this->url->link('marketplace/modification/refresh', 'user_token=' . $this->session->data['user_token'] . $url, true);

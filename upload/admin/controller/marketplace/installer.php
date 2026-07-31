@@ -5,18 +5,6 @@ class ControllerMarketplaceInstaller extends Controller {
 
 		$this->document->setTitle($this->language->get('heading_title'));
 		
-		$data['breadcrumbs'] = array();
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
-		);
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('marketplace/installer', 'user_token=' . $this->session->data['user_token'], true)
-		);
-
 		$data['user_token'] = $this->session->data['user_token'];
 		$data['cancel'] = $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true);
 		$data['text_list_subtitle'] = $this->language->get('text_installer_list_subtitle');

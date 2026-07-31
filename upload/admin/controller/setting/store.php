@@ -89,18 +89,6 @@ class ControllerSettingStore extends Controller {
 			$url .= '&page=' . $this->request->get['page'];
 		}
 
-		$data['breadcrumbs'] = array();
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
-		);
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('setting/store', 'user_token=' . $this->session->data['user_token'], true)
-		);
-
 		$data['add'] = $this->url->link('setting/store/add', 'user_token=' . $this->session->data['user_token'], true);
 		$data['delete'] = $this->url->link('setting/store/delete', 'user_token=' . $this->session->data['user_token'], true);
 
@@ -213,28 +201,8 @@ class ControllerSettingStore extends Controller {
 			$data['error_customer_group_display'] = '';
 		}
 
-		$data['breadcrumbs'] = array();
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
-		);
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('setting/store', 'user_token=' . $this->session->data['user_token'], true)
-		);
-
 		if (!isset($this->request->get['store_id'])) {
-			$data['breadcrumbs'][] = array(
-				'text' => $this->language->get('text_settings'),
-				'href' => $this->url->link('setting/store/add', 'user_token=' . $this->session->data['user_token'], true)
-			);
 		} else {
-			$data['breadcrumbs'][] = array(
-				'text' => $this->language->get('text_settings'),
-				'href' => $this->url->link('setting/store/edit', 'user_token=' . $this->session->data['user_token'] . '&store_id=' . $this->request->get['store_id'], true)
-			);
 		}
 
 		if (isset($this->session->data['success'])) {

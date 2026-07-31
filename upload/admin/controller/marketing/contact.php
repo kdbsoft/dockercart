@@ -9,18 +9,6 @@ class ControllerMarketingContact extends Controller {
 
 		$data['user_token'] = $this->session->data['user_token'];
 
-		$data['breadcrumbs'] = array();
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
-		);
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('marketing/contact', 'user_token=' . $this->session->data['user_token'], true)
-		);
-
 		$data['text_mail_subtitle'] = $this->language->get('text_mail_subtitle');
 
 		$data['text_mail_card'] = $this->language->get('text_mail_card');

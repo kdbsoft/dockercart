@@ -23,16 +23,6 @@ class ControllerExtensionStore extends Controller {
 		}
 
 		$data['user_token'] = $this->session->data['user_token'];
-		$data['breadcrumbs'] = array();
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true),
-		);
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('extension/store', 'user_token=' . $this->session->data['user_token'], true),
-		);
-
 		if (!is_file(DIR_SYSTEM . 'library/dockercart/extension_store.php')) {
 			$data['error'] = 'Extension Store library not found.';
 			$data['categories_tree'] = array();
@@ -125,11 +115,6 @@ class ControllerExtensionStore extends Controller {
 
 		$data['total_offers'] = count($offers);
 		$data['total_categories_count'] = array_sum($category_counts);
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('text_extension'),
-			'href' => $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'], true),
-		);
 
 		if (isset($this->session->data['error'])) {
 			$data['error_warning'] = $this->session->data['error'];

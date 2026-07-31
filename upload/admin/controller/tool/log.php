@@ -25,18 +25,6 @@ class ControllerToolLog extends Controller {
 			$data['success'] = '';
 		}
 
-		$data['breadcrumbs'] = array();
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
-		);
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('tool/log', 'user_token=' . $this->session->data['user_token'], true)
-		);
-
 		$data['download'] = $this->url->link('tool/log/download', 'user_token=' . $this->session->data['user_token'], true);
 		$data['clear'] = $this->url->link('tool/log/clear', 'user_token=' . $this->session->data['user_token'], true);
 

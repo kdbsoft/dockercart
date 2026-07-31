@@ -34,18 +34,6 @@ class ControllerCommonForgotten extends Controller {
 			$data['error_warning'] = '';
 		}
 
-		$data['breadcrumbs'] = array();
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', '', true)
-		);
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('common/forgotten', 'user_token=' . '', true)
-		);
-
 		$data['action'] = $this->url->link('common/forgotten', '', true);
 
 		$data['cancel'] = $this->url->link('common/login', '', true);

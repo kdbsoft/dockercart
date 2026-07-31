@@ -140,48 +140,6 @@ class ControllerExtensionModuleDockercartCheckout extends Controller
         }
 
         // Breadcrumbs
-        $data["breadcrumbs"] = [];
-
-        $data["breadcrumbs"][] = [
-            "text" => $this->language->get("text_home"),
-            "href" => $this->url->link(
-                "common/dashboard",
-                "user_token=" . $this->session->data["user_token"],
-                true,
-            ),
-        ];
-
-        $data["breadcrumbs"][] = [
-            "text" => $this->language->get("text_extension"),
-            "href" => $this->url->link(
-                "marketplace/extension",
-                "user_token=" .
-                    $this->session->data["user_token"] .
-                    "&type=module",
-                true,
-            ),
-        ];
-
-        $data["breadcrumbs"][] = [
-            "text" => $this->language->get("heading_title"),
-            "href" => $this->url->link(
-                "extension/module/dockercart_checkout",
-                "user_token=" . $this->session->data["user_token"],
-                true,
-            ),
-        ];
-
-        $data["action"] = $this->url->link(
-            "extension/module/dockercart_checkout",
-            "user_token=" . $this->session->data["user_token"],
-            true,
-        );
-        $data["cancel"] = $this->url->link(
-            "marketplace/extension",
-            "user_token=" . $this->session->data["user_token"] . "&type=module",
-            true,
-        );
-
         // AJAX URLs
         $data["save_blocks_ajax"] = $this->url->link(
             "extension/module/dockercart_checkout/saveBlocksOrder",

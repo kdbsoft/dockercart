@@ -173,18 +173,6 @@ class ControllerLocalisationCurrency extends Controller {
 			$url .= '&page=' . $this->request->get['page'];
 		}
 
-		$data['breadcrumbs'] = array();
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
-		);
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('localisation/currency', 'user_token=' . $this->session->data['user_token'] . $url, true)
-		);
-
 		$data['add'] = $this->url->link('localisation/currency/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('localisation/currency/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['refresh'] = $this->url->link('localisation/currency/refresh', 'user_token=' . $this->session->data['user_token'] . $url, true);
@@ -319,18 +307,6 @@ class ControllerLocalisationCurrency extends Controller {
 		if (isset($this->request->get['page'])) {
 			$url .= '&page=' . $this->request->get['page'];
 		}
-
-		$data['breadcrumbs'] = array();
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
-		);
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('localisation/currency', 'user_token=' . $this->session->data['user_token'] . $url, true)
-		);
 
 		if (!isset($this->request->get['currency_id'])) {
 			$data['action'] = $this->url->link('localisation/currency/add', 'user_token=' . $this->session->data['user_token'] . $url, true);

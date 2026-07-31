@@ -13,18 +13,6 @@ class ControllerToolBackup extends Controller {
 			$data['error_warning'] = '';
 		}
 
-		$data['breadcrumbs'] = array();
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
-		);
-
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('tool/backup', 'user_token=' . $this->session->data['user_token'], true)
-		);
-
 		$data['user_token'] = $this->session->data['user_token'];
 
 		$data['export'] = $this->url->link('tool/backup/export', 'user_token=' . $this->session->data['user_token'], true);
