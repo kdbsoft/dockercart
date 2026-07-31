@@ -60,7 +60,7 @@
     {% if tracking_number %}
     <div>
       <h3>{{ text_tracking_number }}</h3>
-      <p>{{ tracking_number }}</p>
+      <p>{{ tracking_number|replace({'|': ' | '}) }}</p>
     </div>
     {% endif %}
   </div>
