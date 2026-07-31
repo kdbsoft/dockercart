@@ -2115,6 +2115,15 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
     color: var(--dc-gray-700);
 }
 
+/* Sidebar badge */
+#column-left .badge {
+    display: inline-flex;
+    margin-left: 6px;
+    background: var(--dc-danger, #e74c3c);
+    color: #fff;
+    vertical-align: middle;
+}
+
 /* Extension type filter */
 #ext-type-filter .btn {
     margin-bottom: 2px;

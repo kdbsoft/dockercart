@@ -8,13 +8,97 @@ class ControllerCommonColumnLeft extends Controller {
 			// Level 2 can not have children
 
 			// Menu
+			// Home (dashboard)
 			$data['menus'][] = array(
 				'id'       => 'menu-dashboard',
-				'icon'	   => 'layout-dashboard',
-				'name'	   => $this->language->get('text_dashboard'),
+				'icon'	   => 'home',
+				'name'	   => $this->language->get('text_home'),
 				'href'     => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true),
 				'children' => array()
 			);
+
+			// Sales (Продажи) — parent with Orders, Returns, Vouchers
+			$sales_children = array();
+
+			// Pending orders count (exclude completed and fraud)
+			$pending_orders = 0;
+			if ($this->user->hasPermission('access', 'sale/order')) {
+				$this->load->model('sale/order');
+				$exclude_statuses = (array)$this->config->get('config_complete_status');
+				$fraud_status = (int)$this->config->get('config_fraud_status_id');
+				if ($fraud_status) {
+					$exclude_statuses[] = $fraud_status;
+				}
+				$pending_orders = (int)$this->model_sale_order->getTotalOrdersExcludingStatuses($exclude_statuses);
+			}
+
+			// Pending returns count
+			$pending_returns = 0;
+			if ($this->user->hasPermission('access', 'sale/return')) {
+				$this->load->model('sale/return');
+				$pending_returns = (int)$this->model_sale_return->getTotalReturnsByReturnStatusId(1);
+			}
+
+			if ($this->user->hasPermission('access', 'sale/order')) {
+				$sales_children[] = array(
+					'name'	   => $this->language->get('text_order'),
+					'href'     => $this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'receipt',
+					'badge'    => $pending_orders,
+					'children' => array()
+				);
+			}
+
+			if ($this->user->hasPermission('access', 'sale/return')) {
+				$sales_children[] = array(
+					'name'	   => $this->language->get('text_return'),
+					'href'     => $this->url->link('sale/return', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'rotate-ccw',
+					'badge'    => $pending_returns,
+					'children' => array()
+				);
+			}
+
+			// Voucher
+			$voucher = array();
+
+			if ($this->user->hasPermission('access', 'sale/voucher')) {
+				$voucher[] = array(
+					'name'	   => $this->language->get('text_voucher'),
+					'href'     => $this->url->link('sale/voucher', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'ticket',
+					'children' => array()
+				);
+			}
+
+			if ($this->user->hasPermission('access', 'sale/voucher_theme')) {
+				$voucher[] = array(
+					'name'	   => $this->language->get('text_voucher_theme'),
+					'href'     => $this->url->link('sale/voucher_theme', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'palette',
+					'children' => array()
+				);
+			}
+
+			if ($voucher) {
+				$sales_children[] = array(
+					'name'	   => $this->language->get('text_voucher'),
+					'href'     => '',
+					'icon'	   => 'gift',
+					'children' => $voucher
+				);
+			}
+
+			if ($sales_children) {
+				$data['menus'][] = array(
+					'id'       => 'menu-sale',
+					'icon'	   => 'shopping-cart',
+					'name'	   => $this->language->get('text_sale'),
+					'href'     => '',
+					'badge'    => $pending_orders + $pending_returns,
+					'children' => $sales_children
+				);
+			}
 
 			// Catalog
 			$catalog = array();
@@ -164,6 +248,55 @@ class ControllerCommonColumnLeft extends Controller {
 				);
 			}
 
+			// Customer
+			$customer = array();
+
+			if ($this->user->hasPermission('access', 'customer/customer')) {
+				$customer[] = array(
+					'name'	   => $this->language->get('text_customer'),
+					'href'     => $this->url->link('customer/customer', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'user',
+					'children' => array()
+				);
+			}
+
+			if ($this->user->hasPermission('access', 'customer/customer_group')) {
+				$customer[] = array(
+					'name'	   => $this->language->get('text_customer_group'),
+					'href'     => $this->url->link('customer/customer_group', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'users',
+					'children' => array()
+				);
+			}
+
+			if ($this->user->hasPermission('access', 'customer/customer_approval')) {
+				$customer[] = array(
+					'name'	   => $this->language->get('text_customer_approval'),
+					'href'     => $this->url->link('customer/customer_approval', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'user-check',
+					'children' => array()
+				);
+			}
+
+			if ($this->user->hasPermission('access', 'customer/custom_field')) {
+				$customer[] = array(
+					'name'	   => $this->language->get('text_custom_field'),
+					'href'     => $this->url->link('customer/custom_field', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'text',
+					'children' => array()
+				);
+			}
+
+			if ($customer) {
+				$data['menus'][] = array(
+					'id'       => 'menu-customer',
+					'icon'	   => 'users',
+					'name'	   => $this->language->get('text_customer'),
+					'href'     => '',
+					'children' => $customer
+				);
+			}
+
 			// Extension
 			$marketplace = array();
 
@@ -253,116 +386,6 @@ class ControllerCommonColumnLeft extends Controller {
 				);
 			}
 
-			// Sales
-			$sale = array();
-
-			if ($this->user->hasPermission('access', 'sale/order')) {
-				$sale[] = array(
-					'name'	   => $this->language->get('text_order'),
-					'href'     => $this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'], true),
-					'icon'	   => 'receipt',
-					'children' => array()
-				);
-			}
-
-			if ($this->user->hasPermission('access', 'sale/return')) {
-				$sale[] = array(
-					'name'	   => $this->language->get('text_return'),
-					'href'     => $this->url->link('sale/return', 'user_token=' . $this->session->data['user_token'], true),
-					'icon'	   => 'rotate-ccw',
-					'children' => array()
-				);
-			}
-
-			// Voucher
-			$voucher = array();
-
-			if ($this->user->hasPermission('access', 'sale/voucher')) {
-				$voucher[] = array(
-					'name'	   => $this->language->get('text_voucher'),
-					'href'     => $this->url->link('sale/voucher', 'user_token=' . $this->session->data['user_token'], true),
-					'icon'	   => 'ticket',
-					'children' => array()
-				);
-			}
-
-			if ($this->user->hasPermission('access', 'sale/voucher_theme')) {
-				$voucher[] = array(
-					'name'	   => $this->language->get('text_voucher_theme'),
-					'href'     => $this->url->link('sale/voucher_theme', 'user_token=' . $this->session->data['user_token'], true),
-					'icon'	   => 'palette',
-					'children' => array()
-				);
-			}
-
-			if ($voucher) {
-				$sale[] = array(
-					'name'	   => $this->language->get('text_voucher'),
-					'href'     => '',
-					'icon'	   => 'gift',
-					'children' => $voucher
-				);
-			}
-
-			if ($sale) {
-				$data['menus'][] = array(
-					'id'       => 'menu-sale',
-					'icon'	   => 'shopping-cart',
-					'name'	   => $this->language->get('text_sale'),
-					'href'     => '',
-					'children' => $sale
-				);
-			}
-
-			// Customer
-			$customer = array();
-
-			if ($this->user->hasPermission('access', 'customer/customer')) {
-				$customer[] = array(
-					'name'	   => $this->language->get('text_customer'),
-					'href'     => $this->url->link('customer/customer', 'user_token=' . $this->session->data['user_token'], true),
-					'icon'	   => 'user',
-					'children' => array()
-				);
-			}
-
-			if ($this->user->hasPermission('access', 'customer/customer_group')) {
-				$customer[] = array(
-					'name'	   => $this->language->get('text_customer_group'),
-					'href'     => $this->url->link('customer/customer_group', 'user_token=' . $this->session->data['user_token'], true),
-					'icon'	   => 'users',
-					'children' => array()
-				);
-			}
-
-			if ($this->user->hasPermission('access', 'customer/customer_approval')) {
-				$customer[] = array(
-					'name'	   => $this->language->get('text_customer_approval'),
-					'href'     => $this->url->link('customer/customer_approval', 'user_token=' . $this->session->data['user_token'], true),
-					'icon'	   => 'user-check',
-					'children' => array()
-				);
-			}
-
-			if ($this->user->hasPermission('access', 'customer/custom_field')) {
-				$customer[] = array(
-					'name'	   => $this->language->get('text_custom_field'),
-					'href'     => $this->url->link('customer/custom_field', 'user_token=' . $this->session->data['user_token'], true),
-					'icon'	   => 'text',
-					'children' => array()
-				);
-			}
-
-			if ($customer) {
-				$data['menus'][] = array(
-					'id'       => 'menu-customer',
-					'icon'	   => 'users',
-					'name'	   => $this->language->get('text_customer'),
-					'href'     => '',
-					'children' => $customer
-				);
-			}
-
 			// Marketing
 			$marketing = array();
 
@@ -400,6 +423,17 @@ class ControllerCommonColumnLeft extends Controller {
 					'name'	   => $this->language->get('text_marketing'),
 					'href'     => '',
 					'children' => $marketing
+				);
+			}
+
+			// Analytics
+			if ($this->user->hasPermission('access', 'report/report')) {
+				$data['menus'][] = array(
+					'id'       => 'menu-report',
+					'icon'	   => 'bar-chart-3',
+					'name'	   => $this->language->get('text_analytics'),
+					'href'     => $this->url->link('report/report', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
 				);
 			}
 
@@ -641,16 +675,6 @@ class ControllerCommonColumnLeft extends Controller {
 					'icon'	   => 'clock',
 					'name'	   => $this->language->get('text_scheduler'),
 					'href'     => $this->url->link('tool/dockercart_scheduler', 'user_token=' . $this->session->data['user_token'], true),
-					'children' => array()
-				);
-			}
-
-			// Reports
-			if ($this->user->hasPermission('access', 'report/report')) {
-				$system[] = array(
-					'name'	   => $this->language->get('text_reports'),
-					'href'     => $this->url->link('report/report', 'user_token=' . $this->session->data['user_token'], true),
-					'icon'	   => 'bar-chart-3',
 					'children' => array()
 				);
 			}

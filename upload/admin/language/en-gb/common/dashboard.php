@@ -1,6 +1,6 @@
 <?php
 // Heading
-$_['heading_title'] = 'Dashboard';
+$_['heading_title'] = 'Home';
 $_['text_cache']    = 'Cache';
 
 // Error
