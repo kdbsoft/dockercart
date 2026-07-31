@@ -81,12 +81,18 @@ class ControllerSaleOrderDetail extends Controller {
 		$data['user_agent'] = $order_info['user_agent'];
 		$data['accept_language'] = $order_info['accept_language'];
 		$data['tracking_number'] = $order_info['tracking_number'];
+		$data['tracking_numbers'] = array_values(array_filter(array_map('trim', explode('|', $order_info['tracking_number'])), function (string $number): bool {
+			return $number !== '';
+		}));
 		$data['comment'] = $order_info['comment'];
 		$data['payment_code'] = $order_info['payment_code'];
 		$data['shipping_code'] = $order_info['shipping_code'];
 
 		$data['payment_method'] = $order_info['payment_method'];
 		$data['shipping_method'] = $order_info['shipping_method'];
+
+		$data['payment_methods'] = $this->getAvailablePaymentMethods();
+		$data['shipping_methods'] = $this->getAvailableShippingMethods();
 
 		$data['payment_firstname'] = $order_info['payment_firstname'];
 		$data['payment_lastname'] = $order_info['payment_lastname'];
@@ -412,6 +418,19 @@ class ControllerSaleOrderDetail extends Controller {
 			$result = $this->model_sale_order->updateOrderField($order_id, $field, $value);
 
 			if ($result) {
+				$this->load->model('localisation/country');
+				$this->load->model('localisation/zone');
+
+				if ($field === 'payment_country_id' || $field === 'shipping_country_id') {
+					$prefix = str_replace('_country_id', '', $field);
+					$country_info = $this->model_localisation_country->getCountry((int)$value);
+					$this->model_sale_order->updateOrderField($order_id, $prefix . '_country', $country_info ? $country_info['name'] : '');
+				} elseif ($field === 'payment_zone_id' || $field === 'shipping_zone_id') {
+					$prefix = str_replace('_zone_id', '', $field);
+					$zone_info = $this->model_localisation_zone->getZone((int)$value);
+					$this->model_sale_order->updateOrderField($order_id, $prefix . '_zone', $zone_info ? $zone_info['name'] : '');
+				}
+
 				$json['success'] = $this->language->get('text_success');
 
 				$order_info = $this->model_sale_order->getOrder($order_id);
@@ -787,6 +806,143 @@ class ControllerSaleOrderDetail extends Controller {
 
 	private function getCustomerTypeBadgeClass(array $order_info): string {
 		return $order_info['customer_id'] ? 'registered' : 'guest';
+	}
+
+	private function getAvailablePaymentMethods(): array {
+		$methods = [];
+		$this->load->model('setting/extension');
+		$extensions = $this->model_setting_extension->getInstalled('payment');
+
+		foreach ($extensions as $code) {
+			$status = $this->config->get('payment_' . $code . '_status');
+			if ($status) {
+				$this->load->language('extension/payment/' . $code);
+				$default_title = $this->language->get('heading_title');
+				if (empty($default_title) || $default_title === 'heading_title') {
+					$default_title = ucfirst(str_replace('_', ' ', $code));
+				}
+
+				$sub_methods = $this->getPaymentModuleMethods($code);
+
+				if (!empty($sub_methods)) {
+					foreach ($sub_methods as $sub_code => $sub_data) {
+						$methods[$sub_code] = [
+							'code'          => $sub_code,
+							'title'         => $sub_data['title'],
+							'module_title'  => $default_title,
+							'module_code'   => $code,
+						];
+					}
+				} else {
+					$methods[$code] = [
+						'code'          => $code,
+						'title'         => $default_title,
+						'module_title'  => $default_title,
+						'module_code'   => $code,
+					];
+				}
+			}
+		}
+
+		return $methods;
+	}
+
+	private function getPaymentModuleMethods(string $code): array {
+		$methods = [];
+
+		if ($code === 'dockercart_universal') {
+			$this->load->model('extension/payment/dockercart_universal');
+			$db_methods = $this->model_extension_payment_dockercart_universal->getMethods();
+
+			foreach ($db_methods as $method) {
+				$method_code = 'dockercart_universal.dockercart_universal_' . $method['method_id'];
+				$methods[$method_code] = [
+					'title'     => $method['name'] ?? 'Method ' . $method['method_id'],
+					'method_id' => $method['method_id'],
+				];
+			}
+		}
+
+		return $methods;
+	}
+
+	private function getAvailableShippingMethods(): array {
+		$methods = [];
+		$this->load->model('setting/extension');
+		$extensions = $this->model_setting_extension->getInstalled('shipping');
+
+		foreach ($extensions as $code) {
+			$status = $this->config->get('shipping_' . $code . '_status');
+			if ($status) {
+				$this->load->language('extension/shipping/' . $code);
+				$default_title = $this->language->get('heading_title');
+				if (empty($default_title) || $default_title === 'heading_title') {
+					$default_title = ucfirst(str_replace('_', ' ', $code));
+				}
+
+				$sub_methods = $this->getShippingModuleMethods($code);
+
+				if (!empty($sub_methods)) {
+					foreach ($sub_methods as $sub_code => $sub_data) {
+						$methods[$sub_code] = [
+							'code'          => $sub_code,
+							'title'         => $sub_data['title'],
+							'module_title'  => $default_title,
+							'module_code'   => $code,
+						];
+					}
+				} else {
+					$methods[$code] = [
+						'code'          => $code,
+						'title'         => $default_title,
+						'module_title'  => $default_title,
+						'module_code'   => $code,
+					];
+				}
+			}
+		}
+
+		return $methods;
+	}
+
+	private function getShippingModuleMethods(string $code): array {
+		$methods = [];
+
+		if ($code === 'dockercart_universal') {
+			$this->load->model('extension/shipping/dockercart_universal');
+			$db_methods = $this->model_extension_shipping_dockercart_universal->getMethods();
+
+			foreach ($db_methods as $method) {
+				$method_code = 'dockercart_universal.dockercart_universal_' . $method['method_id'];
+				$methods[$method_code] = [
+					'title'     => $method['name'] ?? 'Method ' . $method['method_id'],
+					'method_id' => $method['method_id'],
+				];
+			}
+		}
+
+		if ($code === 'dockercart_novapost') {
+			$this->load->language('extension/shipping/dockercart_novapost');
+
+			$delivery_types = [
+				'branch'  => 'delivery_branch',
+				'locker'  => 'delivery_locker',
+				'courier' => 'delivery_courier',
+			];
+
+			foreach ($delivery_types as $key => $lang_key) {
+				$method_code = 'dockercart_novapost.' . $key;
+				$title = $this->language->get($lang_key);
+				if (empty($title) || $title === $lang_key) {
+					$title = ucfirst($key);
+				}
+				$methods[$method_code] = [
+					'title' => $title,
+				];
+			}
+		}
+
+		return $methods;
 	}
 
 	private function buildFilterUrl(): string {

@@ -31,6 +31,7 @@ $_['text_panel_order_info']      = 'Order Information';
 $_['text_panel_customer']        = 'Customer';
 $_['text_panel_order_tools']     = 'Order Actions';
 $_['text_panel_order_contents']  = 'Order Contents';
+$_['text_edit_order_contents']   = 'Edit Order';
 $_['text_panel_totals']          = 'Totals';
 $_['text_payment_address']       = 'Payment Address';
 $_['text_shipping_address']      = 'Shipping Address';
@@ -201,12 +202,21 @@ $_['text_print']                 = 'Print';
 
 $_['button_print']               = 'Print';
 
+$_['button_save']                = 'Save';
+$_['button_cancel']              = 'Cancel';
+$_['button_add_tracking']        = 'Add Tracking Number';
+$_['button_remove_tracking']     = 'Remove';
+$_['text_tracking_numbers']      = 'Tracking Numbers';
+$_['text_tracking_max']          = 'Up to 10 numbers';
+
 $_['text_search_product']        = 'Search product by name...';
 $_['text_edit_hint']             = 'Click fields to edit them inline';
 $_['text_more_actions']          = 'More actions';
 $_['text_discount']              = 'Discount';
 $_['text_items']                 = 'items';
 $_['text_buyer']                 = 'Buyer';
+$_['text_edit_buyer']            = 'Edit';
+$_['text_edit_order_detail']     = 'Edit';
 
 $_['text_payer_address']         = 'Billing Address';
 $_['text_same_as_billing']       = 'Same as billing address';

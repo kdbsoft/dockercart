@@ -104,6 +104,7 @@ $_['text_panel_order_info'] = 'Информация о заказе';
 $_['text_panel_customer'] = 'Покупатель';
 $_['text_panel_order_tools'] = 'Действия по заказу';
 $_['text_panel_order_contents'] = 'Состав заказа';
+$_['text_edit_order_contents'] = 'Изменить заказ';
 $_['text_panel_totals']          = 'Итого';
 $_['text_order_detail'] = 'Детали заказа';
 $_['text_order_id'] = 'Номер заказа:';
@@ -187,6 +188,13 @@ $_['text_print']                 = 'Печать';
 
 $_['button_print']               = 'Печать';
 
+$_['button_save']                = 'Сохранить';
+$_['button_cancel']              = 'Отмена';
+$_['button_add_tracking']        = 'Добавить номер';
+$_['button_remove_tracking']     = 'Удалить';
+$_['text_tracking_numbers']      = 'Номера отслеживания';
+$_['text_tracking_max']          = 'До 10 номеров';
+
 $_['error_comment']              = 'Пожалуйста, введите комментарий!';
 $_['error_order_status']         = 'Пожалуйста, выберите статус заказа!';
 
@@ -203,5 +211,7 @@ $_['text_more_actions']          = 'Больше действий';
 $_['text_discount']              = 'Скидка';
 $_['text_items']                 = 'товаров';
 $_['text_buyer']                 = 'Покупатель';
+$_['text_edit_buyer']            = 'Изменить';
+$_['text_edit_order_detail']     = 'Изменить';
 $_['text_show_browser_info']     = 'Показать информацию о браузере';
 $_['text_hide_browser_info']     = 'Скрыть информацию о браузере';
