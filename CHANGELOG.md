@@ -1,3 +1,18 @@
+## [2.5.0](https://github.com/kdbsoft/dockercart/compare/v2.4.1...v2.5.0) (2026-07-31)
+
+### Features
+
+* **analytics:** add day-of-week labels to analytics report ([01c84b0](https://github.com/kdbsoft/dockercart/commit/01c84b0237f2c4fbba8bfa4270731a9633c76c94))
+* **order:** add inline editable panels with payment/shipping ([682e76a](https://github.com/kdbsoft/dockercart/commit/682e76a6bf46b84d237d3729029722984b2388b4))
+* **order:** add multiple tracking numbers with modal editor ([96efa01](https://github.com/kdbsoft/dockercart/commit/96efa01fd3f97fa84496747cc14d0d1e7d8bf1ec))
+* **order:** add payment tracking with order_payments table ([de5acb3](https://github.com/kdbsoft/dockercart/commit/de5acb35955215c1ecab3a48b85baf34144b4e0f))
+* **order:** improve payment reference labeling and add hint ([1a89e9f](https://github.com/kdbsoft/dockercart/commit/1a89e9f0eb46722677cf260a7f85ec613738c0bc))
+
+### Bug Fixes
+
+* **manufacturer:** reposition status field above stores in manufacturer form ([d9d19ce](https://github.com/kdbsoft/dockercart/commit/d9d19ceb6d0f6724ecedbcb923afbbed46b206e4))
+* **return:** exclude completed returns from pending count ([71822f4](https://github.com/kdbsoft/dockercart/commit/71822f443f4c0796ac559b7595638ed6ccca2a39))
+
 ## [2.4.1](https://github.com/kdbsoft/dockercart/compare/v2.4.0...v2.4.1) (2026-07-30)
 
 ### Bug Fixes
