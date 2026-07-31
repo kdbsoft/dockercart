@@ -10,14 +10,14 @@
     {% set i = 0 %}
     {% for menu in menus %}
     <li id="{{ menu.id }}">
-        {% if menu.href %}<a href="{{ menu.href }}" title="{{ menu.name }}"><i data-lucide="{{ menu.icon }}"></i> {{ menu.name }}</a>{% else %}<a href="#collapse{{ i }}" data-toggle="collapse" class="parent collapsed" title="{{ menu.name }}"><i data-lucide="{{ menu.icon }}"></i> {{ menu.name }} <i data-lucide="chevron-right" class="menu-arrow"></i></a>{% endif %}
+        {% if menu.href %}<a href="{{ menu.href }}" title="{{ menu.name }}"><i data-lucide="{{ menu.icon }}"></i> {{ menu.name }}{% if menu.badge is defined and menu.badge > 0 %} <span class="badge">{{ menu.badge }}</span>{% endif %}</a>{% else %}<a href="#collapse{{ i }}" data-toggle="collapse" class="parent collapsed" title="{{ menu.name }}"><i data-lucide="{{ menu.icon }}"></i> {{ menu.name }}{% if menu.badge is defined and menu.badge > 0 %} <span class="badge">{{ menu.badge }}</span>{% endif %} <i data-lucide="chevron-right" class="menu-arrow"></i></a>{% endif %}
         {% if menu.children %}
           <ul id="collapse{{ i }}" class="collapse">
             {% set j = 0 %}
             {% for children_1 in menu.children %}
               {% if children_1.href or children_1.children %}
               <li>{% if children_1.href %}
-                  <a href="{{ children_1.href }}" title="{{ children_1.name }}">{% if children_1.icon %}<i data-lucide="{{ children_1.icon }}"></i> {% endif %}{{ children_1.name }}</a>
+                  <a href="{{ children_1.href }}" title="{{ children_1.name }}">{% if children_1.icon %}<i data-lucide="{{ children_1.icon }}"></i> {% endif %}{{ children_1.name }}{% if children_1.badge is defined and children_1.badge > 0 %} <span class="badge">{{ children_1.badge }}</span>{% endif %}</a>
                 {% else %}
                   <a href="#collapse{{ i }}-{{ j }}" data-toggle="collapse" class="parent collapsed" title="{{ children_1.name }}">{% if children_1.icon %}<i data-lucide="{{ children_1.icon }}"></i> {% endif %}{{ children_1.name }} <i data-lucide="chevron-right" class="menu-arrow"></i></a>
                 {% endif %}

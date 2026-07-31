@@ -1,7 +1,7 @@
 <?php
 
 $_['text_affiliate'] = 'Партнерська програма';
-$_['text_analytics'] = 'Аналітікс';
+$_['text_analytics'] = 'Аналітика';
 $_['text_attribute'] = 'Атрибути';
 $_['text_attribute_group'] = 'Групи атрибутів';
 $_['text_backup'] = 'Резервне копіювання / Відновлення';
@@ -27,6 +27,7 @@ $_['text_customer'] = 'Покупці';
 $_['text_customer_approval'] = 'Схвалення покупців';
 $_['text_customer_group'] = 'Групи покупців';
 $_['text_custommenu'] = 'Конструктор меню';
+$_['text_home'] = 'Головна';
 $_['text_dashboard'] = 'Панель керування';
 $_['text_design'] = 'Дизайн';
 $_['text_download'] = 'Завантаження';
@@ -78,7 +79,7 @@ $_['text_paypal_search'] = 'Пошук транзакції';
 $_['text_processing_status'] = 'Обробка замовлень';
 $_['text_product'] = 'Товари';
 $_['text_product_bundle'] = 'Знижки на комплекти';
-$_['text_reports'] = 'Звіти';
+
 $_['text_scheduler'] = 'Планувальник';
 $_['text_report_affiliate'] = 'Партнерська програма';
 $_['text_report_affiliate_activity'] = 'Активність партнерів';
