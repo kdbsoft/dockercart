@@ -18,6 +18,7 @@
     box-shadow: none;
     background: var(--dc-surface);
     transition: none;
+    margin-bottom: 16px;
 }
 .dcx-panel:hover {
     box-shadow: none;
