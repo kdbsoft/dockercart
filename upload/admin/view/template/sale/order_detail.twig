@@ -32,11 +32,11 @@
               </ul>
             </div>
             <span id="edit-actions" style="display:none">
-              <button type="button" id="btn-save" class="btn btn-primary btn--icon" onclick="saveChanges()" data-toggle="tooltip" title="{{ button_save }}">
-                <i data-lucide="save" width="16" height="16"></i>
+              <button type="button" id="btn-save" class="btn btn-primary" onclick="saveChanges()" data-toggle="tooltip" title="{{ button_save }}">
+                <i data-lucide="save" width="16" height="16"></i> {{ button_save }}
               </button>
-              <button type="button" class="btn btn-default btn--icon" onclick="toggleEditMode()" data-toggle="tooltip" title="{{ button_cancel }}">
-                <i data-lucide="x" width="16" height="16"></i>
+              <button type="button" class="btn btn-default" onclick="toggleEditMode()" data-toggle="tooltip" title="{{ button_cancel }}">
+                <i data-lucide="x" width="16" height="16"></i> {{ button_cancel }}
               </button>
             </span>
           </div>
@@ -81,6 +81,9 @@
             </div>
             <div class="dcx-panel-body dcx-panel-body--flush">
               <div class="order-products-list">
+              {% if product_count == 0 %}
+              <div class="text-muted" style="padding:18px;font-size:13px;text-align:center">{{ text_no_order_products }}</div>
+              {% endif %}
               {% for product in products %}
               <div class="order-product-card" data-product-id="{{ product.product_id }}" data-order-product-id="{{ product.order_product_id }}" data-price-raw="{{ product.price_raw|round(4) }}" data-tax-raw="{{ product.tax_raw|round(4) }}" data-discount-original="{{ product.discount_percent|round(1) }}">
                 <div class="order-product-card__thumb">
@@ -331,7 +334,7 @@
             <div class="dcx-sidebar-card__field">
               <span class="dcx-sidebar-card__label">{{ entry_order_status }}</span>
               <span class="dcx-sidebar-card__value view-only">{{ order_status }}</span>
-              <select class="form-control edit-only" id="edit-order-status" style="display:none">
+              <select class="form-control edit-only" id="edit-order-status" data-original-status="{{ order_status_id }}" style="display:none">
                 {% for status in order_statuses %}
                 <option value="{{ status.order_status_id }}" {% if status.order_status_id == order_status_id %}selected{% endif %}>{{ status.name }}</option>
                 {% endfor %}
@@ -349,6 +352,8 @@
               <select class="form-control edit-only" data-field="payment_method" data-code-field="payment_code" style="display:none">
                 {% if payment_code %}
                   <option value="{{ payment_method }}" data-code="{{ payment_code }}" selected>{{ payment_method }}</option>
+                {% else %}
+                  <option value="" selected>&mdash;</option>
                 {% endif %}
                 {% for code, method in payment_methods %}
                   {% if code != payment_code %}
@@ -363,6 +368,8 @@
               <select class="form-control edit-only" data-field="shipping_method" data-code-field="shipping_code" style="display:none">
                 {% if shipping_code %}
                   <option value="{{ shipping_method }}" data-code="{{ shipping_code }}" selected>{{ shipping_method }}</option>
+                {% else %}
+                  <option value="" selected>&mdash;</option>
                 {% endif %}
                 {% for code, method in shipping_methods %}
                   {% if code != shipping_code %}
@@ -468,6 +475,8 @@
 .dcx-panel-edit-actions { display:none; gap:6px; margin-left:auto; align-items:center; }
 .dcx-panel[data-editing="true"] .dcx-panel-edit-link { display:none; }
 .dcx-panel[data-editing="true"] .dcx-panel-edit-actions { display:flex; }
+body.dcx-global-editing .dcx-panel-edit-link,
+body.dcx-global-editing .dcx-sidebar-edit-link { display:none !important; }
 
 .dcx-sidebar-edit-link { margin-left:auto; font-size:11px; color:var(--dc-primary,#2563eb); text-decoration:none; white-space:nowrap; padding:3px 8px; border-radius:var(--dc-radius-md,6px); border:1px solid var(--dc-primary,#2563eb); display:inline-flex; align-items:center; gap:4px; transition:all .15s; }
 .dcx-sidebar-edit-link:hover { color:#fff; background:var(--dc-primary,#2563eb); text-decoration:none; }
@@ -672,6 +681,7 @@
 <script>
 const USER_TOKEN = '{{ user_token }}';
 const ORDER_ID = {{ order_id }};
+const EDIT_MODE = {{ edit_mode ? 'true' : 'false' }};
 const SHIPPING_ZONE_ID = {{ shipping_zone_id }};
 const PAYMENT_ZONE_ID = {{ payment_zone_id }};
 let isEditing = false;
@@ -682,6 +692,7 @@ function toggleEditMode() {
 		return;
 	}
 	isEditing = true;
+	document.body.classList.add('dcx-global-editing');
 	document.querySelectorAll('.view-only').forEach(el => el.style.display = 'none');
 	document.querySelectorAll('.edit-only').forEach(el => el.style.display = '');
 	document.getElementById('btn-edit').style.display = 'none';
@@ -814,7 +825,7 @@ function savePanelChanges(panelId) {
 				'POST', { field: 'comment', value: commentEl.value }));
 		}
 		const statusEl = panel.querySelector('#edit-order-status');
-		if (statusEl) {
+		if (statusEl && statusEl.value !== statusEl.dataset.originalStatus) {
 			promises.push(api('index.php?route=sale/order_detail/addHistory&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
 				'POST', { order_status_id: statusEl.value, notify: '0', comment: commentEl ? commentEl.value : '' }));
 		}
@@ -836,6 +847,47 @@ function toggleSameAddress() {
 	const cb = document.getElementById('same-address-cb');
 	const el = document.getElementById('edit-payment-address');
 	if (el) el.style.display = cb.checked ? 'none' : '';
+}
+
+let shippingPreviewTimer = null;
+
+function onShippingMethodChange(select) {
+	const codeOption = select.options[select.selectedIndex];
+	const code = codeOption ? (codeOption.dataset.code || '') : '';
+	const shipAddr = document.getElementById('edit-shipping-address');
+	const country = shipAddr && shipAddr.querySelector('[data-address-field="shipping_country_id"]') ? shipAddr.querySelector('[data-address-field="shipping_country_id"]').value : '0';
+	const zone = shipAddr && shipAddr.querySelector('[data-address-field="shipping_zone_id"]') ? shipAddr.querySelector('[data-address-field="shipping_zone_id"]').value : '0';
+	const subTotalEl = document.querySelector('.order-totals-card__row[data-total-code="sub_total"] .order-totals-card__value');
+	const subtotal = subTotalEl ? (parseFloat(subTotalEl.textContent.replace(/[^\d.\-]/g, '').replace(',', '.')) || 0) : 0;
+
+	clearTimeout(shippingPreviewTimer);
+	shippingPreviewTimer = setTimeout(() => {
+		api('index.php?route=sale/order_detail/quoteShipping&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+			'POST', { shipping_code: code, shipping_country_id: country, shipping_zone_id: zone, subtotal: subtotal })
+			.then(j => {
+				if (!j || !j.available) return;
+				applyShippingPreview(j.cost, j.title || '');
+			});
+	}, 250);
+}
+
+function applyShippingPreview(cost, title) {
+	const container = document.querySelector('.order-totals-card');
+	if (!container) return;
+	const shipRow = container.querySelector('.order-totals-card__row[data-total-code="shipping"]');
+	const totalRow = container.querySelector('.order-totals-card__row[data-total-code="total"]');
+	if (!shipRow || !totalRow) return;
+	const parseVal = el => parseFloat(el.textContent.replace(/[^\d.\-]/g, '').replace(',', '.')) || 0;
+	const shipValEl = shipRow.querySelector('.order-totals-card__value');
+	const totalValEl = totalRow.querySelector('.order-totals-card__value');
+	const oldShip = parseVal(shipValEl);
+	const oldTotal = parseVal(totalValEl);
+	shipValEl.textContent = formatCurrency(cost);
+	totalValEl.textContent = formatCurrency(oldTotal - oldShip + cost);
+	if (title) {
+		const label = shipRow.querySelector('.order-totals-card__label');
+		if (label) label.textContent = title;
+	}
 }
 
 function syncPaymentFromShipping() {
@@ -1113,7 +1165,7 @@ function saveChanges() {
 		promises.push(api('index.php?route=sale/order_detail/updateField&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
 			'POST', { field: 'comment', value: commentEl.value }));
 	}
-	if (statusEl) {
+	if (statusEl && statusEl.value !== statusEl.dataset.originalStatus) {
 		promises.push(api('index.php?route=sale/order_detail/addHistory&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
 			'POST', { order_status_id: statusEl.value, notify: '0', comment: commentEl ? commentEl.value : '' }));
 	}
@@ -1294,6 +1346,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	loadTimeline(1);
 
+	if (EDIT_MODE) {
+		toggleEditMode();
+	}
+
 	const shipCountry = document.querySelector('[data-address-field="shipping_country_id"]');
 	if (shipCountry && shipCountry.value) loadZones(shipCountry, '#edit-ship-zone', SHIPPING_ZONE_ID);
 	const payCountry = document.querySelector('[data-address-field="payment_country_id"]');
@@ -1310,6 +1366,13 @@ document.addEventListener('DOMContentLoaded', function() {
 		const opid = card.dataset.orderProductId;
 		clearTimeout(recalcTimers[opid]);
 		recalcTimers[opid] = setTimeout(() => previewRecalc(card), 300);
+	});
+
+	document.addEventListener('change', function(e) {
+		const select = e.target;
+		if (select.matches('.dcx-sidebar-card select[data-code-field="shipping_code"]')) {
+			onShippingMethodChange(select);
+		}
 	});
 
 	// ===================== Add product to order picker =====================

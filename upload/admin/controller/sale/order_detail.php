@@ -3,6 +3,15 @@ declare(strict_types=1);
 
 class ControllerSaleOrderDetail extends Controller {
 	private array $error = [];
+	private ?OrderLocalizer $order_localizer = null;
+
+	private function orderLocalizer(): OrderLocalizer {
+		if ($this->order_localizer === null) {
+			$this->order_localizer = new OrderLocalizer($this->registry);
+		}
+
+		return $this->order_localizer;
+	}
 
 	public function index(): void {
 		$this->load->language('sale/order');
@@ -34,6 +43,7 @@ class ControllerSaleOrderDetail extends Controller {
 		$data['print_url'] = $this->url->link('sale/order_detail/print', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $order_id, true);
 		$data['user_token'] = $this->session->data['user_token'];
 		$data['order_id'] = $order_id;
+		$data['edit_mode'] = !empty($this->request->get['edit']);
 
 		$data['store_id'] = $order_info['store_id'];
 		$data['store_name'] = $order_info['store_name'];
@@ -78,8 +88,8 @@ class ControllerSaleOrderDetail extends Controller {
 		$data['payment_code'] = $order_info['payment_code'];
 		$data['shipping_code'] = $order_info['shipping_code'];
 
-		$data['payment_method'] = $order_info['payment_method'];
-		$data['shipping_method'] = $order_info['shipping_method'];
+		$data['payment_method'] = $this->orderLocalizer()->paymentMethodTitle($order_info);
+		$data['shipping_method'] = $this->orderLocalizer()->shippingMethodTitle($order_info);
 
 		$data['payment_methods'] = $this->getAvailablePaymentMethods();
 		$data['shipping_methods'] = $this->getAvailableShippingMethods();
@@ -91,8 +101,8 @@ class ControllerSaleOrderDetail extends Controller {
 		$data['payment_address_2'] = $order_info['payment_address_2'];
 		$data['payment_city'] = $order_info['payment_city'];
 		$data['payment_postcode'] = $order_info['payment_postcode'];
-		$data['payment_country_id'] = $order_info['payment_country_id'];
-		$data['payment_zone_id'] = $order_info['payment_zone_id'];
+		$data['payment_country_id'] = $order_info['payment_country_id'] ? (int)$order_info['payment_country_id'] : (int)$this->config->get('config_country_id');
+		$data['payment_zone_id'] = $order_info['payment_zone_id'] ? (int)$order_info['payment_zone_id'] : (int)$this->config->get('config_zone_id');
 		$data['payment_country'] = $order_info['payment_country'];
 		$data['payment_zone'] = $order_info['payment_zone'];
 
@@ -103,8 +113,8 @@ class ControllerSaleOrderDetail extends Controller {
 		$data['shipping_address_2'] = $order_info['shipping_address_2'];
 		$data['shipping_city'] = $order_info['shipping_city'];
 		$data['shipping_postcode'] = $order_info['shipping_postcode'];
-		$data['shipping_country_id'] = $order_info['shipping_country_id'];
-		$data['shipping_zone_id'] = $order_info['shipping_zone_id'];
+		$data['shipping_country_id'] = $order_info['shipping_country_id'] ? (int)$order_info['shipping_country_id'] : (int)$this->config->get('config_country_id');
+		$data['shipping_zone_id'] = $order_info['shipping_zone_id'] ? (int)$order_info['shipping_zone_id'] : (int)$this->config->get('config_zone_id');
 		$data['shipping_country'] = $order_info['shipping_country'];
 		$data['shipping_zone'] = $order_info['shipping_zone'];
 
@@ -148,6 +158,8 @@ class ControllerSaleOrderDetail extends Controller {
 		$data['product_count'] = count($products);
 		$data['total_quantity'] = array_sum(array_column($products, 'quantity'));
 
+		$order_localizer = $this->orderLocalizer();
+
 		foreach ($products as $product) {
 			$product_info = $this->model_catalog_product->getProduct($product['product_id']);
 
@@ -162,8 +174,8 @@ class ControllerSaleOrderDetail extends Controller {
 
 			foreach ($options as $option) {
 				$option_data[] = [
-					'name'  => $option['name'],
-					'value' => $option['value'],
+					'name'  => $order_localizer->optionName($option),
+					'value' => $order_localizer->optionValue($option),
 					'type'  => $option['type'],
 				];
 			}
@@ -174,7 +186,7 @@ class ControllerSaleOrderDetail extends Controller {
 			$data['products'][] = [
 				'order_product_id' => $product['order_product_id'],
 				'product_id'       => $product['product_id'],
-				'name'             => $product['name'],
+				'name'             => $order_localizer->productName($product),
 				'model'            => $product['model'],
 				'variant_sku'      => $product['variant_sku'] ?? '',
 				'option'           => $option_data,
@@ -192,11 +204,12 @@ class ControllerSaleOrderDetail extends Controller {
 
 		$data['totals'] = [];
 		$totals = $this->model_sale_order->getOrderTotals($order_id);
+		$shipping_method_title = $this->orderLocalizer()->shippingMethodTitle($order_info);
 
 		foreach ($totals as $total) {
 			$data['totals'][] = [
 				'code'  => $total['code'],
-				'title' => $total['title'],
+				'title' => $this->orderLocalizer()->totalTitle($total, $shipping_method_title),
 				'text'  => $this->currency->format($total['value'], $order_info['currency_code'], $order_info['currency_value']),
 				'value' => $total['value'],
 			];
@@ -237,7 +250,56 @@ class ControllerSaleOrderDetail extends Controller {
 			return;
 		}
 
-		$this->load->model('tool/image');
+		$this->sendPdf(
+			$this->load->view('sale/order_detail_print', [
+				'orders' => [$this->buildPrintData($order_id)],
+			]),
+			'order-' . $order_id . '.pdf'
+		);
+	}
+
+	public function printSelected(): void {
+		$this->load->language('sale/order');
+
+		$ids = [];
+
+		if (isset($this->request->get['order_id'])) {
+			if (is_array($this->request->get['order_id'])) {
+				$ids = $this->request->get['order_id'];
+			} else {
+				$ids = explode(',', (string)$this->request->get['order_id']);
+			}
+
+			$ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
+		}
+
+		$this->load->model('sale/order');
+
+		$orders = [];
+
+		foreach ($ids as $order_id) {
+			if ($this->model_sale_order->getOrder($order_id)) {
+				$orders[] = $this->buildPrintData($order_id);
+			}
+		}
+
+		if (!$orders) {
+			$this->response->redirect($this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'], true));
+			return;
+		}
+
+		$filename = count($orders) === 1
+			? 'order-' . $orders[0]['order_id'] . '.pdf'
+			: 'orders-' . implode('-', array_column($orders, 'order_id')) . '.pdf';
+
+		$this->sendPdf(
+			$this->load->view('sale/order_detail_print', ['orders' => $orders]),
+			$filename
+		);
+	}
+
+	private function buildPrintData(int $order_id): array {
+		$order_info = $this->model_sale_order->getOrder($order_id);
 
 		$data['order_id'] = $order_id;
 		$data['heading_title'] = sprintf($this->language->get('text_order_number'), $order_id);
@@ -250,15 +312,17 @@ class ControllerSaleOrderDetail extends Controller {
 		$data['lastname'] = $order_info['lastname'];
 		$data['email'] = $order_info['email'];
 		$data['telephone'] = $order_info['telephone'];
+		$data['order_status'] = $order_info['order_status'] ? $order_info['order_status'] : $this->language->get('text_missing');
 		$data['payment_address'] = $this->formatAddress($order_info, 'payment');
 		$data['shipping_address'] = $this->formatAddress($order_info, 'shipping');
-		$data['payment_method'] = $order_info['payment_method'];
-		$data['shipping_method'] = $order_info['shipping_method'];
+		$data['payment_method'] = $this->orderLocalizer()->paymentMethodTitle($order_info);
+		$data['shipping_method'] = $this->orderLocalizer()->shippingMethodTitle($order_info);
 		$data['tracking_number'] = $order_info['tracking_number'];
 		$data['comment'] = $order_info['comment'];
 		$data['currency_code'] = $order_info['currency_code'];
 		$data['currency_value'] = $order_info['currency_value'];
 
+		$order_localizer = $this->orderLocalizer();
 		$products = $this->model_sale_order->getOrderProducts($order_id);
 		$data['products'] = [];
 
@@ -267,33 +331,50 @@ class ControllerSaleOrderDetail extends Controller {
 			$option_data = [];
 
 			foreach ($options as $option) {
-				$option_data[] = $option['name'] . ': ' . $option['value'];
+				$option_data[] = $order_localizer->optionName($option) . ': ' . $order_localizer->optionValue($option);
 			}
 
 			$quantity = max(1, (int)$product['quantity']);
 			$unit_tax = $product['tax'] / $quantity;
 
 			$data['products'][] = [
-				'name'    => $product['name'],
-				'model'   => $product['model'],
-				'option'  => implode(', ', $option_data),
+				'name'     => $order_localizer->productName($product),
+				'model'    => $product['model'],
+				'option'   => implode(', ', $option_data),
 				'quantity' => $product['quantity'],
-				'price'   => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $unit_tax : 0), $order_info['currency_code'], $order_info['currency_value']),
-				'total'   => $this->currency->format($product['total'] + ($this->config->get('config_tax') ? $product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value']),
+				'price'    => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $unit_tax : 0), $order_info['currency_code'], $order_info['currency_value']),
+				'total'    => $this->currency->format($product['total'] + ($this->config->get('config_tax') ? $product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value']),
 			];
 		}
 
 		$data['totals'] = [];
 		$totals = $this->model_sale_order->getOrderTotals($order_id);
+		$shipping_method_title = $this->orderLocalizer()->shippingMethodTitle($order_info);
 
 		foreach ($totals as $total) {
 			$data['totals'][] = [
-				'title' => $total['title'],
+				'title' => $this->orderLocalizer()->totalTitle($total, $shipping_method_title),
 				'text'  => $this->currency->format($total['value'], $order_info['currency_code'], $order_info['currency_value']),
 			];
 		}
 
-		$this->response->setOutput($this->load->view('sale/order_detail_print', $data));
+		return $data;
+	}
+
+	private function sendPdf(string $html, string $filename): void {
+		$options = new \Dompdf\Options();
+		$options->set('isRemoteEnabled', false);
+		$options->set('defaultFont', 'DejaVu Sans');
+		$options->set('isHtml5ParserEnabled', true);
+
+		$dompdf = new \Dompdf\Dompdf($options);
+		$dompdf->loadHtml($html, 'UTF-8');
+		$dompdf->setPaper('A4', 'portrait');
+		$dompdf->render();
+
+		$this->response->addHeader('Content-Type: application/pdf');
+		$this->response->addHeader('Content-Disposition: inline; filename="' . $filename . '"');
+		$this->response->setOutput($dompdf->output());
 	}
 
 	public function getTimeline(): void {
@@ -325,19 +406,24 @@ class ControllerSaleOrderDetail extends Controller {
 						$amount = (float)$entry['amount'];
 						$amount_text = $this->currency->format(abs($amount), $order_info['currency_code'], $order_info['currency_value']);
 						$status_name = '<span class="badge ' . ($amount >= 0 ? 'badge-success' : 'badge-danger') . '">' . ($amount >= 0 ? '+' : '−') . ' ' . $amount_text . '</span>';
+						$payment_method = $this->orderLocalizer()->paymentEntryTitle($entry);
 					} elseif ((int)$entry['order_status_id'] === 0) {
 						$status_name = '<span class="badge badge-note">' . $this->language->get('text_note') . '</span>';
+						$payment_method = '';
 					} else {
 						$status_name = $entry['status_name'] ?? '';
+						$payment_method = '';
 					}
+
+					$comment = $this->renderTimelineComment($entry);
 
 					$data['entries'][] = [
 						'order_history_id' => $entry['order_history_id'],
 						'type'             => $entry['type'] ?? 'history',
 						'status_name'      => $status_name,
 						'order_status_id'  => $entry['order_status_id'],
-						'comment'          => nl2br(htmlspecialchars($entry['comment'], ENT_QUOTES, 'UTF-8')),
-						'payment_method'   => htmlspecialchars($entry['payment_method'] ?? '', ENT_QUOTES, 'UTF-8'),
+						'comment'          => $comment,
+						'payment_method'   => htmlspecialchars($payment_method, ENT_QUOTES, 'UTF-8'),
 						'notify'           => $entry['notify'],
 						'date_added'       => date($this->language->get('datetime_format'), strtotime($entry['date_added'])),
 					];
@@ -443,6 +529,14 @@ class ControllerSaleOrderDetail extends Controller {
 					$this->model_sale_order->updateOrderField($order_id, $prefix . '_zone', $zone_info ? $zone_info['name'] : '');
 				}
 
+				if ($field === 'shipping_method' || $field === 'shipping_code') {
+					$recalc = $this->model_sale_order->recalculateShipping($order_id);
+
+					if ($recalc !== null) {
+						$this->journalTotalChange($order_id, (float)$recalc['old_total'], (float)$recalc['new_total']);
+					}
+				}
+
 				$json['success'] = $this->language->get('text_success');
 
 				$order_info = $this->model_sale_order->getOrder($order_id);
@@ -456,8 +550,43 @@ class ControllerSaleOrderDetail extends Controller {
 				} else {
 					$json['value_html'] = $value;
 				}
+
+				if ($field === 'shipping_method' || $field === 'shipping_code') {
+					$json['totals'] = $this->buildTotalsJson($order_id, $order_info);
+				}
 			} else {
 				$json['error'] = $this->language->get('error_action');
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function quoteShipping(): void {
+		$this->load->language('sale/order');
+
+		$json = [];
+
+		if (!$this->user->hasPermission('access', 'sale/order')) {
+			$json['error'] = $this->language->get('error_permission');
+		} else {
+			$order_id = (int)($this->request->get['order_id'] ?? 0);
+			$shipping_code = trim((string)($this->request->post['shipping_code'] ?? ''));
+			$country_id = (int)($this->request->post['shipping_country_id'] ?? 0);
+			$zone_id = (int)($this->request->post['shipping_zone_id'] ?? 0);
+			$subtotal = isset($this->request->post['subtotal']) ? (float)$this->request->post['subtotal'] : null;
+
+			$this->load->model('sale/order');
+
+			$quote = $this->model_sale_order->previewShippingQuote($order_id, $shipping_code, $country_id, $zone_id, $subtotal);
+
+			if ($quote === null) {
+				$json['available'] = false;
+			} else {
+				$json['available'] = true;
+				$json['cost'] = $quote['cost'];
+				$json['title'] = $quote['title'];
 			}
 		}
 
@@ -930,20 +1059,32 @@ class ControllerSaleOrderDetail extends Controller {
 					$currency_code = $order_info['currency_code'];
 					$currency_value = $order_info['currency_value'];
 
-					$note = sprintf(
-						$this->language->get('text_payment_note_received'),
+					$note_params = [
 						$this->currency->format($amount, $currency_code, $currency_value),
 						$this->currency->format($paid_amount, $currency_code, $currency_value),
-						$this->currency->format($total, $currency_code, $currency_value)
+						$this->currency->format($total, $currency_code, $currency_value),
+					];
+
+					$this->model_sale_order->addOrderNote(
+						$order_id,
+						sprintf($this->language->get('text_payment_note_received'), ...$note_params),
+						false,
+						'text_payment_note_received',
+						$note_params
 					);
 
-					$this->model_sale_order->addOrderNote($order_id, $note);
-
 					if ($status === 'overpaid') {
-						$this->model_sale_order->addOrderNote($order_id, sprintf(
-							$this->language->get('text_payment_note_overpaid'),
-							$this->currency->format($paid_amount - $total, $currency_code, $currency_value)
-						));
+						$overpaid_params = [
+							$this->currency->format($paid_amount - $total, $currency_code, $currency_value),
+						];
+
+						$this->model_sale_order->addOrderNote(
+							$order_id,
+							sprintf($this->language->get('text_payment_note_overpaid'), ...$overpaid_params),
+							false,
+							'text_payment_note_overpaid',
+							$overpaid_params
+						);
 					}
 
 					$json['success'] = $this->language->get('text_payment_added');
@@ -981,10 +1122,17 @@ class ControllerSaleOrderDetail extends Controller {
 				if (!$reversal_id) {
 					$json['error'] = $this->language->get('error_action');
 				} else {
-					$this->model_sale_order->addOrderNote($order_id, sprintf(
-						$this->language->get('text_payment_note_reversed'),
-						$this->currency->format((float)$payment['amount'], $order_info['currency_code'], $order_info['currency_value'])
-					));
+					$reversed_params = [
+						$this->currency->format((float)$payment['amount'], $order_info['currency_code'], $order_info['currency_value']),
+					];
+
+					$this->model_sale_order->addOrderNote(
+						$order_id,
+						sprintf($this->language->get('text_payment_note_reversed'), ...$reversed_params),
+						false,
+						'text_payment_note_reversed',
+						$reversed_params
+					);
 
 					$json['success'] = $this->language->get('text_payment_removed');
 					$json['payments_html'] = $this->load->view('sale/order_payments', $this->getPaymentsPartialData($order_id));
@@ -1023,10 +1171,17 @@ class ControllerSaleOrderDetail extends Controller {
 					if (!$reversal_id) {
 						$json['error'] = $this->language->get('error_action');
 					} else {
-						$this->model_sale_order->addOrderNote($order_id, sprintf(
-							$this->language->get('text_payment_note_overpaid_removed'),
-							$this->currency->format($overpaid, $order_info['currency_code'], $order_info['currency_value'])
-						));
+						$overpaid_removed_params = [
+							$this->currency->format($overpaid, $order_info['currency_code'], $order_info['currency_value']),
+						];
+
+						$this->model_sale_order->addOrderNote(
+							$order_id,
+							sprintf($this->language->get('text_payment_note_overpaid_removed'), ...$overpaid_removed_params),
+							false,
+							'text_payment_note_overpaid_removed',
+							$overpaid_removed_params
+						);
 
 						$json['success'] = $this->language->get('text_overpayment_removed');
 						$json['payments_html'] = $this->load->view('sale/order_payments', $this->getPaymentsPartialData($order_id));
@@ -1078,7 +1233,7 @@ class ControllerSaleOrderDetail extends Controller {
 				'amount'           => $this->currency->format(abs($amount), $order_info['currency_code'], $order_info['currency_value']),
 				'amount_raw'       => $amount,
 				'is_reversal'      => $amount < 0,
-				'payment_method'   => $payment['payment_method'],
+				'payment_method'   => $this->orderLocalizer()->paymentEntryTitle($payment),
 				'reference'        => $payment['reference'],
 				'comment'          => $payment['comment'],
 				'date_added'       => date($this->language->get('datetime_format'), strtotime($payment['date_added'])),
@@ -1132,18 +1287,60 @@ class ControllerSaleOrderDetail extends Controller {
 		$currency_code = $order_info['currency_code'];
 		$currency_value = $order_info['currency_value'];
 
-		$this->model_sale_order->addOrderNote($order_id, sprintf(
-			$this->language->get('text_payment_note_total_changed'),
+		$total_changed_params = [
 			$this->currency->format($old_total, $currency_code, $currency_value),
-			$this->currency->format($new_total, $currency_code, $currency_value)
-		));
+			$this->currency->format($new_total, $currency_code, $currency_value),
+		];
+
+		$this->model_sale_order->addOrderNote(
+			$order_id,
+			sprintf($this->language->get('text_payment_note_total_changed'), ...$total_changed_params),
+			false,
+			'text_payment_note_total_changed',
+			$total_changed_params
+		);
 
 		if ((float)$order_info['paid_amount'] > $new_total) {
-			$this->model_sale_order->addOrderNote($order_id, sprintf(
-				$this->language->get('text_payment_note_total_changed_overpaid'),
-				$this->currency->format((float)$order_info['paid_amount'] - $new_total, $currency_code, $currency_value)
-			));
+			$overpaid_params = [
+				$this->currency->format((float)$order_info['paid_amount'] - $new_total, $currency_code, $currency_value),
+			];
+
+			$this->model_sale_order->addOrderNote(
+				$order_id,
+				sprintf($this->language->get('text_payment_note_total_changed_overpaid'), ...$overpaid_params),
+				false,
+				'text_payment_note_total_changed_overpaid',
+				$overpaid_params
+			);
 		}
+	}
+
+	private function renderTimelineComment(array $entry): string {
+		$comment = (string)($entry['comment'] ?? '');
+
+		$resolved = $this->orderLocalizer()->historyComment($entry);
+
+		if ($resolved !== null) {
+			$comment = $resolved;
+		} else {
+			$comment_key = (string)($entry['comment_key'] ?? '');
+
+			if ($comment_key !== '') {
+				$translated = $this->language->get($comment_key);
+
+				if ($translated !== $comment_key) {
+					$params = json_decode((string)($entry['comment_params'] ?? ''), true);
+
+					if (is_array($params) && count($params) > 0) {
+						$translated = sprintf($translated, ...array_values($params));
+					}
+
+					$comment = $translated;
+				}
+			}
+		}
+
+		return nl2br(htmlspecialchars($comment, ENT_QUOTES, 'UTF-8'));
 	}
 
 	private function formatAddress(array $order_info, string $type): string {
@@ -1155,6 +1352,8 @@ class ControllerSaleOrderDetail extends Controller {
 			$format = '{firstname} {lastname}' . "\n" . '{company}' . "\n" . '{address_1}' . "\n" . '{address_2}' . "\n" . '{city} {postcode}' . "\n" . '{zone}' . "\n" . '{country}';
 		}
 
+		$order_localizer = $this->orderLocalizer();
+
 		$find = ['{firstname}', '{lastname}', '{company}', '{address_1}', '{address_2}', '{city}', '{postcode}', '{zone}', '{zone_code}', '{country}'];
 		$replace = [
 			'firstname' => $order_info[$prefix . '_firstname'],
@@ -1164,9 +1363,9 @@ class ControllerSaleOrderDetail extends Controller {
 			'address_2' => $order_info[$prefix . '_address_2'],
 			'city'      => $order_info[$prefix . '_city'],
 			'postcode'  => $order_info[$prefix . '_postcode'],
-			'zone'      => $order_info[$prefix . '_zone'],
+			'zone'      => $order_localizer->zoneName($order_info, $prefix),
 			'zone_code' => $order_info[$prefix . '_zone_code'] ?? '',
-			'country'   => $order_info[$prefix . '_country'],
+			'country'   => $order_localizer->countryName($order_info, $prefix),
 		];
 
 		return str_replace(["\r\n", "\r", "\n"], '<br />', preg_replace(["/\s\s+/", "/\r\r+/", "/\n\n+/"], '<br />', trim(str_replace($find, $replace, $format))));
