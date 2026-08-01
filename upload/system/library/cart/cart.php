@@ -221,6 +221,28 @@ class Cart
                 "'",
         );
 
+        // DockerCart: reservation-aware availability. When checkout holds are
+        // enabled, stock quantities are reduced by active holds of other
+        // sessions (and all order-bound holds) so hasStock()/stock flags
+        // reflect quantities that are actually still available.
+        $reserved_map = [];
+
+        $stock_reservation = new \DockercartStockReservation($this->registry);
+
+        if ($stock_reservation->isEnabled()) {
+            $cart_product_ids = [];
+
+            foreach ($cart_query->rows as $cart_row) {
+                $cart_product_ids[(int) $cart_row["product_id"]] = true;
+            }
+
+            if (!empty($cart_product_ids)) {
+                $reserved_map = $stock_reservation->getReservedByProductIds(
+                    array_keys($cart_product_ids),
+                );
+            }
+        }
+
         foreach ($cart_query->rows as $cart) {
             $stock = true;
             $cart["quantity"] = (float) $cart["quantity"];
@@ -749,6 +771,15 @@ class Cart
                     ];
                 }
                 $product_quantity = (float) $product_query->row["quantity"];
+
+                if (!empty($reserved_map)) {
+                    $reservation_key =
+                        (int) $cart["product_id"] . ":" . $variant_id;
+                    $product_quantity -= (float) ($reserved_map[
+                        $reservation_key
+                    ] ?? 0);
+                }
+
                 // Stock
                 if (
                     ($product_quantity <= 0 && !(int)$product_query->row['preorder']) ||

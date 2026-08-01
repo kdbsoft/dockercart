@@ -101,6 +101,14 @@ class ModelCheckoutOrder extends Model {
 				$this->db->query("UPDATE " . DB_PREFIX . "order_claim SET order_id = '" . (int)$order_id . "', date_added = NOW() WHERE session_id = '" . $this->db->escape($session_id) . "'");
 			}
 
+			// Bind the session's checkout holds to the order so they persist
+			// until stock is subtracted (processing/complete) or the order is
+			// cancelled/refunded.
+			if ($session_id !== '') {
+				$stock_reservation = new \DockercartStockReservation($this->registry);
+				$stock_reservation->bindToOrder($session_id, (int)$order_id);
+			}
+
 			$this->db->query("COMMIT");
 		} catch (\Exception $e) {
 			$this->db->query("ROLLBACK");
@@ -406,6 +414,10 @@ class ModelCheckoutOrder extends Model {
 						$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET quantity = (quantity - " . (float)$order_product['quantity'] . ") WHERE variant_id = '" . (int)$order_product['variant_id'] . "' AND subtract = '1'");
 					}
 				}
+
+				// Release checkout holds bound to this order: stock was just subtracted.
+				$stock_reservation = new \DockercartStockReservation($this->registry);
+				$stock_reservation->releaseOrder((int)$order_id);
 				
 				// Add commission if sale is linked to affiliate referral.
 				if ($order_info['affiliate_id'] && $this->config->get('config_affiliate_auto')) {
@@ -437,6 +449,10 @@ class ModelCheckoutOrder extends Model {
 						$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET quantity = (quantity + " . (float)$order_product['quantity'] . ") WHERE variant_id = '" . (int)$order_product['variant_id'] . "' AND subtract = '1'");
 					}
 				}
+
+				// Release any remaining checkout holds bound to this order (restock).
+				$stock_reservation = new \DockercartStockReservation($this->registry);
+				$stock_reservation->releaseOrder((int)$order_id);
 
 				// Remove coupon, vouchers and reward points history
 				$order_totals = $this->getOrderTotals($order_id);

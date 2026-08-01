@@ -78,6 +78,14 @@ class ControllerCheckoutDockercartCheckout extends Controller
             }
         }
 
+        // DockerCart: hold stock for this checkout session so concurrent
+        // checkouts cannot both claim the last item. Failed holds mean the
+        // stock was taken in the meantime — send the customer back to cart.
+        if (!empty($this->refreshStockReservations())) {
+            $this->response->redirect($this->url->link("checkout/cart"));
+            return;
+        }
+
         $this->load->language("checkout/dockercart_checkout");
 
         $this->document->setTitle($this->language->get("heading_title"));
@@ -689,6 +697,14 @@ class ControllerCheckoutDockercartCheckout extends Controller
                 $this->cart->update($cart_id, $quantity);
             } else {
                 $this->cart->remove($cart_id);
+            }
+
+            // DockerCart: refresh checkout holds after a cart change; a failed
+            // hold means the requested quantity is no longer available.
+            if (!empty($this->refreshStockReservations())) {
+                $json["error"] = $this->language->get("error_stock");
+                $this->sendJsonResponse($json);
+                return;
             }
 
             $json["success"] = true;
@@ -1528,6 +1544,29 @@ class ControllerCheckoutDockercartCheckout extends Controller
                     $data["payment_method"]
                 ];
 
+            // DockerCart: apply the selected payment method's reserve window
+            // (0 = release holds for this method).
+            $stock_reservation = new \DockercartStockReservation(
+                $this->registry,
+            );
+
+            if ($stock_reservation->isEnabled()) {
+                $method_ttl = $stock_reservation->getMethodTtlMinutes(
+                    $this->session->data["payment_method"]["code"],
+                );
+
+                if ($method_ttl !== null) {
+                    if ($method_ttl <= 0) {
+                        $stock_reservation->releaseSession();
+                    } else {
+                        $stock_reservation->applyMethodTtl(
+                            $this->session->getId(),
+                            $method_ttl,
+                        );
+                    }
+                }
+            }
+
             // Save comment
             if (isset($data["comment"])) {
                 $this->session->data["comment"] = strip_tags($data["comment"]);
@@ -1679,6 +1718,50 @@ class ControllerCheckoutDockercartCheckout extends Controller
         $json["totals"] = $this->getCartTotals();
 
         $this->sendJsonResponse($json);
+    }
+
+    /**
+     * DockerCart: refresh checkout stock holds for the current cart, applying
+     * the selected payment method's reserve window (or the global one when the
+     * method has no override). Returns the list of failed lines; empty means
+     * every line was held successfully.
+     */
+    private function refreshStockReservations()
+    {
+        $stock_reservation = new \DockercartStockReservation($this->registry);
+
+        if (!$stock_reservation->isEnabled()) {
+            return [];
+        }
+
+        $reserve_lines = [];
+
+        foreach ($this->cart->getProducts() as $reserve_product) {
+            $reserve_lines[] = [
+                "product_id" => (int) $reserve_product["product_id"],
+                "variant_id" => (int) ($reserve_product["variant_id"] ?? 0),
+                "quantity" => (float) $reserve_product["quantity"],
+            ];
+        }
+
+        $reserve_ttl = $stock_reservation->getDefaultTtlMinutes();
+        $method_ttl = $stock_reservation->getMethodTtlMinutes(
+            isset($this->session->data["payment_method"]["code"])
+                ? $this->session->data["payment_method"]["code"]
+                : null,
+        );
+
+        if ($method_ttl !== null) {
+            $reserve_ttl = $method_ttl;
+        }
+
+        if ($reserve_ttl <= 0) {
+            $stock_reservation->releaseSession();
+
+            return [];
+        }
+
+        return $stock_reservation->reserve($reserve_lines, $reserve_ttl);
     }
 
     /**
@@ -2162,6 +2245,14 @@ class ControllerCheckoutDockercartCheckout extends Controller
         // Validate payment method
         if (empty($this->session->data["payment_method"])) {
             $json["error"] = $this->language->get("error_payment_method");
+        }
+
+        if (!isset($json["error"]) && !isset($json["redirect"])) {
+            // DockerCart: atomically re-hold the cart right before order
+            // creation, so an expired or grabbed hold blocks confirmation.
+            if (!empty($this->refreshStockReservations())) {
+                $json["error"] = $this->language->get("error_stock");
+            }
         }
 
         if (!isset($json["error"]) && !isset($json["redirect"])) {
