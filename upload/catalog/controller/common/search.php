@@ -48,6 +48,8 @@ class ControllerCommonSearch extends Controller {
 		$data['action'] = $this->url->link('product/search');
 		$data['categories'] = $this->model_catalog_category->getCategories(0);
 
+		$data['voice_search'] = $this->config->get('module_dockercart_search_status') && $this->config->get('module_dockercart_search_voice');
+
 		return $this->load->view('common/search', $data);
 	}
 }

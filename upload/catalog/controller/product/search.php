@@ -756,6 +756,8 @@ class ControllerProductSearch extends Controller {
 		$data['category_id'] = $category_id;
 		$data['sub_category'] = $sub_category;
 
+		$data['voice_search'] = $this->config->get('module_dockercart_search_status') && $this->config->get('module_dockercart_search_voice');
+
 		$data['sort'] = $sort;
 		$data['order'] = $order;
 		$data['limit'] = $limit;

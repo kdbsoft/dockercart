@@ -7,3 +7,6 @@ $_['text_all_categories'] = 'All categories';
 $_['text_suggest_categories'] = 'Categories';
 $_['text_suggest_manufacturers'] = 'Manufacturers';
 $_['text_suggest_products'] = 'Products';
+// Voice search
+$_['text_voice_search'] = 'Voice search';
+$_['text_voice_listening'] = 'Listening…';
