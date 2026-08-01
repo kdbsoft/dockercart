@@ -152,6 +152,14 @@
             </div>
           </div>
 
+          {% if spell_correction %}
+          <div class="mb-4 px-4 py-3 bg-blue-50 border border-blue-200 rounded-2xl flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+            <i data-lucide="search" class="w-4 h-4 text-blue-500 shrink-0"></i>
+            <span class="text-gray-700">{{ text_showing_results_for }} <strong class="font-bold text-blue-700">{{ spell_correction.corrected }}</strong></span>
+            <span class="text-gray-500">{{ text_search_instead_for }} <a href="{{ spell_correction.original_href }}" class="font-semibold text-blue-600 hover:text-blue-700 hover:underline">{{ spell_correction.original }}</a></span>
+          </div>
+          {% endif %}
+
           <div id="dc-product-grid" class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-8 dc-view-{{ view_mode|default('grid') }}">
             {% for product in products %}
             {% include 'dockercart/template/product/product_card.twig' with {
@@ -192,6 +200,12 @@
 
           {% else %}
           <div class="flex flex-col items-center justify-center py-24 text-center">
+            {% if spell_suggestion %}
+            <div class="mb-6 px-6 py-4 bg-blue-50 border border-blue-200 rounded-2xl inline-flex items-center gap-3">
+              <i data-lucide="search" class="w-5 h-5 text-blue-500 shrink-0"></i>
+              <p class="text-sm text-blue-800">{{ text_did_you_mean }} <a href="{{ spell_suggestion.href }}" class="font-bold text-blue-600 hover:text-blue-700 hover:underline">{{ spell_suggestion.text }}</a></p>
+            </div>
+            {% endif %}
             <i data-lucide="search-x" class="w-16 h-16 text-gray-200 mb-4"></i>
             <p class="text-lg font-semibold text-gray-500">{{ text_empty }}</p>
           </div>

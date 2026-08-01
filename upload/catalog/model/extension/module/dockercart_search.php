@@ -312,6 +312,82 @@ class ModelExtensionModuleDockercartSearch extends Model {
     }
 
     /**
+     * Get "did you mean" spell-correction suggestion when search yields no results.
+     *
+     * Uses Manticore CALL QSUGGEST against the products index and verifies that
+     * the corrected query actually returns results for the current store/language,
+     * so noisy infix fragments or words from other languages are filtered out.
+     *
+     * @param string $query_text Original search query
+     * @param array  $options    Options (category_id, sub_category)
+     * @return array|null ['text' => string] or null when no reliable correction
+     */
+    public function getSpellSuggestion($query_text, $options = []) {
+        $query_text = $this->normalizeSearchQuery($query_text);
+
+        if ($query_text === '') {
+            return null;
+        }
+
+        $manticore = $this->getManticore();
+
+        if (!$manticore->connect()) {
+            return null;
+        }
+
+        $suggestions = $manticore->suggestCorrected('products', $query_text, [
+            'limit'     => 3,
+            'max_edits' => 2,
+            'reject'    => 1,
+        ]);
+
+        if (empty($suggestions)) {
+            return null;
+        }
+
+        // Prefer the closest correction with the most documents behind it.
+        usort($suggestions, function ($a, $b) {
+            return ($a['distance'] <=> $b['distance'])
+                ?: ($b['docs'] <=> $a['docs']);
+        });
+
+        $query_lc = mb_strtolower($query_text, 'UTF-8');
+
+        $search_options = [
+            'limit'  => 1,
+            'offset' => 0,
+        ];
+
+        if (!empty($options['category_id'])) {
+            $search_options['category_id'] = (int)$options['category_id'];
+
+            if (!empty($options['sub_category'])) {
+                $search_options['sub_category'] = true;
+            }
+        }
+
+        foreach ($suggestions as $suggestion) {
+            $suggest = trim((string)$suggestion['suggest']);
+
+            if ($suggest === '' || (int)$suggestion['distance'] < 1) {
+                continue;
+            }
+
+            if (mb_strtolower($suggest, 'UTF-8') === $query_lc) {
+                continue;
+            }
+
+            $result_data = $this->search($suggest, $search_options);
+
+            if (!empty($result_data['total'])) {
+                return ['text' => $suggest];
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Recursively collect all descendant category IDs (any depth).
      *
      * @param int $category_id

@@ -302,6 +302,125 @@ class ManticoreClient {
     }
 
     /**
+     * Get spell-correction suggestions ("did you mean") for a query via CALL QSUGGEST.
+     *
+     * Corrects each token separately (single-word QSUGGEST) and recombines the
+     * corrected phrase, so unchanged words are preserved. Sentence mode of
+     * QSUGGEST is not used: it returns only the corrected words, dropping the
+     * rest of the query. Requires the table to have infixing (min_infix_len)
+     * and dict=keywords (default for RT tables). With morphology enabled, the
+     * table must set index_exact_words=1 so the dictionary keeps original words.
+     *
+     * @param string $index      Index name
+     * @param string $query_text Query text to correct
+     * @param array  $options    Options (limit, max_edits, reject)
+     * @return array [['suggest' => string, 'distance' => int, 'docs' => int], ...]
+     */
+    public function suggestCorrected($index, $query_text, $options = []) {
+        $query_text = trim((string)$query_text);
+
+        if ($query_text === '') {
+            return [];
+        }
+
+        if (!$this->connect()) {
+            return [];
+        }
+
+        $limit     = isset($options['limit'])     ? (int)$options['limit']     : 3;
+        $max_edits = isset($options['max_edits']) ? (int)$options['max_edits'] : 2;
+        $reject    = isset($options['reject'])    ? (int)$options['reject']    : 1;
+
+        $tokens = preg_split('/\s+/u', $query_text, -1, PREG_SPLIT_NO_EMPTY);
+
+        if (count($tokens) > 8) {
+            return []; // too long to correct reliably
+        }
+
+        $corrected      = [];
+        $total_distance = 0;
+        $min_docs       = PHP_INT_MAX;
+        $query_lc       = mb_strtolower($query_text, 'UTF-8');
+
+        foreach ($tokens as $token) {
+            $best      = null;
+            $has_exact = false;
+
+            // Skip too-short tokens — corrections for them are unreliable
+            if (mb_strlen($token, 'UTF-8') >= 2) {
+                // Note: CALL QSUGGEST expects the index name as a quoted string literal
+                $query = "CALL QSUGGEST('" . $this->escape($token) . "', '" . $this->escape($index)
+                    . "', " . $limit . " as limit, " . $max_edits . " as max_edits, " . $reject . " as reject)";
+
+                $result = $this->query($query);
+
+                if ($result) {
+                    $token_lc = mb_strtolower($token, 'UTF-8');
+
+                    while ($row = $result->fetch_assoc()) {
+                        $suggest  = trim((string)$row['suggest']);
+                        $distance = isset($row['distance']) ? (int)$row['distance'] : 0;
+
+                        // Distance 0 means the token itself exists in the index
+                        // dictionary — it is a real word, not a typo.
+                        if ($distance === 0) {
+                            $has_exact = true;
+                            continue;
+                        }
+
+                        if ($suggest === '') {
+                            continue;
+                        }
+
+                        if (mb_strtolower($suggest, 'UTF-8') === $token_lc) {
+                            continue;
+                        }
+
+                        // Skip infix fragments of the token ("kankeb" -> "kank"):
+                        // with prefix wildcard matching the original query already
+                        // covers token prefixes, so these suggestions are noise.
+                        if (mb_strpos(mb_strtolower($suggest, 'UTF-8'), $token_lc) !== false
+                            && mb_strlen($suggest, 'UTF-8') < mb_strlen($token, 'UTF-8')) {
+                            continue;
+                        }
+
+                        $docs = isset($row['docs']) ? (int)$row['docs'] : 0;
+
+                        // Prefer the closest suggestion with the most documents behind it
+                        if ($best === null
+                            || $distance < $best['distance']
+                            || ($distance === $best['distance'] && $docs > $best['docs'])) {
+                            $best = ['suggest' => $suggest, 'distance' => $distance, 'docs' => $docs];
+                        }
+                    }
+                }
+            }
+
+            // A token that exists in the dictionary is left as-is; otherwise
+            // replace it with the best spelling correction found.
+            if ($has_exact || $best === null) {
+                $corrected[] = $token;
+            } else {
+                $corrected[] = $best['suggest'];
+                $total_distance += $best['distance'];
+                $min_docs = min($min_docs, $best['docs']);
+            }
+        }
+
+        $suggestion = trim(implode(' ', $corrected));
+
+        if ($suggestion === '' || mb_strtolower($suggestion, 'UTF-8') === $query_lc) {
+            return [];
+        }
+
+        return [[
+            'suggest'  => $suggestion,
+            'distance' => $total_distance,
+            'docs'     => $min_docs,
+        ]];
+    }
+
+    /**
      * Search with real total count via SHOW META.
      *
      * Returns both the page of results AND the engine-reported total_found,
