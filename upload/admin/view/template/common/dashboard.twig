@@ -22,14 +22,13 @@
     </div>
     {% endif %}
     {% for row in rows %}
-    <div class="row">{% for dashboard_1 in row %}
-      {% set class = 'col-lg-%s %s'|format(dashboard_1.width, 'col-md-6 col-sm-6') %}
-      {% for dashboard_2 in row %}
-      {% if dashboard_2.width > 3 %}
-      {% set class = 'col-lg-%s %s'|format(dashboard_1.width, 'col-md-12 col-sm-12') %}
+    <div class="row">{% for column in row.columns %}
+      {% if row.md_full %}
+      {% set class = 'col-lg-%s %s'|format(column.width, 'col-md-12 col-sm-12') %}
+      {% else %}
+      {% set class = 'col-lg-%s %s'|format(column.width, 'col-md-6 col-sm-6') %}
       {% endif %}
-      {% endfor %}
-      <div class="{{ class }}">{{ dashboard_1.output }}</div>
+      <div class="{{ class }}">{% for dashboard_1 in column.widgets %}{{ dashboard_1.output }}{% endfor %}</div>
       {% endfor %}</div>
     {% endfor %}</div>
     {{ security }}
