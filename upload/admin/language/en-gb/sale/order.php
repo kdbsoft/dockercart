@@ -180,6 +180,7 @@ $_['entry_total']                = 'Total';
 $_['entry_date_added']           = 'Date Added';
 $_['entry_date_modified']        = 'Date Modified';
 $_['entry_variant_sku']          = 'Variant SKU';
+$_['entry_discount_percent']     = 'Line discount %';
 
 // Help
 $_['help_override']              = 'If the customers order is being blocked from changing the order status due to an anti-fraud extension enable override.';
@@ -213,7 +214,21 @@ $_['button_remove_tracking']     = 'Remove';
 $_['text_tracking_numbers']      = 'Tracking Numbers';
 $_['text_tracking_max']          = 'Up to 10 numbers';
 
-$_['text_search_product']        = 'Search product by name...';
+$_['text_search_product']        = 'Search product by name, model or SKU...';
+$_['text_no_results']            = 'No products found';
+$_['text_price_from']            = 'from';
+$_['text_stock_in']              = 'In stock';
+$_['text_stock_out']             = 'Out of stock';
+$_['text_stock_not_tracked']     = 'Stock not tracked';
+$_['text_configurable']          = 'Configurable';
+$_['text_variant']               = 'Variant';
+$_['text_unit_price']            = 'Unit price';
+$_['text_tax']                   = 'Tax';
+$_['text_line_total']            = 'Line total';
+$_['text_product_added']         = 'Product added to the order!';
+$_['text_opts']                  = 'opts';
+$_['text_clear']                 = 'Clear';
+$_['error_missing_options']      = 'Please select:';
 $_['text_edit_hint']             = 'Click fields to edit them inline';
 $_['text_more_actions']          = 'More actions';
 $_['text_discount']              = 'Discount';
