@@ -2,112 +2,126 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>{{ heading_title }} — {{ text_print }}</title>
+  <title>{% if orders|length > 1 %}{{ text_print_orders }}{% else %}{{ orders[0].heading_title }} — {{ text_print }}{% endif %}</title>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; font-size:12px; color:#333; padding:40px; }
-    .print-header { border-bottom:2px solid #333; padding-bottom:16px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:flex-start; }
-    .print-header h1 { font-size:22px; }
-    .print-status { font-size:12px; color:#555; }
-    .print-meta { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:24px; }
-    .print-meta h3 { font-size:13px; margin-bottom:6px; color:#2563eb; }
-    .print-meta p { font-size:12px; line-height:1.5; }
-    table { width:100%; border-collapse:collapse; margin-bottom:24px; }
-    th { background:#f5f5f5; font-weight:600; font-size:11px; text-transform:uppercase; padding:8px 10px; text-align:left; border-bottom:2px solid #ddd; }
-    td { padding:7px 10px; border-bottom:1px solid #eee; font-size:12px; }
+    body { font-family:'DejaVu Sans',sans-serif; font-size:12px; color:#333; line-height:1.5; }
+    .print-order { padding:32px 36px; }
+    table { width:100%; border-collapse:collapse; }
+    .print-header { border-bottom:2px solid #333; padding-bottom:14px; margin-bottom:20px; }
+    .print-header h1 { font-size:20px; }
+    .print-status { font-size:12px; color:#555; margin-top:2px; }
+    .print-header td { vertical-align:top; }
+    .print-header-right { text-align:right; font-size:12px; }
+    .print-meta { margin-bottom:20px; }
+    .print-meta td { vertical-align:top; padding-right:20px; }
+    .print-meta h3 { font-size:12px; margin-bottom:5px; color:#2563eb; }
+    .print-meta p { font-size:12px; }
+    .print-meta p + p { margin-top:4px; }
+    .print-products { margin-bottom:20px; }
+    .print-products th { background:#f5f5f5; font-weight:600; font-size:11px; text-transform:uppercase; padding:8px 10px; text-align:left; border-bottom:2px solid #ddd; }
+    .print-products td { padding:7px 10px; border-bottom:1px solid #eee; font-size:12px; vertical-align:top; }
+    .print-products .option-line { color:#666; font-size:11px; margin-top:2px; }
     .text-right { text-align:right; }
     .text-center { text-align:center; }
-    .print-totals { width:300px; margin-left:auto; }
-    .print-totals td { border:none; padding:4px 10px; }
+    .print-totals { width:320px; margin-left:auto; }
+    .print-totals td { padding:4px 10px; font-size:12px; }
     .print-totals .grand-total td { font-weight:700; font-size:14px; border-top:2px solid #333; padding-top:8px; }
-    .print-footer { text-align:center; color:#999; font-size:11px; margin-top:48px; border-top:1px solid #eee; padding-top:16px; }
-    @media print {
-      body { padding:0; }
-      .no-print { display:none; }
-    }
+    .print-comment { margin-top:16px; }
+    .print-comment h3 { font-size:12px; margin-bottom:5px; color:#2563eb; }
+    .print-comment p { font-size:12px; color:#555; }
+    .print-footer { text-align:center; color:#999; font-size:11px; margin-top:40px; border-top:1px solid #eee; padding-top:14px; }
   </style>
 </head>
 <body>
-  <div class="print-header">
-    <div>
-      <h1>{{ heading_title }}</h1>
-      <p class="print-status">{{ order_status }}</p>
-    </div>
-    <div class="text-right">
-      <p>{{ store_name }}</p>
-      <p>{{ store_url }}</p>
-      <p>{{ date_added }}</p>
-    </div>
-  </div>
-
-  <div class="print-meta">
-    <div>
-      <h3>{{ text_customer_detail }}</h3>
-      <p>{{ firstname }} {{ lastname }}<br>{{ email }}<br>{{ telephone }}</p>
-    </div>
-    <div>
-      <h3>{{ text_payment_address }}</h3>
-      <p>{{ payment_address|raw }}</p>
-      <p style="margin-top:4px"><strong>{{ text_payment_method }}:</strong> {{ payment_method }}</p>
-    </div>
-    {% if shipping_method %}
-    <div>
-      <h3>{{ text_shipping_address }}</h3>
-      <p>{{ shipping_address|raw }}</p>
-      <p style="margin-top:4px"><strong>{{ text_shipping_method }}:</strong> {{ shipping_method }}</p>
-    </div>
-    {% endif %}
-    {% if tracking_number %}
-    <div>
-      <h3>{{ text_tracking_number }}</h3>
-      <p>{{ tracking_number|replace({'|': ' | '}) }}</p>
-    </div>
-    {% endif %}
-  </div>
-
-  <table>
-    <thead>
+  {% for order in orders %}
+  <div class="print-order"{% if not loop.last %} style="page-break-after: always;"{% endif %}>
+    <table class="print-header">
       <tr>
-        <th>{{ column_product }}</th>
-        <th>{{ column_model }}</th>
-        <th class="text-right">{{ column_quantity }}</th>
-        <th class="text-right">{{ column_price }}</th>
-        <th class="text-right">{{ column_total }}</th>
+        <td>
+          <h1>{{ order.heading_title }}</h1>
+          <p class="print-status">{{ order.order_status }}</p>
+        </td>
+        <td class="print-header-right">
+          <p>{{ order.store_name }}</p>
+          <p>{{ order.store_url }}</p>
+          <p>{{ order.date_added }}</p>
+        </td>
       </tr>
-    </thead>
-    <tbody>
-      {% for product in products %}
+    </table>
+
+    <table class="print-meta">
       <tr>
-        <td>{{ product.name }}{% if product.option %}<br><small style="color:#666">{{ product.option }}</small>{% endif %}</td>
-        <td>{{ product.model }}</td>
-        <td class="text-right">{{ product.quantity }}</td>
-        <td class="text-right">{{ product.price }}</td>
-        <td class="text-right">{{ product.total }}</td>
+        <td>
+          <h3>{{ text_customer_detail }}</h3>
+          <p>{{ order.firstname }} {{ order.lastname }}<br>{{ order.email }}<br>{{ order.telephone }}</p>
+        </td>
+        <td>
+          <h3>{{ text_payment_address }}</h3>
+          <p>{{ order.payment_address|raw }}</p>
+          <p><strong>{{ text_payment_method }}:</strong> {{ order.payment_method }}</p>
+        </td>
+        {% if order.shipping_method %}
+        <td>
+          <h3>{{ text_shipping_address }}</h3>
+          <p>{{ order.shipping_address|raw }}</p>
+          <p><strong>{{ text_shipping_method }}:</strong> {{ order.shipping_method }}</p>
+        </td>
+        {% endif %}
+      </tr>
+      {% if order.tracking_number %}
+      <tr>
+        <td colspan="3">
+          <h3>{{ text_tracking_number }}</h3>
+          <p>{{ order.tracking_number|replace({'|': ' | '}) }}</p>
+        </td>
+      </tr>
+      {% endif %}
+    </table>
+
+    <table class="print-products">
+      <thead>
+        <tr>
+          <th>{{ column_product }}</th>
+          <th>{{ column_model }}</th>
+          <th class="text-right">{{ column_quantity }}</th>
+          <th class="text-right">{{ column_price }}</th>
+          <th class="text-right">{{ column_total }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for product in order.products %}
+        <tr>
+          <td>{{ product.name }}{% if product.option %}<div class="option-line">{{ product.option }}</div>{% endif %}</td>
+          <td>{{ product.model }}</td>
+          <td class="text-right">{{ product.quantity }}</td>
+          <td class="text-right">{{ product.price }}</td>
+          <td class="text-right">{{ product.total }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <table class="print-totals">
+      {% for total in order.totals %}
+      <tr{% if loop.last %} class="grand-total"{% endif %}>
+        <td>{{ total.title }}</td>
+        <td class="text-right">{{ total.text }}</td>
       </tr>
       {% endfor %}
-    </tbody>
-  </table>
+    </table>
 
-  <table class="print-totals">
-    {% for total in totals %}
-    <tr{% if loop.last %} class="grand-total"{% endif %}>
-      <td>{{ total.title }}</td>
-      <td class="text-right">{{ total.text }}</td>
-    </tr>
-    {% endfor %}
-  </table>
-
-  {% if comment %}
-  <div style="margin-top:24px">
-    <h3 style="font-size:13px;margin-bottom:6px">{{ text_comment }}</h3>
-    <p style="font-size:12px;color:#555">{{ comment|nl2br }}</p>
+    {% if order.comment %}
+    <div class="print-comment">
+      <h3>{{ text_comment }}</h3>
+      <p>{{ order.comment|nl2br }}</p>
+    </div>
+    {% endif %}
   </div>
-  {% endif %}
+  {% endfor %}
 
   <div class="print-footer">
     <p>{{ text_print_date }}: {{ "now"|date("Y-m-d H:i:s") }}</p>
   </div>
-
-  <script>window.print();</script>
 </body>
 </html>

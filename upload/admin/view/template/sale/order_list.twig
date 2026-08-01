@@ -1,10 +1,20 @@
 {{ header }}{{ column_left }}
 <div id="content">
+  <style>
+    .spin { animation: spin 1s linear infinite; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  </style>
   <div class="page-header">
     <div class="container-fluid">
       <div class="row">
         <div class="col-sm-12">
           <div class="pull-right">
+            <a href="{{ add }}" class="btn btn-primary"><i data-lucide="plus" width="16" height="16"></i> {{ button_new_order }}</a>
+            <button type="button" id="button-export-csv" title="{{ button_export_csv }}" class="btn btn-success btn--icon" disabled>
+              <i data-lucide="download" width="16" height="16"></i>
+              <i data-lucide="loader" width="16" height="16" class="spin" id="csv-export-spinner" style="display:none"></i>
+            </button>
+            <button type="button" id="button-print" title="{{ button_print_selected }}" class="btn btn-default btn--icon" disabled><i data-lucide="printer" width="16" height="16"></i></button>
             <button type="button" id="button-delete" title="{{ button_delete }}" class="btn btn-danger btn--icon"><i data-lucide="trash-2" width="16" height="16"></i></button>
           </div>
           <h1 class="page-header__title">{{ heading_title }}</h1>
@@ -117,6 +127,7 @@
                 <td class="text-right">{{ order.total }}</td>
                 <td class="text-right"><div style="min-width: 120px;">
                     <div class="btn-group"> <a href="{{ order.view }}" title="{{ button_view }}" class="btn btn-primary btn--icon"><i data-lucide="eye" width="16" height="16"></i></a>
+                      <a href="{{ order.edit }}" title="{{ button_edit }}" class="btn btn-info btn--icon"><i data-lucide="pencil" width="16" height="16"></i></a>
                       <button type="button" data-order-id="{{ order.delete_id }}" data-loading-text="{{ text_loading }}" title="{{ button_delete }}" class="btn btn-danger btn--icon button-order-delete"><i data-lucide="trash-2" width="16" height="16"></i></button>
                     </div>
                   </div></td>
@@ -210,18 +221,70 @@ $('input[name=\'filter_customer\']').autocomplete({
 //--></script> 
   <script type="text/javascript"><!--
 $('input[name^=\'selected\']').on('change', function() {
-	$('#button-delete').prop('disabled', true);
+	$('#button-delete, #button-print, #button-export-csv').prop('disabled', true);
 
 	var selected = $('input[name^=\'selected\']:checked');
 
 	if (selected.length) {
-		$('#button-delete').prop('disabled', false);
+		$('#button-delete, #button-print, #button-export-csv').prop('disabled', false);
 	}
 });
 
-$('#button-delete').prop('disabled', true);
+$('#button-delete, #button-print, #button-export-csv').prop('disabled', true);
 
 $('input[name^=\'selected\']:first').trigger('change');
+
+$('#button-print').on('click', function(e) {
+	e.preventDefault();
+
+	var selected = $('input[name^=\'selected\']:checked');
+
+	if (!selected.length) {
+		return;
+	}
+
+	var orderIds = [];
+
+	selected.each(function() {
+		orderIds.push($(this).val());
+	});
+
+	window.open('{{ print_url }}&order_id=' + orderIds.join(','), '_blank');
+});
+
+$('#button-export-csv').on('click', function(e) {
+	e.preventDefault();
+
+	var selected = $('input[name^=\'selected\']:checked');
+
+	if (!selected.length || $(this).prop('disabled')) {
+		return;
+	}
+
+	var orderIds = [];
+
+	selected.each(function() {
+		orderIds.push($(this).val());
+	});
+
+	var button = $(this);
+
+	button.prop('disabled', true);
+	button.find('i[data-lucide="download"]').hide();
+	$('#csv-export-spinner').show();
+
+	window.location.href = '{{ export_url }}&order_id=' + orderIds.join(',');
+
+	function resetExportButton() {
+		button.prop('disabled', false);
+		button.find('i[data-lucide="download"]').show();
+		$('#csv-export-spinner').hide();
+	}
+
+	window.setTimeout(resetExportButton, 10000);
+
+	$(window).one('focus', resetExportButton);
+});
 
 $('.button-order-delete').on('click', function(e) {
 	e.preventDefault();

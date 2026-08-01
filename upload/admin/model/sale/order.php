@@ -1,5 +1,67 @@
 <?php
 class ModelSaleOrder extends Model {
+	public function createOrder() {
+		$store_id = 0;
+		$store_name = $this->config->get('config_name') ? $this->config->get('config_name') : 'DockerCart';
+		$store_url = $this->request->server['HTTPS'] ? HTTPS_CATALOG : HTTP_CATALOG;
+
+		$currency_code = $this->config->get('config_currency');
+		$currency_id = $this->currency->getId($currency_code);
+		$currency_value = 1.0;
+
+		$processing_statuses = (array)$this->config->get('config_processing_status');
+		$order_status_id = !empty($processing_statuses) ? (int)$processing_statuses[0] : 0;
+
+		$language_id = (int)$this->config->get('config_language_id');
+		if (!$language_id) {
+			$language_id = 1;
+		}
+
+		$invoice_prefix = $this->config->get('config_invoice_prefix');
+		if (!$invoice_prefix) {
+			$invoice_prefix = 'INV-';
+		}
+
+		$ip = isset($this->request->server['REMOTE_ADDR']) ? $this->request->server['REMOTE_ADDR'] : '';
+		$user_agent = isset($this->request->server['HTTP_USER_AGENT']) ? substr($this->request->server['HTTP_USER_AGENT'], 0, 255) : '';
+		$accept_language = isset($this->request->server['HTTP_ACCEPT_LANGUAGE']) ? substr($this->request->server['HTTP_ACCEPT_LANGUAGE'], 0, 255) : '';
+
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "order` SET
+			invoice_prefix = '" . $this->db->escape($invoice_prefix) . "',
+			store_id = '" . (int)$store_id . "',
+			store_name = '" . $this->db->escape($store_name) . "',
+			store_url = '" . $this->db->escape($store_url) . "',
+			customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "',
+			custom_field = '[]',
+			payment_custom_field = '[]',
+			shipping_custom_field = '[]',
+			order_status_id = '" . (int)$order_status_id . "',
+			affiliate_id = '0',
+			commission = '0',
+			marketing_id = '0',
+			language_id = '" . (int)$language_id . "',
+			currency_id = '" . (int)$currency_id . "',
+			currency_code = '" . $this->db->escape($currency_code) . "',
+			currency_value = '" . (float)$currency_value . "',
+			ip = '" . $this->db->escape($ip) . "',
+			forwarded_ip = '',
+			user_agent = '" . $this->db->escape($user_agent) . "',
+			accept_language = '" . $this->db->escape($accept_language) . "',
+			date_added = NOW(),
+			date_modified = NOW()
+		");
+
+		$order_id = $this->db->getLastId();
+
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "order_total` SET order_id = '" . (int)$order_id . "', code = 'sub_total', title = '" . $this->db->escape($this->language->get('text_sub_total')) . "', `value` = '0', sort_order = '1'");
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "order_total` SET order_id = '" . (int)$order_id . "', code = 'shipping', title = '" . $this->db->escape($this->language->get('text_shipping')) . "', `value` = '0', sort_order = '3'");
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "order_total` SET order_id = '" . (int)$order_id . "', code = 'total', title = '" . $this->db->escape($this->language->get('text_total')) . "', `value` = '0', sort_order = '9'");
+
+		$this->addOrderHistory($order_id, $order_status_id, '', false);
+
+		return $order_id;
+	}
+
 	public function getOrder($order_id) {
 		$order_query = $this->db->query("SELECT *, (SELECT CONCAT(c.firstname, ' ', c.lastname) FROM " . DB_PREFIX . "customer c WHERE c.customer_id = o.customer_id) AS customer, (SELECT os.name FROM " . DB_PREFIX . "order_status os WHERE os.order_status_id = o.order_status_id AND os.language_id = '" . (int)$this->config->get('config_language_id') . "') AS order_status FROM `" . DB_PREFIX . "order` o WHERE o.order_id = '" . (int)$order_id . "'");
 
@@ -1039,6 +1101,153 @@ class ModelSaleOrder extends Model {
 		);
 	}
 
+	public function recalculateShipping($order_id) {
+		$order_info = $this->getOrder($order_id);
+
+		if (!$order_info || empty($order_info['shipping_code'])) {
+			return null;
+		}
+
+		$parts = explode('.', (string)$order_info['shipping_code']);
+
+		if (($parts[0] ?? '') !== 'dockercart_universal') {
+			return null;
+		}
+
+		$totals = $this->getOrderTotals($order_id);
+
+		$subtotal = 0.0;
+		$shipping_total_id = 0;
+
+		foreach ($totals as $total) {
+			if ($total['code'] == 'sub_total') {
+				$subtotal = (float)$total['value'];
+			} elseif ($total['code'] == 'shipping') {
+				$shipping_total_id = (int)$total['order_total_id'];
+			}
+		}
+
+		if (!$shipping_total_id) {
+			return null;
+		}
+
+		$currency_value = (float)$order_info['currency_value'];
+
+		if ($currency_value <= 0) {
+			$currency_value = 1.0;
+		}
+
+		$this->load->model('extension/shipping/dockercart_universal');
+
+		$quote = $this->model_extension_shipping_dockercart_universal->getQuoteForOrder(
+			$order_info,
+			$subtotal / $currency_value,
+			$this->getOrderShippingWeight($order_id)
+		);
+
+		if ($quote === null) {
+			return null;
+		}
+
+		$cost = $quote['cost'] === null ? 0.0 : (float)$quote['cost'];
+		$cost_order = round($cost * $currency_value, 4);
+
+		$this->db->query("UPDATE `" . DB_PREFIX . "order_total` SET
+			value = '" . (float)$cost_order . "',
+			title = '" . $this->db->escape($quote['title']) . "'
+			WHERE order_total_id = '" . (int)$shipping_total_id . "'
+		");
+
+		return $this->recalculateOrderTotals($order_id);
+	}
+
+	public function previewShippingQuote($order_id, $shipping_code, $country_id = 0, $zone_id = 0, $subtotal = null) {
+		$order_info = $this->getOrder($order_id);
+
+		if (!$order_info || $shipping_code === '') {
+			return null;
+		}
+
+		$parts = explode('.', (string)$shipping_code);
+
+		if (($parts[0] ?? '') !== 'dockercart_universal') {
+			return null;
+		}
+
+		if ($country_id) {
+			$order_info['shipping_country_id'] = (int)$country_id;
+		}
+
+		if ($zone_id) {
+			$order_info['shipping_zone_id'] = (int)$zone_id;
+		}
+
+		$order_info['shipping_code'] = $shipping_code;
+
+		if ($subtotal === null) {
+			$subtotal = 0.0;
+
+			foreach ($this->getOrderTotals($order_id) as $total) {
+				if ($total['code'] == 'sub_total') {
+					$subtotal = (float)$total['value'];
+					break;
+				}
+			}
+		}
+
+		$currency_value = (float)$order_info['currency_value'];
+
+		if ($currency_value <= 0) {
+			$currency_value = 1.0;
+		}
+
+		$this->load->model('extension/shipping/dockercart_universal');
+
+		$quote = $this->model_extension_shipping_dockercart_universal->getQuoteForOrder(
+			$order_info,
+			(float)$subtotal / $currency_value,
+			$this->getOrderShippingWeight($order_id)
+		);
+
+		if ($quote === null) {
+			return null;
+		}
+
+		$cost = $quote['cost'] === null ? 0.0 : (float)$quote['cost'];
+
+		return array(
+			'cost'  => round($cost * $currency_value, 4),
+			'title' => $quote['title']
+		);
+	}
+
+	private function getOrderShippingWeight($order_id) {
+		$query = $this->db->query("SELECT op.product_id, op.quantity, p.weight, p.weight_class_id, p.shipping
+			FROM `" . DB_PREFIX . "order_product` op
+			LEFT JOIN `" . DB_PREFIX . "product` p ON (op.product_id = p.product_id)
+			WHERE op.order_id = '" . (int)$order_id . "'
+		");
+
+		$weight = 0.0;
+		$default_class = (int)$this->config->get('config_weight_class_id');
+
+		foreach ($query->rows as $row) {
+			if (!$row['shipping']) {
+				continue;
+			}
+
+			$line_weight = (float)$row['weight'] * (float)$row['quantity'];
+
+			if ((int)$row['weight_class_id']) {
+				$line_weight = $this->weight->convert($line_weight, (int)$row['weight_class_id'], $default_class);
+			}
+
+			$weight += $line_weight;
+		}
+
+		return $weight;
+	}
+
 	public function getOrderTimeline($order_id, $start = 0, $limit = 20) {
 		if ($start < 0) {
 			$start = 0;
@@ -1048,14 +1257,14 @@ class ModelSaleOrder extends Model {
 			$limit = 20;
 		}
 
-		$query = $this->db->query("SELECT oh.order_history_id, oh.order_status_id, oh.notify, oh.comment, oh.date_added,
-			os.name AS status_name, 'history' AS type, 0 AS amount, '' AS payment_method
+		$query = $this->db->query("SELECT oh.order_history_id, oh.order_status_id, oh.notify, oh.comment, oh.comment_key, oh.comment_params, oh.date_added,
+			os.name AS status_name, 'history' AS type, 0 AS amount, '' AS payment_method, '' AS payment_code
 			FROM " . DB_PREFIX . "order_history oh
 			LEFT JOIN " . DB_PREFIX . "order_status os ON oh.order_status_id = os.order_status_id AND os.language_id = '" . (int)$this->config->get('config_language_id') . "'
 			WHERE oh.order_id = '" . (int)$order_id . "'
 			UNION ALL
-			SELECT op.order_payment_id, 0, 0, CONVERT(op.comment USING utf8mb4) COLLATE utf8mb4_general_ci, op.date_added,
-			op.payment_method COLLATE utf8mb4_general_ci AS status_name, 'payment' AS type, op.amount, op.payment_method COLLATE utf8mb4_general_ci
+			SELECT op.order_payment_id, 0, 0, CONVERT(op.comment USING utf8mb4) COLLATE utf8mb4_general_ci, '', NULL, op.date_added,
+			op.payment_method COLLATE utf8mb4_general_ci AS status_name, 'payment' AS type, op.amount, op.payment_method COLLATE utf8mb4_general_ci, op.payment_code
 			FROM " . DB_PREFIX . "order_payment op
 			WHERE op.order_id = '" . (int)$order_id . "'
 			ORDER BY date_added DESC, order_history_id DESC
@@ -1280,7 +1489,7 @@ class ModelSaleOrder extends Model {
 		}
 	}
 
-	public function addOrderNote($order_id, $comment, $notify = false) {
+	public function addOrderNote($order_id, $comment, $notify = false, $comment_key = '', $comment_params = array()) {
 		$query = $this->db->query("SELECT order_status_id FROM `" . DB_PREFIX . "order` WHERE order_id = '" . (int)$order_id . "'");
 
 		if (!$query->num_rows) {
@@ -1294,6 +1503,8 @@ class ModelSaleOrder extends Model {
 			order_status_id = '0',
 			notify = '" . (int)$notify . "',
 			comment = '" . $this->db->escape($comment) . "',
+			comment_key = '" . $this->db->escape($comment_key) . "',
+			comment_params = '" . $this->db->escape(is_array($comment_params) ? json_encode($comment_params) : '') . "',
 			date_added = NOW()
 		");
 

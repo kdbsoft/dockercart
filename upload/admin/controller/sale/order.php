@@ -13,7 +13,20 @@ class ControllerSaleOrder extends Controller {
 	}
 
 	public function add() {
-		$this->response->redirect($this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'], true));
+		$this->load->language('sale/order');
+
+		if (!$this->user->hasPermission('modify', 'sale/order')) {
+			$this->response->redirect($this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'], true));
+			return;
+		}
+
+		$this->load->model('sale/order');
+
+		$order_id = $this->model_sale_order->createOrder();
+
+		$this->session->data['success'] = sprintf($this->language->get('text_order_created'), $order_id);
+
+		$this->response->redirect($this->url->link('sale/order_detail', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $order_id . '&edit=1', true));
 	}
 
 	public function edit() {
@@ -76,6 +89,118 @@ class ControllerSaleOrder extends Controller {
 		}
 
 		$this->response->redirect($this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'] . $url, true));
+	}
+
+	public function exportCsv(): void {
+		$this->load->language('sale/order');
+
+		if (!$this->user->hasPermission('access', 'sale/order')) {
+			$this->response->redirect($this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'], true));
+			return;
+		}
+
+		$ids = array();
+
+		if (isset($this->request->get['order_id'])) {
+			if (is_array($this->request->get['order_id'])) {
+				$ids = $this->request->get['order_id'];
+			} else {
+				$ids = explode(',', (string)$this->request->get['order_id']);
+			}
+
+			$ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
+		}
+
+		if (!$ids) {
+			$this->response->redirect($this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'], true));
+			return;
+		}
+
+		$this->load->model('sale/order');
+
+		$items_query = $this->db->query("SELECT order_id, SUM(quantity) AS total_items FROM " . DB_PREFIX . "order_product WHERE order_id IN (" . implode(',', $ids) . ") GROUP BY order_id");
+
+		$items_count = array();
+
+		foreach ($items_query->rows as $row) {
+			$items_count[(int)$row['order_id']] = (int)$row['total_items'];
+		}
+
+		$headers = array(
+			$this->language->get('column_order_id'),
+			$this->language->get('column_date_added'),
+			$this->language->get('column_customer'),
+			$this->language->get('entry_email'),
+			$this->language->get('entry_telephone'),
+			$this->language->get('text_payment_method'),
+			$this->language->get('text_shipping_method'),
+			$this->language->get('column_status'),
+			$this->language->get('text_payment_status'),
+			$this->language->get('column_items'),
+			$this->language->get('column_total'),
+			$this->language->get('column_paid'),
+			$this->language->get('text_tracking_number'),
+			$this->language->get('column_comment')
+		);
+
+		$rows = array();
+
+		foreach ($ids as $order_id) {
+			$order_info = $this->model_sale_order->getOrder($order_id);
+
+			if (!$order_info) {
+				continue;
+			}
+
+			$payment_status = $this->model_sale_order->getPaymentStatus($order_info['total'], $order_info['paid_amount']);
+			$order_localizer = new OrderLocalizer($this->registry);
+			$currency_code = $order_info['currency_code'];
+			$currency_value = $order_info['currency_value'];
+
+			$rows[] = array(
+				$order_id,
+				date($this->language->get('datetime_format'), strtotime($order_info['date_added'])),
+				$order_info['firstname'] . ' ' . $order_info['lastname'],
+				$order_info['email'],
+				$order_info['telephone'],
+				$order_localizer->paymentMethodTitle($order_info),
+				$order_localizer->shippingMethodTitle($order_info),
+				$order_info['order_status'] ? $order_info['order_status'] : $this->language->get('text_missing'),
+				$this->language->get('text_payment_status_' . $payment_status),
+				isset($items_count[(int)$order_id]) ? $items_count[(int)$order_id] : 0,
+				$this->currency->format($order_info['total'], $currency_code, $currency_value),
+				$this->currency->format($order_info['paid_amount'], $currency_code, $currency_value),
+				str_replace('|', ' | ', (string)$order_info['tracking_number']),
+				$order_info['comment']
+			);
+		}
+
+		if (!$rows) {
+			$this->response->redirect($this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'], true));
+			return;
+		}
+
+		$output = "\xEF\xBB\xBF" . $this->csvLine($headers);
+
+		foreach ($rows as $row) {
+			$output .= $this->csvLine($row);
+		}
+
+		$filename = 'orders-' . date('Ymd-His') . '.csv';
+
+		$this->response->addHeader('Content-Type: text/csv; charset=UTF-8');
+		$this->response->addHeader('Content-Disposition: attachment; filename="' . $filename . '"');
+		$this->response->setOutput($output);
+	}
+
+	private function csvLine(array $fields): string {
+		$quoted = array();
+
+		foreach ($fields as $field) {
+			$quoted[] = '"' . str_replace('"', '""', (string)$field) . '"';
+		}
+
+		return implode(',', $quoted) . "\r\n";
 	}
 			
 	protected function getList() {
@@ -184,6 +309,9 @@ class ControllerSaleOrder extends Controller {
 		}
 
 		$data['delete'] = str_replace('&amp;', '&', $this->url->link('sale/order/delete', 'user_token=' . $this->session->data['user_token'] . $url, true));
+		$data['add'] = str_replace('&amp;', '&', $this->url->link('sale/order/add', 'user_token=' . $this->session->data['user_token'], true));
+		$data['print_url'] = str_replace('&amp;', '&', $this->url->link('sale/order_detail/printSelected', 'user_token=' . $this->session->data['user_token'], true));
+		$data['export_url'] = str_replace('&amp;', '&', $this->url->link('sale/order/exportCsv', 'user_token=' . $this->session->data['user_token'], true));
 		$data['text_list_subtitle'] = $this->language->get('text_list_subtitle');
 
 		$data['orders'] = array();
@@ -232,6 +360,7 @@ class ControllerSaleOrder extends Controller {
 			$customer_type_badge_class = $this->getCustomerTypeBadgeClass($result);
 			$status_badge_class = $this->getOrderStatusBadgeClass((int)$result['order_status_id'], $processing_statuses, $complete_statuses, $fraud_status);
 			$payment_status = $this->model_sale_order->getPaymentStatus($result['total'], $result['paid_amount']);
+			$order_localizer = new OrderLocalizer($this->registry);
 
 			$data['orders'][] = array(
 				'order_id'      => $result['order_id'],
@@ -246,15 +375,16 @@ class ControllerSaleOrder extends Controller {
 				'payment_status' => $payment_status,
 				'payment_status_text' => $this->language->get('text_payment_status_' . $payment_status),
 				'payment_status_badge_class' => $this->getPaymentStatusBadgeClass($payment_status),
-				'payment_method' => $result['payment_method'],
+				'payment_method' => $order_localizer->paymentMethodTitle($result),
 				'paid_amount'   => $this->currency->format($result['paid_amount'], $result['currency_code'], $result['currency_value']),
-				'shipping_method' => $result['shipping_method'],
+				'shipping_method' => $order_localizer->shippingMethodTitle($result),
 				'items_count'   => isset($order_items[(int)$result['order_id']]) ? $order_items[(int)$result['order_id']] : 0,
 				'tracking_number' => $result['tracking_number'],
 				'total'         => $this->currency->format($result['total'], $result['currency_code'], $result['currency_value']),
 				'date_added'    => date($this->language->get('datetime_format'), strtotime($result['date_added'])),
 				'shipping_code' => $result['shipping_code'],
 				'view'          => $this->url->link('sale/order_detail', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $result['order_id'] . $url, true),
+				'edit'          => $this->url->link('sale/order_detail', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $result['order_id'] . '&edit=1' . $url, true),
 				'delete_id'     => $result['order_id']
 			);
 		}
