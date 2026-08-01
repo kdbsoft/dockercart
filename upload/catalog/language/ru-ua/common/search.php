@@ -6,3 +6,6 @@ $_['text_search_scoped'] = 'Поиск в %s…';
 $_['text_suggest_categories'] = 'Категории';
 $_['text_suggest_manufacturers'] = 'Производители';
 $_['text_suggest_products'] = 'Товары';
+// Voice search
+$_['text_voice_search'] = 'Голосовой поиск';
+$_['text_voice_listening'] = 'Слушаю…';

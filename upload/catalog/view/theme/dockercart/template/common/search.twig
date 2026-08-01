@@ -7,8 +7,19 @@
       value="{{ search }}"
       placeholder="{{ text_search }}"
       autocomplete="off"
-      class="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-gray-100 border border-transparent text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-400 focus:bg-white transition"
+      class="w-full pl-10 pr-10 py-2.5 rounded-2xl bg-gray-100 border border-transparent text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-400 focus:bg-white transition"
     />
+    {% if voice_search %}
+    <button
+      type="button"
+      class="dc-voice-search-btn absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-full text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition"
+      title="{{ text_voice_search }}"
+      data-voice-listening-title="{{ text_voice_listening }}"
+      aria-label="{{ text_voice_search }}"
+    >
+      <i data-lucide="mic" class="w-4 h-4 pointer-events-none"></i>
+    </button>
+    {% endif %}
     <input type="hidden" name="route" value="product/search" />
     {% if search_category_id %}<input type="hidden" name="category_id" value="{{ search_category_id }}" />{% endif %}
   </div>

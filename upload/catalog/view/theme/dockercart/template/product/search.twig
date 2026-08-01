@@ -26,9 +26,22 @@
 
           <div class="flex-1 min-w-[200px]">
             <label class="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-1.5">{{ text_keyword }}</label>
-            <input type="text" name="search" value="{{ search }}"
-              class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-blue-400 bg-white"
-              placeholder="{{ text_keyword }}" />
+            <div class="relative">
+              <input type="text" name="search" value="{{ search }}"
+                class="w-full rounded-xl border border-gray-200 px-4 py-2.5 pr-10 text-sm focus:outline-none focus:border-blue-400 bg-white"
+                placeholder="{{ text_keyword }}" />
+              {% if voice_search %}
+              <button
+                type="button"
+                class="dc-voice-search-btn absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition"
+                title="{{ text_voice_search }}"
+                data-voice-listening-title="{{ text_voice_listening }}"
+                aria-label="{{ text_voice_search }}"
+              >
+                <i data-lucide="mic" class="w-4 h-4 pointer-events-none"></i>
+              </button>
+              {% endif %}
+            </div>
           </div>
           <button type="submit" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition whitespace-nowrap">
             <i data-lucide="search" class="w-4 h-4 inline-block mr-1.5 align-text-bottom"></i>{{ button_search|default('Search') }}
