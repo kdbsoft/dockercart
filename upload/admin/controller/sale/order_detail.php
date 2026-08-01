@@ -41,6 +41,7 @@ class ControllerSaleOrderDetail extends Controller {
 
 		$data['cancel'] = $this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['print_url'] = $this->url->link('sale/order_detail/print', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $order_id, true);
+		$data['create_return_url'] = $this->url->link('sale/return/add', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $order_id, true);
 		$data['user_token'] = $this->session->data['user_token'];
 		$data['order_id'] = $order_id;
 		$data['edit_mode'] = !empty($this->request->get['edit']);
@@ -265,7 +266,12 @@ class ControllerSaleOrderDetail extends Controller {
 		$this->load->model('customer/customer');
 		$data['reward_total'] = $this->model_customer_customer->getTotalCustomerRewardsByOrderId($order_id);
 
+		$coupon_row = $this->model_sale_order->hasCoupon($order_id);
+		$data['coupon_applied'] = (bool)$coupon_row;
+		$data['coupon_title'] = $coupon_row ? $coupon_row['title'] : '';
+
 		$data = array_merge($data, $this->getPaymentsPartialData($order_id));
+		$data = array_merge($data, $this->getShipmentsPartialData($order_id));
 
 		$data['affiliate_firstname'] = $order_info['affiliate_firstname'];
 		$data['affiliate_lastname'] = $order_info['affiliate_lastname'];
@@ -296,6 +302,8 @@ class ControllerSaleOrderDetail extends Controller {
 			return;
 		}
 
+		$this->model_sale_order->updateInvoiceNo($order_id);
+
 		$this->sendPdf(
 			$this->load->view('sale/order_detail_print', [
 				'orders' => [$this->buildPrintData($order_id)],
@@ -325,6 +333,7 @@ class ControllerSaleOrderDetail extends Controller {
 
 		foreach ($ids as $order_id) {
 			if ($this->model_sale_order->getOrder($order_id)) {
+				$this->model_sale_order->updateInvoiceNo($order_id);
 				$orders[] = $this->buildPrintData($order_id);
 			}
 		}
@@ -349,6 +358,7 @@ class ControllerSaleOrderDetail extends Controller {
 
 		$data['order_id'] = $order_id;
 		$data['heading_title'] = sprintf($this->language->get('text_order_number'), $order_id);
+		$data['invoice_no'] = $order_info['invoice_no'] ? $order_info['invoice_prefix'] . $order_info['invoice_no'] : '';
 		$data['store_name'] = $order_info['store_name'];
 		$data['store_url'] = $order_info['store_id'] == 0
 			? ($this->request->server['HTTPS'] ? HTTPS_CATALOG : HTTP_CATALOG)
@@ -433,7 +443,7 @@ class ControllerSaleOrderDetail extends Controller {
 		} else {
 			$order_id = (int)($this->request->get['order_id'] ?? 0);
 			$page = (int)($this->request->get['page'] ?? 1);
-			$limit = 5;
+			$limit = 10;
 			$start = ($page - 1) * $limit;
 
 			$this->load->model('sale/order');
@@ -517,6 +527,32 @@ class ControllerSaleOrderDetail extends Controller {
 		$this->response->setOutput(json_encode($json));
 	}
 
+	public function duplicate(): void {
+		$this->load->language('sale/order');
+
+		$json = [];
+
+		if (!$this->user->hasPermission('modify', 'sale/order')) {
+			$json['error'] = $this->language->get('error_permission');
+		} else {
+			$order_id = (int)($this->request->get['order_id'] ?? 0);
+
+			$this->load->model('sale/order');
+
+			$new_order_id = $this->model_sale_order->duplicateOrder($order_id);
+
+			if (!$new_order_id) {
+				$json['error'] = $this->language->get('error_action');
+			} else {
+				$json['success'] = $this->language->get('text_order_duplicated');
+				$json['redirect'] = $this->url->link('sale/order_detail', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $new_order_id, true);
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
 	public function addHistory(): void {
 		$this->load->language('sale/order');
 
@@ -536,10 +572,117 @@ class ControllerSaleOrderDetail extends Controller {
 			} else {
 				$this->load->model('sale/order');
 
-				if (!$this->model_sale_order->addOrderHistory($order_id, $order_status_id, $comment, $notify, $override)) {
+				$shipping_status_id = (int)$this->config->get('config_order_flow_shipping_status');
+				$order_info = $this->model_sale_order->getOrder($order_id);
+
+				if (!$override && $shipping_status_id > 0 && $order_status_id === $shipping_status_id && !$order_info['tracking_number']) {
+					$json['error'] = $this->language->get('error_tracking_required');
+				} elseif (!$this->model_sale_order->addOrderHistory($order_id, $order_status_id, $comment, $notify, $override)) {
 					$json['error'] = $this->language->get('error_invalid_transition');
 				} else {
 					$json['success'] = $this->language->get('text_success');
+				}
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function applyCoupon(): void {
+		$this->load->language('sale/order');
+
+		$json = [];
+
+		if (!$this->user->hasPermission('modify', 'sale/order')) {
+			$json['error'] = $this->language->get('error_permission');
+		} else {
+			$order_id = (int)($this->request->get['order_id'] ?? 0);
+			$code = trim((string)($this->request->post['code'] ?? ''));
+
+			$this->load->model('sale/order');
+
+			$result = $this->model_sale_order->applyCoupon($order_id, $code);
+
+			if (!$result) {
+				$json['error'] = $this->language->get('error_coupon_invalid');
+			} else {
+				$note = sprintf($this->language->get('text_coupon_note_added'), $result['code']);
+				$this->model_sale_order->addOrderNote($order_id, $note, false, 'text_coupon_note_added', [$result['code']]);
+
+				$json['success'] = $this->language->get('text_coupon_applied');
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function removeCoupon(): void {
+		$this->load->language('sale/order');
+
+		$json = [];
+
+		if (!$this->user->hasPermission('modify', 'sale/order')) {
+			$json['error'] = $this->language->get('error_permission');
+		} else {
+			$order_id = (int)($this->request->get['order_id'] ?? 0);
+
+			$this->load->model('sale/order');
+
+			$coupon_row = $this->model_sale_order->hasCoupon($order_id);
+
+			if (!$coupon_row) {
+				$json['error'] = $this->language->get('error_action');
+			} else {
+				$code = trim(preg_replace('/^.*\((.*)\)$/', '$1', $coupon_row['title']));
+
+				$this->model_sale_order->removeCoupon($order_id);
+
+				$note = sprintf($this->language->get('text_coupon_note_removed'), $code);
+				$this->model_sale_order->addOrderNote($order_id, $note, false, 'text_coupon_note_removed', [$code]);
+
+				$json['success'] = $this->language->get('text_coupon_removed');
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function addRefund(): void {
+		$this->load->language('sale/order');
+
+		$json = [];
+
+		if (!$this->user->hasPermission('modify', 'sale/order')) {
+			$json['error'] = $this->language->get('error_permission');
+		} else {
+			$order_id = (int)($this->request->get['order_id'] ?? 0);
+			$amount = (float)($this->request->post['amount'] ?? 0);
+			$comment = trim((string)($this->request->post['comment'] ?? ''));
+
+			$this->load->model('sale/order');
+
+			$order_info = $this->model_sale_order->getOrder($order_id);
+
+			if (!$order_info) {
+				$json['error'] = $this->language->get('error_action');
+			} elseif ($amount <= 0) {
+				$json['error'] = $this->language->get('error_refund_amount');
+			} elseif ((float)$order_info['paid_amount'] <= 0) {
+				$json['error'] = $this->language->get('error_refund_no_paid');
+			} elseif ($amount > (float)$order_info['paid_amount']) {
+				$json['error'] = $this->language->get('error_refund_too_large');
+			} else {
+				$amount_text = $this->currency->format($amount, $order_info['currency_code'], $order_info['currency_value']);
+				$note = sprintf($this->language->get('text_refund_note_added'), $amount_text);
+
+				if (!$this->model_sale_order->addOrderRefund($order_id, $amount, $comment ?: $note, 0, 'text_refund_note_added', [$amount_text])) {
+					$json['error'] = $this->language->get('error_action');
+				} else {
+					$json['success'] = $this->language->get('text_refund_added');
+					$json['payments_html'] = $this->load->view('sale/order_payments', $this->getPaymentsPartialData($order_id));
 				}
 			}
 		}
@@ -1072,6 +1215,96 @@ class ControllerSaleOrderDetail extends Controller {
 		$this->response->setOutput(json_encode($json));
 	}
 
+	public function addShipment(): void {
+		$this->load->language('sale/order');
+
+		$json = [];
+
+		if (!$this->user->hasPermission('modify', 'sale/order')) {
+			$json['error'] = $this->language->get('error_permission');
+		} else {
+			$order_id = (int)($this->request->get['order_id'] ?? 0);
+			$tracking_number = trim((string)($this->request->post['tracking_number'] ?? ''));
+			$comment = trim((string)($this->request->post['comment'] ?? ''));
+			$notify = !empty($this->request->post['notify']);
+			$items_raw = $this->request->post['items'] ?? [];
+
+			if (is_string($items_raw)) {
+				$items_raw = json_decode(html_entity_decode($items_raw, ENT_QUOTES, 'UTF-8'), true);
+			}
+
+			$items = is_array($items_raw) ? $items_raw : [];
+
+			$this->load->model('sale/order');
+
+			$order_info = $this->model_sale_order->getOrder($order_id);
+
+			if (!$order_info) {
+				$json['error'] = $this->language->get('error_action');
+			} elseif ($tracking_number === '') {
+				$json['error'] = $this->language->get('error_tracking_number');
+			} else {
+				$shipment_id = $this->model_sale_order->addOrderShipment($order_id, $tracking_number, $items, $comment);
+
+				if (!$shipment_id) {
+					$json['error'] = $this->language->get('error_shipment_items');
+				} else {
+					$this->model_sale_order->addOrderNote(
+						$order_id,
+						sprintf($this->language->get('text_shipping_note_added'), $tracking_number),
+						false,
+						'text_shipping_note_added',
+						[$tracking_number]
+					);
+
+					if ($notify) {
+						$this->load->controller('mail/order/shipped', [
+							'order_id'        => $order_id,
+							'tracking_number' => $tracking_number,
+							'comment'         => $comment,
+						]);
+					}
+
+					$json['success'] = $this->language->get('text_shipment_added');
+					$json['shipments_html'] = $this->load->view('sale/order_shipments', $this->getShipmentsPartialData($order_id));
+				}
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function deleteShipment(): void {
+		$this->load->language('sale/order');
+
+		$json = [];
+
+		if (!$this->user->hasPermission('modify', 'sale/order')) {
+			$json['error'] = $this->language->get('error_permission');
+		} else {
+			$shipment_id = (int)($this->request->post['shipment_id'] ?? 0);
+
+			$this->load->model('sale/order');
+
+			$shipment_info = $this->model_sale_order->getOrderShipment($shipment_id);
+
+			if (!$shipment_info) {
+				$json['error'] = $this->language->get('error_action');
+			} else {
+				$order_id = (int)$shipment_info['order_id'];
+
+				$this->model_sale_order->deleteOrderShipment($shipment_id);
+
+				$json['success'] = $this->language->get('text_shipment_removed');
+				$json['shipments_html'] = $this->load->view('sale/order_shipments', $this->getShipmentsPartialData($order_id));
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
 	public function addPayment(): void {
 		$this->load->language('sale/order');
 
@@ -1240,6 +1473,75 @@ class ControllerSaleOrderDetail extends Controller {
 
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
+	}
+
+	private function getShipmentsPartialData(int $order_id): array {
+		$order_info = $this->model_sale_order->getOrder($order_id);
+		$shipments = $this->model_sale_order->getOrderShipments($order_id);
+		$progress = $this->model_sale_order->getOrderShipmentProgress($order_id);
+		$localizer = $this->orderLocalizer();
+
+		$products = $this->model_sale_order->getOrderProducts($order_id);
+
+		$product_meta = [];
+		$position = 0;
+
+		foreach ($products as $product) {
+			$position++;
+			$product_meta[(int)$product['order_product_id']] = [
+				'position' => $position,
+				'model'    => $product['model'] ?? '',
+			];
+		}
+
+		$shipments_view = [];
+
+		foreach ($shipments as $shipment) {
+			$items = [];
+
+			foreach ($shipment['items'] as $item) {
+				$meta = $product_meta[(int)$item['order_product_id']] ?? null;
+				$items[] = [
+					'order_product_id' => (int)$item['order_product_id'],
+					'position'         => $meta['position'] ?? null,
+					'model'            => $meta['model'] ?? '',
+					'name'             => $localizer->productName($item),
+					'quantity'         => (int)$item['quantity'],
+				];
+			}
+
+			$shipments_view[] = [
+				'shipment_id'     => (int)$shipment['shipment_id'],
+				'tracking_number' => $shipment['tracking_number'],
+				'comment'         => $shipment['comment'],
+				'items'           => $items,
+				'date_added'      => date($this->language->get('datetime_format'), strtotime($shipment['date_added'])),
+			];
+		}
+
+		$products_view = [];
+
+		foreach ($products as $product) {
+			$ordered = (float)$product['quantity'];
+			$shipped = (float)($progress[(int)$product['order_product_id']]['shipped'] ?? 0);
+			$meta = $product_meta[(int)$product['order_product_id']] ?? null;
+
+			$products_view[] = [
+				'order_product_id' => (int)$product['order_product_id'],
+				'position'         => $meta['position'] ?? null,
+				'model'            => $meta['model'] ?? '',
+				'name'             => $localizer->productName($product),
+				'ordered'          => $ordered,
+				'shipped'          => min($shipped, $ordered),
+				'remaining'        => max(0, $ordered - $shipped),
+			];
+		}
+
+		return [
+			'shipments'          => $shipments_view,
+			'shipment_products'  => $products_view,
+			'shipping_status_id' => (int)$this->config->get('config_order_flow_shipping_status'),
+		];
 	}
 
 	private function getPaymentsPartialData(int $order_id): array {

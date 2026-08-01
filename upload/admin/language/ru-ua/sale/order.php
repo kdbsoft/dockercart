@@ -18,7 +18,7 @@ $_['column_quantity'] = 'Количество';
 $_['column_reference'] = 'Ссылка';
 $_['column_status'] = 'Статус';
 $_['column_tracking_number'] = 'Номер отслеживания';
-$_['column_total'] = 'Сумма';
+$_['column_total'] = 'Итого';
 $_['column_paid'] = 'Оплачено';
 $_['column_weight'] = 'Вес товара';
 $_['column_discount_percent'] = 'Скидка %';
@@ -34,6 +34,7 @@ $_['entry_country'] = 'Страна';
 $_['entry_coupon'] = 'Купон';
 $_['entry_currency'] = 'Валюта';
 $_['entry_customer'] = 'Клиент';
+$_['help_filter_customer'] = 'Поиск по имени, email или телефону — формат телефона не важен';
 $_['entry_customer_group'] = 'Группа покупателей';
 $_['entry_date_added'] = 'Дата добавления';
 $_['entry_date_modified'] = 'Дата изменения';
@@ -58,6 +59,7 @@ $_['entry_store'] = 'Магазин';
 $_['entry_telephone'] = 'Телефон';
 $_['entry_tax_number'] = 'ИНН';
 $_['entry_tracking_number'] = 'Номер отслеживания';
+$_['entry_tracking_number_hint'] = 'Может быть номером ТТН перевозчика или номером расходного документа (расходная накладная, ордер и т.д.)';
 $_['entry_theme'] = 'Тема подарочного сертификата';
 $_['entry_to_email'] = 'Адрес электронной почты получателя';
 $_['entry_to_name'] = 'Имя получателя';
@@ -199,6 +201,9 @@ $_['text_print_orders']          = 'Заказы';
 
 $_['button_print']               = 'Печать';
 $_['button_print_selected']      = 'Печать выбранных заказов';
+$_['button_create_return']       = 'Оформить возврат';
+$_['button_duplicate_order']     = 'Дублировать заказ';
+$_['text_order_duplicated']      = 'Заказ продублирован!';
 $_['button_export_csv']          = 'Выгрузить выбранные заказы в CSV';
 $_['button_new_order']           = 'Создать заказ';
 
@@ -222,6 +227,35 @@ $_['text_flow_confirm_terminal'] = 'Этот статус завершает ord
 $_['text_flow_terminal_state']   = 'Order flow для этого заказа завершён.';
 $_['button_flow_apply']          = 'Применить';
 $_['text_comment_optional']      = 'Комментарий (необязательно)';
+$_['text_return_refund_note']    = 'Возврат средств по возврату #%s';
+
+// Shipments
+$_['text_shipments']             = 'Отгрузки';
+$_['text_no_shipments']          = 'Отгрузок не зарегистрировано';
+$_['text_shipment_progress']     = 'Прогресс отгрузки';
+$_['text_shipment_items']        = 'Товары в этой отгрузке';
+$_['text_flow_shipment']         = 'Отгрузка';
+$_['text_shipment_added']        = 'Отгрузка добавлена';
+$_['text_shipment_removed']      = 'Отгрузка удалена';
+$_['text_shipping_note_added']   = 'Добавлена отгрузка: %s';
+$_['text_confirm_remove_shipment'] = 'Удалить эту отгрузку?';
+$_['button_add_shipment']        = 'Добавить отгрузку';
+$_['button_remove_shipment']     = 'Удалить отгрузку';
+$_['error_tracking_number']      = 'Укажите номер ТТН перевозчика или номер расходного документа!';
+$_['error_shipment_items']       = 'Выберите хотя бы один товар с количеством для отгрузки!';
+$_['error_tracking_required']    = 'Добавьте номер ТТН или расходного документа перед переводом заказа в статус отгрузки!';
+
+// Invoice
+$_['text_invoice_no']            = 'Счёт №:';
+
+// Coupon
+$_['button_coupon_apply']        = 'Применить';
+$_['button_coupon_remove']       = 'Удалить купон';
+$_['text_coupon_applied']        = 'Купон применён!';
+$_['text_coupon_removed']        = 'Купон удалён!';
+$_['text_coupon_note_added']     = 'Применён купон: %s';
+$_['text_coupon_note_removed']   = 'Удалён купон: %s';
+$_['error_coupon_invalid']       = 'Купон недействителен, истёк или не подходит по условиям!';
 
 $_['text_payer_address']         = 'Адрес плательщика';
 $_['text_same_as_billing']       = 'Совпадает с адресом плательщика';
@@ -285,6 +319,13 @@ $_['entry_payment_amount']           = 'Сумма платежа';
 $_['entry_payment_reference']        = '№ транзакции';
 $_['text_payment_reference_hint']    = 'Номер транзакции/квитанции из платёжной системы — по нему можно найти платёж';
 $_['button_add_payment']             = 'Записать платёж';
+$_['button_add_refund']              = 'Возврат средств';
+$_['entry_refund_amount']            = 'Сумма возврата';
+$_['text_refund_added']              = 'Возврат средств проведён!';
+$_['text_refund_note_added']         = 'Проведён возврат средств: %s';
+$_['error_refund_amount']            = 'Укажите сумму возврата больше нуля!';
+$_['error_refund_no_paid']           = 'Нет оплаченных средств для возврата!';
+$_['error_refund_too_large']         = 'Сумма возврата не может превышать оплаченную!';
 $_['button_remove_payment']          = 'Отменить';
 $_['button_remove_overpayment']      = 'Убрать переплату';
 $_['column_paid']                    = 'Оплачено';

@@ -62,12 +62,22 @@ class ControllerSaleOrderFlow extends Controller {
 
 		$this->setSetting('config_order_flow_steps', json_encode($steps), 1);
 		$this->setSetting('config_order_flow_transitions', json_encode($transitions), 1);
+
+		$shipping_status_id = (int)($this->request->post['shipping_status_id'] ?? 0);
+
+		if ($shipping_status_id && isset($known_ids[$shipping_status_id])) {
+			$this->setSetting('config_order_flow_shipping_status', (string)$shipping_status_id, 0);
+		} else {
+			$this->setSetting('config_order_flow_shipping_status', '0', 0);
+		}
 	}
 
 	protected function setSetting($key, $value, $serialized): void {
-		$this->db->query("UPDATE `" . DB_PREFIX . "setting` SET `value` = '" . $this->db->escape($value) . "', serialized = '" . (int)$serialized . "' WHERE store_id = '0' AND `code` = 'config' AND `key` = '" . $this->db->escape($key) . "'");
+		$query = $this->db->query("SELECT setting_id FROM `" . DB_PREFIX . "setting` WHERE store_id = '0' AND `code` = 'config' AND `key` = '" . $this->db->escape($key) . "'");
 
-		if (!$this->db->countAffected()) {
+		if ($query->num_rows) {
+			$this->db->query("UPDATE `" . DB_PREFIX . "setting` SET `value` = '" . $this->db->escape($value) . "', serialized = '" . (int)$serialized . "' WHERE store_id = '0' AND `code` = 'config' AND `key` = '" . $this->db->escape($key) . "'");
+		} else {
 			$this->db->query("INSERT INTO `" . DB_PREFIX . "setting` SET store_id = '0', `code` = 'config', `key` = '" . $this->db->escape($key) . "', `value` = '" . $this->db->escape($value) . "', serialized = '" . (int)$serialized . "'");
 		}
 	}
@@ -84,6 +94,8 @@ class ControllerSaleOrderFlow extends Controller {
 
 		$data['action'] = $this->url->link('sale/order_flow', 'user_token=' . $this->session->data['user_token'], true);
 		$data['cancel'] = $this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'], true);
+
+		$data['shipping_status_id'] = (int)$this->config->get('config_order_flow_shipping_status');
 
 		$this->load->model('localisation/order_status');
 

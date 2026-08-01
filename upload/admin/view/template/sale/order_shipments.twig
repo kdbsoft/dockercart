@@ -1,0 +1,96 @@
+{# Order shipments panel: tracking numbers with partial quantities #}
+{% if shipments %}
+<div class="dcx-payment-list">
+  {% for shipment in shipments %}
+  <div class="dcx-payment-item dcx-shipment-item">
+    <div class="dcx-payment-item__row">
+      <span class="dcx-shipment-item__tracking"><i data-lucide="truck" width="12" height="12"></i> {{ shipment.tracking_number }}</span>
+      <span class="dcx-payment-item__date">{{ shipment.date_added }}</span>
+      <button type="button" class="btn btn-xs btn-danger btn--icon dcx-payment-item__remove" onclick="deleteShipment({{ shipment.shipment_id }})" title="{{ button_remove_shipment }}">
+        <i data-lucide="x" width="11" height="11"></i>
+      </button>
+    </div>
+    {% if shipment.items %}
+    <div class="dcx-shipment-item__items">
+      {% for item in shipment.items %}
+      <div class="dcx-shipment-item__line">
+        {% if item.position %}<span class="dcx-shipment-item__pos">#{{ item.position }}</span>{% endif %}
+        {% if item.model %}<span class="dcx-shipment-item__model">{{ item.model }}</span>{% endif %}
+        {{ item.name }} × {{ item.quantity }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% if shipment.comment %}
+    <div class="dcx-payment-item__comment">{{ shipment.comment }}</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="text-muted" style="font-size:12px;margin-top:8px">{{ text_no_shipments }}</div>
+{% endif %}
+
+{% if shipment_products %}
+<div class="dcx-shipment-progress">
+  <div class="order-add-title"><i data-lucide="package-check" width="15" height="15"></i> {{ text_shipment_progress }}</div>
+  {% for product in shipment_products %}
+  <div class="dcx-shipment-progress__row">
+    <span class="dcx-shipment-progress__name">
+      {% if product.position %}<span class="dcx-shipment-item__pos">#{{ product.position }}</span>{% endif %}
+      {% if product.model %}<span class="dcx-shipment-item__model">{{ product.model }}</span>{% endif %}
+      {{ product.name }}
+    </span>
+    <span class="dcx-shipment-progress__count">{{ product.shipped }} / {{ product.ordered }}</span>
+    <div class="payment-progress">
+      <div class="payment-progress__bar" style="width: {{ product.ordered > 0 ? (product.shipped / product.ordered * 100)|round : 0 }}%"></div>
+    </div>
+    {% if product.remaining > 0 %}
+    <span class="dcx-shipment-progress__remaining">{{ text_payment_remaining }}: {{ product.remaining }}</span>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="dcx-payment-add">
+  <div class="order-add-title"><i data-lucide="truck" width="15" height="15"></i> {{ button_add_shipment }}</div>
+  <div class="dcx-fields">
+    <div class="dcx-field">
+      <label class="dcx-label" for="shipment-tracking">{{ entry_tracking_number }}</label>
+      <input type="text" class="form-control" id="shipment-tracking" />
+      <div class="text-muted" style="font-size:11px;margin-top:3px">{{ entry_tracking_number_hint }}</div>
+    </div>
+    {% if shipment_products %}
+    <div class="dcx-field">
+      <label class="dcx-label">{{ text_shipment_items }}</label>
+      <div id="shipment-items">
+        {% for product in shipment_products %}
+        <div class="dcx-shipment-item-row">
+          <span class="dcx-shipment-item-row__name">
+            {% if product.position %}<span class="dcx-shipment-item__pos">#{{ product.position }}</span>{% endif %}
+            {% if product.model %}<span class="dcx-shipment-item__model">{{ product.model }}</span>{% endif %}
+            {{ product.name }}
+          </span>
+          <input type="number" class="form-control" min="0" max="{{ product.remaining }}" value="{{ product.remaining }}" data-opid="{{ product.order_product_id }}" />
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    <div class="dcx-field">
+      <label class="dcx-label" for="shipment-comment">{{ entry_comment }}</label>
+      <textarea class="form-control" id="shipment-comment" rows="2"></textarea>
+    </div>
+    <div class="dcx-field">
+      <label class="dcx-sidebar-card__checkbox">
+        <input type="checkbox" id="shipment-notify" checked /> {{ entry_notify }}
+      </label>
+    </div>
+    <div class="dcx-field">
+      <button type="button" class="btn btn-success" onclick="addShipment()">
+        <i data-lucide="plus" width="14" height="14"></i> {{ button_add_shipment }}
+      </button>
+    </div>
+  </div>
+</div>

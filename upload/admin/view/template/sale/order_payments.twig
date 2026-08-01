@@ -84,3 +84,24 @@
     </div>
   </div>
 </div>
+
+{% if paid_amount_raw > 0 %}
+<div class="dcx-payment-add dcx-refund-add">
+  <div class="order-add-title"><i data-lucide="undo-2" width="15" height="15"></i> {{ button_add_refund }}</div>
+  <div class="dcx-fields">
+    <div class="dcx-field">
+      <label class="dcx-label" for="refund-amount">{{ entry_refund_amount }}</label>
+      <input type="text" class="form-control" id="refund-amount" placeholder="0.00" />
+    </div>
+    <div class="dcx-field">
+      <label class="dcx-label" for="refund-comment">{{ entry_comment }}</label>
+      <textarea class="form-control" id="refund-comment" rows="2"></textarea>
+    </div>
+    <div class="dcx-field">
+      <button type="button" class="btn btn-warning" onclick="addRefund()">
+        <i data-lucide="undo-2" width="14" height="14"></i> {{ button_add_refund }}
+      </button>
+    </div>
+  </div>
+</div>
+{% endif %}

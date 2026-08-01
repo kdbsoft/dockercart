@@ -46,6 +46,9 @@
           <p>{{ order.store_name }}</p>
           <p>{{ order.store_url }}</p>
           <p>{{ order.date_added }}</p>
+          {% if order.invoice_no %}
+          <p><strong>{{ text_invoice_no }}</strong> {{ order.invoice_no }}</p>
+          {% endif %}
         </td>
       </tr>
     </table>

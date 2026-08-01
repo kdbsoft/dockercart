@@ -15,6 +15,10 @@ $_['text_flow_rule_transitions']     = 'Extra transitions below are allowed in a
 $_['text_flow_rule_terminal']        = 'A status with no outgoing transitions (e.g. Cancelled, Refunded) ends the flow.';
 $_['text_flow_rule_override']        = 'Operators can still force any status from the order page by enabling "Force" - flow validation is skipped.';
 
+$_['text_flow_shipping_status']      = 'Shipping status (requires tracking number)';
+$_['text_flow_shipping_status_hint'] = 'When the order moves into this status, the transition modal asks for a tracking number and creates a shipment with partial quantities.';
+$_['text_none']                      = 'None';
+
 // Buttons
 $_['button_flow_add_step']           = 'Add step';
 $_['button_flow_add_transition']     = 'Add transition';

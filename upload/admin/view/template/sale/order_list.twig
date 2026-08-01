@@ -42,6 +42,7 @@
           <div class="filter-field">
             <label for="input-customer">{{ entry_customer }}</label>
             <input type="text" name="filter_customer" value="{{ filter_customer }}" placeholder="{{ entry_customer }}" id="input-customer" class="form-control" />
+            <div class="filter-field__hint">{{ help_filter_customer }}</div>
           </div>
           <div class="filter-field">
             <label for="input-order-status">{{ entry_order_status }}</label>
@@ -115,14 +116,14 @@
                   <input type="checkbox" name="selected[]" value="{{ order.order_id }}" />
                   {% endif %}
                   <input type="hidden" name="shipping_code[]" value="{{ order.shipping_code }}" /></td>
-                <td class="text-right" style="padding-top:8px;padding-bottom:8px;"><div style="margin-bottom:4px;">{{ order.order_id }}</div><small class="text-muted">{{ text_tracking_number }}: <span class="tracking-value" id="tracking-{{ order.order_id }}">{{ order.tracking_number|replace({'|': ' | '}) }}</span> <button type="button" class="btn btn-default btn-xs btn-quick-edit-tracking" data-order-id="{{ order.order_id }}" data-value="{{ order.tracking_number|e('html_attr') }}"><i data-lucide="pencil" width="12" height="12"></i></button></small></td>
+                <td class="text-right" style="padding-top:8px;padding-bottom:8px;">{{ order.order_id }}</td>
                 <td class="text-left" style="padding-top:8px;padding-bottom:8px;">{{ order.customer }}<br><small class="text-muted">{{ order.customer_type }}</small></td>
                 <td class="text-left" style="padding-top:8px;padding-bottom:8px;">{{ order.date_added }}</td>
                 <td class="text-left">
                   <span class="{{ order.order_status_badge_class }}">{{ order.order_status }}</span>
                 </td>
                 <td class="text-left"><span class="{{ order.payment_status_badge_class }}">{{ order.payment_status_text }}</span>{% if order.payment_method %}<div style="font-size:11px;color:#888;margin-top:2px">{{ order.payment_method }}</div>{% endif %}{% if order.paid_amount %}<div style="font-size:11px;color:#888;margin-top:1px">{{ order.paid_amount }}</div>{% endif %}</td>
-                <td class="text-left" style="font-size:12px;color:#555">{{ order.shipping_method }}</td>
+                <td class="text-left" style="font-size:12px;color:#555">{{ order.shipping_method }}{% if order.tracking_number %}<div style="font-size:11px;color:#888;margin-top:2px;white-space:nowrap"><i data-lucide="truck" width="11" height="11" style="vertical-align:-1px"></i> {{ order.tracking_number|replace({'|': ' | '}) }}</div>{% endif %}</td>
                 <td class="text-center" style="padding-top:8px;padding-bottom:8px;">{{ order.items_count }}</td>
                 <td class="text-right">{{ order.total }}</td>
                 <td class="text-right"><div style="min-width: 120px;">
@@ -427,87 +428,5 @@ $('.order-status-select').on('change', function() {
 	});
 });
 //--></script>
-  <script type="text/javascript"><!--
-// Tracking numbers modal edit
-var $trackingModal = null;
-var trackingOrderId = 0;
-
-function openTrackingModal(orderId, currentValue) {
-	trackingOrderId = orderId;
-	var rows = String(currentValue || '').split('|').map(function(v) { return v.trim(); }).filter(Boolean);
-
-	if (!$trackingModal) {
-		$('body').append('<div id="tracking-modal" class="modal fade" tabindex="-1" role="dialog"><div class="modal-dialog modal-sm" role="document"><div class="modal-content">' +
-			'<div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title">{{ text_tracking_numbers }}</h4></div>' +
-			'<div class="modal-body">' +
-			'<div id="tracking-modal-rows"></div>' +
-			'<button type="button" class="btn btn-default btn-sm" id="tracking-modal-add"><i data-lucide="plus" width="11" height="11"></i> {{ button_add_tracking }}</button>' +
-			'<div class="text-muted" style="font-size:11px;margin-top:6px">{{ text_tracking_max }}</div>' +
-			'</div>' +
-			'<div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button><button type="button" class="btn btn-primary" id="tracking-modal-save">{{ button_save }}</button></div>' +
-			'</div></div></div>');
-		$trackingModal = $('#tracking-modal');
-		$('#tracking-modal-add').on('click', function() { addTrackingModalRow(''); });
-		$('#tracking-modal-save').on('click', saveTrackingModal);
-	}
-
-	$('#tracking-modal-rows').empty();
-	(rows.length ? rows : ['']).forEach(function(v) { addTrackingModalRow(v); });
-	updateTrackingModalButtons();
-	$trackingModal.modal('show');
-	$('#tracking-modal-rows input').first().focus().select();
-}
-
-function addTrackingModalRow(value) {
-	var $row = $('<div class="input-group" style="margin-bottom:5px">' +
-		'<input type="text" class="form-control input-sm tracking-modal-input" value="' + $('<div>').text(value || '').html() + '">' +
-		'<span class="input-group-btn"><button type="button" class="btn btn-default btn-sm tracking-modal-remove" title="{{ button_remove_tracking }}"><i data-lucide="x" width="11" height="11"></i></button></span>' +
-		'</div>');
-	$row.find('.tracking-modal-remove').on('click', function() {
-		$row.remove();
-		updateTrackingModalButtons();
-	});
-	$('#tracking-modal-rows').append($row);
-	lucide.createIcons();
-	updateTrackingModalButtons();
-}
-
-function updateTrackingModalButtons() {
-	var count = $('#tracking-modal-rows .tracking-modal-input').length;
-	$('#tracking-modal-add').toggle(count < 10);
-	$('#tracking-modal-rows .tracking-modal-remove').toggle(count > 1);
-}
-
-function getTrackingModalJoined() {
-	return $('#tracking-modal-rows .tracking-modal-input').map(function() {
-		return $(this).val().trim();
-	}).get().filter(Boolean).slice(0, 10).join('|');
-}
-
-function saveTrackingModal() {
-	var newValue = getTrackingModalJoined();
-
-	$.ajax({
-		url: 'index.php?route=sale/order/quickEdit&user_token={{ user_token }}&order_id=' + trackingOrderId,
-		type: 'post',
-		dataType: 'json',
-		data: 'field=tracking_number&value=' + encodeURIComponent(newValue),
-		success: function(json) {
-			if (json['success']) {
-				var display = (json['value_html'] !== undefined ? json['value_html'] : newValue).replace(/\|/g, ' | ');
-				$('#tracking-' + trackingOrderId).text(display);
-				$('.btn-quick-edit-tracking[data-order-id="' + trackingOrderId + '"]').data('value', newValue);
-			}
-			$('#tracking-modal').modal('hide');
-		},
-		error: function() {
-			$('#tracking-modal').modal('hide');
-		}
-	});
-}
-
-$(document).on('click', '.btn-quick-edit-tracking', function() {
-	openTrackingModal($(this).data('order-id'), $(this).data('value'));
-});
-//--></script></div>
+</div>
 {{ footer }} 

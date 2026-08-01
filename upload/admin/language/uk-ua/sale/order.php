@@ -34,6 +34,7 @@ $_['entry_country'] = 'Країна';
 $_['entry_coupon'] = 'Купон';
 $_['entry_currency'] = 'Валюта';
 $_['entry_customer'] = 'Клієнт';
+$_['help_filter_customer'] = 'Пошук за ім\'ям, email або телефоном — формат телефону не важливий';
 $_['entry_customer_group'] = 'Група покупців';
 $_['entry_date_added'] = 'Дата додавання';
 $_['entry_date_modified'] = 'Дата зміни';
@@ -59,6 +60,7 @@ $_['entry_store'] = 'Магазин';
 $_['entry_telephone'] = 'Телефон';
 $_['entry_tax_number'] = 'ІПН';
 $_['entry_tracking_number'] = 'Номер відстеження';
+$_['entry_tracking_number_hint'] = 'Може бути номером ТТН перевізника або номером видаткового документа (видаткова накладна, ордер тощо)';
 $_['entry_theme'] = 'Тема подарункового сертифіката';
 $_['entry_to_email'] = 'Електронна адреса одержувача';
 $_['entry_to_name'] = 'Ім\'я одержувача';
@@ -200,6 +202,9 @@ $_['text_print_orders']          = 'Замовлення';
 
 $_['button_print']               = 'Друк';
 $_['button_print_selected']      = 'Друк вибраних замовлень';
+$_['button_create_return']       = 'Оформити повернення';
+$_['button_duplicate_order']     = 'Дублювати замовлення';
+$_['text_order_duplicated']      = 'Замовлення продубльовано!';
 $_['button_export_csv']          = 'Вивантажити вибрані замовлення у CSV';
 $_['button_new_order']           = 'Створити замовлення';
 
@@ -223,6 +228,35 @@ $_['text_flow_confirm_terminal'] = 'Цей статус завершує order f
 $_['text_flow_terminal_state']   = 'Order flow для цього замовлення завершено.';
 $_['button_flow_apply']          = 'Застосувати';
 $_['text_comment_optional']      = 'Коментар (необов\'язково)';
+$_['text_return_refund_note']    = 'Повернення коштів за поверненням #%s';
+
+// Shipments
+$_['text_shipments']             = 'Відвантаження';
+$_['text_no_shipments']          = 'Відвантажень не зареєстровано';
+$_['text_shipment_progress']     = 'Прогрес відвантаження';
+$_['text_shipment_items']        = 'Товари у цьому відвантаженні';
+$_['text_flow_shipment']         = 'Відвантаження';
+$_['text_shipment_added']        = 'Відвантаження додано';
+$_['text_shipment_removed']      = 'Відвантаження видалено';
+$_['text_shipping_note_added']   = 'Додано відвантаження: %s';
+$_['text_confirm_remove_shipment'] = 'Видалити це відвантаження?';
+$_['button_add_shipment']        = 'Додати відвантаження';
+$_['button_remove_shipment']     = 'Видалити відвантаження';
+$_['error_tracking_number']      = 'Вкажіть номер ТТН перевізника або номер видаткового документа!';
+$_['error_shipment_items']       = 'Виберіть хоча б один товар з кількістю для відвантаження!';
+$_['error_tracking_required']    = 'Додайте номер ТТН або видаткового документа перед переведенням замовлення у статус відвантаження!';
+
+// Invoice
+$_['text_invoice_no']            = 'Рахунок №:';
+
+// Coupon
+$_['button_coupon_apply']        = 'Застосувати';
+$_['button_coupon_remove']       = 'Видалити купон';
+$_['text_coupon_applied']        = 'Купон застосовано!';
+$_['text_coupon_removed']        = 'Купон видалено!';
+$_['text_coupon_note_added']     = 'Застосовано купон: %s';
+$_['text_coupon_note_removed']   = 'Видалено купон: %s';
+$_['error_coupon_invalid']       = 'Купон недійсний, прострочений або не відповідає умовам!';
 
 $_['text_payer_address']         = 'Адреса платника';
 $_['text_same_as_billing']       = 'Збігається з адресою платника';
@@ -286,6 +320,13 @@ $_['entry_payment_amount']           = 'Сума платежу';
 $_['entry_payment_reference']        = '№ транзакції';
 $_['text_payment_reference_hint']    = 'Номер транзакції/квитанції з платіжної системи — за ним можна знайти платіж';
 $_['button_add_payment']             = 'Записати платіж';
+$_['button_add_refund']              = 'Повернення коштів';
+$_['entry_refund_amount']            = 'Сума повернення';
+$_['text_refund_added']              = 'Повернення коштів проведено!';
+$_['text_refund_note_added']         = 'Проведено повернення коштів: %s';
+$_['error_refund_amount']            = 'Вкажіть суму повернення більше нуля!';
+$_['error_refund_no_paid']           = 'Немає оплачених коштів для повернення!';
+$_['error_refund_too_large']         = 'Сума повернення не може перевищувати оплачену!';
 $_['button_remove_payment']          = 'Скасувати';
 $_['button_remove_overpayment']      = 'Прибрати переплату';
 $_['column_paid']                    = 'Оплачено';
