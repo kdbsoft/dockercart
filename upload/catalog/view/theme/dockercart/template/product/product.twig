@@ -149,10 +149,10 @@
           <div class="flex text-sm text-amber-400 gap-0.5">{% for i in 1..5 %}{% if rating >= i %}★{% else %}<span class="text-gray-300">★</span>{% endif %}{% endfor %}</div>
           <a href="#" onclick="document.querySelector('.tab-btn[data-tab=\'review\']').click();return false;" class="text-sm text-gray-500 hover:text-blue-600 transition">{{ reviews }}</a>
           <span class="text-sm text-gray-300">|</span>
-          <span class="text-sm text-gray-500">{{ text_model }} <span id="dc-variant-sku" data-base-sku="{{ model }}">{{ is_configurable and variant_sku is defined and variant_sku ? variant_sku : model }}</span></span>
+          <span class="text-sm text-gray-500">{{ text_model }} <span id="dc-variant-model" data-base-model="{{ model }}">{{ is_configurable and variant_model is defined and variant_model ? variant_model : model }}</span></span>
         </div>
         {% else %}
-        <p class="text-sm text-gray-500 mt-3">{{ text_model }} <span id="dc-variant-sku" data-base-sku="{{ model }}">{{ is_configurable and variant_sku is defined and variant_sku ? variant_sku : model }}</span></p>
+        <p class="text-sm text-gray-500 mt-3">{{ text_model }} <span id="dc-variant-model" data-base-model="{{ model }}">{{ is_configurable and variant_model is defined and variant_model ? variant_model : model }}</span></p>
         {% endif %}
 
         {% set show_call_for_price = (call_for_price is defined and call_for_price) or ((call_for_price_status is defined and call_for_price_status) and call_for_price_phone is defined and call_for_price_phone and dc_base_price_value is defined and dc_base_price_value <= 0) %}
