@@ -82,7 +82,7 @@
             <div class="dcx-panel-body dcx-panel-body--flush">
               <div class="order-products-list">
               {% for product in products %}
-              <div class="order-product-card" data-product-id="{{ product.product_id }}" data-order-product-id="{{ product.order_product_id }}" data-price-raw="{{ product.price_raw|round(4) }}" data-tax-raw="{{ product.tax_raw|round(4) }}">
+              <div class="order-product-card" data-product-id="{{ product.product_id }}" data-order-product-id="{{ product.order_product_id }}" data-price-raw="{{ product.price_raw|round(4) }}" data-tax-raw="{{ product.tax_raw|round(4) }}" data-discount-original="{{ product.discount_percent|round(1) }}">
                 <div class="order-product-card__thumb">
                   <img src="{{ product.thumb }}" alt="{{ product.name }}">
                 </div>
@@ -102,17 +102,20 @@
                     {% endif %}
                   </div>
                   {% if product.discount_percent > 0 %}
-                  <div class="order-product-card__discount">{{ product.discount_percent }}% {{ text_discount }}</div>
+                  <div class="order-product-card__discount">{{ product.discount_percent|round(1) }}% {{ text_discount }}</div>
                   {% endif %}
                 </div>
                 <div class="order-product-card__price">
                   <span class="view-only">{{ product.price }}</span>
-                  <input type="text" class="form-control edit-only" value="{{ product.price_raw|round(2) }}" data-field="price" style="display:none">
+                  <input type="text" class="form-control edit-only" value="{{ product.price_raw|round(currency_decimal_place) }}" data-field="price" style="display:none">
                 </div>
                 <div class="order-product-card__mult">&times;</div>
                 <div class="order-product-card__qty">
-                  <span class="view-only">{{ product.quantity|round }}</span>
-                  <input type="number" class="form-control edit-only" value="{{ product.quantity|round }}" min="0" step="1" data-field="quantity" style="display:none">
+                  <span class="view-only">{{ product.quantity|number_format(currency_decimal_place, '.', '') }}</span>
+                  <input type="number" class="form-control edit-only" value="{{ product.quantity }}" min="0" step="any" data-field="quantity" style="display:none">
+                </div>
+                <div class="order-product-card__disc edit-only" style="display:none" title="{{ entry_discount_percent }}">
+                  <input type="number" class="form-control" value="{{ product.discount_percent|round(1) }}" min="0" max="100" step="0.5" data-field="discount">
                 </div>
                 <div class="order-product-card__total">= {{ product.total }}</div>
                 <div class="order-product-card__actions edit-only" style="display:none">
@@ -130,15 +133,16 @@
                 <div class="dcx-fields">
                   <div class="dcx-field">
                     <label class="dcx-label">{{ text_search_product }}</label>
-                    <div class="order-product-search-wrap" id="product-picker">
+                    <div class="order-product-search-wrap" id="product-picker" data-currency-code="{{ currency_code }}" data-currency-value="{{ currency_value }}" data-customer-group-id="{{ customer_group_id }}">
                       <div class="order-product-search-inner">
                         <input type="text" id="product-search" class="form-control" placeholder="{{ text_search_product }}" autocomplete="off">
                         <input type="hidden" id="product-id" value="0">
-                        <input type="hidden" id="product-price" value="0">
                         <div class="order-product-dropdown" id="product-dropdown"></div>
+                      </div>
+                      <div id="product-summary" class="order-product-summary" style="display:none"></div>
+                      <div id="product-options-container" style="display:none"></div>
+                      <div id="product-preview" class="order-product-preview" style="display:none"></div>
                     </div>
-                    <div id="product-options-container" style="display:none"></div>
-                  </div>
                   </div>
                   <div class="dcx-fields--row order-add-block__row">
                     <div class="dcx-field order-add-block__qty">
@@ -146,7 +150,7 @@
                       <input type="number" id="product-qty" class="form-control" value="1" min="1">
                     </div>
                     <div class="dcx-field order-add-block__btn">
-                      <button type="button" class="btn btn-primary" onclick="addProduct()">
+                      <button type="button" id="product-add-btn" class="btn btn-primary">
                         <i data-lucide="plus" width="14" height="14"></i> {{ button_add }}
                       </button>
                     </div>
@@ -155,7 +159,7 @@
               </div>
 
               {# Totals #}
-              <div class="order-totals-card">
+              <div class="order-totals-card" data-decimal-place="{{ currency_decimal_place }}">
                 {% for total in totals %}
                 {% set label = total.title %}
                 {% if total.code == 'sub_total' %}
@@ -164,7 +168,7 @@
                 {% if loop.last %}
                   <div class="order-totals-card__divider"></div>
                 {% endif %}
-                <div class="order-totals-card__row{% if loop.last %} order-totals-card__row--total{% endif %}" data-total-code="{{ total.code }}">
+                <div class="order-totals-card__row{% if loop.last %} order-totals-card__row--total{% endif %}" data-total-code="{{ total.code }}"{% if total.code == 'sub_total' %} data-label-base="{{ total.title }}"{% endif %}>
                   <span class="order-totals-card__label">{{ label }}</span>
                   <span class="order-totals-card__line"></span>
                   <span class="order-totals-card__value">{{ total.text }}</span>
@@ -495,6 +499,11 @@
 .order-product-card__mult { width:16px; text-align:center; font-size:13px; color:#bbb; }
 .order-product-card__qty { width:70px; text-align:right; font-size:13px; color:#555; }
 .order-product-card__qty input { width:70px; text-align:center; }
+.order-product-card__disc { width:64px; text-align:right; font-size:13px; color:#555; }
+.order-product-card__disc input { width:64px; text-align:center; }
+.order-product-card__disc input::-webkit-outer-spin-button,
+.order-product-card__disc input::-webkit-inner-spin-button { -webkit-appearance:none; }
+.order-product-card__disc input[type=number] { -moz-appearance:textfield; appearance:textfield; }
 .order-product-card__total { width:auto; text-align:right; font-size:13px; font-weight:600; color:#2563eb; min-width:90px; }
 .order-product-card__actions { width:30px; text-align:center; }
 
@@ -530,6 +539,42 @@
 .product-option-pill input { display:none; }
 .product-option-checkbox { display:inline-flex; align-items:center; gap:6px; font-size:13px; cursor:pointer; padding:5px 0; color:var(--dc-text-dark); }
 .product-option-checkbox input { margin:0; width:16px; height:16px; cursor:pointer; accent-color:var(--dc-primary); }
+
+.product-option-pill__price { font-size:10px; opacity:.75; margin-left:4px; font-weight:600; }
+.product-option-pill--active .product-option-pill__price { opacity:.9; }
+.product-option-checkbox__price { font-size:10px; color:var(--dc-text-muted); margin-left:4px; }
+
+.order-product-search-wrap { position:relative; }
+.dcx-picker__thumb { width:34px; height:34px; border-radius:6px; object-fit:cover; flex-shrink:0; }
+.dcx-picker__info { flex:1; min-width:0; }
+.dcx-picker__right { display:flex; flex-direction:column; align-items:flex-end; gap:3px; margin-left:auto; }
+.dcx-picker__item--active { background:var(--dc-gray-100); }
+.dcx-picker__empty { padding:10px 14px; font-size:12px; color:var(--dc-text-muted); text-align:center; }
+.dcx-picker__stock { font-size:10px; padding:1px 7px; border-radius:8px; font-weight:600; white-space:nowrap; }
+.dcx-picker__stock--in { color:#15803d; background:#dcfce7; }
+.dcx-picker__stock--out { color:#b91c1c; background:#fee2e2; }
+.dcx-picker__stock--na { color:#6b7280; background:#f3f4f6; }
+.dcx-picker__config-badge { font-size:10px; font-weight:600; color:#6d28d9; background:#ede9fe; padding:1px 6px; border-radius:8px; margin-left:6px; }
+
+.order-product-summary { display:flex; align-items:center; gap:10px; margin-top:8px; padding:8px 12px; border:1px solid var(--dc-border); border-radius:var(--dc-radius-lg); background:var(--dc-surface); }
+.order-product-summary__thumb { width:36px; height:36px; flex-shrink:0; border-radius:6px; object-fit:cover; }
+.order-product-summary__info { flex:1; min-width:0; }
+.order-product-summary__name { font-size:12px; font-weight:600; color:var(--dc-text-dark); display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.order-product-summary__meta { font-size:11px; color:var(--dc-text-muted); margin-top:2px; }
+.order-product-summary__price { font-size:12px; font-weight:600; color:var(--dc-text-dark); white-space:nowrap; }
+.order-product-summary__price--muted { font-weight:500; color:var(--dc-text-muted); }
+.order-product-summary__clear { flex-shrink:0; background:none; border:0; color:var(--dc-text-muted); cursor:pointer; padding:4px; border-radius:6px; display:inline-flex; }
+.order-product-summary__clear:hover { color:var(--dc-red-500); background:var(--dc-gray-100); }
+
+.order-product-preview { margin-top:8px; padding:9px 12px; border:1px dashed var(--dc-border); border-radius:var(--dc-radius-lg); background:var(--dc-surface-alt); font-size:12px; }
+.order-product-preview__row { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+.order-product-preview__item { display:inline-flex; align-items:baseline; gap:4px; }
+.order-product-preview__label { color:var(--dc-text-muted); font-size:11px; }
+.order-product-preview__value { font-weight:600; color:var(--dc-text-dark); font-variant-numeric:tabular-nums; }
+.order-product-preview__error { display:flex; align-items:center; gap:5px; color:var(--dc-red-500); font-weight:500; }
+.order-product-preview__stock-warn { display:flex; align-items:center; gap:5px; color:#b45309; font-weight:500; }
+.order-product-preview__stock-ok { display:flex; align-items:center; gap:5px; color:#15803d; font-weight:500; }
+.order-add-block__btn .btn[disabled] { opacity:.55; cursor:not-allowed; }
 
 .order-hr { margin:0; border:0; border-top:1px solid #e5e7eb; }
 
@@ -669,6 +714,8 @@ function savePanelChanges(panelId) {
 	if (panelId === 'order-products') {
 		Object.keys(recalcTimers).forEach(k => clearTimeout(recalcTimers[k]));
 		const promises = [];
+		const discountValues = [];
+		let discountChanged = false;
 		panel.querySelectorAll('.order-product-card').forEach(card => {
 			const opid = card.dataset.orderProductId;
 			const qtyInput = card.querySelector('input[data-field="quantity"]');
@@ -681,9 +728,25 @@ function savePanelChanges(panelId) {
 				promises.push(api('index.php?route=sale/order_detail/updateProduct&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
 					'POST', { order_product_id: opid, field: 'price', value: priceInput.value }));
 			}
+			const discInput = card.querySelector('input[data-field="discount"]');
+			const origDisc = parseFloat(card.dataset.discountOriginal) || 0;
+			const newDisc = discInput ? (parseFloat(discInput.value) || 0) : origDisc;
+			discountValues.push(newDisc);
+			if (Math.abs(newDisc - origDisc) > 0.001) discountChanged = true;
 		});
 		Promise.all(promises).then(() => {
-			showAlertAndReload('{{ text_order_saved }}');
+			if (!discountChanged) {
+				showAlertAndReload('{{ text_order_saved }}');
+				return;
+			}
+			api('index.php?route=sale/order_detail/applyLineDiscounts&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+				'POST', { discount: JSON.stringify(discountValues) }).then(j => {
+					if (j.success) {
+						showAlertAndReload('{{ text_order_saved }}');
+					} else if (j.error) {
+						showAlert(j.error, 'danger');
+					}
+				});
 		});
 	} else if (panelId === 'buyer') {
 		const promises = [];
@@ -847,8 +910,14 @@ function api(url, method, data) {
 }
 
 function getCurrencyFormat() {
+	const container = document.querySelector('.order-totals-card');
+	let decimals = 2;
+	if (container && container.dataset.decimalPlace !== undefined) {
+		const dp = parseInt(container.dataset.decimalPlace, 10);
+		if (!isNaN(dp)) decimals = dp;
+	}
 	const row = document.querySelector('.order-totals-card__row[data-total-code="sub_total"] .order-totals-card__value');
-	if (!row) return { symbol: '₴', decimals: 2, dec: '.', thou: '' };
+	if (!row) return { symbol: '₴', decimals, dec: '.', thou: '' };
 	const text = row.textContent.trim();
 	const symbol = text.replace(/[\d\s.,\-]+/g, '').trim();
 	const hasSpace = /\d\s+\S/.test(text) || /\S\s+\d/.test(text);
@@ -860,7 +929,7 @@ function getCurrencyFormat() {
 	if (lastDot > lastComma) { dec = '.'; thou = ','; }
 	else if (lastComma > lastDot) { dec = ','; thou = '.'; }
 	else { dec = '.'; thou = ''; }
-	return { symbol, decimals: 2, dec, thou, prefix, space: hasSpace };
+	return { symbol, decimals, dec, thou, prefix, space: hasSpace };
 }
 
 let _currencyFmt = null;
@@ -882,13 +951,16 @@ function previewRecalc(card) {
 	const opid = card.dataset.orderProductId;
 	const priceInput = card.querySelector('input[data-field="price"]');
 	const qtyInput = card.querySelector('input[data-field="quantity"]');
+	const discInput = card.querySelector('input[data-field="discount"]');
 	const origPrice = parseFloat(card.dataset.priceRaw) || 0;
 	const origTax = parseFloat(card.dataset.taxRaw) || 0;
+	const origQty = qtyInput ? (parseFloat(qtyInput.defaultValue) || 1) : 1;
 	const newPrice = priceInput ? (parseFloat(priceInput.value) || 0) : origPrice;
-	const newQty = qtyInput ? (parseInt(qtyInput.value, 10) || 0) : 0;
-	const taxRate = origPrice > 0 ? origTax / origPrice : 0;
+	const newQty = qtyInput ? (parseFloat(qtyInput.value) || 0) : 0;
+	const newDisc = discInput ? ((parseFloat(discInput.value) || 0) / 100) : 0;
+	const taxRate = origPrice > 0 ? (origTax / origQty) / origPrice : 0;
 
-	const productTotal = newPrice * newQty;
+	const productTotal = newPrice * newQty * (1 - newDisc);
 	const productTax = productTotal * taxRate;
 
 	const totalEl = card.querySelector('.order-product-card__total');
@@ -897,8 +969,10 @@ function previewRecalc(card) {
 	let allProductTotal = 0;
 	let allProductTax = 0;
 	document.querySelectorAll('.order-product-card').forEach(c => {
-		const p = c === card ? productTotal : (parseFloat(c.dataset.priceRaw) * (parseInt(c.querySelector('input[data-field="quantity"]')?.value || c.querySelector('.order-product-card__qty .view-only')?.textContent || 0, 10)));
-		const t = c === card ? productTax : (parseFloat(c.dataset.taxRaw) * (parseInt(c.querySelector('input[data-field="quantity"]')?.value || c.querySelector('.order-product-card__qty .view-only')?.textContent || 0, 10)));
+		const cDisc = parseFloat(c.querySelector('input[data-field="discount"]')?.value) || 0;
+		const factor = 1 - cDisc / 100;
+		const p = c === card ? productTotal : (parseFloat(c.dataset.priceRaw) * (parseFloat(c.querySelector('input[data-field="quantity"]')?.value || c.querySelector('.order-product-card__qty .view-only')?.textContent || 0)) * factor);
+		const t = c === card ? productTax : (parseFloat(c.dataset.taxRaw) * factor);
 		allProductTotal += p;
 		allProductTax += t;
 	});
@@ -936,11 +1010,13 @@ function revertAllInputs() {
 	document.querySelectorAll('.order-product-card').forEach(card => {
 		const priceInput = card.querySelector('input[data-field="price"]');
 		const qtyInput = card.querySelector('input[data-field="quantity"]');
+		const discInput = card.querySelector('input[data-field="discount"]');
 		if (priceInput) priceInput.value = priceInput.defaultValue;
 		if (qtyInput) qtyInput.value = qtyInput.defaultValue;
+		if (discInput) discInput.value = discInput.defaultValue;
 		const totalEl = card.querySelector('.order-product-card__total');
-		const origTotal = parseFloat(card.dataset.priceRaw) * parseInt(qtyInput?.defaultValue || 0, 10);
-		const origTax = parseFloat(card.dataset.taxRaw) * parseInt(qtyInput?.defaultValue || 0, 10);
+		const origTotal = parseFloat(card.dataset.priceRaw) * parseFloat(qtyInput?.defaultValue || 0);
+		const origTax = parseFloat(card.dataset.taxRaw) * parseFloat(qtyInput?.defaultValue || 0);
 		if (totalEl) totalEl.textContent = '= ' + formatCurrency(origTotal);
 	});
 	_currencyFmt = null;
@@ -1058,15 +1134,15 @@ function removeProduct(btn) {
 	const card = btn.closest('.order-product-card');
 	if (!confirm('{{ text_confirm }}')) return;
 	api('index.php?route=sale/order_detail/removeProduct&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
-		'POST', { order_product_id: card.dataset.orderProductId }).then(j => { if (j.success) { card.remove(); location.reload(); } });
-}
-
-function addProduct() {
-	const pid = document.getElementById('product-id').value;
-	const qty = document.getElementById('product-qty').value || 1;
-	if (!pid || pid === '0') return;
-	api('index.php?route=sale/order_detail/addProduct&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
-		'POST', { product_id: pid, quantity: qty }).then(j => { if (j.product) location.reload(); });
+		'POST', { order_product_id: card.dataset.orderProductId }).then(j => {
+			if (j.success) {
+				card.remove();
+				if (j.totals) updateTotalsUI(j.totals, j.total_quantity);
+				showAlert('{{ text_success }}');
+			} else if (j.error) {
+				showAlert(j.error, 'danger');
+			}
+		});
 }
 
 function loadTimeline(page) {
@@ -1228,7 +1304,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	document.addEventListener('input', function(e) {
 		const input = e.target;
-		if (!input.matches('.order-product-card input[data-field="price"], .order-product-card input[data-field="quantity"]')) return;
+		if (!input.matches('.order-product-card input[data-field="price"], .order-product-card input[data-field="quantity"], .order-product-card input[data-field="discount"]')) return;
 		const card = input.closest('.order-product-card');
 		if (!card) return;
 		const opid = card.dataset.orderProductId;
@@ -1236,12 +1312,138 @@ document.addEventListener('DOMContentLoaded', function() {
 		recalcTimers[opid] = setTimeout(() => previewRecalc(card), 300);
 	});
 
-	let selectedProductOptions = [];
+	// ===================== Add product to order picker =====================
 	const ps = document.getElementById('product-search');
 	const pidInput = document.getElementById('product-id');
-	const ppriceInput = document.getElementById('product-price');
 	const optsContainer = document.getElementById('product-options-container');
 	const dropdown = document.getElementById('product-dropdown');
+	const summary = document.getElementById('product-summary');
+	const previewBox = document.getElementById('product-preview');
+	const qtyInput = document.getElementById('product-qty');
+	const addBtn = document.getElementById('product-add-btn');
+	const picker = document.getElementById('product-picker');
+
+	let dropdownItems = [];
+	let dropdownIndex = -1;
+	let previewTimer = null;
+	let previewSeq = 0;
+
+	function buildSearchUrl(val) {
+		let url = 'index.php?route=catalog/product/autocomplete&user_token=' + USER_TOKEN +
+			'&filter_any=1&filter_name=' + encodeURIComponent(val) +
+			'&filter_model=' + encodeURIComponent(val) +
+			'&filter_sku=' + encodeURIComponent(val) + '&limit=10';
+		if (picker) {
+			if (picker.dataset.currencyCode) {
+				url += '&currency_code=' + encodeURIComponent(picker.dataset.currencyCode) + '&currency_value=' + encodeURIComponent(picker.dataset.currencyValue || '1');
+			}
+			if (picker.dataset.customerGroupId) {
+				url += '&customer_group_id=' + encodeURIComponent(picker.dataset.customerGroupId);
+			}
+		}
+		return url;
+	}
+
+	function hideDropdown() {
+		dropdown.style.display = 'none';
+		dropdown.innerHTML = '';
+		dropdownItems = [];
+		dropdownIndex = -1;
+	}
+
+	function buildStockBadge(p) {
+		const b = document.createElement('span');
+		if (p.stock && p.stock.not_tracked) {
+			b.className = 'dcx-picker__stock dcx-picker__stock--na';
+			b.textContent = '{{ text_stock_not_tracked }}';
+		} else if (p.stock && p.stock.total > 0) {
+			b.className = 'dcx-picker__stock dcx-picker__stock--in';
+			b.textContent = '{{ text_stock_in }}: ' + p.stock.total;
+		} else {
+			b.className = 'dcx-picker__stock dcx-picker__stock--out';
+			b.textContent = '{{ text_stock_out }}';
+		}
+		return b;
+	}
+
+	function renderDropdown(items) {
+		dropdown.innerHTML = '';
+		dropdownItems = items;
+		dropdownIndex = -1;
+		if (!items.length) {
+			const empty = document.createElement('div');
+			empty.className = 'dcx-picker__empty';
+			empty.textContent = '{{ text_no_results }}';
+			dropdown.appendChild(empty);
+		} else {
+			items.forEach((p, i) => {
+				const item = document.createElement('div');
+				item.className = 'dcx-picker__item';
+				item.dataset.index = i;
+
+				const thumb = document.createElement('img');
+				thumb.className = 'dcx-picker__thumb';
+				thumb.src = p.thumb || '';
+				thumb.alt = '';
+
+				const info = document.createElement('div');
+				info.className = 'dcx-picker__info';
+				const nameLine = document.createElement('div');
+				nameLine.className = 'dcx-picker__name';
+				const nameText = document.createElement('span');
+				nameText.textContent = p.name;
+				nameLine.appendChild(nameText);
+				if (p.option && p.option.length) {
+					const b = document.createElement('span');
+					b.className = 'dcx-picker__opt-badge';
+					b.textContent = p.option.length + ' {{ text_opts }}';
+					nameLine.appendChild(b);
+				}
+				if (p.is_configurable) {
+					const b = document.createElement('span');
+					b.className = 'dcx-picker__config-badge';
+					b.textContent = '{{ text_configurable }}';
+					nameLine.appendChild(b);
+				}
+				const sub = document.createElement('div');
+				sub.className = 'dcx-picker__sub';
+				sub.textContent = [p.model, p.sku ? 'SKU: ' + p.sku : '', p.manufacturer].filter(Boolean).join(' · ');
+				info.appendChild(nameLine);
+				info.appendChild(sub);
+
+				const right = document.createElement('div');
+				right.className = 'dcx-picker__right';
+				const priceEl = document.createElement('div');
+				priceEl.className = 'dcx-picker__price';
+				if (p.is_configurable && p.price_range_text) {
+					priceEl.textContent = '{{ text_price_from }} ' + p.price_range_text.split(' – ')[0];
+				} else {
+					priceEl.textContent = p.price_text || '';
+				}
+				right.appendChild(priceEl);
+				right.appendChild(buildStockBadge(p));
+
+				item.appendChild(thumb);
+				item.appendChild(info);
+				item.appendChild(right);
+				item.addEventListener('click', function(e) {
+					e.stopPropagation();
+					selectProduct(p);
+				});
+				dropdown.appendChild(item);
+			});
+		}
+		dropdown.style.display = 'block';
+	}
+
+	function moveDropdown(step) {
+		if (!dropdownItems.length) return;
+		dropdownIndex = (dropdownIndex + step + dropdownItems.length) % dropdownItems.length;
+		dropdown.querySelectorAll('.dcx-picker__item').forEach((el, i) => {
+			el.classList.toggle('dcx-picker__item--active', i === dropdownIndex);
+			if (i === dropdownIndex) el.scrollIntoView({ block: 'nearest' });
+		});
+	}
 
 	if (ps && dropdown) {
 		let debounce;
@@ -1250,30 +1452,27 @@ document.addEventListener('DOMContentLoaded', function() {
 			clearTimeout(debounce);
 			debounce = setTimeout(function() {
 				const val = input.value.trim();
-				if (val.length < 2) { pidInput.value = '0'; ppriceInput.value = '0'; selectedProductOptions = []; optsContainer.style.display = 'none'; dropdown.style.display = 'none'; dropdown.innerHTML = ''; return; }
-				api('index.php?route=catalog/product/autocomplete&user_token=' + USER_TOKEN + '&filter_name=' + encodeURIComponent(val), 'GET').then(function(j) {
-					if (!j || !j.length) { dropdown.style.display = 'none'; dropdown.innerHTML = ''; return; }
-					dropdown.innerHTML = '';
-					j.forEach(function(p) {
-						const item = document.createElement('div');
-						item.className = 'dcx-picker__item';
-						const optBadge = p.option && p.option.length ? '<span class="dcx-picker__opt-badge">' + p.option.length + ' opts</span>' : '';
-						item.innerHTML = '<div style="flex:1;min-width:0"><div class="dcx-picker__name">' + p.name + optBadge + '</div><div class="dcx-picker__sub">' + (p.model || '') + '</div></div><div class="dcx-picker__price">' + (p.price || '') + '</div>';
-						item.addEventListener('click', function(e) {
-							e.stopPropagation();
-							pidInput.value = p.product_id;
-							ppriceInput.value = p.price || '0';
-							ps.value = p.name;
-							selectedProductOptions = p.option || [];
-							renderProductOptions(selectedProductOptions);
-							dropdown.style.display = 'none';
-							dropdown.innerHTML = '';
-						});
-						dropdown.appendChild(item);
-					});
-					dropdown.style.display = 'block';
+				if (val.length < 2) {
+					hideDropdown();
+					return;
+				}
+				api(buildSearchUrl(val), 'GET').then(function(j) {
+					renderDropdown(j || []);
 				}).catch(function(err) { console.error('Product search error:', err); });
 			}, 200);
+		});
+
+		ps.addEventListener('keydown', function(e) {
+			if (e.key === 'ArrowDown') { moveDropdown(1); e.preventDefault(); }
+			else if (e.key === 'ArrowUp') { moveDropdown(-1); e.preventDefault(); }
+			else if (e.key === 'Enter') {
+				if (dropdownItems[dropdownIndex]) {
+					selectProduct(dropdownItems[dropdownIndex]);
+				}
+				e.preventDefault();
+			} else if (e.key === 'Escape') {
+				hideDropdown();
+			}
 		});
 
 		ps.addEventListener('focus', function() {
@@ -1282,9 +1481,75 @@ document.addEventListener('DOMContentLoaded', function() {
 
 		document.addEventListener('mousedown', function(e) {
 			if (!dropdown.contains(e.target) && e.target !== ps) {
-				dropdown.style.display = 'none';
+				hideDropdown();
 			}
 		});
+	}
+
+	function selectProduct(p) {
+		pidInput.value = p.product_id;
+		ps.value = p.name;
+		hideDropdown();
+		renderProductSummary(p);
+		renderProductOptions(p.option || []);
+		requestProductPreview();
+	}
+
+	function clearProductSelection() {
+		pidInput.value = '0';
+		ps.value = '';
+		summary.style.display = 'none';
+		summary.innerHTML = '';
+		optsContainer.style.display = 'none';
+		optsContainer.innerHTML = '';
+		previewBox.style.display = 'none';
+		previewBox.innerHTML = '';
+		setAddButtonState(true);
+	}
+
+	function renderProductSummary(p) {
+		summary.innerHTML = '';
+		const thumb = document.createElement('img');
+		thumb.className = 'order-product-summary__thumb';
+		thumb.src = p.thumb || '';
+		thumb.alt = '';
+
+		const info = document.createElement('div');
+		info.className = 'order-product-summary__info';
+		const nameLine = document.createElement('div');
+		nameLine.className = 'order-product-summary__name';
+		const nameText = document.createElement('span');
+		nameText.textContent = p.name;
+		nameLine.appendChild(nameText);
+		if (p.is_configurable) {
+			const b = document.createElement('span');
+			b.className = 'dcx-picker__config-badge';
+			b.textContent = '{{ text_configurable }}';
+			nameLine.appendChild(b);
+		}
+		const meta = document.createElement('div');
+		meta.className = 'order-product-summary__meta';
+		meta.textContent = [p.model, p.sku ? 'SKU: ' + p.sku : '', p.manufacturer].filter(Boolean).join(' · ');
+		info.appendChild(nameLine);
+		info.appendChild(meta);
+
+		const priceEl = document.createElement('div');
+		priceEl.className = 'order-product-summary__price' + (p.is_configurable ? ' order-product-summary__price--muted' : '');
+		priceEl.textContent = (p.is_configurable && p.price_range_text) ? p.price_range_text : (p.price_text || '');
+
+		const clearBtn = document.createElement('button');
+		clearBtn.type = 'button';
+		clearBtn.className = 'order-product-summary__clear';
+		clearBtn.title = '{{ text_clear }}';
+		clearBtn.innerHTML = '<i data-lucide="x" width="14" height="14"></i>';
+		clearBtn.addEventListener('click', clearProductSelection);
+
+		summary.appendChild(thumb);
+		summary.appendChild(info);
+		summary.appendChild(priceEl);
+		summary.appendChild(clearBtn);
+		summary.style.display = 'flex';
+		lucide.createIcons();
 	}
 
 	function renderProductOptions(options) {
@@ -1311,7 +1576,8 @@ document.addEventListener('DOMContentLoaded', function() {
 					pill.className = 'product-option-pill';
 					pill.dataset.povId = v.product_option_value_id;
 					pill.dataset.value = v.name;
-					pill.innerHTML = '<input type="radio" name="po_' + opt.product_option_id + '" value="' + v.product_option_value_id + '" data-name="' + opt.name + '" data-value="' + v.name + '" data-type="' + opt.type + '">' + v.name;
+					const priceSpan = v.price_text ? '<span class="product-option-pill__price">' + v.price_text + '</span>' : '';
+					pill.innerHTML = '<input type="radio" name="po_' + opt.product_option_id + '" value="' + v.product_option_value_id + '" data-name="' + opt.name + '" data-value="' + v.name + '" data-type="' + opt.type + '">' + v.name + priceSpan;
 					if (opt.required) pill.querySelector('input').required = true;
 					pill.addEventListener('click', () => {
 						valuesDiv.querySelectorAll('.product-option-pill').forEach(p => p.classList.remove('product-option-pill--active'));
@@ -1323,7 +1589,8 @@ document.addEventListener('DOMContentLoaded', function() {
 				(opt.product_option_value || []).forEach(v => {
 					const lbl = document.createElement('label');
 					lbl.className = 'product-option-checkbox';
-					lbl.innerHTML = '<input type="checkbox" name="po_' + opt.product_option_id + '[]" value="' + v.product_option_value_id + '" data-name="' + opt.name + '" data-value="' + v.name + '" data-type="' + opt.type + '">' + v.name;
+					const priceSpan = v.price_text ? '<span class="product-option-checkbox__price">' + v.price_text + '</span>' : '';
+					lbl.innerHTML = '<input type="checkbox" name="po_' + opt.product_option_id + '[]" value="' + v.product_option_value_id + '" data-name="' + opt.name + '" data-value="' + v.name + '" data-type="' + opt.type + '">' + v.name + priceSpan;
 					valuesDiv.appendChild(lbl);
 				});
 			} else {
@@ -1337,72 +1604,335 @@ document.addEventListener('DOMContentLoaded', function() {
 			optsContainer.appendChild(group);
 		});
 	}
-});
 
-function addProduct() {
-	const pid = document.getElementById('product-id').value;
-	const qty = document.getElementById('product-qty').value || 1;
-	if (!pid || pid === '0') return;
+	optsContainer.addEventListener('change', requestProductPreview);
+	if (qtyInput) qtyInput.addEventListener('input', requestProductPreview);
+	if (addBtn) addBtn.addEventListener('click', addProduct);
 
-	const groups = document.querySelectorAll('#product-options-container .product-option-group');
+	function collectOptions() {
+		const groups = document.querySelectorAll('#product-options-container .product-option-group');
+		const options = [];
+		groups.forEach(group => {
+			const productOptionId = group.dataset.productOptionId;
+			const optionName = group.dataset.optionName;
+			const optionType = group.dataset.optionType;
+			const checkedInputs = group.querySelectorAll('input:checked');
 
-	const options = [];
-	groups.forEach(group => {
-		const productOptionId = group.dataset.productOptionId;
-		const optionName = group.dataset.optionName;
-		const optionType = group.dataset.optionType;
-		const checkedInputs = group.querySelectorAll('input:checked');
-
-		checkedInputs.forEach(input => {
-			options.push({
-				product_option_id: productOptionId,
-				product_option_value_id: input.value,
-				name: input.dataset.name || optionName,
-				value: input.dataset.value || input.value,
-				type: input.dataset.type || optionType
-			});
-		});
-
-		if (optionType === 'text' || optionType === 'textarea' || optionType === 'file') {
-			const textInput = group.querySelector('input[type="text"], textarea');
-			if (textInput && textInput.value.trim()) {
+			checkedInputs.forEach(input => {
 				options.push({
 					product_option_id: productOptionId,
-					product_option_value_id: 0,
-					name: optionName,
-					value: textInput.value.trim(),
-					type: optionType
+					product_option_value_id: input.value,
+					name: input.dataset.name || optionName,
+					value: input.dataset.value || input.value,
+					type: input.dataset.type || optionType
 				});
-			}
-		}
-	});
+			});
 
-	const requiredOpts = document.querySelectorAll('#product-options-container .product-option-group');
-	const missingRequired = [];
-	requiredOpts.forEach(group => {
-		const hasSelection = group.querySelector('input:checked, input[type="text"][value]:not([value=""])');
-		const isRequired = group.querySelector('.product-option-group__required');
-		if (isRequired && !hasSelection) {
-			missingRequired.push(group.dataset.optionName);
+			if (optionType === 'text' || optionType === 'textarea' || optionType === 'file') {
+				const textInput = group.querySelector('input[type="text"], textarea');
+				if (textInput && textInput.value.trim()) {
+					options.push({
+						product_option_id: productOptionId,
+						product_option_value_id: 0,
+						name: optionName,
+						value: textInput.value.trim(),
+						type: optionType
+					});
+				}
+			}
+		});
+		return options;
+	}
+
+	function missingRequiredOptions() {
+		const missing = [];
+		document.querySelectorAll('#product-options-container .product-option-group').forEach(group => {
+			const hasSelection = group.querySelector('input:checked, input[type="text"][value]:not([value=""]), textarea:not([value=""])');
+			if (group.querySelector('.product-option-group__required') && !hasSelection) {
+				missing.push(group.dataset.optionName);
+			}
+		});
+		return missing;
+	}
+
+	function setAddButtonState(enabled) {
+		if (addBtn) addBtn.disabled = !enabled;
+	}
+
+	function renderPreview(j) {
+		previewBox.innerHTML = '';
+		if (!j) { previewBox.style.display = 'none'; return; }
+		previewBox.style.display = '';
+
+		if (j.variant_error || j.error) {
+			const row = document.createElement('div');
+			row.className = 'order-product-preview__error';
+			row.innerHTML = '<i data-lucide="alert-triangle" width="13" height="13"></i><span></span>';
+			row.querySelector('span').textContent = j.variant_error || j.error;
+			previewBox.appendChild(row);
+			setAddButtonState(false);
+			lucide.createIcons();
+			return;
 		}
-	});
-	if (missingRequired.length) {
-		showAlert('Выберите: ' + missingRequired.join(', '), 'warning');
+		if (!j.price) { previewBox.style.display = 'none'; setAddButtonState(true); return; }
+
+		setAddButtonState(true);
+		const row = document.createElement('div');
+		row.className = 'order-product-preview__row';
+
+		const addPreviewItem = (label, value, className) => {
+			const item = document.createElement('span');
+			item.className = 'order-product-preview__item';
+			const lbl = document.createElement('span');
+			lbl.className = 'order-product-preview__label';
+			lbl.textContent = label;
+			const val = document.createElement('span');
+			val.className = 'order-product-preview__value';
+			val.textContent = value;
+			item.appendChild(lbl);
+			item.appendChild(val);
+			row.appendChild(item);
+		};
+
+		if (j.variant && (j.variant.sku || j.variant.model)) {
+			addPreviewItem('{{ text_variant }}: ', j.variant.sku || j.variant.model);
+		}
+
+		addPreviewItem('{{ text_unit_price }}: ', j.price);
+
+		if (j.tax && parseFloat(j.tax_raw) > 0) {
+			addPreviewItem('{{ text_tax }}: ', j.tax);
+		}
+
+		addPreviewItem('{{ text_line_total }}: ', j.total);
+
+		if (j.subtract) {
+			const stockItem = document.createElement('span');
+			if (j.stock > 0) {
+				stockItem.className = 'order-product-preview__stock-ok';
+				stockItem.innerHTML = '<i data-lucide="circle-check" width="12" height="12"></i><span></span>';
+				stockItem.querySelector('span').textContent = '{{ text_stock_in }}: ' + j.stock;
+			} else {
+				stockItem.className = 'order-product-preview__stock-warn';
+				stockItem.innerHTML = '<i data-lucide="alert-triangle" width="12" height="12"></i><span></span>';
+				stockItem.querySelector('span').textContent = '{{ text_stock_out }}';
+			}
+			row.appendChild(stockItem);
+		}
+
+		previewBox.appendChild(row);
+		lucide.createIcons();
+	}
+
+	function requestProductPreview() {
+		const pid = pidInput.value;
+		const qty = qtyInput ? (qtyInput.value || 1) : 1;
+		if (!pid || pid === '0') {
+			previewBox.style.display = 'none';
+			previewBox.innerHTML = '';
+			setAddButtonState(true);
+			return;
+		}
+		clearTimeout(previewTimer);
+		previewTimer = setTimeout(() => {
+			const seq = ++previewSeq;
+			const data = { product_id: pid, quantity: qty };
+			const options = collectOptions();
+			if (options.length) data.options = JSON.stringify(options);
+			api('index.php?route=sale/order_detail/previewProduct&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID, 'POST', data).then(j => {
+				if (seq !== previewSeq) return;
+				renderPreview(j);
+			}).catch(function() {});
+		}, 250);
+	}
+
+	function updateTotalsUI(totals, totalQuantity) {
+		const container = document.querySelector('.order-totals-card');
+		if (!container) return;
+		totals.forEach(t => {
+			const row = container.querySelector('.order-totals-card__row[data-total-code="' + t.code + '"]');
+			if (!row) return;
+			const val = row.querySelector('.order-totals-card__value');
+			if (val) val.textContent = t.text;
+			if (t.code === 'sub_total' && totalQuantity !== undefined) {
+				const label = row.querySelector('.order-totals-card__label');
+				const base = row.dataset.labelBase;
+				if (label && base) label.textContent = base + ' ({{ text_items }}: ' + totalQuantity + ')';
+			}
+		});
+	}
+
+	function appendProductCard(p) {
+		const list = document.querySelector('.order-products-list');
+		if (!list) return;
+		const decimals = getCurrencyDecimals();
+
+		const card = document.createElement('div');
+		card.className = 'order-product-card';
+		card.dataset.productId = p.product_id;
+		card.dataset.orderProductId = p.order_product_id;
+		card.dataset.priceRaw = (parseFloat(p.price_raw) || 0).toFixed(4);
+		card.dataset.taxRaw = (parseFloat(p.tax_raw) || 0).toFixed(4);
+		card.dataset.discountOriginal = '0';
+
+		const editing = document.querySelector('[data-panel="order-products"]')?.dataset.editing === 'true';
+
+		const thumb = document.createElement('div');
+		thumb.className = 'order-product-card__thumb';
+		const img = document.createElement('img');
+		img.src = p.thumb || '';
+		img.alt = p.name || '';
+		thumb.appendChild(img);
+
+		const info = document.createElement('div');
+		info.className = 'order-product-card__info';
+		const nameDiv = document.createElement('div');
+		nameDiv.className = 'order-product-card__name';
+		const link = document.createElement('a');
+		link.href = p.href || '#';
+		link.target = '_blank';
+		link.textContent = p.name;
+		nameDiv.appendChild(link);
+		info.appendChild(nameDiv);
+
+		const meta = document.createElement('div');
+		meta.className = 'order-product-card__meta';
+		const modelSpan = document.createElement('span');
+		modelSpan.className = 'order-product-card__model';
+		modelSpan.textContent = p.model || '';
+		meta.appendChild(modelSpan);
+		if (p.variant_sku) {
+			const skuSpan = document.createElement('span');
+			skuSpan.className = 'order-product-card__option';
+			skuSpan.textContent = ' · SKU: ' + p.variant_sku;
+			meta.appendChild(skuSpan);
+		}
+		(p.option || []).forEach(o => {
+			const optSpan = document.createElement('span');
+			optSpan.className = 'order-product-card__option';
+			optSpan.textContent = ' · ' + o.name + ': ' + o.value;
+			meta.appendChild(optSpan);
+		});
+		info.appendChild(meta);
+
+		const priceDiv = document.createElement('div');
+		priceDiv.className = 'order-product-card__price';
+		const priceView = document.createElement('span');
+		priceView.className = 'view-only';
+		priceView.textContent = p.price;
+		priceView.style.display = editing ? 'none' : '';
+		const priceInput = document.createElement('input');
+		priceInput.type = 'text';
+		priceInput.className = 'form-control edit-only';
+		priceInput.value = (parseFloat(p.price_raw) || 0).toFixed(decimals);
+		priceInput.dataset.field = 'price';
+		priceInput.style.display = editing ? '' : 'none';
+		priceDiv.appendChild(priceView);
+		priceDiv.appendChild(priceInput);
+
+		const multDiv = document.createElement('div');
+		multDiv.className = 'order-product-card__mult';
+		multDiv.textContent = '×';
+
+		const qtyDiv = document.createElement('div');
+		qtyDiv.className = 'order-product-card__qty';
+		const qtyView = document.createElement('span');
+		qtyView.className = 'view-only';
+		qtyView.textContent = (parseFloat(p.quantity) || 0).toFixed(decimals);
+		qtyView.style.display = editing ? 'none' : '';
+		const qtyInputEl = document.createElement('input');
+		qtyInputEl.type = 'number';
+		qtyInputEl.className = 'form-control edit-only';
+		qtyInputEl.value = p.quantity;
+		qtyInputEl.min = '0';
+		qtyInputEl.step = 'any';
+		qtyInputEl.dataset.field = 'quantity';
+		qtyInputEl.style.display = editing ? '' : 'none';
+		qtyDiv.appendChild(qtyView);
+		qtyDiv.appendChild(qtyInputEl);
+
+		const discDiv = document.createElement('div');
+		discDiv.className = 'order-product-card__disc edit-only';
+		discDiv.style.display = editing ? '' : 'none';
+		discDiv.title = '{{ entry_discount_percent }}';
+		const discInput = document.createElement('input');
+		discInput.type = 'number';
+		discInput.className = 'form-control';
+		discInput.value = '0';
+		discInput.min = '0';
+		discInput.max = '100';
+		discInput.step = '0.5';
+		discInput.dataset.field = 'discount';
+		discDiv.appendChild(discInput);
+
+		const totalDiv = document.createElement('div');
+		totalDiv.className = 'order-product-card__total';
+		totalDiv.textContent = '= ' + (p.total || '');
+
+		const actionsDiv = document.createElement('div');
+		actionsDiv.className = 'order-product-card__actions edit-only';
+		actionsDiv.style.display = editing ? '' : 'none';
+		const removeBtn = document.createElement('button');
+		removeBtn.type = 'button';
+		removeBtn.className = 'btn btn-danger btn-xs btn--icon';
+		removeBtn.title = '{{ button_remove }}';
+		removeBtn.innerHTML = '<i data-lucide="trash-2" width="13" height="13"></i>';
+		removeBtn.addEventListener('click', function() { removeProduct(this); });
+		actionsDiv.appendChild(removeBtn);
+
+		card.appendChild(thumb);
+		card.appendChild(info);
+		card.appendChild(priceDiv);
+		card.appendChild(multDiv);
+		card.appendChild(qtyDiv);
+		card.appendChild(discDiv);
+		card.appendChild(totalDiv);
+		card.appendChild(actionsDiv);
+
+		list.appendChild(card);
+		lucide.createIcons();
+	}
+
+	function getCurrencyDecimals() {
+		const container = document.querySelector('.order-totals-card');
+		if (container && container.dataset.decimalPlace !== undefined) {
+			const dp = parseInt(container.dataset.decimalPlace, 10);
+			if (!isNaN(dp)) return dp;
+		}
+		return 2;
+	}
+
+function addProduct() {
+	const pid = pidInput.value;
+	const qty = qtyInput ? (qtyInput.value || 1) : 1;
+	if (!pid || pid === '0') return;
+
+	const missing = missingRequiredOptions();
+	if (missing.length) {
+		showAlert('{{ error_missing_options }} ' + missing.join(', '), 'warning');
 		return;
 	}
 
 	const data = { product_id: pid, quantity: qty };
+	const options = collectOptions();
 	if (options.length) data.options = JSON.stringify(options);
 
+	setAddButtonState(false);
 	api('index.php?route=sale/order_detail/addProduct&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
 		'POST', data).then(j => {
+			setAddButtonState(true);
 			if (j.error) {
 				showAlert(j.error, 'danger');
-			} else if (j.success) {
-				location.reload();
+			} else if (j.product) {
+				appendProductCard(j.product);
+				if (j.totals) updateTotalsUI(j.totals, j.total_quantity);
+				clearProductSelection();
+				showAlert('{{ text_product_added }}');
 			}
 		});
 }
+
+});
 
 function showProductCard(productId, orderProductId) {
 	if (!productId) return;
