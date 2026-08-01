@@ -7,6 +7,7 @@
     </div>
     <div class="pull-right">
       <select class="tile-period-select" id="chart-range">
+        <option value="all">{{ text_all_time }}</option>
         <option value="day">{{ text_day }}</option>
         <option value="week">{{ text_week }}</option>
         <option value="month" selected>{{ text_month }}</option>
@@ -27,7 +28,8 @@
     completed: {{ text_completed|json_encode|raw }},
     pending: {{ text_pending|json_encode|raw }},
     total: {{ text_total|json_encode|raw }},
-    revenue: {{ text_revenue|json_encode|raw }}
+    revenue: {{ text_revenue|json_encode|raw }},
+    returns: {{ text_returns|json_encode|raw }}
   };
 
   var key = 'dashboard_chart_period';
@@ -64,7 +66,7 @@
               borderRadius: 4,
               borderSkipped: false,
               yAxisID: 'y',
-              order: 3
+              order: 4
             },
             {
               label: labels.pending,
@@ -73,7 +75,7 @@
               borderRadius: 4,
               borderSkipped: false,
               yAxisID: 'y',
-              order: 4
+              order: 5
             },
             {
               label: labels.total,
@@ -93,6 +95,23 @@
               order: 1
             },
             {
+              label: labels.returns,
+              data: json.returns,
+              type: 'line',
+              borderColor: '#f43f5e',
+              backgroundColor: 'transparent',
+              borderWidth: 2,
+              borderDash: [2, 2],
+              tension: 0.4,
+              pointRadius: 0,
+              pointHoverRadius: 5,
+              pointHoverBackgroundColor: '#f43f5e',
+              pointHoverBorderColor: '#fff',
+              pointHoverBorderWidth: 2,
+              yAxisID: 'y',
+              order: 2
+            },
+            {
               label: labels.revenue,
               data: json.revenue,
               type: 'line',
@@ -107,7 +126,7 @@
               pointHoverBorderColor: '#fff',
               pointHoverBorderWidth: 2,
               yAxisID: 'y1',
-              order: 2
+              order: 3
             }
           ]
         },
