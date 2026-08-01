@@ -128,6 +128,9 @@ class ModelExtensionModuleDockercartSearch extends Model {
 
         $manticore->query("ALTER TABLE `products` ADD COLUMN `category_ids` multi");
 
+        // Product variant article codes (configurable products). Added in v3.2.
+        $manticore->query("ALTER TABLE `products` ADD COLUMN `variant_codes` text");
+
         $this->createOrderIndexSchema();
         $this->createCustomerIndexSchema();
     }
@@ -234,6 +237,31 @@ class ModelExtensionModuleDockercartSearch extends Model {
             'mpn'              => $this->buildSearchableCode($product['mpn']   ?? ''),
             'image'            => $product['image'],
         ];
+
+        // Aggregate product variant codes (model/sku/upc/ean/jan/isbn/mpn) for configurable
+        // products. Variants carry their own articles which are NOT stored on oc_product, so
+        // searching by a variant code would otherwise never match. All active variants are folded
+        // into a dedicated `variant_codes` field (kept separate from the display string attributes).
+        $variant_codes_query = $this->db->query("
+            SELECT model, sku, upc, ean, jan, isbn, mpn
+            FROM " . DB_PREFIX . "product_variant
+            WHERE product_id = '" . (int)$product_id . "'
+            AND status = '1'
+        ");
+
+        $variant_codes = [];
+
+        foreach ($variant_codes_query->rows as $variant) {
+            $variant_codes[] = $this->buildSearchableCode($variant['model'] ?? '');
+            $variant_codes[] = $this->buildSearchableCode($variant['sku']   ?? '');
+            $variant_codes[] = $this->buildSearchableCode($variant['upc']   ?? '');
+            $variant_codes[] = $this->buildSearchableCode($variant['ean']   ?? '');
+            $variant_codes[] = $this->buildSearchableCode($variant['jan']   ?? '');
+            $variant_codes[] = $this->buildSearchableCode($variant['isbn']  ?? '');
+            $variant_codes[] = $this->buildSearchableCode($variant['mpn']   ?? '');
+        }
+
+        $doc['variant_codes'] = trim(implode(' ', array_filter($variant_codes)));
 
         // Get special price if exists
         $special_query = $this->db->query("
