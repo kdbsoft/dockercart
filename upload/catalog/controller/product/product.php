@@ -721,8 +721,27 @@ class ControllerProductProduct extends Controller {
 			$tax = $this->config->get('config_tax');
 			$currency_code = isset($this->session->data['currency']) ? $this->session->data['currency'] : $this->config->get('config_currency');
 			$customer_group_id = (int)$this->config->get('config_customer_group_id');
+			$variant_discounts = $pc->getVariantsDiscounts($product_id);
 
 			foreach ($variants as &$variant) {
+				$variant['discounts'] = array();
+
+				if (isset($variant_discounts[(int)$variant['variant_id']])) {
+					foreach ($variant_discounts[(int)$variant['variant_id']] as $vd) {
+						if ((int)$vd['customer_group_id'] !== $customer_group_id) {
+							continue;
+						}
+
+						if (!(($vd['date_start'] === '0000-00-00' || $vd['date_start'] < date('Y-m-d H:i:s')) && ($vd['date_end'] === '0000-00-00' || $vd['date_end'] > date('Y-m-d H:i:s')))) {
+							continue;
+						}
+
+						$variant['discounts'][] = array(
+							'quantity' => (int)$vd['quantity'],
+							'price'    => $this->currency->format($this->tax->calculate((float)$vd['price'], $tax_class_id, $tax), $this->session->data['currency'])
+						);
+					}
+				}
 				$variant_cg_price = $pc->getVariantCustomerGroupPrice((int)$variant['variant_id'], $customer_group_id);
 
 				$effective_price = (float)$variant['price'];
@@ -784,6 +803,25 @@ class ControllerProductProduct extends Controller {
 				if ($default_special_price !== null && $default_special_price < $default_effective_price) {
 					$default_variant['special'] = $default_special_price;
 					$default_variant['special_from'] = $default_effective_price;
+				}
+
+				$default_variant['discounts'] = array();
+
+				if (isset($variant_discounts[(int)$default_variant['variant_id']])) {
+					foreach ($variant_discounts[(int)$default_variant['variant_id']] as $vd) {
+						if ((int)$vd['customer_group_id'] !== $customer_group_id) {
+							continue;
+						}
+
+						if (!(($vd['date_start'] === '0000-00-00' || $vd['date_start'] < date('Y-m-d H:i:s')) && ($vd['date_end'] === '0000-00-00' || $vd['date_end'] > date('Y-m-d H:i:s')))) {
+							continue;
+						}
+
+						$default_variant['discounts'][] = array(
+							'quantity' => (int)$vd['quantity'],
+							'price'    => $this->currency->format($this->tax->calculate((float)$vd['price'], $tax_class_id, $tax), $this->session->data['currency'])
+						);
+					}
 				}
 
 				if (isset($default_variant['price'])) {

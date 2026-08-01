@@ -49,6 +49,8 @@
 	var originalSku = skuEl ? (skuEl.dataset.baseSku || skuEl.textContent) : '';
 	var isInitPhase = true;
 	var taxEl = document.querySelector('[id^="dc-unit-tax"]');
+	var discountsEl = document.getElementById('dc-variant-discounts');
+	var discountText = '{{ text_discount|e('js') }}';
 
 	function getOvIdForPov(axis, povId) {
 		if (!axis.pov_map) return null;
@@ -200,6 +202,19 @@
 			taxEl.textContent = '{{ text_tax|e('js') }} ' + variant.tax_text;
 		} else if (taxEl) {
 			taxEl.textContent = '';
+		}
+
+		// Quantity discounts
+		if (discountsEl) {
+			var vd = (variant && Array.isArray(variant.discounts)) ? variant.discounts : [];
+			discountsEl.innerHTML = '';
+			vd.forEach(function(d) {
+				var p = document.createElement('p');
+				p.className = 'text-xs text-gray-500';
+				p.textContent = d.quantity + (discountText || ' ') + d.price;
+				discountsEl.appendChild(p);
+			});
+			discountsEl.classList.toggle('hidden', vd.length === 0);
 		}
 
 		// Sync base price for dcRecalcOptionPrice so it doesn't overwrite variant price
