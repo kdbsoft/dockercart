@@ -814,9 +814,11 @@ class ControllerSaleOrder extends Controller {
 				$order_info = $this->model_sale_order->getOrder($order_id);
 
 				if ($order_info) {
-					$this->model_sale_order->addOrderHistory($order_id, $order_status_id, $comment, $notify, $override);
-
-					$json['success'] = $this->language->get('text_success');
+					if (!$this->model_sale_order->addOrderHistory($order_id, $order_status_id, $comment, $notify, $override)) {
+						$json['error'] = $this->language->get('error_invalid_transition');
+					} else {
+						$json['success'] = $this->language->get('text_success');
+					}
 				} else {
 					$json['error'] = $this->language->get('error_action');
 				}
