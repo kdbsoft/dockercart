@@ -1,0 +1,235 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
+          <div class="pull-right">
+            <button type="submit" form="form-order-flow" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary btn--icon"><i data-lucide="save" width="16" height="16"></i></button>
+            <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default btn--icon"><i data-lucide="x" width="16" height="16"></i></a>
+          </div>
+          <a href="{{ cancel }}" class="page-header__link">
+            <span class="page-header__back">
+              <i data-lucide="arrow-left" width="20" height="20"></i>
+            </span>
+            <span class="page-header__title">{{ heading_title }}</span>
+          </a>
+        </div>
+      </div>
+      {% if error_warning %}
+      <div class="row">
+        <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
+          <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      {% if success %}
+      <div class="row">
+        <div class="col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
+          <div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> {{ success }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="container-fluid">
+    <form action="{{ action }}" method="post" id="form-order-flow">
+    <div class="row">
+      <div class="col-md-12 col-sm-12 col-lg-offset-2 col-lg-7 col-xl-offset-2 col-xl-7">
+        <div class="dcx-shell">
+
+          <div class="dcx-panel">
+            <div class="dcx-panel-head">
+              <div class="dcx-panel-head__icon"><i data-lucide="workflow" width="18" height="18"></i></div>
+              <div>
+                <div class="dcx-panel-title">{{ text_flow_steps }}</div>
+                <div class="dcx-panel-subtitle">{{ text_flow_steps_subtitle }}</div>
+              </div>
+            </div>
+            <div class="dcx-panel-body">
+              <div id="flow-steps">
+                {% for step in steps %}
+                <div class="flow-step-row" data-status-id="{{ step.order_status_id }}">
+                  <input type="hidden" name="step[]" value="{{ step.order_status_id }}" />
+                  <button type="button" class="btn btn-default btn-xs btn--icon flow-step-btn" onclick="moveStep(this, -1)" title="{{ button_flow_move_up }}"><i data-lucide="chevron-up" width="13" height="13"></i></button>
+                  <button type="button" class="btn btn-default btn-xs btn--icon flow-step-btn" onclick="moveStep(this, 1)" title="{{ button_flow_move_down }}"><i data-lucide="chevron-down" width="13" height="13"></i></button>
+                  <span class="flow-step-name">{{ step.name }}</span>
+                  <button type="button" class="btn btn-danger btn-xs btn--icon flow-step-btn" onclick="removeStepRow(this)" title="{{ button_flow_remove }}"><i data-lucide="trash-2" width="13" height="13"></i></button>
+                </div>
+                {% endfor %}
+              </div>
+              <div class="flow-step-add">
+                <select id="flow-new-step" class="form-control">
+                  {% for status in available_statuses %}
+                  <option value="{{ status.order_status_id }}">{{ status.name }}</option>
+                  {% endfor %}
+                </select>
+                <button type="button" class="btn btn-primary btn-sm" onclick="addStepRow()"><i data-lucide="plus" width="14" height="14"></i> {{ button_flow_add_step }}</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="dcx-panel">
+            <div class="dcx-panel-head">
+              <div class="dcx-panel-head__icon"><i data-lucide="git-branch" width="18" height="18"></i></div>
+              <div>
+                <div class="dcx-panel-title">{{ text_flow_transitions }}</div>
+                <div class="dcx-panel-subtitle">{{ text_flow_transitions_subtitle }}</div>
+              </div>
+            </div>
+            <div class="dcx-panel-body">
+              <div id="flow-transitions">
+                {% for transition in transitions %}
+                <div class="flow-transition-row">
+                  <select name="transition_from[]" class="form-control">
+                    {% for status in order_statuses %}
+                    <option value="{{ status.order_status_id }}" {% if status.order_status_id == transition.from %}selected{% endif %}>{{ status.name }}</option>
+                    {% endfor %}
+                  </select>
+                  <span class="flow-transition-arrow"><i data-lucide="arrow-right" width="14" height="14"></i></span>
+                  <select name="transition_to[]" class="form-control">
+                    {% for status in order_statuses %}
+                    <option value="{{ status.order_status_id }}" {% if status.order_status_id == transition.to %}selected{% endif %}>{{ status.name }}</option>
+                    {% endfor %}
+                  </select>
+                  <button type="button" class="btn btn-danger btn-xs btn--icon" onclick="removeTransitionRow(this)" title="{{ button_flow_remove }}"><i data-lucide="trash-2" width="13" height="13"></i></button>
+                </div>
+                {% endfor %}
+              </div>
+              <div class="flow-step-add">
+                <button type="button" class="btn btn-primary btn-sm" onclick="addTransitionRow()"><i data-lucide="plus" width="14" height="14"></i> {{ button_flow_add_transition }}</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="dcx-panel">
+            <div class="dcx-panel-head">
+              <div class="dcx-panel-head__icon"><i data-lucide="info" width="18" height="18"></i></div>
+              <div>
+                <div class="dcx-panel-title">{{ text_flow_rules }}</div>
+              </div>
+            </div>
+            <div class="dcx-panel-body">
+              <ul class="flow-rules">
+                <li>{{ text_flow_rule_forward }}</li>
+                <li>{{ text_flow_rule_transitions }}</li>
+                <li>{{ text_flow_rule_terminal }}</li>
+                <li>{{ text_flow_rule_override }}</li>
+              </ul>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    </form>
+  </div>
+</div>
+<select id="flow-status-options" class="form-control" style="display:none">
+  {% for status in order_statuses %}
+  <option value="{{ status.order_status_id }}">{{ status.name }}</option>
+  {% endfor %}
+</select>
+<script>
+function flowStatusOptions(selected) {
+	const source = document.getElementById('flow-status-options');
+	const select = document.createElement('select');
+	select.className = 'form-control';
+	Array.from(source.options).forEach(opt => {
+		const o = document.createElement('option');
+		o.value = opt.value;
+		o.textContent = opt.textContent;
+		if (String(opt.value) === String(selected)) o.selected = true;
+		select.appendChild(o);
+	});
+	return select;
+}
+
+function moveStep(btn, delta) {
+	const row = btn.closest('.flow-step-row');
+	if (!row) return;
+	const container = row.parentElement;
+	const rows = Array.from(container.children).filter(el => el.classList.contains('flow-step-row'));
+	const index = rows.indexOf(row);
+	const target = index + delta;
+	if (target < 0 || target >= rows.length) return;
+	if (delta < 0) container.insertBefore(row, rows[target]);
+	else container.insertBefore(rows[target + 1], row);
+}
+
+function removeStepRow(btn) {
+	const row = btn.closest('.flow-step-row');
+	if (!row || !confirm('{{ text_flow_confirm_remove }}')) return;
+	row.remove();
+	const used = Array.from(document.querySelectorAll('.flow-step-row')).map(r => r.dataset.statusId);
+	const select = document.getElementById('flow-new-step');
+	const removedId = row.dataset.statusId;
+	if (select && select.querySelector('option[value="' + removedId + '"]') === null) {
+		const source = document.getElementById('flow-status-options');
+		const src = Array.from(source.options).find(o => o.value === removedId);
+		if (src) {
+			const opt = document.createElement('option');
+			opt.value = src.value;
+			opt.textContent = src.textContent;
+			select.appendChild(opt);
+		}
+	}
+}
+
+function addStepRow() {
+	const select = document.getElementById('flow-new-step');
+	if (!select || !select.value) return;
+	const container = document.getElementById('flow-steps');
+	const source = document.getElementById('flow-status-options');
+	const src = Array.from(source.options).find(o => o.value === select.value);
+	const name = src ? src.textContent : select.options[select.selectedIndex].textContent;
+
+	const row = document.createElement('div');
+	row.className = 'flow-step-row';
+	row.dataset.statusId = select.value;
+	row.innerHTML =
+		'<input type="hidden" name="step[]" value="' + select.value + '" />' +
+		'<button type="button" class="btn btn-default btn-xs btn--icon flow-step-btn" onclick="moveStep(this, -1)" title="{{ button_flow_move_up }}"><i data-lucide="chevron-up" width="13" height="13"></i></button>' +
+		'<button type="button" class="btn btn-default btn-xs btn--icon flow-step-btn" onclick="moveStep(this, 1)" title="{{ button_flow_move_down }}"><i data-lucide="chevron-down" width="13" height="13"></i></button>' +
+		'<span class="flow-step-name"></span>' +
+		'<button type="button" class="btn btn-danger btn-xs btn--icon flow-step-btn" onclick="removeStepRow(this)" title="{{ button_flow_remove }}"><i data-lucide="trash-2" width="13" height="13"></i></button>';
+	row.querySelector('.flow-step-name').textContent = name;
+	container.appendChild(row);
+	select.remove(select.selectedIndex);
+	lucide.createIcons();
+}
+
+function removeTransitionRow(btn) {
+	btn.closest('.flow-transition-row').remove();
+}
+
+function addTransitionRow() {
+	const container = document.getElementById('flow-transitions');
+	const row = document.createElement('div');
+	row.className = 'flow-transition-row';
+	const from = flowStatusOptions('');
+	const to = flowStatusOptions('');
+	from.name = 'transition_from[]';
+	to.name = 'transition_to[]';
+	row.appendChild(from);
+	const arrow = document.createElement('span');
+	arrow.className = 'flow-transition-arrow';
+	arrow.innerHTML = '<i data-lucide="arrow-right" width="14" height="14"></i>';
+	row.appendChild(arrow);
+	row.appendChild(to);
+	const removeBtn = document.createElement('button');
+	removeBtn.type = 'button';
+	removeBtn.className = 'btn btn-danger btn-xs btn--icon';
+	removeBtn.title = '{{ button_flow_remove }}';
+	removeBtn.innerHTML = '<i data-lucide="trash-2" width="13" height="13"></i>';
+	removeBtn.onclick = function () { removeTransitionRow(removeBtn); };
+	row.appendChild(removeBtn);
+	container.appendChild(row);
+	lucide.createIcons();
+}
+</script>
+{{ footer }}
