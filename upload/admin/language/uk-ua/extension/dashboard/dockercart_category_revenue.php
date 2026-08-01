@@ -14,6 +14,7 @@ $_['text_year']        = 'Рік';
 $_['text_pcs']         = 'шт.';
 $_['text_uncategorized'] = 'Без категорії';
 $_['text_no_results']  = 'Даних про продажі поки немає';
+$_['text_view']        = 'Докладніше →';
 
 $_['text_category_revenue_subtitle'] = 'Розподіл виручки за категоріями';
 $_['text_edit_subtitle'] = 'Налаштування параметрів розширення';
