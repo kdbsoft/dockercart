@@ -46,27 +46,7 @@ class ControllerCommonDashboard extends Controller {
 
 		array_multisort($sort_order, SORT_ASC, $dashboards);
 
-		// Split the array so the columns width is not more than 12 on each row.
-		$width = 0;
-		$column = array();
-		$data['rows'] = array();
-
-		foreach ($dashboards as $dashboard) {
-			$column[] = $dashboard;
-
-			$width = ($width + $dashboard['width']);
-
-			if ($width >= 12) {
-				$data['rows'][] = $column;
-
-				$width = 0;
-				$column = array();
-			}
-		}
-
-		if (!empty($column)) {
-    			$data['rows'][] = $column;
-		}
+		$data['rows'] = $this->buildDashboardRows($dashboards);
 
 		if (DIR_STORAGE == DIR_SYSTEM . 'storage/') {
 			$data['security'] = $this->load->controller('common/security');
@@ -88,5 +68,107 @@ class ControllerCommonDashboard extends Controller {
 				$this->load->controller('extension/currency/'.$config_currency_engine.'/currency');
 			}
 		}
+	}
+
+	/**
+	 * Group sorted dashboard widgets into rows of columns. Each column holds one
+	 * or more widgets - a widget can opt into being stacked vertically inside the
+	 * column of another widget via the "dashboard_<code>_stack" setting (value =
+	 * target widget code). Column width is driven by the host widget's width and
+	 * rows close once their accumulated width reaches 12. The "md_full" flag makes
+	 * narrow columns go full-width on medium/small screens when the row contains a
+	 * widget wider than 3 columns.
+	 *
+	 * @param array $dashboards
+	 * @return array
+	 */
+	protected function buildDashboardRows($dashboards) {
+		$stack_targets = array();
+
+		foreach ($dashboards as $dashboard) {
+			$stack_target = $this->config->get('dashboard_' . $dashboard['code'] . '_stack');
+
+			if ($stack_target !== null && $stack_target !== '') {
+				$stack_targets[$dashboard['code']] = $stack_target;
+			}
+		}
+
+		$data['rows'] = array();
+		$row_columns = array();
+		$row_width = 0;
+		$stacked = array();
+
+		$flush_row = function () use (&$data, &$row_columns, &$row_width) {
+			if (!$row_columns) {
+				return;
+			}
+
+			$md_full = false;
+
+			foreach ($row_columns as $column) {
+				foreach ($column['widgets'] as $widget) {
+					if ($widget['width'] > 3) {
+						$md_full = true;
+						break 2;
+					}
+				}
+			}
+
+			$data['rows'][] = array(
+				'columns' => $row_columns,
+				'md_full' => $md_full
+			);
+
+			$row_columns = array();
+			$row_width = 0;
+		};
+
+		foreach ($dashboards as $dashboard) {
+			$code = $dashboard['code'];
+
+			if (isset($stacked[$code])) {
+				continue;
+			}
+
+			// Widgets that stack into another column are appended when that column is built.
+			if (isset($stack_targets[$code])) {
+				$stacked[$code] = true;
+				continue;
+			}
+
+			$widgets = array();
+
+			foreach ($dashboards as $candidate) {
+				$target = isset($stack_targets[$candidate['code']]) ? $stack_targets[$candidate['code']] : null;
+
+				if ($candidate['code'] === $code) {
+					$widgets[] = $candidate;
+				} elseif ($target === $code) {
+					// Stack this widget inside the host widget's column, top to bottom
+					// by sort order.
+					$widgets[] = $candidate;
+					$stacked[$candidate['code']] = true;
+				}
+			}
+
+			usort($widgets, function ($a, $b) {
+				return $a['sort_order'] <=> $b['sort_order'];
+			});
+
+			$row_columns[] = array(
+				'width'   => $dashboard['width'],
+				'widgets' => $widgets
+			);
+
+			$row_width += $dashboard['width'];
+
+			if ($row_width >= 12) {
+				$flush_row();
+			}
+		}
+
+		$flush_row();
+
+		return $data['rows'];
 	}
 }

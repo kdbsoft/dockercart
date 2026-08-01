@@ -106,6 +106,98 @@
 .dcx-panel-heading > .pull-right {
     margin-left: auto;
 }
+.dcx-panel-heading .tile-period-select {
+    background: var(--dc-surface);
+    border: 1px solid var(--dc-border);
+    border-radius: var(--dc-radius-md);
+    color: var(--dc-gray-700);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 28px 4px 8px;
+    cursor: pointer;
+    outline: none;
+}
+.dcx-panel-heading .tile-period-select:hover {
+    border-color: var(--dc-border-medium);
+}
+.dcx-panel-heading .tile-period-select option {
+    background: var(--dc-surface);
+    color: var(--dc-gray-700);
+}
+
+/* Dashboard analytics list widgets (Top Products / Revenue by Category) */
+.dcx-dash-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.dcx-dash-list__item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 18px;
+    border-bottom: 1px solid var(--dc-border-soft);
+}
+.dcx-dash-list__item:last-child {
+    border-bottom: 0;
+}
+.dcx-dash-list__rank {
+    flex: 0 0 auto;
+    width: 22px;
+    height: 22px;
+    border-radius: var(--dc-radius-full);
+    background: var(--dc-primary-light);
+    color: var(--dc-primary);
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.dcx-dash-list__main {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.dcx-dash-list__name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--dc-text-dark);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.dcx-dash-list__meta {
+    font-size: 11px;
+    color: var(--dc-text-muted);
+    margin-top: 2px;
+}
+.dcx-dash-list__bar {
+    height: 4px;
+    margin-top: 6px;
+    border-radius: var(--dc-radius-full);
+    background: var(--dc-gray-100);
+    overflow: hidden;
+}
+.dcx-dash-list__bar-fill {
+    display: block;
+    height: 100%;
+    border-radius: var(--dc-radius-full);
+    background: var(--dc-primary);
+}
+.dcx-dash-list__value {
+    flex: 0 0 auto;
+    text-align: right;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dc-text-dark);
+    white-space: nowrap;
+}
+.dcx-dash-list__empty {
+    padding: 24px 18px;
+    text-align: center;
+    color: var(--dc-text-muted);
+    font-size: 13px;
+}
 
 /* Generic form field */
 .dcx-fields {
