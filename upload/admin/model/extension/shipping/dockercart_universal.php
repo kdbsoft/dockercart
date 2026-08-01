@@ -260,4 +260,138 @@ class ModelExtensionShippingDockercartUniversal extends Model {
 
         return (int)$query->row['total'];
     }
+
+    /**
+     * Compute a shipping quote for an existing order (admin).
+     * Mirrors the catalog getQuote() logic but takes order data instead of the cart.
+     *
+     * @param array $order_info Order row (needs shipping_code, shipping_country_id, shipping_zone_id)
+     * @param float $subtotal   Order subtotal in the store default currency
+     * @param float $weight     Order weight in the store default weight class
+     * @return array|null Quote (cost in store default currency, title) or null when not applicable
+     */
+    public function getQuoteForOrder(array $order_info, float $subtotal, float $weight): ?array {
+        $parts = explode('.', (string)($order_info['shipping_code'] ?? ''));
+
+        if (($parts[0] ?? '') !== 'dockercart_universal') {
+            return null;
+        }
+
+        $method_id = (int)str_replace('dockercart_universal_', '', (string)($parts[1] ?? ''));
+
+        $method = null;
+
+        foreach ($this->getMethods() as $row) {
+            if ((int)$row['method_id'] === $method_id) {
+                $method = $row;
+                break;
+            }
+        }
+
+        if (!$method || !(int)$method['status']) {
+            return null;
+        }
+
+        if (!$this->checkQuoteGeoZone((int)$method['geo_zone_id'], $order_info)) {
+            return null;
+        }
+
+        if (!$this->checkQuoteOrderTotal($method, $subtotal)) {
+            return null;
+        }
+
+        if (!$this->checkQuoteWeight($method, $weight)) {
+            return null;
+        }
+
+        $cost = $this->calculateQuoteCost($method, $subtotal, $weight);
+
+        $title = (string)($method['name'] ?? '');
+
+        if (!empty($method['delivery_time'])) {
+            $title .= ' (' . $method['delivery_time'] . ')';
+        }
+
+        return [
+            'cost'  => $cost,
+            'title' => $title,
+        ];
+    }
+
+    protected function checkQuoteGeoZone(int $geo_zone_id, array $order_info): bool {
+        if ($geo_zone_id == 0) {
+            return true;
+        }
+
+        $query = $this->db->query("
+            SELECT * FROM `" . DB_PREFIX . "zone_to_geo_zone`
+            WHERE geo_zone_id = '" . (int)$geo_zone_id . "'
+            AND country_id = '" . (int)$order_info['shipping_country_id'] . "'
+            AND (zone_id = '" . (int)$order_info['shipping_zone_id'] . "' OR zone_id = '0')
+        ");
+
+        return $query->num_rows > 0;
+    }
+
+    protected function checkQuoteOrderTotal(array $method, float $subtotal): bool {
+        if ($method['min_total'] !== null && $subtotal < (float)$method['min_total']) {
+            return false;
+        }
+
+        if ($method['max_total'] !== null && $subtotal > (float)$method['max_total']) {
+            return false;
+        }
+
+        return true;
+    }
+
+    protected function checkQuoteWeight(array $method, float $weight): bool {
+        if ($method['min_weight'] !== null && $weight < (float)$method['min_weight']) {
+            return false;
+        }
+
+        if ($method['max_weight'] !== null && $weight > (float)$method['max_weight']) {
+            return false;
+        }
+
+        return true;
+    }
+
+    protected function calculateQuoteCost(array $method, float $subtotal, float $weight): ?float {
+        if ($method['free_shipping_threshold'] !== null && $subtotal >= (float)$method['free_shipping_threshold']) {
+            return 0.00;
+        }
+
+        if ($method['cost_type'] === 'weight' && !empty($method['weight_rates'])) {
+            return $this->calculateQuoteWeightCost($method['weight_rates'], $weight);
+        }
+
+        if ($method['cost'] === null || $method['cost'] === '') {
+            return null;
+        }
+
+        return (float)$method['cost'];
+    }
+
+    protected function calculateQuoteWeightCost(string $weight_rates, float $weight): float {
+        $rates = explode(',', $weight_rates);
+        $cost = 0.00;
+
+        foreach ($rates as $rate) {
+            $data = explode(':', trim($rate));
+
+            if (count($data) === 2) {
+                $weight_threshold = (float)$data[0];
+                $rate_cost = (float)$data[1];
+
+                if ($weight <= $weight_threshold) {
+                    return $rate_cost;
+                }
+
+                $cost = $rate_cost;
+            }
+        }
+
+        return $cost;
+    }
 }
