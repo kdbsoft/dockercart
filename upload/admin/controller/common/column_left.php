@@ -449,6 +449,15 @@ class ControllerCommonColumnLeft extends Controller {
 				);
 			}
 
+			if ($this->user->hasPermission('access', 'sale/order')) {
+				$system[] = array(
+					'name'	   => $this->language->get('text_order_flow'),
+					'href'     => $this->url->link('sale/order_flow', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'workflow',
+					'children' => array()
+				);
+			}
+
 			// Users
 			$user = array();
 
