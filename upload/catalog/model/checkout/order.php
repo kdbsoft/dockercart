@@ -290,7 +290,7 @@ class ModelCheckoutOrder extends Model {
 		return $query->rows;
 	}	
 			
-	public function addOrderHistory($order_id, $order_status_id, $comment = '', $notify = false, $override = false, $record_history = true) {
+	public function addOrderHistory($order_id, $order_status_id, $comment = '', $notify = false, $override = false, $record_history = true, $comment_key = '', $comment_params = array()) {
 		$order_info = $this->getOrder($order_id);
 		
 		if ($order_info) {
@@ -372,7 +372,7 @@ class ModelCheckoutOrder extends Model {
 
 
 			if ($record_history) {
-				$this->db->query("INSERT INTO " . DB_PREFIX . "order_history SET order_id = '" . (int)$order_id . "', order_status_id = '" . (int)$order_status_id . "', notify = '" . (int)$notify . "', comment = '" . $this->db->escape($comment) . "', date_added = NOW()");
+				$this->db->query("INSERT INTO " . DB_PREFIX . "order_history SET order_id = '" . (int)$order_id . "', order_status_id = '" . (int)$order_status_id . "', notify = '" . (int)$notify . "', comment = '" . $this->db->escape($comment) . "', comment_key = '" . $this->db->escape($comment_key) . "', comment_params = '" . $this->db->escape(is_array($comment_params) ? json_encode($comment_params) : '') . "', date_added = NOW()");
 			}
 
 			// If old order status is the processing or complete status but new status is not then commence restock, and remove coupon, voucher and reward history
@@ -409,5 +409,25 @@ class ModelCheckoutOrder extends Model {
 
 			$this->cache->delete('product');
 		}
+	}
+
+	public function addOrderNote($order_id, $comment, $notify = false, $comment_key = '', $comment_params = array()) {
+		$query = $this->db->query("SELECT order_status_id FROM `" . DB_PREFIX . "order` WHERE order_id = '" . (int)$order_id . "'");
+
+		if (!$query->num_rows) {
+			return false;
+		}
+
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "order_history` SET
+			order_id = '" . (int)$order_id . "',
+			order_status_id = '0',
+			notify = '" . (int)$notify . "',
+			comment = '" . $this->db->escape($comment) . "',
+			comment_key = '" . $this->db->escape($comment_key) . "',
+			comment_params = '" . $this->db->escape(is_array($comment_params) ? json_encode($comment_params) : '') . "',
+			date_added = NOW()
+		");
+
+		return true;
 	}
 }

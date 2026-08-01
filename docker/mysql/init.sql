@@ -5997,6 +5997,8 @@ CREATE TABLE `oc_order_history` (
   `order_status_id` int(11) NOT NULL,
   `notify` tinyint(1) NOT NULL DEFAULT 0,
   `comment` mediumtext NOT NULL,
+  `comment_key` varchar(255) NOT NULL DEFAULT '',
+  `comment_params` mediumtext DEFAULT NULL,
   `date_added` datetime NOT NULL,
   PRIMARY KEY (`order_history_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=228 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
