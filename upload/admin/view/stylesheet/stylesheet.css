@@ -1309,6 +1309,25 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
     opacity: 1;
 }
 
+.dcx-panel-footer {
+    padding: 10px 16px;
+    background-color: var(--dc-gray-50);
+    border-top: 1px solid var(--dc-border);
+    font-size: 13px;
+    font-weight: 500;
+    text-align: right;
+}
+
+.dcx-panel-footer a {
+    color: var(--dc-primary);
+    opacity: 0.9;
+    transition: opacity 0.15s ease;
+}
+
+.dcx-panel-footer a:hover {
+    opacity: 1;
+}
+
 .tile-period-select {
     background: rgba(255, 255, 255, 0.15);
     border: 1px solid rgba(255, 255, 255, 0.25);
@@ -2269,13 +2288,6 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
 .filter-field .form-control {
     height: 34px;
     font-size: 12px;
-}
-
-.filter-field__hint {
-    font-size: 10px;
-    color: #999;
-    margin-top: 3px;
-    line-height: 1.35;
 }
 
 .filter-field select.form-control {

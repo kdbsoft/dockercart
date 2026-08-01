@@ -41,8 +41,10 @@
           </div>
           <div class="filter-field">
             <label for="input-customer">{{ entry_customer }}</label>
-            <input type="text" name="filter_customer" value="{{ filter_customer }}" placeholder="{{ entry_customer }}" id="input-customer" class="form-control" />
-            <div class="filter-field__hint">{{ help_filter_customer }}</div>
+            <div class="dcx-field-icon-wrap">
+              <input type="text" name="filter_customer" value="{{ filter_customer }}" placeholder="{{ entry_customer }}" id="input-customer" class="form-control" />
+              <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_filter_customer }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
+            </div>
           </div>
           <div class="filter-field">
             <label for="input-order-status">{{ entry_order_status }}</label>
