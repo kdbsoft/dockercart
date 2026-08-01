@@ -99,6 +99,57 @@
               </div>
             </div>
             <div class="dcx-panel-body">
+              {% if return_products %}
+              <div class="dcx-field">
+                <label class="dcx-label">{{ text_return_items }}</label>
+                <div id="return-items">
+                  {% for rp in return_products %}
+                  <div class="return-item-row" data-opid="{{ rp.order_product_id }}" data-price="{{ rp.price }}">
+                    <input type="hidden" name="products[{{ loop.index0 }}][order_product_id]" value="{{ rp.order_product_id }}" />
+                    <input type="hidden" name="products[{{ loop.index0 }}][product_id]" value="{{ rp.product_id }}" />
+                    <input type="hidden" name="products[{{ loop.index0 }}][variant_id]" value="{{ rp.variant_id }}" />
+                    <input type="hidden" name="products[{{ loop.index0 }}][name]" value="{{ rp.name }}" />
+                    <input type="hidden" name="products[{{ loop.index0 }}][model]" value="{{ rp.model }}" />
+                    <input type="hidden" name="products[{{ loop.index0 }}][ordered]" value="{{ rp.ordered }}" />
+                    <input type="hidden" name="products[{{ loop.index0 }}][price]" value="{{ rp.price }}" />
+                    <label class="return-item-row__check">
+                      <input type="checkbox" class="return-item-check" {% if rp.checked %}checked{% endif %} onchange="returnItemChanged(this)" />
+                    </label>
+                    <span class="return-item-row__name">{{ rp.name }}{% if rp.model %} <span class="text-muted">({{ rp.model }})</span>{% endif %}</span>
+                    <input type="number" class="form-control return-item-qty" min="0" max="{{ rp.ordered }}" value="{{ rp.quantity }}" {% if not rp.checked %}disabled{% endif %} onchange="returnItemChanged(this)" oninput="returnItemChanged(this)" />
+                    <span class="return-item-row__ordered">/ {{ rp.ordered }}</span>
+                  </div>
+                  {% endfor %}
+                </div>
+                {% if error_products %}
+                <div class="text-danger">{{ error_products }}</div>
+                {% endif %}
+              </div>
+              <div class="dcx-field">
+                <label class="dcx-label">{{ entry_return_type }}</label>
+                <div class="return-type-row">
+                  {% for t in ['full', 'partial', 'exchange'] %}
+                  <label class="dcx-sidebar-card__checkbox">
+                    <input type="radio" name="type" value="{{ t }}" {% if type == t %}checked{% endif %} onchange="returnTypeChanged(this)" /> {{ attribute(_context, 'text_type_' ~ t) }}
+                  </label>
+                  {% endfor %}
+                </div>
+              </div>
+              <div class="dcx-field">
+                <label class="dcx-label">{{ text_refund }}</label>
+                <label class="dcx-sidebar-card__checkbox">
+                  <input type="checkbox" name="refund" value="1" id="input-refund" {% if refund and not refunded %}checked{% endif %} {% if refunded %}disabled{% endif %} onchange="refundChanged(this)" />
+                  {{ text_refund_money }}
+                </label>
+                {% if refunded %}
+                <div class="text-muted" style="font-size:12px">{{ text_refunded_already }}</div>
+                {% endif %}
+                <input type="text" name="amount" value="{{ amount }}" id="input-amount" class="form-control" style="max-width:180px;margin-top:4px" placeholder="{{ entry_refund_amount }}" {% if not refund or refunded %}disabled{% endif %} oninput="refundChanged(this)" />
+                {% if error_amount %}
+                <div class="text-danger">{{ error_amount }}</div>
+                {% endif %}
+              </div>
+              {% else %}
               <div class="dcx-field required">
                 <label class="dcx-label" for="input-product">{{ entry_product }} <span title="{{ help_product }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                 <input type="text" name="product" value="{{ product }}" placeholder="{{ entry_product }}" id="input-product" class="form-control" />
@@ -118,6 +169,7 @@
                 <label class="dcx-label" for="input-quantity">{{ entry_quantity }}</label>
                 <input type="text" name="quantity" value="{{ quantity }}" placeholder="{{ entry_quantity }}" id="input-quantity" class="form-control" />
               </div>
+              {% endif %}
               <div class="dcx-field">
                 <label class="dcx-label" for="input-return-reason">{{ entry_return_reason }}</label>
                 <select name="return_reason_id" id="input-return-reason" class="form-control">
@@ -137,7 +189,7 @@
             </div>
           </div>
           {% if return_id %}
-          <div class="dcx-panel" style="margin-top: 16px;">
+          <div class="dcx-panel" id="history-panel" style="margin-top: 16px;">
             <div class="dcx-panel-head">
               <div class="dcx-panel-head__icon"><i data-lucide="clock" width="18" height="18"></i></div>
               <div>
@@ -310,7 +362,7 @@ $('#button-history').on('click', function(e) {
 		url: 'index.php?route=sale/return/addhistory&user_token={{ user_token }}&return_id={{ return_id }}',
 		type: 'post',
 		dataType: 'json',
-		data: 'return_status_id=' + encodeURIComponent($('#tab-history select[name=\'return_status_id\']').val()) + '&notify=' + ($('input[name=\'notify\']').prop('checked') ? 1 : 0) + '&comment=' + encodeURIComponent($('#tab-history textarea[name=\'comment\']').val()),
+		data: 'return_status_id=' + encodeURIComponent($('#input-history-status').val()) + '&notify=' + ($('#input-notify').prop('checked') ? 1 : 0) + '&comment=' + encodeURIComponent($('#input-history-comment').val()),
 		beforeSend: function() {
 			$('#button-history').button('loading');
 		},
@@ -318,27 +370,124 @@ $('#button-history').on('click', function(e) {
 			$('#button-history').button('reset');
 		},
 		success: function(json) {
-			$('.alert-dismissible').remove();
+			$('#history-panel .alert-dismissible').remove();
 
 			if (json['error']) {
-				$('#tab-history').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+				$('#history-panel').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
 			}
 
 			if (json['success']) {
 				$('#history').load('index.php?route=sale/return/history&user_token={{ user_token }}&return_id={{ return_id }}');
 
-				$('#tab-history').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+				$('#history-panel').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
 
-				$('#tab-history textarea[name=\'comment\']').val('');
+				$('#input-history-comment').val('');
 			}
+
+			lucide.createIcons();
 		}
 	});
 });
+
+const PAID_AMOUNT = {{ paid_amount_raw }};
+
+function returnItemChanged() {
+	const type = document.querySelector('input[name="type"]:checked');
+	if (type && type.value === 'full') {
+		document.querySelectorAll('.return-item-row').forEach(row => {
+			const check = row.querySelector('.return-item-check');
+			const qty = row.querySelector('.return-item-qty');
+			if (!check.checked) {
+				check.checked = true;
+				qty.disabled = false;
+				qty.value = qty.max;
+			}
+		});
+	}
+	document.querySelectorAll('.return-item-row').forEach(row => {
+		const check = row.querySelector('.return-item-check');
+		const qty = row.querySelector('.return-item-qty');
+		qty.disabled = !check.checked;
+		if (!check.checked) qty.value = 0;
+	});
+	recalcRefund();
+}
+
+function returnTypeChanged(input) {
+	const type = input.value;
+	const refund = document.getElementById('input-refund');
+	const amount = document.getElementById('input-amount');
+
+	if (type === 'full') {
+		document.querySelectorAll('.return-item-row').forEach(row => {
+			const check = row.querySelector('.return-item-check');
+			const qty = row.querySelector('.return-item-qty');
+			check.checked = true;
+			qty.disabled = false;
+			qty.value = qty.max;
+		});
+		if (refund && !refund.disabled) refund.checked = true;
+		if (amount) amount.disabled = false;
+	} else if (type === 'exchange') {
+		if (refund) refund.checked = false;
+		if (amount) amount.disabled = true;
+	}
+
+	recalcRefund();
+}
+
+function refundChanged(input) {
+	const amount = document.getElementById('input-amount');
+
+	if (input.id === 'input-refund') {
+		amount.disabled = !input.checked;
+		if (input.checked) recalcRefund();
+	} else {
+		recalcRefund();
+	}
+}
+
+function recalcRefund() {
+	const type = document.querySelector('input[name="type"]:checked');
+	const refund = document.getElementById('input-refund');
+	const amount = document.getElementById('input-amount');
+	if (!type || !amount || !refund) return;
+
+	if (type.value === 'exchange') {
+		amount.value = '0';
+		return;
+	}
+
+	if (type.value === 'full' && PAID_AMOUNT > 0) {
+		amount.value = PAID_AMOUNT.toFixed(2);
+		return;
+	}
+
+	let sum = 0;
+	document.querySelectorAll('.return-item-row').forEach(row => {
+		const check = row.querySelector('.return-item-check');
+		const qty = row.querySelector('.return-item-qty');
+		if (check && check.checked && qty) {
+			sum += (parseFloat(qty.value) || 0) * parseFloat(row.dataset.price || 0);
+		}
+	});
+
+	amount.value = PAID_AMOUNT > 0 ? Math.min(sum, PAID_AMOUNT).toFixed(2) : sum.toFixed(2);
+}
 //--></script>
   <script type="text/javascript"><!--
 $('.date').datetimepicker({
 	language: '{{ datepicker }}',
 	pickTime: false
 });
-//--></script></div>
+//--></script>
+  <style>
+.return-item-row { display:flex; align-items:center; gap:8px; padding:6px 8px; border:1px solid var(--dc-border,#e5e7eb); border-radius:8px; margin-bottom:6px; background:var(--dc-surface,#fff); }
+.return-item-row__check { flex-shrink:0; margin:0; }
+.return-item-row__name { flex:1; min-width:0; font-size:13px; color:#374151; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.return-item-row .return-item-qty { width:76px; flex-shrink:0; }
+.return-item-row__ordered { flex-shrink:0; font-size:12px; color:#9ca3af; }
+.return-type-row { display:flex; flex-wrap:wrap; gap:12px; }
+</style>
+</div>
 {{ footer }}

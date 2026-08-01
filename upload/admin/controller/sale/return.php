@@ -206,6 +206,145 @@ class ControllerSaleReturn extends Controller {
 		$this->getList();
 	}
 
+	public function exportCsv(): void {
+		$this->load->language('sale/return');
+
+		if (!$this->user->hasPermission('access', 'sale/return')) {
+			$this->response->redirect($this->url->link('sale/return', 'user_token=' . $this->session->data['user_token'], true));
+			return;
+		}
+
+		$this->load->model('sale/return');
+
+		$ids = array();
+
+		if (isset($this->request->get['return_id'])) {
+			if (is_array($this->request->get['return_id'])) {
+				$ids = $this->request->get['return_id'];
+			} else {
+				$ids = explode(',', (string)$this->request->get['return_id']);
+			}
+
+			$ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
+		}
+
+		if (!$ids) {
+			$this->response->redirect($this->url->link('sale/return', 'user_token=' . $this->session->data['user_token'], true));
+			return;
+		}
+
+		$id_list = implode(',', $ids);
+
+		$qty_query = $this->db->query("SELECT return_id, SUM(quantity) AS total_quantity FROM `" . DB_PREFIX . "return_product` WHERE return_id IN (" . $id_list . ") GROUP BY return_id");
+
+		$quantities = array();
+
+		foreach ($qty_query->rows as $row) {
+			$quantities[(int)$row['return_id']] = (int)$row['total_quantity'];
+		}
+
+		$reason_query = $this->db->query("SELECT rr.return_reason_id, rr.name FROM `" . DB_PREFIX . "return_reason` rr WHERE rr.language_id = '" . (int)$this->config->get('config_language_id') . "'");
+
+		$reasons = array();
+
+		foreach ($reason_query->rows as $row) {
+			$reasons[(int)$row['return_reason_id']] = $row['name'];
+		}
+
+		$action_query = $this->db->query("SELECT ra.return_action_id, ra.name FROM `" . DB_PREFIX . "return_action` ra WHERE ra.language_id = '" . (int)$this->config->get('config_language_id') . "'");
+
+		$actions = array();
+
+		foreach ($action_query->rows as $row) {
+			$actions[(int)$row['return_action_id']] = $row['name'];
+		}
+
+		$status_query = $this->db->query("SELECT rs.return_status_id, rs.name FROM `" . DB_PREFIX . "return_status` rs WHERE rs.language_id = '" . (int)$this->config->get('config_language_id') . "'");
+
+		$statuses = array();
+
+		foreach ($status_query->rows as $row) {
+			$statuses[(int)$row['return_status_id']] = $row['name'];
+		}
+
+		$headers = array(
+			$this->language->get('column_return_id'),
+			$this->language->get('column_order_id'),
+			$this->language->get('column_customer'),
+			$this->language->get('entry_email'),
+			$this->language->get('entry_telephone'),
+			$this->language->get('column_product'),
+			$this->language->get('column_model'),
+			$this->language->get('column_quantity'),
+			$this->language->get('text_return_type'),
+			$this->language->get('column_amount'),
+			$this->language->get('entry_return_reason'),
+			$this->language->get('entry_return_action'),
+			$this->language->get('column_status'),
+			$this->language->get('column_date_added'),
+			$this->language->get('column_date_modified'),
+			$this->language->get('column_comment')
+		);
+
+		$rows = array();
+
+		foreach ($ids as $return_id) {
+			$return_info = $this->model_sale_return->getReturn($return_id);
+
+			if (!$return_info) {
+				continue;
+			}
+
+			$type = $return_info['type'] === 'partial' ? 'text_return_type_partial' : ($return_info['type'] === 'exchange' ? 'text_return_type_exchange' : 'text_return_type_full');
+
+			$rows[] = array(
+				$return_id,
+				$return_info['order_id'],
+				$return_info['firstname'] . ' ' . $return_info['lastname'],
+				$return_info['email'],
+				$return_info['telephone'],
+				$return_info['product'],
+				$return_info['model'],
+				isset($quantities[(int)$return_id]) ? $quantities[(int)$return_id] : 0,
+				$this->language->get($type),
+				(float)$return_info['amount'],
+				isset($reasons[(int)$return_info['return_reason_id']]) ? $reasons[(int)$return_info['return_reason_id']] : '',
+				isset($actions[(int)$return_info['return_action_id']]) ? $actions[(int)$return_info['return_action_id']] : '',
+				$return_info['return_status'],
+				date($this->language->get('date_format_short'), strtotime($return_info['date_added'])),
+				date($this->language->get('date_format_short'), strtotime($return_info['date_modified'])),
+				$return_info['comment']
+			);
+		}
+
+		if (!$rows) {
+			$this->response->redirect($this->url->link('sale/return', 'user_token=' . $this->session->data['user_token'], true));
+			return;
+		}
+
+		$output = "\xEF\xBB\xBF" . $this->csvLine($headers);
+
+		foreach ($rows as $row) {
+			$output .= $this->csvLine($row);
+		}
+
+		$filename = 'returns-' . date('Ymd-His') . '.csv';
+
+		$this->response->addHeader('Content-Type: text/csv; charset=UTF-8');
+		$this->response->addHeader('Content-Disposition: attachment; filename="' . $filename . '"');
+		$this->response->setOutput($output);
+	}
+
+	private function csvLine(array $fields): string {
+		$quoted = array();
+
+		foreach ($fields as $field) {
+			$quoted[] = '"' . str_replace('"', '""', (string)$field) . '"';
+		}
+
+		return implode(',', $quoted) . "\r\n";
+	}
+
 	protected function getList() {
 		if (isset($this->request->get['filter_return_id'])) {
 			$filter_return_id = $this->request->get['filter_return_id'];
@@ -321,6 +460,7 @@ class ControllerSaleReturn extends Controller {
 
 		$data['add'] = $this->url->link('sale/return/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('sale/return/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
+		$data['export_url'] = str_replace('&amp;', '&', $this->url->link('sale/return/exportCsv', 'user_token=' . $this->session->data['user_token'], true));
 		$data['text_list_subtitle'] = $this->language->get('text_list_subtitle');
 
 		$data['returns'] = array();
@@ -574,6 +714,18 @@ class ControllerSaleReturn extends Controller {
 			$data['error_model'] = '';
 		}
 
+		if (isset($this->error['products'])) {
+			$data['error_products'] = $this->error['products'];
+		} else {
+			$data['error_products'] = '';
+		}
+
+		if (isset($this->error['amount'])) {
+			$data['error_amount'] = $this->error['amount'];
+		} else {
+			$data['error_amount'] = '';
+		}
+
 		$url = '';
 
 		if (isset($this->request->get['filter_return_id'])) {
@@ -631,6 +783,8 @@ class ControllerSaleReturn extends Controller {
 		if (isset($this->request->get['return_id']) && ($this->request->server['REQUEST_METHOD'] != 'POST')) {
 			$return_info = $this->model_sale_return->getReturn($this->request->get['return_id']);
 		}
+
+		$order_id = (int)($this->request->get['order_id'] ?? 0);
 
 		if (isset($this->request->post['order_id'])) {
 			$data['order_id'] = $this->request->post['order_id'];
@@ -780,6 +934,115 @@ class ControllerSaleReturn extends Controller {
 
 		$data['return_statuses'] = $this->model_localisation_return_status->getReturnStatuses();
 
+		// Return type, refund amount and items
+		if (isset($this->request->post['type'])) {
+			$data['type'] = $this->request->post['type'];
+		} elseif (!empty($return_info)) {
+			$data['type'] = $return_info['type'];
+		} else {
+			$data['type'] = 'full';
+		}
+
+		if (isset($this->request->post['amount'])) {
+			$data['amount'] = $this->request->post['amount'];
+		} elseif (!empty($return_info)) {
+			$data['amount'] = $return_info['amount'];
+		} else {
+			$data['amount'] = 0;
+		}
+
+		if (isset($this->request->post['refund'])) {
+			$data['refund'] = !empty($this->request->post['refund']);
+		} elseif (!empty($return_info)) {
+			$data['refund'] = (float)$return_info['amount'] > 0 && !$return_info['refunded'];
+		} else {
+			$data['refund'] = true;
+		}
+
+		$data['refunded'] = !empty($return_info['refunded']);
+		$data['paid_amount_raw'] = $data['paid_amount_raw'] ?? 0;
+
+		$data['return_products'] = array();
+
+		if (is_array($this->request->post['products'] ?? null)) {
+			foreach ($this->request->post['products'] as $product) {
+				$data['return_products'][] = array(
+					'order_product_id' => (int)($product['order_product_id'] ?? 0),
+					'product_id'       => (int)($product['product_id'] ?? 0),
+					'variant_id'       => (int)($product['variant_id'] ?? 0),
+					'name'             => $product['name'] ?? '',
+					'model'            => $product['model'] ?? '',
+					'ordered'          => (int)($product['ordered'] ?? 0),
+					'quantity'         => (int)($product['quantity'] ?? 0),
+					'price'            => (float)($product['price'] ?? 0),
+					'total'            => (float)($product['total'] ?? 0),
+					'checked'          => !empty($product['checked']),
+				);
+			}
+		} elseif (!empty($return_info)) {
+			$this->load->model('sale/order');
+			$order_products = $this->model_sale_order->getOrderProducts((int)$return_info['order_id']);
+
+			$ordered_by_opid = array();
+
+			foreach ($order_products as $order_product) {
+				$ordered_by_opid[(int)$order_product['order_product_id']] = (int)$order_product['quantity'];
+			}
+
+			foreach ($this->model_sale_return->getReturnProducts((int)$return_info['return_id']) as $product) {
+				$data['return_products'][] = array(
+					'order_product_id' => (int)$product['order_product_id'],
+					'product_id'       => (int)$product['product_id'],
+					'variant_id'       => (int)$product['variant_id'],
+					'name'             => $product['name'],
+					'model'            => $product['model'],
+					'ordered'          => $ordered_by_opid[(int)$product['order_product_id']] ?? (int)$product['quantity'],
+					'quantity'         => (int)$product['quantity'],
+					'price'            => (float)$product['price'],
+					'total'            => (float)$product['total'],
+					'checked'          => true,
+				);
+			}
+		} elseif ($order_id && empty($return_info)) {
+			$this->load->model('sale/order');
+
+			$order_products = $this->model_sale_order->getOrderProducts($order_id);
+
+			foreach ($order_products as $order_product) {
+				$data['return_products'][] = array(
+					'order_product_id' => (int)$order_product['order_product_id'],
+					'product_id'       => (int)$order_product['product_id'],
+					'variant_id'       => (int)($order_product['variant_id'] ?? 0),
+					'name'             => $order_product['name'],
+					'model'            => $order_product['model'],
+					'ordered'          => (int)$order_product['quantity'],
+					'quantity'         => 0,
+					'price'            => (float)$order_product['price'],
+					'total'            => 0,
+					'checked'          => false,
+				);
+			}
+		}
+
+		// Pre-fill order details when a return is created from an order
+		if (!isset($this->request->post['order_id']) && empty($return_info) && $order_id) {
+			$this->load->model('sale/order');
+
+			$order_info = $this->model_sale_order->getOrder($order_id);
+
+			if ($order_info) {
+				$data['order_id'] = $order_id;
+				$data['date_ordered'] = date('Y-m-d', strtotime($order_info['date_added']));
+				$data['customer_id'] = $order_info['customer_id'];
+				$data['customer'] = trim($order_info['firstname'] . ' ' . $order_info['lastname']);
+				$data['firstname'] = $order_info['firstname'];
+				$data['lastname'] = $order_info['lastname'];
+				$data['email'] = $order_info['email'];
+				$data['telephone'] = $order_info['telephone'];
+				$data['paid_amount_raw'] = (float)$order_info['paid_amount'];
+			}
+		}
+
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');
@@ -812,12 +1075,35 @@ class ControllerSaleReturn extends Controller {
 			$this->error['telephone'] = $this->language->get('error_telephone');
 		}
 
-		if ((utf8_strlen($this->request->post['product']) < 1) || (utf8_strlen($this->request->post['product']) > 255)) {
-			$this->error['product'] = $this->language->get('error_product');
+		$has_items = false;
+
+		if (is_array($this->request->post['products'] ?? null)) {
+			foreach ($this->request->post['products'] as $product) {
+				if ((int)($product['quantity'] ?? 0) > 0) {
+					$has_items = true;
+					break;
+				}
+			}
 		}
 
-		if ((utf8_strlen($this->request->post['model']) < 1) || (utf8_strlen($this->request->post['model']) > 64)) {
-			$this->error['model'] = $this->language->get('error_model');
+		if ($has_items) {
+			// Product details come from the order line items
+		} else {
+			if ((utf8_strlen($this->request->post['product'] ?? '') < 1) || (utf8_strlen($this->request->post['product'] ?? '') > 255)) {
+				$this->error['product'] = $this->language->get('error_product');
+			}
+
+			if ((utf8_strlen($this->request->post['model'] ?? '') < 1) || (utf8_strlen($this->request->post['model'] ?? '') > 64)) {
+				$this->error['model'] = $this->language->get('error_model');
+			}
+
+			if ((int)($this->request->post['quantity'] ?? 0) < 1) {
+				$this->error['products'] = $this->language->get('error_products');
+			}
+		}
+
+		if ((float)($this->request->post['amount'] ?? 0) < 0) {
+			$this->error['amount'] = $this->language->get('error_amount');
 		}
 
 		if (empty($this->request->post['return_reason_id'])) {
