@@ -45,8 +45,8 @@
 	var stockBadgeEl = document.getElementById('dc-stock-badge');
 	var defaultImgSrc = mainImgEl ? mainImgEl.src : '';
 	var originalBasePrice = priceEl ? parseFloat(priceEl.dataset.basePrice || '0') : 0;
-	var skuEl = document.getElementById('dc-variant-sku');
-	var originalSku = skuEl ? (skuEl.dataset.baseSku || skuEl.textContent) : '';
+	var skuEl = document.getElementById('dc-variant-model');
+	var originalSku = skuEl ? (skuEl.dataset.baseModel || skuEl.textContent) : '';
 	var isInitPhase = true;
 	var taxEl = document.querySelector('[id^="dc-unit-tax"]');
 	var discountsEl = document.getElementById('dc-variant-discounts');
@@ -194,7 +194,7 @@
 		}
 
 		if (skuEl) {
-			skuEl.textContent = (variant && variant.sku) ? variant.sku : originalSku;
+			skuEl.textContent = (variant && (variant.model || variant.sku)) ? (variant.model || variant.sku) : originalSku;
 		}
 
 		// Tax

@@ -543,13 +543,16 @@ class Cart
 
                     if ($variant_query->num_rows) {
                         $variant_sku = $variant_query->row['sku'];
+                        $variant_model = $variant_query->row['model'];
                         $product_query->row['price'] = (float)$variant_query->row['price'];
                         $product_query->row['quantity'] = (float)$variant_query->row['quantity'];
                         $product_query->row['subtract'] = (int)$variant_query->row['subtract'];
                         $product_query->row['weight'] = (float)$variant_query->row['weight'];
                         $product_query->row['weight_class_id'] = (int)$variant_query->row['weight_class_id'];
 
-                        if (!empty($variant_sku)) {
+                        if (!empty($variant_model)) {
+                            $product_query->row['model'] = $variant_model;
+                        } elseif (!empty($variant_sku)) {
                             $product_query->row['model'] = $variant_sku;
                         }
 
