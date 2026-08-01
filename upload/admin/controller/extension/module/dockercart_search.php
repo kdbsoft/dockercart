@@ -96,7 +96,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
         $data['module_dockercart_search_autocomplete'] = $this->getConfigValue('module_dockercart_search_autocomplete', 1);
         $data['module_dockercart_search_voice'] = $this->getConfigValue('module_dockercart_search_voice', 1);
         $data['module_dockercart_search_autocomplete_limit'] = $this->getConfigValue('module_dockercart_search_autocomplete_limit', 10);
-        $data['module_dockercart_search_min_chars'] = $this->getConfigValue('module_dockercart_search_min_chars', 3);
+        $data['module_dockercart_search_min_chars'] = $this->getConfigValue('module_dockercart_search_min_chars', 2);
         $data['module_dockercart_search_results_limit'] = $this->getConfigValue('module_dockercart_search_results_limit', 20);
         $data['module_dockercart_search_query_mappings'] = $this->getConfigValue('module_dockercart_search_query_mappings', '');
 
@@ -205,6 +205,28 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
                 'code'    => 'dockercart_search_product_delete',
                 'trigger' => 'admin/model/catalog/product/deleteProduct/after',
                 'action'  => 'extension/module/dockercart_search/eventProductDelete'
+            ],
+
+            // Configurable product variant events (variant articles are indexed with the product)
+            [
+                'code'    => 'dockercart_search_variant_add',
+                'trigger' => 'admin/model/catalog/product_configurable/addVariant/after',
+                'action'  => 'extension/module/dockercart_search/eventVariantAdd'
+            ],
+            [
+                'code'    => 'dockercart_search_variant_edit',
+                'trigger' => 'admin/model/catalog/product_configurable/updateVariant/after',
+                'action'  => 'extension/module/dockercart_search/eventVariantEdit'
+            ],
+            [
+                'code'    => 'dockercart_search_variant_delete',
+                'trigger' => 'admin/model/catalog/product_configurable/deleteVariant/after',
+                'action'  => 'extension/module/dockercart_search/eventVariantDelete'
+            ],
+            [
+                'code'    => 'dockercart_search_variant_delete_all',
+                'trigger' => 'admin/model/catalog/product_configurable/deleteAllVariants/after',
+                'action'  => 'extension/module/dockercart_search/eventVariantDeleteAll'
             ],
 
             // Category events
@@ -348,7 +370,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
             'module_dockercart_search_autocomplete' => 1,
             'module_dockercart_search_voice' => 1,
             'module_dockercart_search_autocomplete_limit' => 10,
-            'module_dockercart_search_min_chars' => 3,
+            'module_dockercart_search_min_chars' => 2,
             'module_dockercart_search_results_limit' => 20,
             'module_dockercart_search_query_mappings' => ''
         ]);
@@ -367,6 +389,10 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
             'dockercart_search_product_add',
             'dockercart_search_product_edit',
             'dockercart_search_product_delete',
+            'dockercart_search_variant_add',
+            'dockercart_search_variant_edit',
+            'dockercart_search_variant_delete',
+            'dockercart_search_variant_delete_all',
             'dockercart_search_category_add',
             'dockercart_search_category_edit',
             'dockercart_search_category_delete',
@@ -461,6 +487,76 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
 
             $this->logger->info("Product {$args[0]} deleted from index");
         }
+    }
+
+    /**
+     * Reindex the parent product after a variant is added.
+     * addVariant($product_id, $data) — product_id is args[0].
+     */
+    public function eventVariantAdd($route, $args) {
+        if ($this->config->get('module_dockercart_search_status') && isset($args[0])) {
+            $this->reindexProductByVariantProductId($args[0]);
+        }
+    }
+
+    /**
+     * Reindex the parent product after a variant is updated.
+     * updateVariant($variant_id, $data) — variant_id is args[0].
+     */
+    public function eventVariantEdit($route, $args) {
+        if ($this->config->get('module_dockercart_search_status') && isset($args[0])) {
+            $this->reindexProductByVariantId((int)$args[0]);
+        }
+    }
+
+    /**
+     * Reindex the parent product after a variant is deleted.
+     * deleteVariant($variant_id) — variant_id is args[0].
+     */
+    public function eventVariantDelete($route, $args) {
+        if ($this->config->get('module_dockercart_search_status') && isset($args[0])) {
+            $this->reindexProductByVariantId((int)$args[0]);
+        }
+    }
+
+    /**
+     * Reindex the parent product after all variants are deleted.
+     * deleteAllVariants($product_id) — product_id is args[0].
+     */
+    public function eventVariantDeleteAll($route, $args) {
+        if ($this->config->get('module_dockercart_search_status') && isset($args[0])) {
+            $this->reindexProductByVariantProductId($args[0]);
+        }
+    }
+
+    /**
+     * Resolve product_id from a variant_id and reindex all languages of that product.
+     */
+    private function reindexProductByVariantId($variant_id) {
+        $query = $this->db->query("
+            SELECT product_id FROM " . DB_PREFIX . "product_variant
+            WHERE variant_id = '" . (int)$variant_id . "'
+        ");
+
+        if ($query->num_rows) {
+            $this->reindexProductByVariantProductId((int)$query->row['product_id']);
+        }
+    }
+
+    /**
+     * Reindex a product (by product_id) across all languages.
+     */
+    private function reindexProductByVariantProductId($product_id) {
+        $this->load->model('extension/module/dockercart_search');
+        $this->load->model('localisation/language');
+
+        $languages = $this->model_localisation_language->getLanguages();
+
+        foreach ($languages as $language) {
+            $this->model_extension_module_dockercart_search->indexProduct((int)$product_id, $language['language_id']);
+        }
+
+        $this->logger->info("Product {$product_id} re-indexed after variant change");
     }
 
     public function eventCategoryAdd($route, $args, $output) {
