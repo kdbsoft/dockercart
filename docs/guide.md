@@ -16,6 +16,7 @@
 10. [Security](#10-security)
 11. [Configurable Products & Variants](#11-configurable-products--variants)
 12. [Buy X Get Y (BXGY)](#12-buy-x-get-y-bxgy)
+13. [Order Multilingual Display](#13-order-multilingual-display)
 
 ---
 
@@ -689,3 +690,93 @@ Library: `system/library/bxgy.php`
 - Open product → Promotions section → Add Promotion → Buy X Get Y.
 - Each BXGY card has: Reward Product (autocomplete), Trigger Quantity,
   Discount Type (Free/Percentage), Discount Value, Date Range, Auto-renew.
+
+---
+
+## 13. Order Multilingual Display
+
+Orders snapshot localized strings at checkout time on the customer's language:
+`oc_order.payment_method` / `shipping_method`, `oc_order_product.name`,
+`oc_order_option.name` / `value`, `oc_order_total.title`. The snapshot is the
+historical record (emails and invoices use it as-is) and is never rewritten —
+but it is not translated when the viewer uses a different language.
+
+### Resolution Layer (`system/library/order_localizer.php`)
+
+`OrderLocalizer` re-resolves the snapshot into the **display language**
+(`config_language_id`: admin UI language in admin, customer's current storefront
+language in catalog) at render time, falling back to the stored snapshot when the
+referenced entity or translation is gone:
+
+| Method | Resolves from | Fallback |
+|---|---|---|
+| `paymentMethodTitle($order)` | `payment_code` `dockercart_universal.dockercart_universal_{id}` → `oc_dockercart_universal_payment_description.name` | stored `payment_method` |
+| `shippingMethodTitle($order)` | universal `name` + `delivery_time` (same format as checkout quotes); `dockercart_novapost.{branch\|locker\|courier}` → `delivery_branch/delivery_locker/delivery_courier` language keys | stored `shipping_method` |
+| `paymentEntryTitle($payment)` | like `paymentMethodTitle` but for `oc_order_payment` rows | stored |
+| `productName($order_product)` | `oc_product_description.name` by `product_id` | stored `name` |
+| `optionName($order_option)` | `product_option_id` → `oc_option_description.name` | stored `name` |
+| `optionValue($order_option)` | `product_option_value_id` → `oc_option_value_description.name` for select/radio/checkbox/color/image; free text (text/date/file) kept as stored | stored `value` |
+| `totalTitle($total, $shipping_title)` | `shipping` → resolved shipping method; `sub_total/total/handling/low_order_fee/credit` → `text_*` keys from `extension/total/{code}` (language files live in `catalog/language/` — the resolver falls back to `DIR_CATALOG . 'language/{code}/...'` when the admin's own `Language` object cannot see them); `coupon/reward/voucher` → same key + parenthesized token re-extracted from the stored title | stored `title` |
+| `countryName($order, $type)` / `zoneName($order, $type)` | `oc_country_description` / `oc_zone_description` by `{payment\|shipping}_country_id` / `_zone_id` (`COALESCE` to `oc_country.name` / `oc_zone.name`; table presence checked via `information_schema`, cached) | stored `_country` / `_zone` snapshot |
+| `historyComment($entry)` | checkout-time `order_payment_method` marker (`comment_key` + `comment_params.code`) → re-renders payment method title + description from the universal method descriptions in the display language | `null` → caller uses stored comment |
+
+Notes:
+
+- `tax` total titles fall back to the stored snapshot: the tax rate id is not
+  stored in `oc_order_total`, so the per-language `oc_tax_rate.name` is
+  unreachable retroactively.
+- Renamed/deleted products and options show the current translation in the
+  display language, falling back to the order-time snapshot.
+- Order status names were already multilingual (`oc_order_status` is
+  `PRIMARY KEY (order_status_id, language_id)`, joined on the viewer's language).
+
+### Surfaces
+
+Resolution is applied in **controllers** (display layer) only — models keep
+returning raw snapshots for reports and emails:
+
+- Admin: `sale/order_detail` (detail, print, timeline, payments, address
+  country/zone via `formatAddress`), `sale/order` (list),
+  `extension/dashboard/recent` (cards + product names).
+- Catalog: `account/order` (customer order info: methods, products, options,
+  totals, payments, address country/zone, order history comments).
+- Emails (`mail/order.php`) are unchanged — they use the order's own language.
+
+### Structured Timeline Notes
+
+Auto-generated admin notes («Payment received…», «Order total changed…»,
+reversals) are stored with an i18n key so they render in the viewer's language:
+
+- Migration `20260801_order_history_i18n.sql` adds
+  `oc_order_history.comment_key` (varchar) and `comment_params` (mediumtext JSON)
+  to `oc_order_history` — both idempotent, safe to re-run.
+- `ModelSaleOrder::addOrderNote($order_id, $comment, $notify = false,
+  $comment_key = '', $comment_params = [])` keeps the formatted text in
+  `comment` (legacy display + email paths) and stores key + params alongside.
+- Timeline rendering (`order_detail::getTimeline` →
+  `renderTimelineComment()`) re-renders `sprintf(language->get($key), ...$params)`
+  when a key exists; legacy rows without a key show the stored text as before.
+- Note keys live in `admin/language/{en-gb,ru-ua,uk-ua}/sale/order.php`
+  (`text_payment_note_*`, `text_payment_reversal_comment`,
+  `text_overpayment_reversal_comment`). Keep all three locales in sync when
+  adding new keys.
+- Manual notes/comments typed by an admin are free text and are never
+  translated.
+- The checkout (`extension/payment/dockercart_universal` `confirm()`) writes the
+  selected payment method as an order history entry with
+  `comment_key = 'order_payment_method'` and `comment_params = {code}` (the
+  formatted title+description stays in `comment` as fallback). The timeline and
+  the customer's order history render it through `OrderLocalizer::historyComment()`
+  in the viewer's language; legacy entries without the marker show the stored
+  text. `ModelCheckoutOrder::addOrderHistory()` (catalog) accepts the extra
+  `$comment_key` / `$comment_params` arguments.
+- Only one status entry is written per status change: when the payment `confirm()`
+  runs with the same status the checkout already recorded (the common case where
+  the payment method's order status equals the store default), the payment method
+  is appended as a **note** (`addOrderNote()`, `order_status_id = 0`) instead of a
+  second status record — the timeline then shows the single "Pending" entry plus a
+  note with the payment method, not a duplicated status.
+- Admin Order Details edits only append a status record when the status select
+  value actually changed (`savePanelChanges('order-details')` / `saveChanges()`
+  compare against the initial `order_status_id`); editing other fields or saving
+  with an unchanged status does not add a timeline entry.
