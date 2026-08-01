@@ -118,6 +118,178 @@ class ModelExtensionDashboardChart extends Model {
 		return $order_data;
 	}
 	
+	public function getTotalOrdersByAll() {
+		$implode = array();
+
+		foreach ($this->config->get('config_complete_status') as $order_status_id) {
+			$implode[] = "'" . (int)$order_status_id . "'";
+		}
+
+		$order_data = array();
+
+		$query = $this->db->query("SELECT COUNT(*) AS total, DATE_FORMAT(date_added, '%Y-%m') AS bucket FROM `" . DB_PREFIX . "order` WHERE order_status_id IN(" . implode(",", $implode) . ") GROUP BY DATE_FORMAT(date_added, '%Y-%m') ORDER BY bucket ASC");
+
+		foreach ($query->rows as $result) {
+			$order_data[$result['bucket']] = array(
+				'month' => $result['bucket'],
+				'total' => $result['total']
+			);
+		}
+
+		return $order_data;
+	}
+
+	public function getPendingOrdersByAll() {
+		$implode = array();
+
+		foreach ($this->config->get('config_complete_status') as $order_status_id) {
+			$implode[] = "'" . (int)$order_status_id . "'";
+		}
+
+		$order_data = array();
+
+		$query = $this->db->query("SELECT COUNT(*) AS total, DATE_FORMAT(date_added, '%Y-%m') AS bucket FROM `" . DB_PREFIX . "order` WHERE order_status_id NOT IN(" . implode(",", $implode) . ") AND order_status_id != '0' GROUP BY DATE_FORMAT(date_added, '%Y-%m') ORDER BY bucket ASC");
+
+		foreach ($query->rows as $result) {
+			$order_data[$result['bucket']] = array(
+				'month' => $result['bucket'],
+				'total' => $result['total']
+			);
+		}
+
+		return $order_data;
+	}
+
+	public function getRevenueByAll() {
+		$implode = array();
+
+		foreach ($this->config->get('config_complete_status') as $order_status_id) {
+			$implode[] = "'" . (int)$order_status_id . "'";
+		}
+
+		$revenue_data = array();
+
+		$query = $this->db->query("SELECT SUM(total / currency_value) AS total, DATE_FORMAT(date_added, '%Y-%m') AS bucket FROM `" . DB_PREFIX . "order` WHERE order_status_id IN(" . implode(",", $implode) . ") GROUP BY DATE_FORMAT(date_added, '%Y-%m') ORDER BY bucket ASC");
+
+		foreach ($query->rows as $result) {
+			$revenue_data[$result['bucket']] = array(
+				'month' => $result['bucket'],
+				'total' => (float)$result['total']
+			);
+		}
+
+		return $revenue_data;
+	}
+
+	public function getReturnsByDay() {
+		$return_data = array();
+
+		for ($i = 0; $i < 24; $i++) {
+			$return_data[$i] = array(
+				'hour'  => $i,
+				'total' => 0
+			);
+		}
+
+		$query = $this->db->query("SELECT COUNT(*) AS total, HOUR(date_added) AS hour FROM `" . DB_PREFIX . "return` WHERE DATE(date_added) = DATE(NOW()) GROUP BY HOUR(date_added) ORDER BY date_added ASC");
+
+		foreach ($query->rows as $result) {
+			$return_data[$result['hour']] = array(
+				'hour'  => $result['hour'],
+				'total' => $result['total']
+			);
+		}
+
+		return $return_data;
+	}
+
+	public function getReturnsByWeek() {
+		$return_data = array();
+
+		$date_start = strtotime('-' . date('w') . ' days');
+
+		for ($i = 0; $i < 7; $i++) {
+			$date = date('Y-m-d', $date_start + ($i * 86400));
+
+			$return_data[date('w', strtotime($date))] = array(
+				'day'   => date('D', strtotime($date)),
+				'total' => 0
+			);
+		}
+
+		$query = $this->db->query("SELECT COUNT(*) AS total, date_added FROM `" . DB_PREFIX . "return` WHERE DATE(date_added) >= DATE('" . $this->db->escape(date('Y-m-d', $date_start)) . "') GROUP BY DAYNAME(date_added)");
+
+		foreach ($query->rows as $result) {
+			$return_data[date('w', strtotime($result['date_added']))] = array(
+				'day'   => date('D', strtotime($result['date_added'])),
+				'total' => $result['total']
+			);
+		}
+
+		return $return_data;
+	}
+
+	public function getReturnsByMonth() {
+		$return_data = array();
+
+		for ($i = 1; $i <= date('t'); $i++) {
+			$date = date('Y') . '-' . date('m') . '-' . $i;
+
+			$return_data[date('j', strtotime($date))] = array(
+				'day'   => date('d', strtotime($date)),
+				'total' => 0
+			);
+		}
+
+		$query = $this->db->query("SELECT COUNT(*) AS total, date_added FROM `" . DB_PREFIX . "return` WHERE DATE(date_added) >= DATE('" . $this->db->escape(date('Y') . '-' . date('m') . '-1') . "') GROUP BY DATE(date_added)");
+
+		foreach ($query->rows as $result) {
+			$return_data[date('j', strtotime($result['date_added']))] = array(
+				'day'   => date('d', strtotime($result['date_added'])),
+				'total' => $result['total']
+			);
+		}
+
+		return $return_data;
+	}
+
+	public function getReturnsByYear() {
+		$return_data = array();
+
+		for ($i = 1; $i <= 12; $i++) {
+			$return_data[$i] = array(
+				'month' => date('M', mktime(0, 0, 0, $i)),
+				'total' => 0
+			);
+		}
+
+		$query = $this->db->query("SELECT COUNT(*) AS total, date_added FROM `" . DB_PREFIX . "return` WHERE YEAR(date_added) = YEAR(NOW()) GROUP BY MONTH(date_added)");
+
+		foreach ($query->rows as $result) {
+			$return_data[date('n', strtotime($result['date_added']))] = array(
+				'month' => date('M', strtotime($result['date_added'])),
+				'total' => $result['total']
+			);
+		}
+
+		return $return_data;
+	}
+
+	public function getReturnsByAll() {
+		$return_data = array();
+
+		$query = $this->db->query("SELECT COUNT(*) AS total, DATE_FORMAT(date_added, '%Y-%m') AS bucket FROM `" . DB_PREFIX . "return` GROUP BY DATE_FORMAT(date_added, '%Y-%m') ORDER BY bucket ASC");
+
+		foreach ($query->rows as $result) {
+			$return_data[$result['bucket']] = array(
+				'month' => $result['bucket'],
+				'total' => $result['total']
+			);
+		}
+
+		return $return_data;
+	}
+
 	public function getTotalCustomersByDay() {
 		$customer_data = array();
 

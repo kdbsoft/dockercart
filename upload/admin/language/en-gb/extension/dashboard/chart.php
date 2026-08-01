@@ -12,6 +12,7 @@ $_['text_completed']   = 'Completed';
 $_['text_pending']     = 'Pending';
 $_['text_total']       = 'Total Orders';
 $_['text_revenue']     = 'Revenue';
+$_['text_returns']     = 'Returns';
 $_['text_all_time']    = 'All Time';
 $_['text_day']         = 'Today';
 $_['text_week']        = 'Week';

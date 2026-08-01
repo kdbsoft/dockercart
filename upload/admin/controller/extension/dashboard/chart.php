@@ -99,16 +99,39 @@ class ControllerExtensionDashboardChart extends Controller {
 			'pending' => array(),
 			'total' => array(),
 			'revenue' => array(),
+			'returns' => array(),
 			'currency_symbol_left' => $currency_query->num_rows ? $currency_query->row['symbol_left'] : '$',
 			'currency_symbol_right' => $currency_query->num_rows ? $currency_query->row['symbol_right'] : ''
 		);
 
 		switch ($range) {
+			case 'all':
+				$completed = $this->model_extension_dashboard_chart->getTotalOrdersByAll();
+				$pending = $this->model_extension_dashboard_chart->getPendingOrdersByAll();
+				$revenue = $this->model_extension_dashboard_chart->getRevenueByAll();
+				$returns = $this->model_extension_dashboard_chart->getReturnsByAll();
+
+				$buckets = array_unique(array_merge(array_keys($completed), array_keys($pending), array_keys($revenue), array_keys($returns)));
+				sort($buckets);
+
+				foreach ($buckets as $bucket) {
+					$c = !empty($completed[$bucket]) ? $completed[$bucket]['total'] : 0;
+					$p = !empty($pending[$bucket]) ? $pending[$bucket]['total'] : 0;
+
+					$json['labels'][] = date('M y', strtotime($bucket . '-01'));
+					$json['completed'][] = $c;
+					$json['pending'][] = $p;
+					$json['total'][] = $c + $p;
+					$json['revenue'][] = !empty($revenue[$bucket]) ? $revenue[$bucket]['total'] : 0;
+					$json['returns'][] = !empty($returns[$bucket]) ? $returns[$bucket]['total'] : 0;
+				}
+				break;
 			default:
 			case 'day':
 				$completed = $this->model_extension_dashboard_chart->getTotalOrdersByDay();
 				$pending = $this->model_extension_dashboard_chart->getPendingOrdersByDay();
 				$revenue = $this->model_extension_dashboard_chart->getRevenueByDay();
+				$returns = $this->model_extension_dashboard_chart->getReturnsByDay();
 
 				for ($i = 0; $i < 24; $i++) {
 					$json['labels'][] = str_pad($i, 2, '0', STR_PAD_LEFT) . ':00';
@@ -116,12 +139,14 @@ class ControllerExtensionDashboardChart extends Controller {
 					$json['pending'][] = $pending[$i]['total'];
 					$json['total'][] = $completed[$i]['total'] + $pending[$i]['total'];
 					$json['revenue'][] = $revenue[$i]['total'];
+					$json['returns'][] = $returns[$i]['total'];
 				}
 				break;
 			case 'week':
 				$completed = $this->model_extension_dashboard_chart->getTotalOrdersByWeek();
 				$pending = $this->model_extension_dashboard_chart->getPendingOrdersByWeek();
 				$revenue = $this->model_extension_dashboard_chart->getRevenueByWeek();
+				$returns = $this->model_extension_dashboard_chart->getReturnsByWeek();
 
 				$date_start = strtotime('-' . date('w') . ' days');
 
@@ -134,12 +159,14 @@ class ControllerExtensionDashboardChart extends Controller {
 					$json['pending'][] = $pending[$w]['total'];
 					$json['total'][] = $completed[$w]['total'] + $pending[$w]['total'];
 					$json['revenue'][] = $revenue[$w]['total'];
+					$json['returns'][] = $returns[$w]['total'];
 				}
 				break;
 			case 'month':
 				$completed = $this->model_extension_dashboard_chart->getTotalOrdersByMonth();
 				$pending = $this->model_extension_dashboard_chart->getPendingOrdersByMonth();
 				$revenue = $this->model_extension_dashboard_chart->getRevenueByMonth();
+				$returns = $this->model_extension_dashboard_chart->getReturnsByMonth();
 
 				for ($i = 1; $i <= date('t'); $i++) {
 					$date = date('Y') . '-' . date('m') . '-' . $i;
@@ -150,12 +177,14 @@ class ControllerExtensionDashboardChart extends Controller {
 					$json['pending'][] = $pending[$j]['total'];
 					$json['total'][] = $completed[$j]['total'] + $pending[$j]['total'];
 					$json['revenue'][] = $revenue[$j]['total'];
+					$json['returns'][] = $returns[$j]['total'];
 				}
 				break;
 			case 'year':
 				$completed = $this->model_extension_dashboard_chart->getTotalOrdersByYear();
 				$pending = $this->model_extension_dashboard_chart->getPendingOrdersByYear();
 				$revenue = $this->model_extension_dashboard_chart->getRevenueByYear();
+				$returns = $this->model_extension_dashboard_chart->getReturnsByYear();
 
 				for ($i = 1; $i <= 12; $i++) {
 					$json['labels'][] = date('M', mktime(0, 0, 0, $i));
@@ -163,6 +192,7 @@ class ControllerExtensionDashboardChart extends Controller {
 					$json['pending'][] = $pending[$i]['total'];
 					$json['total'][] = $completed[$i]['total'] + $pending[$i]['total'];
 					$json['revenue'][] = $revenue[$i]['total'];
+					$json['returns'][] = $returns[$i]['total'];
 				}
 				break;
 		}
