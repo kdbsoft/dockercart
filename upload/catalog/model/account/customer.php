@@ -87,7 +87,18 @@ class ModelAccountCustomer extends Model {
 	public function getCustomerByToken($token) {
 		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "customer WHERE token = '" . $this->db->escape($token) . "' AND token != ''");
 
-		$this->db->query("UPDATE " . DB_PREFIX . "customer SET token = ''");
+		if (!$query->num_rows) {
+			return array();
+		}
+
+		// Consume the token atomically: only the first concurrent request with
+		// this token matches the WHERE clause and gets affected_rows = 1; the
+		// loser returns empty. This also stops clearing other customers' tokens.
+		$this->db->query("UPDATE " . DB_PREFIX . "customer SET token = '' WHERE customer_id = '" . (int)$query->row['customer_id'] . "' AND token = '" . $this->db->escape($token) . "' AND token != ''");
+
+		if (!$this->db->countAffected()) {
+			return array();
+		}
 
 		return $query->row;
 	}
@@ -131,13 +142,9 @@ class ModelAccountCustomer extends Model {
 	}
 
 	public function addLoginAttempt($email) {
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "customer_login WHERE email = '" . $this->db->escape(utf8_strtolower((string)$email)) . "'");
-
-		if (!$query->num_rows) {
-			$this->db->query("INSERT INTO " . DB_PREFIX . "customer_login SET email = '" . $this->db->escape(utf8_strtolower((string)$email)) . "', ip = '" . $this->db->escape($this->request->server['REMOTE_ADDR']) . "', total = 1, date_added = '" . $this->db->escape(date('Y-m-d H:i:s')) . "', date_modified = '" . $this->db->escape(date('Y-m-d H:i:s')) . "'");
-		} else {
-			$this->db->query("UPDATE " . DB_PREFIX . "customer_login SET total = (total + 1), date_modified = '" . $this->db->escape(date('Y-m-d H:i:s')) . "' WHERE customer_login_id = '" . (int)$query->row['customer_login_id'] . "'");
-		}
+		// Single-statement upsert: the unique index on email makes concurrent
+		// failed logins merge into one row instead of creating duplicates.
+		$this->db->query("INSERT INTO " . DB_PREFIX . "customer_login SET email = '" . $this->db->escape(utf8_strtolower((string)$email)) . "', ip = '" . $this->db->escape($this->request->server['REMOTE_ADDR']) . "', total = 1, date_added = '" . $this->db->escape(date('Y-m-d H:i:s')) . "', date_modified = '" . $this->db->escape(date('Y-m-d H:i:s')) . "' ON DUPLICATE KEY UPDATE total = (total + 1), date_modified = VALUES(date_modified)");
 	}
 
 	public function getLoginAttempts($email) {
