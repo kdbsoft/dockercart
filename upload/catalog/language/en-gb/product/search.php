@@ -6,6 +6,8 @@ $_['heading_tag']       = 'Tag - ';
 // Text
 $_['text_search']       = 'Products meeting the search criteria';
 $_['text_keyword']      = 'Keywords';
+$_['text_voice_search'] = 'Voice search';
+$_['text_voice_listening'] = 'Listening…';
 $_['text_category']     = 'All Categories';
 $_['text_sub_category'] = 'Search in subcategories';
 $_['text_empty']        = 'There is no product that matches the search criteria.';
