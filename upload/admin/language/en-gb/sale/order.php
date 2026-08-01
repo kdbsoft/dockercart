@@ -143,6 +143,7 @@ $_['column_discount_percent']    = 'Discount %';
 // Entry
 $_['entry_store']                = 'Store';
 $_['entry_customer']             = 'Customer';
+$_['help_filter_customer']       = 'Search by name, email or phone — phone format does not matter';
 $_['entry_customer_group']       = 'Customer Group';
 $_['entry_firstname']            = 'First Name';
 $_['entry_lastname']             = 'Last Name';
@@ -150,6 +151,7 @@ $_['entry_email']                = 'E-Mail';
 $_['entry_telephone']            = 'Telephone';
 $_['entry_tax_number']           = 'VAT Number';
 $_['entry_tracking_number']        = 'Tracking Number';
+$_['entry_tracking_number_hint']   = 'Carrier tracking number (TTN) or the number of a waybill document (delivery note, order, etc.)';
 $_['entry_address']              = 'Choose Address';
 $_['entry_company']              = 'Company';
 $_['entry_address_1']            = 'Address 1';
@@ -209,6 +211,35 @@ $_['text_flow_confirm_terminal'] = 'This status ends the order flow. Continue?';
 $_['text_flow_terminal_state']   = 'This order has ended its flow.';
 $_['button_flow_apply']          = 'Apply';
 $_['text_comment_optional']      = 'Comment (optional)';
+$_['text_return_refund_note']    = 'Refund of return #%s';
+
+// Shipments
+$_['text_shipments']             = 'Shipments';
+$_['text_no_shipments']          = 'No shipments recorded';
+$_['text_shipment_progress']     = 'Shipping progress';
+$_['text_shipment_items']        = 'Items in this shipment';
+$_['text_flow_shipment']         = 'Shipment';
+$_['text_shipment_added']        = 'Shipment added';
+$_['text_shipment_removed']      = 'Shipment removed';
+$_['text_shipping_note_added']   = 'Shipment added: %s';
+$_['text_confirm_remove_shipment'] = 'Remove this shipment?';
+$_['button_add_shipment']        = 'Add shipment';
+$_['button_remove_shipment']     = 'Remove shipment';
+$_['error_tracking_number']      = 'Enter a carrier TTN number or a waybill document number!';
+$_['error_shipment_items']       = 'Select at least one item with a quantity for the shipment!';
+$_['error_tracking_required']    = 'Add a tracking number (TTN/waybill) before changing the status to Shipped!';
+
+// Invoice
+$_['text_invoice_no']            = 'Invoice No:';
+
+// Coupon
+$_['button_coupon_apply']        = 'Apply';
+$_['button_coupon_remove']       = 'Remove coupon';
+$_['text_coupon_applied']        = 'Coupon applied!';
+$_['text_coupon_removed']        = 'Coupon removed!';
+$_['text_coupon_note_added']     = 'Coupon applied: %s';
+$_['text_coupon_note_removed']   = 'Coupon removed: %s';
+$_['error_coupon_invalid']       = 'This coupon is invalid, expired or does not meet the conditions!';
 
 $_['text_timeline']              = 'Timeline';
 $_['text_add_note']              = 'Add Note';
@@ -224,6 +255,9 @@ $_['text_print_orders']          = 'Orders';
 
 $_['button_print']               = 'Print';
 $_['button_print_selected']      = 'Print Selected Orders';
+$_['button_create_return']       = 'Create Return';
+$_['button_duplicate_order']     = 'Duplicate Order';
+$_['text_order_duplicated']      = 'Order duplicated!';
 $_['button_export_csv']          = 'Export Selected Orders to CSV';
 $_['button_new_order']           = 'New Order';
 
@@ -297,6 +331,13 @@ $_['entry_payment_amount']           = 'Payment Amount';
 $_['entry_payment_reference']        = 'Transaction No.';
 $_['text_payment_reference_hint']    = 'Transaction/receipt number from the payment provider — used to look up the payment';
 $_['button_add_payment']             = 'Record Payment';
+$_['button_add_refund']              = 'Refund';
+$_['entry_refund_amount']            = 'Refund Amount';
+$_['text_refund_added']              = 'Refund issued!';
+$_['text_refund_note_added']         = 'Refund issued: %s';
+$_['error_refund_amount']            = 'Please enter a refund amount greater than zero!';
+$_['error_refund_no_paid']           = 'There are no paid funds to refund!';
+$_['error_refund_too_large']         = 'Refund cannot exceed the paid amount!';
 $_['button_remove_payment']          = 'Reverse';
 $_['button_remove_overpayment']      = 'Remove Overpayment';
 $_['column_paid']                    = 'Paid';

@@ -51,6 +51,18 @@
               </div>
             </div>
             <div class="dcx-panel-body">
+              <div class="dcx-fields">
+                <div class="dcx-field">
+                  <label class="dcx-label" for="flow-shipping-status">{{ text_flow_shipping_status }}</label>
+                  <select class="form-control" id="flow-shipping-status" name="shipping_status_id" style="max-width:420px">
+                    <option value="0">{{ text_none }}</option>
+                    {% for status in order_statuses %}
+                    <option value="{{ status.order_status_id }}" {% if status.order_status_id == shipping_status_id %}selected{% endif %}>{{ status.name }}</option>
+                    {% endfor %}
+                  </select>
+                  <div class="text-muted" style="font-size:12px;margin-top:4px">{{ text_flow_shipping_status_hint }}</div>
+                </div>
+              </div>
               <div id="flow-steps">
                 {% for step in steps %}
                 <div class="flow-step-row" data-status-id="{{ step.order_status_id }}">

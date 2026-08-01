@@ -29,6 +29,10 @@
                 <li class="divider"></li>
                 <li><a href="#" onclick="event.preventDefault();addCommission();return false"><i data-lucide="coins" width="14" height="14"></i> {{ button_commission_add }}</a></li>
                 <li><a href="#" onclick="event.preventDefault();removeCommission();return false"><i data-lucide="coins-off" width="14" height="14"></i> {{ button_commission_remove }}</a></li>
+                <li class="divider"></li>
+                <li><a href="#" onclick="event.preventDefault();duplicateOrder();return false"><i data-lucide="copy" width="14" height="14"></i> {{ button_duplicate_order }}</a></li>
+                <li class="divider"></li>
+                <li><a href="{{ create_return_url }}" target="_blank"><i data-lucide="rotate-ccw" width="14" height="14"></i> {{ button_create_return }}</a></li>
               </ul>
             </div>
             <span id="edit-actions" style="display:none">
@@ -96,6 +100,7 @@
               {% endif %}
               {% for product in products %}
               <div class="order-product-card" data-product-id="{{ product.product_id }}" data-order-product-id="{{ product.order_product_id }}" data-price-raw="{{ product.price_raw|round(4) }}" data-tax-raw="{{ product.tax_raw|round(4) }}" data-discount-original="{{ product.discount_percent|round(1) }}">
+                <div class="order-product-card__pos">#{{ loop.index }}</div>
                 <div class="order-product-card__thumb">
                   <img src="{{ product.thumb }}" alt="{{ product.name }}">
                 </div>
@@ -188,23 +193,55 @@
                 </div>
                 {% endfor %}
               </div>
+
+              {# Coupon #}
+              <div class="order-coupon-block">
+                {% if coupon_applied %}
+                <div class="order-coupon-row">
+                  <span class="order-coupon-label"><i data-lucide="tag" width="13" height="13"></i> {{ coupon_title }}</span>
+                  <button type="button" class="btn btn-default btn-xs" onclick="removeCoupon()">
+                    <i data-lucide="x" width="12" height="12"></i> {{ button_coupon_remove }}
+                  </button>
+                </div>
+                {% else %}
+                <div class="order-coupon-row">
+                  <input type="text" id="coupon-code" class="form-control order-coupon-input" placeholder="{{ entry_coupon }}" autocomplete="off">
+                  <button type="button" class="btn btn-default btn-xs" onclick="applyCoupon()">
+                    <i data-lucide="tag" width="12" height="12"></i> {{ button_coupon_apply }}
+                  </button>
+                </div>
+                {% endif %}
+              </div>
             </div>
           </div>
         </div>
 
-        {# Timeline #}
-        <div class="dcx-shell">
-          <div class="dcx-panel">
-            <div class="dcx-panel-head">
-              <div class="dcx-panel-head__icon"><i data-lucide="clock" width="18" height="18"></i></div>
-              <div>
-                <div class="dcx-panel-title">{{ text_timeline }}</div>
-              </div>
+        {# Payments Card #}
+        <div class="dcx-panel" data-panel="payments">
+          <div class="dcx-panel-head">
+            <div class="dcx-panel-head__icon"><i data-lucide="credit-card" width="18" height="18"></i></div>
+            <div>
+              <div class="dcx-panel-title">{{ text_payments }}</div>
             </div>
-            <div class="dcx-panel-body">
-              <div id="timeline-container" data-order-id="{{ order_id }}">
-                <div class="text-center"><i data-lucide="loader" width="18" height="18" class="spin"></i> {{ text_loading }}</div>
-              </div>
+          </div>
+          <div class="dcx-panel-body">
+            <div id="payments-card">
+              {% include 'sale/order_payments.twig' %}
+            </div>
+          </div>
+        </div>
+
+        {# Shipments Card #}
+        <div class="dcx-panel" data-panel="shipments">
+          <div class="dcx-panel-head">
+            <div class="dcx-panel-head__icon"><i data-lucide="truck" width="18" height="18"></i></div>
+            <div>
+              <div class="dcx-panel-title">{{ text_shipments }}</div>
+            </div>
+          </div>
+          <div class="dcx-panel-body">
+            <div id="shipments-card">
+              {% include 'sale/order_shipments.twig' %}
             </div>
           </div>
         </div>
@@ -338,6 +375,10 @@
           </div>
           <div class="dcx-sidebar-card__body">
             <div class="dcx-sidebar-card__field">
+              <span class="dcx-sidebar-card__label">{{ entry_date_added }}</span>
+              <span class="dcx-sidebar-card__value">{{ date_added }}</span>
+            </div>
+            <div class="dcx-sidebar-card__field">
               <span class="dcx-sidebar-card__label">{{ entry_store }}</span>
               <span class="dcx-sidebar-card__value">{{ store_name }}</span>
             </div>
@@ -399,26 +440,6 @@
               </select>
             </div>
             <div class="dcx-sidebar-card__field">
-              <span class="dcx-sidebar-card__label">{{ entry_tracking_number }}</span>
-              <span class="dcx-sidebar-card__value view-only" data-field="tracking_number">{{ tracking_number|replace({'|': ' | '}) ?: '—' }}</span>
-              <div class="edit-only" data-tracking-container data-original="{{ tracking_number }}" style="display:none">
-                {% set tracking_rows = tracking_numbers|length > 0 ? tracking_numbers : [''] %}
-                {% for number in tracking_rows %}
-                <div class="tracking-row">
-                  <input type="text" class="form-control" value="{{ number }}" data-tracking-input placeholder="{{ entry_tracking_number }}">
-                  <button type="button" class="btn btn-default btn-xs btn--icon tracking-row__remove" onclick="removeTrackingInput(this)" title="{{ button_remove_tracking }}">
-                    <i data-lucide="x" width="11" height="11"></i>
-                  </button>
-                </div>
-                {% endfor %}
-                <button type="button" class="btn btn-default btn-xs tracking-add-btn" onclick="addTrackingInput(this)" title="{{ button_add_tracking }}">
-                  <i data-lucide="plus" width="11" height="11"></i> {{ button_add_tracking }}
-                </button>
-                <div class="text-muted" style="font-size:11px;margin-top:4px">{{ text_tracking_max }}</div>
-              </div>
-            </div>
-
-            <div class="dcx-sidebar-card__field">
               <div class="dcx-sidebar-card__field-row">
                 <span class="dcx-sidebar-card__label">{{ text_reward }}</span>
                 <span class="dcx-sidebar-card__value">{{ reward }}</span>
@@ -471,15 +492,15 @@
           </div>
         </div>
 
-        {# Payments Card #}
-        <div class="dcx-sidebar-card" data-panel="payments">
+        {# Timeline #}
+        <div class="dcx-sidebar-card" data-panel="timeline">
           <div class="dcx-sidebar-card__header">
-            <div class="dcx-sidebar-card__header-icon"><i data-lucide="credit-card" width="16" height="16"></i></div>
-            <h3 class="dcx-sidebar-card__title">{{ text_payments }}</h3>
+            <div class="dcx-sidebar-card__header-icon"><i data-lucide="clock" width="16" height="16"></i></div>
+            <h3 class="dcx-sidebar-card__title">{{ text_timeline }}</h3>
           </div>
           <div class="dcx-sidebar-card__body">
-            <div id="payments-card">
-              {% include 'sale/order_payments.twig' %}
+            <div id="timeline-container" data-order-id="{{ order_id }}">
+              <div class="text-center"><i data-lucide="loader" width="18" height="18" class="spin"></i> {{ text_loading }}</div>
             </div>
           </div>
         </div>
@@ -501,7 +522,9 @@ body.dcx-global-editing .dcx-sidebar-edit-link { display:none !important; }
 .dcx-sidebar-edit-link { margin-left:auto; font-size:11px; color:var(--dc-primary,#2563eb); text-decoration:none; white-space:nowrap; padding:3px 8px; border-radius:var(--dc-radius-md,6px); border:1px solid var(--dc-primary,#2563eb); display:inline-flex; align-items:center; gap:4px; transition:all .15s; }
 .dcx-sidebar-edit-link:hover { color:#fff; background:var(--dc-primary,#2563eb); text-decoration:none; }
 .dcx-sidebar-edit-actions { display:none; gap:4px; margin-left:auto; align-items:center; }
+.dcx-panel[data-editing="true"] .dcx-sidebar-edit-link,
 .dcx-sidebar-card[data-editing="true"] .dcx-sidebar-edit-link { display:none; }
+.dcx-panel[data-editing="true"] .dcx-sidebar-edit-actions,
 .dcx-sidebar-card[data-editing="true"] .dcx-sidebar-edit-actions { display:flex; }
 .dcx-panel-body--flush { padding:0; }
 .order-products-list { display:flex; flex-direction:column; margin:0; padding:0; }
@@ -546,6 +569,11 @@ body.dcx-global-editing .dcx-sidebar-edit-link { display:none !important; }
 .order-totals-card__row--total .order-totals-card__line { border-bottom-style:solid; border-bottom-color:#2563eb; }
 .order-totals-card__row--total .order-totals-card__value { font-weight:700; color:#2563eb; font-size:14px; }
 .order-totals-card__divider { border-top:1px solid #e5e7eb; margin:4px 0 2px; }
+
+.order-coupon-block { padding:12px 20px; border-top:1px solid #f0f0f0; }
+.order-coupon-row { display:flex; align-items:center; gap:8px; }
+.order-coupon-label { display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600; color:#374151; flex:1; min-width:0; }
+.order-coupon-input { height:22px; padding:1px 8px; font-size:12px; width:150px; }
 
 .order-product-search-inner { position:relative; }
 .order-product-dropdown { display:none; position:absolute; top:calc(100% + 4px); left:0; right:0; z-index:1050; background:var(--dc-surface); border:1px solid var(--dc-border); border-radius:var(--dc-radius-md); box-shadow:var(--dc-shadow-lg); max-height:260px; overflow-y:auto; }
@@ -634,6 +662,13 @@ body.dcx-global-editing .dcx-sidebar-edit-link { display:none !important; }
 .timeline-comment { font-size:12px; color:#555; margin-top:2px; white-space:pre-wrap; }
 .timeline-load-more { text-align:center; padding:6px; }
 .timeline-note-form { margin-top:10px; border-top:1px solid #eee; padding-top:10px; }
+.timeline-note-form .tl-tabs { border-bottom:none; margin-bottom:0; }
+.timeline-note-form .tl-tabs > li { margin-bottom:0; }
+.timeline-note-form .tl-tabs > li > a { padding:6px 10px; font-size:12px; white-space:nowrap; }
+.timeline-note-form .tl-tabs > li.active > a { font-weight:600; }
+.order-product-card__pos { width:26px; flex-shrink:0; text-align:center; font-size:12px; font-weight:600; color:#9ca3af; font-variant-numeric:tabular-nums; }
+.dcx-shipment-item__pos, .dcx-shipment-progress__pos, .dcx-shipment-item-row__pos { font-weight:600; color:#9ca3af; font-size:11px; }
+.dcx-shipment-item__model, .dcx-shipment-progress__model { font-size:11px; color:#555; font-weight:500; margin-left:4px; }
 .badge-note { background:#fef3e2; color:#e65100; font-weight:500; padding:1px 6px; border-radius:3px; font-size:10px; }
 
 .payment-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-top:6px; }
@@ -649,7 +684,7 @@ body.dcx-global-editing .dcx-sidebar-edit-link { display:none !important; }
 .dcx-payment-item__meta { font-size:11px; color:#888; margin-top:1px; }
 .dcx-payment-item__comment { font-size:11px; color:#666; margin-top:1px; white-space:pre-wrap; }
 .dcx-payment-add { margin-top:12px; border-top:1px solid #f0f0f0; padding-top:12px; }
-.dcx-payment-add .dcx-field { max-width:340px; }
+.dcx-payment-add .dcx-fields .btn { width:100%; }
 .dcx-payment-overpaid { margin-top:10px; padding:8px 10px; border:1px solid #fca5a5; border-radius:6px; background:#fef2f2; }
 .dcx-payment-overpaid__row { display:flex; align-items:center; gap:8px; font-size:12px; }
 .dcx-payment-overpaid__icon { color:#ef4444; flex-shrink:0; }
@@ -712,15 +747,41 @@ body.dcx-global-editing .dcx-sidebar-edit-link { display:none !important; }
 .of-step--current + .of-step__connector { background:#93c5fd; }
 .order-flow-bar__terminal { display:flex; align-items:center; gap:6px; padding:4px 10px; border:1px solid #fca5a5; border-radius:999px; background:#fef2f2; color:#b91c1c; font-size:11px; font-weight:600; }
 .order-flow-bar__actions { display:flex; flex-wrap:wrap; gap:4px; margin-left:auto; }
+
+.dcx-shipment-item__tracking { font-weight:600; color:#2563eb; display:inline-flex; align-items:center; gap:5px; }
+.dcx-shipment-item__items { margin-top:4px; display:flex; flex-direction:column; gap:2px; }
+.dcx-shipment-item__line { font-size:11px; color:#555; }
+.dcx-shipment-progress { margin-top:12px; border-top:1px solid #f0f0f0; padding-top:12px; }
+.dcx-shipment-progress__row { margin-top:6px; font-size:12px; }
+.dcx-shipment-progress__name { color:#374151; font-weight:500; display:block; margin-bottom:2px; }
+.dcx-shipment-progress__count { color:#2563eb; font-weight:600; font-size:11px; }
+.dcx-shipment-progress__remaining { color:#9ca3af; font-size:11px; margin-left:4px; }
+.dcx-shipment-item-row { display:flex; align-items:center; gap:8px; margin-bottom:5px; }
+.dcx-shipment-item-row__name { flex:1; min-width:0; font-size:12px; color:#374151; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.dcx-shipment-item-row input[type="number"] { width:76px; flex-shrink:0; }
 </style>
 
 <script>
 const USER_TOKEN = '{{ user_token }}';
 const ORDER_ID = {{ order_id }};
+const SHIPPING_STATUS_ID = {{ shipping_status_id }};
 const EDIT_MODE = {{ edit_mode ? 'true' : 'false' }};
 const SHIPPING_ZONE_ID = {{ shipping_zone_id }};
 const PAYMENT_ZONE_ID = {{ payment_zone_id }};
 let isEditing = false;
+
+function duplicateOrder() {
+	api('index.php?route=sale/order_detail/duplicate&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID, 'POST')
+		.then(j => {
+			if (j.error) {
+				showAlert(j.error, 'danger');
+				return;
+			}
+			if (j.redirect) {
+				location.href = j.redirect;
+			}
+		});
+}
 
 function toggleEditMode() {
 	if (isEditing) {
@@ -860,14 +921,6 @@ function savePanelChanges(panelId) {
 			promises.push(api('index.php?route=sale/order_detail/updateField&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
 				'POST', { field: 'comment', value: commentEl.value }));
 		}
-		const trackingContainer = panel.querySelector('[data-tracking-container]');
-		if (trackingContainer) {
-			const joined = getTrackingJoined(trackingContainer);
-			if (joined !== (trackingContainer.dataset.original || '')) {
-				promises.push(api('index.php?route=sale/order_detail/updateField&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
-					'POST', { field: 'tracking_number', value: joined }));
-			}
-		}
 		Promise.all(promises).then(() => {
 			showAlertAndReload('{{ text_order_saved }}');
 		});
@@ -938,49 +991,6 @@ function syncPaymentFromShipping() {
 		}
 	});
 	return changes;
-}
-
-function getTrackingInputs(scope) {
-	scope = scope || document;
-	return Array.from(scope.querySelectorAll('[data-tracking-input]'));
-}
-
-function getTrackingContainer(btn) {
-	return (btn && btn.closest('[data-tracking-container]')) || document.querySelector('[data-tracking-container]');
-}
-
-function getTrackingJoined(container) {
-	return getTrackingInputs(container).map(i => i.value.trim()).filter(Boolean).slice(0, 10).join('|');
-}
-
-function updateTrackingButtons(container) {
-	const count = getTrackingInputs(container).length;
-	const addBtn = container.querySelector('.tracking-add-btn');
-	if (addBtn) addBtn.style.display = count >= 10 ? 'none' : '';
-	container.querySelectorAll('.tracking-row__remove').forEach(btn => {
-		btn.style.display = count <= 1 ? 'none' : '';
-	});
-}
-
-function addTrackingInput(btn) {
-	const container = getTrackingContainer(btn);
-	if (!container) return;
-	if (getTrackingInputs(container).length >= 10) return;
-	const row = document.createElement('div');
-	row.className = 'tracking-row';
-	row.innerHTML = '<input type="text" class="form-control" data-tracking-input placeholder="{{ entry_tracking_number }}">' +
-		'<button type="button" class="btn btn-default btn-xs btn--icon tracking-row__remove" onclick="removeTrackingInput(this)" title="{{ button_remove_tracking }}">' +
-		'<i data-lucide="x" width="11" height="11"></i></button>';
-	container.insertBefore(row, container.querySelector('.tracking-add-btn'));
-	lucide.createIcons();
-	updateTrackingButtons(container);
-	row.querySelector('input').focus();
-}
-
-function removeTrackingInput(btn) {
-	const container = btn.closest('[data-tracking-container]');
-	btn.closest('.tracking-row').remove();
-	if (container) updateTrackingButtons(container);
 }
 
 function api(url, method, data) {
@@ -1145,7 +1155,7 @@ function saveChanges() {
 				'POST', { order_product_id: opid, field: 'price', value: priceInput.value }));
 		}
 	});
-	document.querySelectorAll('.dcx-sidebar-card input[data-field], .dcx-sidebar-card select[data-field]').forEach(input => {
+	document.querySelectorAll('[data-panel="buyer"] input[data-field], [data-panel="buyer"] select[data-field], [data-panel="order-details"] input[data-field], [data-panel="order-details"] select[data-field]').forEach(input => {
 		const viewEl = document.querySelector('.view-only[data-field="' + input.dataset.field + '"]');
 		const oldVal = viewEl ? viewEl.textContent.trim() : input.defaultValue;
 		if (input.value !== oldVal) {
@@ -1195,17 +1205,41 @@ function saveChanges() {
 		promises.push(api('index.php?route=sale/order_detail/updateField&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
 			'POST', { field: 'comment', value: commentEl.value }));
 	}
-	const trackingContainer = document.querySelector('[data-tracking-container]');
-	if (trackingContainer) {
-		const joined = getTrackingJoined(trackingContainer);
-		if (joined !== (trackingContainer.dataset.original || '')) {
-			promises.push(api('index.php?route=sale/order_detail/updateField&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
-				'POST', { field: 'tracking_number', value: joined }));
-		}
-	}
 	Promise.all(promises).then(() => {
 		showAlertAndReload('{{ text_order_saved }}');
 	});
+}
+
+function renumberProductPositions() {
+	document.querySelectorAll('.order-products-list .order-product-card').forEach((card, i) => {
+		const pos = card.querySelector('.order-product-card__pos');
+		if (pos) pos.textContent = '#' + (i + 1);
+	});
+}
+
+function applyCoupon() {
+	const codeInput = document.getElementById('coupon-code');
+	const code = codeInput ? codeInput.value.trim() : '';
+	if (!code) return;
+	api('index.php?route=sale/order_detail/applyCoupon&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+		'POST', { code: code }).then(j => {
+			if (j.success) {
+				showAlertAndReload(j.success);
+			} else if (j.error) {
+				showAlert(j.error, 'danger');
+			}
+		});
+}
+
+function removeCoupon() {
+	api('index.php?route=sale/order_detail/removeCoupon&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID, 'POST')
+		.then(j => {
+			if (j.success) {
+				showAlertAndReload(j.success);
+			} else if (j.error) {
+				showAlert(j.error, 'danger');
+			}
+		});
 }
 
 function removeProduct(btn) {
@@ -1215,6 +1249,7 @@ function removeProduct(btn) {
 		'POST', { order_product_id: card.dataset.orderProductId }).then(j => {
 			if (j.success) {
 				card.remove();
+				renumberProductPositions();
 				if (j.totals) updateTotalsUI(j.totals, j.total_quantity);
 				showAlert('{{ text_success }}');
 			} else if (j.error) {
@@ -1309,6 +1344,17 @@ function openFlowTransition(statusId, name, terminal) {
 	document.getElementById('flow-transition-sub').textContent = '{{ text_flow_transition_to }} ' + name;
 	document.getElementById('flow-transition-comment').value = '';
 	document.getElementById('flow-transition-notify').checked = true;
+	const shipSection = document.getElementById('flow-shipping-section');
+	if (shipSection) {
+		const isShipping = SHIPPING_STATUS_ID > 0 && statusId === SHIPPING_STATUS_ID;
+		shipSection.style.display = isShipping ? '' : 'none';
+		if (isShipping) {
+			document.getElementById('flow-shipment-tracking').value = '';
+			document.querySelectorAll('#flow-shipment-items input[data-shipment-qty]').forEach(inp => {
+				inp.value = inp.max;
+			});
+		}
+	}
 	modal.style.display = 'flex';
 	lucide.createIcons();
 }
@@ -1323,12 +1369,92 @@ function confirmFlowTransition() {
 	if (flowTransitionTerminal && !confirm('{{ text_flow_confirm_terminal }}')) return;
 	const comment = document.getElementById('flow-transition-comment').value;
 	const notify = document.getElementById('flow-transition-notify').checked;
-	api('index.php?route=sale/order_detail/addHistory&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
-		'POST', { order_status_id: flowTransitionTarget, comment: comment, notify: notify ? '1' : '0', override: '0' })
+	const doTransition = (notifyCustomer) => {
+		api('index.php?route=sale/order_detail/addHistory&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+			'POST', { order_status_id: flowTransitionTarget, comment: comment, notify: notifyCustomer ? '1' : '0', override: '0' })
+			.then(j => {
+				if (j.success) {
+					closeFlowTransition();
+					showAlertAndReload('{{ text_success }}');
+				} else if (j.error) {
+					showAlert(j.error, 'danger');
+				}
+			});
+	};
+	const shipSection = document.getElementById('flow-shipping-section');
+	if (shipSection && shipSection.style.display !== 'none') {
+		const tracking = document.getElementById('flow-shipment-tracking').value.trim();
+		if (!tracking) {
+			showAlert('{{ error_tracking_number }}', 'danger');
+			return;
+		}
+		const items = [];
+		document.querySelectorAll('#flow-shipment-items input[data-shipment-qty]').forEach(inp => {
+			const qty = parseInt(inp.value, 10) || 0;
+			if (qty > 0) items.push({ order_product_id: inp.dataset.shipmentQty, quantity: qty });
+		});
+		if (!items.length) {
+			showAlert('{{ error_shipment_items }}', 'danger');
+			return;
+		}
+		api('index.php?route=sale/order_detail/addShipment&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+			'POST', { tracking_number: tracking, comment: '', items: JSON.stringify(items), notify: notify ? '1' : '0' })
+			.then(j => {
+				if (j.success) {
+					if (j.shipments_html) refreshShipmentsCard(j.shipments_html);
+					doTransition(false);
+				} else if (j.error) {
+					showAlert(j.error, 'danger');
+				}
+			});
+	} else {
+		doTransition(notify);
+	}
+}
+
+function refreshShipmentsCard(html) {
+	const container = document.getElementById('shipments-card');
+	if (container && html) container.innerHTML = html;
+	lucide.createIcons();
+}
+
+function addShipment() {
+	const tracking = document.getElementById('shipment-tracking').value.trim();
+	if (!tracking) {
+		showAlert('{{ error_tracking_number }}', 'danger');
+		return;
+	}
+	const items = [];
+	document.querySelectorAll('#shipment-items input[data-opid]').forEach(inp => {
+		const qty = parseInt(inp.value, 10) || 0;
+		if (qty > 0) items.push({ order_product_id: inp.dataset.opid, quantity: qty });
+	});
+	if (!items.length) {
+		showAlert('{{ error_shipment_items }}', 'danger');
+		return;
+	}
+	const comment = document.getElementById('shipment-comment').value.trim();
+	const notify = document.getElementById('shipment-notify') ? document.getElementById('shipment-notify').checked : false;
+	api('index.php?route=sale/order_detail/addShipment&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+		'POST', { tracking_number: tracking, comment: comment, items: JSON.stringify(items), notify: notify ? '1' : '0' })
 		.then(j => {
 			if (j.success) {
-				closeFlowTransition();
-				showAlertAndReload('{{ text_success }}');
+				if (j.shipments_html) refreshShipmentsCard(j.shipments_html);
+				showAlert(j.success);
+			} else if (j.error) {
+				showAlert(j.error, 'danger');
+			}
+		});
+}
+
+function deleteShipment(shipmentId) {
+	if (!confirm('{{ text_confirm_remove_shipment }}')) return;
+	api('index.php?route=sale/order_detail/deleteShipment&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+		'POST', { shipment_id: shipmentId })
+		.then(j => {
+			if (j.success) {
+				if (j.shipments_html) refreshShipmentsCard(j.shipments_html);
+				showAlert(j.success);
 			} else if (j.error) {
 				showAlert(j.error, 'danger');
 			}
@@ -1369,6 +1495,29 @@ function addPayment() {
 			const refInput = document.getElementById('payment-reference');
 			if (refInput) refInput.value = '';
 			const commentInput = document.getElementById('payment-comment');
+			if (commentInput) commentInput.value = '';
+			loadTimeline(1);
+			showAlert(j.success);
+		});
+}
+
+function addRefund() {
+	const amount = document.getElementById('refund-amount').value;
+	const comment = document.getElementById('refund-comment').value;
+
+	if (!amount || parseFloat(amount) <= 0) {
+		showAlert('{{ error_refund_amount }}', 'warning');
+		return;
+	}
+
+	api('index.php?route=sale/order_detail/addRefund&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID, 'POST',
+		{ amount: amount, comment: comment })
+		.then(j => {
+			if (j.error) { showAlert(j.error, 'danger'); return; }
+			refreshPaymentsCard(j.payments_html);
+			const amountInput = document.getElementById('refund-amount');
+			if (amountInput) amountInput.value = '';
+			const commentInput = document.getElementById('refund-comment');
 			if (commentInput) commentInput.value = '';
 			loadTimeline(1);
 			showAlert(j.success);
@@ -1450,9 +1599,6 @@ document.addEventListener('DOMContentLoaded', function() {
 	const payCountry = document.querySelector('[data-address-field="payment_country_id"]');
 	if (payCountry && payCountry.value) loadZones(payCountry, '#edit-pay-zone', PAYMENT_ZONE_ID);
 
-	const trackingContainer = document.querySelector('[data-tracking-container]');
-	if (trackingContainer) updateTrackingButtons(trackingContainer);
-
 	document.addEventListener('input', function(e) {
 		const input = e.target;
 		if (!input.matches('.order-product-card input[data-field="price"], .order-product-card input[data-field="quantity"], .order-product-card input[data-field="discount"]')) return;
@@ -1465,7 +1611,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	document.addEventListener('change', function(e) {
 		const select = e.target;
-		if (select.matches('.dcx-sidebar-card select[data-code-field="shipping_code"]')) {
+		if (select.matches('[data-panel="order-details"] select[data-code-field="shipping_code"]')) {
 			onShippingMethodChange(select);
 		}
 	});
@@ -1935,6 +2081,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 		const editing = document.querySelector('[data-panel="order-products"]')?.dataset.editing === 'true';
 
+		const posDiv = document.createElement('div');
+		posDiv.className = 'order-product-card__pos';
+
 		const thumb = document.createElement('div');
 		thumb.className = 'order-product-card__thumb';
 		const img = document.createElement('img');
@@ -2038,6 +2187,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		removeBtn.addEventListener('click', function() { removeProduct(this); });
 		actionsDiv.appendChild(removeBtn);
 
+		card.appendChild(posDiv);
 		card.appendChild(thumb);
 		card.appendChild(info);
 		card.appendChild(priceDiv);
@@ -2048,6 +2198,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		card.appendChild(actionsDiv);
 
 		list.appendChild(card);
+		renumberProductPositions();
 		lucide.createIcons();
 	}
 
@@ -2165,6 +2316,33 @@ document.addEventListener('click', function(e) {
             <input type="checkbox" id="flow-transition-notify" checked /> {{ text_flow_notify_customer }}
           </label>
         </div>
+      </div>
+    </div>
+    <div class="pcm-section" id="flow-shipping-section" style="display:none">
+      <div class="pcm-section__title"><i data-lucide="truck" width="13" height="13"></i> {{ text_flow_shipment }}</div>
+      <div class="dcx-fields">
+        <div class="dcx-field">
+          <label class="dcx-label" for="flow-shipment-tracking">{{ entry_tracking_number }}</label>
+          <input type="text" class="form-control" id="flow-shipment-tracking" />
+          <div class="text-muted" style="font-size:11px;margin-top:3px">{{ entry_tracking_number_hint }}</div>
+        </div>
+        {% if shipment_products %}
+        <div class="dcx-field">
+          <label class="dcx-label">{{ text_shipment_items }}</label>
+          <div id="flow-shipment-items">
+            {% for product in shipment_products %}
+            <div class="dcx-shipment-item-row">
+              <span class="dcx-shipment-item-row__name">
+                {% if product.position %}<span class="dcx-shipment-item__pos">#{{ product.position }}</span>{% endif %}
+                {% if product.model %}<span class="dcx-shipment-item__model">{{ product.model }}</span>{% endif %}
+                {{ product.name }}
+              </span>
+              <input type="number" class="form-control" min="0" max="{{ product.remaining }}" value="{{ product.remaining }}" data-shipment-qty="{{ product.order_product_id }}" />
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
       </div>
     </div>
     <div class="pcm-section" style="display:flex;gap:8px;justify-content:flex-end;border-top:none;padding-top:0">

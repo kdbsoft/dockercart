@@ -2271,6 +2271,13 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
     font-size: 12px;
 }
 
+.filter-field__hint {
+    font-size: 10px;
+    color: #999;
+    margin-top: 3px;
+    line-height: 1.35;
+}
+
 .filter-field select.form-control {
     height: 34px;
 }
