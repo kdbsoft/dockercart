@@ -1,6 +1,7 @@
 <?php
 
 $_['column_action'] = 'Дія';
+$_['column_amount'] = 'Сума';
 $_['column_comment'] = 'Коментар';
 $_['column_customer'] = 'Клієнт';
 $_['column_date_added'] = 'Дата додавання';
@@ -9,8 +10,13 @@ $_['column_model'] = 'Код товара';
 $_['column_notify'] = 'Клієнта сповіщено';
 $_['column_order_id'] = 'Номер замовлення';
 $_['column_product'] = 'Товар';
+$_['column_quantity'] = 'Кількість';
 $_['column_return_id'] = 'Ідентифікатор повернення';
 $_['column_status'] = 'Статус';
+$_['text_return_type'] = 'Тип';
+$_['text_return_type_full'] = 'Повний';
+$_['text_return_type_partial'] = 'Частковий';
+$_['text_return_type_exchange'] = 'Обмін';
 $_['entry_comment'] = 'Коментар';
 $_['entry_customer'] = 'Клієнт';
 $_['entry_date_added'] = 'Дата додавання';
@@ -46,6 +52,19 @@ $_['text_add'] = 'Додати повернення товару';
 $_['text_edit'] = 'Редагувати повернення товару';
 $_['text_history'] = 'Історія';
 $_['text_history_add'] = 'Додати історію';
+$_['text_return_items'] = 'Товари повернення';
+$_['entry_return_type'] = 'Тип повернення';
+$_['text_type_full'] = 'Повне повернення';
+$_['text_type_partial'] = 'Часткове повернення';
+$_['text_type_exchange'] = 'Обмін';
+$_['text_refund'] = 'Повернення грошей';
+$_['text_refund_money'] = 'Повернути гроші (при завершенні)';
+$_['text_refunded_already'] = 'Гроші вже повернуті при завершенні цього повернення.';
+$_['entry_refund_amount'] = 'Сума повернення';
+$_['text_return_complete_note'] = 'Повернення #%s завершено';
+$_['text_return_refund_note'] = 'Повернення коштів за поверненням #%s';
+$_['error_products'] = 'Виберіть хоча б один товар з кількістю для повернення!';
+$_['error_amount'] = 'Сума повернення не може бути від\'ємною!';
 $_['text_list'] = 'Список повернення товарів';
 $_['text_opened'] = 'Відкрито';
 $_['text_order'] = 'Інформація про замовлення';
@@ -63,3 +82,5 @@ $_['text_add_return_subtitle'] = 'Оформити нове повернення
 $_['text_edit_return_subtitle'] = 'Редагувати дані повернення товару';
 
 
+
+$_['button_export_csv'] = 'Експорт обраних повернень у CSV';
