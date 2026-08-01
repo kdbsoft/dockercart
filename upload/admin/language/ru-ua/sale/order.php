@@ -211,6 +211,17 @@ $_['text_tracking_max']          = 'До 10 номеров';
 
 $_['error_comment']              = 'Пожалуйста, введите комментарий!';
 $_['error_order_status']         = 'Пожалуйста, выберите статус заказа!';
+$_['error_invalid_transition']   = 'Данное изменение статуса запрещено настройками order flow!';
+
+$_['text_order_flow']            = 'Поток заказа';
+$_['text_flow_change_status']    = 'Сменить статус';
+$_['text_flow_override']         = 'Принудительно (без проверки flow)';
+$_['text_flow_notify_customer']  = 'Уведомить покупателя';
+$_['text_flow_transition_to']    = 'Перевести заказ в статус:';
+$_['text_flow_confirm_terminal'] = 'Этот статус завершает order flow. Продолжить?';
+$_['text_flow_terminal_state']   = 'Order flow для этого заказа завершён.';
+$_['button_flow_apply']          = 'Применить';
+$_['text_comment_optional']      = 'Комментарий (необязательно)';
 
 $_['text_payer_address']         = 'Адрес плательщика';
 $_['text_same_as_billing']       = 'Совпадает с адресом плательщика';

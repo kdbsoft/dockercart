@@ -40,6 +40,7 @@ $_['text_manufacturer']         = 'Manufacturers';
 $_['text_navigation']           = 'Navigation';
 $_['text_option']               = 'Options';
 $_['text_order']                = 'Orders';
+$_['text_order_flow']           = 'Order Flow';
 $_['text_order_status']         = 'Order Statuses';
 $_['text_product']              = 'Products';
 $_['text_product_bundle']       = 'Bundle Discounts';
