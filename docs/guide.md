@@ -17,6 +17,7 @@
 11. [Configurable Products & Variants](#11-configurable-products--variants)
 12. [Buy X Get Y (BXGY)](#12-buy-x-get-y-bxgy)
 13. [Order Multilingual Display](#13-order-multilingual-display)
+14. [Order Flow](#14-order-flow)
 
 ---
 
@@ -776,7 +777,78 @@ reversals) are stored with an i18n key so they render in the viewer's language:
   is appended as a **note** (`addOrderNote()`, `order_status_id = 0`) instead of a
   second status record — the timeline then shows the single "Pending" entry plus a
   note with the payment method, not a duplicated status.
-- Admin Order Details edits only append a status record when the status select
-  value actually changed (`savePanelChanges('order-details')` / `saveChanges()`
-  compare against the initial `order_status_id`); editing other fields or saving
-  with an unchanged status does not add a timeline entry.
+- Admin Order Details status changes go through the order flow (see
+  [Order Flow](#14-order-flow)): the flow action buttons / "Change status"
+  block call `addHistory`, which appends a timeline record only when the
+  transition succeeds. Editing other order fields via panel save never adds
+  a status record.
+
+## 14. Order Flow
+
+The order flow is a **configurable status workflow** built on top of the
+existing `oc_order_status` catalogue — no separate state machine engine.
+Operators move orders through the flow from the order details page; the
+flow itself is edited on the **System → Order Flow** page.
+
+### Configuration (`oc_setting`, store 0)
+
+Two JSON settings define the flow:
+
+| Setting | Meaning | Default |
+|---|---|---|
+| `config_order_flow_steps` | Ordered chain of status IDs. New orders start at the first step and advance one step at a time. | `["1","132","133","128","129"]` (Pending → Confirmed → Packing → Shipped → Delivered) |
+| `config_order_flow_transitions` | Extra allowed transitions, map of `from status ID → [to status IDs]`, in addition to "forward to next step". | `{"1":["130","131"],"131":["130","132"],"132":["130","134"],"133":["130","134"],"128":["130","134"],"129":["134"]}` (Awaiting Payment as a side status from Pending back to Confirmed, Cancelled from every stage, Refunded after Confirmed) |
+
+Rules:
+
+- A step may always move **forward to the next step**; everything else
+  (cancellation, refund, skips, backwards moves) must be listed as an extra
+  transition.
+- A status with **no outgoing transitions** (no next step, no extras) is
+  terminal — it ends the flow (e.g. Cancelled/Refunded).
+- Statuses not present in the chain are not reachable by the flow at all.
+- When `config_order_flow_steps` is empty/absent the flow is **disabled** and
+  any transition is allowed (backwards compatible with custom setups).
+
+### Enforcement
+
+`admin/model/sale/order.php addOrderHistory()` validates every transition
+against the configured flow (`system/library/order_flow.php`, class
+`OrderFlow`) and returns `false` when the move is not allowed. The AJAX
+endpoints `sale/order/addHistory` and `sale/order_detail/addHistory` surface
+the rejection as `error_invalid_transition`.
+
+- **Override**: passing `override = true` skips validation entirely (timeline
+  "Add History" form, "Change status" block on the order page). This is the
+  escape hatch for exceptions; it is the same mechanism as before the flow.
+- Re-setting the current status is a no-op and never blocked.
+- Stock/commission side effects are untouched: they still follow
+  `config_processing_status` / `config_complete_status` (the migration adds
+  Packing to the processing statuses so stock is subtracted when an order
+  enters Packing or Shipped).
+
+### Order page UI
+
+A horizontal stepper bar (`sale/order_flow_stages.twig`) renders under the
+page header from the configured chain, with the current stage highlighted and
+buttons for every allowed transition. Clicking a button opens a small modal
+(comment + notify customer). Terminal transitions (Cancelled/Refunded) ask for
+explicit confirmation. The previous free-form status select is still available
+in the sidebar under "Change status" with a "Force" checkbox that bypasses
+validation.
+
+### Notes
+
+- The default chain uses statuses `1, 132, 133, 128, 129` (131 Awaiting
+  Payment is a side status, not a step); 132 (Confirmed), 133 (Packing) and
+  134 (Refunded) are added by migration `20260801_add_order_flow.sql`. All
+  three are plain `oc_order_status` rows — they can be renamed/translated in
+  Localisation → Order Statuses and even removed from the flow without code
+  changes.
+- Admin-created custom statuses work unchanged: they are simply not part of
+  the chain, so they require override to be set.
+- The configurator (`sale/order_flow` controller + `sale/order_flow.twig`)
+  validates submitted statuses against `oc_order_status` and writes the
+  settings idempotently (`INSERT IGNORE`-style; re-running `make migrate`
+  never clobbers your customizations — the seed only applies when the keys
+  are absent).
