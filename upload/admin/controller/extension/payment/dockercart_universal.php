@@ -133,6 +133,7 @@ class ControllerExtensionPaymentDockercartUniversal extends Controller {
         // Errors
         $data['error_warning'] = $this->error['warning'] ?? '';
         $data['error_name'] = $this->error['name'] ?? [];
+        $data['error_reserve_minutes'] = $this->error['reserve_minutes'] ?? '';
 
         // URLs
         $data['action'] = $this->url->link('extension/payment/dockercart_universal/form', 'user_token=' . $this->session->data['user_token'] . ($method_id ? '&method_id=' . $method_id : ''), true);
@@ -159,6 +160,7 @@ class ControllerExtensionPaymentDockercartUniversal extends Controller {
             $data['shipping_methods'] = !empty($method_info['shipping_methods']) ? (json_decode($method_info['shipping_methods'], true) ?: []) : [];
             $data['status'] = $method_info['status'];
             $data['sort_order'] = $method_info['sort_order'];
+            $data['reserve_minutes'] = $method_info['reserve_minutes'] ?? '';
         } else {
             $data['method_id'] = 0;
             $data['method_description'] = [];
@@ -169,10 +171,15 @@ class ControllerExtensionPaymentDockercartUniversal extends Controller {
             $data['shipping_methods'] = [];
             $data['status'] = 1;
             $data['sort_order'] = 0;
+            $data['reserve_minutes'] = '';
         }
 
         if (isset($this->request->post['shipping_methods']) && is_array($this->request->post['shipping_methods'])) {
             $data['shipping_methods'] = $this->request->post['shipping_methods'];
+        }
+
+        if (isset($this->request->post['reserve_minutes'])) {
+            $data['reserve_minutes'] = $this->request->post['reserve_minutes'];
         }
 
         // Layout
@@ -256,6 +263,13 @@ class ControllerExtensionPaymentDockercartUniversal extends Controller {
         foreach ($languages as $language) {
             if (empty($this->request->post['method_description'][$language['language_id']]['name'])) {
                 $this->error['name'][$language['language_id']] = $this->language->get('error_name');
+            }
+        }
+
+        // Validate reserve duration: empty (global default), 0 (disabled) or positive minutes
+        if (isset($this->request->post['reserve_minutes']) && $this->request->post['reserve_minutes'] !== '') {
+            if (!is_numeric($this->request->post['reserve_minutes']) || (int)$this->request->post['reserve_minutes'] < 0) {
+                $this->error['reserve_minutes'] = $this->language->get('error_reserve_minutes');
             }
         }
 

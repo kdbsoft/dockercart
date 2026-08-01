@@ -32,6 +32,7 @@ $_['text_disabled']                = 'Disabled';
 $_['text_unnamed']                 = '(Unnamed)';
 $_['text_no_methods']              = 'No payment methods have been created yet.';
 $_['text_no_shipping_methods_available'] = 'No active shipping methods found.';
+$_['text_reserve_global']            = 'Global';
 $_['text_total_methods']           = 'Total Methods';
 $_['text_active_methods']          = 'Active Methods';
 $_['text_geo_zones']               = 'Geo Zones';
@@ -58,12 +59,14 @@ $_['entry_shipping_methods']        = 'Allowed Shipping Methods';
 $_['entry_order_status']           = 'Order Status';
 $_['entry_status']                 = 'Status';
 $_['entry_sort_order']             = 'Sort Order';
+$_['entry_reserve_minutes']        = 'Reserve Duration (minutes)';
 
 // Help
 $_['help_description']             = 'Shown to customer during checkout as payment method details (optional)';
 $_['help_shipping_methods']         = 'Select one or more shipping methods for which this payment method is available. Leave empty to allow all shipping methods.';
 $_['help_order_status']            = 'Order status to set after customer confirms checkout';
 $_['help_sort_order']              = 'Display order among other payment extensions';
+$_['help_reserve_minutes']         = 'How long (in minutes) ordered items stay reserved at checkout for orders placed with this payment method. Leave empty to use the store-wide Reserve Duration setting; 0 disables reservation for this method.';
 
 // Button
 $_['button_add_method']            = 'Add Payment Method';
@@ -75,5 +78,6 @@ $_['button_delete']                = 'Delete';
 // Error
 $_['error_permission']             = 'Warning: You do not have permission to modify Universal Payment!';
 $_['error_name']                   = 'Method name is required for all languages!';
+$_['error_reserve_minutes']        = 'Reserve duration must be 0 or a positive number of minutes!';
 $_['error_method_id']              = 'Invalid payment method ID!';
 $_['error_ajax']                   = 'An error occurred. Please try again.';
