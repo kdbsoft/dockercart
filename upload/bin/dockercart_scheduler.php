@@ -370,48 +370,19 @@ function reapWorkers(array &$activeTasks, PDO $pdo, string $dbPrefix, int $worke
 // ── Task‑Running Check ─────────────────────────────────────────────────
 
 /**
- * Determine whether a task is already being processed by checking the
- * scheduler_task.last_result JSON for an in_progress flag.
+ * Determine whether a task is already being processed by this daemon.
+ *
+ * In-memory PID tracking only: cross-process (and cross-daemon) dedup is
+ * handled by the conditional last_run claim in the main loop — a task may
+ * only be dispatched by the daemon whose conditional UPDATE affected one row.
  *
  * @param string               $taskKey      e.g. "import_yml:1" or "novapost_sync:2"
  * @param array<string, array> $activeTasks  PID tracking map
- * @param PDO                  $pdo
- * @param string               $dbPrefix
  * @return bool
  */
-function isTaskAlreadyRunning(string $taskKey, array $activeTasks, PDO $pdo, string $dbPrefix): bool {
+function isTaskAlreadyRunning(string $taskKey, array $activeTasks): bool {
 	// PID tracking
-	if (isset($activeTasks[$taskKey])) {
-		return true;
-	}
-
-	// Extract task_id for DB check (last identifier after colon)
-	$colonPos = strrpos($taskKey, ':');
-	if ($colonPos === false) {
-		return false;
-	}
-
-	$dbId = (int)substr($taskKey, $colonPos + 1);
-
-	try {
-		$stmt = $pdo->prepare(
-			"SELECT `last_result` FROM `{$dbPrefix}dockercart_scheduler_task` WHERE `task_id` = ?"
-		);
-		$stmt->execute([$dbId]);
-		$row = $stmt->fetch();
-	} catch (\PDOException $e) {
-		return false;
-	}
-
-	if ($row && !empty($row['last_result'])) {
-		$result = json_decode($row['last_result'], true);
-
-		if (is_array($result) && !empty($result['in_progress'])) {
-			return true;
-		}
-	}
-
-	return false;
+	return isset($activeTasks[$taskKey]);
 }
 
 // ── Signal Handling ────────────────────────────────────────────────────
@@ -509,7 +480,40 @@ while ($running) {
 		// Build task_key for dedup: "import_yml:5" or "novapost_sync:2"
 		$taskKey = $taskType . ':' . ($sourceId ?? $taskId);
 
-		if (isTaskAlreadyRunning($taskKey, $activeTasks, $pdo, $dbPrefix)) {
+		if (isTaskAlreadyRunning($taskKey, $activeTasks)) {
+			continue;
+		}
+
+		// Conditional claim: exactly one daemon may dispatch this run. The
+		// UPDATE affects a row only when last_run still matches what we just
+		// observed, so overlapping daemons (restart, scale-out) cannot both
+		// spawn a worker for the same task run.
+		try {
+			if ($lastRun === null) {
+				$claimStmt = $pdo->prepare(
+					"UPDATE `{$schedulerTable}` SET `last_run` = NOW(), `date_modified` = NOW()"
+					. " WHERE `task_id` = ? AND `last_run` IS NULL AND `cron_enabled` = 1"
+				);
+				$claimStmt->execute([$taskId]);
+			} else {
+				$claimStmt = $pdo->prepare(
+					"UPDATE `{$schedulerTable}` SET `last_run` = NOW(), `date_modified` = NOW()"
+					. " WHERE `task_id` = ? AND `last_run` = ? AND `cron_enabled` = 1"
+				);
+				$claimStmt->execute([$taskId, $lastRun]);
+			}
+
+			$claimed = $claimStmt->rowCount() === 1;
+		} catch (\PDOException $e) {
+			$claimed = false;
+		}
+
+		if (!$claimed) {
+			scheduler_log('SKIP',
+				'handler=' . $taskType
+				. ' task=' . $taskId
+				. ' reason="already claimed by another scheduler instance"'
+			);
 			continue;
 		}
 
@@ -522,6 +526,25 @@ while ($running) {
 		$result = spawnWorker($command, $taskType, $taskId);
 
 		if ($result === null || $result['pid'] === 0) {
+			// Best effort: roll the claim back so the task is retried on the
+			// next poll instead of waiting a full schedule interval.
+			try {
+				if ($lastRun === null) {
+					$pdo->exec(
+						"UPDATE `{$schedulerTable}` SET `last_run` = NULL, `date_modified` = NOW()"
+						. " WHERE `task_id` = " . (int)$taskId . " AND `last_run` = NOW()"
+					);
+				} else {
+					$rollbackStmt = $pdo->prepare(
+						"UPDATE `{$schedulerTable}` SET `last_run` = ?, `date_modified` = NOW()"
+						. " WHERE `task_id` = ? AND `last_run` = NOW()"
+					);
+					$rollbackStmt->execute([$lastRun, $taskId]);
+				}
+			} catch (\PDOException $e) {
+				// best effort only
+			}
+
 			scheduler_log('ERROR',
 				'handler=' . $taskType
 				. ' task=' . $taskId
@@ -537,21 +560,6 @@ while ($running) {
 			'task_id'    => $taskId,
 			'started_at' => time(),
 		];
-
-		// Update last_run immediately on spawn to prevent re-spawning
-		try {
-			$pdo->exec(
-				"UPDATE `{$schedulerTable}`"
-				. " SET `last_run` = NOW(), `date_modified` = NOW()"
-				. " WHERE `task_id` = " . (int)$taskId
-			);
-		} catch (\PDOException $e) {
-			scheduler_log('WARNING',
-				'handler=' . $taskType
-				. ' task=' . $taskId
-				. ' error="failed to update last_run: ' . $e->getMessage() . '"'
-			);
-		}
 
 		$GLOBALS['activeTaskCount'] = count($activeTasks);
 
