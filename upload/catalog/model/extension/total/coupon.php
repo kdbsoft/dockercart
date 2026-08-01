@@ -198,18 +198,24 @@ class ModelExtensionTotalCoupon extends Model {
 		if ($code) {
 			$status = true;
 			
-			$coupon_query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "coupon` WHERE code = '" . $this->db->escape($code) . "' AND status = '1'");
+			// Serialize concurrent redemptions of the same coupon. Locking reads
+			// see the latest committed state even under REPEATABLE READ; this
+			// method runs inside the caller's transaction (catalog model
+			// checkout/order addOrderHistory).
+			$coupon_query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "coupon` WHERE code = '" . $this->db->escape($code) . "' AND status = '1' FOR UPDATE");
 
 			if ($coupon_query->num_rows) {
-				$coupon_total = $this->getTotalCouponHistoriesByCoupon($code);
-	
+				$coupon_total_query = $this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "coupon_history` ch LEFT JOIN `" . DB_PREFIX . "coupon` c ON (ch.coupon_id = c.coupon_id) WHERE c.code = '" . $this->db->escape($code) . "' FOR UPDATE");
+				$coupon_total = (int)$coupon_total_query->row['total'];
+
 				if ($coupon_query->row['uses_total'] > 0 && ($coupon_total >= $coupon_query->row['uses_total'])) {
 					$status = false;
 				}
 				
 				if ($order_info['customer_id']) {
-					$customer_total = $this->getTotalCouponHistoriesByCustomerId($code, $order_info['customer_id']);
-					
+					$customer_total_query = $this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "coupon_history` ch LEFT JOIN `" . DB_PREFIX . "coupon` c ON (ch.coupon_id = c.coupon_id) WHERE c.code = '" . $this->db->escape($code) . "' AND ch.customer_id = '" . (int)$order_info['customer_id'] . "' FOR UPDATE");
+					$customer_total = (int)$customer_total_query->row['total'];
+
 					if ($coupon_query->row['uses_customer'] > 0 && ($customer_total >= $coupon_query->row['uses_customer'])) {
 						$status = false;
 					}
