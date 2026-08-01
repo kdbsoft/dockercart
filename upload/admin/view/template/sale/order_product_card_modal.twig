@@ -35,6 +35,15 @@
       </div>
       <div class="pcm-sub">{{ text_stock }}: {{ stock }} &middot; {{ text_status }}: {{ status }}</div>
 
+      {% if variant %}
+      <div class="pcm-variant">
+        {% if variant.price_from %}
+          <span class="pcm-variant__from">{{ variant.price_from }}</span>
+        {% endif %}
+        <span class="pcm-variant__price">{{ variant.price }}</span>
+      </div>
+      {% endif %}
+
       {% if order_options %}
       <div class="pcm-options">
         {% for opt in order_options %}

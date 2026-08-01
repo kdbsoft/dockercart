@@ -172,6 +172,7 @@ class ControllerSaleOrderDetail extends Controller {
 				'product_id'       => $product['product_id'],
 				'name'             => $product['name'],
 				'model'            => $product['model'],
+				'variant_sku'      => $product['variant_sku'] ?? '',
 				'option'           => $option_data,
 				'quantity'         => $product['quantity'],
 				'price'            => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value']),
@@ -537,20 +538,24 @@ class ControllerSaleOrderDetail extends Controller {
 			$product_id = (int)($this->request->post['product_id'] ?? 0);
 			$quantity = (int)($this->request->post['quantity'] ?? 1);
 
-			$optionsRaw = $this->request->post['options'] ?? '[]';
+			$optionsRaw = html_entity_decode((string)($this->request->post['options'] ?? '[]'), ENT_QUOTES, 'UTF-8');
 			$options = json_decode($optionsRaw, true);
 
 			if (!is_array($options)) {
 				$options = [];
 			}
 
-			error_log('addProduct: product_id=' . $product_id . ' options_raw=' . $optionsRaw . ' options_count=' . count($options));
-
 			if (!$product_id) {
 				$json['error'] = $this->language->get('error_action');
 			} else {
 				$this->load->model('sale/order');
-				$order_product_id = $this->model_sale_order->addProductToOrder($order_id, $product_id, $quantity, $options);
+
+				try {
+					$order_product_id = $this->model_sale_order->addProductToOrder($order_id, $product_id, $quantity, $options);
+				} catch (\RuntimeException $e) {
+					$order_product_id = false;
+					$json['error'] = $this->language->get($e->getMessage());
+				}
 
 				if ($order_product_id) {
 					$recalc = $this->model_sale_order->recalculateOrderTotals($order_id);
@@ -589,6 +594,8 @@ class ControllerSaleOrderDetail extends Controller {
 						'product_id'       => $product['product_id'],
 						'name'             => $product['name'],
 						'model'            => $product['model'],
+						'variant_id'       => $product['variant_id'],
+						'variant_sku'      => $product['variant_sku'],
 						'option'           => $option_data,
 						'quantity'         => $product['quantity'],
 						'price'            => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value']),
@@ -1295,9 +1302,9 @@ class ControllerSaleOrderDetail extends Controller {
 
 					$variant_data = null;
 					$order_options = [];
+					$order_product = null;
 					if ($order_id && $order_product_id) {
 						$order_products = $this->model_sale_order->getOrderProducts($order_id);
-						$order_product = null;
 						foreach ($order_products as $op) {
 							if ((int)$op['order_product_id'] === $order_product_id) {
 								$order_product = $op;
@@ -1314,14 +1321,37 @@ class ControllerSaleOrderDetail extends Controller {
 							$variant_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_variant WHERE variant_id = '" . (int)$order_product['variant_id'] . "'");
 							if ($variant_query->row) {
 								$v = $variant_query->row;
+
+								$pc = new \ProductConfigurable($this->registry);
+
+								$variant_base_price = (float)$v['price'];
+								$variant_effective_price = $variant_base_price;
+
+								if ($order_info && !empty($order_info['customer_group_id'])) {
+									$cg_price = $pc->getVariantCustomerGroupPrice((int)$v['variant_id'], (int)$order_info['customer_group_id']);
+
+									if ($cg_price !== null && $cg_price > 0) {
+										$variant_effective_price = $cg_price;
+									}
+
+									$special_price = $pc->getVariantSpecialPrice((int)$v['variant_id'], (int)$order_info['customer_group_id']);
+
+									if ($special_price !== null && $special_price < $variant_effective_price) {
+										$variant_effective_price = $special_price;
+									}
+								}
+
 								$variant_data = [
+									'model' => $v['model'] ?? '',
 									'sku'  => $v['sku'] ?? '',
 									'upc'  => $v['upc'] ?? '',
 									'ean'  => $v['ean'] ?? '',
 									'mpn'  => $v['mpn'] ?? '',
-									'price' => $this->currency->format((float)$v['price'], $this->config->get('config_currency')),
+									'price' => $this->currency->format($variant_effective_price, $this->config->get('config_currency')),
+									'price_from' => $variant_effective_price < $variant_base_price ? $this->currency->format($variant_base_price, $this->config->get('config_currency')) : '',
 									'stock' => (int)$v['quantity'],
 								];
+								if (!empty($v['model'])) $codes[] = ['label' => 'Variant Model', 'value' => $v['model']];
 								if (!empty($v['sku'])) $codes[] = ['label' => 'Variant SKU', 'value' => $v['sku']];
 								if (!empty($v['upc'])) $codes[] = ['label' => 'Variant UPC', 'value' => $v['upc']];
 								if (!empty($v['ean'])) $codes[] = ['label' => 'Variant EAN', 'value' => $v['ean']];
@@ -1346,9 +1376,11 @@ class ControllerSaleOrderDetail extends Controller {
 
 					$stock = ($variant_data && isset($variant_data['stock'])) ? $variant_data['stock'] : ($product_info['quantity'] ?? 0);
 
+					$display_model = ($order_product && !empty($order_product['model'])) ? $order_product['model'] : ($product_info['model'] ?? '');
+
 					$data = [
 						'name'        => $product_info['name'] ?? '',
-						'model'       => $product_info['model'] ?? '',
+						'model'       => $display_model,
 						'description' => $description,
 						'price'       => $this->currency->format($order_price + ($this->config->get('config_tax') ? $order_tax : 0), $currency_code, $currency_value),
 						'total'       => $this->currency->format($order_total + ($this->config->get('config_tax') ? ($order_tax * $order_quantity) : 0), $currency_code, $currency_value),

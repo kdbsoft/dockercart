@@ -179,6 +179,7 @@ $_['entry_order_id']             = 'Order ID';
 $_['entry_total']                = 'Total';
 $_['entry_date_added']           = 'Date Added';
 $_['entry_date_modified']        = 'Date Modified';
+$_['entry_variant_sku']          = 'Variant SKU';
 
 // Help
 $_['help_override']              = 'If the customers order is being blocked from changing the order status due to an anti-fraud extension enable override.';
@@ -187,6 +188,7 @@ $_['help_override']              = 'If the customers order is being blocked from
 $_['error_warning']              = 'Warning: Please check the form carefully for errors!';
 $_['error_permission']           = 'Warning: You do not have permission to modify orders!';
 $_['error_action']               = 'Warning: Could not complete this action!';
+$_['error_variant_not_found']    = 'Warning: No variant matches the selected options!';
 $_['error_filetype']             = 'Invalid file type!';
 $_['error_comment']              = 'Please enter a comment!';
 $_['error_order_status']         = 'Please select an order status!';
