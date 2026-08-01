@@ -213,34 +213,40 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
     }
 
     /**
-     * Add autocomplete script to header (via event)
+     * Add autocomplete and voice search scripts to header (via event)
      */
     public function addAutocompleteScript(&$route, &$args, &$output) {
         if (!$this->config->get('module_dockercart_search_status')) {
             return;
         }
-        if (!$this->config->get('module_dockercart_search_autocomplete')) {
-            return;
+
+        $script = '';
+
+        if ($this->config->get('module_dockercart_search_autocomplete')) {
+            // Add autocomplete JavaScript before </head>
+            $script .= '<script src="catalog/view/javascript/dockercart_search_autocomplete.js?v=' . DOCKERCART_VERSION . '"></script>' . "\n";
+            $script .= '<script>' . "\n";
+            // Load search labels
+            $this->load->language('common/search');
+
+            $script .= 'var dockercart_search_config = {' . "\n";
+            $script .= '    min_chars: ' . ($this->config->get('module_dockercart_search_min_chars') ?: 3) . ',' . "\n";
+            $script .= '    suggest_url: "index.php?route=extension/module/dockercart_search/suggest",' . "\n";
+            $script .= '    labels: {' . "\n";
+            $script .= '        categories: ' . json_encode($this->language->get('text_suggest_categories') ?: 'Categories') . ',' . "\n";
+            $script .= '        manufacturers: ' . json_encode($this->language->get('text_suggest_manufacturers') ?: 'Manufacturers') . ',' . "\n";
+            $script .= '        products: ' . json_encode($this->language->get('text_suggest_products') ?: 'Products') . "\n";
+            $script .= '    }' . "\n";
+            $script .= '};' . "\n";
+            $script .= '</script>' . "\n";
         }
 
-        // Add autocomplete JavaScript before </head>
-        $script = '<script src="catalog/view/javascript/dockercart_search_autocomplete.js?v=' . DOCKERCART_VERSION . '"></script>' . "\n";
-        $script .= '<script>' . "\n";
-        // Load search labels
-        $this->load->language('common/search');
+        if ($this->config->get('module_dockercart_search_voice')) {
+            $script .= '<script src="catalog/view/javascript/dockercart_voice_search.js?v=' . DOCKERCART_VERSION . '"></script>' . "\n";
+        }
 
-        $script .= 'var dockercart_search_config = {' . "\n";
-        $script .= '    min_chars: ' . ($this->config->get('module_dockercart_search_min_chars') ?: 3) . ',' . "\n";
-        $script .= '    suggest_url: "index.php?route=extension/module/dockercart_search/suggest",' . "\n";
-        $script .= '    labels: {' . "\n";
-        $script .= '        categories: ' . json_encode($this->language->get('text_suggest_categories') ?: 'Categories') . ',' . "\n";
-        $script .= '        manufacturers: ' . json_encode($this->language->get('text_suggest_manufacturers') ?: 'Manufacturers') . ',' . "\n";
-        $script .= '        products: ' . json_encode($this->language->get('text_suggest_products') ?: 'Products') . "\n";
-        $script .= '    }' . "\n";
-        $script .= '};' . "\n";
-        $script .= '</script>' . "\n";
-        $script .= '</head>';
-
-        $output = str_replace('</head>', $script, $output);
+        if ($script !== '') {
+            $output = str_replace('</head>', $script . '</head>', $output);
+        }
     }
 }
