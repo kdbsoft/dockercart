@@ -164,7 +164,9 @@ class ModelCatalogProduct extends Model {
 					if (isset($default_variant['subtract'])) {
 						$product_data['subtract'] = (int)$default_variant['subtract'];
 					}
-					if (!empty($default_variant['sku'])) {
+					if (!empty($default_variant['model'])) {
+						$product_data['model'] = $default_variant['model'];
+					} elseif (!empty($default_variant['sku'])) {
 						$product_data['model'] = $default_variant['sku'];
 					}
 					if (!empty($default_variant['upc'])) {

@@ -922,7 +922,7 @@ class ControllerProductProduct extends Controller {
 				}
 
 				if (!empty($selected_variant)) {
-					$data['variant_sku'] = $selected_variant['sku'] ?? '';
+					$data['variant_model'] = !empty($selected_variant['model']) ? $selected_variant['model'] : ($selected_variant['sku'] ?? '');
 					if (!empty($selected_variant['values'])) {
 						foreach ($selected_variant['values'] as $vv) {
 							$ov_id = (int)$vv['option_value_id'];
@@ -990,8 +990,10 @@ class ControllerProductProduct extends Controller {
 							);
 						}
 					}
-					if (!empty($selected_variant['sku'])) {
-						$data['variant_sku'] = $selected_variant['sku'];
+					if (!empty($selected_variant['model'])) {
+						$data['variant_model'] = $selected_variant['model'];
+					} elseif (!empty($selected_variant['sku'])) {
+						$data['variant_model'] = $selected_variant['sku'];
 					}
 				}
 			}
