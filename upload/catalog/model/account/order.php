@@ -118,7 +118,7 @@ class ModelAccountOrder extends Model {
 	}
 
 	public function getOrderPayments($order_id) {
-		$query = $this->db->query("SELECT op.amount, op.payment_method, op.date_added FROM " . DB_PREFIX . "order_payment op LEFT JOIN `" . DB_PREFIX . "order` o ON (op.order_id = o.order_id) WHERE op.order_id = '" . (int)$order_id . "' AND o.customer_id = '" . (int)$this->customer->getId() . "' AND o.customer_id != '0' ORDER BY op.date_added ASC, op.order_payment_id ASC");
+		$query = $this->db->query("SELECT op.amount, op.payment_method, op.payment_code, op.date_added FROM " . DB_PREFIX . "order_payment op LEFT JOIN `" . DB_PREFIX . "order` o ON (op.order_id = o.order_id) WHERE op.order_id = '" . (int)$order_id . "' AND o.customer_id = '" . (int)$this->customer->getId() . "' AND o.customer_id != '0' ORDER BY op.date_added ASC, op.order_payment_id ASC");
 
 		return $query->rows;
 	}
@@ -177,7 +177,7 @@ class ModelAccountOrder extends Model {
 	}
 
 	public function getOrderHistories($order_id) {
-		$query = $this->db->query("SELECT date_added, os.name AS status, oh.comment, oh.notify FROM " . DB_PREFIX . "order_history oh LEFT JOIN " . DB_PREFIX . "order_status os ON oh.order_status_id = os.order_status_id WHERE oh.order_id = '" . (int)$order_id . "' AND os.language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY oh.date_added");
+		$query = $this->db->query("SELECT date_added, os.name AS status, oh.comment, oh.comment_key, oh.comment_params, oh.notify FROM " . DB_PREFIX . "order_history oh LEFT JOIN " . DB_PREFIX . "order_status os ON oh.order_status_id = os.order_status_id WHERE oh.order_id = '" . (int)$order_id . "' AND os.language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY oh.date_added");
 
 		return $query->rows;
 	}
