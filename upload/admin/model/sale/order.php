@@ -9,8 +9,14 @@ class ModelSaleOrder extends Model {
 		$currency_id = $this->currency->getId($currency_code);
 		$currency_value = 1.0;
 
-		$processing_statuses = (array)$this->config->get('config_processing_status');
-		$order_status_id = !empty($processing_statuses) ? (int)$processing_statuses[0] : 0;
+		$flow_steps = (array)$this->config->get('config_order_flow_steps');
+
+		if (!empty($flow_steps)) {
+			$order_status_id = (int)reset($flow_steps);
+		} else {
+			$processing_statuses = (array)$this->config->get('config_processing_status');
+			$order_status_id = !empty($processing_statuses) ? (int)$processing_statuses[0] : 0;
+		}
 
 		$language_id = (int)$this->config->get('config_language_id');
 		if (!$language_id) {
@@ -1444,6 +1450,17 @@ class ModelSaleOrder extends Model {
 		$order_info = $this->getOrder($order_id);
 
 		if ($order_info) {
+			if (!$override) {
+				$order_flow = new \OrderFlow([
+					'steps'       => (array)$this->config->get('config_order_flow_steps'),
+					'transitions' => (array)$this->config->get('config_order_flow_transitions'),
+				]);
+
+				if (!$order_flow->validateTransition((int)$order_info['order_status_id'], (int)$order_status_id)) {
+					return false;
+				}
+			}
+
 			$processing_statuses = (array)$this->config->get('config_processing_status');
 			$complete_statuses = (array)$this->config->get('config_complete_status');
 
@@ -1486,7 +1503,11 @@ class ModelSaleOrder extends Model {
 			}
 
 			$this->cache->delete('product');
+
+			return true;
 		}
+
+		return false;
 	}
 
 	public function addOrderNote($order_id, $comment, $notify = false, $comment_key = '', $comment_params = array()) {
