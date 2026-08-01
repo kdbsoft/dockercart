@@ -198,6 +198,17 @@ $_['error_variant_not_found']    = 'Warning: No variant matches the selected opt
 $_['error_filetype']             = 'Invalid file type!';
 $_['error_comment']              = 'Please enter a comment!';
 $_['error_order_status']         = 'Please select an order status!';
+$_['error_invalid_transition']   = 'This status change is not allowed by the order flow!';
+
+$_['text_order_flow']            = 'Order Flow';
+$_['text_flow_change_status']    = 'Change status';
+$_['text_flow_override']         = 'Force (skip flow validation)';
+$_['text_flow_notify_customer']  = 'Notify customer';
+$_['text_flow_transition_to']    = 'Move order to:';
+$_['text_flow_confirm_terminal'] = 'This status ends the order flow. Continue?';
+$_['text_flow_terminal_state']   = 'This order has ended its flow.';
+$_['button_flow_apply']          = 'Apply';
+$_['text_comment_optional']      = 'Comment (optional)';
 
 $_['text_timeline']              = 'Timeline';
 $_['text_add_note']              = 'Add Note';

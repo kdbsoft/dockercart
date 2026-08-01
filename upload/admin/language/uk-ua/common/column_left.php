@@ -69,6 +69,7 @@ $_['text_openbay_report_price'] = 'Звіт по прайсам';
 $_['text_openbay_settings'] = 'Налаштування';
 $_['text_option'] = 'Опції';
 $_['text_order'] = 'Замовлення';
+$_['text_order_flow'] = 'Потік замовлення';
 $_['text_order_status'] = 'Статуси замовлень';
 $_['text_other_status'] = 'Інші статуси';
 $_['text_pending_status'] = 'Замовлення в очікуванні';
