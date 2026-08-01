@@ -2352,81 +2352,186 @@ class ControllerCatalogProduct extends Controller {
 	public function autocomplete() {
 		$json = array();
 
-		if (isset($this->request->get['filter_name']) || isset($this->request->get['filter_model'])) {
+		if (isset($this->request->get['filter_name']) || isset($this->request->get['filter_model']) || isset($this->request->get['filter_sku'])) {
 			$this->load->model('catalog/product');
 			$this->load->model('catalog/option');
+			$this->load->model('tool/image');
 
-			if (isset($this->request->get['filter_name'])) {
-				$filter_name = $this->request->get['filter_name'];
-			} else {
-				$filter_name = '';
-			}
+			$filter_name = $this->request->get['filter_name'] ?? '';
+			$filter_model = $this->request->get['filter_model'] ?? '';
+			$filter_sku = $this->request->get['filter_sku'] ?? '';
+			$filter_any = (bool)($this->request->get['filter_any'] ?? false);
 
-			if (isset($this->request->get['filter_model'])) {
-				$filter_model = $this->request->get['filter_model'];
-			} else {
-				$filter_model = '';
-			}
+			$limit = (int)($this->request->get['limit'] ?? 5);
 
-			if (isset($this->request->get['limit'])) {
-				$limit = (int)$this->request->get['limit'];
-			} else {
-				$limit = 5;
-			}
+			$currency_code = (string)($this->request->get['currency_code'] ?? '');
+			$currency_value = (float)($this->request->get['currency_value'] ?? 1.0);
+			$customer_group_id = (int)($this->request->get['customer_group_id'] ?? 0);
+
+			$format_currency = $currency_code ? $currency_code : $this->config->get('config_currency');
 
 			$filter_data = array(
 				'filter_name'  => $filter_name,
 				'filter_model' => $filter_model,
+				'filter_sku'   => $filter_sku,
 				'start'        => 0,
 				'limit'        => $limit
 			);
 
-			$results = $this->model_catalog_product->getProducts($filter_data);
+			if ($filter_any) {
+				// OR-search across name/model/SKU: run each filter separately and merge
+				$results = array();
+				$seen = array();
 
-			foreach ($results as $result) {
-				$option_data = array();
+				foreach (array('filter_name' => $filter_name, 'filter_model' => $filter_model, 'filter_sku' => $filter_sku) as $filter_key => $filter_value) {
+					if ($filter_value === '') {
+						continue;
+					}
 
-				$product_options = $this->model_catalog_product->getProductOptions($result['product_id']);
+					$single_filter = array('start' => 0, 'limit' => $limit * 3);
+					$single_filter[$filter_key] = $filter_value;
 
-				foreach ($product_options as $product_option) {
-					$option_info = $this->model_catalog_option->getOption($product_option['option_id']);
+					$rows = $this->model_catalog_product->getProducts($single_filter);
 
-					if ($option_info) {
-						$product_option_value_data = array();
-
-						foreach ($product_option['product_option_value'] as $product_option_value) {
-							$option_value_info = $this->model_catalog_option->getOptionValue($product_option_value['option_value_id']);
-
-							if ($option_value_info) {
-								$product_option_value_data[] = array(
-									'product_option_value_id' => $product_option_value['product_option_value_id'],
-									'option_value_id'         => $product_option_value['option_value_id'],
-									'name'                    => $option_value_info['name'],
-									'price'                   => (float)$product_option_value['price'] ? $this->currency->format($product_option_value['price'], $this->config->get('config_currency')) : false,
-									'price_prefix'            => isset($product_option_value['price_prefix']) ? $product_option_value['price_prefix'] : '+'
-								);
-							}
+					foreach ($rows as $row) {
+						if (!isset($seen[(int)$row['product_id']])) {
+							$seen[(int)$row['product_id']] = true;
+							$results[] = $row;
 						}
-
-						$option_data[] = array(
-							'product_option_id'    => $product_option['product_option_id'],
-							'product_option_value' => $product_option_value_data,
-							'option_id'            => $product_option['option_id'],
-							'name'                 => $option_info['name'],
-							'type'                 => $option_info['type'],
-							'value'                => $product_option['value'],
-							'required'             => $product_option['required']
-						);
 					}
 				}
 
-				$json[] = array(
-					'product_id' => $result['product_id'],
-					'name'       => strip_tags(html_entity_decode($result['name'], ENT_QUOTES, 'UTF-8')),
-					'model'      => $result['model'],
-					'option'     => $option_data,
-					'price'      => $result['price']
-				);
+				$results = array_slice($results, 0, $limit);
+			} else {
+				$results = $this->model_catalog_product->getProducts($filter_data);
+			}
+
+			if ($results) {
+				$product_ids = array_map('intval', array_column($results, 'product_id'));
+
+				$configurable_map = array();
+				$config_query = $this->db->query("SELECT product_id, is_configurable FROM " . DB_PREFIX . "product_configurable WHERE product_id IN (" . implode(',', $product_ids) . ")");
+
+				foreach ($config_query->rows as $row) {
+					$configurable_map[(int)$row['product_id']] = (bool)$row['is_configurable'];
+				}
+
+				$manufacturer_map = array();
+				$manufacturer_query = $this->db->query("SELECT manufacturer_id, name FROM " . DB_PREFIX . "manufacturer WHERE manufacturer_id IN (" . implode(',', array_filter(array_map('intval', array_column($results, 'manufacturer_id')))) . ")");
+
+				foreach ($manufacturer_query->rows as $row) {
+					$manufacturer_map[(int)$row['manufacturer_id']] = $row['name'];
+				}
+
+				$pc = new \ProductConfigurable($this->registry);
+
+				foreach ($results as $result) {
+					$product_id = (int)$result['product_id'];
+					$is_configurable = !empty($configurable_map[$product_id]);
+
+					$price_text = $this->currency->format($result['price'], $format_currency, $currency_value);
+
+					$price_min = 0.0;
+					$price_max = 0.0;
+					$price_range_text = '';
+
+					if ($is_configurable) {
+						$range = $pc->getAggregatedPriceRange($product_id, $customer_group_id ? $customer_group_id : null);
+
+						if ($range['min'] > 0 || $range['max'] > 0) {
+							$price_min = $range['min'];
+							$price_max = $range['max'];
+							$price_range_text = $this->currency->format($price_min, $format_currency, $currency_value);
+
+							if ($price_max > $price_min) {
+								$price_range_text .= ' – ' . $this->currency->format($price_max, $format_currency, $currency_value);
+							}
+						}
+					}
+
+					$stock = array(
+						'total'  => (float)$result['quantity'],
+						'not_tracked' => !(bool)$result['subtract']
+					);
+
+					if ($is_configurable) {
+						$aggregated = $pc->getAggregatedStock($product_id);
+						$stock['total'] = $aggregated['total_stock'];
+						$stock['variants_in_stock'] = $aggregated['variants_in_stock'];
+						$stock['total_variants'] = $aggregated['total_variants'];
+					}
+
+					if ($result['image'] && is_file(DIR_IMAGE . $result['image'])) {
+						$thumb = $this->model_tool_image->resize($result['image'], 40, 40);
+					} else {
+						$thumb = $this->model_tool_image->resize('no_image.png', 40, 40);
+					}
+
+					$option_data = array();
+
+					$product_options = $this->model_catalog_product->getProductOptions($product_id);
+
+					foreach ($product_options as $product_option) {
+						$option_info = $this->model_catalog_option->getOption($product_option['option_id']);
+
+						if ($option_info) {
+							$product_option_value_data = array();
+
+							foreach ($product_option['product_option_value'] as $product_option_value) {
+								$option_value_info = $this->model_catalog_option->getOptionValue($product_option_value['option_value_id']);
+
+								if ($option_value_info) {
+									$option_price = (float)$product_option_value['price'];
+
+									if ($option_price != 0) {
+										$price_text_value = $this->currency->format($option_price, $format_currency, $currency_value);
+									} else {
+										$price_text_value = '';
+									}
+
+									$product_option_value_data[] = array(
+										'product_option_value_id' => $product_option_value['product_option_value_id'],
+										'option_value_id'         => $product_option_value['option_value_id'],
+										'name'                    => $option_value_info['name'],
+										'price'                   => (float)$product_option_value['price'] ? $this->currency->format($product_option_value['price'], $this->config->get('config_currency')) : false,
+										'price_text'              => $price_text_value,
+										'price_prefix'            => isset($product_option_value['price_prefix']) ? $product_option_value['price_prefix'] : '+'
+									);
+								}
+							}
+
+							$option_data[] = array(
+								'product_option_id'    => $product_option['product_option_id'],
+								'product_option_value' => $product_option_value_data,
+								'option_id'            => $product_option['option_id'],
+								'name'                 => $option_info['name'],
+								'type'                 => $option_info['type'],
+								'value'                => $product_option['value'],
+								'required'             => $product_option['required']
+							);
+						}
+					}
+
+					$json[] = array(
+						'product_id'       => $product_id,
+						'name'             => strip_tags(html_entity_decode($result['name'], ENT_QUOTES, 'UTF-8')),
+						'model'            => $result['model'],
+						'sku'              => (string)($result['sku'] ?? ''),
+						'manufacturer'     => $manufacturer_map[(int)$result['manufacturer_id']] ?? '',
+						'quantity'         => $result['quantity'],
+						'subtract'         => (bool)$result['subtract'],
+						'status'           => (bool)$result['status'],
+						'is_configurable'  => $is_configurable,
+						'price'            => $result['price'],
+						'price_text'       => $price_text,
+						'price_min'        => $price_min,
+						'price_max'        => $price_max,
+						'price_range_text' => $price_range_text,
+						'stock'            => $stock,
+						'thumb'            => $thumb,
+						'option'           => $option_data
+					);
+				}
 			}
 		}
 

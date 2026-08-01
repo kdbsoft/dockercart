@@ -137,6 +137,7 @@ class ControllerSaleOrderDetail extends Controller {
 
 		$data['currency_code'] = $order_info['currency_code'];
 		$data['currency_value'] = $order_info['currency_value'];
+		$data['currency_decimal_place'] = $this->currency->getDecimalPlace($order_info['currency_code']);
 
 		$this->load->model('tool/image');
 		$this->load->model('catalog/product');
@@ -167,6 +168,9 @@ class ControllerSaleOrderDetail extends Controller {
 				];
 			}
 
+			$quantity = max(1, (int)$product['quantity']);
+			$unit_tax = $product['tax'] / $quantity;
+
 			$data['products'][] = [
 				'order_product_id' => $product['order_product_id'],
 				'product_id'       => $product['product_id'],
@@ -175,10 +179,10 @@ class ControllerSaleOrderDetail extends Controller {
 				'variant_sku'      => $product['variant_sku'] ?? '',
 				'option'           => $option_data,
 				'quantity'         => $product['quantity'],
-				'price'            => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value']),
+				'price'            => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $unit_tax : 0), $order_info['currency_code'], $order_info['currency_value']),
 				'price_raw'        => $product['price'],
 				'tax_raw'          => $product['tax'],
-				'total'            => $this->currency->format($product['total'] + ($this->config->get('config_tax') ? ($product['tax'] * $product['quantity']) : 0), $order_info['currency_code'], $order_info['currency_value']),
+				'total'            => $this->currency->format($product['total'] + ($this->config->get('config_tax') ? $product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value']),
 				'total_raw'        => $product['total'],
 				'discount_percent' => $order_product_discounts[(int)$product['order_product_id']] ?? 0,
 				'thumb'            => $thumb,
@@ -266,13 +270,16 @@ class ControllerSaleOrderDetail extends Controller {
 				$option_data[] = $option['name'] . ': ' . $option['value'];
 			}
 
+			$quantity = max(1, (int)$product['quantity']);
+			$unit_tax = $product['tax'] / $quantity;
+
 			$data['products'][] = [
 				'name'    => $product['name'],
 				'model'   => $product['model'],
 				'option'  => implode(', ', $option_data),
 				'quantity' => $product['quantity'],
-				'price'   => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value']),
-				'total'   => $this->currency->format($product['total'] + ($this->config->get('config_tax') ? ($product['tax'] * $product['quantity']) : 0), $order_info['currency_code'], $order_info['currency_value']),
+				'price'   => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $unit_tax : 0), $order_info['currency_code'], $order_info['currency_value']),
+				'total'   => $this->currency->format($product['total'] + ($this->config->get('config_tax') ? $product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value']),
 			];
 		}
 
@@ -490,35 +497,29 @@ class ControllerSaleOrderDetail extends Controller {
 
 				$product = $this->db->query("SELECT * FROM `" . DB_PREFIX . "order_product` WHERE order_product_id = '" . (int)$order_product_id . "' AND order_id = '" . (int)$order_id . "'")->row;
 
-				$json['success'] = $this->language->get('text_order_saved');
-				$json['product_total'] = $this->currency->format(
-					$product['total'] + ($this->config->get('config_tax') ? ($product['tax'] * $product['quantity']) : 0),
-					$order_info['currency_code'],
-					$order_info['currency_value']
-				);
-				$json['product_price'] = $this->currency->format(
-					$product['price'] + ($this->config->get('config_tax') ? $product['tax'] : 0),
-					$order_info['currency_code'],
-					$order_info['currency_value']
-				);
-				$json['product_quantity'] = (int)$product['quantity'];
-
-				$totals = $this->model_sale_order->getOrderTotals($order_id);
-				$json['totals'] = [];
-
-				foreach ($totals as $total) {
-					$json['totals'][] = [
-						'code'  => $total['code'],
-						'title' => $total['title'],
-						'text'  => $this->currency->format($total['value'], $order_info['currency_code'], $order_info['currency_value']),
-						'value' => (float)$total['value'],
-					];
+				if (!$product) {
+					$json['error'] = $this->language->get('error_action');
 				}
 
-				$json['total_quantity'] = array_sum(array_column(
-					$this->model_sale_order->getOrderProducts($order_id),
-					'quantity'
-				));
+				if ($product && !isset($json['error'])) {
+					$quantity = max(1, (int)$product['quantity']);
+					$unit_tax = $product['tax'] / $quantity;
+
+					$json['success'] = $this->language->get('text_order_saved');
+					$json['product_total'] = $this->currency->format(
+						$product['total'] + ($this->config->get('config_tax') ? $product['tax'] : 0),
+						$order_info['currency_code'],
+						$order_info['currency_value']
+					);
+					$json['product_price'] = $this->currency->format(
+						$product['price'] + ($this->config->get('config_tax') ? $unit_tax : 0),
+						$order_info['currency_code'],
+						$order_info['currency_value']
+					);
+					$json['product_quantity'] = (int)$product['quantity'];
+					$json['totals'] = $this->buildTotalsJson($order_id, $order_info);
+					$json['total_quantity'] = $this->getOrderTotalQuantity($order_id);
+				}
 			}
 		}
 
@@ -589,6 +590,9 @@ class ControllerSaleOrderDetail extends Controller {
 						];
 					}
 
+					$quantity = max(1, (int)$product['quantity']);
+					$unit_tax = $product['tax'] / $quantity;
+
 					$json['product'] = [
 						'order_product_id' => $order_product_id,
 						'product_id'       => $product['product_id'],
@@ -598,11 +602,18 @@ class ControllerSaleOrderDetail extends Controller {
 						'variant_sku'      => $product['variant_sku'],
 						'option'           => $option_data,
 						'quantity'         => $product['quantity'],
-						'price'            => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value']),
+						'price'            => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $unit_tax : 0), $order_info['currency_code'], $order_info['currency_value']),
 						'price_raw'        => $product['price'],
+						'tax_raw'          => $product['tax'],
+						'total'            => $this->currency->format($product['total'] + ($this->config->get('config_tax') ? $product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value']),
+						'total_raw'        => $product['total'],
+						'discount_percent' => 0,
 						'thumb'            => $thumb,
 						'href'             => $this->url->link('catalog/product/edit', 'user_token=' . $this->session->data['user_token'] . '&product_id=' . $product['product_id'], true),
 					];
+
+					$json['totals'] = $this->buildTotalsJson($order_id, $order_info);
+					$json['total_quantity'] = $this->getOrderTotalQuantity($order_id);
 				} else {
 					$json['error'] = $this->language->get('error_action');
 				}
@@ -631,11 +642,103 @@ class ControllerSaleOrderDetail extends Controller {
 
 			$this->journalTotalChange($order_id, (float)$recalc['old_total'], (float)$recalc['new_total']);
 
+			$order_info = $this->model_sale_order->getOrder($order_id);
+
 			$json['success'] = $this->language->get('text_success');
+			$json['totals'] = $this->buildTotalsJson($order_id, $order_info);
+			$json['total_quantity'] = $this->getOrderTotalQuantity($order_id);
 		}
 
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
+	}
+
+	public function previewProduct(): void {
+		$this->load->language('sale/order');
+
+		$json = [];
+
+		if (!$this->user->hasPermission('modify', 'sale/order')) {
+			$json['error'] = $this->language->get('error_permission');
+		} else {
+			$order_id = (int)($this->request->get['order_id'] ?? 0);
+			$product_id = (int)($this->request->post['product_id'] ?? 0);
+			$quantity = (int)($this->request->post['quantity'] ?? 1);
+
+			$optionsRaw = html_entity_decode((string)($this->request->post['options'] ?? '[]'), ENT_QUOTES, 'UTF-8');
+			$options = json_decode($optionsRaw, true);
+
+			if (!is_array($options)) {
+				$options = [];
+			}
+
+			if (!$product_id) {
+				$json['error'] = $this->language->get('error_action');
+			} else {
+				$this->load->model('sale/order');
+
+				$order_info = $this->model_sale_order->getOrder($order_id);
+
+				if (!$order_info) {
+					$json['error'] = $this->language->get('error_action');
+				} else {
+					try {
+						$pricing = $this->model_sale_order->calculateProductPricing($order_id, $product_id, $quantity, $options);
+					} catch (\RuntimeException $e) {
+						$pricing = false;
+						$json['variant_error'] = $this->language->get($e->getMessage());
+					}
+
+					if ($pricing) {
+						$include_tax = (bool)$this->config->get('config_tax');
+						$unit_price = $pricing['price'] + ($include_tax ? $pricing['tax'] : 0);
+						$line_total = $pricing['total'] + ($include_tax ? $pricing['tax_total'] : 0);
+
+						$json['price'] = $this->currency->format($unit_price, $order_info['currency_code'], $order_info['currency_value']);
+						$json['price_raw'] = $pricing['price'];
+						$json['tax'] = $this->currency->format($pricing['tax'], $order_info['currency_code'], $order_info['currency_value']);
+						$json['tax_raw'] = $pricing['tax'];
+						$json['total'] = $this->currency->format($line_total, $order_info['currency_code'], $order_info['currency_value']);
+						$json['total_raw'] = $line_total;
+						$json['quantity'] = $pricing['quantity'];
+						$json['stock'] = (float)$pricing['stock'];
+						$json['subtract'] = (bool)$pricing['subtract'];
+						$json['available'] = !$pricing['subtract'] || $pricing['stock'] > 0;
+						$json['variant'] = $pricing['variant_id'] ? [
+							'variant_id' => (int)$pricing['variant_id'],
+							'sku'        => $pricing['variant_sku'],
+							'model'      => $pricing['model'],
+						] : null;
+					}
+				}
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	private function buildTotalsJson($order_id, $order_info): array {
+		$totals = $this->model_sale_order->getOrderTotals($order_id);
+		$json = [];
+
+		foreach ($totals as $total) {
+			$json[] = [
+				'code'  => $total['code'],
+				'title' => $total['title'],
+				'text'  => $this->currency->format($total['value'], $order_info['currency_code'], $order_info['currency_value']),
+				'value' => (float)$total['value'],
+			];
+		}
+
+		return $json;
+	}
+
+	private function getOrderTotalQuantity($order_id): int {
+		return (int)array_sum(array_column(
+			$this->model_sale_order->getOrderProducts($order_id),
+			'quantity'
+		));
 	}
 
 	public function recalculate(): void {
@@ -672,13 +775,22 @@ class ControllerSaleOrderDetail extends Controller {
 			$order_id = (int)($this->request->get['order_id'] ?? 0);
 			$discounts = $this->request->post['discount'] ?? [];
 
+			if (!is_array($discounts)) {
+				$decoded = json_decode((string)$discounts, true);
+				$discounts = is_array($decoded) ? $decoded : [];
+			}
+
 			$this->load->model('sale/order');
 
 			$recalc = $this->model_sale_order->applyLineDiscounts($order_id, $discounts);
 
 			$this->journalTotalChange($order_id, (float)$recalc['old_total'], (float)$recalc['new_total']);
 
+			$order_info = $this->model_sale_order->getOrder($order_id);
+
 			$json['success'] = $this->language->get('text_success');
+			$json['totals'] = $this->buildTotalsJson($order_id, $order_info);
+			$json['total_quantity'] = $this->getOrderTotalQuantity($order_id);
 		}
 
 		$this->response->addHeader('Content-Type: application/json');
@@ -1378,12 +1490,14 @@ class ControllerSaleOrderDetail extends Controller {
 
 					$display_model = ($order_product && !empty($order_product['model'])) ? $order_product['model'] : ($product_info['model'] ?? '');
 
+					$unit_tax = $order_quantity > 0 ? $order_tax / $order_quantity : 0;
+
 					$data = [
 						'name'        => $product_info['name'] ?? '',
 						'model'       => $display_model,
 						'description' => $description,
-						'price'       => $this->currency->format($order_price + ($this->config->get('config_tax') ? $order_tax : 0), $currency_code, $currency_value),
-						'total'       => $this->currency->format($order_total + ($this->config->get('config_tax') ? ($order_tax * $order_quantity) : 0), $currency_code, $currency_value),
+						'price'       => $this->currency->format($order_price + ($this->config->get('config_tax') ? $unit_tax : 0), $currency_code, $currency_value),
+						'total'       => $this->currency->format($order_total + ($this->config->get('config_tax') ? $order_tax : 0), $currency_code, $currency_value),
 						'quantity'    => $order_quantity,
 						'stock'       => $stock,
 						'status'      => $product_info['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
