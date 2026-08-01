@@ -135,6 +135,18 @@
                   </select>
                 </div>
                 <div class="dcx-field">
+                  <label class="dcx-label" for="input-voice">{{ entry_voice_search }} <span data-toggle="tooltip" title="{{ help_voice_search }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                  <select name="module_dockercart_search_voice" id="input-voice" class="form-control" style="max-width:200px;">
+                    {% if module_dockercart_search_voice %}
+                    <option value="1" selected="selected">{{ text_enabled }}</option>
+                    <option value="0">{{ text_disabled }}</option>
+                    {% else %}
+                    <option value="1">{{ text_enabled }}</option>
+                    <option value="0" selected="selected">{{ text_disabled }}</option>
+                    {% endif %}
+                  </select>
+                </div>
+                <div class="dcx-field">
                   <label class="dcx-label" for="input-autocomplete-limit">{{ entry_autocomplete_limit }} <span data-toggle="tooltip" title="{{ help_autocomplete_limit }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                   <input type="number" name="module_dockercart_search_autocomplete_limit" value="{{ module_dockercart_search_autocomplete_limit }}" id="input-autocomplete-limit" class="form-control" style="max-width:120px;" />
                 </div>
