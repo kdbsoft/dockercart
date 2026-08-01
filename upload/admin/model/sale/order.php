@@ -820,7 +820,94 @@ class ModelSaleOrder extends Model {
 
 		$quantity = max(1, (int)$quantity);
 
+		$order_query = $this->db->query("SELECT customer_group_id FROM `" . DB_PREFIX . "order` WHERE order_id = '" . (int)$order_id . "'");
+		$customer_group_id = $order_query->num_rows ? (int)$order_query->row['customer_group_id'] : 0;
+
+		$variant_id = 0;
+		$variant_sku = '';
+		$model = $product_info['model'];
 		$price = (float)$product_info['price'];
+		$option_price = 0.0;
+
+		$pc = new \ProductConfigurable($this->registry);
+
+		$axis_ids = array();
+
+		if ($pc->isConfigurable($product_id)) {
+			$axis_query = $this->db->query("SELECT option_id FROM " . DB_PREFIX . "product_configurable_option WHERE product_id = '" . (int)$product_id . "'");
+
+			foreach ($axis_query->rows as $row) {
+				$axis_ids[] = (int)$row['option_id'];
+			}
+		}
+
+		if ($options || $axis_ids) {
+			$pov_ids = array();
+
+			foreach ($options as $option) {
+				if (!empty($option['product_option_value_id'])) {
+					$pov_ids[] = (int)$option['product_option_value_id'];
+				}
+			}
+
+			$axis_selection = array();
+
+			if ($pov_ids) {
+				$pov_query = $this->db->query("SELECT pov.product_option_value_id, po.option_id, pov.option_value_id, COALESCE(cgp.price, pov.price) AS price, COALESCE(cgp.price_prefix, pov.price_prefix) AS price_prefix FROM " . DB_PREFIX . "product_option_value pov INNER JOIN " . DB_PREFIX . "product_option po ON (pov.product_option_id = po.product_option_id) LEFT JOIN " . DB_PREFIX . "dockercart_product_option_value_customer_group_price cgp ON (cgp.product_option_value_id = pov.product_option_value_id AND cgp.customer_group_id = '" . (int)$customer_group_id . "') WHERE pov.product_option_value_id IN (" . implode(',', array_unique($pov_ids)) . ") AND po.product_id = '" . (int)$product_id . "'");
+
+				foreach ($pov_query->rows as $row) {
+					if (in_array((int)$row['option_id'], $axis_ids)) {
+						$axis_selection[(int)$row['option_id']] = (int)$row['option_value_id'];
+					} elseif ($row['price_prefix'] == '+') {
+						$option_price += (float)$row['price'];
+					} elseif ($row['price_prefix'] == '-') {
+						$option_price -= (float)$row['price'];
+					}
+				}
+			}
+
+			if ($axis_ids) {
+				$variant = $pc->resolveVariant($product_id, $axis_selection);
+
+				if (empty($variant)) {
+					throw new \RuntimeException('error_variant_not_found');
+				}
+
+				$variant_id = (int)$variant['variant_id'];
+				$variant_sku = $variant['sku'] ?? '';
+				$variant_model = $variant['model'] ?? '';
+				$price = (float)$variant['price'];
+
+				if (!empty($variant_model)) {
+					$model = $variant_model;
+				} elseif (!empty($variant_sku)) {
+					$model = $variant_sku;
+				}
+
+				if ($customer_group_id) {
+					$cg_price = $pc->getVariantCustomerGroupPrice($variant_id, $customer_group_id);
+
+					if ($cg_price !== null && $cg_price > 0) {
+						$price = $cg_price;
+					}
+
+					$special_price = $pc->getVariantSpecialPrice($variant_id, $customer_group_id);
+
+					if ($special_price !== null && $special_price < $price) {
+						$price = $special_price;
+					}
+
+					$discount_price = $pc->getVariantDiscountPrice($variant_id, $customer_group_id, $quantity);
+
+					if ($discount_price !== null && $discount_price < $price) {
+						$price = $discount_price;
+					}
+				}
+			}
+		}
+
+		$price += $option_price;
+
 		$tax = 0.0;
 
 		if ($product_info['tax_class_id']) {
@@ -837,14 +924,14 @@ class ModelSaleOrder extends Model {
 			order_id = '" . (int)$order_id . "',
 			product_id = '" . (int)$product_id . "',
 			name = '" . $this->db->escape($product_info['name']) . "',
-			model = '" . $this->db->escape($product_info['model']) . "',
+			model = '" . $this->db->escape($model) . "',
 			quantity = '" . (float)$quantity . "',
 			price = '" . (float)$price . "',
 			total = '" . (float)$total . "',
 			tax = '" . (float)$tax_total . "',
 			reward = '" . (int)($product_info['reward'] ?? 0) . "',
-			variant_id = '0',
-			variant_sku = ''
+			variant_id = '" . (int)$variant_id . "',
+			variant_sku = '" . $this->db->escape($variant_sku) . "'
 		");
 
 		$order_product_id = $this->db->getLastId();

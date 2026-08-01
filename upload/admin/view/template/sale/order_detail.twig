@@ -92,6 +92,9 @@
                   </div>
                   <div class="order-product-card__meta">
                     <span class="order-product-card__model">{{ product.model }}</span>
+                    {% if product.variant_sku %}
+                      <span class="order-product-card__option" title="{{ entry_variant_sku }}">· SKU: {{ product.variant_sku }}</span>
+                    {% endif %}
                     {% if product.option %}
                       {% for option in product.option %}
                         <span class="order-product-card__option">· {{ option.name }}: {{ option.value }}</span>
@@ -603,6 +606,9 @@
 .pcm-total { font-weight:700; color:#2563eb; font-size:14px; }
 .pcm-sub { font-size:11px; color:#999; margin-top:2px; }
 .pcm-sep { color:#ddd; }
+.pcm-variant { font-size:11px; color:#555; background:#fff7ed; border:1px solid #fed7aa; border-radius:6px; padding:4px 8px; display:inline-flex; align-items:center; gap:6px; margin-top:4px; }
+.pcm-variant__from { text-decoration:line-through; color:#999; }
+.pcm-variant__price { font-weight:600; color:#c2410c; }
 .pcm-codes { display:flex; flex-wrap:wrap; gap:4px 8px; margin-top:4px; }
 .pcm-code { font-size:11px; color:#666; }
 .pcm-code__label { font-weight:600; color:#999; }
@@ -1259,7 +1265,6 @@ document.addEventListener('DOMContentLoaded', function() {
 							ppriceInput.value = p.price || '0';
 							ps.value = p.name;
 							selectedProductOptions = p.option || [];
-							console.log('Selected product: ' + p.name + ' options=', selectedProductOptions);
 							renderProductOptions(selectedProductOptions);
 							dropdown.style.display = 'none';
 							dropdown.innerHTML = '';
@@ -1283,7 +1288,6 @@ document.addEventListener('DOMContentLoaded', function() {
 	}
 
 	function renderProductOptions(options) {
-		console.log('renderProductOptions: ', options);
 		if (!options || !options.length) { optsContainer.style.display = 'none'; optsContainer.innerHTML = ''; return; }
 		optsContainer.style.display = '';
 		optsContainer.innerHTML = '';
@@ -1341,7 +1345,6 @@ function addProduct() {
 	if (!pid || pid === '0') return;
 
 	const groups = document.querySelectorAll('#product-options-container .product-option-group');
-	console.log('addProduct: groups found=' + groups.length);
 
 	const options = [];
 	groups.forEach(group => {
@@ -1349,10 +1352,8 @@ function addProduct() {
 		const optionName = group.dataset.optionName;
 		const optionType = group.dataset.optionType;
 		const checkedInputs = group.querySelectorAll('input:checked');
-		console.log('  group: ' + optionName + ' type=' + optionType + ' checked=' + checkedInputs.length);
 
 		checkedInputs.forEach(input => {
-			console.log('    checked: value=' + input.value + ' data-value=' + input.dataset.value);
 			options.push({
 				product_option_id: productOptionId,
 				product_option_value_id: input.value,
@@ -1376,12 +1377,9 @@ function addProduct() {
 		}
 	});
 
-	console.log('addProduct: FINAL options=', options);
-
 	const requiredOpts = document.querySelectorAll('#product-options-container .product-option-group');
 	const missingRequired = [];
 	requiredOpts.forEach(group => {
-		const optId = group.dataset.productOptionId;
 		const hasSelection = group.querySelector('input:checked, input[type="text"][value]:not([value=""])');
 		const isRequired = group.querySelector('.product-option-group__required');
 		if (isRequired && !hasSelection) {
@@ -1395,8 +1393,6 @@ function addProduct() {
 
 	const data = { product_id: pid, quantity: qty };
 	if (options.length) data.options = JSON.stringify(options);
-
-	console.log('addProduct: pid=' + pid + ' qty=' + qty + ' options=', options);
 
 	api('index.php?route=sale/order_detail/addProduct&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
 		'POST', data).then(j => {
