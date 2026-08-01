@@ -101,7 +101,10 @@ class ControllerExtensionDashboardDockercartCategoryRevenue extends Controller {
 
 		$data['text_category_revenue_subtitle'] = $this->language->get('text_category_revenue_subtitle');
 		$data['text_no_results'] = $this->language->get('text_no_results');
+		$data['text_view'] = $this->language->get('text_view');
 		$data['user_token'] = $this->session->data['user_token'];
+
+		$data['report'] = $this->url->link('report/report', 'user_token=' . $this->session->data['user_token'] . '&code=dockercart_analytics', true) . '#analytics-category-revenue';
 
 		return $this->load->view('extension/dashboard/dockercart_category_revenue_info', $data);
 	}
