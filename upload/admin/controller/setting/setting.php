@@ -131,6 +131,12 @@ class ControllerSettingSetting extends Controller {
 			$data['error_encryption'] = '';
 		}
 
+		if (isset($this->error['stock_reserve_minutes'])) {
+			$data['error_stock_reserve_minutes'] = $this->error['stock_reserve_minutes'];
+		} else {
+			$data['error_stock_reserve_minutes'] = '';
+		}
+
 		if (isset($this->session->data['success'])) {
 			$data['success'] = $this->session->data['success'];
 
@@ -691,6 +697,22 @@ class ControllerSettingSetting extends Controller {
 			$data['config_stock_checkout'] = $this->config->get('config_stock_checkout');
 		}
 
+		if (isset($this->request->post['config_stock_reserve_enabled'])) {
+			$data['config_stock_reserve_enabled'] = $this->request->post['config_stock_reserve_enabled'];
+		} elseif ($this->config->has('config_stock_reserve_enabled')) {
+			$data['config_stock_reserve_enabled'] = (int)$this->config->get('config_stock_reserve_enabled');
+		} else {
+			$data['config_stock_reserve_enabled'] = 0;
+		}
+
+		if (isset($this->request->post['config_stock_reserve_minutes'])) {
+			$data['config_stock_reserve_minutes'] = $this->request->post['config_stock_reserve_minutes'];
+		} elseif ($this->config->has('config_stock_reserve_minutes')) {
+			$data['config_stock_reserve_minutes'] = (int)$this->config->get('config_stock_reserve_minutes');
+		} else {
+			$data['config_stock_reserve_minutes'] = 30;
+		}
+
 		if (isset($this->request->post['config_affiliate_group_id'])) {
 			$data['config_affiliate_group_id'] = $this->request->post['config_affiliate_group_id'];
 		} else {
@@ -1179,6 +1201,10 @@ class ControllerSettingSetting extends Controller {
 		
 		if ((utf8_strlen($this->request->post['config_encryption']) < 32) || (utf8_strlen($this->request->post['config_encryption']) > 1024)) {
 			$this->error['encryption'] = $this->language->get('error_encryption');
+		}
+
+		if (isset($this->request->post['config_stock_reserve_minutes']) && (!is_numeric($this->request->post['config_stock_reserve_minutes']) || (int)$this->request->post['config_stock_reserve_minutes'] < 0)) {
+			$this->error['stock_reserve_minutes'] = $this->language->get('error_stock_reserve_minutes');
 		}
 
 		if ($this->error && !isset($this->error['warning'])) {
