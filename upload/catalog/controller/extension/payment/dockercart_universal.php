@@ -38,7 +38,21 @@ class ControllerExtensionPaymentDockercartUniversal extends Controller {
                 $comment .= "\n\n" . html_entity_decode(strip_tags((string)$description), ENT_QUOTES, 'UTF-8');
             }
 
-            $this->model_checkout_order->addOrderHistory((int)$this->session->data['order_id'], $order_status_id, $comment, true);
+            $order_id = (int)$this->session->data['order_id'];
+            $order_info = $this->model_checkout_order->getOrder($order_id);
+
+            if ($order_info && (int)$order_info['order_status_id'] !== $order_status_id) {
+                // Status changed — record a proper history entry (comment_key +
+                // comment_params holds the payment code) so the timeline can render
+                // the payment method in the viewer's language; comment keeps the
+                // fallback text.
+                $this->model_checkout_order->addOrderHistory($order_id, $order_status_id, $comment, true, false, true, 'order_payment_method', ['code' => $payment_code]);
+            } elseif ($order_info) {
+                // Status unchanged — the checkout already recorded it, so only add
+                // the payment method as a note to avoid duplicating the status entry
+                // in the timeline.
+                $this->model_checkout_order->addOrderNote($order_id, $comment, true, 'order_payment_method', ['code' => $payment_code]);
+            }
 
             $json['redirect'] = $this->url->link('checkout/success');
         }
