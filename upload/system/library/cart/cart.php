@@ -581,6 +581,42 @@ class Cart
                     ) {
                         $price = (float) $variant_special_query->row["price"];
                     }
+
+                    // Variant quantity discounts (DockerCart)
+                    $variant_discount_quantity = 0;
+
+                    foreach ($cart_query->rows as $cart_2) {
+                        if ((int)$cart_2["product_id"] != (int)$cart["product_id"]) {
+                            continue;
+                        }
+
+                        $cart_2_options = json_decode($cart_2["option"], true);
+                        $cart_2_variant_id = isset($cart_2_options["variant_id"]) ? (int)$cart_2_options["variant_id"] : 0;
+
+                        if ($cart_2_variant_id == $variant_id) {
+                            $variant_discount_quantity += (float)$cart_2["quantity"];
+                        }
+                    }
+
+                    $variant_discount_query = $this->db->query(
+                        "SELECT price FROM " .
+                            DB_PREFIX .
+                            "dockercart_product_variant_discount WHERE variant_id = '" .
+                            (int) $variant_id .
+                            "' AND customer_group_id = '" .
+                            (int) $this->config->get("config_customer_group_id") .
+                            "' AND quantity <= '" .
+                            (float) $variant_discount_quantity .
+                            "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) ORDER BY quantity DESC, priority ASC, price ASC LIMIT 1",
+                    );
+
+                    if (
+                        $variant_discount_query->num_rows &&
+                        (float) $variant_discount_query->row["price"] <
+                            (float) $price
+                    ) {
+                        $price = (float) $variant_discount_query->row["price"];
+                    }
                 }
 
                 if (!$variant_id) {
