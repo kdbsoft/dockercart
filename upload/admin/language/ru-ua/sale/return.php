@@ -1,6 +1,7 @@
 <?php
 
 $_['column_action'] = 'Действие';
+$_['column_amount'] = 'Сумма';
 $_['column_comment'] = 'Комментарий';
 $_['column_customer'] = 'Клиент';
 $_['column_date_added'] = 'Дата добавления';
@@ -9,8 +10,13 @@ $_['column_model'] = 'Код товара';
 $_['column_notify'] = 'Клиент уведомлен';
 $_['column_order_id'] = 'Номер заказа';
 $_['column_product'] = 'Товар';
+$_['column_quantity'] = 'Количество';
 $_['column_return_id'] = 'Номер возврата';
 $_['column_status'] = 'Статус';
+$_['text_return_type'] = 'Тип';
+$_['text_return_type_full'] = 'Полный';
+$_['text_return_type_partial'] = 'Частичный';
+$_['text_return_type_exchange'] = 'Обмен';
 $_['entry_comment'] = 'Комментарий';
 $_['entry_customer'] = 'Клиент';
 $_['entry_date_added'] = 'Дата добавления';
@@ -46,6 +52,19 @@ $_['text_add'] = 'Добавить товар для возврата';
 $_['text_edit'] = 'Редактировать возврат товара';
 $_['text_history'] = 'История';
 $_['text_history_add'] = 'Добавить историю';
+$_['text_return_items'] = 'Товары возврата';
+$_['entry_return_type'] = 'Тип возврата';
+$_['text_type_full'] = 'Полный возврат';
+$_['text_type_partial'] = 'Частичный возврат';
+$_['text_type_exchange'] = 'Обмен';
+$_['text_refund'] = 'Возврат денег';
+$_['text_refund_money'] = 'Вернуть деньги (при завершении)';
+$_['text_refunded_already'] = 'Деньги уже возвращены при завершении этого возврата.';
+$_['entry_refund_amount'] = 'Сумма возврата';
+$_['text_return_complete_note'] = 'Возврат #%s завершён';
+$_['text_return_refund_note'] = 'Возврат средств по возврату #%s';
+$_['error_products'] = 'Выберите хотя бы один товар с количеством для возврата!';
+$_['error_amount'] = 'Сумма возврата не может быть отрицательной!';
 $_['text_list'] = 'Список товаров, подлежащих возврату';
 $_['text_opened'] = 'Открыто';
 $_['text_order'] = 'Информация о заказе';
@@ -63,3 +82,5 @@ $_['text_add_return_subtitle'] = 'Оформить новый возврат т�
 $_['text_edit_return_subtitle'] = 'Редактировать данные возврата товара';
 
 
+
+$_['button_export_csv'] = 'Экспорт выбранных возвратов в CSV';
