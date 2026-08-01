@@ -626,7 +626,7 @@ class ModelSaleOrder extends Model {
 			$new_total = round($new_price * $qty, 4);
 
 			$delta_subtotal += ($new_price - $old_price) * $qty;
-			$delta_tax += ($new_tax - $old_tax) * $qty;
+			$delta_tax += $new_tax - $old_tax;
 
 			$this->db->query("UPDATE `" . DB_PREFIX . "order_product` SET price = '" . (float)$new_price . "', tax = '" . (float)$new_tax . "', total = '" . (float)$new_total . "' WHERE order_product_id = '" . $order_product_id . "'");
 
@@ -777,7 +777,8 @@ class ModelSaleOrder extends Model {
 		}
 
 		$unit_price = (float)$product['price'];
-		$unit_tax = (float)$product['tax'];
+		$old_quantity = (float)$product['quantity'];
+		$unit_tax = $old_quantity > 0 ? (float)$product['tax'] / $old_quantity : 0;
 
 		$new_total = round($unit_price * $quantity, 4);
 		$new_tax = round($unit_tax * $quantity, 4);
@@ -809,7 +810,7 @@ class ModelSaleOrder extends Model {
 		return true;
 	}
 
-	public function addProductToOrder($order_id, $product_id, $quantity = 1, $options = array()) {
+	public function calculateProductPricing($order_id, $product_id, $quantity = 1, $options = array()) {
 		$this->load->model('catalog/product');
 
 		$product_info = $this->model_catalog_product->getProduct($product_id);
@@ -828,6 +829,8 @@ class ModelSaleOrder extends Model {
 		$model = $product_info['model'];
 		$price = (float)$product_info['price'];
 		$option_price = 0.0;
+		$stock = (float)$product_info['quantity'];
+		$subtract = (bool)$product_info['subtract'];
 
 		$pc = new \ProductConfigurable($this->registry);
 
@@ -877,6 +880,8 @@ class ModelSaleOrder extends Model {
 				$variant_sku = $variant['sku'] ?? '';
 				$variant_model = $variant['model'] ?? '';
 				$price = (float)$variant['price'];
+				$stock = (float)($variant['quantity'] ?? 0);
+				$subtract = (bool)($variant['subtract'] ?? true);
 
 				if (!empty($variant_model)) {
 					$model = $variant_model;
@@ -917,21 +922,46 @@ class ModelSaleOrder extends Model {
 			}
 		}
 
-		$total = round($price * $quantity, 4);
-		$tax_total = round($tax * $quantity, 4);
+		return array(
+			'product_info'      => $product_info,
+			'quantity'          => $quantity,
+			'price'             => round($price, 4),
+			'option_price'      => round($option_price, 4),
+			'tax'               => round($tax, 4),
+			'total'             => round($price * $quantity, 4),
+			'tax_total'         => round($tax * $quantity, 4),
+			'variant_id'        => $variant_id,
+			'variant_sku'       => $variant_sku,
+			'model'             => $model,
+			'is_configurable'   => (bool)$axis_ids,
+			'stock'             => $stock,
+			'subtract'          => $subtract,
+			'customer_group_id' => $customer_group_id,
+		);
+	}
+
+	public function addProductToOrder($order_id, $product_id, $quantity = 1, $options = array()) {
+		$pricing = $this->calculateProductPricing($order_id, $product_id, $quantity, $options);
+
+		if (!$pricing) {
+			return false;
+		}
+
+		$order_id = (int)$order_id;
+		$product_info = $pricing['product_info'];
 
 		$this->db->query("INSERT INTO `" . DB_PREFIX . "order_product` SET
-			order_id = '" . (int)$order_id . "',
+			order_id = '" . $order_id . "',
 			product_id = '" . (int)$product_id . "',
 			name = '" . $this->db->escape($product_info['name']) . "',
-			model = '" . $this->db->escape($model) . "',
-			quantity = '" . (float)$quantity . "',
-			price = '" . (float)$price . "',
-			total = '" . (float)$total . "',
-			tax = '" . (float)$tax_total . "',
+			model = '" . $this->db->escape($pricing['model']) . "',
+			quantity = '" . (float)$pricing['quantity'] . "',
+			price = '" . (float)$pricing['price'] . "',
+			total = '" . (float)$pricing['total'] . "',
+			tax = '" . (float)$pricing['tax_total'] . "',
 			reward = '" . (int)($product_info['reward'] ?? 0) . "',
-			variant_id = '" . (int)$variant_id . "',
-			variant_sku = '" . $this->db->escape($variant_sku) . "'
+			variant_id = '" . (int)$pricing['variant_id'] . "',
+			variant_sku = '" . $this->db->escape($pricing['variant_sku']) . "'
 		");
 
 		$order_product_id = $this->db->getLastId();
@@ -939,7 +969,7 @@ class ModelSaleOrder extends Model {
 		if ($options) {
 			foreach ($options as $option) {
 				$this->db->query("INSERT INTO `" . DB_PREFIX . "order_option` SET
-					order_id = '" . (int)$order_id . "',
+					order_id = '" . $order_id . "',
 					order_product_id = '" . (int)$order_product_id . "',
 					product_option_id = '" . (int)$option['product_option_id'] . "',
 					product_option_value_id = '" . (int)$option['product_option_value_id'] . "',
