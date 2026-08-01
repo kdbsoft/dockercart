@@ -193,7 +193,7 @@ services:
       start_period: 30s
 
   mariadb:
-    image: mariadb:11.8
+    image: mariadb:latest
     container_name: ${MARIADB_CONTAINER_NAME:-dockercart_mariadb}
     restart: ${RESTART_POLICY:-unless-stopped}
     security_opt:
