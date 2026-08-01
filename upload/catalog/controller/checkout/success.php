@@ -11,6 +11,10 @@ class ControllerCheckoutSuccess extends Controller {
 			$this->session->data['last_order_id'] = $order_id;
 			$this->cart->clear();
 
+			// Release the order-creation claim for this session so a later
+			// checkout can place a new order (see ModelCheckoutOrder::addOrder).
+			$this->db->query("DELETE FROM " . DB_PREFIX . "order_claim WHERE session_id = '" . $this->db->escape(session_id()) . "'");
+
 			unset($this->session->data['shipping_method']);
 			unset($this->session->data['shipping_methods']);
 			unset($this->session->data['payment_method']);

@@ -28,6 +28,14 @@ class Cart
                 "cart WHERE customer_id = '0' AND date_added < DATE_SUB(NOW(), INTERVAL 30 DAY)",
         );
 
+        // Prune stale order-creation claims (abandoned checkouts) so a session
+        // id that is never reused cannot accumulate rows forever.
+        $this->db->query(
+            "DELETE FROM " .
+                DB_PREFIX .
+                "order_claim WHERE date_added < DATE_SUB(NOW(), INTERVAL 1 DAY)",
+        );
+
         // Try to recover guest carts when session id has changed by using a persistent cookie.
         // This helps when session storage or session IDs rotate but the user returns shortly after.
         if (isset($registry)) {
