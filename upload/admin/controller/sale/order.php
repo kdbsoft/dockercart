@@ -814,7 +814,11 @@ class ControllerSaleOrder extends Controller {
 				$order_info = $this->model_sale_order->getOrder($order_id);
 
 				if ($order_info) {
-					if (!$this->model_sale_order->addOrderHistory($order_id, $order_status_id, $comment, $notify, $override)) {
+					$shipping_status_id = (int)$this->config->get('config_order_flow_shipping_status');
+
+					if (!$override && $shipping_status_id > 0 && $order_status_id === $shipping_status_id && !$order_info['tracking_number']) {
+						$json['error'] = $this->language->get('error_tracking_required');
+					} elseif (!$this->model_sale_order->addOrderHistory($order_id, $order_status_id, $comment, $notify, $override)) {
 						$json['error'] = $this->language->get('error_invalid_transition');
 					} else {
 						$json['success'] = $this->language->get('text_success');
