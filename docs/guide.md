@@ -18,6 +18,7 @@
 12. [Buy X Get Y (BXGY)](#12-buy-x-get-y-bxgy)
 13. [Order Multilingual Display](#13-order-multilingual-display)
 14. [Order Flow](#14-order-flow)
+15. [Product Returns (full / partial / exchange)](#15-product-returns-full--partial--exchange)
 
 ---
 
@@ -837,6 +838,26 @@ explicit confirmation. The previous free-form status select is still available
 in the sidebar under "Change status" with a "Force" checkbox that bypasses
 validation.
 
+### Shipments (tracking numbers)
+
+Order tracking lives in `oc_order_shipment` / `oc_order_shipment_item`
+(migration `20260802_add_order_shipments.sql`). One row = one tracking
+number; items store how much of each order product goes with that number,
+so **partial shipments** are just several rows for the same order:
+
+- The **Shipments** sidebar card lists every tracking number with its items,
+  plus a shipping progress bar per product (shipped / ordered).
+- The **transition modal** shows a tracking-number field and per-product
+  quantities (pre-filled with the remaining amount) when the target status
+  equals `config_order_flow_shipping_status` (default `128` Shipped; set on
+  the System → Order Flow page). Confirming creates the shipment first and
+  then moves the order status.
+- Additional partial shipments can be added any time from the Shipments card
+  (e.g. while the order is already Shipped).
+- `oc_order.tracking_number` is kept in sync as a `|`-joined aggregate of all
+  shipment tracking numbers (used by the order list / print views); deleting
+  a shipment or an order product rebuilds it.
+
 ### Notes
 
 - The default chain uses statuses `1, 132, 133, 128, 129` (131 Awaiting
@@ -852,3 +873,52 @@ validation.
   settings idempotently (`INSERT IGNORE`-style; re-running `make migrate`
   never clobbers your customizations — the seed only applies when the keys
   are absent).
+
+## 15. Product Returns (full / partial / exchange)
+
+Returns are multi-item entities (`oc_return_product` per returned order line,
+migration `20260803_add_return_products.sql`) with a return **type**, a
+**refund amount** and a **refunded** flag:
+
+| Type | Meaning |
+|---|---|
+| `full` | Everything is returned. On completion the order is moved to the Refunded order status (134) |
+| `partial` | Part of the items / quantities is returned; the order keeps its status |
+| `exchange` | Items are returned to stock, no money is refunded (price difference is settled manually via the order's payment journal) |
+
+### Workflow
+
+- **Create from the order page**: the "More actions" menu on the order
+  details page links to `sale/return/add&order_id=...`, which pre-fills the
+  customer data and the order's line items (checkbox + quantity per item,
+  unit price from the order).
+- **Refund**: a "Refund money" checkbox plus the refund amount (JS
+  auto-calculates: `full` → paid amount, `partial` → sum of selected items,
+  `exchange` → 0). The amount is capped at `paid_amount`.
+- **Completion** (return status → Complete, 3) automatically:
+  1. restocks every returned item (`oc_product.quantity`, variant-aware),
+  2. creates a reversal in the order's payment journal
+     (`oc_order_payment`, `addOrderRefund()`, capped at `paid_amount`) and
+     marks the return `refunded`, and
+  3. for `full` returns, moves the order to the Refunded order status (134)
+     via `addOrderHistory(..., override=true)`.
+  Re-running the completion (already Complete) does nothing — restock/refund
+  are guarded by the status change and the `refunded` flag.
+- The admin return form still supports the legacy single-product path
+  (manual product/model/quantity) when no order items are available.
+
+### Catalog side
+
+`catalog/model/account/return.php addReturn()` now also writes the returned
+line into `oc_return_product` (linked to `oc_order_product`, including
+variant and price), so customer-created return requests show full item
+details in admin.
+
+### Notes
+
+- The return status machine is unchanged (Pending / Awaiting Products /
+  Complete) — the money movement is tied to **Complete**, not to the action.
+- `oc_return_action` (Refunded / Credit Issued / Replacement Sent) remains a
+  descriptive field.
+- Emails to the customer still go through the `admin_mail_return` event when
+  a return history entry is added with `notify = 1`.

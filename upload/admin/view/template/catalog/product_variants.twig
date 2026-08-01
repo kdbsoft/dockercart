@@ -302,7 +302,7 @@ function buildVariantRow(productId, variant, axes, defaultVariantId) {
 	var isNew = variantId === 0;
 	var optionValues = {};
 	var cgHasPrices = variant.customer_group_prices && variant.customer_group_prices.length;
-	var hasArticles = variant.sku || variant.upc || variant.ean || variant.mpn;
+	var hasArticles = variant.sku || variant.upc || variant.ean || variant.jan || variant.isbn || variant.mpn;
 	var hasSpecials = variant.variant_specials && variant.variant_specials.length;
 	var hasDiscounts = variant.variant_discounts && variant.variant_discounts.length;
 	var articlesVisible = hasArticles;
@@ -380,6 +380,8 @@ function buildVariantRow(productId, variant, axes, defaultVariantId) {
 	html += '<label><span><i data-lucide="package" width="12" height="12"></i> {{ entry_sku|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-sku-article" value="' + (variant.sku || '') + '" placeholder="SKU" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
 	html += '<label><span><i data-lucide="scan-line" width="12" height="12"></i> {{ entry_upc|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-upc" value="' + (variant.upc || '') + '" placeholder="UPC" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
 	html += '<label><span><i data-lucide="hash" width="12" height="12"></i> {{ entry_ean|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-ean" value="' + (variant.ean || '') + '" placeholder="EAN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
+	html += '<label><span><i data-lucide="hash" width="12" height="12"></i> {{ entry_jan|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-jan" value="' + (variant.jan || '') + '" placeholder="JAN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
+	html += '<label><span><i data-lucide="book-open" width="12" height="12"></i> {{ entry_isbn|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-isbn" value="' + (variant.isbn || '') + '" placeholder="ISBN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
 	html += '<label><span><i data-lucide="tag" width="12" height="12"></i> {{ entry_mpn|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-mpn" value="' + (variant.mpn || '') + '" placeholder="MPN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
 	html += '</div>';
 	html += '</div>';
@@ -537,6 +539,8 @@ function addVariantRow(productId) {
 	html += '<label><span><i data-lucide="package" width="12" height="12"></i> {{ entry_sku|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-sku-article" value="" placeholder="SKU" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
 	html += '<label><span><i data-lucide="scan-line" width="12" height="12"></i> {{ entry_upc|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-upc" value="" placeholder="UPC" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
 	html += '<label><span><i data-lucide="hash" width="12" height="12"></i> {{ entry_ean|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-ean" value="" placeholder="EAN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
+	html += '<label><span><i data-lucide="hash" width="12" height="12"></i> {{ entry_jan|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-jan" value="" placeholder="JAN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
+	html += '<label><span><i data-lucide="book-open" width="12" height="12"></i> {{ entry_isbn|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-isbn" value="" placeholder="ISBN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
 	html += '<label><span><i data-lucide="tag" width="12" height="12"></i> {{ entry_mpn|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-mpn" value="" placeholder="MPN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
 	html += '</div>';
 	html += '</div>';
@@ -669,7 +673,7 @@ function updateSubrowBadges(rowIdx) {
 	var $subrow = $('#dc-variant-cg-row-' + rowIdx);
 
 	var articles = 0;
-	$row.find('.dc-variant-sku-article, .dc-variant-upc, .dc-variant-ean, .dc-variant-mpn').each(function() {
+	$row.find('.dc-variant-sku-article, .dc-variant-upc, .dc-variant-ean, .dc-variant-jan, .dc-variant-isbn, .dc-variant-mpn').each(function() {
 		if ($(this).val()) articles++;
 	});
 	var cgCount = $subrow.find('#dc-cg-prices-' + rowIdx + ' .dc-cg-row').length;
@@ -827,6 +831,8 @@ function saveVariantRow(rowIdx, onSuccess) {
 		sku: cgRow.find('.dc-variant-sku-article').val() || '',
 		upc: cgRow.find('.dc-variant-upc').val() || '',
 		ean: cgRow.find('.dc-variant-ean').val() || '',
+		jan: cgRow.find('.dc-variant-jan').val() || '',
+		isbn: cgRow.find('.dc-variant-isbn').val() || '',
 		mpn: cgRow.find('.dc-variant-mpn').val() || '',
 		price: row.find('.dc-variant-price').val() || 0,
 		quantity: row.find('.dc-variant-qty').val() || 0,
