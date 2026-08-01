@@ -2155,6 +2155,10 @@ class ModelSaleOrder extends Model {
 					}
 				}
 
+				// Release checkout holds bound to this order: stock was just subtracted.
+				$stock_reservation = new \DockercartStockReservation($this->registry);
+				$stock_reservation->releaseOrder((int)$order_id);
+
 				if ((int)$lock_query->row['affiliate_id'] && $this->config->get('config_affiliate_auto')) {
 					$this->db->query("INSERT INTO `" . DB_PREFIX . "customer_transaction` SET customer_id = '" . (int)$lock_query->row['affiliate_id'] . "', order_id = '" . (int)$order_id . "', description = '" . $this->db->escape('Order #' . $order_id) . "', amount = '" . (float)$lock_query->row['commission'] . "', date_added = NOW()");
 				}
@@ -2175,6 +2179,10 @@ class ModelSaleOrder extends Model {
 						$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET quantity = (quantity + " . (float)$order_product['quantity'] . ") WHERE variant_id = '" . (int)$order_product['variant_id'] . "' AND subtract = '1'");
 					}
 				}
+
+				// Release any remaining checkout holds bound to this order (restock).
+				$stock_reservation = new \DockercartStockReservation($this->registry);
+				$stock_reservation->releaseOrder((int)$order_id);
 
 				if ((int)$lock_query->row['affiliate_id']) {
 					$this->db->query("DELETE FROM `" . DB_PREFIX . "customer_transaction` WHERE order_id = '" . (int)$order_id . "'");
