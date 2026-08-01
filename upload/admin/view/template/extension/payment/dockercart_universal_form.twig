@@ -130,6 +130,14 @@
                       <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="0" id="input-sort-order" class="form-control" style="max-width:100px;" />
                     </div>
                   </div>
+                  <div class="dcx-field">
+                    <label class="dcx-label" for="input-reserve-minutes">{{ entry_reserve_minutes }} <span title="{{ help_reserve_minutes }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                    <input type="number" name="reserve_minutes" value="{{ reserve_minutes }}" placeholder="{{ text_reserve_global }}" id="input-reserve-minutes" class="form-control" min="0" style="max-width:150px;" />
+                    <div class="help-block">{{ help_reserve_minutes }}</div>
+                    {% if error_reserve_minutes %}
+                    <div class="text-danger">{{ error_reserve_minutes }}</div>
+                    {% endif %}
+                  </div>
                 </div>
               </form>
             </div>

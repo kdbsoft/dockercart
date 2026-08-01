@@ -16,6 +16,7 @@ class ModelExtensionPaymentDockercartUniversal extends Model {
         parent::__construct($registry);
 
         $this->ensureShippingMethodsColumn();
+        $this->ensureReserveMinutesColumn();
     }
 
     /**
@@ -74,6 +75,7 @@ class ModelExtensionPaymentDockercartUniversal extends Model {
             `min_total` = " . ($data['min_total'] !== '' ? "'" . (float)$data['min_total'] . "'" : "NULL") . ",
             `max_total` = " . ($data['max_total'] !== '' ? "'" . (float)$data['max_total'] . "'" : "NULL") . ",
             `shipping_methods` = " . (!empty($shipping_methods) ? "'" . $this->db->escape(json_encode($shipping_methods)) . "'" : "NULL") . ",
+            `reserve_minutes` = " . (isset($data['reserve_minutes']) && $data['reserve_minutes'] !== '' ? "'" . (int)$data['reserve_minutes'] . "'" : "NULL") . ",
             `status` = '" . (int)($data['status'] ?? 1) . "',
             `sort_order` = '" . (int)($data['sort_order'] ?? 0) . "',
             `date_added` = NOW(),
@@ -110,6 +112,7 @@ class ModelExtensionPaymentDockercartUniversal extends Model {
             `min_total` = " . ($data['min_total'] !== '' ? "'" . (float)$data['min_total'] . "'" : "NULL") . ",
             `max_total` = " . ($data['max_total'] !== '' ? "'" . (float)$data['max_total'] . "'" : "NULL") . ",
             `shipping_methods` = " . (!empty($shipping_methods) ? "'" . $this->db->escape(json_encode($shipping_methods)) . "'" : "NULL") . ",
+            `reserve_minutes` = " . (isset($data['reserve_minutes']) && $data['reserve_minutes'] !== '' ? "'" . (int)$data['reserve_minutes'] . "'" : "NULL") . ",
             `status` = '" . (int)($data['status'] ?? 1) . "',
             `sort_order` = '" . (int)($data['sort_order'] ?? 0) . "',
             `date_modified` = NOW()
@@ -228,6 +231,25 @@ class ModelExtensionPaymentDockercartUniversal extends Model {
 
         if (!$column->num_rows) {
             $this->db->query("ALTER TABLE `" . $this->db->escape($table) . "` ADD `shipping_methods` TEXT NULL AFTER `max_total`");
+        }
+    }
+
+    /**
+     * Ensure reserve_minutes column exists for old installations.
+     */
+    protected function ensureReserveMinutesColumn(): void {
+        $table = DB_PREFIX . 'dockercart_universal_payment';
+
+        $check = $this->db->query("SHOW TABLES LIKE '" . $this->db->escape($table) . "'");
+
+        if (!$check->num_rows) {
+            return;
+        }
+
+        $column = $this->db->query("SHOW COLUMNS FROM `" . $this->db->escape($table) . "` LIKE 'reserve_minutes'");
+
+        if (!$column->num_rows) {
+            $this->db->query("ALTER TABLE `" . $this->db->escape($table) . "` ADD `reserve_minutes` INT(11) NULL DEFAULT NULL AFTER `sort_order`");
         }
     }
 
