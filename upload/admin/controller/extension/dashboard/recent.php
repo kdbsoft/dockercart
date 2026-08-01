@@ -106,10 +106,11 @@ class ControllerExtensionDashboardRecent extends Controller {
 		$order_products = array();
 		if ($order_ids) {
 			$product_query = $this->db->query(
-				"SELECT order_id, name, quantity FROM " . DB_PREFIX . "order_product WHERE order_id IN (" . implode(',', $order_ids) . ") ORDER BY order_id, order_product_id ASC"
+				"SELECT order_id, product_id, name, quantity FROM " . DB_PREFIX . "order_product WHERE order_id IN (" . implode(',', $order_ids) . ") ORDER BY order_id, order_product_id ASC"
 			);
 			foreach ($product_query->rows as $row) {
 				$order_products[$row['order_id']][] = array(
+					'product_id' => (int)$row['product_id'],
 					'name'     => $row['name'],
 					'quantity' => (int)$row['quantity'],
 				);
@@ -138,11 +139,12 @@ class ControllerExtensionDashboardRecent extends Controller {
 			$product_names = array();
 			$max_show = 3;
 			$count = 0;
+			$order_localizer = new OrderLocalizer($this->registry);
 			foreach ($products as $p) {
 				if ($count >= $max_show) {
 					break;
 				}
-				$product_names[] = $p['name'];
+				$product_names[] = $order_localizer->productName($p);
 				$count++;
 			}
 			$has_more = count($products) > $max_show;
@@ -164,8 +166,8 @@ class ControllerExtensionDashboardRecent extends Controller {
 				'date_added'                => date($this->language->get('datetime_format'), strtotime($result['date_added'])),
 				'total'                     => $this->currency->format($result['total'], $result['currency_code'], $result['currency_value']),
 				'view'                      => $this->url->link('sale/order/info', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $order_id, true),
-				'payment_method'            => !empty($result['payment_method']) ? $result['payment_method'] : '',
-				'shipping_method'           => !empty($result['shipping_method']) ? $result['shipping_method'] : '',
+				'payment_method'            => $order_localizer->paymentMethodTitle($result),
+				'shipping_method'           => $order_localizer->shippingMethodTitle($result),
 				'tracking_number'           => $tracking_number,
 				'total_items'               => $total_items,
 				'product_names'             => $product_names,

@@ -1,5 +1,15 @@
 <?php
 class ControllerAccountOrder extends Controller {
+	private $order_localizer = null;
+
+	private function orderLocalizer() {
+		if ($this->order_localizer === null) {
+			$this->order_localizer = new OrderLocalizer($this->registry);
+		}
+
+		return $this->order_localizer;
+	}
+
 	public function index() {
 		if (!$this->customer->isLogged()) {
 			$this->session->data['redirect'] = $this->url->link('account/order', '', true);
@@ -190,14 +200,14 @@ class ControllerAccountOrder extends Controller {
 				'address_2' => $order_info['payment_address_2'],
 				'city'      => $order_info['payment_city'],
 				'postcode'  => $order_info['payment_postcode'],
-				'zone'      => $order_info['payment_zone'],
+				'zone'      => $this->orderLocalizer()->zoneName($order_info, 'payment'),
 				'zone_code' => $order_info['payment_zone_code'],
-				'country'   => $order_info['payment_country']
+				'country'   => $this->orderLocalizer()->countryName($order_info, 'payment')
 			);
 
 			$data['payment_address'] = str_replace(array("\r\n", "\r", "\n"), '<br />', preg_replace(array("/\s\s+/", "/\r\r+/", "/\n\n+/"), '<br />', trim(str_replace($find, $replace, $format))));
 
-			$data['payment_method'] = $order_info['payment_method'];
+			$data['payment_method'] = $this->orderLocalizer()->paymentMethodTitle($order_info);
 
 			$data['total'] = $this->currency->format($order_info['total'], $order_info['currency_code'], $order_info['currency_value']);
 			$data['paid_amount'] = $this->currency->format($order_info['paid_amount'], $order_info['currency_code'], $order_info['currency_value']);
@@ -213,7 +223,7 @@ class ControllerAccountOrder extends Controller {
 				$data['payments'][] = array(
 					'amount'         => $this->currency->format(abs($payment['amount']), $order_info['currency_code'], $order_info['currency_value']),
 					'is_reversal'    => (float)$payment['amount'] < 0,
-					'payment_method' => $payment['payment_method'],
+					'payment_method' => $this->orderLocalizer()->paymentEntryTitle($payment),
 					'date_added'     => date($this->language->get('date_format_short'), strtotime($payment['date_added'])),
 				);
 			}
@@ -245,14 +255,14 @@ class ControllerAccountOrder extends Controller {
 				'address_2' => $order_info['shipping_address_2'],
 				'city'      => $order_info['shipping_city'],
 				'postcode'  => $order_info['shipping_postcode'],
-				'zone'      => $order_info['shipping_zone'],
+				'zone'      => $this->orderLocalizer()->zoneName($order_info, 'shipping'),
 				'zone_code' => $order_info['shipping_zone_code'],
-				'country'   => $order_info['shipping_country']
+				'country'   => $this->orderLocalizer()->countryName($order_info, 'shipping')
 			);
 
 			$data['shipping_address'] = str_replace(array("\r\n", "\r", "\n"), '<br />', preg_replace(array("/\s\s+/", "/\r\r+/", "/\n\n+/"), '<br />', trim(str_replace($find, $replace, $format))));
 
-			$data['shipping_method'] = $order_info['shipping_method'];
+			$data['shipping_method'] = $this->orderLocalizer()->shippingMethodTitle($order_info);
 
 			$this->load->model('catalog/product');
 			$this->load->model('tool/upload');
@@ -268,9 +278,7 @@ class ControllerAccountOrder extends Controller {
 				$options = $this->model_account_order->getOrderOptions($this->request->get['order_id'], $product['order_product_id']);
 
 				foreach ($options as $option) {
-					if ($option['type'] != 'file') {
-						$value = $option['value'];
-					} else {
+					if ($option['type'] == 'file') {
 						$upload_info = $this->model_tool_upload->getUploadByCode($option['value']);
 
 						if ($upload_info) {
@@ -278,10 +286,12 @@ class ControllerAccountOrder extends Controller {
 						} else {
 							$value = '';
 						}
+					} else {
+						$value = $this->orderLocalizer()->optionValue($option);
 					}
 
 					$option_data[] = array(
-						'name'  => $option['name'],
+						'name'  => $this->orderLocalizer()->optionName($option),
 						'value' => (utf8_strlen($value) > 20 ? utf8_substr($value, 0, 20) . '..' : $value)
 					);
 				}
@@ -295,7 +305,7 @@ class ControllerAccountOrder extends Controller {
 				}
 
 				$data['products'][] = array(
-					'name'     => $product['name'],
+					'name'     => $this->orderLocalizer()->productName($product),
 					'model'    => $product['model'],
 					'option'   => $option_data,
 					'quantity' => $product['quantity'],
@@ -322,10 +332,11 @@ class ControllerAccountOrder extends Controller {
 			$data['totals'] = array();
 
 			$totals = $this->model_account_order->getOrderTotals($this->request->get['order_id']);
+			$shipping_method_title = $this->orderLocalizer()->shippingMethodTitle($order_info);
 
 			foreach ($totals as $total) {
 				$data['totals'][] = array(
-					'title' => $total['title'],
+					'title' => $this->orderLocalizer()->totalTitle($total, $shipping_method_title),
 					'text'  => $this->currency->format($total['value'], $order_info['currency_code'], $order_info['currency_value']),
 				);
 			}
@@ -338,10 +349,18 @@ class ControllerAccountOrder extends Controller {
 			$results = $this->model_account_order->getOrderHistories($this->request->get['order_id']);
 
 			foreach ($results as $result) {
+				$comment = $result['comment'];
+
+				$resolved = $this->orderLocalizer()->historyComment($result);
+
+				if ($resolved !== null) {
+					$comment = $resolved;
+				}
+
 				$data['histories'][] = array(
 					'date_added' => date($this->language->get('date_format_short'), strtotime($result['date_added'])),
 					'status'     => $result['status'],
-					'comment'    => $result['notify'] ? nl2br($result['comment']) : ''
+					'comment'    => $result['notify'] ? nl2br($comment) : ''
 				);
 			}
 
