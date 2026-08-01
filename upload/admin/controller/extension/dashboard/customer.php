@@ -127,7 +127,7 @@ class ControllerExtensionDashboardCustomer extends Controller {
 
 		$data['total'] = '—';
 		$data['percentage'] = 0;
-		$data['customer'] = $this->url->link('customer/customer', 'user_token=' . $this->session->data['user_token'], true);
+		$data['customer'] = $this->url->link('report/report', 'user_token=' . $this->session->data['user_token'] . '&code=customer_order', true);
 
 		return $this->load->view('extension/dashboard/customer_info', $data);
 	}
