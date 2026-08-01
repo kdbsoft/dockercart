@@ -111,6 +111,24 @@ class ModelExtensionTotalVoucher extends Model {
 			$voucher_info = $this->getVoucher($code);
 
 			if ($voucher_info) {
+				// Serialize concurrent redemptions of the same voucher. Locking
+				// reads see the latest committed state even under REPEATABLE READ;
+				// this method runs inside the caller's transaction (catalog model
+				// checkout/order addOrderHistory).
+				$voucher_lock = $this->db->query("SELECT voucher_id, amount FROM `" . DB_PREFIX . "voucher` WHERE voucher_id = '" . (int)$voucher_info['voucher_id'] . "' FOR UPDATE");
+
+				if (!$voucher_lock->num_rows) {
+					return $this->config->get('config_fraud_status_id');
+				}
+
+				$history_query = $this->db->query("SELECT SUM(amount) AS total FROM `" . DB_PREFIX . "voucher_history` WHERE voucher_id = '" . (int)$voucher_info['voucher_id'] . "' FOR UPDATE");
+
+				$remaining = (float)$voucher_lock->row['amount'] + (float)$history_query->row['total'];
+
+				if ($remaining <= 0) {
+					return $this->config->get('config_fraud_status_id');
+				}
+
 				$this->db->query("INSERT INTO `" . DB_PREFIX . "voucher_history` SET voucher_id = '" . (int)$voucher_info['voucher_id'] . "', order_id = '" . (int)$order_info['order_id'] . "', amount = '" . (float)$order_total['value'] . "', date_added = NOW()");
 			} else {
 				return $this->config->get('config_fraud_status_id');

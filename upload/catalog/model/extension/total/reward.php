@@ -60,12 +60,23 @@ class ModelExtensionTotalReward extends Model {
 		$end = strrpos($order_total['title'], ')');
 
 		if ($start && $end) {
-			$points = substr($order_total['title'], $start, $end - $start);
+			$points = (int)substr($order_total['title'], $start, $end - $start);
+		}
+
+		if ($points <= 0 || !$order_info['customer_id']) {
+			return $this->config->get('config_fraud_status_id');
 		}
 
 		$this->load->model('account/customer');
 
-		if ($this->model_account_customer->getRewardTotal($order_info['customer_id']) >= $points) {
+		// Serialize concurrent redemptions for this customer. Locking reads see
+		// the latest committed state even under REPEATABLE READ; this method runs
+		// inside the caller's transaction (catalog model checkout/order addOrderHistory).
+		$this->db->query("SELECT customer_id FROM `" . DB_PREFIX . "customer` WHERE customer_id = '" . (int)$order_info['customer_id'] . "' FOR UPDATE");
+
+		$reward_query = $this->db->query("SELECT SUM(points) AS total FROM `" . DB_PREFIX . "customer_reward` WHERE customer_id = '" . (int)$order_info['customer_id'] . "' FOR UPDATE");
+
+		if ((float)$reward_query->row['total'] >= $points) {
 			$this->db->query("INSERT INTO " . DB_PREFIX . "customer_reward SET customer_id = '" . (int)$order_info['customer_id'] . "', order_id = '" . (int)$order_info['order_id'] . "', description = '" . $this->db->escape(sprintf($this->language->get('text_order_id'), (int)$order_info['order_id'])) . "', points = '" . (float)-$points . "', date_added = NOW()");
 		} else {
 			return $this->config->get('config_fraud_status_id');

@@ -1,9 +1,28 @@
 <?php
 class ModelAccountReturn extends Model {
 	public function addReturn($data) {
-		$this->db->query("INSERT INTO `" . DB_PREFIX . "return` SET order_id = '" . (int)$data['order_id'] . "', product_id = '" . (int)$data['product_id'] . "', customer_id = '" . (int)$this->customer->getId() . "', firstname = '" . $this->db->escape($data['firstname']) . "', lastname = '" . $this->db->escape($data['lastname']) . "', email = '" . $this->db->escape($data['email']) . "', telephone = '" . $this->db->escape($data['telephone']) . "', product = '" . $this->db->escape($data['product']) . "', model = '" . $this->db->escape($data['model']) . "', quantity = '" . (int)$data['quantity'] . "', opened = '" . (int)$data['opened'] . "', return_reason_id = '" . (int)$data['return_reason_id'] . "', return_status_id = '" . (int)$this->config->get('config_return_status_id') . "', comment = '" . $this->db->escape($data['comment']) . "', date_ordered = '" . $this->db->escape($data['date_ordered']) . "', date_added = NOW(), date_modified = NOW()");
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "return` SET order_id = '" . (int)$data['order_id'] . "', product_id = '" . (int)$data['product_id'] . "', customer_id = '" . (int)$this->customer->getId() . "', firstname = '" . $this->db->escape($data['firstname']) . "', lastname = '" . $this->db->escape($data['lastname']) . "', email = '" . $this->db->escape($data['email']) . "', telephone = '" . $this->db->escape($data['telephone']) . "', product = '" . $this->db->escape($data['product']) . "', model = '" . $this->db->escape($data['model']) . "', quantity = '" . (int)$data['quantity'] . "', amount = '" . (float)($data['amount'] ?? 0) . "', opened = '" . (int)$data['opened'] . "', return_reason_id = '" . (int)$data['return_reason_id'] . "', return_status_id = '" . (int)$this->config->get('config_return_status_id') . "', comment = '" . $this->db->escape($data['comment']) . "', date_ordered = '" . $this->db->escape($data['date_ordered']) . "', date_added = NOW(), date_modified = NOW()");
 
-		return $this->db->getLastId();
+		$return_id = $this->db->getLastId();
+
+		// Link the returned item to the order line so the admin can see the
+		// full item details (variant, price) and restock/refund on completion.
+		$order_product_query = $this->db->query("SELECT order_product_id, variant_id, price, total FROM `" . DB_PREFIX . "order_product` WHERE order_id = '" . (int)$data['order_id'] . "' AND product_id = '" . (int)$data['product_id'] . "' ORDER BY order_product_id DESC LIMIT 1");
+
+		$order_product = $order_product_query->num_rows ? $order_product_query->row : array();
+
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "return_product` SET
+			return_id = '" . (int)$return_id . "',
+			order_product_id = '" . (int)($order_product['order_product_id'] ?? 0) . "',
+			product_id = '" . (int)$data['product_id'] . "',
+			variant_id = '" . (int)($order_product['variant_id'] ?? 0) . "',
+			name = '" . $this->db->escape($data['product']) . "',
+			model = '" . $this->db->escape($data['model']) . "',
+			quantity = '" . (int)$data['quantity'] . "',
+			price = '" . (float)($order_product['price'] ?? 0) . "',
+			total = '" . (float)($order_product['total'] ?? 0) . "'");
+
+		return $return_id;
 	}
 
 	public function getReturn($return_id) {
