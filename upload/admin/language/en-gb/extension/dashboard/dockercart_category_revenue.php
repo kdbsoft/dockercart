@@ -14,6 +14,7 @@ $_['text_year']        = 'Year';
 $_['text_pcs']         = 'pcs';
 $_['text_uncategorized'] = 'Uncategorized';
 $_['text_no_results']  = 'No sales data yet';
+$_['text_view']        = 'View more →';
 
 $_['text_category_revenue_subtitle'] = 'Revenue distribution across categories';
 $_['text_edit_subtitle'] = 'Configure extension settings and options';
