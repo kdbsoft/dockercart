@@ -323,6 +323,11 @@ find upload -type f -name "*.php" ! -path 'storage/vendor/*' -print0 | xargs -0 
 - **CSS:** Tailwind CSS 3 — build with `npm run build:css`, watch with `npm run watch:css`
 - **Icons:** Lucide icons — not Font Awesome
 - Compiles to `upload/catalog/view/theme/dockercart/stylesheet/tailwind.css`
+- **Voice search** (Web Speech API): microphone button on catalog search inputs (header + results page),
+  injected script `upload/catalog/view/javascript/dockercart_voice_search.js` via the
+  `catalog/view/common/header/after` event. Toggle: admin → Search module → Autocomplete → "Enable Voice Search".
+  Recognized phrase fills the input and fires an `input` event (autocomplete picks it up); no auto-submit.
+  Works in Chrome/Edge/Safari over HTTPS; hidden in unsupported browsers.
 
 ### Database Migrations
 
