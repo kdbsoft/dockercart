@@ -1785,3 +1785,55 @@ div.dcx-field.required > .dcx-label:before {
     border-radius: var(--dc-radius-md);
   }
 }
+
+/* Order Flow configurator */
+.flow-step-row,
+.flow-transition-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border: 1px solid var(--dc-border, #e5e7eb);
+    border-radius: 8px;
+    margin-bottom: 6px;
+    background: var(--dc-surface, #fff);
+}
+.flow-step-name {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--dc-text-heading, #111);
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.flow-step-btn {
+    flex-shrink: 0;
+}
+.flow-transition-row .form-control {
+    flex: 1;
+    min-width: 0;
+}
+.flow-transition-arrow {
+    color: #9ca3af;
+    flex-shrink: 0;
+    display: flex;
+}
+.flow-step-add {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    max-width: 420px;
+}
+.flow-step-add .form-control {
+    flex: 1;
+}
+.flow-rules {
+    margin: 0;
+    padding-left: 18px;
+    color: #555;
+    font-size: 13px;
+    line-height: 1.7;
+}
