@@ -142,6 +142,52 @@ class ControllerSaleOrderDetail extends Controller {
 		$this->load->model('localisation/order_status');
 		$data['order_statuses'] = $this->model_localisation_order_status->getOrderStatuses();
 
+		$order_flow = new \OrderFlow([
+			'steps'       => (array)$this->config->get('config_order_flow_steps'),
+			'transitions' => (array)$this->config->get('config_order_flow_transitions'),
+		]);
+
+		$status_names = [];
+
+		foreach ($data['order_statuses'] as $status) {
+			$status_names[(int)$status['order_status_id']] = $status['name'];
+		}
+
+		$data['flow_enabled'] = $order_flow->isEnabled();
+		$current_index = $order_flow->getStepIndex((int)$order_info['order_status_id']);
+
+		$data['flow_steps'] = [];
+
+		foreach ($order_flow->getSteps() as $step) {
+			$index = $order_flow->getStepIndex($step);
+
+			if ($current_index >= 0) {
+				$state = $index < $current_index ? 'done' : ($index === $current_index ? 'current' : 'upcoming');
+			} else {
+				$state = 'upcoming';
+			}
+
+			$data['flow_steps'][] = [
+				'order_status_id' => $step,
+				'name'            => $status_names[$step] ?? '',
+				'state'           => $state,
+				'index'           => $index,
+			];
+		}
+
+		$data['flow_current_index'] = $current_index;
+		$data['flow_terminal'] = $order_flow->isTerminal((int)$order_info['order_status_id']);
+
+		$data['flow_transitions'] = [];
+
+		foreach ($order_flow->getAllowedTransitions((int)$order_info['order_status_id']) as $target) {
+			$data['flow_transitions'][] = [
+				'order_status_id' => $target,
+				'name'            => $status_names[$target] ?? '',
+				'terminal'        => $order_flow->isTerminal($target),
+			];
+		}
+
 		$this->load->model('localisation/country');
 		$data['countries'] = $this->model_localisation_country->getCountries();
 
@@ -490,9 +536,11 @@ class ControllerSaleOrderDetail extends Controller {
 			} else {
 				$this->load->model('sale/order');
 
-				$this->model_sale_order->addOrderHistory($order_id, $order_status_id, $comment, $notify, $override);
-
-				$json['success'] = $this->language->get('text_success');
+				if (!$this->model_sale_order->addOrderHistory($order_id, $order_status_id, $comment, $notify, $override)) {
+					$json['error'] = $this->language->get('error_invalid_transition');
+				} else {
+					$json['success'] = $this->language->get('text_success');
+				}
 			}
 		}
 
