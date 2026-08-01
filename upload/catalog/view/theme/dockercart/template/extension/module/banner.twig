@@ -90,7 +90,7 @@
 </style>
 
 {% set is_vertical = banner_height > banner_width %}
-<div class="banner-slider{% if is_vertical %} banner--vertical{% else %} banner--horizontal{% endif %} banner-layout--{{ banner_layout|default('grid') }}{% if full_width %} banner-slider--full-width{% endif %}" id="banner-{{ module }}" data-autoplay="3500">
+<div class="banner-slider{% if is_vertical %} banner--vertical{% else %} banner--horizontal{% endif %} banner-layout--{{ banner_layout|default('grid') }}{% if full_width %} banner-slider--full-width{% endif %} select-none" id="banner-{{ module }}" data-autoplay="3500">
   <div class="banner-slides{% if banner_layout == 'stack' %} banner-slides--stack{% endif %}">
     {% for banner in banners %}
       <div class="banner-slide{% if loop.first %} active{% endif %}" style="--stack-index: {{ loop.index }};">
@@ -212,6 +212,40 @@
         goTo(dx < 0 ? current + 1 : current - 1);
         resetAutoplay();
       }
+    }, { passive: true });
+
+    // Any user-initiated scroll (native swipe, scrollbar, wheel) must sync the
+    // active slide and reset the autoplay countdown, so the next auto-advance
+    // is always a full interval after the last manual flip.
+    let userScroll = false;
+    const markUserScroll = () => {
+      userScroll = true;
+      setTimeout(() => { userScroll = false; }, 200);
+    };
+    slides.addEventListener('pointerdown', markUserScroll);
+    slides.addEventListener('touchstart', markUserScroll);
+    slides.addEventListener('wheel', markUserScroll);
+
+    let scrollSyncTimer = null;
+    slides.addEventListener('scroll', () => {
+      if (scrollSyncTimer) return;
+      scrollSyncTimer = setTimeout(() => {
+        scrollSyncTimer = null;
+        if (!userScroll) return;
+        userScroll = false;
+        const pos = slides.scrollLeft + slides.clientWidth / 2;
+        let nearest = 0;
+        let best = Infinity;
+        items.forEach((it, i) => {
+          const d = Math.abs(it.offsetLeft - pos);
+          if (d < best) { best = d; nearest = i; }
+        });
+        if (nearest !== current) {
+          current = nearest;
+          dots.forEach((d, i) => d.classList.toggle('active', i === current));
+          resetAutoplay();
+        }
+      }, 150);
     }, { passive: true });
 
     dots.forEach((dot) => {
