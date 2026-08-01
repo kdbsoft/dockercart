@@ -5,6 +5,7 @@ $_['button_reindex'] = 'Переиндексировать всё';
 $_['button_save'] = 'Сохранить';
 $_['button_test_connection'] = 'Проверить соединение';
 $_['entry_autocomplete'] = 'Включить автодополнение';
+$_['entry_voice_search'] = 'Включить голосовой поиск';
 $_['entry_autocomplete_limit'] = 'Лимит автодополнения';
 $_['entry_field_weights'] = 'Веса полей';
 $_['entry_host'] = 'Хост Manticore';
@@ -29,6 +30,7 @@ $_['error_results_limit'] = 'Лимит результатов должен бы
 $_['heading_title'] = 'Поиск';
 $_['heading_title_menu'] = 'Поисковый индекс';
 $_['help_autocomplete'] = 'Включить AJAX автодополнение в поле поиска';
+$_['help_voice_search'] = 'Добавляет кнопку микрофона в поле поиска (Web Speech API). Работает в Chrome, Edge и Safari по HTTPS; в неподдерживаемых браузерах кнопка скрывается автоматически. Распознанная фраза заполняет поле без отправки формы.';
 $_['help_autocomplete_limit'] = 'Количество подсказок в выпадающем списке';
 $_['help_field_weights'] = 'Важность каждого поля при поиске (больше = важнее)';
 $_['help_host'] = 'Hostname Manticore Search (по умолчанию: manticore)';

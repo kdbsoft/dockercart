@@ -94,6 +94,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
         $data['module_dockercart_search_port'] = $this->getConfigValue('module_dockercart_search_port', 9306);
         $data['module_dockercart_search_http_port'] = $this->getConfigValue('module_dockercart_search_http_port', 9308);
         $data['module_dockercart_search_autocomplete'] = $this->getConfigValue('module_dockercart_search_autocomplete', 1);
+        $data['module_dockercart_search_voice'] = $this->getConfigValue('module_dockercart_search_voice', 1);
         $data['module_dockercart_search_autocomplete_limit'] = $this->getConfigValue('module_dockercart_search_autocomplete_limit', 10);
         $data['module_dockercart_search_min_chars'] = $this->getConfigValue('module_dockercart_search_min_chars', 3);
         $data['module_dockercart_search_results_limit'] = $this->getConfigValue('module_dockercart_search_results_limit', 20);
@@ -345,6 +346,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
             'module_dockercart_search_port' => 9306,
             'module_dockercart_search_http_port' => 9308,
             'module_dockercart_search_autocomplete' => 1,
+            'module_dockercart_search_voice' => 1,
             'module_dockercart_search_autocomplete_limit' => 10,
             'module_dockercart_search_min_chars' => 3,
             'module_dockercart_search_results_limit' => 20,
