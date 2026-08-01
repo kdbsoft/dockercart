@@ -112,7 +112,7 @@ class ControllerExtensionDashboardDockercartConversion extends Controller {
 		$data['user_token'] = $this->session->data['user_token'];
 
 		$data['total'] = '—';
-		$data['report'] = $this->url->link('report/report', 'user_token=' . $this->session->data['user_token'] . '&code=dockercart_analytics', true);
+		$data['report'] = $this->url->link('report/report', 'user_token=' . $this->session->data['user_token'] . '&code=dockercart_analytics', true) . '#analytics-summary';
 
 		return $this->load->view('extension/dashboard/dockercart_conversion_info', $data);
 	}

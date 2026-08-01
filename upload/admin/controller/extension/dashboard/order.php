@@ -127,7 +127,7 @@ class ControllerExtensionDashboardOrder extends Controller {
 
 		$data['total'] = '—';
 		$data['percentage'] = 0;
-		$data['order'] = $this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'], true);
+		$data['order'] = $this->url->link('report/report', 'user_token=' . $this->session->data['user_token'] . '&code=sale_order', true);
 
 		return $this->load->view('extension/dashboard/order_info', $data);
 	}
