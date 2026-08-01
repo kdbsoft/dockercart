@@ -1,7 +1,7 @@
-<section id="hero" class="relative w-full h-[56vh] min-h-[340px] max-h-[540px] overflow-hidden">
-  <div id="hero-slides" class="relative w-full h-full">
+<section id="hero" class="relative w-full h-[56vh] min-h-[340px] max-h-[540px] overflow-hidden cursor-grab active:cursor-grabbing touch-pan-y select-none">
+  <div id="hero-slides" class="relative w-full h-full flex will-change-transform">
     {% for banner in banners %}
-    <div class="hero-slide absolute inset-0 transition-opacity duration-700 ease-in-out{% if not loop.first %} opacity-0{% endif %}{% if banner.link %} cursor-pointer{% endif %}" data-slide="{{ loop.index0 }}"{% if banner.link %} data-slide-link="{{ banner.link }}"{% endif %}>
+    <div class="hero-slide relative shrink-0 basis-full w-full h-full{% if banner.link %} cursor-pointer{% endif %}" data-slide="{{ loop.index0 }}"{% if banner.link %} data-slide-link="{{ banner.link }}"{% endif %}>
       {% if banner.video_type == 'youtube' and banner.video_url %}
       <iframe src="{{ banner.video_url }}"
         class="absolute inset-0 w-full h-full"
@@ -61,60 +61,171 @@
   </div>
   {% endif %}
 
-  <script>
+    <script>
     (function(){
       const moduleId = '{{ module }}';
-      const slides = document.querySelectorAll('#hero .hero-slide');
+      const section = document.getElementById('hero');
+      const track = document.getElementById('hero-slides');
+      if (!track) return;
+      const originals = Array.from(track.children);
+      const N = originals.length;
+      if (!N) return;
       const dots = document.querySelectorAll('#hero .hero-dot');
-      if (!slides.length) return;
 
-      let currentSlide_{{ module }} = 0;
-      const totalSlides_{{ module }} = slides.length;
-      let slideInterval_{{ module }} = null;
+      // Looping track: 3 copies of the slide set (prev | current | next) so
+      // navigation never hits an edge and no empty gap can appear.
+      const base = N;
+      [1, 2].forEach(function () {
+        originals.forEach(function (s) { track.appendChild(s.cloneNode(true)); });
+      });
+      let slideW = track.offsetWidth || 1;
+      let trackIdx = base;
+      let current = 0;
+      let timer = null;
+      let suppressClick = false;
 
-      function applyState(idx){
-        slides.forEach((s,i)=>{
-          s.style.opacity = (i===idx)? '1' : '0';
+      // Always use the live track width so slides tile edge-to-edge even if
+      // layout changes after init (scrollbar, resize, fonts, lazy content).
+      function refreshWidth() {
+        const w = track.offsetWidth;
+        if (w > 0) slideW = w;
+        return slideW;
+      }
+
+      function applyTrack(idx, animate) {
+        refreshWidth();
+        track.style.transition = animate ? 'transform 0.35s ease' : 'none';
+        track.style.transform = 'translateX(' + (-idx * slideW) + 'px)';
+      }
+
+      function normalize() {
+        if (trackIdx < base || trackIdx >= base + N) {
+          trackIdx = base + ((trackIdx - base) % N + N) % N;
+          applyTrack(trackIdx, false);
+        }
+      }
+
+      function updateDots() {
+        dots.forEach(function (d, i) {
+          d.style.width = (i === current) ? '32px' : '8px';
+          d.style.opacity = (i === current) ? '1' : '0.5';
         });
-        dots.forEach((d,i)=>{
-          if(i===idx){ d.style.width='32px'; d.style.opacity='1'; } else { d.style.width='8px'; d.style.opacity='0.5'; }
-        });
       }
 
-      window.goToSlide_{{ module }} = function(index){
-        applyState(index);
-        currentSlide_{{ module }} = index;
-        resetSlideTimer_{{ module }}();
+      function settle(targetIdx) {
+        trackIdx = targetIdx;
+        applyTrack(trackIdx, true);
+        current = ((trackIdx - base) % N + N) % N;
+        updateDots();
+        window.setTimeout(normalize, 380);
       }
 
-      window.nextSlide_{{ module }} = function(){
-        window.goToSlide_{{ module }}((currentSlide_{{ module }} + 1) % totalSlides_{{ module }});
+      function resetTimer() {
+        clearInterval(timer);
+        timer = setInterval(window.nextSlide_{{ module }}, 5000);
       }
 
-      window.prevSlide_{{ module }} = function(){
-        window.goToSlide_{{ module }}((currentSlide_{{ module }} - 1 + totalSlides_{{ module }}) % totalSlides_{{ module }});
-      }
+      window.goToSlide_{{ module }} = function (index) {
+        const fwd = ((index - current) % N + N) % N;
+        const back = N - fwd;
+        settle(trackIdx + (fwd <= back ? fwd : -back));
+        resetTimer();
+      };
 
-      function resetSlideTimer_{{ module }}(){
-        clearInterval(slideInterval_{{ module }});
-        slideInterval_{{ module }} = setInterval(window.nextSlide_{{ module }}, 5000);
-      }
+      window.nextSlide_{{ module }} = function () {
+        settle(trackIdx + 1);
+        resetTimer();
+      };
 
-      // wire dot clicks
-      dots.forEach(d=> d.addEventListener('click', (e)=> window.goToSlide_{{ module }}(parseInt(e.target.dataset.dot))));
+      window.prevSlide_{{ module }} = function () {
+        settle(trackIdx - 1);
+        resetTimer();
+      };
 
-      // slide click → navigate (skip if target is a link or button)
-      document.getElementById('hero').addEventListener('click', function(e) {
+      // slide click → navigate (skip inside a link/button or right after a drag)
+      section.addEventListener('click', function (e) {
+        if (suppressClick) { suppressClick = false; return; }
         if (e.target.closest('a, button')) return;
-        var slide = e.target.closest('.hero-slide');
+        const slide = e.target.closest('.hero-slide');
         if (slide && slide.dataset.slideLink) location.href = slide.dataset.slideLink;
       });
 
+      // drag / swipe (mouse + touch via Pointer Events)
+      let dragPointer = null;
+      let dragStart = null;
+      let dragActive = false;
+      let baseTrackIdx = 0;
+
+      section.addEventListener('pointerdown', function (e) {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        if (dragPointer !== null) return;
+        dragPointer = e.pointerId;
+        dragStart = { x: e.clientX, y: e.clientY };
+        dragActive = false;
+        baseTrackIdx = trackIdx;
+        refreshWidth();
+        clearInterval(timer);
+      });
+
+      section.addEventListener('pointermove', function (e) {
+        if (e.pointerId !== dragPointer || !dragStart) return;
+        const dx = e.clientX - dragStart.x;
+        const dy = e.clientY - dragStart.y;
+        if (!dragActive && Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) {
+          dragActive = true;
+          suppressClick = true;
+          if (section.setPointerCapture) {
+            try { section.setPointerCapture(e.pointerId); } catch (err) {}
+          }
+        }
+        if (dragActive) {
+          track.style.transition = 'none';
+          track.style.transform = 'translateX(' + (-baseTrackIdx * slideW + dx) + 'px)';
+        }
+      }, { passive: true });
+
+      function endDrag(e) {
+        if (e.pointerId !== dragPointer) return;
+        let dx = 0;
+        if (e.type !== 'pointercancel' && dragStart) {
+          dx = e.clientX - dragStart.x;
+        }
+        const wasDrag = dragActive && e.type !== 'pointercancel';
+        dragPointer = null;
+        dragStart = null;
+        dragActive = false;
+        if (wasDrag) {
+          const move = dx < -40 ? 1 : dx > 40 ? -1 : 0;
+          settle(baseTrackIdx + move);
+          resetTimer();
+        } else {
+          applyTrack(baseTrackIdx, true);
+          resetTimer();
+        }
+        window.setTimeout(function () { suppressClick = false; }, 320);
+      }
+
+      section.addEventListener('pointerup', endDrag);
+      section.addEventListener('pointercancel', endDrag);
+
+      // keep alignment on resize and after full load (fonts/scrollbar/layout shifts)
+      window.addEventListener('resize', function () {
+        applyTrack(trackIdx, false);
+      });
+      window.addEventListener('load', function () {
+        applyTrack(trackIdx, false);
+      });
+      if ('ResizeObserver' in window) {
+        new ResizeObserver(function () { applyTrack(trackIdx, false); }).observe(section);
+      }
+
       // init
-      applyState(0);
-      resetSlideTimer_{{ module }}();
+      applyTrack(trackIdx, false);
+      updateDots();
+      resetTimer();
       // initialize lucide icons if available
       if (window.lucide) lucide.createIcons();
     })();
   </script>
+
 </section>
