@@ -1,0 +1,70 @@
+<div class="panel panel-default">
+  <div class="dcx-panel-heading">
+    <div class="dcx-panel-heading__icon"><i data-lucide="folder-tree"></i></div>
+    <div>
+      <h3 class="dcx-panel-title">{{ heading_title }}</h3>
+      <div class="dcx-panel-heading__subtitle">{{ text_category_revenue_subtitle }}</div>
+    </div>
+    <div class="pull-right">
+      <select class="tile-period-select" data-widget="dockercart_category_revenue">
+        <option value="all">{{ text_all_time }}</option>
+        <option value="year">{{ text_year }}</option>
+        <option value="month">{{ text_month }}</option>
+        <option value="week">{{ text_week }}</option>
+        <option value="today">{{ text_today }}</option>
+      </select>
+    </div>
+  </div>
+  <ul class="dcx-dash-list" data-dash-list>
+    <li class="dcx-dash-list__empty">{{ text_no_results }}</li>
+  </ul>
+</div>
+<script>
+(function() {
+  var key = 'dashboard_dc_cat_revenue_period';
+  var $sel = $('.tile-period-select[data-widget="dockercart_category_revenue"]');
+  var $list = $sel.closest('.panel').find('[data-dash-list]');
+  var saved = localStorage.getItem(key) || 'month';
+  var noResults = {{ text_no_results|json_encode|raw }};
+  $sel.val(saved);
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+      return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c];
+    });
+  }
+
+  function render(items) {
+    if (!items.length) {
+      $list.html('<li class="dcx-dash-list__empty">' + esc(noResults) + '</li>');
+      return;
+    }
+
+    var html = '';
+
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      html += '<li class="dcx-dash-list__item">'
+        + '<div class="dcx-dash-list__main">'
+        +   '<div class="dcx-dash-list__name" title="' + esc(item.name) + '">' + esc(item.name) + '</div>'
+        +   '<div class="dcx-dash-list__meta">' + esc(item.meta) + '</div>'
+        +   '<div class="dcx-dash-list__bar"><span class="dcx-dash-list__bar-fill" style="width:' + item.pct + '%"></span></div>'
+        + '</div>'
+        + '<div class="dcx-dash-list__value">' + esc(item.value) + '</div>'
+        + '</li>';
+    }
+
+    $list.html(html);
+  }
+
+  function load(period) {
+    localStorage.setItem(key, period);
+    $.getJSON('index.php?route=extension/dashboard/dockercart_category_revenue/ajax&user_token={{ user_token }}&period=' + period, function(json) {
+      render(json.items || []);
+    });
+  }
+
+  load(saved);
+  $sel.on('change', function() { load($(this).val()); });
+})();
+</script>
