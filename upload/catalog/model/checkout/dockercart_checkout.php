@@ -43,46 +43,35 @@ class ModelCheckoutDockerCartCheckout extends Model {
         $sessionId = session_id();
         $customerId = $this->customer->isLogged() ? $this->customer->getId() : 0;
 
-        // Check if exists
-        $query = $this->db->query("SELECT abandoned_id
-                                   FROM `" . DB_PREFIX . "dockercart_checkout_abandoned`
-                                   WHERE session_id = '" . $this->db->escape($sessionId) . "'
-                                   AND recovered = " . self::STATUS_ABANDONED . "");
-
         $email = isset($data['email']) ? $data['email'] : '';
         $phone = isset($data['telephone']) ? $data['telephone'] : '';
         $cartData = isset($data['cart']) ? json_encode($data['cart']) : '';
         $addressData = isset($data['address']) ? json_encode($data['address']) : '';
         $lastStep = isset($data['step']) ? $data['step'] : '';
 
-        if ($query->num_rows) {
-            // Update existing
-            $this->db->query("UPDATE `" . DB_PREFIX . "dockercart_checkout_abandoned`
-                              SET customer_id = " . (int)$customerId . ",
-                                  email = '" . $this->db->escape($email) . "',
-                                  phone = '" . $this->db->escape($phone) . "',
-                                  cart_data = '" . $this->db->escape($cartData) . "',
-                                  address_data = '" . $this->db->escape($addressData) . "',
-                                  last_step = '" . $this->db->escape($lastStep) . "',
-                                  date_modified = NOW()
-                              WHERE abandoned_id = " . (int)$query->row['abandoned_id']);
+        // Single-statement upsert: the unique key (session_id, recovered)
+        // merges concurrent saves from the same session into one row.
+        $this->db->query("INSERT INTO `" . DB_PREFIX . "dockercart_checkout_abandoned`
+                          SET session_id = '" . $this->db->escape($sessionId) . "',
+                              customer_id = " . (int)$customerId . ",
+                              email = '" . $this->db->escape($email) . "',
+                              phone = '" . $this->db->escape($phone) . "',
+                              cart_data = '" . $this->db->escape($cartData) . "',
+                              address_data = '" . $this->db->escape($addressData) . "',
+                              last_step = '" . $this->db->escape($lastStep) . "',
+                              date_added = NOW(),
+                              date_modified = NOW()
+                          ON DUPLICATE KEY UPDATE
+                              customer_id = " . (int)$customerId . ",
+                              email = '" . $this->db->escape($email) . "',
+                              phone = '" . $this->db->escape($phone) . "',
+                              cart_data = '" . $this->db->escape($cartData) . "',
+                              address_data = '" . $this->db->escape($addressData) . "',
+                              last_step = '" . $this->db->escape($lastStep) . "',
+                              date_modified = NOW(),
+                              abandoned_id = LAST_INSERT_ID(abandoned_id)");
 
-            return (int)$query->row['abandoned_id'];
-        } else {
-            // Insert new
-            $this->db->query("INSERT INTO `" . DB_PREFIX . "dockercart_checkout_abandoned`
-                              SET session_id = '" . $this->db->escape($sessionId) . "',
-                                  customer_id = " . (int)$customerId . ",
-                                  email = '" . $this->db->escape($email) . "',
-                                  phone = '" . $this->db->escape($phone) . "',
-                                  cart_data = '" . $this->db->escape($cartData) . "',
-                                  address_data = '" . $this->db->escape($addressData) . "',
-                                  last_step = '" . $this->db->escape($lastStep) . "',
-                                  date_added = NOW(),
-                                  date_modified = NOW()");
-
-            return $this->db->getLastId();
-        }
+        return $this->db->getLastId();
     }
 
     /**
