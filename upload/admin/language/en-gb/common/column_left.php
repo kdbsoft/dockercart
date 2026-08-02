@@ -49,6 +49,7 @@ $_['text_product']              = 'Products';
 $_['text_product_bundle']       = 'Bundle Discounts';
 $_['text_analytics']            = 'Analytics';
 $_['text_review']               = 'Reviews';
+$_['text_review_setting']       = 'Review Settings';
 $_['text_scheduler']            = 'Scheduler';
 $_['text_return']               = 'Returns';
 $_['text_return_action']        = 'Return Actions';

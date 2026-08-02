@@ -58,6 +58,7 @@ $_['text_return_action'] = 'Действия по возврату';
 $_['text_return_reason'] = 'Причины возврата';
 $_['text_return_status'] = 'Статусы возврата';
 $_['text_review'] = 'Отзывы';
+$_['text_review_setting'] = 'Настройки отзывов';
 $_['text_sale'] = 'Продажи';
 $_['text_seo_url'] = 'SEO URL';
 $_['text_setting'] = 'Настройки';
