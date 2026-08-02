@@ -812,6 +812,52 @@ class ControllerProductSearch extends Controller {
 		$data['category_id'] = $category_id;
 		$data['sub_category'] = $sub_category;
 
+		// Resolve the active search scope: when a category filter is set, load
+		// the category name so the UI can show "searching in category X" and
+		// offer a one-click switch to global (unscoped) search.
+		$data['search_category_id'] = 0;
+		$data['search_category_name'] = '';
+		$data['search_category_href'] = '';
+
+		if ((int)$category_id > 0) {
+			$category_info = $this->model_catalog_category->getCategory((int)$category_id);
+
+			if ($category_info) {
+				$data['search_category_id'] = (int)$category_id;
+				$data['search_category_name'] = $category_info['name'];
+				$data['search_category_href'] = $this->url->link('product/category', 'path=' . (int)$category_id);
+			}
+		}
+
+		// Global search URL: same query without the category scope
+		$global_url = '';
+
+		if (isset($this->request->get['search'])) {
+			$global_url .= '&search=' . urlencode(html_entity_decode($this->request->get['search'], ENT_QUOTES, 'UTF-8'));
+		}
+
+		if (isset($this->request->get['tag'])) {
+			$global_url .= '&tag=' . urlencode(html_entity_decode(trim($this->request->get['tag']), ENT_QUOTES, 'UTF-8'));
+		}
+
+		if (isset($this->request->get['description'])) {
+			$global_url .= '&description=' . $this->request->get['description'];
+		}
+
+		if (isset($this->request->get['sort'])) {
+			$global_url .= '&sort=' . $this->request->get['sort'];
+		}
+
+		if (isset($this->request->get['order'])) {
+			$global_url .= '&order=' . $this->request->get['order'];
+		}
+
+		if (isset($this->request->get['limit'])) {
+			$global_url .= '&limit=' . $this->request->get['limit'];
+		}
+
+		$data['search_global_url'] = $this->url->link('product/search', ltrim($global_url, '&'));
+
 		$data['voice_search'] = $this->config->get('module_dockercart_search_status') && $this->config->get('module_dockercart_search_voice');
 
 		$data['sort'] = $sort;
