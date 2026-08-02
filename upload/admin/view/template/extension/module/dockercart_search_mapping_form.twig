@@ -1,0 +1,70 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="container-fluid">
+    <div class="page-header">
+      <div class="row">
+        <div class="col-lg-offset-1 col-lg-7 col-xl-offset-1 col-xl-7">
+          <a href="{{ cancel }}" class="page-header__link">
+            <span class="page-header__back">
+              <i data-lucide="arrow-left" width="20" height="20"></i>
+            </span>
+            <span class="page-header__title">
+              {{ heading_mapping }}
+            </span>
+          </a>
+        </div>
+        <div class="col-lg-4 col-xl-3">
+          <div class="pull-right">
+            <button type="submit" form="form-mapping" class="btn btn-primary"><i data-lucide="save" width="16" height="16"></i> {{ button_save }}</button>
+            <a href="{{ cancel }}" class="btn btn-default"><i data-lucide="x" width="16" height="16"></i> {{ button_cancel }}</a>
+          </div>
+        </div>
+      </div>
+      {% if error_warning %}
+      <div class="row">
+        <div class="col-lg-offset-1 col-lg-7 col-xl-offset-1 col-xl-7">
+          <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <form action="" method="post" enctype="multipart/form-data" id="form-mapping">
+      <div class="row">
+        <div class="col-md-12 col-lg-offset-1 col-lg-7 col-xl-offset-1 col-xl-7">
+          <div class="dcx-shell">
+            <div class="dcx-panel">
+              <div class="dcx-panel-head">
+                <div class="dcx-panel-head__icon"><i data-lucide="git-compare" width="18" height="18"></i></div>
+                <div>
+                  <div class="dcx-panel-title">{{ heading_mapping }}</div>
+                </div>
+              </div>
+              <div class="dcx-panel-body">
+                <div class="dcx-fields">
+                  <div class="dcx-field">
+                    <label class="dcx-label" for="input-source">{{ entry_source }} <span data-toggle="tooltip" title="{{ help_source }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                    {% if error_source %}
+                    <div class="text-danger">{{ error_source }}</div>
+                    {% endif %}
+                    <input type="text" name="source" value="{{ source }}" id="input-source" class="form-control" />
+                  </div>
+                  <div class="dcx-field">
+                    <label class="dcx-label" for="input-target">{{ entry_target }} <span data-toggle="tooltip" title="{{ help_target }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                    {% if error_target %}
+                    <div class="text-danger">{{ error_target }}</div>
+                    {% endif %}
+                    <input type="text" name="target" value="{{ target }}" id="input-target" class="form-control" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{{ footer }}
