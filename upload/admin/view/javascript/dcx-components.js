@@ -97,6 +97,7 @@ var DcxUI = (function() {
 		this.nameKey = $el.data('name-key') || 'label';
 		this.thumbKey = $el.data('thumb-key') || 'thumb';
 		this.subKey = $el.data('sub-key') || 'model';
+		this.max = parseInt($el.data('max') || 0, 10);
 		var rawMinChars = $el.data('min-chars');
 		this.minChars = (rawMinChars !== undefined && rawMinChars !== '') ? parseInt(rawMinChars, 10) : 1;
 
@@ -273,6 +274,23 @@ var DcxUI = (function() {
 			$item.removeClass('dcx-picker__item--selected');
 			$icon.attr('data-lucide', 'square');
 		} else {
+			if (this.max > 0) {
+				var count = Object.keys(this.selectedItems).length;
+				if (count >= this.max) {
+					var self = this;
+					var previousIds = Object.keys(this.selectedItems);
+					this.selectedItems = {};
+					$.each(previousIds, function(i, prevId) {
+						var $prevItem = self.$results.find('.dcx-picker__item[data-id="' + prevId + '"]');
+						$prevItem.removeClass('dcx-picker__item--selected');
+						var $prevIcon = $prevItem.find('.dcx-picker__item-check [data-lucide]');
+						if ($prevIcon.length) {
+							$prevIcon.attr('data-lucide', 'square');
+							_renderIcons($prevIcon[0]);
+						}
+					});
+				}
+			}
 			this.selectedItems[id] = name;
 			$item.addClass('dcx-picker__item--selected');
 			$icon.attr('data-lucide', 'square-check');
