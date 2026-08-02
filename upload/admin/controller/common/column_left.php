@@ -449,15 +449,6 @@ class ControllerCommonColumnLeft extends Controller {
 				);
 			}
 
-			if ($this->user->hasPermission('access', 'sale/order')) {
-				$system[] = array(
-					'name'	   => $this->language->get('text_order_flow'),
-					'href'     => $this->url->link('sale/order_flow', 'user_token=' . $this->session->data['user_token'], true),
-					'icon'	   => 'workflow',
-					'children' => array()
-				);
-			}
-
 			// Users
 			$user = array();
 
@@ -522,10 +513,28 @@ class ControllerCommonColumnLeft extends Controller {
 			}
 
 			if ($this->user->hasPermission('access', 'localisation/order_status')) {
-				$localisation[] = array(
+				// Orders (parent): statuses + order flow
+				$orders = array();
+
+				$orders[] = array(
 					'name'	   => $this->language->get('text_order_status'),
 					'href'     => $this->url->link('localisation/order_status', 'user_token=' . $this->session->data['user_token'], true),
 					'children' => array()
+				);
+
+				if ($this->user->hasPermission('access', 'sale/order')) {
+					$orders[] = array(
+						'name'	   => $this->language->get('text_order_flow'),
+						'href'     => $this->url->link('sale/order_flow', 'user_token=' . $this->session->data['user_token'], true),
+						'children' => array()
+					);
+				}
+
+				$localisation[] = array(
+					'name'	   => $this->language->get('text_orders'),
+					'href'     => '',
+					'icon'	   => 'workflow',
+					'children' => $orders
 				);
 			}
 
