@@ -14,7 +14,7 @@ $_['text_recurring_item']     = 'Періодичні платежі';
 $_['text_length']             = 'Кількість платежів: %s';
 
 // Entry
-$_['express_entry_coupon']    = 'Введіть код купона:';
+$_['express_entry_coupon']    = 'Введіть промо-код:';
 
 // Button
 $_['button_express_coupon']   = 'Додати';

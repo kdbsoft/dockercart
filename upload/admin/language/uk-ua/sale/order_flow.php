@@ -1,6 +1,6 @@
 <?php
 // Heading
-$_['heading_title']                  = 'Потік замовлення';
+$_['heading_title']                  = 'Order flow';
 
 // Text
 $_['text_success']                   = 'Налаштування order flow збережено!';

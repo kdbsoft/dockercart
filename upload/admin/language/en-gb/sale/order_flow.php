@@ -1,6 +1,6 @@
 <?php
 // Heading
-$_['heading_title']                  = 'Order Flow';
+$_['heading_title']                  = 'Order flow';
 
 // Text
 $_['text_success']                   = 'Success: You have modified the order flow!';
