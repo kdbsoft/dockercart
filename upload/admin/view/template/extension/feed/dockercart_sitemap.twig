@@ -102,6 +102,7 @@
             <div class="dcx-panel-body">
               <ul class="dcx-pills">
                 <li class="active"><a href="#tab-products" data-toggle="tab"><i data-lucide="package" width="14" height="14"></i> {{ tab_products }}</a></li>
+                <li><a href="#tab-reviews" data-toggle="tab"><i data-lucide="message-square" width="14" height="14"></i> {{ tab_reviews }}</a></li>
                 <li><a href="#tab-categories" data-toggle="tab"><i data-lucide="folder" width="14" height="14"></i> {{ tab_categories }}</a></li>
                 <li><a href="#tab-manufacturers" data-toggle="tab"><i data-lucide="factory" width="14" height="14"></i> {{ tab_manufacturers }}</a></li>
                 <li><a href="#tab-information" data-toggle="tab"><i data-lucide="file-text" width="14" height="14"></i> {{ tab_information }}</a></li>
@@ -130,6 +131,39 @@
                         <select name="dockercart_sitemap_product_changefreq" class="form-control">
                           {% for value, text in changefreq_options %}
                             {% if value == dockercart_sitemap_product_changefreq %}
+                              <option value="{{ value }}" selected="selected">{{ text }}</option>
+                            {% else %}
+                              <option value="{{ value }}">{{ text }}</option>
+                            {% endif %}
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="tab-pane" id="tab-reviews">
+                  <div class="dcx-fields">
+                    <div class="dcx-field">
+                      <label class="dcx-label">{{ entry_reviews }} <span data-toggle="tooltip" title="{{ help_reviews }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                      <div class="dcx-checkbox-group">
+                        <label class="dcx-checkbox-label">
+                          <input type="radio" name="dockercart_sitemap_reviews" value="1" {% if dockercart_sitemap_reviews %}checked="checked"{% endif %} /> {{ text_enabled }}
+                        </label>
+                        <label class="dcx-checkbox-label">
+                          <input type="radio" name="dockercart_sitemap_reviews" value="0" {% if not dockercart_sitemap_reviews %}checked="checked"{% endif %} /> {{ text_disabled }}
+                        </label>
+                      </div>
+                    </div>
+                    <div class="dcx-fields dcx-fields--row">
+                      <div class="dcx-field">
+                        <label class="dcx-label">{{ entry_review_priority }} <span data-toggle="tooltip" title="{{ help_priority }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                        <input type="text" name="dockercart_sitemap_review_priority" value="{{ dockercart_sitemap_review_priority }}" placeholder="0.6" class="form-control" />
+                      </div>
+                      <div class="dcx-field">
+                        <label class="dcx-label">{{ entry_review_changefreq }} <span data-toggle="tooltip" title="{{ help_changefreq }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                        <select name="dockercart_sitemap_review_changefreq" class="form-control">
+                          {% for value, text in changefreq_options %}
+                            {% if value == dockercart_sitemap_review_changefreq %}
                               <option value="{{ value }}" selected="selected">{{ text }}</option>
                             {% else %}
                               <option value="{{ value }}">{{ text }}</option>

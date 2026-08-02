@@ -25,6 +25,7 @@ $_['text_section_module_settings'] = 'Module Settings';
 $_['text_section_content_types'] = 'Content Types';
 $_['text_section_limits'] = 'Sitemap Limits';
 $_['tab_products'] = 'Products';
+$_['tab_reviews'] = 'Product Reviews';
 $_['tab_categories'] = 'Categories';
 $_['tab_manufacturers'] = 'Manufacturers';
 $_['tab_information'] = 'Information';
@@ -35,6 +36,10 @@ $_['text_contact'] = 'Contact';
 $_['entry_products']    = 'Include Products';
 $_['entry_product_priority'] = 'Products Priority';
 $_['entry_product_changefreq'] = 'Products Change Frequency';
+
+$_['entry_reviews']    = 'Include Product Reviews';
+$_['entry_review_priority'] = 'Reviews Priority';
+$_['entry_review_changefreq'] = 'Reviews Change Frequency';
 
 $_['entry_categories']  = 'Include Categories';
 $_['entry_category_priority'] = 'Categories Priority';
@@ -49,6 +54,7 @@ $_['entry_information_priority'] = 'Information Pages Priority';
 $_['entry_information_changefreq'] = 'Information Pages Change Frequency';
 
 $_['help_products']     = 'Include products in sitemap';
+$_['help_reviews']      = 'Include the SEO-indexable review pages of products that have approved reviews';
 $_['help_categories']   = 'Include categories in sitemap';
 $_['help_manufacturers'] = 'Include manufacturers in sitemap';
 $_['help_information']  = 'Include information pages in sitemap';
