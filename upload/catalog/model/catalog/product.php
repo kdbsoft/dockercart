@@ -721,6 +721,18 @@ class ModelCatalogProduct extends Model {
 		return $product_data;
 	}
 
+	public function getProductFbt($product_id) {
+		$product_data = array();
+
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_fbt pf LEFT JOIN " . DB_PREFIX . "product p ON (pf.fbt_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE pf.product_id = '" . (int)$product_id . "' AND pf.fbt_id <> '" . (int)$product_id . "' AND p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "' ORDER BY pf.fbt_id ASC");
+
+		foreach ($query->rows as $result) {
+			$product_data[$result['fbt_id']] = $this->getProduct($result['fbt_id']);
+		}
+
+		return $product_data;
+	}
+
 	public function getProductLayoutId($product_id) {
 		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_to_layout WHERE product_id = '" . (int)$product_id . "' AND store_id = '" . (int)$this->config->get('config_store_id') . "'");
 
