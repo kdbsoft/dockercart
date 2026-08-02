@@ -1143,6 +1143,19 @@ class ControllerStartupSeoUrl extends Controller
             "author_id",
             "variant_id",
         ];
+
+        // For scoped search (product/search?category_id=N) the category filter
+        // is a real query parameter and must survive the clean-URL redirect,
+        // otherwise category-scoped searches silently become global searches.
+        if (
+            isset($this->request->get["route"]) &&
+            $this->request->get["route"] === "product/search"
+        ) {
+            $excluded_params = array_values(
+                array_diff($excluded_params, ["category_id"]),
+            );
+        }
+
         $remaining_query = $this->buildRemainingQueryString($excluded_params);
 
         // Append /variant-N to the SEO URL path when present
