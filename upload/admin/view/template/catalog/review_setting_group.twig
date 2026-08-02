@@ -1,0 +1,166 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="pull-right">
+            <button type="submit" form="form-group" class="btn btn-primary"><i data-lucide="save" width="16" height="16"></i> {{ button_save }}</button>
+            <a href="{{ cancel }}" class="btn btn-default"><i data-lucide="x" width="16" height="16"></i> {{ button_cancel }}</a>
+          </div>
+          <h1 class="page-header__title">{{ text_form }}</h1>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-group">
+      <input type="hidden" name="criteria_group_id" value="{{ criteria_group_id }}" />
+      <div class="row">
+        <div class="col-md-12">
+          <div class="dcx-shell">
+            <div class="dcx-panel">
+              <div class="dcx-panel-head">
+                <div class="dcx-panel-head__icon"><i data-lucide="list-checks" width="18" height="18"></i></div>
+                <div>
+                  <div class="dcx-panel-title">{{ text_form }}</div>
+                </div>
+              </div>
+              <div class="dcx-panel-body">
+                <div class="dcx-field">
+                  <label class="dcx-label">{{ entry_group_name }}</label>
+                  <ul class="nav nav-tabs" id="language">
+                    {% for language in languages %}
+                    <li><a href="#group-name-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
+                    {% endfor %}
+                  </ul>
+                  <div class="tab-content">
+                    {% for language in languages %}
+                    <div class="tab-pane" id="group-name-{{ language.language_id }}">
+                      <input type="text" name="group_name[{{ language.language_id }}]" value="{{ group_names[language.language_id] }}" placeholder="{{ entry_group_name }}" class="form-control" />
+                    </div>
+                    {% endfor %}
+                  </div>
+                </div>
+                <div class="dcx-field">
+                  <label class="dcx-label">
+                    <input type="hidden" name="is_default" value="0" />
+                    <input type="checkbox" name="is_default" value="1" {% if is_default %}checked="checked"{% endif %} /> {{ entry_is_default }}
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dcx-shell" style="margin-top: 16px;">
+        <div class="dcx-panel">
+          <div class="dcx-panel-head">
+            <div class="dcx-panel-head__icon"><i data-lucide="star" width="18" height="18"></i></div>
+            <div class="dcx-panel-head__actions">
+              <button type="button" class="btn btn-default" id="button-add-criteria"><i data-lucide="plus" width="14" height="14"></i> {{ button_add_criteria }}</button>
+            </div>
+            <div>
+              <div class="dcx-panel-title">{{ heading_criteria }}</div>
+            </div>
+          </div>
+          <div class="dcx-panel-body">
+            <table class="table table-bordered table-hover" id="criteria-table">
+              <thead>
+                <tr>
+                  <td class="text-left">{{ column_type }}</td>
+                  <td class="text-left">{{ column_name }}</td>
+                  <td class="text-center">{{ column_required }}</td>
+                  <td class="text-right"></td>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in criteria_rows %}
+                <tr class="criteria-row">
+                  <td style="width: 110px;">
+                    <input type="hidden" name="criteria_id[{{ loop.index0 }}]" value="{{ row.criteria_id }}" />
+                    <select name="criteria_type[{{ loop.index0 }}]" class="form-control">
+                      <option value="text" {% if row.type == 'text' %}selected="selected"{% endif %}>{{ text_type_text }}</option>
+                      <option value="rating" {% if row.type == 'rating' %}selected="selected"{% endif %}>{{ text_type_rating }}</option>
+                    </select>
+                  </td>
+                  <td>
+                    <ul class="nav nav-tabs">
+                      {% for language in languages %}
+                      <li><a href="#criteria-{{ loop.index0 }}-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span></a></li>
+                      {% endfor %}
+                    </ul>
+                    <div class="tab-content">
+                      {% for language in languages %}
+                      <div class="tab-pane" id="criteria-{{ loop.index0 }}-{{ language.language_id }}">
+                        <input type="text" name="criteria_name[{{ loop.index0 }}][{{ language.language_id }}]" value="{{ row.names[language.language_id].name }}" placeholder="{{ entry_criteria_name }}" class="form-control" />
+                        <input type="text" name="criteria_help[{{ loop.index0 }}][{{ language.language_id }}]" value="{{ row.names[language.language_id].help }}" placeholder="{{ entry_criteria_help }}" class="form-control" style="margin-top:4px;" />
+                      </div>
+                      {% endfor %}
+                    </div>
+                  </td>
+                  <td class="text-center" style="width: 60px;">
+                    <input type="checkbox" name="criteria_required[{{ loop.index0 }}]" value="1" {% if row.is_required %}checked="checked"{% endif %} />
+                  </td>
+                  <td class="text-right" style="width: 50px;">
+                    <button type="button" class="btn btn-danger btn--icon btn-remove-criteria"><i data-lucide="trash-2" width="14" height="14"></i></button>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            {% if not criteria_rows %}
+            <p class="text-muted">{{ text_no_criteria }}</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<script type="text/javascript"><!--
+$('#language a:first').tab('show');
+
+var rowIndex = {{ criteria_rows|length }};
+
+$('#button-add-criteria').on('click', function() {
+	var html = '';
+	html += '<tr class="criteria-row">';
+	html += '<td><input type="hidden" name="criteria_id[' + rowIndex + ']" value="0" />';
+	html += '<select name="criteria_type[' + rowIndex + ']" class="form-control">';
+	html += '<option value="text">{{ text_type_text }}</option>';
+	html += '<option value="rating">{{ text_type_rating }}</option>';
+	html += '</select></td>';
+	html += '<td><ul class="nav nav-tabs">';
+	{% for language in languages %}
+	html += '<li><a href="#criteria-new-{{ loop.index0 }}-' + rowIndex + '" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span></a></li>';
+	{% endfor %}
+	html += '</ul><div class="tab-content">';
+	{% for language in languages %}
+	html += '<div class="tab-pane" id="criteria-new-{{ loop.index0 }}-' + rowIndex + '">';
+	html += '<input type="text" name="criteria_name[' + rowIndex + '][{{ language.language_id }}]" placeholder="{{ entry_criteria_name }}" class="form-control" />';
+	html += '<input type="text" name="criteria_help[' + rowIndex + '][{{ language.language_id }}]" placeholder="{{ entry_criteria_help }}" class="form-control" style="margin-top:4px;" />';
+	html += '</div>';
+	{% endfor %}
+	html += '</div></td>';
+	html += '<td class="text-center"><input type="checkbox" name="criteria_required[' + rowIndex + ']" value="1" /></td>';
+	html += '<td class="text-right"><button type="button" class="btn btn-danger btn--icon btn-remove-criteria"><i data-lucide="trash-2" width="14" height="14"></i></button></td>';
+	html += '</tr>';
+
+	$('#criteria-table tbody').append(html);
+	$('#criteria-table tbody .criteria-row:last a:first').tab('show');
+	lucide.createIcons();
+	rowIndex++;
+});
+
+$(document).on('click', '.btn-remove-criteria', function() {
+	$(this).closest('.criteria-row').remove();
+});
+//--></script>
+{{ footer }}

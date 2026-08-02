@@ -631,6 +631,30 @@ class ControllerCatalogCategory extends Controller {
 		$data['banner_link_value'] = $parsed_link['value'];
 		$data['banner_link_entity_name'] = $parsed_link['entity_name'];
 
+		// Review criteria group (per-category "what is rated" override)
+		if (isset($this->request->post['review_criteria_group_id'])) {
+			$data['review_criteria_group_id'] = (int)$this->request->post['review_criteria_group_id'];
+		} elseif (!empty($category_info) && isset($category_info['review_criteria_group_id'])) {
+			$data['review_criteria_group_id'] = (int)$category_info['review_criteria_group_id'];
+		} else {
+			$data['review_criteria_group_id'] = 0;
+		}
+
+		$this->load->model('catalog/review_criteria');
+
+		$data['review_criteria_groups'] = array();
+		$data['review_criteria_groups'][] = array(
+			'criteria_group_id' => 0,
+			'name'              => $this->language->get('text_review_criteria_inherit'),
+		);
+
+		foreach ($this->model_catalog_review_criteria->getGroups() as $group) {
+			$data['review_criteria_groups'][] = array(
+				'criteria_group_id' => $group['criteria_group_id'],
+				'name'              => $group['name'] . ($group['is_default'] ? ' (' . $this->language->get('text_default') . ')' : ''),
+			);
+		}
+
 		if (isset($this->request->post['top'])) {
 			$data['top'] = $this->request->post['top'];
 		} elseif (!empty($category_info)) {
