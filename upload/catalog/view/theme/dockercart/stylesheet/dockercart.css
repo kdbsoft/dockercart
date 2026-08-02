@@ -945,6 +945,24 @@ a:hover [data-lucide="arrow-right"]{transform:translateX(4px)}
   }
 }
 
+/* Compact FBT carousel (product page buy column):
+   2 horizontal cards per page; a single card spans the full width */
+.dc-carousel-track--fbt > * {
+  flex: 0 0 calc(50% - 0.5rem);
+}
+
+.dc-carousel-track--fbt > *:only-child {
+  flex: 0 0 100%;
+}
+
+/* Carousel controls stay hidden until the track is actually scrollable;
+   JS adds .dc-carousel--has-pages on init and on resize. */
+.dc-carousel:not(.dc-carousel--has-pages) .dc-carousel-prev,
+.dc-carousel:not(.dc-carousel--has-pages) .dc-carousel-next,
+.dc-carousel:not(.dc-carousel--has-pages) .dc-carousel-page {
+  display: none;
+}
+
 /* Carousel arrows */
 .dc-carousel-btn {
   position: absolute;
@@ -981,6 +999,15 @@ a:hover [data-lucide="arrow-right"]{transform:translateX(4px)}
 
 .dc-carousel-next {
   right: -16px;
+}
+
+/* FBT widget variant: arrows live in the header toolbar, not overlaid */
+.dc-carousel--fbt .dc-carousel-prev {
+  left: auto;
+}
+
+.dc-carousel--fbt .dc-carousel-next {
+  right: auto;
 }
 
 @media (max-width: 639px) {

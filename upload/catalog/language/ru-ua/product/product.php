@@ -72,6 +72,7 @@ $_['text_year'] = 'год';
 $_['text_you_may_also_like'] = 'Вам также может понравиться';
 $_['text_you_may_also_need'] = 'Вам также может понадобиться';
 $_['text_accessory']         = 'Аксессуары';
+$_['text_fbt']               = 'Покупают вместе';
 $_['text_zoom'] = 'Зум';
 $_['button_cart'] = 'В корзину';
 
