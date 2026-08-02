@@ -20,17 +20,39 @@
     var next = carousel._next;
     var scrollLeft = track.scrollLeft;
     var maxScroll = track.scrollWidth - track.clientWidth;
+    var hasPages = maxScroll >= getCardWidth(track);
+
+    carousel.classList.toggle('dc-carousel--has-pages', hasPages);
 
     if (prev) {
-      var atStart = scrollLeft <= 2;
+      var atStart = !hasPages || scrollLeft <= 2;
       prev.style.opacity = atStart ? '0' : '';
       prev.style.pointerEvents = atStart ? 'none' : '';
     }
     if (next) {
-      var atEnd = scrollLeft >= maxScroll - 2;
+      var atEnd = !hasPages || scrollLeft >= maxScroll - 2;
       next.style.opacity = atEnd ? '0' : '';
       next.style.pointerEvents = atEnd ? 'none' : '';
     }
+
+    updatePage(carousel);
+  }
+
+  function updatePage(carousel) {
+    var badge = carousel._page;
+    if (!badge) return;
+
+    var track = carousel._track;
+    var maxScroll = track.scrollWidth - track.clientWidth;
+    if (maxScroll <= 2) {
+      badge.textContent = '1 / 1';
+      return;
+    }
+
+    var total = Math.max(2, Math.ceil(track.scrollWidth / track.clientWidth));
+    var current = Math.min(total, Math.round(track.scrollLeft / maxScroll * (total - 1)) + 1);
+
+    badge.textContent = current + ' / ' + total;
   }
 
   function initCarousel(el) {
@@ -39,10 +61,12 @@
 
     var prev = el.querySelector('.dc-carousel-prev');
     var next = el.querySelector('.dc-carousel-next');
+    var page = el.querySelector('.dc-carousel-page');
 
     el._track = track;
     el._prev = prev;
     el._next = next;
+    el._page = page;
 
     if (prev) {
       prev.addEventListener('click', function () {
