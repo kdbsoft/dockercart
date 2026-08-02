@@ -1,0 +1,94 @@
+<div class="dc-review-card bg-white border rounded-xl p-4 mb-4 shadow-sm">
+  <div class="flex items-start justify-between gap-3 mb-2">
+    <div>
+      <div class="flex items-center gap-2">
+        <strong class="text-sm text-gray-900">{{ review.author }}</strong>
+        {% if review.verified %}
+          <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5" title="{{ text_verified }}">
+            <i data-lucide="badge-check" width="13" height="13"></i>{{ text_verified }}
+          </span>
+        {% endif %}
+      </div>
+      <div class="text-xs text-gray-400 mt-0.5">{{ review.date_added }}</div>
+    </div>
+    <div class="flex items-center gap-2 flex-shrink-0">
+      <div class="dc-stars" aria-hidden="true">
+        {% for i in 1..5 %}
+          {% set diff = review.rating - (i - 1) %}
+          {% if diff >= 1 %}
+            <span class="dc-star active">★</span>
+          {% elseif diff >= 0.1 %}
+            <span class="dc-star dc-star-partial" style="--pct: {{ (diff * 100) | round }}%">★</span>
+          {% else %}
+            <span class="dc-star">★</span>
+          {% endif %}
+        {% endfor %}
+      </div>
+      <div class="text-sm font-semibold text-gray-700">{{ review.rating_value }}/5</div>
+    </div>
+  </div>
+
+  {% if review.criteria %}
+    <div class="flex flex-wrap gap-2 mb-3">
+      {% for item in review.criteria %}
+        {% if item.type == 'rating' %}
+          <div class="inline-flex items-center gap-1.5 bg-gray-50 border border-gray-100 rounded-lg px-2.5 py-1.5">
+            <span class="text-xs text-gray-500">{{ item.name }}:</span>
+            <span class="dc-stars dc-stars-sm" aria-hidden="true">
+              {% for i in 1..5 %}
+                {% set diff = item.value - (i - 1) %}
+                {% if diff >= 1 %}
+                  <span class="dc-star active">★</span>
+                {% elseif diff >= 0.1 %}
+                  <span class="dc-star dc-star-partial" style="--pct: {{ (diff * 100) | round }}%">★</span>
+                {% else %}
+                  <span class="dc-star">★</span>
+                {% endif %}
+              {% endfor %}
+            </span>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if review.pros %}
+    <div class="mb-2">
+      <span class="text-xs font-bold text-emerald-600">{{ text_pros }}</span>
+      <div class="text-sm text-gray-700">{{ review.pros }}</div>
+    </div>
+  {% endif %}
+
+  {% if review.cons %}
+    <div class="mb-2">
+      <span class="text-xs font-bold text-red-500">{{ text_cons }}</span>
+      <div class="text-sm text-gray-700">{{ review.cons }}</div>
+    </div>
+  {% endif %}
+
+  <div class="text-sm text-gray-700 leading-relaxed">{{ review.text }}</div>
+
+  {% if review.images %}
+    <div class="dc-review-thumbs">
+      {% for image in review.images %}
+        <button type="button" class="dc-review-thumb dc-review-thumb-open" data-popup="{{ image.popup }}" aria-label="{{ text_view_image }}">
+          <img src="{{ image.thumb }}" alt="{{ review.author }}" loading="lazy" />
+        </button>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if review.video %}
+    <div class="mt-3">
+      {% if review.video.type == 'youtube' %}
+        <div class="aspect-video max-w-md rounded-xl overflow-hidden bg-black">
+          <iframe src="{{ review.video.embed }}" class="w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+        </div>
+      {% else %}
+        <video class="max-w-md w-full rounded-xl bg-black" controls preload="metadata">
+          <source src="{{ review.video.src }}" type="video/mp4">
+        </video>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>

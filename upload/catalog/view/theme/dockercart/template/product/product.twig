@@ -44,6 +44,8 @@
 
 </style>
 
+{% include 'dockercart/template/product/review_css.twig' %}
+
 <main class="py-20 sm:py-2 lg:py-4 px-4 sm:px-6 lg:px-8 bg-white">
   <!-- ─── BREADCRUMBS ─── -->
   <div class="max-w-7xl mx-auto mb-6">
@@ -145,12 +147,7 @@
         <h1 id="dc-product-name" data-base-name="{{ base_product_name }}" data-base-meta-title="{{ base_meta_title }}" class="text-2xl sm:text-3xl font-extrabold text-gray-900 leading-tight">{{ heading_title }}</h1>
 
         {% if review_status %}
-        <div class="flex flex-wrap items-center gap-3 mt-3">
-          <div class="flex text-sm text-amber-400 gap-0.5">{% for i in 1..5 %}{% if rating >= i %}★{% else %}<span class="text-gray-300">★</span>{% endif %}{% endfor %}</div>
-          <a href="#" onclick="document.querySelector('.tab-btn[data-tab=\'review\']').click();return false;" class="text-sm text-gray-500 hover:text-blue-600 transition">{{ reviews }}</a>
-          <span class="text-sm text-gray-300">|</span>
-          <span class="text-sm text-gray-500">{{ text_model }} <span id="dc-variant-model" data-base-model="{{ model }}">{{ is_configurable and variant_model is defined and variant_model ? variant_model : model }}</span></span>
-        </div>
+        {% include 'dockercart/template/product/review_summary.twig' %}
         {% else %}
         <p class="text-sm text-gray-500 mt-3">{{ text_model }} <span id="dc-variant-model" data-base-model="{{ model }}">{{ is_configurable and variant_model is defined and variant_model ? variant_model : model }}</span></p>
         {% endif %}
@@ -464,37 +461,18 @@
 
       {% if review_status %}
       <div id="dc-tab-review" class="dc-tab-panel mt-5 hidden">
-        <div id="review" class="space-y-3 mb-6"></div>
-        {% if review_guest %}
-        <h3 class="text-base font-bold text-gray-900 mb-4">{{ text_write }}</h3>
-        <form id="form-review" class="space-y-4 max-w-xl">
-          <div>
-            <label class="text-sm font-semibold text-gray-700 block mb-1.5" for="input-name">{{ entry_name }}</label>
-            <input type="text" name="name" value="{{ customer_name }}" id="input-name" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-blue-400 transition" />
-          </div>
-          <div>
-            <label class="text-sm font-semibold text-gray-700 block mb-1.5" for="input-review">{{ entry_review }}</label>
-            <textarea name="text" rows="4" id="input-review" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-blue-400 transition resize-none"></textarea>
-            <p class="text-xs text-gray-400 mt-1">{{ text_note }}</p>
-          </div>
-          <div>
-            <label class="text-sm font-semibold text-gray-700 block mb-2">{{ entry_rating }}</label>
-            <div class="flex items-center gap-3">
-              <span class="text-xs text-gray-400">{{ entry_bad }}</span>
-              <div id="dc-stars-row" class="dc-stars-row" role="group" aria-label="Rating">
-                {% for i in 1..5 %}<span class="dc-star" data-val="{{ i }}" tabindex="0" role="radio" aria-label="{{ i }} stars">★</span>{% endfor %}
-              </div>
-              <span class="text-xs text-gray-400">{{ entry_good }}</span>
-              {% for i in 1..5 %}<input type="radio" name="rating" value="{{ i }}" id="dc-rating-{{ i }}" class="sr-only" />{% endfor %}
-            </div>
-          </div>
-          {{ captcha }}
-          <button type="button" id="button-review" data-loading-text="{{ text_loading }}"
-            class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition">{{ button_continue }}</button>
-        </form>
-        {% else %}
-        <div class="text-sm text-gray-600 p-4 bg-gray-50 rounded-xl">{{ text_login }}</div>
-        {% endif %}
+        <div id="review" data-ajax-load="1" class="space-y-3 mb-6"></div>
+        {% include 'dockercart/template/product/review_form.twig' with {
+          review_guest: review_guest,
+          customer_name: customer_name,
+          customer_logged: customer_logged,
+          criteria: review_criteria,
+          has_rating_criteria: has_rating_criteria,
+          review_images_enabled: review_images_enabled,
+          review_max_images: review_max_images,
+          review_video_enabled: review_video_enabled,
+          captcha: captcha
+        } %}
       </div>
       {% endif %}
     </section>
@@ -1174,24 +1152,6 @@ function closeModal3d() {
     };
   }
 
-  function loadReview(url) {
-    var review = document.getElementById('review');
-    if (!review) return;
-
-    review.style.opacity = '0.35';
-
-    fetch(url, { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-      .then(function(response) { return response.text(); })
-      .then(function(html) {
-        review.innerHTML = html;
-        review.style.opacity = '1';
-      })
-      .catch(function(error) {
-        review.style.opacity = '1';
-        console.error('Review load error:', error);
-      });
-  }
-
   document.addEventListener('DOMContentLoaded', function() {
     var quantityInput = document.getElementById('input-quantity');
     var cartButton = document.getElementById('button-cart');
@@ -1360,68 +1320,11 @@ function closeModal3d() {
       });
     }
 
-{% if review_status %}
-    loadReview('index.php?route=product/product/review&product_id={{ product_id }}');
-
-    document.addEventListener('click', function(e) {
-      var paginationLink = e.target.closest('#review .pagination a');
-      if (!paginationLink) return;
-
-      e.preventDefault();
-      loadReview(paginationLink.getAttribute('href'));
-    });
-
-    var reviewButton = document.getElementById('button-review');
-    var reviewForm = document.getElementById('form-review');
-
-    if (reviewButton && reviewForm) {
-      reviewButton.addEventListener('click', function() {
-        var params = new URLSearchParams(new FormData(reviewForm));
-
-        reviewButton.disabled = true;
-
-        fetch('index.php?route=product/product/write&product_id={{ product_id }}', {
-          method: 'POST',
-          credentials: 'same-origin',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            'X-Requested-With': 'XMLHttpRequest'
-          },
-          body: params.toString()
-        })
-        .then(function(response) { return response.json(); })
-        .then(function(json) {
-          clearNodes('.dc-review-alert');
-
-          if (json.error) {
-            reviewForm.insertAdjacentHTML('afterbegin', '<div class="dc-review-alert text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl p-3 mb-3">' + json.error + '</div>');
-          }
-
-          if (json.success) {
-            reviewForm.insertAdjacentHTML('afterbegin', '<div class="dc-review-alert text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl p-3 mb-3">' + json.success + '</div>');
-
-            var inputName = document.getElementById('input-name');
-            var inputReview = document.getElementById('input-review');
-            if (inputName) inputName.value = '';
-            if (inputReview) inputReview.value = '';
-
-            reviewForm.querySelectorAll('input[name="rating"]').forEach(function(r) { r.checked = false; });
-            document.querySelectorAll('#dc-stars-row .dc-star').forEach(function(s) { s.classList.remove('lit'); });
-          }
-        })
-        .catch(function(error) {
-          console.error('Review submit error:', error);
-        })
-        .finally(function() {
-          reviewButton.disabled = false;
-        });
-      });
-    }
-{% endif %}
   });
 })();
 </script>
 
+{% include 'dockercart/template/product/review_js.twig' %}
 {% include 'dockercart/template/common/partials/schema_product.twig' %}
 {% include 'dockercart/template/product/product_variants.twig' %}
 
