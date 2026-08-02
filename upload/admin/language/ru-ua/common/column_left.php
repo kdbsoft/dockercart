@@ -2,6 +2,7 @@
 
 $_['text_attribute'] = 'Атрибуты';
 $_['text_attribute_group'] = 'Группы атрибутов';
+$_['text_attribute_set'] = 'Наборы атрибутов';
 $_['text_backup'] = 'Резервное копирование / Восстановление';
 $_['text_banner'] = 'Баннеры';
 $_['text_catalog'] = 'Каталог';
@@ -40,6 +41,7 @@ $_['text_menu'] = 'Менеджер меню';
 $_['text_modification'] = 'Модификации';
 $_['text_navigation'] = 'Навигация';
 $_['text_option'] = 'Опции';
+$_['text_option_set'] = 'Наборы опций';
 $_['text_order'] = 'Заказы';
 $_['text_order_flow'] = 'Order flow';
 $_['text_order_status'] = 'Статусы';

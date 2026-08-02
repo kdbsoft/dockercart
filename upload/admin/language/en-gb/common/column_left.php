@@ -2,6 +2,7 @@
 // Text
 $_['text_attribute']            = 'Attributes';
 $_['text_attribute_group']      = 'Attribute Groups';
+$_['text_attribute_set']        = 'Attribute Sets';
 $_['text_backup']               = 'Backup / Restore';
 $_['text_banner']               = 'Banners';
 
@@ -39,6 +40,7 @@ $_['text_modification']         = 'Modifications';
 $_['text_manufacturer']         = 'Manufacturers';
 $_['text_navigation']           = 'Navigation';
 $_['text_option']               = 'Options';
+$_['text_option_set']           = 'Option Sets';
 $_['text_order']                = 'Orders';
 $_['text_order_flow']           = 'Order flow';
 $_['text_order_status']         = 'Statuses';
