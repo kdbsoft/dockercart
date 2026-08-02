@@ -1,9 +1,13 @@
 <?php
 class ModelMarketingCoupon extends Model {
 	public function addCoupon($data) {
-		$this->db->query("INSERT INTO " . DB_PREFIX . "coupon SET name = '" . $this->db->escape($data['name']) . "', code = '" . $this->db->escape($data['code']) . "', discount = '" . (float)$data['discount'] . "', type = '" . $this->db->escape($data['type']) . "', total = '" . (float)$data['total'] . "', logged = '" . (int)$data['logged'] . "', shipping = '" . (int)$data['shipping'] . "', date_start = '" . $this->db->escape($data['date_start']) . "', date_end = '" . $this->db->escape($data['date_end']) . "', uses_total = '" . (int)$data['uses_total'] . "', uses_customer = '" . (int)$data['uses_customer'] . "', status = '" . (int)$data['status'] . "', auto_renew = '" . (int)(!empty($data['auto_renew'])) . "', date_added = NOW()");
+		$this->db->query("INSERT INTO " . DB_PREFIX . "coupon SET name = '" . $this->db->escape($this->getDefaultName($data)) . "', code = '" . $this->db->escape($data['code']) . "', discount = '" . (float)$data['discount'] . "', type = '" . $this->db->escape($data['type']) . "', total = '" . (float)$data['total'] . "', logged = '" . (int)$data['logged'] . "', shipping = '" . (int)$data['shipping'] . "', date_start = '" . $this->db->escape($data['date_start']) . "', date_end = '" . $this->db->escape($data['date_end']) . "', uses_total = '" . (int)$data['uses_total'] . "', uses_customer = '" . (int)$data['uses_customer'] . "', status = '" . (int)$data['status'] . "', auto_renew = '" . (int)(!empty($data['auto_renew'])) . "', date_added = NOW()");
 
 		$coupon_id = $this->db->getLastId();
+
+		foreach ($data['coupon'] as $language_id => $value) {
+			$this->db->query("INSERT INTO " . DB_PREFIX . "coupon_description SET coupon_id = '" . (int)$coupon_id . "', language_id = '" . (int)$language_id . "', name = '" . $this->db->escape($value['name']) . "'");
+		}
 
 		if (isset($data['coupon_product'])) {
 			foreach ($data['coupon_product'] as $product_id) {
@@ -21,7 +25,13 @@ class ModelMarketingCoupon extends Model {
 	}
 
 	public function editCoupon($coupon_id, $data) {
-		$this->db->query("UPDATE " . DB_PREFIX . "coupon SET name = '" . $this->db->escape($data['name']) . "', code = '" . $this->db->escape($data['code']) . "', discount = '" . (float)$data['discount'] . "', type = '" . $this->db->escape($data['type']) . "', total = '" . (float)$data['total'] . "', logged = '" . (int)$data['logged'] . "', shipping = '" . (int)$data['shipping'] . "', date_start = '" . $this->db->escape($data['date_start']) . "', date_end = '" . $this->db->escape($data['date_end']) . "', uses_total = '" . (int)$data['uses_total'] . "', uses_customer = '" . (int)$data['uses_customer'] . "', status = '" . (int)$data['status'] . "', auto_renew = '" . (int)(!empty($data['auto_renew'])) . "' WHERE coupon_id = '" . (int)$coupon_id . "'");
+		$this->db->query("UPDATE " . DB_PREFIX . "coupon SET name = '" . $this->db->escape($this->getDefaultName($data)) . "', code = '" . $this->db->escape($data['code']) . "', discount = '" . (float)$data['discount'] . "', type = '" . $this->db->escape($data['type']) . "', total = '" . (float)$data['total'] . "', logged = '" . (int)$data['logged'] . "', shipping = '" . (int)$data['shipping'] . "', date_start = '" . $this->db->escape($data['date_start']) . "', date_end = '" . $this->db->escape($data['date_end']) . "', uses_total = '" . (int)$data['uses_total'] . "', uses_customer = '" . (int)$data['uses_customer'] . "', status = '" . (int)$data['status'] . "', auto_renew = '" . (int)(!empty($data['auto_renew'])) . "' WHERE coupon_id = '" . (int)$coupon_id . "'");
+
+		$this->db->query("DELETE FROM " . DB_PREFIX . "coupon_description WHERE coupon_id = '" . (int)$coupon_id . "'");
+
+		foreach ($data['coupon'] as $language_id => $value) {
+			$this->db->query("INSERT INTO " . DB_PREFIX . "coupon_description SET coupon_id = '" . (int)$coupon_id . "', language_id = '" . (int)$language_id . "', name = '" . $this->db->escape($value['name']) . "'");
+		}
 
 		$this->db->query("DELETE FROM " . DB_PREFIX . "coupon_product WHERE coupon_id = '" . (int)$coupon_id . "'");
 
@@ -42,9 +52,38 @@ class ModelMarketingCoupon extends Model {
 
 	public function deleteCoupon($coupon_id) {
 		$this->db->query("DELETE FROM " . DB_PREFIX . "coupon WHERE coupon_id = '" . (int)$coupon_id . "'");
+		$this->db->query("DELETE FROM " . DB_PREFIX . "coupon_description WHERE coupon_id = '" . (int)$coupon_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "coupon_product WHERE coupon_id = '" . (int)$coupon_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "coupon_category WHERE coupon_id = '" . (int)$coupon_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "coupon_history WHERE coupon_id = '" . (int)$coupon_id . "'");
+	}
+
+	public function getCouponDescriptions($coupon_id) {
+		$coupon_description_data = array();
+
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "coupon_description WHERE coupon_id = '" . (int)$coupon_id . "'");
+
+		foreach ($query->rows as $result) {
+			$coupon_description_data[$result['language_id']] = array('name' => $result['name']);
+		}
+
+		return $coupon_description_data;
+	}
+
+	protected function getDefaultName($data) {
+		$default_language_id = (int)$this->config->get('config_language_id');
+
+		if (!empty($data['coupon'][$default_language_id]['name'])) {
+			return $data['coupon'][$default_language_id]['name'];
+		}
+
+		foreach ($data['coupon'] as $value) {
+			if (!empty($value['name'])) {
+				return $value['name'];
+			}
+		}
+
+		return '';
 	}
 
 	public function getCoupon($coupon_id) {
@@ -60,7 +99,7 @@ class ModelMarketingCoupon extends Model {
 	}
 
 	public function getCoupons($data = array()) {
-		$sql = "SELECT coupon_id, name, code, discount, date_start, date_end, status, auto_renew FROM " . DB_PREFIX . "coupon";
+		$sql = "SELECT c.coupon_id, COALESCE(cd.name, c.name) AS name, c.code, c.discount, c.date_start, c.date_end, c.status, c.auto_renew FROM " . DB_PREFIX . "coupon c LEFT JOIN " . DB_PREFIX . "coupon_description cd ON (cd.coupon_id = c.coupon_id AND cd.language_id = '" . (int)$this->config->get('config_language_id') . "')";
 
 		$sort_data = array(
 			'name',
@@ -72,9 +111,15 @@ class ModelMarketingCoupon extends Model {
 		);
 
 		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
-			$sql .= " ORDER BY " . $data['sort'];
+			$sort = $data['sort'];
+
+			if ($sort == 'name') {
+				$sql .= " ORDER BY COALESCE(cd.name, c.name)";
+			} else {
+				$sql .= " ORDER BY " . $sort;
+			}
 		} else {
-			$sql .= " ORDER BY name";
+			$sql .= " ORDER BY COALESCE(cd.name, c.name)";
 		}
 
 		if (isset($data['order']) && ($data['order'] == 'DESC')) {

@@ -1,7 +1,7 @@
 <?php
 
 $_["button_accept"] = "Принять";
-$_["button_apply_coupon"] = "Применить купон";
+$_["button_apply_coupon"] = "Применить промо-код";
 $_["button_apply_reward"] = "Применить баллы";
 $_["button_apply_voucher"] = "Применить сертификат";
 $_["button_back"] = "Назад";
@@ -20,7 +20,7 @@ $_["entry_comment"] = "Комментарии к заказу";
 $_["entry_company"] = "Компания";
 $_["entry_confirm"] = "Подтвердить пароль";
 $_["entry_country"] = "Страна";
-$_["entry_coupon"] = "Код купона";
+$_["entry_coupon"] = "Промо-код";
 $_["entry_email"] = "Электронная почта";
 $_["entry_firstname"] = "Имя";
 $_["entry_lastname"] = "Фамилия";
@@ -37,7 +37,7 @@ $_["error_agree"] = "Вы должны согласиться с условия�
 $_["error_city"] = "Город должен быть от 2 до 128 символов!";
 $_["error_confirm"] = "Подтверждение пароля не совпадает!";
 $_["error_country"] = "Пожалуйста, выберите страну!";
-$_["error_coupon"] = "Неверный или истекший код купона!";
+$_["error_coupon"] = "Неверный или истекший промо-код!";
 $_["error_customer"] = "Пожалуйста, сначала введите ваши данные!";
 $_["error_email"] = "Пожалуйста, введите корректный адрес электронной почты!";
 $_["error_email_exists"] =
@@ -101,9 +101,9 @@ $_["text_checkout_shipping"] = "Адрес доставки";
 $_["text_comment_placeholder"] =
     "Добавьте специальные инструкции или заметки к вашему заказу...";
 $_["text_complete_address_first"] = "Пожалуйста, сначала заполните адрес";
-$_["text_coupon_applied"] = "Купон успешно применен!";
-$_["text_coupon_removed"] = "Купон удален";
-$_["text_coupon_voucher"] = "Купон и подарочный сертификат";
+$_["text_coupon_applied"] = "Промо-код успешно применен!";
+$_["text_coupon_removed"] = "Промо-код удален";
+$_["text_coupon_voucher"] = "Промо-код и подарочный сертификат";
 $_["text_create_account"] =
     "Создать аккаунт для более быстрого оформления в следующий раз";
 $_["text_custom_fields"] = "Дополнительная информация";
@@ -111,7 +111,7 @@ $_["text_customer_details"] = "Данные клиента";
 $_["text_default_address"] = "По умолчанию";
 $_["text_empty_cart"] = "Ваша корзина пуста!";
 $_["text_model"] = "Код товара:";
-$_["text_enter_coupon_code"] = "Пожалуйста, введите код купона";
+$_["text_enter_coupon_code"] = "Пожалуйста, введите промо-код";
 $_["text_field_address_1"] = "Адрес / Отделение";
 $_["text_field_address_2"] = "Продолжение адреса";
 $_["text_field_city"] = "Город";
