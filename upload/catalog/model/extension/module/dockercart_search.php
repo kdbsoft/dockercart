@@ -13,10 +13,17 @@
  */
 
 require_once DIR_SYSTEM . 'library/dockercart/manticore.php';
+require_once DIR_SYSTEM . 'library/dockercart/keyboard_layout.php';
 
+use Dockercart\KeyboardLayout;
 use Dockercart\ManticoreClient;
 
 class ModelExtensionModuleDockercartSearch extends Model {
+    /**
+     * Cache key for query mappings (shared with the admin model).
+     */
+    private const MAPPING_CACHE_KEY = 'dockercart.search.query_mappings';
+
     private $manticore;
     private $query_mappings = null;
 
@@ -388,6 +395,54 @@ class ModelExtensionModuleDockercartSearch extends Model {
     }
 
     /**
+     * Get a keyboard-layout suggestion when search yields no results.
+     *
+     * Users sometimes type Cyrillic text while the keyboard is in the Latin
+     * layout (or vice versa): "ghbdtn" instead of "привет". The query is
+     * converted to the opposite layout and the converted query is verified
+     * to actually return results for the current store/language, so noisy
+     * conversions (e.g. "iphone" -> "ироуту") are filtered out.
+     *
+     * @param string $query_text Original search query
+     * @param array  $options    Options (category_id, sub_category)
+     * @return array|null ['text' => string] or null when no reliable conversion
+     */
+    public function getLayoutSuggestion($query_text, $options = []) {
+        $query_text = $this->normalizeSearchQuery($query_text);
+
+        if ($query_text === '') {
+            return null;
+        }
+
+        $converted = KeyboardLayout::convert($query_text);
+
+        if ($converted === '' || $converted === $query_text) {
+            return null;
+        }
+
+        $search_options = [
+            'limit'  => 1,
+            'offset' => 0,
+        ];
+
+        if (!empty($options['category_id'])) {
+            $search_options['category_id'] = (int)$options['category_id'];
+
+            if (!empty($options['sub_category'])) {
+                $search_options['sub_category'] = true;
+            }
+        }
+
+        $result_data = $this->search($converted, $search_options);
+
+        if (!empty($result_data['total'])) {
+            return ['text' => $converted];
+        }
+
+        return null;
+    }
+
+    /**
      * Recursively collect all descendant category IDs (any depth).
      *
      * @param int $category_id
@@ -449,9 +504,14 @@ class ModelExtensionModuleDockercartSearch extends Model {
     }
 
     /**
-     * Parse query mappings from module settings.
+     * Get query mappings (source lowercase => target).
      *
-     * @return array<string,string> source(lowercase) => target
+     * Reads from the shared cache (Redis), falls back to the dedicated
+     * `search_query_mapping` table and finally to the legacy single-text
+     * module setting (pre-migration installs). The admin side invalidates
+     * the cache on every change.
+     *
+     * @return array<string,string>
      */
     private function getQueryMappings() {
         if ($this->query_mappings !== null) {
@@ -460,9 +520,63 @@ class ModelExtensionModuleDockercartSearch extends Model {
 
         $this->query_mappings = [];
 
+        $cached = $this->cache->get(self::MAPPING_CACHE_KEY);
+
+        if (is_array($cached)) {
+            $this->query_mappings = $cached;
+
+            return $this->query_mappings;
+        }
+
+        $mappings = $this->getQueryMappingsFromDatabase();
+
+        // Table unavailable (module installed before the migration) — fall back
+        // to the legacy setting so search keeps working until the admin side
+        // performs the one-time migration.
+        if ($mappings === null) {
+            $mappings = $this->getLegacyQueryMappingsFromConfig();
+        }
+
+        // Cache even an empty result to avoid a DB hit on every request
+        $this->cache->set(self::MAPPING_CACHE_KEY, $mappings);
+
+        $this->query_mappings = $mappings;
+
+        return $this->query_mappings;
+    }
+
+    /**
+     * Read query mappings from the dedicated table.
+     *
+     * @return array<string,string>|null null when the table is unavailable
+     */
+    private function getQueryMappingsFromDatabase() {
+        try {
+            $query = $this->db->query("SELECT `source`, `target` FROM `" . DB_PREFIX . "search_query_mapping`");
+
+            $mappings = [];
+
+            foreach ($query->rows as $row) {
+                $mappings[mb_strtolower($row['source'], 'UTF-8')] = $row['target'];
+            }
+
+            return $mappings;
+        } catch (Exception $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Parse query mappings from the legacy module setting.
+     *
+     * @return array<string,string> source(lowercase) => target
+     */
+    private function getLegacyQueryMappingsFromConfig() {
+        $mappings = [];
+
         $raw = (string)$this->config->get('module_dockercart_search_query_mappings');
         if (trim($raw) === '') {
-            return $this->query_mappings;
+            return $mappings;
         }
 
         $lines = preg_split('/\R/u', $raw);
@@ -489,9 +603,9 @@ class ModelExtensionModuleDockercartSearch extends Model {
                 continue;
             }
 
-            $this->query_mappings[mb_strtolower($source, 'UTF-8')] = $target;
+            $mappings[mb_strtolower($source, 'UTF-8')] = $target;
         }
 
-        return $this->query_mappings;
+        return $mappings;
     }
 }

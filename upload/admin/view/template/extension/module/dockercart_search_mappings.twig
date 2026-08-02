@@ -1,0 +1,111 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="container-fluid">
+    <div class="page-header">
+      <div class="row">
+        <div class="col-lg-offset-1 col-lg-7 col-xl-offset-1 col-xl-7">
+          <a href="{{ cancel }}" class="page-header__link">
+            <span class="page-header__back">
+              <i data-lucide="arrow-left" width="20" height="20"></i>
+            </span>
+            <span class="page-header__title">
+              {{ heading_mappings }}
+            </span>
+          </a>
+        </div>
+        <div class="col-lg-4 col-xl-3">
+          <div class="pull-right">
+            <a href="{{ export_url }}" class="btn btn-default"><i data-lucide="download" width="16" height="16"></i> {{ button_export_csv }}</a>
+            <a href="{{ add }}" class="btn btn-primary"><i data-lucide="plus" width="16" height="16"></i> {{ button_add_mapping }}</a>
+          </div>
+        </div>
+      </div>
+      {% if error_warning %}
+      <div class="row">
+        <div class="col-lg-offset-1 col-lg-7 col-xl-offset-1 col-xl-7">
+          <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      {% if success %}
+      <div class="row">
+        <div class="col-lg-offset-1 col-lg-7 col-xl-offset-1 col-xl-7">
+          <div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> {{ success }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="row">
+      <div class="col-md-12 col-lg-offset-1 col-lg-10 col-xl-offset-1 col-xl-10">
+        <div class="dcx-shell">
+          <div class="dcx-panel">
+            <div class="dcx-panel-head">
+              <div class="dcx-panel-head__icon"><i data-lucide="table" width="18" height="18"></i></div>
+              <div>
+                <div class="dcx-panel-title">{{ heading_mappings }}</div>
+              </div>
+            </div>
+            <div class="dcx-panel-body">
+              <form action="{{ import_url }}" method="post" enctype="multipart/form-data" id="form-import-csv" style="margin-bottom: 8px;">
+                <div class="input-group" style="max-width: 460px;">
+                  <input type="file" name="file" accept=".csv,text/csv" class="form-control" style="height:auto;" required />
+                  <span class="input-group-btn">
+                    <button type="submit" class="btn btn-success"><i data-lucide="upload" width="14" height="14"></i> {{ button_import_csv }}</button>
+                  </span>
+                </div>
+                <p class="help-block">{{ help_import_csv }}</p>
+              </form>
+
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                  <thead>
+                    <tr>
+                      <td class="text-right" style="width: 1px;">#</td>
+                      <td class="text-left">{{ column_source }}</td>
+                      <td class="text-left">{{ column_target }}</td>
+                      <td class="text-right">{{ column_action }}</td>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% if mappings %}
+                    {% for mapping in mappings %}
+                    <tr>
+                      <td class="text-right">{{ loop.index + ((page - 1) * 20) }}</td>
+                      <td class="text-left"><code>{{ mapping.source }}</code></td>
+                      <td class="text-left">{{ mapping.target }}</td>
+                      <td class="text-right">
+                        <a href="{{ mapping.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a>
+                        <form action="{{ mapping.delete }}" method="post" style="display: inline-block;" onsubmit="return confirm('{{ text_confirm_delete }}');">
+                          <button type="submit" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn--icon"><i data-lucide="trash-2" width="14" height="14"></i></button>
+                        </form>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                      <td class="text-center" colspan="4">{{ text_no_results }}</td>
+                    </tr>
+                    {% endif %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pagination-wrap">
+      <div class="row">
+        <div class="col-sm-6 text-left">{{ pagination }}</div>
+        <div class="col-sm-6 text-right">{{ results }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+{{ footer }}

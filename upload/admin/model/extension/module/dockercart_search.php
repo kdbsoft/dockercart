@@ -17,6 +17,13 @@ require_once DIR_SYSTEM . 'library/dockercart/manticore.php';
 use Dockercart\ManticoreClient;
 
 class ModelExtensionModuleDockercartSearch extends Model {
+    /**
+     * Cache key for query mappings (shared with the catalog model).
+     */
+    private const MAPPING_CACHE_KEY = 'dockercart.search.query_mappings';
+
+    private static $mapping_table_ready = false;
+
     private $manticore;
     private $last_error = '';
 
@@ -863,5 +870,238 @@ class ModelExtensionModuleDockercartSearch extends Model {
             'lemmatize_en' => 'English Lemmatizer',
             'lemmatize_de' => 'German Lemmatizer'
         ];
+    }
+
+    /**
+     * Get query mappings as a list of rows, ordered by source.
+     *
+     * @param int|null $start Pagination offset
+     * @param int|null $limit Page size (null = all rows)
+     * @return array<int, array{mapping_id: int, source: string, target: string}>
+     */
+    public function getQueryMappings($start = 0, $limit = null) {
+        $this->ensureMappingTable();
+
+        $sql = "SELECT `mapping_id`, `source`, `target` FROM `" . DB_PREFIX . "search_query_mapping` ORDER BY `source` ASC";
+
+        if ($limit !== null) {
+            $sql .= " LIMIT " . (int)$start . ", " . (int)$limit;
+        }
+
+        $query = $this->db->query($sql);
+
+        return $query->rows ?: [];
+    }
+
+    /**
+     * Get the total number of query mappings.
+     *
+     * @return int
+     */
+    public function getTotalQueryMappings() {
+        $this->ensureMappingTable();
+
+        $query = $this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "search_query_mapping`");
+
+        return (int)$query->row['total'];
+    }
+
+    /**
+     * Get a single query mapping by id.
+     *
+     * @param int $mapping_id
+     * @return array{source: string, target: string}|null
+     */
+    public function getQueryMapping($mapping_id) {
+        $this->ensureMappingTable();
+
+        $query = $this->db->query("SELECT `source`, `target` FROM `" . DB_PREFIX . "search_query_mapping` WHERE `mapping_id` = '" . (int)$mapping_id . "'");
+
+        if ($query->num_rows) {
+            return $query->row;
+        }
+
+        return null;
+    }
+
+    /**
+     * Insert or update a single query mapping.
+     *
+     * Editing removes the old row first, so renaming a source replaces the
+     * colliding row instead of raising a duplicate-key error.
+     *
+     * @param int    $mapping_id 0 for new mappings
+     * @param string $source
+     * @param string $target
+     * @return void
+     */
+    public function saveQueryMapping($mapping_id, $source, $target) {
+        $this->ensureMappingTable();
+
+        $source = trim((string)$source);
+        $target = trim((string)$target);
+
+        if ($source === '' || $target === '') {
+            return;
+        }
+
+        if ((int)$mapping_id > 0) {
+            $this->db->query("DELETE FROM `" . DB_PREFIX . "search_query_mapping` WHERE `mapping_id` = '" . (int)$mapping_id . "'");
+        }
+
+        $this->db->query("INSERT INTO `" . DB_PREFIX . "search_query_mapping` (`source`, `target`)
+            VALUES ('" . $this->db->escape($source) . "', '" . $this->db->escape($target) . "')
+            ON DUPLICATE KEY UPDATE `source` = VALUES(`source`), `target` = VALUES(`target`)");
+
+        $this->clearMappingsCache();
+    }
+
+    /**
+     * Delete a single query mapping.
+     *
+     * @param int $mapping_id
+     * @return void
+     */
+    public function deleteQueryMapping($mapping_id) {
+        $this->ensureMappingTable();
+
+        $this->db->query("DELETE FROM `" . DB_PREFIX . "search_query_mapping` WHERE `mapping_id` = '" . (int)$mapping_id . "'");
+
+        $this->clearMappingsCache();
+    }
+
+    /**
+     * Replace all query mappings (delete + batch insert).
+     *
+     * @param array<int, array{source: string, target: string}> $rows
+     * @return void
+     */
+    public function setQueryMappings($rows) {
+        $this->ensureMappingTable();
+
+        $this->db->query("DELETE FROM `" . DB_PREFIX . "search_query_mapping`");
+
+        $this->insertMappings($rows);
+    }
+
+    /**
+     * Batch upsert mappings (source is unique case-insensitively).
+     * Rows with duplicate sources are deduplicated before insert.
+     *
+     * @param array<int, array{source: string, target: string}> $rows
+     * @return void
+     */
+    public function insertMappings($rows) {
+        $this->ensureMappingTable();
+
+        $deduped = [];
+
+        foreach ($rows as $row) {
+            $source = trim((string)$row['source']);
+            $target = trim((string)$row['target']);
+
+            if ($source === '' || $target === '') {
+                continue;
+            }
+
+            $deduped[mb_strtolower($source, 'UTF-8')] = ['source' => $source, 'target' => $target];
+        }
+
+        foreach (array_chunk($deduped, 500) as $chunk) {
+            $values = [];
+
+            foreach ($chunk as $row) {
+                $values[] = "('" . $this->db->escape($row['source']) . "', '" . $this->db->escape($row['target']) . "')";
+            }
+
+            $this->db->query("INSERT INTO `" . DB_PREFIX . "search_query_mapping` (`source`, `target`) VALUES " . implode(', ', $values) . " ON DUPLICATE KEY UPDATE `source` = VALUES(`source`), `target` = VALUES(`target`)");
+        }
+
+        $this->clearMappingsCache();
+    }
+
+    /**
+     * Ensure the query mapping table exists and migrate legacy config data
+     * (one-time, when the table is empty).
+     *
+     * @return void
+     */
+    public function ensureMappingTable() {
+        if (self::$mapping_table_ready) {
+            return;
+        }
+
+        $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "search_query_mapping` (
+            `mapping_id` int(11) NOT NULL AUTO_INCREMENT,
+            `source` varchar(255) NOT NULL,
+            `target` varchar(255) NOT NULL,
+            PRIMARY KEY (`mapping_id`),
+            UNIQUE KEY `uq_source` (`source`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+        // Mark ready before the legacy migration so re-entrant calls from
+        // insertMappings() (which calls ensureMappingTable()) don't recurse.
+        self::$mapping_table_ready = true;
+
+        $query = $this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "search_query_mapping`");
+
+        // One-time migration from the legacy single-text setting
+        if ((int)$query->row['total'] === 0) {
+            $legacy = (string)$this->config->get('module_dockercart_search_query_mappings');
+
+            if (trim($legacy) !== '') {
+                $rows = $this->parseMappingText($legacy);
+
+                if (!empty($rows)) {
+                    $this->insertMappings($rows);
+                }
+            }
+        }
+    }
+
+    /**
+     * Parse legacy `source=target` (or `source=>target`) text into rows.
+     *
+     * @param string $raw
+     * @return array<int, array{source: string, target: string}>
+     */
+    private function parseMappingText($raw) {
+        $rows = [];
+
+        foreach (preg_split('/\R/u', (string)$raw) as $line) {
+            $line = trim((string)$line);
+
+            if ($line === '' || strpos($line, '#') === 0 || strpos($line, '//') === 0) {
+                continue;
+            }
+
+            if (strpos($line, '=>') !== false) {
+                $parts = explode('=>', $line, 2);
+            } elseif (strpos($line, '=') !== false) {
+                $parts = explode('=', $line, 2);
+            } else {
+                continue;
+            }
+
+            $source = trim((string)$parts[0]);
+            $target = trim((string)$parts[1]);
+
+            if ($source === '' || $target === '') {
+                continue;
+            }
+
+            $rows[] = ['source' => $source, 'target' => $target];
+        }
+
+        return $rows;
+    }
+
+    /**
+     * Invalidate the shared query mappings cache.
+     *
+     * @return void
+     */
+    private function clearMappingsCache() {
+        $this->cache->delete(self::MAPPING_CACHE_KEY);
     }
 }

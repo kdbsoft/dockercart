@@ -79,7 +79,10 @@
                 </div>
                 <div class="dcx-field">
                   <label class="dcx-label" for="input-query-mappings">{{ entry_query_mappings }} <span data-toggle="tooltip" title="{{ help_query_mappings }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
-                  <textarea name="module_dockercart_search_query_mappings" id="input-query-mappings" rows="8" class="form-control">{{ module_dockercart_search_query_mappings }}</textarea>
+                  <div>
+                    <a href="{{ mappings_url }}" class="btn btn-default"><i data-lucide="table" width="16" height="16"></i> {{ button_manage_mappings }}</a>
+                    <span class="help-block">{{ help_query_mappings_page }}</span>
+                  </div>
                 </div>
               </div>
             </div>
