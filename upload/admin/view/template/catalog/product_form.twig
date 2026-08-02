@@ -505,6 +505,20 @@
                   </div>
                 </div>
                 <div class="dcx-panel-body">
+                  <div class="dc-attr-set-toolbar" style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+                    <label for="dc-attribute-set-select" style="margin:0;white-space:nowrap;">{{ text_attribute_set_selector }} <span data-toggle="tooltip" title="{{ text_help_attribute_set }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                    <select id="dc-attribute-set-select" class="form-control" style="width:auto;display:inline-block;min-width:220px;">
+                      <option value=""></option>
+                      {% for attribute_set in attribute_sets %}
+                      <option value="{{ attribute_set.attribute_set_id }}">{{ attribute_set.name }} ({{ attribute_set.attribute_count }})</option>
+                      {% else %}
+                      <option value="" disabled="disabled">{{ text_no_attribute_sets }}</option>
+                      {% endfor %}
+                    </select>
+                    <button type="button" class="btn btn-default btn-sm" onclick="loadAttributeSet();">
+                      <i data-lucide="download" width="14" height="14"></i> {{ button_attribute_set_load }}
+                    </button>
+                  </div>
                   <div id="attributes-container">
                     {% set attribute_row = 0 %}
                     {% for product_attribute in product_attributes %}
@@ -560,6 +574,20 @@
 
                   <div style="margin-top: 30px">
                     <h4>{{ tab_options }} <small id="dc-option-count">({{ product_options|length }})</small></h4>
+                    <div class="dc-opt-set-toolbar" style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+                      <label for="dc-option-set-select" style="margin:0;white-space:nowrap;">{{ text_option_set_selector }} <span title="{{ text_help_option_set }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                      <select id="dc-option-set-select" class="form-control" style="width:auto;display:inline-block;min-width:220px;">
+                        <option value=""></option>
+                        {% for option_set in option_sets %}
+                        <option value="{{ option_set.option_set_id }}">{{ option_set.name }} ({{ option_set.option_count }})</option>
+                        {% else %}
+                        <option value="" disabled="disabled">{{ text_no_option_sets }}</option>
+                        {% endfor %}
+                      </select>
+                      <button type="button" class="btn btn-default btn-sm" onclick="loadOptionSet();">
+                        <i data-lucide="download" width="14" height="14"></i> {{ button_option_set_load }}
+                      </button>
+                    </div>
                     <div id="dc-options-container">
                       {% set option_row = 0 %}
                       {% set option_value_row = 0 %}
@@ -1478,6 +1506,51 @@
 	  attributeautocomplete(index);
   });
 
+  function loadAttributeSet() {
+	  var set_id = $('#dc-attribute-set-select').val();
+	  if (!set_id) return;
+
+	  var $existing = $('#attributes-container .dc-attr-row');
+	  if ($existing.length && !confirm('{{ text_attribute_set_replace_confirm|e("js") }}')) {
+		  return;
+	  }
+
+	  $.ajax({
+		  url: 'index.php?route=catalog/attribute_set/getAttributes&user_token={{ user_token }}&attribute_set_id=' + set_id,
+		  dataType: 'json',
+		  success: function(json) {
+			  if (json['error']) {
+				  if (typeof showToast === 'function') showToast(json['error'], 'error');
+				  return;
+			  }
+
+			  if (!json.length) {
+				  if (typeof showToast === 'function') showToast('{{ text_attribute_set_empty|e("js") }}', 'error');
+				  return;
+			  }
+
+			  $('#attributes-container .dc-attr-row').remove();
+
+			  var added = 0;
+
+			  $.each(json, function(i, item) {
+				  if (!item || !item.attribute_id) return;
+
+				  addAttribute();
+				  var row = attribute_row - 1;
+				  $('input[name=\'product_attribute[' + row + '][name]\']').val(item['name']);
+				  $('input[name=\'product_attribute[' + row + '][attribute_id]\']').val(item['attribute_id']);
+				  added++;
+			  });
+
+			  if (typeof showToast === 'function') {
+				  showToast('{{ text_attribute_set_loaded|e("js") }}'.replace('%d', added), 'success');
+			  }
+			  lucide.createIcons();
+		  }
+	  });
+  }
+
   var option_row = {{ option_row }};
   var dcOptionMode = {{ is_configurable ? "'combined'" : "'simple'" }};
   var dcAxisOptionIds = {{ axis_option_ids|json_encode|raw }};
@@ -1781,6 +1854,71 @@
 	  });
 
 	  option_row++;
+  }
+
+  function loadOptionSet() {
+	  var set_id = $('#dc-option-set-select').val();
+	  if (!set_id) return;
+
+	  var $existing = $('#dc-options-container .dc-option-section').not('.dc-option-axis');
+	  if ($existing.length && !confirm('{{ text_option_set_replace_confirm|e("js") }}')) {
+		  return;
+	  }
+
+	  $.ajax({
+		  url: 'index.php?route=catalog/option_set/getOptions&user_token={{ user_token }}&option_set_id=' + set_id,
+		  dataType: 'json',
+		  success: function(json) {
+			  if (json['error']) {
+				  if (typeof showToast === 'function') showToast(json['error'], 'error');
+				  return;
+			  }
+
+			  if (!json.length) {
+				  if (typeof showToast === 'function') showToast('{{ text_option_set_empty|e("js") }}', 'error');
+				  return;
+			  }
+
+			  $('#dc-options-container .dc-option-section').not('.dc-option-axis').remove();
+
+			  var added = 0;
+			  var skipped = 0;
+
+			  $.each(json, function(i, item) {
+				  if (!item || !item.option_id) return;
+				  if (dcAxisOptionIds.indexOf(parseInt(item.option_id)) >= 0) {
+					  skipped++;
+					  return;
+				  }
+
+				  dcAddOption({
+					  label: item['name'],
+					  value: item['option_id'],
+					  type: item['type'],
+					  option_value: item['option_value']
+				  });
+
+				  if (item['type'] === 'select' || item['type'] === 'radio' || item['type'] === 'checkbox' || item['type'] === 'image' || item['type'] === 'color') {
+					  addAllOptionValues(option_row - 1);
+				  }
+
+				  added++;
+			  });
+
+			  if (typeof showToast === 'function') {
+				  if (added === 0 && skipped > 0) {
+					  showToast('{{ text_option_set_axis_skipped|e("js") }}', 'error');
+				  } else if (added > 0) {
+					  var msg = '{{ text_option_set_loaded|e("js") }}'.replace('%d', added);
+					  if (skipped > 0) {
+						  msg += ' {{ text_option_set_skipped|e("js") }}'.replace('%d', skipped);
+					  }
+					  showToast(msg, 'success');
+				  }
+			  }
+			  lucide.createIcons();
+		  }
+	  });
   }
 
   var option_value_row = {{ option_value_row }};

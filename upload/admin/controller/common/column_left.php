@@ -142,6 +142,15 @@ class ControllerCommonColumnLeft extends Controller {
 				);
 			}
 
+			if ($this->user->hasPermission('access', 'catalog/attribute_set')) {
+				$attribute[] = array(
+					'name'	   => $this->language->get('text_attribute_set'),
+					'href'     => $this->url->link('catalog/attribute_set', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'layers-2',
+					'children' => array()
+				);
+			}
+
 			if ($attribute) {
 				$catalog[] = array(
 					'name'	   => $this->language->get('text_attribute'),
@@ -151,12 +160,33 @@ class ControllerCommonColumnLeft extends Controller {
 				);
 			}
 
+			// Options
+			$option = array();
+
 			if ($this->user->hasPermission('access', 'catalog/option')) {
-				$catalog[] = array(
-					'name'	   => $this->language->get('text_option'),
+				$option[] = array(
+					'name'     => $this->language->get('text_option'),
 					'href'     => $this->url->link('catalog/option', 'user_token=' . $this->session->data['user_token'], true),
 					'icon'	   => 'sliders-horizontal',
 					'children' => array()
+				);
+			}
+
+			if ($this->user->hasPermission('access', 'catalog/option_set')) {
+				$option[] = array(
+					'name'	   => $this->language->get('text_option_set'),
+					'href'     => $this->url->link('catalog/option_set', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'layers-2',
+					'children' => array()
+				);
+			}
+
+			if ($option) {
+				$catalog[] = array(
+					'name'	   => $this->language->get('text_option'),
+					'href'     => '',
+					'icon'	   => 'sliders-horizontal',
+					'children' => $option
 				);
 			}
 
