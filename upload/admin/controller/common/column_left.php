@@ -213,7 +213,18 @@ class ControllerCommonColumnLeft extends Controller {
 					'name'	   => $this->language->get('text_review'),
 					'href'     => $this->url->link('catalog/review', 'user_token=' . $this->session->data['user_token'], true),
 					'icon'	   => 'message-square',
-					'children' => array()
+					'children' => array(
+						array(
+							'name'     => $this->language->get('text_review'),
+							'href'     => $this->url->link('catalog/review', 'user_token=' . $this->session->data['user_token'], true),
+							'children' => array()
+						),
+						array(
+							'name'     => $this->language->get('text_review_setting'),
+							'href'     => $this->url->link('catalog/review_setting', 'user_token=' . $this->session->data['user_token'], true),
+							'children' => array()
+						)
+					)
 				);
 			}
 
