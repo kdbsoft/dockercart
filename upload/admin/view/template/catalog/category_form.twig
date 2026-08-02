@@ -178,6 +178,15 @@
               </select>
             </div>
             <div class="dcx-sidebar-card__field">
+              <label class="dcx-sidebar-card__label" for="input-review-criteria-group">{{ entry_review_criteria_group }}</label>
+              <select name="review_criteria_group_id" id="input-review-criteria-group" class="form-control">
+                {% for group in review_criteria_groups %}
+                <option value="{{ group.criteria_group_id }}" {% if review_criteria_group_id == group.criteria_group_id %}selected="selected"{% endif %}>{{ group.name }}</option>
+                {% endfor %}
+              </select>
+              <span data-toggle="tooltip" title="{{ help_review_criteria_group }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
+            </div>
+            <div class="dcx-sidebar-card__field">
               <label class="dcx-sidebar-card__checkbox">
                 <input type="checkbox" name="top" value="1" {% if top %}checked="checked"{% endif %} id="input-top" />
                 <span>{{ entry_top }}</span>

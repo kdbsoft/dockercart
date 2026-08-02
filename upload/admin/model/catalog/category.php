@@ -25,6 +25,10 @@ class ModelCatalogCategory extends Model {
 			$this->db->query("UPDATE " . DB_PREFIX . "category SET banner_link = '" . $this->db->escape($data['banner_link']) . "' WHERE category_id = '" . (int)$category_id . "'");
 		}
 
+		if (isset($data['review_criteria_group_id'])) {
+			$this->db->query("UPDATE " . DB_PREFIX . "category SET review_criteria_group_id = '" . (int)$data['review_criteria_group_id'] . "' WHERE category_id = '" . (int)$category_id . "'");
+		}
+
 		foreach ($data['category_description'] as $language_id => $value) {
 			$this->db->query("INSERT INTO " . DB_PREFIX . "category_description SET category_id = '" . (int)$category_id . "', language_id = '" . (int)$language_id . "', name = '" . $this->db->escape($value['name']) . "', description = '" . $this->db->escape($value['description']) . "', meta_title = '" . $this->db->escape($value['meta_title']) . "', meta_description = '" . $this->db->escape($value['meta_description']) . "', meta_keyword = '" . $this->db->escape($value['meta_keyword']) . "'");
 		}
@@ -105,6 +109,10 @@ class ModelCatalogCategory extends Model {
 
 	if (isset($data['banner_link'])) {
 		$this->db->query("UPDATE " . DB_PREFIX . "category SET banner_link = '" . $this->db->escape($data['banner_link']) . "' WHERE category_id = '" . (int)$category_id . "'");
+	}
+
+	if (isset($data['review_criteria_group_id'])) {
+		$this->db->query("UPDATE " . DB_PREFIX . "category SET review_criteria_group_id = '" . (int)$data['review_criteria_group_id'] . "' WHERE category_id = '" . (int)$category_id . "'");
 	}
 
 	$this->db->query("DELETE FROM " . DB_PREFIX . "category_description WHERE category_id = '" . (int)$category_id . "'");
