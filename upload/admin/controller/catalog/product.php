@@ -929,9 +929,23 @@ class ControllerCatalogProduct extends Controller {
 		$data['text_panel_attributes_title']     = $this->language->get('text_panel_attributes_title');
 		$data['text_panel_attributes_subtitle']  = $this->language->get('text_panel_attributes_subtitle');
 		$data['text_help_attributes']         = $this->language->get('text_help_attributes');
+		$data['text_attribute_set_selector']   = $this->language->get('text_attribute_set_selector');
+		$data['button_attribute_set_load']     = $this->language->get('button_attribute_set_load');
+		$data['text_help_attribute_set']       = $this->language->get('text_help_attribute_set');
+		$data['text_attribute_set_loaded']     = $this->language->get('text_attribute_set_loaded');
+		$data['text_attribute_set_empty']      = $this->language->get('text_attribute_set_empty');
+		$data['text_attribute_set_replace_confirm'] = $this->language->get('text_attribute_set_replace_confirm');
+		$data['text_no_attribute_sets']       = $this->language->get('text_no_attribute_sets');
 		$data['text_panel_options_title']        = $this->language->get('text_panel_options_title');
 		$data['text_panel_options_subtitle']     = $this->language->get('text_panel_options_subtitle');
 		$data['text_help_options_mode']        = $this->language->get('text_help_options_mode');
+		$data['text_option_set_selector']       = $this->language->get('text_option_set_selector');
+		$data['button_option_set_load']         = $this->language->get('button_option_set_load');
+		$data['text_help_option_set']           = $this->language->get('text_help_option_set');
+		$data['text_option_set_loaded']         = $this->language->get('text_option_set_loaded');
+		$data['text_option_set_empty']          = $this->language->get('text_option_set_empty');
+		$data['text_option_set_replace_confirm'] = $this->language->get('text_option_set_replace_confirm');
+		$data['text_no_option_sets']            = $this->language->get('text_no_option_sets');
 		$data['text_panel_discounts_title']      = $this->language->get('text_panel_discounts_title');
 		$data['text_panel_discounts_subtitle']   = $this->language->get('text_panel_discounts_subtitle');
 		$data['text_panel_specials_title']       = $this->language->get('text_panel_specials_title');
@@ -1442,6 +1456,22 @@ class ControllerCatalogProduct extends Controller {
 				);
 			}
 		}
+
+		// Attribute sets (quick-load bundles of attributes)
+		$this->load->model('catalog/attribute_set');
+
+		$data['attribute_sets'] = $this->model_catalog_attribute_set->getAttributeSets(array(
+			'sort'  => 'astd.name',
+			'order' => 'ASC'
+		));
+
+		// Option sets (quick-load bundles of options)
+		$this->load->model('catalog/option_set');
+
+		$data['option_sets'] = $this->model_catalog_option_set->getOptionSets(array(
+			'sort'  => 'ostd.name',
+			'order' => 'ASC'
+		));
 
 		// Options
 		$this->load->model('catalog/option');
