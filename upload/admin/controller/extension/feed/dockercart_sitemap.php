@@ -86,6 +86,9 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
         $settings = array(
             'dockercart_sitemap_status',
             'dockercart_sitemap_products',
+            'dockercart_sitemap_reviews',
+            'dockercart_sitemap_review_priority',
+            'dockercart_sitemap_review_changefreq',
             'dockercart_sitemap_categories',
             'dockercart_sitemap_manufacturers',
             'dockercart_sitemap_information',
@@ -108,6 +111,13 @@ class ControllerExtensionFeedDockercartSitemap extends Controller {
             } else {
                 $data[$setting] = $this->config->get($setting);
             }
+        }
+
+        if (!isset($data['dockercart_sitemap_review_priority'])) {
+            $data['dockercart_sitemap_review_priority'] = '0.6';
+        }
+        if (!isset($data['dockercart_sitemap_review_changefreq'])) {
+            $data['dockercart_sitemap_review_changefreq'] = 'weekly';
         }
 
         if (!isset($data['dockercart_sitemap_product_priority'])) {

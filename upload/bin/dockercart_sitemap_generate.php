@@ -302,6 +302,26 @@ try {
 		}
 	}
 
+	// Product review pages (SEO-indexable, one URL per product with approved reviews)
+	if ($config->get('dockercart_sitemap_reviews')) {
+		$query = $db->query("SELECT pr.product_id, pr.date_modified FROM " . DB_PREFIX . "product_rating pr INNER JOIN " . DB_PREFIX . "product p ON (pr.product_id = p.product_id) WHERE p.status = 1 AND pr.review_count > 0 ORDER BY pr.product_id");
+		$review_products = $query->rows;
+
+		$review_priority = (float)($config->get('dockercart_sitemap_review_priority') ?: 0.6);
+		$review_changefreq = $config->get('dockercart_sitemap_review_changefreq') ?: 'weekly';
+
+		foreach ($review_products as $review_product) {
+			$urls = $buildAlternateUrls('product/reviews', 'product_id=' . $review_product['product_id'], $languages);
+
+			$lastmod = $review_product['date_modified'] ?? date('Y-m-d');
+			if (strlen($lastmod) > 10) {
+				$lastmod = date('Y-m-d', strtotime($lastmod));
+			}
+
+			$write_entry($urls, $lastmod, $review_changefreq, $review_priority);
+		}
+	}
+
 	// Categories
 	if ($config->get('dockercart_sitemap_categories')) {
 		$query = $db->query("SELECT category_id, date_modified FROM " . DB_PREFIX . "category WHERE status = 1 ORDER BY category_id");
