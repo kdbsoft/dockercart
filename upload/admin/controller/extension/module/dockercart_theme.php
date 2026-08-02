@@ -112,6 +112,10 @@ class ControllerExtensionModuleDockerCartTheme extends Controller {
         $call_for_price_raw = $this->config->get('dockercart_theme_call_for_price_status');
         $data['dockercart_theme_call_for_price_status'] = ($call_for_price_raw === null) ? 1 : (int)$call_for_price_raw;
 
+        /* ── Sale timer status (default: enabled) ── */
+        $sale_timer_raw = $this->config->get('dockercart_theme_sale_timer_status');
+        $data['dockercart_theme_sale_timer_status'] = ($sale_timer_raw === null) ? 1 : (int)$sale_timer_raw;
+
         /* ── Messenger FAB status (default: enabled) ── */
         $fab_raw = $this->config->get('dockercart_theme_messenger_fab_status');
         $data['dockercart_theme_messenger_fab_status'] = ($fab_raw === null) ? 0 : (int)$fab_raw;
@@ -262,6 +266,7 @@ class ControllerExtensionModuleDockerCartTheme extends Controller {
             'dockercart_theme_favicon_master'      => trim((string)($p['dockercart_theme_favicon_master'] ?? '')),
             'dockercart_theme_menu_type'           => ($p['dockercart_theme_menu_type'] ?? '') === 'vertical' ? 'vertical' : 'horizontal',
             'dockercart_theme_call_for_price_status' => (int)($p['dockercart_theme_call_for_price_status'] ?? 1),
+            'dockercart_theme_sale_timer_status' => (int)($p['dockercart_theme_sale_timer_status'] ?? 1),
             'dockercart_theme_messenger_fab_status' => (int)($p['dockercart_theme_messenger_fab_status'] ?? 0),
             'dockercart_theme_product_features' => json_encode($product_features, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             'dockercart_theme_category_features' => json_encode($category_features, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
@@ -869,6 +874,7 @@ class ControllerExtensionModuleDockerCartTheme extends Controller {
             'dockercart_theme_favicon_master' => '',
             'dockercart_theme_menu_type' => 'horizontal',
             'dockercart_theme_call_for_price_status' => 1,
+            'dockercart_theme_sale_timer_status' => 1,
             'dockercart_theme_product_features' => json_encode($product_defaults, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             'dockercart_theme_category_features' => json_encode($category_defaults, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             'dockercart_theme_quickview_features' => json_encode($quickview_defaults, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),

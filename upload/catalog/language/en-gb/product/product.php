@@ -17,6 +17,7 @@ $_['text_option']              = 'Available Options';
 $_['text_sale']                = 'Sale';
 $_['text_call_for_price']      = 'Contact for price';
 $_['text_you_save']            = 'You Save';
+$_['text_sale_ends_in']        = 'Sale ends in';
 $_['text_gift']                = 'Gift with Purchase';
 $_['text_gift_minimum']        = 'Minimum quantity to receive the gift';
 $_['text_gift_badge']          = 'GIFT';

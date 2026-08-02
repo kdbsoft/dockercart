@@ -1,0 +1,31 @@
+{#
+  sale_timer.twig
+  Countdown timer for the product page — shown for products with an active
+  special price (sale). Displays the remaining days as a bold number plus a
+  live HH:MM:SS countdown.
+
+  Required variables:
+    special_date_end  — unix timestamp of the special's end date (0 = none)
+
+  Optional variables:
+    sale_timer_status — 1 show (default) / 0 hide
+    timer_label       — localized label, e.g. "Sale ends in"
+    timer_class       — extra classes appended to the wrapper
+
+  The countdown is driven by sale-timer.js via [data-countdown-until].
+#}
+{% if (sale_timer_status is not defined or sale_timer_status == 1) and special_date_end is defined and special_date_end %}
+<div class="dc-sale-timer flex flex-wrap items-center gap-x-2.5 gap-y-1.5 mt-3 bg-red-50 border border-red-100 rounded-xl px-3 py-2.5 {{ timer_class|default('') }}" data-countdown-until="{{ special_date_end }}" role="timer">
+  <i data-lucide="timer" class="w-4 h-4 text-red-500 flex-shrink-0"></i>
+  {% if timer_label is defined and timer_label %}<span class="text-[11px] font-bold text-red-500 uppercase tracking-wider">{{ timer_label }}</span>{% endif %}
+  <span class="bg-white border border-red-200 rounded-lg px-2.5 py-0.5">
+    <span data-timer-days class="text-lg font-extrabold text-gray-900 leading-none">--</span>
+  </span>
+  <span class="text-red-300 font-bold text-sm">:</span>
+  <span class="dc-sale-timer__box bg-white border border-red-200 rounded-lg min-w-[34px] px-1.5 py-1 text-sm font-bold text-gray-900 text-center"><span data-timer-unit>--</span></span>
+  <span class="text-red-300 font-bold text-sm">:</span>
+  <span class="dc-sale-timer__box bg-white border border-red-200 rounded-lg min-w-[34px] px-1.5 py-1 text-sm font-bold text-gray-900 text-center"><span data-timer-unit>--</span></span>
+  <span class="text-red-300 font-bold text-sm">:</span>
+  <span class="dc-sale-timer__box bg-white border border-red-200 rounded-lg min-w-[34px] px-1.5 py-1 text-sm font-bold text-gray-900 text-center"><span data-timer-unit>--</span></span>
+</div>
+{% endif %}

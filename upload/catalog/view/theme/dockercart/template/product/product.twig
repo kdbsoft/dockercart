@@ -185,6 +185,7 @@
                 <span class="text-sm sm:text-lg text-red-400 line-through">{{ price }}</span>
                 {% if tax %}<span class="text-xs text-gray-400" id="dc-unit-tax">{{ text_tax }} {{ tax }}</span>{% endif %}
               </div>
+            {% include 'dockercart/template/product/sale_timer.twig' with { special_date_end: special_date_end|default(0), sale_timer_status: sale_timer_status|default(1), timer_label: text_sale_ends_in|default('') } %}
         </div>
         {% if you_save_amount %}
         <div class="mt-1.5">

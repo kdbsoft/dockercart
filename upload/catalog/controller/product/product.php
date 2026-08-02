@@ -1075,6 +1075,16 @@ class ControllerProductProduct extends Controller {
 			$data['call_for_price_phone'] = $this->config->get('config_telephone');
 			$data['call_for_price'] = !empty($product_info['call_for_price']);
 
+			// Sale timers
+			$sale_timer_raw = $this->config->get('dockercart_theme_sale_timer_status');
+			$data['sale_timer_status'] = ($sale_timer_raw === null) ? 1 : (int)$sale_timer_raw;
+			$data['special_date_end'] = !empty($product_info['special_date_end']) ? (int)$product_info['special_date_end'] : 0;
+			$data['text_sale_ends_in'] = $this->language->get('text_sale_ends_in');
+
+			if ($data['sale_timer_status']) {
+				$this->document->addScript('catalog/view/theme/dockercart/javascript/sale-timer.js', 'footer');
+			}
+
 			$data['text_write_in_messenger'] = $this->language->get('text_write_in_messenger');
 			$data['text_we_are_in_messengers'] = $this->language->get('text_we_are_in_messengers');
 			$data['text_you_may_also_like'] = $this->language->get('text_you_may_also_like');
