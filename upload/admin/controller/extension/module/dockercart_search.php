@@ -40,10 +40,6 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
 
         // Handle form submission
         if ($this->request->server['REQUEST_METHOD'] == 'POST' && $this->validateForm()) {
-            if (isset($this->request->post['module_dockercart_search_query_mappings'])) {
-                $this->request->post['module_dockercart_search_query_mappings'] = $this->normalizeQueryMappingsText($this->request->post['module_dockercart_search_query_mappings']);
-            }
-
             $this->model_setting_setting->editSetting('module_dockercart_search', $this->request->post);
 
             $this->session->data['success'] = $this->language->get('text_success');
@@ -78,6 +74,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
         $data['reindex_url'] = $this->url->link('extension/module/dockercart_search/reindex', 'user_token=' . $this->session->data['user_token'], true);
         $data['test_connection_url'] = $this->url->link('extension/module/dockercart_search/testConnection', 'user_token=' . $this->session->data['user_token'], true);
         $data['apply_morphology_url'] = $this->url->link('extension/module/dockercart_search/applyMorphology', 'user_token=' . $this->session->data['user_token'], true);
+        $data['mappings_url'] = $this->url->link('extension/module/dockercart_search/mappings', 'user_token=' . $this->session->data['user_token'], true);
 
         // Language strings
         $data['heading_title'] = $this->language->get('heading_title');
@@ -98,7 +95,6 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
         $data['module_dockercart_search_autocomplete_limit'] = $this->getConfigValue('module_dockercart_search_autocomplete_limit', 10);
         $data['module_dockercart_search_min_chars'] = $this->getConfigValue('module_dockercart_search_min_chars', 2);
         $data['module_dockercart_search_results_limit'] = $this->getConfigValue('module_dockercart_search_results_limit', 20);
-        $data['module_dockercart_search_query_mappings'] = $this->getConfigValue('module_dockercart_search_query_mappings', '');
 
         // Note: Morphology is configured in docker/manticore/manticore.conf
         // Current settings: stem_en, lemmatize_ru
@@ -361,6 +357,9 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
         // Register admin menu event
         $this->registerMenuEvent();
 
+        // Create the query mappings table and migrate any legacy config data
+        $this->model_extension_module_dockercart_search->ensureMappingTable();
+
         // Set default settings
         $this->model_setting_setting->editSetting('module_dockercart_search', [
             'module_dockercart_search_status' => 0,
@@ -434,18 +433,287 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
     }
 
     /**
-     * Normalize query mappings text before save.
-     * Keeps one mapping per line and strips empty trailing spaces.
+     * Query mappings list page.
+     * Mappings are stored in a single module setting (one `source=target` per
+     * line), but managed here as a table with add/edit/delete and CSV import/export.
      */
-    private function normalizeQueryMappingsText($raw_text) {
-        $lines = preg_split('/\R/u', (string)$raw_text);
-        $normalized = [];
+    public function mappings() {
+        $this->load->language('extension/module/dockercart_search');
+        $this->load->model('extension/module/dockercart_search');
 
-        foreach ($lines as $line) {
-            $normalized[] = trim((string)$line);
+        $this->document->setTitle($this->language->get('heading_mappings'));
+
+        if (!$this->user->hasPermission('access', 'extension/module/dockercart_search')) {
+            $data['error_warning'] = $this->language->get('error_permission');
+        } else {
+            $data['error_warning'] = '';
         }
 
-        return trim(implode("\n", $normalized));
+        if (isset($this->session->data['error_warning'])) {
+            $data['error_warning'] = $this->session->data['error_warning'];
+            unset($this->session->data['error_warning']);
+        }
+
+        if (isset($this->session->data['success'])) {
+            $data['success'] = $this->session->data['success'];
+            unset($this->session->data['success']);
+        } else {
+            $data['success'] = '';
+        }
+
+        $total = $this->model_extension_module_dockercart_search->getTotalQueryMappings();
+
+        if (isset($this->request->get['page']) && (int)$this->request->get['page'] > 0) {
+            $page = (int)$this->request->get['page'];
+        } else {
+            $page = 1;
+        }
+
+        $limit = 20;
+        $offset = ($page - 1) * $limit;
+
+        $data['mappings'] = [];
+
+        foreach ($this->model_extension_module_dockercart_search->getQueryMappings($offset, $limit) as $mapping) {
+            $mapping_id = (int)$mapping['mapping_id'];
+
+            $data['mappings'][] = [
+                'mapping_id' => $mapping_id,
+                'source'     => $mapping['source'],
+                'target'     => $mapping['target'],
+                'edit'       => $this->url->link('extension/module/dockercart_search/mapping', 'user_token=' . $this->session->data['user_token'] . '&mapping_id=' . $mapping_id, true),
+                'delete'     => $this->url->link('extension/module/dockercart_search/delete', 'user_token=' . $this->session->data['user_token'] . '&mapping_id=' . $mapping_id, true)
+            ];
+        }
+
+        $pagination = new Pagination();
+        $pagination->total = $total;
+        $pagination->page = $page;
+        $pagination->limit = $limit;
+        $pagination->url = $this->url->link('extension/module/dockercart_search/mappings', 'user_token=' . $this->session->data['user_token'] . '&page={page}', true);
+
+        $data['pagination'] = $pagination->render();
+
+        $data['results'] = sprintf($this->language->get('text_pagination'), ($total) ? (($page - 1) * $limit) + 1 : 0, ((($page - 1) * $limit) > ($total - $limit)) ? $total : ((($page - 1) * $limit) + $limit), $total, ceil($total / $limit));
+
+        $data['add'] = $this->url->link('extension/module/dockercart_search/mapping', 'user_token=' . $this->session->data['user_token'], true);
+        $data['cancel'] = $this->url->link('extension/module/dockercart_search', 'user_token=' . $this->session->data['user_token'], true);
+        $data['export_url'] = $this->url->link('extension/module/dockercart_search/exportCsv', 'user_token=' . $this->session->data['user_token'], true);
+        $data['import_url'] = $this->url->link('extension/module/dockercart_search/importCsv', 'user_token=' . $this->session->data['user_token'], true);
+
+        $data['user_token'] = $this->session->data['user_token'];
+        $data['page'] = $page;
+
+        $data['header'] = $this->load->controller('common/header');
+        $data['column_left'] = $this->load->controller('common/column_left');
+        $data['footer'] = $this->load->controller('common/footer');
+
+        $this->response->setOutput($this->load->view('extension/module/dockercart_search_mappings', $data));
+    }
+
+    /**
+     * Add/edit a single query mapping.
+     */
+    public function mapping() {
+        $this->load->language('extension/module/dockercart_search');
+        $this->load->model('extension/module/dockercart_search');
+
+        $this->document->setTitle($this->language->get('heading_mapping'));
+
+        if (isset($this->request->get['mapping_id'])) {
+            $mapping_id = (int)$this->request->get['mapping_id'];
+        } else {
+            $mapping_id = 0;
+        }
+
+        if ($this->request->server['REQUEST_METHOD'] == 'POST' && $this->validateForm()) {
+            $source = trim((string)$this->request->post['source']);
+            $target = trim((string)$this->request->post['target']);
+
+            if ($source === '' || strpos($source, '=') !== false || preg_match('/[\r\n]/u', $source)) {
+                $this->error['source'] = $this->language->get('error_source');
+            }
+
+            if ($target === '' || preg_match('/[\r\n]/u', $target)) {
+                $this->error['target'] = $this->language->get('error_target');
+            }
+
+            if (!$this->error) {
+                $this->model_extension_module_dockercart_search->saveQueryMapping($mapping_id, $source, $target);
+
+                $this->session->data['success'] = $this->language->get('text_success_mapping');
+
+                $this->response->redirect($this->url->link('extension/module/dockercart_search/mappings', 'user_token=' . $this->session->data['user_token'], true));
+            }
+        }
+
+        $data = [];
+
+        $data['error_warning'] = isset($this->error['warning']) ? $this->error['warning'] : '';
+        $data['error_source'] = isset($this->error['source']) ? $this->error['source'] : '';
+        $data['error_target'] = isset($this->error['target']) ? $this->error['target'] : '';
+
+        $data['cancel'] = $this->url->link('extension/module/dockercart_search/mappings', 'user_token=' . $this->session->data['user_token'], true);
+
+        $data['mapping_id'] = $mapping_id;
+
+        if (isset($this->request->post['source'])) {
+            $data['source'] = $this->request->post['source'];
+        } elseif ($mapping_id > 0) {
+            $mapping = $this->model_extension_module_dockercart_search->getQueryMapping($mapping_id);
+
+            if ($mapping !== null) {
+                $data['source'] = $mapping['source'];
+                $data['target'] = $mapping['target'];
+            } else {
+                $data['source'] = '';
+                $data['target'] = '';
+            }
+        } else {
+            $data['source'] = '';
+            $data['target'] = '';
+        }
+
+        if (isset($this->request->post['target'])) {
+            $data['target'] = $this->request->post['target'];
+        }
+
+        $data['header'] = $this->load->controller('common/header');
+        $data['column_left'] = $this->load->controller('common/column_left');
+        $data['footer'] = $this->load->controller('common/footer');
+
+        $this->response->setOutput($this->load->view('extension/module/dockercart_search_mapping_form', $data));
+    }
+
+    /**
+     * Delete a single query mapping (POST).
+     */
+    public function delete() {
+        $this->load->language('extension/module/dockercart_search');
+        $this->load->model('extension/module/dockercart_search');
+
+        if ($this->request->server['REQUEST_METHOD'] == 'POST' && $this->validateForm() && isset($this->request->get['mapping_id'])) {
+            $this->model_extension_module_dockercart_search->deleteQueryMapping((int)$this->request->get['mapping_id']);
+
+            $this->session->data['success'] = $this->language->get('text_success_delete');
+        }
+
+        $this->response->redirect($this->url->link('extension/module/dockercart_search/mappings', 'user_token=' . $this->session->data['user_token'], true));
+    }
+
+    /**
+     * Export query mappings as CSV (UTF-8 with BOM for Excel compatibility).
+     */
+    public function exportCsv() {
+        $this->load->language('extension/module/dockercart_search');
+        $this->load->model('extension/module/dockercart_search');
+
+        if (!$this->user->hasPermission('access', 'extension/module/dockercart_search')) {
+            $this->session->data['error_warning'] = $this->language->get('error_permission');
+
+            $this->response->redirect($this->url->link('extension/module/dockercart_search/mappings', 'user_token=' . $this->session->data['user_token'], true));
+        }
+
+        $rows = $this->model_extension_module_dockercart_search->getQueryMappings();
+
+        $csv = "\xEF\xBB\xBF" . 'source,target' . "\n";
+
+        foreach ($rows as $row) {
+            $csv .= $this->csvField($row['source']) . ',' . $this->csvField($row['target']) . "\n";
+        }
+
+        $this->response->addHeader('Content-Type: text/csv; charset=utf-8');
+        $this->response->addHeader('Content-Disposition: attachment; filename="dockercart_search_mappings.csv"');
+        $this->response->addHeader('Content-Length: ' . strlen($csv));
+        $this->response->setOutput($csv);
+    }
+
+    /**
+     * Import query mappings from an uploaded CSV file.
+     * Existing sources are replaced case-insensitively.
+     */
+    public function importCsv() {
+        $this->load->language('extension/module/dockercart_search');
+        $this->load->model('extension/module/dockercart_search');
+
+        if ($this->request->server['REQUEST_METHOD'] != 'POST') {
+            $this->response->redirect($this->url->link('extension/module/dockercart_search/mappings', 'user_token=' . $this->session->data['user_token'], true));
+        }
+
+        if (!$this->validateForm()) {
+            $this->session->data['error_warning'] = $this->language->get('error_permission');
+
+            $this->response->redirect($this->url->link('extension/module/dockercart_search/mappings', 'user_token=' . $this->session->data['user_token'], true));
+        }
+
+        if (!isset($_FILES['file']) || (int)$_FILES['file']['error'] !== UPLOAD_ERR_OK) {
+            $this->session->data['error_warning'] = $this->language->get('error_upload');
+
+            $this->response->redirect($this->url->link('extension/module/dockercart_search/mappings', 'user_token=' . $this->session->data['user_token'], true));
+        }
+
+        $handle = fopen($_FILES['file']['tmp_name'], 'r');
+
+        if (!$handle) {
+            $this->session->data['error_warning'] = $this->language->get('error_upload');
+
+            $this->response->redirect($this->url->link('extension/module/dockercart_search/mappings', 'user_token=' . $this->session->data['user_token'], true));
+        }
+
+        $rows = [];
+        $skipped = 0;
+        $imported = 0;
+        $first_row = true;
+
+        while (($data = fgetcsv($handle, 0, ',')) !== false) {
+            if (!is_array($data) || count($data) < 2) {
+                $skipped++;
+                continue;
+            }
+
+            $source = ltrim(trim((string)$data[0]), "\xEF\xBB\xBF");
+            $target = trim((string)$data[1]);
+
+            // Skip header row (source,target) if present
+            if ($first_row && mb_strtolower($source, 'UTF-8') === 'source' && mb_strtolower($target, 'UTF-8') === 'target') {
+                $first_row = false;
+                continue;
+            }
+
+            $first_row = false;
+
+            if ($source === '' || $target === '' || strpos($source, '#') === 0 || strpos($source, '//') === 0) {
+                $skipped++;
+                continue;
+            }
+
+            $rows[] = ['source' => $source, 'target' => $target];
+            $imported++;
+        }
+
+        fclose($handle);
+
+        $this->model_extension_module_dockercart_search->insertMappings($rows);
+
+        $message = sprintf($this->language->get('text_import_success'), $imported);
+
+        if ($skipped > 0) {
+            $message .= ' ' . sprintf($this->language->get('text_import_skipped'), $skipped);
+        }
+
+        $this->session->data['success'] = $message;
+
+        $this->response->redirect($this->url->link('extension/module/dockercart_search/mappings', 'user_token=' . $this->session->data['user_token'], true));
+    }
+
+    /**
+     * Escape a value for CSV output (always quoted, quotes doubled).
+     *
+     * @param string $value
+     * @return string
+     */
+    private function csvField($value) {
+        return '"' . str_replace('"', '""', (string)$value) . '"';
     }
 
     // Event handlers (will be called by OpenCart event system)
@@ -768,7 +1036,13 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
             'name' => $this->language->get('heading_title_menu'),
             'href' => $this->url->link('extension/module/dockercart_search', 'user_token=' . $this->session->data['user_token'], true),
             'icon' => 'search',
-            'children' => array()
+            'children' => array(
+                array(
+                    'name' => $this->language->get('heading_mappings'),
+                    'href' => $this->url->link('extension/module/dockercart_search/mappings', 'user_token=' . $this->session->data['user_token'], true),
+                    'icon' => 'list-tree'
+                )
+            )
         );
 
         if (!isset($data['menus']) || !is_array($data['menus'])) {
