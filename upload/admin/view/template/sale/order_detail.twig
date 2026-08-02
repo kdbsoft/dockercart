@@ -13,15 +13,15 @@
             </span>
           </a>
           <div class="pull-right" id="header-actions">
-            <button type="button" id="btn-edit" class="btn btn-primary btn--icon hidden-xs" onclick="toggleEditMode()" data-toggle="tooltip" title="{{ button_edit }}">
-              <i data-lucide="pencil" width="16" height="16"></i>
+            <button type="button" id="btn-edit" class="btn btn-primary hidden-xs" onclick="toggleEditMode()">
+              <i data-lucide="pencil" width="16" height="16"></i> {{ button_edit }}
             </button>
-            <a href="{{ print_url }}" target="_blank" class="btn btn-default btn--icon" data-toggle="tooltip" title="{{ button_print }}">
-              <i data-lucide="printer" width="16" height="16"></i>
+            <a href="{{ print_url }}" target="_blank" class="btn btn-default">
+              <i data-lucide="printer" width="16" height="16"></i> {{ button_print }}
             </a>
             <div class="dropdown" style="display:inline-block">
-              <button class="btn btn-default btn--icon dropdown-toggle" type="button" data-toggle="dropdown" title="{{ text_more_actions }}">
-                <i data-lucide="more-horizontal" width="16" height="16"></i>
+              <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
+                <i data-lucide="more-horizontal" width="16" height="16"></i> {{ text_more_actions }}
               </button>
               <ul class="dropdown-menu dropdown-menu-right">
                 <li><a href="#" onclick="event.preventDefault();addReward();return false"><i data-lucide="star" width="14" height="14"></i> {{ button_reward_add }}</a></li>
@@ -36,10 +36,10 @@
               </ul>
             </div>
             <span id="edit-actions" style="display:none">
-              <button type="button" id="btn-save" class="btn btn-primary" onclick="saveChanges()" data-toggle="tooltip" title="{{ button_save }}">
+              <button type="button" id="btn-save" class="btn btn-primary" onclick="saveChanges()">
                 <i data-lucide="save" width="16" height="16"></i> {{ button_save }}
               </button>
-              <button type="button" class="btn btn-default" onclick="toggleEditMode()" data-toggle="tooltip" title="{{ button_cancel }}">
+              <button type="button" class="btn btn-default" onclick="toggleEditMode()">
                 <i data-lucide="x" width="16" height="16"></i> {{ button_cancel }}
               </button>
             </span>

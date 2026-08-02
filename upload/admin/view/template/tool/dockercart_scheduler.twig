@@ -6,7 +6,7 @@
       <div class="row">
         <div class="col-sm-12">
           <div class="pull-right">
-            <a href="{{ cancel|default('') }}" data-toggle="tooltip" title="{{ button_cancel|default('') }}" class="btn btn-default btn--icon" style="display:none;"><i data-lucide="reply" width="16" height="16"></i></a>
+            <a href="{{ cancel|default('') }}" class="btn btn-default" style="display:none;"><i data-lucide="reply" width="16" height="16"></i> {{ button_cancel|default('') }}</a>
           </div>
           <h1 class="page-header__title">{{ heading_title }}</h1>
         </div>
