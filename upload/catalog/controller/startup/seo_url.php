@@ -291,6 +291,22 @@ class ControllerStartupSeoUrl extends Controller
                     }
                 }
             }
+        } elseif ($route == "product/reviews" && isset($data["product_id"])) {
+            // Dedicated, SEO-indexable product reviews page: {product-keyword}/reviews
+            $product_id = (int) $data["product_id"];
+            $base_url = $this->getSeoKeyword("product_id=" . $product_id);
+            if (!$base_url) {
+                $base_url = $this->buildEntityFallbackKeyword(
+                    "product",
+                    $product_id,
+                    "product_id=" . $product_id,
+                    "product/product",
+                );
+            }
+            if ($base_url) {
+                $url = $base_url . "/reviews";
+                unset($data["product_id"], $data["path"], $data["route"]);
+            }
         } elseif (
             $route == "product/manufacturer/info" &&
             isset($data["manufacturer_id"])
@@ -990,6 +1006,12 @@ class ControllerStartupSeoUrl extends Controller
             $query_param =
                 "product_id=" . (int) $this->request->get["product_id"];
         } elseif (
+            $route === "product/reviews" &&
+            isset($this->request->get["product_id"])
+        ) {
+            $query_param =
+                "product_id=" . (int) $this->request->get["product_id"];
+        } elseif (
             $route === "product/category" &&
             isset($this->request->get["path"])
         ) {
@@ -1042,7 +1064,13 @@ class ControllerStartupSeoUrl extends Controller
 
             // Redirect if SEO URL exists in database
             if ($seo_keyword) {
-                $this->performEnforceCleanUrlRedirect($seo_keyword);
+                if ($route === "product/reviews") {
+                    $this->performEnforceCleanUrlRedirect(
+                        $seo_keyword . "/reviews",
+                    );
+                } else {
+                    $this->performEnforceCleanUrlRedirect($seo_keyword);
+                }
             } elseif ($route === "blog/post" && $post_id) {
                 $this->performEnforceCleanUrlRedirect("blog/post-" . $post_id);
             } elseif ($route === "blog/category" && $cat_id) {
@@ -1360,6 +1388,7 @@ class ControllerStartupSeoUrl extends Controller
         $detected_types = [];
         $matched = [];
         $has_variant_suffix = false;
+        $has_reviews_suffix = false;
 
         // Process each segment of the URL
         foreach ($parts as $part) {
@@ -1370,6 +1399,12 @@ class ControllerStartupSeoUrl extends Controller
                     $this->request->get["variant_id"] = $variant_id;
                 }
                 $has_variant_suffix = true;
+                continue;
+            }
+
+            // Intercept /reviews as the product reviews page suffix
+            if ($part === "reviews") {
+                $has_reviews_suffix = true;
                 continue;
             }
 
@@ -1422,7 +1457,12 @@ class ControllerStartupSeoUrl extends Controller
         }
 
         // Handle multi-segment URLs with canonical redirect (only for GET requests)
-        if ($this->isGetRequest && count($parts) > 1 && !$has_variant_suffix) {
+        if (
+            $this->isGetRequest &&
+            count($parts) > 1 &&
+            !$has_variant_suffix &&
+            !$has_reviews_suffix
+        ) {
             $unique_types = array_values(array_unique($detected_types));
             $has_product = isset($this->request->get["product_id"]);
             $has_manufacturer = isset($this->request->get["manufacturer_id"]);
@@ -1471,7 +1511,13 @@ class ControllerStartupSeoUrl extends Controller
         // Set route based on detected entities if not already set
         if (!isset($this->request->get["route"])) {
             if (isset($this->request->get["product_id"])) {
-                $this->request->get["route"] = "product/product";
+                // Reviews page keeps its own route so the SEO indexable
+                // reviews page is served instead of the product page.
+                if ($has_reviews_suffix) {
+                    $this->request->get["route"] = "product/reviews";
+                } else {
+                    $this->request->get["route"] = "product/product";
+                }
 
                 // Get primary category for product
                 if (!isset($this->request->get["path"])) {
@@ -1737,6 +1783,21 @@ class ControllerStartupSeoUrl extends Controller
      */
     private function generateFallbackKeywordForRequestRoute($route)
     {
+        if (
+            $route === "product/reviews" &&
+            isset($this->request->get["product_id"])
+        ) {
+            $product_id = (int) $this->request->get["product_id"];
+            $fallback = $this->buildEntityFallbackKeyword(
+                "product",
+                $product_id,
+                "product_id=" . $product_id,
+                "product/product",
+            );
+
+            return $fallback !== "" ? $fallback . "/reviews" : "";
+        }
+
         if (
             $route === "product/product" &&
             isset($this->request->get["product_id"])

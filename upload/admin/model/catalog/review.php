@@ -1,35 +1,49 @@
 <?php
 class ModelCatalogReview extends Model {
 	public function addReview($data) {
-		$this->db->query("INSERT INTO " . DB_PREFIX . "review SET author = '" . $this->db->escape($data['author']) . "', product_id = '" . (int)$data['product_id'] . "', text = '" . $this->db->escape(strip_tags($data['text'])) . "', rating = '" . (int)$data['rating'] . "', status = '" . (int)$data['status'] . "', date_added = '" . $this->db->escape($data['date_added']) . "'");
+		$this->db->query("INSERT INTO " . DB_PREFIX . "review SET author = '" . $this->db->escape($data['author']) . "', product_id = '" . (int)$data['product_id'] . "', text = '" . $this->db->escape(strip_tags($data['text'])) . "', rating = '" . (float)$data['rating'] . "', status = '" . (int)$data['status'] . "', verified = '" . (int)$data['verified'] . "', criteria_group_id = '" . (int)$data['criteria_group_id'] . "', date_added = '" . $this->db->escape($data['date_added']) . "'");
 
 		$review_id = $this->db->getLastId();
 
+		$this->saveCriteriaValues($review_id, $data);
+		$this->saveMedia($review_id, $data);
+
 		$this->cache->delete('product');
+
+		$this->recalculateProductRating((int)$data['product_id']);
 
 		return $review_id;
 	}
 
 	public function editReview($review_id, $data) {
-		$this->db->query("UPDATE " . DB_PREFIX . "review SET author = '" . $this->db->escape($data['author']) . "', product_id = '" . (int)$data['product_id'] . "', text = '" . $this->db->escape(strip_tags($data['text'])) . "', rating = '" . (int)$data['rating'] . "', status = '" . (int)$data['status'] . "', date_added = '" . $this->db->escape($data['date_added']) . "', date_modified = NOW() WHERE review_id = '" . (int)$review_id . "'");
+		$this->db->query("UPDATE " . DB_PREFIX . "review SET author = '" . $this->db->escape($data['author']) . "', product_id = '" . (int)$data['product_id'] . "', text = '" . $this->db->escape(strip_tags($data['text'])) . "', rating = '" . (float)$data['rating'] . "', status = '" . (int)$data['status'] . "', verified = '" . (int)$data['verified'] . "', criteria_group_id = '" . (int)$data['criteria_group_id'] . "', date_added = '" . $this->db->escape($data['date_added']) . "', date_modified = NOW() WHERE review_id = '" . (int)$review_id . "'");
+
+		$this->saveCriteriaValues($review_id, $data);
+		$this->saveMedia($review_id, $data);
 
 		$this->cache->delete('product');
+
+		$this->recalculateProductRating((int)$data['product_id']);
 	}
 
 	public function deleteReview($review_id) {
+		$query = $this->db->query("SELECT product_id FROM " . DB_PREFIX . "review WHERE review_id = '" . (int)$review_id . "' LIMIT 1");
+		$product_id = $query->num_rows ? (int)$query->row['product_id'] : 0;
+
+		$this->db->query("DELETE FROM " . DB_PREFIX . "review_criteria_value WHERE review_id = '" . (int)$review_id . "'");
+		$this->db->query("DELETE FROM " . DB_PREFIX . "review_image WHERE review_id = '" . (int)$review_id . "'");
+		$this->db->query("DELETE FROM " . DB_PREFIX . "review_video WHERE review_id = '" . (int)$review_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "review WHERE review_id = '" . (int)$review_id . "'");
+
 		$this->cache->delete('product');
+
+		if ($product_id) {
+			$this->recalculateProductRating($product_id);
+		}
 	}
 
-	public function copyReview($review_id)
-	{
-		$query = $this->db->query(
-			"SELECT * FROM " .
-				DB_PREFIX .
-				"review WHERE review_id = '" .
-				(int) $review_id .
-				"'",
-		);
+	public function copyReview($review_id) {
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "review WHERE review_id = '" . (int)$review_id . "'");
 
 		if (!$query->num_rows) {
 			return false;
@@ -37,26 +51,86 @@ class ModelCatalogReview extends Model {
 
 		$review = $query->row;
 
-		$data = [];
+		$data = array(
+			'product_id'        => $review['product_id'],
+			'author'            => $review['author'],
+			'text'              => $review['text'],
+			'rating'            => $review['rating'],
+			'status'            => $review['status'],
+			'verified'          => $review['verified'],
+			'criteria_group_id' => $review['criteria_group_id'],
+			'date_added'        => $review['date_added'],
+		);
 
-		$data["product_id"] = $review["product_id"];
-		$data["author"] = $review["author"];
-		$data["text"] = $review["text"];
-		$data["rating"] = $review["rating"];
-		$data["status"] = $review["status"];
-		$data["date_added"] = $review["date_added"];
+		$new_review_id = $this->addReview($data);
 
-		return $this->addReview($data);
+		$criteria_values = $this->db->query("SELECT criteria_id, value FROM " . DB_PREFIX . "review_criteria_value WHERE review_id = '" . (int)$review_id . "'");
+
+		foreach ($criteria_values->rows as $row) {
+			$this->db->query("INSERT INTO " . DB_PREFIX . "review_criteria_value SET review_id = '" . (int)$new_review_id . "', criteria_id = '" . (int)$row['criteria_id'] . "', value = '" . $this->db->escape($row['value']) . "'");
+		}
+
+		$images = $this->db->query("SELECT image, sort_order FROM " . DB_PREFIX . "review_image WHERE review_id = '" . (int)$review_id . "'");
+
+		foreach ($images->rows as $row) {
+			$this->db->query("INSERT INTO " . DB_PREFIX . "review_image SET review_id = '" . (int)$new_review_id . "', image = '" . $this->db->escape($row['image']) . "', sort_order = '" . (int)$row['sort_order'] . "'");
+		}
+
+		$videos = $this->db->query("SELECT video_type, video FROM " . DB_PREFIX . "review_video WHERE review_id = '" . (int)$review_id . "'");
+
+		foreach ($videos->rows as $row) {
+			$this->db->query("INSERT INTO " . DB_PREFIX . "review_video SET review_id = '" . (int)$new_review_id . "', video_type = '" . $this->db->escape($row['video_type']) . "', video = '" . $this->db->escape($row['video']) . "', sort_order = '0'");
+		}
+
+		return $new_review_id;
 	}
 
 	public function getReview($review_id) {
 		$query = $this->db->query("SELECT DISTINCT *, (SELECT pd.name FROM " . DB_PREFIX . "product_description pd WHERE pd.product_id = r.product_id AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "') AS product FROM " . DB_PREFIX . "review r WHERE r.review_id = '" . (int)$review_id . "'");
 
-		return $query->row;
+		if (!$query->num_rows) {
+			return $query->row;
+		}
+
+		$row = $query->row;
+		$row['criteria_values'] = array();
+
+		$values = $this->db->query("SELECT criteria_id, value FROM " . DB_PREFIX . "review_criteria_value WHERE review_id = '" . (int)$review_id . "'");
+
+		foreach ($values->rows as $value) {
+			$row['criteria_values'][(int)$value['criteria_id']] = $value['value'];
+		}
+
+		$row['images'] = array();
+
+		$images = $this->db->query("SELECT review_image_id, image, sort_order FROM " . DB_PREFIX . "review_image WHERE review_id = '" . (int)$review_id . "' ORDER BY sort_order ASC");
+
+		foreach ($images->rows as $image) {
+			$row['images'][] = array(
+				'review_image_id' => $image['review_image_id'],
+				'image'           => $image['image'],
+				'sort_order'      => $image['sort_order'],
+			);
+		}
+
+		$row['videos'] = array();
+
+		$videos = $this->db->query("SELECT review_video_id, video_type, video, sort_order FROM " . DB_PREFIX . "review_video WHERE review_id = '" . (int)$review_id . "' ORDER BY sort_order ASC");
+
+		foreach ($videos->rows as $video) {
+			$row['videos'][] = array(
+				'review_video_id' => $video['review_video_id'],
+				'video_type'      => $video['video_type'],
+				'video'           => $video['video'],
+				'sort_order'      => $video['sort_order'],
+			);
+		}
+
+		return $row;
 	}
 
 	public function getReviews($data = array()) {
-		$sql = "SELECT r.review_id, pd.name, r.author, r.rating, r.status, r.date_added FROM " . DB_PREFIX . "review r LEFT JOIN " . DB_PREFIX . "product_description pd ON (r.product_id = pd.product_id) WHERE pd.language_id = '" . (int)$this->config->get('config_language_id') . "'";
+		$sql = "SELECT r.review_id, pd.name, r.author, r.rating, r.status, r.verified, r.date_added, (SELECT COUNT(*) FROM " . DB_PREFIX . "review_image ri WHERE ri.review_id = r.review_id) AS image_count, (SELECT COUNT(*) FROM " . DB_PREFIX . "review_video rv WHERE rv.review_id = r.review_id) AS video_count FROM " . DB_PREFIX . "review r LEFT JOIN " . DB_PREFIX . "product_description pd ON (r.product_id = pd.product_id) WHERE pd.language_id = '" . (int)$this->config->get('config_language_id') . "'";
 
 		if (!empty($data['filter_product'])) {
 			$sql .= " AND pd.name LIKE '" . $this->db->escape($data['filter_product']) . "%'";
@@ -68,6 +142,10 @@ class ModelCatalogReview extends Model {
 
 		if (isset($data['filter_status']) && $data['filter_status'] !== '') {
 			$sql .= " AND r.status = '" . (int)$data['filter_status'] . "'";
+		}
+
+		if (isset($data['filter_verified']) && $data['filter_verified'] !== '') {
+			$sql .= " AND r.verified = '" . (int)$data['filter_verified'] . "'";
 		}
 
 		if (!empty($data['filter_date_added'])) {
@@ -126,6 +204,10 @@ class ModelCatalogReview extends Model {
 			$sql .= " AND r.status = '" . (int)$data['filter_status'] . "'";
 		}
 
+		if (isset($data['filter_verified']) && $data['filter_verified'] !== '') {
+			$sql .= " AND r.verified = '" . (int)$data['filter_verified'] . "'";
+		}
+
 		if (!empty($data['filter_date_added'])) {
 			$sql .= " AND DATE(r.date_added) = DATE('" . $this->db->escape($data['filter_date_added']) . "')";
 		}
@@ -143,7 +225,7 @@ class ModelCatalogReview extends Model {
 
 	public function updateReviewField($review_id, $data) {
 		$string_fields = array('author', 'date_added');
-		$int_fields = array('rating', 'status');
+		$int_fields = array('rating', 'status', 'verified');
 
 		$sets = array();
 		foreach ($string_fields as $field) {
@@ -153,12 +235,97 @@ class ModelCatalogReview extends Model {
 		}
 		foreach ($int_fields as $field) {
 			if (isset($data[$field])) {
-				$sets[] = "`" . $field . "` = '" . (int)$data[$field] . "'";
+				if ($field === 'rating') {
+					$sets[] = "`" . $field . "` = '" . (float)$data[$field] . "'";
+				} else {
+					$sets[] = "`" . $field . "` = '" . (int)$data[$field] . "'";
+				}
 			}
 		}
 
 		if (!empty($sets)) {
+			$query = $this->db->query("SELECT product_id FROM " . DB_PREFIX . "review WHERE review_id = '" . (int)$review_id . "' LIMIT 1");
+			$product_id = $query->num_rows ? (int)$query->row['product_id'] : 0;
+
 			$this->db->query("UPDATE " . DB_PREFIX . "review SET " . implode(', ', $sets) . ", date_modified = NOW() WHERE review_id = '" . (int)$review_id . "'");
+
+			if ($product_id) {
+				$this->recalculateProductRating($product_id);
+			}
+		}
+	}
+
+	/**
+	 * Recompute the aggregate rating cache for a product.
+	 */
+	public function recalculateProductRating($product_id) {
+		$product_id = (int)$product_id;
+
+		if ($product_id <= 0) {
+			return;
+		}
+
+		$query = $this->db->query("SELECT rating FROM " . DB_PREFIX . "review WHERE product_id = '" . $product_id . "' AND status = '1'");
+
+		$rows = $query->rows;
+		$ratings = array_map('floatval', array_column($rows, 'rating'));
+
+		$rating = ReviewRating::average($ratings);
+		$review_count = count($ratings);
+		$distribution = ReviewRating::distribution($rows);
+
+		$this->db->query("INSERT INTO " . DB_PREFIX . "product_rating (product_id, rating, review_count, distribution, date_modified) VALUES ('" . $product_id . "', '" . (float)$rating . "', '" . (int)$review_count . "', '" . $this->db->escape(json_encode($distribution)) . "', NOW()) ON DUPLICATE KEY UPDATE rating = VALUES(rating), review_count = VALUES(review_count), distribution = VALUES(distribution), date_modified = NOW()");
+	}
+
+	private function saveCriteriaValues($review_id, $data) {
+		$this->db->query("DELETE FROM " . DB_PREFIX . "review_criteria_value WHERE review_id = '" . (int)$review_id . "'");
+
+		if (empty($data['criteria']) || !is_array($data['criteria'])) {
+			return;
+		}
+
+		foreach ($data['criteria'] as $criteria_id => $value) {
+			$value = (string)$value;
+
+			if (trim($value) === '') {
+				continue;
+			}
+
+			$this->db->query("INSERT INTO " . DB_PREFIX . "review_criteria_value SET review_id = '" . (int)$review_id . "', criteria_id = '" . (int)$criteria_id . "', value = '" . $this->db->escape($value) . "'");
+		}
+	}
+
+	private function saveMedia($review_id, $data) {
+		$this->db->query("DELETE FROM " . DB_PREFIX . "review_image WHERE review_id = '" . (int)$review_id . "'");
+		$this->db->query("DELETE FROM " . DB_PREFIX . "review_video WHERE review_id = '" . (int)$review_id . "'");
+
+		$sort_order = 0;
+
+		if (!empty($data['review_image']) && is_array($data['review_image'])) {
+			foreach ($data['review_image'] as $image) {
+				$image = trim((string)$image);
+
+				if ($image === '') {
+					continue;
+				}
+
+				$this->db->query("INSERT INTO " . DB_PREFIX . "review_image SET review_id = '" . (int)$review_id . "', image = '" . $this->db->escape($image) . "', sort_order = '" . (int)$sort_order . "'");
+
+				$sort_order++;
+			}
+		}
+
+		$video_type = isset($data['review_video_type']) ? $data['review_video_type'] : '';
+		$video = isset($data['review_video']) ? trim((string)$data['review_video']) : '';
+
+		if ($video_type === 'youtube' && $video !== '') {
+			$video_id = ReviewMedia::extractYouTubeId($video);
+
+			if ($video_id !== '') {
+				$this->db->query("INSERT INTO " . DB_PREFIX . "review_video SET review_id = '" . (int)$review_id . "', video_type = 'youtube', video = '" . $this->db->escape($video_id) . "', sort_order = '0'");
+			}
+		} elseif ($video_type === 'mp4' && $video !== '') {
+			$this->db->query("INSERT INTO " . DB_PREFIX . "review_video SET review_id = '" . (int)$review_id . "', video_type = 'mp4', video = '" . $this->db->escape($video) . "', sort_order = '0'");
 		}
 	}
 }

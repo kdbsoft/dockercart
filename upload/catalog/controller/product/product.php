@@ -1017,8 +1017,33 @@ class ControllerProductProduct extends Controller {
 			}
 
 			$data['reviews'] = sprintf($this->language->get('text_reviews'), (int)$product_info['reviews']);
-			$data['rating'] = (int)$product_info['rating'];
-			$data['review_count'] = (int)$product_info['reviews'];
+
+			// Aggregate rating summary (fractional, from the rating cache)
+			$review_summary = $this->model_catalog_review->getProductRatingSummary($product_id);
+
+			$data['rating'] = $review_summary['rating'];
+			$data['rating_value'] = ReviewRating::format($review_summary['rating']);
+			$data['rating_stars'] = ReviewRating::starComponents($review_summary['rating']);
+			$data['review_count'] = $review_summary['review_count'];
+			$data['rating_distribution'] = $review_summary['distribution'];
+			$data['show_distribution'] = $this->config->get('config_review_show_distribution');
+			$data['reviews_url'] = $this->url->link('product/reviews', 'product_id=' . $product_id);
+
+			// Real reviews for schema.org markup
+			$data['schema_reviews'] = $this->model_catalog_review->getReviewsForSchema($product_id, 5);
+
+			// Review form data (criteria group + media settings)
+			$this->load->model('catalog/review_criteria');
+
+			$criteria_group = $this->model_catalog_review_criteria->getProductCriteriaGroup($product_id);
+			$criteria = $criteria_group['criteria'];
+
+			$data['review_criteria'] = $criteria;
+			$data['has_rating_criteria'] = ReviewCriteria::hasRatingCriteria($criteria);
+			$data['customer_logged'] = $this->customer->isLogged();
+			$data['review_images_enabled'] = $this->config->get('config_review_images_enabled');
+			$data['review_max_images'] = (int)$this->config->get('config_review_max_images');
+			$data['review_video_enabled'] = $this->config->get('config_review_video_enabled');
 
 			// UI language strings
 			$data['text_model'] = $this->language->get('text_model');
@@ -1621,8 +1646,6 @@ class ControllerProductProduct extends Controller {
 	public function review() {
 		$this->load->language('product/product');
 
-		$this->load->model('catalog/review');
-
 		if (isset($this->request->get['product_id'])) {
 			$product_id = (int)$this->request->get['product_id'];
 		} else {
@@ -1635,30 +1658,20 @@ class ControllerProductProduct extends Controller {
 			$page = 1;
 		}
 
-		$data['reviews'] = array();
+		$sort = 'newest';
 
-		$review_total = $this->model_catalog_review->getTotalReviewsByProductId($product_id);
-
-		$results = $this->model_catalog_review->getReviewsByProductId($product_id, ($page - 1) * 5, 5);
-
-		foreach ($results as $result) {
-			$data['reviews'][] = array(
-				'author'     => $result['author'],
-				'text'       => nl2br($result['text']),
-				'rating'     => (int)$result['rating'],
-				'date_added' => date($this->language->get('date_format_short'), strtotime($result['date_added']))
-			);
+		if (isset($this->request->get['sort'])) {
+			$sort = in_array($this->request->get['sort'], array('newest', 'highest', 'lowest'), true) ? $this->request->get['sort'] : 'newest';
 		}
+		$review_list = new ReviewList($this->registry);
+		$fragment = $review_list->build($product_id, $page, $sort, 'product/product/review');
 
-		$pagination = new Pagination();
-		$pagination->total = $review_total;
-		$pagination->page = $page;
-		$pagination->limit = 5;
-		$pagination->url = $this->url->link('product/product/review', 'product_id=' . $product_id . '&page={page}');
-
-		$data['pagination'] = $pagination->render();
-
-		$data['results'] = sprintf($this->language->get('text_pagination'), ($review_total) ? (($page - 1) * 5) + 1 : 0, ((($page - 1) * 5) > ($review_total - 5)) ? $review_total : ((($page - 1) * 5) + 5), $review_total, ceil($review_total / 5));
+		$data['reviews'] = $fragment['reviews'];
+		$data['pagination'] = $fragment['pagination'];
+		$data['text_pagination'] = $fragment['text_pagination'];
+		$data['sort'] = $fragment['sort'];
+		$data['sort_urls'] = $fragment['sort_urls'];
+		$data['text_no_reviews'] = $fragment['text_no_reviews'];
 
 		$this->response->setOutput($this->load->view('product/review', $data));
 	}
@@ -1670,20 +1683,163 @@ class ControllerProductProduct extends Controller {
 
 		if (isset($this->request->get['product_id']) && $this->request->get['product_id']) {
 			if ($this->request->server['REQUEST_METHOD'] == 'POST') {
-				if ((utf8_strlen($this->request->post['name']) < 3) || (utf8_strlen($this->request->post['name']) > 25)) {
+				$product_id = (int)$this->request->get['product_id'];
+
+				$this->load->model('catalog/review');
+				$this->load->model('catalog/review_criteria');
+
+				$post = $this->request->post;
+
+				if (!isset($post['name']) || (utf8_strlen($post['name']) < 3) || (utf8_strlen($post['name']) > 25)) {
 					$json['error'] = $this->language->get('error_name');
 				}
 
-				if ((utf8_strlen($this->request->post['text']) < 25) || (utf8_strlen($this->request->post['text']) > 1000)) {
+				if (!isset($post['text']) || (utf8_strlen($post['text']) < 25) || (utf8_strlen($post['text']) > 1000)) {
 					$json['error'] = $this->language->get('error_text');
 				}
 
-				if (empty($this->request->post['rating']) || $this->request->post['rating'] < 0 || $this->request->post['rating'] > 5) {
-					$json['error'] = $this->language->get('error_rating');
+				// Honeypot (must be empty)
+				if ($this->config->get('config_review_honeypot') && isset($post['website']) && ReviewSpam::honeypotFilled($post['website'])) {
+					$json['error'] = $this->language->get('error_spam');
+				}
+
+				// Spam heuristics
+				if (!isset($json['error']) && isset($post['text']) && ReviewSpam::containsSpamPatterns((string)$post['text'])) {
+					$json['error'] = $this->language->get('error_spam');
+				}
+
+				// Rate limit
+				if (!isset($json['error'])) {
+					$ip = isset($this->request->server['REMOTE_ADDR']) ? (string)$this->request->server['REMOTE_ADDR'] : '';
+					$limit_count = (int)$this->config->get('config_review_rate_limit_count');
+					$limit_minutes = (int)$this->config->get('config_review_rate_limit_minutes');
+
+					if ($limit_count > 0) {
+						$recent = $this->model_catalog_review->getRecentReviewCount($ip, (int)$this->customer->getId(), $limit_minutes);
+
+						if (ReviewSpam::isRateLimited($recent, $limit_count)) {
+							$json['error'] = $this->language->get('error_rate_limit');
+						}
+					}
+				}
+
+				// Criteria group + values
+				$criteria_group = $this->model_catalog_review_criteria->getProductCriteriaGroup($product_id);
+				$criteria = $criteria_group['criteria'];
+				$criteria_values = isset($post['criteria']) && is_array($post['criteria']) ? $post['criteria'] : array();
+
+				if (!isset($json['error'])) {
+					foreach ($criteria as $item) {
+						$opts = array(
+							'required'   => (int)$item['is_required'] === 1,
+							'max_length' => 1000,
+						);
+
+						$value = isset($criteria_values[$item['criteria_id']]) ? $criteria_values[$item['criteria_id']] : '';
+
+						if (ReviewCriteria::validateValue((string)$item['type'], $value, $opts) !== '') {
+							$json['error'] = sprintf($this->language->get('error_criteria'), $item['name']);
+							break;
+						}
+					}
+				}
+
+				// Overall rating: from rating criteria, or manual when none exist
+				$rating = 0.0;
+
+				if (ReviewCriteria::hasRatingCriteria($criteria)) {
+					$rating = ReviewCriteria::computeOverallRating($criteria, $criteria_values);
+				} else {
+					if (empty($post['rating']) || $post['rating'] < 0 || $post['rating'] > 5) {
+						$json['error'] = $this->language->get('error_rating');
+					} else {
+						$rating = (float)$post['rating'];
+					}
+				}
+
+				// Images (max N, registered users only when enabled)
+				$images = array();
+
+				if (!isset($json['error']) && $this->customer->isLogged() && $this->config->get('config_review_images_enabled') && !empty($this->request->files['images'])) {
+					$max_images = (int)$this->config->get('config_review_max_images');
+
+					if ($max_images < 1) {
+						$max_images = 3;
+					}
+
+					$files = $this->request->files['images'];
+
+					$list = array();
+
+					if (isset($files['name']) && is_array($files['name'])) {
+						$count = count($files['name']);
+
+						for ($i = 0; $i < $count; $i++) {
+							$list[] = array(
+								'name'     => $files['name'][$i],
+								'tmp_name' => $files['tmp_name'][$i],
+								'error'    => $files['error'][$i],
+								'size'     => $files['size'][$i],
+							);
+						}
+					} elseif (isset($files['name'])) {
+						$list[] = $files;
+					}
+
+					if (count($list) > $max_images) {
+						$json['error'] = sprintf($this->language->get('error_max_images'), $max_images);
+					} else {
+						$clean_list = array();
+
+						foreach ($list as $file) {
+							if (isset($file['error']) && (int)$file['error'] === UPLOAD_ERR_NO_FILE) {
+								continue;
+							}
+
+							$clean_list[] = $file;
+
+							$result = ReviewMedia::validateImage($file, array('max_size' => (int)$this->config->get('config_review_image_max_size')));
+
+							if (!$result['ok']) {
+								$json['error'] = $this->language->get('error_image_' . $result['error']);
+								break;
+							}
+						}
+
+						if (!isset($json['error'])) {
+							$images = $clean_list;
+						}
+					}
+				}
+
+				// Video (registered users only when enabled): YouTube URL or mp4 upload
+				$video = null;
+
+				if (!isset($json['error']) && $this->customer->isLogged() && $this->config->get('config_review_video_enabled')) {
+					$video_url = isset($post['video_url']) ? trim((string)$post['video_url']) : '';
+
+					if ($video_url !== '') {
+						$video_id = ReviewMedia::extractYouTubeId($video_url);
+
+						if ($video_id === '') {
+							$json['error'] = $this->language->get('error_video');
+						} else {
+							$video = array('type' => 'youtube', 'value' => $video_id);
+						}
+					} elseif (!empty($this->request->files['video_file']['name'])) {
+						$file = $this->request->files['video_file'];
+						$result = ReviewMedia::validateVideo($file, array('max_size' => (int)$this->config->get('config_review_video_max_size')));
+
+						if (!$result['ok']) {
+							$json['error'] = $this->language->get('error_video_' . $result['error']);
+						} else {
+							$video = array('type' => 'mp4', 'file' => $file);
+						}
+					}
 				}
 
 				// Captcha
-				if ($this->config->get('captcha_' . $this->config->get('config_captcha') . '_status') && in_array('review', (array)$this->config->get('config_captcha_page'))) {
+				if (!isset($json['error']) && $this->config->get('captcha_' . $this->config->get('config_captcha') . '_status') && in_array('review', (array)$this->config->get('config_captcha_page'))) {
 					$captcha = $this->load->controller('extension/captcha/' . $this->config->get('config_captcha') . '/validate');
 
 					if ($captcha) {
@@ -1692,9 +1848,24 @@ class ControllerProductProduct extends Controller {
 				}
 
 				if (!isset($json['error'])) {
-					$this->load->model('catalog/review');
+					$data = array(
+						'name'              => $post['name'],
+						'text'              => $post['text'],
+						'rating'            => $rating,
+						'criteria_values'   => $criteria_values,
+						'criteria_group_id' => (int)$criteria_group['criteria_group_id'],
+						'images'            => $images,
+					);
 
-					$this->model_catalog_review->addReview($this->request->get['product_id'], $this->request->post);
+					if ($video !== null) {
+						if ($video['type'] === 'youtube') {
+							$data['video'] = array('type' => 'youtube', 'value' => $video['value']);
+						} elseif (isset($video['file'])) {
+							$data['video_file'] = $video['file'];
+						}
+					}
+
+					$this->model_catalog_review->addReview($product_id, $data);
 
 					$json['success'] = $this->language->get('text_success');
 				}

@@ -1,0 +1,45 @@
+{% if review_status %}
+<div class="flex flex-wrap items-center gap-4 mt-3">
+  <div class="flex items-center gap-3">
+    <span class="text-3xl font-extrabold text-gray-900 leading-none">{{ rating_value|default('0.0') }}</span>
+    <div>
+      <div class="dc-stars" aria-hidden="true">
+        {% for i in 1..5 %}
+          {% set diff = rating - (i - 1) %}
+          {% if diff >= 1 %}
+            <span class="dc-star active">★</span>
+          {% elseif diff >= 0.1 %}
+            <span class="dc-star dc-star-partial" style="--pct: {{ (diff * 100) | round }}%">★</span>
+          {% else %}
+            <span class="dc-star">★</span>
+          {% endif %}
+        {% endfor %}
+      </div>
+      <a href="{{ reviews_url }}" class="text-xs text-gray-500 hover:text-blue-600 transition">{{ reviews }}</a>
+    </div>
+  </div>
+
+  {% if show_distribution and rating_distribution is not empty %}
+  <div class="min-w-[220px] flex-1 max-w-xs">
+    {% for i in 5..1 %}
+      {% set count = rating_distribution[i] is defined ? rating_distribution[i] : 0 %}
+      {% set pct = review_count > 0 ? (count * 100 / review_count) : 0 %}
+      <div class="flex items-center gap-2 text-xs text-gray-500 mb-1">
+        <span class="w-6 flex-shrink-0 flex items-center gap-0.5">{{ i }}<span class="text-[9px]">★</span></span>
+        <div class="dc-dist-bar flex-1"><span style="width: {{ pct | round }}%"></span></div>
+        <span class="w-8 text-right tabular-nums">{{ count }}</span>
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if show_model|default(true) %}
+  <span class="text-sm text-gray-300 hidden sm:inline">|</span>
+  <span class="text-sm text-gray-500">{{ text_model }} <span id="dc-variant-model" data-base-model="{{ model }}">{{ is_configurable and variant_model is defined and variant_model ? variant_model : model }}</span></span>
+  {% endif %}
+</div>
+{% elseif not review_status is defined or not review_status %}
+{% if show_model|default(true) %}
+<p class="text-sm text-gray-500 mt-3">{{ text_model }} <span id="dc-variant-model" data-base-model="{{ model }}">{{ is_configurable and variant_model is defined and variant_model ? variant_model : model }}</span></p>
+{% endif %}
+{% endif %}

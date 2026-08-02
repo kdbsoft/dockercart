@@ -326,6 +326,8 @@ class ControllerCatalogReview extends Controller {
 				'author_raw'      => $result['author'],
 				'rating'          => $result['rating'],
 				'rating_raw'      => $result['rating'],
+				'verified'        => (int)$result['verified'],
+				'has_media'       => ((int)$result['image_count'] + (int)$result['video_count']) > 0,
 				'status'          => ($result['status']) ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
 				'status_raw'      => $result['status'],
 				'date_added'      => date($this->language->get('date_format_short'), strtotime($result['date_added'])),
@@ -581,6 +583,96 @@ class ControllerCatalogReview extends Controller {
 			$data['status'] = '';
 		}
 
+		if (isset($this->request->post['verified'])) {
+			$data['verified'] = $this->request->post['verified'];
+		} elseif (!empty($review_info)) {
+			$data['verified'] = $review_info['verified'];
+		} else {
+			$data['verified'] = 0;
+		}
+
+		// Criteria (resolved from the product's category chain or the review's group)
+		$this->load->model('catalog/review_criteria');
+		$this->load->model('tool/image');
+
+		$criteria_group_id = 0;
+
+		if (!empty($review_info['criteria_group_id'])) {
+			$criteria_group_id = (int)$review_info['criteria_group_id'];
+		}
+
+		if ($criteria_group_id <= 0 && !empty($data['product_id'])) {
+			$criteria_group_id = $this->model_catalog_review_criteria->getProductCriteriaGroupId((int)$data['product_id']);
+		}
+
+		if ($criteria_group_id <= 0) {
+			$criteria_group_id = $this->model_catalog_review_criteria->getDefaultGroupId();
+		}
+
+		$data['criteria_group_id'] = $criteria_group_id;
+		$data['criteria'] = array();
+
+		$criteria_items = $this->model_catalog_review_criteria->getCriteria($criteria_group_id);
+
+		foreach ($criteria_items as $item) {
+			if (isset($this->request->post['criteria'][$item['criteria_id']])) {
+				$value = $this->request->post['criteria'][$item['criteria_id']];
+			} elseif (!empty($review_info['criteria_values']) && isset($review_info['criteria_values'][$item['criteria_id']])) {
+				$value = $review_info['criteria_values'][$item['criteria_id']];
+			} else {
+				$value = '';
+			}
+
+			$data['criteria'][] = array(
+				'criteria_id' => $item['criteria_id'],
+				'type'        => $item['type'],
+				'name'        => $item['name'],
+				'is_required' => (int)$item['is_required'],
+				'value'       => $value,
+			);
+		}
+
+		// Images (max 3)
+		$data['review_images'] = array();
+
+		$images = array();
+
+		if (isset($this->request->post['review_image'])) {
+			$images = $this->request->post['review_image'];
+		} elseif (!empty($review_info['images'])) {
+			$images = array_column($review_info['images'], 'image');
+		}
+
+		foreach ($images as $image) {
+			$image = (string)$image;
+
+			$data['review_images'][] = array(
+				'image' => $image,
+				'thumb' => $image && is_file(DIR_IMAGE . $image) ? $this->model_tool_image->resize($image, 100, 100) : '',
+			);
+		}
+
+		$data['placeholder'] = $this->model_tool_image->resize('no_image.png', 100, 100);
+
+		// Video
+		if (isset($this->request->post['review_video_type'])) {
+			$data['review_video_type'] = $this->request->post['review_video_type'];
+		} elseif (!empty($review_info['videos'][0]['video_type'])) {
+			$data['review_video_type'] = $review_info['videos'][0]['video_type'];
+		} else {
+			$data['review_video_type'] = 'youtube';
+		}
+
+		if (isset($this->request->post['review_video'])) {
+			$data['review_video'] = $this->request->post['review_video'];
+		} elseif (!empty($review_info['videos'][0]['video'])) {
+			$data['review_video'] = $review_info['videos'][0]['video'];
+		} else {
+			$data['review_video'] = '';
+		}
+
+		$data['text_form'] = !isset($this->request->get['review_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
+
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');
@@ -617,14 +709,24 @@ class ControllerCatalogReview extends Controller {
 					$json['value_html'] = htmlspecialchars($val, ENT_QUOTES, 'UTF-8');
 				}
 			} elseif ($field === 'rating') {
-				$val = (int)$value;
+				$val = (float)$value;
 
 				if ($val < 0 || $val > 5) {
 					$json['error'] = $this->language->get('error_rating');
 				} else {
 					$this->model_catalog_review->updateReviewField($review_id, array('rating' => $val));
 					$json['success'] = true;
-					$json['value_html'] = (string)$val;
+					$json['value_html'] = number_format($val, 1, '.', '');
+				}
+			} elseif ($field === 'verified') {
+				$val = (int)$value;
+
+				if ($val !== 0 && $val !== 1) {
+					$json['error'] = 'Invalid verified value';
+				} else {
+					$this->model_catalog_review->updateReviewField($review_id, array('verified' => $val));
+					$json['success'] = true;
+					$json['value_html'] = $val ? $this->language->get('text_verified') : $this->language->get('text_not_verified');
 				}
 			} elseif ($field === 'status') {
 				$val = (int)$value;
@@ -672,7 +774,7 @@ class ControllerCatalogReview extends Controller {
 			$this->error['text'] = $this->language->get('error_text');
 		}
 
-		if (!isset($this->request->post['rating']) || $this->request->post['rating'] < 0 || $this->request->post['rating'] > 5) {
+		if (!isset($this->request->post['rating']) || (float)$this->request->post['rating'] < 0 || (float)$this->request->post['rating'] > 5) {
 			$this->error['rating'] = $this->language->get('error_rating');
 		}
 

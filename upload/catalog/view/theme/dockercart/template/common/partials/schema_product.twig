@@ -47,24 +47,29 @@
   }{% endif %}{% endif %}{% if rating is defined and rating and review_count is defined and review_count > 0 %},
   "aggregateRating": {
     "@type": "AggregateRating",
-    "ratingValue": "{{ rating }}",
-    "reviewCount": "{{ review_count }}"
-  },
+    "ratingValue": "{{ rating_value is defined and rating_value ? rating_value : rating }}",
+    "bestRating": "5",
+    "worstRating": "1",
+    "ratingCount": "{{ review_count }}"
+  }{% if schema_reviews is defined and schema_reviews %},
   "review": [
+{% for r in schema_reviews %}
     {
       "@type": "Review",
-      "name": "{{ heading_title|striptags|trim|e('js') }} - customer review summary",
+      "datePublished": "{{ r.date_added|e('js') }}",
       "reviewRating": {
         "@type": "Rating",
-        "ratingValue": "{{ rating }}",
+        "ratingValue": "{{ r.rating|number_format(1, '.', '') }}",
         "bestRating": "5"
       },
       "author": {
-        "@type": "Organization",
-        "name": "{{ name|default('Customer')|striptags|trim|e('js') }}"
-      }
-    }
-  ]{% endif %}
+        "@type": "Person",
+        "name": "{{ r.author|striptags|trim|e('js') }}"
+      }{% if r.text %},
+      "reviewBody": "{{ r.text|striptags|trim|slice(0, 300)|e('js') }}"{% endif %}
+    }{% if not loop.last %},{% endif %}
+{% endfor %}
+  ]{% endif %}{% endif %}
 }
 </script>
 {% endif %}
