@@ -1,7 +1,6 @@
 {# Order flow stepper — horizontal bar rendered under the page header.
    Expects: flow_enabled, flow_steps, flow_transitions, flow_terminal #}
 <div class="order-flow-bar">
-  <div class="order-flow-bar__label">{{ text_order_flow }}</div>
   <div class="order-flow-steps">
     {% for step in flow_steps %}
     <div class="of-step of-step--{{ step.state }}">

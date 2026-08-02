@@ -21,7 +21,7 @@
             </a>
             <div class="dropdown" style="display:inline-block">
               <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
-                <i data-lucide="more-horizontal" width="16" height="16"></i> {{ text_more_actions }}
+                <i data-lucide="more-vertical" width="16" height="16"></i>
               </button>
               <ul class="dropdown-menu dropdown-menu-right">
                 <li><a href="#" onclick="event.preventDefault();addReward();return false"><i data-lucide="star" width="14" height="14"></i> {{ button_reward_add }}</a></li>
@@ -206,7 +206,7 @@
                 {% else %}
                 <div class="order-coupon-row">
                   <input type="text" id="coupon-code" class="form-control order-coupon-input" placeholder="{{ entry_coupon }}" autocomplete="off">
-                  <button type="button" class="btn btn-default btn-xs" onclick="applyCoupon()">
+                  <button type="button" class="btn btn-default" onclick="applyCoupon()">
                     <i data-lucide="tag" width="12" height="12"></i> {{ button_coupon_apply }}
                   </button>
                 </div>
@@ -733,7 +733,6 @@ body.dcx-global-editing .dcx-sidebar-edit-link { display:none !important; }
 .pcm-attrs__name { font-weight:500; color:#374151; white-space:nowrap; width:120px; padding-right:12px; }
 
 .order-flow-bar { display:flex; align-items:center; flex-wrap:wrap; gap:8px 16px; padding:10px 14px; border:1px solid var(--dc-border,#e5e7eb); border-radius:10px; background:var(--dc-surface,#fff); }
-.order-flow-bar__label { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:#9ca3af; flex-shrink:0; }
 .order-flow-steps { display:flex; align-items:center; flex-wrap:wrap; }
 .of-step { display:flex; align-items:center; gap:6px; padding:2px 0; font-size:12px; color:#9ca3af; }
 .of-step__dot { width:18px; height:18px; border-radius:50%; border:1px solid #d1d5db; background:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; color:#9ca3af; }
