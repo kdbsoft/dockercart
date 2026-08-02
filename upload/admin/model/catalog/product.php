@@ -1045,6 +1045,29 @@ class ModelCatalogProduct extends Model
         $this->db->query(
             "DELETE FROM " .
                 DB_PREFIX .
+                "product_fbt WHERE product_id = '" .
+                (int) $product_id .
+                "'",
+        );
+
+        $fbt_ids = array_unique(array_map("intval", (array) ($data["product_fbt"] ?? [])));
+        foreach ($fbt_ids as $fbt_id) {
+            if ($fbt_id > 0 && $fbt_id !== (int) $product_id) {
+                $this->db->query(
+                    "INSERT INTO " .
+                        DB_PREFIX .
+                        "product_fbt SET product_id = '" .
+                        (int) $product_id .
+                        "', fbt_id = '" .
+                        $fbt_id .
+                        "'",
+                );
+            }
+        }
+
+        $this->db->query(
+            "DELETE FROM " .
+                DB_PREFIX .
                 "product_reward WHERE product_id = '" .
                 (int) $product_id .
                 "'",
@@ -1859,6 +1882,29 @@ class ModelCatalogProduct extends Model
                         (int) $product_id .
                         "', accessory_id = '" .
                         (int) $accessory_id .
+                        "'",
+                );
+            }
+        }
+
+        $this->db->query(
+            "DELETE FROM " .
+                DB_PREFIX .
+                "product_fbt WHERE product_id = '" .
+                (int) $product_id .
+                "'",
+        );
+
+        $fbt_ids = array_unique(array_map("intval", (array) ($data["product_fbt"] ?? [])));
+        foreach ($fbt_ids as $fbt_id) {
+            if ($fbt_id > 0 && $fbt_id !== (int) $product_id) {
+                $this->db->query(
+                    "INSERT INTO " .
+                        DB_PREFIX .
+                        "product_fbt SET product_id = '" .
+                        (int) $product_id .
+                        "', fbt_id = '" .
+                        $fbt_id .
                         "'",
                 );
             }
@@ -2943,6 +2989,25 @@ class ModelCatalogProduct extends Model
         }
 
         return $product_accessory_data;
+    }
+
+    public function getProductFbt($product_id)
+    {
+        $product_fbt_data = [];
+
+        $query = $this->db->query(
+            "SELECT * FROM " .
+                DB_PREFIX .
+                "product_fbt WHERE product_id = '" .
+                (int) $product_id .
+                "'",
+        );
+
+        foreach ($query->rows as $result) {
+            $product_fbt_data[] = (int) $result["fbt_id"];
+        }
+
+        return $product_fbt_data;
     }
 
     public function getTotalProducts($data = [])
