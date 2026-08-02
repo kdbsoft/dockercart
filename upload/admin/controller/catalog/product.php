@@ -1883,6 +1883,27 @@ class ControllerCatalogProduct extends Controller {
 			}
 		}
 
+		if (isset($this->request->post['product_fbt'])) {
+			$products = $this->request->post['product_fbt'];
+		} elseif (isset($this->request->get['product_id'])) {
+			$products = $this->model_catalog_product->getProductFbt($this->request->get['product_id']);
+		} else {
+			$products = array();
+		}
+
+		$data['product_fbt'] = array();
+
+		foreach ($products as $product_id) {
+			$fbt_info = $this->model_catalog_product->getProduct($product_id);
+
+			if ($fbt_info) {
+				$data['product_fbt'][] = array(
+					'product_id' => $fbt_info['product_id'],
+					'name'       => $fbt_info['name']
+				);
+			}
+		}
+
 		if (isset($this->request->post['points'])) {
 			$data['points'] = $this->request->post['points'];
 		} elseif (!empty($product_info)) {
