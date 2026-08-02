@@ -10,12 +10,12 @@
         <div class="col-sm-12">
           <div class="pull-right">
             <a href="{{ add }}" class="btn btn-primary"><i data-lucide="plus" width="16" height="16"></i> {{ button_new_order }}</a>
-            <button type="button" id="button-export-csv" title="{{ button_export_csv }}" class="btn btn-success btn--icon" disabled>
-              <i data-lucide="download" width="16" height="16"></i>
+            <button type="button" id="button-export-csv" class="btn btn-success dc-btn-selection">
+              <i data-lucide="download" width="16" height="16"></i> {{ button_export_csv }}
               <i data-lucide="loader" width="16" height="16" class="spin" id="csv-export-spinner" style="display:none"></i>
             </button>
-            <button type="button" id="button-print" title="{{ button_print_selected }}" class="btn btn-default btn--icon" disabled><i data-lucide="printer" width="16" height="16"></i></button>
-            <button type="button" id="button-delete" title="{{ button_delete }}" class="btn btn-danger btn--icon"><i data-lucide="trash-2" width="16" height="16"></i></button>
+            <button type="button" id="button-print" class="btn btn-default dc-btn-selection"><i data-lucide="printer" width="16" height="16"></i> {{ button_print_selected }}</button>
+            <button type="button" id="button-delete" class="btn btn-danger dc-btn-selection"><i data-lucide="trash-2" width="16" height="16"></i> {{ button_delete }}</button>
           </div>
           <h1 class="page-header__title">{{ heading_title }}</h1>
         </div>
@@ -128,12 +128,7 @@
                 <td class="text-left" style="font-size:12px;color:#555">{{ order.shipping_method }}{% if order.tracking_number %}<div style="font-size:11px;color:#888;margin-top:2px;white-space:nowrap"><i data-lucide="truck" width="11" height="11" style="vertical-align:-1px"></i> {{ order.tracking_number|replace({'|': ' | '}) }}</div>{% endif %}</td>
                 <td class="text-center" style="padding-top:8px;padding-bottom:8px;">{{ order.items_count }}</td>
                 <td class="text-right">{{ order.total }}</td>
-                <td class="text-right"><div style="min-width: 120px;">
-                    <div class="btn-group"> <a href="{{ order.view }}" title="{{ button_view }}" class="btn btn-primary btn--icon"><i data-lucide="eye" width="16" height="16"></i></a>
-                      <a href="{{ order.edit }}" title="{{ button_edit }}" class="btn btn-info btn--icon"><i data-lucide="pencil" width="16" height="16"></i></a>
-                      <button type="button" data-order-id="{{ order.delete_id }}" data-loading-text="{{ text_loading }}" title="{{ button_delete }}" class="btn btn-danger btn--icon button-order-delete"><i data-lucide="trash-2" width="16" height="16"></i></button>
-                    </div>
-                  </div></td>
+                <td class="text-right"><div style="min-width: 120px; white-space: nowrap;"> <a href="{{ order.view }}" data-toggle="tooltip" title="{{ button_view }}" class="btn btn-primary btn--icon"><i data-lucide="eye" width="16" height="16"></i></a> <a href="{{ order.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-info btn--icon"><i data-lucide="pencil" width="16" height="16"></i></a> <button type="button" data-order-id="{{ order.delete_id }}" data-loading-text="{{ text_loading }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn--icon button-order-delete"><i data-lucide="trash-2" width="16" height="16"></i></button> </div></td>
               </tr>
               {% endfor %}
               {% else %}
@@ -223,18 +218,6 @@ $('input[name=\'filter_customer\']').autocomplete({
 });
 //--></script> 
   <script type="text/javascript"><!--
-$('input[name^=\'selected\']').on('change', function() {
-	$('#button-delete, #button-print, #button-export-csv').prop('disabled', true);
-
-	var selected = $('input[name^=\'selected\']:checked');
-
-	if (selected.length) {
-		$('#button-delete, #button-print, #button-export-csv').prop('disabled', false);
-	}
-});
-
-$('#button-delete, #button-print, #button-export-csv').prop('disabled', true);
-
 $('input[name^=\'selected\']:first').trigger('change');
 
 $('#button-print').on('click', function(e) {

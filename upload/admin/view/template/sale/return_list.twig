@@ -6,9 +6,9 @@
       <div class="row">
         <div class="col-sm-12">
           <div class="pull-right">
-            <a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary btn--icon"><i data-lucide="plus" width="16" height="16"></i></a>
-            <button type="button" id="button-export-csv" title="{{ button_export_csv }}" class="btn btn-success btn--icon" disabled><i data-lucide="download" width="16" height="16"></i></button>
-            <button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="confirm('{{ text_confirm }}') ? $('#form-return').submit() : false;"><i data-lucide="trash-2" width="16" height="16"></i></button>
+            <a href="{{ add }}" class="btn btn-primary"><i data-lucide="plus" width="16" height="16"></i> {{ button_add }}</a>
+            <button type="button" id="button-export-csv" class="btn btn-success dc-btn-selection"><i data-lucide="download" width="16" height="16"></i> {{ button_export_csv }}</button>
+            <button type="button" class="btn btn-danger dc-btn-selection" onclick="confirm('{{ text_confirm }}') ? $('#form-return').submit() : false;"><i data-lucide="trash-2" width="16" height="16"></i> {{ button_delete }}</button>
           </div>
           <h1 class="page-header__title">{{ heading_title }}</h1>
         </div>
@@ -258,18 +258,6 @@ $('input[name=\'filter_model\']').autocomplete({
 });
 //--></script>
 <script type="text/javascript"><!--
-$('input[name^=\'selected\']').on('change', function() {
-	$('#button-export-csv').prop('disabled', true);
-
-	var selected = $('input[name^=\'selected\']:checked');
-
-	if (selected.length) {
-		$('#button-export-csv').prop('disabled', false);
-	}
-});
-
-$('#button-export-csv').prop('disabled', true);
-
 $('input[name^=\'selected\']:first').trigger('change');
 
 $('#button-export-csv').on('click', function(e) {
