@@ -1,0 +1,67 @@
+{{ header }}
+
+{% include 'dockercart/template/product/review_css.twig' %}
+
+<main class="py-20 sm:py-2 lg:py-4 px-4 sm:px-6 lg:px-8 bg-white">
+  <div class="max-w-7xl mx-auto">
+    {% include 'dockercart/template/common/partials/breadcrumbs.twig' %}
+
+    <div class="flex flex-wrap items-end justify-between gap-4 mt-4 mb-6">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900">{{ heading_reviews }}</h1>
+        <a href="{{ product_href }}" class="text-sm text-gray-500 hover:text-blue-600 transition">{{ text_view_product }}</a>
+      </div>
+      {% if review_guest %}
+      <a href="#form-review" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition">{{ text_write }}</a>
+      {% endif %}
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <aside class="lg:col-span-1">
+        <div class="bg-gray-50 border border-gray-100 rounded-2xl p-5 sticky top-24">
+          {% include 'dockercart/template/product/review_summary.twig' with { show_model: false } %}
+          {% if review_count %}
+          <div class="mt-4 pt-4 border-t border-gray-200">
+            <a href="{{ product_href }}" class="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 hover:text-blue-700 transition">
+              <i data-lucide="arrow-left" width="16" height="16"></i>{{ text_view_product }}
+            </a>
+          </div>
+          {% endif %}
+        </div>
+      </aside>
+
+      <section class="lg:col-span-2">
+        <div id="review">
+          {% include 'dockercart/template/product/review.twig' with {
+            reviews: reviews_list,
+            sort_urls: sort_urls,
+            pagination: pagination,
+            text_pagination: text_pagination,
+            text_no_reviews: text_no_reviews
+          } %}
+        </div>
+
+        {% if review_status %}
+        <div class="mt-12">
+          {% include 'dockercart/template/product/review_form.twig' with {
+            review_guest: review_guest,
+            customer_name: customer_name,
+            customer_logged: customer_logged,
+            criteria: criteria,
+            has_rating_criteria: has_rating_criteria,
+            review_images_enabled: review_images_enabled,
+            review_max_images: review_max_images,
+            review_video_enabled: review_video_enabled,
+            captcha: captcha
+          } %}
+        </div>
+        {% endif %}
+      </section>
+    </div>
+  </div>
+</main>
+
+{% include 'dockercart/template/common/partials/schema_reviews.twig' %}
+{% include 'dockercart/template/product/review_js.twig' %}
+
+{{ footer }}

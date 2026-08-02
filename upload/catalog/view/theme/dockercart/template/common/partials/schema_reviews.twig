@@ -1,0 +1,39 @@
+{% if schema is defined and schema.product_name %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "{{ schema.product_name|e('js') }}"{% if schema.image %},
+  "image": ["{{ schema.image|e('js') }}"]{% endif %}{% if schema.sku %},
+  "sku": "{{ schema.sku|e('js') }}"{% endif %}{% if schema.model %},
+  "model": "{{ schema.model|e('js') }}"{% endif %}{% if schema.review_count > 0 %},
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "{{ schema.rating }}",
+    "bestRating": "5",
+    "worstRating": "1",
+    "ratingCount": "{{ schema.review_count }}"
+  }{% endif %},
+  "url": "{{ schema.url|e('js') }}"
+{% if schema.reviews %},
+  "review": [
+{% for r in schema.reviews %}
+    {
+      "@type": "Review",
+      "datePublished": "{{ r.date_added|e('js') }}",
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": "{{ r.rating|number_format(1, '.', '') }}",
+        "bestRating": "5"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "{{ r.author|striptags|trim|e('js') }}"
+      }{% if r.text %},
+      "reviewBody": "{{ r.text|striptags|trim|slice(0, 500)|e('js') }}"{% endif %}
+    }{% if not loop.last %},{% endif %}
+{% endfor %}
+  ]{% endif %}
+}
+</script>
+{% endif %}

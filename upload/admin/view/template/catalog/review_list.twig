@@ -75,6 +75,8 @@
                   <td class="text-left">{% if sort == 'pd.name' %}<a href="{{ sort_product }}" class="{{ order|lower }} sortable">{{ column_product }}</a>{% else %}<a href="{{ sort_product }}" class="sortable">{{ column_product }}</a>{% endif %}</td>
                   <td class="text-left">{% if sort == 'r.author' %}<a href="{{ sort_author }}" class="{{ order|lower }} sortable">{{ column_author }}</a>{% else %}<a href="{{ sort_author }}" class="sortable">{{ column_author }}</a>{% endif %}</td>
                   <td class="text-right">{% if sort == 'r.rating' %}<a href="{{ sort_rating }}" class="{{ order|lower }} sortable">{{ column_rating }}</a>{% else %}<a href="{{ sort_rating }}" class="sortable">{{ column_rating }}</a>{% endif %}</td>
+                  <td class="text-left">{{ column_verified }}</td>
+                  <td class="text-left">{{ column_media }}</td>
                   <td class="text-left">{% if sort == 'r.status' %}<a href="{{ sort_status }}" class="{{ order|lower }} sortable">{{ column_status }}</a>{% else %}<a href="{{ sort_status }}" class="sortable">{{ column_status }}</a>{% endif %}</td>
                   <td class="text-left">{% if sort == 'r.date_added' %}<a href="{{ sort_date_added }}" class="{{ order|lower }} sortable">{{ column_date_added }}</a>{% else %}<a href="{{ sort_date_added }}" class="sortable">{{ column_date_added }}</a>{% endif %}</td>
                   <td class="text-right"></td>
@@ -96,6 +98,10 @@
                 <td class="text-right">
                   <span class="inline-edit" data-review-id="{{ review.review_id }}" data-field="rating" data-value="{{ review.rating_raw }}">{{ review.rating }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
                 </td>
+                <td class="text-left">
+                  <span class="inline-edit" data-review-id="{{ review.review_id }}" data-field="verified" data-value="{{ review.verified }}">{% if review.verified %}<span class="text-success">{{ text_verified }}</span>{% else %}<span class="text-muted">{{ text_not_verified }}</span>{% endif %}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
+                </td>
+                <td class="text-center">{% if review.has_media %}<i data-lucide="paperclip" width="14" height="14" class="text-muted" title="{{ text_has_media }}"></i>{% else %}<span class="text-muted">—</span>{% endif %}</td>
                 <td class="text-left">
                   <span class="inline-edit" data-review-id="{{ review.review_id }}" data-field="status" data-value="{{ review.status_raw }}">{{ review.status }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
                 </td>
@@ -195,6 +201,45 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 				type: 'post',
 				dataType: 'json',
 				data: { review_id: reviewId, field: 'status', value: newValue },
+				success: function(json) {
+					if (json['error']) {
+						$span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
+						setTimeout(function() { $span.html($span.data('display')); }, 3000);
+					} else {
+						$span.data('value', newValue);
+						$span.html(json['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+						lucide.createIcons({ nodes: [$span[0]] });
+					}
+				},
+				error: function() {
+					$span.html($span.data('display'));
+				}
+			});
+		});
+
+		$select.on('blur', function() {
+			if (!saved) {
+				$span.html($span.data('display'));
+			}
+		});
+	} else if (field === 'verified') {
+		var $select = $('<select class="form-control input-sm" style="width:auto;display:inline-block;">');
+		$select.append('<option value="1"' + (rawValue == 1 ? ' selected' : '') + '>{{ text_verified }}</option>');
+		$select.append('<option value="0"' + (rawValue == 0 ? ' selected' : '') + '>{{ text_not_verified }}</option>');
+		$span.html($select);
+		$select.focus();
+
+		var saved = false;
+
+		$select.on('change', function() {
+			saved = true;
+			var newValue = $(this).val();
+
+			$.ajax({
+				url: 'index.php?route=catalog/review/updateField&user_token={{ user_token }}',
+				type: 'post',
+				dataType: 'json',
+				data: { review_id: reviewId, field: 'verified', value: newValue },
 				success: function(json) {
 					if (json['error']) {
 						$span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
