@@ -270,7 +270,7 @@ class ControllerMarketingCoupon extends Controller {
 		if (isset($this->error['name'])) {
 			$data['error_name'] = $this->error['name'];
 		} else {
-			$data['error_name'] = '';
+			$data['error_name'] = array();
 		}
 
 		if (isset($this->error['code'])) {
@@ -317,15 +317,28 @@ class ControllerMarketingCoupon extends Controller {
 			$coupon_info = $this->model_marketing_coupon->getCoupon($this->request->get['coupon_id']);
 		}
 
-		if (isset($this->request->post['name'])) {
-			$data['name'] = $this->request->post['name'];
+		$this->load->model('localisation/language');
+
+		$data['languages'] = $this->model_localisation_language->getLanguages();
+
+		if (isset($this->request->post['coupon'])) {
+			$data['coupon'] = $this->request->post['coupon'];
 		} elseif (!empty($coupon_info)) {
-			$data['name'] = $coupon_info['name'];
+			$data['coupon'] = $this->model_marketing_coupon->getCouponDescriptions($this->request->get['coupon_id']);
 		} else {
-			$data['name'] = '';
+			$data['coupon'] = array();
 		}
 
-		$data['coupon_name'] = $data['name'] ?: $this->language->get('text_form');
+		$coupon_name = '';
+
+		foreach ($data['languages'] as $language) {
+			if (!empty($data['coupon'][$language['language_id']]['name'])) {
+				$coupon_name = $data['coupon'][$language['language_id']]['name'];
+				break;
+			}
+		}
+
+		$data['coupon_name'] = $coupon_name ?: $this->language->get('text_form');
 
 		if (isset($this->request->post['code'])) {
 			$data['code'] = $this->request->post['code'];
@@ -481,8 +494,10 @@ class ControllerMarketingCoupon extends Controller {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
-		if ((utf8_strlen($this->request->post['name']) < 3) || (utf8_strlen($this->request->post['name']) > 128)) {
-			$this->error['name'] = $this->language->get('error_name');
+		foreach ($this->request->post['coupon'] as $language_id => $value) {
+			if ((utf8_strlen($value['name']) < 3) || (utf8_strlen($value['name']) > 128)) {
+				$this->error['name'][$language_id] = $this->language->get('error_name');
+			}
 		}
 
 		if ((utf8_strlen($this->request->post['code']) < 3) || (utf8_strlen($this->request->post['code']) > 20)) {

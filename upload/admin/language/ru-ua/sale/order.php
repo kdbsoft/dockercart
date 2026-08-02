@@ -31,7 +31,7 @@ $_['entry_city'] = 'Город';
 $_['entry_comment'] = 'Комментарий';
 $_['entry_company'] = 'Компания';
 $_['entry_country'] = 'Страна';
-$_['entry_coupon'] = 'Купон';
+$_['entry_coupon'] = 'Промо-код';
 $_['entry_currency'] = 'Валюта';
 $_['entry_customer'] = 'Клиент';
 $_['help_filter_customer'] = 'Поиск по имени, email или телефону — формат телефона не важен';
@@ -250,12 +250,12 @@ $_['text_invoice_no']            = 'Счёт №:';
 
 // Coupon
 $_['button_coupon_apply']        = 'Применить';
-$_['button_coupon_remove']       = 'Удалить купон';
-$_['text_coupon_applied']        = 'Купон применён!';
-$_['text_coupon_removed']        = 'Купон удалён!';
-$_['text_coupon_note_added']     = 'Применён купон: %s';
-$_['text_coupon_note_removed']   = 'Удалён купон: %s';
-$_['error_coupon_invalid']       = 'Купон недействителен, истёк или не подходит по условиям!';
+$_['button_coupon_remove']       = 'Удалить промо-код';
+$_['text_coupon_applied']        = 'Промо-код применён!';
+$_['text_coupon_removed']        = 'Промо-код удалён!';
+$_['text_coupon_note_added']     = 'Применён промо-код: %s';
+$_['text_coupon_note_removed']   = 'Удалён промо-код: %s';
+$_['error_coupon_invalid']       = 'Промо-код недействителен, истёк или не подходит по условиям!';
 
 $_['text_payer_address']         = 'Адрес плательщика';
 $_['text_same_as_billing']       = 'Совпадает с адресом плательщика';

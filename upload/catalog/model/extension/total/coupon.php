@@ -5,7 +5,7 @@ class ModelExtensionTotalCoupon extends Model {
 
 		$status = true;
 
-		$coupon_query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "coupon` WHERE code = '" . $this->db->escape($code) . "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) AND status = '1'");
+		$coupon_query = $this->db->query("SELECT c.coupon_id, COALESCE(cd.name, c.name) AS name, c.code, c.type, c.discount, c.logged, c.shipping, c.total, c.date_start, c.date_end, c.uses_total, c.uses_customer, c.status, c.auto_renew, c.date_added FROM `" . DB_PREFIX . "coupon` c LEFT JOIN `" . DB_PREFIX . "coupon_description` cd ON (cd.coupon_id = c.coupon_id AND cd.language_id = '" . (int)$this->config->get('config_language_id') . "') WHERE c.code = '" . $this->db->escape($code) . "' AND ((c.date_start = '0000-00-00' OR c.date_start < NOW()) AND (c.date_end = '0000-00-00' OR c.date_end > NOW())) AND c.status = '1'");
 
 		if ($coupon_query->num_rows) {
 			if ($coupon_query->row['total'] > $this->cart->getSubTotal()) {
@@ -282,6 +282,21 @@ class ModelExtensionTotalCoupon extends Model {
 				)
 			LIMIT 1
 		");
+
+		if ($this->db->countAffected()) {
+			$coupon_id = $this->db->getLastId();
+
+			$this->db->query("
+				INSERT IGNORE INTO `" . DB_PREFIX . "coupon_description` (coupon_id, language_id, name)
+				SELECT '" . (int)$coupon_id . "', cd.language_id, cd.name
+				FROM `" . DB_PREFIX . "coupon_description` cd
+				INNER JOIN `" . DB_PREFIX . "coupon` c ON (cd.coupon_id = c.coupon_id)
+				WHERE c.code = '" . $this->db->escape($code) . "'
+					AND c.auto_renew = '1'
+					AND c.date_end < CURDATE()
+					AND c.date_end != '0000-00-00'
+			");
+		}
 
 		$this->cache->set($cache_key, true, 86400);
 		$done[$key] = true;

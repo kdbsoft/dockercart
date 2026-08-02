@@ -54,7 +54,7 @@ $_['button_checkout'] = 'Оформить заказ';
 
 $_['button_confirm'] = 'Подтвердить заказ';
 
-$_['button_coupon'] = 'Применить купон';
+$_['button_coupon'] = 'Применить промо-код';
 
 $_['button_delete'] = 'Удалить';
 
