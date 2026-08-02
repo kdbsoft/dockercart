@@ -49,9 +49,15 @@
             <div class="dcx-panel-body">
               <div class="dcx-fields">
                 <div class="dcx-field required">
-                  <label class="dcx-label" for="input-name">{{ entry_name }}</label>
-                  <input type="text" name="name" value="{{ name }}" placeholder="{{ entry_name }}" id="input-name" class="form-control" />
-                  {% if error_name %}<div class="text-danger">{{ error_name }}</div>{% endif %}
+                  <label class="dcx-label">{{ entry_name }}</label>
+                  {% for language in languages %}
+                  <div class="dc-attr-row__value"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                    <input type="text" name="coupon[{{ language.language_id }}][name]" value="{{ coupon[language.language_id] ? coupon[language.language_id].name }}" placeholder="{{ entry_name }}" class="form-control" />
+                  </div>
+                  {% if error_name[language.language_id] %}
+                  <div class="text-danger">{{ error_name[language.language_id] }}</div>
+                  {% endif %}
+                  {% endfor %}
                 </div>
                 <div class="dcx-field required">
                   <label class="dcx-label" for="input-code">

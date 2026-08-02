@@ -1,7 +1,7 @@
 <?php
 class ModelExtensionReportCoupon extends Model {
 	public function getCoupons($data = array()) {
-		$sql = "SELECT ch.coupon_id, c.name, c.code, COUNT(DISTINCT ch.order_id) AS `orders`, SUM(ch.amount) AS total FROM `" . DB_PREFIX . "coupon_history` ch LEFT JOIN `" . DB_PREFIX . "coupon` c ON (ch.coupon_id = c.coupon_id)";
+		$sql = "SELECT ch.coupon_id, COALESCE(cd.name, c.name) AS name, c.code, COUNT(DISTINCT ch.order_id) AS `orders`, SUM(ch.amount) AS total FROM `" . DB_PREFIX . "coupon_history` ch LEFT JOIN `" . DB_PREFIX . "coupon` c ON (ch.coupon_id = c.coupon_id) LEFT JOIN `" . DB_PREFIX . "coupon_description` cd ON (cd.coupon_id = c.coupon_id AND cd.language_id = '" . (int)$this->config->get('config_language_id') . "')";
 
 		$implode = array();
 
