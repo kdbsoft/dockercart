@@ -46,6 +46,24 @@
           <button type="submit" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition whitespace-nowrap">
             <i data-lucide="search" class="w-4 h-4 inline-block mr-1.5 align-text-bottom"></i>{{ button_search|default('Search') }}
           </button>
+
+          {% if search_category_name %}
+          <input type="hidden" name="category_id" value="{{ search_category_id }}" />
+          <input type="hidden" name="sub_category" value="{{ sub_category }}" />
+          <div class="w-full flex flex-wrap items-center gap-2">
+            <span class="inline-flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm text-gray-600 bg-blue-50 border border-blue-200 rounded-full px-3.5 py-1.5">
+              <i data-lucide="folder" class="w-4 h-4 text-blue-500 shrink-0"></i>
+              <span>{{ text_search_in_category }}</span>
+              <a href="{{ search_category_href }}" class="font-semibold text-blue-700 hover:text-blue-900 hover:underline">{{ search_category_name }}</a>
+              {% if sub_category %}
+              <span class="text-xs text-gray-400">· {{ text_search_in_subcategories }}</span>
+              {% endif %}
+              <a href="{{ search_global_url }}" class="ml-1 inline-flex items-center gap-0.5 text-xs font-bold text-blue-600 hover:text-blue-800 transition" title="{{ text_search_all_categories }}">
+                <i data-lucide="x" class="w-3.5 h-3.5"></i>{{ text_search_global }}
+              </a>
+            </span>
+          </div>
+          {% endif %}
         </form>
       </div>
     </div>
@@ -235,6 +253,11 @@
             {% endif %}
             <i data-lucide="search-x" class="w-16 h-16 text-gray-200 mb-4"></i>
             <p class="text-lg font-semibold text-gray-500">{{ text_empty }}</p>
+            {% if search_category_name %}
+            <a href="{{ search_global_url }}" class="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition">
+              <i data-lucide="search" class="w-4 h-4"></i>{{ text_search_all_categories }}
+            </a>
+            {% endif %}
           </div>
           {% endif %}
         </div>
