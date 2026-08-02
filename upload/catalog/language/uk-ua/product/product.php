@@ -49,6 +49,7 @@ $_['text_returns_desc'] = '14 днів на повернення';
 $_['text_you_may_also_like'] = 'Можливо, вам сподобається';
 $_['text_you_may_also_need'] = 'Можливо, вам також знадобиться';
 $_['text_accessory']         = 'Аксесуари';
+$_['text_fbt']               = 'Купують разом';
 $_['text_view_all'] = 'Показати всі →';
 $_['text_quick_view'] = 'Швидкий перегляд';
 $_['text_reward'] = 'Бонусні бали:';

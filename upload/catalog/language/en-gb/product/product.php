@@ -53,6 +53,7 @@ $_['text_returns_desc'] = '30-day return';
 $_['text_you_may_also_like'] = 'You may also like';
 $_['text_you_may_also_need'] = 'You may also need';
 $_['text_accessory']         = 'Accessories';
+$_['text_fbt']               = 'Frequently Bought Together';
 $_['text_view_all'] = 'View All →';
 $_['text_tags']                = 'Tags:';
 $_['text_error']               = 'Product not found!';
