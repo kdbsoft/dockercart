@@ -1300,6 +1300,28 @@
                   </div>
                 {% endfor %}</div>
             </div>
+            <div class="dcx-sidebar-card__field">
+              <label class="dcx-sidebar-card__label" for="input-fbt">{{ entry_fbt }} <span data-toggle="tooltip" title="{{ help_fbt }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+              <div class="dcx-picker"
+                   data-url="index.php?route=catalog/product/autocomplete&user_token={{ user_token }}"
+                   data-well="#product-fbt"
+                   data-input-name="product_fbt[]"
+                   data-placeholder="{{ entry_fbt }}"
+                   data-id-key="product_id"
+                   data-name-key="name"
+                   data-sub-key="model"
+                   data-min-chars="0"
+                   data-text-type-to-search="{{ text_picker_type_to_search }}"
+                   data-text-no-results="{{ text_picker_no_results }}"
+                   data-text-error="{{ text_picker_error }}">
+                <input type="text" class="dcx-picker__input form-control" placeholder="{{ entry_fbt }}" />
+              </div>
+              <div id="product-fbt" class="dcx-picker__well" style="height: 150px; overflow: auto;"> {% for product_fbt_item in product_fbt %}
+                  <div class="dcx-picker__well-item" data-id="{{ product_fbt_item.product_id }}"><i data-lucide="circle-minus" width="14" height="14" class="dcx-picker__well-remove"></i> <span class="dcx-picker__well-label">{{ product_fbt_item.name }}</span>
+                    <input type="hidden" name="product_fbt[]" value="{{ product_fbt_item.product_id }}"/>
+                  </div>
+                {% endfor %}</div>
+            </div>
             {% if product_downloads|length > 0 %}
             <div class="dcx-sidebar-card__field">
               <label class="dcx-sidebar-card__label" for="input-download"><span data-toggle="tooltip" title="{{ help_download }}">{{ entry_download }}</span></label>
