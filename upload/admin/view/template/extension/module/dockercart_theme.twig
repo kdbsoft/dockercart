@@ -373,6 +373,14 @@
                   </select>
                   <div class="help-block">{{ help_call_for_price_status }}</div>
                 </div>
+                <div class="dcx-field">
+                  <label class="dcx-label" for="input-sale-timer-status">{{ entry_sale_timer_status }}</label>
+                  <select name="dockercart_theme_sale_timer_status" id="input-sale-timer-status" class="form-control dc-theme-select-sm">
+                    <option value="1" {% if dockercart_theme_sale_timer_status == 1 %}selected="selected"{% endif %}>{{ text_enabled }}</option>
+                    <option value="0" {% if dockercart_theme_sale_timer_status == 0 %}selected="selected"{% endif %}>{{ text_disabled }}</option>
+                  </select>
+                  <div class="help-block">{{ help_sale_timer_status }}</div>
+                </div>
               </div>
             </div>
 

@@ -539,6 +539,20 @@ class ProductConfigurable {
 		return null;
 	}
 
+	public function getVariantSpecialEndDate($variant_id, $customer_group_id) {
+		$query = $this->db->query("SELECT date_end FROM " . DB_PREFIX . "dockercart_product_variant_special WHERE variant_id = '" . (int)$variant_id . "' AND customer_group_id = '" . (int)$customer_group_id . "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) ORDER BY priority ASC, price ASC LIMIT 1");
+
+		if ($query->num_rows) {
+			$date_end = (string)$query->row['date_end'];
+
+			if ($date_end !== '' && $date_end !== '0000-00-00' && $date_end !== '0000-00-00 00:00:00') {
+				return strtotime($date_end);
+			}
+		}
+
+		return null;
+	}
+
 	public function setVariantSpecials($variant_id, $specials) {
 		$this->db->query("DELETE FROM " . DB_PREFIX . "dockercart_product_variant_special WHERE variant_id = '" . (int)$variant_id . "'");
 
