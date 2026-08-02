@@ -6,7 +6,7 @@
       <div class="row">
         <div class="col-sm-12">
           <div class="pull-right">
-            <button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="confirm('{{ text_confirm }}') ? $('#form-upload').submit() : false;"><i data-lucide="trash-2" width="16" height="16"></i></button>
+            <button type="button" class="btn btn-danger dc-btn-selection" onclick="confirm('{{ text_confirm }}') ? $('#form-upload').submit() : false;"><i data-lucide="trash-2" width="16" height="16"></i> {{ button_delete }}</button>
           </div>
           <h1 class="page-header__title">{{ heading_title }}</h1>
         </div>

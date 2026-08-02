@@ -1929,3 +1929,9 @@ div.dcx-field.required > .dcx-label:before {
     font-size: 13px;
     line-height: 1.7;
 }
+
+/* Header buttons: hidden from first paint until selection exists / until enabled */
+.dc-btn-selection,
+.dc-btn-disabled {
+	display: none;
+}

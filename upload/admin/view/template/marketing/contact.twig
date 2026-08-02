@@ -5,8 +5,8 @@
       <div class="row">
         <div class="col-sm-12 col-lg-offset-2 col-lg-8 col-xl-offset-2 col-xl-8">
           <div class="pull-right">
-            <button type="button" id="button-send" data-loading-text="{{ text_loading }}" data-toggle="tooltip" title="{{ button_send }}" class="btn btn-primary btn--icon" onclick="send('index.php?route=marketing/contact/send&user_token={{ user_token }}');"><i data-lucide="send" width="16" height="16"></i></button>
-            <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default btn--icon"><i data-lucide="x" width="16" height="16"></i></a>
+            <button type="button" id="button-send" data-loading-text="{{ text_loading }}" class="btn btn-primary" onclick="send('index.php?route=marketing/contact/send&user_token={{ user_token }}');"><i data-lucide="send" width="16" height="16"></i> {{ button_send }}</button>
+            <a href="{{ cancel }}" class="btn btn-default"><i data-lucide="x" width="16" height="16"></i> {{ button_cancel }}</a>
           </div>
           <a href="{{ cancel }}" class="page-header__link">
             <span class="page-header__back">

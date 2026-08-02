@@ -137,6 +137,29 @@ $(document).ready(function() {
 	$(document).on('click', '[data-toggle=\'tooltip\']', function(e) {
 		$('body > .tooltip').remove();
 	});
+
+	// Show/hide selection-dependent header buttons (class 'dc-btn-selection')
+	function dcUpdateSelectionButtons() {
+		var checked = $('input[name^=\'selected\']:checked').length > 0;
+		$('.dc-btn-selection').toggle(checked);
+	}
+
+	$(document).on('change', 'input[name^=\'selected\']', function() {
+		dcUpdateSelectionButtons();
+	});
+
+	dcUpdateSelectionButtons();
+
+	// Show/hide buttons whose disabled state changes (class 'dc-btn-disabled')
+	function dcSyncDisabledButtons() {
+		$('.dc-btn-disabled').each(function() {
+			$(this).toggle(!$(this).prop('disabled'));
+		});
+	}
+
+	$(document).on('change', 'input, select, textarea', dcSyncDisabledButtons);
+	$(document).ajaxStop(dcSyncDisabledButtons);
+	dcSyncDisabledButtons();
 	
 	$('#button-menu').on('click', function(e) {
 		e.preventDefault();
