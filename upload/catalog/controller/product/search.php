@@ -197,13 +197,17 @@ class ControllerProductSearch extends Controller {
 
 			$data['text_products'] = product_count_label($data['product_total'], $this->language->get('code'));
 
-			// DockerCart Search (Manticore): "did you mean" spell correction when nothing was found.
+			// DockerCart Search (Manticore): "did you mean" spell correction and
+			// keyboard-layout correction when nothing was found.
 			// Only on the first page, for plain (non-tag) searches handled by Manticore.
 			$data['spell_suggestion'] = null;
 			$data['spell_correction'] = null;
+			$data['layout_suggestion'] = null;
+			$data['layout_correction'] = null;
 
 			$no_correct   = isset($this->request->get['nocorrect']) && $this->request->get['nocorrect'];
 			$suggest_from = isset($this->request->get['suggest_from']) ? html_entity_decode(trim((string)$this->request->get['suggest_from']), ENT_QUOTES, 'UTF-8') : '';
+			$layout_from  = isset($this->request->get['layout']) && $this->request->get['layout'];
 
 			// Google-style behavior: when the search yields no results but a likely
 			// typo correction exists, redirect to the corrected query immediately.
@@ -216,8 +220,25 @@ class ControllerProductSearch extends Controller {
 					'sub_category' => $sub_category
 				));
 
-				if ($suggestion !== null && mb_strtolower($suggestion['text'], 'UTF-8') !== mb_strtolower($search, 'UTF-8')) {
-					$suggest_url = 'search=' . urlencode(html_entity_decode($suggestion['text'], ENT_QUOTES, 'UTF-8'));
+				// If there is no reliable typo correction, try the keyboard-layout
+				// conversion ("ghbdtn" -> "привет") as a second chance.
+				$layout = null;
+
+				if ($suggestion === null || mb_strtolower($suggestion['text'], 'UTF-8') === mb_strtolower($search, 'UTF-8')) {
+					$layout = $this->model_extension_module_dockercart_search->getLayoutSuggestion($search, array(
+						'category_id'  => $category_id,
+						'sub_category' => $sub_category
+					));
+				}
+
+				$corrected = $suggestion;
+
+				if ($corrected === null || mb_strtolower($corrected['text'], 'UTF-8') === mb_strtolower($search, 'UTF-8')) {
+					$corrected = $layout;
+				}
+
+				if ($corrected !== null) {
+					$suggest_url = 'search=' . urlencode(html_entity_decode($corrected['text'], ENT_QUOTES, 'UTF-8'));
 
 					// Preserve context parameters (description, category, sorting, limit)
 					if (isset($this->request->get['description'])) {
@@ -246,6 +267,11 @@ class ControllerProductSearch extends Controller {
 
 					// Keep the original query so the customer can switch back to it
 					$suggest_url .= '&suggest_from=' . urlencode($search);
+
+					// Mark the correction as a keyboard-layout fix for the banner
+					if ($corrected === $layout) {
+						$suggest_url .= '&layout=1';
+					}
 
 					$this->response->redirect($this->url->link('product/search', $suggest_url));
 				}
@@ -276,14 +302,22 @@ class ControllerProductSearch extends Controller {
 					$original_url .= '&limit=' . $this->request->get['limit'];
 				}
 
-				$data['spell_correction'] = array(
-					'corrected'     => $search,
-					'original'      => $suggest_from,
-					'original_href' => $this->url->link('product/search', $original_url)
-				);
+				if ($layout_from) {
+					$data['layout_correction'] = array(
+						'corrected'     => $search,
+						'original'      => $suggest_from,
+						'original_href' => $this->url->link('product/search', $original_url)
+					);
+				} else {
+					$data['spell_correction'] = array(
+						'corrected'     => $search,
+						'original'      => $suggest_from,
+						'original_href' => $this->url->link('product/search', $original_url)
+					);
+				}
 			}
 
-			// "Did you mean" fallback on the original-query page (nocorrect=1)
+			// "Did you mean" / keyboard-layout fallback on the original-query page (nocorrect=1)
 			if ($manticore_total !== null && (int)$product_total === 0 && (int)$page === 1 && !isset($this->request->get['tag']) && $no_correct) {
 				$this->load->model('extension/module/dockercart_search');
 
@@ -307,6 +341,28 @@ class ControllerProductSearch extends Controller {
 						'text' => $suggestion['text'],
 						'href' => $this->url->link('product/search', $suggest_url)
 					);
+				} else {
+					$layout = $this->model_extension_module_dockercart_search->getLayoutSuggestion($search, array(
+						'category_id'  => $category_id,
+						'sub_category' => $sub_category
+					));
+
+					if ($layout !== null) {
+						$suggest_url = 'search=' . urlencode(html_entity_decode($layout['text'], ENT_QUOTES, 'UTF-8'));
+
+						if (isset($this->request->get['category_id'])) {
+							$suggest_url .= '&category_id=' . $this->request->get['category_id'];
+						}
+
+						if (isset($this->request->get['sub_category'])) {
+							$suggest_url .= '&sub_category=' . $this->request->get['sub_category'];
+						}
+
+						$data['layout_suggestion'] = array(
+							'text' => $layout['text'],
+							'href' => $this->url->link('product/search', $suggest_url)
+						);
+					}
 				}
 			}
 
