@@ -4,21 +4,29 @@ class ControllerCommonSearch extends Controller {
 		$this->load->language('common/search');
 		$this->load->model('catalog/category');
 
-		// Detect category context for scoped search
+		// Detect category context for scoped search:
+		// - on a category page (path in URL)
+		// - on a scoped search results page (category_id in URL)
 		$search_category_id   = 0;
 		$search_category_name = '';
+		$current_cat_id       = 0;
 
 		if (isset($this->request->get['route']) && $this->request->get['route'] === 'product/category' && !empty($this->request->get['path'])) {
 			$path_parts = array_values(array_filter(array_map('intval', explode('_', (string)$this->request->get['path']))));
 
 			if ($path_parts) {
 				$current_cat_id = (int)end($path_parts);
-				$cat_info = $this->model_catalog_category->getCategory($current_cat_id);
+			}
+		} elseif (isset($this->request->get['route']) && $this->request->get['route'] === 'product/search' && !empty($this->request->get['category_id'])) {
+			$current_cat_id = (int)$this->request->get['category_id'];
+		}
 
-				if ($cat_info) {
-					$search_category_id   = $current_cat_id;
-					$search_category_name = $cat_info['name'];
-				}
+		if ($current_cat_id > 0) {
+			$cat_info = $this->model_catalog_category->getCategory($current_cat_id);
+
+			if ($cat_info) {
+				$search_category_id   = $current_cat_id;
+				$search_category_name = $cat_info['name'];
 			}
 		}
 
