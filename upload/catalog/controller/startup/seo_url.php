@@ -985,6 +985,13 @@ class ControllerStartupSeoUrl extends Controller
 
         $route = $this->request->get["route"];
 
+        // Internal AJAX fragment endpoints must keep their query parameters
+        // (e.g. the product reviews tab fragment). Redirecting these to a
+        // generated SEO URL drops product_id and breaks the request.
+        if ($route === "product/product/review") {
+            return;
+        }
+
         // Don't redirect for admin/install
         if (strpos($route, "admin") === 0 || strpos($route, "install") === 0) {
             return;

@@ -15,3 +15,6 @@ $_['text_write']                 = 'Написати відгук';
 $_['text_verified']              = 'Покупка підтверджена';
 $_['text_pros']                  = 'Переваги';
 $_['text_cons']                  = 'Недоліки';
+
+// Section
+$_['text_reviews_section']   = 'Відгуки покупців';

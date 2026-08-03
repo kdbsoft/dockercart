@@ -32,6 +32,8 @@ class ReviewList {
 		$this->load->language('product/reviews');
 		$this->load->language('product/product');
 
+		$this->load->helper('plural');
+
 		$this->load->model('catalog/review');
 		$this->load->model('tool/image');
 
@@ -110,6 +112,8 @@ class ReviewList {
 
 			$reviews[] = array(
 				'author'        => $result['author'],
+				'author_initials' => $this->initials($result['author']),
+				'avatar_hue'    => abs(crc32($result['author'])) % 360,
 				'rating'        => $result['rating'],
 				'rating_value'  => ReviewRating::format($result['rating']),
 				'text'          => nl2br($this->clean($result['text'])),
@@ -148,6 +152,8 @@ class ReviewList {
 
 		return array(
 			'reviews'          => $reviews,
+			'total'            => $review_total,
+			'total_label'      => review_count_label($review_total, $this->language->get('code')),
 			'pagination'       => $pagination->render(),
 			'text_pagination'  => sprintf($this->language->get('text_pagination'), ($review_total) ? (($page - 1) * $limit) + 1 : 0, ((($page - 1) * $limit) > ($review_total - $limit)) ? $review_total : ((($page - 1) * $limit) + $limit), $review_total, ceil($review_total / $limit)),
 			'sort'             => $sort,
@@ -161,5 +167,24 @@ class ReviewList {
 	 */
 	private function clean(string $text): string {
 		return htmlspecialchars(trim($text), ENT_QUOTES, 'UTF-8');
+	}
+
+	/**
+	 * Initials for the author avatar circle.
+	 */
+	private function initials(string $name): string {
+		$parts = preg_split('/\s+/u', trim($name), -1, PREG_SPLIT_NO_EMPTY);
+
+		if (!$parts) {
+			return '?';
+		}
+
+		$initials = mb_substr($parts[0], 0, 1);
+
+		if (count($parts) > 1) {
+			$initials .= mb_substr($parts[count($parts) - 1], 0, 1);
+		}
+
+		return mb_strtoupper($initials);
 	}
 }

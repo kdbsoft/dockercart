@@ -37,7 +37,7 @@
           {% endif %}
         {% endfor %}
       </div>
-      {% if product.reviews is defined %}<span class="text-[10px] text-gray-400 ml-1">{{ product.reviews }} {{ text_reviews }}</span>{% endif %}
+      {% if product.reviews is defined %}<span class="text-[10px] text-gray-400 ml-1">{{ review_count_label(product.reviews|default(0)) }}</span>{% endif %}
     </div>
     {% endif %}
     {% if product.stock is defined and product.stock %}

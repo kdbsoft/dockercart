@@ -52,6 +52,13 @@ final class Twig {
 				$twig->addExtension(new \Twig\Extension\DebugExtension());
 			}
 
+			// review count with language-aware declension: "1 отзыв, 2 отзыва, 5 отзывов"
+			$twig->addFunction(new \Twig\TwigFunction('review_count_label', function ($count) {
+				require_once(DIR_SYSTEM . 'helper/plural.php');
+
+				return review_count_label((int)$count);
+			}));
+
 			return $twig->render($filename . '.twig', $this->data);
 		} catch (\Twig\Error\SyntaxError $e) {
 			// Syntax errors in template - most common issue

@@ -29,3 +29,21 @@ function product_count_label($count, $language_code) {
 
 	return $c . ' ' . ($c == 1 ? 'product' : 'products');
 }
+
+function review_count_label($count, $language_code = '') {
+	$c = (int)$count;
+
+	if ($language_code === '' && class_exists('Language')) {
+		$language_code = Language::$code;
+	}
+
+	if (strpos($language_code, 'ru') === 0) {
+		return $c . ' ' . plural_form($c, 'отзыв', 'отзыва', 'отзывов');
+	}
+
+	if (strpos($language_code, 'uk') === 0) {
+		return $c . ' ' . plural_form($c, 'відгук', 'відгуки', 'відгуків');
+	}
+
+	return $c . ' ' . ($c == 1 ? 'review' : 'reviews');
+}

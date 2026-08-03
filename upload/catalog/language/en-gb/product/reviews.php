@@ -15,3 +15,6 @@ $_['text_write']                 = 'Write a review';
 $_['text_verified']              = 'Verified purchase';
 $_['text_pros']                  = 'Pros';
 $_['text_cons']                  = 'Cons';
+
+// Section
+$_['text_reviews_section']   = 'Customer Reviews';

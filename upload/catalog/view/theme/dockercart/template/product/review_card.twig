@@ -1,17 +1,20 @@
-<div class="dc-review-card bg-white border rounded-xl p-4 mb-4 shadow-sm">
-  <div class="flex items-start justify-between gap-3 mb-2">
-    <div>
-      <div class="flex items-center gap-2">
+<article class="dc-review-card bg-white border border-gray-100 rounded-2xl p-5 mb-4 shadow-sm">
+  <div class="flex items-start gap-3">
+    <div class="dc-avatar flex-shrink-0" style="background: hsl({{ review.avatar_hue|default(210) }}, 65%, 45%);" aria-hidden="true">{{ review.author_initials|default('?') }}</div>
+    <div class="flex-1 min-w-0">
+      <div class="flex flex-wrap items-center gap-2">
         <strong class="text-sm text-gray-900">{{ review.author }}</strong>
         {% if review.verified %}
-          <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5" title="{{ text_verified }}">
-            <i data-lucide="badge-check" width="13" height="13"></i>{{ text_verified }}
-          </span>
+        <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5" title="{{ text_verified }}">
+          <i data-lucide="badge-check" width="13" height="13"></i>{{ text_verified }}
+        </span>
         {% endif %}
       </div>
-      <div class="text-xs text-gray-400 mt-0.5">{{ review.date_added }}</div>
+      <div class="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
+        <i data-lucide="calendar" width="12" height="12"></i>{{ review.date_added }}
+      </div>
     </div>
-    <div class="flex items-center gap-2 flex-shrink-0">
+    <div class="flex flex-col items-end flex-shrink-0">
       <div class="dc-stars" aria-hidden="true">
         {% for i in 1..5 %}
           {% set diff = review.rating - (i - 1) %}
@@ -24,49 +27,61 @@
           {% endif %}
         {% endfor %}
       </div>
-      <div class="text-sm font-semibold text-gray-700">{{ review.rating_value }}/5</div>
+      <div class="text-sm font-bold text-gray-800 mt-1.5 tabular-nums">{{ review.rating_value }}<span class="text-xs font-medium text-gray-400">/5</span></div>
     </div>
   </div>
 
   {% if review.criteria %}
-    <div class="flex flex-wrap gap-2 mb-3">
+    {% if review.criteria|filter(c => c.type == 'rating')|length > 0 %}
+    <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
       {% for item in review.criteria %}
         {% if item.type == 'rating' %}
-          <div class="inline-flex items-center gap-1.5 bg-gray-50 border border-gray-100 rounded-lg px-2.5 py-1.5">
-            <span class="text-xs text-gray-500">{{ item.name }}:</span>
-            <span class="dc-stars dc-stars-sm" aria-hidden="true">
-              {% for i in 1..5 %}
-                {% set diff = item.value - (i - 1) %}
-                {% if diff >= 1 %}
-                  <span class="dc-star active">★</span>
-                {% elseif diff >= 0.1 %}
-                  <span class="dc-star dc-star-partial" style="--pct: {{ (diff * 100) | round }}%">★</span>
-                {% else %}
-                  <span class="dc-star">★</span>
-                {% endif %}
-              {% endfor %}
-            </span>
+        <div>
+          <div class="flex items-center justify-between gap-3 mb-1">
+            <span class="text-xs text-gray-600">{{ item.name }}</span>
+            <span class="text-xs font-semibold text-gray-800 tabular-nums">{{ item.rating }}/5</span>
           </div>
+          <div class="dc-stars dc-stars-sm" aria-hidden="true">
+            {% for i in 1..5 %}
+              {% set diff = item.value - (i - 1) %}
+              {% if diff >= 1 %}
+                <span class="dc-star active">★</span>
+              {% elseif diff >= 0.1 %}
+                <span class="dc-star dc-star-partial" style="--pct: {{ (diff * 100) | round }}%">★</span>
+              {% else %}
+                <span class="dc-star">★</span>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
         {% endif %}
       {% endfor %}
     </div>
+    {% endif %}
   {% endif %}
 
-  {% if review.pros %}
-    <div class="mb-2">
-      <span class="text-xs font-bold text-emerald-600">{{ text_pros }}</span>
-      <div class="text-sm text-gray-700">{{ review.pros }}</div>
+  {% if review.pros or review.cons %}
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+    {% if review.pros %}
+    <div class="rounded-xl border border-emerald-100 bg-emerald-50/50 p-3">
+      <div class="flex items-center gap-1.5 text-xs font-bold text-emerald-600 mb-1">
+        <i data-lucide="thumbs-up" width="13" height="13"></i>{{ text_pros }}
+      </div>
+      <div class="text-sm text-gray-700 leading-relaxed">{{ review.pros }}</div>
     </div>
-  {% endif %}
-
-  {% if review.cons %}
-    <div class="mb-2">
-      <span class="text-xs font-bold text-red-500">{{ text_cons }}</span>
-      <div class="text-sm text-gray-700">{{ review.cons }}</div>
+    {% endif %}
+    {% if review.cons %}
+    <div class="rounded-xl border border-red-100 bg-red-50/50 p-3">
+      <div class="flex items-center gap-1.5 text-xs font-bold text-red-500 mb-1">
+        <i data-lucide="thumbs-down" width="13" height="13"></i>{{ text_cons }}
+      </div>
+      <div class="text-sm text-gray-700 leading-relaxed">{{ review.cons }}</div>
     </div>
+    {% endif %}
+  </div>
   {% endif %}
 
-  <div class="text-sm text-gray-700 leading-relaxed">{{ review.text }}</div>
+  <div class="text-sm text-gray-700 leading-relaxed mt-4">{{ review.text }}</div>
 
   {% if review.images %}
     <div class="dc-review-thumbs">
@@ -91,4 +106,4 @@
       {% endif %}
     </div>
   {% endif %}
-</div>
+</article>

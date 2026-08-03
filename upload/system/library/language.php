@@ -11,6 +11,15 @@
 * Language class
 */
 class Language {
+	/**
+	 * Locale code (e.g. 'ru-ua') of the last instantiated language.
+	 * Used by pluralization helpers that need the current language at
+	 * template render time.
+	 *
+	 * @var string
+	 */
+	public static $code = '';
+
 	private $default = 'en-gb';
 	private $directory;
 	public $data = array();
@@ -23,6 +32,10 @@ class Language {
  	*/
 	public function __construct($directory = '') {
 		$this->directory = $directory;
+
+		if ($directory) {
+			self::$code = $directory;
+		}
 	}
 	
 	/**
