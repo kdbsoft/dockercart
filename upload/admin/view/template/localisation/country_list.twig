@@ -47,27 +47,25 @@
               <td class="text-left">{% if sort == 'name' %}<a href="{{ sort_name }}" class="{{ order|lower }} sortable">{{ column_name }}</a>{% else %}<a href="{{ sort_name }}" class="sortable">{{ column_name }}</a>{% endif %}</td>
               <td class="text-left">{% if sort == 'iso_code_2' %}<a href="{{ sort_iso_code_2 }}" class="{{ order|lower }} sortable">{{ column_iso_code_2 }}</a>{% else %}<a href="{{ sort_iso_code_2 }}" class="sortable">{{ column_iso_code_2 }}</a>{% endif %}</td>
               <td class="text-left">{% if sort == 'iso_code_3' %}<a href="{{ sort_iso_code_3 }}" class="{{ order|lower }} sortable">{{ column_iso_code_3 }}</a>{% else %}<a href="{{ sort_iso_code_3 }}" class="sortable">{{ column_iso_code_3 }}</a>{% endif %}</td>
-              <td class="text-right"></td>
             </tr>
           </thead>
           <tbody>
             {% if countries %}
             {% for country in countries %}
-            <tr>
+            <tr data-href="{{ country.edit }}">
               <td class="text-center">{% if country.country_id in selected %}
                 <input type="checkbox" name="selected[]" value="{{ country.country_id }}" checked="checked" />
                 {% else %}
                 <input type="checkbox" name="selected[]" value="{{ country.country_id }}" />
                 {% endif %}</td>
-              <td class="text-left">{{ country.name }}</td>
+              <td class="text-left"><a href="{{ country.edit }}" class="row-title-link">{{ country.name }}</a></td>
               <td class="text-left">{{ country.iso_code_2 }}</td>
               <td class="text-left">{{ country.iso_code_3 }}</td>
-              <td class="text-right"><a href="{{ country.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a></td>
             </tr>
             {% endfor %}
             {% else %}
             <tr>
-              <td class="text-center" colspan="5">{{ text_no_results }}</td>
+              <td class="text-center" colspan="4">{{ text_no_results }}</td>
             </tr>
             {% endif %}
           </tbody>

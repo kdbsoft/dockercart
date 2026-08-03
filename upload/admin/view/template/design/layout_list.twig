@@ -32,25 +32,23 @@
             <tr>
               <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
               <td class="text-left">{% if sort == 'name' %}<a href="{{ sort_name }}" class="{{ order|lower }} sortable">{{ column_name }}</a>{% else %}<a href="{{ sort_name }}" class="sortable">{{ column_name }}</a>{% endif %}</td>
-              <td class="text-right"></td>
             </tr>
           </thead>
           <tbody>
             {% if layouts %}
             {% for layout in layouts %}
-            <tr>
+            <tr data-href="{{ layout.edit }}">
               <td class="text-center">{% if layout.layout_id in selected %}
                 <input type="checkbox" name="selected[]" value="{{ layout.layout_id }}" checked="checked" />
                 {% else %}
                 <input type="checkbox" name="selected[]" value="{{ layout.layout_id }}" />
                 {% endif %}</td>
-              <td class="text-left">{{ layout.name }}</td>
-              <td class="text-right"><a href="{{ layout.edit }}" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a> <a href="{{ layout.builder }}" title="{{ text_switch_to_builder }}" target="_blank" class="btn btn-info btn--icon"><i data-lucide="wand-sparkles" width="14" height="14"></i></a></td>
+              <td class="text-left"><a href="{{ layout.edit }}" class="row-title-link">{{ layout.name }}</a> <a href="{{ layout.builder }}" target="_blank" data-toggle="tooltip" title="{{ text_switch_to_builder }}" class="dc-row-icon"><i data-lucide="wand-sparkles" width="13" height="13"></i></a></td>
             </tr>
             {% endfor %}
             {% else %}
             <tr>
-              <td class="text-center" colspan="3">{{ text_no_results }}</td>
+              <td class="text-center" colspan="2">{{ text_no_results }}</td>
             </tr>
             {% endif %}
           </tbody>

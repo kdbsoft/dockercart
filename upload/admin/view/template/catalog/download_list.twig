@@ -35,13 +35,12 @@
                   <td class="text-left">{% if sort == 'dd.name' %}<a href="{{ sort_name }}" class="{{ order|lower }} sortable">{{ column_name }}</a>{% else %}<a href="{{ sort_name }}" class="sortable">{{ column_name }}</a>{% endif %}</td>
                   <td class="text-right">{% if sort == 'd.status' %}<a href="{{ sort_status }}" class="{{ order|lower }} sortable">{{ column_status }}</a>{% else %}<a href="{{ sort_status }}" class="sortable">{{ column_status }}</a>{% endif %}</td>
                   <td class="text-right">{% if sort == 'd.date_added' %}<a href="{{ sort_date_added }}" class="{{ order|lower }} sortable">{{ column_date_added }}</a>{% else %}<a href="{{ sort_date_added }}" class="sortable">{{ column_date_added }}</a>{% endif %}</td>
-                  <td class="text-right"></td>
                 </tr>
               </thead>
               <tbody>
                 {% if downloads %}
                 {% for download in downloads %}
-                <tr>
+                <tr data-href="{{ download.edit }}">
                   <td class="text-center">{% if download.download_id in selected %}
                     <input type="checkbox" name="selected[]" value="{{ download.download_id }}" checked="checked" />
                     {% else %}
@@ -52,12 +51,11 @@
                   </td>
                   <td class="text-right">{{ download.status ? text_enabled : text_disabled }}</td>
                   <td class="text-right">{{ download.date_added }}</td>
-                  <td class="text-right"><a href="{{ download.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a> <a href="{{ download.copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default btn--icon"><i data-lucide="copy" width="14" height="14"></i></a> <a href="{{ download.delete }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="return confirm('{{ text_confirm }}');"><i data-lucide="trash-2" width="14" height="14"></i></a></td>
                 </tr>
                 {% endfor %}
                 {% else %}
                 <tr>
-                  <td class="text-center" colspan="7">{{ text_no_results }}</td>
+                  <td class="text-center" colspan="4">{{ text_no_results }}</td>
                 </tr>
                 {% endif %}
               </tbody>
@@ -78,6 +76,11 @@ $('button[form=\'form-download\']').on('click', function(e) {
 });
 //--></script>
 <script type="text/javascript"><!--
+$(document).on('click', '.inline-edit', function(e) {
+	if ($(e.target).closest('.inline-edit-icon, input, select').length) return;
+	$(this).find('.inline-edit-icon').trigger('click');
+});
+
 $(document).on('click', '.inline-edit-icon', function(e) {
 	e.stopPropagation();
 
@@ -87,6 +90,7 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 	var rawValue = $span.data('value');
 	var downloadId = $span.data('download-id');
 
+	$span.addClass('editing');
 	$span.data('display', $span.html());
 
 	$.ajax({
@@ -94,8 +98,8 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 		dataType: 'json',
 		success: function(json) {
 			if (json['error']) {
-				$span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
-				setTimeout(function() { $span.html($span.data('display')); }, 3000);
+				$span.removeClass('editing'); $span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
+				setTimeout(function() { $span.removeClass('editing'); $span.html($span.data('display')); }, 3000);
 				return;
 			}
 
@@ -107,13 +111,17 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 				html += '<input type="text" class="form-control input-sm inline-edit-name-input" data-lang-id="' + lang.language_id + '" value="' + val.replace(/"/g, '&quot;') + '" style="width:200px;display:inline-block;">';
 				html += '</div>';
 			});
-			html += '<div style="margin-top:4px;"><button type="button" class="btn btn-primary btn-xs inline-edit-name-save">{{ button_save }}</button></div>';
+			html += '<div style="margin-top:4px;"><button type="button" class="btn btn-primary btn-xs inline-edit-name-save">{{ button_save }}</button> <button type="button" class="btn btn-default btn-xs inline-edit-name-cancel">{{ button_cancel }}</button></div>';
 			html += '</div>';
 
 			$span.html(html);
 			$span.find('input').first().focus();
 
 			var reverted = false;
+			$span.on('click', '.inline-edit-name-cancel', function() {
+				reverted = true;
+				$span.removeClass('editing'); $span.html($span.data('display'));
+			});
 
 			$span.on('click', '.inline-edit-name-save', function() {
 				var names = {};
@@ -133,12 +141,12 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 						} else {
 							reverted = true;
 							$span.data('value', res['value_html']);
-							$span.html(res['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+							$span.removeClass('editing'); $span.html(res['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
 							lucide.createIcons({ nodes: [$span[0]] });
 						}
 					},
 					error: function() {
-						$span.html($span.data('display'));
+						$span.removeClass('editing'); $span.html($span.data('display'));
 					}
 				});
 			});
@@ -146,18 +154,18 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 			$span.find('.inline-edit-name-input').on('keydown', function(e) {
 				if (e.which === 27) {
 					reverted = true;
-					$span.html($span.data('display'));
+					$span.removeClass('editing'); $span.html($span.data('display'));
 				}
 			});
 
 			$(document).one('click', function(e) {
 				if (!$(e.target).closest('.inline-edit-names').length && !reverted) {
-					$span.html($span.data('display'));
+					$span.removeClass('editing'); $span.html($span.data('display'));
 				}
 			});
 		},
 		error: function() {
-			$span.html($span.data('display'));
+			$span.removeClass('editing'); $span.html($span.data('display'));
 		}
 	});
 });

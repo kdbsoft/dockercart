@@ -56,13 +56,12 @@
                     <a href="{{ sort_sort_order }}" class="sortable">{{ column_sort_order }}</a>
                     {% endif %}</td>
                   <td class="text-left">{{ column_status }}</td>
-                  <td class="text-right"></td>
                 </tr>
               </thead>
               <tbody>
                 {% if categories %}
                 {% for category in categories %}
-                <tr class="category-row{% if category.level > 0 %} hidden-row{% endif %}" data-category-id="{{ category.category_id }}" data-parent-id="{{ category.parent_id }}" data-level="{{ category.level }}">
+                <tr class="category-row{% if category.level > 0 %} hidden-row{% endif %}" data-href="{{ category.edit }}" data-category-id="{{ category.category_id }}" data-parent-id="{{ category.parent_id }}" data-level="{{ category.level }}">
                   <td class="text-center">{% if category.category_id in selected %}
                     <input type="checkbox" name="selected[]" value="{{ category.category_id }}" checked="checked" />
                     {% else %}
@@ -97,12 +96,11 @@
                       <i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>
                     </span>
                   </td>
-                  <td class="text-right"><a href="{{ category.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a> <a href="{{ category.copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default btn--icon"><i data-lucide="copy" width="14" height="14"></i></a> <a href="{{ category.delete }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="return confirm('{{ text_confirm }}');"><i data-lucide="trash-2" width="14" height="14"></i></a></td>
                 </tr>
                 {% endfor %}
                 {% else %}
                 <tr>
-                  <td class="text-center" colspan="5">{{ text_no_results }}</td>
+                  <td class="text-center" colspan="4">{{ text_no_results }}</td>
                 </tr>
                 {% endif %}
               </tbody>
@@ -436,6 +434,11 @@ $(document).on('click', '.category-image-edit', function(e) {
 		}
 	});
 });
+$(document).on('click', '.inline-edit', function(e) {
+	if ($(e.target).closest('.inline-edit-icon, input, select').length) return;
+	$(this).find('.inline-edit-icon').trigger('click');
+});
+
 $(document).on('click', '.inline-edit-icon', function(e) {
 	e.stopPropagation();
 
@@ -446,6 +449,7 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 	var rawValue = $span.data('value');
 	var categoryId = $span.data('category-id');
 
+	$span.addClass('editing');
 	$span.data('display', $span.html());
 
 	if (field === 'name') {
@@ -454,8 +458,8 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 			dataType: 'json',
 			success: function(json) {
 				if (json['error']) {
-					$span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
-					setTimeout(function() { $span.html($span.data('display')); }, 3000);
+					$span.removeClass('editing'); $span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
+					setTimeout(function() { $span.removeClass('editing'); $span.html($span.data('display')); }, 3000);
 					return;
 				}
 
@@ -467,13 +471,17 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 					html += '<input type="text" class="form-control input-sm inline-edit-name-input" data-lang-id="' + lang.language_id + '" value="' + val.replace(/"/g, '&quot;') + '" style="width:200px;display:inline-block;">';
 					html += '</div>';
 				});
-				html += '<div style="margin-top:4px;"><button type="button" class="btn btn-primary btn-xs inline-edit-name-save">{{ button_save }}</button></div>';
+				html += '<div style="margin-top:4px;"><button type="button" class="btn btn-primary btn-xs inline-edit-name-save">{{ button_save }}</button> <button type="button" class="btn btn-default btn-xs inline-edit-name-cancel">{{ button_cancel }}</button></div>';
 				html += '</div>';
 
 				$span.html(html);
 				$span.find('input').first().focus();
 
 				var reverted = false;
+				$span.on('click', '.inline-edit-name-cancel', function() {
+					reverted = true;
+					$span.removeClass('editing'); $span.html($span.data('display'));
+				});
 
 				$span.on('click', '.inline-edit-name-save', function() {
 					var names = {};
@@ -493,12 +501,12 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 							} else {
 								reverted = true;
 								$span.data('value', res['value_html']);
-								$span.html(res['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+								$span.removeClass('editing'); $span.html(res['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
 								lucide.createIcons({ nodes: [$span[0]] });
 							}
 						},
 						error: function() {
-							$span.html($span.data('display'));
+							$span.removeClass('editing'); $span.html($span.data('display'));
 						}
 					});
 				});
@@ -506,18 +514,18 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 				$span.find('.inline-edit-name-input').on('keydown', function(e) {
 					if (e.which === 27) {
 						reverted = true;
-						$span.html($span.data('display'));
+						$span.removeClass('editing'); $span.html($span.data('display'));
 					}
 				});
 
 				$(document).one('click', function(e) {
 					if (!$(e.target).closest('.inline-edit-names').length && !reverted) {
-						$span.html($span.data('display'));
+						$span.removeClass('editing'); $span.html($span.data('display'));
 					}
 				});
 			},
 			error: function() {
-				$span.html($span.data('display'));
+				$span.removeClass('editing'); $span.html($span.data('display'));
 			}
 		});
 	} else if (field === 'status') {
@@ -539,22 +547,22 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 				data: { category_id: categoryId, field: field, value: newValue },
 				success: function(json) {
 					if (json['error']) {
-						$span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
-						setTimeout(function() { $span.html($span.data('display')); }, 3000);
+						$span.removeClass('editing'); $span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
+						setTimeout(function() { $span.removeClass('editing'); $span.html($span.data('display')); }, 3000);
 					} else {
 						$span.data('value', newValue);
-						$span.html(json['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+						$span.removeClass('editing'); $span.html(json['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
 						lucide.createIcons({ nodes: [$span[0]] });
 					}
 				},
 				error: function() {
-					$span.html($span.data('display'));
+					$span.removeClass('editing'); $span.html($span.data('display'));
 				}
 			});
 		});
 
 		$select.on('blur', function() {
-			if (!saved) $span.html($span.data('display'));
+			if (!saved) { $span.removeClass('editing'); $span.html($span.data('display')); }
 		});
 	} else {
 		var currentDisplay = $span.clone().children('.inline-edit-icon').remove().end().text().trim();
@@ -564,7 +572,7 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 		$input.focus().select();
 
 		function revert() {
-			$span.html($span.data('display'));
+			$span.removeClass('editing'); $span.html($span.data('display'));
 		}
 
 		function save() {
@@ -577,11 +585,11 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 				data: { category_id: categoryId, field: field, value: newValue },
 				success: function(json) {
 					if (json['error']) {
-						$span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
-						setTimeout(function() { $span.html($span.data('display')); }, 3000);
+						$span.removeClass('editing'); $span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
+						setTimeout(function() { $span.removeClass('editing'); $span.html($span.data('display')); }, 3000);
 					} else {
 						$span.data('value', newValue);
-						$span.html(json['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+						$span.removeClass('editing'); $span.html(json['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
 						lucide.createIcons({ nodes: [$span[0]] });
 					}
 				},

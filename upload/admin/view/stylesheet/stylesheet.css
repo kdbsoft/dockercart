@@ -448,6 +448,33 @@ textarea.form-control {
     margin: 4px 0;
 }
 
+.dropdown-menu > li > form {
+    margin: 0;
+}
+
+.dropdown-menu > li > form > .dc-dropdown-submit {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: var(--dc-gray-700);
+    border: none;
+    border-radius: var(--dc-radius-md);
+    background: transparent;
+    text-align: left;
+    transition: background 0.12s ease;
+}
+
+.dropdown-menu > li > form > .dc-dropdown-submit:hover {
+    background: var(--dc-gray-100);
+    color: var(--dc-text-dark);
+}
+
+.dropdown-menu > li > form > .dc-dropdown-submit svg {
+    vertical-align: middle;
+    margin-right: 2px;
+}
+
 .input-group {
     border-radius: var(--dc-radius-md);
     overflow: hidden;
@@ -603,13 +630,26 @@ fieldset[disabled] .btn {
     pointer-events: none;
 }
 
-.inline-edit { cursor: default; }
+.inline-edit { cursor: pointer; }
 .inline-edit .inline-edit-icon { margin-left: 4px; font-size: 13px; opacity: 0.3; cursor: pointer; }
+.inline-edit:hover { text-decoration: underline; }
 .inline-edit:hover .inline-edit-icon { opacity: 0.8; }
+.inline-edit.editing,
+.inline-edit.editing:hover { text-decoration: none; cursor: default; }
 .inline-edit-input { width: 80px; text-align: right; display: inline-block !important; height: 28px; padding: 3px 8px; }
 .inline-edit-input-left { width: 200px; text-align: left; display: inline-block !important; height: 28px; padding: 3px 8px; }
 .inline-edit-name-input { width: 200px; display: inline-block !important; height: 28px; padding: 3px 8px; }
 .inline-edit-error { margin-left: 4px; font-size: 11px; white-space: nowrap; }
+
+.dc-row-icon {
+    margin-left: 6px;
+    color: var(--dc-gray-500);
+    vertical-align: middle;
+}
+
+.dc-row-icon:hover {
+    color: var(--dc-primary);
+}
 
 .btn--icon {
     padding: 8px;
@@ -903,6 +943,22 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
     background-color: var(--dc-blue-50);
 }
 
+.table > tbody > tr[data-href] {
+    cursor: pointer;
+}
+
+.table > tbody > tr[data-href]:hover td:first-child {
+    box-shadow: inset 3px 0 0 var(--dc-primary);
+}
+
+.row-title-link {
+    font-weight: 500;
+}
+
+.row-title-link:hover {
+    text-decoration: underline;
+}
+
 .table a {
     color: var(--dc-gray-900);
     text-decoration: none;
@@ -910,6 +966,24 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
 
 .table a:hover {
     color: var(--dc-primary);
+}
+
+.table a.btn-primary,
+.table a.btn-primary:hover,
+.table a.btn-success,
+.table a.btn-success:hover,
+.table a.btn-danger,
+.table a.btn-danger:hover,
+.table a.btn-info,
+.table a.btn-info:hover,
+.table a.btn-warning,
+.table a.btn-warning:hover {
+    color: var(--dc-surface);
+}
+
+.table a.btn-default,
+.table a.btn-default:hover {
+    color: var(--dc-gray-700);
 }
 
 .table a.sortable:after {

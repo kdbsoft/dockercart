@@ -37,30 +37,28 @@
               <td class="text-left">{% if sort == 'gz.name' %}<a href="{{ sort_geo_zone }}" class="{{ order|lower }} sortable">{{ column_geo_zone }}</a>{% else %}<a href="{{ sort_geo_zone }}" class="sortable">{{ column_geo_zone }}</a>{% endif %}</td>
               <td class="text-left">{% if sort == 'tr.date_added' %}<a href="{{ sort_date_added }}" class="{{ order|lower }} sortable">{{ column_date_added }}</a>{% else %}<a href="{{ sort_date_added }}" class="sortable">{{ column_date_added }}</a>{% endif %}</td>
               <td class="text-left">{% if sort == 'tr.date_modified' %}<a href="{{ sort_date_modified }}" class="{{ order|lower }} sortable">{{ column_date_modified }}</a>{% else %}<a href="{{ sort_date_modified }}" class="sortable">{{ column_date_modified }}</a>{% endif %}</td>
-              <td class="text-right"></td>
             </tr>
           </thead>
           <tbody>
             {% if tax_rates %}
             {% for tax_rate in tax_rates %}
-            <tr>
+            <tr data-href="{{ tax_rate.edit }}">
               <td class="text-center">{% if tax_rate.tax_rate_id in selected %}
                 <input type="checkbox" name="selected[]" value="{{ tax_rate.tax_rate_id }}" checked="checked" />
                 {% else %}
                 <input type="checkbox" name="selected[]" value="{{ tax_rate.tax_rate_id }}" />
                 {% endif %}</td>
-              <td class="text-left">{{ tax_rate.name }}</td>
+              <td class="text-left"><a href="{{ tax_rate.edit }}" class="row-title-link">{{ tax_rate.name }}</a></td>
               <td class="text-right">{{ tax_rate.rate }}</td>
               <td class="text-left">{{ tax_rate.type }}</td>
               <td class="text-left">{{ tax_rate.geo_zone }}</td>
               <td class="text-left">{{ tax_rate.date_added }}</td>
               <td class="text-left">{{ tax_rate.date_modified }}</td>
-              <td class="text-right"><a href="{{ tax_rate.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a></td>
             </tr>
             {% endfor %}
             {% else %}
             <tr>
-              <td class="text-center" colspan="8">{{ text_no_results }}</td>
+              <td class="text-center" colspan="7">{{ text_no_results }}</td>
             </tr>
             {% endif %}
           </tbody>

@@ -36,28 +36,26 @@
               <td class="text-left">{% if sort == 'code' %}<a href="{{ sort_code }}" class="{{ order|lower }} sortable">{{ column_code }}</a>{% else %}<a href="{{ sort_code }}" class="sortable">{{ column_code }}</a>{% endif %}</td>
               <td class="text-right">{% if sort == 'value' %}<a href="{{ sort_value }}" class="{{ order|lower }} sortable">{{ column_value }}</a>{% else %}<a href="{{ sort_value }}" class="sortable">{{ column_value }}</a>{% endif %}</td>
               <td class="text-left">{% if sort == 'date_modified' %}<a href="{{ sort_date_modified }}" class="{{ order|lower }} sortable">{{ column_date_modified }}</a>{% else %}<a href="{{ sort_date_modified }}" class="sortable">{{ column_date_modified }}</a>{% endif %}</td>
-              <td class="text-right"></td>
             </tr>
           </thead>
           <tbody>
             {% if currencies %}
             {% for currency in currencies %}
-            <tr>
+            <tr data-href="{{ currency.edit }}">
               <td class="text-center">{% if currency.currency_id in selected %}
                 <input type="checkbox" name="selected[]" value="{{ currency.currency_id }}" checked="checked" />
                 {% else %}
                 <input type="checkbox" name="selected[]" value="{{ currency.currency_id }}" />
                 {% endif %}</td>
-              <td class="text-left">{{ currency.title }}</td>
+              <td class="text-left"><a href="{{ currency.edit }}" class="row-title-link">{{ currency.title }}</a></td>
               <td class="text-left">{{ currency.code }}</td>
               <td class="text-right">{{ currency.value }}</td>
               <td class="text-left">{{ currency.date_modified }}</td>
-              <td class="text-right"><a href="{{ currency.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a></td>
             </tr>
             {% endfor %}
             {% else %}
             <tr>
-              <td class="text-center" colspan="6">{{ text_no_results }}</td>
+              <td class="text-center" colspan="5">{{ text_no_results }}</td>
             </tr>
             {% endif %}
           </tbody>

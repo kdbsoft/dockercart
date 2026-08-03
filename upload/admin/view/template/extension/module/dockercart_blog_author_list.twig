@@ -35,13 +35,12 @@
                   <td class="text-left">{{ column_name }}</td>
                   <td class="text-left">{{ column_email }}</td>
                   <td class="text-left">{{ column_status }}</td>
-                  <td class="text-right"></td>
                 </tr>
               </thead>
               <tbody>
                 {% if authors %}
                 {% for author in authors %}
-                <tr>
+                <tr data-href="{{ author.edit }}">
                   <td class="text-center">
                     {% if author.selected %}
                     <input type="checkbox" name="selected[]" value="{{ author.author_id }}" checked="checked" />
@@ -49,7 +48,7 @@
                     <input type="checkbox" name="selected[]" value="{{ author.author_id }}" />
                     {% endif %}
                   </td>
-                  <td class="text-left">{{ author.name }}</td>
+                  <td class="text-left"><a href="{{ author.edit }}" class="row-title-link">{{ author.name }}</a></td>
                   <td class="text-left">{{ author.email }}</td>
                   <td class="text-left">
                     <span class="inline-edit" data-author-id="{{ author.author_id }}" data-field="status" data-value="{{ author.status_raw }}">
@@ -61,14 +60,11 @@
                       <i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>
                     </span>
                   </td>
-                  <td class="text-right">
-                    <a href="{{ author.edit }}" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a> <a href="{{ author.copy }}" title="{{ button_copy }}" class="btn btn-default btn--icon"><i data-lucide="copy" width="14" height="14"></i></a> <a href="{{ author.delete }}" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="return confirm('{{ text_confirm }}');"><i data-lucide="trash-2" width="14" height="14"></i></a>
-                  </td>
                 </tr>
                 {% endfor %}
                 {% else %}
                 <tr>
-                  <td class="text-center" colspan="5">{{ text_no_results }}</td>
+                  <td class="text-center" colspan="4">{{ text_no_results }}</td>
                 </tr>
                 {% endif %}
               </tbody>
@@ -89,6 +85,11 @@ $('button[form=\'form-author\']').on('click', function(e) {
 });
 //--></script>
 <script type="text/javascript"><!--
+$(document).on('click', '.inline-edit', function(e) {
+	if ($(e.target).closest('.inline-edit-icon, input, select').length) return;
+	$(this).find('.inline-edit-icon').trigger('click');
+});
+
 $(document).on('click', '.inline-edit-icon', function(e) {
 	e.stopPropagation();
 
@@ -99,6 +100,7 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 	var rawValue = $span.data('value');
 	var authorId = $span.data('author-id');
 
+	$span.addClass('editing');
 	$span.data('display', $span.html());
 
 	if (field === 'status') {
@@ -120,22 +122,22 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 				dataType: 'json',
 				success: function(json) {
 					if (json['error']) {
-						$span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
-						setTimeout(function() { $span.html($span.data('display')); }, 3000);
+						$span.removeClass('editing'); $span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
+						setTimeout(function() { $span.removeClass('editing'); $span.html($span.data('display')); }, 3000);
 					} else {
 						$span.data('value', newValue);
-						$span.html(json['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+						$span.removeClass('editing'); $span.html(json['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
 						lucide.createIcons({ nodes: [$span[0]] });
 					}
 				},
 				error: function() {
-					$span.html($span.data('display'));
+					$span.removeClass('editing'); $span.html($span.data('display'));
 				}
 			});
 		});
 
 		$select.on('blur', function() {
-			if (!saved) $span.html($span.data('display'));
+			if (!saved) { $span.removeClass('editing'); $span.html($span.data('display')); }
 		});
 	}
 });

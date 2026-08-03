@@ -5,10 +5,10 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col-sm-12">
+          <h1 class="page-header__title">{{ heading_title }}</h1>
           <div class="pull-right">
             <button type="button" class="btn btn-danger dc-btn-selection" onclick="confirm('{{ text_confirm }}') ? $('#form-event').submit() : false;"><i data-lucide="trash-2" width="16" height="16"></i> {{ button_delete }}</button>
           </div>
-          <h1 class="page-header__title">{{ heading_title }}</h1>
         </div>
       </div>
     </div>
@@ -49,8 +49,7 @@
             <td class="text-left">{{ event.code }}</td>
             <td class="text-left">{{ event.status }}</td>
             <td class="text-right">{{ event.sort_order }}</td>
-            <td class="text-right"><button type="button" data-toggle="modal" data-target="#modal-event{{ event.event_id }}" class="btn btn-info btn--icon"><i data-lucide="info" width="14" height="14"></i></button>
-              {% if not event.enabled %}<a href="{{ event.enable }}" data-toggle="tooltip" title="{{ button_enable }}" class="btn btn-success btn--icon"><i data-lucide="circle-plus" width="14" height="14"></i></a>{% else %}<a href="{{ event.disable }}" data-toggle="tooltip" title="{{ button_disable }}" class="btn btn-danger btn--icon"><i data-lucide="circle-minus" width="14" height="14"></i></a>{% endif %}
+            <td class="text-right" style="white-space:nowrap;">{% if not event.enabled %}<a href="{{ event.enable }}" class="btn btn-success"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_enable }}</a>{% else %}<a href="{{ event.disable }}" class="btn btn-danger"><i data-lucide="circle-minus" width="14" height="14"></i> {{ button_disable }}</a>{% endif %} <div class="btn-group"><button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><i data-lucide="more-vertical" width="16" height="16"></i></button><ul class="dropdown-menu dropdown-menu-right"><li><a href="#" data-toggle="modal" data-target="#modal-event{{ event.event_id }}"><i data-lucide="info" width="14" height="14"></i> {{ text_info }}</a></li></ul></div>
               <div id="modal-event{{ event.event_id }}" class="modal text-left">
                 <div class="modal-dialog">
                   <div class="modal-content">

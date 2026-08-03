@@ -13,7 +13,7 @@
     </div>
   </div>
   <div class="dc-history-item__action">
-    <button type="button" value="{{ history.extension_install_id }}" data-loading="{{ text_loading }}" data-toggle="tooltip" title="{{ button_uninstall }}" class="btn btn-danger btn--icon"><i data-lucide="trash-2" width="14" height="14"></i></button>
+    <button type="button" value="{{ history.extension_install_id }}" data-loading="{{ text_loading }}" class="btn btn-danger"><i data-lucide="trash-2" width="14" height="14"></i> {{ button_uninstall }}</button>
   </div>
 </div>
 {% endfor %}

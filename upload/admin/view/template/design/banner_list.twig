@@ -33,17 +33,16 @@
               <td style="width:1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
               <td class="text-left">{% if sort == 'name' %}<a href="{{ sort_name }}" class="{{ order|lower }} sortable">{{ column_name }}</a>{% else %}<a href="{{ sort_name }}" class="sortable">{{ column_name }}</a>{% endif %}</td>
               <td class="text-left">{% if sort == 'status' %}<a href="{{ sort_status }}" class="{{ order|lower }} sortable">{{ column_status }}</a>{% else %}<a href="{{ sort_status }}" class="sortable">{{ column_status }}</a>{% endif %}</td>
-              <td class="text-right"></td>
             </tr>
           </thead>
           <tbody>
             {% if banners %}
             {% for banner in banners %}
-            <tr>
+            <tr data-href="{{ banner.edit }}">
               <td class="text-center">
                 <input type="checkbox" name="selected[]" value="{{ banner.banner_id }}" {% if banner.banner_id in selected %}checked="checked"{% endif %} />
               </td>
-              <td class="text-left">{{ banner.name }}</td>
+              <td class="text-left"><a href="{{ banner.edit }}" class="row-title-link">{{ banner.name }}</a></td>
               <td class="text-left">
                 <span class="inline-edit" data-banner-id="{{ banner.banner_id }}" data-field="status" data-value="{{ banner.status_raw }}">
                   {% if banner.status_raw %}
@@ -54,12 +53,11 @@
                   <i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>
                 </span>
               </td>
-              <td class="text-right"><a href="{{ banner.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a></td>
             </tr>
             {% endfor %}
             {% else %}
             <tr>
-              <td class="text-center" colspan="4">{{ text_no_results }}</td>
+              <td class="text-center" colspan="3">{{ text_no_results }}</td>
             </tr>
             {% endif %}
           </tbody>
@@ -75,14 +73,20 @@
   </div>
 </div>
 <script type="text/javascript"><!--
+$(document).on('click', '.inline-edit', function(e) {
+	if ($(e.target).closest('.inline-edit-icon, input, select').length) return;
+	$(this).find('.inline-edit-icon').trigger('click');
+});
+
 $(document).on('click', '.inline-edit-icon', function(e) {
-  e.stopPropagation();
+	e.stopPropagation();
   var $span = $(this).closest('.inline-edit');
   if ($span.find('select').length) return;
 
   var bannerId = $span.data('banner-id');
   var currentValue = $span.data('value');
 
+  $span.addClass('editing');
   $span.data('display', $span.html());
 
   var $select = $('<select class="form-control input-sm" style="width:auto;display:inline-block;">');
@@ -105,23 +109,23 @@ $(document).on('click', '.inline-edit-icon', function(e) {
       data: { banner_id: bannerId, field: 'status', value: newValue },
       success: function(json) {
         if (json['error']) {
-          $span.html($span.data('display'));
+          $span.removeClass('editing'); $span.html($span.data('display'));
         }
         if (json['success']) {
           $span.data('value', newValue);
-          $span.html(json['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+          $span.removeClass('editing'); $span.html(json['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
           lucide.createIcons({ nodes: [$span[0]] });
         }
       },
       error: function() {
-        $span.html($span.data('display'));
+        $span.removeClass('editing'); $span.html($span.data('display'));
       }
     });
   });
 
   $select.on('blur', function() {
     if (!saved) {
-      $span.html($span.data('display'));
+      $span.removeClass('editing'); $span.html($span.data('display'));
     }
   });
 });

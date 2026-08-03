@@ -274,3 +274,36 @@ $(document).ready(function() {
 			
 	});
 });
+
+// Whole-row navigation for list tables
+var inlineEditOpen = false;
+
+$(document).on('mousedown', 'tr[data-href]', function(e) {
+	if ($(e.target).closest('a, button, input, select, textarea, .inline-edit-icon, .inline-edit-input, .inline-edit-name-input, .inline-edit-name-save, .inline-edit-names, .inline-edit').length) {
+		return;
+	}
+
+	inlineEditOpen = $('.inline-edit.editing').length > 0;
+});
+
+$(document).on('click', 'tr[data-href]', function(e) {
+	// An inline-edit handler may have replaced the clicked element's cell
+	// (e.g. when opening an editor), which detaches e.target — in that case
+	// the click belongs to the editor interaction, not to row navigation
+	if (!e.target.isConnected) {
+		return;
+	}
+
+	if ($(e.target).closest('a, button, input, select, textarea, .inline-edit-icon, .inline-edit-input, .inline-edit-name-input, .inline-edit-name-save, .inline-edit-names, .inline-edit').length) {
+		return;
+	}
+
+	// If an inline editor was open on mousedown, this click only closes it;
+	// the next click navigates
+	if (inlineEditOpen) {
+		inlineEditOpen = false;
+		return;
+	}
+
+	window.location = $(this).data('href');
+});

@@ -3,7 +3,7 @@
   <div class="container-fluid">
     <div class="page-header">
       <div class="row">
-        <div class="col-sm-12 col-lg-7 col-xl-offset-1 col-xl-7">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
           <a href="{{ cancel }}" class="page-header__link">
             <span class="page-header__back"><i data-lucide="arrow-left" width="20" height="20"></i></span>
             <span class="page-header__title">
@@ -13,8 +13,6 @@
               </span>
             </span>
           </a>
-        </div>
-        <div class="col-sm-12 col-lg-5 col-xl-3">
           <div class="pull-right">
             <button type="submit" form="form-dockercart-sitemap" class="btn btn-primary"><i data-lucide="save" width="16" height="16"></i> {{ button_save }}</button>
             <button id="button-generate" type="button" class="btn btn-success"><i data-lucide="refresh-cw" width="16" height="16"></i> {{ button_generate }}</button>
@@ -24,7 +22,7 @@
       </div>
       {% if error_warning %}
       <div class="row">
-        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-7">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
           <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
@@ -33,7 +31,7 @@
       {% endif %}
       {% if success %}
       <div class="row">
-        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-7">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
           <div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> {{ success }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>

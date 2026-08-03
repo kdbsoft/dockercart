@@ -68,27 +68,20 @@
                       <td class="text-right" style="width: 1px;">#</td>
                       <td class="text-left">{{ column_source }}</td>
                       <td class="text-left">{{ column_target }}</td>
-                      <td class="text-right">{{ column_action }}</td>
                     </tr>
                   </thead>
                   <tbody>
                     {% if mappings %}
                     {% for mapping in mappings %}
-                    <tr>
+                    <tr data-href="{{ mapping.edit }}">
                       <td class="text-right">{{ loop.index + ((page - 1) * 20) }}</td>
-                      <td class="text-left"><code>{{ mapping.source }}</code></td>
+                      <td class="text-left"><a href="{{ mapping.edit }}" class="row-title-link"><code>{{ mapping.source }}</code></a></td>
                       <td class="text-left">{{ mapping.target }}</td>
-                      <td class="text-right">
-                        <a href="{{ mapping.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a>
-                        <form action="{{ mapping.delete }}" method="post" style="display: inline-block;" onsubmit="return confirm('{{ text_confirm_delete }}');">
-                          <button type="submit" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn--icon"><i data-lucide="trash-2" width="14" height="14"></i></button>
-                        </form>
-                      </td>
                     </tr>
                     {% endfor %}
                     {% else %}
                     <tr>
-                      <td class="text-center" colspan="4">{{ text_no_results }}</td>
+                      <td class="text-center" colspan="3">{{ text_no_results }}</td>
                     </tr>
                     {% endif %}
                   </tbody>
