@@ -69,3 +69,7 @@ $_['error_author']      = 'Author must be between 3 and 64 characters!';
 $_['error_text']        = 'Review Text must be at least 1 character!';
 $_['error_rating']      = 'Review rating required!';
 $_['error_invalid_date'] = 'Invalid date format!';
+// Expandable rows
+$_['text_expand']         = 'Expand';
+$_['text_loading']        = 'Loading...';
+$_['text_loading_error'] = 'Failed to load';

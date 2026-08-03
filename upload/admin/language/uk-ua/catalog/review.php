@@ -55,3 +55,8 @@ $_['text_edit_review_subtitle'] = 'Редагувати статус та дет
 $_['text_review_card'] = 'Деталі';
 
 
+
+// Expandable rows
+$_['text_expand']         = 'Розгорнути';
+$_['text_loading']        = 'Завантаження...';
+$_['text_loading_error'] = 'Не вдалося завантажити';

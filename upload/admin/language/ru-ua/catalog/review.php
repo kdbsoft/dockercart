@@ -55,3 +55,8 @@ $_['text_edit_review_subtitle'] = 'Редактировать статус и д
 $_['text_review_card'] = 'Детали';
 
 
+
+// Expandable rows
+$_['text_expand']         = 'Развернуть';
+$_['text_loading']        = 'Загрузка...';
+$_['text_loading_error'] = 'Не удалось загрузить';

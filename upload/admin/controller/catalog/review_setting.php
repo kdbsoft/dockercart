@@ -11,7 +11,7 @@ class ControllerCatalogReviewSetting extends Controller {
 		$this->load->model('catalog/review_criteria');
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
-			$this->model_setting_setting->editSetting('config', $this->request->post);
+			$this->model_setting_setting->updateSetting('config', $this->request->post);
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
@@ -304,6 +304,8 @@ class ControllerCatalogReviewSetting extends Controller {
 		$data['cancel'] = $this->url->link('catalog/review_setting', 'user_token=' . $this->session->data['user_token'], true);
 
 		$data['user_token'] = $this->session->data['user_token'];
+
+		$data['admin_language_id'] = (int)$this->config->get('config_language_id');
 
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');

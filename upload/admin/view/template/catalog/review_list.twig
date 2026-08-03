@@ -72,6 +72,7 @@
               <thead>
                 <tr>
                   <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
+                  <td style="width: 1px;"></td>
                   <td class="text-left">{% if sort == 'pd.name' %}<a href="{{ sort_product }}" class="{{ order|lower }} sortable">{{ column_product }}</a>{% else %}<a href="{{ sort_product }}" class="sortable">{{ column_product }}</a>{% endif %}</td>
                   <td class="text-left">{% if sort == 'r.author' %}<a href="{{ sort_author }}" class="{{ order|lower }} sortable">{{ column_author }}</a>{% else %}<a href="{{ sort_author }}" class="sortable">{{ column_author }}</a>{% endif %}</td>
                   <td class="text-right">{% if sort == 'r.rating' %}<a href="{{ sort_rating }}" class="{{ order|lower }} sortable">{{ column_rating }}</a>{% else %}<a href="{{ sort_rating }}" class="sortable">{{ column_rating }}</a>{% endif %}</td>
@@ -85,12 +86,15 @@
               <tbody>
               {% if reviews %}
               {% for review in reviews %}
-              <tr>
+              <tr class="review-row" data-review-id="{{ review.review_id }}">
                 <td class="text-center">{% if review.review_id in selected %}
                   <input type="checkbox" name="selected[]" value="{{ review.review_id }}" checked="checked" />
                   {% else %}
                   <input type="checkbox" name="selected[]" value="{{ review.review_id }}" />
                   {% endif %}</td>
+                <td class="text-center">
+                  <button type="button" class="btn btn-default btn--icon btn-expand-review" data-review-id="{{ review.review_id }}" title="{{ text_expand }}"><i data-lucide="chevron-down" width="14" height="14"></i></button>
+                </td>
                 <td class="text-left">{{ review.name }}</td>
                 <td class="text-left">
                   <span class="inline-edit" data-review-id="{{ review.review_id }}" data-field="author" data-value="{{ review.author_raw }}">{{ review.author }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
@@ -110,10 +114,18 @@
                 </td>
                 <td class="text-right"><a href="{{ review.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a> <a href="{{ review.copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default btn--icon"><i data-lucide="copy" width="14" height="14"></i></a> <a href="{{ review.delete }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn--icon" onclick="return confirm('{{ text_confirm }}');"><i data-lucide="trash-2" width="14" height="14"></i></a></td>
               </tr>
+              <tr class="review-expand-row hidden" data-review-id="{{ review.review_id }}">
+                <td class="text-center"></td>
+                <td colspan="9">
+                  <div class="review-expand-content">
+                    <div class="review-expand-loading text-muted"><i data-lucide="loader" width="14" height="14" class="dc-spin"></i> {{ text_loading }}</div>
+                  </div>
+                </td>
+              </tr>
               {% endfor %}
               {% else %}
               <tr>
-                <td class="text-center" colspan="7">{{ text_no_results }}</td>
+                <td class="text-center" colspan="10">{{ text_no_results }}</td>
               </tr>
               {% endif %}
               </tbody>
@@ -168,6 +180,78 @@ $('.date').datetimepicker({
 <script type="text/javascript"><!--
 $('button[form=\'form-review\']').on('click', function(e) {
 	$('#form-review').attr('action', $(this).attr('formaction'));
+});
+//--></script>
+<script type="text/javascript"><!--
+$(document).on('click', '.btn-expand-review', function() {
+	var reviewId = $(this).data('review-id');
+	var $button = $(this);
+	var $icon = $button.find('i');
+	var $row = $('.review-row[data-review-id="' + reviewId + '"]');
+	var $expandRow = $('.review-expand-row[data-review-id="' + reviewId + '"]');
+
+	if ($expandRow.hasClass('hidden')) {
+		var $content = $expandRow.find('.review-expand-content');
+
+		if (!$content.data('loaded')) {
+			$.ajax({
+				url: 'index.php?route=catalog/review/info&user_token={{ user_token }}&review_id=' + reviewId,
+				dataType: 'json',
+				success: function(json) {
+					if (json['error']) {
+						$content.html('<div class="text-danger">' + json['error'] + '</div>');
+						return;
+					}
+
+					var html = '';
+
+					if (json['text']) {
+						html += '<div class="review-expand-text">' + json['text'] + '</div>';
+					}
+
+					if (json['criteria'] && json['criteria'].length) {
+						html += '<div class="review-expand-criteria">';
+						$.each(json['criteria'], function(i, item) {
+							html += '<span class="label label-default">' + $('<div>').text(item['name']).html() + ': ' + $('<div>').text(item['value']).html() + '</span> ';
+						});
+						html += '</div>';
+					}
+
+					if (json['images'] && json['images'].length) {
+						html += '<div class="review-expand-images">';
+						$.each(json['images'], function(i, image) {
+							html += '<a href="' + image['popup'] + '" target="_blank"><img src="' + image['thumb'] + '" /></a>';
+						});
+						html += '</div>';
+					}
+
+					if (json['video']) {
+						html += '<div class="review-expand-video text-muted"><i data-lucide="video" width="14" height="14"></i> ' + $('<div>').text(json['video']).html() + '</div>';
+					}
+
+					if (!html) {
+						html = '<div class="text-muted">—</div>';
+					}
+
+					$content.html(html).data('loaded', true);
+					lucide.createIcons({ nodes: [$content[0]] });
+				},
+				error: function() {
+					$content.html('<div class="text-danger">{{ text_loading_error }}</div>');
+				}
+			});
+		}
+
+		$expandRow.removeClass('hidden');
+		$row.addClass('review-row--expanded');
+		$icon.attr('data-lucide', 'chevron-up');
+		lucide.createIcons({ nodes: [$icon[0]] });
+	} else {
+		$expandRow.addClass('hidden');
+		$row.removeClass('review-row--expanded');
+		$icon.attr('data-lucide', 'chevron-down');
+		lucide.createIcons({ nodes: [$icon[0]] });
+	}
 });
 //--></script>
 <script type="text/javascript"><!--
