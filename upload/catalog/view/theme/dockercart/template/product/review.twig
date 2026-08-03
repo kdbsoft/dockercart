@@ -1,5 +1,10 @@
-<div class="mb-4">
-  <div class="flex items-center gap-2 text-sm">
+<div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+  {% if total is defined and total > 0 %}
+  <span class="text-sm font-semibold text-gray-800">{{ total_label|default(total ~ ' ' ~ text_reviews_word|default('reviews')) }}</span>
+  {% else %}
+  <span></span>
+  {% endif %}
+  <div class="flex flex-wrap items-center gap-2 text-sm">
     <span class="text-gray-400">{{ text_sort }}</span>
     {% for option in sort_urls %}
       <a href="{{ option.href }}" class="px-3 py-1 rounded-full border text-xs font-medium transition {% if option.active %}border-blue-300 text-blue-600 bg-blue-50{% else %}border-gray-200 text-gray-500 hover:border-blue-300 hover:text-blue-600{% endif %}">{{ option.label }}</a>
@@ -17,5 +22,8 @@
     {% if pagination %}<div class="pagination-wrap">{{ pagination }}</div>{% endif %}
   </div>
 {% else %}
-  <p class="text-sm text-gray-500 py-4">{{ text_no_reviews }}</p>
+  <div class="dc-review-empty text-center py-12">
+    <i data-lucide="message-square-off" width="40" height="40" class="mx-auto mb-3 text-gray-200" aria-hidden="true"></i>
+    <p class="text-sm text-gray-500">{{ text_no_reviews }}</p>
+  </div>
 {% endif %}

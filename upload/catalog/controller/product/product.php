@@ -1017,7 +1017,9 @@ class ControllerProductProduct extends Controller {
 				$data['customer_name'] = '';
 			}
 
-			$data['reviews'] = sprintf($this->language->get('text_reviews'), (int)$product_info['reviews']);
+			$this->load->helper('plural');
+
+			$data['reviews'] = review_count_label((int)$product_info['reviews'], $this->language->get('code'));
 
 			// Aggregate rating summary (fractional, from the rating cache)
 			$review_summary = $this->model_catalog_review->getProductRatingSummary($product_id);
@@ -1743,6 +1745,8 @@ class ControllerProductProduct extends Controller {
 		$data['sort'] = $fragment['sort'];
 		$data['sort_urls'] = $fragment['sort_urls'];
 		$data['text_no_reviews'] = $fragment['text_no_reviews'];
+		$data['total'] = $fragment['total'];
+		$data['total_label'] = $fragment['total_label'];
 
 		$this->response->setOutput($this->load->view('product/review', $data));
 	}
