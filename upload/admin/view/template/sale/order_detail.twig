@@ -3,7 +3,7 @@
   <div class="page-header">
     <div class="container-fluid">
       <div class="row">
-        <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-9">
           <a href="{{ cancel }}" class="page-header__link">
             <span class="page-header__back"><i data-lucide="arrow-left" width="20" height="20"></i></span>
             <span class="page-header__title">
@@ -52,7 +52,7 @@
   {% if flow_enabled %}
   <div class="container-fluid" style="margin-bottom:12px">
     <div class="row">
-      <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
+      <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-9">
         {% include 'sale/order_flow_stages.twig' %}
       </div>
     </div>
@@ -61,7 +61,7 @@
 
   <div class="container-fluid">
     <div class="row">
-      <div class="col-md-12 col-sm-12 col-lg-offset-1 col-lg-7 col-xl-offset-1 col-xl-7">
+      <div class="col-md-12 col-sm-12 col-lg-8 col-xl-offset-1 col-xl-6">
 
         {% if success %}
         <div class="alert alert-success alert-dismissible" style="margin-bottom:12px">
@@ -664,7 +664,7 @@ body.dcx-global-editing .dcx-sidebar-edit-link { display:none !important; }
 .timeline-note-form { margin-top:10px; border-top:1px solid #eee; padding-top:10px; }
 .timeline-note-form .tl-tabs { border-bottom:none; margin-bottom:0; }
 .timeline-note-form .tl-tabs > li { margin-bottom:0; }
-.timeline-note-form .tl-tabs > li > a { padding:6px 10px; font-size:12px; white-space:nowrap; }
+.timeline-note-form .tl-tabs > li > a { padding:4px 10px; font-size:11px; white-space:nowrap; }
 .timeline-note-form .tl-tabs > li.active > a { font-weight:600; }
 .order-product-card__pos { width:26px; flex-shrink:0; text-align:center; font-size:12px; font-weight:600; color:#9ca3af; font-variant-numeric:tabular-nums; }
 .dcx-shipment-item__pos, .dcx-shipment-progress__pos, .dcx-shipment-item-row__pos { font-weight:600; color:#9ca3af; font-size:11px; }
@@ -1123,7 +1123,7 @@ function revertAllInputs() {
 function showAlert(msg, type) {
 	const c = document.querySelector('#content > .container-fluid');
 	c.insertAdjacentHTML('afterbegin',
-		'<div class="row"><div class="col-sm-12 col-lg-offset-1 col-lg-10 col-xl-offset-1 col-xl-10"><div class="alert alert-' + (type || 'success') + ' alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> ' +
+		'<div class="row"><div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-9"><div class="alert alert-' + (type || 'success') + ' alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> ' +
 		msg + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div></div></div>');
 	lucide.createIcons();
 	setTimeout(() => { const a = c.querySelector('.alert'); if (a) a.remove(); }, 5000);

@@ -60,6 +60,8 @@ class ControllerAccountOrder extends Controller {
 
 		$results = $this->model_account_order->getOrders(($page - 1) * $limit, $limit);
 
+		$flow = $this->buildOrderFlowData();
+
 		foreach ($results as $result) {
 			$product_total = $this->model_account_order->getTotalOrderProductsByOrderId($result['order_id']);
 			$voucher_total = $this->model_account_order->getTotalOrderVouchersByOrderId($result['order_id']);
@@ -75,9 +77,12 @@ class ControllerAccountOrder extends Controller {
 				'date_added' => date($this->language->get('datetime_format'), strtotime($result['date_added'])),
 				'products'   => ($product_total + $voucher_total),
 				'total'      => $this->currency->format($result['total'], $result['currency_code'], $result['currency_value']),
+				'flow_progress' => $flow['enabled'] ? $this->flowProgress($flow['steps'], (int)$result['order_status_id']) : 0,
 				'view'       => $this->url->link('account/order/info', 'order_id=' . $result['order_id'], true),
 			);
 		}
+
+		$data['flow_enabled'] = $flow['enabled'];
 
 		$pagination = new Pagination();
 		$pagination->total = $order_total;
@@ -343,6 +348,13 @@ class ControllerAccountOrder extends Controller {
 
 			$data['comment'] = nl2br($order_info['comment']);
 
+			// Order flow (status stepper)
+			$flow = $this->buildOrderFlowData((int)$order_info['order_status_id']);
+
+			$data['flow_enabled'] = $flow['enabled'];
+			$data['flow_steps'] = $flow['steps'];
+			$data['flow_terminal'] = $flow['terminal'];
+
 			// History
 			$data['histories'] = array();
 
@@ -379,6 +391,82 @@ class ControllerAccountOrder extends Controller {
 		} else {
 			return new Action('error/not_found');
 		}
+	}
+
+	/**
+	 * Build the configured order flow (status chain) with localized step names.
+	 *
+	 * @param int $order_status_id Current order status (0 = chain not used)
+	 * @return array{enabled: bool, steps: array<int, array<string, mixed>>, terminal: bool}
+	 */
+	private function buildOrderFlowData($order_status_id = 0) {
+		$order_status_id = (int)$order_status_id;
+
+		$order_flow = new OrderFlow(array(
+			'steps'       => (array)$this->config->get('config_order_flow_steps'),
+			'transitions' => (array)$this->config->get('config_order_flow_transitions'),
+		));
+
+		$enabled = $order_flow->isEnabled();
+
+		$steps = array();
+		$current_index = $order_flow->getStepIndex($order_status_id);
+
+		if ($enabled) {
+			$status_names = array();
+
+			$statuses = $this->db->query("SELECT order_status_id, name FROM " . DB_PREFIX . "order_status WHERE language_id = '" . (int)$this->config->get('config_language_id') . "'");
+
+			foreach ($statuses->rows as $status) {
+				$status_names[(int)$status['order_status_id']] = $status['name'];
+			}
+
+			foreach ($order_flow->getSteps() as $step) {
+				$index = $order_flow->getStepIndex($step);
+
+				if ($current_index >= 0) {
+					$state = $index < $current_index ? 'done' : ($index === $current_index ? 'current' : 'upcoming');
+				} else {
+					$state = 'upcoming';
+				}
+
+				$steps[] = array(
+					'order_status_id' => $step,
+					'name'            => isset($status_names[$step]) ? $status_names[$step] : '',
+					'state'           => $state,
+				);
+			}
+		}
+
+		return array(
+			'enabled'  => $enabled,
+			'steps'    => $steps,
+			'terminal' => $order_flow->isTerminal($order_status_id),
+		);
+	}
+
+	/**
+	 * Progress through the flow chain as a 0..100 percent value.
+	 *
+	 * @param array<int, array<string, mixed>> $steps
+	 */
+	private function flowProgress($steps, $order_status_id) {
+		$count = count($steps);
+
+		if ($count <= 0) {
+			return 0;
+		}
+
+		$order_status_id = (int)$order_status_id;
+
+		foreach ($steps as $index => $step) {
+			if ((int)$step['order_status_id'] === $order_status_id) {
+				return (int)round((($index + 1) / $count) * 100);
+			}
+		}
+
+		// Status not in the chain: treat as completed when it sits past the flow
+		return 100;
 	}
 
 	public function reorder() {
