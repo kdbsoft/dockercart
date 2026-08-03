@@ -93,6 +93,25 @@ Tailwind utilities so the built output stays in sync.
   them after `setConfigurableOptions`. Changing the hash format is a **breaking change**.
   See `docs/guide.md` §11 for the full data model.
 
+## Store settings (`oc_setting`) — save semantics
+
+- `editSetting($code, $data)` **deletes ALL rows with that `code` first**, then re-inserts
+  only the POSTed keys — so it is safe ONLY when `$data` carries the complete key set for
+  that code (the full store-settings form in `setting/setting.php` / `setting/store.php`).
+- For partial saves (a settings page that manages a subset of `config_*` keys, e.g.
+  `catalog/review_setting.php`), use `updateSetting($code, $data)` from
+  `upload/admin/model/setting/setting.php` — it upserts only the given keys and leaves
+  everything else intact.
+- **Never call `editSetting('config', ...)` with a subset of config keys** — it wipes ~100
+  store settings (`config_limit_admin`, `config_currency`, `config_language`, ...). The
+  first symptom is blank 500s on every admin list page (`DivisionByZeroError` in
+  pagination from the missing `config_limit_admin`). Restore from `docker/mysql/init.sql`
+  if it happens (dump uses mysqldump escaping: `\"` in the dump = plain `"` in the DB).
+- Error-display toggles live in `oc_setting` (`code='config'`): `config_error_display`,
+  `config_error_log`, `config_error_filename` — set them in the DB (Settings → Server tab
+  or the admin "Display Errors" checkbox), not in code. PHP `display_errors` in the image
+  is `Off` (`docker/php.prod.ini`, baked into the image).
+
 ## Code conventions (differ from typical PHP defaults)
 
 - **Indentation: tabs** (enforced by `.php-cs-fixer.php` `setIndent("\t")`). Spaces will fail CI.
@@ -111,10 +130,13 @@ Tailwind utilities so the built output stays in sync.
 - Tailwind CSS 3: `npm run build:css` (minified) or `npm run watch:css` (watch).
   Input `tools/tailwind/tailwind-input.css` → output `upload/catalog/view/theme/dockercart/stylesheet/tailwind.css`.
 - ES6+ vanilla JS, **no jQuery** in storefront. Icons: Lucide (not Font Awesome).
-- **Tooltips: never use `data-toggle="tooltip"`** on elements containing Lucide `<i>` icons —
-  it causes icon duplication. Use only the `title` attribute for native browser tooltips:
+- **Tooltips: always use Bootstrap `data-toggle="tooltip"`** with the hint text in `title`.
+  A bare `title` (native browser tooltip) is **not** acceptable — it shows nothing here because
+  the admin theme only initialises tooltips for `[data-toggle="tooltip"]` elements
+  (`upload/admin/view/javascript/common.js`). Wrap the trigger in a `<span>` when it carries a
+  Lucide icon:
   ```html
-  <span title="{{ help_text }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+  <span data-toggle="tooltip" title="{{ help_text }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
   ```
 
 ## Custom files & `make update`
