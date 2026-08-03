@@ -6,25 +6,67 @@
   <div class="max-w-7xl mx-auto">
     {% include 'dockercart/template/common/partials/breadcrumbs.twig' %}
 
-    <div class="flex flex-wrap items-end justify-between gap-4 mt-4 mb-6">
+    <div class="flex flex-wrap items-end justify-between gap-4 mt-4 mb-8">
       <div>
+        <p class="text-blue-600 text-sm font-semibold uppercase tracking-widest mb-1">{{ text_reviews_section }}</p>
         <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900">{{ heading_reviews }}</h1>
-        <a href="{{ product_href }}" class="text-sm text-gray-500 hover:text-blue-600 transition">{{ text_view_product }}</a>
+        <a href="{{ product_href }}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-blue-600 transition mt-2">
+          <i data-lucide="arrow-left" width="15" height="15"></i>{{ text_view_product }}
+        </a>
       </div>
       {% if review_guest %}
-      <a href="#form-review" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition">{{ text_write }}</a>
+      <a href="#form-review" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition shadow-sm">
+        <i data-lucide="square-pen" width="16" height="16" class="inline-block mr-1.5 -mt-0.5"></i>{{ text_write }}
+      </a>
       {% endif %}
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <aside class="lg:col-span-1">
-        <div class="bg-gray-50 border border-gray-100 rounded-2xl p-5 sticky top-24">
-          {% include 'dockercart/template/product/review_summary.twig' with { show_model: false } %}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+      <aside class="lg:col-span-1 lg:sticky lg:top-24">
+        <div class="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
           {% if review_count %}
-          <div class="mt-4 pt-4 border-t border-gray-200">
+          <div class="flex items-center gap-4">
+            <span class="text-5xl font-extrabold text-gray-900 leading-none">{{ rating_value|default('0.0') }}</span>
+            <div>
+              <div class="dc-stars" aria-hidden="true">
+                {% for i in 1..5 %}
+                  {% set diff = rating - (i - 1) %}
+                  {% if diff >= 1 %}
+                    <span class="dc-star active">★</span>
+                  {% elseif diff >= 0.1 %}
+                    <span class="dc-star dc-star-partial" style="--pct: {{ (diff * 100) | round }}%">★</span>
+                  {% else %}
+                    <span class="dc-star">★</span>
+                  {% endif %}
+                {% endfor %}
+              </div>
+              <div class="text-sm text-gray-500 mt-1">{{ reviews }}</div>
+            </div>
+          </div>
+
+          {% if show_distribution and rating_distribution is not empty %}
+          <div class="mt-5">
+            {% for i in 5..1 %}
+              {% set count = rating_distribution[i] is defined ? rating_distribution[i] : 0 %}
+              {% set pct = review_count > 0 ? (count * 100 / review_count) : 0 %}
+              <div class="flex items-center gap-2 text-xs text-gray-500 mb-1.5">
+                <span class="w-7 flex-shrink-0 flex items-center gap-1 tabular-nums">{{ i }}<span class="text-[10px] text-amber-400">★</span></span>
+                <div class="dc-dist-bar flex-1"><span style="width: {{ pct | round }}%"></span></div>
+                <span class="w-8 text-right tabular-nums text-gray-400">{{ count }}</span>
+              </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          <div class="mt-5 pt-5 border-t border-gray-100">
             <a href="{{ product_href }}" class="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 hover:text-blue-700 transition">
               <i data-lucide="arrow-left" width="16" height="16"></i>{{ text_view_product }}
             </a>
+          </div>
+          {% else %}
+          <div class="text-center py-4">
+            <i data-lucide="star" width="36" height="36" class="mx-auto mb-3 text-gray-200" aria-hidden="true"></i>
+            <p class="text-sm text-gray-500">{{ text_no_reviews }}</p>
           </div>
           {% endif %}
         </div>
@@ -34,6 +76,8 @@
         <div id="review">
           {% include 'dockercart/template/product/review.twig' with {
             reviews: reviews_list,
+            total: review_total,
+            total_label: review_total_label,
             sort_urls: sort_urls,
             pagination: pagination,
             text_pagination: text_pagination,
@@ -43,17 +87,19 @@
 
         {% if review_status %}
         <div class="mt-12">
-          {% include 'dockercart/template/product/review_form.twig' with {
-            review_guest: review_guest,
-            customer_name: customer_name,
-            customer_logged: customer_logged,
-            criteria: criteria,
-            has_rating_criteria: has_rating_criteria,
-            review_images_enabled: review_images_enabled,
-            review_max_images: review_max_images,
-            review_video_enabled: review_video_enabled,
-            captcha: captcha
-          } %}
+          <div class="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
+            {% include 'dockercart/template/product/review_form.twig' with {
+              review_guest: review_guest,
+              customer_name: customer_name,
+              customer_logged: customer_logged,
+              criteria: criteria,
+              has_rating_criteria: has_rating_criteria,
+              review_images_enabled: review_images_enabled,
+              review_max_images: review_max_images,
+              review_video_enabled: review_video_enabled,
+              captcha: captcha
+            } %}
+          </div>
         </div>
         {% endif %}
       </section>

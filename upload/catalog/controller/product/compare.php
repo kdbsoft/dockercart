@@ -2,6 +2,7 @@
 class ControllerProductCompare extends Controller {
 	public function index() {
 		$this->load->language('product/compare');
+		$this->load->helper('plural');
 
 		$this->load->model('catalog/product');
 
@@ -105,7 +106,7 @@ class ControllerProductCompare extends Controller {
 					'availability' => $availability,
 					'minimum'      => $product_info['minimum'] > 0 ? $product_info['minimum'] : 1,
 					'rating'       => (int)$product_info['rating'],
-					'reviews'      => sprintf($this->language->get('text_reviews'), (int)$product_info['reviews']),
+					'reviews'      => review_count_label((int)$product_info['reviews'], $this->language->get('code')),
 					'weight'       => $this->weight->format($product_info['weight'], $product_info['weight_class_id']),
 					'length'       => $this->length->format($product_info['length'], $product_info['length_class_id']),
 					'width'        => $this->length->format($product_info['width'], $product_info['length_class_id']),
@@ -141,6 +142,7 @@ class ControllerProductCompare extends Controller {
 
 	public function add() {
 		$this->load->language('product/compare');
+		$this->load->helper('plural');
 
 		$json = array();
 
@@ -178,6 +180,7 @@ class ControllerProductCompare extends Controller {
 
 	public function remove() {
 		$this->load->language('product/compare');
+		$this->load->helper('plural');
 
 		$json = array();
 

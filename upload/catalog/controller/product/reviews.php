@@ -73,7 +73,10 @@ class ControllerProductReviews extends Controller {
 			$data['review_count'] = $summary['review_count'];
 			$data['rating_distribution'] = $summary['distribution'];
 			$data['show_distribution'] = $this->config->get('config_review_show_distribution');
-			$data['reviews'] = sprintf($this->language->get('text_reviews'), $data['review_count']);
+
+			$this->load->helper('plural');
+
+			$data['reviews'] = review_count_label($data['review_count'], $this->language->get('code'));
 			$data['rating_stars'] = ReviewRating::starComponents($summary['rating']);
 
 			$review_list = new ReviewList($this->registry);
@@ -85,6 +88,8 @@ class ControllerProductReviews extends Controller {
 			$data['sort'] = $fragment['sort'];
 			$data['sort_urls'] = $fragment['sort_urls'];
 			$data['text_no_reviews'] = $fragment['text_no_reviews'];
+			$data['review_total'] = $fragment['total'];
+			$data['review_total_label'] = $fragment['total_label'];
 
 			// Write form data
 			$data['review_status'] = $this->config->get('config_review_status');
