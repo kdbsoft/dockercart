@@ -55,6 +55,38 @@
         </div>
       </div>
 
+      {# Order Flow #}
+      {% if flow_enabled and flow_steps %}
+      <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 mb-4">
+        <p class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-5">{{ text_order_flow }}</p>
+        <div class="flex items-start">
+          {% for step in flow_steps %}
+          <div class="flex flex-col items-center flex-1 min-w-0">
+            <div class="flex items-center w-full">
+              {% if not loop.first %}
+              <div class="flex-1 h-0.5 rounded-full {% if loop.previtem.state == 'done' %}bg-emerald-400{% else %}bg-gray-200{% endif %}"></div>
+              {% endif %}
+              <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 {% if step.state == 'done' %}bg-emerald-500 text-white{% elseif step.state == 'current' %}bg-blue-600 text-white ring-4 ring-blue-100{% else %}bg-gray-100 text-gray-400{% endif %}">
+                {% if step.state == 'done' %}<i data-lucide="check" width="14" height="14"></i>{% else %}{{ loop.index }}{% endif %}
+              </div>
+              {% if not loop.last %}
+              <div class="flex-1 h-0.5 rounded-full {% if step.state == 'done' %}bg-emerald-400{% else %}bg-gray-200{% endif %}"></div>
+              {% endif %}
+            </div>
+            <div class="text-[11px] mt-2 text-center leading-tight px-1 {% if step.state == 'current' %}font-bold text-gray-900{% elseif step.state == 'done' %}text-gray-700{% else %}text-gray-400{% endif %}">{{ step.name }}</div>
+          </div>
+          {% endfor %}
+        </div>
+        {% if flow_terminal %}
+        <div class="mt-4 flex justify-center">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <i data-lucide="flag" width="13" height="13"></i>{{ text_flow_terminal }}
+          </span>
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+
       {# Payment Status #}
       <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 mb-4">
         <p class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-4">{{ text_payment_status }}</p>

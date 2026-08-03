@@ -65,6 +65,11 @@
               <span class="text-gray-400 font-mono text-xs">{{ order.tracking_number|replace({'|': ' | '}) }}</span>
               {% endif %}
             </div>
+            {% if flow_enabled and order.flow_progress %}
+            <div class="mt-2.5 h-1.5 rounded-full bg-gray-100 overflow-hidden" title="{{ text_order_flow }}">
+              <div class="h-full bg-emerald-400 rounded-full transition-all" style="width: {{ order.flow_progress }}%"></div>
+            </div>
+            {% endif %}
           </div>
           <i data-lucide="chevron-right" class="w-5 h-5 text-gray-300 group-hover:text-blue-500 transition-colors flex-shrink-0"></i>
         </a>
