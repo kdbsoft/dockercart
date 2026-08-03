@@ -31,7 +31,7 @@
           </div>
           <div class="dc-recent-order-card__right">
             <div class="dc-recent-order-card__total">{{ order.total }}</div>
-            <a href="{{ order.view }}" class="btn btn-info btn-xs dc-recent-order-card__view-btn"><i data-lucide="eye" width="13" height="13"></i> {{ text_view }}</a>
+            <a href="{{ order.view }}" class="btn btn-info btn-xs dc-recent-order-card__view-btn"><i data-lucide="arrow-right" width="13" height="13"></i> {{ text_view }}</a>
           </div>
         </div>
 
@@ -119,6 +119,7 @@
 .dc-recent-order-card__row {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 2px;
 }
