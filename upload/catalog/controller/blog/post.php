@@ -86,9 +86,9 @@ class ControllerBlogPost extends Controller {
 				$data['author_url'] = '';
 			}
 
-			// Image
+			// Image (same dimensions as the hero background image)
 			if ($post_info['image']) {
-				$data['image'] = $this->model_tool_image->resize($post_info['image'], 800, 600);
+				$data['image'] = $this->model_tool_image->resize($post_info['image'], 1920, 400);
 				$data['thumb'] = $this->model_tool_image->resize($post_info['image'], 400, 300);
 			} else {
 				$data['image'] = '';
