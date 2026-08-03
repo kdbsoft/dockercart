@@ -5,10 +5,10 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col-sm-12">
+          <h1 class="page-header__title">{{ heading_title }}</h1>
           <div class="pull-right">
             <button type="button" class="btn btn-danger dc-btn-selection" onclick="confirm('{{ text_confirm }}') ? $('#form-upload').submit() : false;"><i data-lucide="trash-2" width="16" height="16"></i> {{ button_delete }}</button>
           </div>
-          <h1 class="page-header__title">{{ heading_title }}</h1>
         </div>
       </div>
     </div>
@@ -68,7 +68,7 @@
             <td class="text-left">{{ upload.name }}</td>
             <td class="text-left">{{ upload.filename }}</td>
             <td class="text-right">{{ upload.date_added }}</td>
-            <td class="text-right"><a href="{{ upload.download }}" data-toggle="tooltip" title="{{ button_download }}" class="btn btn-info btn--icon"><i data-lucide="download" width="14" height="14"></i></a></td>
+            <td class="text-right"><a href="{{ upload.download }}" class="btn btn-info"><i data-lucide="download" width="14" height="14"></i> {{ button_download }}</a></td>
           </tr>
           {% endfor %}
           {% else %}

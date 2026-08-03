@@ -33,26 +33,24 @@
               <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
               <td class="text-left">{{ column_name }}</td>
               <td class="text-left">{{ column_url }}</td>
-              <td class="text-right"></td>
             </tr>
           </thead>
           <tbody>
             {% if stores %}
             {% for store in stores %}
-            <tr>
+            <tr data-href="{{ store.edit }}">
               <td class="text-center">{% if store.store_id in selected %}
                 <input type="checkbox" name="selected[]" value="{{ store.store_id }}" checked="checked" />
                 {% else %}
                 <input type="checkbox" name="selected[]" value="{{ store.store_id }}" />
                 {% endif %}</td>
-              <td class="text-left">{{ store.name }}</td>
+              <td class="text-left"><a href="{{ store.edit }}" class="row-title-link">{{ store.name }}</a></td>
               <td class="text-left">{{ store.url }}</td>
-              <td class="text-right"><a href="{{ store.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a></td>
             </tr>
             {% endfor %}
             {% else %}
             <tr>
-              <td class="text-center" colspan="4">{{ text_no_results }}</td>
+              <td class="text-center" colspan="3">{{ text_no_results }}</td>
             </tr>
             {% endif %}
           </tbody>
