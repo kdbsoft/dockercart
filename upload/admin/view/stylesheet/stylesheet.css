@@ -67,6 +67,7 @@ a {
 .page-header__badge {
     display: inline-flex;
     align-items: center;
+    white-space: nowrap;
     gap: 6px;
     padding: 3px 10px;
     font-size: 12px;
@@ -270,43 +271,48 @@ a:hover, a:focus {
     display: flex;
     flex-wrap: wrap;
     margin-bottom: 20px;
-    border-bottom: 1px solid var(--dc-border);
-    gap: 0;
+    border-bottom: 0;
+    gap: 6px;
+}
+
+.nav-tabs > li {
+    margin: 0;
 }
 
 .nav-tabs > li > a {
     color: var(--dc-text-muted);
     border: 0 !important;
-    border-bottom: 2px solid transparent !important;
-    border-radius: 0;
-    padding: 10px 16px;
+    border-radius: 8px;
+    padding: 8px 14px;
     font-weight: 500;
     font-size: 13px;
     display: inline-flex;
     align-items: center;
     gap: 6px;
     white-space: nowrap;
-    background: none !important;
-    transition: color 0.15s ease, border-color 0.15s ease;
+    background: color-mix(in srgb, var(--dc-gray-500) 10%, transparent) !important;
+    transition: color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 }
 
 .nav-tabs > li > a:hover {
     color: var(--dc-text-dark);
-    background: none !important;
-    border: 0 !important;
-    border-bottom: 2px solid var(--dc-border-medium) !important;
+    background: color-mix(in srgb, var(--dc-gray-500) 16%, transparent) !important;
+    transform: translateY(-1px);
 }
+
 .nav-tabs > li > a:focus {
-    outline: none
+    outline: none;
 }
+
 .nav-tabs > li.active > a,
 .nav-tabs > li.active > a:hover,
 .nav-tabs > li.active > a:focus-visible {
-    color: var(--dc-text-dark);
-    border: 0 !important;
-    border-bottom: 2px solid var(--dc-primary) !important;
-    background: transparent;
+    color: var(--dc-primary);
+    background: color-mix(in srgb, var(--dc-primary) 22%, transparent) !important;
+    font-weight: 600;
+    box-shadow: 0 0 0 1px var(--dc-primary-ring);
 }
+
 
 .nav-tabs > li > a > svg {
     width: 14px;
@@ -3508,4 +3514,28 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
 
 .panel > .list-group .list-group-item:first-child {
     border-top: 0
+}
+
+/* ── Responsive: option value cards ── */
+@media (max-width: 480px) {
+    .dc-opt-cards {
+        grid-template-columns: 1fr;
+    }
+    .dc-opt-card {
+        min-width: 0;
+        overflow: hidden;
+    }
+    .dc-opt-card__grid {
+        grid-template-columns: 1fr;
+    }
+    .dc-opt-card__cg-row {
+        flex-wrap: wrap;
+    }
+    .dc-opt-card__cg-row .option-value-prefix-group {
+        min-width: 0;
+        width: 100%;
+    }
+    .dc-option-section {
+        overflow: hidden;
+    }
 }
