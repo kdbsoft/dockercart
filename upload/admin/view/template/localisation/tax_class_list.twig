@@ -32,25 +32,23 @@
             <tr>
               <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
               <td class="text-left">{% if sort == 'title' %}<a href="{{ sort_title }}" class="{{ order|lower }} sortable">{{ column_title }}</a>{% else %}<a href="{{ sort_title }}" class="sortable">{{ column_title }}</a>{% endif %}</td>
-              <td class="text-right"></td>
             </tr>
           </thead>
           <tbody>
             {% if tax_classes %}
             {% for tax_class in tax_classes %}
-            <tr>
+            <tr data-href="{{ tax_class.edit }}">
               <td class="text-center">{% if tax_class.tax_class_id in selected %}
                 <input type="checkbox" name="selected[]" value="{{ tax_class.tax_class_id }}" checked="checked" />
                 {% else %}
                 <input type="checkbox" name="selected[]" value="{{ tax_class.tax_class_id }}" />
                 {% endif %}</td>
-              <td class="text-left">{{ tax_class.title }}</td>
-              <td class="text-right"><a href="{{ tax_class.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a></td>
+              <td class="text-left"><a href="{{ tax_class.edit }}" class="row-title-link">{{ tax_class.title }}</a></td>
             </tr>
             {% endfor %}
             {% else %}
             <tr>
-              <td class="text-center" colspan="3">{{ text_no_results }}</td>
+              <td class="text-center" colspan="2">{{ text_no_results }}</td>
             </tr>
             {% endif %}
           </tbody>

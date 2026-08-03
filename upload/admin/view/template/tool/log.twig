@@ -4,14 +4,14 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
-          <div class="pull-right">
-            <a href="{{ download }}" class="btn btn-primary"><i data-lucide="download" width="16" height="16"></i> {{ button_download }}</a>
-            <a onclick="confirm('{{ text_confirm }}') ? location.href='{{ clear }}' : false;" class="btn btn-danger"><i data-lucide="eraser" width="16" height="16"></i> {{ button_clear }}</a>
-          </div>
           <a href="{{ cancel }}" class="page-header__link">
             <span class="page-header__back"><i data-lucide="arrow-left" width="20" height="20"></i></span>
             <span class="page-header__title">{{ heading_title }}</span>
           </a>
+          <div class="pull-right">
+            <a href="{{ download }}" class="btn btn-primary"><i data-lucide="download" width="16" height="16"></i> {{ button_download }}</a>
+            <a onclick="confirm('{{ text_confirm }}') ? location.href='{{ clear }}' : false;" class="btn btn-danger"><i data-lucide="eraser" width="16" height="16"></i> {{ button_clear }}</a>
+          </div>
         </div>
       </div>
       {% if error_warning %}

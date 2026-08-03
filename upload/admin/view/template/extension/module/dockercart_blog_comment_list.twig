@@ -65,17 +65,16 @@
                   <td class="text-center">{{ column_rating }}</td>
                   <td class="text-left">{{ column_status }}</td>
                   <td class="text-left">{{ column_date_added }}</td>
-                  <td class="text-right"></td>
                 </tr>
               </thead>
               <tbody>
                 {% if comments %}
                 {% for comment in comments %}
-                <tr>
+                <tr data-href="{{ comment.edit }}">
                   <td class="text-center">
                     <input type="checkbox" name="selected[]" value="{{ comment.comment_id }}" />
                   </td>
-                  <td class="text-left">{{ comment.post_name }}</td>
+                  <td class="text-left"><a href="{{ comment.edit }}" class="row-title-link">{{ comment.post_name }}</a></td>
                   <td class="text-left">{{ comment.author }}</td>
                   <td class="text-center">{{ comment.rating }}</td>
                   <td class="text-left">
@@ -89,14 +88,11 @@
                     </span>
                   </td>
                   <td class="text-left">{{ comment.date_added }}</td>
-                  <td class="text-right">
-                    <a href="{{ comment.edit }}" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a>
-                  </td>
                 </tr>
                 {% endfor %}
                 {% else %}
                 <tr>
-                  <td class="text-center" colspan="7">{{ text_no_results }}</td>
+                  <td class="text-center" colspan="6">{{ text_no_results }}</td>
                 </tr>
                 {% endif %}
               </tbody>
@@ -148,6 +144,11 @@ $('#filter-comment input, #filter-comment select').on('keypress', function(e) {
 });
 //--></script>
 <script type="text/javascript"><!--
+$(document).on('click', '.inline-edit', function(e) {
+	if ($(e.target).closest('.inline-edit-icon, input, select').length) return;
+	$(this).find('.inline-edit-icon').trigger('click');
+});
+
 $(document).on('click', '.inline-edit-icon', function(e) {
 	e.stopPropagation();
 
@@ -158,6 +159,7 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 	var rawValue = $span.data('value');
 	var commentId = $span.data('comment-id');
 
+	$span.addClass('editing');
 	$span.data('display', $span.html());
 
 	if (field === 'status') {
@@ -179,22 +181,22 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 				dataType: 'json',
 				success: function(json) {
 					if (json['error']) {
-						$span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
-						setTimeout(function() { $span.html($span.data('display')); }, 3000);
+						$span.removeClass('editing'); $span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
+						setTimeout(function() { $span.removeClass('editing'); $span.html($span.data('display')); }, 3000);
 					} else {
 						$span.data('value', newValue);
-						$span.html(json['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+						$span.removeClass('editing'); $span.html(json['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
 						lucide.createIcons({ nodes: [$span[0]] });
 					}
 				},
 				error: function() {
-					$span.html($span.data('display'));
+					$span.removeClass('editing'); $span.html($span.data('display'));
 				}
 			});
 		});
 
 		$select.on('blur', function() {
-			if (!saved) $span.html($span.data('display'));
+			if (!saved) { $span.removeClass('editing'); $span.html($span.data('display')); }
 		});
 	}
 });

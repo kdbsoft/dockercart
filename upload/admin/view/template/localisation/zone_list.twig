@@ -52,27 +52,25 @@
               <td class="text-left">{% if sort == 'c.name' %}<a href="{{ sort_country }}" class="{{ order|lower }} sortable">{{ column_country }}</a>{% else %}<a href="{{ sort_country }}" class="sortable">{{ column_country }}</a>{% endif %}</td>
               <td class="text-left">{% if sort == 'z.name' %}<a href="{{ sort_name }}" class="{{ order|lower }} sortable">{{ column_name }}</a>{% else %}<a href="{{ sort_name }}" class="sortable">{{ column_name }}</a>{% endif %}</td>
               <td class="text-left">{% if sort == 'z.code' %}<a href="{{ sort_code }}" class="{{ order|lower }} sortable">{{ column_code }}</a>{% else %}<a href="{{ sort_code }}" class="sortable">{{ column_code }}</a>{% endif %}</td>
-              <td class="text-right"></td>
             </tr>
           </thead>
           <tbody>
             {% if zones %}
             {% for zone in zones %}
-            <tr>
+            <tr data-href="{{ zone.edit }}">
               <td class="text-center">{% if zone.zone_id in selected %}
                 <input type="checkbox" name="selected[]" value="{{ zone.zone_id }}" checked="checked" />
                 {% else %}
                 <input type="checkbox" name="selected[]" value="{{ zone.zone_id }}" />
                 {% endif %}</td>
               <td class="text-left">{{ zone.country }}</td>
-              <td class="text-left">{{ zone.name }}</td>
+              <td class="text-left"><a href="{{ zone.edit }}" class="row-title-link">{{ zone.name }}</a></td>
               <td class="text-left">{{ zone.code }}</td>
-              <td class="text-right"><a href="{{ zone.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a></td>
             </tr>
             {% endfor %}
             {% else %}
             <tr>
-              <td class="text-center" colspan="5">{{ text_no_results }}</td>
+              <td class="text-center" colspan="4">{{ text_no_results }}</td>
             </tr>
             {% endif %}
           </tbody>

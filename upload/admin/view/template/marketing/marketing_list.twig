@@ -60,29 +60,27 @@
               <td class="text-right">{{ column_clicks }}</td>
               <td class="text-right">{{ column_orders }}</td>
               <td class="text-left">{% if sort == 'm.date_added' %}<a href="{{ sort_date_added }}" class="{{ order|lower }} sortable">{{ column_date_added }}</a>{% else %}<a href="{{ sort_date_added }}" class="sortable">{{ column_date_added }}</a>{% endif %}</td>
-              <td class="text-right"></td>
             </tr>
           </thead>
           <tbody>
           {% if marketings %}
           {% for marketing in marketings %}
-          <tr>
+          <tr data-href="{{ marketing.edit }}">
             <td class="text-center">{% if marketing.marketing_id in selected %}
               <input type="checkbox" name="selected[]" value="{{ marketing.marketing_id }}" checked="checked" />
               {% else %}
               <input type="checkbox" name="selected[]" value="{{ marketing.marketing_id }}" />
               {% endif %}</td>
-            <td class="text-left">{{ marketing.name }}</td>
+            <td class="text-left"><a href="{{ marketing.edit }}" class="row-title-link">{{ marketing.name }}</a></td>
             <td class="text-left">{{ marketing.code }}</td>
             <td class="text-right">{{ marketing.clicks }}</td>
             <td class="text-right">{{ marketing.orders }}</td>
             <td class="text-left">{{ marketing.date_added }}</td>
-            <td class="text-right"><a href="{{ marketing.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a></td>
           </tr>
           {% endfor %}
           {% else %}
           <tr>
-            <td class="text-center" colspan="8">{{ text_no_results }}</td>
+            <td class="text-center" colspan="6">{{ text_no_results }}</td>
           </tr>
           {% endif %}
           </tbody>
