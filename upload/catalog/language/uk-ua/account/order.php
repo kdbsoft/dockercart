@@ -45,3 +45,7 @@ $_['text_payment_paid_of'] = 'Оплачено:';
 $_['text_payment_remaining'] = 'Залишок';
 $_['column_payment_method'] = 'Спосіб оплати';
 $_['column_payment_amount'] = 'Сума';
+
+// Order flow
+$_['text_order_flow']    = 'Статус замовлення';
+$_['text_flow_terminal'] = 'Замовлення завершено';

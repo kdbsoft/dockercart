@@ -50,3 +50,6 @@ $_['text_payment_paid_of']         = 'Paid:';
 $_['text_payment_remaining']       = 'Remaining';
 $_['column_payment_method']        = 'Payment Method';
 $_['column_payment_amount']        = 'Amount';
+// Order flow
+$_['text_order_flow']    = 'Order Progress';
+$_['text_flow_terminal'] = 'Order completed';
