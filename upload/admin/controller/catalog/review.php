@@ -680,6 +680,72 @@ class ControllerCatalogReview extends Controller {
 		$this->response->setOutput($this->load->view('catalog/review_form', $data));
 	}
 
+	/**
+	 * AJAX: full review details for the expandable row in the review list.
+	 */
+	public function info() {
+		$json = array();
+
+		if (!$this->user->hasPermission('access', 'catalog/review')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		if (!isset($json['error']) && !isset($this->request->get['review_id'])) {
+			$json['error'] = 'Invalid request';
+		}
+
+		if (!isset($json['error'])) {
+			$this->load->language('catalog/review');
+
+			$this->load->model('catalog/review');
+			$this->load->model('tool/image');
+
+			$review_info = $this->model_catalog_review->getReview((int)$this->request->get['review_id']);
+
+			if (!$review_info) {
+				$json['error'] = 'Review not found';
+			} else {
+				$json['review_id'] = (int)$review_info['review_id'];
+				$json['product'] = $review_info['product'];
+				$json['text'] = nl2br(htmlspecialchars($review_info['text'], ENT_QUOTES, 'UTF-8'));
+				$json['criteria'] = array();
+
+				foreach ((array)$review_info['criteria_values'] as $criteria_id => $value) {
+					$name = (string)$criteria_id;
+
+					$criteria = $this->db->query("SELECT name FROM " . DB_PREFIX . "review_criteria_description WHERE criteria_id = '" . (int)$criteria_id . "' AND language_id = '" . (int)$this->config->get('config_language_id') . "'");
+
+					if ($criteria->num_rows) {
+						$name = $criteria->row['name'];
+					}
+
+					$json['criteria'][] = array(
+						'name'  => $name,
+						'value' => $value,
+					);
+				}
+
+				$json['images'] = array();
+
+				foreach ((array)$review_info['images'] as $image) {
+					$json['images'][] = array(
+						'thumb' => $this->model_tool_image->resize($image['image'], 120, 120),
+						'popup' => $this->model_tool_image->resize($image['image'], 900, 900),
+					);
+				}
+
+				$json['video'] = '';
+
+				if (!empty($review_info['videos'][0]['video'])) {
+					$json['video'] = $review_info['videos'][0]['video'];
+				}
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
 	public function updateField() {
 		$json = array();
 
