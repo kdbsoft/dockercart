@@ -51,5 +51,10 @@ $_['entry_is_default']        = 'Use as default group';
 $_['entry_criteria_name']     = 'Criteria label';
 $_['entry_criteria_help']     = 'Help text (optional)';
 
+$_['text_settings_subtitle'] = 'Configure how customer reviews work on the storefront.';
+$_['text_panel_media'] = 'Photos & Videos';
+$_['text_panel_moderation'] = 'Moderation & Protection';
+$_['text_panel_display'] = 'Display';
+$_['text_groups_subtitle'] = 'Criteria groups define what customers rate. The default group is used when a product has no group assigned.';
 // Error
 $_['error_permission']    = 'Warning: You do not have permission to modify review settings!';

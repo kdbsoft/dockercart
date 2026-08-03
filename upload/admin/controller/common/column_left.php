@@ -39,6 +39,13 @@ class ControllerCommonColumnLeft extends Controller {
 				$pending_returns = (int)$this->model_sale_return->getTotalReturnsExcludingStatuses(array(3));
 			}
 
+			// Pending reviews count (awaiting publication)
+			$pending_reviews = 0;
+			if ($this->user->hasPermission('access', 'catalog/review')) {
+				$this->load->model('catalog/review');
+				$pending_reviews = (int)$this->model_catalog_review->getTotalReviewsAwaitingApproval();
+			}
+
 			if ($this->user->hasPermission('access', 'sale/order')) {
 				$sales_children[] = array(
 					'name'	   => $this->language->get('text_order'),
@@ -56,6 +63,27 @@ class ControllerCommonColumnLeft extends Controller {
 					'icon'	   => 'rotate-ccw',
 					'badge'    => $pending_returns,
 					'children' => array()
+				);
+			}
+
+			if ($this->user->hasPermission('access', 'catalog/review')) {
+				$sales_children[] = array(
+					'name'	   => $this->language->get('text_review'),
+					'href'     => '',
+					'icon'	   => 'message-square',
+					'badge'    => $pending_reviews,
+					'children' => array(
+						array(
+							'name'     => $this->language->get('text_review'),
+							'href'     => $this->url->link('catalog/review', 'user_token=' . $this->session->data['user_token'], true),
+							'children' => array()
+						),
+						array(
+							'name'     => $this->language->get('text_review_setting'),
+							'href'     => $this->url->link('catalog/review_setting', 'user_token=' . $this->session->data['user_token'], true),
+							'children' => array()
+						)
+					)
 				);
 			}
 
@@ -95,7 +123,7 @@ class ControllerCommonColumnLeft extends Controller {
 					'icon'	   => 'shopping-cart',
 					'name'	   => $this->language->get('text_sale'),
 					'href'     => '',
-					'badge'    => $pending_orders + $pending_returns,
+					'badge'    => $pending_orders + $pending_returns + $pending_reviews,
 					'children' => $sales_children
 				);
 			}
@@ -205,26 +233,6 @@ class ControllerCommonColumnLeft extends Controller {
 					'href'     => $this->url->link('catalog/download', 'user_token=' . $this->session->data['user_token'], true),
 					'icon'	   => 'download',
 					'children' => array()
-				);
-			}
-
-			if ($this->user->hasPermission('access', 'catalog/review')) {
-				$catalog[] = array(
-					'name'	   => $this->language->get('text_review'),
-					'href'     => $this->url->link('catalog/review', 'user_token=' . $this->session->data['user_token'], true),
-					'icon'	   => 'message-square',
-					'children' => array(
-						array(
-							'name'     => $this->language->get('text_review'),
-							'href'     => $this->url->link('catalog/review', 'user_token=' . $this->session->data['user_token'], true),
-							'children' => array()
-						),
-						array(
-							'name'     => $this->language->get('text_review_setting'),
-							'href'     => $this->url->link('catalog/review_setting', 'user_token=' . $this->session->data['user_token'], true),
-							'children' => array()
-						)
-					)
 				);
 			}
 
