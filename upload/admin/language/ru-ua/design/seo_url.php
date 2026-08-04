@@ -23,6 +23,7 @@ $_['text_seo_card'] = 'Ссылки';
 $_['text_keyword'] = 'Не используйте пробелы, вместо них замените пробелы дефисом (-) и убедитесь, что SEO-URL уникален во всей системе.';
 $_['text_seo_preview'] = 'Предпросмотр';
 $_['text_seo_url_base'] = 'yoursite.com/';
+$_['text_none'] = 'Нет';
 $_['text_success'] = 'Успех: Вы успешно изменили SEO-URL!';
 // Subtitle
 

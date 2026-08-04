@@ -23,6 +23,7 @@ $_['text_seo_card'] = 'Посилання';
 $_['text_keyword'] = 'Не використовуйте пробіли, натомість замініть їх на - та переконайтеся, що SEO-URL є глобально унікальним.';
 $_['text_seo_preview'] = 'Попередній перегляд';
 $_['text_seo_url_base'] = 'yoursite.com/';
+$_['text_none'] = 'Немає';
 $_['text_success'] = 'Успіх: Ви змінили SEO-URL!';
 // Subtitle
 
