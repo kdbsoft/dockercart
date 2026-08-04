@@ -140,8 +140,12 @@ class ControllerDesignSeoUrl extends Controller {
 		$this->load->model('design/seo_url');
 
 		if (isset($this->request->post['selected']) && $this->validateDelete()) {
-			foreach ($this->request->post['selected'] as $seo_url_id) {
-				$this->model_design_seo_url->deleteSeoUrl($seo_url_id);
+			foreach ($this->request->post['selected'] as $key) {
+				$parts = explode('|', $key, 2);
+				$query = $parts[0];
+				$store_id = isset($parts[1]) ? (int)$parts[1] : 0;
+
+				$this->model_design_seo_url->deleteSeoUrlGroup($query, $store_id);
 			}
 
 			$this->session->data['success'] = $this->language->get('text_success');
@@ -278,18 +282,33 @@ class ControllerDesignSeoUrl extends Controller {
 			'limit'              => $this->config->get('config_limit_admin')
 		);
 
-		$seo_url_total = $this->model_design_seo_url->getTotalSeoUrls($filter_data);
+		$seo_url_total = $this->model_design_seo_url->getTotalSeoUrlGroups($filter_data);
 
-		$results = $this->model_design_seo_url->getSeoUrls($filter_data);
+		$results = $this->model_design_seo_url->getSeoUrlGroups($filter_data);
 
 		foreach ($results as $result) {
+			// Pick a concrete row of this group to point the edit form at; the
+			// edit form loads all language variants for the query anyway.
+			$primary_id = 0;
+			$store = '';
+
+			if ($result['store_id']) {
+				$store = $result['store'];
+			} else {
+				$store = $this->language->get('text_default');
+			}
+
+			foreach ($result['keywords'] as $language_keyword) {
+				$primary_id = $language_keyword['seo_url_id'];
+				break;
+			}
+
 			$data['seo_urls'][] = array(
-				'seo_url_id' => $result['seo_url_id'],
-				'query'      => $result['query'],
-				'keyword'    => $result['keyword'],
-				'store'      => $result['store_id'] ? $result['store'] : $this->language->get('text_default'),
-				'language'   => $result['language'],
-				'edit'       => $this->url->link('design/seo_url/edit', 'user_token=' . $this->session->data['user_token'] . '&seo_url_id=' . $result['seo_url_id'] . $url, true)
+				'query'    => $result['query'],
+				'store_id' => $result['store_id'],
+				'store'    => $store,
+				'keywords' => $result['keywords'],
+				'edit'     => $primary_id ? $this->url->link('design/seo_url/edit', 'user_token=' . $this->session->data['user_token'] . '&seo_url_id=' . $primary_id . $url, true) : ''
 			);
 		}
 
@@ -344,9 +363,7 @@ class ControllerDesignSeoUrl extends Controller {
 		}
 
 		$data['sort_query'] = $this->url->link('design/seo_url', 'user_token=' . $this->session->data['user_token'] . '&sort=query' . $url, true);
-		$data['sort_keyword'] = $this->url->link('design/seo_url', 'user_token=' . $this->session->data['user_token'] . '&sort=keyword' . $url, true);
-		$data['sort_store'] = $this->url->link('design/seo_url', 'user_token=' . $this->session->data['user_token'] . '&sort=store' . $url, true);
-		$data['sort_language'] = $this->url->link('design/seo_url', 'user_token=' . $this->session->data['user_token'] . '&sort=language' . $url, true);
+		$data['sort_store'] = $this->url->link('design/seo_url', 'user_token=' . $this->session->data['user_token'] . '&sort=store_id' . $url, true);
 
 		$url = '';
 
@@ -564,6 +581,82 @@ class ControllerDesignSeoUrl extends Controller {
 						'subtitle' => $result['query'] . ($result['store_id'] ? ' · ' . $result['store'] : ''),
 						'href'     => $this->url->link('design/seo_url/edit', 'user_token=' . $this->session->data['user_token'] . '&seo_url_id=' . $result['seo_url_id'], true)
 					);
+				}
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
+	 * Inline keyword editing: update (or remove) a single language alias of a
+	 * (query, store_id) group. Expects a POST with query, store_id, language_id
+	 * and value (empty value removes the record for that language).
+	 */
+	public function updateKeyword() {
+		$this->load->language('design/seo_url');
+
+		$json = array();
+
+		if (!$this->user->hasPermission('modify', 'design/seo_url')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		if (!isset($this->request->post['query']) || !isset($this->request->post['store_id']) || !isset($this->request->post['language_id']) || !isset($this->request->post['value'])) {
+			$json['error'] = 'Invalid request';
+		}
+
+		if (!isset($json['error'])) {
+			$query = trim((string)$this->request->post['query']);
+			$store_id = (int)$this->request->post['store_id'];
+			$language_id = (int)$this->request->post['language_id'];
+			$keyword = trim((string)$this->request->post['value']);
+
+			$this->load->model('design/seo_url');
+
+			if ($query === '') {
+				$json['error'] = $this->language->get('error_query');
+			} elseif ($keyword === '') {
+				// Empty keyword removes this language variant entirely.
+				$this->model_design_seo_url->deleteSeoUrlRecord($query, $store_id, $language_id);
+				$json['success'] = true;
+				$json['value'] = '';
+			} else {
+				if (utf8_strlen($keyword) < 3 || utf8_strlen($keyword) > 64) {
+					$json['error'] = $this->language->get('error_keyword');
+				} else {
+					$existing = $this->model_design_seo_url->getSeoUrlsByKeyword($keyword, $language_id);
+
+					foreach ($existing as $seo_url) {
+						if ($seo_url['store_id'] == $store_id && $seo_url['query'] != $query) {
+							$json['error'] = $this->language->get('error_exists');
+							break;
+						}
+					}
+				}
+
+				if (!isset($json['error'])) {
+					$seo_url_id = $this->model_design_seo_url->getSeoUrlIdByGroup($query, $store_id, $language_id);
+
+					if ($seo_url_id) {
+						$this->model_design_seo_url->editSeoUrl($seo_url_id, array(
+							'store_id'    => $store_id,
+							'language_id' => $language_id,
+							'query'       => $query,
+							'keyword'     => $keyword
+						));
+					} else {
+						$this->model_design_seo_url->addSeoUrl(array(
+							'store_id'    => $store_id,
+							'language_id' => $language_id,
+							'query'       => $query,
+							'keyword'     => $keyword
+						));
+					}
+
+					$json['success'] = true;
+					$json['value'] = $keyword;
 				}
 			}
 		}
