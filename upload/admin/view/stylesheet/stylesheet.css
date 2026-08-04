@@ -632,7 +632,6 @@ fieldset[disabled] .btn {
 
 .inline-edit { cursor: pointer; }
 .inline-edit .inline-edit-icon { margin-left: 4px; font-size: 13px; opacity: 0.3; cursor: pointer; }
-.inline-edit:hover { text-decoration: underline; }
 .inline-edit:hover .inline-edit-icon { opacity: 0.8; }
 .inline-edit.editing,
 .inline-edit.editing:hover { text-decoration: none; cursor: default; }
