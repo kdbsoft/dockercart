@@ -530,7 +530,7 @@ div.dcx-field.required > .dcx-label:before {
     color: var(--dc-primary);
     opacity: 0.8;
 }
-.dcx-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0; }
+.dcx-section-header { display: flex; align-items: center; justify-content: space-between; margin: 0 0 14px 0; }
 .dcx-section-header h4 { margin: 0 0 14px 0; }
 
 .dcx-table > thead > tr > td {

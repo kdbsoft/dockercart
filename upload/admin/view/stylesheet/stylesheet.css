@@ -650,6 +650,14 @@ fieldset[disabled] .btn {
     color: var(--dc-primary);
 }
 
+.dc-layout-route {
+    display: inline-block;
+    margin: 1px 4px 1px 0;
+    padding: 1px 6px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
 .btn--icon {
     padding: 8px;
     min-width: 36px;
@@ -3750,6 +3758,13 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
 
 .img-thumbnail {
     border-radius: 6px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.img-thumbnail:hover,
+.img-thumbnail:focus {
+    outline: none;
+    border-color: var(--dc-primary, #3b82f6);
 }
 
 /* ── Search input in list pages (e.g. category tree filter) ── */
