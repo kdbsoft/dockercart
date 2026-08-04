@@ -40,6 +40,40 @@ $_['text_revenue_by_category_subtitle'] = 'Top categories by revenue';
 $_['text_uncategorized']        = 'Uncategorized';
 $_['text_edit_subtitle']        = 'Configure extension settings and options';
 $_['text_pagination']           = 'Showing %d to %d of %d (%d pages)';
+$_['text_vs_prev']              = 'vs prev. period';
+$_['text_period']               = '%s — %s';
+$_['text_repeat_sub']           = '%d of %d customers';
+$_['text_cancelled_sub']        = '%d of %d orders';
+$_['text_revenue_orders']       = 'Revenue & Orders';
+$_['text_conversion_subtitle']  = 'Share of completed orders';
+$_['text_aov_subtitle']         = 'Average order value per period';
+$_['text_by_medium']            = 'Orders by Channel';
+$_['text_by_medium_subtitle']   = 'Orders split by traffic medium';
+$_['text_traffic_sources']      = 'Traffic Sources';
+$_['text_traffic_subtitle']     = 'Visits by source';
+$_['text_checkout_funnel']      = 'Checkout Funnel';
+$_['text_checkout_funnel_subtitle'] = 'Orders per order-flow step';
+$_['text_products_per_order']   = 'Products per Order';
+$_['text_products_per_order_subtitle'] = 'Quantity of items sold per period';
+$_['text_avg_items']            = 'Avg items per order';
+$_['text_social_traffic']       = 'Social Traffic';
+$_['text_social_traffic_subtitle'] = 'Visits from social networks';
+$_['text_social_sales']         = 'Social Sales';
+$_['text_social_sales_subtitle'] = 'Orders and revenue from social sources';
+$_['text_products_quantity']    = 'Top Products by Quantity';
+$_['text_products_quantity_subtitle'] = 'Best-selling products by units';
+$_['text_traffic_conversions']  = 'Traffic Conversions';
+$_['text_traffic_conversions_subtitle'] = 'Sessions, orders and revenue by source';
+$_['text_no_data']              = 'No data';
+$_['text_visits']               = 'visits';
+$_['text_all_mediums']          = 'All channels';
+$_['text_direct']               = 'Direct';
+$_['text_organic']              = 'Organic';
+$_['text_social']               = 'Social';
+$_['text_email']                = 'Email';
+$_['text_referral']             = 'Referral';
+$_['text_cpc']                  = 'Paid (CPC)';
+$_['text_display']              = 'Display';
 
 // Column
 $_['column_date_start']    = 'Date Start';
@@ -59,6 +93,10 @@ $_['column_orders_count']  = 'Orders';
 $_['column_cancelled']     = 'Cancelled';
 $_['column_category']      = 'Category';
 $_['column_sold']          = 'Qty Sold';
+$_['column_source']        = 'Source';
+$_['column_medium']        = 'Channel';
+$_['column_sessions']      = 'Sessions';
+$_['column_customers']     = 'Customers';
 
 // Entry
 $_['entry_date_start']  = 'Date Start';
@@ -66,6 +104,8 @@ $_['entry_date_end']    = 'Date End';
 $_['entry_group']       = 'Group By';
 $_['entry_status']      = 'Status';
 $_['entry_sort_order']  = 'Sort Order';
+$_['entry_medium']      = 'Channel';
+$_['entry_source']      = 'Source';
 
 // Button
 $_['button_filter']     = 'Filter';
