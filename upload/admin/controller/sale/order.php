@@ -246,6 +246,78 @@ class ControllerSaleOrder extends Controller {
 			$filter_date_added = '';
 		}
 
+		if (isset($this->request->get['filter_date_added_operator'])) {
+			$filter_date_added_operator = $this->request->get['filter_date_added_operator'];
+		} else {
+			$filter_date_added_operator = '';
+		}
+
+		if (isset($this->request->get['filter_total_operator'])) {
+			$filter_total_operator = $this->request->get['filter_total_operator'];
+		} else {
+			$filter_total_operator = '';
+		}
+
+		// Active saved filter (Shopify-style tabs)
+		$active_filter = $this->getActiveUserFilter('order');
+		$active_filter_id = isset($this->request->get['filter_id']) ? (int)$this->request->get['filter_id'] : 0;
+
+		$this->load->model('user/user_filter');
+
+		$user_id = (int)$this->user->getId();
+		$saved_filters = $this->model_user_user_filter->getFilters($user_id, 'order');
+
+		$active_builtin = isset($this->request->get['filter']) ? $this->request->get['filter'] : '';
+
+		$tab_counts = array(
+			'all' => $this->model_sale_order->getTotalOrders(array()),
+			'unfulfilled' => $this->model_sale_order->getTotalOrders(array('filter_order_status_exclude' => $this->getFulfilledStatusIds())),
+			'unpaid' => $this->model_sale_order->getTotalOrders(array('filter_payment_status' => 'unpaid'))
+		);
+
+		foreach ($saved_filters as $saved) {
+			$tab_counts['custom_' . $saved['filter_id']] = $this->model_sale_order->getTotalOrders($this->buildFilterData($saved['conditions']));
+		}
+
+		// Add builtin tabs (unfulfilled / unpaid) on top of the "All" tab
+		$builtin_tabs = array(
+			array(
+				'id'    => 'unfulfilled',
+				'name'  => $this->language->get('text_filter_unfulfilled'),
+				'href'  => $this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'] . '&filter=unfulfilled', true),
+				'count' => $tab_counts['unfulfilled'],
+				'is_active' => $active_builtin === 'unfulfilled'
+			),
+			array(
+				'id'    => 'unpaid',
+				'name'  => $this->language->get('text_filter_unpaid'),
+				'href'  => $this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'] . '&filter=unpaid', true),
+				'count' => $tab_counts['unpaid'],
+				'is_active' => $active_builtin === 'unpaid'
+			)
+		);
+
+		$data['user_filter'] = $this->renderUserFilter('order', 'sale/order', array(
+			array('key' => 'order_status', 'label' => $this->language->get('entry_order_status'), 'type' => 'multi', 'options' => $this->getOrderStatusOptions()),
+			array('key' => 'payment_status', 'label' => $this->language->get('text_payment_status'), 'type' => 'select', 'options' => array(
+				array('value' => 'unpaid', 'label' => $this->language->get('text_payment_status_unpaid')),
+				array('value' => 'partial', 'label' => $this->language->get('text_payment_status_partial')),
+				array('value' => 'paid', 'label' => $this->language->get('text_payment_status_paid')),
+				array('value' => 'overpaid', 'label' => $this->language->get('text_payment_status_overpaid'))
+			)),
+			array('key' => 'payment_method', 'label' => $this->language->get('text_payment_method'), 'type' => 'text'),
+			array('key' => 'shipping_method', 'label' => $this->language->get('text_shipping_method'), 'type' => 'text'),
+			array('key' => 'total', 'label' => $this->language->get('entry_total'), 'type' => 'range'),
+			array('key' => 'date_preset', 'label' => $this->language->get('entry_date_added'), 'type' => 'preset', 'options' => $this->getDatePresetOptions())
+		), $tab_counts, $active_builtin, $builtin_tabs, array(
+			'placeholder' => $this->language->get('text_search_orders'),
+			'url'         => $this->url->link('sale/order/autocomplete', 'user_token=' . $this->session->data['user_token'], true)
+		));
+
+		$data['active_filter'] = $active_filter;
+		$data['active_filter_id'] = $active_filter_id;
+		$data['filter'] = $active_builtin;
+
 		if (isset($this->request->get['sort'])) {
 			$sort = $this->request->get['sort'];
 		} else {
@@ -323,12 +395,26 @@ class ControllerSaleOrder extends Controller {
 			'filter_order_status_id' => $filter_order_status_id,
 			'filter_payment_status'  => $filter_payment_status,
 			'filter_total'           => $filter_total,
+			'filter_total_operator'  => $filter_total_operator,
 			'filter_date_added'      => $filter_date_added,
+			'filter_date_added_operator' => $filter_date_added_operator,
 			'sort'                   => $sort,
 			'order'                  => $order,
 			'start'                  => ($page - 1) * $this->config->get('config_limit_admin'),
 			'limit'                  => $this->config->get('config_limit_admin')
 		);
+
+		// Apply built-in quick filter (unfulfilled / unpaid)
+		if (isset($this->request->get['filter']) && $this->request->get['filter'] === 'unfulfilled') {
+			$filter_data['filter_order_status_exclude'] = $this->getFulfilledStatusIds();
+		} elseif (isset($this->request->get['filter']) && $this->request->get['filter'] === 'unpaid') {
+			$filter_data['filter_payment_status'] = 'unpaid';
+		}
+
+		// Apply conditions of the active saved filter
+		if ($active_filter) {
+			$this->applyFilterConditions($filter_data, $active_filter['conditions']);
+		}
 
 		$order_total = $this->model_sale_order->getTotalOrders($filter_data);
 
@@ -518,13 +604,25 @@ class ControllerSaleOrder extends Controller {
 		$data['filter_order_status_id'] = $filter_order_status_id;
 		$data['filter_payment_status'] = $filter_payment_status;
 		$data['filter_total'] = $filter_total;
+		$data['filter_total_operator'] = $filter_total_operator;
 		$data['filter_date_added'] = $filter_date_added;
+		$data['filter_date_added_operator'] = $filter_date_added_operator;
 
 		$data['payment_statuses'] = array(
 			'unpaid'   => $this->language->get('text_payment_status_unpaid'),
 			'partial'  => $this->language->get('text_payment_status_partial'),
 			'paid'     => $this->language->get('text_payment_status_paid'),
 			'overpaid' => $this->language->get('text_payment_status_overpaid')
+		);
+
+		$data['filter_operators'] = array(
+			'eq'   => $this->language->get('text_operator_eq'),
+			'ne'   => $this->language->get('text_operator_ne'),
+			'gt'   => $this->language->get('text_operator_gt'),
+			'gte'  => $this->language->get('text_operator_gte'),
+			'lt'   => $this->language->get('text_operator_lt'),
+			'lte'  => $this->language->get('text_operator_lte'),
+			'contains' => $this->language->get('text_operator_contains')
 		);
 
 		$data['sort'] = $sort;
@@ -831,6 +929,157 @@ class ControllerSaleOrder extends Controller {
 
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
+	 * AJAX autocomplete for the order list search bar.
+	 * Finds orders by ID, customer name, email or phone.
+	 */
+	public function autocomplete(): void {
+		$this->load->language('sale/order');
+
+		$json = array();
+
+		if (isset($this->request->get['filter_search'])) {
+			$filter_search = trim((string)$this->request->get['filter_search']);
+		} else {
+			$filter_search = '';
+		}
+
+		if ($filter_search !== '') {
+			$this->load->model('sale/order');
+
+			$is_numeric = ctype_digit($filter_search);
+
+			$filter_data = array(
+				'filter_order_id'  => $is_numeric ? $filter_search : '',
+				'filter_customer'  => $is_numeric ? '' : $filter_search,
+				'sort'             => 'o.order_id',
+				'order'            => 'DESC',
+				'start'            => 0,
+				'limit'            => 8
+			);
+
+			$results = $this->model_sale_order->getOrders($filter_data);
+
+			foreach ($results as $result) {
+				$json[] = array(
+					'id'       => '#' . $result['order_id'],
+					'name'     => $result['customer'],
+					'subtitle' => date($this->language->get('datetime_format'), strtotime($result['date_added'])) . ' · ' . ($result['order_status'] ? $result['order_status'] : $this->language->get('text_missing')),
+					'meta'     => $this->currency->format($result['total'], $result['currency_code'], $result['currency_value']),
+					'href'     => $this->url->link('sale/order_detail', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $result['order_id'], true)
+				);
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
+	 * Order statuses considered "fulfilled" (order complete). Used by the
+	 * built-in Unfulfilled tab. Falls back to config_complete_status.
+	 */
+	private function getFulfilledStatusIds(): array {
+		$complete = (array)$this->config->get('config_complete_status');
+
+		$ids = array_filter(array_map('intval', $complete));
+
+		return $ids ? $ids : array(0);
+	}
+
+	private function getOrderStatusOptions(): array {
+		$this->load->model('localisation/order_status');
+
+		$options = array();
+
+		foreach ($this->model_localisation_order_status->getOrderStatuses() as $status) {
+			$options[] = array(
+				'value' => $status['order_status_id'],
+				'label' => $status['name']
+			);
+		}
+
+		return $options;
+	}
+
+	private function getDatePresetOptions(): array {
+		return array(
+			array('value' => 'today', 'label' => $this->language->get('text_date_today')),
+			array('value' => 'yesterday', 'label' => $this->language->get('text_date_yesterday')),
+			array('value' => 'this_week', 'label' => $this->language->get('text_date_this_week')),
+			array('value' => 'this_month', 'label' => $this->language->get('text_date_this_month')),
+			array('value' => 'this_year', 'label' => $this->language->get('text_date_this_year'))
+		);
+	}
+
+	/**
+	 * Convert saved filter conditions into model filter_data.
+	 */
+	private function buildFilterData(array $conditions): array {
+		$data = array();
+
+		foreach ($conditions as $condition) {
+			$field = (string)($condition['field'] ?? '');
+			$operator = (string)($condition['operator'] ?? 'eq');
+			$value = $condition['value'] ?? '';
+
+			switch ($field) {
+				case 'order_status':
+					if ($operator === 'ne' && is_array($value)) {
+						$data['filter_order_status_exclude'] = array_map('intval', $value);
+					} elseif (is_array($value)) {
+						$data['filter_order_status'] = implode(',', array_map('intval', $value));
+					}
+					break;
+
+				case 'payment_status':
+					$data['filter_payment_status'] = $value;
+					break;
+
+				case 'payment_method':
+					$data['filter_payment_method'] = (string)$value;
+					break;
+
+				case 'shipping_method':
+					$data['filter_shipping_method'] = (string)$value;
+					break;
+
+				case 'total':
+					if (isset($condition['value_min']) || isset($condition['value_max'])) {
+						if (isset($condition['value_min']) && $condition['value_min'] !== '') {
+							$data['filter_total_min'] = $condition['value_min'];
+						}
+
+						if (isset($condition['value_max']) && $condition['value_max'] !== '') {
+							$data['filter_total_max'] = $condition['value_max'];
+						}
+					} else {
+						$data['filter_total'] = (string)$value;
+						$data['filter_total_operator'] = $operator;
+					}
+					break;
+
+				case 'date_preset':
+					$data['filter_date_preset'] = (string)$value;
+					break;
+			}
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Merge saved filter conditions into an existing filter_data array.
+	 */
+	private function applyFilterConditions(array &$filter_data, array $conditions): void {
+		$saved = $this->buildFilterData($conditions);
+
+		// Saved conditions win over URL params for the same keys.
+		foreach ($saved as $key => $value) {
+			$filter_data[$key] = $value;
+		}
 	}
 
 	private function getOrderType($order) {

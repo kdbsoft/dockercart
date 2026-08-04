@@ -301,6 +301,31 @@ class ControllerCatalogReview extends Controller {
 		$data['copy'] = $this->url->link('catalog/review/copy', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('catalog/review/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
+		// Per-admin saved filters (Shopify-style tabs)
+		$active_filter = $this->getActiveUserFilter('review');
+
+		$this->load->model('user/user_filter');
+
+		$user_id = (int)$this->user->getId();
+		$saved_filters = $this->model_user_user_filter->getFilters($user_id, 'review');
+
+		$tab_counts = array(
+			'all' => $this->model_catalog_review->getTotalReviews(array())
+		);
+
+		foreach ($saved_filters as $saved) {
+			$tab_counts['custom_' . $saved['filter_id']] = $this->model_catalog_review->getTotalReviews($this->buildReviewFilterData($saved['conditions']));
+		}
+
+		$data['user_filter'] = $this->renderUserFilter('review', 'catalog/review', array(
+			array('key' => 'product', 'label' => $this->language->get('entry_product'), 'type' => 'text'),
+			array('key' => 'author', 'label' => $this->language->get('entry_author'), 'type' => 'text'),
+			array('key' => 'status', 'label' => $this->language->get('entry_status'), 'type' => 'status'),
+			array('key' => 'date_added', 'label' => $this->language->get('entry_date_added'), 'type' => 'date')
+		), $tab_counts);
+
+		$data['active_filter'] = $active_filter;
+
 		$data['reviews'] = array();
 
 		$filter_data = array(
@@ -313,6 +338,12 @@ class ControllerCatalogReview extends Controller {
 			'start'             => ($page - 1) * $this->config->get('config_limit_admin'),
 			'limit'             => $this->config->get('config_limit_admin')
 		);
+
+		if ($active_filter) {
+			foreach ($this->buildReviewFilterData($active_filter['conditions']) as $key => $value) {
+				$filter_data[$key] = $value;
+			}
+		}
 
 		$review_total = $this->model_catalog_review->getTotalReviews($filter_data);
 
@@ -861,5 +892,34 @@ class ControllerCatalogReview extends Controller {
 		}
 
 		return !$this->error;
+	}
+
+	/**
+	 * Convert saved filter conditions into review model filter_data.
+	 */
+	private function buildReviewFilterData(array $conditions): array {
+		$data = array();
+
+		foreach ($conditions as $condition) {
+			$field = (string)($condition['field'] ?? '');
+			$value = $condition['value'] ?? '';
+
+			switch ($field) {
+				case 'product':
+					$data['filter_product'] = (string)$value;
+					break;
+				case 'author':
+					$data['filter_author'] = (string)$value;
+					break;
+				case 'status':
+					$data['filter_status'] = (string)$value;
+					break;
+				case 'date_added':
+					$data['filter_date_added'] = (string)$value;
+					break;
+			}
+		}
+
+		return $data;
 	}
 }

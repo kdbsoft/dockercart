@@ -84,6 +84,37 @@ class ControllerCustomerCustomerApproval extends Controller {
 		$data['filter_type'] = $filter_type;
 		$data['filter_date_added'] = $filter_date_added;
 
+		// Per-admin saved filters (Shopify-style tabs)
+		$active_filter = $this->getActiveUserFilter('customer_approval');
+
+		$this->load->model('user/user_filter');
+
+		$user_id = (int)$this->user->getId();
+		$saved_filters = $this->model_user_user_filter->getFilters($user_id, 'customer_approval');
+
+		$this->load->model('customer/customer_approval');
+
+		$tab_counts = array(
+			'all' => $this->model_customer_customer_approval->getTotalCustomerApprovals(array())
+		);
+
+		foreach ($saved_filters as $saved) {
+			$tab_counts['custom_' . $saved['filter_id']] = $this->model_customer_customer_approval->getTotalCustomerApprovals($this->buildApprovalFilterData($saved['conditions']));
+		}
+
+		$data['user_filter'] = $this->renderUserFilter('customer_approval', 'customer/customer_approval', array(
+			array('key' => 'name', 'label' => $this->language->get('entry_name'), 'type' => 'text'),
+			array('key' => 'email', 'label' => $this->language->get('entry_email'), 'type' => 'text'),
+			array('key' => 'customer_group_id', 'label' => $this->language->get('entry_customer_group'), 'type' => 'multi', 'options' => $this->getApprovalGroupOptions()),
+			array('key' => 'type', 'label' => $this->language->get('entry_type'), 'type' => 'select', 'options' => array(
+				array('value' => 'customer', 'label' => $this->language->get('text_customer')),
+				array('value' => 'affiliate', 'label' => $this->language->get('text_affiliate'))
+			)),
+			array('key' => 'date_added', 'label' => $this->language->get('entry_date_added'), 'type' => 'date')
+		), $tab_counts);
+
+		$data['active_filter'] = $active_filter;
+
 		$data['user_token'] = $this->session->data['user_token'];
 
 		$this->load->model('customer/customer_group');
@@ -147,6 +178,15 @@ class ControllerCustomerCustomerApproval extends Controller {
 			'start'                    => ($page - 1) * $this->config->get('config_limit_admin'),
 			'limit'                    => $this->config->get('config_limit_admin')
 		);
+
+		// Apply active saved filter
+		$active_filter = $this->getActiveUserFilter('customer_approval');
+
+		if ($active_filter) {
+			foreach ($this->buildApprovalFilterData($active_filter['conditions']) as $key => $value) {
+				$filter_data[$key] = $value;
+			}
+		}
 
 		$this->load->model('customer/customer_approval');
 
@@ -247,5 +287,52 @@ class ControllerCustomerCustomerApproval extends Controller {
 
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
+	 * Convert saved filter conditions into approval model filter_data.
+	 */
+	private function buildApprovalFilterData(array $conditions): array {
+		$data = array();
+
+		foreach ($conditions as $condition) {
+			$field = (string)($condition['field'] ?? '');
+			$value = $condition['value'] ?? '';
+
+			switch ($field) {
+				case 'name':
+					$data['filter_name'] = (string)$value;
+					break;
+				case 'email':
+					$data['filter_email'] = (string)$value;
+					break;
+				case 'customer_group_id':
+					$data['filter_customer_group_id'] = is_array($value) ? implode(',', array_map('intval', $value)) : (string)$value;
+					break;
+				case 'type':
+					$data['filter_type'] = (string)$value;
+					break;
+				case 'date_added':
+					$data['filter_date_added'] = (string)$value;
+					break;
+			}
+		}
+
+		return $data;
+	}
+
+	private function getApprovalGroupOptions(): array {
+		$this->load->model('customer/customer_group');
+
+		$options = array();
+
+		foreach ($this->model_customer_customer_group->getCustomerGroups() as $group) {
+			$options[] = array(
+				'value' => $group['customer_group_id'],
+				'label' => $group['name']
+			);
+		}
+
+		return $options;
 	}
 }

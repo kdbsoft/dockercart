@@ -275,6 +275,34 @@ class ControllerCustomerCustomer extends Controller {
 			$filter_date_added = '';
 		}
 
+		// Per-admin saved filters (Shopify-style tabs)
+		$active_filter = $this->getActiveUserFilter('customer');
+		$active_filter_id = isset($this->request->get['filter_id']) ? (int)$this->request->get['filter_id'] : 0;
+
+		$this->load->model('user/user_filter');
+
+		$user_id = (int)$this->user->getId();
+		$saved_filters = $this->model_user_user_filter->getFilters($user_id, 'customer');
+
+		$tab_counts = array(
+			'all' => $this->model_customer_customer->getTotalCustomers(array())
+		);
+
+		foreach ($saved_filters as $saved) {
+			$tab_counts['custom_' . $saved['filter_id']] = $this->model_customer_customer->getTotalCustomers($this->buildCustomerFilterData($saved['conditions']));
+		}
+
+		$data['user_filter'] = $this->renderUserFilter('customer', 'customer/customer', array(
+			array('key' => 'name', 'label' => $this->language->get('entry_name'), 'type' => 'text'),
+			array('key' => 'email', 'label' => $this->language->get('entry_email'), 'type' => 'text'),
+			array('key' => 'customer_group_id', 'label' => $this->language->get('entry_customer_group'), 'type' => 'multi', 'options' => $this->getCustomerGroupOptions()),
+			array('key' => 'status', 'label' => $this->language->get('entry_status'), 'type' => 'status'),
+			array('key' => 'date_added', 'label' => $this->language->get('entry_date_added'), 'type' => 'date')
+		), $tab_counts);
+
+		$data['active_filter'] = $active_filter;
+		$data['active_filter_id'] = $active_filter_id;
+
 		if (isset($this->request->get['sort'])) {
 			$sort = $this->request->get['sort'];
 		} else {
@@ -353,6 +381,12 @@ class ControllerCustomerCustomer extends Controller {
 			'start'                    => ($page - 1) * $this->config->get('config_limit_admin'),
 			'limit'                    => $this->config->get('config_limit_admin')
 		);
+
+		if ($active_filter) {
+			foreach ($this->buildCustomerFilterData($active_filter['conditions']) as $key => $value) {
+				$filter_data[$key] = $value;
+			}
+		}
 
 		$customer_total = $this->model_customer_customer->getTotalCustomers($filter_data);
 
@@ -1556,5 +1590,52 @@ class ControllerCustomerCustomer extends Controller {
 
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
+	 * Convert saved filter conditions into customer model filter_data.
+	 */
+	private function buildCustomerFilterData(array $conditions): array {
+		$data = array();
+
+		foreach ($conditions as $condition) {
+			$field = (string)($condition['field'] ?? '');
+			$value = $condition['value'] ?? '';
+
+			switch ($field) {
+				case 'name':
+					$data['filter_name'] = (string)$value;
+					break;
+				case 'email':
+					$data['filter_email'] = (string)$value;
+					break;
+				case 'customer_group_id':
+					$data['filter_customer_group_id'] = is_array($value) ? implode(',', array_map('intval', $value)) : (string)$value;
+					break;
+				case 'status':
+					$data['filter_status'] = (string)$value;
+					break;
+				case 'date_added':
+					$data['filter_date_added'] = (string)$value;
+					break;
+			}
+		}
+
+		return $data;
+	}
+
+	private function getCustomerGroupOptions(): array {
+		$this->load->model('customer/customer_group');
+
+		$options = array();
+
+		foreach ($this->model_customer_customer_group->getCustomerGroups() as $group) {
+			$options[] = array(
+				'value' => $group['customer_group_id'],
+				'label' => $group['name']
+			);
+		}
+
+		return $options;
 	}
 }

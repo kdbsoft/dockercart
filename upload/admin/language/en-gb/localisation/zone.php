@@ -1,6 +1,7 @@
 <?php
 // Heading
 $_['heading_title']          = 'Zones';
+$_['text_search_zone']       = 'Search zones by name or code';
 
 // Text
 $_['text_success']           = 'Success: You have modified zones!';
