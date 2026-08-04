@@ -19,26 +19,36 @@ class ControllerMarketplaceEvent extends Controller {
 
 		$this->load->model('setting/event');
 
-		if (isset($this->request->get['event_id']) && $this->validate()) {
-			$this->model_setting_event->enableEvent($this->request->get['event_id']);
-
-			$this->session->data['success'] = $this->language->get('text_success');
-
-			$url = '';
-
-			if (isset($this->request->get['sort'])) {
-				$url .= '&sort=' . $this->request->get['sort'];
+		if ($this->validate()) {
+			if (isset($this->request->get['event_id'])) {
+				$this->model_setting_event->enableEvent($this->request->get['event_id']);
 			}
 
-			if (isset($this->request->get['order'])) {
-				$url .= '&order=' . $this->request->get['order'];
+			if (isset($this->request->post['selected'])) {
+				foreach ($this->request->post['selected'] as $event_id) {
+					$this->model_setting_event->enableEvent($event_id);
+				}
 			}
 
-			if (isset($this->request->get['page'])) {
-				$url .= '&page=' . $this->request->get['page'];
-			}
+			if (isset($this->request->get['event_id']) || isset($this->request->post['selected'])) {
+				$this->session->data['success'] = $this->language->get('text_success');
 
-			$this->response->redirect($this->url->link('marketplace/event', 'user_token=' . $this->session->data['user_token'] . $url, true));
+				$url = '';
+
+				if (isset($this->request->get['sort'])) {
+					$url .= '&sort=' . $this->request->get['sort'];
+				}
+
+				if (isset($this->request->get['order'])) {
+					$url .= '&order=' . $this->request->get['order'];
+				}
+
+				if (isset($this->request->get['page'])) {
+					$url .= '&page=' . $this->request->get['page'];
+				}
+
+				$this->response->redirect($this->url->link('marketplace/event', 'user_token=' . $this->session->data['user_token'] . $url, true));
+			}
 		}
 
 		$this->getList();
@@ -51,26 +61,36 @@ class ControllerMarketplaceEvent extends Controller {
 
 		$this->load->model('setting/event');
 
-		if (isset($this->request->get['event_id']) && $this->validate()) {
-			$this->model_setting_event->disableEvent($this->request->get['event_id']);
-
-			$this->session->data['success'] = $this->language->get('text_success');
-
-			$url = '';
-
-			if (isset($this->request->get['sort'])) {
-				$url .= '&sort=' . $this->request->get['sort'];
+		if ($this->validate()) {
+			if (isset($this->request->get['event_id'])) {
+				$this->model_setting_event->disableEvent($this->request->get['event_id']);
 			}
 
-			if (isset($this->request->get['order'])) {
-				$url .= '&order=' . $this->request->get['order'];
+			if (isset($this->request->post['selected'])) {
+				foreach ($this->request->post['selected'] as $event_id) {
+					$this->model_setting_event->disableEvent($event_id);
+				}
 			}
 
-			if (isset($this->request->get['page'])) {
-				$url .= '&page=' . $this->request->get['page'];
-			}
+			if (isset($this->request->get['event_id']) || isset($this->request->post['selected'])) {
+				$this->session->data['success'] = $this->language->get('text_success');
 
-			$this->response->redirect($this->url->link('marketplace/event', 'user_token=' . $this->session->data['user_token'] . $url, true));
+				$url = '';
+
+				if (isset($this->request->get['sort'])) {
+					$url .= '&sort=' . $this->request->get['sort'];
+				}
+
+				if (isset($this->request->get['order'])) {
+					$url .= '&order=' . $this->request->get['order'];
+				}
+
+				if (isset($this->request->get['page'])) {
+					$url .= '&page=' . $this->request->get['page'];
+				}
+
+				$this->response->redirect($this->url->link('marketplace/event', 'user_token=' . $this->session->data['user_token'] . $url, true));
+			}
 		}
 
 		$this->getList();
@@ -145,6 +165,10 @@ class ControllerMarketplaceEvent extends Controller {
 
 		$data['delete'] = $this->url->link('marketplace/event/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
+		$data['enable'] = $this->url->link('marketplace/event/enable', 'user_token=' . $this->session->data['user_token'] . $url, true);
+
+		$data['disable'] = $this->url->link('marketplace/event/disable', 'user_token=' . $this->session->data['user_token'] . $url, true);
+
 		$data['events'] = array();
 
 		$filter_data = array(
@@ -162,13 +186,8 @@ class ControllerMarketplaceEvent extends Controller {
 			$data['events'][] = array(
 				'event_id'   => $result['event_id'],
 				'code'       => $result['code'],
-				'trigger'    => $result['trigger'],
-				'action'     => $result['action'],
 				'sort_order' => $result['sort_order'],
-				'status'     => $result['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
-				'enable'     => $this->url->link('marketplace/event/enable', 'user_token=' . $this->session->data['user_token'] . '&event_id=' . $result['event_id'] . $url, true),
-				'disable'    => $this->url->link('marketplace/event/disable', 'user_token=' . $this->session->data['user_token'] . '&event_id=' . $result['event_id'] . $url, true),
-				'enabled'    => $result['status']
+				'status'     => $result['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled')
 			);
 		}
 

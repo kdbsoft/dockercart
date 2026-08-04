@@ -1,19 +1,17 @@
 <?php
 // Heading
-$_['heading_title']     = 'Events';
+$_['heading_title']     = 'System Events';
 
 // Text
 $_['text_success']      = 'Success: You have modified events!';
-$_['text_list']         = 'Event List';
-$_['text_event']        = 'Events are used by extensions to override the default functionality of your store. If you have issues you can disable or enable the events here.';
+$_['text_list']         = 'System Event List';
+$_['text_event']        = 'This page lists system events — internal store hooks. An event links a store action (trigger, e.g. "customer added") with a handler function (action) registered by an extension or the core. Handlers are registered automatically when extensions are installed and keep the store working. This is NOT a calendar and NOT a list of activities — there is nothing to configure here in the usual sense. Disabling, deleting or editing events without a good reason can break the store (errors, broken pages or missing functionality). Only disable or delete an event if you are absolutely sure it belongs to a previously removed extension. If in doubt, do not touch anything on this page — contact a developer.';
 $_['text_info']         = 'Event Information';
 $_['text_trigger']      = 'Trigger';
 $_['text_action']       = 'Action';
 // Subtitle
 
-$_['text_event_list_subtitle'] = 'View registered event handlers';
-
-
+$_['text_event_list_subtitle'] = 'View registered system event handlers';
 
 // Column
 $_['column_code']       = 'Event Code';
