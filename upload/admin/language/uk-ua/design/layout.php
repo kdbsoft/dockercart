@@ -2,6 +2,7 @@
 
 $_['column_action'] = 'Дія';
 $_['column_name'] = 'Назва макета';
+$_['column_route'] = 'Маршрути';
 $_['entry_module'] = 'Модуль';
 $_['entry_name'] = 'Назва макета';
 $_['entry_position'] = 'Розташування';

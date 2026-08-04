@@ -32,6 +32,7 @@ $_['text_modules_card']   = 'Modules';
 
 // Column
 $_['column_name']         = 'Layout Name';
+$_['column_route']        = 'Routes';
 $_['column_action']       = 'Action';
 
 // Entry

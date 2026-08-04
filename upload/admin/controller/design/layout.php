@@ -317,10 +317,31 @@ class ControllerDesignLayout extends Controller {
 
 		$results = $this->model_design_layout->getLayouts($filter_data);
 
+		$this->load->model('setting/store');
+
+		$store_names = array();
+
+		foreach ($this->model_setting_store->getStores() as $store) {
+			$store_names[$store['store_id']] = $store['name'];
+		}
+
 		foreach ($results as $result) {
+			$routes = array();
+
+			foreach ($this->model_design_layout->getLayoutRoutes($result['layout_id']) as $layout_route) {
+				$route_text = $layout_route['route'];
+
+				if ($layout_route['store_id'] != 0 && isset($store_names[$layout_route['store_id']])) {
+					$route_text .= ' (' . $store_names[$layout_route['store_id']] . ')';
+				}
+
+				$routes[] = $route_text;
+			}
+
 			$data['layouts'][] = array(
 				'layout_id' => $result['layout_id'],
 				'name'      => $result['name'],
+				'routes'    => $routes,
 				'edit'      => $this->url->link('design/layout/edit', 'user_token=' . $this->session->data['user_token'] . '&layout_id=' . $result['layout_id'] . $url, true),
 				'builder'   => $this->url->link('design/layout/builder', 'user_token=' . $this->session->data['user_token'] . '&layout_id=' . $result['layout_id'], true)
 			);
