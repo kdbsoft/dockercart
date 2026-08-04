@@ -109,6 +109,13 @@ class ControllerExtensionModuleDockercartCheckout extends Controller
                 $this->request->post,
             );
 
+            // System module — always enabled
+            $this->model_setting_setting->editSettingValue(
+                "module_dockercart_checkout",
+                "module_dockercart_checkout_status",
+                "1",
+            );
+
             $this->session->data["success"] = $this->language->get(
                 "text_success",
             );
@@ -154,7 +161,7 @@ class ControllerExtensionModuleDockercartCheckout extends Controller
 
         // Load settings with defaults
         $settings = [
-            "status" => 0,
+            "status" => 1,
             "redirect_standard" => 1,
             "cache_ttl" => self::CACHE_TTL_DEFAULT,
             "theme" => "light",
@@ -180,6 +187,9 @@ class ControllerExtensionModuleDockercartCheckout extends Controller
             $fullKey = self::MODULE_PREFIX . $key;
             $data[$fullKey] = $this->getSettingValue($fullKey, $default);
         }
+
+        // System module — always enabled
+        $data["module_dockercart_checkout_status"] = 1;
 
         // Load and merge checkout blocks configuration
         $blocks_data = $this->getSettingValue(
@@ -291,6 +301,8 @@ class ControllerExtensionModuleDockercartCheckout extends Controller
 	$data["text_active"] = $this->language->get("text_active");
 	$data["text_inactive"] = $this->language->get("text_inactive");
 	$data["text_module_description"] = $this->language->get("text_module_description");
+	$data["text_configurator_title"] = $this->language->get("text_configurator_title");
+	$data["placeholder_optional_description"] = $this->language->get("placeholder_optional_description");
 
         $data["user_token"] = $this->session->data["user_token"];
 
@@ -751,7 +763,7 @@ class ControllerExtensionModuleDockercartCheckout extends Controller
 
         // Default settings
         $defaults = [
-            "module_dockercart_checkout_status" => 0,
+            "module_dockercart_checkout_status" => 1,
             "module_dockercart_checkout_redirect_standard" => 1,
             "module_dockercart_checkout_cache_ttl" => 3600,
             "module_dockercart_checkout_theme" => "light",

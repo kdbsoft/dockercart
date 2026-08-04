@@ -105,7 +105,9 @@
             <div class="panel-heading">
               <i data-lucide="{{ group.icon }}" style="width:20px;height:20px;color:{% if ext.installed %}{% if ext.status_raw %}#166534{% else %}#6b7280{% endif %}{% else %}#9ca3af{% endif %};"></i>
               <strong title="{{ ext.name|striptags }}">{{ ext.name|raw }}</strong>
-              {% if ext.is_official %}
+              {% if ext.is_system %}
+              <span style="font-size:11px;color:#2563eb;vertical-align:middle;margin-left:4px;"><i data-lucide="shield-check"></i> {{ text_system }}</span>
+              {% elseif ext.is_official %}
               <span style="font-size:11px;color:#2563eb;vertical-align:middle;margin-left:4px;"><i data-lucide="circle-check"></i> {{ text_official }}</span>
               {% endif %}
             </div>
@@ -117,7 +119,7 @@
               {# Status + badges #}
               <div style="margin-bottom:8px;display:flex;align-items:center;flex-wrap:wrap;gap:4px;">
                 {% if ext.installed %}
-                  {% if ext.status_raw %}
+                  {% if ext.status_raw or ext.is_system %}
                   <span class="label label-success"><i data-lucide="circle-check"></i> {{ text_enabled }}</span>
                   {% else %}
                   <span class="label label-default"><i data-lucide="circle"></i> {{ text_disabled }}</span>
@@ -140,7 +142,9 @@
                   <i data-lucide="folder-open" style="width:16px;height:16px;color:#6b7280;flex-shrink:0;"></i>
                   <span title="{{ instance.name }}">{{ instance.name }}</span>
                   <a href="{{ instance.edit }}" class="btn btn-xs btn-info" title="{{ button_edit }}"><i data-lucide="pencil"></i></a>
+                  {% if not ext.is_system %}
                   <button type="button" class="btn btn-xs btn-warning btn-instance-delete" title="{{ button_delete }}" data-url="{{ instance.delete }}" data-name="{{ instance.name }}" data-confirm="{{ text_confirm_instance }}"><i data-lucide="trash-2"></i></button>
+                  {% endif %}
                 </div>
                 {% endfor %}
                 <div style="margin-top:4px;">
@@ -161,6 +165,7 @@
                 <a href="{{ ext.edit }}" class="btn btn-xs btn-primary" title="{{ button_edit }}">
                   <i data-lucide="pencil"></i> {{ button_edit }}
                 </a>
+                {% if not ext.is_system %}
                 <button type="button"
                         class="btn btn-xs btn-danger btn-ext-uninstall"
                         title="{{ button_uninstall }}"
@@ -169,6 +174,7 @@
                         data-confirm="{{ text_confirm }}">
                   <i data-lucide="circle-minus"></i>
                 </button>
+                {% endif %}
               {% else %}
                 <button type="button"
                         class="btn btn-xs btn-success btn-ext-install"

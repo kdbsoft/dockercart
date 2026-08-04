@@ -20,8 +20,6 @@ $_["tab_advanced"] = "Advanced";
 $_["tab_license"] = "License (GPL-3.0)";
 
 // General Settings
-$_["entry_status"] = "Module Status";
-$_["help_status"] = "Enable or disable the checkout module";
 $_["text_checkout_settings"] = "Checkout Settings";
 $_["text_select"] = "--- None ---";
 $_["text_select_country_first"] = "Select a country first, then choose a region";
@@ -154,6 +152,9 @@ $_["text_method_enabled"] = "Override Enabled";
 $_["text_custom_title"] = "Custom Title";
 $_["text_custom_description"] = "Custom Description";
 $_["text_default_title"] = "Default Title";
+$_["text_method_status_on"] = "Enabled";
+$_["text_method_status_off"] = "Disabled";
+$_["button_clear_fields"] = "Clear fields";
 $_["text_no_methods_available"] =
     "No methods available. Please ensure shipping/payment extensions are installed and enabled.";
 $_["text_address_fields"] = "Address Fields";
@@ -194,6 +195,8 @@ $_["text_license_checking"] =
 // Buttons
 $_["text_active"] = "Active";
 $_["text_inactive"] = "Inactive";
+$_["placeholder_optional_description"] = "Optional description";
+$_["text_configurator_title"] = "Order Configurator";
 $_["text_module_description"] = "One-page checkout configuration for DockerCart";
 
 $_["button_save"] = "Save";

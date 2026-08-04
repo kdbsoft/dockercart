@@ -20,8 +20,6 @@ $_["tab_advanced"] = "Розширені";
 $_["tab_license"] = "Ліцензія (GPL-3.0)";
 
 // General Settings
-$_["entry_status"] = "Стан модуля";
-$_["help_status"] = "Увімкнення або вимкнення модуля оформлення замовлення DockerCart";
 $_["text_checkout_settings"] = "Налаштування оформлення замовлення";
 $_["text_select"] = "--- Немає ---";
 $_["text_select_country_first"] = "Спочатку виберіть країну, потім регіон";
@@ -173,6 +171,8 @@ $_["text_license_domain"] = "Тип ліцензії";
 $_["text_active"] = "Активно";
 $_["text_inactive"] = "Неактивно";
 $_["text_module"] = "Модуль";
+$_["placeholder_optional_description"] = "Необов'язковий опис";
+$_["text_configurator_title"] = "Конфігуратор замовлення";
 $_["text_module_description"] = "Налаштування односторінкового оформлення замовлення для DockerCart";
 $_["confirm_are_you_sure"] = "Ви впевнені?";
 $_["text_req_abbr"] = "обов";
@@ -185,6 +185,9 @@ $_["text_method_overrides_help"] = "Увімкніть та налаштуйте
 $_["text_custom_title"] = "Власна назва";
 $_["text_custom_description"] = "Власний опис";
 $_["text_default_title"] = "Назва за замовчуванням";
+$_["text_method_status_on"] = "Увімкнено";
+$_["text_method_status_off"] = "Вимкнено";
+$_["button_clear_fields"] = "Очистити поля";
 
 
 // Missing keys from English

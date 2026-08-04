@@ -20,6 +20,7 @@ $_['text_confirm_instance']  = 'Are you sure you want to delete this module inst
 $_['text_enabled']    = 'Enabled';
 $_['text_disabled']   = 'Disabled';
 $_['text_official']   = 'Official';
+$_['text_system']     = 'System';
 $_['text_home']       = 'Home';
 // Subtitle
 
@@ -36,3 +37,4 @@ $_['button_delete']    = 'Delete';
 
 // Error
 $_['error_permission'] = 'Warning: You do not have permission to modify add-ons!';
+$_['error_system_extension'] = 'Warning: This add-on is a system extension and cannot be uninstalled!';

@@ -20,6 +20,7 @@ $_['text_confirm_instance']  = 'Ви впевнені, що хочете вид�
 $_['text_enabled']       = 'Увімкнено';
 $_['text_disabled']      = 'Вимкнено';
 $_['text_official']      = 'Офіційне';
+$_['text_system']        = 'Системне';
 $_['text_home']          = 'Головна';
 // Subtitle
 
@@ -36,3 +37,4 @@ $_['button_delete']      = 'Видалити';
 
 // Error
 $_['error_permission']   = 'Попередження: У вас немає прав на зміну доповнень!';
+$_['error_system_extension'] = 'Попередження: Це системне доповнення, його не можна видалити!';

@@ -11,7 +11,6 @@ $_['text_disabled']     = 'Disabled';
 $_['text_home']         = 'Home';
 
 // Entry labels
-$_['entry_status']      = 'Status';
 $_['entry_call_for_price_status'] = 'Show "Call for Price" button';
 $_['entry_sale_timer_status'] = 'Show sale timers';
 $_['entry_logo_dark']   = 'Footer Logo (dark background)';
@@ -77,7 +76,7 @@ $_['button_add_footer_link'] = 'Add footer link';
 
 // Tab titles
 $_['text_tab_general']             = 'General';
-$_['text_tab_general_subtitle']    = 'Module status, menu type, logos and favicon';
+$_['text_tab_general_subtitle']    = 'Menu type, logos and favicon';
 $_['text_tab_social_payments']     = 'Social & Payments';
 $_['text_tab_social_payments_subtitle'] = 'Social links, messenger widget and payment icons';
 $_['text_tab_features']            = 'Features';
