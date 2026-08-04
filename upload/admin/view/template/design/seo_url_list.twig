@@ -33,29 +33,38 @@
             <tr>
               <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
               <td class="text-left">{% if sort == 'query' %}<a href="{{ sort_query }}" class="{{ order|lower }} sortable">{{ column_query }}</a>{% else %}<a href="{{ sort_query }}" class="sortable">{{ column_query }}</a>{% endif %}</td>
-              <td class="text-left">{% if sort == 'keyword' %}<a href="{{ sort_keyword }}" class="{{ order|lower }} sortable">{{ column_keyword }}</a>{% else %}<a href="{{ sort_keyword }}" class="sortable">{{ column_keyword }}</a>{% endif %}</td>
-              <td class="text-left">{% if sort == 'store' %}<a href="{{ sort_store }}" class="{{ order|lower }} sortable">{{ column_store }}</a>{% else %}<a href="{{ sort_store }}" class="sortable">{{ column_store }}</a>{% endif %}</td>
-              <td class="text-left">{% if sort == 'language' %}<a href="{{ sort_language }}" class="{{ order|lower }} sortable">{{ column_language }}</a>{% else %}<a href="{{ sort_language }}" class="sortable">{{ column_language }}</a>{% endif %}</td>
+              <td class="text-left">{% if sort == 'store_id' %}<a href="{{ sort_store }}" class="{{ order|lower }} sortable">{{ column_store }}</a>{% else %}<a href="{{ sort_store }}" class="sortable">{{ column_store }}</a>{% endif %}</td>
+              <td class="text-left" style="min-width: 240px;">{{ column_keyword }}</td>
             </tr>
           </thead>
           <tbody>
           {% if seo_urls %}
           {% for seo_url in seo_urls %}
           <tr data-href="{{ seo_url.edit }}">
-            <td class="text-center">{% if seo_url.seo_url_id in selected %}
-              <input type="checkbox" name="selected[]" value="{{ seo_url.seo_url_id }}" checked="checked" />
+            <td class="text-center">{% if (seo_url.query ~ '|' ~ seo_url.store_id) in selected %}
+              <input type="checkbox" name="selected[]" value="{{ seo_url.query }}|{{ seo_url.store_id }}" checked="checked" />
               {% else %}
-              <input type="checkbox" name="selected[]" value="{{ seo_url.seo_url_id }}" />
+              <input type="checkbox" name="selected[]" value="{{ seo_url.query }}|{{ seo_url.store_id }}" />
               {% endif %}</td>
             <td class="text-left">{{ seo_url.query }}</td>
-            <td class="text-left"><a href="{{ seo_url.edit }}" class="row-title-link">{{ seo_url.keyword }}</a></td>
             <td class="text-left">{{ seo_url.store }}</td>
-            <td class="text-left">{{ seo_url.language }}</td>
+            <td class="text-left">
+              {% for language in languages %}
+              <div class="dc-keyword-row">
+                <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                {% if seo_url.keywords[language.language_id] %}
+                <span class="inline-edit" data-query="{{ seo_url.query|e('html_attr') }}" data-store-id="{{ seo_url.store_id }}" data-language-id="{{ language.language_id }}" data-value="{{ seo_url.keywords[language.language_id].keyword|e('html_attr') }}">{{ seo_url.keywords[language.language_id].keyword }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
+                {% else %}
+                <span class="inline-edit dc-keyword-empty" data-query="{{ seo_url.query|e('html_attr') }}" data-store-id="{{ seo_url.store_id }}" data-language-id="{{ language.language_id }}" data-value="">{{ text_none }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
+                {% endif %}
+              </div>
+              {% endfor %}
+            </td>
           </tr>
           {% endfor %}
           {% else %}
           <tr>
-            <td class="text-center" colspan="5">{{ text_no_results }}</td>
+            <td class="text-center" colspan="4">{{ text_no_results }}</td>
           </tr>
           {% endif %}
           </tbody>
@@ -70,6 +79,18 @@
     </div>
   </div>
 </div>
+<style>
+.dc-keyword-row { white-space: nowrap; margin-bottom: 3px; }
+.dc-keyword-row:last-child { margin-bottom: 0; }
+.dc-keyword-row .lang-code {
+  display: inline-block; min-width: 26px; font-weight: 700; font-size: 11px;
+  color: #7b8ead; margin-right: 6px;
+}
+.dc-keyword-empty { color: #999; font-style: italic; }
+.inline-edit { cursor: pointer; }
+.inline-edit .inline-edit-icon { margin-left: 4px; color: #a0aec0; }
+.inline-edit:hover .inline-edit-icon { color: #2c7be5; }
+</style>
 <script type="text/javascript"><!--
 $('#button-filter').on('click', function() {
 	var url = 'index.php?route=design/seo_url&user_token={{ user_token }}';
@@ -106,6 +127,81 @@ $('#filter-seo input, #filter-seo select').on('keypress', function(e) {
 	if (e.which == 13) {
 		$('#button-filter').trigger('click');
 	}
+});
+//--></script>
+<script type="text/javascript"><!--
+$(document).on('click', '.inline-edit', function(e) {
+	if ($(e.target).closest('.inline-edit-icon, input, select').length) return;
+	$(this).find('.inline-edit-icon').trigger('click');
+});
+
+$(document).on('click', '.inline-edit-icon', function(e) {
+	e.stopPropagation();
+
+	var $span = $(this).closest('.inline-edit');
+	if ($span.find('input, select').length) return;
+
+	var query = $span.data('query');
+	var storeId = $span.data('store-id');
+	var languageId = $span.data('language-id');
+	var rawValue = $span.data('value') || '';
+
+	$span.addClass('editing');
+	$span.data('display', $span.html());
+
+	$span.html('<input type="text" class="form-control input-sm inline-edit-input" value="' + rawValue.replace(/"/g, '&quot;') + '" />');
+	var $input = $span.find('input');
+	$input.focus().select();
+
+	function revert() {
+		$span.removeClass('editing');
+		$span.html($span.data('display'));
+	}
+
+	function render(value) {
+		$span.data('value', value || '');
+		$span.removeClass('editing');
+		if (value) {
+			$span.removeClass('dc-keyword-empty');
+			$span.html($('<span>').text(value).html() + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+		} else {
+			$span.addClass('dc-keyword-empty');
+			$span.html('<span class="text-muted">{{ text_none|e("js") }}</span><i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+		}
+		lucide.createIcons({ nodes: [$span[0]] });
+	}
+
+	function save() {
+		var newValue = $input.val();
+
+		$.ajax({
+			url: 'index.php?route=design/seo_url/updateKeyword&user_token={{ user_token }}',
+			type: 'post',
+			dataType: 'json',
+			data: { query: query, store_id: storeId, language_id: languageId, value: newValue },
+			success: function(json) {
+				if (json['error']) {
+					$span.removeClass('editing');
+					$span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
+					setTimeout(function() {
+						$span.removeClass('editing');
+						$span.html($span.data('display'));
+					}, 3000);
+				} else {
+					render(json['value'] || '');
+				}
+			},
+			error: function() {
+				revert();
+			}
+		});
+	}
+
+	$input.on('blur', save);
+	$input.on('keydown', function(e) {
+		if (e.which === 13) { e.preventDefault(); $input.trigger('blur'); }
+		if (e.which === 27) { revert(); }
+	});
 });
 //--></script>
 {{ footer }}

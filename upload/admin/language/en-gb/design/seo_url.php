@@ -14,6 +14,7 @@ $_['text_seo_card']    = 'Links';
 $_['text_keyword']     = 'Do not use spaces, instead replace spaces with - and make sure the SEO URL is globally unique.';
 $_['text_seo_preview'] = 'Preview';
 $_['text_seo_url_base'] = 'yoursite.com/';
+$_['text_none'] = 'None';
 // Subtitle
 
 $_['text_list_subtitle'] = 'Manage SEO-friendly URL aliases';
