@@ -47,7 +47,7 @@
 	position: fixed;
 	top: 0;
 	left: 0;
-	width: 235px;
+	width: 245px;
 	height: 100%;
 	z-index: -1;
 	pointer-events: none;
@@ -86,7 +86,7 @@
 }
 
 #column-left.active + #content, #column-left.active + #content + #footer {
-	left: 235px;
+	left: 245px;
 }
 
 /* Desktop */
@@ -97,12 +97,12 @@
 
 	#column-left + #content, #column-left + #content + #footer {
 		left: 0px;
-		margin-left: 235px;
+		margin-left: 245px;
 	}
 
 	#column-left.active + #content, #column-left.active + #content + #footer {
 		left: 0px;
-		margin-left: 235px;
+		margin-left: 245px;
 	}
 }
 
@@ -423,7 +423,7 @@
 	html[dir="rtl"] #column-left + #content,
 	html[dir="rtl"] #column-left + #content + #footer {
 		left: 0px !important;
-		margin-right: 235px !important;
+		margin-right: 245px !important;
 		margin-left: 0px !important;
 	}
 }
