@@ -65,8 +65,8 @@ class ControllerExtensionModuleDockerCartTheme extends Controller {
         $data['cancel']      = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true);
         $data['user_token']  = $this->session->data['user_token'];
 
-        /* ── Module Status ── */
-        $data['dockercart_theme_status'] = (int)$this->config->get('dockercart_theme_status');
+        /* ── Module Status (system module — always enabled) ── */
+        $data['dockercart_theme_status'] = 1;
 
         /* ── Dark Logo ── */
         $logo_dark = (string)$this->config->get('dockercart_theme_logo_dark');
@@ -260,7 +260,7 @@ class ControllerExtensionModuleDockerCartTheme extends Controller {
         );
 
         $settings = [
-            'dockercart_theme_status'              => (int)($p['dockercart_theme_status'] ?? 0),
+            'dockercart_theme_status'              => 1,
             'dockercart_theme_logo_dark'           => trim((string)($p['dockercart_theme_logo_dark'] ?? '')),
             'dockercart_theme_logo_light'          => trim((string)($p['dockercart_theme_logo_light'] ?? '')),
             'dockercart_theme_favicon_master'      => trim((string)($p['dockercart_theme_favicon_master'] ?? '')),
