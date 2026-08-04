@@ -101,7 +101,7 @@
                       <input type="hidden" name="attribute_set_attribute[{{ attribute_row }}][attribute_id]" value="{{ set_attribute.attribute_id }}"/>
                       <div class="dc-set-attr-group text-muted" style="margin-top:3px;font-size:11px;min-height:13px;">{{ set_attribute.attribute_group }}</div>
                     </div>
-                    <button type="button" onclick="$('#set-attribute-row{{ attribute_row }}').remove();" class="btn btn-link btn-remove-attr" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
+                    <button type="button" onclick="$('#set-attribute-row{{ attribute_row }}').remove();" class="btn btn-link btn-remove-attr" data-toggle="tooltip" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
                   </div>
                   {% set attribute_row = attribute_row + 1 %}
                   {% endfor %}
@@ -128,7 +128,7 @@
 	  html += '      <input type="hidden" name="attribute_set_attribute[' + attribute_row + '][attribute_id]" value=""/>';
 	  html += '      <div class="dc-set-attr-group text-muted" style="margin-top:3px;font-size:11px;min-height:13px;"></div>';
 	  html += '  </div>';
-	  html += '  <button type="button" onclick="$(\'#set-attribute-row' + attribute_row + '\').remove();" class="btn btn-link btn-remove-attr" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>';
+	  html += '  <button type="button" onclick="$(\'#set-attribute-row' + attribute_row + '\').remove();" class="btn btn-link btn-remove-attr" data-toggle="tooltip" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>';
 	  html += '</div>';
 
 	  $('#set-attributes-container').append(html);

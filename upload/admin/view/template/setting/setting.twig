@@ -659,10 +659,10 @@
                           <label class="dcx-checkbox-label">
                             <input type="hidden" name="config_stock_reserve_enabled" value="0" />
                             <input type="checkbox" name="config_stock_reserve_enabled" value="1"{% if config_stock_reserve_enabled %} checked="checked"{% endif %}> {{ entry_stock_reserve_enabled }}
-                            <span title="{{ help_stock_reserve_enabled }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
+                            <span data-toggle="tooltip" title="{{ help_stock_reserve_enabled }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
                           </label>
                           <div class="dcx-field">
-                            <label class="dcx-label" for="input-stock-reserve-minutes">{{ entry_stock_reserve_minutes }} <span title="{{ help_stock_reserve_minutes }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                            <label class="dcx-label" for="input-stock-reserve-minutes">{{ entry_stock_reserve_minutes }} <span data-toggle="tooltip" title="{{ help_stock_reserve_minutes }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                             <input type="number" name="config_stock_reserve_minutes" value="{{ config_stock_reserve_minutes }}" placeholder="30" id="input-stock-reserve-minutes" class="form-control" min="0" style="max-width:120px;" />
                             {% if error_stock_reserve_minutes %}
                             <div class="text-danger">{{ error_stock_reserve_minutes }}</div>

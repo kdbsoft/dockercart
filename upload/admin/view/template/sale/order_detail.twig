@@ -137,7 +137,7 @@
                 </div>
                 <div class="order-product-card__total">= {{ product.total }}</div>
                 <div class="order-product-card__actions edit-only" style="display:none">
-                  <button type="button" class="btn btn-danger btn-xs btn--icon" onclick="removeProduct(this)" title="{{ button_remove }}">
+                  <button type="button" class="btn btn-danger btn-xs btn--icon" onclick="removeProduct(this)" data-toggle="tooltip" title="{{ button_remove }}">
                     <i data-lucide="trash-2" width="13" height="13"></i>
                   </button>
                 </div>
@@ -268,7 +268,7 @@
           <div class="dcx-sidebar-card__body">
             <div class="dcx-sidebar-card__field">
               <span class="dcx-sidebar-card__label">{{ entry_firstname }} / {{ entry_lastname }}</span>
-              <span class="dcx-sidebar-card__value view-only">{{ firstname }} {{ lastname }}</span>
+              <span class="dcx-sidebar-card__value view-only">{{ firstname }} {{ lastname }}<a href="#" class="dc-copy-btn" data-copy="{{ firstname }} {{ lastname }}" data-toggle="tooltip" title="{{ text_copy }}" onclick="event.preventDefault(); copyToClipboard(this);"><i data-lucide="copy" width="12" height="12"></i></a></span>
               <div class="edit-only" style="display:none">
                 <input type="text" class="form-control" value="{{ firstname }}" data-field="firstname" placeholder="{{ entry_firstname }}" style="width:48%;display:inline-block">
                 <input type="text" class="form-control" value="{{ lastname }}" data-field="lastname" placeholder="{{ entry_lastname }}" style="width:48%;display:inline-block">
@@ -276,17 +276,17 @@
             </div>
             <div class="dcx-sidebar-card__field">
               <span class="dcx-sidebar-card__label">{{ entry_email }}</span>
-              <span class="dcx-sidebar-card__value view-only" data-field="email">{{ email }}</span>
+              <span class="dcx-sidebar-card__value view-only" data-field="email">{{ email }}<a href="#" class="dc-copy-btn" data-copy="{{ email }}" data-toggle="tooltip" title="{{ text_copy }}" onclick="event.preventDefault(); copyToClipboard(this);"><i data-lucide="copy" width="12" height="12"></i></a></span>
               <input type="email" class="form-control edit-only" value="{{ email }}" data-field="email" style="display:none">
             </div>
             <div class="dcx-sidebar-card__field">
               <span class="dcx-sidebar-card__label">{{ entry_telephone }}</span>
-              <span class="dcx-sidebar-card__value view-only" data-field="telephone">{{ telephone }}</span>
+              <span class="dcx-sidebar-card__value view-only" data-field="telephone">{{ telephone }}<a href="#" class="dc-copy-btn" data-copy="{{ telephone }}" data-toggle="tooltip" title="{{ text_copy }}" onclick="event.preventDefault(); copyToClipboard(this);"><i data-lucide="copy" width="12" height="12"></i></a></span>
               <input type="text" class="form-control edit-only" value="{{ telephone }}" data-field="telephone" style="display:none">
             </div>
             <div class="dcx-sidebar-card__field">
               <span class="dcx-sidebar-card__label">{{ entry_tax_number }}</span>
-              <span class="dcx-sidebar-card__value view-only" data-field="tax_number">{{ tax_number ?: '—' }}</span>
+              <span class="dcx-sidebar-card__value view-only" data-field="tax_number">{{ tax_number ?: '—' }}{% if tax_number %}<a href="#" class="dc-copy-btn" data-copy="{{ tax_number }}" data-toggle="tooltip" title="{{ text_copy }}" onclick="event.preventDefault(); copyToClipboard(this);"><i data-lucide="copy" width="12" height="12"></i></a>{% endif %}</span>
               <input type="text" class="form-control edit-only" value="{{ tax_number }}" data-field="tax_number" style="display:none">
             </div>
             <div class="dcx-sidebar-card__field">
@@ -304,7 +304,7 @@
             {# Shipping address first #}
             <div class="dcx-sidebar-card__field">
               <span class="dcx-sidebar-card__label">{{ text_shipping_address }}</span>
-              <span class="dcx-sidebar-card__value view-only">{{ shipping_address|raw }}</span>
+              <span class="dcx-sidebar-card__value view-only">{{ shipping_address|raw }}<a href="#" class="dc-copy-btn" data-copy-html="{{ shipping_address }}" data-toggle="tooltip" title="{{ text_copy }}" onclick="event.preventDefault(); copyToClipboard(this);"><i data-lucide="copy" width="12" height="12"></i></a></span>
               <div class="edit-only" id="edit-shipping-address" style="display:none">
                 <input type="text" class="form-control" value="{{ shipping_firstname }}" data-address-field="shipping_firstname" placeholder="{{ entry_firstname }}" style="margin-bottom:3px">
                 <input type="text" class="form-control" value="{{ shipping_lastname }}" data-address-field="shipping_lastname" placeholder="{{ entry_lastname }}" style="margin-bottom:3px">
@@ -331,7 +331,7 @@
                   <span class="same-as-badge"><i data-lucide="corner-down-right" width="12" height="12"></i> {{ text_same_as_shipping }}</span>
                 </span>
               {% else %}
-                <span class="dcx-sidebar-card__value view-only">{{ payment_address|raw }}</span>
+                <span class="dcx-sidebar-card__value view-only">{{ payment_address|raw }}<a href="#" class="dc-copy-btn" data-copy-html="{{ payment_address }}" data-toggle="tooltip" title="{{ text_copy }}" onclick="event.preventDefault(); copyToClipboard(this);"><i data-lucide="copy" width="12" height="12"></i></a></span>
               {% endif %}
               <div class="edit-only" style="display:none;margin-top:4px">
                 <label class="checkbox-inline" style="font-size:12px">
@@ -444,10 +444,10 @@
                 <span class="dcx-sidebar-card__label">{{ text_reward }}</span>
                 <span class="dcx-sidebar-card__value">{{ reward }}</span>
                 <div class="dcx-sidebar-card__actions">
-                  <button type="button" class="btn btn-xs btn-success btn--icon" onclick="addReward()" title="{{ button_reward_add }}">
+                  <button type="button" class="btn btn-xs btn-success btn--icon" onclick="addReward()" data-toggle="tooltip" title="{{ button_reward_add }}">
                     <i data-lucide="plus" width="11" height="11"></i>
                   </button>
-                  <button type="button" class="btn btn-xs btn-danger btn--icon" onclick="removeReward()" title="{{ button_reward_remove }}">
+                  <button type="button" class="btn btn-xs btn-danger btn--icon" onclick="removeReward()" data-toggle="tooltip" title="{{ button_reward_remove }}">
                     <i data-lucide="minus" width="11" height="11"></i>
                   </button>
                 </div>
@@ -459,10 +459,10 @@
                 <span class="dcx-sidebar-card__label">{{ text_affiliate }}</span>
                 <span class="dcx-sidebar-card__value">{{ affiliate_firstname }} {{ affiliate_lastname }} ({{ commission }})</span>
                 <div class="dcx-sidebar-card__actions">
-                  <button type="button" class="btn btn-xs btn-success btn--icon" onclick="addCommission()" title="{{ button_commission_add }}">
+                  <button type="button" class="btn btn-xs btn-success btn--icon" onclick="addCommission()" data-toggle="tooltip" title="{{ button_commission_add }}">
                     <i data-lucide="plus" width="11" height="11"></i>
                   </button>
-                  <button type="button" class="btn btn-xs btn-danger btn--icon" onclick="removeCommission()" title="{{ button_commission_remove }}">
+                  <button type="button" class="btn btn-xs btn-danger btn--icon" onclick="removeCommission()" data-toggle="tooltip" title="{{ button_commission_remove }}">
                     <i data-lucide="minus" width="11" height="11"></i>
                   </button>
                 </div>
@@ -642,6 +642,11 @@ body.dcx-global-editing .dcx-sidebar-edit-link { display:none !important; }
 .tracking-row__remove { flex-shrink:0; }
 
 .dcx-sidebar-card__field-row { display:flex; align-items:center; gap:6px; width:100%; }
+
+.dc-copy-btn { display:inline-flex; align-items:center; justify-content:center; color:#9ca3af; text-decoration:none !important; flex-shrink:0; }
+.dc-copy-btn:hover { color:#2563eb; }
+.dc-copy-btn.is-copied { color:#16a34a; }
+.dc-copy-btn svg { width:12px; height:12px; }
 
 .order-browser-toggle { font-size:11px; color:#666; cursor:pointer; display:flex; align-items:center; gap:4px; }
 .order-browser-toggle:hover { color:#333; }
@@ -1127,6 +1132,42 @@ function showAlert(msg, type) {
 		msg + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div></div></div>');
 	lucide.createIcons();
 	setTimeout(() => { const a = c.querySelector('.alert'); if (a) a.remove(); }, 5000);
+}
+
+function copyToClipboard(btn) {
+	const html = btn.getAttribute('data-copy-html');
+	let value;
+	if (html !== null) {
+		const div = document.createElement('div');
+		div.innerHTML = html;
+		div.querySelectorAll('br').forEach(br => br.replaceWith(document.createTextNode('\n')));
+		value = div.textContent || '';
+		value = value.replace(/\n{3,}/g, '\n\n').trim();
+	} else {
+		value = (btn.getAttribute('data-copy') || '').trim();
+	}
+	if (!value) return;
+	const done = () => {
+		btn.classList.add('is-copied');
+		clearTimeout(btn._dcCopyTimer);
+		btn._dcCopyTimer = setTimeout(() => btn.classList.remove('is-copied'), 1500);
+	};
+	if (navigator.clipboard && window.isSecureContext) {
+		navigator.clipboard.writeText(value).then(done, () => fallbackCopy(value, done));
+	} else {
+		fallbackCopy(value, done);
+	}
+}
+
+function fallbackCopy(text, done) {
+	const ta = document.createElement('textarea');
+	ta.value = text;
+	ta.style.position = 'fixed';
+	ta.style.opacity = '0';
+	document.body.appendChild(ta);
+	ta.select();
+	try { document.execCommand('copy'); done(); } catch (e) {}
+	document.body.removeChild(ta);
 }
 
 function showAlertAndReload(msg, type) {

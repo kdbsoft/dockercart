@@ -36,7 +36,7 @@
 
 {# ==================== TOP BAR ==================== #}
 <header class="bg-white border-b border-gray-200 px-4 py-2 flex items-center gap-3 shrink-0 z-10" style="min-height:48px">
-	<a href="{{ back }}" class="flex items-center gap-1 text-gray-500 hover:text-gray-700 shrink-0" title="{{ text_back_to_layouts }}">
+	<a href="{{ back }}" class="flex items-center gap-1 text-gray-500 hover:text-gray-700 shrink-0" data-toggle="tooltip" title="{{ text_back_to_layouts }}">
 		<i data-lucide="arrow-left" class="w-4 h-4"></i>
 	</a>
 
@@ -64,23 +64,23 @@
 	<div class="flex-1"></div>
 
 	<div class="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5 shrink-0" id="viewport-switcher">
-		<button type="button" data-viewport="desktop" class="px-2 py-1 rounded-md text-xs font-medium bg-white shadow-sm text-gray-700" title="Desktop">
+		<button type="button" data-viewport="desktop" class="px-2 py-1 rounded-md text-xs font-medium bg-white shadow-sm text-gray-700" data-toggle="tooltip" title="Desktop">
 			<i data-lucide="monitor" class="w-3.5 h-3.5"></i>
 		</button>
-		<button type="button" data-viewport="tablet" class="px-2 py-1 rounded-md text-xs font-medium text-gray-500 hover:text-gray-700" title="Tablet">
+		<button type="button" data-viewport="tablet" class="px-2 py-1 rounded-md text-xs font-medium text-gray-500 hover:text-gray-700" data-toggle="tooltip" title="Tablet">
 			<i data-lucide="tablet" class="w-3.5 h-3.5"></i>
 		</button>
-		<button type="button" data-viewport="mobile" class="px-2 py-1 rounded-md text-xs font-medium text-gray-500 hover:text-gray-700" title="Mobile">
+		<button type="button" data-viewport="mobile" class="px-2 py-1 rounded-md text-xs font-medium text-gray-500 hover:text-gray-700" data-toggle="tooltip" title="Mobile">
 			<i data-lucide="smartphone" class="w-3.5 h-3.5"></i>
 		</button>
 	</div>
 
-	<a href="{{ preview_url }}" target="_blank" class="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 hover:text-gray-800 border border-gray-200 rounded shrink-0" title="{{ text_preview_page }}">
+	<a href="{{ preview_url }}" target="_blank" class="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 hover:text-gray-800 border border-gray-200 rounded shrink-0" data-toggle="tooltip" title="{{ text_preview_page }}">
 		<i data-lucide="external-link" class="w-3.5 h-3.5"></i>
 		<span class="hidden sm:inline">{{ text_preview_page }}</span>
 	</a>
 
-	<a href="{{ classic_url }}" class="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 hover:text-gray-800 border border-gray-200 rounded shrink-0" title="{{ text_back_to_classic }}">
+	<a href="{{ classic_url }}" class="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 hover:text-gray-800 border border-gray-200 rounded shrink-0" data-toggle="tooltip" title="{{ text_back_to_classic }}">
 		<i data-lucide="file-text" class="w-3.5 h-3.5"></i>
 		<span class="hidden sm:inline">{{ text_switch_to_classic }}</span>
 	</a>
@@ -165,10 +165,10 @@
 					data-module-edit="{{ module.edit }}">
 					<i data-lucide="grip-vertical" class="w-3.5 h-3.5 text-gray-300 shrink-0 cursor-grab"></i>
 					<span class="flex-1 truncate text-xs font-medium">{{ module.display_name ?? module.name }}</span>
-					<button type="button" class="module-edit-btn text-gray-400 hover:text-blue-600 p-0.5" data-module-idx="{{ module.idx }}" title="{{ text_edit_module }}">
+					<button type="button" class="module-edit-btn text-gray-400 hover:text-blue-600 p-0.5" data-module-idx="{{ module.idx }}" data-toggle="tooltip" title="{{ text_edit_module }}">
 						<i data-lucide="settings" class="w-3 h-3"></i>
 					</button>
-					<button type="button" class="module-remove-btn text-gray-400 hover:text-red-600 p-0.5" data-module-idx="{{ module.idx }}" title="{{ text_remove_module }}">
+					<button type="button" class="module-remove-btn text-gray-400 hover:text-red-600 p-0.5" data-module-idx="{{ module.idx }}" data-toggle="tooltip" title="{{ text_remove_module }}">
 						<i data-lucide="x" class="w-3 h-3"></i>
 					</button>
 				</div>
