@@ -26,9 +26,27 @@ class ControllerReportReport extends Controller {
 			if ($this->config->get('report_' . $code . '_status') && $this->user->hasPermission('access', 'extension/report/' . $code)) {
 				$this->load->language('extension/report/' . $code, 'extension');
 				
+				$report_icons = array(
+					'dockercart_analytics' => 'chart-no-axes-column',
+					'sale_order'           => 'shopping-cart',
+					'sale_tax'             => 'percent',
+					'sale_shipping'        => 'truck',
+					'sale_coupon'          => 'ticket-percent',
+					'sale_return'          => 'rotate-ccw',
+					'product_purchased'    => 'package',
+					'product_viewed'       => 'eye',
+					'marketing'            => 'megaphone',
+					'customer_order'       => 'users',
+					'customer_reward'      => 'award',
+					'customer_search'      => 'search',
+					'customer_transaction' => 'credit-card',
+					'customer_activity'    => 'activity'
+				);
+
 				$data['reports'][] = array(
 					'text'       => $this->language->get('extension')->get('heading_title'),
 					'code'       => $code,
+					'icon'       => isset($report_icons[$code]) ? $report_icons[$code] : 'bar-chart-3',
 					'sort_order' => $this->config->get('report_' . $code . '_sort_order'),
 					'href'       => $this->url->link('report/report', 'user_token=' . $this->session->data['user_token'] . '&code=' . $code, true)
 				);
