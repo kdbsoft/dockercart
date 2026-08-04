@@ -208,6 +208,12 @@ class ModelCommonAdminSearch extends Model {
             return ['results' => [], 'total' => 0];
         }
 
+        // Order numbers are often typed with a leading "#" (e.g. "#123").
+        // The hash is not part of the indexed value, so strip it before search.
+        if ($type === 'order') {
+            $query = ltrim($query, '#');
+        }
+
         $filters = [];
 
         if ($this->isMultilingualIndex($type)) {
