@@ -283,7 +283,7 @@ a:hover, a:focus {
     color: var(--dc-text-muted);
     border: 0 !important;
     border-radius: 8px;
-    padding: 8px 14px;
+    padding: 6px 14px;
     font-weight: 500;
     font-size: 13px;
     display: inline-flex;
@@ -307,7 +307,7 @@ a:hover, a:focus {
 .nav-tabs > li.active > a,
 .nav-tabs > li.active > a:hover,
 .nav-tabs > li.active > a:focus-visible {
-    color: var(--dc-primary);
+    color: var(--dc-primary)!important;
     background: color-mix(in srgb, var(--dc-primary) 22%, transparent) !important;
     font-weight: 600;
     box-shadow: 0 0 0 1px var(--dc-primary-ring);
