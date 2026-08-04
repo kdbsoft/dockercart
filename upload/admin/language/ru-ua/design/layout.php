@@ -2,6 +2,7 @@
 
 $_['column_action'] = 'Действие';
 $_['column_name'] = 'Название макета';
+$_['column_route'] = 'Маршруты';
 $_['entry_module'] = 'Модуль';
 $_['entry_name'] = 'Название макета';
 $_['entry_route'] = 'Маршрут';
