@@ -12,6 +12,13 @@ $_['text_direct']      = 'Direct';
 $_['text_other']       = 'Other';
 $_['text_no_results']  = 'No traffic data yet';
 
+// Period
+$_['text_all_time']    = 'All Time';
+$_['text_today']       = 'Today';
+$_['text_week']        = 'Week';
+$_['text_month']       = 'Month';
+$_['text_year']        = 'Year';
+
 // Entry
 $_['entry_status']     = 'Status';
 $_['entry_sort_order'] = 'Sort Order';
