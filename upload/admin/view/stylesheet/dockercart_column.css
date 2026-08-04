@@ -21,13 +21,13 @@
 /* ===================== LAYOUT ===================== */
 
 #column-left {
-	width: 235px;
+	width: 245px;
 	height: 100%;
 	overflow: auto;
 	background: linear-gradient(180deg, #1a1d21 0%, #2d3139 50%, #3d424d 100%);
 	position: absolute;
 	top: 0px;
-	left: -235px;
+	left: -245px;
 	padding-top: 60px;
 	z-index: 10;
 }
