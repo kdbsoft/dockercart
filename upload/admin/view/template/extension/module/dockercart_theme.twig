@@ -282,11 +282,7 @@
             <span class="page-header__back"><i data-lucide="arrow-left" width="20" height="20"></i></span>
             <span class="page-header__title">
               {{ heading_title }}
-              {% if dockercart_theme_status is defined %}
-              <span class="page-header__badge {{ dockercart_theme_status ? 'page-header__badge--active' : 'page-header__badge--inactive' }}">
-                {{ dockercart_theme_status ? text_enabled : text_disabled }}
-              </span>
-              {% endif %}
+              <span class="page-header__badge page-header__badge--active">{{ text_enabled }}</span>
             </span>
           </a>
           <div class="pull-right">
@@ -350,13 +346,6 @@
               <h4><i data-lucide="settings" width="16" height="16"></i> {{ text_section_general|default('Настройки модуля') }}</h4>
 
               <div class="dcx-fields">
-                <div class="dcx-field">
-                  <label class="dcx-label" for="input-status">{{ entry_status }}</label>
-                  <select name="dockercart_theme_status" id="input-status" class="form-control dc-theme-select-sm">
-                    <option value="1" {% if dockercart_theme_status == 1 %}selected="selected"{% endif %}>{{ text_enabled }}</option>
-                    <option value="0" {% if dockercart_theme_status == 0 %}selected="selected"{% endif %}>{{ text_disabled }}</option>
-                  </select>
-                </div>
                 <div class="dcx-field">
                   <label class="dcx-label" for="input-menu-type">{{ entry_menu_type }}</label>
                   <select name="dockercart_theme_menu_type" id="input-menu-type" class="form-control dc-theme-select-md">

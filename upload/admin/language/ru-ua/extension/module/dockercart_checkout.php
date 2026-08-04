@@ -20,8 +20,6 @@ $_["tab_advanced"] = "Расширенные";
 $_["tab_license"] = "Лицензия (GPL-3.0)";
 
 // General Settings
-$_["entry_status"] = "Статус модуля";
-$_["help_status"] = "Включить или отключить модуль оформления заказа DockerCart";
 $_["text_checkout_settings"] = "Настройки оформления заказа";
 $_["text_select"] = "--- Нет ---";
 $_["text_select_country_first"] = "Сначала выберите страну, затем регион";
@@ -170,6 +168,8 @@ $_["text_license_domain"] = "Тип лицензии";
 $_["text_active"] = "Активно";
 $_["text_inactive"] = "Неактивно";
 $_["text_module"] = "Модуль";
+$_["placeholder_optional_description"] = "Необязательное описание";
+$_["text_configurator_title"] = "Конфигуратор заказа";
 $_["text_module_description"] = "Настройка одностраничного оформления заказа для DockerCart";
 $_["confirm_are_you_sure"] = "Вы уверены?";
 $_["text_req_abbr"] = "обяз";
@@ -183,6 +183,9 @@ $_["text_method_overrides_help"] = "Включите и настройте на�
 $_["text_custom_title"] = "Своё название";
 $_["text_custom_description"] = "Своё описание";
 $_["text_default_title"] = "Название по умолчанию";
+$_["text_method_status_on"] = "Включено";
+$_["text_method_status_off"] = "Выключено";
+$_["button_clear_fields"] = "Очистить поля";
 
 
 // Missing keys from English

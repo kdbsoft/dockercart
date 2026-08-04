@@ -2,6 +2,12 @@
 class ControllerMarketplaceExtension extends Controller {
 	private $error = array();
 
+	// System extensions that cannot be uninstalled or disabled
+	private $system_extensions = array(
+		'dockercart_theme',
+		'dockercart_checkout',
+	);
+
 	// Icon map per extension type
 	private $type_icons = array(
 		'module'    => 'puzzle',
@@ -171,6 +177,7 @@ class ControllerMarketplaceExtension extends Controller {
 					'sort_order'     => $sort_order,
 					'ext_link'       => $ext_link,
 					'is_official'    => (strpos($code, 'dockercart_') === 0),
+					'is_system'      => $this->isSystemExtension($code),
 				);
 				}
 
@@ -205,6 +212,7 @@ class ControllerMarketplaceExtension extends Controller {
 		$data['text_instances']     = $this->language->get('text_instances');
 		$data['text_confirm']       = $this->language->get('text_confirm');
 		$data['text_official']      = $this->language->get('text_official');
+		$data['text_system']        = $this->language->get('text_system');
 
 		$data['text_confirm_instance'] = $this->language->get('text_confirm_instance');
 
@@ -278,6 +286,8 @@ class ControllerMarketplaceExtension extends Controller {
 			|| !preg_match('/^[a-zA-Z0-9_]+$/', $extension)
 		) {
 			$json['error'] = $this->language->get('error_permission');
+		} elseif ($this->isSystemExtension($extension)) {
+			$json['error'] = $this->language->get('error_system_extension');
 		} else {
 			$this->load->model('setting/extension');
 
@@ -367,9 +377,15 @@ class ControllerMarketplaceExtension extends Controller {
 		} else {
 			$this->load->model('setting/module');
 
-			$this->model_setting_module->deleteModule((int)$this->request->get['module_id']);
+			$module_info = $this->model_setting_module->getModule((int)$this->request->get['module_id']);
 
-			$json['success'] = $this->language->get('text_success');
+			if (isset($module_info['code']) && $this->isSystemExtension($module_info['code'])) {
+				$json['error'] = $this->language->get('error_system_extension');
+			} else {
+				$this->model_setting_module->deleteModule((int)$this->request->get['module_id']);
+
+				$json['success'] = $this->language->get('text_success');
+			}
 		}
 
 		$this->response->addHeader('Content-Type: application/json');
@@ -389,6 +405,10 @@ class ControllerMarketplaceExtension extends Controller {
 			}
 		}
 		return $types;
+	}
+
+	private function isSystemExtension($code) {
+		return in_array($code, $this->system_extensions);
 	}
 
 	private function resolveStatus($type, $code, $installed) {

@@ -11,7 +11,6 @@ $_['text_disabled']     = 'Отключен';
 $_['text_home']         = 'Главная';
 
 // Entry labels
-$_['entry_status']      = 'Статус';
 $_['entry_call_for_price_status'] = 'Показать кнопку «Цена по запросу»';
 $_['entry_sale_timer_status'] = 'Показывать таймеры акций';
 $_['entry_logo_dark']   = 'Логотип для тёмного фона (футер)';
@@ -73,7 +72,7 @@ $_['button_add_footer_link'] = 'Добавить ссылку подвала';
 
 // Section headings
 $_['text_tab_general']             = 'Основные';
-$_['text_tab_general_subtitle']    = 'Статус модуля, тип меню, логотипы и фавикон';
+$_['text_tab_general_subtitle']    = 'Тип меню, логотипы и фавикон';
 $_['text_tab_social_payments']     = 'Соцсети и оплата';
 $_['text_tab_social_payments_subtitle'] = 'Ссылки на соцсети, виджет мессенджеров и иконки оплаты';
 $_['text_tab_features']            = 'Особенности';
