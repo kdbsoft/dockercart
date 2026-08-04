@@ -3,7 +3,7 @@
   <div class="page-header">
     <div class="container-fluid">
       <div class="row">
-        <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-2 col-xl-8">
           <div class="pull-right">
             <button type="submit" form="form-customer" class="btn btn-primary"><i data-lucide="save" width="16" height="16"></i> {{ button_save }}</button>
             <a href="{{ cancel }}" class="btn btn-default"><i data-lucide="x" width="16" height="16"></i> {{ button_cancel }}</a>
@@ -27,7 +27,7 @@
       </div>
       {% if error_warning %}
       <div class="row">
-        <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-2 col-xl-8">
           <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
@@ -39,11 +39,9 @@
   <div class="container-fluid">
     <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-customer">
     <div class="row">
-      <div class="col-md-12 col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-1 col-xl-10">
+      <div class="col-md-12 col-sm-12 col-lg-12 col-xl-offset-2 col-xl-8">
         <div class="dcx-shell">
-          <div class="dcx-panel">
-            <div class="dcx-panel-body" style="padding-top:0;">
-              <ul class="nav nav-tabs" style="margin-bottom:0;">
+            <ul class="nav nav-tabs">
                 <li class="active"><a href="#tab-general" data-toggle="tab"><i data-lucide="user" width="14" height="14"></i> {{ tab_general }}</a></li>
                 <li><a href="#tab-affiliate" data-toggle="tab"><i data-lucide="users" width="14" height="14"></i> {{ tab_affiliate }}</a></li>
                 {% if customer_id %}
@@ -52,45 +50,29 @@
                 <li><a href="#tab-reward" data-toggle="tab"><i data-lucide="trophy" width="14" height="14"></i> {{ tab_reward }}</a></li>
                 <li><a href="#tab-ip" data-toggle="tab"><i data-lucide="shield" width="14" height="14"></i> {{ tab_ip }}</a></li>
                 {% endif %}
-              </ul>
-              <div class="tab-content" style="padding-top:16px;">
+            </ul>
+          <div class="dcx-panel-body" style="padding-top:16px;">
                 {# ── GENERAL TAB ── #}
                 <div class="tab-pane active" id="tab-general">
-                  <div class="row">
-                    <div class="col-sm-2">
-                      <ul class="nav nav-pills nav-stacked" id="address">
-                        <li class="active"><a href="#tab-customer" data-toggle="tab"><i data-lucide="user" width="14" height="14"></i> {{ tab_general }}</a></li>
-                        {% set address_row = 1 %}
-                        {% for address in addresses %}
-                        <li><a href="#tab-address{{ address_row }}" data-toggle="tab"><i data-lucide="circle-minus" width="14" height="14" onclick="$('#address a:first').tab('show'); $('#address a[href=\'#tab-address{{ address_row }}\']').parent().remove(); $('#tab-address{{ address_row }}').remove();"></i> {{ tab_address }} {{ address_row }}</a></li>
-                        {% set address_row = address_row + 1 %}
-                        {% endfor %}
-                        <li id="address-add"><a onclick="addAddress();"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_address_add }}</a></li>
-                      </ul>
+                  <div class="dcx-panel" style="margin-bottom:16px;">
+                    <div class="dcx-panel-head">
+                      <div class="dcx-panel-head__icon"><i data-lucide="user" width="18" height="18"></i></div>
+                      <div><div class="dcx-panel-title">{{ text_account_card }}</div></div>
                     </div>
-                    <div class="col-sm-10">
-                      <div class="tab-content">
-                        {# ── ACCOUNT PANEL ── #}
-                        <div class="tab-pane active" id="tab-customer">
-                          <div class="dcx-panel" style="margin-bottom:16px;">
-                            <div class="dcx-panel-head">
-                              <div class="dcx-panel-head__icon"><i data-lucide="user" width="18" height="18"></i></div>
-                              <div><div class="dcx-panel-title">{{ text_account_card }}</div></div>
-                            </div>
-                            <div class="dcx-panel-body">
-                              <div class="dcx-fields">
-                                <div class="dcx-field">
-                                  <label class="dcx-label" for="input-customer-group">{{ entry_customer_group }}</label>
-                                  <select name="customer_group_id" id="input-customer-group" class="form-control">
-                                    {% for customer_group in customer_groups %}
-                                    {% if customer_group.customer_group_id == customer_group_id %}
-                                    <option value="{{ customer_group.customer_group_id }}" selected="selected">{{ customer_group.name }}</option>
-                                    {% else %}
-                                    <option value="{{ customer_group.customer_group_id }}">{{ customer_group.name }}</option>
-                                    {% endif %}
-                                    {% endfor %}
-                                  </select>
-                                </div>
+                    <div class="dcx-panel-body">
+                      <div class="dcx-fields">
+                        <div class="dcx-field">
+                          <label class="dcx-label" for="input-customer-group">{{ entry_customer_group }}</label>
+                          <select name="customer_group_id" id="input-customer-group" class="form-control">
+                            {% for customer_group in customer_groups %}
+                            {% if customer_group.customer_group_id == customer_group_id %}
+                            <option value="{{ customer_group.customer_group_id }}" selected="selected">{{ customer_group.name }}</option>
+                            {% else %}
+                            <option value="{{ customer_group.customer_group_id }}">{{ customer_group.name }}</option>
+                            {% endif %}
+                            {% endfor %}
+                          </select>
+                        </div>
                                 <div class="dcx-fields dcx-fields--row">
                                   <div class="dcx-field required">
                                     <label class="dcx-label" for="input-firstname">{{ entry_firstname }}</label>
@@ -303,17 +285,31 @@
                               </div>
                             </div>
                           </div>
-                          {# ── ADDRESS SUB-TABS ── #}
-                          {% set address_row = 1 %}
-                          {% for address in addresses %}
-                          <div class="tab-pane" id="tab-address{{ address_row }}">
-                            <input type="hidden" name="address[{{ address_row }}][address_id]" value="{{ address.address_id }}" />
-                            <div class="dcx-panel" style="margin-bottom:16px;">
-                              <div class="dcx-panel-head">
-                                <div class="dcx-panel-head__icon"><i data-lucide="map-pin" width="18" height="18"></i></div>
-                                <div><div class="dcx-panel-title">{{ text_address_card }} {{ address_row }}</div></div>
-                              </div>
-                              <div class="dcx-panel-body">
+                          {# ── ADDRESS SECTION ── #}
+                          <div class="dcx-panel" style="margin-bottom:16px;">
+                            <div class="dc-address-section__head">
+                              <div class="dcx-panel-head__icon"><i data-lucide="map-pin" width="18" height="18"></i></div>
+                              <div class="dcx-panel-title">{{ text_addresses }}</div>
+                              <button type="button" id="button-address-add" class="btn btn-primary btn-sm dc-address-section__add"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_address_add }}</button>
+                            </div>
+                            <div class="dc-address-list" id="address-list">
+                              {% set address_row = 1 %}
+                              {% if addresses %}
+                              {% for address in addresses %}
+                              <div class="dc-address-item" data-row="{{ address_row }}">
+                                <div class="dc-address-item__head">
+                                  <div class="dc-address-item__icon"><i data-lucide="map-pin" width="16" height="16"></i></div>
+                                  <div>
+                                    <div class="dc-address-item__title">{{ address.firstname }} {{ address.lastname }}{% if address.company %} · {{ address.company }}{% endif %}</div>
+                                    <div class="dc-address-item__subtitle">{% if address.city %}{{ address.city }}{% endif %}{% if address.country %}{% if address.city %}, {% endif %}{{ address.country }}{% endif %}{% if address.address_1 %} · {{ address.address_1 }}{% endif %}</div>
+                                  </div>
+                                  {% if address.address_id == address_id or not addresses %}<span class="dc-address-item__badge">{{ text_default }}</span>{% endif %}
+                                  <div class="dc-address-item__actions">
+                                    <button type="button" class="btn btn-default btn-sm dc-address-item__remove" data-toggle="tooltip" title="{{ button_remove }}"><i data-lucide="trash-2" width="14" height="14"></i></button>
+                                  </div>
+                                </div>
+                                <div class="dc-address-item__body">
+                                <input type="hidden" name="address[{{ address_row }}][address_id]" value="{{ address.address_id }}" />
                                 <div class="dcx-fields">
                                   <div class="dcx-fields dcx-fields--row">
                                     <div class="dcx-field required">
@@ -478,24 +474,24 @@
                                   {% endfor %}
                                   <div class="dcx-field">
                                     <label class="dcx-label">{{ entry_default }}</label>
-                                    <label class="radio">{% if address.address_id == address_id or not addresses %}
+                                    <label class="dc-address-item__default">{% if address.address_id == address_id or not addresses %}
                                       <input type="radio" name="address[{{ address_row }}][default]" value="{{ address_row }}" checked="checked" />
                                       {% else %}
                                       <input type="radio" name="address[{{ address_row }}][default]" value="{{ address_row }}" />
                                       {% endif %}</label>
                                   </div>
+                                  </div>
                                 </div>
                               </div>
+                              {% set address_row = address_row + 1 %}
+                              {% endfor %}
+                              {% else %}
+                              <div class="dc-address-empty">{{ text_no_addresses }}</div>
+                              {% endif %}
                             </div>
                           </div>
-                          {% set address_row = address_row + 1 %}
-                          {% endfor %}
                         </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                {# ── AFFILIATE TAB ── #}
+                        {# ── AFFILIATE TAB ── #}
                 <div class="tab-pane" id="tab-affiliate">
                   <div class="dcx-panel" style="margin-bottom:16px;">
                     <div class="dcx-panel-head">
@@ -817,7 +813,6 @@
                     <div class="dcx-panel-body">
                       <div id="ip"></div>
                     </div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -863,16 +858,46 @@
   <script type="text/javascript"><!--
   var address_row = {{ address_row }};
 
+  function buildAddressSummary(row) {
+    var fn = $('input[name="address[' + row + '][firstname]"]').val();
+    var ln = $('input[name="address[' + row + '][lastname]"]').val();
+    var co = $('input[name="address[' + row + '][company]"]').val();
+    var ci = $('input[name="address[' + row + '][city]"]').val();
+    var a1 = $('input[name="address[' + row + '][address_1]"]').val();
+    var title = '';
+    if (fn || ln) { title = (fn || '') + ' ' + (ln || ''); }
+    if (co) { title += (title ? ' \u00b7 ' : '') + co; }
+    if (!title) { title = '{{ tab_address|e('js') }} ' + row; }
+    var subtitle = '';
+    if (ci) { subtitle = ci; }
+    var $country = $('select[name="address[' + row + '][country_id]"]');
+    if ($country.length) {
+      var countryName = $country.find('option:selected').text();
+      if (countryName && countryName !== '{{ text_select|e('js') }}') {
+        subtitle += (subtitle ? ', ' : '') + countryName;
+      }
+    }
+    if (a1) { subtitle += (subtitle ? ' \u00b7 ' : '') + a1; }
+    var $item = $('.dc-address-item[data-row="' + row + '"]');
+    $item.find('.dc-address-item__title').text(title);
+    $item.find('.dc-address-item__subtitle').text(subtitle);
+  }
+
   function addAddress() {
-    html  = '<div class="tab-pane" id="tab-address' + address_row + '">';
-    html += '  <input type="hidden" name="address[' + address_row + '][address_id]" value="" />';
-    html += '  <div class="dcx-panel" style="margin-bottom:16px;">';
-    html += '    <div class="dcx-panel-head">';
-    html += '      <div class="dcx-panel-head__icon"><i data-lucide="map-pin" width="18" height="18"></i></div>';
-    html += '      <div><div class="dcx-panel-title">{{ text_address_card }} ' + address_row + '</div></div>';
+    html  = '<div class="dc-address-item" data-row="' + address_row + '">';
+    html += '  <div class="dc-address-item__head">';
+    html += '    <div class="dc-address-item__icon"><i data-lucide="map-pin" width="16" height="16"></i></div>';
+    html += '    <div>';
+    html += '      <div class="dc-address-item__title">{{ tab_address|e('js') }} ' + address_row + '</div>';
+    html += '      <div class="dc-address-item__subtitle"></div>';
     html += '    </div>';
-    html += '    <div class="dcx-panel-body">';
-    html += '      <div class="dcx-fields">';
+    html += '    <div class="dc-address-item__actions">';
+    html += '      <button type="button" class="btn btn-default btn-sm dc-address-item__remove" data-toggle="tooltip" title="{{ button_remove|e('js') }}"><i data-lucide="trash-2" width="14" height="14"></i></button>';
+    html += '    </div>';
+    html += '  </div>';
+    html += '  <div class="dc-address-item__body">';
+    html += '    <input type="hidden" name="address[' + address_row + '][address_id]" value="" />';
+    html += '    <div class="dcx-fields">';
     html += '        <div class="dcx-fields dcx-fields--row">';
     html += '          <div class="dcx-field required">';
     html += '            <label class="dcx-label" for="input-firstname' + address_row + '">{{ entry_firstname|e('js') }}</label>';
@@ -994,41 +1019,70 @@
     {% endfor %}
     html += '        <div class="dcx-field">';
     html += '          <label class="dcx-label">{{ entry_default|e('js') }}</label>';
-    html += '          <label class="radio"><input type="radio" name="address[' + address_row + '][default]" value="1" /></label>';
+    html += '          <label class="dc-address-item__default"><input type="radio" name="address[' + address_row + '][default]" value="' + address_row + '" /></label>';
     html += '        </div>';
     html += '      </div>';
     html += '    </div>';
     html += '  </div>';
     html += '</div>';
 
-    $('#tab-general .tab-content').append(html);
+    $('#address-list .dc-address-empty').remove();
+    $('#address-list').append(html);
 
-    $('select[name=\'customer_group_id\']').trigger('change');
-    $('select[name=\'address[' + address_row + '][country_id]\']').trigger('change');
+    $('select[name="customer_group_id"]').trigger('change');
+    $('select[name="address[' + address_row + '][country_id]"]').trigger('change');
 
-    $('#address-add').before('<li><a href="#tab-address' + address_row + '" data-toggle="tab"><i data-lucide="circle-minus" width="14" height="14" onclick="$(\'#address a:first\').tab(\'show\'); $(\'a[href=\\\'#tab-address' + address_row + '\\\']\').parent().remove(); $(\'#tab-address' + address_row + '\').remove();"></i> {{ tab_address|e('js') }} ' + address_row + '</a></li>');
     lucide.createIcons();
-
-    $('#address a[href=\'#tab-address' + address_row + '\']').tab('show');
+    $('#address-list .dc-address-item[data-row="' + address_row + '"] [data-toggle="tooltip"]').tooltip();
 
     $('.date').datetimepicker({ language: '{{ datepicker }}', pickTime: false });
     $('.datetime').datetimepicker({ language: '{{ datepicker }}', pickDate: true, pickTime: true });
     $('.time').datetimepicker({ language: '{{ datepicker }}', pickDate: false });
 
-    $('#tab-address' + address_row + ' .form-group[data-sort]').detach().each(function() {
-      if ($(this).attr('data-sort') >= 0 && $(this).attr('data-sort') <= $('#tab-address' + address_row + ' .form-group').length) {
-        $('#tab-address' + address_row + ' .form-group').eq($(this).attr('data-sort')).before(this);
+    // Live summary update for the new address
+    (function(row) {
+      $('#address-list').on('change keyup', '.dc-address-item[data-row="' + row + '"] :input', function() { buildAddressSummary(row); });
+    })(address_row);
+
+    // Sort custom fields inside the new item
+    $('.dc-address-item[data-row="' + address_row + '"] .dcx-field[data-sort]').detach().each(function() {
+      var $list = $('.dc-address-item[data-row="' + address_row + '"] .dcx-fields');
+      var sort = parseInt($(this).attr('data-sort'));
+      var $items = $list.children();
+      if (sort >= 0 && sort <= $items.length) {
+        $items.eq(sort).before(this);
       }
-      if ($(this).attr('data-sort') > $('#tab-address' + address_row + ' .form-group').length) {
-        $('#tab-address' + address_row + ' .form-group:last').after(this);
-      }
-      if ($(this).attr('data-sort') < -$('#tab-address' + address_row + ' .form-group').length) {
-        $('#tab-address' + address_row + ' .form-group:first').before(this);
+      if (sort > $items.length) {
+        $list.append(this);
       }
     });
 
     address_row++;
   }
+
+  // Add-address button
+  $('#button-address-add').on('click', function() {
+    addAddress();
+  });
+
+  // Remove address (delegated; works for server-rendered + dynamically added items)
+  $('#address-list').on('click', '.dc-address-item__remove', function() {
+    $(this).closest('.dc-address-item').remove();
+    if ($('#address-list .dc-address-item').length === 0) {
+      $('#address-list').html('<div class="dc-address-empty">{{ text_no_addresses|e('js') }}</div>');
+    }
+  });
+
+  // Live summary update + tooltip init for server-rendered addresses
+  {% set address_row = 1 %}
+  {% for address in addresses %}
+  (function(row) {
+    $('#address-list').on('change keyup', '.dc-address-item[data-row="' + row + '"] :input', function() { buildAddressSummary(row); });
+  })({{ address_row }});
+  {% set address_row = address_row + 1 %}
+  {% endfor %}
+  $('#address-list .dc-address-item__remove[data-toggle="tooltip"]').tooltip();
+  $('#button-address-add[data-toggle="tooltip"]').tooltip();
   //--></script>
   <script type="text/javascript"><!--
   function country(element, index, zone_id) {
@@ -1170,7 +1224,7 @@
     $('#ip').load(this.href);
   });
   $('#ip').load('index.php?route=customer/customer/ip&user_token={{ user_token }}&customer_id={{ customer_id }}');
-  $('#content').delegate('button[id^=\'button-custom-field\'], button[id^=\'button-address\']', 'click', function() {
+  $('#content').delegate('button[id^=\'button-custom-field\'], button[id^=\'button-address\'][id$=\'-custom-field\']', 'click', function() {
     var node = this;
     $('#form-upload').remove();
     $('body').prepend('<form enctype="multipart/form-data" id="form-upload" style="display: none;"><input type="file" name="file" /></form>');
@@ -1206,39 +1260,48 @@
   // Sort the custom fields
   {% set address_row = 1 %}
   {% for address in addresses %}
-  $('#tab-address{{ address_row }} .form-group[data-sort]').detach().each(function() {
-    if ($(this).attr('data-sort') >= 0 && $(this).attr('data-sort') <= $('#tab-address{{ address_row }} .form-group').length) {
-      $('#tab-address{{ address_row }} .form-group').eq($(this).attr('data-sort')).before(this);
+  $('.dc-address-item[data-row="{{ address_row }}"] .dcx-field[data-sort]').detach().each(function() {
+    var $list = $('.dc-address-item[data-row="{{ address_row }}"] .dcx-fields');
+    var sort = $(this).attr('data-sort');
+    var $items = $list.children();
+    if (sort >= 0 && sort <= $items.length) {
+      $items.eq(sort).before(this);
     }
-    if ($(this).attr('data-sort') > $('#tab-address{{ address_row }} .form-group').length) {
-      $('#tab-address{{ address_row }} .form-group:last').after(this);
+    if (sort > $items.length) {
+      $list.append(this);
     }
-    if ($(this).attr('data-sort') < -$('#tab-address{{ address_row }} .form-group').length) {
-      $('#tab-address{{ address_row }} .form-group:first').before(this);
+    if (sort < -$items.length) {
+      $list.prepend(this);
     }
   });
   {% set address_row = address_row + 1 %}
   {% endfor %}
-  $('#tab-customer .form-group[data-sort]').detach().each(function() {
-    if ($(this).attr('data-sort') >= 0 && $(this).attr('data-sort') <= $('#tab-customer .form-group').length) {
-      $('#tab-customer .form-group').eq($(this).attr('data-sort')).before(this);
+  $('#tab-general .dcx-field[data-sort]').detach().each(function() {
+    var $list = $('#tab-general .dcx-fields').first();
+    var sort = $(this).attr('data-sort');
+    var $items = $list.children();
+    if (sort >= 0 && sort <= $items.length) {
+      $items.eq(sort).before(this);
     }
-    if ($(this).attr('data-sort') > $('#tab-customer .form-group').length) {
-      $('#tab-customer .form-group:last').after(this);
+    if (sort > $items.length) {
+      $list.append(this);
     }
-    if ($(this).attr('data-sort') < -$('#tab-customer .form-group').length) {
-      $('#tab-customer .form-group:first').before(this);
+    if (sort < -$items.length) {
+      $list.prepend(this);
     }
   });
-  $('#tab-affiliate .form-group[data-sort]').detach().each(function() {
-    if ($(this).attr('data-sort') >= 0 && $(this).attr('data-sort') <= $('#tab-affiliate .form-group').length) {
-      $('#tab-affiliate .form-group').eq($(this).attr('data-sort')).before(this);
+  $('#tab-affiliate .dcx-field[data-sort]').detach().each(function() {
+    var $list = $('#tab-affiliate .dcx-fields').first();
+    var sort = $(this).attr('data-sort');
+    var $items = $list.children();
+    if (sort >= 0 && sort <= $items.length) {
+      $items.eq(sort).before(this);
     }
-    if ($(this).attr('data-sort') > $('#tab-affiliate .form-group').length) {
-      $('#tab-affiliate .form-group:last').after(this);
+    if (sort > $items.length) {
+      $list.append(this);
     }
-    if ($(this).attr('data-sort') < -$('#tab-affiliate .form-group').length) {
-      $('#tab-affiliate .form-group:first').before(this);
+    if (sort < -$items.length) {
+      $list.prepend(this);
     }
   });
   //--></script>
@@ -1249,5 +1312,4 @@
   });
   $('input[name=\'payment\']:checked').trigger('change');
   //--></script>
-</div>
 {{ footer }}
