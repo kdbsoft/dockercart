@@ -138,6 +138,9 @@ class ModelExtensionModuleDockercartSearch extends Model {
         // Product variant article codes (configurable products). Added in v3.2.
         $manticore->query("ALTER TABLE `products` ADD COLUMN `variant_codes` text");
 
+        // Order number as a searchable full-text field (admin search by order #). Added in v3.4.
+        $manticore->query("ALTER TABLE `orders` ADD COLUMN `order_number` text");
+
         $this->createOrderIndexSchema();
         $this->createCustomerIndexSchema();
     }
@@ -531,6 +534,7 @@ class ModelExtensionModuleDockercartSearch extends Model {
 
         $manticore->query("CREATE TABLE IF NOT EXISTS orders (
             id BIGINT PRIMARY KEY,
+            order_number TEXT,
             firstname TEXT,
             lastname TEXT,
             email TEXT,
@@ -613,6 +617,7 @@ class ModelExtensionModuleDockercartSearch extends Model {
 
         $doc = [
             'id' => (int)$order_id,
+            'order_number' => (string)$order_id,
             'store_id' => (int)$order['store_id'],
             'customer_id' => (int)$order['customer_id'],
             'customer_group_id' => (int)$order['customer_group_id'],
