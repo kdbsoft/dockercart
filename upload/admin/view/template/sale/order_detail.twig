@@ -3,7 +3,7 @@
   <div class="page-header">
     <div class="container-fluid">
       <div class="row">
-        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-9">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
           <a href="{{ cancel }}" class="page-header__link">
             <span class="page-header__back"><i data-lucide="arrow-left" width="20" height="20"></i></span>
             <span class="page-header__title">
@@ -52,7 +52,7 @@
   {% if flow_enabled %}
   <div class="container-fluid" style="margin-bottom:12px">
     <div class="row">
-      <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-9">
+      <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
         {% include 'sale/order_flow_stages.twig' %}
       </div>
     </div>
@@ -61,7 +61,7 @@
 
   <div class="container-fluid">
     <div class="row">
-      <div class="col-md-12 col-sm-12 col-lg-8 col-xl-offset-1 col-xl-6">
+      <div class="col-md-12 col-sm-12 col-lg-8 col-xl-offset-1 col-xl-7">
 
         {% if success %}
         <div class="alert alert-success alert-dismissible" style="margin-bottom:12px">
@@ -1128,7 +1128,7 @@ function revertAllInputs() {
 function showAlert(msg, type) {
 	const c = document.querySelector('#content > .container-fluid');
 	c.insertAdjacentHTML('afterbegin',
-		'<div class="row"><div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-9"><div class="alert alert-' + (type || 'success') + ' alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> ' +
+		'<div class="row"><div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10"><div class="alert alert-' + (type || 'success') + ' alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> ' +
 		msg + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div></div></div>');
 	lucide.createIcons();
 	setTimeout(() => { const a = c.querySelector('.alert'); if (a) a.remove(); }, 5000);
