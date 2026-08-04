@@ -286,6 +286,7 @@ $_['error_coupon_invalid']       = 'Промо-код недействителе
 $_['text_payer_address']         = 'Адрес плательщика';
 $_['text_same_as_billing']       = 'Совпадает с адресом плательщика';
 $_['text_same_as_shipping']      = 'Совпадает с адресом доставки';
+$_['text_copy']                  = 'Скопировать в буфер';
 $_['text_browser_info']          = 'Браузер и устройство';
 $_['text_stock']                 = 'Остаток';
 $_['text_description']           = 'Описание';
