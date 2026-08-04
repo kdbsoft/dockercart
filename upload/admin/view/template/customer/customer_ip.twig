@@ -1,29 +1,27 @@
-<div class="table-responsive">
-  <table class="table table-hover">
-    <thead>
-      <tr>
-        <td class="text-left">{{ column_ip }}</td>
-        <td class="text-right">{{ column_total }}</td>
-        <td class="text-left">{{ column_date_added }}</td>
-      </tr>
-    </thead>
-    <tbody>
-      {% if ips %}
-      {% for ip in ips %}
-      <tr>
-        <td class="text-left"><a href="https://whatismyipaddress.com/ip/{{ ip.ip }}" target="_blank">{{ ip.ip }}</a></td>
-        <td class="text-right"><a href="{{ ip.filter_ip }}" target="_blank">{{ ip.total }}</a></td>
-        <td class="text-left">{{ ip.date_added }}</td>      </tr>
-      {% endfor %}
-      {% else %}
-      <tr>
-        <td class="text-center" colspan="3">{{ text_no_results }}</td>
-      </tr>
-      {% endif %}
-    </tbody>
-  </table>
+<div class="dc-ip-list">
+  {% if ips %}
+  {% for ip in ips %}
+  <div class="dc-ip-item">
+    <div class="dc-ip-item__icon"><i data-lucide="shield" width="16" height="16"></i></div>
+    <div class="dc-ip-item__body">
+      <div class="dc-ip-item__title"><a href="https://whatismyipaddress.com/ip/{{ ip.ip }}" target="_blank">{{ ip.ip }}</a></div>
+      <div class="dc-ip-item__subtitle">{{ column_date_added }}: {{ ip.date_added }}</div>
+    </div>
+    <div class="dc-ip-item__actions">
+      <a href="{{ ip.filter_ip }}" target="_blank" class="btn btn-default btn-sm" data-toggle="tooltip" title="{{ column_total }}: {{ ip.total }}"><i data-lucide="filter" width="14" height="14"></i> {{ ip.total }}</a>
+    </div>
+  </div>
+  {% endfor %}
+  {% else %}
+  <div class="dc-ip-empty">{{ text_no_results }}</div>
+  {% endif %}
 </div>
 <div class="row">
   <div class="col-sm-6 text-left">{{ pagination }}</div>
   <div class="col-sm-6 text-right">{{ results }}</div>
 </div>
+<script type="text/javascript"><!--
+if (window.lucide && typeof window.lucide.createIcons === 'function') {
+  lucide.createIcons();
+}
+//--></script>
