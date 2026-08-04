@@ -7,6 +7,8 @@
         <div class="col-sm-12">
           <h1 class="page-header__title">{{ heading_title }}</h1>
           <div class="pull-right">
+            <button type="button" class="btn btn-success dc-btn-selection" onclick="$('#form-event').attr('action', '{{ enable }}'); $('#form-event').submit();"><i data-lucide="circle-plus" width="16" height="16"></i> {{ button_enable }}</button>
+            <button type="button" class="btn btn-warning dc-btn-selection" onclick="$('#form-event').attr('action', '{{ disable }}'); $('#form-event').submit();"><i data-lucide="circle-minus" width="16" height="16"></i> {{ button_disable }}</button>
             <button type="button" class="btn btn-danger dc-btn-selection" onclick="confirm('{{ text_confirm }}') ? $('#form-event').submit() : false;"><i data-lucide="trash-2" width="16" height="16"></i> {{ button_delete }}</button>
           </div>
         </div>
@@ -24,7 +26,7 @@
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
-    <div class="alert alert-info"><i data-lucide="info" width="16" height="16"></i> {{ text_event }}</div>
+    <div class="alert alert-warning"><i data-lucide="triangle-alert" width="16" height="16"></i> {{ text_event }}</div>
     <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-event">
       <div class="table-responsive">
         <table class="table table-bordered table-hover">
@@ -34,7 +36,6 @@
               <td class="text-left">{% if sort == 'code' %}<a href="{{ sort_code }}" class="{{ order|lower }} sortable">{{ column_code }}</a>{% else %}<a href="{{ sort_code }}" class="sortable">{{ column_code }}</a>{% endif %}</td>
               <td class="text-left">{% if sort == 'status' %}<a href="{{ sort_status }}" class="{{ order|lower }} sortable">{{ column_status }}</a>{% else %}<a href="{{ sort_status }}" class="sortable">{{ column_status }}</a>{% endif %}</td>
               <td class="text-right">{% if sort == 'sort_order' %}<a href="{{ sort_sort_order }}" class="{{ order|lower }} sortable">{{ column_sort_order }}</a>{% else %}<a href="{{ sort_sort_order }}" class="sortable">{{ column_sort_order }}</a>{% endif %}</td>
-              <td class="text-right"></td>
             </tr>
           </thead>
           <tbody>
@@ -49,28 +50,11 @@
             <td class="text-left">{{ event.code }}</td>
             <td class="text-left">{{ event.status }}</td>
             <td class="text-right">{{ event.sort_order }}</td>
-            <td class="text-right" style="white-space:nowrap;">{% if not event.enabled %}<a href="{{ event.enable }}" class="btn btn-success"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_enable }}</a>{% else %}<a href="{{ event.disable }}" class="btn btn-danger"><i data-lucide="circle-minus" width="14" height="14"></i> {{ button_disable }}</a>{% endif %} <div class="btn-group"><button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><i data-lucide="more-vertical" width="16" height="16"></i></button><ul class="dropdown-menu dropdown-menu-right"><li><a href="#" data-toggle="modal" data-target="#modal-event{{ event.event_id }}"><i data-lucide="info" width="14" height="14"></i> {{ text_info }}</a></li></ul></div>
-              <div id="modal-event{{ event.event_id }}" class="modal text-left">
-                <div class="modal-dialog">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                      <h4 class="modal-title">{{ text_info }}</h4>
-                    </div>
-                    <div class="modal-body">
-                      <p><strong>{{ text_trigger }}</strong></p>
-                      <p>{{ event.trigger }}</p>
-                      <p><strong>{{ text_action }}</strong></p>
-                      <p>{{ event.action }}</p>
-                    </div>
-                  </div>
-                </div>
-              </div></td>
           </tr>
           {% endfor %}
           {% else %}
           <tr>
-            <td class="text-center" colspan="5">{{ text_no_results }}</td>
+            <td class="text-center" colspan="4">{{ text_no_results }}</td>
           </tr>
           {% endif %}
           </tbody>
