@@ -6,39 +6,30 @@
       <div class="row">
         <div class="col-sm-12">
           <h1 class="page-header__title">{{ heading_title }}</h1>
-          <div class="pull-right">
-            <button type="button" onclick="$('#filter-report').toggleClass('hidden-sm hidden-xs');" class="btn btn-default hidden-md hidden-lg"><i data-lucide="funnel" width="16" height="16"></i> {{ button_filter }}</button>
-          </div>
         </div>
       </div>
     </div>
   </div>
   <div class="container-fluid">
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <div class="panel-heading__icon"><i data-lucide="chart-no-axes-column" width="16" height="16"></i></div>
-        <div>
-          <h3 class="panel-title">{{ text_type }}</h3>
-          <div class="panel-heading__subtitle">{{ text_report_subtitle }}</div>
+    <div class="dcx-shell">
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i data-lucide="chart-no-axes-column" width="16" height="16"></i></div>
+          <div>
+            <h3 class="dcx-panel-title">{{ text_type }}</h3>
+            <div class="dcx-panel-head__subtitle">{{ text_report_subtitle }}</div>
+          </div>
         </div>
-      </div>
-      <div class="panel-body">
-        <div class="well">
-          <div class="input-group">
-            <select name="report" onchange="location = this.value;" class="form-control">
-              {% for report in reports %}
-              {% if code == report.code %}
-              <option value="{{ report.href }}" selected="selected">{{ report.text }}</option>
-              {% else %}
-              <option value="{{ report.href }}">{{ report.text }}</option>
-              {% endif %}
-              {% endfor %}
-            </select>
-            <span class="input-group-addon"><i data-lucide="funnel" width="14" height="14"></i> {{ text_filter }}</span></div>
+        <div class="dcx-panel-body">
+          <ul class="dcx-pills dcx-pills--reports">
+            {% for report in reports %}
+            <li{% if code == report.code %} class="active"{% endif %}><a href="{{ report.href }}"><i data-lucide="{{ report.icon }}" width="14" height="14"></i>{{ report.text }}</a></li>
+            {% endfor %}
+          </ul>
+          <div>{{ report }}</div>
         </div>
       </div>
     </div>
-    <div>{{ report }}</div>
   </div>
 </div>
 {{ footer }}

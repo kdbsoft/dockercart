@@ -1,5 +1,6 @@
-<div class="row">
-  <div id="filter-report" class="col-md-3 col-md-push-9 col-sm-12 hidden-sm hidden-xs">
+<div class="report-analytics">
+  <!-- Filters -->
+  <div class="dcx-shell">
     <div class="dcx-panel">
       <div class="dcx-panel-head">
         <div class="dcx-panel-head__icon"><i data-lucide="funnel" width="14" height="14"></i></div>
@@ -9,7 +10,7 @@
         </div>
       </div>
       <div class="dcx-panel-body">
-        <div class="dcx-fields">
+        <div class="dcx-fields--row">
           <div class="dcx-field">
             <label class="dcx-label" for="input-date-start">{{ entry_date_start }}</label>
             <div class="input-group date">
@@ -53,6 +54,22 @@
               {% endfor %}
             </select>
           </div>
+          <div class="dcx-field">
+            <label class="dcx-label" for="input-medium">{{ entry_medium }}</label>
+            <select name="filter_utm_medium" id="input-medium" class="form-control">
+              {% for medium in mediums %}
+              {% if medium.value == filter_utm_medium %}
+              <option value="{{ medium.value }}" selected="selected">{{ medium.text }}</option>
+              {% else %}
+              <option value="{{ medium.value }}">{{ medium.text }}</option>
+              {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+          <div class="dcx-field">
+            <label class="dcx-label" for="input-source">{{ entry_source }}</label>
+            <input type="text" name="filter_source" value="{{ filter_source }}" placeholder="{{ entry_source }}" id="input-source" class="form-control" />
+          </div>
           <div class="dcx-field text-right">
             <button type="button" id="button-filter" class="btn btn-default"><i data-lucide="funnel" width="14" height="14"></i> {{ button_filter }}</button>
           </div>
@@ -60,239 +77,352 @@
       </div>
     </div>
   </div>
-  <div class="col-md-9 col-md-pull-3 col-sm-12">
-    <div class="row" style="margin-bottom:16px" id="analytics-summary">
-      <div class="col-sm-2">
-        <div class="dcx-panel text-center" style="padding:12px">
-          <div style="font-size:24px;font-weight:700;line-height:1.2">{{ conversion_rate }}</div>
-          <div style="font-size:11px;color:#888;margin-top:4px">{{ text_conversion }}</div>
-          <div style="font-size:11px;color:#888">{{ text_orders }}: {{ completed_orders }}</div>
-        </div>
+
+  <!-- KPI cards -->
+  <div class="report-kpis">
+    {% for kpi in kpis %}
+    <div class="report-kpi dcx-stat-card{% if kpi.color %} dcx-stat-card--{{ kpi.color }}{% endif %}">
+      <div class="report-kpi__head">
+        <i data-lucide="{{ kpi.icon }}" width="16" height="16"></i>
+        <span>{{ kpi.label }}</span>
       </div>
-      <div class="col-sm-2">
-        <div class="dcx-panel text-center" style="padding:12px">
-          <div style="font-size:24px;font-weight:700;line-height:1.2">{{ aov }}</div>
-          <div style="font-size:11px;color:#888;margin-top:4px">{{ text_aov }}</div>
-          <div style="font-size:11px;color:#888">{{ text_revenue }}: {{ revenue }}</div>
-        </div>
+      <div class="report-kpi__value">{{ kpi.value }}</div>
+      <div class="report-kpi__sub">{{ kpi.sub is defined ? kpi.sub : '' }}</div>
+      {% if kpi.delta is not null %}
+      <div class="report-kpi__delta {{ kpi.delta >= 0 ? 'up' : 'down' }}">
+        <i data-lucide="{{ kpi.delta >= 0 ? 'trending-up' : 'trending-down' }}" width="12" height="12"></i>
+        {{ kpi.delta >= 0 ? '+' : '' }}{{ kpi.delta }}% <span class="report-kpi__vs">{{ text_vs_prev }}</span>
       </div>
-      <div class="col-sm-2">
-        <div class="dcx-panel text-center" style="padding:12px">
-          <div style="font-size:24px;font-weight:700;line-height:1.2">{{ repeat_rate }}</div>
-          <div style="font-size:11px;color:#888;margin-top:4px">{{ text_repeat_rate }}</div>
-          <div style="font-size:11px;color:#888">{{ text_repeat_customers }}: {{ repeat_customers }}/{{ total_customers }}</div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Masonry cards -->
+  <div class="report-masonry">
+
+    <!-- 1. Revenue & orders timeline (line) -->
+    <div class="report-card">
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i data-lucide="chart-line" width="16" height="16"></i></div>
+          <div>
+            <h3 class="dcx-panel-title">{{ text_revenue_orders }}</h3>
+            <div class="dcx-panel-head__subtitle">{{ text_period }}</div>
+          </div>
         </div>
-      </div>
-      <div class="col-sm-2">
-        <div class="dcx-panel text-center" style="padding:12px">
-          <div style="font-size:24px;font-weight:700;line-height:1.2">{{ cancellation_rate }}</div>
-          <div style="font-size:11px;color:#888;margin-top:4px">{{ text_cancellation_rate }}</div>
-          <div style="font-size:11px;color:#888">{{ column_cancelled }}: {{ cancelled_orders }}/{{ total_orders }}</div>
-        </div>
-      </div>
-      <div class="col-sm-4">
-        <div class="dcx-panel text-center" style="padding:12px">
-          <div style="font-size:24px;font-weight:700;line-height:1.2">{{ revenue }}</div>
-          <div style="font-size:11px;color:#888;margin-top:4px">{{ text_revenue }}</div>
-          <div style="font-size:11px;color:#888">{{ text_orders }}: {{ total_orders }}</div>
+        <div class="dcx-panel-body">
+          <div class="report-chart-wrap"><canvas id="chart-revenue-orders"></canvas></div>
         </div>
       </div>
     </div>
 
-    <div class="dcx-panel">
-      <div class="dcx-panel-head">
-        <div class="dcx-panel-head__icon"><i data-lucide="chart-no-axes-column" width="16" height="16"></i></div>
-        <div>
-          <h3 class="dcx-panel-title">{{ heading_title }}</h3>
-          <div class="dcx-panel-head__subtitle">{{ text_report_subtitle }}</div>
+    <!-- 2. Conversion rate (bar) -->
+    <div class="report-card">
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i data-lucide="percent" width="16" height="16"></i></div>
+          <div>
+            <h3 class="dcx-panel-title">{{ text_conversion }}</h3>
+            <div class="dcx-panel-head__subtitle">{{ text_conversion_subtitle }}</div>
+          </div>
+        </div>
+        <div class="dcx-panel-body">
+          <div class="report-chart-wrap"><canvas id="chart-conversion"></canvas></div>
         </div>
       </div>
-      <div class="dcx-panel-body">
-        <div class="table-responsive">
-          <table class="table table-bordered">
-            <thead>
-              <tr>
-                <td class="text-left">{{ column_date_start }}</td>
-                <td class="text-left">{{ column_date_end }}</td>
-                <td class="text-right">{{ column_orders }}</td>
-                <td class="text-right">{{ column_completed }}</td>
-                <td class="text-right">{{ column_conversion }}</td>
-                <td class="text-right">{{ column_revenue }}</td>
-                <td class="text-right">{{ column_aov }}</td>
-              </tr>
-            </thead>
-            <tbody>
-            {% if reports %}
-            {% for report in reports %}
-            <tr>
-              <td class="text-left">{{ report.date_start }}</td>
-              <td class="text-left">{{ report.date_end }}</td>
-              <td class="text-right">{{ report.total_orders }}</td>
-              <td class="text-right">{{ report.completed_orders }}</td>
-              <td class="text-right">{{ report.conversion_rate }}</td>
-              <td class="text-right">{{ report.revenue }}</td>
-              <td class="text-right">{{ report.aov }}</td>
-            </tr>
+    </div>
+
+    <!-- 3. Avg order value (line) -->
+    <div class="report-card">
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i data-lucide="receipt" width="16" height="16"></i></div>
+          <div>
+            <h3 class="dcx-panel-title">{{ text_aov }}</h3>
+            <div class="dcx-panel-head__subtitle">{{ text_aov_subtitle }}</div>
+          </div>
+        </div>
+        <div class="dcx-panel-body">
+          <div class="report-chart-wrap"><canvas id="chart-aov"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Revenue by category (doughnut) -->
+    <div class="report-card">
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i data-lucide="folder-tree" width="16" height="16"></i></div>
+          <div>
+            <h3 class="dcx-panel-title">{{ text_revenue_by_category }}</h3>
+            <div class="dcx-panel-head__subtitle">{{ text_revenue_by_category_subtitle }}</div>
+          </div>
+        </div>
+        <div class="dcx-panel-body">
+          <div class="report-chart-wrap report-chart-wrap--donut"><canvas id="chart-category"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Orders by day of week (bar) -->
+    <div class="report-card">
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i data-lucide="calendar" width="16" height="16"></i></div>
+          <div>
+            <h3 class="dcx-panel-title">{{ text_orders_by_day }}</h3>
+            <div class="dcx-panel-head__subtitle">{{ text_orders_by_day_subtitle }}</div>
+          </div>
+        </div>
+        <div class="dcx-panel-body">
+          <div class="report-chart-wrap"><canvas id="chart-day-of-week"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. Orders by hour (bar) -->
+    <div class="report-card">
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i data-lucide="clock" width="16" height="16"></i></div>
+          <div>
+            <h3 class="dcx-panel-title">{{ text_orders_by_hour }}</h3>
+            <div class="dcx-panel-head__subtitle">{{ text_orders_by_hour_subtitle }}</div>
+          </div>
+        </div>
+        <div class="dcx-panel-body">
+          <div class="report-chart-wrap"><canvas id="chart-hour"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. Conversion by channel (pie) -->
+    <div class="report-card">
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i data-lucide="share-2" width="16" height="16"></i></div>
+          <div>
+            <h3 class="dcx-panel-title">{{ text_by_medium }}</h3>
+            <div class="dcx-panel-head__subtitle">{{ text_by_medium_subtitle }}</div>
+          </div>
+        </div>
+        <div class="dcx-panel-body">
+          <div class="report-chart-wrap report-chart-wrap--donut"><canvas id="chart-medium"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. Traffic sources (polarArea) -->
+    <div class="report-card">
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i data-lucide="globe" width="16" height="16"></i></div>
+          <div>
+            <h3 class="dcx-panel-title">{{ text_traffic_sources }}</h3>
+            <div class="dcx-panel-head__subtitle">{{ text_traffic_subtitle }}</div>
+          </div>
+        </div>
+        <div class="dcx-panel-body">
+          <div class="report-chart-wrap report-chart-wrap--donut"><canvas id="chart-traffic"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 9. Checkout funnel (horizontal bar) -->
+    <div class="report-card">
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i data-lucide="filter" width="16" height="16"></i></div>
+          <div>
+            <h3 class="dcx-panel-title">{{ text_checkout_funnel }}</h3>
+            <div class="dcx-panel-head__subtitle">{{ text_checkout_funnel_subtitle }}</div>
+          </div>
+        </div>
+        <div class="dcx-panel-body">
+          <div class="report-chart-wrap"><canvas id="chart-funnel"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 10. Items per order (bar) -->
+    <div class="report-card">
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i data-lucide="package" width="16" height="16"></i></div>
+          <div>
+            <h3 class="dcx-panel-title">{{ text_products_per_order }}</h3>
+            <div class="dcx-panel-head__subtitle">{{ text_products_per_order_subtitle }}</div>
+          </div>
+        </div>
+        <div class="dcx-panel-body">
+          <div class="report-kpi-inline">
+            <div class="report-kpi-inline__value">{{ avg_items }}</div>
+            <div class="report-kpi-inline__label">{{ text_avg_items }}</div>
+          </div>
+          <div class="report-chart-wrap"><canvas id="chart-items"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 11. Social traffic (doughnut) -->
+    <div class="report-card">
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i data-lucide="share-2" width="16" height="16"></i></div>
+          <div>
+            <h3 class="dcx-panel-title">{{ text_social_traffic }}</h3>
+            <div class="dcx-panel-head__subtitle">{{ text_social_traffic_subtitle }}</div>
+          </div>
+        </div>
+        <div class="dcx-panel-body">
+          {% if social_traffic_labels %}
+          <div class="report-chart-wrap report-chart-wrap--donut"><canvas id="chart-social-traffic"></canvas></div>
+          {% else %}
+          <div class="text-center text-muted">{{ text_no_data }}</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- 12. Social sales (list) -->
+    <div class="report-card">
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i data-lucide="shopping-bag" width="16" height="16"></i></div>
+          <div>
+            <h3 class="dcx-panel-title">{{ text_social_sales }}</h3>
+            <div class="dcx-panel-head__subtitle">{{ text_social_sales_subtitle }}</div>
+          </div>
+        </div>
+        <div class="dcx-panel-body">
+          {% if social_sales %}
+          <ul class="dcx-dash-list">
+            {% for sale in social_sales %}
+            <li class="dcx-dash-list__item">
+              <div class="dcx-dash-list__main">
+                <div class="dcx-dash-list__name">{{ sale.source }}</div>
+                <div class="dcx-dash-list__meta">{{ column_orders }}: {{ sale.orders }} · {{ column_customers }}: {{ sale.customers }}</div>
+              </div>
+              <div class="dcx-dash-list__value">{{ sale.revenue }}</div>
+            </li>
             {% endfor %}
-            {% else %}
-            <tr>
-              <td class="text-center" colspan="7">{{ text_no_results }}</td>
-            </tr>
-            {% endif %}
-            </tbody>
-          </table>
-        </div>
-        <div class="row">
-          <div class="col-sm-6 text-left"><div class="pagination-wrap">{{ pagination }}</div></div>
-          <div class="col-sm-6 text-right">{{ results }}</div>
+          </ul>
+          {% else %}
+          <div class="text-center text-muted">{{ text_no_data }}</div>
+          {% endif %}
         </div>
       </div>
     </div>
 
-    <div class="row" style="margin-bottom:16px">
-      <div class="col-sm-6">
-        <div class="dcx-panel">
-          <div class="dcx-panel-head">
-            <div class="dcx-panel-head__icon"><i data-lucide="calendar" width="16" height="16"></i></div>
-            <div>
-              <h3 class="dcx-panel-title">{{ text_orders_by_day }}</h3>
-              <div class="dcx-panel-head__subtitle">{{ text_orders_by_day_subtitle }}</div>
-            </div>
-          </div>
-          <div class="dcx-panel-body">
-            <div class="table-responsive">
-              <table class="table table-bordered">
-                <thead>
-                  <tr>
-                    <td class="text-left">{{ column_day }}</td>
-                    <td class="text-right">{{ column_orders_count }}</td>
-                  </tr>
-                </thead>
-                <tbody>
-                {% for day in orders_by_day %}
-                <tr>
-                  <td class="text-left">{{ day.name }}</td>
-                  <td class="text-right">{{ day.total }}</td>
-                </tr>
-                {% endfor %}
-                </tbody>
-              </table>
-            </div>
+    <!-- 13. Top products by revenue (list) -->
+    <div class="report-card">
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i data-lucide="trophy" width="16" height="16"></i></div>
+          <div>
+            <h3 class="dcx-panel-title">{{ text_top_products }}</h3>
+            <div class="dcx-panel-head__subtitle">{{ text_top_products_subtitle }}</div>
           </div>
         </div>
-      </div>
-      <div class="col-sm-6">
-        <div class="dcx-panel">
-          <div class="dcx-panel-head">
-            <div class="dcx-panel-head__icon"><i data-lucide="clock" width="16" height="16"></i></div>
-            <div>
-              <h3 class="dcx-panel-title">{{ text_orders_by_hour }}</h3>
-              <div class="dcx-panel-head__subtitle">{{ text_orders_by_hour_subtitle }}</div>
-            </div>
-          </div>
-          <div class="dcx-panel-body">
-            <div class="table-responsive" style="max-height:400px;overflow-y:auto">
-              <table class="table table-bordered table-condensed">
-                <thead>
-                  <tr>
-                    <td class="text-left">{{ column_hour }}</td>
-                    <td class="text-right">{{ column_orders_count }}</td>
-                  </tr>
-                </thead>
-                <tbody>
-                {% for slot in orders_by_hour %}
-                <tr>
-                  <td class="text-left">{{ slot.hour }}</td>
-                  <td class="text-right">{{ slot.total }}</td>
-                </tr>
-                {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="dcx-panel" id="analytics-top-products">
-      <div class="dcx-panel-head">
-        <div class="dcx-panel-head__icon"><i data-lucide="package" width="16" height="16"></i></div>
-        <div>
-          <h3 class="dcx-panel-title">{{ text_top_products }}</h3>
-          <div class="dcx-panel-head__subtitle">{{ text_top_products_subtitle }}</div>
-        </div>
-      </div>
-      <div class="dcx-panel-body">
-        <div class="table-responsive">
-          <table class="table table-bordered">
-            <thead>
-              <tr>
-                <td class="text-left">{{ column_product }}</td>
-                <td class="text-left">{{ column_model }}</td>
-                <td class="text-right">{{ column_quantity }}</td>
-                <td class="text-right">{{ column_total }}</td>
-              </tr>
-            </thead>
-            <tbody>
-            {% if top_products %}
+        <div class="dcx-panel-body">
+          {% if top_products %}
+          <ul class="dcx-dash-list">
             {% for product in top_products %}
-            <tr>
-              <td class="text-left">{{ product.name }}</td>
-              <td class="text-left">{{ product.model }}</td>
-              <td class="text-right">{{ product.quantity }}</td>
-              <td class="text-right">{{ product.total }}</td>
-            </tr>
+            <li class="dcx-dash-list__item">
+              <span class="dcx-dash-list__rank">{{ loop.index }}</span>
+              <div class="dcx-dash-list__main">
+                <div class="dcx-dash-list__name" title="{{ product.name }}">{{ product.name }}</div>
+                <div class="dcx-dash-list__meta">{{ product.model }} · {{ column_quantity }}: {{ product.quantity }}</div>
+              </div>
+              <div class="dcx-dash-list__value">{{ product.total }}</div>
+            </li>
             {% endfor %}
-            {% else %}
-            <tr>
-              <td class="text-center" colspan="4">{{ text_no_results }}</td>
-            </tr>
-            {% endif %}
-            </tbody>
-          </table>
+          </ul>
+          {% else %}
+          <div class="text-center text-muted">{{ text_no_data }}</div>
+          {% endif %}
         </div>
       </div>
     </div>
 
-    <div class="dcx-panel" id="analytics-category-revenue">
-      <div class="dcx-panel-head">
-        <div class="dcx-panel-head__icon"><i data-lucide="folder-tree" width="16" height="16"></i></div>
-        <div>
-          <h3 class="dcx-panel-title">{{ text_revenue_by_category }}</h3>
-          <div class="dcx-panel-head__subtitle">{{ text_revenue_by_category_subtitle }}</div>
+    <!-- 14. Top products by quantity (list) -->
+    <div class="report-card">
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i data-lucide="layers" width="16" height="16"></i></div>
+          <div>
+            <h3 class="dcx-panel-title">{{ text_products_quantity }}</h3>
+            <div class="dcx-panel-head__subtitle">{{ text_products_quantity_subtitle }}</div>
+          </div>
         </div>
-      </div>
-      <div class="dcx-panel-body">
-        <div class="table-responsive">
-          <table class="table table-bordered">
-            <thead>
-              <tr>
-                <td class="text-left">{{ column_category }}</td>
-                <td class="text-right">{{ column_sold }}</td>
-                <td class="text-right">{{ column_revenue }}</td>
-              </tr>
-            </thead>
-            <tbody>
-            {% if categories %}
-            {% for cat in categories %}
-            <tr>
-              <td class="text-left">{{ cat.name }}</td>
-              <td class="text-right">{{ cat.quantity_sold }}</td>
-              <td class="text-right">{{ cat.revenue }}</td>
-            </tr>
+        <div class="dcx-panel-body">
+          {% if qty_products %}
+          <ul class="dcx-dash-list">
+            {% for product in qty_products %}
+            <li class="dcx-dash-list__item">
+              <span class="dcx-dash-list__rank">{{ loop.index }}</span>
+              <div class="dcx-dash-list__main">
+                <div class="dcx-dash-list__name" title="{{ product.name }}">{{ product.name }}</div>
+                <div class="dcx-dash-list__meta">{{ product.model }} · {{ column_orders }}: {{ product.orders }}</div>
+              </div>
+              <div class="dcx-dash-list__value">{{ product.quantity }}</div>
+            </li>
             {% endfor %}
-            {% else %}
-            <tr>
-              <td class="text-center" colspan="3">{{ text_no_results }}</td>
-            </tr>
-            {% endif %}
-            </tbody>
-          </table>
+          </ul>
+          {% else %}
+          <div class="text-center text-muted">{{ text_no_data }}</div>
+          {% endif %}
         </div>
       </div>
     </div>
+
+    <!-- 15. Traffic conversions (table) -->
+    <div class="report-card report-card--wide">
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i data-lucide="activity" width="16" height="16"></i></div>
+          <div>
+            <h3 class="dcx-panel-title">{{ text_traffic_conversions }}</h3>
+            <div class="dcx-panel-head__subtitle">{{ text_traffic_conversions_subtitle }}</div>
+          </div>
+        </div>
+        <div class="dcx-panel-body">
+          {% if traffic_conv %}
+          <div class="table-responsive">
+            <table class="table table-bordered table-condensed">
+              <thead>
+                <tr>
+                  <td class="text-left">{{ column_source }}</td>
+                  <td class="text-left">{{ column_medium }}</td>
+                  <td class="text-right">{{ column_sessions }}</td>
+                  <td class="text-right">{{ column_orders }}</td>
+                  <td class="text-right">{{ column_revenue }}</td>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in traffic_conv %}
+                <tr>
+                  <td class="text-left">{{ row.source }}</td>
+                  <td class="text-left">{{ row.medium }}</td>
+                  <td class="text-right">{{ row.sessions }}</td>
+                  <td class="text-right">{{ row.orders }}</td>
+                  <td class="text-right">{{ row.revenue }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="text-center text-muted">{{ text_no_data }}</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
+
 <script type="text/javascript"><!--
 $('#button-filter').on('click', function() {
   var url = '';
@@ -317,6 +447,16 @@ $('#button-filter').on('click', function() {
     url += '&filter_order_status_id=' + encodeURIComponent(filter_order_status_id);
   }
 
+  var filter_utm_medium = $('select[name=\'filter_utm_medium\']').val();
+  if (filter_utm_medium) {
+    url += '&filter_utm_medium=' + encodeURIComponent(filter_utm_medium);
+  }
+
+  var filter_source = $('input[name=\'filter_source\']').val();
+  if (filter_source) {
+    url += '&filter_source=' + encodeURIComponent(filter_source);
+  }
+
   location = 'index.php?route=report/report&code=dockercart_analytics&user_token={{ user_token }}' + url;
 });
 //--></script>
@@ -325,4 +465,195 @@ $('.date').datetimepicker({
   language: '{{ datepicker }}',
   pickTime: false
 });
+//--></script>
+
+<script type="text/javascript"><!--
+var currencySymbolLeft = {{ currency_symbol_left|json_encode|raw }};
+var currencySymbolRight = {{ currency_symbol_right|json_encode|raw }};
+
+function fmtMoney(v) {
+  return currencySymbolLeft + Number(v).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + currencySymbolRight;
+}
+
+function chartBase() {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'circle', padding: 14, font: { size: 11, family: 'Inter' } } },
+      tooltip: { backgroundColor: 'rgba(31, 41, 55, 0.9)', titleFont: { family: 'Inter' }, bodyFont: { family: 'Inter' }, padding: 10, cornerRadius: 6 }
+    }
+  };
+}
+
+var palette = ['#5b7ea8', '#22c55e', '#f59e0b', '#8b5cf6', '#f43f5e', '#06b6d4', '#84cc16', '#f97316', '#eab308', '#ec4899'];
+
+// 1. Revenue & orders timeline
+new Chart(document.getElementById('chart-revenue-orders'), {
+  type: 'line',
+  data: {
+    labels: {{ ts_labels|json_encode|raw }},
+    datasets: [
+      { label: {{ text_revenue|json_encode|raw }}, data: {{ ts_revenue|json_encode|raw }}, borderColor: '#5b7ea8', backgroundColor: 'rgba(91, 126, 168, 0.1)', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4, yAxisID: 'y' },
+      { label: {{ text_orders|json_encode|raw }}, data: {{ ts_orders|json_encode|raw }}, borderColor: '#22c55e', backgroundColor: 'transparent', tension: 0.4, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4, yAxisID: 'y1' }
+    ]
+  },
+  options: Object.assign(chartBase(), {
+    interaction: { mode: 'index', intersect: false },
+    scales: {
+      x: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10, family: 'Inter' }, maxRotation: 0, autoSkip: true, maxTicksLimit: 8 } },
+      y: { position: 'left', grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10, family: 'Inter' }, callback: function(v) { return currencySymbolLeft + Number(v).toLocaleString(); } } },
+      y1: { position: 'right', grid: { drawOnChartArea: false }, ticks: { font: { size: 10, family: 'Inter' }, precision: 0 } }
+    }
+  })
+});
+
+// 2. Conversion rate
+new Chart(document.getElementById('chart-conversion'), {
+  type: 'bar',
+  data: {
+    labels: {{ ts_labels|json_encode|raw }},
+    datasets: [{ label: {{ text_conversion|json_encode|raw }}, data: {{ ts_conversion|json_encode|raw }}, backgroundColor: '#8b5cf6', borderRadius: 4, borderSkipped: false }]
+  },
+  options: Object.assign(chartBase(), {
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 10, family: 'Inter' }, maxRotation: 0, autoSkip: true, maxTicksLimit: 8 } },
+      y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10, family: 'Inter' }, callback: function(v) { return v + '%'; } } }
+    }
+  })
+});
+
+// 3. AOV
+new Chart(document.getElementById('chart-aov'), {
+  type: 'line',
+  data: {
+    labels: {{ ts_labels|json_encode|raw }},
+    datasets: [{ label: {{ text_aov|json_encode|raw }}, data: {{ ts_aov|json_encode|raw }}, borderColor: '#f59e0b', backgroundColor: 'rgba(245, 158, 11, 0.12)', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4 }]
+  },
+  options: Object.assign(chartBase(), {
+    scales: {
+      x: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10, family: 'Inter' }, maxRotation: 0, autoSkip: true, maxTicksLimit: 8 } },
+      y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10, family: 'Inter' }, callback: function(v) { return currencySymbolLeft + Number(v).toLocaleString(); } } }
+    }
+  })
+});
+
+// 4. Revenue by category
+new Chart(document.getElementById('chart-category'), {
+  type: 'doughnut',
+  data: {
+    labels: {{ cat_labels|json_encode|raw }},
+    datasets: [{ data: {{ cat_values|json_encode|raw }}, backgroundColor: palette, borderWidth: 2, borderColor: '#fff' }]
+  },
+  options: Object.assign(chartBase(), {
+    cutout: '55%',
+    plugins: Object.assign(chartBase().plugins, {
+      tooltip: { backgroundColor: 'rgba(31, 41, 55, 0.9)', callbacks: { label: function(ctx) { return ' ' + ctx.label + ': ' + fmtMoney(ctx.parsed); } } }
+    })
+  })
+});
+
+// 5. Orders by day of week
+new Chart(document.getElementById('chart-day-of-week'), {
+  type: 'bar',
+  data: {
+    labels: {{ dow_labels|json_encode|raw }},
+    datasets: [{ label: {{ text_orders|json_encode|raw }}, data: {{ dow_values|json_encode|raw }}, backgroundColor: '#5b7ea8', borderRadius: 4, borderSkipped: false }]
+  },
+  options: Object.assign(chartBase(), {
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 10, family: 'Inter' } } },
+      y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10, family: 'Inter' }, precision: 0 } }
+    }
+  })
+});
+
+// 6. Orders by hour
+new Chart(document.getElementById('chart-hour'), {
+  type: 'bar',
+  data: {
+    labels: {{ hour_labels|json_encode|raw }},
+    datasets: [{ label: {{ text_orders|json_encode|raw }}, data: {{ hour_values|json_encode|raw }}, backgroundColor: '#22c55e', borderRadius: 4, borderSkipped: false }]
+  },
+  options: Object.assign(chartBase(), {
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 9, family: 'Inter' }, maxRotation: 0, autoSkip: true, maxTicksLimit: 12 } },
+      y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10, family: 'Inter' }, precision: 0 } }
+    }
+  })
+});
+
+// 7. Conversion by channel (pie)
+new Chart(document.getElementById('chart-medium'), {
+  type: 'pie',
+  data: {
+    labels: {{ medium_labels|json_encode|raw }},
+    datasets: [{ data: {{ medium_orders|json_encode|raw }}, backgroundColor: palette, borderWidth: 2, borderColor: '#fff' }]
+  },
+  options: Object.assign(chartBase(), {
+    plugins: Object.assign(chartBase().plugins, {
+      tooltip: { backgroundColor: 'rgba(31, 41, 55, 0.9)', callbacks: { label: function(ctx) { return ' ' + ctx.label + ': ' + ctx.parsed + ' ' + {{ text_orders|json_encode|raw }}; } } }
+    })
+  })
+});
+
+// 8. Traffic sources (polarArea)
+new Chart(document.getElementById('chart-traffic'), {
+  type: 'polarArea',
+  data: {
+    labels: {{ traffic_labels|json_encode|raw }},
+    datasets: [{ data: {{ traffic_values|json_encode|raw }}, backgroundColor: palette.map(function(c) { return c + 'cc'; }), borderWidth: 1, borderColor: '#fff' }]
+  },
+  options: Object.assign(chartBase(), {
+    scales: { r: { ticks: { display: false }, grid: { color: 'rgba(0,0,0,0.06)' } } }
+  })
+});
+
+// 9. Checkout funnel
+new Chart(document.getElementById('chart-funnel'), {
+  type: 'bar',
+  data: {
+    labels: {{ funnel_labels|json_encode|raw }},
+    datasets: [{ label: {{ text_orders|json_encode|raw }}, data: {{ funnel_values|json_encode|raw }}, backgroundColor: ['#f43f5e', '#f97316', '#f59e0b', '#84cc16', '#22c55e'], borderRadius: 4, borderSkipped: false }]
+  },
+  options: Object.assign(chartBase(), {
+    indexAxis: 'y',
+    scales: {
+      x: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10, family: 'Inter' }, precision: 0 } },
+      y: { grid: { display: false }, ticks: { font: { size: 10, family: 'Inter' } } }
+    }
+  })
+});
+
+// 10. Items per order
+new Chart(document.getElementById('chart-items'), {
+  type: 'bar',
+  data: {
+    labels: {{ ts_labels|json_encode|raw }},
+    datasets: [{ label: {{ text_products_per_order|json_encode|raw }}, data: {{ ts_products|json_encode|raw }}, backgroundColor: '#06b6d4', borderRadius: 4, borderSkipped: false }]
+  },
+  options: Object.assign(chartBase(), {
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 9, family: 'Inter' }, maxRotation: 0, autoSkip: true, maxTicksLimit: 8 } },
+      y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10, family: 'Inter' }, precision: 0 } }
+    }
+  })
+});
+
+// 11. Social traffic
+{% if social_traffic_labels %}
+new Chart(document.getElementById('chart-social-traffic'), {
+  type: 'doughnut',
+  data: {
+    labels: {{ social_traffic_labels|json_encode|raw }},
+    datasets: [{ data: {{ social_traffic_values|json_encode|raw }}, backgroundColor: palette, borderWidth: 2, borderColor: '#fff' }]
+  },
+  options: Object.assign(chartBase(), {
+    cutout: '55%',
+    plugins: Object.assign(chartBase().plugins, {
+      tooltip: { backgroundColor: 'rgba(31, 41, 55, 0.9)', callbacks: { label: function(ctx) { return ' ' + ctx.label + ': ' + ctx.parsed + ' ' + {{ text_visits|json_encode|raw }}; } } }
+    })
+  })
+});
+{% endif %}
 //--></script>
