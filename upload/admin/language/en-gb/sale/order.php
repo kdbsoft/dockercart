@@ -320,6 +320,7 @@ $_['text_edit_order_detail']     = 'Edit';
 $_['text_payer_address']         = 'Billing Address';
 $_['text_same_as_billing']       = 'Same as billing address';
 $_['text_same_as_shipping']      = 'Same as shipping address';
+$_['text_copy']                  = 'Copy to clipboard';
 $_['text_browser_info']          = 'Browser & Device';
 $_['text_stock']                 = 'Stock';
 $_['text_description']           = 'Description';
