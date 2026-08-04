@@ -53,7 +53,7 @@
                   <input type="checkbox" name="selected[]" value="{{ review.review_id }}" />
                   {% endif %}</td>
                 <td class="text-center">
-                  <button type="button" class="btn btn-default btn--icon btn-expand-review" data-review-id="{{ review.review_id }}" title="{{ text_expand }}"><i data-lucide="chevron-down" width="14" height="14"></i></button>
+                  <button type="button" class="btn btn-default btn--icon btn-expand-review" data-review-id="{{ review.review_id }}" data-toggle="tooltip" title="{{ text_expand }}"><i data-lucide="chevron-down" width="14" height="14"></i></button>
                 </td>
                 <td class="text-left"><a href="{{ review.edit }}" class="row-title-link">{{ review.name }}</a></td>
                 <td class="text-left">
@@ -65,7 +65,7 @@
                 <td class="text-left">
                   <span class="inline-edit" data-review-id="{{ review.review_id }}" data-field="verified" data-value="{{ review.verified }}">{% if review.verified %}<span class="text-success">{{ text_verified }}</span>{% else %}<span class="text-muted">{{ text_not_verified }}</span>{% endif %}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
                 </td>
-                <td class="text-center">{% if review.has_media %}<i data-lucide="paperclip" width="14" height="14" class="text-muted" title="{{ text_has_media }}"></i>{% else %}<span class="text-muted">—</span>{% endif %}</td>
+                <td class="text-center">{% if review.has_media %}<span data-toggle="tooltip" title="{{ text_has_media }}"><i data-lucide="paperclip" width="14" height="14" class="text-muted"></i></span>{% else %}<span class="text-muted">—</span>{% endif %}</td>
                 <td class="text-left">
                   <span class="inline-edit" data-review-id="{{ review.review_id }}" data-field="status" data-value="{{ review.status_raw }}">{{ review.status }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
                 </td>

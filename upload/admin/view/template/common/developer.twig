@@ -38,7 +38,7 @@
               {{ button_off }}
               </label>
               {% endif %}</div></td>
-          <td class="text-right"><button type="button" value="theme" title="{{ button_refresh }}" class="btn btn-warning"><i data-lucide="refresh-cw" width="14" height="14"></i></button></td>
+          <td class="text-right"><button type="button" value="theme" data-toggle="tooltip" title="{{ button_refresh }}" class="btn btn-warning"><i data-lucide="refresh-cw" width="14" height="14"></i></button></td>
         </tr>
         <tr>
           <td>{{ entry_sass }}</td>
@@ -60,12 +60,12 @@
                 <input type="radio" name="developer_sass" value="0" autocomplete="off">
                 {{ button_off }}</label>
               {% endif %}</div></td>
-          <td class="text-right"><button type="button" value="sass" title="{{ button_refresh }}" class="btn btn-warning"><i data-lucide="refresh-cw" width="14" height="14"></i></button></td>
+          <td class="text-right"><button type="button" value="sass" data-toggle="tooltip" title="{{ button_refresh }}" class="btn btn-warning"><i data-lucide="refresh-cw" width="14" height="14"></i></button></td>
         </tr>
         <tr>
           <td>{{ text_systemcache }}</td>
           <td></td>
-          <td class="text-right"><button type="button" value="clearCache" title="{{ text_clear_cache }}" class="btn btn-danger"><i data-lucide="trash-2" width="14" height="14"></i></button></td>
+          <td class="text-right"><button type="button" value="clearCache" data-toggle="tooltip" title="{{ text_clear_cache }}" class="btn btn-danger"><i data-lucide="trash-2" width="14" height="14"></i></button></td>
         </tr>
       </table>
     </div>

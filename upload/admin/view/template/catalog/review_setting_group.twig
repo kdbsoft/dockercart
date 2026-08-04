@@ -84,7 +84,7 @@
                   <div class="dc-criteria-card" id="criteria-row{{ cidx }}">
                     <div class="dc-criteria-card__header">
                       <span class="dc-criteria-card__title">{{ row.names[admin_language_id] is defined and row.names[admin_language_id].name ? row.names[admin_language_id].name : entry_criteria_name }}</span>
-                      <button type="button" class="btn btn-danger btn-xs btn-remove-criteria" title="{{ button_delete }}"><i data-lucide="circle-minus" width="14" height="14"></i></button>
+                      <button type="button" class="btn btn-danger btn-xs btn-remove-criteria" data-toggle="tooltip" title="{{ button_delete }}"><i data-lucide="circle-minus" width="14" height="14"></i></button>
                     </div>
                     <div class="dc-criteria-card__body">
                       <input type="hidden" name="criteria_id[{{ cidx }}]" value="{{ row.criteria_id }}" />

@@ -151,7 +151,7 @@
               </div>
               {% else %}
               <div class="dcx-field required">
-                <label class="dcx-label" for="input-product">{{ entry_product }} <span title="{{ help_product }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                <label class="dcx-label" for="input-product">{{ entry_product }} <span data-toggle="tooltip" title="{{ help_product }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                 <input type="text" name="product" value="{{ product }}" placeholder="{{ entry_product }}" id="input-product" class="form-control" />
                 <input type="hidden" name="product_id" value="{{ product_id }}" />
                 {% if error_product %}

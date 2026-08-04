@@ -67,10 +67,10 @@
                 {% for step in steps %}
                 <div class="flow-step-row" data-status-id="{{ step.order_status_id }}">
                   <input type="hidden" name="step[]" value="{{ step.order_status_id }}" />
-                  <button type="button" class="btn btn-default btn-xs btn--icon flow-step-btn" onclick="moveStep(this, -1)" title="{{ button_flow_move_up }}"><i data-lucide="chevron-up" width="13" height="13"></i></button>
-                  <button type="button" class="btn btn-default btn-xs btn--icon flow-step-btn" onclick="moveStep(this, 1)" title="{{ button_flow_move_down }}"><i data-lucide="chevron-down" width="13" height="13"></i></button>
+                  <button type="button" class="btn btn-default btn-xs btn--icon flow-step-btn" onclick="moveStep(this, -1)" data-toggle="tooltip" title="{{ button_flow_move_up }}"><i data-lucide="chevron-up" width="13" height="13"></i></button>
+                  <button type="button" class="btn btn-default btn-xs btn--icon flow-step-btn" onclick="moveStep(this, 1)" data-toggle="tooltip" title="{{ button_flow_move_down }}"><i data-lucide="chevron-down" width="13" height="13"></i></button>
                   <span class="flow-step-name">{{ step.name }}</span>
-                  <button type="button" class="btn btn-danger btn-xs btn--icon flow-step-btn" onclick="removeStepRow(this)" title="{{ button_flow_remove }}"><i data-lucide="trash-2" width="13" height="13"></i></button>
+                  <button type="button" class="btn btn-danger btn-xs btn--icon flow-step-btn" onclick="removeStepRow(this)" data-toggle="tooltip" title="{{ button_flow_remove }}"><i data-lucide="trash-2" width="13" height="13"></i></button>
                 </div>
                 {% endfor %}
               </div>
@@ -108,7 +108,7 @@
                     <option value="{{ status.order_status_id }}" {% if status.order_status_id == transition.to %}selected{% endif %}>{{ status.name }}</option>
                     {% endfor %}
                   </select>
-                  <button type="button" class="btn btn-danger btn-xs btn--icon" onclick="removeTransitionRow(this)" title="{{ button_flow_remove }}"><i data-lucide="trash-2" width="13" height="13"></i></button>
+                  <button type="button" class="btn btn-danger btn-xs btn--icon" onclick="removeTransitionRow(this)" data-toggle="tooltip" title="{{ button_flow_remove }}"><i data-lucide="trash-2" width="13" height="13"></i></button>
                 </div>
                 {% endfor %}
               </div>
@@ -205,10 +205,10 @@ function addStepRow() {
 	row.dataset.statusId = select.value;
 	row.innerHTML =
 		'<input type="hidden" name="step[]" value="' + select.value + '" />' +
-		'<button type="button" class="btn btn-default btn-xs btn--icon flow-step-btn" onclick="moveStep(this, -1)" title="{{ button_flow_move_up }}"><i data-lucide="chevron-up" width="13" height="13"></i></button>' +
-		'<button type="button" class="btn btn-default btn-xs btn--icon flow-step-btn" onclick="moveStep(this, 1)" title="{{ button_flow_move_down }}"><i data-lucide="chevron-down" width="13" height="13"></i></button>' +
+		'<button type="button" class="btn btn-default btn-xs btn--icon flow-step-btn" onclick="moveStep(this, -1)" data-toggle="tooltip" title="{{ button_flow_move_up }}"><i data-lucide="chevron-up" width="13" height="13"></i></button>' +
+		'<button type="button" class="btn btn-default btn-xs btn--icon flow-step-btn" onclick="moveStep(this, 1)" data-toggle="tooltip" title="{{ button_flow_move_down }}"><i data-lucide="chevron-down" width="13" height="13"></i></button>' +
 		'<span class="flow-step-name"></span>' +
-		'<button type="button" class="btn btn-danger btn-xs btn--icon flow-step-btn" onclick="removeStepRow(this)" title="{{ button_flow_remove }}"><i data-lucide="trash-2" width="13" height="13"></i></button>';
+		'<button type="button" class="btn btn-danger btn-xs btn--icon flow-step-btn" onclick="removeStepRow(this)" data-toggle="tooltip" title="{{ button_flow_remove }}"><i data-lucide="trash-2" width="13" height="13"></i></button>';
 	row.querySelector('.flow-step-name').textContent = name;
 	container.appendChild(row);
 	select.remove(select.selectedIndex);

@@ -40,17 +40,17 @@
         <div class="filemanager-main" id="filemanager-main">
           <div class="row fm-toolbar">
             <div class="col-sm-7">
-              <a href="{{ parent }}" title="{{ button_parent }}" id="button-parent" class="btn btn-default"><i data-lucide="arrow-up-to-line" width="14" height="14"></i></a>
-              <a href="{{ refresh }}" title="{{ button_refresh }}" id="button-refresh" class="btn btn-default"><i data-lucide="refresh-cw" width="14" height="14"></i></a>
-              <button type="button" title="{{ button_upload }}" id="button-upload" class="btn btn-primary"><i data-lucide="upload" width="14" height="14"></i></button>
-              <button type="button" title="{{ button_folder }}" id="button-folder" class="btn btn-default"><i data-lucide="folder-plus" width="14" height="14"></i></button>
-              <button type="button" title="{{ button_delete }}" id="button-delete" class="btn btn-danger"><i data-lucide="trash-2" width="14" height="14"></i></button>
+              <a href="{{ parent }}" data-toggle="tooltip" title="{{ button_parent }}" id="button-parent" class="btn btn-default"><i data-lucide="arrow-up-to-line" width="14" height="14"></i></a>
+              <a href="{{ refresh }}" data-toggle="tooltip" title="{{ button_refresh }}" id="button-refresh" class="btn btn-default"><i data-lucide="refresh-cw" width="14" height="14"></i></a>
+              <button type="button" data-toggle="tooltip" title="{{ button_upload }}" id="button-upload" class="btn btn-primary"><i data-lucide="upload" width="14" height="14"></i></button>
+              <button type="button" data-toggle="tooltip" title="{{ button_folder }}" id="button-folder" class="btn btn-default"><i data-lucide="folder-plus" width="14" height="14"></i></button>
+              <button type="button" data-toggle="tooltip" title="{{ button_delete }}" id="button-delete" class="btn btn-danger"><i data-lucide="trash-2" width="14" height="14"></i></button>
             </div>
             <div class="col-sm-5">
               <div class="input-group">
                 <input type="text" name="search" value="{{ filter_name }}" placeholder="{{ entry_search }}" class="form-control">
                 <span class="input-group-btn">
-                <button type="button" title="{{ button_search }}" id="button-search" class="btn btn-primary"><i data-lucide="search" width="14" height="14"></i></button>
+                <button type="button" data-toggle="tooltip" title="{{ button_search }}" id="button-search" class="btn btn-primary"><i data-lucide="search" width="14" height="14"></i></button>
                 </span>
               </div>
             </div>
@@ -236,7 +236,7 @@ function fmBindEvents() {
 		content: function() {
 			html  = '<div class="input-group">';
 			html += '  <input type="text" name="folder" value="" placeholder="{{ entry_folder }}" class="form-control">';
-			html += '  <span class="input-group-btn"><button type="button" title="{{ button_folder }}" id="button-create" class="btn btn-primary"><i data-lucide="circle-plus" width="14" height="14"></i></button></span>';
+			html += '  <span class="input-group-btn"><button type="button" data-toggle="tooltip" title="{{ button_folder }}" id="button-create" class="btn btn-primary"><i data-lucide="circle-plus" width="14" height="14"></i></button></span>';
 			html += '</div>';
 			return html;
 		}

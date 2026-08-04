@@ -36,7 +36,7 @@
       </span>
       <span class="dcx-payment-item__date">{{ payment.date_added }}</span>
       {% if not payment.is_reversal %}
-      <button type="button" class="btn btn-xs btn-danger btn--icon dcx-payment-item__remove" onclick="removePayment({{ payment.order_payment_id }})" title="{{ button_remove_payment }}">
+      <button type="button" class="btn btn-xs btn-danger btn--icon dcx-payment-item__remove" onclick="removePayment({{ payment.order_payment_id }})" data-toggle="tooltip" title="{{ button_remove_payment }}">
         <i data-lucide="x" width="11" height="11"></i>
       </button>
       {% endif %}

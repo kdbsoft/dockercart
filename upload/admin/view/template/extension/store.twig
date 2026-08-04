@@ -225,13 +225,13 @@
                         <td>{{ license.last_verified ?? text_no_license }}</td>
                         <td class="text-right">
                           {% if license.update_available %}
-                          <button class="btn btn-xs btn-warning store-update-btn" data-sku="{{ license.ext_sku }}" title="{{ text_update }}"><i data-lucide="arrow-up" width="14" height="14"></i></button>
+                          <button class="btn btn-xs btn-warning store-update-btn" data-sku="{{ license.ext_sku }}" data-toggle="tooltip" title="{{ text_update }}"><i data-lucide="arrow-up" width="14" height="14"></i></button>
                           {% endif %}
                           {% if license.is_installed %}
-                          <button class="btn btn-xs btn-danger store-uninstall-btn" data-sku="{{ license.ext_sku }}" title="{{ text_uninstall }}"><i data-lucide="trash-2" width="14" height="14"></i></button>
+                          <button class="btn btn-xs btn-danger store-uninstall-btn" data-sku="{{ license.ext_sku }}" data-toggle="tooltip" title="{{ text_uninstall }}"><i data-lucide="trash-2" width="14" height="14"></i></button>
                           {% endif %}
                           {% if license.status != 'active' %}
-                          <button class="btn btn-xs btn-success store-verify-btn" data-module-code="{{ license.module_code }}" title="{{ text_verify }}"><i data-lucide="check" width="14" height="14"></i> {{ text_verify }}</button>
+                          <button class="btn btn-xs btn-success store-verify-btn" data-module-code="{{ license.module_code }}" data-toggle="tooltip" title="{{ text_verify }}"><i data-lucide="check" width="14" height="14"></i> {{ text_verify }}</button>
                           {% endif %}
                         </td>
                       </tr>

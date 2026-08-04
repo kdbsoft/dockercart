@@ -72,7 +72,7 @@
                   {% for zone_to_geo_zone in zone_to_geo_zones %}
                   <div class="dc-promo-card" id="zone-to-geo-zone-row{{ zone_to_geo_zone_row }}">
                     <div class="dc-promo-card__actions">
-                      <button type="button" onclick="$('#zone-to-geo-zone-row{{ zone_to_geo_zone_row }}').remove();" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
+                      <button type="button" onclick="$('#zone-to-geo-zone-row{{ zone_to_geo_zone_row }}').remove();" class="dc-promo-card__remove" data-toggle="tooltip" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
                     </div>
                     <div class="dc-promo-card__grid">
                       <div class="dc-promo-card__field">
@@ -120,7 +120,7 @@
   $('#button-geo-zone').on('click', function() {
     html  = '<div class="dc-promo-card" id="zone-to-geo-zone-row' + zone_to_geo_zone_row + '">';
     html += '  <div class="dc-promo-card__actions">';
-    html += '    <button type="button" onclick="$(\'#zone-to-geo-zone-row' + zone_to_geo_zone_row + '\').remove();" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>';
+    html += '    <button type="button" onclick="$(\'#zone-to-geo-zone-row' + zone_to_geo_zone_row + '\').remove();" class="dc-promo-card__remove" data-toggle="tooltip" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>';
     html += '  </div>';
     html += '  <div class="dc-promo-card__grid">';
     html += '    <div class="dc-promo-card__field">';

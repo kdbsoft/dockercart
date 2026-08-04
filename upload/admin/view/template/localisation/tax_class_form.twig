@@ -71,7 +71,7 @@
                   {% for tax_rule in tax_rules %}
                   <div class="dc-promo-card" id="tax-rule-row{{ tax_rule_row }}">
                     <div class="dc-promo-card__actions">
-                      <button type="button" onclick="$('#tax-rule-row{{ tax_rule_row }}').remove();" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
+                      <button type="button" onclick="$('#tax-rule-row{{ tax_rule_row }}').remove();" class="dc-promo-card__remove" data-toggle="tooltip" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
                     </div>
                     <div class="dc-promo-card__grid">
                       <div class="dc-promo-card__field">
@@ -130,7 +130,7 @@
   function addRule() {
     html  = '<div class="dc-promo-card" id="tax-rule-row' + tax_rule_row + '">';
     html += '  <div class="dc-promo-card__actions">';
-    html += '    <button type="button" onclick="$(\'#tax-rule-row' + tax_rule_row + '\').remove();" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>';
+    html += '    <button type="button" onclick="$(\'#tax-rule-row' + tax_rule_row + '\').remove();" class="dc-promo-card__remove" data-toggle="tooltip" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>';
     html += '  </div>';
     html += '  <div class="dc-promo-card__grid">';
     html += '    <div class="dc-promo-card__field">';

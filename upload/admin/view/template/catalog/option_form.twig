@@ -163,7 +163,7 @@
                   {% for option_value in option_values %}
                   <div class="dc-opt-card" id="option-value-row{{ option_value_row }}">
                     <div class="dc-opt-card__header">
-                      <span class="dc-opt-card__handle" title="{{ text_drag_to_reorder|default('Drag to reorder') }}">
+                      <span class="dc-opt-card__handle" data-toggle="tooltip" title="{{ text_drag_to_reorder|default('Drag to reorder') }}">
                         <i data-lucide="grip-vertical" width="14" height="14" class="slide-drag-handle"></i>
                       </span>
                       <span class="dc-opt-card__title">

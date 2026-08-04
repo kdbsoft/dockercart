@@ -170,17 +170,17 @@
                     {% if group.is_default %}<span class="dcx-group-card__badge">{{ text_default }}</span>{% endif %}
                   </div>
                   {% if not group.is_default %}
-                  <button type="button" class="btn btn-default btn--icon btn-set-default" data-group-id="{{ group.criteria_group_id }}" title="{{ button_set_default }}"><i data-lucide="star" width="14" height="14"></i></button>
+                  <button type="button" class="btn btn-default btn--icon btn-set-default" data-group-id="{{ group.criteria_group_id }}" data-toggle="tooltip" title="{{ button_set_default }}"><i data-lucide="star" width="14" height="14"></i></button>
                   {% else %}
-                  <span class="dcx-group-card__star" title="{{ text_default }}"><i data-lucide="star" width="14" height="14"></i></span>
+                  <span class="dcx-group-card__star" data-toggle="tooltip" title="{{ text_default }}"><i data-lucide="star" width="14" height="14"></i></span>
                   {% endif %}
                 </div>
                 <div class="dcx-group-card__foot">
-                  <span class="dcx-group-card__count" title="{{ column_criteria }}"><i data-lucide="list-checks" width="13" height="13"></i> {{ group.criteria_count }}</span>
+                  <span class="dcx-group-card__count" data-toggle="tooltip" title="{{ column_criteria }}"><i data-lucide="list-checks" width="13" height="13"></i> {{ group.criteria_count }}</span>
                   <div class="dcx-sidebar-card__actions">
-                    <a href="{{ group.edit }}" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a>
+                    <a href="{{ group.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn--icon"><i data-lucide="pencil" width="14" height="14"></i></a>
                     {% if not group.is_default %}
-                    <button type="button" class="btn btn-danger btn--icon btn-delete-group" data-group-id="{{ group.criteria_group_id }}" title="{{ button_delete }}"><i data-lucide="trash-2" width="14" height="14"></i></button>
+                    <button type="button" class="btn btn-danger btn--icon btn-delete-group" data-group-id="{{ group.criteria_group_id }}" data-toggle="tooltip" title="{{ button_delete }}"><i data-lucide="trash-2" width="14" height="14"></i></button>
                     {% endif %}
                   </div>
                 </div>

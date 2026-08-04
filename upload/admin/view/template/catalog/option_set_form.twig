@@ -87,7 +87,7 @@
               <div class="dcx-panel-head">
                 <div class="dcx-panel-head__icon"><i data-lucide="sliders-horizontal" width="18" height="18"></i></div>
                 <div>
-                  <div class="dcx-panel-title">{{ text_panel_options_title }} <span title="{{ text_help_options }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span></div>
+                  <div class="dcx-panel-title">{{ text_panel_options_title }} <span data-toggle="tooltip" title="{{ text_help_options }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span></div>
                   <div class="dcx-panel-subtitle">{{ text_panel_options_subtitle }}</div>
                 </div>
               </div>
@@ -102,7 +102,7 @@
                       <input type="hidden" name="option_set_option[{{ option_row }}][type]" value="{{ set_option.type }}"/>
                       <div class="dc-set-opt-type text-muted" style="margin-top:3px;font-size:11px;min-height:13px;">{{ set_option.type }}</div>
                     </div>
-                    <button type="button" onclick="$('#set-option-row{{ option_row }}').remove();" class="btn btn-link btn-remove-attr" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
+                    <button type="button" onclick="$('#set-option-row{{ option_row }}').remove();" class="btn btn-link btn-remove-attr" data-toggle="tooltip" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
                   </div>
                   {% set option_row = option_row + 1 %}
                   {% endfor %}
@@ -130,7 +130,7 @@
 	  html += '      <input type="hidden" name="option_set_option[' + option_row + '][type]" value=""/>';
 	  html += '      <div class="dc-set-opt-type text-muted" style="margin-top:3px;font-size:11px;min-height:13px;"></div>';
 	  html += '  </div>';
-	  html += '  <button type="button" onclick="$(\'#set-option-row' + option_row + '\').remove();" class="btn btn-link btn-remove-attr" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>';
+	  html += '  <button type="button" onclick="$(\'#set-option-row' + option_row + '\').remove();" class="btn btn-link btn-remove-attr" data-toggle="tooltip" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>';
 	  html += '</div>';
 
 	  $('#set-options-container').append(html);
