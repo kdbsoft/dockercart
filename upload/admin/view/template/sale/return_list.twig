@@ -26,62 +26,7 @@
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
-    <div id="filter-return" class="filter-bar">
-      <div class="panel panel-default">
-        <div class="panel-body">
-          <div class="filter-field">
-            <label for="input-return-id">{{ entry_return_id }}</label>
-            <input type="text" name="filter_return_id" value="{{ filter_return_id }}" placeholder="{{ entry_return_id }}" id="input-return-id" class="form-control" />
-          </div>
-          <div class="filter-field">
-            <label for="input-order-id">{{ entry_order_id }}</label>
-            <input type="text" name="filter_order_id" value="{{ filter_order_id }}" placeholder="{{ entry_order_id }}" id="input-order-id" class="form-control" />
-          </div>
-          <div class="filter-field">
-            <label for="input-customer">{{ entry_customer }}</label>
-            <input type="text" name="filter_customer" value="{{ filter_customer }}" placeholder="{{ entry_customer }}" id="input-customer" class="form-control" />
-          </div>
-          <div class="filter-field">
-            <label for="input-product">{{ entry_product }}</label>
-            <input type="text" name="filter_product" value="{{ filter_product }}" placeholder="{{ entry_product }}" id="input-product" class="form-control" />
-          </div>
-          <div class="filter-field">
-            <label for="input-model">{{ entry_model }}</label>
-            <input type="text" name="filter_model" value="{{ filter_model }}" placeholder="{{ entry_model }}" id="input-model" class="form-control" />
-          </div>
-          <div class="filter-field">
-            <label for="input-return-status">{{ entry_return_status }}</label>
-            <select name="filter_return_status_id" id="input-return-status" class="form-control">
-              <option value=""></option>
-                {% for return_status in return_statuses %}
-                {% if return_status.return_status_id == filter_return_status_id %}
-                <option value="{{ return_status.return_status_id }}" selected="selected">{{ return_status.name }}</option>
-                {% else %}
-                <option value="{{ return_status.return_status_id }}">{{ return_status.name }}</option>
-                {% endif %}
-                {% endfor %}
-            </select>
-          </div>
-          <div class="filter-field">
-            <label for="input-date-added">{{ entry_date_added }}</label>
-            <div class="filter-field-date date" data-date-format="YYYY-MM-DD">
-              <input type="text" name="filter_date_added" value="{{ filter_date_added }}" placeholder="{{ entry_date_added }}" id="input-date-added" class="form-control" />
-              <button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button>
-            </div>
-          </div>
-          <div class="filter-field">
-            <label for="input-date-modified">{{ entry_date_modified }}</label>
-            <div class="filter-field-date date" data-date-format="YYYY-MM-DD">
-              <input type="text" name="filter_date_modified" value="{{ filter_date_modified }}" placeholder="{{ entry_date_modified }}" id="input-date-modified" class="form-control" />
-              <button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button>
-            </div>
-          </div>
-          <div class="filter-actions">
-            <button type="button" id="button-filter" class="btn btn-default"><i data-lucide="funnel" width="14" height="14"></i> {{ button_filter }}</button>
-          </div>
-        </div>
-      </div>
-    </div>
+    {{ user_filter }}
     <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-return">
       <div class="table-responsive">
         <table class="table table-bordered table-hover">

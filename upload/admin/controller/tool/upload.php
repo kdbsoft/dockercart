@@ -116,6 +116,12 @@ class ControllerToolUpload extends Controller {
 
 		$data['delete'] = $this->url->link('tool/upload/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
+		// Reference lists: search-only toolbar (no saved filter tabs)
+		$data['user_filter'] = $this->renderUserFilter('upload', 'tool/upload', array(), array(), '', array(), array(
+			'placeholder' => $this->language->get('text_search_upload'),
+			'url'         => $this->url->link('tool/upload/autocomplete', 'user_token=' . $this->session->data['user_token'], true)
+		), false);
+
 		$data['uploads'] = array();
 
 		$filter_data = array(
@@ -386,6 +392,40 @@ class ControllerToolUpload extends Controller {
 			$json['code'] = $this->model_tool_upload->addUpload($filename, $file);
 
 			$json['success'] = $this->language->get('text_upload');
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function autocomplete(): void {
+		$json = array();
+
+		if (isset($this->request->get['filter_search'])) {
+			$filter_search = trim((string)$this->request->get['filter_search']);
+
+			if ($filter_search !== '') {
+				$this->load->model('tool/upload');
+
+				$filter_data = array(
+					'filter_name' => $filter_search,
+					'sort'  => 'date_added',
+					'order' => 'DESC',
+					'start' => 0,
+					'limit' => 8
+				);
+
+				$results = $this->model_tool_upload->getUploads($filter_data);
+
+				foreach ($results as $result) {
+					$json[] = array(
+						'id'       => $result['upload_id'],
+						'name'     => $result['name'],
+						'subtitle' => $result['filename'],
+						'href'     => $this->url->link('tool/upload', 'user_token=' . $this->session->data['user_token'] . '&filter_name=' . urlencode($result['name']), true)
+					);
+				}
+			}
 		}
 
 		$this->response->addHeader('Content-Type: application/json');

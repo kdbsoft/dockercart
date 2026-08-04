@@ -168,6 +168,12 @@ class ControllerLocalisationCountry extends Controller {
 		$data['add'] = $this->url->link('localisation/country/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('localisation/country/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
+		// Reference lists: search-only toolbar (no saved filter tabs)
+		$data['user_filter'] = $this->renderUserFilter('country', 'localisation/country', array(), array(), '', array(), array(
+			'placeholder' => $this->language->get('text_search_country'),
+			'url'         => $this->url->link('localisation/country/autocomplete', 'user_token=' . $this->session->data['user_token'], true)
+		), false);
+
 		$data['countries'] = array();
 
 		$filter_data = array(
@@ -469,4 +475,38 @@ class ControllerLocalisationCountry extends Controller {
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
 	}	
+
+	public function autocomplete(): void {
+		$json = array();
+
+		if (isset($this->request->get['filter_search'])) {
+			$filter_search = trim((string)$this->request->get['filter_search']);
+
+			if ($filter_search !== '') {
+				$this->load->model('localisation/country');
+
+				$filter_data = array(
+					'filter_name' => $filter_search,
+					'sort'  => 'name',
+					'order' => 'ASC',
+					'start' => 0,
+					'limit' => 8
+				);
+
+				$results = $this->model_localisation_country->getCountries($filter_data);
+
+				foreach ($results as $result) {
+					$json[] = array(
+						'id'       => $result['country_id'],
+						'name'     => $result['name'],
+						'subtitle' => $result['iso_code_2'] . ' / ' . $result['iso_code_3'],
+						'href'     => $this->url->link('localisation/country/edit', 'user_token=' . $this->session->data['user_token'] . '&country_id=' . $result['country_id'], true)
+					);
+				}
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
 }

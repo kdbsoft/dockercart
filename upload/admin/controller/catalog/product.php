@@ -589,6 +589,39 @@ class ControllerCatalogProduct extends Controller {
 		$data['copy'] = $this->url->link('catalog/product/copy', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('catalog/product/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
+		// Per-admin saved filters (Shopify-style tabs)
+		$active_filter = $this->getActiveUserFilter('product');
+
+		$this->load->model('user/user_filter');
+
+		$user_id = (int)$this->user->getId();
+		$saved_filters = $this->model_user_user_filter->getFilters($user_id, 'product');
+
+		$tab_counts = array(
+			'all' => $this->model_catalog_product->getTotalProducts(array())
+		);
+
+		foreach ($saved_filters as $saved) {
+			$tab_counts['custom_' . $saved['filter_id']] = $this->model_catalog_product->getTotalProducts($this->buildProductFilterData($saved['conditions']));
+		}
+
+		$status_options = array(
+			array('value' => '1', 'label' => $this->language->get('text_enabled')),
+			array('value' => '0', 'label' => $this->language->get('text_disabled'))
+		);
+
+		$data['user_filter'] = $this->renderUserFilter('product', 'catalog/product', array(
+			array('key' => 'name', 'label' => $this->language->get('entry_name'), 'type' => 'text'),
+			array('key' => 'model', 'label' => $this->language->get('entry_model'), 'type' => 'text'),
+			array('key' => 'sku', 'label' => $this->language->get('entry_sku'), 'type' => 'text'),
+			array('key' => 'price', 'label' => $this->language->get('entry_price'), 'type' => 'number'),
+			array('key' => 'quantity', 'label' => $this->language->get('entry_quantity'), 'type' => 'number'),
+			array('key' => 'status', 'label' => $this->language->get('entry_status'), 'type' => 'select', 'options' => $status_options),
+			array('key' => 'manufacturer', 'label' => $this->language->get('entry_manufacturer'), 'type' => 'text')
+		), $tab_counts);
+
+		$data['active_filter'] = $active_filter;
+
 		$data['products'] = array();
 
 		$filter_data = array(
@@ -607,6 +640,12 @@ class ControllerCatalogProduct extends Controller {
 			'start'               => ($page - 1) * $this->config->get('config_limit_admin'),
 			'limit'               => $this->config->get('config_limit_admin')
 		);
+
+		if ($active_filter) {
+			foreach ($this->buildProductFilterData($active_filter['conditions']) as $key => $value) {
+				$filter_data[$key] = $value;
+			}
+		}
 
 		$this->load->model('tool/image');
 
@@ -2866,5 +2905,43 @@ class ControllerCatalogProduct extends Controller {
 
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
+	 * Convert saved filter conditions into product model filter_data.
+	 */
+	private function buildProductFilterData(array $conditions): array {
+		$data = array();
+
+		foreach ($conditions as $condition) {
+			$field = (string)($condition['field'] ?? '');
+			$value = $condition['value'] ?? '';
+
+			switch ($field) {
+				case 'name':
+					$data['filter_name'] = (string)$value;
+					break;
+				case 'model':
+					$data['filter_model'] = (string)$value;
+					break;
+				case 'sku':
+					$data['filter_sku'] = (string)$value;
+					break;
+				case 'price':
+					$data['filter_price'] = (string)$value;
+					break;
+				case 'quantity':
+					$data['filter_quantity_min'] = (string)$value;
+					break;
+				case 'status':
+					$data['filter_status'] = (string)$value;
+					break;
+				case 'manufacturer':
+					$data['filter_manufacturer'] = (string)$value;
+					break;
+			}
+		}
+
+		return $data;
 	}
 }

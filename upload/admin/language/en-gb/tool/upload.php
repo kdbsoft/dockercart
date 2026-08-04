@@ -1,6 +1,7 @@
 <?php
 // Heading
 $_['heading_title']     = 'Uploads';
+$_['text_search_upload'] = 'Search uploads by name or file';
 
 // Text
 $_['text_success']      = 'Success: You have modified uploads!';

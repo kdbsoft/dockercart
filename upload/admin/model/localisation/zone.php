@@ -95,6 +95,14 @@ class ModelLocalisationZone extends Model {
 			$conditions[] = "z.country_id = '" . (int)$data['filter_country_id'] . "'";
 		}
 
+		if (!empty($data['filter_name'])) {
+			if ($this->hasZoneDescriptionTable()) {
+				$conditions[] = "COALESCE(zd.name, z.name) LIKE '%" . $this->db->escape((string)$data['filter_name']) . "%'";
+			} else {
+				$conditions[] = "z.name LIKE '%" . $this->db->escape((string)$data['filter_name']) . "%'";
+			}
+		}
+
 		if ($conditions) {
 			$sql .= " WHERE " . implode(" AND ", $conditions);
 		}
@@ -198,6 +206,10 @@ class ModelLocalisationZone extends Model {
 
 		if (!empty($data['filter_country_id'])) {
 			$sql .= " WHERE country_id = '" . (int)$data['filter_country_id'] . "'";
+		}
+
+		if (!empty($data['filter_name'])) {
+			$sql .= (!empty($data['filter_country_id']) ? " AND" : " WHERE") . " name LIKE '%" . $this->db->escape((string)$data['filter_name']) . "%'";
 		}
 
 		$query = $this->db->query($sql);

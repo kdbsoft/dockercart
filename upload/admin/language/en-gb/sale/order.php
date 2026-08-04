@@ -89,6 +89,32 @@ $_['text_list_subtitle'] = 'View and process customer orders';
 
 $_['text_filter_subtitle'] = 'Narrow results by specific criteria';
 
+$_['text_search_orders']      = 'Search orders by #, customer, email or phone...';
+$_['text_search_no_results']  = 'No orders found';
+
+$_['text_filter_all']         = 'All';
+$_['text_filter_unfulfilled'] = 'Unfulfilled';
+$_['text_filter_unpaid']      = 'Unpaid';
+$_['text_add_filter']         = 'Add filter';
+$_['text_add_condition']      = 'Add condition';
+$_['text_confirm_delete_filter'] = 'Are you sure you want to delete this filter?';
+$_['entry_filter_name']       = 'Filter name';
+$_['error_filter_name']       = 'Please enter a filter name';
+
+$_['text_operator_eq']        = 'is equal to';
+$_['text_operator_ne']        = 'is not equal to';
+$_['text_operator_gt']        = 'is greater than';
+$_['text_operator_gte']       = 'is greater than or equal to';
+$_['text_operator_lt']        = 'is less than';
+$_['text_operator_lte']       = 'is less than or equal to';
+$_['text_operator_contains']  = 'contains';
+
+$_['text_date_today']         = 'Today';
+$_['text_date_yesterday']     = 'Yesterday';
+$_['text_date_this_week']     = 'This week';
+$_['text_date_this_month']    = 'This month';
+$_['text_date_this_year']     = 'This year';
+
 $_['text_add_subtitle'] = 'Create a new order manually';
 
 $_['text_edit_subtitle'] = 'Edit order details';

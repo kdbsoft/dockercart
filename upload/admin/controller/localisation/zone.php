@@ -168,6 +168,12 @@ class ControllerLocalisationZone extends Controller {
 		$data['add'] = $this->url->link('localisation/zone/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('localisation/zone/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
+		// Reference lists: search-only toolbar (no saved filter tabs)
+		$data['user_filter'] = $this->renderUserFilter('zone', 'localisation/zone', array(), array(), '', array(), array(
+			'placeholder' => $this->language->get('text_search_zone'),
+			'url'         => $this->url->link('localisation/zone/autocomplete', 'user_token=' . $this->session->data['user_token'], true)
+		), false);
+
 		$data['zones'] = array();
 
 		$filter_data = array(
@@ -424,5 +430,40 @@ class ControllerLocalisationZone extends Controller {
 		}
 
 		return !$this->error;
+	}
+
+	public function autocomplete(): void {
+		$json = array();
+
+		if (isset($this->request->get['filter_search'])) {
+			$filter_search = trim((string)$this->request->get['filter_search']);
+
+			if ($filter_search !== '') {
+				$this->load->model('localisation/zone');
+				$this->load->model('localisation/country');
+
+				$filter_data = array(
+					'filter_name' => $filter_search,
+					'sort'  => 'z.name',
+					'order' => 'ASC',
+					'start' => 0,
+					'limit' => 8
+				);
+
+				$results = $this->model_localisation_zone->getZones($filter_data);
+
+				foreach ($results as $result) {
+					$json[] = array(
+						'id'       => $result['zone_id'],
+						'name'     => $result['name'],
+						'subtitle' => $result['country'],
+						'href'     => $this->url->link('localisation/zone/edit', 'user_token=' . $this->session->data['user_token'] . '&zone_id=' . $result['zone_id'], true)
+					);
+				}
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
 	}
 }

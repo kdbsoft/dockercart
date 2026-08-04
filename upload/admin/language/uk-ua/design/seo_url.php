@@ -13,6 +13,7 @@ $_['error_permission'] = 'Увага: У вас немає дозволу на �
 $_['error_query'] = 'Запит має містити від 3 до 64 символів!';
 $_['error_query_exists'] = 'Запит вже використовується!';
 $_['heading_title'] = 'URL-адреса SEO';
+$_['text_search_seo_url'] = 'Пошук SEO URL за ключем або запитом';
 $_['text_add'] = 'Додати URL-адресу SEO';
 $_['text_default'] = 'За замовчуванням';
 $_['text_edit'] = 'Редагувати URL-адресу SEO';

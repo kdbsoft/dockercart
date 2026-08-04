@@ -217,6 +217,30 @@ class ControllerMarketingMarketing extends Controller {
 		$data['delete'] = $this->url->link('marketing/marketing/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['text_list_subtitle'] = $this->language->get('text_list_subtitle');
 
+		// Per-admin saved filters (Shopify-style tabs)
+		$active_filter = $this->getActiveUserFilter('marketing');
+
+		$this->load->model('user/user_filter');
+
+		$user_id = (int)$this->user->getId();
+		$saved_filters = $this->model_user_user_filter->getFilters($user_id, 'marketing');
+
+		$tab_counts = array(
+			'all' => $this->model_marketing_marketing->getTotalMarketings(array())
+		);
+
+		foreach ($saved_filters as $saved) {
+			$tab_counts['custom_' . $saved['filter_id']] = $this->model_marketing_marketing->getTotalMarketings($this->buildMarketingFilterData($saved['conditions']));
+		}
+
+		$data['user_filter'] = $this->renderUserFilter('marketing', 'marketing/marketing', array(
+			array('key' => 'name', 'label' => $this->language->get('entry_name'), 'type' => 'text'),
+			array('key' => 'code', 'label' => $this->language->get('entry_code'), 'type' => 'text'),
+			array('key' => 'date_added', 'label' => $this->language->get('entry_date_added'), 'type' => 'date')
+		), $tab_counts);
+
+		$data['active_filter'] = $active_filter;
+
 		$data['marketings'] = array();
 
 		$filter_data = array(
@@ -228,6 +252,12 @@ class ControllerMarketingMarketing extends Controller {
 			'start'             => ($page - 1) * $this->config->get('config_limit_admin'),
 			'limit'             => $this->config->get('config_limit_admin')
 		);
+
+		if ($active_filter) {
+			foreach ($this->buildMarketingFilterData($active_filter['conditions']) as $key => $value) {
+				$filter_data[$key] = $value;
+			}
+		}
 
 		$marketing_total = $this->model_marketing_marketing->getTotalMarketings($filter_data);
 
@@ -476,5 +506,31 @@ class ControllerMarketingMarketing extends Controller {
 		}
 
 		return !$this->error;
+	}
+
+	/**
+	 * Convert saved filter conditions into marketing model filter_data.
+	 */
+	private function buildMarketingFilterData(array $conditions): array {
+		$data = array();
+
+		foreach ($conditions as $condition) {
+			$field = (string)($condition['field'] ?? '');
+			$value = $condition['value'] ?? '';
+
+			switch ($field) {
+				case 'name':
+					$data['filter_name'] = (string)$value;
+					break;
+				case 'code':
+					$data['filter_code'] = (string)$value;
+					break;
+				case 'date_added':
+					$data['filter_date_added'] = (string)$value;
+					break;
+			}
+		}
+
+		return $data;
 	}
 }

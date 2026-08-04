@@ -1,0 +1,572 @@
+<div id="uf-filter-tabs" class="order-filter-tabs" data-uf-entity="{{ uf_entity }}">
+  <div class="order-filter-tabs__inner">
+    <div class="order-filter-tabs__list">
+      {% for tab in uf_tabs %}
+      <a href="{{ tab.href }}" class="order-filter-tab{% if tab.is_active %} is-active{% endif %}">
+        <span class="order-filter-tab__name">{{ tab.name }}</span>
+        {% if tab.count is not null %}
+        <span class="order-filter-tab__count">{{ tab.count }}</span>
+        {% endif %}
+        {% if tab.is_custom %}
+        <span class="order-filter-tab__remove" data-filter-id="{{ tab.filter_id }}" title="{{ uf_text_remove }}"><i data-lucide="x" width="12" height="12"></i></span>
+        {% endif %}
+      </a>
+      {% endfor %}
+      {% if uf_show_add %}
+      <button type="button" class="order-filter-tab order-filter-tab--add uf-add-filter" title="{{ uf_text_add_filter }}">
+        <i data-lucide="plus" width="14" height="14"></i>
+      </button>
+      {% endif %}
+    </div>
+    {% if uf_search %}
+    <div class="order-search-wrap">
+      <div class="search-input-wrap">
+        <i data-lucide="search" width="14" height="14" class="search-input-icon"></i>
+        <input type="search" id="uf-search-input" class="form-control" placeholder="{{ uf_search.placeholder }}" autocomplete="off" data-search-url="{{ uf_search.url }}" />
+        <i data-lucide="loader" width="14" height="14" class="order-search-spinner" style="display:none"></i>
+      </div>
+      <ul class="order-search-dropdown"></ul>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<div id="uf-filter-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title"><i data-lucide="filter" width="18" height="18" style="margin-right:8px;"></i>{{ uf_text_add_filter }}</h4>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="control-label" for="uf-filter-name">{{ uf_text_filter_name }}</label>
+          <input type="text" name="uf_filter_name" value="" id="uf-filter-name" class="form-control" placeholder="{{ uf_text_filter_name }}" />
+        </div>
+        <div id="uf-condition-rows"></div>
+        <div class="text-right" style="margin-top:10px;">
+          <button type="button" class="btn btn-default btn-sm uf-add-condition"><i data-lucide="plus" width="14" height="14"></i> {{ uf_text_add_condition }}</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">{{ uf_text_cancel }}</button>
+        <button type="button" class="btn btn-primary uf-save-filter"><i data-lucide="check" width="14" height="14"></i> {{ uf_text_save }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript"><!--
+(function() {
+	var root = document.getElementById('uf-filter-tabs');
+
+	if (!root) {
+		return;
+	}
+
+	var entity = root.getAttribute('data-uf-entity');
+	var modal = document.getElementById('uf-filter-modal');
+	var rowsWrap = document.getElementById('uf-condition-rows');
+	var saveUrl = '{{ uf_save_url }}';
+	var deleteUrl = '{{ uf_delete_url }}';
+	var token = '{{ uf_user_token }}';
+
+	var fields = {{ uf_fields_json|raw }};
+	var operatorLabels = {{ uf_operators_json|raw }};
+
+	if (window) {
+		window.ufOperatorLabels = operatorLabels;
+	}
+
+	var operatorsByType = {
+		'text': ['contains', 'eq', 'ne'],
+		'number': ['eq', 'ne', 'gt', 'gte', 'lt', 'lte'],
+		'date': ['eq', 'gt', 'gte', 'lt', 'lte'],
+		'select': ['eq'],
+		'multi': ['in', 'not_in'],
+		'status': ['eq'],
+		'range': ['between'],
+		'preset': ['eq']
+	};
+
+	function buildConditionRow(index, preset) {
+		preset = preset || {};
+
+		var row = document.createElement('div');
+		row.className = 'filter-condition-row';
+
+		var fieldSel = document.createElement('select');
+		fieldSel.className = 'form-control filter-condition-field';
+		fieldSel.name = 'conditions[' + index + '][field]';
+
+		fields.forEach(function(f) {
+			var opt = document.createElement('option');
+			opt.value = f.key;
+			opt.textContent = f.label;
+			fieldSel.appendChild(opt);
+		});
+
+		var opSel = document.createElement('select');
+		opSel.className = 'form-control filter-condition-operator';
+		opSel.name = 'conditions[' + index + '][operator]';
+
+		var valueWrap = document.createElement('div');
+		valueWrap.className = 'filter-condition-value-wrap';
+
+		var removeBtn = document.createElement('button');
+		removeBtn.type = 'button';
+		removeBtn.className = 'btn btn-danger btn-sm filter-condition-remove';
+		removeBtn.title = '{{ uf_text_remove }}';
+		removeBtn.innerHTML = '<i data-lucide="trash-2" width="13" height="13"></i>';
+
+		var wrapper = document.createElement('div');
+		wrapper.className = 'filter-condition-fields';
+		wrapper.appendChild(fieldSel);
+		wrapper.appendChild(opSel);
+		wrapper.appendChild(valueWrap);
+		wrapper.appendChild(removeBtn);
+
+		row.appendChild(wrapper);
+
+		function renderValue() {
+			var field = fields.filter(function(f) { return f.key === fieldSel.value; })[0] || fields[0];
+			var type = field.type || 'text';
+
+			valueWrap.innerHTML = '';
+
+			var op = opSel.value;
+
+			if (type === 'range') {
+				var wrap = document.createElement('div');
+				wrap.className = 'filter-condition-range';
+
+				var min = document.createElement('input');
+				min.type = 'text';
+				min.className = 'form-control filter-condition-value filter-condition-value-min';
+				min.name = 'conditions[' + index + '][value_min]';
+				min.placeholder = (field.min_placeholder || '{{ uf_text_from }}');
+				if (preset.value_min) {
+					min.value = preset.value_min;
+				}
+				wrap.appendChild(min);
+
+				var sep = document.createElement('span');
+				sep.className = 'filter-condition-range-sep';
+				sep.textContent = '—';
+				wrap.appendChild(sep);
+
+				var max = document.createElement('input');
+				max.type = 'text';
+				max.className = 'form-control filter-condition-value filter-condition-value-max';
+				max.name = 'conditions[' + index + '][value_max]';
+				max.placeholder = (field.max_placeholder || '{{ uf_text_to }}');
+				if (preset.value_max) {
+					max.value = preset.value_max;
+				}
+				wrap.appendChild(max);
+
+				valueWrap.appendChild(wrap);
+			} else if (type === 'preset') {
+				var presetSel = document.createElement('select');
+				presetSel.className = 'form-control filter-condition-value';
+				presetSel.name = 'conditions[' + index + '][value]';
+
+				(field.options || []).forEach(function(o) {
+					var opt = document.createElement('option');
+					opt.value = o.value;
+					opt.textContent = o.label;
+					if (String(preset.value) === String(o.value)) {
+						opt.selected = true;
+					}
+					presetSel.appendChild(opt);
+				});
+
+				valueWrap.appendChild(presetSel);
+			} else if (type === 'multi' || (type === 'select' && (op === 'in' || op === 'not_in'))) {
+				var multi = document.createElement('select');
+				multi.className = 'form-control filter-condition-value filter-condition-value-multi';
+				multi.multiple = true;
+				multi.name = 'conditions[' + index + '][value][]';
+				multi.style.height = 'auto';
+
+				(field.options || []).forEach(function(o) {
+					var opt = document.createElement('option');
+					opt.value = o.value;
+					opt.textContent = o.label;
+					if (preset.value && preset.value.indexOf(o.value) !== -1) {
+						opt.selected = true;
+					}
+					multi.appendChild(opt);
+				});
+
+				valueWrap.appendChild(multi);
+			} else if (type === 'select') {
+				var single = document.createElement('select');
+				single.className = 'form-control filter-condition-value';
+				single.name = 'conditions[' + index + '][value]';
+
+				(field.options || []).forEach(function(o) {
+					var opt = document.createElement('option');
+					opt.value = o.value;
+					opt.textContent = o.label;
+					if (String(preset.value) === String(o.value)) {
+						opt.selected = true;
+					}
+					single.appendChild(opt);
+				});
+
+				valueWrap.appendChild(single);
+			} else {
+				var input = document.createElement('input');
+				input.type = (type === 'date') ? 'date' : 'text';
+				input.className = 'form-control filter-condition-value';
+				input.name = 'conditions[' + index + '][value]';
+				input.value = (type === 'date' && preset.value) ? preset.value : '';
+				valueWrap.appendChild(input);
+			}
+		}
+
+		function renderOps() {
+			var field = fields.filter(function(f) { return f.key === fieldSel.value; })[0] || fields[0];
+			var type = field.type || 'text';
+			var allowed = operatorsByType[type] || ['eq'];
+
+			opSel.innerHTML = '';
+
+			allowed.forEach(function(op) {
+				var opt = document.createElement('option');
+				opt.value = op;
+				opt.textContent = window.ufOperatorLabels ? window.ufOperatorLabels[op] : op;
+				if (preset.operator === op) {
+					opt.selected = true;
+				}
+				opSel.appendChild(opt);
+			});
+
+			if (allowed.indexOf(preset.operator) === -1) {
+				opSel.selectedIndex = 0;
+			}
+
+			renderValue();
+		}
+
+		fieldSel.addEventListener('change', renderOps);
+		opSel.addEventListener('change', renderValue);
+
+		if (preset.field) {
+			fieldSel.value = preset.field;
+		}
+
+		renderOps();
+
+		removeBtn.addEventListener('click', function() {
+			if (rowsWrap.querySelectorAll('.filter-condition-row').length > 1) {
+				row.remove();
+			}
+		});
+
+		return row;
+	}
+
+	function addRow(preset) {
+		var index = rowsWrap.querySelectorAll('.filter-condition-row').length;
+		var row = buildConditionRow(index, preset);
+		rowsWrap.appendChild(row);
+
+		if (window.lucide && typeof window.lucide.createIcons === 'function') {
+			window.lucide.createIcons({ nodes: [row] });
+		}
+	}
+
+	function resetModal() {
+		document.getElementById('uf-filter-name').value = '';
+		rowsWrap.innerHTML = '';
+
+		fields.forEach(function(f) {
+			if (f.default) {
+				addRow(f.default);
+			}
+		});
+
+		if (!rowsWrap.querySelectorAll('.filter-condition-row').length) {
+			addRow();
+		}
+	}
+
+	document.addEventListener('click', function(e) {
+		var addBtn = e.target.closest('.uf-add-filter');
+
+		if (addBtn) {
+			e.preventDefault();
+			resetModal();
+			$('#uf-filter-modal').modal('show');
+		}
+	});
+
+	document.addEventListener('click', function(e) {
+		var addCond = e.target.closest('.uf-add-condition');
+
+		if (addCond) {
+			e.preventDefault();
+			addRow();
+		}
+	});
+
+	// Search-as-you-type (right side of the filter bar)
+	var searchInput = document.getElementById('uf-search-input');
+	var searchDropdown = document.querySelector('.order-search-dropdown');
+	var searchSpinner = document.querySelector('.order-search-spinner');
+	var searchTimer = null;
+	var searchActive = null;
+
+	function escapeHtml(text) {
+		var div = document.createElement('div');
+		div.textContent = text;
+		return div.innerHTML;
+	}
+
+	function hideSearch() {
+		if (searchDropdown) {
+			searchDropdown.style.display = 'none';
+		}
+	}
+
+	function renderSearchResults(results) {
+		if (!searchDropdown) {
+			return;
+		}
+
+		searchDropdown.innerHTML = '';
+
+		if (!results.length) {
+			var empty = document.createElement('li');
+			empty.className = 'order-search-empty';
+			empty.textContent = '{{ uf_text_no_results }}';
+			searchDropdown.appendChild(empty);
+			searchDropdown.style.display = 'block';
+			return;
+		}
+
+		results.forEach(function(item) {
+			var li = document.createElement('li');
+			var a = document.createElement('a');
+			a.href = item.href;
+
+			var content = '<div class="order-search-item">';
+			content += '<div class="order-search-item-id">' + escapeHtml(item.id) + '</div>';
+			content += '<div class="order-search-item-info">';
+			content += '<div class="order-search-item-customer">' + escapeHtml(item.name) + '</div>';
+			if (item.subtitle) {
+				content += '<div class="order-search-item-sub">' + escapeHtml(item.subtitle) + '</div>';
+			}
+			content += '</div>';
+			if (item.meta) {
+				content += '<div class="order-search-item-total">' + escapeHtml(item.meta) + '</div>';
+			}
+			content += '</div>';
+
+			a.innerHTML = content;
+			li.appendChild(a);
+			searchDropdown.appendChild(li);
+		});
+
+		searchDropdown.style.display = 'block';
+
+		if (window.lucide && typeof window.lucide.createIcons === 'function') {
+			window.lucide.createIcons({ nodes: [searchDropdown] });
+		}
+	}
+
+	if (searchInput && searchDropdown) {
+		var searchUrl = searchInput.getAttribute('data-search-url');
+
+		searchInput.addEventListener('input', function() {
+			clearTimeout(searchTimer);
+
+			var query = this.value.trim();
+
+			if (query.length < 2) {
+				if (searchActive) {
+					searchActive.abort();
+					searchActive = null;
+				}
+				searchSpinner.style.display = 'none';
+				hideSearch();
+				return;
+			}
+
+			searchTimer = setTimeout(function() {
+				if (searchActive) {
+					searchActive.abort();
+				}
+
+				searchSpinner.style.display = 'inline-block';
+
+				searchActive = $.ajax({
+					url: searchUrl + '&filter_search=' + encodeURIComponent(query),
+					dataType: 'json',
+					success: function(json) {
+						renderSearchResults(json || []);
+					},
+					complete: function() {
+						searchSpinner.style.display = 'none';
+						searchActive = null;
+					},
+					error: function() {
+						hideSearch();
+						searchActive = null;
+					}
+				});
+			}, 300);
+		});
+
+		searchInput.addEventListener('keydown', function(e) {
+			if (e.key === 'Escape') {
+				hideSearch();
+			} else if (e.key === 'Enter') {
+				e.preventDefault();
+				var first = searchDropdown.querySelector('a');
+
+				if (first) {
+					window.location.href = first.getAttribute('href');
+				}
+			}
+		});
+
+		searchInput.addEventListener('blur', function() {
+			setTimeout(hideSearch, 200);
+		});
+
+		searchInput.addEventListener('focus', function() {
+			if (searchDropdown.children.length && this.value.trim().length >= 2) {
+				searchDropdown.style.display = 'block';
+			}
+		});
+
+		document.addEventListener('click', function(e) {
+			if (searchInput && !searchInput.closest('.order-filter-tabs').contains(e.target)) {
+				hideSearch();
+			}
+		});
+	}
+
+	document.addEventListener('click', function(e) {
+		var removeBtn = e.target.closest('.order-filter-tab__remove');
+
+		if (!removeBtn || !removeBtn.closest('#uf-filter-tabs')) {
+			return;
+		}
+
+		e.preventDefault();
+		e.stopPropagation();
+
+		if (!confirm('{{ uf_text_confirm_delete }}')) {
+			return;
+		}
+
+		$.ajax({
+			url: deleteUrl,
+			type: 'post',
+			dataType: 'json',
+			data: { entity: entity, filter_id: removeBtn.getAttribute('data-filter-id') },
+			success: function(json) {
+				if (json['error']) {
+					alert(json['error']);
+				} else {
+					location.reload();
+				}
+			},
+			error: function(xhr, ajaxOptions, thrownError) {
+				alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+			}
+		});
+	});
+
+	document.addEventListener('click', function(e) {
+		var saveBtn = e.target.closest('.uf-save-filter');
+
+		if (!saveBtn) {
+			return;
+		}
+
+		var name = document.getElementById('uf-filter-name').value.trim();
+
+		if (!name) {
+			alert('{{ uf_error_filter_name }}');
+			return;
+		}
+
+		var conditions = [];
+
+		Array.prototype.forEach.call(rowsWrap.querySelectorAll('.filter-condition-row'), function(row) {
+			var field = row.querySelector('.filter-condition-field').value;
+			var operator = row.querySelector('.filter-condition-operator').value;
+			var valueEl = row.querySelector('.filter-condition-value');
+			var value;
+			var fieldDef = fields.filter(function(f) { return f.key === field; })[0];
+
+			if (fieldDef && fieldDef.type === 'range') {
+				var minEl = row.querySelector('.filter-condition-value-min');
+				var maxEl = row.querySelector('.filter-condition-value-max');
+				var minVal = minEl ? minEl.value.trim() : '';
+				var maxVal = maxEl ? maxEl.value.trim() : '';
+
+				if (minVal !== '' || maxVal !== '') {
+					conditions.push({
+						field: field,
+						operator: 'between',
+						value_min: minVal,
+						value_max: maxVal
+					});
+				}
+
+				return;
+			}
+
+			if (valueEl) {
+				if (valueEl.matches('select') && valueEl.multiple) {
+					value = Array.prototype.map.call(valueEl.selectedOptions, function(opt) {
+						return opt.value;
+					});
+				} else if (valueEl.matches('select')) {
+					value = valueEl.value;
+				} else {
+					value = valueEl.value.trim();
+				}
+			}
+
+			if ((Array.isArray(value) && value.length) || (!Array.isArray(value) && value !== '')) {
+				conditions.push({
+					field: field,
+					operator: operator,
+					value: value
+				});
+			}
+		});
+
+		var button = saveBtn;
+		button.disabled = true;
+
+		$.ajax({
+			url: saveUrl,
+			type: 'post',
+			dataType: 'json',
+			data: { entity: entity, name: name, conditions: conditions },
+			success: function(json) {
+				if (json['error']) {
+					alert(json['error']);
+				} else {
+					$('#uf-filter-modal').modal('hide');
+					location = 'index.php?route=' + entity + '&user_token=' + token + '&filter_id=' + json['filter_id'];
+				}
+			},
+			error: function(xhr, ajaxOptions, thrownError) {
+				alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+			},
+			complete: function() {
+				button.disabled = false;
+			}
+		});
+	});
+})();
+//--></script>

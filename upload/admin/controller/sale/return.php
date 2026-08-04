@@ -463,6 +463,46 @@ class ControllerSaleReturn extends Controller {
 		$data['export_url'] = str_replace('&amp;', '&', $this->url->link('sale/return/exportCsv', 'user_token=' . $this->session->data['user_token'], true));
 		$data['text_list_subtitle'] = $this->language->get('text_list_subtitle');
 
+		// Per-admin saved filters (Shopify-style tabs)
+		$active_filter = $this->getActiveUserFilter('return');
+
+		$this->load->model('user/user_filter');
+
+		$user_id = (int)$this->user->getId();
+		$saved_filters = $this->model_user_user_filter->getFilters($user_id, 'return');
+
+		$tab_counts = array(
+			'all' => $this->model_sale_return->getTotalReturns(array())
+		);
+
+		foreach ($saved_filters as $saved) {
+			$tab_counts['custom_' . $saved['filter_id']] = $this->model_sale_return->getTotalReturns($this->buildReturnFilterData($saved['conditions']));
+		}
+
+		$this->load->model('localisation/return_status');
+
+		$return_status_options = array();
+
+		foreach ($this->model_localisation_return_status->getReturnStatuses() as $status) {
+			$return_status_options[] = array(
+				'value' => $status['return_status_id'],
+				'label' => $status['name']
+			);
+		}
+
+		$data['user_filter'] = $this->renderUserFilter('return', 'sale/return', array(
+			array('key' => 'return_id', 'label' => $this->language->get('entry_return_id'), 'type' => 'number'),
+			array('key' => 'order_id', 'label' => $this->language->get('entry_order_id'), 'type' => 'number'),
+			array('key' => 'customer', 'label' => $this->language->get('entry_customer'), 'type' => 'text'),
+			array('key' => 'product', 'label' => $this->language->get('entry_product'), 'type' => 'text'),
+			array('key' => 'model', 'label' => $this->language->get('entry_model'), 'type' => 'text'),
+			array('key' => 'return_status_id', 'label' => $this->language->get('entry_return_status'), 'type' => 'multi', 'options' => $return_status_options),
+			array('key' => 'date_added', 'label' => $this->language->get('entry_date_added'), 'type' => 'date'),
+			array('key' => 'date_modified', 'label' => $this->language->get('entry_date_modified'), 'type' => 'date')
+		), $tab_counts);
+
+		$data['active_filter'] = $active_filter;
+
 		$data['returns'] = array();
 
 		$filter_data = array(
@@ -479,6 +519,12 @@ class ControllerSaleReturn extends Controller {
 			'start'                   => ($page - 1) * $this->config->get('config_limit_admin'),
 			'limit'                   => $this->config->get('config_limit_admin')
 		);
+
+		if ($active_filter) {
+			foreach ($this->buildReturnFilterData($active_filter['conditions']) as $key => $value) {
+				$filter_data[$key] = $value;
+			}
+		}
 
 		$return_total = $this->model_sale_return->getTotalReturns($filter_data);
 
@@ -1182,4 +1228,45 @@ class ControllerSaleReturn extends Controller {
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
 	}	
+
+	/**
+	 * Convert saved filter conditions into return model filter_data.
+	 */
+	private function buildReturnFilterData(array $conditions): array {
+		$data = array();
+
+		foreach ($conditions as $condition) {
+			$field = (string)($condition['field'] ?? '');
+			$value = $condition['value'] ?? '';
+
+			switch ($field) {
+				case 'return_id':
+					$data['filter_return_id'] = (string)$value;
+					break;
+				case 'order_id':
+					$data['filter_order_id'] = (string)$value;
+					break;
+				case 'customer':
+					$data['filter_customer'] = (string)$value;
+					break;
+				case 'product':
+					$data['filter_product'] = (string)$value;
+					break;
+				case 'model':
+					$data['filter_model'] = (string)$value;
+					break;
+				case 'return_status_id':
+					$data['filter_return_status_id'] = is_array($value) ? implode(',', array_map('intval', $value)) : (string)$value;
+					break;
+				case 'date_added':
+					$data['filter_date_added'] = (string)$value;
+					break;
+				case 'date_modified':
+					$data['filter_date_modified'] = (string)$value;
+					break;
+			}
+		}
+
+		return $data;
+	}
 }

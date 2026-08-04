@@ -162,6 +162,32 @@ $_['text_list_subtitle'] = 'Просматривайте и обрабатыва
 
 $_['text_filter_subtitle'] = 'Сузить результаты по критериям';
 
+$_['text_search_orders']      = 'Поиск заказов по №, клиенту, email или телефону...';
+$_['text_search_no_results']  = 'Заказы не найдены';
+
+$_['text_filter_all']         = 'Все';
+$_['text_filter_unfulfilled'] = 'Не выполненные';
+$_['text_filter_unpaid']      = 'Не оплаченные';
+$_['text_add_filter']         = 'Добавить фильтр';
+$_['text_add_condition']      = 'Добавить условие';
+$_['text_confirm_delete_filter'] = 'Вы уверены, что хотите удалить этот фильтр?';
+$_['entry_filter_name']       = 'Название фильтра';
+$_['error_filter_name']       = 'Введите название фильтра';
+
+$_['text_operator_eq']        = 'равно';
+$_['text_operator_ne']        = 'не равно';
+$_['text_operator_gt']        = 'больше чем';
+$_['text_operator_gte']       = 'больше или равно';
+$_['text_operator_lt']        = 'меньше чем';
+$_['text_operator_lte']       = 'меньше или равно';
+$_['text_operator_contains']  = 'содержит';
+
+$_['text_date_today']         = 'Сегодня';
+$_['text_date_yesterday']     = 'Вчера';
+$_['text_date_this_week']     = 'На этой неделе';
+$_['text_date_this_month']    = 'В этом месяце';
+$_['text_date_this_year']     = 'В этом году';
+
 $_['text_add_subtitle'] = 'Создать новый заказ вручную';
 
 $_['text_edit_subtitle'] = 'Редактировать данные заказа';

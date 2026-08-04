@@ -32,60 +32,65 @@
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
-    <div id="filter-order" class="filter-bar">
+    {{ user_filter }}
+    <div id="filter-order" class="filter-bar hidden">
       <div class="panel panel-default">
         <div class="panel-body">
-          <div class="filter-field">
-            <label for="input-order-id">{{ entry_order_id }}</label>
-            <input type="text" name="filter_order_id" value="{{ filter_order_id }}" placeholder="{{ entry_order_id }}" id="input-order-id" class="form-control" />
-          </div>
-          <div class="filter-field">
-            <label for="input-customer">{{ entry_customer }}</label>
-            <div class="dcx-field-icon-wrap">
-              <input type="text" name="filter_customer" value="{{ filter_customer }}" placeholder="{{ entry_customer }}" id="input-customer" class="form-control" />
-              <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_filter_customer }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
+          <div class="order-filter-layout">
+            <div class="order-filter-fields">
+              <div class="filter-field">
+                <label for="input-order-id">{{ entry_order_id }}</label>
+                <input type="text" name="filter_order_id" value="{{ filter_order_id }}" placeholder="{{ entry_order_id }}" id="input-order-id" class="form-control" />
+              </div>
+              <div class="filter-field">
+                <label for="input-customer">{{ entry_customer }}</label>
+                <div class="dcx-field-icon-wrap">
+                  <input type="text" name="filter_customer" value="{{ filter_customer }}" placeholder="{{ entry_customer }}" id="input-customer" class="form-control" />
+                  <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_filter_customer }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
+                </div>
+              </div>
+              <div class="filter-field">
+                <label for="input-order-status">{{ entry_order_status }}</label>
+                <select name="filter_order_status_id" id="input-order-status" class="form-control">
+                  <option value=""></option>
+                  {% if filter_order_status_id == '0' %}
+                  <option value="0" selected="selected">{{ text_missing }}</option>
+                  {% else %}
+                  <option value="0">{{ text_missing }}</option>
+                  {% endif %}
+                  {% for order_status in order_statuses %}
+                  {% if order_status.order_status_id == filter_order_status_id %}
+                  <option value="{{ order_status.order_status_id }}" selected="selected">{{ order_status.name }}</option>
+                  {% else %}
+                  <option value="{{ order_status.order_status_id }}">{{ order_status.name }}</option>
+                  {% endif %}
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="filter-field">
+                <label for="input-payment-status">{{ text_payment_status }}</label>
+                <select name="filter_payment_status" id="input-payment-status" class="form-control">
+                  <option value=""></option>
+                  {% for value, text in payment_statuses %}
+                  <option value="{{ value }}" {% if filter_payment_status == value %}selected="selected"{% endif %}>{{ text }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="filter-field">
+                <label for="input-total">{{ entry_total }}</label>
+                <input type="text" name="filter_total" value="{{ filter_total }}" placeholder="{{ entry_total }}" id="input-total" class="form-control" />
+              </div>
+              <div class="filter-field">
+                <label for="input-date-added">{{ entry_date_added }}</label>
+                <div class="filter-field-date date" data-date-format="YYYY-MM-DD">
+                  <input type="text" name="filter_date_added" value="{{ filter_date_added }}" placeholder="{{ entry_date_added }}" id="input-date-added" class="form-control" />
+                  <button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button>
+                </div>
+              </div>
+              <div class="filter-actions">
+                <button type="button" id="button-filter" class="btn btn-default"><i data-lucide="funnel" width="14" height="14"></i> {{ button_filter }}</button>
+              </div>
             </div>
-          </div>
-          <div class="filter-field">
-            <label for="input-order-status">{{ entry_order_status }}</label>
-            <select name="filter_order_status_id" id="input-order-status" class="form-control">
-              <option value=""></option>
-              {% if filter_order_status_id == '0' %}
-              <option value="0" selected="selected">{{ text_missing }}</option>
-              {% else %}
-              <option value="0">{{ text_missing }}</option>
-              {% endif %}
-              {% for order_status in order_statuses %}
-              {% if order_status.order_status_id == filter_order_status_id %}
-              <option value="{{ order_status.order_status_id }}" selected="selected">{{ order_status.name }}</option>
-              {% else %}
-              <option value="{{ order_status.order_status_id }}">{{ order_status.name }}</option>
-              {% endif %}
-              {% endfor %}
-            </select>
-          </div>
-          <div class="filter-field">
-            <label for="input-payment-status">{{ text_payment_status }}</label>
-            <select name="filter_payment_status" id="input-payment-status" class="form-control">
-              <option value=""></option>
-              {% for value, text in payment_statuses %}
-              <option value="{{ value }}" {% if filter_payment_status == value %}selected="selected"{% endif %}>{{ text }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="filter-field">
-            <label for="input-total">{{ entry_total }}</label>
-            <input type="text" name="filter_total" value="{{ filter_total }}" placeholder="{{ entry_total }}" id="input-total" class="form-control" />
-          </div>
-          <div class="filter-field">
-            <label for="input-date-added">{{ entry_date_added }}</label>
-            <div class="filter-field-date date" data-date-format="YYYY-MM-DD">
-              <input type="text" name="filter_date_added" value="{{ filter_date_added }}" placeholder="{{ entry_date_added }}" id="input-date-added" class="form-control" />
-              <button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button>
-            </div>
-          </div>
-          <div class="filter-actions">
-            <button type="button" id="button-filter" class="btn btn-default"><i data-lucide="funnel" width="14" height="14"></i> {{ button_filter }}</button>
           </div>
         </div>
       </div>
@@ -214,7 +219,7 @@ $('input[name=\'filter_customer\']').autocomplete({
 		$('input[name=\'filter_customer\']').val(item['label']);
 	}
 });
-//--></script> 
+//--></script>
   <script type="text/javascript"><!--
 $('input[name^=\'selected\']:first').trigger('change');
 

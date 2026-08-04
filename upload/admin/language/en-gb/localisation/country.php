@@ -1,6 +1,7 @@
 <?php
 // Heading
 $_['heading_title']           = 'Countries';
+$_['text_search_country'] = 'Search countries by name or ISO code';
 
 // Text
 $_['text_success']            = 'Success: You have modified countries!';
