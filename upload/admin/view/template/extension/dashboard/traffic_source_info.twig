@@ -5,17 +5,62 @@
       <h3 class="dcx-panel-title">{{ heading_title }}</h3>
       <div class="dcx-panel-heading__subtitle">{{ text_traffic_subtitle }}</div>
     </div>
+    <div class="pull-right">
+      <select class="tile-period-select" data-widget="traffic_source">
+        <option value="all">{{ text_all_time }}</option>
+        <option value="year">{{ text_year }}</option>
+        <option value="month">{{ text_month }}</option>
+        <option value="week">{{ text_week }}</option>
+        <option value="today">{{ text_today }}</option>
+      </select>
+    </div>
   </div>
-  <ul class="list-group">
-    {% if sources %}
-    {% for source in sources %}
-    <li class="list-group-item" style="display:flex;justify-content:space-between;align-items:center;">
-      <span>{{ source.name }}</span>
-      <span><strong>{{ source.visits }}</strong> <span class="text-muted">({{ source.pct }}%)</span></span>
-    </li>
-    {% endfor %}
-    {% else %}
+  <ul class="list-group" data-dash-list="traffic_source">
     <li class="list-group-item text-center">{{ text_no_results }}</li>
-    {% endif %}
   </ul>
 </div>
+<script>
+(function() {
+  var key = 'dashboard_traffic_source_period';
+  var $sel = $('.tile-period-select[data-widget="traffic_source"]');
+  var $list = $sel.closest('.panel').find('[data-dash-list="traffic_source"]');
+  var saved = localStorage.getItem(key) || 'month';
+  var noResults = {{ text_no_results|json_encode|raw }};
+  $sel.val(saved);
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+      return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c];
+    });
+  }
+
+  function render(items) {
+    if (!items.length) {
+      $list.html('<li class="list-group-item text-center">' + esc(noResults) + '</li>');
+      return;
+    }
+
+    var html = '';
+
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      html += '<li class="list-group-item" style="display:flex;justify-content:space-between;align-items:center;">'
+        + '<span>' + esc(item.name) + '</span>'
+        + '<span><strong>' + esc(item.visits) + '</strong> <span class="text-muted">(' + esc(item.pct) + '%)</span></span>'
+        + '</li>';
+    }
+
+    $list.html(html);
+  }
+
+  function load(period) {
+    localStorage.setItem(key, period);
+    $.getJSON('index.php?route=extension/dashboard/traffic_source/ajax&user_token={{ user_token }}&period=' + period, function(json) {
+      render(json.items || []);
+    });
+  }
+
+  load(saved);
+  $sel.on('change', function() { load($(this).val()); });
+})();
+</script>

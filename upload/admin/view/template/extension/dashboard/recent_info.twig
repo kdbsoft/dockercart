@@ -11,7 +11,7 @@
     {% if orders %}
     <div class="dc-recent-orders">
       {% for order in orders %}
-      <div class="dc-recent-order-card">
+      <a class="dc-recent-order-card" href="{{ order.view }}">
         <div class="dc-recent-order-card__header">
           <div class="dc-recent-order-card__avatar">
             <i data-lucide="user" width="18" height="18"></i>
@@ -31,7 +31,6 @@
           </div>
           <div class="dc-recent-order-card__right">
             <div class="dc-recent-order-card__total">{{ order.total }}</div>
-            <a href="{{ order.view }}" class="btn btn-info btn-xs dc-recent-order-card__view-btn"><i data-lucide="arrow-right" width="13" height="13"></i> {{ text_view }}</a>
           </div>
         </div>
 
@@ -66,7 +65,7 @@
           {% endif %}
         </div>
         {% endif %}
-      </div>
+      </a>
       {% endfor %}
     </div>
     {% else %}
@@ -85,6 +84,9 @@
   gap: 10px;
 }
 .dc-recent-order-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
   border: 1px solid var(--dc-border-soft, #e5e7eb);
   border-radius: var(--dc-radius-lg, 8px);
   background: var(--dc-surface, #fff);
@@ -159,12 +161,6 @@
   font-weight: 600;
   color: var(--dc-text-dark, #1f2937);
   white-space: nowrap;
-}
-.dc-recent-order-card__view-btn {
-  white-space: nowrap;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
 }
 .dc-recent-order-card__details {
   display: flex;

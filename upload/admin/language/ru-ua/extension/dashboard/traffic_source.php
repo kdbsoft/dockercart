@@ -12,6 +12,13 @@ $_['text_direct']      = 'Прямые заходы';
 $_['text_other']       = 'Другие';
 $_['text_no_results']  = 'Данных о трафике пока нет';
 
+// Period
+$_['text_all_time']    = 'Всё время';
+$_['text_today']       = 'Сегодня';
+$_['text_week']        = 'Неделя';
+$_['text_month']       = 'Месяц';
+$_['text_year']        = 'Год';
+
 // Entry
 $_['entry_status']     = 'Статус';
 $_['entry_sort_order'] = 'Порядок сортировки';
