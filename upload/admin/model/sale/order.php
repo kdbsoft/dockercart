@@ -271,6 +271,14 @@ class ModelSaleOrder extends Model {
 			}
 		} elseif (isset($data['filter_order_status_id']) && $data['filter_order_status_id'] !== '') {
 			$sql .= " WHERE o.order_status_id = '" . (int)$data['filter_order_status_id'] . "'";
+		} elseif (!empty($data['filter_order_status_exclude'])) {
+			$exclude = array_map('intval', (array)$data['filter_order_status_exclude']);
+
+			if ($exclude) {
+				$sql .= " WHERE o.order_status_id NOT IN (" . implode(',', $exclude) . ")";
+			} else {
+				$sql .= " WHERE o.order_status_id > '0'";
+			}
 		} else {
 			$sql .= " WHERE o.order_status_id > '0'";
 		}
@@ -296,7 +304,12 @@ class ModelSaleOrder extends Model {
 		}
 
 		if (!empty($data['filter_date_added'])) {
-			$sql .= " AND DATE(o.date_added) = DATE('" . $this->db->escape($data['filter_date_added']) . "')";
+			if (!empty($data['filter_date_added_operator'])) {
+				$operator = $this->getComparisonOperator((string)$data['filter_date_added_operator']);
+				$sql .= " AND DATE(o.date_added) " . $operator . " DATE('" . $this->db->escape($data['filter_date_added']) . "')";
+			} else {
+				$sql .= " AND DATE(o.date_added) = DATE('" . $this->db->escape($data['filter_date_added']) . "')";
+			}
 		}
 
 		if (!empty($data['filter_date_modified'])) {
@@ -304,7 +317,28 @@ class ModelSaleOrder extends Model {
 		}
 
 		if (!empty($data['filter_total'])) {
-			$sql .= " AND o.total = '" . (float)$data['filter_total'] . "'";
+			$operator = !empty($data['filter_total_operator']) ? $this->getComparisonOperator((string)$data['filter_total_operator']) : '=';
+			$sql .= " AND o.total " . $operator . " '" . (float)$data['filter_total'] . "'";
+		}
+
+		if (isset($data['filter_total_min']) && $data['filter_total_min'] !== '') {
+			$sql .= " AND o.total >= '" . (float)$data['filter_total_min'] . "'";
+		}
+
+		if (isset($data['filter_total_max']) && $data['filter_total_max'] !== '') {
+			$sql .= " AND o.total <= '" . (float)$data['filter_total_max'] . "'";
+		}
+
+		if (!empty($data['filter_payment_method'])) {
+			$sql .= " AND o.payment_method LIKE '%" . $this->db->escape((string)$data['filter_payment_method']) . "%'";
+		}
+
+		if (!empty($data['filter_shipping_method'])) {
+			$sql .= " AND o.shipping_method LIKE '%" . $this->db->escape((string)$data['filter_shipping_method']) . "%'";
+		}
+
+		if (!empty($data['filter_date_preset'])) {
+			$sql .= $this->getDatePresetSql((string)$data['filter_date_preset'], 'o.date_added');
 		}
 
 		if (!empty($data['filter_payment_status'])) {
@@ -366,6 +400,43 @@ class ModelSaleOrder extends Model {
 		}
 	}
 
+	private function getComparisonOperator(string $operator): string {
+		switch ($operator) {
+			case 'gt':
+				return '>';
+			case 'gte':
+				return '>=';
+			case 'lt':
+				return '<';
+			case 'lte':
+				return '<=';
+			case 'ne':
+				return '<>';
+			default:
+				return '=';
+		}
+	}
+
+	/**
+	 * Build SQL for a date range preset (today, yesterday, this week, ...).
+	 */
+	private function getDatePresetSql(string $preset, string $column): string {
+		switch ($preset) {
+			case 'today':
+				return " AND DATE(" . $column . ") = CURDATE()";
+			case 'yesterday':
+				return " AND DATE(" . $column . ") = DATE_SUB(CURDATE(), INTERVAL 1 DAY)";
+			case 'this_week':
+				return " AND YEARWEEK(" . $column . ", 1) = YEARWEEK(CURDATE(), 1)";
+			case 'this_month':
+				return " AND YEAR(" . $column . ") = YEAR(CURDATE()) AND MONTH(" . $column . ") = MONTH(CURDATE())";
+			case 'this_year':
+				return " AND YEAR(" . $column . ") = YEAR(CURDATE())";
+			default:
+				return "";
+		}
+	}
+
 	public function getOrderProducts($order_id) {
 		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_product WHERE order_id = '" . (int)$order_id . "'");
 
@@ -413,6 +484,14 @@ class ModelSaleOrder extends Model {
 			}
 		} elseif (isset($data['filter_order_status_id']) && $data['filter_order_status_id'] !== '') {
 			$sql .= " WHERE order_status_id = '" . (int)$data['filter_order_status_id'] . "'";
+		} elseif (!empty($data['filter_order_status_exclude'])) {
+			$exclude = array_map('intval', (array)$data['filter_order_status_exclude']);
+
+			if ($exclude) {
+				$sql .= " WHERE order_status_id NOT IN (" . implode(',', $exclude) . ")";
+			} else {
+				$sql .= " WHERE order_status_id > '0'";
+			}
 		} else {
 			$sql .= " WHERE order_status_id > '0'";
 		}
@@ -438,7 +517,12 @@ class ModelSaleOrder extends Model {
 		}
 
 		if (!empty($data['filter_date_added'])) {
-			$sql .= " AND DATE(date_added) = DATE('" . $this->db->escape($data['filter_date_added']) . "')";
+			if (!empty($data['filter_date_added_operator'])) {
+				$operator = $this->getComparisonOperator((string)$data['filter_date_added_operator']);
+				$sql .= " AND DATE(date_added) " . $operator . " DATE('" . $this->db->escape($data['filter_date_added']) . "')";
+			} else {
+				$sql .= " AND DATE(date_added) = DATE('" . $this->db->escape($data['filter_date_added']) . "')";
+			}
 		}
 
 		if (!empty($data['filter_date_modified'])) {
@@ -446,7 +530,28 @@ class ModelSaleOrder extends Model {
 		}
 
 		if (!empty($data['filter_total'])) {
-			$sql .= " AND total = '" . (float)$data['filter_total'] . "'";
+			$operator = !empty($data['filter_total_operator']) ? $this->getComparisonOperator((string)$data['filter_total_operator']) : '=';
+			$sql .= " AND total " . $operator . " '" . (float)$data['filter_total'] . "'";
+		}
+
+		if (isset($data['filter_total_min']) && $data['filter_total_min'] !== '') {
+			$sql .= " AND total >= '" . (float)$data['filter_total_min'] . "'";
+		}
+
+		if (isset($data['filter_total_max']) && $data['filter_total_max'] !== '') {
+			$sql .= " AND total <= '" . (float)$data['filter_total_max'] . "'";
+		}
+
+		if (!empty($data['filter_payment_method'])) {
+			$sql .= " AND payment_method LIKE '%" . $this->db->escape((string)$data['filter_payment_method']) . "%'";
+		}
+
+		if (!empty($data['filter_shipping_method'])) {
+			$sql .= " AND shipping_method LIKE '%" . $this->db->escape((string)$data['filter_shipping_method']) . "%'";
+		}
+
+		if (!empty($data['filter_date_preset'])) {
+			$sql .= $this->getDatePresetSql((string)$data['filter_date_preset'], 'date_added');
 		}
 
 		if (!empty($data['filter_payment_status'])) {

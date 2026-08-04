@@ -1,6 +1,7 @@
 <?php
 // Heading
 $_['heading_title']    = 'SEO URL';
+$_['text_search_seo_url'] = 'Search SEO URLs by keyword or query';
 
 // Text
 $_['text_success']     = 'Success: You have modified SEO URL!';

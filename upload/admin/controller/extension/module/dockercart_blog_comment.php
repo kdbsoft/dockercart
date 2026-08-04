@@ -166,6 +166,36 @@ class ControllerExtensionModuleDockercartBlogComment extends Controller {
 
 		$data['text_list_subtitle'] = $this->language->get('text_list_subtitle');
 
+		// Per-admin saved filters (Shopify-style tabs)
+		$active_filter = $this->getActiveUserFilter('blog_comment');
+
+		$this->load->model('user/user_filter');
+
+		$user_id = (int)$this->user->getId();
+		$saved_filters = $this->model_user_user_filter->getFilters($user_id, 'blog_comment');
+
+		$tab_counts = array(
+			'all' => $this->model_extension_module_dockercart_blog_comment->getTotalComments(array())
+		);
+
+		foreach ($saved_filters as $saved) {
+			$tab_counts['custom_' . $saved['filter_id']] = $this->model_extension_module_dockercart_blog_comment->getTotalComments($this->buildCommentFilterData($saved['conditions']));
+		}
+
+		$status_options = array(
+			array('value' => '1', 'label' => $this->language->get('text_enabled')),
+			array('value' => '0', 'label' => $this->language->get('text_disabled'))
+		);
+
+		$data['user_filter'] = $this->renderUserFilter('blog_comment', 'extension/module/dockercart_blog_comment', array(
+			array('key' => 'post', 'label' => $this->language->get('entry_post'), 'type' => 'text'),
+			array('key' => 'author', 'label' => $this->language->get('entry_author'), 'type' => 'text'),
+			array('key' => 'email', 'label' => $this->language->get('entry_email'), 'type' => 'text'),
+			array('key' => 'status', 'label' => $this->language->get('entry_status'), 'type' => 'select', 'options' => $status_options)
+		), $tab_counts);
+
+		$data['active_filter'] = $active_filter;
+
 		$data['comments'] = array();
 
 		$filter_data = array(
@@ -176,6 +206,12 @@ class ControllerExtensionModuleDockercartBlogComment extends Controller {
 			'start'         => ($page - 1) * $this->config->get('config_limit_admin'),
 			'limit'         => $this->config->get('config_limit_admin')
 		);
+
+		if ($active_filter) {
+			foreach ($this->buildCommentFilterData($active_filter['conditions']) as $key => $value) {
+				$filter_data[$key] = $value;
+			}
+		}
 
 		$comments = $this->model_extension_module_dockercart_blog_comment->getComments($filter_data);
 		$comment_total = $this->model_extension_module_dockercart_blog_comment->getTotalComments($filter_data);
@@ -361,5 +397,34 @@ class ControllerExtensionModuleDockercartBlogComment extends Controller {
 
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
+	 * Convert saved filter conditions into comment model filter_data.
+	 */
+	private function buildCommentFilterData(array $conditions): array {
+		$data = array();
+
+		foreach ($conditions as $condition) {
+			$field = (string)($condition['field'] ?? '');
+			$value = $condition['value'] ?? '';
+
+			switch ($field) {
+				case 'post':
+					$data['filter_post'] = (string)$value;
+					break;
+				case 'author':
+					$data['filter_author'] = (string)$value;
+					break;
+				case 'email':
+					$data['filter_email'] = (string)$value;
+					break;
+				case 'status':
+					$data['filter_status'] = (string)$value;
+					break;
+			}
+		}
+
+		return $data;
 	}
 }

@@ -947,8 +947,11 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
     cursor: pointer;
 }
 
-.table > tbody > tr[data-href]:hover td:first-child {
-    box-shadow: inset 3px 0 0 var(--dc-primary);
+.table > tbody > tr[data-href]:hover td:first-child input[type="checkbox"] {
+    cursor: pointer;
+}
+.table > tbody > tr[data-href]:hover td:first-child input[type="checkbox"]:hover {
+    border-color: var(--dc-primary);
 }
 
 .row-title-link {
@@ -2414,6 +2417,288 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
 .filter-actions {
     flex-shrink: 0;
     padding-bottom: 1px;
+}
+
+/* ── Order list filter: Shopify-style layout (fields + right AJAX search) ── */
+.order-filter-layout {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+    width: 100%;
+}
+
+.order-filter-fields {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    row-gap: 12px;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.order-search-wrap {
+    position: relative;
+    flex: 0 1 320px;
+    min-width: 240px;
+    max-width: 100%;
+    margin-left: auto;
+}
+
+.order-search-wrap .search-input-wrap .form-control {
+    padding-right: 32px;
+}
+
+.order-search-spinner {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--dc-text-muted);
+    pointer-events: none;
+    animation: spin 1s linear infinite;
+    z-index: 2;
+}
+
+.order-search-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    z-index: 1050;
+    margin-top: 4px;
+    padding: 6px 0;
+    background: var(--dc-surface);
+    border: 1px solid var(--dc-border);
+    border-radius: var(--dc-radius-lg);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    list-style: none;
+    max-height: 420px;
+    overflow-y: auto;
+}
+
+.order-search-dropdown li > a {
+    display: block;
+    padding: 8px 12px;
+    color: var(--dc-text-dark);
+    text-decoration: none;
+    transition: background 0.15s;
+}
+
+.order-search-dropdown li > a:hover {
+    background: var(--dc-gray-100);
+}
+
+.order-search-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.order-search-item-id {
+    flex: 0 0 auto;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--dc-primary);
+}
+
+.order-search-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.order-search-item-customer {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--dc-text-dark);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.order-search-item-sub {
+    font-size: 11px;
+    color: var(--dc-text-muted);
+    margin-top: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.order-search-item-total {
+    flex: 0 0 auto;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--dc-text-dark);
+    white-space: nowrap;
+}
+
+.order-search-empty {
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--dc-text-muted);
+    text-align: center;
+}
+
+/* ── Order filter tabs (Shopify style) ── */
+.order-filter-tabs {
+    margin-bottom: 16px;
+}
+
+.order-filter-tabs__inner {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    width: 100%;
+}
+
+.order-filter-tabs__list {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.order-filter-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--dc-text-dark);
+    background: var(--dc-surface);
+    border: 1px solid var(--dc-border);
+    border-radius: 999px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+    cursor: pointer;
+    line-height: 1.4;
+}
+
+.order-filter-tab:hover {
+    border-color: var(--dc-primary);
+    color: var(--dc-primary);
+    text-decoration: none;
+}
+
+.order-filter-tab.is-active {
+    background: var(--dc-primary);
+    border-color: var(--dc-primary);
+    color: #fff;
+}
+
+.order-filter-tab__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 999px;
+    background: var(--dc-gray-100);
+    color: var(--dc-text-muted);
+}
+
+.order-filter-tab.is-active .order-filter-tab__count {
+    background: rgba(255, 255, 255, 0.25);
+    color: #fff;
+}
+
+.order-filter-tab--add {
+    padding: 7px 10px;
+    color: var(--dc-text-muted);
+}
+
+.order-filter-tab__remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    color: var(--dc-text-muted);
+    opacity: 0.6;
+    transition: all 0.15s ease;
+}
+
+.order-filter-tab__remove:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.08);
+    color: var(--dc-danger);
+}
+
+/* ── Filter builder modal ── */
+.filter-condition-row {
+    margin-bottom: 8px;
+}
+
+.filter-condition-fields {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.filter-condition-fields .form-control {
+    height: 34px;
+    font-size: 12px;
+}
+
+.filter-condition-field {
+    flex: 0 1 170px;
+}
+
+.filter-condition-operator {
+    flex: 0 1 120px;
+}
+
+.filter-condition-value-wrap {
+    flex: 1 1 220px;
+    min-width: 180px;
+}
+
+.filter-condition-value-wrap .form-control {
+    width: 100%;
+}
+
+.filter-condition-value-status {
+    min-height: 34px;
+}
+
+.filter-condition-remove {
+    flex: 0 0 auto;
+}
+
+.filter-condition-range {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.filter-condition-range .form-control {
+    flex: 1;
+    min-width: 0;
+}
+
+.filter-condition-range-sep {
+    color: var(--dc-text-muted);
+    font-size: 12px;
+    flex: 0 0 auto;
+}
+
+@media (max-width: 767px) {
+    .order-search-wrap {
+        flex-basis: 100%;
+        margin-left: 0;
+    }
 }
 
 html[dir="rtl"] .form-group ul.dropdown-menu {

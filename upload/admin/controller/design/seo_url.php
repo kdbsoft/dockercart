@@ -259,6 +259,12 @@ class ControllerDesignSeoUrl extends Controller {
 		$data['delete'] = $this->url->link('design/seo_url/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['text_list_subtitle'] = $this->language->get('text_list_subtitle');
 
+		// Search-only toolbar (no saved filter tabs)
+		$data['user_filter'] = $this->renderUserFilter('seo_url', 'design/seo_url', array(), array(), '', array(), array(
+			'placeholder' => $this->language->get('text_search_seo_url'),
+			'url'         => $this->url->link('design/seo_url/autocomplete', 'user_token=' . $this->session->data['user_token'], true)
+		), false);
+
 		$data['seo_urls'] = array();
 
 		$filter_data = array(
@@ -530,5 +536,39 @@ class ControllerDesignSeoUrl extends Controller {
 		}
 
 		return !$this->error;
+	}
+
+	public function autocomplete(): void {
+		$json = array();
+
+		if (isset($this->request->get['filter_search'])) {
+			$filter_search = trim((string)$this->request->get['filter_search']);
+
+			if ($filter_search !== '') {
+				$this->load->model('design/seo_url');
+
+				$filter_data = array(
+					'filter_keyword' => '%' . $filter_search . '%',
+					'sort'  => 'keyword',
+					'order' => 'ASC',
+					'start' => 0,
+					'limit' => 8
+				);
+
+				$results = $this->model_design_seo_url->getSeoUrls($filter_data);
+
+				foreach ($results as $result) {
+					$json[] = array(
+						'id'       => $result['seo_url_id'],
+						'name'     => $result['keyword'],
+						'subtitle' => $result['query'] . ($result['store_id'] ? ' · ' . $result['store'] : ''),
+						'href'     => $this->url->link('design/seo_url/edit', 'user_token=' . $this->session->data['user_token'] . '&seo_url_id=' . $result['seo_url_id'], true)
+					);
+				}
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
 	}
 }
