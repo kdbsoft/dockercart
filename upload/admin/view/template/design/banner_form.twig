@@ -430,7 +430,7 @@ function duplicateSlide(row, language_id) {
 
   initColorInputs($clone);
   initVideoFields($clone);
-  initLinkFields($clone);
+  DcLinkField.init($clone, { hiddenClass: null });
   if (window.lucide && typeof window.lucide.createIcons === 'function') {
     window.lucide.createIcons();
   }
@@ -681,7 +681,7 @@ function addSlide(language_id) {
   var $card = $(html);
   $('#slide-list-' + language_id).append($card);
   initColorInputs($card);
-  initLinkFields($card);
+  DcLinkField.init($card, { hiddenClass: null });
   initVideoFields($card);
   if (window.lucide && typeof window.lucide.createIcons === 'function') {
     window.lucide.createIcons();
