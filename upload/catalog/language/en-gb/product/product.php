@@ -60,6 +60,7 @@ $_['text_accessory']         = 'Accessories';
 $_['text_fbt']               = 'Frequently Bought Together';
 $_['text_view_all'] = 'View All →';
 $_['text_tags']                = 'Tags:';
+$_['text_all_brand_products']  = 'All products of the brand';
 $_['text_error']               = 'Product not found!';
 $_['text_day']                 = 'day';
 $_['text_week']                = 'week';
