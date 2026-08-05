@@ -334,7 +334,7 @@ class ControllerProductProduct extends Controller {
 
 			$this->load->model('catalog/review');
 
-			$data['tab_review'] = sprintf($this->language->get('tab_review'), $product_info['reviews']);
+			$data['tab_review'] = $this->language->get('tab_review');
 
 			$data['product_id'] = $product_id;
 			$data['schema_product_url'] = $this->url->link('product/product', 'product_id=' . $product_id);
@@ -1019,7 +1019,11 @@ class ControllerProductProduct extends Controller {
 
 			$this->load->helper('plural');
 
-			$data['reviews'] = review_count_label((int)$product_info['reviews'], $this->language->get('code'));
+			if ((int)$product_info['reviews'] > 0) {
+				$data['reviews'] = review_count_label((int)$product_info['reviews'], $this->language->get('code'));
+			} else {
+				$data['reviews'] = $this->language->get('text_write');
+			}
 
 			// Aggregate rating summary (fractional, from the rating cache)
 			$review_summary = $this->model_catalog_review->getProductRatingSummary($product_id);
@@ -1031,6 +1035,8 @@ class ControllerProductProduct extends Controller {
 			$data['rating_distribution'] = $review_summary['distribution'];
 			$data['show_distribution'] = $this->config->get('config_review_show_distribution');
 			$data['reviews_url'] = $this->url->link('product/reviews', 'product_id=' . $product_id);
+			$data['review_ajax_url'] = $this->url->link('product/product/review', 'product_id=' . $product_id);
+			$data['review_write_url'] = $this->url->link('product/product/write', 'product_id=' . $product_id);
 
 			// Real reviews for schema.org markup
 			$data['schema_reviews'] = $this->model_catalog_review->getReviewsForSchema($product_id, 5);
@@ -1741,16 +1747,23 @@ class ControllerProductProduct extends Controller {
 			$sort = in_array($this->request->get['sort'], array('newest', 'highest', 'lowest'), true) ? $this->request->get['sort'] : 'newest';
 		}
 		$review_list = new ReviewList($this->registry);
-		$fragment = $review_list->build($product_id, $page, $sort, 'product/product/review');
+		$fragment = $review_list->build($product_id, $page, $sort, 'product/reviews');
 
 		$data['reviews'] = $fragment['reviews'];
-		$data['pagination'] = $fragment['pagination'];
-		$data['text_pagination'] = $fragment['text_pagination'];
+		$data['has_more'] = $fragment['has_more'];
+		$data['next_page'] = $fragment['next_page'];
+		$data['show_more_label'] = $fragment['show_more_label'];
 		$data['sort'] = $fragment['sort'];
 		$data['sort_urls'] = $fragment['sort_urls'];
 		$data['text_no_reviews'] = $fragment['text_no_reviews'];
+		$data['text_be_first'] = $fragment['text_be_first'];
+		$data['text_be_first_hint'] = $fragment['text_be_first_hint'];
+		$data['text_leave_review'] = $fragment['text_leave_review'];
+		$data['text_reviews_section'] = $this->language->get('text_reviews_section');
 		$data['total'] = $fragment['total'];
 		$data['total_label'] = $fragment['total_label'];
+		$data['reviews_url'] = $this->url->link('product/reviews', 'product_id=' . $product_id);
+		$data['review_ajax_url'] = $this->url->link('product/product/review', 'product_id=' . $product_id);
 
 		$this->response->setOutput($this->load->view('product/review', $data));
 	}

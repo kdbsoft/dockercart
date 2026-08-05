@@ -33,6 +33,7 @@ class ControllerProductReviews extends Controller {
 			$data['product_id'] = $product_id;
 			$data['heading_title'] = $product_info['name'];
 			$data['heading_reviews'] = sprintf($this->language->get('heading_reviews'), $product_info['name']);
+			$data['text_reviews_section'] = $this->language->get('text_reviews_section');
 			$data['product_href'] = $this->url->link('product/product', 'product_id=' . $product_id);
 
 			$page_url = $this->url->link('product/reviews', 'product_id=' . $product_id);
@@ -63,7 +64,7 @@ class ControllerProductReviews extends Controller {
 			);
 
 			$data['breadcrumbs'][] = array(
-				'text' => $this->language->get('text_reviews'),
+				'text' => sprintf($this->language->get('text_reviews'), $summary['review_count']),
 				'href' => $page_url
 			);
 
@@ -83,11 +84,15 @@ class ControllerProductReviews extends Controller {
 			$fragment = $review_list->build($product_id, $page, $sort);
 
 			$data['reviews_list'] = $fragment['reviews'];
-			$data['pagination'] = $fragment['pagination'];
-			$data['text_pagination'] = $fragment['text_pagination'];
+			$data['has_more'] = $fragment['has_more'];
+			$data['next_page'] = $fragment['next_page'];
+			$data['show_more_label'] = $fragment['show_more_label'];
 			$data['sort'] = $fragment['sort'];
 			$data['sort_urls'] = $fragment['sort_urls'];
 			$data['text_no_reviews'] = $fragment['text_no_reviews'];
+			$data['text_be_first'] = $fragment['text_be_first'];
+			$data['text_be_first_hint'] = $fragment['text_be_first_hint'];
+			$data['text_leave_review'] = $fragment['text_leave_review'];
 			$data['review_total'] = $fragment['total'];
 			$data['review_total_label'] = $fragment['total_label'];
 
@@ -96,6 +101,9 @@ class ControllerProductReviews extends Controller {
 			$data['review_guest'] = $this->config->get('config_review_guest') || $this->customer->isLogged();
 			$data['customer_name'] = $this->customer->isLogged() ? $this->customer->getFirstName() . '&nbsp;' . $this->customer->getLastName() : '';
 			$data['customer_logged'] = $this->customer->isLogged();
+			$data['review_write_url'] = $this->url->link('product/product/write', 'product_id=' . $product_id);
+			$data['review_ajax_url'] = $this->url->link('product/product/review', 'product_id=' . $product_id);
+			$data['reviews_url'] = $page_url;
 
 			$criteria_group = $this->model_catalog_review_criteria->getProductCriteriaGroup($product_id);
 			$criteria = $criteria_group['criteria'];
