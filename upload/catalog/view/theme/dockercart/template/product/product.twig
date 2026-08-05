@@ -512,6 +512,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           <aside class="lg:col-span-1 lg:sticky lg:top-24">
             <div class="dc-review-overview-compact p-5 sm:p-6">
+              {% if review_count %}
               <div class="flex items-center gap-4">
                 {% if rating > 0 %}
                 <span class="dc-rating-number text-3xl font-semibold leading-none">{{ rating_value }} <span class="text-base font-normal text-gray-400">/ 5</span></span>
@@ -546,6 +547,14 @@
                     <span class="w-8 text-right tabular-nums text-gray-400">{{ count }}</span>
                   </div>
                 {% endfor %}
+              </div>
+              {% endif %}
+              {% else %}
+              <div class="flex items-center gap-3">
+                <span class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-amber-500 shadow-sm ring-1 ring-gray-100">
+                  <i data-lucide="star" width="21" height="21" aria-hidden="true"></i>
+                </span>
+                <p class="text-sm font-extrabold text-gray-900">{{ text_no_reviews }}</p>
               </div>
               {% endif %}
 
@@ -1401,7 +1410,6 @@ function closeModal3d() {
     setInputNativeType('.date input', 'date');
     setInputNativeType('.datetime input', 'datetime-local');
     setInputNativeType('.time input', 'time');
-    dcRecalcOptionPrice();
 
     var productBlock = document.getElementById('product');
     if (productBlock) {
