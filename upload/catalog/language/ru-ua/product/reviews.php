@@ -22,3 +22,6 @@ $_['text_cons']                  = 'Недостатки';
 
 // Section
 $_['text_reviews_section']   = 'Отзывы покупателей';
+
+// Date format
+$_['date_format_review']     = 'd.m.Y';

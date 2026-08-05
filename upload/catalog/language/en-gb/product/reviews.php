@@ -22,3 +22,6 @@ $_['text_cons']                  = 'Cons';
 
 // Section
 $_['text_reviews_section']   = 'Customer Reviews';
+
+// Date format (American)
+$_['date_format_review']     = 'M d, Y g:i A';

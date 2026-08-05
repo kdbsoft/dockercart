@@ -2,9 +2,9 @@
 <div class="flex flex-wrap items-center gap-3 mt-4">
   <div class="inline-flex self-center items-center gap-2 rounded-2xl bg-amber-50/60 leading-none">
     {% if rating > 0 %}
-    <span class="text-sm font-bold tracking-tight text-slate-950 leading-none">{{ rating_value }}</span>
+    <span class="text-sm font-bold tracking-tight text-gray-900 leading-none">{{ rating_value }}</span><span class="text-sm font-semibold text-gray-400 leading-none">/5</span>
     {% endif %}
-    <div class="flex justify-center gap-2">
+    <div class="flex self-center justify-center gap-2">
       <div class="dc-stars leading-none" aria-hidden="true">
         {% for i in 1..5 %}
           {% set diff = rating - (i - 1) %}
@@ -17,13 +17,13 @@
           {% endif %}
         {% endfor %}
       </div>
-      <a href="{{ reviews_url }}" class="inline-flex items-center gap-1 text-xs font-bold leading-none text-slate-600 hover:text-blue-600 transition">{{ reviews }}<i data-lucide="arrow-up-right" width="12" height="12"></i></a>
+      <a href="{{ reviews_url }}" class="inline-flex items-center gap-1 text-xs font-bold leading-none text-black-600 hover:text-blue-600 transition">{{ reviews }}<i data-lucide="arrow-up-right" width="12" height="12"></i></a>
     </div>
   </div>
 
   {% if show_model|default(true) %}
-  <span class="text-sm text-slate-300 hidden sm:inline">/</span>
-  <span class="text-sm text-slate-500">{{ text_model }} <span id="dc-variant-model" data-base-model="{{ model }}">{{ is_configurable and variant_model is defined and variant_model ? variant_model : model }}</span></span>
+  <span class="text-sm text-gray-300 hidden sm:inline">/</span>
+  <span class="text-sm text-gray-500">{{ text_model }} <span id="dc-variant-model" data-base-model="{{ model }}">{{ is_configurable and variant_model is defined and variant_model ? variant_model : model }}</span></span>
   {% endif %}
 </div>
 {% elseif not review_status is defined or not review_status %}
