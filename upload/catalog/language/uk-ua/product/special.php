@@ -28,6 +28,7 @@ $_['text_model_desc']   = 'Код товару (Я - А)';
 $_['text_limit']        = 'Показати:';
 // New arrivals / specials additions
 $_['text_new_arrivals'] = 'Новинки';
+$_['text_all_new_arrivals'] = 'Всі новинки';
 $_['text_last_90_days'] = 'Останні 90 днів';
 $_['text_badge_30'] = '30 ДНІВ';
 $_['text_badge_60'] = '60 ДНІВ';
@@ -38,6 +39,8 @@ $_['text_newest_first'] = 'Новіші першими';
 $_['text_oldest_first'] = 'Старіші першими';
 // Common UI strings
 $_['text_quick_view'] = 'Швидкий перегляд';
+$_['text_shop_by'] = 'Обрати з';
+$_['text_all_offers'] = 'Усі пропозиції';
 $_['text_sale'] = 'РОЗПРОДАЖ';
 $_['text_special_tagline'] = 'Ексклюзивні пропозиції — не пропустіть.';
 $_['text_products']  = 'товарів';

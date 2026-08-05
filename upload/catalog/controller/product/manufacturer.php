@@ -232,6 +232,7 @@ class ControllerProductManufacturer extends Controller {
 
 			// Ensure labels for info page
 			$data['text_brand'] = $this->language->get('text_brand');
+			$data['text_shop_by'] = $this->language->get('text_shop_by');
 			$data['text_about_brand'] = $this->language->get('text_about_brand') ?: 'About this brand';
 			$data['text_products'] = $this->language->get('text_products');
 			$data['text_quality'] = $this->language->get('text_quality');
