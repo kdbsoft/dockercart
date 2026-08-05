@@ -1,20 +1,20 @@
-<article class="dc-review-card bg-white border border-gray-100 rounded-2xl p-5 mb-4 shadow-sm">
+<article class="dc-review-card bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 mb-4 shadow-[0_8px_24px_rgba(15,23,42,0.035)]">
   <div class="flex items-start gap-3">
     <div class="dc-avatar flex-shrink-0" style="background: hsl({{ review.avatar_hue|default(210) }}, 65%, 45%);" aria-hidden="true">{{ review.author_initials|default('?') }}</div>
     <div class="flex-1 min-w-0">
       <div class="flex flex-wrap items-center gap-2">
-        <strong class="text-sm text-gray-900">{{ review.author }}</strong>
+        <strong class="text-[15px] text-slate-950">{{ review.author }}</strong>
         {% if review.verified %}
-        <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5" title="{{ text_verified }}">
+        <span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-1" title="{{ text_verified }}">
           <i data-lucide="badge-check" width="13" height="13"></i>{{ text_verified }}
         </span>
         {% endif %}
       </div>
-      <div class="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
+      <div class="text-xs text-slate-400 mt-1 flex items-center gap-1">
         <i data-lucide="calendar" width="12" height="12"></i>{{ review.date_added }}
       </div>
     </div>
-    <div class="flex flex-col items-end flex-shrink-0">
+    <div class="dc-review-card-rating flex flex-col items-end flex-shrink-0">
       <div class="dc-stars" aria-hidden="true">
         {% for i in 1..5 %}
           {% set diff = review.rating - (i - 1) %}
@@ -27,9 +27,11 @@
           {% endif %}
         {% endfor %}
       </div>
-      <div class="text-sm font-bold text-gray-800 mt-1.5 tabular-nums">{{ review.rating_value }}<span class="text-xs font-medium text-gray-400">/5</span></div>
+      <div class="text-sm font-extrabold text-slate-800 mt-1 tabular-nums">{{ review.rating_value }}<span class="text-[10px] font-semibold text-slate-400">/5</span></div>
     </div>
   </div>
+
+  <div class="dc-review-card-divider mt-5"></div>
 
   {% if review.criteria %}
     {% if review.criteria|filter(c => c.type == 'rating')|length > 0 %}
@@ -38,8 +40,8 @@
         {% if item.type == 'rating' %}
         <div>
           <div class="flex items-center justify-between gap-3 mb-1">
-            <span class="text-xs text-gray-600">{{ item.name }}</span>
-            <span class="text-xs font-semibold text-gray-800 tabular-nums">{{ item.rating }}/5</span>
+            <span class="text-xs font-semibold text-slate-600">{{ item.name }}</span>
+            <span class="text-xs font-bold text-slate-800 tabular-nums">{{ item.rating }}/5</span>
           </div>
           <div class="dc-stars dc-stars-sm" aria-hidden="true">
             {% for i in 1..5 %}
@@ -67,7 +69,7 @@
       <div class="flex items-center gap-1.5 text-xs font-bold text-emerald-600 mb-1">
         <i data-lucide="thumbs-up" width="13" height="13"></i>{{ text_pros }}
       </div>
-      <div class="text-sm text-gray-700 leading-relaxed">{{ review.pros }}</div>
+      <div class="text-sm text-slate-700 leading-relaxed">{{ review.pros }}</div>
     </div>
     {% endif %}
     {% if review.cons %}
@@ -75,13 +77,13 @@
       <div class="flex items-center gap-1.5 text-xs font-bold text-red-500 mb-1">
         <i data-lucide="thumbs-down" width="13" height="13"></i>{{ text_cons }}
       </div>
-      <div class="text-sm text-gray-700 leading-relaxed">{{ review.cons }}</div>
+      <div class="text-sm text-slate-700 leading-relaxed">{{ review.cons }}</div>
     </div>
     {% endif %}
   </div>
   {% endif %}
 
-  <div class="text-sm text-gray-700 leading-relaxed mt-4">{{ review.text }}</div>
+  <div class="text-[15px] text-slate-700 leading-7 mt-5">{{ review.text }}</div>
 
   {% if review.images %}
     <div class="dc-review-thumbs">

@@ -1,48 +1,47 @@
 {% if review_guest %}
-<h3 class="text-base font-bold text-gray-900 mb-4">{{ text_write }}</h3>
-<form id="form-review" data-product-id="{{ product_id }}" enctype="multipart/form-data" class="space-y-4 max-w-xl">
+<form id="form-review" data-product-id="{{ product_id }}" data-write-url="{{ review_write_url|default('') }}" enctype="multipart/form-data" class="space-y-5 w-full max-w-xl">
   <div>
-    <label class="text-sm font-semibold text-gray-700 block mb-1.5" for="input-name">{{ entry_name }}</label>
-    <input type="text" name="name" value="{{ customer_name }}" id="input-name" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-blue-400 transition" />
+    <label class="text-xs font-bold uppercase tracking-wider text-slate-500 block mb-2" for="input-name">{{ entry_name }}</label>
+    <input type="text" name="name" value="{{ customer_name }}" id="input-name" class="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none transition" />
   </div>
 
   <div>
-    <label class="text-sm font-semibold text-gray-700 block mb-1.5" for="input-review">{{ entry_review }}</label>
-    <textarea name="text" rows="4" id="input-review" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-blue-400 transition resize-none"></textarea>
-    <p class="text-xs text-gray-400 mt-1">{{ text_note }}</p>
+    <label class="text-xs font-bold uppercase tracking-wider text-slate-500 block mb-2" for="input-review">{{ entry_review }}</label>
+    <textarea name="text" rows="5" id="input-review" class="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none transition resize-none"></textarea>
+    <p class="text-xs text-slate-400 mt-1">{{ text_note }}</p>
   </div>
 
   {% for item in criteria %}
     {% if item.type == 'rating' %}
       <div class="dc-criteria-field">
-        <label class="text-sm font-semibold text-gray-700 block mb-2">{{ item.name }}</label>
+        <label class="text-xs font-bold uppercase tracking-wider text-slate-500 block mb-2">{{ item.name }}</label>
         <div class="flex items-center gap-3">
-          <span class="text-xs text-gray-400">{{ entry_bad }}</span>
+          <span class="text-xs text-slate-400">{{ entry_bad }}</span>
           <div class="dc-stars-input" data-criteria-input="criteria[{{ item.criteria_id }}]" role="group" aria-label="{{ item.name }}">
             {% for i in 1..5 %}<span class="dc-star" data-val="{{ i }}" tabindex="0" role="radio">★</span>{% endfor %}
           </div>
-          <span class="text-xs text-gray-400">{{ entry_good }}</span>
+          <span class="text-xs text-slate-400">{{ entry_good }}</span>
         </div>
         <input type="hidden" name="criteria[{{ item.criteria_id }}]" value="" />
       </div>
     {% else %}
       <div>
-        <label class="text-sm font-semibold text-gray-700 block mb-1.5" for="criteria-{{ item.criteria_id }}">{{ item.name }}</label>
-        <textarea name="criteria[{{ item.criteria_id }}]" rows="2" id="criteria-{{ item.criteria_id }}" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-blue-400 transition resize-none"></textarea>
-        {% if item.help %}<p class="text-xs text-gray-400 mt-1">{{ item.help }}</p>{% endif %}
+        <label class="text-xs font-bold uppercase tracking-wider text-slate-500 block mb-2" for="criteria-{{ item.criteria_id }}">{{ item.name }}</label>
+        <textarea name="criteria[{{ item.criteria_id }}]" rows="2" id="criteria-{{ item.criteria_id }}" class="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none transition resize-none"></textarea>
+        {% if item.help %}<p class="text-xs text-slate-400 mt-1">{{ item.help }}</p>{% endif %}
       </div>
     {% endif %}
   {% endfor %}
 
   {% if not has_rating_criteria %}
   <div>
-    <label class="text-sm font-semibold text-gray-700 block mb-2">{{ entry_rating }}</label>
+    <label class="text-xs font-bold uppercase tracking-wider text-slate-500 block mb-2">{{ entry_rating }}</label>
     <div class="flex items-center gap-3">
-      <span class="text-xs text-gray-400">{{ entry_bad }}</span>
+      <span class="text-xs text-slate-400">{{ entry_bad }}</span>
       <div id="dc-stars-row" class="dc-stars-input" role="group" aria-label="Rating">
         {% for i in 1..5 %}<span class="dc-star" data-val="{{ i }}" tabindex="0" role="radio">★</span>{% endfor %}
       </div>
-      <span class="text-xs text-gray-400">{{ entry_good }}</span>
+      <span class="text-xs text-slate-400">{{ entry_good }}</span>
       {% for i in 1..5 %}<input type="radio" name="rating" value="{{ i }}" id="dc-rating-{{ i }}" class="sr-only" />{% endfor %}
     </div>
   </div>
@@ -50,20 +49,20 @@
 
   {% if review_images_enabled and customer_logged %}
   <div>
-    <label class="text-sm font-semibold text-gray-700 block mb-1.5">{{ entry_images }}</label>
-    <input type="file" name="images[]" id="input-review-images" accept="image/jpeg,image/png,image/webp" multiple class="text-sm text-gray-500" />
-    <p class="text-xs text-gray-400 mt-1">{{ text_max_images }}</p>
+    <label class="text-xs font-bold uppercase tracking-wider text-slate-500 block mb-1.5">{{ entry_images }}</label>
+    <input type="file" name="images[]" id="input-review-images" data-max="{{ review_max_images|default(3) }}" accept="image/jpeg,image/png,image/webp" multiple class="text-sm text-slate-500" />
+    <p class="text-xs text-slate-400 mt-1">{{ text_max_images }}</p>
     <div id="dc-review-upload-previews" class="dc-review-upload-preview"></div>
   </div>
   {% endif %}
 
   {% if review_video_enabled and customer_logged %}
   <div>
-    <label class="text-sm font-semibold text-gray-700 block mb-1.5">{{ entry_video }}</label>
-    <input type="text" name="video_url" id="input-video-url" placeholder="{{ entry_video_url }}" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-blue-400 transition mb-2" />
-    <div class="text-xs text-gray-400 mb-1">{{ text_video_or }}</div>
-    <input type="file" name="video_file" id="input-video-file" accept="video/mp4,video/webm" class="text-sm text-gray-500" />
-    <p class="text-xs text-gray-400 mt-1">{{ text_video_hint }}</p>
+    <label class="text-xs font-bold uppercase tracking-wider text-slate-500 block mb-1.5">{{ entry_video }}</label>
+    <input type="text" name="video_url" id="input-video-url" placeholder="{{ entry_video_url }}" class="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none transition mb-2" />
+    <div class="text-xs text-slate-400 mb-1">{{ text_video_or }}</div>
+    <input type="file" name="video_file" id="input-video-file" accept="video/mp4,video/webm" class="text-sm text-slate-500" />
+    <p class="text-xs text-slate-400 mt-1">{{ text_video_hint }}</p>
   </div>
   {% endif %}
 
@@ -72,7 +71,7 @@
   {{ captcha }}
 
   <button type="button" id="button-review" data-loading-text="{{ text_loading }}"
-    class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition">{{ button_continue }}</button>
+    class="inline-flex items-center justify-center px-6 py-3 bg-slate-950 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition shadow-lg shadow-slate-900/10">{{ button_continue }}</button>
 </form>
 {% else %}
 <div class="text-sm text-gray-600 p-4 bg-gray-50 rounded-xl">{{ text_login }}</div>
