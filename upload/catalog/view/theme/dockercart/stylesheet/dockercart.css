@@ -955,6 +955,16 @@ a:hover [data-lucide="arrow-right"]{transform:translateX(4px)}
   flex: 0 0 100%;
 }
 
+/* Bundle carousel: product chips keep their natural compact width */
+.dc-carousel-track--bundle > * {
+  flex: 0 0 auto;
+}
+
+.dc-carousel-track--bundle > a {
+  flex: 0 0 220px;
+  scroll-snap-align: start;
+}
+
 /* Carousel controls stay hidden until the track is actually scrollable;
    JS adds .dc-carousel--has-pages on init and on resize. */
 .dc-carousel:not(.dc-carousel--has-pages) .dc-carousel-prev,
@@ -1007,6 +1017,15 @@ a:hover [data-lucide="arrow-right"]{transform:translateX(4px)}
 }
 
 .dc-carousel--fbt .dc-carousel-next {
+  right: auto;
+}
+
+/* Bundle widget variant: arrows live in the header toolbar, not overlaid */
+.dc-carousel--bundle .dc-carousel-prev {
+  left: auto;
+}
+
+.dc-carousel--bundle .dc-carousel-next {
   right: auto;
 }
 
