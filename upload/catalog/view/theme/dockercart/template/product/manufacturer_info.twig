@@ -11,7 +11,7 @@
           breadcrumbs_link_class: 'hover:text-white transition',
           breadcrumbs_last_class: 'text-white font-semibold'
         } %}
-        <p class="text-xs font-bold uppercase tracking-widest text-blue-400 mb-1">{{ text_brand }}</p>
+        <p class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-blue-400 mb-1"><span class="w-4 h-px bg-blue-400"></span>{{ text_brand }}</p>
         <h1 class="text-2xl sm:text-4xl font-extrabold text-white leading-tight">{{ heading_title }}</h1>
         {% if description %}
         <p class="text-sm sm:text-base text-gray-200 mt-2 max-w-xl line-clamp-2">{{ description|striptags }}</p>
@@ -26,7 +26,7 @@
       <div class="bg-white border border-gray-100 rounded-3xl p-5 sm:p-6 shadow-sm">
         <div class="flex flex-wrap items-end justify-between gap-3 mb-5">
           <div>
-            <p class="text-xs font-bold uppercase tracking-widest text-blue-500">{{ text_refine }}</p>
+            <p class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-blue-500"><span class="w-4 h-px bg-blue-300"></span>{{ text_refine }}</p>
             <h2 class="text-xl sm:text-2xl font-extrabold text-gray-900 mt-1">
               {% if refine_category_name %}
                 {{ refine_category_name }}
@@ -100,7 +100,7 @@
           <div class="bg-white border border-gray-100 rounded-3xl p-4 sm:p-5 mb-5 shadow-sm">
             <div class="flex flex-wrap gap-3 items-center justify-between">
               <div>
-                <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Brand</p>
+                <p class="text-xs font-bold uppercase tracking-widest text-gray-400">{{ text_brand }}</p>
                 <h2 class="text-lg sm:text-xl font-extrabold text-gray-900 mt-0.5">{{ heading_title }}</h2>
               </div>
               <div class="flex items-center gap-3 flex-wrap">
@@ -170,7 +170,7 @@
 
           {% if description %}
           <div class="mt-10 bg-gray-50 border border-gray-100 rounded-3xl p-6 sm:p-8">
-                <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">{{ text_about_brand }}</p>
+                <p class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400 mb-2"><span class="w-4 h-px bg-gray-300"></span>{{ text_about_brand }}</p>
             <h2 class="text-xl sm:text-2xl font-extrabold text-gray-900 leading-tight mb-4">{{ heading_title }}</h2>
             <div class="text-sm sm:text-base text-gray-600 leading-relaxed">{{ description }}</div>
 
@@ -180,12 +180,12 @@
                 <p class="text-sm font-semibold text-gray-900">{{ product_total }}+ {{ text_products|lower }}</p>
               </div>
               <div class="rounded-2xl border border-gray-200 bg-white p-4">
-                <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1">Quality</p>
-                <p class="text-sm font-semibold text-gray-900">Verified and certified supplier</p>
+                <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1">{{ text_quality }}</p>
+                <p class="text-sm font-semibold text-gray-900">{{ text_quality_desc }}</p>
               </div>
               <div class="rounded-2xl border border-gray-200 bg-white p-4">
-                <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1">Support</p>
-                <p class="text-sm font-semibold text-gray-900">Expert guidance before and after purchase</p>
+                <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1">{{ text_support }}</p>
+                <p class="text-sm font-semibold text-gray-900">{{ text_support_desc }}</p>
               </div>
             </div>
           </div>

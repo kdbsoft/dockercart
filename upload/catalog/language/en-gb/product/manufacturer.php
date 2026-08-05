@@ -40,3 +40,7 @@ $_['text_refine_categories'] = 'Categories';
 $_['text_back_to']     = 'Back to %s';
 $_['text_all_brands']  = 'All %s products';
 $_['text_price_from']  = 'from';
+$_['text_quality']     = 'Quality';
+$_['text_quality_desc'] = 'Verified and certified supplier';
+$_['text_support']     = 'Support';
+$_['text_support_desc'] = 'Expert guidance before and after purchase';

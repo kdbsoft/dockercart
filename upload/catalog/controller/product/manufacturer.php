@@ -9,6 +9,8 @@ class ControllerProductManufacturer extends Controller {
 		$data['text_brand'] = $this->language->get('text_brand');
 		$data['text_products'] = $this->language->get('text_products');
 
+		$this->load->helper('plural');
+
 		$this->load->model('catalog/manufacturer');
 
 		$this->load->model('tool/image');
@@ -51,6 +53,11 @@ class ControllerProductManufacturer extends Controller {
 				$thumb = $this->model_tool_image->resize($result['image'], 150, 80);
 			}
 
+			if (!isset($data['categories'][$key]['count'])) {
+				$data['categories'][$key]['count'] = 0;
+			}
+			$data['categories'][$key]['count']++;
+
 			$data['categories'][$key]['manufacturer'][] = array(
 				'name' => $result['name'],
 				'image' => !empty($result['image']) ? $result['image'] : '',
@@ -71,6 +78,12 @@ class ControllerProductManufacturer extends Controller {
 			$sorted_categories[$key] = $data['categories'][$key];
 		}
 		$data['categories'] = $sorted_categories;
+
+		// Localized brand count label per letter group
+		foreach ($data['categories'] as $key => &$group) {
+			$group['count_label'] = brand_count_label($group['count'], $this->language->get('code'));
+		}
+		unset($group);
 
 		$data['continue'] = '/';
 
@@ -221,6 +234,10 @@ class ControllerProductManufacturer extends Controller {
 			$data['text_brand'] = $this->language->get('text_brand');
 			$data['text_about_brand'] = $this->language->get('text_about_brand') ?: 'About this brand';
 			$data['text_products'] = $this->language->get('text_products');
+			$data['text_quality'] = $this->language->get('text_quality');
+			$data['text_quality_desc'] = $this->language->get('text_quality_desc');
+			$data['text_support'] = $this->language->get('text_support');
+			$data['text_support_desc'] = $this->language->get('text_support_desc');
 			$data['text_view_grid'] = $this->language->get('text_view_grid');
 			$data['text_view_list'] = $this->language->get('text_view_list');
 			$data['text_view_table'] = $this->language->get('text_view_table');
