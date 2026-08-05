@@ -32,8 +32,8 @@ class ReviewRatingTest extends TestCase {
 
 	public function testFormat(): void {
 		$this->assertSame('4.2', ReviewRating::format(4.2));
-		$this->assertSame('5.0', ReviewRating::format(5.0));
-		$this->assertSame('0.0', ReviewRating::format(0.0));
+		$this->assertSame('5', ReviewRating::format(5.0));
+		$this->assertSame('0', ReviewRating::format(0.0));
 	}
 
 	public function testDistributionBucketsByRoundedRating(): void {
