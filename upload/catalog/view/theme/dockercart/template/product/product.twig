@@ -141,7 +141,7 @@
       <!-- Info -->
       <div>
         <div class="flex items-center gap-2 mb-3">
-          <span id="dc-stock-badge" data-stock-display="{{ config_stock_display ? '1' : '0' }}" data-text-instock="{{ text_instock }}" data-text-preorder="{{ text_preorder }}" data-text-out-of-stock="{{ text_out_of_stock }}" class="px-2 py-0.5 rounded-full text-[10px] font-bold {% if is_preorder is defined and is_preorder %}bg-amber-100 text-amber-700{% elseif is_in_stock %}bg-emerald-100 text-emerald-700{% else %}bg-red-100 text-red-600{% endif %}">{{ stock }}</span>
+          <span id="dc-stock-badge" data-stock-display="{{ config_stock_display ? '1' : '0' }}" data-text-instock="{{ text_instock }}" data-text-preorder="{{ text_preorder }}" data-text-out-of-stock="{{ text_out_of_stock }}" class="px-2 py-0.5 rounded-full text-[13px] font-bold {% if is_preorder is defined and is_preorder %}bg-amber-100 text-amber-700{% elseif is_in_stock %}bg-emerald-100 text-emerald-700{% else %}bg-red-100 text-red-600{% endif %}">{{ stock }}</span>
         </div>
 
         <h1 id="dc-product-name" data-base-name="{{ base_product_name }}" data-base-meta-title="{{ base_meta_title }}" class="text-2xl sm:text-3xl font-extrabold text-gray-900 leading-tight">{{ heading_title }}</h1>
