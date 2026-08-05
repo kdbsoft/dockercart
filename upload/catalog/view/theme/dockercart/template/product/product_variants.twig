@@ -157,12 +157,12 @@
 		return variantMap[pairs.join('|')] || null;
 	}
 
-	function updateVariantUI(variant) {
+	function updateVariantUI(variant, preservePrice) {
 		if (variantInput) variantInput.value = variant ? variant.variant_id : '';
 
 		var hasSpecial = variant && variant.special !== undefined && variant.special !== null && variant.special_from !== undefined && variant.special < variant.special_from;
 
-		if (priceEl && priceRegularContainer && priceSpecialContainer) {
+		if (priceEl && priceRegularContainer && priceSpecialContainer && !preservePrice) {
 			if (hasSpecial) {
 				priceRegularContainer.classList.add('hidden');
 				priceSpecialContainer.classList.remove('hidden');
@@ -230,7 +230,7 @@
 			}
 		}
 
-		if (typeof dcRecalcOptionPrice === 'function') dcRecalcOptionPrice(); else if (typeof dcUpdateSubtotal === 'function') dcUpdateSubtotal();
+		if (!preservePrice && typeof dcRecalcOptionPrice === 'function') dcRecalcOptionPrice(); else if (!preservePrice && typeof dcUpdateSubtotal === 'function') dcUpdateSubtotal();
 
 		if (variant && variant.image && mainImgEl) {
 			mainImgEl.src = variant.image;
@@ -246,7 +246,7 @@
 			// Update stock badge
 			if (stockBadgeEl) {
 				stockBadgeEl.textContent = stockBadgeEl.dataset.textOutOfStock || '';
-				stockBadgeEl.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-600';
+				stockBadgeEl.className = 'px-2 py-0.5 rounded-full text-[13px] font-bold bg-red-100 text-red-600';
 			}
 		} else {
 			if (cartBtn) cartBtn.classList.remove('hidden');
@@ -258,7 +258,7 @@
 				var qty = variant ? parseFloat(variant.quantity) : 0;
 				var showQty = stockBadgeEl.dataset.stockDisplay === '1' && qty > 0;
 				stockBadgeEl.textContent = showQty ? String(Math.floor(qty)) : (stockBadgeEl.dataset.textInstock || '');
-				stockBadgeEl.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700';
+				stockBadgeEl.className = 'px-2 py-0.5 rounded-full text-[13px] font-bold bg-emerald-100 text-emerald-700';
 			}
 		}
 
@@ -391,10 +391,11 @@
 		// selected variant. Just initialise the compatibility matrix.
 		updateAvailableOptions();
 
-		// Apply button state for the current (default) variant on page load
+		// Apply button state for the current (default) variant on page load,
+		// but keep the server-rendered price to avoid a visible price "flash".
 		var variant = getCurrentVariant();
 		if (variant) {
-			updateVariantUI(variant);
+			updateVariantUI(variant, true);
 		}
 
 		isInitPhase = false;
