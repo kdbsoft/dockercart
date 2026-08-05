@@ -109,7 +109,7 @@
       <p class="text-xs text-gray-900 mb-1">{{ text_model|default('Product Code:') }} {{ product.model }}</p>
     {% endif %}
     {% if product.rating %}
-      <div class="flex items-center gap-0.5 mb-2">
+      <div class="flex items-center mb-2">
         {% for i in 1..5 %}
           <span class="text-xs {% if product.rating >= i %}text-amber-400{% else %}text-gray-200{% endif %}">★</span>
         {% endfor %}
@@ -220,7 +220,7 @@
       <a href="{{ product.href }}" class="{{ link_hover|default('hover:text-blue-600 transition') }}">{{ product.name }}</a>
     </h3>
     {% if product.rating %}
-      <div class="flex items-center gap-0.5 mb-2">
+      <div class="flex items-center mb-2">
         {% for i in 1..5 %}
           <span class="text-xs {% if product.rating >= i %}text-amber-400{% else %}text-gray-200{% endif %}">★</span>
         {% endfor %}
