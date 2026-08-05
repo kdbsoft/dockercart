@@ -21,7 +21,7 @@
   .dc-stars-row .dc-star:hover { transform: scale(1.2); }
   /* Review list stars (non-interactive) */
   .dc-stars { display: inline-flex; gap: 0; }
-  .dc-stars .dc-star { font-size: 1rem; color: #d1d5db; }
+  .dc-stars .dc-star { font-size: 1rem; color: #e5e7eb; }
   .dc-stars .dc-star.active { color: #f59e0b; }
   .dc-option-required-error { border-color: #fca5a5 !important; box-shadow: 0 0 0 3px rgba(239,68,68,.12) !important; border-radius: 0.75rem; }
   .dc-color-swatch { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #e5e7eb; flex-shrink: 0; position: relative; }
@@ -141,7 +141,6 @@
       <!-- Info -->
       <div>
         <div class="flex items-center gap-2 mb-3">
-          {% if manufacturer %}<span class="text-xs font-bold uppercase tracking-widest text-blue-600">{{ manufacturer }}</span>{% endif %}
           <span id="dc-stock-badge" data-stock-display="{{ config_stock_display ? '1' : '0' }}" data-text-instock="{{ text_instock }}" data-text-preorder="{{ text_preorder }}" data-text-out-of-stock="{{ text_out_of_stock }}" class="px-2 py-0.5 rounded-full text-[10px] font-bold {% if is_preorder is defined and is_preorder %}bg-amber-100 text-amber-700{% elseif is_in_stock %}bg-emerald-100 text-emerald-700{% else %}bg-red-100 text-red-600{% endif %}">{{ stock }}</span>
         </div>
 
@@ -477,7 +476,7 @@
       <div class="flex overflow-x-auto gap-2 border-b border-gray-100 pb-3 whitespace-nowrap">
         <button class="tab-btn active px-4 py-2 rounded-xl border border-transparent text-sm font-semibold flex-shrink-0" data-tab="description">{{ tab_description }}</button>
         {% if attribute_groups %}<button class="tab-btn px-4 py-2 rounded-xl border border-transparent text-sm font-semibold flex-shrink-0" data-tab="attribute">{{ tab_attribute }}</button>{% endif %}
-        {% if review_status %}<button class="tab-btn px-4 py-2 rounded-xl border border-transparent text-sm font-semibold flex-shrink-0 inline-flex items-center gap-2" data-tab="review">{{ tab_review }}{% if review_count %}<span class="inline-flex items-center justify-center min-w-6 h-6 px-1.5 rounded-full bg-slate-200 text-slate-900 text-xs font-extrabold">{{ review_count }}</span>{% endif %}</button>{% endif %}
+        {% if review_status %}<button class="tab-btn px-4 py-2 rounded-xl border border-transparent text-sm font-semibold flex-shrink-0 inline-flex items-center gap-2" data-tab="review">{{ tab_review }}{% if review_count %}<span class="inline-flex items-center justify-center min-w-6 h-6 px-1.5 rounded-full bg-blue-100 text-blue-700 text-xs font-extrabold">{{ review_count }}</span>{% endif %}</button>{% endif %}
       </div>
 
       {% set _desc_text = description|striptags|trim %}
@@ -509,14 +508,13 @@
       {% endif %}
 
       {% if review_status %}
-      <div id="dc-tab-review" class="dc-tab-panel mt-5 hidden rounded-3xl bg-slate-50/70 border border-slate-100 p-4 sm:p-6">
+      <div id="dc-tab-review" class="dc-tab-panel mt-5 hidden">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-          {% if review_count %}
           <aside class="lg:col-span-1 lg:sticky lg:top-24">
-            <div class="dc-review-overview-compact p-5 sm:p-6 shadow-sm">
+            <div class="dc-review-overview-compact p-5 sm:p-6">
               <div class="flex items-center gap-4">
                 {% if rating > 0 %}
-                <span class="dc-rating-number text-5xl font-extrabold leading-none">{{ rating_value }}</span>
+                <span class="dc-rating-number text-3xl font-semibold leading-none">{{ rating_value }} <span class="text-base font-normal text-gray-400">/ 5</span></span>
                 {% endif %}
                 <div>
                   <div class="dc-stars" aria-hidden="true">
@@ -531,7 +529,9 @@
                       {% endif %}
                     {% endfor %}
                   </div>
-                  <div class="text-sm font-medium text-slate-500 mt-1">{{ reviews }}</div>
+                  {% if review_count %}
+                  <div class="text-sm font-medium text-gray-500 mt-1">{{ reviews }}</div>
+                  {% endif %}
                 </div>
               </div>
 
@@ -548,9 +548,16 @@
                 {% endfor %}
               </div>
               {% endif %}
+
+              {% if review_guest %}
+              <div class="mt-5 pt-4 border-t border-gray-200">
+                <a href="{{ reviews_url }}#form-review" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition shadow-sm shadow-blue-200">
+                  <i data-lucide="pencil" width="14" height="14"></i> {{ text_write }}
+                </a>
+              </div>
+              {% endif %}
             </div>
           </aside>
-          {% endif %}
 
           <div class="lg:col-span-2">
             <div id="review" data-ajax-load="1" data-ajax-url="{{ review_ajax_url }}" class="space-y-3 mb-6"></div>
@@ -559,6 +566,14 @@
       </div>
       {% endif %}
     </section>
+
+    {% include 'dockercart/template/product/brand_block.twig' with {
+      manufacturer: manufacturer,
+      manufacturers: manufacturers,
+      manufacturer_image: manufacturer_image,
+      text_brand: text_brand,
+      text_all_brand_products: text_all_brand_products
+    } %}
 
     {% if tags %}
     <div class="mt-8 flex flex-wrap items-center gap-2">
@@ -574,7 +589,7 @@
     <section class="mt-12">
       <div class="flex items-end justify-between mb-6">
         <div>
-          <p class="text-blue-600 text-sm font-semibold uppercase tracking-widest mb-1">{{ text_you_may_also_like }}</p>
+          <p class="inline-flex items-center gap-2 text-blue-600 text-sm font-semibold uppercase tracking-widest mb-1"><span class="w-4 h-px bg-blue-300"></span>{{ text_you_may_also_like }}</p>
           <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ text_related }}</h2>
         </div>
         {% if products|length > 4 %}
@@ -606,7 +621,7 @@
     <section class="mt-12">
       <div class="flex items-end justify-between mb-6">
         <div>
-          <p class="text-emerald-600 text-sm font-semibold uppercase tracking-widest mb-1">{{ text_you_may_upgrade }}</p>
+          <p class="inline-flex items-center gap-2 text-emerald-600 text-sm font-semibold uppercase tracking-widest mb-1"><span class="w-4 h-px bg-emerald-300"></span>{{ text_you_may_upgrade }}</p>
           <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ text_upsell }}</h2>
         </div>
         {% if upsell_products|length > 4 %}
@@ -638,7 +653,7 @@
     <section class="mt-12">
       <div class="flex items-end justify-between mb-6">
         <div>
-          <p class="text-amber-600 text-sm font-semibold uppercase tracking-widest mb-1">{{ text_you_may_also_need }}</p>
+          <p class="inline-flex items-center gap-2 text-amber-600 text-sm font-semibold uppercase tracking-widest mb-1"><span class="w-4 h-px bg-amber-300"></span>{{ text_you_may_also_need }}</p>
           <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ text_accessory }}</h2>
         </div>
         {% if accessory_products|length > 4 %}
