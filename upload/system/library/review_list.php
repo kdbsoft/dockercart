@@ -127,12 +127,6 @@ class ReviewList {
 			);
 		}
 
-		$pagination = new Pagination();
-		$pagination->total = $review_total;
-		$pagination->page = $page;
-		$pagination->limit = $limit;
-		$pagination->url = $this->url->link($link_route, 'product_id=' . $product_id . '&sort=' . $sort . '&page={page}');
-
 		$sort_labels = array(
 			'newest'  => $this->language->get('text_sort_newest'),
 			'highest' => $this->language->get('text_sort_highest'),
@@ -154,11 +148,15 @@ class ReviewList {
 			'reviews'          => $reviews,
 			'total'            => $review_total,
 			'total_label'      => review_count_label($review_total, $this->language->get('code')),
-			'pagination'       => $pagination->render(),
-			'text_pagination'  => sprintf($this->language->get('text_pagination'), ($review_total) ? (($page - 1) * $limit) + 1 : 0, ((($page - 1) * $limit) > ($review_total - $limit)) ? $review_total : ((($page - 1) * $limit) + $limit), $review_total, ceil($review_total / $limit)),
+			'has_more'         => $page * $limit < $review_total,
+			'next_page'        => $page + 1,
+			'show_more_label'  => $this->language->get('text_show_more'),
 			'sort'             => $sort,
 			'sort_urls'        => $sort_urls,
 			'text_no_reviews'  => $this->language->get('text_no_reviews'),
+			'text_be_first'       => $this->language->get('text_be_first'),
+			'text_be_first_hint'  => $this->language->get('text_be_first_hint'),
+			'text_leave_review'   => $this->language->get('text_leave_review'),
 		);
 	}
 
