@@ -29,10 +29,17 @@ class ReviewRating {
 	}
 
 	/**
-	 * Format a rating as a fixed one-decimal string: 4.2, 5.0, 0.0.
+	 * Format a rating as a short string: 4.2, 4.5, 5. A trailing ".0"
+	 * is dropped so whole ratings render without a fractional part.
 	 */
 	public static function format(float $rating): string {
-		return number_format($rating, 1, '.', '');
+		$formatted = number_format($rating, 1, '.', '');
+
+		if (str_ends_with($formatted, '.0')) {
+			return substr($formatted, 0, -2);
+		}
+
+		return $formatted;
 	}
 
 	/**
