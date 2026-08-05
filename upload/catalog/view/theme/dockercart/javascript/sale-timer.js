@@ -3,10 +3,11 @@
  * special price. Vanilla JS, no dependencies.
  *
  * Renders into [data-countdown-until] elements (unix timestamp in seconds):
- *   [data-timer-days]  — remaining days
- *   [data-timer-unit]  — HH : MM : SS cells
+ *   [data-timer-cell="days|hours|minutes|seconds"]  — labelled unit cells
+ *   [data-timer-unit="days|hours|minutes|seconds"]  — numeric values
  *
- * The widget is hidden once the countdown reaches zero.
+ * The days cell is hidden once the countdown drops below 24 hours, and the
+ * whole widget is hidden once the countdown reaches zero.
  */
 (function () {
   'use strict';
@@ -14,6 +15,8 @@
   var SECONDS_PER_DAY = 86400;
   var SECONDS_PER_HOUR = 3600;
   var SECONDS_PER_MINUTE = 60;
+
+  var UNITS = ['days', 'hours', 'minutes', 'seconds'];
 
   function getEnd(el) {
     var value = parseInt(el.getAttribute('data-countdown-until'), 10);
@@ -36,12 +39,23 @@
 
     var seconds = totalSeconds;
 
-    if (el._days) {
-      el._days.textContent = String(days);
-    }
+    UNITS.forEach(function (unit) {
+      var entry = el._units[unit];
 
-    el._cells.forEach(function (cell, index) {
-      cell.textContent = pad([hours, minutes, seconds][index]);
+      if (!entry || !entry.value) {
+        return;
+      }
+
+      if (unit === 'days') {
+        entry.value.textContent = String(days);
+        entry.cell.classList.toggle('hidden', days === 0);
+      } else if (unit === 'hours') {
+        entry.value.textContent = pad(hours);
+      } else if (unit === 'minutes') {
+        entry.value.textContent = pad(minutes);
+      } else {
+        entry.value.textContent = pad(seconds);
+      }
     });
   }
 
@@ -70,8 +84,20 @@
       return;
     }
 
-    el._days = el.querySelector('[data-timer-days]');
-    el._cells = el.querySelectorAll('[data-timer-unit]');
+    el._units = {};
+
+    UNITS.forEach(function (unit) {
+      var cell = el.querySelector('[data-timer-cell="' + unit + '"]');
+
+      if (!cell) {
+        return;
+      }
+
+      el._units[unit] = {
+        cell: cell,
+        value: cell.querySelector('[data-timer-unit="' + unit + '"]')
+      };
+    });
 
     el._dcTimerStarted = true;
     tick(el);
