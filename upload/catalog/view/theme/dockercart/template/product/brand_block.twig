@@ -1,0 +1,21 @@
+{% if manufacturer and manufacturers %}
+<section class="mt-10">
+  <div class="rounded-2xl border border-gray-100 bg-white shadow-sm px-5 py-4 flex flex-wrap items-center gap-4">
+    {% if manufacturer_image %}
+    <img src="{{ manufacturer_image }}" alt="{{ manufacturer }}" class="w-12 h-12 rounded-xl object-contain bg-gray-50 border border-gray-100 p-1.5" loading="lazy" />
+    {% else %}
+    <span class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 border border-blue-100 inline-flex items-center justify-center">
+      <i data-lucide="building-2" class="w-6 h-6"></i>
+    </span>
+    {% endif %}
+    <div class="min-w-0">
+      <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400">{{ text_brand }}</p>
+      <a href="{{ manufacturers }}" class="block text-sm font-bold text-gray-900 hover:text-blue-600 transition truncate">{{ manufacturer }}</a>
+    </div>
+    <a href="{{ manufacturers }}" class="ml-auto inline-flex items-center gap-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold px-4 py-2 rounded-lg transition-colors text-xs whitespace-nowrap">
+      {{ text_all_brand_products|default('All products') }}
+      <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+    </a>
+  </div>
+</section>
+{% endif %}

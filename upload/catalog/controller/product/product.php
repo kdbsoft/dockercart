@@ -410,6 +410,17 @@ class ControllerProductProduct extends Controller {
 
 			$this->load->model('tool/image');
 
+			// Brand logo for the "all brand products" block
+			$data['manufacturer_image'] = '';
+
+			if (!empty($product_info['manufacturer_id'])) {
+				$manufacturer_info = $this->model_catalog_manufacturer->getManufacturer($product_info['manufacturer_id']);
+
+				if ($manufacturer_info && $manufacturer_info['image']) {
+					$data['manufacturer_image'] = $this->model_tool_image->resize($manufacturer_info['image'], 80, 80);
+				}
+			}
+
 			if ($product_info['image']) {
 				$data['popup'] = ($this->request->server['HTTPS'] ? $this->config->get('config_ssl') : $this->config->get('config_url')) . 'image/' . $product_info['image'];
 			} else {
