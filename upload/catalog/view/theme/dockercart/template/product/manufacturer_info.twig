@@ -100,8 +100,8 @@
           <div class="bg-white border border-gray-100 rounded-3xl p-4 sm:p-5 mb-5 shadow-sm">
             <div class="flex flex-wrap gap-3 items-center justify-between">
               <div>
-                <p class="text-xs font-bold uppercase tracking-widest text-gray-400">{{ text_brand }}</p>
-                <h2 class="text-lg sm:text-xl font-extrabold text-gray-900 mt-0.5">{{ heading_title }}</h2>
+                <p class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400"><span class="w-4 h-px bg-gray-300"></span>{{ text_shop_by }}</p>
+                <h2 class="text-lg sm:text-xl font-extrabold text-gray-900 mt-0.5">{{ text_all_brands|format(heading_title) }}</h2>
               </div>
               <div class="flex items-center gap-3 flex-wrap">
                 <span class="text-sm text-gray-500">{{ text_product_count }}</span>
