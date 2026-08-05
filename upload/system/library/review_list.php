@@ -110,6 +110,8 @@ class ReviewList {
 				}
 			}
 
+			$date_format = isset($this->language->data['date_format_review']) ? $this->language->get('date_format_review') : $this->language->get('date_format_short');
+
 			$reviews[] = array(
 				'author'        => $result['author'],
 				'author_initials' => $this->initials($result['author']),
@@ -118,7 +120,7 @@ class ReviewList {
 				'rating_value'  => ReviewRating::format($result['rating']),
 				'text'          => nl2br($this->clean($result['text'])),
 				'verified'      => $result['verified'],
-				'date_added'    => date($this->language->get('date_format_short'), strtotime($result['date_added'])),
+				'date_added'    => date($date_format, strtotime($result['date_added'])),
 				'criteria'      => $criteria,
 				'pros'          => nl2br($this->clean($pros)),
 				'cons'          => nl2br($this->clean($cons)),
