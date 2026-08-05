@@ -41,6 +41,8 @@ class ControllerProductReviews extends Controller {
 			// Rating summary + distribution
 			$summary = $this->model_catalog_review->getProductRatingSummary($product_id);
 
+			$this->load->helper('plural');
+
 			$this->document->setTitle(sprintf($this->language->get('text_meta_title'), $product_info['name']));
 			$this->document->setDescription(sprintf($this->language->get('text_meta_description'), $product_info['name'], ReviewRating::format($summary['rating']), $summary['review_count']));
 
@@ -64,7 +66,7 @@ class ControllerProductReviews extends Controller {
 			);
 
 			$data['breadcrumbs'][] = array(
-				'text' => sprintf($this->language->get('text_reviews'), $summary['review_count']),
+				'text' => review_count_label($summary['review_count'], $this->language->get('code')),
 				'href' => $page_url
 			);
 
@@ -74,8 +76,6 @@ class ControllerProductReviews extends Controller {
 			$data['review_count'] = $summary['review_count'];
 			$data['rating_distribution'] = $summary['distribution'];
 			$data['show_distribution'] = $this->config->get('config_review_show_distribution');
-
-			$this->load->helper('plural');
 
 			$data['reviews'] = review_count_label($data['review_count'], $this->language->get('code'));
 			$data['rating_stars'] = ReviewRating::starComponents($summary['rating']);

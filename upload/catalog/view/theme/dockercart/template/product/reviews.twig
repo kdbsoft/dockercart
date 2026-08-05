@@ -2,20 +2,20 @@
 
 {% include 'dockercart/template/product/review_css.twig' %}
 
-<main class="py-20 sm:py-2 lg:py-4 px-4 sm:px-6 lg:px-8 bg-slate-50/70">
+<main class="py-20 sm:py-2 lg:py-4 px-4 sm:px-6 lg:px-8 bg-white">
   <div class="max-w-7xl mx-auto">
     {% include 'dockercart/template/common/partials/breadcrumbs.twig' %}
 
     <div class="flex flex-wrap items-end justify-between gap-5 mt-5 mb-8">
       <div>
-        <p class="inline-flex items-center gap-2 text-blue-600 text-xs font-bold uppercase tracking-[0.18em] mb-2"><span class="w-7 h-px bg-blue-300"></span>{{ text_reviews_section }}</p>
-        <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-slate-950">{{ heading_reviews }}</h1>
-        <a href="{{ product_href }}" class="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-blue-600 transition mt-3">
+        <p class="inline-flex items-center gap-2 text-blue-600 text-xs font-bold uppercase tracking-[0.18em] mb-2"><span class="w-4 h-px bg-blue-300"></span>{{ text_reviews_section }}</p>
+        <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-gray-900">{{ heading_reviews }}</h1>
+        <a href="{{ product_href }}" class="inline-flex items-center gap-1.5 text-sm font-semibold text-gray-900 hover:text-blue-600 transition mt-3">
           <i data-lucide="arrow-left" width="15" height="15"></i>{{ text_view_product }}
         </a>
       </div>
       {% if review_guest %}
-      <a href="{{ reviews_url }}#form-review" class="inline-flex items-center gap-2 px-5 py-3 bg-slate-950 hover:bg-blue-700 text-white text-sm font-bold rounded-2xl transition shadow-lg shadow-slate-900/10">
+      <a href="{{ reviews_url }}#form-review" class="inline-flex items-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition shadow-sm shadow-blue-200">
         <i data-lucide="square-pen" width="16" height="16" class="inline-block mr-1.5 -mt-0.5"></i>{{ text_write }}
       </a>
       {% endif %}
@@ -42,7 +42,7 @@
                   {% endif %}
                 {% endfor %}
               </div>
-              <div class="text-sm font-medium text-slate-500 mt-1">{{ reviews }}</div>
+              <div class="text-sm font-medium text-gray-500 mt-1">{{ reviews }}</div>
             </div>
           </div>
 
@@ -60,18 +60,18 @@
           </div>
           {% endif %}
 
-          <div class="mt-6 pt-5 border-t border-blue-100">
-            <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">{{ text_reviews_section }}</p>
-            <p class="text-sm text-slate-600 mt-1">{{ text_be_first_hint }}</p>
+          <div class="mt-6 pt-5 border-t border-gray-100">
+            <p class="text-xs font-semibold uppercase tracking-wider text-gray-400">{{ text_reviews_section }}</p>
+            <p class="text-sm text-gray-600 mt-1">{{ text_be_first_hint }}</p>
           </div>
           {% else %}
           <div class="flex items-center gap-3">
-            <span class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-amber-500 shadow-sm ring-1 ring-blue-100">
+            <span class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-amber-500 shadow-sm ring-1 ring-gray-100">
               <i data-lucide="star" width="21" height="21" aria-hidden="true"></i>
             </span>
             <div>
-              <p class="text-sm font-extrabold text-slate-950">{{ text_no_reviews }}</p>
-              <p class="text-xs text-slate-500 mt-1">{{ text_be_first_hint }}</p>
+              <p class="text-sm font-extrabold text-gray-900">{{ text_no_reviews }}</p>
+              <p class="text-xs text-gray-500 mt-1">{{ text_be_first_hint }}</p>
             </div>
           </div>
           {% endif %}
@@ -99,11 +99,11 @@
         </div>
 
         {% if review_status %}
-        <div class="mt-12 pt-8 border-t border-slate-200">
-          <h2 class="flex items-center gap-2 text-xl font-extrabold tracking-tight text-slate-950 mb-5">
+        <div class="mt-12 pt-8 border-t border-gray-100">
+          <h2 class="flex items-center gap-2 text-xl font-extrabold tracking-tight text-gray-900 mb-5">
             <i data-lucide="square-pen" width="18" height="18" class="text-blue-600"></i>{{ text_write }}
           </h2>
-          <div class="dc-review-form-shell w-full max-w-3xl p-5 sm:p-7 shadow-sm">
+          <div class="w-full">
             {% include 'dockercart/template/product/review_form.twig' with {
               review_guest: review_guest,
               customer_name: customer_name,
