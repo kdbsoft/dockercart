@@ -1108,6 +1108,10 @@ class ControllerProductProduct extends Controller {
 			$data['sale_timer_status'] = ($sale_timer_raw === null) ? 1 : (int)$sale_timer_raw;
 			$data['special_date_end'] = !empty($product_info['special_date_end']) ? (int)$product_info['special_date_end'] : 0;
 			$data['text_sale_ends_in'] = $this->language->get('text_sale_ends_in');
+			$data['text_timer_days'] = $this->language->get('text_timer_days');
+			$data['text_timer_hours'] = $this->language->get('text_timer_hours');
+			$data['text_timer_minutes'] = $this->language->get('text_timer_minutes');
+			$data['text_timer_seconds'] = $this->language->get('text_timer_seconds');
 
 			if ($data['sale_timer_status']) {
 				$this->document->addScript('catalog/view/theme/dockercart/javascript/sale-timer.js', 'footer');
