@@ -1,6 +1,8 @@
 <?php
 // Text
 $_['text_refine']       = 'Refine Search';
+$_['text_shop_by']      = 'Shop By';
+$_['text_all_products'] = 'All Products';
 $_['text_product']      = 'Products';
 $_['text_error']        = 'Category not found!';
 $_['text_empty']        = 'There are no products to list in this category.';
@@ -27,7 +29,7 @@ $_['text_model_desc']   = 'Product Code (Z - A)';
 $_['text_limit']        = 'Show:';
 $_['text_reviews_word']   = 'reviews';
 // Additional localization for category page UI
-$_['text_subcategories'] = '%s';
+$_['text_subcategories'] = 'Subcategories';
 $_['text_shop_all'] = 'Shop all %s →';
 $_['text_products'] = 'products';
 $_['text_quick_view'] = 'Quick View';
