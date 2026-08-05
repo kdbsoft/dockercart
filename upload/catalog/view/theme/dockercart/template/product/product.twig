@@ -7,19 +7,20 @@
   .dc-thumb.active { border-color: #2563eb !important; box-shadow: 0 0 0 2px #dbeafe inset; }
   .option-btn { transition: border-color .15s, background .15s, color .15s; }
   .option-btn.active { border-color: #2563eb; background: #eff6ff; color: #1e3a8a; }
-  .tab-btn { color: #6b7280; transition: color .15s, background .15s, border-color .15s; }
-  .tab-btn.active { color: #2563eb; border-color: #2563eb !important; background: #eff6ff; }
+  .tab-btn { color: #64748b; transition: color .2s, background .2s, border-color .2s, box-shadow .2s; }
+  .tab-btn:hover { color: #2563eb; background: #f8fafc; }
+  .tab-btn.active { color: #172554; border-color: #bfdbfe !important; background: #eff6ff; box-shadow: 0 5px 12px rgba(37, 99, 235, .08); }
   .zoom-hint { opacity: 0; transform: translateY(6px); transition: all .25s ease; }
   .zoom-target:hover .zoom-hint { opacity: 1; transform: translateY(0); }
 
 
   /* ── Rating stars ─────────────────────────────────────── */
-  .dc-stars-row { display: inline-flex; gap: 3px; cursor: pointer; user-select: none; }
+  .dc-stars-row { display: inline-flex; gap: 0; cursor: pointer; user-select: none; }
   .dc-stars-row .dc-star { font-size: 1.75rem; line-height: 1; color: #d1d5db; transition: color .1s, transform .1s; }
   .dc-stars-row .dc-star.lit { color: #f59e0b; }
   .dc-stars-row .dc-star:hover { transform: scale(1.2); }
   /* Review list stars (non-interactive) */
-  .dc-stars { display: inline-flex; gap: 3px; }
+  .dc-stars { display: inline-flex; gap: 0; }
   .dc-stars .dc-star { font-size: 1rem; color: #d1d5db; }
   .dc-stars .dc-star.active { color: #f59e0b; }
   .dc-option-required-error { border-color: #fca5a5 !important; box-shadow: 0 0 0 3px rgba(239,68,68,.12) !important; border-radius: 0.75rem; }
@@ -186,7 +187,7 @@
         </div>
         {% if you_save_amount %}
         <div class="mt-1.5">
-          <span class="text-sm font-semibold text-green-600">{{ text_you_save }}: {{ you_save_amount }}</span>
+          <span class="text-md font-semibold text-green-600">{{ text_you_save }}: {{ you_save_amount }}</span>
         </div>
         {% endif %}
         {% endif %}
@@ -199,7 +200,7 @@
         <div id="dc-variant-discounts" class="mt-2 space-y-0.5 hidden"></div>
         {% endif %}
         {% if gifts %}
-        <div class="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-2xl">
+        <div class="mt-4 p-4 bg-amber-50 rounded-2xl">
           <h3 class="text-sm font-bold text-amber-800 flex items-center gap-1.5 mb-3">
             <i data-lucide="gift" class="w-4 h-4"></i> {{ text_gift }}
           </h3>
@@ -223,7 +224,7 @@
         </div>
         {% endif %}
         {% if bxgy_rules %}
-        <div class="mt-4 p-4 bg-violet-50 border border-violet-200 rounded-2xl">
+        <div class="mt-4 p-4 bg-violet-50 rounded-2xl">
           <h3 class="text-sm font-bold text-violet-800 flex items-center gap-1.5 mb-3">
             <i data-lucide="zap" class="w-4 h-4"></i> {{ text_bxgy }}
           </h3>
@@ -353,7 +354,7 @@
           <input type="hidden" name="option[variant_id]" value="{{ is_configurable and variant_id is defined ? variant_id : '' }}" id="dc-variant-id" />
 
           {% if fbt_products %}
-          <div class="dc-carousel dc-carousel--fbt mt-6 rounded-2xl border border-blue-200 bg-blue-50/60 p-4">
+          <div class="dc-carousel dc-carousel--fbt mt-6 rounded-2xl bg-blue-50/60 p-4">
             <div class="flex items-center justify-between gap-2 mb-3">
               <div class="flex items-center gap-2 min-w-0">
                 <i data-lucide="sparkles" class="w-4 h-4 text-blue-600 flex-shrink-0"></i>
@@ -476,7 +477,7 @@
       <div class="flex overflow-x-auto gap-2 border-b border-gray-100 pb-3 whitespace-nowrap">
         <button class="tab-btn active px-4 py-2 rounded-xl border border-transparent text-sm font-semibold flex-shrink-0" data-tab="description">{{ tab_description }}</button>
         {% if attribute_groups %}<button class="tab-btn px-4 py-2 rounded-xl border border-transparent text-sm font-semibold flex-shrink-0" data-tab="attribute">{{ tab_attribute }}</button>{% endif %}
-        {% if review_status %}<button class="tab-btn px-4 py-2 rounded-xl border border-transparent text-sm font-semibold flex-shrink-0" data-tab="review">{{ tab_review }}</button>{% endif %}
+        {% if review_status %}<button class="tab-btn px-4 py-2 rounded-xl border border-transparent text-sm font-semibold flex-shrink-0 inline-flex items-center gap-2" data-tab="review">{{ tab_review }}{% if review_count %}<span class="inline-flex items-center justify-center min-w-6 h-6 px-1.5 rounded-full bg-slate-200 text-slate-900 text-xs font-extrabold">{{ review_count }}</span>{% endif %}</button>{% endif %}
       </div>
 
       {% set _desc_text = description|striptags|trim %}
@@ -508,19 +509,53 @@
       {% endif %}
 
       {% if review_status %}
-      <div id="dc-tab-review" class="dc-tab-panel mt-5 hidden">
-        <div id="review" data-ajax-load="1" class="space-y-3 mb-6"></div>
-        {% include 'dockercart/template/product/review_form.twig' with {
-          review_guest: review_guest,
-          customer_name: customer_name,
-          customer_logged: customer_logged,
-          criteria: review_criteria,
-          has_rating_criteria: has_rating_criteria,
-          review_images_enabled: review_images_enabled,
-          review_max_images: review_max_images,
-          review_video_enabled: review_video_enabled,
-          captcha: captcha
-        } %}
+      <div id="dc-tab-review" class="dc-tab-panel mt-5 hidden rounded-3xl bg-slate-50/70 border border-slate-100 p-4 sm:p-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+          {% if review_count %}
+          <aside class="lg:col-span-1 lg:sticky lg:top-24">
+            <div class="dc-review-overview-compact p-5 sm:p-6 shadow-sm">
+              <div class="flex items-center gap-4">
+                {% if rating > 0 %}
+                <span class="dc-rating-number text-5xl font-extrabold leading-none">{{ rating_value }}</span>
+                {% endif %}
+                <div>
+                  <div class="dc-stars" aria-hidden="true">
+                    {% for i in 1..5 %}
+                      {% set diff = rating - (i - 1) %}
+                      {% if diff >= 1 %}
+                        <span class="dc-star active">★</span>
+                      {% elseif diff >= 0.1 %}
+                        <span class="dc-star dc-star-partial" style="--pct: {{ (diff * 100) | round }}%">★</span>
+                      {% else %}
+                        <span class="dc-star">★</span>
+                      {% endif %}
+                    {% endfor %}
+                  </div>
+                  <div class="text-sm font-medium text-slate-500 mt-1">{{ reviews }}</div>
+                </div>
+              </div>
+
+              {% if show_distribution and rating_distribution is not empty %}
+              <div class="mt-5">
+                {% for i in 5..1 %}
+                  {% set count = rating_distribution[i] is defined ? rating_distribution[i] : 0 %}
+                  {% set pct = review_count > 0 ? (count * 100 / review_count) : 0 %}
+                  <div class="flex items-center gap-2 text-xs text-gray-500 mb-1.5">
+                    <span class="w-7 flex-shrink-0 flex items-center gap-1 tabular-nums">{{ i }}<span class="text-[10px] text-amber-400">★</span></span>
+                    <div class="dc-dist-bar flex-1"><span style="width: {{ pct | round }}%"></span></div>
+                    <span class="w-8 text-right tabular-nums text-gray-400">{{ count }}</span>
+                  </div>
+                {% endfor %}
+              </div>
+              {% endif %}
+            </div>
+          </aside>
+          {% endif %}
+
+          <div class="lg:col-span-2">
+            <div id="review" data-ajax-load="1" data-ajax-url="{{ review_ajax_url }}" class="space-y-3 mb-6"></div>
+          </div>
+        </div>
       </div>
       {% endif %}
     </section>
