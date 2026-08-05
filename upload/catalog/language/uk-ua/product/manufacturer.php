@@ -39,3 +39,7 @@ $_['text_refine_categories'] = 'Категорії';
 $_['text_back_to'] = 'Назад до %s';
 $_['text_all_brands'] = 'Всі товари %s';
 $_['text_price_from'] = 'від';
+$_['text_quality'] = 'Якість';
+$_['text_quality_desc'] = 'Перевірений і сертифікований постачальник';
+$_['text_support'] = 'Підтримка';
+$_['text_support_desc'] = 'Експертна допомога до та після покупки';
