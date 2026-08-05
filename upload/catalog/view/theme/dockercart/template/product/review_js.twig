@@ -150,7 +150,7 @@
     var button = form.querySelector('#button-review');
     if (!button) return;
     var productId = form.getAttribute('data-product-id');
-    var action = 'index.php?route=product/product/write&product_id=' + encodeURIComponent(productId);
+    var action = form.getAttribute('data-write-url') || ('index.php?route=product/product/write&product_id=' + encodeURIComponent(productId));
 
     button.addEventListener('click', function () {
       var params = new FormData(form);
@@ -176,7 +176,8 @@
 
           var review = document.getElementById('review');
           if (review && review.getAttribute('data-ajax-load') === '1') {
-            loadReview('index.php?route=product/product/review&product_id=' + encodeURIComponent(productId));
+            var ajaxUrl = review.getAttribute('data-ajax-url');
+            if (ajaxUrl) loadReview(ajaxUrl);
           }
         }
       })
@@ -189,15 +190,88 @@
     });
   }
 
+  function initReviewShowMore() {
+    document.addEventListener('click', function (e) {
+      var showMore = e.target.closest('#dc-review-show-more');
+      if (!showMore) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      var ajaxBase = showMore.getAttribute('data-ajax-url');
+      if (!ajaxBase) return;
+
+      var url = new URL(ajaxBase, window.location.href);
+      url.searchParams.set('page', showMore.getAttribute('data-next-page'));
+      var sort = showMore.getAttribute('data-sort');
+      if (sort) url.searchParams.set('sort', sort);
+
+      var review = document.getElementById('review');
+      if (!review) return;
+
+      var originalHTML = showMore.innerHTML;
+      showMore.disabled = true;
+      showMore.textContent = '...';
+
+      fetch(url, { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(function (response) { return response.text(); })
+        .then(function (html) {
+          var wrapper = document.createElement('div');
+          wrapper.innerHTML = html;
+
+          // Append new review cards (skip the header/sort block)
+          wrapper.querySelectorAll('.dc-review-card').forEach(function (card) {
+            review.appendChild(card);
+          });
+
+          // Replace the show-more button with the next one, if any
+          var oldWrap = showMore.closest('.dc-review-show-more-wrap');
+          if (oldWrap) oldWrap.remove();
+          var next = wrapper.querySelector('#dc-review-show-more');
+          if (next) {
+            review.appendChild(next.closest('.dc-review-show-more-wrap'));
+          }
+
+          if (typeof window.lucide !== 'undefined' && typeof window.lucide.createIcons === 'function') {
+            window.lucide.createIcons();
+          }
+        })
+        .catch(function (error) {
+          console.error('Review load error:', error);
+          showMore.disabled = false;
+          showMore.innerHTML = originalHTML;
+          if (typeof window.lucide !== 'undefined' && typeof window.lucide.createIcons === 'function') {
+            window.lucide.createIcons();
+          }
+        });
+    });
+  }
+
   function initReviewFragment() {
     var review = document.getElementById('review');
     if (!review || review.getAttribute('data-ajax-load') !== '1') return;
+    var ajaxBase = review.getAttribute('data-ajax-url');
+    if (!ajaxBase) return;
 
     document.addEventListener('click', function (e) {
       var link = e.target.closest('#review a');
       if (!link) return;
+      if (link.classList.contains('dc-review-empty-write')) {
+        return;
+      }
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
       e.preventDefault();
-      loadReview(link.getAttribute('href'));
+
+      var url = new URL(ajaxBase, window.location.href);
+      var params = new URL(link.href, window.location.href).searchParams;
+
+      ['sort', 'page'].forEach(function (key) {
+        if (params.has(key)) {
+          url.searchParams.set(key, params.get(key));
+        }
+      });
+
+      loadReview(url.toString());
     });
   }
 
@@ -211,15 +285,18 @@
       initReviewAlerts(form);
       bindReviewSubmit(form);
 
-      // Initial AJAX fragment load on the product page tab
-      if (review && review.getAttribute('data-ajax-load') === '1' && !review.childElementCount) {
-        var productId = form.getAttribute('data-product-id');
-        if (productId) {
-          loadReview('index.php?route=product/product/review&product_id=' + encodeURIComponent(productId));
-        }
+    }
+
+    // The guest form now lives on the dedicated reviews page, so loading the
+    // product tab must not depend on a form being present in the DOM.
+    if (review && review.getAttribute('data-ajax-load') === '1' && !review.childElementCount) {
+      var ajaxUrl = review.getAttribute('data-ajax-url');
+      if (ajaxUrl) {
+        loadReview(ajaxUrl);
       }
     }
 
+    initReviewShowMore();
     initReviewFragment();
     initReviewLightbox();
     if (typeof window.lucide !== 'undefined' && typeof window.lucide.createIcons === 'function') {
