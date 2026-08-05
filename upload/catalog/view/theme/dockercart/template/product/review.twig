@@ -1,29 +1,44 @@
-<div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-  {% if total is defined and total > 0 %}
-  <span class="text-sm font-semibold text-gray-800">{{ total_label|default(total ~ ' ' ~ text_reviews_word|default('reviews')) }}</span>
-  {% else %}
-  <span></span>
-  {% endif %}
+{% if total is defined and total > 0 %}
+<div class="flex flex-wrap items-center justify-between gap-3 mb-5 px-1">
+  <div>
+    <span class="text-lg font-extrabold tracking-tight text-slate-950">{{ total_label|default(total ~ ' ' ~ text_reviews_word|default('reviews')) }}</span>
+    <span class="block text-xs text-slate-400 mt-0.5">{{ text_reviews_section|default('Customer reviews') }}</span>
+  </div>
+  {% if total > 1 %}
   <div class="flex flex-wrap items-center gap-2 text-sm">
-    <span class="text-gray-400">{{ text_sort }}</span>
+    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">{{ text_sort }}</span>
     {% for option in sort_urls %}
-      <a href="{{ option.href }}" class="px-3 py-1 rounded-full border text-xs font-medium transition {% if option.active %}border-blue-300 text-blue-600 bg-blue-50{% else %}border-gray-200 text-gray-500 hover:border-blue-300 hover:text-blue-600{% endif %}">{{ option.label }}</a>
+      <a href="{{ option.href }}" class="px-3 py-1.5 rounded-xl border text-xs font-bold transition {% if option.active %}border-blue-200 text-blue-700 bg-blue-50{% else %}border-slate-200 text-slate-500 bg-white hover:border-blue-300 hover:text-blue-600{% endif %}">{{ option.label }}</a>
     {% endfor %}
   </div>
+  {% endif %}
 </div>
+{% endif %}
 
 {% if reviews %}
   {% for review in reviews %}
     {% include 'dockercart/template/product/review_card.twig' with { review: review } %}
   {% endfor %}
 
-  <div class="flex flex-wrap items-center justify-between gap-3 mt-2">
-    <div class="text-xs text-gray-400">{{ text_pagination }}</div>
-    {% if pagination %}<div class="pagination-wrap">{{ pagination }}</div>{% endif %}
+  {% if has_more|default(false) %}
+  <div class="dc-review-show-more-wrap flex justify-center mt-6 px-1">
+    <button type="button" id="dc-review-show-more" data-next-page="{{ next_page|default(2) }}" data-sort="{{ sort|default('newest') }}" data-ajax-url="{{ review_ajax_url|default('') }}"
+      class="inline-flex items-center gap-2 px-6 py-3 bg-slate-950 hover:bg-blue-700 text-white text-sm font-bold rounded-2xl transition shadow-lg shadow-slate-900/10">
+      <i data-lucide="chevron-down" width="16" height="16"></i>{{ show_more_label|default(text_show_more) }}
+    </button>
   </div>
+  {% endif %}
 {% else %}
-  <div class="dc-review-empty text-center py-12">
-    <i data-lucide="message-square-off" width="40" height="40" class="mx-auto mb-3 text-gray-200" aria-hidden="true"></i>
-    <p class="text-sm text-gray-500">{{ text_no_reviews }}</p>
+  <div class="rounded-3xl bg-gradient-to-br from-blue-50/80 to-white text-center py-12 px-5">
+    <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-blue-600 shadow-sm ring-1 ring-blue-100">
+      <i data-lucide="message-circle-heart" width="27" height="27" aria-hidden="true"></i>
+    </div>
+    <p class="text-lg font-extrabold tracking-tight text-slate-950">{{ text_be_first|default(text_no_reviews) }}</p>
+    {% if text_be_first_hint is defined and text_be_first_hint %}
+    <p class="mt-2 text-sm text-slate-500">{{ text_be_first_hint }}</p>
+    {% endif %}
+    <a href="{{ reviews_url|default('#form-review') }}#form-review" class="dc-review-empty-write inline-flex items-center gap-2 mt-6 px-5 py-3 bg-slate-950 text-white hover:bg-blue-700 rounded-2xl font-bold text-sm transition-colors duration-200 shadow-lg shadow-slate-900/10">
+      <i data-lucide="square-pen" width="16" height="16"></i>{{ text_leave_review|default('Write a review') }}
+    </a>
   </div>
 {% endif %}
