@@ -21,7 +21,7 @@
   unit cell is addressed by [data-timer-cell] / [data-timer-unit].
 #}
 {% if (sale_timer_status is not defined or sale_timer_status == 1) and special_date_end is defined and special_date_end %}
-<div class="dc-sale-timer mt-3 inline-flex self-start items-center gap-3 bg-red-50 border border-red-100 rounded-xl px-3 py-2 {{ timer_class|default('') }}" data-countdown-until="{{ special_date_end }}" role="timer">
+<div class="dc-sale-timer mt-3 self-start inline-flex flex-col items-start gap-2 bg-red-50 rounded-xl px-3 py-2 {{ timer_class|default('') }}" data-countdown-until="{{ special_date_end }}" role="timer">
   <span class="flex items-center gap-1.5 shrink-0">
     <i data-lucide="timer" class="w-4 h-4 text-red-500 flex-shrink-0"></i>
     {% if timer_label is defined and timer_label %}<span class="text-[11px] font-bold text-red-500 uppercase tracking-wider whitespace-nowrap">{{ timer_label }}</span>{% endif %}
@@ -43,7 +43,7 @@
       <div data-timer-unit="seconds" class="text-base font-extrabold text-gray-900 leading-none tabular-nums">--</div>
       <div class="mt-0.5 text-[9px] font-semibold text-red-400 uppercase tracking-wide">{{ timer_label_seconds|default('sec') }}</div>
     </div>
+    <i data-lucide="flame" class="w-3.5 h-3.5 text-red-400 flex-shrink-0"></i>
   </div>
-  <i data-lucide="flame" class="w-3.5 h-3.5 text-red-400 flex-shrink-0"></i>
 </div>
 {% endif %}
