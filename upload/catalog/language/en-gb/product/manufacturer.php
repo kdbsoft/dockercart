@@ -36,6 +36,7 @@ $_['text_limit']        = 'Show:';
 $_['text_load_more']    = 'Show More';
 $_['text_gift_badge']  = 'GIFT';
 $_['text_refine']      = 'Refine Search';
+$_['text_shop_by']     = 'Shop By';
 $_['text_refine_categories'] = 'Categories';
 $_['text_back_to']     = 'Back to %s';
 $_['text_all_brands']  = 'All %s products';

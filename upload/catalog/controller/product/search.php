@@ -520,6 +520,8 @@ class ControllerProductSearch extends Controller {
 			}
 
 			$data['text_refine'] = $this->language->get('text_refine');
+			$data['text_shop_by'] = $this->language->get('text_shop_by');
+			$data['text_search_results'] = $this->language->get('text_search_results');
 			$data['text_refine_categories'] = $this->language->get('text_refine_categories');
 			$data['text_all_categories'] = $this->language->get('text_all_categories');
 			$data['text_back_to'] = $this->language->get('text_back_to');

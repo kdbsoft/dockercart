@@ -39,6 +39,7 @@ class ControllerProductNewArrivals extends Controller {
 		}
 
 		$data['heading_title'] = $this->language->get('text_new_arrivals');
+		$data['text_all_new_arrivals'] = $this->language->get('text_all_new_arrivals');
 		$data['text_empty'] = $this->language->get('text_empty');
 		$data['text_badge_30'] = $this->language->get('text_badge_30');
 		$data['text_badge_60'] = $this->language->get('text_badge_60');

@@ -28,6 +28,7 @@ $_['text_model_desc']   = 'Product Code (Z - A)';
 $_['text_limit']        = 'Show:';
 // New arrivals / specials additions
 $_['text_new_arrivals'] = 'New Arrivals';
+$_['text_all_new_arrivals'] = 'All New Arrivals';
 $_['text_last_90_days'] = 'Last 90 days';
 $_['text_badge_30'] = '30 DAYS';
 $_['text_badge_60'] = '60 DAYS';
@@ -38,6 +39,8 @@ $_['text_newest_first'] = 'Newest first';
 $_['text_oldest_first'] = 'Oldest first';
 // Common UI strings
 $_['text_quick_view'] = 'Quick View';
+$_['text_shop_by'] = 'Shop By';
+$_['text_all_offers'] = 'All offers';
 $_['text_sale'] = 'SALE';
 $_['text_special_tagline'] = 'Exclusive deals updated regularly — don\'t miss out.';
 $_['text_products']  = 'products';

@@ -4,6 +4,7 @@ class ControllerProductProduct extends Controller {
 
 	public function index() {
 		$this->load->language('product/product');
+		$this->load->language('product/reviews');
 
 		$data['breadcrumbs'] = array();
 		$data['current_category_id'] = 0;
@@ -1048,6 +1049,7 @@ class ControllerProductProduct extends Controller {
 			$data['reviews_url'] = $this->url->link('product/reviews', 'product_id=' . $product_id);
 			$data['review_ajax_url'] = $this->url->link('product/product/review', 'product_id=' . $product_id);
 			$data['review_write_url'] = $this->url->link('product/product/write', 'product_id=' . $product_id);
+			$data['text_no_reviews'] = $this->language->get('text_no_reviews');
 
 			// Real reviews for schema.org markup
 			$data['schema_reviews'] = $this->model_catalog_review->getReviewsForSchema($product_id, 5);

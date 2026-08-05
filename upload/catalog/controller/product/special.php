@@ -49,6 +49,8 @@ class ControllerProductSpecial extends Controller {
 		$data['text_quick_view'] = $this->language->get('text_quick_view');
 		$data['text_sale'] = $this->language->get('text_sale');
 		$data['text_gift_badge'] = $this->language->get('text_gift_badge');
+		$data['text_shop_by'] = $this->language->get('text_shop_by');
+		$data['text_all_offers'] = $this->language->get('text_all_offers');
 		$data['text_special_tagline'] = $this->language->get('text_special_tagline');
 		// short word for "reviews" (used in listing templates)
 		$data['text_reviews'] = $this->language->get('text_reviews_word');
