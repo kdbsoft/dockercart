@@ -24,7 +24,7 @@
         {% set last_breadcrumb = breadcrumbs|last %}
             <div class="flex flex-wrap items-end justify-between gap-3 mb-5">
           <div>
-            <p class="text-xs font-bold uppercase tracking-widest text-blue-500">{{ text_refine }}</p>
+            <p class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-blue-500"><span class="w-4 h-px bg-blue-300"></span>{{ text_refine }}</p>
             <h2 class="text-xl sm:text-2xl font-extrabold text-gray-900 mt-1">{{ text_subcategories|format(original_category_name) }}</h2>
             {% if parent_href %}
             <a href="{{ parent_href }}" class="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline mt-1">
@@ -79,7 +79,7 @@
   <section class="pt-8 pb-2 px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto">
       <div class="bg-white border border-gray-100 rounded-3xl p-5 sm:p-6 shadow-sm">
-        <p class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-1">{{ text_related_categories }}</p>
+        <p class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-blue-500 mb-1"><span class="w-4 h-px bg-blue-300"></span>{{ text_related_categories }}</p>
         <h2 class="text-xl sm:text-2xl font-extrabold text-gray-900 mt-1 mb-4">{{ text_you_may_also_like }}</h2>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {% for related in related_categories %}
@@ -203,7 +203,7 @@
 
           {% if description %}
           <div class="mt-10 bg-gray-50 border border-gray-100 rounded-3xl p-6 sm:p-8">
-            <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">{{ text_category_description }}</p>
+            <p class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400 mb-2"><span class="w-4 h-px bg-gray-300"></span>{{ text_category_description }}</p>
             <h2 class="text-xl sm:text-2xl font-extrabold text-gray-900 leading-tight mb-4">{{ heading_title }}</h2>
             <div class="prose prose-lg sm:prose-lg max-w-none
               prose-headings:font-extrabold prose-headings:text-gray-900
