@@ -25,7 +25,7 @@
             <div class="flex flex-wrap items-end justify-between gap-3 mb-5">
           <div>
             <p class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-blue-500"><span class="w-4 h-px bg-blue-300"></span>{{ text_refine }}</p>
-            <h2 class="text-xl sm:text-2xl font-extrabold text-gray-900 mt-1">{{ text_subcategories|format(original_category_name) }}</h2>
+            <h2 class="text-xl sm:text-2xl font-extrabold text-gray-900 mt-1">{{ text_subcategories }}</h2>
             {% if parent_href %}
             <a href="{{ parent_href }}" class="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline mt-1">
               <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> {{ text_back_to|format(parent_category_name) }}
@@ -116,8 +116,8 @@
           <div class="bg-white border border-gray-100 rounded-3xl p-4 sm:p-5 mb-5 shadow-sm">
             <div class="flex flex-wrap gap-3 items-center justify-between">
               <div>
-                <p class="text-xs font-bold uppercase tracking-widest text-gray-400">{{ text_category }}</p>
-                <h2 class="text-lg sm:text-xl font-extrabold text-gray-900 mt-0.5">{{ heading_title }}</h2>
+                <p class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400"><span class="w-4 h-px bg-gray-300"></span>{{ text_shop_by }}</p>
+                <h2 class="text-lg sm:text-xl font-extrabold text-gray-900 mt-0.5">{{ text_all_products }}</h2>
               </div>
                 <div class="flex items-center gap-3 flex-wrap">
                 <span class="text-sm text-gray-500">{{ text_products }}</span>
