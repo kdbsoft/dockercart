@@ -12,3 +12,5 @@ $_['text_store'] = 'Магазины';
 $_['text_support'] = 'Форум поддержки';
 $_['text_search_placeholder'] = 'Поиск...';
 $_['text_view_all_results'] = 'Показать все результаты';
+$_['text_error_summary_one'] = 'Исправьте ошибку ниже:';
+$_['text_error_summary_many'] = 'Исправьте ошибки ниже (%s):';

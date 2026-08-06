@@ -32,7 +32,7 @@ $(document).ready(function() {
 	$('.text-danger').each(function() {
 		var element = $(this).parent().parent();
 
-		if (element.hasClass('form-group')) {
+		if (element.hasClass('form-group') || element.hasClass('dcx-field')) {
 			element.addClass('has-error');
 		}
 	});
@@ -43,7 +43,7 @@ $(document).ready(function() {
 		if (!text.length) return false;
 		if (text === '*') return false;
 		if ($(this).closest('.modal').length) return false;
-		if (!$(this).closest('.form-group').length) return false;
+		if (!$(this).closest('.form-group, .dcx-field').length) return false;
 		return true;
 	});
 
@@ -58,7 +58,7 @@ $(document).ready(function() {
 
 			var $field = $(this).siblings('input, textarea, select').first();
 			if (!$field.length) {
-				$field = $(this).closest('.form-group').find('input, textarea, select').first();
+				$field = $(this).closest('.form-group, .dcx-field').find('input, textarea, select').first();
 			}
 
 			if ($field.length && $field.attr('id')) {
@@ -70,9 +70,13 @@ $(document).ready(function() {
 
 		if (list) {
 			var count = Object.keys(seen).length;
-			var label = count === 1
-				? 'Please correct the error below:'
-				: 'Please correct the ' + count + ' errors below:';
+			var label = '';
+			if (count === 1) {
+				label = $('body').attr('data-error-summary-one') || 'Please correct the error below:';
+			} else {
+				var many = $('body').attr('data-error-summary-many') || 'Please correct the ' + count + ' errors below:';
+				label = many.replace('%s', count);
+			}
 
 			var html = '<div id="dcx-error-summary" class="alert alert-danger alert-dismissible">'
 				+ '<button type="button" class="close" data-dismiss="alert">&times;</button>'
@@ -80,12 +84,34 @@ $(document).ready(function() {
 				+ '<ul style="margin:0;padding-left:20px;">' + list + '</ul>'
 				+ '</div>';
 
-			var $target = $('#content > .container-fluid').first();
+			var $target = $('#content .page-header .container-fluid').first().length
+				? $('#content .page-header .container-fluid').first()
+				: $('#content > .container-fluid').first();
 			if ($target.length) {
-				$target.children('.alert').first().length
-					? $target.children('.alert').first().after(html)
-					: $target.prepend(html);
-				lucide.createIcons();
+				var $alertRow = $target.children('.row').filter(function() {
+					return $(this).find('.alert').length > 0;
+				}).first();
+
+				// Copy the column classes from the existing alert row so the
+				// summary lines up with the other alerts in the page header
+				var colClass = 'col-sm-12';
+				if ($alertRow.length) {
+					var $alertCol = $alertRow.find('.alert').first().closest('[class*="col-"]');
+					if ($alertCol.length && $alertCol.attr('class')) {
+						colClass = $alertCol.attr('class').replace(/\s+/g, ' ').trim();
+					}
+				}
+
+				var $summaryRow = $('<div class="row"><div class="' + colClass + '">' + html + '</div></div>');
+
+				if ($alertRow.length) {
+					$alertRow.after($summaryRow);
+				} else {
+					$target.children().first().after($summaryRow);
+				}
+				if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
+					lucide.createIcons();
+				}
 			}
 		}
 	}
@@ -101,7 +127,7 @@ $(document).ready(function() {
 		$($panes.get().reverse()).each(function() {
 			var paneId = $(this).attr('id');
 			if (paneId) {
-				var $tabLink = $('.nav-tabs a[href="#' + paneId + '"]');
+				var $tabLink = $('.nav-tabs a[href="#' + paneId + '"], .dcx-pills a[href="#' + paneId + '"]');
 				if ($tabLink.length) {
 					$tabLink.tab('show');
 				}

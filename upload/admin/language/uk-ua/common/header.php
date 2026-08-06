@@ -34,3 +34,5 @@ $_['text_store'] = 'Магазини';
 $_['text_support'] = 'Форум підтримки';
 $_['text_search_placeholder'] = 'Пошук...';
 $_['text_view_all_results'] = 'Показати всі результати';
+$_['text_error_summary_one'] = 'Виправте помилку нижче:';
+$_['text_error_summary_many'] = 'Виправте помилки нижче (%s):';
