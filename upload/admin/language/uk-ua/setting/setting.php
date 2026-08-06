@@ -154,6 +154,8 @@ $_['error_customer_group_display'] = 'Ви повинні включити гр�
 $_['error_email'] = 'Адреса електронної пошти, схоже, недійсна!';
 $_['error_encryption'] = 'Ключ шифрування має містити від 32 до 1024 символів!';
 $_['error_stock_reserve_minutes'] = 'Час резерву має бути 0 або додатним числом хвилин!';
+$_['error_invoice_language'] = 'Виберіть коректну мову рахунку!';
+$_['error_invoice_valid_days'] = 'Термін дії рахунку має бути невід\'ємним числом!';
 
 // Tab
 $_['tab_invoice']                   = 'Рахунок та організація';
@@ -167,6 +169,8 @@ $_['text_invoice_logo']             = 'Логотип для рахунку';
 
 // Entry
 $_['entry_invoice_prefix']          = 'Префікс рахунку';
+$_['entry_invoice_valid_days']      = 'Термін дії рахунку, днів';
+$_['entry_invoice_language']        = 'Мова рахунку';
 $_['entry_seller_name']             = 'Назва продавця';
 $_['entry_seller_address']          = 'Адреса продавця';
 $_['entry_seller_email']            = 'Email продавця';
@@ -178,6 +182,22 @@ $_['entry_seller_bank_name']        = 'Назва банку';
 $_['entry_seller_bank_account']     = 'Розрахунковий рахунок (IBAN)';
 $_['entry_seller_bank_swift']       = 'SWIFT / БІК';
 $_['entry_seller_invoice_logo']     = 'Логотип для рахунку';
+
+// Seller tax number type labels (code => label)
+$_['text_seller_tax_type_VAT']        = 'ПДВ';
+$_['text_seller_tax_type_EIN']        = 'ІПН роботодавця (EIN)';
+$_['text_seller_tax_type_TIN']        = 'ІПН (TIN)';
+$_['text_seller_tax_type_ABN']        = 'ABN';
+$_['text_seller_tax_type_GST']        = 'GST';
+$_['text_seller_tax_type_EDRPOU']     = 'ЄДРПОУ';
+$_['text_seller_tax_type_IPN']        = 'ІПН';
+$_['text_seller_tax_type_CVR']        = 'CVR';
+$_['text_seller_tax_type_Momsreg.nr'] = 'Momsreg.nr';
+$_['text_seller_tax_type_Orgnr']      = 'Orgnr';
+$_['text_seller_tax_type_SIRET']      = 'SIRET';
+$_['text_seller_tax_type_CIF']        = 'CIF';
+$_['text_seller_tax_type_P.IVA']      = 'P.IVA';
+$_['text_seller_tax_type_Other']      = 'Інше';
 $_['error_error_filename'] = 'Необхідно ввести ім’я файлу журналу помилок';
 $_['error_ftp_hostname'] = 'Необхідно вказати FTP хост';
 $_['error_ftp_password'] = 'Необхідно вказати FTP пароль';
@@ -225,7 +245,9 @@ $_['help_checkout_guest'] = 'Дозвольте клієнтам оформлю�
 $_['help_comment'] = 'Це поле призначене для будь-яких спеціальних приміток, які ви хотіли б повідомити клієнту, наприклад, магазин не приймає чеки.';
 $_['help_complete_status'] = 'Встановіть статус замовлення, якого має досягти клієнт, перш ніж йому буде дозволено отримати доступ до завантажуваних товарів та подарункових сертифікатів.';
 $_['help_compression'] = 'GZIP для ефективнішої передачі клієнтам, які запитують. Рівень стиснення має бути від 0 до 9.';
-$_['help_invoice_logo'] = 'Залиште порожнім, щоб використовувати логотип магазину. Завантажте своє зображення для окремого логотипу на рахунках.';
+$_['help_invoice_logo'] = 'Завантажте зображення, щоб показати його на рахунках. Залиште порожнім, щоб логотип на рахунках не виводився.';
+$_['help_invoice_valid_days'] = 'Кількість днів, протягом яких рахунок дійсний для оплати. На рахунку буде вказано дату закінчення терміну дії. Залиште порожнім або 0, щоб не вказувати термін.';
+$_['help_invoice_language'] = 'Мова, якою формуються рахунок та друкована форма замовлення. Залиште порожнім, щоб використовувати мову інтерфейсу адміністратора.';
 $_['help_config_seo_url_include_path'] = '/category/subcategory/product';
 $_['help_config_valide_param_flag'] = 'Відключити переадресацію для з дозволеного списку get-параметрів';
 $_['help_cookie'] = 'Показувати повідомлення політики використання файлів cookie';

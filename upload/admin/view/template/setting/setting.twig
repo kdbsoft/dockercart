@@ -3,7 +3,7 @@
   <div class="page-header">
     <div class="container-fluid">
       <div class="row">
-        <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-2 col-xl-7">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-2 col-xl-8">
           <div class="pull-right">
             <button type="submit" id="button-save" form="form-setting" disabled="disabled" class="btn btn-primary dc-btn-disabled"><i data-lucide="save" width="16" height="16"></i> {{ button_save }}</button>
             <a href="{{ cancel }}" class="btn btn-default"><i data-lucide="x" width="16" height="16"></i> {{ button_cancel }}</a>
@@ -16,7 +16,7 @@
       </div>
       {% if error_warning %}
       <div class="row">
-        <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-2 col-xl-7">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-2 col-xl-8">
           <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
@@ -25,7 +25,7 @@
       {% endif %}
       {% if success %}
       <div class="row">
-        <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-2 col-xl-7">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-2 col-xl-8">
           <div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> {{ success }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
@@ -36,7 +36,7 @@
   </div>
   <div class="container-fluid">
     <div class="row">
-      <div class="col-sm-12 col-lg-offset-1 col-lg-11 col-xl-offset-2 col-xl-7">
+      <div class="col-sm-12 col-lg-12 col-xl-offset-2 col-xl-8">
         <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-setting">
           <div class="dcx-shell">
             <div class="dcx-panel">
@@ -1017,10 +1017,33 @@
                   <div class="tab-pane" id="tab-invoice">
                     <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
                       <div class="dcx-section-header"><h4><i data-lucide="file-text" width="16" height="16"></i> {{ text_invoice }}</h4></div>
-                      <div class="dcx-fields">
+                      <div class="dcx-fields dcx-fields--row">
                         <div class="dcx-field">
                           <label class="dcx-label" for="input-invoice-prefix">{{ entry_invoice_prefix }}</label>
                           <input type="text" name="config_invoice_prefix" value="{{ config_invoice_prefix }}" placeholder="INV-" id="input-invoice-prefix" class="form-control" />
+                        </div>
+                        <div class="dcx-field" style="max-width: 50%;">
+                          <label class="dcx-label" for="input-invoice-valid-days">{{ entry_invoice_valid_days }} <span data-toggle="tooltip" title="{{ help_invoice_valid_days }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                          <input type="text" name="config_invoice_valid_days" value="{{ config_invoice_valid_days }}" placeholder="14" id="input-invoice-valid-days" class="form-control" />
+                          {% if error_invoice_valid_days %}
+                          <div class="text-danger">{{ error_invoice_valid_days }}</div>
+                          {% endif %}
+                        </div>
+                        <div class="dcx-field" style="max-width: 50%;">
+                          <label class="dcx-label" for="input-invoice-language">{{ entry_invoice_language }} <span data-toggle="tooltip" title="{{ help_invoice_language }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                          <select name="config_invoice_language" id="input-invoice-language" class="form-control">
+                            <option value="">{{ text_default }}</option>
+                            {% for language in languages %}
+                            {% if language.code == config_invoice_language %}
+                            <option value="{{ language.code }}" selected="selected">{{ language.name }}</option>
+                            {% else %}
+                            <option value="{{ language.code }}">{{ language.name }}</option>
+                            {% endif %}
+                            {% endfor %}
+                          </select>
+                          {% if error_invoice_language %}
+                          <div class="text-danger">{{ error_invoice_language }}</div>
+                          {% endif %}
                         </div>
                       </div>
                     </div>
@@ -1060,24 +1083,31 @@
                     </div>
                     <div class="dcx-section">
                       <div class="dcx-section-header"><h4><i data-lucide="badge-info" width="16" height="16"></i> {{ text_invoice_tax }}</h4></div>
-                        <table class="table table-bordered table-striped" id="tax-numbers">
-                          <thead>
-                            <tr>
-                              <th>{{ entry_seller_tax_number_type }}</th>
-                              <th>{{ entry_seller_tax_number_value }}</th>
-                              <th style="width: 1%;"></th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                          </tbody>
-                          <tfoot>
-                            <tr>
-                              <td colspan="3" class="text-right">
-                                <button type="button" class="btn btn-default btn-sm" onclick="addTaxNumber()"><i data-lucide="plus" width="14" height="14"></i> {{ entry_seller_add_tax }}</button>
-                              </td>
-                            </tr>
-                          </tfoot>
-                        </table>
+                        <div class="dcx-fields">
+                          <div class="dcx-field">
+                            <label class="dcx-label">{{ entry_seller_tax_number_type }}</label>
+                            <div id="seller-tax-numbers">
+                              {% set tax_number_row = 0 %}
+                              {% for tax_number in config_seller_tax_numbers %}
+                              <div class="dc-cgp-row" id="seller-tax-number-row{{ tax_number_row }}">
+                                <select name="config_seller_tax_numbers[{{ tax_number_row }}][type]" class="form-control dc-cgp-select">
+                                  {% for tax_type in seller_tax_types %}
+                                  {% if tax_type == tax_number.type %}
+                                  <option value="{{ tax_type }}" selected="selected">{{ tax_type }}</option>
+                                  {% else %}
+                                  <option value="{{ tax_type }}">{{ tax_type }}</option>
+                                  {% endif %}
+                                  {% endfor %}
+                                </select>
+                                <input type="text" name="config_seller_tax_numbers[{{ tax_number_row }}][value]" value="{{ tax_number.value }}" placeholder="{{ entry_seller_tax_number_value }}" class="form-control dc-cgp-price"/>
+                                <button type="button" onclick="$('#seller-tax-number-row{{ tax_number_row }}').remove();" class="btn btn-link dc-cgp-remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
+                              </div>
+                              {% set tax_number_row = tax_number_row + 1 %}
+                              {% endfor %}
+                            </div>
+                            <button type="button" onclick="addSellerTaxNumber();" class="btn btn-default btn-sm"><i data-lucide="plus" width="14" height="14"></i> {{ entry_seller_add_tax }}</button>
+                          </div>
+                        </div>
                     </div>
                     <div class="dcx-section">
                       <div class="dcx-section-header"><h4><i data-lucide="landmark" width="16" height="16"></i> {{ text_invoice_bank }}</h4></div>
@@ -1091,7 +1121,7 @@
                             <input type="text" name="config_seller_bank_swift" value="{{ config_seller_bank_swift }}" placeholder="{{ entry_seller_bank_swift }}" id="input-seller-bank-swift" class="form-control" />
                           </div>
                         </div>
-                        <div class="dcx-fields">
+                        <div class="dcx-fields dcx-fields--row">
                           <div class="dcx-field">
                             <label class="dcx-label" for="input-seller-bank-account">{{ entry_seller_bank_account }}</label>
                             <input type="text" name="config_seller_bank_account" value="{{ config_seller_bank_account }}" placeholder="{{ entry_seller_bank_account }}" id="input-seller-bank-account" class="form-control" />
@@ -1186,30 +1216,23 @@ $('#language-seo a:first').tab('show');
 $('#language-invoice a:first').tab('show');
 //--></script>
 <script type="text/javascript"><!--
-var taxNumberRow = 0;
+var taxNumberRow = {{ tax_number_row }};
 
-function addTaxNumber(type, value) {
-  var typeOptions = '';
-  var types = ['VAT','EIN','TIN','ABN','GST','EDRPOU','IPN','ИНН','CVR','Momsreg.nr','Orgnr','SIRET','CIF','P.IVA','Other'];
-  for (var i = 0; i < types.length; i++) {
-    typeOptions += '<option value="' + types[i] + '"' + (type === types[i] ? ' selected="selected"' : '') + '>' + types[i] + '</option>';
-  }
+function addSellerTaxNumber() {
+  var html = '<div class="dc-cgp-row" id="seller-tax-number-row' + taxNumberRow + '">';
+  html += '<select name="config_seller_tax_numbers[' + taxNumberRow + '][type]" class="form-control dc-cgp-select">';
+  {% for tax_type in seller_tax_types %}
+  html += '<option value="{{ tax_type }}">{{ tax_type }}</option>';
+  {% endfor %}
+  html += '</select>';
+  html += '<input type="text" name="config_seller_tax_numbers[' + taxNumberRow + '][value]" value="" placeholder="{{ entry_seller_tax_number_value }}" class="form-control dc-cgp-price"/>';
+  html += '<button type="button" onclick="$(\'#seller-tax-number-row' + taxNumberRow + '\').remove();" class="btn btn-link dc-cgp-remove"><i data-lucide="x" width="14" height="14"></i></button>';
+  html += '</div>';
 
-  html  = '<tr id="tax-number-row' + taxNumberRow + '">';
-  html += '  <td><select name="config_seller_tax_numbers[' + taxNumberRow + '][type]" class="form-control">' + typeOptions + '</select></td>';
-  html += '  <td><input type="text" name="config_seller_tax_numbers[' + taxNumberRow + '][value]" value="' + (value || '') + '" placeholder="{{ entry_seller_tax_number_value }}" class="form-control" /></td>';
-  html += '  <td><button type="button" onclick="$(\'#tax-number-row' + taxNumberRow + '\').remove();" class="btn btn-danger btn-sm"><i data-lucide="trash-2" width="14" height="14"></i></button></td>';
-  html += '</tr>';
-
-  $('#tax-numbers tbody').append(html);
+  $('#seller-tax-numbers').append(html);
+  lucide.createIcons();
   taxNumberRow++;
 }
-
-{% if config_seller_tax_numbers %}
-{% for tax in config_seller_tax_numbers %}
-addTaxNumber('{{ tax.type }}', '{{ tax.value }}');
-{% endfor %}
-{% endif %}
 
 function clearInvoiceLogo() {
   $('#input-invoice-logo').val('');

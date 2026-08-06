@@ -5,6 +5,51 @@ class ControllerSaleOrderDetail extends Controller {
 	private array $error = [];
 	private ?OrderLocalizer $order_localizer = null;
 
+	/**
+	 * Temporarily switch the registry language and config_language_id to the
+	 * configured invoice language (config_invoice_language), so invoice and
+	 * print PDFs render in that language instead of the admin session one.
+	 * Restores the previous state afterwards (call in try/finally).
+	 *
+	 * @return array{lang: \Language, language_id: int}|null previous state to restore, or null when not switched
+	 */
+	private function switchToInvoiceLanguage(): ?array {
+		$code = (string)$this->config->get('config_invoice_language');
+
+		if ($code === '') {
+			return null;
+		}
+
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "language` WHERE code = '" . $this->db->escape($code) . "' AND status = '1'");
+
+		if (!$query->num_rows) {
+			return null;
+		}
+
+		$lang = new \Language($query->row['code']);
+		$lang->load($query->row['code']);
+		$lang->load('sale/order');
+
+		$previous = [
+			'lang'        => $this->language,
+			'language_id' => (int)$this->config->get('config_language_id'),
+		];
+
+		$this->registry->set('language', $lang);
+		$this->config->set('config_language_id', (int)$query->row['language_id']);
+
+		return $previous;
+	}
+
+	private function restoreLanguage(?array $previous): void {
+		if ($previous === null) {
+			return;
+		}
+
+		$this->registry->set('language', $previous['lang']);
+		$this->config->set('config_language_id', $previous['language_id']);
+	}
+
 	private function orderLocalizer(): OrderLocalizer {
 		if ($this->order_localizer === null) {
 			$this->order_localizer = new OrderLocalizer($this->registry);
@@ -314,12 +359,18 @@ class ControllerSaleOrderDetail extends Controller {
 
 		$this->model_sale_order->updateInvoiceNo($order_id);
 
-		$this->sendPdf(
-			$this->load->view('sale/order_detail_print', [
-				'orders' => [$this->buildPrintData($order_id)],
-			]),
-			'order-' . $order_id . '.pdf'
-		);
+		$previous_language = $this->switchToInvoiceLanguage();
+
+		try {
+			$this->sendPdf(
+				$this->load->view('sale/order_detail_print', [
+					'orders' => [$this->buildPrintData($order_id)],
+				]),
+				'order-' . $order_id . '.pdf'
+			);
+		} finally {
+			$this->restoreLanguage($previous_language);
+		}
 	}
 
 	public function invoice(): void {
@@ -337,12 +388,21 @@ class ControllerSaleOrderDetail extends Controller {
 
 		$this->model_sale_order->updateInvoiceNo($order_id);
 
-		$this->sendPdf(
-			$this->load->view('sale/order_invoice', [
-				'orders' => [$this->buildInvoiceData($order_id)],
-			]),
-			'invoice-' . $order_id . '.pdf'
-		);
+		$previous_language = $this->switchToInvoiceLanguage();
+
+		try {
+			$invoice_data = $this->buildInvoiceData($order_id);
+
+			$this->sendPdf(
+				$this->load->view('sale/order_invoice', [
+					'orders'        => [$invoice_data],
+					'text_tax_type' => $invoice_data['text_tax_type'] ?? [],
+				]),
+				'invoice-' . $order_id . '.pdf'
+			);
+		} finally {
+			$this->restoreLanguage($previous_language);
+		}
 	}
 
 	public function printSelected(): void {
@@ -380,10 +440,16 @@ class ControllerSaleOrderDetail extends Controller {
 			? 'order-' . $orders[0]['order_id'] . '.pdf'
 			: 'orders-' . implode('-', array_column($orders, 'order_id')) . '.pdf';
 
-		$this->sendPdf(
-			$this->load->view('sale/order_detail_print', ['orders' => $orders]),
-			$filename
-		);
+		$previous_language = $this->switchToInvoiceLanguage();
+
+		try {
+			$this->sendPdf(
+				$this->load->view('sale/order_detail_print', ['orders' => $orders]),
+				$filename
+			);
+		} finally {
+			$this->restoreLanguage($previous_language);
+		}
 	}
 
 	private function buildPrintData(int $order_id): array {
@@ -459,6 +525,11 @@ class ControllerSaleOrderDetail extends Controller {
 		$data['heading_title'] = sprintf($this->language->get('text_invoice'), $order_id);
 		$data['invoice_no'] = $invoice_no;
 		$data['date_added'] = date($this->language->get('datetime_format'), strtotime($order_info['date_added']));
+
+		$invoice_valid_days = (int)$this->config->get('config_invoice_valid_days');
+		$data['invoice_valid_until'] = $invoice_valid_days > 0
+			? date($this->language->get('date_format_short'), strtotime($order_info['date_added'] . ' +' . $invoice_valid_days . ' days'))
+			: '';
 		$data['store_name'] = $order_info['store_name'];
 		$data['store_url'] = $order_info['store_id'] == 0
 			? ($this->request->server['HTTPS'] ? HTTPS_CATALOG : HTTP_CATALOG)
@@ -504,10 +575,46 @@ class ControllerSaleOrderDetail extends Controller {
 		$data['seller_bank_account'] = (string)$this->config->get('config_seller_bank_account');
 		$data['seller_bank_swift'] = (string)$this->config->get('config_seller_bank_swift');
 
-		$logo = $this->config->get('config_seller_invoice_logo');
-		if (!$logo) {
-			$logo = $this->config->get('config_logo');
+		// Localized labels for tax number types (fall back to the raw code)
+		$tax_type_labels = [];
+
+		foreach ($tax_numbers as $tax_number) {
+			$type = isset($tax_number['type']) ? (string)$tax_number['type'] : '';
+
+			if ($type === '') {
+				continue;
+			}
+
+			$key = 'text_tax_type_' . $type;
+			$tax_type_labels[$type] = isset($this->language->data[$key]) ? $this->language->data[$key] : $type;
 		}
+
+		$data['text_tax_type'] = $tax_type_labels;
+
+		// Payment order sample details (buyer pays seller)
+		$payer_firstname = (string)($order_info['payment_firstname'] ?? '');
+		$payer_lastname = (string)($order_info['payment_lastname'] ?? '');
+		$payer_company = (string)($order_info['payment_company'] ?? '');
+
+		// Fall back to order-level customer data when payment fields are empty
+		if ($payer_firstname === '' && $payer_lastname === '') {
+			$payer_firstname = (string)($order_info['firstname'] ?? '');
+			$payer_lastname = (string)($order_info['lastname'] ?? '');
+		}
+
+		$data['payment_order'] = [
+			'seller_name'      => (string)$seller_name,
+			'seller_address'   => (string)$seller_address,
+			'seller_tax_label' => !empty($tax_numbers[0]['type']) ? ($tax_type_labels[$tax_numbers[0]['type']] ?? $tax_numbers[0]['type']) : '',
+			'seller_tax_value' => !empty($tax_numbers[0]['value']) ? (string)$tax_numbers[0]['value'] : '',
+			'bank_name'        => (string)$this->config->get('config_seller_bank_name'),
+			'bank_account'     => (string)$this->config->get('config_seller_bank_account'),
+			'bank_swift'       => (string)$this->config->get('config_seller_bank_swift'),
+			'payer_name'       => trim($payer_firstname . ' ' . $payer_lastname),
+			'payer_company'    => $payer_company,
+		];
+
+		$logo = $this->config->get('config_seller_invoice_logo');
 		$data['seller_logo'] = $logo ? DIR_IMAGE . $logo : '';
 
 		$data['firstname'] = $order_info['firstname'];
@@ -588,6 +695,7 @@ class ControllerSaleOrderDetail extends Controller {
 		$options->set('isRemoteEnabled', false);
 		$options->set('defaultFont', 'DejaVu Sans');
 		$options->set('isHtml5ParserEnabled', true);
+		$options->set('chroot', [realpath(DIR_IMAGE) ?: DIR_IMAGE]);
 
 		$dompdf = new \Dompdf\Dompdf($options);
 		$dompdf->loadHtml($html, 'UTF-8');

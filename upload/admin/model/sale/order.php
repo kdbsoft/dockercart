@@ -11,9 +11,9 @@ class ModelSaleOrder extends Model {
 			return (int)$query->row['invoice_no'];
 		}
 
-		$invoice_prefix = $query->row['invoice_prefix'];
-		if ($invoice_prefix === '') {
-			$invoice_prefix = $this->config->get('config_invoice_prefix');
+		$invoice_prefix = $this->config->get('config_invoice_prefix');
+		if (!$invoice_prefix) {
+			$invoice_prefix = $query->row['invoice_prefix'];
 		}
 		if (!$invoice_prefix) {
 			$invoice_prefix = 'INV-';
@@ -31,7 +31,7 @@ class ModelSaleOrder extends Model {
 
 			$invoice_no = (int)$next_query->row['next'] + 1;
 
-			$this->db->query("UPDATE `" . DB_PREFIX . "order` SET invoice_no = '" . $invoice_no . "' WHERE order_id = '" . (int)$order_id . "'");
+			$this->db->query("UPDATE `" . DB_PREFIX . "order` SET invoice_prefix = '" . $this->db->escape($invoice_prefix) . "', invoice_no = '" . $invoice_no . "' WHERE order_id = '" . (int)$order_id . "'");
 		} finally {
 			$this->db->query("SELECT RELEASE_LOCK('" . $this->db->escape($lock_name) . "')");
 		}

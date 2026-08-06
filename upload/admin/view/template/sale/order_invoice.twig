@@ -10,10 +10,9 @@
     table { width:100%; border-collapse:collapse; }
     .invoice-header { margin-bottom:24px; }
     .invoice-header td { vertical-align:top; }
-    .invoice-title { font-size:28px; font-weight:700; color:#2563eb; text-transform:uppercase; letter-spacing:1px; }
+    .invoice-title { font-size:24px; font-weight:700; color:#2563eb; text-transform:uppercase; letter-spacing:1px; }
     .invoice-meta { text-align:right; font-size:12px; }
     .invoice-meta p + p { margin-top:2px; }
-    .invoice-meta .invoice-no { font-size:14px; font-weight:600; margin-top:4px; }
     .seller-block { margin-bottom:24px; }
     .seller-block h3 { font-size:11px; text-transform:uppercase; color:#2563eb; letter-spacing:0.5px; margin-bottom:4px; }
     .seller-block p { font-size:11px; color:#555; }
@@ -28,12 +27,19 @@
     .invoice-products .option-line { color:#666; font-size:11px; margin-top:2px; }
     .text-right { text-align:right; }
     .text-center { text-align:center; }
+    .no-wrap { white-space:nowrap; }
     .invoice-totals { width:280px; margin-left:auto; }
     .invoice-totals td { padding:4px 10px; font-size:12px; }
     .invoice-totals .grand-total td { font-weight:700; font-size:14px; border-top:2px solid #333; padding-top:8px; }
     .balance-due { margin-top:16px; background:#f0f7ff; border:1px solid #bfdbfe; border-radius:4px; padding:12px 16px; }
     .balance-due-label { font-size:11px; text-transform:uppercase; color:#2563eb; letter-spacing:0.5px; }
     .balance-due-amount { font-size:18px; font-weight:700; color:#1e40af; margin-top:2px; }
+    .payment-order { margin-bottom:24px; border:1px solid #ddd; border-radius:6px; padding:14px 16px; }
+    .payment-order h3 { font-size:11px; text-transform:uppercase; color:#2563eb; letter-spacing:0.5px; margin-bottom:10px; }
+    .payment-order table { width:100%; border-collapse:collapse; }
+    .payment-order td { padding:3px 8px 3px 0; font-size:11px; vertical-align:top; }
+    .payment-order td.label { color:#888; white-space:nowrap; width:150px; }
+    .payment-order td.value { color:#333; font-weight:600; }
     .invoice-payments { margin-top:24px; }
     .invoice-payments h3 { font-size:11px; text-transform:uppercase; color:#2563eb; letter-spacing:0.5px; margin-bottom:6px; }
     .payment-table th { font-size:10px; text-transform:uppercase; color:#888; padding:4px 10px; text-align:left; border-bottom:1px solid #ddd; }
@@ -42,7 +48,7 @@
     .invoice-comment h3 { font-size:11px; text-transform:uppercase; color:#2563eb; letter-spacing:0.5px; margin-bottom:5px; }
     .invoice-comment p { font-size:12px; color:#555; }
     .invoice-footer { text-align:center; color:#999; font-size:11px; margin-top:40px; border-top:1px solid #eee; padding-top:14px; }
-    .logo-img { max-height:48px; margin-bottom:8px; }
+    .logo-img { max-height:32px; margin-bottom:6px; }
   </style>
 </head>
 <body>
@@ -54,13 +60,15 @@
           {% if order.seller_logo %}
           <img src="{{ order.seller_logo }}" class="logo-img" alt="">
           {% endif %}
-          <div class="invoice-title">{{ text_invoice }}</div>
+          <div class="invoice-title">{{ text_invoice }}{% if order.invoice_no %}&nbsp;№&nbsp;{{ order.invoice_no }}{% endif %}</div>
         </td>
         <td class="invoice-meta">
           <p>{{ order.store_name }}</p>
           <p>{{ order.store_url }}</p>
-          <p class="invoice-no">{{ order.invoice_no }}</p>
           <p><strong>{{ text_date_added }}:</strong> {{ order.date_added }}</p>
+          {% if order.invoice_valid_until %}
+          <p><strong>{{ text_invoice_valid_until }}:</strong> {{ order.invoice_valid_until }}</p>
+          {% endif %}
         </td>
       </tr>
     </table>
@@ -73,7 +81,7 @@
           <p>{{ order.seller_address }}</p>
           {% if order.seller_telephone %}<p>{{ order.seller_telephone }}</p>{% endif %}
           {% if order.seller_email %}<p>{{ order.seller_email }}</p>{% endif %}
-          {% for tax in order.seller_tax_numbers %}<p>{{ tax.type }}: {{ tax.value }}</p>{% endfor %}
+          {% for tax in order.seller_tax_numbers %}<p>{{ attribute(text_tax_type, tax.type) is defined ? attribute(text_tax_type, tax.type) : tax.type }}: {{ tax.value }}</p>{% endfor %}
           {% if order.seller_bank_name %}<p>{{ text_bank_name }}: {{ order.seller_bank_name }}</p>{% endif %}
           {% if order.seller_bank_account %}<p>{{ text_bank_account }}: {{ order.seller_bank_account }}</p>{% endif %}
           {% if order.seller_bank_swift %}<p>{{ text_bank_swift }}: {{ order.seller_bank_swift }}</p>{% endif %}
@@ -108,6 +116,36 @@
       {% endif %}
     </table>
 
+    <div class="payment-order">
+      <h3>{{ text_payment_order }}</h3>
+      <table>
+        <tr>
+          <td class="label">{{ text_payment_order_recipient }}</td>
+          <td class="value">{{ order.payment_order.seller_name }}{% if order.payment_order.seller_address %}, {{ order.payment_order.seller_address }}{% endif %}{% if order.payment_order.seller_tax_label and order.payment_order.seller_tax_value %}, {{ order.payment_order.seller_tax_label }} {{ order.payment_order.seller_tax_value }}{% endif %}</td>
+        </tr>
+        <tr>
+          <td class="label">{{ text_payment_order_bank }}</td>
+          <td class="value">{{ order.payment_order.bank_name }}{% if order.payment_order.bank_swift %} ({{ text_bank_swift }}: {{ order.payment_order.bank_swift }}){% endif %}</td>
+        </tr>
+        <tr>
+          <td class="label">{{ text_payment_order_account }}</td>
+          <td class="value">{{ order.payment_order.bank_account }}</td>
+        </tr>
+        <tr>
+          <td class="label">{{ text_payment_order_payer }}</td>
+          <td class="value">{{ order.payment_order.payer_company ? order.payment_order.payer_company ~ ', ' : '' }}{{ order.payment_order.payer_name }}</td>
+        </tr>
+        <tr>
+          <td class="label">{{ text_payment_order_purpose }}</td>
+          <td class="value">{{ text_payment_purpose|format(order.invoice_no ?: '№ ' ~ order.order_id) }}</td>
+        </tr>
+        <tr>
+          <td class="label">{{ text_payment_order_amount }}</td>
+          <td class="value">{{ order.balance_due }}</td>
+        </tr>
+      </table>
+    </div>
+
     <table class="invoice-products">
       <thead>
         <tr>
@@ -123,9 +161,9 @@
         <tr>
           <td>{{ product.name }}{% if product.option %}<div class="option-line">{{ product.option }}</div>{% endif %}</td>
           <td>{{ product.model }}</td>
-          <td class="text-right">{{ product.quantity }}</td>
-          <td class="text-right">{{ product.price }}</td>
-          <td class="text-right">{{ product.total }}</td>
+          <td class="text-right no-wrap">{{ product.quantity }}</td>
+          <td class="text-right no-wrap">{{ product.price }}</td>
+          <td class="text-right no-wrap">{{ product.total }}</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -135,13 +173,13 @@
       {% for total in order.totals %}
       <tr{% if loop.last %} class="grand-total"{% endif %}>
         <td>{{ total.title }}</td>
-        <td class="text-right">{{ total.text }}</td>
+        <td class="text-right no-wrap">{{ total.text }}</td>
       </tr>
       {% endfor %}
     </table>
     <div class="balance-due">
       <div class="balance-due-label">{{ text_balance_due }}</div>
-      <div class="balance-due-amount">{{ order.balance_due }}</div>
+      <div class="balance-due-amount no-wrap">{{ order.balance_due }}</div>
     </div>
 
     {% if order.payments %}
@@ -160,7 +198,7 @@
           <tr>
             <td>{{ payment.date }}</td>
             <td>{{ payment.method }}{% if payment.comment %}<br><span style="color:#888;font-size:10px">{{ payment.comment }}</span>{% endif %}</td>
-            <td class="text-right">{{ payment.amount }}</td>
+            <td class="text-right no-wrap">{{ payment.amount }}</td>
           </tr>
           {% endfor %}
         </tbody>

@@ -137,6 +137,18 @@ class ControllerSettingSetting extends Controller {
 			$data['error_stock_reserve_minutes'] = '';
 		}
 
+		if (isset($this->error['invoice_language'])) {
+			$data['error_invoice_language'] = $this->error['invoice_language'];
+		} else {
+			$data['error_invoice_language'] = '';
+		}
+
+		if (isset($this->error['invoice_valid_days'])) {
+			$data['error_invoice_valid_days'] = $this->error['invoice_valid_days'];
+		} else {
+			$data['error_invoice_valid_days'] = '';
+		}
+
 		if (isset($this->session->data['success'])) {
 			$data['success'] = $this->session->data['success'];
 
@@ -1063,6 +1075,18 @@ class ControllerSettingSetting extends Controller {
 			$data['config_invoice_prefix'] = $this->config->get('config_invoice_prefix');
 		}
 
+		if (isset($this->request->post['config_invoice_valid_days'])) {
+			$data['config_invoice_valid_days'] = $this->request->post['config_invoice_valid_days'];
+		} else {
+			$data['config_invoice_valid_days'] = $this->config->get('config_invoice_valid_days');
+		}
+
+		if (isset($this->request->post['config_invoice_language'])) {
+			$data['config_invoice_language'] = $this->request->post['config_invoice_language'];
+		} else {
+			$data['config_invoice_language'] = $this->config->get('config_invoice_language');
+		}
+
 		if (isset($this->request->post['config_seller_name_i18n'])) {
 			$data['config_seller_name_i18n'] = $this->request->post['config_seller_name_i18n'];
 		} elseif ($this->config->get('config_seller_name_i18n')) {
@@ -1104,12 +1128,14 @@ class ControllerSettingSetting extends Controller {
 		}
 
 		if (isset($this->request->post['config_seller_tax_numbers'])) {
-			$data['config_seller_tax_numbers'] = $this->request->post['config_seller_tax_numbers'];
+			$data['config_seller_tax_numbers'] = $this->normalizeSellerTaxNumbers($this->request->post['config_seller_tax_numbers']);
 		} elseif ($this->config->get('config_seller_tax_numbers')) {
-			$data['config_seller_tax_numbers'] = $this->config->get('config_seller_tax_numbers');
+			$data['config_seller_tax_numbers'] = $this->normalizeSellerTaxNumbers($this->config->get('config_seller_tax_numbers'));
 		} else {
 			$data['config_seller_tax_numbers'] = [];
 		}
+
+		$data['seller_tax_types'] = $this->getSellerTaxTypes();
 
 		if (isset($this->request->post['config_seller_bank_name'])) {
 			$data['config_seller_bank_name'] = $this->request->post['config_seller_bank_name'];
@@ -1138,8 +1164,6 @@ class ControllerSettingSetting extends Controller {
 		$data['seller_invoice_logo_thumb'] = '';
 		if (!empty($data['config_seller_invoice_logo']) && is_file(DIR_IMAGE . $data['config_seller_invoice_logo'])) {
 			$data['seller_invoice_logo_thumb'] = $this->model_tool_image->resize($data['config_seller_invoice_logo'], 100, 100);
-		} elseif (!empty($this->config->get('config_logo')) && is_file(DIR_IMAGE . $this->config->get('config_logo'))) {
-			$data['seller_invoice_logo_thumb'] = $this->model_tool_image->resize($this->config->get('config_logo'), 100, 100);
 		}
 
 		if (empty($data['seller_invoice_logo_thumb'])) {
@@ -1161,6 +1185,30 @@ class ControllerSettingSetting extends Controller {
 		}
 
 		$this->syncConfigImagesInPost();
+
+		if (isset($this->request->post['config_seller_tax_numbers'])) {
+			$this->request->post['config_seller_tax_numbers'] = $this->normalizeSellerTaxNumbers($this->request->post['config_seller_tax_numbers']);
+		}
+
+		if (isset($this->request->post['config_invoice_language']) && $this->request->post['config_invoice_language'] !== '') {
+			$query = $this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "language` WHERE code = '" . $this->db->escape($this->request->post['config_invoice_language']) . "' AND status = '1'");
+
+			if (!$query->row['total']) {
+				$this->error['invoice_language'] = $this->language->get('error_invoice_language');
+			}
+		} elseif (!isset($this->request->post['config_invoice_language'])) {
+			$this->request->post['config_invoice_language'] = '';
+		}
+
+		if (isset($this->request->post['config_invoice_valid_days'])) {
+			$valid_days = (int)$this->request->post['config_invoice_valid_days'];
+
+			if ($valid_days < 0) {
+				$this->error['invoice_valid_days'] = $this->language->get('error_invoice_valid_days');
+			} else {
+				$this->request->post['config_invoice_valid_days'] = $valid_days;
+			}
+		}
 
 		if (!isset($this->request->post['config_contact_form_status'])) {
 			$this->request->post['config_contact_form_status'] = 0;
@@ -1337,6 +1385,42 @@ class ControllerSettingSetting extends Controller {
 
 		$this->request->post['config_images'] = $images;
 		$this->request->post['config_image'] = isset($images[0]) ? $images[0] : '';
+	}
+
+	/**
+	 * Fixed list of supported seller tax number type codes. Localized labels
+	 * live in the language files (text_seller_tax_type_<code>).
+	 */
+	private function getSellerTaxTypes() {
+		return array('VAT', 'EIN', 'TIN', 'ABN', 'GST', 'EDRPOU', 'IPN', 'CVR', 'Momsreg.nr', 'Orgnr', 'SIRET', 'CIF', 'P.IVA', 'Other');
+	}
+
+	/**
+	 * Normalize the config_seller_tax_numbers array: keep only entries that
+	 * carry a value, coerce type/value to strings.
+	 */
+	private function normalizeSellerTaxNumbers($tax_numbers) {
+		$result = array();
+
+		foreach ((array)$tax_numbers as $tax_number) {
+			if (!is_array($tax_number)) {
+				continue;
+			}
+
+			$type = isset($tax_number['type']) ? (string)$tax_number['type'] : '';
+			$value = isset($tax_number['value']) ? (string)$tax_number['value'] : '';
+
+			if ($value === '') {
+				continue;
+			}
+
+			$result[] = array(
+				'type'  => $type,
+				'value' => $value
+			);
+		}
+
+		return $result;
 	}
 	
 	public function theme() {
