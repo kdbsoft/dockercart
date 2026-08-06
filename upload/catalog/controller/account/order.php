@@ -10,6 +10,46 @@ class ControllerAccountOrder extends Controller {
 		return $this->order_localizer;
 	}
 
+	public function invoice() {
+		if (!$this->customer->isLogged()) {
+			$this->session->data['redirect'] = $this->url->link('account/order/invoice', 'order_id=' . (int)($this->request->get['order_id'] ?? 0), true);
+			$this->response->redirect($this->url->link('account/login', '', true));
+			return;
+		}
+
+		$order_id = (int)($this->request->get['order_id'] ?? 0);
+		$this->load->model('account/order');
+		$document = $this->model_account_order->getOrderDocument($order_id);
+
+		if (!$document) {
+			$this->response->redirect($this->url->link('error/not_found', '', true));
+			return;
+		}
+
+		$storage_key = basename((string)$document['storage_key']);
+		$path = DIR_STORAGE . 'documents/invoices/' . $storage_key;
+
+		if (!is_file($path) || !is_readable($path)) {
+			$this->response->redirect($this->url->link('error/not_found', '', true));
+			return;
+		}
+
+		$pdf = file_get_contents($path);
+		if ($pdf === false) {
+			$this->response->redirect($this->url->link('error/not_found', '', true));
+			return;
+		}
+
+		while (ob_get_level() > 0) {
+			ob_end_clean();
+		}
+
+		$this->response->addHeader('Content-Type: application/pdf');
+		$this->response->addHeader('Content-Length: ' . strlen($pdf));
+		$this->response->addHeader('Content-Disposition: inline; filename="invoice-' . $order_id . '.pdf"');
+		$this->response->setOutput($pdf);
+	}
+
 	public function index() {
 		if (!$this->customer->isLogged()) {
 			$this->session->data['redirect'] = $this->url->link('account/order', '', true);
@@ -175,6 +215,10 @@ class ControllerAccountOrder extends Controller {
 			}
 
 			$data['order_id'] = (int)$this->request->get['order_id'];
+			$invoice_document = $this->model_account_order->getOrderDocument((int)$order_info['order_id']);
+			$data['invoice_no'] = !empty($order_info['invoice_no']) ? $order_info['invoice_prefix'] . $order_info['invoice_no'] : '';
+			$data['invoice_generated'] = (bool)$invoice_document;
+			$data['invoice_url'] = $data['invoice_generated'] ? $this->url->link('account/order/invoice', 'order_id=' . (int)$order_info['order_id'], true) : '';
 			$data['date_added'] = date($this->language->get('date_format_short'), strtotime($order_info['date_added']));
 			$data['tracking_number'] = $order_info['tracking_number'];
 

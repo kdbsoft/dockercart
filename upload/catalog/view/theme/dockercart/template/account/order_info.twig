@@ -42,6 +42,9 @@
           <div class="space-y-1.5">
             <p><span class="font-semibold text-gray-500">{{ text_order_id }}</span> <span class="text-gray-800 font-mono">#{{ order_id }}</span></p>
             <p><span class="font-semibold text-gray-500">{{ text_date_added }}</span> <span class="text-gray-800">{{ date_added }}</span></p>
+            {% if invoice_generated %}
+            <p><span class="font-semibold text-gray-500">{{ text_invoice_no }}</span> <a href="{{ invoice_url }}" target="_blank" class="text-blue-600 hover:text-blue-700 font-semibold">{{ invoice_no }} <i data-lucide="file-text" class="inline-block w-4 h-4 align-text-bottom"></i></a></p>
+            {% endif %}
           </div>
           <div class="space-y-1.5">
             {% if payment_method %}

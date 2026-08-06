@@ -87,6 +87,9 @@ class ControllerSaleOrderDetail extends Controller {
 		$data['cancel'] = $this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['print_url'] = $this->url->link('sale/order_detail/print', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $order_id, true);
 		$data['invoice_url'] = $this->url->link('sale/order_detail/invoice', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $order_id, true);
+		$invoice_document = $this->model_sale_order->getOrderDocument($order_id);
+		$data['invoice_no'] = !empty($order_info['invoice_no']) ? $order_info['invoice_prefix'] . $order_info['invoice_no'] : '';
+		$data['invoice_generated'] = (bool)$invoice_document;
 		$data['create_return_url'] = $this->url->link('sale/return/add', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $order_id, true);
 		$data['user_token'] = $this->session->data['user_token'];
 		$data['order_id'] = $order_id;
@@ -381,25 +384,50 @@ class ControllerSaleOrderDetail extends Controller {
 		$this->load->model('sale/order');
 		$order_info = $this->model_sale_order->getOrder($order_id);
 
-		if (!$order_info) {
+		if (!$order_info || !$this->user->hasPermission('access', 'sale/order')) {
 			$this->response->redirect($this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'], true));
 			return;
 		}
 
 		$this->model_sale_order->updateInvoiceNo($order_id);
+		$document = $this->model_sale_order->getOrderDocument($order_id);
+		$document_path = $document ? DIR_STORAGE . 'documents/invoices/' . basename($document['storage_key']) : '';
+
+		if ($document && is_file($document_path)) {
+			$this->sendStoredPdf($document_path, 'invoice-' . $order_id . '.pdf');
+			return;
+		}
 
 		$previous_language = $this->switchToInvoiceLanguage();
 
 		try {
 			$invoice_data = $this->buildInvoiceData($order_id);
+			$pdf = $this->renderPdf($this->load->view('sale/order_invoice', [
+				'orders'        => [$invoice_data],
+				'text_tax_type' => $invoice_data['text_tax_type'] ?? [],
+			]));
 
-			$this->sendPdf(
-				$this->load->view('sale/order_invoice', [
-					'orders'        => [$invoice_data],
-					'text_tax_type' => $invoice_data['text_tax_type'] ?? [],
-				]),
-				'invoice-' . $order_id . '.pdf'
+			$directory = DIR_STORAGE . 'documents/invoices/';
+			if (!is_dir($directory)) {
+				mkdir($directory, 0775, true);
+			}
+
+			$storage_key = bin2hex(random_bytes(24)) . '.pdf';
+			$path = $directory . $storage_key;
+			if (file_put_contents($path, $pdf, LOCK_EX) === false) {
+				throw new \RuntimeException('Unable to save invoice PDF.');
+			}
+
+			$this->model_sale_order->addOrderDocument(
+				$order_id,
+				'invoice',
+				$storage_key,
+				(string)$invoice_data['invoice_no']
 			);
+
+			$document = $this->model_sale_order->getOrderDocument($order_id);
+			$stored_path = $document ? $directory . basename($document['storage_key']) : $path;
+			$this->sendStoredPdf($stored_path, 'invoice-' . $order_id . '.pdf');
 		} finally {
 			$this->restoreLanguage($previous_language);
 		}
@@ -673,38 +701,76 @@ class ControllerSaleOrderDetail extends Controller {
 		$data['total_amount'] = $this->currency->format($total_amount, $order_info['currency_code'], $order_info['currency_value']);
 		$data['balance_due'] = $this->currency->format(max(0, $total_amount - $paid_amount), $order_info['currency_code'], $order_info['currency_value']);
 
-		$payments = $this->model_sale_order->getOrderPayments($order_id);
-		$data['payments'] = [];
-
-		foreach ($payments as $payment) {
-			if ((float)$payment['amount'] > 0) {
-				$data['payments'][] = [
-					'date'    => date($this->language->get('datetime_format'), strtotime($payment['date_added'])),
-					'method'  => $payment['payment_method'],
-					'amount'  => $this->currency->format((float)$payment['amount'], $order_info['currency_code'], $order_info['currency_value']),
-					'comment' => $payment['comment'],
-				];
-			}
-		}
-
 		return $data;
 	}
 
 	private function sendPdf(string $html, string $filename): void {
+		$this->sendStoredPdfFromBytes($this->renderPdf($html), $filename);
+	}
+
+	private function renderPdf(string $html): string {
 		$options = new \Dompdf\Options();
 		$options->set('isRemoteEnabled', false);
 		$options->set('defaultFont', 'DejaVu Sans');
 		$options->set('isHtml5ParserEnabled', true);
-		$options->set('chroot', [realpath(DIR_IMAGE) ?: DIR_IMAGE]);
+
+		$font_cache = DIR_CACHE . 'fonts/';
+		if (!is_dir($font_cache)) {
+			mkdir($font_cache, 0775, true);
+		}
+
+		$options->set('fontDir', $font_cache);
+		$options->set('fontCache', $font_cache);
+		$options->set('chroot', [realpath(DIR_IMAGE) ?: DIR_IMAGE, realpath(DIR_SYSTEM . 'fonts/arial') ?: DIR_SYSTEM . 'fonts/arial']);
 
 		$dompdf = new \Dompdf\Dompdf($options);
+		$this->registerArialFonts($dompdf);
 		$dompdf->loadHtml($html, 'UTF-8');
 		$dompdf->setPaper('A4', 'portrait');
 		$dompdf->render();
 
+		return $dompdf->output();
+	}
+
+	private function sendStoredPdf(string $path, string $filename): void {
+		if (!is_file($path) || !is_readable($path)) {
+			$this->response->redirect($this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'], true));
+			return;
+		}
+
+		$this->sendStoredPdfFromBytes((string)file_get_contents($path), $filename);
+	}
+
+	private function sendStoredPdfFromBytes(string $pdf, string $filename): void {
+		while (ob_get_level() > 0) {
+			ob_end_clean();
+		}
+
 		$this->response->addHeader('Content-Type: application/pdf');
+		$this->response->addHeader('Content-Length: ' . strlen($pdf));
 		$this->response->addHeader('Content-Disposition: inline; filename="' . $filename . '"');
-		$this->response->setOutput($dompdf->output());
+		$this->response->setOutput($pdf);
+	}
+
+	private function registerArialFonts(\Dompdf\Dompdf $dompdf): void {
+		$font_metrics = $dompdf->getFontMetrics();
+		$fonts_dir = DIR_SYSTEM . 'fonts/arial/';
+
+		foreach ([
+			'normal'      => ['file' => 'arial.ttf', 'weight' => '400', 'style' => 'normal'],
+			'bold'        => ['file' => 'arialbd.ttf', 'weight' => '700', 'style' => 'normal'],
+			'italic'      => ['file' => 'ariali.ttf', 'weight' => '400', 'style' => 'italic'],
+			'bold_italic' => ['file' => 'arialbi.ttf', 'weight' => '700', 'style' => 'italic'],
+		] as $font) {
+			$path = realpath($fonts_dir . $font['file']);
+			if ($path !== false) {
+				$font_metrics->registerFont([
+					'family' => 'Arial',
+					'weight' => $font['weight'],
+					'style'  => $font['style'],
+				], 'file://' . $path);
+			}
+		}
 	}
 
 	public function getTimeline(): void {
