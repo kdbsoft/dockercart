@@ -57,6 +57,7 @@ $_['text_review_card'] = 'Детали';
 
 
 // Expandable rows
+$_['text_review_setting'] = 'Настройки отзывов';
 $_['text_expand']         = 'Развернуть';
 $_['text_loading']        = 'Загрузка...';
 $_['text_loading_error'] = 'Не удалось загрузить';
