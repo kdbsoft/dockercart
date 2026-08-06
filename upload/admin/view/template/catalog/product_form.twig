@@ -575,7 +575,7 @@
                   <div style="margin-top: 30px">
                     <h4>{{ tab_options }} <small id="dc-option-count">({{ product_options|length }})</small></h4>
                     <div class="dc-opt-set-toolbar" style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
-                      <label for="dc-option-set-select" style="margin:0;white-space:nowrap;">{{ text_option_set_selector }} <span title="{{ text_help_option_set }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                      <label for="dc-option-set-select" style="margin:0;white-space:nowrap;">{{ text_option_set_selector }} <span title="{{ text_help_option_set }}" data-toggle="tooltip"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                       <select id="dc-option-set-select" class="form-control" style="width:auto;display:inline-block;min-width:220px;">
                         <option value=""></option>
                         {% for option_set in option_sets %}
