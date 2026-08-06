@@ -211,6 +211,41 @@ class ModelExtensionModuleDockerCartCheckout extends Model {
     public function markRecovered($abandoned_id) {
         $this->db->query("UPDATE `" . DB_PREFIX . "dockercart_checkout_abandoned`
                           SET recovered = " . self::STATUS_RECOVERED . ",
+                              restore_token = NULL,
+                              restore_expires = NULL,
+                              date_modified = NOW()
+                          WHERE abandoned_id = " . (int)$abandoned_id);
+    }
+
+    /**
+     * Generate a one-time restore token for an abandoned cart
+     *
+     * @param int $abandoned_id
+     * @param int $ttl_days Token lifetime in days
+     * @return string The generated token
+     */
+    public function createRestoreToken($abandoned_id, $ttl_days = 7) {
+        $token = bin2hex(random_bytes(24));
+
+        $this->db->query("UPDATE `" . DB_PREFIX . "dockercart_checkout_abandoned`
+                          SET restore_token = '" . $this->db->escape($token) . "',
+                              restore_expires = DATE_ADD(NOW(), INTERVAL " . (int)$ttl_days . " DAY),
+                              date_modified = NOW()
+                          WHERE abandoned_id = " . (int)$abandoned_id);
+
+        return $token;
+    }
+
+    /**
+     * Invalidate the restore token of an abandoned cart
+     *
+     * @param int $abandoned_id
+     * @return void
+     */
+    public function clearRestoreToken($abandoned_id) {
+        $this->db->query("UPDATE `" . DB_PREFIX . "dockercart_checkout_abandoned`
+                          SET restore_token = NULL,
+                              restore_expires = NULL,
                               date_modified = NOW()
                           WHERE abandoned_id = " . (int)$abandoned_id);
     }

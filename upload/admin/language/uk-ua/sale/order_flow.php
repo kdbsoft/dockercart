@@ -26,8 +26,22 @@ $_['text_flow_reward_auto_revoke']   = 'Списувати бали при по�
 $_['text_flow_reward_delay_days']    = 'Затримка нарахування (днів)';
 $_['text_flow_reward_delay_hint']    = 'Нараховувати бали через N днів після завершення замовлення (за замовчуванням 14). 0 = нараховувати одразу. Перевірка виконується планувальником раз на добу.';
 
+$_['text_flow_abandoned_title']          = 'Покинуті кошики';
+$_['text_flow_abandoned_subtitle']       = 'Відстеження кошиків, покинутих на оформленні, нагадування та відновлення кошика покупцем.';
+$_['text_flow_abandoned_enable']         = 'Відстежувати покинуті кошики на оформленні';
+$_['text_flow_abandoned_waves']          = 'Хвилі нагадувань';
+$_['text_flow_abandoned_waves_hint']     = 'Кожна хвиля надсилає один лист через вказану кількість днів. Знижка застосовується як автоматично створений промокод у листі.';
+$_['text_flow_abandoned_wave_days_ph']   = 'Днів';
+$_['text_flow_abandoned_wave_days_suffix'] = 'дн. після';
+$_['text_flow_abandoned_wave_discount_suffix'] = '% знижка';
+$_['text_flow_abandoned_delay_days']     = 'Затримка нагадування (днів)';
+$_['text_flow_abandoned_delay_hint']     = 'Надсилати лист-нагадування через N днів після покинутого кошика (за замовчуванням 1). 0 = не надсилати. Перевірка виконується планувальником раз на добу.';
+$_['text_flow_abandoned_retention_days'] = 'Термін зберігання (днів)';
+$_['text_flow_abandoned_retention_hint'] = 'Видаляти відновлені кошики та кошики без контактного email через N днів (за замовчуванням 90).';
+
 // Buttons
 $_['button_flow_add_step']           = 'Додати крок';
+$_['button_flow_add_wave']           = 'Додати хвилю';
 $_['button_flow_add_transition']     = 'Додати перехід';
 $_['button_flow_move_up']            = 'Вгору';
 $_['button_flow_move_down']          = 'Вниз';
