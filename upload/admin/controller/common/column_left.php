@@ -69,21 +69,10 @@ class ControllerCommonColumnLeft extends Controller {
 			if ($this->user->hasPermission('access', 'catalog/review')) {
 				$sales_children[] = array(
 					'name'	   => $this->language->get('text_review'),
-					'href'     => '',
+					'href'     => $this->url->link('catalog/review', 'user_token=' . $this->session->data['user_token'], true),
 					'icon'	   => 'message-square',
 					'badge'    => $pending_reviews,
-					'children' => array(
-						array(
-							'name'     => $this->language->get('text_review'),
-							'href'     => $this->url->link('catalog/review', 'user_token=' . $this->session->data['user_token'], true),
-							'children' => array()
-						),
-						array(
-							'name'     => $this->language->get('text_review_setting'),
-							'href'     => $this->url->link('catalog/review_setting', 'user_token=' . $this->session->data['user_token'], true),
-							'children' => array()
-						)
-					)
+					'children' => array()
 				);
 			}
 
