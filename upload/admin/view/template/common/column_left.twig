@@ -19,7 +19,7 @@
               <li>{% if children_1.href %}
                   <a href="{{ children_1.href }}" title="{{ children_1.name }}">{% if children_1.icon %}<i data-lucide="{{ children_1.icon }}"></i> {% endif %}{{ children_1.name }}{% if children_1.badge is defined and children_1.badge > 0 %} <span class="badge">{{ children_1.badge }}</span>{% endif %}</a>
                 {% else %}
-                  <a href="#collapse{{ i }}-{{ j }}" data-toggle="collapse" class="parent collapsed" title="{{ children_1.name }}">{% if children_1.icon %}<i data-lucide="{{ children_1.icon }}"></i> {% endif %}{{ children_1.name }} <i data-lucide="chevron-right" class="menu-arrow"></i></a>
+                  <a href="#collapse{{ i }}-{{ j }}" data-toggle="collapse" class="parent collapsed" title="{{ children_1.name }}">{% if children_1.icon %}<i data-lucide="{{ children_1.icon }}"></i> {% endif %}{{ children_1.name }}{% if children_1.badge is defined and children_1.badge > 0 %} <span class="badge">{{ children_1.badge }}</span>{% endif %} <i data-lucide="chevron-right" class="menu-arrow"></i></a>
                 {% endif %}
 
                 {% if children_1.children %}
