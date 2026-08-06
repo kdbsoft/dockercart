@@ -14976,7 +14976,6 @@ INSERT INTO `oc_setting` VALUES
 (22641,0,'theme_dockercart','theme_dockercart_image_cart_height','64',0),
 (22642,0,'theme_dockercart','theme_dockercart_image_location_width','268',0),
 (22643,0,'theme_dockercart','theme_dockercart_image_location_height','50',0),
-(24629,0,'module_dockercart_search','module_dockercart_search_status','1',0),
 (24630,0,'module_dockercart_search','module_dockercart_search_min_chars','3',0),
 (24631,0,'module_dockercart_search','module_dockercart_search_results_limit','20',0),
 (24632,0,'module_dockercart_search','module_dockercart_search_query_mappings','',0),

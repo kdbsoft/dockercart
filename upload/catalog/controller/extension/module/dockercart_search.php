@@ -21,12 +21,6 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
     public function suggest() {
         $json = [];
 
-        if (!$this->config->get('module_dockercart_search_status')) {
-            $this->response->addHeader('Content-Type: application/json');
-            $this->response->setOutput(json_encode($json));
-            return;
-        }
-
         if (!$this->config->get('module_dockercart_search_autocomplete')) {
             $this->response->addHeader('Content-Type: application/json');
             $this->response->setOutput(json_encode($json));
@@ -144,10 +138,6 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
      * This intercepts the model call AFTER standard database search and replaces results
      */
     public function overrideGetProducts(&$route, &$args, &$output) {
-        if (!$this->config->get('module_dockercart_search_status')) {
-            return; // Let standard search work
-        }
-
         // Tag search must always stay on native MySQL logic (product_description.tag).
         // This prevents mismatches between Manticore index and MySQL tags.
         if (isset($this->request->get['tag']) && trim((string)$this->request->get['tag']) !== '') {
@@ -216,10 +206,6 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
      * Add autocomplete and voice search scripts to header (via event)
      */
     public function addAutocompleteScript(&$route, &$args, &$output) {
-        if (!$this->config->get('module_dockercart_search_status')) {
-            return;
-        }
-
         $script = '';
 
         if ($this->config->get('module_dockercart_search_autocomplete')) {
