@@ -48,6 +48,7 @@ $_['entry_option_value'] = 'Option Value Name';
 $_['entry_color']        = 'Color';
 $_['entry_sort_order']   = 'Sort Order';
 $_['entry_status']       = 'Status';
+$_['entry_show_option_price'] = 'Show price next to option values';
 
 // Error
 $_['error_permission']   = 'Warning: You do not have permission to modify options!';
