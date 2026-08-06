@@ -584,7 +584,6 @@ class ControllerProductCategory extends Controller {
 		$data['text_call_for_price'] = $this->language->get('text_call_for_price');
 			$data['text_category_description'] = $this->language->get('text_category_description');
 			$data['text_shop_by'] = $this->language->get('text_shop_by');
-			$data['text_all_products'] = $this->language->get('text_all_products');
 			$data['text_model'] = $this->language->get('text_model');
 			$data['text_quantity'] = $this->language->get('text_quantity');
 			$data['text_view_grid'] = $this->language->get('text_view_grid');

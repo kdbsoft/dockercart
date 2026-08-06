@@ -33,7 +33,6 @@ $_['text_rating_asc'] = 'Рейтинг (самый низкий)';
 $_['text_rating_desc'] = 'Рейтинг (самый высокий)';
 $_['text_refine'] = 'Уточнить поиск';
 $_['text_shop_by'] = 'Выбрать из';
-$_['text_all_products'] = 'Все товары';
 $_['text_reviews_word'] = 'отзывы';
 $_['text_shop_all'] = 'Посмотреть все товары %s →';
 $_['text_sort'] = 'Сортировать по:';
