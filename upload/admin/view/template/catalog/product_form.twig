@@ -1159,6 +1159,14 @@
               </select>
             </div>
             <div class="dcx-sidebar-card__field">
+              <div class="dcx-checkbox-group">
+                <label class="dcx-checkbox-label">
+                  <input type="checkbox" name="discontinued" value="1" id="input-discontinued"{% if discontinued %} checked{% endif %} /> {{ entry_discontinued }}
+                  <span data-toggle="tooltip" title="{{ help_discontinued }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
+                </label>
+              </div>
+            </div>
+            <div class="dcx-sidebar-card__field">
               <label class="dcx-sidebar-card__label" for="input-sort-order">{{ entry_sort_order }}</label>
               <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control"/>
             </div>
@@ -1319,6 +1327,28 @@
               <div id="product-fbt" class="dcx-picker__well" style="height: 150px; overflow: auto;"> {% for product_fbt_item in product_fbt %}
                   <div class="dcx-picker__well-item" data-id="{{ product_fbt_item.product_id }}"><i data-lucide="circle-minus" width="14" height="14" class="dcx-picker__well-remove"></i> <span class="dcx-picker__well-label">{{ product_fbt_item.name }}</span>
                     <input type="hidden" name="product_fbt[]" value="{{ product_fbt_item.product_id }}"/>
+                  </div>
+                {% endfor %}</div>
+            </div>
+            <div class="dcx-sidebar-card__field">
+              <label class="dcx-sidebar-card__label" for="input-similar">{{ entry_similar }} <span data-toggle="tooltip" title="{{ help_similar }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+              <div class="dcx-picker"
+                   data-url="index.php?route=catalog/product/autocomplete&user_token={{ user_token }}"
+                   data-well="#product-similar"
+                   data-input-name="product_similar[]"
+                   data-placeholder="{{ entry_similar }}"
+                   data-id-key="product_id"
+                   data-name-key="name"
+                   data-sub-key="model"
+                   data-min-chars="0"
+                   data-text-type-to-search="{{ text_picker_type_to_search }}"
+                   data-text-no-results="{{ text_picker_no_results }}"
+                   data-text-error="{{ text_picker_error }}">
+                <input type="text" class="dcx-picker__input form-control" placeholder="{{ entry_similar }}" />
+              </div>
+              <div id="product-similar" class="dcx-picker__well" style="height: 150px; overflow: auto;"> {% for product_similar in product_similars %}
+                  <div class="dcx-picker__well-item" data-id="{{ product_similar.product_id }}"><i data-lucide="circle-minus" width="14" height="14" class="dcx-picker__well-remove"></i> <span class="dcx-picker__well-label">{{ product_similar.name }}</span>
+                    <input type="hidden" name="product_similar[]" value="{{ product_similar.product_id }}"/>
                   </div>
                 {% endfor %}</div>
             </div>
@@ -1684,6 +1714,7 @@
     $('#product-upsell').toggle($('#product-upsell .dcx-picker__well-item').length > 0);
     $('#product-accessory').toggle($('#product-accessory .dcx-picker__well-item').length > 0);
     $('#product-fbt').toggle($('#product-fbt .dcx-picker__well-item').length > 0);
+    $('#product-similar').toggle($('#product-similar .dcx-picker__well-item').length > 0);
   });
 
   function dcValidateAxisPrices() {

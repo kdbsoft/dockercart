@@ -41,19 +41,9 @@
     <div class="row">
       <div class="col-md-12 col-sm-12 col-lg-12 col-xl-offset-2 col-xl-8">
         <div class="dcx-shell">
-            <ul class="nav nav-tabs">
-                <li class="active"><a href="#tab-general" data-toggle="tab"><i data-lucide="user" width="14" height="14"></i> {{ tab_general }}</a></li>
-                <li><a href="#tab-affiliate" data-toggle="tab"><i data-lucide="users" width="14" height="14"></i> {{ tab_affiliate }}</a></li>
-                {% if customer_id %}
-                <li><a href="#tab-history" data-toggle="tab"><i data-lucide="clock" width="14" height="14"></i> {{ tab_history }}</a></li>
-                <li><a href="#tab-transaction" data-toggle="tab"><i data-lucide="arrow-left-right" width="14" height="14"></i> {{ tab_transaction }}</a></li>
-                <li><a href="#tab-reward" data-toggle="tab"><i data-lucide="trophy" width="14" height="14"></i> {{ tab_reward }}</a></li>
-                <li><a href="#tab-ip" data-toggle="tab"><i data-lucide="shield" width="14" height="14"></i> {{ tab_ip }}</a></li>
-                {% endif %}
-            </ul>
           <div class="dcx-panel-body" style="padding-top:16px;">
-                {# ── GENERAL TAB ── #}
-                <div class="tab-pane active" id="tab-general">
+                {# ── GENERAL ── #}
+                <div id="tab-general">
                   <div class="dcx-panel" style="margin-bottom:16px;">
                     <div class="dcx-panel-head">
                       <div class="dcx-panel-head__icon"><i data-lucide="user" width="18" height="18"></i></div>
@@ -491,8 +481,8 @@
                             </div>
                           </div>
                         </div>
-                        {# ── AFFILIATE TAB ── #}
-                <div class="tab-pane" id="tab-affiliate">
+                        {# ── AFFILIATE ── #}
+                <div id="tab-affiliate">
                   <div class="dcx-panel" style="margin-bottom:16px;">
                     <div class="dcx-panel-head">
                       <div class="dcx-panel-head__icon"><i data-lucide="users" width="18" height="18"></i></div>
@@ -707,9 +697,15 @@
                     </div>
                   </div>
                 </div>
-                {# ── HISTORY TAB ── #}
+                {# ── HISTORY / TRANSACTION / REWARD / IP TABS ── #}
                 {% if customer_id %}
-                <div class="tab-pane" id="tab-history">
+                <ul class="dcx-pills" style="margin-top:4px;">
+                  <li class="active"><a href="#tab-history" data-toggle="tab"><i data-lucide="clock" width="14" height="14"></i> {{ tab_history }}</a></li>
+                  <li><a href="#tab-transaction" data-toggle="tab"><i data-lucide="arrow-left-right" width="14" height="14"></i> {{ tab_transaction }}</a></li>
+                  <li><a href="#tab-reward" data-toggle="tab"><i data-lucide="trophy" width="14" height="14"></i> {{ tab_reward }}</a></li>
+                  <li><a href="#tab-ip" data-toggle="tab"><i data-lucide="shield" width="14" height="14"></i> {{ tab_ip }}</a></li>
+                </ul>
+                <div class="tab-pane active" id="tab-history">
                   <div class="dcx-panel" style="margin-bottom:16px;">
                     <div class="dcx-panel-head">
                       <div class="dcx-panel-head__icon"><i data-lucide="clock" width="18" height="18"></i></div>

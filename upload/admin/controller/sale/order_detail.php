@@ -2,6 +2,8 @@
 declare(strict_types=1);
 
 class ControllerSaleOrderDetail extends Controller {
+	private const INVOICE_RENDER_VERSION = 'qr-v3';
+
 	private array $error = [];
 	private ?OrderLocalizer $order_localizer = null;
 
@@ -393,15 +395,27 @@ class ControllerSaleOrderDetail extends Controller {
 		$document = $this->model_sale_order->getOrderDocument($order_id);
 		$document_path = $document ? DIR_STORAGE . 'documents/invoices/' . basename($document['storage_key']) : '';
 
-		if ($document && is_file($document_path)) {
+		if ($document && !empty($document['public_token']) && ($document['render_version'] ?? '') === self::INVOICE_RENDER_VERSION && is_file($document_path)) {
 			$this->sendStoredPdf($document_path, 'invoice-' . $order_id . '.pdf');
 			return;
 		}
 
 		$previous_language = $this->switchToInvoiceLanguage();
 
+		$token_created = false;
+
 		try {
-			$invoice_data = $this->buildInvoiceData($order_id);
+			$order_info = $this->model_sale_order->getOrder($order_id);
+			$invoice_no = $order_info['invoice_no'] ? $order_info['invoice_prefix'] . $order_info['invoice_no'] : '';
+			$reservation = $this->model_sale_order->ensureInvoiceDocument($order_id, $invoice_no);
+			$document = $reservation['document'];
+			$token_created = (bool)$reservation['token_created'];
+
+			if (empty($document['order_document_id']) || empty($document['storage_key']) || empty($document['public_token'])) {
+				throw new \RuntimeException('Unable to reserve public invoice document.');
+			}
+
+			$invoice_data = $this->buildInvoiceData($order_id, $document);
 			$pdf = $this->renderPdf($this->load->view('sale/order_invoice', [
 				'orders'        => [$invoice_data],
 				'text_tax_type' => $invoice_data['text_tax_type'] ?? [],
@@ -412,22 +426,20 @@ class ControllerSaleOrderDetail extends Controller {
 				mkdir($directory, 0775, true);
 			}
 
-			$storage_key = bin2hex(random_bytes(24)) . '.pdf';
+			$storage_key = basename((string)$document['storage_key']);
 			$path = $directory . $storage_key;
 			if (file_put_contents($path, $pdf, LOCK_EX) === false) {
 				throw new \RuntimeException('Unable to save invoice PDF.');
 			}
 
-			$this->model_sale_order->addOrderDocument(
-				$order_id,
-				'invoice',
-				$storage_key,
-				(string)$invoice_data['invoice_no']
-			);
+			$this->model_sale_order->markInvoiceDocumentRendered((int)$document['order_document_id'], self::INVOICE_RENDER_VERSION);
+			$this->sendStoredPdf($path, 'invoice-' . $order_id . '.pdf');
+		} catch (\Throwable $exception) {
+			if ($token_created && !empty($document['order_document_id']) && !empty($document['public_token'])) {
+				$this->model_sale_order->clearInvoiceDocumentToken((int)$document['order_document_id'], (string)$document['public_token']);
+			}
 
-			$document = $this->model_sale_order->getOrderDocument($order_id);
-			$stored_path = $document ? $directory . basename($document['storage_key']) : $path;
-			$this->sendStoredPdf($stored_path, 'invoice-' . $order_id . '.pdf');
+			throw $exception;
 		} finally {
 			$this->restoreLanguage($previous_language);
 		}
@@ -544,7 +556,7 @@ class ControllerSaleOrderDetail extends Controller {
 		return $data;
 	}
 
-	private function buildInvoiceData(int $order_id): array {
+	private function buildInvoiceData(int $order_id, array $document): array {
 		$order_info = $this->model_sale_order->getOrder($order_id);
 
 		$invoice_no = $order_info['invoice_no'] ? $order_info['invoice_prefix'] . $order_info['invoice_no'] : '';
@@ -562,6 +574,8 @@ class ControllerSaleOrderDetail extends Controller {
 		$data['store_url'] = $order_info['store_id'] == 0
 			? ($this->request->server['HTTPS'] ? HTTPS_CATALOG : HTTP_CATALOG)
 			: $order_info['store_url'];
+		$data['public_invoice_url'] = rtrim((string)$data['store_url'], '/') . '/index.php?route=account/order/public_invoice&token=' . rawurlencode((string)($document['public_token'] ?? ''));
+		$data['invoice_qr_code'] = (new InvoiceQrCode())->generate($data['public_invoice_url']);
 
 		$seller_name = $this->config->get('config_seller_name');
 		if (!$seller_name) {
