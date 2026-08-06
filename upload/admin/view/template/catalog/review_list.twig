@@ -9,6 +9,7 @@
             <a href="{{ add }}" class="btn btn-primary"><i data-lucide="plus" width="16" height="16"></i> {{ button_add }}</a>
             <button type="submit" form="form-review" formaction="{{ copy }}" class="btn btn-default dc-btn-selection"><i data-lucide="copy" width="16" height="16"></i> {{ button_copy }}</button>
             <button type="button" class="btn btn-danger dc-btn-selection" onclick="confirm('{{ text_confirm }}') ? $('#form-review').submit() : false;"><i data-lucide="trash-2" width="16" height="16"></i> {{ button_delete }}</button>
+            <a href="{{ review_settings }}" class="btn btn-default"><i data-lucide="settings" width="16" height="16"></i> {{ text_review_setting }}</a>
           </div>
           <h1 class="page-header__title">{{ heading_title }}</h1>
         </div>

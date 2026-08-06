@@ -70,6 +70,7 @@ $_['error_text']        = 'Review Text must be at least 1 character!';
 $_['error_rating']      = 'Review rating required!';
 $_['error_invalid_date'] = 'Invalid date format!';
 // Expandable rows
+$_['text_review_setting'] = 'Review Settings';
 $_['text_expand']         = 'Expand';
 $_['text_loading']        = 'Loading...';
 $_['text_loading_error'] = 'Failed to load';
