@@ -486,17 +486,17 @@ class ControllerCommonColumnLeft extends Controller {
 					'children' => array()
 				);
 			}
-			// Order flow (moved out of References -> Orders into System -> Settings)
-			if ($this->user->hasPermission('access', 'sale/order')) {
-				$system[] = array(
-					'name'	   => $this->language->get('text_order_flow'),
-					'href'     => $this->url->link('sale/order_flow', 'user_token=' . $this->session->data['user_token'], true),
-					'icon'	   => 'workflow',
-					'children' => array()
-				);
-			}
+		// Order flow (moved out of References -> Orders into System -> Settings)
+		if ($this->user->hasPermission('access', 'sale/order')) {
+			$system[] = array(
+				'name'	   => $this->language->get('text_order_flow'),
+				'href'     => $this->url->link('sale/order_flow', 'user_token=' . $this->session->data['user_token'], true),
+				'icon'	   => 'workflow',
+				'children' => array()
+			);
+		}
 
-			// Users
+		// Users
 			$user = array();
 
 			if ($this->user->hasPermission('access', 'user/user')) {

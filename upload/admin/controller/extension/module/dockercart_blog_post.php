@@ -514,7 +514,7 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 		}
 
 		// Set placeholder for image
-		$data['placeholder'] = $this->model_tool_image->resize('placeholder.png', 200, 200);
+		$data['placeholder'] = $this->model_tool_image->resize('placeholder.png', 140, 140);
 
 		// Load error messages for form fields
 		if (isset($this->error['category'])) {
@@ -543,9 +543,9 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 
 		// Get image thumbnail if exists
 		if ($data['image']) {
-			$data['thumb'] = $this->model_tool_image->resize($data['image'], 200, 200);
+			$data['thumb'] = $this->model_tool_image->resize($data['image'], 140, 140);
 		} else {
-			$data['thumb'] = $this->model_tool_image->resize('placeholder.png', 200, 200);
+			$data['thumb'] = $this->model_tool_image->resize('placeholder.png', 140, 140);
 		}
 
 		// Background image
