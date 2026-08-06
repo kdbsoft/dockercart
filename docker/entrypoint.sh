@@ -400,6 +400,22 @@ SQL
     echo "DockerCart bootstrap finished."
 }
 
+# Гарантирует наличие config_encryption (пустой ключ ломает шифрование сессий/паролей)
+ensure_encryption_key() {
+    local db_host="${DB_HOSTNAME:-mariadb}"
+    local db_user="${DB_USERNAME:-dockercart}"
+    local db_pass="${DB_PASSWORD:-dockercart_password}"
+    local db_name="${DB_DATABASE:-dockercart}"
+    local db_prefix="${DB_PREFIX:-oc_}"
+
+    MYSQL_PWD="${db_pass}" mysql -h"${db_host}" -u"${db_user}" --skip-ssl "${db_name}" <<SQL
+SET NAMES utf8mb4;
+UPDATE \`${db_prefix}setting\` SET \`value\` = REPLACE(UUID(), '-', '')
+WHERE \`key\` = 'config_encryption' AND store_id = 0
+  AND (\`value\` IS NULL OR \`value\` = '');
+SQL
+}
+
 # Всегда синхронизирует config_url/config_ssl из DOCKERCART_URL с БД
 ensure_store_url() {
     local db_host="${DB_HOSTNAME:-mariadb}"
@@ -593,6 +609,8 @@ wait_for_mysql
 initialize_database || echo "WARNING: Database initialization failed — continuing anyway"
 
 apply_php_settings
+
+ensure_encryption_key
 
 ensure_store_url
 

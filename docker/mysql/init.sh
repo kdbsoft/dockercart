@@ -88,3 +88,9 @@ if [ -n "${PRODUCT_TABLE_EXISTS}" ]; then
 fi
 
 echo "[dockercart-init] Bootstrap finished."
+
+# Гарантируем config_encryption (на случай, если bootstrap был пропущен)
+MYSQL_PWD="${DB_PASSWORD}" mariadb -u"${DB_USER}" "${DB_NAME}" -e "
+UPDATE \`${DB_PREFIX}setting\` SET \`value\` = REPLACE(UUID(), '-', '')
+WHERE \`key\` = 'config_encryption' AND store_id = 0
+  AND (\`value\` IS NULL OR \`value\` = '');" || true
