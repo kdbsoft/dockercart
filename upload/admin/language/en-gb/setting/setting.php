@@ -211,6 +211,7 @@ $_['help_maintenance']               = 'Prevents customers from browsing your st
 $_['help_password']                  = 'Allow forgotten password to be used for the admin. This will be disabled automatically if the system detects a hack attempt.';
 $_['help_encryption']                = 'Please provide a secret key that will be used to encrypt private information when processing orders.';
 $_['help_compression']               = 'GZIP for more efficient transfer to requesting clients. Compression level must be between 0 - 9.';
+$_['help_invoice_logo']              = 'Leave empty to use the store logo. Upload a custom image to use a different logo on invoices.';
 
 // Error
 $_['error_warning']                  = 'Warning: Please check the form carefully for errors!';
@@ -233,3 +234,27 @@ $_['error_log_invalid']              = 'Error Log Filename invalid!';
 $_['error_log_extension']            = 'Error Log Filename extension needs to be .log!';
 $_['error_encryption']               = 'Encryption Key must be between 32 and 1024 characters!';
 $_['error_stock_reserve_minutes']    = 'Reserve duration must be 0 or a positive number of minutes!';
+
+// Tab
+$_['tab_invoice']                   = 'Invoice & Organization';
+
+// Invoice sections
+$_['text_invoice']                  = 'Invoice';
+$_['text_invoice_seller']           = 'Seller';
+$_['text_invoice_tax']              = 'Tax Numbers';
+$_['text_invoice_bank']             = 'Bank Details';
+$_['text_invoice_logo']             = 'Invoice Logo';
+
+// Entry
+$_['entry_invoice_prefix']          = 'Invoice Prefix';
+$_['entry_seller_name']             = 'Seller Name';
+$_['entry_seller_address']          = 'Seller Address';
+$_['entry_seller_email']            = 'Seller Email';
+$_['entry_seller_telephone']        = 'Seller Telephone';
+$_['entry_seller_tax_number_type']  = 'Tax Type';
+$_['entry_seller_tax_number_value'] = 'Tax Number';
+$_['entry_seller_add_tax']          = 'Add Tax Number';
+$_['entry_seller_bank_name']        = 'Bank Name';
+$_['entry_seller_bank_account']     = 'Bank Account (IBAN)';
+$_['entry_seller_bank_swift']       = 'SWIFT / BIC';
+$_['entry_seller_invoice_logo']     = 'Invoice Logo';

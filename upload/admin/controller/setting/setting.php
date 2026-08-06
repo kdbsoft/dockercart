@@ -1056,6 +1056,98 @@ class ControllerSettingSetting extends Controller {
 			$data['config_error_filename'] = $this->config->get('config_error_filename');
 		}
 
+		// Invoice & Organization tab data
+		if (isset($this->request->post['config_invoice_prefix'])) {
+			$data['config_invoice_prefix'] = $this->request->post['config_invoice_prefix'];
+		} else {
+			$data['config_invoice_prefix'] = $this->config->get('config_invoice_prefix');
+		}
+
+		if (isset($this->request->post['config_seller_name_i18n'])) {
+			$data['config_seller_name_i18n'] = $this->request->post['config_seller_name_i18n'];
+		} elseif ($this->config->get('config_seller_name_i18n')) {
+			$data['config_seller_name_i18n'] = $this->config->get('config_seller_name_i18n');
+		} else {
+			$data['config_seller_name_i18n'] = [];
+		}
+
+		if (isset($this->request->post['config_seller_address_i18n'])) {
+			$data['config_seller_address_i18n'] = $this->request->post['config_seller_address_i18n'];
+		} elseif ($this->config->get('config_seller_address_i18n')) {
+			$data['config_seller_address_i18n'] = $this->config->get('config_seller_address_i18n');
+		} else {
+			$data['config_seller_address_i18n'] = [];
+		}
+
+		if (isset($this->request->post['config_seller_name'])) {
+			$data['config_seller_name'] = $this->request->post['config_seller_name'];
+		} else {
+			$data['config_seller_name'] = $this->config->get('config_seller_name');
+		}
+
+		if (isset($this->request->post['config_seller_address'])) {
+			$data['config_seller_address'] = $this->request->post['config_seller_address'];
+		} else {
+			$data['config_seller_address'] = $this->config->get('config_seller_address');
+		}
+
+		if (isset($this->request->post['config_seller_email'])) {
+			$data['config_seller_email'] = $this->request->post['config_seller_email'];
+		} else {
+			$data['config_seller_email'] = $this->config->get('config_seller_email');
+		}
+
+		if (isset($this->request->post['config_seller_telephone'])) {
+			$data['config_seller_telephone'] = $this->request->post['config_seller_telephone'];
+		} else {
+			$data['config_seller_telephone'] = $this->config->get('config_seller_telephone');
+		}
+
+		if (isset($this->request->post['config_seller_tax_numbers'])) {
+			$data['config_seller_tax_numbers'] = $this->request->post['config_seller_tax_numbers'];
+		} elseif ($this->config->get('config_seller_tax_numbers')) {
+			$data['config_seller_tax_numbers'] = $this->config->get('config_seller_tax_numbers');
+		} else {
+			$data['config_seller_tax_numbers'] = [];
+		}
+
+		if (isset($this->request->post['config_seller_bank_name'])) {
+			$data['config_seller_bank_name'] = $this->request->post['config_seller_bank_name'];
+		} else {
+			$data['config_seller_bank_name'] = $this->config->get('config_seller_bank_name');
+		}
+
+		if (isset($this->request->post['config_seller_bank_account'])) {
+			$data['config_seller_bank_account'] = $this->request->post['config_seller_bank_account'];
+		} else {
+			$data['config_seller_bank_account'] = $this->config->get('config_seller_bank_account');
+		}
+
+		if (isset($this->request->post['config_seller_bank_swift'])) {
+			$data['config_seller_bank_swift'] = $this->request->post['config_seller_bank_swift'];
+		} else {
+			$data['config_seller_bank_swift'] = $this->config->get('config_seller_bank_swift');
+		}
+
+		if (isset($this->request->post['config_seller_invoice_logo'])) {
+			$data['config_seller_invoice_logo'] = $this->request->post['config_seller_invoice_logo'];
+		} else {
+			$data['config_seller_invoice_logo'] = $this->config->get('config_seller_invoice_logo');
+		}
+
+		$data['seller_invoice_logo_thumb'] = '';
+		if (!empty($data['config_seller_invoice_logo']) && is_file(DIR_IMAGE . $data['config_seller_invoice_logo'])) {
+			$data['seller_invoice_logo_thumb'] = $this->model_tool_image->resize($data['config_seller_invoice_logo'], 100, 100);
+		} elseif (!empty($this->config->get('config_logo')) && is_file(DIR_IMAGE . $this->config->get('config_logo'))) {
+			$data['seller_invoice_logo_thumb'] = $this->model_tool_image->resize($this->config->get('config_logo'), 100, 100);
+		}
+
+		if (empty($data['seller_invoice_logo_thumb'])) {
+			$data['seller_invoice_logo_thumb'] = $this->model_tool_image->resize('no_image.png', 100, 100);
+		}
+
+		$data['placeholder'] = $this->model_tool_image->resize('no_image.png', 100, 100);
+
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');

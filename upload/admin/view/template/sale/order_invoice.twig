@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>{% if orders|length > 1 %}{{ text_invoice }}{% else %}{{ text_invoice }} — {{ orders[0].invoice_no ?: orders[0].order_id }}{% endif %}</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'DejaVu Sans',sans-serif; font-size:12px; color:#333; line-height:1.5; }
+    .invoice { padding:32px 36px; }
+    table { width:100%; border-collapse:collapse; }
+    .invoice-header { margin-bottom:24px; }
+    .invoice-header td { vertical-align:top; }
+    .invoice-title { font-size:28px; font-weight:700; color:#2563eb; text-transform:uppercase; letter-spacing:1px; }
+    .invoice-meta { text-align:right; font-size:12px; }
+    .invoice-meta p + p { margin-top:2px; }
+    .invoice-meta .invoice-no { font-size:14px; font-weight:600; margin-top:4px; }
+    .seller-block { margin-bottom:24px; }
+    .seller-block h3 { font-size:11px; text-transform:uppercase; color:#2563eb; letter-spacing:0.5px; margin-bottom:4px; }
+    .seller-block p { font-size:11px; color:#555; }
+    .addresses { margin-bottom:24px; }
+    .addresses td { vertical-align:top; padding-right:20px; }
+    .addresses h3 { font-size:11px; text-transform:uppercase; color:#2563eb; letter-spacing:0.5px; margin-bottom:5px; }
+    .addresses p { font-size:12px; }
+    .addresses p + p { margin-top:3px; }
+    .invoice-products { margin-bottom:24px; }
+    .invoice-products th { background:#f5f5f5; font-weight:600; font-size:11px; text-transform:uppercase; padding:8px 10px; text-align:left; border-bottom:2px solid #ddd; }
+    .invoice-products td { padding:7px 10px; border-bottom:1px solid #eee; font-size:12px; vertical-align:top; }
+    .invoice-products .option-line { color:#666; font-size:11px; margin-top:2px; }
+    .text-right { text-align:right; }
+    .text-center { text-align:center; }
+    .invoice-totals { width:280px; margin-left:auto; }
+    .invoice-totals td { padding:4px 10px; font-size:12px; }
+    .invoice-totals .grand-total td { font-weight:700; font-size:14px; border-top:2px solid #333; padding-top:8px; }
+    .balance-due { margin-top:16px; background:#f0f7ff; border:1px solid #bfdbfe; border-radius:4px; padding:12px 16px; }
+    .balance-due-label { font-size:11px; text-transform:uppercase; color:#2563eb; letter-spacing:0.5px; }
+    .balance-due-amount { font-size:18px; font-weight:700; color:#1e40af; margin-top:2px; }
+    .invoice-payments { margin-top:24px; }
+    .invoice-payments h3 { font-size:11px; text-transform:uppercase; color:#2563eb; letter-spacing:0.5px; margin-bottom:6px; }
+    .payment-table th { font-size:10px; text-transform:uppercase; color:#888; padding:4px 10px; text-align:left; border-bottom:1px solid #ddd; }
+    .payment-table td { padding:4px 10px; font-size:11px; border-bottom:1px solid #f0f0f0; }
+    .invoice-comment { margin-top:16px; }
+    .invoice-comment h3 { font-size:11px; text-transform:uppercase; color:#2563eb; letter-spacing:0.5px; margin-bottom:5px; }
+    .invoice-comment p { font-size:12px; color:#555; }
+    .invoice-footer { text-align:center; color:#999; font-size:11px; margin-top:40px; border-top:1px solid #eee; padding-top:14px; }
+    .logo-img { max-height:48px; margin-bottom:8px; }
+  </style>
+</head>
+<body>
+  {% for order in orders %}
+  <div class="invoice"{% if not loop.last %} style="page-break-after: always;"{% endif %}>
+    <table class="invoice-header">
+      <tr>
+        <td>
+          {% if order.seller_logo %}
+          <img src="{{ order.seller_logo }}" class="logo-img" alt="">
+          {% endif %}
+          <div class="invoice-title">{{ text_invoice }}</div>
+        </td>
+        <td class="invoice-meta">
+          <p>{{ order.store_name }}</p>
+          <p>{{ order.store_url }}</p>
+          <p class="invoice-no">{{ order.invoice_no }}</p>
+          <p><strong>{{ text_date_added }}:</strong> {{ order.date_added }}</p>
+        </td>
+      </tr>
+    </table>
+
+    <table class="seller-block">
+      <tr>
+        <td>
+          <h3>{{ text_seller }}</h3>
+          <p><strong>{{ order.seller_name }}</strong></p>
+          <p>{{ order.seller_address }}</p>
+          {% if order.seller_telephone %}<p>{{ order.seller_telephone }}</p>{% endif %}
+          {% if order.seller_email %}<p>{{ order.seller_email }}</p>{% endif %}
+          {% for tax in order.seller_tax_numbers %}<p>{{ tax.type }}: {{ tax.value }}</p>{% endfor %}
+          {% if order.seller_bank_name %}<p>{{ text_bank_name }}: {{ order.seller_bank_name }}</p>{% endif %}
+          {% if order.seller_bank_account %}<p>{{ text_bank_account }}: {{ order.seller_bank_account }}</p>{% endif %}
+          {% if order.seller_bank_swift %}<p>{{ text_bank_swift }}: {{ order.seller_bank_swift }}</p>{% endif %}
+        </td>
+      </tr>
+    </table>
+
+    <table class="addresses">
+      <tr>
+        <td>
+          <h3>{{ text_bill_to }}</h3>
+          <p><strong>{{ order.firstname }} {{ order.lastname }}</strong></p>
+          <p>{{ order.payment_address|raw }}</p>
+          <p>{{ order.email }}<br>{{ order.telephone }}</p>
+        </td>
+        {% if order.shipping_method %}
+        <td>
+          <h3>{{ text_ship_to }}</h3>
+          <p>{{ order.shipping_address|raw }}</p>
+          <p><strong>{{ text_payment_method }}:</strong> {{ order.payment_method }}</p>
+          <p><strong>{{ text_shipping_method }}:</strong> {{ order.shipping_method }}</p>
+        </td>
+        {% endif %}
+      </tr>
+      {% if order.tracking_number %}
+      <tr>
+        <td colspan="2">
+          <h3>{{ text_tracking_number }}</h3>
+          <p>{{ order.tracking_number|replace({'|': ' | '}) }}</p>
+        </td>
+      </tr>
+      {% endif %}
+    </table>
+
+    <table class="invoice-products">
+      <thead>
+        <tr>
+          <th>{{ column_product }}</th>
+          <th>{{ column_model }}</th>
+          <th class="text-right">{{ column_quantity }}</th>
+          <th class="text-right">{{ column_price }}</th>
+          <th class="text-right">{{ column_total }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for product in order.products %}
+        <tr>
+          <td>{{ product.name }}{% if product.option %}<div class="option-line">{{ product.option }}</div>{% endif %}</td>
+          <td>{{ product.model }}</td>
+          <td class="text-right">{{ product.quantity }}</td>
+          <td class="text-right">{{ product.price }}</td>
+          <td class="text-right">{{ product.total }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <table class="invoice-totals">
+      {% for total in order.totals %}
+      <tr{% if loop.last %} class="grand-total"{% endif %}>
+        <td>{{ total.title }}</td>
+        <td class="text-right">{{ total.text }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    <div class="balance-due">
+      <div class="balance-due-label">{{ text_balance_due }}</div>
+      <div class="balance-due-amount">{{ order.balance_due }}</div>
+    </div>
+
+    {% if order.payments %}
+    <div class="invoice-payments">
+      <h3>{{ text_payment_history }}</h3>
+      <table class="payment-table">
+        <thead>
+          <tr>
+            <th>{{ text_date_added }}</th>
+            <th>{{ text_payment_method }}</th>
+            <th class="text-right">{{ column_total }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for payment in order.payments %}
+          <tr>
+            <td>{{ payment.date }}</td>
+            <td>{{ payment.method }}{% if payment.comment %}<br><span style="color:#888;font-size:10px">{{ payment.comment }}</span>{% endif %}</td>
+            <td class="text-right">{{ payment.amount }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    {% if order.comment %}
+    <div class="invoice-comment">
+      <h3>{{ text_comment }}</h3>
+      <p>{{ order.comment|nl2br }}</p>
+    </div>
+    {% endif %}
+  </div>
+  {% endfor %}
+
+  <div class="invoice-footer">
+    <p>{{ text_print_date }}: {{ "now"|date("Y-m-d H:i:s") }}</p>
+  </div>
+</body>
+</html>
