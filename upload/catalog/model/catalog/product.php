@@ -141,6 +141,7 @@ class ModelCatalogProduct extends Model {
 				'date_modified'    => $query->row['date_modified'],
 				'viewed'           => $query->row['viewed'],
 				'has_gift'         => !empty($query->row['has_gift']),
+				'discontinued'     => !empty($query->row['discontinued']),
 				'call_for_price'   => !empty($query->row['call_for_price'])
 			);
 
@@ -729,6 +730,49 @@ class ModelCatalogProduct extends Model {
 
 		foreach ($query->rows as $result) {
 			$product_data[$result['fbt_id']] = $this->getProduct($result['fbt_id']);
+		}
+
+		return $product_data;
+	}
+
+	public function getProductSimilar($product_id) {
+		$product_data = array();
+
+		// Manually assigned similar products
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_similar ps LEFT JOIN " . DB_PREFIX . "product p ON (ps.similar_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE ps.product_id = '" . (int)$product_id . "' AND ps.similar_id <> '" . (int)$product_id . "' AND p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "' ORDER BY ps.similar_id ASC");
+
+		foreach ($query->rows as $result) {
+			$product_data[$result['similar_id']] = $this->getProduct($result['similar_id']);
+		}
+
+		// Top up with in-stock products from the same categories when not enough similar ones
+		$limit = 12;
+
+		if (count($product_data) < $limit) {
+			$exclude_ids = array_merge(array_keys($product_data), array((int)$product_id));
+
+			$sql = "SELECT DISTINCT p.product_id FROM " . DB_PREFIX . "product p LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) LEFT JOIN " . DB_PREFIX . "product_to_category p2c ON (p.product_id = p2c.product_id) WHERE p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "' AND (p.quantity > 0 OR p.preorder = '1') AND p2c.category_id IN (SELECT category_id FROM " . DB_PREFIX . "product_to_category WHERE product_id = '" . (int)$product_id . "')";
+
+			if ($exclude_ids) {
+				$sql .= " AND p.product_id NOT IN (" . implode(',', $exclude_ids) . ")";
+			}
+
+			$sql .= " ORDER BY p.viewed DESC LIMIT " . ($limit - count($product_data));
+
+			$query = $this->db->query($sql);
+
+			foreach ($query->rows as $result) {
+				if (count($product_data) >= $limit) {
+					break;
+				}
+
+				$product_info = $this->getProduct($result['product_id']);
+
+				// Only in-stock (or pre-order) products make good substitutes
+				if ($product_info && ((float)$product_info['quantity'] > 0 || !empty($product_info['preorder']))) {
+					$product_data[$result['product_id']] = $product_info;
+				}
+			}
 		}
 
 		return $product_data;

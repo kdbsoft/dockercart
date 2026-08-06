@@ -26,6 +26,29 @@ class ControllerAccountOrder extends Controller {
 			return;
 		}
 
+		$this->sendInvoiceDocument($document, $order_id);
+	}
+
+	public function public_invoice(): void {
+		$token = strtolower(trim((string)($this->request->get['token'] ?? '')));
+
+		if (!preg_match('/^[a-f0-9]{64}$/', $token)) {
+			$this->response->redirect($this->url->link('error/not_found', '', true));
+			return;
+		}
+
+		$this->load->model('account/order');
+		$document = $this->model_account_order->getPublicInvoiceDocument($token);
+
+		if (!$document) {
+			$this->response->redirect($this->url->link('error/not_found', '', true));
+			return;
+		}
+
+		$this->sendInvoiceDocument($document, (int)$document['order_id']);
+	}
+
+	private function sendInvoiceDocument(array $document, int $order_id): void {
 		$storage_key = basename((string)$document['storage_key']);
 		$path = DIR_STORAGE . 'documents/invoices/' . $storage_key;
 
@@ -47,6 +70,7 @@ class ControllerAccountOrder extends Controller {
 		$this->response->addHeader('Content-Type: application/pdf');
 		$this->response->addHeader('Content-Length: ' . strlen($pdf));
 		$this->response->addHeader('Content-Disposition: inline; filename="invoice-' . $order_id . '.pdf"');
+		$this->response->addHeader('X-Robots-Tag: noindex, nofollow');
 		$this->response->setOutput($pdf);
 	}
 

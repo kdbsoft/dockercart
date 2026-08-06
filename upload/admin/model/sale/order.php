@@ -6,6 +6,42 @@ class ModelSaleOrder extends Model {
 		return $query->num_rows ? $query->row : [];
 	}
 
+	public function ensureInvoiceDocument(int $order_id, string $invoice_no): array {
+		$document = $this->getOrderDocument($order_id);
+		$token_created = false;
+
+		if ($document && !empty($document['public_token'])) {
+			return [
+				'document'      => $document,
+				'token_created' => false,
+			];
+		}
+
+		$public_token = bin2hex(random_bytes(32));
+
+		if ($document) {
+			$this->db->query("UPDATE `" . DB_PREFIX . "order_document` SET public_token = '" . $this->db->escape($public_token) . "', invoice_no = '" . $this->db->escape($invoice_no) . "' WHERE order_document_id = '" . (int)$document['order_document_id'] . "' AND (public_token IS NULL OR public_token = '')");
+			$token_created = (bool)$this->db->countAffected();
+		} else {
+			$storage_key = bin2hex(random_bytes(24)) . '.pdf';
+			$this->db->query("INSERT IGNORE INTO `" . DB_PREFIX . "order_document` SET order_id = '" . (int)$order_id . "', document_type = 'invoice', storage_key = '" . $this->db->escape($storage_key) . "', invoice_no = '" . $this->db->escape($invoice_no) . "', public_token = '" . $this->db->escape($public_token) . "', date_added = NOW()");
+			$token_created = (bool)$this->db->countAffected();
+		}
+
+		return [
+			'document'      => $this->getOrderDocument($order_id),
+			'token_created' => $token_created,
+		];
+	}
+
+	public function clearInvoiceDocumentToken(int $order_document_id, string $public_token): void {
+		$this->db->query("UPDATE `" . DB_PREFIX . "order_document` SET public_token = NULL, render_version = NULL WHERE order_document_id = '" . (int)$order_document_id . "' AND document_type = 'invoice' AND public_token = '" . $this->db->escape($public_token) . "'");
+	}
+
+	public function markInvoiceDocumentRendered(int $order_document_id, string $render_version): void {
+		$this->db->query("UPDATE `" . DB_PREFIX . "order_document` SET render_version = '" . $this->db->escape($render_version) . "' WHERE order_document_id = '" . (int)$order_document_id . "' AND document_type = 'invoice'");
+	}
+
 	public function addOrderDocument(int $order_id, string $document_type, string $storage_key, string $invoice_no = ''): bool {
 		$this->db->query("INSERT IGNORE INTO `" . DB_PREFIX . "order_document` SET order_id = '" . (int)$order_id . "', document_type = '" . $this->db->escape($document_type) . "', storage_key = '" . $this->db->escape($storage_key) . "', invoice_no = '" . $this->db->escape($invoice_no) . "', date_added = NOW()");
 

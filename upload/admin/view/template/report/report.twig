@@ -23,7 +23,7 @@
         <div class="dcx-panel-body">
           <ul class="dcx-pills dcx-pills--reports">
             {% for report in reports %}
-            <li{% if code == report.code %} class="active"{% endif %}><a href="{{ report.href }}"><i data-lucide="{{ report.icon }}" width="14" height="14"></i>{{ report.text }}</a></li>
+            <li{% if code == report.code or (not code and loop.first) %} class="active"{% endif %}><a href="{{ report.href }}"><i data-lucide="{{ report.icon }}" width="14" height="14"></i>{{ report.text }}</a></li>
             {% endfor %}
           </ul>
           <div>{{ report }}</div>

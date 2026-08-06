@@ -6,6 +6,12 @@ class ModelAccountOrder extends Model {
 		return $query->num_rows ? $query->row : [];
 	}
 
+	public function getPublicInvoiceDocument(string $public_token): array {
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "order_document` WHERE document_type = 'invoice' AND public_token = '" . $this->db->escape($public_token) . "' LIMIT 1");
+
+		return $query->num_rows ? $query->row : [];
+	}
+
 	public function getOrder($order_id) {
 		$order_query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "order` WHERE order_id = '" . (int)$order_id . "' AND customer_id = '" . (int)$this->customer->getId() . "' AND customer_id != '0' AND order_status_id > '0'");
 
