@@ -1,7 +1,7 @@
 <?php
 
 $_['column_action'] = 'Действие';
-$_['column_date_added'] = 'Дата добавления';
+$_['column_date_added'] = 'Дата создания';
 $_['column_date_modified'] = 'Дата изменения';
 $_['column_geo_zone'] = 'Геозона';
 $_['column_name'] = 'Налоговое наименование';

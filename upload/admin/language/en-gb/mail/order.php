@@ -2,7 +2,7 @@
 // Text
 $_['text_subject']           = '%s - Order Update %s';
 $_['text_order_id']          = 'Order ID:';
-$_['text_date_added']        = 'Date Added:';
+$_['text_date_added']        = 'Date Created:';
 $_['text_order_status']      = 'Your order has been updated to the following status:';
 $_['text_tracking_number']   = 'Tracking number:';
 $_['text_comment']           = 'The comments for your order are:';

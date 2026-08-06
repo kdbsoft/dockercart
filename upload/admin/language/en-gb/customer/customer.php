@@ -56,7 +56,7 @@ $_['column_name']               = 'Customer Name';
 $_['column_email']              = 'E-Mail';
 $_['column_customer_group']     = 'Customer Group';
 $_['column_status']             = 'Status';
-$_['column_date_added']         = 'Date Added';
+$_['column_date_added']         = 'Date Created';
 $_['column_comment']            = 'Comment';
 $_['column_description']        = 'Description';
 $_['column_amount']             = 'Amount';
@@ -105,7 +105,7 @@ $_['entry_amount']              = 'Amount';
 $_['entry_points']              = 'Points';
 $_['entry_name']                = 'Customer Name';
 $_['entry_ip']                  = 'IP';
-$_['entry_date_added']          = 'Date Added';
+$_['entry_date_added']          = 'Date Created';
 
 // Help
 $_['help_safe']                 = 'Set to true to avoid this customer from being caught by the anti-fraud system';

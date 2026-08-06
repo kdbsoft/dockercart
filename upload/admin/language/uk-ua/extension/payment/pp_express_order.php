@@ -23,7 +23,7 @@ $_['column_amount']					= 'Итого';
 $_['column_type']					= 'Payment type';
 $_['column_status']					= 'Статус';
 $_['column_pend_reason']			= 'Pending reason';
-$_['column_date_added']				= 'Дата додавання';
+$_['column_date_added']				= 'Дата створення';
 $_['column_action']					= 'Дія';
 
 // Button

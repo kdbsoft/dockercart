@@ -14,7 +14,7 @@ $_['column_code']       = 'Код події';
 $_['column_trigger']    = 'Тригер';
 $_['column_action']     = 'Дія';
 $_['column_status']     = 'Статус';
-$_['column_date_added'] = 'Дата додавання';
+$_['column_date_added'] = 'Дата створення';
 
 // Error
 $_['error_permission']  = 'У вас недостатньо прав для внесення змін';

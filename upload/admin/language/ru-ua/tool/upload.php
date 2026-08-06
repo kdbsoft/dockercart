@@ -1,10 +1,10 @@
 <?php
 
 $_['column_action'] = 'Действие';
-$_['column_date_added'] = 'Дата добавления';
+$_['column_date_added'] = 'Дата создания';
 $_['column_filename'] = 'Имя файла';
 $_['column_name'] = 'Загрузить имя';
-$_['entry_date_added'] = 'Дата добавления';
+$_['entry_date_added'] = 'Дата создания';
 $_['entry_filename'] = 'Имя файла';
 $_['entry_name'] = 'Загрузить имя';
 $_['error_file'] = 'Файл для загрузки не найден!';

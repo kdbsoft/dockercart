@@ -1,7 +1,7 @@
 <?php
 
 $_['column_action'] = 'Дія';
-$_['column_date_added'] = 'Дата додавання';
+$_['column_date_added'] = 'Дата створення';
 $_['column_status'] = 'Статус';
 $_['column_username'] = 'Ім\'я користувача';
 $_['entry_confirm'] = 'Підтвердити';

@@ -29,7 +29,7 @@ $_['text_file_card']    = 'File';
 // Column
 $_['column_name']       = 'Download Name';
 $_['column_status']     = 'Status';
-$_['column_date_added'] = 'Date Added';
+$_['column_date_added'] = 'Date Created';
 $_['column_action']     = 'Action';
 
 // Entry

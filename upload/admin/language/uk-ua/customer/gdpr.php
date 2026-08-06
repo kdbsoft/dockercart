@@ -21,14 +21,14 @@ $_['text_remove']       = 'Видалити';
 $_['column_email']      = 'E-Mail';
 $_['column_request']    = 'Запит';
 $_['column_status']     = 'Статус';
-$_['column_date_added'] = 'Дата додання';
+$_['column_date_added'] = 'Дата створення';
 $_['column_action']     = 'Дія';
 
 // Entry
 $_['entry_email']       = 'E-Mail';
 $_['entry_action']      = 'Дія';
 $_['entry_status']      = 'Статус';
-$_['entry_date_added']  = 'Дата додання';
+$_['entry_date_added']  = 'Дата створення';
 
 // Error
 $_['error_permission']  = 'Ви не маєте прав для редагування GDPR';

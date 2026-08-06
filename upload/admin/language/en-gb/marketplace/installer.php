@@ -11,7 +11,7 @@ $_['text_install']      = 'Installing';
 
 // Column
 $_['column_filename']   = 'Filename';
-$_['column_date_added'] = 'Date Added';
+$_['column_date_added'] = 'Date Created';
 $_['column_action']     = 'Action';
 
 // Entry

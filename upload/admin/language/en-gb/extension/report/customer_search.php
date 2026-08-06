@@ -21,7 +21,7 @@ $_['column_products']   = 'Found Products';
 $_['column_category']   = 'Category';
 $_['column_customer']   = 'Customer';
 $_['column_ip']         = 'IP';
-$_['column_date_added'] = 'Date Added';
+$_['column_date_added'] = 'Date Created';
 
 // Entry
 $_['entry_date_start']  = 'Date Start';
