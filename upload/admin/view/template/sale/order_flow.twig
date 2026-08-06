@@ -120,6 +120,37 @@
 
           <div class="dcx-panel">
             <div class="dcx-panel-head">
+              <div class="dcx-panel-head__icon"><i data-lucide="star" width="18" height="18"></i></div>
+              <div>
+                <div class="dcx-panel-title">{{ text_flow_reward_title }}</div>
+                <div class="dcx-panel-subtitle">{{ text_flow_reward_subtitle }}</div>
+              </div>
+            </div>
+            <div class="dcx-panel-body">
+              <div class="dcx-fields">
+                <div class="checkbox" style="margin-top:0">
+                  <label>
+                    <input type="checkbox" name="reward_auto_award" value="1" {% if reward_auto_award %}checked{% endif %} />
+                    {{ text_flow_reward_auto_award }}
+                  </label>
+                </div>
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" name="reward_auto_revoke" value="1" {% if reward_auto_revoke %}checked{% endif %} />
+                    {{ text_flow_reward_auto_revoke }}
+                  </label>
+                </div>
+                <div class="dcx-field" style="margin-top:10px">
+                  <label class="dcx-label" for="reward-delay-days">{{ text_flow_reward_delay_days }}</label>
+                  <input type="number" class="form-control" id="reward-delay-days" name="reward_delay_days" value="{{ reward_delay_days }}" min="0" max="365" style="max-width:180px" />
+                  <div class="text-muted" style="font-size:12px;margin-top:4px">{{ text_flow_reward_delay_hint }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dcx-panel">
+            <div class="dcx-panel-head">
               <div class="dcx-panel-head__icon"><i data-lucide="info" width="18" height="18"></i></div>
               <div>
                 <div class="dcx-panel-title">{{ text_flow_rules }}</div>

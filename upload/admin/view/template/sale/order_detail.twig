@@ -443,6 +443,11 @@
               <div class="dcx-sidebar-card__field-row">
                 <span class="dcx-sidebar-card__label">{{ text_reward }}</span>
                 <span class="dcx-sidebar-card__value">{{ reward }}</span>
+                {% if reward_awarded_text %}
+                <span class="dcx-sidebar-card__value" style="font-size:11px;color:#28a745">{{ reward_awarded_text }}</span>
+                {% elseif reward_delayed %}
+                <span class="dcx-sidebar-card__value" style="font-size:11px;color:#6c757d">{{ text_reward_pending }}</span>
+                {% endif %}
                 <div class="dcx-sidebar-card__actions">
                   <button type="button" class="btn btn-xs btn-success btn--icon" onclick="addReward()" data-toggle="tooltip" title="{{ button_reward_add }}">
                     <i data-lucide="plus" width="11" height="11"></i>
