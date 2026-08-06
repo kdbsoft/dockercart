@@ -389,6 +389,15 @@ div.dcx-field.required > .dcx-label:before {
     align-self: flex-start;
 }
 
+/* Field validation state */
+.dcx-field.has-error .form-control {
+    border-color: var(--dc-red-500, #a94442);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 6px rgba(169, 68, 66, 0.35);
+}
+.dcx-field.has-error .dcx-label {
+    color: var(--dc-red-500, #a94442);
+}
+
 .dcx-profile-tabs {
     display: flex;
     flex-wrap: wrap;
