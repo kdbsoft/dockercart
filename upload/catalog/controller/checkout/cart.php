@@ -42,6 +42,14 @@ class ControllerCheckoutCart extends Controller {
 				$data['success'] = '';
 			}
 
+			if (isset($this->session->data['abandoned_restored'])) {
+				$data['abandoned_restored'] = true;
+
+				unset($this->session->data['abandoned_restored']);
+			} else {
+				$data['abandoned_restored'] = false;
+			}
+
 			$data['action'] = $this->url->link('checkout/cart/edit', '', true);
 
 			if ($this->config->get('config_cart_weight')) {

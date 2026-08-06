@@ -86,6 +86,10 @@ class ControllerCheckoutDockercartCheckout extends Controller
             return;
         }
 
+        // Checkout analytics: record the funnel entry
+        $this->load->model("checkout/dockercart_checkout");
+        $this->model_checkout_dockercart_checkout->trackStep("cart");
+
         $this->load->language("checkout/dockercart_checkout");
 
         $this->document->setTitle($this->language->get("heading_title"));
@@ -213,6 +217,9 @@ class ControllerCheckoutDockercartCheckout extends Controller
         );
         $data["ajax_confirm"] = $this->url->link(
             "checkout/dockercart_checkout/confirm",
+        );
+        $data["ajax_abandoned"] = $this->url->link(
+            "checkout/dockercart_checkout/abandoned",
         );
         $data["ajax_country"] = $this->url->link("checkout/checkout/country");
         $data["ajax_update_cart"] = $this->url->link(
@@ -971,6 +978,26 @@ class ControllerCheckoutDockercartCheckout extends Controller
             }
         }
 
+        // Persist the abandoned cart with the contact data from the form as
+        // soon as a valid email is present — even if other required fields
+        // failed validation. Otherwise carts abandoned mid-checkout would be
+        // recorded without a way to reach the customer.
+        if (
+            !empty($data["email"]) &&
+            filter_var($data["email"], FILTER_VALIDATE_EMAIL)
+        ) {
+            $this->saveAbandonedCart(
+                "customer",
+                $data["email"],
+                $data["telephone"] ?? "",
+            );
+        }
+
+        if (isset($json["success"])) {
+            $this->load->model("checkout/dockercart_checkout");
+            $this->model_checkout_dockercart_checkout->trackStep("customer");
+        }
+
         $this->sendJsonResponse($json);
     }
 
@@ -985,6 +1012,11 @@ class ControllerCheckoutDockercartCheckout extends Controller
 
         $input = file_get_contents("php://input");
         $data = json_decode($input, true);
+
+        // Persist contact identifiers sent with the address (see frontend
+        // saveShippingAddress/savePaymentAddress) so abandoned carts keep the
+        // customer email even before the confirm flow calls the customer endpoint.
+        $this->persistContactData($data);
 
         // Apply default country/zone from module config when not provided by user
         if (
@@ -1258,6 +1290,13 @@ class ControllerCheckoutDockercartCheckout extends Controller
             $json["shipping_methods"] = $methods;
         }
 
+        if (isset($json["success"])) {
+            $this->saveAbandonedCart("shipping_address");
+
+            $this->load->model("checkout/dockercart_checkout");
+            $this->model_checkout_dockercart_checkout->trackStep("shipping_address");
+        }
+
         $this->sendJsonResponse($json);
     }
 
@@ -1272,6 +1311,10 @@ class ControllerCheckoutDockercartCheckout extends Controller
 
         $input = file_get_contents("php://input");
         $data = json_decode($input, true);
+
+        // Persist contact identifiers sent with the address (see frontend
+        // savePaymentAddress/savePaymentAddressSameAsShipping).
+        $this->persistContactData($data);
 
         // If payment country/zone fields are hidden in module settings, use store defaults.
         if (
@@ -1457,6 +1500,13 @@ class ControllerCheckoutDockercartCheckout extends Controller
             $json["payment_methods"] = $this->getPaymentMethods();
         }
 
+        if (isset($json["success"])) {
+            $this->saveAbandonedCart("payment_address");
+
+            $this->load->model("checkout/dockercart_checkout");
+            $this->model_checkout_dockercart_checkout->trackStep("payment_address");
+        }
+
         $this->sendJsonResponse($json);
     }
 
@@ -1494,6 +1544,9 @@ class ControllerCheckoutDockercartCheckout extends Controller
                     ][$shipping[1]];
                 $json["success"] = true;
                 $json["totals"] = $this->getCartTotals();
+
+                $this->load->model("checkout/dockercart_checkout");
+                $this->model_checkout_dockercart_checkout->trackStep("shipping_method");
             }
         }
 
@@ -1573,6 +1626,9 @@ class ControllerCheckoutDockercartCheckout extends Controller
             }
 
             $json["success"] = true;
+
+            $this->load->model("checkout/dockercart_checkout");
+            $this->model_checkout_dockercart_checkout->trackStep("payment_method");
         }
 
         $this->sendJsonResponse($json);
@@ -2267,10 +2323,22 @@ class ControllerCheckoutDockercartCheckout extends Controller
             // Create order and add order_id to session (needed by payment extensions)
             $this->load->model("checkout/order");
 
+            // Final snapshot of the cart before order creation
+            $this->saveAbandonedCart("confirm");
+
+            $this->load->model("checkout/dockercart_checkout");
+            $this->model_checkout_dockercart_checkout->trackStep("confirm");
+
             // Prepare order data from session
             $order_data = $this->prepareOrderData();
             $order_id = $this->model_checkout_order->addOrder($order_data);
             $this->session->data["order_id"] = $order_id;
+
+            // Mark the abandoned cart as recovered (same session)
+            if ($order_id) {
+                $this->model_checkout_dockercart_checkout->markRecovered();
+                $this->model_checkout_dockercart_checkout->trackStep("completed");
+            }
 
             // Add initial order history so the order has a valid status in admin (uses config default)
             if ($order_id) {
@@ -4360,5 +4428,170 @@ class ControllerCheckoutDockercartCheckout extends Controller
         }
 
         return $methods;
+    }
+
+    /**
+     * AJAX: Quietly record the abandoned cart as soon as the customer typed
+     * their contact details (called on blur/change of the customer fields).
+     * Stores the email/telephone into the session and snapshots the cart.
+     */
+    public function abandoned()
+    {
+        $json = [];
+
+        $data = $this->getJsonInput();
+
+        if (!empty($data["email"])) {
+            $this->persistContactData($data);
+            $this->saveAbandonedCart(
+                "customer",
+                $data["email"],
+                $data["telephone"] ?? "",
+            );
+
+            $json["success"] = true;
+        }
+
+        $this->sendJsonResponse($json);
+    }
+
+    /**
+     * Persist contact identifiers (email/telephone) sent with address payloads
+     * into the session, so abandoned carts keep them even before the customer
+     * endpoint runs. Only fills when a valid email is present; never overwrites
+     * data that is already stored.
+     */
+    private function persistContactData($data)
+    {
+        if (
+            empty($data["email"]) ||
+            !filter_var($data["email"], FILTER_VALIDATE_EMAIL)
+        ) {
+            return;
+        }
+
+        if ($this->customer->isLogged()) {
+            if (
+                !isset(
+                    $this->session->data["dockercart_temp_customer"]["email"],
+                ) ||
+                !$this->session->data["dockercart_temp_customer"]["email"]
+            ) {
+                $this->session->data["dockercart_temp_customer"] = [
+                    "firstname" =>
+                        $data["firstname"] ??
+                        $this->customer->getFirstName(),
+                    "lastname" =>
+                        $data["lastname"] ?? $this->customer->getLastName(),
+                    "email" => $data["email"],
+                    "telephone" =>
+                        $data["telephone"] ?? $this->customer->getTelephone(),
+                ];
+            }
+
+            return;
+        }
+
+        if (
+            !isset($this->session->data["guest"]["email"]) ||
+            !$this->session->data["guest"]["email"]
+        ) {
+            $this->session->data["guest"] = [
+                "customer_group_id" => $this->config->get(
+                    "config_customer_group_id",
+                ),
+                "firstname" => $data["firstname"] ?? "",
+                "lastname" => $data["lastname"] ?? "",
+                "email" => $data["email"],
+                "telephone" => $data["telephone"] ?? "",
+                "fax" => "",
+                "custom_field" => [],
+            ];
+        }
+    }
+
+    /**
+     * Restore an abandoned cart by one-time token
+     */
+    public function restore()
+    {
+        $token = isset($this->request->get["token"])
+            ? trim((string) $this->request->get["token"])
+            : "";
+
+        $this->load->model("checkout/dockercart_checkout");
+
+        if (
+            !$token ||
+            !$this->model_checkout_dockercart_checkout->restoreByToken(
+                $token,
+            )
+        ) {
+            $this->response->redirect($this->url->link("checkout/cart"));
+            return;
+        }
+
+        // Flash message shown on the cart page
+        $this->session->data["abandoned_restored"] = true;
+
+        $this->response->redirect($this->url->link("checkout/cart"));
+    }
+
+    /**
+     * Save the current cart as an abandoned cart (used on checkout steps)
+     *
+     * @param string $step
+     * @param string $email Explicit contact email (form data), empty to resolve from session
+     * @param string $telephone Explicit contact phone
+     */
+    private function saveAbandonedCart($step, $email = "", $telephone = "")
+    {
+        if (!$this->config->get("config_cart_abandoned_enable")) {
+            return;
+        }
+
+        $this->load->model("checkout/dockercart_checkout");
+
+        // Build contact data. Priority: explicit form data -> temporary override
+        // typed on the checkout form (logged-in users) -> guest session -> customer account.
+        if (!$email) {
+            if (
+                isset(
+                    $this->session->data["dockercart_temp_customer"]["email"],
+                ) &&
+                $this->session->data["dockercart_temp_customer"]["email"]
+            ) {
+                $email =
+                    $this->session->data["dockercart_temp_customer"]["email"];
+                $telephone =
+                    $this->session->data["dockercart_temp_customer"][
+                        "telephone"
+                    ] ?? "";
+            } elseif (
+                isset($this->session->data["guest"]["email"]) &&
+                $this->session->data["guest"]["email"]
+            ) {
+                $email = $this->session->data["guest"]["email"];
+                $telephone = isset(
+                    $this->session->data["guest"]["telephone"],
+                )
+                    ? $this->session->data["guest"]["telephone"]
+                    : "";
+            } elseif ($this->customer->isLogged()) {
+                $email = $this->customer->getEmail();
+                $telephone = $this->customer->getTelephone();
+            }
+        }
+
+        $this->model_checkout_dockercart_checkout->saveAbandonedCart([
+            "email" => $email,
+            "telephone" => $telephone,
+            "cart" => $this->cart->getProducts(),
+            "address" =>
+                $this->session->data["shipping_address"] ??
+                $this->session->data["payment_address"] ??
+                [],
+            "step" => $step,
+        ]);
     }
 }

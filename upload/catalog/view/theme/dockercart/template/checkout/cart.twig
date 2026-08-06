@@ -33,6 +33,12 @@
         <span>{{ success }}</span>
       </div>
       {% endif %}
+      {% if abandoned_restored %}
+      <div class="mb-5 bg-blue-50 border border-blue-200 text-blue-700 rounded-2xl px-5 py-4 text-sm flex items-center gap-3">
+        <i data-lucide="shopping-bag" class="w-5 h-5 flex-shrink-0"></i>
+        <span>{{ text_abandoned_restored }}</span>
+      </div>
+      {% endif %}
       {% if error_warning %}
       <div class="mb-5 bg-red-50 border border-red-200 text-red-700 rounded-2xl px-5 py-4 text-sm flex items-center gap-3">
         <i data-lucide="circle-alert" class="w-5 h-5 flex-shrink-0"></i>

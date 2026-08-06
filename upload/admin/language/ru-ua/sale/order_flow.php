@@ -26,8 +26,22 @@ $_['text_flow_reward_auto_revoke']   = 'Списывать баллы при в�
 $_['text_flow_reward_delay_days']    = 'Задержка начисления (дней)';
 $_['text_flow_reward_delay_hint']    = 'Начислять баллы через N дней после завершения заказа (по умолчанию 14). 0 = начислять сразу. Проверка выполняется планировщиком раз в сутки.';
 
+$_['text_flow_abandoned_title']          = 'Брошенные корзины';
+$_['text_flow_abandoned_subtitle']       = 'Отслеживание корзин, брошенных на чекауте, напоминания и восстановление корзины покупателем.';
+$_['text_flow_abandoned_enable']         = 'Отслеживать брошенные корзины на чекауте';
+$_['text_flow_abandoned_waves']          = 'Волны напоминаний';
+$_['text_flow_abandoned_waves_hint']     = 'Каждая волна отправляет одно письмо через указанное число дней. Скидка применяется как автоматически созданный промокод в письме.';
+$_['text_flow_abandoned_wave_days_ph']   = 'Дней';
+$_['text_flow_abandoned_wave_days_suffix'] = 'дн. после';
+$_['text_flow_abandoned_wave_discount_suffix'] = '% скидка';
+$_['text_flow_abandoned_delay_days']     = 'Задержка напоминания (дней)';
+$_['text_flow_abandoned_delay_hint']     = 'Отправлять письмо-напоминание через N дней после брошенной корзины (по умолчанию 1). 0 = не отправлять. Проверка выполняется планировщиком раз в сутки.';
+$_['text_flow_abandoned_retention_days'] = 'Срок хранения (дней)';
+$_['text_flow_abandoned_retention_hint'] = 'Удалять восстановленные корзины и корзины без контактного email через N дней (по умолчанию 90).';
+
 // Buttons
 $_['button_flow_add_step']           = 'Добавить шаг';
+$_['button_flow_add_wave']           = 'Добавить волну';
 $_['button_flow_add_transition']     = 'Добавить переход';
 $_['button_flow_move_up']            = 'Вверх';
 $_['button_flow_move_down']          = 'Вниз';
