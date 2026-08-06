@@ -1,5 +1,17 @@
 <?php
 class ModelSaleOrder extends Model {
+	public function getOrderDocument(int $order_id, string $document_type = 'invoice'): array {
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "order_document` WHERE order_id = '" . (int)$order_id . "' AND document_type = '" . $this->db->escape($document_type) . "' LIMIT 1");
+
+		return $query->num_rows ? $query->row : [];
+	}
+
+	public function addOrderDocument(int $order_id, string $document_type, string $storage_key, string $invoice_no = ''): bool {
+		$this->db->query("INSERT IGNORE INTO `" . DB_PREFIX . "order_document` SET order_id = '" . (int)$order_id . "', document_type = '" . $this->db->escape($document_type) . "', storage_key = '" . $this->db->escape($storage_key) . "', invoice_no = '" . $this->db->escape($invoice_no) . "', date_added = NOW()");
+
+		return (bool)$this->db->countAffected();
+	}
+
 	public function updateInvoiceNo($order_id) {
 		$query = $this->db->query("SELECT invoice_prefix, invoice_no FROM `" . DB_PREFIX . "order` WHERE order_id = '" . (int)$order_id . "'");
 

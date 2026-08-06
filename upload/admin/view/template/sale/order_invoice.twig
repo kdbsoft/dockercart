@@ -4,219 +4,196 @@
   <meta charset="UTF-8">
   <title>{% if orders|length > 1 %}{{ text_invoice }}{% else %}{{ text_invoice }} — {{ orders[0].invoice_no ?: orders[0].order_id }}{% endif %}</title>
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family:'DejaVu Sans',sans-serif; font-size:12px; color:#333; line-height:1.5; }
-    .invoice { padding:32px 36px; }
-    table { width:100%; border-collapse:collapse; }
-    .invoice-header { margin-bottom:24px; }
-    .invoice-header td { vertical-align:top; }
-    .invoice-title { font-size:24px; font-weight:700; color:#2563eb; text-transform:uppercase; letter-spacing:1px; }
-    .invoice-meta { text-align:right; font-size:12px; }
-    .invoice-meta p + p { margin-top:2px; }
-    .seller-block { margin-bottom:24px; }
-    .seller-block h3 { font-size:11px; text-transform:uppercase; color:#2563eb; letter-spacing:0.5px; margin-bottom:4px; }
-    .seller-block p { font-size:11px; color:#555; }
-    .addresses { margin-bottom:24px; }
-    .addresses td { vertical-align:top; padding-right:20px; }
-    .addresses h3 { font-size:11px; text-transform:uppercase; color:#2563eb; letter-spacing:0.5px; margin-bottom:5px; }
-    .addresses p { font-size:12px; }
-    .addresses p + p { margin-top:3px; }
-    .invoice-products { margin-bottom:24px; }
-    .invoice-products th { background:#f5f5f5; font-weight:600; font-size:11px; text-transform:uppercase; padding:8px 10px; text-align:left; border-bottom:2px solid #ddd; }
-    .invoice-products td { padding:7px 10px; border-bottom:1px solid #eee; font-size:12px; vertical-align:top; }
-    .invoice-products .option-line { color:#666; font-size:11px; margin-top:2px; }
-    .text-right { text-align:right; }
-    .text-center { text-align:center; }
-    .no-wrap { white-space:nowrap; }
-    .invoice-totals { width:280px; margin-left:auto; }
-    .invoice-totals td { padding:4px 10px; font-size:12px; }
-    .invoice-totals .grand-total td { font-weight:700; font-size:14px; border-top:2px solid #333; padding-top:8px; }
-    .balance-due { margin-top:16px; background:#f0f7ff; border:1px solid #bfdbfe; border-radius:4px; padding:12px 16px; }
-    .balance-due-label { font-size:11px; text-transform:uppercase; color:#2563eb; letter-spacing:0.5px; }
-    .balance-due-amount { font-size:18px; font-weight:700; color:#1e40af; margin-top:2px; }
-    .payment-order { margin-bottom:24px; border:1px solid #ddd; border-radius:6px; padding:14px 16px; }
-    .payment-order h3 { font-size:11px; text-transform:uppercase; color:#2563eb; letter-spacing:0.5px; margin-bottom:10px; }
-    .payment-order table { width:100%; border-collapse:collapse; }
-    .payment-order td { padding:3px 8px 3px 0; font-size:11px; vertical-align:top; }
-    .payment-order td.label { color:#888; white-space:nowrap; width:150px; }
-    .payment-order td.value { color:#333; font-weight:600; }
-    .invoice-payments { margin-top:24px; }
-    .invoice-payments h3 { font-size:11px; text-transform:uppercase; color:#2563eb; letter-spacing:0.5px; margin-bottom:6px; }
-    .payment-table th { font-size:10px; text-transform:uppercase; color:#888; padding:4px 10px; text-align:left; border-bottom:1px solid #ddd; }
-    .payment-table td { padding:4px 10px; font-size:11px; border-bottom:1px solid #f0f0f0; }
-    .invoice-comment { margin-top:16px; }
-    .invoice-comment h3 { font-size:11px; text-transform:uppercase; color:#2563eb; letter-spacing:0.5px; margin-bottom:5px; }
-    .invoice-comment p { font-size:12px; color:#555; }
-    .invoice-footer { text-align:center; color:#999; font-size:11px; margin-top:40px; border-top:1px solid #eee; padding-top:14px; }
-    .logo-img { max-height:32px; margin-bottom:6px; }
+    @page { size: A4 portrait; margin: 0; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { font-family: Arial, 'DejaVu Sans', Helvetica, sans-serif; font-size: 9pt; color: #1e293b; line-height: 1.5; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    table { width: 100%; max-width: 100%; border-collapse: collapse; table-layout: fixed; }
+    .page { width: auto; min-height: auto; padding: 20mm; }
+    .accent { height: 2.5px; background: #0f172a; margin: 0 0 18px 0; }
+    .doc-head td { vertical-align: top; padding: 0; }
+    .brand-logo { max-height: 30px; max-width: 200px; margin-bottom: 8px; display: block; }
+    .brand-fallback { font-size: 12pt; font-weight: 700; color: #0f172a; letter-spacing: 0.2px; margin-bottom: 2px; }
+    .doc-title { font-size: 17pt; font-weight: 700; color: #0f172a; line-height: 1; letter-spacing: 0.6px; text-transform: uppercase; }
+    .doc-number { font-size: 9pt; font-weight: 700; color: #0f172a; margin-top: 4px; }
+    .doc-meta { text-align: right; font-size: 7.5pt; color: #64748b; line-height: 1.6; }
+    .doc-meta strong { color: #334155; font-weight: 700; }
+    .doc-meta .store-name { font-size: 8.5pt; color: #0f172a; font-weight: 700; }
+    .section { margin-bottom: 16px; }
+    .section h3 { font-size: 7pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #0f172a; margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px solid #e2e8f0; }
+    .kv { font-size: 8.5pt; color: #334155; line-height: 1.6; }
+    .kv strong { color: #0f172a; }
+    .kv .muted { color: #64748b; }
+    .addr-grid td { vertical-align: top; padding-right: 18px; width: 50%; }
+    .addr-grid td:last-child { padding-right: 0; }
+    .addr-grid .addr-name { font-size: 9pt; font-weight: 700; color: #0f172a; margin-bottom: 3px; }
+    .addr-grid .addr-lines { font-size: 8.5pt; color: #334155; line-height: 1.6; }
+    .addr-grid .addr-lines .muted { color: #64748b; }
+    .pay-order { border: 1px solid #e2e8f0; }
+    .pay-order-head { background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 7px 10px; }
+    .pay-order-head h3 { margin: 0; padding: 0; border: 0; font-size: 7pt; }
+    .pay-order-body { padding: 8px 10px; }
+    .pay-order-body table td { padding: 3px 8px 3px 0; font-size: 7.5pt; vertical-align: top; line-height: 1.5; }
+    .pay-order-body td.label { color: #64748b; white-space: nowrap; width: 132px; text-transform: uppercase; letter-spacing: 0.3px; font-size: 7pt; padding-top: 4px; }
+    .pay-order-body td.value { color: #0f172a; font-weight: 400; }
+    .pay-order-body td.value strong { font-weight: 700; }
+    .items th { background: #0f172a; color: #ffffff; font-weight: 700; font-size: 7pt; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 9px; text-align: left; }
+    .items td { padding: 7px 9px; border-bottom: 1px solid #e2e8f0; font-size: 8.5pt; vertical-align: top; color: #1e293b; }
+    .items tr:last-child td { border-bottom-color: #cbd5e1; }
+    .items .opt { color: #64748b; font-size: 7.5pt; margin-top: 2px; line-height: 1.4; }
+    .text-right { text-align: right; }
+    .text-center { text-align: center; }
+    .no-wrap { white-space: nowrap; }
+    .totals-wrap { margin-top: 10px; }
+    .totals { width: 260px; margin-left: auto; }
+    .totals td { padding: 4px 9px; font-size: 8.5pt; color: #334155; }
+    .totals .grand td { font-weight: 700; font-size: 10pt; color: #0f172a; border-top: 2px solid #0f172a; padding-top: 7px; }
+    .due { margin-top: 12px; border: 1.5px solid #0f172a; background: #f8fafc; padding: 10px 14px; width: 260px; margin-left: auto; }
+    .due-label { font-size: 7pt; text-transform: uppercase; letter-spacing: 0.6px; color: #64748b; font-weight: 700; }
+    .due-amount { font-size: 14pt; font-weight: 700; color: #0f172a; margin-top: 1px; line-height: 1.2; }
+    .note { margin-top: 14px; border-left: 2px solid #e2e8f0; padding-left: 10px; }
+    .note h3 { border: 0; padding: 0; margin-bottom: 4px; }
+    .note p { font-size: 8.5pt; color: #475569; line-height: 1.6; }
+    .page-foot { margin-top: 22px; border-top: 1px solid #e2e8f0; padding-top: 10px; text-align: center; color: #94a3b8; font-size: 7pt; line-height: 1.6; }
+    .page-foot strong { color: #64748b; font-weight: 700; }
   </style>
 </head>
 <body>
   {% for order in orders %}
-  <div class="invoice"{% if not loop.last %} style="page-break-after: always;"{% endif %}>
-    <table class="invoice-header">
+  <div class="page"{% if not loop.last %} style="page-break-after: always;"{% endif %}>
+    <table class="doc-head">
       <tr>
         <td>
-          {% if order.seller_logo %}
-          <img src="{{ order.seller_logo }}" class="logo-img" alt="">
-          {% endif %}
-          <div class="invoice-title">{{ text_invoice }}{% if order.invoice_no %}&nbsp;№&nbsp;{{ order.invoice_no }}{% endif %}</div>
+          {% if order.seller_logo %}<img src="{{ order.seller_logo }}" class="brand-logo" alt="">{% else %}<div class="brand-fallback">{{ order.seller_name ?: order.store_name }}</div>{% endif %}
+          {% if order.seller_logo and order.seller_name %}<div style="font-size: 7.5pt; color: #64748b; margin-bottom: 1px;">{{ order.seller_name }}</div>{% endif %}
+          <div class="doc-title">{{ text_invoice }}</div>
+          {% if order.invoice_no %}<div class="doc-number">№ {{ order.invoice_no }}</div>{% endif %}
         </td>
-        <td class="invoice-meta">
-          <p>{{ order.store_name }}</p>
-          <p>{{ order.store_url }}</p>
-          <p><strong>{{ text_date_added }}:</strong> {{ order.date_added }}</p>
-          {% if order.invoice_valid_until %}
-          <p><strong>{{ text_invoice_valid_until }}:</strong> {{ order.invoice_valid_until }}</p>
-          {% endif %}
+        <td class="doc-meta">
+          <div class="store-name">{{ order.store_name }}</div>
+          <div>{{ order.store_url }}</div>
+          <div><strong>{{ text_date_added }}:</strong> {{ order.date_added }}</div>
+          {% if order.invoice_valid_until %}<div><strong>{{ text_invoice_valid_until }}:</strong> {{ order.invoice_valid_until }}</div>{% endif %}
+          <div style="margin-top: 4px; color: #94a3b8;">{{ text_order }}: #{{ order.order_id }}</div>
         </td>
       </tr>
     </table>
+    <div class="accent"></div>
 
-    <table class="seller-block">
-      <tr>
-        <td>
-          <h3>{{ text_seller }}</h3>
-          <p><strong>{{ order.seller_name }}</strong></p>
-          <p>{{ order.seller_address }}</p>
-          {% if order.seller_telephone %}<p>{{ order.seller_telephone }}</p>{% endif %}
-          {% if order.seller_email %}<p>{{ order.seller_email }}</p>{% endif %}
-          {% for tax in order.seller_tax_numbers %}<p>{{ attribute(text_tax_type, tax.type) is defined ? attribute(text_tax_type, tax.type) : tax.type }}: {{ tax.value }}</p>{% endfor %}
-          {% if order.seller_bank_name %}<p>{{ text_bank_name }}: {{ order.seller_bank_name }}</p>{% endif %}
-          {% if order.seller_bank_account %}<p>{{ text_bank_account }}: {{ order.seller_bank_account }}</p>{% endif %}
-          {% if order.seller_bank_swift %}<p>{{ text_bank_swift }}: {{ order.seller_bank_swift }}</p>{% endif %}
-        </td>
-      </tr>
-    </table>
-
-    <table class="addresses">
-      <tr>
-        <td>
-          <h3>{{ text_bill_to }}</h3>
-          <p><strong>{{ order.firstname }} {{ order.lastname }}</strong></p>
-          <p>{{ order.payment_address|raw }}</p>
-          <p>{{ order.email }}<br>{{ order.telephone }}</p>
-        </td>
-        {% if order.shipping_method %}
-        <td>
-          <h3>{{ text_ship_to }}</h3>
-          <p>{{ order.shipping_address|raw }}</p>
-          <p><strong>{{ text_payment_method }}:</strong> {{ order.payment_method }}</p>
-          <p><strong>{{ text_shipping_method }}:</strong> {{ order.shipping_method }}</p>
-        </td>
-        {% endif %}
-      </tr>
-      {% if order.tracking_number %}
-      <tr>
-        <td colspan="2">
-          <h3>{{ text_tracking_number }}</h3>
-          <p>{{ order.tracking_number|replace({'|': ' | '}) }}</p>
-        </td>
-      </tr>
-      {% endif %}
-    </table>
-
-    <div class="payment-order">
-      <h3>{{ text_payment_order }}</h3>
+    <div class="section">
       <table>
         <tr>
-          <td class="label">{{ text_payment_order_recipient }}</td>
-          <td class="value">{{ order.payment_order.seller_name }}{% if order.payment_order.seller_address %}, {{ order.payment_order.seller_address }}{% endif %}{% if order.payment_order.seller_tax_label and order.payment_order.seller_tax_value %}, {{ order.payment_order.seller_tax_label }} {{ order.payment_order.seller_tax_value }}{% endif %}</td>
-        </tr>
-        <tr>
-          <td class="label">{{ text_payment_order_bank }}</td>
-          <td class="value">{{ order.payment_order.bank_name }}{% if order.payment_order.bank_swift %} ({{ text_bank_swift }}: {{ order.payment_order.bank_swift }}){% endif %}</td>
-        </tr>
-        <tr>
-          <td class="label">{{ text_payment_order_account }}</td>
-          <td class="value">{{ order.payment_order.bank_account }}</td>
-        </tr>
-        <tr>
-          <td class="label">{{ text_payment_order_payer }}</td>
-          <td class="value">{{ order.payment_order.payer_company ? order.payment_order.payer_company ~ ', ' : '' }}{{ order.payment_order.payer_name }}</td>
-        </tr>
-        <tr>
-          <td class="label">{{ text_payment_order_purpose }}</td>
-          <td class="value">{{ text_payment_purpose|format(order.invoice_no ?: '№ ' ~ order.order_id) }}</td>
-        </tr>
-        <tr>
-          <td class="label">{{ text_payment_order_amount }}</td>
-          <td class="value">{{ order.balance_due }}</td>
+          <td style="vertical-align: top; padding-right: 16px;">
+            <h3>{{ text_seller }}</h3>
+            <div class="kv">
+              <div><strong>{{ order.seller_name }}</strong></div>
+              {% if order.seller_address %}<div>{{ order.seller_address }}</div>{% endif %}
+              {% if order.seller_telephone %}<div><span class="muted">{{ text_telephone }}:</span> {{ order.seller_telephone }}</div>{% endif %}
+              {% if order.seller_email %}<div><span class="muted">{{ text_email }}:</span> {{ order.seller_email }}</div>{% endif %}
+              {% for tax in order.seller_tax_numbers %}<div><span class="muted">{{ attribute(text_tax_type, tax.type) is defined ? attribute(text_tax_type, tax.type) : tax.type }}:</span> {{ tax.value }}</div>{% endfor %}
+              {% if order.seller_bank_name %}<div><span class="muted">{{ text_bank_name }}:</span> {{ order.seller_bank_name }}</div>{% endif %}
+              {% if order.seller_bank_account %}<div><span class="muted">{{ text_bank_account }}:</span> {{ order.seller_bank_account }}</div>{% endif %}
+              {% if order.seller_bank_swift %}<div><span class="muted">{{ text_bank_swift }}:</span> {{ order.seller_bank_swift }}</div>{% endif %}
+            </div>
+          </td>
         </tr>
       </table>
     </div>
 
-    <table class="invoice-products">
+    <div class="section">
+      <table class="addr-grid">
+        <tr>
+          <td>
+            <h3>{{ text_bill_to }}</h3>
+            <div class="addr-name">{{ order.firstname }} {{ order.lastname }}</div>
+            <div class="addr-lines">{{ order.payment_address|raw }}</div>
+            <div class="addr-lines" style="margin-top: 4px;">{{ order.email }}<br>{{ order.telephone }}</div>
+          </td>
+          {% if order.shipping_method %}
+          <td>
+            <h3>{{ text_ship_to }}</h3>
+            <div class="addr-lines">{{ order.shipping_address|raw }}</div>
+            <div class="kv" style="margin-top: 6px; font-size: 7.5pt;">
+              <div><span class="muted">{{ text_payment_method }}:</span> {{ order.payment_method }}</div>
+              <div><span class="muted">{{ text_shipping_method }}:</span> {{ order.shipping_method }}</div>
+            </div>
+          </td>
+          {% endif %}
+        </tr>
+        {% if order.tracking_number %}
+        <tr>
+          <td colspan="2" style="padding-top: 10px;">
+            <h3>{{ text_tracking_number }}</h3>
+            <div class="kv">{{ order.tracking_number|replace({'|': ' · '}) }}</div>
+          </td>
+        </tr>
+        {% endif %}
+      </table>
+    </div>
+
+    <div class="section pay-order">
+      <div class="pay-order-head"><h3>{{ text_payment_order }}</h3></div>
+      <div class="pay-order-body">
+        <table>
+          <tr><td class="label">{{ text_payment_order_recipient }}</td><td class="value"><strong>{{ order.payment_order.seller_name }}</strong>{% if order.payment_order.seller_address %}, {{ order.payment_order.seller_address }}{% endif %}{% if order.payment_order.seller_tax_label and order.payment_order.seller_tax_value %}, {{ order.payment_order.seller_tax_label }} {{ order.payment_order.seller_tax_value }}{% endif %}</td></tr>
+          <tr><td class="label">{{ text_payment_order_bank }}</td><td class="value">{{ order.payment_order.bank_name }}{% if order.payment_order.bank_swift %} <span class="muted">({{ text_bank_swift }}: {{ order.payment_order.bank_swift }})</span>{% endif %}</td></tr>
+          <tr><td class="label">{{ text_payment_order_account }}</td><td class="value">{{ order.payment_order.bank_account }}</td></tr>
+          <tr><td class="label">{{ text_payment_order_payer }}</td><td class="value">{{ order.payment_order.payer_company ? order.payment_order.payer_company ~ ', ' : '' }}{{ order.payment_order.payer_name }}</td></tr>
+          <tr><td class="label">{{ text_payment_order_purpose }}</td><td class="value">{{ text_payment_purpose|format(order.invoice_no ?: '№ ' ~ order.order_id) }}</td></tr>
+          <tr><td class="label">{{ text_payment_order_amount }}</td><td class="value" style="font-weight: 700; font-size: 8.5pt;">{{ order.balance_due }}</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <table class="items">
       <thead>
         <tr>
-          <th>{{ column_product }}</th>
-          <th>{{ column_model }}</th>
-          <th class="text-right">{{ column_quantity }}</th>
-          <th class="text-right">{{ column_price }}</th>
-          <th class="text-right">{{ column_total }}</th>
+          <th style="width: 46%;">{{ column_product }}</th>
+          <th style="width: 18%;">{{ column_model }}</th>
+          <th class="text-right" style="width: 12%;">{{ column_quantity }}</th>
+          <th class="text-right" style="width: 12%;">{{ column_price }}</th>
+          <th class="text-right" style="width: 12%;">{{ column_total }}</th>
         </tr>
       </thead>
       <tbody>
         {% for product in order.products %}
         <tr>
-          <td>{{ product.name }}{% if product.option %}<div class="option-line">{{ product.option }}</div>{% endif %}</td>
-          <td>{{ product.model }}</td>
+          <td>{{ product.name }}{% if product.option %}<div class="opt">{{ product.option }}</div>{% endif %}</td>
+          <td class="muted" style="color: #64748b; font-size: 8pt;">{{ product.model }}</td>
           <td class="text-right no-wrap">{{ product.quantity }}</td>
           <td class="text-right no-wrap">{{ product.price }}</td>
-          <td class="text-right no-wrap">{{ product.total }}</td>
+          <td class="text-right no-wrap" style="font-weight: 700;">{{ product.total }}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
 
-    <table class="invoice-totals">
-      {% for total in order.totals %}
-      <tr{% if loop.last %} class="grand-total"{% endif %}>
-        <td>{{ total.title }}</td>
-        <td class="text-right no-wrap">{{ total.text }}</td>
-      </tr>
-      {% endfor %}
-    </table>
-    <div class="balance-due">
-      <div class="balance-due-label">{{ text_balance_due }}</div>
-      <div class="balance-due-amount no-wrap">{{ order.balance_due }}</div>
-    </div>
-
-    {% if order.payments %}
-    <div class="invoice-payments">
-      <h3>{{ text_payment_history }}</h3>
-      <table class="payment-table">
-        <thead>
-          <tr>
-            <th>{{ text_date_added }}</th>
-            <th>{{ text_payment_method }}</th>
-            <th class="text-right">{{ column_total }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for payment in order.payments %}
-          <tr>
-            <td>{{ payment.date }}</td>
-            <td>{{ payment.method }}{% if payment.comment %}<br><span style="color:#888;font-size:10px">{{ payment.comment }}</span>{% endif %}</td>
-            <td class="text-right no-wrap">{{ payment.amount }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
+    <div class="totals-wrap">
+      <table class="totals">
+        {% for total in order.totals %}
+        <tr{% if loop.last %} class="grand"{% endif %}>
+          <td>{{ total.title }}</td>
+          <td class="text-right no-wrap">{{ total.text }}</td>
+        </tr>
+        {% endfor %}
       </table>
+      <div class="due">
+        <div class="due-label">{{ text_balance_due }}</div>
+        <div class="due-amount no-wrap">{{ order.balance_due }}</div>
+      </div>
     </div>
-    {% endif %}
 
     {% if order.comment %}
-    <div class="invoice-comment">
+    <div class="note">
       <h3>{{ text_comment }}</h3>
       <p>{{ order.comment|nl2br }}</p>
     </div>
     {% endif %}
+
+    <div class="page-foot">
+      <div>{{ order.store_name }} · {{ order.store_url }}</div>
+      <div>{{ text_print_date }}: {{ "now"|date("Y-m-d H:i:s") }}</div>
+    </div>
   </div>
   {% endfor %}
-
-  <div class="invoice-footer">
-    <p>{{ text_print_date }}: {{ "now"|date("Y-m-d H:i:s") }}</p>
-  </div>
 </body>
 </html>
