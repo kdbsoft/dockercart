@@ -7,9 +7,9 @@ $_['text_instock'] = 'В наличии';
 $_['text_preorder'] = 'Предзаказ';
 $_['text_out_of_stock'] = 'Нет в наличии';
 $_['text_empty'] = 'Вы еще не просмотрели ни одного товара.';
-$_['column_image'] = 'Изображение';
-$_['column_name'] = 'Название товара';
-$_['column_model'] = 'Код товара';
-$_['column_stock'] = 'Наличие';
-$_['column_price'] = 'Цена за единицу';
-$_['column_action'] = 'Действие';
+$_['text_viewed_on'] = 'Просмотрено';
+$_['text_call_for_price'] = 'Уточнить цену';
+
+// Locale
+$_['date_format_short'] = 'd/m/Y';
+$_['time_format'] = 'H:i';

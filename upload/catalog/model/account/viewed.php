@@ -67,6 +67,41 @@ class ModelAccountViewed extends Model {
 		return $product_ids;
 	}
 
+	public function getViewedProducts($limit = 0) {
+		$limit = (int)$limit;
+
+		if ($this->customer->isLogged()) {
+			$customer_id = (int)$this->customer->getId();
+			$sql = "SELECT product_id, date_modified FROM " . DB_PREFIX . "dockercart_viewed_product WHERE customer_id = '" . $customer_id . "' ORDER BY date_modified DESC, viewed_id DESC";
+		} else {
+			$session_id = $this->getSessionId();
+
+			if ($session_id === '') {
+				return array();
+			}
+
+			$session_id_sql = $this->db->escape($session_id);
+			$sql = "SELECT product_id, date_modified FROM " . DB_PREFIX . "dockercart_viewed_product WHERE customer_id IS NULL AND session_id = '" . $session_id_sql . "' ORDER BY date_modified DESC, viewed_id DESC";
+		}
+
+		if ($limit > 0) {
+			$sql .= " LIMIT " . $limit;
+		}
+
+		$query = $this->db->query($sql);
+
+		$products = array();
+
+		foreach ($query->rows as $row) {
+			$products[] = array(
+				'product_id'    => (int)$row['product_id'],
+				'date_modified' => $row['date_modified']
+			);
+		}
+
+		return $products;
+	}
+
 	private function trimCustomerViews($customer_id, $limit) {
 		$customer_id = (int)$customer_id;
 		$limit = (int)$limit;
