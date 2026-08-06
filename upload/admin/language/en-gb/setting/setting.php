@@ -211,7 +211,9 @@ $_['help_maintenance']               = 'Prevents customers from browsing your st
 $_['help_password']                  = 'Allow forgotten password to be used for the admin. This will be disabled automatically if the system detects a hack attempt.';
 $_['help_encryption']                = 'Please provide a secret key that will be used to encrypt private information when processing orders.';
 $_['help_compression']               = 'GZIP for more efficient transfer to requesting clients. Compression level must be between 0 - 9.';
-$_['help_invoice_logo']              = 'Leave empty to use the store logo. Upload a custom image to use a different logo on invoices.';
+$_['help_invoice_logo']              = 'Upload an image to show it on invoices. Leave empty to hide the logo on invoices.';
+$_['help_invoice_valid_days']        = 'Number of days the invoice remains valid for payment. The expiry date is shown on the invoice. Leave empty or 0 to omit the validity period.';
+$_['help_invoice_language']          = 'Language used for invoices and order printouts. Leave empty to use the admin interface language.';
 
 // Error
 $_['error_warning']                  = 'Warning: Please check the form carefully for errors!';
@@ -234,6 +236,8 @@ $_['error_log_invalid']              = 'Error Log Filename invalid!';
 $_['error_log_extension']            = 'Error Log Filename extension needs to be .log!';
 $_['error_encryption']               = 'Encryption Key must be between 32 and 1024 characters!';
 $_['error_stock_reserve_minutes']    = 'Reserve duration must be 0 or a positive number of minutes!';
+$_['error_invoice_language']         = 'Please select a valid invoice language!';
+$_['error_invoice_valid_days']       = 'Invoice validity days must be a non-negative number!';
 
 // Tab
 $_['tab_invoice']                   = 'Invoice & Organization';
@@ -247,6 +251,8 @@ $_['text_invoice_logo']             = 'Invoice Logo';
 
 // Entry
 $_['entry_invoice_prefix']          = 'Invoice Prefix';
+$_['entry_invoice_valid_days']      = 'Invoice Valid Days';
+$_['entry_invoice_language']        = 'Invoice Language';
 $_['entry_seller_name']             = 'Seller Name';
 $_['entry_seller_address']          = 'Seller Address';
 $_['entry_seller_email']            = 'Seller Email';
@@ -258,3 +264,19 @@ $_['entry_seller_bank_name']        = 'Bank Name';
 $_['entry_seller_bank_account']     = 'Bank Account (IBAN)';
 $_['entry_seller_bank_swift']       = 'SWIFT / BIC';
 $_['entry_seller_invoice_logo']     = 'Invoice Logo';
+
+// Seller tax number type labels (code => label)
+$_['text_seller_tax_type_VAT']        = 'VAT';
+$_['text_seller_tax_type_EIN']        = 'EIN';
+$_['text_seller_tax_type_TIN']        = 'TIN';
+$_['text_seller_tax_type_ABN']        = 'ABN';
+$_['text_seller_tax_type_GST']        = 'GST';
+$_['text_seller_tax_type_EDRPOU']     = 'EDRPOU';
+$_['text_seller_tax_type_IPN']        = 'IPN';
+$_['text_seller_tax_type_CVR']        = 'CVR';
+$_['text_seller_tax_type_Momsreg.nr'] = 'Momsreg.nr';
+$_['text_seller_tax_type_Orgnr']      = 'Orgnr';
+$_['text_seller_tax_type_SIRET']      = 'SIRET';
+$_['text_seller_tax_type_CIF']        = 'CIF';
+$_['text_seller_tax_type_P.IVA']      = 'P.IVA';
+$_['text_seller_tax_type_Other']      = 'Other';
