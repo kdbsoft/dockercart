@@ -264,14 +264,14 @@ class ControllerExtensionModuleDockercartBlogAuthor extends Controller {
 		$this->load->model('tool/image');
 
 		if (isset($this->request->post['image']) && is_file(DIR_IMAGE . $this->request->post['image'])) {
-			$data['thumb'] = $this->model_tool_image->resize($this->request->post['image'], 100, 100);
+			$data['thumb'] = $this->model_tool_image->resize($this->request->post['image'], 140, 140);
 		} elseif (!empty($author_info) && is_file(DIR_IMAGE . $author_info['image'])) {
-			$data['thumb'] = $this->model_tool_image->resize($author_info['image'], 100, 100);
+			$data['thumb'] = $this->model_tool_image->resize($author_info['image'], 140, 140);
 		} else {
-			$data['thumb'] = $this->model_tool_image->resize('no_image.png', 100, 100);
+			$data['thumb'] = $this->model_tool_image->resize('no_image.png', 140, 140);
 		}
 
-		$data['placeholder'] = $this->model_tool_image->resize('no_image.png', 100, 100);
+		$data['placeholder'] = $this->model_tool_image->resize('no_image.png', 140, 140);
 
 		if (isset($this->request->post['status'])) {
 			$data['status'] = $this->request->post['status'];
