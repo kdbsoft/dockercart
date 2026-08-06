@@ -126,6 +126,18 @@
                     </select>
                   </div>
                   <div class="dcx-field">
+                    <label class="dcx-label" for="input-show-option-price">{{ entry_show_option_price }}</label>
+                    <select name="show_option_price" id="input-show-option-price" class="form-control">
+                      {% if show_option_price %}
+                      <option value="1" selected="selected">{{ text_enabled }}</option>
+                      <option value="0">{{ text_disabled }}</option>
+                      {% else %}
+                      <option value="1">{{ text_enabled }}</option>
+                      <option value="0" selected="selected">{{ text_disabled }}</option>
+                      {% endif %}
+                    </select>
+                  </div>
+                  <div class="dcx-field">
                     <label class="dcx-label" for="input-sort-order">{{ entry_sort_order }}</label>
                     <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control" />
                   </div>
@@ -173,6 +185,7 @@
                     </div>
                     <div class="dc-opt-card__body">
                       <input type="hidden" name="option_value[{{ option_value_row }}][option_value_id]" value="{{ option_value.option_value_id }}" />
+                      <input type="hidden" name="option_value[{{ option_value_row }}][sort_order]" value="{{ option_value_row }}" class="dc-opt-sort-order" />
                       <div class="dc-opt-card__field">
                         <div class="dc-opt-card__languages" style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
                         {% for language in languages %}
@@ -235,6 +248,7 @@ function addOptionValue() {
 	html += '  </div>';
 	html += '  <div class="dc-opt-card__body">';
 	html += '    <input type="hidden" name="option_value[' + option_value_row + '][option_value_id]" value="" />';
+	html += '    <input type="hidden" name="option_value[' + option_value_row + '][sort_order]" value="' + option_value_row + '" class="dc-opt-sort-order" />';
 	html += '    <div class="dc-opt-card__field">';
 	html += '      <div class="dc-opt-card__languages" style="flex: 1; display: flex; flex-direction: column; gap: 6px;">';
 	{% for language in languages %}

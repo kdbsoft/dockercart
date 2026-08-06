@@ -1,7 +1,7 @@
 <?php
 class ModelCatalogOption extends Model {
 	public function addOption($data) {
-		$this->db->query("INSERT INTO `" . DB_PREFIX . "option` SET type = '" . $this->db->escape($data['type']) . "', sort_order = '" . (int)$data['sort_order'] . "', status = '" . (isset($data['status']) ? (int)$data['status'] : 1) . "'");
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "option` SET type = '" . $this->db->escape($data['type']) . "', sort_order = '" . (int)$data['sort_order'] . "', status = '" . (isset($data['status']) ? (int)$data['status'] : 1) . "', show_option_price = '" . (isset($data['show_option_price']) ? (int)$data['show_option_price'] : 1) . "'");
 
 		$option_id = $this->db->getLastId();
 
@@ -11,7 +11,7 @@ class ModelCatalogOption extends Model {
 
 		if (isset($data['option_value'])) {
 			foreach ($data['option_value'] as $option_value) {
-					$this->db->query("INSERT INTO " . DB_PREFIX . "option_value SET option_id = '" . (int)$option_id . "', color_code = '" . $this->db->escape($option_value['color_code'] ?? '') . "', sort_order = '" . (int)$option_value['sort_order'] . "'");
+					$this->db->query("INSERT INTO " . DB_PREFIX . "option_value SET option_id = '" . (int)$option_id . "', color_code = '" . $this->db->escape($option_value['color_code'] ?? '') . "', sort_order = '" . (int)($option_value['sort_order'] ?? 0) . "'");
 
 				$option_value_id = $this->db->getLastId();
 
@@ -25,7 +25,7 @@ class ModelCatalogOption extends Model {
 	}
 
 	public function editOption($option_id, $data) {
-		$this->db->query("UPDATE `" . DB_PREFIX . "option` SET type = '" . $this->db->escape($data['type']) . "', sort_order = '" . (int)$data['sort_order'] . "', status = '" . (isset($data['status']) ? (int)$data['status'] : 1) . "' WHERE option_id = '" . (int)$option_id . "'");
+		$this->db->query("UPDATE `" . DB_PREFIX . "option` SET type = '" . $this->db->escape($data['type']) . "', sort_order = '" . (int)$data['sort_order'] . "', status = '" . (isset($data['status']) ? (int)$data['status'] : 1) . "', show_option_price = '" . (isset($data['show_option_price']) ? (int)$data['show_option_price'] : 1) . "' WHERE option_id = '" . (int)$option_id . "'");
 
 		$this->db->query("DELETE FROM " . DB_PREFIX . "option_description WHERE option_id = '" . (int)$option_id . "'");
 
@@ -39,9 +39,9 @@ class ModelCatalogOption extends Model {
 		if (isset($data['option_value'])) {
 			foreach ($data['option_value'] as $option_value) {
 				if ($option_value['option_value_id']) {
-					$this->db->query("INSERT INTO " . DB_PREFIX . "option_value SET option_value_id = '" . (int)$option_value['option_value_id'] . "', option_id = '" . (int)$option_id . "', color_code = '" . $this->db->escape($option_value['color_code'] ?? '') . "', sort_order = '" . (int)$option_value['sort_order'] . "'");
+					$this->db->query("INSERT INTO " . DB_PREFIX . "option_value SET option_value_id = '" . (int)$option_value['option_value_id'] . "', option_id = '" . (int)$option_id . "', color_code = '" . $this->db->escape($option_value['color_code'] ?? '') . "', sort_order = '" . (int)($option_value['sort_order'] ?? 0) . "'");
 				} else {
-				$this->db->query("INSERT INTO " . DB_PREFIX . "option_value SET option_id = '" . (int)$option_id . "', color_code = '" . $this->db->escape($option_value['color_code'] ?? '') . "', sort_order = '" . (int)$option_value['sort_order'] . "'");
+				$this->db->query("INSERT INTO " . DB_PREFIX . "option_value SET option_id = '" . (int)$option_id . "', color_code = '" . $this->db->escape($option_value['color_code'] ?? '') . "', sort_order = '" . (int)($option_value['sort_order'] ?? 0) . "'");
 				}
 
 				$option_value_id = $this->db->getLastId();
@@ -82,6 +82,7 @@ class ModelCatalogOption extends Model {
 		$data["type"] = $option["type"];
 		$data["sort_order"] = $option["sort_order"];
 		$data["status"] = $option["status"];
+		$data["show_option_price"] = $option["show_option_price"];
 		$data["option_description"] = $this->getOptionDescriptions(
 			$option_id,
 		);
