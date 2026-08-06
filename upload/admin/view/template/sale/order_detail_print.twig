@@ -4,127 +4,139 @@
   <meta charset="UTF-8">
   <title>{% if orders|length > 1 %}{{ text_print_orders }}{% else %}{{ orders[0].heading_title }} — {{ text_print }}{% endif %}</title>
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family:'DejaVu Sans',sans-serif; font-size:12px; color:#333; line-height:1.5; }
-    .print-order { padding:32px 36px; }
-    table { width:100%; border-collapse:collapse; }
-    .print-header { border-bottom:2px solid #333; padding-bottom:14px; margin-bottom:20px; }
-    .print-header h1 { font-size:20px; }
-    .print-status { font-size:12px; color:#555; margin-top:2px; }
-    .print-header td { vertical-align:top; }
-    .print-header-right { text-align:right; font-size:12px; }
-    .print-meta { margin-bottom:20px; }
-    .print-meta td { vertical-align:top; padding-right:20px; }
-    .print-meta h3 { font-size:12px; margin-bottom:5px; color:#2563eb; }
-    .print-meta p { font-size:12px; }
-    .print-meta p + p { margin-top:4px; }
-    .print-products { margin-bottom:20px; }
-    .print-products th { background:#f5f5f5; font-weight:600; font-size:11px; text-transform:uppercase; padding:8px 10px; text-align:left; border-bottom:2px solid #ddd; }
-    .print-products td { padding:7px 10px; border-bottom:1px solid #eee; font-size:12px; vertical-align:top; }
-    .print-products .option-line { color:#666; font-size:11px; margin-top:2px; }
-    .text-right { text-align:right; }
-    .text-center { text-align:center; }
-    .print-totals { width:320px; margin-left:auto; }
-    .print-totals td { padding:4px 10px; font-size:12px; }
-    .print-totals .grand-total td { font-weight:700; font-size:14px; border-top:2px solid #333; padding-top:8px; }
-    .print-comment { margin-top:16px; }
-    .print-comment h3 { font-size:12px; margin-bottom:5px; color:#2563eb; }
-    .print-comment p { font-size:12px; color:#555; }
-    .print-footer { text-align:center; color:#999; font-size:11px; margin-top:40px; border-top:1px solid #eee; padding-top:14px; }
+    @page { size: A4 portrait; margin: 0; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { font-family: Arial, 'DejaVu Sans', Helvetica, sans-serif; font-size: 9pt; color: #1e293b; line-height: 1.5; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    table { width: 100%; max-width: 100%; border-collapse: collapse; table-layout: fixed; }
+    .page { width: auto; min-height: auto; padding: 20mm; }
+    .accent { height: 2.5px; background: #0f172a; margin: 0 0 16px 0; }
+    .doc-head td { vertical-align: top; padding: 0; }
+    .doc-title { font-size: 16pt; font-weight: 700; color: #0f172a; line-height: 1.15; letter-spacing: 0.3px; }
+    .doc-sub { font-size: 8.5pt; color: #64748b; margin-top: 3px; }
+    .doc-sub strong { color: #334155; font-weight: 700; }
+    .doc-meta { text-align: right; font-size: 7.5pt; color: #64748b; line-height: 1.6; }
+    .doc-meta strong { color: #334155; font-weight: 700; }
+    .doc-meta .store-name { font-size: 8.5pt; color: #0f172a; font-weight: 700; }
+    .status-badge { display: inline-block; border: 1px solid #0f172a; color: #0f172a; font-size: 7pt; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; padding: 2px 7px; margin-top: 6px; }
+    .section { margin-bottom: 14px; }
+    .section h3 { font-size: 7pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #0f172a; margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px solid #e2e8f0; }
+    .kv { font-size: 8.5pt; color: #334155; line-height: 1.6; }
+    .kv .muted { color: #64748b; }
+    .meta-grid td { vertical-align: top; padding-right: 16px; width: 33.33%; }
+    .meta-grid td:last-child { padding-right: 0; }
+    .meta-grid .person { font-size: 9pt; font-weight: 700; color: #0f172a; margin-bottom: 3px; }
+    .meta-grid .addr { font-size: 8.5pt; color: #334155; line-height: 1.6; }
+    .items th { background: #0f172a; color: #ffffff; font-weight: 700; font-size: 7pt; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 9px; text-align: left; }
+    .items td { padding: 7px 9px; border-bottom: 1px solid #e2e8f0; font-size: 8.5pt; vertical-align: top; color: #1e293b; }
+    .items tr:last-child td { border-bottom-color: #cbd5e1; }
+    .items .opt { color: #64748b; font-size: 7.5pt; margin-top: 2px; line-height: 1.4; }
+    .text-right { text-align: right; }
+    .no-wrap { white-space: nowrap; }
+    .totals { width: 260px; margin-left: auto; margin-top: 10px; }
+    .totals td { padding: 4px 9px; font-size: 8.5pt; color: #334155; }
+    .totals .grand td { font-weight: 700; font-size: 10pt; color: #0f172a; border-top: 2px solid #0f172a; padding-top: 7px; }
+    .note { margin-top: 14px; border-left: 2px solid #e2e8f0; padding-left: 10px; }
+    .note h3 { border: 0; padding: 0; margin-bottom: 4px; }
+    .note p { font-size: 8.5pt; color: #475569; line-height: 1.6; }
+    .page-foot { margin-top: 22px; border-top: 1px solid #e2e8f0; padding-top: 10px; text-align: center; color: #94a3b8; font-size: 7pt; line-height: 1.6; }
   </style>
 </head>
 <body>
   {% for order in orders %}
-  <div class="print-order"{% if not loop.last %} style="page-break-after: always;"{% endif %}>
-    <table class="print-header">
+  <div class="page"{% if not loop.last %} style="page-break-after: always;"{% endif %}>
+    <table class="doc-head">
       <tr>
         <td>
-          <h1>{{ order.heading_title }}</h1>
-          <p class="print-status">{{ order.order_status }}</p>
+          <div class="doc-title">{{ order.heading_title }}</div>
+          {% if order.order_status %}<div class="status-badge">{{ order.order_status }}</div>{% endif %}
+          {% if order.invoice_no %}<div class="doc-sub"><strong>{{ text_invoice_no }}</strong> {{ order.invoice_no }}</div>{% endif %}
         </td>
-        <td class="print-header-right">
-          <p>{{ order.store_name }}</p>
-          <p>{{ order.store_url }}</p>
-          <p>{{ order.date_added }}</p>
-          {% if order.invoice_no %}
-          <p><strong>{{ text_invoice_no }}</strong> {{ order.invoice_no }}</p>
+        <td class="doc-meta">
+          <div class="store-name">{{ order.store_name }}</div>
+          <div>{{ order.store_url }}</div>
+          <div><strong>{{ text_date_added }}:</strong> {{ order.date_added }}</div>
+          <div style="margin-top: 2px; color: #94a3b8;">{{ text_order_id }} {{ order.order_id }}</div>
+        </td>
+      </tr>
+    </table>
+    <div class="accent"></div>
+
+    <div class="section">
+      <table class="meta-grid">
+        <tr>
+          <td>
+            <h3>{{ text_customer_detail }}</h3>
+            <div class="person">{{ order.firstname }} {{ order.lastname }}</div>
+            <div class="kv">{{ order.email }}<br>{{ order.telephone }}</div>
+          </td>
+          <td>
+            <h3>{{ text_payment_address }}</h3>
+            <div class="addr">{{ order.payment_address|raw }}</div>
+            <div class="kv" style="margin-top: 6px; font-size: 7.5pt;"><span class="muted">{{ text_payment_method }}:</span> {{ order.payment_method }}</div>
+          </td>
+          {% if order.shipping_method %}
+          <td>
+            <h3>{{ text_shipping_address }}</h3>
+            <div class="addr">{{ order.shipping_address|raw }}</div>
+            <div class="kv" style="margin-top: 6px; font-size: 7.5pt;"><span class="muted">{{ text_shipping_method }}:</span> {{ order.shipping_method }}</div>
+          </td>
           {% endif %}
-        </td>
-      </tr>
-    </table>
-
-    <table class="print-meta">
-      <tr>
-        <td>
-          <h3>{{ text_customer_detail }}</h3>
-          <p>{{ order.firstname }} {{ order.lastname }}<br>{{ order.email }}<br>{{ order.telephone }}</p>
-        </td>
-        <td>
-          <h3>{{ text_payment_address }}</h3>
-          <p>{{ order.payment_address|raw }}</p>
-          <p><strong>{{ text_payment_method }}:</strong> {{ order.payment_method }}</p>
-        </td>
-        {% if order.shipping_method %}
-        <td>
-          <h3>{{ text_shipping_address }}</h3>
-          <p>{{ order.shipping_address|raw }}</p>
-          <p><strong>{{ text_shipping_method }}:</strong> {{ order.shipping_method }}</p>
-        </td>
+        </tr>
+        {% if order.tracking_number %}
+        <tr>
+          <td colspan="3" style="padding-top: 10px;">
+            <h3>{{ text_tracking_number }}</h3>
+            <div class="kv">{{ order.tracking_number|replace({'|': ' · '}) }}</div>
+          </td>
+        </tr>
         {% endif %}
-      </tr>
-      {% if order.tracking_number %}
-      <tr>
-        <td colspan="3">
-          <h3>{{ text_tracking_number }}</h3>
-          <p>{{ order.tracking_number|replace({'|': ' | '}) }}</p>
-        </td>
-      </tr>
-      {% endif %}
-    </table>
+      </table>
+    </div>
 
-    <table class="print-products">
+    <table class="items">
       <thead>
         <tr>
-          <th>{{ column_product }}</th>
-          <th>{{ column_model }}</th>
-          <th class="text-right">{{ column_quantity }}</th>
-          <th class="text-right">{{ column_price }}</th>
-          <th class="text-right">{{ column_total }}</th>
+          <th style="width: 46%;">{{ column_product }}</th>
+          <th style="width: 18%;">{{ column_model }}</th>
+          <th class="text-right" style="width: 12%;">{{ column_quantity }}</th>
+          <th class="text-right" style="width: 12%;">{{ column_price }}</th>
+          <th class="text-right" style="width: 12%;">{{ column_total }}</th>
         </tr>
       </thead>
       <tbody>
         {% for product in order.products %}
         <tr>
-          <td>{{ product.name }}{% if product.option %}<div class="option-line">{{ product.option }}</div>{% endif %}</td>
-          <td>{{ product.model }}</td>
-          <td class="text-right">{{ product.quantity }}</td>
-          <td class="text-right">{{ product.price }}</td>
-          <td class="text-right">{{ product.total }}</td>
+          <td>{{ product.name }}{% if product.option %}<div class="opt">{{ product.option }}</div>{% endif %}</td>
+          <td style="color: #64748b; font-size: 8pt;">{{ product.model }}</td>
+          <td class="text-right no-wrap">{{ product.quantity }}</td>
+          <td class="text-right no-wrap">{{ product.price }}</td>
+          <td class="text-right no-wrap" style="font-weight: 700;">{{ product.total }}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
 
-    <table class="print-totals">
+    <table class="totals">
       {% for total in order.totals %}
-      <tr{% if loop.last %} class="grand-total"{% endif %}>
+      <tr{% if loop.last %} class="grand"{% endif %}>
         <td>{{ total.title }}</td>
-        <td class="text-right">{{ total.text }}</td>
+        <td class="text-right no-wrap">{{ total.text }}</td>
       </tr>
       {% endfor %}
     </table>
 
     {% if order.comment %}
-    <div class="print-comment">
+    <div class="note">
       <h3>{{ text_comment }}</h3>
       <p>{{ order.comment|nl2br }}</p>
     </div>
     {% endif %}
+
+    <div class="page-foot">
+      <div>{{ order.store_name }} · {{ order.store_url }}</div>
+      <div>{{ text_print_date }}: {{ "now"|date("Y-m-d H:i:s") }}</div>
+    </div>
   </div>
   {% endfor %}
-
-  <div class="print-footer">
-    <p>{{ text_print_date }}: {{ "now"|date("Y-m-d H:i:s") }}</p>
-  </div>
 </body>
 </html>

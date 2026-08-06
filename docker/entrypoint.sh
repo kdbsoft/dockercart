@@ -14,6 +14,8 @@ fix_permissions() {
 
     if [ -d "/var/www/storage" ]; then
         chmod -R 775 /var/www/storage 2>/dev/null || true
+        mkdir -p /var/www/storage/documents/invoices 2>/dev/null || true
+        chmod 2775 /var/www/storage/documents /var/www/storage/documents/invoices 2>/dev/null || true
     fi
 
     # Writable dirs for uploads

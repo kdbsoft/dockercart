@@ -24,6 +24,7 @@ $_['text_history'] = 'История заказов';
 $_['text_order'] = 'Информация о заказе';
 $_['text_order_detail'] = 'Детали заказа';
 $_['text_order_id'] = 'Номер заказа:';
+$_['text_invoice_no'] = 'Счёт №:';
 $_['text_payment_address'] = 'Адрес для оплаты';
 $_['text_payment_method'] = 'Способ оплаты:';
 $_['text_shipping_address'] = 'Адрес доставки';

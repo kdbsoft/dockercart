@@ -25,6 +25,7 @@ $_['text_history'] = 'Історія замовлень';
 $_['text_order'] = 'Інформація про замовлення';
 $_['text_order_detail'] = 'Деталі замовлення';
 $_['text_order_id'] = 'Номер замовлення:';
+$_['text_invoice_no'] = 'Рахунок №:';
 $_['text_payment_address'] = 'Адреса для оплати';
 $_['text_payment_method'] = 'Спосіб оплати:';
 $_['text_shipping_address'] = 'Адреса доставки';

@@ -17,7 +17,7 @@
               <i data-lucide="pencil" width="16" height="16"></i> {{ button_edit }}
             </button>
             <a href="{{ invoice_url }}" target="_blank" class="btn btn-primary">
-              <i data-lucide="file-text" width="16" height="16"></i> {{ button_invoice }}
+              <i data-lucide="file-text" width="16" height="16"></i> {{ button_invoice }}{% if invoice_no %} № {{ invoice_no }}{% endif %}
             </a>
             <a href="{{ print_url }}" target="_blank" class="btn btn-default">
               <i data-lucide="printer" width="16" height="16"></i> {{ button_print }}
