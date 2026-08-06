@@ -9,12 +9,9 @@
             <span class="page-header__back">
               <i data-lucide="arrow-left" width="20" height="20"></i>
             </span>
-            <span class="page-header__title">
-              {{ heading_title }}
-              <span class="page-header__badge {{ module_dockercart_search_status ? 'page-header__badge--active' : 'page-header__badge--inactive' }}">
-                {{ module_dockercart_search_status ? text_active : text_inactive }}
-              </span>
-            </span>
+             <span class="page-header__title">
+               {{ heading_title }}
+             </span>
           </a>
           <div class="pull-right">
             <button type="submit" form="form-dockercart-search" class="btn btn-primary"><i data-lucide="save" width="16" height="16"></i> {{ button_save }}</button>
@@ -55,18 +52,6 @@
             </div>
             <div class="dcx-panel-body">
               <div class="dcx-fields">
-                <div class="dcx-field">
-                  <label class="dcx-label" for="input-status">{{ entry_status }} <span data-toggle="tooltip" title="{{ help_status }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
-                  <select name="module_dockercart_search_status" id="input-status" class="form-control">
-                    {% if module_dockercart_search_status %}
-                    <option value="1" selected="selected">{{ text_enabled }}</option>
-                    <option value="0">{{ text_disabled }}</option>
-                    {% else %}
-                    <option value="1">{{ text_enabled }}</option>
-                    <option value="0" selected="selected">{{ text_disabled }}</option>
-                    {% endif %}
-                  </select>
-                </div>
                 <div class="dcx-field">
                   <label class="dcx-label" for="input-min-chars">{{ entry_min_chars }} <span data-toggle="tooltip" title="{{ help_min_chars }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                   <input type="number" name="module_dockercart_search_min_chars" value="{{ module_dockercart_search_min_chars }}" id="input-min-chars" class="form-control" style="max-width:120px;" />

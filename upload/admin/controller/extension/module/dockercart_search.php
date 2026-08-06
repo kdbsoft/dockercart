@@ -86,7 +86,6 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
         $data['error_warning'] = isset($this->error['warning']) ? $this->error['warning'] : '';
 
         // Module settings
-        $data['module_dockercart_search_status'] = $this->getConfigValue('module_dockercart_search_status', 0);
         $data['module_dockercart_search_host'] = $this->getConfigValue('module_dockercart_search_host', 'manticore');
         $data['module_dockercart_search_port'] = $this->getConfigValue('module_dockercart_search_port', 9306);
         $data['module_dockercart_search_http_port'] = $this->getConfigValue('module_dockercart_search_http_port', 9308);
@@ -181,188 +180,13 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
      */
     public function install() {
         $this->load->model('extension/module/dockercart_search');
-        $this->load->model('setting/event');
         $this->load->model('setting/setting');
-
-        // Register events for automatic indexing
-        $events = [
-            // Product events
-            [
-                'code'    => 'dockercart_search_product_add',
-                'trigger' => 'admin/model/catalog/product/addProduct/after',
-                'action'  => 'extension/module/dockercart_search/eventProductAdd'
-            ],
-            [
-                'code'    => 'dockercart_search_product_edit',
-                'trigger' => 'admin/model/catalog/product/editProduct/after',
-                'action'  => 'extension/module/dockercart_search/eventProductEdit'
-            ],
-            [
-                'code'    => 'dockercart_search_product_delete',
-                'trigger' => 'admin/model/catalog/product/deleteProduct/after',
-                'action'  => 'extension/module/dockercart_search/eventProductDelete'
-            ],
-
-            // Configurable product variant events (variant articles are indexed with the product)
-            [
-                'code'    => 'dockercart_search_variant_add',
-                'trigger' => 'admin/model/catalog/product_configurable/addVariant/after',
-                'action'  => 'extension/module/dockercart_search/eventVariantAdd'
-            ],
-            [
-                'code'    => 'dockercart_search_variant_edit',
-                'trigger' => 'admin/model/catalog/product_configurable/updateVariant/after',
-                'action'  => 'extension/module/dockercart_search/eventVariantEdit'
-            ],
-            [
-                'code'    => 'dockercart_search_variant_delete',
-                'trigger' => 'admin/model/catalog/product_configurable/deleteVariant/after',
-                'action'  => 'extension/module/dockercart_search/eventVariantDelete'
-            ],
-            [
-                'code'    => 'dockercart_search_variant_delete_all',
-                'trigger' => 'admin/model/catalog/product_configurable/deleteAllVariants/after',
-                'action'  => 'extension/module/dockercart_search/eventVariantDeleteAll'
-            ],
-
-            // Category events
-            [
-                'code'    => 'dockercart_search_category_add',
-                'trigger' => 'admin/model/catalog/category/addCategory/after',
-                'action'  => 'extension/module/dockercart_search/eventCategoryAdd'
-            ],
-            [
-                'code'    => 'dockercart_search_category_edit',
-                'trigger' => 'admin/model/catalog/category/editCategory/after',
-                'action'  => 'extension/module/dockercart_search/eventCategoryEdit'
-            ],
-            [
-                'code'    => 'dockercart_search_category_delete',
-                'trigger' => 'admin/model/catalog/category/deleteCategory/after',
-                'action'  => 'extension/module/dockercart_search/eventCategoryDelete'
-            ],
-
-            // Manufacturer events
-            [
-                'code'    => 'dockercart_search_manufacturer_add',
-                'trigger' => 'admin/model/catalog/manufacturer/addManufacturer/after',
-                'action'  => 'extension/module/dockercart_search/eventManufacturerAdd'
-            ],
-            [
-                'code'    => 'dockercart_search_manufacturer_edit',
-                'trigger' => 'admin/model/catalog/manufacturer/editManufacturer/after',
-                'action'  => 'extension/module/dockercart_search/eventManufacturerEdit'
-            ],
-            [
-                'code'    => 'dockercart_search_manufacturer_delete',
-                'trigger' => 'admin/model/catalog/manufacturer/deleteManufacturer/after',
-                'action'  => 'extension/module/dockercart_search/eventManufacturerDelete'
-            ],
-
-            // Information events
-            [
-                'code'    => 'dockercart_search_information_add',
-                'trigger' => 'admin/model/catalog/information/addInformation/after',
-                'action'  => 'extension/module/dockercart_search/eventInformationAdd'
-            ],
-            [
-                'code'    => 'dockercart_search_information_edit',
-                'trigger' => 'admin/model/catalog/information/editInformation/after',
-                'action'  => 'extension/module/dockercart_search/eventInformationEdit'
-            ],
-            [
-                'code'    => 'dockercart_search_information_delete',
-                'trigger' => 'admin/model/catalog/information/deleteInformation/after',
-                'action'  => 'extension/module/dockercart_search/eventInformationDelete'
-            ],
-
-            // Order events
-            [
-                'code'    => 'dockercart_search_order_add',
-                'trigger' => 'catalog/model/checkout/order/addOrder/after',
-                'action'  => 'extension/module/dockercart_search/eventOrderAdd'
-            ],
-            [
-                'code'    => 'dockercart_search_order_edit',
-                'trigger' => 'catalog/model/checkout/order/editOrder/after',
-                'action'  => 'extension/module/dockercart_search/eventOrderEdit'
-            ],
-            [
-                'code'    => 'dockercart_search_order_delete',
-                'trigger' => 'catalog/model/checkout/order/deleteOrder/after',
-                'action'  => 'extension/module/dockercart_search/eventOrderDelete'
-            ],
-            [
-                'code'    => 'dockercart_search_order_status_change',
-                'trigger' => 'catalog/model/checkout/order/addOrderHistory/after',
-                'action'  => 'extension/module/dockercart_search/eventOrderStatusChange'
-            ],
-
-            // Customer events (admin)
-            [
-                'code'    => 'dockercart_search_customer_add',
-                'trigger' => 'admin/model/customer/customer/addCustomer/after',
-                'action'  => 'extension/module/dockercart_search/eventCustomerAdd'
-            ],
-            [
-                'code'    => 'dockercart_search_customer_edit',
-                'trigger' => 'admin/model/customer/customer/editCustomer/after',
-                'action'  => 'extension/module/dockercart_search/eventCustomerEdit'
-            ],
-            [
-                'code'    => 'dockercart_search_customer_delete',
-                'trigger' => 'admin/model/customer/customer/deleteCustomer/after',
-                'action'  => 'extension/module/dockercart_search/eventCustomerDelete'
-            ],
-
-            // Customer events (catalog)
-            [
-                'code'    => 'dockercart_search_customer_add_front',
-                'trigger' => 'catalog/model/account/customer/addCustomer/after',
-                'action'  => 'extension/module/dockercart_search/eventCustomerAddFront'
-            ],
-            [
-                'code'    => 'dockercart_search_customer_edit_front',
-                'trigger' => 'catalog/model/account/customer/editCustomer/after',
-                'action'  => 'extension/module/dockercart_search/eventCustomerEditFront'
-            ],
-
-            // Frontend: Add autocomplete script to header
-            [
-                'code'    => 'dockercart_search_autocomplete',
-                'trigger' => 'catalog/view/common/header/after',
-                'action'  => 'extension/module/dockercart_search/addAutocompleteScript'
-            ],
-
-            // Frontend: Override standard search with Manticore (after getProducts completes)
-            [
-                'code'    => 'dockercart_search_override',
-                'trigger' => 'catalog/model/catalog/product/getProducts/after',
-                'action'  => 'extension/module/dockercart_search/overrideGetProducts'
-            ]
-        ];
-
-        foreach ($events as $event) {
-            // Delete if exists (for clean reinstall)
-            $this->db->query("DELETE FROM `" . DB_PREFIX . "event` WHERE `code` = '" . $this->db->escape($event['code']) . "'");
-
-            // Add event
-            $this->model_setting_event->addEvent(
-                $event['code'],
-                $event['trigger'],
-                $event['action']
-            );
-        }
-
-        // Register admin menu event
-        $this->registerMenuEvent();
 
         // Create the query mappings table and migrate any legacy config data
         $this->model_extension_module_dockercart_search->ensureMappingTable();
 
         // Set default settings
         $this->model_setting_setting->editSetting('module_dockercart_search', [
-            'module_dockercart_search_status' => 0,
             'module_dockercart_search_host' => 'manticore',
             'module_dockercart_search_port' => 9306,
             'module_dockercart_search_http_port' => 9308,
@@ -378,47 +202,10 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
     }
 
     /**
-     * Uninstall module - removes events
+     * Uninstall is a no-op for this system module — events are managed in init.sql.
      */
     public function uninstall() {
-        $this->load->model('setting/event');
-
-        // Remove all events
-        $events = [
-            'dockercart_search_product_add',
-            'dockercart_search_product_edit',
-            'dockercart_search_product_delete',
-            'dockercart_search_variant_add',
-            'dockercart_search_variant_edit',
-            'dockercart_search_variant_delete',
-            'dockercart_search_variant_delete_all',
-            'dockercart_search_category_add',
-            'dockercart_search_category_edit',
-            'dockercart_search_category_delete',
-            'dockercart_search_manufacturer_add',
-            'dockercart_search_manufacturer_edit',
-            'dockercart_search_manufacturer_delete',
-            'dockercart_search_information_add',
-            'dockercart_search_information_edit',
-            'dockercart_search_information_delete',
-            'dockercart_search_order_add',
-            'dockercart_search_order_edit',
-            'dockercart_search_order_delete',
-            'dockercart_search_order_status_change',
-            'dockercart_search_customer_add',
-            'dockercart_search_customer_edit',
-            'dockercart_search_customer_delete',
-            'dockercart_search_customer_add_front',
-            'dockercart_search_customer_edit_front',
-            'dockercart_search_override',
-            'dockercart_search_admin_menu'
-        ];
-
-        foreach ($events as $event_code) {
-            $this->db->query("DELETE FROM `" . DB_PREFIX . "event` WHERE `code` = '" . $this->db->escape($event_code) . "'");
-        }
-
-        $this->logger->info('Module uninstalled successfully');
+        $this->logger->info('System module uninstall is a no-op');
     }
 
     /**
@@ -718,23 +505,21 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
 
     // Event handlers (will be called by OpenCart event system)
 
-    public function eventProductAdd($route, $args, $output) {
-        if ($this->config->get('module_dockercart_search_status')) {
-            $this->load->model('extension/module/dockercart_search');
-            $this->load->model('localisation/language');
+	public function eventProductAdd($route, $args, $output) {
+        $this->load->model('extension/module/dockercart_search');
+        $this->load->model('localisation/language');
 
-            $languages = $this->model_localisation_language->getLanguages();
+        $languages = $this->model_localisation_language->getLanguages();
 
-            foreach ($languages as $language) {
-                $this->model_extension_module_dockercart_search->indexProduct($output, $language['language_id']);
-            }
-
-            $this->logger->info("Product {$output} indexed for all languages");
+        foreach ($languages as $language) {
+            $this->model_extension_module_dockercart_search->indexProduct($output, $language['language_id']);
         }
+
+        $this->logger->info("Product {$output} indexed for all languages");
     }
 
     public function eventProductEdit($route, $args) {
-        if ($this->config->get('module_dockercart_search_status') && isset($args[0])) {
+        if (isset($args[0])) {
             $this->load->model('extension/module/dockercart_search');
             $this->load->model('localisation/language');
 
@@ -749,7 +534,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
     }
 
     public function eventProductDelete($route, $args) {
-        if ($this->config->get('module_dockercart_search_status') && isset($args[0])) {
+        if (isset($args[0])) {
             $this->load->model('extension/module/dockercart_search');
             $this->model_extension_module_dockercart_search->deleteProduct($args[0]);
 
@@ -762,7 +547,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
      * addVariant($product_id, $data) — product_id is args[0].
      */
     public function eventVariantAdd($route, $args) {
-        if ($this->config->get('module_dockercart_search_status') && isset($args[0])) {
+        if (isset($args[0])) {
             $this->reindexProductByVariantProductId($args[0]);
         }
     }
@@ -772,7 +557,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
      * updateVariant($variant_id, $data) — variant_id is args[0].
      */
     public function eventVariantEdit($route, $args) {
-        if ($this->config->get('module_dockercart_search_status') && isset($args[0])) {
+        if (isset($args[0])) {
             $this->reindexProductByVariantId((int)$args[0]);
         }
     }
@@ -782,7 +567,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
      * deleteVariant($variant_id) — variant_id is args[0].
      */
     public function eventVariantDelete($route, $args) {
-        if ($this->config->get('module_dockercart_search_status') && isset($args[0])) {
+        if (isset($args[0])) {
             $this->reindexProductByVariantId((int)$args[0]);
         }
     }
@@ -792,7 +577,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
      * deleteAllVariants($product_id) — product_id is args[0].
      */
     public function eventVariantDeleteAll($route, $args) {
-        if ($this->config->get('module_dockercart_search_status') && isset($args[0])) {
+        if (isset($args[0])) {
             $this->reindexProductByVariantProductId($args[0]);
         }
     }
@@ -828,22 +613,20 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
     }
 
     public function eventCategoryAdd($route, $args, $output) {
-        if ($this->config->get('module_dockercart_search_status')) {
-            $this->load->model('extension/module/dockercart_search');
-            $this->load->model('localisation/language');
+        $this->load->model('extension/module/dockercart_search');
+        $this->load->model('localisation/language');
 
-            $languages = $this->model_localisation_language->getLanguages();
+        $languages = $this->model_localisation_language->getLanguages();
 
-            foreach ($languages as $language) {
-                $this->model_extension_module_dockercart_search->indexCategory($output, $language['language_id']);
-            }
-
-            $this->logger->info("Category {$output} indexed for all languages");
+        foreach ($languages as $language) {
+            $this->model_extension_module_dockercart_search->indexCategory($output, $language['language_id']);
         }
+
+        $this->logger->info("Category {$output} indexed for all languages");
     }
 
     public function eventCategoryEdit($route, $args) {
-        if ($this->config->get('module_dockercart_search_status') && isset($args[0])) {
+        if (isset($args[0])) {
             $this->load->model('extension/module/dockercart_search');
             $this->load->model('localisation/language');
 
@@ -858,7 +641,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
     }
 
     public function eventCategoryDelete($route, $args) {
-        if ($this->config->get('module_dockercart_search_status') && isset($args[0])) {
+        if (isset($args[0])) {
             $this->load->model('extension/module/dockercart_search');
             $this->model_extension_module_dockercart_search->deleteCategory($args[0]);
 
@@ -867,16 +650,14 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
     }
 
     public function eventManufacturerAdd($route, $args, $output) {
-        if ($this->config->get('module_dockercart_search_status')) {
-            $this->load->model('extension/module/dockercart_search');
-            $this->model_extension_module_dockercart_search->indexManufacturer($output);
+        $this->load->model('extension/module/dockercart_search');
+        $this->model_extension_module_dockercart_search->indexManufacturer($output);
 
-            $this->logger->info("Manufacturer {$output} indexed");
-        }
+        $this->logger->info("Manufacturer {$output} indexed");
     }
 
     public function eventManufacturerEdit($route, $args) {
-        if ($this->config->get('module_dockercart_search_status') && isset($args[0])) {
+        if (isset($args[0])) {
             $this->load->model('extension/module/dockercart_search');
             $this->model_extension_module_dockercart_search->indexManufacturer($args[0]);
 
@@ -885,7 +666,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
     }
 
     public function eventManufacturerDelete($route, $args) {
-        if ($this->config->get('module_dockercart_search_status') && isset($args[0])) {
+        if (isset($args[0])) {
             $this->load->model('extension/module/dockercart_search');
             $this->model_extension_module_dockercart_search->deleteManufacturer($args[0]);
 
@@ -894,22 +675,20 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
     }
 
     public function eventInformationAdd($route, $args, $output) {
-        if ($this->config->get('module_dockercart_search_status')) {
-            $this->load->model('extension/module/dockercart_search');
-            $this->load->model('localisation/language');
+        $this->load->model('extension/module/dockercart_search');
+        $this->load->model('localisation/language');
 
-            $languages = $this->model_localisation_language->getLanguages();
+        $languages = $this->model_localisation_language->getLanguages();
 
-            foreach ($languages as $language) {
-                $this->model_extension_module_dockercart_search->indexInformation($output, $language['language_id']);
-            }
-
-            $this->logger->info("Information page {$output} indexed for all languages");
+        foreach ($languages as $language) {
+            $this->model_extension_module_dockercart_search->indexInformation($output, $language['language_id']);
         }
+
+        $this->logger->info("Information page {$output} indexed for all languages");
     }
 
     public function eventInformationEdit($route, $args) {
-        if ($this->config->get('module_dockercart_search_status') && isset($args[0])) {
+        if (isset($args[0])) {
             $this->load->model('extension/module/dockercart_search');
             $this->load->model('localisation/language');
 
@@ -924,7 +703,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
     }
 
     public function eventInformationDelete($route, $args) {
-        if ($this->config->get('module_dockercart_search_status') && isset($args[0])) {
+        if (isset($args[0])) {
             $this->load->model('extension/module/dockercart_search');
             $this->model_extension_module_dockercart_search->deleteInformation($args[0]);
 
@@ -933,16 +712,14 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
     }
 
     public function eventOrderAdd($route, $args, $output) {
-        if ($this->config->get('module_dockercart_search_status')) {
-            $this->load->model('extension/module/dockercart_search');
-            $this->model_extension_module_dockercart_search->indexOrder($output);
+        $this->load->model('extension/module/dockercart_search');
+        $this->model_extension_module_dockercart_search->indexOrder($output);
 
-            $this->logger->info("Order {$output} indexed");
-        }
+        $this->logger->info("Order {$output} indexed");
     }
 
     public function eventOrderEdit($route, $args) {
-        if ($this->config->get('module_dockercart_search_status') && isset($args[0])) {
+        if (isset($args[0])) {
             $this->load->model('extension/module/dockercart_search');
             $this->model_extension_module_dockercart_search->indexOrder($args[0]);
 
@@ -951,7 +728,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
     }
 
     public function eventOrderDelete($route, $args) {
-        if ($this->config->get('module_dockercart_search_status') && isset($args[0])) {
+        if (isset($args[0])) {
             $this->load->model('extension/module/dockercart_search');
             $this->model_extension_module_dockercart_search->deleteOrder($args[0]);
 
@@ -960,7 +737,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
     }
 
     public function eventOrderStatusChange($route, $args) {
-        if ($this->config->get('module_dockercart_search_status') && isset($args[0])) {
+        if (isset($args[0])) {
             $this->load->model('extension/module/dockercart_search');
             $this->model_extension_module_dockercart_search->indexOrder($args[0]);
 
@@ -969,16 +746,14 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
     }
 
     public function eventCustomerAdd($route, $args, $output) {
-        if ($this->config->get('module_dockercart_search_status')) {
-            $this->load->model('extension/module/dockercart_search');
-            $this->model_extension_module_dockercart_search->indexCustomer($output);
+        $this->load->model('extension/module/dockercart_search');
+        $this->model_extension_module_dockercart_search->indexCustomer($output);
 
-            $this->logger->info("Customer {$output} indexed");
-        }
+        $this->logger->info("Customer {$output} indexed");
     }
 
     public function eventCustomerEdit($route, $args) {
-        if ($this->config->get('module_dockercart_search_status') && isset($args[0])) {
+        if (isset($args[0])) {
             $this->load->model('extension/module/dockercart_search');
             $this->model_extension_module_dockercart_search->indexCustomer($args[0]);
 
@@ -987,7 +762,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
     }
 
     public function eventCustomerDelete($route, $args) {
-        if ($this->config->get('module_dockercart_search_status') && isset($args[0])) {
+        if (isset($args[0])) {
             $this->load->model('extension/module/dockercart_search');
             $this->model_extension_module_dockercart_search->deleteCustomer($args[0]);
 
@@ -996,16 +771,14 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
     }
 
     public function eventCustomerAddFront($route, $args, $output) {
-        if ($this->config->get('module_dockercart_search_status')) {
-            $this->load->model('extension/module/dockercart_search');
-            $this->model_extension_module_dockercart_search->indexCustomer($output);
+        $this->load->model('extension/module/dockercart_search');
+        $this->model_extension_module_dockercart_search->indexCustomer($output);
 
-            $this->logger->info("Customer {$output} indexed (front registration)");
-        }
+        $this->logger->info("Customer {$output} indexed (front registration)");
     }
 
     public function eventCustomerEditFront($route, $args) {
-        if ($this->config->get('module_dockercart_search_status') && isset($args[0])) {
+        if (isset($args[0])) {
             $this->load->model('extension/module/dockercart_search');
             $this->model_extension_module_dockercart_search->indexCustomer($args[0]);
 

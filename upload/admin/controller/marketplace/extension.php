@@ -6,6 +6,7 @@ class ControllerMarketplaceExtension extends Controller {
 	private $system_extensions = array(
 		'dockercart_theme',
 		'dockercart_checkout',
+		'dockercart_search',
 	);
 
 	// Icon map per extension type
