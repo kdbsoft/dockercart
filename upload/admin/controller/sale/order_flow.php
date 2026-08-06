@@ -70,6 +70,12 @@ class ControllerSaleOrderFlow extends Controller {
 		} else {
 			$this->setSetting('config_order_flow_shipping_status', '0', 0);
 		}
+
+		$this->setSetting('config_reward_auto_award', isset($this->request->post['reward_auto_award']) ? '1' : '0', 0);
+		$this->setSetting('config_reward_auto_revoke', isset($this->request->post['reward_auto_revoke']) ? '1' : '0', 0);
+
+		$reward_delay_days = max(0, (int)($this->request->post['reward_delay_days'] ?? 14));
+		$this->setSetting('config_reward_delay_days', (string)$reward_delay_days, 0);
 	}
 
 	protected function setSetting($key, $value, $serialized): void {
@@ -96,6 +102,10 @@ class ControllerSaleOrderFlow extends Controller {
 		$data['cancel'] = $this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'], true);
 
 		$data['shipping_status_id'] = (int)$this->config->get('config_order_flow_shipping_status');
+
+		$data['reward_auto_award'] = (bool)$this->config->get('config_reward_auto_award');
+		$data['reward_auto_revoke'] = (bool)$this->config->get('config_reward_auto_revoke');
+		$data['reward_delay_days'] = (int)$this->config->get('config_reward_delay_days');
 
 		$this->load->model('localisation/order_status');
 

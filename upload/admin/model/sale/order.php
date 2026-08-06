@@ -231,6 +231,8 @@ class ModelSaleOrder extends Model {
 				'total'                   => $order_query->row['total'],
 				'paid_amount'             => $order_query->row['paid_amount'],
 				'reward'                  => $reward,
+				'reward_awarded'          => (int)$order_query->row['reward_awarded'],
+				'reward_revoked_points'   => (int)$order_query->row['reward_revoked_points'],
 				'order_status_id'         => $order_query->row['order_status_id'],
 				'order_status'            => $order_query->row['order_status'],
 				'affiliate_id'            => $order_query->row['affiliate_id'],
@@ -1874,6 +1876,17 @@ class ModelSaleOrder extends Model {
 
 			$this->db->query("UPDATE `" . DB_PREFIX . "order` SET paid_amount = paid_amount - '" . (float)$refund . "', date_modified = NOW() WHERE order_id = '" . (int)$order_id . "'");
 
+			// Partial refund → revoke reward points proportionally to the
+			// refunded share of what was paid before this refund. Idempotent:
+			// reward_revoked_points already includes previous revocations, so
+			// repeated partial refunds converge to zero.
+			$paid_before_refund = (float)$order_info['paid_amount'];
+
+			if ($paid_before_refund > 0) {
+				$dockercart_reward = new \DockercartReward($this->registry);
+				$dockercart_reward->revokeOrderReward((int)$order_id, $refund / $paid_before_refund);
+			}
+
 			if ($note_key === '') {
 				$note_key = 'text_return_refund_note';
 				$note_params = array($return_id);
@@ -2248,6 +2261,9 @@ class ModelSaleOrder extends Model {
 			$was_processing = in_array($old_status_id, array_merge($processing_statuses, $complete_statuses));
 			$is_processing = in_array((int)$order_status_id, array_merge($processing_statuses, $complete_statuses));
 
+			$was_complete = in_array($old_status_id, $complete_statuses);
+			$is_complete = in_array((int)$order_status_id, $complete_statuses);
+
 			// Transition from non-proc/complete to proc/complete → subtract stock, add affiliate commission
 			if (!$was_processing && $is_processing) {
 				$order_products = $this->getOrderProducts($order_id);
@@ -2267,6 +2283,13 @@ class ModelSaleOrder extends Model {
 				if ((int)$lock_query->row['affiliate_id'] && $this->config->get('config_affiliate_auto')) {
 					$this->db->query("INSERT INTO `" . DB_PREFIX . "customer_transaction` SET customer_id = '" . (int)$lock_query->row['affiliate_id'] . "', order_id = '" . (int)$order_id . "', description = '" . $this->db->escape('Order #' . $order_id) . "', amount = '" . (float)$lock_query->row['commission'] . "', date_added = NOW()");
 				}
+			}
+
+			// Entering a complete status → auto-award the order's reward points
+			// (idempotent: oc_order.reward_awarded flips once, never resets).
+			if (!$was_complete && $is_complete) {
+				$dockercart_reward = new \DockercartReward($this->registry);
+				$dockercart_reward->awardOrderReward((int)$order_id);
 			}
 
 			$this->db->query("UPDATE `" . DB_PREFIX . "order` SET order_status_id = '" . (int)$order_status_id . "', date_modified = NOW() WHERE order_id = '" . (int)$order_id . "'");
@@ -2292,6 +2315,14 @@ class ModelSaleOrder extends Model {
 				if ((int)$lock_query->row['affiliate_id']) {
 					$this->db->query("DELETE FROM `" . DB_PREFIX . "customer_transaction` WHERE order_id = '" . (int)$order_id . "'");
 				}
+			}
+
+			// Leaving a complete status → revoke the awarded reward points.
+			// Runs after the restock/commission block; the admin flow has no
+			// reward unconfirm() cycle to interfere with.
+			if ($was_complete && !$is_complete) {
+				$dockercart_reward = new \DockercartReward($this->registry);
+				$dockercart_reward->revokeOrderReward((int)$order_id, 1.0);
 			}
 
 			$this->db->query("COMMIT");

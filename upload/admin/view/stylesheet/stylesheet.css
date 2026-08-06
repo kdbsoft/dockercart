@@ -2033,6 +2033,9 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
 }
 
 /* Status accent — override generic blue ::before */
+.ext-card.panel-success {
+    cursor: pointer;
+}
 .ext-card .panel-heading::before {
     background: var(--dc-gray-300);
 }

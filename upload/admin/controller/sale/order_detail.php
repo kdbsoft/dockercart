@@ -266,6 +266,15 @@ class ControllerSaleOrderDetail extends Controller {
 		$this->load->model('customer/customer');
 		$data['reward_total'] = $this->model_customer_customer->getTotalCustomerRewardsByOrderId($order_id);
 
+		$reward_points = $order_info['reward'];
+		$reward_awarded = $reward_points > 0 && $data['reward_total'] > 0;
+		$data['reward_awarded'] = $reward_awarded;
+		$data['reward_awarded_text'] = $reward_awarded
+			? sprintf($this->language->get('text_reward_awarded'), $data['reward_total'])
+			: '';
+
+		$data['reward_delayed'] = (bool)$this->config->get('config_reward_delay_days');
+
 		$coupon_row = $this->model_sale_order->hasCoupon($order_id);
 		$data['coupon_applied'] = (bool)$coupon_row;
 		$data['coupon_title'] = $coupon_row ? $coupon_row['title'] : '';
@@ -1135,7 +1144,10 @@ class ControllerSaleOrderDetail extends Controller {
 				$reward_total = $this->model_customer_customer->getTotalCustomerRewardsByOrderId($order_id);
 
 				if (!$reward_total) {
+					// Manual award marks the order as awarded so the delayed
+					// scheduler run does not double-award it.
 					$this->model_customer_customer->addReward($order_info['customer_id'], $this->language->get('text_order_id') . ' #' . $order_id, $order_info['reward'], $order_id);
+					$this->db->query("UPDATE `" . DB_PREFIX . "order` SET reward_awarded = '1' WHERE order_id = '" . (int)$order_id . "'");
 				}
 			}
 

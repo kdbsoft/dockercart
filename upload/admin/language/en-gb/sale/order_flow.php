@@ -19,6 +19,13 @@ $_['text_flow_shipping_status']      = 'Shipping status (requires tracking numbe
 $_['text_flow_shipping_status_hint'] = 'When the order moves into this status, the transition modal asks for a tracking number and creates a shipment with partial quantities.';
 $_['text_none']                      = 'None';
 
+$_['text_flow_reward_title']         = 'Reward points';
+$_['text_flow_reward_subtitle']      = 'Award and revoke order reward points automatically.';
+$_['text_flow_reward_auto_award']    = 'Auto-award reward points when an order enters a complete status';
+$_['text_flow_reward_auto_revoke']   = 'Auto-revoke reward points on refund or reversal (full or proportional to the refunded amount)';
+$_['text_flow_reward_delay_days']    = 'Award delay (days)';
+$_['text_flow_reward_delay_hint']    = 'Award points N days after the order is completed (default 14). 0 = award immediately. The scheduler checks once a day.';
+
 // Buttons
 $_['button_flow_add_step']           = 'Add step';
 $_['button_flow_add_transition']     = 'Add transition';
