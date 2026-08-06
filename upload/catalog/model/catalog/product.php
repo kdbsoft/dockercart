@@ -621,7 +621,8 @@ class ModelCatalogProduct extends Model {
 				'name'                 => $product_option['name'],
 				'type'                 => $product_option['type'],
 				'value'                => $product_option['value'],
-				'required'             => $product_option['required']
+				'required'             => $product_option['required'],
+				'show_option_price'    => $product_option['show_option_price']
 			);
 		}
 

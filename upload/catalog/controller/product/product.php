@@ -671,7 +671,8 @@ class ControllerProductProduct extends Controller {
 					'name'                 => $option['name'],
 					'type'                 => $option['type'],
 					'value'                => $option['value'],
-					'required'             => $option['required']
+					'required'             => $option['required'],
+					'show_option_price'    => $option['show_option_price']
 				);
 			}
 
