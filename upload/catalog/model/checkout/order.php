@@ -379,8 +379,16 @@ class ModelCheckoutOrder extends Model {
 				$safe = false;
 			}
 
+			$processing_statuses = (array)$this->config->get('config_processing_status');
+			$complete_statuses = (array)$this->config->get('config_complete_status');
+
+			$was_complete = in_array((int)$order_info['order_status_id'], $complete_statuses);
+			$is_complete = in_array((int)$order_status_id, $complete_statuses);
+			$was_processing = in_array((int)$order_info['order_status_id'], array_merge($processing_statuses, $complete_statuses));
+			$is_processing = in_array((int)$order_status_id, array_merge($processing_statuses, $complete_statuses));
+
 			// Only do the fraud check if the customer is not on the safe list and the order status is changing into the complete or process order status
-			if (!$safe && !$override && in_array($order_status_id, array_merge($this->config->get('config_processing_status'), $this->config->get('config_complete_status')))) {
+			if (!$safe && !$override && in_array($order_status_id, array_merge($processing_statuses, $complete_statuses))) {
 				// Anti-Fraud
 				$this->load->model('setting/extension');
 
@@ -402,7 +410,7 @@ class ModelCheckoutOrder extends Model {
 			}
 
 			// If current order status is not processing or complete but new status is processing or complete then commence completing the order
-			if (!in_array($order_info['order_status_id'], array_merge($this->config->get('config_processing_status'), $this->config->get('config_complete_status'))) && in_array($order_status_id, array_merge($this->config->get('config_processing_status'), $this->config->get('config_complete_status')))) {
+			if (!$was_processing && $is_processing) {
 				// Redeem coupon, vouchers and reward points
 				$order_totals = $this->getOrderTotals($order_id);
 
@@ -445,6 +453,13 @@ class ModelCheckoutOrder extends Model {
 				}
 			}
 
+			// Entering a complete status → auto-award the order's reward points
+			// (idempotent: oc_order.reward_awarded flips once, never resets).
+			if (!$was_complete && $is_complete) {
+				$dockercart_reward = new \DockercartReward($this->registry);
+				$dockercart_reward->awardOrderReward((int)$order_id);
+			}
+
 			// Update the DB with the new statuses
 			$this->db->query("UPDATE `" . DB_PREFIX . "order` SET order_status_id = '" . (int)$order_status_id . "', date_modified = NOW() WHERE order_id = '" . (int)$order_id . "'");
 
@@ -454,7 +469,7 @@ class ModelCheckoutOrder extends Model {
 			}
 
 			// If old order status is the processing or complete status but new status is not then commence restock, and remove coupon, voucher and reward history
-			if (in_array($order_info['order_status_id'], array_merge($this->config->get('config_processing_status'), $this->config->get('config_complete_status'))) && !in_array($order_status_id, array_merge($this->config->get('config_processing_status'), $this->config->get('config_complete_status')))) {
+			if ($was_processing && !$is_processing) {
 				// Restock
 				$order_products = $this->getOrderProducts($order_id);
 
@@ -487,6 +502,15 @@ class ModelCheckoutOrder extends Model {
 					
 					$this->model_account_customer->deleteTransactionByOrderId($order_id);
 				}
+			}
+
+			// Leaving a complete status → revoke the awarded reward points.
+			// Runs AFTER the unconfirm() cycle so our negative reversal rows are
+			// not wiped by reward::unconfirm (it deletes points < 0 for the
+			// order); our reversals must survive to keep the ledger consistent.
+			if ($was_complete && !$is_complete) {
+				$dockercart_reward = new \DockercartReward($this->registry);
+				$dockercart_reward->revokeOrderReward((int)$order_id, 1.0);
 			}
 
 				$this->db->query("COMMIT");
