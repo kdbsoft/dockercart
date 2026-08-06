@@ -14,3 +14,5 @@ $_['text_clear_cache']    = 'Reset Cache';
 $_['text_clear_cache_success'] = 'Cache has been reset successfully.';
 $_['text_search_placeholder'] = 'Search...';
 $_['text_view_all_results'] = 'View all results';
+$_['text_error_summary_one'] = 'Please correct the error below:';
+$_['text_error_summary_many'] = 'Please correct the %s errors below:';

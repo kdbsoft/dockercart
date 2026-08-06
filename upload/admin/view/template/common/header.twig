@@ -38,7 +38,7 @@
 <script type="text/javascript" src="{{ script }}{% if script|slice(0,4) != 'http' and script|slice(0,2) != '//' %}?v={{ dockercart_version }}{% endif %}"></script>
 {% endfor %}
 </head>
-<body data-user-token="{{ user_token }}">
+<body data-user-token="{{ user_token }}" data-error-summary-one="{{ text_error_summary_one|e('html_attr') }}" data-error-summary-many="{{ text_error_summary_many|e('html_attr') }}">
 <div id="container">
 <header id="header" class="navbar navbar-static-top">
   <div class="container-fluid">
