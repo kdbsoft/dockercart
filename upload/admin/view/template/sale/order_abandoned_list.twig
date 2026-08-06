@@ -25,12 +25,10 @@
     </div>
     {% endif %}
     {{ user_filter }}
-    <form id="form-abandoned" method="post" enctype="multipart/form-data">
           <div class="table-responsive">
             <table class="table table-bordered table-hover dcx-table">
               <thead>
                 <tr>
-                  <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
                   <td class="text-left">{{ column_id }}</td>
                   <td class="text-left">{{ column_date_added }}</td>
                   <td class="text-left">{{ column_customer }}</td>
@@ -44,9 +42,6 @@
                 {% if abandoned_carts %}
                 {% for cart in abandoned_carts %}
                 <tr>
-                  <td class="text-center">
-                    <input type="checkbox" name="selected[]" value="{{ cart.abandoned_id }}" />
-                  </td>
                   <td class="text-left">#{{ cart.abandoned_id }}</td>
                   <td class="text-left">{{ cart.date_added }}</td>
                   <td class="text-left">
@@ -76,13 +71,12 @@
                 {% endfor %}
                 {% else %}
                 <tr>
-                  <td class="text-center" colspan="8">{{ text_no_results }}</td>
+                  <td class="text-center" colspan="7">{{ text_no_results }}</td>
                 </tr>
                 {% endif %}
               </tbody>
             </table>
           </div>
-    </form>
         <div class="pagination-wrap">
           <div class="row">
             <div class="col-sm-6 text-left">{{ pagination }}</div>

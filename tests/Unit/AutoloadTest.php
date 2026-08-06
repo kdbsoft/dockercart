@@ -11,6 +11,7 @@ class AutoloadTest extends TestCase
     {
         $this->assertTrue(class_exists(\Twig\Environment::class));
         $this->assertTrue(class_exists(\ScssPhp\ScssPhp\Compiler::class));
+        $this->assertTrue(class_exists(\Endroid\QrCode\Builder\Builder::class));
     }
 
     public function testPhpVersionMeetsRequirement(): void

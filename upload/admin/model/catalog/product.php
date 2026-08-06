@@ -34,6 +34,8 @@ class ModelCatalogProduct extends Model
                 (int) $data["subtract"] .
                 "', preorder = '" .
                 (int) ($data["preorder"] ?? 0) .
+                "', discontinued = '" .
+                (int) ($data["discontinued"] ?? 0) .
                 "', date_available = '" .
                 $this->db->escape($data["date_available"]) .
                 "', manufacturer_id = '" .
@@ -1201,6 +1203,8 @@ class ModelCatalogProduct extends Model
                 (int) $data["subtract"] .
                 "', preorder = '" .
                 (int) ($data["preorder"] ?? 0) .
+                "', discontinued = '" .
+                (int) ($data["discontinued"] ?? 0) .
                 "', date_available = '" .
                 $this->db->escape($data["date_available"]) .
                 "', manufacturer_id = '" .
@@ -1997,6 +2001,29 @@ class ModelCatalogProduct extends Model
             }
         }
 
+        $this->db->query(
+            "DELETE FROM " .
+                DB_PREFIX .
+                "product_similar WHERE product_id = '" .
+                (int) $product_id .
+                "'",
+        );
+
+        $similar_ids = array_unique(array_map("intval", (array) ($data["product_similar"] ?? [])));
+        foreach ($similar_ids as $similar_id) {
+            if ($similar_id > 0 && $similar_id !== (int) $product_id) {
+                $this->db->query(
+                    "INSERT INTO " .
+                        DB_PREFIX .
+                        "product_similar SET product_id = '" .
+                        (int) $product_id .
+                        "', similar_id = '" .
+                        $similar_id .
+                        "'",
+                );
+            }
+        }
+
         if (isset($data['product_configurable'])) {
             $pc = new ProductConfigurable($this->registry);
 
@@ -2245,6 +2272,13 @@ class ModelCatalogProduct extends Model
             "DELETE FROM " .
                 DB_PREFIX .
                 "product_accessory WHERE product_id = '" .
+                (int) $product_id .
+                "'",
+        );
+        $this->db->query(
+            "DELETE FROM " .
+                DB_PREFIX .
+                "product_similar WHERE product_id = '" .
                 (int) $product_id .
                 "'",
         );
@@ -3008,6 +3042,25 @@ class ModelCatalogProduct extends Model
         }
 
         return $product_fbt_data;
+    }
+
+    public function getProductSimilar($product_id)
+    {
+        $product_similar_data = [];
+
+        $query = $this->db->query(
+            "SELECT * FROM " .
+                DB_PREFIX .
+                "product_similar WHERE product_id = '" .
+                (int) $product_id .
+                "'",
+        );
+
+        foreach ($query->rows as $result) {
+            $product_similar_data[] = (int) $result["similar_id"];
+        }
+
+        return $product_similar_data;
     }
 
     public function getTotalProducts($data = [])

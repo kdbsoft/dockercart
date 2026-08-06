@@ -1348,6 +1348,14 @@ class ControllerCatalogProduct extends Controller {
 			$data['preorder'] = 0;
 		}
 
+		if (isset($this->request->post['discontinued'])) {
+			$data['discontinued'] = (int)$this->request->post['discontinued'];
+		} elseif (!empty($product_info)) {
+			$data['discontinued'] = (int)$product_info['discontinued'];
+		} else {
+			$data['discontinued'] = 0;
+		}
+
 		if (isset($this->request->post['status'])) {
 			$data['status'] = $this->request->post['status'];
 		} elseif (!empty($product_info)) {
@@ -1939,6 +1947,27 @@ class ControllerCatalogProduct extends Controller {
 				$data['product_fbt'][] = array(
 					'product_id' => $fbt_info['product_id'],
 					'name'       => $fbt_info['name']
+				);
+			}
+		}
+
+		if (isset($this->request->post['product_similar'])) {
+			$products = $this->request->post['product_similar'];
+		} elseif (isset($this->request->get['product_id'])) {
+			$products = $this->model_catalog_product->getProductSimilar($this->request->get['product_id']);
+		} else {
+			$products = array();
+		}
+
+		$data['product_similars'] = array();
+
+		foreach ($products as $product_id) {
+			$similar_info = $this->model_catalog_product->getProduct($product_id);
+
+			if ($similar_info) {
+				$data['product_similars'][] = array(
+					'product_id' => $similar_info['product_id'],
+					'name'       => $similar_info['name']
 				);
 			}
 		}
