@@ -1625,6 +1625,7 @@ class ControllerProductProduct extends Controller {
 
 		$data['text_bundle_title'] = $this->language->get('text_bundle_title');
 		$data['text_bundle_save'] = $this->language->get('text_bundle_save');
+		$data['text_bundle_number'] = $this->language->get('text_bundle_number');
 		$data['button_bundle_add'] = $this->language->get('button_bundle_add');
 
 		// Skip view tracking for known bots/crawlers

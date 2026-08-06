@@ -38,6 +38,7 @@ $_['text_upsell'] = 'Рекомендуемые товары';
 $_['text_you_may_upgrade'] = 'Возможно, вам подойдёт лучше';
 $_['text_bundle_title'] = 'Вместе дешевле';
 $_['text_bundle_save'] = 'Комплект';
+$_['text_bundle_number'] = 'Комплект #%s';
 $_['button_bundle_add'] = 'Добавить комплект в корзину';
 $_['text_returns'] = 'Возвраты';
 $_['text_returns_desc'] = 'Возврат в течение 14 дней';
