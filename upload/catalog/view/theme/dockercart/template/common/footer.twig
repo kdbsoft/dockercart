@@ -13,6 +13,10 @@
             <a href="{{ home }}" class="inline-flex items-center">
               <img src="{{ logo_dark }}" title="{{ name }}" alt="{{ name }}" class="object-contain max-w-[160px] sm:max-w-[220px]" />
             </a>
+        {% elseif name %}
+            <a href="{{ home }}" class="inline-flex items-center">
+              <span class="text-xl font-extrabold text-white tracking-tight">{{ name }}</span>
+            </a>
         {% endif %}
         </div>
 
