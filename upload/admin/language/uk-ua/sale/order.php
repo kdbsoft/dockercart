@@ -246,15 +246,15 @@ $_['text_tracking_max']          = 'До 10 номерів';
 
 $_['error_comment']              = 'Будь ласка, введіть коментар!';
 $_['error_order_status']         = 'Будь ласка, виберіть статус замовлення!';
-$_['error_invalid_transition']   = 'Ця зміна статусу заборонена налаштуваннями order flow!';
+$_['error_invalid_transition']   = 'Ця зміна статусу заборонена налаштуваннями Flow замовлень!';
 
-$_['text_order_flow']            = 'Потік замовлення';
+$_['text_order_flow']            = 'Flow замовлень';
 $_['text_flow_change_status']    = 'Змінити статус';
-$_['text_flow_override']         = 'Примусово (без перевірки flow)';
+$_['text_flow_override']         = 'Примусово (без перевірки Flow)';
 $_['text_flow_notify_customer']  = 'Повідомити покупця';
 $_['text_flow_transition_to']    = 'Перевести замовлення у статус:';
-$_['text_flow_confirm_terminal'] = 'Цей статус завершує order flow. Продовжити?';
-$_['text_flow_terminal_state']   = 'Order flow для цього замовлення завершено.';
+$_['text_flow_confirm_terminal'] = 'Цей статус завершує Flow замовлень. Продовжити?';
+$_['text_flow_terminal_state']   = 'Flow замовлень для цього замовлення завершено.';
 $_['button_flow_apply']          = 'Застосувати';
 $_['text_comment_optional']      = 'Коментар (необов\'язково)';
 $_['text_return_refund_note']    = 'Повернення коштів за поверненням #%s';
@@ -277,6 +277,17 @@ $_['error_tracking_required']    = 'Додайте номер ТТН або ви
 
 // Invoice
 $_['text_invoice_no']            = 'Рахунок №:';
+$_['button_invoice']             = 'Рахунок до оплати';
+$_['text_invoice']               = 'Рахунок до оплати';
+$_['text_balance_due']           = 'Залишок до оплати';
+$_['text_paid_amount']           = 'Сплачено';
+$_['text_payment_history']       = 'Історія платежів';
+$_['text_seller']                = 'Продавець';
+$_['text_bill_to']               = 'Покупець';
+$_['text_ship_to']               = 'Адреса доставки';
+$_['text_bank_name']             = 'Банк';
+$_['text_bank_account']          = 'Розрахунковий рахунок';
+$_['text_bank_swift']            = 'SWIFT';
 
 // Coupon
 $_['button_coupon_apply']        = 'Застосувати';

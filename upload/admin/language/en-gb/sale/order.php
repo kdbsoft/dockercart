@@ -260,6 +260,17 @@ $_['error_tracking_required']    = 'Add a tracking number (TTN/waybill) before c
 
 // Invoice
 $_['text_invoice_no']            = 'Invoice No:';
+$_['button_invoice']             = 'Invoice';
+$_['text_invoice']               = 'Invoice';
+$_['text_balance_due']           = 'Balance Due';
+$_['text_paid_amount']           = 'Paid Amount';
+$_['text_payment_history']       = 'Payment History';
+$_['text_seller']                = 'Seller';
+$_['text_bill_to']               = 'Bill To';
+$_['text_ship_to']               = 'Ship To';
+$_['text_bank_name']             = 'Bank';
+$_['text_bank_account']          = 'Account';
+$_['text_bank_swift']            = 'SWIFT';
 
 // Coupon
 $_['button_coupon_apply']        = 'Apply';
