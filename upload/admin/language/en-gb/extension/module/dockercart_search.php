@@ -33,7 +33,6 @@ $_['text_developer_name'] = 'DockerCart Official';
 $_['text_contact'] = 'Contact';
 
 // Entry
-$_['entry_status']      = 'Status';
 $_['entry_host']        = 'Manticore Host';
 $_['entry_port']        = 'MySQL Protocol Port';
 $_['entry_http_port']   = 'HTTP API Port';
@@ -69,7 +68,6 @@ $_['button_import_csv'] = 'Import CSV';
 $_['button_manage_mappings'] = 'Manage Query Mappings';
 
 // Help
-$_['help_status']       = 'Enable or disable Manticore search';
 $_['help_host']         = 'Hostname of Manticore Search (default: manticore)';
 $_['help_port']         = 'MySQL protocol port (default: 9306)';
 $_['help_http_port']    = 'HTTP API port for autocomplete (default: 9308)';
