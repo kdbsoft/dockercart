@@ -82,6 +82,7 @@
       let trackIdx = base;
       let current = 0;
       let timer = null;
+      let hovered = false;
       let suppressClick = false;
 
       // Always use the live track width so slides tile edge-to-edge even if
@@ -122,8 +123,19 @@
 
       function resetTimer() {
         clearInterval(timer);
+        if (hovered) return;
         timer = setInterval(window.nextSlide_{{ module }}, 5000);
       }
+
+      // pause autoplay while the cursor is over the slider
+      section.addEventListener('mouseenter', function () {
+        hovered = true;
+        clearInterval(timer);
+      });
+      section.addEventListener('mouseleave', function () {
+        hovered = false;
+        resetTimer();
+      });
 
       window.goToSlide_{{ module }} = function (index) {
         const fwd = ((index - current) % N + N) % N;
