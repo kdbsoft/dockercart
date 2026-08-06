@@ -36,6 +36,7 @@ $_['text_upsell'] = 'Рекомендовані товари';
 $_['text_you_may_upgrade'] = 'Можливо, вам підійде краще';
 $_['text_bundle_title'] = 'Разом дешевше';
 $_['text_bundle_save'] = 'Комплект';
+$_['text_bundle_number'] = 'Комплект #%s';
 $_['button_bundle_add'] = 'Додати комплект у кошик';
 $_['text_reviews'] = '%s відгуків';
 // Додаткові UI рядки
