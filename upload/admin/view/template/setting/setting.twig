@@ -55,6 +55,7 @@
                   <li><a href="#tab-image" data-toggle="tab"><i data-lucide="image" width="14" height="14"></i> {{ tab_image }}</a></li>
                   <li><a href="#tab-mail" data-toggle="tab"><i data-lucide="mail" width="14" height="14"></i> {{ tab_mail }}</a></li>
                   <li><a href="#tab-server" data-toggle="tab"><i data-lucide="server" width="14" height="14"></i> {{ tab_server }}</a></li>
+                  <li><a href="#tab-invoice" data-toggle="tab"><i data-lucide="receipt" width="14" height="14"></i> {{ tab_invoice }}</a></li>
                 </ul>
                 <div class="tab-content">
                   <div class="tab-pane active" id="tab-store">
@@ -1013,6 +1014,107 @@
                       </div>
                     </div>
                   </div>
+                  <div class="tab-pane" id="tab-invoice">
+                    <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+                      <div class="dcx-section-header"><h4><i data-lucide="file-text" width="16" height="16"></i> {{ text_invoice }}</h4></div>
+                      <div class="dcx-fields">
+                        <div class="dcx-field">
+                          <label class="dcx-label" for="input-invoice-prefix">{{ entry_invoice_prefix }}</label>
+                          <input type="text" name="config_invoice_prefix" value="{{ config_invoice_prefix }}" placeholder="INV-" id="input-invoice-prefix" class="form-control" />
+                        </div>
+                      </div>
+                    </div>
+                    <div class="dcx-section">
+                      <div class="dcx-section-header"><h4><i data-lucide="building-2" width="16" height="16"></i> {{ text_invoice_seller }}</h4></div>
+                        <ul class="nav nav-tabs" id="language-invoice">
+                          {% for language in languages %}
+                          <li><a href="#language-invoice{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
+                          {% endfor %}
+                        </ul>
+                        <div class="tab-content">
+                          {% for language in languages %}
+                          <div class="tab-pane" id="language-invoice{{ language.language_id }}">
+                            <div class="dcx-fields">
+                              <div class="dcx-field required">
+                                <label class="dcx-label" for="input-seller-name{{ language.language_id }}">{{ entry_seller_name }}</label>
+                                <input type="text" name="config_seller_name_i18n[{{ language.language_id }}]" value="{{ config_seller_name_i18n[language.language_id] is defined ? config_seller_name_i18n[language.language_id] : '' }}" placeholder="{{ entry_seller_name }}" id="input-seller-name{{ language.language_id }}" class="form-control" />
+                              </div>
+                              <div class="dcx-field required">
+                                <label class="dcx-label" for="input-seller-address{{ language.language_id }}">{{ entry_seller_address }}</label>
+                                <textarea name="config_seller_address_i18n[{{ language.language_id }}]" placeholder="{{ entry_seller_address }}" rows="3" id="input-seller-address{{ language.language_id }}" class="form-control">{{ config_seller_address_i18n[language.language_id] is defined ? config_seller_address_i18n[language.language_id] : '' }}</textarea>
+                              </div>
+                            </div>
+                          </div>
+                          {% endfor %}
+                        </div>
+                        <div class="dcx-fields" style="margin-top: 15px;">
+                          <div class="dcx-field">
+                            <label class="dcx-label" for="input-seller-email">{{ entry_seller_email }}</label>
+                            <input type="text" name="config_seller_email" value="{{ config_seller_email }}" placeholder="{{ entry_seller_email }}" id="input-seller-email" class="form-control" />
+                          </div>
+                          <div class="dcx-field">
+                            <label class="dcx-label" for="input-seller-telephone">{{ entry_seller_telephone }}</label>
+                            <input type="text" name="config_seller_telephone" value="{{ config_seller_telephone }}" placeholder="{{ entry_seller_telephone }}" id="input-seller-telephone" class="form-control" />
+                          </div>
+                        </div>
+                    </div>
+                    <div class="dcx-section">
+                      <div class="dcx-section-header"><h4><i data-lucide="badge-info" width="16" height="16"></i> {{ text_invoice_tax }}</h4></div>
+                        <table class="table table-bordered table-striped" id="tax-numbers">
+                          <thead>
+                            <tr>
+                              <th>{{ entry_seller_tax_number_type }}</th>
+                              <th>{{ entry_seller_tax_number_value }}</th>
+                              <th style="width: 1%;"></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                          </tbody>
+                          <tfoot>
+                            <tr>
+                              <td colspan="3" class="text-right">
+                                <button type="button" class="btn btn-default btn-sm" onclick="addTaxNumber()"><i data-lucide="plus" width="14" height="14"></i> {{ entry_seller_add_tax }}</button>
+                              </td>
+                            </tr>
+                          </tfoot>
+                        </table>
+                    </div>
+                    <div class="dcx-section">
+                      <div class="dcx-section-header"><h4><i data-lucide="landmark" width="16" height="16"></i> {{ text_invoice_bank }}</h4></div>
+                        <div class="dcx-fields dcx-fields--row">
+                          <div class="dcx-field" style="max-width: 50%;">
+                            <label class="dcx-label" for="input-seller-bank-name">{{ entry_seller_bank_name }}</label>
+                            <input type="text" name="config_seller_bank_name" value="{{ config_seller_bank_name }}" placeholder="{{ entry_seller_bank_name }}" id="input-seller-bank-name" class="form-control" />
+                          </div>
+                          <div class="dcx-field" style="max-width: 50%;">
+                            <label class="dcx-label" for="input-seller-bank-swift">{{ entry_seller_bank_swift }}</label>
+                            <input type="text" name="config_seller_bank_swift" value="{{ config_seller_bank_swift }}" placeholder="{{ entry_seller_bank_swift }}" id="input-seller-bank-swift" class="form-control" />
+                          </div>
+                        </div>
+                        <div class="dcx-fields">
+                          <div class="dcx-field">
+                            <label class="dcx-label" for="input-seller-bank-account">{{ entry_seller_bank_account }}</label>
+                            <input type="text" name="config_seller_bank_account" value="{{ config_seller_bank_account }}" placeholder="{{ entry_seller_bank_account }}" id="input-seller-bank-account" class="form-control" />
+                          </div>
+                        </div>
+                    </div>
+                    <div class="dcx-section">
+                      <div class="dcx-section-header"><h4><i data-lucide="image" width="16" height="16"></i> {{ text_invoice_logo }}</h4></div>
+                        <div class="dcx-fields">
+                          <div class="dcx-field">
+                            <div class="input-group">
+                              <a href="" id="thumb-invoice-logo" data-toggle="image" class="input-group-addon img-thumbnail">
+                                <img src="{{ seller_invoice_logo_thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" />
+                              </a>
+                              <input type="text" name="config_seller_invoice_logo" value="{{ config_seller_invoice_logo }}" id="input-invoice-logo" class="form-control" placeholder="{{ help_invoice_logo }}" readonly="readonly" />
+                              <span class="input-group-btn">
+                                <button type="button" class="btn btn-default" onclick="clearInvoiceLogo()"><i data-lucide="x" width="14" height="14"></i></button>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                 </div>
               </div>
             </div>
@@ -1078,11 +1180,42 @@ $('select[name=\'config_country_id\']').on('change', function() {
 
 $('select[name=\'config_country_id\']').trigger('change');
 //--></script>
-  <script type="text/javascript"><!--
+<script type="text/javascript"><!--
 $('#language a:first').tab('show');
 $('#language-seo a:first').tab('show');
+$('#language-invoice a:first').tab('show');
 //--></script>
 <script type="text/javascript"><!--
+var taxNumberRow = 0;
+
+function addTaxNumber(type, value) {
+  var typeOptions = '';
+  var types = ['VAT','EIN','TIN','ABN','GST','EDRPOU','IPN','ИНН','CVR','Momsreg.nr','Orgnr','SIRET','CIF','P.IVA','Other'];
+  for (var i = 0; i < types.length; i++) {
+    typeOptions += '<option value="' + types[i] + '"' + (type === types[i] ? ' selected="selected"' : '') + '>' + types[i] + '</option>';
+  }
+
+  html  = '<tr id="tax-number-row' + taxNumberRow + '">';
+  html += '  <td><select name="config_seller_tax_numbers[' + taxNumberRow + '][type]" class="form-control">' + typeOptions + '</select></td>';
+  html += '  <td><input type="text" name="config_seller_tax_numbers[' + taxNumberRow + '][value]" value="' + (value || '') + '" placeholder="{{ entry_seller_tax_number_value }}" class="form-control" /></td>';
+  html += '  <td><button type="button" onclick="$(\'#tax-number-row' + taxNumberRow + '\').remove();" class="btn btn-danger btn-sm"><i data-lucide="trash-2" width="14" height="14"></i></button></td>';
+  html += '</tr>';
+
+  $('#tax-numbers tbody').append(html);
+  taxNumberRow++;
+}
+
+{% if config_seller_tax_numbers %}
+{% for tax in config_seller_tax_numbers %}
+addTaxNumber('{{ tax.type }}', '{{ tax.value }}');
+{% endfor %}
+{% endif %}
+
+function clearInvoiceLogo() {
+  $('#input-invoice-logo').val('');
+  $('#thumb-invoice-logo img').attr('src', '{{ placeholder }}');
+}
+
 function toggleOauthFields() {
 	if ($('#input-mail-smtp-auth-method').val() === 'oauth') {
 		$('#oauth-fields').removeClass('hidden');

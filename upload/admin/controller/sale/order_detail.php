@@ -41,6 +41,7 @@ class ControllerSaleOrderDetail extends Controller {
 
 		$data['cancel'] = $this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['print_url'] = $this->url->link('sale/order_detail/print', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $order_id, true);
+		$data['invoice_url'] = $this->url->link('sale/order_detail/invoice', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $order_id, true);
 		$data['create_return_url'] = $this->url->link('sale/return/add', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $order_id, true);
 		$data['user_token'] = $this->session->data['user_token'];
 		$data['order_id'] = $order_id;
@@ -321,6 +322,29 @@ class ControllerSaleOrderDetail extends Controller {
 		);
 	}
 
+	public function invoice(): void {
+		$this->load->language('sale/order');
+
+		$order_id = (int)($this->request->get['order_id'] ?? 0);
+
+		$this->load->model('sale/order');
+		$order_info = $this->model_sale_order->getOrder($order_id);
+
+		if (!$order_info) {
+			$this->response->redirect($this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'], true));
+			return;
+		}
+
+		$this->model_sale_order->updateInvoiceNo($order_id);
+
+		$this->sendPdf(
+			$this->load->view('sale/order_invoice', [
+				'orders' => [$this->buildInvoiceData($order_id)],
+			]),
+			'invoice-' . $order_id . '.pdf'
+		);
+	}
+
 	public function printSelected(): void {
 		$this->load->language('sale/order');
 
@@ -421,6 +445,139 @@ class ControllerSaleOrderDetail extends Controller {
 				'title' => $this->orderLocalizer()->totalTitle($total, $shipping_method_title),
 				'text'  => $this->currency->format($total['value'], $order_info['currency_code'], $order_info['currency_value']),
 			];
+		}
+
+		return $data;
+	}
+
+	private function buildInvoiceData(int $order_id): array {
+		$order_info = $this->model_sale_order->getOrder($order_id);
+
+		$invoice_no = $order_info['invoice_no'] ? $order_info['invoice_prefix'] . $order_info['invoice_no'] : '';
+
+		$data['order_id'] = $order_id;
+		$data['heading_title'] = sprintf($this->language->get('text_invoice'), $order_id);
+		$data['invoice_no'] = $invoice_no;
+		$data['date_added'] = date($this->language->get('datetime_format'), strtotime($order_info['date_added']));
+		$data['store_name'] = $order_info['store_name'];
+		$data['store_url'] = $order_info['store_id'] == 0
+			? ($this->request->server['HTTPS'] ? HTTPS_CATALOG : HTTP_CATALOG)
+			: $order_info['store_url'];
+
+		$seller_name = $this->config->get('config_seller_name');
+		if (!$seller_name) {
+			$seller_name = $this->config->get('config_name');
+		}
+		if (is_array($seller_name)) {
+			$seller_name = reset($seller_name);
+		}
+
+		$seller_address = $this->config->get('config_seller_address');
+		if (!$seller_address) {
+			$seller_address = $this->config->get('config_address');
+		}
+		if (is_array($seller_address)) {
+			$seller_address = reset($seller_address);
+		}
+
+		$seller_email = $this->config->get('config_seller_email');
+		if (!$seller_email) {
+			$seller_email = $this->config->get('config_email');
+		}
+
+		$seller_telephone = $this->config->get('config_seller_telephone');
+		if (!$seller_telephone) {
+			$seller_telephone = $this->config->get('config_telephone');
+		}
+
+		$tax_numbers = $this->config->get('config_seller_tax_numbers');
+		if (!is_array($tax_numbers)) {
+			$tax_numbers = json_decode((string)$tax_numbers, true) ?: [];
+		}
+
+		$data['seller_name'] = (string)$seller_name;
+		$data['seller_address'] = (string)$seller_address;
+		$data['seller_email'] = (string)$seller_email;
+		$data['seller_telephone'] = (string)$seller_telephone;
+		$data['seller_tax_numbers'] = $tax_numbers;
+		$data['seller_bank_name'] = (string)$this->config->get('config_seller_bank_name');
+		$data['seller_bank_account'] = (string)$this->config->get('config_seller_bank_account');
+		$data['seller_bank_swift'] = (string)$this->config->get('config_seller_bank_swift');
+
+		$logo = $this->config->get('config_seller_invoice_logo');
+		if (!$logo) {
+			$logo = $this->config->get('config_logo');
+		}
+		$data['seller_logo'] = $logo ? DIR_IMAGE . $logo : '';
+
+		$data['firstname'] = $order_info['firstname'];
+		$data['lastname'] = $order_info['lastname'];
+		$data['email'] = $order_info['email'];
+		$data['telephone'] = $order_info['telephone'];
+		$data['payment_address'] = $this->formatAddress($order_info, 'payment');
+		$data['shipping_address'] = $this->formatAddress($order_info, 'shipping');
+		$data['payment_method'] = $this->orderLocalizer()->paymentMethodTitle($order_info);
+		$data['shipping_method'] = $this->orderLocalizer()->shippingMethodTitle($order_info);
+		$data['tracking_number'] = $order_info['tracking_number'];
+		$data['comment'] = $order_info['comment'];
+		$data['currency_code'] = $order_info['currency_code'];
+		$data['currency_value'] = $order_info['currency_value'];
+
+		$order_localizer = $this->orderLocalizer();
+		$products = $this->model_sale_order->getOrderProducts($order_id);
+		$data['products'] = [];
+
+		foreach ($products as $product) {
+			$options = $this->model_sale_order->getOrderOptions($order_id, $product['order_product_id']);
+			$option_data = [];
+
+			foreach ($options as $option) {
+				$option_data[] = $order_localizer->optionName($option) . ': ' . $order_localizer->optionValue($option);
+			}
+
+			$quantity = max(1, (int)$product['quantity']);
+			$unit_tax = $product['tax'] / $quantity;
+
+			$data['products'][] = [
+				'name'     => $order_localizer->productName($product),
+				'model'    => $product['model'],
+				'option'   => implode(', ', $option_data),
+				'quantity' => $product['quantity'],
+				'price'    => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $unit_tax : 0), $order_info['currency_code'], $order_info['currency_value']),
+				'total'    => $this->currency->format($product['total'] + ($this->config->get('config_tax') ? $product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value']),
+			];
+		}
+
+		$data['totals'] = [];
+		$totals = $this->model_sale_order->getOrderTotals($order_id);
+		$shipping_method_title = $this->orderLocalizer()->shippingMethodTitle($order_info);
+
+		foreach ($totals as $total) {
+			$data['totals'][] = [
+				'title' => $this->orderLocalizer()->totalTitle($total, $shipping_method_title),
+				'text'  => $this->currency->format($total['value'], $order_info['currency_code'], $order_info['currency_value']),
+			];
+		}
+
+		$paid_amount = (float)$order_info['paid_amount'];
+		$total_amount = (float)$order_info['total'];
+
+		$data['paid_amount'] = $this->currency->format($paid_amount, $order_info['currency_code'], $order_info['currency_value']);
+		$data['total_amount'] = $this->currency->format($total_amount, $order_info['currency_code'], $order_info['currency_value']);
+		$data['balance_due'] = $this->currency->format(max(0, $total_amount - $paid_amount), $order_info['currency_code'], $order_info['currency_value']);
+
+		$payments = $this->model_sale_order->getOrderPayments($order_id);
+		$data['payments'] = [];
+
+		foreach ($payments as $payment) {
+			if ((float)$payment['amount'] > 0) {
+				$data['payments'][] = [
+					'date'    => date($this->language->get('datetime_format'), strtotime($payment['date_added'])),
+					'method'  => $payment['payment_method'],
+					'amount'  => $this->currency->format((float)$payment['amount'], $order_info['currency_code'], $order_info['currency_value']),
+					'comment' => $payment['comment'],
+				];
+			}
 		}
 
 		return $data;

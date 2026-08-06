@@ -13,6 +13,9 @@ class ModelSaleOrder extends Model {
 
 		$invoice_prefix = $query->row['invoice_prefix'];
 		if ($invoice_prefix === '') {
+			$invoice_prefix = $this->config->get('config_invoice_prefix');
+		}
+		if (!$invoice_prefix) {
 			$invoice_prefix = 'INV-';
 		}
 

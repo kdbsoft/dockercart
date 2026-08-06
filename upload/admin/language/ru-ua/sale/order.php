@@ -245,15 +245,15 @@ $_['text_tracking_max']          = 'До 10 номеров';
 
 $_['error_comment']              = 'Пожалуйста, введите комментарий!';
 $_['error_order_status']         = 'Пожалуйста, выберите статус заказа!';
-$_['error_invalid_transition']   = 'Данное изменение статуса запрещено настройками order flow!';
+$_['error_invalid_transition']   = 'Данное изменение статуса запрещено настройками Flow заказов!';
 
-$_['text_order_flow']            = 'Поток заказа';
+$_['text_order_flow']            = 'Flow заказов';
 $_['text_flow_change_status']    = 'Сменить статус';
-$_['text_flow_override']         = 'Принудительно (без проверки flow)';
+$_['text_flow_override']         = 'Принудительно (без проверки Flow)';
 $_['text_flow_notify_customer']  = 'Уведомить покупателя';
 $_['text_flow_transition_to']    = 'Перевести заказ в статус:';
-$_['text_flow_confirm_terminal'] = 'Этот статус завершает order flow. Продолжить?';
-$_['text_flow_terminal_state']   = 'Order flow для этого заказа завершён.';
+$_['text_flow_confirm_terminal'] = 'Этот статус завершает Flow заказов. Продолжить?';
+$_['text_flow_terminal_state']   = 'Flow заказов для этого заказа завершён.';
 $_['button_flow_apply']          = 'Применить';
 $_['text_comment_optional']      = 'Комментарий (необязательно)';
 $_['text_return_refund_note']    = 'Возврат средств по возврату #%s';
@@ -276,6 +276,17 @@ $_['error_tracking_required']    = 'Добавьте номер ТТН или р
 
 // Invoice
 $_['text_invoice_no']            = 'Счёт №:';
+$_['button_invoice']             = 'Счёт на оплату';
+$_['text_invoice']               = 'Счёт на оплату';
+$_['text_balance_due']           = 'Остаток к оплате';
+$_['text_paid_amount']           = 'Оплачено';
+$_['text_payment_history']       = 'История платежей';
+$_['text_seller']                = 'Продавец';
+$_['text_bill_to']               = 'Покупатель';
+$_['text_ship_to']               = 'Адрес доставки';
+$_['text_bank_name']             = 'Банк';
+$_['text_bank_account']          = 'Расчётный счёт';
+$_['text_bank_swift']            = 'SWIFT';
 
 // Coupon
 $_['button_coupon_apply']        = 'Применить';

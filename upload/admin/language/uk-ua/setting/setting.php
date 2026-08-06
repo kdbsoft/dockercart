@@ -154,6 +154,30 @@ $_['error_customer_group_display'] = 'Ви повинні включити гр�
 $_['error_email'] = 'Адреса електронної пошти, схоже, недійсна!';
 $_['error_encryption'] = 'Ключ шифрування має містити від 32 до 1024 символів!';
 $_['error_stock_reserve_minutes'] = 'Час резерву має бути 0 або додатним числом хвилин!';
+
+// Tab
+$_['tab_invoice']                   = 'Рахунок та організація';
+
+// Invoice sections
+$_['text_invoice']                  = 'Рахунок';
+$_['text_invoice_seller']           = 'Продавець';
+$_['text_invoice_tax']              = 'Податкові номери';
+$_['text_invoice_bank']             = 'Банківські реквізити';
+$_['text_invoice_logo']             = 'Логотип для рахунку';
+
+// Entry
+$_['entry_invoice_prefix']          = 'Префікс рахунку';
+$_['entry_seller_name']             = 'Назва продавця';
+$_['entry_seller_address']          = 'Адреса продавця';
+$_['entry_seller_email']            = 'Email продавця';
+$_['entry_seller_telephone']        = 'Телефон продавця';
+$_['entry_seller_tax_number_type']  = 'Тип податку';
+$_['entry_seller_tax_number_value'] = 'Номер';
+$_['entry_seller_add_tax']          = 'Додати податковий номер';
+$_['entry_seller_bank_name']        = 'Назва банку';
+$_['entry_seller_bank_account']     = 'Розрахунковий рахунок (IBAN)';
+$_['entry_seller_bank_swift']       = 'SWIFT / БІК';
+$_['entry_seller_invoice_logo']     = 'Логотип для рахунку';
 $_['error_error_filename'] = 'Необхідно ввести ім’я файлу журналу помилок';
 $_['error_ftp_hostname'] = 'Необхідно вказати FTP хост';
 $_['error_ftp_password'] = 'Необхідно вказати FTP пароль';
@@ -201,6 +225,7 @@ $_['help_checkout_guest'] = 'Дозвольте клієнтам оформлю�
 $_['help_comment'] = 'Це поле призначене для будь-яких спеціальних приміток, які ви хотіли б повідомити клієнту, наприклад, магазин не приймає чеки.';
 $_['help_complete_status'] = 'Встановіть статус замовлення, якого має досягти клієнт, перш ніж йому буде дозволено отримати доступ до завантажуваних товарів та подарункових сертифікатів.';
 $_['help_compression'] = 'GZIP для ефективнішої передачі клієнтам, які запитують. Рівень стиснення має бути від 0 до 9.';
+$_['help_invoice_logo'] = 'Залиште порожнім, щоб використовувати логотип магазину. Завантажте своє зображення для окремого логотипу на рахунках.';
 $_['help_config_seo_url_include_path'] = '/category/subcategory/product';
 $_['help_config_valide_param_flag'] = 'Відключити переадресацію для з дозволеного списку get-параметрів';
 $_['help_cookie'] = 'Показувати повідомлення політики використання файлів cookie';
