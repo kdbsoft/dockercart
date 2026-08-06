@@ -9,11 +9,9 @@ $_['text_instock']  = 'In Stock';
 $_['text_preorder']  = 'Pre-Order';
 $_['text_out_of_stock']  = 'Out Of Stock';
 $_['text_empty']    = 'You have not viewed any products yet.';
+$_['text_viewed_on'] = 'Viewed on';
+$_['text_call_for_price'] = 'Contact for price';
 
-// Column
-$_['column_image']  = 'Image';
-$_['column_name']   = 'Product Name';
-$_['column_model']  = 'Product Code';
-$_['column_stock']  = 'Stock';
-$_['column_price']  = 'Unit Price';
-$_['column_action'] = 'Action';
+// Locale
+$_['date_format_short'] = 'm/d/Y';
+$_['time_format'] = 'h:i A';

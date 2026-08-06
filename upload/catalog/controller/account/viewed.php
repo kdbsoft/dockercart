@@ -30,10 +30,10 @@ class ControllerAccountViewed extends Controller {
 
 		$data['products'] = array();
 
-		$product_ids = $this->model_account_viewed->getViewedProductIds();
+		$viewed_products = $this->model_account_viewed->getViewedProducts();
 
-		foreach ($product_ids as $product_id) {
-			$product_info = $this->model_catalog_product->getProduct($product_id);
+		foreach ($viewed_products as $viewed_product) {
+			$product_info = $this->model_catalog_product->getProduct($viewed_product['product_id']);
 
 			if (!$product_info) {
 				continue;
@@ -42,8 +42,8 @@ class ControllerAccountViewed extends Controller {
 			if ($product_info['image']) {
 				$image = $this->model_tool_image->resize(
 					$product_info['image'],
-					$this->config->get('theme_' . $this->config->get('config_theme') . '_image_wishlist_width'),
-					$this->config->get('theme_' . $this->config->get('config_theme') . '_image_wishlist_height')
+					100,
+					100
 				);
 			} else {
 				$image = $this->model_tool_image->resize('placeholder.png', 100, 100);
@@ -58,6 +58,8 @@ class ControllerAccountViewed extends Controller {
 			} else {
 				$stock = $this->language->get('text_instock');
 			}
+
+			$is_in_stock = ($product_info['quantity'] > 0) || !empty($product_info['preorder']);
 
 			if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
 				$price = $this->currency->format(
@@ -77,20 +79,40 @@ class ControllerAccountViewed extends Controller {
 				$special = false;
 			}
 
+			$discount_percent = 0;
+			if (!is_null($product_info['special']) && (float)$product_info['price'] > 0) {
+				$discount_percent = (int)round((1 - ((float)$product_info['special'] / (float)$product_info['price'])) * 100);
+				if ($discount_percent < 0) {
+					$discount_percent = 0;
+				}
+			}
+
 			$data['products'][] = array(
-				'product_id' => (int)$product_info['product_id'],
-				'thumb'      => $image,
-				'name'       => $product_info['name'],
-				'model'      => $product_info['model'],
-				'stock'      => $stock,
-				'price'      => $price,
-				'special'    => $special,
-				'minimum'    => ($product_info['minimum'] > 0 ? (float)$product_info['minimum'] : 1),
-				'href'       => $this->url->link('product/product', 'product_id=' . (int)$product_info['product_id'])
+				'product_id'  => (int)$product_info['product_id'],
+				'thumb'       => $image,
+				'name'        => $product_info['name'],
+				'model'       => $product_info['model'],
+				'stock'       => $stock,
+				'price'       => $price,
+				'special'     => $special,
+				'discount'    => $discount_percent,
+				'rating'      => !empty($product_info['rating']) ? (int)$product_info['rating'] : 0,
+				'reviews'     => !empty($product_info['reviews']) ? (int)$product_info['reviews'] : 0,
+				'price_raw'   => (float)$product_info['price'],
+				'call_for_price' => !empty($product_info['call_for_price']),
+				'is_in_stock' => $is_in_stock,
+				'is_preorder' => !empty($product_info['preorder']),
+				'minimum'     => ($product_info['minimum'] > 0 ? (float)$product_info['minimum'] : 1),
+				'date_viewed' => date($this->language->get('date_format_short') . ' ' . $this->language->get('time_format'), strtotime($viewed_product['date_modified'])),
+				'href'        => $this->url->link('product/product', 'product_id=' . (int)$product_info['product_id'])
 			);
 		}
 
 		$data['continue'] = $this->customer->isLogged() ? $this->url->link('account/account', '', true) : $this->url->link('common/home');
+
+		$data['text_call_for_price'] = $this->language->get('text_call_for_price');
+		$data['call_for_price_status'] = (int)$this->config->get('dockercart_theme_call_for_price_status');
+		$data['call_for_price_phone'] = $this->config->get('config_telephone');
 
 		$data['account_menu'] = $this->load->controller('common/account_menu');
 

@@ -7,9 +7,9 @@ $_['text_instock'] = 'В наявності';
 $_['text_preorder'] = 'Передзамовлення';
 $_['text_out_of_stock'] = 'Немає в наявності';
 $_['text_empty'] = 'Ви ще не переглянули жодного товару.';
-$_['column_image'] = 'Зображення';
-$_['column_name'] = 'Назва товару';
-$_['column_model'] = 'Код товара';
-$_['column_stock'] = 'Наявність';
-$_['column_price'] = 'Ціна за одиницю';
-$_['column_action'] = 'Дія';
+$_['text_viewed_on'] = 'Переглянуто';
+$_['text_call_for_price'] = 'Уточнити ціну';
+
+// Locale
+$_['date_format_short'] = 'd.m.Y';
+$_['time_format'] = 'H:i';
