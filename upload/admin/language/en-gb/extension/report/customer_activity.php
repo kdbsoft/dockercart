@@ -33,7 +33,7 @@ $_['text_edit_subtitle'] = 'Configure extension settings and options';
 $_['column_customer']              = 'Customer';
 $_['column_comment']               = 'Comment';
 $_['column_ip']                    = 'IP';
-$_['column_date_added']            = 'Date Added';
+$_['column_date_added']            = 'Date Created';
 
 // Entry
 $_['entry_customer']               = 'Customer';

@@ -2,7 +2,7 @@
 
 $_['column_category'] = 'Категория';
 $_['column_customer'] = 'Клиент';
-$_['column_date_added'] = 'Дата добавления';
+$_['column_date_added'] = 'Дата создания';
 $_['column_ip'] = 'IP';
 $_['column_keyword'] = 'Ключевое слово';
 $_['column_products'] = 'Найденные товары';

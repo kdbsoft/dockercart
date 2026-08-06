@@ -46,7 +46,7 @@ $_['column_email']                     = 'Email';
 $_['column_type']                      = 'Type';
 $_['column_source']                    = 'Source';
 $_['column_status']                    = 'Status';
-$_['column_date_added']                = 'Date Added';
+$_['column_date_added']                = 'Date Created';
 $_['column_action']                    = 'Action';
 
 // Button

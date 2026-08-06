@@ -39,7 +39,7 @@ $_['column_available']   = 'Доступна';
 // Entry
 $_['entry_name']         = 'Назва';
 $_['entry_filename']     = 'І’мя файлу';
-$_['entry_date_added']   = 'Дата додання';
+$_['entry_date_added']   = 'Дата створення';
 
 // Button
 $_['button_start']       = 'Старт оновлення';

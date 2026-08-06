@@ -14,7 +14,7 @@ $_['column_name']       = 'Назва модифікатора';
 $_['column_author']     = 'Автор';
 $_['column_version']    = 'Версія';
 $_['column_status']     = 'Статус';
-$_['column_date_added'] = 'Дата додавання';
+$_['column_date_added'] = 'Дата створення';
 $_['column_action']     = 'Дія';
 
 // Error

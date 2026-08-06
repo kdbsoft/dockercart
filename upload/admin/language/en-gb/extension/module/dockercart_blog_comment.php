@@ -19,7 +19,7 @@ $_['column_post']       = 'Post';
 $_['column_author']     = 'Author';
 $_['column_rating']     = 'Rating';
 $_['column_status']     = 'Status';
-$_['column_date_added'] = 'Date Added';
+$_['column_date_added'] = 'Date Created';
 $_['column_action']     = 'Action';
 
 // Text - Cards
@@ -32,7 +32,7 @@ $_['entry_email']       = 'Email';
 $_['entry_text']        = 'Text';
 $_['entry_rating']      = 'Rating';
 $_['entry_status']      = 'Status';
-$_['entry_date_added']  = 'Date Added';
+$_['entry_date_added']  = 'Date Created';
 
 // Error
 $_['error_permission']  = 'Warning: You do not have permission to modify blog comments!';

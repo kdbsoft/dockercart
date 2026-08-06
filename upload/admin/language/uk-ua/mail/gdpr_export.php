@@ -23,5 +23,5 @@ $_['text_country']    = 'Країна';
 $_['text_zone']       = 'Регіон / Область';
 $_['text_history']    = 'Історія входу';
 $_['text_ip']         = 'IP';
-$_['text_date_added'] = 'Дата додання';
+$_['text_date_added'] = 'Дата створення';
 $_['text_thanks']     = 'Дякуємо,';

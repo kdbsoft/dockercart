@@ -3,11 +3,11 @@
 $_['column_action'] = 'Дія';
 $_['column_clicks'] = 'Кліки';
 $_['column_code'] = 'Код';
-$_['column_date_added'] = 'Дата додавання';
+$_['column_date_added'] = 'Дата створення';
 $_['column_name'] = 'Назва кампанії';
 $_['column_orders'] = 'Замовлення';
 $_['entry_code'] = 'Код відстеження';
-$_['entry_date_added'] = 'Дата додавання';
+$_['entry_date_added'] = 'Дата створення';
 $_['entry_description'] = 'Опис кампанії';
 $_['entry_example'] = 'Приклади';
 $_['entry_name'] = 'Назва кампанії';

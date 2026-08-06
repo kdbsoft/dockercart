@@ -20,7 +20,7 @@ $_['text_edit_user_subtitle'] = 'Edit admin user credentials';
 // Column
 $_['column_username']       = 'Username';
 $_['column_status']         = 'Status';
-$_['column_date_added']     = 'Date Added';
+$_['column_date_added']     = 'Date Created';
 $_['column_action']         = 'Action';
 
 // Entry

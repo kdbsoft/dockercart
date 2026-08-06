@@ -29,7 +29,7 @@ $_['column_verified']   = 'Verified';
 $_['column_media']      = 'Media';
 $_['column_votes']      = 'Votes';
 $_['column_status']     = 'Status';
-$_['column_date_added'] = 'Date Added';
+$_['column_date_added'] = 'Date Created';
 $_['column_action']     = 'Action';
 
 // Entry
@@ -38,7 +38,7 @@ $_['entry_author']      = 'Author';
 $_['entry_rating']      = 'Rating';
 $_['entry_status']      = 'Status';
 $_['entry_text']        = 'Review Text';
-$_['entry_date_added']  = 'Date Added';
+$_['entry_date_added']  = 'Date Created';
 $_['entry_verified']    = 'Verified purchase';
 $_['entry_images']      = 'Images';
 $_['entry_video']       = 'Video';

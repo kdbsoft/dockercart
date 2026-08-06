@@ -2,7 +2,7 @@
 
 $_['column_category'] = 'Категорія';
 $_['column_customer'] = 'Клієнт';
-$_['column_date_added'] = 'Дата додавання';
+$_['column_date_added'] = 'Дата створення';
 $_['column_ip'] = 'ІП';
 $_['column_keyword'] = 'Ключове слово';
 $_['column_products'] = 'Знайдені товари';
