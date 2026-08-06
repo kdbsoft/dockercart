@@ -76,6 +76,49 @@ class ControllerSaleOrderFlow extends Controller {
 
 		$reward_delay_days = max(0, (int)($this->request->post['reward_delay_days'] ?? 14));
 		$this->setSetting('config_reward_delay_days', (string)$reward_delay_days, 0);
+
+		$this->setSetting('config_cart_abandoned_enable', isset($this->request->post['cart_abandoned_enable']) ? '1' : '0', 0);
+
+		$cart_abandoned_delay_days = max(0, (int)($this->request->post['cart_abandoned_delay_days'] ?? 1));
+		$this->setSetting('config_cart_abandoned_delay_days', (string)$cart_abandoned_delay_days, 0);
+
+		$cart_abandoned_retention_days = max(0, (int)($this->request->post['cart_abandoned_retention_days'] ?? 90));
+		$this->setSetting('config_cart_abandoned_retention_days', (string)$cart_abandoned_retention_days, 0);
+
+		// Reminder waves: [{days: N, discount: N}, ...]
+		$waves = array();
+		$wave_days = (array)($this->request->post['cart_abandoned_wave_days'] ?? array());
+		$wave_discounts = (array)($this->request->post['cart_abandoned_wave_discount'] ?? array());
+
+		foreach ($wave_days as $i => $days) {
+			$days = max(0, (int)$days);
+			$discount = max(0, min(100, (int)($wave_discounts[$i] ?? 0)));
+
+			if ($days > 0) {
+				$waves[] = array(
+					'days'     => $days,
+					'discount' => $discount
+				);
+			}
+		}
+
+		// Sort ascending by day and dedupe
+		usort($waves, function ($a, $b) {
+			return $a['days'] <=> $b['days'];
+		});
+
+		$unique = array();
+		foreach ($waves as $wave) {
+			$unique[$wave['days']] = $wave;
+		}
+
+		$waves = array_values($unique);
+
+		if (!$waves) {
+			$waves = array(array('days' => 1, 'discount' => 0));
+		}
+
+		$this->setSetting('config_cart_abandoned_waves', json_encode($waves), 1);
 	}
 
 	protected function setSetting($key, $value, $serialized): void {
@@ -106,6 +149,25 @@ class ControllerSaleOrderFlow extends Controller {
 		$data['reward_auto_award'] = (bool)$this->config->get('config_reward_auto_award');
 		$data['reward_auto_revoke'] = (bool)$this->config->get('config_reward_auto_revoke');
 		$data['reward_delay_days'] = (int)$this->config->get('config_reward_delay_days');
+
+		$data['cart_abandoned_enable'] = (bool)$this->config->get('config_cart_abandoned_enable');
+		$data['cart_abandoned_delay_days'] = (int)$this->config->get('config_cart_abandoned_delay_days');
+		$data['cart_abandoned_retention_days'] = (int)$this->config->get('config_cart_abandoned_retention_days');
+
+		$waves = (array)$this->config->get('config_cart_abandoned_waves');
+
+		if (!$waves) {
+			$waves = array(array('days' => 1, 'discount' => 0));
+		}
+
+		$data['cart_abandoned_waves'] = array();
+
+		foreach ($waves as $wave) {
+			$data['cart_abandoned_waves'][] = array(
+				'days'     => (int)($wave['days'] ?? 1),
+				'discount' => (int)($wave['discount'] ?? 0)
+			);
+		}
 
 		$this->load->model('localisation/order_status');
 

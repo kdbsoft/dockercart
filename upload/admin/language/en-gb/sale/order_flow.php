@@ -26,8 +26,22 @@ $_['text_flow_reward_auto_revoke']   = 'Auto-revoke reward points on refund or r
 $_['text_flow_reward_delay_days']    = 'Award delay (days)';
 $_['text_flow_reward_delay_hint']    = 'Award points N days after the order is completed (default 14). 0 = award immediately. The scheduler checks once a day.';
 
+$_['text_flow_abandoned_title']          = 'Abandoned carts';
+$_['text_flow_abandoned_subtitle']       = 'Track carts abandoned at checkout, send reminders and let customers restore them.';
+$_['text_flow_abandoned_enable']         = 'Track abandoned carts at checkout';
+$_['text_flow_abandoned_waves']          = 'Reminder waves';
+$_['text_flow_abandoned_waves_hint']     = 'Each wave sends one e-mail after the given number of days. The discount is applied as an auto-generated coupon code included in the e-mail.';
+$_['text_flow_abandoned_wave_days_ph']   = 'Days';
+$_['text_flow_abandoned_wave_days_suffix'] = 'day(s) after';
+$_['text_flow_abandoned_wave_discount_suffix'] = '% discount';
+$_['text_flow_abandoned_delay_days']     = 'Reminder delay (days)';
+$_['text_flow_abandoned_delay_hint']     = 'Send the reminder e-mail N days after the cart was abandoned (default 1). 0 = disabled. The scheduler checks once a day.';
+$_['text_flow_abandoned_retention_days'] = 'Retention period (days)';
+$_['text_flow_abandoned_retention_hint'] = 'Delete recovered carts and carts without a contact email after N days (default 90).';
+
 // Buttons
 $_['button_flow_add_step']           = 'Add step';
+$_['button_flow_add_wave']           = 'Add wave';
 $_['button_flow_add_transition']     = 'Add transition';
 $_['button_flow_move_up']            = 'Move up';
 $_['button_flow_move_down']          = 'Move down';

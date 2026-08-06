@@ -22,7 +22,7 @@ class ModelCheckoutDockerCartCheckout extends Model {
      * @return void
      */
     public function trackStep($step, $data = array()) {
-        $sessionId = session_id();
+        $sessionId = $this->session->getId();
         $customerId = $this->customer->isLogged() ? $this->customer->getId() : 0;
 
         $this->db->query("INSERT INTO `" . DB_PREFIX . "dockercart_checkout_analytics`
@@ -40,7 +40,7 @@ class ModelCheckoutDockerCartCheckout extends Model {
      * @return int
      */
     public function saveAbandonedCart($data) {
-        $sessionId = session_id();
+        $sessionId = $this->session->getId();
         $customerId = $this->customer->isLogged() ? $this->customer->getId() : 0;
 
         $email = isset($data['email']) ? $data['email'] : '';
@@ -80,13 +80,78 @@ class ModelCheckoutDockerCartCheckout extends Model {
      * @return void
      */
     public function markRecovered() {
-        $sessionId = session_id();
+        $sessionId = $this->session->getId();
 
         $this->db->query("UPDATE `" . DB_PREFIX . "dockercart_checkout_abandoned`
                           SET recovered = " . self::STATUS_RECOVERED . ",
+                              restore_token = NULL,
+                              restore_expires = NULL,
                               date_modified = NOW()
                           WHERE session_id = '" . $this->db->escape($sessionId) . "'
                           AND recovered = " . self::STATUS_ABANDONED . "");
+    }
+
+    /**
+     * Restore an abandoned cart by one-time token
+     *
+     * @param string $token
+     * @return bool True when the cart was restored
+     */
+    public function restoreByToken($token) {
+        $query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "dockercart_checkout_abandoned`
+                                   WHERE restore_token = '" . $this->db->escape($token) . "'
+                                   AND recovered = " . self::STATUS_ABANDONED . "
+                                   AND restore_expires >= NOW()
+                                   LIMIT 1");
+
+        if (!$query->num_rows) {
+            return false;
+        }
+
+        $row = $query->row;
+        $products = json_decode($row['cart_data'], true);
+
+        if (!is_array($products)) {
+            return false;
+        }
+
+        // Clear the current session cart so restored items are not duplicated
+        foreach ($this->cart->getProducts() as $existing) {
+            $this->cart->remove($existing['cart_id']);
+        }
+
+        foreach ($products as $product) {
+            if (!isset($product['product_id'], $product['quantity'])) {
+                continue;
+            }
+
+            // Convert the stored option rows back into the add() option format
+            // (product_option_id => value), keeping the configurable variant id.
+            $option = array();
+
+            if (isset($product['option']) && is_array($product['option'])) {
+                foreach ($product['option'] as $option_row) {
+                    if (isset($option_row['product_option_id'])) {
+                        $option[$option_row['product_option_id']] = $option_row['product_option_value_id'];
+                    }
+                }
+            }
+
+            if (!empty($product['variant_id'])) {
+                $option['variant_id'] = (int)$product['variant_id'];
+            }
+
+            $this->cart->add((int)$product['product_id'], (float)$product['quantity'], $option);
+        }
+
+        // Invalidate the token (single use)
+        $this->db->query("UPDATE `" . DB_PREFIX . "dockercart_checkout_abandoned`
+                          SET restore_token = NULL,
+                              restore_expires = NULL,
+                              date_modified = NOW()
+                          WHERE abandoned_id = " . (int)$row['abandoned_id']);
+
+        return true;
     }
 
     /**

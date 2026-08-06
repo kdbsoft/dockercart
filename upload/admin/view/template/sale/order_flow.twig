@@ -151,6 +151,47 @@
 
           <div class="dcx-panel">
             <div class="dcx-panel-head">
+              <div class="dcx-panel-head__icon"><i data-lucide="shopping-cart" width="18" height="18"></i></div>
+              <div>
+                <div class="dcx-panel-title">{{ text_flow_abandoned_title }}</div>
+                <div class="dcx-panel-subtitle">{{ text_flow_abandoned_subtitle }}</div>
+              </div>
+            </div>
+            <div class="dcx-panel-body">
+              <div class="dcx-fields">
+                <div class="checkbox" style="margin-top:0">
+                  <label>
+                    <input type="checkbox" name="cart_abandoned_enable" value="1" {% if cart_abandoned_enable %}checked{% endif %} />
+                    {{ text_flow_abandoned_enable }}
+                  </label>
+                </div>
+                <div class="dcx-field" style="margin-top:10px">
+                  <label class="dcx-label">{{ text_flow_abandoned_waves }}</label>
+                  <div class="text-muted" style="font-size:12px;margin-top:4px;margin-bottom:8px">{{ text_flow_abandoned_waves_hint }}</div>
+                  <div id="abandoned-waves">
+                    {% for wave in cart_abandoned_waves %}
+                    <div class="abandoned-wave-row" style="display:flex;gap:10px;align-items:center;margin-bottom:8px">
+                      <input type="number" name="cart_abandoned_wave_days[]" value="{{ wave.days }}" min="1" max="365" class="form-control" style="max-width:100px" placeholder="{{ text_flow_abandoned_wave_days_ph }}" />
+                      <span class="text-muted" style="font-size:12px">{{ text_flow_abandoned_wave_days_suffix }}</span>
+                      <input type="number" name="cart_abandoned_wave_discount[]" value="{{ wave.discount }}" min="0" max="100" class="form-control" style="max-width:100px" placeholder="%" />
+                      <span class="text-muted" style="font-size:12px">{{ text_flow_abandoned_wave_discount_suffix }}</span>
+                      <button type="button" class="btn btn-danger btn-sm dc-wave-remove" data-toggle="tooltip" title="{{ button_flow_remove }}"><i data-lucide="trash-2" width="14" height="14"></i></button>
+                    </div>
+                    {% endfor %}
+                  </div>
+                  <button type="button" class="btn btn-primary btn-sm" id="dc-wave-add"><i data-lucide="plus" width="14" height="14"></i> {{ button_flow_add_wave }}</button>
+                </div>
+                <div class="dcx-field" style="margin-top:10px">
+                  <label class="dcx-label" for="cart-abandoned-retention-days">{{ text_flow_abandoned_retention_days }}</label>
+                  <input type="number" class="form-control" id="cart-abandoned-retention-days" name="cart_abandoned_retention_days" value="{{ cart_abandoned_retention_days }}" min="0" max="365" style="max-width:180px" />
+                  <div class="text-muted" style="font-size:12px;margin-top:4px">{{ text_flow_abandoned_retention_hint }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dcx-panel">
+            <div class="dcx-panel-head">
               <div class="dcx-panel-head__icon"><i data-lucide="info" width="18" height="18"></i></div>
               <div>
                 <div class="dcx-panel-title">{{ text_flow_rules }}</div>
@@ -274,5 +315,64 @@ function addTransitionRow() {
 	container.appendChild(row);
 	lucide.createIcons();
 }
+
+// Reminder waves: add / remove rows
+document.addEventListener('click', function (e) {
+	if (e.target.closest('#dc-wave-add')) {
+		const container = document.getElementById('abandoned-waves');
+		if (!container) return;
+
+		const row = document.createElement('div');
+		row.className = 'abandoned-wave-row';
+		row.style.cssText = 'display:flex;gap:10px;align-items:center;margin-bottom:8px';
+
+		const days = document.createElement('input');
+		days.type = 'number';
+		days.name = 'cart_abandoned_wave_days[]';
+		days.min = 1;
+		days.max = 365;
+		days.className = 'form-control';
+		days.style.maxWidth = '100px';
+		days.placeholder = '{{ text_flow_abandoned_wave_days_ph|e('js') }}';
+
+		const daysSuffix = document.createElement('span');
+		daysSuffix.className = 'text-muted';
+		daysSuffix.style.fontSize = '12px';
+		daysSuffix.textContent = '{{ text_flow_abandoned_wave_days_suffix|e('js') }}';
+
+		const discount = document.createElement('input');
+		discount.type = 'number';
+		discount.name = 'cart_abandoned_wave_discount[]';
+		discount.min = 0;
+		discount.max = 100;
+		discount.className = 'form-control';
+		discount.style.maxWidth = '100px';
+		discount.placeholder = '%';
+
+		const discountSuffix = document.createElement('span');
+		discountSuffix.className = 'text-muted';
+		discountSuffix.style.fontSize = '12px';
+		discountSuffix.textContent = '{{ text_flow_abandoned_wave_discount_suffix|e('js') }}';
+
+		const removeBtn = document.createElement('button');
+		removeBtn.type = 'button';
+		removeBtn.className = 'btn btn-danger btn-sm dc-wave-remove';
+		removeBtn.title = '{{ button_flow_remove|e('js') }}';
+		removeBtn.innerHTML = '<i data-lucide="trash-2" width="14" height="14"></i>';
+
+		row.appendChild(days);
+		row.appendChild(daysSuffix);
+		row.appendChild(discount);
+		row.appendChild(discountSuffix);
+		row.appendChild(removeBtn);
+		container.appendChild(row);
+		lucide.createIcons();
+	}
+
+	if (e.target.closest('.dc-wave-remove')) {
+		const row = e.target.closest('.abandoned-wave-row');
+		if (row) row.remove();
+	}
+});
 </script>
 {{ footer }}

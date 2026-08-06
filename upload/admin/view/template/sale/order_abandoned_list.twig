@@ -1,0 +1,153 @@
+{{ header }}
+{{ column_left }}
+<div id="content">
+  <div class="container-fluid">
+    <div class="page-header">
+
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="pull-right">
+            <button type="button" id="button-export-csv" class="btn btn-success"><i data-lucide="download" width="16" height="16"></i> {{ button_export_csv }}</button>
+          </div>
+          <h1 class="page-header__title">{{ heading_title }}</h1>
+        </div>
+      </div>
+        </div>
+
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    {{ user_filter }}
+    <form id="form-abandoned" method="post" enctype="multipart/form-data">
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover dcx-table">
+              <thead>
+                <tr>
+                  <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
+                  <td class="text-left">{{ column_id }}</td>
+                  <td class="text-left">{{ column_date_added }}</td>
+                  <td class="text-left">{{ column_customer }}</td>
+                  <td class="text-left">{{ column_items }}</td>
+                  <td class="text-left">{{ column_last_step }}</td>
+                  <td class="text-center">{{ column_age }}</td>
+                  <td class="text-right">{{ column_action }}</td>
+                </tr>
+              </thead>
+              <tbody>
+                {% if abandoned_carts %}
+                {% for cart in abandoned_carts %}
+                <tr>
+                  <td class="text-center">
+                    <input type="checkbox" name="selected[]" value="{{ cart.abandoned_id }}" />
+                  </td>
+                  <td class="text-left">#{{ cart.abandoned_id }}</td>
+                  <td class="text-left">{{ cart.date_added }}</td>
+                  <td class="text-left">
+                    {% if cart.email %}
+                    <a href="mailto:{{ cart.email }}">{{ cart.email }}</a>
+                    {% else %}
+                    <span class="text-muted">{{ text_no_email }}</span>
+                    {% endif %}
+                    {% if cart.phone %}
+                    <br /><span class="text-muted">{{ cart.phone }}</span>
+                    {% endif %}
+                    <br /><span class="text-muted">{{ cart.customer }}</span>
+                  </td>
+                  <td class="text-left">
+                    {{ cart.items }}
+                    {% if cart.items_count > 5 %}
+                    <br /><span class="text-muted">+{{ cart.items_count - 5 }} {{ text_more }}</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-left">{{ cart.last_step }}</td>
+                  <td class="text-center"><span class="label label-warning">{{ cart.age }}</span></td>
+                  <td class="text-right">
+                    <button type="button" class="btn btn-info btn-sm dc-restore-link" data-abandoned-id="{{ cart.abandoned_id }}" data-toggle="tooltip" title="{{ button_restore_link }}"><i data-lucide="link" width="14" height="14"></i></button>
+                    <button type="button" class="btn btn-success btn-sm dc-mark-recovered" data-abandoned-id="{{ cart.abandoned_id }}" data-toggle="tooltip" title="{{ button_mark_recovered }}"><i data-lucide="check" width="14" height="14"></i></button>
+                  </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                  <td class="text-center" colspan="8">{{ text_no_results }}</td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+    </form>
+        <div class="pagination-wrap">
+          <div class="row">
+            <div class="col-sm-6 text-left">{{ pagination }}</div>
+            <div class="col-sm-6 text-right">{{ results }}</div>
+          </div>
+        </div>
+  </div>
+</div>
+<script type="text/javascript">
+$('#button-filter').on('click', function() {
+  var url = '{{ filter_url }}';
+
+  var filter_email = $('input[name=\'filter_email\']').val();
+  var filter_date_start = $('input[name=\'filter_date_start\']').val();
+  var filter_date_end = $('input[name=\'filter_date_end\']').val();
+
+  if (filter_email) {
+    url += '&filter_email=' + encodeURIComponent(filter_email);
+  }
+  if (filter_date_start) {
+    url += '&filter_date_start=' + encodeURIComponent(filter_date_start);
+  }
+  if (filter_date_end) {
+    url += '&filter_date_end=' + encodeURIComponent(filter_date_end);
+  }
+
+  location = url;
+});
+
+$(document).on('click', '.dc-restore-link', function() {
+  var abandonedId = $(this).data('abandoned-id');
+  var url = '{{ restore }}';
+
+  $('<form method="post" action="' + url + '">' +
+    '<input type="hidden" name="abandoned_id" value="' + abandonedId + '" />' +
+    '</form>').appendTo('body').submit();
+});
+
+$(document).on('click', '.dc-mark-recovered', function() {
+  var abandonedId = $(this).data('abandoned-id');
+  var url = '{{ mark_recovered }}';
+
+  if (!confirm('{{ text_confirm_mark_recovered }}')) return;
+
+  $('<form method="post" action="' + url + '">' +
+    '<input type="hidden" name="abandoned_id" value="' + abandonedId + '" />' +
+    '</form>').appendTo('body').submit();
+});
+
+$('#button-export-csv').on('click', function(e) {
+  e.preventDefault();
+
+  var button = $(this);
+  button.prop('disabled', true);
+  button.find('i[data-lucide="download"]').hide();
+
+  window.location.href = '{{ export_url }}';
+
+  function resetExportButton() {
+    button.prop('disabled', false);
+    button.find('i[data-lucide="download"]').show();
+  }
+
+  window.setTimeout(resetExportButton, 10000);
+  $(window).one('focus', resetExportButton);
+});
+</script>
+{{ footer }}

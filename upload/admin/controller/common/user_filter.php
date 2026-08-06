@@ -182,7 +182,8 @@ class ControllerCommonUserFilter extends Controller {
 			'upload'            => 'tool/upload',
 			'marketing'         => 'marketing/marketing',
 			'seo_url'           => 'design/seo_url',
-			'blog_comment'      => 'extension/module/dockercart_blog'
+			'blog_comment'      => 'extension/module/dockercart_blog',
+			'abandoned_cart'    => 'sale/order'
 		);
 
 		return $map[$entity] ?? '';

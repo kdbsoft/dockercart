@@ -848,7 +848,8 @@ const CONFIG = {
     voucher: '{{ ajax_voucher }}',
     reward: '{{ ajax_reward }}',
     country: '{{ ajax_country }}',
-    confirm: '{{ ajax_confirm }}'
+    confirm: '{{ ajax_confirm }}',
+    abandoned: '{{ ajax_abandoned }}'
   },
   shippingRequired: {{ shipping_required ? 'true' : 'false' }},
   debug: {{ debug ? 'true' : 'false' }}
@@ -1690,7 +1691,11 @@ document.addEventListener('DOMContentLoaded', () => {
       city: $('#input-city')?.value || '',
       postcode: $('#input-postcode')?.value || '',
       country_id: getShippingCountryId(),
-      zone_id: getShippingZoneId()
+      zone_id: getShippingZoneId(),
+      // Contact identifiers — persisted into the guest session by the server
+      // so abandoned carts keep the customer email even before the confirm flow.
+      email: $('#input-email')?.value || '',
+      telephone: $('#input-telephone')?.value || ''
     };
 
     log('Loading shipping methods with data:', data);
@@ -2793,21 +2798,42 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Also listen to Step 1 fields and trigger address save when both Step 1 and address are complete
-    ['#input-email', '#input-firstname', '#input-lastname'].forEach(selector => {
+    ['#input-email', '#input-firstname', '#input-lastname', '#input-telephone'].forEach(selector => {
       const input = $(selector);
       if (input) {
         input.addEventListener('blur', () => {
           log('Step 1 field changed, checking if we should save address');
           setTimeout(checkAddressComplete, 200);
+          trackAbandonedCart();
         });
         input.addEventListener('change', () => {
           log('Step 1 field changed, checking if we should save address');
           setTimeout(checkAddressComplete, 200);
+          trackAbandonedCart();
         });
       }
     });
     window._shippingAddressListenersAttached = true;
   }
+
+  // Quietly record the abandoned cart once the customer typed their contact
+  // details — stores email/telephone into the session and snapshots the cart,
+  // so the admin list shows the contact even if the checkout is abandoned
+  // before the address step or the confirm flow.
+  const trackAbandonedCart = () => {
+    const email = $('#input-email')?.value?.trim() || '';
+    if (!email) return;
+
+    ajax(ajaxUrls.abandoned, {
+      method: 'POST',
+      data: {
+        email: email,
+        telephone: $('#input-telephone')?.value?.trim() || '',
+        firstname: $('#input-firstname')?.value?.trim() || '',
+        lastname: $('#input-lastname')?.value?.trim() || ''
+      }
+    }).catch(() => { /* silent tracking — never block the checkout */ });
+  };
 
   // Auto-trigger shipping address save for logged-in users with prefilled data
   // This ensures shipping methods are loaded immediately on page load
@@ -3059,7 +3085,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // Save payment address as same as shipping
   const savePaymentAddressSameAsShipping = () => {
     log('Saving payment address same as shipping');
-    ajax(ajaxUrls.payment_address, { method: 'POST', data: { same_as_shipping: true } })
+    // Include the contact identifiers so the server can persist them into the
+    // guest session even before the confirm flow calls the customer endpoint.
+    const contactData = {
+      same_as_shipping: true,
+      email: $('#input-email')?.value || '',
+      telephone: $('#input-telephone')?.value || ''
+    };
+    ajax(ajaxUrls.payment_address, { method: 'POST', data: contactData })
       .then(json => {
         log('Payment address saved (same as shipping)', json);
         if (json.error) {
@@ -3095,7 +3128,12 @@ document.addEventListener('DOMContentLoaded', () => {
       city: $('#input-payment-city')?.value || '',
       postcode: $('#input-payment-postcode')?.value || '',
       country_id: getPaymentCountryId(),
-      zone_id: getPaymentZoneId()
+      zone_id: getPaymentZoneId(),
+      // Contact identifiers from the customer details block — the server
+      // persists them into the guest session so abandoned carts keep them
+      // even when the customer endpoint was not called yet.
+      email: $('#input-email')?.value || '',
+      telephone: $('#input-telephone')?.value || ''
     };
 
     log('Saving separate payment address', data);
@@ -3884,10 +3922,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Only save if account creation is requested OR one of the following is true:
       //  - admin-configured required customer fields exist and are all valid
-      //  - there are no admin-required customer fields and the user has provided
-      //    at least one identifying value (firstname/lastname/email/telephone)
-      // This keeps behavior configurable via admin while still saving user-entered
-      // optional identifiers like telephone when no required fields block the save.
+      //  - the user has provided at least one identifying value
+      //    (firstname/lastname/email/telephone) — even when other required
+      //    fields are missing: the server returns structured field errors for
+      //    those, but the entered identifiers still get persisted so abandoned
+      //    carts keep the contact data.
       const anyIdentifyingFilled = (guestData.firstname && guestData.firstname.trim() !== '')
         || (guestData.lastname && guestData.lastname.trim() !== '')
         || (guestData.email && guestData.email.trim() !== '')
@@ -3901,7 +3940,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // fall back to saving when any identifying field is present.
       const shouldSave = createAccountChecked
         || (hasRequired && isStep1Valid())
-        || (!hasRequired && anyIdentifyingFilled)
+        || anyIdentifyingFilled
         || (isLogged && anyIdentifyingFilled);
 
       if (shouldSave) {

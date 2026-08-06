@@ -263,6 +263,7 @@ class ControllerSaleOrder extends Controller {
 		$active_filter_id = isset($this->request->get['filter_id']) ? (int)$this->request->get['filter_id'] : 0;
 
 		$this->load->model('user/user_filter');
+		$this->load->model('extension/module/dockercart_checkout');
 
 		$user_id = (int)$this->user->getId();
 		$saved_filters = $this->model_user_user_filter->getFilters($user_id, 'order');
@@ -272,14 +273,15 @@ class ControllerSaleOrder extends Controller {
 		$tab_counts = array(
 			'all' => $this->model_sale_order->getTotalOrders(array()),
 			'unfulfilled' => $this->model_sale_order->getTotalOrders(array('filter_order_status_exclude' => $this->getFulfilledStatusIds())),
-			'unpaid' => $this->model_sale_order->getTotalOrders(array('filter_payment_status' => 'unpaid'))
+			'unpaid' => $this->model_sale_order->getTotalOrders(array('filter_payment_status' => 'unpaid')),
+			'abandoned' => $this->countAbandonedCarts()
 		);
 
 		foreach ($saved_filters as $saved) {
 			$tab_counts['custom_' . $saved['filter_id']] = $this->model_sale_order->getTotalOrders($this->buildFilterData($saved['conditions']));
 		}
 
-		// Add builtin tabs (unfulfilled / unpaid) on top of the "All" tab
+		// Add builtin tabs (unfulfilled / unpaid / abandoned) on top of the "All" tab
 		$builtin_tabs = array(
 			array(
 				'id'    => 'unfulfilled',
@@ -294,6 +296,13 @@ class ControllerSaleOrder extends Controller {
 				'href'  => $this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'] . '&filter=unpaid', true),
 				'count' => $tab_counts['unpaid'],
 				'is_active' => $active_builtin === 'unpaid'
+			),
+			array(
+				'id'    => 'abandoned',
+				'name'  => $this->language->get('text_filter_abandoned'),
+				'href'  => $this->url->link('sale/order_abandoned', 'user_token=' . $this->session->data['user_token'], true),
+				'count' => $tab_counts['abandoned'],
+				'is_active' => $active_builtin === 'abandoned'
 			)
 		);
 
@@ -1175,5 +1184,14 @@ class ControllerSaleOrder extends Controller {
 		);
 
 		return str_replace(array("\r\n", "\r", "\n"), '<br />', preg_replace(array("/\s\s+/", "/\r\r+/", "/\n\n+/"), '<br />', trim(str_replace($find, $replace, $format))));
+	}
+
+	protected function countAbandonedCarts() {
+		try {
+			return (int)$this->model_extension_module_dockercart_checkout->getTotalAbandonedCarts();
+		} catch (\Exception $e) {
+			// Table may not exist yet (module not installed)
+			return 0;
+		}
 	}
 }

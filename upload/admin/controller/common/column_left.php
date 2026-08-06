@@ -32,6 +32,18 @@ class ControllerCommonColumnLeft extends Controller {
 				$pending_orders = (int)$this->model_sale_order->getTotalOrdersExcludingStatuses($exclude_statuses);
 			}
 
+			// Abandoned carts count (unrecovered checkout carts)
+			$pending_abandoned = 0;
+			if ($this->user->hasPermission('access', 'sale/order')) {
+				try {
+					$this->load->model('extension/module/dockercart_checkout');
+					$pending_abandoned = (int)$this->model_extension_module_dockercart_checkout->getTotalAbandonedCarts();
+				} catch (\Exception $e) {
+					// Table may not exist yet (module not installed)
+					$pending_abandoned = 0;
+				}
+			}
+
 			// Pending returns count (exclude completed)
 			$pending_returns = 0;
 			if ($this->user->hasPermission('access', 'sale/return')) {
@@ -451,6 +463,33 @@ class ControllerCommonColumnLeft extends Controller {
 					'href'     => $this->url->link('marketing/contact', 'user_token=' . $this->session->data['user_token'], true),
 					'icon'	   => 'mail',
 					'children' => array()
+				);
+			}
+
+			// Carts submenu (abandoned carts + conversion statistics)
+			if ($this->user->hasPermission('access', 'sale/order')) {
+				$carts = array();
+
+				$carts[] = array(
+					'name'	   => $this->language->get('text_abandoned_cart'),
+					'href'     => $this->url->link('sale/order_abandoned', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'shopping-basket',
+					'badge'    => $pending_abandoned,
+					'children' => array()
+				);
+
+				$carts[] = array(
+					'name'	   => $this->language->get('text_abandoned_stats'),
+					'href'     => $this->url->link('marketing/abandoned_stats', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'	   => 'chart-column',
+					'children' => array()
+				);
+
+				$marketing[] = array(
+					'name'	   => $this->language->get('text_carts'),
+					'href'     => '',
+					'icon'	   => 'shopping-cart',
+					'children' => $carts
 				);
 			}
 
