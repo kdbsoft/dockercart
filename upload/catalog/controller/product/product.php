@@ -1141,6 +1141,7 @@ class ControllerProductProduct extends Controller {
 			$data['text_we_are_in_messengers'] = $this->language->get('text_we_are_in_messengers');
 			$data['text_you_may_also_like'] = $this->language->get('text_you_may_also_like');
 			$data['text_you_may_also_need'] = $this->language->get('text_you_may_also_need');
+			$data['text_you_may_upgrade'] = $this->language->get('text_you_may_upgrade');
 			$data['text_view_all'] = $this->language->get('text_view_all');
 			$data['text_quick_view'] = $this->language->get('text_quick_view');
 			$data['text_total'] = $this->language->get('text_total');
@@ -1779,6 +1780,7 @@ class ControllerProductProduct extends Controller {
 		$data['total_label'] = $fragment['total_label'];
 		$data['reviews_url'] = $this->url->link('product/reviews', 'product_id=' . $product_id);
 		$data['review_ajax_url'] = $this->url->link('product/product/review', 'product_id=' . $product_id);
+		$data['vote_url'] = $fragment['vote_url'];
 
 		$this->response->setOutput($this->load->view('product/review', $data));
 	}
@@ -1979,6 +1981,45 @@ class ControllerProductProduct extends Controller {
 			}
 		} else {
 			$json['error'] = $this->language->get('error_product');
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function vote() {
+		$this->load->language('product/reviews');
+		$this->load->language('product/product');
+
+		$json = array();
+
+		if ($this->request->server['REQUEST_METHOD'] == 'POST') {
+			$review_id = isset($this->request->post['review_id']) ? (int)$this->request->post['review_id'] : 0;
+			$vote = isset($this->request->post['vote']) ? (string)$this->request->post['vote'] : '';
+
+			if (!$this->customer->isLogged()) {
+				$json['error'] = 'login';
+				$json['login_url'] = $this->url->link('account/login');
+			} elseif (!in_array($vote, array('like', 'dislike'), true)) {
+				$json['error'] = $this->language->get('error_vote');
+			} elseif ($review_id <= 0) {
+				$json['error'] = $this->language->get('error_review');
+			} else {
+				$this->load->model('catalog/review');
+
+				if (!$this->model_catalog_review->reviewExists($review_id)) {
+					$json['error'] = $this->language->get('error_review');
+				} else {
+					$result = $this->model_catalog_review->voteReview($review_id, (int)$this->customer->getId(), $vote);
+
+					$json['success'] = $this->language->get('text_vote_success');
+					$json['likes'] = $result['likes'];
+					$json['dislikes'] = $result['dislikes'];
+					$json['my_vote'] = $result['my_vote'];
+				}
+			}
+		} else {
+			$json['error'] = $this->language->get('error_review');
 		}
 
 		$this->response->addHeader('Content-Type: application/json');

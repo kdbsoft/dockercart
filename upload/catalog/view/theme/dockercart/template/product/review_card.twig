@@ -82,6 +82,15 @@
 
   <div class="text-[15px] text-gray-700 leading-7 mt-5">{{ review.text }}</div>
 
+  <div class="dc-review-votes flex items-center gap-2 mt-5" data-review-id="{{ review.review_id }}" data-vote-url="{{ vote_url|default('') }}">
+    <button type="button" class="dc-vote-btn dc-vote-like inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition {% if review.my_vote == 'like' %}border-blue-300 text-blue-700 bg-blue-50{% else %}border-gray-200 text-gray-500 bg-white hover:border-blue-300 hover:text-blue-600{% endif %}" data-vote="like" aria-pressed="{% if review.my_vote == 'like' %}true{% else %}false{% endif %}">
+      <i data-lucide="thumbs-up" width="14" height="14"></i><span class="dc-vote-count tabular-nums">{{ review.votes.likes }}</span>
+    </button>
+    <button type="button" class="dc-vote-btn dc-vote-dislike inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition {% if review.my_vote == 'dislike' %}border-red-300 text-red-600 bg-red-50{% else %}border-gray-200 text-gray-500 bg-white hover:border-red-300 hover:text-red-500{% endif %}" data-vote="dislike" aria-pressed="{% if review.my_vote == 'dislike' %}true{% else %}false{% endif %}">
+      <i data-lucide="thumbs-down" width="14" height="14"></i><span class="dc-vote-count tabular-nums">{{ review.votes.dislikes }}</span>
+    </button>
+  </div>
+
   {% if review.images %}
     <div class="dc-review-thumbs">
       {% for image in review.images %}
