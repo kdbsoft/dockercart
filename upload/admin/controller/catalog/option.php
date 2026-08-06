@@ -392,6 +392,14 @@ class ControllerCatalogOption extends Controller {
 			$data['status'] = true;
 		}
 
+		if (isset($this->request->post['show_option_price'])) {
+			$data['show_option_price'] = $this->request->post['show_option_price'];
+		} elseif (!empty($option_info)) {
+			$data['show_option_price'] = $option_info['show_option_price'];
+		} else {
+			$data['show_option_price'] = true;
+		}
+
 		$data['text_status_card'] = $this->language->get('text_status_card');
 		$data['entry_status'] = $this->language->get('entry_status');
 		$data['text_enabled'] = $this->language->get('text_enabled');
