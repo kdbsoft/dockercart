@@ -2,7 +2,7 @@
 
 $_['column_action'] = 'Действие';
 $_['column_customer_group'] = 'Группа покупателей';
-$_['column_date_added'] = 'Дата добавления';
+$_['column_date_added'] = 'Дата создания';
 $_['column_email'] = 'Электронная почта';
 $_['column_name'] = 'Имя клиента';
 $_['column_type'] = 'Тип';
@@ -11,7 +11,7 @@ $_['button_deny'] = 'Отклонить';
 $_['button_edit'] = 'Редактировать';
 $_['button_filter'] = 'Фильтр';
 $_['entry_customer_group'] = 'Группа покупателей';
-$_['entry_date_added'] = 'Дата добавления';
+$_['entry_date_added'] = 'Дата создания';
 $_['entry_email'] = 'Электронная почта';
 $_['entry_name'] = 'Имя клиента';
 $_['entry_type'] = 'Тип';

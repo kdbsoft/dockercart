@@ -3,13 +3,13 @@
 $_['button_approve'] = 'Одобрить';
 $_['column_action'] = 'Действие';
 $_['column_author'] = 'Автор';
-$_['column_date_added'] = 'Дата добавления';
+$_['column_date_added'] = 'Дата создания';
 $_['column_post'] = 'Статья';
 $_['column_rating'] = 'Рейтинг';
 $_['column_status'] = 'Статус';
 $_['text_status_card'] = 'Статус';
 $_['entry_author'] = 'Автор';
-$_['entry_date_added'] = 'Дата добавления';
+$_['entry_date_added'] = 'Дата создания';
 $_['entry_email'] = 'Электронная почта';
 $_['entry_post'] = 'Статья';
 $_['entry_rating'] = 'Рейтинг';

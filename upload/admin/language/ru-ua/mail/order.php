@@ -2,7 +2,7 @@
 // Text
 $_['text_subject']           = '%s - Обновление заказа %s';
 $_['text_order_id']          = 'Номер заказа:';
-$_['text_date_added']        = 'Дата добавления:';
+$_['text_date_added']        = 'Дата создания:';
 $_['text_order_status']      = 'Ваш заказ переведён в статус:';
 $_['text_tracking_number']   = 'Номер отслеживания:';
 $_['text_comment']           = 'Комментарий к вашему заказу:';

@@ -18,7 +18,7 @@ $_['text_month']           = 'Місяць';
 $_['column_code']          = 'Назва завдання';
 $_['column_cycle']         = 'Цикл повторення';
 $_['column_status']        = 'Статус';
-$_['column_date_added']    = 'Дата додання';
+$_['column_date_added']    = 'Дата створення';
 $_['column_date_modified'] = 'Дата редагування';
 $_['column_action']        = 'Дія';
 

@@ -24,7 +24,7 @@ $_['column_code']               = 'Код відстеження';
 $_['column_balance']            = 'Баланс';
 $_['column_status']             = 'Статус';
 $_['column_approved']           = 'Схвалити';
-$_['column_date_added']         = 'Дата додавання';
+$_['column_date_added']         = 'Дата створення';
 $_['column_description']        = 'Опис';
 $_['column_amount']             = 'Разом';
 $_['column_action']             = 'Дія';
@@ -61,7 +61,7 @@ $_['entry_amount']              = 'Разом';
 $_['entry_description']         = 'Опис';
 $_['entry_name']                = 'Ім’я партнера';
 $_['entry_approved']            = 'Схвалити';
-$_['entry_date_added']          = 'Дата додавання';
+$_['entry_date_added']          = 'Дата створення';
 
 // Help
 $_['help_code']                 = 'Цей код використовується для відстеження рефералів';

@@ -1,10 +1,10 @@
 <?php
 
 $_['column_action'] = 'Дія';
-$_['column_date_added'] = 'Дата додавання';
+$_['column_date_added'] = 'Дата створення';
 $_['column_filename'] = 'Ім\'я файлу';
 $_['column_name'] = 'Назва завантаження';
-$_['entry_date_added'] = 'Дата додавання';
+$_['entry_date_added'] = 'Дата створення';
 $_['entry_filename'] = 'Ім\'я файлу';
 $_['entry_name'] = 'Назва завантаження';
 $_['error_file'] = 'Завантажений файл не знайдено!';

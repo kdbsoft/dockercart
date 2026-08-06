@@ -1,7 +1,7 @@
 <?php
 
 $_['column_action'] = 'Дія';
-$_['column_date_added'] = 'Дата додавання';
+$_['column_date_added'] = 'Дата створення';
 $_['column_date_modified'] = 'Дата зміни';
 $_['column_geo_zone'] = 'Географічна зона';
 $_['column_name'] = 'Назва податкової установи';

@@ -14,7 +14,7 @@ $_['column_article']    = 'До статті';
 $_['column_author']     = 'Автор відгуку';
 $_['column_rating']     = 'Рейтинг';
 $_['column_status']     = 'Статус';
-$_['column_date_added'] = 'Дата додавання';
+$_['column_date_added'] = 'Дата створення';
 $_['column_action']     = 'Операції';
 
 // Entry
@@ -23,7 +23,7 @@ $_['entry_author']      = 'Автор відгуку';
 $_['entry_rating']      = 'Рейтинг';
 $_['entry_status']      = 'Статус';
 $_['entry_text']        = 'Текст відгуку';
-$_['entry_date_added']  = 'Дата додавання';
+$_['entry_date_added']  = 'Дата створення';
 
 // Help
 $_['help_article']      = '(Автодоповнення)';

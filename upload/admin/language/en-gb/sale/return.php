@@ -45,7 +45,7 @@ $_['column_model']         = 'Product Code';
 $_['column_quantity']      = 'Quantity';
 $_['column_amount']        = 'Amount';
 $_['column_status']        = 'Status';
-$_['column_date_added']    = 'Date Added';
+$_['column_date_added']    = 'Date Created';
 $_['column_date_modified'] = 'Date Modified';
 $_['column_comment']       = 'Comment';
 $_['column_notify']        = 'Customer Notified';
@@ -73,7 +73,7 @@ $_['entry_return_action']  = 'Return Action';
 $_['entry_return_status']  = 'Return Status';
 $_['entry_notify']         = 'Notify Customer';
 $_['entry_return_id']      = 'Return ID';
-$_['entry_date_added']     = 'Date Added';
+$_['entry_date_added']     = 'Date Created';
 $_['entry_date_modified']  = 'Date Modified';
 
 // Help

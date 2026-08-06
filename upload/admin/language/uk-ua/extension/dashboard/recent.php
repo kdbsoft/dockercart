@@ -3,7 +3,7 @@
 $_['column_action'] = 'Дія';
 $_['column_customer'] = 'Клієнт';
 $_['column_type'] = 'Тип';
-$_['column_date_added'] = 'Дата додавання';
+$_['column_date_added'] = 'Дата створення';
 $_['column_order_id'] = 'Номер замовлення';
 $_['column_status'] = 'Статус';
 $_['column_total'] = 'Сума';

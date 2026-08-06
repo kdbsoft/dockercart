@@ -1,7 +1,7 @@
 <?php
 
 $_['column_action'] = 'Дія';
-$_['column_date_added'] = 'Дата додавання';
+$_['column_date_added'] = 'Дата створення';
 $_['column_filename'] = 'Ім\'я файлу';
 $_['entry_progress'] = 'Прогрес';
 $_['entry_upload'] = 'Завантажити файл';

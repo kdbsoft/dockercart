@@ -3,13 +3,13 @@
 $_['button_approve'] = 'Схвалити';
 $_['column_action'] = 'Дія';
 $_['column_author'] = 'Автор';
-$_['column_date_added'] = 'Дата додавання';
+$_['column_date_added'] = 'Дата створення';
 $_['column_post'] = 'Пост';
 $_['column_rating'] = 'Рейтинг';
 $_['column_status'] = 'Статус';
 $_['text_status_card'] = 'Статус';
 $_['entry_author'] = 'Автор';
-$_['entry_date_added'] = 'Дата додавання';
+$_['entry_date_added'] = 'Дата створення';
 $_['entry_email'] = 'Електронна пошта';
 $_['entry_post'] = 'Пост';
 $_['entry_rating'] = 'Рейтинг';

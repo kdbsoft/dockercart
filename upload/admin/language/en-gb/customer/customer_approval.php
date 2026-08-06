@@ -16,7 +16,7 @@ $_['column_name']           = 'Customer Name';
 $_['column_email']          = 'E-Mail';
 $_['column_customer_group'] = 'Customer Group';
 $_['column_type']           = 'Type';
-$_['column_date_added']     = 'Date Added';
+$_['column_date_added']     = 'Date Created';
 $_['column_action']         = 'Action';
 
 // Button
@@ -30,7 +30,7 @@ $_['entry_name']            = 'Customer Name';
 $_['entry_email']           = 'E-Mail';
 $_['entry_customer_group']  = 'Customer Group';
 $_['entry_type']            = 'Type';
-$_['entry_date_added']      = 'Date Added';
+$_['entry_date_added']      = 'Date Created';
 
 // Error
 $_['error_permission']      = 'Warning: You do not have permission to modify customer approvals!';

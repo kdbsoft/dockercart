@@ -1,7 +1,7 @@
 <?php
 
 $_['column_action'] = 'Действие';
-$_['column_date_added'] = 'Дата добавления';
+$_['column_date_added'] = 'Дата создания';
 $_['column_status'] = 'Статус';
 $_['column_username'] = 'Имя пользователя';
 $_['entry_confirm'] = 'Подтверждать';

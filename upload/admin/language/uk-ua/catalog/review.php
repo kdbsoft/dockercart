@@ -2,7 +2,7 @@
 
 $_['column_action'] = 'Дія';
 $_['column_author'] = 'Автор';
-$_['column_date_added'] = 'Дата додавання';
+$_['column_date_added'] = 'Дата створення';
 $_['column_product'] = 'Товар';
 $_['column_rating'] = 'Рейтинг';
 $_['column_status'] = 'Статус';
@@ -10,7 +10,7 @@ $_['column_verified'] = 'Підтверджено';
 $_['column_media'] = 'Медіа';
 $_['column_votes'] = 'Голоси';
 $_['entry_author'] = 'Автор';
-$_['entry_date_added'] = 'Дата додавання';
+$_['entry_date_added'] = 'Дата створення';
 $_['entry_product'] = 'Товар';
 $_['entry_rating'] = 'Рейтинг';
 $_['entry_status'] = 'Статус';

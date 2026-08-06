@@ -1,7 +1,7 @@
 <?php
 
 $_['column_action'] = 'Дія';
-$_['column_date_added'] = 'Дата додання';
+$_['column_date_added'] = 'Дата створення';
 $_['column_filename'] = 'І’мя файлу';
 $_['column_size'] = 'Розмір';
 $_['entry_export'] = 'Експорт';

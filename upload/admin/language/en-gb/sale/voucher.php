@@ -31,7 +31,7 @@ $_['column_amount']     = 'Amount';
 $_['column_status']     = 'Status';
 $_['column_order_id']   = 'Order ID';
 $_['column_customer']   = 'Customer';
-$_['column_date_added'] = 'Date Added';
+$_['column_date_added'] = 'Date Created';
 $_['column_action']     = 'Action';
 
 // Entry
