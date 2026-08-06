@@ -1629,6 +1629,7 @@ div.dcx-field.required > .dcx-label:before {
 .dc-cgp-remove { padding: 4px 6px; color: #999; font-size: 14px; border: 1px solid #ddd; border-radius: 3px; }
 .dc-cgp-remove:hover { color: #c00; text-decoration: none; border: 1px solid #ddd; }
 #customer-group-prices + .btn { max-width: 400px; display: block; }
+#seller-tax-numbers + .btn { align-self: flex-start; }
 
 /* ── Product media gallery (Shopify-style) ── */
 .product-media-gallery { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
