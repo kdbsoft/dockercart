@@ -44,6 +44,7 @@ $_['text_upsell']              = 'Upsell Products';
 $_['text_you_may_upgrade']     = 'You might prefer these';
 $_['text_bundle_title']        = 'Buy Together Cheaper';
 $_['text_bundle_save']         = 'Bundle Deal';
+$_['text_bundle_number']       = 'Bundle #%s';
 $_['button_bundle_add']        = 'Add Bundle to Cart';
 $_['text_quick_view'] = 'Quick View';
 // UI additions
