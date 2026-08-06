@@ -17,7 +17,7 @@
 
 {% if reviews %}
   {% for review in reviews %}
-    {% include 'dockercart/template/product/review_card.twig' with { review: review } %}
+    {% include 'dockercart/template/product/review_card.twig' with { review: review, vote_url: vote_url|default('') } %}
   {% endfor %}
 
   {% if has_more|default(false) %}

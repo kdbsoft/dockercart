@@ -19,6 +19,9 @@ $_['text_write']                 = 'Write a review';
 $_['text_verified']              = 'Verified purchase';
 $_['text_pros']                  = 'Pros';
 $_['text_cons']                  = 'Cons';
+$_['text_vote_success']          = 'Thank you for your vote!';
+$_['error_vote']                 = 'Invalid vote value!';
+$_['error_review']               = 'Review not found!';
 
 // Section
 $_['text_reviews_section']   = 'Customer Reviews';

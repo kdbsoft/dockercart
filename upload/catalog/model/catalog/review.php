@@ -214,6 +214,127 @@ class ModelCatalogReview extends Model {
 	}
 
 	/**
+	 * Whether a review exists (approved or not).
+	 */
+	public function reviewExists(int $review_id): bool {
+		$query = $this->db->query("SELECT review_id FROM " . DB_PREFIX . "review WHERE review_id = '" . (int)$review_id . "' LIMIT 1");
+
+		return (bool)$query->num_rows;
+	}
+
+	/**
+	 * Cast a customer vote on a review (toggle + switch semantics).
+	 *
+	 * Passing the same vote the customer already cast removes it; passing the
+	 * other vote switches it. A single active vote per customer/review pair.
+	 *
+	 * @return array{likes: int, dislikes: int, my_vote: string}
+	 */
+	public function voteReview(int $review_id, int $customer_id, string $vote): array {
+		$vote_value = $vote === 'like' ? 1 : 0;
+
+		$query = $this->db->query("SELECT vote FROM " . DB_PREFIX . "review_vote WHERE review_id = '" . (int)$review_id . "' AND customer_id = '" . (int)$customer_id . "' LIMIT 1");
+
+		if ($query->num_rows) {
+			if ((int)$query->row['vote'] === $vote_value) {
+				// Same vote again — remove it (toggle off).
+				$this->db->query("DELETE FROM " . DB_PREFIX . "review_vote WHERE review_id = '" . (int)$review_id . "' AND customer_id = '" . (int)$customer_id . "'");
+			} else {
+				// Switch to the other vote.
+				$this->db->query("UPDATE " . DB_PREFIX . "review_vote SET vote = '" . $vote_value . "', date_added = NOW() WHERE review_id = '" . (int)$review_id . "' AND customer_id = '" . (int)$customer_id . "'");
+			}
+		} else {
+			$this->db->query("INSERT INTO " . DB_PREFIX . "review_vote SET review_id = '" . (int)$review_id . "', customer_id = '" . (int)$customer_id . "', vote = '" . $vote_value . "', date_added = NOW()");
+		}
+
+		$counts = $this->getVoteCounts($review_id);
+
+		return array(
+			'likes'    => $counts['likes'],
+			'dislikes' => $counts['dislikes'],
+			'my_vote'  => $this->getCustomerVote($review_id, $customer_id),
+		);
+	}
+
+	/**
+	 * Like/dislike totals for a single review.
+	 *
+	 * @return array{likes: int, dislikes: int}
+	 */
+	public function getVoteCounts(int $review_id): array {
+		$query = $this->db->query("SELECT SUM(vote = 1) AS likes, SUM(vote = 0) AS dislikes FROM " . DB_PREFIX . "review_vote WHERE review_id = '" . (int)$review_id . "'");
+
+		return array(
+			'likes'    => $query->num_rows ? (int)$query->row['likes'] : 0,
+			'dislikes' => $query->num_rows ? (int)$query->row['dislikes'] : 0,
+		);
+	}
+
+	/**
+	 * Like/dislike totals for a set of review ids (list rendering).
+	 *
+	 * @param array<int, int> $review_ids
+	 * @return array<int, array{likes: int, dislikes: int}>
+	 */
+	public function getVotesForReviews(array $review_ids): array {
+		if (!$review_ids) {
+			return array();
+		}
+
+		$query = $this->db->query("SELECT review_id, SUM(vote = 1) AS likes, SUM(vote = 0) AS dislikes FROM " . DB_PREFIX . "review_vote WHERE review_id IN (" . implode(',', $review_ids) . ") GROUP BY review_id");
+
+		$votes = array();
+
+		foreach ($query->rows as $row) {
+			$votes[(int)$row['review_id']] = array(
+				'likes'    => (int)$row['likes'],
+				'dislikes' => (int)$row['dislikes'],
+			);
+		}
+
+		return $votes;
+	}
+
+	/**
+	 * The current customer's vote per review id ('like', 'dislike' or '').
+	 *
+	 * @param array<int, int> $review_ids
+	 * @return array<int, string>
+	 */
+	public function getCustomerVotes(array $review_ids, int $customer_id): array {
+		if (!$review_ids || $customer_id <= 0) {
+			return array();
+		}
+
+		$query = $this->db->query("SELECT review_id, vote FROM " . DB_PREFIX . "review_vote WHERE review_id IN (" . implode(',', $review_ids) . ") AND customer_id = '" . (int)$customer_id . "'");
+
+		$votes = array();
+
+		foreach ($query->rows as $row) {
+			$votes[(int)$row['review_id']] = (int)$row['vote'] === 1 ? 'like' : 'dislike';
+		}
+
+		return $votes;
+	}
+
+	/**
+	 * A single customer's vote for one review ('like', 'dislike' or '').
+	 */
+	public function getCustomerVote(int $review_id, int $customer_id): string {
+		if ($customer_id <= 0) {
+			return '';
+		}
+
+		$query = $this->db->query("SELECT vote FROM " . DB_PREFIX . "review_vote WHERE review_id = '" . (int)$review_id . "' AND customer_id = '" . (int)$customer_id . "' LIMIT 1");
+
+		if (!$query->num_rows) {
+			return '';
+		}
+
+		return (int)$query->row['vote'] === 1 ? 'like' : 'dislike';
+	}
+
+	/**
 	 * Aggregate rating summary from the oc_product_rating cache, with a
 	 * lazy recompute fallback when no cache row exists yet.
 	 *

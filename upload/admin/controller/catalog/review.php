@@ -359,6 +359,8 @@ class ControllerCatalogReview extends Controller {
 				'rating_raw'      => $result['rating'],
 				'verified'        => (int)$result['verified'],
 				'has_media'       => ((int)$result['image_count'] + (int)$result['video_count']) > 0,
+				'likes'           => (int)$result['likes'],
+				'dislikes'        => (int)$result['dislikes'],
 				'status'          => ($result['status']) ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
 				'status_raw'      => $result['status'],
 				'date_added'      => date($this->language->get('date_format_short'), strtotime($result['date_added'])),
@@ -741,6 +743,8 @@ class ControllerCatalogReview extends Controller {
 				$json['review_id'] = (int)$review_info['review_id'];
 				$json['product'] = $review_info['product'];
 				$json['text'] = nl2br(htmlspecialchars($review_info['text'], ENT_QUOTES, 'UTF-8'));
+				$json['likes'] = (int)$review_info['likes'];
+				$json['dislikes'] = (int)$review_info['dislikes'];
 				$json['criteria'] = array();
 
 				foreach ((array)$review_info['criteria_values'] as $criteria_id => $value) {
