@@ -4,9 +4,9 @@
   <div class="max-w-7xl mx-auto">
     <div class="text-center mb-8">
       {% if section_small is defined and section_small and (section_title is defined ? section_title : heading_title) != section_small %}
-        <p class="inline-flex items-center gap-2 text-rose-500 text-sm font-semibold uppercase tracking-widest mb-1"><span class="w-4 h-px bg-rose-300"></span>{{ section_small }}</p>
+        <p class="inline-flex items-center gap-2 text-rose-500 text-sm font-semibold uppercase tracking-widest mb-1"><span class="w-4 h-px bg-rose-300"></span>{{ section_title is defined ? section_title : heading_title }}</p>
       {% endif %}
-      <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ section_title is defined ? section_title : heading_title }}</h2>
+      <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ section_small is defined and section_small ? section_small : (section_title is defined ? section_title : heading_title) }}</h2>
     </div>
 
     {% if category_filter %}
