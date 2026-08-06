@@ -50,6 +50,11 @@ class ReviewList {
 		$review_total = $this->model_catalog_review->getTotalReviewsByProductId($product_id);
 		$results = $this->model_catalog_review->getReviewsByProductId($product_id, ($page - 1) * $limit, $limit, $sort);
 
+		$review_ids = array_map('intval', array_column($results, 'review_id'));
+		$votes = $this->model_catalog_review->getVotesForReviews($review_ids);
+		$customer_id = (int)$this->customer->getId();
+		$my_votes = $this->model_catalog_review->getCustomerVotes($review_ids, $customer_id);
+
 		$reviews = array();
 
 		foreach ($results as $result) {
@@ -126,6 +131,8 @@ class ReviewList {
 				'cons'          => nl2br($this->clean($cons)),
 				'images'        => $images,
 				'video'         => $video,
+				'votes'         => isset($votes[$result['review_id']]) ? $votes[$result['review_id']] : array('likes' => 0, 'dislikes' => 0),
+				'my_vote'       => isset($my_votes[$result['review_id']]) ? $my_votes[$result['review_id']] : '',
 			);
 		}
 
@@ -159,6 +166,7 @@ class ReviewList {
 			'text_be_first'       => $this->language->get('text_be_first'),
 			'text_be_first_hint'  => $this->language->get('text_be_first_hint'),
 			'text_leave_review'   => $this->language->get('text_leave_review'),
+			'vote_url'            => $this->url->link('product/product/vote'),
 		);
 	}
 

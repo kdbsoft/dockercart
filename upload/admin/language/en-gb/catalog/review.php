@@ -27,6 +27,7 @@ $_['column_author']     = 'Author';
 $_['column_rating']     = 'Rating';
 $_['column_verified']   = 'Verified';
 $_['column_media']      = 'Media';
+$_['column_votes']      = 'Votes';
 $_['column_status']     = 'Status';
 $_['column_date_added'] = 'Date Added';
 $_['column_action']     = 'Action';
@@ -48,6 +49,7 @@ $_['text_verified']         = 'Yes';
 $_['text_not_verified']     = 'No';
 $_['text_has_media']        = 'Has media';
 $_['text_no_criteria']      = 'No criteria configured for this group.';
+$_['text_votes_tooltip']    = 'Likes / Dislikes';
 
 // Tabs
 $_['tab_review']            = 'Review';

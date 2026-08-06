@@ -95,6 +95,7 @@ class ControllerProductReviews extends Controller {
 			$data['text_leave_review'] = $fragment['text_leave_review'];
 			$data['review_total'] = $fragment['total'];
 			$data['review_total_label'] = $fragment['total_label'];
+			$data['vote_url'] = $fragment['vote_url'];
 
 			// Write form data
 			$data['review_status'] = $this->config->get('config_review_status');

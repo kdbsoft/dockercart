@@ -275,6 +275,68 @@
     });
   }
 
+  function initReviewVotes() {
+    document.addEventListener('click', function (e) {
+      var button = e.target.closest('.dc-vote-btn');
+      if (!button) return;
+
+      var container = button.closest('.dc-review-votes');
+      if (!container) return;
+
+      var voteUrl = container.getAttribute('data-vote-url');
+      if (!voteUrl) return;
+
+      var reviewId = container.getAttribute('data-review-id');
+      var vote = button.getAttribute('data-vote');
+
+      // The server toggles: same vote again removes it, the other vote
+      // switches. No need to send 'none'.
+
+      button.disabled = true;
+
+      fetch(voteUrl, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'X-Requested-With': 'XMLHttpRequest' },
+        body: 'review_id=' + encodeURIComponent(reviewId) + '&vote=' + encodeURIComponent(vote)
+      })
+      .then(function (response) { return response.json(); })
+      .then(function (json) {
+        if (json.error === 'login' && json.login_url) {
+          window.location.href = json.login_url;
+          return;
+        }
+
+        if (json.error) {
+          if (typeof dcShowToast === 'function') dcShowToast(json.error);
+          return;
+        }
+
+        if (json.success) {
+          var likeBtn = container.querySelector('.dc-vote-like');
+          var dislikeBtn = container.querySelector('.dc-vote-dislike');
+          var likeCount = likeBtn.querySelector('.dc-vote-count');
+          var dislikeCount = dislikeBtn.querySelector('.dc-vote-count');
+
+          if (likeCount) likeCount.textContent = json.likes;
+          if (dislikeCount) dislikeCount.textContent = json.dislikes;
+
+          [likeBtn, dislikeBtn].forEach(function (btn) {
+            var active = btn.getAttribute('data-vote') === json.my_vote;
+            btn.classList.toggle('active', active);
+            btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+          });
+        }
+      })
+      .catch(function (error) {
+        console.error('Review vote error:', error);
+      })
+      .finally(function () {
+        button.disabled = false;
+      });
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     var form = document.getElementById('form-review');
     var review = document.getElementById('review');
@@ -299,6 +361,7 @@
     initReviewShowMore();
     initReviewFragment();
     initReviewLightbox();
+    initReviewVotes();
     if (typeof window.lucide !== 'undefined' && typeof window.lucide.createIcons === 'function') {
       window.lucide.createIcons();
     }
