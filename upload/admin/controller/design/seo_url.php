@@ -21,14 +21,13 @@ class ControllerDesignSeoUrl extends Controller {
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
 			$query = $this->request->post['query'];
-			$this->model_design_seo_url->deleteSeoUrlsByQuery($query);
+			$store_id = isset($this->request->post['store_id']) ? (int)$this->request->post['store_id'] : 0;
+			$this->model_design_seo_url->deleteSeoUrlGroup($query, $store_id);
 
-			if (isset($this->request->post['seo_url'])) {
-				foreach ($this->request->post['seo_url'] as $store_id => $languages) {
-					foreach ($languages as $language_id => $keyword) {
-						if ($keyword !== '') {
-							$this->db->query("INSERT INTO `" . DB_PREFIX . "seo_url` SET store_id = '" . (int)$store_id . "', language_id = '" . (int)$language_id . "', query = '" . $this->db->escape($query) . "', keyword = '" . $this->db->escape($keyword) . "'");
-						}
+			if (isset($this->request->post['seo_url'][$store_id])) {
+				foreach ($this->request->post['seo_url'][$store_id] as $language_id => $keyword) {
+					if ($keyword !== '') {
+						$this->db->query("INSERT INTO `" . DB_PREFIX . "seo_url` SET store_id = '" . (int)$store_id . "', language_id = '" . (int)$language_id . "', query = '" . $this->db->escape($query) . "', keyword = '" . $this->db->escape($keyword) . "'");
 					}
 				}
 				$this->model_design_seo_url->invalidateSeoUrlCache();
@@ -81,14 +80,13 @@ class ControllerDesignSeoUrl extends Controller {
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
 			$query = $this->request->post['query'];
-			$this->model_design_seo_url->deleteSeoUrlsByQuery($query);
+			$store_id = isset($this->request->post['store_id']) ? (int)$this->request->post['store_id'] : 0;
+			$this->model_design_seo_url->deleteSeoUrlGroup($query, $store_id);
 
-			if (isset($this->request->post['seo_url'])) {
-				foreach ($this->request->post['seo_url'] as $store_id => $languages) {
-					foreach ($languages as $language_id => $keyword) {
-						if ($keyword !== '') {
-							$this->db->query("INSERT INTO `" . DB_PREFIX . "seo_url` SET store_id = '" . (int)$store_id . "', language_id = '" . (int)$language_id . "', query = '" . $this->db->escape($query) . "', keyword = '" . $this->db->escape($keyword) . "'");
-						}
+			if (isset($this->request->post['seo_url'][$store_id])) {
+				foreach ($this->request->post['seo_url'][$store_id] as $language_id => $keyword) {
+					if ($keyword !== '') {
+						$this->db->query("INSERT INTO `" . DB_PREFIX . "seo_url` SET store_id = '" . (int)$store_id . "', language_id = '" . (int)$language_id . "', query = '" . $this->db->escape($query) . "', keyword = '" . $this->db->escape($keyword) . "'");
 					}
 				}
 				$this->model_design_seo_url->invalidateSeoUrlCache();
@@ -500,6 +498,16 @@ class ControllerDesignSeoUrl extends Controller {
 			);
 		}
 
+		// A form edits exactly one (query, store_id) alias group — match the
+		// list view, where each row is one store's variant of a query.
+		if (isset($this->request->post['store_id'])) {
+			$data['store_id'] = (int)$this->request->post['store_id'];
+		} elseif (!empty($seo_url_info)) {
+			$data['store_id'] = (int)$seo_url_info['store_id'];
+		} else {
+			$data['store_id'] = 0;
+		}
+
 		$this->load->model('localisation/language');
 
 		$data['languages'] = $this->model_localisation_language->getLanguages();
@@ -529,8 +537,10 @@ class ControllerDesignSeoUrl extends Controller {
 		}
 
 		if (isset($this->request->post['seo_url'])) {
-			foreach ($this->request->post['seo_url'] as $store_id => $languages) {
-				foreach ($languages as $language_id => $keyword) {
+			$store_id = isset($this->request->post['store_id']) ? (int)$this->request->post['store_id'] : 0;
+
+			if (isset($this->request->post['seo_url'][$store_id])) {
+				foreach ($this->request->post['seo_url'][$store_id] as $language_id => $keyword) {
 					if ($keyword !== '') {
 						$existing = $this->model_design_seo_url->getSeoUrlsByKeyword($keyword, $language_id);
 						foreach ($existing as $seo_url) {

@@ -48,25 +48,30 @@
                   <div class="text-danger">{{ error_query }}</div>
                   {% endif %}
                 </div>
-                {% for store in stores %}
-                  {% if stores|length > 1 %}
-                  <div class="dcx-field">
-                    <label class="dcx-label">{{ store.name }}</label>
-                  </div>
-                  {% endif %}
-                  <div class="dcx-field required">
-                    <label class="dcx-label">{{ entry_keyword }}</label>
-                    {% for language in languages %}
-                    <div class="dc-attr-row__value">
-                      <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
-                      <input type="text" name="seo_url[{{ store.store_id }}][{{ language.language_id }}]" value="{% if seo_url[store.store_id][language.language_id] %}{{ seo_url[store.store_id][language.language_id] }}{% endif %}" placeholder="{{ entry_keyword }}" class="form-control" />
-                    </div>
-                    {% if error_keyword[store.store_id][language.language_id] %}
-                    <div class="text-danger">{{ error_keyword[store.store_id][language.language_id] }}</div>
+                <div class="dcx-field">
+                  <label class="dcx-label" for="input-store">{{ entry_store }}</label>
+                  <select name="store_id" id="input-store" class="form-control">
+                    {% for store in stores %}
+                    {% if store.store_id == store_id %}
+                    <option value="{{ store.store_id }}" selected="selected">{{ store.name }}</option>
+                    {% else %}
+                    <option value="{{ store.store_id }}">{{ store.name }}</option>
                     {% endif %}
                     {% endfor %}
+                  </select>
+                </div>
+                <div class="dcx-field required">
+                  <label class="dcx-label">{{ entry_keyword }}</label>
+                  {% for language in languages %}
+                  <div class="dc-attr-row__value">
+                    <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                    <input type="text" name="seo_url[{{ store_id }}][{{ language.language_id }}]" value="{% if seo_url[store_id][language.language_id] %}{{ seo_url[store_id][language.language_id] }}{% endif %}" placeholder="{{ entry_keyword }}" class="form-control" />
                   </div>
-                {% endfor %}
+                  {% if error_keyword[store_id][language.language_id] %}
+                  <div class="text-danger">{{ error_keyword[store_id][language.language_id] }}</div>
+                  {% endif %}
+                  {% endfor %}
+                </div>
                 <div class="dcx-field">
                   <div class="dcx-seo-preview">
                     <span class="dcx-seo-preview__label">{{ text_seo_preview }}</span>

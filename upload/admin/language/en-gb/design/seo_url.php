@@ -32,6 +32,7 @@ $_['column_action']    = 'Action';
 
 // Entry
 $_['entry_query']        = 'Query';
+$_['entry_store']        = 'Store';
 $_['entry_keyword']      = 'Keyword';
 
 // Error
