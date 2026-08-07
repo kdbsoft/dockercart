@@ -44,6 +44,7 @@ $_['text_reviews'] = '%s відгуків';
 $_['text_delivery'] = 'Доставка';
 $_['text_delivery_desc'] = 'Швидка доставка';
 $_['text_zoom'] = 'Збільшити';
+$_['text_360_hint'] = 'Тягніть, щоб обертати';
 $_['text_warranty'] = 'Гарантія';
 $_['text_warranty_desc'] = 'Офіційна гарантія';
 $_['text_returns'] = 'Повернення';

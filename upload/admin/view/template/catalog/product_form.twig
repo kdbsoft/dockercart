@@ -494,6 +494,21 @@
                       </div>
                       <div class="help-block text-muted" style="margin-top:8px;">{{ help_model_3d }}</div>
                     </div>
+                    <div class="dcx-field">
+                      <label class="dcx-label">{{ entry_image_360 }}</label>
+                      <div class="dc-video-card">
+                        <a href="" id="thumb-image-360" data-toggle="image" data-type="image" class="dc-video-card__link">
+                          <img src="{{ image_360_thumb }}" data-placeholder="{{ image_360_placeholder }}" class="dc-video-card__img" />
+                          <div class="dc-video-card__overlay"{% if not image_360 %} style="display:none;"{% endif %}>
+                            <i data-lucide="rotate-3d" class="dc-video-card__icon"></i>
+                            <span class="dc-video-card__name">{{ image_360 }}</span>
+                          </div>
+                        </a>
+                        <button type="button" onclick="clearImage360()" class="dc-video-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
+                        <input type="hidden" name="image_360" value="{{ image_360 }}" id="input-image-360" />
+                      </div>
+                      <div class="help-block text-muted" style="margin-top:8px;">{{ help_image_360 }}</div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -2678,6 +2693,13 @@
     $card.find('.dc-video-card__img').attr('src', $card.find('.dc-video-card__img').attr('data-placeholder'));
     $card.find('.dc-video-card__overlay').hide();
     $('#input-model-3d').val('');
+  }
+
+  function clearImage360() {
+    var $card = $('#thumb-image-360').closest('.dc-video-card');
+    $card.find('.dc-video-card__img').attr('src', $card.find('.dc-video-card__img').attr('data-placeholder'));
+    $card.find('.dc-video-card__overlay').hide();
+    $('#input-image-360').val('');
   }
 
   function openVideoFileManager() {

@@ -51,6 +51,7 @@ $_['text_quick_view'] = 'Quick View';
 // UI additions
 $_['text_delivery'] = 'Delivery';
 $_['text_zoom'] = 'Zoom';
+$_['text_360_hint'] = 'Drag to rotate';
 $_['text_delivery_desc'] = 'Free shipping';
 $_['text_warranty'] = 'Warranty';
 $_['text_warranty_desc'] = 'Official warranty';
