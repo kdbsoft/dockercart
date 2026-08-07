@@ -111,31 +111,88 @@
   }
 
   function initReviewLightbox() {
+    if (typeof window.GLightbox === 'function') return;
     document.addEventListener('click', function (e) {
-      var opener = e.target.closest('.dc-review-thumb-open');
-      if (opener) {
-        e.preventDefault();
-        var popup = opener.getAttribute('data-popup');
-        var box = document.createElement('div');
-        box.className = 'dc-lightbox';
-        var img = document.createElement('img');
-        img.src = popup;
-        img.alt = '';
-        var close = document.createElement('button');
-        close.type = 'button';
-        close.className = 'dc-lightbox-close';
-        close.textContent = '×';
-        close.addEventListener('click', function () { box.remove(); });
-        box.addEventListener('click', function (ev) { if (ev.target === box) box.remove(); });
-        box.appendChild(img);
-        box.appendChild(close);
-        document.body.appendChild(box);
-        return;
-      }
+      var opener = e.target.closest('.dc-review-thumb');
+      if (!opener) return;
+      var popup = opener.getAttribute('data-popup') || opener.getAttribute('href');
+      if (!popup) return;
+      e.preventDefault();
+      var box = document.createElement('div');
+      box.className = 'dc-lightbox';
+      var img = document.createElement('img');
+      img.src = popup;
+      img.alt = '';
+      var close = document.createElement('button');
+      close.type = 'button';
+      close.className = 'dc-lightbox-close';
+      close.textContent = '×';
+      close.addEventListener('click', function () { box.remove(); });
+      box.addEventListener('click', function (ev) { if (ev.target === box) box.remove(); });
+      box.appendChild(img);
+      box.appendChild(close);
+      document.body.appendChild(box);
+    });
+    document.addEventListener('click', function (e) {
       if (e.target.classList && e.target.classList.contains('dc-lightbox-close')) {
         e.target.parentElement.remove();
       }
     });
+  }
+
+  function initReviewModal() {
+    var modal = document.getElementById('dc-review-modal');
+    if (!modal) return;
+    var lastTrigger = null;
+    function openModal(trigger) {
+      lastTrigger = trigger || document.activeElement;
+      modal.classList.remove('hidden');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      var focusEl = modal.querySelector('input[name="name"], textarea[name="text"]');
+      if (focusEl) focusEl.focus();
+      if (typeof window.lucide !== 'undefined' && typeof window.lucide.createIcons === 'function') {
+        window.lucide.createIcons();
+      }
+    }
+    function closeModal() {
+      modal.classList.add('hidden');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      if (lastTrigger && typeof lastTrigger.focus === 'function') {
+        try { lastTrigger.focus(); } catch (e) {}
+      }
+    }
+    document.addEventListener('click', function (e) {
+      var trigger = e.target.closest('[data-review-modal-open]');
+      if (trigger) {
+        e.preventDefault();
+        openModal(trigger);
+        return;
+      }
+      if (e.target.closest('[data-review-modal-close]')) {
+        closeModal();
+      }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+        closeModal();
+      }
+    });
+    modal.addEventListener('click', function (e) {
+      if (e.target === modal) closeModal();
+    });
+
+    var form = modal.querySelector('#form-review');
+    if (form) {
+      var observer = new MutationObserver(function () {
+        var success = form.querySelector('.dc-review-alert');
+        if (success && success.textContent.indexOf('Спасибо') !== -1) {
+          setTimeout(closeModal, 1800);
+        }
+      });
+      observer.observe(form, { childList: true, subtree: true });
+    }
   }
 
   function initReviewAlerts(form) {
@@ -346,7 +403,6 @@
       initReviewUploads(form);
       initReviewAlerts(form);
       bindReviewSubmit(form);
-
     }
 
     // The guest form now lives on the dedicated reviews page, so loading the
@@ -362,6 +418,10 @@
     initReviewFragment();
     initReviewLightbox();
     initReviewVotes();
+    initReviewModal();
+    if (typeof window.GLightbox === 'function') {
+      window.GLightbox({ touchNavigation: true, loop: false });
+    }
     if (typeof window.lucide !== 'undefined' && typeof window.lucide.createIcons === 'function') {
       window.lucide.createIcons();
     }

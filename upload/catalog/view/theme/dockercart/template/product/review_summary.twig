@@ -5,7 +5,7 @@
     <span class="text-sm font-bold tracking-tight text-gray-900 leading-none">{{ rating_value }}</span><span class="text-sm font-semibold text-gray-400 leading-none">/5</span>
     {% endif %}
     <div class="flex self-center justify-center gap-2">
-      <div class="dc-stars leading-none" aria-hidden="true">
+      <div class="dc-stars dc-stars-summary leading-none" aria-hidden="true">
         {% for i in 1..5 %}
           {% set diff = rating - (i - 1) %}
           {% if diff >= 1 %}
@@ -17,7 +17,7 @@
           {% endif %}
         {% endfor %}
       </div>
-      <a href="{{ reviews_url }}" class="inline-flex items-center gap-1 text-xs font-bold leading-none text-black-600 hover:text-blue-600 transition">{{ reviews }}<i data-lucide="arrow-up-right" width="12" height="12"></i></a>
+      <a href="{{ reviews_url }}" class="inline-flex items-center gap-1 text-xs font-bold leading-none text-blue-600 hover:text-blue-700 transition">{{ reviews }}<i data-lucide="arrow-up-right" width="12" height="12"></i></a>
     </div>
   </div>
 

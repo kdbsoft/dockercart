@@ -4,8 +4,10 @@
   .dc-star.dc-star-partial { color: #e5e7eb; }
   .dc-star.dc-star-partial::after { content: '★'; position: absolute; inset: 0; color: #f59e0b; clip-path: inset(0 calc(100% - var(--pct)) 0 0); }
   .dc-stars { display: inline-flex; gap: 0; }
-  .dc-stars .dc-star { font-size: 1rem; }
-  .dc-stars-sm .dc-star { font-size: 0.8rem; }
+  .dc-stars .dc-star { font-size: 16px; }
+  .dc-stars-sm .dc-star { font-size: 13px; }
+  .dc-stars-hero .dc-star { font-size: 20px; }
+  .dc-stars-summary .dc-star { font-size: 14px; }
 
   .dc-stars-input { display: inline-flex; gap: 4px; cursor: pointer; user-select: none; }
   .dc-stars-input .dc-star { font-size: 1.65rem; transition: color .15s, transform .15s; }
@@ -13,30 +15,31 @@
   .dc-stars-input .dc-star:hover { transform: translateY(-2px) scale(1.1); }
 
   .dc-avatar {
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     border-radius: 9999px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     color: #fff;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
     letter-spacing: 0.02em;
   }
 
+  .dc-review-hero { background: #f9fafb; border: 1px solid #f3f4f6; border-radius: 1rem; }
   .dc-review-overview { background: #f9fafb; border: 1px solid #f3f4f6; border-radius: 1rem; }
   .dc-review-overview-compact { background: #f9fafb; border: 1px solid #f3f4f6; border-radius: 1rem; }
   .dc-rating-number { color: #111827; letter-spacing: -.06em; }
-  .dc-dist-bar { height: 7px; border-radius: 9999px; background: #e5e7eb; overflow: hidden; }
+  .dc-dist-bar { height: 8px; border-radius: 9999px; background: #f3f4f6; overflow: hidden; }
   .dc-dist-bar > span { display: block; height: 100%; border-radius: 9999px; background: #f59e0b; }
 
-  .dc-review-card { position: relative; transition: border-color .2s, box-shadow .2s, transform .2s; }
-  .dc-review-card:hover { border-color: #dbeafe; box-shadow: 0 10px 15px -3px rgba(15, 23, 42, .08); transform: translateY(-1px); }
+  .dc-review-card { position: relative; transition: border-color .2s; }
   .dc-review-card-divider { height: 1px; background: #f3f4f6; }
-  .dc-review-thumbs { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 14px; }
-  .dc-review-thumb { width: 82px; height: 82px; border-radius: 14px; overflow: hidden; border: 1px solid #e5e7eb; cursor: pointer; background: #f9fafb; transition: transform .2s, border-color .2s; }
-  .dc-review-thumb:hover { transform: translateY(-2px); border-color: #93c5fd; }
+
+  .dc-review-thumbs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .dc-review-thumb { width: 64px; height: 64px; border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb; cursor: pointer; background: #f9fafb; transition: border-color .2s, box-shadow .2s; }
+  .dc-review-thumb:hover { border-color: #93c5fd; box-shadow: 0 0 0 3px #dbeafe; }
   .dc-review-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
   .dc-lightbox { position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,.88); display: flex; align-items: center; justify-content: center; padding: 24px; }
@@ -49,6 +52,25 @@
   .dc-review-upload-preview .item img { width: 100%; height: 100%; object-fit: cover; }
   .dc-review-upload-preview .item .remove { position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; border-radius: 9999px; background: rgba(0,0,0,.55); color: #fff; border: none; font-size: 12px; line-height: 1; cursor: pointer; }
 
+  .dc-review-sort { display: inline-flex; gap: 4px; padding: 3px; background: #f3f4f6; border-radius: 9999px; }
+  .dc-review-sort a { padding: 6px 14px; border-radius: 9999px; font-size: 13px; font-weight: 700; color: #6b7280; text-decoration: none; transition: background .15s, color .15s, box-shadow .15s; }
+  .dc-review-sort a.active { background: #fff; color: #111827; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  .dc-review-sort a:hover:not(.active) { color: #374151; }
+
+  .dc-review-show-more-btn { width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; font-size: 14px; font-weight: 700; color: #374151; cursor: pointer; transition: border-color .15s, background .15s; }
+  .dc-review-show-more-btn:hover { border-color: #93c5fd; background: #eff6ff; color: #1d4ed8; }
+  .dc-review-show-more-btn:disabled { opacity: .6; cursor: wait; }
+
+  .dc-review-modal { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .dc-review-modal.hidden { display: none; }
+  .dc-review-modal-backdrop { position: absolute; inset: 0; background: rgba(15,23,42,.5); backdrop-filter: blur(4px); }
+  .dc-review-modal-card { position: relative; width: 100%; max-width: 640px; max-height: 90vh; overflow-y: auto; background: #fff; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,.2); }
+  .dc-review-modal-head { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 22px 28px 18px; background: #fff; border-bottom: 1px solid #f3f4f6; border-radius: 16px 16px 0 0; }
+  .dc-review-modal-body { padding: 24px 28px 28px; }
+  .dc-review-modal-body #form-review > div { display: flex; flex-direction: column; gap: 24px; }
+  .dc-review-modal-body #form-review > div > * { margin-top: 0 !important; }
+  .dc-review-modal-body #form-review > div > .grid { display: grid !important; }
+
   .pagination { display: inline-flex; flex-wrap: wrap; gap: 5px; list-style: none; margin: 0; padding: 0; }
   .pagination li a, .pagination li span { display: inline-flex; align-items: center; justify-content: center; min-width: 34px; height: 34px; padding: 0 9px; border: 1px solid #e5e7eb; border-radius: 10px; font-size: 12px; color: #4b5563; text-decoration: none; transition: border-color .15s, color .15s, background .15s; }
   .pagination li.active span { background: #2563eb; border-color: #2563eb; color: #fff; font-weight: 700; }
@@ -56,7 +78,9 @@
   .pagination li { margin: 0; }
 
   @media (max-width: 639px) {
-    .dc-review-card:hover { transform: none; }
-    .dc-review-thumb { width: 72px; height: 72px; }
+    .dc-review-thumb { width: 56px; height: 56px; }
+    .dc-review-modal { padding: 12px; align-items: flex-end; }
+    .dc-review-modal-card { max-height: 92vh; border-radius: 16px 16px 0 0; }
+    .dc-review-sort { width: 100%; overflow-x: auto; }
   }
 </style>
