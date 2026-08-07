@@ -514,16 +514,16 @@
 
       {% if review_status %}
       <div id="dc-tab-review" class="dc-tab-panel mt-5 hidden">
+        {% if review_count %}
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           <aside class="lg:col-span-1 lg:sticky lg:top-24">
             <div class="dc-review-overview-compact p-5 sm:p-6">
-              {% if review_count %}
               <div class="flex items-center gap-4">
                 {% if rating > 0 %}
-                <span class="dc-rating-number text-3xl font-semibold leading-none">{{ rating_value }} <span class="text-base font-normal text-gray-400">/ 5</span></span>
+                <span class="dc-rating-number text-4xl font-extrabold leading-none">{{ rating_value }}<span class="text-base font-normal text-gray-400"> / 5</span></span>
                 {% endif %}
                 <div>
-                  <div class="dc-stars" aria-hidden="true">
+                  <div class="dc-stars dc-stars-hero" aria-hidden="true">
                     {% for i in 1..5 %}
                       {% set diff = rating - (i - 1) %}
                       {% if diff >= 1 %}
@@ -554,20 +554,16 @@
                 {% endfor %}
               </div>
               {% endif %}
-              {% else %}
-              <div class="flex items-center gap-3">
-                <span class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-amber-500 shadow-sm ring-1 ring-gray-100">
-                  <i data-lucide="star" width="21" height="21" aria-hidden="true"></i>
-                </span>
-                <p class="text-sm font-extrabold text-gray-900">{{ text_no_reviews }}</p>
-              </div>
-              {% endif %}
 
               {% if review_guest %}
-              <div class="mt-5 pt-4 border-t border-gray-200">
-                <a href="{{ reviews_url }}#form-review" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition shadow-sm shadow-blue-200">
-                  <i data-lucide="pencil" width="14" height="14"></i> {{ text_write }}
-                </a>
+              <div class="mt-5 pt-4 border-t border-gray-100">
+                <button type="button" data-review-modal-open class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition shadow-sm shadow-blue-200">
+                  <i data-lucide="square-pen" width="14" height="14"></i>{{ text_write }}
+                </button>
+              </div>
+              {% else %}
+              <div class="mt-5 pt-4 border-t border-gray-100">
+                <p class="text-xs text-gray-400">{{ text_login }}</p>
               </div>
               {% endif %}
             </div>
@@ -577,6 +573,9 @@
             <div id="review" data-ajax-load="1" data-ajax-url="{{ review_ajax_url }}" class="space-y-3 mb-6"></div>
           </div>
         </div>
+        {% else %}
+        <div id="review" data-ajax-load="1" data-ajax-url="{{ review_ajax_url }}" class="mb-6"></div>
+        {% endif %}
       </div>
       {% endif %}
     </section>
@@ -1460,6 +1459,21 @@ function closeModal3d() {
 })();
 </script>
 
+{% if review_status %}
+{% include 'dockercart/template/product/review_modal.twig' with {
+  review_guest: review_guest,
+  customer_name: customer_name,
+  customer_logged: customer_logged,
+  criteria: review_criteria,
+  has_rating_criteria: has_rating_criteria,
+  review_images_enabled: review_images_enabled,
+  review_max_images: review_max_images,
+  review_video_enabled: review_video_enabled,
+  captcha: captcha,
+  product_id: product_id,
+  review_write_url: review_write_url
+} %}
+{% endif %}
 {% include 'dockercart/template/product/review_js.twig' %}
 {% include 'dockercart/template/common/partials/schema_product.twig' %}
 {% include 'dockercart/template/product/product_variants.twig' %}

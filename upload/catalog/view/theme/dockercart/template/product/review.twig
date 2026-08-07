@@ -1,16 +1,12 @@
 {% if total is defined and total > 0 %}
-<div class="flex flex-wrap items-center justify-between gap-3 mb-5 px-1">
-  <div>
-    <span class="text-lg font-extrabold tracking-tight text-gray-900">{{ total_label|default(total ~ ' ' ~ text_reviews_word|default('reviews')) }}</span>
-    <span class="block text-xs text-gray-400 mt-0.5">{{ text_reviews_section|default('Customer reviews') }}</span>
-  </div>
+<div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+  <span class="text-base font-extrabold tracking-tight text-gray-900">{{ total_label|default(total ~ ' ' ~ text_reviews_word|default('reviews')) }}</span>
   {% if total > 1 %}
-  <div class="flex flex-wrap items-center gap-2 text-sm">
-    <span class="text-xs font-semibold uppercase tracking-wider text-gray-400">{{ text_sort }}</span>
+  <nav class="dc-review-sort" aria-label="{{ text_sort }}">
     {% for option in sort_urls %}
-      <a href="{{ option.href }}" class="px-3 py-1.5 rounded-xl border text-xs font-bold transition {% if option.active %}border-blue-200 text-blue-700 bg-blue-50{% else %}border-gray-200 text-gray-500 bg-white hover:border-blue-300 hover:text-blue-600{% endif %}">{{ option.label }}</a>
+      <a href="{{ option.href }}" class="{% if option.active %}active{% endif %}">{{ option.label }}</a>
     {% endfor %}
-  </div>
+  </nav>
   {% endif %}
 </div>
 {% endif %}
@@ -21,24 +17,24 @@
   {% endfor %}
 
   {% if has_more|default(false) %}
-  <div class="dc-review-show-more-wrap flex justify-center mt-6 px-1">
+  <div class="dc-review-show-more-wrap mt-6">
     <button type="button" id="dc-review-show-more" data-next-page="{{ next_page|default(2) }}" data-sort="{{ sort|default('newest') }}" data-ajax-url="{{ review_ajax_url|default('') }}"
-      class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition shadow-sm shadow-blue-200">
+      class="dc-review-show-more-btn">
       <i data-lucide="chevron-down" width="16" height="16"></i>{{ show_more_label|default(text_show_more) }}
     </button>
   </div>
   {% endif %}
 {% else %}
-  <div class="dc-review-empty rounded-2xl border border-gray-100 bg-gray-50 text-center py-12 px-5">
-    <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-blue-600 shadow-sm ring-1 ring-gray-100">
-      <i data-lucide="message-circle-heart" width="27" height="27" aria-hidden="true"></i>
+  <div class="text-center py-12 px-6">
+    <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-50 text-amber-500 ring-1 ring-amber-100">
+      <i data-lucide="star" width="28" height="28" aria-hidden="true"></i>
     </div>
     <p class="text-lg font-extrabold tracking-tight text-gray-900">{{ text_be_first|default(text_no_reviews) }}</p>
     {% if text_be_first_hint is defined and text_be_first_hint %}
     <p class="mt-2 text-sm text-gray-500">{{ text_be_first_hint }}</p>
     {% endif %}
-    <a href="{{ reviews_url|default('#form-review') }}#form-review" class="dc-review-empty-write inline-flex items-center gap-2 mt-6 px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm transition-colors duration-200 shadow-sm shadow-blue-200">
+    <button type="button" data-review-modal-open class="mt-7 inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm transition shadow-sm shadow-blue-200">
       <i data-lucide="square-pen" width="16" height="16"></i>{{ text_leave_review|default('Write a review') }}
-    </a>
+    </button>
   </div>
 {% endif %}
